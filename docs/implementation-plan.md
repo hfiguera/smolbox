@@ -1,6 +1,6 @@
 # SmolBox implementation plan
 
-Status: implementation in progress, September 6, 2026. Initial real-runtime smoke probes pass on Linux x86_64 and macOS arm64. The standalone scaffold and quality gates are implemented. Command, worker, machine-creation, file-path, binary-result, and SSE contracts are implemented; managed execution, persistence, and production profiles remain incomplete.
+Status: implementation in progress, September 6, 2026. Initial real-runtime smoke probes pass on Linux x86_64 and macOS arm64. The standalone scaffold and quality gates are implemented. Immutable execution contracts and the bounded HTTP client are implemented. Five low-level real-library cases pass on each initial platform, including an authenticated TLS proxy. Managed execution, persistence, and production profile qualification remain incomplete.
 
 Implementation evidence lives in [compatibility.md](compatibility.md) and `docs/evidence/`. Checked items below mean the specific work has evidence; they do not waive the remaining phase exit conditions or release requirements.
 
@@ -512,7 +512,7 @@ Dependencies: none.
 - [x] Connect with `ssh linux` and complete the Linux host preflight in section 10.2; record the architecture, virtualization access, tool versions, and dedicated test workspace.
 - [x] Run one manually controlled Python command and file round trip on Linux and macOS.
 - [x] Verify how a prepared runtime runs with guest egress disabled.
-- [ ] Verify neutral image entry points and disabled restart policies keep caller commands behind the dispatch boundary.
+- [x] Verify neutral image entry points and disabled restart policies keep caller commands behind the dispatch boundary. Real-library tests stage/execute once, stop/start, and verify the test marker remains single; source fixtures force `/bin/true` and `never`. Guest markers are test instrumentation, not production execution receipts.
 - [ ] Measure exec timeout, stream disconnect, cancellation, binary output, and server-side buffering behavior.
 - [x] Determine whether durable exec receipts/deduplication exist; record the conservative recovery contract if absent. No such identity or receipt is exposed by the selected exec API; preserve uncertainty.
 - [ ] Complete the profile capability matrix, including process and host disk bounds.
@@ -548,7 +548,7 @@ in Phase 3; profile certification remains a real-runtime gate.
 
 - [x] Implement public types, finite errors, configuration parsing, command/spec validation, and canonical fingerprints. HMAC-SHA256 covers all semantic fields, including policy, manifests, deadlines, and metadata.
 - [x] Implement worker namespacing and profile-to-wire conversion using only supported fields. Names are opaque; namespace matching alone never authorizes cleanup. Unsupported hard controls fail early.
-- [ ] Add endpoint codecs, binary handling, path handling, and SSE parser.
+- [x] Add endpoint codecs, binary handling, path handling, and SSE parser. List responses use the actual `machines` envelope. Lifecycle POSTs send `{}` because the upstream optional JSON extractor rejects an empty JSON body.
 - [x] Property-test normalization, fingerprint stability, and stream boundaries. Canonical macOS lane: 33 passing cases (5 properties, 28 examples), 100% current library line coverage, all five analyzers pass.
 - [x] Document low-level versus managed guarantees. Public module docs distinguish weak machine evidence, keyed identity, guest allocations, upstream-default file permissions, and host-store responsibilities.
 
@@ -558,11 +558,13 @@ Exit: invalid or unsupported work is rejected before transport; codecs pass real
 
 Dependencies: Phase 2.
 
-- [ ] Implement lifecycle, file, and exec calls with explicit auth, TLS, retries, redirects, and timeouts.
-- [ ] Add controlled HTTP server tests for stream failures and request replay counting.
-- [ ] Verify loopback and Unix-socket behavior, and remote proxy authentication.
-- [ ] Bound controller buffering and expose byte-preserving results where supported.
-- [ ] Run a disposable real machine through create/start/exec/files/stop/delete.
+- [x] Implement lifecycle, file, and exec calls with explicit auth, TLS, retries, redirects, and timeouts.
+- [x] Add controlled HTTP server tests for stream failures and request replay counting.
+- [x] Verify loopback and Unix-socket behavior, and remote proxy authentication.
+- [x] Bound controller buffering and expose byte-preserving results where supported.
+- [x] Run a disposable real machine through create/start/exec/files/stop/delete.
+
+Evidence: 48 deterministic cases pass on canonical macOS/Linux and the two compatibility lanes. Five opt-in real-library cases pass on each initial platform, including live TLS proxy forwarding. Both worker inventories are empty after cleanup. Source hashes and remaining qualification gaps are recorded in `docs/evidence/phase3-client.json`.
 
 Exit: supported client operations work on the pinned worker; POST exec is never retried by hidden transport defaults.
 

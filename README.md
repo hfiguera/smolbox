@@ -10,7 +10,19 @@ prepared-machine requests, guest path validation, byte-exact buffered result
 decoding, and a bounded SSE parser. SSE output is explicitly lossy UTF-8 in the
 pinned upstream release. Immutable execution specifications use keyed fingerprints;
 profiles reject unsupported hard controls and file manifests use bounded host
-references. These types do not themselves provide durable execution. Transport and managed execution are still being built.
+references. These types do not themselves provide durable execution. The low-level
+HTTP client is implemented and tested against pinned Linux and macOS workers;
+managed execution and persistence are still being built.
+
+```elixir
+{:ok, worker} = SmolBox.Worker.new("local", "http://127.0.0.1:19470",
+  allow_insecure_loopback: true)
+{:ok, client} = SmolBox.Client.new(worker)
+{:ok, machines} = SmolBox.Client.list(client)
+```
+
+See the [client guide](docs/client.md) for preparation, execution, ownership,
+transport limits, and failure semantics.
 
 SmolBox will provide low-level worker operations and an explicitly supervised
 execution runtime. It will not bundle a database, workflow engine, language

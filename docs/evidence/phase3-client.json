@@ -1,0 +1,60 @@
+{
+  "stage": "phase3_low_level_client",
+  "date": "2026-09-06",
+  "canonical_macos_mix_ci": "passed",
+  "canonical_linux_mix_ci": "passed",
+  "minimum_1_18_tests": "passed",
+  "elixir_1_19_tests": "passed",
+  "deterministic_cases": 48,
+  "coverage_library_and_support_percent": 98.99,
+  "real_library": {
+    "macos_arm64": {
+      "cases": 5,
+      "seconds": 7.0,
+      "seed": 376238
+    },
+    "linux_x86_64": {
+      "cases": 5,
+      "seconds": 7.9,
+      "seed": 887992
+    }
+  },
+  "runtime_and_artifact_pins": [
+    "phase0-macos.json",
+    "phase0-linux.json"
+  ],
+  "worker_inventory_after_suite": "empty on both hosts",
+  "source_sha256": {
+    "lib/smolbox/client.ex": "e4c8a5f059cf40d134c42508328dc99d7f24c3d2aa6e80b7d03b783361ceb4d1",
+    "lib/smolbox/command.ex": "478aed18aec28fa17e78e315cc6e64b505fdf525177a9337c6d2650c5b76f03c",
+    "lib/smolbox/error.ex": "4cb373db8ba2afc9fe0706ac769829ae5f5092fb2f11c1a349fa73b171c2ae6a",
+    "lib/smolbox/execution_spec.ex": "7b4000a62415df9a2db1e38ddce19873fbcf675f72523dd2376fb5f38134ca7e",
+    "lib/smolbox/files.ex": "15c2054bb8bd11b004de8a6c7a9dd707db4deccf001abdd70998e858ea6cf204",
+    "lib/smolbox/identity.ex": "baaea42558663ab47934747ae267ea244143a8a8068ea14f64604cf1a0a942e1",
+    "lib/smolbox/machine.ex": "dad4339377b59bffb50406ae75373ebb9cb21ebb63f1bdb3fdf55b8bf457f317",
+    "lib/smolbox/machine_spec.ex": "1e639c7e02d262b01fa0fb40dcf96542605815b9b050de7bb365c9884efec14b",
+    "lib/smolbox/manifest.ex": "64bbfcabea90905d9cb0b3ac9399fa997486b4461d5e13989f3f892938bfeb10",
+    "lib/smolbox/profile.ex": "f06dc2bbf20c30fd951f7206fd64555429088a274576aa7eda7021b232ae2fbc",
+    "lib/smolbox/result.ex": "92c70d47ab004c7264712bb1c7891823456171dc4aeab18a2eba8e1b0afdcbe3",
+    "lib/smolbox/transport/capture.ex": "05806459d076dbd6058cf921bf6f3d88b2d43954ae6377e0a591f6660f850455",
+    "lib/smolbox/transport/req.ex": "7ec7e4226c674fa95f490172876e86badf963d3f0b8ddcf8b7521a0c89cbd1dd",
+    "lib/smolbox/transport.ex": "1a15e02792d6db5734c1fab454f6d3b3f9fb5ab0188547a7640e96d3dcc322ea",
+    "lib/smolbox/validation.ex": "5ba7ebd755abccf59d56a55e7d9eb67f578c5acb0eece681d2a2b3c5ebe62965",
+    "lib/smolbox/wire/sse.ex": "1df603f2eddf0d76216633437bb43319fb5a083ab278022c0364cbcf42dd9d39",
+    "lib/smolbox/worker.ex": "cf610c147ca6a66475000685283f1ab1ab2659dce1fa437e0c2ab13c3751dd01",
+    "mix.exs": "23f5fdde4f75b8b2b5ca284623d39bd449ec8602de160e12d5eed0d2066ba2bb",
+    "mix.lock": "41a256ff8b12e2c0f58bf525de8d0343e2b9b77fcd37e3d1d6df9976cfd98fab",
+    "test/contract/client_test.exs": "91c26d10caffe0331e534c6bb05a6b1e45f462580268694121e7922a4f84e46d",
+    "test/contract/security_transport_test.exs": "3ffa1b088f7ef46f7ab179f0cad454d56fe05561b700e35962a94f6e0f9c8e77",
+    "test/contract/stream_transport_test.exs": "2e167a7554d3765a57254f2e05ed2de45840f06e2d45bdc6ed5030c454e13594",
+    "test/runtime/client_runtime_test.exs": "41abf6b7036c6a4db431c1e380efa61f445ac05a6a14541cd611e32b3bf79eab",
+    "test/support/peer.ex": "1f550f5429ab2ecda5f46e8e48b15d6f0071ed2b44c219ba8fa77bd7066cdb08",
+    "test/support/tls.ex": "ba5e071ed838623464f3d2ba0aabfc28ac98436642f2c095c1519dae3141b137"
+  },
+  "remaining": [
+    "managed execution and durability",
+    "resource and symlink adversarial qualification",
+    "full restart/fault matrix",
+    "exact release commit CI and packaging"
+  ]
+}

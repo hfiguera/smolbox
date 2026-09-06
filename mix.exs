@@ -21,12 +21,16 @@ defmodule SmolBox.MixProject do
           "README.md",
           "CHANGELOG.md",
           "LICENSE",
+          "docs/client.md",
           "docs/compatibility.md",
           "docs/evidence/*.json"
         ]
       ],
-      docs: [extras: ["README.md", "docs/compatibility.md"]],
-      dialyzer: [plt_add_apps: [:mix, :credence, :dialyxir], plt_local_path: "_build/plts"],
+      docs: [extras: ["README.md", "docs/client.md", "docs/compatibility.md"]],
+      dialyzer: [
+        plt_add_apps: [:mix, :ex_unit, :credence, :dialyxir],
+        plt_local_path: "_build/plts"
+      ],
       # Developer tools are exercised by subprocess canaries; coverage gates library code.
       test_coverage: [ignore_modules: [~r/^Mix.Tasks.Smolbox.Ci\./], summary: [threshold: 90]]
     ]

@@ -108,7 +108,7 @@ These findings require continued real-runtime verification:
 | No guest egress / control-plane access | Public TCP denial passes; broader checks pending | Public TCP denial passes; broader checks pending |
 | Durable result recovery | No verified receipt | No verified receipt |
 | Safe cancellation and cleanup | Normal stop/delete passes; races pending | Normal stop/delete passes; races pending |
-| Authenticated remote API | Pending | Pending |
+| Authenticated TLS proxy | Real worker forwarding passes | Real worker forwarding passes |
 
 Uncertified hard controls must be rejected before dispatch. Local development
 qualification must not be advertised as production multi-tenant certification.
@@ -134,3 +134,37 @@ developer tasks pass warning-as-error compilation. No dependency source was patc
 The repository currently has no configured Git remote. Source metadata and an
 independent consumer review remain release prerequisites, not fabricated links
 or evidence supplied by these examples.
+
+## Low-level Elixir client qualification
+
+Five opt-in `ClientRuntimeTest` cases pass on each initial platform using the
+same pinned runtime and artifacts from the Phase 0 manifests. They cover Python
+binary output/file collection with nonzero exit, JavaScript SSE/file output,
+public TCP denial, observed timeout, explicit VM stop during streamed execution,
+neutral restart, and authenticated TLS forwarding to the real worker. Each
+case creates an opaque name and checks ownership before stop/delete. Both
+worker inventories were empty after the suite. These tests do not exercise
+managed recovery, store durability, or hostile resource enforcement.
+
+Run on the worker host, where the artifact paths can be checked:
+
+```sh
+SMOLBOX_RUNTIME_URL=http://127.0.0.1:19470 \
+SMOLBOX_PYTHON_ARTIFACT=/tmp/smolbox-qualification/python.smolmachine \
+SMOLBOX_JS_ARTIFACT=/tmp/smolbox-qualification/node.smolmachine \
+MIX_ENV=test mix test test/runtime --include runtime --warnings-as-errors
+```
+
+Missing required environment or an unavailable worker fails the explicitly
+selected suite. Normal `mix ci` excludes runtime-tagged cases and requires no
+worker. Its 48 deterministic cases pass on macOS/Linux canonical toolchains,
+Elixir 1.18.4/OTP 27.3.4.15, and Elixir 1.19.5/OTP 28.5. All five analyzers pass
+on both canonical hosts. Controlled actual HTTP peers test lost connections,
+redirect rejection, TLS trust/hostname failures, authentication, Unix sockets,
+SSE fragmentation/limits, blocking observers, and no POST replay. Coverage is
+98.99% across compiled library and test-support modules.
+
+Source inspection additionally found atomic temporary-file installation in the
+agent. Guest-path resolution varies with the active namespace and needs hostile
+symlink/race qualification before any stronger containment claim. The HTTP API
+has no permission option. See the [client guide](client.md) for current semantics.
