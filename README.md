@@ -5,6 +5,11 @@ An independent Elixir library for self-hosted `smolvm serve` workers.
 Implementation is in progress. No managed execution API or production isolation
 profile is released yet. See [compatibility evidence](docs/compatibility.md).
 
+The current foundation includes validated command and worker configuration,
+prepared-machine requests, guest path validation, byte-exact buffered result
+decoding, and a bounded SSE parser. SSE output is explicitly lossy UTF-8 in the
+pinned upstream release. Transport and managed execution are still being built.
+
 SmolBox will provide low-level worker operations and an explicitly supervised
 execution runtime. It will not bundle a database, workflow engine, language
 runner, function publishing system, or hosted sandbox service.

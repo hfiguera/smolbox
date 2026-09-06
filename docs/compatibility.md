@@ -63,6 +63,12 @@ stop/delete. Timings include intentional timeout tests, not performance benchmar
 These probes do not prove child-process termination, connection-loss recovery,
 control-plane isolation, hard host quotas, or managed-library behavior.
 
+A separate macOS connection-loss probe opened a ten-second Python command's
+SSE stream, read its first output event header, and closed the connection.
+The VM still reported `running`; an explicit stop returned `stopped` in about
+75 ms. This demonstrates that closing observation is not whole-VM cancellation;
+it does not recover the lost command's exit status or establish a latency SLA.
+
 ## Source-derived contract findings
 
 These findings require continued real-runtime verification:
@@ -78,6 +84,11 @@ These findings require continued real-runtime verification:
   on workers; the default 4 GiB is unsuitable for small-file profiles.
 - File transfer into image machines invokes an internal `/bin/true` command to
   activate the overlay. This is not the user command and must not become one.
+- File GET and PUT also ensure the machine is running. Download is not a purely
+  observational operation: it can restart a stopped machine. Reconciliation
+  must not use file reads as a harmless liveness probe or collect after confirmed
+  termination through this endpoint. Stop/delete must remain the final lifecycle
+  operations for a cancelled machine.
 - Exec has no verified durable request receipt or deduplication ID. Lost
   acceptance/result evidence remains unknown; never automatically replay exec.
 - Machine identity includes `createdAt` at second resolution, not a verified

@@ -7,7 +7,7 @@ defmodule SmolBox.Error do
   """
 
   @enforce_keys [:category, :operation]
-  defexception [:category, :operation, evidence: :not_dispatched]
+  defexception [:category, :operation, :exit_code, evidence: :not_dispatched]
 
   @type category ::
           :validation
@@ -27,6 +27,7 @@ defmodule SmolBox.Error do
   @type t :: %__MODULE__{
           category: category(),
           operation: atom(),
+          exit_code: integer() | nil,
           evidence: evidence()
         }
 

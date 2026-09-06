@@ -1,0 +1,43 @@
+{
+  "stage": "phase2_contract_increment",
+  "date": "2026-09-06",
+  "source_sha256": {
+    "packages/smolbox/lib/smolbox/command.ex": "478aed18aec28fa17e78e315cc6e64b505fdf525177a9337c6d2650c5b76f03c",
+    "packages/smolbox/lib/smolbox/error.ex": "4cb373db8ba2afc9fe0706ac769829ae5f5092fb2f11c1a349fa73b171c2ae6a",
+    "packages/smolbox/lib/smolbox/files.ex": "15c2054bb8bd11b004de8a6c7a9dd707db4deccf001abdd70998e858ea6cf204",
+    "packages/smolbox/lib/smolbox/machine_spec.ex": "1e639c7e02d262b01fa0fb40dcf96542605815b9b050de7bb365c9884efec14b",
+    "packages/smolbox/lib/smolbox/result.ex": "92c70d47ab004c7264712bb1c7891823456171dc4aeab18a2eba8e1b0afdcbe3",
+    "packages/smolbox/lib/smolbox/wire/sse.ex": "1df603f2eddf0d76216633437bb43319fb5a083ab278022c0364cbcf42dd9d39",
+    "packages/smolbox/lib/smolbox/worker.ex": "cf610c147ca6a66475000685283f1ab1ab2659dce1fa437e0c2ab13c3751dd01",
+    "packages/smolbox/mix.exs": "5c3ead5f0a158bdc6ea9fb9b07c2fd98af1a3f5dd6bbae4cec3def7f674c7004",
+    "packages/smolbox/mix.lock": "41a256ff8b12e2c0f58bf525de8d0343e2b9b77fcd37e3d1d6df9976cfd98fab",
+    "packages/smolbox/test/fixtures/wire/README.md": "017720e8dde121df8c02e1d16a762efdc9196f6b673ca92fccc572c2deb05617",
+    "packages/smolbox/test/fixtures/wire/created.json": "55ebf93c57cfd435b7ca93cc4979f845a9e6cf01cba218af7365f9c9e62aa322",
+    "packages/smolbox/test/fixtures/wire/exec.json": "29be94360656944293fb40c16bd60541f78a29b5a5c501760a4c968dea4c05d7",
+    "packages/smolbox/test/fixtures/wire/exec.sse": "e75b54d3a0a66ad81327a62d86165d4b840a187dc1bc228e9aa6ea127470992c",
+    "packages/smolbox/test/fixtures/wire/running.json": "7f909b47af1363ce15ac119a26a476db3548af6d08e7c7feb09ad99cea30bff5",
+    "packages/smolbox/test/unit/command_test.exs": "5642c43cd4270a65a7e769cf167716bf8c153b51767c9c325da724ec1fb24c3d",
+    "packages/smolbox/test/unit/error_test.exs": "9f026c57525cfe0366607cdd57a748ca12cc67e4f9cc5710be18c7738200e097",
+    "packages/smolbox/test/unit/files_test.exs": "9820c6e4166b7f0bb6d067dffd96f1d53a9e8034ee64d3adb86ac6ccc099e544",
+    "packages/smolbox/test/unit/machine_spec_test.exs": "292a7500adfc2b1dfdd109946bef6f7436d259eabae28a8eea024778ed3769ee",
+    "packages/smolbox/test/unit/result_test.exs": "44d01cfb6d1e03d013e414a9b400b61cfba2b7d446c48b0078de2c6dd7af413b",
+    "packages/smolbox/test/unit/sse_test.exs": "9a87834025e5e2319da2294805c11eb2ed0803dd8adfb9fa6b9c38a7cedf13c3",
+    "packages/smolbox/test/unit/worker_test.exs": "be883eee1eda1bc640336620178818646478a2f68689432d8201255741d36cbd"
+  },
+  "canonical_macos_mix_ci": "passed",
+  "canonical_linux_mix_ci": "passed",
+  "tests": {
+    "properties": 3,
+    "examples": 20
+  },
+  "minimum_elixir_1_18_tests": "passed",
+  "elixir_1_19_tests": "passed",
+  "library_coverage_percent": 100,
+  "wire_fixtures": "captured_from_pinned_macos_runtime",
+  "remaining": [
+    "execution specification and keyed fingerprints",
+    "managed identities and profiles",
+    "remaining endpoint codecs",
+    "network transport and real library integration"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "name": "fixture",
+  "state": "created",
+  "cpus": 1,
+  "memoryMb": 256,
+  "mounts": [],
+  "ports": [],
+  "network": false,
+  "gpu": false,
+  "cuda": false,
+  "storageGb": 1,
+  "overlayGb": 1,
+  "branchable": false,
+  "forkable": false,
+  "branchpointHeld": false,
+  "forkpointHeld": false,
+  "createdAt": 1700000000
+}

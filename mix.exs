@@ -47,6 +47,7 @@ defmodule SmolBox.MixProject do
       {:req, "~> 0.7.4"},
       {:jason, "~> 1.4"},
       {:telemetry, "~> 1.3"},
+      {:nimble_options, "~> 1.1"},
       {:stream_data, "~> 1.2", only: :test},
       {:plug, "~> 1.18", only: :test},
       {:bandit, "~> 1.8", only: :test},

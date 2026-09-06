@@ -1,0 +1,22 @@
+{
+  "name": "fixture",
+  "state": "running",
+  "cpus": 1,
+  "memoryMb": 256,
+  "pid": 1234,
+  "mounts": [],
+  "ports": [],
+  "network": false,
+  "gpu": false,
+  "cuda": false,
+  "storageGb": 1,
+  "overlayGb": 1,
+  "branchable": false,
+  "forkable": false,
+  "branchpointHeld": false,
+  "forkpointHeld": false,
+  "cpuSeconds": 0,
+  "cpuMillis": 24,
+  "rssMb": 311,
+  "createdAt": 1700000000
+}

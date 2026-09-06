@@ -1,6 +1,6 @@
 # SmolBox implementation plan
 
-Status: implementation in progress, September 6, 2026. Initial real-runtime smoke probes pass on Linux x86_64 and macOS arm64. The package scaffold and quality-gate work are underway; no managed runtime or production profile is complete.
+Status: implementation in progress, September 6, 2026. Initial real-runtime smoke probes pass on Linux x86_64 and macOS arm64. The standalone scaffold and quality gates are implemented. Command, worker, machine-creation, file-path, binary-result, and SSE contracts are implemented; managed execution, persistence, and production profiles remain incomplete.
 
 Implementation evidence lives in [compatibility.md](compatibility.md) and `docs/evidence/`. Checked items below mean the specific work has evidence; they do not waive the remaining phase exit conditions or release requirements.
 
@@ -364,7 +364,7 @@ Phase 0 must determine whether the pinned worker API exposes durable, queryable 
 | Machine create | Inspect the persisted name and ownership after ambiguity; do not create a replacement blindly |
 | File upload before command dispatch | Retry only under verified overwrite/atomicity semantics and the same digest |
 | Execute command | Never retry automatically after possible acceptance |
-| Read/download declared outputs | Retry boundedly while retaining the machine and evidence |
+| Read/download declared outputs | Retry only during authorized collection on a running owned machine; the pinned endpoint can auto-start a stopped VM, so never use it as a liveness probe or after confirmed termination |
 | Stop/delete | Reconcile owned machine state; verified absence can complete cleanup |
 | Persist result / notify caller | Reuse the same execution identity; persist before sending advisory notifications |
 
@@ -508,7 +508,7 @@ Dependencies: none.
 
 - [x] Select the SmolVM release candidate and exact Elixir/OTP/tool pins.
 - [x] Inspect the local upstream checkout described in section 2.1, record its commit and working-tree status, and tie source-derived contract decisions to the selected release.
-- [ ] Capture its OpenAPI schema, checksums, and minimal request/response/event fixtures. Schema subset and checksums are saved; attributed response fixtures remain to be completed.
+- [x] Capture its OpenAPI schema, checksums, and minimal request/response/event fixtures. Attributed schema, lifecycle, buffered exec, and SSE fixtures are saved under `test/fixtures`.
 - [x] Connect with `ssh linux` and complete the Linux host preflight in section 10.2; record the architecture, virtualization access, tool versions, and dedicated test workspace.
 - [x] Run one manually controlled Python command and file round trip on Linux and macOS.
 - [x] Verify how a prepared runtime runs with guest egress disabled.
@@ -537,6 +537,12 @@ Exit: an intentionally introduced compiler warning, Credo/ex_slop issue, duplica
 ### Phase 2 — Model contracts, validation, and wire codecs
 
 Dependencies: Phases 0–1.
+
+Current increment: `Command`, `Worker`, `MachineSpec`, `Files`, `Result`, and
+`Wire.SSE` have validation and property tests, including captured upstream
+responses. Worker configuration rejects unsafe endpoints, and machine starts
+remain separate from user-command dispatch. Execution-spec fingerprints,
+managed identities, profiles, and the remaining endpoint codecs are still pending.
 
 - [ ] Implement public types, finite errors, configuration parsing, command/spec validation, and canonical fingerprints.
 - [ ] Implement worker namespacing and profile-to-wire conversion using only supported fields.
