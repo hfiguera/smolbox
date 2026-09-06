@@ -48,7 +48,7 @@ Two small host applications, including one without Keel or Jido, must demonstrat
 
 ## 2. Starting point and verified dependencies
 
-At planning time the tracked Keel repository contains the idea document and no SmolBox `mix.exs`, runtime implementation, or CI workflow. The requested package directory already exists. Treat `packages/smolbox/external-references/` as reference material, not package source; do not modify, format, analyze, or ship nested upstream repositories.
+At planning time the tracked Keel repository contains the idea document and no SmolBox `mix.exs`, runtime implementation, or CI workflow. The requested package directory already exists. Treat `packages/smolbox/external-references/` as reference material, not package source; source inspection is encouraged, but do not modify, format, run SmolBox's quality analyzers over, or ship nested upstream repositories.
 
 ### 2.1 Upstream boundary
 
@@ -57,6 +57,14 @@ The selected project is `smol-machines/smolvm`, with its per-host `smolvm serve`
 Use SmolVM `v1.14.1` as the first compatibility-spike candidate, not as an already certified runtime. That release was visible during this review. Record the exact runtime version, source commit, binary checksum, host architecture, guest image digests, and generated OpenAPI checksum before accepting it. [Candidate release](https://github.com/smol-machines/smolvm/releases/tag/v1.14.1).
 
 Source inspection of that tag confirms camelCase exec fields, including `timeoutSecs`, and an argument-vector command. Its buffered response includes byte-preserving base64 output alongside lossy text. This evidence should inform fixtures; it does not establish cancellation, output bounds, or durable execution receipts. [API types](https://github.com/smol-machines/smolvm/blob/v1.14.1/src/api/types.rs), [execution handlers](https://github.com/smol-machines/smolvm/blob/v1.14.1/src/api/handlers/exec.rs).
+
+#### Local upstream source checkout
+
+The user has cloned SmolVM at `/Users/humberto/Projects/keel/packages/smolbox/external-references/smolvm` (repository-relative path: `packages/smolbox/external-references/smolvm`). Use this checkout when implementation work needs direct inspection of upstream API types, handlers, tests, or runtime behavior. The containing `external-references/` directory is ignored by Git.
+
+Before relying on local source as compatibility evidence, record its commit and working-tree status and compare it with the selected release; do not assume the checkout matches `v1.14.1`. Inspect pinned source with read-only Git commands when needed, preserving the user's checkout. Source inspection informs the contract, but real-runtime tests must still verify operational guarantees.
+
+This checkout is a local development reference, not a SmolBox dependency or a required CI input. CI and other contributors must obtain the explicitly pinned upstream version independently; do not hard-code this absolute path into implementation, tests, or workflows.
 
 ### 2.2 Elixir and OTP policy
 
@@ -468,6 +476,20 @@ Python and JS scripts are execution fixtures supplied by the tests. Do not turn 
 
 Real-runtime test selection must fail when explicitly requested but the runtime or virtualization capability is absent. A skipped real-runtime suite cannot qualify a platform for release.
 
+#### Available Linux test host
+
+The user has provided a Linux machine for SmolBox testing, accessible from the development machine with:
+
+```sh
+ssh linux
+```
+
+Use this host for the Linux compatibility spike and real-runtime integration tests. Access is authorized for that testing; the SSH alias does not establish its architecture, KVM availability, installed tooling, or readiness. Before the first run, verify the host architecture, kernel, `/dev/kvm` access, available CPU/memory/disk capacity, and installed SmolVM and Elixir/OTP versions. Match the pinned runtime and guest images to the verified architecture.
+
+Use a dedicated test workspace and per-run resource names, preserve unrelated host workloads, and collect bounded test reports with the exact SmolBox commit and runtime/image versions. Apply the isolation requirements above before disruptive or resource-abuse tests. Record the verified setup and repeatable commands in `docs/compatibility.md` during implementation.
+
+The `linux` alias is a local SSH configuration, not an automatically available CI runner. Keep the remote destination configurable in test tooling; CI access and runner isolation must be configured separately under section 12.7.
+
 ### 10.3 Fault injection matrix
 
 Inject controller failure immediately before/after: store acceptance, admission reservation, machine creation, file upload, dispatch-intent write, HTTP exec send, first output, exit event, artifact persistence, result write, stop, delete, and notification.
@@ -483,7 +505,9 @@ Complete phases in dependency order. Each phase should be a focused PR or a smal
 Dependencies: none.
 
 - [ ] Select the SmolVM release candidate and exact Elixir/OTP/tool pins.
+- [ ] Inspect the local upstream checkout described in section 2.1, record its commit and working-tree status, and tie source-derived contract decisions to the selected release.
 - [ ] Capture its OpenAPI schema, checksums, and minimal request/response/event fixtures.
+- [ ] Connect with `ssh linux` and complete the Linux host preflight in section 10.2; record the architecture, virtualization access, tool versions, and dedicated test workspace.
 - [ ] Run one manually controlled Python command and file round trip on Linux and macOS.
 - [ ] Verify how a prepared runtime runs with guest egress disabled.
 - [ ] Verify neutral image entry points and disabled restart policies keep caller commands behind the dispatch boundary.
