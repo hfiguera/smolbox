@@ -1,0 +1,142 @@
+defmodule SmolBox.ExecutionSpec do
+  @moduledoc """
+  Immutable managed execution intent; host code supplies policy and artifact approval.
+
+  The runtime artifact map contains exactly `id`, `sha256`, and `architecture`
+  (`x86_64` or `aarch64`). It is resolved against host configuration, never fetched
+  as a caller-provided image URL. The specification contains no endpoint overrides.
+
+  Queue budgets are relative at construction; the store must persist an absolute
+  deadline on first acceptance. Repeated submission never resets that deadline.
+  `fingerprint/2` uses a stable host secret (at least 32 bytes) to prevent guessing
+  low-entropy environment/stdin values from a public hash. Rotate this key only
+  with an explicit stored-identity migration. Do not log or persist its bytes.
+
+  The host store must protect command/environment/stdin contents at rest; inspection
+  of this struct excludes them. Metadata is limited to 16 bounded scalar entries.
+  """
+
+  alias SmolBox.{Command, Error, Manifest, Profile, Validation}
+
+  @enforce_keys [:scope, :id, :artifact, :command, :profile]
+  @derive {Inspect, only: [:scope, :id]}
+  defstruct [
+    :scope,
+    :id,
+    :artifact,
+    :command,
+    :profile,
+    inputs: [],
+    outputs: [],
+    queue_ms: 60_000,
+    retention_ms: 86_400_000,
+    metadata: %{}
+  ]
+
+  @type t :: %__MODULE__{
+          scope: String.t(),
+          id: String.t(),
+          artifact: %{String.t() => String.t()},
+          command: Command.t(),
+          profile: Profile.t(),
+          inputs: [Manifest.input()],
+          outputs: [Manifest.output()],
+          queue_ms: pos_integer(),
+          retention_ms: pos_integer(),
+          metadata: %{String.t() => String.t() | integer() | boolean() | nil}
+        }
+
+  @spec new(term()) :: {:ok, t()} | {:error, Error.t()}
+  def new(options) do
+    allowed = [
+      :scope,
+      :id,
+      :artifact,
+      :command,
+      :profile,
+      :inputs,
+      :outputs,
+      :queue_ms,
+      :retention_ms,
+      :metadata
+    ]
+
+    if Validation.keys?(options, allowed) and
+         Enum.all?([:scope, :id, :artifact, :command, :profile], &Keyword.has_key?(options, &1)) do
+      spec = struct!(__MODULE__, options)
+      with :ok <- validate(spec), do: {:ok, spec}
+    else
+      invalid()
+    end
+  end
+
+  @spec validate(term()) :: :ok | {:error, Error.t()}
+  def validate(%__MODULE__{} = spec) do
+    with :ok <- Command.validate(spec.command),
+         :ok <- Profile.validate(spec.profile),
+         :ok <- Manifest.validate(spec.inputs, spec.outputs, spec.profile),
+         true <- fields?(spec) do
+      :ok
+    else
+      _invalid -> invalid()
+    end
+  end
+
+  def validate(_spec), do: invalid()
+
+  @doc "Fingerprint every semantic field with domain separation and a host-owned secret."
+  @spec fingerprint(t(), binary()) :: {:ok, String.t()} | {:error, Error.t()}
+  def fingerprint(spec, key)
+      when is_binary(key) and byte_size(key) >= 32 and byte_size(key) <= 4096 do
+    with :ok <- validate(spec) do
+      normalized = %{
+        spec
+        | command: %{spec.command | env: Enum.sort(spec.command.env)},
+          inputs: Enum.sort_by(spec.inputs, & &1["path"]),
+          outputs: Enum.sort_by(spec.outputs, & &1["path"])
+      }
+
+      bytes = :erlang.term_to_binary({"smolbox-spec-v1", canonical(normalized)})
+      {:ok, :hmac |> :crypto.mac(:sha256, key, bytes) |> Base.encode16(case: :lower)}
+    end
+  end
+
+  def fingerprint(_spec, _key), do: invalid()
+
+  defp fields?(spec) do
+    Validation.identifier?(spec.scope) and Validation.identifier?(spec.id) and
+      artifact?(spec.artifact) and Validation.integer?(spec.queue_ms, 1, 86_400_000) and
+      Validation.integer?(spec.retention_ms, 60_000, 2_592_000_000) and metadata?(spec.metadata) and
+      spec.command.timeout_secs * 1000 <= spec.profile.execution_ms
+  end
+
+  defp artifact?(%{"id" => id, "sha256" => digest, "architecture" => architecture} = artifact) do
+    map_size(artifact) == 3 and Validation.identifier?(id) and Validation.digest?(digest) and
+      architecture in ["x86_64", "aarch64"]
+  end
+
+  defp artifact?(_artifact), do: false
+
+  defp metadata?(metadata) when is_map(metadata) and map_size(metadata) <= 16 do
+    Enum.all?(metadata, fn {key, value} -> Validation.identifier?(key) and scalar?(value) end)
+  end
+
+  defp metadata?(_metadata), do: false
+  defp scalar?(value) when is_boolean(value) or is_nil(value), do: true
+
+  defp scalar?(value) when is_integer(value),
+    do: Validation.integer?(value, -9_007_199_254_740_991, 9_007_199_254_740_991)
+
+  defp scalar?(value), do: Validation.text?(value, 256)
+
+  # Tagged shapes avoid map/list/tuple ambiguity. Sorting is explicit across OTP versions.
+  defp canonical(%_struct{} = value), do: value |> Map.from_struct() |> canonical()
+
+  defp canonical(value) when is_map(value),
+    do: {:map, value |> Enum.sort() |> Enum.map(fn {key, item} -> {key, canonical(item)} end)}
+
+  defp canonical(value) when is_list(value), do: {:list, Enum.map(value, &canonical/1)}
+  defp canonical(value), do: value
+
+  defp invalid, do: {:error, %Error{category: :validation, operation: :execution_spec}}
+end

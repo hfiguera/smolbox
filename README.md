@@ -8,7 +8,9 @@ profile is released yet. See [compatibility evidence](docs/compatibility.md).
 The current foundation includes validated command and worker configuration,
 prepared-machine requests, guest path validation, byte-exact buffered result
 decoding, and a bounded SSE parser. SSE output is explicitly lossy UTF-8 in the
-pinned upstream release. Transport and managed execution are still being built.
+pinned upstream release. Immutable execution specifications use keyed fingerprints;
+profiles reject unsupported hard controls and file manifests use bounded host
+references. These types do not themselves provide durable execution. Transport and managed execution are still being built.
 
 SmolBox will provide low-level worker operations and an explicitly supervised
 execution runtime. It will not bundle a database, workflow engine, language

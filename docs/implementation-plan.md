@@ -541,14 +541,16 @@ Dependencies: Phases 0–1.
 Current increment: `Command`, `Worker`, `MachineSpec`, `Files`, `Result`, and
 `Wire.SSE` have validation and property tests, including captured upstream
 responses. Worker configuration rejects unsafe endpoints, and machine starts
-remain separate from user-command dispatch. Execution-spec fingerprints,
-managed identities, profiles, and the remaining endpoint codecs are still pending.
+remain separate from user-command dispatch. Keyed execution-spec fingerprints
+and namespaced machine identities are now implemented with immutable profiles and
+bounded file manifests. The HTTP client and endpoint response integration follow
+in Phase 3; profile certification remains a real-runtime gate.
 
-- [ ] Implement public types, finite errors, configuration parsing, command/spec validation, and canonical fingerprints.
-- [ ] Implement worker namespacing and profile-to-wire conversion using only supported fields.
+- [x] Implement public types, finite errors, configuration parsing, command/spec validation, and canonical fingerprints. HMAC-SHA256 covers all semantic fields, including policy, manifests, deadlines, and metadata.
+- [x] Implement worker namespacing and profile-to-wire conversion using only supported fields. Names are opaque; namespace matching alone never authorizes cleanup. Unsupported hard controls fail early.
 - [ ] Add endpoint codecs, binary handling, path handling, and SSE parser.
-- [ ] Property-test normalization, fingerprint stability, and stream boundaries.
-- [ ] Document low-level versus managed guarantees.
+- [x] Property-test normalization, fingerprint stability, and stream boundaries. Canonical macOS lane: 33 passing cases (5 properties, 28 examples), 100% current library line coverage, all five analyzers pass.
+- [x] Document low-level versus managed guarantees. Public module docs distinguish weak machine evidence, keyed identity, guest allocations, upstream-default file permissions, and host-store responsibilities.
 
 Exit: invalid or unsupported work is rejected before transport; codecs pass real captured fixtures and malformed-input tests.
 

@@ -1,0 +1,41 @@
+{
+  "stage": "phase2_identity_policy_increment",
+  "date": "2026-09-06",
+  "canonical_macos_mix_ci": "passed",
+  "tests": {
+    "properties": 5,
+    "examples": 28
+  },
+  "library_coverage_percent": 100,
+  "source_sha256": {
+    "lib/smolbox/command.ex": "478aed18aec28fa17e78e315cc6e64b505fdf525177a9337c6d2650c5b76f03c",
+    "lib/smolbox/error.ex": "4cb373db8ba2afc9fe0706ac769829ae5f5092fb2f11c1a349fa73b171c2ae6a",
+    "lib/smolbox/execution_spec.ex": "7b4000a62415df9a2db1e38ddce19873fbcf675f72523dd2376fb5f38134ca7e",
+    "lib/smolbox/files.ex": "15c2054bb8bd11b004de8a6c7a9dd707db4deccf001abdd70998e858ea6cf204",
+    "lib/smolbox/identity.ex": "baaea42558663ab47934747ae267ea244143a8a8068ea14f64604cf1a0a942e1",
+    "lib/smolbox/machine.ex": "dad4339377b59bffb50406ae75373ebb9cb21ebb63f1bdb3fdf55b8bf457f317",
+    "lib/smolbox/machine_spec.ex": "1e639c7e02d262b01fa0fb40dcf96542605815b9b050de7bb365c9884efec14b",
+    "lib/smolbox/manifest.ex": "64bbfcabea90905d9cb0b3ac9399fa997486b4461d5e13989f3f892938bfeb10",
+    "lib/smolbox/profile.ex": "f06dc2bbf20c30fd951f7206fd64555429088a274576aa7eda7021b232ae2fbc",
+    "lib/smolbox/result.ex": "92c70d47ab004c7264712bb1c7891823456171dc4aeab18a2eba8e1b0afdcbe3",
+    "lib/smolbox/validation.ex": "5ba7ebd755abccf59d56a55e7d9eb67f578c5acb0eece681d2a2b3c5ebe62965",
+    "lib/smolbox/wire/sse.ex": "1df603f2eddf0d76216633437bb43319fb5a083ab278022c0364cbcf42dd9d39",
+    "lib/smolbox/worker.ex": "cf610c147ca6a66475000685283f1ab1ab2659dce1fa437e0c2ab13c3751dd01",
+    "test/unit/command_test.exs": "5642c43cd4270a65a7e769cf167716bf8c153b51767c9c325da724ec1fb24c3d",
+    "test/unit/error_test.exs": "9f026c57525cfe0366607cdd57a748ca12cc67e4f9cc5710be18c7738200e097",
+    "test/unit/execution_spec_test.exs": "254d204857a942da648722557eb44005f1cc9412cc1fb4cd711981af8e3fcc56",
+    "test/unit/files_test.exs": "9820c6e4166b7f0bb6d067dffd96f1d53a9e8034ee64d3adb86ac6ccc099e544",
+    "test/unit/identity_test.exs": "24aa3c46e853f5126e2cc1f09e4a11e3f7e90a3eb4bed967fb3221f4a4e32310",
+    "test/unit/machine_spec_test.exs": "292a7500adfc2b1dfdd109946bef6f7436d259eabae28a8eea024778ed3769ee",
+    "test/unit/machine_test.exs": "f69062a27331d81e3e6c5d1c9bc7b07ee2c69c0e00e5c90f1882b99a676f0f5a",
+    "test/unit/profile_test.exs": "4e14306b0d76934649a3a65ec4f14ec79edf7722f73201f7e967ac650e5a203b",
+    "test/unit/result_test.exs": "44d01cfb6d1e03d013e414a9b400b61cfba2b7d446c48b0078de2c6dd7af413b",
+    "test/unit/sse_test.exs": "9a87834025e5e2319da2294805c11eb2ed0803dd8adfb9fa6b9c38a7cedf13c3",
+    "test/unit/worker_test.exs": "be883eee1eda1bc640336620178818646478a2f68689432d8201255741d36cbd"
+  },
+  "remaining": [
+    "HTTP endpoint integration",
+    "runtime profile certification",
+    "managed execution and durable store"
+  ]
+}
