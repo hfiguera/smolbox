@@ -1,0 +1,37 @@
+{
+  "kind": "phase0_smoke",
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "runtime": "1.14.1",
+  "results": [
+    {
+      "language": "python",
+      "machine": "sbxq-064b559f5a65",
+      "checks": [
+        "offline_create_start_allocation",
+        "binary_file_roundtrip",
+        "binary_exec_nonzero",
+        "command_timeout_observed",
+        "text_sse_exit",
+        "public_tcp_egress_denied",
+        "stop_delete"
+      ],
+      "elapsed_seconds": 2.153,
+      "artifact_sha256": "d982cfdf0c59b862ad3e1b107446b127460f716c8407fd0e2b6b0de2a62fe18e"
+    },
+    {
+      "language": "node",
+      "machine": "sbxq-f0b5baf19132",
+      "checks": [
+        "offline_create_start_allocation",
+        "binary_file_roundtrip",
+        "binary_exec_nonzero",
+        "command_timeout_observed",
+        "text_sse_exit",
+        "public_tcp_egress_denied",
+        "stop_delete"
+      ],
+      "elapsed_seconds": 2.448,
+      "artifact_sha256": "0aec0242b27a0b401312e1333ab9d71f821aabf20bd2fe22f849d66f3d706e95"
+    }
+  ]
+}

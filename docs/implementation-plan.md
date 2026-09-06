@@ -1,6 +1,8 @@
 # SmolBox implementation plan
 
-Status: proposed implementation plan, September 6, 2026. No SmolBox runtime or CI implementation is claimed by this document.
+Status: implementation in progress, September 6, 2026. Initial real-runtime smoke probes pass on Linux x86_64 and macOS arm64. The package scaffold and quality-gate work are underway; no managed runtime or production profile is complete.
+
+Implementation evidence lives in [compatibility.md](compatibility.md) and `docs/evidence/`. Checked items below mean the specific work has evidence; they do not waive the remaining phase exit conditions or release requirements.
 
 This plan covers only the `smolbox` Elixir package. It translates the sandbox boundary in [Keel's idea document](../../../ideas/001-initial-idea.txt) into implementation work, verification requirements, and release gates. Proposed module names and APIs below are design targets, not existing interfaces.
 
@@ -504,15 +506,15 @@ Complete phases in dependency order. Each phase should be a focused PR or a smal
 
 Dependencies: none.
 
-- [ ] Select the SmolVM release candidate and exact Elixir/OTP/tool pins.
-- [ ] Inspect the local upstream checkout described in section 2.1, record its commit and working-tree status, and tie source-derived contract decisions to the selected release.
-- [ ] Capture its OpenAPI schema, checksums, and minimal request/response/event fixtures.
-- [ ] Connect with `ssh linux` and complete the Linux host preflight in section 10.2; record the architecture, virtualization access, tool versions, and dedicated test workspace.
-- [ ] Run one manually controlled Python command and file round trip on Linux and macOS.
-- [ ] Verify how a prepared runtime runs with guest egress disabled.
+- [x] Select the SmolVM release candidate and exact Elixir/OTP/tool pins.
+- [x] Inspect the local upstream checkout described in section 2.1, record its commit and working-tree status, and tie source-derived contract decisions to the selected release.
+- [ ] Capture its OpenAPI schema, checksums, and minimal request/response/event fixtures. Schema subset and checksums are saved; attributed response fixtures remain to be completed.
+- [x] Connect with `ssh linux` and complete the Linux host preflight in section 10.2; record the architecture, virtualization access, tool versions, and dedicated test workspace.
+- [x] Run one manually controlled Python command and file round trip on Linux and macOS.
+- [x] Verify how a prepared runtime runs with guest egress disabled.
 - [ ] Verify neutral image entry points and disabled restart policies keep caller commands behind the dispatch boundary.
 - [ ] Measure exec timeout, stream disconnect, cancellation, binary output, and server-side buffering behavior.
-- [ ] Determine whether durable exec receipts/deduplication exist; record the conservative recovery contract if absent.
+- [x] Determine whether durable exec receipts/deduplication exist; record the conservative recovery contract if absent. No such identity or receipt is exposed by the selected exec API; preserve uncertainty.
 - [ ] Complete the profile capability matrix, including process and host disk bounds.
 - [ ] Record proxy/account isolation requirements and platform limitations.
 

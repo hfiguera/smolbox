@@ -1,0 +1,37 @@
+{
+  "kind": "phase0_smoke",
+  "platform": "Linux-7.1.5-76070105-generic-x86_64-with-glibc2.39",
+  "runtime": "1.14.1",
+  "results": [
+    {
+      "language": "python",
+      "machine": "sbxq-30c0347891f9",
+      "checks": [
+        "offline_create_start_allocation",
+        "binary_file_roundtrip",
+        "binary_exec_nonzero",
+        "command_timeout_observed",
+        "text_sse_exit",
+        "public_tcp_egress_denied",
+        "stop_delete"
+      ],
+      "elapsed_seconds": 2.313,
+      "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2"
+    },
+    {
+      "language": "node",
+      "machine": "sbxq-36a7dabe5971",
+      "checks": [
+        "offline_create_start_allocation",
+        "binary_file_roundtrip",
+        "binary_exec_nonzero",
+        "command_timeout_observed",
+        "text_sse_exit",
+        "public_tcp_egress_denied",
+        "stop_delete"
+      ],
+      "elapsed_seconds": 2.487,
+      "artifact_sha256": "768b8d2158a75abd90ccc73a65a83717aebfe37e62ed91d0db0bb731584df776"
+    }
+  ]
+}

@@ -1,0 +1,1463 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "smolvm API",
+    "description": "smolvm API for managing machines and images.",
+    "license": {
+      "name": "Apache-2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0"
+    },
+    "version": "0.5.2"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Health check endpoint.",
+        "operationId": "health",
+        "responses": {
+          "200": {
+            "description": "Server is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/machines": {
+      "get": {
+        "tags": [
+          "Machines"
+        ],
+        "summary": "List all machines.",
+        "operationId": "list_machines",
+        "responses": {
+          "200": {
+            "description": "List of machines",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListMachinesResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Database error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Machines"
+        ],
+        "summary": "Create a new machine.",
+        "operationId": "create_machine",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMachineRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Machine created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MachineInfo"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Machine already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/machines/{name}": {
+      "get": {
+        "tags": [
+          "Machines"
+        ],
+        "summary": "Get machine status.",
+        "operationId": "get_machine",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "Machine name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Machine details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MachineInfo"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Machine not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Machines"
+        ],
+        "summary": "Delete a machine.",
+        "operationId": "delete_machine",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "Machine name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cascade",
+            "in": "query",
+            "description": "Also delete clones forked from this machine (fork base cannot be removed while its clones depend on it)",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Machine deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Machine not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Machine is a fork base with live clones (use cascade)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to delete",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/machines/{name}/start": {
+      "post": {
+        "tags": [
+          "Machines"
+        ],
+        "summary": "Start a machine.",
+        "operationId": "start_machine",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "Machine name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "forkable",
+            "in": "query",
+            "description": "Start as a fork base (memfd RAM + control socket)",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "forkPoolSize",
+            "in": "query",
+            "description": "Planned runnable CUDA clones; implies forkable and enables automatic VRAM budgeting",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "cudaVramLimitMib",
+            "in": "query",
+            "description": "Optional logical VRAM limit per golden/clone session; requires forkPoolSize",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartMachineRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Machine started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MachineInfo"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Machine not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A published host port is already in use (PORT_IN_USE)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to start",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/machines/{name}/stop": {
+      "post": {
+        "tags": [
+          "Machines"
+        ],
+        "summary": "Stop a machine.",
+        "operationId": "stop_machine",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "Machine name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Machine stopped",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MachineInfo"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Machine not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to stop",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/machines/{id}/exec": {
+      "post": {
+        "tags": [
+          "Execution"
+        ],
+        "summary": "Execute a command in a machine.",
+        "description": "This executes directly in the VM (not in a container).",
+        "operationId": "exec_command",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Machine name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Command executed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExecResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Machine not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Execution failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/machines/{id}/exec/stream": {
+      "post": {
+        "tags": [
+          "Execution"
+        ],
+        "summary": "Execute a command with streaming output (Server-Sent Events).",
+        "description": "Returns real-time stdout/stderr as SSE events. Useful for long-running\ncommands where buffering the entire output is impractical.",
+        "operationId": "exec_stream",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Machine name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Streaming output (SSE)",
+            "content": {
+              "text/event-stream": {}
+            }
+          },
+          "404": {
+            "description": "Machine not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Execution failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/machines/{id}/files/{path}": {
+      "get": {
+        "tags": [
+          "Files"
+        ],
+        "summary": "Download a file from a machine.",
+        "description": "Returns the file contents as a raw byte stream.",
+        "operationId": "download_file",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Machine name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "path",
+            "in": "path",
+            "description": "File path inside the VM",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File contents",
+            "content": {
+              "application/octet-stream": {}
+            }
+          },
+          "404": {
+            "description": "Machine or file not found"
+          },
+          "500": {
+            "description": "Read failed"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Files"
+        ],
+        "summary": "Upload a file to a machine.",
+        "description": "Writes the request body as a file at the specified path inside the VM.\nCreates parent directories automatically.",
+        "operationId": "upload_file",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Machine name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "path",
+            "in": "path",
+            "description": "File path inside the VM (e.g., workspace/script.py)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32",
+                  "minimum": 0
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "File uploaded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileUploadResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Machine not found"
+          },
+          "500": {
+            "description": "Write failed"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApiErrorResponse": {
+        "type": "object",
+        "description": "API error response.",
+        "required": [
+          "error",
+          "code"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Error code.",
+            "example": "NOT_FOUND"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message.",
+            "example": "machine 'test' not found"
+          }
+        }
+      },
+      "CreateMachineRequest": {
+        "type": "object",
+        "description": "Request to create a new machine.",
+        "properties": {
+          "allowedCidrs": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "Allowed egress CIDR ranges."
+          },
+          "allowedHosts": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "Allowed egress hostnames (and their subdomains); DNS answers for these\nnames are learned into the egress allow-list."
+          },
+          "autoGraph": {
+            "type": "boolean",
+            "description": "Ask compatible CUDA frameworks to graph safe compiled regions.\nImplies CUDA; arbitrary eager CUDA calls are not captured."
+          },
+          "blobPeers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Brokered P2P blob peers: node base URLs (`https://<addr>:<port>`) supplied\nby the control plane. On a cache miss the layer blob is fetched from a\npeer's `GET /p2p/blob/<digest>` (over node\u2192node mTLS) before the registry.\nEmpty (the default) \u21d2 registry-only, byte-for-byte as before."
+          },
+          "cmd": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Workload command run when the machine starts (see `entrypoint`)."
+          },
+          "cpus": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "Number of vCPUs.",
+            "example": 4,
+            "minimum": 0
+          },
+          "cuda": {
+            "type": "boolean",
+            "description": "Enable CUDA remoting (host NVIDIA GPU via the bundled shims)."
+          },
+          "dockerSocket": {
+            "type": "boolean",
+            "description": "Expose the guest's Docker daemon socket to the host as a Unix socket in\nthe VM data dir, so a host client can drive it with `DOCKER_HOST=unix://\u2026`.\nOff by default."
+          },
+          "entrypoint": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Workload entrypoint. With `cmd`, overrides the image's (or the\n`.smolmachine` artifact's) own entrypoint+cmd, matching the CLI's\n`machine create -- <command>` precedence. Empty = use the image's."
+          },
+          "env": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnvVar"
+            },
+            "description": "Environment variables for the machine's workload (init commands and the\nentrypoint). For `from`/`registry_ref` machines these layer on top of\nthe artifact manifest's env; a request variable wins on name collision."
+          },
+          "from": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Path to a `.smolmachine` or `.smolcheckpoint` artifact. Creates from\npre-packed layers or restores the artifact's captured live state.\nMutually exclusive with `image`."
+          },
+          "gpu": {
+            "type": "boolean",
+            "description": "Enable GPU acceleration (Vulkan via virtio-gpu)."
+          },
+          "image": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "OCI image reference (e.g., \"alpine:latest\"). Mutually exclusive with `from`."
+          },
+          "memoryMb": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "Memory in MiB.",
+            "example": 8192,
+            "minimum": 0
+          },
+          "mounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MountSpec"
+            },
+            "description": "Host mounts to attach."
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Machine name. Auto-generated if omitted.",
+            "example": "my-vm"
+          },
+          "network": {
+            "type": "boolean",
+            "description": "Enable outbound network access (TSI).\nNote: Only TCP/UDP supported, not ICMP (ping)."
+          },
+          "networkBackend": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/NetworkBackend",
+                "description": "Network backend: `tsi` (outbound-only) or `virtio-net`.\n\nWhen omitted, machines created through the API default to `virtio-net`:\nthe server configures a guest host-service (the rollout ingress), and\npublished `ports`, egress policies and fleet mode need virtio-net too.\n(`tsi` is the default only for outbound-only machines launched outside\n`smolvm serve`.) Set `tsi` explicitly for the lighter outbound-only\nbackend; published `ports` require `virtio-net` (TSI has no inbound\npath), so that combination is rejected."
+              }
+            ]
+          },
+          "overlayGb": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Overlay disk size in GiB (default: 10).",
+            "minimum": 0
+          },
+          "ports": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PortSpec"
+            },
+            "description": "Port mappings (host:guest)."
+          },
+          "registryIdentityToken": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Bearer credential (an OCI Distribution `identity_token`) to present when\npulling `registry_ref`. The control plane supplies a short-lived,\ntenant-scoped token here so a node can fetch a tenant's private\n`.smolmachine`. Takes precedence over any persisted registry credential."
+          },
+          "registryRef": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Registry reference to a .smolmachine artifact (e.g., \"myapp:v1\").\nPulls from the registry before creating the VM.\nMutually exclusive with `image` and `from`."
+          },
+          "restart": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/RestartSpec",
+                "description": "Restart policy configuration."
+              }
+            ]
+          },
+          "secrets": {
+            "type": "object",
+            "description": "Secret refs attached to the machine. Resolved at every\nsubsequent exec against the host's env/files. Rejected unless empty;\naccepted \u2014 `from_env`/`from_file` on the API surface would let\nan untrusted caller exfiltrate the server process's env or\nread arbitrary host files; use the CLI `machine create` path\nfor those source kinds."
+          },
+          "storageGb": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Storage disk size in GiB (default: 20).",
+            "minimum": 0
+          },
+          "workdir": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Working directory for the machine's workload. Overrides the artifact\nmanifest's workdir when set."
+          }
+        }
+      },
+      "DeleteResponse": {
+        "type": "object",
+        "description": "Generic delete response.",
+        "required": [
+          "deleted"
+        ],
+        "properties": {
+          "deleted": {
+            "type": "string",
+            "description": "Name of deleted resource.",
+            "example": "my-machine"
+          }
+        }
+      },
+      "EnvVar": {
+        "type": "object",
+        "description": "Environment variable.",
+        "required": [
+          "name",
+          "value"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Variable name.",
+            "example": "MY_VAR"
+          },
+          "value": {
+            "type": "string",
+            "description": "Variable value.",
+            "example": "my_value"
+          }
+        }
+      },
+      "ExecRequest": {
+        "type": "object",
+        "description": "Request to execute a command in a machine.\n\n`deny_unknown_fields`: an unknown or mis-cased field is a hard 400, not a\nsilent no-op. This matters for the safety fields (`timeoutSecs`, etc.) \u2014 a\ncaller who writes `timeout_secs` must be told, not left running an untrusted\ncommand with no timeout because the field was quietly dropped.",
+        "required": [
+          "command"
+        ],
+        "properties": {
+          "background": {
+            "type": "boolean",
+            "description": "Run the command detached: spawn it in the background and return its PID\nimmediately instead of waiting. The process keeps running (a long-lived\ndaemon \u2014 dev server, agent runner) until it exits or the machine stops."
+          },
+          "command": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Command and arguments.",
+            "example": [
+              "echo",
+              "hello"
+            ]
+          },
+          "env": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnvVar"
+            },
+            "description": "Environment variables."
+          },
+          "secrets": {
+            "type": "object",
+            "description": "Ad-hoc secret refs. Rejected unless empty: an untrusted HTTP\ncaller cannot read this host's env/files. See `RequestSecretRefs`."
+          },
+          "stdin": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Data to pipe to the command's stdin."
+          },
+          "timeoutSecs": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Timeout in seconds.",
+            "example": 30,
+            "minimum": 0
+          },
+          "user": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Run as this user: a name from the image or a numeric `uid[:gid]`,\noverriding the image's USER. Only meaningful for image machines; a bare\nVM has no container user to become.",
+            "example": "1000:1000"
+          },
+          "workdir": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Working directory.",
+            "example": "/workspace"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ExecResponse": {
+        "type": "object",
+        "description": "Command execution result.\n\n**Encoding note**: `stdout`/`stderr` are a lossy UTF-8 view (non-UTF-8 bytes\nbecome U+FFFD) kept for older clients. `stdoutB64`/`stderrB64` carry the raw,\nbyte-exact output (base64) and should be preferred by callers that need\nbinary-safe results (image bytes, tarballs, etc.) \u2014 the agent preserves\nbytes end-to-end and these fields do too.",
+        "required": [
+          "exitCode",
+          "stdout",
+          "stderr",
+          "stdoutB64",
+          "stderrB64"
+        ],
+        "properties": {
+          "exitCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Exit code.",
+            "example": 0
+          },
+          "stderr": {
+            "type": "string",
+            "description": "Standard error, lossy UTF-8 (non-UTF-8 bytes \u2192 U+FFFD). Prefer `stderrB64`.",
+            "example": ""
+          },
+          "stderrB64": {
+            "type": "string",
+            "description": "Raw stderr bytes, base64-encoded \u2014 byte-exact, binary-safe."
+          },
+          "stdout": {
+            "type": "string",
+            "description": "Standard output, lossy UTF-8 (non-UTF-8 bytes \u2192 U+FFFD). Prefer `stdoutB64`.",
+            "example": "hello\n"
+          },
+          "stdoutB64": {
+            "type": "string",
+            "description": "Raw stdout bytes, base64-encoded \u2014 byte-exact, binary-safe."
+          }
+        }
+      },
+      "FileUploadResponse": {
+        "type": "object",
+        "description": "Response from file upload.",
+        "required": [
+          "path",
+          "size"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Path where the file was written."
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Size of the file in bytes.",
+            "minimum": 0
+          }
+        }
+      },
+      "HealthResponse": {
+        "type": "object",
+        "description": "Health check response.",
+        "required": [
+          "status",
+          "version"
+        ],
+        "properties": {
+          "machines": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/MachineCountsResponse",
+                "description": "Machine counts."
+              }
+            ]
+          },
+          "status": {
+            "type": "string",
+            "description": "Health status (e.g., \"ok\").",
+            "example": "ok"
+          },
+          "uptime_seconds": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Server uptime in seconds.",
+            "minimum": 0
+          },
+          "version": {
+            "type": "string",
+            "description": "Server version.",
+            "example": "0.5.2"
+          }
+        }
+      },
+      "ListMachinesResponse": {
+        "type": "object",
+        "description": "List machines response.",
+        "required": [
+          "machines"
+        ],
+        "properties": {
+          "machines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MachineInfo"
+            },
+            "description": "List of machines."
+          }
+        }
+      },
+      "MachineCountsResponse": {
+        "type": "object",
+        "description": "Machine counts for health response.",
+        "required": [
+          "total",
+          "running"
+        ],
+        "properties": {
+          "running": {
+            "type": "integer",
+            "description": "Currently running machines.",
+            "minimum": 0
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total machines in the database.",
+            "minimum": 0
+          }
+        }
+      },
+      "MachineInfo": {
+        "type": "object",
+        "description": "Machine status information.",
+        "required": [
+          "name",
+          "state",
+          "cpus",
+          "memoryMb",
+          "mounts",
+          "ports",
+          "network",
+          "gpu",
+          "cuda",
+          "branchable",
+          "forkable",
+          "branchpointHeld",
+          "forkpointHeld",
+          "createdAt"
+        ],
+        "properties": {
+          "allowedCidrs": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "Allowed egress CIDRs. Omitted when unrestricted; an empty list denies all."
+          },
+          "allowedHosts": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "Allowed egress hostnames. Omitted when unset. Echoes back what `create` accepted."
+          },
+          "branchable": {
+            "type": "boolean",
+            "description": "Whether ordinary starts launch this machine as a branch source."
+          },
+          "branchpointHeld": {
+            "type": "boolean",
+            "description": "True while this child is an already-booted clean slot parked at the\nworkload branchpoint and available for one assignment."
+          },
+          "cpuMillis": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Same consumed CPU but in MILLISECONDS \u2014 sub-second precision so consumers\nintegrating this don't quantize a barely-busy process up to a whole second.\nDerived from the same nanosecond sample as `cpu_seconds`. Omitted for\nstopped machines (no live process to sample).",
+            "example": 42830,
+            "minimum": 0
+          },
+          "cpuSeconds": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Consumed CPU-seconds (user+system) of the machine's CURRENT VMM process,\nsampled live from the host. Resets to 0 on a VM restart \u2014 it's a stateless\nsnapshot; the control plane accumulates a durable total from it. Omitted\nfor stopped machines (no live process to sample).",
+            "example": 42,
+            "minimum": 0
+          },
+          "cpus": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Number of vCPUs.",
+            "example": 2,
+            "minimum": 0
+          },
+          "createdAt": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Creation timestamp (seconds since Unix epoch).",
+            "minimum": 0
+          },
+          "cuda": {
+            "type": "boolean",
+            "description": "Whether transparent CUDA remoting is enabled for this machine."
+          },
+          "cudaBranchPoolSize": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "Planned runnable CUDA child count used for automatic capacity budgeting.",
+            "minimum": 0
+          },
+          "cudaForkPoolSize": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "Legacy alias for `cuda_branch_pool_size`.",
+            "minimum": 0
+          },
+          "cudaVramLimitMib": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Explicit logical CUDA memory limit per source/child session, in MiB.",
+            "minimum": 0
+          },
+          "diskUsedMb": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Actual host disk consumed by this machine's data dir, in MiB (real blocks of\nthe sparse disk images, not provisioned capacity). An instantaneous gauge the\ncontrol integrates over time for active-disk billing. Omitted when the data\ndir can't be read.",
+            "example": 256,
+            "minimum": 0
+          },
+          "egressBytes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Cumulative guest-outbound (egress) bytes since boot, for billing. Present\nonly for virtio-net machines that have reported a value; omitted for TSI\nor machines that haven't flushed yet. Surfaced the same way `storage_gb`\nis, so the control plane reads both from the machine list.",
+            "example": 1048576,
+            "minimum": 0
+          },
+          "forkable": {
+            "type": "boolean",
+            "description": "Legacy alias for `branchable`."
+          },
+          "forkpointHeld": {
+            "type": "boolean",
+            "description": "Legacy alias for `branchpoint_held`."
+          },
+          "gpu": {
+            "type": "boolean",
+            "description": "Whether Vulkan/graphics GPU acceleration is enabled for this machine."
+          },
+          "memoryMb": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Memory in MiB.",
+            "example": 1024,
+            "minimum": 0
+          },
+          "mounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MountInfo"
+            },
+            "description": "Configured mounts (with virtiofs tags for container use)."
+          },
+          "name": {
+            "type": "string",
+            "description": "Machine name.",
+            "example": "my-vm"
+          },
+          "network": {
+            "type": "boolean",
+            "description": "Whether outbound network access is enabled."
+          },
+          "networkBackend": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/NetworkBackend",
+                "description": "Network backend the machine runs (`tsi` or `virtio-net`). Echoes back\nwhat `create` accepted; omitted when `create` left it unset (the\nlaunch then picks the contextual default \u2014 `virtio-net` under\n`smolvm serve`, with ports, or with an egress policy; `tsi` otherwise)."
+              }
+            ]
+          },
+          "overlayGb": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Overlay disk size in GiB.",
+            "example": 2,
+            "minimum": 0
+          },
+          "parentMachine": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Immediate parent machine when this machine was created by branching."
+          },
+          "pid": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "Process ID (if running).",
+            "example": 12345
+          },
+          "ports": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PortSpec"
+            },
+            "description": "Configured port mappings."
+          },
+          "rssMb": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Current resident memory (RSS) of the machine's VMM process, in MiB, sampled\nlive from the host. Unlike CPU this is an instantaneous gauge (not a\ncounter); the control plane integrates it over time for active-memory\nbilling. Omitted for stopped machines (no live process to sample).",
+            "example": 128,
+            "minimum": 0
+          },
+          "state": {
+            "type": "string",
+            "description": "Current state (\"created\", \"running\", \"stopped\").",
+            "example": "running"
+          },
+          "storageGb": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Storage disk size in GiB.",
+            "example": 20,
+            "minimum": 0
+          }
+        }
+      },
+      "MountInfo": {
+        "type": "object",
+        "description": "Mount information (for responses, includes virtiofs tag).",
+        "required": [
+          "tag",
+          "source",
+          "target",
+          "readonly",
+          "staged"
+        ],
+        "properties": {
+          "readonly": {
+            "type": "boolean",
+            "description": "Read-only mount."
+          },
+          "source": {
+            "type": "string",
+            "description": "Host path.",
+            "example": "/Users/me/code"
+          },
+          "staged": {
+            "type": "boolean",
+            "description": "Whether this is a guest-local staged mount."
+          },
+          "tag": {
+            "type": "string",
+            "description": "Virtiofs tag (e.g., \"smolvm0\"). Use this in container mounts.",
+            "example": "smolvm0"
+          },
+          "target": {
+            "type": "string",
+            "description": "Path inside the machine.",
+            "example": "/workspace"
+          }
+        }
+      },
+      "MountSpec": {
+        "type": "object",
+        "description": "Mount specification (for requests).",
+        "required": [
+          "source",
+          "target"
+        ],
+        "properties": {
+          "readonly": {
+            "type": "boolean",
+            "description": "Read-only mount."
+          },
+          "source": {
+            "type": "string",
+            "description": "Host path to mount.",
+            "example": "/Users/me/code"
+          },
+          "staged": {
+            "type": "boolean",
+            "description": "Use a guest-local working copy and synchronize it in batches."
+          },
+          "target": {
+            "type": "string",
+            "description": "Path inside the machine.",
+            "example": "/workspace"
+          }
+        }
+      },
+      "NetworkBackend": {
+        "type": "string",
+        "description": "Network backend override for machine launch.",
+        "enum": [
+          "tsi",
+          "virtio-net"
+        ]
+      },
+      "PortSpec": {
+        "type": "object",
+        "description": "Port mapping specification.",
+        "required": [
+          "host",
+          "guest"
+        ],
+        "properties": {
+          "guest": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Port inside the machine.",
+            "example": 80,
+            "minimum": 0
+          },
+          "host": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Port on the host.",
+            "example": 8080,
+            "minimum": 0
+          }
+        }
+      },
+      "RegistryAuthSpec": {
+        "type": "object",
+        "description": "Credentials for the registry a machine's image lives in.\n\nSupplied per-start rather than stored on the machine record: a customer's\nregistry password must not be written to node disk, and the caller (the\ncontrol plane) already re-sends it on every dispatch. The username is\nconventional for token-style credentials (`token`, `oauth2accesstoken`,\na GitHub PAT username); what matters is the password.",
+        "required": [
+          "username",
+          "password"
+        ],
+        "properties": {
+          "password": {
+            "type": "string",
+            "description": "Registry password, token, or PAT."
+          },
+          "username": {
+            "type": "string",
+            "description": "Registry username."
+          }
+        }
+      },
+      "RestartSpec": {
+        "type": "object",
+        "description": "Restart policy specification for machine creation.",
+        "properties": {
+          "maxRetries": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "Maximum restart attempts (0 = unlimited).",
+            "minimum": 0
+          },
+          "policy": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Restart policy: \"never\", \"always\", \"on-failure\", \"unless-stopped\"."
+          }
+        }
+      },
+      "StartMachineRequest": {
+        "type": "object",
+        "description": "Optional body for `POST /machines/{name}/start`.\n\nEntirely optional so an older caller that sends no body keeps working\nunchanged \u2014 the route accepted only a query string before this existed.",
+        "properties": {
+          "registryAuth": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/RegistryAuthSpec",
+                "description": "Credentials for the image's registry, used for THIS start only.\n\nTakes precedence over any registry credentials configured on the node,\nwhich are operator-level and therefore cannot be per-tenant. Without\nthis, a private image on a third-party registry (a customer's own\n`ghcr.io/<org>/<img>`) has no way to authenticate and the in-guest pull\nfails with an opaque DENIED."
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
