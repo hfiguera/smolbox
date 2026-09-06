@@ -1,6 +1,6 @@
 # SmolBox implementation plan
 
-Status: implementation in progress, September 6, 2026. Initial real-runtime smoke probes pass on Linux x86_64 and macOS arm64. The standalone scaffold and quality gates are implemented. Immutable execution contracts and the bounded HTTP client are implemented. Five low-level real-library cases pass on each initial platform, including an authenticated TLS proxy. Managed execution, persistence, and production profile qualification remain incomplete.
+Status: implementation in progress, September 6, 2026. Initial real-runtime smoke probes pass on Linux x86_64 and macOS arm64. The standalone scaffold and quality gates are implemented. Immutable execution contracts and the bounded HTTP client are implemented. Five low-level real-library cases pass on each initial platform, including an authenticated TLS proxy. Versioned state, fenced store operations, the memory adapter, and shared store scenarios are implemented. Managed execution, durable persistence, and production profile qualification remain incomplete.
 
 Implementation evidence lives in [compatibility.md](compatibility.md) and `docs/evidence/`. Checked items below mean the specific work has evidence; they do not waive the remaining phase exit conditions or release requirements.
 
@@ -572,13 +572,15 @@ Exit: supported client operations work on the pinned worker; POST exec is never 
 
 Dependencies: Phase 2; can proceed alongside Phase 3 after interfaces settle.
 
-- [ ] Implement the store behaviour, memory adapter, versioned records, and conformance suite.
+- [x] Implement the store behaviour, memory adapter, versioned records, and conformance suite. Memory conformance, bounded admission, claim/worker fencing, immutable evidence, safe record encoding, and fresh-BEAM codec loading pass. This is not durable-database evidence.
 - [ ] Implement a minimal host-owned Ecto/Postgres adapter and migrations under `examples/durable_host`.
 - [ ] Test atomic acceptance, conflicting duplicate specs, claim races, reservations, and due-work queries.
 - [ ] Define migration/version compatibility and credential-reference handling.
 - [ ] Fail durable startup when persistence semantics are absent.
 
 Exit: a fresh BEAM process can inspect accepted records and due work through the durable example; memory mode is visibly ephemeral.
+
+Current Phase 4 evidence: 68 deterministic cases (6 properties, 62 examples) pass on macOS/Linux canonical and both compatibility lanes; all five analyzers pass on canonical hosts. Library-only coverage is 98.02%, excluding test-peer and conformance helpers. A disposable PostgreSQL 16.15 instance is running on the Linux host through a private Unix socket; the Ecto adapter and database recovery tests remain to be implemented. See `docs/recovery.md` and `docs/evidence/phase4-store-foundation.json`.
 
 ### Phase 5 — Managed execution and asynchronous handles
 

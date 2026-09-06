@@ -22,17 +22,27 @@ defmodule SmolBox.MixProject do
           "CHANGELOG.md",
           "LICENSE",
           "docs/client.md",
+          "docs/recovery.md",
           "docs/compatibility.md",
           "docs/evidence/*.json"
         ]
       ],
-      docs: [extras: ["README.md", "docs/client.md", "docs/compatibility.md"]],
+      docs: [extras: ["README.md", "docs/client.md", "docs/recovery.md", "docs/compatibility.md"]],
       dialyzer: [
         plt_add_apps: [:mix, :ex_unit, :credence, :dialyxir],
         plt_local_path: "_build/plts"
       ],
-      # Developer tools are exercised by subprocess canaries; coverage gates library code.
-      test_coverage: [ignore_modules: [~r/^Mix.Tasks.Smolbox.Ci\./], summary: [threshold: 90]]
+      # Canaries exercise developer tasks. Peer fixtures and shared adapter tests
+      # are not production library code and must not inflate its coverage floor.
+      test_coverage: [
+        ignore_modules: [
+          ~r/^Mix.Tasks.Smolbox.Ci\./,
+          SmolBox.TestPeer,
+          SmolBox.TestTLS,
+          SmolBox.Store.Contract
+        ],
+        summary: [threshold: 90]
+      ]
     ]
   end
 

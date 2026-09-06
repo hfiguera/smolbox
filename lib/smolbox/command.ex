@@ -38,6 +38,7 @@ defmodule SmolBox.Command do
   @spec validate(term()) :: :ok | {:error, Error.t()}
   def validate(%__MODULE__{} = command) do
     checks = [
+      SmolBox.Validation.struct_shape?(command, __MODULE__),
       valid_argv?(command.argv),
       valid_env?(command.env),
       valid_stdin?(command.stdin),

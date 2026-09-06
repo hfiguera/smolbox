@@ -76,6 +76,7 @@ defmodule SmolBox.Profile do
   @spec validate(term()) :: :ok | {:error, Error.t()}
   def validate(%__MODULE__{} = profile) do
     checks = [
+      Validation.struct_shape?(profile, __MODULE__),
       Validation.identifier?(profile.id),
       Validation.integer?(profile.cpus, 1, 64),
       Validation.integer?(profile.memory_mb, 128, 16_384),

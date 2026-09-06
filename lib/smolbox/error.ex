@@ -21,9 +21,17 @@ defmodule SmolBox.Error do
           | :identity_conflict
           | :not_found
           | :store
+          | :stale_claim
+          | :stale_version
           | :unknown
           | :cleanup
-  @type evidence :: :not_dispatched | :dispatch_uncertain | :exited
+  @type evidence ::
+          :not_dispatched
+          | :dispatch_uncertain
+          | :running_observed
+          | :exited
+          | :termination_confirmed
+          | :unknown
   @type t :: %__MODULE__{
           category: category(),
           operation: atom(),

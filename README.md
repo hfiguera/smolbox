@@ -14,6 +14,10 @@ references. These types do not themselves provide durable execution. The low-lev
 HTTP client is implemented and tested against pinned Linux and macOS workers;
 managed execution and persistence are still being built.
 
+The [store foundation](docs/recovery.md) now includes atomic acceptance, fenced
+claims, capacity reservations, bounded due queries, and an explicitly ephemeral
+memory adapter. Database-backed recovery remains pending.
+
 ```elixir
 {:ok, worker} = SmolBox.Worker.new("local", "http://127.0.0.1:19470",
   allow_insecure_loopback: true)

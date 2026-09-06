@@ -75,7 +75,7 @@ defmodule SmolBox.ExecutionSpec do
     with :ok <- Command.validate(spec.command),
          :ok <- Profile.validate(spec.profile),
          :ok <- Manifest.validate(spec.inputs, spec.outputs, spec.profile),
-         true <- fields?(spec) do
+         true <- Validation.struct_shape?(spec, __MODULE__) and fields?(spec) do
       :ok
     else
       _invalid -> invalid()
