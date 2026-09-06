@@ -1,0 +1,3 @@
+defmodule Canary do
+  def values(items), do: Enum.map(items, fn item -> item end)
+end

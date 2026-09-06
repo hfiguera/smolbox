@@ -1,0 +1,94 @@
+{
+  "stage": "phase1_scaffold",
+  "date": "2026-09-06",
+  "source_sha256": {
+    ".github/workflows/smolbox-ci.yml": "e8f1c6dce206468faa79ee516918934750ac1662ec0b089effb8b6e6b29be466",
+    "packages/smolbox/.credo.exs": "aa712f3c87164f716b17a565c5f96fd76737393349aec3ded108802ac201d825",
+    "packages/smolbox/.ex_dna.exs": "883cc58138e3f8a6ca39cb6fc5be90c37e6b92134a7e56a2de3dc6ed9e99dc22",
+    "packages/smolbox/.formatter.exs": "5a7904f575be523f356cb3b344d2d432193fa63f82880506c83bb407a0f5bb0f",
+    "packages/smolbox/.tool-versions": "a60bb9d439588bfc07f6afd092b92f94e174a47757eb342418c28d988aa18704",
+    "packages/smolbox/dev/mix/tasks/smolbox.ci.credence.ex": "94758c00ab65b59bf572ceaa812d2637bf704006da4db47f38863085dd47d727",
+    "packages/smolbox/dev/mix/tasks/smolbox.ci.verify_checks.ex": "5ba979fd42245f13d9be60b2eb2ddfb1deacf1fb488fa75d7cb61255b77d03f4",
+    "packages/smolbox/lib/smolbox/error.ex": "575b6da384c2c971e6effe3f9b7e31f96952fc1e415a5084f3c3e8836ad92db2",
+    "packages/smolbox/mix.exs": "d8bb9bbe2c7d8390e5956f26fb5855b09ad434422ec5fc7885f71e90670ffdfa",
+    "packages/smolbox/mix.lock": "41a256ff8b12e2c0f58bf525de8d0343e2b9b77fcd37e3d1d6df9976cfd98fab",
+    "packages/smolbox/test/fixtures/quality/compiler_bad.ex.fixture": "8c86193b9861e44ccc6b6fa526eaae69bab589c089855c23b1de9ab8512b917d",
+    "packages/smolbox/test/fixtures/quality/compiler_clean.ex.fixture": "6469551625f2d746e4e5c4c42aaa8a8e2f5a5d9a5da8d77ccf1a7a62a1b6396b",
+    "packages/smolbox/test/fixtures/quality/coverage_bad.ex.fixture": "95f1d06cbf553ca73bd31c9892e984aad337422cf7dcac7181db84c428e29343",
+    "packages/smolbox/test/fixtures/quality/coverage_clean.ex.fixture": "6469551625f2d746e4e5c4c42aaa8a8e2f5a5d9a5da8d77ccf1a7a62a1b6396b",
+    "packages/smolbox/test/fixtures/quality/credence_bad.ex.fixture": "5456dc4b8f7f6baf23d1df9b5842f98d495719fdf6ee7e6eff562c8072f31b0b",
+    "packages/smolbox/test/fixtures/quality/credence_clean.ex.fixture": "6469551625f2d746e4e5c4c42aaa8a8e2f5a5d9a5da8d77ccf1a7a62a1b6396b",
+    "packages/smolbox/test/fixtures/quality/credo_bad.ex.fixture": "e8564b4585e9acf50cfdda32a942f5d565ea485816d5fc2e73cf02f03b8958f6",
+    "packages/smolbox/test/fixtures/quality/credo_clean.ex.fixture": "8ef9e28bab5fe25abb4aad3cfd111ed7277907a951e2e83224c12ee970d6359a",
+    "packages/smolbox/test/fixtures/quality/dialyzer_bad.ex.fixture": "2de23e8fab16beb3c43bce43077eddb540ae004a550a8f3a49d5e468e9c2cce7",
+    "packages/smolbox/test/fixtures/quality/dialyzer_clean.ex.fixture": "f85594bcc5bbf2f4d82bca226dcc6295162800c050b2fa7f4be425d4c1343d63",
+    "packages/smolbox/test/fixtures/quality/ex_dna_bad.ex.fixture": "c5940656c56e1b9b522b78622eaf45c95000409f746668de86b148f149c96db0",
+    "packages/smolbox/test/fixtures/quality/ex_dna_clean.ex.fixture": "6469551625f2d746e4e5c4c42aaa8a8e2f5a5d9a5da8d77ccf1a7a62a1b6396b",
+    "packages/smolbox/test/fixtures/quality/ex_slop_bad.ex.fixture": "8987b133abbdb6255f3b46f5357d8bda601e4afa05f3c268f257409dbe10f712",
+    "packages/smolbox/test/fixtures/quality/ex_slop_clean.ex.fixture": "8ef9e28bab5fe25abb4aad3cfd111ed7277907a951e2e83224c12ee970d6359a",
+    "packages/smolbox/test/test_helper.exs": "b7fd7264c1a77eeaa0da17af2069be2c9f17d4303d5d91eb92dd0611367f7dca",
+    "packages/smolbox/test/unit/error_test.exs": "9f026c57525cfe0366607cdd57a748ca12cc67e4f9cc5710be18c7738200e097"
+  },
+  "canonical": {
+    "elixir": "1.20.4",
+    "otp": "28.5",
+    "macos_mix_ci": "passed",
+    "linux_mix_ci": "passed"
+  },
+  "compatibility_tests": [
+    {
+      "elixir": "1.18.4",
+      "otp": "27.3.4.15",
+      "result": "passed"
+    },
+    {
+      "elixir": "1.19.5",
+      "otp": "28.5",
+      "result": "passed"
+    }
+  ],
+  "canaries_both_hosts": {
+    "compiler": {
+      "bad_exit": 1,
+      "clean_exit": 0
+    },
+    "credo": {
+      "bad_exit": 16,
+      "clean_exit": 0
+    },
+    "ex_slop": {
+      "bad_exit": 8,
+      "clean_exit": 0
+    },
+    "credence": {
+      "bad_exit": 1,
+      "clean_exit": 0
+    },
+    "ex_dna": {
+      "bad_exit": 1,
+      "clean_exit": 0
+    },
+    "dialyzer": {
+      "bad_exit": 2,
+      "clean_exit": 0
+    },
+    "coverage": {
+      "bad_exit": 3,
+      "clean_exit": 0
+    }
+  },
+  "library_test_count": 1,
+  "library_coverage_percent": 100,
+  "docs": "passed",
+  "hex_audit": "passed",
+  "deps_audit": "passed",
+  "hex_build": "passed",
+  "fresh_production_consumer": "passed_without_quality_tools",
+  "actionlint": "1.7.12 passed",
+  "limitations": [
+    "Scaffold only; no managed runtime implemented",
+    "GitHub-hosted workflow has not run; repository has no remote",
+    "Real SmolVM smoke results are separate Phase 0 evidence",
+    "Source URL and independent consumer review remain pending"
+  ]
+}

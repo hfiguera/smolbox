@@ -524,13 +524,13 @@ Deliverables: compatibility/security notes and attributed wire fixtures. Exit: e
 
 Dependencies: initial Phase 0 version decisions.
 
-- [ ] Create `mix.exs`, explicit package metadata, source URL, runtime dependencies, development tools, formatter, and documentation setup.
-- [ ] Use environment-specific compilation paths so `dev/mix/tasks` is excluded from production consumers.
-- [ ] Commit the maintainer lockfile and exact toolchain pins; do not rely on the lockfile to constrain downstream Hex consumers.
-- [ ] Implement the Credence CI wrapper and quality-check canaries described in section 12.
-- [ ] Add root-level GitHub workflows and the local `mix ci` entry point.
-- [ ] Require every requested analyzer; verify intentional bad fixtures produce a failing process.
-- [ ] Configure packaging exclusions for references, nested repositories, credentials, caches, VM state, and CI-only code.
+- [ ] Create `mix.exs`, explicit package metadata, source URL, runtime dependencies, development tools, formatter, and documentation setup. Scaffold is implemented; the repository has no Git remote and the public source URL remains pending user input.
+- [x] Use environment-specific compilation paths so `dev/mix/tasks` is excluded from production consumers.
+- [x] Commit the maintainer lockfile and exact toolchain pins; do not rely on the lockfile to constrain downstream Hex consumers.
+- [x] Implement the Credence CI wrapper and quality-check canaries described in section 12.
+- [x] Add root-level GitHub workflows and the local `mix ci` entry point. Initial workflow covers deterministic/quality/compatibility/security/docs/package checks; durable-store and real-library runtime jobs follow their implementation phases.
+- [x] Require every requested analyzer; verify intentional bad fixtures produce a failing process. Compiler, all five analyzers, and coverage have verified clean/bad counterparts.
+- [x] Configure packaging exclusions for references, nested repositories, credentials, caches, VM state, and CI-only code. A fresh production consumer compiled from the tarball without quality tools; API/supervisor smoke checks remain for later phases.
 
 Exit: an intentionally introduced compiler warning, Credo/ex_slop issue, duplicate, Credence issue, or Dialyzer violation fails its gate. Clean scaffold passes; no live workers are contacted by routine CI.
 

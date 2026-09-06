@@ -30,7 +30,8 @@ health/version. Both platforms pass the initial Python/Node smoke probe below.
 The Linux runtime uses `/tmp/smolbox-qualification/data` as a dedicated data root.
 Its login shell initially had no Elixir, Mix, or SmolVM on PATH; the pinned
 SmolVM distribution was extracted in `/tmp/smolbox-qualification/runtime`.
-Elixir setup for the Linux library tests remains to be done.
+Elixir 1.20.4 / OTP 28.5 was installed under `/tmp/smolbox-qualification/mise`
+for library tests, without changing the account's global toolchain.
 macOS uses unique test machine
 names in the normal SmolVM state directory: `SMOLVM_DATA_DIR` is Linux-only in
 this release. Never delete machines belonging to another workload.
@@ -104,9 +105,20 @@ qualification must not be advertised as production multi-tenant certification.
 ## Toolchain
 
 Canonical: Elixir 1.20.4 / OTP 28.5. Minimum lane: Elixir 1.18.4 / OTP 27.3.4.15.
-Additional lane: Elixir 1.19.5 / OTP 28.5. Lane results are pending.
-The canonical versions are installed locally; repository pins do not change
-the user's global toolchain.
+Additional lane: Elixir 1.19.5 / OTP 28.5. Scaffold compilation/tests pass on
+all three combinations in separate local workspaces. The canonical `mix ci`
+also passes on the Linux host. These results cover the scaffold, not the future
+managed runtime. Repository pins do not change the user's global toolchain.
+
+Use separate workspaces for simultaneous Elixir/OTP lanes. Sharing dependency
+directories can mix rebar build artifacts. Source transfers to Linux must omit
+macOS resource-fork/AppleDouble metadata; otherwise `._*.exs` files are invalid
+Elixir inputs. The recorded successful Linux run used a plain source archive.
+
+Credence 0.8.1 emits upstream compilation warnings on Elixir 1.20.4; Mix's
+dependency compilation reports them separately from the project's warning gate.
+They are not suppressed or represented as SmolBox diagnostics. The library and
+developer tasks pass warning-as-error compilation. No dependency source was patched.
 
 The repository currently has no configured Git remote. Source metadata and an
 independent consumer review remain release prerequisites, not fabricated links

@@ -1,0 +1,4 @@
+defmodule Canary do
+  @spec count(integer()) :: integer()
+  def count(value), do: String.length(value)
+end

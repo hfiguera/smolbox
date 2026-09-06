@@ -1,0 +1,14 @@
+/_build/
+/deps/
+/cover/
+/doc/
+/.local/
+/reports/
+/*.ez
+/*.tar
+/erl_crash.dump
+__pycache__/
+*.pyc
+/examples/*/_build/
+/examples/*/deps/
+/examples/*/reports/

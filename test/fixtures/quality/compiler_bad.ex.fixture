@@ -1,0 +1,6 @@
+defmodule Canary do
+  def add(left, right) do
+    unused = :canary
+    left + right
+  end
+end

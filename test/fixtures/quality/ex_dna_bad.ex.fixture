@@ -1,0 +1,19 @@
+defmodule FirstCanary do
+  def calculate(items) do
+    items
+    |> Enum.map(fn item -> {item.name, item.count * item.price} end)
+    |> Enum.filter(fn {_name, total} -> total > 10 end)
+    |> Enum.sort_by(fn {name, total} -> {total, name} end)
+    |> Enum.take(10)
+  end
+end
+
+defmodule SecondCanary do
+  def calculate(items) do
+    items
+    |> Enum.map(fn item -> {item.name, item.count * item.price} end)
+    |> Enum.filter(fn {_name, total} -> total > 10 end)
+    |> Enum.sort_by(fn {name, total} -> {total, name} end)
+    |> Enum.take(10)
+  end
+end

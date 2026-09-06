@@ -1,0 +1,4 @@
+defmodule Canary do
+  @moduledoc false
+  def values(items), do: Enum.map(items, fn item -> item end)
+end

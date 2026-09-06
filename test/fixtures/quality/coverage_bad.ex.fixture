@@ -1,0 +1,4 @@
+defmodule Canary do
+  def add(left, right), do: left + right
+  def multiply(left, right), do: left * right
+end
