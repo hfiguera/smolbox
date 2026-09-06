@@ -1,0 +1,826 @@
+# SmolBox implementation plan
+
+Status: proposed implementation plan, September 6, 2026. No SmolBox runtime or CI implementation is claimed by this document.
+
+This plan covers only the `smolbox` Elixir package. It translates the sandbox boundary in [Keel's idea document](../../../ideas/001-initial-idea.txt) into implementation work, verification requirements, and release gates. Proposed module names and APIs below are design targets, not existing interfaces.
+
+## 1. Outcome and scope
+
+SmolBox should let an Elixir application submit an authorized command with files and resource constraints to a configured pool of self-hosted `smolvm serve` workers, observe the outcome, collect outputs, and reconcile interrupted operations without blindly executing the command again.
+
+Ship an independently usable library with optional, explicitly started supervised components. A consumer must be able to use it without Keel, Phoenix, Jido, Runic, Jizoku, or a function publishing system.
+
+### 1.1 Required first-release capabilities
+
+- A typed client for the verified subset of a pinned SmolVM local HTTP API.
+- Local development through loopback or a protected Unix socket; remote worker access through authenticated TLS proxies.
+- Machine creation, inspection, start, stop, and deletion within a library-owned namespace.
+- Command execution with an argument vector, explicit environment, working directory, and deadline.
+- Bounded stdout/stderr handling, streamed execution events, and explicit nonzero exit results.
+- Staging and collection of approved files with size limits and digest verification.
+- Asynchronous execution handles and inspection independent of the caller process.
+- A small configured worker pool with health, capability checks, resource admission, and draining.
+- Stable request identities, duplicate-submission handling, persisted state through a host store, and reconciliation after restart.
+- Cancellation requests whose outcomes are confirmed by worker evidence, plus separately tracked cleanup.
+- Telemetry and structured errors that omit secrets and uploaded code by default.
+- Tests against controlled HTTP peers and real pinned SmolVM installations on Linux and macOS.
+- Required CI gates for Dialyzer, Credo, ex_dna, ex_slop, and Credence, alongside compilation, formatting, tests, dependency audits, documentation, and packaging.
+
+### 1.2 Explicit exclusions
+
+Do not implement the following in this package:
+
+- Monaco, LiveView, React Flow, agents, voice channels, or application pages.
+- Python dependency resolution, JavaScript bundling, TypeScript compilation recipes, or language-specific function runners.
+- Function input/output business schemas, test-case selection, build promotion, publication, or production activation.
+- A second workflow engine, workflow retries, approval flows, or compensation for external effects.
+- A managed sandbox service, public worker API, billing, infrastructure provisioning, or autoscaling.
+- A Firecracker backend, embedded SmolVM NIF, or the managed Smol Machines cloud API.
+- Arbitrary host mounts, guest access to host credentials, GPU/CUDA, interactive terminals, or persistent developer workspaces in the first release.
+- Warm VM reuse, branching, checkpoints, or machine export as required first-release features. Add verified primitives later only for a concrete consumer.
+- Exactly-once external execution or recovery of live guest processes after host loss.
+
+A host may use SmolBox to execute a build command or a test command. SmolBox treats these as workloads; the host's lifecycle module interprets them.
+
+### 1.3 Evidence required to call the first release usable
+
+Two small host applications, including one without Keel or Jido, must demonstrate submission, files, results, cancellation, restart inspection, and cleanup. At least one must use a durable store. A simulated and a real interrupted execution must remain identified as the original operation; insufficient evidence must produce an explicit unknown outcome.
+
+## 2. Starting point and verified dependencies
+
+At planning time the tracked Keel repository contains the idea document and no SmolBox `mix.exs`, runtime implementation, or CI workflow. The requested package directory already exists. Treat `packages/smolbox/external-references/` as reference material, not package source; do not modify, format, analyze, or ship nested upstream repositories.
+
+### 2.1 Upstream boundary
+
+The selected project is `smol-machines/smolvm`, with its per-host `smolvm serve` API. Its documentation lists lifecycle, command execution, file transfer, and SSE operations. It also states that local API authentication and complete fleet management are outside that API's guarantees. [Local API](https://smolmachines.com/docs/local/local-api-smolvm-serve), [self-hosting](https://smolmachines.com/docs/local/self-hosting).
+
+Use SmolVM `v1.14.1` as the first compatibility-spike candidate, not as an already certified runtime. That release was visible during this review. Record the exact runtime version, source commit, binary checksum, host architecture, guest image digests, and generated OpenAPI checksum before accepting it. [Candidate release](https://github.com/smol-machines/smolvm/releases/tag/v1.14.1).
+
+Source inspection of that tag confirms camelCase exec fields, including `timeoutSecs`, and an argument-vector command. Its buffered response includes byte-preserving base64 output alongside lossy text. This evidence should inform fixtures; it does not establish cancellation, output bounds, or durable execution receipts. [API types](https://github.com/smol-machines/smolvm/blob/v1.14.1/src/api/types.rs), [execution handlers](https://github.com/smol-machines/smolvm/blob/v1.14.1/src/api/handlers/exec.rs).
+
+### 2.2 Elixir and OTP policy
+
+- Proposed minimum: Elixir 1.18, since the reviewed ex_dna and ex_slop releases require `~> 1.18`.
+- Canonical development/quality lane: Elixir 1.20.4 with a verified OTP 28 patch.
+- Compatibility lanes: latest reviewed patches of Elixir 1.18 / OTP 27 and Elixir 1.19 / OTP 28.
+- Add Elixir 1.20 / OTP 29 as a current-OTP lane once the dependency resolution and tools pass there.
+- Pin exact patches in the repository's tool-version file and CI. The combinations above are the intended matrix, not permission to use floating versions indefinitely.
+- Do not claim support for untested combinations or for every future Elixir minor merely because a dependency requirement permits installation.
+
+The official compatibility table supports those version pairings. Recheck it when pinning or expanding the matrix. [Elixir/OTP compatibility](https://hexdocs.pm/elixir/compatibility-and-deprecations.html#between-elixir-and-erlang-otp).
+
+### 2.3 Dependency decisions
+
+| Dependency | Intended use | Boundary |
+|---|---|---|
+| Req, initially evaluate stable 0.7.4 | HTTP requests and controlled response streaming | Private transport implementation; no global Req defaults |
+| Jason | JSON wire encoding and decoding | Explicitly declare direct use; never turn remote keys into atoms |
+| telemetry | Execution, transport, capacity, and cleanup events | No exporter dependency in the library |
+| NimbleOptions, if it materially simplifies config validation | Trusted host configuration | Request structs still require explicit validation |
+| ExUnit and StreamData | Unit, property, and concurrency tests | Development/test only |
+| Req.Test and a local HTTP test server | Deterministic client behavior and real stream fragmentation | Tests must exercise the actual transport boundary too |
+| Dialyxir, Credo, ex_dna, ex_slop, Credence | Required quality checks | Development/test only; details in section 12 |
+| ExDoc and mix_audit | Docs and dependency security checks | Development/test only |
+
+Do not require Ecto, Phoenix PubSub, Oban, Jizoku, or an object-store SDK in the core package. Supply host extension points only where this plan needs them. Req supports streaming but also has automatic request behavior that must be configured deliberately. [Req](https://hexdocs.pm/req/Req.html), [Req retry behavior](https://hexdocs.pm/req/Req.Steps.html#retry/1).
+
+## 3. Package structure and deployment
+
+Keep `packages/smolbox` as a standalone Mix project within the repository. Do not turn Keel into an umbrella merely to implement this package. The package must compile and test when copied outside this repository.
+
+Target structure; create files as their phases require them:
+
+```text
+packages/smolbox/
+  mix.exs
+  mix.lock
+  .formatter.exs
+  .credo.exs
+  .ex_dna.exs
+  README.md
+  CHANGELOG.md
+  LICENSE
+  lib/
+    smolbox.ex
+    smolbox/
+      client.ex
+      client/{machines,exec,files}.ex
+      transport.ex
+      transport/req.ex
+      wire/{encode,decode,sse}.ex
+      error.ex
+      worker.ex
+      capabilities.ex
+      command.ex
+      execution_spec.ex
+      execution.ex
+      result.ex
+      profile.ex
+      files.ex
+      runtime.ex
+      runtime/{coordinator,admission,executor,reconciler,cleanup}.ex
+      store.ex
+      store/memory.ex
+      artifact_store.ex
+      telemetry.ex
+  dev/mix/tasks/
+    smolbox.ci.credence.ex
+    smolbox.ci.verify_checks.ex
+  test/
+    unit/
+    contract/
+    runtime/
+    integration/
+    support/
+    fixtures/{wire,openapi,quality}/
+  scripts/ci/
+  examples/
+    minimal_host/
+    durable_host/
+  docs/
+    implementation-plan.md
+    compatibility.md
+    security.md
+    recovery.md
+    host-integration.md
+```
+
+The actual workflow YAML belongs at the repository root, for example `.github/workflows/smolbox-ci.yml`; its commands run with `working-directory: packages/smolbox`. Package internals above are an initial map, not a reason to create empty modules or one-line wrappers.
+
+```mermaid
+flowchart TB
+    Host["Host application<br/>Authorization and business/workflow policy"]
+    API["SmolBox public execution API"]
+    Runtime["Named SmolBox runtime<br/>Admission, execution and reconciliation"]
+    Store[("Host durable store<br/>Intent, claims, state and due work")]
+    Artifacts[("Host artifact storage")]
+    Client["SmolBox client<br/>Wire validation and bounded HTTP / SSE"]
+    Proxy["Authenticated worker proxy"]
+    Serve["Private smolvm serve"]
+    Guest["Disposable guest<br/>Caller-supplied command and files"]
+    Host --> API
+    API --> Runtime
+    Runtime <--> Store
+    Runtime <--> Artifacts
+    Runtime <--> Client
+    Host -.->|Optional low-level client use| Client
+    Client <--> Proxy
+    Proxy <--> Serve
+    Serve <--> Guest
+```
+
+The worker proxy and SmolVM installation are operator-managed dependencies. SmolBox provides their deployment contract and integration tests; it does not implement a new generic proxy service. A basic authenticated proxy must not be described as supplying durable execution receipts or request deduplication.
+
+## 4. Public API and data contracts
+
+### 4.1 Two explicit API levels
+
+The low-level client exposes verified machine, file, and command operations. It is useful without a scheduler, but it does not promise durable execution or safe replay of commands.
+
+The managed API adds persisted intent, admission, identity, reconciliation, and cleanup. Prefer it in Keel and any application that needs work to outlive a request process.
+
+Proposed signatures:
+
+| API | Contract |
+|---|---|
+| `SmolBox.child_spec(options)` | Start an explicitly named, host-supervised runtime |
+| `SmolBox.submit(runtime, spec)` | Return `{:ok, handle}` only after the store accepts the request; otherwise a typed error |
+| `SmolBox.fetch(runtime, scope, execution_id)` | Return an authoritative stored snapshot within that scope |
+| `SmolBox.await(runtime, handle, timeout)` | Wait for an observed result; observer timeout does not cancel work |
+| `SmolBox.cancel(runtime, scope, execution_id, options)` | Persist cancellation intent; acknowledgment does not mean termination |
+| `SmolBox.reconcile(runtime, scope, execution_id)` | Request inspection of existing work, never a command replay |
+| `SmolBox.drain_worker(runtime, worker_id)` | Stop new admission while observing existing work |
+| `SmolBox.Client.*` | Typed low-level operations with documented weaker guarantees |
+
+Do not expose arbitrary remote URLs or arbitrary machine names through the managed API. Host code chooses the configured worker pool and profile. A scope is a trusted host namespace, not proof of end-user authorization.
+
+### 4.2 Execution specification
+
+Define an immutable `ExecutionSpec` containing:
+
+- Caller-supplied execution ID or idempotency key, scoped to the runtime/host namespace.
+- Pinned runtime image or verified prepared-artifact reference and target architecture.
+- Command argument vector, optional stdin bytes under a cap, approved environment entries, and guest working directory.
+- Input-file manifest: approved source reference, destination, size, digest, and access mode.
+- Declared output paths, per-file and aggregate collection bounds, and destination references.
+- Host-selected profile and its immutable policy identity.
+- Queue expiry, execution deadline, and cleanup/evidence retention policy.
+- Correlation metadata limited to approved scalar fields; no opaque dumped application state.
+
+Build a canonical specification fingerprint. Include every field that changes execution meaning. Redact or securely key hashes involving low-entropy secret values; do not expose a public digest that enables guessing credentials. A duplicate key with an identical fingerprint returns the existing handle. A duplicate key with a different fingerprint fails with an identity-conflict error.
+
+For the first release, allow only host-approved runtime artifacts, one managed command per disposable machine, and no detached/background mode. Multiple staging operations are internal preparation, not independently retryable user commands. Reject unknown options, duplicate environment names, invalid paths, invalid UTF-8 where the upstream field requires text, and unsupported binary stdin explicitly.
+
+Approved runtime images must start with a verified neutral entry point. Machine start, image initialization, restart policies, and reconnection must not invoke the caller's command before the persisted dispatch boundary or automatically repeat it. Disable automatic workload restart in managed mode. Include image entry-point behavior in the Phase 0 contract tests.
+
+### 4.3 Results, errors, and events
+
+Keep three dimensions separate:
+
+| Dimension | Example values |
+|---|---|
+| Execution evidence | `not_dispatched`, `dispatch_uncertain`, `running_observed`, `exited`, `termination_confirmed`, `unknown` |
+| Collection status | `pending`, `complete`, `partial`, `failed` |
+| Cleanup status | `pending`, `in_progress`, `complete`, `failed` |
+
+A result includes exit code when known, bounded stdout/stderr or stored output references, byte counts/truncation indicators, declared artifacts, timings, worker/machine identity, and observed evidence. Do not equate exit code zero with valid function JSON or business success; the caller's lifecycle module owns that interpretation.
+
+Use a structured error with a finite category, operation, execution identity, safe message, dispatch-evidence classification, and optional redacted upstream details. Categories should distinguish validation, unsupported capability, authentication, admission exhaustion, queue expiry, transport failure, protocol failure, nonzero command exit, output limit, unknown outcome, and cleanup failure.
+
+Progress notifications are advisory. Consumers recover by fetching a snapshot; mailbox delivery is not durable history. Do not provide an unbounded per-subscriber log stream. The first release can offer bounded callbacks plus cursor-based inspection; a richer subscription interface requires explicit backpressure and disconnect semantics.
+
+## 5. Profiles, isolation, and file safety
+
+### 5.1 Threat and trust boundary
+
+Treat commands, guest output, files, image contents, and dependency-installation code as untrusted. The Elixir host, durable store, proxy configuration, SmolVM host account, VMM, host OS, and hypervisor are trusted infrastructure. Guest root must not be trusted to attest that execution happened only once or to enforce host safety limits.
+
+The managed API accepts policy selected by trusted application code. It must not merge caller-supplied Smolfile settings, host mounts, proxy credentials, or arbitrary endpoint overrides into a worker request.
+
+Default to no guest network access, no host mounts, no port forwarding, no SSH-agent forwarding, no host sockets, and no GPU features. The library must not broaden these capabilities because an image pull or a command failed.
+
+### 5.2 Capability matrix before implementation claims
+
+Create `docs/compatibility.md` with one row per control, pinned runtime, host OS, and architecture:
+
+| Control | Required evidence | Reject or qualify when unavailable |
+|---|---|---|
+| CPU allocation | Correct vCPU configuration and admission reservation | A vCPU count is not a CPU-time quota |
+| Guest memory | Runtime configuration plus overload experiment | Record host overhead; guest memory alone is not a full host RSS bound |
+| Wall-clock deadline | Verified process-tree/VM termination behavior | HTTP timeout alone cannot satisfy it |
+| Disk | Guest storage bounds and host sparse-file/cache accounting | Requested disk size alone does not prove host exhaustion protection |
+| Process limit | Enforced guest/host mechanism under hostile code | Do not rely on a user-editable function runner or guest root cooperation |
+| Output | Streaming limits plus bounded upstream behavior | Limiting BEAM buffering does not prove the server buffers safely |
+| Egress denial | Tests for guest traffic, host/control-plane access, and image preparation | Do not silently enable networking |
+| Allowed egress, later | Actual DNS/CIDR behavior including redirect and private-address cases | A hostname list is not a complete isolation proof |
+| Concurrency | Atomic admission across the supported controller topology | A local semaphore cannot enforce a cluster-wide quota |
+| Cancellation | Observable termination and separately known command outcome | Stopping observation is not cancellation |
+
+An enforceable supported profile is a first-release gate. If a requested hard control cannot be enforced, reject that profile before dispatch. Define the minimal supported profile from measured capabilities; do not advertise every proposed limit as implemented. Record whether a control protects the guest, the worker host, or only the controller.
+
+### 5.3 Staging and collection rules
+
+- Resolve artifact references through trusted host integration; do not fetch arbitrary guest-provided URLs.
+- Stream to private staging locations with bounded size, verify the digest, and publish a completed staged file atomically where the chosen transport supports it.
+- Normalize guest paths, reject traversal/NUL/ambiguous encodings, and keep output selection within the approved workspace.
+- Treat symlinks and archive members as untrusted. Do not unpack guest-controlled archives directly into host paths; first-release file transfer can avoid archive extraction entirely.
+- Use exact declared output paths initially; defer recursive wildcard collection until its traversal and resource bounds are proven.
+- Define handling of missing files, changing files, partial transfer, digest mismatch, duplicate names, and excessive aggregate output.
+- Host artifact-store credentials never enter the guest. Optional future guest credentials need a separate explicit policy; no inheritance from host environment.
+- Preserve binary data using verified binary-safe wire fields or file download. Do not silently substitute lossy text output for byte-exact output.
+- Include artifact staging and collection in the overall deadline and capacity accounting. Retain enough disk accounting for failed cleanup and unknown outcomes.
+
+## 6. Persistence, state transitions, and recovery
+
+### 6.1 Store boundary
+
+Define a `SmolBox.Store` behaviour whose contract includes atomic insert-if-absent, lookup, versioned state transition, bounded due-work queries, execution claims, admission reservations, and cleanup scheduling. Specify transactions/CAS semantics and error behavior before choosing module callback names.
+
+Provide:
+
+1. An in-memory adapter for tests and explicitly ephemeral local use. Its documentation must state that a VM/application restart loses records and may leave worker machines behind.
+2. A durable host example implementing the contract with Ecto/Postgres, its own Repo and migrations, outside the published core dependency tree.
+3. A reusable adapter conformance suite covering duplicate keys, conflicting fingerprints, compare-and-swap races, restart reads, claims, and due-work recovery.
+
+Managed durable mode requires a store that declares and passes the required semantics. Do not silently fall back to memory. Persistence failure before acceptance prevents dispatch. Persistence failure after possible dispatch causes reconciliation work and conservative uncertainty, not a new execution.
+
+The core library does not start a database or run host migrations. The durable example is required evidence and integration guidance, not a promise that an arbitrary callback adapter is safe.
+
+### 6.2 Persisted record
+
+Store at least the schema version, namespace, execution ID, fingerprint, immutable spec/artifact references, worker ID, machine name, admission reservation, controller claim/fencing generation, state/version, stage timestamps, cancellation intent, dispatch intent/evidence, observed exit, result references, collection status, cleanup status, next reconciliation time, and redacted error history.
+
+Do not serialize PIDs, open sockets, process references, closures, or arbitrary host modules as durable job state. Credential references can be resolved at dispatch; secret values require an explicit secure host storage policy if persistence is necessary.
+
+Persist worker and machine identity before creation. Generate bounded opaque machine names with a host-controlled ownership namespace; never derive a raw machine name from end-user text. Persist mappings sufficient to verify ownership on later cleanup. A matching name alone is not proof of ownership after conflicts or manual replacement.
+
+### 6.3 State machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> accepted
+    accepted --> preparing: capacity reserved
+    accepted --> expired: queue deadline reached
+    accepted --> cancelled: cancellation before dispatch
+    preparing --> ready: machine and files verified
+    preparing --> failed: known preparation failure
+    preparing --> cancelled: cancellation before command dispatch
+    ready --> cancelled: cancellation before command dispatch
+    ready --> dispatching: dispatch intent persisted
+    dispatching --> running: positive execution evidence
+    dispatching --> unknown: acceptance or response lost
+    running --> collecting: exit observed
+    running --> unknown: execution evidence lost
+    running --> cancelling: cancellation requested
+    cancelling --> collecting: termination and outcome observed
+    cancelling --> unknown: termination or outcome uncertain
+    unknown --> collecting: later authoritative exit evidence
+    unknown --> cancelling: termination requested
+    unknown --> unknown: evidence still insufficient
+    collecting --> completed: exit and required outputs recorded
+    collecting --> collection_failed: required outputs unavailable
+```
+
+This is the normal execution projection. Cleanup is a separate persisted state machine and can still be pending after completion, failure, cancellation, or uncertainty. A completed command may have a nonzero exit code. An unknown execution may be confirmed stopped without recovering its original exit code; represent both facts rather than forcing a successful/failed result.
+
+### 6.4 The dispatch uncertainty rule
+
+There is an unavoidable gap between writing dispatch intent and receiving worker evidence. Persisting intent before HTTP does not make the worker command idempotent.
+
+After the request may have been sent:
+
+- Disable automatic command retries in the HTTP stack, proxy, queue consumer, and execution process restart path.
+- Inspect the existing machine and any trustworthy execution record. Machine existence, guest-written files, an SSE reconnect, or a PID alone may be insufficient evidence.
+- Do not resend `exec` simply because no running process can be found; it may already have completed.
+- If no durable host-side receipt exists, preserve `unknown`. Document that this API path cannot recover every command result after a connection loss.
+- A host workflow may later authorize a distinct retry attempt based on its own idempotency/business policy. SmolBox never invents that authorization.
+
+Phase 0 must determine whether the pinned worker API exposes durable, queryable execution identity and deduplication. If it does not, the initial release uses the conservative unknown-outcome contract. Automatic recovery of a precise outcome requires a separately reviewed worker-side receipt capability; adding a guest wrapper or an ordinary TLS proxy is not sufficient. A future receipt adapter must still handle the gap between receipt persistence and process spawn honestly.
+
+### 6.5 Concurrency and ownership
+
+- Atomic store acceptance prevents two controllers from accepting conflicting specifications under one ID.
+- Claims and reservations coordinate controllers but cannot retract an HTTP request already in flight.
+- Prefer one active controller owner per configured worker in the initial deployment model. Multi-controller takeover must not replay dispatched work.
+- A stale controller must fail its next state write after losing its fencing generation. Require a fresh claim immediately before dispatch and conservative treatment of any race after it.
+- Count unresolved executions and unconfirmed cleanup against capacity until evidence permits release. Expose an operator reconciliation path; do not silently overbook.
+- On restart, scan bounded batches of due records and rebuild observation tasks. Registry entries and process mailboxes are caches, not authority.
+
+### 6.6 Retry and cleanup table
+
+| Operation | Retry policy |
+|---|---|
+| Read-only inspection | Bounded retries with jitter within the observation deadline |
+| Machine create | Inspect the persisted name and ownership after ambiguity; do not create a replacement blindly |
+| File upload before command dispatch | Retry only under verified overwrite/atomicity semantics and the same digest |
+| Execute command | Never retry automatically after possible acceptance |
+| Read/download declared outputs | Retry boundedly while retaining the machine and evidence |
+| Stop/delete | Reconcile owned machine state; verified absence can complete cleanup |
+| Persist result / notify caller | Reuse the same execution identity; persist before sending advisory notifications |
+
+Cleanup needs persisted due times, bounded retries, alerts after exhaustion, and an ownership-aware orphan sweep. Delete only verified owned resources. Do not discard an unknown operation's remaining evidence merely to make the queue appear clean; apply a documented retention policy and record any evidence loss.
+
+## 7. Transport and wire implementation
+
+### 7.1 Endpoint inventory
+
+Capture the installed release's `smolvm serve openapi` output and a minimal, attributed set of fixtures. Build the client against this selected subset:
+
+| Operation | Documented local API path | Initial use |
+|---|---|---|
+| Create/list/inspect machines | `/api/v1/machines` and `/api/v1/machines/:name` | Required |
+| Start/stop/delete | Machine lifecycle paths | Required |
+| Buffered command execution | `/api/v1/machines/:name/exec` | Small bounded cases only after server bounds are measured |
+| Streamed command execution | `/api/v1/machines/:name/exec/stream` | Preferred for observable command output |
+| Upload/download files | `/api/v1/machines/:name/files/*path` | Required, within verified transfer limits |
+| Machine logs | `/api/v1/machines/:name/logs` | Diagnostic use; not proof of a particular command result |
+| Image preparation | Verified image/preparation paths | Host-controlled setup; not implicit guest permission expansion |
+
+Do not implement every route because it exists upstream. Live-memory features, pools, cloud rollouts, and unrelated upstream services are outside this package's initial contract.
+
+### 7.2 HTTP behavior
+
+- Configure a client instance per worker configuration; never mutate global HTTP defaults.
+- Use TLS peer verification and configured CA/mTLS or proxy token authentication for remote workers. Restrict plain HTTP to explicitly configured local development endpoints.
+- Disable redirects and automatic retries for mutating requests; no credential forwarding to a redirect target.
+- Bound connect, pool checkout, response idle, request body, response body, and overall operation time separately.
+- Encode request fields centrally and reject unknown host options before dispatch. Keep all untrusted JSON keys as strings at the wire boundary.
+- Validate status, content type, required fields, sizes, numeric ranges, and error payloads. Unknown additive response fields may be ignored deliberately; missing safety-critical fields fail.
+- Never log authorization headers, environment values, stdin, source files, or complete remote error bodies by default.
+- Test Unix-socket support in the actual Req/Finch transport version. If that path is unavailable, report it and use configured loopback for development; do not pretend socket support was verified.
+
+### 7.3 SSE and backpressure
+
+Implement a small protocol-focused parser, not a generic event bus. Test split UTF-8 sequences, partial lines, CRLF, multi-line data, comments/keepalives, unknown event types, invalid JSON, oversized events, duplicate exit events, EOF without exit, and chunks arriving after termination.
+
+Wire event decoding follows the pinned source and fixtures. Preserve stdout/stderr ordering within each stream; do not invent a total order if the runtime cannot provide it. Distinguish transport completion from a command exit event.
+
+Read in bounded chunks. Use controlled consumers or bounded spool files rather than sending unbounded chunks into a GenServer mailbox. Define what happens when output storage or a subscriber is slow: stop optional live delivery, preserve bounded capture, and request termination if a hard output limit is exceeded. Disconnecting the SSE request alone must not be treated as stopping the guest.
+
+## 8. OTP runtime and pool management
+
+Use explicit host supervision:
+
+```text
+Host supervisor
+  SmolBox runtime supervisor (one named instance)
+    scoped Registry
+    HTTP connection pool
+    admission/coordinator process
+    DynamicSupervisor for execution observers
+    Task.Supervisor for bounded I/O work
+    reconciler
+    cleanup scheduler
+```
+
+The final tree can be smaller if responsibilities compose cleanly. Do not use a GenServer merely as an in-memory map. Avoid blocking the coordinator on long HTTP calls or guest work. Execution-process restarts resume observation from persisted state; they do not rerun the original command.
+
+Configuration includes stable worker IDs, proxy endpoint/auth references, runtime version/capabilities, OS/architecture, supported image/profile references, CPU/memory/disk reservations, concurrency limits, and drain state. Keep caller metadata separate from worker configuration.
+
+Admission chooses an eligible healthy worker using a simple deterministic policy such as available capacity with stable tie-breaking. Bound the pending queue, implement explicit overload/expiry results, reserve host overhead, and release resources only under the persisted outcome/cleanup rules. First-release fairness can be a bounded FIFO within host-assigned pools; cross-tenant priority algorithms are later work.
+
+Health distinguishes reachable, degraded, draining, and unavailable. HTTP reachability alone does not establish image availability, hypervisor readiness, or free execution capacity. Refresh capabilities after upgrades and reject incompatible work. Drain prevents new submissions to a worker while keeping observation and cleanup available.
+
+Runtime shutdown stops admission, persists due work, and allows a bounded observation drain. Whether a workload continues or is explicitly terminated follows its host-selected policy; killing the Elixir process must not be presented as confirmed cancellation.
+
+Persist absolute deadlines for restart recovery and use monotonic elapsed time within a process. Specify queue, preparation, execution, collection, and cleanup budgets separately. Convert to the runtime's timeout units deliberately, without rounding into an unbounded request. If the controller restarts after a deadline, reconcile and request termination where appropriate; do not reset the workload's allowed time.
+
+## 9. Telemetry and operator information
+
+Provide documented telemetry for admission, preparation, dispatch, observed exit, unknown outcome, collection, cancellation, cleanup, and worker health changes. Separate queue wait, runtime preparation, code execution, collection, and cleanup durations.
+
+Metrics must use bounded labels such as event kind, platform, and outcome category. Execution IDs belong in structured events/traces, not high-cardinality metric labels. Payloads exclude secrets, input values, code, and stdout/stderr unless the host explicitly opts into a separate protected sink.
+
+Inspection must expose last known stage, evidence quality, version compatibility, cancellation intent, next reconciliation time, output availability, and cleanup state. Document which actions are observational, which terminate an owned guest, and which require a new host-authorized execution.
+
+## 10. Test strategy
+
+### 10.1 Deterministic suite: required on every relevant PR
+
+| Area | Required scenarios |
+|---|---|
+| Encoding | Exact field names, omitted defaults, invalid fields, path escaping, environment limits |
+| Decoding | Nonzero exit, malformed body, base64 bytes, oversized payload, unknown additive fields |
+| Transport | Auth failure, redirect rejection, timeout, disconnect before/after possible acceptance, no POST replay |
+| Streaming | Every SSE boundary case in section 7.3; bounded slow-consumer behavior |
+| Identity | Identical duplicate returns same handle; conflicting spec fails; two concurrent submitters |
+| State | Valid/invalid transitions, cancellation races, stale state writes, expiry before dispatch |
+| Store | Restart reads, claim conflicts, atomic reservations, pagination of due work, unavailable database |
+| Files | Digest mismatch, traversal, symlinks, binary files, missing outputs, changing outputs, collection caps |
+| Cleanup | Failed stop/delete, already absent owned machine, foreign machine protection, orphan discovery |
+| Isolation configuration | No implicit network/mount/socket/credential capability; unsupported profile fails early |
+| Telemetry | Correct events, bounded metadata, redaction, slow or crashing observers |
+
+Use a controllable clock and deterministic failure injection. Avoid tests that merely restate field assignments. Property tests should explore state transitions, ID conflict semantics, path normalization, and arbitrary chunk boundaries.
+
+### 10.2 Real-runtime suites
+
+Run in dedicated disposable worker environments with pinned binaries and images:
+
+1. Linux x86_64 with working KVM: Python and JS scripts, file round trip, stdout/stderr, nonzero exit, timeout, cancellation, no-network test, collection, deletion.
+2. macOS arm64 with verified virtualization support: the same supported contract, including artifact architecture checks.
+3. Add Linux arm64 only when a runner exists and the suite passes; do not infer it from macOS arm64.
+4. Store-backed restart tests: terminate the Elixir controller at each dispatch/collection/cleanup boundary and reconnect through a fresh host process.
+5. Worker restart and transport fault tests: lost response, restarted `smolvm serve`, missing guest, inaccessible host, and unavailable output storage.
+6. Resource-abuse tests in isolated, quota-controlled hosts: excessive memory/disk/processes/output and attempted access to host or control-plane resources.
+
+Python and JS scripts are execution fixtures supplied by the tests. Do not turn these fixtures into a SmolBox function-runner SDK or add TypeScript build recipes to the package.
+
+Real-runtime test selection must fail when explicitly requested but the runtime or virtualization capability is absent. A skipped real-runtime suite cannot qualify a platform for release.
+
+### 10.3 Fault injection matrix
+
+Inject controller failure immediately before/after: store acceptance, admission reservation, machine creation, file upload, dispatch-intent write, HTTP exec send, first output, exit event, artifact persistence, result write, stop, delete, and notification.
+
+For each boundary assert the execution ID, number of actual commands observed by the controlled worker, resulting evidence state, capacity accounting, and eventual cleanup. The accepted outcome can be `unknown`; a second uncontrolled command is never the expected recovery behavior.
+
+## 11. Implementation phases and reviewable increments
+
+Complete phases in dependency order. Each phase should be a focused PR or a small series of PRs with its stated evidence. Do not mark a phase complete because only a mock path works when its exit condition requires a real worker.
+
+### Phase 0 — Verify the worker contract and hard feasibility questions
+
+Dependencies: none.
+
+- [ ] Select the SmolVM release candidate and exact Elixir/OTP/tool pins.
+- [ ] Capture its OpenAPI schema, checksums, and minimal request/response/event fixtures.
+- [ ] Run one manually controlled Python command and file round trip on Linux and macOS.
+- [ ] Verify how a prepared runtime runs with guest egress disabled.
+- [ ] Verify neutral image entry points and disabled restart policies keep caller commands behind the dispatch boundary.
+- [ ] Measure exec timeout, stream disconnect, cancellation, binary output, and server-side buffering behavior.
+- [ ] Determine whether durable exec receipts/deduplication exist; record the conservative recovery contract if absent.
+- [ ] Complete the profile capability matrix, including process and host disk bounds.
+- [ ] Record proxy/account isolation requirements and platform limitations.
+
+Deliverables: compatibility/security notes and attributed wire fixtures. Exit: enough evidence to implement a supported minimal profile; unresolved controls are explicitly unsupported rather than guessed.
+
+### Phase 1 — Scaffold the standalone package and make CI fail correctly
+
+Dependencies: initial Phase 0 version decisions.
+
+- [ ] Create `mix.exs`, explicit package metadata, source URL, runtime dependencies, development tools, formatter, and documentation setup.
+- [ ] Use environment-specific compilation paths so `dev/mix/tasks` is excluded from production consumers.
+- [ ] Commit the maintainer lockfile and exact toolchain pins; do not rely on the lockfile to constrain downstream Hex consumers.
+- [ ] Implement the Credence CI wrapper and quality-check canaries described in section 12.
+- [ ] Add root-level GitHub workflows and the local `mix ci` entry point.
+- [ ] Require every requested analyzer; verify intentional bad fixtures produce a failing process.
+- [ ] Configure packaging exclusions for references, nested repositories, credentials, caches, VM state, and CI-only code.
+
+Exit: an intentionally introduced compiler warning, Credo/ex_slop issue, duplicate, Credence issue, or Dialyzer violation fails its gate. Clean scaffold passes; no live workers are contacted by routine CI.
+
+### Phase 2 — Model contracts, validation, and wire codecs
+
+Dependencies: Phases 0–1.
+
+- [ ] Implement public types, finite errors, configuration parsing, command/spec validation, and canonical fingerprints.
+- [ ] Implement worker namespacing and profile-to-wire conversion using only supported fields.
+- [ ] Add endpoint codecs, binary handling, path handling, and SSE parser.
+- [ ] Property-test normalization, fingerprint stability, and stream boundaries.
+- [ ] Document low-level versus managed guarantees.
+
+Exit: invalid or unsupported work is rejected before transport; codecs pass real captured fixtures and malformed-input tests.
+
+### Phase 3 — Low-level client and safe transport
+
+Dependencies: Phase 2.
+
+- [ ] Implement lifecycle, file, and exec calls with explicit auth, TLS, retries, redirects, and timeouts.
+- [ ] Add controlled HTTP server tests for stream failures and request replay counting.
+- [ ] Verify loopback and Unix-socket behavior, and remote proxy authentication.
+- [ ] Bound controller buffering and expose byte-preserving results where supported.
+- [ ] Run a disposable real machine through create/start/exec/files/stop/delete.
+
+Exit: supported client operations work on the pinned worker; POST exec is never retried by hidden transport defaults.
+
+### Phase 4 — Store contract, identity, and durable host example
+
+Dependencies: Phase 2; can proceed alongside Phase 3 after interfaces settle.
+
+- [ ] Implement the store behaviour, memory adapter, versioned records, and conformance suite.
+- [ ] Implement a minimal host-owned Ecto/Postgres adapter and migrations under `examples/durable_host`.
+- [ ] Test atomic acceptance, conflicting duplicate specs, claim races, reservations, and due-work queries.
+- [ ] Define migration/version compatibility and credential-reference handling.
+- [ ] Fail durable startup when persistence semantics are absent.
+
+Exit: a fresh BEAM process can inspect accepted records and due work through the durable example; memory mode is visibly ephemeral.
+
+### Phase 5 — Managed execution and asynchronous handles
+
+Dependencies: Phases 3–4.
+
+- [ ] Start the named runtime with host supervision and bounded task concurrency.
+- [ ] Implement acceptance, single-worker admission, preparation, dispatch intent, observation, result persistence, and inspection.
+- [ ] Implement observer timeout separately from execution deadline.
+- [ ] Connect file staging/collection through a minimal host artifact-store behaviour; supply a local example and a fake store.
+- [ ] Keep JSON function-result interpretation outside the core.
+- [ ] Demonstrate one prepared Python script and one prepared JS script through the managed API.
+
+Exit: a caller can disconnect and later retrieve the same execution; a nonzero exit and collection failure remain distinguishable.
+
+### Phase 6 — Recovery, cancellation, and cleanup
+
+Dependencies: Phase 5.
+
+- [ ] Implement persisted cancellation intent, evidence-based termination, and cancellation/completion race handling.
+- [ ] Implement bounded reconciliation and cleanup scans on startup and periodically.
+- [ ] Enforce no replay after dispatch uncertainty; preserve unknown outcomes and resource accounting.
+- [ ] Protect foreign resources during cleanup; implement orphan detection within verified ownership boundaries.
+- [ ] Exercise the full fault matrix against controlled peers and selected real-worker boundaries.
+
+Exit: restarts do not duplicate commands; unresolved execution and cleanup are inspectable; cleanup failures cannot rewrite successful command results.
+
+### Phase 7 — Configured worker pool, profiles, and draining
+
+Dependencies: Phase 6.
+
+- [ ] Add health and capability selection, bounded queueing, expiry, and explicit overload results.
+- [ ] Reserve CPU/memory/disk/concurrency under the store's supported ownership model.
+- [ ] Implement drain and incompatible-worker behavior without disabling inspection.
+- [ ] Enforce and test the certified minimal profile on both initial platforms.
+- [ ] Document limits of controller ownership and reject unsupported HA configurations.
+
+Exit: a degraded/draining/incompatible worker receives no new work; unknown executions retain appropriate capacity reservations.
+
+### Phase 8 — Telemetry, docs, examples, and security validation
+
+Dependencies: Phases 5–7.
+
+- [ ] Add documented redacted telemetry and operator inspection fields.
+- [ ] Finish minimal and durable host examples with no Keel/Jido dependency.
+- [ ] Document deployment, artifact preparation, unknown-outcome handling, cancellation, cleanup, and upgrades.
+- [ ] Test adversarial outputs, limits, paths, credential isolation, and endpoint access on dedicated hosts.
+- [ ] Record measured cold/warm-image preparation, queue, execution, and collection times without claiming VM boot time is total function latency.
+
+Exit: another developer can follow the examples, understand failure states, and identify each required external service.
+
+### Phase 9 — Release candidate and adoption evidence
+
+Dependencies: all earlier exit conditions and section 12 gates.
+
+- [ ] Run the complete required CI and live platform matrix on the exact release commit.
+- [ ] Build the Hex tarball, inspect its file list, and compile/test a fresh consumer from the extracted package.
+- [ ] Verify production consumption excludes CI tools and example-only dependencies.
+- [ ] Confirm package name availability, license, source metadata, changelog, semantic version, and supported capability claims.
+- [ ] Record successful use by the two host examples and at least one independent consumer review.
+- [ ] Publish only through a separate explicit release action after the release evidence is complete.
+
+Exit: package documentation and behavior agree; remaining unsupported capabilities are visible. Hex publication is not part of ordinary CI or this planning task.
+
+## 12. Required CI and local checks
+
+All five user-requested analyzers are mandatory. Their inclusion in `mix.exs` is not proof that they execute. Keep evidence that each gate detects a known violation.
+
+### 12.1 Verified quality-tool versions
+
+These versions were checked against Hex metadata on September 6, 2026. Pin the selected versions in the maintainer lockfile and review upgrades intentionally:
+
+| Requested tool | Package reviewed | Invocation/design |
+|---|---|---|
+| Dialyzer | `dialyxir` 1.4.8 | `mix dialyzer` |
+| Credo | `credo` 1.7.19 | `mix credo --strict` |
+| ex_dna | `ex_dna` 1.5.4 | `mix ex_dna lib dev test/support --max-clones 0` |
+| ex_slop | `ex_slop` 0.4.4 | Enabled Credo plugin, executed by `mix credo --strict` |
+| Credence | `credence` 0.8.1 | Project-owned read-only `mix smolbox.ci.credence` task using the supported analysis API |
+
+Initial dependency constraints:
+
+```elixir
+{:dialyxir, "~> 1.4.8", only: [:dev, :test], runtime: false},
+{:credo, "~> 1.7.19", only: [:dev, :test], runtime: false},
+{:ex_dna, "~> 1.5.4", only: [:dev, :test], runtime: false},
+{:ex_slop, "~> 0.4.4", only: [:dev, :test], runtime: false},
+{:credence, "~> 0.8.1", only: [:dev, :test], runtime: false}
+```
+
+Resolve these together on the chosen matrix before freezing the lockfile. They are proposed constraints supported by reviewed releases, not a claim that this repository has already compiled them. [Dialyxir](https://hexdocs.pm/dialyxir/readme.html), [Credo](https://hexdocs.pm/credo/overview.html), [ExDNA](https://hexdocs.pm/ex_dna/readme.html), [ExSlop](https://hexdocs.pm/ex_slop/readme.html), [Credence](https://github.com/Cinderella-Man/credence).
+
+### 12.2 Credo and ex_slop configuration
+
+Start with Credo defaults plus the ExSlop plugin, scoped to maintained Elixir code:
+
+```elixir
+%{
+  configs: [
+    %{
+      name: "default",
+      files: %{
+        included: ["lib/", "dev/", "test/", "mix.exs"],
+        excluded: [~r"/fixtures/"]
+      },
+      plugins: [{ExSlop, []}]
+    }
+  ]
+}
+```
+
+Run strict mode. Do not add an explicit `checks.enabled` list without also including `ExSlop.recommended_checks()` as documented by the plugin: an authoritative enabled list can otherwise discard the plugin's checks. Test a known ExSlop violation in an isolated fixture project and verify it appears in output and causes failure. A green Credo process with no ExSlop checks is a failed CI setup.
+
+Use recommended checks first. Review optional checks individually; keep localized, documented exceptions for real false positives. Do not disable whole categories to make generated code pass. The ExDNA CLI is a separate required gate, so do not also enable its Credo plugin and run the same duplicate analysis twice by default.
+
+### 12.3 ex_dna policy
+
+Scan production code, developer tasks, and reusable test support. Keep intentional wire fixtures, upstream references, `_build`, `deps`, and caches outside analysis. Keep ordinary test files under Credo/Credence; duplication across scenario tests need not force an artificial shared abstraction.
+
+Use a zero reported-clone budget initially with documented detector settings, for example the default AST mass threshold and explicit `.ex_dna.exs` configuration. Add narrow source suppressions only when duplication is intentional and the reason is recorded. Do not increase the budget automatically after a failing PR.
+
+Verify the pinned detector fails on a known duplicate pair and passes the corresponding refactoring. Report analysis scope and file count; an empty scope must fail the project gate. Broader fuzzy matching can be evaluated separately before making it a required policy.
+
+### 12.4 Credence: implement a real read-only gate
+
+The reviewed `credence` 0.8.1 Hex artifact exposes analysis APIs and specialist maintenance tasks, but no general `mix credence --check` command. Do not put a nonexistent CLI in the workflow.
+
+Implement `Mix.Tasks.Smolbox.Ci.Credence` under `dev/mix/tasks`, compiled only in development/test. Its requirements:
+
+1. Enumerate maintained `.ex`/`.exs` files deterministically from `lib`, `dev`, ordinary tests, and package config; exclude fixtures and external references explicitly.
+2. Fail on an empty production-code scope, unreadable files, parse failures, analyzer crashes, or timeouts.
+3. Use `Credence.Pattern.analyze(source, assumptions: :strict)` for the required AST-pattern gate. This API returns issue structs without writing source.
+4. Let the required `mix compile --warnings-as-errors` and `mix test --warnings-as-errors` gates cover compilation and test-module diagnostics in their actual project context.
+5. Do not recompile each project/config/test file through `Credence.analyze/2` inside a running test VM: its semantic phase compiles source and may introduce module-redefinition or execution-context problems. If full per-file semantic analysis is added later, isolate it in disposable processes and validate its diagnostics first.
+6. Report path, available line/column, rule, and message; fail with a nonzero process status when unsuppressed findings exist. Produce a machine-readable report if practical.
+7. Use strict assumptions because paths and output can contain arbitrary Unicode. Do not enable semantic assumptions merely to silence findings.
+8. Never call `Credence.fix/2` or modify files in CI. Refactor findings through ordinary reviewed changes.
+9. If exceptions are necessary, implement an explicit project-owned suppression format with rule, path, bounded source fingerprint, and reason; fail on stale exceptions. Do not claim this is a built-in Credence config format.
+
+The essential analysis call is:
+
+```elixir
+issues = Credence.Pattern.analyze(source, assumptions: :strict)
+```
+
+This is intentionally Credence's pattern analysis plus project-context compiler gates, not a claim that every Credence phase runs independently. The package source was inspected to verify this distinction. [Credence API](https://credence.hexdocs.pm/Credence.html), [Pattern API](https://credence.hexdocs.pm/Credence.Pattern.html), [reviewed Hex artifact](https://repo.hex.pm/tarballs/credence-0.8.1.tar).
+
+### 12.5 Dialyzer
+
+- Run `MIX_ENV=test mix dialyzer` on the canonical toolchain so public callbacks and compiled test support are included in the intended analysis scope.
+- Give public structs, return values, store callbacks, and error categories useful typespecs. Avoid `term()` everywhere just to satisfy analysis.
+- Cache PLTs by OS/architecture, OTP version, Elixir version, lockfile hash, and Dialyzer configuration. Separate base PLTs from project/dependency PLTs where useful.
+- A cache miss rebuilds the PLT; it never skips analysis. Save valid PLTs only after their creation succeeds.
+- Do not use an ignore-exit-status flag. Keep the initial ignore list empty; any later exception needs a narrow match and rationale.
+- Verify a known type mismatch produces a failing job during CI setup and after material tool upgrades.
+
+### 12.6 Local command contract
+
+All commands run from `packages/smolbox`. Implement `mix ci` with the test environment selected through `def cli/0` or explicit invocation. The alias must run the same deterministic checks used in CI, not merely print instructions.
+
+Core local sequence:
+
+```sh
+MIX_ENV=test mix deps.get
+MIX_ENV=test mix format --check-formatted
+MIX_ENV=test mix deps.unlock --check-unused
+MIX_ENV=test mix compile --warnings-as-errors
+MIX_ENV=test mix test --warnings-as-errors
+MIX_ENV=test mix credo --strict
+MIX_ENV=test mix ex_dna lib dev test/support --max-clones 0
+MIX_ENV=test mix smolbox.ci.credence
+MIX_ENV=test mix dialyzer
+```
+
+`mix smolbox.ci.credence` and `mix smolbox.ci.verify_checks` are tasks this project must implement. They are not commands supplied by an existing dependency. Real-runtime tests require an explicit separate command and capability preflight; ordinary `mix ci` must not silently contact a local or remote sandbox worker.
+
+Additional CI commands, with the needed development dependencies configured:
+
+```sh
+MIX_ENV=test mix smolbox.ci.verify_checks
+MIX_ENV=test mix test --cover --warnings-as-errors
+MIX_ENV=dev mix docs --warnings-as-errors
+MIX_ENV=dev mix hex.audit
+MIX_ENV=dev mix deps.audit
+MIX_ENV=dev mix hex.build
+```
+
+`mix hex.audit` checks retired dependencies; `mix deps.audit` from mix_audit checks known vulnerabilities. Neither proves that the code is safe. Dependency-fetch/advisory failures must be visible and must not be converted into a passing security gate. [Hex audit](https://hexdocs.pm/hex/Mix.Tasks.Hex.Audit.html), [mix_audit](https://hexdocs.pm/mix_audit/Mix.Tasks.Deps.Audit.html), [ExDoc](https://hexdocs.pm/ex_doc/readme.html), [Hex build](https://hexdocs.pm/hex/Mix.Tasks.Hex.Build.html).
+
+Configure a meaningful coverage threshold after the first runtime path exists: proposed floor 90% for maintained library code, with explicit exclusions only for justified non-executable/generated boundaries. Require scenario coverage for dispatch uncertainty and cleanup even when line coverage passes. Do not write tests that mirror implementation just to meet a number.
+
+Use the pinned Mix version's `test_coverage` summary threshold configuration and verify a deliberately uncovered fixture causes a nonzero exit; producing an HTML report alone is not a coverage gate.
+
+### 12.7 CI jobs and required statuses
+
+| Job/status | Runs | Passing evidence |
+|---|---|---|
+| `smolbox-format-compile` | Format, unused lock entries, warning-free compile | No source modifications or compiler warnings |
+| `smolbox-credo-ex-slop` | Strict Credo with verified ExSlop registration | Both built-in and plugin checks active; no unsuppressed findings |
+| `smolbox-ex-dna` | Scoped standalone duplicate scan | No reported clones above the reviewed zero budget |
+| `smolbox-credence` | Project read-only wrapper | Nonempty scope; strict-assumption analysis; no unsuppressed findings |
+| `smolbox-dialyzer` | Dialyxir with keyed PLT cache | No unsuppressed type warnings |
+| `smolbox-tests` | Deterministic tests on the version matrix | Tests actually execute; seed/count reported; no warnings |
+| `smolbox-coverage` | Canonical deterministic coverage run | Coverage threshold and failure-scenario requirements met |
+| `smolbox-store-contract` | Durable host example against disposable Postgres | Store conformance and fresh-process recovery pass |
+| `smolbox-quality-canaries` | Isolated deliberate analyzer violations | Each analyzer fails for its expected reason; clean counterparts pass |
+| `smolbox-security` | Retired dependency and vulnerability audits | Current advisory fetch succeeds and policy passes |
+| `smolbox-docs-package` | Docs, Hex build, tar inspection, fresh consumer | No docs warnings; usable package without CI/example dependencies |
+| `smolbox-linux-runtime` | Pinned real Linux worker suite | KVM and runtime preflight succeeds; required cases execute |
+| `smolbox-macos-runtime` | Pinned real macOS arm64 suite | Virtualization preflight succeeds; required cases execute |
+| `smolbox-required` | Aggregate job with explicit dependency-result checks | Every required applicable check succeeds; unexpected skip is failure |
+
+Ordinary untrusted PRs run deterministic/quality/package checks on disposable hosted runners without worker credentials. Real-VM jobs run only on isolated trusted infrastructure after code is eligible for that environment; never run arbitrary fork PR code on a persistent privileged self-hosted worker or via `pull_request_target` with secrets.
+
+Before merging runtime-affecting changes, require trusted real-worker validation of the exact candidate commit. If no safe runner is available, keep that evidence pending; do not convert the job to a successful skip. Documentation-only changes may use a checked path policy to omit real-VM jobs, while preserving the always-reported aggregate status. A release always requires both supported platform suites.
+
+### 12.8 Workflow implementation details
+
+- Trigger on relevant package files, workflow files, shared tool configuration, and dependency pins. Use a path classifier plus an always-reported aggregate status so path filtering cannot strand or bypass required checks.
+- Use `erlef/setup-beam` and checkout/cache/upload actions pinned to reviewed full commit SHAs. Record the corresponding action versions in comments and automate reviewed updates. [setup-beam](https://github.com/erlef/setup-beam).
+- Keep permissions read-only by default. Publishing has a separate protected workflow and narrowly scoped credentials.
+- Use exact matrix entries and report actual `elixir --version`, OTP, dependency lock hash, and SmolVM/image versions in job artifacts.
+- Key dependency/build caches by package path, OS, architecture, OTP, Elixir, environment, and lock hash. Do not share test/dev/prod BEAM output blindly.
+- Set finite job timeouts and run steps under fail-fast shell behavior. Do not use `continue-on-error` for required analyzers or `|| true` around lint commands.
+- Run independent analyzer jobs separately so one failure does not hide the others. The aggregate must inspect failure/cancelled/skipped states explicitly.
+- Do not cancel a live-worker job without a cleanup plan. Use per-run ownership prefixes, cancellation cleanup, and an independent orphan sweeper for abandoned CI machines.
+- Upload bounded redacted logs, test reports, coverage, and compatibility manifests on failure. Do not upload VM disks, guest secrets, full code inputs, or registry credentials.
+- Check the tracked working tree after gates; automatic source edits or unexpected lockfile changes fail CI. Expected generated reports remain in ignored output directories.
+- Test minimum supported runtime dependencies in a dedicated consumer lane; the maintainer lockfile alone does not prove compatibility with every allowed dependency range.
+
+### 12.9 Quality-gate verification
+
+Keep intentional violations outside ordinary analyzer scope. The verification task should create isolated temporary fixture projects or invoke each tool against explicit fixture paths, record the exit code, and verify that the expected rule fired. A missing executable, failed dependency load, or unrelated compile crash is not a successful negative test.
+
+Include at least: a compiler warning, a Credo-specific issue, an ExSlop-specific issue, an ExDNA duplicate pair, a strict-mode Credence pattern, a Dialyzer mismatch, and a clean counterpart for each. Verify analyzer invocations leave source bytes unchanged. These are tests of the CI integration, not duplicated tests of every upstream rule.
+
+### 12.10 Package and example isolation
+
+Allowlist files in Hex metadata. Include runtime source, public docs, license, and necessary runtime assets only. Exclude `dev`, private CI configs, external references, examples' databases, fixture credentials, and all VM/cache state from the tarball unless a specific public test asset is deliberately needed.
+
+Keep this implementation plan as repository planning material. Public ExDoc extras and packaged guides must be self-contained and must not depend on the parent Keel idea document or other files outside the package.
+
+Build a temporary consumer from the tarball's extracted package, fetch only runtime dependencies under `MIX_ENV=prod`, and compile with warnings treated as errors. Exercise a fake-transport client call and explicit supervisor startup without automatically connecting to a worker. Run examples separately from the package artifact check.
+
+## 13. Benchmarks and operational qualification
+
+Measure the complete submission path under a documented workload: queueing, machine preparation, image availability, staging, guest command, output collection, and cleanup. Separate cold image, cached image, and already-running host effects. Report host hardware, virtualization backend, image digests, concurrency, input/output sizes, and latency distribution.
+
+Benchmark controller memory and mailbox growth under slow consumers and high output. Test bounded queue rejection rather than measuring unlimited acceptance. Include failed, cancelled, and unknown runs in resource-accounting measurements.
+
+Do not publish a Firecracker comparison or a universal startup claim from these tests. SmolBox's initial performance objective is bounded controller behavior and acceptable measured end-to-end latency for the reference workloads; optimize only after correctness and isolation gates pass.
+
+## 14. Release checklist and unresolved decisions
+
+### 14.1 Release blockers
+
+- [ ] Certified minimal execution profile with each hard limit tied to real enforcement evidence.
+- [ ] Private worker control interface and tested authenticated remote access.
+- [ ] No hidden exec retries after ambiguous acceptance.
+- [ ] Accurate unknown-outcome, cancellation, collection, and cleanup reporting.
+- [ ] Durable host example and store conformance pass across process restart.
+- [ ] Every requested analyzer runs, fails correctly, and is required in CI.
+- [ ] Real Linux and macOS suites pass on the release commit; unsupported platforms are not advertised.
+- [ ] Package tarball is clean and usable outside Keel.
+- [ ] Documentation explains host responsibilities and library limitations without exactly-once claims.
+- [ ] License and Hex metadata are reviewed before publication. Name availability is rechecked; a previous 404 does not reserve the name.
+
+### 14.2 Decisions to resolve with evidence
+
+| Decision | When | Default until resolved |
+|---|---|---|
+| Exact SmolVM patch and supported API schema | Phase 0 | Candidate v1.14.1 only; no compatibility claim |
+| Supported hard resource profile | Phase 0 and Phase 7 | Reject controls without verified enforcement |
+| Worker-side exec receipt availability | Phase 0 | Preserve uncertainty; never replay exec automatically |
+| Runtime image preparation without guest egress | Phase 0 | Prepared approved artifacts; no permission broadening |
+| Final store callback/transaction shape | Phase 4 | Behaviour plus durable host example; no database in core |
+| Unix-socket transport support | Phase 3 | Test explicitly; loopback is the development fallback |
+| Multi-controller worker ownership | Phase 7 | One active owner per worker; conservative recovery |
+| Advanced image export/branching support | After first consumer need | Outside first release |
+| Independent function lifecycle package | Outside this plan | Keep build/test/publish semantics out of SmolBox |
+
+The first implementation milestone is a narrow but complete command execution path with honest failure semantics. The package is complete only when its documented operational and CI requirements are demonstrated, not when all proposed modules exist.
