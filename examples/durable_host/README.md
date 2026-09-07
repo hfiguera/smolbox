@@ -129,7 +129,72 @@ object directory while collection is paused, then restores it in a finalizer.
 It requires a known exit, failed collection, verified VM cleanup and no command
 replay after runtime restart. The cancellation cases require the original intent
 timestamp and observed exit to survive. These three tests use a real worker and
-PostgreSQL alongside the 18 fresh-BEAM interruption cases.
+PostgreSQL alongside 20 fresh-BEAM interruption cases and two dispatcher-failure
+cases that preserve execution progress before/after SQL result persistence.
+
+## Opt-in durable benchmark
+
+The benchmark uses this host's real PostgreSQL store, directory adapter and a
+previously provisioned, initially idle SmolVM 1.14.1 worker. It provisions no
+service, changes no host quotas and clears no image/page cache. Apply the example
+migrations first. Use native approved artifacts, a new private object directory,
+fresh 32-byte fingerprint/encryption key files and a unique store partition for
+each trial. Keep the private settings and keys after failure so accepted records
+can be inspected and recovered before another trial.
+
+Create a mode-0600 JSON settings file using the following fields. Replace every
+placeholder, including the measured hardware and database topology; zero memory
+is deliberately invalid. The report path must not already exist.
+
+```json
+{
+  "url": "http://127.0.0.1:19470",
+  "artifact_path": "/private/catalog/python.smolmachine",
+  "artifact_sha256": "verified-native-artifact-sha256",
+  "artifact_root": "/private/new-trial/objects",
+  "fingerprint_key_file": "/private/new-trial/fingerprint.key",
+  "encryption_key_file": "/private/new-trial/encryption.key",
+  "id": "unique-trial-id",
+  "partition": "unique-trial-partition",
+  "report": "/private/new-trial/report.json",
+  "samples": 20,
+  "hardware": {"cpu": "verified CPU model", "memory_bytes": 0},
+  "database_topology": "describe the actual local or forwarded connection",
+  "cache_context": "describe the existing worker/cache state; do not assume cold"
+}
+```
+
+Run from this example with the normal database configuration and pinned toolchain:
+
+```sh
+MIX_ENV=test mix run scripts/benchmark.exs /absolute/path/to/settings.json
+```
+
+The default trial runs 20 sequential Python submissions, then fills four queue
+positions while one VM is occupied and requires four excess submissions to be
+rejected. It also measures a 512 KiB producer with a caller delayed by two seconds,
+a preparation failure with no exec invocation, and cancellation after guest output
+with an unknown outcome and retained reservation. It waits through the actual
+retention window and confirms that all owned records release capacity and the
+initially empty worker becomes empty again. Expect several minutes; do not run
+another owner or database-fault test against these resources concurrently.
+
+Reports include monotonic lifecycle request times, stage durations, queue waits,
+observed outcome/cleanup times, bounded invocation counts and sampled memory.
+Input verification downloads are distinguished from output collection. Transport
+invocations are recorded before forwarding; a killed observer can have a start
+with no completed request duration. Counts are client instrumentation, not worker
+acceptance receipts. Telemetry must settle without drops/timeouts, and the metrics
+table has a 5,000-row limit. Missing required evidence fails the trial.
+
+Outcome polling has a 25 ms interval and cleanup polling 100 ms. Resource samples
+are taken every 100 ms; they can miss peaks. Supervised-process statistics exclude
+nested linked request tasks, while whole-BEAM memory also includes the Repo, HTTP
+pools and benchmark instrumentation. Neither measures worker/host RSS or proves a
+hard mailbox bound. The delayed caller uses the managed pull API; the separate
+live security suite tests a blocked low-level streaming callback. Cache and
+hardware descriptions are operator declarations. Read the recorded qualification
+limitations before comparing trials or making latency/isolation claims.
 
 ## Host integration and security
 

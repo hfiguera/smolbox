@@ -720,7 +720,7 @@ Dependencies: Phases 5–7.
 - [x] Finish minimal and durable host examples with no Keel/Jido dependency. Both standalone Mix projects compile, pass Dialyzer/audits, and demonstrate real Python execution, binary collection, cancellation and retention-window cleanup on Linux and macOS. The durable host also passes fresh-BEAM fault recovery; examples explicitly use a development profile.
 - [x] Document deployment, artifact preparation, unknown-outcome handling, cancellation, cleanup, and upgrades. Packaged client/host/recovery/security/telemetry guides describe the external services and operator procedures, including pinned upstream preparation flags, template floors, durable keys, migrations, drain limits and immutable revisions. Actual resource/isolation qualification and independent consumer review remain separate gates.
 - [ ] Test adversarial outputs, limits, paths, credential isolation, and endpoint access on dedicated hosts.
-- [ ] Record measured cold/warm-image preparation, queue, execution, and collection times without claiming VM boot time is total function latency.
+- [ ] Record measured cold/warm-image preparation, queue, execution, and collection times without claiming VM boot time is total function latency. Warm-state durable measurements, bounded queue rejection, delayed consumers, preparation failure and uncertain-cancellation accounting now pass on both hosts. Fresh isolated worker/cache-miss and cold-host measurements remain pending.
 
 Exit: another developer can follow the examples, understand failure states, and identify each required external service.
 
@@ -765,6 +765,35 @@ pass. See `docs/evidence/phase8-boundaries.json` for source hashes, test seeds a
 the initially rejected fixture namespace. The live CI gate requires all 14 cases.
 These finite probes do not complete quota-controlled resource-abuse, all
 credential/control-interface, cold-cache benchmark or production-profile gates.
+
+Warm-state benchmark milestone: the durable example now includes an opt-in,
+bounded metrics collector and 100 ms resource sampler. Each full trial runs
+20 sequential submissions, a one-slot/four-pending burst with four rejected
+offers, a finite 512 KiB producer with a delayed caller, a preparation failure
+and uncertain cancellation. All 28 accepted executions per host reach verified
+cleanup with zero remaining reservations; successful example commands also
+verify their binary output and one-byte guest marker. Invocation records precede
+transport calls, so a killed observer cannot hide a possible dispatch merely
+because its completed duration is missing. These remain client measurements,
+not worker acceptance receipts.
+
+The complete local `mix ci` passes on macOS and Linux: 156 deterministic cases,
+all five analyzers, and a separately repeated clean/bad canary pair for the
+compiler, each analyzer and coverage. ExDNA now analyzes 71 files and Credence
+122, including the benchmark. Both durable examples pass forced Dialyzer checks.
+ExDoc passes. Source hashes, raw-report checksums, every sequential sample and
+measured limitations are recorded in `docs/evidence/phase8-benchmarks.json`;
+`docs/resource-qualification.md` explains the results. No cache was cleared and
+the Mac/Linux hardware and database paths differ. The cold-state, hard-profile,
+protected GitHub and final release-candidate gates remain open.
+
+The benchmark milestone's fresh canonical macOS production consumer also passes
+from the built tarball, including warning-free compilation and public
+client/supervisor smoke checks. Runtime dependencies exclude the benchmark,
+examples and analyzer tools. The tested archive SHA-256 is
+`9df83dfea5e89aa6603201e44cfc0c55c2574099af8f75f0098df6ecb14e543a`;
+the retained consumer-report SHA-256 is
+`64a3ddeacfbdd0e58b4272537ead5ced23cfbe01715a000c1af75d31a8698b7d`.
 
 ### Phase 9 — Release candidate and adoption evidence
 
@@ -979,6 +1008,18 @@ Build a temporary consumer from the tarball's extracted package, fetch only runt
 Measure the complete submission path under a documented workload: queueing, machine preparation, image availability, staging, guest command, output collection, and cleanup. Separate cold image, cached image, and already-running host effects. Report host hardware, virtualization backend, image digests, concurrency, input/output sizes, and latency distribution.
 
 Benchmark controller memory and mailbox growth under slow consumers and high output. Test bounded queue rejection rather than measuring unlimited acceptance. Include failed, cancelled, and unknown runs in resource-accounting measurements.
+
+Implemented reproducible warm-state workload: use the durable example's
+`scripts/benchmark.exs` and the private settings contract in its README. The
+collector records lifecycle request durations separately from stage spans,
+distinguishes input verification from output collection, counts transport starts
+before forwarding, and rejects missing/overflowed telemetry evidence. Raw
+reports include actual binary sizes, queue waits, returned outcome and cleanup
+times, and sampled BEAM/supervised-process memory. Reports do not equate those
+samples with worker RSS or a hard mailbox limit. The first sample on an existing
+worker is not classified as cold. Benchmark results and reproduction instructions
+are evidence for the stated workload only; remaining cache and host-isolation
+conditions must be measured independently.
 
 Do not publish a Firecracker comparison or a universal startup claim from these tests. SmolBox's initial performance objective is bounded controller behavior and acceptable measured end-to-end latency for the reference workloads; optimize only after correctness and isolation gates pass.
 
