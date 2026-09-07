@@ -79,7 +79,7 @@ defmodule SmolBox.Transport.Req do
     initial = Capture.new(request)
 
     fn {:data, data}, {req, response} ->
-      with :ok <- response_status(response, request.accept),
+      with :ok <- response_status(response, request),
            capture = Req.Response.get_private(response, :smolbox_capture, initial),
            {:ok, capture} <- Capture.feed(capture, data) do
         {:cont, {req, Req.Response.put_private(response, :smolbox_capture, capture)}}
@@ -93,7 +93,7 @@ defmodule SmolBox.Transport.Req do
   defp finish(response, request) do
     case Req.Response.get_private(response, :smolbox_error) do
       nil ->
-        with :ok <- response_status(response, request.accept) do
+        with :ok <- response_status(response, request) do
           response
           |> Req.Response.get_private(:smolbox_capture, Capture.new(request))
           |> Capture.finish()
@@ -111,18 +111,22 @@ defmodule SmolBox.Transport.Req do
   defp response_status(%{status: 409}, _accept), do: failure(:identity_conflict)
   defp response_status(%{status: status}, _accept) when status != 200, do: failure(:protocol)
 
-  defp response_status(response, accept) do
+  defp response_status(response, request) do
     content_types = Req.Response.get_header(response, "content-type")
     encodings = Req.Response.get_header(response, "content-encoding")
 
-    if media_type?(content_types, accept) and encodings in [[], ["identity"]] do
+    if media_type?(content_types, request) and encodings in [[], ["identity"]] do
       :ok
     else
       failure(:protocol)
     end
   end
 
-  defp media_type?([type], expected),
+  # Empty readiness has no representation to decode; proxies may add a media
+  # type. Capture still rejects every non-empty body, and encodings stay strict.
+  defp media_type?(_types, %{mode: :empty}), do: true
+
+  defp media_type?([type], %{accept: expected}),
     do:
       type |> String.split(";", parts: 2) |> hd() |> String.trim() |> String.downcase() ==
         expected

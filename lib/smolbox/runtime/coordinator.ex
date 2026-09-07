@@ -2,8 +2,8 @@ defmodule SmolBox.Runtime.Coordinator do
   @moduledoc false
   use GenServer
 
-  alias SmolBox.{Client, Execution}
-  alias SmolBox.Runtime.{Executor, Session}
+  alias SmolBox.Execution
+  alias SmolBox.Runtime.{Executor, Session, WorkerHealth}
 
   def start_link(options), do: GenServer.start_link(__MODULE__, options)
 
@@ -18,7 +18,7 @@ defmodule SmolBox.Runtime.Coordinator do
       health: %{},
       draining: MapSet.new(),
       cursor: nil,
-      health_at: 0
+      health_at: nil
     }
 
     {:ok, state, {:continue, :start}}
@@ -47,7 +47,9 @@ defmodule SmolBox.Runtime.Coordinator do
           qualification: worker.qualification,
           architecture: worker.architecture,
           platform: worker.platform,
-          runtime_version: worker.runtime_version
+          runtime_version: worker.runtime_version,
+          health: get_in(state.health, [id, :health]),
+          health_checked_at_ms: get_in(state.health, [id, :checked_at_ms])
         }
       end)
 
@@ -80,7 +82,7 @@ defmodule SmolBox.Runtime.Coordinator do
     if state.scan do
       {:noreply, state}
     else
-      refresh = state.config.clock.now() - state.health_at >= 5000
+      refresh = state.health_at == nil or state.config.clock.monotonic() - state.health_at >= 5000
 
       task =
         Task.Supervisor.async_nolink(state.tasks, fn ->
@@ -102,7 +104,7 @@ defmodule SmolBox.Runtime.Coordinator do
       | scan: nil,
         health: health,
         cursor: cursor,
-        health_at: if(refreshed, do: state.config.clock.now(), else: state.health_at)
+        health_at: if(refreshed, do: state.config.clock.monotonic(), else: state.health_at)
     }
 
     {:noreply, Enum.reduce(records, next, &launch(&2, Execution.key(&1)))}
@@ -143,7 +145,11 @@ defmodule SmolBox.Runtime.Coordinator do
   defp status(state, worker) do
     if worker.draining or MapSet.member?(state.draining, worker.client.worker.id),
       do: :draining,
-      else: Map.get(state.health, worker.client.worker.id, :unavailable)
+      else:
+        WorkerHealth.status(
+          Map.get(state.health, worker.client.worker.id),
+          state.config.clock.monotonic()
+        )
   end
 
   defp scan(config, cursor, previous, refresh) do
@@ -157,7 +163,7 @@ defmodule SmolBox.Runtime.Coordinator do
       |> Enum.zip(config.workers)
       |> Map.new(fn
         {{:ok, status}, worker} -> {worker.client.worker.id, status}
-        {_failed, worker} -> {worker.client.worker.id, :unavailable}
+        {_failed, worker} -> {worker.client.worker.id, nil}
       end)
 
     case Session.store(config, :due, [config.clock.now(), cursor, 100]) do
@@ -179,19 +185,12 @@ defmodule SmolBox.Runtime.Coordinator do
            config.lease_ms
          ]) do
       {:ok, _lease} ->
-        if refresh, do: reachable(worker), else: Map.get(previous, id, :unavailable)
+        if refresh,
+          do: WorkerHealth.observe(worker, config.clock),
+          else: Map.get(previous, id)
 
       _failed ->
-        :unavailable
-    end
-  end
-
-  defp reachable(worker) do
-    client = %{worker.client | worker: %{worker.client.worker | operation_timeout_ms: 1000}}
-
-    case Client.list(client) do
-      {:ok, _machines} -> :ready
-      _failed -> :unavailable
+        nil
     end
   end
 end

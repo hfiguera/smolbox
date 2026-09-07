@@ -74,6 +74,7 @@ defmodule SmolBox do
     end
   end
 
+  @doc "Exclude a worker from new admission-task launches; already active work may continue."
   @spec drain_worker(runtime(), String.t()) :: :ok | {:error, Error.t()}
   def drain_worker(runtime, worker_id), do: call(runtime, {:drain, worker_id})
 

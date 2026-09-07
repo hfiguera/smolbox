@@ -32,6 +32,9 @@ defmodule SmolBox.ClientRuntimeTest do
       )
 
     {:ok, client} = Client.new(worker)
+    assert {:ok, %{version: "1.14.1", total: total}} = Client.health(client)
+    assert is_integer(total)
+    assert :ok = Client.readiness(client)
     assert {:ok, _machines} = Client.list(client)
     %{client: client, python: python, javascript: javascript}
   end
@@ -209,6 +212,8 @@ defmodule SmolBox.ClientRuntimeTest do
       )
 
     {:ok, protected} = Client.new(worker)
+    assert {:ok, %{version: "1.14.1"}} = Client.health(protected)
+    assert :ok = Client.readiness(protected)
     name = machine(context.client, context.python)
     assert {:ok, %Machine{state: :running}} = Client.inspect_machine(protected, name)
     {:ok, command} = Command.new(["python", "-c", "print('protected')"])
@@ -217,6 +222,8 @@ defmodule SmolBox.ClientRuntimeTest do
              Client.exec(protected, name, command)
 
     wrong = %{protected | worker: %{worker | token: "incorrect"}}
+    assert {:error, %Error{category: :authentication}} = Client.health(wrong)
+    assert {:error, %Error{category: :authentication}} = Client.readiness(wrong)
     assert {:error, %Error{category: :authentication}} = Client.exec(wrong, name, command)
   end
 

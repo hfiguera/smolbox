@@ -17,7 +17,8 @@ defmodule SmolBox.Transport do
           content_type: String.t(),
           accept: String.t(),
           max_bytes: pos_integer(),
-          mode: :buffer | {:sse, pos_integer(), (SmolBox.Wire.SSE.event() -> any()) | nil}
+          mode:
+            :buffer | :empty | {:sse, pos_integer(), (SmolBox.Wire.SSE.event() -> any()) | nil}
         }
 
   @callback request(Worker.t(), request()) :: {:ok, binary() | Result.t()} | {:error, Error.t()}

@@ -19,7 +19,7 @@ defmodule SmolBox.Client do
   symlink containment inside an untrusted guest. No archive extraction is done.
   """
 
-  alias SmolBox.{Command, Error, Files, Machine, MachineSpec, Result, Validation, Worker}
+  alias SmolBox.{Command, Error, Files, Health, Machine, MachineSpec, Result, Validation, Worker}
 
   @enforce_keys [:worker]
   @derive {Inspect, only: []}
@@ -37,6 +37,22 @@ defmodule SmolBox.Client do
       {:ok, %__MODULE__{worker: worker, transport: transport}}
     else
       _invalid -> error(:validation, :client)
+    end
+  end
+
+  @spec health(t()) :: {:ok, Health.t()} | {:error, Error.t()}
+  def health(client) do
+    with {:ok, body} <- json(client, :get, "/health", nil, :health),
+         do: Health.from_wire(body)
+  end
+
+  @doc "Checks the upstream blocking-pool probe; requires HTTP 200 with an empty body."
+  @spec readiness(t()) :: :ok | {:error, Error.t()}
+  def readiness(client) do
+    case request(client, :get, "/readyz", "", "application/json", "*/*", :empty, :readiness) do
+      {:ok, ""} -> :ok
+      {:ok, _invalid} -> error(:protocol, :readiness)
+      {:error, _error} = error -> error
     end
   end
 

@@ -16,3 +16,8 @@ The upstream schema is covered by Apache-2.0; the upstream license is included
 as `LICENSE.smolvm`. The extraction removes unrelated endpoints and schemas;
 it does not change their retained definitions. This fixture is not shipped in
 the Hex package. It does not establish operational guarantees absent runtime tests.
+
+The pinned exported schema omits `/readyz`, although the tagged source defines
+it in `src/api/handlers/health.rs` and both runtime distributions serve it. Its
+HTTP-200/empty-body contract is verified directly by the client runtime tests;
+no invented definition has been inserted into this exported fixture.

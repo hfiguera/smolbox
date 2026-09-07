@@ -208,12 +208,50 @@ already verified. Missing creation evidence requires separate operator resolutio
 a momentary 404 cannot authorize releasing that reservation. It cannot bypass
 ownership checks or authorize another command.
 
-`drain_worker` prevents new admission in this runtime while preserving existing
-observation and cleanup. Persist intended drain configuration in the host and use
+`drain_worker` excludes a worker from subsequent admission-task launches in this
+runtime while preserving observation and cleanup. An admission task already in
+flight may finish assigning work; draining is not an atomic worker-side fence or
+cancellation request. Persist intended drain configuration in the host and use
 `draining: true` when restarting; the convenience call itself is runtime-local.
-Worker reports distinguish reachability and drain state, and carry the explicit
-qualification label. A reachable worker is not proof of artifact availability or
-host quotas. A failed preparation is reported without enabling guest networking.
+
+Worker reports include the host-approved version/qualification, the latest typed
+health observation and its wall-clock timestamp. Health age uses monotonic time.
+The controller refreshes probes about every five seconds in groups of at most
+four workers; stale observations are unavailable. Each HTTP probe has a 500 ms
+operation deadline, and health JSON is capped at four KiB. A slower healthy host
+can therefore be withheld conservatively. Long probes never run in the coordinator.
+
+| Status | Admission meaning |
+| --- | --- |
+| `ready` | The reported version matches 1.14.1, inventory is available, and readiness succeeded |
+| `degraded` | The server responded, but inventory or blocking-pool readiness was unavailable |
+| `incompatible` | The server reported a different runtime version |
+| `unavailable` | No current valid probe or worker ownership claim is available |
+| `draining` | Host configuration or this runtime's drain flag excludes new task launches |
+
+Admission tries matching workers in configured order, with fresh health/readiness
+checks before reservation. It rechecks cancellation and the original queue deadline
+after probing. Prepared work is checked again before dispatch intent, so version
+drift does not silently run a command against another runtime release. A failed
+preparation still uses recorded identity for cleanup. Inspection and cleanup remain
+available when a worker is incompatible or draining; health never authorizes
+deleting an untracked resource.
+
+The store atomically charges slots, configured CPUs, guest memory plus the
+profile's host-memory overhead, and requested disk allocations. These are
+accounting reservations, not measurements or hard
+host limits. Operators must leave overhead and account for other host workloads.
+Pending acceptance and active controller tasks are separately bounded. Capacity
+exhaustion keeps accepted work queued until its fixed deadline; a full acceptance
+queue returns `:admission_exhausted`. Identical existing identities still resolve.
+The initial scheduler has no cross-tenant priority or strict fairness guarantee.
+
+Runtime version and readiness cannot certify artifact availability or host quotas.
+The host still verifies immutable artifact bytes, OS/architecture and the exact
+profile revision. Unsupported profile controls and duplicate endpoint registrations
+are rejected. Endpoint aliases cannot be discovered reliably by this client: each
+physical worker must have one store authority. Active-active execution fencing is
+not supported by upstream; deploying competing controllers does not create it.
 
 Stopping the runtime stops observers with bounded supervision shutdown. It does
 not promise that a guest stopped. Restart with the same store and fingerprint key

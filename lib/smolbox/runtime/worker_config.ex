@@ -5,7 +5,8 @@ defmodule SmolBox.Runtime.WorkerConfig do
   Artifact entries have `id`, `sha256`, `architecture`, and an absolute prepared
   `.smolmachine` `path` on this worker. The operator verifies artifact digests,
   neutral `/bin/true` startup, disabled workload restart, and the pinned runtime
-  before registering them. The worker API cannot attest to these properties.
+  before registering them. Managed admission compares the server-reported version
+  and checks readiness; the worker API cannot attest artifact contents or isolation.
 
   The initial qualification is explicitly `:development`; it does not certify
   hostile multi-tenant host quotas. Requested unsupported hard controls are

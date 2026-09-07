@@ -19,7 +19,7 @@ defmodule SmolBox.Transport.Capture do
   ]
 
   @type t :: %__MODULE__{
-          mode: :buffer | :sse,
+          mode: :buffer | :empty | :sse,
           max_bytes: pos_integer(),
           max_output: pos_integer() | nil,
           on_event: (SSE.event() -> any()) | nil,
@@ -34,6 +34,7 @@ defmodule SmolBox.Transport.Capture do
 
   @spec new(SmolBox.Transport.request()) :: t()
   def new(%{mode: :buffer, max_bytes: max}), do: %__MODULE__{mode: :buffer, max_bytes: max}
+  def new(%{mode: :empty}), do: %__MODULE__{mode: :empty, max_bytes: 1}
 
   def new(%{mode: {:sse, max_output, callback}, max_bytes: max}) do
     %__MODULE__{mode: :sse, max_bytes: max, max_output: max_output, on_event: callback}
@@ -50,6 +51,7 @@ defmodule SmolBox.Transport.Capture do
 
   @spec finish(t()) :: {:ok, binary() | Result.t()} | {:error, Error.t()}
   def finish(%{mode: :buffer} = state), do: {:ok, join(state.chunks)}
+  def finish(%{mode: :empty}), do: {:ok, ""}
 
   def finish(%{mode: :sse} = state) do
     with :ok <- SSE.finish(state.parser) do
@@ -65,6 +67,11 @@ defmodule SmolBox.Transport.Capture do
 
   defp consume(%{mode: :buffer} = state, bytes),
     do: {:ok, %{state | chunks: [bytes | state.chunks]}}
+
+  defp consume(%{mode: :empty} = state, ""), do: {:ok, state}
+
+  defp consume(%{mode: :empty}, _bytes),
+    do: {:error, %Error{category: :protocol, operation: :readiness}}
 
   defp consume(%{mode: :sse} = state, bytes) do
     with {:ok, parser, events} <- SSE.feed(state.parser, bytes) do

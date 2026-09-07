@@ -653,13 +653,23 @@ Exit: restarts do not duplicate commands; unresolved execution and cleanup are i
 
 Dependencies: Phase 6.
 
-- [ ] Add health and capability selection, bounded queueing, expiry, and explicit overload results.
-- [ ] Reserve CPU/memory/disk/concurrency under the store's supported ownership model.
-- [ ] Implement drain and incompatible-worker behavior without disabling inspection.
+- [x] Add health/version and readiness selection, bounded queueing, expiry, and explicit overload results. Typed `/health` plus the actual empty `/readyz` response drive admission; cached observations expire, and fresh checks precede reservation and command dispatch. Missing inventory, failed readiness, version drift, second-worker selection and queue expiry have controlled coverage. Real endpoints pass on both platforms, including authenticated TLS proxy access.
+- [x] Reserve CPU/memory/disk/concurrency under the store's supported ownership model. Both adapters atomically charge slots, CPUs, guest memory plus host overhead, and requested disk allocations. Real cancellation tests verify the reservation prevents another assignment while the first outcome remains unknown. These are configured accounting bounds, not certified hard host limits.
+- [x] Implement drain and incompatible-worker behavior without disabling inspection. Drain closes subsequent admission-task launches; already active admission/observation/cleanup may finish. The runtime-local convenience call is not an atomic worker-side fence; hosts persist intended `draining: true` configuration. Real and controlled tests verify post-drain queue expiry and retained inspection access.
 - [ ] Enforce and test the certified minimal profile on both initial platforms.
-- [ ] Document limits of controller ownership and reject unsupported HA configurations.
+- [x] Document limits of controller ownership and reject unsupported configuration. Stable physical-worker identity and one store authority are required; exact endpoint aliases, unknown options and unsupported qualifications are rejected. Leases fence store writes only. Active-active command fencing, DNS/proxy alias discovery and hard atomic drain are not claimed.
 
-Exit: a degraded/draining/incompatible worker receives no new work; unknown executions retain appropriate capacity reservations.
+Exit: fresh admission excludes a degraded/incompatible worker; draining excludes
+new admission-task launches while allowing already active work to finish. Unknown
+executions retain appropriate capacity reservations. Hard minimal-profile
+certification remains a separate unmet acceptance criterion; the qualified worker
+configuration is still explicitly `:development`.
+
+Current health increment: 138 deterministic cases and all five analyzers pass on
+canonical macOS/Linux; library coverage is 95.18%. All nine real client/runtime
+cases and all 21 durable-host VM cases pass on both platforms. Separate final
+client and managed reruns include authenticated health/readiness, drain and
+retained-capacity assertions. See `docs/evidence/phase7-worker-health.json`.
 
 ### Phase 8 — Telemetry, docs, examples, and security validation
 

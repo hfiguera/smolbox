@@ -49,6 +49,9 @@ defmodule SmolBox.ManagedRuntimeTest do
       )
 
     {:ok, client} = Client.new(worker)
+    assert {:ok, %{version: "1.14.1", total: total}} = Client.health(client)
+    assert is_integer(total)
+    assert :ok = Client.readiness(client)
     assert {:ok, _machines} = Client.list(client)
     {:ok, profile} = Profile.new("managed-dev-v1")
 
@@ -127,6 +130,20 @@ defmodule SmolBox.ManagedRuntimeTest do
       assert {:error, %Error{category: :not_found}} =
                Client.inspect_machine(context.client, cleaned.machine_name)
     end
+
+    assert :ok = SmolBox.drain_worker(context.runtime, "managed")
+
+    queued = %{
+      spec(context, "python", ["python", "-c", "print('queued')"], [])
+      | id: "drained",
+        queue_ms: 50
+    }
+
+    assert {:ok, handle} = SmolBox.submit(context.runtime, queued)
+    assert {:ok, expired} = SmolBox.await(context.runtime, handle, 5000)
+    assert expired.state == :expired and expired.machine_name == nil
+    assert {:ok, [%{status: :draining}]} = SmolBox.workers(context.runtime)
+    assert {:ok, %{candidates: []}} = SmolBox.audit_worker(context.runtime, "managed")
   end
 
   test "managed cancellation stops the actual VM and preserves uncertainty during evidence retention",
@@ -155,6 +172,15 @@ defmodule SmolBox.ManagedRuntimeTest do
              Client.inspect_machine(context.client, running.machine_name)
 
     assert stopped.next_due_at_ms > System.system_time(:millisecond)
+
+    assert {:ok, %{slots: 1, cpus: 1, memory_mb: 512, disk_gb: 2}} =
+             Memory.usage(context.store, "managed")
+
+    queued = %{spec | id: "after-unknown", queue_ms: 50}
+    assert {:ok, handle} = SmolBox.submit(context.runtime, queued)
+    assert {:ok, expired} = SmolBox.await(context.runtime, handle, 5000)
+    assert expired.state == :expired and expired.reservation == nil
+    assert expired.machine_name == nil
   end
 
   test "orphan inspection leaves a real untracked namespace candidate untouched", context do

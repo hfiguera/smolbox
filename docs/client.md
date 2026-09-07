@@ -24,6 +24,14 @@ cannot be disabled. Loopback development requires `allow_insecure_loopback: true
 A local Unix socket can instead use `unix_socket: "/private/run/smolvm.sock"`
 with `http://localhost`. Client construction makes no network request.
 
+`Client.health(client)` reads the server-reported version, optional inventory
+counts and uptime as a `SmolBox.Health` value. Missing counts remain `nil`; they
+are not treated as zero. `Client.readiness(client)` requires the separate
+blocking-pool probe to return HTTP 200 with an empty body. It preserves normal
+authentication, TLS, deadline and byte-limit checks. JSON/SSE responses still
+require their own media types. These endpoints do not attest artifact digests,
+host quotas or isolation.
+
 An owned disposable machine starts from an approved artifact, with guest networking,
 mounts, sockets, GPU, ports, and workload restart disabled:
 

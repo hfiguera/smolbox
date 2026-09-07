@@ -35,6 +35,21 @@ defmodule SmolBox.ManagedPeer do
     respond(conn, response, agent)
   end
 
+  defp route("GET", ["health"], _body, state) do
+    body = %{
+      "status" => "ok",
+      "version" => Keyword.get(state.options, :runtime_version, "1.14.1"),
+      "machines" => %{"total" => map_size(state.machines), "running" => 0},
+      "uptime_seconds" => 0
+    }
+
+    body = if state.options[:inventory_unavailable], do: Map.delete(body, "machines"), else: body
+    {{:json, 200, body}, state}
+  end
+
+  defp route("GET", ["readyz"], _body, state),
+    do: {{:empty, if(state.options[:unready], do: 503, else: 200)}, state}
+
   defp route("GET", ["api", "v1", "machines"], _body, state),
     do: {{:json, 200, %{"machines" => Map.values(state.machines)}}, state}
 
@@ -105,6 +120,7 @@ defmodule SmolBox.ManagedPeer do
   end
 
   defp respond(conn, {:json, status, body}, _agent), do: TestPeer.json(conn, body, status)
+  defp respond(conn, {:empty, status}, _agent), do: Plug.Conn.send_resp(conn, status, "")
 
   defp respond(conn, {:bytes, bytes}, _agent),
     do:

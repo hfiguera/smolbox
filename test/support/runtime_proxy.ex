@@ -55,10 +55,13 @@ defmodule SmolBox.RuntimeProxy do
     if Req.Response.get_private(response, :over_limit, false) do
       TestPeer.json(conn, %{}, 502)
     else
-      [content_type] = Req.Response.get_header(response, "content-type")
+      conn =
+        case Req.Response.get_header(response, "content-type") do
+          [] -> conn
+          [content_type] -> Plug.Conn.put_resp_content_type(conn, content_type)
+        end
 
       conn
-      |> Plug.Conn.put_resp_content_type(content_type)
       |> Plug.Conn.send_resp(
         response.status,
         Req.Response.get_private(response, :bounded_body, "")

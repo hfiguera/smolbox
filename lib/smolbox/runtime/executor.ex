@@ -1,7 +1,7 @@
 defmodule SmolBox.Runtime.Executor do
   @moduledoc false
   alias SmolBox.{Client, Error, Execution, Identity, Machine, Profile}
-  alias SmolBox.Runtime.{Cleanup, Files, Observation, Session, WorkerConfig}
+  alias SmolBox.Runtime.{Cleanup, Files, Observation, Session, WorkerConfig, WorkerHealth}
 
   def run(config, key, eligible) do
     Session.safe(fn ->
@@ -58,17 +58,7 @@ defmodule SmolBox.Runtime.Executor do
     result =
       Enum.reduce_while(workers, Session.error(:admission_exhausted, :reservation), fn worker,
                                                                                        _previous ->
-        {:ok, name} = Identity.machine_name(session.config.namespace)
-
-        reserved =
-          Session.store(session.config, :reserve, [
-            session.key,
-            Session.guard(record),
-            {worker.client.worker.id, name, worker.capacity},
-            Session.now(session)
-          ])
-
-        case reserved do
+        case reserve_worker(session, worker) do
           {:ok, next} -> {:halt, {:ok, worker, next}}
           {:error, %Error{category: :admission_exhausted}} = error -> {:cont, error}
           error -> {:halt, error}
@@ -84,6 +74,25 @@ defmodule SmolBox.Runtime.Executor do
 
       error ->
         error
+    end
+  end
+
+  defp reserve_worker(session, worker) do
+    with %{status: :ready} <- WorkerHealth.observe(worker, session.config.clock),
+         {:ok, current} <- Session.claim(session),
+         true <-
+           current.cancel_requested_at_ms == nil and
+             not Execution.expired?(current, Session.now(session)),
+         {:ok, name} <- Identity.machine_name(session.config.namespace) do
+      Session.store(session.config, :reserve, [
+        session.key,
+        Session.guard(current),
+        {worker.client.worker.id, name, worker.capacity},
+        Session.now(session)
+      ])
+    else
+      {:error, _error} = error -> error
+      _ineligible -> Session.error(:admission_exhausted, :reservation)
     end
   end
 
@@ -128,7 +137,8 @@ defmodule SmolBox.Runtime.Executor do
   end
 
   defp verify_dispatch(session, current) do
-    with {:ok, observed} <-
+    with :ok <- dispatch_health(session, current),
+         {:ok, observed} <-
            Session.io(session, current, :preparation, fn ->
              Client.inspect_machine(session.worker.client, current.machine_name)
            end),
@@ -143,6 +153,15 @@ defmodule SmolBox.Runtime.Executor do
 
       {:error, error} ->
         fail_preparation(session, error)
+    end
+  end
+
+  defp dispatch_health(session, record) do
+    case Session.io(session, record, :preparation, fn ->
+           WorkerHealth.observe(session.worker, session.config.clock)
+         end) do
+      %{status: :ready} -> :ok
+      _unqualified -> Session.error(:unsupported_capability, :worker)
     end
   end
 

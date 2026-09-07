@@ -19,6 +19,35 @@ defmodule SmolBox.ClientTest do
 
   defp fixture(name), do: "test/fixtures/wire/#{name}.json" |> File.read!() |> Jason.decode!()
 
+  test "health and empty readiness responses use distinct strict wire contracts" do
+    peer =
+      client(fn conn ->
+        case conn.request_path do
+          "/health" -> TestPeer.json(conn, fixture("health"))
+          "/readyz" -> Plug.Conn.send_resp(conn, 200, "")
+          "/api/v1/machines" -> Plug.Conn.send_resp(conn, 200, "")
+        end
+      end)
+
+    assert {:ok, %{version: "1.14.1", total: 0, running: 0}} = Client.health(peer)
+    assert :ok = Client.readiness(peer)
+    assert {:error, %Error{category: :protocol}} = Client.list(peer)
+
+    proxy =
+      client(fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.send_resp(200, "")
+      end)
+
+    assert :ok = Client.readiness(proxy)
+
+    for {status, body} <- [{503, ""}, {401, ""}, {302, ""}, {200, "x"}, {200, "not empty"}] do
+      peer = client(&Plug.Conn.send_resp(&1, status, body))
+      assert {:error, %Error{operation: :readiness}} = Client.readiness(peer)
+    end
+  end
+
   test "actual HTTP lifecycle bodies, paths, media types and names round trip" do
     parent = self()
 
