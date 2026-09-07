@@ -13,6 +13,8 @@ to Hex. Public APIs and persisted record formats remain compatible with RC1.
 - Update installation, example versions and documentation source links to
   `v0.1.0-rc.2`. Exact-candidate acceptance is recorded separately in the repository's
   release-candidate reports.
+- Wait for the intended process in the executable-identity regression test,
+  replacing a fixed startup delay that raced on a GitHub compatibility runner.
 
 - Align main CI and optional live-workflow checks with the pinned Elixir 1.20.4 /
   OTP 29.0.6 toolchain. Retain Elixir 1.18/OTP 27 and Elixir 1.19–1.20/OTP 28

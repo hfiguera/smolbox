@@ -4,11 +4,12 @@ defmodule SmolBox.CI.PreflightTest do
 
   test "process executable inspection uses executable identity even with a spoofed argv zero" do
     {:ok, child} =
-      Child.start_link(["bash", "-c", "exec -a smolbox-fake-name sleep 30"])
+      Child.start_link(["bash", "-c", "sleep 0.2; exec -a smolbox-fake-name sleep 30"])
 
     try do
-      Process.sleep(50)
-      file = Preflight.executable!(Child.os_pid(child), Util.platform())
+      pid = Child.os_pid(child)
+      await_spoofed_argv(pid, System.monotonic_time(:millisecond) + 5_000)
+      file = Preflight.executable!(pid, Util.platform())
       assert Util.digest(file) == Util.digest(System.find_executable("sleep"))
     after
       Child.stop(child)
@@ -66,6 +67,22 @@ defmodule SmolBox.CI.PreflightTest do
     assert_raise ArgumentError, fn -> Util.private_file!(link, 16_384) end
     File.chmod!(file, 0o644)
     assert_raise ArgumentError, fn -> Util.private_file!(file, 16_384) end
+  end
+
+  defp await_spoofed_argv(pid, deadline) do
+    {arguments, 0} = System.cmd("ps", ["-p", to_string(pid), "-o", "args="])
+
+    cond do
+      String.starts_with?(String.trim(arguments), "smolbox-fake-name ") ->
+        :ok
+
+      System.monotonic_time(:millisecond) >= deadline ->
+        flunk("owned child did not exec the spoofed command before its deadline")
+
+      true ->
+        Process.sleep(10)
+        await_spoofed_argv(pid, deadline)
+    end
   end
 
   defp manifest do
