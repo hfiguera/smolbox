@@ -35,7 +35,14 @@ defmodule SmolBox.Example.Setup do
     {:ok, objects} = Directory.new(settings["artifact_root"])
     :ok = Directory.seed(objects, "example", "program-v1", @program)
     :ok = Directory.seed(objects, "example", "input-v1", <<0, 255, 7>>)
-    {:ok, profile} = Profile.new("example-offline-v1", execution_ms: 5000)
+
+    {:ok, profile} =
+      Profile.new("example-offline-v2",
+        execution_ms: 5000,
+        storage_gb: 20,
+        overlay_gb: 10,
+        host_overhead_mb: 768
+      )
 
     artifact = %{
       "id" => "python-example-v1",
@@ -53,7 +60,8 @@ defmodule SmolBox.Example.Setup do
         platform: platform(),
         profiles: [profile],
         artifacts: [Map.put(artifact, "path", artifact_file)],
-        capacity: %{slots: 1, cpus: 1, memory_mb: 512, disk_gb: 2}
+        allocation_floor: %{storage_gb: 20, overlay_gb: 10, host_overhead_mb: 768},
+        capacity: %{slots: 1, cpus: 1, memory_mb: 1024, disk_gb: 30}
       )
 
     options = [

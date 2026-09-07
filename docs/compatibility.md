@@ -274,3 +274,28 @@ this increment reran all four managed cases on each platform. The five client
 cases remain separately recorded historical evidence until the full release
 matrix runs again. See `docs/evidence/phase6-orphan-inspection.json`. Worker
 service restart and the remaining isolation/release gates are still pending.
+
+
+## Allocation floor correction (September 7)
+
+The increment after `137ed09` corrects an admission assumption found by real
+resource probes. SmolVM 1.14.1 reports requested disk sizes even when it retains
+larger runtime templates. On both hosts a 1 GiB storage request exposed
+21,118,275,584 guest filesystem bytes. Linux raw disks were 20/10 GiB. See
+[resource qualification](resource-qualification.md) for source paths, cgroup
+observations, the bounded guest OOM experiment, and remaining requirements.
+
+Workers now require an operator-declared `allocation_floor`. Smaller profiles
+fail new submission and recovered prepared dispatch. Examples use immutable
+profile v2 with 20/10 GiB disks and 768 MiB VMM overhead; records keep their
+original fingerprints and are never rewritten. This corrects configured
+reservations without claiming a host filesystem quota or cgroup attestation.
+
+At this increment, `mix ci` passes 144 cases on each canonical host with all five
+analyzers. All nine real client/managed cases and all 21 durable real-worker cases
+pass on each host. Clean minimum Elixir 1.18.4/OTP 27.3.4.15 and additional
+1.19.5/OTP 28.5 lanes pass the same 144 deterministic cases. Bad and clean
+compiler/analyzer/coverage canaries pass their expected outcomes on both hosts.
+Seeds, durations and source hashes are in
+`docs/evidence/phase7-resource-floor.json`. None of this marks hard-profile
+certification or release acceptance complete.

@@ -8,13 +8,28 @@ defmodule SmolBox.Runtime.WorkerConfig do
   before registering them. Managed admission compares the server-reported version
   and checks readiness; the worker API cannot attest artifact contents or isolation.
 
+  `allocation_floor` is a required operator declaration with `storage_gb`,
+  `overlay_gb`, and `host_overhead_mb`. It must cover the largest actual disk
+  templates across this worker's runtime and approved artifacts, and its VMM
+  overhead. SmolVM 1.14.1 only grows disk templates: a smaller API request can
+  still expose a larger guest disk. Admission rejects profiles below these
+  floors. This declaration is not remotely attested or a host filesystem quota.
+
   The initial qualification is explicitly `:development`; it does not certify
   hostile multi-tenant host quotas. Requested unsupported hard controls are
   rejected by `SmolBox.Profile`. Reachability alone does not qualify a worker.
   """
   alias SmolBox.{Client, Error, ExecutionSpec, MachineSpec, Profile, Store, Validation}
 
-  @enforce_keys [:client, :architecture, :platform, :artifacts, :profiles, :capacity]
+  @enforce_keys [
+    :client,
+    :architecture,
+    :platform,
+    :artifacts,
+    :profiles,
+    :capacity,
+    :allocation_floor
+  ]
   @derive {Inspect, only: [:architecture, :platform, :runtime_version, :qualification]}
   defstruct @enforce_keys ++
               [runtime_version: "1.14.1", qualification: :development, draining: false]
@@ -26,6 +41,11 @@ defmodule SmolBox.Runtime.WorkerConfig do
           artifacts: [map()],
           profiles: [Profile.t()],
           capacity: Store.capacity(),
+          allocation_floor: %{
+            storage_gb: pos_integer(),
+            overlay_gb: pos_integer(),
+            host_overhead_mb: pos_integer()
+          },
           runtime_version: String.t(),
           qualification: :development,
           draining: boolean()
@@ -53,7 +73,8 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   @spec supports?(t(), ExecutionSpec.t()) :: boolean()
   def supports?(worker, spec) do
-    spec.profile in worker.profiles and worker.architecture == spec.artifact["architecture"] and
+    spec.profile in worker.profiles and allocation_fits?(worker, spec.profile) and
+      worker.architecture == spec.artifact["architecture"] and
       Enum.any?(
         worker.artifacts,
         &(Map.take(&1, ["id", "sha256", "architecture"]) == spec.artifact)
@@ -71,7 +92,8 @@ defmodule SmolBox.Runtime.WorkerConfig do
   defp valid_fields?(worker) do
     valid_client?(worker.client) and worker.runtime_version == "1.14.1" and
       worker.qualification == :development and valid_platform?(worker) and
-      is_boolean(worker.draining) and capacity?(worker.capacity) and catalogs?(worker)
+      is_boolean(worker.draining) and capacity?(worker.capacity) and catalogs?(worker) and
+      allocation_floor?(worker.allocation_floor)
   end
 
   defp valid_client?(%Client{} = client) do
@@ -111,6 +133,21 @@ defmodule SmolBox.Runtime.WorkerConfig do
     is_map(capacity) and Enum.sort(Map.keys(capacity)) == [:cpus, :disk_gb, :memory_mb, :slots] and
       Enum.all?(Map.values(capacity), &Validation.integer?(&1, 1, 1_048_576))
   end
+
+  defp allocation_floor?(
+         %{storage_gb: storage, overlay_gb: overlay, host_overhead_mb: memory} = floor
+       ),
+       do:
+         map_size(floor) == 3 and Validation.integer?(storage, 1, 64) and
+           Validation.integer?(overlay, 1, 64) and Validation.integer?(memory, 128, 16_384)
+
+  defp allocation_floor?(_floor), do: false
+
+  defp allocation_fits?(worker, profile),
+    do:
+      Enum.all?(worker.allocation_floor, fn {field, minimum} ->
+        Map.fetch!(profile, field) >= minimum
+      end)
 
   defp unique?(entries, function),
     do: MapSet.size(MapSet.new(entries, function)) == length(entries)

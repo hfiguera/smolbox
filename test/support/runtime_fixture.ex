@@ -25,6 +25,7 @@ defmodule SmolBox.RuntimeFixture do
         platform: :linux,
         architecture: "x86_64",
         profiles: [spec.profile],
+        allocation_floor: %{storage_gb: 1, overlay_gb: 1, host_overhead_mb: 256},
         capacity: Contract.capacity(),
         draining: Keyword.get(options, :draining, false),
         artifacts: [Map.put(spec.artifact, "path", "/approved/python.smolmachine")]

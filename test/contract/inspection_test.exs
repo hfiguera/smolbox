@@ -35,6 +35,7 @@ defmodule SmolBox.InspectionTest do
         draining: true,
         profiles: [spec.profile],
         artifacts: [Map.put(spec.artifact, "path", "/approved/private-artifact.smolmachine")],
+        allocation_floor: %{storage_gb: 1, overlay_gb: 1, host_overhead_mb: 256},
         capacity: Contract.capacity(10)
       )
 

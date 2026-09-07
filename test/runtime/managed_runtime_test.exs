@@ -53,7 +53,9 @@ defmodule SmolBox.ManagedRuntimeTest do
     assert is_integer(total)
     assert :ok = Client.readiness(client)
     assert {:ok, _machines} = Client.list(client)
-    {:ok, profile} = Profile.new("managed-dev-v1")
+
+    {:ok, profile} =
+      Profile.new("managed-dev-v2", storage_gb: 20, overlay_gb: 10, host_overhead_mb: 768)
 
     {:ok, configured} =
       WorkerConfig.new(
@@ -62,7 +64,8 @@ defmodule SmolBox.ManagedRuntimeTest do
         platform: platform,
         artifacts: artifacts,
         profiles: [profile],
-        capacity: %{slots: 1, cpus: 1, memory_mb: 512, disk_gb: 2}
+        allocation_floor: %{storage_gb: 20, overlay_gb: 10, host_overhead_mb: 768},
+        capacity: %{slots: 1, cpus: 1, memory_mb: 1024, disk_gb: 30}
       )
 
     store = start_supervised!(Memory)
@@ -173,7 +176,7 @@ defmodule SmolBox.ManagedRuntimeTest do
 
     assert stopped.next_due_at_ms > System.system_time(:millisecond)
 
-    assert {:ok, %{slots: 1, cpus: 1, memory_mb: 512, disk_gb: 2}} =
+    assert {:ok, %{slots: 1, cpus: 1, memory_mb: 1024, disk_gb: 30}} =
              Memory.usage(context.store, "managed")
 
     queued = %{spec | id: "after-unknown", queue_ms: 50}

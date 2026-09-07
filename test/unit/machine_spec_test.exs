@@ -27,7 +27,7 @@ defmodule SmolBox.MachineSpecTest do
           {"valid", "/a/../x.smolmachine", []},
           {"valid", "/x.smolmachine", [cpus: 65]},
           {"valid", "/x.smolmachine", [memory_mb: 1]},
-          {"valid", "/x.smolmachine", [overlay_gb: 9]},
+          {"valid", "/x.smolmachine", [overlay_gb: 65]},
           {"valid", "/x.smolmachine", [network: true]},
           {"valid", "/x.smolmachine", [cpus: 1, cpus: 2]},
           {"valid", "/x.smolmachine", %{}}

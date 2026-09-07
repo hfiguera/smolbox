@@ -41,7 +41,7 @@ defmodule SmolBox.Machine do
     if MachineSpec.valid_name?(name) and state in ["created", "running", "stopped"] and
          Validation.integer?(created, 0, 253_402_300_799) and
          Validation.integer?(cpus, 1, 64) and Validation.integer?(memory, 128, 16_384) and
-         Validation.integer?(storage, 1, 8) and Validation.integer?(overlay, 1, 8) do
+         Validation.integer?(storage, 1, 64) and Validation.integer?(overlay, 1, 64) do
       {:ok,
        %__MODULE__{
          name: name,

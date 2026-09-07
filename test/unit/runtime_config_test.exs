@@ -18,6 +18,7 @@ defmodule SmolBox.RuntimeConfigTest do
       platform: :linux,
       architecture: "x86_64",
       profiles: [spec.profile],
+      allocation_floor: %{storage_gb: 1, overlay_gb: 1, host_overhead_mb: 256},
       capacity: Contract.capacity(),
       artifacts: [Map.put(spec.artifact, "path", "/approved/runtime.smolmachine")]
     ]
@@ -51,6 +52,12 @@ defmodule SmolBox.RuntimeConfigTest do
           [profiles: []],
           [artifacts: []],
           [capacity: %{}],
+          [allocation_floor: nil],
+          [allocation_floor: %{storage_gb: 1, overlay_gb: 1}],
+          [allocation_floor: %{storage_gb: 65, overlay_gb: 1, host_overhead_mb: 256}],
+          [allocation_floor: %{storage_gb: 1, overlay_gb: 0, host_overhead_mb: 256}],
+          [allocation_floor: %{storage_gb: 1, overlay_gb: 1, host_overhead_mb: 127}],
+          [allocation_floor: %{storage_gb: 1, overlay_gb: 1, host_overhead_mb: 256, unknown: 1}],
           [runtime_version: "future"],
           [qualification: :production],
           [architecture: "arm32"],
@@ -68,6 +75,26 @@ defmodule SmolBox.RuntimeConfigTest do
     assert {:error, %Error{}} = WorkerConfig.validate(Map.put(context.worker, :surprise, true))
     forged_client = context.worker.client |> Map.delete(:worker) |> Map.put(:surprise, true)
     assert {:error, %Error{}} = WorkerConfig.validate(%{context.worker | client: forged_client})
+
+    assert {:error, %Error{}} =
+             WorkerConfig.new(Keyword.delete(context.options, :allocation_floor))
+  end
+
+  test "template sizes and VMM overhead are explicit prerequisites for supported profiles",
+       context do
+    for {field, value} <- [storage_gb: 20, overlay_gb: 10, host_overhead_mb: 768] do
+      floor = Map.put(context.worker.allocation_floor, field, value)
+      worker = %{context.worker | allocation_floor: floor}
+      assert :ok = WorkerConfig.validate(worker)
+      refute WorkerConfig.supports?(worker, context.spec)
+
+      profile = Map.put(context.spec.profile, field, value)
+
+      assert WorkerConfig.supports?(%{worker | profiles: [profile]}, %{
+               context.spec
+               | profile: profile
+             })
+    end
   end
 
   test "runtime bounds, store callbacks, and duplicate endpoint aliases are checked", context do

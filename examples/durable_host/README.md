@@ -188,3 +188,11 @@ runtime. An upgrade must back up records, preserve keys and immutable identities
 and migrate payloads and index projections together under host-controlled
 maintenance. This example does not silently reinterpret future schemas or fall
 back to memory when PostgreSQL is unavailable.
+
+The shared setup uses immutable profile `example-offline-v2`: 1 vCPU, 256 MiB
+guest memory, 768 MiB VMM allowance, 20 GiB storage and 10 GiB overlay. Its
+required worker allocation floor matches the supplied 1.14.1 disk templates.
+These are accounting reservations, not hard host filesystem/RSS quotas. A host
+with different or larger artifact templates must requalify and update the floor.
+Existing v1 records retain their original spec: inspect their original handles;
+reusing their ID with the changed profile intentionally returns an identity conflict.

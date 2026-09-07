@@ -23,7 +23,8 @@ with `SmolBox.Client.new/2`. Remote workers require verified HTTPS and a bearer
 token. Proxy tokens stay in trusted configuration, outside persisted records.
 
 ```elixir
-{:ok, profile} = SmolBox.Profile.new("offline-policy-v1")
+{:ok, profile} = SmolBox.Profile.new("offline-policy-v2",
+  storage_gb: 20, overlay_gb: 10, host_overhead_mb: 768)
 {:ok, configured_worker} = SmolBox.Runtime.WorkerConfig.new(
   client: client,
   platform: :linux,
@@ -35,7 +36,8 @@ token. Proxy tokens stay in trusted configuration, outside persisted records.
     "architecture" => "x86_64",
     "path" => "/approved/python-v1.smolmachine"
   }],
-  capacity: %{slots: 2, cpus: 2, memory_mb: 1024, disk_gb: 4}
+  allocation_floor: %{storage_gb: 20, overlay_gb: 10, host_overhead_mb: 768},
+  capacity: %{slots: 2, cpus: 2, memory_mb: 2048, disk_gb: 60}
 )
 
 children = [
@@ -57,6 +59,24 @@ Its image must have neutral `/bin/true` startup and no automatic workload restar
 Neither HTTP reachability nor a supplied digest proves those facts. `platform`
 is `:linux` or `:macos`; architectures initially tested are Linux `x86_64` and
 macOS `aarch64`. Linux arm64 remains unqualified.
+
+`allocation_floor` is required and has no inferred default. Verify the largest
+storage/overlay templates across the runtime installation and every approved
+artifact, plus VMM overhead, before registering a worker. The pinned release's
+supplied templates measured 20 GiB storage and 10 GiB overlay on both hosts.
+SmolVM 1.14.1 retains a larger template even when its API reports a 1 GiB request.
+Managed submission rejects profiles below the declared floor. Recovered work
+checks the current floor again before dispatch; raising it does not rewrite an
+existing specification or silently repeat a command. The low-level client cannot
+detect this mismatch from the API response alone.
+
+The example reserves 256 MiB guest memory plus 768 MiB VMM overhead per slot.
+Linux source and a delegated cgroup observation support this VMM allowance for
+the tested non-CUDA configuration. It is not a universal RSS bound, and macOS
+does not provide the same cgroup controls. Disk reservations exclude shared
+artifact caches, logs, layers, filesystem metadata and unrelated workloads.
+Operators must separately bound and account for those resources. A floor is a
+trusted configuration declaration, not an attestation or hostile-tenant quota.
 
 Each physical worker must have one stable ID and one shared store authority.
 Exact duplicate endpoint configurations are rejected, but aliases/proxies can

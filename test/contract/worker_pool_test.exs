@@ -148,7 +148,29 @@ defmodule SmolBox.WorkerPoolTest do
            end)
   end
 
-  for revoked <- [:profile, :artifact] do
+  test "a profile below the declared disk floor is rejected without accepting work or creating a VM" do
+    context = RuntimeFixture.start()
+    stop_supervised!(Runtime)
+    [worker] = context.options[:workers]
+
+    worker = %{
+      worker
+      | allocation_floor: %{storage_gb: 20, overlay_gb: 10, host_overhead_mb: 768}
+    }
+
+    runtime = start_supervised!({Runtime, Keyword.put(context.options, :workers, [worker])})
+
+    assert {:error, %Error{category: :unsupported_capability, operation: :submit}} =
+             SmolBox.submit(runtime, context.spec)
+
+    assert {:error, %Error{category: :not_found}} =
+             SmolBox.fetch(runtime, context.spec.scope, context.spec.id)
+
+    assert ManagedPeer.snapshot(context.peer).machines == %{}
+    assert ManagedPeer.snapshot(context.peer).commands == []
+  end
+
+  for revoked <- [:profile, :artifact, :allocation_floor] do
     test "recovered prepared work cannot dispatch after its #{revoked} approval is removed" do
       observer = self()
 
@@ -172,6 +194,9 @@ defmodule SmolBox.WorkerPoolTest do
 
           :artifact ->
             %{worker | artifacts: [Map.put(hd(worker.artifacts), "id", "new-artifact")]}
+
+          :allocation_floor ->
+            %{worker | allocation_floor: %{storage_gb: 20, overlay_gb: 10, host_overhead_mb: 768}}
         end
 
       runtime = start_supervised!({Runtime, Keyword.put(context.options, :workers, [worker])})

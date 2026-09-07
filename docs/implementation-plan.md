@@ -1,6 +1,6 @@
 # SmolBox implementation plan
 
-Status: implementation in progress, September 6, 2026. Phases 1–5 have substantial implemented and tested capabilities: standalone quality gates, immutable contracts, bounded client, fenced state, memory/Postgres stores, and the first supervised managed runtime. Seven real client/managed cases pass on each pinned Linux/macOS worker, and 12 real Postgres cases pass. Source metadata, complete fault/resource qualification, host demonstrations, and release acceptance remain incomplete.
+Status: implementation in progress, September 7, 2026. Phases 1–7 have substantial implemented and tested capabilities: standalone quality gates, immutable contracts, bounded client, fenced state, memory/Postgres stores, managed recovery, worker health, and allocation admission. The current allocation-floor increment passes 144 deterministic cases and nine real client/managed cases on each Linux/macOS host. Full resource/security qualification, public telemetry, source metadata, and release acceptance remain incomplete.
 
 
 Implementation evidence lives in [compatibility.md](compatibility.md) and `docs/evidence/`. Checked items below mean the specific work has evidence; they do not waive the remaining phase exit conditions or release requirements.
@@ -654,7 +654,7 @@ Exit: restarts do not duplicate commands; unresolved execution and cleanup are i
 Dependencies: Phase 6.
 
 - [x] Add health/version and readiness selection, bounded queueing, expiry, and explicit overload results. Typed `/health` plus the actual empty `/readyz` response drive admission; cached observations expire, and fresh checks precede reservation and command dispatch. Missing inventory, failed readiness, version drift, second-worker selection and queue expiry have controlled coverage. Real endpoints pass on both platforms, including authenticated TLS proxy access.
-- [x] Reserve CPU/memory/disk/concurrency under the store's supported ownership model. Both adapters atomically charge slots, CPUs, guest memory plus host overhead, and requested disk allocations. Real cancellation tests verify the reservation prevents another assignment while the first outcome remains unknown. These are configured accounting bounds, not certified hard host limits.
+- [x] Reserve CPU/memory/disk/concurrency under the store's supported ownership model. Both adapters atomically charge slots, CPUs, guest memory plus host overhead, and requested disk allocations. Required operator-declared allocation floors prevent requests below the actual template sizes and VMM allowance; supplied templates require 20/10 GiB and the tested Linux VMM adds 768 MiB. Real cancellation tests verify the reservation prevents another assignment while the first outcome remains unknown. These are configured accounting bounds, not certified hard host limits.
 - [x] Implement drain and incompatible-worker behavior without disabling inspection. Drain closes subsequent admission-task launches; already active admission/observation/cleanup may finish. The runtime-local convenience call is not an atomic worker-side fence; hosts persist intended `draining: true` configuration. Real and controlled tests verify post-drain queue expiry and retained inspection access.
 - [ ] Enforce and test the certified minimal profile on both initial platforms.
 - [x] Document limits of controller ownership and reject unsupported configuration. Stable physical-worker identity and one store authority are required; exact endpoint aliases, unknown options and unsupported qualifications are rejected. Leases fence store writes only. Active-active command fencing, DNS/proxy alias discovery and hard atomic drain are not claimed.
@@ -676,6 +676,18 @@ request and revalidates current artifact/profile approval for recovered prepared
 work. Mismatched creation replies remain unverified with their reservation;
 revoked approval never authorizes a command. See
 `docs/evidence/phase7-allocation-policy.json` for the checks and real managed runs.
+
+Resource correction from real qualification: SmolVM 1.14.1 copies disk templates
+without shrinking them. Both platforms returned `storageGb: 1` while the guest
+exposed a roughly 20 GiB filesystem; Linux also had 20/10 GiB raw disks. The
+required worker `allocation_floor` now makes this dependency explicit, rejects
+undersized new work, and rechecks recovered prepared work before dispatch.
+Profiles/decoders allow up to 64 GiB per requested disk so the actual released
+templates can be represented. This expands an arbitrary initial 8 GiB validation
+ceiling; it does not add a hard filesystem quota. No persisted specification is
+rewritten. Examples use a new immutable profile revision and reserve 30 GiB disk
+plus 768 MiB VMM overhead per VM. Shared caches/logs/layers remain separate host
+responsibilities. See [resource qualification](resource-qualification.md).
 
 ### Phase 8 — Telemetry, docs, examples, and security validation
 

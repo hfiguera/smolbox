@@ -1,0 +1,136 @@
+{
+  "recorded_at": "2026-09-07T04:07:54.067154+00:00",
+  "base_commit": "137ed09",
+  "scope": "Allocation floor correction and bounded exploratory Linux memory probe; not hard resource certification",
+  "upstream": {
+    "tag": "v1.14.1",
+    "commit": "e8d09ef616d363004d55b80a6cdb31a4e7e1842d",
+    "read_only_source": [
+      "src/storage.rs:543-580",
+      "src/storage.rs:696-727",
+      "src/disk_utils.rs:76-127",
+      "src/process.rs:386-525"
+    ]
+  },
+  "disk_observations": {
+    "request": {
+      "storage_gb": 1,
+      "overlay_gb": 1,
+      "memory_mb": 256,
+      "cpus": 1
+    },
+    "linux": {
+      "api_storage_gb": 1,
+      "api_overlay_gb": 1,
+      "guest_filesystem_bytes": 21118275584,
+      "raw_storage_bytes": 21474836480,
+      "raw_overlay_bytes": 10737418240
+    },
+    "macos": {
+      "api_storage_gb": 1,
+      "api_overlay_gb": 1,
+      "guest_filesystem_bytes": 21118275584,
+      "runtime_storage_template_bytes": 21474836480,
+      "runtime_overlay_template_bytes": 10737418240
+    },
+    "conclusion": "API metadata alone did not justify a 2 GiB reservation; template copies do not shrink."
+  },
+  "linux_memory_probe": {
+    "maximum_attempted_guest_allocation_bytes": 402653184,
+    "guest_requested_mb": 256,
+    "child_exit": -9,
+    "guest_kernel_oom_victim": true,
+    "command_parent_exit": 0,
+    "command_elapsed_ms": 268,
+    "unit_controls": {
+      "memory_max": 2147483648,
+      "memory_swap_max": 0,
+      "cpu_max": "200000 100000",
+      "pids_max": 128
+    },
+    "vmm_controls": {
+      "memory_max": 1073741824,
+      "cpu_max": "100000 100000",
+      "pids_max": 1024,
+      "inherited_pids_max": 128
+    },
+    "unit_memory_peak": 514179072,
+    "vmm_memory_peak": 363044864,
+    "host_oom_kill_events": 0,
+    "qualification": "One finite guest OOM experiment, not a hard host containment certificate."
+  },
+  "cleanup": {
+    "linux_vm_absence_observed": true,
+    "macos_vm_absence_observed": true,
+    "owned_linux_unit": "inactive/not-found after invocation and empty-inventory verification",
+    "unrelated_workloads_stopped": false,
+    "probe_correction": "macOS exploratory script matched stop as :ok instead of {:ok, machine}; verified stop succeeded, then separate receipt-checked cleanup completed deletion and absence."
+  },
+  "validation": {
+    "macos": {
+      "deterministic_cases": 144,
+      "seed": 364306,
+      "seconds": 65.2,
+      "all_five_analyzers": "passed",
+      "runtime_cases": 9,
+      "runtime_seed": 110588,
+      "runtime_seconds": 18.1,
+      "durable_runtime_cases": 21,
+      "durable_seed": 720199,
+      "durable_seconds": 267.4
+    },
+    "linux": {
+      "deterministic_cases": 144,
+      "seed": 657807,
+      "seconds": 66.3,
+      "all_five_analyzers": "passed",
+      "runtime_cases": 9,
+      "runtime_seed": 841652,
+      "runtime_seconds": 19.7,
+      "durable_runtime_cases": 21,
+      "durable_seed": 230410,
+      "durable_seconds": 271.9
+    },
+    "analyzer_canaries": "All five analyzers plus compiler and coverage: expected failing bad and passing clean variants on both hosts.",
+    "docs": "warnings-as-errors passed",
+    "compatibility": {
+      "minimum": {
+        "elixir": "1.18.4",
+        "otp": "27.3.4.15",
+        "passed_cases": 144,
+        "excluded_runtime_cases": 9,
+        "seed": 31592,
+        "seconds": 65.0
+      },
+      "additional": {
+        "elixir": "1.19.5",
+        "otp": "28.5",
+        "passed_cases": 144,
+        "excluded_runtime_cases": 9,
+        "seed": 682963,
+        "seconds": 64.9
+      },
+      "clean_compile": "warnings-as-errors passed in both clean temporary copies",
+      "discarded_run": "First copied workspaces contained an obsolete helper; removed that exact stale file and cleaned/rebuilt before recording successful lanes."
+    },
+    "example_dialyzer": {
+      "minimal_macos": "passed --force-check",
+      "durable_linux": "passed --force-check"
+    }
+  },
+  "remaining": [
+    "Host disk quota, process/output stress, and macOS resource qualification",
+    "Full security, buffering, and bounded-observer experiments",
+    "Telemetry and release acceptance"
+  ],
+  "source_sha256": {
+    "lib/smolbox/runtime/worker_config.ex": "8e012d5636dceeca01f09c8c2fef2a78160d28c967a8f32f673d20769553f76d",
+    "lib/smolbox/profile.ex": "2bb5229f41cd0f7ca19161af441cb6dc019961962fc34394ccf531a4a43c1d1c",
+    "lib/smolbox/machine_spec.ex": "a9f2617e92093eb973f13c210eb7706c681df3945ac3bdfc410c1a98f35f6755",
+    "lib/smolbox/machine.ex": "34900ba603174ce29c0c44a563f04df51890d7bbd707998f90309ed4fbcc9ef8",
+    "examples/support/lib/setup.ex": "4947a678856e4d3224de6d507e681ebcff9477bbe93ffd3b7b1dd4b06500a72d",
+    "test/contract/worker_pool_test.exs": "3c767ac478ac974cb903791fd6ddd4a645474f2fd5e826486e73350114b96f92",
+    "test/unit/runtime_config_test.exs": "9e5054f2524fa35e9634deda5a9e313b9ef0238bc24a2de537e540552c69dd08",
+    "test/runtime/managed_runtime_test.exs": "84f9e54e2543af7ff85e5f23fdcdbae42718fc4c41be50c116b7ce63f8af53e0"
+  }
+}

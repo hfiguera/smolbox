@@ -63,3 +63,11 @@ fencing primitive. This example does not certify hostile multi-tenant isolation.
 Stopping this host loses its memory store. Use the durable host example for
 restart recovery. Never run separate store authorities against the same physical
 worker concurrently; even unique execution names do not coordinate capacity.
+
+The shared setup uses immutable profile `example-offline-v2`: 1 vCPU, 256 MiB
+guest memory, 768 MiB VMM allowance, 20 GiB storage and 10 GiB overlay. Its
+required worker allocation floor matches the supplied 1.14.1 disk templates.
+These are accounting reservations, not hard host filesystem/RSS quotas. A host
+with different or larger artifact templates must requalify and update the floor.
+Existing v1 records retain their original spec: inspect their original handles;
+reusing their ID with the changed profile intentionally returns an identity conflict.

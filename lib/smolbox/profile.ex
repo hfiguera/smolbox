@@ -3,7 +3,9 @@ defmodule SmolBox.Profile do
   Immutable, host-selected policy for disposable offline executions.
 
   `id` identifies this exact policy revision. CPU and memory are guest allocations;
-  disk sizes are guest volumes, not worker filesystem quotas. Host admission also
+  disk sizes are requested guest volumes, not worker filesystem quotas. The
+  worker's required `allocation_floor` must cover its actual disk templates;
+  upstream reports requests even when a larger template is retained. Host admission also
   reserves `host_overhead_mb`. No CPU-time, host RSS, process-count, or host-disk
   hard quota is promised. Requests for such controls are rejected as unsupported.
   Worker qualification and host isolation remain prerequisites for managed use.
@@ -98,8 +100,8 @@ defmodule SmolBox.Profile do
       Validation.identifier?(profile.id),
       Validation.integer?(profile.cpus, 1, 64),
       Validation.integer?(profile.memory_mb, 128, 16_384),
-      Validation.integer?(profile.storage_gb, 1, 8),
-      Validation.integer?(profile.overlay_gb, 1, 8),
+      Validation.integer?(profile.storage_gb, 1, 64),
+      Validation.integer?(profile.overlay_gb, 1, 64),
       Validation.integer?(profile.host_overhead_mb, 128, 16_384),
       Validation.integer?(profile.max_output_bytes, 1, 8_388_608),
       Validation.integer?(profile.max_file_bytes, 1, 1_048_576),

@@ -7,6 +7,11 @@ defmodule SmolBox.MachineSpec do
   enables networking to fetch a missing image. Starts use `/bin/true` and never
   restart the workload automatically. No host mounts, sockets, GPU, or ports
   are exposed by this contract.
+
+  Disk sizes are requests. SmolVM 1.14.1 copies larger disk templates without
+  shrinking them, while its API still reports the request. Low-level callers
+  must verify runtime/artifact disk geometry; managed workers require an
+  explicit allocation floor. A matching create reply alone is not enforcement.
   """
 
   alias SmolBox.Error
@@ -48,7 +53,7 @@ defmodule SmolBox.MachineSpec do
     if SmolBox.Validation.struct_shape?(spec, __MODULE__) and
          valid_name?(spec.name) and artifact_path?(spec.artifact_path) and
          in_range?(spec.cpus, 1..64) and in_range?(spec.memory_mb, 128..16_384) and
-         in_range?(spec.storage_gb, 1..8) and in_range?(spec.overlay_gb, 1..8) do
+         in_range?(spec.storage_gb, 1..64) and in_range?(spec.overlay_gb, 1..64) do
       :ok
     else
       invalid()
