@@ -1,18 +1,33 @@
 # SmolBox implementation plan
 
-Status: **0.1.0-rc.2 preparation and exact-candidate validation in progress**,
-September 7, 2026. RC2 includes the boundary cleanup, onboarding and README
-improvements, and the pinned Elixir 1.20.4/OTP 29.0.6 toolchain. Its scope remains
-the development-qualified client/controller contract in section 1.4.
+Status: **0.1.0-rc.2 accepted for the development-qualified first-release scope**,
+September 7, 2026. Candidate `9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a`, tagged
+`v0.1.0-rc.2`, passed the complete required matrix at that exact commit.
 
-Freeze the candidate before running the required checks. Validate the four
-maintained Elixir/OTP pairs on Linux and macOS, canonical quality/coverage checks,
-real runtime and recovery suites, both host examples, ordinary GitHub CI, and
-four fresh consumers of one identical package archive. Create `v0.1.0-rc.2` only
-after the required checks pass. Preserve RC1's tag and historical evidence.
-Record RC2 acceptance in `docs/release-candidates/0.1.0-rc.2.md` and its JSON
-companion in a later repository-only attestation commit. No Hex or GitHub Release
-publication is authorized by this validation.
+- Ordinary GitHub CI: all 18 jobs passed with zero skips.
+- Eight Linux/macOS Elixir/OTP lanes: 186 deterministic cases each, including
+  the pinned Elixir 1.20.4/OTP 29.0.6 pair on both platforms.
+- Both canonical hosts: all five analyzers and eight bad/clean canary pairs,
+  95.40% production-library coverage, 22 standalone tooling tests, dependency
+  audits, zero dependency cycles, and warning-free ExDoc with 42-page link checks.
+- Each host: 14 real client/runtime tests, 16 SQL store tests, 25 durable recovery
+  tests, three worker-service fault scenarios, both normal/cancellation host
+  examples, actual database-outage rejection and verified owned-resource cleanup.
+- Four fresh current/minimum dependency consumers: the same verified 84-file
+  archive, with every file matched to the candidate Git object. Version, changelog,
+  MIT license/dependency declarations, source tag/links and Hex-name availability
+  were reviewed.
+
+The [RC2 attestation](release-candidates/0.1.0-rc.2.md) and its
+[machine-readable evidence](release-candidates/0.1.0-rc.2.json) record the matrix
+and the GitHub-discovered process-launch test race corrected before the final
+freeze. RC1's tag and historical evidence remain intact. The later repository-only
+attestation commit does not replace the tested candidate.
+
+RC2 retains section 1.4's scope. Production resource/isolation certification,
+protected real-worker GitHub infrastructure and independent consumer review remain
+excluded; no production profile is certified. No required work remains for RC2
+under that scope. No Hex package, GitHub Release or public service was published.
 
 ## Previous release and development checkpoints
 
@@ -1296,7 +1311,7 @@ consumer runs are not represented as reruns of this new documentation archive.
 The final release-commit matrix was still pending at this documentation checkpoint;
 its subsequent completion is recorded below.
 
-#### Final candidate acceptance (September 7, 2026)
+#### RC1 candidate acceptance (September 7, 2026)
 
 **Accepted:** `0.1.0-rc.1` at `164c0c2c3f71109b4224c2f7f2c807a25e0cdebd`.
 The pushed tag `v0.1.0-rc.1` identifies that exact commit. All required checks
@@ -1336,6 +1351,34 @@ retains bounded machine-readable evidence. No candidate source correction was
 needed. This later attestation changes only repository-only documentation and
 does not make its own commit the release candidate.
 
+#### RC2 candidate acceptance (September 7, 2026)
+
+**Accepted:** `0.1.0-rc.2` at `9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a`.
+The pushed tag `v0.1.0-rc.2` identifies the tested commit. The full required matrix
+was repeated after correcting the initial candidate's process-launch test race.
+The [RC2 report](release-candidates/0.1.0-rc.2.md) and its JSON companion supersede
+RC1 for current acceptance while retaining every historical checkpoint.
+
+All 18 ordinary GitHub jobs passed without skips. Eight local Linux/macOS
+compatibility lanes passed 186 deterministic cases each. Both canonical hosts
+used Elixir 1.20.4/OTP 29.0.6 and passed every analyzer/canary, 95.40% coverage,
+22 standalone tooling tests, audits, zero dependency cycles, and warning-free
+42-page ExDoc/link checks. On each host, 14 real client/runtime tests, 16 store
+tests, 25 durable recovery tests, three worker-service faults, four host demos
+and an actual database-outage check passed with verified cleanup.
+
+All four fresh production consumers used one 84-file archive, SHA-256
+`e8e500641ed421a7191e8695c051bb4bef7f42db8115a0c5941f7900fcfdbe55`, whose
+packaged files match the candidate Git objects. Metadata, MIT text and dependency
+license declarations, the remote tag and 168 generated source links were checked.
+The Hex API returned 404 at the recorded time; this does not reserve the name.
+
+Private PostgreSQL instances ran locally on each host (17.10 macOS, 16.15 Linux),
+with 30 connections and Unix sockets only. Both had zero reservations/due work
+and no noninternal test triggers before shutdown; actual outage checks then
+failed closed. Original worker services and Linux's shared database were preserved.
+Section 1.4's exclusions remain unchanged; no package or service was published.
+
 #### Candidate freeze and validation records
 
 Finish metadata before creating the candidate commit, then run all checks from
@@ -1346,8 +1389,8 @@ If an implementation or packaged file needs a correction, freeze a new candidate
 commit and repeat the affected acceptance matrix without carrying over false
 exact-commit claims.
 
-The candidate tag `v0.1.0-rc.1` must point to the accepted commit. Record completed
-validation in `docs/release-candidates/0.1.0-rc.1.md`, its JSON companion and this
+The version's candidate tag must point to its accepted commit. Record completed
+validation in `docs/release-candidates/<version>.md`, its JSON companion and this
 plan in a separate documentation commit; these files are excluded from the package.
 That attestation commit does not replace the candidate or change its archive. Do not claim an
 untested documentation commit is the release candidate. No Hex or GitHub Release

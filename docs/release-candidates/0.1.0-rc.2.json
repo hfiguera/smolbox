@@ -1,0 +1,4025 @@
+{
+  "candidate": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+  "candidate_correction": {
+    "failure": "A maintainer process-identity test assumed a child had executed after a fixed 50 ms delay. GitHub minimum-toolchain CI observed the launch shell instead.",
+    "fix": "Candidate 9ce713f replaces the sleep assumption with a bounded check for the child's post-exec process title, with deliberate launch delay. All required final checks were rerun at that candidate.",
+    "initial_candidate": "54ade3c1b0d06165158707d8ae3344d1acb530c4",
+    "initial_ci": {
+      "conclusion": "failure",
+      "headSha": "54ade3c1b0d06165158707d8ae3344d1acb530c4",
+      "jobs": [
+        {
+          "conclusion": "success",
+          "name": "smolbox-credence",
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34158691678/job/101855779434"
+        },
+        {
+          "conclusion": "success",
+          "name": "smolbox-coverage",
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34158691678/job/101855779459"
+        },
+        {
+          "conclusion": "success",
+          "name": "smolbox-docs-package",
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34158691678/job/101855779471"
+        },
+        {
+          "conclusion": "success",
+          "name": "smolbox-minimal-host",
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34158691678/job/101855779485"
+        },
+        {
+          "conclusion": "success",
+          "name": "smolbox-dialyzer",
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34158691678/job/101855779505"
+        },
+        {
+          "conclusion": "success",
+          "name": "smolbox-compatibility (1.19.5, 28.5)",
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34158691678/job/101855779535"
+        },
+        {
+          "conclusion": "success",
+          "name": "smolbox-security",
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34158691678/job/101855779540"
+        },
+        {
+          "conclusion": "success",
+          "name": "smolbox-tests",
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34158691678/job/101855779574"
+        },
+        {
+          "conclusion": "success",
+          "name": "smolbox-ci-tools",
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34158691678/job/101855779582"
+        },
+        {
+          "conclusion": "success",
+          "name": "smolbox-ex-dna",
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34158691678/job/101855779587"
+        },
+        {
+          "conclusion": "success",
+          "name": "smolbox-store-contract",
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34158691678/job/101855779598"
+        },
+        {
+          "conclusion": "success",
+          "name": "smolbox-minimum-dependencies",
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34158691678/job/101855779599"
+        },
+        {
+          "conclusion": "success",
+          "name": "smolbox-compatibility (1.20.4, 28.5)",
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34158691678/job/101855779607"
+        },
+        {
+          "conclusion": "success",
+          "name": "smolbox-format-compile",
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34158691678/job/101855779623"
+        },
+        {
+          "conclusion": "success",
+          "name": "smolbox-quality-canaries",
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34158691678/job/101855779653"
+        },
+        {
+          "conclusion": "failure",
+          "name": "smolbox-compatibility (1.18.4, 27.3.4.15)",
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34158691678/job/101855779678"
+        },
+        {
+          "conclusion": "success",
+          "name": "smolbox-credo-ex-slop",
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34158691678/job/101855779722"
+        },
+        {
+          "conclusion": "failure",
+          "name": "smolbox-required",
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34158691678/job/101856850164"
+        }
+      ],
+      "url": "https://github.com/hfiguera/smolbox/actions/runs/34158691678"
+    },
+    "initial_failure_seed": 589085
+  },
+  "cleanup": {
+    "checked_at": "2026-09-07T20:48:26.370138Z",
+    "linux": {
+      "checked_at": "2026-09-07T20:47:25.010235Z",
+      "database": {
+        "listen_addresses": "",
+        "max_connections": "30",
+        "needs_work": 0,
+        "noninternal_triggers": 0,
+        "private_state_retained": true,
+        "records": 5,
+        "reserved_slots": 0,
+        "stopped": true,
+        "task_owned_postgres_pid": "164915",
+        "version": "PostgreSQL 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, 64-bit"
+      },
+      "fault_api_port_free": true,
+      "fault_guest_port_free": true,
+      "no_ssh_forward_created": true,
+      "original_worker_pid": "44097",
+      "original_worker_preserved": true,
+      "shared_linux_database_preserved": true
+    },
+    "macos": {
+      "checked_at": "2026-09-07T20:44:14.145047Z",
+      "database": {
+        "listen_addresses": "",
+        "max_connections": "30",
+        "needs_work": 0,
+        "noninternal_triggers": 0,
+        "private_state_retained": true,
+        "records": 5,
+        "reserved_slots": 0,
+        "stopped": true,
+        "task_owned_postgres_pid": "91653",
+        "version": "PostgreSQL 17.10 (Homebrew) on aarch64-apple-darwin25.4.0, compiled by Apple clang version 21.0.0 (clang-2100.0.123.102), 64-bit"
+      },
+      "fault_api_port_free": true,
+      "fault_guest_port_free": true,
+      "no_ssh_forward_created": true,
+      "original_worker_pid": "82617",
+      "original_worker_preserved": true,
+      "shared_linux_database_preserved": null
+    },
+    "upstream_checkout": {
+      "commit": "e8d09ef616d363004d55b80a6cdb31a4e7e1842d",
+      "existing_incomplete_status_sha256": "dd534723a58842e413d785348723a830485e6edb31bd09caa99ebe055aa7e7aa",
+      "modified_by_validation": false
+    }
+  },
+  "compatibility": [
+    {
+      "checked_at": "2026-09-07T20:28:06.301960Z",
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "doctests": 4,
+      "elixir": "1.20.4",
+      "erts": "17.0.6",
+      "excluded_runtime_tests": 14,
+      "lane": "canonical",
+      "ordinary_tests": 176,
+      "otp": "29.0.6",
+      "passed": 186,
+      "platform": "macos",
+      "properties": 6,
+      "seed": 740747,
+      "source_unchanged": true,
+      "system": "Darwin 25.6.0 arm64"
+    },
+    {
+      "checked_at": "2026-09-07T20:31:16.957327Z",
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "doctests": 4,
+      "elixir": "1.19.5",
+      "erts": "16.4",
+      "excluded_runtime_tests": 14,
+      "lane": "middle",
+      "ordinary_tests": 176,
+      "otp": "28.5",
+      "passed": 186,
+      "platform": "macos",
+      "properties": 6,
+      "seed": 817022,
+      "source_unchanged": true,
+      "system": "Darwin 25.6.0 arm64"
+    },
+    {
+      "checked_at": "2026-09-07T20:29:42.817263Z",
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "doctests": 4,
+      "elixir": "1.18.4",
+      "erts": "15.2.7.11",
+      "excluded_runtime_tests": 14,
+      "lane": "minimum",
+      "ordinary_tests": 176,
+      "otp": "27.3.4.15",
+      "passed": 186,
+      "platform": "macos",
+      "properties": 6,
+      "seed": 899516,
+      "source_unchanged": true,
+      "system": "Darwin 25.6.0 arm64"
+    },
+    {
+      "checked_at": "2026-09-07T20:32:50.986493Z",
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "doctests": 4,
+      "elixir": "1.20.4",
+      "erts": "16.4",
+      "excluded_runtime_tests": 14,
+      "lane": "otp28",
+      "ordinary_tests": 176,
+      "otp": "28.5",
+      "passed": 186,
+      "platform": "macos",
+      "properties": 6,
+      "seed": 152091,
+      "source_unchanged": true,
+      "system": "Darwin 25.6.0 arm64"
+    },
+    {
+      "checked_at": "2026-09-07T20:28:06.576443Z",
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "doctests": 4,
+      "elixir": "1.20.4",
+      "erts": "17.0.6",
+      "excluded_runtime_tests": 14,
+      "lane": "canonical",
+      "ordinary_tests": 176,
+      "otp": "29.0.6",
+      "passed": 186,
+      "platform": "linux",
+      "properties": 6,
+      "seed": 709404,
+      "source_unchanged": true,
+      "system": "Linux 7.1.5-76070105-generic x86_64"
+    },
+    {
+      "checked_at": "2026-09-07T20:31:59.580973Z",
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "doctests": 4,
+      "elixir": "1.19.5",
+      "erts": "16.4",
+      "excluded_runtime_tests": 14,
+      "lane": "middle",
+      "ordinary_tests": 176,
+      "otp": "28.5",
+      "passed": 186,
+      "platform": "linux",
+      "properties": 6,
+      "seed": 156145,
+      "source_unchanged": true,
+      "system": "Linux 7.1.5-76070105-generic x86_64"
+    },
+    {
+      "checked_at": "2026-09-07T20:30:06.937207Z",
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "doctests": 4,
+      "elixir": "1.18.4",
+      "erts": "15.2.7.11",
+      "excluded_runtime_tests": 14,
+      "lane": "minimum",
+      "ordinary_tests": 176,
+      "otp": "27.3.4.15",
+      "passed": 186,
+      "platform": "linux",
+      "properties": 6,
+      "seed": 976254,
+      "source_unchanged": true,
+      "system": "Linux 7.1.5-76070105-generic x86_64"
+    },
+    {
+      "checked_at": "2026-09-07T20:33:58.837812Z",
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "doctests": 4,
+      "elixir": "1.20.4",
+      "erts": "16.4",
+      "excluded_runtime_tests": 14,
+      "lane": "otp28",
+      "ordinary_tests": 176,
+      "otp": "28.5",
+      "passed": 186,
+      "platform": "linux",
+      "properties": 6,
+      "seed": 533440,
+      "source_unchanged": true,
+      "system": "Linux 7.1.5-76070105-generic x86_64"
+    }
+  ],
+  "exclusions": [
+    "Production resource/isolation certification",
+    "Provisioned protected real-worker GitHub CI",
+    "Independent consumer review",
+    "Hex publication",
+    "GitHub Release publication"
+  ],
+  "github": {
+    "conclusion": "success",
+    "headSha": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+    "jobs": [
+      {
+        "conclusion": "success",
+        "name": "smolbox-dialyzer",
+        "url": "https://github.com/hfiguera/smolbox/actions/runs/34159275731/job/101857506179"
+      },
+      {
+        "conclusion": "success",
+        "name": "smolbox-compatibility (1.18.4, 27.3.4.15)",
+        "url": "https://github.com/hfiguera/smolbox/actions/runs/34159275731/job/101857506327"
+      },
+      {
+        "conclusion": "success",
+        "name": "smolbox-ci-tools",
+        "url": "https://github.com/hfiguera/smolbox/actions/runs/34159275731/job/101857506357"
+      },
+      {
+        "conclusion": "success",
+        "name": "smolbox-tests",
+        "url": "https://github.com/hfiguera/smolbox/actions/runs/34159275731/job/101857506404"
+      },
+      {
+        "conclusion": "success",
+        "name": "smolbox-coverage",
+        "url": "https://github.com/hfiguera/smolbox/actions/runs/34159275731/job/101857506413"
+      },
+      {
+        "conclusion": "success",
+        "name": "smolbox-ex-dna",
+        "url": "https://github.com/hfiguera/smolbox/actions/runs/34159275731/job/101857506421"
+      },
+      {
+        "conclusion": "success",
+        "name": "smolbox-format-compile",
+        "url": "https://github.com/hfiguera/smolbox/actions/runs/34159275731/job/101857506427"
+      },
+      {
+        "conclusion": "success",
+        "name": "smolbox-compatibility (1.20.4, 28.5)",
+        "url": "https://github.com/hfiguera/smolbox/actions/runs/34159275731/job/101857506442"
+      },
+      {
+        "conclusion": "success",
+        "name": "smolbox-minimum-dependencies",
+        "url": "https://github.com/hfiguera/smolbox/actions/runs/34159275731/job/101857506451"
+      },
+      {
+        "conclusion": "success",
+        "name": "smolbox-credo-ex-slop",
+        "url": "https://github.com/hfiguera/smolbox/actions/runs/34159275731/job/101857506465"
+      },
+      {
+        "conclusion": "success",
+        "name": "smolbox-credence",
+        "url": "https://github.com/hfiguera/smolbox/actions/runs/34159275731/job/101857506468"
+      },
+      {
+        "conclusion": "success",
+        "name": "smolbox-docs-package",
+        "url": "https://github.com/hfiguera/smolbox/actions/runs/34159275731/job/101857506471"
+      },
+      {
+        "conclusion": "success",
+        "name": "smolbox-compatibility (1.19.5, 28.5)",
+        "url": "https://github.com/hfiguera/smolbox/actions/runs/34159275731/job/101857506472"
+      },
+      {
+        "conclusion": "success",
+        "name": "smolbox-store-contract",
+        "url": "https://github.com/hfiguera/smolbox/actions/runs/34159275731/job/101857506504"
+      },
+      {
+        "conclusion": "success",
+        "name": "smolbox-security",
+        "url": "https://github.com/hfiguera/smolbox/actions/runs/34159275731/job/101857506528"
+      },
+      {
+        "conclusion": "success",
+        "name": "smolbox-quality-canaries",
+        "url": "https://github.com/hfiguera/smolbox/actions/runs/34159275731/job/101857506560"
+      },
+      {
+        "conclusion": "success",
+        "name": "smolbox-minimal-host",
+        "url": "https://github.com/hfiguera/smolbox/actions/runs/34159275731/job/101857506573"
+      },
+      {
+        "conclusion": "success",
+        "name": "smolbox-required",
+        "url": "https://github.com/hfiguera/smolbox/actions/runs/34159275731/job/101858387392"
+      }
+    ],
+    "status": "completed",
+    "url": "https://github.com/hfiguera/smolbox/actions/runs/34159275731"
+  },
+  "hex_name": {
+    "body_sha256": "c63782a5823039903b5eae18d902681d8eb6effae655d03b90c85858f861092f",
+    "checked_at": "2026-09-07T20:34:41Z",
+    "headers_sha256": "d5c605330ceeec65af806c643d0cee9b334a2eee28e923a43403f07831212da8",
+    "name_not_reserved": true,
+    "response_date_header": "Mon, 07 Sep 2026 20:34:41 GMT",
+    "status": 404,
+    "url": "https://hex.pm/api/packages/smolbox"
+  },
+  "metadata": {
+    "checked_at": "2026-09-07T20:35:59.600310Z",
+    "dependencies_separately_fetched_not_vendored": true,
+    "license_sha256": "210d654cc505eadb7ab98860653dabc84cfdc8f6c450386028c21f1ece9f155d",
+    "runtime_dependency_license_review": [
+      {
+        "licenses": [
+          "MIT"
+        ],
+        "name": "finch",
+        "notices": {
+          "LICENSE.md": "2c3c57158df2131ff09f57d9c7850da0844910f0fa8ac60294dd9396e3672e81"
+        },
+        "version": "0.23.0"
+      },
+      {
+        "licenses": [
+          "Apache-2.0"
+        ],
+        "name": "hpax",
+        "notices": {
+          "LICENSE.txt": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9"
+        },
+        "version": "1.0.4"
+      },
+      {
+        "licenses": [
+          "Apache-2.0"
+        ],
+        "name": "jason",
+        "notices": {
+          "LICENSE": "6c73f07b2f5abbb4fd00f30cba97e4f358b86977b46ad82d87357964a2d350e0"
+        },
+        "version": "1.4.5"
+      },
+      {
+        "licenses": [
+          "Apache-2.0"
+        ],
+        "name": "mime",
+        "notices": {
+          "LICENSE": "79bfd5cbf8cb79a2c73d1d94447461f93407c7f14dc789942c2ee41e167ba48f"
+        },
+        "version": "2.0.7"
+      },
+      {
+        "licenses": [
+          "Apache-2.0"
+        ],
+        "name": "mint",
+        "notices": {
+          "LICENSE.txt": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9"
+        },
+        "version": "1.10.0"
+      },
+      {
+        "licenses": [
+          "Apache-2.0"
+        ],
+        "name": "nimble_options",
+        "notices": {
+          "LICENSE.md": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594"
+        },
+        "version": "1.1.1"
+      },
+      {
+        "licenses": [
+          "Apache-2.0"
+        ],
+        "name": "nimble_pool",
+        "notices": {},
+        "version": "1.1.0"
+      },
+      {
+        "licenses": [
+          "Apache-2.0"
+        ],
+        "name": "req",
+        "notices": {
+          "LICENSE.md": "f9e693078c728b5e62856ba365d6d4e915c87dc47228bfc607132e7f7505101f"
+        },
+        "version": "0.7.4"
+      },
+      {
+        "licenses": [
+          "Apache-2.0"
+        ],
+        "name": "telemetry",
+        "notices": {
+          "LICENSE": "0cec06e0e55fbc3dc5cee4fca9b607f66cb8f4e4dbcf3b3c013594dd156732e9",
+          "NOTICE": "3ca23c239bc03e2bcd3899da04d4271370e230e30f7dc171c7e8ad35809c6bb0"
+        },
+        "version": "1.4.2"
+      }
+    ],
+    "spdx_mit_normalized_match": true,
+    "spdx_source": "https://spdx.org/licenses/MIT.json",
+    "version": "0.1.0-rc.2"
+  },
+  "package": {
+    "consumers": {
+      "linux-current": {
+        "architecture": "x86_64",
+        "minimum": false,
+        "package_sha256": "e8e500641ed421a7191e8695c051bb4bef7f42db8115a0c5941f7900fcfdbe55",
+        "platform": "linux",
+        "runtime_dependencies": [
+          "finch",
+          "hpax",
+          "jason",
+          "mime",
+          "mint",
+          "nimble_options",
+          "nimble_pool",
+          "req",
+          "telemetry"
+        ],
+        "smoke": {
+          "client": true,
+          "supervisor": true,
+          "versions": {
+            "jason": "1.4.5",
+            "nimble_options": "1.1.1",
+            "req": "0.7.4",
+            "telemetry": "1.4.2"
+          }
+        },
+        "source_identity": {
+          "checked_at": "2026-09-07T20:38:25.225369Z",
+          "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+          "elixir": "1.20.4",
+          "erts": "17.0.6",
+          "otp": "29.0.6",
+          "source_unchanged": true,
+          "system": "Linux 7.1.5-76070105-generic x86_64"
+        },
+        "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:8:8] [ds:8:8:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)"
+      },
+      "linux-minimum": {
+        "architecture": "x86_64",
+        "minimum": true,
+        "package_sha256": "e8e500641ed421a7191e8695c051bb4bef7f42db8115a0c5941f7900fcfdbe55",
+        "platform": "linux",
+        "runtime_dependencies": [
+          "finch",
+          "hpax",
+          "jason",
+          "mime",
+          "mint",
+          "nimble_options",
+          "nimble_pool",
+          "req",
+          "telemetry"
+        ],
+        "smoke": {
+          "client": true,
+          "supervisor": true,
+          "versions": {
+            "jason": "1.4.0",
+            "nimble_options": "1.1.0",
+            "req": "0.7.4",
+            "telemetry": "1.3.0"
+          }
+        },
+        "source_identity": {
+          "checked_at": "2026-09-07T20:30:06.937207Z",
+          "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+          "elixir": "1.18.4",
+          "erts": "15.2.7.11",
+          "otp": "27.3.4.15",
+          "source_unchanged": true,
+          "system": "Linux 7.1.5-76070105-generic x86_64"
+        },
+        "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:8:8] [ds:8:8:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)"
+      },
+      "macos-current": {
+        "architecture": "arm64",
+        "minimum": false,
+        "package_sha256": "e8e500641ed421a7191e8695c051bb4bef7f42db8115a0c5941f7900fcfdbe55",
+        "platform": "macos",
+        "runtime_dependencies": [
+          "finch",
+          "hpax",
+          "jason",
+          "mime",
+          "mint",
+          "nimble_options",
+          "nimble_pool",
+          "req",
+          "telemetry"
+        ],
+        "smoke": {
+          "client": true,
+          "supervisor": true,
+          "versions": {
+            "jason": "1.4.5",
+            "nimble_options": "1.1.1",
+            "req": "0.7.4",
+            "telemetry": "1.4.2"
+          }
+        },
+        "source_identity": {
+          "checked_at": "2026-09-07T20:37:09.014540Z",
+          "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+          "elixir": "1.20.4",
+          "erts": "17.0.6",
+          "otp": "29.0.6",
+          "source_unchanged": true,
+          "system": "Darwin 25.6.0 arm64"
+        },
+        "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)"
+      },
+      "macos-minimum": {
+        "architecture": "arm64",
+        "minimum": true,
+        "package_sha256": "e8e500641ed421a7191e8695c051bb4bef7f42db8115a0c5941f7900fcfdbe55",
+        "platform": "macos",
+        "runtime_dependencies": [
+          "finch",
+          "hpax",
+          "jason",
+          "mime",
+          "mint",
+          "nimble_options",
+          "nimble_pool",
+          "req",
+          "telemetry"
+        ],
+        "smoke": {
+          "client": true,
+          "supervisor": true,
+          "versions": {
+            "jason": "1.4.0",
+            "nimble_options": "1.1.0",
+            "req": "0.7.4",
+            "telemetry": "1.3.0"
+          }
+        },
+        "source_identity": {
+          "checked_at": "2026-09-07T20:29:42.817263Z",
+          "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+          "elixir": "1.18.4",
+          "erts": "15.2.7.11",
+          "otp": "27.3.4.15",
+          "source_unchanged": true,
+          "system": "Darwin 25.6.0 arm64"
+        },
+        "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)"
+      }
+    },
+    "files": {
+      "lib/smolbox/transport/req.ex": "748485e5e9683cff55d8718905829cbf4b0ec89394f3066cf82c1c37b3a5a2ee",
+      "lib/smolbox/runtime/config.ex": "bfa68f5dda45888cfa78a7777e2140a35e144de08bd8cab28a2e8f1f17a76444",
+      "lib/smolbox/transport/capture.ex": "df828264adf33a5d96759b445f156189d7ade1b0c4666f66831442569cb084d4",
+      "lib/smolbox/runtime/cleanup.ex": "2778350885d8ed065b9547ac0e3b70ffd8eff63ff7cf8844b588a69a99d804fd",
+      "lib/smolbox/execution.ex": "2c730c8f4971bb6e447178fc62d02e910de711fe287eed6156608eb85b7158a0",
+      "lib/smolbox/client.ex": "694a793a62f761f38e9880559dbcbcaa8065db985acb09d6dc7ece97604eec5f",
+      "lib/smolbox/validation.ex": "4df0e14313ffb67caefdf3a7e4b9d63a8a6588666b4142409b525d2955cc2530",
+      "docs/evidence/otp29-macos.json": "7322929a1839cb0cb5ea3d1b35add9ba99a294ea56836b8ceb3fbd4e81ca0800",
+      "lib/smolbox.ex": "1627052996935124b5b033d4d7dd205fe4f04a025435dba43fdc6f3b23463fa0",
+      "lib/smolbox/telemetry.ex": "ec28badc3bff5bd3d40f87350f840208be306a522a9bd600d6bfd49e3ebbf5f9",
+      "docs/evidence/phase8-cache-state.json": "376889039b073250945716266734b4037885eb2c0d9063c97efd10eb512f75fd",
+      "lib/smolbox/runtime/worker_config.ex": "fe01e39b480c93d742030fc5db9f94e6572377eada65566c82705351ba82f0f9",
+      "lib/smolbox/identity.ex": "baaea42558663ab47934747ae267ea244143a8a8068ea14f64604cf1a0a942e1",
+      "docs/evidence/phase0-macos.json": "9cea2d7882f1e79ca3a80afcb36d4f9b631c16c838ba72c87627d5a46e5b0ac4",
+      "docs/security.md": "e003a4d06186217f64a7071952445d5e25760ad46aa270570b479c279eb8acbc",
+      "docs/recovery.md": "6f11c51d1f14b560ed92f5832e297aa189f283c76627704655fdf1eecc12f713",
+      "docs/evidence/phase7-worker-health.json": "c1be74740dfd9e4c46982ee1fa8cafedb8cceba75e0a6ea305b74ad287f9c3f8",
+      "docs/evidence/phase3-client.json": "dbc9edc77c06412a3d27554db07573ff991be40a842c1272ef595239ca7d8acd",
+      "docs/evidence/phase1-scaffold.json": "60f2cdad2d4d1e580e8300fbe377d1b9d1b453f1d7e480e385bc5a7259eee9af",
+      "docs/telemetry.md": "0f8d8973923c1e63d80cfb9d7888c26464d6eb07e8c5418e2ad5a9ff801112ad",
+      "lib/smolbox/store/memory.ex": "027747ca4f7a32f243b0fc787acbac62f7832471b28531fa964e634a903f00b5",
+      "docs/evidence/phase9-package-consumer.json": "895dab035b7bb38aa7ef537f66d4254a8490de069caaff8bfa52b589b31870b1",
+      "docs/evidence/otp29-linux.json": "dcf8669fdc70a2b81781b9f077c72dad92325e551e8928e507a3c404b6d8fcb1",
+      "docs/evidence/phase6-controller-faults.json": "bf66b4708b18fc42310ad116dd0301cbcb0c734552092babb49ee93198185df3",
+      "docs/evidence/phase8-telemetry.json": "3fbaf61cd05037d17ccc31e39d04533cd7e57c176b7bd2ff7d1d899c3bc40113",
+      "docs/evidence/phase6-service-faults.json": "9b1fe7f068f285f012011f9f067d9210468df7bfca7e3357bf278afda20bf603",
+      "mix.exs": "c65887e8437c096c89ce92d5f6999aa95e6042958d2a31efa945c7f663aaa587",
+      "docs/evidence/phase2-identity.json": "197bc4bb7d73d34253309b8c9e5159904f84134426b9310c26911f0ac6140e4a",
+      "lib/smolbox/artifact_store.ex": "2d61ae4c7b6eeab70d6dbe822f390353565555b80b33a5602d3487b591128cbe",
+      "docs/evidence/phase8-boundaries.json": "a1b592d9c080d7012ceb7c4730306d0a6d8a450190a7bf718a10ffe7de0e85ed",
+      "lib/smolbox/runtime/files.ex": "1acecfe874e8397c4c13fbd40751e629808dbefb920ac640f06d09edb415fc55",
+      "docs/evidence/phase8-linux-containment.json": "c43527578042fda1b4f00e8d3c1a770550cf89c16e582e7df9d107e85f94f216",
+      "lib/smolbox/runtime/worker_health.ex": "fc19df3f3bf28dfda625b1f6f3b882e2a16b75421145442d2e8d77b6b935f1c0",
+      "docs/evidence/phase0-linux.json": "81d46301bc4f9c1c925af2f2e45ba9e10aa46760c9d3a689dba7bbcb61dd5053",
+      "docs/evidence/phase1-live-ci.json": "dbcc5fa81198680d1ba1e6752b4b688736cc7a97285a81d4aec87b967d01338b",
+      "lib/smolbox/wire/sse.ex": "1df603f2eddf0d76216633437bb43319fb5a083ab278022c0364cbcf42dd9d39",
+      "docs/evidence/phase6-orphan-inspection.json": "aec7db1b68c9077faf50038db552519e158dc807c0eb5c077122b9ecd91dc811",
+      "lib/smolbox/store/codec.ex": "19346d99a428fff53512479832317a51fbd371a5b0e209fc4e3ef78edbc4016c",
+      "lib/smolbox/runtime/inspection.ex": "de9270595036e946fe6ca90ad44467df6b24964324ca427931403ec2b7ec5dba",
+      "docs/host-integration.md": "e9dd5d91cf0e2b78356ae895c7171e1f1b65154dba6d977574826ded1c5463b8",
+      "docs/evidence/phase4-durable.json": "7c56679d56026116fa744d33b996e4105ed2560cbd0c202538b0f36aedc7538a",
+      "lib/smolbox/manifest.ex": "64bbfcabea90905d9cb0b3ac9399fa997486b4461d5e13989f3f892938bfeb10",
+      "lib/smolbox/execution_validation.ex": "5cb54942be581c72910b9c5034b308477129174ef24e51b65c744eb1015a02c4",
+      "lib/smolbox/transport.ex": "ed6a497a1e746330bc7527becd8b520a5c9b8320a9102604633dfb13fa4802de",
+      "lib/smolbox/store/record_ops.ex": "b293446ff1536a75cb86731a280908d9564a489a942ab53d454e67c5a2547050",
+      "docs/getting-started.md": "631250aaf830c6dba6d157135b5600187fc2d4b8aaa94e7767ef0264bf5f610a",
+      "docs/troubleshooting.md": "95bb2a6d1a967d4b42f0720340ec15b2ff1b4bb4aa75632d5a9522bf2ca8d9f2",
+      "lib/smolbox/machine_spec.ex": "e5567d5759c382c5b9daac78d2c030414e101589ce8e1fe25ccbaec665716557",
+      "docs/evidence/phase4-store-foundation.json": "e24b2f0747fce2da1298704a38676a8652dc2629d4148756a97d975052d1fdc9",
+      "docs/evidence/phase8-benchmarks.json": "bb3801994ee91ab8dae31db4344e4a3123019edc5938c89037130f5bab397f9d",
+      "lib/smolbox/worker.ex": "281f6be0b563eba81b25e3c8f9aca26b00f664f6333a830d80b983a5797913cf",
+      "lib/smolbox/runtime/coordinator.ex": "d6621ac53f756388682bfd4da44be5fc58bb3349c00ea1beb285d8939fc34bd7",
+      "lib/smolbox/error.ex": "f7965086db5ba5b0f3442acfef5f9a20bb6a9bbc4db6f5d33445d8e1beca9e07",
+      "lib/smolbox/runtime.ex": "b4c0b5a7f03ef3612ebb3e885bfedc27e8d41104a63dbb21c5f1d2bce0af9915",
+      "lib/smolbox/result.ex": "380a75352ed9b49b6e37a474254c55ef4b6b5551832dce7d3acda332f5b5b78a",
+      "LICENSE": "210d654cc505eadb7ab98860653dabc84cfdc8f6c450386028c21f1ece9f155d",
+      "lib/smolbox/telemetry/dispatcher.ex": "30a2513d3aaeb24e953011ff9ca651f9eac66b1d6105a8d491e8178d3796063b",
+      "README.md": "39cff49987f6085306eb960c127bd9e7ff9c29323101bb4daec391b4ccf4e6ce",
+      "lib/smolbox/execution_spec.ex": "a8e0854bec01e5f731c85f810bbc72e62d0fa590c54f16b58eb277c62cb1a05c",
+      "docs/compatibility.md": "b056b9b91073defc3cea5505a6406f761605089e848e1b3d24697aaa70809648",
+      "lib/smolbox/artifact_store/directory.ex": "c8afa7093cef1962a0592d3333dd2de08ed2d284731b840df1d99b1ec73c7bdc",
+      "docs/client.md": "76ff2dbdd6491f0a4bf778701cb574269bcc7318cb15666c225614ed8f414885",
+      "lib/smolbox/runtime/session.ex": "0de9f6a337225c4727fb939103bca8f82d3ed011e75a1b16ef0bf35a2de22767",
+      "lib/smolbox/runtime/work_supervisor.ex": "40e5cfd18c84e55c232272e38477e66b689ea77baf72661171329c50738b4743",
+      "lib/smolbox/health.ex": "85b075434cb592ed0d5d2b7940ed210971f3de48c32774bc8d389e38955db9e9",
+      "docs/evidence/phase7-resource-floor.json": "79500708780ea4cc196c899c349fbe4e1aa48dc09c1b44fbff6005f9ddd71085",
+      "lib/smolbox/runtime/observation.ex": "9409647db1e835e3d3f38c01de206daab37e78686d6c6b6ec595886af372795a",
+      "lib/smolbox/runtime/executor.ex": "0660e5fa5ef24a85f8c2ab05cd1274e84223bb38b0ae75ad16af57080d3ee72e",
+      "docs/evidence/phase2-contracts.json": "1d8b4e5a5a4dc12e15ff02e34c97c46fe33e70e3ff5e2b2c843abc7c5ed989f5",
+      "docs/evidence/phase6-durable-recovery.json": "f8c193a59a5f59500aaca9db27b7ed0d554e5693d3fcc077e8bdea42651211de",
+      "docs/evidence/phase8-macos-memory.json": "baea64fd6fa089689e92512919b1df7aff0244797c71517f656f48033a344397",
+      "docs/resource-qualification.md": "2e7ed55e20de403db3d0fadf0a97f072ac27ac1d9aeea705ce34878e276e5078",
+      "lib/smolbox/runtime/clock.ex": "a3b7bf21a90a4ccf4977791f97736137af01fdee4a2b3a5ebb3d6a0d18dbf114",
+      "docs/evidence/phase5-managed.json": "8cbddad328d367f648ef2e24dacc01fbe405aa4de1983379302e0f564cb95b27",
+      "docs/evidence/phase8-compatibility.json": "537bfd0ea5a1635571552013e821a00d8d99efac36c321b895e991e579f25dc1",
+      "lib/smolbox/profile.ex": "234b2214748fac97ad2dddfad1c5403a7f8bb148d08aaaeb2bb293c43d5ae7a3",
+      "docs/evidence/phase7-allocation-policy.json": "1063d69a27b9c7590e1a2166d4d285406b15d007ba6f75d73d181f60602dae7a",
+      "lib/smolbox/machine.ex": "34900ba603174ce29c0c44a563f04df51890d7bbd707998f90309ed4fbcc9ef8",
+      "docs/evidence/phase6-worker-restart.json": "5c26c26e4e19bbdb2ca87dcb73ccaf66bc77562db2e9437b035db4f0a364181e",
+      "CHANGELOG.md": "3840a2262dea66c981497f44cc4083eb2d13403a9c99ad7dff7920329b1f8384",
+      "docs/evidence/phase9-readiness.json": "36b4229ec6de396ab7aef136cc19ca90de43dad9de9e88c4039e4c344b7de474",
+      "lib/smolbox/command.ex": "788a585c7201dc75991ea68e23c0d9ab12e1a726c4dbed9b957ac07c677eb2c4",
+      "lib/smolbox/files.ex": "15c2054bb8bd11b004de8a6c7a9dd707db4deccf001abdd70998e858ea6cf204",
+      "lib/smolbox/store.ex": "43c74543c44c8e961513e5ff30f69e2c88d24011b010aa3df4d3e6e122656648"
+    },
+    "review": {
+      "checked_at": "2026-09-07T20:39:03.187584Z",
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "consumers": 4,
+      "excluded_material_absent": true,
+      "identical_archive_and_source_files": true,
+      "licenses": [
+        "MIT"
+      ],
+      "name": "smolbox",
+      "package_file_count": 84,
+      "package_sha256": "e8e500641ed421a7191e8695c051bb4bef7f42db8115a0c5941f7900fcfdbe55",
+      "status": "passed",
+      "version": "0.1.0-rc.2"
+    }
+  },
+  "quality": {
+    "linux": {
+      "canaries": [
+        "compiler: bad canary verified (exit 1)",
+        "compiler: clean canary verified (exit 0)",
+        "xref: bad canary verified (exit 1)",
+        "xref: clean canary verified (exit 0)",
+        "credo: bad canary verified (exit 16)",
+        "credo: clean canary verified (exit 0)",
+        "ex_slop: bad canary verified (exit 8)",
+        "ex_slop: clean canary verified (exit 0)",
+        "credence: bad canary verified (exit 1)",
+        "credence: clean canary verified (exit 0)",
+        "ex_dna: bad canary verified (exit 1)",
+        "ex_dna: clean canary verified (exit 0)",
+        "dialyzer: bad canary verified (exit 2)",
+        "dialyzer: clean canary verified (exit 0)",
+        "coverage: bad canary verified (exit 3)",
+        "coverage: clean canary verified (exit 0)"
+      ],
+      "coverage_floor": 90,
+      "coverage_percent": 95.4,
+      "database_outage": "failed_closed",
+      "documentation_pages": 42,
+      "static_file_dependency_cycles": 0,
+      "store_runtime_excluded": 25,
+      "store_tests": 16,
+      "tooling_tests": 22
+    },
+    "macos": {
+      "canaries": [
+        "compiler: bad canary verified (exit 1)",
+        "compiler: clean canary verified (exit 0)",
+        "xref: bad canary verified (exit 1)",
+        "xref: clean canary verified (exit 0)",
+        "credo: bad canary verified (exit 16)",
+        "credo: clean canary verified (exit 0)",
+        "ex_slop: bad canary verified (exit 8)",
+        "ex_slop: clean canary verified (exit 0)",
+        "credence: bad canary verified (exit 1)",
+        "credence: clean canary verified (exit 0)",
+        "ex_dna: bad canary verified (exit 1)",
+        "ex_dna: clean canary verified (exit 0)",
+        "dialyzer: bad canary verified (exit 2)",
+        "dialyzer: clean canary verified (exit 0)",
+        "coverage: bad canary verified (exit 3)",
+        "coverage: clean canary verified (exit 0)"
+      ],
+      "coverage_floor": 90,
+      "coverage_percent": 95.4,
+      "database_outage": "failed_closed",
+      "documentation_pages": 42,
+      "static_file_dependency_cycles": 0,
+      "store_runtime_excluded": 25,
+      "store_tests": 16,
+      "tooling_tests": 22
+    }
+  },
+  "raw_evidence_sha256": {
+    "macos-minimal_host-cancel.json.log": "d462e4c8bc48287dfe15559528a0c6305eb57d533b9d7a819a95a6c0231d2e17",
+    "macos-middle-tooling.json": "4e5b7554ace4d43ab0df89c390d7d37309fcedce0b6a9294f470f715a5b809ca",
+    "linux-minimum-tooling.json": "02ac1dfb55f0b11742dca3516c2f24962dc417dd5dcde87302a84884b3b1eef8",
+    "macos-minimal_host-cancel.json": "328b3c80470fe3efec7d00b6fb43c5f915cb737fbbde596c5effd999722648e5",
+    "linux-consumer-current.json": "e3c0f29a39ff216c63a8fa162adf99f243cf073c2c3b2f0abc967c976b996597",
+    "linux-minimal_host-cancel.json.log": "f507a7af6a7d83a9fab4117a6f9936f385d6bf30ce2f752b9242ec70b361915c",
+    "linux-canonical-dev-compile.json.log": "67c745b4a0ddb0e5dad33d2d9fc501a95268409983ba3b7f284f27a66e68bf2e",
+    "macos-otp28-dependencies.json.log": "bdef70ad91a2eb6d2cc42f3cfa8cc5daf2e13dd52e0b9a021c62e32ffdf9d655",
+    "macos-minimal_host-hex-audit.json.log": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+    "actionlint.json": "e72bfc1ad8c0713626b958a56d67a56abaf1ab26419948b9fb087425548915b9",
+    "macos-minimum-compile.json": "3bcc9420ba123223548755c6be075bd111df937654a8d976a86b52d79c4b2534",
+    "macos-canonical-lock.json": "c633c1704d05c1c5933b9330f4045c8ac1595e997103ac20a0c8b45e86dce93b",
+    "linux-canonical-docs.json": "44bdeaa21bdc8b9fac4b966cea09b46f3e19d7cff1731f5cb09f409dcd45087d",
+    "linux-minimal_host-dependencies.json.log": "eac300caf2e12032084c2807a68c958452fa370ded2d57089a3cd17d7ad7f1ed",
+    "linux-canonical-dev-compile.json": "d6b66ec58152792e0e1948ace9d21aefabcaa908fea51d521b33ef27f687e54e",
+    "linux-fault-restart-step.json.log": "7c38d426ac01b1a2f0b7e7621027c490f3c0e3331c199bc889f3ffedc3f4e336",
+    "linux-fault-unavailable-step.json.log": "607c970b8e2efbe5df2009760914991a7f674b32a6b46c7d20b26fede1bbf135",
+    "linux-runtime-step.json": "d0d414aae3f085647fbc8529339db22240b77ebcc24d5450d3824fb81c9e9ead",
+    "macos-canonical-identity.json": "cc8426d7ae8501f23309999eec2f8cf0d373d510dbf4a6bec098398efddb9ed6",
+    "macos-durable_host-hex-audit.json": "e539dc3059e7387e2806981e6dfeae8bea02eb33debda263d93c12666e91e2a0",
+    "macos-minimal_host-hex-audit.json": "08a8bed8800108e2a71ca01c6ef89e80a0b0a1aeeeceb1ec150ed8f2b00ede31",
+    "linux-canonical-credo.json.log": "2d48e151c20dc10b353fad4dc94d1378f4ee903194291a6d8c5fa0c85fe9083f",
+    "macos-durable_host-deps-audit.json.log": "3016e51e4eac0d421674d2128bbbdefb2924b4646e0c14a1ab034977ad73fae5",
+    "linux-minimal_host-normal.json.log": "d213b2e60b9e7198f9bb771d7fc3818054ccbd18e6f7bddc37e27b6e6ae474ff",
+    "linux-canonical-hex-audit.json.log": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+    "macos-minimum-compile.json.log": "6b3baa724e82018f91018bf71b24e94599f54cd4832790bb5411cceb93c4f45a",
+    "macos-minimal_host-dependency-graph-compile.json.log": "ca49dea460ea5889b6317df5cc9dc35c8ec8ed030283e9688b4a7a3fdf1798f0",
+    "macos-durable-runtime-step.json.log": "cb07868c91f60514c6af36ff773c4fefeb1031c692f8f8db26beda7e8f47ecd0",
+    "cleanup-review.json": "8d8942c238f95df87d8caad2a87b272adc67cb6324bf71cf73929215aae57b01",
+    "macos-minimal_host-dependencies.json": "b91a6449fd4ea4f556762f2d3fb92b62160527fc4fced8f5ed9690977d701f78",
+    "macos-minimal_host-dialyzer.json.log": "e072c1dae33c680fb812c9c6a4c62feed7ebad7e0646e7ae3b87817b1941231e",
+    "macos-otp28-tests.json": "977d18e5b334e3ad28229a05f5b7e8aace2dccb43d8145b28f6f5f929faf6b12",
+    "macos-canonical-lock.json.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "linux-cleanup.json": "5db6536bb604ef1230255370a4965b5ac42b01c00e7b254177b465c0e5e0efb9",
+    "macos-otp28-dependency-compile.json.log": "d97c0dc3431e43d7c8a24d464775f3e060c9eb7daabf82a352b30ef005e502a9",
+    "linux-canonical-lock.json": "072c67e8031beedf2828eaabc1a384365ff378f8a0e8b617dea0e218b498cb8a",
+    "linux-preflight-step.json.log": "b36cb193feb25392d94547241ba2feb50840ebf804765cdd5844e801806e2814",
+    "linux-durable_host-normal.json": "057249734ef44726fca88ea2d762e2962b733da482fbcf900f336d28fd899f9a",
+    "linux-final-preflight-step.json.log": "b36cb193feb25392d94547241ba2feb50840ebf804765cdd5844e801806e2814",
+    "macos-middle-tests.json": "f6883d92f9bf68eb6d09662a16f3ec518f26345c832e08a5a972f24022138ef8",
+    "linux-durable_host-migrate.json.log": "b2f2528a14f3416018ceca73e4c461221bf6d40eb1e320511f5db79a393cdc6f",
+    "linux-runtime.json": "7a75f60bd7f4692d2900e691b777d0124c3749ef884f908d33947c21afbd01b8",
+    "macos-middle-dependency-compile.json.log": "ba1db709af38fdbfe7c98a31f9b61f860881983640272938b35ec0e34c768369",
+    "macos-minimum-dependencies.json.log": "5e2232efb5505883f0e461f024b24c5297858ddd9d6514e779e89b5bec785b47",
+    "hex-final-review.json": "7c781b6a86953074123b70b7e792e4f93b1b7ac955318e199df9e2746bf568df",
+    "linux-otp28-tests.json": "9afa25f4956e1715fc05cd8d0b1e141cda7adaa8c87457eacbdfa2ff29354415",
+    "linux-durable_host-compile.json.log": "8101bf4a5b6019a9f02b0f7d1ef7c4a7800001cc34c4b0479d549bc4a80be73d",
+    "linux-fault-restart-step.json": "e81350dc20e2c167ec99ec6121ad8c41ba6e11bd78bb535cdc1435eabb14a813",
+    "linux-final-preflight-step.json": "0a65afb47c10c668e0f3b697730c4617462c4b581956c18bdff13d06acabf937",
+    "linux-canonical-dialyzer.json.log": "ae90554c13547588147dd2dfd231c1e715dec9dc0d83273ab15b1bab6653adce",
+    "linux-preflight.json": "b36cb193feb25392d94547241ba2feb50840ebf804765cdd5844e801806e2814",
+    "linux-database-outage.json": "383ccfd4f4595187b222ab93e0cda68aab5bb200fb96affabe232b0dc1f66bb7",
+    "linux-minimal_host-deps-audit.json": "457e8359f1d2dbc38740fcc1b2c897937d673315ae496442f6931b8ed23dff04",
+    "macos-fault-missing-step.json": "5202c6559d320fc0fd9ed7e2f99c85c6e98796dca43a920f76de16f0a1608b58",
+    "linux-runtime-step.json.log": "7a75f60bd7f4692d2900e691b777d0124c3749ef884f908d33947c21afbd01b8",
+    "linux-consumer-minimum.json": "2b6a77a8b77c53d7e8dc6f7ccff2d77ab34959d515f35b8483bb2d8431d0ee07",
+    "macos-canonical-tooling.json.log": "58342e28335f6b5bf1e74780de38be1e514ebb4dfd456a5394a62e226d7458f2",
+    "macos-durable_host-dialyzer.json.log": "26e6e135ed321e4a50d91591853a981ee5766ce03a6258add33d01e4761c5773",
+    "macos-minimal_host-normal.json.log": "8439dbc4f04e21833c89a6f4bdbc27bf25cfa554a3274bb4abf941016dc0d1d3",
+    "linux-minimal_host-normal.json": "991b3644cddef9ddae2501071bd5ff38ff49d7e02bcd83e2836fd1538983f02d",
+    "macos-canonical-docs-links.json": "0e413528f817cf58e057d1fef40f8a3935544044b65b551ce1d938e0961b8117",
+    "linux-canonical-xref.json.log": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548",
+    "linux-otp28-dependency-compile.json": "640a6f521dd13d84e976f600854c6eba948b259764b864e41d614ec82b7c5127",
+    "linux-middle-compile.json.log": "6b3baa724e82018f91018bf71b24e94599f54cd4832790bb5411cceb93c4f45a",
+    "linux-durable_host-xref.json": "2eeffd7ea93ff747735f996d615abcea18d752a724251ef4b7bf3e114500304b",
+    "macos-durable_host-dependencies.json": "5a2001a9064fb1ec7e56afd2fd4528f995084d72e61e8b20d44cb1b30bb18d56",
+    "macos-preflight-step.json.log": "93a07b7541148b06cbce86f356c305f975d1e330ec75be75597dd7d32d348a1c",
+    "linux-middle-dependencies.json": "5cbc5689b5b367edbf7724fb5faf6bfbfd62c824f7129bb52246bb39bd579eb7",
+    "spdx-mit.json": "7ee089dccc625bf18b0ab1e80e0c4bcac5587884f5be25d9013b8ad6c61dd439",
+    "linux-minimal_host-hex-audit.json": "b36adda903b62d7a70721957af9ac83a79be7426bad3c0876d587390d712350f",
+    "macos-minimum-dependency-compile.json.log": "27655ee61ab27e423cdaa8d0598d2e2f736cf4f325ca9b05b1ba6c576068f579",
+    "macos-database-outage.json.log": "f090dd47a12af3805d942e71d8b8fad0838b1a6893a1dea8fba04ae00e79c2bc",
+    "macos-consumer-current-step.json": "eb2db987570dcc5090cffd969f3f0828afaf8b9577022048d2aa0dfe1e996f04",
+    "linux-durable_host-dependency-graph-compile.json.log": "8a75e81f85850c184f005a8c715e5c7a68976bfcff0ffea0bd48b8aecbc626cc",
+    "linux-minimum-compile.json.log": "6b3baa724e82018f91018bf71b24e94599f54cd4832790bb5411cceb93c4f45a",
+    "linux-otp28-identity.json": "73501ed39e6a1c9c3b20892e1b26e9fbcbcd14fba04bf4e598ef2c4b64ac943b",
+    "linux-final-preflight.json": "b36cb193feb25392d94547241ba2feb50840ebf804765cdd5844e801806e2814",
+    "linux-durable_host-deps-audit.json.log": "3016e51e4eac0d421674d2128bbbdefb2924b4646e0c14a1ab034977ad73fae5",
+    "linux-otp28-compile.json.log": "6b3baa724e82018f91018bf71b24e94599f54cd4832790bb5411cceb93c4f45a",
+    "macos-middle-dependencies.json": "695b99567de07b5ac5f5e63f297cb95e4f1f3d2392cd6d48908e532da45e6dc9",
+    "linux-otp28-compile.json": "eebc9ef172fab87785f479e6035762982b6dd0a0c493cf920067d088c7429fac",
+    "macos-canonical-hex-audit.json": "e645d2d8e4bdf48984f321f1f083fd2ef6ad1bb9cd8c4ad5a913e5fe6e12bed6",
+    "macos-canonical-credo.json": "1de5deabe7e2dddc43b739148011e959ccd19283e9854d2f4a0f3d0c9db5b504",
+    "macos-durable_host-cancel.json": "6bad0653d535eb0d5f5bb40c0bd468d39a8b2386dfff4e14fdd6ba17b23ac93c",
+    "macos-canonical-hex-audit.json.log": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+    "linux-durable-runtime-step.json.log": "98eccab3383e47205df1fa5caa3ede86136b82d2edb10530524bcbb46b4283a6",
+    "macos-middle-dependency-compile.json": "c33cab42fcae211dca767312b76079ccca6eb643c007798456aa6fd6b390d7c3",
+    "linux-otp28-tests.json.log": "3d81e1feea7f6a556925fbce13818442a200b427b514b0eb8d86b5ae263596c6",
+    "macos-middle-compile.json.log": "6b3baa724e82018f91018bf71b24e94599f54cd4832790bb5411cceb93c4f45a",
+    "linux-canonical-ex-dna.json": "ebf861f0bd38ec5efe53ef6c727cc0dab71433fb492fdf9a91bfde804666c396",
+    "linux-canonical-docs.json.log": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+    "macos-minimal_host-dependency-graph-compile.json": "1fc6bc666e9a0809897a656f16aa48099088a44157d7b23d243100c0f2d9338f",
+    "macos-fault-unavailable-step.json": "050930ef38e506b6a36a876283d815cf0a54983bd8e163757512db91c2f147ed",
+    "macos-otp28-tooling.json": "539fcf64d2048d0129af6014db8c7fff62befd55cbf09357494fd53de4768a9e",
+    "macos-consumer-current-step.json.log": "75844d2c3ceb6133e2f70a3dc617ceed872814d090cc72cdac8dd2ac070554da",
+    "linux-minimum-tooling.json.log": "fa26956b25eafe1ab0af6c9c00e1df4bcc9d6a985a6a26e5b6fd2bb8ab5fde0e",
+    "linux-canonical-xref.json": "958f597d4224f72e82ffd0db65eb62b09dbe81fde576f8fdaec1b064e27ff6af",
+    "macos-canonical-tests.json.log": "2855f957c915568677a34dab62b76ec085824b2ff26f331daa3edd9edb9a8182",
+    "metadata-review.json": "a02605c02f1fe1b310c0b3d87f72b90ac80281d9bf8247b3bd10378756147400",
+    "macos-consumer-current.json": "98d079cfbb73f127c5b101d4f333fd8ecf13d2214e9754a3326e8740f204dd15",
+    "macos-runtime-step.json.log": "1d282c746a6925de732747acf664e9a3b2038dc360aca9e35135aafb9a206e9b",
+    "macos-final-preflight-step.json.log": "93a07b7541148b06cbce86f356c305f975d1e330ec75be75597dd7d32d348a1c",
+    "macos-canonical-format.json.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "macos-otp28-dependencies.json": "bf5fc6ba144d91fb86a5fe182fbdbcd1567dfc21b3d0f1f499e416679c98cea8",
+    "macos-durable_host-hex-audit.json.log": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+    "linux-durable_host-dialyzer.json.log": "3f36f2e4ef0fb6904658b3d2c4f9bb6d61b331e7771dd80ce6bcba681aaff4c7",
+    "macos-middle-tests.json.log": "665c7f993d24dc187a128748056daf9829caa0580fa3dc13cc81bb866298e27d",
+    "linux-canonical-dialyzer.json": "3cde8f7cd8c1cb074b01cb7ad6ff559a71f399496e31548b0ac22a6f85be6abb",
+    "linux-canonical-coverage.json.log": "deab0cdfe421f2d69c96d7f067d6b66152f3a69ac9749f2a5eee5eb347a145ab",
+    "linux-middle-dependencies.json.log": "dc59b5eb8651fcfa1e3788950f558624d19759e8eb1532680d1b3bb8cfb2f52d",
+    "macos-canonical-format.json": "a179c6f1718107bd9aadf95bc5c9e07d5ab8dc01564f288789bc3677afd83078",
+    "macos-minimal_host-compile.json.log": "38e1db2dc72b14b85babddc0c9b8d2a881f92abc1402c3539179fb7745ce1d31",
+    "macos-durable_host-compile.json": "b10e109749cc9f92f378eb4993e1e0a529b88a68b448aea7bf4ac4e20663c976",
+    "linux-canonical-credo.json": "45f781b5711a8fe4a8892e5d23dcb6f97b794803992059b9afc2a6944e2e9237",
+    "linux-durable_host-deps-audit.json": "98d90bfc935c8623d41f931795a6c13059474462457a9948e7d36935c66c80f0",
+    "linux-minimal_host-dependency-graph-compile.json": "b6bd8bca3791c7e48bbd839dde917f885e71fb5b679c10e271712b621acabcce",
+    "macos-preflight.json": "93a07b7541148b06cbce86f356c305f975d1e330ec75be75597dd7d32d348a1c",
+    "linux-fault-missing-step.json.log": "353369c5c34d8a911c4dde2c0b756d3c73ec2497bbe9f3770db5f0509c3a17a1",
+    "macos-canonical-dialyzer.json.log": "710ff3fb3d0f6b87eb5b6c58e5cb2a5dfb35d9ba2a61734e18080b8f7d2089bb",
+    "macos-consumer-minimum-step.json": "d5da2fd9fb0db23173f600672eb7f4cd898eff45f1d5b1a812a3e595c357c240",
+    "linux-otp28-dependencies.json": "50120a69e6ad8bdfd8d7493cfc123a7b6520b7cea11ca1e1e46b00d43d5dc675",
+    "macos-canonical-xref.json.log": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548",
+    "linux-middle-dependency-compile.json.log": "ba1db709af38fdbfe7c98a31f9b61f860881983640272938b35ec0e34c768369",
+    "macos-minimal_host-dependencies.json.log": "36eb135b70331f5e410d69edd925dfbab40179de20c15ef1844f9eb7e48d0fe1",
+    "macos-otp28-identity.json": "38dd5a95917035483ad93637b56fd0c71d2fc1b0a663bc46a122456e9ead9afc",
+    "macos-canonical-compile.json": "3c652ae15329a66d1e62ada481751e2e4a320b0fce0ee2860698a6ed97ae89f4",
+    "linux-minimum-dependency-compile.json.log": "27655ee61ab27e423cdaa8d0598d2e2f736cf4f325ca9b05b1ba6c576068f579",
+    "macos-minimal_host-deps-audit.json": "73241c2aeca643b381d0b5277d5e00a12c7a37472244e284c57d7acf4e840fcd",
+    "linux-canonical-tooling.json": "17841f93d30d339619c11cf5f2571d11234c0927cea7c9ba1b8491b573be5375",
+    "linux-middle-tests.json": "00d2d9ca6514a3d2bd495304ef8db976f3a6b9a802af688402dcaa679132e646",
+    "linux-durable-runtime.json": "98eccab3383e47205df1fa5caa3ede86136b82d2edb10530524bcbb46b4283a6",
+    "linux-minimum-compile.json": "935e65c12722db512e5cd64389218646c587481099f9d44c1c5eb36166ef40f1",
+    "macos-canonical-dev-compile.json.log": "67c745b4a0ddb0e5dad33d2d9fc501a95268409983ba3b7f284f27a66e68bf2e",
+    "macos-fault-restart-step.json.log": "9dbcd61426f81a442037a07b81c6d1372541d863afc83bc88fed2cdf02fee9e9",
+    "macos-canonical-dependency-compile.json": "002cac4edf08004d6e5c5540c0c041c5128ec5c2e739a9707bdef0386a12c94f",
+    "github-tag-ref.json": "c142ba2fca47f38ba29130f36b86b946b12b2a2fb2d82357ae44142fcbf829c2",
+    "linux-minimal_host-dependency-graph-compile.json.log": "875d7a2d4cf2df10a3356d5f2025ca70b70387e92d8c2a8be6af2f21a90742e3",
+    "macos-durable_host-dependency-graph-compile.json.log": "1edd5164bd57a1cafc45481407831c6645ce5ade60f301c41f50fd383a81a5d2",
+    "macos-durable_host-xref.json.log": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548",
+    "linux-durable_host-dependencies.json.log": "f36d676958d6b1ce4bd81a4cd08d2f59d6286e12d0de2c6cb5e544454b55df8a",
+    "macos-durable_host-dependency-graph-compile.json": "d6af1018cfedd09bb1f896dc510eace7ede09ef21f992a97b98e7316774821d7",
+    "macos-final-preflight.json": "93a07b7541148b06cbce86f356c305f975d1e330ec75be75597dd7d32d348a1c",
+    "linux-minimal_host-dialyzer.json": "7ee66fc0a9e56f120ffebea7fd4954e1474981edc62e48e87c0d655e66fadc15",
+    "macos-final-preflight-step.json": "9b70c7081e2b843b857f4c30025a669fff730d6d5e555f436caa61c9e7f75276",
+    "linux-database-outage.json.log": "f090dd47a12af3805d942e71d8b8fad0838b1a6893a1dea8fba04ae00e79c2bc",
+    "macos-canonical-deps-audit.json": "ce4d7668ad34a2007ef2e39deb22b826449c991468e4fd4a775248640251fc91",
+    "macos-canonical-dependency-compile.json.log": "239c9167f97567758041bd7e8fc9db84dbe891d2ce25a4d23024cfbdb233f1d7",
+    "linux-minimum-dependency-compile.json": "30e27dc59d90d8d658e8508094a161afd9298ba01ff1ac85a12761ae33b4f15e",
+    "linux-canonical-canaries.json": "29f9390e7cbda7bfa6811d088f34d1f040ee9b53075ac4631641b82d25cd9a2d",
+    "linux-durable_host-normal.json.log": "8f1124686a1e0b8ce79b6211d656f0e93d50708a79c72eaa2bc2c6d52de3d2b9",
+    "macos-canonical-docs-links.json.log": "4becb7fed09596d86e9f5b2d81c9c1f9bacb31d06c8e2cc7f47e322dad12dac6",
+    "macos-canonical-tooling.json": "788a6aa53804f930b3c9eb1ee6d64beef8312a6267246287d1b83139c8907423",
+    "linux-fault-unavailable-step.json": "d818ad2526449b4e00ebe5cb69621dbd8f848f97cc8815b31b6aaf062a9f2a1f",
+    "macos-canonical-dependencies.json.log": "afcacc6af33bc98ae37242b35b7056afb0ca2206b123b8e97fb8888809a2b23c",
+    "linux-minimal_host-compile.json": "aac6bc9ef909560d36f4615d7d623e46eb2eb89b888b4fca58126a81029c86f5",
+    "linux-canonical-hex-audit.json": "8a79cc9651b26a850405fd88548ff23feb0f52d29962b19e558b8f9f60239dc8",
+    "macos-canonical-docs.json": "4bb81ab6e0f9d86dc4f6363ee0d575d1e5fc541f4bd9fe57af6d5fdf19c8bc4b",
+    "macos-minimum-dependencies.json": "07cba18c0f1bd809d0363e68b3bca7bced94a6f833b540c6204b09e2f56f1d85",
+    "linux-durable_host-dependencies.json": "cd23ddec1d1f03734e3b105071bbbeaa466fd7a917df2f845adeb00b961b2efb",
+    "macos-canonical-deps-audit.json.log": "3016e51e4eac0d421674d2128bbbdefb2924b4646e0c14a1ab034977ad73fae5",
+    "linux-consumer-current-step.json.log": "bb126524147be8ebe988c892a833cc1cf2e9f6da14e1c659cbc5bd48de4f0ab8",
+    "macos-durable-runtime-step.json": "2310f61b33cfac6cb26077aa796a5af48c309bf1bd83102444cfc67b7a05316c",
+    "linux-minimal_host-dialyzer.json.log": "3bbc46d9613a6034d4b08fefa10112cdcd69ca4bed5f42b5b70803d54c88c0d8",
+    "linux-minimal_host-compile.json.log": "38e1db2dc72b14b85babddc0c9b8d2a881f92abc1402c3539179fb7745ce1d31",
+    "macos-durable_host-migrate.json": "52bf83a2df0c7ec16c40687a0902a553416521b1f1d89e2b54e4cfe4ba64361f",
+    "linux-durable_host-store-tests.json": "9326857ef8020806ef5ee455bc536e142347d944ecd5ed95031befba981c9c1e",
+    "linux-middle-identity.json": "4e675e1fe060fbfb8ebb76b58cb1d5182888fa1d7a1948e2c616735aaa5e6664",
+    "linux-canonical-coverage.json": "88511c3d050aa629de08de3c3562b8cbcdaeb367d8491fb332d5ce2bdadbb4e2",
+    "macos-otp28-compile.json": "e2cd376acaa022a996ea2ba5ada59e2f7f1a9e806d5fdf7a918c56c73374ba3d",
+    "macos-preflight-step.json": "7b1bbff0d60aef85222d687b70db95e01209d90ab11c654793f0e512e7fdae78",
+    "macos-durable_host-xref.json": "202ddfeb270f4772fa5fec7b554cddfd43ca2912159d062f28a9657687c4d633",
+    "linux-otp28-dependency-compile.json.log": "b1f2bbb3ca01bf43f3ad4591b77edd723fac50d7e9f043afd998ffd9501c75e3",
+    "macos-otp28-compile.json.log": "6b3baa724e82018f91018bf71b24e94599f54cd4832790bb5411cceb93c4f45a",
+    "macos-canonical-xref.json": "31c9a9f4ba32685ca53a81fd7a05eca28d75e5309453d6a61c860c3098da37f4",
+    "macos-middle-dependencies.json.log": "80d993ba0af2d6133ea979f137539ba16d2ff7eba69142cb629154ef472bb1f6",
+    "macos-durable_host-store-tests.json": "d0b0f72bce24240d57b05112f5dc437e1d0b1ea53c8f657b83def31432cb9bd5",
+    "linux-fault-missing-step.json": "2e52dc16df46bb090475a28f940cc7619f189472946f44efa04a171fcb75a4e9",
+    "linux-durable_host-compile.json": "bef222d3d60677ca8adba0cbe5c877b6075cd8662091a24f42a8696f3dd1cec2",
+    "macos-minimal_host-deps-audit.json.log": "3016e51e4eac0d421674d2128bbbdefb2924b4646e0c14a1ab034977ad73fae5",
+    "macos-minimal_host-compile.json": "e9c0246d109363c1abdcdf0e4f69228108098f2d7273e3c9028b2ed0daba011a",
+    "macos-durable-runtime.json": "cb07868c91f60514c6af36ff773c4fefeb1031c692f8f8db26beda7e8f47ecd0",
+    "linux-canonical-ex-dna.json.log": "e519b70d12438fc10b3b58acc216289ee71821c34da45812cb03fe4d70b1b7e8",
+    "macos-canonical-canaries.json.log": "e0b964a623497ff2bb478f184e6c238afa88d2b496eb969c1ad810acf8e4339f",
+    "github-minimum-initial.log": "0ca294e143586e72358f1562529f0fe1b64d67316e2f155e10e08cde9d6844a0",
+    "macos-manifest.json": "8954d95d171f1f3b1075e0a0a32b6baeb5905c59b168c0488b9fa412f31cfa59",
+    "github-initial-failure.json": "ac2b487d4e6f90d10ca8a85c169057f852d4c2dc8602a26b6994b11fed0fc885",
+    "macos-runtime-step.json": "5cc112f7f244df128e6fdff08f98ef2500095e96fc74a8a30f1114671bcd9048",
+    "linux-durable_host-xref.json.log": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548",
+    "linux-canonical-docs-links.json.log": "4becb7fed09596d86e9f5b2d81c9c1f9bacb31d06c8e2cc7f47e322dad12dac6",
+    "linux-durable_host-dependency-graph-compile.json": "2e5ecf5bac78d3658bbb547a56cc3daefb3ab1d393eca4ea89e03d7ddec17da1",
+    "linux-durable_host-hex-audit.json.log": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+    "linux-otp28-tooling.json.log": "93fc2d276b048717544fab1564ff0f3cfd66538dfefc7f151f05b5c3c1cb2780",
+    "linux-durable_host-dialyzer.json": "0177fe6a48c724f63809973fe7fd39f02428bff9af2124a926cb9da49c3010a3",
+    "macos-canonical-docs.json.log": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+    "macos-cleanup.json": "a67abc8f00d2cd17a72da20a475a96e8cf80d4e4b8539298a3b0583008e8b386",
+    "linux-canonical-dependency-compile.json.log": "00d2cd3b66582af7a8869b1881f7371b64353a66fd5ab24a1531a59323f146c0",
+    "macos-otp28-dependency-compile.json": "2370922997880f2d0dcf9f4f4b563ed7afe4a5b1bc7fc3900a6828875b16071b",
+    "linux-canonical-credence.json.log": "69bb38f9d9ec5063ba633c212cc65fe72a0281e995fbf82604f837c373d51b23",
+    "github-tag-source.json": "dfd9ec92007e932aa6781a3e31810e640501f88ac4998a84fdbb85cff2a3ea0f",
+    "linux-canonical-tests.json": "78e57e3ba2981ec711e67b75a8889dec9c1d136e42262b10dd3121b2d386a14d",
+    "macos-canonical-canaries.json": "7e4088bce648ef43c10d7fba4fb5b5dbc149ea567c0ea2517c42296189c9e86f",
+    "macos-minimum-tests.json.log": "9a575ac9620ddd766274528565ec52ec49674d865139c1c6fb5d7db2c4a1785a",
+    "macos-durable_host-deps-audit.json": "6ead5088863c600e78fefca24966fa7fa899c9b3b04925f48d0cef161aa542a5",
+    "macos-canonical-tests.json": "0b624996169c5f996cf1b5c8f6155ed1e66abeb0e7449b05c2e9d597bbbc7956",
+    "linux-manifest.json": "b07ea9d03321832269348e2c69e4b6a8eb59140672a10e04e198f922a777861a",
+    "linux-canonical-dependency-compile.json": "482b942682601ba123ee58909ece803f69daedf1f118451a1f5f7bc2d0211bbe",
+    "linux-minimum-tests.json.log": "a31d9d7d8021aecb6111932c841fdb63ac32c52276bb0062e8e716c15c597916",
+    "linux-canonical-compile.json.log": "6b3baa724e82018f91018bf71b24e94599f54cd4832790bb5411cceb93c4f45a",
+    "macos-database-outage.json": "5254127b84926d523833792a9d388e9a469b4d372a2e6cec94514db12dbf4961",
+    "macos-fault-unavailable-step.json.log": "a63bd328cf0629c5d86f176f331b97d82dcf462f1bca6e596da4cfa023268f0d",
+    "macos-fault-missing.json": "d253d4a027b65bf82ad207737919637d7cac87843d36711504e7ebcd75644683",
+    "macos-minimum-identity.json": "436800319f36909564097dabfc81f42c26b4832415d2ec89767f30bb8e59d4fe",
+    "linux-middle-tests.json.log": "ad5317e1efef9b4002939c34698be5d53b161dc539dd2bc9d5836ef19f164095",
+    "macos-durable_host-store-tests.json.log": "59cc0693f2deec01013254ea5243d09acda238405e211afc1347a11f84d0ab8e",
+    "actionlint.json.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "macos-fault-missing-step.json.log": "d253d4a027b65bf82ad207737919637d7cac87843d36711504e7ebcd75644683",
+    "macos-minimal_host-dialyzer.json": "85082304ed07c44f94fc34b85bea82708bb7e1ddd74641447f3eba066c4254cb",
+    "linux-durable-runtime-step.json": "bf677349ea81f052573d740e76a89d29b5f1513bb547311e981e7e74fe575943",
+    "macos-fault-restart.json": "9dbcd61426f81a442037a07b81c6d1372541d863afc83bc88fed2cdf02fee9e9",
+    "linux-otp28-tooling.json": "ad60da15393a3ea3f013fc491d5b44a1a9bec42388d153077ea3557e8aa27a19",
+    "linux-minimum-dependencies.json.log": "a37263ccacc09054ca87edc51639ff084f67b748d67b5d1ff72510d002e3c429",
+    "macos-otp28-tests.json.log": "c9027baa09fbd6058258d6fe3ec297f5ad1e82aa625defacf29e083aff753fc6",
+    "linux-fault-restart.json": "7c38d426ac01b1a2f0b7e7621027c490f3c0e3331c199bc889f3ffedc3f4e336",
+    "linux-minimum-dependencies.json": "669e22efc4630e1f2810ac93989f7de16e9d8c09df29c133bbbd31caba71403a",
+    "macos-canonical-ex-dna.json.log": "d2bfcac6bfd420d854e9ed8a47481bef79e0fb3e93ed7d8fa20c01e940bfcab1",
+    "linux-consumer-minimum-step.json.log": "250533ce6e9ec97d2294573b9c120373791afa8c2c1944f81d1bca9ae4b9cf36",
+    "macos-canonical-coverage.json.log": "6c6a8e69645431b8430e29198459914d8d28cab28a6657ae15eaa0cc7f449502",
+    "linux-canonical-credence.json": "e4085e23f5570a9ec6cc5fd55bab65993cc9d23ef99d8f3a613221f2212c95f6",
+    "macos-middle-tooling.json.log": "5f4ee3e9417ec696385434d7f4c746a6eaf07778f70784fc49f129aa3095a934",
+    "macos-canonical-compile.json.log": "6b3baa724e82018f91018bf71b24e94599f54cd4832790bb5411cceb93c4f45a",
+    "linux-durable_host-cancel.json": "4622ddc2bb4316a98f7c2bd4aae8b8ae86a00448de5f96877f1f09e2d131a15d",
+    "macos-fault-unavailable.json": "a63bd328cf0629c5d86f176f331b97d82dcf462f1bca6e596da4cfa023268f0d",
+    "macos-canonical-credo.json.log": "9be03568dfed5dd12b02bb781a842552819f935bc51839a0fda59c9a9d8e90fb",
+    "linux-middle-tooling.json": "1b33a7efc78826a8eb7ac462c03d33149a1ab6df948aea3c897583a5a84f1700",
+    "macos-durable_host-dialyzer.json": "b4b28c353fdc58cd6f0a8cae46fad7beaba49a9e07580384f24aebd218c04e22",
+    "github-tag-commit.json": "447561c41eb17971f87d659bdf9129dcb3a38174edfa79ff82ab9ad67c936b54",
+    "macos-canonical-ex-dna.json": "30b79c632f36b4e094619d67e492a1348ca71e5d3ddb2ed9be430859b0c14131",
+    "macos-package-identity.json": "5d2e8b5f70e1473b6ff34810d49d5c66480ec95856ccbd42486ac76c1538d4f0",
+    "linux-canonical-docs-links.json": "71c03ea9c6af316774b27d6bcec0a5db03f8d8a4bab2305148c30be5be2a8674",
+    "linux-canonical-canaries.json.log": "e0b964a623497ff2bb478f184e6c238afa88d2b496eb969c1ad810acf8e4339f",
+    "macos-durable_host-migrate.json.log": "07140e1e0fa629a5949ddc78659889d8213418f4806881eb01751ce840802adf",
+    "macos-consumer-minimum-step.json.log": "1c97b5365d3a3b70abc7baf9eecd8e36e73f3763864dd9b2b280a03acc9ff0e4",
+    "linux-canonical-deps-audit.json.log": "3016e51e4eac0d421674d2128bbbdefb2924b4646e0c14a1ab034977ad73fae5",
+    "macos-durable_host-cancel.json.log": "636ca22045fb33783f423cd27dfca7f2ce5c0781af3afdb01f4198399c31b663",
+    "linux-durable_host-store-tests.json.log": "52b35af415c7f0a131edf9765bcd331e11de4c2655968af7ff97a080e2ba976a",
+    "linux-middle-compile.json": "dede14540fab1dde94be638c5a7f195726317c681a6472a03f1e7d93e143a543",
+    "macos-minimum-tooling.json": "1577abab56d45f5957a622634344d422eb75079a2db0154395a5f63752c30343",
+    "macos-consumer-minimum.json": "08ec10b7f6b33e32f330043d15bf966d3587b834712930e17ef1b7a7446f087f",
+    "macos-otp28-tooling.json.log": "f0c6b2101a4e8d26b1c6e6dc9253d8d5b417436be98e70ea82aa0ccba4e0030e",
+    "macos-fault-restart-step.json": "df911b7172c7a210f7580accb9123dc9b99837d368ae3567fafa8ee73fa96413",
+    "macos-minimum-tooling.json.log": "a3b6bdb2771b1750ee0de7424c9bf8203ad94ea3087ff85445d3e3024c5ee161",
+    "linux-canonical-dependencies.json": "8ee169234b006885a0f5d03ee95b58ddf27a6db5f0c8823d5e2c4e15a309986d",
+    "linux-canonical-lock.json.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "linux-minimal_host-hex-audit.json.log": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+    "macos-minimum-tests.json": "eb99da2109b886488094589119cb03ec19b40a126c436270e64485e631958fe0",
+    "linux-minimum-identity.json": "01984f434980684a284cc5354584409771810f6f4db79a592efa7d51a754598e",
+    "linux-durable_host-migrate.json": "80202a6c0a971f5f348b1ead3f22977d190257e98b0d7047e8e97c269b879a33",
+    "macos-middle-compile.json": "c25cdc3de3147b0f4f183d3eba20e9da806abb8ff6d9a07e5abf7b703d71362f",
+    "hex-name-body.json": "c63782a5823039903b5eae18d902681d8eb6effae655d03b90c85858f861092f",
+    "macos-runtime.json": "1d282c746a6925de732747acf664e9a3b2038dc360aca9e35135aafb9a206e9b",
+    "linux-durable_host-hex-audit.json": "44f049743d8995780a5aa19c72f0171cfe59ec395671fe87aa88239b6ce79413",
+    "linux-fault-missing.json": "353369c5c34d8a911c4dde2c0b756d3c73ec2497bbe9f3770db5f0509c3a17a1",
+    "linux-consumer-minimum-step.json": "886fbbbe444467b9e43b1d9aabf1ffeb1e2ddd1f7d114966c47823951828e7fb",
+    "linux-consumer-current-step.json": "3c4dc37f23884a4964fdc6cdae18f95f45d3f1b4b0b0caf30985df926e39c102",
+    "linux-package-identity.json": "46e2d7180eaddec7beef06e66319801372512b2dd05f9f8b57aad168c5d90afa",
+    "macos-minimum-dependency-compile.json": "31ade08b0df4b36af8680373a18908607a5e40e7fd360e649d047c006bac0beb",
+    "linux-canonical-dependencies.json.log": "e24cd0bb37f7d59e4b32abb8cf6bf60acbcd56eb430e2c14535ea7d60ff9bd64",
+    "linux-minimal_host-deps-audit.json.log": "3016e51e4eac0d421674d2128bbbdefb2924b4646e0c14a1ab034977ad73fae5",
+    "linux-otp28-dependencies.json.log": "50277ec60f4289628cf43861a2963af79ee3bbbcf594945f04b44aa187803cd0",
+    "linux-canonical-identity.json": "b3da9005bd34880d06dfbaf0aa6175d03741729d86648575cd6127db804a9be1",
+    "linux-fault-unavailable.json": "607c970b8e2efbe5df2009760914991a7f674b32a6b46c7d20b26fede1bbf135",
+    "macos-durable_host-normal.json": "080ec30dae5d3e892a52581d0d1a9baa1418ef909f25e6f4e4c1025b31142915",
+    "linux-minimal_host-dependencies.json": "e44b8dab511db44ce3e9541087da73773d8a1dc8c52d173a207576e47e29ccc3",
+    "macos-canonical-dialyzer.json": "f758b42f65e61e7daf0c735b74177b6bd2b310efa435cf197e1902b373a52c59",
+    "macos-minimal_host-normal.json": "20f39f9ddad6c7fbf2a357f0df525c5fe23e62fa8d11cdd0cf1a529308a14ec5",
+    "linux-middle-tooling.json.log": "8d53d85d3fe7621187e81909ffe0e135dc63acb457060d98e6351f8d7020d2ed",
+    "macos-canonical-credence.json": "8ddda3735e8f47ce646a99fc97e01cd9e85116c9b61f9de95c6cc74f4114da5b",
+    "linux-canonical-compile.json": "809ab58aa8cb22b31601858c5819a9723b38bbc578fecb46378bf895896c1400",
+    "linux-minimum-tests.json": "a620b0b2abe3103046e18e055ac532c1c86a5c2314c97a21c8b7caef13963824",
+    "macos-canonical-dependencies.json": "fb07e0122e93e0f4bebd83cb2584714be022611f38c43482816565ac5e162733",
+    "linux-canonical-format.json.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "linux-canonical-tooling.json.log": "3f8bfadabca52fc3bbd4c05e5aa852794a6431c0cfdc4a8ef6beca915e6e2c16",
+    "macos-canonical-credence.json.log": "69bb38f9d9ec5063ba633c212cc65fe72a0281e995fbf82604f837c373d51b23",
+    "linux-canonical-deps-audit.json": "99a384b07f44e61c2ae5387d1ace463c575a2c0055c0fdd80111dc6afa1aa08e",
+    "linux-durable_host-cancel.json.log": "44db507e5fe6a85645bb4a408f2a8382d0969ec95c0d0908226eb45487192e06",
+    "source-tag-review.json": "00c11c5167b1acfbaf478bfec3c18aa794c067af9812ef2042bc0512a97fd9ac",
+    "linux-preflight-step.json": "f686857f466424a8aa5649130a23665814289ef0fa994ab792f7401babd770b6",
+    "pretag.json": "5479c66d931d2fd06447bc63cfeb53f9414b4a530f81ba5099b79ce654b4d9ba",
+    "source-links-review.json": "0b08372888d8fc1bcef406cbb369f6589035aafa0e3fbe2074ba54d30eca7858",
+    "macos-middle-identity.json": "5e7359734ff525053773b5593a73dd41e7324ba69a9170c1cb12c3d9858bb4d4",
+    "linux-canonical-tests.json.log": "b62a24c60ef2f9c3250b59addccc7512875d97af707f631744341b87850c606c",
+    "package-review.json": "821f1b07bff5f99962b02a94390efa000d7978e8bc1a8864958beba5d1f0eb09",
+    "macos-canonical-coverage.json": "4553bf0062e34d67b78bf3dd92ddaa78ad75a4fc95417ea3d7da08a639a9515d",
+    "macos-durable_host-normal.json.log": "f3eb0f41178fef8e9dd54a5e1fa957abe038c6cc7955b4d8995bbe4e2a17d381",
+    "github-ci.json": "5d6c784ec0d5912dc6433d8081764534d404ff4efed963a9e47b26f582ddb497",
+    "macos-durable_host-dependencies.json.log": "e6450ac68883ee27ed23d999fc22ff50012596b738190142e7683baa0caa4da6",
+    "macos-canonical-dev-compile.json": "28a08d04ebb466ebcc45b7819e70afc194e50419dd1b5c21bb49979578782f9c",
+    "linux-canonical-format.json": "c5fff69621c5d178e78fe2b6c68709d980ba3a88937107cab5984231c6da23ad",
+    "macos-durable_host-compile.json.log": "8101bf4a5b6019a9f02b0f7d1ef7c4a7800001cc34c4b0479d549bc4a80be73d",
+    "linux-minimal_host-cancel.json": "28a4f7bd22e801adfe7263e4fddfe349583a7e9f03009ab0eaa80ce48ecde240",
+    "linux-middle-dependency-compile.json": "c89eec98c578d2c112a5ad5a57779b6bb4b340b7e61f795e96eb8a023d7a94a7"
+  },
+  "recorded_at": "2026-09-07T20:49:13.803192Z",
+  "runtime": {
+    "linux": {
+      "client_runtime": {
+        "captured_bytes": 161,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "c33d3d404a8a903c58cc45addfbc1c6a409a179d6ec7b2a5adc800e51556ac8b",
+        "seconds": 33.865,
+        "status": "passed",
+        "tests": {
+          "passed": 14,
+          "seed": 473100
+        }
+      },
+      "durable_recovery": {
+        "captured_bytes": 174,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "eed232e71ec5e6971b2497c638f3dd814d12c6dd8e27663bd1f9014230d5790f",
+        "seconds": 285.685,
+        "status": "passed",
+        "tests": {
+          "passed": 25,
+          "seed": 373014
+        }
+      },
+      "examples": {
+        "durable_host-cancel": {
+          "cleanup": "complete",
+          "collection": "pending",
+          "evidence": "termination_confirmed",
+          "exit_code": null,
+          "reserved": false,
+          "state": "unknown"
+        },
+        "durable_host-normal": {
+          "cleanup": "complete",
+          "collection": "complete",
+          "evidence": "exited",
+          "exit_code": 0,
+          "reserved": false,
+          "state": "completed"
+        },
+        "minimal_host-cancel": {
+          "cleanup": "complete",
+          "collection": "pending",
+          "evidence": "termination_confirmed",
+          "exit_code": null,
+          "reserved": false,
+          "state": "unknown"
+        },
+        "minimal_host-normal": {
+          "cleanup": "complete",
+          "collection": "complete",
+          "evidence": "exited",
+          "exit_code": 0,
+          "reserved": false,
+          "state": "completed"
+        }
+      },
+      "final_preflight": {
+        "architecture": "x86_64",
+        "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+        "declared_teardown_at_unix": 0,
+        "development": true,
+        "isolation": "Operator-provisioned lifecycle; not host resource or hypervisor attestation",
+        "javascript_sha256": "768b8d2158a75abd90ccc73a65a83717aebfe37e62ed91d0db0bb731584df776",
+        "kernel": "7.1.5-76070105-generic",
+        "lifecycle_id": "rc2-9ce713f-linux",
+        "logical_cpus": 8,
+        "platform": "linux",
+        "python_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+        "status": "preflight_passed",
+        "virtualization": "KVM accessible",
+        "worker_binary_sha256": "bb2432804d4bf5d6cbb688d3af160a6a01c99194830f0099d64f291d4ad62373",
+        "worker_version": "1.14.1",
+        "working_tree_changes": false
+      },
+      "initial_preflight": {
+        "architecture": "x86_64",
+        "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+        "declared_teardown_at_unix": 0,
+        "development": true,
+        "isolation": "Operator-provisioned lifecycle; not host resource or hypervisor attestation",
+        "javascript_sha256": "768b8d2158a75abd90ccc73a65a83717aebfe37e62ed91d0db0bb731584df776",
+        "kernel": "7.1.5-76070105-generic",
+        "lifecycle_id": "rc2-9ce713f-linux",
+        "logical_cpus": 8,
+        "platform": "linux",
+        "python_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+        "status": "preflight_passed",
+        "virtualization": "KVM accessible",
+        "worker_binary_sha256": "bb2432804d4bf5d6cbb688d3af160a6a01c99194830f0099d64f291d4ad62373",
+        "worker_version": "1.14.1",
+        "working_tree_changes": false
+      },
+      "service_faults": {
+        "missing": {
+          "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+          "dispatch_attempts": 1,
+          "guest_marker": "single byte before recovery",
+          "guest_survived_api_server": true,
+          "operator_deleted_vm": true,
+          "outage_seconds": 0.051,
+          "partition": "restart-ab0a884320c7d28c",
+          "platform": "linux",
+          "result": {
+            "absence_at_ms": 1788814036976,
+            "artifacts": [],
+            "cancel_requested_at_ms": null,
+            "cleanup": "complete",
+            "collection": "pending",
+            "evidence": "termination_confirmed",
+            "exit_code": null,
+            "id": "restart-ab0a884320c7d28c",
+            "machine_name": "sbxexample-qec2s6c7m2cs7klwjush",
+            "reserved": false,
+            "scope": "example",
+            "state": "unknown",
+            "worker_id": "example-worker"
+          },
+          "retained_workspace": "/tmp/sbx-worker-restart-67fbb528f17594ed9757f8b4",
+          "runtime_version": "1.14.1",
+          "scenario": "missing",
+          "seconds": 9.119,
+          "status": "passed"
+        },
+        "restart": {
+          "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+          "dispatch_attempts": 1,
+          "guest_marker": "single byte before recovery",
+          "guest_survived_api_server": true,
+          "operator_deleted_vm": false,
+          "outage_seconds": 0.051,
+          "partition": "restart-93b3313e615e5e25",
+          "platform": "linux",
+          "result": {
+            "absence_at_ms": 1788813896705,
+            "artifacts": [],
+            "cancel_requested_at_ms": null,
+            "cleanup": "complete",
+            "collection": "pending",
+            "evidence": "termination_confirmed",
+            "exit_code": null,
+            "id": "restart-93b3313e615e5e25",
+            "machine_name": "sbxexample-witm24bmejrzcgk2buir",
+            "reserved": false,
+            "scope": "example",
+            "state": "unknown",
+            "worker_id": "example-worker"
+          },
+          "retained_workspace": "/tmp/sbx-worker-restart-62013ef5323ad9b9ec1afb50",
+          "runtime_version": "1.14.1",
+          "scenario": "restart",
+          "seconds": 67.305,
+          "status": "passed"
+        },
+        "unavailable": {
+          "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+          "dispatch_attempts": 1,
+          "guest_marker": "single byte before recovery",
+          "guest_survived_api_server": true,
+          "operator_deleted_vm": true,
+          "outage_seconds": 90.069,
+          "partition": "restart-5ba27a1657759ccd",
+          "platform": "linux",
+          "result": {
+            "absence_at_ms": 1788814026875,
+            "artifacts": [],
+            "cancel_requested_at_ms": 1788813904878,
+            "cleanup": "complete",
+            "collection": "pending",
+            "evidence": "termination_confirmed",
+            "exit_code": null,
+            "id": "restart-5ba27a1657759ccd",
+            "machine_name": "sbxexample-zrgi2rvqqg2b2rh3jazc",
+            "reserved": false,
+            "scope": "example",
+            "state": "unknown",
+            "worker_id": "example-worker"
+          },
+          "retained_workspace": "/tmp/sbx-worker-restart-0f34d50d322a48677eb3e287",
+          "runtime_version": "1.14.1",
+          "scenario": "unavailable",
+          "seconds": 129.0,
+          "status": "passed"
+        }
+      }
+    },
+    "macos": {
+      "client_runtime": {
+        "captured_bytes": 161,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "3f55fa54fba2f5815b1ee3530865ef1899bcba1d59faa1dfeac4781de93855a0",
+        "seconds": 31.244,
+        "status": "passed",
+        "tests": {
+          "passed": 14,
+          "seed": 606213
+        }
+      },
+      "durable_recovery": {
+        "captured_bytes": 174,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "8cd733214838ebf2a85ddb22ada98cf80d7976230bf15655555456a7dd601239",
+        "seconds": 270.5,
+        "status": "passed",
+        "tests": {
+          "passed": 25,
+          "seed": 982065
+        }
+      },
+      "examples": {
+        "durable_host-cancel": {
+          "cleanup": "complete",
+          "collection": "pending",
+          "evidence": "termination_confirmed",
+          "exit_code": null,
+          "reserved": false,
+          "state": "unknown"
+        },
+        "durable_host-normal": {
+          "cleanup": "complete",
+          "collection": "complete",
+          "evidence": "exited",
+          "exit_code": 0,
+          "reserved": false,
+          "state": "completed"
+        },
+        "minimal_host-cancel": {
+          "cleanup": "complete",
+          "collection": "pending",
+          "evidence": "termination_confirmed",
+          "exit_code": null,
+          "reserved": false,
+          "state": "unknown"
+        },
+        "minimal_host-normal": {
+          "cleanup": "complete",
+          "collection": "complete",
+          "evidence": "exited",
+          "exit_code": 0,
+          "reserved": false,
+          "state": "completed"
+        }
+      },
+      "final_preflight": {
+        "architecture": "arm64",
+        "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+        "declared_teardown_at_unix": 0,
+        "development": true,
+        "isolation": "Operator-provisioned lifecycle; not host resource or hypervisor attestation",
+        "javascript_sha256": "0aec0242b27a0b401312e1333ab9d71f821aabf20bd2fe22f849d66f3d706e95",
+        "kernel": "25.6.0",
+        "lifecycle_id": "rc2-9ce713f-macos",
+        "logical_cpus": 16,
+        "platform": "macos",
+        "python_sha256": "d982cfdf0c59b862ad3e1b107446b127460f716c8407fd0e2b6b0de2a62fe18e",
+        "status": "preflight_passed",
+        "virtualization": "Actual VM boot required in following suite",
+        "worker_binary_sha256": "af238c1190aefbc1c293f515c720c9c15f968498ad67624a9b9f824a51af0c79",
+        "worker_version": "1.14.1",
+        "working_tree_changes": false
+      },
+      "initial_preflight": {
+        "architecture": "arm64",
+        "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+        "declared_teardown_at_unix": 0,
+        "development": true,
+        "isolation": "Operator-provisioned lifecycle; not host resource or hypervisor attestation",
+        "javascript_sha256": "0aec0242b27a0b401312e1333ab9d71f821aabf20bd2fe22f849d66f3d706e95",
+        "kernel": "25.6.0",
+        "lifecycle_id": "rc2-9ce713f-macos",
+        "logical_cpus": 16,
+        "platform": "macos",
+        "python_sha256": "d982cfdf0c59b862ad3e1b107446b127460f716c8407fd0e2b6b0de2a62fe18e",
+        "status": "preflight_passed",
+        "virtualization": "Actual VM boot required in following suite",
+        "worker_binary_sha256": "af238c1190aefbc1c293f515c720c9c15f968498ad67624a9b9f824a51af0c79",
+        "worker_version": "1.14.1",
+        "working_tree_changes": false
+      },
+      "service_faults": {
+        "missing": {
+          "artifact_sha256": "d982cfdf0c59b862ad3e1b107446b127460f716c8407fd0e2b6b0de2a62fe18e",
+          "dispatch_attempts": 1,
+          "guest_marker": "single byte before recovery",
+          "guest_survived_api_server": true,
+          "operator_deleted_vm": true,
+          "outage_seconds": 0.051,
+          "partition": "restart-2707cdbe85acb7a5",
+          "platform": "macos",
+          "result": {
+            "absence_at_ms": 1788813824453,
+            "artifacts": [],
+            "cancel_requested_at_ms": null,
+            "cleanup": "complete",
+            "collection": "pending",
+            "evidence": "termination_confirmed",
+            "exit_code": null,
+            "id": "restart-2707cdbe85acb7a5",
+            "machine_name": "sbxexample-b3q2e54m2lgf2ljzg4sz",
+            "reserved": false,
+            "scope": "example",
+            "state": "unknown",
+            "worker_id": "example-worker"
+          },
+          "retained_workspace": "/var/folders/9p/b5vht97d40x618n_gy_0yrpw0000gn/T/sbx-worker-restart-86332396bdbe0be3c0137634",
+          "runtime_version": "1.14.1",
+          "scenario": "missing",
+          "seconds": 8.951,
+          "status": "passed"
+        },
+        "restart": {
+          "artifact_sha256": "d982cfdf0c59b862ad3e1b107446b127460f716c8407fd0e2b6b0de2a62fe18e",
+          "dispatch_attempts": 1,
+          "guest_marker": "single byte before recovery",
+          "guest_survived_api_server": true,
+          "operator_deleted_vm": false,
+          "outage_seconds": 0.051,
+          "partition": "restart-f585af21a0fe46e2",
+          "platform": "macos",
+          "result": {
+            "absence_at_ms": 1788813685638,
+            "artifacts": [],
+            "cancel_requested_at_ms": null,
+            "cleanup": "complete",
+            "collection": "pending",
+            "evidence": "termination_confirmed",
+            "exit_code": null,
+            "id": "restart-f585af21a0fe46e2",
+            "machine_name": "sbxexample-fizmx6slohu3xikfwcce",
+            "reserved": false,
+            "scope": "example",
+            "state": "unknown",
+            "worker_id": "example-worker"
+          },
+          "retained_workspace": "/var/folders/9p/b5vht97d40x618n_gy_0yrpw0000gn/T/sbx-worker-restart-441067373852cf9a2a3e049f",
+          "runtime_version": "1.14.1",
+          "scenario": "restart",
+          "seconds": 66.954,
+          "status": "passed"
+        },
+        "unavailable": {
+          "artifact_sha256": "d982cfdf0c59b862ad3e1b107446b127460f716c8407fd0e2b6b0de2a62fe18e",
+          "dispatch_attempts": 1,
+          "guest_marker": "single byte before recovery",
+          "guest_survived_api_server": true,
+          "operator_deleted_vm": true,
+          "outage_seconds": 90.069,
+          "partition": "restart-0d9b0dbd1bf7b427",
+          "platform": "macos",
+          "result": {
+            "absence_at_ms": 1788813814846,
+            "artifacts": [],
+            "cancel_requested_at_ms": 1788813693153,
+            "cleanup": "complete",
+            "collection": "pending",
+            "evidence": "termination_confirmed",
+            "exit_code": null,
+            "id": "restart-0d9b0dbd1bf7b427",
+            "machine_name": "sbxexample-cf42wfxxq22eshop6dth",
+            "reserved": false,
+            "scope": "example",
+            "state": "unknown",
+            "worker_id": "example-worker"
+          },
+          "retained_workspace": "/var/folders/9p/b5vht97d40x618n_gy_0yrpw0000gn/T/sbx-worker-restart-12034c6f02c91fde3322298b",
+          "runtime_version": "1.14.1",
+          "scenario": "unavailable",
+          "seconds": 128.621,
+          "status": "passed"
+        }
+      }
+    }
+  },
+  "schema": 1,
+  "setup_notes": [
+    "Each host used its own PostgreSQL instance with 30 connections and a private local Unix socket; Linux's shared database was preserved.",
+    "Package construction used an additional clean source checkout per host to avoid concurrent Mix operations in runtime test checkouts."
+  ],
+  "source_links": {
+    "candidate": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+    "candidate_files_and_lines_valid": true,
+    "checked_at": "2026-09-07T20:40:30.384382Z",
+    "generated_pages": 42,
+    "generated_source_links_checked": 168,
+    "source_ref": "v0.1.0-rc.2"
+  },
+  "source_tag": {
+    "authenticated_source_blob_matches": true,
+    "candidate": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+    "candidate_files_and_lines_valid": true,
+    "checked_at": "2026-09-07T20:49:13.532611Z",
+    "generated_pages": 42,
+    "generated_source_links_checked": 168,
+    "remote_tag_resolved": true,
+    "source_ref": "v0.1.0-rc.2",
+    "source_url": "https://github.com/hfiguera/smolbox/blob/v0.1.0-rc.2/lib/smolbox.ex",
+    "tag": "v0.1.0-rc.2",
+    "tag_object": "2bf5a4d5a74d69113c0d0f16372851bd47f94e13"
+  },
+  "status": "accepted_for_revised_first_release_scope",
+  "steps": {
+    "linux-canonical-dependency-compile": {
+      "audit_fetch_error": false,
+      "captured_bytes": 8101,
+      "command": [
+        "mix",
+        "deps.compile",
+        "--force"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "00d2cd3b66582af7a8869b1881f7371b64353a66fd5ab24a1531a59323f146c0",
+      "seconds": 24.542,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:28:10.589366Z",
+      "status": "passed"
+    },
+    "macos-canonical-coverage": {
+      "audit_fetch_error": false,
+      "captured_bytes": 3689,
+      "command": [
+        "mix",
+        "test",
+        "--cover",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "6c6a8e69645431b8430e29198459914d8d28cab28a6657ae15eaa0cc7f449502",
+      "seconds": 77.174,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:29:44.042984Z",
+      "status": "passed"
+    },
+    "linux-minimum-compile": {
+      "audit_fetch_error": false,
+      "captured_bytes": 47,
+      "command": [
+        "mix",
+        "compile",
+        "--force",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-minimum",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "6b3baa724e82018f91018bf71b24e94599f54cd4832790bb5411cceb93c4f45a",
+      "seconds": 2.559,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:28:37.988524Z",
+      "status": "passed"
+    },
+    "linux-canonical-coverage": {
+      "audit_fetch_error": false,
+      "captured_bytes": 3689,
+      "command": [
+        "mix",
+        "test",
+        "--cover",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "deab0cdfe421f2d69c96d7f067d6b66152f3a69ac9749f2a5eee5eb347a145ab",
+      "seconds": 79.141,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:30:11.454333Z",
+      "status": "passed"
+    },
+    "macos-durable_host-store-tests": {
+      "audit_fetch_error": false,
+      "captured_bytes": 174,
+      "command": [
+        "mix",
+        "test",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical/examples/durable_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "59cc0693f2deec01013254ea5243d09acda238405e211afc1347a11f84d0ab8e",
+      "seconds": 1.928,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:32:49.732460Z",
+      "status": "passed"
+    },
+    "linux-durable_host-hex-audit": {
+      "audit_fetch_error": false,
+      "captured_bytes": 47,
+      "command": [
+        "mix",
+        "hex.audit"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical/examples/durable_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+      "seconds": 1.235,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:35:49.013521Z",
+      "status": "passed"
+    },
+    "macos-fault-unavailable-step": {
+      "audit_fetch_error": false,
+      "captured_bytes": 854,
+      "command": [
+        "elixir",
+        "scripts/ci.exs",
+        "worker-fault",
+        "--smolvm",
+        "/private/tmp/smolbox-qualification/darwin/smolvm",
+        "--url",
+        "http://127.0.0.1:19471",
+        "--python",
+        "/tmp/smolbox-qualification/python.smolmachine",
+        "--scenario",
+        "unavailable",
+        "--report",
+        "/tmp/smolbox-rc2-final.Pci7oW/macos-fault-unavailable.json"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "a63bd328cf0629c5d86f176f331b97d82dcf462f1bca6e596da4cfa023268f0d",
+      "seconds": 128.949,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:41:26.029951Z",
+      "status": "passed"
+    },
+    "macos-minimal_host-normal": {
+      "audit_fetch_error": false,
+      "captured_bytes": 609,
+      "command": [
+        "env",
+        "SMOLBOX_EXECUTION_ID=rc2-9ce713f-macos-minimal_host-normal",
+        "mix",
+        "run",
+        "scripts/demo.exs"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical/examples/minimal_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "8439dbc4f04e21833c89a6f4bdbc27bf25cfa554a3274bb4abf941016dc0d1d3",
+      "seconds": 1.734,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:33:24.027135Z",
+      "status": "passed"
+    },
+    "linux-consumer-current-step": {
+      "audit_fetch_error": false,
+      "captured_bytes": 83,
+      "command": [
+        "elixir",
+        "scripts/ci.exs",
+        "package-consumer",
+        "--report",
+        "/tmp/smolbox-rc2-final.Pci7oW/linux-consumer-current.json",
+        "--archive",
+        "/tmp/smolbox-rc2-final.Pci7oW/smolbox-0.1.0-rc.2.tar"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-package-source",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "bb126524147be8ebe988c892a833cc1cf2e9f6da14e1c659cbc5bd48de4f0ab8",
+      "seconds": 8.705,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:38:25.717670Z",
+      "status": "passed"
+    },
+    "macos-middle-dependencies": {
+      "audit_fetch_error": false,
+      "captured_bytes": 681,
+      "command": [
+        "mix",
+        "deps.get"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-middle",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "80d993ba0af2d6133ea979f137539ba16d2ff7eba69142cb629154ef472bb1f6",
+      "seconds": 0.777,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:29:43.137926Z",
+      "status": "passed"
+    },
+    "macos-middle-tests": {
+      "audit_fetch_error": false,
+      "captured_bytes": 375,
+      "command": [
+        "mix",
+        "test",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-middle",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "665c7f993d24dc187a128748056daf9829caa0580fa3dc13cc81bb866298e27d",
+      "seconds": 76.731,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:29:53.494947Z",
+      "status": "passed"
+    },
+    "linux-canonical-dependencies": {
+      "audit_fetch_error": false,
+      "captured_bytes": 681,
+      "command": [
+        "mix",
+        "deps.get"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "e24cd0bb37f7d59e4b32abb8cf6bf60acbcd56eb430e2c14535ea7d60ff9bd64",
+      "seconds": 1.333,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:28:08.646402Z",
+      "status": "passed"
+    },
+    "macos-canonical-dependencies": {
+      "audit_fetch_error": false,
+      "captured_bytes": 680,
+      "command": [
+        "mix",
+        "deps.get"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "afcacc6af33bc98ae37242b35b7056afb0ca2206b123b8e97fb8888809a2b23c",
+      "seconds": 0.809,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:28:07.634271Z",
+      "status": "passed"
+    },
+    "linux-canonical-compile": {
+      "audit_fetch_error": false,
+      "captured_bytes": 47,
+      "command": [
+        "mix",
+        "compile",
+        "--force",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "6b3baa724e82018f91018bf71b24e94599f54cd4832790bb5411cceb93c4f45a",
+      "seconds": 2.35,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:28:38.807751Z",
+      "status": "passed"
+    },
+    "macos-durable_host-xref": {
+      "audit_fetch_error": false,
+      "captured_bytes": 16,
+      "command": [
+        "mix",
+        "xref",
+        "graph",
+        "--format",
+        "cycles",
+        "--fail-above",
+        "0"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical/examples/durable_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548",
+      "seconds": 0.396,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:32:48.185398Z",
+      "status": "passed"
+    },
+    "linux-canonical-docs": {
+      "audit_fetch_error": false,
+      "captured_bytes": 128,
+      "command": [
+        "env",
+        "MIX_ENV=dev",
+        "mix",
+        "docs",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+      "seconds": 0.905,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:33:14.723966Z",
+      "status": "passed"
+    },
+    "macos-canonical-deps-audit": {
+      "audit_fetch_error": false,
+      "captured_bytes": 26,
+      "command": [
+        "mix",
+        "deps.audit"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "3016e51e4eac0d421674d2128bbbdefb2924b4646e0c14a1ab034977ad73fae5",
+      "seconds": 1.184,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:31:38.738603Z",
+      "status": "passed"
+    },
+    "macos-consumer-minimum-step": {
+      "audit_fetch_error": false,
+      "captured_bytes": 83,
+      "command": [
+        "elixir",
+        "scripts/ci.exs",
+        "package-consumer",
+        "--minimum",
+        "--archive",
+        "/tmp/smolbox-rc2-final.Pci7oW/smolbox-0.1.0-rc.2.tar",
+        "--report",
+        "/tmp/smolbox-rc2-final.Pci7oW/macos-consumer-minimum.json"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-minimum",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "1c97b5365d3a3b70abc7baf9eecd8e36e73f3763864dd9b2b280a03acc9ff0e4",
+      "seconds": 5.345,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:37:15.340258Z",
+      "status": "passed"
+    },
+    "macos-canonical-tests": {
+      "audit_fetch_error": false,
+      "captured_bytes": 384,
+      "command": [
+        "mix",
+        "test",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "2855f957c915568677a34dab62b76ec085824b2ff26f331daa3edd9edb9a8182",
+      "seconds": 77.072,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:28:20.326279Z",
+      "status": "passed"
+    },
+    "macos-durable_host-normal": {
+      "audit_fetch_error": false,
+      "captured_bytes": 609,
+      "command": [
+        "env",
+        "SMOLBOX_EXECUTION_ID=rc2-9ce713f-macos-durable_host-normal",
+        "mix",
+        "run",
+        "scripts/demo.exs"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical/examples/durable_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "f3eb0f41178fef8e9dd54a5e1fa957abe038c6cc7955b4d8995bbe4e2a17d381",
+      "seconds": 1.805,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:34:33.148266Z",
+      "status": "passed"
+    },
+    "linux-otp28-tests": {
+      "audit_fetch_error": false,
+      "captured_bytes": 384,
+      "command": [
+        "mix",
+        "test",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-otp28",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "3d81e1feea7f6a556925fbce13818442a200b427b514b0eb8d86b5ae263596c6",
+      "seconds": 79.346,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:32:31.884245Z",
+      "status": "passed"
+    },
+    "linux-minimal_host-deps-audit": {
+      "audit_fetch_error": false,
+      "captured_bytes": 26,
+      "command": [
+        "mix",
+        "deps.audit"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical/examples/minimal_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "3016e51e4eac0d421674d2128bbbdefb2924b4646e0c14a1ab034977ad73fae5",
+      "seconds": 1.615,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:34:22.933821Z",
+      "status": "passed"
+    },
+    "macos-middle-compile": {
+      "audit_fetch_error": false,
+      "captured_bytes": 47,
+      "command": [
+        "mix",
+        "compile",
+        "--force",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-middle",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "6b3baa724e82018f91018bf71b24e94599f54cd4832790bb5411cceb93c4f45a",
+      "seconds": 0.718,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:29:52.424560Z",
+      "status": "passed"
+    },
+    "linux-otp28-tooling": {
+      "audit_fetch_error": false,
+      "captured_bytes": 154,
+      "command": [
+        "elixir",
+        "scripts/ci_test.exs"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-otp28",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "93fc2d276b048717544fab1564ff0f3cfd66538dfefc7f151f05b5c3c1cb2780",
+      "seconds": 6.511,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:33:51.913971Z",
+      "status": "passed"
+    },
+    "macos-canonical-hex-audit": {
+      "audit_fetch_error": false,
+      "captured_bytes": 47,
+      "command": [
+        "mix",
+        "hex.audit"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+      "seconds": 1.502,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:31:36.893438Z",
+      "status": "passed"
+    },
+    "linux-middle-tooling": {
+      "audit_fetch_error": false,
+      "captured_bytes": 156,
+      "command": [
+        "elixir",
+        "scripts/ci_test.exs"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-middle",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "8d53d85d3fe7621187e81909ffe0e135dc63acb457060d98e6351f8d7020d2ed",
+      "seconds": 6.357,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:31:52.853135Z",
+      "status": "passed"
+    },
+    "linux-durable_host-dialyzer": {
+      "audit_fetch_error": false,
+      "captured_bytes": 1903,
+      "command": [
+        "mix",
+        "dialyzer",
+        "--force-check"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical/examples/durable_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "3f36f2e4ef0fb6904658b3d2c4f9bb6d61b331e7771dd80ce6bcba681aaff4c7",
+      "seconds": 57.634,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:34:50.652322Z",
+      "status": "passed"
+    },
+    "linux-canonical-credo": {
+      "audit_fetch_error": false,
+      "captured_bytes": 319,
+      "command": [
+        "mix",
+        "credo",
+        "--strict"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "2d48e151c20dc10b353fad4dc94d1378f4ee903194291a6d8c5fa0c85fe9083f",
+      "seconds": 1.463,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:31:31.118631Z",
+      "status": "passed"
+    },
+    "linux-minimal_host-cancel": {
+      "audit_fetch_error": false,
+      "captured_bytes": 358,
+      "command": [
+        "env",
+        "SMOLBOX_EXECUTION_ID=rc2-9ce713f-linux-minimal_host-cancel",
+        "SMOLBOX_EXAMPLE_WAIT=true",
+        "SMOLBOX_EXAMPLE_CANCEL=true",
+        "mix",
+        "run",
+        "scripts/demo.exs"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical/examples/minimal_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "f507a7af6a7d83a9fab4117a6f9936f385d6bf30ce2f752b9242ec70b361915c",
+      "seconds": 66.879,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:36:39.337283Z",
+      "status": "passed"
+    },
+    "macos-minimal_host-dialyzer": {
+      "audit_fetch_error": false,
+      "captured_bytes": 1343,
+      "command": [
+        "mix",
+        "dialyzer",
+        "--force-check"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical/examples/minimal_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "e072c1dae33c680fb812c9c6a4c62feed7ebad7e0646e7ae3b87817b1941231e",
+      "seconds": 19.115,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:31:49.212356Z",
+      "status": "passed"
+    },
+    "linux-minimal_host-hex-audit": {
+      "audit_fetch_error": false,
+      "captured_bytes": 47,
+      "command": [
+        "mix",
+        "hex.audit"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical/examples/minimal_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+      "seconds": 1.101,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:34:21.253355Z",
+      "status": "passed"
+    },
+    "macos-otp28-tooling": {
+      "audit_fetch_error": false,
+      "captured_bytes": 155,
+      "command": [
+        "elixir",
+        "scripts/ci_test.exs"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-otp28",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "f0c6b2101a4e8d26b1c6e6dc9253d8d5b417436be98e70ea82aa0ccba4e0030e",
+      "seconds": 5.945,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:32:44.754472Z",
+      "status": "passed"
+    },
+    "macos-otp28-tests": {
+      "audit_fetch_error": false,
+      "captured_bytes": 384,
+      "command": [
+        "mix",
+        "test",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-otp28",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "c9027baa09fbd6058258d6fe3ec297f5ad1e82aa625defacf29e083aff753fc6",
+      "seconds": 76.572,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:31:27.782950Z",
+      "status": "passed"
+    },
+    "linux-canonical-docs-links": {
+      "audit_fetch_error": false,
+      "captured_bytes": 60,
+      "command": [
+        "env",
+        "MIX_ENV=dev",
+        "mix",
+        "smolbox.ci.docs"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "4becb7fed09596d86e9f5b2d81c9c1f9bacb31d06c8e2cc7f47e322dad12dac6",
+      "seconds": 0.523,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:33:16.184355Z",
+      "status": "passed"
+    },
+    "linux-canonical-lock": {
+      "audit_fetch_error": false,
+      "captured_bytes": 0,
+      "command": [
+        "mix",
+        "deps.unlock",
+        "--check-unused"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seconds": 0.561,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:28:37.506547Z",
+      "status": "passed"
+    },
+    "linux-minimal_host-normal": {
+      "audit_fetch_error": false,
+      "captured_bytes": 609,
+      "command": [
+        "env",
+        "SMOLBOX_EXECUTION_ID=rc2-9ce713f-linux-minimal_host-normal",
+        "mix",
+        "run",
+        "scripts/demo.exs"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical/examples/minimal_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "d213b2e60b9e7198f9bb771d7fc3818054ccbd18e6f7bddc37e27b6e6ae474ff",
+      "seconds": 2.231,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:36:36.567885Z",
+      "status": "passed"
+    },
+    "macos-minimum-dependencies": {
+      "audit_fetch_error": false,
+      "captured_bytes": 678,
+      "command": [
+        "mix",
+        "deps.get"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-minimum",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "5e2232efb5505883f0e461f024b24c5297858ddd9d6514e779e89b5bec785b47",
+      "seconds": 0.839,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:28:06.374392Z",
+      "status": "passed"
+    },
+    "linux-middle-dependency-compile": {
+      "audit_fetch_error": false,
+      "captured_bytes": 1694,
+      "command": [
+        "mix",
+        "deps.compile",
+        "--force"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-middle",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "ba1db709af38fdbfe7c98a31f9b61f860881983640272938b35ec0e34c768369",
+      "seconds": 21.335,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:30:09.274298Z",
+      "status": "passed"
+    },
+    "macos-minimum-compile": {
+      "audit_fetch_error": false,
+      "captured_bytes": 47,
+      "command": [
+        "mix",
+        "compile",
+        "--force",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-minimum",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "6b3baa724e82018f91018bf71b24e94599f54cd4832790bb5411cceb93c4f45a",
+      "seconds": 0.912,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:28:18.261897Z",
+      "status": "passed"
+    },
+    "linux-middle-tests": {
+      "audit_fetch_error": false,
+      "captured_bytes": 375,
+      "command": [
+        "mix",
+        "test",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-middle",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "ad5317e1efef9b4002939c34698be5d53b161dc539dd2bc9d5836ef19f164095",
+      "seconds": 78.69,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:30:33.574646Z",
+      "status": "passed"
+    },
+    "macos-fault-missing-step": {
+      "audit_fetch_error": false,
+      "captured_bytes": 838,
+      "command": [
+        "elixir",
+        "scripts/ci.exs",
+        "worker-fault",
+        "--smolvm",
+        "/private/tmp/smolbox-qualification/darwin/smolvm",
+        "--url",
+        "http://127.0.0.1:19471",
+        "--python",
+        "/tmp/smolbox-qualification/python.smolmachine",
+        "--scenario",
+        "missing",
+        "--report",
+        "/tmp/smolbox-rc2-final.Pci7oW/macos-fault-missing.json"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "d253d4a027b65bf82ad207737919637d7cac87843d36711504e7ebcd75644683",
+      "seconds": 9.281,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:43:35.310134Z",
+      "status": "passed"
+    },
+    "macos-durable_host-compile": {
+      "audit_fetch_error": false,
+      "captured_bytes": 60,
+      "command": [
+        "mix",
+        "compile",
+        "--force",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical/examples/durable_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "8101bf4a5b6019a9f02b0f7d1ef7c4a7800001cc34c4b0479d549bc4a80be73d",
+      "seconds": 0.585,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:32:22.416098Z",
+      "status": "passed"
+    },
+    "macos-canonical-lock": {
+      "audit_fetch_error": false,
+      "captured_bytes": 0,
+      "command": [
+        "mix",
+        "deps.unlock",
+        "--check-unused"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seconds": 0.291,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:28:17.713116Z",
+      "status": "passed"
+    },
+    "macos-durable_host-cancel": {
+      "audit_fetch_error": false,
+      "captured_bytes": 358,
+      "command": [
+        "env",
+        "SMOLBOX_EXECUTION_ID=rc2-9ce713f-macos-durable_host-cancel",
+        "SMOLBOX_EXAMPLE_WAIT=true",
+        "SMOLBOX_EXAMPLE_CANCEL=true",
+        "mix",
+        "run",
+        "scripts/demo.exs"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical/examples/durable_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "636ca22045fb33783f423cd27dfca7f2ce5c0781af3afdb01f4198399c31b663",
+      "seconds": 71.696,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:34:35.283189Z",
+      "status": "passed"
+    },
+    "linux-canonical-dev-compile": {
+      "audit_fetch_error": false,
+      "captured_bytes": 47,
+      "command": [
+        "env",
+        "MIX_ENV=dev",
+        "mix",
+        "compile",
+        "--force",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "67c745b4a0ddb0e5dad33d2d9fc501a95268409983ba3b7f284f27a66e68bf2e",
+      "seconds": 1.353,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:33:12.798552Z",
+      "status": "passed"
+    },
+    "macos-canonical-format": {
+      "audit_fetch_error": false,
+      "captured_bytes": 0,
+      "command": [
+        "mix",
+        "format",
+        "--check-formatted"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seconds": 0.275,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:28:17.051200Z",
+      "status": "passed"
+    },
+    "linux-minimal_host-dependencies": {
+      "audit_fetch_error": false,
+      "captured_bytes": 300,
+      "command": [
+        "mix",
+        "deps.get"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical/examples/minimal_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "eac300caf2e12032084c2807a68c958452fa370ded2d57089a3cd17d7ad7f1ed",
+      "seconds": 0.869,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:33:17.292438Z",
+      "status": "passed"
+    },
+    "macos-durable_host-dependencies": {
+      "audit_fetch_error": false,
+      "captured_bytes": 389,
+      "command": [
+        "mix",
+        "deps.get"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical/examples/durable_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "e6450ac68883ee27ed23d999fc22ff50012596b738190142e7683baa0caa4da6",
+      "seconds": 0.803,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:32:11.298783Z",
+      "status": "passed"
+    },
+    "macos-consumer-current-step": {
+      "audit_fetch_error": false,
+      "captured_bytes": 83,
+      "command": [
+        "elixir",
+        "scripts/ci.exs",
+        "package-consumer",
+        "--report",
+        "/tmp/smolbox-rc2-final.Pci7oW/macos-consumer-current.json",
+        "--package-output",
+        "/tmp/smolbox-rc2-final.Pci7oW/smolbox-0.1.0-rc.2.tar"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-package-source",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "75844d2c3ceb6133e2f70a3dc617ceed872814d090cc72cdac8dd2ac070554da",
+      "seconds": 5.622,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:37:09.342123Z",
+      "status": "passed"
+    },
+    "macos-durable_host-deps-audit": {
+      "audit_fetch_error": false,
+      "captured_bytes": 26,
+      "command": [
+        "mix",
+        "deps.audit"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical/examples/durable_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "3016e51e4eac0d421674d2128bbbdefb2924b4646e0c14a1ab034977ad73fae5",
+      "seconds": 1.426,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:32:46.418710Z",
+      "status": "passed"
+    },
+    "linux-canonical-ex-dna": {
+      "audit_fetch_error": false,
+      "captured_bytes": 121,
+      "command": [
+        "mix",
+        "ex_dna",
+        "lib",
+        "dev",
+        "scripts",
+        "test/support",
+        "examples/durable_host/lib",
+        "examples/durable_host/priv",
+        "examples/durable_host/test/support",
+        "examples/minimal_host/lib",
+        "examples/support/lib",
+        "--max-clones",
+        "0"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "e519b70d12438fc10b3b58acc216289ee71821c34da45812cb03fe4d70b1b7e8",
+      "seconds": 0.789,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:31:33.127038Z",
+      "status": "passed"
+    },
+    "linux-otp28-compile": {
+      "audit_fetch_error": false,
+      "captured_bytes": 47,
+      "command": [
+        "mix",
+        "compile",
+        "--force",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-otp28",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "6b3baa724e82018f91018bf71b24e94599f54cd4832790bb5411cceb93c4f45a",
+      "seconds": 3.324,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:32:27.855173Z",
+      "status": "passed"
+    },
+    "linux-canonical-hex-audit": {
+      "audit_fetch_error": false,
+      "captured_bytes": 47,
+      "command": [
+        "mix",
+        "hex.audit"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+      "seconds": 1.077,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:33:09.192206Z",
+      "status": "passed"
+    },
+    "macos-final-preflight-step": {
+      "audit_fetch_error": false,
+      "captured_bytes": 711,
+      "command": [
+        "elixir",
+        "scripts/ci.exs",
+        "preflight",
+        "--development",
+        "--platform",
+        "macos",
+        "--manifest",
+        "/tmp/smolbox-rc2-final.Pci7oW/macos-manifest.json",
+        "--report",
+        "/tmp/smolbox-rc2-final.Pci7oW/macos-final-preflight.json"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "93a07b7541148b06cbce86f356c305f975d1e330ec75be75597dd7d32d348a1c",
+      "seconds": 0.59,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:43:44.930202Z",
+      "status": "passed"
+    },
+    "linux-durable_host-dependency-graph-compile": {
+      "audit_fetch_error": false,
+      "captured_bytes": 3811,
+      "command": [
+        "mix",
+        "deps.compile",
+        "--force"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical/examples/durable_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "8a75e81f85850c184f005a8c715e5c7a68976bfcff0ffea0bd48b8aecbc626cc",
+      "seconds": 21.392,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:34:26.710526Z",
+      "status": "passed"
+    },
+    "macos-durable-runtime-step": {
+      "audit_fetch_error": false,
+      "captured_bytes": 205,
+      "command": [
+        "elixir",
+        "../../scripts/ci.exs",
+        "bounded",
+        "--report",
+        "/tmp/smolbox-rc2-final.Pci7oW/macos-durable-runtime.json",
+        "--timeout",
+        "1200",
+        "--expected-tests",
+        "25",
+        "--",
+        "mix",
+        "test",
+        "test/recovery_runtime_test.exs",
+        "--include",
+        "runtime",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical/examples/durable_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "cb07868c91f60514c6af36ff773c4fefeb1031c692f8f8db26beda7e8f47ecd0",
+      "seconds": 270.776,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:35:47.309362Z",
+      "status": "passed"
+    },
+    "macos-canonical-dev-compile": {
+      "audit_fetch_error": false,
+      "captured_bytes": 47,
+      "command": [
+        "env",
+        "MIX_ENV=dev",
+        "mix",
+        "compile",
+        "--force",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "67c745b4a0ddb0e5dad33d2d9fc501a95268409983ba3b7f284f27a66e68bf2e",
+      "seconds": 0.695,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:31:40.269085Z",
+      "status": "passed"
+    },
+    "macos-preflight-step": {
+      "audit_fetch_error": false,
+      "captured_bytes": 711,
+      "command": [
+        "elixir",
+        "scripts/ci.exs",
+        "preflight",
+        "--development",
+        "--platform",
+        "macos",
+        "--manifest",
+        "/tmp/smolbox-rc2-final.Pci7oW/macos-manifest.json",
+        "--report",
+        "/tmp/smolbox-rc2-final.Pci7oW/macos-preflight.json"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "93a07b7541148b06cbce86f356c305f975d1e330ec75be75597dd7d32d348a1c",
+      "seconds": 0.619,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:28:06.642474Z",
+      "status": "passed"
+    },
+    "linux-durable_host-cancel": {
+      "audit_fetch_error": false,
+      "captured_bytes": 358,
+      "command": [
+        "env",
+        "SMOLBOX_EXECUTION_ID=rc2-9ce713f-linux-durable_host-cancel",
+        "SMOLBOX_EXAMPLE_WAIT=true",
+        "SMOLBOX_EXAMPLE_CANCEL=true",
+        "mix",
+        "run",
+        "scripts/demo.exs"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical/examples/durable_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "44db507e5fe6a85645bb4a408f2a8382d0969ec95c0d0908226eb45487192e06",
+      "seconds": 72.005,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:37:49.749116Z",
+      "status": "passed"
+    },
+    "linux-middle-dependencies": {
+      "audit_fetch_error": false,
+      "captured_bytes": 679,
+      "command": [
+        "mix",
+        "deps.get"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-middle",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "dc59b5eb8651fcfa1e3788950f558624d19759e8eb1532680d1b3bb8cfb2f52d",
+      "seconds": 1.182,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:30:07.531082Z",
+      "status": "passed"
+    },
+    "linux-otp28-dependencies": {
+      "audit_fetch_error": false,
+      "captured_bytes": 681,
+      "command": [
+        "mix",
+        "deps.get"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-otp28",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "50277ec60f4289628cf43861a2963af79ee3bbbcf594945f04b44aa187803cd0",
+      "seconds": 1.163,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:32:00.158127Z",
+      "status": "passed"
+    },
+    "linux-canonical-canaries": {
+      "audit_fetch_error": false,
+      "captured_bytes": 621,
+      "command": [
+        "mix",
+        "smolbox.ci.verify_checks"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "e0b964a623497ff2bb478f184e6c238afa88d2b496eb969c1ad810acf8e4339f",
+      "seconds": 19.107,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:32:49.462704Z",
+      "status": "passed"
+    },
+    "linux-otp28-dependency-compile": {
+      "audit_fetch_error": false,
+      "captured_bytes": 6232,
+      "command": [
+        "mix",
+        "deps.compile",
+        "--force"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-otp28",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "b1f2bbb3ca01bf43f3ad4591b77edd723fac50d7e9f043afd998ffd9501c75e3",
+      "seconds": 25.118,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:32:01.987579Z",
+      "status": "passed"
+    },
+    "macos-minimum-tooling": {
+      "audit_fetch_error": false,
+      "captured_bytes": 155,
+      "command": [
+        "elixir",
+        "scripts/ci_test.exs"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-minimum",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "a3b6bdb2771b1750ee0de7424c9bf8203ad94ea3087ff85445d3e3024c5ee161",
+      "seconds": 5.907,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:29:36.661864Z",
+      "status": "passed"
+    },
+    "macos-minimum-dependency-compile": {
+      "audit_fetch_error": false,
+      "captured_bytes": 1694,
+      "command": [
+        "mix",
+        "deps.compile",
+        "--force"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-minimum",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "27655ee61ab27e423cdaa8d0598d2e2f736cf4f325ca9b05b1ba6c576068f579",
+      "seconds": 10.292,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:28:07.591978Z",
+      "status": "passed"
+    },
+    "macos-canonical-docs-links": {
+      "audit_fetch_error": false,
+      "captured_bytes": 60,
+      "command": [
+        "env",
+        "MIX_ENV=dev",
+        "mix",
+        "smolbox.ci.docs"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "4becb7fed09596d86e9f5b2d81c9c1f9bacb31d06c8e2cc7f47e322dad12dac6",
+      "seconds": 0.353,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:31:42.213127Z",
+      "status": "passed"
+    },
+    "linux-minimal_host-dialyzer": {
+      "audit_fetch_error": false,
+      "captured_bytes": 1328,
+      "command": [
+        "mix",
+        "dialyzer",
+        "--force-check"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical/examples/minimal_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "3bbc46d9613a6034d4b08fefa10112cdcd69ca4bed5f42b5b70803d54c88c0d8",
+      "seconds": 51.808,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:33:28.883672Z",
+      "status": "passed"
+    },
+    "linux-fault-restart-step": {
+      "audit_fetch_error": false,
+      "captured_bytes": 796,
+      "command": [
+        "elixir",
+        "scripts/ci.exs",
+        "worker-fault",
+        "--smolvm",
+        "/tmp/smolbox-qualification/runtime/smolvm",
+        "--url",
+        "http://127.0.0.1:19471",
+        "--python",
+        "/tmp/smolbox-qualification/python.smolmachine",
+        "--scenario",
+        "restart",
+        "--report",
+        "/tmp/smolbox-rc2-final.Pci7oW/linux-fault-restart.json"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "7c38d426ac01b1a2f0b7e7621027c490f3c0e3331c199bc889f3ffedc3f4e336",
+      "seconds": 67.911,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:43:48.964289Z",
+      "status": "passed"
+    },
+    "linux-database-outage": {
+      "audit_fetch_error": false,
+      "captured_bytes": 31,
+      "command": [
+        "mix",
+        "run",
+        "--no-start",
+        "--no-compile",
+        "scripts/check_unavailable.exs"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical/examples/durable_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "f090dd47a12af3805d942e71d8b8fad0838b1a6893a1dea8fba04ae00e79c2bc",
+      "seconds": 18.5,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:47:25.563415Z",
+      "status": "passed"
+    },
+    "macos-canonical-credo": {
+      "audit_fetch_error": false,
+      "captured_bytes": 319,
+      "command": [
+        "mix",
+        "credo",
+        "--strict"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "9be03568dfed5dd12b02bb781a842552819f935bc51839a0fda59c9a9d8e90fb",
+      "seconds": 0.567,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:31:01.561569Z",
+      "status": "passed"
+    },
+    "macos-canonical-canaries": {
+      "audit_fetch_error": false,
+      "captured_bytes": 621,
+      "command": [
+        "mix",
+        "smolbox.ci.verify_checks"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "e0b964a623497ff2bb478f184e6c238afa88d2b496eb969c1ad810acf8e4339f",
+      "seconds": 9.442,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:31:27.091133Z",
+      "status": "passed"
+    },
+    "linux-durable_host-store-tests": {
+      "audit_fetch_error": false,
+      "captured_bytes": 174,
+      "command": [
+        "mix",
+        "test",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical/examples/durable_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "52b35af415c7f0a131edf9765bcd331e11de4c2655968af7ff97a080e2ba976a",
+      "seconds": 4.321,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:35:56.176995Z",
+      "status": "passed"
+    },
+    "linux-minimum-tests": {
+      "audit_fetch_error": false,
+      "captured_bytes": 374,
+      "command": [
+        "mix",
+        "test",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-minimum",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "a31d9d7d8021aecb6111932c841fdb63ac32c52276bb0062e8e716c15c597916",
+      "seconds": 78.457,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:28:41.310610Z",
+      "status": "passed"
+    },
+    "macos-otp28-compile": {
+      "audit_fetch_error": false,
+      "captured_bytes": 47,
+      "command": [
+        "mix",
+        "compile",
+        "--force",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-otp28",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "6b3baa724e82018f91018bf71b24e94599f54cd4832790bb5411cceb93c4f45a",
+      "seconds": 0.808,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:31:26.591888Z",
+      "status": "passed"
+    },
+    "macos-minimum-tests": {
+      "audit_fetch_error": false,
+      "captured_bytes": 374,
+      "command": [
+        "mix",
+        "test",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-minimum",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "9a575ac9620ddd766274528565ec52ec49674d865139c1c6fb5d7db2c4a1785a",
+      "seconds": 76.759,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:28:19.549784Z",
+      "status": "passed"
+    },
+    "macos-canonical-xref": {
+      "audit_fetch_error": false,
+      "captured_bytes": 16,
+      "command": [
+        "mix",
+        "xref",
+        "graph",
+        "--format",
+        "cycles",
+        "--fail-above",
+        "0"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548",
+      "seconds": 0.327,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:28:19.519471Z",
+      "status": "passed"
+    },
+    "macos-canonical-dialyzer": {
+      "audit_fetch_error": false,
+      "captured_bytes": 1734,
+      "command": [
+        "mix",
+        "dialyzer",
+        "--force-check"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "710ff3fb3d0f6b87eb5b6c58e5cb2a5dfb35d9ba2a61734e18080b8f7d2089bb",
+      "seconds": 22.571,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:31:04.102263Z",
+      "status": "passed"
+    },
+    "linux-durable_host-deps-audit": {
+      "audit_fetch_error": false,
+      "captured_bytes": 26,
+      "command": [
+        "mix",
+        "deps.audit"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical/examples/durable_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "3016e51e4eac0d421674d2128bbbdefb2924b4646e0c14a1ab034977ad73fae5",
+      "seconds": 1.963,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:35:50.933046Z",
+      "status": "passed"
+    },
+    "linux-durable-runtime-step": {
+      "audit_fetch_error": false,
+      "captured_bytes": 207,
+      "command": [
+        "elixir",
+        "../../scripts/ci.exs",
+        "bounded",
+        "--report",
+        "/tmp/smolbox-rc2-final.Pci7oW/linux-durable-runtime.json",
+        "--timeout",
+        "1200",
+        "--expected-tests",
+        "25",
+        "--",
+        "mix",
+        "test",
+        "test/recovery_runtime_test.exs",
+        "--include",
+        "runtime",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical/examples/durable_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "98eccab3383e47205df1fa5caa3ede86136b82d2edb10530524bcbb46b4283a6",
+      "seconds": 286.176,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:39:02.277522Z",
+      "status": "passed"
+    },
+    "macos-canonical-compile": {
+      "audit_fetch_error": false,
+      "captured_bytes": 47,
+      "command": [
+        "mix",
+        "compile",
+        "--force",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "6b3baa724e82018f91018bf71b24e94599f54cd4832790bb5411cceb93c4f45a",
+      "seconds": 0.797,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:28:18.358610Z",
+      "status": "passed"
+    },
+    "macos-fault-restart-step": {
+      "audit_fetch_error": false,
+      "captured_bytes": 840,
+      "command": [
+        "elixir",
+        "scripts/ci.exs",
+        "worker-fault",
+        "--smolvm",
+        "/private/tmp/smolbox-qualification/darwin/smolvm",
+        "--url",
+        "http://127.0.0.1:19471",
+        "--python",
+        "/tmp/smolbox-qualification/python.smolmachine",
+        "--scenario",
+        "restart",
+        "--report",
+        "/tmp/smolbox-rc2-final.Pci7oW/macos-fault-restart.json"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "9dbcd61426f81a442037a07b81c6d1372541d863afc83bc88fed2cdf02fee9e9",
+      "seconds": 67.284,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:40:18.415984Z",
+      "status": "passed"
+    },
+    "linux-durable_host-normal": {
+      "audit_fetch_error": false,
+      "captured_bytes": 609,
+      "command": [
+        "env",
+        "SMOLBOX_EXECUTION_ID=rc2-9ce713f-linux-durable_host-normal",
+        "mix",
+        "run",
+        "scripts/demo.exs"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical/examples/durable_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "8f1124686a1e0b8ce79b6211d656f0e93d50708a79c72eaa2bc2c6d52de3d2b9",
+      "seconds": 2.303,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:37:46.933830Z",
+      "status": "passed"
+    },
+    "macos-canonical-dependency-compile": {
+      "audit_fetch_error": false,
+      "captured_bytes": 8125,
+      "command": [
+        "mix",
+        "deps.compile",
+        "--force"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "239c9167f97567758041bd7e8fc9db84dbe891d2ce25a4d23024cfbdb233f1d7",
+      "seconds": 7.839,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:28:08.848218Z",
+      "status": "passed"
+    },
+    "macos-minimal_host-deps-audit": {
+      "audit_fetch_error": false,
+      "captured_bytes": 26,
+      "command": [
+        "mix",
+        "deps.audit"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical/examples/minimal_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "3016e51e4eac0d421674d2128bbbdefb2924b4646e0c14a1ab034977ad73fae5",
+      "seconds": 1.247,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:32:09.701674Z",
+      "status": "passed"
+    },
+    "actionlint": {
+      "audit_fetch_error": false,
+      "captured_bytes": 0,
+      "command": [
+        "/tmp/smolbox-qualification/actionlint/actionlint"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seconds": 0.024,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:35:59.897536Z",
+      "status": "passed"
+    },
+    "linux-preflight-step": {
+      "audit_fetch_error": false,
+      "captured_bytes": 699,
+      "command": [
+        "elixir",
+        "scripts/ci.exs",
+        "preflight",
+        "--development",
+        "--platform",
+        "linux",
+        "--manifest",
+        "/tmp/smolbox-rc2-final.Pci7oW/linux-manifest.json",
+        "--report",
+        "/tmp/smolbox-rc2-final.Pci7oW/linux-preflight.json"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "b36cb193feb25392d94547241ba2feb50840ebf804765cdd5844e801806e2814",
+      "seconds": 0.816,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:28:07.196362Z",
+      "status": "passed"
+    },
+    "linux-canonical-tests": {
+      "audit_fetch_error": false,
+      "captured_bytes": 384,
+      "command": [
+        "mix",
+        "test",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "b62a24c60ef2f9c3250b59addccc7512875d97af707f631744341b87850c606c",
+      "seconds": 80.068,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:28:43.906302Z",
+      "status": "passed"
+    },
+    "macos-durable_host-migrate": {
+      "audit_fetch_error": false,
+      "captured_bytes": 2528,
+      "command": [
+        "mix",
+        "ecto.migrate"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical/examples/durable_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "07140e1e0fa629a5949ddc78659889d8213418f4806881eb01751ce840802adf",
+      "seconds": 0.47,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:32:48.920201Z",
+      "status": "passed"
+    },
+    "linux-canonical-format": {
+      "audit_fetch_error": false,
+      "captured_bytes": 0,
+      "command": [
+        "mix",
+        "format",
+        "--check-formatted"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seconds": 0.656,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:28:35.951692Z",
+      "status": "passed"
+    },
+    "linux-consumer-minimum-step": {
+      "audit_fetch_error": false,
+      "captured_bytes": 83,
+      "command": [
+        "elixir",
+        "scripts/ci.exs",
+        "package-consumer",
+        "--minimum",
+        "--archive",
+        "/tmp/smolbox-rc2-final.Pci7oW/smolbox-0.1.0-rc.2.tar",
+        "--report",
+        "/tmp/smolbox-rc2-final.Pci7oW/linux-consumer-minimum.json"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-minimum",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "250533ce6e9ec97d2294573b9c120373791afa8c2c1944f81d1bca9ae4b9cf36",
+      "seconds": 9.437,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:38:34.965013Z",
+      "status": "passed"
+    },
+    "linux-minimal_host-dependency-graph-compile": {
+      "audit_fetch_error": false,
+      "captured_bytes": 2901,
+      "command": [
+        "mix",
+        "deps.compile",
+        "--force"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical/examples/minimal_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "875d7a2d4cf2df10a3356d5f2025ca70b70387e92d8c2a8be6af2f21a90742e3",
+      "seconds": 8.312,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:33:18.720416Z",
+      "status": "passed"
+    },
+    "macos-otp28-dependency-compile": {
+      "audit_fetch_error": false,
+      "captured_bytes": 6232,
+      "command": [
+        "mix",
+        "deps.compile",
+        "--force"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-otp28",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "d97c0dc3431e43d7c8a24d464775f3e060c9eb7daabf82a352b30ef005e502a9",
+      "seconds": 7.608,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:31:18.580788Z",
+      "status": "passed"
+    },
+    "macos-minimal_host-dependency-graph-compile": {
+      "audit_fetch_error": false,
+      "captured_bytes": 2925,
+      "command": [
+        "mix",
+        "deps.compile",
+        "--force"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical/examples/minimal_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "ca49dea460ea5889b6317df5cc9dc35c8ec8ed030283e9688b4a7a3fdf1798f0",
+      "seconds": 4.01,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:31:44.056847Z",
+      "status": "passed"
+    },
+    "linux-canonical-xref": {
+      "audit_fetch_error": false,
+      "captured_bytes": 16,
+      "command": [
+        "mix",
+        "xref",
+        "graph",
+        "--format",
+        "cycles",
+        "--fail-above",
+        "0"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548",
+      "seconds": 0.881,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:28:41.809249Z",
+      "status": "passed"
+    },
+    "linux-minimum-tooling": {
+      "audit_fetch_error": false,
+      "captured_bytes": 155,
+      "command": [
+        "elixir",
+        "scripts/ci_test.exs"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-minimum",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "fa26956b25eafe1ab0af6c9c00e1df4bcc9d6a985a6a26e5b6fd2bb8ab5fde0e",
+      "seconds": 6.26,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:30:00.298144Z",
+      "status": "passed"
+    },
+    "macos-otp28-dependencies": {
+      "audit_fetch_error": false,
+      "captured_bytes": 681,
+      "command": [
+        "mix",
+        "deps.get"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-otp28",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "bdef70ad91a2eb6d2cc42f3cfa8cc5daf2e13dd52e0b9a021c62e32ffdf9d655",
+      "seconds": 0.893,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:31:17.305495Z",
+      "status": "passed"
+    },
+    "linux-final-preflight-step": {
+      "audit_fetch_error": false,
+      "captured_bytes": 699,
+      "command": [
+        "elixir",
+        "scripts/ci.exs",
+        "preflight",
+        "--development",
+        "--platform",
+        "linux",
+        "--manifest",
+        "/tmp/smolbox-rc2-final.Pci7oW/linux-manifest.json",
+        "--report",
+        "/tmp/smolbox-rc2-final.Pci7oW/linux-final-preflight.json"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "b36cb193feb25392d94547241ba2feb50840ebf804765cdd5844e801806e2814",
+      "seconds": 0.736,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:47:17.709999Z",
+      "status": "passed"
+    },
+    "linux-runtime-step": {
+      "audit_fetch_error": false,
+      "captured_bytes": 206,
+      "command": [
+        "elixir",
+        "scripts/ci.exs",
+        "bounded",
+        "--report",
+        "/tmp/smolbox-rc2-final.Pci7oW/linux-runtime.json",
+        "--timeout",
+        "600",
+        "--expected-tests",
+        "14",
+        "--",
+        "mix",
+        "test",
+        "test/runtime",
+        "--include",
+        "runtime",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "7a75f60bd7f4692d2900e691b777d0124c3749ef884f908d33947c21afbd01b8",
+      "seconds": 34.496,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:36:01.307494Z",
+      "status": "passed"
+    },
+    "macos-middle-tooling": {
+      "audit_fetch_error": false,
+      "captured_bytes": 156,
+      "command": [
+        "elixir",
+        "scripts/ci_test.exs"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-middle",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "5f4ee3e9417ec696385434d7f4c746a6eaf07778f70784fc49f129aa3095a934",
+      "seconds": 5.949,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:31:10.677652Z",
+      "status": "passed"
+    },
+    "linux-durable_host-compile": {
+      "audit_fetch_error": false,
+      "captured_bytes": 60,
+      "command": [
+        "mix",
+        "compile",
+        "--force",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical/examples/durable_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "8101bf4a5b6019a9f02b0f7d1ef7c4a7800001cc34c4b0479d549bc4a80be73d",
+      "seconds": 1.237,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:34:48.755584Z",
+      "status": "passed"
+    },
+    "linux-middle-compile": {
+      "audit_fetch_error": false,
+      "captured_bytes": 47,
+      "command": [
+        "mix",
+        "compile",
+        "--force",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-middle",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "6b3baa724e82018f91018bf71b24e94599f54cd4832790bb5411cceb93c4f45a",
+      "seconds": 1.764,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:30:31.192016Z",
+      "status": "passed"
+    },
+    "macos-middle-dependency-compile": {
+      "audit_fetch_error": false,
+      "captured_bytes": 1694,
+      "command": [
+        "mix",
+        "deps.compile",
+        "--force"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-middle",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "ba1db709af38fdbfe7c98a31f9b61f860881983640272938b35ec0e34c768369",
+      "seconds": 7.773,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:29:44.302048Z",
+      "status": "passed"
+    },
+    "macos-durable_host-dialyzer": {
+      "audit_fetch_error": false,
+      "captured_bytes": 1942,
+      "command": [
+        "mix",
+        "dialyzer",
+        "--force-check"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical/examples/durable_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "26e6e135ed321e4a50d91591853a981ee5766ce03a6258add33d01e4761c5773",
+      "seconds": 20.863,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:32:23.348219Z",
+      "status": "passed"
+    },
+    "macos-durable_host-dependency-graph-compile": {
+      "audit_fetch_error": false,
+      "captured_bytes": 3835,
+      "command": [
+        "mix",
+        "deps.compile",
+        "--force"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical/examples/durable_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "1edd5164bd57a1cafc45481407831c6645ce5ade60f301c41f50fd383a81a5d2",
+      "seconds": 9.604,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:32:12.451977Z",
+      "status": "passed"
+    },
+    "macos-durable_host-hex-audit": {
+      "audit_fetch_error": false,
+      "captured_bytes": 47,
+      "command": [
+        "mix",
+        "hex.audit"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical/examples/durable_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+      "seconds": 1.502,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:32:44.556675Z",
+      "status": "passed"
+    },
+    "macos-minimal_host-cancel": {
+      "audit_fetch_error": false,
+      "captured_bytes": 358,
+      "command": [
+        "env",
+        "SMOLBOX_EXECUTION_ID=rc2-9ce713f-macos-minimal_host-cancel",
+        "SMOLBOX_EXAMPLE_WAIT=true",
+        "SMOLBOX_EXAMPLE_CANCEL=true",
+        "mix",
+        "run",
+        "scripts/demo.exs"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical/examples/minimal_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "d462e4c8bc48287dfe15559528a0c6305eb57d533b9d7a819a95a6c0231d2e17",
+      "seconds": 66.582,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:33:26.100617Z",
+      "status": "passed"
+    },
+    "macos-canonical-credence": {
+      "audit_fetch_error": false,
+      "captured_bytes": 51,
+      "command": [
+        "mix",
+        "smolbox.ci.credence"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "69bb38f9d9ec5063ba633c212cc65fe72a0281e995fbf82604f837c373d51b23",
+      "seconds": 0.562,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:31:03.213469Z",
+      "status": "passed"
+    },
+    "macos-minimal_host-compile": {
+      "audit_fetch_error": false,
+      "captured_bytes": 59,
+      "command": [
+        "mix",
+        "compile",
+        "--force",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical/examples/minimal_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "38e1db2dc72b14b85babddc0c9b8d2a881f92abc1402c3539179fb7745ce1d31",
+      "seconds": 0.436,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:31:48.421574Z",
+      "status": "passed"
+    },
+    "linux-canonical-tooling": {
+      "audit_fetch_error": false,
+      "captured_bytes": 154,
+      "command": [
+        "elixir",
+        "scripts/ci_test.exs"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "3f8bfadabca52fc3bbd4c05e5aa852794a6431c0cfdc4a8ef6beca915e6e2c16",
+      "seconds": 6.24,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:30:04.504620Z",
+      "status": "passed"
+    },
+    "macos-runtime-step": {
+      "audit_fetch_error": false,
+      "captured_bytes": 206,
+      "command": [
+        "elixir",
+        "scripts/ci.exs",
+        "bounded",
+        "--report",
+        "/tmp/smolbox-rc2-final.Pci7oW/macos-runtime.json",
+        "--timeout",
+        "600",
+        "--expected-tests",
+        "14",
+        "--",
+        "mix",
+        "test",
+        "test/runtime",
+        "--include",
+        "runtime",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "1d282c746a6925de732747acf664e9a3b2038dc360aca9e35135aafb9a206e9b",
+      "seconds": 31.523,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:32:52.013603Z",
+      "status": "passed"
+    },
+    "linux-durable_host-dependencies": {
+      "audit_fetch_error": false,
+      "captured_bytes": 389,
+      "command": [
+        "mix",
+        "deps.get"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical/examples/durable_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "f36d676958d6b1ce4bd81a4cd08d2f59d6286e12d0de2c6cb5e544454b55df8a",
+      "seconds": 1.068,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:34:25.090907Z",
+      "status": "passed"
+    },
+    "macos-minimal_host-hex-audit": {
+      "audit_fetch_error": false,
+      "captured_bytes": 47,
+      "command": [
+        "mix",
+        "hex.audit"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical/examples/minimal_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+      "seconds": 0.662,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:32:08.689339Z",
+      "status": "passed"
+    },
+    "macos-database-outage": {
+      "audit_fetch_error": false,
+      "captured_bytes": 31,
+      "command": [
+        "mix",
+        "run",
+        "--no-start",
+        "--no-compile",
+        "scripts/check_unavailable.exs"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical/examples/durable_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "f090dd47a12af3805d942e71d8b8fad0838b1a6893a1dea8fba04ae00e79c2bc",
+      "seconds": 18.318,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:44:14.449890Z",
+      "status": "passed"
+    },
+    "linux-fault-unavailable-step": {
+      "audit_fetch_error": false,
+      "captured_bytes": 808,
+      "command": [
+        "elixir",
+        "scripts/ci.exs",
+        "worker-fault",
+        "--smolvm",
+        "/tmp/smolbox-qualification/runtime/smolvm",
+        "--url",
+        "http://127.0.0.1:19471",
+        "--python",
+        "/tmp/smolbox-qualification/python.smolmachine",
+        "--scenario",
+        "unavailable",
+        "--report",
+        "/tmp/smolbox-rc2-final.Pci7oW/linux-fault-unavailable.json"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "607c970b8e2efbe5df2009760914991a7f674b32a6b46c7d20b26fede1bbf135",
+      "seconds": 129.563,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:44:57.396608Z",
+      "status": "passed"
+    },
+    "linux-canonical-credence": {
+      "audit_fetch_error": false,
+      "captured_bytes": 51,
+      "command": [
+        "mix",
+        "smolbox.ci.credence"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "69bb38f9d9ec5063ba633c212cc65fe72a0281e995fbf82604f837c373d51b23",
+      "seconds": 1.016,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:31:34.437514Z",
+      "status": "passed"
+    },
+    "macos-canonical-tooling": {
+      "audit_fetch_error": false,
+      "captured_bytes": 155,
+      "command": [
+        "elixir",
+        "scripts/ci_test.exs"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "58342e28335f6b5bf1e74780de38be1e514ebb4dfd456a5394a62e226d7458f2",
+      "seconds": 5.944,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:29:37.763207Z",
+      "status": "passed"
+    },
+    "linux-minimum-dependencies": {
+      "audit_fetch_error": false,
+      "captured_bytes": 678,
+      "command": [
+        "mix",
+        "deps.get"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-minimum",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "a37263ccacc09054ca87edc51639ff084f67b748d67b5d1ff72510d002e3c429",
+      "seconds": 1.469,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:28:06.825465Z",
+      "status": "passed"
+    },
+    "macos-minimal_host-dependencies": {
+      "audit_fetch_error": false,
+      "captured_bytes": 300,
+      "command": [
+        "mix",
+        "deps.get"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical/examples/minimal_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "36eb135b70331f5e410d69edd925dfbab40179de20c15ef1844f9eb7e48d0fe1",
+      "seconds": 0.772,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:31:42.934967Z",
+      "status": "passed"
+    },
+    "linux-minimum-dependency-compile": {
+      "audit_fetch_error": false,
+      "captured_bytes": 1694,
+      "command": [
+        "mix",
+        "deps.compile",
+        "--force"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-minimum",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "27655ee61ab27e423cdaa8d0598d2e2f736cf4f325ca9b05b1ba6c576068f579",
+      "seconds": 28.326,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:28:08.951358Z",
+      "status": "passed"
+    },
+    "linux-durable_host-xref": {
+      "audit_fetch_error": false,
+      "captured_bytes": 16,
+      "command": [
+        "mix",
+        "xref",
+        "graph",
+        "--format",
+        "cycles",
+        "--fail-above",
+        "0"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical/examples/durable_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548",
+      "seconds": 0.623,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:35:53.455679Z",
+      "status": "passed"
+    },
+    "linux-fault-missing-step": {
+      "audit_fetch_error": false,
+      "captured_bytes": 794,
+      "command": [
+        "elixir",
+        "scripts/ci.exs",
+        "worker-fault",
+        "--smolvm",
+        "/tmp/smolbox-qualification/runtime/smolvm",
+        "--url",
+        "http://127.0.0.1:19471",
+        "--python",
+        "/tmp/smolbox-qualification/python.smolmachine",
+        "--scenario",
+        "missing",
+        "--report",
+        "/tmp/smolbox-rc2-final.Pci7oW/linux-fault-missing.json"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "353369c5c34d8a911c4dde2c0b756d3c73ec2497bbe9f3770db5f0509c3a17a1",
+      "seconds": 9.71,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:47:07.470618Z",
+      "status": "passed"
+    },
+    "linux-canonical-deps-audit": {
+      "audit_fetch_error": false,
+      "captured_bytes": 26,
+      "command": [
+        "mix",
+        "deps.audit"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "3016e51e4eac0d421674d2128bbbdefb2924b4646e0c14a1ab034977ad73fae5",
+      "seconds": 1.415,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:33:10.822396Z",
+      "status": "passed"
+    },
+    "linux-minimal_host-compile": {
+      "audit_fetch_error": false,
+      "captured_bytes": 59,
+      "command": [
+        "mix",
+        "compile",
+        "--force",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical/examples/minimal_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "38e1db2dc72b14b85babddc0c9b8d2a881f92abc1402c3539179fb7745ce1d31",
+      "seconds": 0.681,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:33:27.616556Z",
+      "status": "passed"
+    },
+    "macos-canonical-ex-dna": {
+      "audit_fetch_error": false,
+      "captured_bytes": 121,
+      "command": [
+        "mix",
+        "ex_dna",
+        "lib",
+        "dev",
+        "scripts",
+        "test/support",
+        "examples/durable_host/lib",
+        "examples/durable_host/priv",
+        "examples/durable_host/test/support",
+        "examples/minimal_host/lib",
+        "examples/support/lib",
+        "--max-clones",
+        "0"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "d2bfcac6bfd420d854e9ed8a47481bef79e0fb3e93ed7d8fa20c01e940bfcab1",
+      "seconds": 0.433,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:31:02.452655Z",
+      "status": "passed"
+    },
+    "linux-canonical-dialyzer": {
+      "audit_fetch_error": false,
+      "captured_bytes": 1696,
+      "command": [
+        "mix",
+        "dialyzer",
+        "--force-check"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "ae90554c13547588147dd2dfd231c1e715dec9dc0d83273ab15b1bab6653adce",
+      "seconds": 72.846,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:31:36.009873Z",
+      "status": "passed"
+    },
+    "macos-canonical-docs": {
+      "audit_fetch_error": false,
+      "captured_bytes": 128,
+      "command": [
+        "env",
+        "MIX_ENV=dev",
+        "mix",
+        "docs",
+        "--warnings-as-errors"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/macos-canonical",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+      "seconds": 0.543,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:31:41.314513Z",
+      "status": "passed"
+    },
+    "linux-durable_host-migrate": {
+      "audit_fetch_error": false,
+      "captured_bytes": 2528,
+      "command": [
+        "mix",
+        "ecto.migrate"
+      ],
+      "commit": "9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a",
+      "cwd": "/tmp/smolbox-rc2-final.Pci7oW/linux-canonical/examples/durable_host",
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "b2f2528a14f3416018ceca73e4c461221bf6d40eb1e320511f5db79a393cdc6f",
+      "seconds": 0.886,
+      "source_unchanged": true,
+      "started_at": "2026-09-07T20:35:54.656961Z",
+      "status": "passed"
+    }
+  },
+  "validation": "local development hosts plus ordinary hosted GitHub CI",
+  "version": "0.1.0-rc.2"
+}
