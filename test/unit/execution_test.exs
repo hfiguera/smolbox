@@ -182,6 +182,22 @@ defmodule SmolBox.ExecutionTest do
     invalid = [
       nil,
       %{record | spec: nil},
+      record |> Map.delete(:spec) |> Map.put(:unexpected, :data),
+      %{record | spec: record.spec |> Map.delete(:command) |> Map.put(:unexpected, :data)},
+      %{
+        record
+        | spec: %{
+            record.spec
+            | command: record.spec.command |> Map.delete(:argv) |> Map.put(:unexpected, :data)
+          }
+      },
+      %{
+        record
+        | spec: %{
+            record.spec
+            | profile: record.spec.profile |> Map.delete(:cpus) |> Map.put(:unexpected, :data)
+          }
+      },
       %{record | schema: 2},
       %{record | deadlines: %{queue: self()}},
       %{record | claim_owner: self()},

@@ -75,8 +75,26 @@ defmodule SmolBox.Profile do
 
   @spec validate(term()) :: :ok | {:error, Error.t()}
   def validate(%__MODULE__{} = profile) do
+    if Validation.struct_shape?(profile, __MODULE__),
+      do: validate_fields(profile),
+      else: invalid()
+  end
+
+  def validate(_profile), do: invalid()
+
+  @doc "Convert only the supported machine allocation controls."
+  @spec machine(t(), String.t(), String.t()) :: {:ok, MachineSpec.t()} | {:error, Error.t()}
+  def machine(profile, name, artifact_path) do
+    with :ok <- validate(profile) do
+      options =
+        profile |> Map.from_struct() |> Map.take([:cpus, :memory_mb, :storage_gb, :overlay_gb])
+
+      MachineSpec.new(name, artifact_path, Map.to_list(options))
+    end
+  end
+
+  defp validate_fields(profile) do
     checks = [
-      Validation.struct_shape?(profile, __MODULE__),
       Validation.identifier?(profile.id),
       Validation.integer?(profile.cpus, 1, 64),
       Validation.integer?(profile.memory_mb, 128, 16_384),
@@ -91,19 +109,6 @@ defmodule SmolBox.Profile do
     ]
 
     if Enum.all?(checks), do: :ok, else: invalid()
-  end
-
-  def validate(_profile), do: invalid()
-
-  @doc "Convert only the supported machine allocation controls."
-  @spec machine(t(), String.t(), String.t()) :: {:ok, MachineSpec.t()} | {:error, Error.t()}
-  def machine(profile, name, artifact_path) do
-    with :ok <- validate(profile) do
-      options =
-        profile |> Map.from_struct() |> Map.take([:cpus, :memory_mb, :storage_gb, :overlay_gb])
-
-      MachineSpec.new(name, artifact_path, Map.to_list(options))
-    end
   end
 
   defp budgets?(profile) do

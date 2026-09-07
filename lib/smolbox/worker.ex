@@ -70,7 +70,8 @@ defmodule SmolBox.Worker do
   @doc "Revalidate configuration before using credentials or starting network I/O."
   @spec validate(term()) :: :ok | {:error, Error.t()}
   def validate(%__MODULE__{} = worker) do
-    with true <- identifier?(worker.id),
+    with true <- SmolBox.Validation.struct_shape?(worker, __MODULE__),
+         true <- identifier?(worker.id),
          {:ok, uri} <- endpoint(worker.base_url),
          true <- authorized_transport?(uri, worker),
          true <- valid_bounds?(worker),

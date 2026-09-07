@@ -153,10 +153,13 @@ defmodule SmolBox.Store.RecordOps do
 
   @spec due?(Execution.t(), non_neg_integer()) :: boolean()
   def due?(record, now),
+    do: record.next_due_at_ms <= now and needs_work?(record)
+
+  @spec needs_work?(Execution.t()) :: boolean()
+  def needs_work?(record),
     do:
-      record.next_due_at_ms <= now and
-        not (record.cleanup == :complete and
-               (Execution.terminal?(record) or record.state == :unknown))
+      not (record.cleanup == :complete and
+             (Execution.terminal?(record) or record.state == :unknown))
 
   @spec cursor(Execution.t()) :: Store.cursor()
   def cursor(record), do: {record.next_due_at_ms, record.scope, record.id}

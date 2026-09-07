@@ -45,7 +45,8 @@ defmodule SmolBox.MachineSpec do
 
   @spec validate(term()) :: :ok | {:error, Error.t()}
   def validate(%__MODULE__{} = spec) do
-    if valid_name?(spec.name) and artifact_path?(spec.artifact_path) and
+    if SmolBox.Validation.struct_shape?(spec, __MODULE__) and
+         valid_name?(spec.name) and artifact_path?(spec.artifact_path) and
          in_range?(spec.cpus, 1..64) and in_range?(spec.memory_mb, 128..16_384) and
          in_range?(spec.storage_gb, 1..8) and in_range?(spec.overlay_gb, 1..8) do
       :ok

@@ -37,17 +37,9 @@ defmodule SmolBox.Command do
   @doc "Revalidate a struct before transport, including manually constructed values."
   @spec validate(term()) :: :ok | {:error, Error.t()}
   def validate(%__MODULE__{} = command) do
-    checks = [
-      SmolBox.Validation.struct_shape?(command, __MODULE__),
-      valid_argv?(command.argv),
-      valid_env?(command.env),
-      valid_stdin?(command.stdin),
-      valid_user?(command.user),
-      valid_timeout?(command.timeout_secs),
-      Files.validate_path(command.workdir) == :ok
-    ]
-
-    if Enum.all?(checks), do: :ok, else: invalid()
+    if SmolBox.Validation.struct_shape?(command, __MODULE__),
+      do: validate_fields(command),
+      else: invalid()
   end
 
   def validate(_command), do: invalid()
@@ -68,6 +60,19 @@ defmodule SmolBox.Command do
 
       {:ok, wire |> optional("stdin", command.stdin) |> optional("user", command.user)}
     end
+  end
+
+  defp validate_fields(command) do
+    checks = [
+      valid_argv?(command.argv),
+      valid_env?(command.env),
+      valid_stdin?(command.stdin),
+      valid_user?(command.user),
+      valid_timeout?(command.timeout_secs),
+      Files.validate_path(command.workdir) == :ok
+    ]
+
+    if Enum.all?(checks), do: :ok, else: invalid()
   end
 
   defp valid_options?(options) do

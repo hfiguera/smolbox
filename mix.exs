@@ -83,7 +83,7 @@ defmodule SmolBox.MixProject do
         "compile --warnings-as-errors",
         "test --warnings-as-errors",
         "credo --strict",
-        "ex_dna lib dev test/support --max-clones 0",
+        "ex_dna lib dev test/support examples/durable_host/lib examples/durable_host/priv --max-clones 0",
         "smolbox.ci.credence",
         "dialyzer"
       ]

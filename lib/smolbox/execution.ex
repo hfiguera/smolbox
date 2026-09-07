@@ -216,7 +216,8 @@ defmodule SmolBox.Execution do
   @doc "Validate a persisted record after decoding it, including shapes that could contain BEAM resources."
   @spec validate(term()) :: :ok | {:error, Error.t()}
   def validate(%__MODULE__{} = record) do
-    with :ok <- ExecutionSpec.validate(record.spec),
+    with true <- Validation.struct_shape?(record, __MODULE__),
+         :ok <- ExecutionSpec.validate(record.spec),
          true <- fields?(record),
          true <- ExecutionValidation.metadata?(record) do
       outcome(record)

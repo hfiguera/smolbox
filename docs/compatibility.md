@@ -168,3 +168,18 @@ Source inspection additionally found atomic temporary-file installation in the
 agent. Guest-path resolution varies with the active namespace and needs hostile
 symlink/race qualification before any stronger containment claim. The HTTP API
 has no permission option. See the [client guide](client.md) for current semantics.
+
+## Durable store qualification
+
+The host example passes 10 tests against PostgreSQL 16.15 on Linux x86_64,
+including concurrent store conformance, rollback/corruption, and a fresh BEAM
+read. A separate probe with the actual database stopped confirms typed failures
+for capability inspection, lookup, and acceptance. The database is isolated on a
+private Unix socket and was restored afterward. Evidence and package/container
+checksums are recorded in `docs/evidence/phase4-durable.json`.
+
+Postgrex 0.22.4 emits an upstream deprecated `xref` exclusion warning with Elixir
+1.20.4. Project and example source pass warning-as-error compilation; dependency
+source is not patched or diagnostics suppressed. The example has separate locks,
+Dialyzer, and vulnerability audits. This database result does not yet demonstrate
+controller restart during a real managed execution.

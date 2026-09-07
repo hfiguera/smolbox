@@ -1,8 +1,9 @@
 # Persistence and recovery contract
 
 The store behaviour, versioned execution records, bounded memory adapter, and
-shared adapter tests are implemented. The durable example and supervised managed
-runtime are still under implementation. No automatic recovery service is released.
+shared adapter tests are implemented. The host-owned Ecto/Postgres example passes
+real database conformance and fresh-process reads. The supervised managed runtime
+is still under implementation. No automatic recovery service is released.
 
 `SmolBox.Store` defines atomic acceptance, authoritative lookup, worker leases,
 execution claims, compare-and-swap writes, reservations, release, cancellation
@@ -62,3 +63,9 @@ context. It checks concurrent acceptance, conflicts, claims and CAS races, atomi
 reservations, release conditions, worker takeover, expiry, and due pagination.
 The suite alone does not certify durability; also run fresh-process database
 recovery, unavailable-database, corruption, and transaction-failure tests.
+
+The repository example at `examples/durable_host` owns its Repo, schema migration,
+AES-256-GCM record encryption, and indexed projections. Mutations serialize on a
+partition row inside a SQL transaction. It demonstrates a small-pool adapter,
+not automatic database provisioning, key rotation, or unlimited throughput. See
+its README for configuration, schema upgrades, keys, and retention responsibilities.

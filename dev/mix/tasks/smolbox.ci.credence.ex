@@ -27,7 +27,15 @@ defmodule Mix.Tasks.Smolbox.Ci.Credence do
   end
 
   defp maintained_files do
-    ["lib/**/*.ex", "dev/**/*.ex", "test/**/*.{ex,exs}", "mix.exs", ".*.exs"]
+    [
+      "lib/**/*.ex",
+      "dev/**/*.ex",
+      "test/**/*.{ex,exs}",
+      "mix.exs",
+      ".*.exs",
+      "examples/*/*.exs",
+      "examples/*/{lib,config,test,priv,scripts}/**/*.{ex,exs}"
+    ]
     |> Enum.flat_map(&Path.wildcard(&1, match_dot: true))
     |> Enum.reject(&String.starts_with?(&1, "test/fixtures/"))
     |> Enum.uniq()
