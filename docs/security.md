@@ -161,7 +161,7 @@ its store process stops.
    durable example's authenticated index backfill instructions for its older schema.
 4. Pin and verify the new binary, schema and artifact bytes on a separate candidate
    worker. Recheck template sizes, VMM overhead, network behavior, proxy semantics,
-   host quotas and all advertised platform tests. SmolBox 0.1.0-dev currently admits
+   host quotas and all advertised platform tests. SmolBox 0.1.0-rc.1 admits
    only the qualified SmolVM 1.14.1 contract; a different version is incompatible.
 5. Give changed artifacts/profiles new immutable revisions. Do not rewrite saved
    execution specifications or resubmit a changed specification under an existing

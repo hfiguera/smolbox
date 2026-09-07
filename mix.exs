@@ -2,11 +2,12 @@ defmodule SmolBox.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/hfiguera/smolbox"
+  @version "0.1.0-rc.1"
 
   def project do
     [
       app: :smolbox,
-      version: "0.1.0-dev",
+      version: @version,
       source_url: @source_url,
       elixir: "~> 1.18",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -38,7 +39,7 @@ defmodule SmolBox.MixProject do
         ]
       ],
       docs: [
-        source_ref: "main",
+        source_ref: "v#{@version}",
         extras: [
           "README.md",
           "docs/client.md",

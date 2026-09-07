@@ -1,10 +1,11 @@
 # Changelog
 
-## 0.1.0-dev
+## 0.1.0-rc.1
 
-Unreleased. Implementation and development-host verification are substantially
-complete; resource-profile certification, protected CI and release acceptance
-remain open. No production isolation profile is certified.
+Unreleased candidate for the first client/controller release. It uses the existing
+development-qualified worker contract. Production resource/isolation certification,
+protected real-worker GitHub infrastructure and independent consumer review are
+outside this release's scope. No production isolation profile is certified.
 
 ### Implemented
 
@@ -29,6 +30,9 @@ remain open. No production isolation profile is certified.
   tests, standalone host examples, production-package consumer checks and CI
   gates for Dialyzer, Credo, ex_dna, ex_slop and Credence. Deliberate bad/clean
   canaries verify the analyzers and coverage gate actually run and fail correctly.
+- Elixir maintainer tools for bounded commands, preflight, package consumers and
+  worker-service faults. Regular CI and optional manual runtime qualification
+  have separate strict result gates. Source links target `v0.1.0-rc.1`.
 
 ### Required configuration and limitations
 
@@ -51,4 +55,4 @@ original delayed request can start a VM after a successful stop; cleanup retains
 uncertain evidence and reservations through the configured deadline/retention
 policy. Stronger guarantees and unsupported hard controls are rejected or
 explicitly excluded. See the compatibility, recovery and security guides for
-measured behavior and remaining qualification.
+measured behavior and unqualified boundaries.

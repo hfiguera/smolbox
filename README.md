@@ -4,13 +4,14 @@ An independent Elixir library for self-hosted `smolvm serve` workers.
 
 Source: [hfiguera/smolbox on GitHub](https://github.com/hfiguera/smolbox).
 
-Implementation is in progress. The low-level client, managed runtime, versioned
+Release candidate: `0.1.0-rc.1`. The low-level client, managed runtime, versioned
 store contract, memory adapter, and host-owned Postgres example are implemented.
 Managed Python/JavaScript, cancellation and durable controller-restart cases pass
 on real Linux and macOS workers. The first release targets this tested contract
 with development-qualified workers. Production resource/isolation certification
-is outside its scope; no production isolation profile is certified. Final
-candidate validation and release metadata review remain incomplete.
+is outside its scope; no production isolation profile is certified. Candidate
+validation records identify the exact tested commit and package; this prerelease
+does not imply publication to Hex.
 
 The managed API accepts immutable keyed identities, reserves capacity, stages
 bounded files, persists dispatch intent, observes results, collects outputs, and

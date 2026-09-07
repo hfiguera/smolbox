@@ -27,8 +27,8 @@ individual phase/evidence records below.
 The source repository is [hfiguera/smolbox](https://github.com/hfiguera/smolbox).
 The `origin` remote, package metadata and ExDoc source links use this repository.
 It remains private during implementation; public visibility is not a prerequisite
-for completing the repository metadata. Development documentation links to `main`;
-release documentation must use its matching release tag or commit.
+for completing the repository metadata. Candidate documentation links to the
+matching `v0.1.0-rc.1` tag; source links must resolve to the tested candidate.
 
 Implementation evidence lives in [compatibility.md](compatibility.md) and `docs/evidence/`. Checked items below mean the specific work has evidence; they do not waive the remaining phase exit conditions or release requirements.
 
@@ -1064,7 +1064,7 @@ applying the exclusions in section 1.4.
 - [x] Keep publication separate from implementation and ordinary CI. No Hex publication or public service deployment is performed for this goal. A future release needs separate explicit authorization after all release evidence passes; this checkbox records the policy, not a published release.
 
 Pre-release metadata review is recorded in `docs/evidence/phase9-readiness.json`.
-The package remains `0.1.0-dev` with MIT metadata and the reviewed standard
+At that checkpoint, the package was `0.1.0-dev` with MIT metadata and the reviewed standard
 license text. Its changelog now describes the complete implemented API and
 measured limitations. The official Hex package API returned 404 for `smolbox`
 on September 7, 2026; that observation neither reserves the name nor establishes
@@ -1163,8 +1163,25 @@ Remaining release work is:
   Unsupported hard controls and unqualified isolation properties remain explicit.
 
 The two supplied host examples and automated consumers provide the planned
-adoption evidence. No independent review is claimed. Version remains `0.1.0-dev`
-until the final metadata decision; this scope change does not authorize publishing.
+adoption evidence. No independent review is claimed. The selected candidate is
+`0.1.0-rc.1`; this metadata decision does not authorize publishing.
+
+#### Candidate freeze and validation records
+
+Finish metadata before creating the candidate commit, then run all checks from
+clean checkouts of that exact commit. Build one package archive and pass those
+same bytes to all four current/minimum dependency consumers. Record source,
+runtime/image and archive hashes, commands, counts, failures and cleanup results.
+If an implementation or packaged file needs a correction, freeze a new candidate
+commit and repeat the affected acceptance matrix without carrying over false
+exact-commit claims.
+
+The candidate tag `v0.1.0-rc.1` must point to the accepted commit. Record completed
+validation in `docs/release-candidates/0.1.0-rc.1.md` and this plan in a separate
+documentation commit; both files are excluded from the package. That attestation
+commit does not replace the candidate or change its archive. Do not claim an
+untested documentation commit is the release candidate. No Hex or GitHub Release
+publication is part of this validation.
 
 Scope-revision validation: the documentation builds with ExDoc warnings treated
 as errors, formatting passes, and a fresh canonical macOS production consumer
