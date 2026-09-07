@@ -15,6 +15,13 @@ defmodule SmolBox.Runtime do
   alias SmolBox.Runtime.{Config, Coordinator, WorkSupervisor}
   alias SmolBox.Telemetry.Dispatcher
 
+  @doc """
+  Start a linked runtime using the options documented in `SmolBox.child_spec/1`.
+
+  Normal applications add `{SmolBox, options}` to their supervision tree. Startup
+  validates adapter contracts and store capabilities before starting observers.
+  Returns `{:ok, pid}` or the underlying validation/supervisor startup error.
+  """
   @spec start_link(keyword()) :: Supervisor.on_start()
   def start_link(options) do
     with {:ok, config} <- Config.new(options),

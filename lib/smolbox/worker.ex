@@ -55,6 +55,37 @@ defmodule SmolBox.Worker do
           max_response_bytes: pos_integer()
         }
 
+  @doc """
+  Validate a worker endpoint without making a network request.
+
+  `id` is a stable identifier of at most 64 ASCII letters, digits, dots, underscores
+  or hyphens, beginning with a letter/digit. `base_url` is the origin URL, such as
+  `https://worker.example`; do not append `/api/v1` or include credentials/query parameters.
+
+  | Option | Default | Meaning |
+  |---|---|---|
+  | `:token` | `nil` | Bearer token, required for HTTPS endpoints |
+  | `:ca_cert_file` | `nil` | Existing CA file; otherwise use the transport's default trust store |
+  | `:allow_insecure_loopback` | `false` | Explicitly permit local HTTP on `localhost`, `127.0.0.1`, or `::1` |
+  | `:unix_socket` | `nil` | Absolute local socket path, at most 100 bytes, with a loopback HTTP base URL |
+  | `:connect_timeout_ms` | `1000` | Connection budget |
+  | `:receive_timeout_ms` | `15_000` | Receive-idle budget |
+  | `:pool_timeout_ms` | `5000` | Connection-pool checkout budget |
+  | `:operation_timeout_ms` | `30_000` | Total client-operation budget, including streaming callbacks |
+  | `:max_request_bytes` | `1_048_576` | Encoded request body cap, at most 2 MiB |
+  | `:max_response_bytes` | `16_777_216` | Encoded response/stream cap, at most 32 MiB |
+
+  All budgets are positive and at most 900,000 ms. Byte caps are positive. HTTPS
+  always requires peer/hostname verification. The worker's own file-transfer cap
+  must be configured separately. Returns a typed `:validation` error for invalid
+  options. See [Low-level client](client.html) for transport examples.
+
+  ## Example
+
+      iex> {:ok, worker} = SmolBox.Worker.new("local", "http://127.0.0.1:19470", allow_insecure_loopback: true)
+      iex> worker.operation_timeout_ms
+      30_000
+  """
   @spec new(term(), term(), term()) :: {:ok, t()} | {:error, Error.t()}
   def new(id, base_url, options \\ []) do
     with true <- Keyword.keyword?(options),

@@ -36,6 +36,18 @@ defmodule SmolBox.MachineSpec do
           overlay_gb: pos_integer()
         }
 
+  @doc """
+  Describe a machine using a name and absolute `.smolmachine` path on the worker.
+
+  Names have at most 31 lowercase letters, digits, underscores or hyphens and
+  start with a letter/digit; `SmolBox.Identity.machine_name/1` generates opaque
+  names. Options are `:cpus` (default 1, range 1–64), `:memory_mb` (256, 128–16,384),
+  `:storage_gb` and `:overlay_gb` (each 1, range 1–64). For the reference templates,
+  explicitly request 20/10 GiB disks. Construction does not read the artifact.
+
+  Pass the validated value to `SmolBox.Client.create/2`. Use `SmolBox.Profile`
+  and `SmolBox.ExecutionSpec` for managed submissions instead.
+  """
   @spec new(term(), term(), term()) :: {:ok, t()} | {:error, Error.t()}
   def new(name, artifact_path, options \\ []) do
     with true <- Keyword.keyword?(options),
@@ -48,6 +60,7 @@ defmodule SmolBox.MachineSpec do
     end
   end
 
+  @doc "Revalidate the machine name, worker artifact path and allocation bounds."
   @spec validate(term()) :: :ok | {:error, Error.t()}
   def validate(%__MODULE__{} = spec) do
     if SmolBox.Validation.struct_shape?(spec, __MODULE__) and
@@ -68,6 +81,7 @@ defmodule SmolBox.MachineSpec do
     is_binary(name) and byte_size(name) <= 31 and Regex.match?(~r/\A[a-z0-9][a-z0-9_-]*\z/, name)
   end
 
+  @doc "Encode the pinned offline creation request after validation."
   @spec to_wire(t()) :: {:ok, map()} | {:error, Error.t()}
   def to_wire(spec) do
     with :ok <- validate(spec) do

@@ -11,6 +11,11 @@ defmodule SmolBox do
   guest. `cancel/3` persists intent; fetch the record to distinguish an observed
   exit, unknown outcome, confirmed termination, and eventual cleanup. No API
   automatically repeats an uncertain command.
+
+  Begin with the [Getting started](getting-started.html) walkthrough. Configure
+  the runtime with `child_spec/1`, describe work with `SmolBox.ExecutionSpec.new/1`,
+  then call `submit/2`. Use `SmolBox.Client` when your host already manages the
+  machine lifecycle and only needs individual worker operations.
   """
   alias SmolBox.{Error, Execution, ExecutionSpec, Runtime, Validation}
   alias SmolBox.Runtime.{Inspection, Session, WorkerConfig}
@@ -18,6 +23,42 @@ defmodule SmolBox do
   @type runtime :: Supervisor.supervisor()
   @type handle :: Execution.key()
 
+  @doc """
+  Build a named runtime child for your application's supervision tree.
+
+  Start the store before this child. The artifact adapter is `{module, context}`;
+  its context need not be a process. See the complete setup in
+  [Getting started](getting-started.html) and [Host integration](host-integration.html).
+
+  Required options:
+
+  | Option | Meaning |
+  |---|---|
+  | `:name` | An atom used to register this runtime and address the managed API |
+  | `:namespace` | Exclusive machine-name prefix: 1–10 lowercase letters/digits, starting with a letter |
+  | `:store` | `{adapter_module, context}` implementing `SmolBox.Store` |
+  | `:artifact_store` | `{adapter_module, context}` implementing `SmolBox.ArtifactStore` |
+  | `:fingerprint_key` | Stable host secret of 32–4096 bytes; keep it across durable restarts |
+
+  Optional options:
+
+  | Option | Default | Meaning |
+  |---|---|---|
+  | `:workers` | `[]` | Up to 64 `SmolBox.Runtime.WorkerConfig` values with unique worker IDs/endpoints; an empty list permits inspection but cannot admit new work |
+  | `:mode` | `:durable` | `:ephemeral` explicitly permits a non-durable store such as `SmolBox.Store.Memory` |
+  | `:max_pending` | `128` | Pending-queue bound, 1–10,000 |
+  | `:max_active` | `4` | Concurrent runtime work tasks, 1–64; worker reservations separately bound admitted guests |
+  | `:poll_ms` | `250` | Scan interval, 10–5000 ms |
+  | `:lease_ms` | `30_000` | Ownership lease, 1000–900,000 ms and at least four times `:poll_ms` |
+  | `:cleanup_attempts` | `5` | Automatic cleanup-attempt budget, 1–20 |
+  | `:telemetry_max_pending` | `128` | Notification bound, 1–1024 |
+  | `:telemetry_timeout_ms` | `100` | Handler delivery budget, 1–1000 ms |
+  | `:clock` | `SmolBox.Runtime.Clock` | Host clock module matching `SmolBox.Runtime.Clock.now/0` and `SmolBox.Runtime.Clock.monotonic/0`; primarily useful for tests |
+
+  Unknown options are rejected during startup. Stopping the runtime stops
+  observers; it does not establish guest termination. Use durable storage when
+  execution ownership must survive a controller restart.
+  """
   @spec child_spec(keyword()) :: Supervisor.child_spec()
   def child_spec(options),
     do: %{
@@ -26,6 +67,19 @@ defmodule SmolBox do
       type: :supervisor
     }
 
+  @doc """
+  Accept an immutable execution and return `{:ok, {scope, id}}`.
+
+  Acceptance records intent; it does not mean the guest has started or the command
+  has succeeded. The same scoped ID and semantic specification return the original
+  handle. A changed specification under that ID returns `:identity_conflict`.
+  At least one configured worker must support a new specification's exact profile
+  and approved artifact; otherwise acceptance returns `:unsupported_capability`.
+
+  Preserve the spec and identity after an ambiguous store/transport failure.
+  Inspect or resubmit the same identity to resolve acceptance; a fresh ID can
+  authorize another execution. Host code must authorize `spec.scope`.
+  """
   @spec submit(runtime(), ExecutionSpec.t()) :: {:ok, handle()} | {:error, Error.t()}
   def submit(runtime, spec) do
     with {:ok, config} <- config(runtime),
@@ -51,6 +105,14 @@ defmodule SmolBox do
     end
   end
 
+  @doc """
+  Read `{:ok, %SmolBox.Execution{}}` for an existing scoped identity.
+
+  Returns a typed `:not_found` error only when the store reports absence.
+  This is a read, with no worker command or implicit cancellation. The full record
+  includes its specification and output; authorize access and avoid logging it.
+  Inspect `state`, `result`, `collection`, `cleanup`, and `reservation` separately.
+  """
   @spec fetch(runtime(), String.t(), String.t()) :: SmolBox.Store.result()
   def fetch(runtime, scope, id) do
     with :ok <- key(scope, id),
@@ -58,6 +120,14 @@ defmodule SmolBox do
          do: Session.store(config, :fetch, [{scope, id}])
   end
 
+  @doc """
+  Persist cancellation intent and return the existing execution handle.
+
+  Repeated calls preserve the first cancellation timestamp. An acknowledgment is
+  not proof the VM has stopped. After dispatch, missing exit evidence can remain
+  unknown even after confirmed termination. A concurrently observed exit is
+  preserved. Use `fetch/3` to follow termination, collection, and cleanup.
+  """
   @spec cancel(runtime(), String.t(), String.t()) :: {:ok, handle()} | {:error, Error.t()}
   def cancel(runtime, scope, id) do
     with :ok <- key(scope, id),
@@ -78,6 +148,13 @@ defmodule SmolBox do
   @spec drain_worker(runtime(), String.t()) :: :ok | {:error, Error.t()}
   def drain_worker(runtime, worker_id), do: call(runtime, {:drain, worker_id})
 
+  @doc """
+  Read configured workers and their latest controller health/drain observations.
+
+  Results include configured capacity, allocation floor, platform, architecture,
+  version, qualification and status. Capacity is declared admission capacity,
+  not a live host free-memory/disk measurement. See [Telemetry](telemetry.html).
+  """
   @spec workers(runtime()) :: {:ok, [map()]} | {:error, Error.t()}
   def workers(runtime), do: call(runtime, :workers)
 
@@ -107,6 +184,18 @@ defmodule SmolBox do
     with {:ok, config} <- config(runtime), do: Inspection.page(config, worker_id, options)
   end
 
+  @doc """
+  Wait up to `timeout` milliseconds for a terminal or unknown stored outcome.
+
+  `timeout` is 0–900,000 ms. Returns `{:ok, %SmolBox.Execution{}}` for a terminal
+  state or `:unknown`, or `{:error, %SmolBox.Error{category: :expired}}` when this
+  caller's wait expires. Store and validation errors are returned normally.
+
+  A returned record can have a nonzero command exit, collection failure, or no
+  known exit. Cleanup and capacity release may still be pending. This function
+  never cancels the command; it is safe to await the same handle again. Use
+  `cancel/3` for cancellation and `fetch/3` to inspect continuing cleanup.
+  """
   @spec await(runtime(), handle(), non_neg_integer()) :: SmolBox.Store.result()
   def await(runtime, {scope, id}, timeout) do
     if Validation.integer?(timeout, 0, 900_000),

@@ -46,6 +46,40 @@ defmodule SmolBox.ExecutionSpec do
           metadata: %{String.t() => String.t() | integer() | boolean() | nil}
         }
 
+  @doc """
+  Validate a complete managed execution specification without dispatching it.
+
+  Required options are `:scope`, `:id`, `:command` (`SmolBox.Command`), `:profile`
+  (`SmolBox.Profile`), and `:artifact`. Scope and ID are 1–128 ASCII letters,
+  digits, dots, underscores, colons or hyphens, starting with a letter/digit.
+  The artifact has exactly string keys `"id"`, `"sha256"`, and `"architecture"`;
+  its approved worker path is resolved from `SmolBox.Runtime.WorkerConfig`.
+
+  | Optional field | Default | Meaning |
+  |---|---|---|
+  | `:inputs` | `[]` | Up to 32 exact input declarations; see `SmolBox.Manifest` |
+  | `:outputs` | `[]` | Up to 32 exact output declarations; see `SmolBox.Manifest` |
+  | `:queue_ms` | `60_000` | 1–86,400,000 ms from first acceptance until queue expiry |
+  | `:retention_ms` | `86_400_000` | 60,000–2,592,000,000 ms after the execution deadline for unknown-outcome retention |
+  | `:metadata` | `%{}` | Up to 16 string identifier keys with string (up to 256 bytes), bounded integer, boolean or nil values |
+
+  The command timeout in seconds must fit the profile's execution budget in
+  milliseconds. Successful construction proves shape and bounds, not worker
+  availability or artifact approval; `SmolBox.submit/2` checks configured support.
+  All semantic fields participate in identity conflict detection.
+
+  ## Example
+
+      iex> {:ok, command} = SmolBox.Command.new(["python", "-c", "print(42)"])
+      iex> {:ok, profile} = SmolBox.Profile.new("offline-v1", storage_gb: 20, overlay_gb: 10, host_overhead_mb: 768)
+      iex> artifact = %{"id" => "python-v1", "sha256" => SmolBox.Files.sha256("example image bytes"), "architecture" => "aarch64"}
+      iex> {:ok, spec} = SmolBox.ExecutionSpec.new(scope: "demo", id: "request-1", command: command, profile: profile, artifact: artifact)
+      iex> {spec.scope, spec.id, spec.queue_ms}
+      {"demo", "request-1", 60_000}
+
+  The digest above is only a constructor example. Actual execution requires the
+  digest of an approved prepared image, as shown in [Getting started](getting-started.html).
+  """
   @spec new(term()) :: {:ok, t()} | {:error, Error.t()}
   def new(options) do
     allowed = [
@@ -70,6 +104,7 @@ defmodule SmolBox.ExecutionSpec do
     end
   end
 
+  @doc "Revalidate a specification, including its command, profile, file declarations and budgets."
   @spec validate(term()) :: :ok | {:error, Error.t()}
   def validate(%__MODULE__{} = spec) do
     with true <- Validation.struct_shape?(spec, __MODULE__),

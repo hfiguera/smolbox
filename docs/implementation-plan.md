@@ -49,6 +49,37 @@ changes, freeze a new candidate and repeat the complete required matrix, includi
 the existing Linux/macOS real-runtime suites. The original RC tag and attestation
 continue to describe only candidate `164c0c2`.
 
+Post-candidate documentation review, September 7: ExDoc now starts at the README,
+groups guides and API modules by use, and omits developer Mix tasks from public
+navigation. The new getting-started guide covers worker/artifact preparation,
+supervision, input staging, duplicate submission, execution, output reading and
+confirmed cleanup. Troubleshooting and constructor option references explain
+failure outcomes and defaults. Evidence JSON files are copied into the generated
+site; a new CI task checks local files and HTML fragments. These changes are
+unreleased and do not move the accepted candidate tag or its source links.
+
+On macOS with Elixir 1.20.4/OTP 28.5, `mix ci` passed 186 cases (4 doctests,
+6 properties, 176 tests), all five analyzers, formatting, compilation and the
+dependency-cycle check. The 14 separately tagged real-runtime cases were excluded
+from that deterministic command, as intended. The 22 standalone CI-tool tests
+also passed. ExDoc built with warnings treated as errors; all 42 generated HTML
+pages passed the local-link check. Browser review verified the guide layout,
+navigation and API search. Three regression tests prove that valid generated
+links pass and missing files/fragments or an absent site fail.
+
+The exact final walkthrough code block was extracted from the guide and run on
+the existing native macOS SmolVM 1.14.1 worker, with Python artifact SHA-256
+`d982cfdf0c59b862ad3e1b107446b127460f716c8407fd0e2b6b0de2a62fe18e`.
+It returned the original handle on duplicate submission, printed the expected
+message, collected `42\n`, and confirmed completed cleanup with no reservation.
+The worker inventory was empty afterward and its original process was preserved.
+Current and minimum production consumers passed from the same 82-file archive
+with SHA-256 `03a9ac8eb86f9631e04f8389abadd48456449c7040179d2ef107a4558600ee33`;
+the minimum consumer used Elixir 1.18.4/OTP 27.3.4.15. Both new guides are packaged.
+The newly pinned Elixir 1.20.4/OTP 29.0.6 pair was unavailable locally and was not
+validated by this review. This is documentation-change evidence, not a rerun of
+the complete Linux/macOS release-candidate matrix.
+
 The source repository is [hfiguera/smolbox](https://github.com/hfiguera/smolbox).
 The `origin` remote, package metadata and ExDoc source links use this repository.
 It remains private during implementation; public visibility is not a prerequisite
@@ -1378,6 +1409,7 @@ Additional CI commands, with the needed development dependencies configured:
 MIX_ENV=test mix smolbox.ci.verify_checks
 MIX_ENV=test mix test --cover --warnings-as-errors
 MIX_ENV=dev mix docs --warnings-as-errors
+MIX_ENV=dev mix smolbox.ci.docs
 MIX_ENV=dev mix hex.audit
 MIX_ENV=dev mix deps.audit
 MIX_ENV=dev mix hex.build
@@ -1405,7 +1437,7 @@ Use the pinned Mix version's `test_coverage` summary threshold configuration and
 | `smolbox-minimal-host` | Standalone minimal example compilation, Dialyzer and audits | Path dependency type information is refreshed; no example-only dependency enters the library |
 | `smolbox-quality-canaries` | Isolated deliberate analyzer and dependency-cycle violations | Each gate fails for its expected reason; clean counterparts pass |
 | `smolbox-security` | Retired dependency and vulnerability audits | Current advisory fetch succeeds and policy passes |
-| `smolbox-docs-package` | Docs, Hex build, tar inspection, fresh consumer | No docs warnings; usable package without CI/example dependencies |
+| `smolbox-docs-package` | Docs, generated local-link check, Hex build, tar inspection, fresh consumer | No docs warnings or broken local links/fragments; packaged user guides; usable package without CI/example dependencies |
 | `smolbox-minimum-dependencies` | Fresh production consumer with minimum direct dependencies on Elixir 1.18.4/OTP 27.3.4.15 | Explicit dependency versions, package compilation and public API/supervisor smoke checks pass |
 | `smolbox-required` | Ordinary CI aggregate with explicit dependency-result checks | Every ordinary check succeeds; missing, failed, cancelled or skipped dependencies fail |
 | `smolbox-runtime-candidate` | Optional manual qualification: infrastructure enablement and exact candidate commit | Infrastructure is explicitly enabled; checked-out commit is passed to both platforms |

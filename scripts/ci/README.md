@@ -30,6 +30,35 @@ reviewed commit through a maintainer-controlled branch/ref; live jobs check out
 the recorded commit, and their preflight records it.
 Validating another branch tip does not qualify the release candidate.
 
+## Documentation and package checks
+
+Build the site and check its generated local links from the repository root:
+
+```sh
+MIX_ENV=dev mix docs --warnings-as-errors
+MIX_ENV=dev mix smolbox.ci.docs
+```
+
+The docs/package CI job runs both commands. The second command checks local
+`href` and `src` files and HTML fragments, including evidence assets that ExDoc's
+reference warnings do not cover. It accepts an optional output-directory argument
+and fails if no HTML pages exist. It does not request external URLs or establish
+that private GitHub links are accessible to a reader.
+
+ExDoc 0.40.4 deliberately references an optional, hosting-provided `docs_config.js`
+version-menu script without generating it locally. The checker excludes only
+that exact generated script tag; other missing assets fail. Tests exercise a
+valid site, missing files/fragments and an absent site. Constructor doctests run
+with the ordinary deterministic suite. Developer Mix tasks remain compiled for
+maintainer use but are filtered out of public ExDoc navigation.
+
+`elixir scripts/ci.exs package-consumer --report /absolute/path/to/report.json`
+builds a fresh archive, checks the explicit package allowlist and starts a separate
+production consumer. The getting-started and troubleshooting guides must be in
+the archive. Examples, tests, maintainer tooling and external references must not
+be in it. For a release, validate both current and minimum consumers against the
+same saved archive as described in the implementation plan.
+
 ## Dependency cycles
 
 Run `MIX_ENV=test mix xref graph --format cycles --fail-above 0` from the repository

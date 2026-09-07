@@ -23,7 +23,30 @@ defmodule SmolBox.Command do
           timeout_secs: pos_integer()
         }
 
-  @doc "Validate arguments and reject duplicate or unknown options."
+  @doc """
+  Create a command from an executable and argument list, without inserting a shell.
+
+  `argv` has 1–256 UTF-8 entries, at most 16 KiB each and 64 KiB combined. The
+  executable must be nonempty; arguments may be empty. NUL bytes are rejected.
+
+  | Option | Default | Meaning |
+  |---|---|---|
+  | `:workdir` | `"/workspace"` | Validated absolute guest workspace path |
+  | `:timeout_secs` | `30` | Upstream command timeout, a whole number from 1–300 seconds |
+  | `:env` | `[]` | Up to 64 unique `{string_name, string_value}` pairs; names up to 128 bytes, values up to 8192 bytes |
+  | `:stdin` | `nil` | Up to 64 KiB of UTF-8 text; buffered execution only |
+  | `:user` | `nil` | Optional nonempty guest user string, at most 128 bytes |
+
+  Environment variable names use letters/digits/underscores and cannot begin
+  with a digit. Binary inputs belong in files. In managed execution, the command
+  timeout must fit the profile's `execution_ms` budget.
+
+  ## Example
+
+      iex> {:ok, command} = SmolBox.Command.new(["python", "/workspace/main.py"], timeout_secs: 10, env: [{"MODE", "demo"}])
+      iex> {command.argv, command.timeout_secs, command.workdir}
+      {["python", "/workspace/main.py"], 10, "/workspace"}
+  """
   @spec new(term(), term()) :: {:ok, t()} | {:error, Error.t()}
   def new(argv, options \\ []) do
     if valid_options?(options) do

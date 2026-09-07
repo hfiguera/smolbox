@@ -51,6 +51,27 @@ defmodule SmolBox.Runtime.WorkerConfig do
           draining: boolean()
         }
 
+  @doc """
+  Register a worker's approved artifacts, profiles, and admission capacity.
+
+  Required keyword options:
+
+  | Option | Value |
+  |---|---|
+  | `:client` | A validated `SmolBox.Client` |
+  | `:platform` | `:linux` or `:macos`; initially qualified hosts are Linux x86_64 and macOS Apple Silicon |
+  | `:architecture` | `"x86_64"` or `"aarch64"`; macOS requires `"aarch64"` |
+  | `:artifacts` | 1–32 maps with exactly string keys `"id"`, `"sha256"`, `"architecture"`, and absolute worker `"path"` ending in `.smolmachine` |
+  | `:profiles` | 1–32 valid `SmolBox.Profile` values with unique IDs |
+  | `:capacity` | Atom-keyed map with `:slots`, `:cpus`, `:memory_mb`, and `:disk_gb`; each 1–1,048,576 |
+  | `:allocation_floor` | Atom-keyed map with `:storage_gb` and `:overlay_gb` (1–64 each), and `:host_overhead_mb` (128–16,384) |
+
+  Optional fields are `:runtime_version` (only `"1.14.1"`), `:qualification`
+  (only `:development`), and `:draining` (default `false`). Artifact IDs must be
+  unique and architectures must match this worker. Construction makes no worker
+  request or remote digest check. Profiles below the floor cannot support execution.
+  See [Getting started](getting-started.html) for a complete configuration.
+  """
   @spec new(keyword()) :: {:ok, t()} | {:error, Error.t()}
   def new(options) do
     if Validation.keys?(options, @enforce_keys ++ [:runtime_version, :qualification, :draining]) and
@@ -62,6 +83,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
     end
   end
 
+  @doc "Revalidate configuration shape, catalogs and declarations without contacting the worker."
   @spec validate(term()) :: :ok | {:error, Error.t()}
   def validate(%__MODULE__{} = worker) do
     if Validation.struct_shape?(worker, __MODULE__) and valid_fields?(worker),
@@ -71,6 +93,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   def validate(_worker), do: invalid()
 
+  @doc "Check exact profile/artifact approval and allocation floors; this is not a health probe."
   @spec supports?(t(), ExecutionSpec.t()) :: boolean()
   def supports?(worker, spec) do
     spec.profile in worker.profiles and allocation_fits?(worker, spec.profile) and
@@ -81,6 +104,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
       )
   end
 
+  @doc "Resolve the worker-local image path for a specification already accepted by `supports?/2`."
   @spec artifact_path(t(), ExecutionSpec.t()) :: String.t()
   def artifact_path(worker, spec) do
     Enum.find(

@@ -7,6 +7,7 @@ defmodule SmolBox.MixProject do
   def project do
     [
       app: :smolbox,
+      name: "SmolBox",
       version: @version,
       source_url: @source_url,
       elixir: "~> 1.18",
@@ -28,6 +29,8 @@ defmodule SmolBox.MixProject do
           "README.md",
           "CHANGELOG.md",
           "LICENSE",
+          "docs/getting-started.md",
+          "docs/troubleshooting.md",
           "docs/client.md",
           "docs/host-integration.md",
           "docs/recovery.md",
@@ -39,11 +42,71 @@ defmodule SmolBox.MixProject do
         ]
       ],
       docs: [
+        main: "readme",
         source_ref: "v#{@version}",
+        filter_modules: ~r/^Elixir\.SmolBox(?:\.|$)/,
+        assets: %{"docs/evidence" => "evidence"},
+        groups_for_extras: [
+          "Start here": ["README.md", "docs/getting-started.md"],
+          "Using SmolBox": [
+            "docs/client.md",
+            "docs/host-integration.md",
+            "docs/troubleshooting.md",
+            "docs/telemetry.md"
+          ],
+          "Operations and compatibility": [
+            "docs/recovery.md",
+            "docs/security.md",
+            "docs/resource-qualification.md",
+            "docs/compatibility.md"
+          ]
+        ],
+        groups_for_modules: [
+          "Managed execution": [
+            SmolBox,
+            SmolBox.Runtime,
+            SmolBox.Runtime.WorkerConfig,
+            SmolBox.ExecutionSpec,
+            SmolBox.Execution,
+            SmolBox.Profile
+          ],
+          "Client and commands": [
+            SmolBox.Client,
+            SmolBox.Worker,
+            SmolBox.Command,
+            SmolBox.MachineSpec,
+            SmolBox.Machine,
+            SmolBox.Health,
+            SmolBox.Result,
+            SmolBox.Error
+          ],
+          "Files and artifacts": [
+            SmolBox.ArtifactStore,
+            SmolBox.ArtifactStore.Directory,
+            SmolBox.Manifest,
+            SmolBox.Files
+          ],
+          "Store adapters": [
+            SmolBox.Store,
+            SmolBox.Store.Memory,
+            SmolBox.Store.Codec,
+            SmolBox.Store.RecordOps
+          ],
+          "Extensions and internals": [
+            SmolBox.Telemetry,
+            SmolBox.Identity,
+            SmolBox.Transport,
+            SmolBox.Transport.Req,
+            SmolBox.Wire.SSE,
+            SmolBox.Runtime.Clock
+          ]
+        ],
         extras: [
           "README.md",
+          "docs/getting-started.md",
           "docs/client.md",
           "docs/host-integration.md",
+          "docs/troubleshooting.md",
           "docs/recovery.md",
           "docs/telemetry.md",
           "docs/security.md",

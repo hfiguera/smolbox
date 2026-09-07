@@ -62,6 +62,38 @@ defmodule SmolBox.Profile do
           cleanup_ms: pos_integer()
         }
 
+  @doc """
+  Create an immutable host-approved profile revision.
+
+  | Option | Default | Range/meaning |
+  |---|---|---|
+  | `:cpus` | `1` | 1–64 guest vCPUs |
+  | `:memory_mb` | `256` | 128–16,384 MiB guest allocation |
+  | `:storage_gb` | `1` | 1–64 GiB storage allocation |
+  | `:overlay_gb` | `1` | 1–64 GiB overlay allocation |
+  | `:host_overhead_mb` | `256` | 128–16,384 MiB additional admission reservation |
+  | `:max_output_bytes` | `1_048_576` | 1 byte–8 MiB of combined captured stdout/stderr |
+  | `:max_file_bytes` | `1_048_576` | 1 byte–1 MiB per declared file |
+  | `:max_total_file_bytes` | `4_194_304` | 1 byte–16 MiB per direction; must cover `:max_file_bytes` |
+  | `:preparation_ms` | `60_000` | First preparation stage budget |
+  | `:execution_ms` | `30_000` | Command observation budget |
+  | `:collection_ms` | `30_000` | Output collection budget |
+  | `:cleanup_ms` | `30_000` | Cleanup mutation budget, separate from unknown-outcome retention |
+
+  Each stage budget must be 1000–300,000 ms. A default profile is structurally
+  valid but its 1/1 GiB disks do **not** meet the reference SmolVM 1.14.1 template
+  floor. Use the actual operator-verified floor, as in the example below.
+
+  Give every changed policy a new `id`; managed submission matches the complete
+  profile against the worker's catalog. Unsupported hard quotas and networking,
+  mounts, ports, GPU, restart or background options return `:unsupported_capability`.
+
+  ## Example
+
+      iex> {:ok, profile} = SmolBox.Profile.new("offline-v1", storage_gb: 20, overlay_gb: 10, host_overhead_mb: 768)
+      iex> {profile.storage_gb, profile.overlay_gb, profile.max_output_bytes}
+      {20, 10, 1_048_576}
+  """
   @spec new(term(), term()) :: {:ok, t()} | {:error, Error.t()}
   def new(id, options \\ []) do
     with :ok <- supported(options),
@@ -75,6 +107,7 @@ defmodule SmolBox.Profile do
     end
   end
 
+  @doc "Revalidate profile shape and bounds; this does not attest worker enforcement."
   @spec validate(term()) :: :ok | {:error, Error.t()}
   def validate(%__MODULE__{} = profile) do
     if Validation.struct_shape?(profile, __MODULE__),

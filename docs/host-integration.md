@@ -1,14 +1,19 @@
 # Managed host integration
 
+Start with [Getting started](getting-started.md) for a complete runnable example.
+This guide explains how to adapt that flow to your application's supervision,
+authorization, durable storage, and worker configuration. Constructor options are
+documented in `SmolBox.child_spec/1` and `SmolBox.Runtime.WorkerConfig.new/1`.
+
 See [telemetry and inspection](telemetry.md) for bounded lifecycle observations,
 notification failure semantics, and authoritative operator fields.
 See [deployment boundaries](security.md) for worker/proxy setup, artifact trust,
 storage responsibilities and upgrade/recovery procedures.
 
 The managed runtime has real Linux/macOS execution and durable fault recovery
-coverage. Full resource and hostile-workload qualification is still in progress. Its current
-worker qualification is explicitly development use; do not advertise it as a
-production multi-tenant isolation certificate.
+coverage. Production resource and hostile-workload qualification are outside the
+first-release scope. Its current worker qualification is explicitly development
+use; it is not a production multi-tenant isolation certificate.
 
 The host owns authorization, prepared runtime artifacts, worker installation,
 proxy credentials, persistence, and artifact retention. SmolBox owns one command

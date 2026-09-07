@@ -26,6 +26,14 @@ defmodule SmolBox.Client do
   defstruct [:worker, transport: SmolBox.Transport.Req]
   @type t :: %__MODULE__{worker: Worker.t(), transport: module()}
 
+  @doc """
+  Create a client from validated worker configuration without network I/O.
+
+  The only option is `:transport`, a module implementing `SmolBox.Transport`;
+  the default is `SmolBox.Transport.Req`. Client operations return typed
+  `SmolBox.Error` values and never automatically retry mutations. For managed
+  execution identity, observation and cleanup, use `SmolBox` instead.
+  """
   @spec new(Worker.t(), keyword()) :: {:ok, t()} | {:error, Error.t()}
   def new(worker, options \\ []) do
     with :ok <- Worker.validate(worker),
@@ -40,6 +48,13 @@ defmodule SmolBox.Client do
     end
   end
 
+  @doc """
+  Read server-reported health and version as `{:ok, %SmolBox.Health{}}`.
+
+  Missing inventory counts remain `nil`. This observation does not qualify the
+  worker's artifacts or isolation; use `readiness/1` for the separate pool probe.
+  Managed admission independently requires the pinned version.
+  """
   @spec health(t()) :: {:ok, Health.t()} | {:error, Error.t()}
   def health(client) do
     with {:ok, body} <- json(client, :get, "/health", nil, :health),
@@ -56,6 +71,15 @@ defmodule SmolBox.Client do
     end
   end
 
+  @doc """
+  Create an offline machine from an approved prepared artifact on the worker.
+
+  Returns the creation observation after matching name and requested allocations.
+  Persist intent before this call and creation evidence before further mutations.
+  A lost or mismatched response can leave creation uncertain; it does not authorize
+  retry or deletion by name. See `SmolBox.MachineSpec.new/3` and the
+  [client lifecycle example](client.html).
+  """
   @spec create(t(), MachineSpec.t()) :: {:ok, Machine.t()} | {:error, Error.t()}
   def create(client, spec) do
     with {:ok, wire} <- MachineSpec.to_wire(spec),
@@ -69,6 +93,12 @@ defmodule SmolBox.Client do
     end
   end
 
+  @doc """
+  Read up to 1024 machine observations from the configured worker.
+
+  All entries must satisfy the supported offline machine contract; an incompatible
+  entry fails the result. Listing does not establish ownership or authorize cleanup.
+  """
   @spec list(t()) :: {:ok, [Machine.t()]} | {:error, Error.t()}
   def list(client) do
     with {:ok, body} <- json(client, :get, "/api/v1/machines", nil, :list) do
@@ -76,13 +106,30 @@ defmodule SmolBox.Client do
     end
   end
 
+  @doc "Read a named machine without starting it; absence is a typed `:not_found` error."
   @spec inspect_machine(t(), String.t()) :: {:ok, Machine.t()} | {:error, Error.t()}
   def inspect_machine(client, name), do: lifecycle(client, name, :get, "", :inspect)
+  @doc "Start a machine and return its observation. The caller must establish ownership first."
   @spec start(t(), String.t()) :: {:ok, Machine.t()} | {:error, Error.t()}
   def start(client, name), do: lifecycle(client, name, :post, "/start", :start)
+
+  @doc """
+  Stop an owned machine and return its observation.
+
+  This does not recover the command's exit code or fence an earlier delayed exec
+  request. The caller must verify the returned state and continue appropriate
+  reconciliation. See [Recovery](recovery.html).
+  """
   @spec stop(t(), String.t()) :: {:ok, Machine.t()} | {:error, Error.t()}
   def stop(client, name), do: lifecycle(client, name, :post, "/stop", :stop)
 
+  @doc """
+  Delete an owned machine and validate the worker's deletion acknowledgment.
+
+  Returns `:ok` on a matching acknowledgment. Establish ownership and termination
+  before calling; verify absence afterward with `inspect_machine/2`. This low-level
+  operation does not manage retention or release a managed execution's reservation.
+  """
   @spec delete(t(), String.t()) :: :ok | {:error, Error.t()}
   def delete(client, name) do
     with {:ok, path} <- machine_path(name),
@@ -93,6 +140,17 @@ defmodule SmolBox.Client do
     end
   end
 
+  @doc """
+  Execute a command with buffered, byte-preserving stdout and stderr.
+
+  `:max_output_bytes` defaults to 1 MiB and accepts 1 byte–8 MiB combined output.
+  The worker's encoded response cap also applies. Bounded UTF-8 stdin is supported
+  through `SmolBox.Command`. A nonzero exit returns `{:ok, %SmolBox.Result{}}`.
+
+  Exec can start a stopped VM. A timeout or lost response does not prove the
+  command failed or terminated; never automatically replay an uncertain exec.
+  An output-limit error may retain a known exit code; inspect its evidence.
+  """
   @spec exec(t(), String.t(), Command.t(), keyword()) :: {:ok, Result.t()} | {:error, Error.t()}
   def exec(client, name, command, options \\ []) do
     with {:ok, max} <- output_options(options, [:max_output_bytes]),
@@ -103,6 +161,18 @@ defmodule SmolBox.Client do
     end
   end
 
+  @doc """
+  Execute through SSE, returning bounded output with `encoding: :lossy_utf8`.
+
+  Options are `:max_output_bytes` (default 1 MiB, range 1 byte–8 MiB combined) and
+  `:on_event`, an optional one-argument function. It receives `{:stdout, text}`,
+  `{:stderr, text}`, and `{:exit, integer}` synchronously. A crashing callback is
+  detached; a blocked callback consumes the overall operation deadline. Notifications
+  are advisory and the encoded response cap includes stream framing.
+
+  Streaming stdin is rejected on the pinned worker; use `exec/4` or files. A lost
+  stream is not guest termination. Binary output should use buffered execution.
+  """
   @spec exec_stream(t(), String.t(), Command.t(), keyword()) ::
           {:ok, Result.t()} | {:error, Error.t()}
   def exec_stream(client, name, command, options \\ []) do
@@ -125,6 +195,14 @@ defmodule SmolBox.Client do
     end
   end
 
+  @doc """
+  Upload up to 1 MiB of bytes to an exact guest workspace path.
+
+  `sha256` is the lowercase digest from `SmolBox.Files.sha256/1`. The client verifies
+  it before sending and checks the worker's path/size acknowledgment. This endpoint
+  can start a stopped VM; it is a mutation and must not be blindly retried.
+  Permissions and atomic rename are not caller-configurable through this API.
+  """
   @spec upload(t(), String.t(), String.t(), binary(), String.t()) :: :ok | {:error, Error.t()}
   def upload(client, name, guest_path, bytes, sha256) do
     with :ok <- input_bytes(bytes, sha256),
@@ -148,6 +226,15 @@ defmodule SmolBox.Client do
     end
   end
 
+  @doc """
+  Download one exact guest workspace file, preserving its bytes.
+
+  `max_bytes` is required, from 1 byte through 1 MiB. The smaller of this limit and
+  the worker response cap applies. Downloads can start a stopped machine, so they
+  are not passive recovery probes. Lexical path checks do not establish symlink
+  containment. Managed outputs should be read through the artifact adapter after
+  collection, rather than reopening the guest after cleanup.
+  """
   @spec download(t(), String.t(), String.t(), pos_integer()) ::
           {:ok, binary()} | {:error, Error.t()}
   def download(client, name, guest_path, max_bytes) do

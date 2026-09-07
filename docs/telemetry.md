@@ -12,6 +12,32 @@ Use `SmolBox.Telemetry.events/0` to register a handler with
 attachment, detachment, export and retention. A handler should finish promptly;
 any downstream queue or service it uses needs its own bounds and redaction policy.
 
+## Attach a handler
+
+This complete example logs event names at debug level without exposing execution
+identifiers, command output, or artifact data:
+
+```elixir
+defmodule MyApp.SmolBoxEvents do
+  require Logger
+
+  def handle_event(event, _measurements, _metadata, _config) do
+    Logger.debug(fn -> "SmolBox event: " <> Enum.join(event, ".") end)
+  end
+end
+
+:ok = :telemetry.attach_many(
+  "my-app-smolbox-events",
+  SmolBox.Telemetry.events(),
+  &MyApp.SmolBoxEvents.handle_event/4,
+  nil
+)
+```
+
+Attach once during host startup. Remove the handler with
+`:telemetry.detach("my-app-smolbox-events")`. Applications that export measurements
+can use the fields below, with bounded queues and finite metric labels.
+
 ## Events and measurements
 
 All names start with `[:smolbox]`. Execution events carry `count`, stored

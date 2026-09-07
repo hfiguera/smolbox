@@ -12,7 +12,7 @@ defmodule SmolBox.CI.Package do
   }
   @forbidden ~w(credo ex_slop ex_dna credence dialyxir ex_doc mix_audit ecto ecto_sql postgrex stream_data plug bandit)
   @public ~w(mix.exs README.md CHANGELOG.md LICENSE)
-  @docs ~w(client host-integration recovery telemetry security resource-qualification compatibility)
+  @docs ~w(getting-started troubleshooting client host-integration recovery telemetry security resource-qualification compatibility)
 
   def run(arguments) do
     {options, []} =

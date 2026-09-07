@@ -14,6 +14,15 @@ defmodule SmolBox.Store.Memory do
   alias SmolBox.{Error, Execution, MachineSpec, Store, Validation}
   alias SmolBox.Store.{Codec, RecordOps}
 
+  @doc """
+  Start an ephemeral store, optionally registered with `:name`.
+
+  `:max_records` defaults to 256 (maximum 10,000); `:max_bytes` defaults to 64 MiB
+  (maximum 1 GiB). Both must be positive. The byte limit covers encoded records,
+  not total process memory. Use the PID or registered name as the store context:
+  `{SmolBox.Store.Memory, store}`. A runtime using it must set `mode: :ephemeral`.
+  Completed identities are retained and count toward these limits.
+  """
   @spec start_link(keyword()) :: GenServer.on_start()
   def start_link(options \\ []) do
     {name, options} = Keyword.pop(options, :name)

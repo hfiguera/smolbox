@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Add a complete managed-execution walkthrough, troubleshooting guide, tested
+  constructor examples and public API option references. Make the README the
+  ExDoc entry point and group the guides and APIs by use.
+- Include linked evidence assets in the generated documentation and reject
+  broken local file/fragment links in CI. Package both new user guides; keep
+  developer-only Mix tasks out of the public API navigation.
 - Remove dependency cycles in execution validation, the CI command runner and
   the durable host example. Public APIs and persisted record formats are unchanged;
   machine identity and execution writes remain in the same store transaction.

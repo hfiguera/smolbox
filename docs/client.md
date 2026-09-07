@@ -2,8 +2,9 @@
 
 This API performs one verified worker operation at a time. It does not persist
 request identities, reserve capacity, reconcile a crash, or authorize deletion.
-Use it only when host code owns those responsibilities. The managed runtime is
-implemented with development qualification; release acceptance remains incomplete.
+Use it when host code owns those responsibilities. For a complete managed
+execution, begin with [Getting started](getting-started.md). This guide describes
+the pinned 1.14.1 client contract and its development-qualified worker boundary.
 
 Install the pinned SmolVM release from [compatibility evidence](compatibility.md).
 Prepare an approved, architecture-matched `.smolmachine` artifact on the worker

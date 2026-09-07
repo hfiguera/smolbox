@@ -283,6 +283,7 @@ jobs:
         run: |
           MIX_ENV=dev mix deps.get
           MIX_ENV=dev mix docs --warnings-as-errors
+          MIX_ENV=dev mix smolbox.ci.docs
           elixir scripts/ci.exs package-consumer --report "$RUNNER_TEMP/smolbox-consumer-current.json" --package-output "$RUNNER_TEMP/smolbox-consumer-current.tar"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:

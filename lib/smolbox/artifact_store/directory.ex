@@ -25,6 +25,13 @@ defmodule SmolBox.ArtifactStore.Directory do
   @type t :: %__MODULE__{root: String.t()}
   @max 1_048_576
 
+  @doc """
+  Configure an absolute existing private directory with mode `0700`.
+
+  The directory is not created by this call. Pass the returned context as
+  `{SmolBox.ArtifactStore.Directory, context}` in the runtime's `:artifact_store`
+  option. This adapter is not a process and needs no supervisor child.
+  """
   @spec new(String.t()) :: {:ok, t()} | {:error, Error.t()}
   def new(root) when is_binary(root) do
     with true <- Path.type(root) == :absolute,
@@ -38,6 +45,13 @@ defmodule SmolBox.ArtifactStore.Directory do
 
   def new(_root), do: error(:validation)
 
+  @doc """
+  Store approved input bytes under a scope and opaque source reference.
+
+  Bytes must fit within 1 MiB. The source reference is used as `"source"` in an
+  input manifest; it is not a filename. Repeating identical bytes succeeds;
+  different bytes under the same reference return an identity conflict.
+  """
   @spec seed(t(), String.t(), String.t(), binary()) :: :ok | {:error, Error.t()}
   def seed(store, scope, reference, bytes) when is_binary(bytes),
     do: save(store, {:input, scope, reference}, bytes, Files.sha256(bytes))
@@ -51,6 +65,13 @@ defmodule SmolBox.ArtifactStore.Directory do
   def put(store, {scope, id}, destination, bytes, digest),
     do: save(store, {:output, scope, id, destination}, bytes, digest)
 
+  @doc """
+  Read a collected output using its execution handle and manifest destination.
+
+  `max` is a positive byte limit up to 1 MiB. This reads host artifact storage and
+  remains usable after VM cleanup. `:not_found` means no receipt/blob was found;
+  check the execution's collection state before expecting an output.
+  """
   @spec read_output(t(), {String.t(), String.t()}, String.t(), pos_integer()) ::
           {:ok, binary()} | {:error, Error.t()}
   def read_output(store, {scope, id}, destination, max),

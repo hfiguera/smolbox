@@ -1,22 +1,21 @@
 # Persistence and recovery contract
 
-The store behaviour, versioned execution records, bounded memory adapter, and
-shared adapter tests are implemented. The host-owned Ecto/Postgres example passes
-real database conformance and fresh-process reads. The supervised managed runtime
-passes 20 real database-backed controller process-kill boundaries on each initial
-platform, including notification delivery and the full example retention interval. Actual API-server
-SIGKILL/restart also passes on Linux and macOS: the VM survives the server,
-the command result stays unknown, and verified cleanup eventually releases its
-reservation without another dispatch. Real worker outages beyond cleanup deadlines,
-missing VMs, output-directory outages, and cancellation at SQL result commit also
-pass on both platforms. Full resource qualification remains incomplete; this is
-not yet a release candidate.
+Use a durable store when executions must survive an application restart. SmolBox
+persists intent and observations; the host adapter supplies transactions and
+durability. The included PostgreSQL example has real database and process-recovery
+coverage on Linux and macOS. Production hostile-workload qualification is outside
+the first-release scope. See [Compatibility](compatibility.md) for recorded evidence
+and [Troubleshooting](troubleshooting.md) for common operational symptoms.
+
+## Store contract
 
 `SmolBox.Store` defines atomic acceptance, authoritative lookup, worker leases,
 execution claims, compare-and-swap writes, reservations, release, cancellation
 intent, resource inspection, and bounded due-work scans. A host adapter owns its
 database, migrations, credentials, encryption, availability, and retention.
 The core package has no database dependency and never runs host migrations.
+
+## Identity, claims, and replay
 
 An execution key is `{scope, execution_id}`. Acceptance stores the immutable spec
 and keyed fingerprint before any worker action. Identical duplicates return the
@@ -37,6 +36,8 @@ The selected worker API has no durable command receipt. An uncertain operation
 can remain unknown indefinitely even after its VM is confirmed stopped or absent.
 Only the host can authorize a distinct execution attempt under a new identity.
 
+## Outcomes and deadlines
+
 Execution, collection and cleanup remain separate. Nonzero exit is an observed
 result. Failed output collection cannot erase it, and failed cleanup cannot turn
 it into a failed command. Error history retains the latest eight redacted entries.
@@ -49,6 +50,8 @@ Absolute queue and stage deadlines survive reloads. First entry sets preparation
 execution, collection, and cleanup budgets; repeated inspection never resets
 them. Due queries use bounded pages ordered by `{next_due_at_ms, scope, id}`.
 Records remain the authority when observers, callers or mailboxes disappear.
+
+## Storage adapters
 
 `SmolBox.Store.Memory` is explicitly ephemeral. A process/VM restart loses its
 records and can leave machines behind. It bounds record count and encoded record
@@ -64,18 +67,24 @@ encrypt secrets: adapters must authenticate and encrypt payloads or use an
 explicitly approved equivalent storage policy. Unknown-schema or corrupt rows
 are errors requiring migration or investigation, never permission to start over.
 
-The reusable suite is in `test/support/store/contract.ex`. An adapter test module
+The reusable suite is in
+[`test/support/store/contract.ex`](https://github.com/hfiguera/smolbox/blob/v0.1.0-rc.1/test/support/store/contract.ex).
+It is repository test support, not part of the published library package. An adapter test module
 uses `SmolBox.Store.Contract` and supplies `adapter` and `store` in its setup
 context. It checks concurrent acceptance, conflicts, claims and CAS races, atomic
 reservations, release conditions, worker takeover, expiry, and due pagination.
 The suite alone does not certify durability; also run fresh-process database
 recovery, unavailable-database, corruption, and transaction-failure tests.
 
-The repository example at `examples/durable_host` owns its Repo, schema migration,
+The repository's
+[durable host example](https://github.com/hfiguera/smolbox/tree/v0.1.0-rc.1/examples/durable_host)
+owns its Repo, schema migration,
 AES-256-GCM record encryption, and indexed projections. Mutations serialize on a
 partition row inside a SQL transaction. It demonstrates a small-pool adapter,
 not automatic database provisioning, key rotation, or unlimited throughput. See
 its README for configuration, schema upgrades, keys, and retention responsibilities.
+
+## Machine ownership and assignment lookup
 
 A missing machine can be only a temporary observation while an old create request
 is still in flight. Managed recovery therefore never releases an assigned
@@ -94,6 +103,8 @@ transaction authenticated backfill. Missing backfill work blocks startup and
 lookup until completed; see the example README for the maintenance procedure.
 Worker inventory inspection remains read-only and never substitutes a matching
 name for recorded creation evidence.
+
+## Worker and output-store failures
 
 An API-server restart is not a VM restart. SmolVM 1.14.1 keeps VMs running when
 `smolvm serve` exits. The dedicated qualification script kills its own server
