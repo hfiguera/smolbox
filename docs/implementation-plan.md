@@ -86,8 +86,9 @@ library, tests and tooling source remain identical to `de4f35f`; no library code
 or dependency-lock changes were needed. Main CI checks and the optional live
 workflows now select this pair, with distinct OTP 29 cache keys. Compatibility
 jobs retain Elixir 1.18.4/OTP 27.3.4.15, Elixir 1.19.5/OTP 28.5, and
-Elixir 1.20.4/OTP 28.5. The updated workflows pass Actionlint; they have not yet
-run on GitHub and this review supplies no Linux OTP 29 result.
+Elixir 1.20.4/OTP 28.5. The updated workflows pass Actionlint. At this checkpoint,
+they had not run on GitHub and no Linux OTP 29 result was available; the Linux
+follow-up below supplies that host's development evidence.
 
 Local macOS validation passed all 186 deterministic cases (seed 626550), all five
 analyzers, all eight bad/clean quality-canary pairs, 95.40% coverage (seed 919835),
@@ -115,6 +116,44 @@ Elixir 1.20.4/OTP 29.0.6, using the same 83-file archive with SHA-256
 `69e4289bff7dcc40637bd967192f5a14863fb3adcb41429727512381f47a14b1`.
 The minimum-dependency check here tests dependency lower bounds on OTP 29; it is
 not a new Elixir 1.18/OTP 27 run. The original release archive remains untouched.
+
+Post-candidate Linux OTP 29 validation, September 7: installed the same Elixir
+1.20.4/OTP 29.0.6 pair (ERTS 17.0.6) under the Linux qualification directory,
+without changing the account's global toolchain. A clean, separate checkout of
+`a480f8f40356c3fcd3d7cb82f65c83eb626a5c39` was used on Linux x86_64 with KVM.
+Library, test, example and dependency-lock contents match the macOS source
+commit `de4f35f`; no library or lock changes were needed.
+
+Linux passed all 186 deterministic cases (seed 670350), all five analyzers,
+eight bad/clean quality-canary pairs, 95.40% coverage (seed 398984), and 22
+standalone tooling cases. A dedicated socket-only PostgreSQL 16.15 instance
+passed 16 store tests and all 25 bounded real-worker restart-recovery cases.
+All 14 separate real client/runtime cases passed. The exact getting-started
+walkthrough passed, including duplicate-handle reuse, expected stdout and file
+contents, complete collection/cleanup and released reservation. Both host examples
+passed compilation and forced Dialyzer; root/example dependency audits passed.
+An initial minimal-example Dialyzer attempt lost a consolidated BEAM file while
+other Mix checks ran in that build directory. Repeating the same commands alone
+passed without source changes; the evidence retains the initial failure digest.
+
+ExDoc built with warnings treated as errors and all 42 HTML pages passed local
+file/fragment checks. Fresh current/minimum-dependency production consumers both
+passed on the Linux OTP 29 pair using one 83-file archive, SHA-256
+`7485995c1e0aa3ac65db44375836fb70a3f16da01f9bfc61cfd21024ad11c50f`.
+The database had zero execution/identity rows and no test triggers before the
+task-owned instance was stopped; the actual outage probe passed. Original SmolVM
+and shared PostgreSQL services were preserved, and worker inventory was empty.
+[The Linux evidence](evidence/otp29-linux.json) records source hashes, seeds,
+bounded reports, package consumers and cleanup. This supplies the previously
+missing Linux OTP 29 validation; it does not claim a GitHub workflow run or
+requalify the original RC tag.
+
+After adding this Linux report, formatting and the ExDoc build/link checks passed
+again locally. Fresh current/minimum-dependency consumers on macOS OTP 29 passed
+from the updated 84-file archive, including the Linux evidence asset, SHA-256
+`3130198936a76d669d906d71b564790a48634f23c0f0f49b461b22132ecb02f2`.
+That documentation refresh is separate from the committed-source Linux archive
+identified above.
 
 The source repository is [hfiguera/smolbox](https://github.com/hfiguera/smolbox).
 The `origin` remote, package metadata and ExDoc source links use this repository.

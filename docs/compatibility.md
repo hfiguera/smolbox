@@ -17,28 +17,47 @@ Excluded work is not represented as completed or scheduled.
 
 The repository pin and main CI configuration use Elixir **1.20.4 / OTP 29.0.6**.
 On September 7, 2026, this pair passed the following checks on macOS Apple Silicon
-against the library and test code at `de4f35f`:
+and Linux x86_64 with KVM. The macOS run used the library and test code at
+`de4f35f`; the Linux run used a clean, separate checkout of `a480f8f`. Library,
+test, example and dependency-lock contents are identical between those commits.
 
-| Check | Local result |
-|---|---|
-| Deterministic suite | 186 passed: 4 doctests, 6 properties, 176 ordinary tests |
-| Production-library coverage | 95.40% |
-| Dialyzer, Credo, ex_slop, ex_dna, Credence | All passed; all bad/clean quality canaries behaved as expected |
-| Standalone maintainer tools | 22 passed |
-| PostgreSQL store contract | 16 passed against a dedicated PostgreSQL 17.10 instance |
-| Real SmolVM client/runtime suite | All 14 cases passed |
-| Durable restart recovery | All 25 fresh-controller recovery cases passed |
-| Getting-started walkthrough | Exact code block passed, including duplicate handle, output-file contents and confirmed cleanup |
-| Host examples | Both compiled and passed forced Dialyzer checks |
+| Check | macOS arm64 | Linux x86_64 |
+|---|---|---|
+| Deterministic suite | 186 passed | 186 passed |
+| Production-library coverage | 95.40% | 95.40% |
+| Dialyzer, Credo, ex_slop, ex_dna, Credence | All passed | All passed |
+| Quality canaries | 8 bad/clean pairs passed | 8 bad/clean pairs passed |
+| Standalone maintainer tools | 22 passed | 22 passed |
+| PostgreSQL store contract | 16 passed, PostgreSQL 17.10 | 16 passed, PostgreSQL 16.15 |
+| Real SmolVM client/runtime suite | 14 passed | 14 passed |
+| Durable restart recovery | 25 passed | 25 passed |
+| Exact getting-started walkthrough | Passed | Passed |
+| Host examples | Both compiled and passed forced Dialyzer | Both compiled and passed forced Dialyzer |
+| Root and example dependency audits | Passed | Passed |
+| ExDoc and local file/fragment links | 42 pages passed | 42 pages passed |
+| Fresh package consumers | Current and minimum dependencies passed | Current and minimum dependencies passed |
 
-See the [OTP 29 macOS evidence](evidence/otp29-macos.json) for source hashes,
-seeds, runtime report digests and toolchain identity. No library code changes
-were needed for this pair. The worker used pinned SmolVM 1.14.1 and the same
-approved native Python/Node artifacts as the existing macOS qualification.
+Each deterministic run contains 4 doctests, 6 properties and 176 ordinary tests;
+the 14 real-runtime cases run separately. Both walkthroughs verified duplicate
+handle reuse, expected output-file contents and confirmed cleanup. Both package
+dependency selections used OTP 29; they do not replace minimum-toolchain testing.
 
-These are local development results. The updated GitHub workflows have not yet
-run, and this review supplies no Linux OTP 29 result or new release-candidate
-attestation. CI retains Elixir 1.18.4/OTP 27.3.4.15, Elixir 1.19.5/OTP 28.5 and
+See the [macOS evidence](evidence/otp29-macos.json) and
+[Linux evidence](evidence/otp29-linux.json) for source hashes, seeds, runtime
+report digests and toolchain identity. No library code changes were needed for
+this pair. Each worker used pinned SmolVM 1.14.1 and its previously qualified
+native Python/Node artifacts. Dedicated socket-only test databases were stopped
+after checking empty execution/identity tables; actual database-outage rejection
+passed. Worker inventories were empty and existing services were preserved.
+
+Run Mix checks sequentially within each project. On Linux, an initial example
+Dialyzer run lost a consolidated BEAM file while other Mix checks ran in the same
+build directory. The same commands passed when run alone, without source or lock
+changes; the evidence records both attempts. Serialize dependency audits across
+projects too because they share an advisory checkout.
+
+These are development-host results, not a GitHub Actions run or a new
+release-candidate attestation. CI retains Elixir 1.18.4/OTP 27.3.4.15, Elixir 1.19.5/OTP 28.5 and
 Elixir 1.20.4/OTP 28.5 compatibility lanes. The accepted candidate below retains
 its original toolchain and evidence.
 
