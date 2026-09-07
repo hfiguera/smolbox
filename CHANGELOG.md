@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Remove dependency cycles in execution validation, the CI command runner and
+  the durable host example. Public APIs and persisted record formats are unchanged;
+  machine identity and execution writes remain in the same store transaction.
+- Reject static file-dependency cycles in ordinary CI, with failing/passing canaries
+  and a PostgreSQL regression for rollback after an execution write fails.
+
 ## 0.1.0-rc.1
 
 Unreleased candidate for the first client/controller release. It uses the existing

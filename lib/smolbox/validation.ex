@@ -32,6 +32,9 @@ defmodule SmolBox.Validation do
   @spec integer?(term(), integer(), integer()) :: boolean()
   def integer?(value, min, max), do: is_integer(value) and value >= min and value <= max
 
+  @spec timestamp?(term()) :: boolean()
+  def timestamp?(value), do: integer?(value, 0, 253_402_300_000_000)
+
   @spec struct_shape?(map(), module()) :: boolean()
   def struct_shape?(value, module),
     do: Enum.sort(Map.keys(value)) == Enum.sort(Map.keys(module.__struct__()))

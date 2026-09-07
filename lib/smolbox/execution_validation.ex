@@ -1,12 +1,12 @@
 defmodule SmolBox.ExecutionValidation do
   @moduledoc false
 
-  alias SmolBox.{Error, Execution, Machine, MachineSpec, Validation}
+  alias SmolBox.{Error, Machine, MachineSpec, Validation}
 
+  # The caller validates the record's struct shape, spec and scalar fields first.
   @spec metadata?(map()) :: boolean()
   def metadata?(record) do
-    Validation.struct_shape?(record, Execution) and deadlines?(record) and
-      reservation?(record) and machine?(record.created_machine, record) and
+    deadlines?(record) and reservation?(record) and machine?(record.created_machine, record) and
       artifacts?(record.artifacts, record.spec) and error?(record.last_error) and
       history?(record.errors)
   end
@@ -18,7 +18,7 @@ defmodule SmolBox.ExecutionValidation do
       deadlines[:queue] == record.accepted_at_ms + record.spec.queue_ms and
       Enum.all?(deadlines, fn {stage, timestamp} ->
         stage in [:queue, :preparation, :execution, :collection, :cleanup] and
-          Execution.timestamp?(timestamp) and timestamp >= record.accepted_at_ms
+          Validation.timestamp?(timestamp) and timestamp >= record.accepted_at_ms
       end)
   end
 
@@ -149,7 +149,7 @@ defmodule SmolBox.ExecutionValidation do
   defp history?(errors), do: Validation.list?(errors, 8) and Enum.all?(errors, &history_entry?/1)
 
   defp history_entry?(%{at_ms: at, error: error} = entry),
-    do: map_size(entry) == 2 and Execution.timestamp?(at) and error?(error)
+    do: map_size(entry) == 2 and Validation.timestamp?(at) and error?(error)
 
   defp history_entry?(_entry), do: false
 end

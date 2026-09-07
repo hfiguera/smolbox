@@ -29,6 +29,26 @@ repository-only attestation commit does not replace that candidate. Historical
 checkpoints below retain their original results; Phase 9's final record supersedes
 their then-pending release gates without changing the evidence.
 
+Post-candidate boundary cleanup, September 7: execution validation, CI command
+execution and the durable example now have one-way dependencies. The store adapter
+coordinates record/index writes within the existing partition transaction. Public
+APIs and persisted record formats are unchanged. Root and durable-example CI reject
+static file-dependency cycles, with an isolated failing/passing canary.
+
+Working-tree checks on macOS with Elixir 1.20.4/OTP 28.5 passed: 179 deterministic
+cases, 95.40% library coverage, all five analyzers and all bad/clean canaries,
+22 standalone tooling tests, warning-free ExDoc, and zero cycles in both projects.
+The durable example passed 16 tests against an isolated PostgreSQL 17.10 instance,
+including rollback of a machine assignment after a rejected execution write, plus
+its forced Dialyzer check and database-outage rejection. The task-owned database
+was stopped after verifying no test partitions, triggers or functions remained.
+Current-dependency and minimum-dependency consumers
+passed from the same new 80-file archive; the latter used Elixir 1.18.4/OTP 27.3.4.15.
+These development checks do not qualify a new release commit. Before shipping these
+changes, freeze a new candidate and repeat the complete required matrix, including
+the existing Linux/macOS real-runtime suites. The original RC tag and attestation
+continue to describe only candidate `164c0c2`.
+
 The source repository is [hfiguera/smolbox](https://github.com/hfiguera/smolbox).
 The `origin` remote, package metadata and ExDoc source links use this repository.
 It remains private during implementation; public visibility is not a prerequisite
@@ -1333,6 +1353,7 @@ MIX_ENV=test mix deps.get
 MIX_ENV=test mix format --check-formatted
 MIX_ENV=test mix deps.unlock --check-unused
 MIX_ENV=test mix compile --warnings-as-errors
+MIX_ENV=test mix xref graph --format cycles --fail-above 0
 MIX_ENV=test mix test --warnings-as-errors
 MIX_ENV=test mix credo --strict
 MIX_ENV=test mix ex_dna lib dev scripts test/support examples/durable_host/lib examples/durable_host/priv examples/durable_host/test/support examples/minimal_host/lib examples/support/lib --max-clones 0
@@ -1344,6 +1365,12 @@ MIX_ENV=test mix dialyzer
 implemented under `dev/mix/tasks/`. Both executed successfully during final-candidate
 validation. Real-runtime tests require an explicit separate command and capability
 preflight; ordinary `mix ci` must not silently contact a local or remote sandbox worker.
+
+The dependency-cycle gate checks all statically tracked file dependencies, without
+a compile-only filter or cycle allowlist. Run the same command separately from
+`examples/durable_host`; its ordinary store-contract CI job includes it. An isolated
+bad/clean cycle canary verifies failure and success. This is not layer enforcement
+and does not analyze dynamic calls or external reference code.
 
 Additional CI commands, with the needed development dependencies configured:
 
@@ -1367,16 +1394,16 @@ Use the pinned Mix version's `test_coverage` summary threshold configuration and
 | Job/status | Runs | Passing evidence |
 |---|---|---|
 | `smolbox-ci-tools` | Standalone Elixir tooling regressions | Tooling tests run before dependency installation, including both aggregate gates |
-| `smolbox-format-compile` | Format, unused lock entries, warning-free compile | No source modifications or compiler warnings |
+| `smolbox-format-compile` | Format, unused lock entries, warning-free compile, dependency cycles | No source modifications, compiler warnings or static file-dependency cycles |
 | `smolbox-credo-ex-slop` | Strict Credo with verified ExSlop registration | Both built-in and plugin checks active; no unsuppressed findings |
 | `smolbox-ex-dna` | Scoped standalone duplicate scan | No reported clones above the reviewed zero budget |
 | `smolbox-credence` | Project read-only wrapper | Nonempty scope; strict-assumption analysis; no unsuppressed findings |
 | `smolbox-dialyzer` | Dialyxir with keyed PLT cache | No unsuppressed type warnings |
 | `smolbox-tests` | Deterministic tests on the version matrix | Tests actually execute; seed/count reported; no warnings |
 | `smolbox-coverage` | Canonical deterministic coverage run | Coverage threshold and failure-scenario requirements met |
-| `smolbox-store-contract` | Durable host example against disposable Postgres | Store conformance, fresh-process reads and actual database-outage startup rejection pass |
+| `smolbox-store-contract` | Durable host example against disposable Postgres and dependency-cycle check | No static file-dependency cycles; store conformance, fresh-process reads and actual database-outage startup rejection pass |
 | `smolbox-minimal-host` | Standalone minimal example compilation, Dialyzer and audits | Path dependency type information is refreshed; no example-only dependency enters the library |
-| `smolbox-quality-canaries` | Isolated deliberate analyzer violations | Each analyzer fails for its expected reason; clean counterparts pass |
+| `smolbox-quality-canaries` | Isolated deliberate analyzer and dependency-cycle violations | Each gate fails for its expected reason; clean counterparts pass |
 | `smolbox-security` | Retired dependency and vulnerability audits | Current advisory fetch succeeds and policy passes |
 | `smolbox-docs-package` | Docs, Hex build, tar inspection, fresh consumer | No docs warnings; usable package without CI/example dependencies |
 | `smolbox-minimum-dependencies` | Fresh production consumer with minimum direct dependencies on Elixir 1.18.4/OTP 27.3.4.15 | Explicit dependency versions, package compilation and public API/supervisor smoke checks pass |

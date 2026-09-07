@@ -12,7 +12,7 @@ defmodule Mix.Tasks.Smolbox.Ci.VerifyChecks do
 
     try do
       Enum.each(
-        [:compiler, :credo, :ex_slop, :credence, :ex_dna, :dialyzer, :coverage],
+        [:compiler, :xref, :credo, :ex_slop, :credence, :ex_dna, :dialyzer, :coverage],
         &verify(&1, root)
       )
     after
@@ -37,6 +37,18 @@ defmodule Mix.Tasks.Smolbox.Ci.VerifyChecks do
 
   defp invoke(:compiler, directory, file), do: compile(directory, file)
 
+  defp invoke(:xref, directory, _file) do
+    write_project(directory)
+
+    File.write!(Path.join(directory, "peer.ex"), """
+    defmodule CanaryPeer do
+      def value, do: Canary.leaf()
+    end
+    """)
+
+    project_mix(directory, ["xref", "graph", "--format", "cycles", "--fail-above", "0"])
+  end
+
   defp invoke(:coverage, directory, _file) do
     write_project(directory)
     File.mkdir!(Path.join(directory, "test"))
@@ -49,11 +61,7 @@ defmodule Mix.Tasks.Smolbox.Ci.VerifyChecks do
     end
     """)
 
-    System.cmd("mix", ["test", "--cover", "--warnings-as-errors"],
-      cd: directory,
-      stderr_to_stdout: true,
-      env: [{"MIX_ENV", "test"}]
-    )
+    project_mix(directory, ["test", "--cover", "--warnings-as-errors"])
   end
 
   defp invoke(tool, directory, file) when tool in [:credo, :ex_slop] do
@@ -89,8 +97,11 @@ defmodule Mix.Tasks.Smolbox.Ci.VerifyChecks do
 
   defp compile(directory, _file) do
     write_project(directory)
+    project_mix(directory, ["compile", "--warnings-as-errors"])
+  end
 
-    System.cmd("mix", ["compile", "--warnings-as-errors"],
+  defp project_mix(directory, args) do
+    System.cmd("mix", args,
       cd: directory,
       stderr_to_stdout: true,
       env: [{"MIX_ENV", "test"}]
@@ -124,6 +135,7 @@ defmodule Mix.Tasks.Smolbox.Ci.VerifyChecks do
   end
 
   defp expected(:compiler), do: "unused"
+  defp expected(:xref), do: "Too many cycles"
   defp expected(:credo), do: "Credo.Check.Warning.IoInspect"
   defp expected(:ex_slop), do: "ExSlop.Check.Refactor.IdentityMap"
   defp expected(:credence), do: "no_identity_enum_map"

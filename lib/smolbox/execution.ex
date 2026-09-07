@@ -255,7 +255,7 @@ defmodule SmolBox.Execution do
 
   @doc false
   @spec timestamp?(term()) :: boolean()
-  def timestamp?(value), do: Validation.integer?(value, 0, 253_402_300_000_000)
+  def timestamp?(value), do: Validation.timestamp?(value)
 
   defp outcome(record) do
     checks = [

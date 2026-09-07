@@ -142,7 +142,7 @@ defmodule SmolBox.DurableHost.Store do
 
   defp insert_record(context, record, max_pending) do
     if Database.pending_count(context) < max_pending do
-      with {:ok, record} <- Database.write(context, record), do: {:ok, record, :inserted}
+      with {:ok, record} <- persist(context, record), do: {:ok, record, :inserted}
     else
       error(:admission_exhausted)
     end
@@ -160,9 +160,15 @@ defmodule SmolBox.DurableHost.Store do
     transaction(context, fn ->
       with {:ok, record} <- Database.read(context, key),
            {:ok, next} <- function.(record) do
-        Database.write(context, next)
+        persist(context, next)
       end
     end)
+  end
+
+  # Both writes belong to the caller's partition transaction. A record write
+  # failure must roll back the identity assignment as well.
+  defp persist(context, record) do
+    with :ok <- MachineIndex.remember(context, record), do: Database.write(context, record)
   end
 
   defp transaction(context, function) do

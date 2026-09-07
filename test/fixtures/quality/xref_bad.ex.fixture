@@ -1,0 +1,4 @@
+defmodule Canary do
+  def value, do: CanaryPeer.value()
+  def leaf, do: :ok
+end

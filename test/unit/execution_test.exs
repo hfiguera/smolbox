@@ -262,6 +262,35 @@ defmodule SmolBox.ExecutionTest do
     assert {:error, _} = Execution.transition(absent, [absence_at_ms: nil], 1200)
   end
 
+  test "persisted deadlines and error history enforce the same timestamp bounds" do
+    record = record()
+    failure = %Error{category: :store, operation: :store}
+    latest = 253_402_300_000_000
+
+    assert Execution.timestamp?(0)
+    assert Execution.timestamp?(latest)
+
+    assert :ok =
+             Execution.validate(%{
+               record
+               | deadlines: Map.put(record.deadlines, :execution, latest),
+                 errors: [%{at_ms: latest, error: failure}]
+             })
+
+    for invalid <- [-1, latest + 1, 1000.0, nil, self()] do
+      refute Execution.timestamp?(invalid)
+
+      assert {:error, %Error{category: :validation}} =
+               Execution.validate(%{
+                 record
+                 | deadlines: Map.put(record.deadlines, :execution, invalid)
+               })
+
+      assert {:error, %Error{category: :validation}} =
+               Execution.validate(%{record | errors: [%{at_ms: invalid, error: failure}]})
+    end
+  end
+
   test "a fresh BEAM can decode the fixed schema without interning atoms from stored bytes" do
     {:ok, bytes} = Codec.encode(dispatching())
     dir = Path.join(System.tmp_dir!(), "sbx-codec-#{System.unique_integer([:positive])}")

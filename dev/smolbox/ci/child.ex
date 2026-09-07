@@ -2,8 +2,6 @@ defmodule SmolBox.CI.Child do
   @moduledoc false
   use GenServer
 
-  alias SmolBox.CI.Util
-
   def start_link(arguments, options \\ []),
     do: GenServer.start_link(__MODULE__, {arguments, options})
 
@@ -29,7 +27,10 @@ defmodule SmolBox.CI.Child do
     Process.flag(:trap_exit, true)
     timeout = Keyword.get(options, :timeout, 1_200_000)
     limit = Keyword.get(options, :output_limit, 4 * 1024 * 1024)
-    Util.ensure!(arguments != [] and timeout > 0 and limit > 0, "invalid child bounds")
+
+    unless arguments != [] and timeout > 0 and limit > 0,
+      do: raise(ArgumentError, "invalid child bounds")
+
     port = open_gated(arguments, options)
     {:os_pid, pid} = Port.info(port, :os_pid)
     # Unix BEAM ports start a new session. Verify before releasing the shell gate;

@@ -53,6 +53,7 @@ jobs:
           mix format --check-formatted
           mix deps.unlock --check-unused
           mix compile --warnings-as-errors
+          mix xref graph --format cycles --fail-above 0
       - name: Check tracked files were not modified
         run: git diff --exit-code
 
@@ -403,6 +404,7 @@ jobs:
       - run: elixir --version
       - run: mix compile --warnings-as-errors
       - run: mix ecto.migrate
+      - run: mix xref graph --format cycles --fail-above 0
       - run: mix test --warnings-as-errors
       - run: mix dialyzer --force-check
       - run: mix hex.audit

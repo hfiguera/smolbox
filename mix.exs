@@ -113,6 +113,7 @@ defmodule SmolBox.MixProject do
         "format --check-formatted",
         "deps.unlock --check-unused",
         "compile --warnings-as-errors",
+        "xref graph --format cycles --fail-above 0",
         "test --warnings-as-errors",
         "credo --strict",
         "ex_dna lib dev scripts test/support examples/durable_host/lib examples/durable_host/priv examples/durable_host/test/support examples/minimal_host/lib examples/support/lib --max-clones 0",

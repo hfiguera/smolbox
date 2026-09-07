@@ -30,6 +30,19 @@ reviewed commit through a maintainer-controlled branch/ref; live jobs check out
 the recorded commit, and their preflight records it.
 Validating another branch tip does not qualify the release candidate.
 
+## Dependency cycles
+
+Run `MIX_ENV=test mix xref graph --format cycles --fail-above 0` from the repository
+root and from `examples/durable_host`. The root `mix ci` alias and the ordinary
+format/compile job check the library and compiled developer/test support files;
+the durable-store job checks the example's compiled files separately.
+
+All statically tracked file-dependency cycles fail, including runtime-call cycles.
+There are no cycle allowlists. External references and dependencies are outside
+these project graphs. This check does not enforce architectural layers or detect
+dynamic calls. `mix smolbox.ci.verify_checks` proves the gate with an isolated
+two-file cycle and an acyclic counterpart.
+
 ## Optional protected workflow: requirements before enabling
 
 The checked-in workflows do not provision workers or configure GitHub protections.

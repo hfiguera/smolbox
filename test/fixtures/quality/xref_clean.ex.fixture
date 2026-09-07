@@ -1,0 +1,4 @@
+defmodule Canary do
+  def value, do: :ok
+  def leaf, do: :ok
+end
