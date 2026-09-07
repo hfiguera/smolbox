@@ -2,6 +2,8 @@
 
 An independent Elixir library for self-hosted `smolvm serve` workers.
 
+Source: [hfiguera/smolbox on GitHub](https://github.com/hfiguera/smolbox).
+
 Implementation is in progress. The low-level client, managed runtime, versioned
 store contract, memory adapter, and host-owned Postgres example are implemented.
 Managed Python/JavaScript, cancellation and durable controller-restart cases pass

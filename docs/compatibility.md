@@ -172,15 +172,25 @@ dependency compilation reports them separately from the project's warning gate.
 They are not suppressed or represented as SmolBox diagnostics. The library and
 developer tasks pass warning-as-error compilation. No dependency source was patched.
 
-The repository currently has no configured Git remote. Source metadata and an
-independent consumer review remain release prerequisites, not fabricated links
-or evidence supplied by these examples.
+The source repository is [hfiguera/smolbox](https://github.com/hfiguera/smolbox),
+configured as `origin` and in the package and documentation metadata. It remains
+private during implementation. Development ExDoc source links target `main`;
+release documentation must target its matching tag or commit. Independent
+consumer review remains a release prerequisite.
+
+The first [GitHub CI run](https://github.com/hfiguera/smolbox/actions/runs/34138037540)
+at `17fabbaf30281d11303a2980042d7b0f975e43f5` passed all 16 ordinary jobs. Its
+aggregate failed under the previous policy because both real-worker jobs were
+skipped. Protected runtime qualification remains pending; that run does not
+validate the later opt-in policy or this metadata change.
 
 ## Historical milestone records
 
 The following sections describe earlier increments in order. Counts and pending
 items are historical; use the current summary and capability table above for
-the latest status.
+the latest status. The linked evidence files retain their original contents,
+including missing-remote and source-metadata observations made before repository
+setup.
 
 ## Low-level Elixir client qualification
 
@@ -388,7 +398,7 @@ errors because a consumer's flag alone does not enforce that on dependencies.
 CI runs the current consumer in the docs/package job and a required minimum
 consumer on Elixir 1.18.4/OTP 27.3.4.15. Successful reports and tested tarballs use
 a pinned upload-artifact action with missing outputs treated as errors. Actionlint
-passes locally; GitHub execution remains pending a repository remote. These
+passed locally at that milestone; GitHub execution was not yet available. These
 checks advance an independent acceptance item while resource certification and
 the final release matrix remain incomplete.
 

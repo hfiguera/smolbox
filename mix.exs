@@ -1,10 +1,13 @@
 defmodule SmolBox.MixProject do
   use Mix.Project
 
+  @source_url "https://github.com/hfiguera/smolbox"
+
   def project do
     [
       app: :smolbox,
       version: "0.1.0-dev",
+      source_url: @source_url,
       elixir: "~> 1.18",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
@@ -14,7 +17,10 @@ defmodule SmolBox.MixProject do
         "An Elixir client and supervised execution runtime for self-hosted SmolVM workers",
       package: [
         licenses: ["MIT"],
-        links: %{"SmolVM upstream" => "https://github.com/smol-machines/smolvm"},
+        links: %{
+          "GitHub" => @source_url,
+          "SmolVM upstream" => "https://github.com/smol-machines/smolvm"
+        },
         files: [
           "lib",
           "mix.exs",
@@ -32,6 +38,7 @@ defmodule SmolBox.MixProject do
         ]
       ],
       docs: [
+        source_ref: "main",
         extras: [
           "README.md",
           "docs/client.md",

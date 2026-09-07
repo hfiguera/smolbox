@@ -12,14 +12,23 @@ and failed attempts. These are development-host results; release acceptance is
 **not complete**.
 
 The remaining release dependencies are a certified enforceable minimal profile
-and its remaining hostile-workload qualification, a public source repository URL,
-provisioned protected/disposable Linux and macOS CI runners, an independent
+and its remaining hostile-workload qualification, provisioned protected/disposable
+Linux and macOS CI runners, an independent
 consumer review, and the complete matrix on the eventual exact release commit.
 Unsupported hard controls remain rejected. No Hex package or public service has
 been published. See the current acceptance checkpoint in Phase 9 and the
 individual phase/evidence records below.
 
+The source repository is [hfiguera/smolbox](https://github.com/hfiguera/smolbox).
+The `origin` remote, package metadata and ExDoc source links use this repository.
+It remains private during implementation; public visibility is not a prerequisite
+for completing the repository metadata. Development documentation links to `main`;
+release documentation must use its matching release tag or commit.
+
 Implementation evidence lives in [compatibility.md](compatibility.md) and `docs/evidence/`. Checked items below mean the specific work has evidence; they do not waive the remaining phase exit conditions or release requirements.
+
+Historical evidence files retain their original metadata and pending items;
+earlier reports of a missing remote or source URL predate this repository setup.
 
 This plan defines implementation work, verification requirements, and release gates for the `smolbox` Elixir library. The detailed design sections retain the original rationale and targets; the public client/host guides and generated API docs describe the implemented interfaces.
 
@@ -555,15 +564,23 @@ Deliverables: compatibility/security notes and attributed wire fixtures. Exit: e
 
 Dependencies: initial Phase 0 version decisions.
 
-- [ ] Create `mix.exs`, explicit package metadata, source URL, runtime dependencies, development tools, formatter, and documentation setup. Scaffold is implemented; the repository has no Git remote and the public source URL remains pending user input.
+- [x] Create `mix.exs`, explicit package metadata, source URL, runtime dependencies, development tools, formatter, and documentation setup. The project source URL and Hex GitHub link point to `https://github.com/hfiguera/smolbox`; ExDoc generates source links against `main`. The private repository is configured as `origin`.
 - [x] Use environment-specific compilation paths so `dev/mix/tasks` is excluded from production consumers.
 - [x] Commit the maintainer lockfile and exact toolchain pins; do not rely on the lockfile to constrain downstream Hex consumers.
 - [x] Implement the Credence CI wrapper and quality-check canaries described in section 12.
-- [x] Add root-level GitHub workflows and the local `mix ci` entry point. The workflow covers deterministic/quality/compatibility/security/docs/package checks, the durable store, and protected Linux/macOS live jobs. Explicit manual runtime selection and a fixed dependency-result gate reject missing, failed, cancelled and unexpectedly skipped checks. Push and pull-request runs require ordinary CI only; an opted-in manual qualification requires both real-worker jobs. Live infrastructure provisioning and actual GitHub execution remain pending; checked-in jobs alone do not qualify a release.
+- [x] Add root-level GitHub workflows and the local `mix ci` entry point. The workflow covers deterministic/quality/compatibility/security/docs/package checks, the durable store, and protected Linux/macOS live jobs. Explicit manual runtime selection and a fixed dependency-result gate reject missing, failed, cancelled and unexpectedly skipped checks. Push and pull-request runs require ordinary CI only; an opted-in manual qualification requires both real-worker jobs. Ordinary jobs have executed on GitHub; live infrastructure provisioning and protected real-worker execution remain pending. Checked-in jobs alone do not qualify a release.
 - [x] Require every requested analyzer; verify intentional bad fixtures produce a failing process. Compiler, all five analyzers, and coverage have verified clean/bad counterparts.
 - [x] Configure packaging exclusions for references, nested repositories, credentials, caches, VM state, and CI-only code. A fresh production consumer compiled from the tarball without quality tools; API/supervisor smoke checks remain for later phases.
 
 Exit: an intentionally introduced compiler warning, Credo/ex_slop issue, duplicate, Credence issue, or Dialyzer violation fails its gate. Clean scaffold passes; no live workers are contacted by routine CI.
+
+Repository metadata validation (September 7): formatting and ExDoc with warnings
+treated as errors pass. All 168 generated source links target `main`, with file
+paths and line numbers checked against the local source. The built Hex archive
+contains the GitHub and upstream links; its 80 allowed files pass the canonical
+macOS fresh production-consumer checks, including warning-as-error compilation,
+client/supervisor smoke checks and runtime-only dependencies. This verifies the
+metadata update without changing repository visibility or publishing the package.
 
 Live-CI milestone: 16 policy/preflight/bounded-runner regressions pass on both
 hosts, including deliberate zero/partial/skipped suites, overflow, deadlines and
@@ -574,8 +591,13 @@ on each. Real development preflight verifies the current worker binaries,
 wrappers, prepared artifacts and private listeners. These runs preserve one
 dispatch attempt and unknown outcomes through verified owned-resource cleanup.
 See `docs/evidence/phase1-live-ci.json` for counts, seeds, hashes and limitations.
-No remote is configured, so protected GitHub execution and independent ephemeral
-worker teardown remain unverified external requirements.
+The repository now has a configured remote. In the first
+[GitHub CI run](https://github.com/hfiguera/smolbox/actions/runs/34138037540)
+at `17fabbaf30281d11303a2980042d7b0f975e43f5`, all 16 ordinary jobs passed.
+The aggregate failed under the previous policy because both real-worker jobs
+were skipped. That run does not validate the later opt-in policy or this metadata
+change. Protected real-worker execution and independent ephemeral worker teardown
+remain unverified external requirements.
 
 ### Phase 2 — Model contracts, validation, and wire codecs
 
@@ -768,9 +790,9 @@ The tested archive SHA-256 is
 `b3ac361b708183440587a8d8f434bf39ba573016422aab0ba2c7bee21aae4d09`;
 the retained local consumer report SHA-256 is
 `61b3e20ef3682158f1555e4b1220f701c9152d451bca52be284399ede574c4f7`.
-The public source URL and independent deployment/consumer review are still
-pending. Documentation describes obligations and limitations; it does not make
-the security acceptance checklist pass.
+The repository source URL is now configured; independent deployment/consumer
+review remains pending. Documentation describes obligations and limitations;
+it does not make the security acceptance checklist pass.
 
 Finite boundary milestone: the full real client/runtime suite now has 14 cases
 and passes on both hosts. Five added cases verify output overflow with accurate
@@ -896,10 +918,10 @@ license text. Its changelog now describes the complete implemented API and
 measured limitations. The official Hex package API returned 404 for `smolbox`
 on September 7, 2026; that observation neither reserves the name nor establishes
 publishing permission. Declared licenses/notices from the nine resolved runtime
-dependencies are recorded; dependency/upstream source is not bundled. The public
-source URL, protected runner provisioning, independent review and remaining
-resource qualification are still required. No metadata review is counted as
-release-candidate acceptance.
+dependencies are recorded; dependency/upstream source is not bundled. Repository
+metadata is now configured as recorded in Phase 1. Protected runner provisioning,
+independent review and remaining resource qualification are still required.
+No metadata review is counted as release-candidate acceptance.
 
 The updated 79-file package archive now passes fresh production consumers on
 canonical Elixir 1.20.4/OTP 28.5 and minimum Elixir 1.18.4/OTP 27.3.4.15 on **both**
@@ -928,7 +950,7 @@ vulnerabilities. Audit log hashes are macOS
 `34e3de07c4d429c9596af39c72ab7c18cc171ff4db388abdc15afedf22304e4d`.
 ExDoc passes warnings as errors. This archive is a verified **unreleased**
 artifact; it is not a final release commit or a waiver of profile, protected-CI,
-source-metadata or independent-review requirements.
+final metadata review or independent-review requirements.
 
 #### Current acceptance checkpoint (September 7)
 
@@ -976,11 +998,8 @@ dependencies and the work they unlock are:
   credential and endpoint cases must run under suitable independently enforced
   host boundaries. Finite guest OOM and Linux enclosure results do not replace
   that requirement.
-- **Public source repository URL:** this checkout has no Git remote. The owner
-  must identify the actual repository before source metadata can be completed;
-  no repository link is invented.
 - **Protected CI infrastructure:** the checked-in jobs and tested local gate
-  helpers need an actual repository, protected environments and disposable
+  helpers still need protected environments and disposable
   Linux/macOS runners with independent teardown. Local SSH/macOS runs cannot
   stand in for successful protected GitHub runs. Provisioning requirements are
   explicit in `scripts/ci/README.md`.
