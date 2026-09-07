@@ -2,9 +2,11 @@
 
 See [telemetry and inspection](telemetry.md) for bounded lifecycle observations,
 notification failure semantics, and authoritative operator fields.
+See [deployment boundaries](security.md) for worker/proxy setup, artifact trust,
+storage responsibilities and upgrade/recovery procedures.
 
-The managed runtime is implemented and has initial real Linux/macOS execution
-coverage. Full fault and resource qualification is still in progress. Its current
+The managed runtime has real Linux/macOS execution and durable fault recovery
+coverage. Full resource and hostile-workload qualification is still in progress. Its current
 worker qualification is explicitly development use; do not advertise it as a
 production multi-tenant isolation certificate.
 

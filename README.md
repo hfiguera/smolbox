@@ -14,6 +14,7 @@ reconciles cleanup. A lost command response stays unknown; recovery never
 silently replays it. Cancellation and cleanup are separate evidence dimensions.
 See [host integration](docs/host-integration.md), [recovery](docs/recovery.md),
 [telemetry and inspection](docs/telemetry.md),
+[deployment boundaries](docs/security.md),
 and the current [compatibility evidence](docs/compatibility.md).
 
 ```elixir

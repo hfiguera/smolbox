@@ -25,7 +25,7 @@ FORBIDDEN = {"credo", "ex_slop", "ex_dna", "credence", "dialyxir", "ex_doc", "mi
              "ecto", "ecto_sql", "postgrex", "stream_data", "plug", "bandit"}
 PUBLIC = {"mix.exs", "README.md", "CHANGELOG.md", "LICENSE"}
 PUBLIC_DOCS = {"docs/client.md", "docs/host-integration.md", "docs/recovery.md", "docs/telemetry.md",
-               "docs/resource-qualification.md", "docs/compatibility.md"}
+               "docs/security.md", "docs/resource-qualification.md", "docs/compatibility.md"}
 LIMIT = 64 * 1024 * 1024
 
 SMOKE = '''

@@ -3,7 +3,7 @@
 This API performs one verified worker operation at a time. It does not persist
 request identities, reserve capacity, reconcile a crash, or authorize deletion.
 Use it only when host code owns those responsibilities. The managed runtime is
-still under implementation.
+implemented with development qualification; release acceptance remains incomplete.
 
 Install the pinned SmolVM release from [compatibility evidence](compatibility.md).
 Prepare an approved, architecture-matched `.smolmachine` artifact on the worker
@@ -44,7 +44,8 @@ mounts, sockets, GPU, ports, and workload restart disabled:
 ```elixir
 {:ok, name} = SmolBox.Identity.machine_name("myapp")
 # Persist name and intent in your host before creating the machine.
-{:ok, spec} = SmolBox.MachineSpec.new(name, "/approved/python.smolmachine")
+{:ok, spec} = SmolBox.MachineSpec.new(name, "/approved/python.smolmachine",
+  storage_gb: 20, overlay_gb: 10)
 {:ok, created} = SmolBox.Client.create(client, spec)
 # Persist creation evidence before continuing.
 {:ok, running} = SmolBox.Client.start(client, name)
@@ -98,3 +99,63 @@ harmless recovery probe or collect after confirmed termination. Keep stop/delete
 as the final lifecycle operations for cancelled work. Host artifact credentials
 must stay outside the guest, and host storage must protect command and environment
 contents at rest.
+
+## Preparing the reference runtimes
+
+This is an operator step using upstream SmolVM, outside the library's execution
+API. It prepares a base language runtime; it does not build or publish user
+functions. Perform it on an isolated preparation host with the matching native
+architecture, sufficient disk/memory and the pinned installation. Preparation
+may fetch images with networking; offline execution later must not.
+
+From a new private directory with enough space for layers, templates and output,
+the selected 1.14.1 CLI supports:
+
+```sh
+smolvm pack create --image python:3.12-alpine --entrypoint /bin/true \
+  --cpus 1 --mem 256 --staging-dir ./staging --output ./python
+smolvm pack create --image node:22-alpine --entrypoint /bin/true \
+  --cpus 1 --mem 256 --staging-dir ./staging --output ./node
+```
+
+The output names are executable stubs; the corresponding payloads are
+`python.smolmachine` and `node.smolmachine`. Do not pass a `.smolmachine` extension
+as `--output`, use `--single-file`, or reuse existing output names. SmolBox uses
+the sidecar payload and does not invoke the packed executable. The CLI's default
+pack memory is 8192 MiB, so the explicit resource options matter. Check local
+`smolvm pack create -h` against the pinned version before changing the recipe.
+
+These tags identify the initial test recipe, not immutable production approvals.
+Select and record an approved OCI digest for repeatable preparation, then record
+the resulting payload's SHA-256, host OS/architecture, upstream binary checksum
+and template geometry. Use `shasum -a 256` on macOS or `sha256sum` on Linux to
+hash each payload. A rebuilt artifact gets a new approved revision and new live
+evidence even when its source image tag is unchanged.
+
+Copy only the verified runtime payload into an operator-owned catalog on the
+worker and verify the digest there. Inspect neutrality and keep secrets,
+host mounts, ports and automatic workload restart out of the artifact/configuration.
+Managed creation additionally forces `/bin/true`, empty command arguments and
+restart `never`. Qualify offline Python/JS execution, binary staging/collection
+and stop/start without replay before admitting the artifact. The real-runtime
+tests exercise those behaviors; a pack operation alone does not qualify an image.
+
+The released templates measured 20/10 GiB. Validate them and any larger artifact
+templates before setting `allocation_floor`; do not infer physical disk capacity
+from a smaller create request or initially sparse files. Keep preparation caches
+under a separate host budget. See [resource qualification](resource-qualification.md).
+
+Start a separately provisioned private worker with the tested file cap:
+
+```sh
+SMOLVM_FILE_TRANSFER_MAX_BYTES=1048576 \
+  smolvm serve start --listen 127.0.0.1:19470
+```
+
+This starts a local service, not an authenticated public endpoint. Configure
+worker account isolation, hard host limits and the remote proxy independently
+as described in [deployment boundaries](security.md). On Linux, an explicitly
+configured `SMOLVM_DATA_DIR` can separate worker state. The pinned macOS build
+uses its normal account state directory; that environment variable does not
+isolate it. Use a dedicated account/host for a new macOS worker and never clear
+shared caches or inventories to simulate a fresh installation.

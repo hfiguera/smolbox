@@ -25,6 +25,7 @@ defmodule SmolBox.MixProject do
           "docs/host-integration.md",
           "docs/recovery.md",
           "docs/telemetry.md",
+          "docs/security.md",
           "docs/resource-qualification.md",
           "docs/compatibility.md",
           "docs/evidence/*.json"
@@ -37,6 +38,7 @@ defmodule SmolBox.MixProject do
           "docs/host-integration.md",
           "docs/recovery.md",
           "docs/telemetry.md",
+          "docs/security.md",
           "docs/resource-qualification.md",
           "docs/compatibility.md"
         ]

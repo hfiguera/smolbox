@@ -517,7 +517,7 @@ Dependencies: none.
 - [ ] Measure exec timeout, stream disconnect, cancellation, binary output, and server-side buffering behavior.
 - [x] Determine whether durable exec receipts/deduplication exist; record the conservative recovery contract if absent. No such identity or receipt is exposed by the selected exec API; preserve uncertainty.
 - [ ] Complete the profile capability matrix, including process and host disk bounds.
-- [ ] Record proxy/account isolation requirements and platform limitations.
+- [x] Record proxy/account isolation requirements and platform limitations. `docs/security.md` documents trusted accounts, private control interfaces, authenticated TLS, finite proxy queues, disabled mutation retries, artifact approval, platform-specific controls and unfenced requests. Documentation does not certify the still-pending hostile-host/resource experiments.
 
 Deliverables: compatibility/security notes and attributed wire fixtures. Exit: enough evidence to implement a supported minimal profile; unresolved controls are explicitly unsupported rather than guessed.
 
@@ -695,7 +695,7 @@ Dependencies: Phases 5–7.
 
 - [x] Add documented redacted telemetry and operator inspection fields. Bounded asynchronous delivery, finite metadata, stage durations, persisted cancellation timestamps, worker status/capacity and ephemeral drop/timeout counters are implemented. Controlled saturation/handler failures and real fresh-BEAM notification boundaries pass. See `docs/telemetry.md` and `docs/evidence/phase8-telemetry.json`.
 - [x] Finish minimal and durable host examples with no Keel/Jido dependency. Both standalone Mix projects compile, pass Dialyzer/audits, and demonstrate real Python execution, binary collection, cancellation and retention-window cleanup on Linux and macOS. The durable host also passes fresh-BEAM fault recovery; examples explicitly use a development profile.
-- [ ] Document deployment, artifact preparation, unknown-outcome handling, cancellation, cleanup, and upgrades.
+- [x] Document deployment, artifact preparation, unknown-outcome handling, cancellation, cleanup, and upgrades. Packaged client/host/recovery/security/telemetry guides describe the external services and operator procedures, including pinned upstream preparation flags, template floors, durable keys, migrations, drain limits and immutable revisions. Actual resource/isolation qualification and independent consumer review remain separate gates.
 - [ ] Test adversarial outputs, limits, paths, credential isolation, and endpoint access on dedicated hosts.
 - [ ] Record measured cold/warm-image preparation, queue, execution, and collection times without claiming VM boot time is total function latency.
 
@@ -718,6 +718,17 @@ same tarball's minimum-dependency consumers on Elixir 1.18.4/OTP 27.3.4.15 on bo
 hosts. Documentation passes warnings-as-errors. These are milestone checks, not
 the final release-commit matrix. Hard host-resource certification, security
 qualification and latency measurements remain separate unchecked work.
+
+Deployment-guide validation: pinned 1.14.1 CLI help/source confirms the documented
+pack/serve options. ExDoc passes warnings-as-errors and a fresh canonical macOS
+production consumer compiles the 72-file package including `docs/security.md`.
+The tested archive SHA-256 is
+`b3ac361b708183440587a8d8f434bf39ba573016422aab0ba2c7bee21aae4d09`;
+the retained local consumer report SHA-256 is
+`61b3e20ef3682158f1555e4b1220f701c9152d451bca52be284399ede574c4f7`.
+The public source URL and independent deployment/consumer review are still
+pending. Documentation describes obligations and limitations; it does not make
+the security acceptance checklist pass.
 
 ### Phase 9 — Release candidate and adoption evidence
 

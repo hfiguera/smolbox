@@ -3,8 +3,8 @@
 The store behaviour, versioned execution records, bounded memory adapter, and
 shared adapter tests are implemented. The host-owned Ecto/Postgres example passes
 real database conformance and fresh-process reads. The supervised managed runtime
-passes 18 real database-backed controller process-kill boundaries on each initial
-platform, including the full example retention interval. Actual API-server
+passes 20 real database-backed controller process-kill boundaries on each initial
+platform, including notification delivery and the full example retention interval. Actual API-server
 SIGKILL/restart also passes on Linux and macOS: the VM survives the server,
 the command result stays unknown, and verified cleanup eventually releases its
 reservation without another dispatch. Real worker outages beyond cleanup deadlines,
