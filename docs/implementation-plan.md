@@ -1,34 +1,40 @@
 # SmolBox implementation plan
 
-Status: implementation and release qualification in progress, September 7, 2026.
-The standalone client/runtime, durable state and host examples, bounded telemetry,
-documentation, deterministic tests and required CI configuration are implemented.
-The 156-case library baseline passed all six advertised host/toolchain lanes.
-The maintainer-tool migration adds 22 regression cases; the current 178-case
-suite passes on both canonical hosts, and the standalone tooling tests also pass
-on both minimum-toolchain hosts. Fourteen real client/runtime cases and 25 durable recovery
-cases pass on each canonical Linux/macOS host, with separately recorded worker
-service faults. Every requested analyzer and its bad/clean canary has executed
-successfully. The measured resource and cache experiments retain their limits
-and failed attempts. These are development-host results; release acceptance is
-**not complete**.
+Status: **0.1.0-rc.1 accepted for the revised first-release scope**, September 7, 2026.
+Candidate `164c0c2c3f71109b4224c2f7f2c807a25e0cdebd`, tagged `v0.1.0-rc.1`, passed
+the complete required matrix. The standalone library, durable host examples,
+documentation, tests and CI configuration are implemented. Ordinary GitHub CI
+passed all 17 jobs without skips. All six supported Linux/macOS toolchain lanes
+passed 178 deterministic cases. Both canonical hosts passed every requested
+analyzer and bad/clean canary, with 95.40% production-library coverage.
+
+Each canonical host also passed 14 real client/runtime tests, 15 PostgreSQL store
+tests, 25 durable recovery tests, three worker-service fault scenarios, both host
+examples and actual database-outage checks. Four fresh current/minimum dependency
+consumers used the same verified 80-file archive. Version, changelog, license,
+source tag/links, package metadata and current Hex-name availability were reviewed.
+See [the final candidate attestation](release-candidates/0.1.0-rc.1.md) and its
+[bounded machine-readable evidence](release-candidates/0.1.0-rc.1.json).
 
 The first release targets the tested client/controller contract with the existing
 `:development` worker qualification. Production resource/isolation certification,
 protected real-worker GitHub infrastructure and independent consumer review are
 outside this release's scope; none is claimed complete or scheduled as follow-up.
-Remaining release work is the final ordinary CI, compatibility, existing real-runtime
-and package-consumer matrix on the exact release commit, plus metadata and claims
-review. Recorded local Linux/macOS runs can supply the real-runtime evidence.
-Unsupported hard controls remain rejected. No Hex package or public service has
-been published. See the current acceptance checkpoint in Phase 9 and the
-individual phase/evidence records below.
+Unsupported hard controls remain rejected. Local results establish development-host
+behavior, not production isolation. No required work remains for this candidate
+under section 1.4. No Hex package, GitHub Release or public service was published.
+
+The candidate tag and archive remain tied to the tested commit. The later
+repository-only attestation commit does not replace that candidate. Historical
+checkpoints below retain their original results; Phase 9's final record supersedes
+their then-pending release gates without changing the evidence.
 
 The source repository is [hfiguera/smolbox](https://github.com/hfiguera/smolbox).
 The `origin` remote, package metadata and ExDoc source links use this repository.
 It remains private during implementation; public visibility is not a prerequisite
 for completing the repository metadata. Candidate documentation links to the
-matching `v0.1.0-rc.1` tag; source links must resolve to the tested candidate.
+verified `v0.1.0-rc.1` tag; source links resolve to the tested candidate for readers
+with access to the private repository.
 
 Implementation evidence lives in [compatibility.md](compatibility.md) and `docs/evidence/`. Checked items below mean the specific work has evidence; they do not waive the remaining phase exit conditions or release requirements.
 
@@ -1056,12 +1062,14 @@ conditions; they make no production resource/isolation certification claim.
 Dependencies: the in-scope earlier exit conditions and ordinary section 12 gates,
 applying the exclusions in section 1.4.
 
-- [ ] Run ordinary GitHub CI, the full supported Elixir/OTP compatibility matrix and the existing bounded real-runtime suites on the exact release commit. Local Linux/macOS runs with recorded identities/results/cleanup satisfy real-runtime verification; the optional protected GitHub workflow is not required.
-- [x] Build the Hex tarball, inspect its file list, and compile/test a fresh consumer from the extracted package. The repeatable package-consumer harness passes current and minimum runtime dependencies, fake-transport decoding, and explicit supervision without contacting a worker. Repeat on the final release commit; the complete release matrix is still unchecked.
+- [x] Run ordinary GitHub CI, the full supported Elixir/OTP compatibility matrix and the existing bounded real-runtime suites on the exact release commit. Local Linux/macOS runs with recorded identities/results/cleanup satisfy real-runtime verification; the optional protected GitHub workflow is not required.
+- [x] Build the Hex tarball, inspect its file list, and compile/test a fresh consumer from the extracted package. The repeatable package-consumer harness passes current and minimum runtime dependencies, fake-transport decoding, and explicit supervision without contacting a worker. All four consumers were repeated against the final candidate archive; see the attestation below.
 - [x] Verify production consumption excludes CI tools and example-only dependencies. Fresh `MIX_ENV=prod` consumers resolve only runtime dependencies, inspect package members/compiled modules, and compile extracted SmolBox itself with warnings as errors.
-- [ ] Confirm package name availability, license, source metadata, changelog, semantic version, and supported capability claims.
-- [x] Record successful use by the two supplied host examples and automated fresh package consumers. Phases 8 and 9 retain these results; repeat the applicable checks on the exact release candidate. No independent consumer review is required or claimed.
+- [x] Confirm package name availability, license, source metadata, changelog, semantic version, and supported capability claims.
+- [x] Record successful use by the two supplied host examples and automated fresh package consumers. Phases 8 and 9 retain the milestone results; both examples and all four consumers also passed on the exact release candidate. No independent consumer review is required or claimed.
 - [x] Keep publication separate from implementation and ordinary CI. No Hex publication or public service deployment is performed for this goal. A future release needs separate explicit authorization after all release evidence passes; this checkbox records the policy, not a published release.
+
+#### Historical metadata and package checkpoints
 
 Pre-release metadata review is recorded in `docs/evidence/phase9-readiness.json`.
 At that checkpoint, the package was `0.1.0-dev` with MIT metadata and the reviewed standard
@@ -1140,31 +1148,45 @@ all runtime and package-configuration bytes match it. The earlier minimum/Linux
 consumer runs are not represented as reruns of this new documentation archive.
 The final release-commit matrix is still required.
 
-#### Current acceptance after the scope revision
+#### Final candidate acceptance (September 7, 2026)
 
-The working implementation is not yet a fully accepted release candidate. The
-three workstreams in section 1.4 are excluded, with no new certification claim.
-Remaining release work is:
+**Accepted:** `0.1.0-rc.1` at `164c0c2c3f71109b4224c2f7f2c807a25e0cdebd`.
+The pushed tag `v0.1.0-rc.1` identifies that exact commit. All required checks
+passed under section 1.4; excluded work is not represented as completed.
 
-- **Exact-candidate checks:** pass ordinary GitHub CI, all supported Elixir/OTP
-  compatibility lanes, the existing 14 client/runtime cases and 25 durable cases
-  per canonical platform, and the three existing service-fault scenarios per
-  platform. Use recorded local Linux/macOS runs for the real-worker suites;
-  include source/runtime/image identities, pass counts and verified cleanup.
-  Keep shared-database runs sequential. Additional hostile-workload experiments
-  and protected GitHub worker runs are not required.
-- **Final package verification:** build the candidate archive, check its allowlist,
-  render documentation with warnings as errors, and run fresh current/minimum
-  dependency consumers on both hosts against that same archive. Earlier archive
-  hashes remain milestone evidence, not results for subsequently changed bytes.
-- **Metadata and claims review:** finalize version/changelog/source references,
-  review license and package metadata, recheck Hex name availability, and confirm
-  every capability claim fits the measured development-qualified contract.
-  Unsupported hard controls and unqualified isolation properties remain explicit.
+- [GitHub CI](https://github.com/hfiguera/smolbox/actions/runs/34147600792): all
+  17 jobs passed, zero skipped. All five requested analyzers and their deliberate
+  bad/clean canaries also passed on both canonical local hosts.
+- Compatibility: 178 executed deterministic cases in each of six Linux/macOS
+  Elixir/OTP lanes; 95.40% coverage on both canonical hosts. Each lane excluded
+  14 live cases, which separately passed on both canonical hosts.
+- Existing real-runtime matrix: 14 client/runtime cases, 25 durable recovery
+  cases and three worker-service fault scenarios per platform, without skipped
+  cases. Both supplied examples passed normal/cancellation flows. The 15-case
+  SQL store suite and actual database-outage checks passed on each host.
+- Package: all four fresh production consumers passed against one 80-file
+  archive with SHA-256 `d8f07bf862f94528d7f3171c0b10284e8c23101d18f1fce2d3602b46378ccf82`.
+  Every packaged file matches the candidate Git object; no maintainer, example
+  or external-reference material was included.
+- Metadata: `0.1.0-rc.1`, changelog, MIT text/declarations, repository metadata,
+  tag and 168 generated source links verified. The official Hex API returned
+  404 at the recorded review time; availability is not reserved.
+- Cleanup: both original development workers had empty inventories at final
+  preflight, all owned fault services were stopped, and private test databases
+  had zero reservations/due work before shutdown. The owned SSH forward was
+  closed. Existing shared services and private durable evidence were preserved.
 
-The two supplied host examples and automated consumers provide the planned
-adoption evidence. No independent review is claimed. The selected candidate is
-`0.1.0-rc.1`; this metadata decision does not authorize publishing.
+The two real suites used independent task-owned PostgreSQL instances, each with
+20 connections and a private socket; macOS forwarded only its own instance.
+The earlier rule to serialize suites sharing one database still applies. No
+production isolation, protected CI worker infrastructure or independent review
+is claimed. No package or service publication was performed.
+
+The [candidate report](release-candidates/0.1.0-rc.1.md) records commands, pins,
+seeds, counts, digests, local setup corrections and scope limits; its JSON companion
+retains bounded machine-readable evidence. No candidate source correction was
+needed. This later attestation changes only repository-only documentation and
+does not make its own commit the release candidate.
 
 #### Candidate freeze and validation records
 
@@ -1177,9 +1199,9 @@ commit and repeat the affected acceptance matrix without carrying over false
 exact-commit claims.
 
 The candidate tag `v0.1.0-rc.1` must point to the accepted commit. Record completed
-validation in `docs/release-candidates/0.1.0-rc.1.md` and this plan in a separate
-documentation commit; both files are excluded from the package. That attestation
-commit does not replace the candidate or change its archive. Do not claim an
+validation in `docs/release-candidates/0.1.0-rc.1.md`, its JSON companion and this
+plan in a separate documentation commit; these files are excluded from the package.
+That attestation commit does not replace the candidate or change its archive. Do not claim an
 untested documentation commit is the release candidate. No Hex or GitHub Release
 publication is part of this validation.
 
@@ -1190,7 +1212,8 @@ and runtime-only dependencies. Its SHA-256 is
 `7b882cfa5ade9ab7ab73082a8c9493b1f2eb6fc98f968a2f29a5f99a6a4c7b63`;
 the report and archive are retained under `/tmp/smolbox-scope-review.jjrRZc`.
 Only documentation changed. Runtime behavior, tests, workflow guards and historical
-evidence files are unchanged; the final candidate matrix remains to be run.
+evidence files were unchanged at that checkpoint; the final matrix was then
+pending and has since passed as recorded above.
 
 At the recorded worker checkpoint, both normal development workers had empty
 inventories. The namespace preflight, two contained Linux workers and fresh-cache
@@ -1436,28 +1459,28 @@ permissions or imply stronger isolation guarantees.
 These boxes track verification of the final candidate, even where earlier
 milestones passed. The three workstreams excluded in section 1.4 are not blockers.
 
-- [ ] Release claims describe the development-qualified contract, with unsupported hard controls rejected and no production isolation certification claim.
-- [ ] Private worker control interface and tested authenticated remote access.
-- [ ] No hidden exec retries after ambiguous acceptance.
-- [ ] Accurate unknown-outcome, cancellation, collection, and cleanup reporting.
-- [ ] Durable host example and store conformance pass across process restart.
-- [ ] Every requested analyzer runs, fails correctly, and is required in CI.
-- [ ] Existing real Linux and macOS suites pass on the release commit with recorded local results and cleanup; unsupported platforms are not advertised. Protected GitHub worker infrastructure is optional.
-- [ ] Package tarball is clean and usable in a fresh consumer application.
-- [ ] Documentation explains host responsibilities and library limitations without exactly-once claims.
-- [ ] License and Hex metadata are reviewed before publication. Name availability is rechecked; a previous 404 does not reserve the name.
+- [x] Release claims describe the development-qualified contract, with unsupported hard controls rejected and no production isolation certification claim.
+- [x] Private worker control interface and tested authenticated remote access.
+- [x] No hidden exec retries after ambiguous acceptance.
+- [x] Accurate unknown-outcome, cancellation, collection, and cleanup reporting.
+- [x] Durable host example and store conformance pass across process restart.
+- [x] Every requested analyzer runs, fails correctly, and is required in CI.
+- [x] Existing real Linux and macOS suites pass on the release commit with recorded local results and cleanup; unsupported platforms are not advertised. Protected GitHub worker infrastructure is optional.
+- [x] Package tarball is clean and usable in a fresh consumer application.
+- [x] Documentation explains host responsibilities and library limitations without exactly-once claims.
+- [x] License and Hex metadata are reviewed before publication. Name availability is rechecked; a previous 404 does not reserve the name.
 
-### 14.2 Decisions to resolve with evidence
+### 14.2 Resolved boundaries and excluded extensions
 
-| Decision | When | Default until resolved |
-|---|---|---|
-| Exact SmolVM patch and supported API schema | Phase 0 | Candidate v1.14.1 only; no compatibility claim |
-| Production hard resource profile | Outside first release; revisit only after a new scope decision | Development-qualified allocations/accounting only; reject unsupported hard controls |
-| Worker-side exec receipt availability | Phase 0 | Preserve uncertainty; never replay exec automatically |
-| Runtime image preparation without guest egress | Phase 0 | Prepared approved artifacts; no permission broadening |
-| Final store callback/transaction shape | Phase 4 | Behaviour plus durable host example; no database in core |
-| Unix-socket transport support | Phase 3 | Test explicitly; loopback is the development fallback |
-| Multi-controller worker ownership | Phase 7 | One active owner per worker; conservative recovery |
-| Advanced image export/branching support | After first consumer need | Outside first release |
+| Decision | Accepted first-release boundary |
+|---|---|
+| Exact SmolVM patch and API schema | 1.14.1 at the recorded source/binary/OpenAPI pins; real development-host suites pass on Linux x86_64 and macOS arm64 |
+| Production hard resource profile | Outside first release; development allocations/accounting only, unsupported hard controls rejected |
+| Worker-side exec receipts | No verified durable receipt or fence; retain uncertainty and never replay exec automatically |
+| Runtime preparation without guest egress | Approved native prepared artifacts, neutral entrypoint, no workload restart or permission broadening |
+| Store callback/transaction shape | Schema 1 behavior, memory adapter and conforming PostgreSQL host example; no database dependency in core |
+| Unix-socket transport | Actual Req/Finch transport contract test passes; live development workers use explicit loopback, with real authenticated TLS proxy tests |
+| Multi-controller worker ownership | One authoritative store/namespace per worker; leases fence store writes, not already-sent HTTP |
+| Export, branching and warm reuse | Outside first release; no implementation or compatibility claim |
 
 The first implementation milestone is a narrow but complete command execution path with honest failure semantics. The package is complete only when its documented operational and CI requirements are demonstrated, not when all proposed modules exist.
