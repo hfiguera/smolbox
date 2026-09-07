@@ -279,11 +279,21 @@ defmodule SmolBox.Execution do
       preserves?(previous, next, [:result, :created_machine, :absence_at_ms]) and
         (previous.evidence != :exited or next.evidence == :exited) and
         (previous.evidence != :termination_confirmed or
-           next.evidence in [:termination_confirmed, :exited]) and
+           next.evidence in [:termination_confirmed, :exited] or
+           reobserved_running?(previous, next)) and
         (previous.cleanup != :complete or next.cleanup == :complete)
 
     if valid, do: :ok, else: invalid()
   end
+
+  defp reobserved_running?(%{state: :unknown}, %{
+         state: :unknown,
+         evidence: :unknown,
+         last_error: %Error{category: :unknown, operation: :inspect}
+       }),
+       do: true
+
+  defp reobserved_running?(_previous, _next), do: false
 
   defp preserves?(previous, next, fields),
     do: Enum.all?(fields, &(Map.fetch!(previous, &1) in [nil, Map.fetch!(next, &1)]))

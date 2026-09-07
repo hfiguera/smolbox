@@ -609,6 +609,25 @@ Exit: a caller can disconnect and later retrieve the same execution; a nonzero e
 
 Dependencies: Phase 5.
 
+Current work: 35 controlled interruption boundaries plus two delayed-request
+scenarios pass. The delayed-original-exec scenario also passes against real
+Linux and macOS workers through a bounded test proxy. Canonical suites now pass
+123 deterministic cases, with 94.70% library coverage and all five analyzers.
+See `docs/evidence/phase6-controller-faults.json`. They cover store acceptance/reservation, HTTP creation/upload/exec,
+first output/exit, artifact and result persistence, completion, stop/delete,
+absence recording and capacity release. Fresh-controller recovery never sends a
+second command. These controlled peers are not a replacement for real
+store-backed process-kill tests, which remain pending.
+
+The delayed-request probes required stricter behavior than the initial Phase 5
+increment: a 404 during ambiguous creation cannot release capacity, and retained
+unknown VMs require periodic observation after stop because an already-sent exec
+can arrive later and auto-start the VM. Source inspection of `exec.rs` and
+`state.rs` at the pinned tag confirms that lifecycle locks do not provide durable
+request fencing. Current termination evidence can be revoked after a running VM
+is reobserved. Strong cancellation/deadline guarantees remain uncertified.
+
+
 - [ ] Complete qualification of persisted cancellation intent, evidence-based termination, and cancellation/completion race handling. The initial implementation passes normal controlled and real stop paths; boundary races remain.
 - [x] Implement bounded reconciliation and cleanup scans on startup and periodically. Bounded task slots, paginated due scans, persisted retry counts/deadlines, and owner claims are implemented; full fault qualification remains below.
 - [ ] Complete no-replay and accounting fault qualification. Observer restart tests preserve one command and unknown evidence; all dispatch/collection/persistence interruption boundaries still need coverage.

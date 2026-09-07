@@ -198,3 +198,25 @@ The managed increment passes 86 deterministic cases with 94.30% library coverage
 on canonical macOS/Linux and all five analyzers on each. The durable example has
 12 real Postgres cases, including managed durable startup. See
 `docs/evidence/phase5-managed.json` for versions, seeds and source hashes.
+
+## Delayed request and controller-fault evidence
+
+Thirty-five controlled controller-interruption boundaries and two delayed-request
+cases now pass on canonical Linux/macOS. The delayed-exec case also passes against
+both real workers: an original request held before forwarding can start the VM
+after a successful stop. SmolBox sends no second exec; it reobserves and stops the
+owned VM again while preserving unknown outcome and its reservation. This
+experiment disproves treating a stop response as a fence for pending requests.
+
+A recovered ambiguous create without recorded creation evidence never releases
+capacity merely because inspection temporarily returns 404. The old request may
+still create a resource. The host integration guide documents the resulting
+operator quiescence requirement. Source inspection also found that exec obtains
+its in-memory machine reference before the implicit-start lifecycle lock; a lock
+alone must not be represented as durable request fencing.
+
+The runtime suite now contains eight cases; this increment reran its three managed
+cases on each platform. The five unchanged client cases were last run together
+with managed tests in the Phase 5 increment. Full store-backed process termination,
+worker restart, retention-window completion and hostile resource qualification
+are still pending. See `docs/evidence/phase6-controller-faults.json`.

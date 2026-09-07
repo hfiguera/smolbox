@@ -120,7 +120,10 @@ creates the prepared VM, records creation evidence, starts its neutral workload,
 and stages inputs. Both the input read and a download after staging must match
 the declared size and SHA-256 before dispatch intent is written. An ambiguous
 creation without persisted creation evidence never authorizes adoption or deletion
-using the name alone.
+using the name alone. A missing-machine observation is also insufficient when
+creation may still be in flight: that reservation remains held, even if the
+worker currently returns 404. Operator recovery must first establish that the
+old worker request cannot subsequently create the resource.
 
 The default command channel is SSE with bounded lossy UTF-8 output. Commands with
 supported text stdin use the byte-preserving buffered endpoint because the pinned
@@ -156,7 +159,12 @@ out of order. Deadlines are not reset on restart.
 
 Unknown executions are stopped promptly when ownership permits it. Their guest
 disks remain until the persisted execution deadline plus `retention_ms`; this is
-the evidence-retention policy, not a result-recovery promise. For these records,
+the evidence-retention policy, not a result-recovery promise. Retained unknown
+machines are checked periodically, including for a previously sent exec that
+arrives after stop and implicitly starts the VM again. Stop is an observation of
+termination at that point in time; it does not fence pending worker requests.
+Reobserving a running VM revokes that current termination evidence until another
+stop is confirmed. The original command remains unknown and is never resent. For these records,
 the fixed cleanup deadline includes that intentional wait followed by the cleanup
 budget. The original command is never resent. Retained or failed-cleanup machines
 continue to consume reservations.
@@ -165,7 +173,9 @@ Cleanup checks creation evidence before stop/delete and verifies absence before
 releasing capacity. Failed cleanup does not rewrite successful command results.
 Retries are bounded. After exhaustion, automatic work only inspects periodically;
 it sends no more mutations. `reconcile` can request earlier inspection and can
-confirm absence after an operator has resolved the resource. It cannot bypass
+confirm absence after an operator has resolved a resource whose creation was
+already verified. Missing creation evidence requires separate operator resolution;
+a momentary 404 cannot authorize releasing that reservation. It cannot bypass
 ownership checks or authorize another command.
 
 `drain_worker` prevents new admission in this runtime while preserving existing
@@ -178,3 +188,20 @@ host quotas. A failed preparation is reported without enabling guest networking.
 Stopping the runtime stops observers with bounded supervision shutdown. It does
 not promise that a guest stopped. Restart with the same store and fingerprint key
 to reconcile. Memory mode loses this authority when its store process stops.
+
+## Unfenced worker requests
+
+The pinned worker takes a machine reference before exec's implicit-start lifecycle
+lock. Stop and delete use lifecycle locks, but neither supplies durable command
+identity nor a request-fencing token. Controller leases cannot retract requests
+already accepted by a proxy or worker. A delayed original request can arrive after
+a stop; this is possible without SmolBox issuing any retry.
+
+Do not treat `termination_confirmed` as a guarantee that no queued request can
+subsequently start work. The runtime continues observation during unknown-outcome
+retention and stops a reobserved owned VM. Hard deadline/cancellation guarantees
+under arbitrary proxy queues, worker scheduler stalls, or controller loss require
+an independently verified worker-side fencing/quiescence mechanism. None is
+certified in this implementation. A configured execution deadline is an
+observation budget plus an upstream command timeout, not proof of bounded wall
+clock termination under those failures.

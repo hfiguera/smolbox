@@ -49,6 +49,11 @@ defmodule SmolBox.MixProject do
           SmolBox.TestPeer,
           SmolBox.TestArtifacts,
           SmolBox.ManagedPeer,
+          SmolBox.FaultGate,
+          SmolBox.FaultStore,
+          SmolBox.FaultArtifacts,
+          SmolBox.RuntimeFixture,
+          SmolBox.RuntimeProxy,
           SmolBox.TestTLS,
           SmolBox.Store.Contract
         ],

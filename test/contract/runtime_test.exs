@@ -1,55 +1,10 @@
 defmodule SmolBox.RuntimeTest do
   use ExUnit.Case, async: false
-  alias SmolBox.{Client, Error, ExecutionSpec, Files, ManagedPeer, Runtime, TestArtifacts, Worker}
-  alias SmolBox.Runtime.{Config, WorkerConfig}
-  alias SmolBox.Store.{Contract, Memory}
+  alias SmolBox.{Error, ExecutionSpec, Files, ManagedPeer, Runtime}
+  alias SmolBox.Runtime.Config
+  alias SmolBox.Store.Memory
 
-  defp setup_runtime(options \\ []) do
-    {peer, port} = ManagedPeer.start(options)
-    store = start_supervised!(Memory)
-    artifacts = start_supervised!({Agent, fn -> %{{"contract", "input"} => <<0, 255>>} end})
-
-    {:ok, endpoint} =
-      Worker.new("peer", "http://127.0.0.1:#{port}", allow_insecure_loopback: true)
-
-    {:ok, client} = Client.new(endpoint)
-    spec = Contract.record().spec
-
-    {:ok, worker} =
-      WorkerConfig.new(
-        client: client,
-        platform: :linux,
-        architecture: "x86_64",
-        profiles: [spec.profile],
-        capacity: Contract.capacity(),
-        draining: Keyword.get(options, :draining, false),
-        artifacts: [Map.put(spec.artifact, "path", "/approved/python.smolmachine")]
-      )
-
-    config = [
-      name: SmolBox.TestRuntime,
-      namespace: "runtest",
-      store: {Memory, store},
-      mode: :ephemeral,
-      fingerprint_key: :binary.copy(<<2>>, 32),
-      artifact_store: {TestArtifacts, artifacts},
-      workers: [worker],
-      poll_ms: 20,
-      lease_ms: 1000,
-      max_pending: Keyword.get(options, :max_pending, 128)
-    ]
-
-    runtime = start_supervised!({Runtime, config})
-
-    %{
-      runtime: runtime,
-      peer: peer,
-      store: store,
-      artifacts: artifacts,
-      spec: spec,
-      options: config
-    }
-  end
+  defp setup_runtime(options \\ []), do: SmolBox.RuntimeFixture.start(options)
 
   test "durable mode rejects an ephemeral or unavailable store before worker I/O" do
     context = setup_runtime()

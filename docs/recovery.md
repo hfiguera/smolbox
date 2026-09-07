@@ -70,3 +70,11 @@ AES-256-GCM record encryption, and indexed projections. Mutations serialize on a
 partition row inside a SQL transaction. It demonstrates a small-pool adapter,
 not automatic database provisioning, key rotation, or unlimited throughput. See
 its README for configuration, schema upgrades, keys, and retention responsibilities.
+
+A missing machine can be only a temporary observation while an old create request
+is still in flight. Managed recovery therefore never releases an assigned
+reservation without persisted creation evidence merely because a lookup returns
+404. Likewise, stopping a VM does not fence a delayed original exec request.
+Unknown retained machines are rechecked; a reobserved running VM revokes current
+termination evidence until another stop is confirmed. See the host integration
+guide for the operator quiescence boundary and deadline limitations.

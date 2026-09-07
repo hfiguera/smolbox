@@ -1,6 +1,6 @@
 defmodule SmolBox.ManagedPeer do
   @moduledoc false
-  alias SmolBox.TestPeer
+  alias SmolBox.{FaultGate, TestPeer}
 
   def start(options \\ []) do
     agent =
@@ -21,6 +21,9 @@ defmodule SmolBox.ManagedPeer do
   defp handle(conn, agent) do
     {:ok, body, conn} = TestPeer.body(conn)
     segments = conn.path_info
+    faults = Agent.get(agent, & &1.options[:faults])
+    event = event(conn.method, segments)
+    FaultGate.hit(faults, event, :before)
 
     response =
       Agent.get_and_update(agent, fn state ->
@@ -28,6 +31,7 @@ defmodule SmolBox.ManagedPeer do
         route(conn.method, segments, body, state)
       end)
 
+    FaultGate.hit(faults, event, :after)
     respond(conn, response, agent)
   end
 
@@ -80,8 +84,10 @@ defmodule SmolBox.ManagedPeer do
     command = Jason.decode!(body)
     files = Map.put(state.files, {machine["name"], ["workspace", "out.bin"]}, <<0, 255, 17>>)
 
+    machines = Map.put(state.machines, machine["name"], Map.put(machine, "state", "running"))
+
     {{:exec, machine["name"], state.options},
-     %{state | commands: [command | state.commands], files: files}}
+     %{state | commands: [command | state.commands], files: files, machines: machines}}
   end
 
   defp machine_route("PUT", ["files" | file], body, machine, state) do
@@ -110,16 +116,34 @@ defmodule SmolBox.ManagedPeer do
     conn =
       conn |> Plug.Conn.put_resp_content_type("text/event-stream") |> Plug.Conn.send_chunked(200)
 
-    {:ok, conn} = Plug.Conn.chunk(conn, "event: stdout\ndata: started\n\n")
+    conn = chunk(conn, "event: stdout\ndata: started\n\n")
+
+    FaultGate.hit(options[:faults], :first_output, :after)
 
     if options[:hold] do
       wait_stopped(agent, name, System.monotonic_time(:millisecond) + 5000)
       conn
     else
-      {:ok, conn} = Plug.Conn.chunk(conn, "event: exit\ndata: {\"exitCode\":7}\n\n")
+      FaultGate.hit(options[:faults], :exit, :before)
+      conn = chunk(conn, "event: exit\ndata: {\"exitCode\":7}\n\n")
+      FaultGate.hit(options[:faults], :exit, :after)
       conn
     end
   end
+
+  defp chunk(conn, bytes) do
+    case Plug.Conn.chunk(conn, bytes) do
+      {:ok, next} -> next
+      {:error, _disconnected} -> conn
+    end
+  end
+
+  defp event("POST", ["api", "v1", "machines"]), do: :create
+  defp event("POST", ["api", "v1", "machines", _name, "exec" | _suffix]), do: :exec
+  defp event("POST", ["api", "v1", "machines", _name, "stop"]), do: :stop
+  defp event("DELETE", _segments), do: :delete
+  defp event("PUT", _segments), do: :upload
+  defp event(_method, _segments), do: :http_read
 
   defp wait_stopped(agent, name, deadline) do
     running = Agent.get(agent, &(get_in(&1, [:machines, name, "state"]) == "running"))

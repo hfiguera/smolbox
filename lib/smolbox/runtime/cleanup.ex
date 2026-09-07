@@ -9,6 +9,7 @@ defmodule SmolBox.Runtime.Cleanup do
         record.cleanup == :complete -> release(session, record)
         not Execution.terminal?(record) and record.state != :unknown -> {:ok, record}
         session.worker == nil -> Session.error(:unsupported_capability, :cleanup)
+        record.created_machine == nil -> unverified_creation(session)
         record.cleanup_attempts >= session.config.cleanup_attempts -> exhausted(session, record)
         true -> attempt(session, record)
       end
@@ -38,7 +39,8 @@ defmodule SmolBox.Runtime.Cleanup do
   defp finish_observation(session, record, observed) do
     if record.created_machine != nil and
          Machine.same_incarnation?(record.created_machine, observed) do
-      with :ok <- stop(session, record, observed),
+      with {:ok, record} <- acknowledge_restart(session, record, observed),
+           :ok <- stop(session, record, observed),
            {:ok, stopped} <- inspect_machine(session, record),
            true <-
              Machine.same_incarnation?(record.created_machine, stopped) and
@@ -59,6 +61,15 @@ defmodule SmolBox.Runtime.Cleanup do
     end
   end
 
+  defp acknowledge_restart(session, %{evidence: :termination_confirmed}, %{state: :running}) do
+    Session.patch(session,
+      evidence: :unknown,
+      last_error: %Error{category: :unknown, operation: :inspect, evidence: :unknown}
+    )
+  end
+
+  defp acknowledge_restart(_session, record, _observed), do: {:ok, record}
+
   defp stop(session, record, %{state: :running}) do
     case Session.io(session, record, :cleanup, fn ->
            Client.stop(session.worker.client, record.machine_name)
@@ -78,7 +89,8 @@ defmodule SmolBox.Runtime.Cleanup do
       Session.patch(session,
         evidence: :termination_confirmed,
         cleanup_attempts: max(record.cleanup_attempts - 1, 0),
-        next_due_at_ms: retain_until
+        next_due_at_ms:
+          min(retain_until, Session.now(session) + max(1000, session.config.poll_ms))
       )
     else
       with {:ok, confirmed} <- Session.patch(session, evidence: :termination_confirmed),
@@ -148,6 +160,15 @@ defmodule SmolBox.Runtime.Cleanup do
       )
     end
   end
+
+  defp unverified_creation(session),
+    do:
+      Session.patch(session,
+        cleanup: :failed,
+        cleanup_attempts: session.config.cleanup_attempts,
+        next_due_at_ms: Session.now(session) + 60_000,
+        last_error: %Error{category: :identity_conflict, operation: :create}
+      )
 
   defp exhausted(session, record) do
     client = %{

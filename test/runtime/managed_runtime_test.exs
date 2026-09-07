@@ -153,6 +153,75 @@ defmodule SmolBox.ManagedRuntimeTest do
     assert stopped.next_due_at_ms > System.system_time(:millisecond)
   end
 
+  test "a delayed original exec can restart a stopped real VM and is stopped again", context do
+    parent = self()
+
+    gate =
+      start_supervised!(
+        {Agent, fn -> %{event: :exec, phase: :before, observer: parent, fired: false} end},
+        id: :delayed_exec_gate
+      )
+
+    {counts, port} = SmolBox.RuntimeProxy.start(context.client.worker.base_url, gate)
+    {:ok, config} = GenServer.call(Runtime.coordinator(context.runtime), :config)
+
+    {:ok, endpoint} =
+      Worker.new("managed", "http://127.0.0.1:#{port}", allow_insecure_loopback: true)
+
+    {:ok, client} = Client.new(endpoint)
+    [worker] = config.workers
+
+    options =
+      config
+      |> Map.from_struct()
+      |> Map.delete(:owner)
+      |> Map.put(:workers, [%{worker | client: client}])
+      |> Map.to_list()
+
+    stop_supervised!(Runtime)
+    runtime = start_supervised!({Runtime, options})
+    context = %{context | runtime: runtime}
+
+    spec = %{
+      spec(
+        context,
+        "python",
+        ["python", "-u", "-c", "import time; print('late'); time.sleep(10)"],
+        []
+      )
+      | outputs: []
+    }
+
+    assert {:ok, handle} = SmolBox.submit(runtime, spec)
+    own_cleanup(context, handle)
+    assert_receive {:boundary, :exec, :before, blocked}, 10_000
+    assert {:ok, ^handle} = SmolBox.cancel(runtime, spec.scope, spec.id)
+    stopped = wait_for(context, handle, &(&1.evidence == :termination_confirmed))
+
+    assert {:ok, %Machine{state: :stopped}} =
+             Client.inspect_machine(context.client, stopped.machine_name)
+
+    assert Agent.get(counts, & &1) == %{exec: 1, forwarded: 0}
+    send(blocked, :release_boundary)
+
+    observed =
+      wait_for(context, handle, fn record ->
+        record.evidence == :termination_confirmed and
+          Enum.any?(
+            record.errors,
+            &(&1.error.operation == :inspect and &1.error.category == :unknown)
+          )
+      end)
+
+    assert observed.state == :unknown
+    assert observed.result == nil
+    assert observed.reservation != nil
+    assert Agent.get(counts, & &1) == %{exec: 1, forwarded: 1}
+
+    assert {:ok, %Machine{state: :stopped}} =
+             Client.inspect_machine(context.client, observed.machine_name)
+  end
+
   defp spec(context, id, argv, inputs) do
     artifact = Enum.find(context.artifacts, &(&1["id"] == id)) |> Map.delete("path")
     {:ok, command} = Command.new(argv)
