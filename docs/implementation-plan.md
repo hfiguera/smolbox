@@ -1,11 +1,27 @@
 # SmolBox implementation plan
 
-Status: implementation in progress, September 7, 2026. Phases 1–7 have substantial implemented and tested capabilities: standalone quality gates, immutable contracts, bounded client, fenced state, memory/Postgres stores, managed recovery, worker health, and allocation admission. The current allocation-floor increment passes 144 deterministic cases and nine real client/managed cases on each Linux/macOS host. Full resource/security qualification, public telemetry, source metadata, and release acceptance remain incomplete.
+Status: implementation and release qualification in progress, September 7, 2026.
+The standalone client/runtime, durable state and host examples, bounded telemetry,
+documentation, deterministic tests and required CI configuration are implemented.
+The current suite executes 156 deterministic cases on all six advertised
+host/toolchain lanes. Fourteen real client/runtime cases and 25 durable recovery
+cases pass on each canonical Linux/macOS host, with separately recorded worker
+service faults. Every requested analyzer and its bad/clean canary has executed
+successfully. The measured resource and cache experiments retain their limits
+and failed attempts. These are development-host results; release acceptance is
+**not complete**.
 
+The remaining release dependencies are a certified enforceable minimal profile
+and its remaining hostile-workload qualification, a public source repository URL,
+provisioned protected/disposable Linux and macOS CI runners, an independent
+consumer review, and the complete matrix on the eventual exact release commit.
+Unsupported hard controls remain rejected. No Hex package or public service has
+been published. See the current acceptance checkpoint in Phase 9 and the
+individual phase/evidence records below.
 
 Implementation evidence lives in [compatibility.md](compatibility.md) and `docs/evidence/`. Checked items below mean the specific work has evidence; they do not waive the remaining phase exit conditions or release requirements.
 
-This plan covers only the `smolbox` Elixir package. It translates the sandbox boundary in [Keel's idea document](../../../ideas/001-initial-idea.txt) into implementation work, verification requirements, and release gates. Proposed module names and APIs below are design targets, not existing interfaces.
+This plan covers only the `smolbox` Elixir package. It translates the sandbox boundary in [Keel's idea document](../../../ideas/001-initial-idea.txt) into implementation work, verification requirements, and release gates. The detailed design sections retain the original rationale and targets; the public client/host guides and generated API docs describe the implemented interfaces.
 
 ## 1. Outcome and scope
 
@@ -910,6 +926,56 @@ vulnerabilities. Audit log hashes are macOS
 ExDoc passes warnings as errors. This archive is a verified **unreleased**
 artifact; it is not a final release commit or a waiver of profile, protected-CI,
 source-metadata or independent-review requirements.
+
+#### Current acceptance checkpoint (September 7)
+
+The latest cache evidence increases the reviewed package to 80 files. The exact
+archive retained at `/tmp/smolbox-qualification/acceptance-checkpoint.tar` has
+SHA-256 `689195ab595c3fbd6e33d4374b063441ae97683b89c062086ff292897290dc43`.
+Fresh production consumers of this identical archive pass on canonical and
+minimum Elixir/OTP on both hosts, including minimum direct dependencies,
+warning-as-error package compilation, public client/supervisor smoke checks and
+runtime-only dependency isolation. All packaged file hashes match commit
+`945f3ef` (this checkpoint edits only the excluded implementation plan).
+
+| Retained consumer report | SHA-256 |
+|---|---|
+| macos | `6277e62394546f103d29fa3ee0f1453e8c0a17e79d162cf84264d5c0f66e3c76` |
+| linux | `3dcc11ddcf4e6d5ee670ea7bc4c99b4e7e110ae7bff2a207821e3a83202284cb` |
+| minimum-macos | `4e7ddbd35c6d39e3c5f795112fa811e829a9b97b2e0d8bfe6ef79160b332fb91` |
+| minimum-linux | `c4cfff0145b8e08ecb1cfbe8de261748bf6de53c25092c2c92b8261a1cdf8cd3` |
+
+The working implementation is not a fully accepted release candidate. Remaining
+dependencies and the work they unlock are:
+
+- **Verified minimal resource profile and dedicated qualification environment:**
+  the current pinned runtime/development setup has no certified host RSS,
+  CPU-time, process-count or disk profile on both platforms. Strict requests for
+  unsupported controls remain rejected. Remaining hostile-output/protocol,
+  credential and endpoint cases must run under suitable independently enforced
+  host boundaries. Finite guest OOM and Linux enclosure results do not replace
+  that requirement.
+- **Public source repository URL:** this checkout has no Git remote. The owner
+  must identify the actual repository before source metadata can be completed;
+  no repository link is invented.
+- **Protected CI infrastructure:** the checked-in jobs and tested local gate
+  helpers need an actual repository, protected environments and disposable
+  Linux/macOS runners with independent teardown. Local SSH/macOS runs cannot
+  stand in for successful protected GitHub runs. Provisioning requirements are
+  explicit in `scripts/ci/README.md`.
+- **Independent consumer review:** the two supplied applications and four
+  automated production consumers pass, but they are not a review by an
+  independent consumer. No external review or message to a reviewer is claimed.
+- **Final exact release-commit matrix:** run all required jobs and real suites,
+  review claims/version/source metadata and recheck Hex availability after the
+  preceding dependencies are resolved. This checkpoint keeps version
+  `0.1.0-dev`; it does not authorize publishing.
+
+Both normal development workers have empty inventories. The namespace preflight,
+two contained Linux workers and fresh-cache worker are inactive, with their
+owned process/cgroup teardown verified. No unrelated workload or upstream source
+was modified. Private evidence, durable records and keys are retained for
+inspection/recovery. Nothing was published to Hex or deployed as a public service.
 
 Exit: package documentation and behavior agree; remaining unsupported capabilities are visible. Hex publication is not part of ordinary CI or this planning task.
 
