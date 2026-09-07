@@ -13,11 +13,45 @@ evidence. The repository's `docs/release-candidates/0.1.0-rc.1.md` records candi
 identity and validation separately from this package's historical evidence.
 Excluded work is not represented as completed or scheduled.
 
-## Current tested scope
+## Current development toolchain
+
+The repository pin and main CI configuration use Elixir **1.20.4 / OTP 29.0.6**.
+On September 7, 2026, this pair passed the following checks on macOS Apple Silicon
+against the library and test code at `de4f35f`:
+
+| Check | Local result |
+|---|---|
+| Deterministic suite | 186 passed: 4 doctests, 6 properties, 176 ordinary tests |
+| Production-library coverage | 95.40% |
+| Dialyzer, Credo, ex_slop, ex_dna, Credence | All passed; all bad/clean quality canaries behaved as expected |
+| Standalone maintainer tools | 22 passed |
+| PostgreSQL store contract | 16 passed against a dedicated PostgreSQL 17.10 instance |
+| Real SmolVM client/runtime suite | All 14 cases passed |
+| Durable restart recovery | All 25 fresh-controller recovery cases passed |
+| Getting-started walkthrough | Exact code block passed, including duplicate handle, output-file contents and confirmed cleanup |
+| Host examples | Both compiled and passed forced Dialyzer checks |
+
+See the [OTP 29 macOS evidence](evidence/otp29-macos.json) for source hashes,
+seeds, runtime report digests and toolchain identity. No library code changes
+were needed for this pair. The worker used pinned SmolVM 1.14.1 and the same
+approved native Python/Node artifacts as the existing macOS qualification.
+
+These are local development results. The updated GitHub workflows have not yet
+run, and this review supplies no Linux OTP 29 result or new release-candidate
+attestation. CI retains Elixir 1.18.4/OTP 27.3.4.15, Elixir 1.19.5/OTP 28.5 and
+Elixir 1.20.4/OTP 28.5 compatibility lanes. The accepted candidate below retains
+its original toolchain and evidence.
+
+OTP 29 reports deprecated `catch` expressions while compiling the maintainer-only
+Yamerl dependency, and Credence retains its existing upstream compiler warnings.
+SmolBox and both host examples pass their own warning-as-error compilation gates;
+dependency warnings are not suppressed or counted as library warnings.
+
+## Accepted release-candidate scope
 
 The library baseline passed 156 deterministic cases (six properties and 150
 ordinary tests) on all six host/toolchain combinations listed below. The Elixir
-maintainer-tool migration adds 22 regression cases; the current 178-case suite
+maintainer-tool migration added 22 regression cases; that 178-case suite
 passes on canonical macOS and Linux. The standalone tooling tests also pass
 on Elixir 1.18.4/OTP 27.3.4.15 on both hosts. Fourteen
 real-runtime cases are excluded from that count; all fourteen separately pass
@@ -41,7 +75,7 @@ hashes and test counts are unchanged by the maintainer migration:
 [empty versus cached Linux image state](evidence/phase8-cache-state.json).
 
 The sections after “Historical milestone records” retain earlier test counts
-and gaps as an audit trail. They do not supersede this current summary or the
+and gaps as an audit trail. They do not supersede the candidate summary or the
 remaining release requirements.
 
 ## Pinned upstream

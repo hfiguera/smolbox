@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Align main CI and optional live-workflow checks with the pinned Elixir 1.20.4 /
+  OTP 29.0.6 toolchain. Retain Elixir 1.18/OTP 27 and Elixir 1.19–1.20/OTP 28
+  compatibility jobs with separate build/PLT caches for OTP 29.
 - Add a complete managed-execution walkthrough, troubleshooting guide, tested
   constructor examples and public API option references. Make the README the
   ExDoc entry point and group the guides and APIs by use.

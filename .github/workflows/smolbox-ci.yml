@@ -26,7 +26,7 @@ jobs:
           persist-credentials: false
       - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
         with:
-          otp-version: '28.5'
+          otp-version: '29.0.6'
           elixir-version: '1.20.4'
       - run: elixir scripts/ci_test.exs
 
@@ -37,7 +37,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
         with:
-          otp-version: '28.5'
+          otp-version: '29.0.6'
           elixir-version: '1.20.4'
       - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
@@ -45,7 +45,7 @@ jobs:
             deps
             _build/test
             _build/plts
-          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp28.5-ex1.20.4-test-${{ hashFiles('mix.lock', 'mix.exs') }}
+          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp29.0.6-ex1.20.4-test-${{ hashFiles('mix.lock', 'mix.exs') }}
       - run: mix deps.get
       - run: elixir --version
       - name: Run required checks
@@ -64,7 +64,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
         with:
-          otp-version: '28.5'
+          otp-version: '29.0.6'
           elixir-version: '1.20.4'
       - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
@@ -72,7 +72,7 @@ jobs:
             deps
             _build/test
             _build/plts
-          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp28.5-ex1.20.4-test-${{ hashFiles('mix.lock', 'mix.exs') }}
+          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp29.0.6-ex1.20.4-test-${{ hashFiles('mix.lock', 'mix.exs') }}
       - run: mix deps.get
       - run: elixir --version
       - name: Run required checks
@@ -89,7 +89,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
         with:
-          otp-version: '28.5'
+          otp-version: '29.0.6'
           elixir-version: '1.20.4'
       - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
@@ -97,7 +97,7 @@ jobs:
             deps
             _build/test
             _build/plts
-          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp28.5-ex1.20.4-test-${{ hashFiles('mix.lock', 'mix.exs') }}
+          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp29.0.6-ex1.20.4-test-${{ hashFiles('mix.lock', 'mix.exs') }}
       - run: mix deps.get
       - run: elixir --version
       - name: Run required checks
@@ -115,7 +115,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
         with:
-          otp-version: '28.5'
+          otp-version: '29.0.6'
           elixir-version: '1.20.4'
       - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
@@ -123,7 +123,7 @@ jobs:
             deps
             _build/test
             _build/plts
-          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp28.5-ex1.20.4-test-${{ hashFiles('mix.lock', 'mix.exs') }}
+          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp29.0.6-ex1.20.4-test-${{ hashFiles('mix.lock', 'mix.exs') }}
       - run: mix deps.get
       - run: elixir --version
       - name: Run required checks
@@ -140,7 +140,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
         with:
-          otp-version: '28.5'
+          otp-version: '29.0.6'
           elixir-version: '1.20.4'
       - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
@@ -148,7 +148,7 @@ jobs:
             deps
             _build/test
             _build/plts
-          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp28.5-ex1.20.4-test-${{ hashFiles('mix.lock', 'mix.exs') }}
+          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp29.0.6-ex1.20.4-test-${{ hashFiles('mix.lock', 'mix.exs') }}
       - run: mix deps.get
       - run: elixir --version
       - name: Run required checks
@@ -165,7 +165,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
         with:
-          otp-version: '28.5'
+          otp-version: '29.0.6'
           elixir-version: '1.20.4'
       - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
@@ -173,7 +173,7 @@ jobs:
             deps
             _build/test
             _build/plts
-          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp28.5-ex1.20.4-test-${{ hashFiles('mix.lock', 'mix.exs') }}
+          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp29.0.6-ex1.20.4-test-${{ hashFiles('mix.lock', 'mix.exs') }}
       - run: mix deps.get
       - run: elixir --version
       - name: Run required checks
@@ -190,7 +190,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
         with:
-          otp-version: '28.5'
+          otp-version: '29.0.6'
           elixir-version: '1.20.4'
       - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
@@ -198,7 +198,7 @@ jobs:
             deps
             _build/test
             _build/plts
-          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp28.5-ex1.20.4-test-${{ hashFiles('mix.lock', 'mix.exs') }}
+          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp29.0.6-ex1.20.4-test-${{ hashFiles('mix.lock', 'mix.exs') }}
       - run: mix deps.get
       - run: elixir --version
       - name: Run required checks
@@ -215,7 +215,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
         with:
-          otp-version: '28.5'
+          otp-version: '29.0.6'
           elixir-version: '1.20.4'
       - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
@@ -223,7 +223,7 @@ jobs:
             deps
             _build/test
             _build/plts
-          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp28.5-ex1.20.4-test-${{ hashFiles('mix.lock', 'mix.exs') }}
+          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp29.0.6-ex1.20.4-test-${{ hashFiles('mix.lock', 'mix.exs') }}
       - run: mix deps.get
       - run: elixir --version
       - name: Run required checks
@@ -241,7 +241,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
         with:
-          otp-version: '28.5'
+          otp-version: '29.0.6'
           elixir-version: '1.20.4'
       - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
@@ -249,7 +249,7 @@ jobs:
             deps
             _build/test
             _build/plts
-          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp28.5-ex1.20.4-test-${{ hashFiles('mix.lock', 'mix.exs') }}
+          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp29.0.6-ex1.20.4-test-${{ hashFiles('mix.lock', 'mix.exs') }}
       - run: mix deps.get
       - run: elixir --version
       - name: Run required checks
@@ -268,7 +268,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
         with:
-          otp-version: '28.5'
+          otp-version: '29.0.6'
           elixir-version: '1.20.4'
       - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
@@ -276,7 +276,7 @@ jobs:
             deps
             _build/dev
             _build/plts
-          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp28.5-ex1.20.4-dev-${{ hashFiles('mix.lock', 'mix.exs') }}
+          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp29.0.6-ex1.20.4-dev-${{ hashFiles('mix.lock', 'mix.exs') }}
       - run: mix deps.get
       - run: elixir --version
       - name: Run required checks
@@ -306,6 +306,8 @@ jobs:
           - elixir: '1.18.4'
             otp: '27.3.4.15'
           - elixir: '1.19.5'
+            otp: '28.5'
+          - elixir: '1.20.4'
             otp: '28.5'
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -353,14 +355,14 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
         with:
-          otp-version: '28.5'
+          otp-version: '29.0.6'
           elixir-version: '1.20.4'
       - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: |
             examples/minimal_host/deps
             examples/minimal_host/_build
-          key: smolbox-minimal-${{ runner.os }}-${{ runner.arch }}-otp28.5-ex1.20.4-test-${{ hashFiles('examples/minimal_host/mix.lock', 'examples/minimal_host/mix.exs') }}
+          key: smolbox-minimal-${{ runner.os }}-${{ runner.arch }}-otp29.0.6-ex1.20.4-test-${{ hashFiles('examples/minimal_host/mix.lock', 'examples/minimal_host/mix.exs') }}
       - run: mix deps.get
       - run: elixir --version
       - run: mix compile --warnings-as-errors
@@ -393,14 +395,14 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
         with:
-          otp-version: '28.5'
+          otp-version: '29.0.6'
           elixir-version: '1.20.4'
       - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: |
             examples/durable_host/deps
             examples/durable_host/_build
-          key: smolbox-durable-${{ runner.os }}-${{ runner.arch }}-otp28.5-ex1.20.4-test-${{ hashFiles('examples/durable_host/mix.lock', 'examples/durable_host/mix.exs') }}
+          key: smolbox-durable-${{ runner.os }}-${{ runner.arch }}-otp29.0.6-ex1.20.4-test-${{ hashFiles('examples/durable_host/mix.lock', 'examples/durable_host/mix.exs') }}
       - run: mix deps.get
       - run: elixir --version
       - run: mix compile --warnings-as-errors
@@ -448,7 +450,7 @@ jobs:
           persist-credentials: false
       - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
         with:
-          otp-version: '28.5'
+          otp-version: '29.0.6'
           elixir-version: '1.20.4'
       - name: Require every configured check to succeed
         env:

@@ -4,6 +4,24 @@
 package checks on disposable hosted runners for every push and pull request.
 It can also be dispatched manually. It contains no real-worker jobs.
 
+Main checks use Elixir 1.20.4 with OTP 29.0.6, matching `.tool-versions`.
+Compatibility jobs retain Elixir 1.18.4/OTP 27.3.4.15, Elixir 1.19.5/OTP 28.5
+and Elixir 1.20.4/OTP 28.5. Cache keys include the exact main toolchain so OTP 28
+builds and PLTs are not reused for OTP 29. The optional live workflow uses the
+same main pair; changing its configuration does not supply a successful run.
+
+For local validation, run `mise install`, then `mise exec -- elixir --version`.
+A newly installed Elixir distribution may need its own Hex/Rebar installations:
+`mise exec -- mix local.hex --force` and `mise exec -- mix local.rebar --force`.
+Use `mise exec --` before the commands below to select the repository pin without
+changing the user's global toolchain. Compatibility evidence records actual
+results separately from workflow configuration.
+
+Run dependency audits sequentially when several projects share one development
+host. MixAudit 2.1 uses a shared advisory checkout; concurrent updates can fail
+while the command still returns zero. A Git refresh error invalidates that audit
+result. Resolve the refresh and rerun it before recording a pass.
+
 `SmolBox Runtime Qualification` (`smolbox-runtime-qualification.yml`) is a separate,
 optional manual-only workflow. Provisioning and running its protected worker
 infrastructure are outside the first-release scope. It remains available for

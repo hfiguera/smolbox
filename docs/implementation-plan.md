@@ -76,9 +76,45 @@ The worker inventory was empty afterward and its original process was preserved.
 Current and minimum production consumers passed from the same 82-file archive
 with SHA-256 `03a9ac8eb86f9631e04f8389abadd48456449c7040179d2ef107a4558600ee33`;
 the minimum consumer used Elixir 1.18.4/OTP 27.3.4.15. Both new guides are packaged.
-The newly pinned Elixir 1.20.4/OTP 29.0.6 pair was unavailable locally and was not
-validated by this review. This is documentation-change evidence, not a rerun of
-the complete Linux/macOS release-candidate matrix.
+At that documentation-review checkpoint, Elixir 1.20.4/OTP 29.0.6 was not yet
+installed. The following toolchain validation supersedes that local limitation.
+The documentation review did not rerun the complete Linux/macOS candidate matrix.
+
+Post-candidate OTP 29 validation, September 7: installed Elixir 1.20.4 compiled
+for OTP 29 and verified the running Erlang patch as 29.0.6 (ERTS 17.0.6). The
+library, tests and tooling source remain identical to `de4f35f`; no library code
+or dependency-lock changes were needed. Main CI checks and the optional live
+workflows now select this pair, with distinct OTP 29 cache keys. Compatibility
+jobs retain Elixir 1.18.4/OTP 27.3.4.15, Elixir 1.19.5/OTP 28.5, and
+Elixir 1.20.4/OTP 28.5. The updated workflows pass Actionlint; they have not yet
+run on GitHub and this review supplies no Linux OTP 29 result.
+
+Local macOS validation passed all 186 deterministic cases (seed 626550), all five
+analyzers, all eight bad/clean quality-canary pairs, 95.40% coverage (seed 919835),
+and 22 standalone tooling tests. A dedicated PostgreSQL 17.10 instance passed all
+16 store tests and all 25 real-worker restart-recovery cases. The separate real
+client/runtime suite passed all 14 cases. The exact getting-started code block
+also passed on this pair, with the original duplicate handle, expected stdout and
+`42\n` file, complete collection/cleanup and no reservation. Both host examples
+passed compilation and forced Dialyzer checks. Project warning gates remained
+enabled; existing dependency warnings and OTP 29 Yamerl deprecation warnings were
+visible. Root/example dependency audits passed after serializing their shared
+advisory-checkout refreshes; failed parallel refresh output was not accepted.
+
+After the real suites, the task database had zero execution and machine-identity
+rows and no test triggers. The task-owned database was stopped and the actual
+database-outage probe printed `database-unavailable-confirmed`. The original
+SmolVM server remained running with an empty inventory. Source hashes, seeds and
+bounded runtime reports are in [the OTP 29 macOS evidence](evidence/otp29-macos.json).
+These development checks do not move or requalify the original RC tag.
+
+ExDoc subsequently built with warnings treated as errors, and all 42 HTML pages
+passed the local file/fragment check, including the new evidence asset. Fresh
+production consumers with current and minimum direct dependencies both passed on
+Elixir 1.20.4/OTP 29.0.6, using the same 83-file archive with SHA-256
+`69e4289bff7dcc40637bd967192f5a14863fb3adcb41429727512381f47a14b1`.
+The minimum-dependency check here tests dependency lower bounds on OTP 29; it is
+not a new Elixir 1.18/OTP 27 run. The original release archive remains untouched.
 
 The source repository is [hfiguera/smolbox](https://github.com/hfiguera/smolbox).
 The `origin` remote, package metadata and ExDoc source links use this repository.
@@ -187,9 +223,9 @@ This checkout is a local development reference, not a SmolBox dependency or a re
 ### 2.2 Elixir and OTP policy
 
 - Proposed minimum: Elixir 1.18, since the reviewed ex_dna and ex_slop releases require `~> 1.18`.
-- Canonical development/quality lane: Elixir 1.20.4 with a verified OTP 28 patch.
-- Compatibility lanes: latest reviewed patches of Elixir 1.18 / OTP 27 and Elixir 1.19 / OTP 28.
-- Add Elixir 1.20 / OTP 29 as a current-OTP lane once the dependency resolution and tools pass there.
+- Canonical development/quality lane: Elixir 1.20.4 with OTP 29.0.6, matching `.tool-versions`.
+- Compatibility lanes: Elixir 1.18.4 / OTP 27.3.4.15, Elixir 1.19.5 / OTP 28.5, and Elixir 1.20.4 / OTP 28.5.
+- OTP 29 results must identify the tested host; adding the pair to CI does not establish an unexecuted Linux or macOS result.
 - Pin exact patches in the repository's tool-version file and CI. The combinations above are the intended matrix, not permission to use floating versions indefinitely.
 - Do not claim support for untested combinations or for every future Elixir minor merely because a dependency requirement permits installation.
 
