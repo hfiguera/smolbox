@@ -253,6 +253,13 @@ are rejected. Endpoint aliases cannot be discovered reliably by this client: eac
 physical worker must have one store authority. Active-active execution fencing is
 not supported by upstream; deploying competing controllers does not create it.
 
+Recovery rechecks the current artifact/profile approval before dispatching an
+execution still in the prepared state. Removing that approval prevents command
+dispatch and fails preparation; verified cleanup can still proceed through the
+original worker. Existing handles remain inspectable. This does not cancel a
+command whose dispatch may already have happened, and it does not rewrite an
+observed result. Keep worker endpoints configured while they own unresolved work.
+
 Stopping the runtime stops observers with bounded supervision shutdown. It does
 not promise that a guest stopped. Restart with the same store and fingerprint key
 to reconcile. Memory mode loses this authority when its store process stops.

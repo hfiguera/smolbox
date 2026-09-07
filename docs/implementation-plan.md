@@ -671,6 +671,12 @@ cases and all 21 durable-host VM cases pass on both platforms. Separate final
 client and managed reruns include authenticated health/readiness, drain and
 retained-capacity assertions. See `docs/evidence/phase7-worker-health.json`.
 
+A subsequent policy check rejects allocation replies that differ from the
+request and revalidates current artifact/profile approval for recovered prepared
+work. Mismatched creation replies remain unverified with their reservation;
+revoked approval never authorizes a command. See
+`docs/evidence/phase7-allocation-policy.json` for the checks and real managed runs.
+
 ### Phase 8 — Telemetry, docs, examples, and security validation
 
 Dependencies: Phases 5–7.

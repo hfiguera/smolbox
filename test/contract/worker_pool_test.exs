@@ -125,7 +125,66 @@ defmodule SmolBox.WorkerPoolTest do
     assert ManagedPeer.snapshot(context.peer).machines == %{}
   end
 
-  defp wait_cleanup(runtime, handle, remaining \\ 100)
+  test "incorrect created allocations prevent guest startup and retain an unverified reservation" do
+    context = RuntimeFixture.start(created_allocations: %{"memoryMb" => 512})
+    assert {:ok, handle} = SmolBox.submit(context.runtime, context.spec)
+    assert {:ok, record} = SmolBox.await(context.runtime, handle, 5000)
+    assert record.state == :failed and record.evidence == :not_dispatched
+
+    assert Enum.any?(
+             record.errors,
+             &(&1.error.category == :protocol and &1.error.operation == :create)
+           )
+
+    assert record.created_machine == nil and record.reservation != nil
+    assert ManagedPeer.snapshot(context.peer).commands == []
+    assert ManagedPeer.snapshot(context.peer).machines[record.machine_name]["memoryMb"] == 512
+
+    assert {:ok, %{candidates: [%{status: :unverified}]}} =
+             SmolBox.audit_worker(context.runtime, "peer")
+
+    refute Enum.any?(ManagedPeer.snapshot(context.peer).operations, fn {_method, path} ->
+             String.ends_with?(path, "/start") or String.ends_with?(path, "/stop")
+           end)
+  end
+
+  for revoked <- [:profile, :artifact] do
+    test "recovered prepared work cannot dispatch after its #{revoked} approval is removed" do
+      observer = self()
+
+      gate =
+        start_supervised!(
+          {Agent,
+           fn -> %{event: :dispatch_intent, phase: :before, observer: observer, fired: false} end},
+          id: :approval_gate
+        )
+
+      context = RuntimeFixture.start(faults: gate)
+      assert {:ok, handle} = SmolBox.submit(context.runtime, context.spec)
+      assert_receive {:boundary, :dispatch_intent, :before, _blocked}, 5000
+      stop_supervised!(Runtime)
+      [worker] = context.options[:workers]
+
+      worker =
+        case unquote(revoked) do
+          :profile ->
+            %{worker | profiles: [%{context.spec.profile | id: "new-policy"}]}
+
+          :artifact ->
+            %{worker | artifacts: [Map.put(hd(worker.artifacts), "id", "new-artifact")]}
+        end
+
+      runtime = start_supervised!({Runtime, Keyword.put(context.options, :workers, [worker])})
+      assert {:ok, ^handle} = SmolBox.submit(runtime, context.spec)
+      record = wait_cleanup(runtime, handle)
+      assert record.state == :failed and record.evidence == :not_dispatched
+      assert record.last_error.category == :unsupported_capability
+      assert ManagedPeer.snapshot(context.peer).commands == []
+      assert ManagedPeer.snapshot(context.peer).machines == %{}
+    end
+  end
+
+  defp wait_cleanup(runtime, handle, remaining \\ 250)
   defp wait_cleanup(_runtime, _handle, 0), do: flunk("owned cleanup did not complete")
 
   defp wait_cleanup(runtime, {scope, id} = handle, remaining) do

@@ -156,7 +156,16 @@ defmodule SmolBox.Runtime.Executor do
     end
   end
 
+  defp dispatch_health(%{worker: nil}, _record),
+    do: Session.error(:unsupported_capability, :worker)
+
   defp dispatch_health(session, record) do
+    if WorkerConfig.supports?(session.worker, record.spec),
+      do: observe_dispatch_health(session, record),
+      else: Session.error(:unsupported_capability, :worker)
+  end
+
+  defp observe_dispatch_health(session, record) do
     case Session.io(session, record, :preparation, fn ->
            WorkerHealth.observe(session.worker, session.config.clock)
          end) do

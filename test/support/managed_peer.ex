@@ -61,6 +61,7 @@ defmodule SmolBox.ManagedPeer do
       |> File.read!()
       |> Jason.decode!()
       |> Map.put("name", input["name"])
+      |> Map.merge(Keyword.get(state.options, :created_allocations, %{}))
 
     response = if state.options[:create_lost], do: {:json, 503, %{}}, else: {:json, 200, machine}
     {response, %{state | machines: Map.put(state.machines, machine["name"], machine)}}

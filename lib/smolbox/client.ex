@@ -59,8 +59,13 @@ defmodule SmolBox.Client do
   @spec create(t(), MachineSpec.t()) :: {:ok, Machine.t()} | {:error, Error.t()}
   def create(client, spec) do
     with {:ok, wire} <- MachineSpec.to_wire(spec),
-         {:ok, body} <- json(client, :post, "/api/v1/machines", wire, :create) do
-      decode_machine(body, spec.name, :create)
+         {:ok, body} <- json(client, :post, "/api/v1/machines", wire, :create),
+         {:ok, created} <- decode_machine(body, spec.name, :create) do
+      fields = [:cpus, :memory_mb, :storage_gb, :overlay_gb]
+
+      if Map.take(created, fields) == Map.take(spec, fields),
+        do: {:ok, created},
+        else: error(:protocol, :create, :dispatch_uncertain)
     end
   end
 

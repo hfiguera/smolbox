@@ -1,0 +1,47 @@
+{
+  "recorded_at": "2026-09-07T03:33:08.394835+00:00",
+  "base_commit": "02b3fd0",
+  "scope": "Phase 7 allocation reply and recovered policy validation; not host resource certification",
+  "behavior": [
+    "creation reply allocations must match the requested MachineSpec",
+    "mismatch returns a protocol error with uncertain creation evidence",
+    "managed work never starts that unverified VM or releases its reservation",
+    "prepared recovery rechecks current artifact and profile approval",
+    "revoked approval fails preparation and preserves ordinary verified cleanup",
+    "existing handles remain inspectable and no command is replayed"
+  ],
+  "validation": {
+    "macos": {
+      "deterministic_cases": 141,
+      "seed": 822761,
+      "seconds": 63.6,
+      "all_five_analyzers": "passed",
+      "managed_runtime_cases": 4,
+      "managed_seed": 586693,
+      "managed_seconds": 11.5
+    },
+    "linux": {
+      "deterministic_cases": 141,
+      "seed": 213866,
+      "seconds": 65.6,
+      "all_five_analyzers": "passed",
+      "managed_runtime_cases": 4,
+      "managed_seed": 912310,
+      "managed_seconds": 12.3
+    },
+    "new_controlled_cases": 3,
+    "durable_recovery": "unchanged store schema; 21 real cases on each host last verified in phase7-worker-health.json",
+    "canaries": "unchanged analyzer policy; prior bad/clean runs in phase6-durable-recovery.json"
+  },
+  "remaining": [
+    "actual host and guest resource enforcement experiments",
+    "public telemetry and notification failure tests",
+    "benchmark and release qualification"
+  ],
+  "source_sha256": {
+    "lib/smolbox/client.ex": "293e4989fff85929fb05d1560ec94fb31794310d2daad4343828fdff6e84fb42",
+    "lib/smolbox/runtime/executor.ex": "802f5ebd8feeea82734aedfbc612f32b50ba9a703f5b9931ddd36431b1b3c892",
+    "test/support/managed_peer.ex": "eb5bbfdd098084f255c911ab574d9883c0c342e50a64929fa3d9f4475af1bf5d",
+    "test/contract/worker_pool_test.exs": "6bab744aa301990492a634d70b906b96d834c67b46c7114aa6abe54e42574611"
+  }
+}
