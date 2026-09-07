@@ -7,14 +7,15 @@ defmodule SmolBox.CI.CLI do
   def run(["preflight" | arguments]), do: Preflight.run(arguments)
   def run(["worker-fault" | arguments]), do: WorkerFault.run(arguments)
 
-  def run(["required"]) do
+  def run([command]) when command in ~w(required runtime-required) do
     results = System.fetch_env!("NEEDS_JSON") |> JSON.decode!()
+    scope = if command == "runtime-required", do: :runtime, else: :ci
 
     failed =
       Gate.failures(
         results,
         System.fetch_env!("GITHUB_EVENT_NAME"),
-        System.fetch_env!("QUALIFY_RUNTIME")
+        scope
       )
 
     IO.puts(JSON.encode!(%{failed_dependencies: failed}))
@@ -25,6 +26,6 @@ defmodule SmolBox.CI.CLI do
     do:
       raise(
         ArgumentError,
-        "expected bounded, package-consumer, preflight, worker-fault or required"
+        "expected bounded, package-consumer, preflight, worker-fault, required or runtime-required"
       )
 end

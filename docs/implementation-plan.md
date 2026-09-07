@@ -131,6 +131,7 @@ smolbox/
   .github/workflows/
     smolbox-ci.yml
     smolbox-live.yml
+    smolbox-runtime-qualification.yml
   .gitattributes
   .gitignore
   mix.exs
@@ -570,7 +571,7 @@ Dependencies: initial Phase 0 version decisions.
 - [x] Use environment-specific compilation paths so `dev/mix/tasks` is excluded from production consumers.
 - [x] Commit the maintainer lockfile and exact toolchain pins; do not rely on the lockfile to constrain downstream Hex consumers.
 - [x] Implement the Credence CI wrapper and quality-check canaries described in section 12.
-- [x] Add root-level GitHub workflows and the local `mix ci` entry point. The workflow covers deterministic/quality/compatibility/security/docs/package checks, the durable store, and protected Linux/macOS live jobs. Explicit manual runtime selection and a fixed dependency-result gate reject missing, failed, cancelled and unexpectedly skipped checks. Push and pull-request runs require ordinary CI only; an opted-in manual qualification requires both real-worker jobs. Ordinary jobs have executed on GitHub; live infrastructure provisioning and protected real-worker execution remain pending. Checked-in jobs alone do not qualify a release.
+- [x] Add root-level GitHub workflows and the local `mix ci` entry point. `SmolBox CI` covers deterministic/quality/compatibility/security/docs/package checks and the durable store on push, pull request or manual dispatch. The separate manual-only `SmolBox Runtime Qualification` workflow requires candidate preparation and protected Linux/macOS live jobs. Each workflow has a fixed dependency-result gate rejecting missing, failed, cancelled and skipped checks. Ordinary jobs have executed on GitHub; live infrastructure provisioning and protected real-worker execution remain pending. Checked-in jobs alone do not qualify a release.
 - [x] Require every requested analyzer; verify intentional bad fixtures produce a failing process. Compiler, all five analyzers, and coverage have verified clean/bad counterparts.
 - [x] Configure packaging exclusions for references, nested repositories, credentials, caches, VM state, and CI-only code. A fresh production consumer compiled from the tarball without quality tools; API/supervisor smoke checks remain for later phases.
 
@@ -593,9 +594,10 @@ dependencies. Host probes also use standard Unix process tools and `curl`, with
 user configuration, proxies, redirects and mutation retries disabled.
 
 The obsolete changed-path classifier and full-history checkout are gone.
-`smolbox-ci-tools` records the checked-out commit and runs the tooling regressions;
-the aggregate gate reads the explicit manual qualification selection. Missing,
-failed, cancelled and unexpectedly skipped dependencies still fail. The old
+At this migration milestone, `smolbox-ci-tools` recorded the checked-out commit
+and ran the tooling regressions; the aggregate gate read the manual qualification
+selection. The subsequent workflow separation below moves candidate recording
+to the runtime workflow and removes the skip exception from ordinary CI. The old
 Phase 0 probe's unique assertions now live in the fourteen real Elixir runtime
 cases, including Python timeout/network/streaming, JavaScript binary nonzero
 output, file round trips and observed allocations.
@@ -661,6 +663,29 @@ The aggregate failed under the previous policy because both real-worker jobs
 were skipped. That run does not validate the later opt-in policy or this metadata
 change. Protected real-worker execution and independent ephemeral worker teardown
 remain unverified external requirements.
+
+Workflow separation (September 7): the ordinary
+[GitHub run at `2a403f5`](https://github.com/hfiguera/smolbox/actions/runs/34145090794)
+passed all 17 regular jobs, including the aggregate, all five analyzers and their
+canaries. Its canonical suite passed 178 cases with 95.40% coverage. Its two
+runtime jobs were intentionally skipped under the earlier opt-in policy.
+The current change removes those jobs and their input from `smolbox-ci.yml` and
+moves candidate preparation and both platforms into the manual-only
+`smolbox-runtime-qualification.yml`, reusing `smolbox-live.yml` unchanged.
+Disabled infrastructure fails candidate preparation before scheduling workers.
+The ordinary and runtime aggregates each require their own exact job set to
+succeed, with no allowed skips. A release requires both successful workflows on
+the same exact commit. The prior green run does not verify this separation;
+new GitHub execution and protected-worker provisioning remain outstanding.
+
+Local validation of this separation: all 22 standalone tooling regressions pass
+on macOS with canonical Elixir 1.20.4/OTP 28.5 and minimum Elixir 1.18.4/OTP
+27.3.4.15. Canonical `mix ci` passes 178 cases (seed 930801, 76.8 seconds), format,
+unused-lock checks, warning-as-error compilation and all five analyzers. Actionlint
+accepts all three workflow files. Parsed workflow checks verify triggers, exact
+dependency sets against both Elixir gates, aggregate command selection and shared
+candidate wiring. Executing the actual infrastructure-guard shell step rejects
+unset/false enablement and accepts true. These checks contact no live workers.
 
 ### Phase 2 — Model contracts, validation, and wire codecs
 
@@ -1215,7 +1240,7 @@ Use the pinned Mix version's `test_coverage` summary threshold configuration and
 
 | Job/status | Runs | Passing evidence |
 |---|---|---|
-| `smolbox-ci-tools` | Candidate commit and standalone Elixir tooling regressions | Tooling tests run before dependency installation; candidate identity is recorded without change-path classification |
+| `smolbox-ci-tools` | Standalone Elixir tooling regressions | Tooling tests run before dependency installation, including both aggregate gates |
 | `smolbox-format-compile` | Format, unused lock entries, warning-free compile | No source modifications or compiler warnings |
 | `smolbox-credo-ex-slop` | Strict Credo with verified ExSlop registration | Both built-in and plugin checks active; no unsuppressed findings |
 | `smolbox-ex-dna` | Scoped standalone duplicate scan | No reported clones above the reviewed zero budget |
@@ -1229,15 +1254,17 @@ Use the pinned Mix version's `test_coverage` summary threshold configuration and
 | `smolbox-security` | Retired dependency and vulnerability audits | Current advisory fetch succeeds and policy passes |
 | `smolbox-docs-package` | Docs, Hex build, tar inspection, fresh consumer | No docs warnings; usable package without CI/example dependencies |
 | `smolbox-minimum-dependencies` | Fresh production consumer with minimum direct dependencies on Elixir 1.18.4/OTP 27.3.4.15 | Explicit dependency versions, package compilation and public API/supervisor smoke checks pass |
-| `smolbox-linux-runtime` | Opt-in pinned real Linux worker suite | KVM and runtime preflight succeeds; required cases execute |
-| `smolbox-macos-runtime` | Opt-in pinned real macOS arm64 suite | Virtualization preflight succeeds; required cases execute |
-| `smolbox-required` | Aggregate job with explicit dependency-result checks | Every ordinary check succeeds; only unrequested live jobs may be skipped |
+| `smolbox-required` | Ordinary CI aggregate with explicit dependency-result checks | Every ordinary check succeeds; missing, failed, cancelled or skipped dependencies fail |
+| `smolbox-runtime-candidate` | Manual qualification: infrastructure enablement and exact candidate commit | Infrastructure is explicitly enabled; checked-out commit is passed to both platforms |
+| `smolbox-linux-runtime` | Manual qualification: pinned real Linux worker suite | KVM and runtime preflight succeeds; required cases execute |
+| `smolbox-macos-runtime` | Manual qualification: pinned real macOS arm64 suite | Virtualization preflight succeeds; required cases execute |
+| `smolbox-runtime-required` | Manual qualification aggregate | Candidate preparation and both platforms succeed; missing, failed, cancelled or skipped dependencies fail |
 
 Ordinary untrusted PRs run deterministic/quality/package checks on disposable hosted runners without worker credentials. Real-VM jobs run only on isolated trusted infrastructure after code is eligible for that environment; never run arbitrary fork PR code on a persistent privileged self-hosted worker or via `pull_request_target` with secrets.
 
-Push and pull-request CI requires the ordinary quality, deterministic, durable-store and package checks. Real-worker qualification is no longer a required automatic merge check. Request it explicitly with `qualify_runtime: true` for a reviewed candidate; once requested, missing, skipped or failed platform jobs fail the run. A release still requires real-worker evidence on both supported platforms for the exact release commit. Ordinary CI success alone does not satisfy that release requirement.
+Push and pull-request CI requires the ordinary quality, deterministic, durable-store and package checks and contains no real-worker jobs. Request real-worker qualification through the separate `SmolBox Runtime Qualification` workflow for a reviewed candidate. Missing, skipped or failed platform jobs fail that workflow. A release requires successful ordinary CI and real-worker evidence on both supported platforms for the same exact release commit; the manual workflow does not rerun ordinary CI. Ordinary CI success alone does not satisfy that release requirement.
 
-The implemented live workflow is dispatched explicitly with `qualify_runtime`
+The runtime qualification workflow is dispatched explicitly
 after the operator provisions isolated disposable workers and protects the two
 runtime environments. Its preflight verifies the selected private listener,
 pinned executable and wrapper, native artifacts, database socket and empty
@@ -1251,7 +1278,7 @@ are explicitly development evidence, not successful protected GitHub jobs.
 
 ### 12.8 Workflow implementation details
 
-- Run ordinary CI on every push and pull request, with an always-reported aggregate status. Record the checked-out candidate commit; select runtime qualification through the explicit manual input.
+- Run ordinary CI on every push and pull request, with an always-reported aggregate status and no runtime job dependencies. Use a separate manual workflow for runtime qualification, record its checked-out candidate commit, and pass that exact identity to both platforms. Its aggregate must require candidate preparation and both platforms to succeed.
 - Use `erlef/setup-beam` and checkout/cache/upload actions pinned to reviewed full commit SHAs. Record the corresponding action versions in comments and automate reviewed updates. [setup-beam](https://github.com/erlef/setup-beam).
 - Keep permissions read-only by default. Publishing has a separate protected workflow and narrowly scoped credentials.
 - Use exact matrix entries and report actual `elixir --version`, OTP, dependency lock hash, and SmolVM/image versions in job artifacts.

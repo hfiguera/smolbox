@@ -1,23 +1,28 @@
 # SmolBox CI infrastructure contract
 
-The ordinary workflow runs quality, deterministic, durable-store and package
-checks on disposable hosted runners for every push and pull request. Real-worker
-qualification is optional and runs only on manual dispatch with `qualify_runtime:
-true`. A manual dispatch with the option disabled runs ordinary CI as well.
+`SmolBox CI` (`smolbox-ci.yml`) runs quality, deterministic, durable-store and
+package checks on disposable hosted runners for every push and pull request.
+It can also be dispatched manually. It contains no real-worker jobs.
 
-`smolbox-ci-tools` runs the standalone ExUnit tooling tests and records the
-checked-out candidate commit. Runtime qualification follows the explicit manual
-input. There is no changed-path classification or full-history checkout.
+`SmolBox Runtime Qualification` (`smolbox-runtime-qualification.yml`) is a separate,
+manual-only workflow. It verifies the infrastructure enablement variable, records
+the checked-out candidate commit, and calls the shared `smolbox-live.yml` worker
+workflow once for Linux and once for macOS. A dispatch with infrastructure
+disabled fails before scheduling real-worker jobs.
 
-`smolbox-required` rejects missing, failed, cancelled and unexpectedly skipped
-dependencies. Only the two live jobs may be skipped when qualification was not
-requested. When it was requested, both platform jobs must succeed; disabled or
-missing infrastructure cannot turn that request into a successful skip.
+`smolbox-ci-tools` runs the standalone ExUnit tooling tests. There is no changed-path
+classification or full-history checkout. `smolbox-required` requires every ordinary
+dependency to succeed. `smolbox-runtime-required` separately requires candidate
+preparation and both platform jobs to succeed. Both gates reject missing, failed,
+cancelled and skipped dependencies; neither accepts a skipped required job.
+Their commands are `elixir scripts/ci.exs required` and
+`elixir scripts/ci.exs runtime-required`, respectively.
 
 A passing ordinary CI run establishes its tested library checks. Release
-qualification separately requires real-worker evidence for the exact candidate
-commit. Dispatch that reviewed commit through a maintainer-controlled branch/ref;
-live jobs check out the selected commit, and their preflight records it.
+qualification separately requires successful ordinary CI and real-worker evidence
+for the same exact candidate commit. The manual workflow does not rerun ordinary
+CI. Dispatch that reviewed commit through a maintainer-controlled branch/ref;
+live jobs check out the recorded commit, and their preflight records it.
 Validating another branch tip does not qualify the release candidate.
 
 ## Enable protected live workers only after provisioning
@@ -102,9 +107,9 @@ Hard resource-abuse certification remains a separate, incomplete acceptance item
 this workflow does not certify it by declaration. The recorded development-host
 benchmarks cover their stated workloads and image-cache conditions. The live
 workflow does not rerun those benchmarks or establish broader performance claims.
-Choose `qualify_runtime: true` when dispatching the reviewed candidate for runtime
-qualification. With the option disabled, a successful run establishes ordinary
-CI only and supplies no new runtime evidence.
+Dispatch `SmolBox Runtime Qualification` for the reviewed candidate when the
+infrastructure is ready. There is no runtime toggle in `SmolBox CI`. Successful
+ordinary CI supplies no new runtime evidence.
 
 ## Bounded reports and local verification
 
@@ -123,7 +128,7 @@ Only bounded JSON reports are uploaded. VM disks, database payloads, private key
 and guest code/output are excluded. Store/service test files remain private until
 the independent teardown. No package publication occurs in these workflows.
 
-Both workflows live in this standalone repository's `.github/workflows/`.
+The two entry workflows and shared worker workflow live in `.github/workflows/`.
 Library jobs run from the repository root, and example jobs run from their
 respective `examples/` directories.
 

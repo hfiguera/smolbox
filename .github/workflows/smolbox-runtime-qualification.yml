@@ -1,0 +1,67 @@
+name: SmolBox Runtime Qualification
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  smolbox-runtime-candidate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      commit: ${{ steps.candidate.outputs.commit }}
+    steps:
+      - name: Require provisioned runtime infrastructure
+        env:
+          RUNTIME_ENABLED: ${{ vars.SMOLBOX_TRUSTED_RUNTIME_ENABLED }}
+        run: |
+          if [ "$RUNTIME_ENABLED" != true ]; then
+            echo "::error::Provision protected disposable workers before enabling SMOLBOX_TRUSTED_RUNTIME_ENABLED. See scripts/ci/README.md."
+            exit 1
+          fi
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - id: candidate
+        run: echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  smolbox-linux-runtime:
+    needs: smolbox-runtime-candidate
+    uses: ./.github/workflows/smolbox-live.yml
+    with:
+      platform: linux
+      commit: ${{ needs.smolbox-runtime-candidate.outputs.commit }}
+
+  smolbox-macos-runtime:
+    needs: smolbox-runtime-candidate
+    uses: ./.github/workflows/smolbox-live.yml
+    with:
+      platform: macos
+      commit: ${{ needs.smolbox-runtime-candidate.outputs.commit }}
+
+  smolbox-runtime-required:
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    needs:
+      - smolbox-runtime-candidate
+      - smolbox-linux-runtime
+      - smolbox-macos-runtime
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
+        with:
+          otp-version: '28.5'
+          elixir-version: '1.20.4'
+      - name: Require candidate preparation and both real platforms to succeed
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: elixir scripts/ci.exs runtime-required

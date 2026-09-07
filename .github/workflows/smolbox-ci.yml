@@ -4,11 +4,6 @@ on:
   push:
   pull_request:
   workflow_dispatch:
-    inputs:
-      qualify_runtime:
-        description: Run the reviewed candidate on protected disposable real workers
-        type: boolean
-        default: false
 
 permissions:
   contents: read
@@ -25,8 +20,6 @@ jobs:
   smolbox-ci-tools:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
-    outputs:
-      commit: ${{ steps.candidate.outputs.commit }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -36,8 +29,6 @@ jobs:
           otp-version: '28.5'
           elixir-version: '1.20.4'
       - run: elixir scripts/ci_test.exs
-      - id: candidate
-        run: echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
   smolbox-format-compile:
     runs-on: ubuntu-24.04
@@ -425,26 +416,6 @@ jobs:
           mix run --no-start --no-compile scripts/check_unavailable.exs
       - run: git diff --exit-code
 
-  smolbox-linux-runtime:
-    needs: smolbox-ci-tools
-    if: >-
-      github.event_name == 'workflow_dispatch' && inputs.qualify_runtime &&
-      vars.SMOLBOX_TRUSTED_RUNTIME_ENABLED == 'true'
-    uses: ./.github/workflows/smolbox-live.yml
-    with:
-      platform: linux
-      commit: ${{ needs.smolbox-ci-tools.outputs.commit }}
-
-  smolbox-macos-runtime:
-    needs: smolbox-ci-tools
-    if: >-
-      github.event_name == 'workflow_dispatch' && inputs.qualify_runtime &&
-      vars.SMOLBOX_TRUSTED_RUNTIME_ENABLED == 'true'
-    uses: ./.github/workflows/smolbox-live.yml
-    with:
-      platform: macos
-      commit: ${{ needs.smolbox-ci-tools.outputs.commit }}
-
   smolbox-required:
     if: always()
     runs-on: ubuntu-24.04
@@ -468,8 +439,6 @@ jobs:
       - smolbox-minimum-dependencies
       - smolbox-minimal-host
       - smolbox-store-contract
-      - smolbox-linux-runtime
-      - smolbox-macos-runtime
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -481,5 +450,4 @@ jobs:
       - name: Require every configured check to succeed
         env:
           NEEDS_JSON: ${{ toJSON(needs) }}
-          QUALIFY_RUNTIME: ${{ github.event_name == 'workflow_dispatch' && inputs.qualify_runtime && 'true' || 'false' }}
         run: elixir scripts/ci.exs required
