@@ -720,7 +720,7 @@ Dependencies: Phases 5–7.
 - [x] Finish minimal and durable host examples with no Keel/Jido dependency. Both standalone Mix projects compile, pass Dialyzer/audits, and demonstrate real Python execution, binary collection, cancellation and retention-window cleanup on Linux and macOS. The durable host also passes fresh-BEAM fault recovery; examples explicitly use a development profile.
 - [x] Document deployment, artifact preparation, unknown-outcome handling, cancellation, cleanup, and upgrades. Packaged client/host/recovery/security/telemetry guides describe the external services and operator procedures, including pinned upstream preparation flags, template floors, durable keys, migrations, drain limits and immutable revisions. Actual resource/isolation qualification and independent consumer review remain separate gates.
 - [ ] Test adversarial outputs, limits, paths, credential isolation, and endpoint access on dedicated hosts.
-- [ ] Record measured cold/warm-image preparation, queue, execution, and collection times without claiming VM boot time is total function latency. Warm-state durable measurements, bounded queue rejection, delayed consumers, preparation failure and uncertain-cancellation accounting now pass on both hosts. Fresh isolated worker/cache-miss and cold-host measurements remain pending.
+- [x] Record measured image-cache availability, preparation, queue, execution, collection and cleanup without equating VM boot time with total function latency. The twenty-sample durable workload passes on both hosts, including bounded queue rejection, delayed consumers, preparation failure and uncertain-cancellation accounting. A separate fresh private Linux worker now records one verified image-cache miss followed by nineteen cache-hit samples. macOS uses per-machine extraction, with no equivalent shared-extraction hit path. These are already-running-host measurements; one cold-cache sample does not establish a percentile or SLA, and pristine-host startup is not claimed.
 
 Exit: another developer can follow the examples, understand failure states, and identify each required external service.
 
@@ -838,6 +838,27 @@ PID-match fixture failed because it compared different observed PID domains;
 that attempt and its successful cleanup remain in
 `docs/evidence/phase8-macos-memory.json`. No host quota or broader macOS
 production-isolation claim follows from this finite guest experiment.
+
+Cache-state measurement is now recorded in `docs/evidence/phase8-cache-state.json`.
+A new private Linux worker had no extracted image cache before its first request.
+The first outcome/cleanup took 2.171/2.477 seconds; the following nineteen cached
+samples had outcome median/p95 1.956/2.184 seconds and cleanup median/p95
+2.220/3.413 seconds. Create took 218.895 ms for the miss versus cached median
+17.263 ms. One miss is a single observation, not a cold-cache distribution. All
+28 accepted executions across benchmark phases cleaned up and released capacity;
+the verified owned worker unit was stopped. Four benchmark source hashes match
+the previously verified implementation. The initial missing object-directory
+setup failure occurred before submission and is preserved.
+
+Measurement clarification: earlier progress notes grouped an image-cache miss
+and a cold OS host together. They are separate conditions. The plan's reference
+workload now distinguishes empty/cached extraction on an already-running Linux
+host, while macOS 1.14.1 has only the per-machine packed-extraction path tested
+by its twenty-sample workload. No OS cache clearing, host reboot, fabricated
+macOS cache-hit path or cold-host performance claim is needed to report these
+results. The bounded reference measurement item is complete for those explicit
+conditions; production resource certification and the remaining isolation/CI
+requirements remain open.
 
 ### Phase 9 — Release candidate and adoption evidence
 
@@ -1101,9 +1122,11 @@ before forwarding, and rejects missing/overflowed telemetry evidence. Raw
 reports include actual binary sizes, queue waits, returned outcome and cleanup
 times, and sampled BEAM/supervised-process memory. Reports do not equate those
 samples with worker RSS or a hard mailbox limit. The first sample on an existing
-worker is not classified as cold. Benchmark results and reproduction instructions
-are evidence for the stated workload only; remaining cache and host-isolation
-conditions must be measured independently.
+worker is not classified as cold. The additional fresh private Linux trial
+separates the first verified image-cache miss from nineteen cache-hit samples;
+macOS per-machine extraction has no equivalent shared-cache hit path. Benchmark
+results apply only to the stated workload and cache/host conditions. Broader
+performance claims and host-isolation certification need their own evidence.
 
 Do not publish a Firecracker comparison or a universal startup claim from these tests. SmolBox's initial performance objective is bounded controller behavior and acceptable measured end-to-end latency for the reference workloads; optimize only after correctness and isolation gates pass.
 

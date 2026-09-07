@@ -214,15 +214,63 @@ source hashes, native artifact identities and report checksums.
 
 These workers and their host page caches had already been used. Pinned source
 uses shared pack extraction on Linux and per-machine extraction on macOS; that
-does not turn the first measured submission into a cold-host experiment. Fresh
-isolated worker-state/cache-miss and cold-host measurements remain pending.
+does not turn the first measured submission into a cold-host experiment. The later private-worker trial below separates an empty Linux image cache from
+subsequent cache reuse. No pristine/cold OS-host result is claimed.
+
+## Empty image cache versus cached extraction
+
+A later Linux trial used a new private `SMOLVM_DATA_DIR` on an already-running
+host, with the default shared-extraction path enabled. Before its first
+submission, the data root contained only the new worker database files and no
+shared extraction cache. The pinned distribution and Python artifact were
+already present; host page caches and the normal worker were untouched. The
+same durable benchmark ran twenty sequential submissions and its normal queue,
+slow-consumer, preparation-failure and uncertain-cancellation phases.
+
+| Measurement | First cache-miss sample (n=1) | Cached samples 2–20 (n=19) |
+|---|---:|---:|
+| Outcome, seconds | 2.171 | median 1.956; p95 2.184 |
+| Through cleanup, seconds | 2.477 | median 2.220; p95 3.413 |
+| Create request, milliseconds | 218.895 | median 17.263; maximum 20.055 |
+
+There is only one cache-miss sample; no cold-cache percentile or reliable
+speedup estimate follows from it. Cached cleanup had two larger observations,
+so the p95 remains 3.413 seconds rather than dropping them. This separately
+started worker also differs from the earlier normal worker; end-to-end changes
+cannot be attributed solely to cache state. Polling, PostgreSQL, staging,
+execution, collection and cleanup remain included in the reported path.
+
+After the trial, its private shared extraction tree contained 797 entries with
+130,871,296 allocated regular-file bytes and 21,602,145,645 logical bytes,
+including sparse image data. Cache storage is additional host accounting;
+initial allocated blocks are not a future disk-usage bound. All 28 accepted
+executions released reservations, all notification checks passed, and inventory
+was empty. The exact owned worker unit was then stopped after verifying its
+PID, cgroup and invocation identity. Private settings, keys, database and cache
+remain as evidence. An omitted object directory initially failed host setup
+before submission; that attempt is retained and no accepted command was replayed.
+
+Pinned source makes shared pack extraction Linux-only. On macOS, each packed
+machine creation clears/rebuilds its own extraction directory and owns its own
+case-sensitive volume. The previously recorded twenty macOS samples therefore
+include per-machine extraction on an already-running host; a Linux-style shared
+extraction cache-hit path is unavailable. Source evidence explains the platform
+path without inventing a macOS cached-extraction result.
+
+[Cache-state evidence](evidence/phase8-cache-state.json) records every sequential
+sample, the initial/final cache state, matching benchmark source hashes,
+resources and report identities. These measurements distinguish image-cache
+availability from OS-host startup. Network image acquisition, pristine-host boot
+and statistically broad cold-cache distributions remain unmeasured and are not
+part of the reported performance claim.
 
 ## Remaining evidence
 
 Required work includes broader CPU/process/output and hostile-protocol
 qualification, independently bounded macOS resource experiments, broader
-credential/control-plane tests, cold-state measurements and actual protected
-release-worker jobs. The contained Linux disk-full and finite slow-reader
+credential/control-plane tests and actual protected release-worker jobs.
+Pristine-host and broader cold-cache performance data would need separate trials
+before making claims about those conditions. The contained Linux disk-full and finite slow-reader
 experiments above cover specific workloads and expose a cleanup limitation. Finite
 output/path probes and the workload above cover specific behavior; passing them
 does not substitute for exhaustion/isolation experiments. The implementation plan

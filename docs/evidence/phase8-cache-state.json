@@ -1,0 +1,1774 @@
+{
+  "recorded_utc": "2026-09-07T07:52:44.018903+00:00",
+  "status": "fresh private Linux image-cache miss and subsequent cached workload passed; profile/release acceptance remains incomplete",
+  "smolbox_base_commit": "a697edb",
+  "benchmark_source_sha256": {
+    "examples/durable_host/lib/benchmark.ex": "f1f4acba10bf5a5b9ac1f6a369e0670ec3651fdffa69a259ebd52aa387a87cbc",
+    "examples/durable_host/lib/benchmark_metrics.ex": "3ecc15a1044c13bff69d8f8b96731a0dbd629190f90d47cf5dfe849f95e7cfd1",
+    "examples/durable_host/lib/benchmark_sampler.ex": "d4227f5e8c796d525e01e328c1e7b444d5313646486a67c89add99d038d2c167",
+    "examples/durable_host/scripts/benchmark.exs": "824145f967e38a9c607386320a50cbd634a47a8df85b499aeb90b649a27af0f8"
+  },
+  "upstream_commit": "e8d09ef616d363004d55b80a6cdb31a4e7e1842d",
+  "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+  "runtime_version": "1.14.1",
+  "environment": {
+    "platform": "linux",
+    "architecture": "x86_64-pc-linux-gnu",
+    "elixir": "1.20.4",
+    "otp": "28",
+    "erts": "16.4",
+    "schedulers": 8,
+    "hardware": {
+      "cpu": "11th Gen Intel Core i5-1135G7 @ 2.40GHz",
+      "memory_bytes": 67027787776
+    },
+    "database_topology": "Postgres 16.15 on this host through its private Unix socket",
+    "cache_context": "Fresh isolated Linux worker data root before first submission; shared pack extraction enabled. Host OS page cache already warm; runtime distribution and prepared artifact already present. Subsequent samples reuse this worker state. No host/page cache clearing.",
+    "profile": {
+      "cpus": 1,
+      "memory_mb": 256,
+      "storage_gb": 20,
+      "overlay_gb": 10
+    },
+    "controller": {
+      "lease_ms": 2000,
+      "max_active": 4,
+      "max_pending": 4,
+      "poll_ms": 50,
+      "telemetry_limit": 1024
+    },
+    "input_bytes": 318,
+    "observed_end_to_end": "Includes caller/store polling: 25 ms to outcome, 100 ms to cleanup",
+    "sampling": "100 ms; supervised-process heap/mailbox and whole-BEAM memory, not host RSS or hard bounds"
+  },
+  "before": {
+    "MainPID": "95807",
+    "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/smolbox-cache-worker-a.service",
+    "ActiveState": "active",
+    "InvocationID": "9b0b9617dda54202a5a839fb990a7bd8",
+    "limits": {
+      "memory.max": "2147483648",
+      "memory.swap.max": "0",
+      "cpu.max": "200000 100000",
+      "pids.max": "256"
+    },
+    "initial_files": [
+      ".local/share/smolvm/server/smolvm.db-wal",
+      ".local/share/smolvm/server/smolvm.db",
+      ".local/share/smolvm/server/smolvm.db-shm"
+    ],
+    "inventory": {
+      "machines": []
+    }
+  },
+  "after": {
+    "owned_unit": {
+      "MainPID": "95807",
+      "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/smolbox-cache-worker-a.service",
+      "ActiveState": "active",
+      "InvocationID": "9b0b9617dda54202a5a839fb990a7bd8"
+    },
+    "inventory": {
+      "machines": []
+    },
+    "cache": {
+      "entries": [
+        "d6c548fb",
+        "d6c548fb.artifact-sha256",
+        "d6c548fb.artifact-sha256.lock",
+        "d6c548fb.artifact-source.json",
+        "d6c548fb.lock"
+      ],
+      "files": 797,
+      "regular_logical_bytes": 21602145645,
+      "regular_allocated_bytes": 130871296
+    },
+    "statistics": {
+      "memory.peak": "384450560",
+      "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0",
+      "cpu.stat": "usage_usec 50054955\nuser_usec 27818363\nsystem_usec 22236592\nnice_usec 0\ncore_sched.force_idle_usec 0\nnr_periods 1101\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0",
+      "pids.peak": "24",
+      "pids.events": "max 0"
+    },
+    "benchmark_status": "passed",
+    "remaining_reservations": {
+      "slots": 0,
+      "cpus": 0,
+      "disk_gb": 0,
+      "memory_mb": 0
+    }
+  },
+  "teardown": {
+    "worker_process_absent": true,
+    "owned_unit_cgroup_absent": true,
+    "inventory_verified_empty_before_stop": true
+  },
+  "sequential_samples": [
+    {
+      "state": "completed",
+      "exit_code": 0,
+      "evidence": "exited",
+      "collection": "complete",
+      "artifact_bytes": 4,
+      "stdout_bytes": 13,
+      "through_cleanup_us": 2476833,
+      "to_outcome_us": 2170932,
+      "metrics": {
+        "queue_wait_ms": [
+          75
+        ],
+        "requests_us": {
+          "start": [
+            1362543
+          ],
+          "stop": [
+            153755
+          ],
+          "delete": [
+            36063
+          ],
+          "inspect": [
+            2469,
+            1787,
+            2416,
+            1791,
+            1506,
+            1451,
+            3253
+          ],
+          "create": [
+            218895
+          ],
+          "exec": [
+            136695
+          ],
+          "verify_input": [
+            63517,
+            20733
+          ],
+          "download": [
+            15029,
+            15482
+          ],
+          "upload": [
+            67630,
+            36165
+          ]
+        },
+        "transport_invocations": {
+          "start": 1,
+          "stop": 1,
+          "delete": 1,
+          "inspect": 7,
+          "create": 1,
+          "exec": 1,
+          "verify_input": 2,
+          "download": 2,
+          "upload": 2
+        },
+        "stages_ms": {
+          "cleanup": [
+            219
+          ],
+          "collection": [
+            106
+          ],
+          "execution": [
+            146
+          ],
+          "preparation": [
+            1796
+          ]
+        },
+        "request_bytes": 744
+      }
+    },
+    {
+      "state": "completed",
+      "exit_code": 0,
+      "evidence": "exited",
+      "collection": "complete",
+      "artifact_bytes": 4,
+      "stdout_bytes": 13,
+      "through_cleanup_us": 2142922,
+      "to_outcome_us": 1938059,
+      "metrics": {
+        "queue_wait_ms": [
+          30
+        ],
+        "requests_us": {
+          "start": [
+            1375971
+          ],
+          "stop": [
+            143491
+          ],
+          "delete": [
+            36625
+          ],
+          "inspect": [
+            3176,
+            1921,
+            2107,
+            1971,
+            1542,
+            1567,
+            2509
+          ],
+          "create": [
+            16775
+          ],
+          "exec": [
+            149388
+          ],
+          "verify_input": [
+            69849,
+            16487
+          ],
+          "download": [
+            15054,
+            14893
+          ],
+          "upload": [
+            61067,
+            32392
+          ]
+        },
+        "transport_invocations": {
+          "start": 1,
+          "stop": 1,
+          "delete": 1,
+          "inspect": 7,
+          "create": 1,
+          "exec": 1,
+          "verify_input": 2,
+          "download": 2,
+          "upload": 2
+        },
+        "stages_ms": {
+          "cleanup": [
+            216
+          ],
+          "collection": [
+            92
+          ],
+          "execution": [
+            157
+          ],
+          "preparation": [
+            1596
+          ]
+        },
+        "request_bytes": 744
+      }
+    },
+    {
+      "state": "completed",
+      "exit_code": 0,
+      "evidence": "exited",
+      "collection": "complete",
+      "artifact_bytes": 4,
+      "stdout_bytes": 13,
+      "through_cleanup_us": 2282836,
+      "to_outcome_us": 1975350,
+      "metrics": {
+        "queue_wait_ms": [
+          33
+        ],
+        "requests_us": {
+          "start": [
+            1403768
+          ],
+          "stop": [
+            143561
+          ],
+          "delete": [
+            37680
+          ],
+          "inspect": [
+            1515,
+            1953,
+            2304,
+            1824,
+            1562,
+            1377,
+            2080
+          ],
+          "create": [
+            17106
+          ],
+          "exec": [
+            139758
+          ],
+          "verify_input": [
+            55972,
+            17766
+          ],
+          "download": [
+            14916,
+            16682
+          ],
+          "upload": [
+            113957,
+            33662
+          ]
+        },
+        "transport_invocations": {
+          "start": 1,
+          "stop": 1,
+          "delete": 1,
+          "inspect": 7,
+          "create": 1,
+          "exec": 1,
+          "verify_input": 2,
+          "download": 2,
+          "upload": 2
+        },
+        "stages_ms": {
+          "cleanup": [
+            208
+          ],
+          "collection": [
+            89
+          ],
+          "execution": [
+            149
+          ],
+          "preparation": [
+            1676
+          ]
+        },
+        "request_bytes": 744
+      }
+    },
+    {
+      "state": "completed",
+      "exit_code": 0,
+      "evidence": "exited",
+      "collection": "complete",
+      "artifact_bytes": 4,
+      "stdout_bytes": 13,
+      "through_cleanup_us": 2250444,
+      "to_outcome_us": 1943428,
+      "metrics": {
+        "queue_wait_ms": [
+          39
+        ],
+        "requests_us": {
+          "start": [
+            1341731
+          ],
+          "stop": [
+            147638
+          ],
+          "delete": [
+            37267
+          ],
+          "inspect": [
+            1675,
+            1795,
+            3215,
+            1846,
+            1493,
+            1386,
+            3363
+          ],
+          "create": [
+            16871
+          ],
+          "exec": [
+            139107
+          ],
+          "verify_input": [
+            84655,
+            21106
+          ],
+          "download": [
+            14553,
+            17788
+          ],
+          "upload": [
+            102029,
+            31989
+          ]
+        },
+        "transport_invocations": {
+          "start": 1,
+          "stop": 1,
+          "delete": 1,
+          "inspect": 7,
+          "create": 1,
+          "exec": 1,
+          "verify_input": 2,
+          "download": 2,
+          "upload": 2
+        },
+        "stages_ms": {
+          "cleanup": [
+            216
+          ],
+          "collection": [
+            98
+          ],
+          "execution": [
+            148
+          ],
+          "preparation": [
+            1623
+          ]
+        },
+        "request_bytes": 744
+      }
+    },
+    {
+      "state": "completed",
+      "exit_code": 0,
+      "evidence": "exited",
+      "collection": "complete",
+      "artifact_bytes": 4,
+      "stdout_bytes": 13,
+      "through_cleanup_us": 2143915,
+      "to_outcome_us": 1939136,
+      "metrics": {
+        "queue_wait_ms": [
+          22
+        ],
+        "requests_us": {
+          "start": [
+            1406400
+          ],
+          "stop": [
+            143778
+          ],
+          "delete": [
+            36786
+          ],
+          "inspect": [
+            1527,
+            1957,
+            2481,
+            1761,
+            1470,
+            1841,
+            949
+          ],
+          "create": [
+            15860
+          ],
+          "exec": [
+            132645
+          ],
+          "verify_input": [
+            72607,
+            17932
+          ],
+          "download": [
+            14884,
+            16043
+          ],
+          "upload": [
+            64590,
+            32510
+          ]
+        },
+        "transport_invocations": {
+          "start": 1,
+          "stop": 1,
+          "delete": 1,
+          "inspect": 7,
+          "create": 1,
+          "exec": 1,
+          "verify_input": 2,
+          "download": 2,
+          "upload": 2
+        },
+        "stages_ms": {
+          "cleanup": [
+            216
+          ],
+          "collection": [
+            109
+          ],
+          "execution": [
+            141
+          ],
+          "preparation": [
+            1630
+          ]
+        },
+        "request_bytes": 744
+      }
+    },
+    {
+      "state": "completed",
+      "exit_code": 0,
+      "evidence": "exited",
+      "collection": "complete",
+      "artifact_bytes": 4,
+      "stdout_bytes": 13,
+      "through_cleanup_us": 3375837,
+      "to_outcome_us": 2048770,
+      "metrics": {
+        "queue_wait_ms": [
+          18
+        ],
+        "requests_us": {
+          "start": [
+            1475399
+          ],
+          "stop": [
+            1182129
+          ],
+          "delete": [
+            36285
+          ],
+          "inspect": [
+            2175,
+            1709,
+            3063,
+            1887,
+            875,
+            1569,
+            3259
+          ],
+          "create": [
+            17064
+          ],
+          "exec": [
+            134290
+          ],
+          "verify_input": [
+            17243,
+            18016
+          ],
+          "download": [
+            14835,
+            17277
+          ],
+          "upload": [
+            135663,
+            52888
+          ]
+        },
+        "transport_invocations": {
+          "start": 1,
+          "stop": 1,
+          "delete": 1,
+          "inspect": 7,
+          "create": 1,
+          "exec": 1,
+          "verify_input": 2,
+          "download": 2,
+          "upload": 2
+        },
+        "stages_ms": {
+          "cleanup": [
+            1254
+          ],
+          "collection": [
+            103
+          ],
+          "execution": [
+            142
+          ],
+          "preparation": [
+            1743
+          ]
+        },
+        "request_bytes": 744
+      }
+    },
+    {
+      "state": "completed",
+      "exit_code": 0,
+      "evidence": "exited",
+      "collection": "complete",
+      "artifact_bytes": 4,
+      "stdout_bytes": 13,
+      "through_cleanup_us": 2014821,
+      "to_outcome_us": 1810702,
+      "metrics": {
+        "queue_wait_ms": [
+          66
+        ],
+        "requests_us": {
+          "start": [
+            1243101
+          ],
+          "stop": [
+            137524
+          ],
+          "delete": [
+            37007
+          ],
+          "inspect": [
+            1511,
+            2047,
+            2209,
+            1908,
+            1534,
+            1465,
+            963
+          ],
+          "create": [
+            16344
+          ],
+          "exec": [
+            140968
+          ],
+          "verify_input": [
+            68838,
+            16202
+          ],
+          "download": [
+            15337,
+            17370
+          ],
+          "upload": [
+            64420,
+            30326
+          ]
+        },
+        "transport_invocations": {
+          "start": 1,
+          "stop": 1,
+          "delete": 1,
+          "inspect": 7,
+          "create": 1,
+          "exec": 1,
+          "verify_input": 2,
+          "download": 2,
+          "upload": 2
+        },
+        "stages_ms": {
+          "cleanup": [
+            205
+          ],
+          "collection": [
+            102
+          ],
+          "execution": [
+            148
+          ],
+          "preparation": [
+            1463
+          ]
+        },
+        "request_bytes": 744
+      }
+    },
+    {
+      "state": "completed",
+      "exit_code": 0,
+      "evidence": "exited",
+      "collection": "complete",
+      "artifact_bytes": 4,
+      "stdout_bytes": 13,
+      "through_cleanup_us": 2162586,
+      "to_outcome_us": 1853390,
+      "metrics": {
+        "queue_wait_ms": [
+          34
+        ],
+        "requests_us": {
+          "start": [
+            1303162
+          ],
+          "stop": [
+            157296
+          ],
+          "delete": [
+            36217
+          ],
+          "inspect": [
+            2866,
+            1830,
+            2254,
+            2040,
+            1349,
+            1941,
+            3431
+          ],
+          "create": [
+            17093
+          ],
+          "exec": [
+            141609
+          ],
+          "verify_input": [
+            17087,
+            17288
+          ],
+          "download": [
+            15065,
+            16465
+          ],
+          "upload": [
+            113527,
+            30964
+          ]
+        },
+        "transport_invocations": {
+          "start": 1,
+          "stop": 1,
+          "delete": 1,
+          "inspect": 7,
+          "create": 1,
+          "exec": 1,
+          "verify_input": 2,
+          "download": 2,
+          "upload": 2
+        },
+        "stages_ms": {
+          "cleanup": [
+            232
+          ],
+          "collection": [
+            104
+          ],
+          "execution": [
+            149
+          ],
+          "preparation": [
+            1526
+          ]
+        },
+        "request_bytes": 744
+      }
+    },
+    {
+      "state": "completed",
+      "exit_code": 0,
+      "evidence": "exited",
+      "collection": "complete",
+      "artifact_bytes": 4,
+      "stdout_bytes": 13,
+      "through_cleanup_us": 2009063,
+      "to_outcome_us": 1806110,
+      "metrics": {
+        "queue_wait_ms": [
+          62
+        ],
+        "requests_us": {
+          "start": [
+            1254365
+          ],
+          "stop": [
+            148957
+          ],
+          "delete": [
+            37652
+          ],
+          "inspect": [
+            1610,
+            1694,
+            1674,
+            1849,
+            1415,
+            1235,
+            554
+          ],
+          "create": [
+            17308
+          ],
+          "exec": [
+            134477
+          ],
+          "verify_input": [
+            19739,
+            17949
+          ],
+          "download": [
+            14835,
+            15327
+          ],
+          "upload": [
+            110016,
+            30285
+          ]
+        },
+        "transport_invocations": {
+          "start": 1,
+          "stop": 1,
+          "delete": 1,
+          "inspect": 7,
+          "create": 1,
+          "exec": 1,
+          "verify_input": 2,
+          "download": 2,
+          "upload": 2
+        },
+        "stages_ms": {
+          "cleanup": [
+            215
+          ],
+          "collection": [
+            88
+          ],
+          "execution": [
+            143
+          ],
+          "preparation": [
+            1475
+          ]
+        },
+        "request_bytes": 744
+      }
+    },
+    {
+      "state": "completed",
+      "exit_code": 0,
+      "evidence": "exited",
+      "collection": "complete",
+      "artifact_bytes": 4,
+      "stdout_bytes": 13,
+      "through_cleanup_us": 2273683,
+      "to_outcome_us": 1965807,
+      "metrics": {
+        "queue_wait_ms": [
+          38
+        ],
+        "requests_us": {
+          "start": [
+            1413238
+          ],
+          "stop": [
+            149380
+          ],
+          "delete": [
+            37343
+          ],
+          "inspect": [
+            2178,
+            2046,
+            3768,
+            1936,
+            1340,
+            1393,
+            3545
+          ],
+          "create": [
+            17263
+          ],
+          "exec": [
+            139260
+          ],
+          "verify_input": [
+            18985,
+            16873
+          ],
+          "download": [
+            14689,
+            19805
+          ],
+          "upload": [
+            111906,
+            33096
+          ]
+        },
+        "transport_invocations": {
+          "start": 1,
+          "stop": 1,
+          "delete": 1,
+          "inspect": 7,
+          "create": 1,
+          "exec": 1,
+          "verify_input": 2,
+          "download": 2,
+          "upload": 2
+        },
+        "stages_ms": {
+          "cleanup": [
+            217
+          ],
+          "collection": [
+            116
+          ],
+          "execution": [
+            148
+          ],
+          "preparation": [
+            1637
+          ]
+        },
+        "request_bytes": 744
+      }
+    },
+    {
+      "state": "completed",
+      "exit_code": 0,
+      "evidence": "exited",
+      "collection": "complete",
+      "artifact_bytes": 4,
+      "stdout_bytes": 13,
+      "through_cleanup_us": 2158818,
+      "to_outcome_us": 1955610,
+      "metrics": {
+        "queue_wait_ms": [
+          64
+        ],
+        "requests_us": {
+          "start": [
+            1378817
+          ],
+          "stop": [
+            144221
+          ],
+          "delete": [
+            36786
+          ],
+          "inspect": [
+            1744,
+            1813,
+            1975,
+            2025,
+            1496,
+            1716,
+            767
+          ],
+          "create": [
+            18580
+          ],
+          "exec": [
+            137729
+          ],
+          "verify_input": [
+            74025,
+            18244
+          ],
+          "download": [
+            14735,
+            15007
+          ],
+          "upload": [
+            64328,
+            32708
+          ]
+        },
+        "transport_invocations": {
+          "start": 1,
+          "stop": 1,
+          "delete": 1,
+          "inspect": 7,
+          "create": 1,
+          "exec": 1,
+          "verify_input": 2,
+          "download": 2,
+          "upload": 2
+        },
+        "stages_ms": {
+          "cleanup": [
+            211
+          ],
+          "collection": [
+            92
+          ],
+          "execution": [
+            145
+          ],
+          "preparation": [
+            1607
+          ]
+        },
+        "request_bytes": 744
+      }
+    },
+    {
+      "state": "completed",
+      "exit_code": 0,
+      "evidence": "exited",
+      "collection": "complete",
+      "artifact_bytes": 4,
+      "stdout_bytes": 13,
+      "through_cleanup_us": 2219691,
+      "to_outcome_us": 1912658,
+      "metrics": {
+        "queue_wait_ms": [
+          43
+        ],
+        "requests_us": {
+          "start": [
+            1385441
+          ],
+          "stop": [
+            154600
+          ],
+          "delete": [
+            36930
+          ],
+          "inspect": [
+            2047,
+            2134,
+            2317,
+            1915,
+            1812,
+            1464,
+            3193
+          ],
+          "create": [
+            17543
+          ],
+          "exec": [
+            135899
+          ],
+          "verify_input": [
+            17930,
+            18615
+          ],
+          "download": [
+            15454,
+            16665
+          ],
+          "upload": [
+            103722,
+            31131
+          ]
+        },
+        "transport_invocations": {
+          "start": 1,
+          "stop": 1,
+          "delete": 1,
+          "inspect": 7,
+          "create": 1,
+          "exec": 1,
+          "verify_input": 2,
+          "download": 2,
+          "upload": 2
+        },
+        "stages_ms": {
+          "cleanup": [
+            222
+          ],
+          "collection": [
+            104
+          ],
+          "execution": [
+            143
+          ],
+          "preparation": [
+            1600
+          ]
+        },
+        "request_bytes": 744
+      }
+    },
+    {
+      "state": "completed",
+      "exit_code": 0,
+      "evidence": "exited",
+      "collection": "complete",
+      "artifact_bytes": 4,
+      "stdout_bytes": 13,
+      "through_cleanup_us": 2205743,
+      "to_outcome_us": 2001596,
+      "metrics": {
+        "queue_wait_ms": [
+          66
+        ],
+        "requests_us": {
+          "start": [
+            1391798
+          ],
+          "stop": [
+            139692
+          ],
+          "delete": [
+            38461
+          ],
+          "inspect": [
+            1880,
+            1790,
+            2778,
+            1730,
+            1719,
+            1505,
+            1857
+          ],
+          "create": [
+            18914
+          ],
+          "exec": [
+            142748
+          ],
+          "verify_input": [
+            84158,
+            18674
+          ],
+          "download": [
+            15298,
+            16247
+          ],
+          "upload": [
+            56891,
+            34283
+          ]
+        },
+        "transport_invocations": {
+          "start": 1,
+          "stop": 1,
+          "delete": 1,
+          "inspect": 7,
+          "create": 1,
+          "exec": 1,
+          "verify_input": 2,
+          "download": 2,
+          "upload": 2
+        },
+        "stages_ms": {
+          "cleanup": [
+            213
+          ],
+          "collection": [
+            93
+          ],
+          "execution": [
+            151
+          ],
+          "preparation": [
+            1639
+          ]
+        },
+        "request_bytes": 744
+      }
+    },
+    {
+      "state": "completed",
+      "exit_code": 0,
+      "evidence": "exited",
+      "collection": "complete",
+      "artifact_bytes": 4,
+      "stdout_bytes": 13,
+      "through_cleanup_us": 2221576,
+      "to_outcome_us": 1913199,
+      "metrics": {
+        "queue_wait_ms": [
+          45
+        ],
+        "requests_us": {
+          "start": [
+            1355809
+          ],
+          "stop": [
+            167298
+          ],
+          "delete": [
+            36516
+          ],
+          "inspect": [
+            2143,
+            1766,
+            3214,
+            1769,
+            1406,
+            2267,
+            2329
+          ],
+          "create": [
+            15534
+          ],
+          "exec": [
+            136878
+          ],
+          "verify_input": [
+            81446,
+            14851
+          ],
+          "download": [
+            15329,
+            19171
+          ],
+          "upload": [
+            56372,
+            29845
+          ]
+        },
+        "transport_invocations": {
+          "start": 1,
+          "stop": 1,
+          "delete": 1,
+          "inspect": 7,
+          "create": 1,
+          "exec": 1,
+          "verify_input": 2,
+          "download": 2,
+          "upload": 2
+        },
+        "stages_ms": {
+          "cleanup": [
+            240
+          ],
+          "collection": [
+            112
+          ],
+          "execution": [
+            144
+          ],
+          "preparation": [
+            1572
+          ]
+        },
+        "request_bytes": 744
+      }
+    },
+    {
+      "state": "completed",
+      "exit_code": 0,
+      "evidence": "exited",
+      "collection": "complete",
+      "artifact_bytes": 4,
+      "stdout_bytes": 13,
+      "through_cleanup_us": 3412741,
+      "to_outcome_us": 2082630,
+      "metrics": {
+        "queue_wait_ms": [
+          66
+        ],
+        "requests_us": {
+          "start": [
+            1388829
+          ],
+          "stop": [
+            1161709
+          ],
+          "delete": [
+            36694
+          ],
+          "inspect": [
+            1915,
+            1759,
+            3748,
+            1898,
+            1402,
+            1267,
+            1994
+          ],
+          "create": [
+            20055
+          ],
+          "exec": [
+            135187
+          ],
+          "verify_input": [
+            20225,
+            21260
+          ],
+          "download": [
+            14384,
+            18909
+          ],
+          "upload": [
+            189988,
+            50957
+          ]
+        },
+        "transport_invocations": {
+          "start": 1,
+          "stop": 1,
+          "delete": 1,
+          "inspect": 7,
+          "create": 1,
+          "exec": 1,
+          "verify_input": 2,
+          "download": 2,
+          "upload": 2
+        },
+        "stages_ms": {
+          "cleanup": [
+            1238
+          ],
+          "collection": [
+            115
+          ],
+          "execution": [
+            144
+          ],
+          "preparation": [
+            1732
+          ]
+        },
+        "request_bytes": 744
+      }
+    },
+    {
+      "state": "completed",
+      "exit_code": 0,
+      "evidence": "exited",
+      "collection": "complete",
+      "artifact_bytes": 4,
+      "stdout_bytes": 13,
+      "through_cleanup_us": 2203300,
+      "to_outcome_us": 2000113,
+      "metrics": {
+        "queue_wait_ms": [
+          70
+        ],
+        "requests_us": {
+          "start": [
+            1350330
+          ],
+          "stop": [
+            143876
+          ],
+          "delete": [
+            35463
+          ],
+          "inspect": [
+            1769,
+            1811,
+            1904,
+            1845,
+            722,
+            1256,
+            1537
+          ],
+          "create": [
+            19300
+          ],
+          "exec": [
+            138848
+          ],
+          "verify_input": [
+            65529,
+            18883
+          ],
+          "download": [
+            15004,
+            14838
+          ],
+          "upload": [
+            116290,
+            33914
+          ]
+        },
+        "transport_invocations": {
+          "start": 1,
+          "stop": 1,
+          "delete": 1,
+          "inspect": 7,
+          "create": 1,
+          "exec": 1,
+          "verify_input": 2,
+          "download": 2,
+          "upload": 2
+        },
+        "stages_ms": {
+          "cleanup": [
+            216
+          ],
+          "collection": [
+            94
+          ],
+          "execution": [
+            149
+          ],
+          "preparation": [
+            1638
+          ]
+        },
+        "request_bytes": 744
+      }
+    },
+    {
+      "state": "completed",
+      "exit_code": 0,
+      "evidence": "exited",
+      "collection": "complete",
+      "artifact_bytes": 4,
+      "stdout_bytes": 13,
+      "through_cleanup_us": 2167009,
+      "to_outcome_us": 1963063,
+      "metrics": {
+        "queue_wait_ms": [
+          55
+        ],
+        "requests_us": {
+          "start": [
+            1369074
+          ],
+          "stop": [
+            144989
+          ],
+          "delete": [
+            35886
+          ],
+          "inspect": [
+            1816,
+            1866,
+            2286,
+            1899,
+            1361,
+            1363,
+            1236
+          ],
+          "create": [
+            17894
+          ],
+          "exec": [
+            141615
+          ],
+          "verify_input": [
+            73927,
+            19512
+          ],
+          "download": [
+            14898,
+            16954
+          ],
+          "upload": [
+            59422,
+            34755
+          ]
+        },
+        "transport_invocations": {
+          "start": 1,
+          "stop": 1,
+          "delete": 1,
+          "inspect": 7,
+          "create": 1,
+          "exec": 1,
+          "verify_input": 2,
+          "download": 2,
+          "upload": 2
+        },
+        "stages_ms": {
+          "cleanup": [
+            217
+          ],
+          "collection": [
+            103
+          ],
+          "execution": [
+            150
+          ],
+          "preparation": [
+            1611
+          ]
+        },
+        "request_bytes": 744
+      }
+    },
+    {
+      "state": "completed",
+      "exit_code": 0,
+      "evidence": "exited",
+      "collection": "complete",
+      "artifact_bytes": 4,
+      "stdout_bytes": 13,
+      "through_cleanup_us": 2253461,
+      "to_outcome_us": 1946226,
+      "metrics": {
+        "queue_wait_ms": [
+          23
+        ],
+        "requests_us": {
+          "start": [
+            1358783
+          ],
+          "stop": [
+            152177
+          ],
+          "delete": [
+            36609
+          ],
+          "inspect": [
+            1550,
+            1882,
+            2183,
+            1859,
+            1696,
+            1513,
+            2224
+          ],
+          "create": [
+            18564
+          ],
+          "exec": [
+            136312
+          ],
+          "verify_input": [
+            61174,
+            20766
+          ],
+          "download": [
+            14921,
+            18293
+          ],
+          "upload": [
+            115240,
+            32579
+          ]
+        },
+        "transport_invocations": {
+          "start": 1,
+          "stop": 1,
+          "delete": 1,
+          "inspect": 7,
+          "create": 1,
+          "exec": 1,
+          "verify_input": 2,
+          "download": 2,
+          "upload": 2
+        },
+        "stages_ms": {
+          "cleanup": [
+            227
+          ],
+          "collection": [
+            103
+          ],
+          "execution": [
+            144
+          ],
+          "preparation": [
+            1644
+          ]
+        },
+        "request_bytes": 744
+      }
+    },
+    {
+      "state": "completed",
+      "exit_code": 0,
+      "evidence": "exited",
+      "collection": "complete",
+      "artifact_bytes": 4,
+      "stdout_bytes": 13,
+      "through_cleanup_us": 3410743,
+      "to_outcome_us": 2183811,
+      "metrics": {
+        "queue_wait_ms": [
+          66
+        ],
+        "requests_us": {
+          "start": [
+            1431492
+          ],
+          "stop": [
+            1162769
+          ],
+          "delete": [
+            36694
+          ],
+          "inspect": [
+            2924,
+            1845,
+            2349,
+            1913,
+            1311,
+            1694,
+            1919
+          ],
+          "create": [
+            15924
+          ],
+          "exec": [
+            145392
+          ],
+          "verify_input": [
+            33720,
+            21122
+          ],
+          "download": [
+            14881,
+            17258
+          ],
+          "upload": [
+            242949,
+            55713
+          ]
+        },
+        "transport_invocations": {
+          "start": 1,
+          "stop": 1,
+          "delete": 1,
+          "inspect": 7,
+          "create": 1,
+          "exec": 1,
+          "verify_input": 2,
+          "download": 2,
+          "upload": 2
+        },
+        "stages_ms": {
+          "cleanup": [
+            1230
+          ],
+          "collection": [
+            95
+          ],
+          "execution": [
+            153
+          ],
+          "preparation": [
+            1823
+          ]
+        },
+        "request_bytes": 744
+      }
+    },
+    {
+      "state": "completed",
+      "exit_code": 0,
+      "evidence": "exited",
+      "collection": "complete",
+      "artifact_bytes": 4,
+      "stdout_bytes": 13,
+      "through_cleanup_us": 2326919,
+      "to_outcome_us": 2019734,
+      "metrics": {
+        "queue_wait_ms": [
+          69
+        ],
+        "requests_us": {
+          "start": [
+            1396749
+          ],
+          "stop": [
+            149513
+          ],
+          "delete": [
+            37230
+          ],
+          "inspect": [
+            1493,
+            1688,
+            2113,
+            1601,
+            1270,
+            1422,
+            3520
+          ],
+          "create": [
+            17809
+          ],
+          "exec": [
+            137684
+          ],
+          "verify_input": [
+            72525,
+            20016
+          ],
+          "download": [
+            16010,
+            17311
+          ],
+          "upload": [
+            105719,
+            36230
+          ]
+        },
+        "transport_invocations": {
+          "start": 1,
+          "stop": 1,
+          "delete": 1,
+          "inspect": 7,
+          "create": 1,
+          "exec": 1,
+          "verify_input": 2,
+          "download": 2,
+          "upload": 2
+        },
+        "stages_ms": {
+          "cleanup": [
+            216
+          ],
+          "collection": [
+            103
+          ],
+          "execution": [
+            146
+          ],
+          "preparation": [
+            1673
+          ]
+        },
+        "request_bytes": 744
+      }
+    }
+  ],
+  "cached_samples_2_through_20": {
+    "to_outcome_us": {
+      "count": 19,
+      "median": 1.95561,
+      "p95_nearest": 2.183811,
+      "maximum": 2.183811
+    },
+    "through_cleanup_us": {
+      "count": 19,
+      "median": 2.219691,
+      "p95_nearest": 3.412741,
+      "maximum": 3.412741
+    },
+    "create_request_ms": {
+      "count": 19,
+      "median": 17.263,
+      "p95_nearest": 20.055,
+      "maximum": 20.055
+    }
+  },
+  "resources": {
+    "sequential": {
+      "observations": 473,
+      "beam_binary_bytes": 6753648,
+      "beam_total_bytes": 66850616,
+      "supervised_max_mailbox": 2,
+      "supervised_process_memory_bytes": 297272
+    },
+    "burst": {
+      "observations": 163,
+      "beam_binary_bytes": 9614872,
+      "beam_total_bytes": 70802552,
+      "supervised_max_mailbox": 1,
+      "supervised_process_memory_bytes": 491032
+    },
+    "failures": {
+      "observations": 676,
+      "beam_binary_bytes": 7618336,
+      "beam_total_bytes": 67849656,
+      "supervised_max_mailbox": 1,
+      "supervised_process_memory_bytes": 275584
+    },
+    "slow_consumer": {
+      "observations": 35,
+      "beam_binary_bytes": 12437520,
+      "beam_total_bytes": 72439184,
+      "supervised_max_mailbox": 0,
+      "supervised_process_memory_bytes": 280888
+    }
+  },
+  "notifications": {
+    "dropped": 0,
+    "timed_out": 0,
+    "processed": 1123
+  },
+  "remaining_reservations": {
+    "slots": 0,
+    "cpus": 0,
+    "disk_gb": 0,
+    "memory_mb": 0
+  },
+  "other_phases": {
+    "accepted_queue_entries": 4,
+    "slow_consumer_delay_ms": 2000,
+    "failure_cases": 2,
+    "status": "All original benchmark assertions passed, including bounded rejection, one invocation per accepted command, known results, no exec after preparation failure, uncertain-cancellation retention and verified cleanup."
+  },
+  "raw_report_sha256": {
+    "worker-after.json": "fae069595e03e159d40ad9c52fff4425efd69069ab26b00a9c31329492f261b6",
+    "report.json": "1dba7bdb5180f8e237adeb03523bab15d2023b4e2b7ae486430159877961d83c",
+    "run.log": "dc0b3657b92fb9ad380e7c8c0d76f27dec641615c6c991929ef45865d14d2253",
+    "worker-before.json": "90aa1b314cc6cf0fef8c9e99009af8261d9a957186dd702eb3b1aaa41738258d",
+    "worker.log": "1c3c0059685886c91d7e2caa4515775ccbfae1b5131a12b3741f6578093e0982",
+    "owned-teardown.json": "e4aecc0b74139d2beb94db9b6416264fd44568a3f247c74494efc5f3f55557b4",
+    "initialization-failure.log": "a0ebbf447c0bb65d7789d2f8e07a4d4deeaa4852dace984a894259c62e6724d7"
+  },
+  "initialization_failure": "An omitted private object directory caused Directory.new validation to fail during host setup, before runtime startup or submission. The required owned mode-0700 directory was created; the failure log is retained. No accepted command was retried.",
+  "limitations": [
+    "First sample is a single image-cache miss observation; no cold p95 or reliable cache-speedup estimate is inferred.",
+    "The worker data root was new, shared extraction enabled and no private _shared files existed before the first submission. The normal worker data and host OS caches were untouched.",
+    "Prepared artifact and distribution already existed; neither network image pulls nor OS reboot/pristine-host costs are measured.",
+    "All 28 accepted commands, including other benchmark phases, cleaned up; private cache/database/settings/keys remain for evidence. Only the verified owned worker unit was stopped.",
+    "The separately bounded worker unit differs from the original warm-state worker; end-to-end differences cannot be assigned only to cache state. Unit counters are not a complete host/VMM RSS guarantee.",
+    "Source has shared extraction only on Linux. macOS packed create uses a fresh per-machine extraction path; its prior twenty-sample trial includes that work on an already-running host. A Linux-style cached-extraction comparison is not an available macOS path in this release.",
+    "Hard resource-profile and protected release-host qualification remain incomplete."
+  ]
+}

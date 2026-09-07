@@ -21,7 +21,8 @@ fixture correction changes no analyzer or production behavior. Current evidence:
 [service and CI harness](evidence/phase1-live-ci.json), and
 [warm durable workload](evidence/phase8-benchmarks.json), and
 [contained Linux resource experiments](evidence/phase8-linux-containment.json), and
-[macOS guest-memory overload](evidence/phase8-macos-memory.json).
+[macOS guest-memory overload](evidence/phase8-macos-memory.json), and
+[empty versus cached Linux image state](evidence/phase8-cache-state.json).
 
 The sections after “Historical milestone records” retain earlier test counts
 and gaps as an audit trail. They do not supersede this current summary or the
