@@ -22,24 +22,22 @@ env:
   MIX_ENV: test
 
 jobs:
-  smolbox-change-scope:
+  smolbox-ci-tools:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     outputs:
-      runtime_required: ${{ steps.scope.outputs.runtime_required }}
-      commit: ${{ steps.scope.outputs.commit }}
+      commit: ${{ steps.candidate.outputs.commit }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          fetch-depth: 0
           persist-credentials: false
-      - run: python3 -m unittest discover -s scripts/ci -p 'test_*.py' -v
-      - id: scope
-        env:
-          QUALIFY_RUNTIME: ${{ github.event_name == 'workflow_dispatch' && inputs.qualify_runtime && 'true' || 'false' }}
-        run: >-
-          python3 scripts/ci/classify_changes.py --event "$GITHUB_EVENT_NAME"
-          --payload "$GITHUB_EVENT_PATH" --qualify-runtime "$QUALIFY_RUNTIME"
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
+        with:
+          otp-version: '28.5'
+          elixir-version: '1.20.4'
+      - run: elixir scripts/ci_test.exs
+      - id: candidate
+        run: echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
   smolbox-format-compile:
     runs-on: ubuntu-24.04
@@ -113,8 +111,8 @@ jobs:
       - name: Run required checks
         run: |
           mix compile --warnings-as-errors
-          python3 -c 'import pathlib; assert list(pathlib.Path("lib").rglob("*.ex")), "empty production scope"'
-          mix ex_dna lib dev test/support examples/durable_host/lib examples/durable_host/priv examples/durable_host/test/support examples/minimal_host/lib examples/support/lib --max-clones 0
+          elixir -e 'if Path.wildcard("lib/**/*.ex") == [], do: System.halt(1)'
+          mix ex_dna lib dev scripts test/support examples/durable_host/lib examples/durable_host/priv examples/durable_host/test/support examples/minimal_host/lib examples/support/lib --max-clones 0
       - name: Check tracked files were not modified
         run: git diff --exit-code
 
@@ -293,7 +291,7 @@ jobs:
         run: |
           MIX_ENV=dev mix deps.get
           MIX_ENV=dev mix docs --warnings-as-errors
-          python3 scripts/ci/package_consumer.py --report "$RUNNER_TEMP/smolbox-consumer-current.json" --package-output "$RUNNER_TEMP/smolbox-consumer-current.tar"
+          elixir scripts/ci.exs package-consumer --report "$RUNNER_TEMP/smolbox-consumer-current.json" --package-output "$RUNNER_TEMP/smolbox-consumer-current.tar"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: smolbox-consumer-current
@@ -341,7 +339,7 @@ jobs:
           elixir-version: '1.18.4'
       - run: mix deps.get
       - run: elixir --version
-      - run: python3 scripts/ci/package_consumer.py --minimum --report "$RUNNER_TEMP/smolbox-consumer-minimum.json" --package-output "$RUNNER_TEMP/smolbox-consumer-minimum.tar"
+      - run: elixir scripts/ci.exs package-consumer --minimum --report "$RUNNER_TEMP/smolbox-consumer-minimum.json" --package-output "$RUNNER_TEMP/smolbox-consumer-minimum.tar"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: smolbox-consumer-minimum
@@ -428,24 +426,24 @@ jobs:
       - run: git diff --exit-code
 
   smolbox-linux-runtime:
-    needs: smolbox-change-scope
+    needs: smolbox-ci-tools
     if: >-
       github.event_name == 'workflow_dispatch' && inputs.qualify_runtime &&
       vars.SMOLBOX_TRUSTED_RUNTIME_ENABLED == 'true'
     uses: ./.github/workflows/smolbox-live.yml
     with:
       platform: linux
-      commit: ${{ needs.smolbox-change-scope.outputs.commit }}
+      commit: ${{ needs.smolbox-ci-tools.outputs.commit }}
 
   smolbox-macos-runtime:
-    needs: smolbox-change-scope
+    needs: smolbox-ci-tools
     if: >-
       github.event_name == 'workflow_dispatch' && inputs.qualify_runtime &&
       vars.SMOLBOX_TRUSTED_RUNTIME_ENABLED == 'true'
     uses: ./.github/workflows/smolbox-live.yml
     with:
       platform: macos
-      commit: ${{ needs.smolbox-change-scope.outputs.commit }}
+      commit: ${{ needs.smolbox-ci-tools.outputs.commit }}
 
   smolbox-required:
     if: always()
@@ -455,7 +453,7 @@ jobs:
       run:
         working-directory: .
     needs:
-      - smolbox-change-scope
+      - smolbox-ci-tools
       - smolbox-format-compile
       - smolbox-credo-ex-slop
       - smolbox-ex-dna
@@ -476,7 +474,12 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
+        with:
+          otp-version: '28.5'
+          elixir-version: '1.20.4'
       - name: Require every configured check to succeed
         env:
           NEEDS_JSON: ${{ toJSON(needs) }}
-        run: python3 scripts/ci/check_required.py
+          QUALIFY_RUNTIME: ${{ github.event_name == 'workflow_dispatch' && inputs.qualify_runtime && 'true' || 'false' }}
+        run: elixir scripts/ci.exs required

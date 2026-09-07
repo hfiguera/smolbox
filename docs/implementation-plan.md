@@ -3,8 +3,10 @@
 Status: implementation and release qualification in progress, September 7, 2026.
 The standalone client/runtime, durable state and host examples, bounded telemetry,
 documentation, deterministic tests and required CI configuration are implemented.
-The current suite executes 156 deterministic cases on all six advertised
-host/toolchain lanes. Fourteen real client/runtime cases and 25 durable recovery
+The 156-case library baseline passed all six advertised host/toolchain lanes.
+The maintainer-tool migration adds 22 regression cases; the current 178-case
+suite passes on both canonical hosts, and the standalone tooling tests also pass
+on both minimum-toolchain hosts. Fourteen real client/runtime cases and 25 durable recovery
 cases pass on each canonical Linux/macOS host, with separately recorded worker
 service faults. Every requested analyzer and its bad/clean canary has executed
 successfully. The measured resource and cache experiments retain their limits
@@ -13,8 +15,8 @@ and failed attempts. These are development-host results; release acceptance is
 
 The remaining release dependencies are a certified enforceable minimal profile
 and its remaining hostile-workload qualification, provisioned protected/disposable
-Linux and macOS CI runners, an independent
-consumer review, and the complete matrix on the eventual exact release commit.
+Linux and macOS CI runners, an independent consumer review, and the complete
+matrix on the eventual exact release commit.
 Unsupported hard controls remain rejected. No Hex package or public service has
 been published. See the current acceptance checkpoint in Phase 9 and the
 individual phase/evidence records below.
@@ -582,6 +584,67 @@ macOS fresh production-consumer checks, including warning-as-error compilation,
 client/supervisor smoke checks and runtime-only dependencies. This verifies the
 metadata update without changing repository visibility or publishing the package.
 
+Maintainer-tool migration (September 7): all eleven Python scripts and test files
+have been removed. `elixir scripts/ci.exs` dispatches the required-status gate,
+package-consumer check, live preflight, bounded runner and worker-service fault
+scenarios. Shared implementation lives under `dev/smolbox/ci/`; production and
+Hex consumers exclude it. The bootstrap uses Elixir/OTP without fetching Mix
+dependencies. Host probes also use standard Unix process tools and `curl`, with
+user configuration, proxies, redirects and mutation retries disabled.
+
+The obsolete changed-path classifier and full-history checkout are gone.
+`smolbox-ci-tools` records the checked-out commit and runs the tooling regressions;
+the aggregate gate reads the explicit manual qualification selection. Missing,
+failed, cancelled and unexpectedly skipped dependencies still fail. The old
+Phase 0 probe's unique assertions now live in the fourteen real Elixir runtime
+cases, including Python timeout/network/streaming, JavaScript binary nonzero
+output, file round trips and observed allocations.
+
+Verification: 22 standalone ExUnit regressions pass on canonical and minimum
+toolchains on both hosts. The canonical full suite passes 178 cases on each
+host; macOS production-library coverage is 95.40%. All five analyzers pass on
+both hosts and their bad/clean canaries have executed successfully. Formatter,
+dependency-lock checks, security audits, ExDoc and Actionlint pass. The new
+runner has executed all fourteen live client/runtime cases and all three
+worker-service fault scenarios on both platforms. Each service scenario retains
+one dispatch attempt, unknown outcome evidence and verified owned-VM cleanup.
+
+The initial concurrent durable runs failed because macOS forwards the same
+Linux PostgreSQL instance, whose unchanged connection limit is 20. The macOS
+diagnostic rerun passed all 25 cases (seed 441647, 281.4 seconds); its actual
+output also passes the new summary validator. A subsequent isolated Linux run
+passed all 25 through the new bounded runner (seed 457043, 287.0 seconds).
+The CI guide now requires sequential local runs when sharing this database;
+protected CI jobs require dedicated instances. Both normal workers have empty
+inventories after testing; no unrelated services or upstream checkout were changed.
+One stopped VM retained by the failed Linux run was matched to its encrypted
+execution record and full creation evidence before deletion. Reconciliation then
+released its reservation, with the dispatch ledger still containing one attempt.
+
+The final 80-file archive has SHA-256
+`c207c9e54727bf0dae6341a981ef30ad624a300c83b460739575c8e41f44b1e5`.
+That identical archive passes fresh current and minimum dependency consumers on
+both hosts, with package-file hashes matching the maintained source. Runtime,
+consumer, initial failed-run and final preflight evidence is retained locally in
+`/tmp/smolbox-elixir-evidence-BMHcY4`. Its `source-manifest-final.json` records the
+tooling source and removed files, with SHA-256
+`69253d737df276067b498effebb6a2c6b86146512aca2cac98c4aa79159bdda1`.
+The macOS diagnostic log remains private; it is not an uploaded CI artifact.
+These records describe the working tree based on `7c97895`, not an exact-release
+commit or an executed GitHub run of the migrated workflows.
+
+The port includes regression checks for an exited leader with a TERM-ignoring
+descendant, unrelated-process preservation, bounded output and phase queues,
+exclusive report creation, rejected incomplete suites, private manifest files,
+spoofed macOS argv names, HTTP redirects/error-body overflow, user curl config,
+and malformed package members/gzip. The first macOS executable probe exposed
+that `ps comm` can reflect spoofed argv; the replacement requires exactly one
+mapped text file matching the kernel short name, followed by the pinned digest.
+A consumer fixture initially triggered an ExUnit unmatched-file warning; it is
+now an explicitly loaded `.exs.template`, and the warning-as-error suite passes.
+These development-host results do not provision or certify protected CI workers
+or complete the pending release resource profile.
+
 Live-CI milestone: 16 policy/preflight/bounded-runner regressions pass on both
 hosts, including deliberate zero/partial/skipped suites, overflow, deadlines and
 surviving child-process cleanup. Actionlint accepts both workflows. The bounded
@@ -1031,7 +1094,7 @@ These versions were checked against Hex metadata on September 6, 2026. Pin the s
 |---|---|---|
 | Dialyzer | `dialyxir` 1.4.8 | `mix dialyzer` |
 | Credo | `credo` 1.7.19 | `mix credo --strict` |
-| ex_dna | `ex_dna` 1.5.4 | `mix ex_dna lib dev test/support examples/durable_host/lib examples/durable_host/priv examples/durable_host/test/support examples/minimal_host/lib examples/support/lib --max-clones 0` |
+| ex_dna | `ex_dna` 1.5.4 | `mix ex_dna lib dev scripts test/support examples/durable_host/lib examples/durable_host/priv examples/durable_host/test/support examples/minimal_host/lib examples/support/lib --max-clones 0` |
 | ex_slop | `ex_slop` 0.4.4 | Enabled Credo plugin, executed by `mix credo --strict` |
 | Credence | `credence` 0.8.1 | Project-owned read-only `mix smolbox.ci.credence` task using the supported analysis API |
 
@@ -1124,7 +1187,7 @@ MIX_ENV=test mix deps.unlock --check-unused
 MIX_ENV=test mix compile --warnings-as-errors
 MIX_ENV=test mix test --warnings-as-errors
 MIX_ENV=test mix credo --strict
-MIX_ENV=test mix ex_dna lib dev test/support examples/durable_host/lib examples/durable_host/priv examples/durable_host/test/support examples/minimal_host/lib examples/support/lib --max-clones 0
+MIX_ENV=test mix ex_dna lib dev scripts test/support examples/durable_host/lib examples/durable_host/priv examples/durable_host/test/support examples/minimal_host/lib examples/support/lib --max-clones 0
 MIX_ENV=test mix smolbox.ci.credence
 MIX_ENV=test mix dialyzer
 ```
@@ -1152,7 +1215,7 @@ Use the pinned Mix version's `test_coverage` summary threshold configuration and
 
 | Job/status | Runs | Passing evidence |
 |---|---|---|
-| `smolbox-change-scope` | Candidate commit, changed-path inventory, explicit qualification selection and CI-helper regressions | Only manual dispatch with `qualify_runtime: true` requires both live platforms; ordinary CI does not depend on change paths |
+| `smolbox-ci-tools` | Candidate commit and standalone Elixir tooling regressions | Tooling tests run before dependency installation; candidate identity is recorded without change-path classification |
 | `smolbox-format-compile` | Format, unused lock entries, warning-free compile | No source modifications or compiler warnings |
 | `smolbox-credo-ex-slop` | Strict Credo with verified ExSlop registration | Both built-in and plugin checks active; no unsuppressed findings |
 | `smolbox-ex-dna` | Scoped standalone duplicate scan | No reported clones above the reviewed zero budget |
@@ -1188,7 +1251,7 @@ are explicitly development evidence, not successful protected GitHub jobs.
 
 ### 12.8 Workflow implementation details
 
-- Run ordinary CI on every push and pull request, with an always-reported aggregate status. Record the candidate and changed paths for evidence; select runtime qualification through the explicit manual input.
+- Run ordinary CI on every push and pull request, with an always-reported aggregate status. Record the checked-out candidate commit; select runtime qualification through the explicit manual input.
 - Use `erlef/setup-beam` and checkout/cache/upload actions pinned to reviewed full commit SHAs. Record the corresponding action versions in comments and automate reviewed updates. [setup-beam](https://github.com/erlef/setup-beam).
 - Keep permissions read-only by default. Publishing has a separate protected workflow and narrowly scoped credentials.
 - Use exact matrix entries and report actual `elixir --version`, OTP, dependency lock hash, and SmolVM/image versions in job artifacts.

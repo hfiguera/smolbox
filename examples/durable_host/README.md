@@ -99,8 +99,9 @@ For a separate API-server restart probe, use an otherwise idle worker data root
 with **no server listening** on the selected loopback port. From the package root:
 
 ```sh
-MIX_ENV=test python3 scripts/qualify_worker_restart.py \
+MIX_ENV=test elixir scripts/ci.exs worker-fault \
   --smolvm /absolute/path/to/smolvm \
+  --url http://127.0.0.1:19471 \
   --python /absolute/path/to/python.smolmachine \
   --report /absolute/path/to/worker-restart-report.json
 ```

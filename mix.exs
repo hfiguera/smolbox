@@ -59,6 +59,7 @@ defmodule SmolBox.MixProject do
       test_coverage: [
         ignore_modules: [
           ~r/^Mix.Tasks.Smolbox.Ci\./,
+          ~r/^SmolBox.CI\./,
           SmolBox.TestPeer,
           SmolBox.TestArtifacts,
           SmolBox.ManagedPeer,
@@ -113,7 +114,7 @@ defmodule SmolBox.MixProject do
         "compile --warnings-as-errors",
         "test --warnings-as-errors",
         "credo --strict",
-        "ex_dna lib dev test/support examples/durable_host/lib examples/durable_host/priv examples/durable_host/test/support examples/minimal_host/lib examples/support/lib --max-clones 0",
+        "ex_dna lib dev scripts test/support examples/durable_host/lib examples/durable_host/priv examples/durable_host/test/support examples/minimal_host/lib examples/support/lib --max-clones 0",
         "smolbox.ci.credence",
         "dialyzer"
       ]

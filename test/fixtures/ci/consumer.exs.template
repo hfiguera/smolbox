@@ -1,0 +1,46 @@
+
+defmodule Consumer.Transport do
+  @behaviour SmolBox.Transport
+  @impl true
+  def request(_worker, %{method: :get, path: "/health"}) do
+    send(self(), :fake_transport_called)
+    {:ok, ~s({"status":"ok","version":"1.14.1","machines":{"total":0,"running":0}})}
+  end
+end
+
+defmodule Consumer.Artifacts do
+  @behaviour SmolBox.ArtifactStore
+  @impl true
+  def read(_, _, _, _), do: raise("unexpected artifact access")
+  @impl true
+  def put(_, _, _, _, _), do: raise("unexpected artifact access")
+end
+
+{:ok, _apps} = Application.ensure_all_started(:smolbox)
+[] = Application.spec(:smolbox, :mod)
+{:ok, endpoint} = SmolBox.Worker.new("consumer", "http://127.0.0.1:1", allow_insecure_loopback: true)
+{:ok, client} = SmolBox.Client.new(endpoint, transport: Consumer.Transport)
+{:ok, %{version: "1.14.1", total: 0, running: 0}} = SmolBox.Client.health(client)
+receive do
+  :fake_transport_called -> :ok
+after
+  100 -> raise "client did not exercise the supplied transport"
+end
+
+children = [
+  {SmolBox.Store.Memory, name: Consumer.Store},
+  {SmolBox, name: Consumer.Runtime, namespace: "consumer", mode: :ephemeral,
+    store: {SmolBox.Store.Memory, Consumer.Store},
+    artifact_store: {Consumer.Artifacts, nil},
+    fingerprint_key: :crypto.strong_rand_bytes(32), workers: []}
+]
+{:ok, supervisor} = Supervisor.start_link(children, strategy: :one_for_one)
+{:ok, []} = SmolBox.workers(Consumer.Runtime)
+{:error, %{category: :not_found}} = SmolBox.fetch(Consumer.Runtime, "scope", "missing")
+{:error, %{category: :not_found}} = SmolBox.cancel(Consumer.Runtime, "scope", "missing")
+:ok = Supervisor.stop(supervisor)
+nil = Process.whereis(Consumer.Runtime)
+versions = Map.new([:req, :jason, :telemetry, :nimble_options], fn app ->
+  {app, app |> Application.spec(:vsn) |> to_string()}
+end)
+File.write!("smoke.json", Jason.encode!(%{client: true, supervisor: true, versions: versions}))

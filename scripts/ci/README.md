@@ -5,10 +5,9 @@ checks on disposable hosted runners for every push and pull request. Real-worker
 qualification is optional and runs only on manual dispatch with `qualify_runtime:
 true`. A manual dispatch with the option disabled runs ordinary CI as well.
 
-`smolbox-change-scope` records the checked-out commit and changed-path count. Its
-`runtime_required` output reflects the explicit manual qualification input; file
-paths do not make real-worker checks mandatory. First pushes, empty diffs and
-code changes all use the same ordinary CI policy.
+`smolbox-ci-tools` runs the standalone ExUnit tooling tests and records the
+checked-out candidate commit. Runtime qualification follows the explicit manual
+input. There is no changed-path classification or full-history checkout.
 
 `smolbox-required` rejects missing, failed, cancelled and unexpectedly skipped
 dependencies. Only the two live jobs may be skipped when qualification was not
@@ -39,8 +38,10 @@ Before setting repository variable `SMOLBOX_TRUSTED_RUNTIME_ENABLED` to `true`:
    distribution, native prepared Python/Node artifacts, and a private Postgres
    16.15 database with at least 20 connections. The database must be dedicated
    to this job; tests kill child controllers and create/migrate their own tables.
-   Install Python 3.11+ and the platform virtualization dependencies. Setup-beam
-   supplies the pinned Elixir/OTP toolchain.
+   Install `curl`, Git, the standard Unix process tools (`ps`, `kill`, `sh`,
+   and `lsof` on macOS), and the platform virtualization dependencies. Setup-beam
+   supplies the pinned Elixir/OTP toolchain. Host-side Python is not required;
+   Python/Node remain installed inside the guest artifacts being tested.
 4. Enforce external host quotas and a lifecycle that destroys the whole worker,
    its guests, database and private files on success, failure, timeout, cancellation
    and runner loss. Configure an independent sweeper for abandoned lifecycle IDs.
@@ -83,7 +84,7 @@ override, and refuse to stop an existing listener. Linux fault state uses a new
 job-owned directory. On macOS, SmolVM uses account-level state, which is another
 reason the account/host must be disposable and dedicated.
 
-`runtime_preflight.py` verifies the actual listener belongs to the selected account
+`elixir scripts/ci.exs preflight` verifies the actual listener belongs to the selected account
 and PID, the executable/wrapper match the downloaded release archives, native
 architecture, KVM access on Linux, fixture digests, private database socket, typed
 health/readiness and empty inventory. It rejects an overriding `DATABASE_URL`.
@@ -107,9 +108,13 @@ CI only and supplies no new runtime evidence.
 
 ## Bounded reports and local verification
 
-`run_bounded.py` launches one owned process group, bounds elapsed time and captured
-output, and requires the exact ExUnit pass count when requested. It rejects zero,
-partial, skipped or excluded suites. Normal non-ExUnit commands require exit zero.
+`elixir scripts/ci.exs bounded` launches one owned process group, bounds elapsed time and captured
+output, and requires the exact ExUnit pass count when requested. It verifies the
+child's independent process group before releasing its startup gate. A TERM-ignoring
+descendant is killed even if the leader exits; terminating a BEAM task alone is
+not treated as OS-process cleanup. It exclusively reserves the report file before
+launching a command. It rejects zero, partial, skipped or excluded suites.
+Normal non-ExUnit commands require exit zero.
 Failure reports contain status, byte count and output digest, without raw test
 arguments or output. A killed controller is not confirmed guest cleanup: the
 external disposable-worker lifecycle remains mandatory.
@@ -122,15 +127,33 @@ Both workflows live in this standalone repository's `.github/workflows/`.
 Library jobs run from the repository root, and example jobs run from their
 respective `examples/` directories.
 
-Run the Python policy/runner regressions from the repository root:
+Maintainer code lives under `dev/smolbox/ci/`, outside the Hex package and
+production compilation paths. `scripts/ci.exs` loads only those modules using the
+installed Elixir/OTP standard library; no Mix dependency fetch is needed for
+preflight, aggregation or process control. The modules and their ExUnit tests
+are covered by the normal Elixir formatter and quality gates. Tooling code is
+excluded from the production-library coverage percentage.
+
+The loopback HTTP helper invokes `curl` with user configuration, proxies,
+redirects and retries disabled. Its owned subprocess has both a deadline and a captured-output cap,
+including error responses. On macOS, executable inspection matches the kernel
+short name to exactly one mapped text file from `lsof`, then checks the release
+digest. Spoofed argv names are not trusted; ambiguous mappings fail.
+
+Run the standalone tooling regressions from the repository root:
 
 ```sh
-python3 -m unittest discover -s scripts/ci -p 'test_*.py' -v
+elixir scripts/ci_test.exs
 ```
 
-For explicitly authorized local development, `runtime_preflight.py --development`
+For explicitly authorized local development, `elixir scripts/ci.exs preflight --development`
 permits a persistent test host and marks that limitation in the report. It is
 rejected inside GitHub Actions. It does not turn the local SSH alias into a safe
 CI runner. Uncommitted files are recorded in development reports and rejected in
 CI. Use reports and real commands as evidence; mocked lifecycle declarations,
 unit tests or workflow YAML alone cannot qualify a platform or release.
+
+If local macOS forwards the Linux PostgreSQL socket, run the two durable suites
+sequentially. The 20-connection prerequisite is per job; sharing that database
+between simultaneous suites can exhaust it. Protected CI jobs require separate
+dedicated database instances.

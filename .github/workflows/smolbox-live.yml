@@ -31,7 +31,6 @@ jobs:
         working-directory: .
     env:
       MIX_ENV: test
-      PYTHONOPTIMIZE: '0'
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -47,7 +46,7 @@ jobs:
           mkdir "$RUNNER_TEMP/smolbox-live-reports"
           test "$(git rev-parse HEAD)" = "$EXPECTED_COMMIT"
           elixir --version
-          python3 scripts/ci/runtime_preflight.py --platform "$QUALIFICATION_PLATFORM" \
+          elixir scripts/ci.exs preflight --platform "$QUALIFICATION_PLATFORM" \
             --manifest "$SMOLBOX_CI_WORKER_MANIFEST" \
             --report "$RUNNER_TEMP/smolbox-live-reports/preflight.json"
         env:
@@ -55,21 +54,21 @@ jobs:
           QUALIFICATION_PLATFORM: ${{ inputs.platform }}
       - name: Fetch locked library dependencies
         run: >-
-          python3 scripts/ci/run_bounded.py --report "$RUNNER_TEMP/smolbox-live-reports/dependencies.json"
+          elixir scripts/ci.exs bounded --report "$RUNNER_TEMP/smolbox-live-reports/dependencies.json"
           --timeout 1200 -- mix deps.get
       - name: Require all real client/runtime cases
         run: >-
-          python3 scripts/ci/run_bounded.py --report "$RUNNER_TEMP/smolbox-live-reports/runtime.json"
+          elixir scripts/ci.exs bounded --report "$RUNNER_TEMP/smolbox-live-reports/runtime.json"
           --timeout 600 --expected-tests 14 -- mix test test/runtime --include runtime --warnings-as-errors
       - name: Prepare the isolated durable example
         working-directory: examples/durable_host
         run: |
-          python3 ../../scripts/ci/run_bounded.py --report "$RUNNER_TEMP/smolbox-live-reports/durable-dependencies.json" --timeout 1200 -- mix deps.get
-          python3 ../../scripts/ci/run_bounded.py --report "$RUNNER_TEMP/smolbox-live-reports/migrations.json" --timeout 180 -- mix ecto.migrate
+          elixir ../../scripts/ci.exs bounded --report "$RUNNER_TEMP/smolbox-live-reports/durable-dependencies.json" --timeout 1200 -- mix deps.get
+          elixir ../../scripts/ci.exs bounded --report "$RUNNER_TEMP/smolbox-live-reports/migrations.json" --timeout 180 -- mix ecto.migrate
       - name: Require the fresh-BEAM and durable recovery matrix
         working-directory: examples/durable_host
         run: >-
-          python3 ../../scripts/ci/run_bounded.py --report "$RUNNER_TEMP/smolbox-live-reports/durable-runtime.json"
+          elixir ../../scripts/ci.exs bounded --report "$RUNNER_TEMP/smolbox-live-reports/durable-runtime.json"
           --timeout 1200 --expected-tests 25 -- mix test test/recovery_runtime_test.exs --include runtime --warnings-as-errors
       - name: Require real worker-service fault scenarios
         run: |
@@ -78,16 +77,16 @@ jobs:
           export SMOLVM_DATA_DIR="$RUNNER_TEMP/smolbox-service-fault-data"
           export SMOLVM_GUEST_ROLLOUT_HOST_PORT=19472
           for scenario in restart unavailable missing; do
-            python3 scripts/ci/run_bounded.py \
+            elixir scripts/ci.exs bounded \
               --report "$RUNNER_TEMP/smolbox-live-reports/service-$scenario-runner.json" --timeout 600 -- \
-              python3 scripts/qualify_worker_restart.py --smolvm "$SMOLBOX_SMOLVM_CLI" \
+              elixir scripts/ci.exs worker-fault --smolvm "$SMOLBOX_SMOLVM_CLI" \
               --url http://127.0.0.1:19471 --python "$SMOLBOX_PYTHON_ARTIFACT" \
               --scenario "$scenario" --report "$RUNNER_TEMP/smolbox-live-reports/service-$scenario.json"
           done
       - name: Reject changed candidate files
         run: |
           git diff --exit-code
-          python3 -c 'import subprocess; assert not subprocess.check_output(["git", "status", "--porcelain"]), "candidate checkout changed"'
+          test -z "$(git status --porcelain)"
       - name: Preserve bounded reports without VM disks or test payloads
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

@@ -6,6 +6,7 @@
         included: [
           "lib/",
           "dev/",
+          "scripts/",
           "test/",
           "mix.exs",
           "examples/*/mix.exs",

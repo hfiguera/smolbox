@@ -30,6 +30,7 @@ defmodule Mix.Tasks.Smolbox.Ci.Credence do
     [
       "lib/**/*.ex",
       "dev/**/*.ex",
+      "scripts/**/*.exs",
       "test/**/*.{ex,exs}",
       "mix.exs",
       ".*.exs",

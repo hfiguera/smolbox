@@ -47,6 +47,7 @@ defmodule SmolBox.ClientRuntimeTest do
     on_exit(fn -> cleanup(client, created) end)
     assert {:ok, %Machine{state: :running} = running} = Client.start(client, name)
     assert Machine.same_incarnation?(created, running)
+    assert running.cpus == spec.cpus and running.memory_mb == spec.memory_mb
     name
   end
 
@@ -99,6 +100,8 @@ defmodule SmolBox.ClientRuntimeTest do
                Files.sha256(bytes)
              )
 
+    assert {:ok, ^bytes} = Client.download(context.client, name, "/workspace/input.bin", 100)
+
     {:ok, command} = Command.new(["python", "/workspace/main.py"])
 
     assert {:ok,
@@ -107,10 +110,46 @@ defmodule SmolBox.ClientRuntimeTest do
 
     assert {:ok, <<10, 5, 255, 0>>} =
              Client.download(context.client, name, "/workspace/output.bin", 100)
+
+    {:ok, stream} = Command.new(["python", "-c", "print('stream-ok')"])
+
+    assert {:ok, %Result{exit_code: 0, stdout: "stream-ok\n"}} =
+             Client.exec_stream(context.client, name, stream)
+
+    {:ok, timeout} = Command.new(["python", "-c", "import time; time.sleep(10)"], timeout_secs: 1)
+    assert {:ok, %Result{exit_code: 124}} = Client.exec(context.client, name, timeout)
+
+    {:ok, network} =
+      Command.new([
+        "python",
+        "-c",
+        """
+        import socket
+        try:
+            socket.create_connection(('1.1.1.1', 443), timeout=1)
+        except OSError:
+            print('denied')
+        else:
+            raise SystemExit(99)
+        """
+      ])
+
+    assert {:ok, %Result{exit_code: 0, stdout: "denied\n"}} =
+             Client.exec(context.client, name, network)
   end
 
   test "JavaScript, streamed events, timeout and guest network denial", context do
     name = machine(context.client, context.javascript)
+
+    {:ok, binary} =
+      Command.new([
+        "node",
+        "-e",
+        "process.stdout.write(Buffer.from([0,255,254])); process.stderr.write('err'); process.exitCode=7"
+      ])
+
+    assert {:ok, %Result{exit_code: 7, stdout: <<0, 255, 254>>, stderr: "err"}} =
+             Client.exec(context.client, name, binary)
 
     script = """
     const fs = require('node:fs');

@@ -4,17 +4,22 @@ Status: qualification in progress, 2026-09-07. No production profile is certifie
 
 ## Current tested scope
 
-The current library passes 156 deterministic cases (six properties and 150
-ordinary tests) on all six host/toolchain combinations listed below. Fourteen
+The library baseline passed 156 deterministic cases (six properties and 150
+ordinary tests) on all six host/toolchain combinations listed below. The Elixir
+maintainer-tool migration adds 22 regression cases; the current 178-case suite
+passes on canonical macOS and Linux. The standalone tooling tests also pass
+on Elixir 1.18.4/OTP 27.3.4.15 on both hosts. Fourteen
 real-runtime cases are excluded from that count; all fourteen separately pass
 on canonical macOS and Linux. The durable host separately passes 25 real-worker
 recovery cases per platform, including fresh controller termination and
 dispatcher/notification faults. Three owned worker-service fault scenarios pass
 on each host. These are development-host results, not protected GitHub runs.
 
-All five requested analyzers pass on both canonical hosts. Their deliberate
-bad/clean canaries are recorded in the benchmark milestone; the later deadline
-fixture correction changes no analyzer or production behavior. Current evidence:
+All five requested analyzers and their deliberate bad/clean canaries pass on both
+canonical hosts. Production-library coverage remains 95.40%; maintainer modules
+are excluded from that percentage, like the existing developer tasks.
+The evidence files below record the earlier library milestones; their source
+hashes and test counts are unchanged by the maintainer migration:
 [compatibility lanes](evidence/phase8-compatibility.json),
 [live output/path boundaries](evidence/phase8-boundaries.json),
 [durable telemetry recovery](evidence/phase8-telemetry.json),
@@ -62,24 +67,29 @@ macOS uses unique test machine
 names in the normal SmolVM state directory: `SMOLVM_DATA_DIR` is Linux-only in
 this release. Never delete machines belonging to another workload.
 
-### Reproducible initial smoke probe
+### Runtime smoke coverage
 
-The maintained `scripts/qualify_runtime.py` explicitly contacts a loopback
-worker. It is separate from `mix ci`. Use the pinned distribution to prepare
-Python and Node artifacts on each matching host, then start `smolvm serve start
--l 127.0.0.1:19470` with `SMOLVM_FILE_TRANSFER_MAX_BYTES=1048576`.
-Preparation may fetch approved public images; execution itself uses no guest
-network. Initial artifacts were built from `python:3.12-alpine` and
-`node:22-alpine`, overriding the entrypoint to `/bin/true` with restart `never`.
-Those tags are preparation inputs only; each probe records the actual artifact
-SHA-256. Rebuilt artifacts require new evidence.
+The original standalone Phase 0 probe has been retired. Its lifecycle, allocation,
+binary file/output, nonzero exit, Python/JavaScript streaming, timeout and network
+checks are now covered by the maintained Elixir runtime suite. This suite exercises
+the actual SmolBox client and remains separate from ordinary `mix ci`.
+
+Prepare approved Python and Node artifacts using the [deployment guide](security.md).
+The original Phase 0 artifacts used `python:3.12-alpine` and `node:22-alpine`,
+with `/bin/true` as the entrypoint and restart policy `never`. Those image tags
+are preparation inputs; each qualification uses the actual artifact digest.
+Start the pinned worker with `SMOLVM_FILE_TRANSFER_MAX_BYTES=1048576` on loopback,
+then run from the repository root:
 
 ```sh
-python3 scripts/qualify_runtime.py \
-  --python /tmp/smolbox-qualification/python.smolmachine \
-  --node /tmp/smolbox-qualification/node.smolmachine \
-  --report /tmp/smolbox-qualification/smoke.json
+SMOLBOX_RUNTIME_URL=http://127.0.0.1:19470 \
+SMOLBOX_PYTHON_ARTIFACT=/absolute/path/to/python.smolmachine \
+SMOLBOX_JS_ARTIFACT=/absolute/path/to/node.smolmachine \
+MIX_ENV=test mix test test/runtime --include runtime --warnings-as-errors
 ```
+
+The following reports retain the original Phase 0 observations and tool identity;
+they are historical evidence, not results from the replacement runner.
 
 Reports: [macOS](evidence/phase0-macos.json), [Linux](evidence/phase0-linux.json).
 Both demonstrate create/start with no mounts, ports, or guest network; binary
@@ -143,6 +153,11 @@ real failure tests do not establish production multi-tenant certification. See
 for measured scope and remaining experiments.
 
 ## Toolchain
+
+The table records the six-lane library baseline before the maintainer-tool
+migration. The expanded 178-case suite was rerun on both canonical hosts; its
+22 standalone tooling cases also pass on both minimum-toolchain hosts. This
+does not claim a rerun of the full expanded suite on every earlier lane.
 
 The maintained package, rather than only the original scaffold, passes these
 lanes after the bounded deadline-fixture correction:
@@ -360,7 +375,7 @@ certification or release acceptance complete.
 
 ## Repeatable production-package consumer check
 
-`scripts/ci/package_consumer.py` builds the actual Hex tarball, bounds and
+`elixir scripts/ci.exs package-consumer` builds the actual Hex tarball, bounds and
 allowlists its members, extracts it into a private temporary directory, and
 creates a fresh `MIX_ENV=prod` consumer. It checks a supplied fake-transport
 health response and explicit Memory/SmolBox supervisor startup with no workers.
@@ -372,10 +387,10 @@ example-only code. This smoke test does not replace real-worker qualification.
 Run under the selected toolchain from the SmolBox repository root:
 
 ```sh
-python3 scripts/ci/package_consumer.py \
+elixir scripts/ci.exs package-consumer \
   --report /absolute/new/consumer-current.json \
   --package-output /absolute/new/smolbox.tar
-python3 scripts/ci/package_consumer.py --minimum \
+elixir scripts/ci.exs package-consumer --minimum \
   --archive /absolute/new/smolbox.tar \
   --report /absolute/new/consumer-minimum.json
 ```
