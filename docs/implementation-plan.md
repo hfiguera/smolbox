@@ -945,6 +945,24 @@ runtime-only dependency isolation. All packaged file hashes match commit
 | minimum-macos | `4e7ddbd35c6d39e3c5f795112fa811e829a9b97b2e0d8bfe6ef79160b332fb91` |
 | minimum-linux | `c4cfff0145b8e08ecb1cfbe8de261748bf6de53c25092c2c92b8261a1cdf8cd3` |
 
+Documentation consistency follow-up: the security guide now reflects the
+verified macOS guest-memory and contained Linux disk/output experiments without
+certifying the remaining host controls. The CI guide distinguishes completed
+reference benchmarks from pending resource certification. The quality-tool text
+now describes the actually compiled/executed dependencies instead of the initial
+proposal. No runtime or CI policy code changed.
+
+ExDoc passes with warnings treated as errors. A refreshed 80-file package at
+`/tmp/smolbox-qualification/doc-consistency-package.tar` passes a fresh canonical
+macOS production consumer; its SHA-256 is
+`a3f03a6d5baccd58b596e370fafe6ffb49d9a0b5b5d0629c7966308b327b0a6b`.
+The report SHA-256 is
+`82448e64bef753caf16fdfa9c150f78fa588734f5ab88531fbe02f87175c7dd4`.
+Only packaged `docs/security.md` differs from the four-consumer checkpoint above;
+all runtime and package-configuration bytes match it. The earlier minimum/Linux
+consumer runs are not represented as reruns of this new documentation archive.
+The final release-commit matrix is still required.
+
 The working implementation is not a fully accepted release candidate. Remaining
 dependencies and the work they unlock are:
 
@@ -1005,7 +1023,7 @@ Initial dependency constraints:
 {:credence, "~> 0.8.1", only: [:dev, :test], runtime: false}
 ```
 
-Resolve these together on the chosen matrix before freezing the lockfile. They are proposed constraints supported by reviewed releases, not a claim that this repository has already compiled them. [Dialyxir](https://hexdocs.pm/dialyxir/readme.html), [Credo](https://hexdocs.pm/credo/overview.html), [ExDNA](https://hexdocs.pm/ex_dna/readme.html), [ExSlop](https://hexdocs.pm/ex_slop/readme.html), [Credence](https://github.com/Cinderella-Man/credence).
+These tools are now resolved in the maintainer lockfile and have compiled and executed on both canonical hosts. Deliberate bad/clean canaries verify each requested analyzer; current compatibility evidence records the tested toolchain lanes. The declared constraints remain distinct from the maintainer lockfile and do not pin downstream consumers. [Dialyxir](https://hexdocs.pm/dialyxir/readme.html), [Credo](https://hexdocs.pm/credo/overview.html), [ExDNA](https://hexdocs.pm/ex_dna/readme.html), [ExSlop](https://hexdocs.pm/ex_slop/readme.html), [Credence](https://github.com/Cinderella-Man/credence).
 
 ### 12.2 Credo and ex_slop configuration
 

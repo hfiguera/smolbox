@@ -72,13 +72,13 @@ never authorizes networking or an arbitrary image pull.
 | Control | Current boundary | Remaining qualification |
 | --- | --- | --- |
 | Concurrency and reservations | Atomic store admission for the documented ownership topology | Does not coordinate an unrelated store or external worker users |
-| vCPU allocation | Requested, decoded and matched; a real Linux guest reports one CPU | Allocation is not a CPU-time quota; host contention remains external |
-| Guest memory | Real Linux finite overload produced a guest OOM victim while VM/host survived | No universal host-RSS bound; macOS hostile-memory qualification pending |
+| vCPU allocation | Requested, decoded and matched; real guests on both platforms report one CPU | Allocation is not a CPU-time quota; host contention remains external |
+| Guest memory | Finite overload experiments on both platforms record guest OOM evidence while the command parent and VM survive | No universal host-RSS bound or complete hostile-memory certification |
 | Host CPU/memory/tasks | Linux cgroup values observed on a separately constrained service | Upstream setup is best-effort; macOS has no corresponding cgroup mechanism |
-| Disk | Required verified template allocation floors and reservation accounting | Hard host storage/cache/log quotas and disk-abuse qualification pending |
+| Disk | Verified template allocation floors and reservations; a contained Linux disk-full probe demonstrates failed database deletion after a successful stop | No certified storage/cache/log quota profile; equivalent bounded macOS exhaustion qualification remains pending |
 | Guest process count | No certified hostile-guest process limit | Guest root cooperation or a Python/JS wrapper cannot supply it |
 | Deadlines/cancellation | Persisted budgets, upstream timeout and observed owned-VM stop | Delayed requests are unfenced; strong termination bounds remain unsupported |
-| Output | Bounded BEAM capture and transport; real finite overflow and blocked-observer tests preserve the available exit evidence | Total server/channel/frame memory and quota-controlled abuse qualification remain pending |
+| Output | Bounded BEAM capture and transport; finite overflow and blocked-observer tests, including a contained Linux producer, preserve the available evidence | Arbitrary hostile-protocol behavior and total server/channel/frame memory remain unqualified |
 | Egress and credentials | Offline configuration; tested public TCP and selected guest-to-host routes fail; initial credential-sentinel checks | These probes do not certify every host route, credential source or protocol |
 
 Run resource-abuse tests only inside independently verified host limits. A profile

@@ -90,8 +90,10 @@ The client/runtime suite includes finite output overflow, blocked observers,
 file-transfer caps, packed-image symlink behavior, guest FIFO reads and selected
 host/control endpoint probes. Successful characterization of an upstream
 limitation is not a claim that the limitation supplies isolation.
-Hard resource-abuse certification and benchmark evidence are separate acceptance
-items and remain pending; this workflow does not certify those by declaration.
+Hard resource-abuse certification remains a separate, incomplete acceptance item;
+this workflow does not certify it by declaration. The recorded development-host
+benchmarks cover their stated workloads and image-cache conditions. The live
+workflow does not rerun those benchmarks or establish broader performance claims.
 Choose `qualify_runtime: true` when dispatching the reviewed candidate. A dispatch
 with the option disabled still fails its required live-evidence gate.
 
