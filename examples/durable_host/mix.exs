@@ -4,7 +4,7 @@ defmodule SmolBox.DurableHost.MixProject do
   def project do
     [
       app: :smolbox_durable_host,
-      version: "0.1.0-rc.2",
+      version: "0.1.0",
       elixir: "~> 1.18",
       elixirc_paths: paths(Mix.env()),
       deps: [

@@ -1,6 +1,6 @@
 # Compatibility evidence
 
-Release candidate: `0.1.0-rc.2`, 2026-09-07. The first release
+Version: `0.1.0`, 2026-09-07. The first release
 targets the tested development-qualified client/controller contract. No production
 profile is certified; additional production resource/isolation qualification,
 protected real-worker GitHub infrastructure and independent consumer review are
@@ -253,9 +253,8 @@ They are not suppressed or represented as SmolBox diagnostics. The library and
 developer tasks pass warning-as-error compilation. No dependency source was patched.
 
 The source repository is [hfiguera/smolbox](https://github.com/hfiguera/smolbox),
-configured as `origin` and in the package and documentation metadata. It remains
-private during implementation. Candidate ExDoc source links target the matching
-`v0.1.0-rc.2` tag. The supplied host
+configured as `origin` and in the package and documentation metadata. The repository
+is public. ExDoc source links target the matching `v0.1.0` tag. The supplied host
 examples and automated package consumers provide first-release adoption evidence;
 no independent consumer review is required or claimed.
 

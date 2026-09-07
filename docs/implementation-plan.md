@@ -1,5 +1,22 @@
 # SmolBox implementation plan
 
+Status: **0.1.0 final-release preparation and exact-commit validation in progress**,
+September 7, 2026. The maintainer explicitly authorized publication of the validated
+`v0.1.0` tag, Hex package and HexDocs, followed by the GitHub Release. This later
+authorization supersedes historical no-publication instructions for this release
+only; production resource/isolation certification and the other section 1.4
+exclusions remain unchanged.
+
+Prepare final metadata before freezing the commit. Repeat the required eight
+Linux/macOS toolchain lanes, canonical quality checks, real runtime/recovery and
+host-example checks, ordinary GitHub CI, and four consumers of one exact archive.
+After acceptance, push the version tag, publish and verify Hex/HexDocs from that
+same source, then publish the GitHub Release. Preserve RC tags and historical
+evidence, and record the final validation/publication in a separate repository-only
+attestation under `docs/release-candidates/0.1.0.md` and its JSON companion.
+
+## RC2 acceptance checkpoint
+
 Status: **0.1.0-rc.2 accepted for the development-qualified first-release scope**,
 September 7, 2026. Candidate `9ce713f8cc8b4e1b417473869b76a5dc7ad2dd8a`, tagged
 `v0.1.0-rc.2`, passed the complete required matrix at that exact commit.

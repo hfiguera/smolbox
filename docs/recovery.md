@@ -68,7 +68,7 @@ explicitly approved equivalent storage policy. Unknown-schema or corrupt rows
 are errors requiring migration or investigation, never permission to start over.
 
 The reusable suite is in
-[`test/support/store/contract.ex`](https://github.com/hfiguera/smolbox/blob/v0.1.0-rc.2/test/support/store/contract.ex).
+[`test/support/store/contract.ex`](https://github.com/hfiguera/smolbox/blob/v0.1.0/test/support/store/contract.ex).
 It is repository test support, not part of the published library package. An adapter test module
 uses `SmolBox.Store.Contract` and supplies `adapter` and `store` in its setup
 context. It checks concurrent acceptance, conflicts, claims and CAS races, atomic
@@ -77,7 +77,7 @@ The suite alone does not certify durability; also run fresh-process database
 recovery, unavailable-database, corruption, and transaction-failure tests.
 
 The repository's
-[durable host example](https://github.com/hfiguera/smolbox/tree/v0.1.0-rc.2/examples/durable_host)
+[durable host example](https://github.com/hfiguera/smolbox/tree/v0.1.0/examples/durable_host)
 owns its Repo, schema migration,
 AES-256-GCM record encryption, and indexed projections. Mutations serialize on a
 partition row inside a SQL transaction. It demonstrates a small-pool adapter,

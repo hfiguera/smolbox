@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.1.0
+
+First release of the development-qualified SmolVM client and supervised execution
+runtime. Promotes RC2's API and behavior; public APIs and persisted record formats
+are unchanged. Production resource/isolation certification remains outside this
+release's scope, and unsupported hard controls remain rejected.
+
+- Publish installation through Hex and versioned API documentation through HexDocs.
+- Provide typed SmolVM 1.14.1 client operations and explicitly supervised execution
+  with immutable identities, duplicate/conflict handling, bounded files/output,
+  cancellation, recovery and cleanup. Uncertain accepted commands are never replayed.
+- Include managed-execution and troubleshooting guides, PostgreSQL and minimal
+  host examples, telemetry, and documented upstream and deployment limitations.
+- Support the tested Linux x86_64/KVM and macOS Apple Silicon worker platforms,
+  with Elixir 1.18/OTP 27, Elixir 1.19–1.20/OTP 28 and Elixir 1.20/OTP 29 lanes.
+- Retain the analyzer, coverage, dependency-cycle, documentation-link and package
+  consumer gates. Exact-release validation and publication are recorded separately
+  in the repository's release reports.
+
 ## 0.1.0-rc.2
 
 Second candidate for the development-qualified client/controller release.

@@ -2,7 +2,7 @@ defmodule SmolBox.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/hfiguera/smolbox"
-  @version "0.1.0-rc.2"
+  @version "0.1.0"
 
   def project do
     [

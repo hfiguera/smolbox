@@ -10,11 +10,10 @@ that needs restart recovery.
 In an existing Elixir Mix application, add this entry to `deps/0` in `mix.exs`:
 
 ```elixir
-{:smolbox, git: "https://github.com/hfiguera/smolbox.git", tag: "v0.1.0-rc.2"}
+{:smolbox, "~> 0.1.0"}
 ```
 
-Run `mix deps.get`. The candidate has not been published to Hex; the Git dependency
-requires repository access. With a sibling local checkout, use
+Run `mix deps.get` to fetch the package from Hex. With a sibling local checkout, use
 `{:smolbox, path: "../smolbox"}` instead. Elixir 1.18 and later are accepted by the
 package; use one of the tested Elixir/OTP pairs in [Compatibility](compatibility.md).
 
@@ -250,8 +249,8 @@ See [Troubleshooting](troubleshooting.md) for concrete result-handling examples.
 
 Continue with [Managed host integration](host-integration.md) and
 [Persistence and recovery](recovery.md). The repository's
-[minimal host](https://github.com/hfiguera/smolbox/tree/v0.1.0-rc.2/examples/minimal_host)
-and [PostgreSQL host](https://github.com/hfiguera/smolbox/tree/v0.1.0-rc.2/examples/durable_host)
+[minimal host](https://github.com/hfiguera/smolbox/tree/v0.1.0/examples/minimal_host)
+and [PostgreSQL host](https://github.com/hfiguera/smolbox/tree/v0.1.0/examples/durable_host)
 are complete applications; they are source examples, not modules shipped in the
 library package.
 
