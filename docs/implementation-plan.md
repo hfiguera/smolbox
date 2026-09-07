@@ -621,7 +621,12 @@ SIGKILL/restart boundaries on each platform (36 total), including dispatch inten
 first output, result/artifact persistence, stop/delete, absence and release.
 Unknown cases wait through the actual one-minute example retention window;
 known results survive interruption. See `docs/evidence/phase6-durable-recovery.json`.
-Worker restart/unavailability and orphan discovery still need qualification.
+Bounded orphan discovery is implemented and qualified without adopting or deleting
+untracked resources. Actual API-server SIGKILL/restart now passes with a real
+PostgreSQL-backed controller on both platforms. The VM survives server loss;
+the original identity/deadline and unknown result survive recovery, with one
+dispatch attempt and verified retention-window cleanup. See
+`docs/evidence/phase6-worker-restart.json`. Prolonged unavailability remains.
 
 The delayed-request probes required stricter behavior than the initial Phase 5
 increment: a 404 during ambiguous creation cannot release capacity, and retained
@@ -634,9 +639,9 @@ is reobserved. Strong cancellation/deadline guarantees remain uncertified.
 
 - [ ] Complete qualification of persisted cancellation intent, evidence-based termination, and cancellation/completion race handling. The initial implementation passes normal controlled and real stop paths; boundary races remain.
 - [x] Implement bounded reconciliation and cleanup scans on startup and periodically. Bounded task slots, paginated due scans, persisted retry counts/deadlines, and owner claims are implemented; full fault qualification remains below.
-- [ ] Complete no-replay and accounting fault qualification. Controlled interruption boundaries and 36 real durable-host process-kill cases pass without a second dispatch. Actual worker restart/prolonged unavailability remain; this is not a request-fencing or exactly-once certification.
+- [ ] Complete no-replay and accounting fault qualification. Controlled interruption boundaries, 36 real durable-host process-kill cases, and API-server restart on both platforms pass without a second dispatch. Prolonged unavailability remains; this is not a request-fencing or exactly-once certification.
 - [x] Protect foreign resources during cleanup; implement orphan detection within verified ownership boundaries. `audit_worker/3` reports bounded read-only pages; names never authorize adoption or deletion. Worker/name assignment indexes are atomic and survive cleanup in both stores. Real tests leave untracked candidates untouched on Linux/macOS; controlled tests cover changed creation evidence, incomplete/slow stores and cleanup races.
-- [ ] Exercise the full fault matrix against controlled peers and selected real-worker boundaries. Controller interruption and artifact-write interruption now have real durable evidence; worker/service restart, output-store unavailability and notification boundaries remain.
+- [ ] Exercise the full fault matrix against controlled peers and selected real-worker boundaries. Controller interruption, API-server restart and artifact-write interruption now have real durable evidence; prolonged worker unavailability, output-store unavailability and notification boundaries remain.
 
 Exit: restarts do not duplicate commands; unresolved execution and cleanup are inspectable; cleanup failures cannot rewrite successful command results.
 

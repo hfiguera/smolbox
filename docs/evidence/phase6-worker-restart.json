@@ -1,0 +1,97 @@
+{
+  "recorded_at": "2026-09-07T02:50:29.191732+00:00",
+  "base_commit": "10dba31",
+  "scope": "Phase 6 actual API-server restart; not full release qualification",
+  "upstream": {
+    "version": "1.14.1",
+    "revision": "e8d09ef616d363004d55b80a6cdb31a4e7e1842d"
+  },
+  "toolchain": {
+    "elixir": "1.20.4",
+    "otp": "28.5",
+    "postgresql": "16.15"
+  },
+  "scenarios": {
+    "linux": {
+      "status": "passed",
+      "partition": "restart-f8cc6540f5cdd51a",
+      "seconds": 67.101,
+      "result": {
+        "id": "restart-f8cc6540f5cdd51a",
+        "scope": "example",
+        "state": "unknown",
+        "cleanup": "complete",
+        "exit_code": null,
+        "machine_name": "sbxexample-a5n3luj5zr57td2l4awo",
+        "evidence": "termination_confirmed",
+        "artifacts": [],
+        "worker_id": "example-worker",
+        "collection": "pending",
+        "cancel_requested_at_ms": null,
+        "absence_at_ms": 1788749272477,
+        "reserved": false
+      },
+      "dispatch_attempts": 1,
+      "guest_marker": "single byte before recovery",
+      "guest_survived_api_server": true,
+      "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+      "runtime_version": "1.14.1",
+      "platform": "Linux"
+    },
+    "macos": {
+      "status": "passed",
+      "partition": "restart-58b0078ecb8289f8",
+      "seconds": 67.2,
+      "result": {
+        "id": "restart-58b0078ecb8289f8",
+        "scope": "example",
+        "state": "unknown",
+        "cleanup": "complete",
+        "exit_code": null,
+        "machine_name": "sbxexample-coxy3j2xqauy7tsswbdc",
+        "evidence": "termination_confirmed",
+        "artifacts": [],
+        "worker_id": "example-worker",
+        "collection": "pending",
+        "cancel_requested_at_ms": null,
+        "absence_at_ms": 1788749355248,
+        "reserved": false
+      },
+      "dispatch_attempts": 1,
+      "guest_marker": "single byte before recovery",
+      "guest_survived_api_server": true,
+      "artifact_sha256": "d982cfdf0c59b862ad3e1b107446b127460f716c8407fd0e2b6b0de2a62fe18e",
+      "runtime_version": "1.14.1",
+      "platform": "Darwin"
+    }
+  },
+  "assertions": [
+    "SIGKILL and reap only the owned API-server child",
+    "durable unknown state before server restart",
+    "same recorded VM running after server restart",
+    "no second client dispatch",
+    "original execution fingerprint and deadline retained",
+    "full evidence retention window before deletion",
+    "machine absence before capacity release",
+    "empty final worker inventory"
+  ],
+  "limitations": [
+    "client dispatch ledger and guest marker are test instrumentation, not durable execution receipts",
+    "server restart does not kill VMs",
+    "worker requests are not fenced",
+    "prolonged unavailability and other phase 6 boundaries remain"
+  ],
+  "source_sha256": {
+    "scripts/qualify_worker_restart.py": "a2a3c05c98f1fdb42fb1dcbe183f98ddcdac6432919d8589c7853de57d6904d5",
+    "examples/durable_host/scripts/worker_restart.exs": "a8b675756a60ba4be3daecf66536361b291c80d8228e29c6693510c9a110a743"
+  },
+  "increment_checks": {
+    "canonical_macos_deterministic_cases": 127,
+    "seed": 31008,
+    "seconds": 59.6,
+    "all_five_analyzers": "passed",
+    "docs": "warnings-as-errors passed",
+    "python": "syntax check passed on both hosts",
+    "core_library_changes": "none"
+  }
+}

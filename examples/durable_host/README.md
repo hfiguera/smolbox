@@ -95,6 +95,28 @@ creation evidence. They do not sweep names or delete an unverified machine.
 Inspect retained resources before retrying. Real restart tests do not establish
 hard host resource quotas or fence already accepted upstream requests.
 
+For a separate API-server restart probe, use an otherwise idle worker data root
+with **no server listening** on the selected loopback port. From the package root:
+
+```sh
+MIX_ENV=test python3 scripts/qualify_worker_restart.py \
+  --smolvm /absolute/path/to/smolvm \
+  --python /absolute/path/to/python.smolmachine \
+  --report /absolute/path/to/worker-restart-report.json
+```
+
+Run through the pinned toolchain so the child `mix` command uses it too. Supply
+the same database configuration as above; Linux additionally requires an explicit
+dedicated `SMOLVM_DATA_DIR`. The script refuses an occupied port, starts and kills
+only its own server/controller processes, and requires an initially empty worker
+inventory. It uses the pinned 1.14.1 runtime, checks recorded creation evidence
+before cleanup, and bounds its HTTP reads and child diagnostics. It retains its
+private keys, object directory and SQL partition for inspection, including after
+success. The JSON report identifies that workspace without exposing key bytes.
+The worker server is stopped when the probe finishes; it never starts or stops
+a pre-existing host service. The probe takes about 67 seconds on the qualified
+hosts because it waits through the actual retention window.
+
 ## Host integration and security
 
 Construct `SmolBox.DurableHost.Store.new(Repo, partition, encryption_key)` with a

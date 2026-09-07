@@ -4,9 +4,11 @@ The store behaviour, versioned execution records, bounded memory adapter, and
 shared adapter tests are implemented. The host-owned Ecto/Postgres example passes
 real database conformance and fresh-process reads. The supervised managed runtime
 passes 18 real database-backed controller process-kill boundaries on each initial
-platform, including the full example retention interval. Worker-service faults
-and full resource qualification remain incomplete; this is not yet a release
-candidate.
+platform, including the full example retention interval. Actual API-server
+SIGKILL/restart also passes on Linux and macOS: the VM survives the server,
+the command result stays unknown, and verified cleanup eventually releases its
+reservation without another dispatch. Prolonged worker outages and full resource
+qualification remain incomplete; this is not yet a release candidate.
 
 `SmolBox.Store` defines atomic acceptance, authoritative lookup, worker leases,
 execution claims, compare-and-swap writes, reservations, release, cancellation
@@ -90,3 +92,12 @@ transaction authenticated backfill. Missing backfill work blocks startup and
 lookup until completed; see the example README for the maintenance procedure.
 Worker inventory inspection remains read-only and never substitutes a matching
 name for recorded creation evidence.
+
+An API-server restart is not a VM restart. SmolVM 1.14.1 keeps VMs running when
+`smolvm serve` exits. The dedicated qualification script kills its own server
+after the durable controller records running work, waits for recorded uncertainty,
+then restarts the server against the same worker data. It verifies the original
+VM still runs before allowing recovery. Recovery keeps the execution identity,
+deadline and unknown outcome, stops the verified VM, waits through retention,
+deletes it, records absence, and releases capacity. This tests reconnection and
+cleanup; it does not recover a command receipt or fence earlier worker requests.
