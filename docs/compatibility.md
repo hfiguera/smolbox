@@ -19,7 +19,8 @@ fixture correction changes no analyzer or production behavior. Current evidence:
 [live output/path boundaries](evidence/phase8-boundaries.json),
 [durable telemetry recovery](evidence/phase8-telemetry.json),
 [service and CI harness](evidence/phase1-live-ci.json), and
-[warm durable workload](evidence/phase8-benchmarks.json).
+[warm durable workload](evidence/phase8-benchmarks.json), and
+[contained Linux resource experiments](evidence/phase8-linux-containment.json).
 
 The sections after “Historical milestone records” retain earlier test counts
 and gaps as an audit trail. They do not supersede this current summary or the
@@ -124,10 +125,10 @@ These findings require continued real-runtime verification:
 |---|---|---|
 | Guest vCPU/memory allocation | Observed configuration; bounded guest OOM experiment passes | Observed configuration; overload qualification pending |
 | Host RSS / CPU-time hard quota | Owned cgroup observation; no certified profile | Uncertified |
-| Guest disk and host storage accounting | 20/10 GiB template floors verified; no certified profile | Same template floors verified; host quota pending |
+| Guest disk and host storage accounting | 20/10 GiB floors; contained host-disk-full probe exposes database cleanup failure; no certified profile | Same template floors verified; host quota pending |
 | Hostile process count control | Unsupported hard control | Unsupported hard control |
 | Deadline and whole-VM termination | Real timeout/cancellation/recovery passes; delayed requests are not fenced | Same |
-| Output and file transfer caps | Finite overflow and worker cap pass; broader buffering qualification pending | Same |
+| Output and file transfer caps | Finite overflow/file cap pass; contained blocked-reader probe passes; broader buffering pending | Finite overflow/file cap and blocked callback pass; independent host quota qualification pending |
 | No guest egress / control-plane access | Public TCP and three control-plane routes denied; broader isolation pending | Same |
 | Durable result recovery | Persisted results survive controller failure; no upstream receipt for a lost result | Same |
 | Safe cancellation and cleanup | Unknown outcomes and reservations survive faults through retention and verified cleanup | Same |

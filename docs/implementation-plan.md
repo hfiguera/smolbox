@@ -807,6 +807,28 @@ failure, corrected results and remaining limits. `docs/compatibility.md` now
 separates current results from its historical milestone counts. This is a
 compatibility milestone, not the exact final release-commit matrix.
 
+Two independently bounded Linux experiments now add a real host-disk-full
+boundary and finite slow-reader behavior. Private namespace workers had verified
+2 GiB/no-swap/200%-CPU/128-task parent limits and 512 MiB tmpfs data mounts.
+The disk producer received `EIO` at 336,592,896 guest bytes when the host mount
+filled. Stop succeeded, but SmolVM could not commit deletion because its database
+was also full. The retained owned unit/mount was explicitly torn down after
+identity verification; this is not counted as successful API cleanup. A separate
+64 MiB-upper-bound producer with a blocked callback expired observation after
+3,003 ms, preserved uncertainty and then passed owned-VM stop/delete. Both units
+and private mounts are gone, and the normal worker remains healthy and empty.
+
+`docs/evidence/phase8-linux-containment.json` records kernel counters, source and
+report hashes, settings, limitations and the failed delete. These experiments
+also show why 128 host tasks do not enforce a guest process-count limit. The
+namespace setup disables per-VM UID dropping/shared extraction and logs a
+ten-second failed systemd scope adoption, so its timings are not the normal
+cold-start benchmark. Minimal-profile certification remains unchecked. A
+production storage design must preserve control metadata capacity and qualify
+recovery when exhausted storage prevents the worker API from cleaning up.
+Equivalent independently bounded macOS experiments, broader isolation and final
+protected CI/release evidence still remain.
+
 ### Phase 9 — Release candidate and adoption evidence
 
 Dependencies: all earlier exit conditions and section 12 gates.

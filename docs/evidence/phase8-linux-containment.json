@@ -1,0 +1,242 @@
+{
+  "recorded_utc": "2026-09-07T07:31:51.526870+00:00",
+  "status": "bounded Linux experiments complete; hard-profile and release qualification incomplete",
+  "smolbox_source_base": "6bf13053ce73e88d93de6d4fd650e6f8e708aa7a; production library unchanged at 4b4783b",
+  "platform": "Linux x86_64 7.1.5-76070105-generic; Intel i5-1135G7; Elixir 1.20.4 / OTP 28.5",
+  "upstream": {
+    "version": "1.14.1",
+    "commit": "e8d09ef616d363004d55b80a6cdb31a4e7e1842d",
+    "binary_sha256": "bb2432804d4bf5d6cbb688d3af160a6a01c99194830f0099d64f291d4ad62373",
+    "wrapper_sha256": "8caeb3b6e7d834493a578b0fe8bd1e7aa02e68fba6d61bcf70fdbec41a27ce68"
+  },
+  "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+  "enclosure": {
+    "owner": "existing unprivileged Linux test account; private user/mount namespace maps that account to namespace UID 0",
+    "systemd_properties": {
+      "MemoryMax": 2147483648,
+      "MemorySwapMax": 0,
+      "CPUQuota": "200%",
+      "TasksMax": 128,
+      "RuntimeMaxSec": 300,
+      "KillMode": "control-group",
+      "TimeoutStopSec": 5
+    },
+    "actual_control_files": {
+      "memory.max": "2147483648",
+      "memory.swap.max": "0",
+      "cpu.max": "200000 100000",
+      "pids.max": "128"
+    },
+    "data_mount": {
+      "type": "tmpfs",
+      "bytes": 536870912,
+      "options": [
+        "mode=0700",
+        "nodev",
+        "nosuid"
+      ],
+      "scope": "new owned data path inside private namespace; not shared host mounts"
+    },
+    "wrapper_limits": {
+      "deadline_seconds": 270,
+      "worker_log_bytes": 524288,
+      "tmpfs_sampling_ms": 100
+    },
+    "runtime_options": {
+      "SMOLVM_VM_UID_DROP": "off",
+      "SMOLVM_DISABLE_SHARED_EXTRACT": "1",
+      "SMOLVM_FILE_TRANSFER_MAX_BYTES": "1048576",
+      "SMOLVM_GUEST_ROLLOUT_HOST_PORT": "19474",
+      "api": "127.0.0.1:19473"
+    }
+  },
+  "preflight": {
+    "status": "passed",
+    "pid": 93167,
+    "namespace_uid": 0,
+    "cgroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/smolbox-ns-preflight-a.service",
+    "limits": {
+      "memory.max": "2147483648",
+      "memory.swap.max": "0",
+      "cpu.max": "200000 100000",
+      "pids.max": "128"
+    },
+    "tmpfs_bytes": 1048576,
+    "written_bytes": 1048576,
+    "observed_error": "ENOSPC",
+    "scope": "Namespace/mount/cgroup capability preflight only; no SmolVM started"
+  },
+  "source_inspection": {
+    "api/handlers/machines.rs": "delete_one commits registry/database removal before removing data; a full database can prevent cleanup",
+    "startup_observation": "Both namespace workers logged a ten-second failed systemd scope adoption. The VM remained in the verified capped parent unit. No per-VM scope or restart-safe adoption is claimed."
+  },
+  "trials": {
+    "a": {
+      "statistics": {
+        "memory.peak": "866095104",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0",
+        "cpu.stat": "usage_usec 6813864\nuser_usec 5895431\nsystem_usec 918432\nnice_usec 505000\ncore_sched.force_idle_usec 0\nnr_periods 1561\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0",
+        "pids.peak": "26",
+        "pids.events": "max 0"
+      },
+      "elapsed_seconds": 246.68582631999743,
+      "sampled_tmpfs_peak_bytes": 536870912,
+      "worker_log_sha256": "7ac01325a22c1adc20120d9e8e184b34ba9bb769d9834ce07751cfd0d8d46892",
+      "worker_log_bytes": 621,
+      "worker_exit_code": 0,
+      "boot": {
+        "result": "{:ok, #SmolBox.Result<exit_code: 0, encoding: :bytes, ...>}",
+        "create_ms": 253.266,
+        "start_ms": 10035.847
+      },
+      "raw_records": {
+        "boot.json": "f22028c5c263b4c43cf433509ee1d5bbabb0e2b99d9d381449f54cf8dad59953",
+        "worker.log": "7ac01325a22c1adc20120d9e8e184b34ba9bb769d9834ce07751cfd0d8d46892",
+        "owned-teardown.json": "b15fb9d7c2779be6f61d91a896a7a46e52b1066869eb79ba12c4e3c07f4bf9e2",
+        "processes.json": "63380c1e283f098ac9c1527d350bcac3c440bc814ced2dd2633843eee839f91b",
+        "started.json": "b570b03c802cd9c13d5a1b26027b3e4658342227c7b37d5ed2bbd640e395d7aa",
+        "cpu.json": "e1197a6a47ebafb4fff8e19ba471c43d6eee85d622457e970f7f74574c82e100",
+        "after-exhaustion.json": "f0880e11f85b7479e3893d2fb0204c42a667218242dc72dd3cdeecb0dc89505c",
+        "disk.json": "9fc66e00e509c6977d99628a2e38fe83bdb832f7ad8346e0faa47cb88efc1364",
+        "finished.json": "dd574ab001956a46f06b79d72eeef5895cf8e46328d613d2feb1599cfec89984"
+      },
+      "cpu": {
+        "exit_code": 0,
+        "elapsed_ms": 4045.895,
+        "guest_report": {
+          "wall_seconds": 4.000005985000001,
+          "process_cpu_seconds": 3.996734323,
+          "cpus": 1
+        }
+      },
+      "processes": {
+        "exit_code": 0,
+        "elapsed_ms": 2161.41,
+        "guest_report": {
+          "spawned": 32,
+          "exit_codes": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "disk": {
+        "exit_code": 0,
+        "elapsed_ms": 466.071,
+        "guest_report": {
+          "written_bytes": 336592896,
+          "error": {
+            "errno": 5,
+            "message": "I/O error"
+          }
+        }
+      },
+      "deletion": {
+        "result": "protocol error, dispatch_uncertain",
+        "worker_error": "commit vm removal: database or disk is full",
+        "inspection": "same owned VM remained stopped in inventory",
+        "api_deletion_confirmed": false,
+        "operator_teardown": "verified exact unit MainPID, control-group and invocation ID, then stopped only that unit",
+        "final_verification": "original worker/launcher PIDs and cgroup absent; private tmpfs mount gone; normal worker still healthy with empty inventory"
+      }
+    },
+    "b": {
+      "statistics": {
+        "memory.peak": "324579328",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0",
+        "cpu.stat": "usage_usec 1264598\nuser_usec 799039\nsystem_usec 465559\nnice_usec 0\ncore_sched.force_idle_usec 0\nnr_periods 126\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0",
+        "pids.peak": "26",
+        "pids.events": "max 0"
+      },
+      "elapsed_seconds": 15.991083566004818,
+      "sampled_tmpfs_peak_bytes": 194314240,
+      "worker_log_sha256": "bb638611ebcb2706943521b745ccc732f905ad9130770201f0d735491322a145",
+      "worker_log_bytes": 385,
+      "worker_exit_code": 0,
+      "boot": {
+        "result": "{:ok, #SmolBox.Result<exit_code: 0, encoding: :bytes, ...>}",
+        "create_ms": 254.933,
+        "start_ms": 10036.069
+      },
+      "raw_records": {
+        "boot.json": "b17efa3d72538f671f00801c003939f4018e43bd5e1c62a8857c45e3b6cf9cc5",
+        "worker.log": "bb638611ebcb2706943521b745ccc732f905ad9130770201f0d735491322a145",
+        "output.json": "fe3c7a983ee82152accf498eaa5212b6de1c67a0bd19b747d37a18325dc59e01",
+        "cleanup.json": "8f866745bbf50662189698d4d3758ccb621e0f723a9ab7149f492f03d0383516",
+        "started.json": "53f84ed2e27f332c9887943cbadb72292a1cfc2d04dad9bb515415151c37611e",
+        "finished.json": "35cb60e778d21c23b680d2c62f87dac9afadb3f1469b6db191eaf4772766c1cd"
+      },
+      "output": {
+        "error": {
+          "category": "transport",
+          "__exception__": true,
+          "exit_code": null,
+          "operation": "exec_stream",
+          "evidence": "dispatch_uncertain"
+        },
+        "client_elapsed_ms": 3003.067,
+        "producer_upper_bytes": 67108864,
+        "output_capture_bytes": 65536,
+        "callback_dead": true,
+        "machine_still_running": true,
+        "exec_invocations": 1
+      },
+      "cleanup": {
+        "stopped": "stopped",
+        "verified_owned": true,
+        "inventory_empty": true
+      },
+      "final_verification": "owned worker/launcher PIDs and cgroup absent; private mount gone; normal worker still healthy with empty inventory"
+    }
+  },
+  "probe_source_sha256": {
+    "namespace_preflight.py": "7f55f5d6a70d07ed220ec4071c6927a77da7510f6a230c1c3e0fbe6b44daf1c1",
+    "namespace_worker.py": "8ed23977e2be7602acd9a42d57821f86d2bed3ce9f292eb0d917dbd8f809fe0c",
+    "namespace_vm_probe.exs": "19e4a9d5ec23f5866dd7ba90a14c2175dfc4b44d82e37448c89a255173d6d0f4",
+    "namespace_stress.exs": "8c368f217e1f8b127c5ee807802be8ba26e8ce20392cbc53f89e3194398aded5",
+    "namespace_output.exs": "27bacb39b9d07c17633cfbdd076fffc03e48d8d2d0257037623e8d2820b965a0"
+  },
+  "probe_source_location": "Private qualification sources retained under /tmp/smolbox-qualification on both hosts; exploratory evidence, not a maintained CI runner.",
+  "initial_probe_error": "The first boot script passed operation_timeout_ms to Client.new instead of Worker.new; validation rejected it before worker I/O. Corrected before creating a machine.",
+  "limitations": [
+    "Only the stated finite workloads were exercised; no production profile is certified.",
+    "The guest saw one vCPU. A four-second CPU loop does not certify CPU-time throttling; parent cpu.stat reported no throttling.",
+    "Thirty-two guest children ran while the host unit peaked at 26 tasks. Host pids.max is not a guest process-count quota; no pids.max exhaustion was observed.",
+    "Memory accounting covers the parent unit and tmpfs, with no recorded cgroup OOM. It is not a universal VMM RSS claim.",
+    "The output producer was bounded above at 64 MiB; actual emitted bytes and command outcome after observation loss were not recovered. One stream invocation is test instrumentation, not a durable upstream receipt.",
+    "The second trial stops/deletes the owned VM and verifies empty inventory. The disk-full trial instead requires owned unit/mount teardown after failed API deletion; do not count teardown as a successful delete response.",
+    "Fresh data roots and per-machine extraction do not mean a pristine/cold host or default Linux shared-cache benchmark. Both starts included the observed ten-second scope-adoption timeout.",
+    "The distribution and trusted prepared artifact were outside the private writable data mount. Upstream flags disable per-VM UID dropping/shared extraction in this user namespace. This cannot be advertised as the default deployment security configuration.",
+    "Equivalent independently bounded macOS hostile-resource tests, broader endpoint/credential isolation, upstream protocol abuse and protected disposable CI jobs remain pending."
+  ]
+}

@@ -175,3 +175,19 @@ absence of a verified resource; it cannot authorize replay or override ownership
 conflicts. Retain an audit of manual actions outside SmolBox's optional telemetry.
 Never interpret a cancelled HTTP request, dead controller or expired `await` as
 confirmed guest termination.
+
+## Worker storage exhaustion
+
+A contained Linux 1.14.1 probe filled its private 512 MiB data mount. The guest
+observed a write I/O error and could be stopped, but SmolVM could not commit its
+VM deletion because its database shared the full mount. SmolBox correctly
+reported uncertainty; an observed stop does not confirm cleanup. Retain the
+execution's reservation and ownership evidence through the normal cleanup path.
+
+Operators need verified headroom for control metadata or separately bounded
+storage, and an owned-worker recovery procedure for exhausted storage. The
+experiment recovered by destroying only its separately bounded, verified owned
+unit and private in-memory mount. This cannot be generalized to deleting a
+shared worker's data or all machines with a matching name prefix. See
+[resource qualification](resource-qualification.md) for exact limits, counters
+and the remaining production-profile requirements.

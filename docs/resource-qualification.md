@@ -58,7 +58,8 @@ process as an OOM victim. The command parent and VM survived. The host unit and
 VM cgroup reported no OOM events; observed peaks were 514,179,072 and 363,044,864
 bytes respectively. This is evidence for that guest-memory experiment, not a
 complete hostile-workload qualification or proof of host OOM containment under
-all conditions. No disk-fill or process-exhaustion experiment was run.
+all conditions. No disk-fill or process-exhaustion experiment was run in that initial increment;
+the later contained Linux experiments below add a host-disk-full observation.
 
 The probe also observed one guest CPU/affinity, no host test sentinel in its
 environment, no rollout token, and no host qualification workspace path. These
@@ -67,6 +68,69 @@ Both probe VMs were stopped/deleted only after comparing their full recorded
 creation evidence, and subsequent inspection observed absence. The owned Linux
 unit was stopped after verifying its invocation ID and empty inventory. No
 unrelated service or VM was stopped.
+
+## Contained Linux exhaustion and slow-reader experiments
+
+Two later experiments used fresh owned worker data directories mounted as
+512 MiB tmpfs filesystems inside private user/mount namespaces. The same
+unprivileged account launched user-systemd units with independently verified
+kernel limits: 2 GiB memory, no swap, 200% CPU quota and 128 host tasks. Units had
+a 300-second deadline and control-group teardown; the launcher imposed a
+270-second deadline and 512 KiB worker-log cap. The normal worker and shared host
+mounts were untouched. A prior 1 MiB mount preflight actually reached `ENOSPC`.
+These are exploratory development-host experiments, not a supported provisioner
+or production profile.
+
+The released runtime and approved Python artifact stayed outside the writable
+data mount. Inside the namespace, `SMOLVM_VM_UID_DROP=off` and
+`SMOLVM_DISABLE_SHARED_EXTRACT=1` were required test settings. Both boots logged
+a failed systemd scope-adoption attempt lasting ten seconds. The VMM remained in
+the verified capped parent unit; per-VM scope adoption and service-restart
+independence were not established. Creation took about 254 ms and start about
+10.036 seconds, dominated by that timeout. Fresh data roots do not make those
+numbers a default deployment or cold-host benchmark.
+
+The first guest observed one vCPU and consumed about 3.997 CPU seconds in a
+four-second loop. Thirty-two finite `sleep` children all completed. The parent
+unit peaked at 26 host tasks and did not hit its task limit. This directly
+illustrates why a host task cap does not count guest processes; a hard guest
+process-count control remains unsupported. The CPU trial did not cause observed
+parent-quota throttling and is not evidence of a CPU-time quota.
+
+A finite disk producer attempted at most 640 MiB in 1 MiB writes with `fsync`
+after every write. At 336,592,896 guest bytes it received `EIO`. The private host
+mount was exactly full at 536,870,912 bytes. The parent unit's recorded memory
+peak was 866,095,104 bytes, with no cgroup OOM/max event. The guest could still be
+stopped, but the subsequent delete returned an uncertain protocol error.
+SmolVM's own log reported that committing VM removal failed because its database
+or disk was full. Read-only inventory confirmed the same owned machine remained
+stopped. Source orders database removal before data-directory removal.
+
+This is a cleanup failure that operators must account for. Guest writable data
+can exhaust space needed by the worker's control metadata. Capacity reservations
+alone do not prevent it. A production storage design needs verified control-plane
+headroom or separately bounded storage, plus ownership-aware recovery when the
+API cannot commit cleanup. Do not mark deletion complete or release reservations
+on the basis of a stop response. The experiment ended by verifying and stopping
+only its exact owned unit; its processes/cgroup disappeared and its private
+in-memory mount was destroyed. This teardown is **not** a successful API delete.
+
+The second guest attempted at most 64 MiB of output while its client's stream
+callback blocked. SmolBox retained a 64 KiB capture limit and ended observation
+after 3,003 ms; the callback process was gone and the VM still running. The
+reported outcome stayed unknown with no exit code. Actual emitted bytes were
+not recovered, so the upper bound must not be described as a completed 64 MiB
+transfer. Explicit ownership-checked stop/delete then succeeded, inventory was
+empty, and the owned unit exited. Its memory peak was 324,579,328 bytes and
+sampled tmpfs use peaked at 194,314,240 bytes; no cgroup OOM or task-limit event
+occurred. One finite producer does not prove safety against arbitrary hostile
+protocol frames or all server-buffering patterns.
+
+[Contained Linux evidence](evidence/phase8-linux-containment.json) retains
+settings, kernel counters, raw-report/source hashes, successful checks and failed
+cleanup. The normal worker remained healthy with empty inventory after both
+trials. Equivalent independently bounded macOS experiments and broader isolation
+qualification remain open.
 
 ## Measured durable-host workload
 
@@ -133,10 +197,11 @@ isolated worker-state/cache-miss and cold-host measurements remain pending.
 
 ## Remaining evidence
 
-Required work includes bounded CPU/process/disk/output stress under independently
-verified host quotas, macOS resource qualification, server-side buffering and
-quota-controlled slow-reader measurements, broader credential/control-plane
-tests, cold-state measurements and actual protected release-worker jobs. Finite
+Required work includes broader CPU/process/output and hostile-protocol
+qualification, independently bounded macOS resource experiments, broader
+credential/control-plane tests, cold-state measurements and actual protected
+release-worker jobs. The contained Linux disk-full and finite slow-reader
+experiments above cover specific workloads and expose a cleanup limitation. Finite
 output/path probes and the workload above cover specific behavior; passing them
 does not substitute for exhaustion/isolation experiments. The implementation plan
 keeps minimal-profile certification unchecked.
