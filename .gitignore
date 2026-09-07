@@ -12,3 +12,4 @@ __pycache__/
 /examples/*/_build/
 /examples/*/deps/
 /examples/*/reports/
+/external-references/

@@ -359,7 +359,7 @@ compile with warnings treated as errors. Package source hashes must remain
 unchanged, and resolved dependencies/compiled modules must exclude CI and
 example-only code. This smoke test does not replace real-worker qualification.
 
-Run under the selected toolchain from `packages/smolbox`:
+Run under the selected toolchain from the SmolBox repository root:
 
 ```sh
 python3 scripts/ci/package_consumer.py \

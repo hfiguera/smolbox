@@ -1,0 +1,478 @@
+name: SmolBox CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      qualify_runtime:
+        description: Run the reviewed candidate on protected disposable real workers
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+    working-directory: .
+
+env:
+  MIX_ENV: test
+
+jobs:
+  smolbox-change-scope:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      runtime_required: ${{ steps.scope.outputs.runtime_required }}
+      commit: ${{ steps.scope.outputs.commit }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - run: python3 -m unittest discover -s scripts/ci -p 'test_*.py' -v
+      - id: scope
+        run: python3 scripts/ci/classify_changes.py --event "$GITHUB_EVENT_NAME" --payload "$GITHUB_EVENT_PATH"
+
+  smolbox-format-compile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
+        with:
+          otp-version: '28.5'
+          elixir-version: '1.20.4'
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            deps
+            _build/test
+            _build/plts
+          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp28.5-ex1.20.4-test-${{ hashFiles('mix.lock', 'mix.exs') }}
+      - run: mix deps.get
+      - run: elixir --version
+      - name: Run required checks
+        run: |
+          mix format --check-formatted
+          mix deps.unlock --check-unused
+          mix compile --warnings-as-errors
+      - name: Check tracked files were not modified
+        run: git diff --exit-code
+
+  smolbox-credo-ex-slop:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
+        with:
+          otp-version: '28.5'
+          elixir-version: '1.20.4'
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            deps
+            _build/test
+            _build/plts
+          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp28.5-ex1.20.4-test-${{ hashFiles('mix.lock', 'mix.exs') }}
+      - run: mix deps.get
+      - run: elixir --version
+      - name: Run required checks
+        run: |
+          mix compile --warnings-as-errors
+          mix credo --strict
+      - name: Check tracked files were not modified
+        run: git diff --exit-code
+
+  smolbox-ex-dna:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
+        with:
+          otp-version: '28.5'
+          elixir-version: '1.20.4'
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            deps
+            _build/test
+            _build/plts
+          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp28.5-ex1.20.4-test-${{ hashFiles('mix.lock', 'mix.exs') }}
+      - run: mix deps.get
+      - run: elixir --version
+      - name: Run required checks
+        run: |
+          mix compile --warnings-as-errors
+          python3 -c 'import pathlib; assert list(pathlib.Path("lib").rglob("*.ex")), "empty production scope"'
+          mix ex_dna lib dev test/support examples/durable_host/lib examples/durable_host/priv examples/durable_host/test/support examples/minimal_host/lib examples/support/lib --max-clones 0
+      - name: Check tracked files were not modified
+        run: git diff --exit-code
+
+  smolbox-credence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
+        with:
+          otp-version: '28.5'
+          elixir-version: '1.20.4'
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            deps
+            _build/test
+            _build/plts
+          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp28.5-ex1.20.4-test-${{ hashFiles('mix.lock', 'mix.exs') }}
+      - run: mix deps.get
+      - run: elixir --version
+      - name: Run required checks
+        run: |
+          mix compile --warnings-as-errors
+          mix smolbox.ci.credence
+      - name: Check tracked files were not modified
+        run: git diff --exit-code
+
+  smolbox-dialyzer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
+        with:
+          otp-version: '28.5'
+          elixir-version: '1.20.4'
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            deps
+            _build/test
+            _build/plts
+          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp28.5-ex1.20.4-test-${{ hashFiles('mix.lock', 'mix.exs') }}
+      - run: mix deps.get
+      - run: elixir --version
+      - name: Run required checks
+        run: |
+          mix compile --warnings-as-errors
+          mix dialyzer
+      - name: Check tracked files were not modified
+        run: git diff --exit-code
+
+  smolbox-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
+        with:
+          otp-version: '28.5'
+          elixir-version: '1.20.4'
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            deps
+            _build/test
+            _build/plts
+          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp28.5-ex1.20.4-test-${{ hashFiles('mix.lock', 'mix.exs') }}
+      - run: mix deps.get
+      - run: elixir --version
+      - name: Run required checks
+        run: |
+          mix compile --warnings-as-errors
+          mix test --warnings-as-errors
+      - name: Check tracked files were not modified
+        run: git diff --exit-code
+
+  smolbox-coverage:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
+        with:
+          otp-version: '28.5'
+          elixir-version: '1.20.4'
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            deps
+            _build/test
+            _build/plts
+          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp28.5-ex1.20.4-test-${{ hashFiles('mix.lock', 'mix.exs') }}
+      - run: mix deps.get
+      - run: elixir --version
+      - name: Run required checks
+        run: |
+          mix compile --warnings-as-errors
+          mix test --cover --warnings-as-errors
+      - name: Check tracked files were not modified
+        run: git diff --exit-code
+
+  smolbox-quality-canaries:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
+        with:
+          otp-version: '28.5'
+          elixir-version: '1.20.4'
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            deps
+            _build/test
+            _build/plts
+          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp28.5-ex1.20.4-test-${{ hashFiles('mix.lock', 'mix.exs') }}
+      - run: mix deps.get
+      - run: elixir --version
+      - name: Run required checks
+        run: |
+          mix compile --warnings-as-errors
+          mix dialyzer
+          mix smolbox.ci.verify_checks
+      - name: Check tracked files were not modified
+        run: git diff --exit-code
+
+  smolbox-security:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
+        with:
+          otp-version: '28.5'
+          elixir-version: '1.20.4'
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            deps
+            _build/test
+            _build/plts
+          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp28.5-ex1.20.4-test-${{ hashFiles('mix.lock', 'mix.exs') }}
+      - run: mix deps.get
+      - run: elixir --version
+      - name: Run required checks
+        run: |
+          mix hex.audit
+          mix deps.audit
+      - name: Check tracked files were not modified
+        run: git diff --exit-code
+
+  smolbox-docs-package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      MIX_ENV: dev
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
+        with:
+          otp-version: '28.5'
+          elixir-version: '1.20.4'
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            deps
+            _build/dev
+            _build/plts
+          key: smolbox-${{ runner.os }}-${{ runner.arch }}-otp28.5-ex1.20.4-dev-${{ hashFiles('mix.lock', 'mix.exs') }}
+      - run: mix deps.get
+      - run: elixir --version
+      - name: Run required checks
+        run: |
+          MIX_ENV=dev mix deps.get
+          MIX_ENV=dev mix docs --warnings-as-errors
+          python3 scripts/ci/package_consumer.py --report "$RUNNER_TEMP/smolbox-consumer-current.json" --package-output "$RUNNER_TEMP/smolbox-consumer-current.tar"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: smolbox-consumer-current
+          path: |
+            ${{ runner.temp }}/smolbox-consumer-current.json
+            ${{ runner.temp }}/smolbox-consumer-current.tar
+          if-no-files-found: error
+          retention-days: 14
+      - name: Check tracked files were not modified
+        run: git diff --exit-code
+
+  smolbox-compatibility:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - elixir: '1.18.4'
+            otp: '27.3.4.15'
+          - elixir: '1.19.5'
+            otp: '28.5'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
+        with:
+          otp-version: ${{ matrix.otp }}
+          elixir-version: ${{ matrix.elixir }}
+      - run: mix deps.get
+      - run: elixir --version
+      - run: mix compile --warnings-as-errors
+      - run: mix test --warnings-as-errors
+      - run: git diff --exit-code
+
+  smolbox-minimum-dependencies:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      MIX_ENV: dev
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
+        with:
+          otp-version: '27.3.4.15'
+          elixir-version: '1.18.4'
+      - run: mix deps.get
+      - run: elixir --version
+      - run: python3 scripts/ci/package_consumer.py --minimum --report "$RUNNER_TEMP/smolbox-consumer-minimum.json" --package-output "$RUNNER_TEMP/smolbox-consumer-minimum.tar"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: smolbox-consumer-minimum
+          path: |
+            ${{ runner.temp }}/smolbox-consumer-minimum.json
+            ${{ runner.temp }}/smolbox-consumer-minimum.tar
+          if-no-files-found: error
+          retention-days: 14
+      - run: git diff --exit-code
+
+  smolbox-minimal-host:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: examples/minimal_host
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
+        with:
+          otp-version: '28.5'
+          elixir-version: '1.20.4'
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            examples/minimal_host/deps
+            examples/minimal_host/_build
+          key: smolbox-minimal-${{ runner.os }}-${{ runner.arch }}-otp28.5-ex1.20.4-test-${{ hashFiles('examples/minimal_host/mix.lock', 'examples/minimal_host/mix.exs') }}
+      - run: mix deps.get
+      - run: elixir --version
+      - run: mix compile --warnings-as-errors
+      - run: mix dialyzer --force-check
+      - run: mix hex.audit
+      - run: mix deps.audit
+      - run: git diff --exit-code
+
+  smolbox-store-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: examples/durable_host
+    env:
+      DATABASE_URL: ecto://postgres:postgres@127.0.0.1:5432/smolbox_contract
+    services:
+      postgres:
+        image: postgres:16.15@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: smolbox_contract
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
+        with:
+          otp-version: '28.5'
+          elixir-version: '1.20.4'
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            examples/durable_host/deps
+            examples/durable_host/_build
+          key: smolbox-durable-${{ runner.os }}-${{ runner.arch }}-otp28.5-ex1.20.4-test-${{ hashFiles('examples/durable_host/mix.lock', 'examples/durable_host/mix.exs') }}
+      - run: mix deps.get
+      - run: elixir --version
+      - run: mix compile --warnings-as-errors
+      - run: mix ecto.migrate
+      - run: mix test --warnings-as-errors
+      - run: mix dialyzer --force-check
+      - run: mix hex.audit
+      - run: mix deps.audit
+      - name: Verify unavailable database fails closed
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        run: |
+          docker stop "$POSTGRES_CONTAINER"
+          trap 'docker start "$POSTGRES_CONTAINER"' EXIT
+          mix run --no-start --no-compile scripts/check_unavailable.exs
+      - run: git diff --exit-code
+
+  smolbox-linux-runtime:
+    needs: smolbox-change-scope
+    if: >-
+      github.event_name == 'workflow_dispatch' && inputs.qualify_runtime &&
+      vars.SMOLBOX_TRUSTED_RUNTIME_ENABLED == 'true'
+    uses: ./.github/workflows/smolbox-live.yml
+    with:
+      platform: linux
+      commit: ${{ needs.smolbox-change-scope.outputs.commit }}
+
+  smolbox-macos-runtime:
+    needs: smolbox-change-scope
+    if: >-
+      github.event_name == 'workflow_dispatch' && inputs.qualify_runtime &&
+      vars.SMOLBOX_TRUSTED_RUNTIME_ENABLED == 'true'
+    uses: ./.github/workflows/smolbox-live.yml
+    with:
+      platform: macos
+      commit: ${{ needs.smolbox-change-scope.outputs.commit }}
+
+  smolbox-required:
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: .
+    needs:
+      - smolbox-change-scope
+      - smolbox-format-compile
+      - smolbox-credo-ex-slop
+      - smolbox-ex-dna
+      - smolbox-credence
+      - smolbox-dialyzer
+      - smolbox-tests
+      - smolbox-coverage
+      - smolbox-quality-canaries
+      - smolbox-security
+      - smolbox-docs-package
+      - smolbox-compatibility
+      - smolbox-minimum-dependencies
+      - smolbox-minimal-host
+      - smolbox-store-contract
+      - smolbox-linux-runtime
+      - smolbox-macos-runtime
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Require every configured check to succeed
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: python3 scripts/ci/check_required.py

@@ -13,11 +13,11 @@ def documentation_only(path):
     parts = pathlib.PurePosixPath(path).parts
     if any(part in ("..", ".") for part in parts) or path.startswith("/"):
         return False
-    if path in ("packages/smolbox/README.md", "packages/smolbox/CHANGELOG.md"):
+    if path in ("README.md", "CHANGELOG.md"):
         return True
-    if path.startswith("packages/smolbox/docs/") and path.endswith(".md"):
+    if path.startswith("docs/") and path.endswith(".md"):
         return True
-    return path.startswith("ideas/") and path.endswith((".md", ".txt"))
+    return False
 
 
 def needs_runtime(paths, event):

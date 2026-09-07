@@ -2,7 +2,7 @@
 
 The ordinary workflow runs quality, deterministic, durable-store and package
 checks on disposable hosted runners. Its path classifier permits live-test skips
-only for the narrow documented Markdown/planning scope. Unknown files, empty
+only for root `README.md`, root `CHANGELOG.md`, and `docs/**/*.md`. Unknown files, empty
 diffs, code/configuration changes and every manual dispatch require real-worker
 evidence. Renames inspect both old and new paths. Evidence JSON changes are
 conservatively treated as requiring validation.
@@ -110,7 +110,11 @@ Only bounded JSON reports are uploaded. VM disks, database payloads, private key
 and guest code/output are excluded. Store/service test files remain private until
 the independent teardown. No package publication occurs in these workflows.
 
-Run the Python policy/runner regressions from the package:
+Both workflows live in this standalone repository's `.github/workflows/`.
+Library jobs run from the repository root, and example jobs run from their
+respective `examples/` directories. No Keel checkout or parent workflow is needed.
+
+Run the Python policy/runner regressions from the repository root:
 
 ```sh
 python3 -m unittest discover -s scripts/ci -p 'test_*.py' -v

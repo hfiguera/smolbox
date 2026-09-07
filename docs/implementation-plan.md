@@ -19,9 +19,11 @@ Unsupported hard controls remain rejected. No Hex package or public service has
 been published. See the current acceptance checkpoint in Phase 9 and the
 individual phase/evidence records below.
 
+Repository migration: SmolBox now has its own Git repository at `/Users/humberto/Projects/smolbox`. Its 30 package commits, local upstream reference and CI gates were preserved; standalone migration validation passed. See [repository-migration.md](repository-migration.md) for the commit mapping, checks and their limits. The public remote URL and protected-runner requirements above remain unresolved.
+
 Implementation evidence lives in [compatibility.md](compatibility.md) and `docs/evidence/`. Checked items below mean the specific work has evidence; they do not waive the remaining phase exit conditions or release requirements.
 
-This plan covers only the `smolbox` Elixir package. It translates the sandbox boundary in [Keel's idea document](../../../ideas/001-initial-idea.txt) into implementation work, verification requirements, and release gates. The detailed design sections retain the original rationale and targets; the public client/host guides and generated API docs describe the implemented interfaces.
+This plan covers only the `smolbox` Elixir package. It originated from Keel's sandbox design and is now maintained in SmolBox's independent repository; a Keel checkout is not required. It defines implementation work, verification requirements, and release gates. The detailed design sections retain the original rationale and targets; the public client/host guides and generated API docs describe the implemented interfaces.
 
 ## 1. Outcome and scope
 
@@ -67,7 +69,7 @@ Two small host applications, including one without Keel or Jido, must demonstrat
 
 ## 2. Starting point and verified dependencies
 
-At planning time the tracked Keel repository contains the idea document and no SmolBox `mix.exs`, runtime implementation, or CI workflow. The requested package directory already exists. Treat `packages/smolbox/external-references/` as reference material, not package source; source inspection is encouraged, but do not modify, format, run SmolBox's quality analyzers over, or ship nested upstream repositories.
+At planning time Keel contained the idea document and no SmolBox `mix.exs`, runtime implementation, or CI workflow. SmolBox has since been implemented and extracted into its own Git repository at `/Users/humberto/Projects/smolbox`. See [repository migration](repository-migration.md) for the history boundary and validation. Treat `external-references/` as reference material, not package source; source inspection is encouraged, but do not modify, format, run SmolBox's quality analyzers over, or ship nested upstream repositories.
 
 ### 2.1 Upstream boundary
 
@@ -79,7 +81,7 @@ Source inspection of that tag confirms camelCase exec fields, including `timeout
 
 #### Local upstream source checkout
 
-The user has cloned SmolVM at `/Users/humberto/Projects/keel/packages/smolbox/external-references/smolvm` (repository-relative path: `packages/smolbox/external-references/smolvm`). Use this checkout when implementation work needs direct inspection of upstream API types, handlers, tests, or runtime behavior. The containing `external-references/` directory is ignored by Git.
+The user-provided SmolVM checkout was preserved during migration and is now at `/Users/humberto/Projects/smolbox/external-references/smolvm` (repository-relative path: `external-references/smolvm`). Use this checkout when implementation work needs direct inspection of upstream API types, handlers, tests, or runtime behavior. The containing `external-references/` directory is ignored by Git.
 
 Before relying on local source as compatibility evidence, record its commit and working-tree status and compare it with the selected release; do not assume the checkout matches `v1.14.1`. Inspect pinned source with read-only Git commands when needed, preserving the user's checkout. Source inspection informs the contract, but real-runtime tests must still verify operational guarantees.
 
@@ -113,12 +115,17 @@ Do not require Ecto, Phoenix PubSub, Oban, Jizoku, or an object-store SDK in the
 
 ## 3. Package structure and deployment
 
-Keep `packages/smolbox` as a standalone Mix project within the repository. Do not turn Keel into an umbrella merely to implement this package. The package must compile and test when copied outside this repository.
+Maintain SmolBox as a standalone Mix project at its own repository root. Keel and other consumers depend on the library through Mix; this repository does not require a parent project or umbrella. The packaged library must also compile and run in a fresh external consumer.
 
 Target structure; create files as their phases require them:
 
 ```text
-packages/smolbox/
+smolbox/
+  .github/workflows/
+    smolbox-ci.yml
+    smolbox-live.yml
+  .gitattributes
+  .gitignore
   mix.exs
   mix.lock
   .formatter.exs
@@ -172,7 +179,7 @@ packages/smolbox/
     host-integration.md
 ```
 
-The actual workflow YAML belongs at the repository root, for example `.github/workflows/smolbox-ci.yml`; its commands run with `working-directory: packages/smolbox`. Package internals above are an initial map, not a reason to create empty modules or one-line wrappers.
+The actual workflow YAML belongs at the repository root, for example `.github/workflows/smolbox-ci.yml`; library commands run from the SmolBox repository root and host-example commands run from their respective `examples/` directories. Package internals above are an initial map, not a reason to create empty modules or one-line wrappers.
 
 ```mermaid
 flowchart TB
@@ -1091,7 +1098,7 @@ This is intentionally Credence's pattern analysis plus project-context compiler 
 
 ### 12.6 Local command contract
 
-All commands run from `packages/smolbox`. Implement `mix ci` with the test environment selected through `def cli/0` or explicit invocation. The alias must run the same deterministic checks used in CI, not merely print instructions.
+All commands run from the SmolBox repository root. Implement `mix ci` with the test environment selected through `def cli/0` or explicit invocation. The alias must run the same deterministic checks used in CI, not merely print instructions.
 
 Core local sequence:
 
@@ -1188,7 +1195,7 @@ Include at least: a compiler warning, a Credo-specific issue, an ExSlop-specific
 
 Allowlist files in Hex metadata. Include runtime source, public docs, license, and necessary runtime assets only. Exclude `dev`, private CI configs, external references, examples' databases, fixture credentials, and all VM/cache state from the tarball unless a specific public test asset is deliberately needed.
 
-Keep this implementation plan as repository planning material. Public ExDoc extras and packaged guides must be self-contained and must not depend on the parent Keel idea document or other files outside the package.
+Keep this implementation plan as repository planning material. Public ExDoc extras and packaged guides must be self-contained and must not depend on the original Keel idea document or other files outside the package.
 
 Build a temporary consumer from the tarball's extracted package, fetch only runtime dependencies under `MIX_ENV=prod`, and compile with warnings treated as errors. Exercise a fake-transport client call and explicit supervisor startup without automatically connecting to a worker. Run examples separately from the package artifact check.
 

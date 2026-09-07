@@ -1,0 +1,98 @@
+name: SmolBox protected live worker
+
+on:
+  workflow_call:
+    inputs:
+      platform:
+        type: string
+        required: true
+      commit:
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  live:
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      vars.SMOLBOX_TRUSTED_RUNTIME_ENABLED == 'true' &&
+      (inputs.platform == 'linux' || inputs.platform == 'macos')
+    environment: ${{ format('smolbox-{0}-runtime', inputs.platform) }}
+    runs-on: ${{ inputs.platform == 'linux' && fromJSON('["self-hosted", "Linux", "X64", "smolbox-disposable"]') || fromJSON('["self-hosted", "macOS", "ARM64", "smolbox-disposable"]') }}
+    timeout-minutes: 45
+    concurrency:
+      group: smolbox-live-${{ github.repository }}-${{ inputs.platform }}
+      cancel-in-progress: false
+    defaults:
+      run:
+        shell: bash
+        working-directory: .
+    env:
+      MIX_ENV: test
+      PYTHONOPTIMIZE: '0'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ inputs.commit }}
+          persist-credentials: false
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
+        with:
+          otp-version: '28.5'
+          elixir-version: '1.20.4'
+      - name: Verify operator-provisioned worker before any VM test
+        run: |
+          umask 077
+          mkdir "$RUNNER_TEMP/smolbox-live-reports"
+          test "$(git rev-parse HEAD)" = "$EXPECTED_COMMIT"
+          elixir --version
+          python3 scripts/ci/runtime_preflight.py --platform "$QUALIFICATION_PLATFORM" \
+            --manifest "$SMOLBOX_CI_WORKER_MANIFEST" \
+            --report "$RUNNER_TEMP/smolbox-live-reports/preflight.json"
+        env:
+          EXPECTED_COMMIT: ${{ inputs.commit }}
+          QUALIFICATION_PLATFORM: ${{ inputs.platform }}
+      - name: Fetch locked library dependencies
+        run: >-
+          python3 scripts/ci/run_bounded.py --report "$RUNNER_TEMP/smolbox-live-reports/dependencies.json"
+          --timeout 1200 -- mix deps.get
+      - name: Require all real client/runtime cases
+        run: >-
+          python3 scripts/ci/run_bounded.py --report "$RUNNER_TEMP/smolbox-live-reports/runtime.json"
+          --timeout 600 --expected-tests 14 -- mix test test/runtime --include runtime --warnings-as-errors
+      - name: Prepare the isolated durable example
+        working-directory: examples/durable_host
+        run: |
+          python3 ../../scripts/ci/run_bounded.py --report "$RUNNER_TEMP/smolbox-live-reports/durable-dependencies.json" --timeout 1200 -- mix deps.get
+          python3 ../../scripts/ci/run_bounded.py --report "$RUNNER_TEMP/smolbox-live-reports/migrations.json" --timeout 180 -- mix ecto.migrate
+      - name: Require the fresh-BEAM and durable recovery matrix
+        working-directory: examples/durable_host
+        run: >-
+          python3 ../../scripts/ci/run_bounded.py --report "$RUNNER_TEMP/smolbox-live-reports/durable-runtime.json"
+          --timeout 1200 --expected-tests 25 -- mix test test/recovery_runtime_test.exs --include runtime --warnings-as-errors
+      - name: Require real worker-service fault scenarios
+        run: |
+          umask 077
+          mkdir "$RUNNER_TEMP/smolbox-service-fault-data"
+          export SMOLVM_DATA_DIR="$RUNNER_TEMP/smolbox-service-fault-data"
+          export SMOLVM_GUEST_ROLLOUT_HOST_PORT=19472
+          for scenario in restart unavailable missing; do
+            python3 scripts/ci/run_bounded.py \
+              --report "$RUNNER_TEMP/smolbox-live-reports/service-$scenario-runner.json" --timeout 600 -- \
+              python3 scripts/qualify_worker_restart.py --smolvm "$SMOLBOX_SMOLVM_CLI" \
+              --url http://127.0.0.1:19471 --python "$SMOLBOX_PYTHON_ARTIFACT" \
+              --scenario "$scenario" --report "$RUNNER_TEMP/smolbox-live-reports/service-$scenario.json"
+          done
+      - name: Reject changed candidate files
+        run: |
+          git diff --exit-code
+          python3 -c 'import subprocess; assert not subprocess.check_output(["git", "status", "--porcelain"]), "candidate checkout changed"'
+      - name: Preserve bounded reports without VM disks or test payloads
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: smolbox-${{ inputs.platform }}-live-${{ inputs.commit }}
+          path: ${{ runner.temp }}/smolbox-live-reports/*.json
+          if-no-files-found: error
+          retention-days: 14

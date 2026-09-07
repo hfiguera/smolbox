@@ -13,21 +13,22 @@ from classify_changes import changes, needs_runtime, revision
 
 class ClassificationTest(unittest.TestCase):
     def test_documentation_skip_is_narrow(self):
-        paths = ["packages/smolbox/docs/telemetry.md", "ideas/001-initial-idea.txt"]
+        paths = ["README.md", "CHANGELOG.md", "docs/telemetry.md"]
         self.assertFalse(needs_runtime(paths, "pull_request"))
         self.assertFalse(needs_runtime(paths, "push"))
         for path in [
-            "packages/smolbox/lib/smolbox.ex", "packages/smolbox/test/fixtures/notes.md",
-            "packages/smolbox/docs/evidence/candidate.json", "packages/smolbox/mix.exs",
-            "packages/smolbox/external-references/smolvm/README.md",
+            "lib/smolbox.ex", "test/fixtures/notes.md",
+            "docs/evidence/candidate.json", "mix.exs",
+            "external-references/smolvm/README.md",
             ".github/workflows/smolbox-ci.yml", "AGENTS.md", ".tool-versions",
-            "unknown", "packages/smolbox/docs/../lib/unsafe.md", "/ideas/unsafe.txt",
+            "unknown", "docs/../lib/unsafe.md", "/docs/unsafe.md",
+            "ideas/001-initial-idea.txt", "packages/smolbox/docs/client.md",
         ]:
             with self.subTest(path=path):
                 self.assertTrue(needs_runtime(paths + [path], "pull_request"))
 
     def test_dispatch_and_empty_diff_require_live_evidence(self):
-        self.assertTrue(needs_runtime(["packages/smolbox/docs/client.md"], "workflow_dispatch"))
+        self.assertTrue(needs_runtime(["docs/client.md"], "workflow_dispatch"))
         self.assertTrue(needs_runtime([], "push"))
 
     def test_invalid_revisions_are_never_git_arguments(self):
@@ -42,13 +43,13 @@ class ClassificationTest(unittest.TestCase):
                 self.git("init", "--quiet")
                 self.git("config", "user.name", "SmolBox CI fixture")
                 self.git("config", "user.email", "fixture@example.invalid")
-                source = pathlib.Path("packages/smolbox/lib/example.ex")
+                source = pathlib.Path("lib/example.ex")
                 source.parent.mkdir(parents=True)
                 source.write_text("fixture\n", encoding="utf-8")
                 self.git("add", ".")
                 self.git("commit", "--quiet", "-m", "fixture base")
                 base = self.git("rev-parse", "HEAD").strip()
-                target = pathlib.Path("packages/smolbox/docs/example.md")
+                target = pathlib.Path("docs/example.md")
                 target.parent.mkdir(parents=True)
                 self.git("mv", os.fspath(source), os.fspath(target))
                 self.git("commit", "--quiet", "-m", "fixture rename")
@@ -59,7 +60,7 @@ class ClassificationTest(unittest.TestCase):
                 pathlib.Path(".tool-versions").write_text("fixture\n", encoding="utf-8")
                 self.git("add", ".tool-versions")
                 self.git("commit", "--quiet", "-m", "fixture root configuration")
-                with contextlib.chdir("packages/smolbox"):
+                with contextlib.chdir("docs"):
                     _, initial = changes("push", {"before": "0" * 40})
                     self.assertCountEqual(initial, [".tool-versions", os.fspath(target)])
                     self.assertTrue(needs_runtime(initial, "push"))
