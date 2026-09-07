@@ -529,11 +529,23 @@ Dependencies: initial Phase 0 version decisions.
 - [x] Use environment-specific compilation paths so `dev/mix/tasks` is excluded from production consumers.
 - [x] Commit the maintainer lockfile and exact toolchain pins; do not rely on the lockfile to constrain downstream Hex consumers.
 - [x] Implement the Credence CI wrapper and quality-check canaries described in section 12.
-- [x] Add root-level GitHub workflows and the local `mix ci` entry point. Initial workflow covers deterministic/quality/compatibility/security/docs/package checks; durable-store and real-library runtime jobs follow their implementation phases.
+- [x] Add root-level GitHub workflows and the local `mix ci` entry point. The workflow covers deterministic/quality/compatibility/security/docs/package checks, the durable store, and protected Linux/macOS live jobs. Conservative path classification and a fixed dependency-result gate reject missing, failed, cancelled and unexpectedly skipped checks. Live infrastructure provisioning and actual GitHub execution remain pending; checked-in jobs alone do not qualify a release.
 - [x] Require every requested analyzer; verify intentional bad fixtures produce a failing process. Compiler, all five analyzers, and coverage have verified clean/bad counterparts.
 - [x] Configure packaging exclusions for references, nested repositories, credentials, caches, VM state, and CI-only code. A fresh production consumer compiled from the tarball without quality tools; API/supervisor smoke checks remain for later phases.
 
 Exit: an intentionally introduced compiler warning, Credo/ex_slop issue, duplicate, Credence issue, or Dialyzer violation fails its gate. Clean scaffold passes; no live workers are contacted by routine CI.
+
+Live-CI milestone: 16 policy/preflight/bounded-runner regressions pass on both
+hosts, including deliberate zero/partial/skipped suites, overflow, deadlines and
+surviving child-process cleanup. Actionlint accepts both workflows. The bounded
+runner executes all nine real client/runtime cases and all 25 durable cases on
+each host; restart, prolonged-unavailability and missing-VM scenarios also pass
+on each. Real development preflight verifies the current worker binaries,
+wrappers, prepared artifacts and private listeners. These runs preserve one
+dispatch attempt and unknown outcomes through verified owned-resource cleanup.
+See `docs/evidence/phase1-live-ci.json` for counts, seeds, hashes and limitations.
+No remote is configured, so protected GitHub execution and independent ephemeral
+worker teardown remain unverified external requirements.
 
 ### Phase 2 — Model contracts, validation, and wire codecs
 
@@ -876,6 +888,7 @@ Use the pinned Mix version's `test_coverage` summary threshold configuration and
 
 | Job/status | Runs | Passing evidence |
 |---|---|---|
+| `smolbox-change-scope` | Conservative path classification and CI-helper regression tests | Only the explicit documentation policy permits live skips; empty/unknown diffs and manual dispatches require both platforms |
 | `smolbox-format-compile` | Format, unused lock entries, warning-free compile | No source modifications or compiler warnings |
 | `smolbox-credo-ex-slop` | Strict Credo with verified ExSlop registration | Both built-in and plugin checks active; no unsuppressed findings |
 | `smolbox-ex-dna` | Scoped standalone duplicate scan | No reported clones above the reviewed zero budget |
@@ -896,6 +909,18 @@ Use the pinned Mix version's `test_coverage` summary threshold configuration and
 Ordinary untrusted PRs run deterministic/quality/package checks on disposable hosted runners without worker credentials. Real-VM jobs run only on isolated trusted infrastructure after code is eligible for that environment; never run arbitrary fork PR code on a persistent privileged self-hosted worker or via `pull_request_target` with secrets.
 
 Before merging runtime-affecting changes, require trusted real-worker validation of the exact candidate commit. If no safe runner is available, keep that evidence pending; do not convert the job to a successful skip. Documentation-only changes may use a checked path policy to omit real-VM jobs, while preserving the always-reported aggregate status. A release always requires both supported platform suites.
+
+The implemented live workflow is dispatched explicitly with `qualify_runtime`
+after the operator provisions isolated disposable workers and protects the two
+runtime environments. Its preflight verifies the selected private listener,
+pinned executable and wrapper, native artifacts, database socket and empty
+worker inventory. External teardown declarations are trusted operator input,
+not attestation. The bounded runner rejects zero, partial, excluded or skipped
+ExUnit suites and kills only its owned command process group on timeout/overflow.
+That does not prove guest cleanup: an independent host lifecycle must cover
+runner loss and cancellation. The exact provisioning and dispatch contract is
+in `scripts/ci/README.md`. Persistent local macOS and `ssh linux` qualification
+are explicitly development evidence, not successful protected GitHub jobs.
 
 ### 12.8 Workflow implementation details
 

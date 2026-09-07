@@ -1,0 +1,248 @@
+{
+  "status": "Local CI-helper/live-runner qualification passed; protected GitHub jobs and release candidate remain pending",
+  "recorded_at_utc": "2026-09-07T06:12:24.970959+00:00",
+  "base_commit": "2b47f0417efa447014ce47eb882a21e48ad96ac6",
+  "source_identity": "Base commit plus CI file hashes below. Existing core/test code matches the telemetry milestone on both hosts; its only intervening mix.exs change packages the security guide. Linux is a copied source tree without Git metadata. No exact-release-commit or GitHub-run claim.",
+  "canonical": {
+    "elixir": "1.20.4",
+    "otp": "28.5",
+    "postgres": "16.15",
+    "smolvm": "1.14.1",
+    "smolvm_commit": "e8d09ef616d363004d55b80a6cdb31a4e7e1842d"
+  },
+  "policy_regressions": {
+    "macos": {
+      "passed": 16,
+      "seconds": 2.306
+    },
+    "linux": {
+      "passed": 16,
+      "seconds": 2.071
+    },
+    "negative_cases": [
+      "missing/failed/cancelled required jobs",
+      "unexpected live skip",
+      "zero/partial/skipped/excluded test suite",
+      "unknown/empty/renamed changed paths",
+      "invalid manifest route/permissions/lifecycle",
+      "output overflow",
+      "deadline",
+      "exited leader with live output-pipe descendant"
+    ]
+  },
+  "workflow_validation": "Actionlint passes both workflows; explicit aggregate dependency set matches all workflow jobs.",
+  "preflight": {
+    "macos": {
+      "status": "preflight_passed",
+      "development": true,
+      "platform": "macos",
+      "architecture": "arm64",
+      "kernel": "25.6.0",
+      "logical_cpus": 16,
+      "worker_version": "1.14.1",
+      "worker_binary_sha256": "af238c1190aefbc1c293f515c720c9c15f968498ad67624a9b9f824a51af0c79",
+      "python_sha256": "d982cfdf0c59b862ad3e1b107446b127460f716c8407fd0e2b6b0de2a62fe18e",
+      "javascript_sha256": "0aec0242b27a0b401312e1333ab9d71f821aabf20bd2fe22f849d66f3d706e95",
+      "lifecycle_id": "local-qualification-telemetry",
+      "declared_teardown_at_unix": null,
+      "isolation": "Operator-provisioned lifecycle; this check is not hard resource or hypervisor attestation",
+      "virtualization": "Actual VM boot is required in the following suite",
+      "commit": "2b47f0417efa447014ce47eb882a21e48ad96ac6",
+      "working_tree_changes": true,
+      "report_sha256": "4108c8b4fbf6275be8749117db941e4a78e1287197ce99f21ef707300e6d42d3"
+    },
+    "linux": {
+      "status": "preflight_passed",
+      "development": true,
+      "platform": "linux",
+      "architecture": "x86_64",
+      "kernel": "7.1.5-76070105-generic",
+      "logical_cpus": 8,
+      "worker_version": "1.14.1",
+      "worker_binary_sha256": "bb2432804d4bf5d6cbb688d3af160a6a01c99194830f0099d64f291d4ad62373",
+      "python_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+      "javascript_sha256": "768b8d2158a75abd90ccc73a65a83717aebfe37e62ed91d0db0bb731584df776",
+      "lifecycle_id": "local-qualification-telemetry",
+      "declared_teardown_at_unix": null,
+      "isolation": "Operator-provisioned lifecycle; this check is not hard resource or hypervisor attestation",
+      "virtualization": "KVM accessible",
+      "source_sha256": "ce2a1678a8380f03b3f891a9bd9d509038782f0474fc8871f8661545be647ea2",
+      "checkout": "copied source tree without Git metadata; not an exact-commit CI qualification",
+      "report_sha256": "e78e8c468d3b7afbc65f9f7d7e79008b8ccfda94498efa40c2209ac7aa106af8"
+    }
+  },
+  "real_runtime": {
+    "macos": {
+      "exit_code": 0,
+      "failure": null,
+      "seconds": 18.81,
+      "captured_bytes": 155,
+      "output_sha256": "6ff133ef4222065cb6ebdf0da6da861dab2124f9814e3aa056f9897348f7ff74",
+      "tests": {
+        "passed": 9,
+        "seed": 116478
+      },
+      "status": "passed",
+      "report_sha256": "af8e97b4b444bd588bc7a5d26d629b8d5bea07b59006b07138a63d33cd652071"
+    },
+    "linux": {
+      "exit_code": 0,
+      "failure": null,
+      "seconds": 20.431,
+      "captured_bytes": 155,
+      "output_sha256": "67fb5f28c9ebd6bab89c59f513a9c0c5f2c7e2c35c4d2acf61f0c06c1cee3e9b",
+      "tests": {
+        "passed": 9,
+        "seed": 469737
+      },
+      "status": "passed",
+      "report_sha256": "35737451e2682d780f931ce2e23b0b829e5c45bfef99881020dc80dbea3d85ae"
+    }
+  },
+  "durable_runtime": {
+    "macos": {
+      "exit_code": 0,
+      "failure": null,
+      "seconds": 281.329,
+      "captured_bytes": 521,
+      "output_sha256": "aadef92ce6afead2c830aed11bd638432f11a2210f486829b76f7237f7e35e06",
+      "tests": {
+        "passed": 25,
+        "seed": 315047
+      },
+      "status": "passed",
+      "report_sha256": "f4bc1daf703fe3c6183806a698c56d7eaeb4399321394f64e4814d3d85423a1c"
+    },
+    "linux": {
+      "exit_code": 0,
+      "failure": null,
+      "seconds": 286.632,
+      "captured_bytes": 174,
+      "output_sha256": "e8f5a1d2f20fcecbeca7195a1c58a716a1529d37d8c16c607107b7b9bb42367a",
+      "tests": {
+        "passed": 25,
+        "seed": 273916
+      },
+      "status": "passed",
+      "report_sha256": "be7ba2504e8d3b92c9173565201923cab0a0d9e598cee4261be195cf09f17fa9"
+    }
+  },
+  "service_faults": {
+    "macos": [
+      {
+        "status": "passed",
+        "scenario": "restart",
+        "seconds": 67.428,
+        "outage_seconds": 0.109,
+        "dispatch_attempts": 1,
+        "guest_marker": "single byte before recovery",
+        "guest_survived_api_server": true,
+        "outcome": "unknown",
+        "exit_code": null,
+        "cleanup": "complete",
+        "reservation_retained": false,
+        "operator_deleted_vm": false,
+        "report_sha256": "fb7e9ad803056ba9a1712f24674de5c4365f1becca5fb10b7818300ab9065fe4"
+      },
+      {
+        "status": "passed",
+        "scenario": "unavailable",
+        "seconds": 124.531,
+        "outage_seconds": 94.839,
+        "dispatch_attempts": 1,
+        "guest_marker": "single byte before recovery",
+        "guest_survived_api_server": true,
+        "outcome": "unknown",
+        "exit_code": null,
+        "cleanup": "complete",
+        "reservation_retained": false,
+        "operator_deleted_vm": true,
+        "report_sha256": "282b84be1f78062e1c57e11efead23337d3d22656fd99fce2febdc59cc411294"
+      },
+      {
+        "status": "passed",
+        "scenario": "missing",
+        "seconds": 4.442,
+        "outage_seconds": 0.107,
+        "dispatch_attempts": 1,
+        "guest_marker": "single byte before recovery",
+        "guest_survived_api_server": true,
+        "outcome": "unknown",
+        "exit_code": null,
+        "cleanup": "complete",
+        "reservation_retained": false,
+        "operator_deleted_vm": true,
+        "report_sha256": "416ee8612b88f6c0d66ba2d53fca703218915c300df9dd000c3f7d13ed8f8689"
+      }
+    ],
+    "linux": [
+      {
+        "status": "passed",
+        "scenario": "restart",
+        "seconds": 67.261,
+        "outage_seconds": 0.113,
+        "dispatch_attempts": 1,
+        "guest_marker": "single byte before recovery",
+        "guest_survived_api_server": true,
+        "outcome": "unknown",
+        "exit_code": null,
+        "cleanup": "complete",
+        "reservation_retained": false,
+        "operator_deleted_vm": false,
+        "report_sha256": "da35b13d634b14bbb53accde92169fb91e5426f99c594476cec8b4bb7689323a"
+      },
+      {
+        "status": "passed",
+        "scenario": "unavailable",
+        "seconds": 123.98,
+        "outage_seconds": 94.741,
+        "dispatch_attempts": 1,
+        "guest_marker": "single byte before recovery",
+        "guest_survived_api_server": true,
+        "outcome": "unknown",
+        "exit_code": null,
+        "cleanup": "complete",
+        "reservation_retained": false,
+        "operator_deleted_vm": true,
+        "report_sha256": "1cb87861e3ca3afe459fdf2cc074428d53805aaadf5825de1a52057231db98d8"
+      },
+      {
+        "status": "passed",
+        "scenario": "missing",
+        "seconds": 4.384,
+        "outage_seconds": 0.109,
+        "dispatch_attempts": 1,
+        "guest_marker": "single byte before recovery",
+        "guest_survived_api_server": true,
+        "outcome": "unknown",
+        "exit_code": null,
+        "cleanup": "complete",
+        "reservation_retained": false,
+        "operator_deleted_vm": true,
+        "report_sha256": "98e2ebeac6a9a6eba22e5c45c29a714532ca12709c6ec9e76c5d53b6deb37a92"
+      }
+    ]
+  },
+  "limitations": [
+    "Persistent authorized development hosts are not disposable trusted CI workers.",
+    "Lifecycle/expiry declarations do not attest host quotas or an independent reaper.",
+    "The bounded command runner cannot prove VM termination after controller death.",
+    "This repository has no remote; protected environments, runner registration and actual GitHub executions remain unverified.",
+    "Host-resource abuse certification, remaining security/benchmark work, source metadata and independent consumer review remain release dependencies."
+  ],
+  "source_sha256": {
+    ".github/workflows/smolbox-ci.yml": "ca22ab4b9e39cfcdf3c2fe0a868202024d2b1ca7f899369c076798102d520088",
+    ".github/workflows/smolbox-live.yml": "bac5afbd4b98743b64fb7154a3db1235a7f191e5d784741a5b40569008297344",
+    "packages/smolbox/scripts/ci/check_required.py": "6c58241e3a19d801d96d376b0f77a84b9bd69b14f2a8a636e75f4cae524882a8",
+    "packages/smolbox/scripts/ci/classify_changes.py": "13bafa7efa8beca11bea960c5ba3797e9b11950020c92d2275f9db94b2c9c0c6",
+    "packages/smolbox/scripts/ci/package_consumer.py": "3f4a025a1b345eb7ac508c2ba161a1430956e5ea48ef4b1f0237f7b51f2f0d91",
+    "packages/smolbox/scripts/ci/run_bounded.py": "4c1c35312f0b8ca6a0a9ca2b355875c89c9657a8a277fca61ebe1debbfa50142",
+    "packages/smolbox/scripts/ci/runtime_preflight.py": "ce2a1678a8380f03b3f891a9bd9d509038782f0474fc8871f8661545be647ea2",
+    "packages/smolbox/scripts/ci/test_classify_changes.py": "53cb8dc6f063c2853043682f0cbfe08ffdabda632d39fe911b30732e573f33da",
+    "packages/smolbox/scripts/ci/test_required.py": "b02afff5a428b2f73423b3c42c8abfb87c87df83418e2d82fcd0f343265b54ba",
+    "packages/smolbox/scripts/ci/test_run_bounded.py": "36df7c1aa15714f1af2a081433c4dd725bb39cdfd8163f0d53b7b95d3bd517f9",
+    "packages/smolbox/scripts/ci/test_runtime_preflight.py": "f94cfbcb2d7f1ec428613105339a91ffb75d10347534dd80f79da7742aeee871",
+    "packages/smolbox/scripts/ci/README.md": "992a0daa3031c31512658b6ef396d27e76d925b041bc7beeb072ef84b9b41483",
+    "packages/smolbox/scripts/qualify_worker_restart.py": "7ceea46a3b3d34df927e534dac456ba4584316aaaa676a36e1f437218cb6276f"
+  }
+}
