@@ -14,7 +14,7 @@ defmodule SmolBox.FaultGate do
       end)
 
     if target do
-      send(target, {:boundary, event, phase, self()})
+      notify(target, event, phase)
 
       receive do
         :release_boundary -> :ok
@@ -23,4 +23,7 @@ defmodule SmolBox.FaultGate do
       end
     end
   end
+
+  defp notify(:stdio, event, phase), do: IO.puts("boundary:#{event}:#{phase}")
+  defp notify(target, event, phase), do: send(target, {:boundary, event, phase, self()})
 end

@@ -3,8 +3,10 @@
 The store behaviour, versioned execution records, bounded memory adapter, and
 shared adapter tests are implemented. The host-owned Ecto/Postgres example passes
 real database conformance and fresh-process reads. The supervised managed runtime
-is implemented with initial real-platform coverage. Full fault qualification
-remains incomplete; this is not yet a release candidate.
+passes 18 real database-backed controller process-kill boundaries on each initial
+platform, including the full example retention interval. Worker-service faults
+and full resource qualification remain incomplete; this is not yet a release
+candidate.
 
 `SmolBox.Store` defines atomic acceptance, authoritative lookup, worker leases,
 execution claims, compare-and-swap writes, reservations, release, cancellation

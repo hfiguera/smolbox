@@ -1,9 +1,10 @@
 # Durable host example
 
 This standalone host owns an Ecto Repo and a PostgreSQL implementation of
-`SmolBox.Store`. It has no Keel, Jido, or Phoenix dependency. It currently
-exercises persistence; the managed command demonstration is added with the
-runtime implementation.
+`SmolBox.Store`. It has no Keel, Jido, or Phoenix dependency. It includes a managed
+Python execution demonstration and a real-worker process-kill recovery suite.
+Shared example setup lives in `../support/lib`; fault-test helpers are compiled
+only in the test environment from the repository's `test/support/fault` directory.
 
 Use the package's pinned Elixir/OTP toolchain. From this directory, configure
 `DATABASE_URL` for a disposable PostgreSQL database, then run:
@@ -13,7 +14,7 @@ MIX_ENV=test mix deps.get
 MIX_ENV=test mix compile --warnings-as-errors
 MIX_ENV=test mix ecto.migrate
 MIX_ENV=test mix test --warnings-as-errors
-MIX_ENV=test mix dialyzer
+MIX_ENV=test mix dialyzer --force-check
 MIX_ENV=test mix hex.audit
 MIX_ENV=test mix deps.audit
 ```
@@ -38,6 +39,61 @@ MIX_ENV=test mix run --no-start --no-compile scripts/check_unavailable.exs
 
 CI stops only its disposable service container, runs this probe, and restarts
 that container. Do not stop a shared database to run it.
+
+The outage probe also attempts managed runtime startup and requires a typed store
+error. Example Dialyzer commands use `--force-check` because SmolBox's path
+dependency can change while the example lockfile stays the same.
+
+## Managed execution and process recovery
+
+Configure the worker, pinned Python artifact, private object directory,
+fingerprint key file, and execution ID described in `../minimal_host/README.md`.
+Also provide a stable `SMOLBOX_STORE_PARTITION` and
+`SMOLBOX_ENCRYPTION_KEY_FILE` pointing to a different private 32-byte key. Apply
+the migration first, then run:
+
+```sh
+MIX_ENV=test mix run scripts/demo.exs
+```
+
+The host submits a Python command, verifies its binary outputs and test marker,
+then prints the recorded outcome after cleanup releases capacity. Repeating the
+same identity with the same spec returns the existing outcome. Keep the partition,
+both keys, artifact catalog and object directory stable across restarts. Changing
+the spec under that identity fails instead of running a new command.
+
+To demonstrate cancellation, use a new identity and set both
+`SMOLBOX_EXAMPLE_WAIT=true` and `SMOLBOX_EXAMPLE_CANCEL=true`. The command result
+may remain unknown after termination and deletion. The real retention interval
+is intentional and is not shortened by the example's observer timeout.
+
+Run the separate process-kill suite only against a dedicated, otherwise idle
+worker and disposable PostgreSQL database:
+
+```sh
+MIX_ENV=test mix test test/recovery_runtime_test.exs \
+  --include runtime --trace --warnings-as-errors
+```
+
+Explicit selection requires `SMOLBOX_RUNTIME_URL`, `SMOLBOX_PYTHON_ARTIFACT`, and
+`SMOLBOX_PYTHON_SHA256`; missing values fail. These tests are excluded from the
+ordinary store suite, which still uses a real database. Each runtime case creates
+a private directory, independent secret keys and a SQL partition, launches a real
+child BEAM, waits for a named boundary, sends SIGKILL to that owned process, and
+launches a fresh BEAM with the original durable identity. Cases run serially and
+wait through the real retention deadline when the outcome is uncertain.
+
+The test's trusted host ledger counts client dispatch attempts, not worker
+acceptance receipts. No-replay assertions combine that ledger, durable identity,
+persisted result or uncertainty, guest test outputs when available, and observed
+machine absence before capacity release. The ledger is test instrumentation and
+does not change SmolBox's production guarantee.
+
+On success, tests remove only their own SQL partition and private files. On a
+failure they retain evidence and stop only a machine matching its recorded
+creation evidence. They do not sweep names or delete an unverified machine.
+Inspect retained resources before retrying. Real restart tests do not establish
+hard host resource quotas or fence already accepted upstream requests.
 
 ## Host integration and security
 

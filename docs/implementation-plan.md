@@ -616,8 +616,12 @@ Linux and macOS workers through a bounded test proxy. Canonical suites now pass
 See `docs/evidence/phase6-controller-faults.json`. They cover store acceptance/reservation, HTTP creation/upload/exec,
 first output/exit, artifact and result persistence, completion, stop/delete,
 absence recording and capacity release. Fresh-controller recovery never sends a
-second command. These controlled peers are not a replacement for real
-store-backed process-kill tests, which remain pending.
+second command. A subsequent durable-host increment passes 18 real PostgreSQL-backed
+SIGKILL/restart boundaries on each platform (36 total), including dispatch intent,
+first output, result/artifact persistence, stop/delete, absence and release.
+Unknown cases wait through the actual one-minute example retention window;
+known results survive interruption. See `docs/evidence/phase6-durable-recovery.json`.
+Worker restart/unavailability and orphan discovery still need qualification.
 
 The delayed-request probes required stricter behavior than the initial Phase 5
 increment: a 404 during ambiguous creation cannot release capacity, and retained
@@ -630,9 +634,9 @@ is reobserved. Strong cancellation/deadline guarantees remain uncertified.
 
 - [ ] Complete qualification of persisted cancellation intent, evidence-based termination, and cancellation/completion race handling. The initial implementation passes normal controlled and real stop paths; boundary races remain.
 - [x] Implement bounded reconciliation and cleanup scans on startup and periodically. Bounded task slots, paginated due scans, persisted retry counts/deadlines, and owner claims are implemented; full fault qualification remains below.
-- [ ] Complete no-replay and accounting fault qualification. Observer restart tests preserve one command and unknown evidence; all dispatch/collection/persistence interruption boundaries still need coverage.
+- [ ] Complete no-replay and accounting fault qualification. Controlled interruption boundaries and 36 real durable-host process-kill cases pass without a second dispatch. Actual worker restart/prolonged unavailability remain; this is not a request-fencing or exactly-once certification.
 - [ ] Protect foreign resources during cleanup; implement orphan detection within verified ownership boundaries.
-- [ ] Exercise the full fault matrix against controlled peers and selected real-worker boundaries.
+- [ ] Exercise the full fault matrix against controlled peers and selected real-worker boundaries. Controller interruption and artifact-write interruption now have real durable evidence; worker/service restart, output-store unavailability and notification boundaries remain.
 
 Exit: restarts do not duplicate commands; unresolved execution and cleanup are inspectable; cleanup failures cannot rewrite successful command results.
 
@@ -653,7 +657,7 @@ Exit: a degraded/draining/incompatible worker receives no new work; unknown exec
 Dependencies: Phases 5–7.
 
 - [ ] Add documented redacted telemetry and operator inspection fields.
-- [ ] Finish minimal and durable host examples with no Keel/Jido dependency.
+- [x] Finish minimal and durable host examples with no Keel/Jido dependency. Both standalone Mix projects compile, pass Dialyzer/audits, and demonstrate real Python execution, binary collection, cancellation and retention-window cleanup on Linux and macOS. The durable host also passes fresh-BEAM fault recovery; examples explicitly use a development profile.
 - [ ] Document deployment, artifact preparation, unknown-outcome handling, cancellation, cleanup, and upgrades.
 - [ ] Test adversarial outputs, limits, paths, credential isolation, and endpoint access on dedicated hosts.
 - [ ] Record measured cold/warm-image preparation, queue, execution, and collection times without claiming VM boot time is total function latency.
@@ -813,7 +817,8 @@ Use the pinned Mix version's `test_coverage` summary threshold configuration and
 | `smolbox-dialyzer` | Dialyxir with keyed PLT cache | No unsuppressed type warnings |
 | `smolbox-tests` | Deterministic tests on the version matrix | Tests actually execute; seed/count reported; no warnings |
 | `smolbox-coverage` | Canonical deterministic coverage run | Coverage threshold and failure-scenario requirements met |
-| `smolbox-store-contract` | Durable host example against disposable Postgres | Store conformance and fresh-process recovery pass |
+| `smolbox-store-contract` | Durable host example against disposable Postgres | Store conformance, fresh-process reads and actual database-outage startup rejection pass |
+| `smolbox-minimal-host` | Standalone minimal example compilation, Dialyzer and audits | Path dependency type information is refreshed; no example-only dependency enters the library |
 | `smolbox-quality-canaries` | Isolated deliberate analyzer violations | Each analyzer fails for its expected reason; clean counterparts pass |
 | `smolbox-security` | Retired dependency and vulnerability audits | Current advisory fetch succeeds and policy passes |
 | `smolbox-docs-package` | Docs, Hex build, tar inspection, fresh consumer | No docs warnings; usable package without CI/example dependencies |

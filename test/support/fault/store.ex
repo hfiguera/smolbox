@@ -14,7 +14,7 @@ defmodule SmolBox.FaultStore do
   defp invoke(context, operation, arguments) do
     event = event(operation, arguments)
     FaultGate.hit(context.faults, event, :before)
-    result = apply(Memory, operation, [context.store | arguments])
+    result = apply(Map.get(context, :adapter, Memory), operation, [context.store | arguments])
     FaultGate.hit(context.faults, event, :after)
     result
   end

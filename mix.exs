@@ -51,6 +51,7 @@ defmodule SmolBox.MixProject do
           SmolBox.ManagedPeer,
           SmolBox.FaultGate,
           SmolBox.FaultStore,
+          SmolBox.FaultTransport,
           SmolBox.FaultArtifacts,
           SmolBox.RuntimeFixture,
           SmolBox.RuntimeProxy,
@@ -99,7 +100,7 @@ defmodule SmolBox.MixProject do
         "compile --warnings-as-errors",
         "test --warnings-as-errors",
         "credo --strict",
-        "ex_dna lib dev test/support examples/durable_host/lib examples/durable_host/priv --max-clones 0",
+        "ex_dna lib dev test/support examples/durable_host/lib examples/durable_host/priv examples/durable_host/test/support examples/minimal_host/lib examples/support/lib --max-clones 0",
         "smolbox.ci.credence",
         "dialyzer"
       ]

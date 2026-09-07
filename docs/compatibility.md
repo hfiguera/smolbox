@@ -220,3 +220,35 @@ cases on each platform. The five unchanged client cases were last run together
 with managed tests in the Phase 5 increment. Full store-backed process termination,
 worker restart, retention-window completion and hostile resource qualification
 are still pending. See `docs/evidence/phase6-controller-faults.json`.
+
+## Durable process-kill and host-example evidence
+
+Eighteen real PostgreSQL-backed controller SIGKILL boundaries pass on each
+platform: Linux seed 271982 (267.5 seconds), macOS seed 791731 (260.2 seconds).
+Each case kills an owned child BEAM at a named boundary and recovers through a
+fresh BEAM using the original keys, store partition, spec and execution ID.
+These are real SmolVM calls and database commits, not mocked restart tests.
+
+The suite covers dispatch intent, first output, result/artifact writes, completion,
+stop, delete, absence recording and reservation release. Lost result evidence
+stays unknown; persisted results and collected artifacts survive. A trusted host
+test ledger verifies no second client dispatch attempt; it is not an upstream
+acceptance receipt. Unknown cases wait through the real 60-second example
+retention interval before automatic deletion and release. The library's default
+retention remains 24 hours. Absence and termination are observations, not fences
+for arbitrary pending worker requests.
+
+Both minimal and durable host examples pass normal execution and cancellation on
+both platforms. Normal runs verify reversed binary data and a one-byte test
+marker; cancellation retains unknown outcome while cleanup completes. They
+operate without Keel/Jido and keep keys in private host files. macOS durable
+tests connect to the dedicated Linux PostgreSQL instance over an SSH-forwarded
+Unix socket in a private directory; no public database listener was added.
+
+The ordinary durable conformance suite still runs separately: 12 cases on each
+host, excluding the 18 explicitly opt-in VM cases. Example Dialyzer now forces
+PLT validation because path-dependency changes do not necessarily change the
+example lockfile. All five root analyzers and deliberate bad/clean canaries pass
+on both canonical hosts. Actual worker-service restart, orphan discovery, host
+resource abuse, and release acceptance remain pending. See
+`docs/evidence/phase6-durable-recovery.json` for this increment.

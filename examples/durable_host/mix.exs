@@ -11,6 +11,7 @@ defmodule SmolBox.DurableHost.MixProject do
         {:smolbox, path: "../.."},
         {:ecto_sql, "~> 3.14.0"},
         {:postgrex, "~> 0.22.4"},
+        {:jason, "~> 1.4"},
         {:dialyxir, "~> 1.4.8", only: [:dev, :test], runtime: false},
         {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false}
       ],
@@ -21,6 +22,14 @@ defmodule SmolBox.DurableHost.MixProject do
   def application,
     do: [extra_applications: [:logger, :crypto], mod: {SmolBox.DurableHost.Application, []}]
 
-  defp paths(:test), do: ["lib", Path.expand("../../test/support/store", __DIR__)]
-  defp paths(_env), do: ["lib"]
+  defp paths(:test),
+    do: [
+      "lib",
+      "test/support",
+      Path.expand("../../test/support/store", __DIR__),
+      Path.expand("../../test/support/fault", __DIR__),
+      Path.expand("../support/lib", __DIR__)
+    ]
+
+  defp paths(_env), do: ["lib", Path.expand("../support/lib", __DIR__)]
 end
