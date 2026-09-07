@@ -1,10 +1,11 @@
 defmodule SmolBox.DurableHost.RecoveryRuntimeTest do
   use ExUnit.Case, async: false
 
-  alias SmolBox.{Client, Error, Machine}
+  alias SmolBox.{Client, Error, FaultArtifacts, FaultStore, FaultTransport, Machine, Runtime}
 
   alias SmolBox.ArtifactStore.Directory
   alias SmolBox.DurableHost.{ControllerProcess, Database, Demo, Store}
+  alias SmolBox.Example.Setup
 
   @moduletag :runtime
   @moduletag timeout: 180_000
@@ -62,6 +63,7 @@ defmodule SmolBox.DurableHost.RecoveryRuntimeTest do
     %{
       settings_file: file,
       settings: settings,
+      options: options,
       store: store,
       spec: spec,
       objects: directory,
@@ -98,6 +100,119 @@ defmodule SmolBox.DurableHost.RecoveryRuntimeTest do
                Client.inspect_machine(context.worker.client, recovered.machine_name)
 
       verify_outcome(context, event, phase, recovered, attempts_before)
+    end
+  end
+
+  @tag event: "artifact_outage"
+  test "actual artifact-directory outage preserves exit and cleanup across runtime restart",
+       context do
+    observer = self()
+
+    gate =
+      start_supervised!(
+        {Agent,
+         fn -> %{event: :artifact_put, phase: :before, observer: observer, fired: false} end}
+      )
+
+    FaultTransport.configure(context.worker.client.worker.id, nil, context.settings["ledger"])
+    client = %{context.worker.client | transport: FaultTransport}
+
+    options =
+      context.options
+      |> Keyword.put(:workers, [%{context.worker | client: client}])
+      |> Keyword.put(
+        :artifact_store,
+        {FaultArtifacts, %{store: context.objects, adapter: Directory, faults: gate}}
+      )
+
+    runtime = start_supervised!({Runtime, options})
+    assert {:ok, handle} = SmolBox.submit(runtime, context.spec)
+    assert_receive {:boundary, :artifact_put, :before, blocked}, 10_000
+    offline = context.objects.root <> ".offline"
+    File.rename!(context.objects.root, offline)
+
+    record =
+      try do
+        send(blocked, :release_boundary)
+
+        Setup.wait_for(runtime, handle, &(&1.cleanup == :complete and &1.reservation == nil))
+      after
+        File.rename!(offline, context.objects.root)
+      end
+
+    assert record.state == :collection_failed
+    assert record.collection == :failed
+    assert record.result.exit_code == 0
+    assert record.artifacts == []
+    assert record.last_error.operation == :artifact_store
+    assert record.absence_at_ms != nil
+    stop_supervised!(Runtime)
+    recovered_runtime = start_supervised!({Runtime, options})
+    assert {:ok, ^handle} = SmolBox.submit(recovered_runtime, context.spec)
+    assert {:ok, recovered} = Store.fetch(context.store, handle)
+    assert recovered.fingerprint == record.fingerprint
+    assert recovered.result == record.result
+    assert recovered.state == :collection_failed and recovered.reservation == nil
+    assert attempts(context.settings["ledger"]) == 1
+
+    assert {:error, %Error{category: :not_found}} =
+             Client.inspect_machine(client, record.machine_name)
+  end
+
+  for phase <- [:before, :after] do
+    @tag event: "cancellation_result"
+    test "cancellation #{phase} SQL result commit retains the real exit and original intent",
+         context do
+      phase = unquote(phase)
+      observer = self()
+
+      gate =
+        start_supervised!(
+          {Agent,
+           fn -> %{event: :result_write, phase: phase, observer: observer, fired: false} end}
+        )
+
+      FaultTransport.configure(context.worker.client.worker.id, nil, context.settings["ledger"])
+      client = %{context.worker.client | transport: FaultTransport}
+
+      options =
+        context.options
+        |> Keyword.put(:workers, [%{context.worker | client: client}])
+        |> Keyword.put(
+          :store,
+          {FaultStore, %{store: context.store, adapter: Store, faults: gate}}
+        )
+
+      runtime = start_supervised!({Runtime, options})
+      assert {:ok, handle} = SmolBox.submit(runtime, context.spec)
+      assert_receive {:boundary, :result_write, ^phase, blocked}, 10_000
+      assert {:ok, ^handle} = SmolBox.cancel(runtime, context.spec.scope, context.spec.id)
+      assert {:ok, requested} = Store.fetch(context.store, handle)
+      assert requested.cancel_requested_at_ms != nil
+      send(blocked, :release_boundary)
+
+      cleaned =
+        Setup.wait_for(runtime, handle, &(&1.cleanup == :complete and &1.reservation == nil))
+
+      assert cleaned.state in [:completed, :collection_failed]
+      assert cleaned.result.exit_code == 0
+      assert cleaned.cancel_requested_at_ms == requested.cancel_requested_at_ms
+      assert cleaned.absence_at_ms != nil
+      stop_supervised!(Runtime)
+      recovered_runtime = start_supervised!({Runtime, options})
+      assert {:ok, ^handle} = SmolBox.submit(recovered_runtime, context.spec)
+
+      assert {:ok, ^handle} =
+               SmolBox.cancel(recovered_runtime, context.spec.scope, context.spec.id)
+
+      assert {:ok, recovered} = Store.fetch(context.store, handle)
+      assert recovered.fingerprint == cleaned.fingerprint
+      assert recovered.result == cleaned.result
+      assert recovered.cancel_requested_at_ms == requested.cancel_requested_at_ms
+      assert attempts(context.settings["ledger"]) == 1
+
+      assert {:error, %Error{category: :not_found}} =
+               Client.inspect_machine(client, cleaned.machine_name)
     end
   end
 

@@ -48,6 +48,41 @@ defmodule SmolBox.RuntimeFaultTest do
     end
   end
 
+  for phase <- [:before, :after] do
+    test "cancellation #{phase} result persistence preserves an observed exit across restart" do
+      observer = self()
+      phase = unquote(phase)
+
+      gate =
+        start_supervised!(
+          {Agent,
+           fn -> %{event: :result_write, phase: phase, observer: observer, fired: false} end},
+          id: :cancel_gate
+        )
+
+      context = RuntimeFixture.start(faults: gate)
+      assert {:ok, handle} = SmolBox.submit(context.runtime, context.spec)
+      assert_receive {:boundary, :result_write, ^phase, blocked}, 6000
+      assert {:ok, ^handle} = SmolBox.cancel(context.runtime, "contract", "one")
+      assert {:ok, requested} = SmolBox.fetch(context.runtime, "contract", "one")
+      assert requested.cancel_requested_at_ms != nil
+      send(blocked, :release_boundary)
+      record = settled(context.runtime)
+      assert record.state == :completed
+      assert record.result.exit_code == 7
+      assert record.cancel_requested_at_ms == requested.cancel_requested_at_ms
+      assert_accounting(record, context.peer)
+      stop_supervised!(Runtime)
+      runtime = start_supervised!({Runtime, context.options})
+      assert {:ok, ^handle} = SmolBox.submit(runtime, context.spec)
+      assert {:ok, ^handle} = SmolBox.cancel(runtime, "contract", "one")
+      assert {:ok, recovered} = SmolBox.fetch(runtime, "contract", "one")
+      assert recovered.result == record.result
+      assert recovered.cancel_requested_at_ms == requested.cancel_requested_at_ms
+      assert match?([_command], ManagedPeer.snapshot(context.peer).commands)
+    end
+  end
+
   test "a delayed create response cannot turn temporary absence into released capacity" do
     {context, spec, blocked, submission} = blocked_request(:create)
     stop_supervised!(Runtime)

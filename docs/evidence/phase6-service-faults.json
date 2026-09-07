@@ -1,0 +1,175 @@
+{
+  "recorded_at": "2026-09-07T03:00:00.982222+00:00",
+  "base_commit": "fddc459",
+  "scope": "Phase 6 selected real service faults and cancellation/result races",
+  "upstream": {
+    "version": "1.14.1",
+    "revision": "e8d09ef616d363004d55b80a6cdb31a4e7e1842d"
+  },
+  "scenarios": {
+    "linux": {
+      "unavailable": {
+        "status": "passed",
+        "scenario": "unavailable",
+        "partition": "restart-1c975414be7b130a",
+        "seconds": 124.152,
+        "result": {
+          "id": "restart-1c975414be7b130a",
+          "scope": "example",
+          "state": "unknown",
+          "cleanup": "complete",
+          "exit_code": null,
+          "absence_at_ms": 1788749670697,
+          "cancel_requested_at_ms": 1788749548976,
+          "machine_name": "sbxexample-uyyfxbpjfhl7eqdh4qmm",
+          "evidence": "termination_confirmed",
+          "artifacts": [],
+          "worker_id": "example-worker",
+          "collection": "pending",
+          "reserved": false
+        },
+        "dispatch_attempts": 1,
+        "guest_marker": "single byte before recovery",
+        "guest_survived_api_server": true,
+        "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+        "runtime_version": "1.14.1",
+        "platform": "Linux",
+        "outage_seconds": 94.744,
+        "operator_deleted_vm": true
+      },
+      "missing": {
+        "status": "passed",
+        "scenario": "missing",
+        "partition": "restart-17990edf9b14f60d",
+        "seconds": 4.455,
+        "result": {
+          "id": "restart-17990edf9b14f60d",
+          "scope": "example",
+          "state": "unknown",
+          "cleanup": "complete",
+          "exit_code": null,
+          "absence_at_ms": 1788749692790,
+          "cancel_requested_at_ms": null,
+          "machine_name": "sbxexample-qqrojsh4f7eibhouq26y",
+          "evidence": "termination_confirmed",
+          "artifacts": [],
+          "worker_id": "example-worker",
+          "collection": "pending",
+          "reserved": false
+        },
+        "dispatch_attempts": 1,
+        "guest_marker": "single byte before recovery",
+        "guest_survived_api_server": true,
+        "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+        "runtime_version": "1.14.1",
+        "platform": "Linux",
+        "outage_seconds": 0.111,
+        "operator_deleted_vm": true
+      }
+    },
+    "macos": {
+      "unavailable": {
+        "status": "passed",
+        "scenario": "unavailable",
+        "partition": "restart-19213427ceb99280",
+        "seconds": 124.397,
+        "result": {
+          "id": "restart-19213427ceb99280",
+          "scope": "example",
+          "state": "unknown",
+          "cleanup": "complete",
+          "exit_code": null,
+          "absence_at_ms": 1788749670798,
+          "cancel_requested_at_ms": 1788749548703,
+          "machine_name": "sbxexample-m6hf3mdur2lfrn3xk4sq",
+          "evidence": "termination_confirmed",
+          "artifacts": [],
+          "worker_id": "example-worker",
+          "collection": "pending",
+          "reserved": false
+        },
+        "dispatch_attempts": 1,
+        "guest_marker": "single byte before recovery",
+        "guest_survived_api_server": true,
+        "artifact_sha256": "d982cfdf0c59b862ad3e1b107446b127460f716c8407fd0e2b6b0de2a62fe18e",
+        "runtime_version": "1.14.1",
+        "platform": "Darwin",
+        "outage_seconds": 94.863,
+        "operator_deleted_vm": true
+      },
+      "missing": {
+        "status": "passed",
+        "scenario": "missing",
+        "partition": "restart-df1ad3671897009f",
+        "seconds": 4.478,
+        "result": {
+          "id": "restart-df1ad3671897009f",
+          "scope": "example",
+          "state": "unknown",
+          "cleanup": "complete",
+          "exit_code": null,
+          "absence_at_ms": 1788749692628,
+          "cancel_requested_at_ms": null,
+          "machine_name": "sbxexample-cshkvc7k3d3bsb2pk2by",
+          "evidence": "termination_confirmed",
+          "artifacts": [],
+          "worker_id": "example-worker",
+          "collection": "pending",
+          "reserved": false
+        },
+        "dispatch_attempts": 1,
+        "guest_marker": "single byte before recovery",
+        "guest_survived_api_server": true,
+        "artifact_sha256": "d982cfdf0c59b862ad3e1b107446b127460f716c8407fd0e2b6b0de2a62fe18e",
+        "runtime_version": "1.14.1",
+        "platform": "Darwin",
+        "outage_seconds": 0.107,
+        "operator_deleted_vm": true
+      }
+    }
+  },
+  "validation": {
+    "macos": {
+      "deterministic_cases": 129,
+      "seed": 658042,
+      "seconds": 59.6,
+      "artifact_outage_cases": 1,
+      "artifact_seed": 214581,
+      "artifact_seconds": 2.2,
+      "cancellation_sql_cases": 2,
+      "cancellation_seed": 825809,
+      "cancellation_seconds": 4.1,
+      "all_five_analyzers": "passed after bounded test assertion correction"
+    },
+    "linux": {
+      "artifact_outage_cases": 1,
+      "artifact_seed": 613498,
+      "artifact_seconds": 3.0,
+      "cancellation_sql_cases": 2,
+      "cancellation_seed": 98208,
+      "cancellation_seconds": 4.9,
+      "deterministic_cases": 129,
+      "seed": 985972,
+      "seconds": 61.3,
+      "all_five_analyzers": "passed"
+    },
+    "prior_controller_matrix": "18 fresh-BEAM cases per platform; unchanged cases last run in phase6-orphan-inspection.json",
+    "canaries": "unchanged policy; verified bad/clean runs in phase6-durable-recovery.json"
+  },
+  "qualification_boundary": [
+    "unknown outcome remains unknown after stop or deletion",
+    "a 95-second API outage crossed the persisted cleanup deadline",
+    "exhausted mutation budget did not reset on reconnection",
+    "reservation released only after verified operator deletion and observed absence",
+    "actual private-directory rename caused output persistence failure",
+    "known exit and original cancellation timestamp survived SQL commit races and runtime restart",
+    "only one client dispatch attempt; no durable upstream receipt is claimed",
+    "public notification fault checks move to Phase 8 with introduction of that interface"
+  ],
+  "source_sha256": {
+    "scripts/qualify_worker_restart.py": "7ceea46a3b3d34df927e534dac456ba4584316aaaa676a36e1f437218cb6276f",
+    "examples/durable_host/scripts/worker_restart.exs": "8d5cfd32bf61e4c22787576395d48ecc52ac033d9eef921653f9b3564c15e76a",
+    "examples/durable_host/test/recovery_runtime_test.exs": "2ea7f43dfa480806e96645079a0d989bdf1593eec64b63e0a01151da5fa8c2d1",
+    "test/contract/runtime_fault_test.exs": "bc05a5e69b6cc540e14bc056c7aea1e2cf916f0f67ead770eabff30dd128779f"
+  }
+}

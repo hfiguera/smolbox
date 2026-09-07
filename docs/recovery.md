@@ -7,8 +7,10 @@ passes 18 real database-backed controller process-kill boundaries on each initia
 platform, including the full example retention interval. Actual API-server
 SIGKILL/restart also passes on Linux and macOS: the VM survives the server,
 the command result stays unknown, and verified cleanup eventually releases its
-reservation without another dispatch. Prolonged worker outages and full resource
-qualification remain incomplete; this is not yet a release candidate.
+reservation without another dispatch. Real worker outages beyond cleanup deadlines,
+missing VMs, output-directory outages, and cancellation at SQL result commit also
+pass on both platforms. Full resource qualification remains incomplete; this is
+not yet a release candidate.
 
 `SmolBox.Store` defines atomic acceptance, authoritative lookup, worker leases,
 execution claims, compare-and-swap writes, reservations, release, cancellation
@@ -101,3 +103,19 @@ VM still runs before allowing recovery. Recovery keeps the execution identity,
 deadline and unknown outcome, stops the verified VM, waits through retention,
 deletes it, records absence, and releases capacity. This tests reconnection and
 cleanup; it does not recover a command receipt or fence earlier worker requests.
+
+Cleanup has a finite mutation budget. When the API remains unavailable beyond
+that budget and the persisted cleanup deadline, recovery retains the unknown
+outcome, cancellation intent and reservation. Reconnection alone does not reset
+the budget or authorize more mutations. Bounded read-only reconciliation can
+recognize absence after an operator resolves the verified resource and then
+release capacity. Real probes keep the API down for approximately 95 seconds
+to cross this boundary; the still-running VM requires operator cleanup.
+
+An unavailable output store produces `:collection_failed` while preserving the
+known command exit and allowing independent machine cleanup. Restoring storage
+and resubmitting the same execution does not replay the command or silently
+recollect deleted guest files. Cancellation racing with a received exit also
+retains that exit: cancellation intent is not permission to replace observed
+evidence with a fabricated cancelled result. Collection may finish or fail
+depending on which file operations completed before cancellation was observed.

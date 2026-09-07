@@ -20,12 +20,39 @@ IO.puts("phase:running")
 "worker_down\n" = IO.gets("")
 unknown = Setup.wait_for(runtime, handle, &(&1.state == :unknown))
 true = unknown.reservation != nil and unknown.result == nil
+
+if settings["scenario"] == "unavailable" do
+  {:ok, ^handle} = SmolBox.cancel(runtime, spec.scope, spec.id)
+
+  exhausted =
+    Setup.wait_for(
+      runtime,
+      handle,
+      &(&1.cleanup == :failed and
+          System.system_time(:millisecond) > Map.fetch!(&1.deadlines, :cleanup)),
+      130_000
+    )
+
+  true = exhausted.cleanup_attempts >= 5 and exhausted.reservation != nil
+  true = exhausted.absence_at_ms == nil and exhausted.cancel_requested_at_ms != nil
+end
+
 Supervisor.stop(runtime)
 IO.puts("phase:paused")
 "resume\n" = IO.gets("")
 
 {:ok, recovered_runtime} = Runtime.start_link(options)
 {:ok, ^handle} = SmolBox.submit(recovered_runtime, spec)
+
+if settings["scenario"] == "unavailable" do
+  {:ok, retained} = Store.fetch(store, handle)
+  true = retained.cleanup == :failed and retained.reservation != nil
+  true = retained.absence_at_ms == nil and retained.cancel_requested_at_ms != nil
+  :ok = SmolBox.reconcile(recovered_runtime, spec.scope, spec.id)
+  IO.puts("phase:retained")
+  "resolved\n" = IO.gets("")
+  :ok = SmolBox.reconcile(recovered_runtime, spec.scope, spec.id)
+end
 
 cleaned =
   Setup.wait_for(

@@ -626,7 +626,11 @@ untracked resources. Actual API-server SIGKILL/restart now passes with a real
 PostgreSQL-backed controller on both platforms. The VM survives server loss;
 the original identity/deadline and unknown result survive recovery, with one
 dispatch attempt and verified retention-window cleanup. See
-`docs/evidence/phase6-worker-restart.json`. Prolonged unavailability remains.
+`docs/evidence/phase6-worker-restart.json`. Additional real probes now cover
+worker unavailability beyond the persisted cleanup deadline, operator-confirmed
+VM disappearance, actual output-directory unavailability, and cancellation
+immediately before/after SQL result persistence. All pass on both platforms;
+see `docs/evidence/phase6-service-faults.json`.
 
 The delayed-request probes required stricter behavior than the initial Phase 5
 increment: a 404 during ambiguous creation cannot release capacity, and retained
@@ -637,11 +641,11 @@ request fencing. Current termination evidence can be revoked after a running VM
 is reobserved. Strong cancellation/deadline guarantees remain uncertified.
 
 
-- [ ] Complete qualification of persisted cancellation intent, evidence-based termination, and cancellation/completion race handling. The initial implementation passes normal controlled and real stop paths; boundary races remain.
+- [x] Qualify persisted cancellation intent, evidence-based termination, and cancellation/completion race handling. Controlled and real SQL result-commit races preserve the observed exit and original cancellation timestamp across runtime restart. Real outages retain intent and reservations beyond the cleanup deadline; verified operator deletion allows later absence-based release.
 - [x] Implement bounded reconciliation and cleanup scans on startup and periodically. Bounded task slots, paginated due scans, persisted retry counts/deadlines, and owner claims are implemented; full fault qualification remains below.
-- [ ] Complete no-replay and accounting fault qualification. Controlled interruption boundaries, 36 real durable-host process-kill cases, and API-server restart on both platforms pass without a second dispatch. Prolonged unavailability remains; this is not a request-fencing or exactly-once certification.
+- [x] Qualify no-replay and accounting through the selected fault matrix. Controlled interruption boundaries, 36 real durable-host process-kill cases, API-server restart, prolonged unavailability and missing-VM cases on both platforms pass without a second dispatch. This is not a request-fencing or exactly-once certification.
 - [x] Protect foreign resources during cleanup; implement orphan detection within verified ownership boundaries. `audit_worker/3` reports bounded read-only pages; names never authorize adoption or deletion. Worker/name assignment indexes are atomic and survive cleanup in both stores. Real tests leave untracked candidates untouched on Linux/macOS; controlled tests cover changed creation evidence, incomplete/slow stores and cleanup races.
-- [ ] Exercise the full fault matrix against controlled peers and selected real-worker boundaries. Controller interruption, API-server restart and artifact-write interruption now have real durable evidence; prolonged worker unavailability, output-store unavailability and notification boundaries remain.
+- [x] Exercise the controller fault matrix and selected real service faults. Actual worker outages, missing VMs and filesystem output-store unavailability now supplement controller/result/artifact interruption evidence. Public telemetry/notification fault tests belong to Phase 8, where that interface is introduced; the current internal first-output notification already has interruption coverage. Moving that not-yet-existing public interface's checks avoids treating its absence as a tested notification implementation.
 
 Exit: restarts do not duplicate commands; unresolved execution and cleanup are inspectable; cleanup failures cannot rewrite successful command results.
 

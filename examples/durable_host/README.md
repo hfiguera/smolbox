@@ -114,8 +114,22 @@ before cleanup, and bounds its HTTP reads and child diagnostics. It retains its
 private keys, object directory and SQL partition for inspection, including after
 success. The JSON report identifies that workspace without exposing key bytes.
 The worker server is stopped when the probe finishes; it never starts or stops
-a pre-existing host service. The probe takes about 67 seconds on the qualified
-hosts because it waits through the actual retention window.
+a pre-existing host service. The default `--scenario restart` takes about 67
+seconds on the qualified hosts because it waits through the actual retention
+window. Run it again with `--scenario unavailable` and `--scenario missing`, each
+with its own report filename. Unavailability lasts beyond the stored cleanup
+deadline; the probe verifies retained cancellation/accounting, then acts as the
+operator to stop/delete only its recorded VM. The missing scenario deletes that
+verified VM while the controller is paused and checks absence-based recovery.
+Both retain an unknown result and require exactly one recorded dispatch attempt.
+
+The runtime test file also contains an actual output-directory outage and two
+cancellation races at SQL result commit. The outage moves only the test's private
+object directory while collection is paused, then restores it in a finalizer.
+It requires a known exit, failed collection, verified VM cleanup and no command
+replay after runtime restart. The cancellation cases require the original intent
+timestamp and observed exit to survive. These three tests use a real worker and
+PostgreSQL alongside the 18 fresh-BEAM interruption cases.
 
 ## Host integration and security
 

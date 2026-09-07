@@ -116,12 +116,38 @@ def digest(file):
     return result.hexdigest()
 
 
+def delete_owned(url, created):
+    """Delete only a VM matching the persisted creation evidence; confirm absence."""
+    try:
+        current = request(url)
+    except urllib.error.HTTPError as error:
+        if error.code == 404:
+            return
+        raise
+    if not same_machine(current, created):
+        raise RuntimeError("cleanup identity conflict; resource retained")
+    if current["state"] == "running":
+        request(url + "/stop", "POST", {})
+    stopped = request(url)
+    assert same_machine(stopped, created) and stopped["state"] != "running"
+    request(url, "DELETE")
+    try:
+        request(url)
+    except urllib.error.HTTPError as error:
+        if error.code == 404:
+            return
+        raise
+    raise RuntimeError("owned VM remains present after deletion")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--smolvm", required=True)
     parser.add_argument("--url", default="http://127.0.0.1:19470")
     parser.add_argument("--python", required=True)
     parser.add_argument("--report", required=True)
+    parser.add_argument("--scenario", choices=["restart", "unavailable", "missing"],
+                        default="restart")
     args = parser.parse_args()
     address = urllib.parse.urlsplit(args.url)
     assert address.scheme == "http" and address.hostname == "127.0.0.1"
@@ -145,6 +171,7 @@ def main():
                 "fingerprint_key_file": str(workspace / "fingerprint.key"),
                 "encryption_key_file": str(workspace / "encryption.key"),
                 "partition": identity, "id": identity, "wait": True,
+                "scenario": args.scenario,
                 "ledger": str(workspace / "dispatch-attempts")}
     settings_file = workspace / "settings.json"
     settings_file.write_text(json.dumps(settings))
@@ -158,7 +185,8 @@ def main():
     controller = None
     snapshots = []
     started = time.monotonic()
-    report = {"status": "failed", "retained_workspace": str(workspace), "partition": identity}
+    report = {"status": "failed", "scenario": args.scenario,
+              "retained_workspace": str(workspace), "partition": identity}
     try:
         ready(args.url)
         assert request(args.url + "/api/v1/machines") == {"machines": []}
@@ -167,15 +195,25 @@ def main():
         controller.phase("phase:running", snapshots)
         assert len(snapshots) == 1
         worker.kill()
+        down_at = time.monotonic()
         controller.send("worker_down")
-        controller.phase("phase:paused", snapshots)
+        controller.phase("phase:paused", snapshots, timeout=140)
+        outage_seconds = time.monotonic() - down_at
         worker = Child(worker_args, env=worker_env)
         ready(args.url)
         machine_url = args.url + "/api/v1/machines/" + urllib.parse.quote(snapshots[0]["name"], safe="")
         observed = request(machine_url)
         assert same_machine(observed, snapshots[0]) and observed["state"] == "running"
         assert request(machine_url + "/files/workspace/count", binary=True) == b"x"
+        if args.scenario == "missing":
+            delete_owned(machine_url, snapshots[0])
         controller.send("resume")
+        if args.scenario == "unavailable":
+            controller.phase("phase:retained", snapshots)
+            observed = request(machine_url)
+            assert same_machine(observed, snapshots[0]) and observed["state"] == "running"
+            delete_owned(machine_url, snapshots[0])
+            controller.send("resolved")
         completed = controller.phase("phase:complete", snapshots, timeout=120)
         result = json.loads(completed.removeprefix("phase:complete:"))
         assert controller.process.wait(timeout=10) == 0
@@ -184,7 +222,9 @@ def main():
         report.update(status="passed", seconds=round(time.monotonic() - started, 3),
                       result=result, dispatch_attempts=1, guest_marker="single byte before recovery",
                       guest_survived_api_server=True, artifact_sha256=settings["artifact_sha256"],
-                      runtime_version="1.14.1", platform=os.uname().sysname)
+                      runtime_version="1.14.1", platform=os.uname().sysname,
+                      outage_seconds=round(outage_seconds, 3),
+                      operator_deleted_vm=args.scenario != "restart")
     except BaseException as error:
         report.update(status="failed", failure=type(error).__name__)
         raise
@@ -202,17 +242,7 @@ def main():
                     ready(args.url)
                 for created in snapshots:
                     url = args.url + "/api/v1/machines/" + urllib.parse.quote(created["name"], safe="")
-                    try:
-                        current = request(url)
-                        if not same_machine(current, created):
-                            raise RuntimeError("cleanup identity conflict; resource retained")
-                        request(url + "/stop", "POST", {})
-                        stopped = request(url)
-                        assert same_machine(stopped, created) and stopped["state"] != "running"
-                        request(url, "DELETE")
-                    except urllib.error.HTTPError as error:
-                        if error.code != 404:
-                            raise
+                    delete_owned(url, created)
         except BaseException as error:
             cleanup_errors.append(type(error).__name__)
         finally:
