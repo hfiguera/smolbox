@@ -299,3 +299,48 @@ compiler/analyzer/coverage canaries pass their expected outcomes on both hosts.
 Seeds, durations and source hashes are in
 `docs/evidence/phase7-resource-floor.json`. None of this marks hard-profile
 certification or release acceptance complete.
+
+
+## Repeatable production-package consumer check
+
+`scripts/ci/package_consumer.py` builds the actual Hex tarball, bounds and
+allowlists its members, extracts it into a private temporary directory, and
+creates a fresh `MIX_ENV=prod` consumer. It checks a supplied fake-transport
+health response and explicit Memory/SmolBox supervisor startup with no workers.
+No worker API is contacted. Both the consumer and extracted SmolBox project
+compile with warnings treated as errors. Package source hashes must remain
+unchanged, and resolved dependencies/compiled modules must exclude CI and
+example-only code. This smoke test does not replace real-worker qualification.
+
+Run under the selected toolchain from `packages/smolbox`:
+
+```sh
+python3 scripts/ci/package_consumer.py \
+  --report /absolute/new/consumer-current.json \
+  --package-output /absolute/new/smolbox.tar
+python3 scripts/ci/package_consumer.py --minimum \
+  --archive /absolute/new/smolbox.tar \
+  --report /absolute/new/consumer-minimum.json
+```
+
+Outputs must not already exist. `--archive` accepts an already built **trusted**
+SmolBox archive so different hosts/toolchains can test the identical artifact.
+Its Mix project executes during compilation; this tool is not a sandbox for
+untrusted packages. Temporary consumer files are removed on completion or error.
+The report records package/file hashes, toolchain, architecture, runtime versions,
+resolved dependency names, consumer lockfile and smoke results. `--package-output`
+retains the exact tested archive without publishing it.
+
+The minimum direct versions are Req 0.7.4, Jason 1.4.0, telemetry 1.3.0 and
+NimbleOptions 1.1.0. Transitive dependencies are resolved and recorded, not claimed
+to cover every permitted combination. Jason 1.4.0 emits upstream deprecation and
+optional-Decimal warnings on newer Elixir. No upstream sources are patched or
+warnings hidden. SmolBox itself is compiled as the root project with warnings as
+errors because a consumer's flag alone does not enforce that on dependencies.
+
+CI runs the current consumer in the docs/package job and a required minimum
+consumer on Elixir 1.18.4/OTP 27.3.4.15. Successful reports and tested tarballs use
+a pinned upload-artifact action with missing outputs treated as errors. Actionlint
+passes locally; GitHub execution remains pending a repository remote. These
+checks advance an independent acceptance item while resource certification and
+public telemetry remain incomplete.

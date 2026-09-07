@@ -1,0 +1,145 @@
+{
+  "recorded_at": "2026-09-07T04:24:42.192134+00:00",
+  "base_commit": "c07c5ae",
+  "scope": "Production package-consumer gate; not final release-candidate acceptance",
+  "identical_tarball_sha256": "c40e676ac5acf220bcdf807714d347e4a226124c8b2b4d916a989798ecae3921",
+  "package_file_count": 65,
+  "checks": [
+    "Actual Hex tarball inspection and bounded allowlist extraction",
+    "Fresh production dependency resolution",
+    "Extracted SmolBox and consumer root compilation with warnings as errors",
+    "Fake-transport health decoding",
+    "Explicit Memory store and SmolBox supervision, empty workers, read/cancel missing identity, orderly shutdown",
+    "Runtime-only dependency and module checks",
+    "Unchanged package file contents after consumer compilation",
+    "Intentional development-file, traversal, and symlink archive injections rejected"
+  ],
+  "consumers": {
+    "consumer-macos-current": {
+      "package_sha256": "c40e676ac5acf220bcdf807714d347e4a226124c8b2b4d916a989798ecae3921",
+      "platform": "Darwin",
+      "architecture": "arm64",
+      "toolchain": "Erlang/OTP 28 [erts-16.4] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 28)",
+      "smoke": {
+        "supervisor": true,
+        "client": true,
+        "versions": {
+          "nimble_options": "1.1.1",
+          "telemetry": "1.4.2",
+          "jason": "1.4.5",
+          "req": "0.7.4"
+        }
+      },
+      "runtime_dependencies": [
+        "finch",
+        "hpax",
+        "jason",
+        "mime",
+        "mint",
+        "nimble_options",
+        "nimble_pool",
+        "req",
+        "telemetry"
+      ]
+    },
+    "consumer-linux-current": {
+      "package_sha256": "d6a45bf3b73ebd6cd8ad5e05ddf194fef965eaa310ca50bde801c921a433fbf3",
+      "platform": "Linux",
+      "architecture": "x86_64",
+      "toolchain": "Erlang/OTP 28 [erts-16.4] [source] [64-bit] [smp:8:8] [ds:8:8:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 28)",
+      "smoke": {
+        "supervisor": true,
+        "client": true,
+        "versions": {
+          "nimble_options": "1.1.1",
+          "telemetry": "1.4.2",
+          "jason": "1.4.5",
+          "req": "0.7.4"
+        }
+      },
+      "runtime_dependencies": [
+        "finch",
+        "hpax",
+        "jason",
+        "mime",
+        "mint",
+        "nimble_options",
+        "nimble_pool",
+        "req",
+        "telemetry"
+      ]
+    },
+    "consumer-common-macos-minimum": {
+      "package_sha256": "c40e676ac5acf220bcdf807714d347e4a226124c8b2b4d916a989798ecae3921",
+      "platform": "Darwin",
+      "architecture": "arm64",
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "smoke": {
+        "supervisor": true,
+        "client": true,
+        "versions": {
+          "req": "0.7.4",
+          "jason": "1.4.0",
+          "telemetry": "1.3.0",
+          "nimble_options": "1.1.0"
+        }
+      },
+      "runtime_dependencies": [
+        "finch",
+        "hpax",
+        "jason",
+        "mime",
+        "mint",
+        "nimble_options",
+        "nimble_pool",
+        "req",
+        "telemetry"
+      ]
+    },
+    "consumer-common-linux-minimum": {
+      "package_sha256": "c40e676ac5acf220bcdf807714d347e4a226124c8b2b4d916a989798ecae3921",
+      "platform": "Linux",
+      "architecture": "x86_64",
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:8:8] [ds:8:8:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "smoke": {
+        "supervisor": true,
+        "client": true,
+        "versions": {
+          "req": "0.7.4",
+          "jason": "1.4.0",
+          "telemetry": "1.3.0",
+          "nimble_options": "1.1.0"
+        }
+      },
+      "runtime_dependencies": [
+        "finch",
+        "hpax",
+        "jason",
+        "mime",
+        "mint",
+        "nimble_options",
+        "nimble_pool",
+        "req",
+        "telemetry"
+      ]
+    }
+  },
+  "all_consumer_file_hash_maps_identical": true,
+  "minimum_policy": "Four direct dependencies pinned at their lower bounds; transitive resolver results are recorded, not exhaustive combinations.",
+  "warnings": "Jason 1.4.0 upstream deprecation/optional-Decimal warnings remain visible; extracted SmolBox root compilation passes --warnings-as-errors.",
+  "ci": {
+    "actionlint": "passed",
+    "aggregate": "requires minimum-dependencies job as well as current docs/package consumer",
+    "github_actions": "not executed: repository has no remote",
+    "artifact_action": "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 (v4.6.2), verified against upstream tag"
+  },
+  "remaining": [
+    "Complete telemetry and resource/security qualification",
+    "Rerun final release commit and archive matrix",
+    "Source URL, independent consumer review, and actual GitHub execution"
+  ],
+  "source_sha256": {
+    "scripts/ci/package_consumer.py": "0b5eff39db562db5e3211cde221cbc382e588f18fbaf5cbad98c31bf289c2d64",
+    ".github/workflows/smolbox-ci.yml": "e515ddc9a2c6705c85af6170651f1142a7ac82485171bded5d13d40881e54f13"
+  }
+}

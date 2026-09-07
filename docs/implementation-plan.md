@@ -706,8 +706,8 @@ Exit: another developer can follow the examples, understand failure states, and 
 Dependencies: all earlier exit conditions and section 12 gates.
 
 - [ ] Run the complete required CI and live platform matrix on the exact release commit.
-- [ ] Build the Hex tarball, inspect its file list, and compile/test a fresh consumer from the extracted package.
-- [ ] Verify production consumption excludes CI tools and example-only dependencies.
+- [x] Build the Hex tarball, inspect its file list, and compile/test a fresh consumer from the extracted package. The repeatable package-consumer harness passes current and minimum runtime dependencies, fake-transport decoding, and explicit supervision without contacting a worker. Repeat on the final release commit; the complete release matrix is still unchecked.
+- [x] Verify production consumption excludes CI tools and example-only dependencies. Fresh `MIX_ENV=prod` consumers resolve only runtime dependencies, inspect package members/compiled modules, and compile extracted SmolBox itself with warnings as errors.
 - [ ] Confirm package name availability, license, source metadata, changelog, semantic version, and supported capability claims.
 - [ ] Record successful use by the two host examples and at least one independent consumer review.
 - [ ] Publish only through a separate explicit release action after the release evidence is complete.
@@ -859,6 +859,7 @@ Use the pinned Mix version's `test_coverage` summary threshold configuration and
 | `smolbox-quality-canaries` | Isolated deliberate analyzer violations | Each analyzer fails for its expected reason; clean counterparts pass |
 | `smolbox-security` | Retired dependency and vulnerability audits | Current advisory fetch succeeds and policy passes |
 | `smolbox-docs-package` | Docs, Hex build, tar inspection, fresh consumer | No docs warnings; usable package without CI/example dependencies |
+| `smolbox-minimum-dependencies` | Fresh production consumer with minimum direct dependencies on Elixir 1.18.4/OTP 27.3.4.15 | Explicit dependency versions, package compilation and public API/supervisor smoke checks pass |
 | `smolbox-linux-runtime` | Pinned real Linux worker suite | KVM and runtime preflight succeeds; required cases execute |
 | `smolbox-macos-runtime` | Pinned real macOS arm64 suite | Virtualization preflight succeeds; required cases execute |
 | `smolbox-required` | Aggregate job with explicit dependency-result checks | Every required applicable check succeeds; unexpected skip is failure |
