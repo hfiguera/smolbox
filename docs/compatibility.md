@@ -288,7 +288,7 @@ for arbitrary pending worker requests.
 Both minimal and durable host examples pass normal execution and cancellation on
 both platforms. Normal runs verify reversed binary data and a one-byte test
 marker; cancellation retains unknown outcome while cleanup completes. They
-operate without Keel/Jido and keep keys in private host files. macOS durable
+keep keys in private host files. macOS durable
 tests connect to the dedicated Linux PostgreSQL instance over an SSH-forwarded
 Unix socket in a private directory; no public database listener was added.
 

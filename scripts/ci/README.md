@@ -112,7 +112,7 @@ the independent teardown. No package publication occurs in these workflows.
 
 Both workflows live in this standalone repository's `.github/workflows/`.
 Library jobs run from the repository root, and example jobs run from their
-respective `examples/` directories. No Keel checkout or parent workflow is needed.
+respective `examples/` directories.
 
 Run the Python policy/runner regressions from the repository root:
 

@@ -22,7 +22,7 @@ class ClassificationTest(unittest.TestCase):
             "external-references/smolvm/README.md",
             ".github/workflows/smolbox-ci.yml", "AGENTS.md", ".tool-versions",
             "unknown", "docs/../lib/unsafe.md", "/docs/unsafe.md",
-            "ideas/001-initial-idea.txt", "packages/smolbox/docs/client.md",
+            "notes/design.txt", "nested/docs/client.md",
         ]:
             with self.subTest(path=path):
                 self.assertTrue(needs_runtime(paths + [path], "pull_request"))

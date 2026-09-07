@@ -1,8 +1,8 @@
 # Durable host example
 
 This standalone host owns an Ecto Repo and a PostgreSQL implementation of
-`SmolBox.Store`. It has no Keel, Jido, or Phoenix dependency. It includes a managed
-Python execution demonstration and a real-worker process-kill recovery suite.
+`SmolBox.Store`. It includes a managed Python execution demonstration and a
+real-worker process-kill recovery suite.
 Shared example setup lives in `../support/lib`; fault-test helpers are compiled
 only in the test environment from the repository's `test/support/fault` directory.
 

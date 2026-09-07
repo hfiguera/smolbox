@@ -19,17 +19,15 @@ Unsupported hard controls remain rejected. No Hex package or public service has
 been published. See the current acceptance checkpoint in Phase 9 and the
 individual phase/evidence records below.
 
-Repository migration: SmolBox now has its own Git repository at `/Users/humberto/Projects/smolbox`. Its 30 package commits, local upstream reference and CI gates were preserved; standalone migration validation passed. See [repository-migration.md](repository-migration.md) for the commit mapping, checks and their limits. The public remote URL and protected-runner requirements above remain unresolved.
-
 Implementation evidence lives in [compatibility.md](compatibility.md) and `docs/evidence/`. Checked items below mean the specific work has evidence; they do not waive the remaining phase exit conditions or release requirements.
 
-This plan covers only the `smolbox` Elixir package. It originated from Keel's sandbox design and is now maintained in SmolBox's independent repository; a Keel checkout is not required. It defines implementation work, verification requirements, and release gates. The detailed design sections retain the original rationale and targets; the public client/host guides and generated API docs describe the implemented interfaces.
+This plan defines implementation work, verification requirements, and release gates for the `smolbox` Elixir library. The detailed design sections retain the original rationale and targets; the public client/host guides and generated API docs describe the implemented interfaces.
 
 ## 1. Outcome and scope
 
 SmolBox should let an Elixir application submit an authorized command with files and resource constraints to a configured pool of self-hosted `smolvm serve` workers, observe the outcome, collect outputs, and reconcile interrupted operations without blindly executing the command again.
 
-Ship an independently usable library with optional, explicitly started supervised components. A consumer must be able to use it without Keel, Phoenix, Jido, Runic, Jizoku, or a function publishing system.
+Ship an independently usable library with optional, explicitly started supervised components.
 
 ### 1.1 Required first-release capabilities
 
@@ -51,25 +49,23 @@ Ship an independently usable library with optional, explicitly started supervise
 
 Do not implement the following in this package:
 
-- Monaco, LiveView, React Flow, agents, voice channels, or application pages.
 - Python dependency resolution, JavaScript bundling, TypeScript compilation recipes, or language-specific function runners.
-- Function input/output business schemas, test-case selection, build promotion, publication, or production activation.
-- A second workflow engine, workflow retries, approval flows, or compensation for external effects.
+- Application-level retries, approvals, or compensation for external effects.
 - A managed sandbox service, public worker API, billing, infrastructure provisioning, or autoscaling.
-- A Firecracker backend, embedded SmolVM NIF, or the managed Smol Machines cloud API.
+- An embedded SmolVM NIF or the managed Smol Machines cloud API.
 - Arbitrary host mounts, guest access to host credentials, GPU/CUDA, interactive terminals, or persistent developer workspaces in the first release.
 - Warm VM reuse, branching, checkpoints, or machine export as required first-release features. Add verified primitives later only for a concrete consumer.
 - Exactly-once external execution or recovery of live guest processes after host loss.
 
-A host may use SmolBox to execute a build command or a test command. SmolBox treats these as workloads; the host's lifecycle module interprets them.
+The host supplies commands and interprets their results. SmolBox manages execution and cleanup.
 
 ### 1.3 Evidence required to call the first release usable
 
-Two small host applications, including one without Keel or Jido, must demonstrate submission, files, results, cancellation, restart inspection, and cleanup. At least one must use a durable store. A simulated and a real interrupted execution must remain identified as the original operation; insufficient evidence must produce an explicit unknown outcome.
+Two small host applications must demonstrate submission, files, results, cancellation, restart inspection, and cleanup. At least one must use a durable store. A simulated and a real interrupted execution must remain identified as the original operation; insufficient evidence must produce an explicit unknown outcome.
 
 ## 2. Starting point and verified dependencies
 
-At planning time Keel contained the idea document and no SmolBox `mix.exs`, runtime implementation, or CI workflow. SmolBox has since been implemented and extracted into its own Git repository at `/Users/humberto/Projects/smolbox`. See [repository migration](repository-migration.md) for the history boundary and validation. Treat `external-references/` as reference material, not package source; source inspection is encouraged, but do not modify, format, run SmolBox's quality analyzers over, or ship nested upstream repositories.
+Treat `external-references/` as reference material, not package source; source inspection is encouraged, but do not modify, format, run SmolBox's quality analyzers over, or ship nested upstream repositories.
 
 ### 2.1 Upstream boundary
 
@@ -81,11 +77,11 @@ Source inspection of that tag confirms camelCase exec fields, including `timeout
 
 #### Local upstream source checkout
 
-The user-provided SmolVM checkout was preserved during migration and is now at `/Users/humberto/Projects/smolbox/external-references/smolvm` (repository-relative path: `external-references/smolvm`). Use this checkout when implementation work needs direct inspection of upstream API types, handlers, tests, or runtime behavior. The containing `external-references/` directory is ignored by Git.
+A local SmolVM source checkout is available at `external-references/smolvm`. Use this checkout when implementation work needs direct inspection of upstream API types, handlers, tests, or runtime behavior. The containing `external-references/` directory is ignored by Git.
 
 Before relying on local source as compatibility evidence, record its commit and working-tree status and compare it with the selected release; do not assume the checkout matches `v1.14.1`. Inspect pinned source with read-only Git commands when needed, preserving the user's checkout. Source inspection informs the contract, but real-runtime tests must still verify operational guarantees.
 
-This checkout is a local development reference, not a SmolBox dependency or a required CI input. CI and other contributors must obtain the explicitly pinned upstream version independently; do not hard-code this absolute path into implementation, tests, or workflows.
+This checkout is a local development reference, not a SmolBox dependency or a required CI input. CI and other contributors must obtain the explicitly pinned upstream version independently; do not require a maintainer-specific checkout path in implementation, tests, or workflows.
 
 ### 2.2 Elixir and OTP policy
 
@@ -111,11 +107,11 @@ The official compatibility table supports those version pairings. Recheck it whe
 | Dialyxir, Credo, ex_dna, ex_slop, Credence | Required quality checks | Development/test only; details in section 12 |
 | ExDoc and mix_audit | Docs and dependency security checks | Development/test only |
 
-Do not require Ecto, Phoenix PubSub, Oban, Jizoku, or an object-store SDK in the core package. Supply host extension points only where this plan needs them. Req supports streaming but also has automatic request behavior that must be configured deliberately. [Req](https://hexdocs.pm/req/Req.html), [Req retry behavior](https://hexdocs.pm/req/Req.Steps.html#retry/1).
+Database and artifact-storage integrations belong in host adapters. Supply extension points only where this plan needs them. Req supports streaming but also has automatic request behavior that must be configured deliberately. [Req](https://hexdocs.pm/req/Req.html), [Req retry behavior](https://hexdocs.pm/req/Req.Steps.html#retry/1).
 
 ## 3. Package structure and deployment
 
-Maintain SmolBox as a standalone Mix project at its own repository root. Keel and other consumers depend on the library through Mix; this repository does not require a parent project or umbrella. The packaged library must also compile and run in a fresh external consumer.
+Maintain SmolBox as a standalone Mix project at its repository root. The packaged library must compile and run in a fresh external consumer.
 
 Target structure; create files as their phases require them:
 
@@ -211,7 +207,7 @@ The worker proxy and SmolVM installation are operator-managed dependencies. Smol
 
 The low-level client exposes verified machine, file, and command operations. It is useful without a scheduler, but it does not promise durable execution or safe replay of commands.
 
-The managed API adds persisted intent, admission, identity, reconciliation, and cleanup. Prefer it in Keel and any application that needs work to outlive a request process.
+The managed API adds persisted intent, admission, identity, reconciliation, and cleanup. Use it when work must outlive a request process.
 
 Proposed signatures:
 
@@ -740,7 +736,7 @@ responsibilities. See [resource qualification](resource-qualification.md).
 Dependencies: Phases 5–7.
 
 - [x] Add documented redacted telemetry and operator inspection fields. Bounded asynchronous delivery, finite metadata, stage durations, persisted cancellation timestamps, worker status/capacity and ephemeral drop/timeout counters are implemented. Controlled saturation/handler failures and real fresh-BEAM notification boundaries pass. See `docs/telemetry.md` and `docs/evidence/phase8-telemetry.json`.
-- [x] Finish minimal and durable host examples with no Keel/Jido dependency. Both standalone Mix projects compile, pass Dialyzer/audits, and demonstrate real Python execution, binary collection, cancellation and retention-window cleanup on Linux and macOS. The durable host also passes fresh-BEAM fault recovery; examples explicitly use a development profile.
+- [x] Finish the minimal and durable host examples. Both standalone Mix projects compile, pass Dialyzer/audits, and demonstrate real Python execution, binary collection, cancellation and retention-window cleanup on Linux and macOS. The durable host also passes fresh-BEAM fault recovery; examples explicitly use a development profile.
 - [x] Document deployment, artifact preparation, unknown-outcome handling, cancellation, cleanup, and upgrades. Packaged client/host/recovery/security/telemetry guides describe the external services and operator procedures, including pinned upstream preparation flags, template floors, durable keys, migrations, drain limits and immutable revisions. Actual resource/isolation qualification and independent consumer review remain separate gates.
 - [ ] Test adversarial outputs, limits, paths, credential isolation, and endpoint access on dedicated hosts.
 - [x] Record measured image-cache availability, preparation, queue, execution, collection and cleanup without equating VM boot time with total function latency. The twenty-sample durable workload passes on both hosts, including bounded queue rejection, delayed consumers, preparation failure and uncertain-cancellation accounting. A separate fresh private Linux worker now records one verified image-cache miss followed by nineteen cache-hit samples. macOS uses per-machine extraction, with no equivalent shared-extraction hit path. These are already-running-host measurements; one cold-cache sample does not establish a percentile or SLA, and pristine-host startup is not claimed.
@@ -1195,7 +1191,7 @@ Include at least: a compiler warning, a Credo-specific issue, an ExSlop-specific
 
 Allowlist files in Hex metadata. Include runtime source, public docs, license, and necessary runtime assets only. Exclude `dev`, private CI configs, external references, examples' databases, fixture credentials, and all VM/cache state from the tarball unless a specific public test asset is deliberately needed.
 
-Keep this implementation plan as repository planning material. Public ExDoc extras and packaged guides must be self-contained and must not depend on the original Keel idea document or other files outside the package.
+Keep this implementation plan as repository planning material. Public ExDoc extras and packaged guides must be self-contained.
 
 Build a temporary consumer from the tarball's extracted package, fetch only runtime dependencies under `MIX_ENV=prod`, and compile with warnings treated as errors. Exercise a fake-transport client call and explicit supervisor startup without automatically connecting to a worker. Run examples separately from the package artifact check.
 
@@ -1219,7 +1215,7 @@ macOS per-machine extraction has no equivalent shared-cache hit path. Benchmark
 results apply only to the stated workload and cache/host conditions. Broader
 performance claims and host-isolation certification need their own evidence.
 
-Do not publish a Firecracker comparison or a universal startup claim from these tests. SmolBox's initial performance objective is bounded controller behavior and acceptable measured end-to-end latency for the reference workloads; optimize only after correctness and isolation gates pass.
+SmolBox's initial performance objective is bounded controller behavior and acceptable measured end-to-end latency for the reference workloads; optimize only after correctness and isolation gates pass.
 
 ## 14. Release checklist and unresolved decisions
 
@@ -1232,7 +1228,7 @@ Do not publish a Firecracker comparison or a universal startup claim from these 
 - [ ] Durable host example and store conformance pass across process restart.
 - [ ] Every requested analyzer runs, fails correctly, and is required in CI.
 - [ ] Real Linux and macOS suites pass on the release commit; unsupported platforms are not advertised.
-- [ ] Package tarball is clean and usable outside Keel.
+- [ ] Package tarball is clean and usable in a fresh consumer application.
 - [ ] Documentation explains host responsibilities and library limitations without exactly-once claims.
 - [ ] License and Hex metadata are reviewed before publication. Name availability is rechecked; a previous 404 does not reserve the name.
 
@@ -1248,6 +1244,5 @@ Do not publish a Firecracker comparison or a universal startup claim from these 
 | Unix-socket transport support | Phase 3 | Test explicitly; loopback is the development fallback |
 | Multi-controller worker ownership | Phase 7 | One active owner per worker; conservative recovery |
 | Advanced image export/branching support | After first consumer need | Outside first release |
-| Independent function lifecycle package | Outside this plan | Keep build/test/publish semantics out of SmolBox |
 
 The first implementation milestone is a narrow but complete command execution path with honest failure semantics. The package is complete only when its documented operational and CI requirements are demonstrated, not when all proposed modules exist.

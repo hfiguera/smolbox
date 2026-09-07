@@ -1,7 +1,7 @@
 # Minimal host example
 
 This Mix project runs SmolBox under a host supervisor with an explicitly
-ephemeral memory store. It has no Keel, Phoenix, or agent framework dependency.
+ephemeral memory store.
 The shared example setup lives in `../support/lib`; keep that directory when
 copying this example. Production consumers install the library separately.
 
