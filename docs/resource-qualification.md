@@ -132,6 +132,28 @@ cleanup. The normal worker remained healthy with empty inventory after both
 trials. Equivalent independently bounded macOS experiments and broader isolation
 qualification remain open.
 
+## Finite macOS guest-memory overload
+
+A separate macOS arm64 experiment created a neutral 256 MiB, one-vCPU Python
+machine on the normal development worker. A child attempted at most 384 MiB in
+1 MiB allocations, with a 15-second child deadline. The child exited with
+signal 9; the guest kernel `oom_kill` counter advanced from zero to one and its
+log identified an OOM-killed Python process. The parent command exited zero and
+the VM remained running. Guest `MemTotal` was 244,820 KiB after kernel overhead.
+Explicit ownership-checked stop/delete then succeeded and inventory was empty.
+
+The first trial's assertion incorrectly tried to match the command-local child
+PID directly against the guest-kernel log PID. It failed and is retained as a
+failed fixture. The second trial records both domains (child PID 3; kernel log
+PID 188), the kernel counter and bounded OOM log evidence without asserting an
+unverified mapping. Both trials' owned machines were cleaned up. See
+[macOS guest-memory evidence](evidence/phase8-macos-memory.json).
+
+This completes a finite guest-allocation/overload observation on each platform.
+It does not provide independent macOS host RSS, CPU-time, disk or process limits,
+nor qualify arbitrary hostile protocols. Those production-profile requirements
+remain open.
+
 ## Measured durable-host workload
 
 The repeatable benchmark in `examples/durable_host/scripts/benchmark.exs` uses

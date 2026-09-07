@@ -1,0 +1,78 @@
+{
+  "recorded_utc": "2026-09-07T07:40:25.945810+00:00",
+  "status": "finite guest-memory overload observed; host resource certification incomplete",
+  "platform": "Darwin 25.6.0 arm64, Apple M4 Max, 128 GiB host memory",
+  "toolchain": "Elixir 1.20.4 / OTP 28.5",
+  "smolvm": {
+    "version": "1.14.1",
+    "commit": "e8d09ef616d363004d55b80a6cdb31a4e7e1842d",
+    "binary_sha256": "af238c1190aefbc1c293f515c720c9c15f968498ad67624a9b9f824a51af0c79",
+    "artifact_sha256": "d982cfdf0c59b862ad3e1b107446b127460f716c8407fd0e2b6b0de2a62fe18e"
+  },
+  "configuration": {
+    "guest_memory_mb": 256,
+    "vcpus": 1,
+    "storage_gb": 20,
+    "overlay_gb": 10,
+    "network": false,
+    "mounts": [],
+    "ports": [],
+    "entrypoint": [
+      "/bin/true"
+    ],
+    "restart": "never",
+    "child_upper_allocation_bytes": 402653184,
+    "child_deadline_seconds": 15,
+    "exec_deadline_seconds": 25,
+    "captured_result_limit_bytes": 16384
+  },
+  "observation": {
+    "attempted_upper_bytes": 402653184,
+    "child_pid": 3,
+    "cpus": 1,
+    "elapsed_ms": 202.145,
+    "guest_parent_exited_zero": true,
+    "matching_oom_lines": [],
+    "mem_total": "MemTotal:         244820 kB",
+    "oom_count_after": 1,
+    "oom_count_before": 0,
+    "returncode": -9,
+    "scope": "Finite guest-memory experiment on normal macOS development worker; no independent host RSS/disk quota asserted",
+    "stderr_bytes": 0,
+    "stdout_bytes": 0,
+    "vm_survived": true,
+    "kernel_oom_lines": [
+      "[    0.751775] oom-kill:constraint=CONSTRAINT_NONE,nodemask=(null),cpuset=/,mems_allowed=0,global_oom,task_memcg=/,task=python,pid=188,uid=0",
+      "[    0.751779] Out of memory: Killed process 188 (python) total-vm:223912kB, anon-rss:215572kB, file-rss:336kB, shmem-rss:0kB, UID:0 pgtables:476kB oom_score_adj:0"
+    ]
+  },
+  "cleanup": {
+    "stopped": "stopped",
+    "inventory_empty": true,
+    "verified_owned": true
+  },
+  "raw_report_sha256": {
+    "run.log": "ca65790fc27fe04d533632d0a7dd59cdf4dfb0b528d19439f497928af828ed00",
+    "memory.json": "adc649c542c1000b6876c105580a6790f794e4520f8dc3c25f541a93fe76b2e0",
+    "cleanup.json": "6dcdb00f195f6e23fc4cf1a9a3c63013f4ed59ce36b69ab4105d0423796fd998",
+    "creation.json": "751dab002f1c234071ee57741b42cc965b510f12d135dcbd9ac5574909cf5895"
+  },
+  "probe_source_sha256": "db0b37251ebb25610eecc20511fd803d7400e7116fc8976d1fd6b84380b96a27",
+  "initial_trial": {
+    "result": "assertion failed; not counted as a passing OOM test",
+    "observation": "Child exited signal 9 but the fixture incorrectly required the child PID to match a guest-kernel OOM log PID directly.",
+    "follow_up": "The second fresh VM records a 0-to-1 guest kernel oom_kill counter, SIGKILL child exit, and an OOM-killed Python process in kernel logs. The command-local child PID was 3; kernel log PID was 188. No unverified PID mapping is asserted.",
+    "cleanup": {
+      "stopped": "stopped",
+      "inventory_empty": true,
+      "verified_owned": true
+    },
+    "failure_log_sha256": "0e62a608409df60159704bbaf495c1b2191ed120c01abb93976d0d3a0ceb4834"
+  },
+  "limitations": [
+    "This is a finite guest-memory experiment on the normal development worker; no independently enforced host RSS, CPU-time, disk or task quota is claimed.",
+    "The child parent exited successfully and the VM remained running. No recoverable execution receipt or arbitrary hostile-code isolation follows from guest kernel counters.",
+    "Both trials used separate new owned machines and verified stop/delete plus empty inventory. A failed fixture was not retried as the same managed execution.",
+    "Equivalent broad host-exhaustion and upstream protocol qualification remain open."
+  ]
+}

@@ -829,6 +829,16 @@ recovery when exhausted storage prevents the worker API from cleaning up.
 Equivalent independently bounded macOS experiments, broader isolation and final
 protected CI/release evidence still remain.
 
+A finite macOS guest-memory experiment now complements the Linux guest OOM
+result. In a neutral 256 MiB VM, a child attempted at most 384 MiB, exited with
+signal 9, and the guest kernel OOM counter advanced from zero to one while its
+log identified an OOM-killed Python process. The parent and VM survived;
+ownership-checked stop/delete and empty inventory passed. An initial direct
+PID-match fixture failed because it compared different observed PID domains;
+that attempt and its successful cleanup remain in
+`docs/evidence/phase8-macos-memory.json`. No host quota or broader macOS
+production-isolation claim follows from this finite guest experiment.
+
 ### Phase 9 — Release candidate and adoption evidence
 
 Dependencies: all earlier exit conditions and section 12 gates.
@@ -838,7 +848,47 @@ Dependencies: all earlier exit conditions and section 12 gates.
 - [x] Verify production consumption excludes CI tools and example-only dependencies. Fresh `MIX_ENV=prod` consumers resolve only runtime dependencies, inspect package members/compiled modules, and compile extracted SmolBox itself with warnings as errors.
 - [ ] Confirm package name availability, license, source metadata, changelog, semantic version, and supported capability claims.
 - [ ] Record successful use by the two host examples and at least one independent consumer review.
-- [ ] Publish only through a separate explicit release action after the release evidence is complete.
+- [x] Keep publication separate from implementation and ordinary CI. No Hex publication or public service deployment is performed for this goal. A future release needs separate explicit authorization after all release evidence passes; this checkbox records the policy, not a published release.
+
+Pre-release metadata review is recorded in `docs/evidence/phase9-readiness.json`.
+The package remains `0.1.0-dev` with MIT metadata and the reviewed standard
+license text. Its changelog now describes the complete implemented API and
+measured limitations. The official Hex package API returned 404 for `smolbox`
+on September 7, 2026; that observation neither reserves the name nor establishes
+publishing permission. Declared licenses/notices from the nine resolved runtime
+dependencies are recorded; dependency/upstream source is not bundled. The public
+source URL, protected runner provisioning, independent review and remaining
+resource qualification are still required. No metadata review is counted as
+release-candidate acceptance.
+
+The updated 79-file package archive now passes fresh production consumers on
+canonical Elixir 1.20.4/OTP 28.5 and minimum Elixir 1.18.4/OTP 27.3.4.15 on **both**
+Linux and macOS. All four consume the identical tarball:
+`226211fb1b52114bad62300a9e5d7d2dee6b4a37c8bbe18c7899bb22dbb3e433`.
+Its public client/supervisor smoke checks and extracted-package compilation pass
+with warnings treated as errors. Minimum direct dependencies are Req 0.7.4,
+Jason 1.4.0, telemetry 1.3.0 and NimbleOptions 1.1.0; current consumers resolve
+Req 0.7.4, Jason 1.4.5, telemetry 1.4.2 and NimbleOptions 1.1.1. All resolve only
+the nine runtime dependencies, with no analyzer/example/upstream source bundled.
+All 79 packaged file hashes match the reviewed working tree before commit.
+Reports are retained privately under `/tmp/smolbox-qualification`; recording
+their hashes here avoids a recursive hash dependency inside the package:
+
+| Consumer report | SHA-256 |
+|---|---|
+| macos | `abfd44b36938b15cb5446277320fd434f92e515ba3bb790eba16cb6450e3cd4e` |
+| linux | `40b3c02e6c1811b1ff0cbb07984917a9d01b17eff090a39e21e7dfa53799ee61` |
+| minimum-macos | `5ecabe0671fff6107d7eb05c5708a3ba4de7963045d0ef6dcf2d1ec53096eb77` |
+| minimum-linux | `a1335df414f448ff1a1d8978d399cf0b1423b2e95e0d10c90f2cc655b61fad02` |
+
+Both canonical dependency audits fetched successfully: `mix hex.audit` reported
+no retired/security-advisory packages and `mix deps.audit` no known
+vulnerabilities. Audit log hashes are macOS
+`34e3de07c4d429c9596af39c72ab7c18cc171ff4db388abdc15afedf22304e4d` and Linux
+`34e3de07c4d429c9596af39c72ab7c18cc171ff4db388abdc15afedf22304e4d`.
+ExDoc passes warnings as errors. This archive is a verified **unreleased**
+artifact; it is not a final release commit or a waiver of profile, protected-CI,
+source-metadata or independent-review requirements.
 
 Exit: package documentation and behavior agree; remaining unsupported capabilities are visible. Hex publication is not part of ordinary CI or this planning task.
 

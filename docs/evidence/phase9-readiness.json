@@ -1,0 +1,102 @@
+{
+  "recorded_utc": "2026-09-07T07:36:17.481400+00:00",
+  "status": "pre-release review in progress; not a release candidate acceptance",
+  "base_commit": "4022244ae72cb3fce865ca5c91d5db86e7a9a5a7",
+  "package": {
+    "name": "smolbox",
+    "version": "0.1.0-dev",
+    "semantic_version": "valid prerelease; not promoted to a released or RC version",
+    "declared_license": "MIT",
+    "license_sha256": "210d654cc505eadb7ab98860653dabc84cfdc8f6c450386028c21f1ece9f155d",
+    "license_text_review": "Standard MIT permission/disclaimer text with 2026 SmolBox contributors notice.",
+    "changelog_sha256": "3d68e5806d06629d3dfaf6d22ee31a902a237f2d6099e8ba22ab57865785996c",
+    "source_url": null,
+    "source_url_status": "No Git remote is configured; public repository URL requested from owner and still pending.",
+    "publication": "No Hex publication or public service deployment performed. No publishing step in ordinary CI."
+  },
+  "name_observation": {
+    "url": "https://hex.pm/api/packages/smolbox",
+    "observed_utc": "2026-09-07T07:30:27.954923+00:00",
+    "status": 404,
+    "body": "{\"message\":\"Page not found\",\"status\":404}",
+    "sha256": "c63782a5823039903b5eae18d902681d8eb6effae655d03b90c85858f861092f",
+    "interpretation": "404 indicates no package at this endpoint at observation time; does not reserve the name or prove publishing authorization."
+  },
+  "runtime_dependency_metadata": {
+    "finch": {
+      "declared_license": "MIT",
+      "metadata_sha256": "184dd4129fba44fd6b03ce34dfe5c85a015de006139da87d6eed667732e35f32",
+      "bundled_license_notice_hashes": {
+        "LICENSE.md": "2c3c57158df2131ff09f57d9c7850da0844910f0fa8ac60294dd9396e3672e81"
+      }
+    },
+    "hpax": {
+      "declared_license": "Apache-2.0",
+      "metadata_sha256": "6b102868fddb3fa88b28c68f1278c8eab16bdd5b7b08bbf03cf65748962cc843",
+      "bundled_license_notice_hashes": {
+        "LICENSE.txt": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9"
+      }
+    },
+    "jason": {
+      "declared_license": "Apache-2.0",
+      "metadata_sha256": "57827c4083c1c80505c3901498b7226a542b721dcdedcb94bdc5c11d4de89e42",
+      "bundled_license_notice_hashes": {
+        "LICENSE": "6c73f07b2f5abbb4fd00f30cba97e4f358b86977b46ad82d87357964a2d350e0"
+      }
+    },
+    "mime": {
+      "declared_license": "Apache-2.0",
+      "metadata_sha256": "a0de9e69f85a2278af8a6eb88f86c0dc88eaf33e6b67a788025328f27af7d653",
+      "bundled_license_notice_hashes": {
+        "LICENSE": "79bfd5cbf8cb79a2c73d1d94447461f93407c7f14dc789942c2ee41e167ba48f"
+      }
+    },
+    "mint": {
+      "declared_license": "Apache-2.0",
+      "metadata_sha256": "72381e9d9f72853820b2754255b0e4c2fdb52b982ba199e6d523986c0c6e1eea",
+      "bundled_license_notice_hashes": {
+        "LICENSE.txt": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9"
+      }
+    },
+    "nimble_options": {
+      "declared_license": "Apache-2.0",
+      "metadata_sha256": "3b6243a414bafdafe8574bfe65c552f7020a70995dec7157df33f3b0a9527bce",
+      "bundled_license_notice_hashes": {
+        "LICENSE.md": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594"
+      }
+    },
+    "nimble_pool": {
+      "declared_license": "Apache-2.0",
+      "metadata_sha256": "bc2bc7b15c4782d2307e059434ebd98f0df2d09d1cd707d464b836534082849b",
+      "bundled_license_notice_hashes": {}
+    },
+    "req": {
+      "declared_license": "Apache-2.0",
+      "metadata_sha256": "75ee24db9429f6bccb6e899b26eb76031e113a354269b966d20e2a7d8184c534",
+      "bundled_license_notice_hashes": {
+        "LICENSE.md": "f9e693078c728b5e62856ba365d6d4e915c87dc47228bfc607132e7f7505101f"
+      }
+    },
+    "telemetry": {
+      "declared_license": "Apache-2.0",
+      "metadata_sha256": "29778243956492d0d255bf2289fe5e4f6b10f22d282ca5679015a478c1eb33d2",
+      "bundled_license_notice_hashes": {
+        "LICENSE": "0cec06e0e55fbc3dc5cee4fca9b607f66cb8f4e4dbcf3b3c013594dd156732e9",
+        "NOTICE": "3ca23c239bc03e2bcd3899da04d4271370e230e30f7dc171c7e8ad35809c6bb0"
+      }
+    }
+  },
+  "license_scope": "Declared licenses and existing notices from the nine resolved production dependencies are recorded. Dependencies are resolved separately; no vendored upstream runtime, analyzer code or dependency source is shipped in the SmolBox tarball.",
+  "capability_review": "README, changelog, client, compatibility, recovery, resource and security documentation retain unknown outcomes, template floors, weak upstream identity, lexical-only guest paths, failed deletion under full storage, host quota responsibilities, optional lossy telemetry and explicit scope exclusions.",
+  "external_requirements": [
+    "Public repository/source URL and actual remote.",
+    "Provisioned protected Linux/macOS disposable CI runners, reviewed environments and independent worker teardown.",
+    "Independent consumer review by someone outside the supplied examples/implementation.",
+    "Suitable independently bounded macOS environment and remaining hard-profile qualification; current development host results are not that evidence."
+  ],
+  "remaining_local_or_upstream_work": [
+    "Broader resource/protocol/control-plane qualification and cold-state measurements require the appropriate host controls.",
+    "Re-run complete CI/live/consumer matrix on the final exact release commit after blockers are resolved.",
+    "Promote version and recheck Hex availability only when release acceptance is met; publish only under separate explicit authorization."
+  ]
+}

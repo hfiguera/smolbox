@@ -20,7 +20,8 @@ fixture correction changes no analyzer or production behavior. Current evidence:
 [durable telemetry recovery](evidence/phase8-telemetry.json),
 [service and CI harness](evidence/phase1-live-ci.json), and
 [warm durable workload](evidence/phase8-benchmarks.json), and
-[contained Linux resource experiments](evidence/phase8-linux-containment.json).
+[contained Linux resource experiments](evidence/phase8-linux-containment.json), and
+[macOS guest-memory overload](evidence/phase8-macos-memory.json).
 
 The sections after “Historical milestone records” retain earlier test counts
 and gaps as an audit trail. They do not supersede this current summary or the
@@ -123,7 +124,7 @@ These findings require continued real-runtime verification:
 
 | Control | Linux x86_64 | macOS arm64 |
 |---|---|---|
-| Guest vCPU/memory allocation | Observed configuration; bounded guest OOM experiment passes | Observed configuration; overload qualification pending |
+| Guest vCPU/memory allocation | Observed configuration; bounded guest OOM experiment passes | Observed configuration; finite guest OOM counter/log experiment passes |
 | Host RSS / CPU-time hard quota | Owned cgroup observation; no certified profile | Uncertified |
 | Guest disk and host storage accounting | 20/10 GiB floors; contained host-disk-full probe exposes database cleanup failure; no certified profile | Same template floors verified; host quota pending |
 | Hostile process count control | Unsupported hard control | Unsupported hard control |
