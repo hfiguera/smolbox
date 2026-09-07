@@ -1,5 +1,21 @@
 # SmolBox implementation plan
 
+Status: **0.1.0-rc.2 preparation and exact-candidate validation in progress**,
+September 7, 2026. RC2 includes the boundary cleanup, onboarding and README
+improvements, and the pinned Elixir 1.20.4/OTP 29.0.6 toolchain. Its scope remains
+the development-qualified client/controller contract in section 1.4.
+
+Freeze the candidate before running the required checks. Validate the four
+maintained Elixir/OTP pairs on Linux and macOS, canonical quality/coverage checks,
+real runtime and recovery suites, both host examples, ordinary GitHub CI, and
+four fresh consumers of one identical package archive. Create `v0.1.0-rc.2` only
+after the required checks pass. Preserve RC1's tag and historical evidence.
+Record RC2 acceptance in `docs/release-candidates/0.1.0-rc.2.md` and its JSON
+companion in a later repository-only attestation commit. No Hex or GitHub Release
+publication is authorized by this validation.
+
+## Previous release and development checkpoints
+
 Status: **0.1.0-rc.1 accepted for the revised first-release scope**, September 7, 2026.
 Candidate `164c0c2c3f71109b4224c2f7f2c807a25e0cdebd`, tagged `v0.1.0-rc.1`, passed
 the complete required matrix. The standalone library, durable host examples,

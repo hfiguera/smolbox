@@ -78,13 +78,13 @@ creating machines, executing commands, streaming output, and transferring files.
 
 ## Installation and first run
 
-The current candidate is `0.1.0-rc.1`; it has not been published to Hex. For now,
+The current candidate is `0.1.0-rc.2`; it has not been published to Hex. For now,
 add the tagged source dependency to your application's `mix.exs`:
 
 ```elixir
 {:smolbox,
  git: "https://github.com/hfiguera/smolbox.git",
- tag: "v0.1.0-rc.1"}
+ tag: "v0.1.0-rc.2"}
 ```
 
 Then run `mix deps.get`. Git installation requires repository access. A local
@@ -103,7 +103,7 @@ To run the local walkthrough, you need:
 stage a Python file, submit it, read its output file, and confirm cleanup. The
 walkthrough uses an in-memory store and needs no database. Applications that need
 restart recovery must provide a durable `SmolBox.Store` adapter; a complete
-[PostgreSQL host example](https://github.com/hfiguera/smolbox/tree/v0.1.0-rc.1/examples/durable_host)
+[PostgreSQL host example](https://github.com/hfiguera/smolbox/tree/v0.1.0-rc.2/examples/durable_host)
 is included in the repository.
 
 ## Current scope
@@ -144,4 +144,4 @@ the compatibility guide. From this repository, `mix ci` runs deterministic check
 without contacting a real worker. Generate this site with
 `MIX_ENV=dev mix docs --warnings-as-errors`. Live worker tests are a separate opt-in
 operation described in the repository's
-[CI guide](https://github.com/hfiguera/smolbox/blob/v0.1.0-rc.1/scripts/ci/README.md).
+[CI guide](https://github.com/hfiguera/smolbox/blob/v0.1.0-rc.2/scripts/ci/README.md).

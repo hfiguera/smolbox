@@ -1,6 +1,18 @@
 # Changelog
 
-## Unreleased
+## 0.1.0-rc.2
+
+Second candidate for the development-qualified client/controller release.
+This candidate retains RC1's execution and isolation limits and is not published
+to Hex. Public APIs and persisted record formats remain compatible with RC1.
+
+- Rewrite the README around concrete use cases and a verified Python execution
+  example, with explicit setup requirements and links to the full walkthrough.
+- Record successful Elixir 1.20.4 / OTP 29.0.6 development validation on both
+  Linux x86_64 and macOS Apple Silicon, including real workers and durable recovery.
+- Update installation, example versions and documentation source links to
+  `v0.1.0-rc.2`. Exact-candidate acceptance is recorded separately in the repository's
+  release-candidate reports.
 
 - Align main CI and optional live-workflow checks with the pinned Elixir 1.20.4 /
   OTP 29.0.6 toolchain. Retain Elixir 1.18/OTP 27 and Elixir 1.19–1.20/OTP 28

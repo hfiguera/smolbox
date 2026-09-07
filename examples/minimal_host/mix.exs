@@ -4,7 +4,7 @@ defmodule SmolBox.MinimalHost.MixProject do
   def project do
     [
       app: :smolbox_minimal_host,
-      version: "0.1.0-rc.1",
+      version: "0.1.0-rc.2",
       elixir: "~> 1.18",
       elixirc_paths: ["lib", Path.expand("../support/lib", __DIR__)],
       deps: [

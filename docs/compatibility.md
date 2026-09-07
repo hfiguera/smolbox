@@ -1,6 +1,6 @@
 # Compatibility evidence
 
-Release candidate: `0.1.0-rc.1`, 2026-09-07. The first release
+Release candidate: `0.1.0-rc.2`, 2026-09-07. The first release
 targets the tested development-qualified client/controller contract. No production
 profile is certified; additional production resource/isolation qualification,
 protected real-worker GitHub infrastructure and independent consumer review are
@@ -9,8 +9,9 @@ outside the first-release scope.
 Ordinary CI, the supported compatibility matrix, existing bounded real-runtime
 suites and fresh package consumers remain required for the exact release
 candidate. Recorded local Linux/macOS results can supply the real-runtime
-evidence. The repository's `docs/release-candidates/0.1.0-rc.1.md` records candidate
-identity and validation separately from this package's historical evidence.
+evidence. The repository's `docs/release-candidates/` reports record each
+candidate's identity and validation separately from this package's historical
+evidence. Earlier results below do not substitute for exact-candidate validation.
 Excluded work is not represented as completed or scheduled.
 
 ## Current development toolchain
@@ -66,7 +67,7 @@ Yamerl dependency, and Credence retains its existing upstream compiler warnings.
 SmolBox and both host examples pass their own warning-as-error compilation gates;
 dependency warnings are not suppressed or counted as library warnings.
 
-## Accepted release-candidate scope
+## Accepted RC1 scope (historical)
 
 The library baseline passed 156 deterministic cases (six properties and 150
 ordinary tests) on all six host/toolchain combinations listed below. The Elixir
@@ -254,7 +255,7 @@ developer tasks pass warning-as-error compilation. No dependency source was patc
 The source repository is [hfiguera/smolbox](https://github.com/hfiguera/smolbox),
 configured as `origin` and in the package and documentation metadata. It remains
 private during implementation. Candidate ExDoc source links target the matching
-`v0.1.0-rc.1` tag. The supplied host
+`v0.1.0-rc.2` tag. The supplied host
 examples and automated package consumers provide first-release adoption evidence;
 no independent consumer review is required or claimed.
 
