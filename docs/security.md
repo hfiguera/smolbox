@@ -3,8 +3,10 @@
 SmolBox is a client and controller for operator-managed SmolVM workers. It does
 not provision a secure worker, proxy, database, image registry or hypervisor.
 The current `:development` qualification is not a production isolation profile.
-Hard resource and hostile-workload qualification remains incomplete on both
-tested platforms. See [resource evidence](resource-qualification.md) and
+Hard resource and hostile-workload qualification is incomplete on both tested
+platforms and outside the first-release scope. Removing it as a release
+prerequisite changes no enforcement or isolation claim. See
+[resource evidence](resource-qualification.md) and
 [compatibility evidence](compatibility.md) before choosing a deployment boundary.
 
 ## What must be trusted
@@ -69,13 +71,13 @@ It uses approved prepared artifacts with `/bin/true` and restart policy `never`.
 Image preparation happens separately under host policy; a failed offline execution
 never authorizes networking or an arbitrary image pull.
 
-| Control | Current boundary | Remaining qualification |
+| Control | Current boundary | Unqualified boundary |
 | --- | --- | --- |
 | Concurrency and reservations | Atomic store admission for the documented ownership topology | Does not coordinate an unrelated store or external worker users |
 | vCPU allocation | Requested, decoded and matched; real guests on both platforms report one CPU | Allocation is not a CPU-time quota; host contention remains external |
 | Guest memory | Finite overload experiments on both platforms record guest OOM evidence while the command parent and VM survive | No universal host-RSS bound or complete hostile-memory certification |
 | Host CPU/memory/tasks | Linux cgroup values observed on a separately constrained service | Upstream setup is best-effort; macOS has no corresponding cgroup mechanism |
-| Disk | Verified template allocation floors and reservations; a contained Linux disk-full probe demonstrates failed database deletion after a successful stop | No certified storage/cache/log quota profile; equivalent bounded macOS exhaustion qualification remains pending |
+| Disk | Verified template allocation floors and reservations; a contained Linux disk-full probe demonstrates failed database deletion after a successful stop | No certified storage/cache/log quota profile; equivalent bounded macOS exhaustion behavior is unverified |
 | Guest process count | No certified hostile-guest process limit | Guest root cooperation or a Python/JS wrapper cannot supply it |
 | Deadlines/cancellation | Persisted budgets, upstream timeout and observed owned-VM stop | Delayed requests are unfenced; strong termination bounds remain unsupported |
 | Output | Bounded BEAM capture and transport; finite overflow and blocked-observer tests, including a contained Linux producer, preserve the available evidence | Arbitrary hostile-protocol behavior and total server/channel/frame memory remain unqualified |
@@ -190,4 +192,4 @@ experiment recovered by destroying only its separately bounded, verified owned
 unit and private in-memory mount. This cannot be generalized to deleting a
 shared worker's data or all machines with a matching name prefix. See
 [resource qualification](resource-qualification.md) for exact limits, counters
-and the remaining production-profile requirements.
+and the unqualified production-profile boundaries.

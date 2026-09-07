@@ -1,6 +1,15 @@
 # Compatibility evidence
 
-Status: qualification in progress, 2026-09-07. No production profile is certified.
+Status: final-candidate validation remains pending, 2026-09-07. The first release
+targets the tested development-qualified client/controller contract. No production
+profile is certified; additional production resource/isolation qualification,
+protected real-worker GitHub infrastructure and independent consumer review are
+outside the first-release scope.
+
+Ordinary CI, the supported compatibility matrix, existing bounded real-runtime
+suites and fresh package consumers remain required for the exact release
+candidate. Recorded local Linux/macOS results can supply the real-runtime
+evidence. Excluded work is not represented as completed or scheduled.
 
 ## Current tested scope
 
@@ -190,14 +199,16 @@ developer tasks pass warning-as-error compilation. No dependency source was patc
 The source repository is [hfiguera/smolbox](https://github.com/hfiguera/smolbox),
 configured as `origin` and in the package and documentation metadata. It remains
 private during implementation. Development ExDoc source links target `main`;
-release documentation must target its matching tag or commit. Independent
-consumer review remains a release prerequisite.
+release documentation must target its matching tag or commit. The supplied host
+examples and automated package consumers provide first-release adoption evidence;
+no independent consumer review is required or claimed.
 
 The first [GitHub CI run](https://github.com/hfiguera/smolbox/actions/runs/34138037540)
 at `17fabbaf30281d11303a2980042d7b0f975e43f5` passed all 16 ordinary jobs. Its
 aggregate failed under the previous policy because both real-worker jobs were
-skipped. Protected runtime qualification remains pending; that run does not
-validate the later opt-in policy or this metadata change.
+skipped. That run does not validate the later opt-in policy or metadata change.
+Protected runtime qualification has not run and is optional for the first
+release; the existing real suites still require exact-candidate local evidence.
 
 ## Historical milestone records
 

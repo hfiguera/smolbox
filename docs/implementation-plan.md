@@ -13,10 +13,13 @@ successfully. The measured resource and cache experiments retain their limits
 and failed attempts. These are development-host results; release acceptance is
 **not complete**.
 
-The remaining release dependencies are a certified enforceable minimal profile
-and its remaining hostile-workload qualification, provisioned protected/disposable
-Linux and macOS CI runners, an independent consumer review, and the complete
-matrix on the eventual exact release commit.
+The first release targets the tested client/controller contract with the existing
+`:development` worker qualification. Production resource/isolation certification,
+protected real-worker GitHub infrastructure and independent consumer review are
+outside this release's scope; none is claimed complete or scheduled as follow-up.
+Remaining release work is the final ordinary CI, compatibility, existing real-runtime
+and package-consumer matrix on the exact release commit, plus metadata and claims
+review. Recorded local Linux/macOS runs can supply the real-runtime evidence.
 Unsupported hard controls remain rejected. No Hex package or public service has
 been published. See the current acceptance checkpoint in Phase 9 and the
 individual phase/evidence records below.
@@ -31,6 +34,8 @@ Implementation evidence lives in [compatibility.md](compatibility.md) and `docs/
 
 Historical evidence files retain their original metadata and pending items;
 earlier reports of a missing remote or source URL predate this repository setup.
+The scope decision in section 1.4 supersedes their former release prerequisites
+without changing any test result, missing evidence or unsupported guarantee.
 
 This plan defines implementation work, verification requirements, and release gates for the `smolbox` Elixir library. The detailed design sections retain the original rationale and targets; the public client/host guides and generated API docs describe the implemented interfaces.
 
@@ -73,6 +78,34 @@ The host supplies commands and interprets their results. SmolBox manages executi
 ### 1.3 Evidence required to call the first release usable
 
 Two small host applications must demonstrate submission, files, results, cancellation, restart inspection, and cleanup. At least one must use a durable store. A simulated and a real interrupted execution must remain identified as the original operation; insufficient evidence must produce an explicit unknown outcome.
+
+### 1.4 First-release scope decision (September 7)
+
+The maintainer has removed these three workstreams from the first-release acceptance criteria:
+
+- **Production resource and isolation qualification:** no new certification campaign
+  for excessive memory/disk/processes/output, total server buffering, hard termination
+  deadlines, hostile file races or comprehensive credential/control-endpoint isolation.
+  Keep completed experiments, existing regression tests and their measured limits.
+- **Protected real-worker GitHub infrastructure:** no required provisioning of
+  disposable Linux/macOS runners, protected environments or independent CI worker
+  teardown. Keep the manual workflow and local test tools available. Its existing
+  infrastructure and strict pass requirements still apply if it is used.
+- **Independent consumer review:** external integration feedback is welcome, but
+  soliciting or obtaining it is not a release prerequisite. Supplied examples and
+  automated fresh consumers are the planned adoption evidence.
+
+These items are out of scope, not completed, and have no scheduled follow-up.
+Adding any of them later requires a new scope decision. The library continues to
+reject unsupported hard controls and makes no production isolation certification
+claim. Capacity reservations are accounting; they do not establish host quotas.
+Cancellation remains evidence-based, with unknown outcomes preserved.
+
+Existing functional, fault-recovery, boundary, quality and package checks remain
+required. Run the existing bounded Linux/macOS suites for the exact release commit
+on the available development hosts and retain commit, toolchain, runtime/image
+identities, results and cleanup evidence. Label these as local development-host
+validation. No skipped suite or earlier-commit result substitutes for that run.
 
 ## 2. Starting point and verified dependencies
 
@@ -298,7 +331,13 @@ Create `docs/compatibility.md` with one row per control, pinned runtime, host OS
 | Concurrency | Atomic admission across the supported controller topology | A local semaphore cannot enforce a cluster-wide quota |
 | Cancellation | Observable termination and separately known command outcome | Stopping observation is not cancellation |
 
-An enforceable supported profile is a first-release gate. If a requested hard control cannot be enforced, reject that profile before dispatch. Define the minimal supported profile from measured capabilities; do not advertise every proposed limit as implemented. Record whether a control protects the guest, the worker host, or only the controller.
+This matrix describes the evidence needed before advertising each guarantee; it
+is not a requirement to implement or certify every row in the first release.
+The existing `:development` qualification exposes measured guest allocations and
+controller accounting. If a requested hard control cannot be enforced, reject
+that profile before dispatch. Record whether a control protects the guest, the
+worker host, or only the controller. A certified production profile is outside
+the first-release scope under section 1.4.
 
 ### 5.3 Staging and collection rules
 
@@ -320,7 +359,7 @@ boundary. Profiles requiring that stronger guarantee remain unsupported. File
 uploads replace the tested symlink without changing its former target; FIFO
 reads can block before upstream's type check and require an independent client
 deadline plus owned-VM termination. See `docs/security.md` for the measured
-scope and remaining qualification requirements.
+scope and unqualified boundaries.
 - Include artifact staging and collection in the overall deadline and capacity accounting. Retain enough disk accounting for failed cleanup and unknown outcomes.
 
 ## 6. Persistence, state transitions, and recovery
@@ -508,14 +547,21 @@ Use a controllable clock and deterministic failure injection. Avoid tests that m
 
 ### 10.2 Real-runtime suites
 
-Run in dedicated disposable worker environments with pinned binaries and images:
+For the first release, run the existing bounded suites on the available Linux and
+macOS development hosts with pinned binaries/images, dedicated test workspaces,
+verified resource ownership and cleanup. Retain exact candidate evidence:
 
 1. Linux x86_64 with working KVM: Python and JS scripts, file round trip, stdout/stderr, nonzero exit, timeout, cancellation, no-network test, collection, deletion.
 2. macOS arm64 with verified virtualization support: the same supported contract, including artifact architecture checks.
 3. Add Linux arm64 only when a runner exists and the suite passes; do not infer it from macOS arm64.
 4. Store-backed restart tests: terminate the Elixir controller at each dispatch/collection/cleanup boundary and reconnect through a fresh host process.
 5. Worker restart and transport fault tests: lost response, restarted `smolvm serve`, missing guest, inaccessible host, and unavailable output storage.
-6. Resource-abuse tests in isolated, quota-controlled hosts: excessive memory/disk/processes/output and attempted access to host or control-plane resources.
+
+The completed finite output, path, deadline and resource probes remain in the
+test/evidence record. Expanding into a production resource-abuse or isolation
+campaign is outside this release. Such experiments would require independently
+enforced host bounds; the scope change does not authorize disruptive tests on
+shared hosts.
 
 Python and JS scripts are execution fixtures supplied by the tests. Do not turn these fixtures into a SmolBox function-runner SDK or add TypeScript build recipes to the package.
 
@@ -533,7 +579,7 @@ Use this host for the Linux compatibility spike and real-runtime integration tes
 
 Use a dedicated test workspace and per-run resource names, preserve unrelated host workloads, and collect bounded test reports with the exact SmolBox commit and runtime/image versions. Apply the isolation requirements above before disruptive or resource-abuse tests. Record the verified setup and repeatable commands in `docs/compatibility.md` during implementation.
 
-The `linux` alias is a local SSH configuration, not an automatically available CI runner. Keep the remote destination configurable in test tooling; CI access and runner isolation must be configured separately under section 12.7.
+The `linux` alias is a local SSH configuration, not an automatically available CI runner. Keep the remote destination configurable in test tooling. Local runs can provide first-release integration evidence. If the optional GitHub runtime workflow is enabled later, its CI access and runner isolation must be configured separately under section 12.7.
 
 ### 10.3 Fault injection matrix
 
@@ -556,12 +602,15 @@ Dependencies: none.
 - [x] Run one manually controlled Python command and file round trip on Linux and macOS.
 - [x] Verify how a prepared runtime runs with guest egress disabled.
 - [x] Verify neutral image entry points and disabled restart policies keep caller commands behind the dispatch boundary. Real-library tests stage/execute once, stop/start, and verify the test marker remains single; source fixtures force `/bin/true` and `never`. Guest markers are test instrumentation, not production execution receipts.
-- [ ] Measure exec timeout, stream disconnect, cancellation, binary output, and server-side buffering behavior.
+- [x] Record the existing finite timeout, stream-disconnect, cancellation and binary-output checks, including known server-buffering limits. Phases 6 and 8 record the passing cases and uncertainty rules; this does not establish total server-memory bounds or hard termination deadlines.
 - [x] Determine whether durable exec receipts/deduplication exist; record the conservative recovery contract if absent. No such identity or receipt is exposed by the selected exec API; preserve uncertainty.
-- [ ] Complete the profile capability matrix, including process and host disk bounds.
-- [x] Record proxy/account isolation requirements and platform limitations. `docs/security.md` documents trusted accounts, private control interfaces, authenticated TLS, finite proxy queues, disabled mutation retries, artifact approval, platform-specific controls and unfenced requests. Documentation does not certify the still-pending hostile-host/resource experiments.
+- [x] Record measured allocations/accounting and explicitly unsupported process and host-disk controls in the capability matrix. This is a record of the current development contract, not a certified production profile.
+- [x] Record proxy/account isolation requirements and platform limitations. `docs/security.md` documents trusted accounts, private control interfaces, authenticated TLS, finite proxy queues, disabled mutation retries, artifact approval, platform-specific controls and unfenced requests. Documentation does not certify hostile-host/resource isolation.
 
-Deliverables: compatibility/security notes and attributed wire fixtures. Exit: enough evidence to implement a supported minimal profile; unresolved controls are explicitly unsupported rather than guessed.
+The broader buffering, hard-resource and isolation qualification previously
+included in this phase is outside the first release under section 1.4.
+
+Deliverables: compatibility/security notes and attributed wire fixtures. Exit: the development-qualified client/controller contract has real evidence and clearly bounded claims; unresolved hard controls are explicitly unsupported rather than guessed.
 
 ### Phase 1 — Scaffold the standalone package and make CI fail correctly
 
@@ -571,7 +620,7 @@ Dependencies: initial Phase 0 version decisions.
 - [x] Use environment-specific compilation paths so `dev/mix/tasks` is excluded from production consumers.
 - [x] Commit the maintainer lockfile and exact toolchain pins; do not rely on the lockfile to constrain downstream Hex consumers.
 - [x] Implement the Credence CI wrapper and quality-check canaries described in section 12.
-- [x] Add root-level GitHub workflows and the local `mix ci` entry point. `SmolBox CI` covers deterministic/quality/compatibility/security/docs/package checks and the durable store on push, pull request or manual dispatch. The separate manual-only `SmolBox Runtime Qualification` workflow requires candidate preparation and protected Linux/macOS live jobs. Each workflow has a fixed dependency-result gate rejecting missing, failed, cancelled and skipped checks. Ordinary jobs have executed on GitHub; live infrastructure provisioning and protected real-worker execution remain pending. Checked-in jobs alone do not qualify a release.
+- [x] Add root-level GitHub workflows and the local `mix ci` entry point. `SmolBox CI` covers deterministic/quality/compatibility/security/docs/package checks and the durable store on push, pull request or manual dispatch. The optional manual-only `SmolBox Runtime Qualification` workflow requires candidate preparation and protected Linux/macOS live jobs when dispatched. Each workflow has a fixed dependency-result gate rejecting missing, failed, cancelled and skipped checks. Ordinary jobs have executed on GitHub. Provisioning and running protected real-worker CI are outside the first-release scope; local real-runtime evidence remains required.
 - [x] Require every requested analyzer; verify intentional bad fixtures produce a failing process. Compiler, all five analyzers, and coverage have verified clean/bad counterparts.
 - [x] Configure packaging exclusions for references, nested repositories, credentials, caches, VM state, and CI-only code. A fresh production consumer compiled from the tarball without quality tools; API/supervisor smoke checks remain for later phases.
 
@@ -645,7 +694,8 @@ mapped text file matching the kernel short name, followed by the pinned digest.
 A consumer fixture initially triggered an ExUnit unmatched-file warning; it is
 now an explicitly loaded `.exs.template`, and the warning-as-error suite passes.
 These development-host results do not provision or certify protected CI workers
-or complete the pending release resource profile.
+or establish a production resource profile. Both workstreams are outside the
+first-release scope under section 1.4.
 
 Live-CI milestone: 16 policy/preflight/bounded-runner regressions pass on both
 hosts, including deliberate zero/partial/skipped suites, overflow, deadlines and
@@ -662,21 +712,22 @@ at `17fabbaf30281d11303a2980042d7b0f975e43f5`, all 16 ordinary jobs passed.
 The aggregate failed under the previous policy because both real-worker jobs
 were skipped. That run does not validate the later opt-in policy or this metadata
 change. Protected real-worker execution and independent ephemeral worker teardown
-remain unverified external requirements.
+remain unverified and are now outside the first-release scope.
 
 Workflow separation (September 7): the ordinary
 [GitHub run at `2a403f5`](https://github.com/hfiguera/smolbox/actions/runs/34145090794)
 passed all 17 regular jobs, including the aggregate, all five analyzers and their
 canaries. Its canonical suite passed 178 cases with 95.40% coverage. Its two
 runtime jobs were intentionally skipped under the earlier opt-in policy.
-The current change removes those jobs and their input from `smolbox-ci.yml` and
+Commit `0051fff` removes those jobs and their input from `smolbox-ci.yml` and
 moves candidate preparation and both platforms into the manual-only
 `smolbox-runtime-qualification.yml`, reusing `smolbox-live.yml` unchanged.
 Disabled infrastructure fails candidate preparation before scheduling workers.
 The ordinary and runtime aggregates each require their own exact job set to
-succeed, with no allowed skips. A release requires both successful workflows on
-the same exact commit. The prior green run does not verify this separation;
-new GitHub execution and protected-worker provisioning remain outstanding.
+succeed, with no allowed skips. At this milestone, both successful workflows on
+the same exact commit were release requirements. Section 1.4 now permits recorded
+local runs for the existing real-runtime suites and makes GitHub runtime
+qualification optional. The prior green run does not verify this separation.
 
 Local validation of this separation: all 22 standalone tooling regressions pass
 on macOS with canonical Elixir 1.20.4/OTP 28.5 and minimum Elixir 1.18.4/OTP
@@ -686,6 +737,11 @@ accepts all three workflow files. Parsed workflow checks verify triggers, exact
 dependency sets against both Elixir gates, aggregate command selection and shared
 candidate wiring. Executing the actual infrastructure-guard shell step rejects
 unset/false enablement and accepts true. These checks contact no live workers.
+
+The subsequent [GitHub run at `0051fff`](https://github.com/hfiguera/smolbox/actions/runs/34146296618)
+passes all 17 ordinary jobs with zero skipped jobs, confirming the ordinary
+workflow separation. It supplies no protected real-worker evidence and predates
+the current documentation scope revision.
 
 ### Phase 2 — Model contracts, validation, and wire codecs
 
@@ -697,7 +753,7 @@ responses. Worker configuration rejects unsafe endpoints, and machine starts
 remain separate from user-command dispatch. Keyed execution-spec fingerprints
 and namespaced machine identities are now implemented with immutable profiles and
 bounded file manifests. The HTTP client and endpoint response integration follow
-in Phase 3; profile certification remains a real-runtime gate.
+in Phase 3; no production profile certification follows from these fixtures.
 
 - [x] Implement public types, finite errors, configuration parsing, command/spec validation, and canonical fingerprints. HMAC-SHA256 covers all semantic fields, including policy, manifests, deadlines, and metadata.
 - [x] Implement worker namespacing and profile-to-wire conversion using only supported fields. Names are opaque; namespace matching alone never authorizes cleanup. Unsupported hard controls fail early.
@@ -808,14 +864,14 @@ Dependencies: Phase 6.
 - [x] Add health/version and readiness selection, bounded queueing, expiry, and explicit overload results. Typed `/health` plus the actual empty `/readyz` response drive admission; cached observations expire, and fresh checks precede reservation and command dispatch. Missing inventory, failed readiness, version drift, second-worker selection and queue expiry have controlled coverage. Real endpoints pass on both platforms, including authenticated TLS proxy access.
 - [x] Reserve CPU/memory/disk/concurrency under the store's supported ownership model. Both adapters atomically charge slots, CPUs, guest memory plus host overhead, and requested disk allocations. Required operator-declared allocation floors prevent requests below the actual template sizes and VMM allowance; supplied templates require 20/10 GiB and the tested Linux VMM adds 768 MiB. Real cancellation tests verify the reservation prevents another assignment while the first outcome remains unknown. These are configured accounting bounds, not certified hard host limits.
 - [x] Implement drain and incompatible-worker behavior without disabling inspection. Drain closes subsequent admission-task launches; already active admission/observation/cleanup may finish. The runtime-local convenience call is not an atomic worker-side fence; hosts persist intended `draining: true` configuration. Real and controlled tests verify post-drain queue expiry and retained inspection access.
-- [ ] Enforce and test the certified minimal profile on both initial platforms.
 - [x] Document limits of controller ownership and reject unsupported configuration. Stable physical-worker identity and one store authority are required; exact endpoint aliases, unknown options and unsupported qualifications are rejected. Leases fence store writes only. Active-active command fencing, DNS/proxy alias discovery and hard atomic drain are not claimed.
 
 Exit: fresh admission excludes a degraded/incompatible worker; draining excludes
 new admission-task launches while allowing already active work to finish. Unknown
 executions retain appropriate capacity reservations. Hard minimal-profile
-certification remains a separate unmet acceptance criterion; the qualified worker
-configuration is still explicitly `:development`.
+certification is outside the first release under section 1.4; the worker
+configuration remains explicitly `:development`, with unsupported hard controls
+rejected. Removing certification as a gate does not change enforcement behavior.
 
 Current health increment: 138 deterministic cases and all five analyzers pass on
 canonical macOS/Linux; library coverage is 95.18%. All nine real client/runtime
@@ -847,11 +903,16 @@ Dependencies: Phases 5–7.
 
 - [x] Add documented redacted telemetry and operator inspection fields. Bounded asynchronous delivery, finite metadata, stage durations, persisted cancellation timestamps, worker status/capacity and ephemeral drop/timeout counters are implemented. Controlled saturation/handler failures and real fresh-BEAM notification boundaries pass. See `docs/telemetry.md` and `docs/evidence/phase8-telemetry.json`.
 - [x] Finish the minimal and durable host examples. Both standalone Mix projects compile, pass Dialyzer/audits, and demonstrate real Python execution, binary collection, cancellation and retention-window cleanup on Linux and macOS. The durable host also passes fresh-BEAM fault recovery; examples explicitly use a development profile.
-- [x] Document deployment, artifact preparation, unknown-outcome handling, cancellation, cleanup, and upgrades. Packaged client/host/recovery/security/telemetry guides describe the external services and operator procedures, including pinned upstream preparation flags, template floors, durable keys, migrations, drain limits and immutable revisions. Actual resource/isolation qualification and independent consumer review remain separate gates.
-- [ ] Test adversarial outputs, limits, paths, credential isolation, and endpoint access on dedicated hosts.
+- [x] Document deployment, artifact preparation, unknown-outcome handling, cancellation, cleanup, and upgrades. Packaged client/host/recovery/security/telemetry guides describe the external services and operator procedures, including pinned upstream preparation flags, template floors, durable keys, migrations, drain limits and immutable revisions. They distinguish completed tests from unqualified production resource/isolation guarantees.
 - [x] Record measured image-cache availability, preparation, queue, execution, collection and cleanup without equating VM boot time with total function latency. The twenty-sample durable workload passes on both hosts, including bounded queue rejection, delayed consumers, preparation failure and uncertain-cancellation accounting. A separate fresh private Linux worker now records one verified image-cache miss followed by nineteen cache-hit samples. macOS uses per-machine extraction, with no equivalent shared-extraction hit path. These are already-running-host measurements; one cold-cache sample does not establish a percentile or SLA, and pristine-host startup is not claimed.
 
-Exit: another developer can follow the examples, understand failure states, and identify each required external service.
+The remaining adversarial resource/output, file-boundary, credential and
+control-endpoint campaign is outside the first release under section 1.4.
+Completed finite probes and all existing regression cases remain required.
+
+Exit: examples and guides provide reproducible setup, failure-state interpretation
+and required service contracts, checked through the supplied examples and
+automated consumers. An independent developer review is not required or claimed.
 
 Telemetry milestone evidence: canonical macOS and Linux each pass 156
 deterministic cases (6 properties and 150 tests) and all five analyzers. Coverage
@@ -868,8 +929,8 @@ BEAM handlers are outside this isolation guarantee.
 The telemetry package also passes a fresh canonical production consumer and the
 same tarball's minimum-dependency consumers on Elixir 1.18.4/OTP 27.3.4.15 on both
 hosts. Documentation passes warnings-as-errors. These are milestone checks, not
-the final release-commit matrix. Hard host-resource certification, security
-qualification and latency measurements remain separate unchecked work.
+the final release-commit matrix. They do not certify hard host resources or
+comprehensive isolation; later finite measurements retain their stated limits.
 
 Deployment-guide validation: pinned 1.14.1 CLI help/source confirms the documented
 pack/serve options. ExDoc passes warnings-as-errors and a fresh canonical macOS
@@ -878,9 +939,9 @@ The tested archive SHA-256 is
 `b3ac361b708183440587a8d8f434bf39ba573016422aab0ba2c7bee21aae4d09`;
 the retained local consumer report SHA-256 is
 `61b3e20ef3682158f1555e4b1220f701c9152d451bca52be284399ede574c4f7`.
-The repository source URL is now configured; independent deployment/consumer
-review remains pending. Documentation describes obligations and limitations;
-it does not make the security acceptance checklist pass.
+The repository source URL is now configured; no independent deployment/consumer
+review has occurred or is required for the first release. Documentation describes
+obligations and limitations; it does not certify untested security properties.
 
 Finite boundary milestone: the full real client/runtime suite now has 14 cases
 and passes on both hosts. Five added cases verify output overflow with accurate
@@ -892,8 +953,9 @@ are removed with creation-evidence checks and both inventories are empty. Strict
 Credo/ExSlop, ExDNA (68 files, zero clones), Credence, Dialyzer, ExDoc and Actionlint
 pass. See `docs/evidence/phase8-boundaries.json` for source hashes, test seeds and
 the initially rejected fixture namespace. The live CI gate requires all 14 cases.
-These finite probes do not complete quota-controlled resource-abuse, all
-credential/control-interface, cold-cache benchmark or production-profile gates.
+These finite probes do not certify quota-controlled resource-abuse resistance,
+all credential/control-interface boundaries or a production profile. They also
+provide no cold-cache performance evidence.
 
 Warm-state benchmark milestone: the durable example now includes an opt-in,
 bounded metrics collector and 100 ms resource sampler. Each full trial runs
@@ -913,8 +975,9 @@ compiler, each analyzer and coverage. ExDNA now analyzes 71 files and Credence
 ExDoc passes. Source hashes, raw-report checksums, every sequential sample and
 measured limitations are recorded in `docs/evidence/phase8-benchmarks.json`;
 `docs/resource-qualification.md` explains the results. No cache was cleared and
-the Mac/Linux hardware and database paths differ. The cold-state, hard-profile,
-protected GitHub and final release-candidate gates remain open.
+the Mac/Linux hardware and database paths differ. These measurements do not
+establish cold-state behavior, a hard profile or protected GitHub execution.
+The final release-candidate matrix remains required under the revised scope.
 
 The benchmark milestone's fresh canonical macOS production consumer also passes
 from the built tarball, including warning-free compilation and public
@@ -952,11 +1015,11 @@ report hashes, settings, limitations and the failed delete. These experiments
 also show why 128 host tasks do not enforce a guest process-count limit. The
 namespace setup disables per-VM UID dropping/shared extraction and logs a
 ten-second failed systemd scope adoption, so its timings are not the normal
-cold-start benchmark. Minimal-profile certification remains unchecked. A
+cold-start benchmark. No minimal production profile is certified. A
 production storage design must preserve control metadata capacity and qualify
 recovery when exhausted storage prevents the worker API from cleaning up.
-Equivalent independently bounded macOS experiments, broader isolation and final
-protected CI/release evidence still remain.
+Equivalent independently bounded macOS experiments, broader isolation and
+protected real-worker GitHub execution are unverified and outside this release.
 
 A finite macOS guest-memory experiment now complements the Linux guest OOM
 result. In a neutral 256 MiB VM, a child attempted at most 384 MiB, exited with
@@ -986,18 +1049,18 @@ host, while macOS 1.14.1 has only the per-machine packed-extraction path tested
 by its twenty-sample workload. No OS cache clearing, host reboot, fabricated
 macOS cache-hit path or cold-host performance claim is needed to report these
 results. The bounded reference measurement item is complete for those explicit
-conditions; production resource certification and the remaining isolation/CI
-requirements remain open.
+conditions; they make no production resource/isolation certification claim.
 
 ### Phase 9 — Release candidate and adoption evidence
 
-Dependencies: all earlier exit conditions and section 12 gates.
+Dependencies: the in-scope earlier exit conditions and ordinary section 12 gates,
+applying the exclusions in section 1.4.
 
-- [ ] Run the complete required CI and live platform matrix on the exact release commit.
+- [ ] Run ordinary GitHub CI, the full supported Elixir/OTP compatibility matrix and the existing bounded real-runtime suites on the exact release commit. Local Linux/macOS runs with recorded identities/results/cleanup satisfy real-runtime verification; the optional protected GitHub workflow is not required.
 - [x] Build the Hex tarball, inspect its file list, and compile/test a fresh consumer from the extracted package. The repeatable package-consumer harness passes current and minimum runtime dependencies, fake-transport decoding, and explicit supervision without contacting a worker. Repeat on the final release commit; the complete release matrix is still unchecked.
 - [x] Verify production consumption excludes CI tools and example-only dependencies. Fresh `MIX_ENV=prod` consumers resolve only runtime dependencies, inspect package members/compiled modules, and compile extracted SmolBox itself with warnings as errors.
 - [ ] Confirm package name availability, license, source metadata, changelog, semantic version, and supported capability claims.
-- [ ] Record successful use by the two host examples and at least one independent consumer review.
+- [x] Record successful use by the two supplied host examples and automated fresh package consumers. Phases 8 and 9 retain these results; repeat the applicable checks on the exact release candidate. No independent consumer review is required or claimed.
 - [x] Keep publication separate from implementation and ordinary CI. No Hex publication or public service deployment is performed for this goal. A future release needs separate explicit authorization after all release evidence passes; this checkbox records the policy, not a published release.
 
 Pre-release metadata review is recorded in `docs/evidence/phase9-readiness.json`.
@@ -1008,7 +1071,8 @@ on September 7, 2026; that observation neither reserves the name nor establishes
 publishing permission. Declared licenses/notices from the nine resolved runtime
 dependencies are recorded; dependency/upstream source is not bundled. Repository
 metadata is now configured as recorded in Phase 1. Protected runner provisioning,
-independent review and remaining resource qualification are still required.
+independent review and remaining production resource/isolation qualification are
+outside the first release under section 1.4.
 No metadata review is counted as release-candidate acceptance.
 
 The updated 79-file package archive now passes fresh production consumers on
@@ -1037,10 +1101,10 @@ vulnerabilities. Audit log hashes are macOS
 `34e3de07c4d429c9596af39c72ab7c18cc171ff4db388abdc15afedf22304e4d` and Linux
 `34e3de07c4d429c9596af39c72ab7c18cc171ff4db388abdc15afedf22304e4d`.
 ExDoc passes warnings as errors. This archive is a verified **unreleased**
-artifact; it is not a final release commit or a waiver of profile, protected-CI,
-final metadata review or independent-review requirements.
+artifact; it is not a final release commit or a substitute for the remaining
+exact-candidate checks and metadata review.
 
-#### Current acceptance checkpoint (September 7)
+#### Recorded package checkpoint (September 7, before the scope revision)
 
 The latest cache evidence increases the reviewed package to 80 files. The exact
 archive retained at `/tmp/smolbox-qualification/acceptance-checkpoint.tar` has
@@ -1060,8 +1124,8 @@ runtime-only dependency isolation. All packaged file hashes match commit
 
 Documentation consistency follow-up: the security guide now reflects the
 verified macOS guest-memory and contained Linux disk/output experiments without
-certifying the remaining host controls. The CI guide distinguishes completed
-reference benchmarks from pending resource certification. The quality-tool text
+certifying the remaining host controls. The CI guide distinguished completed
+reference benchmarks from then-pending resource certification. The quality-tool text
 now describes the actually compiled/executed dependencies instead of the initial
 proposal. No runtime or CI policy code changed.
 
@@ -1076,34 +1140,47 @@ all runtime and package-configuration bytes match it. The earlier minimum/Linux
 consumer runs are not represented as reruns of this new documentation archive.
 The final release-commit matrix is still required.
 
-The working implementation is not a fully accepted release candidate. Remaining
-dependencies and the work they unlock are:
+#### Current acceptance after the scope revision
 
-- **Verified minimal resource profile and dedicated qualification environment:**
-  the current pinned runtime/development setup has no certified host RSS,
-  CPU-time, process-count or disk profile on both platforms. Strict requests for
-  unsupported controls remain rejected. Remaining hostile-output/protocol,
-  credential and endpoint cases must run under suitable independently enforced
-  host boundaries. Finite guest OOM and Linux enclosure results do not replace
-  that requirement.
-- **Protected CI infrastructure:** the checked-in jobs and tested local gate
-  helpers still need protected environments and disposable
-  Linux/macOS runners with independent teardown. Local SSH/macOS runs cannot
-  stand in for successful protected GitHub runs. Provisioning requirements are
-  explicit in `scripts/ci/README.md`.
-- **Independent consumer review:** the two supplied applications and four
-  automated production consumers pass, but they are not a review by an
-  independent consumer. No external review or message to a reviewer is claimed.
-- **Final exact release-commit matrix:** run all required jobs and real suites,
-  review claims/version/source metadata and recheck Hex availability after the
-  preceding dependencies are resolved. This checkpoint keeps version
-  `0.1.0-dev`; it does not authorize publishing.
+The working implementation is not yet a fully accepted release candidate. The
+three workstreams in section 1.4 are excluded, with no new certification claim.
+Remaining release work is:
 
-Both normal development workers have empty inventories. The namespace preflight,
-two contained Linux workers and fresh-cache worker are inactive, with their
-owned process/cgroup teardown verified. No unrelated workload or upstream source
-was modified. Private evidence, durable records and keys are retained for
-inspection/recovery. Nothing was published to Hex or deployed as a public service.
+- **Exact-candidate checks:** pass ordinary GitHub CI, all supported Elixir/OTP
+  compatibility lanes, the existing 14 client/runtime cases and 25 durable cases
+  per canonical platform, and the three existing service-fault scenarios per
+  platform. Use recorded local Linux/macOS runs for the real-worker suites;
+  include source/runtime/image identities, pass counts and verified cleanup.
+  Keep shared-database runs sequential. Additional hostile-workload experiments
+  and protected GitHub worker runs are not required.
+- **Final package verification:** build the candidate archive, check its allowlist,
+  render documentation with warnings as errors, and run fresh current/minimum
+  dependency consumers on both hosts against that same archive. Earlier archive
+  hashes remain milestone evidence, not results for subsequently changed bytes.
+- **Metadata and claims review:** finalize version/changelog/source references,
+  review license and package metadata, recheck Hex name availability, and confirm
+  every capability claim fits the measured development-qualified contract.
+  Unsupported hard controls and unqualified isolation properties remain explicit.
+
+The two supplied host examples and automated consumers provide the planned
+adoption evidence. No independent review is claimed. Version remains `0.1.0-dev`
+until the final metadata decision; this scope change does not authorize publishing.
+
+Scope-revision validation: the documentation builds with ExDoc warnings treated
+as errors, formatting passes, and a fresh canonical macOS production consumer
+passes with the updated 80-file archive, including client/supervisor smoke checks
+and runtime-only dependencies. Its SHA-256 is
+`7b882cfa5ade9ab7ab73082a8c9493b1f2eb6fc98f968a2f29a5f99a6a4c7b63`;
+the report and archive are retained under `/tmp/smolbox-scope-review.jjrRZc`.
+Only documentation changed. Runtime behavior, tests, workflow guards and historical
+evidence files are unchanged; the final candidate matrix remains to be run.
+
+At the recorded worker checkpoint, both normal development workers had empty
+inventories. The namespace preflight, two contained Linux workers and fresh-cache
+worker were inactive, with their owned process/cgroup teardown verified. No
+unrelated workload or upstream source was modified. Private evidence, durable
+records and keys were retained for inspection/recovery. The scope revision ran
+no new worker experiments and published nothing to Hex or a public service.
 
 Exit: package documentation and behavior agree; remaining unsupported capabilities are visible. Hex publication is not part of ordinary CI or this planning task.
 
@@ -1255,16 +1332,21 @@ Use the pinned Mix version's `test_coverage` summary threshold configuration and
 | `smolbox-docs-package` | Docs, Hex build, tar inspection, fresh consumer | No docs warnings; usable package without CI/example dependencies |
 | `smolbox-minimum-dependencies` | Fresh production consumer with minimum direct dependencies on Elixir 1.18.4/OTP 27.3.4.15 | Explicit dependency versions, package compilation and public API/supervisor smoke checks pass |
 | `smolbox-required` | Ordinary CI aggregate with explicit dependency-result checks | Every ordinary check succeeds; missing, failed, cancelled or skipped dependencies fail |
-| `smolbox-runtime-candidate` | Manual qualification: infrastructure enablement and exact candidate commit | Infrastructure is explicitly enabled; checked-out commit is passed to both platforms |
-| `smolbox-linux-runtime` | Manual qualification: pinned real Linux worker suite | KVM and runtime preflight succeeds; required cases execute |
-| `smolbox-macos-runtime` | Manual qualification: pinned real macOS arm64 suite | Virtualization preflight succeeds; required cases execute |
-| `smolbox-runtime-required` | Manual qualification aggregate | Candidate preparation and both platforms succeed; missing, failed, cancelled or skipped dependencies fail |
+| `smolbox-runtime-candidate` | Optional manual qualification: infrastructure enablement and exact candidate commit | Infrastructure is explicitly enabled; checked-out commit is passed to both platforms |
+| `smolbox-linux-runtime` | Optional manual qualification: pinned real Linux worker suite | KVM and runtime preflight succeeds; required cases execute |
+| `smolbox-macos-runtime` | Optional manual qualification: pinned real macOS arm64 suite | Virtualization preflight succeeds; required cases execute |
+| `smolbox-runtime-required` | Optional manual qualification aggregate | Candidate preparation and both platforms succeed; missing, failed, cancelled or skipped dependencies fail |
 
 Ordinary untrusted PRs run deterministic/quality/package checks on disposable hosted runners without worker credentials. Real-VM jobs run only on isolated trusted infrastructure after code is eligible for that environment; never run arbitrary fork PR code on a persistent privileged self-hosted worker or via `pull_request_target` with secrets.
 
-Push and pull-request CI requires the ordinary quality, deterministic, durable-store and package checks and contains no real-worker jobs. Request real-worker qualification through the separate `SmolBox Runtime Qualification` workflow for a reviewed candidate. Missing, skipped or failed platform jobs fail that workflow. A release requires successful ordinary CI and real-worker evidence on both supported platforms for the same exact release commit; the manual workflow does not rerun ordinary CI. Ordinary CI success alone does not satisfy that release requirement.
+Push and pull-request CI requires the ordinary quality, deterministic, durable-store and package checks and contains no real-worker jobs. A release requires successful ordinary CI and the existing real-worker regression suites on both supported platforms for the same exact release commit. Recorded local Linux/macOS runs satisfy the latter requirement. Ordinary CI success alone does not supply that runtime evidence.
 
-The runtime qualification workflow is dispatched explicitly
+The separate `SmolBox Runtime Qualification` workflow is retained as optional
+tooling; provisioning and using it are outside the first-release scope. If it is
+dispatched, missing, skipped or failed platform jobs still fail the workflow.
+It does not rerun ordinary CI.
+
+If used, the runtime qualification workflow is dispatched explicitly
 after the operator provisions isolated disposable workers and protects the two
 runtime environments. Its preflight verifies the selected private listener,
 pinned executable and wrapper, native artifacts, database socket and empty
@@ -1273,12 +1355,13 @@ not attestation. The bounded runner rejects zero, partial, excluded or skipped
 ExUnit suites and kills only its owned command process group on timeout/overflow.
 That does not prove guest cleanup: an independent host lifecycle must cover
 runner loss and cancellation. The exact provisioning and dispatch contract is
-in `scripts/ci/README.md`. Persistent local macOS and `ssh linux` qualification
-are explicitly development evidence, not successful protected GitHub jobs.
+in `scripts/ci/README.md`. Local macOS and `ssh linux` runs must be labeled as
+development-host validation. They can satisfy first-release functional checks,
+but do not certify production isolation or protected GitHub worker execution.
 
 ### 12.8 Workflow implementation details
 
-- Run ordinary CI on every push and pull request, with an always-reported aggregate status and no runtime job dependencies. Use a separate manual workflow for runtime qualification, record its checked-out candidate commit, and pass that exact identity to both platforms. Its aggregate must require candidate preparation and both platforms to succeed.
+- Run ordinary CI on every push and pull request, with an always-reported aggregate status and no runtime job dependencies. Retain the separate manual workflow as optional tooling for provisioned infrastructure. When dispatched, it records its checked-out candidate commit, passes that exact identity to both platforms, and requires candidate preparation and both platforms to succeed.
 - Use `erlef/setup-beam` and checkout/cache/upload actions pinned to reviewed full commit SHAs. Record the corresponding action versions in comments and automate reviewed updates. [setup-beam](https://github.com/erlef/setup-beam).
 - Keep permissions read-only by default. Publishing has a separate protected workflow and narrowly scoped credentials.
 - Use exact matrix entries and report actual `elixir --version`, OTP, dependency lock hash, and SmolVM/image versions in job artifacts.
@@ -1324,19 +1407,25 @@ macOS per-machine extraction has no equivalent shared-cache hit path. Benchmark
 results apply only to the stated workload and cache/host conditions. Broader
 performance claims and host-isolation certification need their own evidence.
 
-SmolBox's initial performance objective is bounded controller behavior and acceptable measured end-to-end latency for the reference workloads; optimize only after correctness and isolation gates pass.
+SmolBox's initial performance objective is bounded controller behavior and
+documented end-to-end latency for the reference workloads. Optimize within the
+tested contract after correctness checks pass; performance work must not broaden
+permissions or imply stronger isolation guarantees.
 
 ## 14. Release checklist and unresolved decisions
 
-### 14.1 Release blockers
+### 14.1 Required final-candidate checks
 
-- [ ] Certified minimal execution profile with each hard limit tied to real enforcement evidence.
+These boxes track verification of the final candidate, even where earlier
+milestones passed. The three workstreams excluded in section 1.4 are not blockers.
+
+- [ ] Release claims describe the development-qualified contract, with unsupported hard controls rejected and no production isolation certification claim.
 - [ ] Private worker control interface and tested authenticated remote access.
 - [ ] No hidden exec retries after ambiguous acceptance.
 - [ ] Accurate unknown-outcome, cancellation, collection, and cleanup reporting.
 - [ ] Durable host example and store conformance pass across process restart.
 - [ ] Every requested analyzer runs, fails correctly, and is required in CI.
-- [ ] Real Linux and macOS suites pass on the release commit; unsupported platforms are not advertised.
+- [ ] Existing real Linux and macOS suites pass on the release commit with recorded local results and cleanup; unsupported platforms are not advertised. Protected GitHub worker infrastructure is optional.
 - [ ] Package tarball is clean and usable in a fresh consumer application.
 - [ ] Documentation explains host responsibilities and library limitations without exactly-once claims.
 - [ ] License and Hex metadata are reviewed before publication. Name availability is rechecked; a previous 404 does not reserve the name.
@@ -1346,7 +1435,7 @@ SmolBox's initial performance objective is bounded controller behavior and accep
 | Decision | When | Default until resolved |
 |---|---|---|
 | Exact SmolVM patch and supported API schema | Phase 0 | Candidate v1.14.1 only; no compatibility claim |
-| Supported hard resource profile | Phase 0 and Phase 7 | Reject controls without verified enforcement |
+| Production hard resource profile | Outside first release; revisit only after a new scope decision | Development-qualified allocations/accounting only; reject unsupported hard controls |
 | Worker-side exec receipt availability | Phase 0 | Preserve uncertainty; never replay exec automatically |
 | Runtime image preparation without guest egress | Phase 0 | Prepared approved artifacts; no permission broadening |
 | Final store callback/transaction shape | Phase 4 | Behaviour plus durable host example; no database in core |

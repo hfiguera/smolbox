@@ -1,9 +1,14 @@
-# Resource qualification in progress
+# Resource evidence and unqualified boundaries
 
 No hard production execution profile is certified. The library rejects requested
 CPU-time, host-RSS, process-count and host-disk-byte controls. Its development
 profile declares guest allocations and controller admission reservations. A
 matching worker API reply is not proof of enforcement.
+
+Completing production resource/isolation qualification is outside the first
+release. The experiments below remain evidence for their recorded conditions;
+the unmeasured boundaries are not newly supported. No further certification
+campaign is scheduled, and unsupported hard controls remain rejected.
 
 ## Disk template mismatch in SmolVM 1.14.1
 
@@ -130,7 +135,7 @@ protocol frames or all server-buffering patterns.
 settings, kernel counters, raw-report/source hashes, successful checks and failed
 cleanup. The normal worker remained healthy with empty inventory after both
 trials. Equivalent independently bounded macOS experiments and broader isolation
-qualification remain open.
+qualification are unverified and outside the first release.
 
 ## Finite macOS guest-memory overload
 
@@ -151,8 +156,8 @@ unverified mapping. Both trials' owned machines were cleaned up. See
 
 This completes a finite guest-allocation/overload observation on each platform.
 It does not provide independent macOS host RSS, CPU-time, disk or process limits,
-nor qualify arbitrary hostile protocols. Those production-profile requirements
-remain open.
+nor qualify arbitrary hostile protocols. Those production-profile guarantees
+remain unsupported.
 
 ## Measured durable-host workload
 
@@ -264,14 +269,17 @@ availability from OS-host startup. Network image acquisition, pristine-host boot
 and statistically broad cold-cache distributions remain unmeasured and are not
 part of the reported performance claim.
 
-## Remaining evidence
+## Evidence needed for stronger future claims
 
-Required work includes broader CPU/process/output and hostile-protocol
-qualification, independently bounded macOS resource experiments, broader
-credential/control-plane tests and actual protected release-worker jobs.
+Broader CPU/process/output and hostile-protocol qualification, independently
+bounded macOS resource experiments and comprehensive credential/control-plane
+tests are outside the first release. They would need a new scope decision and
+actual evidence before supporting stronger claims. Protected real-worker GitHub
+infrastructure is also outside the first release; recorded local runs of the
+existing functional suites remain part of final-candidate validation.
 Pristine-host and broader cold-cache performance data would need separate trials
 before making claims about those conditions. The contained Linux disk-full and finite slow-reader
 experiments above cover specific workloads and expose a cleanup limitation. Finite
 output/path probes and the workload above cover specific behavior; passing them
-does not substitute for exhaustion/isolation experiments. The implementation plan
-keeps minimal-profile certification unchecked.
+does not substitute for exhaustion/isolation experiments. Excluding those
+experiments from release acceptance does not certify a production profile.

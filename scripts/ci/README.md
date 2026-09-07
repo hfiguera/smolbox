@@ -5,8 +5,10 @@ package checks on disposable hosted runners for every push and pull request.
 It can also be dispatched manually. It contains no real-worker jobs.
 
 `SmolBox Runtime Qualification` (`smolbox-runtime-qualification.yml`) is a separate,
-manual-only workflow. It verifies the infrastructure enablement variable, records
-the checked-out candidate commit, and calls the shared `smolbox-live.yml` worker
+optional manual-only workflow. Provisioning and running its protected worker
+infrastructure are outside the first-release scope. It remains available for
+future use after an explicit infrastructure decision. It verifies the enablement
+variable, records the checked-out candidate commit, and calls the shared `smolbox-live.yml` worker
 workflow once for Linux and once for macOS. A dispatch with infrastructure
 disabled fails before scheduling real-worker jobs.
 
@@ -19,13 +21,16 @@ Their commands are `elixir scripts/ci.exs required` and
 `elixir scripts/ci.exs runtime-required`, respectively.
 
 A passing ordinary CI run establishes its tested library checks. Release
-qualification separately requires successful ordinary CI and real-worker evidence
-for the same exact candidate commit. The manual workflow does not rerun ordinary
-CI. Dispatch that reviewed commit through a maintainer-controlled branch/ref;
-live jobs check out the recorded commit, and their preflight records it.
+validation requires successful ordinary CI and the existing bounded real-worker
+suites for the same exact candidate commit. Recorded local Linux/macOS runs can
+supply this evidence, with source/runtime/image identities, results and verified
+cleanup. They establish development-host behavior, not production isolation.
+The optional manual workflow does not rerun ordinary CI. If used, dispatch the
+reviewed commit through a maintainer-controlled branch/ref; live jobs check out
+the recorded commit, and their preflight records it.
 Validating another branch tip does not qualify the release candidate.
 
-## Enable protected live workers only after provisioning
+## Optional protected workflow: requirements before enabling
 
 The checked-in workflows do not provision workers or configure GitHub protections.
 Before setting repository variable `SMOLBOX_TRUSTED_RUNTIME_ENABLED` to `true`:
@@ -103,9 +108,9 @@ The client/runtime suite includes finite output overflow, blocked observers,
 file-transfer caps, packed-image symlink behavior, guest FIFO reads and selected
 host/control endpoint probes. Successful characterization of an upstream
 limitation is not a claim that the limitation supplies isolation.
-Hard resource-abuse certification remains a separate, incomplete acceptance item;
-this workflow does not certify it by declaration. The recorded development-host
-benchmarks cover their stated workloads and image-cache conditions. The live
+Hard resource-abuse certification is incomplete and outside first-release
+acceptance; this workflow does not certify it by declaration. The recorded
+development-host benchmarks cover their stated workloads and image-cache conditions. The live
 workflow does not rerun those benchmarks or establish broader performance claims.
 Dispatch `SmolBox Runtime Qualification` for the reviewed candidate when the
 infrastructure is ready. There is no runtime toggle in `SmolBox CI`. Successful
@@ -121,8 +126,9 @@ not treated as OS-process cleanup. It exclusively reserves the report file befor
 launching a command. It rejects zero, partial, skipped or excluded suites.
 Normal non-ExUnit commands require exit zero.
 Failure reports contain status, byte count and output digest, without raw test
-arguments or output. A killed controller is not confirmed guest cleanup: the
-external disposable-worker lifecycle remains mandatory.
+arguments or output. A killed controller is not confirmed guest cleanup. The
+optional GitHub workflow still requires its external disposable-worker lifecycle;
+local runs must verify owned-resource cleanup and report unresolved outcomes.
 
 Only bounded JSON reports are uploaded. VM disks, database payloads, private keys
 and guest code/output are excluded. Store/service test files remain private until
