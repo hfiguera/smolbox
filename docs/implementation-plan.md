@@ -1,19 +1,25 @@
 # SmolBox implementation plan
 
-Status: **0.1.0 final-release preparation and exact-commit validation in progress**,
-September 7, 2026. The maintainer explicitly authorized publication of the validated
-`v0.1.0` tag, Hex package and HexDocs, followed by the GitHub Release. This later
-authorization supersedes historical no-publication instructions for this release
-only; production resource/isolation certification and the other section 1.4
-exclusions remain unchanged.
+Status: **0.1.0 published and verified**, September 7, 2026. Tag `v0.1.0` identifies
+validated commit `21b3e92fa4feaa4d86d4ac6981ddacf50388d641`. The complete required final-commit matrix passed:
+18 ordinary GitHub jobs, eight compatibility lanes with 186 deterministic cases
+each, all analyzers/canaries, 95.40% coverage, documentation checks, real workers,
+durable recovery, host examples, package consumers and owned-resource cleanup.
 
-Prepare final metadata before freezing the commit. Repeat the required eight
-Linux/macOS toolchain lanes, canonical quality checks, real runtime/recovery and
-host-example checks, ordinary GitHub CI, and four consumers of one exact archive.
-After acceptance, push the version tag, publish and verify Hex/HexDocs from that
-same source, then publish the GitHub Release. Preserve RC tags and historical
-evidence, and record the final validation/publication in a separate repository-only
-attestation under `docs/release-candidates/0.1.0.md` and its JSON companion.
+The maintainer explicitly authorized this publication after the earlier RC-only
+work. [Hex](https://hex.pm/packages/smolbox/0.1.0) and
+[HexDocs](https://hexdocs.pm/smolbox/0.1.0/) were published and verified before the
+[GitHub Release](https://github.com/hfiguera/smolbox/releases/tag/v0.1.0).
+The downloaded Hex tarball matches the validated 84-file archive, and fresh
+macOS/Linux consumers successfully installed the documented Hex dependency.
+
+See the [0.1.0 release report](release-candidates/0.1.0.md) and its
+[machine-readable evidence](release-candidates/0.1.0.json). No required work remains
+for this release under section 1.4. Production resource/isolation certification,
+protected real-worker GitHub provisioning and independent consumer review remain
+excluded; no production profile is certified. Historical RC evidence and tags
+remain unchanged. This later repository-only attestation does not replace the
+validated release commit.
 
 ## RC2 acceptance checkpoint
 
@@ -1246,7 +1252,7 @@ applying the exclusions in section 1.4.
 - [x] Verify production consumption excludes CI tools and example-only dependencies. Fresh `MIX_ENV=prod` consumers resolve only runtime dependencies, inspect package members/compiled modules, and compile extracted SmolBox itself with warnings as errors.
 - [x] Confirm package name availability, license, source metadata, changelog, semantic version, and supported capability claims.
 - [x] Record successful use by the two supplied host examples and automated fresh package consumers. Phases 8 and 9 retain the milestone results; both examples and all four consumers also passed on the exact release candidate. No independent consumer review is required or claimed.
-- [x] Keep publication separate from implementation and ordinary CI. No Hex publication or public service deployment is performed for this goal. A future release needs separate explicit authorization after all release evidence passes; this checkbox records the policy, not a published release.
+- [x] Keep publication separate from implementation and ordinary CI. The original implementation and RC validation published no package. The maintainer subsequently authorized 0.1.0 publication after successful final-commit validation; the release report records its completed Hex/HexDocs and GitHub publication. Ordinary CI does not publish packages or deploy services.
 
 #### Historical metadata and package checkpoints
 
@@ -1395,6 +1401,20 @@ with 30 connections and Unix sockets only. Both had zero reservations/due work
 and no noninternal test triggers before shutdown; actual outage checks then
 failed closed. Original worker services and Linux's shared database were preserved.
 Section 1.4's exclusions remain unchanged; no package or service was published.
+
+#### 0.1.0 release acceptance and publication (September 7, 2026)
+
+**Published and verified:** `0.1.0` at `21b3e92fa4feaa4d86d4ac6981ddacf50388d641`, tagged `v0.1.0`.
+All required exact-commit checks passed. The [release report](release-candidates/0.1.0.md)
+and its JSON companion record the eight compatibility lanes, canonical quality
+checks, both complete native runtime/recovery matrices, four archive consumers,
+metadata review and cleanup. No excluded qualification is claimed complete.
+
+The 84-file archive has SHA-256 `2bc04c69839941a2b7bad26fdec1b668c243c4e583798497f7d8421b57d25b3e`. After the separately authorized
+publication, the downloaded Hex package matched those exact bytes. Two additional
+macOS/Linux consumers installed and exercised the public Hex package. Versioned
+HexDocs and source links were verified before publishing the GitHub Release.
+The later repository-only attestation commit does not change the release tag.
 
 #### Candidate freeze and validation records
 
