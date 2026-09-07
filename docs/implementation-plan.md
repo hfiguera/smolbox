@@ -622,23 +622,26 @@ Deliverables: compatibility/security notes and attributed wire fixtures. Exit: t
 
 Dependencies: initial Phase 0 version decisions.
 
-- [x] Create `mix.exs`, explicit package metadata, source URL, runtime dependencies, development tools, formatter, and documentation setup. The project source URL and Hex GitHub link point to `https://github.com/hfiguera/smolbox`; ExDoc generates source links against `main`. The private repository is configured as `origin`.
+- [x] Create `mix.exs`, explicit package metadata, source URL, runtime dependencies, development tools, formatter, and documentation setup. The project source URL and Hex GitHub link point to `https://github.com/hfiguera/smolbox`; candidate ExDoc source links target `v0.1.0-rc.1`. The private repository is configured as `origin`.
 - [x] Use environment-specific compilation paths so `dev/mix/tasks` is excluded from production consumers.
 - [x] Commit the maintainer lockfile and exact toolchain pins; do not rely on the lockfile to constrain downstream Hex consumers.
 - [x] Implement the Credence CI wrapper and quality-check canaries described in section 12.
 - [x] Add root-level GitHub workflows and the local `mix ci` entry point. `SmolBox CI` covers deterministic/quality/compatibility/security/docs/package checks and the durable store on push, pull request or manual dispatch. The optional manual-only `SmolBox Runtime Qualification` workflow requires candidate preparation and protected Linux/macOS live jobs when dispatched. Each workflow has a fixed dependency-result gate rejecting missing, failed, cancelled and skipped checks. Ordinary jobs have executed on GitHub. Provisioning and running protected real-worker CI are outside the first-release scope; local real-runtime evidence remains required.
 - [x] Require every requested analyzer; verify intentional bad fixtures produce a failing process. Compiler, all five analyzers, and coverage have verified clean/bad counterparts.
-- [x] Configure packaging exclusions for references, nested repositories, credentials, caches, VM state, and CI-only code. A fresh production consumer compiled from the tarball without quality tools; API/supervisor smoke checks remain for later phases.
+- [x] Configure packaging exclusions for references, nested repositories, credentials, caches, VM state, and CI-only code. A fresh production consumer compiled from the scaffold tarball without quality tools. Phase 9 subsequently verified public API/supervisor smoke checks in all four final-candidate consumers.
 
 Exit: an intentionally introduced compiler warning, Credo/ex_slop issue, duplicate, Credence issue, or Dialyzer violation fails its gate. Clean scaffold passes; no live workers are contacted by routine CI.
 
-Repository metadata validation (September 7): formatting and ExDoc with warnings
-treated as errors pass. All 168 generated source links target `main`, with file
-paths and line numbers checked against the local source. The built Hex archive
-contains the GitHub and upstream links; its 80 allowed files pass the canonical
+Initial repository metadata checkpoint (September 7, before the candidate freeze):
+formatting and ExDoc with warnings treated as errors passed. At that checkpoint,
+all 168 generated source links targeted `main`, with file paths and line numbers
+checked against the local source. The built Hex archive contained the GitHub and
+upstream links; its 80 allowed files passed the canonical
 macOS fresh production-consumer checks, including warning-as-error compilation,
-client/supervisor smoke checks and runtime-only dependencies. This verifies the
-metadata update without changing repository visibility or publishing the package.
+client/supervisor smoke checks and runtime-only dependencies. That checkpoint
+verified the initial metadata update without changing repository visibility or
+publishing the package. Phase 9 subsequently verified all 168 candidate source
+links against `v0.1.0-rc.1` and confirmed the remote tag resolves to the tested commit.
 
 Maintainer-tool migration (September 7): all eleven Python scripts and test files
 have been removed. `elixir scripts/ci.exs` dispatches the required-status gate,
@@ -974,16 +977,18 @@ transport calls, so a killed observer cannot hide a possible dispatch merely
 because its completed duration is missing. These remain client measurements,
 not worker acceptance receipts.
 
-The complete local `mix ci` passes on macOS and Linux: 156 deterministic cases,
+At the benchmark milestone, the complete local `mix ci` passed on macOS and Linux:
+156 deterministic cases,
 all five analyzers, and a separately repeated clean/bad canary pair for the
-compiler, each analyzer and coverage. ExDNA now analyzes 71 files and Credence
-122, including the benchmark. Both durable examples pass forced Dialyzer checks.
-ExDoc passes. Source hashes, raw-report checksums, every sequential sample and
+compiler, each analyzer and coverage. ExDNA analyzed 71 files and Credence
+122, including the benchmark. Both durable examples passed forced Dialyzer checks.
+ExDoc passed. Source hashes, raw-report checksums, every sequential sample and
 measured limitations are recorded in `docs/evidence/phase8-benchmarks.json`;
 `docs/resource-qualification.md` explains the results. No cache was cleared and
 the Mac/Linux hardware and database paths differ. These measurements do not
 establish cold-state behavior, a hard profile or protected GitHub execution.
-The final release-candidate matrix remains required under the revised scope.
+The final release-candidate matrix was still pending at this benchmark checkpoint;
+Phase 9 records its subsequent completion under the revised scope.
 
 The benchmark milestone's fresh canonical macOS production consumer also passes
 from the built tarball, including warning-free compilation and public
@@ -1108,9 +1113,9 @@ no retired/security-advisory packages and `mix deps.audit` no known
 vulnerabilities. Audit log hashes are macOS
 `34e3de07c4d429c9596af39c72ab7c18cc171ff4db388abdc15afedf22304e4d` and Linux
 `34e3de07c4d429c9596af39c72ab7c18cc171ff4db388abdc15afedf22304e4d`.
-ExDoc passes warnings as errors. This archive is a verified **unreleased**
-artifact; it is not a final release commit or a substitute for the remaining
-exact-candidate checks and metadata review.
+ExDoc passed warnings as errors at this checkpoint. This verified **unreleased**
+archive remains historical milestone evidence. The final candidate acceptance
+below records the subsequent exact-candidate checks and metadata review.
 
 #### Recorded package checkpoint (September 7, before the scope revision)
 
@@ -1146,7 +1151,8 @@ The report SHA-256 is
 Only packaged `docs/security.md` differs from the four-consumer checkpoint above;
 all runtime and package-configuration bytes match it. The earlier minimum/Linux
 consumer runs are not represented as reruns of this new documentation archive.
-The final release-commit matrix is still required.
+The final release-commit matrix was still pending at this documentation checkpoint;
+its subsequent completion is recorded below.
 
 #### Final candidate acceptance (September 7, 2026)
 
@@ -1334,7 +1340,10 @@ MIX_ENV=test mix smolbox.ci.credence
 MIX_ENV=test mix dialyzer
 ```
 
-`mix smolbox.ci.credence` and `mix smolbox.ci.verify_checks` are tasks this project must implement. They are not commands supplied by an existing dependency. Real-runtime tests require an explicit separate command and capability preflight; ordinary `mix ci` must not silently contact a local or remote sandbox worker.
+`mix smolbox.ci.credence` and `mix smolbox.ci.verify_checks` are project-owned tasks
+implemented under `dev/mix/tasks/`. Both executed successfully during final-candidate
+validation. Real-runtime tests require an explicit separate command and capability
+preflight; ordinary `mix ci` must not silently contact a local or remote sandbox worker.
 
 Additional CI commands, with the needed development dependencies configured:
 
