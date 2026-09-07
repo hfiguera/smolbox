@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Conservative real-worker selection; unknown scope never grants a live-test skip."""
+"""Identify the CI candidate and select explicitly requested runtime qualification."""
 
 import argparse
 import json
@@ -9,21 +9,14 @@ import re
 import subprocess
 
 
-def documentation_only(path):
-    parts = pathlib.PurePosixPath(path).parts
-    if any(part in ("..", ".") for part in parts) or path.startswith("/"):
-        return False
-    if path in ("README.md", "CHANGELOG.md"):
-        return True
-    if path.startswith("docs/") and path.endswith(".md"):
-        return True
-    return False
-
-
-def needs_runtime(paths, event):
-    # A dispatch is also the release/candidate-validation entry point, even
-    # when its most recent commit only records documentation or evidence.
-    return event == "workflow_dispatch" or not paths or not all(map(documentation_only, paths))
+def needs_runtime(event, requested):
+    if event not in ("push", "pull_request", "workflow_dispatch"):
+        raise ValueError("unsupported CI event")
+    if requested not in ("true", "false"):
+        raise ValueError("runtime qualification selection must be true or false")
+    if requested == "true" and event != "workflow_dispatch":
+        raise ValueError("runtime qualification requires a manual dispatch")
+    return requested == "true"
 
 
 def revision(value):
@@ -61,6 +54,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--event", choices=["push", "pull_request", "workflow_dispatch"], required=True)
     parser.add_argument("--payload", type=pathlib.Path, required=True)
+    parser.add_argument("--qualify-runtime", choices=["true", "false"], required=True)
     args = parser.parse_args()
     with args.payload.open("rb") as stream:
         payload_bytes = stream.read(1024 * 1024 + 1)
@@ -68,7 +62,7 @@ def main():
         raise ValueError("event payload exceeded CI bound")
     payload = json.loads(payload_bytes)
     head, paths = changes(args.event, payload)
-    required = needs_runtime(paths, args.event)
+    required = needs_runtime(args.event, args.qualify_runtime)
     report = {"commit": head, "runtime_required": required, "changed_path_count": len(paths)}
     print(json.dumps(report, sort_keys=True))
     if output_file := os.environ.get("GITHUB_OUTPUT"):

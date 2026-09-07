@@ -35,7 +35,11 @@ jobs:
           persist-credentials: false
       - run: python3 -m unittest discover -s scripts/ci -p 'test_*.py' -v
       - id: scope
-        run: python3 scripts/ci/classify_changes.py --event "$GITHUB_EVENT_NAME" --payload "$GITHUB_EVENT_PATH"
+        env:
+          QUALIFY_RUNTIME: ${{ github.event_name == 'workflow_dispatch' && inputs.qualify_runtime && 'true' || 'false' }}
+        run: >-
+          python3 scripts/ci/classify_changes.py --event "$GITHUB_EVENT_NAME"
+          --payload "$GITHUB_EVENT_PATH" --qualify-runtime "$QUALIFY_RUNTIME"
 
   smolbox-format-compile:
     runs-on: ubuntu-24.04

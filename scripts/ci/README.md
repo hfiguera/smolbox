@@ -1,18 +1,25 @@
 # SmolBox CI infrastructure contract
 
 The ordinary workflow runs quality, deterministic, durable-store and package
-checks on disposable hosted runners. Its path classifier permits live-test skips
-only for root `README.md`, root `CHANGELOG.md`, and `docs/**/*.md`. Unknown files, empty
-diffs, code/configuration changes and every manual dispatch require real-worker
-evidence. Renames inspect both old and new paths. Evidence JSON changes are
-conservatively treated as requiring validation.
+checks on disposable hosted runners for every push and pull request. Real-worker
+qualification is optional and runs only on manual dispatch with `qualify_runtime:
+true`. A manual dispatch with the option disabled runs ordinary CI as well.
+
+`smolbox-change-scope` records the checked-out commit and changed-path count. Its
+`runtime_required` output reflects the explicit manual qualification input; file
+paths do not make real-worker checks mandatory. First pushes, empty diffs and
+code changes all use the same ordinary CI policy.
 
 `smolbox-required` rejects missing, failed, cancelled and unexpectedly skipped
-dependencies. A code PR can finish its ordinary checks while the aggregate still
-fails because trusted live validation is pending. This is intentional. Dispatch
-the exact reviewed candidate commit through a maintainer-controlled branch/ref;
-live jobs check out the classifier's commit, and their preflight records it.
-Validating another branch tip does not qualify the PR's merge candidate.
+dependencies. Only the two live jobs may be skipped when qualification was not
+requested. When it was requested, both platform jobs must succeed; disabled or
+missing infrastructure cannot turn that request into a successful skip.
+
+A passing ordinary CI run establishes its tested library checks. Release
+qualification separately requires real-worker evidence for the exact candidate
+commit. Dispatch that reviewed commit through a maintainer-controlled branch/ref;
+live jobs check out the selected commit, and their preflight records it.
+Validating another branch tip does not qualify the release candidate.
 
 ## Enable protected live workers only after provisioning
 
@@ -94,8 +101,9 @@ Hard resource-abuse certification remains a separate, incomplete acceptance item
 this workflow does not certify it by declaration. The recorded development-host
 benchmarks cover their stated workloads and image-cache conditions. The live
 workflow does not rerun those benchmarks or establish broader performance claims.
-Choose `qualify_runtime: true` when dispatching the reviewed candidate. A dispatch
-with the option disabled still fails its required live-evidence gate.
+Choose `qualify_runtime: true` when dispatching the reviewed candidate for runtime
+qualification. With the option disabled, a successful run establishes ordinary
+CI only and supplies no new runtime evidence.
 
 ## Bounded reports and local verification
 

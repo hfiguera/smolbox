@@ -13,13 +13,13 @@ class RequiredStatusTest(unittest.TestCase):
     def test_complete_live_matrix_passes(self):
         self.assertEqual(failures(self.baseline()), {})
 
-    def test_runtime_changes_cannot_pass_with_skipped_live_jobs(self):
+    def test_requested_qualification_cannot_pass_with_skipped_live_jobs(self):
         for job in LIVE:
             results = self.baseline()
             results[job]["result"] = "skipped"
             self.assertEqual(failures(results), {job: "skipped"})
 
-    def test_only_explicit_documentation_policy_permits_live_skips(self):
+    def test_ordinary_run_permits_only_live_skips(self):
         results = self.baseline("false")
         for job in LIVE:
             results[job]["result"] = "skipped"
