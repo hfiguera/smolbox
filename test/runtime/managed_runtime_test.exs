@@ -71,24 +71,23 @@ defmodule SmolBox.ManagedRuntimeTest do
     store = start_supervised!(Memory)
     objects = start_supervised!({Agent, fn -> %{} end})
 
-    runtime =
-      start_supervised!(
-        {Runtime,
-         [
-           name: SmolBox.RealRuntime,
-           namespace: "sbxmanaged",
-           mode: :ephemeral,
-           store: {Memory, store},
-           fingerprint_key: :crypto.strong_rand_bytes(32),
-           artifact_store: {TestArtifacts, objects},
-           workers: [configured],
-           poll_ms: 50,
-           lease_ms: 5000
-         ]}
-      )
+    options = [
+      name: SmolBox.RealRuntime,
+      namespace: "sbxmanaged",
+      mode: :ephemeral,
+      store: {Memory, store},
+      fingerprint_key: :crypto.strong_rand_bytes(32),
+      artifact_store: {TestArtifacts, objects},
+      workers: [configured],
+      poll_ms: 50,
+      lease_ms: 5000
+    ]
+
+    runtime = start_supervised!({Runtime, options})
 
     %{
       runtime: runtime,
+      options: options,
       store: store,
       objects: objects,
       profile: profile,
@@ -214,20 +213,13 @@ defmodule SmolBox.ManagedRuntimeTest do
       )
 
     {counts, port} = SmolBox.RuntimeProxy.start(context.client.worker.base_url, gate)
-    {:ok, config} = GenServer.call(Runtime.coordinator(context.runtime), :config)
 
     {:ok, endpoint} =
       Worker.new("managed", "http://127.0.0.1:#{port}", allow_insecure_loopback: true)
 
     {:ok, client} = Client.new(endpoint)
-    [worker] = config.workers
-
-    options =
-      config
-      |> Map.from_struct()
-      |> Map.delete(:owner)
-      |> Map.put(:workers, [%{worker | client: client}])
-      |> Map.to_list()
+    [worker] = context.options[:workers]
+    options = Keyword.put(context.options, :workers, [%{worker | client: client}])
 
     stop_supervised!(Runtime)
     runtime = start_supervised!({Runtime, options})

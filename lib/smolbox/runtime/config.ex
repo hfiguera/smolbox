@@ -16,12 +16,14 @@ defmodule SmolBox.Runtime.Config do
     poll_ms: [type: :pos_integer, default: 250],
     lease_ms: [type: :pos_integer, default: 30_000],
     cleanup_attempts: [type: :pos_integer, default: 5],
+    telemetry_max_pending: [type: :pos_integer, default: 128],
+    telemetry_timeout_ms: [type: :pos_integer, default: 100],
     clock: [type: :atom, default: SmolBox.Runtime.Clock]
   ]
 
   @enforce_keys Keyword.keys(@schema) ++ [:owner]
   @derive {Inspect, only: [:name, :namespace, :mode, :max_pending, :max_active]}
-  defstruct Keyword.keys(@schema) ++ [:owner]
+  defstruct Keyword.keys(@schema) ++ [:owner, :telemetry_table]
 
   @type t :: %__MODULE__{
           name: atom(),
@@ -36,6 +38,9 @@ defmodule SmolBox.Runtime.Config do
           poll_ms: pos_integer(),
           lease_ms: pos_integer(),
           cleanup_attempts: pos_integer(),
+          telemetry_max_pending: pos_integer(),
+          telemetry_timeout_ms: pos_integer(),
+          telemetry_table: :ets.tid() | nil,
           clock: module(),
           owner: String.t()
         }
@@ -86,6 +91,8 @@ defmodule SmolBox.Runtime.Config do
       Validation.integer?(config.poll_ms, 10, 5000) and
       Validation.integer?(config.lease_ms, 1000, 900_000) and
       config.lease_ms >= config.poll_ms * 4 and
+      Validation.integer?(config.telemetry_max_pending, 1, 1024) and
+      Validation.integer?(config.telemetry_timeout_ms, 1, 1000) and
       Validation.integer?(config.cleanup_attempts, 1, 20)
   end
 

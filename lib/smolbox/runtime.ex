@@ -4,12 +4,16 @@ defmodule SmolBox.Runtime do
 
   Starting the library application alone opens no worker connections and starts
   no scheduler or database. A named runtime checks its host store semantics,
-  then starts a bounded task supervisor and a coordinator. Shutdown terminates
+  then starts a bounded work subtree and an independent notification dispatcher.
+  The work subtree couples its task supervisor and coordinator for recovery;
+  a dispatcher restart alone does not interrupt those execution processes.
+  Shutdown terminates
   observers; this is not proof of guest cancellation. Persisted due work is the
   restart authority. Durable mode never falls back to memory.
   """
   use Supervisor
-  alias SmolBox.Runtime.{Config, Coordinator}
+  alias SmolBox.Runtime.{Config, Coordinator, WorkSupervisor}
+  alias SmolBox.Telemetry.Dispatcher
 
   @spec start_link(keyword()) :: Supervisor.on_start()
   def start_link(options) do
@@ -19,19 +23,28 @@ defmodule SmolBox.Runtime do
 
   @impl Supervisor
   def init(config) do
+    config = %{config | telemetry_table: Dispatcher.table()}
+
     children = [
-      {Task.Supervisor, max_children: config.max_active + 1},
-      {Coordinator, {config, self()}}
+      {Dispatcher,
+       table: config.telemetry_table,
+       metadata: %{runtime: config.name, namespace: config.namespace},
+       max_pending: config.telemetry_max_pending,
+       timeout_ms: config.telemetry_timeout_ms},
+      {WorkSupervisor, config}
     ]
 
-    Supervisor.init(children, strategy: :one_for_all)
+    Supervisor.init(children, strategy: :one_for_one)
   end
 
   @doc false
   @spec coordinator(Supervisor.supervisor()) :: pid()
   def coordinator(runtime) do
+    {WorkSupervisor, work, :supervisor, _modules} =
+      Enum.find(Supervisor.which_children(runtime), &(elem(&1, 0) == WorkSupervisor))
+
     {Coordinator, pid, :worker, _modules} =
-      Enum.find(Supervisor.which_children(runtime), &(elem(&1, 0) == Coordinator))
+      Enum.find(Supervisor.which_children(work), &(elem(&1, 0) == Coordinator))
 
     pid
   end

@@ -4,6 +4,12 @@
 
 Implementation and upstream compatibility qualification in progress; unreleased.
 
+Managed runtimes now emit bounded, redacted asynchronous telemetry with separate
+stage timings and notification counters. Slow handlers and a dispatcher restart
+are isolated from the coordinator/execution subtree. Notifications remain lossy;
+stored execution evidence is authoritative. Worker inspection exposes configured
+capacity and allocation floors alongside health and compatibility observations.
+
 Worker configuration now requires an explicit `allocation_floor` for runtime and
 artifact disk templates plus VMM overhead. Profiles below this floor are rejected
 before acceptance and before recovered prepared work dispatches. SmolVM 1.14.1

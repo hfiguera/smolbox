@@ -81,6 +81,10 @@ defmodule SmolBox do
   @spec workers(runtime()) :: {:ok, [map()]} | {:error, Error.t()}
   def workers(runtime), do: call(runtime, :workers)
 
+  @doc "Read ephemeral notification counters; an epoch change resets them."
+  @spec telemetry_stats(runtime()) :: {:ok, map()} | {:error, Error.t()}
+  def telemetry_stats(runtime), do: call(runtime, :telemetry_stats)
+
   @doc """
   Read a bounded page of namespace candidates against stored machine assignments.
 

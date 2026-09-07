@@ -1,6 +1,6 @@
 defmodule SmolBox.Runtime.Executor do
   @moduledoc false
-  alias SmolBox.{Client, Error, Execution, Identity, Machine, Profile}
+  alias SmolBox.{Client, Error, Execution, Identity, Machine, Profile, Telemetry}
   alias SmolBox.Runtime.{Cleanup, Files, Observation, Session, WorkerConfig, WorkerHealth}
 
   def run(config, key, eligible) do
@@ -97,26 +97,11 @@ defmodule SmolBox.Runtime.Executor do
   end
 
   defp prepare(session, record) do
-    {:ok, spec} =
-      Profile.machine(
-        record.spec.profile,
-        record.machine_name,
-        WorkerConfig.artifact_path(session.worker, record.spec)
-      )
-
     result =
-      with {:ok, created} <-
-             Session.io(session, record, :preparation, fn ->
-               Client.create(session.worker.client, spec)
-             end),
-           {:ok, saved} <- Session.patch(session, created_machine: created),
-           {:ok, started} <-
-             Session.io(session, saved, :preparation, fn ->
-               Client.start(session.worker.client, saved.machine_name)
-             end),
-           true <- Machine.same_incarnation?(created, started) and started.state == :running,
-           :ok <- Files.stage(session, saved),
-           {:ok, ready} <- Session.patch(session, state: :ready) do
+      with {:ok, ready} <-
+             Telemetry.span(session.config.telemetry_table, :preparation, session.key, fn ->
+               prepare_machine(session, record)
+             end) do
         dispatch(session, ready)
       end
 
@@ -124,6 +109,29 @@ defmodule SmolBox.Runtime.Executor do
       {:ok, _record} = ok -> ok
       {:error, error} -> fail_preparation(session, error)
       false -> fail_preparation(session, %Error{category: :identity_conflict, operation: :start})
+    end
+  end
+
+  defp prepare_machine(session, record) do
+    {:ok, spec} =
+      Profile.machine(
+        record.spec.profile,
+        record.machine_name,
+        WorkerConfig.artifact_path(session.worker, record.spec)
+      )
+
+    with {:ok, created} <-
+           Session.io(session, record, :preparation, fn ->
+             Client.create(session.worker.client, spec)
+           end),
+         {:ok, saved} <- Session.patch(session, created_machine: created),
+         {:ok, started} <-
+           Session.io(session, saved, :preparation, fn ->
+             Client.start(session.worker.client, saved.machine_name)
+           end),
+         true <- Machine.same_incarnation?(created, started) and started.state == :running,
+         :ok <- Files.stage(session, saved) do
+      Session.patch(session, state: :ready)
     end
   end
 

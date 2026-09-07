@@ -24,7 +24,7 @@ MINIMUM = {"req": "0.7.4", "jason": "1.4.0", "telemetry": "1.3.0", "nimble_optio
 FORBIDDEN = {"credo", "ex_slop", "ex_dna", "credence", "dialyxir", "ex_doc", "mix_audit",
              "ecto", "ecto_sql", "postgrex", "stream_data", "plug", "bandit"}
 PUBLIC = {"mix.exs", "README.md", "CHANGELOG.md", "LICENSE"}
-PUBLIC_DOCS = {"docs/client.md", "docs/host-integration.md", "docs/recovery.md",
+PUBLIC_DOCS = {"docs/client.md", "docs/host-integration.md", "docs/recovery.md", "docs/telemetry.md",
                "docs/resource-qualification.md", "docs/compatibility.md"}
 LIMIT = 64 * 1024 * 1024
 

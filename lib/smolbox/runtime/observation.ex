@@ -1,9 +1,15 @@
 defmodule SmolBox.Runtime.Observation do
   @moduledoc false
-  alias SmolBox.{Client, Error, Result}
+  alias SmolBox.{Client, Error, Result, Telemetry}
   alias SmolBox.Runtime.Session
 
   def run(session, record) do
+    Telemetry.span(session.config.telemetry_table, :execution, session.key, fn ->
+      observe_command(session, record)
+    end)
+  end
+
+  defp observe_command(session, record) do
     observer = self()
     once = :atomics.new(1, [])
     token = make_ref()

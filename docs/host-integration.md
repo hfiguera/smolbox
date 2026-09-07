@@ -1,5 +1,8 @@
 # Managed host integration
 
+See [telemetry and inspection](telemetry.md) for bounded lifecycle observations,
+notification failure semantics, and authoritative operator fields.
+
 The managed runtime is implemented and has initial real Linux/macOS execution
 coverage. Full fault and resource qualification is still in progress. Its current
 worker qualification is explicitly development use; do not advertise it as a

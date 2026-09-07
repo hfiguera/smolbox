@@ -1,6 +1,6 @@
 defmodule SmolBox.Runtime.Session do
   @moduledoc false
-  alias SmolBox.{Error, Execution}
+  alias SmolBox.{Error, Execution, Telemetry}
   alias SmolBox.Runtime.{Config, WorkerConfig}
 
   @enforce_keys [:config, :key, :worker, :wall, :monotonic]
@@ -53,7 +53,13 @@ defmodule SmolBox.Runtime.Session do
     do: %{owner: record.claim_owner, generation: record.generation, version: record.version}
 
   @spec store(Config.t(), atom(), list()) :: term()
-  def store(%{store: {adapter, context}}, operation, arguments) do
+  def store(%{store: {adapter, context}} = config, operation, arguments) do
+    result = call_store(adapter, context, operation, arguments)
+    Telemetry.store_result(Map.get(config, :telemetry_table), operation, arguments, result)
+    result
+  end
+
+  defp call_store(adapter, context, operation, arguments) do
     apply(adapter, operation, [context | arguments])
   rescue
     _redacted -> error(:store, :store)

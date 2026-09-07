@@ -2,8 +2,9 @@ defmodule SmolBox.Runtime.Coordinator do
   @moduledoc false
   use GenServer
 
-  alias SmolBox.Execution
+  alias SmolBox.{Execution, Telemetry}
   alias SmolBox.Runtime.{Executor, Session, WorkerHealth}
+  alias SmolBox.Telemetry.Dispatcher
 
   def start_link(options), do: GenServer.start_link(__MODULE__, options)
 
@@ -36,6 +37,9 @@ defmodule SmolBox.Runtime.Coordinator do
   @impl GenServer
   def handle_call(:config, _from, state), do: {:reply, {:ok, state.config}, state}
 
+  def handle_call(:telemetry_stats, _from, state),
+    do: {:reply, {:ok, Dispatcher.stats(state.config.telemetry_table)}, state}
+
   def handle_call(:workers, _from, state) do
     reports =
       Enum.map(state.config.workers, fn worker ->
@@ -48,6 +52,8 @@ defmodule SmolBox.Runtime.Coordinator do
           architecture: worker.architecture,
           platform: worker.platform,
           runtime_version: worker.runtime_version,
+          allocation_floor: worker.allocation_floor,
+          capacity: worker.capacity,
           health: get_in(state.health, [id, :health]),
           health_checked_at_ms: get_in(state.health, [id, :checked_at_ms])
         }
@@ -57,9 +63,14 @@ defmodule SmolBox.Runtime.Coordinator do
   end
 
   def handle_call({:drain, id}, _from, state) do
-    if Enum.any?(state.config.workers, &(&1.client.worker.id == id)),
-      do: {:reply, :ok, %{state | draining: MapSet.put(state.draining, id)}},
-      else: {:reply, Session.error(:not_found, :worker), state}
+    case Enum.find(state.config.workers, &(&1.client.worker.id == id)) do
+      nil ->
+        {:reply, Session.error(:not_found, :worker), state}
+
+      worker ->
+        Telemetry.worker(state.config.telemetry_table, worker, :draining)
+        {:reply, :ok, %{state | draining: MapSet.put(state.draining, id)}}
+    end
   end
 
   def handle_call({:reconcile, key}, _from, state) do
@@ -106,6 +117,10 @@ defmodule SmolBox.Runtime.Coordinator do
         cursor: cursor,
         health_at: if(refreshed, do: state.config.clock.monotonic(), else: state.health_at)
     }
+
+    for worker <- state.config.workers,
+        status(state, worker) != status(next, worker),
+        do: Telemetry.worker(state.config.telemetry_table, worker, status(next, worker))
 
     {:noreply, Enum.reduce(records, next, &launch(&2, Execution.key(&1)))}
   end

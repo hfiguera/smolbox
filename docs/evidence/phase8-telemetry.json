@@ -1,0 +1,284 @@
+{
+  "status": "Telemetry milestone verified; not a release candidate or isolation certification",
+  "recorded_at_utc": "2026-09-07T05:18:20.346904+00:00",
+  "base_commit": "125754df3c553f63f9bf3205faa8d4a94873f16e",
+  "source_identity": "Base commit plus the listed final Elixir source hashes. Documentation/evidence and later CI-policy work are separate from these test inputs.",
+  "runtime": {
+    "version": "1.14.1",
+    "commit": "e8d09ef616d363004d55b80a6cdb31a4e7e1842d",
+    "backend": "libkrun"
+  },
+  "canonical": {
+    "elixir": "1.20.4",
+    "otp": "28.5",
+    "macos": {
+      "passed": 156,
+      "seed": 151937,
+      "seconds": 72.2,
+      "log_sha256": "f35c6393539718f8348253f5a2fecc1c2cf461430a1a0233b271a7d511651f98",
+      "properties": 6,
+      "ordinary_tests": 150,
+      "excluded_real_runtime": 9,
+      "credo_files": 112,
+      "credo_checks": 100,
+      "ex_dna_files": 68,
+      "ex_dna_clones": 0,
+      "credence_files": 117,
+      "dialyzer_errors": 0
+    },
+    "linux": {
+      "passed": 156,
+      "seed": 388975,
+      "seconds": 74.4,
+      "log_sha256": "992ceb8c6b7ed466095e5e731dcdbc45fdcc6cfb9010b008c9a17d7b3f55ab60",
+      "properties": 6,
+      "ordinary_tests": 150,
+      "excluded_real_runtime": 9,
+      "credo_files": 112,
+      "credo_checks": 100,
+      "ex_dna_files": 68,
+      "ex_dna_clones": 0,
+      "credence_files": 117,
+      "dialyzer_errors": 0
+    }
+  },
+  "coverage": {
+    "passed": 156,
+    "seed": 318369,
+    "seconds": 72.4,
+    "log_sha256": "f0ecc8dd03c89dce1240ee5ca344850cb2b968da7b77bd505f26b681ccdc4ce8",
+    "percent": 95.4
+  },
+  "real_runtime": {
+    "macos": {
+      "passed": 9,
+      "seed": 863887,
+      "seconds": 18.1,
+      "log_sha256": "ea246f7f18c8f56f2a6a0b76310253315fcb98d21a113191e09ec1d95015f8fa"
+    },
+    "linux": {
+      "passed": 9,
+      "seed": 775187,
+      "seconds": 19.8,
+      "log_sha256": "d5200f8dd75b256e214b98812249820f0c345aa9b05a2b78f3f753f6b19c5dd1"
+    }
+  },
+  "durable_runtime": {
+    "postgres": "16.15",
+    "macos_initial": {
+      "passed": 25,
+      "seed": 223722,
+      "seconds": 281.1,
+      "log_sha256": "95ddddd04822da208c47efe9ce5dd30f9635d57855f146dde54b6402ac3ae6fb"
+    },
+    "macos_final": {
+      "passed": 25,
+      "seed": 872174,
+      "seconds": 281.3,
+      "log_sha256": "acc58704653b37f414ccd238580c6fac3c08df089a2d68d88ef521fa29dbe6b2"
+    },
+    "linux": {
+      "passed": 25,
+      "seed": 390338,
+      "seconds": 286.0,
+      "log_sha256": "8b8cb61f14328c97e16a156878f5493485931f10842deee7da127ac19bdec725"
+    }
+  },
+  "fault_evidence": [
+    "20 fresh-BEAM SIGKILL boundaries per host, including before/after delivery of an observed-exit notification; fresh processes recover the same identity without a second command.",
+    "Dispatcher termination before/after SQL result commit leaves coordinator/executor work alive; known exit, binary artifact and one-byte command-count marker survive fresh-BEAM recovery.",
+    "Actual artifact directory outage and two cancellation/result-commit races remain in each 25-case durable suite.",
+    "Controlled slow/killed delivery, dispatcher restart, saturated backlog, abandoned producer credits, redaction, cancellation and original exception propagation pass."
+  ],
+  "corrections": [
+    "Initial Linux live run passed 8/9: a restart fixture copied the private telemetry ETS handle back into validated user options. The fixture now retains and reuses its original public options; both final nine-case suites pass.",
+    "The macOS rerun intended to select dispatcher cases also included the runtime tag, so ExUnit ran all 25 cases. Its full result is recorded accurately; it verifies the added guest counter/artifact assertions."
+  ],
+  "package_consumers": [
+    {
+      "report_sha256": "f8056a4cf71936bd775269ae1f60608b888ac356b7e3807c702994155d6c96fd",
+      "package_sha256": "1f666da14448301456e6702a22cf8217d056744b8cb1986b3d30122c26ae862f",
+      "minimum": false,
+      "platform": "Darwin",
+      "architecture": "arm64",
+      "toolchain": "Erlang/OTP 28 [erts-16.4] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 28)",
+      "smoke": {
+        "supervisor": true,
+        "client": true,
+        "versions": {
+          "nimble_options": "1.1.1",
+          "telemetry": "1.4.2",
+          "jason": "1.4.5",
+          "req": "0.7.4"
+        }
+      },
+      "package_file_count": 70
+    },
+    {
+      "report_sha256": "b8c1d24c5ae53159687e534d3ceee04ed73f4733d60cec9a88a4a1ddf3cf4029",
+      "package_sha256": "1f666da14448301456e6702a22cf8217d056744b8cb1986b3d30122c26ae862f",
+      "minimum": true,
+      "platform": "Darwin",
+      "architecture": "arm64",
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "smoke": {
+        "supervisor": true,
+        "client": true,
+        "versions": {
+          "req": "0.7.4",
+          "jason": "1.4.0",
+          "telemetry": "1.3.0",
+          "nimble_options": "1.1.0"
+        }
+      },
+      "package_file_count": 70
+    },
+    {
+      "report_sha256": "060e349ea3c48f1cae6294a4fcd9924336bb1bec7226d9e34d98965c5b018f40",
+      "package_sha256": "1f666da14448301456e6702a22cf8217d056744b8cb1986b3d30122c26ae862f",
+      "minimum": true,
+      "platform": "Linux",
+      "architecture": "x86_64",
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:8:8] [ds:8:8:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "smoke": {
+        "supervisor": true,
+        "client": true,
+        "versions": {
+          "req": "0.7.4",
+          "jason": "1.4.0",
+          "telemetry": "1.3.0",
+          "nimble_options": "1.1.0"
+        }
+      },
+      "package_file_count": 70
+    }
+  ],
+  "other_checks": [
+    "ExDoc warnings-as-errors passed",
+    "Minimal macOS and durable Linux examples pass Dialyzer with --force-check",
+    "Final fixture edits pass formatting, Credo/ExSlop, ExDNA, strict Credence and real tests",
+    "Analyzers and their canary policy are unchanged from the separately recorded resource-floor milestone"
+  ],
+  "limits": [
+    "Notification delivery is optional, lossy and bounded; counters reset by epoch. Exporter work spawned elsewhere is outside the dispatcher bound.",
+    "No exactly-once delivery, worker request fencing or hard host resource certification is implied.",
+    "The 70-file tested archive predates this evidence and subsequent documentation/CI-policy changes; repeat the package/live matrix on the final release candidate.",
+    "GitHub execution, public source metadata and independent consumer review remain external prerequisites."
+  ],
+  "source_sha256": {
+    "dev/mix/tasks/smolbox.ci.credence.ex": "5d0a498b85eece9476fbfcdcb4327340ee47de9dc5e6a9356fdb1fd98c5a2e45",
+    "dev/mix/tasks/smolbox.ci.verify_checks.ex": "5ba979fd42245f13d9be60b2eb2ddfb1deacf1fb488fa75d7cb61255b77d03f4",
+    "examples/durable_host/.formatter.exs": "30ff60f0cb9ed4fbb3b951b062b35795c461e06b83248ca7cee8c946ed4645af",
+    "examples/durable_host/config/config.exs": "a9c8a40bee44a7647bdce8b428c10c0728343dc874d3693706f72d0c530263f2",
+    "examples/durable_host/config/runtime.exs": "c2f2f847d6439eaaf3e0128f88a4b2fac41629934c6b948dc3e16897a0221852",
+    "examples/durable_host/lib/application.ex": "b0149229e29910ad91c1d2c6637b7eedd50bb42e52734421e973363bb327bf02",
+    "examples/durable_host/lib/database.ex": "4661cd41330865d7b6446fb2d4e28444961424a67d925a1f1cf69b63551b93ab",
+    "examples/durable_host/lib/demo.ex": "fd562159cb84dae2a1d91f0d50062ef1b9b6540d9c4aec41f1221344e95a3f95",
+    "examples/durable_host/lib/machine_index.ex": "1be671968109a0d6e5b6591b3c2f7a7eefa26a934903a3aab6e18d25ff3d8f75",
+    "examples/durable_host/lib/record_crypto.ex": "628fe86e5b9a3adc1923923782f1f15b5b511eab92b00cece2169d21ca236b43",
+    "examples/durable_host/lib/repo.ex": "135981af1a6ad9747d227844b0cc9c1be7df83e4c4a0c4fe4bcd37047006296a",
+    "examples/durable_host/lib/store.ex": "f4d79566793933e59df01acca9a77bff92428b3478f0955819707bfc75a066ce",
+    "examples/durable_host/mix.exs": "89118d07f2e9b3ca0c53873716f8ec57585dcf7345760b3d7d993090611d9921",
+    "examples/durable_host/priv/repo/migrations/20260906000000_create_smolbox_store.exs": "c6dda670d2b7cefec2d935761b3cd9aed804b874bfceee8470195b66659b9630",
+    "examples/durable_host/priv/repo/migrations/20260907000000_index_machine_assignments.exs": "511f73fc3b9138d76415477b1f8603dc560d79f97b4b5b040e4e7669dfd847b4",
+    "examples/durable_host/scripts/backfill_machine_index.exs": "8a6eb0da1593974fcefda0f56119cdcbabcb506cff1f8158c8566206bbda8e45",
+    "examples/durable_host/scripts/check_unavailable.exs": "6eeea34968fcbbd7fb97fe78c515fc513d260080e208ad69fdba80296cdba133",
+    "examples/durable_host/scripts/controller.exs": "561cf87a7daa3e8dc1c2b5ae87c002bb5b6b82ff127f9b5164776f2016638158",
+    "examples/durable_host/scripts/demo.exs": "a9c5737c0b6bf6f1e9ccbe9f0de712eafe42e7f7627f8c70f9580c92f443ad7a",
+    "examples/durable_host/scripts/read_record.exs": "a5af1e093b5286c9dd65587fddeea5d3890e47069b8e908ab34ccb57c667cb10",
+    "examples/durable_host/scripts/worker_restart.exs": "8d5cfd32bf61e4c22787576395d48ecc52ac033d9eef921653f9b3564c15e76a",
+    "examples/durable_host/test/machine_index_test.exs": "461a005791e0eea4a84898819b5a1bebcd5a6d8d5bcd89e5bc38b34597af28cf",
+    "examples/durable_host/test/recovery_runtime_test.exs": "e18e68a021335d0130df1ff8229e00145ce8524036a5463191e525fce2f3bc33",
+    "examples/durable_host/test/store_test.exs": "b4719da548bf44be0f28cc91d31348b8aa7a27e5d87ac4b8891c09d6be0eb2d0",
+    "examples/durable_host/test/support/controller_process.ex": "e44c42c6cd50775cfa215e39042769d9a156ec687003631c328af5088483c8bc",
+    "examples/durable_host/test/support/notification_probe.ex": "afb7a099f0fcbb87597999bf0dd2dc1017b33fcaaa37a556b9487220c6a8913f",
+    "examples/durable_host/test/test_helper.exs": "b7fd7264c1a77eeaa0da17af2069be2c9f17d4303d5d91eb92dd0611367f7dca",
+    "examples/minimal_host/.formatter.exs": "8fcd591747985da4121989f20e24d8dc63223b01cf62f5501f844edf24ddf002",
+    "examples/minimal_host/lib/demo.ex": "4ef1cde01ebc4444ae94e13629e37c41e4fa023ed0ccec835f5906c977095439",
+    "examples/minimal_host/mix.exs": "b4fea44408312790cc47baf50bab3be1d8cbe2a79e55028ee45ba13cb69ad973",
+    "examples/minimal_host/scripts/demo.exs": "61ef83e2b29669f54d30bab5f7d5465fb4d3c3c7af358508aabb54a7d526f711",
+    "examples/support/lib/setup.ex": "4947a678856e4d3224de6d507e681ebcff9477bbe93ffd3b7b1dd4b06500a72d",
+    "lib/smolbox.ex": "0e33b7a85fa91c148c16271eeb5f30a3abe6c01c60f1e53ff59227a2e1efefea",
+    "lib/smolbox/artifact_store.ex": "2d61ae4c7b6eeab70d6dbe822f390353565555b80b33a5602d3487b591128cbe",
+    "lib/smolbox/artifact_store/directory.ex": "d0c7b5afaeed73c14a8fd51ec59c3aa514aab2be41df01b4893eed315ae01184",
+    "lib/smolbox/client.ex": "293e4989fff85929fb05d1560ec94fb31794310d2daad4343828fdff6e84fb42",
+    "lib/smolbox/command.ex": "edbd69aa1f0f02c29e1a43599f209a8afb43a196e480b64a4c91f252305aae19",
+    "lib/smolbox/error.ex": "f7965086db5ba5b0f3442acfef5f9a20bb6a9bbc4db6f5d33445d8e1beca9e07",
+    "lib/smolbox/execution.ex": "ab7665a3f06bcd94d132b4cbccaa288967a4751cf32c0e38e74f0235b6b4692f",
+    "lib/smolbox/execution_spec.ex": "5b07fd9f749e0706bb7e272a2fb4aa6a9754fde1516cf003ad791537a97c89f9",
+    "lib/smolbox/execution_validation.ex": "270075e37a608a6b744a029b3db4ab69650fc226655b5f4d49ddfb88bc8244b6",
+    "lib/smolbox/files.ex": "15c2054bb8bd11b004de8a6c7a9dd707db4deccf001abdd70998e858ea6cf204",
+    "lib/smolbox/health.ex": "85b075434cb592ed0d5d2b7940ed210971f3de48c32774bc8d389e38955db9e9",
+    "lib/smolbox/identity.ex": "baaea42558663ab47934747ae267ea244143a8a8068ea14f64604cf1a0a942e1",
+    "lib/smolbox/machine.ex": "34900ba603174ce29c0c44a563f04df51890d7bbd707998f90309ed4fbcc9ef8",
+    "lib/smolbox/machine_spec.ex": "a9f2617e92093eb973f13c210eb7706c681df3945ac3bdfc410c1a98f35f6755",
+    "lib/smolbox/manifest.ex": "64bbfcabea90905d9cb0b3ac9399fa997486b4461d5e13989f3f892938bfeb10",
+    "lib/smolbox/profile.ex": "2bb5229f41cd0f7ca19161af441cb6dc019961962fc34394ccf531a4a43c1d1c",
+    "lib/smolbox/result.ex": "380a75352ed9b49b6e37a474254c55ef4b6b5551832dce7d3acda332f5b5b78a",
+    "lib/smolbox/runtime.ex": "e6a50fce62b38b406b05611109a821bb5bc2ee9e6bf3b2e8b68e71711930e379",
+    "lib/smolbox/runtime/cleanup.ex": "2778350885d8ed065b9547ac0e3b70ffd8eff63ff7cf8844b588a69a99d804fd",
+    "lib/smolbox/runtime/clock.ex": "a3b7bf21a90a4ccf4977791f97736137af01fdee4a2b3a5ebb3d6a0d18dbf114",
+    "lib/smolbox/runtime/config.ex": "bfa68f5dda45888cfa78a7777e2140a35e144de08bd8cab28a2e8f1f17a76444",
+    "lib/smolbox/runtime/coordinator.ex": "d6621ac53f756388682bfd4da44be5fc58bb3349c00ea1beb285d8939fc34bd7",
+    "lib/smolbox/runtime/executor.ex": "0660e5fa5ef24a85f8c2ab05cd1274e84223bb38b0ae75ad16af57080d3ee72e",
+    "lib/smolbox/runtime/files.ex": "1acecfe874e8397c4c13fbd40751e629808dbefb920ac640f06d09edb415fc55",
+    "lib/smolbox/runtime/inspection.ex": "de9270595036e946fe6ca90ad44467df6b24964324ca427931403ec2b7ec5dba",
+    "lib/smolbox/runtime/observation.ex": "9409647db1e835e3d3f38c01de206daab37e78686d6c6b6ec595886af372795a",
+    "lib/smolbox/runtime/session.ex": "0de9f6a337225c4727fb939103bca8f82d3ed011e75a1b16ef0bf35a2de22767",
+    "lib/smolbox/runtime/work_supervisor.ex": "40e5cfd18c84e55c232272e38477e66b689ea77baf72661171329c50738b4743",
+    "lib/smolbox/runtime/worker_config.ex": "8e012d5636dceeca01f09c8c2fef2a78160d28c967a8f32f673d20769553f76d",
+    "lib/smolbox/runtime/worker_health.ex": "fc19df3f3bf28dfda625b1f6f3b882e2a16b75421145442d2e8d77b6b935f1c0",
+    "lib/smolbox/store.ex": "43c74543c44c8e961513e5ff30f69e2c88d24011b010aa3df4d3e6e122656648",
+    "lib/smolbox/store/codec.ex": "19346d99a428fff53512479832317a51fbd371a5b0e209fc4e3ef78edbc4016c",
+    "lib/smolbox/store/memory.ex": "bcad85d38f48d0b73040e7158922e4a82c0009672d7944cb4ebdc254d460cfc9",
+    "lib/smolbox/store/record_ops.ex": "b293446ff1536a75cb86731a280908d9564a489a942ab53d454e67c5a2547050",
+    "lib/smolbox/telemetry.ex": "ec28badc3bff5bd3d40f87350f840208be306a522a9bd600d6bfd49e3ebbf5f9",
+    "lib/smolbox/telemetry/dispatcher.ex": "30a2513d3aaeb24e953011ff9ca651f9eac66b1d6105a8d491e8178d3796063b",
+    "lib/smolbox/transport.ex": "ed6a497a1e746330bc7527becd8b520a5c9b8320a9102604633dfb13fa4802de",
+    "lib/smolbox/transport/capture.ex": "df828264adf33a5d96759b445f156189d7ade1b0c4666f66831442569cb084d4",
+    "lib/smolbox/transport/req.ex": "748485e5e9683cff55d8718905829cbf4b0ec89394f3066cf82c1c37b3a5a2ee",
+    "lib/smolbox/validation.ex": "8156459a0d0d7bcec735e41fc940139ba46f649ae9f493f97b30693da73e44a8",
+    "lib/smolbox/wire/sse.ex": "1df603f2eddf0d76216633437bb43319fb5a083ab278022c0364cbcf42dd9d39",
+    "lib/smolbox/worker.ex": "cd47e4a1cbb5437d582f5b693601e48af790dd7876f6edbc5b4d2053dba9bd87",
+    "mix.exs": "5f0c1097a52aa768cc10c4f679322f09e158c85abd952718117ba32990154c25",
+    "test/contract/client_test.exs": "3005a8e2a4a769e25950197de263c16f3a6373b5fb30895da3085d2f9e875cd7",
+    "test/contract/inspection_test.exs": "85b9dd4ab6b01ea0da0b8c7d81d4ac904ce90dbe995835f3cff909117e9fda48",
+    "test/contract/runtime_fault_test.exs": "bc05a5e69b6cc540e14bc056c7aea1e2cf916f0f67ead770eabff30dd128779f",
+    "test/contract/runtime_test.exs": "2f7297526721f9bdb79b16e26e7b6b8384835bdafffa979a359bcda3ce11527f",
+    "test/contract/security_transport_test.exs": "3ffa1b088f7ef46f7ab179f0cad454d56fe05561b700e35962a94f6e0f9c8e77",
+    "test/contract/stream_transport_test.exs": "2e167a7554d3765a57254f2e05ed2de45840f06e2d45bdc6ed5030c454e13594",
+    "test/contract/telemetry_dispatcher_test.exs": "fc18828d6f7902742451657ab0a3f7cda4455f3683453672dbc23ab6afa13b95",
+    "test/contract/telemetry_test.exs": "f2c6065034bcf29c60c57d83a44421f10de97182ddba18cb4de34e023b2a7dbc",
+    "test/contract/worker_pool_test.exs": "3c767ac478ac974cb903791fd6ddd4a645474f2fd5e826486e73350114b96f92",
+    "test/runtime/client_runtime_test.exs": "c5cefb4a6639fca511b86e0f6b81aa976d60b507a0e16a916d4839c96d282c42",
+    "test/runtime/managed_runtime_test.exs": "606ffda3580a83c52b0786f56c46111d3cff3d3201bbae1f5a050a437928fb69",
+    "test/support/fault/artifacts.ex": "d3ad42dbe94fb12e9d1ced330b42070e770499e0bca7192933dee5ba045d229c",
+    "test/support/fault/gate.ex": "eb40d9e7ae13b4c424350aa0e2d9c4c927fc8eac653cdf6acbf643ee4c4815fd",
+    "test/support/fault/memory_artifacts.ex": "f8c81afb922a4732b0633c5bfec3debcc475b03f40829194758e00ce26fc0dd5",
+    "test/support/fault/store.ex": "61ab299713250f8bf7680751e6a65aa2395a426bba67ef2dacc9f466495bdf1a",
+    "test/support/fault/transport.ex": "c5d8f44aeb96e74038e0ab34880a1211ee2f4f3a1a12caac1ab737a8c841f315",
+    "test/support/managed_peer.ex": "eb5bbfdd098084f255c911ab574d9883c0c342e50a64929fa3d9f4475af1bf5d",
+    "test/support/peer.ex": "1f550f5429ab2ecda5f46e8e48b15d6f0071ed2b44c219ba8fa77bd7066cdb08",
+    "test/support/runtime_fixture.ex": "81251d985510d3b8af02873a9b92f0f0d127f168db314c34a515f49ef863c432",
+    "test/support/runtime_proxy.ex": "0f4f7b1e404f5d582ec3a134824f13535b0fe2851192d9daca14d5198329d871",
+    "test/support/store/contract.ex": "2ba604d211613a73245a1aff45d017402608faa8ef47eabe2c448672302b4650",
+    "test/support/tls.ex": "ba5e071ed838623464f3d2ba0aabfc28ac98436642f2c095c1519dae3141b137",
+    "test/test_helper.exs": "b7fd7264c1a77eeaa0da17af2069be2c9f17d4303d5d91eb92dd0611367f7dca",
+    "test/unit/command_test.exs": "5642c43cd4270a65a7e769cf167716bf8c153b51767c9c325da724ec1fb24c3d",
+    "test/unit/directory_test.exs": "df83e23c04203a538211ce87b0cac418befa8d24cd93499c65d65e319fdd0b6c",
+    "test/unit/error_test.exs": "9f026c57525cfe0366607cdd57a748ca12cc67e4f9cc5710be18c7738200e097",
+    "test/unit/execution_spec_test.exs": "254d204857a942da648722557eb44005f1cc9412cc1fb4cd711981af8e3fcc56",
+    "test/unit/execution_test.exs": "9892dda2719dfb4a4de501f258fc5216bd9e8a54ab92e264f4d9f757246fb3b1",
+    "test/unit/files_test.exs": "9820c6e4166b7f0bb6d067dffd96f1d53a9e8034ee64d3adb86ac6ccc099e544",
+    "test/unit/health_test.exs": "7b5e4fa0a027fe42408f64d8e72fca3fc61fbab28d9940b9587200d73ae1327f",
+    "test/unit/identity_test.exs": "24aa3c46e853f5126e2cc1f09e4a11e3f7e90a3eb4bed967fb3221f4a4e32310",
+    "test/unit/machine_spec_test.exs": "446a4121d2bdf09ee05662ecb23259cb1cd1a9cd7790eb26b66a98e27439bfe9",
+    "test/unit/machine_test.exs": "f69062a27331d81e3e6c5d1c9bc7b07ee2c69c0e00e5c90f1882b99a676f0f5a",
+    "test/unit/memory_store_test.exs": "fb72463a696adf5e5e67ed411d4695d7ca1b757a5b8a303b17f208e73150d4cb",
+    "test/unit/profile_test.exs": "4e14306b0d76934649a3a65ec4f14ec79edf7722f73201f7e967ac650e5a203b",
+    "test/unit/result_test.exs": "44d01cfb6d1e03d013e414a9b400b61cfba2b7d446c48b0078de2c6dd7af413b",
+    "test/unit/runtime_config_test.exs": "fe3c9b4937335f45613de681f078ba915d67e180dfafa88cf453aa112e7bf0e3",
+    "test/unit/sse_test.exs": "9a87834025e5e2319da2294805c11eb2ed0803dd8adfb9fa6b9c38a7cedf13c3",
+    "test/unit/worker_test.exs": "be883eee1eda1bc640336620178818646478a2f68689432d8201255741d36cbd"
+  }
+}

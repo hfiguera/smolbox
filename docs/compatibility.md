@@ -343,4 +343,26 @@ consumer on Elixir 1.18.4/OTP 27.3.4.15. Successful reports and tested tarballs 
 a pinned upload-artifact action with missing outputs treated as errors. Actionlint
 passes locally; GitHub execution remains pending a repository remote. These
 checks advance an independent acceptance item while resource certification and
-public telemetry remain incomplete.
+the final release matrix remain incomplete.
+
+## Telemetry milestone
+
+Bounded, redacted managed telemetry and inspection are documented in the
+[telemetry guide](telemetry.md). Both canonical hosts pass 156 deterministic
+cases and all five analyzers; library coverage is 95.40%. Nine live cases and
+25 durable-host cases pass on each platform. The durable matrix includes fresh
+controller termination before/after notification delivery and dispatcher failure
+before/after result persistence. Results, one-command markers, binary artifacts,
+capacity and cleanup survive those failures. Notifications remain optional and
+lossy; stored evidence is authoritative.
+
+A fixture initially tried to reuse the private telemetry ETS handle as user
+configuration during restart. Validation rejected it before dispatch. The fixture
+now retains its public options, and both full live suites pass. This illustrates
+why a deterministic-only pass is insufficient for a supervision change.
+
+The same 70-file package archive passes fresh production consumers on canonical
+macOS and minimum direct dependencies on Elixir 1.18.4/OTP 27.3.4.15 on both hosts.
+That archive predates this evidence and later documentation changes; it is not
+the final release artifact. Source hashes, seeds, counts, archive identity and
+limitations are recorded in [telemetry evidence](evidence/phase8-telemetry.json).

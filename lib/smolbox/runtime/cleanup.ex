@@ -1,18 +1,34 @@
 defmodule SmolBox.Runtime.Cleanup do
   @moduledoc false
-  alias SmolBox.{Client, Error, Execution, Machine}
+  alias SmolBox.{Client, Error, Execution, Machine, Telemetry}
   alias SmolBox.Runtime.Session
 
   def run(session) do
-    with {:ok, record} <- Session.claim(session) do
-      cond do
-        record.cleanup == :complete -> release(session, record)
-        not Execution.terminal?(record) and record.state != :unknown -> {:ok, record}
-        session.worker == nil -> Session.error(:unsupported_capability, :cleanup)
-        record.created_machine == nil -> unverified_creation(session)
-        record.cleanup_attempts >= session.config.cleanup_attempts -> exhausted(session, record)
-        true -> attempt(session, record)
-      end
+    with {:ok, record} <- Session.claim(session), do: run_record(session, record)
+  end
+
+  defp run_record(session, record) do
+    if pending?(record) do
+      Telemetry.span(session.config.telemetry_table, :cleanup, session.key, fn ->
+        reconcile(session, record)
+      end)
+    else
+      {:ok, record}
+    end
+  end
+
+  defp pending?(%{cleanup: :complete, reservation: nil}), do: false
+
+  defp pending?(record),
+    do: Execution.terminal?(record) or record.state == :unknown or record.cleanup == :complete
+
+  defp reconcile(session, record) do
+    cond do
+      record.cleanup == :complete -> release(session, record)
+      session.worker == nil -> Session.error(:unsupported_capability, :cleanup)
+      record.created_machine == nil -> unverified_creation(session)
+      record.cleanup_attempts >= session.config.cleanup_attempts -> exhausted(session, record)
+      true -> attempt(session, record)
     end
   end
 

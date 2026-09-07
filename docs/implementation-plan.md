@@ -693,13 +693,31 @@ responsibilities. See [resource qualification](resource-qualification.md).
 
 Dependencies: Phases 5–7.
 
-- [ ] Add documented redacted telemetry and operator inspection fields.
+- [x] Add documented redacted telemetry and operator inspection fields. Bounded asynchronous delivery, finite metadata, stage durations, persisted cancellation timestamps, worker status/capacity and ephemeral drop/timeout counters are implemented. Controlled saturation/handler failures and real fresh-BEAM notification boundaries pass. See `docs/telemetry.md` and `docs/evidence/phase8-telemetry.json`.
 - [x] Finish minimal and durable host examples with no Keel/Jido dependency. Both standalone Mix projects compile, pass Dialyzer/audits, and demonstrate real Python execution, binary collection, cancellation and retention-window cleanup on Linux and macOS. The durable host also passes fresh-BEAM fault recovery; examples explicitly use a development profile.
 - [ ] Document deployment, artifact preparation, unknown-outcome handling, cancellation, cleanup, and upgrades.
 - [ ] Test adversarial outputs, limits, paths, credential isolation, and endpoint access on dedicated hosts.
 - [ ] Record measured cold/warm-image preparation, queue, execution, and collection times without claiming VM boot time is total function latency.
 
 Exit: another developer can follow the examples, understand failure states, and identify each required external service.
+
+Telemetry milestone evidence: canonical macOS and Linux each pass 156
+deterministic cases (6 properties and 150 tests) and all five analyzers. Coverage
+is 95.40%. Both platforms pass nine live client/runtime cases and 25 durable-host
+cases, including 20 fresh-BEAM interruption boundaries and dispatcher failure
+before/after SQL result persistence. Execution counts, binary artifacts, stored
+identity, reservations and verified cleanup are checked independently of delivery.
+The first live Linux run exposed a fixture that reused an internal ETS handle as
+public configuration; it now retains its original options and both full live
+suites pass. Slow handlers and dispatcher failure do not run inside execution
+tasks; notifications are still lossy, and repeated supervisor failures or hostile
+BEAM handlers are outside this isolation guarantee.
+
+The telemetry package also passes a fresh canonical production consumer and the
+same tarball's minimum-dependency consumers on Elixir 1.18.4/OTP 27.3.4.15 on both
+hosts. Documentation passes warnings-as-errors. These are milestone checks, not
+the final release-commit matrix. Hard host-resource certification, security
+qualification and latency measurements remain separate unchecked work.
 
 ### Phase 9 — Release candidate and adoption evidence
 

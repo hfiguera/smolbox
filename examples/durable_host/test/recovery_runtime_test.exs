@@ -6,6 +6,7 @@ defmodule SmolBox.DurableHost.RecoveryRuntimeTest do
   alias SmolBox.ArtifactStore.Directory
   alias SmolBox.DurableHost.{ControllerProcess, Database, Demo, Store}
   alias SmolBox.Example.Setup
+  alias SmolBox.Telemetry.Dispatcher
 
   @moduletag :runtime
   @moduletag timeout: 180_000
@@ -28,7 +29,9 @@ defmodule SmolBox.DurableHost.RecoveryRuntimeTest do
     {"absence_record", "before"},
     {"absence_record", "after"},
     {"release", "before"},
-    {"release", "after"}
+    {"release", "after"},
+    {"notification", "before"},
+    {"notification", "after"}
   ]
 
   setup %{event: event} do
@@ -79,6 +82,10 @@ defmodule SmolBox.DurableHost.RecoveryRuntimeTest do
       {output, status} = ControllerProcess.run(context.settings_file, "fault", event, phase)
       assert output =~ "boundary:#{event}:#{phase}\n"
       assert status != 0
+
+      if event == "notification" and phase == "after",
+        do: assert(output =~ "notification:delivered\n")
+
       key = {context.spec.scope, context.spec.id}
       assert {:ok, before} = Store.fetch(context.store, key)
       assert before.created_machine != nil
@@ -100,6 +107,67 @@ defmodule SmolBox.DurableHost.RecoveryRuntimeTest do
                Client.inspect_machine(context.worker.client, recovered.machine_name)
 
       verify_outcome(context, event, phase, recovered, attempts_before)
+    end
+  end
+
+  for phase <- [:before, :after] do
+    @tag event: "notification_dispatcher"
+    test "dispatcher death #{phase} SQL result commit preserves live work and restart evidence",
+         context do
+      phase = unquote(phase)
+      observer = self()
+
+      gate =
+        start_supervised!(
+          {Agent,
+           fn -> %{event: :result_write, phase: phase, observer: observer, fired: false} end}
+        )
+
+      FaultTransport.configure(context.worker.client.worker.id, nil, context.settings["ledger"])
+      client = %{context.worker.client | transport: FaultTransport}
+
+      options =
+        context.options
+        |> Keyword.put(:workers, [%{context.worker | client: client}])
+        |> Keyword.put(
+          :store,
+          {FaultStore, %{store: context.store, adapter: Store, faults: gate}}
+        )
+
+      runtime = start_supervised!({Runtime, options})
+      assert {:ok, handle} = SmolBox.submit(runtime, context.spec)
+      assert_receive {:boundary, :result_write, ^phase, blocked}, 10_000
+      coordinator = Runtime.coordinator(runtime)
+      assert {:ok, before} = Store.fetch(context.store, handle)
+
+      {Dispatcher, dispatcher, :worker, _modules} =
+        Enum.find(Supervisor.which_children(runtime), &(elem(&1, 0) == Dispatcher))
+
+      Process.exit(dispatcher, :kill)
+      assert Process.alive?(blocked)
+      send(blocked, :release_boundary)
+
+      clean =
+        Setup.wait_for(runtime, handle, &(&1.cleanup == :complete and &1.reservation == nil))
+
+      assert Runtime.coordinator(runtime) == coordinator
+      assert clean.fingerprint == before.fingerprint and clean.machine_name == before.machine_name
+      assert clean.result.exit_code == 0 and clean.state == :completed
+      stop_supervised!(Runtime)
+
+      {output, status} =
+        ControllerProcess.run(context.settings_file, "recover", "result_write", "after")
+
+      assert status == 0, output
+      assert {:ok, recovered} = Store.fetch(context.store, handle)
+      assert recovered.result == clean.result and recovered.reservation == nil
+      assert {:ok, "x"} = Directory.read_output(context.objects, handle, "count", 32)
+      assert {:ok, <<7, 255, 0>>} = Directory.read_output(context.objects, handle, "output", 32)
+      assert attempts(context.settings["ledger"]) == 1
+      assert {:ok, %{slots: 0}} = Store.usage(context.store, context.worker.client.worker.id)
+
+      assert {:error, %Error{category: :not_found}} =
+               Client.inspect_machine(client, clean.machine_name)
     end
   end
 

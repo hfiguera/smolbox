@@ -1,5 +1,5 @@
 alias SmolBox.ArtifactStore.Directory
-alias SmolBox.DurableHost.{Demo, Store}
+alias SmolBox.DurableHost.{Demo, NotificationProbe, Store}
 alias SmolBox.Example.Setup
 alias SmolBox.{FaultArtifacts, FaultStore, FaultTransport, Runtime}
 
@@ -19,6 +19,7 @@ events = [
   :delete,
   :absence_record,
   :release,
+  :notification,
   :exec
 ]
 
@@ -47,6 +48,11 @@ options =
     {FaultArtifacts, %{store: objects, adapter: Directory, faults: gate}}
   )
 
+if event == :notification and mode == "fault" do
+  :ok = NotificationProbe.attach(gate)
+end
+
+options = Keyword.put(options, :telemetry_timeout_ms, 1000)
 {:ok, runtime} = Runtime.start_link(options)
 {:ok, handle} = SmolBox.submit(runtime, spec)
 

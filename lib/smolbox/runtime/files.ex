@@ -1,6 +1,6 @@
 defmodule SmolBox.Runtime.Files do
   @moduledoc false
-  alias SmolBox.{Client, Files, Machine}
+  alias SmolBox.{Client, Files, Machine, Telemetry}
   alias SmolBox.Runtime.Session
 
   def stage(session, record) do
@@ -13,6 +13,12 @@ defmodule SmolBox.Runtime.Files do
   end
 
   def collect(session, record) do
+    Telemetry.span(session.config.telemetry_table, :collection, session.key, fn ->
+      collect_files(session, record)
+    end)
+  end
+
+  defp collect_files(session, record) do
     pending =
       Enum.reject(record.spec.outputs, fn output ->
         Enum.any?(record.artifacts, &(&1["path"] == output["path"]))

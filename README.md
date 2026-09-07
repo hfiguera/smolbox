@@ -4,8 +4,8 @@ An independent Elixir library for self-hosted `smolvm serve` workers.
 
 Implementation is in progress. The low-level client, managed runtime, versioned
 store contract, memory adapter, and host-owned Postgres example are implemented.
-Initial managed Python/JavaScript and cancellation cases pass on real Linux and
-macOS workers. Full fault/resource qualification and release acceptance remain
+Managed Python/JavaScript, cancellation and durable controller-restart cases pass
+on real Linux and macOS workers. Full resource qualification and release acceptance remain
 incomplete; no production isolation profile is certified.
 
 The managed API accepts immutable keyed identities, reserves capacity, stages
@@ -13,6 +13,7 @@ bounded files, persists dispatch intent, observes results, collects outputs, and
 reconciles cleanup. A lost command response stays unknown; recovery never
 silently replays it. Cancellation and cleanup are separate evidence dimensions.
 See [host integration](docs/host-integration.md), [recovery](docs/recovery.md),
+[telemetry and inspection](docs/telemetry.md),
 and the current [compatibility evidence](docs/compatibility.md).
 
 ```elixir

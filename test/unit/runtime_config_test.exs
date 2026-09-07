@@ -113,6 +113,8 @@ defmodule SmolBox.RuntimeConfigTest do
           [artifact_store: {String, nil}],
           [max_active: 65],
           [max_pending: 0],
+          [telemetry_max_pending: 1025],
+          [telemetry_timeout_ms: 1001],
           [poll_ms: 0],
           [lease_ms: 1000, poll_ms: 1000],
           [fingerprint_key: "short"],
