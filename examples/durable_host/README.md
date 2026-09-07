@@ -124,8 +124,30 @@ One physical worker must have one stable worker ID and one store partition acros
 controllers. Changing the partition is not controller takeover. Leases fence
 store writes; they cannot retract worker HTTP requests.
 
-The current SQL migration and record codec are schema version 1. Unknown or
-corrupt payload versions fail closed. Apply migrations before starting a managed
+The record codec remains schema version 1. A second SQL migration adds
+`smolbox_machine_identities` for bounded worker/name lookup, with a unique
+assignment per worker/name and per execution. Reservation writes this index in
+the same transaction as the encrypted execution record; cleanup retains it.
+
+For an existing example database, stop its controllers, apply migrations, and
+backfill each partition using that partition's original encryption key:
+
+```sh
+MIX_ENV=test mix ecto.migrate
+MIX_ENV=test mix run scripts/backfill_machine_index.exs \
+  the_partition /absolute/private/encryption.key 100
+```
+
+Each transaction reads and authenticates one existing record before inserting
+its assignment. The command performs at most the supplied number of steps
+(1..10000). `machine-index:more` exits with code 2 and means another invocation
+is needed; `machine-index:done` means the partition is indexed. Wrong keys and
+conflicting assignments fail without rewriting records. Runtime startup and
+machine lookup reject incomplete indexes. Check every partition before restarting
+controllers. A fresh database has no backfill work. SQL index maintenance remains
+trusted infrastructure; this is not protection against a hostile database owner.
+
+Unknown or corrupt payload versions fail closed. Apply migrations before starting a managed
 runtime. An upgrade must back up records, preserve keys and immutable identities,
 and migrate payloads and index projections together under host-controlled
 maintenance. This example does not silently reinterpret future schemas or fall

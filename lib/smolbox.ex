@@ -13,7 +13,7 @@ defmodule SmolBox do
   automatically repeats an uncertain command.
   """
   alias SmolBox.{Error, Execution, ExecutionSpec, Runtime, Validation}
-  alias SmolBox.Runtime.{Session, WorkerConfig}
+  alias SmolBox.Runtime.{Inspection, Session, WorkerConfig}
 
   @type runtime :: Supervisor.supervisor()
   @type handle :: Execution.key()
@@ -79,6 +79,28 @@ defmodule SmolBox do
 
   @spec workers(runtime()) :: {:ok, [map()]} | {:error, Error.t()}
   def workers(runtime), do: call(runtime, :workers)
+
+  @doc """
+  Read a bounded page of namespace candidates against stored machine assignments.
+
+  This is an operator API across scopes; hosts must authorize access. It sends
+  only a worker list request and store reads. Neither names nor findings authorize
+  adoption, stopping, or deletion. `:owned` still relies on weak upstream creation
+  evidence and exclusive namespace control. `:untracked`, `:unverified`,
+  `:conflict`, and `:cleanup_conflict` require investigation; `:unavailable` is not absence.
+  A cleanup conflict can be a concurrent deletion or a possible reappearance;
+  these separate worker/store reads cannot establish their chronological order.
+
+  Options are `:limit` (1..100, default 20) and `:cursor` (the previous page's
+  `next_cursor`). Pages are fresh observations, not a stable historical snapshot;
+  periodic scans should restart at nil. The worker list has a one-second budget;
+  store lookups have 500 ms each in groups of at most four. No stdout, code,
+  command environment, or artifact content is returned.
+  """
+  @spec audit_worker(runtime(), String.t(), keyword()) :: {:ok, map()} | {:error, Error.t()}
+  def audit_worker(runtime, worker_id, options \\ []) do
+    with {:ok, config} <- config(runtime), do: Inspection.page(config, worker_id, options)
+  end
 
   @spec await(runtime(), handle(), non_neg_integer()) :: SmolBox.Store.result()
   def await(runtime, {scope, id}, timeout) do

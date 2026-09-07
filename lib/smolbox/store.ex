@@ -26,6 +26,12 @@ defmodule SmolBox.Store do
   Completed clean records are retained for identity lookup, not silently removed.
   Adapters must document retention and database/storage limits independently.
 
+  `find_machine` resolves a worker/name assignment through durable evidence. Its
+  index is updated atomically with reservation and retained after cleanup. Names
+  cannot be assigned to another execution on that worker. Missing, unavailable,
+  corrupt, or incompletely migrated indexes must not be conflated. This lookup
+  proves an assignment, not the current machine's incarnation or ownership.
+
   Implementations may share the pure record operations, but must independently
   pass the adapter conformance suite and demonstrate their transaction semantics.
   """
@@ -54,6 +60,7 @@ defmodule SmolBox.Store do
   @callback accept(context(), Execution.t(), pos_integer()) ::
               {:ok, Execution.t(), :inserted | :existing} | {:error, Error.t()}
   @callback fetch(context(), Execution.key()) :: result()
+  @callback find_machine(context(), String.t(), String.t()) :: result()
   @callback claim_worker(context(), String.t(), String.t(), non_neg_integer(), pos_integer()) ::
               {:ok, lease()} | {:error, Error.t()}
   @callback claim(context(), Execution.key(), String.t(), non_neg_integer(), pos_integer()) ::

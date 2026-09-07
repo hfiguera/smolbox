@@ -9,8 +9,8 @@ defmodule SmolBox.DurableHost.Store do
   """
   @behaviour SmolBox.Store
 
-  alias SmolBox.DurableHost.Database
-  alias SmolBox.{Error, Execution, Validation}
+  alias SmolBox.DurableHost.{Database, MachineIndex}
+  alias SmolBox.{Error, Execution, MachineSpec, Validation}
   alias SmolBox.Store.RecordOps
 
   @enforce_keys [:repo, :partition, :key]
@@ -35,7 +35,8 @@ defmodule SmolBox.DurableHost.Store do
         []
       )
 
-      {:ok, %{schema: 1, durable: true, atomic: true}}
+      with :ok <- MachineIndex.ready(context),
+           do: {:ok, %{schema: 1, durable: true, atomic: true}}
     end)
   end
 
@@ -50,6 +51,17 @@ defmodule SmolBox.DurableHost.Store do
 
   @impl SmolBox.Store
   def fetch(context, key), do: safe(fn -> Database.read(context, key) end)
+
+  @impl SmolBox.Store
+  def find_machine(context, worker, name) do
+    if Validation.identifier?(worker) and MachineSpec.valid_name?(name),
+      do: safe(fn -> MachineIndex.find(context, worker, name) end),
+      else: error(:validation)
+  end
+
+  @doc "Backfill one authenticated assignment in this partition under a transaction; run before runtime startup."
+  def backfill_machine_index(context),
+    do: transaction(context, fn -> MachineIndex.backfill_one(context) end)
 
   @impl SmolBox.Store
   def claim_worker(context, worker, owner, now, ttl) do

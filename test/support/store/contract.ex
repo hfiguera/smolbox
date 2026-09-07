@@ -42,7 +42,8 @@ defmodule SmolBox.Store.Contract do
     {"worker takeover preserves dispatch uncertainty and existing reservations", :takeover},
     {"queue expiry cannot reserve or reset its original deadline", :expiry},
     {"due work is bounded and cancellation intent survives subsequent reads", :pagination},
-    {"concurrent request timestamp order cannot discard cancellation intent", :timestamps}
+    {"concurrent request timestamp order cannot discard cancellation intent", :timestamps},
+    {"machine assignment lookup is scoped, unique and retained after release", :machine_lookup}
   ]
 
   defmacro __using__(options) do
@@ -72,6 +73,69 @@ defmodule SmolBox.Store.Contract do
     assert {:ok, renewed} = adapter.claim(store, key, "owner", 1095, 1000)
     assert renewed.updated_at_ms == 1100
     assert renewed.cancel_requested_at_ms == 1090
+  end
+
+  def machine_lookup(adapter, store) do
+    assert {:error, %Error{category: :not_found}} = adapter.find_machine(store, "worker", "vm")
+
+    assert {:error, %Error{category: :validation}} =
+             adapter.find_machine(store, "worker", "../vm")
+
+    assert {:ok, _lease} = adapter.claim_worker(store, "worker", "owner", 1000, 5000)
+    assert {:ok, _lease} = adapter.claim_worker(store, "other", "owner", 1000, 5000)
+
+    for id <- ["one", "two"] do
+      assert {:ok, _, :inserted} = adapter.accept(store, record(id), 10)
+    end
+
+    assert {:ok, one} = adapter.claim(store, {"contract", "one"}, "owner", 1100, 5000)
+    assert {:ok, two} = adapter.claim(store, {"contract", "two"}, "owner", 1100, 5000)
+
+    assert {:ok, reserved} =
+             adapter.reserve(
+               store,
+               Execution.key(one),
+               guard(one),
+               {"worker", "vm", capacity(2)},
+               1100
+             )
+
+    assert {:ok, ^reserved} = adapter.find_machine(store, "worker", "vm")
+
+    assert {:error, %Error{category: :identity_conflict}} =
+             adapter.reserve(
+               store,
+               Execution.key(two),
+               guard(two),
+               {"worker", "vm", capacity(2)},
+               1100
+             )
+
+    assert {:ok, ^two} = adapter.fetch(store, Execution.key(two))
+
+    assert {:ok, other} =
+             adapter.reserve(
+               store,
+               Execution.key(two),
+               guard(two),
+               {"other", "vm", capacity()},
+               1100
+             )
+
+    assert {:ok, ^other} = adapter.find_machine(store, "other", "vm")
+
+    assert {:ok, cleaned} =
+             adapter.write(
+               store,
+               Execution.key(one),
+               guard(reserved),
+               [state: :failed, cleanup: :complete, absence_at_ms: 1200],
+               1200
+             )
+
+    assert {:ok, released} = adapter.release(store, Execution.key(one), guard(cleaned), 1200)
+    assert {:ok, ^released} = adapter.find_machine(store, "worker", "vm")
+    assert {:ok, ^other} = adapter.find_machine(store, "other", "vm")
   end
 
   def acceptance(adapter, store) do

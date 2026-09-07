@@ -7,7 +7,9 @@ defmodule SmolBox.ManagedRuntimeTest do
     Error,
     ExecutionSpec,
     Files,
+    Identity,
     Machine,
+    MachineSpec,
     Profile,
     Runtime,
     TestArtifacts,
@@ -141,6 +143,8 @@ defmodule SmolBox.ManagedRuntimeTest do
     {:ok, handle} = SmolBox.submit(context.runtime, spec)
     own_cleanup(context, handle)
     running = wait_for(context, handle, &(&1.state == :running))
+    assert {:ok, report} = SmolBox.audit_worker(context.runtime, "managed")
+    assert Enum.any?(report.candidates, &(&1.status == :owned and &1.execution == handle))
     assert {:ok, ^handle} = SmolBox.cancel(context.runtime, spec.scope, spec.id)
     stopped = wait_for(context, handle, &(&1.evidence == :termination_confirmed))
     assert stopped.state == :unknown
@@ -151,6 +155,24 @@ defmodule SmolBox.ManagedRuntimeTest do
              Client.inspect_machine(context.client, running.machine_name)
 
     assert stopped.next_due_at_ms > System.system_time(:millisecond)
+  end
+
+  test "orphan inspection leaves a real untracked namespace candidate untouched", context do
+    {:ok, name} = Identity.machine_name("sbxmanaged")
+    artifact = Enum.find(context.artifacts, &(&1["id"] == "python"))
+    {:ok, machine_spec} = MachineSpec.new(name, artifact["path"])
+    {:ok, created} = Client.create(context.client, machine_spec)
+    on_exit(fn -> remove_owned(context.client, created) end)
+
+    assert {:ok, report} = SmolBox.audit_worker(context.runtime, "managed")
+    assert Enum.any?(report.candidates, &(&1.machine_name == name and &1.status == :untracked))
+
+    assert {:error, %Error{category: :not_found}} =
+             Memory.find_machine(context.store, "managed", name)
+
+    assert {:ok, observed} = Client.inspect_machine(context.client, name)
+    assert Machine.same_incarnation?(created, observed)
+    assert observed.state == created.state
   end
 
   test "a delayed original exec can restart a stopped real VM and is stopped again", context do

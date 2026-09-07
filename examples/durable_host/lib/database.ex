@@ -1,7 +1,7 @@
 defmodule SmolBox.DurableHost.Database do
   @moduledoc false
   alias Ecto.Adapters.SQL
-  alias SmolBox.DurableHost.RecordCrypto
+  alias SmolBox.DurableHost.{MachineIndex, RecordCrypto}
   alias SmolBox.Error
   alias SmolBox.Store.RecordOps
 
@@ -39,7 +39,8 @@ defmodule SmolBox.DurableHost.Database do
   end
 
   def write(context, record) do
-    with {:ok, bytes} <- RecordCrypto.encrypt(record, context.key, context.partition) do
+    with :ok <- MachineIndex.remember(context, record),
+         {:ok, bytes} <- RecordCrypto.encrypt(record, context.key, context.partition) do
       query(
         context,
         """

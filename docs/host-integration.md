@@ -141,6 +141,36 @@ an atomic multi-file filesystem snapshot. Output storage is keyed by execution
 identity and destination: identical retries succeed, changed content conflicts.
 A collection failure preserves the command exit and any already recorded outputs.
 
+## Read-only orphan inspection
+
+`SmolBox.audit_worker(runtime, worker_id, limit: 20)` compares a bounded page of
+namespace candidates with stored assignments. Pass the returned `next_cursor`
+to continue; restart at nil for a fresh scan. This operator API spans scopes, so
+the host must authorize it independently of an end user's execution handle.
+
+| Status | Meaning |
+|---|---|
+| `owned` | Recorded assignment and creation fields match the current observation; exclusive namespace control and weak upstream identity still apply |
+| `untracked` | The authoritative store lookup found no assignment; the name does not prove ownership |
+| `unverified` | Assignment exists but creation evidence was never persisted |
+| `conflict` | Recorded creation fields differ; leave the resource untouched |
+| `cleanup_conflict` | The worker list observed a machine while the record says cleanup complete; this can be concurrent deletion or possible reappearance |
+| `unavailable` | Store lookup timed out, failed, or returned unusable evidence; this is not absence |
+
+The API sends one list request and read-only store lookups. It does not adopt,
+reserve, stop, delete, execute, or download files. Pages are separate observations,
+not an atomic snapshot; investigate and rescan before deciding on manual action.
+Foreign names are counted, not treated as owned candidates. A worker response
+outside the strict offline machine contract fails decoding rather than weakening
+that contract. A page has at most 100 candidates, a one-second list budget and
+500 ms per lookup with four lookups at a time. No code, environment, secrets,
+stdout/stderr, or artifact content appears in the report.
+
+Store adapters must implement `find_machine/3` and preserve the worker/name index
+atomically with reservation, including after cleanup. An incomplete or unavailable
+index must fail closed. The durable example supplies a unique SQL index and an
+explicit authenticated backfill for records from its earlier migration.
+
 ## Cancellation, deadlines, and cleanup
 
 `SmolBox.cancel(runtime, scope, id)` persists intent. Before dispatch, the record

@@ -11,7 +11,7 @@ defmodule SmolBox.Store.Memory do
   use GenServer
   @behaviour SmolBox.Store
 
-  alias SmolBox.{Error, Execution, Store, Validation}
+  alias SmolBox.{Error, Execution, MachineSpec, Store, Validation}
   alias SmolBox.Store.{Codec, RecordOps}
 
   @spec start_link(keyword()) :: GenServer.on_start()
@@ -39,6 +39,7 @@ defmodule SmolBox.Store.Memory do
       {:ok,
        %{
          records: %{},
+         machine_keys: %{},
          sizes: %{},
          bytes: 0,
          leases: %{},
@@ -52,6 +53,8 @@ defmodule SmolBox.Store.Memory do
   def accept(store, record, max_pending), do: call(store, {:accept, record, max_pending})
   @impl Store
   def fetch(store, key), do: call(store, {:fetch, key})
+  @impl Store
+  def find_machine(store, worker, name), do: call(store, {:find_machine, worker, name})
   @impl Store
   def claim_worker(store, worker, owner, now, ttl),
     do: call(store, {:claim_worker, worker, owner, now, ttl})
@@ -87,6 +90,21 @@ defmodule SmolBox.Store.Memory do
     do: {{:ok, %{schema: 1, durable: false, atomic: true}}, state}
 
   defp execute({:fetch, key}, state), do: {lookup(state, key), state}
+
+  defp execute({:find_machine, worker, name}, state) do
+    result =
+      if Validation.identifier?(worker) and MachineSpec.valid_name?(name) do
+        case Map.fetch(state.machine_keys, {worker, name}) do
+          {:ok, key} -> lookup(state, key)
+          :error -> error(:not_found)
+        end
+      else
+        error(:validation)
+      end
+
+    {result, state}
+  end
+
   defp execute({:usage, worker}, state), do: {{:ok, used(state, worker)}, state}
 
   defp execute({:accept, record, max_pending}, state) do
@@ -201,7 +219,8 @@ defmodule SmolBox.Store.Memory do
   end
 
   defp put_record(state, record) do
-    with {:ok, bytes} <- Codec.encode(record) do
+    with {:ok, machine_keys} <- machine_index(state.machine_keys, record),
+         {:ok, bytes} <- Codec.encode(record) do
       key = Execution.key(record)
       size = byte_size(bytes)
       total = state.bytes - Map.get(state.sizes, key, 0) + size
@@ -211,12 +230,26 @@ defmodule SmolBox.Store.Memory do
          %{
            state
            | records: Map.put(state.records, key, record),
+             machine_keys: machine_keys,
              sizes: Map.put(state.sizes, key, size),
              bytes: total
          }}
       else
         error(:admission_exhausted)
       end
+    end
+  end
+
+  defp machine_index(index, %{worker_id: nil}), do: {:ok, index}
+
+  defp machine_index(index, record) do
+    machine_key = {record.worker_id, record.machine_name}
+    execution_key = Execution.key(record)
+
+    case Map.fetch(index, machine_key) do
+      {:ok, ^execution_key} -> {:ok, index}
+      {:ok, _conflict} -> error(:identity_conflict)
+      :error -> {:ok, Map.put(index, machine_key, execution_key)}
     end
   end
 

@@ -252,3 +252,25 @@ example lockfile. All five root analyzers and deliberate bad/clean canaries pass
 on both canonical hosts. Actual worker-service restart, orphan discovery, host
 resource abuse, and release acceptance remain pending. See
 `docs/evidence/phase6-durable-recovery.json` for this increment.
+
+## Bounded orphan inspection and assignment indexes
+
+`audit_worker/3` now reports namespace candidates through a bounded, read-only
+worker/store comparison. Controlled cases verify ownership evidence, conflicts,
+untracked names, cleanup races, pagination, redaction and timed-out stores. A
+real untracked candidate remains untouched on both platforms; running managed
+VMs are matched to their stored assignments.
+
+Both adapters retain unique worker/name assignments after cleanup. The durable
+example's second migration adds the index; existing example partitions were
+backfilled using their original keys without changing execution records.
+Conformance now has nine shared scenarios plus two PostgreSQL migration tests.
+All 15 ordinary Postgres tests pass on each host, and all 18 actual controller
+SIGKILL cases were repeated successfully on each platform after the index change.
+
+The canonical suite passes 127 deterministic cases and all five analyzers on
+both hosts, with 94.79% library coverage. The real runtime suite has nine cases;
+this increment reran all four managed cases on each platform. The five client
+cases remain separately recorded historical evidence until the full release
+matrix runs again. See `docs/evidence/phase6-orphan-inspection.json`. Worker
+service restart and the remaining isolation/release gates are still pending.

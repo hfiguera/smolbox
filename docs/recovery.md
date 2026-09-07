@@ -80,3 +80,13 @@ reservation without persisted creation evidence merely because a lookup returns
 Unknown retained machines are rechecked; a reobserved running VM revokes current
 termination evidence until another stop is confirmed. See the host integration
 guide for the operator quiescence boundary and deadline limitations.
+
+`find_machine/3` resolves a worker/name to its original execution through an
+assignment index retained after cleanup. Reservation updates that index
+atomically, preventing a second execution from taking the same worker/name.
+The memory adapter bounds the index by its record count. The durable example's
+second migration adds a unique SQL mapping and an explicit one-record-per-
+transaction authenticated backfill. Missing backfill work blocks startup and
+lookup until completed; see the example README for the maintenance procedure.
+Worker inventory inspection remains read-only and never substitutes a matching
+name for recorded creation evidence.
