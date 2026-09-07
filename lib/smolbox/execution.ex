@@ -336,8 +336,18 @@ defmodule SmolBox.Execution do
       end
 
     if record.cleanup == :in_progress,
-      do: Map.put_new(deadlines, :cleanup, now + record.spec.profile.cleanup_ms),
+      do: Map.put_new(deadlines, :cleanup, cleanup_deadline(record, now)),
       else: deadlines
+  end
+
+  defp cleanup_deadline(record, now) do
+    retention_until =
+      if record.state == :unknown,
+        do:
+          Map.get(record.deadlines, :execution, record.accepted_at_ms) + record.spec.retention_ms,
+        else: now
+
+    max(now, retention_until) + record.spec.profile.cleanup_ms
   end
 
   defp result?(nil, _max), do: true
@@ -345,7 +355,8 @@ defmodule SmolBox.Execution do
   defp result?(%Result{} = result, max) do
     Validation.struct_shape?(result, Result) and
       Validation.integer?(result.exit_code, -2_147_483_648, 2_147_483_647) and
-      result.encoding in [:bytes, :lossy_utf8] and is_binary(result.stdout) and
+      result.encoding in [:bytes, :lossy_utf8] and is_boolean(result.truncated) and
+      is_binary(result.stdout) and
       is_binary(result.stderr) and
       byte_size(result.stdout) + byte_size(result.stderr) <= max
   end

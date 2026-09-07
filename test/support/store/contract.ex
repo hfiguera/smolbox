@@ -41,7 +41,8 @@ defmodule SmolBox.Store.Contract do
      :reservations},
     {"worker takeover preserves dispatch uncertainty and existing reservations", :takeover},
     {"queue expiry cannot reserve or reset its original deadline", :expiry},
-    {"due work is bounded and cancellation intent survives subsequent reads", :pagination}
+    {"due work is bounded and cancellation intent survives subsequent reads", :pagination},
+    {"concurrent request timestamp order cannot discard cancellation intent", :timestamps}
   ]
 
   defmacro __using__(options) do
@@ -58,6 +59,19 @@ defmodule SmolBox.Store.Contract do
       use ExUnit.Case, unquote(options)
       unquote_splicing(cases)
     end
+  end
+
+  def timestamps(adapter, store) do
+    original = record()
+    key = Execution.key(original)
+    assert {:ok, _, :inserted} = adapter.accept(store, original, 1)
+    assert {:ok, claimed} = adapter.claim(store, key, "owner", 1100, 1000)
+    assert {:ok, cancelled} = adapter.cancel(store, key, 1090)
+    assert cancelled.cancel_requested_at_ms == 1090
+    assert cancelled.updated_at_ms == claimed.updated_at_ms
+    assert {:ok, renewed} = adapter.claim(store, key, "owner", 1095, 1000)
+    assert renewed.updated_at_ms == 1100
+    assert renewed.cancel_requested_at_ms == 1090
   end
 
   def acceptance(adapter, store) do
@@ -182,7 +196,12 @@ defmodule SmolBox.Store.Contract do
                1300
              )
 
+    assert {:ok, due_before, _cursor} = adapter.due(store, 1300, nil, 100)
+    assert Enum.any?(due_before, &(Execution.key(&1) == key))
+
     assert {:ok, released} = adapter.release(store, key, guard(cleaned), 1400)
+    assert {:ok, due_after, _cursor} = adapter.due(store, 1400, nil, 100)
+    refute Enum.any?(due_after, &(Execution.key(&1) == key))
     assert released.reservation == nil
 
     assert {:ok, %{slots: 0, cpus: 0, memory_mb: 0, disk_gb: 0}} =

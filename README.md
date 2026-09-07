@@ -2,21 +2,18 @@
 
 An independent Elixir library for self-hosted `smolvm serve` workers.
 
-Implementation is in progress. No managed execution API or production isolation
-profile is released yet. See [compatibility evidence](docs/compatibility.md).
+Implementation is in progress. The low-level client, managed runtime, versioned
+store contract, memory adapter, and host-owned Postgres example are implemented.
+Initial managed Python/JavaScript and cancellation cases pass on real Linux and
+macOS workers. Full fault/resource qualification and release acceptance remain
+incomplete; no production isolation profile is certified.
 
-The current foundation includes validated command and worker configuration,
-prepared-machine requests, guest path validation, byte-exact buffered result
-decoding, and a bounded SSE parser. SSE output is explicitly lossy UTF-8 in the
-pinned upstream release. Immutable execution specifications use keyed fingerprints;
-profiles reject unsupported hard controls and file manifests use bounded host
-references. These types do not themselves provide durable execution. The low-level
-HTTP client is implemented and tested against pinned Linux and macOS workers;
-managed execution and persistence are still being built.
-
-The [store foundation](docs/recovery.md) now includes atomic acceptance, fenced
-claims, capacity reservations, bounded due queries, and an explicitly ephemeral
-memory adapter. Database-backed recovery remains pending.
+The managed API accepts immutable keyed identities, reserves capacity, stages
+bounded files, persists dispatch intent, observes results, collects outputs, and
+reconciles cleanup. A lost command response stays unknown; recovery never
+silently replays it. Cancellation and cleanup are separate evidence dimensions.
+See [host integration](docs/host-integration.md), [recovery](docs/recovery.md),
+and the current [compatibility evidence](docs/compatibility.md).
 
 ```elixir
 {:ok, worker} = SmolBox.Worker.new("local", "http://127.0.0.1:19470",
@@ -28,8 +25,8 @@ memory adapter. Database-backed recovery remains pending.
 See the [client guide](docs/client.md) for preparation, execution, ownership,
 transport limits, and failure semantics.
 
-SmolBox will provide low-level worker operations and an explicitly supervised
-execution runtime. It will not bundle a database, workflow engine, language
+SmolBox provides low-level worker operations and an explicitly supervised
+execution runtime. It does not bundle a database, workflow engine, language
 runner, function publishing system, or hosted sandbox service.
 
 Development uses the versions in `.tool-versions`. Run commands from this

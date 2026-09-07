@@ -76,6 +76,28 @@ defmodule SmolBox.DurableHost.StoreTest do
     assert {:error, %Error{category: :store}} = Store.accept(store, record, 10)
   end
 
+  test "a managed durable runtime starts against the actual Repo and inspects accepted identity",
+       %{store: store} do
+    record = Contract.record()
+    assert {:ok, _, :inserted} = Store.accept(store, record, 10)
+
+    runtime =
+      start_supervised!(
+        {SmolBox,
+         name: SmolBox.DurableExampleRuntime,
+         namespace: "durable",
+         store: {Store, store},
+         artifact_store: {SmolBox.ArtifactStore.Directory, nil},
+         fingerprint_key: :binary.copy(<<1>>, 32),
+         workers: []}
+      )
+
+    assert {:ok, {"contract", "one"}} = SmolBox.submit(runtime, record.spec)
+    assert {:ok, snapshot} = SmolBox.fetch(runtime, "contract", "one")
+    assert snapshot.fingerprint == record.fingerprint
+    assert snapshot.evidence == :not_dispatched
+  end
+
   test "a fresh BEAM reads committed identity and due work from Postgres", %{store: store} do
     record = Contract.record()
     assert {:ok, _, :inserted} = Store.accept(store, record, 10)

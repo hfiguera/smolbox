@@ -22,12 +22,21 @@ defmodule SmolBox.MixProject do
           "CHANGELOG.md",
           "LICENSE",
           "docs/client.md",
+          "docs/host-integration.md",
           "docs/recovery.md",
           "docs/compatibility.md",
           "docs/evidence/*.json"
         ]
       ],
-      docs: [extras: ["README.md", "docs/client.md", "docs/recovery.md", "docs/compatibility.md"]],
+      docs: [
+        extras: [
+          "README.md",
+          "docs/client.md",
+          "docs/host-integration.md",
+          "docs/recovery.md",
+          "docs/compatibility.md"
+        ]
+      ],
       dialyzer: [
         plt_add_apps: [:mix, :ex_unit, :credence, :dialyxir],
         plt_local_path: "_build/plts"
@@ -38,6 +47,8 @@ defmodule SmolBox.MixProject do
         ignore_modules: [
           ~r/^Mix.Tasks.Smolbox.Ci\./,
           SmolBox.TestPeer,
+          SmolBox.TestArtifacts,
+          SmolBox.ManagedPeer,
           SmolBox.TestTLS,
           SmolBox.Store.Contract
         ],

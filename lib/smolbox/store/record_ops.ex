@@ -158,7 +158,7 @@ defmodule SmolBox.Store.RecordOps do
   @spec needs_work?(Execution.t()) :: boolean()
   def needs_work?(record),
     do:
-      not (record.cleanup == :complete and
+      not (record.cleanup == :complete and record.reservation == nil and
              (Execution.terminal?(record) or record.state == :unknown))
 
   @spec cursor(Execution.t()) :: Store.cursor()
@@ -213,9 +213,15 @@ defmodule SmolBox.Store.RecordOps do
   end
 
   defp update(record, patch, now) do
-    next = struct!(record, Map.merge(patch, %{version: record.version + 1, updated_at_ms: now}))
-
-    with true <- Execution.timestamp?(now) and now >= record.updated_at_ms,
+    with true <- Execution.timestamp?(now),
+         next =
+           struct!(
+             record,
+             Map.merge(patch, %{
+               version: record.version + 1,
+               updated_at_ms: max(now, record.updated_at_ms)
+             })
+           ),
          :ok <- Execution.validate(next) do
       {:ok, next}
     else

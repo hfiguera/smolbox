@@ -1,6 +1,7 @@
 # SmolBox implementation plan
 
-Status: implementation in progress, September 6, 2026. Initial real-runtime smoke probes pass on Linux x86_64 and macOS arm64. The standalone scaffold and quality gates are implemented. Immutable execution contracts and the bounded HTTP client are implemented. Five low-level real-library cases pass on each initial platform, including an authenticated TLS proxy. Versioned state, fenced store operations, the memory adapter, and shared store scenarios are implemented. The host-owned Ecto/Postgres adapter now passes real database conformance, fresh-process reads, and outage handling. Managed execution and production profile qualification remain incomplete.
+Status: implementation in progress, September 6, 2026. Phases 1–5 have substantial implemented and tested capabilities: standalone quality gates, immutable contracts, bounded client, fenced state, memory/Postgres stores, and the first supervised managed runtime. Seven real client/managed cases pass on each pinned Linux/macOS worker, and 12 real Postgres cases pass. Source metadata, complete fault/resource qualification, host demonstrations, and release acceptance remain incomplete.
+
 
 Implementation evidence lives in [compatibility.md](compatibility.md) and `docs/evidence/`. Checked items below mean the specific work has evidence; they do not waive the remaining phase exit conditions or release requirements.
 
@@ -576,7 +577,7 @@ Dependencies: Phase 2; can proceed alongside Phase 3 after interfaces settle.
 - [x] Implement a minimal host-owned Ecto/Postgres adapter and migrations under `examples/durable_host`. Schema 1 uses transactional partition locks, indexed due queries, and authenticated encrypted records.
 - [x] Test atomic acceptance, conflicting duplicate specs, claim races, reservations, and due-work queries. Ten real PostgreSQL tests pass, including the shared concurrent conformance scenarios, rollback, corruption, and a fresh BEAM read.
 - [x] Define migration/version compatibility and credential-reference handling. The example documents host-owned schema/key migration, strict version rejection, worker credentials outside records, and persistent secret storage.
-- [ ] Fail durable startup when persistence semantics are absent. Adapter capability probing and actual outage failures are verified; enforcement at managed-runtime startup follows in Phase 5 because that runtime does not exist yet.
+- [x] Fail durable startup when persistence semantics are absent. Managed startup rejects ephemeral mode masquerading as durable, unavailable storage, and missing callbacks. The real Postgres adapter starts in durable mode and exposes the original accepted identity; no database migrations or memory fallback occur in core.
 
 Exit: a fresh BEAM process can inspect accepted records and due work through the durable example; memory mode is visibly ephemeral.
 
@@ -586,12 +587,21 @@ Current Phase 4 evidence: 68 deterministic cases (6 properties, 62 examples) pas
 
 Dependencies: Phases 3–4.
 
-- [ ] Start the named runtime with host supervision and bounded task concurrency.
-- [ ] Implement acceptance, single-worker admission, preparation, dispatch intent, observation, result persistence, and inspection.
-- [ ] Implement observer timeout separately from execution deadline.
-- [ ] Connect file staging/collection through a minimal host artifact-store behaviour; supply a local example and a fake store.
-- [ ] Keep JSON function-result interpretation outside the core.
-- [ ] Demonstrate one prepared Python script and one prepared JS script through the managed API.
+- [x] Start the named runtime with host supervision and bounded task concurrency.
+- [x] Implement acceptance, single-worker admission, preparation, dispatch intent, observation, result persistence, and inspection.
+- [x] Implement observer timeout separately from execution deadline.
+- [x] Connect file staging/collection through a minimal host artifact-store behaviour; supply a local example and a fake store.
+- [x] Keep JSON function-result interpretation outside the core.
+- [x] Demonstrate one prepared Python script and one prepared JS script through the managed API.
+
+Evidence: the runtime and local directory artifact adapter are documented in `docs/host-integration.md`; controlled HTTP tests exercise caller exit, duplicate identity, collection failure, cancellation, observer restart, lost creation response, foreign-machine protection, queue bounds, and cleanup exhaustion. Real managed Python/JS collection and VM cancellation pass on both initial platforms. Library-only coverage is 94.30% across 86 deterministic cases. The full controller-boundary fault matrix and independent host applications remain Phase 6/8 work; these initial tests do not substitute for them.
+
+Necessary contract corrections found during implementation:
+
+- Due scans must retain records whose cleanup is complete but whose capacity release did not commit. Both store adapters now test this boundary.
+- Concurrent request timestamps can arrive out of order. Claims/cancellation keep `updated_at_ms` nondecreasing; CAS still rejects stale versions. Observer monotonic time bounds elapsed stages separately from persisted wall timestamps.
+- Unknown-outcome disks wait until the execution deadline plus evidence retention before deletion. Their fixed cleanup deadline includes this intentional wait plus the cleanup budget; it is not reset on restart. Whole-VM stop is attempted before that wait.
+- After cleanup mutation retries are exhausted, only bounded read-only inspection continues. Observing operator-resolved absence can still release the original reservation.
 
 Exit: a caller can disconnect and later retrieve the same execution; a nonzero exit and collection failure remain distinguishable.
 
@@ -599,9 +609,9 @@ Exit: a caller can disconnect and later retrieve the same execution; a nonzero e
 
 Dependencies: Phase 5.
 
-- [ ] Implement persisted cancellation intent, evidence-based termination, and cancellation/completion race handling.
-- [ ] Implement bounded reconciliation and cleanup scans on startup and periodically.
-- [ ] Enforce no replay after dispatch uncertainty; preserve unknown outcomes and resource accounting.
+- [ ] Complete qualification of persisted cancellation intent, evidence-based termination, and cancellation/completion race handling. The initial implementation passes normal controlled and real stop paths; boundary races remain.
+- [x] Implement bounded reconciliation and cleanup scans on startup and periodically. Bounded task slots, paginated due scans, persisted retry counts/deadlines, and owner claims are implemented; full fault qualification remains below.
+- [ ] Complete no-replay and accounting fault qualification. Observer restart tests preserve one command and unknown evidence; all dispatch/collection/persistence interruption boundaries still need coverage.
 - [ ] Protect foreign resources during cleanup; implement orphan detection within verified ownership boundaries.
 - [ ] Exercise the full fault matrix against controlled peers and selected real-worker boundaries.
 

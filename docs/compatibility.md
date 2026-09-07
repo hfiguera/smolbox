@@ -183,3 +183,18 @@ Postgrex 0.22.4 emits an upstream deprecated `xref` exclusion warning with Elixi
 source is not patched or diagnostics suppressed. The example has separate locks,
 Dialyzer, and vulnerability audits. This database result does not yet demonstrate
 controller restart during a real managed execution.
+
+## Initial managed-runtime qualification
+
+The combined real suite now has seven cases on each initial platform. Two new
+managed cases execute prepared Python/JavaScript with staged source, nonzero
+exit, binary collection and confirmed deletion, and cancel a running guest while
+preserving an unknown outcome with confirmed termination. Test-owned retained
+machines are removed by an ownership-checked fixture finalizer. Both inventories
+are empty afterward. This is not yet full retention-window or crash-boundary
+qualification.
+
+The managed increment passes 86 deterministic cases with 94.30% library coverage
+on canonical macOS/Linux and all five analyzers on each. The durable example has
+12 real Postgres cases, including managed durable startup. See
+`docs/evidence/phase5-managed.json` for versions, seeds and source hashes.

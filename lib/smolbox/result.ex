@@ -11,13 +11,14 @@ defmodule SmolBox.Result do
 
   @enforce_keys [:exit_code, :stdout, :stderr]
   @derive {Inspect, only: [:exit_code, :encoding]}
-  defstruct [:exit_code, :stdout, :stderr, encoding: :bytes]
+  defstruct [:exit_code, :stdout, :stderr, encoding: :bytes, truncated: false]
 
   @type t :: %__MODULE__{
           exit_code: integer(),
           stdout: binary(),
           stderr: binary(),
-          encoding: :bytes | :lossy_utf8
+          encoding: :bytes | :lossy_utf8,
+          truncated: boolean()
         }
 
   @doc "Decode byte-exact buffered output; lossy fallback is deliberately unsupported."
