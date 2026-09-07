@@ -1,0 +1,115 @@
+{
+  "status": "Finite real-runtime characterization passed; production isolation profile remains uncertified",
+  "recorded_at_utc": "2026-09-07T06:24:08.232015+00:00",
+  "base_commit": "bf2bf9992c299b39f71ada9af8c3fde10d253477",
+  "source_identity": "Base commit plus the listed new fixture/documentation/workflow hashes. No production Elixir code changed in this milestone.",
+  "canonical": {
+    "elixir": "1.20.4",
+    "otp": "28.5",
+    "smolvm": "1.14.1",
+    "upstream_commit": "e8d09ef616d363004d55b80a6cdb31a4e7e1842d",
+    "backend": "libkrun"
+  },
+  "final_real_suite": {
+    "macos": {
+      "passed": 14,
+      "seed": 161692,
+      "seconds": 28.4,
+      "log_sha256": "98a666ff013bc3bc4e1cc8ad9dc5c7040817b72152dc2a7e935fa99c8d1ee108",
+      "status": "passed"
+    },
+    "linux": {
+      "passed": 14,
+      "seed": 527320,
+      "seconds": 31.0,
+      "log_sha256": "503799d98a3396506f5af2847e5415fae6c3aa5e328c33f7dc28c34df1b10f9f",
+      "status": "passed"
+    }
+  },
+  "new_cases": [
+    {
+      "case": "finite output overflow",
+      "workload": "8192 stdout bytes, 128-byte capture allowance, exit 7",
+      "buffered": "typed output_limit, evidence exited, exit_code 7",
+      "streamed": "typed output_limit, dispatch_uncertain, no exit code"
+    },
+    {
+      "case": "file limits and symlinks",
+      "client_limit": "65537-byte file rejected by 65536-byte client cap",
+      "worker_limit": "1048577-byte file rejected; bounded raw response confirms HTTP 500 INTERNAL_ERROR and the 1048576-byte cap diagnostic",
+      "symlink_read": "workspace link follows a guest-only /tmp sentinel",
+      "symlink_write": "link replaced by a regular file; old target unchanged",
+      "scope": "guest filesystem only; not a host escape or containment guarantee"
+    },
+    {
+      "case": "blocked stream callback",
+      "workload": "started line plus 64 x 8192 stdout bytes and a one-byte marker",
+      "observation_deadline_ms": 3000,
+      "result": "callback process killed; transport uncertainty; VM still running and guest marker exists"
+    },
+    {
+      "case": "selected control endpoints",
+      "routes": [
+        "100.96.0.1:19470/health",
+        "100.96.0.1:10081/api/v1/machines",
+        "127.0.0.1:19470/health"
+      ],
+      "result": "all requests fail from offline guest; no rollout-token environment key",
+      "scope": "these three routes on these prepared artifacts only"
+    },
+    {
+      "case": "FIFO read",
+      "observation_deadline_ms": 2000,
+      "result": "transport error within five seconds; explicit owned-VM stop succeeds",
+      "scope": "agent opens before type check; client expiry is not VM termination"
+    }
+  ],
+  "cleanup": "All fixture VMs stopped/deleted only after matching creation evidence; both complete worker inventories observed empty afterward.",
+  "quality": {
+    "credo_files": 113,
+    "credo_checks": 100,
+    "ex_slop": "registered through Credo",
+    "ex_dna_files": 68,
+    "ex_dna_clones": 0,
+    "credence_files": 118,
+    "dialyzer_errors": 0,
+    "exdoc_warnings_as_errors": "passed",
+    "actionlint": "1.7.12 passed"
+  },
+  "initial_fixture_failure": {
+    "platform": "macos",
+    "passed": 0,
+    "cases": 5,
+    "seed": 688216,
+    "cause": "fixture namespace exceeded the identity prefix limit; corrected before any VM creation",
+    "log_sha256": "0c8c4a5fe3fee8e4612137bbcf642a64636dd27707c725026e37df9997c8724c"
+  },
+  "source_review_only": [
+    "SSE handler uses an unbounded channel by message count; collector relay cap is 11 MiB checked after each frame.",
+    "The host receiver caps a serialized frame at 32 MiB; this is not total process memory.",
+    "Without an active persistent overlay the guest file resolver returns the normalized path without canonical workspace containment.",
+    "Guest file read opens the path before checking regular-file metadata."
+  ],
+  "upstream_source_sha256": {
+    "src/api/handlers/exec.rs": "5aa1482e47f9b722a4bcf60dcbbfe9ca993d61fa5826467ce2552583a1b22802",
+    "src/agent/client.rs": "754e4d228fd6fa260b4adc53917cbabc9d4a09292eea12b2f5609533ec6904da",
+    "crates/smolvm-agent/src/main.rs": "0173930ee495a3b41448a5af3417aa7a6374b105c2875316a0d8d00f2c5fb0e4",
+    "crates/smolvm-protocol/src/lib.rs": "4ad58f2da280621673c8e5d23c0c577096fc82bd35c745caf50afeb75ce4c9d4",
+    "src/api/handlers/files.rs": "dc2ba8ec3d00ff9540f7c3f2be87ff1172058589a9d234bbeb30308c348ac7bc",
+    "src/api/guest_rollout.rs": "dfd55018e0e10f9082bf009998a18aa3d01ac89d6d3dbca25949e05994046580"
+  },
+  "limitations": [
+    "Finite workloads are not quota-controlled exhaustion tests.",
+    "Host RSS, CPU-time, guest-process and host-disk hard bounds remain uncertified, especially on macOS.",
+    "Race-free workspace containment is unavailable on the selected packed-artifact API path.",
+    "All host routes/credentials and adversarial protocol peers have not been exhaustively qualified.",
+    "True cold-state and warmed-path benchmarks remain pending.",
+    "Protected GitHub runs, exact-release-commit validation, source metadata and independent consumer review remain pending."
+  ],
+  "source_sha256": {
+    "packages/smolbox/test/runtime/security_runtime_test.exs": "8c7869002a35fede9a5212691ccc94e6c2b18d091fcea91975c8ad4aeaf223e5",
+    "packages/smolbox/docs/security.md": "5567fdd657d4649dfad9e338d6422d61f5e1ecfc86a1996e695e52f54d6e775e",
+    "packages/smolbox/scripts/ci/README.md": "78dd8dcffaa18cc974a3769f496619fb1bf8b19f0f789973a1c1682358d6fb4c",
+    ".github/workflows/smolbox-live.yml": "1e20c9ec7e0384f1d0bbf74b0fc0ad8dd10930b5fcfb6237062a945d152f9a21"
+  }
+}

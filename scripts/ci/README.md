@@ -84,8 +84,12 @@ The manifest's external isolation and teardown declarations are trusted operator
 inputs, not remote attestation. macOS virtualization is established by actual VM
 tests, not by checking an OS name. A preflight pass never counts as a live-suite pass.
 
-The live workflow runs all nine current client/runtime cases, all 25 durable
+The live workflow runs all 14 current client/runtime cases, all 25 durable
 recovery cases, and restart/prolonged-unavailability/missing-VM service scenarios.
+The client/runtime suite includes finite output overflow, blocked observers,
+file-transfer caps, packed-image symlink behavior, guest FIFO reads and selected
+host/control endpoint probes. Successful characterization of an upstream
+limitation is not a claim that the limitation supplies isolation.
 Hard resource-abuse certification and benchmark evidence are separate acceptance
 items and remain pending; this workflow does not certify those by declaration.
 Choose `qualify_runtime: true` when dispatching the reviewed candidate. A dispatch

@@ -279,6 +279,17 @@ An enforceable supported profile is a first-release gate. If a requested hard co
 - Define handling of missing files, changing files, partial transfer, digest mismatch, duplicate names, and excessive aggregate output.
 - Host artifact-store credentials never enter the guest. Optional future guest credentials need a separate explicit policy; no inheritance from host environment.
 - Preserve binary data using verified binary-safe wire fields or file download. Do not silently substitute lossy text output for byte-exact output.
+
+Observed staging correction: the pinned packed Python artifacts follow a
+`/workspace` symlink to a file elsewhere inside the guest on download. Linux and
+macOS both reproduce this. The API restricts output selection lexically, but
+cannot promise canonical workspace containment or race-free symlink rejection.
+Do not substitute an untrusted guest precheck for a descriptor-level upstream
+boundary. Profiles requiring that stronger guarantee remain unsupported. File
+uploads replace the tested symlink without changing its former target; FIFO
+reads can block before upstream's type check and require an independent client
+deadline plus owned-VM termination. See `docs/security.md` for the measured
+scope and remaining qualification requirements.
 - Include artifact staging and collection in the overall deadline and capacity accounting. Retain enough disk accounting for failed cleanup and unknown outcomes.
 
 ## 6. Persistence, state transitions, and recovery
@@ -742,6 +753,19 @@ The public source URL and independent deployment/consumer review are still
 pending. Documentation describes obligations and limitations; it does not make
 the security acceptance checklist pass.
 
+Finite boundary milestone: the full real client/runtime suite now has 14 cases
+and passes on both hosts. Five added cases verify output overflow with accurate
+exit evidence, client/server file caps, observed packed-image symlink behavior,
+blocked callback expiry, three selected control endpoints and FIFO read expiry.
+The server-cap assertion inspects a bounded response and requires its specific
+byte-cap diagnostic; an unrelated HTTP failure is insufficient. All owned VMs
+are removed with creation-evidence checks and both inventories are empty. Strict
+Credo/ExSlop, ExDNA (68 files, zero clones), Credence, Dialyzer, ExDoc and Actionlint
+pass. See `docs/evidence/phase8-boundaries.json` for source hashes, test seeds and
+the initially rejected fixture namespace. The live CI gate requires all 14 cases.
+These finite probes do not complete quota-controlled resource-abuse, all
+credential/control-interface, cold-cache benchmark or production-profile gates.
+
 ### Phase 9 — Release candidate and adoption evidence
 
 Dependencies: all earlier exit conditions and section 12 gates.
@@ -767,7 +791,7 @@ These versions were checked against Hex metadata on September 6, 2026. Pin the s
 |---|---|---|
 | Dialyzer | `dialyxir` 1.4.8 | `mix dialyzer` |
 | Credo | `credo` 1.7.19 | `mix credo --strict` |
-| ex_dna | `ex_dna` 1.5.4 | `mix ex_dna lib dev test/support examples/durable_host/lib examples/durable_host/priv --max-clones 0` |
+| ex_dna | `ex_dna` 1.5.4 | `mix ex_dna lib dev test/support examples/durable_host/lib examples/durable_host/priv examples/durable_host/test/support examples/minimal_host/lib examples/support/lib --max-clones 0` |
 | ex_slop | `ex_slop` 0.4.4 | Enabled Credo plugin, executed by `mix credo --strict` |
 | Credence | `credence` 0.8.1 | Project-owned read-only `mix smolbox.ci.credence` task using the supported analysis API |
 
@@ -860,7 +884,7 @@ MIX_ENV=test mix deps.unlock --check-unused
 MIX_ENV=test mix compile --warnings-as-errors
 MIX_ENV=test mix test --warnings-as-errors
 MIX_ENV=test mix credo --strict
-MIX_ENV=test mix ex_dna lib dev test/support examples/durable_host/lib examples/durable_host/priv --max-clones 0
+MIX_ENV=test mix ex_dna lib dev test/support examples/durable_host/lib examples/durable_host/priv examples/durable_host/test/support examples/minimal_host/lib examples/support/lib --max-clones 0
 MIX_ENV=test mix smolbox.ci.credence
 MIX_ENV=test mix dialyzer
 ```

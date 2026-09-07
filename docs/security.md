@@ -78,8 +78,8 @@ never authorizes networking or an arbitrary image pull.
 | Disk | Required verified template allocation floors and reservation accounting | Hard host storage/cache/log quotas and disk-abuse qualification pending |
 | Guest process count | No certified hostile-guest process limit | Guest root cooperation or a Python/JS wrapper cannot supply it |
 | Deadlines/cancellation | Persisted budgets, upstream timeout and observed owned-VM stop | Delayed requests are unfenced; strong termination bounds remain unsupported |
-| Output | Bounded BEAM capture and transport; oversized results fail explicitly | Server/channel/frame behavior and slow-reader resource use require live qualification |
-| Egress and credentials | Offline configuration, initial TCP denial and credential-sentinel checks | Full host/control-plane and hostile-path tests remain pending |
+| Output | Bounded BEAM capture and transport; real finite overflow and blocked-observer tests preserve the available exit evidence | Total server/channel/frame memory and quota-controlled abuse qualification remain pending |
+| Egress and credentials | Offline configuration; tested public TCP and selected guest-to-host routes fail; initial credential-sentinel checks | These probes do not certify every host route, credential source or protocol |
 
 Run resource-abuse tests only inside independently verified host limits. A profile
 field, health response, API allocation echo or successful ordinary command does
@@ -106,6 +106,30 @@ validation cannot establish race-free symlink containment inside an actively
 changing guest. Collected files are bounded individual snapshots, not an atomic
 filesystem snapshot. Keep guest-derived names and bytes out of host path-building
 logic except through a conforming artifact adapter.
+
+The pinned prepared Python artifact follows a `/workspace` symlink on download
+even when its target is elsewhere inside the guest. Both Linux and macOS tests
+read a guest-only `/tmp` sentinel through such a link. Upload replaces that link
+with a regular file and leaves its former target unchanged. This is not a host
+filesystem escape, but it means workspace-only canonical containment is absent
+for this artifact path. An extra guest `stat` before download cannot close a
+hostile symlink race. Keep secrets out of the entire guest image and do not claim
+workspace containment from the lexical API restriction.
+
+A guest FIFO is another tested limitation: the agent opens the path before its
+regular-file check, so a read with no writer can block. The client operation
+deadline returns a transport error; stopping and inspecting the owned VM clears
+the blocked guest. Neither that deadline nor a rejected oversized response is a
+successful file transfer or confirmed guest termination. The worker's configured
+1 MiB file cap rejects a 1 MiB-plus-one file with an HTTP error; a smaller client
+cap independently rejects an oversized response.
+
+Finite output tests also distinguish verified results from missing evidence.
+An 8 KiB buffered response exceeding a 128-byte output allowance retains the
+received exit code in its typed error. The equivalent interrupted SSE capture
+reports uncertainty with no exit code. A blocked callback expires while a finite
+512 KiB guest producer can finish and write its test marker; expiry kills the
+local observer, not the VM. These measurements do not bound total worker memory.
 
 The directory adapter requires a private root, bounds bytes and verifies immutable
 publication. It is not a general multi-host object store, hostile-host filesystem
