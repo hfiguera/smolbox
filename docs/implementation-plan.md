@@ -795,6 +795,18 @@ examples and analyzer tools. The tested archive SHA-256 is
 the retained consumer-report SHA-256 is
 `64a3ddeacfbdd0e58b4272537ead5ced23cfbe01715a000c1af75d31a8698b7d`.
 
+The complete current deterministic suite also passes all six advertised
+host/toolchain lanes: Elixir 1.18.4/OTP 27.3.4.15, 1.19.5/OTP 28.5 and
+1.20.4/OTP 28.5 on Linux and macOS. Each executes six properties and 150 ordinary
+tests; fourteen runtime exclusions are not counted as live evidence. A cold
+Linux run exposed an acceptance-timing assumption in the HTTP deadline fixture.
+Its correction passes targeted tests and the full matrix without changing
+production behavior. Both canonical `mix ci` runs pass every analyzer.
+`docs/evidence/phase8-compatibility.json` records the source identities, initial
+failure, corrected results and remaining limits. `docs/compatibility.md` now
+separates current results from its historical milestone counts. This is a
+compatibility milestone, not the exact final release-commit matrix.
+
 ### Phase 9 — Release candidate and adoption evidence
 
 Dependencies: all earlier exit conditions and section 12 gates.

@@ -1,6 +1,29 @@
 # Compatibility evidence
 
-Status: qualification in progress, 2026-09-06. No production profile is certified.
+Status: qualification in progress, 2026-09-07. No production profile is certified.
+
+## Current tested scope
+
+The current library passes 156 deterministic cases (six properties and 150
+ordinary tests) on all six host/toolchain combinations listed below. Fourteen
+real-runtime cases are excluded from that count; all fourteen separately pass
+on canonical macOS and Linux. The durable host separately passes 25 real-worker
+recovery cases per platform, including fresh controller termination and
+dispatcher/notification faults. Three owned worker-service fault scenarios pass
+on each host. These are development-host results, not protected GitHub runs.
+
+All five requested analyzers pass on both canonical hosts. Their deliberate
+bad/clean canaries are recorded in the benchmark milestone; the later deadline
+fixture correction changes no analyzer or production behavior. Current evidence:
+[compatibility lanes](evidence/phase8-compatibility.json),
+[live output/path boundaries](evidence/phase8-boundaries.json),
+[durable telemetry recovery](evidence/phase8-telemetry.json),
+[service and CI harness](evidence/phase1-live-ci.json), and
+[warm durable workload](evidence/phase8-benchmarks.json).
+
+The sections after “Historical milestone records” retain earlier test counts
+and gaps as an audit trail. They do not supersede this current summary or the
+remaining release requirements.
 
 ## Pinned upstream
 
@@ -95,31 +118,46 @@ These findings require continued real-runtime verification:
   immutable generation token. Namespace exclusivity is an operator requirement;
   a matching name alone cannot authorize deletion after a conflict.
 
-## Qualification still required
+## Capability status
 
 | Control | Linux x86_64 | macOS arm64 |
 |---|---|---|
-| Guest vCPU/memory allocation | Initial allocation only | Initial allocation only |
-| Host RSS / CPU-time hard quota | Uncertified | Uncertified |
-| Guest disk and host storage accounting | Pending | Pending |
-| Hostile process count control | Uncertified | Uncertified |
-| Deadline and whole-VM termination | Pending | Pending |
-| Output and file transfer caps | Source evidence; binary round trip passes | Source evidence; binary round trip passes |
-| No guest egress / control-plane access | Public TCP denial passes; broader checks pending | Public TCP denial passes; broader checks pending |
-| Durable result recovery | No verified receipt | No verified receipt |
-| Safe cancellation and cleanup | Normal stop/delete passes; races pending | Normal stop/delete passes; races pending |
+| Guest vCPU/memory allocation | Observed configuration; bounded guest OOM experiment passes | Observed configuration; overload qualification pending |
+| Host RSS / CPU-time hard quota | Owned cgroup observation; no certified profile | Uncertified |
+| Guest disk and host storage accounting | 20/10 GiB template floors verified; no certified profile | Same template floors verified; host quota pending |
+| Hostile process count control | Unsupported hard control | Unsupported hard control |
+| Deadline and whole-VM termination | Real timeout/cancellation/recovery passes; delayed requests are not fenced | Same |
+| Output and file transfer caps | Finite overflow and worker cap pass; broader buffering qualification pending | Same |
+| No guest egress / control-plane access | Public TCP and three control-plane routes denied; broader isolation pending | Same |
+| Durable result recovery | Persisted results survive controller failure; no upstream receipt for a lost result | Same |
+| Safe cancellation and cleanup | Unknown outcomes and reservations survive faults through retention and verified cleanup | Same |
 | Authenticated TLS proxy | Real worker forwarding passes | Real worker forwarding passes |
+| Canonical workspace containment | Unsupported; guest symlink read escapes the lexical workspace | Same |
 
-Uncertified hard controls must be rejected before dispatch. Local development
-qualification must not be advertised as production multi-tenant certification.
+Uncertified hard controls are rejected before dispatch. Existing controlled and
+real failure tests do not establish production multi-tenant certification. See
+[resource qualification](resource-qualification.md) and [security](security.md)
+for measured scope and remaining experiments.
 
 ## Toolchain
 
-Canonical: Elixir 1.20.4 / OTP 28.5. Minimum lane: Elixir 1.18.4 / OTP 27.3.4.15.
-Additional lane: Elixir 1.19.5 / OTP 28.5. Scaffold compilation/tests pass on
-all three combinations in separate local workspaces. The canonical `mix ci`
-also passes on the Linux host. These results cover the scaffold, not the future
-managed runtime. Repository pins do not change the user's global toolchain.
+The maintained package, rather than only the original scaffold, passes these
+lanes after the bounded deadline-fixture correction:
+
+| Elixir / OTP | macOS arm64 | Linux x86_64 |
+|---|---|---|
+| 1.18.4 / 27.3.4.15 (minimum) | 156 passed | 156 passed |
+| 1.19.5 / 28.5 | 156 passed | 156 passed |
+| 1.20.4 / 28.5 (canonical) | 156 passed; all five analyzers | 156 passed; all five analyzers |
+
+Each lane excludes 14 explicitly opt-in real-runtime cases. On Elixir 1.18 the
+summary includes those exclusions in its printed “164 tests”; the executed
+count is 150 ordinary tests plus six properties. One cold Linux run exposed a
+test fixture that assumed a 50 ms request always reached its peer. The corrected
+fixture confirms acceptance before measuring bounded outer/idle deadlines and
+passes all lanes. No library deadline or transport behavior changed. Seeds,
+durations, matching source hashes and the failed attempt are retained in
+[compatibility evidence](evidence/phase8-compatibility.json).
 
 Use separate workspaces for simultaneous Elixir/OTP lanes. Sharing dependency
 directories can mix rebar build artifacts. Source transfers to Linux must omit
@@ -134,6 +172,12 @@ developer tasks pass warning-as-error compilation. No dependency source was patc
 The repository currently has no configured Git remote. Source metadata and an
 independent consumer review remain release prerequisites, not fabricated links
 or evidence supplied by these examples.
+
+## Historical milestone records
+
+The following sections describe earlier increments in order. Counts and pending
+items are historical; use the current summary and capability table above for
+the latest status.
 
 ## Low-level Elixir client qualification
 

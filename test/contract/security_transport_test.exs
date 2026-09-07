@@ -143,14 +143,28 @@ defmodule SmolBox.SecurityTransportTest do
 
     port =
       TestPeer.start(fn conn ->
-        send(parent, :accepted)
-        Process.sleep(300)
+        send(parent, {:accepted, self()})
+
+        receive do
+          :release -> :ok
+        after
+          5000 -> :ok
+        end
+
         TestPeer.json(conn, %{"machines" => []})
       end)
 
-    for options <- [[operation_timeout_ms: 50], [receive_timeout_ms: 50]] do
-      assert {:error, %Error{category: :transport}} = Client.list(client(port, options))
-      assert_receive :accepted
+    for options <- [[operation_timeout_ms: 1000], [receive_timeout_ms: 1000]] do
+      started = System.monotonic_time(:millisecond)
+      observer = Task.async(fn -> Client.list(client(port, options)) end)
+      assert_receive {:accepted, connection}, 1500
+
+      try do
+        assert {:error, %Error{category: :transport}} = Task.await(observer, 2000)
+        assert System.monotonic_time(:millisecond) - started < 2500
+      after
+        send(connection, :release)
+      end
     end
 
     {:ok, command} = Command.new(["true"])
@@ -158,7 +172,7 @@ defmodule SmolBox.SecurityTransportTest do
     assert {:error, %Error{evidence: :not_dispatched}} =
              Client.exec(client(port, max_request_bytes: 1), "fixture", command)
 
-    refute_receive :accepted
+    refute_receive {:accepted, _connection}
   end
 
   test "a peer that drops the accepted connection sees exactly one exec attempt" do
