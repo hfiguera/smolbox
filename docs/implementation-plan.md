@@ -2,7 +2,7 @@
 
 ## 0.1.1 documentation and validation release
 
-Status: **release preparation in progress**. The maintainer authorized publishing
+Status: **published and verified**, September 8, 2026. The maintainer authorized publishing
 0.1.1 with the revised operating guides and Linux qualification evidence. Library
 source, public APIs, persisted records and production dependencies remain unchanged
 from 0.1.0. New validation runs only on Linux, following the maintainer's explicit
@@ -12,8 +12,15 @@ checks and current/minimum consumers of the same final package. Earlier macOS
 results remain historical evidence; no new macOS run is required or claimed for
 this patch. This scoped decision does not rewrite first-release acceptance below.
 
-Freeze and validate the release commit before publication. Record its results,
-package hashes, publication and cleanup in a separate repository-only attestation.
+Tag `v0.1.1` identifies tested commit `db0797c58b1209017641d759b6ff3a35a9f2e8a1`.
+All 18 ordinary CI jobs passed, as did the four Linux compatibility lanes,
+analyzers/canaries, 14 real runtime cases, 16 store cases, 25 durable recovery
+cases, three service-fault scenarios, both examples and current/minimum consumers.
+The public Hex archive and fresh registry consumer matched the validated 86-file
+package. HexDocs and the GitHub Release were published and verified; cleanup
+preserved existing host services. See the [0.1.1 release report](release-candidates/0.1.1.md)
+and [machine-readable evidence](release-candidates/0.1.1.json). No required work
+remains for this patch's scoped release. This attestation does not move its tag.
 
 ## 0.1.0 publication
 

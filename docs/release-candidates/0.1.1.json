@@ -1,0 +1,4055 @@
+{
+  "acceptance": {
+    "candidate": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+    "cleanup": {
+      "checked_at": "2026-09-08T06:05:21.844502Z",
+      "database": {
+        "listen_addresses": "",
+        "max_connections": "30",
+        "needs_work": 0,
+        "noninternal_triggers": 0,
+        "private_state_retained": true,
+        "records": 5,
+        "reserved_slots": 0,
+        "stopped": true,
+        "task_owned_postgres_pid": "240408",
+        "version": "PostgreSQL 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, 64-bit"
+      },
+      "fault_api_port_free": true,
+      "fault_guest_port_free": true,
+      "no_ssh_forward_created": true,
+      "original_worker_pid": "44097",
+      "original_worker_preserved": true,
+      "shared_linux_database_preserved": true
+    },
+    "dry_run_interrupted_attempt": {
+      "accepted": false,
+      "file": "linux-publish-dry-run.json",
+      "reason": "Hex waited for authentication; terminated before docs/package checks despite zero exit"
+    },
+    "github_ci": {
+      "conclusion": "success",
+      "headSha": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+      "jobs": [
+        {
+          "completedAt": "2026-09-08T05:44:35Z",
+          "conclusion": "success",
+          "databaseId": 101951127058,
+          "name": "smolbox-ci-tools",
+          "startedAt": "2026-09-08T05:44:18Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-09-08T05:44:20Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-09-08T05:44:19Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:20Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 2,
+              "startedAt": "2026-09-08T05:44:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:27Z",
+              "conclusion": "success",
+              "name": "Run erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124",
+              "number": 3,
+              "startedAt": "2026-09-08T05:44:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:33Z",
+              "conclusion": "success",
+              "name": "Run elixir scripts/ci_test.exs",
+              "number": 4,
+              "startedAt": "2026-09-08T05:44:27Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:33Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 8,
+              "startedAt": "2026-09-08T05:44:33Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:33Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 9,
+              "startedAt": "2026-09-08T05:44:33Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34191771307/job/101951127058"
+        },
+        {
+          "completedAt": "2026-09-08T05:45:22Z",
+          "conclusion": "success",
+          "databaseId": 101951127168,
+          "name": "smolbox-format-compile",
+          "startedAt": "2026-09-08T05:44:18Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-09-08T05:44:20Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-09-08T05:44:19Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:21Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 2,
+              "startedAt": "2026-09-08T05:44:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:27Z",
+              "conclusion": "success",
+              "name": "Run erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124",
+              "number": 3,
+              "startedAt": "2026-09-08T05:44:21Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:27Z",
+              "conclusion": "success",
+              "name": "Run actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830",
+              "number": 4,
+              "startedAt": "2026-09-08T05:44:27Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:29Z",
+              "conclusion": "success",
+              "name": "Run mix deps.get",
+              "number": 5,
+              "startedAt": "2026-09-08T05:44:27Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:29Z",
+              "conclusion": "success",
+              "name": "Run elixir --version",
+              "number": 6,
+              "startedAt": "2026-09-08T05:44:29Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:20Z",
+              "conclusion": "success",
+              "name": "Run required checks",
+              "number": 7,
+              "startedAt": "2026-09-08T05:44:29Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:20Z",
+              "conclusion": "success",
+              "name": "Check tracked files were not modified",
+              "number": 8,
+              "startedAt": "2026-09-08T05:45:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:20Z",
+              "conclusion": "success",
+              "name": "Post Run actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830",
+              "number": 15,
+              "startedAt": "2026-09-08T05:45:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:20Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 16,
+              "startedAt": "2026-09-08T05:45:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:20Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 17,
+              "startedAt": "2026-09-08T05:45:20Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34191771307/job/101951127168"
+        },
+        {
+          "completedAt": "2026-09-08T05:48:04Z",
+          "conclusion": "success",
+          "databaseId": 101951127197,
+          "name": "smolbox-quality-canaries",
+          "startedAt": "2026-09-08T05:44:18Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-09-08T05:44:20Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-09-08T05:44:19Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:20Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 2,
+              "startedAt": "2026-09-08T05:44:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:26Z",
+              "conclusion": "success",
+              "name": "Run erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124",
+              "number": 3,
+              "startedAt": "2026-09-08T05:44:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:26Z",
+              "conclusion": "success",
+              "name": "Run actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830",
+              "number": 4,
+              "startedAt": "2026-09-08T05:44:26Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:28Z",
+              "conclusion": "success",
+              "name": "Run mix deps.get",
+              "number": 5,
+              "startedAt": "2026-09-08T05:44:26Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:28Z",
+              "conclusion": "success",
+              "name": "Run elixir --version",
+              "number": 6,
+              "startedAt": "2026-09-08T05:44:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:48:02Z",
+              "conclusion": "success",
+              "name": "Run required checks",
+              "number": 7,
+              "startedAt": "2026-09-08T05:44:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:48:02Z",
+              "conclusion": "success",
+              "name": "Check tracked files were not modified",
+              "number": 8,
+              "startedAt": "2026-09-08T05:48:02Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:48:03Z",
+              "conclusion": "success",
+              "name": "Post Run actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830",
+              "number": 15,
+              "startedAt": "2026-09-08T05:48:02Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:48:03Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 16,
+              "startedAt": "2026-09-08T05:48:03Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:48:03Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 17,
+              "startedAt": "2026-09-08T05:48:03Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34191771307/job/101951127197"
+        },
+        {
+          "completedAt": "2026-09-08T05:45:21Z",
+          "conclusion": "success",
+          "databaseId": 101951127252,
+          "name": "smolbox-credo-ex-slop",
+          "startedAt": "2026-09-08T05:44:19Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-09-08T05:44:20Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-09-08T05:44:19Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:21Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 2,
+              "startedAt": "2026-09-08T05:44:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:26Z",
+              "conclusion": "success",
+              "name": "Run erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124",
+              "number": 3,
+              "startedAt": "2026-09-08T05:44:21Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:27Z",
+              "conclusion": "success",
+              "name": "Run actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830",
+              "number": 4,
+              "startedAt": "2026-09-08T05:44:26Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:28Z",
+              "conclusion": "success",
+              "name": "Run mix deps.get",
+              "number": 5,
+              "startedAt": "2026-09-08T05:44:27Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:29Z",
+              "conclusion": "success",
+              "name": "Run elixir --version",
+              "number": 6,
+              "startedAt": "2026-09-08T05:44:29Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:19Z",
+              "conclusion": "success",
+              "name": "Run required checks",
+              "number": 7,
+              "startedAt": "2026-09-08T05:44:29Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:19Z",
+              "conclusion": "success",
+              "name": "Check tracked files were not modified",
+              "number": 8,
+              "startedAt": "2026-09-08T05:45:19Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:20Z",
+              "conclusion": "success",
+              "name": "Post Run actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830",
+              "number": 15,
+              "startedAt": "2026-09-08T05:45:19Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:20Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 16,
+              "startedAt": "2026-09-08T05:45:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:20Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 17,
+              "startedAt": "2026-09-08T05:45:20Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34191771307/job/101951127252"
+        },
+        {
+          "completedAt": "2026-09-08T05:46:44Z",
+          "conclusion": "success",
+          "databaseId": 101951127254,
+          "name": "smolbox-coverage",
+          "startedAt": "2026-09-08T05:44:18Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-09-08T05:44:21Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-09-08T05:44:19Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:22Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 2,
+              "startedAt": "2026-09-08T05:44:21Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:28Z",
+              "conclusion": "success",
+              "name": "Run erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124",
+              "number": 3,
+              "startedAt": "2026-09-08T05:44:22Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:29Z",
+              "conclusion": "success",
+              "name": "Run actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830",
+              "number": 4,
+              "startedAt": "2026-09-08T05:44:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:30Z",
+              "conclusion": "success",
+              "name": "Run mix deps.get",
+              "number": 5,
+              "startedAt": "2026-09-08T05:44:29Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:31Z",
+              "conclusion": "success",
+              "name": "Run elixir --version",
+              "number": 6,
+              "startedAt": "2026-09-08T05:44:30Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:46:40Z",
+              "conclusion": "success",
+              "name": "Run required checks",
+              "number": 7,
+              "startedAt": "2026-09-08T05:44:31Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:46:40Z",
+              "conclusion": "success",
+              "name": "Check tracked files were not modified",
+              "number": 8,
+              "startedAt": "2026-09-08T05:46:40Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:46:41Z",
+              "conclusion": "success",
+              "name": "Post Run actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830",
+              "number": 15,
+              "startedAt": "2026-09-08T05:46:40Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:46:41Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 16,
+              "startedAt": "2026-09-08T05:46:41Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:46:41Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 17,
+              "startedAt": "2026-09-08T05:46:41Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34191771307/job/101951127254"
+        },
+        {
+          "completedAt": "2026-09-08T05:47:54Z",
+          "conclusion": "success",
+          "databaseId": 101951127272,
+          "name": "smolbox-dialyzer",
+          "startedAt": "2026-09-08T05:44:18Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-09-08T05:44:21Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-09-08T05:44:19Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:22Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 2,
+              "startedAt": "2026-09-08T05:44:21Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:28Z",
+              "conclusion": "success",
+              "name": "Run erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124",
+              "number": 3,
+              "startedAt": "2026-09-08T05:44:22Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:28Z",
+              "conclusion": "success",
+              "name": "Run actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830",
+              "number": 4,
+              "startedAt": "2026-09-08T05:44:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:31Z",
+              "conclusion": "success",
+              "name": "Run mix deps.get",
+              "number": 5,
+              "startedAt": "2026-09-08T05:44:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:31Z",
+              "conclusion": "success",
+              "name": "Run elixir --version",
+              "number": 6,
+              "startedAt": "2026-09-08T05:44:31Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:47:50Z",
+              "conclusion": "success",
+              "name": "Run required checks",
+              "number": 7,
+              "startedAt": "2026-09-08T05:44:31Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:47:50Z",
+              "conclusion": "success",
+              "name": "Check tracked files were not modified",
+              "number": 8,
+              "startedAt": "2026-09-08T05:47:50Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:47:51Z",
+              "conclusion": "success",
+              "name": "Post Run actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830",
+              "number": 15,
+              "startedAt": "2026-09-08T05:47:50Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:47:51Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 16,
+              "startedAt": "2026-09-08T05:47:51Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:47:51Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 17,
+              "startedAt": "2026-09-08T05:47:51Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34191771307/job/101951127272"
+        },
+        {
+          "completedAt": "2026-09-08T05:44:49Z",
+          "conclusion": "success",
+          "databaseId": 101951127315,
+          "name": "smolbox-minimal-host",
+          "startedAt": "2026-09-08T05:44:18Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-09-08T05:44:20Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-09-08T05:44:19Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:20Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 2,
+              "startedAt": "2026-09-08T05:44:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:26Z",
+              "conclusion": "success",
+              "name": "Run erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124",
+              "number": 3,
+              "startedAt": "2026-09-08T05:44:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:27Z",
+              "conclusion": "success",
+              "name": "Run actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830",
+              "number": 4,
+              "startedAt": "2026-09-08T05:44:26Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:28Z",
+              "conclusion": "success",
+              "name": "Run mix deps.get",
+              "number": 5,
+              "startedAt": "2026-09-08T05:44:27Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:28Z",
+              "conclusion": "success",
+              "name": "Run elixir --version",
+              "number": 6,
+              "startedAt": "2026-09-08T05:44:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:29Z",
+              "conclusion": "success",
+              "name": "Run mix compile --warnings-as-errors",
+              "number": 7,
+              "startedAt": "2026-09-08T05:44:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:44Z",
+              "conclusion": "success",
+              "name": "Run mix dialyzer --force-check",
+              "number": 8,
+              "startedAt": "2026-09-08T05:44:29Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:45Z",
+              "conclusion": "success",
+              "name": "Run mix hex.audit",
+              "number": 9,
+              "startedAt": "2026-09-08T05:44:44Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:46Z",
+              "conclusion": "success",
+              "name": "Run mix deps.audit",
+              "number": 10,
+              "startedAt": "2026-09-08T05:44:45Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:46Z",
+              "conclusion": "success",
+              "name": "Run git diff --exit-code",
+              "number": 11,
+              "startedAt": "2026-09-08T05:44:46Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:47Z",
+              "conclusion": "success",
+              "name": "Post Run actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830",
+              "number": 21,
+              "startedAt": "2026-09-08T05:44:46Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:47Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 22,
+              "startedAt": "2026-09-08T05:44:47Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:47Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 23,
+              "startedAt": "2026-09-08T05:44:47Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34191771307/job/101951127315"
+        },
+        {
+          "completedAt": "2026-09-08T05:45:23Z",
+          "conclusion": "success",
+          "databaseId": 101951127332,
+          "name": "smolbox-credence",
+          "startedAt": "2026-09-08T05:44:19Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-09-08T05:44:21Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-09-08T05:44:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:21Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 2,
+              "startedAt": "2026-09-08T05:44:21Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:28Z",
+              "conclusion": "success",
+              "name": "Run erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124",
+              "number": 3,
+              "startedAt": "2026-09-08T05:44:21Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:28Z",
+              "conclusion": "success",
+              "name": "Run actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830",
+              "number": 4,
+              "startedAt": "2026-09-08T05:44:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:31Z",
+              "conclusion": "success",
+              "name": "Run mix deps.get",
+              "number": 5,
+              "startedAt": "2026-09-08T05:44:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:31Z",
+              "conclusion": "success",
+              "name": "Run elixir --version",
+              "number": 6,
+              "startedAt": "2026-09-08T05:44:31Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:20Z",
+              "conclusion": "success",
+              "name": "Run required checks",
+              "number": 7,
+              "startedAt": "2026-09-08T05:44:31Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:20Z",
+              "conclusion": "success",
+              "name": "Check tracked files were not modified",
+              "number": 8,
+              "startedAt": "2026-09-08T05:45:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:21Z",
+              "conclusion": "success",
+              "name": "Post Run actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830",
+              "number": 15,
+              "startedAt": "2026-09-08T05:45:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:21Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 16,
+              "startedAt": "2026-09-08T05:45:21Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:21Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 17,
+              "startedAt": "2026-09-08T05:45:21Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34191771307/job/101951127332"
+        },
+        {
+          "completedAt": "2026-09-08T05:45:33Z",
+          "conclusion": "success",
+          "databaseId": 101951127353,
+          "name": "smolbox-docs-package",
+          "startedAt": "2026-09-08T05:44:18Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-09-08T05:44:20Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-09-08T05:44:19Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:22Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 2,
+              "startedAt": "2026-09-08T05:44:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:27Z",
+              "conclusion": "success",
+              "name": "Run erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124",
+              "number": 3,
+              "startedAt": "2026-09-08T05:44:22Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:28Z",
+              "conclusion": "success",
+              "name": "Run actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830",
+              "number": 4,
+              "startedAt": "2026-09-08T05:44:27Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:30Z",
+              "conclusion": "success",
+              "name": "Run mix deps.get",
+              "number": 5,
+              "startedAt": "2026-09-08T05:44:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:30Z",
+              "conclusion": "success",
+              "name": "Run elixir --version",
+              "number": 6,
+              "startedAt": "2026-09-08T05:44:30Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:29Z",
+              "conclusion": "success",
+              "name": "Run required checks",
+              "number": 7,
+              "startedAt": "2026-09-08T05:44:30Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:30Z",
+              "conclusion": "success",
+              "name": "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+              "number": 8,
+              "startedAt": "2026-09-08T05:45:29Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:30Z",
+              "conclusion": "success",
+              "name": "Check tracked files were not modified",
+              "number": 9,
+              "startedAt": "2026-09-08T05:45:30Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:31Z",
+              "conclusion": "success",
+              "name": "Post Run actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830",
+              "number": 17,
+              "startedAt": "2026-09-08T05:45:30Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:31Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 18,
+              "startedAt": "2026-09-08T05:45:31Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:31Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 19,
+              "startedAt": "2026-09-08T05:45:31Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34191771307/job/101951127353"
+        },
+        {
+          "completedAt": "2026-09-08T05:46:33Z",
+          "conclusion": "success",
+          "databaseId": 101951127355,
+          "name": "smolbox-compatibility (1.19.5, 28.5)",
+          "startedAt": "2026-09-08T05:44:18Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-09-08T05:44:20Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-09-08T05:44:19Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:21Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 2,
+              "startedAt": "2026-09-08T05:44:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:32Z",
+              "conclusion": "success",
+              "name": "Run erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124",
+              "number": 3,
+              "startedAt": "2026-09-08T05:44:21Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:34Z",
+              "conclusion": "success",
+              "name": "Run mix deps.get",
+              "number": 4,
+              "startedAt": "2026-09-08T05:44:32Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:34Z",
+              "conclusion": "success",
+              "name": "Run elixir --version",
+              "number": 5,
+              "startedAt": "2026-09-08T05:44:34Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:13Z",
+              "conclusion": "success",
+              "name": "Run mix compile --warnings-as-errors",
+              "number": 6,
+              "startedAt": "2026-09-08T05:44:34Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:46:31Z",
+              "conclusion": "success",
+              "name": "Run mix test --warnings-as-errors",
+              "number": 7,
+              "startedAt": "2026-09-08T05:45:13Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:46:31Z",
+              "conclusion": "success",
+              "name": "Run git diff --exit-code",
+              "number": 8,
+              "startedAt": "2026-09-08T05:46:31Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:46:31Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 16,
+              "startedAt": "2026-09-08T05:46:31Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:46:31Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 17,
+              "startedAt": "2026-09-08T05:46:31Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34191771307/job/101951127355"
+        },
+        {
+          "completedAt": "2026-09-08T05:45:10Z",
+          "conclusion": "success",
+          "databaseId": 101951127358,
+          "name": "smolbox-security",
+          "startedAt": "2026-09-08T05:44:18Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-09-08T05:44:19Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-09-08T05:44:18Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:20Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 2,
+              "startedAt": "2026-09-08T05:44:19Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:26Z",
+              "conclusion": "success",
+              "name": "Run erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124",
+              "number": 3,
+              "startedAt": "2026-09-08T05:44:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:26Z",
+              "conclusion": "success",
+              "name": "Run actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830",
+              "number": 4,
+              "startedAt": "2026-09-08T05:44:26Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:28Z",
+              "conclusion": "success",
+              "name": "Run mix deps.get",
+              "number": 5,
+              "startedAt": "2026-09-08T05:44:26Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:28Z",
+              "conclusion": "success",
+              "name": "Run elixir --version",
+              "number": 6,
+              "startedAt": "2026-09-08T05:44:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:08Z",
+              "conclusion": "success",
+              "name": "Run required checks",
+              "number": 7,
+              "startedAt": "2026-09-08T05:44:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:08Z",
+              "conclusion": "success",
+              "name": "Check tracked files were not modified",
+              "number": 8,
+              "startedAt": "2026-09-08T05:45:08Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:08Z",
+              "conclusion": "success",
+              "name": "Post Run actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830",
+              "number": 15,
+              "startedAt": "2026-09-08T05:45:08Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:09Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 16,
+              "startedAt": "2026-09-08T05:45:08Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:09Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 17,
+              "startedAt": "2026-09-08T05:45:09Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34191771307/job/101951127358"
+        },
+        {
+          "completedAt": "2026-09-08T05:46:45Z",
+          "conclusion": "success",
+          "databaseId": 101951127398,
+          "name": "smolbox-compatibility (1.18.4, 27.3.4.15)",
+          "startedAt": "2026-09-08T05:44:18Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-09-08T05:44:20Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-09-08T05:44:19Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:21Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 2,
+              "startedAt": "2026-09-08T05:44:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:26Z",
+              "conclusion": "success",
+              "name": "Run erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124",
+              "number": 3,
+              "startedAt": "2026-09-08T05:44:21Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:29Z",
+              "conclusion": "success",
+              "name": "Run mix deps.get",
+              "number": 4,
+              "startedAt": "2026-09-08T05:44:26Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:29Z",
+              "conclusion": "success",
+              "name": "Run elixir --version",
+              "number": 5,
+              "startedAt": "2026-09-08T05:44:29Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:22Z",
+              "conclusion": "success",
+              "name": "Run mix compile --warnings-as-errors",
+              "number": 6,
+              "startedAt": "2026-09-08T05:44:29Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:46:42Z",
+              "conclusion": "success",
+              "name": "Run mix test --warnings-as-errors",
+              "number": 7,
+              "startedAt": "2026-09-08T05:45:22Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:46:42Z",
+              "conclusion": "success",
+              "name": "Run git diff --exit-code",
+              "number": 8,
+              "startedAt": "2026-09-08T05:46:42Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:46:42Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 16,
+              "startedAt": "2026-09-08T05:46:42Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:46:42Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 17,
+              "startedAt": "2026-09-08T05:46:42Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34191771307/job/101951127398"
+        },
+        {
+          "completedAt": "2026-09-08T05:46:32Z",
+          "conclusion": "success",
+          "databaseId": 101951127420,
+          "name": "smolbox-tests",
+          "startedAt": "2026-09-08T05:44:18Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-09-08T05:44:20Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-09-08T05:44:19Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:21Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 2,
+              "startedAt": "2026-09-08T05:44:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:28Z",
+              "conclusion": "success",
+              "name": "Run erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124",
+              "number": 3,
+              "startedAt": "2026-09-08T05:44:21Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:28Z",
+              "conclusion": "success",
+              "name": "Run actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830",
+              "number": 4,
+              "startedAt": "2026-09-08T05:44:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:29Z",
+              "conclusion": "success",
+              "name": "Run mix deps.get",
+              "number": 5,
+              "startedAt": "2026-09-08T05:44:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:30Z",
+              "conclusion": "success",
+              "name": "Run elixir --version",
+              "number": 6,
+              "startedAt": "2026-09-08T05:44:29Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:46:29Z",
+              "conclusion": "success",
+              "name": "Run required checks",
+              "number": 7,
+              "startedAt": "2026-09-08T05:44:30Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:46:29Z",
+              "conclusion": "success",
+              "name": "Check tracked files were not modified",
+              "number": 8,
+              "startedAt": "2026-09-08T05:46:29Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:46:29Z",
+              "conclusion": "success",
+              "name": "Post Run actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830",
+              "number": 15,
+              "startedAt": "2026-09-08T05:46:29Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:46:30Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 16,
+              "startedAt": "2026-09-08T05:46:29Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:46:30Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 17,
+              "startedAt": "2026-09-08T05:46:30Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34191771307/job/101951127420"
+        },
+        {
+          "completedAt": "2026-09-08T05:46:38Z",
+          "conclusion": "success",
+          "databaseId": 101951127421,
+          "name": "smolbox-compatibility (1.20.4, 28.5)",
+          "startedAt": "2026-09-08T05:44:18Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-09-08T05:44:19Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-09-08T05:44:19Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:20Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 2,
+              "startedAt": "2026-09-08T05:44:19Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:26Z",
+              "conclusion": "success",
+              "name": "Run erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124",
+              "number": 3,
+              "startedAt": "2026-09-08T05:44:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:28Z",
+              "conclusion": "success",
+              "name": "Run mix deps.get",
+              "number": 4,
+              "startedAt": "2026-09-08T05:44:26Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:28Z",
+              "conclusion": "success",
+              "name": "Run elixir --version",
+              "number": 5,
+              "startedAt": "2026-09-08T05:44:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:18Z",
+              "conclusion": "success",
+              "name": "Run mix compile --warnings-as-errors",
+              "number": 6,
+              "startedAt": "2026-09-08T05:44:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:46:37Z",
+              "conclusion": "success",
+              "name": "Run mix test --warnings-as-errors",
+              "number": 7,
+              "startedAt": "2026-09-08T05:45:18Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:46:37Z",
+              "conclusion": "success",
+              "name": "Run git diff --exit-code",
+              "number": 8,
+              "startedAt": "2026-09-08T05:46:37Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:46:37Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 16,
+              "startedAt": "2026-09-08T05:46:37Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:46:37Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 17,
+              "startedAt": "2026-09-08T05:46:37Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34191771307/job/101951127421"
+        },
+        {
+          "completedAt": "2026-09-08T05:45:19Z",
+          "conclusion": "success",
+          "databaseId": 101951127423,
+          "name": "smolbox-ex-dna",
+          "startedAt": "2026-09-08T05:44:18Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-09-08T05:44:19Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-09-08T05:44:19Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:20Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 2,
+              "startedAt": "2026-09-08T05:44:19Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:26Z",
+              "conclusion": "success",
+              "name": "Run erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124",
+              "number": 3,
+              "startedAt": "2026-09-08T05:44:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:26Z",
+              "conclusion": "success",
+              "name": "Run actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830",
+              "number": 4,
+              "startedAt": "2026-09-08T05:44:26Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:28Z",
+              "conclusion": "success",
+              "name": "Run mix deps.get",
+              "number": 5,
+              "startedAt": "2026-09-08T05:44:26Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:28Z",
+              "conclusion": "success",
+              "name": "Run elixir --version",
+              "number": 6,
+              "startedAt": "2026-09-08T05:44:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:17Z",
+              "conclusion": "success",
+              "name": "Run required checks",
+              "number": 7,
+              "startedAt": "2026-09-08T05:44:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:17Z",
+              "conclusion": "success",
+              "name": "Check tracked files were not modified",
+              "number": 8,
+              "startedAt": "2026-09-08T05:45:17Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:17Z",
+              "conclusion": "success",
+              "name": "Post Run actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830",
+              "number": 15,
+              "startedAt": "2026-09-08T05:45:17Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:18Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 16,
+              "startedAt": "2026-09-08T05:45:17Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:18Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 17,
+              "startedAt": "2026-09-08T05:45:18Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34191771307/job/101951127423"
+        },
+        {
+          "completedAt": "2026-09-08T05:45:43Z",
+          "conclusion": "success",
+          "databaseId": 101951127433,
+          "name": "smolbox-store-contract",
+          "startedAt": "2026-09-08T05:44:19Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-09-08T05:44:22Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-09-08T05:44:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:38Z",
+              "conclusion": "success",
+              "name": "Initialize containers",
+              "number": 2,
+              "startedAt": "2026-09-08T05:44:22Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:39Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 3,
+              "startedAt": "2026-09-08T05:44:38Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:49Z",
+              "conclusion": "success",
+              "name": "Run erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124",
+              "number": 4,
+              "startedAt": "2026-09-08T05:44:39Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:53Z",
+              "conclusion": "success",
+              "name": "Run actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830",
+              "number": 5,
+              "startedAt": "2026-09-08T05:44:49Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:54Z",
+              "conclusion": "success",
+              "name": "Run mix deps.get",
+              "number": 6,
+              "startedAt": "2026-09-08T05:44:53Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:55Z",
+              "conclusion": "success",
+              "name": "Run elixir --version",
+              "number": 7,
+              "startedAt": "2026-09-08T05:44:54Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:55Z",
+              "conclusion": "success",
+              "name": "Run mix compile --warnings-as-errors",
+              "number": 8,
+              "startedAt": "2026-09-08T05:44:55Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:56Z",
+              "conclusion": "success",
+              "name": "Run mix ecto.migrate",
+              "number": 9,
+              "startedAt": "2026-09-08T05:44:55Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:57Z",
+              "conclusion": "success",
+              "name": "Run mix xref graph --format cycles --fail-above 0",
+              "number": 10,
+              "startedAt": "2026-09-08T05:44:56Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:01Z",
+              "conclusion": "success",
+              "name": "Run mix test --warnings-as-errors",
+              "number": 11,
+              "startedAt": "2026-09-08T05:44:57Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:15Z",
+              "conclusion": "success",
+              "name": "Run mix dialyzer --force-check",
+              "number": 12,
+              "startedAt": "2026-09-08T05:45:01Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:16Z",
+              "conclusion": "success",
+              "name": "Audit Hex dependencies with a verified Decimal exception",
+              "number": 13,
+              "startedAt": "2026-09-08T05:45:15Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:18Z",
+              "conclusion": "success",
+              "name": "Run mix deps.audit",
+              "number": 14,
+              "startedAt": "2026-09-08T05:45:16Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:37Z",
+              "conclusion": "success",
+              "name": "Verify unavailable database fails closed",
+              "number": 15,
+              "startedAt": "2026-09-08T05:45:18Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:37Z",
+              "conclusion": "success",
+              "name": "Run git diff --exit-code",
+              "number": 16,
+              "startedAt": "2026-09-08T05:45:37Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:38Z",
+              "conclusion": "success",
+              "name": "Post Run actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830",
+              "number": 30,
+              "startedAt": "2026-09-08T05:45:37Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:38Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 31,
+              "startedAt": "2026-09-08T05:45:38Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:38Z",
+              "conclusion": "success",
+              "name": "Stop containers",
+              "number": 32,
+              "startedAt": "2026-09-08T05:45:38Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:45:38Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 33,
+              "startedAt": "2026-09-08T05:45:38Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34191771307/job/101951127433"
+        },
+        {
+          "completedAt": "2026-09-08T05:44:45Z",
+          "conclusion": "success",
+          "databaseId": 101951127438,
+          "name": "smolbox-minimum-dependencies",
+          "startedAt": "2026-09-08T05:44:18Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-09-08T05:44:20Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-09-08T05:44:19Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:21Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 2,
+              "startedAt": "2026-09-08T05:44:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:26Z",
+              "conclusion": "success",
+              "name": "Run erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124",
+              "number": 3,
+              "startedAt": "2026-09-08T05:44:21Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:28Z",
+              "conclusion": "success",
+              "name": "Run mix deps.get",
+              "number": 4,
+              "startedAt": "2026-09-08T05:44:26Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:28Z",
+              "conclusion": "success",
+              "name": "Run elixir --version",
+              "number": 5,
+              "startedAt": "2026-09-08T05:44:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:42Z",
+              "conclusion": "success",
+              "name": "Run elixir scripts/ci.exs package-consumer --minimum --report \"$RUNNER_TEMP/smolbox-consumer-minimum.json\" --package-output \"$RUNNER_TEMP/smolbox-consumer-minimum.tar\"",
+              "number": 6,
+              "startedAt": "2026-09-08T05:44:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:43Z",
+              "conclusion": "success",
+              "name": "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+              "number": 7,
+              "startedAt": "2026-09-08T05:44:42Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:43Z",
+              "conclusion": "success",
+              "name": "Run git diff --exit-code",
+              "number": 8,
+              "startedAt": "2026-09-08T05:44:43Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:43Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 16,
+              "startedAt": "2026-09-08T05:44:43Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:44:43Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 17,
+              "startedAt": "2026-09-08T05:44:43Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34191771307/job/101951127438"
+        },
+        {
+          "completedAt": "2026-09-08T05:48:19Z",
+          "conclusion": "success",
+          "databaseId": 101951867951,
+          "name": "smolbox-required",
+          "startedAt": "2026-09-08T05:48:07Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-09-08T05:48:08Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-09-08T05:48:07Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:48:09Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 2,
+              "startedAt": "2026-09-08T05:48:08Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:48:16Z",
+              "conclusion": "success",
+              "name": "Run erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124",
+              "number": 3,
+              "startedAt": "2026-09-08T05:48:09Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:48:17Z",
+              "conclusion": "success",
+              "name": "Require every configured check to succeed",
+              "number": 4,
+              "startedAt": "2026-09-08T05:48:16Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:48:17Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 8,
+              "startedAt": "2026-09-08T05:48:17Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-08T05:48:17Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 9,
+              "startedAt": "2026-09-08T05:48:17Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/hfiguera/smolbox/actions/runs/34191771307/job/101951867951"
+        }
+      ],
+      "status": "completed",
+      "url": "https://github.com/hfiguera/smolbox/actions/runs/34191771307"
+    },
+    "metadata": {
+      "checked_at": "2026-09-08T05:47:00.786876Z",
+      "dependencies_separately_fetched_not_vendored": true,
+      "license_sha256": "210d654cc505eadb7ab98860653dabc84cfdc8f6c450386028c21f1ece9f155d",
+      "runtime_dependency_license_review": [
+        {
+          "licenses": [
+            "MIT"
+          ],
+          "name": "finch",
+          "notices": {
+            "LICENSE.md": "2c3c57158df2131ff09f57d9c7850da0844910f0fa8ac60294dd9396e3672e81"
+          },
+          "version": "0.23.0"
+        },
+        {
+          "licenses": [
+            "Apache-2.0"
+          ],
+          "name": "hpax",
+          "notices": {
+            "LICENSE.txt": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9"
+          },
+          "version": "1.0.4"
+        },
+        {
+          "licenses": [
+            "Apache-2.0"
+          ],
+          "name": "jason",
+          "notices": {
+            "LICENSE": "6c73f07b2f5abbb4fd00f30cba97e4f358b86977b46ad82d87357964a2d350e0"
+          },
+          "version": "1.4.5"
+        },
+        {
+          "licenses": [
+            "Apache-2.0"
+          ],
+          "name": "mime",
+          "notices": {
+            "LICENSE": "79bfd5cbf8cb79a2c73d1d94447461f93407c7f14dc789942c2ee41e167ba48f"
+          },
+          "version": "2.0.7"
+        },
+        {
+          "licenses": [
+            "Apache-2.0"
+          ],
+          "name": "mint",
+          "notices": {
+            "LICENSE.txt": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9"
+          },
+          "version": "1.10.0"
+        },
+        {
+          "licenses": [
+            "Apache-2.0"
+          ],
+          "name": "nimble_options",
+          "notices": {
+            "LICENSE.md": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594"
+          },
+          "version": "1.1.1"
+        },
+        {
+          "licenses": [
+            "Apache-2.0"
+          ],
+          "name": "nimble_pool",
+          "notices": {},
+          "version": "1.1.0"
+        },
+        {
+          "licenses": [
+            "Apache-2.0"
+          ],
+          "name": "req",
+          "notices": {
+            "LICENSE.md": "f9e693078c728b5e62856ba365d6d4e915c87dc47228bfc607132e7f7505101f"
+          },
+          "version": "0.7.4"
+        },
+        {
+          "licenses": [
+            "Apache-2.0"
+          ],
+          "name": "telemetry",
+          "notices": {
+            "LICENSE": "0cec06e0e55fbc3dc5cee4fca9b607f66cb8f4e4dbcf3b3c013594dd156732e9",
+            "NOTICE": "3ca23c239bc03e2bcd3899da04d4271370e230e30f7dc171c7e8ad35809c6bb0"
+          },
+          "version": "1.4.2"
+        }
+      ],
+      "spdx_mit_normalized_match": true,
+      "spdx_source": "https://spdx.org/licenses/MIT.json",
+      "version": "0.1.1"
+    },
+    "package": {
+      "checked_at": "2026-09-08T05:47:00.477784Z",
+      "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+      "consumers": 2,
+      "excluded_material_absent": true,
+      "identical_archive_and_source_files": true,
+      "licenses": [
+        "MIT"
+      ],
+      "name": "smolbox",
+      "package_file_count": 86,
+      "package_sha256": "a704bba157bc7b34d4a74e3da5ae5cab061036e1503b976f34ea455b0c3d2146",
+      "status": "passed",
+      "version": "0.1.1"
+    },
+    "recorded_at": "2026-09-08T06:07:00.973907Z",
+    "scope": "Linux-only documentation/validation patch; unchanged lib and production dependencies",
+    "source_links": {
+      "candidate": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+      "candidate_files_and_lines_valid": true,
+      "checked_at": "2026-09-08T05:53:55.047268Z",
+      "generated_pages": 42,
+      "generated_source_links_checked": 168,
+      "source_ref": "v0.1.1"
+    },
+    "status": "accepted",
+    "steps": {
+      "linux-minimum-tooling.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 155,
+        "command": [
+          "elixir",
+          "scripts/ci_test.exs"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-minimum",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "b7cc00ffecfe076e2986a6afd1fd24b569909767f3e7c859d79776db2c90edb4",
+        "seconds": 6.343,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:48:00.158083Z",
+        "status": "passed"
+      },
+      "linux-canonical-docs.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 128,
+        "command": [
+          "env",
+          "MIX_ENV=dev",
+          "mix",
+          "docs",
+          "--warnings-as-errors"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+        "seconds": 1.41,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:50:19.009681Z",
+        "status": "passed"
+      },
+      "linux-canonical-dev-compile.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 435,
+        "command": [
+          "env",
+          "MIX_ENV=dev",
+          "mix",
+          "compile",
+          "--force",
+          "--warnings-as-errors"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "51f6fdc2bc017b138d876ef4259df51bf3902f66a81c321c3ce27f74624a98ca",
+        "seconds": 2.287,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:50:16.097026Z",
+        "status": "passed"
+      },
+      "linux-runtime-step.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 206,
+        "command": [
+          "elixir",
+          "scripts/ci.exs",
+          "bounded",
+          "--report",
+          "/tmp/smolbox-release-011.Ww16pH/linux-runtime.json",
+          "--timeout",
+          "600",
+          "--expected-tests",
+          "14",
+          "--",
+          "mix",
+          "test",
+          "test/runtime",
+          "--include",
+          "runtime",
+          "--warnings-as-errors"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "55347115bbf644faad7cb7bd07af3b6c6babeedc2fb3c278e1bff0f392939461",
+        "seconds": 35.339,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:53:48.618826Z",
+        "status": "passed"
+      },
+      "linux-canonical-lock.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 0,
+        "command": [
+          "mix",
+          "deps.unlock",
+          "--check-unused"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "seconds": 0.399,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:45:40.008732Z",
+        "status": "passed"
+      },
+      "linux-durable_host-normal.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 617,
+        "command": [
+          "env",
+          "SMOLBOX_EXECUTION_ID=release-011-db0797c-linux-durable_host-normal",
+          "mix",
+          "run",
+          "scripts/demo.exs"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical/examples/durable_host",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "f8d2142b243870497a73bdce563792680b383c188aed78fba984457b719ad56a",
+        "seconds": 2.377,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:55:35.314240Z",
+        "status": "passed"
+      },
+      "linux-archive-rebuild.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 3769,
+        "command": [
+          "mix",
+          "hex.build",
+          "--output",
+          "/tmp/smolbox-release-011.Ww16pH/rebuilt-smolbox-0.1.1.tar"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-package-source",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "bedb8a5776befa4fbbadcce43fa89b8ac0e26af0386049665d23c68f326a9f3e",
+        "seconds": 0.486,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:53:52.145955Z",
+        "status": "passed"
+      },
+      "linux-otp28-tests.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 390,
+        "command": [
+          "mix",
+          "test",
+          "--warnings-as-errors"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-otp28",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "f5c793abca1c7cca20c80800748666744a0b8919ebaebfb8ab7ca62407fc3460",
+        "seconds": 78.974,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:51:33.318943Z",
+        "status": "passed"
+      },
+      "linux-fault-restart-step.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 796,
+        "command": [
+          "elixir",
+          "scripts/ci.exs",
+          "worker-fault",
+          "--smolvm",
+          "/tmp/smolbox-qualification/runtime/smolvm",
+          "--url",
+          "http://127.0.0.1:19471",
+          "--python",
+          "/tmp/smolbox-qualification/python.smolmachine",
+          "--scenario",
+          "restart",
+          "--report",
+          "/tmp/smolbox-release-011.Ww16pH/linux-fault-restart.json"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "87ff47fa44cc55db31e3225282d4eac048ae7097248fa7383c49caf27ec42dae",
+        "seconds": 67.982,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T06:01:37.384764Z",
+        "status": "passed"
+      },
+      "linux-final-preflight-step.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 707,
+        "command": [
+          "elixir",
+          "scripts/ci.exs",
+          "preflight",
+          "--development",
+          "--platform",
+          "linux",
+          "--manifest",
+          "/tmp/smolbox-release-011.Ww16pH/linux-manifest.json",
+          "--report",
+          "/tmp/smolbox-release-011.Ww16pH/linux-final-preflight.json"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "0a985da52ea9cbd2557ea26423ac041c74bc82f75d43a8c80071fe1e33ec8934",
+        "seconds": 0.819,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T06:05:06.601691Z",
+        "status": "passed"
+      },
+      "linux-database-outage.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 31,
+        "command": [
+          "mix",
+          "run",
+          "--no-start",
+          "--no-compile",
+          "scripts/check_unavailable.exs"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical/examples/durable_host",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "f090dd47a12af3805d942e71d8b8fad0838b1a6893a1dea8fba04ae00e79c2bc",
+        "seconds": 18.48,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T06:05:22.470410Z",
+        "status": "passed"
+      },
+      "linux-minimal_host-deps-audit.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 26,
+        "command": [
+          "mix",
+          "deps.audit"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical/examples/minimal_host",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "3016e51e4eac0d421674d2128bbbdefb2924b4646e0c14a1ab034977ad73fae5",
+        "seconds": 1.386,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:51:45.714672Z",
+        "status": "passed"
+      },
+      "linux-minimal_host-normal.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 617,
+        "command": [
+          "env",
+          "SMOLBOX_EXECUTION_ID=release-011-db0797c-linux-minimal_host-normal",
+          "mix",
+          "run",
+          "scripts/demo.exs"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical/examples/minimal_host",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "b3cb24979886c63cb92ad705a941af4fb71aee7ac8c14e7a5576ce8dc3fb89c9",
+        "seconds": 2.182,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:54:24.814788Z",
+        "status": "passed"
+      },
+      "linux-otp28-dependency-compile.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 7099,
+        "command": [
+          "mix",
+          "deps.compile",
+          "--force"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-otp28",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "e2b31728eae94a709d829c890e5da1ca4965a05963e5093e8a0bff89fd99294a",
+        "seconds": 57.692,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:50:30.169874Z",
+        "status": "passed"
+      },
+      "linux-durable_host-xref.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 16,
+        "command": [
+          "mix",
+          "xref",
+          "graph",
+          "--format",
+          "cycles",
+          "--fail-above",
+          "0"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical/examples/durable_host",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548",
+        "seconds": 0.869,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:53:38.825511Z",
+        "status": "passed"
+      },
+      "linux-middle-dependencies.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 779,
+        "command": [
+          "mix",
+          "deps.get"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-middle",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "76aed2f2370b27565adf1ad80663978f7c0eaea337596488f011f7e7612cb5e5",
+        "seconds": 1.103,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:48:07.442637Z",
+        "status": "passed"
+      },
+      "linux-minimal_host-hex-audit.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 47,
+        "command": [
+          "sh",
+          "/tmp/smolbox-release-011.Ww16pH/audit-example.sh",
+          "minimal_host"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical/examples/minimal_host",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+        "seconds": 1.043,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:51:43.967334Z",
+        "status": "passed"
+      },
+      "linux-publish-dry-run-authenticated.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 12415,
+        "command": [
+          "mix",
+          "hex.publish",
+          "--dry-run",
+          "--yes"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-package-source",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "526f955a8d18b548125376eab21323ca6c9527fbfc1bb9bc16a8eeea9ade456d",
+        "seconds": 59.206,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:52:51.812127Z",
+        "status": "passed"
+      },
+      "linux-otp28-compile.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 47,
+        "command": [
+          "mix",
+          "compile",
+          "--force",
+          "--warnings-as-errors"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-otp28",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "7563ff5f231e2e9ae71fcff7951ae9a16cb0eac6c1a3a7ecfba4d16821179b92",
+        "seconds": 3.613,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:51:28.790550Z",
+        "status": "passed"
+      },
+      "linux-canonical-ex-dna.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 121,
+        "command": [
+          "mix",
+          "ex_dna",
+          "lib",
+          "dev",
+          "scripts",
+          "test/support",
+          "examples/durable_host/lib",
+          "examples/durable_host/priv",
+          "examples/durable_host/test/support",
+          "examples/minimal_host/lib",
+          "examples/support/lib",
+          "--max-clones",
+          "0"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "982bff14512d357f22bfc2c4fe08ae7f2f336eef3b35b07099c28620266dbed0",
+        "seconds": 1.281,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:48:36.688151Z",
+        "status": "passed"
+      },
+      "linux-canonical-xref.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 16,
+        "command": [
+          "mix",
+          "xref",
+          "graph",
+          "--format",
+          "cycles",
+          "--fail-above",
+          "0"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548",
+        "seconds": 0.544,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:45:43.959799Z",
+        "status": "passed"
+      },
+      "linux-canonical-dialyzer.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 1724,
+        "command": [
+          "mix",
+          "dialyzer",
+          "--force-check"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "c2654acf0e78a96d1f1283728d183d8680f3ba671ad42a44a78d69b6d3026314",
+        "seconds": 72.886,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:48:41.439129Z",
+        "status": "passed"
+      },
+      "linux-canonical-credo.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 319,
+        "command": [
+          "mix",
+          "credo",
+          "--strict"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "34b98203b9ade82e8cab8987a033c7ae7159d5ea3bbe998466901e122e25d0fd",
+        "seconds": 3.584,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:48:32.383321Z",
+        "status": "passed"
+      },
+      "linux-durable_host-deps-audit.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 26,
+        "command": [
+          "mix",
+          "deps.audit"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical/examples/durable_host",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "3016e51e4eac0d421674d2128bbbdefb2924b4646e0c14a1ab034977ad73fae5",
+        "seconds": 1.688,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:53:36.148410Z",
+        "status": "passed"
+      },
+      "linux-minimal_host-dependency-graph-compile.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 2907,
+        "command": [
+          "mix",
+          "deps.compile",
+          "--force"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical/examples/minimal_host",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "7f651d20831adb96c209f3fec8290fd8a41b2148299c50f7cc3b35010e9155fb",
+        "seconds": 10.729,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:50:24.053531Z",
+        "status": "passed"
+      },
+      "linux-otp28-dependencies.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 780,
+        "command": [
+          "mix",
+          "deps.get"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-otp28",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "52f4815fe8d83b06042812a99c87d1bc026a70d511ac2e457a662ac8e10e65f0",
+        "seconds": 1.326,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:50:27.955433Z",
+        "status": "passed"
+      },
+      "linux-canonical-tooling.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 153,
+        "command": [
+          "elixir",
+          "scripts/ci_test.exs"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "d257bdcbd529b336d0b1ba736ec1f92c5f9baf64a54926c0c29e3dc368e90cb8",
+        "seconds": 6.338,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:47:04.824870Z",
+        "status": "passed"
+      },
+      "linux-middle-tests.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 382,
+        "command": [
+          "mix",
+          "test",
+          "--warnings-as-errors"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-middle",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "463509d67ae1692a3357b1d08bc5b9f72a9b167646b092c360ff3b4ec4657a33",
+        "seconds": 79.713,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:48:59.843131Z",
+        "status": "passed"
+      },
+      "linux-minimum-compile.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 47,
+        "command": [
+          "mix",
+          "compile",
+          "--force",
+          "--warnings-as-errors"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-minimum",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "7563ff5f231e2e9ae71fcff7951ae9a16cb0eac6c1a3a7ecfba4d16821179b92",
+        "seconds": 2.344,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:46:37.933852Z",
+        "status": "passed"
+      },
+      "linux-minimal_host-dialyzer.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 1332,
+        "command": [
+          "mix",
+          "dialyzer",
+          "--force-check"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical/examples/minimal_host",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "684dfa462d2d4b737970b32a62f862b61bff60126b85d60db85786db03642db0",
+        "seconds": 65.766,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:50:37.249218Z",
+        "status": "passed"
+      },
+      "linux-package-docs-links.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 60,
+        "command": [
+          "mix",
+          "smolbox.ci.docs"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-package-source",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "4becb7fed09596d86e9f5b2d81c9c1f9bacb31d06c8e2cc7f47e322dad12dac6",
+        "seconds": 0.826,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:53:53.366160Z",
+        "status": "passed"
+      },
+      "linux-minimum-dependency-compile.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 2540,
+        "command": [
+          "mix",
+          "deps.compile",
+          "--force"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-minimum",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "360d9f12a23f94ae2471f6a3e370f516bc7dfaa7b040edaba878e81b4b2cb422",
+        "seconds": 51.342,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:45:45.973346Z",
+        "status": "passed"
+      },
+      "linux-canonical-canaries.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 621,
+        "command": [
+          "mix",
+          "smolbox.ci.verify_checks"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "e0b964a623497ff2bb478f184e6c238afa88d2b496eb969c1ad810acf8e4339f",
+        "seconds": 16.413,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:49:54.998047Z",
+        "status": "passed"
+      },
+      "linux-fault-unavailable-step.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 810,
+        "command": [
+          "elixir",
+          "scripts/ci.exs",
+          "worker-fault",
+          "--smolvm",
+          "/tmp/smolbox-qualification/runtime/smolvm",
+          "--url",
+          "http://127.0.0.1:19471",
+          "--python",
+          "/tmp/smolbox-qualification/python.smolmachine",
+          "--scenario",
+          "unavailable",
+          "--report",
+          "/tmp/smolbox-release-011.Ww16pH/linux-fault-unavailable.json"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "6c911e7e348ec9475478761dc86bcfc098fa29f3a6af677a34009cdbd5c32c33",
+        "seconds": 129.568,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T06:02:45.975825Z",
+        "status": "passed"
+      },
+      "linux-minimal_host-compile.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 59,
+        "command": [
+          "mix",
+          "compile",
+          "--force",
+          "--warnings-as-errors"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical/examples/minimal_host",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "38e1db2dc72b14b85babddc0c9b8d2a881f92abc1402c3539179fb7745ce1d31",
+        "seconds": 0.842,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:50:35.621168Z",
+        "status": "passed"
+      },
+      "linux-canonical-hex-audit.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 47,
+        "command": [
+          "mix",
+          "hex.audit"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+        "seconds": 1.026,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:50:12.080262Z",
+        "status": "passed"
+      },
+      "linux-durable_host-dependencies.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 655,
+        "command": [
+          "mix",
+          "deps.get"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical/examples/durable_host",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "672aa9811a1c32a0621dee05eaa6d04f6db8ad22bf4c85c154a74d5860c5e0f4",
+        "seconds": 0.823,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:51:47.770328Z",
+        "status": "passed"
+      },
+      "linux-durable_host-store-tests.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 173,
+        "command": [
+          "mix",
+          "test",
+          "--warnings-as-errors"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical/examples/durable_host",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "6c4e730eb8c7ea4719af33970150057304998799bd8f30c62c40016fb8055867",
+        "seconds": 5.034,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:53:42.624248Z",
+        "status": "passed"
+      },
+      "linux-canonical-coverage.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 3696,
+        "command": [
+          "mix",
+          "test",
+          "--cover",
+          "--warnings-as-errors"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "bc5a725f6e9f9d3827cd08ec288aef43b02711fe7613c388edff0fb89df9ee20",
+        "seconds": 79.87,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:47:11.776042Z",
+        "status": "passed"
+      },
+      "linux-fault-missing-step.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 794,
+        "command": [
+          "elixir",
+          "scripts/ci.exs",
+          "worker-fault",
+          "--smolvm",
+          "/tmp/smolbox-qualification/runtime/smolvm",
+          "--url",
+          "http://127.0.0.1:19471",
+          "--python",
+          "/tmp/smolbox-qualification/python.smolmachine",
+          "--scenario",
+          "missing",
+          "--report",
+          "/tmp/smolbox-release-011.Ww16pH/linux-fault-missing.json"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "d9dd96909032a17dd15cbb3b5753aee7c0794eb86e8467490a495656b86d2732",
+        "seconds": 9.824,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T06:04:56.154743Z",
+        "status": "passed"
+      },
+      "linux-durable_host-compile.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 60,
+        "command": [
+          "mix",
+          "compile",
+          "--force",
+          "--warnings-as-errors"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical/examples/durable_host",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "d1af0cb24341496142e9bac1e9ec5b61015a78ebfcd190ddfb42597205ce8852",
+        "seconds": 1.199,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:52:14.074735Z",
+        "status": "passed"
+      },
+      "linux-durable_host-dependency-graph-compile.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 3817,
+        "command": [
+          "mix",
+          "deps.compile",
+          "--force"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical/examples/durable_host",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "e1b3c59a46f3768b3d05a8ca66949f2e7360ad9989907b053d68575546d6916c",
+        "seconds": 24.15,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:51:49.248031Z",
+        "status": "passed"
+      },
+      "linux-durable_host-dialyzer.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 1912,
+        "command": [
+          "mix",
+          "dialyzer",
+          "--force-check"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical/examples/durable_host",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "28bdacee78078dd426984b57d447443e5d7cffd4b2d400fc198faef515ad3326",
+        "seconds": 76.291,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:52:15.951002Z",
+        "status": "passed"
+      },
+      "linux-canonical-tests.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 391,
+        "command": [
+          "mix",
+          "test",
+          "--warnings-as-errors"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "23308205c0458ac76983190256d8eb87a5ed5da5bbf2270d6025cc860169e008",
+        "seconds": 78.952,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:45:45.273028Z",
+        "status": "passed"
+      },
+      "linux-canonical-dependency-compile.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 8906,
+        "command": [
+          "mix",
+          "deps.compile",
+          "--force"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "b72caac1447c58d9085a8d94c7c4636295ad2b8f5b086a858a456bee35c9fae3",
+        "seconds": 40.193,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:44:58.173547Z",
+        "status": "passed"
+      },
+      "linux-durable-runtime-step.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 207,
+        "command": [
+          "elixir",
+          "../../scripts/ci.exs",
+          "bounded",
+          "--report",
+          "/tmp/smolbox-release-011.Ww16pH/linux-durable-runtime.json",
+          "--timeout",
+          "1200",
+          "--expected-tests",
+          "25",
+          "--",
+          "mix",
+          "test",
+          "test/recovery_runtime_test.exs",
+          "--include",
+          "runtime",
+          "--warnings-as-errors"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical/examples/durable_host",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "d038e848c27d491fc0e17dcc35424fd86a1153ea95aa039d20094b0e938e0ee4",
+        "seconds": 285.847,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:56:50.932210Z",
+        "status": "passed"
+      },
+      "linux-otp28-tooling.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 152,
+        "command": [
+          "elixir",
+          "scripts/ci_test.exs"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-otp28",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "020577fc83b4a6dc0717649d6b4ffe73384cee9cd7df140a223008cad96da4bc",
+        "seconds": 7.166,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:52:53.663707Z",
+        "status": "passed"
+      },
+      "linux-minimum-dependencies.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 780,
+        "command": [
+          "mix",
+          "deps.get"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-minimum",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "7066725369a32e4652965684ccffea4d2b616e84831b242ad0ee8f291486f260",
+        "seconds": 1.122,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:45:44.079319Z",
+        "status": "passed"
+      },
+      "linux-canonical-credence.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 51,
+        "command": [
+          "mix",
+          "smolbox.ci.credence"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "c28c7353a76f642a7ec81697d50e370e6276153fa250f334080f2a3514a174eb",
+        "seconds": 2.048,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:48:38.672851Z",
+        "status": "passed"
+      },
+      "linux-durable_host-cancel.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 366,
+        "command": [
+          "env",
+          "SMOLBOX_EXECUTION_ID=release-011-db0797c-linux-durable_host-cancel",
+          "SMOLBOX_EXAMPLE_WAIT=true",
+          "SMOLBOX_EXAMPLE_CANCEL=true",
+          "mix",
+          "run",
+          "scripts/demo.exs"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical/examples/durable_host",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "7c6cbb0099077e5f32e012b1674d2af29075bad132bf6c3d7e7810e759635dfc",
+        "seconds": 72.009,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:55:38.312643Z",
+        "status": "passed"
+      },
+      "linux-middle-tooling.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 155,
+        "command": [
+          "elixir",
+          "scripts/ci_test.exs"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-middle",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "f13b5430e7b4514f26853793eeef8060816994485fcd0a042293c052d0026271",
+        "seconds": 6.502,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:50:20.326541Z",
+        "status": "passed"
+      },
+      "linux-canonical-docs-links.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 60,
+        "command": [
+          "env",
+          "MIX_ENV=dev",
+          "mix",
+          "smolbox.ci.docs"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "4becb7fed09596d86e9f5b2d81c9c1f9bacb31d06c8e2cc7f47e322dad12dac6",
+        "seconds": 0.548,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:50:21.104560Z",
+        "status": "passed"
+      },
+      "linux-middle-compile.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 47,
+        "command": [
+          "mix",
+          "compile",
+          "--force",
+          "--warnings-as-errors"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-middle",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "7563ff5f231e2e9ae71fcff7951ae9a16cb0eac6c1a3a7ecfba4d16821179b92",
+        "seconds": 3.034,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:48:56.084336Z",
+        "status": "passed"
+      },
+      "linux-canonical-dependencies.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 780,
+        "command": [
+          "mix",
+          "deps.get"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "b69287dfed82b670bebf540b14268a1c77df0e8165e7777fa3b5fc36c9ce32f7",
+        "seconds": 1.071,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:44:56.501149Z",
+        "status": "passed"
+      },
+      "linux-durable_host-migrate.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 2528,
+        "command": [
+          "mix",
+          "ecto.migrate"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical/examples/durable_host",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "c7497249df8f7c50664b8d6249487298c24bf5038486a9353476ab5c7a02bb3b",
+        "seconds": 1.028,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:53:40.634886Z",
+        "status": "passed"
+      },
+      "linux-durable_host-hex-audit.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 226,
+        "command": [
+          "sh",
+          "/tmp/smolbox-release-011.Ww16pH/audit-example.sh",
+          "durable_host"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical/examples/durable_host",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "858bfa914c29fa7456db8f11b84d04cd2e194d622cf68cf432e48a71d41053e7",
+        "seconds": 1.827,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:53:33.224065Z",
+        "status": "passed"
+      },
+      "linux-consumer-minimum-step.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 85,
+        "command": [
+          "elixir",
+          "scripts/ci.exs",
+          "package-consumer",
+          "--minimum",
+          "--archive",
+          "/tmp/smolbox-release-011.Ww16pH/smolbox-0.1.1.tar",
+          "--report",
+          "/tmp/smolbox-release-011.Ww16pH/linux-consumer-minimum.json"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-package-source",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "e416f8edf2b0c76daeb392fcf19bb1521ee991417d0db5f5147fb395ba4c55f6",
+        "seconds": 12.861,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:45:59.018004Z",
+        "status": "passed"
+      },
+      "linux-consumer-current-step.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 85,
+        "command": [
+          "elixir",
+          "scripts/ci.exs",
+          "package-consumer",
+          "--report",
+          "/tmp/smolbox-release-011.Ww16pH/linux-consumer-current.json",
+          "--package-output",
+          "/tmp/smolbox-release-011.Ww16pH/smolbox-0.1.1.tar"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-package-source",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "740898374bd7881c34c8562e72d017cabf3aff3bfd8c0585364880d40268c5f2",
+        "seconds": 12.977,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:45:45.278569Z",
+        "status": "passed"
+      },
+      "linux-minimal_host-dependencies.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 300,
+        "command": [
+          "mix",
+          "deps.get"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical/examples/minimal_host",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "ce0761cab006745428b3c2f5bb0f5d664005dd0cc810fb5d04b45de6504cbb3e",
+        "seconds": 0.944,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:50:22.372369Z",
+        "status": "passed"
+      },
+      "linux-canonical-compile.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 47,
+        "command": [
+          "mix",
+          "compile",
+          "--force",
+          "--warnings-as-errors"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "7563ff5f231e2e9ae71fcff7951ae9a16cb0eac6c1a3a7ecfba4d16821179b92",
+        "seconds": 2.209,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:45:41.015298Z",
+        "status": "passed"
+      },
+      "linux-minimum-tests.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 381,
+        "command": [
+          "mix",
+          "test",
+          "--warnings-as-errors"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-minimum",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "f9f4a7c3e17e3564ce0fd9ac6445259e1ad4f06c526151387cad3f0f5fadd202",
+        "seconds": 78.646,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:46:40.905643Z",
+        "status": "passed"
+      },
+      "linux-canonical-deps-audit.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 26,
+        "command": [
+          "mix",
+          "deps.audit"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "3016e51e4eac0d421674d2128bbbdefb2924b4646e0c14a1ab034977ad73fae5",
+        "seconds": 1.703,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:50:13.751509Z",
+        "status": "passed"
+      },
+      "linux-preflight-step.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 707,
+        "command": [
+          "elixir",
+          "scripts/ci.exs",
+          "preflight",
+          "--development",
+          "--platform",
+          "linux",
+          "--manifest",
+          "/tmp/smolbox-release-011.Ww16pH/linux-manifest.json",
+          "--report",
+          "/tmp/smolbox-release-011.Ww16pH/linux-preflight.json"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "0a985da52ea9cbd2557ea26423ac041c74bc82f75d43a8c80071fe1e33ec8934",
+        "seconds": 0.812,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:44:55.077844Z",
+        "status": "passed"
+      },
+      "linux-canonical-format.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 0,
+        "command": [
+          "mix",
+          "format",
+          "--check-formatted"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "seconds": 0.444,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:45:38.969019Z",
+        "status": "passed"
+      },
+      "linux-minimal_host-cancel.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 366,
+        "command": [
+          "env",
+          "SMOLBOX_EXECUTION_ID=release-011-db0797c-linux-minimal_host-cancel",
+          "SMOLBOX_EXAMPLE_WAIT=true",
+          "SMOLBOX_EXAMPLE_CANCEL=true",
+          "mix",
+          "run",
+          "scripts/demo.exs"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-canonical/examples/minimal_host",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "3e889f6ab19e24f821b1ed71a49a46ad48def7badeb2f8ff49a739c07e6562ea",
+        "seconds": 66.808,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:54:27.661598Z",
+        "status": "passed"
+      },
+      "linux-middle-dependency-compile.json": {
+        "audit_fetch_error": false,
+        "captured_bytes": 2539,
+        "command": [
+          "mix",
+          "deps.compile",
+          "--force"
+        ],
+        "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+        "cwd": "/tmp/smolbox-release-011.Ww16pH/linux-middle",
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "cd7c1d9011227ccaa92f25c5e080d83c540b8a12ca8223828795f46b555eea02",
+        "seconds": 46.089,
+        "source_unchanged": true,
+        "started_at": "2026-09-08T05:48:09.182780Z",
+        "status": "passed"
+      }
+    }
+  },
+  "github_release": {
+    "assets": [
+      {
+        "apiUrl": "https://api.github.com/repos/hfiguera/smolbox/releases/assets/549976247",
+        "contentType": "application/x-tar",
+        "createdAt": "2026-09-08T06:10:41Z",
+        "digest": "sha256:a704bba157bc7b34d4a74e3da5ae5cab061036e1503b976f34ea455b0c3d2146",
+        "downloadCount": 0,
+        "id": "RA_kwDOURXFm84gx_i3",
+        "label": "",
+        "name": "smolbox-0.1.1.tar",
+        "size": 208384,
+        "state": "uploaded",
+        "updatedAt": "2026-09-08T06:10:43Z",
+        "url": "https://github.com/hfiguera/smolbox/releases/download/v0.1.1/smolbox-0.1.1.tar"
+      }
+    ],
+    "isDraft": false,
+    "isPrerelease": false,
+    "name": "SmolBox v0.1.1",
+    "publishedAt": "2026-09-08T06:10:43Z",
+    "tagName": "v0.1.1",
+    "targetCommitish": "main",
+    "url": "https://github.com/hfiguera/smolbox/releases/tag/v0.1.1"
+  },
+  "macos": {
+    "historical_release": "v0.1.0",
+    "new_execution": false,
+    "unchanged_library_tree": "a4609cf59b8b4ec05791fdb7b7db25ce523f2757"
+  },
+  "publication": {
+    "checked_at": "2026-09-08T06:09:53.069011Z",
+    "docs_url": "https://hexdocs.pm/smolbox/0.1.1/",
+    "hex_checksum_matches": true,
+    "owner": "hfiguera",
+    "package_sha256": "a704bba157bc7b34d4a74e3da5ae5cab061036e1503b976f34ea455b0c3d2146",
+    "package_url": "https://hex.pm/packages/smolbox/0.1.1",
+    "pages": {
+      "SmolBox.html": {
+        "sha256": "7145d476580570adb539b832d51287c3309ac4467787d00c583b5368471b9dda",
+        "status": "passed"
+      },
+      "getting-started.html": {
+        "sha256": "1f7d8a1b9ee285469d7ba3e17730baa11b7202744f7fca4c8cc5fce9853348c5",
+        "status": "passed"
+      },
+      "index.html": {
+        "sha256": "e3a2b404938f08048dc5137dc9e027f6b123a026cdc3175a1e8636ef10a7d600",
+        "status": "passed"
+      },
+      "readme.html": {
+        "sha256": "e6143ac0f55d648ea432e6e62025990fe5d242903a9dfd605d417f0c8b565fb1",
+        "status": "passed"
+      },
+      "resource-qualification.html": {
+        "sha256": "03a9f64b7b3633545c62d3b7e4caaf78240c680d357a28798dcb75a99824b3b9",
+        "status": "passed"
+      },
+      "security.html": {
+        "sha256": "d5a09699b0d84c2e1ed817e0befa453a11f6a6e3d48af7058b475ce1754ed7e4",
+        "status": "passed"
+      }
+    },
+    "status": "passed",
+    "validated_archive_identical": true,
+    "version": "0.1.1"
+  },
+  "published_package_consumer": {
+    "checked_at": "2026-09-08T06:10:00.808294Z",
+    "declared_dependency": "{:smolbox, ~> 0.1.1}",
+    "file_count": 86,
+    "lock_sha256": "2d131b09a63a677f32eab41c843294620692f0e1e5ac77574317dfd1f3788da0",
+    "package_files_match_validated_archive": true,
+    "platform": "linux",
+    "smoke": {
+      "client": true,
+      "supervisor": true,
+      "versions": {
+        "jason": "1.4.5",
+        "nimble_options": "1.1.1",
+        "req": "0.7.4",
+        "telemetry": "1.4.2"
+      }
+    },
+    "source": "Hex registry",
+    "status": "passed",
+    "version": "0.1.1"
+  },
+  "recorded_at": "2026-09-08T06:10:45.023984Z",
+  "release_commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+  "reports": {
+    "doc-version-links.json": {
+      "checked_at": "2026-09-08T05:58:15.195257Z",
+      "github_destinations_checked": 176,
+      "source_ref": "v0.1.1",
+      "status": "passed"
+    },
+    "linux-canonical-identity.json": {
+      "checked_at": "2026-09-08T05:44:54.493110Z",
+      "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+      "elixir": "1.20.4",
+      "erts": "17.0.6",
+      "otp": "29.0.6",
+      "source_unchanged": true,
+      "system": "Linux 7.1.5-76070105-generic x86_64"
+    },
+    "linux-consumer-current.json": {
+      "architecture": "x86_64",
+      "consumer_lockfile": "%{\n  \"finch\": {:hex, :finch, \"0.23.0\", \"e3f9287ac25a8832f848b144c2b57346aac65b205e2e0629a52adfe6507fd837\", [:mix], [{:mime, \"~> 1.0 or ~> 2.0\", [hex: :mime, repo: \"hexpm\", optional: false]}, {:mint, \"~> 1.8\", [hex: :mint, repo: \"hexpm\", optional: false]}, {:nimble_options, \"~> 0.4 or ~> 1.0\", [hex: :nimble_options, repo: \"hexpm\", optional: false]}, {:nimble_pool, \"~> 1.1\", [hex: :nimble_pool, repo: \"hexpm\", optional: false]}, {:telemetry, \"~> 0.4 or ~> 1.0\", [hex: :telemetry, repo: \"hexpm\", optional: false]}], \"hexpm\", \"80e58d3f936f57e3fdf404f83a3642897ae6d9fb642934e46da4d8fe761b99d5\"},\n  \"hpax\": {:hex, :hpax, \"1.0.4\", \"777de5d433b0fbdc7c418159c8055910faa8047ffdb3d6b31098d2a46cd7685c\", [:mix], [], \"hexpm\", \"afc7cb142ebcc2d01ce7816190b98ce5dd49e799111b24249f3443d730f377ca\"},\n  \"jason\": {:hex, :jason, \"1.4.5\", \"2e3a008590b0b8d7388c20293e9dcc9cf3e5d642fd2a114e4cbbb52e595d940a\", [:mix], [{:decimal, \"~> 1.0 or ~> 2.0 or ~> 3.0\", [hex: :decimal, repo: \"hexpm\", optional: true]}], \"hexpm\", \"b0c823996102bcd0239b3c2444eb00409b72f6a140c1950bc8b457d836b30684\"},\n  \"mime\": {:hex, :mime, \"2.0.7\", \"b8d739037be7cd402aee1ba0306edfdef982687ee7e9859bee6198c1e7e2f128\", [:mix], [], \"hexpm\", \"6171188e399ee16023ffc5b76ce445eb6d9672e2e241d2df6050f3c771e80ccd\"},\n  \"mint\": {:hex, :mint, \"1.10.0\", \"85af3353bfc504f5bdfe494bd92b8490f87a306dc659ee1ad0af435107e898dc\", [:mix], [{:castore, \"~> 0.1.0 or ~> 1.0\", [hex: :castore, repo: \"hexpm\", optional: true]}, {:hpax, \"~> 0.1.1 or ~> 0.2.0 or ~> 1.0\", [hex: :hpax, repo: \"hexpm\", optional: false]}], \"hexpm\", \"8b16fb72aaa7531d206a1f05e4cc85509ba531ccec7a17a22736c9c95cbb24d1\"},\n  \"nimble_options\": {:hex, :nimble_options, \"1.1.1\", \"e3a492d54d85fc3fd7c5baf411d9d2852922f66e69476317787a7b2bb000a61b\", [:mix], [], \"hexpm\", \"821b2470ca9442c4b6984882fe9bb0389371b8ddec4d45a9504f00a66f650b44\"},\n  \"nimble_pool\": {:hex, :nimble_pool, \"1.1.0\", \"bf9c29fbdcba3564a8b800d1eeb5a3c58f36e1e11d7b7fb2e084a643f645f06b\", [:mix], [], \"hexpm\", \"af2e4e6b34197db81f7aad230c1118eac993acc0dae6bc83bac0126d4ae0813a\"},\n  \"req\": {:hex, :req, \"0.7.4\", \"23e9ffec17de032a46a4b15ed65c09793893bf4a7c680f4bbf6227fce6bdf74d\", [:mix], [{:brotli, \"~> 0.3.1\", [hex: :brotli, repo: \"hexpm\", optional: true]}, {:finch, \"~> 0.21\", [hex: :finch, repo: \"hexpm\", optional: false]}, {:jason, \"~> 1.0\", [hex: :jason, repo: \"hexpm\", optional: false]}, {:mime, \"~> 2.0.6 or ~> 2.1\", [hex: :mime, repo: \"hexpm\", optional: false]}, {:nimble_csv, \"~> 1.0\", [hex: :nimble_csv, repo: \"hexpm\", optional: true]}, {:plug, \"~> 1.0\", [hex: :plug, repo: \"hexpm\", optional: true]}], \"hexpm\", \"4b192d63253e8dcc6221ef992ea9ebef7d3555166e8423aa5b553e86bc3c69a2\"},\n  \"telemetry\": {:hex, :telemetry, \"1.4.2\", \"a0cb522801dffb1c49fe6e30561badffc7b6d0e180db1300df759faa22062855\", [:rebar3], [], \"hexpm\", \"928f6495066506077862c0d1646609eed891a4326bee3126ba54b60af61febb1\"},\n}\n",
+      "minimum": false,
+      "package_file_sha256": {
+        "lib/smolbox/transport/req.ex": "748485e5e9683cff55d8718905829cbf4b0ec89394f3066cf82c1c37b3a5a2ee",
+        "lib/smolbox/runtime/config.ex": "bfa68f5dda45888cfa78a7777e2140a35e144de08bd8cab28a2e8f1f17a76444",
+        "lib/smolbox/transport/capture.ex": "df828264adf33a5d96759b445f156189d7ade1b0c4666f66831442569cb084d4",
+        "lib/smolbox/runtime/cleanup.ex": "2778350885d8ed065b9547ac0e3b70ffd8eff63ff7cf8844b588a69a99d804fd",
+        "lib/smolbox/execution.ex": "2c730c8f4971bb6e447178fc62d02e910de711fe287eed6156608eb85b7158a0",
+        "lib/smolbox/client.ex": "694a793a62f761f38e9880559dbcbcaa8065db985acb09d6dc7ece97604eec5f",
+        "lib/smolbox/validation.ex": "4df0e14313ffb67caefdf3a7e4b9d63a8a6588666b4142409b525d2955cc2530",
+        "docs/evidence/otp29-macos.json": "7322929a1839cb0cb5ea3d1b35add9ba99a294ea56836b8ceb3fbd4e81ca0800",
+        "lib/smolbox.ex": "1627052996935124b5b033d4d7dd205fe4f04a025435dba43fdc6f3b23463fa0",
+        "lib/smolbox/telemetry.ex": "ec28badc3bff5bd3d40f87350f840208be306a522a9bd600d6bfd49e3ebbf5f9",
+        "docs/evidence/phase8-cache-state.json": "376889039b073250945716266734b4037885eb2c0d9063c97efd10eb512f75fd",
+        "lib/smolbox/runtime/worker_config.ex": "fe01e39b480c93d742030fc5db9f94e6572377eada65566c82705351ba82f0f9",
+        "lib/smolbox/identity.ex": "baaea42558663ab47934747ae267ea244143a8a8068ea14f64604cf1a0a942e1",
+        "docs/evidence/phase0-macos.json": "9cea2d7882f1e79ca3a80afcb36d4f9b631c16c838ba72c87627d5a46e5b0ac4",
+        "docs/security.md": "ce9fad342ca6023414a24445e50f32533421d968bcb3dffc75471ac83a39a9ea",
+        "docs/recovery.md": "358ad9ba70f98a97e91dd86df425fb74c6f1f6c7480ef473677a1bc086b9f212",
+        "docs/evidence/phase7-worker-health.json": "c1be74740dfd9e4c46982ee1fa8cafedb8cceba75e0a6ea305b74ad287f9c3f8",
+        "docs/evidence/phase3-client.json": "dbc9edc77c06412a3d27554db07573ff991be40a842c1272ef595239ca7d8acd",
+        "docs/evidence/phase1-scaffold.json": "60f2cdad2d4d1e580e8300fbe377d1b9d1b453f1d7e480e385bc5a7259eee9af",
+        "docs/telemetry.md": "0f8d8973923c1e63d80cfb9d7888c26464d6eb07e8c5418e2ad5a9ff801112ad",
+        "lib/smolbox/store/memory.ex": "027747ca4f7a32f243b0fc787acbac62f7832471b28531fa964e634a903f00b5",
+        "docs/evidence/phase9-package-consumer.json": "895dab035b7bb38aa7ef537f66d4254a8490de069caaff8bfa52b589b31870b1",
+        "docs/evidence/otp29-linux.json": "dcf8669fdc70a2b81781b9f077c72dad92325e551e8928e507a3c404b6d8fcb1",
+        "docs/evidence/phase6-controller-faults.json": "bf66b4708b18fc42310ad116dd0301cbcb0c734552092babb49ee93198185df3",
+        "docs/evidence/phase8-telemetry.json": "3fbaf61cd05037d17ccc31e39d04533cd7e57c176b7bd2ff7d1d899c3bc40113",
+        "docs/evidence/phase6-service-faults.json": "9b1fe7f068f285f012011f9f067d9210468df7bfca7e3357bf278afda20bf603",
+        "mix.exs": "5bcb450564794fcce28b50d298455d309ec448833f45a9a54d006956ffd1ca21",
+        "docs/evidence/phase2-identity.json": "197bc4bb7d73d34253309b8c9e5159904f84134426b9310c26911f0ac6140e4a",
+        "lib/smolbox/artifact_store.ex": "2d61ae4c7b6eeab70d6dbe822f390353565555b80b33a5602d3487b591128cbe",
+        "docs/evidence/phase8-boundaries.json": "a1b592d9c080d7012ceb7c4730306d0a6d8a450190a7bf718a10ffe7de0e85ed",
+        "lib/smolbox/runtime/files.ex": "1acecfe874e8397c4c13fbd40751e629808dbefb920ac640f06d09edb415fc55",
+        "docs/evidence/phase8-linux-containment.json": "c43527578042fda1b4f00e8d3c1a770550cf89c16e582e7df9d107e85f94f216",
+        "lib/smolbox/runtime/worker_health.ex": "fc19df3f3bf28dfda625b1f6f3b882e2a16b75421145442d2e8d77b6b935f1c0",
+        "docs/evidence/phase0-linux.json": "81d46301bc4f9c1c925af2f2e45ba9e10aa46760c9d3a689dba7bbcb61dd5053",
+        "docs/evidence/phase1-live-ci.json": "dbcc5fa81198680d1ba1e6752b4b688736cc7a97285a81d4aec87b967d01338b",
+        "lib/smolbox/wire/sse.ex": "1df603f2eddf0d76216633437bb43319fb5a083ab278022c0364cbcf42dd9d39",
+        "docs/evidence/phase6-orphan-inspection.json": "aec7db1b68c9077faf50038db552519e158dc807c0eb5c077122b9ecd91dc811",
+        "lib/smolbox/store/codec.ex": "19346d99a428fff53512479832317a51fbd371a5b0e209fc4e3ef78edbc4016c",
+        "lib/smolbox/runtime/inspection.ex": "de9270595036e946fe6ca90ad44467df6b24964324ca427931403ec2b7ec5dba",
+        "docs/host-integration.md": "a508e0ef335c4d1e75c35a428cb996477d4a5889e8b02adb3c6b9cc10f254556",
+        "docs/evidence/phase4-durable.json": "7c56679d56026116fa744d33b996e4105ed2560cbd0c202538b0f36aedc7538a",
+        "lib/smolbox/manifest.ex": "64bbfcabea90905d9cb0b3ac9399fa997486b4461d5e13989f3f892938bfeb10",
+        "lib/smolbox/execution_validation.ex": "5cb54942be581c72910b9c5034b308477129174ef24e51b65c744eb1015a02c4",
+        "lib/smolbox/transport.ex": "ed6a497a1e746330bc7527becd8b520a5c9b8320a9102604633dfb13fa4802de",
+        "lib/smolbox/store/record_ops.ex": "b293446ff1536a75cb86731a280908d9564a489a942ab53d454e67c5a2547050",
+        "docs/getting-started.md": "ec90d9a37ee598f5ac6a96b0141962267fa5291d0000e00cea5cda1ec05979a7",
+        "docs/troubleshooting.md": "fd2043a822649e21635fc56e2083623b993477e5ecd9681509ba29e2561a97d8",
+        "lib/smolbox/machine_spec.ex": "e5567d5759c382c5b9daac78d2c030414e101589ce8e1fe25ccbaec665716557",
+        "docs/evidence/phase4-store-foundation.json": "e24b2f0747fce2da1298704a38676a8652dc2629d4148756a97d975052d1fdc9",
+        "docs/evidence/phase8-benchmarks.json": "bb3801994ee91ab8dae31db4344e4a3123019edc5938c89037130f5bab397f9d",
+        "lib/smolbox/worker.ex": "281f6be0b563eba81b25e3c8f9aca26b00f664f6333a830d80b983a5797913cf",
+        "docs/evidence/nested-kvm-lab.json": "ba236f2bfb24b8feef90907c7bc23c8e9ec7040d3b8d559173a5ec5451a3097d",
+        "lib/smolbox/runtime/coordinator.ex": "d6621ac53f756388682bfd4da44be5fc58bb3349c00ea1beb285d8939fc34bd7",
+        "lib/smolbox/error.ex": "f7965086db5ba5b0f3442acfef5f9a20bb6a9bbc4db6f5d33445d8e1beca9e07",
+        "lib/smolbox/runtime.ex": "b4c0b5a7f03ef3612ebb3e885bfedc27e8d41104a63dbb21c5f1d2bce0af9915",
+        "lib/smolbox/result.ex": "380a75352ed9b49b6e37a474254c55ef4b6b5551832dce7d3acda332f5b5b78a",
+        "LICENSE": "210d654cc505eadb7ab98860653dabc84cfdc8f6c450386028c21f1ece9f155d",
+        "lib/smolbox/telemetry/dispatcher.ex": "30a2513d3aaeb24e953011ff9ca651f9eac66b1d6105a8d491e8178d3796063b",
+        "README.md": "5e026af97fc65c76c02af95cecaad9d978448ff0a2a0a55ed418a34a4031f2a8",
+        "lib/smolbox/execution_spec.ex": "a8e0854bec01e5f731c85f810bbc72e62d0fa590c54f16b58eb277c62cb1a05c",
+        "docs/compatibility.md": "08d1272678c2962981808283d2d6d44fd65166b95440e92c051e88524b2ff920",
+        "lib/smolbox/artifact_store/directory.ex": "c8afa7093cef1962a0592d3333dd2de08ed2d284731b840df1d99b1ec73c7bdc",
+        "docs/client.md": "76ff2dbdd6491f0a4bf778701cb574269bcc7318cb15666c225614ed8f414885",
+        "lib/smolbox/runtime/session.ex": "0de9f6a337225c4727fb939103bca8f82d3ed011e75a1b16ef0bf35a2de22767",
+        "lib/smolbox/runtime/work_supervisor.ex": "40e5cfd18c84e55c232272e38477e66b689ea77baf72661171329c50738b4743",
+        "lib/smolbox/health.ex": "85b075434cb592ed0d5d2b7940ed210971f3de48c32774bc8d389e38955db9e9",
+        "docs/evidence/phase7-resource-floor.json": "79500708780ea4cc196c899c349fbe4e1aa48dc09c1b44fbff6005f9ddd71085",
+        "lib/smolbox/runtime/observation.ex": "9409647db1e835e3d3f38c01de206daab37e78686d6c6b6ec595886af372795a",
+        "lib/smolbox/runtime/executor.ex": "0660e5fa5ef24a85f8c2ab05cd1274e84223bb38b0ae75ad16af57080d3ee72e",
+        "docs/evidence/phase2-contracts.json": "1d8b4e5a5a4dc12e15ff02e34c97c46fe33e70e3ff5e2b2c843abc7c5ed989f5",
+        "docs/evidence/phase6-durable-recovery.json": "f8c193a59a5f59500aaca9db27b7ed0d554e5693d3fcc077e8bdea42651211de",
+        "docs/evidence/phase8-macos-memory.json": "baea64fd6fa089689e92512919b1df7aff0244797c71517f656f48033a344397",
+        "docs/resource-qualification.md": "7ac7ba3a53247ebf233491993fc1309ec65c9224c8090733aeb6e007f166fed9",
+        "lib/smolbox/runtime/clock.ex": "a3b7bf21a90a4ccf4977791f97736137af01fdee4a2b3a5ebb3d6a0d18dbf114",
+        "docs/evidence/phase5-managed.json": "8cbddad328d367f648ef2e24dacc01fbe405aa4de1983379302e0f564cb95b27",
+        "docs/evidence/phase8-compatibility.json": "537bfd0ea5a1635571552013e821a00d8d99efac36c321b895e991e579f25dc1",
+        "lib/smolbox/profile.ex": "234b2214748fac97ad2dddfad1c5403a7f8bb148d08aaaeb2bb293c43d5ae7a3",
+        "docs/evidence/phase7-allocation-policy.json": "1063d69a27b9c7590e1a2166d4d285406b15d007ba6f75d73d181f60602dae7a",
+        "lib/smolbox/machine.ex": "34900ba603174ce29c0c44a563f04df51890d7bbd707998f90309ed4fbcc9ef8",
+        "docs/evidence/phase6-worker-restart.json": "5c26c26e4e19bbdb2ca87dcb73ccaf66bc77562db2e9437b035db4f0a364181e",
+        "CHANGELOG.md": "fca9198d51f4ad452ffb4e15acf572e0694a88225ab5a39856b3fa0b888327f4",
+        "docs/evidence/phase9-readiness.json": "36b4229ec6de396ab7aef136cc19ca90de43dad9de9e88c4039e4c344b7de474",
+        "lib/smolbox/command.ex": "788a585c7201dc75991ea68e23c0d9ab12e1a726c4dbed9b957ac07c677eb2c4",
+        "docs/evidence/linux-production-qualification.json": "16ab09cb0cbe1b0e3f998925c6567fdc922bd05d23798155521158bcbfc7aca8",
+        "lib/smolbox/files.ex": "15c2054bb8bd11b004de8a6c7a9dd707db4deccf001abdd70998e858ea6cf204",
+        "lib/smolbox/store.ex": "43c74543c44c8e961513e5ff30f69e2c88d24011b010aa3df4d3e6e122656648"
+      },
+      "package_files": [
+        "lib/smolbox.ex",
+        "lib/smolbox/result.ex",
+        "lib/smolbox/artifact_store.ex",
+        "lib/smolbox/health.ex",
+        "lib/smolbox/telemetry.ex",
+        "lib/smolbox/store.ex",
+        "lib/smolbox/client.ex",
+        "lib/smolbox/telemetry/dispatcher.ex",
+        "lib/smolbox/machine.ex",
+        "lib/smolbox/execution.ex",
+        "lib/smolbox/machine_spec.ex",
+        "lib/smolbox/runtime/config.ex",
+        "lib/smolbox/runtime/inspection.ex",
+        "lib/smolbox/runtime/observation.ex",
+        "lib/smolbox/runtime/executor.ex",
+        "lib/smolbox/runtime/coordinator.ex",
+        "lib/smolbox/runtime/worker_config.ex",
+        "lib/smolbox/runtime/worker_health.ex",
+        "lib/smolbox/runtime/session.ex",
+        "lib/smolbox/runtime/files.ex",
+        "lib/smolbox/runtime/cleanup.ex",
+        "lib/smolbox/runtime/work_supervisor.ex",
+        "lib/smolbox/runtime/clock.ex",
+        "lib/smolbox/worker.ex",
+        "lib/smolbox/files.ex",
+        "lib/smolbox/store/record_ops.ex",
+        "lib/smolbox/store/codec.ex",
+        "lib/smolbox/store/memory.ex",
+        "lib/smolbox/execution_validation.ex",
+        "lib/smolbox/artifact_store/directory.ex",
+        "lib/smolbox/command.ex",
+        "lib/smolbox/manifest.ex",
+        "lib/smolbox/transport/capture.ex",
+        "lib/smolbox/transport/req.ex",
+        "lib/smolbox/identity.ex",
+        "lib/smolbox/runtime.ex",
+        "lib/smolbox/error.ex",
+        "lib/smolbox/execution_spec.ex",
+        "lib/smolbox/wire/sse.ex",
+        "lib/smolbox/validation.ex",
+        "lib/smolbox/profile.ex",
+        "lib/smolbox/transport.ex",
+        "mix.exs",
+        "README.md",
+        "CHANGELOG.md",
+        "LICENSE",
+        "docs/getting-started.md",
+        "docs/troubleshooting.md",
+        "docs/client.md",
+        "docs/host-integration.md",
+        "docs/recovery.md",
+        "docs/telemetry.md",
+        "docs/security.md",
+        "docs/resource-qualification.md",
+        "docs/compatibility.md",
+        "docs/evidence/linux-production-qualification.json",
+        "docs/evidence/nested-kvm-lab.json",
+        "docs/evidence/otp29-linux.json",
+        "docs/evidence/otp29-macos.json",
+        "docs/evidence/phase0-linux.json",
+        "docs/evidence/phase0-macos.json",
+        "docs/evidence/phase1-live-ci.json",
+        "docs/evidence/phase1-scaffold.json",
+        "docs/evidence/phase2-contracts.json",
+        "docs/evidence/phase2-identity.json",
+        "docs/evidence/phase3-client.json",
+        "docs/evidence/phase4-durable.json",
+        "docs/evidence/phase4-store-foundation.json",
+        "docs/evidence/phase5-managed.json",
+        "docs/evidence/phase6-controller-faults.json",
+        "docs/evidence/phase6-durable-recovery.json",
+        "docs/evidence/phase6-orphan-inspection.json",
+        "docs/evidence/phase6-service-faults.json",
+        "docs/evidence/phase6-worker-restart.json",
+        "docs/evidence/phase7-allocation-policy.json",
+        "docs/evidence/phase7-resource-floor.json",
+        "docs/evidence/phase7-worker-health.json",
+        "docs/evidence/phase8-benchmarks.json",
+        "docs/evidence/phase8-boundaries.json",
+        "docs/evidence/phase8-cache-state.json",
+        "docs/evidence/phase8-compatibility.json",
+        "docs/evidence/phase8-linux-containment.json",
+        "docs/evidence/phase8-macos-memory.json",
+        "docs/evidence/phase8-telemetry.json",
+        "docs/evidence/phase9-package-consumer.json",
+        "docs/evidence/phase9-readiness.json"
+      ],
+      "package_modules": [
+        "Elixir.Inspect.SmolBox.ArtifactStore.Directory.beam",
+        "Elixir.Inspect.SmolBox.Client.beam",
+        "Elixir.Inspect.SmolBox.Command.beam",
+        "Elixir.Inspect.SmolBox.Execution.beam",
+        "Elixir.Inspect.SmolBox.ExecutionSpec.beam",
+        "Elixir.Inspect.SmolBox.MachineSpec.beam",
+        "Elixir.Inspect.SmolBox.Result.beam",
+        "Elixir.Inspect.SmolBox.Runtime.Config.beam",
+        "Elixir.Inspect.SmolBox.Runtime.WorkerConfig.beam",
+        "Elixir.Inspect.SmolBox.Worker.beam",
+        "Elixir.SmolBox.ArtifactStore.Directory.beam",
+        "Elixir.SmolBox.ArtifactStore.beam",
+        "Elixir.SmolBox.Client.beam",
+        "Elixir.SmolBox.Command.beam",
+        "Elixir.SmolBox.Error.beam",
+        "Elixir.SmolBox.Execution.beam",
+        "Elixir.SmolBox.ExecutionSpec.beam",
+        "Elixir.SmolBox.ExecutionValidation.beam",
+        "Elixir.SmolBox.Files.beam",
+        "Elixir.SmolBox.Health.beam",
+        "Elixir.SmolBox.Identity.beam",
+        "Elixir.SmolBox.Machine.beam",
+        "Elixir.SmolBox.MachineSpec.beam",
+        "Elixir.SmolBox.Manifest.beam",
+        "Elixir.SmolBox.Profile.beam",
+        "Elixir.SmolBox.Result.beam",
+        "Elixir.SmolBox.Runtime.Cleanup.beam",
+        "Elixir.SmolBox.Runtime.Clock.beam",
+        "Elixir.SmolBox.Runtime.Config.beam",
+        "Elixir.SmolBox.Runtime.Coordinator.beam",
+        "Elixir.SmolBox.Runtime.Executor.beam",
+        "Elixir.SmolBox.Runtime.Files.beam",
+        "Elixir.SmolBox.Runtime.Inspection.beam",
+        "Elixir.SmolBox.Runtime.Observation.beam",
+        "Elixir.SmolBox.Runtime.Session.beam",
+        "Elixir.SmolBox.Runtime.WorkSupervisor.beam",
+        "Elixir.SmolBox.Runtime.WorkerConfig.beam",
+        "Elixir.SmolBox.Runtime.WorkerHealth.beam",
+        "Elixir.SmolBox.Runtime.beam",
+        "Elixir.SmolBox.Store.Codec.beam",
+        "Elixir.SmolBox.Store.Memory.beam",
+        "Elixir.SmolBox.Store.RecordOps.beam",
+        "Elixir.SmolBox.Store.beam",
+        "Elixir.SmolBox.Telemetry.Dispatcher.beam",
+        "Elixir.SmolBox.Telemetry.beam",
+        "Elixir.SmolBox.Transport.Capture.beam",
+        "Elixir.SmolBox.Transport.Req.beam",
+        "Elixir.SmolBox.Transport.beam",
+        "Elixir.SmolBox.Validation.beam",
+        "Elixir.SmolBox.Wire.SSE.beam",
+        "Elixir.SmolBox.Worker.beam",
+        "Elixir.SmolBox.beam"
+      ],
+      "package_sha256": "a704bba157bc7b34d4a74e3da5ae5cab061036e1503b976f34ea455b0c3d2146",
+      "platform": "linux",
+      "runtime_dependencies": [
+        "finch",
+        "hpax",
+        "jason",
+        "mime",
+        "mint",
+        "nimble_options",
+        "nimble_pool",
+        "req",
+        "telemetry"
+      ],
+      "smoke": {
+        "client": true,
+        "supervisor": true,
+        "versions": {
+          "jason": "1.4.5",
+          "nimble_options": "1.1.1",
+          "req": "0.7.4",
+          "telemetry": "1.4.2"
+        }
+      },
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)"
+    },
+    "linux-consumer-minimum.json": {
+      "architecture": "x86_64",
+      "consumer_lockfile": "%{\n  \"finch\": {:hex, :finch, \"0.23.0\", \"e3f9287ac25a8832f848b144c2b57346aac65b205e2e0629a52adfe6507fd837\", [:mix], [{:mime, \"~> 1.0 or ~> 2.0\", [hex: :mime, repo: \"hexpm\", optional: false]}, {:mint, \"~> 1.8\", [hex: :mint, repo: \"hexpm\", optional: false]}, {:nimble_options, \"~> 0.4 or ~> 1.0\", [hex: :nimble_options, repo: \"hexpm\", optional: false]}, {:nimble_pool, \"~> 1.1\", [hex: :nimble_pool, repo: \"hexpm\", optional: false]}, {:telemetry, \"~> 0.4 or ~> 1.0\", [hex: :telemetry, repo: \"hexpm\", optional: false]}], \"hexpm\", \"80e58d3f936f57e3fdf404f83a3642897ae6d9fb642934e46da4d8fe761b99d5\"},\n  \"hpax\": {:hex, :hpax, \"1.0.4\", \"777de5d433b0fbdc7c418159c8055910faa8047ffdb3d6b31098d2a46cd7685c\", [:mix], [], \"hexpm\", \"afc7cb142ebcc2d01ce7816190b98ce5dd49e799111b24249f3443d730f377ca\"},\n  \"jason\": {:hex, :jason, \"1.4.0\", \"e855647bc964a44e2f67df589ccf49105ae039d4179db7f6271dfd3843dc27e6\", [:mix], [{:decimal, \"~> 1.0 or ~> 2.0\", [hex: :decimal, repo: \"hexpm\", optional: true]}], \"hexpm\", \"79a3791085b2a0f743ca04cec0f7be26443738779d09302e01318f97bdb82121\"},\n  \"mime\": {:hex, :mime, \"2.0.7\", \"b8d739037be7cd402aee1ba0306edfdef982687ee7e9859bee6198c1e7e2f128\", [:mix], [], \"hexpm\", \"6171188e399ee16023ffc5b76ce445eb6d9672e2e241d2df6050f3c771e80ccd\"},\n  \"mint\": {:hex, :mint, \"1.10.0\", \"85af3353bfc504f5bdfe494bd92b8490f87a306dc659ee1ad0af435107e898dc\", [:mix], [{:castore, \"~> 0.1.0 or ~> 1.0\", [hex: :castore, repo: \"hexpm\", optional: true]}, {:hpax, \"~> 0.1.1 or ~> 0.2.0 or ~> 1.0\", [hex: :hpax, repo: \"hexpm\", optional: false]}], \"hexpm\", \"8b16fb72aaa7531d206a1f05e4cc85509ba531ccec7a17a22736c9c95cbb24d1\"},\n  \"nimble_options\": {:hex, :nimble_options, \"1.1.0\", \"3b31a57ede9cb1502071fade751ab0c7b8dbe75a9a4c2b5bbb0943a690b63172\", [:mix], [], \"hexpm\", \"8bbbb3941af3ca9acc7835f5655ea062111c9c27bcac53e004460dfd19008a99\"},\n  \"nimble_pool\": {:hex, :nimble_pool, \"1.1.0\", \"bf9c29fbdcba3564a8b800d1eeb5a3c58f36e1e11d7b7fb2e084a643f645f06b\", [:mix], [], \"hexpm\", \"af2e4e6b34197db81f7aad230c1118eac993acc0dae6bc83bac0126d4ae0813a\"},\n  \"req\": {:hex, :req, \"0.7.4\", \"23e9ffec17de032a46a4b15ed65c09793893bf4a7c680f4bbf6227fce6bdf74d\", [:mix], [{:brotli, \"~> 0.3.1\", [hex: :brotli, repo: \"hexpm\", optional: true]}, {:finch, \"~> 0.21\", [hex: :finch, repo: \"hexpm\", optional: false]}, {:jason, \"~> 1.0\", [hex: :jason, repo: \"hexpm\", optional: false]}, {:mime, \"~> 2.0.6 or ~> 2.1\", [hex: :mime, repo: \"hexpm\", optional: false]}, {:nimble_csv, \"~> 1.0\", [hex: :nimble_csv, repo: \"hexpm\", optional: true]}, {:plug, \"~> 1.0\", [hex: :plug, repo: \"hexpm\", optional: true]}], \"hexpm\", \"4b192d63253e8dcc6221ef992ea9ebef7d3555166e8423aa5b553e86bc3c69a2\"},\n  \"telemetry\": {:hex, :telemetry, \"1.3.0\", \"fedebbae410d715cf8e7062c96a1ef32ec22e764197f70cda73d82778d61e7a2\", [:rebar3], [], \"hexpm\", \"7015fc8919dbe63764f4b4b87a95b7c0996bd539e0d499be6ec9d7f3875b79e6\"},\n}\n",
+      "minimum": true,
+      "package_file_sha256": {
+        "lib/smolbox/transport/req.ex": "748485e5e9683cff55d8718905829cbf4b0ec89394f3066cf82c1c37b3a5a2ee",
+        "lib/smolbox/runtime/config.ex": "bfa68f5dda45888cfa78a7777e2140a35e144de08bd8cab28a2e8f1f17a76444",
+        "lib/smolbox/transport/capture.ex": "df828264adf33a5d96759b445f156189d7ade1b0c4666f66831442569cb084d4",
+        "lib/smolbox/runtime/cleanup.ex": "2778350885d8ed065b9547ac0e3b70ffd8eff63ff7cf8844b588a69a99d804fd",
+        "lib/smolbox/execution.ex": "2c730c8f4971bb6e447178fc62d02e910de711fe287eed6156608eb85b7158a0",
+        "lib/smolbox/client.ex": "694a793a62f761f38e9880559dbcbcaa8065db985acb09d6dc7ece97604eec5f",
+        "lib/smolbox/validation.ex": "4df0e14313ffb67caefdf3a7e4b9d63a8a6588666b4142409b525d2955cc2530",
+        "docs/evidence/otp29-macos.json": "7322929a1839cb0cb5ea3d1b35add9ba99a294ea56836b8ceb3fbd4e81ca0800",
+        "lib/smolbox.ex": "1627052996935124b5b033d4d7dd205fe4f04a025435dba43fdc6f3b23463fa0",
+        "lib/smolbox/telemetry.ex": "ec28badc3bff5bd3d40f87350f840208be306a522a9bd600d6bfd49e3ebbf5f9",
+        "docs/evidence/phase8-cache-state.json": "376889039b073250945716266734b4037885eb2c0d9063c97efd10eb512f75fd",
+        "lib/smolbox/runtime/worker_config.ex": "fe01e39b480c93d742030fc5db9f94e6572377eada65566c82705351ba82f0f9",
+        "lib/smolbox/identity.ex": "baaea42558663ab47934747ae267ea244143a8a8068ea14f64604cf1a0a942e1",
+        "docs/evidence/phase0-macos.json": "9cea2d7882f1e79ca3a80afcb36d4f9b631c16c838ba72c87627d5a46e5b0ac4",
+        "docs/security.md": "ce9fad342ca6023414a24445e50f32533421d968bcb3dffc75471ac83a39a9ea",
+        "docs/recovery.md": "358ad9ba70f98a97e91dd86df425fb74c6f1f6c7480ef473677a1bc086b9f212",
+        "docs/evidence/phase7-worker-health.json": "c1be74740dfd9e4c46982ee1fa8cafedb8cceba75e0a6ea305b74ad287f9c3f8",
+        "docs/evidence/phase3-client.json": "dbc9edc77c06412a3d27554db07573ff991be40a842c1272ef595239ca7d8acd",
+        "docs/evidence/phase1-scaffold.json": "60f2cdad2d4d1e580e8300fbe377d1b9d1b453f1d7e480e385bc5a7259eee9af",
+        "docs/telemetry.md": "0f8d8973923c1e63d80cfb9d7888c26464d6eb07e8c5418e2ad5a9ff801112ad",
+        "lib/smolbox/store/memory.ex": "027747ca4f7a32f243b0fc787acbac62f7832471b28531fa964e634a903f00b5",
+        "docs/evidence/phase9-package-consumer.json": "895dab035b7bb38aa7ef537f66d4254a8490de069caaff8bfa52b589b31870b1",
+        "docs/evidence/otp29-linux.json": "dcf8669fdc70a2b81781b9f077c72dad92325e551e8928e507a3c404b6d8fcb1",
+        "docs/evidence/phase6-controller-faults.json": "bf66b4708b18fc42310ad116dd0301cbcb0c734552092babb49ee93198185df3",
+        "docs/evidence/phase8-telemetry.json": "3fbaf61cd05037d17ccc31e39d04533cd7e57c176b7bd2ff7d1d899c3bc40113",
+        "docs/evidence/phase6-service-faults.json": "9b1fe7f068f285f012011f9f067d9210468df7bfca7e3357bf278afda20bf603",
+        "mix.exs": "5bcb450564794fcce28b50d298455d309ec448833f45a9a54d006956ffd1ca21",
+        "docs/evidence/phase2-identity.json": "197bc4bb7d73d34253309b8c9e5159904f84134426b9310c26911f0ac6140e4a",
+        "lib/smolbox/artifact_store.ex": "2d61ae4c7b6eeab70d6dbe822f390353565555b80b33a5602d3487b591128cbe",
+        "docs/evidence/phase8-boundaries.json": "a1b592d9c080d7012ceb7c4730306d0a6d8a450190a7bf718a10ffe7de0e85ed",
+        "lib/smolbox/runtime/files.ex": "1acecfe874e8397c4c13fbd40751e629808dbefb920ac640f06d09edb415fc55",
+        "docs/evidence/phase8-linux-containment.json": "c43527578042fda1b4f00e8d3c1a770550cf89c16e582e7df9d107e85f94f216",
+        "lib/smolbox/runtime/worker_health.ex": "fc19df3f3bf28dfda625b1f6f3b882e2a16b75421145442d2e8d77b6b935f1c0",
+        "docs/evidence/phase0-linux.json": "81d46301bc4f9c1c925af2f2e45ba9e10aa46760c9d3a689dba7bbcb61dd5053",
+        "docs/evidence/phase1-live-ci.json": "dbcc5fa81198680d1ba1e6752b4b688736cc7a97285a81d4aec87b967d01338b",
+        "lib/smolbox/wire/sse.ex": "1df603f2eddf0d76216633437bb43319fb5a083ab278022c0364cbcf42dd9d39",
+        "docs/evidence/phase6-orphan-inspection.json": "aec7db1b68c9077faf50038db552519e158dc807c0eb5c077122b9ecd91dc811",
+        "lib/smolbox/store/codec.ex": "19346d99a428fff53512479832317a51fbd371a5b0e209fc4e3ef78edbc4016c",
+        "lib/smolbox/runtime/inspection.ex": "de9270595036e946fe6ca90ad44467df6b24964324ca427931403ec2b7ec5dba",
+        "docs/host-integration.md": "a508e0ef335c4d1e75c35a428cb996477d4a5889e8b02adb3c6b9cc10f254556",
+        "docs/evidence/phase4-durable.json": "7c56679d56026116fa744d33b996e4105ed2560cbd0c202538b0f36aedc7538a",
+        "lib/smolbox/manifest.ex": "64bbfcabea90905d9cb0b3ac9399fa997486b4461d5e13989f3f892938bfeb10",
+        "lib/smolbox/execution_validation.ex": "5cb54942be581c72910b9c5034b308477129174ef24e51b65c744eb1015a02c4",
+        "lib/smolbox/transport.ex": "ed6a497a1e746330bc7527becd8b520a5c9b8320a9102604633dfb13fa4802de",
+        "lib/smolbox/store/record_ops.ex": "b293446ff1536a75cb86731a280908d9564a489a942ab53d454e67c5a2547050",
+        "docs/getting-started.md": "ec90d9a37ee598f5ac6a96b0141962267fa5291d0000e00cea5cda1ec05979a7",
+        "docs/troubleshooting.md": "fd2043a822649e21635fc56e2083623b993477e5ecd9681509ba29e2561a97d8",
+        "lib/smolbox/machine_spec.ex": "e5567d5759c382c5b9daac78d2c030414e101589ce8e1fe25ccbaec665716557",
+        "docs/evidence/phase4-store-foundation.json": "e24b2f0747fce2da1298704a38676a8652dc2629d4148756a97d975052d1fdc9",
+        "docs/evidence/phase8-benchmarks.json": "bb3801994ee91ab8dae31db4344e4a3123019edc5938c89037130f5bab397f9d",
+        "lib/smolbox/worker.ex": "281f6be0b563eba81b25e3c8f9aca26b00f664f6333a830d80b983a5797913cf",
+        "docs/evidence/nested-kvm-lab.json": "ba236f2bfb24b8feef90907c7bc23c8e9ec7040d3b8d559173a5ec5451a3097d",
+        "lib/smolbox/runtime/coordinator.ex": "d6621ac53f756388682bfd4da44be5fc58bb3349c00ea1beb285d8939fc34bd7",
+        "lib/smolbox/error.ex": "f7965086db5ba5b0f3442acfef5f9a20bb6a9bbc4db6f5d33445d8e1beca9e07",
+        "lib/smolbox/runtime.ex": "b4c0b5a7f03ef3612ebb3e885bfedc27e8d41104a63dbb21c5f1d2bce0af9915",
+        "lib/smolbox/result.ex": "380a75352ed9b49b6e37a474254c55ef4b6b5551832dce7d3acda332f5b5b78a",
+        "LICENSE": "210d654cc505eadb7ab98860653dabc84cfdc8f6c450386028c21f1ece9f155d",
+        "lib/smolbox/telemetry/dispatcher.ex": "30a2513d3aaeb24e953011ff9ca651f9eac66b1d6105a8d491e8178d3796063b",
+        "README.md": "5e026af97fc65c76c02af95cecaad9d978448ff0a2a0a55ed418a34a4031f2a8",
+        "lib/smolbox/execution_spec.ex": "a8e0854bec01e5f731c85f810bbc72e62d0fa590c54f16b58eb277c62cb1a05c",
+        "docs/compatibility.md": "08d1272678c2962981808283d2d6d44fd65166b95440e92c051e88524b2ff920",
+        "lib/smolbox/artifact_store/directory.ex": "c8afa7093cef1962a0592d3333dd2de08ed2d284731b840df1d99b1ec73c7bdc",
+        "docs/client.md": "76ff2dbdd6491f0a4bf778701cb574269bcc7318cb15666c225614ed8f414885",
+        "lib/smolbox/runtime/session.ex": "0de9f6a337225c4727fb939103bca8f82d3ed011e75a1b16ef0bf35a2de22767",
+        "lib/smolbox/runtime/work_supervisor.ex": "40e5cfd18c84e55c232272e38477e66b689ea77baf72661171329c50738b4743",
+        "lib/smolbox/health.ex": "85b075434cb592ed0d5d2b7940ed210971f3de48c32774bc8d389e38955db9e9",
+        "docs/evidence/phase7-resource-floor.json": "79500708780ea4cc196c899c349fbe4e1aa48dc09c1b44fbff6005f9ddd71085",
+        "lib/smolbox/runtime/observation.ex": "9409647db1e835e3d3f38c01de206daab37e78686d6c6b6ec595886af372795a",
+        "lib/smolbox/runtime/executor.ex": "0660e5fa5ef24a85f8c2ab05cd1274e84223bb38b0ae75ad16af57080d3ee72e",
+        "docs/evidence/phase2-contracts.json": "1d8b4e5a5a4dc12e15ff02e34c97c46fe33e70e3ff5e2b2c843abc7c5ed989f5",
+        "docs/evidence/phase6-durable-recovery.json": "f8c193a59a5f59500aaca9db27b7ed0d554e5693d3fcc077e8bdea42651211de",
+        "docs/evidence/phase8-macos-memory.json": "baea64fd6fa089689e92512919b1df7aff0244797c71517f656f48033a344397",
+        "docs/resource-qualification.md": "7ac7ba3a53247ebf233491993fc1309ec65c9224c8090733aeb6e007f166fed9",
+        "lib/smolbox/runtime/clock.ex": "a3b7bf21a90a4ccf4977791f97736137af01fdee4a2b3a5ebb3d6a0d18dbf114",
+        "docs/evidence/phase5-managed.json": "8cbddad328d367f648ef2e24dacc01fbe405aa4de1983379302e0f564cb95b27",
+        "docs/evidence/phase8-compatibility.json": "537bfd0ea5a1635571552013e821a00d8d99efac36c321b895e991e579f25dc1",
+        "lib/smolbox/profile.ex": "234b2214748fac97ad2dddfad1c5403a7f8bb148d08aaaeb2bb293c43d5ae7a3",
+        "docs/evidence/phase7-allocation-policy.json": "1063d69a27b9c7590e1a2166d4d285406b15d007ba6f75d73d181f60602dae7a",
+        "lib/smolbox/machine.ex": "34900ba603174ce29c0c44a563f04df51890d7bbd707998f90309ed4fbcc9ef8",
+        "docs/evidence/phase6-worker-restart.json": "5c26c26e4e19bbdb2ca87dcb73ccaf66bc77562db2e9437b035db4f0a364181e",
+        "CHANGELOG.md": "fca9198d51f4ad452ffb4e15acf572e0694a88225ab5a39856b3fa0b888327f4",
+        "docs/evidence/phase9-readiness.json": "36b4229ec6de396ab7aef136cc19ca90de43dad9de9e88c4039e4c344b7de474",
+        "lib/smolbox/command.ex": "788a585c7201dc75991ea68e23c0d9ab12e1a726c4dbed9b957ac07c677eb2c4",
+        "docs/evidence/linux-production-qualification.json": "16ab09cb0cbe1b0e3f998925c6567fdc922bd05d23798155521158bcbfc7aca8",
+        "lib/smolbox/files.ex": "15c2054bb8bd11b004de8a6c7a9dd707db4deccf001abdd70998e858ea6cf204",
+        "lib/smolbox/store.ex": "43c74543c44c8e961513e5ff30f69e2c88d24011b010aa3df4d3e6e122656648"
+      },
+      "package_files": [
+        "lib/smolbox.ex",
+        "lib/smolbox/result.ex",
+        "lib/smolbox/artifact_store.ex",
+        "lib/smolbox/health.ex",
+        "lib/smolbox/telemetry.ex",
+        "lib/smolbox/store.ex",
+        "lib/smolbox/client.ex",
+        "lib/smolbox/telemetry/dispatcher.ex",
+        "lib/smolbox/machine.ex",
+        "lib/smolbox/execution.ex",
+        "lib/smolbox/machine_spec.ex",
+        "lib/smolbox/runtime/config.ex",
+        "lib/smolbox/runtime/inspection.ex",
+        "lib/smolbox/runtime/observation.ex",
+        "lib/smolbox/runtime/executor.ex",
+        "lib/smolbox/runtime/coordinator.ex",
+        "lib/smolbox/runtime/worker_config.ex",
+        "lib/smolbox/runtime/worker_health.ex",
+        "lib/smolbox/runtime/session.ex",
+        "lib/smolbox/runtime/files.ex",
+        "lib/smolbox/runtime/cleanup.ex",
+        "lib/smolbox/runtime/work_supervisor.ex",
+        "lib/smolbox/runtime/clock.ex",
+        "lib/smolbox/worker.ex",
+        "lib/smolbox/files.ex",
+        "lib/smolbox/store/record_ops.ex",
+        "lib/smolbox/store/codec.ex",
+        "lib/smolbox/store/memory.ex",
+        "lib/smolbox/execution_validation.ex",
+        "lib/smolbox/artifact_store/directory.ex",
+        "lib/smolbox/command.ex",
+        "lib/smolbox/manifest.ex",
+        "lib/smolbox/transport/capture.ex",
+        "lib/smolbox/transport/req.ex",
+        "lib/smolbox/identity.ex",
+        "lib/smolbox/runtime.ex",
+        "lib/smolbox/error.ex",
+        "lib/smolbox/execution_spec.ex",
+        "lib/smolbox/wire/sse.ex",
+        "lib/smolbox/validation.ex",
+        "lib/smolbox/profile.ex",
+        "lib/smolbox/transport.ex",
+        "mix.exs",
+        "README.md",
+        "CHANGELOG.md",
+        "LICENSE",
+        "docs/getting-started.md",
+        "docs/troubleshooting.md",
+        "docs/client.md",
+        "docs/host-integration.md",
+        "docs/recovery.md",
+        "docs/telemetry.md",
+        "docs/security.md",
+        "docs/resource-qualification.md",
+        "docs/compatibility.md",
+        "docs/evidence/linux-production-qualification.json",
+        "docs/evidence/nested-kvm-lab.json",
+        "docs/evidence/otp29-linux.json",
+        "docs/evidence/otp29-macos.json",
+        "docs/evidence/phase0-linux.json",
+        "docs/evidence/phase0-macos.json",
+        "docs/evidence/phase1-live-ci.json",
+        "docs/evidence/phase1-scaffold.json",
+        "docs/evidence/phase2-contracts.json",
+        "docs/evidence/phase2-identity.json",
+        "docs/evidence/phase3-client.json",
+        "docs/evidence/phase4-durable.json",
+        "docs/evidence/phase4-store-foundation.json",
+        "docs/evidence/phase5-managed.json",
+        "docs/evidence/phase6-controller-faults.json",
+        "docs/evidence/phase6-durable-recovery.json",
+        "docs/evidence/phase6-orphan-inspection.json",
+        "docs/evidence/phase6-service-faults.json",
+        "docs/evidence/phase6-worker-restart.json",
+        "docs/evidence/phase7-allocation-policy.json",
+        "docs/evidence/phase7-resource-floor.json",
+        "docs/evidence/phase7-worker-health.json",
+        "docs/evidence/phase8-benchmarks.json",
+        "docs/evidence/phase8-boundaries.json",
+        "docs/evidence/phase8-cache-state.json",
+        "docs/evidence/phase8-compatibility.json",
+        "docs/evidence/phase8-linux-containment.json",
+        "docs/evidence/phase8-macos-memory.json",
+        "docs/evidence/phase8-telemetry.json",
+        "docs/evidence/phase9-package-consumer.json",
+        "docs/evidence/phase9-readiness.json"
+      ],
+      "package_modules": [
+        "Elixir.Inspect.SmolBox.ArtifactStore.Directory.beam",
+        "Elixir.Inspect.SmolBox.Client.beam",
+        "Elixir.Inspect.SmolBox.Command.beam",
+        "Elixir.Inspect.SmolBox.Execution.beam",
+        "Elixir.Inspect.SmolBox.ExecutionSpec.beam",
+        "Elixir.Inspect.SmolBox.MachineSpec.beam",
+        "Elixir.Inspect.SmolBox.Result.beam",
+        "Elixir.Inspect.SmolBox.Runtime.Config.beam",
+        "Elixir.Inspect.SmolBox.Runtime.WorkerConfig.beam",
+        "Elixir.Inspect.SmolBox.Worker.beam",
+        "Elixir.SmolBox.ArtifactStore.Directory.beam",
+        "Elixir.SmolBox.ArtifactStore.beam",
+        "Elixir.SmolBox.Client.beam",
+        "Elixir.SmolBox.Command.beam",
+        "Elixir.SmolBox.Error.beam",
+        "Elixir.SmolBox.Execution.beam",
+        "Elixir.SmolBox.ExecutionSpec.beam",
+        "Elixir.SmolBox.ExecutionValidation.beam",
+        "Elixir.SmolBox.Files.beam",
+        "Elixir.SmolBox.Health.beam",
+        "Elixir.SmolBox.Identity.beam",
+        "Elixir.SmolBox.Machine.beam",
+        "Elixir.SmolBox.MachineSpec.beam",
+        "Elixir.SmolBox.Manifest.beam",
+        "Elixir.SmolBox.Profile.beam",
+        "Elixir.SmolBox.Result.beam",
+        "Elixir.SmolBox.Runtime.Cleanup.beam",
+        "Elixir.SmolBox.Runtime.Clock.beam",
+        "Elixir.SmolBox.Runtime.Config.beam",
+        "Elixir.SmolBox.Runtime.Coordinator.beam",
+        "Elixir.SmolBox.Runtime.Executor.beam",
+        "Elixir.SmolBox.Runtime.Files.beam",
+        "Elixir.SmolBox.Runtime.Inspection.beam",
+        "Elixir.SmolBox.Runtime.Observation.beam",
+        "Elixir.SmolBox.Runtime.Session.beam",
+        "Elixir.SmolBox.Runtime.WorkSupervisor.beam",
+        "Elixir.SmolBox.Runtime.WorkerConfig.beam",
+        "Elixir.SmolBox.Runtime.WorkerHealth.beam",
+        "Elixir.SmolBox.Runtime.beam",
+        "Elixir.SmolBox.Store.Codec.beam",
+        "Elixir.SmolBox.Store.Memory.beam",
+        "Elixir.SmolBox.Store.RecordOps.beam",
+        "Elixir.SmolBox.Store.beam",
+        "Elixir.SmolBox.Telemetry.Dispatcher.beam",
+        "Elixir.SmolBox.Telemetry.beam",
+        "Elixir.SmolBox.Transport.Capture.beam",
+        "Elixir.SmolBox.Transport.Req.beam",
+        "Elixir.SmolBox.Transport.beam",
+        "Elixir.SmolBox.Validation.beam",
+        "Elixir.SmolBox.Wire.SSE.beam",
+        "Elixir.SmolBox.Worker.beam",
+        "Elixir.SmolBox.beam"
+      ],
+      "package_sha256": "a704bba157bc7b34d4a74e3da5ae5cab061036e1503b976f34ea455b0c3d2146",
+      "platform": "linux",
+      "runtime_dependencies": [
+        "finch",
+        "hpax",
+        "jason",
+        "mime",
+        "mint",
+        "nimble_options",
+        "nimble_pool",
+        "req",
+        "telemetry"
+      ],
+      "smoke": {
+        "client": true,
+        "supervisor": true,
+        "versions": {
+          "jason": "1.4.0",
+          "nimble_options": "1.1.0",
+          "req": "0.7.4",
+          "telemetry": "1.3.0"
+        }
+      },
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)"
+    },
+    "linux-durable-runtime.json": {
+      "captured_bytes": 173,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "203658ced02b27628edceea83fc1ba275c6be6114edfc279ff10f0e33d18b221",
+      "seconds": 285.271,
+      "status": "passed",
+      "tests": {
+        "passed": 25,
+        "seed": 104868
+      }
+    },
+    "linux-fault-missing.json": {
+      "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+      "dispatch_attempts": 1,
+      "guest_marker": "single byte before recovery",
+      "guest_survived_api_server": true,
+      "operator_deleted_vm": true,
+      "outage_seconds": 0.051,
+      "partition": "restart-676fe1dd13390586",
+      "platform": "linux",
+      "result": {
+        "absence_at_ms": 1788847505791,
+        "artifacts": [],
+        "cancel_requested_at_ms": null,
+        "cleanup": "complete",
+        "collection": "pending",
+        "evidence": "termination_confirmed",
+        "exit_code": null,
+        "id": "restart-676fe1dd13390586",
+        "machine_name": "sbxexample-4ynricxssugvuczoez4m",
+        "reserved": false,
+        "scope": "example",
+        "state": "unknown",
+        "worker_id": "example-worker"
+      },
+      "retained_workspace": "/tmp/sbx-worker-restart-c5c107bd0d7a16d58f48f9ea",
+      "runtime_version": "1.14.1",
+      "scenario": "missing",
+      "seconds": 9.144,
+      "status": "passed"
+    },
+    "linux-fault-restart.json": {
+      "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+      "dispatch_attempts": 1,
+      "guest_marker": "single byte before recovery",
+      "guest_survived_api_server": true,
+      "operator_deleted_vm": false,
+      "outage_seconds": 0.051,
+      "partition": "restart-af9d98f9d552e206",
+      "platform": "linux",
+      "result": {
+        "absence_at_ms": 1788847365270,
+        "artifacts": [],
+        "cancel_requested_at_ms": null,
+        "cleanup": "complete",
+        "collection": "pending",
+        "evidence": "termination_confirmed",
+        "exit_code": null,
+        "id": "restart-af9d98f9d552e206",
+        "machine_name": "sbxexample-rub7eywcbr2lphpsqdy5",
+        "reserved": false,
+        "scope": "example",
+        "state": "unknown",
+        "worker_id": "example-worker"
+      },
+      "retained_workspace": "/tmp/sbx-worker-restart-8422c1366b9bc4995f3f25c6",
+      "runtime_version": "1.14.1",
+      "scenario": "restart",
+      "seconds": 67.311,
+      "status": "passed"
+    },
+    "linux-fault-unavailable.json": {
+      "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+      "dispatch_attempts": 1,
+      "guest_marker": "single byte before recovery",
+      "guest_survived_api_server": true,
+      "operator_deleted_vm": true,
+      "outage_seconds": 90.015,
+      "partition": "restart-1f1ff6160de0a937",
+      "platform": "linux",
+      "result": {
+        "absence_at_ms": 1788847495406,
+        "artifacts": [],
+        "cancel_requested_at_ms": 1788847373459,
+        "cleanup": "complete",
+        "collection": "pending",
+        "evidence": "termination_confirmed",
+        "exit_code": null,
+        "id": "restart-1f1ff6160de0a937",
+        "machine_name": "sbxexample-47dh2e6znlu2ypv77hsv",
+        "reserved": false,
+        "scope": "example",
+        "state": "unknown",
+        "worker_id": "example-worker"
+      },
+      "retained_workspace": "/tmp/sbx-worker-restart-5ad90d91a183d5acef255aa8",
+      "runtime_version": "1.14.1",
+      "scenario": "unavailable",
+      "seconds": 128.899,
+      "status": "passed"
+    },
+    "linux-final-preflight.json": {
+      "architecture": "x86_64",
+      "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+      "declared_teardown_at_unix": 0,
+      "development": true,
+      "isolation": "Operator-provisioned lifecycle; not host resource or hypervisor attestation",
+      "javascript_sha256": "768b8d2158a75abd90ccc73a65a83717aebfe37e62ed91d0db0bb731584df776",
+      "kernel": "7.1.5-76070105-generic",
+      "lifecycle_id": "release-011-db0797c-linux",
+      "logical_cpus": 8,
+      "platform": "linux",
+      "python_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+      "status": "preflight_passed",
+      "virtualization": "KVM accessible",
+      "worker_binary_sha256": "bb2432804d4bf5d6cbb688d3af160a6a01c99194830f0099d64f291d4ad62373",
+      "worker_version": "1.14.1",
+      "working_tree_changes": false
+    },
+    "linux-middle-identity.json": {
+      "checked_at": "2026-09-08T05:50:27.190761Z",
+      "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+      "elixir": "1.19.5",
+      "erts": "16.4",
+      "otp": "28.5",
+      "source_unchanged": true,
+      "system": "Linux 7.1.5-76070105-generic x86_64"
+    },
+    "linux-minimum-identity.json": {
+      "checked_at": "2026-09-08T05:48:06.825652Z",
+      "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+      "elixir": "1.18.4",
+      "erts": "15.2.7.11",
+      "otp": "27.3.4.15",
+      "source_unchanged": true,
+      "system": "Linux 7.1.5-76070105-generic x86_64"
+    },
+    "linux-otp28-identity.json": {
+      "checked_at": "2026-09-08T05:53:01.346509Z",
+      "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+      "elixir": "1.20.4",
+      "erts": "16.4",
+      "otp": "28.5",
+      "source_unchanged": true,
+      "system": "Linux 7.1.5-76070105-generic x86_64"
+    },
+    "linux-preflight.json": {
+      "architecture": "x86_64",
+      "commit": "db0797c58b1209017641d759b6ff3a35a9f2e8a1",
+      "declared_teardown_at_unix": 0,
+      "development": true,
+      "isolation": "Operator-provisioned lifecycle; not host resource or hypervisor attestation",
+      "javascript_sha256": "768b8d2158a75abd90ccc73a65a83717aebfe37e62ed91d0db0bb731584df776",
+      "kernel": "7.1.5-76070105-generic",
+      "lifecycle_id": "release-011-db0797c-linux",
+      "logical_cpus": 8,
+      "platform": "linux",
+      "python_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+      "status": "preflight_passed",
+      "virtualization": "KVM accessible",
+      "worker_binary_sha256": "bb2432804d4bf5d6cbb688d3af160a6a01c99194830f0099d64f291d4ad62373",
+      "worker_version": "1.14.1",
+      "working_tree_changes": false
+    },
+    "linux-runtime.json": {
+      "captured_bytes": 160,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "7a133260745563841e26fe14368f11b85c3e8036c32b36476ed526935d2919fe",
+      "seconds": 34.356,
+      "status": "passed",
+      "tests": {
+        "passed": 14,
+        "seed": 177661
+      }
+    },
+    "published-library-comparison.json": {
+      "checked_at": "2026-09-08T06:02:59.835934Z",
+      "compared_versions": [
+        "0.1.0",
+        "0.1.1"
+      ],
+      "identical_library_files": 42,
+      "production_requirements_identical": true,
+      "status": "passed"
+    }
+  },
+  "status": "published_and_verified",
+  "tag": "v0.1.1",
+  "validation_hosts": [
+    "ssh linux",
+    "GitHub-hosted Linux CI"
+  ],
+  "version": "0.1.1"
+}
