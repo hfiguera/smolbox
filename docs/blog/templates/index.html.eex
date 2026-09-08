@@ -1,0 +1,28 @@
+<main id="main" class="index-main" tabindex="-1">
+  <section class="introduction" aria-labelledby="site-title">
+    <div>
+      <h1 id="site-title">Running code<br>beyond the BEAM.</h1>
+      <p>Practical notes on Python, JavaScript, and the execution lifecycle in SmolBox.</p>
+    </div>
+    <aside class="project-note" aria-label="About this project">
+      <p>SmolBox runs programs in disposable microVMs and tracks their outcomes from your Elixir application.</p>
+      <a href="https://hexdocs.pm/smolbox/0.1.0/getting-started.html">Set up your first worker <%= SmolBox.Blog.HTML.arrow(:external) %></a>
+    </aside>
+  </section>
+  <section class="articles" aria-labelledby="articles-title">
+    <div class="section-heading"><h2 id="articles-title">Engineering notes</h2><a href="<%= @root %>feed.xml">Subscribe via RSS</a></div>
+    <%= for article <- @site.articles do %>
+    <article class="post-entry">
+      <a class="post-illustration" href="<%= @root %>blog/<%= article["slug"] %>/" tabindex="-1" aria-hidden="true">
+        <img src="<%= @root %>media/<%= article["slug"] %>/<%= article["image"] %>" alt="" width="1200" height="630">
+      </a>
+      <div class="post-summary">
+        <h3><a href="<%= @root %>blog/<%= article["slug"] %>/"><%= SmolBox.Blog.HTML.escape(article["title"]) %></a></h3>
+        <p class="post-meta"><time datetime="<%= article["published_on"] %>"><%= Calendar.strftime(Date.from_iso8601!(article["published_on"]), "%B %-d, %Y") %></time><span><%= article["minutes"] %> min read</span><span><%= SmolBox.Blog.HTML.escape(article["category"]) %></span></p>
+        <p><%= SmolBox.Blog.HTML.escape(article["description"]) %></p>
+        <a class="article-link" href="<%= @root %>blog/<%= article["slug"] %>/">Read the guide <%= SmolBox.Blog.HTML.arrow(:right) %></a>
+      </div>
+    </article>
+    <% end %>
+  </section>
+</main>

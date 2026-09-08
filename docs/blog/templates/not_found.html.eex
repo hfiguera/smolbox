@@ -1,0 +1,6 @@
+<main id="main" class="simple-main not-found" tabindex="-1">
+  <h1>This page isn’t here.</h1>
+  <p>The link may be outdated, or the address may have a typo.</p>
+  <a class="article-link" href="<%= @root %>">Browse the engineering notes <%= SmolBox.Blog.HTML.arrow(:right) %></a>
+  <p>Looking for an API? <a href="https://hexdocs.pm/smolbox/">Open the documentation.</a></p>
+</main>

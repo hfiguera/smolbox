@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="706" viewBox="0 0 390 706" role="img" aria-labelledby="title desc">
+  <title id="title">The execution lifecycle</title>
+  <desc id="desc">SmolBox and its store live in the Elixir application. They manage a SmolVM worker, which runs Python in a disposable VM.</desc>
+  <rect width="390" height="706" fill="#edf2fa"/>
+  <g font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif">
+    <rect x="24" y="24" width="342" height="196" rx="8" fill="#17304e"/>
+    <text x="48" y="65" font-size="23" font-weight="700" fill="#fff">Elixir application</text>
+    <path d="M48 88h294" stroke="#667d9b"/>
+    <text x="48" y="126" font-size="28" font-weight="700" fill="#b9d1ff">SmolBox + store</text>
+    <text x="48" y="164" font-size="19" fill="#e2eaf6">Identity · outcome · cleanup</text>
+    <text x="48" y="196" font-size="18" fill="#e2eaf6">Supervised by your application</text>
+    <path d="M195 233v35m-7-9 7 9 7-9" fill="none" stroke="#215bc7" stroke-width="3"/>
+    <rect x="24" y="282" width="342" height="176" rx="8" fill="#fff" stroke="#a6b8ce"/>
+    <text x="48" y="323" font-size="23" font-weight="700" fill="#17304e">SmolVM worker</text>
+    <text x="48" y="362" font-size="19" fill="#17304e">Create · run · observe</text>
+    <text x="48" y="397" font-size="19" fill="#17304e">Collect files · delete the VM</text>
+    <text x="48" y="431" font-size="18" fill="#526478">On your own host</text>
+    <path d="M195 472v35m-7-9 7 9 7-9" fill="none" stroke="#215bc7" stroke-width="3"/>
+    <rect x="24" y="522" width="342" height="160" rx="8" fill="#215bc7"/>
+    <text x="48" y="562" font-size="23" font-weight="700" fill="#fff">Disposable VM</text>
+    <text x="48" y="608" font-size="30" font-weight="700" fill="#fff">Python</text>
+    <text x="48" y="648" font-size="19" fill="#e4edff">One command · approved image</text>
+  </g>
+</svg>

@@ -1,0 +1,14 @@
+<main id="main" class="simple-main" tabindex="-1">
+  <a class="back-link" href="<%= @root %>"><%= SmolBox.Blog.HTML.arrow(:left) %> Back to the blog</a>
+  <h1>Analytics privacy</h1>
+  <div class="prose">
+    <p>The published SmolBox blog uses Cloudflare Web Analytics to understand aggregate page visits, referring sites, and page performance.</p>
+    <h2 id="what-is-measured">What is measured</h2>
+    <p>The beacon measures page views and browser performance. Cloudflare says this service does not use cookies, local storage, or fingerprinting to track people across sites. It does not log URL query strings or support custom events. We do not send article copy actions or code snippets as analytics events.</p>
+    <p>This blog shares the <code>hfiguera.github.io</code> hostname with the Obscura blog. Their traffic uses the same analytics property and can be separated by page path. These measurements do not establish whether a reader installed or used the library.</p>
+    <h2 id="your-browser">Your browser</h2>
+    <p>The script loads from <code>static.cloudflareinsights.com</code> and sends measurements to <code>cloudflareinsights.com</code>. Blocking it does not affect reading, navigation, or code examples. Local previews have analytics disabled unless explicitly enabled for verification.</p>
+    <p>See Cloudflare’s <a href="https://developers.cloudflare.com/web-analytics/about/">privacy approach</a>, <a href="https://developers.cloudflare.com/web-analytics/data-metrics/data-origin-and-collection/">data collection documentation</a>, and <a href="https://developers.cloudflare.com/web-analytics/faq/">analytics limitations</a>.</p>
+    <p>The source is available on <a href="https://github.com/hfiguera/smolbox">GitHub</a>. For questions about this site’s configuration, <a href="https://github.com/hfiguera/smolbox/issues">open an issue</a>.</p>
+  </div>
+</main>

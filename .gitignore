@@ -2,6 +2,8 @@
 /deps/
 /cover/
 /doc/
+/_site/
+/.impeccable/
 /.local/
 /reports/
 /*.ez

@@ -1,0 +1,13 @@
+[
+  {
+    "slug": "running-python-from-elixir-with-smolbox",
+    "title": "Introducing SmolBox: managing SmolVM executions from Elixir",
+    "description": "Why we chose SmolVM and how SmolBox manages execution identity, outcomes, and cleanup from Elixir, with a runnable Python example.",
+    "published_on": "2026-09-07",
+    "updated_on": "2026-09-07",
+    "version": "0.1.0",
+    "category": "Project introduction",
+    "image": "execution-lifecycle.png",
+    "image_alt": "An Elixir application submits an identified command to SmolBox, which manages a SmolVM worker and a disposable Python VM."
+  }
+]
