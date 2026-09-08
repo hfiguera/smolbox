@@ -20,6 +20,21 @@ Only the two paths are included; no icon font, package, or remote asset request
 is required to display them.
 
 No stock imagery, generated photography, or third-party font files are included.
-Both PNG files carry their origin in a PNG text chunk. Keep editable SVG sources
+The lifecycle PNG files carry their origin in a PNG text chunk. Keep editable SVG sources
 and this record when replacing the raster. Do not copy this development note
 into `media/` or `assets/`, which are public output directories.
+
+## Nested KVM case study
+
+These diagrams are original, repository-authored SVG geometry using the existing
+navy and cobalt palette. They depict the recorded Linux deployment conceptually;
+they are not screenshots of a running VM or a security certification. Budgets
+refer to the layer labelled in the diagram. The article explains the distinction
+between host limits, guest allocations and recovery deadlines.
+
+| Asset | Origin |
+| --- | --- |
+| `media/testing-smolbox-with-nested-kvm/nested-lab.svg` | Editable desktop deployment diagram at 1200 × 780. |
+| `media/testing-smolbox-with-nested-kvm/nested-lab-mobile.svg` | Vertical composition at 390 × 824 with readable mobile labels. |
+| `media/testing-smolbox-with-nested-kvm/nested-lab-social.svg` | Simplified 1200 × 630 composition for article cards and social previews. |
+| `media/testing-smolbox-with-nested-kvm/nested-lab.png` | Linux Chromium rasterization of `nested-lab-social.svg`, at 1200 × 630. |

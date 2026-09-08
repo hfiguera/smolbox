@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="824" viewBox="0 0 390 824" role="img" aria-labelledby="title desc">
+  <title id="title">Recovery at each layer</title>
+  <desc id="desc">Physical host recovery sits outside the disposable QEMU guest. Inside the guest, the Elixir controller and PostgreSQL keep execution records outside the bounded SmolVM worker. The worker runs an inner microVM using nested KVM.</desc>
+  <rect width="390" height="824" fill="#edf2fa"/>
+  <g font-family="sans-serif">
+    <text x="18" y="34" font-size="24" font-weight="700" fill="#17304e">Recovery at each layer</text>
+    <rect x="12" y="56" width="366" height="712" rx="8" fill="#17304e"/>
+    <text x="28" y="91" font-size="23" font-weight="700" fill="#fff">Physical Linux host</text>
+    <text x="28" y="121" font-size="18" fill="#d5e3fa">QEMU: 12 GiB · Lab storage: 128 GiB</text>
+    <rect x="28" y="139" width="334" height="40" rx="4" fill="#e2eaf6"/>
+    <text x="40" y="165" font-size="18" font-weight="600" fill="#17304e">Host deadline + recovery timer</text>
+    <rect x="28" y="199" width="334" height="550" rx="6" fill="#fff"/>
+    <text x="42" y="232" font-size="22" font-weight="700" fill="#17304e">Disposable QEMU guest</text>
+    <text x="42" y="261" font-size="18" fill="#526478">4 vCPU · 8 GiB RAM · 100 GiB disk</text>
+    <rect x="42" y="280" width="306" height="167" rx="4" fill="#edf2fa" stroke="#a6b8ce"/>
+    <text x="56" y="313" font-size="22" font-weight="700" fill="#17304e">Elixir controller</text>
+    <text x="56" y="343" font-size="19" fill="#17304e">SmolBox + PostgreSQL</text>
+    <text x="56" y="378" font-size="18" fill="#526478">Identity · outcome · cleanup</text>
+    <text x="56" y="422" font-size="18" fill="#17304e">Outside worker storage</text>
+    <path d="M195 457v34m-7-9 7 9 7-9" fill="none" stroke="#215bc7" stroke-width="2"/>
+    <text x="206" y="479" font-size="16" fill="#526478">HTTP / Unix socket</text>
+    <rect x="42" y="502" width="306" height="229" rx="4" fill="#215bc7"/>
+    <text x="56" y="535" font-size="21" font-weight="700" fill="#fff">Bounded SmolVM worker</text>
+    <text x="56" y="564" font-size="18" fill="#e4edff">1.5 GiB · 1 CPU · 96 host tasks</text>
+    <rect x="56" y="586" width="278" height="129" rx="4" fill="#edf2fa"/>
+    <text x="70" y="618" font-size="21" font-weight="700" fill="#17304e">Inner Linux microVM</text>
+    <text x="70" y="649" font-size="18" fill="#17304e">Python / Node.js · 256 MiB</text>
+    <text x="70" y="690" font-size="18" fill="#526478">Real nested KVM</text>
+    <text x="18" y="793" font-size="16" fill="#526478">Recorded Linux configuration.</text>
+    <text x="18" y="815" font-size="16" fill="#526478">CPU limits are bandwidth.</text>
+  </g>
+</svg>
