@@ -226,7 +226,7 @@ For a new application using the public Hex package, the
 contains the full setup with `{:smolbox, "~> 0.1.0"}`. The repository example uses
 a path dependency so its host code and library match the release tag.
 
-## What 0.1.0 does not promise
+## Production qualification and remaining boundaries
 
 **Update — September 7, 2026:** Since the 0.1.0 release, we have tested SmolBox in
 a constrained Linux deployment with externally enforced resource limits,
