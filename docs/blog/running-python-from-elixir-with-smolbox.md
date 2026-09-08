@@ -228,8 +228,16 @@ a path dependency so its host code and library match the release tag.
 
 ## What 0.1.0 does not promise
 
-> SmolBox 0.1.0 has not been validated for production execution of untrusted code
-> or hard host resource limits.
+**Update — September 7, 2026:** Since the 0.1.0 release, we have tested SmolBox in
+a constrained Linux deployment with externally enforced resource limits,
+including memory and storage exhaustion, CPU throttling, and recovery after
+worker failure. The
+[qualification guide](https://github.com/hfiguera/smolbox/blob/main/docs/linux-production-qualification.md)
+records the configuration, results, evidence, and remaining limitations.
+
+These results apply to that specific deployment. General production execution
+of arbitrary untrusted code remains unqualified. The example in this article
+uses a different setup and does not configure the tested deployment.
 
 Guest CPU and memory allocations, admission accounting, and limits on collected
 output do not establish hard quotas on the worker host. Requests for unsupported
