@@ -198,6 +198,11 @@ The two entry workflows and shared worker workflow live in `.github/workflows/`.
 Library jobs run from the repository root, and example jobs run from their
 respective `examples/` directories.
 
+The separately authorized [nested Linux lab](../../docs/nested-kvm-lab.md) uses
+`scripts/lab/` and the same bounded runtime test runner on `ssh linux`. Its host
+deadline and recovery timer were tested against a frozen QEMU process. It is
+maintainer infrastructure, not a GitHub runner or a production qualification.
+
 Maintainer code lives under `dev/smolbox/ci/`, outside the Hex package and
 production compilation paths. `scripts/ci.exs` loads only those modules using the
 installed Elixir/OTP standard library; no Mix dependency fetch is needed for

@@ -1,0 +1,51 @@
+[Unit]
+Description=Disposable SmolBox nested KVM lab (%i)
+RequiresMountsFor=/var/lib/smolbox-lab
+After=local-fs.target
+
+[Service]
+Type=exec
+User=smolbox-lab
+Group=smolbox-lab
+SupplementaryGroups=kvm
+Environment=HOME=/var/lib/smolbox-lab/home
+WorkingDirectory=/var/lib/smolbox-lab
+ExecStart=/usr/local/libexec/smolbox-lab/launch-vm %i
+RuntimeMaxSec=2h
+TimeoutStopSec=15s
+KillMode=control-group
+SendSIGKILL=yes
+Restart=no
+CPUAccounting=yes
+CPUQuota=400%
+MemoryAccounting=yes
+MemoryHigh=10G
+MemoryMax=12G
+MemorySwapMax=0
+TasksAccounting=yes
+TasksMax=256
+LimitFSIZE=110G
+LimitCORE=0
+Nice=10
+UMask=0007
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/smolbox-lab
+TemporaryFileSystem=/tmp:rw,size=64M /var/tmp:rw,size=64M
+PrivateDevices=no
+DevicePolicy=closed
+DeviceAllow=/dev/kvm rw
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+ProtectKernelLogs=yes
+ProtectClock=yes
+RestrictSUIDSGID=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+LockPersonality=yes
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX AF_INET AF_NETLINK
+StandardOutput=null
+StandardError=null

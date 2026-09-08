@@ -7,8 +7,11 @@ matching worker API reply is not proof of enforcement.
 
 Completing production resource/isolation qualification is outside the first
 release. The experiments below remain evidence for their recorded conditions;
-the unmeasured boundaries are not newly supported. No further certification
-campaign is scheduled, and unsupported hard controls remain rejected.
+the unmeasured boundaries are not newly supported. A separately authorized nested
+Linux lab now provides bounded infrastructure for future investigation; its
+functional/recovery checks do not constitute a production certification campaign.
+Unsupported hard controls remain rejected. The maintainer operating guide is
+`docs/nested-kvm-lab.md` in the source repository.
 
 ## Disk template mismatch in SmolVM 1.14.1
 

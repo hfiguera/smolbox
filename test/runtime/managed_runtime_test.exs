@@ -237,7 +237,9 @@ defmodule SmolBox.ManagedRuntimeTest do
 
     assert {:ok, handle} = SmolBox.submit(runtime, spec)
     own_cleanup(context, handle)
-    assert_receive {:boundary, :exec, :before, blocked}, 10_000
+    # Nested KVM can take longer to reach the fault-injection point. This only
+    # bounds fixture setup; command and cancellation deadlines remain unchanged.
+    assert_receive {:boundary, :exec, :before, blocked}, 30_000
     assert {:ok, ^handle} = SmolBox.cancel(runtime, spec.scope, spec.id)
     stopped = wait_for(context, handle, &(&1.evidence == :termination_confirmed))
 

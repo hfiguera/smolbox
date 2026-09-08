@@ -1,0 +1,216 @@
+{
+  "schema": 1,
+  "status": "passed",
+  "recorded_at_utc": "2026-09-08T01:58:17Z",
+  "scope": "Disposable nested Linux lab setup and functional/recovery validation",
+  "host": {
+    "ssh_alias": "linux",
+    "os": "Pop!_OS 24.04",
+    "kernel": "7.1.5-76070105-generic",
+    "architecture": "x86_64",
+    "qemu": "QEMU emulator version 8.2.2 (Debian 1:8.2.2+ds-0ubuntu1.18)",
+    "nested_intel_kvm": true,
+    "test_account": "smolbox-lab",
+    "physical_recovery_access": "confirmed by operator; no physical-host crash or reboot tested"
+  },
+  "budgets": {
+    "measurement_window": "Kernel counters and QEMU memory peak from the final runtime test unit; these are observations, not exhaustion tests.",
+    "guest_vcpus": 4,
+    "guest_memory_gib": 8,
+    "guest_virtual_disk_gib": 100,
+    "qemu_cpu_bandwidth_percent": 400,
+    "qemu_memory_max_bytes": 12884901888,
+    "qemu_memory_swap_max_bytes": 0,
+    "qemu_host_tasks_max": 256,
+    "host_storage_backing_bytes": 137438953472,
+    "host_storage_allocated_bytes": 137439084544,
+    "observed_guest_allocations": "4\nMemTotal:        8131784 kB\n107374182400\nkvm\n",
+    "qemu_memory_peak_bytes": 2209599488,
+    "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0\n",
+    "cpu_events": "usage_usec 282923473\nuser_usec 146619082\nsystem_usec 136304391\nnice_usec 145003000\ncore_sched.force_idle_usec 0\nnr_periods 2550\nnr_throttled 2\nthrottled_usec 29434\nnr_bursts 0\nburst_usec 0\n",
+    "serial_ring_bytes": 1048576,
+    "test_deadline_seconds": 2700,
+    "provisioning_deadline_seconds": 7200,
+    "recovery_probe_deadline_seconds": 30,
+    "termination_grace_seconds": 15,
+    "recovery_controller_memory_max_bytes": 536870912
+  },
+  "baseline": {
+    "sha256": "f53fd04d815c8881fb87b82be4b6d8968688a13bdcb4f2e381b5c374f482a735",
+    "cloud_image_release": "Ubuntu 24.04 release-20260826",
+    "cloud_image_sha256": "d0fe84bb5f80853425fa6be28e2c106f30104c3cfe8611933f2e65c9b63f0e30",
+    "smolvm_archive_sha256": "e91786c12808ce87655aa190eb5f6692672cd659a89367b5ec18dace5756af2f",
+    "smolvm_upstream_commit": "e8d09ef616d363004d55b80a6cdb31a4e7e1842d",
+    "python_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+    "node_sha256": "768b8d2158a75abd90ccc73a65a83717aebfe37e62ed91d0db0bb731584df776"
+  },
+  "source": {
+    "base_commit": "903324ef566c284cf78e60698efabe410c67bc1d",
+    "branch": "nested-kvm-lab",
+    "uncommitted_changes": "Lab tooling/docs and a runtime fixture setup wait of 30 seconds instead of 10. Library source unchanged.",
+    "library_hash_scheme": "The final '-' entry hashes the sorted sha256sum listing of all files under lib/.",
+    "validated_source_sha256": "d01a9786288e90c68277ed9c41ed3f597f84cc0ee4c1e1bc872c0a3f77aa4108  mix.lock\n839f3f51dc165dd7e421d4a8654935b062af8435f17c8ce74a70b4b88c20d77a  test/runtime/managed_runtime_test.exs\necb49174ae1aaea9c375ac00a0f04ca7bdf07759104d5fae6d1294c0cb4b27a6  scripts/lab/nested-probe.exs\n6fe0e471b41776af13c8e36bbc1762d39440a742c8cd0cea8364e4679912bb76  scripts/lab/network-probe.exs\n15a76bc9699cc2bd46b7e5a116702862ecdcc464c2741cf05596f56538862976  -\n",
+    "lab_tool_sha256": "7a3a638808654f03419c9852ce9b99f14312bb208ac36548477e290af534268c  guest-ssh.sh\n1e0cfdfdff67f185baf65a61b51f0b7aa287deab40592c8436ea5d5e45e2d050  install-host.sh\nf5c9679aeb246705d74439b34201874806480ec4792815bcf0226dbbbd86250b  install-operator.sh\n78f18b921c509eed73166344762dc77708c9fee3b00ce99a32d3bcf0ead33bc3  kvm-fds.sh\n18dbf1f1d548ce643e9ee9684b387b87f1ab1679091156a7a24f0da481f33395  labctl.sh\n5bb6b7d368c51803900eca0e4553a0b4cbe58572e74044b2ab768f54b78a72bc  launch-vm.sh\nc8752f39f869cebb7207dd6d6bf37ed3554b2be580cda8b2cd2bb3c05e6fb9f9  prepare-host.sh\n7893b62757feb5bf761205f62b2cf163e343ad955c991408a9871cb61ca3476d  provision-guest.sh\n3f5429e921fbda2f577c2c55a1dacb642a50bb0c42f2f7a4b7403c89eb317893  recovery-sweep.sh\naff44be43563083bd7673f255567e6637c3a85f71f2ef171ab151861db679f18  verify-guest.sh\n5d5efbb1c7b9b852520c05cf9c9d46246fe03d43780a3148ef33d071d7e8a9ec  verify-recovery.sh\n839f3f51dc165dd7e421d4a8654935b062af8435f17c8ce74a70b4b88c20d77a  managed_runtime_test.exs\necb49174ae1aaea9c375ac00a0f04ca7bdf07759104d5fae6d1294c0cb4b27a6  nested-probe.exs\n6fe0e471b41776af13c8e36bbc1762d39440a742c8cd0cea8364e4679912bb76  network-probe.exs\n21439bfb5855f8ba2e3057238d761530757954c66f7003982a0d6b9d042eaddf  smolbox-lab@.service\n"
+  },
+  "checks": {
+    "real_nested_execution": {
+      "binary_roundtrip": true,
+      "cleanup": "verified_absent",
+      "elixir": "1.20.4",
+      "guest_kernel": "6.8.0-139-generic",
+      "nested_kvm_descriptors": [
+        "/proc/1217/fd/16 anon_inode:kvm-vm",
+        "/proc/1217/fd/27 anon_inode:kvm-vcpu:0"
+      ],
+      "nonzero_exit": 7,
+      "otp": "29.0.6",
+      "recorded_at": "2026-09-08T01:51:28.014056Z",
+      "smolvm": "1.14.1",
+      "source_commit": "903324ef566c284cf78e60698efabe410c67bc1d",
+      "source_staging": true,
+      "status": "passed"
+    },
+    "restricted_network": {
+      "host_management": "econnrefused",
+      "host_ssh": "econnrefused",
+      "public_https": "enetunreach",
+      "slirp_dns": "timeout",
+      "status": "passed"
+    },
+    "runtime_suite": {
+      "seconds": 152.103,
+      "status": "passed",
+      "failure": null,
+      "tests": {
+        "seed": 459277,
+        "passed": 14
+      },
+      "exit_code": 0,
+      "captured_bytes": 162,
+      "output_sha256": "c4b4ab929fbc5117ada6887700386fd0b38673b4866e7c3e5b08ac9427179767"
+    },
+    "recovery": {
+      "status": "passed",
+      "invocation": "592932d4282c4e0aa994772f3adb8990",
+      "original_cgroup": "/system.slice/system-smolbox\\x2dlab.slice/smolbox-lab@probe.service",
+      "frozen_pid": 213601,
+      "replacement_pid": 213916,
+      "frozen_at_unix": 1788832131,
+      "terminated_at_unix": 1788832152,
+      "recovered_at_unix": 1788832189,
+      "host_deadline_result": "timeout",
+      "original_process_absent": true,
+      "original_cgroup_absent": true,
+      "management_port_closed_before_replacement": true,
+      "automatic_disk_rebuild": true,
+      "baseline_digest_verified": true,
+      "guest_marker_absent_after_rebuild": true,
+      "replacement_inventory_empty": true,
+      "exclusive_vm_lock_verified": true,
+      "periodic_capture_after_freeze": true,
+      "concurrent_start_rejected": true,
+      "operator_lingering": true
+    },
+    "deterministic": {
+      "passed": 194,
+      "doctests": 4,
+      "properties": 6,
+      "ordinary_tests": 184,
+      "seed": 439230,
+      "runtime_cases_excluded_here": 14,
+      "runtime_cases_run_separately": true
+    },
+    "quality": {
+      "shellcheck": "passed",
+      "systemd_unit_verify": "passed",
+      "format": "passed",
+      "compile_warnings_as_errors": "passed",
+      "xref_cycles": 0,
+      "credo_and_ex_slop": "passed",
+      "ex_dna": {
+        "files": 92,
+        "clones": 0
+      },
+      "credence": {
+        "files": 151,
+        "mode": "strict",
+        "result": "passed"
+      },
+      "dialyzer": {
+        "errors": 0,
+        "skipped": 0
+      }
+    }
+  },
+  "failed_attempts": [
+    {
+      "stage": "storage reservation",
+      "observation": "mkfs initially discarded reserved blocks",
+      "correction": "nodiscard formatting plus verified fallocate reservation"
+    },
+    {
+      "stage": "artifact provisioning",
+      "observation": "worker could not read root-owned mode-0640 catalog files",
+      "correction": "approved catalog files mode 0644"
+    },
+    {
+      "stage": "first create",
+      "observation": "transport deadline during first preparation",
+      "correction": "sparse 20/10 GiB templates materialized before sealing"
+    },
+    {
+      "stage": "KVM evidence fixture",
+      "observation": "process-name filter missed the boot helper; libkrun had closed its initial /dev/kvm descriptor",
+      "correction": "inspect worker processes for live VM and vCPU descriptors, then require real execution"
+    },
+    {
+      "stage": "original runtime timing fixture",
+      "report": {
+        "seconds": 146.737,
+        "status": "failed",
+        "failure": null,
+        "exit_code": 2,
+        "captured_bytes": 572,
+        "output_sha256": "9540cd9c8d22c9d3667c8d9a22e8592ca500ebb16e4ca5b878aa55538c09d242"
+      },
+      "observation": "delayed-exec fixture did not reach its injection point within 10 seconds",
+      "correction": "30-second setup wait; execution, cancellation and no-replay assertions unchanged"
+    },
+    {
+      "stage": "diagnostic wrapper",
+      "observation": "a blanket 16 MiB file-size limit caused SIGXFSZ in a diagnostic test process",
+      "correction": "test output uses the existing bounded Elixir capture; no blanket small file-size limit on BEAM"
+    },
+    {
+      "stage": "operator recovery",
+      "observation": "existing user manager lacked newly granted group membership",
+      "correction": "sg activates granted group; writable-volume preflight rejects missing access; actual rebuild verified"
+    }
+  ],
+  "cleanup": {
+    "all_lab_vm_processes_absent": true,
+    "management_port_closed": true,
+    "fresh_overlay_ready": true,
+    "baseline_digest_verified": true,
+    "recovery_timer_enabled": true,
+    "operator_lingering_enabled": true,
+    "original_worker_pid": 44097,
+    "original_worker_health": {
+      "status": "ok",
+      "version": "1.14.1",
+      "machines": {
+        "total": 0,
+        "running": 0
+      },
+      "uptime_seconds": 82971
+    }
+  },
+  "limitations": [
+    "No macOS tests run for this work.",
+    "Nested configuration only; not a production isolation certification.",
+    "No hard-limit exhaustion or hypervisor escape/fuzzing campaign.",
+    "No new durable-store recovery matrix or protected GitHub worker qualification.",
+    "OS packages were provisioned from Ubuntu repositories; retained baseline hash pins this installation, not future apt results."
+  ],
+  "raw_log_sha256": "119ff84e3a22d8df6970918fbb7c77100b22254b60dfc6a766ebf6e955bf8964  /var/lib/smolbox-lab/evidence/ex-dna-complete.log\nc9ed5e78fcbffc0c52a52a1e424fd604149abb1155e80a0290d664a5149c231d  /var/lib/smolbox-lab/evidence/final-verification.log\ncab3cfc09755a17350848ca45673db2c0c384c9fed983b8d338bcc09857add9c  /var/lib/smolbox-lab/evidence/nested-probe-artifact-permission-failure.log\n38cec877c410c68aa23534abe255bcc378e72ca43ad66f02ab156eedf09912bf  /var/lib/smolbox-lab/evidence/nested-probe-final.log\n2a121ca5b473f8797a946bf8d908b0dd0b5603c65edc65d8691054e55f703ec4  /var/lib/smolbox-lab/evidence/nested-probe-kvm.log\ne3f6308146380ffc06f0da738aac3696d0440d2ed1232220f17344f8c45c638d  /var/lib/smolbox-lab/evidence/nested-probe-warm.log\n3d00952e782bb3b344db0dfa79e043b5239e07dd571afb23ee5642a469df7e6f  /var/lib/smolbox-lab/evidence/nested-probe.log\n0d342be76f0c3fc133b53ded15a7d2737300a49f3bafd94d6cb828b888a81210  /var/lib/smolbox-lab/evidence/provision.log\n0c921c380990c8aa44c9108f3fc2e7763f61f5e0109e62900a88fa78de84ec46  /var/lib/smolbox-lab/evidence/quality-initial.log\nd19e7031b00d41a6a114f46a553e55ada3f6cc3bec383a3b5c363f98b7736cfe  /var/lib/smolbox-lab/evidence/quality-remaining.log\n6049777a7f267043b6f496453159fa705faa1434ee7e562cb2286fa37a3f3f0f  /var/lib/smolbox-lab/evidence/recovery-check.log\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  /var/lib/smolbox-lab/evidence/recovery-last.log\n9615438cf0580438451e8b5d2b3680a25fbecac6e7d365f78b1c864f6d60ff93  /var/lib/smolbox-lab/evidence/runtime-adjusted.log\n8da697d1738fff9dba07614035e7bc9998cd994543238f8d5982a2779b9af55b  /var/lib/smolbox-lab/evidence/runtime.log\n"
+}
