@@ -235,9 +235,14 @@ worker failure. The
 [qualification guide](https://github.com/hfiguera/smolbox/blob/main/docs/linux-production-qualification.md)
 records the configuration, results, evidence, and remaining limitations.
 
-These results apply to that specific deployment. General production execution
-of arbitrary untrusted code remains unqualified. The example in this article
-uses a different setup and does not configure the tested deployment.
+SmolBox relies on
+[SmolVM's isolation model](https://github.com/smol-machines/smolvm/blob/e8d09ef616d363004d55b80a6cdb31a4e7e1842d/SECURITY.md)
+for running untrusted code. Production deployments must protect worker access
+and configure host resource limits, networking, and credentials.
+
+Our validation results apply to the specific Linux deployment documented above.
+The example in this article uses a different setup and does not configure that
+deployment.
 
 Guest CPU and memory allocations, admission accounting, and limits on collected
 output do not establish hard quotas on the worker host. Requests for unsupported
@@ -245,8 +250,8 @@ controls remain rejected. Worker isolation, credentials, and upstream file-path
 boundaries require separate assessment for a deployment.
 
 Read [Deployment boundaries](https://hexdocs.pm/smolbox/0.1.0/security.html) before
-deciding where to run it. The release's Linux and macOS execution and recovery
-tests do not establish production isolation.
+deciding where to run it, including the supported controls and your application's
+responsibilities.
 
 The useful abstraction is the execution record: a stable identity, an honest
 account of what happened, and cleanup that remains visible until it is finished.
