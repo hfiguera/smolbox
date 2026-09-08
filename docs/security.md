@@ -19,7 +19,7 @@ After the 0.1.0 release, a Linux campaign verified external resource enforcement
 and failure recovery on one pinned nested deployment. See the
 [validation summary](resource-qualification.md#subsequent-linux-deployment-validation)
 and the full
-[Linux qualification guide](https://github.com/hfiguera/smolbox/blob/main/docs/linux-production-qualification.md).
+[Linux qualification guide](https://github.com/hfiguera/smolbox/blob/v0.1.1/docs/linux-production-qualification.md).
 Those results apply to that configuration: one execution at a time, approved
 images, no guest networking, host mounts or production secrets. They do not
 extend to arbitrary images, concurrent tenants or macOS host limits.
@@ -179,7 +179,7 @@ its store process stops.
    durable example's authenticated index backfill instructions for its older schema.
 4. Pin and verify the new binary, schema and artifact bytes on a separate candidate
    worker. Recheck template sizes, VMM overhead, network behavior, proxy semantics,
-   host quotas and all advertised platform tests. SmolBox 0.1.0 admits
+   host quotas and all advertised platform tests. SmolBox 0.1.1 admits
    only the qualified SmolVM 1.14.1 contract; a different version is incompatible.
 5. Give changed artifacts/profiles new immutable revisions. Do not rewrite saved
    execution specifications or resubmit a changed specification under an existing

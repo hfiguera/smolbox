@@ -50,7 +50,7 @@ networking or macOS host limits. Guest symlinks can still reach other paths
 inside the guest; canonical workspace containment remains unsupported.
 
 The full
-[Linux qualification guide](https://github.com/hfiguera/smolbox/blob/main/docs/linux-production-qualification.md)
+[Linux qualification guide](https://github.com/hfiguera/smolbox/blob/v0.1.1/docs/linux-production-qualification.md)
 describes the deployment, reproduction steps and limitations. The bundled
 [Linux candidate evidence](evidence/linux-production-qualification.json)
 records source identities, kernel counters, successful checks and retained failed

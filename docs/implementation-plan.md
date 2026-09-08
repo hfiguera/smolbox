@@ -1,5 +1,22 @@
 # SmolBox implementation plan
 
+## 0.1.1 documentation and validation release
+
+Status: **release preparation in progress**. The maintainer authorized publishing
+0.1.1 with the revised operating guides and Linux qualification evidence. Library
+source, public APIs, persisted records and production dependencies remain unchanged
+from 0.1.0. New validation runs only on Linux, following the maintainer's explicit
+host restriction. This patch therefore requires ordinary CI, the supported
+Elixir/OTP lanes, existing bounded Linux runtime/recovery suites, documentation
+checks and current/minimum consumers of the same final package. Earlier macOS
+results remain historical evidence; no new macOS run is required or claimed for
+this patch. This scoped decision does not rewrite first-release acceptance below.
+
+Freeze and validate the release commit before publication. Record its results,
+package hashes, publication and cleanup in a separate repository-only attestation.
+
+## 0.1.0 publication
+
 Status: **0.1.0 published and verified**, September 7, 2026. Tag `v0.1.0` identifies
 validated commit `21b3e92fa4feaa4d86d4ac6981ddacf50388d641`. The complete required final-commit matrix passed:
 18 ordinary GitHub jobs, eight compatibility lanes with 186 deterministic cases

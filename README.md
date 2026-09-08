@@ -81,10 +81,10 @@ creating machines, executing commands, streaming output, and transferring files.
 Add SmolBox to your application's `mix.exs`:
 
 ```elixir
-{:smolbox, "~> 0.1.0"}
+{:smolbox, "~> 0.1.1"}
 ```
 
-Then run `mix deps.get`. The [API documentation](https://hexdocs.pm/smolbox/0.1.0/)
+Then run `mix deps.get`. The [API documentation](https://hexdocs.pm/smolbox/0.1.1/)
 includes the guides below. A local checkout can instead be used with
 `{:smolbox, path: "../smolbox"}`.
 
@@ -101,7 +101,7 @@ To run the local walkthrough, you need:
 stage a Python file, submit it, read its output file, and confirm cleanup. The
 walkthrough uses an in-memory store and needs no database. Applications that need
 restart recovery must provide a durable `SmolBox.Store` adapter; a complete
-[PostgreSQL host example](https://github.com/hfiguera/smolbox/tree/v0.1.0/examples/durable_host)
+[PostgreSQL host example](https://github.com/hfiguera/smolbox/tree/v0.1.1/examples/durable_host)
 is included in the repository.
 
 ## Current scope
@@ -152,4 +152,4 @@ the compatibility guide. From this repository, `mix ci` runs deterministic check
 without contacting a real worker. Generate this site with
 `MIX_ENV=dev mix docs --warnings-as-errors`. Live worker tests are a separate opt-in
 operation described in the repository's
-[CI guide](https://github.com/hfiguera/smolbox/blob/v0.1.0/scripts/ci/README.md).
+[CI guide](https://github.com/hfiguera/smolbox/blob/v0.1.1/scripts/ci/README.md).

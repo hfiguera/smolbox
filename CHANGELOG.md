@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.1.1
+
+Documentation and validation release. Library source, public APIs, persisted record
+formats and production dependencies are unchanged from 0.1.0.
+
+- Update the README and operating guides with the division of responsibilities
+  between SmolBox, SmolVM and the deployment, and link the recorded Linux results.
+- Include evidence of external resource enforcement and failure recovery in one
+  constrained Linux deployment. These results do not add portable hard-control
+  options or establish the same guarantees for other deployments.
+- Add repository-only tools for a disposable nested KVM lab and bounded Linux
+  qualification, including separate worker data and control storage.
+- Allow the supplied host examples to use a configured SmolVM Unix socket.
+- Add the engineering blog and strengthen runtime fixtures and CI checks.
+
+Release validation runs on Linux. The earlier macOS results remain historical
+evidence for the unchanged library; this patch does not claim a new macOS run.
+
 ## 0.1.0
 
 First release of the development-qualified SmolVM client and supervised execution

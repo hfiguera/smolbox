@@ -1,6 +1,6 @@
 # Compatibility evidence
 
-Version: `0.1.0`, released 2026-09-07. The library's supported qualification is
+Version: `0.1.1`. The library's supported qualification is
 `:development`; requested hard-control options remain unsupported. The original
 release evidence below records the client/controller contract on Linux and macOS.
 
@@ -12,13 +12,13 @@ they do not change the library's profile options or establish macOS host limits.
 Protected real-worker GitHub infrastructure and independent consumer review were
 outside the original release scope and were not added by this campaign.
 
-Ordinary CI, the supported compatibility matrix, existing bounded real-runtime
-suites and fresh package consumers remain required for the exact release
-candidate. Recorded local Linux/macOS results can supply the real-runtime
-evidence. The repository's `docs/release-candidates/` reports record each
-candidate's identity and validation separately from this package's historical
-evidence. Earlier results below do not substitute for exact-candidate validation.
-Excluded work is not represented as completed or scheduled.
+The 0.1.1 documentation and validation release leaves library source and production
+dependencies unchanged from 0.1.0. Its validation is restricted to Linux by the
+maintainer: ordinary CI, supported Elixir/OTP lanes, bounded real-runtime suites
+and fresh package consumers must pass for its exact commit. The earlier macOS
+results remain historical evidence; they are not a new 0.1.1 macOS run. The
+repository's `docs/release-candidates/` reports record each release's identity,
+validation and scope separately. Excluded work is not represented as completed.
 
 ## Current development toolchain
 
@@ -263,7 +263,7 @@ developer tasks pass warning-as-error compilation. No dependency source was patc
 
 The source repository is [hfiguera/smolbox](https://github.com/hfiguera/smolbox),
 configured as `origin` and in the package and documentation metadata. The repository
-is public. ExDoc source links target the matching `v0.1.0` tag. The supplied host
+is public. ExDoc source links target the matching `v0.1.1` tag. The supplied host
 examples and automated package consumers provide first-release adoption evidence;
 no independent consumer review is required or claimed.
 

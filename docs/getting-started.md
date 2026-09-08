@@ -14,7 +14,7 @@ or its external host resource controls.
 In an existing Elixir Mix application, add this entry to `deps/0` in `mix.exs`:
 
 ```elixir
-{:smolbox, "~> 0.1.0"}
+{:smolbox, "~> 0.1.1"}
 ```
 
 Run `mix deps.get` to fetch the package from Hex. With a sibling local checkout, use
@@ -253,8 +253,8 @@ See [Troubleshooting](troubleshooting.md) for concrete result-handling examples.
 
 Continue with [Managed host integration](host-integration.md) and
 [Persistence and recovery](recovery.md). The repository's
-[minimal host](https://github.com/hfiguera/smolbox/tree/v0.1.0/examples/minimal_host)
-and [PostgreSQL host](https://github.com/hfiguera/smolbox/tree/v0.1.0/examples/durable_host)
+[minimal host](https://github.com/hfiguera/smolbox/tree/v0.1.1/examples/minimal_host)
+and [PostgreSQL host](https://github.com/hfiguera/smolbox/tree/v0.1.1/examples/durable_host)
 are complete applications; they are source examples, not modules shipped in the
 library package.
 

@@ -48,6 +48,13 @@ reviewed commit through a maintainer-controlled branch/ref; live jobs check out
 the recorded commit, and their preflight records it.
 Validating another branch tip does not qualify the release candidate.
 
+For the 0.1.1 documentation and validation patch, the maintainer restricted all
+new execution to Linux. Run ordinary CI, the supported Elixir/OTP lanes, bounded
+Linux runtime/recovery suites, docs and current/minimum package consumers for the
+final commit. Library source and production dependencies are unchanged from 0.1.0;
+the previous macOS results remain historical and must not be reported as a new
+0.1.1 run. See the release-specific scope in the implementation plan.
+
 ## Temporary Decimal advisory exception
 
 The PostgreSQL example's CI job temporarily acknowledges `EEF-CVE-2026-32686`
