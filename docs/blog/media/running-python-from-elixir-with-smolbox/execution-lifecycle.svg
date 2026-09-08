@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">A program runs. Its execution stays observable.</title>
+  <desc id="desc">SmolBox in the Elixir application manages a worker API. A disposable VM runs Python. The execution record tracks identity, outcome, and cleanup.</desc>
+  <rect width="1200" height="630" fill="#edf2fa"/>
+  <g font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" fill="#17304e">
+    <text x="64" y="92" font-size="36" font-weight="700">A program runs.</text>
+    <text x="64" y="140" font-size="36" font-weight="700">Its execution stays observable.</text>
+    <rect x="64" y="202" width="348" height="257" rx="8" fill="#17304e"/>
+    <text x="92" y="245" fill="#fff" font-size="25" font-weight="650">Elixir application</text>
+    <path d="M92 268h292" stroke="#667d9b"/>
+    <text x="92" y="308" fill="#b9d1ff" font-size="28" font-weight="700">SmolBox</text>
+    <text x="92" y="347" fill="#e2eaf6" font-size="21">Identity · outcome · cleanup</text>
+    <text x="92" y="420" fill="#e2eaf6" font-size="19">Supervised runtime + store</text>
+    <path d="M430 288h63m-10-8 10 8-10 8" fill="none" stroke="#215bc7" stroke-width="3"/>
+    <path d="M493 374h-63m10-8-10 8 10 8" fill="none" stroke="#526478" stroke-width="3"/>
+    <rect x="516" y="202" width="268" height="257" rx="8" fill="#fff" stroke="#a6b8ce"/>
+    <text x="542" y="245" font-size="25" font-weight="650">SmolVM worker</text>
+    <path d="M542 268h216" stroke="#d8e0eb"/>
+    <text x="542" y="313" font-size="21">Create the VM</text>
+    <text x="542" y="349" font-size="21">Run and observe</text>
+    <text x="542" y="385" font-size="21">Collect files</text>
+    <text x="542" y="421" font-size="21">Delete the VM</text>
+    <path d="M802 330h48m-10-8 10 8-10 8" fill="none" stroke="#215bc7" stroke-width="3"/>
+    <rect x="872" y="202" width="264" height="257" rx="8" fill="#215bc7"/>
+    <text x="898" y="245" fill="#fff" font-size="25" font-weight="650">Disposable VM</text>
+    <path d="M898 268h212" stroke="#8db2f7"/>
+    <text x="898" y="340" fill="#fff" font-size="34" font-weight="700">Python</text>
+    <text x="898" y="382" fill="#e4edff" font-size="21">One command</text>
+    <text x="898" y="420" fill="#e4edff" font-size="19">An approved image</text>
+    <text x="64" y="546" font-size="22" fill="#526478">Run on your hosts. Keep track from Elixir.</text>
+    <text x="64" y="584" font-size="18" fill="#526478">SmolBox 0.1.0 · SmolVM 1.14.1 · Development use</text>
+  </g>
+</svg>

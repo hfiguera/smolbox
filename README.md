@@ -123,6 +123,9 @@ image; SmolBox does not build or publish user functions.
 
 ## Guides
 
+The [engineering blog](https://hfiguera.github.io/smolbox/) has practical articles
+about running programs from Elixir and managing their execution lifecycle.
+
 | Guide | What you will learn |
 |---|---|
 | [Getting started](docs/getting-started.md) | Connect, stage a Python program, submit it, read its result, and finish cleanup |

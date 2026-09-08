@@ -115,13 +115,14 @@ defmodule SmolBox.MixProject do
         ]
       ],
       dialyzer: [
-        plt_add_apps: [:mix, :ex_unit, :credence, :dialyxir],
+        plt_add_apps: [:mix, :ex_unit, :credence, :dialyxir, :ex_doc, :makeup],
         plt_local_path: "_build/plts"
       ],
       # Canaries exercise developer tasks. Peer fixtures and shared adapter tests
       # are not production library code and must not inflate its coverage floor.
       test_coverage: [
         ignore_modules: [
+          ~r/^SmolBox\.Blog(?:\.|$)/,
           ~r/^Mix.Tasks.Smolbox.Ci\./,
           ~r/^SmolBox.CI\./,
           SmolBox.TestPeer,
@@ -165,7 +166,10 @@ defmodule SmolBox.MixProject do
       {:ex_dna, "~> 1.5.4", only: [:dev, :test], runtime: false},
       {:ex_slop, "~> 0.4.4", only: [:dev, :test], runtime: false},
       {:credence, "~> 0.8.1", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.40", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.40", only: [:dev, :test], runtime: false},
+      {:makeup_syntect, "~> 0.1.4", only: [:dev, :test], runtime: false},
+      # Match upstream's 0.9 support while its latest Hex release still constrains 0.8.
+      {:rustler_precompiled, "~> 0.9.0", only: [:dev, :test], runtime: false, override: true},
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false}
     ]
   end

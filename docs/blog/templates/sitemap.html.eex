@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc><%= @site.url %></loc><lastmod><%= @latest %></lastmod></url>
+  <url><loc><%= @site.url %>privacy/</loc></url>
+  <%= for article <- @site.articles do %>
+  <url><loc><%= @site.url %>blog/<%= article["slug"] %>/</loc><lastmod><%= article["updated_on"] %></lastmod></url>
+  <% end %>
+</urlset>

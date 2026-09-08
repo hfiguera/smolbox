@@ -1,0 +1,59 @@
+name: SmolBox blog
+
+on:
+  pull_request:
+    paths: ['docs/blog/**', 'dev/smolbox/blog*', 'dev/smolbox/blog/**', 'scripts/*blog.exs', 'test/unit/blog_test.exs', '.github/workflows/blog.yml', 'mix.exs', 'mix.lock']
+  push:
+    paths: ['docs/blog/**', 'dev/smolbox/blog*', 'dev/smolbox/blog/**', 'scripts/*blog.exs', 'test/unit/blog_test.exs', '.github/workflows/blog.yml', 'mix.exs', 'mix.lock']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: blog-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build and verify blog
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      MIX_ENV: dev
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
+        with:
+          otp-version: '29.0.6'
+          elixir-version: '1.20.4'
+      - run: mix deps.get
+      - run: mix compile --warnings-as-errors
+      - run: mix run --no-start scripts/build_blog.exs --analytics
+      - run: mix run --no-start scripts/verify_blog.exs --analytics
+      - name: Blog regression tests
+        run: MIX_ENV=test mix test test/unit/blog_test.exs --warnings-as-errors
+      - run: git diff --exit-code
+      - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
+        with:
+          path: _site
+
+  deploy:
+    name: Publish GitHub Pages
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+      - name: Deploy verified site
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4

@@ -1,0 +1,307 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-07T22:36:21.368663+00:00",
+  "title": "Design System: SmolBox engineering blog",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Cool paper",
+        "tonalRamp": [
+          "oklch(15.00% 0.00286 264.54)",
+          "oklch(26.43% 0.00286 264.54)",
+          "oklch(37.86% 0.00286 264.54)",
+          "oklch(49.29% 0.00286 264.54)",
+          "oklch(60.71% 0.00286 264.54)",
+          "oklch(72.14% 0.00286 264.54)",
+          "oklch(83.57% 0.00286 264.54)",
+          "oklch(95.00% 0.00286 264.54)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Navy ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.06280 254.17)",
+          "oklch(26.43% 0.06280 254.17)",
+          "oklch(37.86% 0.06280 254.17)",
+          "oklch(49.29% 0.06280 254.17)",
+          "oklch(60.71% 0.06280 254.17)",
+          "oklch(72.14% 0.06280 254.17)",
+          "oklch(83.57% 0.06280 254.17)",
+          "oklch(95.00% 0.06280 254.17)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Slate",
+        "tonalRamp": [
+          "oklch(15.00% 0.03891 251.30)",
+          "oklch(26.43% 0.03891 251.30)",
+          "oklch(37.86% 0.03891 251.30)",
+          "oklch(49.29% 0.03891 251.30)",
+          "oklch(60.71% 0.03891 251.30)",
+          "oklch(72.14% 0.03891 251.30)",
+          "oklch(83.57% 0.03891 251.30)",
+          "oklch(95.00% 0.03891 251.30)"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Cobalt",
+        "tonalRamp": [
+          "oklch(15.00% 0.17913 261.44)",
+          "oklch(26.43% 0.17913 261.44)",
+          "oklch(37.86% 0.17913 261.44)",
+          "oklch(49.29% 0.17913 261.44)",
+          "oklch(60.71% 0.17913 261.44)",
+          "oklch(72.14% 0.17913 261.44)",
+          "oklch(83.57% 0.17913 261.44)",
+          "oklch(95.00% 0.17913 261.44)"
+        ]
+      },
+      "accent-hover": {
+        "role": "primary",
+        "displayName": "Deep cobalt",
+        "tonalRamp": [
+          "oklch(15.00% 0.15252 261.09)",
+          "oklch(26.43% 0.15252 261.09)",
+          "oklch(37.86% 0.15252 261.09)",
+          "oklch(49.29% 0.15252 261.09)",
+          "oklch(60.71% 0.15252 261.09)",
+          "oklch(72.14% 0.15252 261.09)",
+          "oklch(83.57% 0.15252 261.09)",
+          "oklch(95.00% 0.15252 261.09)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Fine rule",
+        "tonalRamp": [
+          "oklch(15.00% 0.01734 256.28)",
+          "oklch(26.43% 0.01734 256.28)",
+          "oklch(37.86% 0.01734 256.28)",
+          "oklch(49.29% 0.01734 256.28)",
+          "oklch(60.71% 0.01734 256.28)",
+          "oklch(72.14% 0.01734 256.28)",
+          "oklch(83.57% 0.01734 256.28)",
+          "oklch(95.00% 0.01734 256.28)"
+        ]
+      },
+      "wash": {
+        "role": "neutral",
+        "displayName": "Blue wash",
+        "tonalRamp": [
+          "oklch(15.00% 0.01199 259.82)",
+          "oklch(26.43% 0.01199 259.82)",
+          "oklch(37.86% 0.01199 259.82)",
+          "oklch(49.29% 0.01199 259.82)",
+          "oklch(60.71% 0.01199 259.82)",
+          "oklch(72.14% 0.01199 259.82)",
+          "oklch(83.57% 0.01199 259.82)",
+          "oklch(95.00% 0.01199 259.82)"
+        ]
+      },
+      "code": {
+        "role": "neutral",
+        "displayName": "Code charcoal",
+        "tonalRamp": [
+          "oklch(15.00% 0.02960 256.85)",
+          "oklch(26.43% 0.02960 256.85)",
+          "oklch(37.86% 0.02960 256.85)",
+          "oklch(49.29% 0.02960 256.85)",
+          "oklch(60.71% 0.02960 256.85)",
+          "oklch(72.14% 0.02960 256.85)",
+          "oklch(83.57% 0.02960 256.85)",
+          "oklch(95.00% 0.02960 256.85)"
+        ]
+      },
+      "amber": {
+        "role": "secondary",
+        "displayName": "Caveat amber",
+        "tonalRamp": [
+          "oklch(15.00% 0.10246 65.01)",
+          "oklch(26.43% 0.10246 65.01)",
+          "oklch(37.86% 0.10246 65.01)",
+          "oklch(49.29% 0.10246 65.01)",
+          "oklch(60.71% 0.10246 65.01)",
+          "oklch(72.14% 0.10246 65.01)",
+          "oklch(83.57% 0.10246 65.01)",
+          "oklch(95.00% 0.10246 65.01)"
+        ]
+      },
+      "code-text": {
+        "role": "neutral",
+        "displayName": "Code text",
+        "tonalRamp": [
+          "oklch(15.00% 0.01205 259.82)",
+          "oklch(26.43% 0.01205 259.82)",
+          "oklch(37.86% 0.01205 259.82)",
+          "oklch(49.29% 0.01205 259.82)",
+          "oklch(60.71% 0.01205 259.82)",
+          "oklch(72.14% 0.01205 259.82)",
+          "oklch(83.57% 0.01205 259.82)",
+          "oklch(95.00% 0.01205 259.82)"
+        ]
+      },
+      "white": {
+        "role": "neutral",
+        "displayName": "White",
+        "tonalRamp": [
+          "oklch(15.00% 0.00000 0.00)",
+          "oklch(26.43% 0.00000 0.00)",
+          "oklch(37.86% 0.00000 0.00)",
+          "oklch(49.29% 0.00000 0.00)",
+          "oklch(60.71% 0.00000 0.00)",
+          "oklch(72.14% 0.00000 0.00)",
+          "oklch(83.57% 0.00000 0.00)",
+          "oklch(95.00% 0.00000 0.00)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Index title",
+        "purpose": "The largest title on the index; explicit responsive steps."
+      },
+      "headline": {
+        "displayName": "Article title",
+        "purpose": "The article H1, aligned with its prose column."
+      },
+      "title": {
+        "displayName": "Section heading",
+        "purpose": "Article H2 headings."
+      },
+      "body": {
+        "displayName": "Reading text",
+        "purpose": "Long-form prose bounded to 70ch."
+      },
+      "label": {
+        "displayName": "Metadata",
+        "purpose": "Dates, reading time, category, and version."
+      },
+      "code": {
+        "displayName": "Fenced code",
+        "purpose": "Stable-size monospace examples with horizontal scrolling."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "forward-arrow",
+        "value": "transform .18s ease-out; translateX(4px)",
+        "purpose": "Hover feedback on article and next-step forward links."
+      },
+      {
+        "name": "anchor-scroll",
+        "value": "scroll-behavior: smooth; scroll-padding-top: 2rem",
+        "purpose": "Section links preserve a little space above the destination."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "scroll-behavior: auto; transition: none !important",
+        "purpose": "Remove smooth scrolling and transitions when reduced motion is requested."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact-desktop",
+        "value": "1050px"
+      },
+      {
+        "name": "single-column",
+        "value": "800px"
+      },
+      {
+        "name": "vertical-diagram",
+        "value": "600px"
+      },
+      {
+        "name": "phone",
+        "value": "480px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Project navigation",
+      "kind": "nav",
+      "description": "Navy project links; the current page and hover state gain cobalt and an underline.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Project navigation\"><a href=\"#blog\" aria-current=\"page\">Blog</a><a href=\"https://hexdocs.pm/smolbox/\">Docs</a><a href=\"https://hex.pm/packages/smolbox\">Hex</a><a href=\"https://github.com/hfiguera/smolbox\">GitHub</a></nav>",
+      "css": ".ds-nav{display:flex;gap:30px;align-items:center;font:15px/1.7 -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif}.ds-nav a{color:var(--ink,#17304e);padding-block:12px;text-decoration:none;text-underline-offset:.2em;text-decoration-thickness:1px}.ds-nav a:hover,.ds-nav a[aria-current]{color:var(--accent,#215bc7);text-decoration:underline}.ds-nav a:focus-visible{outline:3px solid var(--accent,#215bc7);outline-offset:5px;border-radius:2px;}@media(max-width:480px){.ds-nav{justify-content:space-between;gap:14px}}"
+    },
+    {
+      "name": "Article action link",
+      "kind": "custom",
+      "refersTo": "action-link",
+      "description": "A bold text action with an inline SVG arrow and a restrained hover movement.",
+      "html": "<a class=\"ds-action\" href=\"#guide\">Read the guide <svg class=\"ds-arrow\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M4 12h16m-7-7 7 7-7 7\"/></svg></a>",
+      "css": ".ds-action{display:inline-block;color:var(--accent,#215bc7);font:700 16px/1.7 -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif;padding-block:8px;text-decoration:underline;text-underline-offset:.2em;text-decoration-thickness:1px}.ds-action .ds-arrow{display:inline-block;vertical-align:-.15em;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;margin-left:10px;transition:transform .18s ease-out}.ds-action:hover{color:var(--accent-hover,#16479f)}.ds-action:hover .ds-arrow{transform:translateX(4px)}.ds-action:focus-visible{outline:3px solid var(--accent,#215bc7);outline-offset:5px;border-radius:2px;}@media(prefers-reduced-motion:reduce){.ds-action .ds-arrow{transition:none}}"
+    },
+    {
+      "name": "Copy code button",
+      "kind": "button",
+      "refersTo": "copy-code",
+      "description": "The progressive enhancement for code blocks; labels and clipboard behavior are implemented in assets/site.js.",
+      "html": "<button class=\"ds-copy\" type=\"button\" aria-label=\"Copy code example\">Copy</button>",
+      "css": ".ds-copy{border:1px solid #67768c;border-radius:4px;background:var(--code,#1f2937);color:#e7ecf4;font:12px/1.7 -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif;padding:4px 11px;cursor:pointer}.ds-copy:hover{background:#344155}.ds-copy:focus-visible{outline:3px solid #b9d1ff;outline-offset:5px;border-radius:2px}"
+    },
+    {
+      "name": "Article contents",
+      "kind": "nav",
+      "description": "An initially open native details list of H2 section links, with fine structural rules.",
+      "html": "<aside class=\"ds-contents\"><details open><summary>In this article</summary><nav aria-label=\"Article sections\"><ol><li><a href=\"#where-smolbox-fits\">Where SmolBox fits</a></li><li><a href=\"#run-the-supplied-python-example\">Run the supplied Python example</a></li><li><a href=\"#give-the-work-a-stable-identity\">Give the work a stable identity</a></li></ol></nav></details></aside>",
+      "css": ".ds-contents{font:14px/1.5 -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif;color:var(--ink,#17304e)}.ds-contents details{border-top:1px solid var(--line,#d8e0eb);padding-top:16px}.ds-contents summary{cursor:pointer;font-weight:700;padding-block:7px}.ds-contents ol{list-style:none;padding:0;margin:12px 0}.ds-contents li{margin-bottom:12px}.ds-contents a{color:var(--muted,#526478);display:block;padding-block:3px;text-decoration:none;text-underline-offset:.2em}.ds-contents a:hover,.ds-contents a:focus-visible{color:var(--accent,#215bc7);text-decoration:underline}.ds-contents a:focus-visible,.ds-contents summary:focus-visible{outline:3px solid var(--accent,#215bc7);outline-offset:5px;border-radius:2px;}@media(max-width:800px){.ds-contents details{border-bottom:1px solid var(--line,#d8e0eb);padding-bottom:16px}.ds-contents ol{columns:2;column-gap:28px}.ds-contents li{break-inside:avoid}}@media(max-width:480px){.ds-contents ol{columns:1}}"
+    },
+    {
+      "name": "Fenced code panel",
+      "kind": "custom",
+      "refersTo": "code-block",
+      "description": "A flat dark panel with preserved whitespace, horizontal scrolling, and reserved space for the enhanced copy control.",
+      "html": "<pre class=\"ds-code\"><code>git clone --branch v0.1.0 --depth 1 https://github.com/hfiguera/smolbox.git\ncd smolbox/examples/minimal_host</code></pre>",
+      "css": ".ds-code{position:relative;background:var(--code,#1f2937);color:#e7ecf4;border-radius:8px;margin:28px 0;padding:46px 24px 24px;overflow-x:auto;scrollbar-color:#64758d var(--code,#1f2937)}.ds-code code{font:14px/1.7 ui-monospace, \"SFMono-Regular\", Consolas, monospace;tab-size:2;background:transparent;color:inherit}@media(max-width:480px){.ds-code{padding-inline:16px}}"
+    },
+    {
+      "name": "Caveat",
+      "kind": "custom",
+      "description": "Amber text and a pale amber field distinguish a limitation from the surrounding prose.",
+      "html": "<blockquote class=\"ds-caveat\"><p>SmolBox 0.1.0 does not certify production execution of hostile code or hard host resource limits.</p></blockquote>",
+      "css": ".ds-caveat{margin:28px 0;padding:20px 24px;background:#fbf2e6;color:var(--amber,#86510f);border-radius:6px;font:18px/1.7 -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif}.ds-caveat p{margin:0 0 1.4rem}.ds-caveat p:last-child{margin-bottom:0}@media(max-width:480px){.ds-caveat{font-size:17px}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Technical field guide",
+    "overview": "The blog uses cool white paper, navy text, clear rules, and geometric diagrams\nto make engineering explanations easy to follow. Headings establish a strong\nreading order; the surrounding layout stays open and quiet. This is a Read\nsurface, using the platform sans stack for both headings and prose.\n\nThis record describes the implemented blog. Its source of truth is\n`assets/site.css`, the EEx templates, `assets/site.js`, and the editable SVGs.\nThe token frontmatter records shared values; the companion\n`.impeccable/design.json` records states, breakpoints, and component previews.\nBoth files are development notes under `docs/blog/`, outside the public asset\ndirectories. Update them together when the implemented system changes.",
+    "keyCharacteristics": [
+      "Open layouts with a bounded prose measure and a desktop contents rail.",
+      "Navy hierarchy, cobalt navigation, and amber caveats.",
+      "Flat surfaces with crisp rules and small, functional corner rounding.",
+      "Original diagrams, readable code, and progressive enhancement."
+    ],
+    "rules": [
+      {
+        "name": "The Structural Color Rule",
+        "body": "Use the shared palette to distinguish text, actions, code, diagrams, and caveats. Preserve those roles when adding content.",
+        "section": "colors"
+      },
+      {
+        "name": "The Reading Measure Rule",
+        "body": "Keep prose bounded and let long code and tables scroll inside their own containers. A wide example must not widen the page.",
+        "section": "layout"
+      }
+    ],
+    "dos": [
+      "**Do** reuse the palette roles and the platform sans/monospace pairing.",
+      "**Do** preserve the reading measure, prose alignment, and responsive contents.",
+      "**Do** keep section navigation, focus indicators, and content usable without JavaScript.",
+      "**Do** use inline SVG for directional icons and preserve meaningful diagram descriptions.",
+      "**Do** update this record and its sidecar after visual changes, then inspect desktop and mobile pages using the checks in `README.md`."
+    ],
+    "donts": [
+      "**Don't** turn open article entries into elevated cards; the current system uses rules and space.",
+      "**Don't** use amber for ordinary links or decorative emphasis; it identifies caveats.",
+      "**Don't** shrink the desktop lifecycle diagram into unreadable mobile labels.",
+      "**Don't** copy design notes into `assets/` or `media/`; both directories are published in full."
+    ]
+  }
+}

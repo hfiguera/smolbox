@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= SmolBox.Blog.HTML.escape(@title) %></title>
+  <meta name="description" content="<%= SmolBox.Blog.HTML.escape(@description) %>">
+  <meta name="theme-color" content="#17304e">
+  <%= if @noindex do %><meta name="robots" content="noindex"><% end %>
+  <link rel="canonical" href="<%= @canonical %>">
+  <link rel="alternate" type="application/rss+xml" title="SmolBox engineering notes" href="<%= @site.url %>feed.xml">
+  <link rel="icon" type="image/svg+xml" href="<%= @root %>assets/favicon.svg">
+  <link rel="stylesheet" href="<%= @root %>assets/site.css">
+  <%= if @article do %><link rel="stylesheet" href="<%= @root %>assets/syntax.css"><% end %>
+  <meta property="og:type" content="<%= if @article, do: "article", else: "website" %>">
+  <meta property="og:site_name" content="SmolBox">
+  <meta property="og:title" content="<%= SmolBox.Blog.HTML.escape(@title) %>">
+  <meta property="og:description" content="<%= SmolBox.Blog.HTML.escape(@description) %>">
+  <meta property="og:url" content="<%= @canonical %>">
+  <meta property="og:image" content="<%= @image %>">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="<%= SmolBox.Blog.HTML.escape(if @article, do: @article["image_alt"], else: "SmolBox's Elixir host manages a SmolVM worker and a disposable Python VM.") %>">
+  <meta name="twitter:card" content="summary_large_image">
+  <%= if @article do %>
+  <meta property="article:published_time" content="<%= @article["published_on"] %>">
+  <meta property="article:modified_time" content="<%= @article["updated_on"] %>">
+  <script type="application/ld+json"><%= Jason.encode!(%{"@context" => "https://schema.org", "@type" => "TechArticle", "headline" => @article["title"], "description" => @description, "datePublished" => @article["published_on"], "dateModified" => @article["updated_on"], "author" => %{"@type" => "Person", "name" => "Humberto Figuera", "url" => "https://github.com/hfiguera", "sameAs" => ["https://x.com/hfiguera", "https://github.com/hfiguera"]}, "image" => @image, "mainEntityOfPage" => @canonical}, escape: :html_safe) %></script>
+  <% end %>
+</head>
+<body id="top">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="<%= @root %>" aria-label="SmolBox blog home">
+        <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><path d="M4 9 16 3l12 6v14l-12 6-12-6Z M4 9l12 6 12-6 M16 15v14"/></svg>
+        <span>SmolBox</span>
+      </a>
+      <nav aria-label="Project navigation">
+        <a href="<%= @root %>"<%= if @canonical == @site.url, do: " aria-current=\"page\"" %>>Blog</a>
+        <a href="https://hexdocs.pm/smolbox/">Docs</a>
+        <a href="https://hex.pm/packages/smolbox">Hex</a>
+        <a href="https://github.com/hfiguera/smolbox">GitHub</a>
+      </nav>
+    </div>
+  </header>
+  <%= @body %>
+  <footer class="site-footer">
+    <div>
+      <a class="footer-brand" href="<%= @root %>">SmolBox</a>
+      <p>An Elixir library for self-hosted SmolVM workers.</p>
+    </div>
+    <nav aria-label="Footer navigation">
+      <a href="<%= @root %>feed.xml">RSS feed</a>
+      <a href="<%= @root %>privacy/">Analytics privacy</a>
+      <a href="#top">Back to top</a>
+    </nav>
+  </footer>
+  <script defer src="<%= @root %>assets/site.js"></script>
+  <%= if @site.token do %>
+  <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"<%= @site.token %>"}'></script>
+  <% end %>
+</body>
+</html>
