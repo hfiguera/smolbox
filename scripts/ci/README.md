@@ -48,6 +48,21 @@ reviewed commit through a maintainer-controlled branch/ref; live jobs check out
 the recorded commit, and their preflight records it.
 Validating another branch tip does not qualify the release candidate.
 
+## Temporary Decimal advisory exception
+
+The PostgreSQL example's CI job temporarily acknowledges `EEF-CVE-2026-32686`
+only in its Hex audit step. The
+[maintainer advisory](https://github.com/ericmj/decimal/security/advisories/GHSA-rhv4-8758-jx7v)
+identifies Decimal 3.0.0 as fixed, while the
+[EEF feed](https://cna.erlef.org/osv/EEF-CVE-2026-32686.json) currently lists 3.1.1
+as affected without a fixed-version boundary. The locked 3.1.1 includes the fix;
+its default exponent limits and rejection of oversized parsed/cast exponents
+were checked on Linux. The CI step requires the loaded Decimal version to be
+exactly 3.1.1 before auditing with this single advisory ID acknowledged. Other
+advisories and retirements still fail the audit; `mix deps.audit` also remains
+enabled. Remove the temporary exception once the feed is corrected. Any Decimal
+version change requires reviewing and removing or revising the exception.
+
 ## Documentation and package checks
 
 Build the site and check its generated local links from the repository root:
