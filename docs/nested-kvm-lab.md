@@ -237,7 +237,13 @@ The lab VMs are stopped. A clean replacement disk and the pinned baseline remain
 and the recovery timer remains enabled. The original physical-host SmolVM worker
 is healthy at its original PID. The host retains the 128 GiB storage reservation.
 
-These checks qualify this lab for the recorded functional/recovery work. No
+These initial checks qualify this lab for the recorded functional/recovery work. No
 hard-limit exhaustion campaign, hypervisor escape/fuzzing assessment, new durable
-recovery matrix or production certification was performed. SmolBox 0.1.0's
+recovery matrix or production certification was performed in that increment. SmolBox 0.1.0's
 production-isolation limitation remains accurate.
+
+The separately authorized [Linux candidate campaign](linux-production-qualification.md)
+extends this baseline with PostgreSQL and a dedicated bounded worker. It records
+later exhaustion, isolation and durable recovery results separately from the
+initial lab evidence above. New writable runs must install the candidate's tmpfs
+mounts before startup; its preflight refuses missing storage boundaries.

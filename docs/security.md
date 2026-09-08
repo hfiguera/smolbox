@@ -9,6 +9,13 @@ prerequisite changes no enforcement or isolation claim. See
 [resource evidence](resource-qualification.md) and
 [compatibility evidence](compatibility.md) before choosing a deployment boundary.
 
+The subsequent Linux candidate described in the repository's
+`docs/linux-production-qualification.md` adds measured external containment and
+failure recovery on one pinned nested deployment. Its finite tests and dedicated
+host controls are not a portable security guarantee supplied by the Hex library.
+In particular, they do not qualify arbitrary images, network access, concurrent
+tenants or macOS host limits.
+
 ## What must be trusted
 
 The Elixir application authorizes users, assigns scopes and selects approved

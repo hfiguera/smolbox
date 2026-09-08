@@ -203,6 +203,13 @@ The separately authorized [nested Linux lab](../../docs/nested-kvm-lab.md) uses
 deadline and recovery timer were tested against a frozen QEMU process. It is
 maintainer infrastructure, not a GitHub runner or a production qualification.
 
+The [Linux candidate campaign](../../docs/linux-production-qualification.md)
+adds explicit resource exhaustion and outage tests inside that disposable guest.
+Its opt-in test helper selects a Unix socket and resets only the stopped owned
+worker before each case. Keep its workload, database-outage and reset scripts
+sequential. All execution and quality checks for that campaign run on `ssh linux`;
+it supplies no new macOS evidence or protected GitHub runner.
+
 Maintainer code lives under `dev/smolbox/ci/`, outside the Hex package and
 production compilation paths. `scripts/ci.exs` loads only those modules using the
 installed Elixir/OTP standard library; no Mix dependency fetch is needed for

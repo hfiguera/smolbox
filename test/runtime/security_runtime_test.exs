@@ -7,9 +7,13 @@ defmodule SmolBox.SecurityRuntimeTest do
   @moduletag timeout: 60_000
 
   setup do
+    SmolBox.LabCandidate.reset()
+
     {:ok, worker} =
-      Worker.new("security-probe", System.fetch_env!("SMOLBOX_RUNTIME_URL"),
-        allow_insecure_loopback: true
+      Worker.new(
+        "security-probe",
+        System.fetch_env!("SMOLBOX_RUNTIME_URL"),
+        SmolBox.LabCandidate.endpoint_options(allow_insecure_loopback: true)
       )
 
     {:ok, client} = Client.new(worker)
@@ -193,6 +197,7 @@ defmodule SmolBox.SecurityRuntimeTest do
       Req.get!(
         context.client.worker.base_url <>
           "/api/v1/machines/#{context.name}/files/workspace/large",
+        unix_socket: context.client.worker.unix_socket,
         raw: true,
         retry: false,
         redirect: false,

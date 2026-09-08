@@ -28,6 +28,7 @@ defmodule SmolBox.DurableHost.MixProject do
       "test/support",
       Path.expand("../../test/support/store", __DIR__),
       Path.expand("../../test/support/fault", __DIR__),
+      Path.expand("../../test/support/lab", __DIR__),
       Path.expand("../support/lib", __DIR__)
     ]
 

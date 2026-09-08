@@ -13,6 +13,16 @@ functional/recovery checks do not constitute a production certification campaign
 Unsupported hard controls remain rejected. The maintainer operating guide is
 `docs/nested-kvm-lab.md` in the source repository.
 
+A subsequent, separately authorized Linux campaign now exercises an externally
+bounded worker inside that lab. Its candidate separates VM storage from control
+metadata, restricts the worker to a private Unix socket and network namespace,
+and checks pinned inputs and kernel controls before startup. The source guide
+`docs/linux-production-qualification.md` records the tested deployment, results
+and limits. Those deployment controls do not enable unsupported library options
+or retrospectively qualify every installation of SmolBox 0.1.0.
+The [Linux candidate evidence](evidence/linux-production-qualification.json)
+records the measured controls, successful checks, failures and remaining limits.
+
 ## Disk template mismatch in SmolVM 1.14.1
 
 Pinned source is `e8d09ef616d363004d55b80a6cdb31a4e7e1842d`. The released Linux and

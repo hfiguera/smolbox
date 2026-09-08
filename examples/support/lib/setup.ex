@@ -172,9 +172,15 @@ defmodule SmolBox.Example.Setup do
     }
 
   defp endpoint_options do
-    case System.get_env("SMOLBOX_PROXY_TOKEN") do
-      nil -> [allow_insecure_loopback: true]
-      token -> [token: token]
+    options =
+      case System.get_env("SMOLBOX_PROXY_TOKEN") do
+        nil -> [allow_insecure_loopback: true]
+        token -> [token: token]
+      end
+
+    case System.get_env("SMOLBOX_RUNTIME_SOCKET") do
+      nil -> options
+      socket -> Keyword.put(options, :unix_socket, socket)
     end
   end
 

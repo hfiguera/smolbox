@@ -71,13 +71,22 @@ recovered_at=$(date +%s)
 
 ctl start test
 wait_for_ssh
-guest 'test ! -e /home/lab/disposable-marker && curl --fail --silent --max-time 5 http://127.0.0.1:19470/api/v1/machines' \
-  > "$lab/evidence/replacement-inventory.json"
+guest 'test ! -e /home/lab/disposable-marker'
+if guest 'test -f /etc/systemd/system/smolbox-qualification.service'; then
+  guest 'sudo bash /opt/smolbox/source/scripts/lab/install-candidate.sh && sudo bash /opt/smolbox/source/scripts/lab/candidate-control.sh start'
+  guest 'curl --fail --silent --max-time 5 --unix-socket /srv/sbq/run/api.sock http://localhost/api/v1/machines' \
+    > "$lab/evidence/replacement-inventory.json"
+  endpoint=unix:///srv/sbq/run/api.sock
+else
+  guest 'curl --fail --silent --max-time 5 http://127.0.0.1:19470/api/v1/machines' \
+    > "$lab/evidence/replacement-inventory.json"
+  endpoint=http://127.0.0.1:19470
+fi
 jq -e '.machines == []' "$lab/evidence/replacement-inventory.json" >/dev/null
 replacement_pid=$(systemctl show smolbox-lab@test.service -p MainPID --value)
 [[ $replacement_pid != "$pid" ]] || exit 1
 
-jq -n --arg invocation "$invocation" --arg group "$group" \
+jq -n --arg invocation "$invocation" --arg group "$group" --arg endpoint "$endpoint" \
   --argjson frozen_pid "$pid" --argjson replacement_pid "$replacement_pid" \
   --argjson frozen_at "$frozen_at" --argjson terminated_at "$terminated_at" \
   --argjson recovered_at "$recovered_at" \
@@ -88,7 +97,8 @@ jq -n --arg invocation "$invocation" --arg group "$group" \
     original_process_absent: true, original_cgroup_absent: true,
     management_port_closed_before_replacement: true, automatic_disk_rebuild: true,
     baseline_digest_verified: true, guest_marker_absent_after_rebuild: true,
-    replacement_inventory_empty: true, exclusive_vm_lock_verified: true,
+    replacement_inventory_empty: true, replacement_worker_endpoint: $endpoint,
+    exclusive_vm_lock_verified: true,
     periodic_capture_after_freeze: true,
     concurrent_start_rejected: true, operator_lingering: true}' \
   > "$lab/evidence/recovery.json"
