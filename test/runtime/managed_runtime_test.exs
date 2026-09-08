@@ -23,6 +23,7 @@ defmodule SmolBox.ManagedRuntimeTest do
   @moduletag timeout: 120_000
 
   setup do
+    SmolBox.LabCandidate.reset()
     url = System.fetch_env!("SMOLBOX_RUNTIME_URL")
     python = System.fetch_env!("SMOLBOX_PYTHON_ARTIFACT")
     javascript = System.fetch_env!("SMOLBOX_JS_ARTIFACT")
@@ -42,10 +43,14 @@ defmodule SmolBox.ManagedRuntimeTest do
       end
 
     {:ok, worker} =
-      Worker.new("managed", url,
-        allow_insecure_loopback: true,
-        operation_timeout_ms: 20_000,
-        receive_timeout_ms: 15_000
+      Worker.new(
+        "managed",
+        url,
+        SmolBox.LabCandidate.endpoint_options(
+          allow_insecure_loopback: true,
+          operation_timeout_ms: 20_000,
+          receive_timeout_ms: 15_000
+        )
       )
 
     {:ok, client} = Client.new(worker)
@@ -119,8 +124,13 @@ defmodule SmolBox.ManagedRuntimeTest do
 
       {:ok, handle} = SmolBox.submit(context.runtime, spec)
       own_cleanup(context, handle)
-      assert {:ok, result} = SmolBox.await(context.runtime, handle, 30_000)
-      assert result.state == :completed
+
+      assert {:ok, result} =
+               SmolBox.await(context.runtime, handle, SmolBox.LabCandidate.observation_ms(30_000))
+
+      assert result.state == :completed,
+             inspect(Map.take(result, [:state, :last_error, :evidence, :cleanup]))
+
       assert result.result.exit_code == 7
       assert result.result.stdout == id <> "\n"
       assert result.collection == :complete
@@ -212,7 +222,7 @@ defmodule SmolBox.ManagedRuntimeTest do
         id: :delayed_exec_gate
       )
 
-    {counts, port} = SmolBox.RuntimeProxy.start(context.client.worker.base_url, gate)
+    {counts, port} = SmolBox.RuntimeProxy.start(context.client.worker, gate)
 
     {:ok, endpoint} =
       Worker.new("managed", "http://127.0.0.1:#{port}", allow_insecure_loopback: true)
@@ -237,7 +247,9 @@ defmodule SmolBox.ManagedRuntimeTest do
 
     assert {:ok, handle} = SmolBox.submit(runtime, spec)
     own_cleanup(context, handle)
-    assert_receive {:boundary, :exec, :before, blocked}, 10_000
+    # Nested KVM can take longer to reach the fault-injection point. This only
+    # bounds fixture setup; command and cancellation deadlines remain unchanged.
+    assert_receive {:boundary, :exec, :before, blocked}, 30_000
     assert {:ok, ^handle} = SmolBox.cancel(runtime, spec.scope, spec.id)
     stopped = wait_for(context, handle, &(&1.evidence == :termination_confirmed))
 

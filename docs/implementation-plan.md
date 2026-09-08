@@ -1723,3 +1723,79 @@ milestones passed. The three workstreams excluded in section 1.4 are not blocker
 | Export, branching and warm reuse | Outside first release; no implementation or compatibility claim |
 
 The first implementation milestone is a narrow but complete command execution path with honest failure semantics. The package is complete only when its documented operational and CI requirements are demonstrated, not when all proposed modules exist.
+
+## 15. Follow-up: disposable nested Linux lab
+
+The operator authorized this separate infrastructure task after the 0.1.0 release.
+It does not reopen or rewrite first-release acceptance, certify a production
+execution profile, or enable protected GitHub workers. All new virtualization,
+resource, isolation and recovery checks run only on `ssh linux`, including its
+disposable guest. No new macOS tests are part of this work.
+
+- [x] Install QEMU/cloud-image tools, a dedicated KVM account and private storage.
+- [x] Verify a 4-vCPU, 8-GiB, 100-GiB guest and independent host controls: 400% CPU
+  bandwidth, 12 GiB QEMU memory, zero swap, 256 host tasks and a physically reserved
+  128 GiB volume for lab data.
+- [x] Provision and hash a disposable Ubuntu baseline with SmolVM 1.14.1, approved
+  Python/Node artifacts, Elixir 1.20.4, OTP 29.0.6 and locked test dependencies.
+  Separate provisioning downloads from restricted test networking and private SSH.
+- [x] Verify actual nested KVM descriptors and real SmolBox execution, staging,
+  collection and deletion; run all 14 existing runtime cases on the rebuilt guest.
+- [x] Prove host-side timeout, periodic bounded evidence capture, frozen-QEMU
+  teardown, automatic disk rebuild and a clean replacement. The operator confirmed
+  physical recovery access. Preserve the existing physical-host worker.
+
+The original delayed-exec fixture exceeded its ten-second setup wait under nested
+virtualization. Its synchronization wait is now thirty seconds; execution,
+cancellation and no-replay checks retain their limits. The original failure is
+recorded alongside the successful 14-case run. All 194 deterministic tests and
+the relevant quality gates also passed on Linux.
+
+See [the operating guide](nested-kvm-lab.md) and
+[the evidence](evidence/nested-kvm-lab.json) for exact identities, corrected setup
+issues, test results, retained infrastructure and limitations. This establishes
+a lab for further investigation, not successful adversarial production validation.
+
+## 16. Follow-up: bounded Linux execution candidate
+
+The operator subsequently authorized a contained resource and isolation campaign,
+using only `ssh linux` and its disposable guest. This work does not change the
+published 0.1.0 contract or enable hard-control options that the library rejects.
+It qualifies explicit external deployment controls and records their limits.
+
+- [x] Install a dedicated worker account with a private Unix API, private network
+  namespace, pinned runtime/catalog and enforced startup checks. Verify actual
+  kernel controls and separate bounded cache, metadata and socket filesystems.
+- [x] Bound the worker/VMM cgroup independently of the controller: one CPU of
+  bandwidth, 1.5 GiB charged memory, zero swap, 96 host tasks and a 300-second
+  lifetime. Keep the independent outer QEMU and physical storage bounds.
+- [x] Exercise Python/Node execution, finite memory/CPU/process/output abuse,
+  disk exhaustion, stalled consumers, file boundaries and named credential or
+  control endpoints. Separate host task exhaustion from guest process counts.
+- [x] Verify real PostgreSQL recovery through worker OOM, database outage and an
+  independent worker deadline, preserving execution identity, uncertain outcomes
+  and capacity until owned absence is established. Never replay an accepted exec.
+- [x] Re-run all 194 deterministic, 14 runtime, 16 durable-store and 25 recovery
+  cases on Linux. Run the analyzers, coverage, bad/clean analyzer canaries, example
+  Dialyzer, documentation and package-consumer checks; retain failed attempts.
+- [x] Finish the final admission/exhaustion repetition and frozen-QEMU recovery,
+  export the reviewed evidence and record the final source/baseline identities.
+  All eleven unsafe configurations were rejected; a clean replacement passed
+  actual KVM execution and deletion with all 38 source hashes matching.
+- [x] Validate the final documentation and 86-file package with a fresh production
+  consumer on Linux. Stop the lab, verify the clean disposable overlay and retain
+  the baseline. Record the archive digest and preserved physical-host worker in
+  [the final handoff](linux-production-handoff.json); nothing was published.
+
+Runtime testing exposed short cold-start observation budgets and a transient
+owned-process presence after systemd returned from stop. The candidate runtime
+fixtures now allow the declared preparation budget; per-command timeouts and
+cancellation/no-replay assertions remain intact. The control script waits for
+verified process absence before erasing worker state or accepting another run.
+A stop status or zero `MainPID` alone is insufficient.
+
+See [the candidate guide](linux-production-qualification.md) for the exact
+contract, reproduction steps and unresolved limits. CPU-time, per-process RSS,
+guest PID limits, canonical workspace containment, arbitrary images, external
+networking, multi-tenant operation and macOS host enforcement are not qualified.
+Finite tests do not establish absence of hypervisor/kernel vulnerabilities.

@@ -1,0 +1,675 @@
+{
+  "schema_version": 1,
+  "recorded_date_utc": "2026-09-08",
+  "conclusion": "Measured containment and failure recovery for the specified nested Linux candidate; no blanket production certification or new library hard-control capability.",
+  "execution_locations": [
+    "ssh linux",
+    "its disposable smolbox-nested guest"
+  ],
+  "macos_execution": false,
+  "source": {
+    "base_git_commit": "d848b04cbeb813aa547f382ddf67599e0d23d80c",
+    "branch": "nested-kvm-lab",
+    "uncommitted": true,
+    "release_candidate_commit": null,
+    "library_code_unchanged_from_base": true,
+    "qualification_and_test_source_sha256": {
+      "scripts/lab/candidate-capture.sh": "db566a2dfa66b3bac152c114ac69dbf1445f546bc9fff5b5767b9be7f693fb95",
+      "scripts/lab/candidate-checks.sh": "43257247dba265ca5b1293f48571def416f1654c5f653a08fe90f7a1de337535",
+      "scripts/lab/candidate-control.sh": "748a750a3f554dd935c1582651024bb771f7e0a7304adece575ec28dd7c993d7",
+      "scripts/lab/candidate-policy.sh": "560aa1263b8183373b42e87dfd5e0261c092255083d4cb83d22cf3bc871f3d2d",
+      "scripts/lab/durable-candidate.exs": "abff0f8428b7ab8581d5484541e8dab459699db61e398edaf27809e0080b42d6",
+      "scripts/lab/guest-ssh.sh": "7a3a638808654f03419c9852ce9b99f14312bb208ac36548477e290af534268c",
+      "scripts/lab/host-boundaries.sh": "13b53a004565e65d5f8caf08f8c838c15089e0fb4c5b8b79e8fc193ce8adb644",
+      "scripts/lab/install-candidate.sh": "793cbd2d5bed6727dc863c68aa1ea6c18471f264367a331a6c7b55b7a76a79b4",
+      "scripts/lab/install-host.sh": "1e0cfdfdff67f185baf65a61b51f0b7aa287deab40592c8436ea5d5e45e2d050",
+      "scripts/lab/install-operator.sh": "f5c9679aeb246705d74439b34201874806480ec4792815bcf0226dbbbd86250b",
+      "scripts/lab/kvm-fds.sh": "78f18b921c509eed73166344762dc77708c9fee3b00ce99a32d3bcf0ead33bc3",
+      "scripts/lab/labctl.sh": "18dbf1f1d548ce643e9ee9684b387b87f1ab1679091156a7a24f0da481f33395",
+      "scripts/lab/launch-vm.sh": "5bb6b7d368c51803900eca0e4553a0b4cbe58572e74044b2ab768f54b78a72bc",
+      "scripts/lab/nested-probe.exs": "ecb49174ae1aaea9c375ac00a0f04ca7bdf07759104d5fae6d1294c0cb4b27a6",
+      "scripts/lab/network-probe.exs": "6fe0e471b41776af13c8e36bbc1762d39440a742c8cd0cea8364e4679912bb76",
+      "scripts/lab/prepare-host.sh": "c8752f39f869cebb7207dd6d6bf37ed3554b2be580cda8b2cd2bb3c05e6fb9f9",
+      "scripts/lab/provision-guest.sh": "7893b62757feb5bf761205f62b2cf163e343ad955c991408a9871cb61ca3476d",
+      "scripts/lab/qualification-probe.exs": "a11446039d5c63d4547c82c310eb79884efbb2b6d85acabcb63278cfde459e9e",
+      "scripts/lab/recovery-sweep.sh": "3f5429e921fbda2f577c2c55a1dacb642a50bb0c42f2f7a4b7403c89eb317893",
+      "scripts/lab/run-check.exs": "4efcff83c79fc3597e387331ef83d49cd636f0870404c451a34519741960f90b",
+      "scripts/lab/smolbox-lab@.service": "21439bfb5855f8ba2e3057238d761530757954c66f7003982a0d6b9d042eaddf",
+      "scripts/lab/smolbox-qualification.service": "971004b9ef499cf4207f83085931aba8f5cfcdc0785acbb46a642d0039fa941c",
+      "scripts/lab/verify-candidate-admission.sh": "2870d37f3ae2b1e98182b7fae3691ddaa049076e6b5d4481fa697462f1af6e45",
+      "scripts/lab/verify-guest.sh": "aff44be43563083bd7673f255567e6637c3a85f71f2ef171ab151861db679f18",
+      "scripts/lab/verify-recovery.sh": "89b1a91b1cd93b9754654e18ee3fdc0f2961afe750620030df084e6e3460c5e8",
+      "scripts/lab/vm-boundary.sh": "e75bcaca2855db639d992c25d822d416ff58a980e9e9b50412410a3bd9ef153e",
+      "scripts/lab/watch-candidate.sh": "55d91000a310c335c4d922881d01b3cce4eb3f3a1125cb32ac3de98b6f0f6785",
+      "scripts/lab/worker-preflight.sh": "5f6febd75c8c3748546c2bf3b220fe9ea735b831ef551b95ee062a66ccf3593c",
+      "test/support/lab/candidate.ex": "f0cbbc2db9d43f3655a713f750cafc9839ece855fb1038cb7a5dbe6a6b9bf5d8",
+      "test/runtime/client_runtime_test.exs": "0732c6d262061a545b66351ad9d2ff3ae7d3507fcbc41816c50bd005d6e87ec3",
+      "test/runtime/managed_runtime_test.exs": "9d15dd593040b886b6730e88a58d58bf44e4e3fce8a9d002dd3299f2da94f624",
+      "test/runtime/security_runtime_test.exs": "81492e92d75f64480fb82da461cdb6916337f7f8a61073190d91eca31c283b3a",
+      "test/support/runtime_proxy.ex": "256b3f8646d82c6b76c4762306a9e0ae89cccb5b2ae18102dd9d220a47f54611",
+      "examples/support/lib/setup.ex": "356d64b39f6d5976af1624377c83e0522896b9842c1e1e180badb6c1b23fc6f4",
+      "examples/durable_host/mix.exs": "75a0c9baef87782116a54e1a4c6b8224ee5d7197cfee54273b04fda2ace70a33",
+      "examples/durable_host/test/recovery_runtime_test.exs": "9370703aef1b99b3e5763a42863ba0eee8c928cc0aff0ae5d1455c010a890ca7",
+      "mix.exs": "be3ac8c51ede5fb38ac27599dd0f7c17044c584837558bd0ad154d61a0e20ee9",
+      "mix.lock": "d01a9786288e90c68277ed9c41ed3f597f84cc0ee4c1e1bc872c0a3f77aa4108"
+    }
+  },
+  "target": {
+    "architecture": "x86_64",
+    "physical_kernel": "7.1.5-76070105-generic",
+    "guest_kernel": "6.8.0-139-generic",
+    "qemu": "8.2.2 (1:8.2.2+ds-0ubuntu1.18)",
+    "systemd": "255.4-1ubuntu8.17",
+    "postgresql": "16.15-0ubuntu0.24.04.1",
+    "elixir": "1.20.4",
+    "otp": "29.0.6",
+    "test_baseline_sha256": "06959bad6daf230bd1a85a9ce5127bf556c2ccbcc39da5bde4ecb73f8495e27f",
+    "retained_baseline_sha256": "4ff59594af008ff0efb517e9c70cb90d5cf7c240dc0f71d53a162c7b4a0eea2d"
+  },
+  "pinned_inputs": {
+    "smolvm_version": "1.14.1",
+    "upstream_revision": "e8d09ef616d363004d55b80a6cdb31a4e7e1842d",
+    "upstream_checkout_modified": false,
+    "distribution_sha256": "e91786c12808ce87655aa190eb5f6692672cd659a89367b5ec18dace5756af2f",
+    "wrapper_sha256": "8caeb3b6e7d834493a578b0fe8bd1e7aa02e68fba6d61bcf70fdbec41a27ce68",
+    "binary_sha256": "bb2432804d4bf5d6cbb688d3af160a6a01c99194830f0099d64f291d4ad62373",
+    "libkrun_sha256": "3f021ac366152b33c7c329f893804fa9adda5d4352fac4b88214ae28fb89ebd0",
+    "libkrunfw_sha256": "767495f52bd786e6e0b0fa1b04adf40dea44b80019f6953ca6eb6394cc90d264",
+    "guest_agent_sha256": "bbeabaa935ff859438e418515dff0ca514e757a99ffc834d6cbb06447de4b8ca",
+    "python_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+    "node_sha256": "768b8d2158a75abd90ccc73a65a83717aebfe37e62ed91d0db0bb731584df776"
+  },
+  "worker_contract": {
+    "max_concurrent_executions": 1,
+    "trusted_artifacts_only": true,
+    "guest_root_in_scope": true,
+    "network": "private namespace, loopback only; guest TCP/vsock routes probed",
+    "control_endpoint": "unix:///srv/sbq/run/api.sock",
+    "cpu_max": "100000 100000",
+    "memory_max_bytes": 1610612736,
+    "memory_swap_max_bytes": 0,
+    "pids_max": 96,
+    "cache_tmpfs_bytes": 805306368,
+    "control_tmpfs_bytes": 67108864,
+    "api_directory_tmpfs_bytes": 4194304,
+    "private_tmpfs_bytes_each": 33554432,
+    "worker_runtime_max_seconds": 300,
+    "supervisor_stop_grace_seconds": 5,
+    "file_transfer_max_bytes": 1048576,
+    "guest_memory_mb": 256,
+    "guest_cpus_tested": [
+      1,
+      2
+    ],
+    "logical_disk_gb": {
+      "storage": 20,
+      "overlay": 10
+    },
+    "runtime_fixture_request_timeout_ms": 60000,
+    "runtime_fixture_receive_timeout_ms": 55000
+  },
+  "physical_envelope": {
+    "configured_and_inspected": true,
+    "physical_host_exhaustion_tested": false,
+    "qemu_memory_max_bytes": 12884901888,
+    "qemu_swap_max_bytes": 0,
+    "qemu_cpu_percent": 400,
+    "qemu_tasks_max": 256,
+    "outer_guest_memory_gib": 8,
+    "outer_guest_vcpus": 4,
+    "outer_virtual_disk_bytes": 107374182400,
+    "backing_file_size_bytes": 137438953472,
+    "backing_file_allocated_bytes": 137439088640,
+    "test_runtime_max_seconds": 2700,
+    "test_stop_grace_seconds": 15
+  },
+  "validation": {
+    "deterministic_passed": 194,
+    "deterministic_breakdown": {
+      "doctests": 4,
+      "properties": 6,
+      "ordinary": 184
+    },
+    "coverage_percent": 95.4,
+    "runtime_passed": 14,
+    "durable_store_passed": 16,
+    "durable_recovery_passed": 25,
+    "analyzer_bad_and_clean_canaries": [
+      "compiler",
+      "xref",
+      "credo",
+      "ex_slop",
+      "credence",
+      "ex_dna",
+      "dialyzer",
+      "coverage"
+    ],
+    "checks": {
+      "quality-profile-final": {
+        "seconds": 86.297,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 2040,
+        "output_sha256": "73f44cdb4a28883b50fb0efc857052abc1f60d1dc304725c2398624812157092"
+      },
+      "coverage-profile-final": {
+        "seconds": 80.175,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 3695,
+        "output_sha256": "1222efbb117a152d40513ade2177c0b7525ccb658aab3a58460801e4a2d6b2fa"
+      },
+      "runtime-profile-60": {
+        "seconds": 171.023,
+        "status": "passed",
+        "failure": null,
+        "tests": {
+          "seed": 998438,
+          "passed": 14
+        },
+        "exit_code": 0,
+        "captured_bytes": 185,
+        "output_sha256": "9aeef6615f4490e77863074dcceb1d06377865f3702deae740e35d0c50054a1b"
+      },
+      "store-profile-final": {
+        "seconds": 3.057,
+        "status": "passed",
+        "failure": null,
+        "tests": {
+          "seed": 427818,
+          "passed": 16
+        },
+        "exit_code": 0,
+        "captured_bytes": 160,
+        "output_sha256": "c6a318209139d8ea5a31272f400eafa639406ec751c1eaf451f43166bee069a7"
+      },
+      "durable-profile-final": {
+        "seconds": 571.361,
+        "status": "passed",
+        "failure": null,
+        "tests": {
+          "seed": 991540,
+          "passed": 25
+        },
+        "exit_code": 0,
+        "captured_bytes": 346,
+        "output_sha256": "0aef0b78f400d462744d574c695a1bd3a7edca442ef94e0efda3c47260132cb6"
+      },
+      "host-profile-final": {
+        "seconds": 30.301,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 458,
+        "output_sha256": "0d9729e41b070f2b9f2c422732d2f177e2a0b844c73ef842d7029293d16f9fd6"
+      },
+      "admission-profile-final": {
+        "seconds": 6.82,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 2451,
+        "output_sha256": "27fed01cfbd1a2e3ca2329112e8b850da049b618c2144d0dd7a01595a5834644"
+      },
+      "descendants-profile-final": {
+        "seconds": 310.843,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 48,
+        "output_sha256": "689174904bbd81b3d2875b0840389b058dd2229d7001522caf7cc9e593edd9c3"
+      },
+      "durable-profile-worker_oom": {
+        "seconds": 29.395,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 174,
+        "output_sha256": "5206f2a2035ed7dd709bb15c4b7755e09c56f90beb4c5fa2c8f7e877e2127629"
+      },
+      "durable-profile-database_outage": {
+        "seconds": 25.679,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 6480,
+        "output_sha256": "ebc20011fd490197687b13a38720b158714ace82a100fa7ad70fa9cc806584ad"
+      },
+      "durable-profile-worker_deadline": {
+        "seconds": 304.279,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 179,
+        "output_sha256": "b436fcdb8729bec474db254b2e745e49d2663e0da26ece43f33028d82cbc0701"
+      },
+      "analyzer-canaries": {
+        "seconds": 16.788,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 621,
+        "output_sha256": "e0b964a623497ff2bb478f184e6c238afa88d2b496eb969c1ad810acf8e4339f"
+      },
+      "durable-dialyzer-final": {
+        "seconds": 230.154,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 2270,
+        "output_sha256": "295d042ba2a40fa8b0d01eeb7d5e89d5ae2464d98bc0a6dd7a35cd68de6b122e"
+      },
+      "durable-xref-final": {
+        "seconds": 0.63,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 16,
+        "output_sha256": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548"
+      }
+    }
+  },
+  "workload_probes": {
+    "smoke": {
+      "status": "passed",
+      "cleanup": "verified_absent",
+      "elapsed_ms": 7861,
+      "observations": {
+        "system": "Linux"
+      },
+      "real_kvm_vm_found": true,
+      "vmm_threads_checked": 18,
+      "no_new_privileges": true,
+      "seccomp_mode": 2,
+      "effective_capabilities_zero": true,
+      "kernel_memory_peak_bytes": 361578496
+    },
+    "node": {
+      "status": "passed",
+      "cleanup": "verified_absent",
+      "elapsed_ms": 12646,
+      "observations": {
+        "node": "executed"
+      },
+      "real_kvm_vm_found": true,
+      "vmm_threads_checked": 18,
+      "no_new_privileges": true,
+      "seccomp_mode": 2,
+      "effective_capabilities_zero": true,
+      "kernel_memory_peak_bytes": 726548480
+    },
+    "memory": {
+      "status": "passed",
+      "cleanup": "verified_absent",
+      "elapsed_ms": 9694,
+      "observations": {
+        "dmesg_exit": 0,
+        "oom_log": [
+          "[    9.131163] Out of memory: Killed process 446 (python) total-vm:207452kB, anon-rss:198272kB, file-rss:536kB, shmem-rss:0kB, UID:0 pgtables:444kB oom_score_adj:0"
+        ],
+        "returncode": -9
+      },
+      "real_kvm_vm_found": true,
+      "vmm_threads_checked": 18,
+      "no_new_privileges": true,
+      "seccomp_mode": 2,
+      "effective_capabilities_zero": true,
+      "kernel_memory_peak_bytes": 511135744
+    },
+    "cpu": {
+      "status": "passed",
+      "cleanup": "verified_absent",
+      "elapsed_ms": 17314,
+      "observations": {
+        "exit_codes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "seconds": 8.100062209999999
+      },
+      "real_kvm_vm_found": true,
+      "vmm_threads_checked": 18,
+      "no_new_privileges": true,
+      "seccomp_mode": 2,
+      "effective_capabilities_zero": true,
+      "kernel_memory_peak_bytes": 366612480
+    },
+    "processes": {
+      "status": "passed",
+      "cleanup": "verified_absent",
+      "elapsed_ms": 13760,
+      "observations": {
+        "children": 192,
+        "errno": null
+      },
+      "real_kvm_vm_found": true,
+      "vmm_threads_checked": 18,
+      "no_new_privileges": true,
+      "seccomp_mode": 2,
+      "effective_capabilities_zero": true,
+      "kernel_memory_peak_bytes": 403836928
+    },
+    "disk": {
+      "status": "passed",
+      "cleanup": "verified_absent",
+      "elapsed_ms": 11467,
+      "observations": {
+        "errno": 5,
+        "written": 591396864
+      },
+      "real_kvm_vm_found": true,
+      "vmm_threads_checked": 18,
+      "no_new_privileges": true,
+      "seccomp_mode": 2,
+      "effective_capabilities_zero": true,
+      "kernel_memory_peak_bytes": 1131532288
+    },
+    "output": {
+      "status": "passed",
+      "cleanup": "verified_absent",
+      "elapsed_ms": 8578,
+      "observations": {
+        "category": "output_limit",
+        "producer_upper_bound": 134217728,
+        "captured_limit": 65536,
+        "completed_transfer": false
+      },
+      "real_kvm_vm_found": true,
+      "vmm_threads_checked": 18,
+      "no_new_privileges": true,
+      "seccomp_mode": 2,
+      "effective_capabilities_zero": true,
+      "kernel_memory_peak_bytes": 357244928
+    },
+    "slow_reader": {
+      "status": "passed",
+      "cleanup": "verified_absent",
+      "elapsed_ms": 11337,
+      "observations": {
+        "category": "transport",
+        "producer_upper_bound": 134217728,
+        "captured_limit": 65536,
+        "completed_transfer": false
+      },
+      "real_kvm_vm_found": true,
+      "vmm_threads_checked": 18,
+      "no_new_privileges": true,
+      "seccomp_mode": 2,
+      "effective_capabilities_zero": true,
+      "kernel_memory_peak_bytes": 370356224
+    },
+    "isolation": {
+      "status": "passed",
+      "cleanup": "verified_absent",
+      "elapsed_ms": 9027,
+      "observations": {
+        "control_env_present": false,
+        "endpoints": {
+          "1.1.1.1:443": "101",
+          "10.0.2.2:22": "101",
+          "10.0.2.2:22460": "101",
+          "100.96.0.1:10081": "101",
+          "127.0.0.1:19470": "111",
+          "169.254.169.254:80": "101"
+        },
+        "host_paths": {
+          "/dev/kvm": false,
+          "/etc/smolbox-qualification-canary": false,
+          "/home/lab/.ssh/authorized_keys": false,
+          "/srv/sbq/control/smolvm/server/smolvm.db": false,
+          "/srv/sbq/run/api.sock": false,
+          "/var/lib/smolbox-lab/home/id_ed25519": false
+        },
+        "uid": 0,
+        "vsock": {
+          "6000": "104",
+          "6004": "104",
+          "10081": "None"
+        }
+      },
+      "real_kvm_vm_found": true,
+      "vmm_threads_checked": 18,
+      "no_new_privileges": true,
+      "seccomp_mode": 2,
+      "effective_capabilities_zero": true,
+      "kernel_memory_peak_bytes": 358420480
+    },
+    "files": {
+      "status": "passed",
+      "cleanup": "verified_absent",
+      "elapsed_ms": 10298,
+      "observations": {
+        "symlink": "guest-only target readable; no workspace containment claim",
+        "fifo": "observation deadline; VM cleanup required"
+      },
+      "real_kvm_vm_found": true,
+      "vmm_threads_checked": 18,
+      "no_new_privileges": true,
+      "seccomp_mode": 2,
+      "effective_capabilities_zero": true,
+      "kernel_memory_peak_bytes": 368791552
+    }
+  },
+  "host_exhaustion": {
+    "cpu": {
+      "throttled_periods": 81,
+      "throttled_usec": 23934790,
+      "usage_usec": 8345589
+    },
+    "tasks": {
+      "pids_events_max": 4
+    },
+    "memory": {
+      "peak_bytes": 1610612736,
+      "memory_events_max": 23,
+      "oom": 1,
+      "oom_kill": 1,
+      "supervisor_result": "oom-kill"
+    },
+    "complete_owned_process_removal": true,
+    "restored_worker_healthy": true
+  },
+  "admission": {
+    "rejected_cases": [
+      "MemoryMax=2G",
+      "SMOLVM_LANDLOCK=off",
+      "PrivateNetwork=no",
+      "RuntimeMaxSec=0",
+      "KillMode=process",
+      "Restart=always",
+      "CPUQuota=200%",
+      "TasksMax=192",
+      "MemorySwapMax=1G",
+      "altered approved Node artifact",
+      "missing cache tmpfs"
+    ],
+    "api_not_started_for_bad_configuration": true,
+    "restored_configuration_healthy": true
+  },
+  "process_sampling": {
+    "samples": 600,
+    "live_process_observations": 1005,
+    "outside_cgroup_observed": false,
+    "zombies_excluded_from_live_process_count": true,
+    "atomic_lifetime_attestation": false
+  },
+  "durable_faults": {
+    "worker_oom": {
+      "status": "passed",
+      "result": "unknown",
+      "cleanup": "verified_absent",
+      "scenario": "worker_oom",
+      "dispatches": 1,
+      "reservation_retained_during_outage": true,
+      "identity_preserved": true
+    },
+    "database_outage": {
+      "status": "passed",
+      "result": "unknown",
+      "cleanup": "verified_absent",
+      "scenario": "database_outage",
+      "dispatches": 1,
+      "reservation_retained_during_outage": true,
+      "identity_preserved": true
+    },
+    "worker_deadline": {
+      "status": "passed",
+      "result": "unknown",
+      "cleanup": "verified_absent",
+      "scenario": "worker_deadline",
+      "dispatches": 1,
+      "reservation_retained_during_outage": true,
+      "identity_preserved": true
+    }
+  },
+  "known_limits": [
+    "No hypervisor/kernel escape fuzzing or independent security review was performed.",
+    "No generic production qualification or hard-control fields were enabled in SmolBox 0.1.0.",
+    "CPU bandwidth is not CPU time; cgroup charged memory is not per-process RSS; host tasks are not guest PIDs.",
+    "A guest symlink outside /workspace is readable within the guest. Canonical workspace containment is not provided.",
+    "Finite output trials do not establish arbitrary protocol or server-buffering safety. The 128 MiB value is a producer upper bound, not a completed transfer.",
+    "Active Landlock LSM and the pinned kernel are checked; upstream ignores successful restrict_self RulesetStatus. Individual Landlock/seccomp denial rules were not directly proven.",
+    "Only named paths and TCP/vsock routes were probed. Arbitrary images, external networking, persistent guests, multiple controllers and public multi-tenant operation are outside scope.",
+    "Worker timeout depends on the outer kernel. Loss of that kernel falls back to the physical-host 45-minute QEMU deadline and stop grace.",
+    "Physical-host failure needs the operator's confirmed physical recovery access. No physical-host crash test was performed.",
+    "No new macOS execution or qualification was performed."
+  ],
+  "retained_failed_attempts": [
+    {
+      "file": "durable-deadline-300.json",
+      "status": "failed",
+      "seconds": 64.705,
+      "exit_code": 1,
+      "output_sha256": "c1cfb652afed94e0209a1887c01b74049797f50de745a7ff798dae6cceb3425c"
+    },
+    {
+      "file": "durable-final-worker_deadline.json",
+      "status": "failed",
+      "seconds": 62.862,
+      "exit_code": 1,
+      "output_sha256": "454ce6a22bff8872ec87bfa76eeb521c1bd850a956d550f2abf8810f1bdc1647"
+    },
+    {
+      "file": "durable-final.json",
+      "status": "failed",
+      "seconds": 545.11,
+      "exit_code": 2,
+      "output_sha256": "a98eaf92a9fcacafd70cb6ac1df3409ce50a10aacdb3a7a0cc62fde45cd1b52d"
+    },
+    {
+      "file": "durable-oom.json",
+      "status": "failed",
+      "seconds": 22.295,
+      "exit_code": 1,
+      "output_sha256": "138416450d25dd6cee526746b9a1037dbf767f2be959a59a55755655497017b7"
+    },
+    {
+      "file": "memory-first-failure.json",
+      "status": "failed",
+      "error": "\n\n#SmolBox.Result<exit_code: 1, encoding: :bytes, ...>\n"
+    },
+    {
+      "file": "memory-key-failure.json",
+      "status": "failed",
+      "error": "\n\nexit=1 stderr=Traceback (most recent call last):\n       File \"<string>\", line 4, in <module>\n       File \"<string>\", line 3, in oom\n     KeyError: 'oom_kill'\n\n"
+    },
+    {
+      "file": "quality-candidate-final.json",
+      "status": "failed",
+      "seconds": 89.544,
+      "exit_code": 8,
+      "output_sha256": "34b048e15a135a8c19dd6a4bf59dd27a08eecf9fa5b3ae623e6583e6ec4a911e"
+    },
+    {
+      "file": "quality-first.json",
+      "status": "failed",
+      "seconds": 0.518,
+      "exit_code": 1,
+      "output_sha256": "db1737b1510ae7e7ecaaddb75e26d058a77ff6d2800e7efe031606ab8113f537"
+    },
+    {
+      "file": "runtime-revised.json",
+      "status": "failed",
+      "seconds": 207.186,
+      "exit_code": 2,
+      "output_sha256": "37d87da68453bd8ea54e089537010870a2852507dc29b4027f18b4e8c8cbf680"
+    },
+    {
+      "file": "runtime-unix.json",
+      "status": "failed",
+      "seconds": 165.619,
+      "exit_code": 2,
+      "output_sha256": "2e3891f6772bdebb3fb05c59f4e588ae129476f79a16f1b4a8ee2b8f234a4c2b"
+    },
+    {
+      "file": "runtime.json",
+      "status": "failed",
+      "seconds": 108.389,
+      "exit_code": 2,
+      "output_sha256": "9612542258f46a052a12d5f4cd81400079e1144be0bbd25b818ba8e3d8e3f459"
+    },
+    {
+      "file": "runtime-final.json",
+      "status": "failed",
+      "seconds": 187.048,
+      "exit_code": 2,
+      "output_sha256": "98bf9249730752e70c54d7fef9b95aa8326b26430ebe451042e9e4d7ee2d8f19"
+    }
+  ],
+  "corrections": [
+    "Forward the Unix socket through all runtime fixture and example paths.",
+    "Use the full preparation observation budget for the one-CPU nested candidate; retain command/cancellation/no-replay limits.",
+    "Observe complete process absence after systemd stop before erasing state or admitting another run.",
+    "Extend only cold-boot fault-injection synchronization waits to 30 seconds.",
+    "Replace a shortened deadline and a silent readiness fixture with a real 300-second worker-deadline test and explicit readiness output.",
+    "Use a pre-start systemd drop-in; RuntimeMaxSec is not supported by set-property on this installed systemd.",
+    "Keep control metadata, VM/cache storage and API-directory storage separately bounded.",
+    "Check actual supervisor policy and kernel controls before startup; reject weaker settings.",
+    "Correct failed formatting, ShellCheck, complexity and report-wiring checks and rerun them."
+  ],
+  "private_evidence_locations": [
+    "/var/lib/smolbox-lab/evidence/candidate-first",
+    "/var/lib/smolbox-lab/evidence/candidate"
+  ],
+  "outer_recovery": {
+    "status": "passed",
+    "invocation": "293c0036223a42099c748a93427a9c4d",
+    "original_cgroup": "/system.slice/system-smolbox\\x2dlab.slice/smolbox-lab@probe.service",
+    "frozen_pid": 234920,
+    "replacement_pid": 235248,
+    "frozen_at_unix": 1788841422,
+    "terminated_at_unix": 1788841443,
+    "recovered_at_unix": 1788841490,
+    "host_deadline_result": "timeout",
+    "original_process_absent": true,
+    "original_cgroup_absent": true,
+    "management_port_closed_before_replacement": true,
+    "automatic_disk_rebuild": true,
+    "baseline_digest_verified": true,
+    "guest_marker_absent_after_rebuild": true,
+    "replacement_inventory_empty": true,
+    "replacement_worker_endpoint": "unix:///srv/sbq/run/api.sock",
+    "exclusive_vm_lock_verified": true,
+    "periodic_capture_after_freeze": true,
+    "concurrent_start_rejected": true,
+    "operator_lingering": true
+  },
+  "replacement_validation": {
+    "smoke": {
+      "status": "passed",
+      "cleanup": "verified_absent",
+      "elapsed_ms": 8797,
+      "observations": {
+        "system": "Linux"
+      }
+    },
+    "all_38_qualification_source_hashes_verified": true,
+    "worker_stopped_after_smoke": true
+  },
+  "final_handoff_report": "docs/linux-production-handoff.json in the source repository; final package digest and lab shutdown are recorded separately to avoid a package containing its own digest.",
+  "raw_report_files_test_keys_or_vm_images_published": false
+}

@@ -5,6 +5,10 @@ and waits for cleanup. It uses an in-memory execution store so you can learn the
 API without a database. The final section explains what changes in an application
 that needs restart recovery.
 
+This walkthrough does not configure the separately
+[tested Linux deployment](resource-qualification.md#subsequent-linux-deployment-validation)
+or its external host resource controls.
+
 ## 1. Install SmolBox
 
 In an existing Elixir Mix application, add this entry to `deps/0` in `mix.exs`:

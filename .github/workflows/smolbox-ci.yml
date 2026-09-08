@@ -410,7 +410,15 @@ jobs:
       - run: mix xref graph --format cycles --fail-above 0
       - run: mix test --warnings-as-errors
       - run: mix dialyzer --force-check
-      - run: mix hex.audit
+      # Decimal's maintainer identifies 3.0.0 as fixed, but the EEF feed currently
+      # includes 3.1.1. Remove this exception when the feed is corrected.
+      # https://github.com/ericmj/decimal/security/advisories/GHSA-rhv4-8758-jx7v
+      - name: Audit Hex dependencies with a verified Decimal exception
+        env:
+          HEX_IGNORE_ADVISORIES: EEF-CVE-2026-32686
+        run: |
+          mix run --no-start --no-compile -e '{:ok, _} = Application.ensure_all_started(:decimal); "3.1.1" = to_string(Application.spec(:decimal, :vsn))'
+          mix hex.audit
       - run: mix deps.audit
       - name: Verify unavailable database fails closed
         env:

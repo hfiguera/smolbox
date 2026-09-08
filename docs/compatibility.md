@@ -1,10 +1,16 @@
 # Compatibility evidence
 
-Version: `0.1.0`, 2026-09-07. The first release
-targets the tested development-qualified client/controller contract. No production
-profile is certified; additional production resource/isolation qualification,
-protected real-worker GitHub infrastructure and independent consumer review are
-outside the first-release scope.
+Version: `0.1.0`, released 2026-09-07. The library's supported qualification is
+`:development`; requested hard-control options remain unsupported. The original
+release evidence below records the client/controller contract on Linux and macOS.
+
+A subsequent
+[Linux deployment campaign](resource-qualification.md#subsequent-linux-deployment-validation)
+verified external worker resource enforcement and failure recovery on one pinned
+nested configuration. Those results supplement the earlier platform evidence;
+they do not change the library's profile options or establish macOS host limits.
+Protected real-worker GitHub infrastructure and independent consumer review were
+outside the original release scope and were not added by this campaign.
 
 Ordinary CI, the supported compatibility matrix, existing bounded real-runtime
 suites and fresh package consumers remain required for the exact release
@@ -201,10 +207,11 @@ These findings require continued real-runtime verification:
 | Control | Linux x86_64 | macOS arm64 |
 |---|---|---|
 | Guest vCPU/memory allocation | Observed configuration; bounded guest OOM experiment passes | Observed configuration; finite guest OOM counter/log experiment passes |
-| Host RSS / CPU-time hard quota | Owned cgroup observation; no certified profile | Uncertified |
-| Guest disk and host storage accounting | 20/10 GiB floors; contained host-disk-full probe exposes database cleanup failure; no certified profile | Same template floors verified; host quota pending |
+| Host RSS / CPU-time hard quota | Unsupported library controls; the separate deployment tests charged memory and CPU bandwidth, which are different quantities | Unsupported library controls; no corresponding host enforcement tested |
+| External worker CPU/memory/task limits | The nested deployment recorded CPU throttling, OOM kill at 1.5 GiB charged memory and task denial under a 96-task cap | Not covered by the Linux campaign |
+| Guest disk and host storage accounting | 20/10 GiB floors; earlier shared-storage exhaustion prevented deletion; later separate 768 MiB VM/cache and 64 MiB metadata mounts passed exhaustion and cleanup | Same template floors verified; host quota pending |
 | Hostile process count control | Unsupported hard control | Unsupported hard control |
-| Deadline and whole-VM termination | Real timeout/cancellation/recovery passes; delayed requests are not fenced | Same |
+| Deadline and whole-VM termination | Real timeout/cancellation/recovery passes; the nested deployment also passed a 300-second worker deadline and frozen outer-VM recovery | Real timeout/cancellation/recovery passes; the external deadline campaign was Linux-only |
 | Output and file transfer caps | Finite overflow/file cap pass; contained blocked-reader probe passes; broader buffering pending | Finite overflow/file cap and blocked callback pass; independent host quota qualification pending |
 | No guest egress / control-plane access | Public TCP and three control-plane routes denied; broader isolation pending | Same |
 | Durable result recovery | Persisted results survive controller failure; no upstream receipt for a lost result | Same |
@@ -212,10 +219,12 @@ These findings require continued real-runtime verification:
 | Authenticated TLS proxy | Real worker forwarding passes | Real worker forwarding passes |
 | Canonical workspace containment | Unsupported; guest symlink read escapes the lexical workspace | Same |
 
-Uncertified hard controls are rejected before dispatch. Existing controlled and
-real failure tests do not establish production multi-tenant certification. See
+Unsupported hard-control options are rejected before dispatch. The external
+Linux controls above are configured by that deployment, not by a profile field.
+They cover one execution at a time and do not qualify concurrent tenants.
+Delayed requests remain unfenced on both platforms. See
 [resource qualification](resource-qualification.md) and [security](security.md)
-for measured scope and remaining experiments.
+for measured scope, independent deadline behavior and remaining limits.
 
 ## Toolchain
 

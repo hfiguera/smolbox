@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-08T04:40:29Z",
+  "conclusion": "Final Linux documentation and production-package consumer passed; the lab is stopped with a clean disposable overlay. This record does not certify unrestricted production execution of hostile code.",
+  "source": {
+    "base_git_commit": "d848b04cbeb813aa547f382ddf67599e0d23d80c",
+    "branch": "nested-kvm-lab",
+    "uncommitted": true,
+    "release_candidate_commit": null,
+    "library_code_unchanged_from_base": true
+  },
+  "execution": {
+    "host": "ssh linux",
+    "guest": "smolbox-nested",
+    "macos_tests_or_runtime_execution": false
+  },
+  "qualification_evidence": {
+    "path": "docs/evidence/linux-production-qualification.json",
+    "sha256": "16ab09cb0cbe1b0e3f998925c6567fdc922bd05d23798155521158bcbfc7aca8",
+    "qualification_source_hashes": 38,
+    "all_source_hashes_verified_after_replacement": true
+  },
+  "final_checks": {
+    "docs": {
+      "status": "passed",
+      "exit_code": 0,
+      "seconds": 34.702,
+      "output_sha256": "0b619c8ce38c044bf0fe42617c6ea69d64928ec329b52eee8643fcb526272777"
+    },
+    "docs_links": {
+      "status": "passed",
+      "exit_code": 0,
+      "seconds": 0.471,
+      "output_sha256": "4becb7fed09596d86e9f5b2d81c9c1f9bacb31d06c8e2cc7f47e322dad12dac6"
+    },
+    "package_consumer": {
+      "status": "passed",
+      "exit_code": 0,
+      "seconds": 8.935,
+      "output_sha256": "b4c8a33fa47f59e2a27fba466a2951e2b846d9a40546b2e865c71daeb99e814b"
+    }
+  },
+  "package": {
+    "package_sha256": "5320ea795dac15fbeec7900970fa36c78b0ddd244f450c99d4ae4859dd6385f7",
+    "package_file_count": 86,
+    "qualification_evidence_sha256": "16ab09cb0cbe1b0e3f998925c6567fdc922bd05d23798155521158bcbfc7aca8",
+    "runtime_dependencies": [
+      "finch",
+      "hpax",
+      "jason",
+      "mime",
+      "mint",
+      "nimble_options",
+      "nimble_pool",
+      "req",
+      "telemetry"
+    ],
+    "smoke": {
+      "client": true,
+      "supervisor": true,
+      "versions": {
+        "jason": "1.4.5",
+        "nimble_options": "1.1.1",
+        "req": "0.7.4",
+        "telemetry": "1.4.2"
+      }
+    },
+    "platform": "linux",
+    "architecture": "x86_64",
+    "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+    "private_archive_path": "/var/lib/smolbox-lab/evidence/candidate/smolbox-handoff.tar",
+    "published": false,
+    "handoff_report_excluded_from_archive": true
+  },
+  "cleanup": {
+    "all_lab_qemu_main_pids_zero": true,
+    "provision_unit": {
+      "active_state": "inactive",
+      "result": "success"
+    },
+    "test_unit": {
+      "active_state": "inactive",
+      "result": "success"
+    },
+    "probe_unit": {
+      "active_state": "failed",
+      "result": "timeout",
+      "expected_deadline_result": true
+    },
+    "no_lab_account_processes": true,
+    "management_port_22460_closed": true,
+    "recovery_required_marker_absent": true,
+    "recovery_timer_active": true,
+    "baseline_sha256": "4ff59594af008ff0efb517e9c70cb90d5cf7c240dc0f71d53a162c7b4a0eea2d",
+    "baseline_digest_check": "passed",
+    "disposable_overlay": {
+      "path": "/var/lib/smolbox-lab/images/run.qcow2",
+      "backing_path": "/var/lib/smolbox-lab/images/baseline.qcow2",
+      "virtual_bytes": 107374182400,
+      "allocated_bytes": 200704,
+      "dirty": false,
+      "corrupt": false
+    },
+    "original_physical_host_worker": {
+      "pid": 44097,
+      "command": "smolvm-bin",
+      "health_endpoint": "http://127.0.0.1:19470/health",
+      "status": "ok",
+      "version": "1.14.1",
+      "machines_total": 0,
+      "machines_running": 0,
+      "preserved": true
+    },
+    "physical_host_crash_or_reboot_tested": false
+  },
+  "private_evidence_directory": "/var/lib/smolbox-lab/evidence/candidate",
+  "private_test_keys_database_payloads_or_vm_disks_published": false,
+  "limitations": "Results apply to the pinned nested Linux deployment and finite tested workloads. SmolBox 0.1.0 remains development-qualified; no generic production flag or unsupported hard-control option was enabled. See the qualification guide and bundled evidence for observed boundaries and untested assumptions."
+}

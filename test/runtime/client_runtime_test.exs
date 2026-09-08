@@ -18,6 +18,10 @@ defmodule SmolBox.ClientRuntimeTest do
   @moduletag :runtime
   @moduletag timeout: 120_000
 
+  setup do
+    SmolBox.LabCandidate.reset()
+  end
+
   setup_all do
     url = System.fetch_env!("SMOLBOX_RUNTIME_URL")
     python = System.fetch_env!("SMOLBOX_PYTHON_ARTIFACT")
@@ -25,10 +29,14 @@ defmodule SmolBox.ClientRuntimeTest do
     for artifact <- [python, javascript], do: assert(File.regular?(artifact))
 
     {:ok, worker} =
-      Worker.new("qualification", url,
-        allow_insecure_loopback: true,
-        operation_timeout_ms: 20_000,
-        receive_timeout_ms: 15_000
+      Worker.new(
+        "qualification",
+        url,
+        SmolBox.LabCandidate.endpoint_options(
+          allow_insecure_loopback: true,
+          operation_timeout_ms: 20_000,
+          receive_timeout_ms: 15_000
+        )
       )
 
     {:ok, client} = Client.new(worker)
@@ -235,10 +243,10 @@ defmodule SmolBox.ClientRuntimeTest do
     File.chmod!(dir, 0o700)
     on_exit(fn -> File.rm_rf!(dir) end)
     certs = TestTLS.create(dir)
-    base_url = context.client.worker.base_url
+    endpoint = context.client.worker
 
     port =
-      TestPeer.start(&proxy(&1, base_url),
+      TestPeer.start(&proxy(&1, endpoint),
         scheme: :https,
         certfile: certs.cert,
         keyfile: certs.key
@@ -268,7 +276,7 @@ defmodule SmolBox.ClientRuntimeTest do
 
   # Disposable fixture proxy, not a production proxy implementation. Only tiny
   # qualification requests are forwarded; authorization is checked before I/O.
-  defp proxy(conn, base_url) do
+  defp proxy(conn, endpoint) do
     if Plug.Conn.get_req_header(conn, "authorization") == ["Bearer disposable-test-token"] do
       {:ok, body, conn} = TestPeer.body(conn)
       method = %{"GET" => :get, "POST" => :post}[conn.method]
@@ -276,7 +284,8 @@ defmodule SmolBox.ClientRuntimeTest do
       response =
         Req.request!(
           method: method,
-          url: base_url <> conn.request_path,
+          url: endpoint.base_url <> conn.request_path,
+          unix_socket: endpoint.unix_socket,
           body: body,
           headers: [{"content-type", "application/json"}],
           raw: true,

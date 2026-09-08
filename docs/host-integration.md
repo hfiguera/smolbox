@@ -11,9 +11,13 @@ See [deployment boundaries](security.md) for worker/proxy setup, artifact trust,
 storage responsibilities and upgrade/recovery procedures.
 
 The managed runtime has real Linux/macOS execution and durable fault recovery
-coverage. Production resource and hostile-workload qualification are outside the
-first-release scope. Its current worker qualification is explicitly development
-use; it is not a production multi-tenant isolation certificate.
+coverage. A subsequent
+[Linux deployment campaign](resource-qualification.md#subsequent-linux-deployment-validation)
+also verified external worker resource limits and failure recovery in one
+constrained nested configuration. The library's supported qualification remains
+`:development`; the host configuration below does not install those external
+controls. Multi-tenant operation and macOS host enforcement are outside that
+campaign's scope.
 
 The host owns authorization, prepared runtime artifacts, worker installation,
 proxy credentials, persistence, and artifact retention. SmolBox owns one command

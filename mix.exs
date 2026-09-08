@@ -133,6 +133,7 @@ defmodule SmolBox.MixProject do
           SmolBox.FaultTransport,
           SmolBox.FaultArtifacts,
           SmolBox.RuntimeFixture,
+          SmolBox.LabCandidate,
           SmolBox.RuntimeProxy,
           SmolBox.TestTLS,
           SmolBox.Store.Contract

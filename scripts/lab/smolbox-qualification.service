@@ -1,0 +1,62 @@
+[Unit]
+Description=Single-execution SmolVM qualification candidate
+ConditionVirtualization=kvm
+RequiresMountsFor=/srv/sbq/control /srv/sbq/cache /srv/sbq/run
+
+[Service]
+Type=exec
+User=smolbox-qual
+Group=smolbox-qual
+SupplementaryGroups=kvm
+Environment=HOME=/srv/sbq/home
+Environment=XDG_CACHE_HOME=/srv/sbq/cache
+Environment=XDG_DATA_HOME=/srv/sbq/control
+Environment=SMOLVM_FILE_TRANSFER_MAX_BYTES=1048576
+Environment=SMOLVM_DISABLE_SHARED_EXTRACT=1
+Environment=SMOLVM_SECCOMP=enforce
+Environment=SMOLVM_LANDLOCK=enforce
+WorkingDirectory=/srv/sbq
+ExecStartPre=+/usr/local/libexec/smolbox-qualification-policy
+ExecStartPre=/usr/local/libexec/smolbox-qualification-preflight
+ExecStart=/opt/smolbox/runtime/smolvm serve start --listen unix:///srv/sbq/run/api.sock --seccomp enforce --landlock enforce
+ExecStopPost=+/usr/local/libexec/smolbox-qualification-capture
+RuntimeMaxSec=300s
+TimeoutStopSec=5s
+KillMode=control-group
+SendSIGKILL=yes
+Restart=no
+OOMPolicy=stop
+MemoryAccounting=yes
+MemoryMax=1536M
+MemorySwapMax=0
+CPUAccounting=yes
+CPUQuota=100%
+TasksAccounting=yes
+TasksMax=96
+LimitCORE=0
+LimitFSIZE=32G
+UMask=0007
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/srv/sbq/control /srv/sbq/cache /srv/sbq/run
+ReadOnlyPaths=/opt/smolbox/runtime /opt/smolbox/catalog
+InaccessiblePaths=/run/dbus/system_bus_socket
+TemporaryFileSystem=/tmp:rw,size=32M,mode=1777 /var/tmp:rw,size=32M,mode=1777
+PrivateNetwork=yes
+DevicePolicy=closed
+DeviceAllow=/dev/kvm rw
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+ProtectKernelLogs=yes
+ProtectClock=yes
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+LockPersonality=yes
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK AF_VSOCK
+StandardOutput=journal
+StandardError=journal
+LogRateLimitIntervalSec=30s
+LogRateLimitBurst=50

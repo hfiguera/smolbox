@@ -2,17 +2,17 @@ defmodule SmolBox.RuntimeProxy do
   @moduledoc false
   alias SmolBox.{FaultGate, TestPeer}
 
-  def start(base_url, gate) do
+  def start(endpoint, gate) do
     counts =
       ExUnit.Callbacks.start_supervised!({Agent, fn -> %{exec: 0, forwarded: 0} end},
         id: make_ref()
       )
 
-    port = TestPeer.start(&forward(&1, base_url, gate, counts))
+    port = TestPeer.start(&forward(&1, endpoint, gate, counts))
     {counts, port}
   end
 
-  defp forward(conn, base_url, gate, counts) do
+  defp forward(conn, endpoint, gate, counts) do
     {:ok, body, conn} = TestPeer.body(conn)
     command = String.ends_with?(conn.request_path, "/exec/stream")
 
@@ -27,7 +27,8 @@ defmodule SmolBox.RuntimeProxy do
     response =
       Req.request(
         method: method,
-        url: base_url <> conn.request_path,
+        url: endpoint.base_url <> conn.request_path,
+        unix_socket: endpoint.unix_socket,
         body: body,
         headers:
           Enum.filter(conn.req_headers, fn {key, _value} -> key in ["content-type", "accept"] end),
