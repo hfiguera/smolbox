@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">When the sandbox fails</title>
+  <desc id="desc">Testing SmolBox with nested KVM: exhaust storage, stop the worker, verify recovery. A physical Linux host supervises a disposable worker environment containing a nested SmolVM machine.</desc>
+  <rect width="1200" height="630" fill="#edf2fa"/>
+  <g font-family="sans-serif">
+    <text x="58" y="88" font-size="43" font-weight="700" fill="#17304e">When the sandbox fails</text>
+    <text x="58" y="135" font-size="28" fill="#526478">Testing SmolBox with nested KVM</text>
+    <rect x="58" y="185" width="1084" height="311" rx="10" fill="#17304e"/>
+    <text x="88" y="234" font-size="27" font-weight="700" fill="#fff">Physical Linux host</text>
+    <text x="638" y="234" font-size="25" fill="#d5e3fa">Independent deadline + recovery</text>
+    <rect x="88" y="266" width="1024" height="202" rx="6" fill="#fff"/>
+    <text x="116" y="312" font-size="27" font-weight="700" fill="#17304e">Disposable worker environment</text>
+    <text x="116" y="364" font-size="26" fill="#17304e">Elixir + SmolBox</text>
+    <text x="116" y="413" font-size="23" fill="#526478">Keep the execution record</text>
+    <path d="M502 378h67m-10-8 10 8-10 8" fill="none" stroke="#215bc7" stroke-width="3"/>
+    <rect x="600" y="331" width="484" height="109" rx="5" fill="#215bc7"/>
+    <text x="625" y="372" font-size="26" font-weight="700" fill="#fff">SmolVM + inner microVM</text>
+    <text x="625" y="413" font-size="23" fill="#e4edff">Bound resources. Observe failure.</text>
+    <text x="58" y="554" font-size="27" font-weight="600" fill="#17304e">Exhaust storage. Stop the worker. Verify recovery.</text>
+    <text x="58" y="595" font-size="21" fill="#526478">SmolBox engineering notes · A case study from one Linux deployment</text>
+  </g>
+</svg>

@@ -1,5 +1,16 @@
 [
   {
+    "slug": "testing-smolbox-with-nested-kvm",
+    "title": "When the sandbox fails: testing SmolBox with nested KVM",
+    "description": "What disk exhaustion, worker OOM and a frozen VM taught us about resource limits, execution records and recovery in an Elixir application.",
+    "published_on": "2026-09-08",
+    "updated_on": "2026-09-08",
+    "version": "0.1.0",
+    "category": "Failure and recovery",
+    "image": "nested-lab.png",
+    "image_alt": "When the sandbox fails: a Linux host supervises a disposable worker environment running SmolBox and nested SmolVM machines."
+  },
+  {
     "slug": "running-python-from-elixir-with-smolbox",
     "title": "Introducing SmolBox: managing SmolVM executions from Elixir",
     "description": "Why we chose SmolVM and how SmolBox manages execution identity, outcomes, and cleanup from Elixir, with a runnable Python example.",
