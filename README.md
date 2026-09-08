@@ -110,11 +110,17 @@ SmolBox has real execution and durable recovery tests on Linux x86_64 and macOS
 Apple Silicon. It supports the pinned **SmolVM 1.14.1** API; other upstream
 versions need compatibility verification.
 
-The current release is tested for development use. It has **not been qualified
-for production execution of hostile code or hard host resource limits**. VM
-allocation settings and limits on returned files/output do not establish those
-guarantees. Read [Deployment boundaries](docs/security.md) when assessing a
-deployment.
+SmolBox relies on SmolVM's isolation model for running untrusted code. Your
+deployment must protect worker access and configure host resource limits,
+networking, and credentials. A subsequent validation campaign tested these
+controls and failure recovery in one constrained Linux deployment; see
+[Linux deployment validation](docs/resource-qualification.md#subsequent-linux-deployment-validation)
+for its results and limits. The walkthrough does not configure that deployment.
+
+The library's supported qualification remains `:development`. Its allocation
+settings and admission reservations do not enforce host quotas; unsupported
+hard-control options remain rejected. Read
+[Deployment boundaries](docs/security.md) when configuring your workers.
 
 Worker installation, runtime image preparation, authentication, and host storage
 remain application/operator responsibilities. SmolBox runs programs already
@@ -135,6 +141,7 @@ about running programs from Elixir and managing their execution lifecycle.
 | [Persistence and recovery](docs/recovery.md) | Use durable storage and recover after controller or worker failures |
 | [Telemetry](docs/telemetry.md) | Observe activity and inspect workers without treating notifications as receipts |
 | [Deployment boundaries](docs/security.md) | Understand worker isolation, credentials, file boundaries, and operator responsibilities |
+| [Resource evidence](docs/resource-qualification.md) | Review the tested Linux deployment controls, historical experiments, and remaining limits |
 | [Compatibility](docs/compatibility.md) | Check the tested SmolVM, Elixir/OTP, OS, and artifact combinations |
 
 ## Contributing

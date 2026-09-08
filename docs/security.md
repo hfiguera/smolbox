@@ -1,20 +1,28 @@
 # Deployment and trust boundaries
 
-SmolBox is a client and controller for operator-managed SmolVM workers. It does
-not provision a secure worker, proxy, database, image registry or hypervisor.
-The current `:development` qualification is not a production isolation profile.
-Hard resource and hostile-workload qualification is incomplete on both tested
-platforms and outside the first-release scope. Removing it as a release
-prerequisite changes no enforcement or isolation claim. See
-[resource evidence](resource-qualification.md) and
-[compatibility evidence](compatibility.md) before choosing a deployment boundary.
+SmolBox relies on
+[SmolVM's isolation model](https://github.com/smol-machines/smolvm/blob/e8d09ef616d363004d55b80a6cdb31a4e7e1842d/SECURITY.md)
+for running untrusted code. Each part of a deployment has a separate responsibility:
 
-The subsequent Linux candidate described in the repository's
-`docs/linux-production-qualification.md` adds measured external containment and
-failure recovery on one pinned nested deployment. Its finite tests and dedicated
-host controls are not a portable security guarantee supplied by the Hex library.
-In particular, they do not qualify arbitrary images, network access, concurrent
-tenants or macOS host limits.
+| Component | Responsibility |
+|---|---|
+| SmolVM and its virtualization stack | Run each workload in its own VM and defend the guest-to-host boundary under the upstream security model |
+| SmolBox | Manage execution identity, admission, observation, bounded collection, uncertain outcomes and cleanup |
+| Application and deployment | Authorize access, approve images, protect worker interfaces, enforce host resource limits, configure networking and credentials, and operate durable storage and recovery |
+
+SmolBox does not provision a worker, proxy, database, image registry or hypervisor.
+The library's supported qualification remains `:development`; it does not install
+or attest host resource controls. Requested unsupported hard-control options
+remain rejected.
+
+After the 0.1.0 release, a Linux campaign verified external resource enforcement
+and failure recovery on one pinned nested deployment. See the
+[validation summary](resource-qualification.md#subsequent-linux-deployment-validation)
+and the full
+[Linux qualification guide](https://github.com/hfiguera/smolbox/blob/main/docs/linux-production-qualification.md).
+Those results apply to that configuration: one execution at a time, approved
+images, no guest networking, host mounts or production secrets. They do not
+extend to arbitrary images, concurrent tenants or macOS host limits.
 
 ## What must be trusted
 
@@ -78,15 +86,18 @@ It uses approved prepared artifacts with `/bin/true` and restart policy `never`.
 Image preparation happens separately under host policy; a failed offline execution
 never authorizes networking or an arbitrary image pull.
 
-| Control | Current boundary | Unqualified boundary |
+Linux deployment results below refer to that specific externally constrained
+configuration. The library's profile options do not configure its host controls.
+
+| Control | Observed behavior | Scope and limitations |
 | --- | --- | --- |
 | Concurrency and reservations | Atomic store admission for the documented ownership topology | Does not coordinate an unrelated store or external worker users |
 | vCPU allocation | Requested, decoded and matched; real guests on both platforms report one CPU | Allocation is not a CPU-time quota; host contention remains external |
 | Guest memory | Finite overload experiments on both platforms record guest OOM evidence while the command parent and VM survive | No universal host-RSS bound or complete hostile-memory certification |
-| Host CPU/memory/tasks | Linux cgroup values observed on a separately constrained service | Upstream setup is best-effort; macOS has no corresponding cgroup mechanism |
-| Disk | Verified template allocation floors and reservations; a contained Linux disk-full probe demonstrates failed database deletion after a successful stop | No certified storage/cache/log quota profile; equivalent bounded macOS exhaustion behavior is unverified |
+| Host CPU/memory/tasks | The Linux deployment recorded CPU throttling, an OOM kill at 1.5 GiB charged memory, and task denial under a 96-task cap | External worker controls; CPU bandwidth is not CPU time, charged memory is not process RSS, and host tasks are not guest PIDs; macOS enforcement was not tested in this campaign |
+| Disk | Verified template allocation floors and reservations; the later Linux deployment filled its 768 MiB VM/cache mount while separate 64 MiB control storage retained space, and API deletion succeeded | The earlier shared-storage cleanup failure remains relevant to that layout; these external worker quotas are not per-execution library options or evidence for macOS host limits |
 | Guest process count | No certified hostile-guest process limit | Guest root cooperation or a Python/JS wrapper cannot supply it |
-| Deadlines/cancellation | Persisted budgets, upstream timeout and observed owned-VM stop | Delayed requests are unfenced; strong termination bounds remain unsupported |
+| Deadlines/cancellation | Persisted budgets and observed owned-VM stop; the Linux deployment also passed an independent 300-second worker deadline and frozen outer-VM recovery | The worker unit has a five-second stop grace; outer-kernel failure falls back to the physical host's 45-minute QEMU deadline plus stop grace; delayed requests remain unfenced |
 | Output | Bounded BEAM capture and transport; finite overflow and blocked-observer tests, including a contained Linux producer, preserve the available evidence | Arbitrary hostile-protocol behavior and total server/channel/frame memory remain unqualified |
 | Egress and credentials | Offline configuration; tested public TCP and selected guest-to-host routes fail; initial credential-sentinel checks | These probes do not certify every host route, credential source or protocol |
 
@@ -187,7 +198,7 @@ confirmed guest termination.
 
 ## Worker storage exhaustion
 
-A contained Linux 1.14.1 probe filled its private 512 MiB data mount. The guest
+An earlier contained Linux 1.14.1 probe filled its private 512 MiB data mount. The guest
 observed a write I/O error and could be stopped, but SmolVM could not commit its
 VM deletion because its database shared the full mount. SmolBox correctly
 reported uncertainty; an observed stop does not confirm cleanup. Retain the
@@ -199,4 +210,13 @@ experiment recovered by destroying only its separately bounded, verified owned
 unit and private in-memory mount. This cannot be generalized to deleting a
 shared worker's data or all machines with a matching name prefix. See
 [resource qualification](resource-qualification.md) for exact limits, counters
-and the unqualified production-profile boundaries.
+and the recorded shared-storage failure.
+
+The subsequent nested Linux deployment separated its 768 MiB VM/cache mount
+from its 64 MiB control-metadata mount. Repeating disk exhaustion filled the
+VM/cache mount while metadata retained free space; owned stop, API deletion and
+absence inspection all succeeded. This resolves the observed cleanup problem
+for that storage layout. It does not change SmolVM's behavior when data and
+metadata share an exhausted filesystem. See
+[Linux deployment validation](resource-qualification.md#subsequent-linux-deployment-validation)
+for the tested configuration and recovery evidence.

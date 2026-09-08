@@ -1,27 +1,61 @@
-# Resource evidence and unqualified boundaries
+# Resource evidence and deployment boundaries
 
-No hard production execution profile is certified. The library rejects requested
-CPU-time, host-RSS, process-count and host-disk-byte controls. Its development
-profile declares guest allocations and controller admission reservations. A
-matching worker API reply is not proof of enforcement.
+SmolBox relies on SmolVM for VM isolation and on the deployment for host resource
+enforcement. Execution profiles declare guest allocations and controller admission
+reservations; the supported worker qualification remains `:development`.
+The library rejects requested CPU-time, host-RSS,
+process-count and host-disk-byte controls; a matching worker API reply is not
+proof of enforcement. See [Deployment boundaries](security.md) for the division
+of responsibilities.
 
-Completing production resource/isolation qualification is outside the first
-release. The experiments below remain evidence for their recorded conditions;
-the unmeasured boundaries are not newly supported. A separately authorized nested
-Linux lab now provides bounded infrastructure for future investigation; its
-functional/recovery checks do not constitute a production certification campaign.
-Unsupported hard controls remain rejected. The maintainer operating guide is
-`docs/nested-kvm-lab.md` in the source repository.
+The original 0.1.0 experiments are retained below with their recorded settings
+and outcomes. The subsequent Linux campaign adds evidence for a different,
+externally constrained deployment. It does not change the library's accepted
+profile options or the results of the earlier experiments.
 
-A subsequent, separately authorized Linux campaign now exercises an externally
-bounded worker inside that lab. Its candidate separates VM storage from control
-metadata, restricts the worker to a private Unix socket and network namespace,
-and checks pinned inputs and kernel controls before startup. The source guide
-`docs/linux-production-qualification.md` records the tested deployment, results
-and limits. Those deployment controls do not enable unsupported library options
-or retrospectively qualify every installation of SmolBox 0.1.0.
-The [Linux candidate evidence](evidence/linux-production-qualification.json)
-records the measured controls, successful checks, failures and remaining limits.
+## Subsequent Linux deployment validation
+
+After the 0.1.0 release, we tested pinned SmolVM 1.14.1 and approved Python/Node
+artifacts in a disposable Linux x86_64 VM with nested KVM. The configuration runs
+one execution at a time, with no guest networking, host mounts or production
+secrets. It uses a dedicated worker account, private Unix API and network
+namespace, and startup checks for pinned inputs and required kernel controls.
+
+| Worker control | Configuration and observed result |
+|---|---|
+| CPU bandwidth | One CPU of bandwidth; kernel throttling recorded under load |
+| Charged memory | 1.5 GiB, zero swap; the kernel recorded an OOM kill at the limit and systemd stopped the worker |
+| Host tasks | 96 processes/threads; the kernel rejected further task creation |
+| VM/cache storage | 768 MiB tmpfs with separate 64 MiB control storage; disk exhaustion produced a write error, metadata retained space, and owned API deletion succeeded |
+| Worker lifetime | 300-second deadline with five-second stop grace; the independent deadline terminated the worker during a potentially accepted execution |
+
+These controls apply to the worker and its VMM processes inside the outer VM.
+The physical host separately bounds QEMU and lab storage; the worker exhaustion
+results do not establish that every outer limit was exhausted. CPU bandwidth is
+not accumulated CPU time, charged memory is not per-process RSS, and host tasks
+are not guest PIDs. Storage is bounded for this worker, not through a per-command
+disk-quota option in SmolBox.
+
+The campaign passed all 14 runtime, 16 PostgreSQL store and 25 durable recovery
+cases, plus ten workload probes and eleven rejected unsafe configurations.
+Additional worker OOM, database-outage and deadline cases preserved execution
+identity and unknown outcomes without replay, retaining capacity until owned
+absence was verified. The physical host also terminated a frozen outer VM,
+rebuilt its disposable disk and verified a clean replacement execution.
+
+If the outer guest kernel stops responding, recovery uses the physical host's
+45-minute QEMU deadline plus stop grace, rather than the worker's 300-second
+clock. The tests do not cover arbitrary images, concurrent tenants, external
+networking or macOS host limits. Guest symlinks can still reach other paths
+inside the guest; canonical workspace containment remains unsupported.
+
+The full
+[Linux qualification guide](https://github.com/hfiguera/smolbox/blob/main/docs/linux-production-qualification.md)
+describes the deployment, reproduction steps and limitations. The bundled
+[Linux candidate evidence](evidence/linux-production-qualification.json)
+records source identities, kernel counters, successful checks and retained failed
+attempts. Its scripts target that disposable lab; installing the Hex package or
+following Getting Started does not configure this deployment.
 
 ## Disk template mismatch in SmolVM 1.14.1
 
@@ -76,8 +110,10 @@ process as an OOM victim. The command parent and VM survived. The host unit and
 VM cgroup reported no OOM events; observed peaks were 514,179,072 and 363,044,864
 bytes respectively. This is evidence for that guest-memory experiment, not a
 complete hostile-workload qualification or proof of host OOM containment under
-all conditions. No disk-fill or process-exhaustion experiment was run in that initial increment;
-the later contained Linux experiments below add a host-disk-full observation.
+all conditions. No disk-fill or process-exhaustion experiment was run in that
+initial increment. The next section records the earlier shared-storage failure;
+the [subsequent campaign](#subsequent-linux-deployment-validation) adds measured
+host OOM, task denial, CPU throttling and recovery with separate storage.
 
 The probe also observed one guest CPU/affinity, no host test sentinel in its
 environment, no rollout token, and no host qualification workspace path. These
@@ -132,6 +168,13 @@ API cannot commit cleanup. Do not mark deletion complete or release reservations
 on the basis of a stop response. The experiment ended by verifying and stopping
 only its exact owned unit; its processes/cgroup disappeared and its private
 in-memory mount was destroyed. This teardown is **not** a successful API delete.
+
+The subsequent nested Linux deployment used separate 768 MiB VM/cache and 64 MiB
+control-metadata mounts. Its disk-full trial retained metadata headroom and
+completed stop, API deletion and absence verification. That result addresses
+the failure for the tested storage layout; it does not repair or erase the
+earlier shared-storage result. See
+[Subsequent Linux deployment validation](#subsequent-linux-deployment-validation).
 
 The second guest attempted at most 64 MiB of output while its client's stream
 callback blocked. SmolBox retained a 64 KiB capture limit and ended observation
@@ -284,15 +327,16 @@ part of the reported performance claim.
 
 ## Evidence needed for stronger future claims
 
-Broader CPU/process/output and hostile-protocol qualification, independently
-bounded macOS resource experiments and comprehensive credential/control-plane
-tests are outside the first release. They would need a new scope decision and
-actual evidence before supporting stronger claims. Protected real-worker GitHub
-infrastructure is also outside the first release; recorded local runs of the
-existing functional suites remain part of final-candidate validation.
-Pristine-host and broader cold-cache performance data would need separate trials
-before making claims about those conditions. The contained Linux disk-full and finite slow-reader
-experiments above cover specific workloads and expose a cleanup limitation. Finite
-output/path probes and the workload above cover specific behavior; passing them
-does not substitute for exhaustion/isolation experiments. Excluding those
-experiments from release acceptance does not certify a production profile.
+The subsequent Linux campaign provides the enforcement and recovery evidence
+summarized above. New evidence is needed before extending those results to
+different deployment assumptions, runtime versions, kernels or images.
+Concurrent tenants, external networking, arbitrary images, independent macOS
+host limits and broader protocol or credential-access behavior remain outside
+the measured scope. The finite probes do not establish the absence of every
+kernel, hypervisor or runtime vulnerability.
+
+Protected real-worker GitHub infrastructure was not provisioned as part of these
+local campaigns. Recorded local runs remain distinct from CI execution.
+Pristine-host and broader cold-cache performance claims also need separate
+trials. Preserve the historical measurements and their conditions when comparing
+them with later deployments.

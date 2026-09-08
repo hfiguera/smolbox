@@ -3,9 +3,14 @@
 Use a durable store when executions must survive an application restart. SmolBox
 persists intent and observations; the host adapter supplies transactions and
 durability. The included PostgreSQL example has real database and process-recovery
-coverage on Linux and macOS. Production hostile-workload qualification is outside
-the first-release scope. See [Compatibility](compatibility.md) for recorded evidence
-and [Troubleshooting](troubleshooting.md) for common operational symptoms.
+coverage on Linux and macOS. A subsequent
+[constrained Linux deployment](resource-qualification.md#subsequent-linux-deployment-validation)
+also passed worker OOM, database-outage and independent worker-deadline tests.
+Those tests preserved execution identity and unknown outcomes without replay,
+retaining capacity until owned absence was verified. They do not add execution
+fencing to the upstream API or change the recovery contract below. See
+[Compatibility](compatibility.md) for recorded evidence and
+[Troubleshooting](troubleshooting.md) for common operational symptoms.
 
 ## Store contract
 
