@@ -12,13 +12,13 @@ No new macOS or Linux ARM64 runtime qualification is claimed. Earlier macOS
 - [x] Add exact, explicit 1.14.6 worker support without accepting version drift.
 - [x] Capture official binary/agent/libkrun/OpenAPI identities and actual wire
   fixtures; validate old and newly prepared Python/Node artifacts and disk sizing.
-- [ ] Run the full Linux client/runtime, PostgreSQL, durable recovery, service
+- [x] Run the full Linux client/runtime, PostgreSQL, durable recovery, service
   fault and example suites for both supported runtime versions.
 - [x] Repeat the constrained Linux resource/isolation campaign on 1.14.6,
   including kernel controls, startup refusals, exhaustion and external recovery.
-- [ ] Validate all four Linux Elixir/OTP lanes, coverage, all five analyzers and
+- [x] Validate all four Linux Elixir/OTP lanes, coverage, all five analyzers and
   their canaries, audits, ExDoc and current/minimum package consumers.
-- [ ] Document explicit upgrade/drain procedures and measured boundaries,
+- [x] Document explicit upgrade/drain procedures and measured boundaries,
   freeze an untagged candidate and record exact-commit acceptance and cleanup.
 
 Preparation evidence is bundled in
@@ -30,9 +30,26 @@ eleven startup refusals, three durable outage cases and frozen outer-VM recovery
 passed. The initial recovery failures and subsequent preparation-budget correction
 remain recorded. All four Linux language lanes, five analyzers and canaries,
 95.41% coverage, example analysis/audits and 42-page ExDoc link checks passed.
-The candidate still requires its final source freeze, complete service/example
-checks and exact-commit package acceptance; preparation results do not imply
-that those pending checks have run.
+The final untagged candidate is
+`279e7ce4d210e9ab8c256167a73df626fffefe25`. Its exact-commit matrix passed all
+14 runtime, 16 store and 25 recovery cases, three service-failure scenarios,
+four normal/cancellation examples and the walkthrough on each runtime version.
+The rebuilt-artifact 1.14.6 suite passed another 14 cases and its disk-sizing
+probe. All four language lanes passed 199 deterministic cases and 23 tooling
+cases each; quality, canaries, audits, documentation and three fresh consumers
+of the same 88-file archive passed. Final cleanup confirmed zero pending work
+or reservations, no owned worker/VM processes, a clean rebuilt disposable disk,
+the unchanged baseline and preserved physical-host services.
+
+See the [0.1.2 candidate report](release-candidates/0.1.2.md) and
+[exact-commit evidence](release-candidates/0.1.2.json). These repository-only
+attestations are excluded from the tested package. Its SHA-256 is
+`80d1fe6b124a2e4c234b2130249edfda5481bd5fa800f4ad1dbcbe19b204cc29`.
+The candidate is accepted for this scoped Linux compatibility preparation;
+general production security certification and new macOS qualification are not
+claimed. The authenticated Hex publishing dry run remains outstanding: the
+attempt stopped at missing authentication and is not counted as passed.
+Authenticate and repeat it when the separate release step is authorized.
 
 Local execution of the required CI commands supplies this preparation's evidence.
 No GitHub run of the new commit is claimed without an authorized push. The existing
