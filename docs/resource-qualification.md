@@ -57,6 +57,32 @@ records source identities, kernel counters, successful checks and retained faile
 attempts. Its scripts target that disposable lab; installing the Hex package or
 following Getting Started does not configure this deployment.
 
+## SmolVM 1.14.6 Linux deployment retest
+
+On September 10, 2026, the 0.1.2 compatibility work repeated the constrained
+campaign with the complete released Linux x86_64 SmolVM 1.14.6 distribution.
+The original worker limits above were retained: 1.5 GiB charged memory with no
+swap, one CPU of bandwidth, 96 host tasks, separate bounded control/cache
+storage, and the independent 300-second deadline. The private API, network
+namespace, seccomp and Landlock startup requirements also remained in place.
+
+All ten workload probes and eleven deliberately weakened configurations passed
+their expected assertions. Every observed VMM thread had seccomp filtering,
+`NoNewPrivs` and an empty effective capability set. Separate host injections
+recorded CPU throttling, task denial and a worker OOM kill. Durable worker OOM,
+database failure and deadline tests preserved the execution identity and unknown
+outcome, with one recorded dispatch attempt and cleanup confirmed after recovery.
+The physical host's frozen-VM recovery check also passed, followed by a clean
+1.14.6 execution in the replacement guest.
+
+The [compatibility evidence](evidence/smolvm-1.14.6-compatibility.json) records
+the pinned inputs, measured results and failed attempts. It also distinguishes
+the retained 1.14.1 artifacts from newly prepared 1.14.6 payloads. This campaign
+does not test concurrent tenants, arbitrary images, asynchronous block I/O,
+macOS, Linux ARM64 or every possible kernel exploit. The library still rejects
+unsupported hard-control requests. These results qualify the recorded Linux
+configuration and workloads, not a portable security guarantee from SmolBox.
+
 ## Disk template mismatch in SmolVM 1.14.1
 
 Pinned source is `e8d09ef616d363004d55b80a6cdb31a4e7e1842d`. The released Linux and

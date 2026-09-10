@@ -37,6 +37,8 @@ defmodule SmolBox.CI.PreflightTest do
           {"worker_url", "http://user:password@127.0.0.1:19470"},
           {"python_artifact", "/private/file\nINJECTED=1"},
           {"worker_pid", true},
+          {"runtime_version", "1.14.5"},
+          {"runtime_version", "1.14.6-dev"},
           {"database_port", 0},
           {"expires_at_unix", System.os_time(:second) - 1},
           {"expires_at_unix", System.os_time(:second) + 100_000}
@@ -50,6 +52,15 @@ defmodule SmolBox.CI.PreflightTest do
       Preflight.validate!(manifest(), "linux", false, %{
         "DATABASE_URL" => "ecto://unexpected.invalid/database"
       })
+    end
+  end
+
+  test "candidate preflight accepts explicit Linux 1.14.6 without qualifying macOS" do
+    manifest = Map.put(manifest(), "runtime_version", "1.14.6")
+    assert Preflight.validate!(manifest, "linux", false, %{}).port == 19_470
+
+    assert_raise ArgumentError, fn ->
+      Preflight.validate!(Map.put(manifest, "platform", "macos"), "macos", false, %{})
     end
   end
 

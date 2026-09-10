@@ -58,6 +58,7 @@ defmodule SmolBox.Example.Setup do
         client: client,
         architecture: architecture(),
         platform: platform(),
+        runtime_version: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.14.1"),
         profiles: [profile],
         artifacts: [Map.put(artifact, "path", artifact_file)],
         allocation_floor: %{storage_gb: 20, overlay_gb: 10, host_overhead_mb: 768},
@@ -172,10 +173,15 @@ defmodule SmolBox.Example.Setup do
     }
 
   defp endpoint_options do
+    # Match the example's 60-second preparation budget. A cold nested boot can
+    # outlast the client's ordinary 15-second receive timeout under a CPU cap.
+    # Managed command/collection/cleanup budgets still bound their own stages.
+    preparation = [operation_timeout_ms: 60_000, receive_timeout_ms: 55_000]
+
     options =
       case System.get_env("SMOLBOX_PROXY_TOKEN") do
-        nil -> [allow_insecure_loopback: true]
-        token -> [token: token]
+        nil -> [allow_insecure_loopback: true] ++ preparation
+        token -> [token: token] ++ preparation
       end
 
     case System.get_env("SMOLBOX_RUNTIME_SOCKET") do

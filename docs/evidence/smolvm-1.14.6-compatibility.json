@@ -1,0 +1,659 @@
+{
+  "scope": "Linux x86_64 only, ssh linux, disposable Ubuntu 24.04 guest with real nested KVM and kernel 6.8.0-139-generic",
+  "status": "preparation evidence; exact-commit acceptance is recorded separately",
+  "date": "2026-09-10",
+  "source": {
+    "state": "uncommitted compatibility preparation; runtime suite variants and failed attempts are distinguished below",
+    "base_commit": "60925ff"
+  },
+  "suites": {
+    "old_runtime": {
+      "report": "runtime-11/runtime-final.json",
+      "result": {
+        "captured_bytes": 162,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "d4ed6616d7b7c2bd4f0009f3d319f0a980334952b22af61d165cf4451416cae0",
+        "seconds": 256.109,
+        "status": "passed",
+        "tests": {
+          "passed": 14,
+          "seed": 370738
+        }
+      },
+      "sha256": "c5488cc1aa3e643293bff3c0351e984897912bd48e5d41d0ac37f16c92feed85"
+    },
+    "old_store": {
+      "report": "runtime-11/store-final.json",
+      "result": {
+        "captured_bytes": 333,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "d638fd49bdc8ffb45cbb681ee6100f08db15a2571adfd180ee22a3574d344090",
+        "seconds": 3.484,
+        "status": "passed",
+        "tests": {
+          "passed": 16,
+          "seed": 797971
+        }
+      },
+      "sha256": "c682813217f9806e7c849dd9221203d191c1cfc9c8d8d517402c3076adf3008d"
+    },
+    "old_recovery": {
+      "report": "runtime-11/durable-final.json",
+      "result": {
+        "captured_bytes": 347,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "3fc5465e5a1556b06512fae6b2f9431d9f257a57cdb27f469c06ac55d2f847c8",
+        "seconds": 616.891,
+        "status": "passed",
+        "tests": {
+          "passed": 25,
+          "seed": 127471
+        }
+      },
+      "sha256": "b9fc7d718effdc20a31ea1a6ba42107b86792ad597399aaf27fefd4867a6a2e1"
+    },
+    "new_runtime_original_artifacts": {
+      "report": "campaign-16/runtime-final.json",
+      "result": {
+        "captured_bytes": 162,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "5d10b80a03465ae741bc0ae1068a626a5fa38505a28882e7ff161cb6c78a3bf7",
+        "seconds": 159.722,
+        "status": "passed",
+        "tests": {
+          "passed": 14,
+          "seed": 985076
+        }
+      },
+      "sha256": "4dd3b5965cae262b74832b99f8e9ffd8a568cc93d6bd640c24d41994c87160a6"
+    },
+    "new_runtime_rebuilt_artifacts": {
+      "report": "fresh-16/runtime-fresh-16.json",
+      "result": {
+        "captured_bytes": 162,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "c535413a300131a48d484c91d63b338e3ab808135d0394a6493d44fa5cb780a6",
+        "seconds": 269.753,
+        "status": "passed",
+        "tests": {
+          "passed": 14,
+          "seed": 981064
+        }
+      },
+      "sha256": "37aa7fbdc5f4d21a84dfffc71abeb49249b4c73e3b52c0bfe6bcefd295b3f87e"
+    },
+    "new_store": {
+      "report": "campaign-16/store-final.json",
+      "result": {
+        "captured_bytes": 160,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "e130d06ef2c7efdb58096c4e0ca5db52d05f2dd7a1ce4bebea1838e98424fff3",
+        "seconds": 3.053,
+        "status": "passed",
+        "tests": {
+          "passed": 16,
+          "seed": 123633
+        }
+      },
+      "sha256": "6182fa5c7079604af45df123da65f10b01aa0b4d3bd46d8fda780f385c7ef671"
+    },
+    "new_recovery": {
+      "report": "campaign-16/recovery-corrected-16.json",
+      "result": {
+        "captured_bytes": 544,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "089d43976db14de7b326d29e6c654124fdc924caa0cf3d4cb4756d6225f89096",
+        "seconds": 596.865,
+        "status": "passed",
+        "tests": {
+          "passed": 25,
+          "seed": 613824
+        }
+      },
+      "sha256": "7f64a81ea1e44c34d902c68dfb50108153d63e1baf2ec313c5cf14b3fde4e30a"
+    }
+  },
+  "schema": 1,
+  "probes": {
+    "cpu": {
+      "report": "campaign-16/cpu.json",
+      "result": {
+        "cleanup": "verified_absent",
+        "elapsed_ms": 17293,
+        "observations": {
+          "exit_codes": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "seconds": 8.083256215000002
+        },
+        "runtime_version": "1.14.6",
+        "scenario": "cpu",
+        "status": "passed"
+      },
+      "sha256": "f76113e8db8f6b8dd2b53c113e899216f6fe4fa778985097e369d789c4feed6c",
+      "observed_vmm_threads_filtered": true
+    },
+    "disk": {
+      "report": "campaign-16/disk.json",
+      "result": {
+        "cleanup": "verified_absent",
+        "elapsed_ms": 11714,
+        "observations": {
+          "errno": 5,
+          "written": 591396864
+        },
+        "runtime_version": "1.14.6",
+        "scenario": "disk",
+        "status": "passed"
+      },
+      "sha256": "10a41e8cfe0eb608056ea50a523af28373421890117c5d63111b7a5d013362d1",
+      "observed_vmm_threads_filtered": true
+    },
+    "files": {
+      "report": "campaign-16/files.json",
+      "result": {
+        "cleanup": "verified_absent",
+        "elapsed_ms": 10303,
+        "observations": {
+          "fifo": "observation deadline; VM cleanup required",
+          "symlink": "guest-only target readable; no workspace containment claim"
+        },
+        "runtime_version": "1.14.6",
+        "scenario": "files",
+        "status": "passed"
+      },
+      "sha256": "63fc6a2a7bcb16228261b153836d24356efadd2feaadce39cad6ecc4c8cfdd6e",
+      "observed_vmm_threads_filtered": true
+    },
+    "isolation": {
+      "report": "campaign-16/isolation.json",
+      "result": {
+        "cleanup": "verified_absent",
+        "elapsed_ms": 8685,
+        "observations": {
+          "control_env_present": false,
+          "endpoints": {
+            "1.1.1.1:443": "101",
+            "10.0.2.2:22": "101",
+            "10.0.2.2:22460": "101",
+            "100.96.0.1:10081": "101",
+            "127.0.0.1:19470": "111",
+            "169.254.169.254:80": "101"
+          },
+          "host_paths": {
+            "/dev/kvm": false,
+            "/etc/smolbox-qualification-canary": false,
+            "/home/lab/.ssh/authorized_keys": false,
+            "/srv/sbq/control/smolvm/server/smolvm.db": false,
+            "/srv/sbq/run/api.sock": false,
+            "/var/lib/smolbox-lab/home/id_ed25519": false
+          },
+          "uid": 0,
+          "vsock": {
+            "10081": "None",
+            "6000": "104",
+            "6004": "104"
+          }
+        },
+        "runtime_version": "1.14.6",
+        "scenario": "isolation",
+        "status": "passed"
+      },
+      "sha256": "84698b367355240376b9a808275faf6b233013f9f4dc71040850adccde85f934",
+      "observed_vmm_threads_filtered": true
+    },
+    "memory": {
+      "report": "campaign-16/memory.json",
+      "result": {
+        "cleanup": "verified_absent",
+        "elapsed_ms": 11399,
+        "observations": {
+          "dmesg_exit": 0,
+          "oom_log": [
+            "[   10.780306] Out of memory: Killed process 449 (python) total-vm:208480kB, anon-rss:199680kB, file-rss:0kB, shmem-rss:0kB, UID:0 pgtables:448kB oom_score_adj:0"
+          ],
+          "returncode": -9
+        },
+        "runtime_version": "1.14.6",
+        "scenario": "memory",
+        "status": "passed"
+      },
+      "sha256": "b534f8c591d5c31c98256b8c977cf83e7290272cc95ed1ba3af693650a70f360",
+      "observed_vmm_threads_filtered": true
+    },
+    "node": {
+      "report": "campaign-16/node.json",
+      "result": {
+        "cleanup": "verified_absent",
+        "elapsed_ms": 10930,
+        "observations": {
+          "node": "executed"
+        },
+        "runtime_version": "1.14.6",
+        "scenario": "node",
+        "status": "passed"
+      },
+      "sha256": "0809e0fd8fa7478157cdf29a098cf09fc2423d1fb367ca314785dea89af9dcaa",
+      "observed_vmm_threads_filtered": true
+    },
+    "output": {
+      "report": "campaign-16/output.json",
+      "result": {
+        "cleanup": "verified_absent",
+        "elapsed_ms": 8564,
+        "observations": {
+          "captured_limit": 65536,
+          "category": "output_limit",
+          "completed_transfer": false,
+          "producer_upper_bound": 134217728
+        },
+        "runtime_version": "1.14.6",
+        "scenario": "output",
+        "status": "passed"
+      },
+      "sha256": "9bbc3c32062486b67649557e37e17fa96b4533a5aa7da9d82903bd47fca53702",
+      "observed_vmm_threads_filtered": true
+    },
+    "processes": {
+      "report": "campaign-16/processes.json",
+      "result": {
+        "cleanup": "verified_absent",
+        "elapsed_ms": 13590,
+        "observations": {
+          "children": 192,
+          "errno": null
+        },
+        "runtime_version": "1.14.6",
+        "scenario": "processes",
+        "status": "passed"
+      },
+      "sha256": "4b289616bdea9e1f08ebecef3c8f104d5dd5830bac17168afa5cea0ea7ad15c9",
+      "observed_vmm_threads_filtered": true
+    },
+    "slow_reader": {
+      "report": "campaign-16/slow_reader.json",
+      "result": {
+        "cleanup": "verified_absent",
+        "elapsed_ms": 12397,
+        "observations": {
+          "captured_limit": 65536,
+          "category": "transport",
+          "completed_transfer": false,
+          "producer_upper_bound": 134217728
+        },
+        "runtime_version": "1.14.6",
+        "scenario": "slow_reader",
+        "status": "passed"
+      },
+      "sha256": "34f99cb7158216ff8de536c7e2f7c5b393d70dcf1f2eaa78759bc88bb574b0f0",
+      "observed_vmm_threads_filtered": true
+    },
+    "smoke": {
+      "report": "campaign-16/smoke.json",
+      "result": {
+        "cleanup": "verified_absent",
+        "elapsed_ms": 8510,
+        "observations": {
+          "system": "Linux"
+        },
+        "runtime_version": "1.14.6",
+        "scenario": "smoke",
+        "status": "passed"
+      },
+      "sha256": "87004f2414568278cf81a431e27ba23e6c3e0a6928618ffd50143ca444ea3576",
+      "observed_vmm_threads_filtered": true
+    }
+  },
+  "candidate_version": "0.1.2",
+  "upstream": {
+    "version": "1.14.6",
+    "commit": "6c503014629bba91631152728c3081c944653f31",
+    "archive_sha256": "94a1edb0c42b20ac562c3759ed216bab2cab9e27c382f6560969144f7bd1dce3",
+    "executable_sha256": "cc1f9b5f14613191ca83c706d52f4350f69b69a6c431c867cd662b51cb36d7d6",
+    "libkrun_sha256": "af43ad572bffe052d94d3d8d38beebc0b0f1e7d832f25ad6d352d5d919c0ddd1",
+    "agent_sha256": "067539a55bd72bb05d54472ca153fb4dea0be0239069c9f1a21aa610e26da020"
+  },
+  "openapi": {
+    "paths": 8,
+    "referenced_components": 19,
+    "full_sha256": "f3a0cf982a82acc125d1d02d09d707f0467b9867b4e17281d65a461a6b76ef99",
+    "subset_sha256": "6c9f935f0a1e72c92eb49e5c382d54ebfb5f41ed3742683360667b0708d8cd26"
+  },
+  "original_artifacts": {
+    "node": "768b8d2158a75abd90ccc73a65a83717aebfe37e62ed91d0db0bb731584df776",
+    "python": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2"
+  },
+  "rebuilt_artifacts": [
+    {
+      "kind": "python",
+      "manifest": {
+        "assets": {
+          "agent_rootfs": {
+            "path": "agent-rootfs.tar",
+            "size": 38535680
+          },
+          "layers": [
+            {
+              "digest": "sha256:dcdab2955f12246798e234b01fc75c1492fc7adfcd7955656490130380bbe567",
+              "path": "layers/dcdab2955f12246798e234b01fc75c1492fc7adfcd7955656490130380bbe567.tar",
+              "size": 50864640
+            }
+          ],
+          "libraries": [
+            {
+              "path": "lib/libkrun.so",
+              "size": 8585344
+            },
+            {
+              "path": "lib/libkrunfw.so.5",
+              "size": 17041080
+            }
+          ],
+          "storage_template": {
+            "path": "storage.ext4",
+            "size": 21474836480
+          }
+        },
+        "cmd": [
+          "/bin/true"
+        ],
+        "cpus": 1,
+        "created": "2026-09-10T21:30:23.206542382Z",
+        "cuda": false,
+        "digest": "none",
+        "entrypoint": [
+          "/bin/true"
+        ],
+        "env": [
+          "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+          "LANG=C.UTF-8",
+          "GPG_KEY=7169605F62C751356D054A26A821E680E5FA6305",
+          "PYTHON_VERSION=3.12.14",
+          "PYTHON_SHA256=5c8462af5790baf43a321a1559dbe0db06d1be4300fb85fb53c40060668e548a"
+        ],
+        "gpu": false,
+        "host_platform": "linux/amd64",
+        "image": "python:3.12-alpine",
+        "image_size": 50864640,
+        "mem": 256,
+        "mode": "container",
+        "network": false,
+        "platform": "linux/amd64",
+        "smolvm_version": "1.14.6",
+        "workdir": "/"
+      },
+      "sha256": "390d23e3502d2602939844116d764c748132a2a357c0f5ad04f95a4287b31b0d",
+      "size": 32409507
+    },
+    {
+      "kind": "node",
+      "manifest": {
+        "assets": {
+          "agent_rootfs": {
+            "path": "agent-rootfs.tar",
+            "size": 38535680
+          },
+          "layers": [
+            {
+              "digest": "sha256:9d688b200921b8cc25004afe0ded6c7cc418ee835a718384b2f631cc94564796",
+              "path": "layers/9d688b200921b8cc25004afe0ded6c7cc418ee835a718384b2f631cc94564796.tar",
+              "size": 167291392
+            }
+          ],
+          "libraries": [
+            {
+              "path": "lib/libkrun.so",
+              "size": 8585344
+            },
+            {
+              "path": "lib/libkrunfw.so.5",
+              "size": 17041080
+            }
+          ],
+          "storage_template": {
+            "path": "storage.ext4",
+            "size": 21474836480
+          }
+        },
+        "cmd": [
+          "/bin/true"
+        ],
+        "cpus": 1,
+        "created": "2026-09-10T21:31:17.356633366Z",
+        "cuda": false,
+        "digest": "none",
+        "entrypoint": [
+          "/bin/true"
+        ],
+        "env": [
+          "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+          "NODE_VERSION=22.23.2",
+          "YARN_VERSION=1.22.22"
+        ],
+        "gpu": false,
+        "host_platform": "linux/amd64",
+        "image": "node:22-alpine",
+        "image_size": 167291392,
+        "mem": 256,
+        "mode": "container",
+        "network": false,
+        "platform": "linux/amd64",
+        "smolvm_version": "1.14.6",
+        "workdir": "/"
+      },
+      "sha256": "ee47d1aeb1887572edd455202295429286ae1b83a7ddb597e388eaf2674f5d10",
+      "size": 67744801
+    }
+  ],
+  "rebuild": "1.14.6 pack create --from-vm with the previously approved layers, offline; no new registry pull or immutable OCI image claim",
+  "geometry": {
+    "old_runtime": {
+      "report": "runtime-11/geometry-11.json",
+      "result": {
+        "after_workload": "MainPID=2735\nResult=success\nMemoryPeak=356020224\nTasksCurrent=23\nActiveState=active\nInvocationID=feaa9e8325c04ed8915c45a9a308bd97\nmemory.current\n355246080\nmemory.peak\n356020224\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 13103315\nuser_usec 8002600\nsystem_usec 5100714\ncore_sched.force_idle_usec 0\nnr_periods 140\nnr_throttled 122\nthrottled_usec 4837878\nnr_bursts 0\nburst_usec 0\npids.current\n23\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    176128  66932736   1% /srv/sbq/control\nsmolbox-qualification 805306368 177704960 627601408  23% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+        "before": "MainPID=2735\nResult=success\nMemoryPeak=140709888\nTasksCurrent=3\nActiveState=active\nInvocationID=feaa9e8325c04ed8915c45a9a308bd97\nmemory.current\n138055680\nmemory.peak\n140709888\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 558839\nuser_usec 360756\nsystem_usec 198082\ncore_sched.force_idle_usec 0\nnr_periods 9\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\npids.current\n3\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    172032  66936832   1% /srv/sbq/control\nsmolbox-qualification 805306368 130867200 674439168  17% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+        "cleanup": "verified_absent",
+        "elapsed_ms": 13493,
+        "machine": "qual-q32qieeugs56dkglvahh",
+        "observations": {
+          "filesystem_bytes": 21118275584,
+          "raw_disk_bytes": [
+            21474836480,
+            10737418240
+          ],
+          "uid": 0
+        },
+        "runtime_version": "1.14.1",
+        "scenario": "geometry",
+        "source": "qualification-probe.exs",
+        "status": "passed",
+        "vm_boundary": "VMM PID 2795\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n"
+      },
+      "sha256": "d76cefc3d9eeb14c3a06ba5895df760a821b5ae0a0be0b22b687b47082dc6d59"
+    },
+    "new_runtime": {
+      "report": "campaign-16/geometry.json",
+      "result": {
+        "after_workload": "MainPID=10523\nResult=success\nMemoryPeak=352481280\nTasksCurrent=22\nActiveState=active\nInvocationID=eff005f78d1a40199f2622d41b9f67b1\nmemory.current\n351694848\nmemory.peak\n352481280\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 8242350\nuser_usec 4769855\nsystem_usec 3472494\ncore_sched.force_idle_usec 0\nnr_periods 89\nnr_throttled 76\nthrottled_usec 3483356\nnr_bursts 0\nburst_usec 0\npids.current\n22\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    176128  66932736   1% /srv/sbq/control\nsmolbox-qualification 805306368 177786880 627519488  23% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+        "before": "MainPID=10523\nResult=success\nMemoryPeak=140849152\nTasksCurrent=3\nActiveState=active\nInvocationID=eff005f78d1a40199f2622d41b9f67b1\nmemory.current\n138203136\nmemory.peak\n140849152\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 363467\nuser_usec 247373\nsystem_usec 116094\ncore_sched.force_idle_usec 0\nnr_periods 6\nnr_throttled 1\nthrottled_usec 4294\nnr_bursts 0\nburst_usec 0\npids.current\n3\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    172032  66936832   1% /srv/sbq/control\nsmolbox-qualification 805306368 130867200 674439168  17% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+        "cleanup": "verified_absent",
+        "elapsed_ms": 8536,
+        "machine": "qual-b5isowt53zsvpl3nd5dz",
+        "observations": {
+          "filesystem_bytes": 1038790656,
+          "raw_disk_bytes": [
+            1073741824,
+            1073741824
+          ],
+          "uid": 0
+        },
+        "runtime_version": "1.14.6",
+        "scenario": "geometry",
+        "source": "qualification-probe.exs",
+        "status": "passed",
+        "vm_boundary": "VMM PID 10585\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n"
+      },
+      "sha256": "d614ea79c3e4129660bcfc7037fd5690681106950978118b943555011729126e"
+    }
+  },
+  "host_boundaries": {
+    "cpu": {
+      "cpu.stat": "usage_usec 8399041\nuser_usec 2529160\nsystem_usec 5869881\ncore_sched.force_idle_usec 0\nnr_periods 87\nnr_throttled 82\nthrottled_usec 23973958\nnr_bursts 0\nburst_usec 0",
+      "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+      "memory.peak": "8392704",
+      "pids.events": "max 0",
+      "result": "success"
+    },
+    "memory": {
+      "cpu.stat": "usage_usec 12657911\nuser_usec 12027127\nsystem_usec 630784\ncore_sched.force_idle_usec 0\nnr_periods 129\nnr_throttled 20\nthrottled_usec 74115\nnr_bursts 0\nburst_usec 0",
+      "memory.events": "low 0\nhigh 0\nmax 25\noom 1\noom_kill 1\noom_group_kill 0",
+      "memory.peak": "1610612736",
+      "pids.events": "max 0",
+      "result": "oom-kill"
+    },
+    "tasks": {
+      "cpu.stat": "usage_usec 406249\nuser_usec 186900\nsystem_usec 219348\ncore_sched.force_idle_usec 0\nnr_periods 20\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0",
+      "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+      "memory.peak": "29171712",
+      "pids.events": "max 4",
+      "result": "success"
+    }
+  },
+  "startup_refusals": {
+    "report": "campaign-16/admission-16.json",
+    "result": {
+      "captured_bytes": 2451,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "27fed01cfbd1a2e3ca2329112e8b850da049b618c2144d0dd7a01595a5834644",
+      "seconds": 7.059,
+      "status": "passed"
+    },
+    "sha256": "bc88aca352e07820b80458e84258ed5811955b00226a32ace1e375b3c73fba24"
+  },
+  "outage_scenarios": {
+    "database_outage": {
+      "report": "outages-16/durable-database_outage.json",
+      "result": {
+        "cleanup": "verified_absent",
+        "dispatches": 1,
+        "identity_preserved": true,
+        "reservation_retained_during_outage": true,
+        "result": "unknown",
+        "scenario": "database_outage",
+        "status": "passed"
+      },
+      "sha256": "ca1f128778de5c03376a50c498dae85cbac61c4f75c913ba948a03994af12e31"
+    },
+    "worker_deadline": {
+      "report": "outages-16/durable-worker_deadline.json",
+      "result": {
+        "cleanup": "verified_absent",
+        "dispatches": 1,
+        "identity_preserved": true,
+        "reservation_retained_during_outage": true,
+        "result": "unknown",
+        "scenario": "worker_deadline",
+        "status": "passed"
+      },
+      "sha256": "3625cbe77b585a60a0475ede8bb7e670997681d3742ef06bec47d4f883c620c2"
+    },
+    "worker_oom": {
+      "report": "outages-16/durable-worker_oom.json",
+      "result": {
+        "cleanup": "verified_absent",
+        "dispatches": 1,
+        "identity_preserved": true,
+        "reservation_retained_during_outage": true,
+        "result": "unknown",
+        "scenario": "worker_oom",
+        "status": "passed"
+      },
+      "sha256": "308e1bf2f18e980050172b45e943aae7ec263e146de56f27fa60c255506200ee"
+    }
+  },
+  "external_recovery": {
+    "report": "outer-recovery.json",
+    "result": {
+      "automatic_disk_rebuild": true,
+      "baseline_digest_verified": true,
+      "concurrent_start_rejected": true,
+      "exclusive_vm_lock_verified": true,
+      "frozen_at_unix": 1789074019,
+      "frozen_pid": 296576,
+      "guest_marker_absent_after_rebuild": true,
+      "host_deadline_result": "timeout",
+      "invocation": "dd4fde411ffd4adaa46146df8391053a",
+      "management_port_closed_before_replacement": true,
+      "operator_lingering": true,
+      "original_cgroup": "/system.slice/system-smolbox\\x2dlab.slice/smolbox-lab@probe.service",
+      "original_cgroup_absent": true,
+      "original_process_absent": true,
+      "periodic_capture_after_freeze": true,
+      "recovered_at_unix": 1789074089,
+      "replacement_inventory_empty": true,
+      "replacement_pid": 296941,
+      "replacement_worker_endpoint": "unix:///srv/sbq/run/api.sock",
+      "status": "passed",
+      "terminated_at_unix": 1789074042
+    },
+    "sha256": "676711817ef314834389c0761800a56e4005a1764420dead7478de5e09446756"
+  },
+  "replacement_execution": {
+    "report": "runtime-11/replacement-smoke-16.json",
+    "result": {
+      "after_workload": "MainPID=2091\nResult=success\nMemoryPeak=369442816\nTasksCurrent=22\nActiveState=active\nInvocationID=643f27e54cfa45cabc44b86c44efc83d\nmemory.current\n368783360\nmemory.peak\n369442816\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 10637125\nuser_usec 6560585\nsystem_usec 4076539\ncore_sched.force_idle_usec 0\nnr_periods 114\nnr_throttled 99\nthrottled_usec 4026534\nnr_bursts 0\nburst_usec 0\npids.current\n22\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    176128  66932736   1% /srv/sbq/control\nsmolbox-qualification 805306368 185360384 619945984  24% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+      "before": "MainPID=2091\nResult=success\nMemoryPeak=142225408\nTasksCurrent=4\nActiveState=active\nInvocationID=643f27e54cfa45cabc44b86c44efc83d\nmemory.current\n139194368\nmemory.peak\n142225408\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 587521\nuser_usec 379856\nsystem_usec 207664\ncore_sched.force_idle_usec 0\nnr_periods 10\nnr_throttled 1\nthrottled_usec 8032\nnr_bursts 0\nburst_usec 0\npids.current\n4\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    172032  66936832   1% /srv/sbq/control\nsmolbox-qualification 805306368 131268608 674037760  17% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+      "cleanup": "verified_absent",
+      "elapsed_ms": 10875,
+      "machine": "qual-ipccxncmmgcf6tagkvh7",
+      "observations": {
+        "system": "Linux"
+      },
+      "runtime_version": "1.14.6",
+      "scenario": "smoke",
+      "source": "qualification-probe.exs",
+      "status": "passed",
+      "vm_boundary": "VMM PID 2152\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n"
+    },
+    "sha256": "2add450a9303cb15ee6c7c35679c27fe0a084f48e2e18eeb32e499559e88703c"
+  },
+  "failed_attempts": [
+    {
+      "report": {
+        "report": "first-runtime/durable-final.json",
+        "result": {
+          "captured_bytes": 2810,
+          "exit_code": 2,
+          "failure": null,
+          "output_sha256": "05d79f3765e1b466a577535b23f8f56f17cd7835ebf812e392b6a547fd5e8ff4",
+          "seconds": 899.518,
+          "status": "failed"
+        },
+        "sha256": "50d346218dc5821bb54b187709b46a48bd9116d02bc07d579678ac46472f34e7"
+      },
+      "explanation": "Four cases timed out before the intended recovery boundary. Retained records were not_dispatched with pending collection and failed cleanup. The worker reported a VM still reachable after scope kill, without a PID. Shared examples now use 60-second operation / 55-second receive budgets to match the existing preparation profile. The full 25-case rerun passed; command deadlines, retention, leases and no-replay semantics were not changed."
+    }
+  ],
+  "limitations": [
+    "Finite deployment evidence, not a security audit or universal hostile-code guarantee.",
+    "No macOS or Linux ARM64 1.14.6 runtime qualification.",
+    "Synchronous block I/O only; no asynchronous engine qualification.",
+    "One active execution, offline approved artifacts, no concurrent tenants or production credentials.",
+    "Host tasks are not guest PIDs; charged memory is not per-process RSS; CPU bandwidth is not accumulated CPU time.",
+    "Failed startup can still require external worker teardown; unknown outcomes never authorize command replay.",
+    "Historical 1.14.1 and shared-filesystem cleanup comparison evidence remain separate.",
+    "No new GitHub Actions run, release tag, Hex publication or GitHub Release."
+  ],
+  "private_evidence_location": "/var/lib/smolbox-lab/evidence/compat-0.1.2"
+}

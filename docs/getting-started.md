@@ -17,8 +17,9 @@ In an existing Elixir Mix application, add this entry to `deps/0` in `mix.exs`:
 {:smolbox, "~> 0.1.1"}
 ```
 
-Run `mix deps.get` to fetch the package from Hex. With a sibling local checkout, use
-`{:smolbox, path: "../smolbox"}` instead. Elixir 1.18 and later are accepted by the
+Run `mix deps.get` to fetch the published package from Hex. The 0.1.2 candidate
+is not published; to use its SmolVM 1.14.6 option, use a sibling local checkout
+with `{:smolbox, path: "../smolbox"}`. Elixir 1.18 and later are accepted by the
 package; use one of the tested Elixir/OTP pairs in [Compatibility](compatibility.md).
 
 For a new application, run `mix new smolbox_demo` and `cd smolbox_demo` first.
@@ -31,7 +32,9 @@ Use Linux x86_64 with KVM or macOS Apple Silicon. This walkthrough runs the Elix
 application on the worker host so it can verify the local artifact file. Remote
 workers use a different host configuration; see [Managed host integration](host-integration.md).
 
-You need a **dedicated, empty SmolVM 1.14.1 worker** and an approved native Python
+You need a **dedicated, empty worker**: select **SmolVM 1.14.6 on Linux x86_64**
+with the 0.1.2 candidate, or **1.14.1 on macOS Apple Silicon**. Existing Linux
+1.14.1 deployments remain compatible. Use an approved native Python
 artifact with neutral `/bin/true` startup. Follow the
 [reference-runtime preparation instructions](client.md#preparing-the-reference-runtimes)
 to create `python.smolmachine`, record its SHA-256, and start the private worker
@@ -49,6 +52,7 @@ In your application directory, set these values using the artifact you approved:
 
 ```sh
 export SMOLBOX_RUNTIME_URL=http://127.0.0.1:19470
+export SMOLBOX_RUNTIME_VERSION=1.14.6
 export SMOLBOX_PYTHON_ARTIFACT=/absolute/path/to/python.smolmachine
 export SMOLBOX_PYTHON_SHA256=replace_with_the_approved_64_character_sha256
 export SMOLBOX_DEMO_DIR="$(mktemp -d)"
@@ -58,6 +62,14 @@ iex -S mix
 
 `SMOLBOX_DEMO_DIR` is a new private directory for input/output objects. Keep it
 separate from the runtime image and from all guest-accessible directories.
+Set `SMOLBOX_RUNTIME_VERSION=1.14.1` for macOS or an existing 1.14.1 worker.
+The walkthrough checks this explicit selection; it never adopts an arbitrary
+version from the health response.
+
+For a local Unix endpoint, set `SMOLBOX_RUNTIME_URL=http://localhost` and
+`SMOLBOX_RUNTIME_SOCKET=/absolute/path/to/smolvm.sock` instead. The example's
+60-second operation and 55-second receive budgets allow cold preparation;
+the execution profile still controls each stage's deadline separately.
 
 ## 3. Run the complete example
 
@@ -94,11 +106,15 @@ true = actual_sha256 == approved_sha256
 
 {:ok, worker} =
   Worker.new("demo-worker", System.fetch_env!("SMOLBOX_RUNTIME_URL"),
-    allow_insecure_loopback: true
+    allow_insecure_loopback: true,
+    unix_socket: System.get_env("SMOLBOX_RUNTIME_SOCKET"),
+    operation_timeout_ms: 60_000,
+    receive_timeout_ms: 55_000
   )
 
 {:ok, client} = SmolBox.Client.new(worker)
-{:ok, %{version: "1.14.1"}} = SmolBox.Client.health(client)
+runtime_version = System.fetch_env!("SMOLBOX_RUNTIME_VERSION")
+{:ok, %{version: ^runtime_version}} = SmolBox.Client.health(client)
 :ok = SmolBox.Client.readiness(client)
 {:ok, []} = SmolBox.Client.list(client)
 
@@ -117,6 +133,7 @@ artifact = %{
     client: client,
     platform: platform,
     architecture: architecture,
+    runtime_version: runtime_version,
     artifacts: [artifact],
     profiles: [profile],
     allocation_floor: %{storage_gb: 20, overlay_gb: 10, host_overhead_mb: 768},

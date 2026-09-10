@@ -4,6 +4,8 @@ defmodule SmolBox.WorkerPoolTest do
   alias SmolBox.Runtime.{Clock, WorkerHealth}
 
   for {options, status} <- [
+        {[runtime_version: "1.14.6"], :incompatible},
+        {[runtime_version: "1.14.1", expected_runtime_version: "1.14.6"], :incompatible},
         {[runtime_version: "1.15.0"], :incompatible},
         {[unready: true], :degraded},
         {[inventory_unavailable: true], :degraded}
@@ -24,6 +26,18 @@ defmodule SmolBox.WorkerPoolTest do
                method == "GET"
              end)
     end
+  end
+
+  test "explicit 1.14.6 admission preserves identity, collection and cleanup" do
+    context = RuntimeFixture.start(runtime_version: "1.14.6", expected_runtime_version: "1.14.6")
+    wait_status(context.runtime, :ready)
+    assert {:ok, handle} = SmolBox.submit(context.runtime, context.spec)
+    assert {:ok, record} = SmolBox.await(context.runtime, handle, 5000)
+    assert record.state == :completed and record.collection == :complete
+    assert {:ok, ^handle} = SmolBox.submit(context.runtime, context.spec)
+    assert wait_cleanup(context.runtime, handle).reservation == nil
+    assert match?([_command], ManagedPeer.snapshot(context.peer).commands)
+    assert ManagedPeer.snapshot(context.peer).machines == %{}
   end
 
   test "a healthy second worker receives work while a degraded first worker stays inspectable" do
@@ -55,7 +69,7 @@ defmodule SmolBox.WorkerPoolTest do
     wait_status(context.runtime, :ready)
 
     Agent.update(context.peer, fn state ->
-      %{state | options: Keyword.put(state.options, :runtime_version, "1.15.0")}
+      %{state | options: Keyword.put(state.options, :runtime_version, "1.14.6")}
     end)
 
     assert {:ok, handle} = SmolBox.submit(context.runtime, %{context.spec | queue_ms: 100})
@@ -112,7 +126,7 @@ defmodule SmolBox.WorkerPoolTest do
     assert_receive {:boundary, :creation_record, :after, blocked}, 5000
 
     Agent.update(context.peer, fn state ->
-      %{state | options: Keyword.put(state.options, :runtime_version, "1.15.0")}
+      %{state | options: Keyword.put(state.options, :runtime_version, "1.14.6")}
     end)
 
     send(blocked, :release_boundary)

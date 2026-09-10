@@ -4,8 +4,8 @@ defmodule SmolBox.Command do
 
   Timeouts are positive whole seconds, matching SmolVM's `timeoutSecs` field.
   The initial maximum is five minutes; managed execution can impose an earlier
-  absolute deadline. `stdin` must be UTF-8 and is only supported by buffered
-  execution in SmolVM 1.14.1. Arbitrary binary data belongs in staged files.
+  absolute deadline. `stdin` must be UTF-8 and SmolBox accepts it only for buffered
+  execution. Arbitrary binary data belongs in staged files.
   """
 
   alias SmolBox.{Error, Files}

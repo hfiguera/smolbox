@@ -54,7 +54,8 @@ defmodule SmolBox.ManagedRuntimeTest do
       )
 
     {:ok, client} = Client.new(worker)
-    assert {:ok, %{version: "1.14.1", total: total}} = Client.health(client)
+    version = SmolBox.LabCandidate.runtime_version()
+    assert {:ok, %{version: ^version, total: total}} = Client.health(client)
     assert is_integer(total)
     assert :ok = Client.readiness(client)
     assert {:ok, _machines} = Client.list(client)
@@ -67,6 +68,7 @@ defmodule SmolBox.ManagedRuntimeTest do
         client: client,
         architecture: architecture,
         platform: platform,
+        runtime_version: version,
         artifacts: artifacts,
         profiles: [profile],
         allocation_floor: %{storage_gb: 20, overlay_gb: 10, host_overhead_mb: 768},

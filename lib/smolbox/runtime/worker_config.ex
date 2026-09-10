@@ -66,7 +66,8 @@ defmodule SmolBox.Runtime.WorkerConfig do
   | `:capacity` | Atom-keyed map with `:slots`, `:cpus`, `:memory_mb`, and `:disk_gb`; each 1–1,048,576 |
   | `:allocation_floor` | Atom-keyed map with `:storage_gb` and `:overlay_gb` (1–64 each), and `:host_overhead_mb` (128–16,384) |
 
-  Optional fields are `:runtime_version` (only `"1.14.1"`), `:qualification`
+  Optional fields are `:runtime_version` (default `"1.14.1"`; explicitly select
+  `"1.14.6"` for Linux x86_64), `:qualification`
   (only `:development`), and `:draining` (default `false`). Artifact IDs must be
   unique and architectures must match this worker. Construction makes no worker
   request or remote digest check. Profiles below the floor cannot support execution.
@@ -114,11 +115,18 @@ defmodule SmolBox.Runtime.WorkerConfig do
   end
 
   defp valid_fields?(worker) do
-    valid_client?(worker.client) and worker.runtime_version == "1.14.1" and
+    valid_client?(worker.client) and supported_runtime?(worker) and
       worker.qualification == :development and valid_platform?(worker) and
       is_boolean(worker.draining) and capacity?(worker.capacity) and catalogs?(worker) and
       allocation_floor?(worker.allocation_floor)
   end
+
+  defp supported_runtime?(%{runtime_version: "1.14.1"}), do: true
+
+  defp supported_runtime?(%{runtime_version: "1.14.6", platform: :linux, architecture: "x86_64"}),
+    do: true
+
+  defp supported_runtime?(_worker), do: false
 
   defp valid_client?(%Client{} = client) do
     Validation.struct_shape?(client, Client) and

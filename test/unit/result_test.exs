@@ -5,10 +5,12 @@ defmodule SmolBox.ResultTest do
   alias SmolBox.{Error, Result}
 
   test "decodes a captured worker response without using its lossy text fields" do
-    wire = "test/fixtures/wire/exec.json" |> File.read!() |> Jason.decode!()
+    for prefix <- ["", "1.14.6/"] do
+      wire = "test/fixtures/wire/#{prefix}exec.json" |> File.read!() |> Jason.decode!()
 
-    assert {:ok, %Result{exit_code: 7, stdout: <<0, 255, 254>>, stderr: "err"}} =
-             Result.from_wire(wire, 64)
+      assert {:ok, %Result{exit_code: 7, stdout: <<0, 255, 254>>, stderr: "err"}} =
+               Result.from_wire(wire, 64)
+    end
   end
 
   property "buffered decoding preserves arbitrary bytes and nonzero exits" do

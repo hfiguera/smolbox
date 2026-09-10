@@ -43,6 +43,7 @@ token. Proxy tokens stay in trusted configuration, outside persisted records.
   client: client,
   platform: :linux,
   architecture: "x86_64",
+  runtime_version: "1.14.6",
   profiles: [profile],
   artifacts: [%{
     "id" => "python-v1",
@@ -67,6 +68,9 @@ children = [
 ]
 ```
 
+This fragment explicitly selects Linux 1.14.6 with the unpublished 0.1.2
+candidate. Use `"1.14.1"` for an existing worker; omitting the field retains
+that default. See [runtime selection](compatibility.md#runtime-selection).
 This is a host configuration fragment, not a self-provisioning script. The host
 must verify artifact bytes on the worker and retain that immutable artifact.
 Its image must have neutral `/bin/true` startup and no automatic workload restart.
@@ -76,7 +80,7 @@ macOS `aarch64`. Linux arm64 remains unqualified.
 
 `allocation_floor` is required and has no inferred default. Verify the largest
 storage/overlay templates across the runtime installation and every approved
-artifact, plus VMM overhead, before registering a worker. The pinned release's
+artifact, plus VMM overhead, before registering a worker. The 1.14.1 release's
 supplied templates measured 20 GiB storage and 10 GiB overlay on both hosts.
 SmolVM 1.14.1 retains a larger template even when its API reports a 1 GiB request.
 Managed submission rejects profiles below the declared floor. Recovered work
@@ -257,7 +261,7 @@ can therefore be withheld conservatively. Long probes never run in the coordinat
 
 | Status | Admission meaning |
 | --- | --- |
-| `ready` | The reported version matches 1.14.1, inventory is available, and readiness succeeded |
+| `ready` | The reported version matches the worker's explicitly configured supported version, inventory is available, and readiness succeeded |
 | `degraded` | The server responded, but inventory or blocking-pool readiness was unavailable |
 | `incompatible` | The server reported a different runtime version |
 | `unavailable` | No current valid probe or worker ownership claim is available |
@@ -297,6 +301,46 @@ observed result. Keep worker endpoints configured while they own unresolved work
 Stopping the runtime stops observers with bounded supervision shutdown. It does
 not promise that a guest stopped. Restart with the same store and fingerprint key
 to reconcile. Memory mode loses this authority when its store process stops.
+
+## Upgrading a worker
+
+SmolBox 0.1.2 adds an explicit Linux x86_64 option:
+
+```elixir
+{:ok, worker} = SmolBox.Runtime.WorkerConfig.new(
+  Keyword.put(existing_worker_options, :runtime_version, "1.14.6")
+)
+```
+
+Use this version for new Linux deployments after consulting its
+[compatibility evidence](compatibility.md#runtime-selection).
+Omitting `:runtime_version` retains `"1.14.1"`; an Elixir dependency update does
+not install SmolVM or silently change the expected worker version. macOS workers
+continue to use 1.14.1. Unverified versions and 1.14.6 host combinations fail
+configuration validation. Health checks still require an exact version match.
+
+For an existing worker:
+
+1. Pause submissions at the application boundary and persist its drain setting.
+   Drain all controllers sharing the authoritative configuration. The convenience
+   drain call cannot retract an admission or request already in flight.
+2. Keep the original endpoint and store available until owned executions have
+   finished observation, collection and verified cleanup. Resolve unknown work
+   using its original identity; do not resubmit commands or discard reservations.
+3. Once the worker is empty and no requests remain in flight, stop it and install
+   the complete pinned distribution. Verify binary, agent, libkrun and artifact
+   digests. Do not mix files from different distributions.
+4. Recheck the deployment controls and approved artifact/profile revisions.
+   Smaller disk requests in 1.14.6 can require `resize2fs`; API allocations still
+   do not prove host storage quotas. Retain conservative floors until measured.
+5. Update the expected version, start the worker, verify health/readiness and
+   empty inventory, run an owned smoke execution through cleanup, then resume
+   admission. Rollback also requires a drained worker; do not assume its modified
+   registry or live VM state can be opened safely by the older runtime.
+
+No persisted SmolBox record schema or fingerprint change is needed for the
+version option. Changing an artifact or profile still changes execution meaning;
+use a new approved revision and never rewrite an already accepted specification.
 
 ## Unfenced worker requests
 

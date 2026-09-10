@@ -19,13 +19,28 @@ for item in control:67108864 cache:805306368 run:4194304; do
   [[ $(stat -c %u "$path") == "$(id -u)" ]] || exit 1
 done
 [[ $(find /sys/class/net -mindepth 1 -maxdepth 1 -printf '%f\n') == lo ]] || exit 1
-[[ ! -w /opt/smolbox/runtime/smolvm-bin && ! -w /opt/smolbox/catalog/python.smolmachine ]] || exit 1
+case "${SMOLBOX_CANDIDATE_VERSION:-1.14.1}" in
+  1.14.1)
+    runtime=/opt/smolbox/runtime
+    binary=bb2432804d4bf5d6cbb688d3af160a6a01c99194830f0099d64f291d4ad62373
+    krun=3f021ac366152b33c7c329f893804fa9adda5d4352fac4b88214ae28fb89ebd0
+    agent=bbeabaa935ff859438e418515dff0ca514e757a99ffc834d6cbb06447de4b8ca
+    ;;
+  1.14.6)
+    runtime=/opt/smolbox/runtime-1.14.6
+    binary=cc1f9b5f14613191ca83c706d52f4350f69b69a6c431c867cd662b51cb36d7d6
+    krun=af43ad572bffe052d94d3d8d38beebc0b0f1e7d832f25ad6d352d5d919c0ddd1
+    agent=067539a55bd72bb05d54472ca153fb4dea0be0239069c9f1a21aa610e26da020
+    ;;
+  *) exit 1 ;;
+esac
+[[ ! -w $runtime/smolvm-bin && ! -w /opt/smolbox/catalog/python.smolmachine ]] || exit 1
 printf '%s\n' \
-  '8caeb3b6e7d834493a578b0fe8bd1e7aa02e68fba6d61bcf70fdbec41a27ce68  /opt/smolbox/runtime/smolvm' \
-  'bb2432804d4bf5d6cbb688d3af160a6a01c99194830f0099d64f291d4ad62373  /opt/smolbox/runtime/smolvm-bin' \
-  '3f021ac366152b33c7c329f893804fa9adda5d4352fac4b88214ae28fb89ebd0  /opt/smolbox/runtime/lib/libkrun.so' \
-  '767495f52bd786e6e0b0fa1b04adf40dea44b80019f6953ca6eb6394cc90d264  /opt/smolbox/runtime/lib/libkrunfw.so' \
-  'bbeabaa935ff859438e418515dff0ca514e757a99ffc834d6cbb06447de4b8ca  /opt/smolbox/runtime/agent-rootfs/usr/local/bin/smolvm-agent' \
+  "8caeb3b6e7d834493a578b0fe8bd1e7aa02e68fba6d61bcf70fdbec41a27ce68  $runtime/smolvm" \
+  "$binary  $runtime/smolvm-bin" \
+  "$krun  $runtime/lib/libkrun.so" \
+  "767495f52bd786e6e0b0fa1b04adf40dea44b80019f6953ca6eb6394cc90d264  $runtime/lib/libkrunfw.so" \
+  "$agent  $runtime/agent-rootfs/usr/local/bin/smolvm-agent" \
   '76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2  /opt/smolbox/catalog/python.smolmachine' \
   '768b8d2158a75abd90ccc73a65a83717aebfe37e62ed91d0db0bb731584df776  /opt/smolbox/catalog/node.smolmachine' \
   | sha256sum --check --status

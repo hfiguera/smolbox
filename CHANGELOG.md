@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.2 (unreleased)
+
+- Add explicit `runtime_version: "1.14.6"` support for Linux x86_64 workers.
+  Existing configurations retain the `"1.14.1"` default and exact version checks.
+  macOS 1.14.6 and Linux ARM64 1.14.6 are not qualified.
+- Update maintainer checks and host examples to select a runtime version explicitly.
+  Public execution APIs, persisted record formats and production dependencies
+  remain unchanged. No new hard resource or isolation controls are exposed.
+
+Linux runtime and constrained deployment preparation results are documented in
+the compatibility guide. Exact-commit release acceptance is recorded separately.
+No 0.1.2 tag, Hex package or GitHub Release has been created.
+
 ## 0.1.1
 
 Documentation and validation release. Library source, public APIs, persisted record

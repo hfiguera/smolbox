@@ -1,8 +1,92 @@
 # Compatibility evidence
 
-Version: `0.1.1`. The library's supported qualification is
+Version: `0.1.2` candidate, not released. The library's supported qualification is
 `:development`; requested hard-control options remain unsupported. The original
 release evidence below records the client/controller contract on Linux and macOS.
+
+## Runtime selection
+
+The candidate adds explicit `runtime_version: "1.14.6"` for Linux x86_64.
+The Linux runtime and constrained deployment results are recorded below;
+exact-commit release acceptance is recorded separately in the repository's
+`docs/release-candidates/` directory.
+The default remains `"1.14.1"`, preserving existing configurations. A worker
+must report the exact configured version; supporting two versions does not
+allow automatic fallback or accepting an arbitrary `1.14.x` release.
+
+SmolVM 1.14.6 on macOS and Linux ARM64 remains unsupported. No new macOS tests
+run for this candidate. The older macOS 1.14.1 results below are historical,
+not evidence for a different libkrun, runtime or deployment.
+
+SmolVM is installed by the operator, separately from the Elixir dependency.
+Use the [upgrade procedure](host-integration.md#upgrading-a-worker) before
+changing a worker that owns executions. Keep existing allocation floors until
+the selected runtime and approved artifacts have measured replacement values.
+
+The new upstream identity is `v1.14.6`, commit
+`6c503014629bba91631152728c3081c944653f31`. The complete Linux x86_64 archive has
+SHA-256 `94a1edb0c42b20ac562c3759ed216bab2cab9e27c382f6560969144f7bd1dce3`.
+The binary and libkrun identities are recorded with the
+[shared storage cleanup comparison](resource-qualification.md#shared-storage-cleanup-retest).
+That comparison passed, but does not by itself qualify managed recovery or
+the separately enforced Linux deployment.
+
+The [upstream comparison](https://github.com/smol-machines/smolvm/compare/v1.14.1...v1.14.6)
+includes changes to disk templates, packing, lifecycle operations and libkrun.
+For SmolBox's contract, the relevant changes are:
+
+- Deletion releases VM data before committing registry removal, allowing the
+  tested cleanup operation to complete when shared storage is full.
+- New disks can be shrunk to the requested size using the host's `resize2fs`.
+  In the Linux candidate, a fresh 1/1 GiB request produced two 1,073,741,824-byte
+  raw disks and a 1,038,790,656-byte `/workspace` filesystem. This measures one
+  artifact/configuration; it does not attest every template or impose a quota.
+- Packing changes entrypoint and `USER` handling. Rebuilding a runtime artifact
+  requires a new digest and verification of its actual startup and execution
+  behavior, rather than reusing approval based on its language tag.
+- The default block engine is synchronous. SmolBox does not select or qualify
+  the new optional asynchronous engine. Linux seccomp installation and libkrun
+  also changed, so old kernel-control results alone do not qualify the new stack.
+- Archive path resolution changed upstream. SmolBox's individual bounded file
+  operations remain its supported interface; archive and recursive operations
+  are not added by this patch.
+
+The eight API paths and nineteen referenced schema components used by the client
+were captured from the new binary. Captured lifecycle replies include additional
+resource statistics and `blockIo: "sync"`; the client retains its strict required
+fields while ignoring additive observations. Buffered output still uses base64
+bytes, and streaming retains its lossy UTF-8 contract. This source and wire review
+is not a security audit of every upstream change.
+
+### 0.1.2 preparation results
+
+Both Linux worker versions passed all 14 client/runtime cases, 16 PostgreSQL
+store cases and 25 durable recovery cases. The 1.14.6 run first used the approved
+1.14.1 Python/Node artifacts. A second 14-case runtime run passed with new payloads
+prepared by 1.14.6 from those same layers using `pack create --from-vm`, without
+network access or a new registry pull. Those payloads have new digests and were
+separately approved; they do not establish compatibility for arbitrary images.
+The expanded runtime suite also verified buffered bytes, lossy UTF-8 streaming
+and explicit guest UID 65534 through both execution modes.
+
+The complete constrained Linux campaign passed with 1.14.6, including all ten
+workload probes, eleven startup refusals, actual worker OOM, database failure,
+the 300-second worker deadline, and frozen outer-VM recovery. See the
+[deployment retest](resource-qualification.md#smolvm-1-14-6-linux-deployment-retest)
+and [machine-readable evidence](evidence/smolvm-1.14.6-compatibility.json).
+
+One initial recovery run failed four cases before reaching their intended
+interruption boundaries. The failures involved cold preparation and unresolved
+cleanup under the worker CPU cap. The examples now allow a 60-second operation
+and 55-second receive budget, matching their existing preparation profile; the complete
+25-case rerun passed. Command deadlines, leases, retention and uncertainty
+semantics are unchanged. The failed attempt remains in the evidence, and a
+startup failure can still require external worker teardown.
+
+The default is retained for compatibility with existing worker installations.
+For a new Linux x86_64 installation using this candidate, explicitly select
+1.14.6 to obtain the tested upstream cleanup fix. Updating the Elixir dependency
+does not update a separately installed worker.
 
 A subsequent
 [Linux deployment campaign](resource-qualification.md#subsequent-linux-deployment-validation)

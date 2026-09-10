@@ -40,7 +40,8 @@ defmodule SmolBox.ClientRuntimeTest do
       )
 
     {:ok, client} = Client.new(worker)
-    assert {:ok, %{version: "1.14.1", total: total}} = Client.health(client)
+    version = SmolBox.LabCandidate.runtime_version()
+    assert {:ok, %{version: ^version, total: total}} = Client.health(client)
     assert is_integer(total)
     assert :ok = Client.readiness(client)
     assert {:ok, _machines} = Client.list(client)
@@ -124,6 +125,14 @@ defmodule SmolBox.ClientRuntimeTest do
     assert {:ok, %Result{exit_code: 0, stdout: "stream-ok\n"}} =
              Client.exec_stream(context.client, name, stream)
 
+    {:ok, guest_user} = Command.new(["id", "-u"], user: "65534:65534")
+
+    assert {:ok, %Result{exit_code: 0, stdout: "65534\n"}} =
+             Client.exec(context.client, name, guest_user)
+
+    assert {:ok, %Result{exit_code: 0, stdout: "65534\n"}} =
+             Client.exec_stream(context.client, name, guest_user)
+
     {:ok, timeout} = Command.new(["python", "-c", "import time; time.sleep(10)"], timeout_secs: 1)
     assert {:ok, %Result{exit_code: 124}} = Client.exec(context.client, name, timeout)
 
@@ -158,6 +167,9 @@ defmodule SmolBox.ClientRuntimeTest do
 
     assert {:ok, %Result{exit_code: 7, stdout: <<0, 255, 254>>, stderr: "err"}} =
              Client.exec(context.client, name, binary)
+
+    assert {:ok, %Result{exit_code: 7, stdout: "\u0000��", stderr: "err", encoding: :lossy_utf8}} =
+             Client.exec_stream(context.client, name, binary)
 
     script = """
     const fs = require('node:fs');
@@ -259,7 +271,8 @@ defmodule SmolBox.ClientRuntimeTest do
       )
 
     {:ok, protected} = Client.new(worker)
-    assert {:ok, %{version: "1.14.1"}} = Client.health(protected)
+    version = SmolBox.LabCandidate.runtime_version()
+    assert {:ok, %{version: ^version}} = Client.health(protected)
     assert :ok = Client.readiness(protected)
     name = machine(context.client, context.python)
     assert {:ok, %Machine{state: :running}} = Client.inspect_machine(protected, name)

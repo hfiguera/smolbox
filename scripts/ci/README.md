@@ -55,6 +55,18 @@ final commit. Library source and production dependencies are unchanged from 0.1.
 the previous macOS results remain historical and must not be reported as a new
 0.1.1 run. See the release-specific scope in the implementation plan.
 
+## 0.1.2 runtime selection
+
+The unpublished 0.1.2 candidate additionally supports an explicit Linux x86_64
+SmolVM 1.14.6 selection. Set `runtime_version` in the private worker manifest;
+preflight verifies that version's binary checksum and exports
+`SMOLBOX_RUNTIME_VERSION` for runtime tests, examples and service fault checks.
+An omitted field retains 1.14.1. macOS still accepts only 1.14.1 in this tooling.
+Selecting a different version never installs it or accepts an unexpected server
+version. The new candidate's validation runs on Linux only, with previous macOS
+results retained as historical evidence. See the implementation plan for its
+current acceptance status.
+
 ## Documentation and package checks
 
 Build the site and check its generated local links from the repository root:
@@ -111,7 +123,7 @@ Before setting repository variable `SMOLBOX_TRUSTED_RUNTIME_ENABLED` to `true`:
    are not a protection mechanism: configure and verify them before enabling
    the repository variable. The job has an additional explicit dispatch guard;
    neither `pull_request` nor `pull_request_target` executes this live workflow.
-3. Provision a dedicated worker account/state, the complete pinned 1.14.1
+3. Provision a dedicated worker account/state, the complete selected pinned
    distribution, native prepared Python/Node artifacts, and a private Postgres
    16.15 database with at least 20 connections. The database must be dedicated
    to this job; tests kill child controllers and create/migrate their own tables.
@@ -136,6 +148,7 @@ with actual observations; the sample deliberately does not pass preflight:
 {
   "schema": 1,
   "platform": "linux",
+  "runtime_version": "1.14.6",
   "ephemeral_runner": true,
   "expires_at_unix": 0,
   "lifecycle_id": "scheduler-owned-unique-id",

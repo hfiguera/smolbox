@@ -2,8 +2,8 @@ defmodule SmolBox.Result do
   @moduledoc """
   Observed command output and exit status. A nonzero exit is still an observed result.
 
-  Buffered execution uses `:bytes`; SSE output uses `:lossy_utf8` because SmolVM
-  1.14.1 does not preserve arbitrary bytes on that route. This result does not
+  Buffered execution uses `:bytes`; SSE output uses `:lossy_utf8` and must not
+  be used to preserve arbitrary binary output. This result does not
   assert application success, artifact collection, or machine cleanup.
   """
 

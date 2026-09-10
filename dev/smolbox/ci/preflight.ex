@@ -1,19 +1,16 @@
 defmodule SmolBox.CI.Preflight do
   @moduledoc false
-  alias SmolBox.CI.{HTTP, Util}
-
-  @pins %{
-    "linux" => {"x86_64", "bb2432804d4bf5d6cbb688d3af160a6a01c99194830f0099d64f291d4ad62373"},
-    "macos" => {"arm64", "af238c1190aefbc1c293f515c720c9c15f968498ad67624a9b9f824a51af0c79"}
-  }
+  alias SmolBox.CI.{HTTP, Runtime, Util}
   @wrapper "8caeb3b6e7d834493a578b0fe8bd1e7aa02e68fba6d61bcf70fdbec41a27ce68"
 
   def validate!(manifest, platform, development, environment \\ System.get_env()) do
     Util.ensure!(
       manifest["schema"] == 1 and manifest["platform"] == platform and
-        Map.has_key?(@pins, platform),
+        platform in ["linux", "macos"],
       "unsupported worker manifest or platform"
     )
+
+    Runtime.pin!(platform, Map.get(manifest, "runtime_version", "1.14.1"))
 
     Util.ensure!(
       !(environment["GITHUB_ACTIONS"] == "true" and development),
@@ -119,7 +116,8 @@ defmodule SmolBox.CI.Preflight do
 
   def verify!(manifest, platform, development) do
     uri = validate!(manifest, platform, development)
-    {architecture, pin} = Map.fetch!(@pins, platform)
+    version = Map.get(manifest, "runtime_version", "1.14.1")
+    {architecture, pin} = Runtime.pin!(platform, version)
 
     Util.ensure!(
       Util.platform() == platform and String.trim(Util.command!(["uname", "-m"])) == architecture,
@@ -152,7 +150,7 @@ defmodule SmolBox.CI.Preflight do
     health = HTTP.json!(manifest["worker_url"] <> "/health", "GET", nil, 4096)
 
     Util.ensure!(
-      health["version"] == "1.14.1" and health["machines"] === %{"total" => 0, "running" => 0},
+      health["version"] == version and health["machines"] === %{"total" => 0, "running" => 0},
       "worker must be pinned and idle"
     )
 
@@ -180,7 +178,7 @@ defmodule SmolBox.CI.Preflight do
        architecture: architecture,
        kernel: String.trim(Util.command!(["uname", "-r"])),
        logical_cpus: :erlang.system_info(:logical_processors),
-       worker_version: "1.14.1",
+       worker_version: version,
        worker_binary_sha256: pin,
        python_sha256: manifest["python_sha256"],
        javascript_sha256: manifest["javascript_sha256"],
@@ -293,6 +291,7 @@ defmodule SmolBox.CI.Preflight do
       values = %{
         "SMOLBOX_SMOLVM_CLI" => Path.join(Path.dirname(executable), "smolvm"),
         "SMOLBOX_RUNTIME_URL" => manifest["worker_url"],
+        "SMOLBOX_RUNTIME_VERSION" => Map.get(manifest, "runtime_version", "1.14.1"),
         "SMOLBOX_PYTHON_ARTIFACT" => manifest["python_artifact"],
         "SMOLBOX_PYTHON_SHA256" => manifest["python_sha256"],
         "SMOLBOX_JS_ARTIFACT" => manifest["javascript_artifact"],

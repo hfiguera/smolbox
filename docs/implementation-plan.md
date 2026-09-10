@@ -1,5 +1,44 @@
 # SmolBox implementation plan
 
+## 0.1.2 compatibility candidate (not released)
+
+The maintainer authorized preparing and validating this patch on September 10,
+2026, explicitly excluding the real `v0.1.2` tag, Hex publication and GitHub
+Release. All new execution runs on `ssh linux`. Existing 1.14.1 configuration
+and its default remain compatible; 1.14.6 is an explicit Linux x86_64 option.
+No new macOS or Linux ARM64 runtime qualification is claimed. Earlier macOS
+1.14.1 evidence remains historical. Unsupported hard controls stay rejected.
+
+- [x] Add exact, explicit 1.14.6 worker support without accepting version drift.
+- [x] Capture official binary/agent/libkrun/OpenAPI identities and actual wire
+  fixtures; validate old and newly prepared Python/Node artifacts and disk sizing.
+- [ ] Run the full Linux client/runtime, PostgreSQL, durable recovery, service
+  fault and example suites for both supported runtime versions.
+- [x] Repeat the constrained Linux resource/isolation campaign on 1.14.6,
+  including kernel controls, startup refusals, exhaustion and external recovery.
+- [ ] Validate all four Linux Elixir/OTP lanes, coverage, all five analyzers and
+  their canaries, audits, ExDoc and current/minimum package consumers.
+- [ ] Document explicit upgrade/drain procedures and measured boundaries,
+  freeze an untagged candidate and record exact-commit acceptance and cleanup.
+
+Preparation evidence is bundled in
+[`smolvm-1.14.6-compatibility.json`](evidence/smolvm-1.14.6-compatibility.json).
+Both worker versions passed 14 runtime, 16 store and 25 recovery cases. A second
+1.14.6 runtime run passed with rebuilt Python/Node payloads, including explicit
+guest UID selection and binary/streaming behavior. The ten workload probes,
+eleven startup refusals, three durable outage cases and frozen outer-VM recovery
+passed. The initial recovery failures and subsequent preparation-budget correction
+remain recorded. All four Linux language lanes, five analyzers and canaries,
+95.41% coverage, example analysis/audits and 42-page ExDoc link checks passed.
+The candidate still requires its final source freeze, complete service/example
+checks and exact-commit package acceptance; preparation results do not imply
+that those pending checks have run.
+
+Local execution of the required CI commands supplies this preparation's evidence.
+No GitHub run of the new commit is claimed without an authorized push. The existing
+manual worker workflow remains optional. Versioned public documentation/source
+links become available only after the separately authorized release.
+
 ## 0.1.1 documentation and validation release
 
 Status: **published and verified**, September 8, 2026. The maintainer authorized publishing
