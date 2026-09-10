@@ -176,6 +176,10 @@ the failure for the tested storage layout; it does not repair or erase the
 earlier shared-storage result. See
 [Subsequent Linux deployment validation](#subsequent-linux-deployment-validation).
 
+A [September 10 retest of SmolVM 1.14.6](#shared-storage-cleanup-retest)
+reproduced the original shared storage failure on 1.14.1 and verified the upstream
+deletion fix on 1.14.6. The historical measurements above remain unchanged.
+
 The second guest attempted at most 64 MiB of output while its client's stream
 callback blocked. SmolBox retained a 64 KiB capture limit and ended observation
 after 3,003 ms; the callback process was gone and the VM still running. The
@@ -192,6 +196,56 @@ settings, kernel counters, raw-report/source hashes, successful checks and faile
 cleanup. The normal worker remained healthy with empty inventory after both
 trials. Equivalent independently bounded macOS experiments and broader isolation
 qualification are unverified and outside the first release.
+
+## Shared storage cleanup retest
+
+On September 10, 2026, a targeted comparison ran inside the disposable nested
+Linux lab on `ssh linux`. It used SmolBox 0.1.1's unchanged production library,
+Elixir 1.20.4 / OTP 29.0.6, the approved Python image, and the complete official
+SmolVM 1.14.1 and 1.14.6 distributions. Their source and binary hashes, individual
+reports, and fixture corrections are recorded in
+[the cleanup evidence](evidence/smolvm-1.14.6-cleanup.json).
+
+Both versions placed their registry and VM data on the **same 512 MiB tmpfs**.
+Device IDs verified that the paths shared a filesystem. A dedicated worker had
+a 2 GiB cgroup memory maximum, zero swap, 200% CPU bandwidth, 128 host tasks and
+a 300-second deadline. The outer QEMU retained the existing lab controls.
+The workload attempted at most 640 MiB in 1 MiB writes with `fsync` after every
+write. No host producer filled any remaining space.
+
+| Observation | SmolVM 1.14.1 | SmolVM 1.14.6 |
+|---|---|---|
+| Shared filesystem after guest writes | All 536,870,912 bytes consumed | All 536,870,912 bytes consumed, in all three completed trials |
+| Guest result | `EIO` after 330,301,440 written bytes | `EIO` after 329,252,864 to 330,301,440 written bytes |
+| Stop | Succeeded; released one 4 KiB block | Succeeded; released one 4 KiB block |
+| API delete | Uncertain protocol error; worker logged `commit vm removal: database or disk is full` | Succeeded in all three trials |
+| Storage after delete | Still full; same owned VM remained stopped in inventory | Only 188,416 bytes (184 KiB) used; VM data directory absent |
+| Worker restart and subsequent work | Not counted as successful cleanup; owned service teardown required | Deleted VM remained absent; a new VM passed create/start/upload/exec/download/stop/delete/absence |
+
+This reproduces the original failure mechanism in a nested environment. It does
+not reproduce every detail of the earlier direct-host user-namespace experiment:
+the kernel, account setup, private Unix endpoint and Elixir/OTP pair differ.
+Guest acknowledged bytes also vary with filesystem overhead. Both comparison
+versions used the same lab layout and guest workload.
+
+[Upstream PR #1219](https://github.com/smol-machines/smolvm/pull/1219), included in
+[SmolVM 1.14.6](https://github.com/smol-machines/smolvm/releases/tag/v1.14.6), moves
+VM data removal before the registry write in the HTTP API deletion path. Removing
+that data frees space for the metadata transaction in this shared filesystem
+case. Our observation confirms the released behavior through `SmolBox.Client`;
+it does not attribute every difference between the two complete distributions
+to that one patch.
+
+The result does not cover a separately full metadata filesystem, a read-only or
+failing filesystem, permission errors during removal, forked machines, or
+concurrent tenants. It does not replace control storage headroom and recovery
+design. **SmolBox's supported runtime pin remains 1.14.1**: this finite client
+regression check is not the full compatibility, managed recovery, or release
+qualification suite for 1.14.6. No macOS validation ran.
+
+The [lab guide](https://github.com/hfiguera/smolbox/blob/main/docs/nested-kvm-lab.md#retesting-shared-storage-cleanup)
+describes how to run the maintained reproduction. Private raw reports remain on
+the Linux host; repository evidence contains reviewed observations and hashes.
 
 ## Finite macOS guest-memory overload
 

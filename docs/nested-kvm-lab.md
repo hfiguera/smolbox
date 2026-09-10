@@ -188,6 +188,63 @@ remain useful. Evidence uses fixed filenames under the bounded data volume.
 Guest test output uses the existing bounded Elixir runner. Keep private raw logs
 and keys out of Git; export only reviewed reports and hashes.
 
+## Retesting shared storage cleanup
+
+The September 10, 2026 comparison of SmolVM 1.14.1 and 1.14.6 is recorded in
+[Resource evidence](resource-qualification.md#shared-storage-cleanup-retest).
+It uses a new account and one shared 512 MiB tmpfs inside a disposable test VM.
+The candidate deployment's separate metadata mount would hide the original
+failure mechanism. The regression's UID drop and shared extraction settings
+match the earlier exploratory experiment; this is not a new isolation profile.
+
+Start from a clean `test` overlay using the procedure above. Leave the baseline
+and original worker unchanged. On the physical Linux host, download the official
+`smolvm-1.14.6-linux-x86_64.tar.gz` release archive into the bounded lab staging
+directory. Verify SHA-256
+`94a1edb0c42b20ac562c3759ed216bab2cab9e27c382f6560969144f7bd1dce3`, then transfer
+it through `guest-ssh.sh` to `/home/lab/input/` in the guest. The guest needs no
+outbound network. Its existing `/opt/smolbox/runtime` must still contain the
+verified 1.14.1 distribution and `/opt/smolbox/catalog` the approved Python image.
+
+Stage the reviewed SmolBox source and locked dependencies in
+`/home/lab/cleanup-validation/source`, owned by `lab`, and create the sibling
+`reports` directory. The following commands run **inside the disposable guest**
+through `guest-ssh.sh`, with the lab's Elixir/OTP environment loaded:
+
+```sh
+cd /home/lab/cleanup-validation/source
+mix compile --warnings-as-errors
+sudo bash scripts/lab/cleanup-regression-control.sh prepare
+sudo bash scripts/lab/cleanup-regression-control.sh start 1.14.1
+timeout 240 mix run scripts/lab/cleanup-regression.exs 1.14.1 baseline
+sudo journalctl -u smolbox-cleanup.service --no-pager -n 250 > ../reports/baseline-worker.log
+sudo bash scripts/lab/cleanup-regression-control.sh start 1.14.6
+timeout 240 mix run scripts/lab/cleanup-regression.exs 1.14.6 fixed
+sudo bash scripts/lab/cleanup-regression-control.sh stop
+```
+
+The baseline passes only when it observes the expected failed API deletion and
+the same stopped machine. That is **successful reproduction of a failure**,
+not successful cleanup. The next `start` explicitly tears down this owned worker
+and clears only its test state. It must not be counted as an API deletion.
+
+The fixed case requires successful API deletion, actual storage reclamation,
+data directory absence, continued registry absence after restarting the worker
+without resetting its storage, and a subsequent execution with file transfer
+and verified cleanup. Both cases first verify the shared filesystem, actual
+cgroup controls and live nested KVM descriptors. Stop can free one 4 KiB block;
+the probe records that small change instead of filling it again from the host.
+
+Reports checkpoint observations outside the full filesystem. A failed assertion
+preserves the report and does not replay a command. Stop the exact experiment
+service after failures; it also has an independent 300-second deadline. Export
+reports, bounded journal output and source hashes to the physical host before
+stopping the outer lab VM. The existing recovery timer then restores a clean
+overlay. Never seal this exposed test disk as a new baseline.
+
+This client experiment does not upgrade SmolBox's supported runtime version.
+Broader compatibility and managed recovery tests are separate work.
+
 ## Recovery and removal
 
 Host-side teardown works when the guest worker, database, OS or management SSH
