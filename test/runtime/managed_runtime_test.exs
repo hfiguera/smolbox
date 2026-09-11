@@ -234,7 +234,11 @@ defmodule SmolBox.ManagedRuntimeTest do
     {counts, port} = SmolBox.RuntimeProxy.start(context.client.worker, gate)
 
     {:ok, endpoint} =
-      Worker.new("managed", "http://127.0.0.1:#{port}", allow_insecure_loopback: true)
+      Worker.new("managed", "http://127.0.0.1:#{port}",
+        allow_insecure_loopback: true,
+        receive_timeout_ms: context.client.worker.receive_timeout_ms,
+        operation_timeout_ms: context.client.worker.operation_timeout_ms
+      )
 
     {:ok, client} = Client.new(endpoint)
     [worker] = context.options[:workers]
@@ -258,7 +262,9 @@ defmodule SmolBox.ManagedRuntimeTest do
     own_cleanup(context, handle)
     # Nested KVM can take longer to reach the fault-injection point. This only
     # bounds fixture setup; command and cancellation deadlines remain unchanged.
-    assert_receive {:boundary, :exec, :before, blocked}, 30_000
+    assert_receive {:boundary, :exec, :before, blocked},
+                   SmolBox.LabCandidate.observation_ms(30_000)
+
     assert {:ok, ^handle} = SmolBox.cancel(runtime, spec.scope, spec.id)
     stopped = wait_for(context, handle, &(&1.evidence == :termination_confirmed))
 

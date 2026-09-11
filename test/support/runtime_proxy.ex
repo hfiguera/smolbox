@@ -35,7 +35,7 @@ defmodule SmolBox.RuntimeProxy do
         retry: false,
         redirect: false,
         raw: true,
-        receive_timeout: 15_000,
+        receive_timeout: endpoint.receive_timeout_ms,
         into: &capture/2
       )
 
