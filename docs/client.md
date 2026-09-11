@@ -6,13 +6,18 @@ Use it when host code owns those responsibilities. For a complete managed
 execution, begin with [Getting started](getting-started.md). This guide describes
 the supported client contract and its development-qualified worker boundary.
 See [runtime selection](compatibility.md#runtime-selection) for the explicit
-Linux 1.14.6 candidate and retained 1.14.1 compatibility.
+Linux/macOS 1.14.6 candidate and retained 1.14.1 compatibility.
 
 Install the pinned SmolVM release from [compatibility evidence](compatibility.md).
 Prepare an approved, architecture-matched `.smolmachine` artifact on the worker
 host, verify its digest, and start a private `smolvm serve` endpoint. For bounded
 small-file workloads set `SMOLVM_FILE_TRANSFER_MAX_BYTES=1048576` before starting
 the server. SmolBox never enables guest networking to fetch an image.
+
+For SmolVM 1.14.6, verify the host's `resize2fs` before requesting disks smaller
+than its bundled templates. Our macOS run without that tool lost a workspace
+file after stop/start; health and successful execution alone did not detect the
+problem. See [runtime prerequisites](compatibility.md#macos-1-14-6-prerequisites).
 
 ```elixir
 {:ok, worker} = SmolBox.Worker.new("worker-1", "https://worker.internal.example",

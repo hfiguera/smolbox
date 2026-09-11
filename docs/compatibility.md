@@ -6,7 +6,8 @@ release evidence below records the client/controller contract on Linux and macOS
 
 ## Runtime selection
 
-The candidate adds explicit `runtime_version: "1.14.6"` for Linux x86_64.
+The candidate adds explicit `runtime_version: "1.14.6"` for Linux x86_64 and
+macOS Apple Silicon.
 The Linux runtime and constrained deployment results are recorded below;
 exact-commit release acceptance is recorded separately in the repository's
 `docs/release-candidates/` directory.
@@ -14,9 +15,10 @@ The default remains `"1.14.1"`, preserving existing configurations. A worker
 must report the exact configured version; supporting two versions does not
 allow automatic fallback or accepting an arbitrary `1.14.x` release.
 
-SmolVM 1.14.6 on macOS and Linux ARM64 remains unsupported. No new macOS tests
-run for this candidate. The older macOS 1.14.1 results below are historical,
-not evidence for a different libkrun, runtime or deployment.
+Linux ARM64 remains unsupported for 1.14.6. A separate native macOS campaign
+checks ordinary compatibility and controlled lifecycle recovery. Exhaustion and
+adversarial testing remain in the disposable Linux lab. The older macOS 1.14.1
+results below remain historical evidence for that version.
 
 SmolVM is installed by the operator, separately from the Elixir dependency.
 Use the [upgrade procedure](host-integration.md#upgrading-a-worker) before
@@ -84,9 +86,45 @@ semantics are unchanged. The failed attempt remains in the evidence, and a
 startup failure can still require external worker teardown.
 
 The default is retained for compatibility with existing worker installations.
-For a new Linux x86_64 installation using this candidate, explicitly select
+For a new Linux x86_64 or macOS Apple Silicon installation using this candidate, explicitly select
 1.14.6 to obtain the tested upstream cleanup fix. Updating the Elixir dependency
 does not update a separately installed worker.
+
+### macOS 1.14.6 prerequisites
+
+Use the complete official Darwin ARM64 distribution, including its matching
+agent and libkrun. Its archive SHA-256 is
+`484b63c6a7c74c4d05dce2e63fcce3d135e0fba56a1d77128024e5736d3384a8`.
+Do not mix those files with an older installation. The native validation host
+uses macOS 26.6.2 on Apple Silicon and Elixir 1.20.4/OTP 29.0.6.
+
+Disk requests below the bundled 20 GiB storage / 10 GiB overlay templates need
+working `resize2fs` on the worker host. On macOS, install it with
+`brew install e2fsprogs`; upstream searches Homebrew's e2fsprogs directory and
+then the worker's `PATH`. Our private validation environment used e2fsprogs
+1.47.4 without changing the existing SmolVM installation.
+
+The first run without that tool passed eight of nine ordinary runtime cases,
+but a workspace file disappeared after stopping and restarting its VM. The
+failure reproduced through direct HTTP calls without `SmolBox.Client`, even
+after explicitly flushing the file. Version 1.14.1 preserved the same file.
+With 1.14.6, matching 20/10 GiB requests also preserved it. Upstream logs showed
+failed template shrinking; boot continued without the format markers that
+prevent reinitializing disks. Supplying `resize2fs` made all nine original
+runtime cases pass unchanged. A successful health/start/exec reply therefore
+does not establish a correctly prepared worker.
+
+Verify disk geometry and file persistence through a complete stop/start cycle
+on a fresh, owned VM before admitting work. Retain conservative allocation
+floors until you have measured the selected runtime and artifacts. These
+compatibility checks do not establish hard host quotas or macOS isolation
+against hostile workloads. The five security boundary cases run separately
+on Linux and are not counted as macOS passes.
+
+The [macOS preparation evidence](evidence/smolvm-1.14.6-macos.json) preserves
+the initial failures, dependency correction, artifact/runtime identities and
+passed checks. Final candidate acceptance is recorded separately in the
+repository's release reports.
 
 A subsequent
 [Linux deployment campaign](resource-qualification.md#subsequent-linux-deployment-validation)

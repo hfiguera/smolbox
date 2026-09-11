@@ -32,9 +32,10 @@ Use Linux x86_64 with KVM or macOS Apple Silicon. This walkthrough runs the Elix
 application on the worker host so it can verify the local artifact file. Remote
 workers use a different host configuration; see [Managed host integration](host-integration.md).
 
-You need a **dedicated, empty worker**: select **SmolVM 1.14.6 on Linux x86_64**
-with the 0.1.2 candidate, or **1.14.1 on macOS Apple Silicon**. Existing Linux
-1.14.1 deployments remain compatible. Use an approved native Python
+You need a **dedicated, empty worker**: select **SmolVM 1.14.6 on Linux x86_64 or
+macOS Apple Silicon** with the 0.1.2 candidate. Existing 1.14.1 deployments
+remain compatible. Check the [1.14.6 host prerequisites](compatibility.md#macos-1-14-6-prerequisites),
+then use an approved native Python
 artifact with neutral `/bin/true` startup. Follow the
 [reference-runtime preparation instructions](client.md#preparing-the-reference-runtimes)
 to create `python.smolmachine`, record its SHA-256, and start the private worker
@@ -62,7 +63,7 @@ iex -S mix
 
 `SMOLBOX_DEMO_DIR` is a new private directory for input/output objects. Keep it
 separate from the runtime image and from all guest-accessible directories.
-Set `SMOLBOX_RUNTIME_VERSION=1.14.1` for macOS or an existing 1.14.1 worker.
+Set `SMOLBOX_RUNTIME_VERSION=1.14.1` for an existing 1.14.1 worker on either host.
 The walkthrough checks this explicit selection; it never adopts an arbitrary
 version from the health response.
 
@@ -104,13 +105,20 @@ true = actual_sha256 == approved_sha256
     {:unix, :linux} -> {:linux, "x86_64"}
   end
 
+worker_options = [
+  allow_insecure_loopback: true,
+  operation_timeout_ms: 60_000,
+  receive_timeout_ms: 55_000
+]
+
+worker_options =
+  case System.get_env("SMOLBOX_RUNTIME_SOCKET") do
+    nil -> worker_options
+    socket -> Keyword.put(worker_options, :unix_socket, socket)
+  end
+
 {:ok, worker} =
-  Worker.new("demo-worker", System.fetch_env!("SMOLBOX_RUNTIME_URL"),
-    allow_insecure_loopback: true,
-    unix_socket: System.get_env("SMOLBOX_RUNTIME_SOCKET"),
-    operation_timeout_ms: 60_000,
-    receive_timeout_ms: 55_000
-  )
+  Worker.new("demo-worker", System.fetch_env!("SMOLBOX_RUNTIME_URL"), worker_options)
 
 {:ok, client} = SmolBox.Client.new(worker)
 runtime_version = System.fetch_env!("SMOLBOX_RUNTIME_VERSION")

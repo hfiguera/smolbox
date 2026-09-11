@@ -57,15 +57,29 @@ the previous macOS results remain historical and must not be reported as a new
 
 ## 0.1.2 runtime selection
 
-The unpublished 0.1.2 candidate additionally supports an explicit Linux x86_64
+The unpublished 0.1.2 candidate additionally supports an explicit Linux x86_64 or macOS Apple Silicon
 SmolVM 1.14.6 selection. Set `runtime_version` in the private worker manifest;
 preflight verifies that version's binary checksum and exports
 `SMOLBOX_RUNTIME_VERSION` for runtime tests, examples and service fault checks.
-An omitted field retains 1.14.1. macOS still accepts only 1.14.1 in this tooling.
+An omitted field retains 1.14.1.
 Selecting a different version never installs it or accepts an unexpected server
-version. The new candidate's validation runs on Linux only, with previous macOS
-results retained as historical evidence. See the implementation plan for its
-current acceptance status.
+version. Initial candidate validation ran on Linux. The subsequent native macOS
+campaign is restricted to ordinary compatibility and controlled lifecycle checks;
+exhaustion and adversarial testing remain in the disposable Linux lab. See the
+implementation plan for the separate checkpoints and current acceptance status.
+
+The native macOS runtime command selects only the nine ordinary cases:
+
+```sh
+mix test test/runtime/client_runtime_test.exs test/runtime/managed_runtime_test.exs --include runtime --warnings-as-errors
+```
+
+The five cases in `security_runtime_test.exs` are outside this Mac campaign.
+They remain covered by the separate Linux runtime suite. Do not count excluded
+or unexecuted cases as macOS passes. Supply working `resize2fs` for 1.14.6 disk
+requests below the templates; missing it caused file loss after stop/start in
+the initial Mac run. A successful health probe is insufficient. The unchanged
+file persistence test must pass on fresh VMs before recording compatibility.
 
 ## Documentation and package checks
 

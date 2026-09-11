@@ -97,7 +97,12 @@ defmodule SmolBox.RuntimeConfigTest do
           artifacts: Enum.map(candidate.artifacts, &Map.put(&1, "architecture", architecture))
       }
 
-      assert {:error, %Error{category: :validation}} = WorkerConfig.validate(worker)
+      if platform == :macos do
+        assert :ok = WorkerConfig.validate(worker)
+      else
+        assert {:error, %Error{category: :validation}} = WorkerConfig.validate(worker)
+      end
+
       assert :ok = WorkerConfig.validate(%{worker | runtime_version: "1.14.1"})
     end
 

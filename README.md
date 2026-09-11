@@ -79,7 +79,7 @@ creating machines, executing commands, streaming output, and transferring files.
 ## Installation and first run
 
 This checkout prepares **0.1.2**, which is not published yet. Its explicit
-SmolVM 1.14.6 option targets Linux x86_64. Use a local path dependency to try the
+SmolVM 1.14.6 option targets Linux x86_64 and macOS Apple Silicon. Use a local path dependency to try the
 candidate; the published 0.1.1 package below retains its 1.14.1 contract.
 
 Add SmolBox to your application's `mix.exs`:
@@ -95,8 +95,10 @@ includes the guides below. A local checkout can instead be used with
 To run the local walkthrough, you need:
 
 - Elixir **1.18 or later**, using a [tested Elixir/OTP pair](docs/compatibility.md).
-- A dedicated worker: **SmolVM 1.14.6 on Linux x86_64 with KVM** for the 0.1.2
-  candidate, or **1.14.1 on Linux x86_64 or macOS Apple Silicon**.
+- A dedicated worker: **SmolVM 1.14.6 or 1.14.1**, on Linux x86_64 with KVM or
+  macOS Apple Silicon. Version 1.14.6 requires the 0.1.2 candidate.
+- The host's `resize2fs` tool for 1.14.6 disk requests below its template sizes.
+  On macOS, install `e2fsprogs`; see the [runtime prerequisites](docs/compatibility.md#macos-1-14-6-prerequisites).
 - A prepared Python image for that worker's architecture, with its SHA-256
   recorded. The guide links to the image preparation commands and host capacity
   requirements.
@@ -111,8 +113,8 @@ is included in the repository.
 ## Current scope
 
 SmolBox has real execution and durable recovery tests on Linux x86_64 and macOS
-Apple Silicon with **SmolVM 1.14.1**. The 0.1.2 candidate adds explicit Linux
-x86_64 **1.14.6** support; validation status is recorded in
+Apple Silicon with **SmolVM 1.14.1**. The 0.1.2 candidate adds explicit
+**1.14.6** support on those hosts; validation status is recorded in
 [Compatibility](docs/compatibility.md#runtime-selection). Existing configurations
 retain the 1.14.1 default. Select the exact version you operate; the package does
 not upgrade an external worker or accept arbitrary upstream releases.

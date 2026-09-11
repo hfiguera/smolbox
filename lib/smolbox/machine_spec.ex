@@ -12,6 +12,11 @@ defmodule SmolBox.MachineSpec do
   shrinking them, while its API still reports the request. Low-level callers
   must verify runtime/artifact disk geometry; managed workers require an
   explicit allocation floor. A matching create reply alone is not enforcement.
+
+  SmolVM 1.14.6 needs the host's `resize2fs` for requests below template sizes.
+  Missing it caused file loss after stop/start in the macOS validation. Verify
+  the host prerequisite and persistence before admitting work; see
+  [Compatibility](compatibility.html#macos-1-14-6-prerequisites).
   """
 
   alias SmolBox.Error

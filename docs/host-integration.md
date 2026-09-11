@@ -304,7 +304,7 @@ to reconcile. Memory mode loses this authority when its store process stops.
 
 ## Upgrading a worker
 
-SmolBox 0.1.2 adds an explicit Linux x86_64 option:
+SmolBox 0.1.2 adds an explicit Linux x86_64 and macOS Apple Silicon option:
 
 ```elixir
 {:ok, worker} = SmolBox.Runtime.WorkerConfig.new(
@@ -312,11 +312,11 @@ SmolBox 0.1.2 adds an explicit Linux x86_64 option:
 )
 ```
 
-Use this version for new Linux deployments after consulting its
+Use this version for new workers on those hosts after consulting its
 [compatibility evidence](compatibility.md#runtime-selection).
 Omitting `:runtime_version` retains `"1.14.1"`; an Elixir dependency update does
-not install SmolVM or silently change the expected worker version. macOS workers
-continue to use 1.14.1. Unverified versions and 1.14.6 host combinations fail
+not install SmolVM or silently change the expected worker version.
+Unverified versions and 1.14.6 host combinations fail
 configuration validation. Health checks still require an exact version match.
 
 For an existing worker:
@@ -331,8 +331,13 @@ For an existing worker:
    the complete pinned distribution. Verify binary, agent, libkrun and artifact
    digests. Do not mix files from different distributions.
 4. Recheck the deployment controls and approved artifact/profile revisions.
-   Smaller disk requests in 1.14.6 can require `resize2fs`; API allocations still
-   do not prove host storage quotas. Retain conservative floors until measured.
+   Disk requests below the 1.14.6 templates require working `resize2fs` on the
+   worker host (`brew install e2fsprogs` on macOS). Missing it caused file loss
+   after restart in our macOS check, despite successful health/start/exec replies.
+   Verify a small owned file survives stop/start before admitting work; see
+   [the observed failure](compatibility.md#macos-1-14-6-prerequisites).
+   API allocations still do not prove host storage quotas. Retain conservative
+   floors until measured.
 5. Update the expected version, start the worker, verify health/readiness and
    empty inventory, run an owned smoke execution through cleanup, then resume
    admission. Rollback also requires a drained worker; do not assume its modified

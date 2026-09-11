@@ -8,7 +8,9 @@ defmodule SmolBox.CI.Runtime do
     {"macos", "1.14.1"} =>
       {"arm64", "af238c1190aefbc1c293f515c720c9c15f968498ad67624a9b9f824a51af0c79"},
     {"linux", "1.14.6"} =>
-      {"x86_64", "cc1f9b5f14613191ca83c706d52f4350f69b69a6c431c867cd662b51cb36d7d6"}
+      {"x86_64", "cc1f9b5f14613191ca83c706d52f4350f69b69a6c431c867cd662b51cb36d7d6"},
+    {"macos", "1.14.6"} =>
+      {"arm64", "f62d06160f674ba516f828758b6dcf981c531d548987a6e7e34f56f5bddb41b7"}
   }
 
   def pin!(platform, version) do

@@ -15,6 +15,10 @@ defmodule SmolBox.Runtime.WorkerConfig do
   still expose a larger guest disk. Admission rejects profiles below these
   floors. This declaration is not remotely attested or a host filesystem quota.
 
+  Version 1.14.6 requires working host `resize2fs` for disk requests below
+  template sizes. Verify file persistence across stop/start before admission;
+  see [Compatibility](compatibility.html#macos-1-14-6-prerequisites).
+
   The initial qualification is explicitly `:development`; it does not certify
   hostile multi-tenant host quotas. Requested unsupported hard controls are
   rejected by `SmolBox.Profile`. Reachability alone does not qualify a worker.
@@ -67,7 +71,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   | `:allocation_floor` | Atom-keyed map with `:storage_gb` and `:overlay_gb` (1–64 each), and `:host_overhead_mb` (128–16,384) |
 
   Optional fields are `:runtime_version` (default `"1.14.1"`; explicitly select
-  `"1.14.6"` for Linux x86_64), `:qualification`
+  `"1.14.6"` for Linux x86_64 or macOS Apple Silicon), `:qualification`
   (only `:development`), and `:draining` (default `false`). Artifact IDs must be
   unique and architectures must match this worker. Construction makes no worker
   request or remote digest check. Profiles below the floor cannot support execution.
@@ -123,8 +127,8 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   defp supported_runtime?(%{runtime_version: "1.14.1"}), do: true
 
-  defp supported_runtime?(%{runtime_version: "1.14.6", platform: :linux, architecture: "x86_64"}),
-    do: true
+  defp supported_runtime?(%{runtime_version: "1.14.6", platform: platform, architecture: arch}),
+    do: {platform, arch} in [{:linux, "x86_64"}, {:macos, "aarch64"}]
 
   defp supported_runtime?(_worker), do: false
 

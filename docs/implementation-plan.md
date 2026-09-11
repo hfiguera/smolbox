@@ -2,9 +2,44 @@
 
 ## 0.1.2 compatibility candidate (not released)
 
+### Native macOS follow-up
+
+Status: **validation in progress**, September 10, 2026. The maintainer separately
+authorized ordinary native macOS 1.14.6 compatibility checks. Exhaustion and
+adversarial tests remain restricted to the disposable Linux lab. No tag, release,
+push or pull request is authorized by this follow-up.
+
+- [x] Verify the official Darwin ARM64 archive, binary, agent, libkrun and the
+  client OpenAPI subset; use a private worker home and database and preserve
+  existing host services.
+- [x] Boot and execute both approved ARM64 Python/Node artifacts, verify explicit
+  UID execution and cleanup, and run the nine ordinary client/runtime cases.
+- [x] Diagnose the initial file persistence failure without weakening the test.
+  Without `resize2fs`, 1.14.6 lost a file after stop/start with 1/1 GiB requests;
+  direct HTTP reproduced it, while 1.14.1 and matching 20/10 GiB requests retained
+  the file. Supplying private e2fsprogs 1.47.4 made all nine cases pass unchanged.
+- [x] Run all 16 PostgreSQL store and 25 durable recovery cases on the private
+  macOS services. The current `mix ci` quality command also passes.
+- [x] Run both examples normally and with cancellation, and the exact walkthrough.
+  Fix the walkthrough to omit `unix_socket` when its environment variable is
+  absent; passing `nil` previously failed TCP setup before any command dispatch.
+  All eight analyzer canary pairs also pass.
+- [ ] Finish service recovery and fresh artifacts on the frozen candidate.
+- [ ] Freeze the updated candidate, validate its applicable complete gates and
+  package consumers, and record final identity, results and owned-resource cleanup.
+
+The working candidate now permits explicit macOS 1.14.6 and documents its host
+dependency. The exact-commit acceptance below remains the earlier Linux
+checkpoint; it must not be presented as acceptance of these later changes.
+The five adversarial runtime cases are not run or counted as passes on macOS.
+Preparation identities, failures and results are preserved in
+[`smolvm-1.14.6-macos.json`](evidence/smolvm-1.14.6-macos.json).
+
+### Initial Linux checkpoint
+
 The maintainer authorized preparing and validating this patch on September 10,
 2026, explicitly excluding the real `v0.1.2` tag, Hex publication and GitHub
-Release. All new execution runs on `ssh linux`. Existing 1.14.1 configuration
+Release. All execution for this initial checkpoint ran on `ssh linux`. Existing 1.14.1 configuration
 and its default remain compatible; 1.14.6 is an explicit Linux x86_64 option.
 No new macOS or Linux ARM64 runtime qualification is claimed. Earlier macOS
 1.14.1 evidence remains historical. Unsupported hard controls stay rejected.

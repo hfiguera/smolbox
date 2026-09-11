@@ -1,0 +1,772 @@
+{
+  "runtime": {
+    "version": "1.14.6",
+    "assets": {
+      "agent-rootfs/usr/local/bin/smolvm-agent": "5b67a95497e074923f34c9b6b41dffba3fcbf28a717f90b9da1f8d20b9453c00",
+      "lib/libkrun.dylib": "f059967442fd6eae0e98a9213815b650a9b29f85f1e785618374bba5c213618d",
+      "lib/libkrunfw.5.dylib": "af0e3f5011d6735539b1c9b80e3fbf9672289921c070593b7955c9b8e0ef7c34",
+      "smolvm": "8caeb3b6e7d834493a578b0fe8bd1e7aa02e68fba6d61bcf70fdbec41a27ce68",
+      "smolvm-bin": "f62d06160f674ba516f828758b6dcf981c531d548987a6e7e34f56f5bddb41b7"
+    },
+    "commit": "6c503014629bba91631152728c3081c944653f31",
+    "archive_sha256": "484b63c6a7c74c4d05dce2e63fcce3d135e0fba56a1d77128024e5736d3384a8",
+    "openapi_sha256": "216adee332a840bfb1a7f1920adbc209c9c4609b926fb17fdf2e18153676bffd",
+    "client_openapi_subset_sha256": "6c9f935f0a1e72c92eb49e5c382d54ebfb5f41ed3742683360667b0708d8cd26",
+    "client_openapi_subset": "8 paths and 19 schemas; identical to Linux 1.14.6 captured subset"
+  },
+  "scope": "Ordinary compatibility and controlled lifecycle recovery only. Exhaustion and adversarial tests remain in the disposable Linux lab.",
+  "status": "macos_preparation_passed_with_recorded_failures_not_final_candidate_acceptance",
+  "schema": 1,
+  "artifacts": [
+    {
+      "size": 32301947,
+      "kind": "python",
+      "sha256": "d982cfdf0c59b862ad3e1b107446b127460f716c8407fd0e2b6b0de2a62fe18e",
+      "manifest": {
+        "assets": {
+          "agent_rootfs": {
+            "path": "agent-rootfs.tar",
+            "size": 50000384
+          },
+          "layers": [
+            {
+              "digest": "sha256:3567a3eccaac65af0d192eedecaefb89d13371be65b65b5cc41338cffdfe1b87",
+              "path": "layers/3567a3eccaac65af0d192eedecaefb89d13371be65b65b5cc41338cffdfe1b87.tar",
+              "size": 55166464
+            }
+          ],
+          "libraries": [
+            {
+              "path": "lib/libkrun.dylib",
+              "size": 6756112
+            },
+            {
+              "path": "lib/libkrunfw.5.dylib",
+              "size": 13512464
+            },
+            {
+              "path": "lib/libvirglrenderer.1.dylib",
+              "size": 2309616
+            },
+            {
+              "path": "lib/libMoltenVK.dylib",
+              "size": 5109344
+            },
+            {
+              "path": "lib/libepoxy.0.dylib",
+              "size": 1188496
+            }
+          ],
+          "storage_template": {
+            "path": "storage.ext4",
+            "size": 21474836480
+          }
+        },
+        "cmd": [
+          "python3"
+        ],
+        "cpus": 1,
+        "created": "2026-09-06T21:48:04.555834Z",
+        "cuda": false,
+        "digest": "sha256:4185d2c55ba89731509d80ef7972b16c75553fdda1cb61d46ede5aac3595b1aa",
+        "entrypoint": [
+          "/bin/true"
+        ],
+        "env": [
+          "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+          "LANG=C.UTF-8",
+          "GPG_KEY=7169605F62C751356D054A26A821E680E5FA6305",
+          "PYTHON_VERSION=3.12.14",
+          "PYTHON_SHA256=5c8462af5790baf43a321a1559dbe0db06d1be4300fb85fb53c40060668e548a"
+        ],
+        "gpu": false,
+        "host_platform": "darwin/arm64",
+        "image": "python:3.12-alpine",
+        "image_size": 59176038,
+        "mem": 256,
+        "mode": "container",
+        "network": false,
+        "platform": "linux/arm64",
+        "smolvm_version": "1.14.1",
+        "workdir": "/"
+      }
+    },
+    {
+      "size": 67589243,
+      "kind": "node",
+      "sha256": "0aec0242b27a0b401312e1333ab9d71f821aabf20bd2fe22f849d66f3d706e95",
+      "manifest": {
+        "assets": {
+          "agent_rootfs": {
+            "path": "agent-rootfs.tar",
+            "size": 50000384
+          },
+          "layers": [
+            {
+              "digest": "sha256:e49b7473c9cb9ca81e7e1fb32f5df15258b5b8632bfaed6caef18440d9bf7928",
+              "path": "layers/e49b7473c9cb9ca81e7e1fb32f5df15258b5b8632bfaed6caef18440d9bf7928.tar",
+              "size": 163441664
+            }
+          ],
+          "libraries": [
+            {
+              "path": "lib/libkrun.dylib",
+              "size": 6756112
+            },
+            {
+              "path": "lib/libkrunfw.5.dylib",
+              "size": 13512464
+            },
+            {
+              "path": "lib/libvirglrenderer.1.dylib",
+              "size": 2309616
+            },
+            {
+              "path": "lib/libMoltenVK.dylib",
+              "size": 5109344
+            },
+            {
+              "path": "lib/libepoxy.0.dylib",
+              "size": 1188496
+            }
+          ],
+          "storage_template": {
+            "path": "storage.ext4",
+            "size": 21474836480
+          }
+        },
+        "cmd": [
+          "node"
+        ],
+        "cpus": 1,
+        "created": "2026-09-06T21:48:40.874688Z",
+        "cuda": false,
+        "digest": "sha256:828963118f6838ebdaf6b01b9b24d10c5dffe2f4aaf3ebca33d0d3f74366833e",
+        "entrypoint": [
+          "/bin/true"
+        ],
+        "env": [
+          "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+          "NODE_VERSION=22.23.2",
+          "YARN_VERSION=1.22.22"
+        ],
+        "gpu": false,
+        "host_platform": "darwin/arm64",
+        "image": "node:22-alpine",
+        "image_size": 160874642,
+        "mem": 256,
+        "mode": "container",
+        "network": false,
+        "platform": "linux/arm64",
+        "smolvm_version": "1.14.1",
+        "workdir": "/"
+      }
+    }
+  ],
+  "recorded_at_utc": "2026-09-11T01:59:43.162034Z",
+  "base_commit": "baacdf1",
+  "platform": {
+    "version": "26.6.2",
+    "os": "macOS",
+    "otp": "29.0.6",
+    "elixir": "1.20.4",
+    "build": "25G83",
+    "architecture": "arm64",
+    "hypervisor_available": true,
+    "postgres": "17.11"
+  },
+  "host_dependency": {
+    "scope": "Extracted under ignored task directory and available only to private worker; existing runtime and global e2fsprogs installation unchanged",
+    "version": "1.47.4",
+    "source": "Homebrew e2fsprogs arm64_tahoe bottle",
+    "tool": "resize2fs",
+    "bottle_sha256": "f8024861ae8b5a645374d7960a5b5e3c41576c792712925d55deb186a74a1d06"
+  },
+  "checks": {
+    "prep-canaries": {
+      "captured_bytes": 645,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "a4759699d958cca6d22e4d3867064aa0ddb2128cbe6de55c9e2fffea773806ba",
+      "seconds": 9.544,
+      "status": "passed"
+    },
+    "prep-durable": {
+      "captured_bytes": 173,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "b136ba6d3461b7031c072a39934ac320724839673337488ee8804d7428297d9b",
+      "seconds": 278.829,
+      "status": "passed",
+      "tests": {
+        "passed": 25,
+        "seed": 736965
+      }
+    },
+    "prep-example-durable_host-cancel": {
+      "captured_bytes": 362,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "3f254f9be1497561cea61da1c82f7858a649724e1e47bc40a86154729317d559",
+      "seconds": 66.986,
+      "status": "passed"
+    },
+    "prep-example-durable_host-normal": {
+      "captured_bytes": 613,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "fa5584fcac6b8f95fdecb27867ff2fa1e6d1dd85224e95cebad851bcc8038ea3",
+      "seconds": 2.115,
+      "status": "passed"
+    },
+    "prep-example-minimal_host-cancel": {
+      "captured_bytes": 362,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "88c4aadb75c3572d0a6a18daf675fb12f0d9d9b1d9e54e93be9cdd17db0c53d6",
+      "seconds": 66.906,
+      "status": "passed"
+    },
+    "prep-example-minimal_host-normal": {
+      "captured_bytes": 754,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "8aa42af7bf75442fa04fc2a6d75537f8d585df82d4879b89147eb031745b9958",
+      "seconds": 2.442,
+      "status": "passed"
+    },
+    "prep-migrations": {
+      "captured_bytes": 2671,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "73f8ea35574cb6ab43654863b2c059781155768bed308d64f73e4833ab7c5fca",
+      "seconds": 1.234,
+      "status": "passed"
+    },
+    "prep-quality": {
+      "captured_bytes": 2110,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "7f31a599a0e5dfd47d3d9f80c6a7a4dd7b271cbebd491a98fd9e8827c7b4d5f7",
+      "seconds": 81.122,
+      "status": "passed"
+    },
+    "prep-runtime": {
+      "captured_bytes": 735,
+      "exit_code": 2,
+      "failure": null,
+      "output_sha256": "12db918150189547803fd75eff230a735e7b753271612fa5eacd2f94cc60fd32",
+      "seconds": 30.988,
+      "status": "failed"
+    },
+    "prep-runtime-resize2fs": {
+      "captured_bytes": 154,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "6e3821254ed5e71b014433712168b8264f2384f4d6d153e36fe33d336c33f0b1",
+      "seconds": 24.26,
+      "status": "passed",
+      "tests": {
+        "passed": 9,
+        "seed": 739458
+      }
+    },
+    "prep-store": {
+      "captured_bytes": 160,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "6d4cb132f682a50fb1be9b0073a8a64818ac2faf1a2a3a8e4c3b17a71dd70181",
+      "seconds": 1.158,
+      "status": "passed",
+      "tests": {
+        "passed": 16,
+        "seed": 464103
+      }
+    },
+    "prep-walkthrough": {
+      "captured_bytes": 318,
+      "exit_code": 1,
+      "failure": null,
+      "output_sha256": "8202a763a86359fa3793a67143b9f3cc4d546980edb06677660637bc13bc783e",
+      "seconds": 0.355,
+      "status": "failed"
+    },
+    "prep-walkthrough-tcp": {
+      "captured_bytes": 121,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "435fc9dd1fd86907d6cb95351b6357ef2ebf71fa6fd39e27c3d38c81c7b92101",
+      "seconds": 2.143,
+      "status": "passed"
+    }
+  },
+  "restart_comparison": [
+    {
+      "after_restart": {
+        "body": "{\"error\":\"agent operation failed: read file: failed to read /workspace/dispatch-count in the workload container: open /workspace/dispatch-count: No such file or directory (os error 2)\",\"code\":\"INTERNAL_ERROR\"}",
+        "status": 500
+      },
+      "before": {
+        "body": "x",
+        "status": 200
+      },
+      "files_before": [
+        {
+          "inode": 102533914,
+          "name": "storage.raw",
+          "size": 21474836480,
+          "type": "regular"
+        },
+        {
+          "inode": 102533915,
+          "name": "overlay.raw",
+          "size": 10737418240,
+          "type": "regular"
+        }
+      ],
+      "files_restarted": [
+        {
+          "inode": 102533928,
+          "name": "storage.raw",
+          "size": 21474836480,
+          "type": "regular"
+        },
+        {
+          "inode": 102533926,
+          "name": "overlay.raw",
+          "size": 10737418240,
+          "type": "regular"
+        },
+        {
+          "inode": 102533927,
+          "name": "overlay.formatted",
+          "size": 1,
+          "type": "regular"
+        },
+        {
+          "inode": 102533929,
+          "name": "storage.formatted",
+          "size": 1,
+          "type": "regular"
+        }
+      ],
+      "files_stopped": [
+        {
+          "inode": 102533914,
+          "name": "storage.raw",
+          "size": 21474836480,
+          "type": "regular"
+        },
+        {
+          "inode": 102533915,
+          "name": "overlay.raw",
+          "size": 10737418240,
+          "type": "regular"
+        }
+      ],
+      "mutation_dispatches": 1,
+      "overlay_gb": 1,
+      "storage_gb": 1,
+      "transport": "Req HTTP without SmolBox.Client; retry:false",
+      "version": "1.14.6"
+    },
+    {
+      "after_restart": {
+        "body": "x",
+        "status": 200
+      },
+      "before": {
+        "body": "x",
+        "status": 200
+      },
+      "files_before": [
+        {
+          "inode": 102534879,
+          "name": "storage.raw",
+          "size": 21474836480,
+          "type": "regular"
+        },
+        {
+          "inode": 102534880,
+          "name": "overlay.raw",
+          "size": 10737418240,
+          "type": "regular"
+        },
+        {
+          "inode": 102534882,
+          "name": "overlay.formatted",
+          "size": 1,
+          "type": "regular"
+        },
+        {
+          "inode": 102534881,
+          "name": "storage.formatted",
+          "size": 1,
+          "type": "regular"
+        }
+      ],
+      "files_restarted": [
+        {
+          "inode": 102534879,
+          "name": "storage.raw",
+          "size": 21474836480,
+          "type": "regular"
+        },
+        {
+          "inode": 102534880,
+          "name": "overlay.raw",
+          "size": 10737418240,
+          "type": "regular"
+        },
+        {
+          "inode": 102534882,
+          "name": "overlay.formatted",
+          "size": 1,
+          "type": "regular"
+        },
+        {
+          "inode": 102534881,
+          "name": "storage.formatted",
+          "size": 1,
+          "type": "regular"
+        }
+      ],
+      "files_stopped": [
+        {
+          "inode": 102534879,
+          "name": "storage.raw",
+          "size": 21474836480,
+          "type": "regular"
+        },
+        {
+          "inode": 102534880,
+          "name": "overlay.raw",
+          "size": 10737418240,
+          "type": "regular"
+        },
+        {
+          "inode": 102534882,
+          "name": "overlay.formatted",
+          "size": 1,
+          "type": "regular"
+        },
+        {
+          "inode": 102534881,
+          "name": "storage.formatted",
+          "size": 1,
+          "type": "regular"
+        }
+      ],
+      "mutation_dispatches": 1,
+      "overlay_gb": 10,
+      "storage_gb": 20,
+      "transport": "Req HTTP without SmolBox.Client; retry:false",
+      "version": "1.14.6"
+    },
+    {
+      "after_restart": {
+        "body": "x",
+        "status": 200
+      },
+      "before": {
+        "body": "x",
+        "status": 200
+      },
+      "files_before": [
+        {
+          "inode": 102535846,
+          "name": "storage.raw",
+          "size": 21474836480,
+          "type": "regular"
+        },
+        {
+          "inode": 102535845,
+          "name": "overlay.raw",
+          "size": 10737418240,
+          "type": "regular"
+        },
+        {
+          "inode": 102535847,
+          "name": "overlay.formatted",
+          "size": 1,
+          "type": "regular"
+        },
+        {
+          "inode": 102535848,
+          "name": "storage.formatted",
+          "size": 1,
+          "type": "regular"
+        }
+      ],
+      "files_restarted": [
+        {
+          "inode": 102535846,
+          "name": "storage.raw",
+          "size": 21474836480,
+          "type": "regular"
+        },
+        {
+          "inode": 102535845,
+          "name": "overlay.raw",
+          "size": 10737418240,
+          "type": "regular"
+        },
+        {
+          "inode": 102535847,
+          "name": "overlay.formatted",
+          "size": 1,
+          "type": "regular"
+        },
+        {
+          "inode": 102535848,
+          "name": "storage.formatted",
+          "size": 1,
+          "type": "regular"
+        }
+      ],
+      "files_stopped": [
+        {
+          "inode": 102535846,
+          "name": "storage.raw",
+          "size": 21474836480,
+          "type": "regular"
+        },
+        {
+          "inode": 102535845,
+          "name": "overlay.raw",
+          "size": 10737418240,
+          "type": "regular"
+        },
+        {
+          "inode": 102535847,
+          "name": "overlay.formatted",
+          "size": 1,
+          "type": "regular"
+        },
+        {
+          "inode": 102535848,
+          "name": "storage.formatted",
+          "size": 1,
+          "type": "regular"
+        }
+      ],
+      "mutation_dispatches": 1,
+      "overlay_gb": 1,
+      "storage_gb": 1,
+      "transport": "Req HTTP without SmolBox.Client; retry:false",
+      "version": "1.14.1"
+    },
+    {
+      "after_restart": {
+        "body": "x",
+        "status": 200
+      },
+      "before": {
+        "body": "x",
+        "status": 200
+      },
+      "files_before": [
+        {
+          "inode": 102536806,
+          "name": "storage.raw",
+          "size": 21474836480,
+          "type": "regular"
+        },
+        {
+          "inode": 102536805,
+          "name": "overlay.raw",
+          "size": 10737418240,
+          "type": "regular"
+        },
+        {
+          "inode": 102536807,
+          "name": "overlay.formatted",
+          "size": 1,
+          "type": "regular"
+        },
+        {
+          "inode": 102536808,
+          "name": "storage.formatted",
+          "size": 1,
+          "type": "regular"
+        }
+      ],
+      "files_restarted": [
+        {
+          "inode": 102536806,
+          "name": "storage.raw",
+          "size": 21474836480,
+          "type": "regular"
+        },
+        {
+          "inode": 102536805,
+          "name": "overlay.raw",
+          "size": 10737418240,
+          "type": "regular"
+        },
+        {
+          "inode": 102536807,
+          "name": "overlay.formatted",
+          "size": 1,
+          "type": "regular"
+        },
+        {
+          "inode": 102536808,
+          "name": "storage.formatted",
+          "size": 1,
+          "type": "regular"
+        }
+      ],
+      "files_stopped": [
+        {
+          "inode": 102536806,
+          "name": "storage.raw",
+          "size": 21474836480,
+          "type": "regular"
+        },
+        {
+          "inode": 102536805,
+          "name": "overlay.raw",
+          "size": 10737418240,
+          "type": "regular"
+        },
+        {
+          "inode": 102536807,
+          "name": "overlay.formatted",
+          "size": 1,
+          "type": "regular"
+        },
+        {
+          "inode": 102536808,
+          "name": "storage.formatted",
+          "size": 1,
+          "type": "regular"
+        }
+      ],
+      "mutation_dispatches": 1,
+      "overlay_gb": 10,
+      "storage_gb": 20,
+      "transport": "Req HTTP without SmolBox.Client; retry:false",
+      "version": "1.14.1"
+    }
+  ],
+  "restart_additional_observations": [
+    {
+      "attempts": [
+        {
+          "delay_ms": 0,
+          "raw_error": {
+            "body": "{\"error\":\"agent operation failed: read file: failed to read /workspace/dispatch-count in the workload container: open /workspace/dispatch-count: No such file or directory (os error 2)\",\"code\":\"INTERNAL_ERROR\"}",
+            "status": 500
+          },
+          "result": "{:error, %SmolBox.Error{category: :protocol, operation: :download, exit_code: nil, evidence: :dispatch_uncertain}}"
+        },
+        {
+          "delay_ms": 250,
+          "raw_error": {
+            "body": "{\"error\":\"agent operation failed: read file: failed to read /workspace/dispatch-count in the workload container: open /workspace/dispatch-count: No such file or directory (os error 2)\",\"code\":\"INTERNAL_ERROR\"}",
+            "status": 500
+          },
+          "result": "{:error, %SmolBox.Error{category: :protocol, operation: :download, exit_code: nil, evidence: :dispatch_uncertain}}"
+        },
+        {
+          "delay_ms": 1000,
+          "raw_error": {
+            "body": "{\"error\":\"agent operation failed: read file: failed to read /workspace/dispatch-count in the workload container: open /workspace/dispatch-count: No such file or directory (os error 2)\",\"code\":\"INTERNAL_ERROR\"}",
+            "status": 500
+          },
+          "result": "{:error, %SmolBox.Error{category: :protocol, operation: :download, exit_code: nil, evidence: :dispatch_uncertain}}"
+        }
+      ],
+      "dispatches": 1,
+      "mode": "original",
+      "name": "mac6rest-xai5szi3fag26eolsxry",
+      "start": "running",
+      "stop": "stopped"
+    },
+    {
+      "attempts": [
+        {
+          "delay_ms": 0,
+          "raw_error": {
+            "body": "{\"error\":\"agent operation failed: read file: failed to read /workspace/dispatch-count in the workload container: open /workspace/dispatch-count: No such file or directory (os error 2)\",\"code\":\"INTERNAL_ERROR\"}",
+            "status": 500
+          },
+          "result": "{:error, %SmolBox.Error{category: :protocol, operation: :download, exit_code: nil, evidence: :dispatch_uncertain}}"
+        },
+        {
+          "delay_ms": 250,
+          "raw_error": {
+            "body": "{\"error\":\"agent operation failed: read file: failed to read /workspace/dispatch-count in the workload container: open /workspace/dispatch-count: No such file or directory (os error 2)\",\"code\":\"INTERNAL_ERROR\"}",
+            "status": 500
+          },
+          "result": "{:error, %SmolBox.Error{category: :protocol, operation: :download, exit_code: nil, evidence: :dispatch_uncertain}}"
+        },
+        {
+          "delay_ms": 1000,
+          "raw_error": {
+            "body": "{\"error\":\"agent operation failed: read file: failed to read /workspace/dispatch-count in the workload container: open /workspace/dispatch-count: No such file or directory (os error 2)\",\"code\":\"INTERNAL_ERROR\"}",
+            "status": 500
+          },
+          "result": "{:error, %SmolBox.Error{category: :protocol, operation: :download, exit_code: nil, evidence: :dispatch_uncertain}}"
+        }
+      ],
+      "dispatches": 1,
+      "mode": "fsync",
+      "name": "mac6rest-2357d6wid22kpwdn4yln",
+      "start": "running",
+      "stop": "stopped"
+    },
+    {
+      "attempts": [
+        {
+          "delay_ms": 0,
+          "raw_error": {
+            "body": "{\"error\":\"agent operation failed: read file: failed to read /workspace/dispatch-count in the workload container: open /workspace/dispatch-count: No such file or directory (os error 2)\",\"code\":\"INTERNAL_ERROR\"}",
+            "status": 500
+          },
+          "result": "{:error, %SmolBox.Error{category: :protocol, operation: :download, exit_code: nil, evidence: :dispatch_uncertain}}"
+        },
+        {
+          "delay_ms": 250,
+          "raw_error": {
+            "body": "{\"error\":\"agent operation failed: read file: failed to read /workspace/dispatch-count in the workload container: open /workspace/dispatch-count: No such file or directory (os error 2)\",\"code\":\"INTERNAL_ERROR\"}",
+            "status": 500
+          },
+          "result": "{:error, %SmolBox.Error{category: :protocol, operation: :download, exit_code: nil, evidence: :dispatch_uncertain}}"
+        },
+        {
+          "delay_ms": 1000,
+          "raw_error": {
+            "body": "{\"error\":\"agent operation failed: read file: failed to read /workspace/dispatch-count in the workload container: open /workspace/dispatch-count: No such file or directory (os error 2)\",\"code\":\"INTERNAL_ERROR\"}",
+            "status": 500
+          },
+          "result": "{:error, %SmolBox.Error{category: :protocol, operation: :download, exit_code: nil, evidence: :dispatch_uncertain}}"
+        }
+      ],
+      "dispatches": 1,
+      "mode": "original-again",
+      "name": "mac6rest-3kxfnybat6sdqotro6mq",
+      "start": "running",
+      "stop": "stopped"
+    }
+  ],
+  "failure_analysis": {
+    "initial_runtime": "8 of 9 passed; file missing after stop/start with 1/1 GiB requests and no resize2fs",
+    "dependency_correction": "All 9 original cases passed unchanged after supplying resize2fs; explicit flush and delayed observations alone did not fix it",
+    "source_evidence": [
+      "v1.14.6 src/disk_utils.rs copy_disk_from_template/shrink_ext4_image",
+      "v1.14.6 src/storage.rs ensure_formatted/needs_format",
+      "v1.14.6 src/agent/manager.rs prepare_for_launch"
+    ],
+    "inference": "Failed shrinking leaves no formatted marker, while launch logs a warning and continues. A subsequent launch can copy the template again, consistent with the observed lost file.",
+    "missing_dependency_worker_log_sha256": "47bab8a43c84ae9ada711d8fab2e904ec5a54e82796ee2dd1eaaaa52f278ad37",
+    "walkthrough": "TCP setup failed before dispatch because unix_socket:nil fails NimbleOptions validation. Documentation now omits the option when absent; unchanged public API then completed the walkthrough."
+  },
+  "limitations": [
+    "No Mac exhaustion or adversarial runtime cases executed",
+    "No general isolation certification or hard Mac host quotas",
+    "Fresh artifacts, service faults, exact candidate gates and final cleanup recorded separately when complete",
+    "No release, tag, push or PR"
+  ]
+}
