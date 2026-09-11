@@ -4,7 +4,7 @@
 
 ### Native macOS follow-up
 
-Status: **validation in progress**, September 10, 2026. The maintainer separately
+Status: **scoped validation complete**, September 10, 2026. The maintainer separately
 authorized ordinary native macOS 1.14.6 compatibility checks. Exhaustion and
 adversarial tests remain restricted to the disposable Linux lab. No tag, release,
 push or pull request is authorized by this follow-up.
@@ -24,13 +24,27 @@ push or pull request is authorized by this follow-up.
   Fix the walkthrough to omit `unix_socket` when its environment variable is
   absent; passing `nil` previously failed TCP setup before any command dispatch.
   All eight analyzer canary pairs also pass.
-- [ ] Finish service recovery and fresh artifacts on the frozen candidate.
-- [ ] Freeze the updated candidate, validate its applicable complete gates and
+- [x] Finish service recovery and fresh artifacts on the frozen candidate.
+- [x] Freeze the updated candidate, validate its applicable complete gates and
   package consumers, and record final identity, results and owned-resource cleanup.
 
-The working candidate now permits explicit macOS 1.14.6 and documents its host
-dependency. The exact-commit acceptance below remains the earlier Linux
-checkpoint; it must not be presented as acceptance of these later changes.
+The accepted candidate is `9662e57c03940b155b356a41c20b20f002553341`.
+It permits explicit macOS 1.14.6 and documents its host dependency. All four
+Elixir/OTP lanes passed 199 deterministic and 23 tooling cases on each platform.
+Quality gates and analyzer canaries passed, as did the exact-candidate live
+matrix: nine ordinary macOS cases with both old and fresh artifacts, fourteen
+Linux runtime cases, and sixteen store plus twenty-five durable cases on each
+platform. Both hosts also passed three service scenarios, four example runs,
+the walkthrough and a real database outage. All task runtimes were stopped;
+existing services and the Linux recovery baseline were preserved.
+
+Six package consumers used the same 89-file archive, SHA-256
+`26bb1e99e2709e0fbb7f847258e568a1ca8c6e64c00ed6890e6067d44f87d9e1`.
+The authenticated publishing dry run passed on macOS; nothing was published.
+See the [final candidate report](release-candidates/0.1.2-macos.md) and
+[exact-commit evidence](release-candidates/0.1.2-macos.json). These files and the
+plan are excluded from package contents. The acceptance below remains the
+earlier Linux checkpoint, including its then-outstanding authentication step.
 The five adversarial runtime cases are not run or counted as passes on macOS.
 Preparation identities, failures and results are preserved in
 [`smolvm-1.14.6-macos.json`](evidence/smolvm-1.14.6-macos.json).
