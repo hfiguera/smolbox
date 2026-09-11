@@ -1,12 +1,12 @@
 # Compatibility evidence
 
-Version: `0.1.2` candidate, not released. The library's supported qualification is
+Version: `0.1.2`. The library's supported qualification is
 `:development`; requested hard-control options remain unsupported. The original
 release evidence below records the client/controller contract on Linux and macOS.
 
 ## Runtime selection
 
-The candidate defaults to `runtime_version: "1.14.6"` for Linux x86_64 and
+SmolBox defaults to `runtime_version: "1.14.6"` for Linux x86_64 and
 macOS Apple Silicon.
 The Linux runtime and constrained deployment results are recorded below;
 exact-commit release acceptance is recorded separately in the repository's

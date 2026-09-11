@@ -68,8 +68,8 @@ children = [
 ]
 ```
 
-This fragment explicitly selects Linux 1.14.6 with the unpublished 0.1.2
-candidate. Omitting the field also selects 1.14.6. Use `"1.14.1"` explicitly
+This fragment explicitly selects Linux 1.14.6 with SmolBox 0.1.2.
+Omitting the field also selects 1.14.6. Use `"1.14.1"` explicitly
 for an existing worker. See [runtime selection](compatibility.md#runtime-selection).
 This is a host configuration fragment, not a self-provisioning script. The host
 must verify artifact bytes on the worker and retain that immutable artifact.

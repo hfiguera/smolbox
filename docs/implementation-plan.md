@@ -1,6 +1,21 @@
 # SmolBox implementation plan
 
-## 0.1.2 compatibility candidate (not released)
+## 0.1.2 release
+
+Status: **publication authorized and in progress**, September 10, 2026.
+PR #5 was squash merged as `644cc645d5d4d4b7fc84191b138a9581538d9b20`;
+its complete tree matches the accepted branch head, and ordinary GitHub CI
+passed on the merged commit. Release finalization changes only documentation
+and release status text. Library, tests, tooling implementations, dependency
+locks and worker configuration remain identical to the tested default candidate.
+
+Publication checks rebuild the final archive, verify every file against the
+release commit, rerun documentation and package consumers, and require passing
+ordinary CI. The native macOS and disposable Linux runtime results below retain
+their original commit identities; finalization does not claim a new live or
+exhaustion campaign. The package checksum changes with the finalized documents.
+Publication and public registry verification will be recorded separately from
+the historical candidate reports below.
 
 ### Default runtime update
 

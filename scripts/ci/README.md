@@ -57,7 +57,7 @@ the previous macOS results remain historical and must not be reported as a new
 
 ## 0.1.2 runtime selection
 
-The unpublished 0.1.2 candidate defaults to SmolVM 1.14.6 on Linux x86_64 or macOS Apple Silicon.
+SmolBox 0.1.2 defaults to SmolVM 1.14.6 on Linux x86_64 or macOS Apple Silicon.
 Set `runtime_version` in the private worker manifest to select a version explicitly;
 preflight verifies that version's binary checksum and exports
 `SMOLBOX_RUNTIME_VERSION` for runtime tests, examples and service fault checks.

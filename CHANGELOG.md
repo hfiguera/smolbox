@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.2 (unreleased)
+## 0.1.2
 
 - Default to SmolVM **1.14.6** for Linux x86_64 and
   macOS Apple Silicon workers.
@@ -22,7 +22,6 @@
 
 Native runtime and constrained Linux deployment preparation results are documented in
 the compatibility guide. Exact-commit release acceptance is recorded separately.
-No 0.1.2 tag, Hex package or GitHub Release has been created.
 
 ## 0.1.1
 
