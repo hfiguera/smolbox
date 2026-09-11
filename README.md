@@ -79,7 +79,7 @@ creating machines, executing commands, streaming output, and transferring files.
 ## Installation and first run
 
 This checkout prepares **0.1.2**, which is not published yet. Its explicit
-SmolVM 1.14.6 option targets Linux x86_64 and macOS Apple Silicon. Use a local path dependency to try the
+SmolVM 1.14.6 default targets Linux x86_64 and macOS Apple Silicon. Use a local path dependency to try the
 candidate; the published 0.1.1 package below retains its 1.14.1 contract.
 
 Add SmolBox to your application's `mix.exs`:
@@ -113,11 +113,13 @@ is included in the repository.
 ## Current scope
 
 SmolBox has real execution and durable recovery tests on Linux x86_64 and macOS
-Apple Silicon with **SmolVM 1.14.1**. The 0.1.2 candidate adds explicit
-**1.14.6** support on those hosts; validation status is recorded in
-[Compatibility](docs/compatibility.md#runtime-selection). Existing configurations
-retain the 1.14.1 default. Select the exact version you operate; the package does
-not upgrade an external worker or accept arbitrary upstream releases.
+Apple Silicon with **SmolVM 1.14.1 and 1.14.6**; validation status is recorded in
+[Compatibility](docs/compatibility.md#runtime-selection). The 0.1.2 candidate
+defaults to **1.14.6**. Before upgrading an application that still uses a 1.14.1
+worker, explicitly configure `runtime_version: "1.14.1"` or follow the
+[worker upgrade procedure](docs/host-integration.md#upgrading-a-worker).
+The package does not upgrade an external worker. A version mismatch prevents
+new execution; arbitrary upstream releases and automatic fallback are not accepted.
 
 SmolBox relies on SmolVM's isolation model for running untrusted code. Your
 deployment must protect worker access and configure host resource limits,

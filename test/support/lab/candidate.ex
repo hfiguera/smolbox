@@ -1,7 +1,7 @@
 defmodule SmolBox.LabCandidate do
   @moduledoc false
 
-  def runtime_version, do: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.14.1")
+  def runtime_version, do: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.14.6")
 
   # The standard suites keep their existing behavior unless the dedicated Linux
   # campaign explicitly selects this owned deployment. Reset never touches the

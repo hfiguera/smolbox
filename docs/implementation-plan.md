@@ -2,6 +2,25 @@
 
 ## 0.1.2 compatibility candidate (not released)
 
+### Default runtime update
+
+Status: **validation in progress**, September 10, 2026. The maintainer authorized
+making SmolVM 1.14.6 the default after its native macOS and Linux validation.
+Existing 1.14.1 workers remain supported through explicit configuration; omitted
+versions now expect 1.14.6 and mismatches must prevent admission. The default
+change does not install a worker or change persisted execution records.
+
+- [x] Align library, host examples and CI manifest defaults, and document the
+  required configuration for existing 1.14.1 installations.
+- [x] Exercise default admission, explicit legacy admission and rejection of
+  both mismatch directions without dispatching commands.
+- [ ] Freeze and validate the new candidate: applicable quality and language
+  lanes, ordinary native macOS and disposable Linux execution, docs and fresh
+  package consumers with assertions for the default and explicit legacy selection.
+- [ ] Record the final package, validation scope and cleanup. No release, tag,
+  push or pull request is authorized. Earlier evidence below remains historical;
+  unchanged exhaustion scenarios are not rerun as part of changing a default.
+
 ### Native macOS follow-up
 
 Status: **scoped validation complete**, September 10, 2026. The maintainer separately

@@ -6,12 +6,14 @@ release evidence below records the client/controller contract on Linux and macOS
 
 ## Runtime selection
 
-The candidate adds explicit `runtime_version: "1.14.6"` for Linux x86_64 and
+The candidate defaults to `runtime_version: "1.14.6"` for Linux x86_64 and
 macOS Apple Silicon.
 The Linux runtime and constrained deployment results are recorded below;
 exact-commit release acceptance is recorded separately in the repository's
 `docs/release-candidates/` directory.
-The default remains `"1.14.1"`, preserving existing configurations. A worker
+To keep using an existing 1.14.1 worker after upgrading SmolBox, explicitly set
+`runtime_version: "1.14.1"`. Otherwise upgrade the worker using the procedure
+below. Omitting the option changes the expected version to 1.14.6. A worker
 must report the exact configured version; supporting two versions does not
 allow automatic fallback or accepting an arbitrary `1.14.x` release.
 
@@ -85,10 +87,11 @@ and 55-second receive budget, matching their existing preparation profile; the c
 semantics are unchanged. The failed attempt remains in the evidence, and a
 startup failure can still require external worker teardown.
 
-The default is retained for compatibility with existing worker installations.
-For a new Linux x86_64 or macOS Apple Silicon installation using this candidate, explicitly select
-1.14.6 to obtain the tested upstream cleanup fix. Updating the Elixir dependency
-does not update a separately installed worker.
+For a new Linux x86_64 or macOS Apple Silicon installation, the 1.14.6 default
+selects the version with the tested upstream cleanup fix. Updating the Elixir
+dependency does not update a separately installed worker. The historical results
+below retain the selections used by those runs; final candidate acceptance is
+recorded separately.
 
 ### macOS 1.14.6 prerequisites
 

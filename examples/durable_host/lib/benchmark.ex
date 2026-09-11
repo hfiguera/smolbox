@@ -303,7 +303,7 @@ defmodule SmolBox.DurableHost.Benchmark do
   end
 
   defp assert_idle(client) do
-    version = System.get_env("SMOLBOX_RUNTIME_VERSION", "1.14.1")
+    version = System.get_env("SMOLBOX_RUNTIME_VERSION", "1.14.6")
     {:ok, %{version: ^version, total: 0}} = Client.health(client)
     :ok = Client.readiness(client)
     {:ok, []} = Client.list(client)

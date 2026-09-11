@@ -55,12 +55,14 @@ defmodule SmolBox.CI.PreflightTest do
     end
   end
 
-  test "candidate preflight accepts explicit 1.14.6 on both supported host platforms" do
-    manifest = Map.put(manifest(), "runtime_version", "1.14.6")
-    assert Preflight.validate!(manifest, "linux", false, %{}).port == 19_470
+  test "candidate preflight accepts the default and both explicit supported versions" do
+    for version <- [nil, "1.14.1", "1.14.6"] do
+      manifest = if version, do: Map.put(manifest(), "runtime_version", version), else: manifest()
+      assert Preflight.validate!(manifest, "linux", false, %{}).port == 19_470
 
-    assert Preflight.validate!(Map.put(manifest, "platform", "macos"), "macos", false, %{}).port ==
-             19_470
+      assert Preflight.validate!(Map.put(manifest, "platform", "macos"), "macos", false, %{}).port ==
+               19_470
+    end
   end
 
   test "manifest files must be private, regular, owned and bounded" do

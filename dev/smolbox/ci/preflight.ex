@@ -10,7 +10,7 @@ defmodule SmolBox.CI.Preflight do
       "unsupported worker manifest or platform"
     )
 
-    Runtime.pin!(platform, Map.get(manifest, "runtime_version", "1.14.1"))
+    Runtime.pin!(platform, Map.get(manifest, "runtime_version", "1.14.6"))
 
     Util.ensure!(
       !(environment["GITHUB_ACTIONS"] == "true" and development),
@@ -116,7 +116,7 @@ defmodule SmolBox.CI.Preflight do
 
   def verify!(manifest, platform, development) do
     uri = validate!(manifest, platform, development)
-    version = Map.get(manifest, "runtime_version", "1.14.1")
+    version = Map.get(manifest, "runtime_version", "1.14.6")
     {architecture, pin} = Runtime.pin!(platform, version)
 
     Util.ensure!(
@@ -291,7 +291,7 @@ defmodule SmolBox.CI.Preflight do
       values = %{
         "SMOLBOX_SMOLVM_CLI" => Path.join(Path.dirname(executable), "smolvm"),
         "SMOLBOX_RUNTIME_URL" => manifest["worker_url"],
-        "SMOLBOX_RUNTIME_VERSION" => Map.get(manifest, "runtime_version", "1.14.1"),
+        "SMOLBOX_RUNTIME_VERSION" => Map.get(manifest, "runtime_version", "1.14.6"),
         "SMOLBOX_PYTHON_ARTIFACT" => manifest["python_artifact"],
         "SMOLBOX_PYTHON_SHA256" => manifest["python_sha256"],
         "SMOLBOX_JS_ARTIFACT" => manifest["javascript_artifact"],

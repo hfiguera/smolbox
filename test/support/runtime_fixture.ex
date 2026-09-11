@@ -21,15 +21,20 @@ defmodule SmolBox.RuntimeFixture do
 
     {:ok, worker} =
       WorkerConfig.new(
-        client: client,
-        platform: :linux,
-        architecture: "x86_64",
-        profiles: [spec.profile],
-        allocation_floor: %{storage_gb: 1, overlay_gb: 1, host_overhead_mb: 256},
-        capacity: Contract.capacity(),
-        draining: Keyword.get(options, :draining, false),
-        runtime_version: Keyword.get(options, :expected_runtime_version, "1.14.1"),
-        artifacts: [Map.put(spec.artifact, "path", "/approved/python.smolmachine")]
+        [
+          client: client,
+          platform: :linux,
+          architecture: "x86_64",
+          profiles: [spec.profile],
+          allocation_floor: %{storage_gb: 1, overlay_gb: 1, host_overhead_mb: 256},
+          capacity: Contract.capacity(),
+          draining: Keyword.get(options, :draining, false),
+          artifacts: [Map.put(spec.artifact, "path", "/approved/python.smolmachine")]
+        ] ++
+          case Keyword.fetch(options, :expected_runtime_version) do
+            {:ok, version} -> [runtime_version: version]
+            :error -> []
+          end
       )
 
     config = [

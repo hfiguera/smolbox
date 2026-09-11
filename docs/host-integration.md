@@ -69,8 +69,8 @@ children = [
 ```
 
 This fragment explicitly selects Linux 1.14.6 with the unpublished 0.1.2
-candidate. Use `"1.14.1"` for an existing worker; omitting the field retains
-that default. See [runtime selection](compatibility.md#runtime-selection).
+candidate. Omitting the field also selects 1.14.6. Use `"1.14.1"` explicitly
+for an existing worker. See [runtime selection](compatibility.md#runtime-selection).
 This is a host configuration fragment, not a self-provisioning script. The host
 must verify artifact bytes on the worker and retain that immutable artifact.
 Its image must have neutral `/bin/true` startup and no automatic workload restart.
@@ -304,18 +304,21 @@ to reconcile. Memory mode loses this authority when its store process stops.
 
 ## Upgrading a worker
 
-SmolBox 0.1.2 adds an explicit Linux x86_64 and macOS Apple Silicon option:
+SmolBox 0.1.2 defaults to 1.14.6 on Linux x86_64 and macOS Apple Silicon.
+Before upgrading SmolBox against a worker that remains on 1.14.1, preserve its
+expected version explicitly:
 
 ```elixir
 {:ok, worker} = SmolBox.Runtime.WorkerConfig.new(
-  Keyword.put(existing_worker_options, :runtime_version, "1.14.6")
+  Keyword.put(existing_worker_options, :runtime_version, "1.14.1")
 )
 ```
 
-Use this version for new workers on those hosts after consulting its
+Use 1.14.6 for new workers after consulting its
 [compatibility evidence](compatibility.md#runtime-selection).
-Omitting `:runtime_version` retains `"1.14.1"`; an Elixir dependency update does
-not install SmolVM or silently change the expected worker version.
+Omitting `:runtime_version` now expects `"1.14.6"`; an Elixir dependency update
+does not install SmolVM. If the server still reports 1.14.1, the runtime refuses
+new execution until the expected version and installed worker match.
 Unverified versions and 1.14.6 host combinations fail
 configuration validation. Health checks still require an exact version match.
 

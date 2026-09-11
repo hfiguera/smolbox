@@ -36,7 +36,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   ]
   @derive {Inspect, only: [:architecture, :platform, :runtime_version, :qualification]}
   defstruct @enforce_keys ++
-              [runtime_version: "1.14.1", qualification: :development, draining: false]
+              [runtime_version: "1.14.6", qualification: :development, draining: false]
 
   @type t :: %__MODULE__{
           client: Client.t(),
@@ -70,8 +70,8 @@ defmodule SmolBox.Runtime.WorkerConfig do
   | `:capacity` | Atom-keyed map with `:slots`, `:cpus`, `:memory_mb`, and `:disk_gb`; each 1–1,048,576 |
   | `:allocation_floor` | Atom-keyed map with `:storage_gb` and `:overlay_gb` (1–64 each), and `:host_overhead_mb` (128–16,384) |
 
-  Optional fields are `:runtime_version` (default `"1.14.1"`; explicitly select
-  `"1.14.6"` for Linux x86_64 or macOS Apple Silicon), `:qualification`
+  Optional fields are `:runtime_version` (default `"1.14.6"` for Linux x86_64 or
+  macOS Apple Silicon; explicitly select `"1.14.1"` for an existing worker), `:qualification`
   (only `:development`), and `:draining` (default `false`). Artifact IDs must be
   unique and architectures must match this worker. Construction makes no worker
   request or remote digest check. Profiles below the floor cannot support execution.

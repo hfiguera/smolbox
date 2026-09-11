@@ -58,7 +58,7 @@ defmodule SmolBox.Example.Setup do
         client: client,
         architecture: architecture(),
         platform: platform(),
-        runtime_version: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.14.1"),
+        runtime_version: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.14.6"),
         profiles: [profile],
         artifacts: [Map.put(artifact, "path", artifact_file)],
         allocation_floor: %{storage_gb: 20, overlay_gb: 10, host_overhead_mb: 768},

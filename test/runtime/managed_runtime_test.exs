@@ -65,15 +65,22 @@ defmodule SmolBox.ManagedRuntimeTest do
 
     {:ok, configured} =
       WorkerConfig.new(
-        client: client,
-        architecture: architecture,
-        platform: platform,
-        runtime_version: version,
-        artifacts: artifacts,
-        profiles: [profile],
-        allocation_floor: %{storage_gb: 20, overlay_gb: 10, host_overhead_mb: 768},
-        capacity: %{slots: 1, cpus: 1, memory_mb: 1024, disk_gb: 30}
+        [
+          client: client,
+          architecture: architecture,
+          platform: platform,
+          artifacts: artifacts,
+          profiles: [profile],
+          allocation_floor: %{storage_gb: 20, overlay_gb: 10, host_overhead_mb: 768},
+          capacity: %{slots: 1, cpus: 1, memory_mb: 1024, disk_gb: 30}
+        ] ++
+          case System.fetch_env("SMOLBOX_RUNTIME_VERSION") do
+            {:ok, selected} -> [runtime_version: selected]
+            :error -> []
+          end
       )
+
+    assert configured.runtime_version == version
 
     store = start_supervised!(Memory)
     objects = start_supervised!({Agent, fn -> %{} end})

@@ -18,7 +18,7 @@ In an existing Elixir Mix application, add this entry to `deps/0` in `mix.exs`:
 ```
 
 Run `mix deps.get` to fetch the published package from Hex. The 0.1.2 candidate
-is not published; to use its SmolVM 1.14.6 option, use a sibling local checkout
+is not published; to use its SmolVM 1.14.6 default, use a sibling local checkout
 with `{:smolbox, path: "../smolbox"}`. Elixir 1.18 and later are accepted by the
 package; use one of the tested Elixir/OTP pairs in [Compatibility](compatibility.md).
 
@@ -34,7 +34,8 @@ workers use a different host configuration; see [Managed host integration](host-
 
 You need a **dedicated, empty worker**: select **SmolVM 1.14.6 on Linux x86_64 or
 macOS Apple Silicon** with the 0.1.2 candidate. Existing 1.14.1 deployments
-remain compatible. Check the [1.14.6 host prerequisites](compatibility.md#macos-1-14-6-prerequisites),
+require explicit `runtime_version: "1.14.1"` (or the environment setting below).
+Check the [1.14.6 host prerequisites](compatibility.md#macos-1-14-6-prerequisites),
 then use an approved native Python
 artifact with neutral `/bin/true` startup. Follow the
 [reference-runtime preparation instructions](client.md#preparing-the-reference-runtimes)
@@ -63,7 +64,9 @@ iex -S mix
 
 `SMOLBOX_DEMO_DIR` is a new private directory for input/output objects. Keep it
 separate from the runtime image and from all guest-accessible directories.
-Set `SMOLBOX_RUNTIME_VERSION=1.14.1` for an existing 1.14.1 worker on either host.
+Omitting `SMOLBOX_RUNTIME_VERSION` selects 1.14.6 in this walkthrough. Set it to
+`1.14.1` for an existing 1.14.1 worker on either host. A library upgrade does not
+upgrade the worker; mismatched versions prevent admission.
 The walkthrough checks this explicit selection; it never adopts an arbitrary
 version from the health response.
 
@@ -121,7 +124,7 @@ worker_options =
   Worker.new("demo-worker", System.fetch_env!("SMOLBOX_RUNTIME_URL"), worker_options)
 
 {:ok, client} = SmolBox.Client.new(worker)
-runtime_version = System.fetch_env!("SMOLBOX_RUNTIME_VERSION")
+runtime_version = System.get_env("SMOLBOX_RUNTIME_VERSION", "1.14.6")
 {:ok, %{version: ^runtime_version}} = SmolBox.Client.health(client)
 :ok = SmolBox.Client.readiness(client)
 {:ok, []} = SmolBox.Client.list(client)

@@ -80,9 +80,12 @@ defmodule SmolBox.RuntimeConfigTest do
              WorkerConfig.new(Keyword.delete(context.options, :allocation_floor))
   end
 
-  test "runtime upgrades are explicit and restricted to the supported host combination",
+  test "runtime defaults to 1.14.6 and retains explicit 1.14.1 support",
        context do
-    assert context.worker.runtime_version == "1.14.1"
+    assert context.worker.runtime_version == "1.14.6"
+
+    assert {:ok, %{runtime_version: "1.14.1"}} =
+             WorkerConfig.new(Keyword.put(context.options, :runtime_version, "1.14.1"))
 
     assert {:ok, candidate} =
              WorkerConfig.new(Keyword.put(context.options, :runtime_version, "1.14.6"))
