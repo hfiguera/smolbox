@@ -87,7 +87,7 @@ defmodule SmolBox.DurableHost.Benchmark do
       database_topology: settings["database_topology"],
       cache_context: settings["cache_context"],
       artifact_sha256: settings["artifact_sha256"],
-      runtime_version: "1.14.1",
+      runtime_version: context.worker.runtime_version,
       profile: Map.take(context.spec.profile, [:cpus, :memory_mb, :storage_gb, :overlay_gb]),
       controller: %{
         max_active: 4,
@@ -303,7 +303,8 @@ defmodule SmolBox.DurableHost.Benchmark do
   end
 
   defp assert_idle(client) do
-    {:ok, %{version: "1.14.1", total: 0}} = Client.health(client)
+    version = System.get_env("SMOLBOX_RUNTIME_VERSION", "1.14.6")
+    {:ok, %{version: ^version, total: 0}} = Client.health(client)
     :ok = Client.readiness(client)
     {:ok, []} = Client.list(client)
   end

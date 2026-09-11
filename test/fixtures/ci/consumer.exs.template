@@ -4,7 +4,7 @@ defmodule Consumer.Transport do
   @impl true
   def request(_worker, %{method: :get, path: "/health"}) do
     send(self(), :fake_transport_called)
-    {:ok, ~s({"status":"ok","version":"1.14.1","machines":{"total":0,"running":0}})}
+    {:ok, ~s({"status":"ok","version":"1.14.6","machines":{"total":0,"running":0}})}
   end
 end
 
@@ -20,12 +20,22 @@ end
 [] = Application.spec(:smolbox, :mod)
 {:ok, endpoint} = SmolBox.Worker.new("consumer", "http://127.0.0.1:1", allow_insecure_loopback: true)
 {:ok, client} = SmolBox.Client.new(endpoint, transport: Consumer.Transport)
-{:ok, %{version: "1.14.1", total: 0, running: 0}} = SmolBox.Client.health(client)
+{:ok, %{version: "1.14.6", total: 0, running: 0}} = SmolBox.Client.health(client)
 receive do
   :fake_transport_called -> :ok
 after
   100 -> raise "client did not exercise the supplied transport"
 end
+
+{:ok, profile} = SmolBox.Profile.new("consumer")
+worker_options = [client: client, platform: :linux, architecture: "x86_64",
+  profiles: [profile], allocation_floor: %{storage_gb: 1, overlay_gb: 1, host_overhead_mb: 256},
+  capacity: %{slots: 1, cpus: 1, memory_mb: 1024, disk_gb: 2},
+  artifacts: [%{"id" => "python", "sha256" => String.duplicate("a", 64),
+    "architecture" => "x86_64", "path" => "/approved/python.smolmachine"}]]
+{:ok, %{runtime_version: "1.14.6"}} = SmolBox.Runtime.WorkerConfig.new(worker_options)
+{:ok, %{runtime_version: "1.14.1"}} = SmolBox.Runtime.WorkerConfig.new(
+  Keyword.put(worker_options, :runtime_version, "1.14.1"))
 
 children = [
   {SmolBox.Store.Memory, name: Consumer.Store},
@@ -43,4 +53,5 @@ nil = Process.whereis(Consumer.Runtime)
 versions = Map.new([:req, :jason, :telemetry, :nimble_options], fn app ->
   {app, app |> Application.spec(:vsn) |> to_string()}
 end)
-File.write!("smoke.json", Jason.encode!(%{client: true, supervisor: true, versions: versions}))
+File.write!("smoke.json", Jason.encode!(%{client: true, supervisor: true,
+  runtime_default: "1.14.6", legacy_runtime_explicit: "1.14.1", versions: versions}))

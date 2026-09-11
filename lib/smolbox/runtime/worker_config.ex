@@ -15,6 +15,10 @@ defmodule SmolBox.Runtime.WorkerConfig do
   still expose a larger guest disk. Admission rejects profiles below these
   floors. This declaration is not remotely attested or a host filesystem quota.
 
+  Version 1.14.6 requires working host `resize2fs` for disk requests below
+  template sizes. Verify file persistence across stop/start before admission;
+  see [Compatibility](compatibility.html#macos-1-14-6-prerequisites).
+
   The initial qualification is explicitly `:development`; it does not certify
   hostile multi-tenant host quotas. Requested unsupported hard controls are
   rejected by `SmolBox.Profile`. Reachability alone does not qualify a worker.
@@ -32,7 +36,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   ]
   @derive {Inspect, only: [:architecture, :platform, :runtime_version, :qualification]}
   defstruct @enforce_keys ++
-              [runtime_version: "1.14.1", qualification: :development, draining: false]
+              [runtime_version: "1.14.6", qualification: :development, draining: false]
 
   @type t :: %__MODULE__{
           client: Client.t(),
@@ -66,7 +70,8 @@ defmodule SmolBox.Runtime.WorkerConfig do
   | `:capacity` | Atom-keyed map with `:slots`, `:cpus`, `:memory_mb`, and `:disk_gb`; each 1–1,048,576 |
   | `:allocation_floor` | Atom-keyed map with `:storage_gb` and `:overlay_gb` (1–64 each), and `:host_overhead_mb` (128–16,384) |
 
-  Optional fields are `:runtime_version` (only `"1.14.1"`), `:qualification`
+  Optional fields are `:runtime_version` (default `"1.14.6"` for Linux x86_64 or
+  macOS Apple Silicon; explicitly select `"1.14.1"` for an existing worker), `:qualification`
   (only `:development`), and `:draining` (default `false`). Artifact IDs must be
   unique and architectures must match this worker. Construction makes no worker
   request or remote digest check. Profiles below the floor cannot support execution.
@@ -114,11 +119,18 @@ defmodule SmolBox.Runtime.WorkerConfig do
   end
 
   defp valid_fields?(worker) do
-    valid_client?(worker.client) and worker.runtime_version == "1.14.1" and
+    valid_client?(worker.client) and supported_runtime?(worker) and
       worker.qualification == :development and valid_platform?(worker) and
       is_boolean(worker.draining) and capacity?(worker.capacity) and catalogs?(worker) and
       allocation_floor?(worker.allocation_floor)
   end
+
+  defp supported_runtime?(%{runtime_version: "1.14.1"}), do: true
+
+  defp supported_runtime?(%{runtime_version: "1.14.6", platform: platform, architecture: arch}),
+    do: {platform, arch} in [{:linux, "x86_64"}, {:macos, "aarch64"}]
+
+  defp supported_runtime?(_worker), do: false
 
   defp valid_client?(%Client{} = client) do
     Validation.struct_shape?(client, Client) and

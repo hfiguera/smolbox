@@ -1,0 +1,1785 @@
+{
+  "status": "accepted_for_scoped_linux_and_macos_1_14_6_candidate",
+  "linux": {
+    "runtime": {
+      "result": {
+        "captured_bytes": 209,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "e1a1669ac61a1817cb5ed92c319d72d56d154554ce198ae76c1bdc31e6ba6e18",
+        "seconds": 193.445,
+        "status": "passed",
+        "tests": {
+          "passed": 14,
+          "seed": 976091
+        }
+      },
+      "report_file": "runtime-final.json",
+      "report_sha256": "2a7bda822e023cc31039edb2673024f7bc6b4b4e7f52e3e0b12299fa96b7c2e0",
+      "raw_log_retained": true
+    },
+    "store": {
+      "result": {
+        "captured_bytes": 160,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "e6aa1096dea9b4487698043f49e13a54c1f682761a50bf9088326afa5f6be783",
+        "seconds": 3.209,
+        "status": "passed",
+        "tests": {
+          "passed": 16,
+          "seed": 662692
+        }
+      },
+      "report_file": "store-final.json",
+      "report_sha256": "b803198093747016346e2c3fa7f5c0e8f6fec059e349aacca1b7deb7255ea893",
+      "raw_log_retained": true
+    },
+    "cleanup": {
+      "result": {
+        "all_lab_units_stopped": true,
+        "baseline_sha256": "4ff59594af008ff0efb517e9c70cb90d5cf7c240dc0f71d53a162c7b4a0eea2d",
+        "baseline_unchanged": true,
+        "checked_at": "2026-09-11T02:39:01Z",
+        "disk": {
+          "actual-size": 200704,
+          "backing-filename": "/var/lib/smolbox-lab/images/baseline.qcow2",
+          "backing-filename-format": "qcow2",
+          "children": [
+            {
+              "info": {
+                "actual-size": 200704,
+                "children": [],
+                "dirty-flag": false,
+                "filename": "/var/lib/smolbox-lab/images/run.qcow2",
+                "format": "file",
+                "format-specific": {
+                  "data": {},
+                  "type": "file"
+                },
+                "virtual-size": 198656
+              },
+              "name": "file"
+            }
+          ],
+          "cluster-size": 65536,
+          "dirty-flag": false,
+          "filename": "/var/lib/smolbox-lab/images/run.qcow2",
+          "format": "qcow2",
+          "format-specific": {
+            "data": {
+              "compat": "1.1",
+              "compression-type": "zlib",
+              "corrupt": false,
+              "extended-l2": false,
+              "lazy-refcounts": false,
+              "refcount-bits": 16
+            },
+            "type": "qcow2"
+          },
+          "full-backing-filename": "/var/lib/smolbox-lab/images/baseline.qcow2",
+          "virtual-size": 107374182400
+        },
+        "disposable_disk_clean": true,
+        "disposable_disk_recreated_from_baseline": true,
+        "final_outer_cgroup_absent": true,
+        "final_outer_pid": 332895,
+        "final_outer_pid_absent": true,
+        "original_database": {
+          "comm": "postgres",
+          "pid": 39570,
+          "preserved": true
+        },
+        "original_worker": {
+          "comm": "smolvm-bin",
+          "pid": 44097,
+          "preserved": true
+        },
+        "private_guest_port_closed": true,
+        "recovery_marker_cleared": true,
+        "recovery_timer_active": true,
+        "scope": "Only task-owned nested environments were stopped; existing physical-host services were preserved",
+        "status": "passed"
+      },
+      "report_file": "host-cleanup.json",
+      "report_sha256": "ccd20ff52a7f0881c8984b9bfa042ea25e0350e14d1bbb8a92268bdac028408e",
+      "raw_log_retained": false
+    },
+    "consumers": {
+      "package-current": {
+        "report_sha256": "70f0e6d5a7c0e196400d6646a94eebda928973b72af95c1d42946ec0a3ba7d77",
+        "minimum": false,
+        "smoke": {
+          "client": true,
+          "supervisor": true,
+          "versions": {
+            "jason": "1.4.5",
+            "nimble_options": "1.1.1",
+            "req": "0.7.4",
+            "telemetry": "1.4.2"
+          }
+        },
+        "package_sha256": "26bb1e99e2709e0fbb7f847258e568a1ca8c6e64c00ed6890e6067d44f87d9e1"
+      },
+      "package-minimum": {
+        "report_sha256": "2589a209ac135c52c5e85866016c070bde614715be8c68a6e2a477e0bc70ee05",
+        "minimum": true,
+        "smoke": {
+          "client": true,
+          "supervisor": true,
+          "versions": {
+            "jason": "1.4.0",
+            "nimble_options": "1.1.0",
+            "req": "0.7.4",
+            "telemetry": "1.3.0"
+          }
+        },
+        "package_sha256": "26bb1e99e2709e0fbb7f847258e568a1ca8c6e64c00ed6890e6067d44f87d9e1"
+      },
+      "package-otp27": {
+        "report_sha256": "e6569d22535af44f5dc203d0bb5719184a4113941e9b45576a92ce2f71907ced",
+        "minimum": true,
+        "smoke": {
+          "client": true,
+          "supervisor": true,
+          "versions": {
+            "jason": "1.4.0",
+            "nimble_options": "1.1.0",
+            "req": "0.7.4",
+            "telemetry": "1.3.0"
+          }
+        },
+        "package_sha256": "26bb1e99e2709e0fbb7f847258e568a1ca8c6e64c00ed6890e6067d44f87d9e1"
+      }
+    },
+    "examples": {
+      "durable_host-cancel": {
+        "result": {
+          "captured_bytes": 348,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "df117076ad61d50c55e022a3a7b94dd82384857ba89a075b69d6763db5071f36",
+          "seconds": 75.383,
+          "status": "passed"
+        },
+        "report_file": "example2-1146-durable_host-cancel.json",
+        "report_sha256": "a5bf0a94383c4014cf5fcc6ea346458f1401438eab6eb7b61d296f4b1e54b2a0",
+        "raw_log_retained": true
+      },
+      "durable_host-normal": {
+        "result": {
+          "captured_bytes": 599,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "81b1c55268bde7bce6a63816ab0043857a17ae1886fb5c753d380f5c5630ac7b",
+          "seconds": 11.984,
+          "status": "passed"
+        },
+        "report_file": "example2-1146-durable_host-normal.json",
+        "report_sha256": "2dd046b00da67a553ad20665612bdd7adae0cf868eb393a4ab6a99de00b54d1f",
+        "raw_log_retained": true
+      },
+      "minimal_host-cancel": {
+        "result": {
+          "captured_bytes": 348,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "2aebf247e7e379882d769801d2ba43ae58b3b99fd2d020ec3e882728635365b3",
+          "seconds": 75.051,
+          "status": "passed"
+        },
+        "report_file": "example2-1146-minimal_host-cancel.json",
+        "report_sha256": "6bd5379d42b4606cdc24d25ca0eaa8630128780576edfaba01ee2309641ecb9c",
+        "raw_log_retained": true
+      },
+      "minimal_host-normal": {
+        "result": {
+          "captured_bytes": 599,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "e757dc2304732acb7e2962dbda42dbb0d10eb8841b08f9e4ac1d9fd26a90f941",
+          "seconds": 9.68,
+          "status": "passed"
+        },
+        "report_file": "example2-1146-minimal_host-normal.json",
+        "report_sha256": "9beab59b54094804d8b184137dad0b7ce7c87bd012c4dd59b91b12f502ee2e64",
+        "raw_log_retained": true
+      }
+    },
+    "quality": {
+      "canaries": {
+        "result": {
+          "captured_bytes": 621,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "e0b964a623497ff2bb478f184e6c238afa88d2b496eb969c1ad810acf8e4339f",
+          "seconds": 15.334,
+          "status": "passed"
+        },
+        "report_file": "canaries.json",
+        "report_sha256": "c734b74b1f55645cd8cb429f2e8e479c4b69183738fb778112167ef113c7e97e",
+        "raw_log_retained": false
+      },
+      "compile-durable_host": {
+        "result": {
+          "captured_bytes": 25,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "bd364c33f85fbaca28666a37f50d4891a570e4ac67b5088b287846420e66cd17",
+          "seconds": 0.95,
+          "status": "passed"
+        },
+        "report_file": "compile-deps-audit-hex-audit-durable_host.json",
+        "report_sha256": "9854a708f426d292358b7cffa39da3ffe878dc3d4d129a6090ede4e5eccadefc",
+        "raw_log_retained": false
+      },
+      "compile-minimal_host": {
+        "result": {
+          "captured_bytes": 24,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "62ac10239807a71149064330c2cfc045f7688ae6bf5d9baefd67a2452e47789a",
+          "seconds": 0.603,
+          "status": "passed"
+        },
+        "report_file": "compile-deps-audit-hex-audit-minimal_host.json",
+        "report_sha256": "24fc235e4b5dbfd21eb7d9c59d37598ecfab5bd5ef8960ed5fdfa3bf4b3cf8c2",
+        "raw_log_retained": false
+      },
+      "coverage": {
+        "result": {
+          "captured_bytes": 3701,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "0652149634dbd7682261f38e373d38e2803e945ba380614dbf9f1e78f44657a2",
+          "seconds": 80.933,
+          "status": "passed"
+        },
+        "report_file": "coverage.json",
+        "report_sha256": "548727e720d649dd8f430945c7a4533bd0968a468ee2488126e87e6740c028d7",
+        "raw_log_retained": false
+      },
+      "deps-audit-durable_host": {
+        "result": {
+          "captured_bytes": 63,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "3ab3057a627dd4d27e401a315cd925f03734595fc285ddb8427aced7062273f1",
+          "seconds": 2.25,
+          "status": "passed"
+        },
+        "report_file": "deps-audit-hex-audit-durable_host.json",
+        "report_sha256": "9df53cd8be1b644689735dac9be813025140d78749e87623a21191fc3945b3e3",
+        "raw_log_retained": false
+      },
+      "deps-audit-minimal_host": {
+        "result": {
+          "captured_bytes": 63,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "3ab3057a627dd4d27e401a315cd925f03734595fc285ddb8427aced7062273f1",
+          "seconds": 1.993,
+          "status": "passed"
+        },
+        "report_file": "deps-audit-hex-audit-minimal_host.json",
+        "report_sha256": "a3fb961db14cde28292d9316b462177d43951dc98423ce1defbb5fecf86f0550",
+        "raw_log_retained": false
+      },
+      "deps-audit-root": {
+        "result": {
+          "captured_bytes": 26,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "3016e51e4eac0d421674d2128bbbdefb2924b4646e0c14a1ab034977ad73fae5",
+          "seconds": 1.297,
+          "status": "passed"
+        },
+        "report_file": "deps-audit-hex-audit-root.json",
+        "report_sha256": "8f53a551b4b89b695de53216daf63625046c0b1169b5a6e57ab556ec72acf45c",
+        "raw_log_retained": false
+      },
+      "dialyzer-durable_host": {
+        "result": {
+          "captured_bytes": 1853,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "7779a68dd0f6f72f4de4de05f544d813c7ddec0aeecf79c281f8d8369fe97dcf",
+          "seconds": 57.256,
+          "status": "passed"
+        },
+        "report_file": "dialyzer-xref-compile-deps-audit-hex-audit-durable_host.json",
+        "report_sha256": "30f91dc13c258e67784a83ffacb725071c22703fa6e38bdafa61e2892b89c15e",
+        "raw_log_retained": false
+      },
+      "dialyzer-minimal_host": {
+        "result": {
+          "captured_bytes": 1308,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "9af162c6329d0624530ec27d0739a9607c9e7f393026664d7b3e9fdd57741d2d",
+          "seconds": 40.77,
+          "status": "passed"
+        },
+        "report_file": "dialyzer-xref-compile-deps-audit-hex-audit-minimal_host.json",
+        "report_sha256": "7d2281bf94e4cbf069a1c4a97415bfe67b40b41f7de0d67dc7dfde2a19835313",
+        "raw_log_retained": false
+      },
+      "doc-links": {
+        "result": {
+          "captured_bytes": 60,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "4becb7fed09596d86e9f5b2d81c9c1f9bacb31d06c8e2cc7f47e322dad12dac6",
+          "seconds": 0.611,
+          "status": "passed"
+        },
+        "report_file": "doc-links.json",
+        "report_sha256": "97cd7440fde05e06baf75225b4d76a34d436edf3a3fbf302bba00117d5ee7a19",
+        "raw_log_retained": false
+      },
+      "docs": {
+        "result": {
+          "captured_bytes": 153,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "2c82202881a04d8ec7dcc208f385eef29553cf4c1fc7cc1e81bd0cf3331f0b7e",
+          "seconds": 2.66,
+          "status": "passed"
+        },
+        "report_file": "docs.json",
+        "report_sha256": "fb03777b0b08a71fc7cf4fc28b005fe287f56360d5a7d44b3324cef898cb048e",
+        "raw_log_retained": false
+      },
+      "hex-audit-durable_host": {
+        "result": {
+          "captured_bytes": 47,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+          "seconds": 1.162,
+          "status": "passed"
+        },
+        "report_file": "hex-audit-durable_host.json",
+        "report_sha256": "37c7777782512154efb58bf2cd86c9f6b5c7b06cc9a698af620486b521885301",
+        "raw_log_retained": false
+      },
+      "hex-audit-minimal_host": {
+        "result": {
+          "captured_bytes": 47,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+          "seconds": 0.916,
+          "status": "passed"
+        },
+        "report_file": "hex-audit-minimal_host.json",
+        "report_sha256": "127981541319073e245d1fbf6989517bd4474e86b32d9b7297e09f315d1b321b",
+        "raw_log_retained": false
+      },
+      "hex-audit-root": {
+        "result": {
+          "captured_bytes": 47,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+          "seconds": 1.085,
+          "status": "passed"
+        },
+        "report_file": "hex-audit-root.json",
+        "report_sha256": "e851d8a9142c080dcf2bbe847d2ebd27adbdf455f9daf9b57e5bc42a434f32f0",
+        "raw_log_retained": false
+      },
+      "quality": {
+        "result": {
+          "captured_bytes": 2150,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "b968f47ffe588028548aa274cca4a405d0cbef94bddf90ea3d70f681ccfcf931",
+          "seconds": 86.707,
+          "status": "passed"
+        },
+        "report_file": "quality.json",
+        "report_sha256": "0a8d288544ddfe184e8bf65933dd4172573f8dae9a6cae7e5734084195fd5e4f",
+        "raw_log_retained": false
+      },
+      "tooling": {
+        "result": {
+          "captured_bytes": 154,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "c63e0028c18bf05faba7c08fdfaceb12546a010a49aa82c5d53f403ab54446e0",
+          "seconds": 6.297,
+          "status": "passed"
+        },
+        "report_file": "tooling.json",
+        "report_sha256": "021f67c2d709c874a69d5567d2f333edb5d71ca78aa7a32d0c7b20fa8a9f5aa9",
+        "raw_log_retained": false
+      },
+      "xref-durable_host": {
+        "result": {
+          "captured_bytes": 16,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548",
+          "seconds": 0.54,
+          "status": "passed"
+        },
+        "report_file": "xref-compile-deps-audit-hex-audit-durable_host.json",
+        "report_sha256": "713809038a5ef01f4ba968dc8f6db8b884710822af299d8574a608436bee6c8c",
+        "raw_log_retained": false
+      },
+      "xref-minimal_host": {
+        "result": {
+          "captured_bytes": 16,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548",
+          "seconds": 0.501,
+          "status": "passed"
+        },
+        "report_file": "xref-compile-deps-audit-hex-audit-minimal_host.json",
+        "report_sha256": "f8c4e1aff27f6f7b1c15a2f9a68b7fe113d5f2240750c3ca76f9ccd8402ed56e",
+        "raw_log_retained": false
+      }
+    },
+    "platform": "Linux x86_64; runtime tests in the existing disposable nested KVM lab",
+    "durable": {
+      "result": {
+        "captured_bytes": 173,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "ea05a38a7c1410276dbc1bd8860dcd77e8c8c756a772364e3aed6c761970e2c8",
+        "seconds": 632.009,
+        "status": "passed",
+        "tests": {
+          "passed": 25,
+          "seed": 422218
+        }
+      },
+      "report_file": "durable-final.json",
+      "report_sha256": "a822301d22aa11a2ed99870de50713dd1ba29424161114f33628952c31ca4a82",
+      "raw_log_retained": true
+    },
+    "service_faults": {
+      "missing": {
+        "result": {
+          "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+          "dispatch_attempts": 1,
+          "guest_marker": "single byte before recovery",
+          "guest_survived_api_server": true,
+          "operator_deleted_vm": true,
+          "outage_seconds": 0.051,
+          "partition": "restart-7aeb2b25cafa5b1d",
+          "platform": "linux",
+          "result": {
+            "absence_at_ms": 1789093893348,
+            "artifacts": [],
+            "cancel_requested_at_ms": null,
+            "cleanup": "complete",
+            "collection": "pending",
+            "evidence": "termination_confirmed",
+            "exit_code": null,
+            "id": "restart-7aeb2b25cafa5b1d",
+            "machine_name": "sbxexample-ht66dlehk5z7emtzsjtb",
+            "reserved": false,
+            "scope": "example",
+            "state": "unknown",
+            "worker_id": "example-worker"
+          },
+          "retained_workspace": "/tmp/sbx-worker-restart-a0e7f645432eda9f52bda044",
+          "runtime_version": "1.14.6",
+          "scenario": "missing",
+          "seconds": 16.934,
+          "status": "passed"
+        },
+        "report_file": "service-detail-1.14.6-missing.json",
+        "report_sha256": "3f012e3a1a7bcfe8414aa373c0ad4657b2a27dd1c30ab84162db878774c79e0f",
+        "raw_log_retained": false
+      },
+      "restart": {
+        "result": {
+          "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+          "dispatch_attempts": 1,
+          "guest_marker": "single byte before recovery",
+          "guest_survived_api_server": true,
+          "operator_deleted_vm": false,
+          "outage_seconds": 0.051,
+          "partition": "restart-d91566196f5dc179",
+          "platform": "linux",
+          "result": {
+            "absence_at_ms": 1789093737209,
+            "artifacts": [],
+            "cancel_requested_at_ms": null,
+            "cleanup": "complete",
+            "collection": "pending",
+            "evidence": "termination_confirmed",
+            "exit_code": null,
+            "id": "restart-d91566196f5dc179",
+            "machine_name": "sbxexample-gdvbpu3uyzggaibsuo6t",
+            "reserved": false,
+            "scope": "example",
+            "state": "unknown",
+            "worker_id": "example-worker"
+          },
+          "retained_workspace": "/tmp/sbx-worker-restart-129fc8fe4f5495f4d66af73a",
+          "runtime_version": "1.14.6",
+          "scenario": "restart",
+          "seconds": 76.886,
+          "status": "passed"
+        },
+        "report_file": "service-detail-1.14.6-restart.json",
+        "report_sha256": "19838698053443f7d1203d13abce71c12f85109f0403a382cd274307953e51af",
+        "raw_log_retained": false
+      },
+      "unavailable": {
+        "result": {
+          "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+          "dispatch_attempts": 1,
+          "guest_marker": "single byte before recovery",
+          "guest_survived_api_server": true,
+          "operator_deleted_vm": true,
+          "outage_seconds": 89.967,
+          "partition": "restart-0a5033721c09089b",
+          "platform": "linux",
+          "result": {
+            "absence_at_ms": 1789093875018,
+            "artifacts": [],
+            "cancel_requested_at_ms": 1789093753216,
+            "cleanup": "complete",
+            "collection": "pending",
+            "evidence": "termination_confirmed",
+            "exit_code": null,
+            "id": "restart-0a5033721c09089b",
+            "machine_name": "sbxexample-hup6ym7xbsifae7n422p",
+            "reserved": false,
+            "scope": "example",
+            "state": "unknown",
+            "worker_id": "example-worker"
+          },
+          "retained_workspace": "/tmp/sbx-worker-restart-45913da56b9a35ea38b75efc",
+          "runtime_version": "1.14.6",
+          "scenario": "unavailable",
+          "seconds": 136.316,
+          "status": "passed"
+        },
+        "report_file": "service-detail-1.14.6-unavailable.json",
+        "report_sha256": "5fc8e9c9e3995076ef400b999c806aacbfd701208b60083e8c644859750f0ae5",
+        "raw_log_retained": false
+      }
+    },
+    "walkthrough": {
+      "result": {
+        "captured_bytes": 121,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "435fc9dd1fd86907d6cb95351b6357ef2ebf71fa6fd39e27c3d38c81c7b92101",
+        "seconds": 9.914,
+        "status": "passed"
+      },
+      "report_file": "walkthrough-1146.json",
+      "report_sha256": "386500f2da4c30e3958453210d80640715818a402f35135fc6464de70d8d6878",
+      "raw_log_retained": true
+    },
+    "database_unavailable": {
+      "result": {
+        "captured_bytes": 31,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "f090dd47a12af3805d942e71d8b8fad0838b1a6893a1dea8fba04ae00e79c2bc",
+        "seconds": 18.482,
+        "status": "passed"
+      },
+      "report_file": "database-unavailable-final.json",
+      "report_sha256": "0aaa2e445f84daba16930f31a4527758f6fbfa9c51037ac13761e32aab52b94c",
+      "raw_log_retained": true
+    },
+    "primary_lane": {
+      "otp": "29.0.6",
+      "elixir": "1.20.4",
+      "deterministic_passed": 199,
+      "tooling_passed": 23
+    },
+    "additional_lanes": {
+      "elixir119": {
+        "otp": "28.5",
+        "elixir": "1.19.5",
+        "tools": {
+          "result": {
+            "captured_bytes": 156,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "c34c1abcb2ef9c17b0fc2c6ad6ccf2cc37f36950e82b99680044319d7cef59a9",
+            "seconds": 6.334,
+            "status": "passed"
+          },
+          "report_file": "tooling-elixir119.json",
+          "report_sha256": "bcd69fa43663c52247ae722b0563807ec09f8e56072c7cb440b3f6c68672d219",
+          "raw_log_retained": true
+        },
+        "deterministic_passed": 199,
+        "runtime_excluded_not_counted": 14,
+        "tooling_passed": 23,
+        "compilation": {
+          "result": {
+            "captured_bytes": 2992,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "874ba68018295fb60ddc80ac31fd3b7994444a4fc4a05d317071d85b1e2e1adc",
+            "seconds": 61.577,
+            "status": "passed"
+          },
+          "report_file": "compile-elixir119.json",
+          "report_sha256": "df09848025ac45839be1af354c0bea499d13f2abb5a1222b02423b4e5307ebb3",
+          "raw_log_retained": true
+        },
+        "tests": {
+          "result": {
+            "captured_bytes": 387,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "af3c36e842e4b8f95caec70fb39966b6d3a34aaebd22f1379163595386653871",
+            "seconds": 81.624,
+            "status": "passed"
+          },
+          "report_file": "tests-elixir119.json",
+          "report_sha256": "1f0acdca0c26c161ac86f39f311aba902d6c62af1be0e79d903fc6f1cb1a6c76",
+          "raw_log_retained": true
+        }
+      },
+      "otp27": {
+        "otp": "27.3.4.15",
+        "elixir": "1.18.4",
+        "tools": {
+          "result": {
+            "captured_bytes": 156,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "30e82b4f81b57c75de3fd20c7c6427c11d7d97ec69c5fc8c1a482b28fa4fe3e6",
+            "seconds": 6.653,
+            "status": "passed"
+          },
+          "report_file": "tooling-otp27.json",
+          "report_sha256": "7e05ecc72ebc7a08e6c7e412b0b7df1cfb981542061426093f88d27b7c761fac",
+          "raw_log_retained": true
+        },
+        "deterministic_passed": 199,
+        "runtime_excluded_not_counted": 14,
+        "tooling_passed": 23,
+        "compilation": {
+          "result": {
+            "captured_bytes": 2916,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "965d82dd7dcde023a1404f07a2ae4c8a414b0b18f3d7318564d5a74a538dd4b2",
+            "seconds": 56.26,
+            "status": "passed"
+          },
+          "report_file": "compile-otp27.json",
+          "report_sha256": "fcbb812574cbcf49e20f8b6aade241503b0012d2ec5213c4dbfc4790492bc265",
+          "raw_log_retained": true
+        },
+        "tests": {
+          "result": {
+            "captured_bytes": 386,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "9d385a6397c09d18715eb8e488ae4e7894f842eda30cefc9ed4e7618cdab0e15",
+            "seconds": 79.382,
+            "status": "passed"
+          },
+          "report_file": "tests-otp27.json",
+          "report_sha256": "c302bd2bfa00e45f470ad5c5f04ba661089021e9cc4135870df6b6d5f90cdd01",
+          "raw_log_retained": true
+        }
+      },
+      "otp28": {
+        "otp": "28.5",
+        "elixir": "1.20.4",
+        "tools": {
+          "result": {
+            "captured_bytes": 154,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "4fec0ce3439578755ff9760045c8c7895fbbe2381f7badaf7b8f31bd4f75734f",
+            "seconds": 6.598,
+            "status": "passed"
+          },
+          "report_file": "tooling-otp28.json",
+          "report_sha256": "c81485035a3f1a3586114df59fcb582d6593d367b50bf623014ccbf0c9aeb11b",
+          "raw_log_retained": true
+        },
+        "deterministic_passed": 199,
+        "runtime_excluded_not_counted": 14,
+        "tooling_passed": 23,
+        "compilation": {
+          "result": {
+            "captured_bytes": 7042,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "003d5dbba2bd3392061ec46fe9d2f0d1f34311c14df7c42e1fa6a8ade7f8bd65",
+            "seconds": 51.978,
+            "status": "passed"
+          },
+          "report_file": "compile-otp28.json",
+          "report_sha256": "26bcd442238f1c12263d413f000d64ec4ffef2a0bb4b28c24b8a65893fcc6ab4",
+          "raw_log_retained": true
+        },
+        "tests": {
+          "result": {
+            "captured_bytes": 396,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "e59def897265483d47b1a020beb6dec95c0745cd323d55f2685d5458c7e7d950",
+            "seconds": 80.508,
+            "status": "passed"
+          },
+          "report_file": "tests-otp28.json",
+          "report_sha256": "8d9657599ee2939c0efca63fe4d96548440f43413a3683a43d7623dc7fccc008",
+          "raw_log_retained": true
+        }
+      }
+    }
+  },
+  "package": {
+    "commit": "9662e57c03940b155b356a41c20b20f002553341",
+    "every_file_matches_git": true,
+    "license_unchanged_from_0_1_1": true,
+    "licenses": [
+      "MIT"
+    ],
+    "package_files": 89,
+    "package_name": "smolbox",
+    "package_sha256": "26bb1e99e2709e0fbb7f847258e568a1ca8c6e64c00ed6890e6067d44f87d9e1",
+    "public_tag_links": "not requested; v0.1.2 remains intentionally unpublished",
+    "same_archive_for_consumers": true,
+    "source_link_files_and_lines_valid_at_candidate": true,
+    "source_links": 168,
+    "status": "passed",
+    "version": "0.1.2"
+  },
+  "schema": 1,
+  "candidate": "9662e57c03940b155b356a41c20b20f002553341",
+  "recorded_at_utc": "2026-09-11T02:41:40.890214Z",
+  "authorization": {
+    "tag_created": false,
+    "hex_published": false,
+    "github_release_created": false,
+    "branch_pushed": false,
+    "pull_request_created": false
+  },
+  "advisory_database": {
+    "sha": "5246bccd929b29309a014670b41ed2f2c6918c39",
+    "macos_and_linux": "Explicit git pull --ff-only succeeded without changes; local HEAD matched the public remote main branch after audits",
+    "exclusions": []
+  },
+  "temporary_power_inhibitor": {
+    "pid": 55476,
+    "stopped": true,
+    "persistent_power_settings_changed": false
+  },
+  "publishing_dry_run": {
+    "result": {
+      "captured_bytes": 4343,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "07753140851b2bda23910c2ae3eb07b98a6a37e56c728b3832351e576f76f0e3",
+      "seconds": 1.559,
+      "status": "passed"
+    },
+    "report_file": "final-publish-dry-run.json",
+    "report_sha256": "eb830bb3c1634c74e3595dfce7669109deb0a65f0c19e47cfa51eec9edd6fc47",
+    "raw_log_retained": false
+  },
+  "macos": {
+    "runtime": {
+      "result": {
+        "captured_bytes": 154,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "76532b3f4a0a24dbbe541ae82e1157b5c01385318b33ec23bab0076e2c7ff89a",
+        "seconds": 23.041,
+        "status": "passed",
+        "tests": {
+          "passed": 9,
+          "seed": 155259
+        }
+      },
+      "report_file": "final-runtime.json",
+      "report_sha256": "3105cadf352532e668b585109ca261e089776d97b3ea6a2dda741905a54a8c83",
+      "raw_log_retained": true
+    },
+    "store": {
+      "result": {
+        "captured_bytes": 394,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "fadf62c7565382254f72019961323ce518aec9268b84c5131a2b3e0e48aab8eb",
+        "seconds": 1.214,
+        "status": "passed",
+        "tests": {
+          "passed": 16,
+          "seed": 344583
+        }
+      },
+      "report_file": "final-store.json",
+      "report_sha256": "aba9645e7ce75a1353ad2544c8666205c8c922d7da94d56b91c44e8aabc107b5",
+      "raw_log_retained": true
+    },
+    "cleanup": {
+      "result": {
+        "candidate": "9662e57c03940b155b356a41c20b20f002553341",
+        "create_reservations": 0,
+        "filesystem_snapshot": "Filesystem   1024-blocks      Used Available Capacity iused     ifree %iused  Mounted on\n/dev/disk3s5   971350180 892865492  54777740    95% 6821366 547777400    1%   /System/Volumes/Data\n",
+        "original_database_pid": 1932,
+        "original_services_preserved": true,
+        "original_worker_pid": 48910,
+        "owned_runtime_binary_and_libkrun_unmapped": true,
+        "owned_worker_ports_closed": [
+          19480,
+          19481,
+          19482,
+          19484,
+          19486
+        ],
+        "pending_records": 0,
+        "postgres_shutdown": "waiting for server to shut down.... done\nserver stopped",
+        "private_database_socket_absent": true,
+        "private_postgres_pid": 87308,
+        "private_postgres_stopped": true,
+        "recorded_at_utc": "2026-09-11T02:27:50.943158Z",
+        "registered_vms": 0,
+        "reserved_slots": 0,
+        "scope": "Private native compatibility services stopped; retained bounded reports, approved artifacts, dependencies and database files are task data, not active runtimes. No Mac host quota or adversarial isolation qualification.",
+        "status": "passed",
+        "task_allocated_disk": "316500\t/tmp/sbx-mac6.dt7zE3\n"
+      },
+      "report_file": "mac-cleanup.json",
+      "report_sha256": "7e2b6e642fddbfb42f72b27194bdb2a408eb70327897e1aef03250c3a80dbd0f",
+      "raw_log_retained": false
+    },
+    "consumers": {
+      "package-current": {
+        "report_sha256": "0d54dbbc4866d540f6d51f9c1cb334216826431186e11df40d8641e7f1f6d019",
+        "minimum": false,
+        "smoke": {
+          "client": true,
+          "supervisor": true,
+          "versions": {
+            "jason": "1.4.5",
+            "nimble_options": "1.1.1",
+            "req": "0.7.4",
+            "telemetry": "1.4.2"
+          }
+        },
+        "package_sha256": "26bb1e99e2709e0fbb7f847258e568a1ca8c6e64c00ed6890e6067d44f87d9e1"
+      },
+      "package-minimum": {
+        "report_sha256": "cdd68a60a37360095f0d48e4dea2025836751bd0766b5e85f608015bf43fc983",
+        "minimum": true,
+        "smoke": {
+          "client": true,
+          "supervisor": true,
+          "versions": {
+            "jason": "1.4.0",
+            "nimble_options": "1.1.0",
+            "req": "0.7.4",
+            "telemetry": "1.3.0"
+          }
+        },
+        "package_sha256": "26bb1e99e2709e0fbb7f847258e568a1ca8c6e64c00ed6890e6067d44f87d9e1"
+      },
+      "package-minimum-otp27": {
+        "report_sha256": "91e66afe97ccd810173e0fbeb2be3852b4c5207af2df1c9703ebfd2505ad41b1",
+        "minimum": true,
+        "smoke": {
+          "client": true,
+          "supervisor": true,
+          "versions": {
+            "jason": "1.4.0",
+            "nimble_options": "1.1.0",
+            "req": "0.7.4",
+            "telemetry": "1.3.0"
+          }
+        },
+        "package_sha256": "26bb1e99e2709e0fbb7f847258e568a1ca8c6e64c00ed6890e6067d44f87d9e1"
+      }
+    },
+    "examples": {
+      "durable_host-cancel": {
+        "result": {
+          "captured_bytes": 362,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "52cb802f49d7e01aca3d036cf9dadf75236380ac35966135496de225762afea4",
+          "seconds": 67.327,
+          "status": "passed"
+        },
+        "report_file": "final-example-durable_host-cancel.json",
+        "report_sha256": "13302062019c1ec4582ef4f747c24f5d68934b8f539369530f4c82c75f74c04a",
+        "raw_log_retained": true
+      },
+      "durable_host-normal": {
+        "result": {
+          "captured_bytes": 613,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "a57128af2d2064c9017572e8604765a7e0832e91fe0dc0672305700d8784c9b6",
+          "seconds": 3.003,
+          "status": "passed"
+        },
+        "report_file": "final-example-durable_host-normal.json",
+        "report_sha256": "faac00bab3eeb22a14cefd65ec52d9519439fe0dd3d753b494f04ccd2621cb9d",
+        "raw_log_retained": true
+      },
+      "minimal_host-cancel": {
+        "result": {
+          "captured_bytes": 362,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "926b3536e18f90e335b6ea4fb51f11f623d6792c2e36ef20b5c4fa4325cffa5d",
+          "seconds": 66.971,
+          "status": "passed"
+        },
+        "report_file": "final-example-minimal_host-cancel.json",
+        "report_sha256": "941acc6c371a2a7aee1248dc2f2a2880a45c547d3e637bee4bee27f6fbb9db0c",
+        "raw_log_retained": true
+      },
+      "minimal_host-normal": {
+        "result": {
+          "captured_bytes": 613,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "3a86f6b6d0df2364232c7783f01554cd5028bbb939aa587c12f11668e764c17e",
+          "seconds": 2.216,
+          "status": "passed"
+        },
+        "report_file": "final-example-minimal_host-normal.json",
+        "report_sha256": "a491839727aea8e1b66ee0ae1be60568f8efda918e1f4c92679f19af23361944",
+        "raw_log_retained": true
+      }
+    },
+    "quality": {
+      "canaries": {
+        "result": {
+          "captured_bytes": 621,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "e0b964a623497ff2bb478f184e6c238afa88d2b496eb969c1ad810acf8e4339f",
+          "seconds": 9.312,
+          "status": "passed"
+        },
+        "report_file": "final-canaries.json",
+        "report_sha256": "3247a27f6fb172bc22dd26ad4d3722d19627053c365d406b5023c3df2e12eda0",
+        "raw_log_retained": true
+      },
+      "compile-durable_host": {
+        "result": {
+          "captured_bytes": 0,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "seconds": 0.535,
+          "status": "passed"
+        },
+        "report_file": "final-compile-durable_host.json",
+        "report_sha256": "c3751a6a3a46e47b427abeee99e2424db4032c0c62631e6d620f8f907a3fcbec",
+        "raw_log_retained": true
+      },
+      "compile-minimal_host": {
+        "result": {
+          "captured_bytes": 0,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "seconds": 0.423,
+          "status": "passed"
+        },
+        "report_file": "final-compile-minimal_host.json",
+        "report_sha256": "4d1292f6ce769bb0b3c8ae93fd77d0a705182598214a6c7d1be5b0e3815ccab9",
+        "raw_log_retained": true
+      },
+      "coverage": {
+        "result": {
+          "captured_bytes": 3701,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "78cbb4697f1f47b0f721a16332186155008f614d03f66c7b8bb6ceb5ad1a191c",
+          "seconds": 78.262,
+          "status": "passed",
+          "tests": {
+            "doctests": 4,
+            "ordinary": 189,
+            "passed": 199,
+            "properties": 6,
+            "runtime_excluded_not_counted": 14
+          }
+        },
+        "report_file": "final-coverage.json",
+        "report_sha256": "d19bc6f5816059e271e3712359d90c5f48c8c0abe2825bd777315b7c64a30d30",
+        "raw_log_retained": true
+      },
+      "deps-audit-durable_host": {
+        "result": {
+          "captured_bytes": 26,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "3016e51e4eac0d421674d2128bbbdefb2924b4646e0c14a1ab034977ad73fae5",
+          "seconds": 1.098,
+          "status": "passed"
+        },
+        "report_file": "final-deps-audit-durable_host.json",
+        "report_sha256": "425a1e1d40a24bc9c90ab29c472f46d4ddcaf1e679905c2030c3cd946f0565c7",
+        "raw_log_retained": true
+      },
+      "deps-audit-minimal_host": {
+        "result": {
+          "captured_bytes": 62,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "97ded97167511bf60ff91c193a7dd566aad8fe50374cef37b0ee6d2e290000e6",
+          "seconds": 1.174,
+          "status": "passed"
+        },
+        "report_file": "final-deps-audit-minimal_host.json",
+        "report_sha256": "9fc9a82c89e867640a58a585ecece64ebfa7d3dab74ba8705049b0ff5b9c8a9b",
+        "raw_log_retained": true
+      },
+      "deps-audit-root": {
+        "result": {
+          "captured_bytes": 26,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "3016e51e4eac0d421674d2128bbbdefb2924b4646e0c14a1ab034977ad73fae5",
+          "seconds": 1.429,
+          "status": "passed"
+        },
+        "report_file": "final-deps-audit-root.json",
+        "report_sha256": "91d33c2ba2275da09c7470489f17b58639af79ac8683ac6143ea0ccb7cbbcf81",
+        "raw_log_retained": true
+      },
+      "dialyzer-durable_host": {
+        "result": {
+          "captured_bytes": 1759,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "99c1e6a0f3bc69009eed044491d13a6dc4d8da23ffa078837c95a1e7cb27f497",
+          "seconds": 19.073,
+          "status": "passed"
+        },
+        "report_file": "final-dialyzer-durable_host.json",
+        "report_sha256": "20bc78230a6a821edfd6c79dc410895d36099a64f0a0673d1ed47c59aaa3f36f",
+        "raw_log_retained": true
+      },
+      "dialyzer-minimal_host": {
+        "result": {
+          "captured_bytes": 1135,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "8a9dff7432a60072ed77e390bd2800f832415e7978fa62a3e73b55514e6e831c",
+          "seconds": 12.021,
+          "status": "passed"
+        },
+        "report_file": "final-dialyzer-minimal_host.json",
+        "report_sha256": "dbb6601bcadddd30cc3c169556fff203dfbced81995a51c557fbf78d00448f14",
+        "raw_log_retained": true
+      },
+      "doc-links": {
+        "result": {
+          "captured_bytes": 60,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "4becb7fed09596d86e9f5b2d81c9c1f9bacb31d06c8e2cc7f47e322dad12dac6",
+          "seconds": 0.382,
+          "status": "passed"
+        },
+        "report_file": "final-doc-links.json",
+        "report_sha256": "3b7227bcb132526837b703cdf9ce5b87d1138e7d9bc4183a97d3a49c5bde04ad",
+        "raw_log_retained": true
+      },
+      "docs": {
+        "result": {
+          "captured_bytes": 128,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+          "seconds": 0.942,
+          "status": "passed"
+        },
+        "report_file": "final-docs.json",
+        "report_sha256": "cbfec826ff7ccc57faa9e330f89d7aa30b6ee6ac45355db6657bdeacdcf8abf0",
+        "raw_log_retained": true
+      },
+      "hex-audit-durable_host": {
+        "result": {
+          "captured_bytes": 47,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+          "seconds": 0.632,
+          "status": "passed"
+        },
+        "report_file": "final-hex-audit-durable_host.json",
+        "report_sha256": "e0dfae388082f07f4100c20b65832625ce20ec0f3954dbe345cf3f97a1008266",
+        "raw_log_retained": true
+      },
+      "hex-audit-minimal_host": {
+        "result": {
+          "captured_bytes": 47,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+          "seconds": 0.709,
+          "status": "passed"
+        },
+        "report_file": "final-hex-audit-minimal_host.json",
+        "report_sha256": "c925de3b15d6677d8834b85aa3fe69cea3315f5cbb8bd5ab733be5607c27c78e",
+        "raw_log_retained": true
+      },
+      "hex-audit-root": {
+        "result": {
+          "captured_bytes": 47,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+          "seconds": 1.387,
+          "status": "passed"
+        },
+        "report_file": "final-hex-audit-root.json",
+        "report_sha256": "8a79f26e837c0d8f2d88dacaa2e49e17a064cc58148e4b3b34d85f9a8599a871",
+        "raw_log_retained": true
+      },
+      "quality": {
+        "result": {
+          "captured_bytes": 2110,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "d5c557c12f39dcd0c91af5dca2be11ef6faf9f471bca2f237eb5958ababed056",
+          "seconds": 80.953,
+          "status": "passed"
+        },
+        "report_file": "final-quality.json",
+        "report_sha256": "87355166616ddc48674164a2f8bc75ce4d70796015cd2ef71625e61e0b60a4d1",
+        "raw_log_retained": true
+      },
+      "tooling": {
+        "result": {
+          "captured_bytes": 155,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "bf29798c81ddb0c051429cd6d373f89b625a47ebeaa491b1a8054d57d88259dc",
+          "seconds": 6.004,
+          "status": "passed",
+          "tests": {
+            "passed": 23,
+            "seed": 581957
+          }
+        },
+        "report_file": "final-tooling.json",
+        "report_sha256": "bd1c197a19a57650e7a01d2ff18eb08f0a8496c4af42574ddbabf05ef6cde752",
+        "raw_log_retained": true
+      },
+      "xref-durable_host": {
+        "result": {
+          "captured_bytes": 16,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548",
+          "seconds": 0.45,
+          "status": "passed"
+        },
+        "report_file": "final-xref-durable_host.json",
+        "report_sha256": "6db437b616057bb53d81feb3b2d33ddfc47d241d3f62bb9098aadcd4fd659060",
+        "raw_log_retained": true
+      },
+      "xref-minimal_host": {
+        "result": {
+          "captured_bytes": 16,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548",
+          "seconds": 0.41,
+          "status": "passed"
+        },
+        "report_file": "final-xref-minimal_host.json",
+        "report_sha256": "1117cc453386b03769f66aaf45dca61860147db4062bba774911b95e361b2db2",
+        "raw_log_retained": true
+      }
+    },
+    "preflight": {
+      "result": {
+        "architecture": "arm64",
+        "commit": "9662e57c03940b155b356a41c20b20f002553341",
+        "declared_teardown_at_unix": 1789095805,
+        "development": true,
+        "isolation": "Operator-provisioned lifecycle; not host resource or hypervisor attestation",
+        "javascript_sha256": "0aec0242b27a0b401312e1333ab9d71f821aabf20bd2fe22f849d66f3d706e95",
+        "kernel": "25.6.0",
+        "lifecycle_id": "macos-012-native",
+        "logical_cpus": 16,
+        "platform": "macos",
+        "python_sha256": "d982cfdf0c59b862ad3e1b107446b127460f716c8407fd0e2b6b0de2a62fe18e",
+        "status": "preflight_passed",
+        "virtualization": "Actual VM boot required in following suite",
+        "worker_binary_sha256": "f62d06160f674ba516f828758b6dcf981c531d548987a6e7e34f56f5bddb41b7",
+        "worker_version": "1.14.6",
+        "working_tree_changes": false
+      },
+      "report_file": "final-preflight.json",
+      "report_sha256": "af9a07b4476e4184e9b7e4a3f72fa20e45ae8ecf659493691d632ea9698eb1bb",
+      "raw_log_retained": false
+    },
+    "platform": "macOS 26.6.2 build 25G83, Apple Silicon, native Hypervisor.framework",
+    "runtime_fresh": {
+      "result": {
+        "captured_bytes": 152,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "ee3b8c7320206fa93a1641b112d7c364c935e9218244857b6aa04be5aef6d04f",
+        "seconds": 21.932,
+        "status": "passed",
+        "tests": {
+          "passed": 9,
+          "seed": 1914
+        }
+      },
+      "report_file": "final-runtime-fresh.json",
+      "report_sha256": "fd05940763a87d71ead9a579073f42595ca8a9259c1faf5093a0490eb087a994",
+      "raw_log_retained": true
+    },
+    "geometry": {
+      "result": {
+        "cleanup": "empty inventory",
+        "observations": [
+          {
+            "disks": {
+              "overlay": {
+                "formatted_marker": true,
+                "inode": 102605018,
+                "size": 1073741824
+              },
+              "storage": {
+                "formatted_marker": true,
+                "inode": 102605019,
+                "size": 1073741824
+              }
+            },
+            "filesystem": "Filesystem           1K-blocks      Used Available Use% Mounted on\n/dev/vda               1014444     58776    939284   6% /workspace\n",
+            "kind": "python",
+            "mapped_libraries": "p72658\nftxt\nn/Users/humberto/Projects/smolbox/.local/0.1.2-macos/runtime/smolvm-1.14.6-darwin-arm64/smolvm-bin\nftxt\nn/Library/Preferences/Logging/.plist-cache.gbISkC25\nftxt\nn/Users/humberto/Projects/smolbox/.local/0.1.2-macos/runtime/smolvm-1.14.6-darwin-arm64/lib/libepoxy.0.dylib\nftxt\nn/usr/lib/dyld\nftxt\nn/Users/humberto/Projects/smolbox/.local/0.1.2-macos/runtime/smolvm-1.14.6-darwin-arm64/lib/libvirglrenderer.1.dylib\nftxt\nn/Users/humberto/Projects/smolbox/.local/0.1.2-macos/runtime/smolvm-1.14.6-darwin-arm64/lib/libkrun.dylib\nftxt\nn/Users/humberto/Projects/smolbox/.local/0.1.2-macos/runtime/smolvm-1.14.6-darwin-arm64/lib/libMoltenVK.dylib\nftxt\nn/Users/humberto/Projects/smolbox/.local/0.1.2-macos/runtime/smolvm-1.14.6-darwin-arm64/lib/libkrunfw.5.dylib\n",
+            "name": "mac6disk-lzs2eg3fxee2iy6parsu",
+            "vmm_pid": 72658
+          },
+          {
+            "disks": {
+              "overlay": {
+                "formatted_marker": true,
+                "inode": 102605972,
+                "size": 1073741824
+              },
+              "storage": {
+                "formatted_marker": true,
+                "inode": 102605973,
+                "size": 1073741824
+              }
+            },
+            "filesystem": "Filesystem           1K-blocks      Used Available Use% Mounted on\n/dev/vda               1014444    166424    831636  17% /workspace\n",
+            "kind": "node",
+            "mapped_libraries": "p72669\nftxt\nn/Users/humberto/Projects/smolbox/.local/0.1.2-macos/runtime/smolvm-1.14.6-darwin-arm64/smolvm-bin\nftxt\nn/Library/Preferences/Logging/.plist-cache.gbISkC25\nftxt\nn/usr/lib/dyld\nftxt\nn/Users/humberto/Projects/smolbox/.local/0.1.2-macos/runtime/smolvm-1.14.6-darwin-arm64/lib/libepoxy.0.dylib\nftxt\nn/Users/humberto/Projects/smolbox/.local/0.1.2-macos/runtime/smolvm-1.14.6-darwin-arm64/lib/libvirglrenderer.1.dylib\nftxt\nn/Users/humberto/Projects/smolbox/.local/0.1.2-macos/runtime/smolvm-1.14.6-darwin-arm64/lib/libkrun.dylib\nftxt\nn/Users/humberto/Projects/smolbox/.local/0.1.2-macos/runtime/smolvm-1.14.6-darwin-arm64/lib/libMoltenVK.dylib\nftxt\nn/Users/humberto/Projects/smolbox/.local/0.1.2-macos/runtime/smolvm-1.14.6-darwin-arm64/lib/libkrunfw.5.dylib\n",
+            "name": "mac6disk-yferammezc26hn7gy2g7",
+            "vmm_pid": 72669
+          }
+        ],
+        "status": "passed"
+      },
+      "report_file": "final-geometry.json",
+      "report_sha256": "dad50a8c47ebf14a7e6c3a0f077930f318743d74ebc33a320e8af9574179566d",
+      "raw_log_retained": false
+    },
+    "fresh_artifacts": {
+      "manifests": [
+        {
+          "kind": "python",
+          "manifest": {
+            "assets": {
+              "agent_rootfs": {
+                "path": "agent-rootfs.tar",
+                "size": 49996288
+              },
+              "layers": [
+                {
+                  "digest": "sha256:6388f02cc8362feb7a0a5207ba96b3b1dab4330be27cb194994a439693427fb0",
+                  "path": "layers/6388f02cc8362feb7a0a5207ba96b3b1dab4330be27cb194994a439693427fb0.tar",
+                  "size": 55170560
+                }
+              ],
+              "libraries": [
+                {
+                  "path": "lib/libkrun.dylib",
+                  "size": 6736704
+                },
+                {
+                  "path": "lib/libkrunfw.5.dylib",
+                  "size": 13512464
+                },
+                {
+                  "path": "lib/libvirglrenderer.1.dylib",
+                  "size": 2309616
+                },
+                {
+                  "path": "lib/libMoltenVK.dylib",
+                  "size": 5109344
+                },
+                {
+                  "path": "lib/libepoxy.0.dylib",
+                  "size": 1188496
+                }
+              ],
+              "storage_template": {
+                "path": "storage.ext4",
+                "size": 21474836480
+              }
+            },
+            "cpus": 1,
+            "created": "2026-09-11T02:01:45.803803Z",
+            "cuda": false,
+            "digest": "none",
+            "entrypoint": [
+              "/bin/true"
+            ],
+            "env": [
+              "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+              "LANG=C.UTF-8",
+              "GPG_KEY=7169605F62C751356D054A26A821E680E5FA6305",
+              "PYTHON_VERSION=3.12.14",
+              "PYTHON_SHA256=5c8462af5790baf43a321a1559dbe0db06d1be4300fb85fb53c40060668e548a"
+            ],
+            "gpu": false,
+            "host_platform": "darwin/arm64",
+            "image": "python:3.12-alpine",
+            "image_size": 55170560,
+            "mem": 256,
+            "mode": "container",
+            "network": false,
+            "platform": "linux/arm64",
+            "smolvm_version": "1.14.6",
+            "workdir": "/"
+          },
+          "sha256": "d4fdc417ae000a1b56c99a1e6d8ee216b094f1dbd5ba1bf3c9fb613d404d9120",
+          "size": 32331019
+        },
+        {
+          "kind": "node",
+          "manifest": {
+            "assets": {
+              "agent_rootfs": {
+                "path": "agent-rootfs.tar",
+                "size": 49996288
+              },
+              "layers": [
+                {
+                  "digest": "sha256:bc0aa4538c3db0a8a00ca282ac11c3aa18c89206df6f94bd9107077da0f20d7a",
+                  "path": "layers/bc0aa4538c3db0a8a00ca282ac11c3aa18c89206df6f94bd9107077da0f20d7a.tar",
+                  "size": 163445760
+                }
+              ],
+              "libraries": [
+                {
+                  "path": "lib/libkrun.dylib",
+                  "size": 6736704
+                },
+                {
+                  "path": "lib/libkrunfw.5.dylib",
+                  "size": 13512464
+                },
+                {
+                  "path": "lib/libvirglrenderer.1.dylib",
+                  "size": 2309616
+                },
+                {
+                  "path": "lib/libMoltenVK.dylib",
+                  "size": 5109344
+                },
+                {
+                  "path": "lib/libepoxy.0.dylib",
+                  "size": 1188496
+                }
+              ],
+              "storage_template": {
+                "path": "storage.ext4",
+                "size": 21474836480
+              }
+            },
+            "cpus": 1,
+            "created": "2026-09-11T02:01:50.773087Z",
+            "cuda": false,
+            "digest": "none",
+            "entrypoint": [
+              "/bin/true"
+            ],
+            "env": [
+              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+              "NODE_VERSION=22.23.2",
+              "YARN_VERSION=1.22.22"
+            ],
+            "gpu": false,
+            "host_platform": "darwin/arm64",
+            "image": "node:22-alpine",
+            "image_size": 163445760,
+            "mem": 256,
+            "mode": "container",
+            "network": false,
+            "platform": "linux/arm64",
+            "smolvm_version": "1.14.6",
+            "workdir": "/"
+          },
+          "sha256": "38d8ed81c1e7094494634b354a4a1c591dcd59c1c0a14aabeebc39dda5162d37",
+          "size": 67625195
+        }
+      ],
+      "packing": {
+        "node": {
+          "result": {
+            "captured_bytes": 838,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "9755e2c68542e90f4df2a4eb166793c61fe46920665eafb140c4e7e5d86b29f5",
+            "seconds": 3.574,
+            "status": "passed"
+          },
+          "report_file": "pack-node.json",
+          "report_sha256": "3dce964f90122cb13d2b0df70328bf2dea8e4137a2b463ab7313c9ca53840624",
+          "raw_log_retained": true
+        },
+        "python": {
+          "result": {
+            "captured_bytes": 779,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "2ed559198c0000d0ebaa28703992a5ebc7cf097b44b54a16b5b1ada89b585121",
+            "seconds": 2.209,
+            "status": "passed"
+          },
+          "report_file": "pack-python.json",
+          "report_sha256": "52a408a5ef1c7987407a0f27a683246c45bf1e806667d807d7422abe9789e9c0",
+          "raw_log_retained": true
+        }
+      }
+    },
+    "durable": {
+      "result": {
+        "captured_bytes": 173,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "89ca48ebfd4b12d1d3fbeb65317d07586ee33326608904191164fd4486dd9ee5",
+        "seconds": 280.962,
+        "status": "passed",
+        "tests": {
+          "passed": 25,
+          "seed": 702697
+        }
+      },
+      "report_file": "final-durable.json",
+      "report_sha256": "265652692108db511bdd3bd2745f038b3185a6e748e52953e0b8dc92935f8d71",
+      "raw_log_retained": true
+    },
+    "service_faults": {
+      "missing": {
+        "result": {
+          "artifact_sha256": "d982cfdf0c59b862ad3e1b107446b127460f716c8407fd0e2b6b0de2a62fe18e",
+          "dispatch_attempts": 1,
+          "guest_marker": "single byte before recovery",
+          "guest_survived_api_server": true,
+          "operator_deleted_vm": true,
+          "outage_seconds": 0.051,
+          "partition": "restart-ceba18f0c263c454",
+          "platform": "macos",
+          "result": {
+            "absence_at_ms": 1789093241420,
+            "artifacts": [],
+            "cancel_requested_at_ms": null,
+            "cleanup": "complete",
+            "collection": "pending",
+            "evidence": "termination_confirmed",
+            "exit_code": null,
+            "id": "restart-ceba18f0c263c454",
+            "machine_name": "sbxexample-vnf3r22meu2hx2mpx4vc",
+            "reserved": false,
+            "scope": "example",
+            "state": "unknown",
+            "worker_id": "example-worker"
+          },
+          "retained_workspace": "/var/folders/9p/b5vht97d40x618n_gy_0yrpw0000gn/T/sbx-worker-restart-e6bb5be26eb4f187239a5568",
+          "runtime_version": "1.14.6",
+          "scenario": "missing",
+          "seconds": 9.434,
+          "status": "passed"
+        },
+        "report_file": "final-service-missing.json",
+        "report_sha256": "a76c2139fb3bbcb8b60ef4d444fdc4af9ec2d245ee6f9e77294d71f05e4f95df",
+        "raw_log_retained": false
+      },
+      "restart": {
+        "result": {
+          "artifact_sha256": "d982cfdf0c59b862ad3e1b107446b127460f716c8407fd0e2b6b0de2a62fe18e",
+          "dispatch_attempts": 1,
+          "guest_marker": "single byte before recovery",
+          "guest_survived_api_server": true,
+          "operator_deleted_vm": false,
+          "outage_seconds": 0.051,
+          "partition": "restart-3da06cdef92f1bc5",
+          "platform": "macos",
+          "result": {
+            "absence_at_ms": 1789093100979,
+            "artifacts": [],
+            "cancel_requested_at_ms": null,
+            "cleanup": "complete",
+            "collection": "pending",
+            "evidence": "termination_confirmed",
+            "exit_code": null,
+            "id": "restart-3da06cdef92f1bc5",
+            "machine_name": "sbxexample-zkqedj36cdyetlljmji4",
+            "reserved": false,
+            "scope": "example",
+            "state": "unknown",
+            "worker_id": "example-worker"
+          },
+          "retained_workspace": "/var/folders/9p/b5vht97d40x618n_gy_0yrpw0000gn/T/sbx-worker-restart-28a4b3e85836e16ff556c43a",
+          "runtime_version": "1.14.6",
+          "scenario": "restart",
+          "seconds": 67.624,
+          "status": "passed"
+        },
+        "report_file": "final-service-restart.json",
+        "report_sha256": "db7b6f4061ceed1945a68d7dd8c3845c8eecfbd2cb6133b51704387c184dbdae",
+        "raw_log_retained": false
+      },
+      "unavailable": {
+        "result": {
+          "artifact_sha256": "d982cfdf0c59b862ad3e1b107446b127460f716c8407fd0e2b6b0de2a62fe18e",
+          "dispatch_attempts": 1,
+          "guest_marker": "single byte before recovery",
+          "guest_survived_api_server": true,
+          "operator_deleted_vm": true,
+          "outage_seconds": 89.964,
+          "partition": "restart-a0df17ea47edc828",
+          "platform": "macos",
+          "result": {
+            "absence_at_ms": 1789093231255,
+            "artifacts": [],
+            "cancel_requested_at_ms": 1789093109474,
+            "cleanup": "complete",
+            "collection": "pending",
+            "evidence": "termination_confirmed",
+            "exit_code": null,
+            "id": "restart-a0df17ea47edc828",
+            "machine_name": "sbxexample-nsgw4zpdscc5mk7djkwv",
+            "reserved": false,
+            "scope": "example",
+            "state": "unknown",
+            "worker_id": "example-worker"
+          },
+          "retained_workspace": "/var/folders/9p/b5vht97d40x618n_gy_0yrpw0000gn/T/sbx-worker-restart-ecbf94b639b8f224f9a3477e",
+          "runtime_version": "1.14.6",
+          "scenario": "unavailable",
+          "seconds": 129.328,
+          "status": "passed"
+        },
+        "report_file": "final-service-unavailable.json",
+        "report_sha256": "b0ed8a78fcce05c03c4a786655bb7ba9c7e8809577c70ecef295f8b1da5e413e",
+        "raw_log_retained": false
+      }
+    },
+    "walkthrough": {
+      "result": {
+        "captured_bytes": 121,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "435fc9dd1fd86907d6cb95351b6357ef2ebf71fa6fd39e27c3d38c81c7b92101",
+        "seconds": 2.602,
+        "status": "passed"
+      },
+      "report_file": "final-walkthrough.json",
+      "report_sha256": "1d394ac249f193d4a88aa56b76b26d4c559e5217367ba28a46ff9c797a981be9",
+      "raw_log_retained": true
+    },
+    "database_unavailable": {
+      "result": {
+        "captured_bytes": 31,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "f090dd47a12af3805d942e71d8b8fad0838b1a6893a1dea8fba04ae00e79c2bc",
+        "seconds": 18.323,
+        "status": "passed"
+      },
+      "report_file": "final-database-unavailable.json",
+      "report_sha256": "5c08d59d7e064a41adc9abc4c1c293d1a57f06e8ad044c060c0e3458c61aeedb",
+      "raw_log_retained": true
+    },
+    "primary_lane": {
+      "otp": "29.0.6",
+      "elixir": "1.20.4",
+      "deterministic_passed": 199,
+      "tooling_passed": 23,
+      "coverage_percent": 95.41
+    },
+    "additional_lanes": {
+      "elixir119": {
+        "otp": "28.5",
+        "elixir": "1.19.5",
+        "tools": {
+          "result": {
+            "captured_bytes": 156,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "1fbbdd5d7694ad91f700aa600a0f440c90469b65d74d7ee9a853a3e84d1f12b7",
+            "seconds": 6.091,
+            "status": "passed"
+          },
+          "report_file": "final-tooling-elixir119.json",
+          "report_sha256": "42c58d7b4fe173721f438367cb7ef83d5b83591b8d5e85536b0f09d52e4dd84f",
+          "raw_log_retained": true
+        },
+        "deterministic_passed": 199,
+        "runtime_excluded_not_counted": 14,
+        "tooling_passed": 23,
+        "compilation": {
+          "result": {
+            "captured_bytes": 2834,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "972f00daeb71872084e66199432cba80f8471cc0535d6122aea22925cf85fd7e",
+            "seconds": 28.698,
+            "status": "passed"
+          },
+          "report_file": "final-compile-elixir119.json",
+          "report_sha256": "e2bab094155a119446057027fcea98be62b66b0193306aa1781bc4f511231870",
+          "raw_log_retained": true
+        },
+        "tests": {
+          "result": {
+            "captured_bytes": 387,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "e1bce74a2ce26cd24e8da81b9b5fe153df2a1abbc8aef9b854dec1149bd60706",
+            "seconds": 77.632,
+            "status": "passed"
+          },
+          "report_file": "final-tests-elixir119.json",
+          "report_sha256": "3f033808d784d62b29ac882be2f2db8de442115931a3243a05c01a74eae1b411",
+          "raw_log_retained": true
+        }
+      },
+      "otp27": {
+        "otp": "27.3.4.15",
+        "elixir": "1.18.4",
+        "tools": {
+          "result": {
+            "captured_bytes": 156,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "bb2f28fa67c19bf45fa9a53050067286d0b16d3557d62b25ac68f26cdac4f2d5",
+            "seconds": 6.098,
+            "status": "passed"
+          },
+          "report_file": "final-tooling-otp27.json",
+          "report_sha256": "a81584aebfbb8db835110427fcbf18c3b9076e7de3f2258122039fa88f2ff2f7",
+          "raw_log_retained": true
+        },
+        "deterministic_passed": 199,
+        "runtime_excluded_not_counted": 14,
+        "tooling_passed": 23,
+        "compilation": {
+          "result": {
+            "captured_bytes": 2539,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "62c1dd2432d7de11608368af5707b6578ca637f6ee6c0ff176c22911a5fba67d",
+            "seconds": 33.188,
+            "status": "passed"
+          },
+          "report_file": "final-compile-otp27.json",
+          "report_sha256": "3961a4f67d09f8a28d605977c26e93dd936451104606f8f14a82a40b236ea3f5",
+          "raw_log_retained": true
+        },
+        "tests": {
+          "result": {
+            "captured_bytes": 386,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "b2f2291c797d63af9bbd1247cb6780c7a13337cb7a084344faa05383a43e7a3d",
+            "seconds": 77.226,
+            "status": "passed"
+          },
+          "report_file": "final-tests-otp27.json",
+          "report_sha256": "d24fcb8f8cd1b3819a4fca933b8640edac5e962e3d9fa487869314302269a7b8",
+          "raw_log_retained": true
+        }
+      },
+      "otp28": {
+        "otp": "28.5",
+        "elixir": "1.20.4",
+        "tools": {
+          "result": {
+            "captured_bytes": 155,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "bdefec8148b4fbc82d153ec8ff1f8652c9f325847b136591393ba8a42e3a400c",
+            "seconds": 6.01,
+            "status": "passed"
+          },
+          "report_file": "final-tooling-otp28.json",
+          "report_sha256": "aad6cc6dfa1100e51a3fc82141c68a5cf62e3483988005f93c8168756ec86c5e",
+          "raw_log_retained": true
+        },
+        "deterministic_passed": 199,
+        "runtime_excluded_not_counted": 14,
+        "tooling_passed": 23,
+        "compilation": {
+          "result": {
+            "captured_bytes": 6890,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "c8628a3b2bf4a756314b9c261e46ff5f348bc8874805821f441e221f586fc010",
+            "seconds": 27.978,
+            "status": "passed"
+          },
+          "report_file": "final-compile-otp28.json",
+          "report_sha256": "b757baa234268a9fa6318280a7eca1987e09e56949c65b37c574dd84984b2df6",
+          "raw_log_retained": true
+        },
+        "tests": {
+          "result": {
+            "captured_bytes": 396,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "83ff5620df241c1ce208b3483d5ca40d0b7c94867b51e42a204ffdeff0fb2288",
+            "seconds": 77.585,
+            "status": "passed"
+          },
+          "report_file": "final-tests-otp28.json",
+          "report_sha256": "0f53f07d5b709470b25800dc242ef4591def2acdeeddfb51b9bcd419cf4f0cda",
+          "raw_log_retained": true
+        }
+      }
+    }
+  },
+  "preparation": {
+    "evidence": "../evidence/smolvm-1.14.6-macos.json",
+    "failures_preserved": [
+      "Missing resize2fs caused file loss on restart",
+      "TCP walkthrough passed unix_socket:nil",
+      "Packing hit the API file cap; separate bounded packing allowance corrected preparation",
+      "A task coverage parser rejected the deterministic suite's excluded runtime tags; corrected report runner passed",
+      "Noncanonical /tmp build path broke temporary dependency symlinks; canonical path passed without dependency changes"
+    ]
+  },
+  "boundaries": [
+    "SmolVM 1.14.6 requires working host resize2fs for disk requests below bundled templates",
+    "Existing 1.14.1 default preserved; earlier complete 1.14.1 matrix remains historical and is not claimed as rerun by this follow-up",
+    "Mac suite executes 9 ordinary cases; the other 5 boundary cases run only in the Linux lab",
+    "Prior constrained Linux exhaustion campaign applies to its recorded deployment and was not repeated or extended to macOS here",
+    "No general production security certification or hard macOS host resource limit claim",
+    "These are local CI command executions, not a new GitHub Actions run",
+    "Release publication and v0.1.2 tag require separate authorization"
+  ]
+}

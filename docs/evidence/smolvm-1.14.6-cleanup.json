@@ -1,0 +1,675 @@
+{
+  "recorded_date_utc": "2026-09-10",
+  "status": "completed: shared storage deletion failure reproduced on 1.14.1; 1.14.6 passed three complete regression trials",
+  "scope": "SmolBox.Client only, in the authorized disposable nested Linux lab. No macOS tests, runtime pin change, public deployment or full 1.14.6 qualification.",
+  "smolbox": {
+    "source_commit": "84e170747be503e8732a03c10ac3da1dea6f7a06",
+    "version": "0.1.1",
+    "production_lib_tree": "a4609cf59b8b4ec05791fdb7b7db25ce523f2757",
+    "production_lib_identical_to": "v0.1.1",
+    "elixir": "1.20.4",
+    "otp": "29.0.6"
+  },
+  "upstream": {
+    "baseline": {
+      "version": "1.14.1",
+      "commit": "e8d09ef616d363004d55b80a6cdb31a4e7e1842d",
+      "binary_sha256": "bb2432804d4bf5d6cbb688d3af160a6a01c99194830f0099d64f291d4ad62373",
+      "libkrun_sha256": "3f021ac366152b33c7c329f893804fa9adda5d4352fac4b88214ae28fb89ebd0"
+    },
+    "candidate": {
+      "version": "1.14.6",
+      "commit": "6c503014629bba91631152728c3081c944653f31",
+      "archive_sha256": "94a1edb0c42b20ac562c3759ed216bab2cab9e27c382f6560969144f7bd1dce3",
+      "binary_sha256": "cc1f9b5f14613191ca83c706d52f4350f69b69a6c431c867cd662b51cb36d7d6",
+      "libkrun_sha256": "af43ad572bffe052d94d3d8d38beebc0b0f1e7d832f25ad6d352d5d919c0ddd1"
+    },
+    "fix": {
+      "url": "https://github.com/smol-machines/smolvm/pull/1219",
+      "commit": "79c255e84340044568c9002d530fd1da6bcdc9e5",
+      "change": "HTTP API delete removes VM data before committing registry removal."
+    }
+  },
+  "python_artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+  "enclosure": {
+    "execution_host": "ssh linux, disposable smolbox-nested guest only",
+    "guest_kernel": "6.8.0-139-generic",
+    "architecture": "x86_64",
+    "baseline_sha256": "4ff59594af008ff0efb517e9c70cb90d5cf7c240dc0f71d53a162c7b4a0eea2d",
+    "worker": {
+      "memory_max_bytes": 2147483648,
+      "memory_swap_max_bytes": 0,
+      "cpu_bandwidth": "200000 100000",
+      "tasks_max": 128,
+      "deadline_seconds": 300,
+      "stop_grace_seconds": 5,
+      "private_network": true,
+      "api": "private Unix socket",
+      "data_fs": "512 MiB tmpfs, shared by VM files and registry",
+      "api_fs": "separate 4 MiB tmpfs",
+      "temporary_fs": "two 32 MiB tmpfs",
+      "uid_drop": "off",
+      "shared_extract": false,
+      "guest_network": false,
+      "guest": {
+        "cpus": 1,
+        "memory_mb": 256,
+        "storage_gb": 20,
+        "overlay_gb": 10
+      }
+    },
+    "outer": {
+      "cpus": 4,
+      "guest_memory_bytes": 8589934592,
+      "disk_virtual_gib": 100,
+      "memory_max_bytes": 12884901888,
+      "memory_swap_max_bytes": 0,
+      "cpu_quota": "400%",
+      "tasks_max": 256,
+      "host_lab_volume_gib": 128,
+      "deadline_seconds": 2700,
+      "stop_grace_seconds": 15
+    },
+    "workload": {
+      "maximum_guest_bytes": 671088640,
+      "write_bytes": 1048576,
+      "fsync_after_each_write": true,
+      "timeout_seconds": 45,
+      "host_padding": false
+    }
+  },
+  "fixture_corrections": [
+    {
+      "report": "baseline-1",
+      "error": "Preflight used unexpanded XDG paths; SMOLVM_DATA_DIR rewrites paths to .cache and .local/share. Stopped before the fill workload.",
+      "correction": "Verified both actual paths and their identical device IDs."
+    },
+    {
+      "report": "baseline-2",
+      "error": "Fixture required zero free bytes after stop, but stop released one 4096-byte tmpfs block. Stopped before delete.",
+      "correction": "Retained the requirement to observe a completely full filesystem after the workload; record and allow at most one released block after stop, without host padding."
+    },
+    {
+      "report": "fixed-2",
+      "change": "Added cgroup counters immediately after deletion, before worker restart resets the unit counters. Both fixed trials completed the full functional assertions."
+    },
+    {
+      "check": "initial mix ci",
+      "error": "Source transfer added two macOS AppleDouble metadata files in the isolated Linux copy; formatter rejected them.",
+      "correction": "Removed only those transfer artifacts from the disposable copy and reran CI. They were never repository source."
+    },
+    {
+      "report": "fixed-final",
+      "change": "Credence required MapSet.size instead of Enum.uniq |> length for the shared-device check. The final source passed the full workload again; production library code unchanged."
+    }
+  ],
+  "probe_source_sha256": {
+    "scripts/lab/cleanup-regression-control.sh": "496934f7ec88938e84c4f4cc94a99ab6c51d255a6997cabf1a6208e00b9bd7e5",
+    "scripts/lab/cleanup-regression.exs": "01d34c1cda5203da27cc6e766b202963a506213c87ef848bbf5032da1a3e731d"
+  },
+  "trials": {
+    "baseline-1": {
+      "label": "baseline-1",
+      "status": "failed",
+      "version": "1.14.1",
+      "failure": "no match of right hand side value:\n\n    {\"43\\n\", 1}\n",
+      "started_utc": "2026-09-10T19:42:04.427094Z",
+      "created": {
+        "name": "cleanup-pejwldvuiujfdtyhtij3",
+        "state": "created",
+        "cpus": 1,
+        "memory_mb": 256,
+        "storage_gb": 20,
+        "overlay_gb": 10,
+        "created_at": 1789069324
+      },
+      "before_fill": {
+        "available_bytes": 351715328,
+        "total_bytes": 536870912,
+        "used_bytes": 185155584
+      },
+      "finished_utc": "2026-09-10T19:42:14.386843Z",
+      "limits": {
+        "cpu.max": "200000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "pids.max": "128"
+      },
+      "cgroup_before": {
+        "cpu.stat": "usage_usec 26968\nuser_usec 7865\nsystem_usec 19103\ncore_sched.force_idle_usec 0\nnr_periods 2\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "memory.peak": "21471232",
+        "pids.events": "max 0",
+        "pids.peak": "5"
+      }
+    },
+    "baseline-2": {
+      "label": "baseline-2",
+      "status": "failed",
+      "version": "1.14.1",
+      "failure": "\n\nAssertion with == failed\ncode:  assert storage().available_bytes == 0\nleft:  4096\nright: 0\n",
+      "started_utc": "2026-09-10T19:42:51.500543Z",
+      "created": {
+        "name": "cleanup-czs4inphy33eenlg3kbp",
+        "state": "created",
+        "cpus": 1,
+        "memory_mb": 256,
+        "storage_gb": 20,
+        "overlay_gb": 10,
+        "created_at": 1789069371
+      },
+      "before_fill": {
+        "available_bytes": 351588352,
+        "total_bytes": 536870912,
+        "used_bytes": 185282560
+      },
+      "fill": {
+        "error": {
+          "errno": 5,
+          "message": "I/O error"
+        },
+        "written_bytes": 330301440
+      },
+      "after_fill": {
+        "available_bytes": 0,
+        "total_bytes": 536870912,
+        "used_bytes": 536870912
+      },
+      "after_stop": {
+        "available_bytes": 4096,
+        "total_bytes": 536870912,
+        "used_bytes": 536866816
+      },
+      "finished_utc": "2026-09-10T19:43:01.648672Z",
+      "limits": {
+        "cpu.max": "200000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "pids.max": "128"
+      },
+      "cgroup_before": {
+        "cpu.stat": "usage_usec 19621\nuser_usec 10792\nsystem_usec 8829\ncore_sched.force_idle_usec 0\nnr_periods 2\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "memory.peak": "5955584",
+        "pids.events": "max 0",
+        "pids.peak": "5"
+      },
+      "shared_filesystem": {
+        "paths": [
+          "/srv/smolbox-cleanup/data",
+          "/srv/smolbox-cleanup/data/.local/share/smolvm/server/smolvm.db",
+          "/srv/smolbox-cleanup/data/.cache/smolvm/vms/4f400c428b6f0257"
+        ],
+        "device_ids": [
+          "43",
+          "43",
+          "43"
+        ]
+      },
+      "nested_kvm_descriptors": true
+    },
+    "baseline-3": {
+      "label": "baseline-3",
+      "status": "passed",
+      "version": "1.14.1",
+      "delete": {
+        "category": "protocol",
+        "operation": "delete",
+        "evidence": "dispatch_uncertain"
+      },
+      "started_utc": "2026-09-10T19:43:32.184568Z",
+      "created": {
+        "name": "cleanup-yrp7nfkbkojjc2rbtzr4",
+        "state": "created",
+        "cpus": 1,
+        "memory_mb": 256,
+        "storage_gb": 20,
+        "overlay_gb": 10,
+        "created_at": 1789069412
+      },
+      "before_fill": {
+        "available_bytes": 351850496,
+        "total_bytes": 536870912,
+        "used_bytes": 185020416
+      },
+      "fill": {
+        "error": {
+          "errno": 5,
+          "message": "I/O error"
+        },
+        "written_bytes": 330301440
+      },
+      "after_fill": {
+        "available_bytes": 0,
+        "total_bytes": 536870912,
+        "used_bytes": 536870912
+      },
+      "after_stop": {
+        "available_bytes": 4096,
+        "total_bytes": 536870912,
+        "used_bytes": 536866816
+      },
+      "after_delete": {
+        "available_bytes": 0,
+        "total_bytes": 536870912,
+        "used_bytes": 536870912
+      },
+      "baseline": "original failure reproduced; API cleanup did not succeed",
+      "final_storage": {
+        "available_bytes": 0,
+        "total_bytes": 536870912,
+        "used_bytes": 536870912
+      },
+      "cgroup_after": {
+        "cpu.stat": "usage_usec 11457390\nuser_usec 6509131\nsystem_usec 4948258\ncore_sched.force_idle_usec 0\nnr_periods 111\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "memory.peak": "852684800",
+        "pids.events": "max 0",
+        "pids.peak": "23"
+      },
+      "finished_utc": "2026-09-10T19:43:43.334121Z",
+      "limits": {
+        "cpu.max": "200000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "pids.max": "128"
+      },
+      "cgroup_before": {
+        "cpu.stat": "usage_usec 21505\nuser_usec 9054\nsystem_usec 12450\ncore_sched.force_idle_usec 0\nnr_periods 2\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "memory.peak": "6115328",
+        "pids.events": "max 0",
+        "pids.peak": "5"
+      },
+      "shared_filesystem": {
+        "paths": [
+          "/srv/smolbox-cleanup/data",
+          "/srv/smolbox-cleanup/data/.local/share/smolvm/server/smolvm.db",
+          "/srv/smolbox-cleanup/data/.cache/smolvm/vms/b3bb4cac93d8570a"
+        ],
+        "device_ids": [
+          "43",
+          "43",
+          "43"
+        ]
+      },
+      "nested_kvm_descriptors": true
+    },
+    "fixed-1": {
+      "label": "fixed-1",
+      "status": "passed",
+      "version": "1.14.6",
+      "delete": {
+        "status": "ok"
+      },
+      "started_utc": "2026-09-10T19:44:10.456328Z",
+      "created": {
+        "name": "cleanup-4plalhbfau2wjh3fdaz2",
+        "state": "created",
+        "cpus": 1,
+        "memory_mb": 256,
+        "storage_gb": 20,
+        "overlay_gb": 10,
+        "created_at": 1789069450
+      },
+      "before_fill": {
+        "available_bytes": 350932992,
+        "total_bytes": 536870912,
+        "used_bytes": 185937920
+      },
+      "fill": {
+        "error": {
+          "errno": 5,
+          "message": "I/O error"
+        },
+        "written_bytes": 330301440
+      },
+      "after_fill": {
+        "available_bytes": 0,
+        "total_bytes": 536870912,
+        "used_bytes": 536870912
+      },
+      "after_stop": {
+        "available_bytes": 4096,
+        "total_bytes": 536870912,
+        "used_bytes": 536866816
+      },
+      "after_delete": {
+        "available_bytes": 536682496,
+        "total_bytes": 536870912,
+        "used_bytes": 188416
+      },
+      "data_directory_absent": true,
+      "absence_after_worker_restart": true,
+      "replacement": {
+        "name": "cleanup-27cqckkiohetfi43mgjh",
+        "state": "created",
+        "cpus": 1,
+        "memory_mb": 256,
+        "storage_gb": 20,
+        "overlay_gb": 10,
+        "created_at": 1789069461
+      },
+      "subsequent_execution": "create/start/upload/exec/download/stop/delete/absence passed",
+      "final_storage": {
+        "available_bytes": 536719360,
+        "total_bytes": 536870912,
+        "used_bytes": 151552
+      },
+      "cgroup_after": {
+        "cpu.stat": "usage_usec 8352574\nuser_usec 4825146\nsystem_usec 3527427\ncore_sched.force_idle_usec 0\nnr_periods 77\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "memory.peak": "376274944",
+        "pids.events": "max 0",
+        "pids.peak": "23"
+      },
+      "finished_utc": "2026-09-10T19:44:28.954142Z",
+      "limits": {
+        "cpu.max": "200000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "pids.max": "128"
+      },
+      "cgroup_before": {
+        "cpu.stat": "usage_usec 20256\nuser_usec 8529\nsystem_usec 11727\ncore_sched.force_idle_usec 0\nnr_periods 2\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "memory.peak": "5652480",
+        "pids.events": "max 0",
+        "pids.peak": "5"
+      },
+      "shared_filesystem": {
+        "paths": [
+          "/srv/smolbox-cleanup/data",
+          "/srv/smolbox-cleanup/data/.local/share/smolvm/server/smolvm.db",
+          "/srv/smolbox-cleanup/data/.cache/smolvm/vms/be4dba4e78508a62"
+        ],
+        "device_ids": [
+          "43",
+          "43",
+          "43"
+        ]
+      },
+      "nested_kvm_descriptors": true
+    },
+    "fixed-2": {
+      "label": "fixed-2",
+      "status": "passed",
+      "version": "1.14.6",
+      "delete": {
+        "status": "ok"
+      },
+      "started_utc": "2026-09-10T19:45:21.213054Z",
+      "created": {
+        "name": "cleanup-36ansbdnzhl5umkollt5",
+        "state": "created",
+        "cpus": 1,
+        "memory_mb": 256,
+        "storage_gb": 20,
+        "overlay_gb": 10,
+        "created_at": 1789069521
+      },
+      "before_fill": {
+        "available_bytes": 351195136,
+        "total_bytes": 536870912,
+        "used_bytes": 185675776
+      },
+      "fill": {
+        "error": {
+          "errno": 5,
+          "message": "I/O error"
+        },
+        "written_bytes": 329252864
+      },
+      "after_fill": {
+        "available_bytes": 0,
+        "total_bytes": 536870912,
+        "used_bytes": 536870912
+      },
+      "after_stop": {
+        "available_bytes": 4096,
+        "total_bytes": 536870912,
+        "used_bytes": 536866816
+      },
+      "after_delete": {
+        "available_bytes": 536682496,
+        "total_bytes": 536870912,
+        "used_bytes": 188416
+      },
+      "cgroup_after_delete": {
+        "cpu.stat": "usage_usec 10414846\nuser_usec 6147701\nsystem_usec 4267144\ncore_sched.force_idle_usec 0\nnr_periods 101\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "memory.peak": "852758528",
+        "pids.events": "max 0",
+        "pids.peak": "23"
+      },
+      "data_directory_absent": true,
+      "absence_after_worker_restart": true,
+      "replacement": {
+        "name": "cleanup-ouzhzg5wplymavh2b2da",
+        "state": "created",
+        "cpus": 1,
+        "memory_mb": 256,
+        "storage_gb": 20,
+        "overlay_gb": 10,
+        "created_at": 1789069531
+      },
+      "subsequent_execution": "create/start/upload/exec/download/stop/delete/absence passed",
+      "final_storage": {
+        "available_bytes": 536719360,
+        "total_bytes": 536870912,
+        "used_bytes": 151552
+      },
+      "cgroup_final_worker": {
+        "cpu.stat": "usage_usec 8210139\nuser_usec 4470251\nsystem_usec 3739887\ncore_sched.force_idle_usec 0\nnr_periods 76\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "memory.peak": "375447552",
+        "pids.events": "max 0",
+        "pids.peak": "23"
+      },
+      "finished_utc": "2026-09-10T19:45:39.091904Z",
+      "limits": {
+        "cpu.max": "200000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "pids.max": "128"
+      },
+      "cgroup_before": {
+        "cpu.stat": "usage_usec 27674\nuser_usec 13837\nsystem_usec 13837\ncore_sched.force_idle_usec 0\nnr_periods 2\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "memory.peak": "5881856",
+        "pids.events": "max 0",
+        "pids.peak": "4"
+      },
+      "shared_filesystem": {
+        "paths": [
+          "/srv/smolbox-cleanup/data",
+          "/srv/smolbox-cleanup/data/.local/share/smolvm/server/smolvm.db",
+          "/srv/smolbox-cleanup/data/.cache/smolvm/vms/2b4afedda6701d2f"
+        ],
+        "device_ids": [
+          "43",
+          "43",
+          "43"
+        ]
+      },
+      "nested_kvm_descriptors": true
+    },
+    "fixed-final": {
+      "label": "fixed-final",
+      "status": "passed",
+      "version": "1.14.6",
+      "delete": {
+        "status": "ok"
+      },
+      "started_utc": "2026-09-10T19:51:45.695794Z",
+      "created": {
+        "name": "cleanup-jit25tbb64p2mbv4mxvm",
+        "state": "created",
+        "cpus": 1,
+        "memory_mb": 256,
+        "storage_gb": 20,
+        "overlay_gb": 10,
+        "created_at": 1789069905
+      },
+      "before_fill": {
+        "available_bytes": 350998528,
+        "total_bytes": 536870912,
+        "used_bytes": 185872384
+      },
+      "fill": {
+        "error": {
+          "errno": 5,
+          "message": "I/O error"
+        },
+        "written_bytes": 330301440
+      },
+      "after_fill": {
+        "available_bytes": 0,
+        "total_bytes": 536870912,
+        "used_bytes": 536870912
+      },
+      "after_stop": {
+        "available_bytes": 4096,
+        "total_bytes": 536870912,
+        "used_bytes": 536866816
+      },
+      "after_delete": {
+        "available_bytes": 536682496,
+        "total_bytes": 536870912,
+        "used_bytes": 188416
+      },
+      "cgroup_after_delete": {
+        "cpu.stat": "usage_usec 10941137\nuser_usec 6444601\nsystem_usec 4496535\ncore_sched.force_idle_usec 0\nnr_periods 105\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "memory.peak": "852172800",
+        "pids.events": "max 0",
+        "pids.peak": "23"
+      },
+      "data_directory_absent": true,
+      "absence_after_worker_restart": true,
+      "replacement": {
+        "name": "cleanup-xv46y5zo6u7gws36tdno",
+        "state": "created",
+        "cpus": 1,
+        "memory_mb": 256,
+        "storage_gb": 20,
+        "overlay_gb": 10,
+        "created_at": 1789069916
+      },
+      "subsequent_execution": "create/start/upload/exec/download/stop/delete/absence passed",
+      "final_storage": {
+        "available_bytes": 536719360,
+        "total_bytes": 536870912,
+        "used_bytes": 151552
+      },
+      "cgroup_final_worker": {
+        "cpu.stat": "usage_usec 9229666\nuser_usec 5147272\nsystem_usec 4082394\ncore_sched.force_idle_usec 0\nnr_periods 86\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "memory.peak": "375287808",
+        "pids.events": "max 0",
+        "pids.peak": "23"
+      },
+      "finished_utc": "2026-09-10T19:52:04.998665Z",
+      "limits": {
+        "cpu.max": "200000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "pids.max": "128"
+      },
+      "cgroup_before": {
+        "cpu.stat": "usage_usec 21874\nuser_usec 13314\nsystem_usec 8559\ncore_sched.force_idle_usec 0\nnr_periods 2\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "memory.peak": "5857280",
+        "pids.events": "max 0",
+        "pids.peak": "5"
+      },
+      "shared_filesystem": {
+        "paths": [
+          "/srv/smolbox-cleanup/data",
+          "/srv/smolbox-cleanup/data/.local/share/smolvm/server/smolvm.db",
+          "/srv/smolbox-cleanup/data/.cache/smolvm/vms/3ccc0d13bdcb4e81"
+        ],
+        "device_ids": [
+          "43",
+          "43",
+          "43"
+        ]
+      },
+      "nested_kvm_descriptors": true
+    }
+  },
+  "baseline_worker_error": "commit vm removal: database or disk is full",
+  "raw_report_sha256": {
+    "baseline-1.json": "c944e4babc6e1ad624f49f54a2b1fa1778c50051722cbf25c033904bf70d210a",
+    "baseline-2.json": "6d5920adebc06e8fb7f4719a74af6dfe5a420333c7bab7fbc1cee848ed70218e",
+    "baseline-3.json": "16411d604477c371ed0a02ecb143b7e4e73ea581e3ef680ea49d1c83b18df7d5",
+    "fixed-1.json": "d3846bc36ba26b558194a70dce9aa082088fa210a379a569f9cd374f9a96edab",
+    "fixed-2.json": "e84eb8b7f29704da5ef4bb1bf77b4e10f8a9b4bc59b1fec5173c288df0c36076",
+    "worker.log": "3f9f668bd7ffc351577911d80e51175c6a13de9b540b535ea22d8195dba78710",
+    "fixed-final.json": "47c5fa3242a2cf92c689dc454646a882f6e0386854ce4c1311b786e2aa9fefc3",
+    "ci.log": "9a663466d436045f6cc9f6109decb38d30cc497923f153212718cad91891483e",
+    "docs.log": "52b2a94cefd2c50dd202de07ade209e83195adc2aa63764e9c9587f9ee43a877",
+    "ci-tools.log": "ec22c3718753ccc6e59d460d3d1d66724b83f499e24ca04c29e6f208f63731f7",
+    "host-final.txt": "a6e541c7a4ab21184a1d24bfcb5e068e4fb2dbdff9e58a94590460c4ec1229e3"
+  },
+  "evidence_location": "/var/lib/smolbox-lab/evidence/cleanup-1.14.6 on ssh linux",
+  "limitations": [
+    "This reproduces the shared-filesystem failure mechanism, not every setting of the original direct-host user-namespace experiment.",
+    "The comparison uses whole released distributions, including different libkrun builds; it is not an isolated commit benchmark.",
+    "Successful low-level client calls do not establish the full supported compatibility or durable managed recovery matrix for 1.14.6.",
+    "No separately exhausted metadata filesystem, read-only filesystem, deletion permission failures, forked machines, concurrent tenants or macOS runtime tested.",
+    "No generalized production isolation or hard resource guarantee added.",
+    "The first successful fixed trial's final cgroup counters describe only the replacement worker incarnation; fixed-2 adds pre-restart counters.",
+    "Expected failure in the baseline required explicit owned environment reset; never count that reset as API cleanup."
+  ],
+  "final_verification": {
+    "worker_stopped": true,
+    "worker_pid_zero": true,
+    "worker_processes_absent": true,
+    "worker_cgroup_absent": true,
+    "outer_vm_stopped": true,
+    "outer_pid": 280847,
+    "outer_pid_absent": true,
+    "outer_cgroup_absent": true,
+    "baseline_sha256_unchanged": true,
+    "clean_overlay_rebuilt": true,
+    "clean_overlay_actual_bytes": 200704,
+    "clean_overlay_qemu_check": "No errors",
+    "recovered_at_utc": "2026-09-10T19:57:12Z",
+    "recovery_timer": "active",
+    "original_worker": {
+      "pid": 44097,
+      "unchanged": true,
+      "version": "1.14.1",
+      "healthy": true,
+      "total_machines": 0,
+      "running_machines": 0
+    },
+    "original_postgresql": {
+      "pid": 39570,
+      "unchanged": true
+    },
+    "checks": {
+      "mix_ci": {
+        "exit_code": 0,
+        "deterministic_cases_passed": 194,
+        "runtime_cases_excluded": 14,
+        "note": "The separately executed cleanup regression is real-runtime evidence for this task; the existing full 14-case runtime suite was not rerun against 1.14.6.",
+        "format": "passed",
+        "compile_warnings_as_errors": "passed",
+        "dependency_cycles": 0,
+        "credo_and_ex_slop": "151 files, 100 checks, no findings",
+        "ex_dna": "97 files, 0 clones",
+        "credence": "156 files, no findings",
+        "dialyzer": "0 errors, 0 skips"
+      },
+      "ci_tooling_tests_passed": 22,
+      "exdoc": {
+        "warnings_as_errors": "passed",
+        "local_links_and_fragments": "42 pages passed"
+      },
+      "shellcheck": "passed",
+      "systemd_unit_validation": "passed"
+    }
+  }
+}

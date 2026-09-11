@@ -1,6 +1,6 @@
 defmodule SmolBox.CI.WorkerFault do
   @moduledoc false
-  alias SmolBox.CI.{Child, HTTP, Util}
+  alias SmolBox.CI.{Child, HTTP, Runtime, Util}
   @root Path.expand("../../..", __DIR__)
 
   def run(arguments) do
@@ -23,8 +23,11 @@ defmodule SmolBox.CI.WorkerFault do
 
     Util.ensure!(!File.exists?(options[:report]), "fault report must be new")
 
+    version = Runtime.selected_version()
+    Runtime.pin!(Util.platform(), version)
+
     Util.ensure!(
-      Util.command!([options[:smolvm], "--version"]) == "smolvm 1.14.1\n",
+      Util.command!([options[:smolvm], "--version"]) == "smolvm #{version}\n",
       "wrong worker version"
     )
 
@@ -146,7 +149,7 @@ defmodule SmolBox.CI.WorkerFault do
   defp ready!(url, deadline) do
     ready =
       try do
-        HTTP.json!(url <> "/health")["version"] == "1.14.1"
+        HTTP.json!(url <> "/health")["version"] == Runtime.selected_version()
       rescue
         ArgumentError -> false
       end
@@ -232,7 +235,7 @@ defmodule SmolBox.CI.WorkerFault do
       guest_marker: "single byte before recovery",
       guest_survived_api_server: true,
       artifact_sha256: settings["artifact_sha256"],
-      runtime_version: "1.14.1",
+      runtime_version: Runtime.selected_version(),
       platform: Util.platform(),
       outage_seconds: outage,
       operator_deleted_vm: settings["scenario"] != "restart"

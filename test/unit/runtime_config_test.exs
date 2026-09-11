@@ -80,6 +80,41 @@ defmodule SmolBox.RuntimeConfigTest do
              WorkerConfig.new(Keyword.delete(context.options, :allocation_floor))
   end
 
+  test "runtime defaults to 1.14.6 and retains explicit 1.14.1 support",
+       context do
+    assert context.worker.runtime_version == "1.14.6"
+
+    assert {:ok, %{runtime_version: "1.14.1"}} =
+             WorkerConfig.new(Keyword.put(context.options, :runtime_version, "1.14.1"))
+
+    assert {:ok, candidate} =
+             WorkerConfig.new(Keyword.put(context.options, :runtime_version, "1.14.6"))
+
+    assert :ok = WorkerConfig.validate(candidate)
+
+    for {platform, architecture} <- [{:macos, "aarch64"}, {:linux, "aarch64"}] do
+      worker = %{
+        candidate
+        | platform: platform,
+          architecture: architecture,
+          artifacts: Enum.map(candidate.artifacts, &Map.put(&1, "architecture", architecture))
+      }
+
+      if platform == :macos do
+        assert :ok = WorkerConfig.validate(worker)
+      else
+        assert {:error, %Error{category: :validation}} = WorkerConfig.validate(worker)
+      end
+
+      assert :ok = WorkerConfig.validate(%{worker | runtime_version: "1.14.1"})
+    end
+
+    for version <- ["1.14.2", "1.14.5", "1.14.7", "1.14.6-dev"] do
+      assert {:error, %Error{category: :validation}} =
+               WorkerConfig.validate(%{candidate | runtime_version: version})
+    end
+  end
+
   test "template sizes and VMM overhead are explicit prerequisites for supported profiles",
        context do
     for {field, value} <- [storage_gb: 20, overlay_gb: 10, host_overhead_mb: 768] do

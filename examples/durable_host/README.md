@@ -48,6 +48,16 @@ dependency can change while the example lockfile stays the same.
 
 Configure the worker, pinned Python artifact, private object directory,
 fingerprint key file, and execution ID described in `../minimal_host/README.md`.
+For the unpublished 0.1.2 candidate on Linux x86_64 or macOS Apple Silicon,
+omitting `SMOLBOX_RUNTIME_VERSION` selects 1.14.6. Set it to `1.14.1` for an
+existing older worker. Supply the 1.14.6 host's `resize2fs` for smaller disk
+requests; see [host prerequisites](../../docs/compatibility.md#macos-1-14-6-prerequisites).
+Child controllers inherit the selection and require an
+exact match with the server. Changing it does not upgrade the worker itself.
+The examples use a 60-second client operation budget and a 55-second receive
+budget for cold preparation. The profile separately bounds each execution stage;
+these settings do not lengthen command execution or authorize a retry after a
+lost response.
 Also provide a stable `SMOLBOX_STORE_PARTITION` and
 `SMOLBOX_ENCRYPTION_KEY_FILE` pointing to a different private 32-byte key. Apply
 the migration first, then run:
@@ -110,7 +120,7 @@ Run through the pinned toolchain so the child `mix` command uses it too. Supply
 the same database configuration as above; Linux additionally requires an explicit
 dedicated `SMOLVM_DATA_DIR`. The script refuses an occupied port, starts and kills
 only its own server/controller processes, and requires an initially empty worker
-inventory. It uses the pinned 1.14.1 runtime, checks recorded creation evidence
+inventory. It requires the explicitly selected runtime version, checks recorded creation evidence
 before cleanup, and bounds its HTTP reads and child diagnostics. It retains its
 private keys, object directory and SQL partition for inspection, including after
 success. The JSON report identifies that workspace without exposing key bytes.
@@ -136,7 +146,8 @@ cases that preserve execution progress before/after SQL result persistence.
 ## Opt-in durable benchmark
 
 The benchmark uses this host's real PostgreSQL store, directory adapter and a
-previously provisioned, initially idle SmolVM 1.14.1 worker. It provisions no
+previously provisioned, initially idle SmolVM worker matching `SMOLBOX_RUNTIME_VERSION`
+(default 1.14.6). It provisions no
 service, changes no host quotas and clears no image/page cache. Apply the example
 migrations first. Use native approved artifacts, a new private object directory,
 fresh 32-byte fingerprint/encryption key files and a unique store partition for

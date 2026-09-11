@@ -4,13 +4,20 @@ This API performs one verified worker operation at a time. It does not persist
 request identities, reserve capacity, reconcile a crash, or authorize deletion.
 Use it when host code owns those responsibilities. For a complete managed
 execution, begin with [Getting started](getting-started.md). This guide describes
-the pinned 1.14.1 client contract and its development-qualified worker boundary.
+the supported client contract and its development-qualified worker boundary.
+See [runtime selection](compatibility.md#runtime-selection) for the explicit
+Linux/macOS 1.14.6 candidate and retained 1.14.1 compatibility.
 
 Install the pinned SmolVM release from [compatibility evidence](compatibility.md).
 Prepare an approved, architecture-matched `.smolmachine` artifact on the worker
 host, verify its digest, and start a private `smolvm serve` endpoint. For bounded
 small-file workloads set `SMOLVM_FILE_TRANSFER_MAX_BYTES=1048576` before starting
 the server. SmolBox never enables guest networking to fetch an image.
+
+For SmolVM 1.14.6, verify the host's `resize2fs` before requesting disks smaller
+than its bundled templates. Our macOS run without that tool lost a workspace
+file after stop/start; health and successful execution alone did not detect the
+problem. See [runtime prerequisites](compatibility.md#macos-1-14-6-prerequisites).
 
 ```elixir
 {:ok, worker} = SmolBox.Worker.new("worker-1", "https://worker.internal.example",
@@ -72,8 +79,8 @@ codes are observed results, not transport errors. `exec_stream/4` uses the actua
 SSE protocol, captures bounded **lossy UTF-8**, and accepts `on_event: callback`.
 Callbacks are synchronous, provide backpressure, and are bounded by the overall
 operation timeout. A crashing optional callback is detached. Notifications are
-advisory; they are not a durable event log. Streaming stdin is rejected because
-SmolVM 1.14.1 ignores it. Use buffered execution or staged binary files instead.
+advisory; they are not a durable event log. SmolBox rejects streaming stdin.
+Use buffered execution or staged binary files instead.
 
 Worker configuration separately bounds connection, pool checkout, receive idle,
 overall operation, request bytes, and response bytes. The response cap includes
@@ -110,7 +117,7 @@ architecture, sufficient disk/memory and the pinned installation. Preparation
 may fetch images with networking; offline execution later must not.
 
 From a new private directory with enough space for layers, templates and output,
-the selected 1.14.1 CLI supports:
+the supported CLI provides these preparation commands:
 
 ```sh
 smolvm pack create --image python:3.12-alpine --entrypoint /bin/true \
@@ -140,6 +147,12 @@ Managed creation additionally forces `/bin/true`, empty command arguments and
 restart `never`. Qualify offline Python/JS execution, binary staging/collection
 and stop/start without replay before admitting the artifact. The real-runtime
 tests exercise those behaviors; a pack operation alone does not qualify an image.
+
+Choose the command's guest identity explicitly with `Command.new(argv, user:
+"65534:65534")` when it matters, and verify the resulting UID and file access
+with your artifact. SmolBox passes this choice to execution; it does not enforce
+an application-wide guest user policy. Changes to upstream CLI `USER` handling
+do not by themselves establish the same behavior through the HTTP API.
 
 The released templates measured 20/10 GiB. Validate them and any larger artifact
 templates before setting `allocation_floor`; do not infer physical disk capacity

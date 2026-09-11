@@ -54,7 +54,8 @@ defmodule SmolBox.ManagedRuntimeTest do
       )
 
     {:ok, client} = Client.new(worker)
-    assert {:ok, %{version: "1.14.1", total: total}} = Client.health(client)
+    version = SmolBox.LabCandidate.runtime_version()
+    assert {:ok, %{version: ^version, total: total}} = Client.health(client)
     assert is_integer(total)
     assert :ok = Client.readiness(client)
     assert {:ok, _machines} = Client.list(client)
@@ -64,14 +65,22 @@ defmodule SmolBox.ManagedRuntimeTest do
 
     {:ok, configured} =
       WorkerConfig.new(
-        client: client,
-        architecture: architecture,
-        platform: platform,
-        artifacts: artifacts,
-        profiles: [profile],
-        allocation_floor: %{storage_gb: 20, overlay_gb: 10, host_overhead_mb: 768},
-        capacity: %{slots: 1, cpus: 1, memory_mb: 1024, disk_gb: 30}
+        [
+          client: client,
+          architecture: architecture,
+          platform: platform,
+          artifacts: artifacts,
+          profiles: [profile],
+          allocation_floor: %{storage_gb: 20, overlay_gb: 10, host_overhead_mb: 768},
+          capacity: %{slots: 1, cpus: 1, memory_mb: 1024, disk_gb: 30}
+        ] ++
+          case System.fetch_env("SMOLBOX_RUNTIME_VERSION") do
+            {:ok, selected} -> [runtime_version: selected]
+            :error -> []
+          end
       )
+
+    assert configured.runtime_version == version
 
     store = start_supervised!(Memory)
     objects = start_supervised!({Agent, fn -> %{} end})
@@ -225,7 +234,11 @@ defmodule SmolBox.ManagedRuntimeTest do
     {counts, port} = SmolBox.RuntimeProxy.start(context.client.worker, gate)
 
     {:ok, endpoint} =
-      Worker.new("managed", "http://127.0.0.1:#{port}", allow_insecure_loopback: true)
+      Worker.new("managed", "http://127.0.0.1:#{port}",
+        allow_insecure_loopback: true,
+        receive_timeout_ms: context.client.worker.receive_timeout_ms,
+        operation_timeout_ms: context.client.worker.operation_timeout_ms
+      )
 
     {:ok, client} = Client.new(endpoint)
     [worker] = context.options[:workers]
@@ -249,7 +262,9 @@ defmodule SmolBox.ManagedRuntimeTest do
     own_cleanup(context, handle)
     # Nested KVM can take longer to reach the fault-injection point. This only
     # bounds fixture setup; command and cancellation deadlines remain unchanged.
-    assert_receive {:boundary, :exec, :before, blocked}, 30_000
+    assert_receive {:boundary, :exec, :before, blocked},
+                   SmolBox.LabCandidate.observation_ms(30_000)
+
     assert {:ok, ^handle} = SmolBox.cancel(runtime, spec.scope, spec.id)
     stopped = wait_for(context, handle, &(&1.evidence == :termination_confirmed))
 

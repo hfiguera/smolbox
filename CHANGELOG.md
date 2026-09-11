@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.1.2 (unreleased)
+
+- Default to SmolVM **1.14.6** for Linux x86_64 and
+  macOS Apple Silicon workers.
+  **Upgrade configuration:** applications with an existing 1.14.1 worker must
+  explicitly set `runtime_version: "1.14.1"` or upgrade their worker before
+  using the new default. Exact version checks reject mismatches; the library
+  does not install SmolVM. Explicit 1.14.1 support remains available.
+  Linux ARM64 1.14.6 is not qualified.
+- Document the host `resize2fs` prerequisite for 1.14.6 disk requests below
+  template sizes, including the observed macOS file loss after restart when
+  that tool was absent. Bounded macOS compatibility checks do not qualify
+  exhaustion, adversarial isolation or hard host resource limits.
+- Fix the getting-started example to omit the optional Unix socket setting
+  when connecting over TCP. Passing `nil` was rejected by option validation.
+- Update maintainer checks and host examples to default to 1.14.6 and retain
+  explicit version selection.
+  Public execution APIs, persisted record formats and production dependencies
+  remain unchanged. No new hard resource or isolation controls are exposed.
+
+Native runtime and constrained Linux deployment preparation results are documented in
+the compatibility guide. Exact-commit release acceptance is recorded separately.
+No 0.1.2 tag, Hex package or GitHub Release has been created.
+
 ## 0.1.1
 
 Documentation and validation release. Library source, public APIs, persisted record

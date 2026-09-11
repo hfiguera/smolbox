@@ -6,13 +6,18 @@ defmodule SmolBox.MachineTest do
   defp fixture(name), do: "test/fixtures/wire/#{name}.json" |> File.read!() |> Jason.decode!()
 
   test "captured lifecycle observations retain weak creation evidence across states" do
-    assert {:ok, created} = Machine.from_wire(fixture("created"))
-    assert {:ok, running} = Machine.from_wire(fixture("running"))
-    assert Machine.same_incarnation?(created, running)
-    refute Machine.same_incarnation?(created, %{running | created_at: running.created_at + 1})
-    refute Machine.same_incarnation?(created, %{running | memory_mb: 512})
-    assert {:ok, stopped} = Machine.from_wire(Map.put(fixture("running"), "state", "stopped"))
-    assert stopped.state == :stopped
+    for prefix <- ["", "1.14.6/"] do
+      assert {:ok, created} = Machine.from_wire(fixture(prefix <> "created"))
+      assert {:ok, running} = Machine.from_wire(fixture(prefix <> "running"))
+      assert Machine.same_incarnation?(created, running)
+      refute Machine.same_incarnation?(created, %{running | created_at: running.created_at + 1})
+      refute Machine.same_incarnation?(created, %{running | memory_mb: 512})
+
+      assert {:ok, stopped} =
+               Machine.from_wire(Map.put(fixture(prefix <> "running"), "state", "stopped"))
+
+      assert stopped.state == :stopped
+    end
   end
 
   test "missing, unsafe and malformed observations fail closed" do

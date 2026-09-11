@@ -55,6 +55,33 @@ final commit. Library source and production dependencies are unchanged from 0.1.
 the previous macOS results remain historical and must not be reported as a new
 0.1.1 run. See the release-specific scope in the implementation plan.
 
+## 0.1.2 runtime selection
+
+The unpublished 0.1.2 candidate defaults to SmolVM 1.14.6 on Linux x86_64 or macOS Apple Silicon.
+Set `runtime_version` in the private worker manifest to select a version explicitly;
+preflight verifies that version's binary checksum and exports
+`SMOLBOX_RUNTIME_VERSION` for runtime tests, examples and service fault checks.
+An omitted field selects 1.14.6. Existing 1.14.1 fixtures must now declare
+`"runtime_version": "1.14.1"` in the manifest.
+Selecting a different version never installs it or accepts an unexpected server
+version. Initial candidate validation ran on Linux. The subsequent native macOS
+campaign is restricted to ordinary compatibility and controlled lifecycle checks;
+exhaustion and adversarial testing remain in the disposable Linux lab. See the
+implementation plan for the separate checkpoints and current acceptance status.
+
+The native macOS runtime command selects only the nine ordinary cases:
+
+```sh
+mix test test/runtime/client_runtime_test.exs test/runtime/managed_runtime_test.exs --include runtime --warnings-as-errors
+```
+
+The five cases in `security_runtime_test.exs` are outside this Mac campaign.
+They remain covered by the separate Linux runtime suite. Do not count excluded
+or unexecuted cases as macOS passes. Supply working `resize2fs` for 1.14.6 disk
+requests below the templates; missing it caused file loss after stop/start in
+the initial Mac run. A successful health probe is insufficient. The unchanged
+file persistence test must pass on fresh VMs before recording compatibility.
+
 ## Documentation and package checks
 
 Build the site and check its generated local links from the repository root:
@@ -111,7 +138,7 @@ Before setting repository variable `SMOLBOX_TRUSTED_RUNTIME_ENABLED` to `true`:
    are not a protection mechanism: configure and verify them before enabling
    the repository variable. The job has an additional explicit dispatch guard;
    neither `pull_request` nor `pull_request_target` executes this live workflow.
-3. Provision a dedicated worker account/state, the complete pinned 1.14.1
+3. Provision a dedicated worker account/state, the complete selected pinned
    distribution, native prepared Python/Node artifacts, and a private Postgres
    16.15 database with at least 20 connections. The database must be dedicated
    to this job; tests kill child controllers and create/migrate their own tables.
@@ -136,6 +163,7 @@ with actual observations; the sample deliberately does not pass preflight:
 {
   "schema": 1,
   "platform": "linux",
+  "runtime_version": "1.14.6",
   "ephemeral_runner": true,
   "expires_at_unix": 0,
   "lifecycle_id": "scheduler-owned-unique-id",

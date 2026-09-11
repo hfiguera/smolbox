@@ -1,5 +1,154 @@
 # SmolBox implementation plan
 
+## 0.1.2 compatibility candidate (not released)
+
+### Default runtime update
+
+Status: **scoped validation complete**, September 10, 2026. The maintainer authorized
+making SmolVM 1.14.6 the default after its native macOS and Linux validation.
+Existing 1.14.1 workers remain supported through explicit configuration; omitted
+versions now expect 1.14.6 and mismatches prevent admission. The default change
+does not install a worker or change persisted execution records.
+
+- [x] Align library, host examples and CI manifest defaults, and document the
+  required configuration for existing 1.14.1 installations.
+- [x] Exercise default admission, explicit legacy admission and rejection of
+  both mismatch directions without dispatching commands.
+- [x] Freeze and validate the new candidate: all four language lanes, complete
+  quality checks, ordinary native macOS and disposable Linux execution, docs
+  and six fresh package consumers that assert both runtime selections.
+- [x] Record the final package, validation scope and cleanup. No release, tag,
+  push or pull request was created. Earlier evidence below remains historical;
+  unchanged exhaustion scenarios were not repeated for this default change.
+
+Final candidate: `2a85abfd07afeb7bb2bbd07fab2056271ebf7040`, following the default
+implementation in `3c32e6e2d6d97a7688a03399dfa7cda52c0d83ac`. Both hosts passed
+200 deterministic and 23 tooling cases on each supported Elixir/OTP pair,
+all analyzer canaries, 95.41% coverage, audits, ExDoc and three package consumers.
+Live validation passed nine default runtime cases on macOS, fourteen on Linux,
+and sixteen store plus twenty-five durable recovery cases on each. Both hosts
+also passed four explicit 1.14.1 managed cases, four normal/cancellation example
+runs and the walkthrough. Task services were stopped and original services
+preserved; Linux recovery recreated a clean disk from its unchanged baseline.
+
+The first Linux default run passed thirteen of fourteen cases. A test proxy
+retained a 15-second receive budget while its configured worker allowed 55
+seconds. The fixture now honors the worker's operation/receive budgets and uses
+the existing Linux setup observation allowance. The final full rerun passed;
+production deadlines and execution/cancellation assertions are unchanged. The
+failed result and log are preserved in the final evidence.
+
+The same 89-file archive served all six final consumers, SHA-256
+`bb3c4dd9a49725431501452c3484167a221bd351666eea232c4612c9c1855f79`.
+Every packaged file matches the final candidate; only test files changed after
+the default implementation. The authenticated Hex publishing dry run passed
+without publishing. See the [final default report](release-candidates/0.1.2-default.md)
+and [machine-readable evidence](release-candidates/0.1.2-default.json). These
+attestations and the implementation plan are excluded from the archive.
+
+### Native macOS follow-up
+
+Status: **scoped validation complete**, September 10, 2026. The maintainer separately
+authorized ordinary native macOS 1.14.6 compatibility checks. Exhaustion and
+adversarial tests remain restricted to the disposable Linux lab. No tag, release,
+push or pull request is authorized by this follow-up.
+
+- [x] Verify the official Darwin ARM64 archive, binary, agent, libkrun and the
+  client OpenAPI subset; use a private worker home and database and preserve
+  existing host services.
+- [x] Boot and execute both approved ARM64 Python/Node artifacts, verify explicit
+  UID execution and cleanup, and run the nine ordinary client/runtime cases.
+- [x] Diagnose the initial file persistence failure without weakening the test.
+  Without `resize2fs`, 1.14.6 lost a file after stop/start with 1/1 GiB requests;
+  direct HTTP reproduced it, while 1.14.1 and matching 20/10 GiB requests retained
+  the file. Supplying private e2fsprogs 1.47.4 made all nine cases pass unchanged.
+- [x] Run all 16 PostgreSQL store and 25 durable recovery cases on the private
+  macOS services. The current `mix ci` quality command also passes.
+- [x] Run both examples normally and with cancellation, and the exact walkthrough.
+  Fix the walkthrough to omit `unix_socket` when its environment variable is
+  absent; passing `nil` previously failed TCP setup before any command dispatch.
+  All eight analyzer canary pairs also pass.
+- [x] Finish service recovery and fresh artifacts on the frozen candidate.
+- [x] Freeze the updated candidate, validate its applicable complete gates and
+  package consumers, and record final identity, results and owned-resource cleanup.
+
+The accepted candidate is `9662e57c03940b155b356a41c20b20f002553341`.
+It permits explicit macOS 1.14.6 and documents its host dependency. All four
+Elixir/OTP lanes passed 199 deterministic and 23 tooling cases on each platform.
+Quality gates and analyzer canaries passed, as did the exact-candidate live
+matrix: nine ordinary macOS cases with both old and fresh artifacts, fourteen
+Linux runtime cases, and sixteen store plus twenty-five durable cases on each
+platform. Both hosts also passed three service scenarios, four example runs,
+the walkthrough and a real database outage. All task runtimes were stopped;
+existing services and the Linux recovery baseline were preserved.
+
+Six package consumers used the same 89-file archive, SHA-256
+`26bb1e99e2709e0fbb7f847258e568a1ca8c6e64c00ed6890e6067d44f87d9e1`.
+The authenticated publishing dry run passed on macOS; nothing was published.
+See the [final candidate report](release-candidates/0.1.2-macos.md) and
+[exact-commit evidence](release-candidates/0.1.2-macos.json). These files and the
+plan are excluded from package contents. The acceptance below remains the
+earlier Linux checkpoint, including its then-outstanding authentication step.
+The five adversarial runtime cases are not run or counted as passes on macOS.
+Preparation identities, failures and results are preserved in
+[`smolvm-1.14.6-macos.json`](evidence/smolvm-1.14.6-macos.json).
+
+### Initial Linux checkpoint
+
+The maintainer authorized preparing and validating this patch on September 10,
+2026, explicitly excluding the real `v0.1.2` tag, Hex publication and GitHub
+Release. All execution for this initial checkpoint ran on `ssh linux`. Existing 1.14.1 configuration
+and its default remain compatible; 1.14.6 is an explicit Linux x86_64 option.
+No new macOS or Linux ARM64 runtime qualification is claimed. Earlier macOS
+1.14.1 evidence remains historical. Unsupported hard controls stay rejected.
+
+- [x] Add exact, explicit 1.14.6 worker support without accepting version drift.
+- [x] Capture official binary/agent/libkrun/OpenAPI identities and actual wire
+  fixtures; validate old and newly prepared Python/Node artifacts and disk sizing.
+- [x] Run the full Linux client/runtime, PostgreSQL, durable recovery, service
+  fault and example suites for both supported runtime versions.
+- [x] Repeat the constrained Linux resource/isolation campaign on 1.14.6,
+  including kernel controls, startup refusals, exhaustion and external recovery.
+- [x] Validate all four Linux Elixir/OTP lanes, coverage, all five analyzers and
+  their canaries, audits, ExDoc and current/minimum package consumers.
+- [x] Document explicit upgrade/drain procedures and measured boundaries,
+  freeze an untagged candidate and record exact-commit acceptance and cleanup.
+
+Preparation evidence is bundled in
+[`smolvm-1.14.6-compatibility.json`](evidence/smolvm-1.14.6-compatibility.json).
+Both worker versions passed 14 runtime, 16 store and 25 recovery cases. A second
+1.14.6 runtime run passed with rebuilt Python/Node payloads, including explicit
+guest UID selection and binary/streaming behavior. The ten workload probes,
+eleven startup refusals, three durable outage cases and frozen outer-VM recovery
+passed. The initial recovery failures and subsequent preparation-budget correction
+remain recorded. All four Linux language lanes, five analyzers and canaries,
+95.41% coverage, example analysis/audits and 42-page ExDoc link checks passed.
+The final untagged candidate is
+`279e7ce4d210e9ab8c256167a73df626fffefe25`. Its exact-commit matrix passed all
+14 runtime, 16 store and 25 recovery cases, three service-failure scenarios,
+four normal/cancellation examples and the walkthrough on each runtime version.
+The rebuilt-artifact 1.14.6 suite passed another 14 cases and its disk-sizing
+probe. All four language lanes passed 199 deterministic cases and 23 tooling
+cases each; quality, canaries, audits, documentation and three fresh consumers
+of the same 88-file archive passed. Final cleanup confirmed zero pending work
+or reservations, no owned worker/VM processes, a clean rebuilt disposable disk,
+the unchanged baseline and preserved physical-host services.
+
+See the [0.1.2 candidate report](release-candidates/0.1.2.md) and
+[exact-commit evidence](release-candidates/0.1.2.json). These repository-only
+attestations are excluded from the tested package. Its SHA-256 is
+`80d1fe6b124a2e4c234b2130249edfda5481bd5fa800f4ad1dbcbe19b204cc29`.
+The candidate is accepted for this scoped Linux compatibility preparation;
+general production security certification and new macOS qualification are not
+claimed. The authenticated Hex publishing dry run remains outstanding: the
+attempt stopped at missing authentication and is not counted as passed.
+Authenticate and repeat it when the separate release step is authorized.
+
+Local execution of the required CI commands supplies this preparation's evidence.
+No GitHub run of the new commit is claimed without an authorized push. The existing
+manual worker workflow remains optional. Versioned public documentation/source
+links become available only after the separately authorized release.
+
 ## 0.1.1 documentation and validation release
 
 Status: **published and verified**, September 8, 2026. The maintainer authorized publishing

@@ -12,7 +12,9 @@ defmodule SmolBox.QualificationProbe do
       Worker.new("candidate", "http://localhost", unix_socket: "/srv/sbq/run/api.sock")
 
     {:ok, client} = Client.new(worker)
-    assert {:ok, %{version: "1.14.1", total: 0}} = Client.health(client)
+    version = System.get_env("SMOLBOX_RUNTIME_VERSION", "1.14.6")
+    assert version in ["1.14.1", "1.14.6"]
+    assert {:ok, %{version: ^version, total: 0}} = Client.health(client)
     {:ok, name} = Identity.machine_name("qual")
     artifact = if kind == "node", do: "node", else: "python"
 
@@ -20,8 +22,8 @@ defmodule SmolBox.QualificationProbe do
       MachineSpec.new(name, "/opt/smolbox/catalog/#{artifact}.smolmachine",
         cpus: 2,
         memory_mb: 256,
-        storage_gb: 20,
-        overlay_gb: 10
+        storage_gb: if(kind == "geometry", do: 1, else: 20),
+        overlay_gb: if(kind == "geometry", do: 1, else: 10)
       )
 
     assert {:ok, created} = Client.create(client, spec)
@@ -29,6 +31,7 @@ defmodule SmolBox.QualificationProbe do
 
     report = %{
       scenario: kind,
+      runtime_version: version,
       machine: name,
       source: "qualification-probe.exs",
       before: metrics()
@@ -123,6 +126,40 @@ defmodule SmolBox.QualificationProbe do
     assert {:ok, %{exit_code: 0, stdout: output}} = Client.exec(client, name, command)
     assert Jason.decode!(output) == %{"platform" => "linux"}
     %{node: "executed"}
+  end
+
+  defp probe("geometry", client, name) do
+    data =
+      python(client, name, """
+      import json, os, pathlib
+      fs=os.statvfs('/workspace')
+      pathlib.Path('/workspace/geometry').write_bytes(b'roundtrip')
+      print(json.dumps({'filesystem_bytes':fs.f_blocks*fs.f_frsize,'uid':os.getuid()}))
+      """)
+
+    key = :crypto.hash(:sha256, name) |> Base.encode16(case: :lower) |> binary_part(0, 16)
+    directory = "/srv/sbq/cache/smolvm/vms/#{key}"
+
+    {sizes, 0} =
+      System.cmd("sudo", [
+        "stat",
+        "-c",
+        "%s",
+        "#{directory}/storage.raw",
+        "#{directory}/overlay.raw"
+      ])
+
+    actual = sizes |> String.split() |> Enum.map(&String.to_integer/1)
+
+    expected =
+      if System.get_env("SMOLBOX_RUNTIME_VERSION", "1.14.6") == "1.14.6",
+        do: [1_073_741_824, 1_073_741_824],
+        else: [21_474_836_480, 10_737_418_240]
+
+    assert actual == expected
+    assert data["filesystem_bytes"] <= hd(expected)
+    assert {:ok, "roundtrip"} = Client.download(client, name, "/workspace/geometry", 32)
+    Map.put(data, "raw_disk_bytes", actual)
   end
 
   defp probe("memory", client, name) do

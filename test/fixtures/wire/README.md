@@ -14,3 +14,13 @@ the SSE workload prints `café` followed by a newline and exits with code 0.
 2026-09-07 at 03:02 UTC with an empty inventory. `/readyz` returned HTTP 200,
 zero content length and no Content-Type; that empty response has a distinct
 transport contract and does not relax JSON or SSE media-type validation.
+
+The `1.14.6/` fixtures were captured on September 10, 2026 from the official
+Linux x86_64 v1.14.6 distribution in the disposable nested KVM lab. Source commit:
+`6c503014629bba91631152728c3081c944653f31`; binary SHA-256:
+`cc1f9b5f14613191ca83c706d52f4350f69b69a6c431c867cd662b51cb36d7d6`.
+`scripts/lab/capture-wire.exs` uses the same synthetic output workloads and a
+65,536-byte response cap. Only lifecycle names, creation times and PIDs are
+normalized. Responses include the new `blockIo` and resource observation fields;
+these do not become resource enforcement claims. Execution bytes and SSE framing
+remain verbatim. The owned VM was stopped and deleted, and inventory was empty.

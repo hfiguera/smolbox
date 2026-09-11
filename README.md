@@ -78,6 +78,10 @@ creating machines, executing commands, streaming output, and transferring files.
 
 ## Installation and first run
 
+This checkout prepares **0.1.2**, which is not published yet. Its explicit
+SmolVM 1.14.6 default targets Linux x86_64 and macOS Apple Silicon. Use a local path dependency to try the
+candidate; the published 0.1.1 package below retains its 1.14.1 contract.
+
 Add SmolBox to your application's `mix.exs`:
 
 ```elixir
@@ -91,8 +95,10 @@ includes the guides below. A local checkout can instead be used with
 To run the local walkthrough, you need:
 
 - Elixir **1.18 or later**, using a [tested Elixir/OTP pair](docs/compatibility.md).
-- A dedicated **SmolVM 1.14.1** worker on **Linux x86_64 with KVM** or
-  **macOS Apple Silicon**.
+- A dedicated worker: **SmolVM 1.14.6 or 1.14.1**, on Linux x86_64 with KVM or
+  macOS Apple Silicon. Version 1.14.6 requires the 0.1.2 candidate.
+- The host's `resize2fs` tool for 1.14.6 disk requests below its template sizes.
+  On macOS, install `e2fsprogs`; see the [runtime prerequisites](docs/compatibility.md#macos-1-14-6-prerequisites).
 - A prepared Python image for that worker's architecture, with its SHA-256
   recorded. The guide links to the image preparation commands and host capacity
   requirements.
@@ -101,14 +107,19 @@ To run the local walkthrough, you need:
 stage a Python file, submit it, read its output file, and confirm cleanup. The
 walkthrough uses an in-memory store and needs no database. Applications that need
 restart recovery must provide a durable `SmolBox.Store` adapter; a complete
-[PostgreSQL host example](https://github.com/hfiguera/smolbox/tree/v0.1.1/examples/durable_host)
+[PostgreSQL host example](https://github.com/hfiguera/smolbox/tree/v0.1.2/examples/durable_host)
 is included in the repository.
 
 ## Current scope
 
 SmolBox has real execution and durable recovery tests on Linux x86_64 and macOS
-Apple Silicon. It supports the pinned **SmolVM 1.14.1** API; other upstream
-versions need compatibility verification.
+Apple Silicon with **SmolVM 1.14.1 and 1.14.6**; validation status is recorded in
+[Compatibility](docs/compatibility.md#runtime-selection). The 0.1.2 candidate
+defaults to **1.14.6**. Before upgrading an application that still uses a 1.14.1
+worker, explicitly configure `runtime_version: "1.14.1"` or follow the
+[worker upgrade procedure](docs/host-integration.md#upgrading-a-worker).
+The package does not upgrade an external worker. A version mismatch prevents
+new execution; arbitrary upstream releases and automatic fallback are not accepted.
 
 SmolBox relies on SmolVM's isolation model for running untrusted code. Your
 deployment must protect worker access and configure host resource limits,
@@ -152,4 +163,6 @@ the compatibility guide. From this repository, `mix ci` runs deterministic check
 without contacting a real worker. Generate this site with
 `MIX_ENV=dev mix docs --warnings-as-errors`. Live worker tests are a separate opt-in
 operation described in the repository's
-[CI guide](https://github.com/hfiguera/smolbox/blob/v0.1.1/scripts/ci/README.md).
+[CI guide](https://github.com/hfiguera/smolbox/blob/v0.1.2/scripts/ci/README.md).
+These candidate source links become available when the release tag is published;
+until then, use the corresponding files in this checkout.

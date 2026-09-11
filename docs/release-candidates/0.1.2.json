@@ -1,0 +1,1068 @@
+{
+  "status": "accepted for the scoped Linux compatibility candidate; unpublished",
+  "version": "0.1.2",
+  "policy": {
+    "default_runtime": "1.14.1",
+    "recommended_new_linux_x86_64_runtime": "1.14.6",
+    "exact_configured_version_required": true,
+    "automatic_fallback": false,
+    "library_upgrades_worker": false
+  },
+  "documentation": {
+    "blog": {
+      "evidence": {
+        "path": "blog.log",
+        "sha256": "e801c3a1c49b68881cbbfbbf1da0c88bbb65579e2356462a831b9fdeed597a9f"
+      },
+      "articles": 2,
+      "pages": 5,
+      "feeds": "passed",
+      "analytics": "enabled",
+      "deployed": false
+    },
+    "exdoc_pages": 42,
+    "source_links": 168,
+    "local_links_and_fragments": "passed",
+    "public_v0_1_2_tag_links": "intentionally unavailable before release"
+  },
+  "branch": "prepare-0.1.2-smolvm-compatibility",
+  "package": {
+    "archive": "smolbox-0.1.2.tar",
+    "files": 88,
+    "sha256": "80d1fe6b124a2e4c234b2130249edfda5481bd5fa800f4ad1dbcbe19b204cc29",
+    "consumers": [
+      {
+        "status": "passed",
+        "otp": "29.0.6",
+        "elixir": "1.20.4",
+        "evidence": {
+          "path": "package-current.json",
+          "sha256": "48ab7d654a34d363021b79b31ba668a2eaa1f6edd250f2cd21f67dbed63d6a5d"
+        },
+        "minimum_dependencies": false,
+        "smoke": {
+          "client": true,
+          "supervisor": true,
+          "versions": {
+            "jason": "1.4.5",
+            "nimble_options": "1.1.1",
+            "req": "0.7.4",
+            "telemetry": "1.4.2"
+          }
+        },
+        "package_sha256": "80d1fe6b124a2e4c234b2130249edfda5481bd5fa800f4ad1dbcbe19b204cc29"
+      },
+      {
+        "status": "passed",
+        "otp": "29.0.6",
+        "elixir": "1.20.4",
+        "evidence": {
+          "path": "package-minimum.json",
+          "sha256": "2888450f7028481fdba541f702f5c403df825d55cbf979d22eb0025ea4a0d7a8"
+        },
+        "minimum_dependencies": true,
+        "smoke": {
+          "client": true,
+          "supervisor": true,
+          "versions": {
+            "jason": "1.4.0",
+            "nimble_options": "1.1.0",
+            "req": "0.7.4",
+            "telemetry": "1.3.0"
+          }
+        },
+        "package_sha256": "80d1fe6b124a2e4c234b2130249edfda5481bd5fa800f4ad1dbcbe19b204cc29"
+      },
+      {
+        "status": "passed",
+        "otp": "27.3.4.15",
+        "elixir": "1.18.4",
+        "evidence": {
+          "path": "package-minimum-otp27.json",
+          "sha256": "a3de36faf156cc966241934f6c841524fc1a75b977724744cf01e05c77878feb"
+        },
+        "minimum_dependencies": true,
+        "smoke": {
+          "client": true,
+          "supervisor": true,
+          "versions": {
+            "jason": "1.4.0",
+            "nimble_options": "1.1.0",
+            "req": "0.7.4",
+            "telemetry": "1.3.0"
+          }
+        },
+        "package_sha256": "80d1fe6b124a2e4c234b2130249edfda5481bd5fa800f4ad1dbcbe19b204cc29"
+      }
+    ],
+    "source_check": {
+      "result": {
+        "commit": "279e7ce4d210e9ab8c256167a73df626fffefe25",
+        "every_file_matches_git": true,
+        "license_unchanged_from_0_1_1": true,
+        "licenses": [
+          "MIT"
+        ],
+        "package_files": 88,
+        "package_name": "smolbox",
+        "package_sha256": "80d1fe6b124a2e4c234b2130249edfda5481bd5fa800f4ad1dbcbe19b204cc29",
+        "public_tag_links": "not requested; v0.1.2 remains intentionally unpublished",
+        "same_archive_for_consumers": true,
+        "source_link_files_and_lines_valid_at_candidate": true,
+        "source_links": 168,
+        "status": "passed",
+        "version": "0.1.2"
+      },
+      "evidence": {
+        "path": "package-source-check.json",
+        "sha256": "c05c56ad7cc073ba6c019f4e36bb26e5a948f997b51af60d621aa2e9a6c6305b"
+      }
+    }
+  },
+  "candidate": "279e7ce4d210e9ab8c256167a73df626fffefe25",
+  "quality": {
+    "status": "passed",
+    "commands": [
+      "mix ci",
+      "mix smolbox.ci.verify_checks",
+      "mix test --cover --warnings-as-errors",
+      "elixir scripts/ci_test.exs"
+    ],
+    "evidence": {
+      "path": "quality.log",
+      "sha256": "6c00fa82b99b67244e7cbd4239873f185dbcb5eeaef4956948ff41bf6595e3f4"
+    },
+    "examples": {
+      "compile": "passed",
+      "projects": [
+        "minimal_host",
+        "durable_host"
+      ],
+      "forced_dialyzer": "passed",
+      "dependency_cycles": 0
+    },
+    "lanes": [
+      {
+        "status": "passed",
+        "otp": "29.0.6",
+        "elixir": "1.20.4",
+        "evidence": {
+          "path": "quality.log",
+          "sha256": "6c00fa82b99b67244e7cbd4239873f185dbcb5eeaef4956948ff41bf6595e3f4"
+        },
+        "deterministic_cases": 199,
+        "runtime_cases_excluded": 14,
+        "standalone_tool_cases": 23
+      },
+      {
+        "status": "passed",
+        "otp": "27.3.4.15",
+        "elixir": "1.18.4",
+        "evidence": {
+          "path": "tests-otp27.log",
+          "sha256": "eb8fdcf32ba8e672c59289d68ec0b68523e111ea50d4214379b12a2475adfe7a"
+        },
+        "deterministic_cases": 199,
+        "runtime_cases_excluded": 14,
+        "standalone_tool_cases": 23
+      },
+      {
+        "status": "passed",
+        "otp": "28.5",
+        "elixir": "1.19.5",
+        "evidence": {
+          "path": "tests-elixir119.log",
+          "sha256": "3150165ef7cf7f5a751ec6855758cee76b0289c064a858e69d2d142e2036b372"
+        },
+        "deterministic_cases": 199,
+        "runtime_cases_excluded": 14,
+        "standalone_tool_cases": 23
+      },
+      {
+        "status": "passed",
+        "otp": "28.5",
+        "elixir": "1.20.4",
+        "evidence": {
+          "path": "tests-otp28.log",
+          "sha256": "c4a164fdb3543769cab745ba98c7dac87db77777d88c8d0c6e993933ec0e2720"
+        },
+        "deterministic_cases": 199,
+        "runtime_cases_excluded": 14,
+        "standalone_tool_cases": 23
+      }
+    ],
+    "coverage_percent": 95.41,
+    "coverage_floor": 90,
+    "analyzers": [
+      "Dialyzer",
+      "Credo",
+      "ex_slop",
+      "ex_dna",
+      "Credence"
+    ],
+    "canary_pairs": [
+      "compiler",
+      "xref",
+      "credo",
+      "ex_slop",
+      "credence",
+      "ex_dna",
+      "dialyzer",
+      "coverage"
+    ],
+    "audits": {
+      "commands": [
+        "mix hex.audit",
+        "mix deps.audit"
+      ],
+      "projects": [
+        "root",
+        "minimal_host",
+        "durable_host"
+      ],
+      "refresh_succeeded": true,
+      "advisory_exceptions": false
+    },
+    "shellcheck": [
+      "scripts/lab/select-runtime.sh",
+      "scripts/lab/worker-preflight.sh"
+    ]
+  },
+  "schema_version": 1,
+  "recorded_at": "2026-09-10T22:46:47.662905Z",
+  "authorization": {
+    "execution_host": "ssh linux",
+    "macos_execution": false,
+    "tag_created": false,
+    "hex_published": false,
+    "github_release_created": false,
+    "branch_pushed": false,
+    "pull_request_created": false
+  },
+  "publishing_dry_run": {
+    "status": "blocked before authenticated publishing checks",
+    "exit_code": 1,
+    "evidence": {
+      "path": "hex-dry-run.log",
+      "sha256": "a3a26f8cd52adbeaece3930c592449db844fe7e45bfee4944c306ca0984bbde9"
+    },
+    "passed": false,
+    "authenticated": false,
+    "next_step": "Authenticate Hex and repeat the complete dry run when release preparation is separately authorized; do not count this attempt as passed"
+  },
+  "runtime_acceptance": {
+    "1.14.1": {
+      "cleanup": {
+        "evidence": [
+          {
+            "path": "runtime-11/final-commit.txt",
+            "sha256": "077c546b1520c80aa81ee5802672f6da4f7983589a4f0011420d70fef0d50c7d"
+          },
+          {
+            "path": "runtime-11/finished-commit.txt",
+            "sha256": "077c546b1520c80aa81ee5802672f6da4f7983589a4f0011420d70fef0d50c7d"
+          },
+          {
+            "path": "runtime-11/finished-kvm-fds.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "runtime-11/finished-store-counts.txt",
+            "sha256": "2ce220d8d046f85fd648a70bc8e4b330562a745e56a371ee36e2596a39f56a37"
+          },
+          {
+            "path": "runtime-11/outer-stopped.txt",
+            "sha256": "08e01db9ab10ca97c3d74e683b7cd1c6a75c31140d82bf133dcbce5dbe2e3481"
+          }
+        ],
+        "pending_records": 0,
+        "reserved_slots": 0,
+        "kvm_descriptors": 0,
+        "source_unchanged": true
+      },
+      "suites": {
+        "durable-final": {
+          "result": {
+            "captured_bytes": 347,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "ef063199e17ca84c35f7839a6f2035d73c9026f618fd9e89052bd913f59379b6",
+            "seconds": 573.615,
+            "status": "passed",
+            "tests": {
+              "passed": 25,
+              "seed": 395786
+            }
+          },
+          "evidence": {
+            "path": "runtime-11/durable-final.json",
+            "sha256": "bf34758cfe3043e015c80719695ed3c3e600b1e779e8630c0f52d22f19ff8b4d"
+          }
+        },
+        "runtime-final": {
+          "result": {
+            "captured_bytes": 209,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "276d0b8fd2fdde97abb8e24324760a291748a243bfec4399e11c1dc6427be075",
+            "seconds": 171.388,
+            "status": "passed",
+            "tests": {
+              "passed": 14,
+              "seed": 332532
+            }
+          },
+          "evidence": {
+            "path": "runtime-11/runtime-final.json",
+            "sha256": "fe0df81ab689be2183969130ff21565820bfdd6b6ed2a07e1202627b28fecb7d"
+          }
+        },
+        "store-final": {
+          "result": {
+            "captured_bytes": 160,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "69cc9275ed01c21ec146f3e81f09fc9f0be4053ba8602436104f876fe2bde417",
+            "seconds": 3.304,
+            "status": "passed",
+            "tests": {
+              "passed": 16,
+              "seed": 733696
+            }
+          },
+          "evidence": {
+            "path": "runtime-11/store-final.json",
+            "sha256": "06d8c381abc6d00dc6678ca8387fe06a04326e6d2a2ffa0631193bf25d4efe63"
+          }
+        }
+      },
+      "candidate": "279e7ce4d210e9ab8c256167a73df626fffefe25",
+      "examples": {
+        "durable_host-cancel": {
+          "result": {
+            "captured_bytes": 348,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "b972c5c618a45dca6aaccfedefe21a5578c6ea904fd297ea2ee13c65efe20428",
+            "seconds": 75.674,
+            "status": "passed"
+          },
+          "evidence": {
+            "path": "runtime-11/example2-1141-durable_host-cancel.json",
+            "sha256": "d415123895d3f065113674b65241c7067d13c1d14635431fac78fd668158e039"
+          }
+        },
+        "durable_host-normal": {
+          "result": {
+            "captured_bytes": 599,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "752bdab0425a52657264f441870bf7e2e9d1f34c9f1566dbb6a1149c9138ffa9",
+            "seconds": 11.532,
+            "status": "passed"
+          },
+          "evidence": {
+            "path": "runtime-11/example2-1141-durable_host-normal.json",
+            "sha256": "0a8f6717419b5d16c048b2496f3a2a00add2ffbff5d64d3a25d2dcce138e7a13"
+          }
+        },
+        "minimal_host-cancel": {
+          "result": {
+            "captured_bytes": 348,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "d773160daad993fd2011660ea4b25deff93b9a66d34274747048a8dcbf1b66d0",
+            "seconds": 74.903,
+            "status": "passed"
+          },
+          "evidence": {
+            "path": "runtime-11/example2-1141-minimal_host-cancel.json",
+            "sha256": "d5aee36818bff54412259765fef66fad6662b53ad1c1cbe216cbb4ec11752364"
+          }
+        },
+        "minimal_host-normal": {
+          "result": {
+            "captured_bytes": 599,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "42fb83df3fa6e58ea8aff09690e36b72585944ce84d33a4b59e9c9158566995d",
+            "seconds": 11.211,
+            "status": "passed"
+          },
+          "evidence": {
+            "path": "runtime-11/example2-1141-minimal_host-normal.json",
+            "sha256": "e2d14104eb76af5aa4c210a7af24cb033ce939fb7a06849a48421de9ceb2f2cc"
+          }
+        }
+      },
+      "service_faults": {
+        "missing": {
+          "check": {
+            "result": {
+              "captured_bytes": 795,
+              "exit_code": 0,
+              "failure": null,
+              "output_sha256": "486d92d8ab2861b12763e9afdd9848dc59883de1e27162050c2944bc0586bb9f",
+              "seconds": 17.432,
+              "status": "passed"
+            },
+            "evidence": {
+              "path": "runtime-11/service-1141-missing.json",
+              "sha256": "a8050ab9eb9ed9989e6efd5f131e2f47b70f68f47323a60b94841092ac9d06f5"
+            }
+          },
+          "detail": {
+            "result": {
+              "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+              "dispatch_attempts": 1,
+              "guest_marker": "single byte before recovery",
+              "guest_survived_api_server": true,
+              "operator_deleted_vm": true,
+              "outage_seconds": 0.051,
+              "partition": "restart-1643d7284ca54c12",
+              "platform": "linux",
+              "result": {
+                "absence_at_ms": 1789080108765,
+                "artifacts": [],
+                "cancel_requested_at_ms": null,
+                "cleanup": "complete",
+                "collection": "pending",
+                "evidence": "termination_confirmed",
+                "exit_code": null,
+                "id": "restart-1643d7284ca54c12",
+                "machine_name": "sbxexample-wypplnm6swjiwj23ykvz",
+                "reserved": false,
+                "scope": "example",
+                "state": "unknown",
+                "worker_id": "example-worker"
+              },
+              "retained_workspace": "/tmp/sbx-worker-restart-7a9c021226f9d2970fe8cb91",
+              "runtime_version": "1.14.1",
+              "scenario": "missing",
+              "seconds": 16.454,
+              "status": "passed"
+            },
+            "evidence": {
+              "path": "runtime-11/service-detail-1.14.1-missing.json",
+              "sha256": "486d92d8ab2861b12763e9afdd9848dc59883de1e27162050c2944bc0586bb9f"
+            }
+          }
+        },
+        "restart": {
+          "check": {
+            "result": {
+              "captured_bytes": 796,
+              "exit_code": 0,
+              "failure": null,
+              "output_sha256": "509125b52fbaf6c9991dc08f9f86a72215839a9498a7625b8e59effd6f3f4874",
+              "seconds": 78.668,
+              "status": "passed"
+            },
+            "evidence": {
+              "path": "runtime-11/service-1141-restart.json",
+              "sha256": "e80e8ca8e479f387d5bfe9fd9eb663ee2149af2d440735fd0f20071f7525c2f9"
+            }
+          },
+          "detail": {
+            "result": {
+              "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+              "dispatch_attempts": 1,
+              "guest_marker": "single byte before recovery",
+              "guest_survived_api_server": true,
+              "operator_deleted_vm": false,
+              "outage_seconds": 0.051,
+              "partition": "restart-8b9b2516fd679d8c",
+              "platform": "linux",
+              "result": {
+                "absence_at_ms": 1789079951482,
+                "artifacts": [],
+                "cancel_requested_at_ms": null,
+                "cleanup": "complete",
+                "collection": "pending",
+                "evidence": "termination_confirmed",
+                "exit_code": null,
+                "id": "restart-8b9b2516fd679d8c",
+                "machine_name": "sbxexample-4uk2jieo5tcn27czwcak",
+                "reserved": false,
+                "scope": "example",
+                "state": "unknown",
+                "worker_id": "example-worker"
+              },
+              "retained_workspace": "/tmp/sbx-worker-restart-eba2334e122b99a0ffd26738",
+              "runtime_version": "1.14.1",
+              "scenario": "restart",
+              "seconds": 77.575,
+              "status": "passed"
+            },
+            "evidence": {
+              "path": "runtime-11/service-detail-1.14.1-restart.json",
+              "sha256": "509125b52fbaf6c9991dc08f9f86a72215839a9498a7625b8e59effd6f3f4874"
+            }
+          }
+        },
+        "unavailable": {
+          "check": {
+            "result": {
+              "captured_bytes": 809,
+              "exit_code": 0,
+              "failure": null,
+              "output_sha256": "09ae764d1ac1f985703fcadf214ae363ce5e5463cd9cf7468ed71b6fbea9285a",
+              "seconds": 138.711,
+              "status": "passed"
+            },
+            "evidence": {
+              "path": "runtime-11/service-1141-unavailable.json",
+              "sha256": "408415f20a290cc4a7dbbacbee8328c429f2eb7ad2c823f98c914faff21ce415"
+            }
+          },
+          "detail": {
+            "result": {
+              "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+              "dispatch_attempts": 1,
+              "guest_marker": "single byte before recovery",
+              "guest_survived_api_server": true,
+              "operator_deleted_vm": true,
+              "outage_seconds": 90.016,
+              "partition": "restart-d98d1fe32fc6b5c8",
+              "platform": "linux",
+              "result": {
+                "absence_at_ms": 1789080090847,
+                "artifacts": [],
+                "cancel_requested_at_ms": 1789079968802,
+                "cleanup": "complete",
+                "collection": "pending",
+                "evidence": "termination_confirmed",
+                "exit_code": null,
+                "id": "restart-d98d1fe32fc6b5c8",
+                "machine_name": "sbxexample-n2z5q6uo37wsjpo6ia3p",
+                "reserved": false,
+                "scope": "example",
+                "state": "unknown",
+                "worker_id": "example-worker"
+              },
+              "retained_workspace": "/tmp/sbx-worker-restart-45a000ee3b967e3b0920c5b9",
+              "runtime_version": "1.14.1",
+              "scenario": "unavailable",
+              "seconds": 137.73,
+              "status": "passed"
+            },
+            "evidence": {
+              "path": "runtime-11/service-detail-1.14.1-unavailable.json",
+              "sha256": "09ae764d1ac1f985703fcadf214ae363ce5e5463cd9cf7468ed71b6fbea9285a"
+            }
+          }
+        }
+      },
+      "walkthrough": {
+        "result": {
+          "captured_bytes": 121,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "435fc9dd1fd86907d6cb95351b6357ef2ebf71fa6fd39e27c3d38c81c7b92101",
+          "seconds": 10.656,
+          "status": "passed"
+        },
+        "evidence": {
+          "path": "runtime-11/walkthrough-1141.json",
+          "sha256": "4e33954179c71baf488d3d8541ca86ee0ee9bf4b14eaa0c723cce5395bda9398"
+        }
+      },
+      "database_unavailable": {
+        "result": {
+          "captured_bytes": 31,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "f090dd47a12af3805d942e71d8b8fad0838b1a6893a1dea8fba04ae00e79c2bc",
+          "seconds": 18.504,
+          "status": "passed"
+        },
+        "evidence": {
+          "path": "runtime-11/database-unavailable-final.json",
+          "sha256": "c0104244ed9e2702594433429fda3ff6a30055da632a869aac770e4b955a6baa"
+        }
+      }
+    },
+    "1.14.6": {
+      "cleanup": {
+        "evidence": [
+          {
+            "path": "runtime-16/final-commit.txt",
+            "sha256": "077c546b1520c80aa81ee5802672f6da4f7983589a4f0011420d70fef0d50c7d"
+          },
+          {
+            "path": "runtime-16/finished-commit.txt",
+            "sha256": "077c546b1520c80aa81ee5802672f6da4f7983589a4f0011420d70fef0d50c7d"
+          },
+          {
+            "path": "runtime-16/finished-kvm-fds.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "runtime-16/finished-store-counts.txt",
+            "sha256": "2ce220d8d046f85fd648a70bc8e4b330562a745e56a371ee36e2596a39f56a37"
+          },
+          {
+            "path": "runtime-16/outer-stopped.txt",
+            "sha256": "08e01db9ab10ca97c3d74e683b7cd1c6a75c31140d82bf133dcbce5dbe2e3481"
+          }
+        ],
+        "pending_records": 0,
+        "reserved_slots": 0,
+        "kvm_descriptors": 0,
+        "source_unchanged": true
+      },
+      "suites": {
+        "durable-final": {
+          "result": {
+            "captured_bytes": 694,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "a96db2e7ccd3cd265617edbe5e0e50a463a1c5c018ff54a315e1633116f20c7e",
+            "seconds": 606.811,
+            "status": "passed",
+            "tests": {
+              "passed": 25,
+              "seed": 544353
+            }
+          },
+          "evidence": {
+            "path": "runtime-16/durable-final.json",
+            "sha256": "21508af0962974c30a3836d75e4cf5de448fbf9c0c47c045a5bed6ad1a730547"
+          }
+        },
+        "runtime-final": {
+          "result": {
+            "captured_bytes": 209,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "79c30001a5a9f1f0718ee89e2a503922a16e8bd27ac9c06f07c0e474a3dbed0b",
+            "seconds": 200.211,
+            "status": "passed",
+            "tests": {
+              "passed": 14,
+              "seed": 269944
+            }
+          },
+          "evidence": {
+            "path": "runtime-16/runtime-final.json",
+            "sha256": "833cf2fe04cebe2d4a083ad4420aa40e1e642f223f813069261b38b5bc0aa1f0"
+          }
+        },
+        "store-final": {
+          "result": {
+            "captured_bytes": 160,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "b371c461cd24dd3a99503b5858a65b17c0ce0b9b00f516afb0e807ae7aade1c5",
+            "seconds": 3.607,
+            "status": "passed",
+            "tests": {
+              "passed": 16,
+              "seed": 124210
+            }
+          },
+          "evidence": {
+            "path": "runtime-16/store-final.json",
+            "sha256": "e0f8e59ffbf9765c45e6148909bb6feb6ce002742f5608902fe424ab3dd3a902"
+          }
+        }
+      },
+      "candidate": "279e7ce4d210e9ab8c256167a73df626fffefe25",
+      "examples": {
+        "durable_host-cancel": {
+          "result": {
+            "captured_bytes": 348,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "03bc3a419bf29acf4ce15766424357284cf17d4793bc0654409f292f6ec15e8f",
+            "seconds": 76.023,
+            "status": "passed"
+          },
+          "evidence": {
+            "path": "runtime-16/example2-1146-durable_host-cancel.json",
+            "sha256": "e971785d7004cff13f0feb61bd951756f2caefc7ab925dc482bf70c87d450ac6"
+          }
+        },
+        "durable_host-normal": {
+          "result": {
+            "captured_bytes": 599,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "cfc5e62e6a81442752c1309af26cc9850500eeef2de1c76bf0366d54e30e5b62",
+            "seconds": 11.158,
+            "status": "passed"
+          },
+          "evidence": {
+            "path": "runtime-16/example2-1146-durable_host-normal.json",
+            "sha256": "937f5a3259bee17973c3b656da067e4e555e8c32a243b92c171610fab683b1a0"
+          }
+        },
+        "minimal_host-cancel": {
+          "result": {
+            "captured_bytes": 348,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "f26ef9f5bea201eb264d1b9c254b33bb87e6fb3890adebe5a6294a522c1e5212",
+            "seconds": 75.479,
+            "status": "passed"
+          },
+          "evidence": {
+            "path": "runtime-16/example2-1146-minimal_host-cancel.json",
+            "sha256": "2560a64f2fb8a99b43cff97bafe072ea19384546ba2fd943d176c69ce651cdbf"
+          }
+        },
+        "minimal_host-normal": {
+          "result": {
+            "captured_bytes": 599,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "17e56cc7c002718e2b3aea680fe8842add5d5548fb54f8b2e357ae35b0bfe87b",
+            "seconds": 11.14,
+            "status": "passed"
+          },
+          "evidence": {
+            "path": "runtime-16/example2-1146-minimal_host-normal.json",
+            "sha256": "99234c1c646ed393d9564d04389247024718b09f8a1b6ee0b6713172861bf11e"
+          }
+        }
+      },
+      "service_faults": {
+        "missing": {
+          "check": {
+            "result": {
+              "captured_bytes": 795,
+              "exit_code": 0,
+              "failure": null,
+              "output_sha256": "624ae8f177eff5e5b33827cdbe231bfd27372f9d539dcb5c2e6342d841b755e9",
+              "seconds": 18.226,
+              "status": "passed"
+            },
+            "evidence": {
+              "path": "runtime-16/service-1146-missing.json",
+              "sha256": "926fba7c4b547c956f0c3f4272e7b8e0b04314b2aa1f72f114a61d5b930eb211"
+            }
+          },
+          "detail": {
+            "result": {
+              "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+              "dispatch_attempts": 1,
+              "guest_marker": "single byte before recovery",
+              "guest_survived_api_server": true,
+              "operator_deleted_vm": true,
+              "outage_seconds": 0.051,
+              "partition": "restart-4831a2276876dd8c",
+              "platform": "linux",
+              "result": {
+                "absence_at_ms": 1789078031215,
+                "artifacts": [],
+                "cancel_requested_at_ms": null,
+                "cleanup": "complete",
+                "collection": "pending",
+                "evidence": "termination_confirmed",
+                "exit_code": null,
+                "id": "restart-4831a2276876dd8c",
+                "machine_name": "sbxexample-levkpl27ke2dhdtrxrt6",
+                "reserved": false,
+                "scope": "example",
+                "state": "unknown",
+                "worker_id": "example-worker"
+              },
+              "retained_workspace": "/tmp/sbx-worker-restart-858e72f066e39f87e3c43819",
+              "runtime_version": "1.14.6",
+              "scenario": "missing",
+              "seconds": 17.203,
+              "status": "passed"
+            },
+            "evidence": {
+              "path": "runtime-16/service-detail-1.14.6-missing.json",
+              "sha256": "624ae8f177eff5e5b33827cdbe231bfd27372f9d539dcb5c2e6342d841b755e9"
+            }
+          }
+        },
+        "restart": {
+          "check": {
+            "result": {
+              "captured_bytes": 796,
+              "exit_code": 0,
+              "failure": null,
+              "output_sha256": "ec2d7b6d517b9b9cee53b376afa29b06331af3cb253b54415e529930d5262da9",
+              "seconds": 83.903,
+              "status": "passed"
+            },
+            "evidence": {
+              "path": "runtime-16/service-1146-restart.json",
+              "sha256": "3cf2bc4bc9b2325d6126c1be09eca8f4e8f2ccd7637d3b69e2cb7144b9f271b5"
+            }
+          },
+          "detail": {
+            "result": {
+              "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+              "dispatch_attempts": 1,
+              "guest_marker": "single byte before recovery",
+              "guest_survived_api_server": true,
+              "operator_deleted_vm": false,
+              "outage_seconds": 0.051,
+              "partition": "restart-3fbf35ace2aed98f",
+              "platform": "linux",
+              "result": {
+                "absence_at_ms": 1789077873987,
+                "artifacts": [],
+                "cancel_requested_at_ms": null,
+                "cleanup": "complete",
+                "collection": "pending",
+                "evidence": "termination_confirmed",
+                "exit_code": null,
+                "id": "restart-3fbf35ace2aed98f",
+                "machine_name": "sbxexample-q2qngj42ebosarmnkwol",
+                "reserved": false,
+                "scope": "example",
+                "state": "unknown",
+                "worker_id": "example-worker"
+              },
+              "retained_workspace": "/tmp/sbx-worker-restart-ea9553d70d1c0cb8bfc0d969",
+              "runtime_version": "1.14.6",
+              "scenario": "restart",
+              "seconds": 82.744,
+              "status": "passed"
+            },
+            "evidence": {
+              "path": "runtime-16/service-detail-1.14.6-restart.json",
+              "sha256": "ec2d7b6d517b9b9cee53b376afa29b06331af3cb253b54415e529930d5262da9"
+            }
+          }
+        },
+        "unavailable": {
+          "check": {
+            "result": {
+              "captured_bytes": 810,
+              "exit_code": 0,
+              "failure": null,
+              "output_sha256": "b3a6d638d6e8780c047627a0d7158dba51687dd5305ade901d8a2e6f5b2c39a1",
+              "seconds": 138.08,
+              "status": "passed"
+            },
+            "evidence": {
+              "path": "runtime-16/service-1146-unavailable.json",
+              "sha256": "7410f52f7b66b53f1d3672bceccc9ba889e71e0bcd94bd712d49997af801a05b"
+            }
+          },
+          "detail": {
+            "result": {
+              "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+              "dispatch_attempts": 1,
+              "guest_marker": "single byte before recovery",
+              "guest_survived_api_server": true,
+              "operator_deleted_vm": true,
+              "outage_seconds": 89.964,
+              "partition": "restart-1723a9e24e94af05",
+              "platform": "linux",
+              "result": {
+                "absence_at_ms": 1789078012519,
+                "artifacts": [],
+                "cancel_requested_at_ms": 1789077890715,
+                "cleanup": "complete",
+                "collection": "pending",
+                "evidence": "termination_confirmed",
+                "exit_code": null,
+                "id": "restart-1723a9e24e94af05",
+                "machine_name": "sbxexample-fdy2warxrjjykoj625sm",
+                "reserved": false,
+                "scope": "example",
+                "state": "unknown",
+                "worker_id": "example-worker"
+              },
+              "retained_workspace": "/tmp/sbx-worker-restart-77daabde4d322437ebbc5e74",
+              "runtime_version": "1.14.6",
+              "scenario": "unavailable",
+              "seconds": 137.085,
+              "status": "passed"
+            },
+            "evidence": {
+              "path": "runtime-16/service-detail-1.14.6-unavailable.json",
+              "sha256": "b3a6d638d6e8780c047627a0d7158dba51687dd5305ade901d8a2e6f5b2c39a1"
+            }
+          }
+        }
+      },
+      "walkthrough": {
+        "result": {
+          "captured_bytes": 121,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "435fc9dd1fd86907d6cb95351b6357ef2ebf71fa6fd39e27c3d38c81c7b92101",
+          "seconds": 11.023,
+          "status": "passed"
+        },
+        "evidence": {
+          "path": "runtime-16/walkthrough-1146.json",
+          "sha256": "fc0e56ba2e47f254044f49751e1e9f73e1fde48e7d837ebbae767a5b0668f9a5"
+        }
+      },
+      "database_unavailable": {
+        "result": {
+          "captured_bytes": 31,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "f090dd47a12af3805d942e71d8b8fad0838b1a6893a1dea8fba04ae00e79c2bc",
+          "seconds": 18.518,
+          "status": "passed"
+        },
+        "evidence": {
+          "path": "runtime-16/database-unavailable-final.json",
+          "sha256": "38d4a6b6ff453c37272468f3cbbd4e7077825d01ff4ebc14afb4d3e118d9871d"
+        }
+      }
+    }
+  },
+  "rebuilt_artifacts_1_14_6": {
+    "runtime": {
+      "result": {
+        "captured_bytes": 162,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "3603b3437703e8b024b53e4d8a682fdc9b12a6a0c8a01cdd75155915782797f3",
+        "seconds": 190.477,
+        "status": "passed",
+        "tests": {
+          "passed": 14,
+          "seed": 327265
+        }
+      },
+      "evidence": {
+        "path": "runtime-16/runtime-fresh-final.json",
+        "sha256": "84df60c38bd9a75a82fe09fc0b8e863d672b505643c811d10e8b45a8e17840a2"
+      }
+    },
+    "geometry_check": {
+      "result": {
+        "captured_bytes": 89,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "0c085e1f2e083dc109d0fe4ce092d6e10d687ddc1a7beec3d2e5fe8e47c2e051",
+        "seconds": 10.979,
+        "status": "passed"
+      },
+      "evidence": {
+        "path": "runtime-16/geometry-fresh-final.json",
+        "sha256": "b1cfb900dd45ee37d27e8437fd8c9c5b3bb8bfa6fdfa14ede24fcdfa09da20e4"
+      }
+    },
+    "geometry": {
+      "cleanup": "verified_absent",
+      "observations": {
+        "filesystem_bytes": 1038790656,
+        "raw_disk_bytes": [
+          1073741824,
+          1073741824
+        ],
+        "uid": 0
+      },
+      "runtime_version": "1.14.6",
+      "status": "passed"
+    },
+    "geometry_evidence": {
+      "path": "runtime-16/geometry.json",
+      "sha256": "b2d51303aa60afa741982fe15192ee3915e5fa8f83672d06d6ceda67cf13d457"
+    },
+    "preparation": "Offline pack create --from-vm using the approved Python/Node layers; not a fresh registry pull"
+  },
+  "preparation": {
+    "identity": "Recorded preparation tree based on 60925ff; distinct from the exact candidate runs above",
+    "compatibility_evidence": "../evidence/smolvm-1.14.6-compatibility.json",
+    "cleanup_comparison": "../evidence/smolvm-1.14.6-cleanup.json",
+    "workload_probes": 10,
+    "startup_refusals": 11,
+    "durable_outages": 3,
+    "frozen_outer_recovery": "passed",
+    "failed_attempts": "Initial 1.14.6 recovery run had four failures; retained in preparation evidence. Example preparation budgets corrected, all 25 cases rerun successfully."
+  },
+  "host_cleanup": {
+    "result": {
+      "all_lab_units_stopped": true,
+      "baseline_sha256": "4ff59594af008ff0efb517e9c70cb90d5cf7c240dc0f71d53a162c7b4a0eea2d",
+      "baseline_unchanged": true,
+      "checked_at": "2026-09-10T22:46:36Z",
+      "disk": {
+        "actual-size": 200704,
+        "backing-filename": "/var/lib/smolbox-lab/images/baseline.qcow2",
+        "backing-filename-format": "qcow2",
+        "children": [
+          {
+            "info": {
+              "actual-size": 200704,
+              "children": [],
+              "dirty-flag": false,
+              "filename": "/var/lib/smolbox-lab/images/run.qcow2",
+              "format": "file",
+              "format-specific": {
+                "data": {},
+                "type": "file"
+              },
+              "virtual-size": 198656
+            },
+            "name": "file"
+          }
+        ],
+        "cluster-size": 65536,
+        "dirty-flag": false,
+        "filename": "/var/lib/smolbox-lab/images/run.qcow2",
+        "format": "qcow2",
+        "format-specific": {
+          "data": {
+            "compat": "1.1",
+            "compression-type": "zlib",
+            "corrupt": false,
+            "extended-l2": false,
+            "lazy-refcounts": false,
+            "refcount-bits": 16
+          },
+          "type": "qcow2"
+        },
+        "full-backing-filename": "/var/lib/smolbox-lab/images/baseline.qcow2",
+        "virtual-size": 107374182400
+      },
+      "disposable_disk_clean": true,
+      "disposable_disk_recreated_from_baseline": true,
+      "final_outer_cgroup_absent": true,
+      "final_outer_pid": 321564,
+      "final_outer_pid_absent": true,
+      "original_database": {
+        "comm": "postgres",
+        "pid": 39570,
+        "preserved": true
+      },
+      "original_worker": {
+        "comm": "smolvm-bin",
+        "pid": 44097,
+        "preserved": true
+      },
+      "private_guest_port_closed": true,
+      "recovery_marker_cleared": true,
+      "recovery_timer_active": true,
+      "scope": "Only task-owned nested environments were stopped; existing physical-host services were preserved",
+      "status": "passed"
+    },
+    "evidence": {
+      "path": "host-cleanup.json",
+      "sha256": "713963bfed95fc48c5e0e18abbecef99a8cfd4db627f2d170bb8bbc092a96c4e"
+    }
+  },
+  "fixture_correction": {
+    "description": "Final fresh-artifact attempt stopped before worker startup because root-owned catalog files retained mode 0600. Corrected to 0444; both original digests verified and the complete fresh-artifact suite passed.",
+    "evidence": {
+      "path": "catalog-permission-correction.txt",
+      "sha256": "65d27da6db5d5e9d4da905b8c7823b69aced4834138e28b3f4c4a0012acb7a1b"
+    }
+  },
+  "limitations": [
+    "Development qualification remains the supported library profile",
+    "Configuration-specific Linux x86_64 nested KVM evidence, not universal security certification",
+    "No new macOS run or macOS 1.14.6 or Linux ARM64 qualification",
+    "No asynchronous block I/O, concurrent tenant isolation or arbitrary image qualification",
+    "Worker lifecycle API uncertainty still requires external recovery",
+    "Host task quotas do not bound guest PID counts; charged memory is not per-process RSS",
+    "No new GitHub Actions run because no push was authorized"
+  ],
+  "evidence_root": "ssh linux:/var/lib/smolbox-lab/evidence/compat-0.1.2/final",
+  "attestation_excluded_from_package": true
+}
