@@ -4,22 +4,47 @@
 
 ### Default runtime update
 
-Status: **validation in progress**, September 10, 2026. The maintainer authorized
+Status: **scoped validation complete**, September 10, 2026. The maintainer authorized
 making SmolVM 1.14.6 the default after its native macOS and Linux validation.
 Existing 1.14.1 workers remain supported through explicit configuration; omitted
-versions now expect 1.14.6 and mismatches must prevent admission. The default
-change does not install a worker or change persisted execution records.
+versions now expect 1.14.6 and mismatches prevent admission. The default change
+does not install a worker or change persisted execution records.
 
 - [x] Align library, host examples and CI manifest defaults, and document the
   required configuration for existing 1.14.1 installations.
 - [x] Exercise default admission, explicit legacy admission and rejection of
   both mismatch directions without dispatching commands.
-- [ ] Freeze and validate the new candidate: applicable quality and language
-  lanes, ordinary native macOS and disposable Linux execution, docs and fresh
-  package consumers with assertions for the default and explicit legacy selection.
-- [ ] Record the final package, validation scope and cleanup. No release, tag,
-  push or pull request is authorized. Earlier evidence below remains historical;
-  unchanged exhaustion scenarios are not rerun as part of changing a default.
+- [x] Freeze and validate the new candidate: all four language lanes, complete
+  quality checks, ordinary native macOS and disposable Linux execution, docs
+  and six fresh package consumers that assert both runtime selections.
+- [x] Record the final package, validation scope and cleanup. No release, tag,
+  push or pull request was created. Earlier evidence below remains historical;
+  unchanged exhaustion scenarios were not repeated for this default change.
+
+Final candidate: `2a85abfd07afeb7bb2bbd07fab2056271ebf7040`, following the default
+implementation in `3c32e6e2d6d97a7688a03399dfa7cda52c0d83ac`. Both hosts passed
+200 deterministic and 23 tooling cases on each supported Elixir/OTP pair,
+all analyzer canaries, 95.41% coverage, audits, ExDoc and three package consumers.
+Live validation passed nine default runtime cases on macOS, fourteen on Linux,
+and sixteen store plus twenty-five durable recovery cases on each. Both hosts
+also passed four explicit 1.14.1 managed cases, four normal/cancellation example
+runs and the walkthrough. Task services were stopped and original services
+preserved; Linux recovery recreated a clean disk from its unchanged baseline.
+
+The first Linux default run passed thirteen of fourteen cases. A test proxy
+retained a 15-second receive budget while its configured worker allowed 55
+seconds. The fixture now honors the worker's operation/receive budgets and uses
+the existing Linux setup observation allowance. The final full rerun passed;
+production deadlines and execution/cancellation assertions are unchanged. The
+failed result and log are preserved in the final evidence.
+
+The same 89-file archive served all six final consumers, SHA-256
+`bb3c4dd9a49725431501452c3484167a221bd351666eea232c4612c9c1855f79`.
+Every packaged file matches the final candidate; only test files changed after
+the default implementation. The authenticated Hex publishing dry run passed
+without publishing. See the [final default report](release-candidates/0.1.2-default.md)
+and [machine-readable evidence](release-candidates/0.1.2-default.json). These
+attestations and the implementation plan are excluded from the archive.
 
 ### Native macOS follow-up
 
