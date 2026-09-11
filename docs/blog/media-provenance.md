@@ -38,3 +38,17 @@ between host limits, guest allocations and recovery deadlines.
 | `media/testing-smolbox-with-nested-kvm/nested-lab-mobile.svg` | Vertical composition at 390 × 824 with readable mobile labels. |
 | `media/testing-smolbox-with-nested-kvm/nested-lab-social.svg` | Simplified 1200 × 630 composition for article cards and social previews. |
 | `media/testing-smolbox-with-nested-kvm/nested-lab.png` | Linux Chromium rasterization of `nested-lab-social.svg`, at 1200 × 630. |
+
+## Upstream cleanup follow-up
+
+Original SVG geometry using the existing blog palette. The article diagrams
+simplify the HTTP deletion ordering changed in SmolVM PR #1219. The social
+composition illustrates the collaboration, not a runtime trace. No portraits,
+social screenshots or third-party artwork are included.
+
+| Asset | Origin |
+| --- | --- |
+| `media/from-a-full-disk-to-an-upstream-fix/deletion-order.svg` | Editable desktop sequence comparison at 1200 × 520. |
+| `media/from-a-full-disk-to-an-upstream-fix/deletion-order-mobile.svg` | Vertical comparison at 390 × 670 for readable mobile labels. |
+| `media/from-a-full-disk-to-an-upstream-fix/upstream-cleanup-social.svg` | Original 1200 × 630 composition for article cards and sharing. |
+| `media/from-a-full-disk-to-an-upstream-fix/upstream-cleanup.png` | Chrome rasterization of `upstream-cleanup-social.svg`, at 1200 × 630. |
