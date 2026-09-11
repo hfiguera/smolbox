@@ -2,7 +2,7 @@
 
 ## 0.1.2 release
 
-Status: **publication authorized and in progress**, September 10, 2026.
+Status: **published and verified**, September 10, 2026 (September 11 UTC).
 PR #5 was squash merged as `644cc645d5d4d4b7fc84191b138a9581538d9b20`;
 its complete tree matches the accepted branch head, and ordinary GitHub CI
 passed on the merged commit. Release finalization changes only documentation
@@ -14,8 +14,17 @@ release commit, rerun documentation and package consumers, and require passing
 ordinary CI. The native macOS and disposable Linux runtime results below retain
 their original commit identities; finalization does not claim a new live or
 exhaustion campaign. The package checksum changes with the finalized documents.
-Publication and public registry verification will be recorded separately from
-the historical candidate reports below.
+Tag `v0.1.2` identifies release commit
+`1b383e56e89f1fdc0ad059f03aea873a4b588022`. All 18 ordinary GitHub CI jobs,
+both hosts' quality/docs checks and six consumers of the finalized archive
+passed. The published 89-file Hex archive matches SHA-256
+`e5bb001d9207b3106b4e6f6ec4c9eb40c1804500f5719514abf0f764f37f6a2d`.
+Fresh public Hex consumers passed on Linux and macOS; HexDocs, tagged sources
+and the GitHub release asset were verified. See the
+[publication report](release-candidates/0.1.2-release.md) and
+[machine-readable evidence](release-candidates/0.1.2-release.json).
+No required publication work remains. Historical candidate reports below
+retain their original identities and then-current release restrictions.
 
 ### Default runtime update
 
