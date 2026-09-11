@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+  <title id="title">The order that made room for cleanup</title>
+  <desc id="desc">After a machine stops on a full shared filesystem, writing registry removal first can fail before its data is freed. The revised HTTP deletion path frees VM data before writing registry removal.</desc>
+  <rect width="1200" height="520" rx="8" fill="#edf2fa"/>
+  <g font-family="sans-serif">
+    <text x="42" y="55" font-size="30" font-weight="700" fill="#17304e">One full filesystem. Two deletion sequences.</text>
+    <text x="42" y="93" font-size="23" fill="#526478">VM data and the worker registry share storage. The machine is already stopped.</text>
+    <text x="42" y="159" font-size="25" font-weight="700" fill="#86510f">Before</text>
+    <rect x="210" y="122" width="422" height="121" rx="6" fill="#fff6e7" stroke="#86510f" stroke-width="2"/>
+    <text x="235" y="165" font-size="28" font-weight="700" fill="#86510f">Write registry removal</text>
+    <text x="235" y="206" font-size="24" fill="#86510f">Fails: no space to commit</text>
+    <path d="M652 182h51" fill="none" stroke="#526478" stroke-width="2" stroke-dasharray="6 5"/>
+    <path d="m676 171 20 22m0-22-20 22" fill="none" stroke="#86510f" stroke-width="3"/>
+    <rect x="724" y="122" width="432" height="121" rx="6" fill="#fbfcfe" stroke="#d8e0eb" stroke-width="2"/>
+    <text x="749" y="165" font-size="28" font-weight="700" fill="#526478">Free VM data</text>
+    <text x="749" y="206" font-size="24" fill="#526478">Not reached</text>
+    <text x="42" y="324" font-size="25" font-weight="700" fill="#215bc7">After</text>
+    <rect x="210" y="287" width="422" height="121" rx="6" fill="#215bc7"/>
+    <text x="235" y="330" font-size="28" font-weight="700" fill="#fff">Free VM data</text>
+    <text x="235" y="371" font-size="24" fill="#fff">Space becomes available</text>
+    <path d="M650 347h54m-12-10 12 10-12 10" fill="none" stroke="#215bc7" stroke-width="3"/>
+    <rect x="724" y="287" width="432" height="121" rx="6" fill="#fff" stroke="#215bc7" stroke-width="2"/>
+    <text x="749" y="330" font-size="28" font-weight="700" fill="#17304e">Write registry removal</text>
+    <text x="749" y="371" font-size="24" fill="#526478">Use the released space</text>
+    <text x="42" y="477" font-size="23" fill="#526478">Simplified HTTP deletion path · SmolVM PR #1219</text>
+  </g>
+</svg>

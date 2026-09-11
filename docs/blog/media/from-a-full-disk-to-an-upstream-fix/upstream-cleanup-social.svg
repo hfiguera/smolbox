@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">From a full disk to an upstream fix</title>
+  <desc id="desc">SmolBox and SmolVM: reproduce a cleanup failure, fix the deletion order, and verify resource removal and the next execution. An open source collaboration.</desc>
+  <rect width="1200" height="630" fill="#edf2fa"/>
+  <g font-family="sans-serif">
+    <text x="58" y="73" font-size="22" font-weight="600" fill="#215bc7">SMOLBOX ENGINEERING NOTES</text>
+    <text x="58" y="148" font-size="48" font-weight="700" fill="#17304e">From a full disk</text>
+    <text x="58" y="207" font-size="48" font-weight="700" fill="#17304e">to an upstream fix</text>
+    <text x="58" y="258" font-size="26" fill="#526478">An Elixir integration. A runtime maintainer. A shared improvement.</text>
+    <rect x="58" y="310" width="330" height="180" rx="6" fill="#17304e"/>
+    <text x="82" y="354" font-size="23" fill="#d5e3fa">01</text>
+    <text x="82" y="401" font-size="30" font-weight="700" fill="#fff">Reproduce</text>
+    <text x="82" y="451" font-size="23" fill="#fff">A full disk blocks cleanup</text>
+    <path d="M399 401h26m-9-8 9 8-9 8" fill="none" stroke="#215bc7" stroke-width="3"/>
+    <rect x="435" y="310" width="330" height="180" rx="6" fill="#215bc7"/>
+    <text x="459" y="354" font-size="23" fill="#fff">02</text>
+    <text x="459" y="401" font-size="30" font-weight="700" fill="#fff">Fix upstream</text>
+    <text x="459" y="451" font-size="23" fill="#fff">Free data before recording</text>
+    <path d="M776 401h26m-9-8 9 8-9 8" fill="none" stroke="#215bc7" stroke-width="3"/>
+    <rect x="812" y="310" width="330" height="180" rx="6" fill="#fff" stroke="#215bc7" stroke-width="2"/>
+    <text x="836" y="354" font-size="23" fill="#526478">03</text>
+    <text x="836" y="401" font-size="30" font-weight="700" fill="#17304e">Verify</text>
+    <text x="836" y="451" font-size="23" fill="#526478">Cleanup and the next run</text>
+    <text x="58" y="564" font-size="25" font-weight="600" fill="#17304e">SmolBox + SmolVM</text>
+    <text x="1142" y="564" text-anchor="end" font-size="23" fill="#526478">Open source in practice</text>
+  </g>
+</svg>

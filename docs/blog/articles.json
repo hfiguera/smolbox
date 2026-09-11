@@ -1,5 +1,16 @@
 [
   {
+    "slug": "from-a-full-disk-to-an-upstream-fix",
+    "title": "From a full disk to an upstream fix",
+    "description": "A cleanup failure in our Elixir integration, a fix from SmolVM's maintainer, and the tests that closed the loop. A small story of contributing to open source.",
+    "published_on": "2026-09-11",
+    "updated_on": "2026-09-11",
+    "version": "0.1.2",
+    "category": "Open source collaboration",
+    "image": "upstream-cleanup.png",
+    "image_alt": "From a full disk to an upstream fix: reproduce the failure, fix the deletion order, and verify cleanup and the next execution."
+  },
+  {
     "slug": "testing-smolbox-with-nested-kvm",
     "title": "When the sandbox fails: testing SmolBox with nested KVM",
     "description": "What disk exhaustion, worker OOM and a frozen VM taught us about resource limits, execution records and recovery in an Elixir application.",

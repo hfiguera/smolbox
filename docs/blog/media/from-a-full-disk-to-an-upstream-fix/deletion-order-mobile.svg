@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="670" viewBox="0 0 390 670" role="img" aria-labelledby="title desc">
+  <title id="title">The order that made room for cleanup</title>
+  <desc id="desc">Before: the registry write fails on a full filesystem, leaving VM data allocated. After: free VM data, then use the released space to write registry removal. A simplified view of SmolVM PR 1219.</desc>
+  <rect width="390" height="670" rx="8" fill="#edf2fa"/>
+  <g font-family="sans-serif">
+    <text x="22" y="42" font-size="26" font-weight="700" fill="#17304e">One full filesystem</text>
+    <text x="22" y="77" font-size="19" fill="#526478">VM data and registry share storage.</text>
+    <text x="22" y="105" font-size="19" fill="#526478">The machine is already stopped.</text>
+    <text x="22" y="151" font-size="22" font-weight="700" fill="#86510f">Before</text>
+    <rect x="22" y="167" width="346" height="91" rx="6" fill="#fff6e7" stroke="#86510f" stroke-width="1.5"/>
+    <text x="39" y="203" font-size="23" font-weight="700" fill="#86510f">Write registry removal</text>
+    <text x="39" y="235" font-size="20" fill="#86510f">Fails: no space to commit</text>
+    <path d="m28 283 15 15m0-15-15 15" fill="none" stroke="#86510f" stroke-width="2"/>
+    <text x="56" y="298" font-size="20" fill="#526478">VM data is not freed</text>
+    <path d="M22 334h346" stroke="#d8e0eb"/>
+    <text x="22" y="377" font-size="22" font-weight="700" fill="#215bc7">After</text>
+    <rect x="22" y="394" width="346" height="88" rx="6" fill="#215bc7"/>
+    <text x="39" y="429" font-size="23" font-weight="700" fill="#fff">Free VM data</text>
+    <text x="39" y="460" font-size="20" fill="#fff">Space becomes available</text>
+    <path d="M195 490v30m-8-8 8 8 8-8" fill="none" stroke="#215bc7" stroke-width="2.5"/>
+    <rect x="22" y="529" width="346" height="88" rx="6" fill="#fff" stroke="#215bc7" stroke-width="1.5"/>
+    <text x="39" y="564" font-size="23" font-weight="700" fill="#17304e">Write registry removal</text>
+    <text x="39" y="595" font-size="20" fill="#526478">Use the released space</text>
+    <text x="22" y="650" font-size="17" fill="#526478">HTTP deletion path · SmolVM PR #1219</text>
+  </g>
+</svg>
