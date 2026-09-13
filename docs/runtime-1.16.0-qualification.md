@@ -177,6 +177,26 @@ all nineteen affected parser/client cases separately on the canonical toolchain
 (seed 430891). Formatting, ExDoc generation and all 42 documentation page link
 checks passed after that addition. Final committed-candidate checks remain open.
 
+At `ab7ad95`, native macOS passed nine ordinary runtime cases (seed 623036),
+sixteen PostgreSQL store cases (712859), and all twenty-five durable recovery
+cases (243606, 276.129 seconds). The database was a private PostgreSQL 17 cluster
+listening only on a private Unix socket. The ordinary worker and database were
+stopped after the suite; separate service recovery checks use the same owned
+installation. Canonical `mix ci` passed 204 deterministic cases and all analyzers
+(seed 782338); coverage passed 204 cases (501256) at 95.41%.
+
+A fresh Linux suite at that commit passed thirteen of fourteen runtime cases.
+Managed cancellation failed while waiting for `running` (seed 556040,
+408.957 seconds overall). Its polling helper still allowed only thirty seconds,
+despite the sixty-second preparation/transport configuration. It now uses the
+existing lab-only ninety-second observation allowance and reports the last state
+if that observation expires. Production deadlines and ordinary platform waits
+are unchanged. The isolated cancellation rerun passed (26.754 seconds) with the
+same seed; that single case does not replace a full suite. The failed run's
+worker journal also recorded a missing-PID stop warning while a VM was reachable;
+external service teardown completed. Both the failed report and journal are
+retained for comparison with the complete rerun.
+
 ### Timeout scope conflict
 
 The existing command maximum is 300 seconds and the managed execution budget
