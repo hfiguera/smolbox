@@ -1,4 +1,51 @@
 {
+  "examples": {
+    "example-durable_host-cancel": {
+      "captured_bytes": 362,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "1dedb875fcc42f0bfd14b50f0db56a5e2ceea8519a373b942f03903e92733c3d",
+      "seconds": 66.745,
+      "source_commit": "adc0c27c8465d7c500bf5ef1b9466112b70009a1",
+      "status": "passed"
+    },
+    "example-durable_host-normal": {
+      "captured_bytes": 613,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "60ef464d5d1120da42fa3e16b38010610a2ebb298812ca1f6065a94bdc68f49b",
+      "seconds": 2.002,
+      "source_commit": "adc0c27c8465d7c500bf5ef1b9466112b70009a1",
+      "status": "passed"
+    },
+    "example-minimal_host-cancel": {
+      "captured_bytes": 362,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "2f1f05d8473c035e3502df491723a9f1ecb66ebdcc1c511c8ec51f1a96d28397",
+      "seconds": 66.736,
+      "source_commit": "adc0c27c8465d7c500bf5ef1b9466112b70009a1",
+      "status": "passed"
+    },
+    "example-minimal_host-normal": {
+      "captured_bytes": 648,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "00276eabb22ba27f948ba47a9e02009a799ecad6d6867ec7731a3939a9716d0f",
+      "seconds": 2.07,
+      "source_commit": "adc0c27c8465d7c500bf5ef1b9466112b70009a1",
+      "status": "passed"
+    },
+    "walkthrough": {
+      "captured_bytes": 121,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "435fc9dd1fd86907d6cb95351b6357ef2ebf71fa6fd39e27c3d38c81c7b92101",
+      "seconds": 1.974,
+      "source_commit": "adc0c27c8465d7c500bf5ef1b9466112b70009a1",
+      "status": "passed"
+    }
+  },
   "failed_attempts": [
     {
       "corrected": true,
@@ -120,6 +167,47 @@
     "external_cli_delete_while_server_down": true,
     "runtime": "1.16.0",
     "scope": "one ordinary VM, bounded native macOS restart observations",
+    "stale_inventory_removed": true,
+    "status": "passed"
+  },
+  "restart_with_followup_execution": {
+    "cleanup": "verified_absent",
+    "cycles": [
+      {
+        "cycle": 1,
+        "dispatch_marker": "x",
+        "followup_exit": 0,
+        "followup_stdout": "42\n",
+        "server_pid": 33693,
+        "total_runtime_processes": 2,
+        "vm_birth": "Sun Sep 13 17:25:25 2026",
+        "vm_pid": 33687
+      },
+      {
+        "cycle": 2,
+        "dispatch_marker": "x",
+        "followup_exit": 0,
+        "followup_stdout": "42\n",
+        "server_pid": 33714,
+        "total_runtime_processes": 2,
+        "vm_birth": "Sun Sep 13 17:25:25 2026",
+        "vm_pid": 33687
+      },
+      {
+        "cycle": 3,
+        "dispatch_marker": "x",
+        "followup_exit": 0,
+        "followup_stdout": "42\n",
+        "server_pid": 33734,
+        "total_runtime_processes": 2,
+        "vm_birth": "Sun Sep 13 17:25:25 2026",
+        "vm_pid": 33687
+      }
+    ],
+    "external_cli_delete_while_server_down": true,
+    "runtime": "1.16.0",
+    "scope": "one ordinary VM, bounded native macOS restart observations",
+    "source_commit": "adc0c27c8465d7c500bf5ef1b9466112b70009a1",
     "stale_inventory_removed": true,
     "status": "passed"
   },

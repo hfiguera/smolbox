@@ -229,6 +229,50 @@ selection in addition to the unchanged default and legacy selection. This
 initial archive precedes the addition of the partial macOS evidence file, so it
 is not the final package manifest.
 
+### Further Linux and macOS observations
+
+At `6a4a6b6055d9c28c21c5bea01c7b1ab970f2ee5d`, the complete Linux runtime suite
+passed all fourteen cases (420.645 seconds, seed 453229), followed by all sixteen
+PostgreSQL store cases (3.505 seconds, seed 980339). The subsequent durable suite
+did **not** pass: controllers failed to reach `first_output_record:after` and
+`dispatch_intent:before`, and the outer test runner stopped the suite at its
+1,200-second deadline. No complete passing test count is claimed for that run.
+The worker journal reported a VM still reachable after an attempted scope kill
+with no PID to signal. The root cause remains under investigation; increasing
+an observation timeout alone would not establish successful recovery.
+
+After external worker teardown, there were no KVM file descriptors, but the
+database still contained three records needing work and three reserved slots.
+Those observations establish physical teardown, not completed durable cleanup.
+The failed reports, journal and sanitized final resource/store counts were
+exported before disposing of the guest.
+
+A separate Linux missing-prerequisite probe completed in 41.543 seconds. With
+`resize2fs` temporarily unavailable inside the disposable guest, a requested
+1/1 GiB machine started with 20/10 GiB raw disks and no formatted markers. The
+previously uploaded file could not be downloaded after stop/start. The guest
+existence command ran successfully, but its custom Inspect output omitted stdout;
+that report does not independently prove the file was absent inside the guest.
+API cleanup verified empty inventory, and the exact original host tool checksum
+was restored. Together with the macOS observation, this confirms that consumers
+must verify the actual worker's resizing prerequisite rather than infer successful
+preparation from an accepted start response.
+
+At `adc0c27c8465d7c500bf5ef1b9466112b70009a1`, ordinary native Linux checks passed:
+204 deterministic cases (seed 146040), 95.41% coverage, all eight bad/clean analyzer
+canary pairs, all 23 CI tooling cases, dependency security checks, both examples'
+compilation/cycle/Dialyzer checks, and ExDoc generation/link checks. The fourteen
+excluded runtime cases in the deterministic run are not counted as passes there.
+These checks ran in a separate temporary host checkout with two BEAM schedulers;
+they did not run resource-exhaustion workloads on the physical host.
+
+Additional bounded macOS checks at the same commit passed both examples' normal
+execution and cancellation paths, plus the executable getting-started walkthrough.
+A follow-up restart probe retained the same VMM PID and birth identity through
+three API server restarts, successfully executed a new command after each restart,
+and retained the original one-byte dispatch marker. External CLI deletion while
+the server was down was reconciled on restart, with no remaining owned processes.
+
 ### Timeout scope conflict
 
 The existing command maximum is 300 seconds and the managed execution budget

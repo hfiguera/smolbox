@@ -1,0 +1,262 @@
+{
+  "durable_failed_attempt": {
+    "complete_suite_pass": false,
+    "final_state_sha256": "e1f283acd259d0f60b5c288de229f2f9555e249d48d4ee2ed4a8db71620ba4fd",
+    "journal_sha256": "ee3fe1aaeecedce68c46f01e73afaff816915044a81e265c7cd40023ffaddc58",
+    "kvm_fds_after_teardown": 0,
+    "missing_boundaries": [
+      "first_output_record:after",
+      "dispatch_intent:before"
+    ],
+    "pending_records_after_teardown": 3,
+    "report": {
+      "captured_bytes": 1459,
+      "exit_code": 0,
+      "failure": "deadline",
+      "output_sha256": "51a16cfa6b3171330c81ab99c6d058d6c0ed51144bf42b78fbeddbb6c97aa4bd",
+      "seconds": 1200.09,
+      "status": "failed"
+    },
+    "reserved_slots_after_teardown": 3,
+    "source_commit": "6a4a6b6055d9c28c21c5bea01c7b1ab970f2ee5d"
+  },
+  "limitations": [
+    "Not final-commit validation.",
+    "Complete Linux durable recovery has not passed.",
+    "Linux containment, resource fault, isolation, legacy runtime and full language/package campaigns remain incomplete.",
+    "No default runtime promotion or general security certification."
+  ],
+  "missing_resize2fs": {
+    "detail": {
+      "cleanup": "empty inventory",
+      "observation": {
+        "collection_after_restart": "{:error, %SmolBox.Error{category: :protocol, operation: :download, exit_code: nil, evidence: :dispatch_uncertain}}",
+        "disks": {
+          "overlay": {
+            "bytes": 10737418240,
+            "formatted_marker": false
+          },
+          "storage": {
+            "bytes": 21474836480,
+            "formatted_marker": false
+          }
+        },
+        "guest_presence": "{:ok, #SmolBox.Result<exit_code: 0, encoding: :bytes, ...>}",
+        "persisted": false,
+        "restart": "{:ok, %SmolBox.Machine{name: \"sb160miss-rnrfnn7vig6e5iymrdnp\", state: :running, created_at: 1789342398, cpus: 1, memory_mb: 256, storage_gb: 1, overlay_gb: 1}}",
+        "start": "accepted"
+      },
+      "requested_disks_gib": [
+        1,
+        1
+      ],
+      "runtime": "1.16.0",
+      "status": "characterization_complete"
+    },
+    "limitation": "Guest existence command stdout was omitted by custom Inspect; failure to download does not independently prove guest-side absence.",
+    "runner": {
+      "captured_bytes": 836,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "0f1556a358100b80c9283c82a9644e89a5f99219297a273824603d225e8c4142",
+      "seconds": 41.543,
+      "status": "passed"
+    },
+    "source_commit": "6a4a6b6055d9c28c21c5bea01c7b1ab970f2ee5d",
+    "tool_restored_sha256": "1a0ea5f6784285b82098fe7935c95bf1ac76713aec904cc9b43920fa85ebe35d"
+  },
+  "quality": {
+    "analyzer_bad_clean_pairs": 8,
+    "coverage_percent": 95.41,
+    "deterministic_cases": 204,
+    "deterministic_seed": 146040,
+    "elixir": "1.20.4",
+    "otp": "29.0.6",
+    "reports": {
+      "canaries": {
+        "captured_bytes": 621,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "e0b964a623497ff2bb478f184e6c238afa88d2b496eb969c1ad810acf8e4339f",
+        "seconds": 32.732,
+        "status": "passed"
+      },
+      "compile-durable_host": {
+        "captured_bytes": 25,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "bd364c33f85fbaca28666a37f50d4891a570e4ac67b5088b287846420e66cd17",
+        "seconds": 3.003,
+        "status": "passed"
+      },
+      "compile-minimal_host": {
+        "captured_bytes": 24,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "62ac10239807a71149064330c2cfc045f7688ae6bf5d9baefd67a2452e47789a",
+        "seconds": 1.048,
+        "status": "passed"
+      },
+      "coverage": {
+        "captured_bytes": 3707,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "88c45242d6d39b4b17080dcb0efd356b608230b0a00fd032bbc18ebffba18b5c",
+        "seconds": 89.353,
+        "status": "passed"
+      },
+      "deps": {
+        "captured_bytes": 732,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "715b95b58a1ba06fa6878e11294ff38d7b09b1f3ba1bfd6bb8e9bb83d5aadceb",
+        "seconds": 2.446,
+        "status": "passed"
+      },
+      "deps-audit-durable_host": {
+        "captured_bytes": 63,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "3ab3057a627dd4d27e401a315cd925f03734595fc285ddb8427aced7062273f1",
+        "seconds": 5.828,
+        "status": "passed"
+      },
+      "deps-audit-minimal_host": {
+        "captured_bytes": 63,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "3ab3057a627dd4d27e401a315cd925f03734595fc285ddb8427aced7062273f1",
+        "seconds": 3.841,
+        "status": "passed"
+      },
+      "deps-audit-root": {
+        "captured_bytes": 26,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "3016e51e4eac0d421674d2128bbbdefb2924b4646e0c14a1ab034977ad73fae5",
+        "seconds": 2.033,
+        "status": "passed"
+      },
+      "dialyzer-durable_host": {
+        "captured_bytes": 1837,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "40fe785a524e564617fc38bb743da26e85f6f852e820b54cf2912e959da6e3e5",
+        "seconds": 127.832,
+        "status": "passed"
+      },
+      "dialyzer-minimal_host": {
+        "captured_bytes": 1302,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "e6f3a3eeb11d724eedc14ee1eb7631ca7faafbf6bc6d14e081e548642aaab6e5",
+        "seconds": 95.388,
+        "status": "passed"
+      },
+      "doc-links": {
+        "captured_bytes": 60,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "4becb7fed09596d86e9f5b2d81c9c1f9bacb31d06c8e2cc7f47e322dad12dac6",
+        "seconds": 0.842,
+        "status": "passed"
+      },
+      "docs": {
+        "captured_bytes": 153,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "2c82202881a04d8ec7dcc208f385eef29553cf4c1fc7cc1e81bd0cf3331f0b7e",
+        "seconds": 4.61,
+        "status": "passed"
+      },
+      "hex-audit-durable_host": {
+        "captured_bytes": 47,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+        "seconds": 1.451,
+        "status": "passed"
+      },
+      "hex-audit-minimal_host": {
+        "captured_bytes": 47,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+        "seconds": 1.376,
+        "status": "passed"
+      },
+      "hex-audit-root": {
+        "captured_bytes": 47,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+        "seconds": 1.457,
+        "status": "passed"
+      },
+      "quality": {
+        "captured_bytes": 2141,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "84119a62ff6016e9a584254c24d816b09f4307068820918241e37876fbdd85fd",
+        "seconds": 106.9,
+        "status": "passed"
+      },
+      "tooling": {
+        "captured_bytes": 153,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "2aa5fbda041dd52c5634989f29c857aa2d8f179b35f7a03d98bf6f8833415164",
+        "seconds": 6.928,
+        "status": "passed"
+      },
+      "xref-durable_host": {
+        "captured_bytes": 16,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548",
+        "seconds": 1.138,
+        "status": "passed"
+      },
+      "xref-minimal_host": {
+        "captured_bytes": 16,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548",
+        "seconds": 0.944,
+        "status": "passed"
+      }
+    },
+    "source_commit": "adc0c27c8465d7c500bf5ef1b9466112b70009a1",
+    "tooling_cases": 23
+  },
+  "runtime": "1.16.0",
+  "runtime_and_store": {
+    "runtime": {
+      "captured_bytes": 162,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "c577131b51f7726c4115075743fbfc689ce62c6cc11ebdcc0d83ab21a7902dd8",
+      "seconds": 420.645,
+      "status": "passed",
+      "tests": {
+        "passed": 14,
+        "seed": 453229
+      }
+    },
+    "source_commit": "6a4a6b6055d9c28c21c5bea01c7b1ab970f2ee5d",
+    "store": {
+      "captured_bytes": 160,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "60c1ebf7c5a72e18ded3a9b9fb567aa042af230e7262a115b26e0e002521333e",
+      "seconds": 3.505,
+      "status": "passed",
+      "tests": {
+        "passed": 16,
+        "seed": 980339
+      }
+    }
+  },
+  "scope": "Native Linux ordinary CI and disposable nested KVM runtime observations are separate configurations.",
+  "status": "partial; qualification incomplete"
+}
