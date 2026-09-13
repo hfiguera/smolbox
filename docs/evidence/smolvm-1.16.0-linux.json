@@ -20,6 +20,135 @@
     "reserved_slots_after_teardown": 3,
     "source_commit": "6a4a6b6055d9c28c21c5bea01c7b1ab970f2ee5d"
   },
+  "language_matrix": {
+    "lanes": [
+      {
+        "deterministic_passed": 204,
+        "elixir": "1.18.4",
+        "otp": "27.3.4.15",
+        "reports": {
+          "compile": {
+            "captured_bytes": 2922,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "b5fd3a6dfe95d270d28ea76f2ea65b2a8b36d4b90d0c077b461278f5fe3b08de",
+            "seconds": 60.249,
+            "status": "passed"
+          },
+          "tests": {
+            "captured_bytes": 391,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "6bd9e96f447f260a92e7c5230d3ef535d9a83e5160b6a4b47620fae18b4c1f91",
+            "seconds": 80.937,
+            "status": "passed"
+          },
+          "tooling": {
+            "captured_bytes": 155,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "926da1fa01a6c7ea25e94739e3e6a6b3d16078f25a647f8aa6aea77a338d5edf",
+            "seconds": 6.361,
+            "status": "passed"
+          },
+          "version": {
+            "captured_bytes": 143,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "05eebecc0c91193562bd5a1908ec38c35e750dcc168f15d26bbddd416c21f0fc",
+            "seconds": 0.154,
+            "status": "passed"
+          }
+        },
+        "runtime_excluded_not_counted": 14,
+        "seed": 585175
+      },
+      {
+        "deterministic_passed": 204,
+        "elixir": "1.19.5",
+        "otp": "28.5",
+        "reports": {
+          "compile": {
+            "captured_bytes": 2922,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "b11a7949be707cc7ea6020e31df8d058a5f5e236ef7a91e35591ffe8b7528e48",
+            "seconds": 62.991,
+            "status": "passed"
+          },
+          "tests": {
+            "captured_bytes": 392,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "8a4e0f7d66f8974067345690d35496b8b175963563ff6d8e3e0dfc4c927bb67a",
+            "seconds": 81.566,
+            "status": "passed"
+          },
+          "tooling": {
+            "captured_bytes": 156,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "7a495f885446a910b27fabf046ca770f7918da79d72a423854b33c805ba37fca",
+            "seconds": 6.728,
+            "status": "passed"
+          },
+          "version": {
+            "captured_bytes": 138,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "96b2616fe3236cc99ff4bd7aa74f16b29a7cd535d0ed302802fb2a7260e54657",
+            "seconds": 0.177,
+            "status": "passed"
+          }
+        },
+        "runtime_excluded_not_counted": 14,
+        "seed": 240190
+      },
+      {
+        "deterministic_passed": 204,
+        "elixir": "1.20.4",
+        "otp": "28.5",
+        "reports": {
+          "compile": {
+            "captured_bytes": 7054,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "f3a454848c4c24116f9fee78fe40df247c0ddd6d6c7cabc9c1b61bfbc4e8c7f6",
+            "seconds": 81.428,
+            "status": "passed"
+          },
+          "tests": {
+            "captured_bytes": 401,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "04fdb70de2c98de334fde8e0282cfe80d5f8892061994861cec9b7e0f06f1b06",
+            "seconds": 83.57,
+            "status": "passed"
+          },
+          "tooling": {
+            "captured_bytes": 154,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "43cb953134b64fa5792e1b9ceac3269c6ec1b5276a0a174ee754619fcdb0ba78",
+            "seconds": 6.556,
+            "status": "passed"
+          },
+          "version": {
+            "captured_bytes": 138,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "b2ea3032afbde557454665d09f0aeac67792625513de862950d6c398d476ccc9",
+            "seconds": 0.302,
+            "status": "passed"
+          }
+        },
+        "runtime_excluded_not_counted": 14,
+        "seed": 578120
+      }
+    ],
+    "note": "Elixir 1.20.4/OTP 28 emitted Credence dependency compiler warnings; SmolBox compilation with warnings-as-errors passed.",
+    "source_commit": "adc0c27c8465d7c500bf5ef1b9466112b70009a1"
+  },
   "limitations": [
     "Not final-commit validation.",
     "Complete Linux durable recovery has not passed.",
@@ -64,6 +193,86 @@
     },
     "source_commit": "6a4a6b6055d9c28c21c5bea01c7b1ab970f2ee5d",
     "tool_restored_sha256": "1a0ea5f6784285b82098fe7935c95bf1ac76713aec904cc9b43920fa85ebe35d"
+  },
+  "package_consumers": {
+    "failed_harness_attempt": "The first wrapper invoked nonexistent mix smolbox.ci.package; corrected command is elixir scripts/ci.exs package-consumer. Completed language lanes were not rerun.",
+    "reports": {
+      "current": {
+        "detail_sha256": "9a13745aa90b660bc1095f572264b209de42ff9562b31b2cb8ae0a567f79c903",
+        "files": 90,
+        "package_sha256": "e2cfbb06c2c79f1ed5d6aee7e8dd3c2b4ea8f33b270487d6b37c8961b4227aff",
+        "runner": {
+          "captured_bytes": 126,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "53812f4c7359de0db6497b1f0c42ae8981bd77a22afd4f5ae280943b6400309b",
+          "seconds": 22.28,
+          "status": "passed"
+        },
+        "runtime_dependencies": [
+          "finch",
+          "hpax",
+          "jason",
+          "mime",
+          "mint",
+          "nimble_options",
+          "nimble_pool",
+          "req",
+          "telemetry"
+        ],
+        "smoke": {
+          "candidate_runtime_explicit": "1.16.0",
+          "client": true,
+          "legacy_runtime_explicit": "1.14.1",
+          "runtime_default": "1.14.6",
+          "supervisor": true,
+          "versions": {
+            "jason": "1.4.5",
+            "nimble_options": "1.1.1",
+            "req": "0.7.4",
+            "telemetry": "1.4.2"
+          }
+        }
+      },
+      "minimum": {
+        "detail_sha256": "892c2785603fe29e486069f55ef12245c1fac52b67e7adca0ec28840ee122b2b",
+        "files": 90,
+        "package_sha256": "e2cfbb06c2c79f1ed5d6aee7e8dd3c2b4ea8f33b270487d6b37c8961b4227aff",
+        "runner": {
+          "captured_bytes": 126,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "13d3fffa511b7546a93a75dcd15029074a006f193d2036eb9817374b7778a467",
+          "seconds": 21.624,
+          "status": "passed"
+        },
+        "runtime_dependencies": [
+          "finch",
+          "hpax",
+          "jason",
+          "mime",
+          "mint",
+          "nimble_options",
+          "nimble_pool",
+          "req",
+          "telemetry"
+        ],
+        "smoke": {
+          "candidate_runtime_explicit": "1.16.0",
+          "client": true,
+          "legacy_runtime_explicit": "1.14.1",
+          "runtime_default": "1.14.6",
+          "supervisor": true,
+          "versions": {
+            "jason": "1.4.0",
+            "nimble_options": "1.1.0",
+            "req": "0.7.4",
+            "telemetry": "1.3.0"
+          }
+        }
+      }
+    },
+    "source_commit": "adc0c27c8465d7c500bf5ef1b9466112b70009a1"
   },
   "quality": {
     "analyzer_bad_clean_pairs": 8,

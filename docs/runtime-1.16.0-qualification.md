@@ -266,6 +266,22 @@ excluded runtime cases in the deterministic run are not counted as passes there.
 These checks ran in a separate temporary host checkout with two BEAM schedulers;
 they did not run resource-exhaustion workloads on the physical host.
 
+The three additional native Linux language lanes passed at that same commit:
+Elixir 1.18.4/OTP 27.3.4.15 (seed 585175), Elixir 1.19.5/OTP 28.5 (seed 240190),
+and Elixir 1.20.4/OTP 28.5 (seed 578120). Each executed 204 deterministic cases
+and all 23 tooling cases, with runtime exclusions counted separately. Actual
+installed `OTP_VERSION` files were checked. The Elixir 1.20.4/OTP 28 dependency
+build emitted Credence compiler warnings; SmolBox's own compilation with warnings
+treated as errors passed.
+
+Fresh native Linux package consumers passed with current dependencies and with
+the exact minimum direct dependency set on Elixir 1.18.4/OTP 27.3.4.15. Their smoke
+checks confirmed explicit 1.16.0 selection, default 1.14.6 and legacy 1.14.1.
+The first matrix wrapper called a nonexistent package task; its failed attempt
+was retained, and the corrected package command ran separately without repeating
+the completed language lanes. These archives precede the final documentation
+and default decision; they are not final release artifacts.
+
 Additional bounded macOS checks at the same commit passed both examples' normal
 execution and cancellation paths, plus the executable getting-started walkthrough.
 A follow-up restart probe retained the same VMM PID and birth identity through
