@@ -60,7 +60,31 @@ if mode == "fault" do
   receive do
     :unused -> :ok
   after
-    120_000 -> raise "controller was not interrupted by its test owner"
+    85_000 ->
+      # Preserve bounded state evidence before the owner's 100-second deadline.
+      # A missing fault boundary can be a preparation failure, not a slow test.
+      {:ok, observed} = Store.fetch(store, handle)
+
+      diagnostic = %{
+        state: observed.state,
+        evidence: observed.evidence,
+        cleanup: observed.cleanup,
+        collection: observed.collection,
+        reserved: observed.reservation != nil,
+        last_error:
+          if(observed.last_error,
+            do: Map.take(observed.last_error, [:category, :operation, :evidence]),
+            else: nil
+          )
+      }
+
+      IO.puts("boundary_not_reached:" <> Jason.encode!(diagnostic))
+
+      receive do
+        :unused -> :ok
+      after
+        35_000 -> raise "controller was not interrupted by its test owner"
+      end
   end
 else
   record = Setup.wait_for(runtime, handle, &(&1.cleanup == :complete and &1.reservation == nil))
