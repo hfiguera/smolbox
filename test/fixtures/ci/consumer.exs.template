@@ -36,6 +36,8 @@ worker_options = [client: client, platform: :linux, architecture: "x86_64",
 {:ok, %{runtime_version: "1.14.6"}} = SmolBox.Runtime.WorkerConfig.new(worker_options)
 {:ok, %{runtime_version: "1.14.1"}} = SmolBox.Runtime.WorkerConfig.new(
   Keyword.put(worker_options, :runtime_version, "1.14.1"))
+{:ok, %{runtime_version: "1.16.0"}} = SmolBox.Runtime.WorkerConfig.new(
+  Keyword.put(worker_options, :runtime_version, "1.16.0"))
 
 children = [
   {SmolBox.Store.Memory, name: Consumer.Store},
@@ -54,4 +56,5 @@ versions = Map.new([:req, :jason, :telemetry, :nimble_options], fn app ->
   {app, app |> Application.spec(:vsn) |> to_string()}
 end)
 File.write!("smoke.json", Jason.encode!(%{client: true, supervisor: true,
-  runtime_default: "1.14.6", legacy_runtime_explicit: "1.14.1", versions: versions}))
+  runtime_default: "1.14.6", legacy_runtime_explicit: "1.14.1",
+  candidate_runtime_explicit: "1.16.0", versions: versions}))

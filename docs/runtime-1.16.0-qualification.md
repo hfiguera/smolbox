@@ -197,6 +197,38 @@ worker journal also recorded a missing-PID stop warning while a VM was reachable
 external service teardown completed. Both the failed report and journal are
 retained for comparison with the complete rerun.
 
+At `6a4a6b6`, the complete Linux runtime suite passed fourteen cases (seed
+453229, 420.645 seconds), followed by sixteen PostgreSQL store cases (980339).
+The twenty-five-case durable run is still pending. The failed attempts have not
+been overwritten by these results.
+
+The [partial macOS evidence](evidence/smolvm-1.16.0-macos.json) now records all
+three service recovery scenarios: server restart, extended unavailability, and
+external deletion. Each passed with one recorded dispatch and verified cleanup.
+A separate process observation retained the same VMM PID and start time through
+three API restarts and repeated `start` calls. Each observation contained exactly
+one API process and one VMM. Deleting that VM through the CLI while the API was
+down left an empty inventory after API restart and no remaining runtime process
+after teardown. This is a bounded observation of those specific restart paths.
+
+Short deadline probes returned exit 124 after 1,018 ms buffered and 1,005 ms
+streamed for a one-second command limit. A 200 ms receive budget (inside a
+250 ms operation budget) returned transport uncertainty after 202 ms; a later
+marker proved that the command continued without replay. An expired one-millisecond
+managed await did not request cancellation: the original execution completed with
+exit zero, one marker byte, collected output and verified cleanup. These cases
+do not satisfy the separate execution-longer-than-five-minutes requirement.
+An initial probe failed artifact-store setup because its private directory lacked
+mode 0700; the corrected attempt is recorded separately. The first successful
+restart probe lost its detailed report to a runner filename collision; a clean
+rerun retained both the process detail and runner result.
+
+A fresh consumer on Elixir 1.18.4/OTP 27.3.4.15 passed with exact minimum runtime
+dependencies and explicit 1.16.0 configuration. Its fixture now exercises that
+selection in addition to the unchanged default and legacy selection. This
+initial archive precedes the addition of the partial macOS evidence file, so it
+is not the final package manifest.
+
 ### Timeout scope conflict
 
 The existing command maximum is 300 seconds and the managed execution budget

@@ -1,0 +1,290 @@
+{
+  "failed_attempts": [
+    {
+      "corrected": true,
+      "failure": "Private artifact directory lacked required mode 0700; managed submission did not start.",
+      "log_sha256": "c9fd27071dc8d649487ed433dba16d1ab83320b0b965be6c77fdc905309a5d22",
+      "probe": "short timeouts"
+    },
+    {
+      "corrected": true,
+      "failure": "The first successful probe reused its detailed-report name for the outer runner, losing the detail; it also reloaded an already loaded helper.",
+      "log_sha256": "ccf098fe4040e708ab60a0a65b16b11652a1512fc30396bc56cc134a6da4a712",
+      "probe": "restart identity"
+    }
+  ],
+  "limitations": [
+    "Bounded ordinary compatibility and controlled recovery only; no macOS exhaustion or adversarial testing.",
+    "The longer-than-five-minute execution requirement remains open because the current public command/profile limits stop at five minutes.",
+    "Nix packaging was reviewed, not installed or qualified.",
+    "Linux deployment qualification and final default selection are separate and incomplete."
+  ],
+  "platform": {
+    "architecture": "arm64",
+    "build": "25G83",
+    "elixir": "1.20.4",
+    "os": "macOS 26.6.2",
+    "otp": "29.0.6",
+    "postgresql": "17.11 (Homebrew); private Unix socket only"
+  },
+  "preparation": {
+    "artifacts": [
+      {
+        "artifact": "python",
+        "disks": {
+          "overlay": {
+            "bytes": 1073741824,
+            "formatted_marker": true
+          },
+          "storage": {
+            "bytes": 1073741824,
+            "formatted_marker": true
+          }
+        },
+        "filesystem": "Filesystem           1K-blocks      Used Available Use% Mounted on\n/dev/vda               1014444     58776    939284   6% /workspace\n",
+        "restart_bytes": "AP8SCg==",
+        "sha256": "d4fdc417ae000a1b56c99a1e6d8ee216b094f1dbd5ba1bf3c9fb613d404d9120"
+      },
+      {
+        "artifact": "node",
+        "disks": {
+          "overlay": {
+            "bytes": 1073741824,
+            "formatted_marker": true
+          },
+          "storage": {
+            "bytes": 1073741824,
+            "formatted_marker": true
+          }
+        },
+        "filesystem": "Filesystem           1K-blocks      Used Available Use% Mounted on\n/dev/vda               1014444    166428    831632  17% /workspace\n",
+        "restart_bytes": "AP8SCg==",
+        "sha256": "38d8ed81c1e7094494634b354a4a1c591dcd59c1c0a14aabeebc39dda5162d37"
+      }
+    ],
+    "attribution_correction": "The initial raw report attributed the tool to a private PATH wrapper. The later discovery of the preferred absolute Homebrew path supersedes that attribution.",
+    "missing_tool": {
+      "cleanup": "empty inventory",
+      "configuration": "Only the owned worker process tree cannot read resize2fs paths; system installation untouched",
+      "observation": {
+        "collection_after_restart": "{:error, %SmolBox.Error{category: :protocol, operation: :download, exit_code: nil, evidence: :dispatch_uncertain}}",
+        "disks": {
+          "overlay": {
+            "bytes": 10737418240,
+            "formatted_marker": false
+          },
+          "storage": {
+            "bytes": 21474836480,
+            "formatted_marker": false
+          }
+        },
+        "persisted": false,
+        "restart": "{:ok, %SmolBox.Machine{name: \"sb160miss-au65yyezgft6qiev7o4a\", state: :running, created_at: 1789337599, cpus: 1, memory_mb: 256, storage_gb: 1, overlay_gb: 1}}",
+        "start": "accepted"
+      },
+      "runtime": "1.16.0",
+      "status": "characterization_complete"
+    },
+    "resize2fs_sha256": "2f5c1940c364b2cd451f09f37004c0b7a3eff4a822672acead493f4618e734f0",
+    "tool_supplier": "Host Homebrew e2fsprogs 1.47.4; upstream searches its absolute path before PATH"
+  },
+  "recorded_at": "2026-09-13T23:15:16.961323Z",
+  "restart_identity": {
+    "cleanup": "verified_absent",
+    "cycles": [
+      {
+        "cycle": 1,
+        "dispatch_marker": "x",
+        "server_pid": 25902,
+        "total_runtime_processes": 2,
+        "vm_birth": "Sun Sep 13 17:12:50 2026",
+        "vm_pid": 25860
+      },
+      {
+        "cycle": 2,
+        "dispatch_marker": "x",
+        "server_pid": 25928,
+        "total_runtime_processes": 2,
+        "vm_birth": "Sun Sep 13 17:12:50 2026",
+        "vm_pid": 25860
+      },
+      {
+        "cycle": 3,
+        "dispatch_marker": "x",
+        "server_pid": 25972,
+        "total_runtime_processes": 2,
+        "vm_birth": "Sun Sep 13 17:12:50 2026",
+        "vm_pid": 25860
+      }
+    ],
+    "external_cli_delete_while_server_down": true,
+    "runtime": "1.16.0",
+    "scope": "one ordinary VM, bounded native macOS restart observations",
+    "stale_inventory_removed": true,
+    "status": "passed"
+  },
+  "runtime": {
+    "archive_sha256": "7be55af510b698bb95c9e9b103004c81f75cacfaa62b00aaf554441e9023353b",
+    "components": {
+      "agent-rootfs/usr/local/bin/smolvm-agent": "0958ebc69f66e75fb992bf8b88ba98016fdb2074387fd158e0ea52b5f51a3bf9",
+      "lib/libkrun.dylib": "fd6c20f203ca31731b005c4681c93bac2ef38630340433656ff1c1664b926a45",
+      "lib/libkrunfw.5.dylib": "819d9902587788859fcdc7ebe0ca38c8c493c58667d5aaa151fb935c0b7d74a5",
+      "smolvm": "8caeb3b6e7d834493a578b0fe8bd1e7aa02e68fba6d61bcf70fdbec41a27ce68",
+      "smolvm-bin": "d9172bd4640ec0c30a267f9559746b12158cdc445443c21a01dd813c4eb6be45"
+    },
+    "tag_commit": "e1dd54bf7be6d144ad6bdef4ebf310f57809a6a6",
+    "version": "1.16.0"
+  },
+  "service_faults": {
+    "missing": {
+      "artifact_sha256": "d4fdc417ae000a1b56c99a1e6d8ee216b094f1dbd5ba1bf3c9fb613d404d9120",
+      "dispatch_attempts": 1,
+      "guest_survived_api_server": true,
+      "operator_deleted_vm": true,
+      "outage_seconds": 0.051,
+      "platform": "macos",
+      "result": {
+        "absence_at_ms": 1789340676780,
+        "artifacts": [],
+        "cancel_requested_at_ms": null,
+        "cleanup": "complete",
+        "collection": "pending",
+        "evidence": "termination_confirmed",
+        "exit_code": null,
+        "id": "restart-698d9593f7d5a376",
+        "machine_name": "sbxexample-xzmxrrtnnfyfw3bzqjhu",
+        "reserved": false,
+        "scope": "example",
+        "state": "unknown",
+        "worker_id": "example-worker"
+      },
+      "runtime_version": "1.16.0",
+      "seconds": 9.368,
+      "status": "passed"
+    },
+    "restart": {
+      "artifact_sha256": "d4fdc417ae000a1b56c99a1e6d8ee216b094f1dbd5ba1bf3c9fb613d404d9120",
+      "dispatch_attempts": 1,
+      "guest_survived_api_server": true,
+      "operator_deleted_vm": false,
+      "outage_seconds": 0.051,
+      "platform": "macos",
+      "result": {
+        "absence_at_ms": 1789340537277,
+        "artifacts": [],
+        "cancel_requested_at_ms": null,
+        "cleanup": "complete",
+        "collection": "pending",
+        "evidence": "termination_confirmed",
+        "exit_code": null,
+        "id": "restart-69557c163b0aeed3",
+        "machine_name": "sbxexample-2bxyox5ttn3u2rl32tns",
+        "reserved": false,
+        "scope": "example",
+        "state": "unknown",
+        "worker_id": "example-worker"
+      },
+      "runtime_version": "1.16.0",
+      "seconds": 67.332,
+      "status": "passed"
+    },
+    "unavailable": {
+      "artifact_sha256": "d4fdc417ae000a1b56c99a1e6d8ee216b094f1dbd5ba1bf3c9fb613d404d9120",
+      "dispatch_attempts": 1,
+      "guest_survived_api_server": true,
+      "operator_deleted_vm": true,
+      "outage_seconds": 90.068,
+      "platform": "macos",
+      "result": {
+        "absence_at_ms": 1789340666745,
+        "artifacts": [],
+        "cancel_requested_at_ms": 1789340545021,
+        "cleanup": "complete",
+        "collection": "pending",
+        "evidence": "termination_confirmed",
+        "exit_code": null,
+        "id": "restart-0ba210bda8d2d28e",
+        "machine_name": "sbxexample-sspmf4k7hwsh35zitfwz",
+        "reserved": false,
+        "scope": "example",
+        "state": "unknown",
+        "worker_id": "example-worker"
+      },
+      "runtime_version": "1.16.0",
+      "seconds": 128.643,
+      "status": "passed"
+    }
+  },
+  "short_timeouts": {
+    "direct": {
+      "buffered": {
+        "elapsed_ms": 1018,
+        "exit_code": 124
+      },
+      "http_expiry": {
+        "completed_marker": "xy",
+        "dispatches": 1,
+        "elapsed_ms": 202,
+        "evidence": "dispatch_uncertain",
+        "guest_still_running": true
+      },
+      "streamed": {
+        "elapsed_ms": 1005,
+        "exit_code": 124
+      }
+    },
+    "managed_await": {
+      "cancellation_requested": false,
+      "cleanup": "verified_complete",
+      "dispatch_marker": "x",
+      "eventual_exit": 0,
+      "expired": true
+    },
+    "runtime": "1.16.0",
+    "status": "passed"
+  },
+  "source_note": "Runtime/store/durable suites ran at ab7ad95; later probes used identical library code. This is not final-candidate acceptance.",
+  "source_revision_at_export": "6a4a6b6055d9c28c21c5bea01c7b1ab970f2ee5d",
+  "status": "partial_qualification",
+  "suites": {
+    "durable": {
+      "captured_bytes": 173,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "ca67f1465ffadf60952691b9491e205d08a572d4ea2f6d4c97f68702770257b3",
+      "seconds": 276.129,
+      "source_commit": "ab7ad9596b4cd92d6b16f00092625e2fe98687a6",
+      "status": "passed",
+      "tests": {
+        "passed": 25,
+        "seed": 243606
+      }
+    },
+    "runtime": {
+      "captured_bytes": 154,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "2ac66cd026d747898d5c2340a998afaf7cd3cd47cbc5ff0434718af62a5b0df8",
+      "seconds": 20.701,
+      "source_commit": "ab7ad9596b4cd92d6b16f00092625e2fe98687a6",
+      "status": "passed",
+      "tests": {
+        "passed": 9,
+        "seed": 623036
+      }
+    },
+    "store": {
+      "captured_bytes": 160,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "e33dd98f9c9cff6797f768ad7c0aaafe9f8d79d01b299896c78e723de92951f0",
+      "seconds": 0.974,
+      "source_commit": "ab7ad9596b4cd92d6b16f00092625e2fe98687a6",
+      "status": "passed",
+      "tests": {
+        "passed": 16,
+        "seed": 712859
+      }
+    }
+  }
+}
