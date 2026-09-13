@@ -68,14 +68,51 @@ and Node `38d8ed81c1e7094494634b354a4a1c591dcd59c1c0a14aabeebc39dda5162d37`.
 The older `/tmp/smolbox-qualification` payloads are no longer present; they were
 not silently replaced or described as tested.
 
-A separate preparation probe verified the private worker's PATH/HOME, supplied
+A separate preparation probe verified the private worker's PATH/HOME, available
 e2fsprogs 1.47.4, and two exactly 1,073,741,824-byte raw disks for each artifact.
 Binary files survived a complete stop/start cycle and both machines were deleted
 with an empty inventory. The worker has a one-hour process-group deadline,
 1 MiB captured-log cap and storage guards; these are ordinary-test safeguards,
-not hard macOS host resource qualification. Missing-prerequisite behavior is
-still pending. Raw results remain in the private task directory until reviewed
-evidence is exported. These checks precede the final candidate freeze.
+not hard macOS host resource qualification. Raw results remain in the private
+task directory until reviewed evidence is exported. These checks precede the
+final candidate freeze.
+
+The initial probe described the private tool on PATH as the supplier. A later
+check found a Homebrew installation at `/opt/homebrew/opt/e2fsprogs`, installed
+after the prior release's private setup. Tagged source searches that absolute
+path first. The effective available host tool is therefore Homebrew 1.47.4,
+SHA-256 `2f5c1940c364b2cd451f09f37004c0b7a3eff4a822672acead493f4618e734f0`.
+The private PATH wrapper's presence alone does not prove it was invoked; this
+correction supersedes that attribution in the retained initial raw report.
+
+A separate owned worker was denied reads of `resize2fs` paths using a process-only
+macOS sandbox profile, without modifying the installed tool. A 1/1 GiB request
+still started, exposing 20/10 GiB raw disks without formatted markers. After
+stopping and restarting it, the previously collected file could no longer be
+downloaded. API cleanup succeeded and inventory was empty. This characterizes
+missing prerequisites; it is not a successful disk-preparation result. The
+initial probe had an overlong test namespace and failed before creation; its
+log is retained separately from the corrected experiment. The worker was stopped
+and its private process group exited.
+
+The first Linux candidate run passed all fourteen runtime cases (seed 54154,
+369.070 seconds) and sixteen PostgreSQL cases (seed 472974). This used commit
+`7432953` plus the new runtime selector and exact binary/agent/libkrun preflight
+pins. All archive component checks passed, and Linux exports the same OpenAPI
+hash as macOS. During the suites, 600 samples observed 801 live account-owned
+processes, all within `/system.slice/smolbox-qualification.service`. The service
+remains unprivileged with 1.5 GiB charged memory, zero swap and 96 tasks. This is
+sampled containment evidence, not completed exhaustion or durable qualification.
+
+All eight analyzer canary pairs passed. The first coverage run reached 95.41%
+but failed a maintainer test, so the gate did not pass: macOS `lsof` took about
+30 seconds and its 30-second sleep fixture expired before mapping collection.
+A separate 120-second fixture preserved its executable identity; numeric UID
+output did not remove the delay. The test fixture now lives up to 120 seconds
+under its own bounded child supervisor, and cleanup still stops it. Executable
+identity checks are unchanged. The corrected fixture suite passed with the same
+seed, and the full coverage rerun passed all 204 cases (seed 921400) at 95.41%.
+ExDoc built without warnings and all 42 pages passed local link/fragment checks.
 
 ### Timeout scope conflict
 
