@@ -140,7 +140,10 @@ defmodule SmolBox.DurableHost.RecoveryRuntimeTest do
 
       runtime = start_supervised!({Runtime, options})
       assert {:ok, handle} = SmolBox.submit(runtime, context.spec)
-      assert_receive {:boundary, :result_write, ^phase, blocked}, @setup_timeout
+
+      assert_receive {:boundary, :result_write, ^phase, blocked},
+                     SmolBox.LabCandidate.observation_ms(@setup_timeout)
+
       coordinator = Runtime.coordinator(runtime)
       assert {:ok, before} = Store.fetch(context.store, handle)
 
@@ -199,7 +202,10 @@ defmodule SmolBox.DurableHost.RecoveryRuntimeTest do
 
     runtime = start_supervised!({Runtime, options})
     assert {:ok, handle} = SmolBox.submit(runtime, context.spec)
-    assert_receive {:boundary, :artifact_put, :before, blocked}, @setup_timeout
+
+    assert_receive {:boundary, :artifact_put, :before, blocked},
+                   SmolBox.LabCandidate.observation_ms(@setup_timeout)
+
     offline = context.objects.root <> ".offline"
     File.rename!(context.objects.root, offline)
 
@@ -257,7 +263,10 @@ defmodule SmolBox.DurableHost.RecoveryRuntimeTest do
 
       runtime = start_supervised!({Runtime, options})
       assert {:ok, handle} = SmolBox.submit(runtime, context.spec)
-      assert_receive {:boundary, :result_write, ^phase, blocked}, @setup_timeout
+
+      assert_receive {:boundary, :result_write, ^phase, blocked},
+                     SmolBox.LabCandidate.observation_ms(@setup_timeout)
+
       assert {:ok, ^handle} = SmolBox.cancel(runtime, context.spec.scope, context.spec.id)
       assert {:ok, requested} = Store.fetch(context.store, handle)
       assert requested.cancel_requested_at_ms != nil

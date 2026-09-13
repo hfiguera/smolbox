@@ -38,3 +38,19 @@ Full exported schema SHA-256:
 `f3a0cf982a82acc125d1d02d09d707f0467b9867b4e17281d65a461a6b76ef99`.
 Extracted fixture SHA-256:
 `6c9f935f0a1e72c92eb49e5c382d54ebfb5f41ed3742683360667b0708d8cd26`.
+
+## smolvm 1.16.0
+
+`smolvm-v1.16.0-subset.json` was mechanically extracted from the official Darwin
+ARM64 binary on September 13, 2026. The Linux x86_64 export has the same full
+schema digest. The eight used paths and nineteen referenced schemas are identical
+to the 1.14.6 subset, including the exported API metadata. Runtime health is
+verified independently; the metadata is not a runtime version assertion.
+
+Source: https://github.com/smol-machines/smolvm/tree/v1.16.0
+Commit: `e1dd54bf7be6d144ad6bdef4ebf310f57809a6a6`.
+
+Full exported schema SHA-256:
+`f3a0cf982a82acc125d1d02d09d707f0467b9867b4e17281d65a461a6b76ef99`.
+Extracted fixture SHA-256:
+`6c9f935f0a1e72c92eb49e5c382d54ebfb5f41ed3742683360667b0708d8cd26`.

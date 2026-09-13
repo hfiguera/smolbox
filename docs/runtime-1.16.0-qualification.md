@@ -45,6 +45,14 @@ Nix adds e2fsprogs to runtime dependencies on macOS. This is a packaging change,
 not evidence that an archive supplies a host-compatible resize2fs executable.
 Nix is reviewed, not an installation path qualified by this campaign.
 
+The Nix expression at the official tag also still contains the old 1.14.6 archive
+hashes while selecting 1.16.0 filenames. Decoding its Darwin and Linux x86_64 SRI
+values yields `484b63c6a7c74c4d05dce2e63fcce3d135e0fba56a1d77128024e5736d3384a8`
+and `94a1edb0c42b20ac562c3759ed216bab2cab9e27c382f6560969144f7bd1dce3`, which do
+not match the official 1.16.0 archives above. This source discrepancy is another
+reason not to describe the untested Nix path as qualified. Archive testing uses
+the verified release assets directly, without changing upstream files.
+
 The official Darwin binary exports the same eight used paths and nineteen
 referenced schemas as the captured 1.14.6 subset. The complete OpenAPI hash is
 also unchanged: `f3a0cf982a82acc125d1d02d09d707f0467b9867b4e17281d65a461a6b76ef99`.
@@ -104,6 +112,43 @@ processes, all within `/system.slice/smolbox-qualification.service`. The service
 remains unprivileged with 1.5 GiB charged memory, zero swap and 96 tasks. This is
 sampled containment evidence, not completed exhaustion or durable qualification.
 
+Synthetic Linux lifecycle, health, buffered-byte and SSE responses were captured
+and added under `test/fixtures/wire/1.16.0/`. The mechanically extracted OpenAPI
+subset is byte-identical to 1.14.6. Capture finished with verified deletion and
+an empty inventory. A separate Linux geometry probe requested 1/1 GiB and observed
+two 1,073,741,824-byte disks with a 1,038,790,656-byte workspace filesystem; its
+file survived a complete stop/start cycle and cleanup was verified.
+
+The candidate process's actual PATH includes `/usr/sbin`. Its mount namespace
+can execute `/usr/sbin/resize2fs`, supplied by Ubuntu's
+`e2fsprogs 1.47.0-2.4~exp1ubuntu4.1`, executable SHA-256
+`1a0ea5f6784285b82098fe7935c95bf1ac76713aec904cc9b43920fa85ebe35d`.
+The `-V` probe prints the 1.47.0 banner and exits with an invalid-option message;
+the successful geometry and persistence run supplies the functional evidence.
+The controlled Linux missing-prerequisite case remains outstanding. Guest reports
+were exported before stopping the outer VM; its recovery completed and no worker
+KVM file descriptors remained at the final guest observation.
+
+The initial durable run finished with 23 of 25 cases passing (seed 162868,
+1,078.035 seconds). The artifact-directory outage and dispatcher-death-after-commit
+cases did not reach their intended boundary within the fixture's 30-second wait;
+their retained SQL records were still `preparing`. The original log and failed
+runner report are preserved. The worker subsequently reached its independent
+300-second lifetime. The suite launcher now stops the candidate on failure too.
+
+The three in-process fault scenarios now use the existing lab-only 90-second
+observation allowance, while ordinary runs retain 30 seconds. Production command,
+lease, preparation and cleanup budgets are unchanged. All five affected cases
+passed in a targeted rerun with the same seed (156.8 seconds), including the two
+original failures. That run deliberately excluded the other twenty cases; the
+full-suite report validator correctly rejected its result. Its trace is retained
+as targeted evidence only, and a complete 25-case rerun remains required.
+
+Dependency retirement and vulnerability audits passed. Fresh package consumers
+passed with both current and exact minimum runtime dependency versions on the
+canonical macOS toolchain. These initial consumers verify the unchanged 1.14.6
+default; they do not replace final-candidate package validation.
+
 All eight analyzer canary pairs passed. The first coverage run reached 95.41%
 but failed a maintainer test, so the gate did not pass: macOS `lsof` took about
 30 seconds and its 30-second sleep fixture expired before mapping collection.
@@ -113,6 +158,24 @@ under its own bounded child supervisor, and cleanup still stops it. Executable
 identity checks are unchanged. The corrected fixture suite passed with the same
 seed, and the full coverage rerun passed all 204 cases (seed 921400) at 95.41%.
 ExDoc built without warnings and all 42 pages passed local link/fragment checks.
+
+At `b65709f`, native macOS backward compatibility passed all nine ordinary cases
+on 1.14.6 (seed 393358, 20.8 seconds) and 1.14.1 (seed 763237, 28.1 seconds),
+using the approved artifacts listed above. Both inventories were empty and both
+owned worker groups were stopped afterward. A first 1.14.6 attempt failed during
+worker setup because the private Bash wrapper expanded an empty array under
+`set -u`; the corrected wrapper and successful rerun are recorded separately.
+This was not an upstream runtime failure. Linux backward compatibility remains
+pending, as does final-candidate validation on both platforms.
+
+The additional native macOS language lanes passed compilation, 204 deterministic
+cases and 23 CI-tooling cases each: Elixir 1.18.4/OTP 27.3.4.15 (test seed 323218),
+Elixir 1.19.5/OTP 28.5 (539593), and Elixir 1.20.4/OTP 28.5 (533539).
+Runtime exclusions are not counted as passes. These runs used the existing
+fixture coverage; the subsequent addition of captured 1.16.0 responses passed
+all nineteen affected parser/client cases separately on the canonical toolchain
+(seed 430891). Formatting, ExDoc generation and all 42 documentation page link
+checks passed after that addition. Final committed-candidate checks remain open.
 
 ### Timeout scope conflict
 
@@ -129,7 +192,7 @@ No validation bounds have been relaxed while that scope decision is pending.
 - [x] Resolve the exact release and verify both downloaded archive checksums.
 - [ ] Finish bundled component and full used-API comparison; capture real wire fixtures.
 - [x] Validate explicit version admission and rejection without changing the default.
-- [ ] Linux x86_64 ordinary runtime suite, approved Python/Node artifacts and cleanup.
+- [x] Initial Linux x86_64 ordinary runtime suite, approved Python/Node artifacts and cleanup.
 - [x] Initial native macOS ordinary runtime suite, approved Python/Node artifacts and cleanup.
 - [ ] Actual worker resize2fs environment, disk geometry, missing prerequisite behavior
   and file persistence across stop/start on both platforms.

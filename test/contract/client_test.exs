@@ -30,8 +30,12 @@ defmodule SmolBox.ClientTest do
       end)
 
     assert {:ok, %{version: "1.14.1", total: 0, running: 0}} = Client.health(peer)
-    upgraded = client(&TestPeer.json(&1, fixture("1.14.6/health")))
-    assert {:ok, %{version: "1.14.6", total: 0, running: 0}} = Client.health(upgraded)
+
+    for version <- ["1.14.6", "1.16.0"] do
+      upgraded = client(&TestPeer.json(&1, fixture(version <> "/health")))
+      assert {:ok, %{version: ^version, total: 0, running: 0}} = Client.health(upgraded)
+    end
+
     assert :ok = Client.readiness(peer)
     assert {:error, %Error{category: :protocol}} = Client.list(peer)
 
