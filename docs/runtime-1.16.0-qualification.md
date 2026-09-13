@@ -125,8 +125,9 @@ can execute `/usr/sbin/resize2fs`, supplied by Ubuntu's
 `1a0ea5f6784285b82098fe7935c95bf1ac76713aec904cc9b43920fa85ebe35d`.
 The `-V` probe prints the 1.47.0 banner and exits with an invalid-option message;
 the successful geometry and persistence run supplies the functional evidence.
-The controlled Linux missing-prerequisite case remains outstanding. Guest reports
-were exported before stopping the outer VM; its recovery completed and no worker
+The controlled Linux missing-prerequisite case was still outstanding at this
+initial checkpoint; its later result is recorded below. Guest reports were
+exported before stopping the outer VM; its recovery completed and no worker
 KVM file descriptors remained at the final guest observation.
 
 The initial durable run finished with 23 of 25 cases passing (seed 162868,
@@ -302,11 +303,11 @@ No validation bounds have been relaxed while that scope decision is pending.
 
 - [x] Create the requested branch; preserve the external checkout.
 - [x] Resolve the exact release and verify both downloaded archive checksums.
-- [ ] Finish bundled component and full used-API comparison; capture real wire fixtures.
+- [x] Finish bundled component and full used-API comparison; capture real wire fixtures.
 - [x] Validate explicit version admission and rejection without changing the default.
 - [x] Initial Linux x86_64 ordinary runtime suite, approved Python/Node artifacts and cleanup.
 - [x] Initial native macOS ordinary runtime suite, approved Python/Node artifacts and cleanup.
-- [ ] Actual worker resize2fs environment, disk geometry, missing prerequisite behavior
+- [x] Actual worker resize2fs environment, disk geometry, missing prerequisite behavior
   and file persistence across stop/start on both platforms.
 - [ ] Buffered and streamed commands exceeding five minutes through SmolBox;
   shorter command/transport deadlines, await expiry and confirmed cancellation.
