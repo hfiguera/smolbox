@@ -6,6 +6,8 @@ defmodule SmolBox.WorkerPoolTest do
   for {options, status} <- [
         {[runtime_version: "1.14.1"], :incompatible},
         {[runtime_version: "1.14.6", expected_runtime_version: "1.14.1"], :incompatible},
+        {[runtime_version: "1.16.0"], :incompatible},
+        {[runtime_version: "1.14.6", expected_runtime_version: "1.16.0"], :incompatible},
         {[runtime_version: "1.15.0"], :incompatible},
         {[unready: true], :degraded},
         {[inventory_unavailable: true], :degraded}
@@ -30,7 +32,8 @@ defmodule SmolBox.WorkerPoolTest do
 
   for {label, options} <- [
         {"default 1.14.6", []},
-        {"explicit 1.14.1", [runtime_version: "1.14.1", expected_runtime_version: "1.14.1"]}
+        {"explicit 1.14.1", [runtime_version: "1.14.1", expected_runtime_version: "1.14.1"]},
+        {"explicit 1.16.0", [runtime_version: "1.16.0", expected_runtime_version: "1.16.0"]}
       ] do
     test "#{label} admission preserves identity, collection and cleanup" do
       context = RuntimeFixture.start(unquote(options))

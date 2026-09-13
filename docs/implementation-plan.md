@@ -1,5 +1,15 @@
 # SmolBox implementation plan
 
+## smolvm 1.16.0 qualification in progress
+
+The maintainer authorized qualifying official 1.16.0 under the existing public
+contract on branch `support-smolvm-1.16.0`. The default remains 1.14.6 until Linux
+and native macOS acceptance passes. Exhaustion and adversarial checks run only
+inside the disposable Linux lab. Tags, publication, pushes and PRs are excluded.
+The [qualification checklist](runtime-1.16.0-qualification.md) records the exact
+release inputs, progress and outstanding acceptance work. Historical completed
+release records below do not count as evidence for this new runtime.
+
 ## 0.1.2 release
 
 Status: **published and verified**, September 10, 2026 (September 11 UTC).

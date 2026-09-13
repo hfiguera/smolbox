@@ -127,8 +127,9 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   defp supported_runtime?(%{runtime_version: "1.14.1"}), do: true
 
-  defp supported_runtime?(%{runtime_version: "1.14.6", platform: platform, architecture: arch}),
-    do: {platform, arch} in [{:linux, "x86_64"}, {:macos, "aarch64"}]
+  defp supported_runtime?(%{runtime_version: version, platform: platform, architecture: arch})
+       when version in ["1.14.6", "1.16.0"],
+       do: {platform, arch} in [{:linux, "x86_64"}, {:macos, "aarch64"}]
 
   defp supported_runtime?(_worker), do: false
 

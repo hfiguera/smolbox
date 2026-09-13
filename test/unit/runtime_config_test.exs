@@ -109,9 +109,31 @@ defmodule SmolBox.RuntimeConfigTest do
       assert :ok = WorkerConfig.validate(%{worker | runtime_version: "1.14.1"})
     end
 
-    for version <- ["1.14.2", "1.14.5", "1.14.7", "1.14.6-dev"] do
+    for version <- ["1.14.2", "1.14.5", "1.14.7", "1.14.6-dev", "1.15.1", "1.16.0-dev", "1.16.1"] do
       assert {:error, %Error{category: :validation}} =
                WorkerConfig.validate(%{candidate | runtime_version: version})
+    end
+  end
+
+  test "1.16.0 candidate requires an explicit version and a supported platform", context do
+    assert context.worker.runtime_version == "1.14.6"
+
+    for {platform, architecture} <- [{:linux, "x86_64"}, {:macos, "aarch64"}] do
+      artifacts = Enum.map(context.worker.artifacts, &Map.put(&1, "architecture", architecture))
+
+      options =
+        Keyword.merge(context.options,
+          runtime_version: "1.16.0",
+          platform: platform,
+          architecture: architecture,
+          artifacts: artifacts
+        )
+
+      assert {:ok, worker} = WorkerConfig.new(options)
+      assert :ok = WorkerConfig.validate(worker)
+
+      assert {:error, %Error{category: :validation}} =
+               WorkerConfig.validate(%{worker | platform: :linux, architecture: "aarch64"})
     end
   end
 
