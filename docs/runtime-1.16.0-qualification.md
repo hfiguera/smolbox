@@ -1,6 +1,6 @@
 # smolvm 1.16.0 qualification
 
-Status: **runtime qualification passed; final archive acceptance pending**.
+Status: **qualification complete; final archive acceptance passed**.
 Branch `support-smolvm-1.16.0` starts from
 `b649bdb0f29c574f89caebd20ac8ca3c06495bfa`. The unreleased checkout now defaults
 to 1.16.0 after Linux/macOS and legacy compatibility qualification. The changed
@@ -711,6 +711,31 @@ with an empty inventory, zero pending work/slots and verified worker/database
 shutdown. Temporary installations and private evidence remain outside Git and
 the package. Final archive acceptance is recorded after the documentation commit.
 
+## Final archive acceptance
+
+Documentation/evidence commit `4b7e2b7840619e9ef6eedd73c5a6f494aa0fd1cd`
+passed fresh current and minimum dependency package consumers on Linux. Both
+consumed the same 91-file archive, SHA-256
+`f4c818468fd7f50f01e72ecceadd8a7913dfff6e6bbd7dd510ac4ea3d5b9e439`.
+They verified client and supervisor startup, the 1.16.0 default, and explicit
+1.14.1/1.14.6 selection. The minimum run used Elixir 1.18.4/OTP 27; the current
+run used Elixir 1.20.4/OTP 29. Dependency versions and toolchain details are in
+the [acceptance record](release-candidates/smolvm-1.16.0-acceptance.json).
+
+Only Markdown documentation and qualification JSON changed after functional
+validation at `5ea1e73`. Documentation generation and local links passed after
+those changes. Every packaged file's digest matches the final source tree.
+This acceptance record, the implementation plan and this guide are excluded from
+package contents, avoiding a circular archive hash. The retained raw report
+archive has SHA-256
+`2bb68774ffa853ffe62331ad519ad5533bd9ce64d6a82d08e66a0a5c1bf40f40`.
+
+Final inspection confirmed the disposable Linux VM and recovery supervisor were
+inactive, their main process IDs were zero, and the recovery marker was absent.
+Owned native macOS qualification workers and databases were stopped. Private
+fixture data remains local; unrelated host workloads were preserved. No push,
+PR, tag, release or package publication was performed.
+
 ## Required evidence
 
 - [x] Create the requested branch; preserve the external checkout.
@@ -734,9 +759,9 @@ the package. Final archive acceptance is recorded after the documentation commit
 - [x] Every ordinary CI gate, all analyzers and canaries, language lanes, example
   checks, documentation, minimum dependencies and fresh package consumers.
 - [x] Final support/default decision and synchronized public documentation.
-- [ ] Final committed candidate validation, evidence identities and owned cleanup.
+- [x] Final committed candidate validation, evidence identities and owned cleanup.
 
 Raw preparation material is retained under ignored `.local/qualification-1.16.0/`.
 Reports must distinguish source review, tests, failures and corrections. No
 earlier runtime result or skipped case satisfies this checklist. Qualification
-will apply only to the recorded configurations, not general security certification.
+applies only to the recorded configurations, not general security certification.
