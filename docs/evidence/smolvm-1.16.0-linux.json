@@ -1295,6 +1295,52 @@
     "status": "passed",
     "worker_independent_lifetime_seconds": 300
   },
+  "legacy_1_14_6_timing_diagnostic": {
+    "archive_sha256": "3d8d9e1b56bf2e4eca63cdee018902df54f05fcb493c558d39fa1c6836eb7b46",
+    "create_elapsed_ms": [
+      15365,
+      15846
+    ],
+    "excluded_cases": 23,
+    "full_compatibility_pass": false,
+    "initial_selection_failure": {
+      "report": {
+        "captured_bytes": 4616,
+        "exit_code": 1,
+        "failure": null,
+        "output_sha256": "28829284164d10d3a52207bfbbb0df72ff2f3e37fe6a1c5dd4a990223cd11a64",
+        "seconds": 2.52,
+        "status": "failed"
+      },
+      "scope": "The first filter omitted the literal test prefix, excluded all 25 cases, and exited nonzero. No cases or VM work executed. Corrected name filters selected exactly two cases; no accepted command was replayed."
+    },
+    "lab_account_kvm_descriptors_after_stop": 0,
+    "passed_cases": [
+      "result_write:after",
+      "delete:before"
+    ],
+    "pending_records_after_stop": 0,
+    "request_count": 70,
+    "reserved_slots_after_stop": 0,
+    "runner": {
+      "captured_bytes": 4534,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "df2098c48fb93448ff421adafed47c1776841aaa733765d365d347ee1cc8034a",
+      "seconds": 62.091,
+      "status": "passed"
+    },
+    "runtime": "1.14.6",
+    "scope": "Two previously relevant recovery cases passed with a temporary Req copy recording bounded request timing and error observations. All requests returned successfully or observed expected absence. This supports returning to the full uninstrumented suite but does not resolve the earlier intermittent startup failure or replace full compatibility coverage. Monotonic origins differ between controller BEAM instances; compare individual elapsed durations, not absolute timestamps across processes.",
+    "seed": 602028,
+    "source_base": "4e5692fb5aa4d68a21e384dbcad888ce6f6f20c1",
+    "start_elapsed_ms": [
+      9596,
+      8916
+    ],
+    "transport_sha256": "18e2cedb82532c5e0bd8049e51843590fb8222c702e437e432a28263c7a56214",
+    "worker_account_kvm_descriptors_after_stop": 0
+  },
   "limitations": [
     "Not final-commit validation.",
     "The legacy Linux 1.14.6 campaign remains incomplete.",

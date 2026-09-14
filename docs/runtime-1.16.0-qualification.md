@@ -516,6 +516,15 @@ worker stop. These small samples did not reproduce the startup error and do not
 resolve the failed recovery suite or identify disk size as its cause. An initial
 malformed request was rejected before startup and is retained separately.
 
+The next timing diagnostic selected only `result_write:after` and `delete:before`.
+Both passed in 62.091 seconds, with the other 23 cases excluded. Creation took
+15.365 and 15.846 seconds; start took 9.596 and 8.916 seconds. Requests returned
+successfully or observed expected absence, and final SQL counts and actual-account
+KVM checks were empty. A temporary transport recorded individual request durations;
+its instrumentation was removed before returning to the full suite. These samples
+do not resolve the earlier startup error. The first selection attempt excluded
+every case due to a malformed name filter and is explicitly not counted as a pass.
+
 An earlier attempt combined broad runtime inclusion with the name filters and
 therefore admitted unrelated cases. It was deliberately stopped and its output
 retained as incomplete. The process exited zero after SIGTERM, but there was no
