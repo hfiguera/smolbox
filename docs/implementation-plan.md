@@ -1,3 +1,17 @@
+# SmolBox 0.1.3 release preparation
+
+The selected version is 0.1.3. Branch `release-0.1.3` prepares the merged runtime
+and networking work for release, with a prominent explanation of the durable
+record compatibility change despite the patch version number. Every codec write
+uses v2, including offline work; old readers cannot read it. See
+[Upgrading to 0.1.3](recovery.md#upgrading-to-0-1-3) for coordinated controller
+upgrades, worker version selection and rollback limits.
+
+Preparation and remaining publication steps are recorded in
+[the release checkpoint](release-candidates/0.1.3.md). No 0.1.3 tag or publication
+is implied by this preparation entry. Prior live evidence below retains its
+original revisions and platform limits.
+
 # Controlled network access follow-up
 
 Branch `controlled-network-access` adds explicit operator-approved outbound

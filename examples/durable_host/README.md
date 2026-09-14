@@ -238,7 +238,13 @@ One physical worker must have one stable worker ID and one store partition acros
 controllers. Changing the partition is not controller takeover. Leases fence
 store writes; they cannot retract worker HTTP requests.
 
-The record codec remains schema version 1. A second SQL migration adds
+SmolBox 0.1.3 writes record schema v2, including offline executions, and reads
+legacy v1 records as offline. All controllers sharing this database must upgrade
+together; old readers cannot read v2, and there is no built-in downgrade after
+v2 writes. Follow [Upgrading to 0.1.3](../../docs/recovery.md#upgrading-to-0-1-3).
+This payload change does not add a SQL migration or change the encryption envelope.
+
+The existing second SQL migration adds
 `smolbox_machine_identities` for bounded worker/name lookup, with a unique
 assignment per worker/name and per execution. Reservation writes this index in
 the same transaction as the encrypted execution record; cleanup retains it.

@@ -1,6 +1,6 @@
 # Deployment and trust boundaries
 
-The unreleased controlled-network feature permits explicit operator-approved
+The controlled networking feature introduced in 0.1.3 permits explicit operator-approved
 outbound policies on smolvm 1.16.0. Existing offline defaults and prior offline
 qualification evidence remain unchanged. See [Controlled network access](network-access.md)
 for DNS/IP semantics, profile approval and the separate enforcement fixture.

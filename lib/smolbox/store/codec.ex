@@ -11,7 +11,9 @@ defmodule SmolBox.Store.Codec do
   these bytes or use an explicitly approved equivalent secure storage policy.
   Schema v2 adds network policy. Exact v1 records are upgraded to offline defaults
   on read; offline fingerprints are unchanged. Old readers cannot read v2 writes.
-  Coordinate controller upgrades. Silently treating undecodable records as absent
+  Every write uses v2, including offline executions. Follow
+  [Upgrading to 0.1.3](recovery.html#upgrading-to-0-1-3) across all controllers.
+  Silently treating undecodable records as absent
   would permit replay and is forbidden.
   """
 

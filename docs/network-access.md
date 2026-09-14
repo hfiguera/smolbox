@@ -1,7 +1,7 @@
 # Controlled network access
 
-This unreleased feature requires smolvm **1.16.0**. Published SmolBox 0.1.2 does
-not include it. Existing profiles and machines remain offline by default.
+Controlled networking is introduced in SmolBox **0.1.3** and requires smolvm
+**1.16.0**. SmolBox 0.1.2 does not include it. Existing profiles and machines remain offline by default.
 Networking never enables image pulls, ports, mounts, or credential forwarding.
 
 ## Approve a policy
@@ -91,7 +91,8 @@ Offline execution fingerprints retain their previous representation, so resubmit
 an old execution does not acquire a new identity. Malformed v1 records and v1
 records containing network fields are rejected. Do not downgrade a store writer
 or run old readers after v2 records have been written; coordinate this upgrade
-across controllers. Custom store formats need equivalent explicit migration.
+across controllers, including offline users. Follow [Upgrading to 0.1.3](recovery.md#upgrading-to-0-1-3).
+Custom store formats need equivalent explicit migration.
 
 ## Validation
 
