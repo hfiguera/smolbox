@@ -1,9 +1,9 @@
 {
   "durable_failed_attempt": {
     "complete_suite_pass": false,
+    "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
     "final_state_sha256": "e1f283acd259d0f60b5c288de229f2f9555e249d48d4ee2ed4a8db71620ba4fd",
     "journal_sha256": "ee3fe1aaeecedce68c46f01e73afaff816915044a81e265c7cd40023ffaddc58",
-    "kvm_fds_after_teardown": 0,
     "missing_boundaries": [
       "first_output_record:after",
       "dispatch_intent:before"
@@ -24,6 +24,7 @@
     "child_observation_seconds": 100,
     "controller_diagnostic_commit": "cd97ecf",
     "controller_sha256": "0b9c7e7eda199b4d9873bb577ea8d8cba793623ad509afb08b0dbe83251ebec8",
+    "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
     "earlier_failure_scope": "Fresh rerun passed; root cause of the earlier two boundary waits is not established.",
     "failed_harness_attempt": {
       "captured_bytes": 17836,
@@ -34,7 +35,6 @@
       "status": "failed"
     },
     "failed_harness_cause": "Missing SMOLBOX_PYTHON_SHA256 prevented all fixture setups before execution.",
-    "kvm_fds_after_teardown": 0,
     "pending_records_after_teardown": 0,
     "production_budgets_changed": false,
     "reserved_slots_after_teardown": 0,
@@ -107,6 +107,253 @@
       "missing-storage-boundary: rejected"
     ],
     "tasks": "max 4"
+  },
+  "guest_workloads": {
+    "additional_geometry_probe": true,
+    "limits": [
+      "Host task controls are not guest PID limits; the guest process probe created 192 children.",
+      "File symlinks can reach other guest paths; no workspace-only boundary is asserted.",
+      "Sampled output and buffering observations do not prove behavior for an unbounded producer."
+    ],
+    "probes": {
+      "cpu": {
+        "cleanup": "verified_absent",
+        "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
+        "observations": {
+          "exit_codes": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "seconds": 8.084177258
+        },
+        "raw_report_sha256": "52bc054389d2cd171bf42e5c95d2af811fed22146f1be7a19d7cc11e58d51465",
+        "runner": {
+          "captured_bytes": 84,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "2441e2dcd3ad85dcde48e176fcb91c5ae4e9606cb3f32ec2fb14989a132a6598",
+          "seconds": 40.612,
+          "status": "passed"
+        },
+        "vm_boundary": "VMM PID 21531\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n"
+      },
+      "disk": {
+        "cleanup": "verified_absent",
+        "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
+        "observations": {
+          "errno": 5,
+          "written": 586153984
+        },
+        "raw_report_sha256": "b9bfeea41cdb7b37ff6ad8db73bea5098bbe5698b8a467c4557daa2e0989766e",
+        "runner": {
+          "captured_bytes": 85,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "8d1ea031162859844f8477bd91d1b68b584437da8207d5228c584d43740f0550",
+          "seconds": 34.649,
+          "status": "passed"
+        },
+        "vm_boundary": "VMM PID 22880\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n"
+      },
+      "files": {
+        "cleanup": "verified_absent",
+        "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
+        "observations": {
+          "fifo": "observation deadline; VM cleanup required",
+          "symlink": "guest-only target readable; no workspace containment claim"
+        },
+        "raw_report_sha256": "204d9fe01005162ae0a91c1e59c2f0700b0254aa5edf03085e5f0e1fe0ada29c",
+        "runner": {
+          "captured_bytes": 85,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "d3ca2acb30ae2cba03fa55336a23a896b920db9d2d15f5a702a0837a4a2e26b4",
+          "seconds": 33.059,
+          "status": "passed"
+        },
+        "vm_boundary": "VMM PID 25400\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n"
+      },
+      "geometry": {
+        "cleanup": "verified_absent",
+        "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
+        "observations": {
+          "filesystem_bytes": 1038790656,
+          "raw_disk_bytes": [
+            1073741824,
+            1073741824
+          ],
+          "stop_start_persistence": true,
+          "uid": 0
+        },
+        "raw_report_sha256": "17d229bb897427812ceca17e5d87189fbeb647c3dea6096f9342946e6c974a8e",
+        "runner": {
+          "captured_bytes": 89,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "855e1de73cd0769e90f32083948e04cd2ef18816cbcb52d07fdf3c58bf6d387a",
+          "seconds": 30.347,
+          "status": "passed"
+        },
+        "vm_boundary": "VMM PID 20238\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n"
+      },
+      "isolation": {
+        "cleanup": "verified_absent",
+        "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
+        "observations": {
+          "control_env_present": false,
+          "endpoints": {
+            "1.1.1.1:443": "101",
+            "10.0.2.2:22": "101",
+            "10.0.2.2:22460": "101",
+            "100.96.0.1:10081": "101",
+            "127.0.0.1:19470": "111",
+            "169.254.169.254:80": "101"
+          },
+          "host_paths": {
+            "/dev/kvm": false,
+            "/etc/smolbox-qualification-canary": false,
+            "/home/lab/.ssh/authorized_keys": false,
+            "/srv/sbq/control/smolvm/server/smolvm.db": false,
+            "/srv/sbq/run/api.sock": false,
+            "/var/lib/smolbox-lab/home/id_ed25519": false
+          },
+          "uid": 0,
+          "vsock": {
+            "10081": "None",
+            "6000": "104",
+            "6004": "104"
+          }
+        },
+        "raw_report_sha256": "8aff432018a5d4804556f6997df4163f27f67046405b681337c8c1e5596fe18c",
+        "runner": {
+          "captured_bytes": 89,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "12419f7a4a9966c8a13159e4170b465ec8cd16a2c5da62b288e17012919659f3",
+          "seconds": 31.34,
+          "status": "passed"
+        },
+        "vm_boundary": "VMM PID 24784\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n"
+      },
+      "memory": {
+        "cleanup": "verified_absent",
+        "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
+        "observations": {
+          "dmesg_exit": 0,
+          "oom_log": [
+            "[   11.072961] Out of memory: Killed process 456 (python) total-vm:208480kB, anon-rss:199808kB, file-rss:116kB, shmem-rss:0kB, UID:0 pgtables:448kB oom_score_adj:0"
+          ],
+          "returncode": -9
+        },
+        "raw_report_sha256": "daf63fa5e2433a478fb7de9f489398278f40710d45b659226e92b847714f24f0",
+        "runner": {
+          "captured_bytes": 87,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "0d0a8b6463f9d193f4276b6979d2d4e3bafd33d8e8158673ac952f25ddd7df93",
+          "seconds": 33.529,
+          "status": "passed"
+        },
+        "vm_boundary": "VMM PID 20917\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n"
+      },
+      "node": {
+        "cleanup": "verified_absent",
+        "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
+        "observations": {
+          "node": "executed"
+        },
+        "raw_report_sha256": "0d5c238e5d038531a34956cbc24508fc01d4093b265194b9f6f86837fc2f7bd6",
+        "runner": {
+          "captured_bytes": 85,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "7f310dad6ba5848bc86b5482691b85aafe36df86dd140e441cfaa102420f2e12",
+          "seconds": 33.455,
+          "status": "passed"
+        },
+        "vm_boundary": "VMM PID 19618\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n"
+      },
+      "output": {
+        "cleanup": "verified_absent",
+        "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
+        "observations": {
+          "captured_limit": 65536,
+          "category": "output_limit",
+          "completed_transfer": false,
+          "producer_upper_bound": 134217728
+        },
+        "raw_report_sha256": "21c2a6b889fe1855d0d3252c46fb722994580b2ceb5d828c1ff4c35a04a4f228",
+        "runner": {
+          "captured_bytes": 86,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "50c5b5c0b667024be4bb7314ca1990ad0c615141ded6e5939985239e2b8dc0fa",
+          "seconds": 32.875,
+          "status": "passed"
+        },
+        "vm_boundary": "VMM PID 23545\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n"
+      },
+      "processes": {
+        "cleanup": "verified_absent",
+        "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
+        "observations": {
+          "children": 192,
+          "errno": null
+        },
+        "raw_report_sha256": "8773278bd8d737cdc51561e8bdaa0dda3663b680771350ec65b58543b1f934bc",
+        "runner": {
+          "captured_bytes": 90,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "4d5e4c05e03a0d7471df70629874edcbad3151eb241d4836baacff5c27071a60",
+          "seconds": 36.3,
+          "status": "passed"
+        },
+        "vm_boundary": "VMM PID 22156\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n"
+      },
+      "slow_reader": {
+        "cleanup": "verified_absent",
+        "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
+        "observations": {
+          "captured_limit": 65536,
+          "category": "transport",
+          "completed_transfer": false,
+          "producer_upper_bound": 134217728
+        },
+        "raw_report_sha256": "c53debbb77a0ac67cd1f00da0e43ceedd20cf6403191499e65361556574962a7",
+        "runner": {
+          "captured_bytes": 92,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "446226a6796d827f157c1b66b32e5e607c026f3347a3f5234df7194e3adc0b96",
+          "seconds": 35.047,
+          "status": "passed"
+        },
+        "vm_boundary": "VMM PID 24160\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n"
+      },
+      "smoke": {
+        "cleanup": "verified_absent",
+        "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
+        "observations": {
+          "system": "Linux"
+        },
+        "raw_report_sha256": "a52de5f6e441a6db86f34343b71ca5d5d52204cd8b897124eab5441025684c08",
+        "runner": {
+          "captured_bytes": 85,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "ae2152644793a113eac8254f67e439ca88d2f8effecee4440ced073661175263",
+          "seconds": 25.939,
+          "status": "passed"
+        },
+        "vm_boundary": "VMM PID 18943\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n"
+      }
+    },
+    "source_base": "adc0c27c8465d7c500bf5ef1b9466112b70009a1",
+    "status": "passed",
+    "workloads": 10
   },
   "language_matrix": {
     "lanes": [
@@ -239,7 +486,7 @@
   },
   "limitations": [
     "Not final-commit validation.",
-    "Guest workload, independent durable service-failure, outer-VM recovery and legacy Linux campaigns remain incomplete.",
+    "Independent durable service-failure, outer-VM recovery and legacy Linux campaigns remain incomplete.",
     "The longer-than-five-minute public-contract requirement remains unresolved.",
     "No default runtime promotion or general security certification."
   ],
@@ -555,8 +802,73 @@
     }
   },
   "scope": "Native Linux ordinary CI and disposable nested KVM runtime observations are separate configurations.",
+  "service_fixture_followup": {
+    "archive_sha256": "632df14d6a3431ceb9c5dbc10570ace0c205d718c7a3e138985adbb360d62a4e",
+    "diagnostic_rerun": {
+      "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+      "dispatch_attempts": 1,
+      "guest_marker": "single byte before recovery",
+      "guest_survived_api_server": true,
+      "operator_deleted_vm": false,
+      "outage_seconds": 0.052,
+      "partition": "restart-bcfefd32e8777943",
+      "platform": "linux",
+      "result": {
+        "absence_at_ms": 1789345205249,
+        "artifacts": [],
+        "cancel_requested_at_ms": null,
+        "cleanup": "complete",
+        "collection": "pending",
+        "evidence": "termination_confirmed",
+        "exit_code": null,
+        "id": "restart-bcfefd32e8777943",
+        "machine_name": "sbxexample-epplibysg6ex3zdboloj",
+        "reserved": false,
+        "scope": "example",
+        "state": "unknown",
+        "worker_id": "example-worker"
+      },
+      "retained_workspace": "/tmp/sbx-worker-restart-c9b4701103168b635e23cadc",
+      "runtime_version": "1.16.0",
+      "scenario": "restart",
+      "seconds": 92.041,
+      "status": "passed"
+    },
+    "diagnostic_rerun_changes": "Sanitized failure reason and expected phase; initial phase allowance still 30 seconds in this run.",
+    "disposal": {
+      "outer_guest_stopped_utc": "2026-09-14T00:21:12Z",
+      "recovery_marker_absent": true,
+      "subsequent_active_state": "inactive",
+      "subsequent_main_pid": 0,
+      "subsequent_result": "success"
+    },
+    "failed_attempt": {
+      "cleanup_errors": [
+        "ArgumentError"
+      ],
+      "failure": "ArgumentError",
+      "partition": "restart-0e05b0250c82560b",
+      "retained_workspace": "/tmp/sbx-worker-restart-1a6656989911f519dbfdb020",
+      "scenario": "restart",
+      "status": "failed"
+    },
+    "orphan": {
+      "account": "lab",
+      "command_name": "libkrun VM",
+      "observed_utc": "2026-09-14T00:21:04Z",
+      "pid": 26250,
+      "started_utc": "2026-09-14T00:14:10Z",
+      "uid": 1000,
+      "vcpu_descriptors": 1,
+      "vm_descriptors": 1
+    },
+    "orphan_observation_sha256": "b3d5ed885e4bd72c59c610ed868e815cee4d6a3d38e6c662ebb02a70ead1469d",
+    "scope": "Initial fixture cleanup failed and leaked a VMM until outer guest disposal. A later passing fixture does not erase that failure. Extended-unavailability and external-deletion fixtures remain outstanding on Linux.",
+    "source_base": "adc0c27c8465d7c500bf5ef1b9466112b70009a1"
+  },
   "shared_storage_cleanup": {
     "controller_change_commit": "067b6ec",
+    "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
     "detail": {
       "absence_after_worker_restart": true,
       "after_delete": {
@@ -660,7 +972,6 @@
       "subsequent_execution": "create/start/upload/exec/download/stop/delete/absence passed",
       "version": "1.16.0"
     },
-    "kvm_fds_after_teardown": 0,
     "profile": {
       "cpu_percent": 200,
       "memory_max_bytes": 2147483648,

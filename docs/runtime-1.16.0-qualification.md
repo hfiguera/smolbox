@@ -127,8 +127,9 @@ The `-V` probe prints the 1.47.0 banner and exits with an invalid-option message
 the successful geometry and persistence run supplies the functional evidence.
 The controlled Linux missing-prerequisite case was still outstanding at this
 initial checkpoint; its later result is recorded below. Guest reports were
-exported before stopping the outer VM; its recovery completed and no worker
-KVM file descriptors remained at the final guest observation.
+exported before stopping the outer VM; its recovery completed. The descriptor
+check used the baseline account, not the candidate account; the independent
+candidate stop checks provide the account-process teardown evidence instead.
 
 The initial durable run finished with 23 of 25 cases passing (seed 162868,
 1,078.035 seconds). The artifact-directory outage and dispatcher-death-after-commit
@@ -242,7 +243,7 @@ The worker journal reported a VM still reachable after an attempted scope kill
 with no PID to signal. The root cause remains under investigation; increasing
 an observation timeout alone would not establish successful recovery.
 
-After external worker teardown, there were no KVM file descriptors, but the
+After external worker teardown verified absence of candidate account processes, the
 database still contained three records needing work and three reserved slots.
 Those observations establish physical teardown, not completed durable cleanup.
 The failed reports, journal and sanitized final resource/store counts were
@@ -267,7 +268,9 @@ The complete-suite observation budget was 30 minutes, while each controller's
 100-second observation deadline and all preparation, execution, lease and cleanup
 budgets stayed unchanged. The run included all original interruption boundaries;
 no cases were skipped or excluded. Final observation found zero pending database
-records, zero reserved slots and no KVM file descriptors. The earlier failed run
+records and zero reserved slots; external teardown verified absence of candidate
+account processes. The descriptor check used the wrong account and supplies no
+additional proof for this run. The earlier failed run
 remains evidence: this successful rerun does not establish why both earlier
 boundary waits failed or guarantee a startup latency under every host load.
 
@@ -282,7 +285,9 @@ writes filled the 512 MiB shared registry/data filesystem to zero available byte
 stop left only 4 KiB free. API deletion succeeded, reclaimed more than 511 MiB,
 and removed the VM data directory. Absence survived an API server restart, and a
 replacement machine completed creation, upload, execution, collection and deletion.
-Final external teardown found no KVM file descriptors. This focused experiment
+Final external teardown verified absence of the cleanup account's processes.
+Its descriptor check also used the baseline account and is not independent
+cleanup evidence. This focused experiment
 used its separate 2 GiB / 200% CPU / 128-task profile with VM UID dropping disabled;
 it does not replace the stricter deployment's resource and isolation campaign.
 The version-selecting experiment controller is committed as `067b6ec`.
@@ -295,8 +300,54 @@ of the owned processes. All eleven negative startup cases were rejected, coverin
 weakened limits and lifecycle policy, disabled Landlock/private networking,
 modified artifacts and a missing storage boundary. Restoring the expected
 configuration produced a healthy 1.16.0 worker. These deliberate injections test
-the external worker controls; the separate guest workload campaign is still
-required.
+the external worker controls separately from guest behavior.
+
+The ten guest workload probes and an additional geometry/persistence probe then
+all passed. They covered Python, Node, guest memory exhaustion, CPU saturation,
+process creation, full storage, output limits, a slow reader, isolation and file
+boundaries. Each verified API cleanup and subsequent external teardown with no
+candidate account processes remaining. The baseline account's empty descriptor
+report does not add evidence for the candidate account. The VMM's observed threads retained seccomp,
+NoNewPrivileges and zero effective capabilities in the candidate cgroup.
+
+These observations preserve the existing limits of the claim: 192 guest children
+were allowed, so the host task limit is not a per-guest PID limit. Guest symlinks
+can reference other guest paths; the file API does not promise a workspace-only
+boundary. The output probes used bounded producers and do not establish behavior
+for every possible output stream. Independent durable service-failure and outer
+VM recovery cases remain separate requirements.
+
+### Service fixture failure and descriptor-check correction
+
+A standalone Linux API restart fixture failed after 34.647 seconds and reported
+an additional cleanup error. Its original report retained only `ArgumentError`,
+so the failure's exact cause is unknown. A fresh diagnostic rerun passed in
+92.041 seconds with one dispatch and a surviving guest across the API outage.
+Its execution result remained `unknown` with confirmed termination and complete
+cleanup; this does not establish a known command exit or successful collection.
+
+An account-specific descriptor inspection then found a detached VMM from the
+first failed fixture: PID 26250, UID 1000 (`lab`), started at 00:14:10 UTC on
+September 14. At 00:21:04 it still held a KVM VM and vCPU descriptor. The previous
+helper inspected `smolbox-worker`, while candidate, shared-storage and standalone
+fixtures used `smolbox-qual`, `smolbox-cleanup` and `lab`, respectively. Empty
+reports for the baseline account were incorrectly treated as broader evidence.
+The helper now accepts those explicit accounts; it detected this live VMM.
+Selecting processes only by `smolvm-bin` command name also misses VMM processes
+whose command name is `libkrun VM`.
+
+Candidate and shared-storage controllers independently wait for all processes
+owned by their actual account to disappear. Those teardown checks remain valid.
+The standalone fixture had no equivalent final boundary, so its failed cleanup
+must remain a failure. The entire disposable outer guest was stopped at 00:21:12
+UTC. Subsequent host observation confirmed `MainPID=0`, inactive state, successful
+unit result and completed recovery. This removed the test environment containing
+the orphan; it does not retroactively make the fixture cleanup pass.
+
+The fixture now records a fixed, sanitized failure reason and expected phase.
+Its initial running-phase observation is aligned with the example's permitted
+60-second preparation budget by allowing 90 seconds. That adjustment still needs
+real Linux revalidation and does not explain the earlier failure by itself.
 
 At `adc0c27c8465d7c500bf5ef1b9466112b70009a1`, ordinary native Linux checks passed:
 204 deterministic cases (seed 146040), 95.41% coverage, all eight bad/clean analyzer
