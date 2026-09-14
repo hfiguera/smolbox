@@ -80,7 +80,7 @@ creating machines, executing commands, streaming output, and transferring files.
 
 Published SmolBox **0.1.2** defaults to SmolVM **1.14.6** on Linux x86_64 and
 macOS Apple Silicon. This unreleased checkout defaults to **1.16.0** after
-platform qualification; see [the evidence and final-check status](docs/compatibility.md#smolvm-1-16-0-qualification).
+platform qualification; see [the qualification evidence](docs/compatibility.md#smolvm-1-16-0-qualification).
 
 Add SmolBox to your application's `mix.exs`:
 
@@ -114,8 +114,7 @@ is included in the repository.
 ## Current scope
 
 SmolBox has real execution and durable recovery tests on Linux x86_64 and macOS
-Apple Silicon with **SmolVM 1.14.1, 1.14.6 and 1.16.0**; results and remaining
-final checks are recorded in [Compatibility](docs/compatibility.md#runtime-selection).
+Apple Silicon with **SmolVM 1.14.1, 1.14.6 and 1.16.0**; results are recorded in [Compatibility](docs/compatibility.md#runtime-selection).
 This checkout defaults to **1.16.0**; published 0.1.2 defaults to **1.14.6**.
 Before adopting the new default with an older worker, explicitly configure
 `runtime_version: "1.14.1"` or `"1.14.6"`, or follow the

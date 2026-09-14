@@ -4,8 +4,9 @@
 
 The maintainer authorized qualifying official 1.16.0 under the existing public
 contract on branch `support-smolvm-1.16.0`. Linux and native macOS platform
-qualification passed; the checkout now defaults to 1.16.0, with final validation
-of that configuration still required. Exhaustion and adversarial checks run only
+qualification passed; the checkout now defaults to 1.16.0. Final runtime,
+recovery, language-matrix and quality checks passed at `5ea1e73`; final archive
+acceptance after the evidence update is recorded in the qualification checklist. Exhaustion and adversarial checks run only
 inside the disposable Linux lab. Tags, publication, pushes and PRs are excluded.
 The [qualification checklist](runtime-1.16.0-qualification.md) records the exact
 release inputs, progress and outstanding acceptance work. Historical completed
@@ -16,8 +17,11 @@ recovery suites, the repeated constrained Linux workload/control tests, three AP
 service-failure cases, a live-VMM observation at the real worker deadline, and
 independent outer-VM recovery with a verified 1.16.0 replacement. Legacy versions
 passed the ordinary suites and all 25 recovery cases on Linux and macOS. Commit
-`849557c` records that completed compatibility milestone. Final committed-candidate
-checks remain in progress. The
+`849557c` records that completed compatibility milestone. Commit `5ea1e73`
+then passed all final runtime/store/recovery cases on both platforms, eighteen
+quality gates per platform, the complete language matrix, and current/minimum
+package consumers. Documentation changes receive final archive acceptance
+separately. The
 buffered and streaming HTTP operations crossed five minutes through the public
 client while their guest commands stayed within the existing 300-second limit.
 An earlier streaming startup failure and the full legacy 1.14.6 recovery failure

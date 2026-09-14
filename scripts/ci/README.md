@@ -71,7 +71,7 @@ exhaustion and adversarial testing remain in the disposable Linux lab. See the
 implementation plan for the separate checkpoints and current acceptance status.
 
 Preflight uses the official platform binary pins for each supported version.
-Consult the [1.16.0 evidence and final-check status](../../docs/compatibility.md#smolvm-1-16-0-qualification).
+Consult the [1.16.0 qualification evidence](../../docs/compatibility.md#smolvm-1-16-0-qualification).
 Manifest admission alone is not runtime qualification. No protected GitHub worker infrastructure was provisioned or
 executed by the local qualification campaign.
 

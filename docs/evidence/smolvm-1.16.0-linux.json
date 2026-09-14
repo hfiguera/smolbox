@@ -271,6 +271,62 @@
     ],
     "tasks": "max 4"
   },
+  "final_recorded_at": "2026-09-14 UTC",
+  "final_runtime_5ea1e73": {
+    "checks": {
+      "durable": {
+        "captured_bytes": 4393,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "f0194c5d1a6c02a2a74b2dffca4ba59c1f70a1f2732a0beda610a9978e11fc3c",
+        "seconds": 1169.44,
+        "status": "passed",
+        "tests": {
+          "passed": 25,
+          "seed": 913260
+        }
+      },
+      "runtime": {
+        "captured_bytes": 209,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "4719fc526f2cbb6084c4ae07f7c44f4a6253384de188e2f1da5d56e9f4c4901a",
+        "seconds": 445.242,
+        "status": "passed",
+        "tests": {
+          "passed": 14,
+          "seed": 913260
+        }
+      },
+      "store": {
+        "captured_bytes": 332,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "b092fccb4801338ce5081037d3a0952dd099ccff21655496472b6fec21353998",
+        "seconds": 3.075,
+        "status": "passed",
+        "tests": {
+          "passed": 16,
+          "seed": 37540
+        }
+      }
+    },
+    "cleanup": {
+      "actual_lab_kvm_descriptors": 0,
+      "actual_qualification_kvm_descriptors": 0,
+      "initial_store_log_sha256": "36b431a55b24cc35f485ca6eac55c17b7d1c752b324fc372381951febb36068e",
+      "launcher_correction": "Initial store selection ran 13 successful cases but omitted machine_index_test.exs; expected-16 guard stopped the launcher. After verified teardown and empty store, the complete two-file store suite and 25 recovery cases passed. The successful 14 runtime cases were retained, not rerun.",
+      "pending": 0,
+      "remaining_owned_beams": 0,
+      "remaining_owned_workers": 0,
+      "slots": 0
+    },
+    "raw_archive_sha256": "74ca89ea4449d092286cc4449836951ee66fe56fb81ff432fc79de0cbc6429b6",
+    "runtime": "1.16.0",
+    "runtime_version_environment": "unset",
+    "scope": "Committed candidate with the version environment variable unset. Managed runtime tests omit runtime_version, exercising the library default. Mac tests are ordinary compatibility/recovery; Linux tests run inside the disposable nested KVM guest.",
+    "source_commit": "5ea1e73e32b3d1faf8a5881ac06d3ee6f029e871"
+  },
   "guest_workloads": {
     "additional_geometry_probe": true,
     "limits": [
@@ -517,6 +573,157 @@
     "source_base": "adc0c27c8465d7c500bf5ef1b9466112b70009a1",
     "status": "passed",
     "workloads": 10
+  },
+  "language_checkpoint_5ea1e73": {
+    "archive_sha256": "fea949c87bcaaea04ce1a2461b8a59f4151f22d22c19ed2f69dc6aa688974216",
+    "lanes": {
+      "1-18-4-otp-27": {
+        "checks": {
+          "compile": {
+            "captured_bytes": 46,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "64a3403add76977bc6c689a08ecbad2e20468d607263e80ecb65e8105f4682da",
+            "seconds": 0.908,
+            "status": "passed"
+          },
+          "otp-patch": {
+            "captured_bytes": 11,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "e179d850f967cac2067c939df8f68553f2b0cef36116460d876502c654b988a3",
+            "seconds": 0.21,
+            "status": "passed"
+          },
+          "tests": {
+            "captured_bytes": 391,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "5fd2ac210eb074c6f7e9a10caf69073a9828fd7bff6a0f8ee16870d5b0f44fa0",
+            "seconds": 79.486,
+            "status": "passed"
+          },
+          "tooling": {
+            "captured_bytes": 156,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "427a5a560381dff8b93a8666b49702bc62e331219ff6121e1dbe37f9b69d3422",
+            "seconds": 6.663,
+            "status": "passed"
+          },
+          "version": {
+            "captured_bytes": 143,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "05eebecc0c91193562bd5a1908ec38c35e750dcc168f15d26bbddd416c21f0fc",
+            "seconds": 0.215,
+            "status": "passed"
+          }
+        },
+        "deterministic_cases": 204,
+        "excluded_runtime_cases_not_counted": 14,
+        "otp_patch": "27.3.4.15",
+        "tooling_cases": 23
+      },
+      "1-19-5-otp-28": {
+        "checks": {
+          "compile": {
+            "captured_bytes": 46,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "64a3403add76977bc6c689a08ecbad2e20468d607263e80ecb65e8105f4682da",
+            "seconds": 1.02,
+            "status": "passed"
+          },
+          "otp-patch": {
+            "captured_bytes": 6,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "669a552fb386db8c3dd5b5cc530eb9d11466a99bce4766efd4b4595945a66490",
+            "seconds": 0.27,
+            "status": "passed"
+          },
+          "tests": {
+            "captured_bytes": 392,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "5e37af8d0d358cd74794ceb02380cbdda5fa14e90aad3ed30f835dcc782ced00",
+            "seconds": 81.008,
+            "status": "passed"
+          },
+          "tooling": {
+            "captured_bytes": 156,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "0eeea0d6e074cc11aa4a89f7dd708a323888f719c6176ad461263c88349f6237",
+            "seconds": 6.456,
+            "status": "passed"
+          },
+          "version": {
+            "captured_bytes": 138,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "96b2616fe3236cc99ff4bd7aa74f16b29a7cd535d0ed302802fb2a7260e54657",
+            "seconds": 0.219,
+            "status": "passed"
+          }
+        },
+        "deterministic_cases": 204,
+        "excluded_runtime_cases_not_counted": 14,
+        "otp_patch": "28.5",
+        "tooling_cases": 23
+      },
+      "1-20-4-otp-28": {
+        "checks": {
+          "compile": {
+            "captured_bytes": 24,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "643fef37343c8f06dd71921b20b929d8d34b5847532a65041adf534cf1988f9d",
+            "seconds": 0.944,
+            "status": "passed"
+          },
+          "otp-patch": {
+            "captured_bytes": 6,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "669a552fb386db8c3dd5b5cc530eb9d11466a99bce4766efd4b4595945a66490",
+            "seconds": 0.214,
+            "status": "passed"
+          },
+          "tests": {
+            "captured_bytes": 401,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "54864d554ec35d9caec1a7a6be7821f615bb7c188b81d1afc7951e17677abd04",
+            "seconds": 79.656,
+            "status": "passed"
+          },
+          "tooling": {
+            "captured_bytes": 153,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "9ccf3a2e378e27bf8e2768d62ea0236929712c80e61e3f45bb70f84022b29b90",
+            "seconds": 6.784,
+            "status": "passed"
+          },
+          "version": {
+            "captured_bytes": 138,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "b2ea3032afbde557454665d09f0aeac67792625513de862950d6c398d476ccc9",
+            "seconds": 0.184,
+            "status": "passed"
+          }
+        },
+        "deterministic_cases": 204,
+        "excluded_runtime_cases_not_counted": 14,
+        "otp_patch": "28.5",
+        "tooling_cases": 23
+      }
+    },
+    "scope": "Ordinary tests in a separate owned host checkout with two BEAM schedulers and lower process priority. Actual OTP patch files verified. No runtime, exhaustion or adversarial qualification implied.",
+    "source_commit": "5ea1e73e32b3d1faf8a5881ac06d3ee6f029e871"
   },
   "language_checkpoint_bc1a755": {
     "archive_sha256": "9c066240e35e3ca40db654f5d48dc556be10b09d64ab4316a7586880830bdb1e",
@@ -1368,9 +1575,9 @@
     "worker_account_kvm_descriptors_after_stop": 0
   },
   "limitations": [
-    "Not final-commit validation.",
+    "Final runtime and quality evidence identifies candidate 5ea1e73. Final documentation/archive acceptance is recorded separately in the repository qualification guide.",
     "Buffered and streaming HTTP operations beyond five minutes passed with 299-second guest commands. Public command and managed-execution limits remain unchanged; earlier startup failures remain recorded.",
-    "The unreleased checkout default is now 1.16.0; final candidate validation remains required. No general security certification."
+    "The unreleased checkout defaults to 1.16.0. Results apply only to the documented deployment; no general production or security certification."
   ],
   "long_operation_first_attempt": {
     "archive_sha256": "aa35a0aa52d45c89d2fb92d570f513f4991a47bb124a7a4d449a0268e3ff98bd",
@@ -1627,6 +1834,64 @@
       "terminated_at_unix": 1789347438
     },
     "scope": "Frozen baseline guest proves independent host recovery; exact 1.16.0 explicitly installed and exercised in the clean replacement. No claim of a candidate execution in the frozen guest."
+  },
+  "package_checkpoint_5ea1e73": {
+    "reports": {
+      "current": {
+        "detail_sha256": "808afb623dca42de6bbdf1f4b8950d974de5a7d19e43fb1285bd8d9e0bc1afaa",
+        "files": 91,
+        "package_sha256": "272d16209f802825c41365b4892714e1472f2ad313ea8a3fa6f764471fe350f0",
+        "runner": {
+          "captured_bytes": 126,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "6a9d2234c8824271dbc0420e0306f4fcfb16d4f95773aee39d7476b52c64d6f5",
+          "seconds": 14.2,
+          "status": "passed"
+        },
+        "smoke": {
+          "client": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "runtime_default": "1.16.0",
+          "supervisor": true,
+          "versions": {
+            "jason": "1.4.5",
+            "nimble_options": "1.1.1",
+            "req": "0.7.4",
+            "telemetry": "1.4.2"
+          }
+        }
+      },
+      "minimum": {
+        "detail_sha256": "bc80e632fd5375f0a978ff5abe26ac859c68b9d124697d3c623136f30be3afb5",
+        "files": 91,
+        "package_sha256": "272d16209f802825c41365b4892714e1472f2ad313ea8a3fa6f764471fe350f0",
+        "runner": {
+          "captured_bytes": 126,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "2e084f9bcff574959eb2e91f41672c9c1f5e7b878f6a3f811ab18ef0af1cc769",
+          "seconds": 13.85,
+          "status": "passed"
+        },
+        "smoke": {
+          "client": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "runtime_default": "1.16.0",
+          "supervisor": true,
+          "versions": {
+            "jason": "1.4.0",
+            "nimble_options": "1.1.0",
+            "req": "0.7.4",
+            "telemetry": "1.3.0"
+          }
+        }
+      }
+    },
+    "scope": "Current and minimum dependencies consume the same archive. Later documentation/evidence updates require separate final archive acceptance.",
+    "source_commit": "5ea1e73e32b3d1faf8a5881ac06d3ee6f029e871"
   },
   "package_consumers": {
     "failed_harness_attempt": "The first wrapper invoked nonexistent mix smolbox.ci.package; corrected command is elixir scripts/ci.exs package-consumer. Completed language lanes were not rerun.",
@@ -2031,6 +2296,168 @@
       "tooling": 262455
     },
     "source_commit": "4e5692fb5aa4d68a21e384dbcad888ce6f6f20c1",
+    "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+    "tooling_cases": 23
+  },
+  "quality_checkpoint_5ea1e73": {
+    "canary_pairs": 8,
+    "checks": {
+      "canaries": {
+        "captured_bytes": 621,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "e0b964a623497ff2bb478f184e6c238afa88d2b496eb969c1ad810acf8e4339f",
+        "seconds": 16.357,
+        "status": "passed"
+      },
+      "compile-durable_host": {
+        "captured_bytes": 24,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "03d47c6b429a076348282533b9725f493e889974a689133db39f187fac79a634",
+        "seconds": 1.102,
+        "status": "passed"
+      },
+      "compile-minimal_host": {
+        "captured_bytes": 23,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "d9904e527cccaec0e854b323b04ec7f0b408ecb02771ac243d1284fc624b3205",
+        "seconds": 0.779,
+        "status": "passed"
+      },
+      "coverage": {
+        "captured_bytes": 3706,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "7ccdf97d64a4bfc9b6f49d439f8252d94c740a7545391a12cb47f1f0a521ff67",
+        "seconds": 79.98,
+        "status": "passed"
+      },
+      "deps-audit-durable_host": {
+        "captured_bytes": 62,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "97ded97167511bf60ff91c193a7dd566aad8fe50374cef37b0ee6d2e290000e6",
+        "seconds": 1.822,
+        "status": "passed"
+      },
+      "deps-audit-minimal_host": {
+        "captured_bytes": 62,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "97ded97167511bf60ff91c193a7dd566aad8fe50374cef37b0ee6d2e290000e6",
+        "seconds": 1.547,
+        "status": "passed"
+      },
+      "deps-audit-root": {
+        "captured_bytes": 26,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "3016e51e4eac0d421674d2128bbbdefb2924b4646e0c14a1ab034977ad73fae5",
+        "seconds": 1.278,
+        "status": "passed"
+      },
+      "dialyzer-durable_host": {
+        "captured_bytes": 1672,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "3e1ef5d6d998eebc062aa6656ed83fc0cc1ee4b3a604b467b4983fae51ed3bb2",
+        "seconds": 46.795,
+        "status": "passed"
+      },
+      "dialyzer-minimal_host": {
+        "captured_bytes": 1135,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "04b50d0cd3b03b43536654b5d1ecd41f81c399c1617af0df6a003ad2b92123ab",
+        "seconds": 13.908,
+        "status": "passed"
+      },
+      "doc-links": {
+        "captured_bytes": 60,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "4becb7fed09596d86e9f5b2d81c9c1f9bacb31d06c8e2cc7f47e322dad12dac6",
+        "seconds": 0.581,
+        "status": "passed"
+      },
+      "docs": {
+        "captured_bytes": 152,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "aae7135d7f0a37a3cd227d50e111b3f799daa99f6cfa30e5a2e60bca2d7bef5e",
+        "seconds": 2.073,
+        "status": "passed"
+      },
+      "hex-audit-durable_host": {
+        "captured_bytes": 47,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+        "seconds": 0.945,
+        "status": "passed"
+      },
+      "hex-audit-minimal_host": {
+        "captured_bytes": 47,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+        "seconds": 0.918,
+        "status": "passed"
+      },
+      "hex-audit-root": {
+        "captured_bytes": 47,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+        "seconds": 1.08,
+        "status": "passed"
+      },
+      "quality": {
+        "captured_bytes": 2139,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "a3d7d5bcd8d625f8b7e1ee48e289909e5a0b7a7ad5974151d1da850505edd71e",
+        "seconds": 88.951,
+        "status": "passed"
+      },
+      "tooling": {
+        "captured_bytes": 154,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "f7ddab1aecb84b8b647f4ad98aee0ca378b50a5e3e66f058594cd9b88aaae741",
+        "seconds": 6.397,
+        "status": "passed"
+      },
+      "xref-durable_host": {
+        "captured_bytes": 16,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548",
+        "seconds": 0.611,
+        "status": "passed"
+      },
+      "xref-minimal_host": {
+        "captured_bytes": 16,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548",
+        "seconds": 0.661,
+        "status": "passed"
+      }
+    },
+    "coverage_percent": 95.41,
+    "deterministic_cases": 204,
+    "documentation_pages": 42,
+    "excluded_runtime_cases_not_counted": 14,
+    "scope": "Final ordinary quality checks with the 1.16.0 default at committed candidate 5ea1e73. No real runtime or adversarial workloads executed by these gates; package and real-runtime acceptance have separate evidence.",
+    "seeds": {
+      "coverage": 333604,
+      "quality": 817538,
+      "tooling": 658523
+    },
+    "source_commit": "5ea1e73e32b3d1faf8a5881ac06d3ee6f029e871",
     "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
     "tooling_cases": 23
   },
@@ -2564,5 +2991,5 @@
     "source_base": "4e5692fb5aa4d68a21e384dbcad888ce6f6f20c1",
     "unit_properties_limitation": "The successful transient unit was unloaded before final systemctl show; subsequent LoadState was not-found. Its infinity/default property report does not describe the earlier running unit and is not enforcement evidence. No new resource qualification is claimed by this diagnostic."
   },
-  "status": "partial; qualification incomplete"
+  "status": "runtime_and_platform_qualification_complete"
 }

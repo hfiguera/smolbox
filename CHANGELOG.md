@@ -5,10 +5,12 @@
 - Default to smolvm **1.16.0** on Linux x86_64 and macOS Apple Silicon after
   platform qualification, retaining explicit 1.14.1 and 1.14.6 support. Applications
   using an older worker must retain its explicit `runtime_version` or upgrade the
-  worker before adopting this default. Final candidate checks remain in progress.
+  worker before adopting this default.
 - Record the tagged API and packaging review, actual host resizing prerequisites,
   platform runtime/recovery results and repeated constrained Linux experiments.
-  The existing public five-minute command limit remains unchanged.
+  Final validation covers real runtime and durable recovery on both platforms,
+  the complete quality/language matrix and package consumers. The existing
+  public five-minute command limit remains unchanged.
 - Correct the lab's account-specific cleanup observations, retain private bounded
   service-fixture diagnostics, and require a live VMM near the real worker deadline.
   Earlier failed or insufficient observations remain in the qualification record.

@@ -1,10 +1,10 @@
 # smolvm 1.16.0 qualification
 
-Status: **platform qualification passed; final candidate checks in progress**.
+Status: **runtime qualification passed; final archive acceptance pending**.
 Branch `support-smolvm-1.16.0` starts from
 `b649bdb0f29c574f89caebd20ac8ca3c06495bfa`. The unreleased checkout now defaults
-to 1.16.0 after Linux/macOS and legacy compatibility qualification. Final
-validation of the changed default remains required. No release or public API expansion is planned
+to 1.16.0 after Linux/macOS and legacy compatibility qualification. The changed
+default passed final runtime, recovery and quality validation at `5ea1e73`. No release or public API expansion is planned
 in this task. Existing runtime selections and execution semantics remain intact.
 
 ## Inputs and source review
@@ -671,6 +671,46 @@ worker and PostgreSQL server were confirmed stopped. No exhaustion or adversaria
 workloads ran on macOS. This completes the legacy runtime coverage; changing
 the default and validating the final candidate remain separate work.
 
+## Final default validation
+
+Commit `5ea1e73e32b3d1faf8a5881ac06d3ee6f029e871` changes the default to
+1.16.0 after platform and legacy qualification. Explicit 1.14.1 and 1.14.6
+configuration remains supported. The published 0.1.2 package is unchanged.
+
+All eighteen ordinary quality gates passed on both platforms at that commit:
+204 deterministic cases, 95.41% coverage, the required analyzers and eight
+bad/clean canary pairs, 23 CI-tooling cases, root and example security checks,
+example compilation/xref/Dialyzer, and 42 documentation pages with valid local
+links. The three additional language lanes on each platform passed the same
+204 deterministic and 23 tooling cases, with actual OTP patch files checked.
+Runtime exclusions are not counted as passes. Together with the main
+Elixir 1.20.4/OTP 29.0.6 lane, this covers all configured language pairs.
+
+With `SMOLBOX_RUNTIME_VERSION` unset, native macOS passed nine ordinary runtime
+cases, sixteen store cases and twenty-five durable recovery cases. Linux passed
+all fourteen runtime cases and the complete sixteen-case store suite. Its initial
+store launcher accidentally selected only thirteen cases; the expected-count
+guard stopped that attempt. After verified teardown and an empty store, the
+complete selection ran successfully. The passing runtime suite was retained.
+
+Both package consumers at `5ea1e73` used the same 91-file archive, SHA-256
+`272d16209f802825c41365b4892714e1472f2ad313ea8a3fa6f764471fe350f0`.
+The current-dependency consumer and the minimum-dependency consumer compiled and
+verified the client, supervisor, 1.16.0 default and explicit legacy selections.
+The minimum run used Elixir 1.18.4/OTP 27.3.4.15. This archive is a checkpoint;
+subsequent evidence updates require final package validation again.
+
+Linux then passed all twenty-five recovery cases in **1169.440 seconds**, seed
+913260, within the original 1200-second suite deadline. No deadline extension or
+rerun was needed. Final inspection found zero pending rows and reserved slots,
+no owned BEAM/worker processes, and no KVM descriptors for either actual test
+account. The source was unchanged. The raw archive SHA-256 is
+`74ca89ea4449d092286cc4449836951ee66fe56fb81ff432fc79de0cbc6429b6`.
+All evidence was exported before stopping the outer VM. macOS similarly ended
+with an empty inventory, zero pending work/slots and verified worker/database
+shutdown. Temporary installations and private evidence remain outside Git and
+the package. Final archive acceptance is recorded after the documentation commit.
+
 ## Required evidence
 
 - [x] Create the requested branch; preserve the external checkout.
@@ -691,7 +731,7 @@ the default and validating the final candidate remain separate work.
 - [x] Complete contained Linux resource/isolation campaign, effective cgroups and
   independent worker/outer-VM recovery. No exhaustion or adversarial tests on Mac.
 - [x] Real backward compatibility for 1.14.1 and 1.14.6 on supported platforms.
-- [ ] Every ordinary CI gate, all analyzers and canaries, language lanes, example
+- [x] Every ordinary CI gate, all analyzers and canaries, language lanes, example
   checks, documentation, minimum dependencies and fresh package consumers.
 - [x] Final support/default decision and synchronized public documentation.
 - [ ] Final committed candidate validation, evidence identities and owned cleanup.

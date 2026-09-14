@@ -8,7 +8,8 @@ release evidence below records the client/controller contract on Linux and macOS
 
 This unreleased checkout defaults to `runtime_version: "1.16.0"` on Linux x86_64
 and macOS Apple Silicon after platform qualification. Explicit 1.14.1 and 1.14.6
-support remains. Final checks of the changed default are in progress. The published SmolBox 0.1.2 package does not include this additional
+support remains. The changed default passed runtime, durable recovery, quality
+and language-matrix checks on both platforms at `5ea1e73`. The published SmolBox 0.1.2 package does not include this additional
 selection; use this checkout to exercise it. No Linux ARM64 support is added.
 
 Testing uses official tag `v1.16.0`, commit
@@ -31,8 +32,9 @@ apply to that configured deployment. See the
 [Linux evidence](evidence/smolvm-1.16.0-linux.json) and
 [macOS evidence](evidence/smolvm-1.16.0-macos.json) for exact inputs, failed
 attempts, corrections and limits. Legacy runtime coverage now passes on both platforms, including all 25 durable
-recovery cases for each older version. The default has been promoted to 1.16.0; final
-candidate checks remain in progress.
+recovery cases for each older version. The 1.16.0 default also passed final candidate runtime,
+store and recovery checks on both platforms. The reports identify the exact
+source revisions and retain earlier failed attempts.
 
 ### Host preparation prerequisites
 
