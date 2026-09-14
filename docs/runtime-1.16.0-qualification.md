@@ -555,7 +555,7 @@ exclusions were not counted as passes. This checkpoint includes the bounded
 preparation fixture correction; final package consumers and default selection
 remain separate acceptance work.
 
-### HTTP operation duration and remaining streaming qualification
+### HTTP operation duration and streaming event timing
 
 The existing command maximum is 300 seconds and the managed execution budget
 maximum is 300,000 ms. A guest command allowed to run longer than five minutes
@@ -588,6 +588,25 @@ machines completed the fixture's identity-checked API stop/delete/absence steps;
 after worker teardown, actual-account KVM descriptor checks were empty. The
 overall run remains failed, with the buffered proof recorded separately.
 
+A fresh streaming attempt at the same source commit completed in **386.357
+seconds**, with **299.000 seconds** measured by Python inside the guest. Creation
+took 630 ms outside that duration. The production transport delivered the first
+stdout callback at 87.357 seconds, the final stdout at 386.353 seconds and exit
+zero at 386.357 seconds. The expected `xy` marker, same-incarnation inspection,
+API stop/delete/absence and empty final inventory all passed. Actual `lab` KVM
+descriptor checks were empty before and after teardown. The fixture intentionally
+stopped its worker after completion; that worker report's `stopped` status is not
+a failed command result.
+
+This attempt retained the 480-second receive and 540-second operation budgets,
+with an 840-second worker process-group deadline inside a 900-second service.
+While loaded and active, the service reported 2 GiB memory, zero swap, 200% CPU,
+128 tasks and control-group teardown. The successful transient unit was unloaded
+before final inspection; its later default properties are not limit evidence.
+This is an ordinary bounded runtime check, separate from the strict 300-second
+deployment qualification. It establishes the streaming operation and event timing
+without replaying the earlier uncertain command or resolving its startup failure.
+
 The tagged buffered handler awaits guest execution before returning its response.
 The streaming handler instead starts an asynchronous execution task and returns
 an SSE response after VM startup and request setup. Its response body continues
@@ -608,7 +627,7 @@ timing must be recorded separately when testing the five-minute boundary.
   and file persistence across stop/start on both platforms.
 - [x] Buffered public exec operation exceeding the former five-minute HTTP limit,
   with guest and request durations recorded separately within existing limits.
-- [ ] Complete the corresponding streaming operation and event-timing check;
+- [x] Complete the corresponding streaming operation and event-timing check;
   retain its startup failure rather than treating the buffered proof as both paths.
 - [x] Shorter command/transport deadlines, await expiry and confirmed cancellation.
 - [x] PostgreSQL store contract, durable recovery, database outage, worker failures,

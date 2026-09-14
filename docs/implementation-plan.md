@@ -15,10 +15,11 @@ recovery suites, the repeated constrained Linux workload/control tests, three AP
 service-failure cases, a live-VMM observation at the real worker deadline, and
 independent outer-VM recovery with a verified 1.16.0 replacement. Legacy Linux
 compatibility and final committed-candidate checks remain in progress. The
-buffered HTTP operation crossed five minutes through the public client while
-its guest command stayed within the existing 300-second limit. Streaming startup
-and the full legacy 1.14.6 recovery run have retained failures under investigation;
-no validation bound has been bypassed or enlarged.
+buffered and streaming HTTP operations crossed five minutes through the public
+client while their guest commands stayed within the existing 300-second limit.
+An earlier streaming startup failure and the full legacy 1.14.6 recovery failure
+remain recorded; the legacy startup diagnostic captured an upstream HTTP 500
+from a timed-out agent response. No validation bound has been bypassed or enlarged.
 The [consumer compatibility guide](compatibility.md#smolvm-1-16-0-qualification)
 separates this branch's additional selection from the published 0.1.2 package.
 

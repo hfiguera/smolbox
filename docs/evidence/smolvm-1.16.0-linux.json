@@ -1332,6 +1332,77 @@
       "status": "failed"
     }
   },
+  "long_streaming_v3": {
+    "archive_sha256": "b6a79190d3a62873873ac9486f8c51c539eb7ba3f81d23225d7b0c86ec3a62cd",
+    "cleanup": "Default production transport; freshly created identity, implicit startup, verified output and marker, same-incarnation inspection, stop/delete and not-found assertions. Empty inventory and zero actual lab-account KVM descriptors before and after teardown.",
+    "effective_unit_properties_while_active": "RuntimeMaxUSec=15min\nMainPID=3546\nResult=success\nCPUQuotaPerSecUSec=2s\nMemoryMax=2147483648\nMemorySwapMax=0\nTasksMax=128\nKillMode=control-group\nLoadState=loaded\nActiveState=active\n",
+    "preflight_correction": "The first launcher preflight stopped before worker startup because this fresh legacy diagnostic guest did not yet contain 1.16.0. The official archive and all component hashes were then verified and installed before this single execution attempt.",
+    "runner": {
+      "captured_bytes": 122,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "d7051d5bf5ef792c5ac6b12021256b72ae65ba671c015eb53fe6a4044cbdb736",
+      "seconds": 393.176,
+      "status": "passed"
+    },
+    "scope": "A real streaming HTTP operation lasting 386.357 seconds, including implicit startup. First stdout callback at 87.357 seconds, final stdout at 386.353 seconds, exit at 386.357 seconds. Guest runtime was 299.000 seconds with the existing 300-second command limit. This does not extend the managed execution budget or establish a guest command exceeding five minutes. It does not erase the previous startup failure.",
+    "source_commit": "4e5692fb5aa4d68a21e384dbcad888ce6f6f20c1",
+    "status": "passed",
+    "streamed": {
+      "connect_timeout_ms": 5000,
+      "create_ms": 630,
+      "execution_operation_exceeded_300_seconds": true,
+      "execution_operation_ms": 386357,
+      "exit_code": 0,
+      "explicit_start_before_exec": false,
+      "guest_command_exceeded_five_minutes": false,
+      "guest_seconds": 299.0,
+      "guest_timeout_seconds": 300,
+      "initial_machine_state": "created",
+      "marker": "xy",
+      "mode": "streamed",
+      "operation_timeout_ms": 540000,
+      "receive_timeout_ms": 480000,
+      "runtime": "1.16.0",
+      "scope": "Public low-level exec duration includes implicit VM startup. This is not a guest command longer than five minutes.",
+      "source_commit": "4e5692fb5aa4d68a21e384dbcad888ce6f6f20c1",
+      "status": "passed",
+      "stream_events": [
+        {
+          "elapsed_ms": 87357,
+          "event": [
+            "stdout",
+            "begin\n"
+          ]
+        },
+        {
+          "elapsed_ms": 386353,
+          "event": [
+            "stdout",
+            "end\nguest_seconds=299.000\n"
+          ]
+        },
+        {
+          "elapsed_ms": 386357,
+          "event": [
+            "exit",
+            0
+          ]
+        }
+      ],
+      "worker_process_group_deadline_ms": 840000
+    },
+    "unit_observation_limitation": "The successful transient unit was unloaded before final property inspection. Only the saved live loaded/active properties establish its configured limits; post-exit default properties are not enforcement evidence.",
+    "worker_report": {
+      "captured_bytes": 203,
+      "exit_code": 0,
+      "failure": "stopped",
+      "output_sha256": "d3a4abb1a64e31c281457f662f52fbf4b09cdd4bf383590628ccaccc41e20225",
+      "seconds": 387.83,
+      "status": "failed"
+    },
+    "worker_report_interpretation": "The fixture intentionally stopped the worker after successful execution and API cleanup. Child reports this as failure=stopped; the execution and enclosing runner returned success."
+  },
   "missing_resize2fs": {
     "detail": {
       "cleanup": "empty inventory",

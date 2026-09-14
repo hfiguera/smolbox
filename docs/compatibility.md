@@ -62,8 +62,11 @@ to 300 seconds and a managed execution budget to 300,000 ms. A buffered public
 exec operation including implicit startup completed in 357.460 seconds, with
 299.002 seconds measured inside the guest and a 300-second command deadline.
 This verifies the longer HTTP operation, not a guest command exceeding five
-minutes. The corresponding streaming attempt failed during implicit preparation
-and remains under investigation. Shorter-deadline, observation-timeout and
+minutes. A subsequent streamed operation completed in 386.357 seconds, with
+299.000 seconds inside the guest. Its output callbacks arrived at 87.357 and
+386.353 seconds, followed by exit zero at 386.357 seconds. The earlier streaming
+startup failure remains recorded; a successful later run does not establish its
+cause or eliminate that failure mode. Shorter-deadline, observation-timeout and
 independent Linux worker-deadline tests are recorded separately. See the
 [client budget guidance](client.md#execution-and-transport-budgets) when choosing
 explicit bounded settings. No validation limits or public defaults were relaxed.

@@ -118,8 +118,12 @@ In smolvm 1.16.0, execution routes no longer inherit the generic five-minute
 server timeout. That upstream change does not extend SmolBox's public command
 maximum or remove its configured client deadlines. A buffered public exec
 operation including implicit startup completed in 357.460 seconds, with a guest
-command lasting 299.002 seconds. Streaming qualification remains incomplete;
-see [the qualification status](compatibility.md#smolvm-1-16-0-qualification).
+command lasting 299.002 seconds. A streamed operation completed in 386.357
+seconds, delivering its first output at 87.357 seconds and exit event at 386.357
+seconds; its guest command lasted 299.000 seconds. These measurements include
+startup and do not establish guest commands exceeding five minutes. See
+[the qualification status](compatibility.md#smolvm-1-16-0-qualification) for the
+retained startup failure and remaining acceptance work.
 `SmolBox.await/3` has a separate caller wait budget. Expiring that wait does not
 cancel the command or replace a recorded outcome with a timeout result.
 
