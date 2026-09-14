@@ -344,10 +344,29 @@ UTC. Subsequent host observation confirmed `MainPID=0`, inactive state, successf
 unit result and completed recovery. This removed the test environment containing
 the orphan; it does not retroactively make the fixture cleanup pass.
 
-The fixture now records a fixed, sanitized failure reason and expected phase.
+The fixture now records a fixed, sanitized failure reason and expected phase,
+and retains its bounded controller log privately with mode `0600` after failure.
 Its initial running-phase observation is aligned with the example's permitted
-60-second preparation budget by allowing 90 seconds. That adjustment still needs
-real Linux revalidation and does not explain the earlier failure by itself.
+60-second preparation budget by allowing 90 seconds. This does not explain the
+earlier failure by itself.
+
+A fresh guest then ran all three standalone service scenarios inside an external
+systemd unit with a 900-second lifetime and control-group teardown. Two initial
+setup attempts failed before dispatch because the fresh database lacked the
+example's schema; the retained log and PostgreSQL log identified the missing
+relation. After applying the existing migrations, all three cases passed:
+restart in 90.679 seconds, extended unavailability in 136.702 seconds, and external
+deletion in 16.878 seconds. Each recorded one dispatch, an unknown command result,
+confirmed termination, complete cleanup and released capacity. Correct account
+checks found no KVM descriptors after each case, before the enclosing unit ended.
+The unit then exited successfully with no remaining main process.
+
+These runs used source `adc0c27` plus the diagnostic fixture (SHA-256
+`b079cc096e3cb1068bf2358cba05a71a5bff4581b14942b67c27a95ca7cc7fca`)
+and corrected descriptor helper. Local canonical CI passed all 204 deterministic
+tests (seed 110013), all analyzers, 23 tooling cases, and documentation generation
+and link checks after these fixture changes. This is checkpoint evidence, not
+the final candidate validation.
 
 At `adc0c27c8465d7c500bf5ef1b9466112b70009a1`, ordinary native Linux checks passed:
 204 deterministic cases (seed 146040), 95.41% coverage, all eight bad/clean analyzer

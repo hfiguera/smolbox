@@ -866,6 +866,168 @@
     "scope": "Initial fixture cleanup failed and leaked a VMM until outer guest disposal. A later passing fixture does not erase that failure. Extended-unavailability and external-deletion fixtures remain outstanding on Linux.",
     "source_base": "adc0c27c8465d7c500bf5ef1b9466112b70009a1"
   },
+  "service_recovery": {
+    "archive_sha256": "b0e049be129f4da154961335b61cba3e5b067da00259e58132a7e5fac13aba5d",
+    "descriptor_helper_sha256": "69bb955af9be85ffd99febc7edc98f295beb36fd0203c8ba2a5fcdc1ce6584a2",
+    "enclosing_unit": {
+      "kill_mode": "control-group",
+      "main_pid_after": 0,
+      "result": "success",
+      "runtime_max_seconds": 900
+    },
+    "failed_setup_attempts": [
+      {
+        "expected_phase": "phase:running",
+        "failure": "ArgumentError",
+        "partition": "restart-d273412589478bb3",
+        "reason": "controller_exited_before_phase",
+        "retained_workspace": "/tmp/sbx-worker-restart-26b651bb30bedf26cea131bf",
+        "scenario": "restart",
+        "status": "failed"
+      },
+      {
+        "expected_phase": "phase:running",
+        "failure": "ArgumentError",
+        "partition": "restart-130da16537587e44",
+        "reason": "controller_exited_before_phase",
+        "retained_workspace": "/tmp/sbx-worker-restart-14ef2e1fe5cc71ab3713835a",
+        "scenario": "restart",
+        "status": "failed"
+      }
+    ],
+    "fixture_sha256": "b079cc096e3cb1068bf2358cba05a71a5bff4581b14942b67c27a95ca7cc7fca",
+    "scenarios": {
+      "missing": {
+        "actual_account": "lab",
+        "kvm_fds_after_fixture_before_unit_stop": 0,
+        "report": {
+          "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+          "dispatch_attempts": 1,
+          "guest_marker": "single byte before recovery",
+          "guest_survived_api_server": true,
+          "operator_deleted_vm": true,
+          "outage_seconds": 0.051,
+          "partition": "restart-884039469633b48c",
+          "platform": "linux",
+          "result": {
+            "absence_at_ms": 1789346273948,
+            "artifacts": [],
+            "cancel_requested_at_ms": null,
+            "cleanup": "complete",
+            "collection": "pending",
+            "evidence": "termination_confirmed",
+            "exit_code": null,
+            "id": "restart-884039469633b48c",
+            "machine_name": "sbxexample-dhbg7hvvxz5segxw7g6u",
+            "reserved": false,
+            "scope": "example",
+            "state": "unknown",
+            "worker_id": "example-worker"
+          },
+          "retained_workspace": "/tmp/sbx-worker-restart-5fd0c9e41aa0c1bbf0c4a5af",
+          "runtime_version": "1.16.0",
+          "scenario": "missing",
+          "seconds": 16.878,
+          "status": "passed"
+        },
+        "runner": {
+          "captured_bytes": 795,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "99472933413786f10bbd3b36446370589d10ef5f2de4dbf0b4a7d83d1bad1fd1",
+          "seconds": 17.534,
+          "status": "passed"
+        }
+      },
+      "restart": {
+        "actual_account": "lab",
+        "kvm_fds_after_fixture_before_unit_stop": 0,
+        "report": {
+          "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+          "dispatch_attempts": 1,
+          "guest_marker": "single byte before recovery",
+          "guest_survived_api_server": true,
+          "operator_deleted_vm": false,
+          "outage_seconds": 0.051,
+          "partition": "restart-d4b17fa9b1dde5eb",
+          "platform": "linux",
+          "result": {
+            "absence_at_ms": 1789346117967,
+            "artifacts": [],
+            "cancel_requested_at_ms": null,
+            "cleanup": "complete",
+            "collection": "pending",
+            "evidence": "termination_confirmed",
+            "exit_code": null,
+            "id": "restart-d4b17fa9b1dde5eb",
+            "machine_name": "sbxexample-lbbyavp4c2bb5mmf4ya5",
+            "reserved": false,
+            "scope": "example",
+            "state": "unknown",
+            "worker_id": "example-worker"
+          },
+          "retained_workspace": "/tmp/sbx-worker-restart-f04410c29fef928272ba3159",
+          "runtime_version": "1.16.0",
+          "scenario": "restart",
+          "seconds": 90.679,
+          "status": "passed"
+        },
+        "runner": {
+          "captured_bytes": 796,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "80e91642a2fcf4bf25d1d78a82646db6eb3d63f3621f3b13b0bc5b4f9e05f9c8",
+          "seconds": 91.354,
+          "status": "passed"
+        }
+      },
+      "unavailable": {
+        "actual_account": "lab",
+        "kvm_fds_after_fixture_before_unit_stop": 0,
+        "report": {
+          "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+          "dispatch_attempts": 1,
+          "guest_marker": "single byte before recovery",
+          "guest_survived_api_server": true,
+          "operator_deleted_vm": true,
+          "outage_seconds": 89.915,
+          "partition": "restart-77985de5e79fef1b",
+          "platform": "linux",
+          "result": {
+            "absence_at_ms": 1789346255945,
+            "artifacts": [],
+            "cancel_requested_at_ms": 1789346133867,
+            "cleanup": "complete",
+            "collection": "pending",
+            "evidence": "termination_confirmed",
+            "exit_code": null,
+            "id": "restart-77985de5e79fef1b",
+            "machine_name": "sbxexample-w6vnqfduh7mstony2rj4",
+            "reserved": false,
+            "scope": "example",
+            "state": "unknown",
+            "worker_id": "example-worker"
+          },
+          "retained_workspace": "/tmp/sbx-worker-restart-bf16b4bd292a2f89be8dd8ab",
+          "runtime_version": "1.16.0",
+          "scenario": "unavailable",
+          "seconds": 136.702,
+          "status": "passed"
+        },
+        "runner": {
+          "captured_bytes": 810,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "ef2e194567753f58ee300326e6207a135bbee5bb0d9311434387f061b35f4ebc",
+          "seconds": 137.354,
+          "status": "passed"
+        }
+      }
+    },
+    "setup_correction": "Fresh guest database lacked the example schema. Controller failed before dispatch; existing ecto migrations applied before the passing run.",
+    "source_base": "adc0c27c8465d7c500bf5ef1b9466112b70009a1",
+    "status": "passed"
+  },
   "shared_storage_cleanup": {
     "controller_change_commit": "067b6ec",
     "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
