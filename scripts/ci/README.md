@@ -69,6 +69,13 @@ campaign is restricted to ordinary compatibility and controlled lifecycle checks
 exhaustion and adversarial testing remain in the disposable Linux lab. See the
 implementation plan for the separate checkpoints and current acceptance status.
 
+This branch also recognizes `"runtime_version": "1.16.0"` in that manifest,
+using the official platform binary pins. The default remains 1.14.6 during
+qualification. Consult the [1.16.0 status](../../docs/compatibility.md#smolvm-1-16-0-qualification)
+before selecting it; recognition by preflight is not completed runtime
+qualification. No protected GitHub worker infrastructure was provisioned or
+executed by the local qualification campaign.
+
 The native macOS runtime command selects only the nine ordinary cases:
 
 ```sh
@@ -77,7 +84,7 @@ mix test test/runtime/client_runtime_test.exs test/runtime/managed_runtime_test.
 
 The five cases in `security_runtime_test.exs` are outside this Mac campaign.
 They remain covered by the separate Linux runtime suite. Do not count excluded
-or unexecuted cases as macOS passes. Supply working `resize2fs` for 1.14.6 disk
+or unexecuted cases as macOS passes. Supply working `resize2fs` for 1.14.6 or 1.16.0 disk
 requests below the templates; missing it caused file loss after stop/start in
 the initial Mac run. A successful health probe is insufficient. The unchanged
 file persistence test must pass on fresh VMs before recording compatibility.

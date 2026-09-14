@@ -446,6 +446,25 @@ three API server restarts, successfully executed a new command after each restar
 and retained the original one-byte dispatch marker. External CLI deletion while
 the server was down was reconciled on restart, with no remaining owned processes.
 
+### Legacy Linux and package checkpoints
+
+At `5abc003`, the fresh Linux 1.14.1 compatibility campaign passed all fourteen
+runtime cases (174.198 seconds, seed 383893) and all twenty-five durable recovery
+cases (595.131 seconds, seed 63332). Tracked source remained unchanged during
+the run. Final checks found zero pending records, zero reserved slots and no KVM
+descriptors for the actual `smolbox-qual` account. The 1.14.6 Linux campaign is
+running separately in a fresh disposable guest.
+
+At documentation checkpoint `1ac5ff4`, the same newly built package archive
+passed current and exact-minimum dependency consumers on native macOS. The
+current consumer used Elixir 1.20.4/OTP 29; the minimum consumer used Elixir
+1.18.4/OTP 27, with Jason 1.4.0, NimbleOptions 1.1.0, Req 0.7.4 and telemetry
+1.3.0. Both confirmed explicit 1.16.0 and 1.14.1 selections, the unchanged 1.14.6
+default, and ordinary supervision. The archive SHA-256 is
+`56a145eaadfbc9ee48d7f88e8604c0be7fd8148c2b05ab2eaae8401aaa05b149`.
+These consumers test package contents and configuration without a real worker;
+they are not additional runtime tests or the final candidate archive.
+
 ### Timeout scope conflict
 
 The existing command maximum is 300 seconds and the managed execution budget

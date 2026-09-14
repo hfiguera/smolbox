@@ -590,9 +590,43 @@
     "note": "Elixir 1.20.4/OTP 28 emitted Credence dependency compiler warnings; SmolBox compilation with warnings-as-errors passed.",
     "source_commit": "adc0c27c8465d7c500bf5ef1b9466112b70009a1"
   },
+  "legacy_1_14_1": {
+    "actual_account": "smolbox-qual",
+    "archive_sha256": "8a96be968180800e7d49316b45c6de5f1d1fdaed095673e226d6454c96f07e4b",
+    "durable": {
+      "captured_bytes": 4909,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "e500a0b3e062acd60e1ca0a39000b7c533d9d3a58274770dbc699410ff8e73c6",
+      "seconds": 595.131,
+      "status": "passed",
+      "tests": {
+        "passed": 25,
+        "seed": 63332
+      }
+    },
+    "harness_sha256": "7df26c0cfa0142adc63cec69680f532aef4caf875bc142ac358f5a22652609df  /home/lab/input/linux-legacy-suites.sh\n28d2fc4e3adbb0a25f35abb25e85c64abeacbc605194ae96e40ed26f46d16eb7  /opt/smolbox/source/scripts/lab/run-check-legacy.exs\n",
+    "kvm_fds_after_teardown": 0,
+    "pending_records": 0,
+    "reserved_slots": 0,
+    "runtime": {
+      "captured_bytes": 185,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "ec2750664e68c15f4146e47407e68d05dce6b78f8750cb60a27e3da93eb2c6b7",
+      "seconds": 174.198,
+      "status": "passed",
+      "tests": {
+        "passed": 14,
+        "seed": 383893
+      }
+    },
+    "source_commit": "5abc0037bea19daf97d094f08eb773f5b9c61bff",
+    "status": "passed"
+  },
   "limitations": [
     "Not final-commit validation.",
-    "Legacy Linux campaigns remain incomplete.",
+    "The legacy Linux 1.14.6 campaign remains incomplete.",
     "The longer-than-five-minute public-contract requirement remains unresolved.",
     "No default runtime promotion or general security certification."
   ],
