@@ -9,11 +9,15 @@ defmodule SmolBox.QualificationProbe do
     assert {"smolbox-nested\n", 0} = System.cmd("hostname", [])
 
     {:ok, worker} =
-      Worker.new("candidate", "http://localhost", unix_socket: "/srv/sbq/run/api.sock")
+      Worker.new("candidate", "http://localhost",
+        unix_socket: "/srv/sbq/run/api.sock",
+        operation_timeout_ms: 60_000,
+        receive_timeout_ms: 55_000
+      )
 
     {:ok, client} = Client.new(worker)
-    version = System.get_env("SMOLBOX_RUNTIME_VERSION", "1.14.6")
-    assert version in ["1.14.1", "1.14.6"]
+    version = System.get_env("SMOLBOX_RUNTIME_VERSION", "1.16.0")
+    assert version in ["1.14.1", "1.14.6", "1.16.0"]
     assert {:ok, %{version: ^version, total: 0}} = Client.health(client)
     {:ok, name} = Identity.machine_name("qual")
     artifact = if kind == "node", do: "node", else: "python"
@@ -152,14 +156,19 @@ defmodule SmolBox.QualificationProbe do
     actual = sizes |> String.split() |> Enum.map(&String.to_integer/1)
 
     expected =
-      if System.get_env("SMOLBOX_RUNTIME_VERSION", "1.14.6") == "1.14.6",
+      if System.get_env("SMOLBOX_RUNTIME_VERSION", "1.16.0") in ["1.14.6", "1.16.0"],
         do: [1_073_741_824, 1_073_741_824],
         else: [21_474_836_480, 10_737_418_240]
 
     assert actual == expected
     assert data["filesystem_bytes"] <= hd(expected)
     assert {:ok, "roundtrip"} = Client.download(client, name, "/workspace/geometry", 32)
-    Map.put(data, "raw_disk_bytes", actual)
+    assert {:ok, command} = Command.new(["sync"])
+    assert {:ok, %{exit_code: 0}} = Client.exec(client, name, command)
+    assert {:ok, _} = Client.stop(client, name)
+    assert {:ok, _} = Client.start(client, name)
+    assert {:ok, "roundtrip"} = Client.download(client, name, "/workspace/geometry", 32)
+    Map.merge(data, %{"raw_disk_bytes" => actual, "stop_start_persistence" => true})
   end
 
   defp probe("memory", client, name) do

@@ -9,12 +9,16 @@ defmodule SmolBox.CaptureWire do
   def run do
     assert {"smolbox-nested\n", 0} = System.cmd("hostname", [])
     version = System.fetch_env!("SMOLBOX_RUNTIME_VERSION")
-    assert version in ["1.14.1", "1.14.6"]
+    assert version in ["1.14.1", "1.14.6", "1.16.0"]
     directory = "/home/lab/qualification/wire-#{version}"
     File.mkdir!(directory)
 
     {:ok, worker} =
-      Worker.new("capture", "http://localhost", unix_socket: "/srv/sbq/run/api.sock")
+      Worker.new("capture", "http://localhost",
+        unix_socket: "/srv/sbq/run/api.sock",
+        operation_timeout_ms: 60_000,
+        receive_timeout_ms: 55_000
+      )
 
     {:ok, client} = Client.new(worker)
     health = request(worker, :get, "/health", nil)

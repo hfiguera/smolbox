@@ -6,7 +6,7 @@ defmodule SmolBox.MachineTest do
   defp fixture(name), do: "test/fixtures/wire/#{name}.json" |> File.read!() |> Jason.decode!()
 
   test "captured lifecycle observations retain weak creation evidence across states" do
-    for prefix <- ["", "1.14.6/"] do
+    for prefix <- ["", "1.14.6/", "1.16.0/"] do
       assert {:ok, created} = Machine.from_wire(fixture(prefix <> "created"))
       assert {:ok, running} = Machine.from_wire(fixture(prefix <> "running"))
       assert Machine.same_incarnation?(created, running)

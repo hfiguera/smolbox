@@ -57,7 +57,15 @@ defmodule SmolBox.CI.WorkerFault do
       try do
         exercise(state)
       rescue
-        error -> %{status: "failed", failure: inspect(error.__struct__)}
+        error ->
+          retain_controller_log(state)
+
+          %{
+            status: "failed",
+            failure: inspect(error.__struct__),
+            reason: failure_reason(error),
+            expected_phase: Agent.get(state, &Map.get(&1, :expected_phase))
+          }
       end
 
     cleanup_errors = cleanup(state)
@@ -180,7 +188,9 @@ defmodule SmolBox.CI.WorkerFault do
       )
 
     Agent.update(state, &%{&1 | controller: controller})
-    phase!(state, "phase:running")
+    # The example permits 60 seconds of preparation. The fixture must not abort
+    # an otherwise permitted cold boot at its generic 30-second phase limit.
+    phase!(state, "phase:running", 90_000)
     [created] = Agent.get(state, & &1.snapshots)
     stop_child(worker)
     Agent.update(state, &%{&1 | worker: nil})
@@ -243,6 +253,7 @@ defmodule SmolBox.CI.WorkerFault do
   end
 
   defp phase!(state, expected, timeout \\ 30_000) do
+    Agent.update(state, &Map.put(&1, :expected_phase, expected))
     wait_phase(state, expected, System.monotonic_time(:millisecond) + timeout)
   end
 
@@ -330,6 +341,28 @@ defmodule SmolBox.CI.WorkerFault do
         HTTP.json!(url <> "/api/v1/machines") == %{"machines" => []},
         "worker inventory not empty"
       )
+
+  # Keep report reasons useful without copying arbitrary exception text, command
+  # output or fixture credentials into a shareable qualification report.
+  defp failure_reason(error) do
+    case Exception.message(error) do
+      "controller phase deadline elapsed" -> "controller_phase_deadline"
+      "controller exited before required phase" -> "controller_exited_before_phase"
+      "guest did not survive server outage" -> "guest_did_not_survive_server_outage"
+      _other -> "unclassified"
+    end
+  end
+
+  defp retain_controller_log(state) do
+    %{controller: controller, settings: settings} = Agent.get(state, & &1)
+
+    if controller do
+      {log, _report} = Child.snapshot(controller)
+      path = Path.join(settings["workspace"], "controller.log")
+      File.write!(path, log, [:exclusive])
+      File.chmod!(path, 0o600)
+    end
+  end
 
   defp stop_child(nil), do: :ok
 

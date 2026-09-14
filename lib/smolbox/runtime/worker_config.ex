@@ -15,7 +15,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   still expose a larger guest disk. Admission rejects profiles below these
   floors. This declaration is not remotely attested or a host filesystem quota.
 
-  Version 1.14.6 requires working host `resize2fs` for disk requests below
+  Versions 1.14.6 and 1.16.0 require working host `resize2fs` for disk requests below
   template sizes. Verify file persistence across stop/start before admission;
   see [Compatibility](compatibility.html#macos-1-14-6-prerequisites).
 
@@ -36,7 +36,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   ]
   @derive {Inspect, only: [:architecture, :platform, :runtime_version, :qualification]}
   defstruct @enforce_keys ++
-              [runtime_version: "1.14.6", qualification: :development, draining: false]
+              [runtime_version: "1.16.0", qualification: :development, draining: false]
 
   @type t :: %__MODULE__{
           client: Client.t(),
@@ -70,11 +70,14 @@ defmodule SmolBox.Runtime.WorkerConfig do
   | `:capacity` | Atom-keyed map with `:slots`, `:cpus`, `:memory_mb`, and `:disk_gb`; each 1–1,048,576 |
   | `:allocation_floor` | Atom-keyed map with `:storage_gb` and `:overlay_gb` (1–64 each), and `:host_overhead_mb` (128–16,384) |
 
-  Optional fields are `:runtime_version` (default `"1.14.6"` for Linux x86_64 or
-  macOS Apple Silicon; explicitly select `"1.14.1"` for an existing worker), `:qualification`
+  Optional fields are `:runtime_version` (default `"1.16.0"` for Linux x86_64 or
+  macOS Apple Silicon; explicitly select `"1.14.1"` or `"1.14.6"` for an existing worker), `:qualification`
   (only `:development`), and `:draining` (default `false`). Artifact IDs must be
   unique and architectures must match this worker. Construction makes no worker
   request or remote digest check. Profiles below the floor cannot support execution.
+  The 1.16.0 default is unreleased; published 0.1.2 defaults to 1.14.6. See the
+  [qualification evidence](compatibility.html#smolvm-1-16-0-qualification) and
+  upgrade the separately installed worker or retain its explicit version.
   See [Getting started](getting-started.html) for a complete configuration.
   """
   @spec new(keyword()) :: {:ok, t()} | {:error, Error.t()}
@@ -127,8 +130,9 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   defp supported_runtime?(%{runtime_version: "1.14.1"}), do: true
 
-  defp supported_runtime?(%{runtime_version: "1.14.6", platform: platform, architecture: arch}),
-    do: {platform, arch} in [{:linux, "x86_64"}, {:macos, "aarch64"}]
+  defp supported_runtime?(%{runtime_version: version, platform: platform, architecture: arch})
+       when version in ["1.14.6", "1.16.0"],
+       do: {platform, arch} in [{:linux, "x86_64"}, {:macos, "aarch64"}]
 
   defp supported_runtime?(_worker), do: false
 

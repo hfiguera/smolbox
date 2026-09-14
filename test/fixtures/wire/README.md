@@ -24,3 +24,12 @@ Linux x86_64 v1.14.6 distribution in the disposable nested KVM lab. Source commi
 normalized. Responses include the new `blockIo` and resource observation fields;
 these do not become resource enforcement claims. Execution bytes and SSE framing
 remain verbatim. The owned VM was stopped and deleted, and inventory was empty.
+
+The `1.16.0/` fixtures were captured on September 13, 2026 using the official
+Linux x86_64 release inside the disposable nested KVM lab. Source commit:
+`e1dd54bf7be6d144ad6bdef4ebf310f57809a6a6`; binary SHA-256:
+`487f20b84053ce6441c67d4d8af35fc028d3bfc7fcfd2da4309c070930fe46a1`.
+The same capture script, synthetic workloads, response cap and normalization
+rules apply. Buffered bytes and SSE framing remain verbatim. Capture completed
+with verified deletion and an empty inventory. These responses do not establish
+completion of the broader 1.16.0 qualification campaign.

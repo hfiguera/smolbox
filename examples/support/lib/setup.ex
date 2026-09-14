@@ -31,6 +31,7 @@ defmodule SmolBox.Example.Setup do
 
   def build(settings, store, mode, name) do
     artifact_file = settings["artifact_path"]
+    preparation_ms = Map.get(settings, "preparation_ms", 60_000)
     true = digest_file(artifact_file) == settings["artifact_sha256"]
     {:ok, objects} = Directory.new(settings["artifact_root"])
     :ok = Directory.seed(objects, "example", "program-v1", @program)
@@ -38,6 +39,7 @@ defmodule SmolBox.Example.Setup do
 
     {:ok, profile} =
       Profile.new("example-offline-v2",
+        preparation_ms: preparation_ms,
         execution_ms: 5000,
         storage_gb: 20,
         overlay_gb: 10,
@@ -50,7 +52,9 @@ defmodule SmolBox.Example.Setup do
       "architecture" => architecture()
     }
 
-    {:ok, endpoint} = Worker.new("example-worker", settings["url"], endpoint_options())
+    {:ok, endpoint} =
+      Worker.new("example-worker", settings["url"], endpoint_options(preparation_ms))
+
     {:ok, client} = Client.new(endpoint)
 
     {:ok, worker} =
@@ -58,7 +62,7 @@ defmodule SmolBox.Example.Setup do
         client: client,
         architecture: architecture(),
         platform: platform(),
-        runtime_version: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.14.6"),
+        runtime_version: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.16.0"),
         profiles: [profile],
         artifacts: [Map.put(artifact, "path", artifact_file)],
         allocation_floor: %{storage_gb: 20, overlay_gb: 10, host_overhead_mb: 768},
@@ -172,11 +176,14 @@ defmodule SmolBox.Example.Setup do
       "mode" => "runtime_default"
     }
 
-  defp endpoint_options do
-    # Match the example's 60-second preparation budget. A cold nested boot can
-    # outlast the client's ordinary 15-second receive timeout under a CPU cap.
+  defp endpoint_options(preparation_ms) do
+    # Match the configured preparation budget, allowing a five-second margin
+    # after receive expiry. The ordinary example still uses 60/55 seconds.
     # Managed command/collection/cleanup budgets still bound their own stages.
-    preparation = [operation_timeout_ms: 60_000, receive_timeout_ms: 55_000]
+    preparation = [
+      operation_timeout_ms: preparation_ms,
+      receive_timeout_ms: max(1000, preparation_ms - 5000)
+    ]
 
     options =
       case System.get_env("SMOLBOX_PROXY_TOKEN") do

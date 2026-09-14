@@ -1,0 +1,2995 @@
+{
+  "ci_port_close_race": {
+    "failure": "A killed process closed its port between Port.info/1 and Port.close/1 in the CI supervisor; the leader/descendant cleanup test crashed.",
+    "fix": "Close the owned port directly and handle ArgumentError for an already-closed port, preserving report completion.",
+    "fix_commit": "0548717",
+    "fixed_child_sha256": "edb87fff8fd25c8b7d3b8f815453537edf1ea0b66037212897eb1f8a311003ad",
+    "initial_source_commit": "bc1a75569f224e9604f557d79c4d222e2af928cd",
+    "initial_tooling_result": {
+      "captured_bytes": 1163,
+      "exit_code": 2,
+      "failure": null,
+      "output_sha256": "285bcd8465e3a06fd5140f7cd7cc80e69e5c111348df24d7910ee5e1bdfa461b",
+      "seconds": 7.008,
+      "status": "failed"
+    },
+    "linux_tooling_with_fixed_file": {
+      "122257": {
+        "captured_bytes": 155,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "45254db6ca4f89ce642e5678c6cdf262408fbd9dff376d5d050f605685413496",
+        "seconds": 21.574,
+        "status": "passed",
+        "tests": {
+          "passed": 23,
+          "seed": 122257
+        }
+      },
+      "48192": {
+        "captured_bytes": 154,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "9f8e6ede74675ef271609332cb56fcb30ed12a570a7dfa19172f461751204a38",
+        "seconds": 16.285,
+        "status": "passed",
+        "tests": {
+          "passed": 23,
+          "seed": 48192
+        }
+      }
+    },
+    "raw_evidence_archive_sha256": "a7d3c8f6973e6ca54a02a3c55412421045363739d0efe67709ade6c62b734193",
+    "scope": "All 23 tooling cases rerun in an isolated Linux source snapshot with the single fixed Child file. This does not replace the remaining quality stages or runtime qualification."
+  },
+  "database_unavailable_ci_checkpoint": {
+    "command": "MIX_ENV=test mix run --no-start --no-compile scripts/check_unavailable.exs",
+    "report": {
+      "captured_bytes": 31,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "f090dd47a12af3805d942e71d8b8fad0838b1a6893a1dea8fba04ae00e79c2bc",
+      "seconds": 18.911,
+      "status": "passed"
+    },
+    "scope": "Required CI script executed against an explicitly absent private Unix socket. Confirms store capabilities/fetch/accept and runtime startup return store errors. Actual database loss during accepted executions is covered separately by the disposable Linux recovery scenarios.",
+    "source_commit": "4e5692fb5aa4d68a21e384dbcad888ce6f6f20c1",
+    "working_directory": "examples/durable_host"
+  },
+  "durable_deployment": {
+    "archive_sha256": "5d7484b13d9ab44eedacb919e542da0f5064ff8073c57ece6a8f74837997e187",
+    "corrected_deadline": {
+      "acceptance_complete": true,
+      "actual_account": "smolbox-qual",
+      "archive_sha256": "1d5108232152f3cc4d1bd1b3ae40d33e2273f0adc8ea8218c3349b139645779e",
+      "fixture_sha256": "0d81553841ee92307fed0e5f8b3c35e0f6cf7b94c5f46d89ab71614f1d0275b0",
+      "http_operation_ms": 300000,
+      "http_receive_ms": 300000,
+      "kvm_fds_after_teardown": 0,
+      "live_vm_trace": "uptime=1427.17 VMM PID 17910\nuptime=1428.46 VMM PID 17910\nuptime=1429.75 VMM PID 17910\nuptime=1431.03 VMM PID 17910\nuptime=1432.45 VMM PID 17910\nuptime=1433.74 VMM PID 17910\nuptime=1435.04 VMM PID 17910\nuptime=1436.32 VMM PID 17910\nuptime=1437.63 VMM PID 17910\nuptime=1438.92 VMM PID 17910\nuptime=1440.20 VMM PID 17910\nuptime=1441.65 VMM PID 17910\nuptime=1442.95 VMM PID 17910\nuptime=1444.24 VMM PID 17910\nuptime=1445.55 VMM PID 17910\nuptime=1446.85 VMM PID 17910\nuptime=1448.16 VMM PID 17910\nuptime=1449.49 VMM PID 17910\nuptime=1450.79 VMM PID 17910\nuptime=1452.09 VMM PID 17910\nuptime=1453.40 VMM PID 17910\nuptime=1454.69 VMM PID 17910\nuptime=1455.97 VMM PID 17910\nuptime=1457.26 VMM PID 17910\nlive_vm_samples=24\nresult=timeout\n",
+      "observer_sha256": "0e2c02f2cf83c5f0a0a2e718744bccfdf7c1e49e10a40a53df37ac5561e21005",
+      "public_limits_or_defaults_changed": false,
+      "report": {
+        "cleanup": "verified_absent",
+        "dispatches": 1,
+        "identity_preserved": true,
+        "reservation_retained_during_outage": true,
+        "result": "unknown",
+        "scenario": "worker_deadline",
+        "status": "passed"
+      },
+      "runner": {
+        "captured_bytes": 179,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "b436fcdb8729bec474db254b2e745e49d2663e0da26ece43f33028d82cbc0701",
+        "seconds": 304.92,
+        "status": "passed"
+      },
+      "source_base": "adc0c27c8465d7c500bf5ef1b9466112b70009a1",
+      "unit_deadline_seconds": 300,
+      "unit_started_monotonic_us_observed": 1157553089
+    },
+    "deadline_limitation": "Initial fixture passed unit expiry/recovery but did not establish a live VM at expiry. Actual-account inspection before unit expiry found no KVM descriptors. Its 60-second HTTP operation budget permitted earlier uncertainty and cleanup. The separate corrected_deadline entry supplies passing live-VM observation and recovery evidence.",
+    "scenarios": {
+      "database_outage": {
+        "acceptance_complete": true,
+        "actual_account": "smolbox-qual",
+        "kvm_fds_after_teardown": 0,
+        "report": {
+          "cleanup": "verified_absent",
+          "dispatches": 1,
+          "identity_preserved": true,
+          "reservation_retained_during_outage": true,
+          "result": "unknown",
+          "scenario": "database_outage",
+          "status": "passed"
+        },
+        "runner": {
+          "captured_bytes": 5499,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "0615d761758b81011a7473432c8aa74705cc1b1c14e16f66ad00b2da2d9c9a50",
+          "seconds": 37.517,
+          "status": "passed"
+        }
+      },
+      "worker_deadline": {
+        "acceptance_complete": false,
+        "actual_account": "smolbox-qual",
+        "kvm_fds_after_teardown": 0,
+        "report": {
+          "cleanup": "verified_absent",
+          "dispatches": 1,
+          "identity_preserved": true,
+          "reservation_retained_during_outage": true,
+          "result": "unknown",
+          "scenario": "worker_deadline",
+          "status": "passed"
+        },
+        "runner": {
+          "captured_bytes": 529,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "ccc20e43776a98035b2c6168d8e24a37573879a46bf972658d28e789594d3d2b",
+          "seconds": 304.238,
+          "status": "passed"
+        }
+      },
+      "worker_oom": {
+        "acceptance_complete": true,
+        "actual_account": "smolbox-qual",
+        "kvm_fds_after_teardown": 0,
+        "report": {
+          "cleanup": "verified_absent",
+          "dispatches": 1,
+          "identity_preserved": true,
+          "reservation_retained_during_outage": true,
+          "result": "unknown",
+          "scenario": "worker_oom",
+          "status": "passed"
+        },
+        "runner": {
+          "captured_bytes": 347,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "ca711d41137cbf715432085497f85875e75abcb52b1c26d0ed5e7fd083961bdd",
+          "seconds": 38.088,
+          "status": "passed"
+        }
+      }
+    },
+    "source_base": "adc0c27c8465d7c500bf5ef1b9466112b70009a1",
+    "status": "passed with corrected live-execution deadline fixture"
+  },
+  "durable_failed_attempt": {
+    "complete_suite_pass": false,
+    "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
+    "final_state_sha256": "e1f283acd259d0f60b5c288de229f2f9555e249d48d4ee2ed4a8db71620ba4fd",
+    "journal_sha256": "ee3fe1aaeecedce68c46f01e73afaff816915044a81e265c7cd40023ffaddc58",
+    "missing_boundaries": [
+      "first_output_record:after",
+      "dispatch_intent:before"
+    ],
+    "pending_records_after_teardown": 3,
+    "report": {
+      "captured_bytes": 1459,
+      "exit_code": 0,
+      "failure": "deadline",
+      "output_sha256": "51a16cfa6b3171330c81ab99c6d058d6c0ed51144bf42b78fbeddbb6c97aa4bd",
+      "seconds": 1200.09,
+      "status": "failed"
+    },
+    "reserved_slots_after_teardown": 3,
+    "source_commit": "6a4a6b6055d9c28c21c5bea01c7b1ab970f2ee5d"
+  },
+  "durable_recovery": {
+    "child_observation_seconds": 100,
+    "controller_diagnostic_commit": "cd97ecf",
+    "controller_sha256": "0b9c7e7eda199b4d9873bb577ea8d8cba793623ad509afb08b0dbe83251ebec8",
+    "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
+    "earlier_failure_scope": "Fresh rerun passed; root cause of the earlier two boundary waits is not established.",
+    "failed_harness_attempt": {
+      "captured_bytes": 17836,
+      "exit_code": 2,
+      "failure": null,
+      "output_sha256": "73fc70a94900c3ad3b6229d91aa5109a6796e5eee929f24d69f2267d9ebb4d4f",
+      "seconds": 18.814,
+      "status": "failed"
+    },
+    "failed_harness_cause": "Missing SMOLBOX_PYTHON_SHA256 prevented all fixture setups before execution.",
+    "pending_records_after_teardown": 0,
+    "production_budgets_changed": false,
+    "reserved_slots_after_teardown": 0,
+    "runner": {
+      "captured_bytes": 4565,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "64e9a9c65323625e32f861c281e0390555c6e7575db3196f23f6925b99c3b534",
+      "seconds": 1352.806,
+      "status": "passed",
+      "tests": {
+        "passed": 25,
+        "seed": 1167
+      }
+    },
+    "sampled_containment": {
+      "live_process_observations": 759,
+      "outside_candidate_cgroup": 0,
+      "samples": 600
+    },
+    "source_base": "adc0c27c8465d7c500bf5ef1b9466112b70009a1",
+    "status": "passed",
+    "suite_observation_seconds": 1800
+  },
+  "external_boundaries_and_admission": {
+    "cpu": "usage_usec 8328586\nuser_usec 2404228\nsystem_usec 5924357\ncore_sched.force_idle_usec 0\nnr_periods 86\nnr_throttled 80\nthrottled_usec 23965910\nnr_bursts 0\nburst_usec 0",
+    "memory": "low 0\nhigh 0\nmax 36\noom 1\noom_kill 1\noom_group_kill 0",
+    "memory_peak_bytes": 1610612736,
+    "oom_result": "oom-kill",
+    "reports": {
+      "admission-1160": {
+        "captured_bytes": 2451,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "27fed01cfbd1a2e3ca2329112e8b850da049b618c2144d0dd7a01595a5834644",
+        "seconds": 7.869,
+        "status": "passed"
+      },
+      "host-boundaries-1160": {
+        "captured_bytes": 458,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "0d9729e41b070f2b9f2c422732d2f177e2a0b844c73ef842d7029293d16f9fd6",
+        "seconds": 29.857,
+        "status": "passed"
+      }
+    },
+    "restored_health": {
+      "machines": {
+        "running": 0,
+        "total": 0
+      },
+      "status": "ok",
+      "uptime_seconds": 0,
+      "version": "1.16.0"
+    },
+    "scope": "Faults injected into the owned worker cgroup inside the disposable nested KVM guest; no physical-host or macOS exhaustion.",
+    "source_base": "adc0c27c8465d7c500bf5ef1b9466112b70009a1",
+    "startup_refusals": [
+      "weaker-memory: rejected",
+      "disabled-landlock: rejected",
+      "missing-private-network: rejected",
+      "RuntimeMaxSec:0: rejected",
+      "KillMode:process: rejected",
+      "Restart:always: rejected",
+      "CPUQuota:200%: rejected",
+      "TasksMax:192: rejected",
+      "MemorySwapMax:1G: rejected",
+      "altered-artifact: rejected",
+      "missing-storage-boundary: rejected"
+    ],
+    "tasks": "max 4"
+  },
+  "final_recorded_at": "2026-09-14 UTC",
+  "final_runtime_5ea1e73": {
+    "checks": {
+      "durable": {
+        "captured_bytes": 4393,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "f0194c5d1a6c02a2a74b2dffca4ba59c1f70a1f2732a0beda610a9978e11fc3c",
+        "seconds": 1169.44,
+        "status": "passed",
+        "tests": {
+          "passed": 25,
+          "seed": 913260
+        }
+      },
+      "runtime": {
+        "captured_bytes": 209,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "4719fc526f2cbb6084c4ae07f7c44f4a6253384de188e2f1da5d56e9f4c4901a",
+        "seconds": 445.242,
+        "status": "passed",
+        "tests": {
+          "passed": 14,
+          "seed": 913260
+        }
+      },
+      "store": {
+        "captured_bytes": 332,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "b092fccb4801338ce5081037d3a0952dd099ccff21655496472b6fec21353998",
+        "seconds": 3.075,
+        "status": "passed",
+        "tests": {
+          "passed": 16,
+          "seed": 37540
+        }
+      }
+    },
+    "cleanup": {
+      "actual_lab_kvm_descriptors": 0,
+      "actual_qualification_kvm_descriptors": 0,
+      "initial_store_log_sha256": "36b431a55b24cc35f485ca6eac55c17b7d1c752b324fc372381951febb36068e",
+      "launcher_correction": "Initial store selection ran 13 successful cases but omitted machine_index_test.exs; expected-16 guard stopped the launcher. After verified teardown and empty store, the complete two-file store suite and 25 recovery cases passed. The successful 14 runtime cases were retained, not rerun.",
+      "pending": 0,
+      "remaining_owned_beams": 0,
+      "remaining_owned_workers": 0,
+      "slots": 0
+    },
+    "raw_archive_sha256": "74ca89ea4449d092286cc4449836951ee66fe56fb81ff432fc79de0cbc6429b6",
+    "runtime": "1.16.0",
+    "runtime_version_environment": "unset",
+    "scope": "Committed candidate with the version environment variable unset. Managed runtime tests omit runtime_version, exercising the library default. Mac tests are ordinary compatibility/recovery; Linux tests run inside the disposable nested KVM guest.",
+    "source_commit": "5ea1e73e32b3d1faf8a5881ac06d3ee6f029e871"
+  },
+  "guest_workloads": {
+    "additional_geometry_probe": true,
+    "limits": [
+      "Host task controls are not guest PID limits; the guest process probe created 192 children.",
+      "File symlinks can reach other guest paths; no workspace-only boundary is asserted.",
+      "Sampled output and buffering observations do not prove behavior for an unbounded producer."
+    ],
+    "probes": {
+      "cpu": {
+        "cleanup": "verified_absent",
+        "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
+        "observations": {
+          "exit_codes": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "seconds": 8.084177258
+        },
+        "raw_report_sha256": "52bc054389d2cd171bf42e5c95d2af811fed22146f1be7a19d7cc11e58d51465",
+        "runner": {
+          "captured_bytes": 84,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "2441e2dcd3ad85dcde48e176fcb91c5ae4e9606cb3f32ec2fb14989a132a6598",
+          "seconds": 40.612,
+          "status": "passed"
+        },
+        "vm_boundary": "VMM PID 21531\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n"
+      },
+      "disk": {
+        "cleanup": "verified_absent",
+        "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
+        "observations": {
+          "errno": 5,
+          "written": 586153984
+        },
+        "raw_report_sha256": "b9bfeea41cdb7b37ff6ad8db73bea5098bbe5698b8a467c4557daa2e0989766e",
+        "runner": {
+          "captured_bytes": 85,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "8d1ea031162859844f8477bd91d1b68b584437da8207d5228c584d43740f0550",
+          "seconds": 34.649,
+          "status": "passed"
+        },
+        "vm_boundary": "VMM PID 22880\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n"
+      },
+      "files": {
+        "cleanup": "verified_absent",
+        "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
+        "observations": {
+          "fifo": "observation deadline; VM cleanup required",
+          "symlink": "guest-only target readable; no workspace containment claim"
+        },
+        "raw_report_sha256": "204d9fe01005162ae0a91c1e59c2f0700b0254aa5edf03085e5f0e1fe0ada29c",
+        "runner": {
+          "captured_bytes": 85,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "d3ca2acb30ae2cba03fa55336a23a896b920db9d2d15f5a702a0837a4a2e26b4",
+          "seconds": 33.059,
+          "status": "passed"
+        },
+        "vm_boundary": "VMM PID 25400\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n"
+      },
+      "geometry": {
+        "cleanup": "verified_absent",
+        "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
+        "observations": {
+          "filesystem_bytes": 1038790656,
+          "raw_disk_bytes": [
+            1073741824,
+            1073741824
+          ],
+          "stop_start_persistence": true,
+          "uid": 0
+        },
+        "raw_report_sha256": "17d229bb897427812ceca17e5d87189fbeb647c3dea6096f9342946e6c974a8e",
+        "runner": {
+          "captured_bytes": 89,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "855e1de73cd0769e90f32083948e04cd2ef18816cbcb52d07fdf3c58bf6d387a",
+          "seconds": 30.347,
+          "status": "passed"
+        },
+        "vm_boundary": "VMM PID 20238\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n"
+      },
+      "isolation": {
+        "cleanup": "verified_absent",
+        "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
+        "observations": {
+          "control_env_present": false,
+          "endpoints": {
+            "1.1.1.1:443": "101",
+            "10.0.2.2:22": "101",
+            "10.0.2.2:22460": "101",
+            "100.96.0.1:10081": "101",
+            "127.0.0.1:19470": "111",
+            "169.254.169.254:80": "101"
+          },
+          "host_paths": {
+            "/dev/kvm": false,
+            "/etc/smolbox-qualification-canary": false,
+            "/home/lab/.ssh/authorized_keys": false,
+            "/srv/sbq/control/smolvm/server/smolvm.db": false,
+            "/srv/sbq/run/api.sock": false,
+            "/var/lib/smolbox-lab/home/id_ed25519": false
+          },
+          "uid": 0,
+          "vsock": {
+            "10081": "None",
+            "6000": "104",
+            "6004": "104"
+          }
+        },
+        "raw_report_sha256": "8aff432018a5d4804556f6997df4163f27f67046405b681337c8c1e5596fe18c",
+        "runner": {
+          "captured_bytes": 89,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "12419f7a4a9966c8a13159e4170b465ec8cd16a2c5da62b288e17012919659f3",
+          "seconds": 31.34,
+          "status": "passed"
+        },
+        "vm_boundary": "VMM PID 24784\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n"
+      },
+      "memory": {
+        "cleanup": "verified_absent",
+        "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
+        "observations": {
+          "dmesg_exit": 0,
+          "oom_log": [
+            "[   11.072961] Out of memory: Killed process 456 (python) total-vm:208480kB, anon-rss:199808kB, file-rss:116kB, shmem-rss:0kB, UID:0 pgtables:448kB oom_score_adj:0"
+          ],
+          "returncode": -9
+        },
+        "raw_report_sha256": "daf63fa5e2433a478fb7de9f489398278f40710d45b659226e92b847714f24f0",
+        "runner": {
+          "captured_bytes": 87,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "0d0a8b6463f9d193f4276b6979d2d4e3bafd33d8e8158673ac952f25ddd7df93",
+          "seconds": 33.529,
+          "status": "passed"
+        },
+        "vm_boundary": "VMM PID 20917\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n"
+      },
+      "node": {
+        "cleanup": "verified_absent",
+        "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
+        "observations": {
+          "node": "executed"
+        },
+        "raw_report_sha256": "0d5c238e5d038531a34956cbc24508fc01d4093b265194b9f6f86837fc2f7bd6",
+        "runner": {
+          "captured_bytes": 85,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "7f310dad6ba5848bc86b5482691b85aafe36df86dd140e441cfaa102420f2e12",
+          "seconds": 33.455,
+          "status": "passed"
+        },
+        "vm_boundary": "VMM PID 19618\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n"
+      },
+      "output": {
+        "cleanup": "verified_absent",
+        "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
+        "observations": {
+          "captured_limit": 65536,
+          "category": "output_limit",
+          "completed_transfer": false,
+          "producer_upper_bound": 134217728
+        },
+        "raw_report_sha256": "21c2a6b889fe1855d0d3252c46fb722994580b2ceb5d828c1ff4c35a04a4f228",
+        "runner": {
+          "captured_bytes": 86,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "50c5b5c0b667024be4bb7314ca1990ad0c615141ded6e5939985239e2b8dc0fa",
+          "seconds": 32.875,
+          "status": "passed"
+        },
+        "vm_boundary": "VMM PID 23545\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n"
+      },
+      "processes": {
+        "cleanup": "verified_absent",
+        "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
+        "observations": {
+          "children": 192,
+          "errno": null
+        },
+        "raw_report_sha256": "8773278bd8d737cdc51561e8bdaa0dda3663b680771350ec65b58543b1f934bc",
+        "runner": {
+          "captured_bytes": 90,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "4d5e4c05e03a0d7471df70629874edcbad3151eb241d4836baacff5c27071a60",
+          "seconds": 36.3,
+          "status": "passed"
+        },
+        "vm_boundary": "VMM PID 22156\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n"
+      },
+      "slow_reader": {
+        "cleanup": "verified_absent",
+        "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
+        "observations": {
+          "captured_limit": 65536,
+          "category": "transport",
+          "completed_transfer": false,
+          "producer_upper_bound": 134217728
+        },
+        "raw_report_sha256": "c53debbb77a0ac67cd1f00da0e43ceedd20cf6403191499e65361556574962a7",
+        "runner": {
+          "captured_bytes": 92,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "446226a6796d827f157c1b66b32e5e607c026f3347a3f5234df7194e3adc0b96",
+          "seconds": 35.047,
+          "status": "passed"
+        },
+        "vm_boundary": "VMM PID 24160\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n"
+      },
+      "smoke": {
+        "cleanup": "verified_absent",
+        "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
+        "observations": {
+          "system": "Linux"
+        },
+        "raw_report_sha256": "a52de5f6e441a6db86f34343b71ca5d5d52204cd8b897124eab5441025684c08",
+        "runner": {
+          "captured_bytes": 85,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "ae2152644793a113eac8254f67e439ca88d2f8effecee4440ced073661175263",
+          "seconds": 25.939,
+          "status": "passed"
+        },
+        "vm_boundary": "VMM PID 18943\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n"
+      }
+    },
+    "source_base": "adc0c27c8465d7c500bf5ef1b9466112b70009a1",
+    "status": "passed",
+    "workloads": 10
+  },
+  "language_checkpoint_5ea1e73": {
+    "archive_sha256": "fea949c87bcaaea04ce1a2461b8a59f4151f22d22c19ed2f69dc6aa688974216",
+    "lanes": {
+      "1-18-4-otp-27": {
+        "checks": {
+          "compile": {
+            "captured_bytes": 46,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "64a3403add76977bc6c689a08ecbad2e20468d607263e80ecb65e8105f4682da",
+            "seconds": 0.908,
+            "status": "passed"
+          },
+          "otp-patch": {
+            "captured_bytes": 11,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "e179d850f967cac2067c939df8f68553f2b0cef36116460d876502c654b988a3",
+            "seconds": 0.21,
+            "status": "passed"
+          },
+          "tests": {
+            "captured_bytes": 391,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "5fd2ac210eb074c6f7e9a10caf69073a9828fd7bff6a0f8ee16870d5b0f44fa0",
+            "seconds": 79.486,
+            "status": "passed"
+          },
+          "tooling": {
+            "captured_bytes": 156,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "427a5a560381dff8b93a8666b49702bc62e331219ff6121e1dbe37f9b69d3422",
+            "seconds": 6.663,
+            "status": "passed"
+          },
+          "version": {
+            "captured_bytes": 143,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "05eebecc0c91193562bd5a1908ec38c35e750dcc168f15d26bbddd416c21f0fc",
+            "seconds": 0.215,
+            "status": "passed"
+          }
+        },
+        "deterministic_cases": 204,
+        "excluded_runtime_cases_not_counted": 14,
+        "otp_patch": "27.3.4.15",
+        "tooling_cases": 23
+      },
+      "1-19-5-otp-28": {
+        "checks": {
+          "compile": {
+            "captured_bytes": 46,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "64a3403add76977bc6c689a08ecbad2e20468d607263e80ecb65e8105f4682da",
+            "seconds": 1.02,
+            "status": "passed"
+          },
+          "otp-patch": {
+            "captured_bytes": 6,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "669a552fb386db8c3dd5b5cc530eb9d11466a99bce4766efd4b4595945a66490",
+            "seconds": 0.27,
+            "status": "passed"
+          },
+          "tests": {
+            "captured_bytes": 392,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "5e37af8d0d358cd74794ceb02380cbdda5fa14e90aad3ed30f835dcc782ced00",
+            "seconds": 81.008,
+            "status": "passed"
+          },
+          "tooling": {
+            "captured_bytes": 156,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "0eeea0d6e074cc11aa4a89f7dd708a323888f719c6176ad461263c88349f6237",
+            "seconds": 6.456,
+            "status": "passed"
+          },
+          "version": {
+            "captured_bytes": 138,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "96b2616fe3236cc99ff4bd7aa74f16b29a7cd535d0ed302802fb2a7260e54657",
+            "seconds": 0.219,
+            "status": "passed"
+          }
+        },
+        "deterministic_cases": 204,
+        "excluded_runtime_cases_not_counted": 14,
+        "otp_patch": "28.5",
+        "tooling_cases": 23
+      },
+      "1-20-4-otp-28": {
+        "checks": {
+          "compile": {
+            "captured_bytes": 24,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "643fef37343c8f06dd71921b20b929d8d34b5847532a65041adf534cf1988f9d",
+            "seconds": 0.944,
+            "status": "passed"
+          },
+          "otp-patch": {
+            "captured_bytes": 6,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "669a552fb386db8c3dd5b5cc530eb9d11466a99bce4766efd4b4595945a66490",
+            "seconds": 0.214,
+            "status": "passed"
+          },
+          "tests": {
+            "captured_bytes": 401,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "54864d554ec35d9caec1a7a6be7821f615bb7c188b81d1afc7951e17677abd04",
+            "seconds": 79.656,
+            "status": "passed"
+          },
+          "tooling": {
+            "captured_bytes": 153,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "9ccf3a2e378e27bf8e2768d62ea0236929712c80e61e3f45bb70f84022b29b90",
+            "seconds": 6.784,
+            "status": "passed"
+          },
+          "version": {
+            "captured_bytes": 138,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "b2ea3032afbde557454665d09f0aeac67792625513de862950d6c398d476ccc9",
+            "seconds": 0.184,
+            "status": "passed"
+          }
+        },
+        "deterministic_cases": 204,
+        "excluded_runtime_cases_not_counted": 14,
+        "otp_patch": "28.5",
+        "tooling_cases": 23
+      }
+    },
+    "scope": "Ordinary tests in a separate owned host checkout with two BEAM schedulers and lower process priority. Actual OTP patch files verified. No runtime, exhaustion or adversarial qualification implied.",
+    "source_commit": "5ea1e73e32b3d1faf8a5881ac06d3ee6f029e871"
+  },
+  "language_checkpoint_bc1a755": {
+    "archive_sha256": "9c066240e35e3ca40db654f5d48dc556be10b09d64ab4316a7586880830bdb1e",
+    "lanes": {
+      "1-18-4-otp-27": {
+        "checks": {
+          "compile": {
+            "captured_bytes": 46,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "b0cc35f6573070e737b9dca5526c23a28daf9e5abf8cb7427da3e686f9a5ac8f",
+            "seconds": 1.143,
+            "status": "passed"
+          },
+          "otp-patch": {
+            "captured_bytes": 11,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "e179d850f967cac2067c939df8f68553f2b0cef36116460d876502c654b988a3",
+            "seconds": 0.299,
+            "status": "passed"
+          },
+          "tests": {
+            "captured_bytes": 391,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "88534e0fced66b98f6b596016e4467ccaff423b09d46d2653533201de4155a35",
+            "seconds": 85.202,
+            "status": "passed"
+          },
+          "tooling": {
+            "captured_bytes": 155,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "d8c4e2ace182493751c6c39bd330a005b83c5c09f7c2972a41443e8303381f0b",
+            "seconds": 7.169,
+            "status": "passed"
+          },
+          "version": {
+            "captured_bytes": 143,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "05eebecc0c91193562bd5a1908ec38c35e750dcc168f15d26bbddd416c21f0fc",
+            "seconds": 0.252,
+            "status": "passed"
+          }
+        },
+        "deterministic_cases": 204,
+        "excluded_runtime_cases_not_counted": 14,
+        "otp_patch": "27.3.4.15",
+        "tooling_cases": 23
+      },
+      "1-19-5-otp-28": {
+        "checks": {
+          "compile": {
+            "captured_bytes": 46,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "b0cc35f6573070e737b9dca5526c23a28daf9e5abf8cb7427da3e686f9a5ac8f",
+            "seconds": 1.347,
+            "status": "passed"
+          },
+          "otp-patch": {
+            "captured_bytes": 6,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "669a552fb386db8c3dd5b5cc530eb9d11466a99bce4766efd4b4595945a66490",
+            "seconds": 0.452,
+            "status": "passed"
+          },
+          "tests": {
+            "captured_bytes": 393,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "3ed49319146b26d029d9ce9847ff8f71eb3bb5bdf85b96c54b2c2bceb86968a3",
+            "seconds": 92.916,
+            "status": "passed"
+          },
+          "tooling": {
+            "captured_bytes": 155,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "395aff4982553db89f756dc2776a91277e883a08b26359a63c28e49ba529f6ef",
+            "seconds": 10.652,
+            "status": "passed"
+          },
+          "version": {
+            "captured_bytes": 138,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "96b2616fe3236cc99ff4bd7aa74f16b29a7cd535d0ed302802fb2a7260e54657",
+            "seconds": 0.401,
+            "status": "passed"
+          }
+        },
+        "deterministic_cases": 204,
+        "excluded_runtime_cases_not_counted": 14,
+        "otp_patch": "28.5",
+        "tooling_cases": 23
+      },
+      "1-20-4-otp-28": {
+        "checks": {
+          "compile": {
+            "captured_bytes": 24,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "03d47c6b429a076348282533b9725f493e889974a689133db39f187fac79a634",
+            "seconds": 4.006,
+            "status": "passed"
+          },
+          "otp-patch": {
+            "captured_bytes": 6,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "669a552fb386db8c3dd5b5cc530eb9d11466a99bce4766efd4b4595945a66490",
+            "seconds": 1.205,
+            "status": "passed"
+          },
+          "tests": {
+            "captured_bytes": 402,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "97083b61dbe852e9ccefe6785af2cbecd97876cde677ab0f3910ec320b7e1cdf",
+            "seconds": 91.764,
+            "status": "passed"
+          },
+          "tooling": {
+            "captured_bytes": 154,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "452bdcd0405b6b8ea7866eb00cc78714bef84526a38ab5331dccf46cad4df356",
+            "seconds": 6.479,
+            "status": "passed"
+          },
+          "version": {
+            "captured_bytes": 138,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "b2ea3032afbde557454665d09f0aeac67792625513de862950d6c398d476ccc9",
+            "seconds": 1.163,
+            "status": "passed"
+          }
+        },
+        "deterministic_cases": 204,
+        "excluded_runtime_cases_not_counted": 14,
+        "otp_patch": "28.5",
+        "tooling_cases": 23
+      }
+    },
+    "scope": "Ordinary tests in a separate owned host checkout with two BEAM schedulers and lower process priority. Actual OTP patch files verified. No runtime, exhaustion or adversarial qualification implied.",
+    "source_commit": "bc1a75569f224e9604f557d79c4d222e2af928cd"
+  },
+  "language_matrix": {
+    "lanes": [
+      {
+        "deterministic_passed": 204,
+        "elixir": "1.18.4",
+        "otp": "27.3.4.15",
+        "reports": {
+          "compile": {
+            "captured_bytes": 2922,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "b5fd3a6dfe95d270d28ea76f2ea65b2a8b36d4b90d0c077b461278f5fe3b08de",
+            "seconds": 60.249,
+            "status": "passed"
+          },
+          "tests": {
+            "captured_bytes": 391,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "6bd9e96f447f260a92e7c5230d3ef535d9a83e5160b6a4b47620fae18b4c1f91",
+            "seconds": 80.937,
+            "status": "passed"
+          },
+          "tooling": {
+            "captured_bytes": 155,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "926da1fa01a6c7ea25e94739e3e6a6b3d16078f25a647f8aa6aea77a338d5edf",
+            "seconds": 6.361,
+            "status": "passed"
+          },
+          "version": {
+            "captured_bytes": 143,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "05eebecc0c91193562bd5a1908ec38c35e750dcc168f15d26bbddd416c21f0fc",
+            "seconds": 0.154,
+            "status": "passed"
+          }
+        },
+        "runtime_excluded_not_counted": 14,
+        "seed": 585175
+      },
+      {
+        "deterministic_passed": 204,
+        "elixir": "1.19.5",
+        "otp": "28.5",
+        "reports": {
+          "compile": {
+            "captured_bytes": 2922,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "b11a7949be707cc7ea6020e31df8d058a5f5e236ef7a91e35591ffe8b7528e48",
+            "seconds": 62.991,
+            "status": "passed"
+          },
+          "tests": {
+            "captured_bytes": 392,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "8a4e0f7d66f8974067345690d35496b8b175963563ff6d8e3e0dfc4c927bb67a",
+            "seconds": 81.566,
+            "status": "passed"
+          },
+          "tooling": {
+            "captured_bytes": 156,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "7a495f885446a910b27fabf046ca770f7918da79d72a423854b33c805ba37fca",
+            "seconds": 6.728,
+            "status": "passed"
+          },
+          "version": {
+            "captured_bytes": 138,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "96b2616fe3236cc99ff4bd7aa74f16b29a7cd535d0ed302802fb2a7260e54657",
+            "seconds": 0.177,
+            "status": "passed"
+          }
+        },
+        "runtime_excluded_not_counted": 14,
+        "seed": 240190
+      },
+      {
+        "deterministic_passed": 204,
+        "elixir": "1.20.4",
+        "otp": "28.5",
+        "reports": {
+          "compile": {
+            "captured_bytes": 7054,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "f3a454848c4c24116f9fee78fe40df247c0ddd6d6c7cabc9c1b61bfbc4e8c7f6",
+            "seconds": 81.428,
+            "status": "passed"
+          },
+          "tests": {
+            "captured_bytes": 401,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "04fdb70de2c98de334fde8e0282cfe80d5f8892061994861cec9b7e0f06f1b06",
+            "seconds": 83.57,
+            "status": "passed"
+          },
+          "tooling": {
+            "captured_bytes": 154,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "43cb953134b64fa5792e1b9ceac3269c6ec1b5276a0a174ee754619fcdb0ba78",
+            "seconds": 6.556,
+            "status": "passed"
+          },
+          "version": {
+            "captured_bytes": 138,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "b2ea3032afbde557454665d09f0aeac67792625513de862950d6c398d476ccc9",
+            "seconds": 0.302,
+            "status": "passed"
+          }
+        },
+        "runtime_excluded_not_counted": 14,
+        "seed": 578120
+      }
+    ],
+    "note": "Elixir 1.20.4/OTP 28 emitted Credence dependency compiler warnings; SmolBox compilation with warnings-as-errors passed.",
+    "source_commit": "adc0c27c8465d7c500bf5ef1b9466112b70009a1"
+  },
+  "legacy_1_14_1": {
+    "actual_account": "smolbox-qual",
+    "archive_sha256": "8a96be968180800e7d49316b45c6de5f1d1fdaed095673e226d6454c96f07e4b",
+    "durable": {
+      "captured_bytes": 4909,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "e500a0b3e062acd60e1ca0a39000b7c533d9d3a58274770dbc699410ff8e73c6",
+      "seconds": 595.131,
+      "status": "passed",
+      "tests": {
+        "passed": 25,
+        "seed": 63332
+      }
+    },
+    "harness_sha256": "7df26c0cfa0142adc63cec69680f532aef4caf875bc142ac358f5a22652609df  /home/lab/input/linux-legacy-suites.sh\n28d2fc4e3adbb0a25f35abb25e85c64abeacbc605194ae96e40ed26f46d16eb7  /opt/smolbox/source/scripts/lab/run-check-legacy.exs\n",
+    "kvm_fds_after_teardown": 0,
+    "pending_records": 0,
+    "reserved_slots": 0,
+    "runtime": {
+      "captured_bytes": 185,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "ec2750664e68c15f4146e47407e68d05dce6b78f8750cb60a27e3da93eb2c6b7",
+      "seconds": 174.198,
+      "status": "passed",
+      "tests": {
+        "passed": 14,
+        "seed": 383893
+      }
+    },
+    "source_commit": "5abc0037bea19daf97d094f08eb773f5b9c61bff",
+    "status": "passed"
+  },
+  "legacy_1_14_6_corrected_full_suite_attempt": {
+    "actual_worker_account_kvm_descriptors_after_stop": 0,
+    "archive_sha256": "6588115599b7a43f0e066c54d5053fd5ee73bacddeaf2bb77b562b909c0e476d",
+    "cases_not_started": 5,
+    "cleanup": "Harness reached 2100 seconds and stopped its process group. The remaining owned controller PID/PGID 7588 was verified as user lab in the durable example directory, then terminated. The owned worker was inactive; both account descriptor checks were empty. Reports were exported before disposing the outer VM. No accepted commands were replayed.",
+    "completed_case_lines": 19,
+    "completed_suite_pass": false,
+    "failed_boundaries": [
+      "notification:before",
+      "artifact_record:after",
+      "release:after",
+      "dispatch_intent:after"
+    ],
+    "harness_sha256_record": "132336c335ea3560fe3fc9e56b182af9d637106787b3188345c873f8b35bd0da  scripts/lab/run-check-legacy-35.exs",
+    "interrupted_case": "absence_record:before",
+    "journal_sha256": "ca559fd5dfd5ce55aa5e9a8b7405b0446d68a7cd24724bee83e30ae10119ceaf",
+    "lab_account_kvm_descriptors_after_stop": 0,
+    "observation": "Cases failed before the requested boundary with not_dispatched execution evidence and protocol errors from start/delete. Upstream journal includes VM still reachable via vsock after scope kill; no PID to signal. A longer suite deadline alone would not resolve the four observed failures.",
+    "pending_records_after_teardown": 3,
+    "report": {
+      "captured_bytes": 6844,
+      "exit_code": 0,
+      "failure": "deadline",
+      "output_sha256": "fc057347365dd9f889b813afa9ad5c90f50d5a87c1944580de430383b99d7c76",
+      "seconds": 2100.201,
+      "status": "failed"
+    },
+    "reported_case_failures": 4,
+    "reserved_slots_after_teardown": 3,
+    "sanitized_retained_records": [
+      {
+        "accepted_at_ms": 1789354045195,
+        "cleanup": "failed",
+        "created_machine_recorded": true,
+        "deadlines": {
+          "cleanup": 1789354159788,
+          "preparation": 1789354165423,
+          "queue": 1789354105195
+        },
+        "errors": [
+          {
+            "at_ms": 1789354131628,
+            "error": {
+              "category": "transport",
+              "evidence": "dispatch_uncertain",
+              "operation": "inspect"
+            }
+          },
+          {
+            "at_ms": 1789354131027,
+            "error": {
+              "category": "transport",
+              "evidence": "dispatch_uncertain",
+              "operation": "inspect"
+            }
+          },
+          {
+            "at_ms": 1789354130526,
+            "error": {
+              "category": "transport",
+              "evidence": "dispatch_uncertain",
+              "operation": "inspect"
+            }
+          },
+          {
+            "at_ms": 1789354130126,
+            "error": {
+              "category": "transport",
+              "evidence": "dispatch_uncertain",
+              "operation": "inspect"
+            }
+          },
+          {
+            "at_ms": 1789354129822,
+            "error": {
+              "category": "transport",
+              "evidence": "dispatch_uncertain",
+              "operation": "inspect"
+            }
+          },
+          {
+            "at_ms": 1789354129734,
+            "error": {
+              "category": "protocol",
+              "evidence": "dispatch_uncertain",
+              "operation": "start"
+            }
+          }
+        ],
+        "evidence": "not_dispatched",
+        "reservation_retained": true,
+        "state": "failed",
+        "updated_at_ms": 1789354191733
+      },
+      {
+        "accepted_at_ms": 1789353057210,
+        "cleanup": "failed",
+        "created_machine_recorded": true,
+        "deadlines": {
+          "cleanup": 1789353207520,
+          "preparation": 1789353177382,
+          "queue": 1789353117210
+        },
+        "errors": [
+          {
+            "at_ms": 1789353195154,
+            "error": {
+              "category": "protocol",
+              "evidence": "dispatch_uncertain",
+              "operation": "delete"
+            }
+          },
+          {
+            "at_ms": 1789353191422,
+            "error": {
+              "category": "protocol",
+              "evidence": "dispatch_uncertain",
+              "operation": "delete"
+            }
+          },
+          {
+            "at_ms": 1789353187777,
+            "error": {
+              "category": "protocol",
+              "evidence": "dispatch_uncertain",
+              "operation": "delete"
+            }
+          },
+          {
+            "at_ms": 1789353184309,
+            "error": {
+              "category": "protocol",
+              "evidence": "dispatch_uncertain",
+              "operation": "delete"
+            }
+          },
+          {
+            "at_ms": 1789353180835,
+            "error": {
+              "category": "protocol",
+              "evidence": "dispatch_uncertain",
+              "operation": "delete"
+            }
+          },
+          {
+            "at_ms": 1789353177440,
+            "error": {
+              "category": "expired",
+              "evidence": "not_dispatched",
+              "operation": "runtime"
+            }
+          }
+        ],
+        "evidence": "not_dispatched",
+        "reservation_retained": true,
+        "state": "failed",
+        "updated_at_ms": 1789353195154
+      },
+      {
+        "accepted_at_ms": 1789352692943,
+        "cleanup": "failed",
+        "created_machine_recorded": true,
+        "deadlines": {
+          "cleanup": 1789352843253,
+          "preparation": 1789352813092,
+          "queue": 1789352752943
+        },
+        "errors": [
+          {
+            "at_ms": 1789352831078,
+            "error": {
+              "category": "protocol",
+              "evidence": "dispatch_uncertain",
+              "operation": "delete"
+            }
+          },
+          {
+            "at_ms": 1789352827250,
+            "error": {
+              "category": "protocol",
+              "evidence": "dispatch_uncertain",
+              "operation": "delete"
+            }
+          },
+          {
+            "at_ms": 1789352823561,
+            "error": {
+              "category": "protocol",
+              "evidence": "dispatch_uncertain",
+              "operation": "delete"
+            }
+          },
+          {
+            "at_ms": 1789352820043,
+            "error": {
+              "category": "protocol",
+              "evidence": "dispatch_uncertain",
+              "operation": "delete"
+            }
+          },
+          {
+            "at_ms": 1789352816598,
+            "error": {
+              "category": "protocol",
+              "evidence": "dispatch_uncertain",
+              "operation": "delete"
+            }
+          },
+          {
+            "at_ms": 1789352813146,
+            "error": {
+              "category": "expired",
+              "evidence": "not_dispatched",
+              "operation": "runtime"
+            }
+          }
+        ],
+        "evidence": "not_dispatched",
+        "reservation_retained": true,
+        "state": "failed",
+        "updated_at_ms": 1789352831078
+      }
+    ],
+    "seed": 602028,
+    "source_commit": "cfbe8ca7fe38d6bfe1b1519c5b30c7bc5ff87a54",
+    "storage_observation": "Filesystem               1B-blocks       Used   Available Use% Mounted on\n/dev/vda1             102888095744 5604651008 97266667520   6% /\nsmolbox-qualification     67108864      73728    67035136   1% /srv/sbq/control\nsmolbox-qualification    805306368  141176832   664129536  18% /srv/sbq/cache\n"
+  },
+  "legacy_1_14_6_direct_start_diagnostics": {
+    "durable_fixture_disk_sizes": [
+      {
+        "case_number": 1,
+        "create_seconds": 15.365953,
+        "final_http_status": 404,
+        "guest_memory_mb": 256,
+        "overlay_gb": 10,
+        "owned_kvm_descriptors_after_stop": 0,
+        "start_http_status": 200,
+        "start_seconds": 9.687582,
+        "storage_gb": 20
+      },
+      {
+        "case_number": 2,
+        "create_seconds": 16.61206,
+        "final_http_status": 404,
+        "guest_memory_mb": 256,
+        "overlay_gb": 10,
+        "owned_kvm_descriptors_after_stop": 0,
+        "start_http_status": 200,
+        "start_seconds": 8.388832,
+        "storage_gb": 20
+      }
+    ],
+    "durable_sizes_archive_sha256": "e21e0e90e8ccab0657aeae8c9bd3a73c0247fd7ac1cb6a6e56842e49df14aa93",
+    "initial_invalid_probe": "The first two start requests supplied a JSON content type with an empty body and returned HTTP 400 before startup. SmolBox sends an empty JSON object. Corrected probes supplied that object, used new identities, and retained the invalid requests separately; those 400 responses are not runtime failure evidence.",
+    "runtime": "1.14.6",
+    "scope": "Direct curl create/start/inspect/stop/delete requests against the same strict candidate service, without SmolBox or the durable controller and without guest command submission. Two 1/1 GiB cases and two 20/10 GiB cases returned HTTP 200 for start and 404 after deletion. These small samples do not resolve or replace the failed recovery suite and do not establish disk sizes as the cause.",
+    "small_and_invalid_archive_sha256": "6b4e5836f972b8220db90243f98cbee7d472e2b00275c209fb5d8ce0f61cc10d",
+    "small_disks": [
+      {
+        "case_number": 1,
+        "create_seconds": 0.133979,
+        "final_http_status": 404,
+        "guest_memory_mb": 256,
+        "overlay_gb": 1,
+        "owned_kvm_descriptors_after_stop": 0,
+        "start_http_status": 200,
+        "start_seconds": 25.016152,
+        "storage_gb": 1
+      },
+      {
+        "case_number": 2,
+        "create_seconds": 0.134987,
+        "final_http_status": 404,
+        "guest_memory_mb": 256,
+        "overlay_gb": 1,
+        "owned_kvm_descriptors_after_stop": 0,
+        "start_http_status": 200,
+        "start_seconds": 25.197459,
+        "storage_gb": 1
+      }
+    ],
+    "source_commit": "4e5692fb5aa4d68a21e384dbcad888ce6f6f20c1",
+    "status": "did_not_reproduce_startup_failure"
+  },
+  "legacy_1_14_6_first_failure_diagnostic": {
+    "archive_sha256": "41f17739b18a43ddabd1589ec13bd7c186bd1d7c3737669303a52bfc77525f34",
+    "completed_cases": 2,
+    "console_capture": "9fb81462294663fb/agent-console.log\n9fb81462294663fb/agent-startup-error.log\n",
+    "console_limitation": "Only selected error/memory/timeout lines from the last 32768 bytes of each console file were captured. No matching lines were found; this does not prove absence of all guest failures or establish the cause of the missing agent response.",
+    "diagnostic_transport": "Temporary copy of production Req with bounded non-success HTTP body and console capture. Dispatch, retry, result and deadline behavior was unchanged; capture adds diagnostic latency. Restored after the run. This diagnostic does not replace the full uninstrumented compatibility suite.",
+    "failed_case": "delete:before",
+    "full_compatibility_pass": false,
+    "http_response": {
+      "method": "post",
+      "observed_at_ms": 1789356809965,
+      "path": "/api/v1/machines/sbxexample-zmmrurfs2unlvsaarteb/start",
+      "status": 500
+    },
+    "lab_account_kvm_descriptors_after_stop": 0,
+    "observation": "The startup endpoint returned an upstream agent-response timeout. The delete:before fault boundary was reached during cleanup of a failed execution; recovered cleanup completed but the expected successful command result was absent. Reaching a cleanup boundary alone does not establish successful execution.",
+    "passed_cases": 1,
+    "response_body": {
+      "code": "INTERNAL_ERROR",
+      "error": "io operation failed: timed out waiting for an agent response frame"
+    },
+    "runner": {
+      "captured_bytes": 1015,
+      "exit_code": 2,
+      "failure": null,
+      "output_sha256": "8616dd04163b01dda0ebc6a7e69238c0a8d0fc5b4e3ee8179387988343c56ab1",
+      "seconds": 238.862,
+      "status": "failed"
+    },
+    "runtime": "1.14.6",
+    "seed": 602028,
+    "selected_cases": 25,
+    "source_base": "4e5692fb5aa4d68a21e384dbcad888ce6f6f20c1",
+    "transport_sha256": "de5a0e58edee0d719c55338668908cca54f5a49f9fcac70a596870ee280c561a",
+    "worker_account_kvm_descriptors_after_stop": 0
+  },
+  "legacy_1_14_6_full_suite_pass": {
+    "actual_lab_kvm_descriptors": 0,
+    "actual_qualification_kvm_descriptors": 0,
+    "pending_records": 0,
+    "raw_archive": "legacy-final-results.tar",
+    "raw_archive_sha256": "18099dab976f48aaab8b51e15a79b8e1709f97526174cd4afc8508a40a5a7a45",
+    "remaining_owned_beams": 0,
+    "remaining_owned_workers": 0,
+    "report": {
+      "captured_bytes": 4393,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "3eba46c87e9f4e8814d4bae1c93a03f5374ce74000a7f58d160be33dab78598e",
+      "seconds": 1265.343,
+      "status": "passed",
+      "tests": {
+        "passed": 25,
+        "seed": 602028
+      }
+    },
+    "reserved_slots": 0,
+    "runner_sha256": "9da30e47b424379a2b9c8ab1c586d32881ad622b8b054aa0630b245c798f6522",
+    "runtime_archive_sha256": "94a1edb0c42b20ac562c3759ed216bab2cab9e27c382f6560969144f7bd1dce3",
+    "scope": "All 25 durable recovery cases with seed 602028, original production transport and clean source. Fresh disposable guest, same one-CPU, 1536-MiB, 96-task, 300-second worker controls. Preparation 120 seconds, receive 115 seconds, observer 180 seconds, per-case 300 seconds; 2100-second whole-suite bound. Earlier failed runs remain; this pass does not establish their root cause.",
+    "source_commit": "4e5692fb5aa4d68a21e384dbcad888ce6f6f20c1"
+  },
+  "legacy_1_14_6_initial": {
+    "actual_account_kvm_fds_after_stop": 0,
+    "durable": {
+      "captured_bytes": 6102,
+      "exit_code": 2,
+      "failure": null,
+      "output_sha256": "60553b723c58359cad406aee2a395c9f2885ebcdb6a97ed4eb4c1d2218901835",
+      "seconds": 1412.273,
+      "status": "failed"
+    },
+    "durable_failed": 2,
+    "durable_passed": 23,
+    "failed_record_observations": [
+      {
+        "accepted_at_ms": 1789350390455,
+        "cleanup": "failed",
+        "created_machine_recorded": false,
+        "deadlines": {
+          "preparation": 1789350450548,
+          "queue": 1789350450455
+        },
+        "errors": [
+          {
+            "at_ms": 1789350445796,
+            "error": {
+              "category": "identity_conflict",
+              "evidence": "not_dispatched",
+              "operation": "create"
+            }
+          },
+          {
+            "at_ms": 1789350445667,
+            "error": {
+              "category": "transport",
+              "evidence": "dispatch_uncertain",
+              "operation": "create"
+            }
+          }
+        ],
+        "evidence": "not_dispatched",
+        "reservation_retained": true,
+        "state": "failed",
+        "updated_at_ms": 1789350445796
+      },
+      {
+        "accepted_at_ms": 1789350490118,
+        "cleanup": "failed",
+        "created_machine_recorded": false,
+        "deadlines": {
+          "preparation": 1789350550257,
+          "queue": 1789350550118
+        },
+        "errors": [
+          {
+            "at_ms": 1789350545325,
+            "error": {
+              "category": "identity_conflict",
+              "evidence": "not_dispatched",
+              "operation": "create"
+            }
+          },
+          {
+            "at_ms": 1789350545285,
+            "error": {
+              "category": "transport",
+              "evidence": "dispatch_uncertain",
+              "operation": "create"
+            }
+          }
+        ],
+        "evidence": "not_dispatched",
+        "reservation_retained": true,
+        "state": "failed",
+        "updated_at_ms": 1789350545325
+      }
+    ],
+    "interpretation": "Both failures occurred during create at the fixture's 55-second receive budget, before the requested fault boundary. Creation was unverified and capacity retained; no accepted command was replayed.",
+    "next_check": "Use a 120-second preparation budget and 115-second receive budget within the existing contract for the cold nested durable fixture; retain the original failure and rerun the two cases before the full suite.",
+    "pending_records": 2,
+    "raw_archive_sha256": "97a9e4e7b3917aa34b8e50198c1b44c5f028b9a4073d800711f8488047e07781",
+    "record_observations_sha256": "137bac5dbb3be6957b25ead44806f133b2528dc86e2450fc53b49be50fe9d929",
+    "reserved_slots": 2,
+    "runtime": {
+      "captured_bytes": 209,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "93a2f220e2a8b9749edd225c75565d71dd510995536b87bc90894a1dc460b278",
+      "seconds": 427.792,
+      "status": "passed",
+      "tests": {
+        "passed": 14,
+        "seed": 611407
+      }
+    },
+    "source_commit": "5abc0037bea19daf97d094f08eb773f5b9c61bff",
+    "status": "incomplete"
+  },
+  "legacy_1_14_6_target_selection_correction": {
+    "archive_sha256": "07fdf217ca2ecc2f7e57fd15ac0d514ac85fd63ca14096c1a70359a2fbf3c335",
+    "cleanup": "The remaining explicitly owned controller was stopped; evidence was exported before the disposable outer guest was rebuilt.",
+    "correction": "Use name-only filters without --include runtime, and require exactly 2 passing cases and 23 exclusions in the final ExUnit summary.",
+    "kvm_fds_after_owned_stop": 0,
+    "pending_records_after_interruption": 1,
+    "process_exit_is_not_suite_completion": true,
+    "raw_process_result": {
+      "captured_bytes": 1843,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "037d55b4eb6c9e8d216a41a732c277882ce10474a3f696f13e5518cafec885a6",
+      "seconds": 347.845,
+      "status": "passed"
+    },
+    "reason": "Adding --include runtime to name-only filters admitted unrelated runtime tests. The confirmed selection error was stopped deliberately before the intended two-case check could be accepted.",
+    "reserved_slots_after_interruption": 1,
+    "status": "interrupted_not_qualified",
+    "suite_summary_present": false
+  },
+  "legacy_1_14_6_targeted_corrected": {
+    "actual_account_kvm_fds_after_stop": 0,
+    "archive_sha256": "c7a50748eade056d2bcfc931d839839f9be37bc5bf75b7efbf43384b50657585",
+    "base_source_commit": "0548717",
+    "controller_observation_ms": 180000,
+    "excluded_cases_not_counted": 23,
+    "fixture_commit_with_identical_tested_files": "cfbe8ca7fe38d6bfe1b1519c5b30c7bc5ff87a54",
+    "operation_timeout_ms": 120000,
+    "passed_cases": 2,
+    "pending_records": 0,
+    "preparation_ms": 120000,
+    "receive_timeout_ms": 115000,
+    "reserved_slots": 0,
+    "runner": {
+      "captured_bytes": 4565,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "cce9f13686cd14639a67dbc59b006acea73a28b5bd937e8c5837bba02e76c628",
+      "seconds": 78.986,
+      "status": "passed"
+    },
+    "scope": "The two previously failed fault-boundary cases only. Full 25-case compatibility remains pending.",
+    "seed": 602028,
+    "status": "passed",
+    "worker_independent_lifetime_seconds": 300
+  },
+  "legacy_1_14_6_timing_diagnostic": {
+    "archive_sha256": "3d8d9e1b56bf2e4eca63cdee018902df54f05fcb493c558d39fa1c6836eb7b46",
+    "create_elapsed_ms": [
+      15365,
+      15846
+    ],
+    "excluded_cases": 23,
+    "full_compatibility_pass": false,
+    "initial_selection_failure": {
+      "report": {
+        "captured_bytes": 4616,
+        "exit_code": 1,
+        "failure": null,
+        "output_sha256": "28829284164d10d3a52207bfbbb0df72ff2f3e37fe6a1c5dd4a990223cd11a64",
+        "seconds": 2.52,
+        "status": "failed"
+      },
+      "scope": "The first filter omitted the literal test prefix, excluded all 25 cases, and exited nonzero. No cases or VM work executed. Corrected name filters selected exactly two cases; no accepted command was replayed."
+    },
+    "lab_account_kvm_descriptors_after_stop": 0,
+    "passed_cases": [
+      "result_write:after",
+      "delete:before"
+    ],
+    "pending_records_after_stop": 0,
+    "request_count": 70,
+    "reserved_slots_after_stop": 0,
+    "runner": {
+      "captured_bytes": 4534,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "df2098c48fb93448ff421adafed47c1776841aaa733765d365d347ee1cc8034a",
+      "seconds": 62.091,
+      "status": "passed"
+    },
+    "runtime": "1.14.6",
+    "scope": "Two previously relevant recovery cases passed with a temporary Req copy recording bounded request timing and error observations. All requests returned successfully or observed expected absence. This supports returning to the full uninstrumented suite but does not resolve the earlier intermittent startup failure or replace full compatibility coverage. Monotonic origins differ between controller BEAM instances; compare individual elapsed durations, not absolute timestamps across processes.",
+    "seed": 602028,
+    "source_base": "4e5692fb5aa4d68a21e384dbcad888ce6f6f20c1",
+    "start_elapsed_ms": [
+      9596,
+      8916
+    ],
+    "transport_sha256": "18e2cedb82532c5e0bd8049e51843590fb8222c702e437e432a28263c7a56214",
+    "worker_account_kvm_descriptors_after_stop": 0
+  },
+  "limitations": [
+    "Final runtime and quality evidence identifies candidate 5ea1e73. Final documentation/archive acceptance is recorded separately in the repository qualification guide.",
+    "Buffered and streaming HTTP operations beyond five minutes passed with 299-second guest commands. Public command and managed-execution limits remain unchanged; earlier startup failures remain recorded.",
+    "The unreleased checkout defaults to 1.16.0. Results apply only to the documented deployment; no general production or security certification."
+  ],
+  "long_operation_first_attempt": {
+    "archive_sha256": "aa35a0aa52d45c89d2fb92d570f513f4991a47bb124a7a4d449a0268e3ff98bd",
+    "guest_command_seconds": 299,
+    "guest_deadline_seconds": 300,
+    "operation_timeout_ms": 390000,
+    "receive_timeout_ms": 360000,
+    "recovery": "The fixture identity-checked the created machine and completed its API stop/delete/absence assertions in the after block. The enclosing unit exited, and a fresh actual-account descriptor check was empty. Command outcome remains unknown; no replay.",
+    "report": {
+      "captured_bytes": 484,
+      "exit_code": 1,
+      "failure": null,
+      "output_sha256": "831ae9aa38f78cc3ac2213001734fea2343084a9a7f97ff79d693dba08a6a53d",
+      "seconds": 368.15,
+      "status": "failed"
+    },
+    "result": "Uncertain transport error during buffered execution. No successful execution or five-minute proof established; streaming was not reached.",
+    "runtime": "1.16.0",
+    "source_commit": "4e5692fb5aa4d68a21e384dbcad888ce6f6f20c1",
+    "timing_limitation": "The first fixture did not persist individual create/exec timing before its success assertion. Worker runtime of 362.244 seconds is consistent with expiry of the configured receive wait, but does not separately measure guest or startup duration.",
+    "unit_properties": "RuntimeMaxUSec=15min\nMainPID=0\nResult=exit-code\nCPUQuotaPerSecUSec=2s\nMemoryMax=2147483648\nMemorySwapMax=0\nTasksMax=128\nKillMode=control-group\nActiveState=failed\n",
+    "worker_report": {
+      "captured_bytes": 203,
+      "exit_code": 0,
+      "failure": "stopped",
+      "output_sha256": "43c13ebf68420c0a6235ca8d443d4d0352c527d965bf8a3f04dd69000a3f4108",
+      "seconds": 362.244,
+      "status": "failed"
+    }
+  },
+  "long_operation_v2": {
+    "archive_sha256": "60a353bf89caf56435595ed908248298c61daadfc93539c245238950147f82d5",
+    "buffered": {
+      "connect_timeout_ms": 5000,
+      "create_ms": 770,
+      "execution_operation_exceeded_300_seconds": true,
+      "execution_operation_ms": 357460,
+      "exit_code": 0,
+      "explicit_start_before_exec": false,
+      "guest_command_exceeded_five_minutes": false,
+      "guest_seconds": 299.002,
+      "guest_timeout_seconds": 300,
+      "initial_machine_state": "created",
+      "marker": "xy",
+      "mode": "buffered",
+      "operation_timeout_ms": 540000,
+      "receive_timeout_ms": 480000,
+      "runtime": "1.16.0",
+      "scope": "Public low-level exec duration includes implicit VM startup. This is not a guest command longer than five minutes.",
+      "source_commit": "4e5692fb5aa4d68a21e384dbcad888ce6f6f20c1",
+      "status": "passed",
+      "stream_events": [],
+      "worker_process_group_deadline_ms": 1140000
+    },
+    "cleanup": "Each reached machine was identity-checked and API stop/delete/absence assertions completed in the fixture after block. Worker and enclosing unit then exited. Final actual lab-account KVM descriptor check was empty. An uncertain streaming command was not replayed.",
+    "runner": {
+      "captured_bytes": 525,
+      "exit_code": 1,
+      "failure": null,
+      "output_sha256": "14c4ad81263ffb444dc6fde5dab82b4fe702669ce75506244b8404bfe72e4723",
+      "seconds": 420.783,
+      "status": "failed"
+    },
+    "scope": "Buffered Client.exec traversed the former 300-second HTTP operation boundary through the default production transport, with an existing 300-second guest deadline. This does not extend the guest command or managed execution maximum and does not establish streaming success. The enclosing worker had external 2 GiB/200% CPU/128-task limits and a 1200-second lifetime, separate from the strict 300-second deployment profile.",
+    "source_commit": "4e5692fb5aa4d68a21e384dbcad888ce6f6f20c1",
+    "status": "buffered proof passed; streaming failed during implicit startup",
+    "streamed": {
+      "create_ms": 1183,
+      "execution_operation_ms": 55419,
+      "mode": "streamed",
+      "observed": {
+        "category": "protocol",
+        "evidence": "dispatch_uncertain",
+        "operation": "exec_stream",
+        "outcome": "error"
+      }
+    },
+    "streaming_failure_observation": "Worker warning: failed to relaunch image workload after implicit start; pull image for workload timed out waiting for an agent response frame. No completed streaming command was observed.",
+    "unit_properties": "RuntimeMaxUSec=20min\nMainPID=0\nResult=exit-code\nCPUQuotaPerSecUSec=2s\nMemoryMax=2147483648\nMemorySwapMax=0\nTasksMax=128\nKillMode=control-group\nActiveState=failed\n",
+    "worker_log_sha256": "bbb26a11064bb042d55d25a6b40dfe583b86e768ee29f0585ab04554771a7d4e",
+    "worker_report": {
+      "captured_bytes": 679,
+      "exit_code": 0,
+      "failure": "stopped",
+      "output_sha256": "bbb26a11064bb042d55d25a6b40dfe583b86e768ee29f0585ab04554771a7d4e",
+      "seconds": 417.165,
+      "status": "failed"
+    }
+  },
+  "long_streaming_v3": {
+    "archive_sha256": "b6a79190d3a62873873ac9486f8c51c539eb7ba3f81d23225d7b0c86ec3a62cd",
+    "cleanup": "Default production transport; freshly created identity, implicit startup, verified output and marker, same-incarnation inspection, stop/delete and not-found assertions. Empty inventory and zero actual lab-account KVM descriptors before and after teardown.",
+    "effective_unit_properties_while_active": "RuntimeMaxUSec=15min\nMainPID=3546\nResult=success\nCPUQuotaPerSecUSec=2s\nMemoryMax=2147483648\nMemorySwapMax=0\nTasksMax=128\nKillMode=control-group\nLoadState=loaded\nActiveState=active\n",
+    "preflight_correction": "The first launcher preflight stopped before worker startup because this fresh legacy diagnostic guest did not yet contain 1.16.0. The official archive and all component hashes were then verified and installed before this single execution attempt.",
+    "runner": {
+      "captured_bytes": 122,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "d7051d5bf5ef792c5ac6b12021256b72ae65ba671c015eb53fe6a4044cbdb736",
+      "seconds": 393.176,
+      "status": "passed"
+    },
+    "scope": "A real streaming HTTP operation lasting 386.357 seconds, including implicit startup. First stdout callback at 87.357 seconds, final stdout at 386.353 seconds, exit at 386.357 seconds. Guest runtime was 299.000 seconds with the existing 300-second command limit. This does not extend the managed execution budget or establish a guest command exceeding five minutes. It does not erase the previous startup failure.",
+    "source_commit": "4e5692fb5aa4d68a21e384dbcad888ce6f6f20c1",
+    "status": "passed",
+    "streamed": {
+      "connect_timeout_ms": 5000,
+      "create_ms": 630,
+      "execution_operation_exceeded_300_seconds": true,
+      "execution_operation_ms": 386357,
+      "exit_code": 0,
+      "explicit_start_before_exec": false,
+      "guest_command_exceeded_five_minutes": false,
+      "guest_seconds": 299.0,
+      "guest_timeout_seconds": 300,
+      "initial_machine_state": "created",
+      "marker": "xy",
+      "mode": "streamed",
+      "operation_timeout_ms": 540000,
+      "receive_timeout_ms": 480000,
+      "runtime": "1.16.0",
+      "scope": "Public low-level exec duration includes implicit VM startup. This is not a guest command longer than five minutes.",
+      "source_commit": "4e5692fb5aa4d68a21e384dbcad888ce6f6f20c1",
+      "status": "passed",
+      "stream_events": [
+        {
+          "elapsed_ms": 87357,
+          "event": [
+            "stdout",
+            "begin\n"
+          ]
+        },
+        {
+          "elapsed_ms": 386353,
+          "event": [
+            "stdout",
+            "end\nguest_seconds=299.000\n"
+          ]
+        },
+        {
+          "elapsed_ms": 386357,
+          "event": [
+            "exit",
+            0
+          ]
+        }
+      ],
+      "worker_process_group_deadline_ms": 840000
+    },
+    "unit_observation_limitation": "The successful transient unit was unloaded before final property inspection. Only the saved live loaded/active properties establish its configured limits; post-exit default properties are not enforcement evidence.",
+    "worker_report": {
+      "captured_bytes": 203,
+      "exit_code": 0,
+      "failure": "stopped",
+      "output_sha256": "d3a4abb1a64e31c281457f662f52fbf4b09cdd4bf383590628ccaccc41e20225",
+      "seconds": 387.83,
+      "status": "failed"
+    },
+    "worker_report_interpretation": "The fixture intentionally stopped the worker after successful execution and API cleanup. Child reports this as failure=stopped; the execution and enclosing runner returned success."
+  },
+  "missing_resize2fs": {
+    "detail": {
+      "cleanup": "empty inventory",
+      "observation": {
+        "collection_after_restart": "{:error, %SmolBox.Error{category: :protocol, operation: :download, exit_code: nil, evidence: :dispatch_uncertain}}",
+        "disks": {
+          "overlay": {
+            "bytes": 10737418240,
+            "formatted_marker": false
+          },
+          "storage": {
+            "bytes": 21474836480,
+            "formatted_marker": false
+          }
+        },
+        "guest_presence": "{:ok, #SmolBox.Result<exit_code: 0, encoding: :bytes, ...>}",
+        "persisted": false,
+        "restart": "{:ok, %SmolBox.Machine{name: \"sb160miss-rnrfnn7vig6e5iymrdnp\", state: :running, created_at: 1789342398, cpus: 1, memory_mb: 256, storage_gb: 1, overlay_gb: 1}}",
+        "start": "accepted"
+      },
+      "requested_disks_gib": [
+        1,
+        1
+      ],
+      "runtime": "1.16.0",
+      "status": "characterization_complete"
+    },
+    "limitation": "Guest existence command stdout was omitted by custom Inspect; failure to download does not independently prove guest-side absence.",
+    "runner": {
+      "captured_bytes": 836,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "0f1556a358100b80c9283c82a9644e89a5f99219297a273824603d225e8c4142",
+      "seconds": 41.543,
+      "status": "passed"
+    },
+    "source_commit": "6a4a6b6055d9c28c21c5bea01c7b1ab970f2ee5d",
+    "tool_restored_sha256": "1a0ea5f6784285b82098fe7935c95bf1ac76713aec904cc9b43920fa85ebe35d"
+  },
+  "outer_vm_recovery": {
+    "host_archive_sha256": "c4044d19619fe2ef172afd49fe3b8bb7d77eb5ebe670efe9a5fecd5176dfb968",
+    "observer_sha256": "4f271f5180f971baf500bcda34db2b483f8a3bd52791c450142eafb834f1f4a4",
+    "probe_deadline_seconds": 30,
+    "replacement_archive_sha256": "52430e494a5cb3a57f64e15b5db4fce268883a68e5cc3c297d0a183ec8f2619f",
+    "replacement_runner": {
+      "captured_bytes": 132,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "bd965e74c6fc42e4c113c150fcf8fc85dadc57688d14ca4bf6e2fbab7d5b6da5",
+      "seconds": 24.157,
+      "status": "passed"
+    },
+    "replacement_smoke": {
+      "after_workload": "MainPID=1708\nResult=success\nMemoryPeak=479449088\nTasksCurrent=22\nActiveState=active\nInvocationID=beb5a35a5b0445d2b03c0502082d2124\nmemory.current\n478814208\nmemory.peak\n479449088\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 22981952\nuser_usec 19682903\nsystem_usec 3299048\ncore_sched.force_idle_usec 0\nnr_periods 237\nnr_throttled 80\nthrottled_usec 3219705\nnr_bursts 0\nburst_usec 0\npids.current\n22\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    176128  66932736   1% /srv/sbq/control\nsmolbox-qualification 805306368 190664704 614641664  24% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+      "before": "MainPID=1708\nResult=success\nMemoryPeak=256933888\nTasksCurrent=4\nActiveState=active\nInvocationID=beb5a35a5b0445d2b03c0502082d2124\nmemory.current\n256450560\nmemory.peak\n256933888\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 15591306\nuser_usec 15416356\nsystem_usec 174949\ncore_sched.force_idle_usec 0\nnr_periods 161\nnr_throttled 10\nthrottled_usec 7824\nnr_bursts 0\nburst_usec 0\npids.current\n4\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    172032  66936832   1% /srv/sbq/control\nsmolbox-qualification 805306368 136511488 668794880  17% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+      "cleanup": "verified_absent",
+      "elapsed_ms": 7822,
+      "machine": "qual-tr4mwzleqiwypibfgw4g",
+      "observations": {
+        "system": "Linux"
+      },
+      "runtime_version": "1.16.0",
+      "scenario": "smoke",
+      "source": "qualification-probe.exs",
+      "status": "passed",
+      "vm_boundary": "VMM PID 1952\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n"
+    },
+    "replacement_source": "adc0c27c8465d7c500bf5ef1b9466112b70009a1",
+    "report": {
+      "automatic_disk_rebuild": true,
+      "baseline_digest_verified": true,
+      "concurrent_start_rejected": true,
+      "exclusive_vm_lock_verified": true,
+      "frozen_at_unix": 1789347417,
+      "frozen_guest_runtime_scope": "baseline guest; no candidate execution",
+      "frozen_pid": 477505,
+      "guest_marker_absent_after_rebuild": true,
+      "host_deadline_result": "timeout",
+      "invocation": "cbc8a9112ece459bbe408b3e4f851c40",
+      "management_port_closed_before_replacement": true,
+      "operator_lingering": true,
+      "original_cgroup": "/system.slice/system-smolbox\\x2dlab.slice/smolbox-lab@probe.service",
+      "original_cgroup_absent": true,
+      "original_process_absent": true,
+      "periodic_capture_after_freeze": true,
+      "recovered_at_unix": 1789347477,
+      "replacement_inventory_empty": true,
+      "replacement_pid": 477865,
+      "replacement_runtime": "1.16.0",
+      "replacement_smoke_passed": true,
+      "replacement_worker_account_absent": true,
+      "replacement_worker_endpoint": "unix:///srv/sbq/run/api.sock",
+      "status": "passed",
+      "terminated_at_unix": 1789347438
+    },
+    "scope": "Frozen baseline guest proves independent host recovery; exact 1.16.0 explicitly installed and exercised in the clean replacement. No claim of a candidate execution in the frozen guest."
+  },
+  "package_checkpoint_5ea1e73": {
+    "reports": {
+      "current": {
+        "detail_sha256": "808afb623dca42de6bbdf1f4b8950d974de5a7d19e43fb1285bd8d9e0bc1afaa",
+        "files": 91,
+        "package_sha256": "272d16209f802825c41365b4892714e1472f2ad313ea8a3fa6f764471fe350f0",
+        "runner": {
+          "captured_bytes": 126,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "6a9d2234c8824271dbc0420e0306f4fcfb16d4f95773aee39d7476b52c64d6f5",
+          "seconds": 14.2,
+          "status": "passed"
+        },
+        "smoke": {
+          "client": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "runtime_default": "1.16.0",
+          "supervisor": true,
+          "versions": {
+            "jason": "1.4.5",
+            "nimble_options": "1.1.1",
+            "req": "0.7.4",
+            "telemetry": "1.4.2"
+          }
+        }
+      },
+      "minimum": {
+        "detail_sha256": "bc80e632fd5375f0a978ff5abe26ac859c68b9d124697d3c623136f30be3afb5",
+        "files": 91,
+        "package_sha256": "272d16209f802825c41365b4892714e1472f2ad313ea8a3fa6f764471fe350f0",
+        "runner": {
+          "captured_bytes": 126,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "2e084f9bcff574959eb2e91f41672c9c1f5e7b878f6a3f811ab18ef0af1cc769",
+          "seconds": 13.85,
+          "status": "passed"
+        },
+        "smoke": {
+          "client": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "runtime_default": "1.16.0",
+          "supervisor": true,
+          "versions": {
+            "jason": "1.4.0",
+            "nimble_options": "1.1.0",
+            "req": "0.7.4",
+            "telemetry": "1.3.0"
+          }
+        }
+      }
+    },
+    "scope": "Current and minimum dependencies consume the same archive. Later documentation/evidence updates require separate final archive acceptance.",
+    "source_commit": "5ea1e73e32b3d1faf8a5881ac06d3ee6f029e871"
+  },
+  "package_consumers": {
+    "failed_harness_attempt": "The first wrapper invoked nonexistent mix smolbox.ci.package; corrected command is elixir scripts/ci.exs package-consumer. Completed language lanes were not rerun.",
+    "reports": {
+      "current": {
+        "detail_sha256": "9a13745aa90b660bc1095f572264b209de42ff9562b31b2cb8ae0a567f79c903",
+        "files": 90,
+        "package_sha256": "e2cfbb06c2c79f1ed5d6aee7e8dd3c2b4ea8f33b270487d6b37c8961b4227aff",
+        "runner": {
+          "captured_bytes": 126,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "53812f4c7359de0db6497b1f0c42ae8981bd77a22afd4f5ae280943b6400309b",
+          "seconds": 22.28,
+          "status": "passed"
+        },
+        "runtime_dependencies": [
+          "finch",
+          "hpax",
+          "jason",
+          "mime",
+          "mint",
+          "nimble_options",
+          "nimble_pool",
+          "req",
+          "telemetry"
+        ],
+        "smoke": {
+          "candidate_runtime_explicit": "1.16.0",
+          "client": true,
+          "legacy_runtime_explicit": "1.14.1",
+          "runtime_default": "1.14.6",
+          "supervisor": true,
+          "versions": {
+            "jason": "1.4.5",
+            "nimble_options": "1.1.1",
+            "req": "0.7.4",
+            "telemetry": "1.4.2"
+          }
+        }
+      },
+      "minimum": {
+        "detail_sha256": "892c2785603fe29e486069f55ef12245c1fac52b67e7adca0ec28840ee122b2b",
+        "files": 90,
+        "package_sha256": "e2cfbb06c2c79f1ed5d6aee7e8dd3c2b4ea8f33b270487d6b37c8961b4227aff",
+        "runner": {
+          "captured_bytes": 126,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "13d3fffa511b7546a93a75dcd15029074a006f193d2036eb9817374b7778a467",
+          "seconds": 21.624,
+          "status": "passed"
+        },
+        "runtime_dependencies": [
+          "finch",
+          "hpax",
+          "jason",
+          "mime",
+          "mint",
+          "nimble_options",
+          "nimble_pool",
+          "req",
+          "telemetry"
+        ],
+        "smoke": {
+          "candidate_runtime_explicit": "1.16.0",
+          "client": true,
+          "legacy_runtime_explicit": "1.14.1",
+          "runtime_default": "1.14.6",
+          "supervisor": true,
+          "versions": {
+            "jason": "1.4.0",
+            "nimble_options": "1.1.0",
+            "req": "0.7.4",
+            "telemetry": "1.3.0"
+          }
+        }
+      }
+    },
+    "source_commit": "adc0c27c8465d7c500bf5ef1b9466112b70009a1"
+  },
+  "quality": {
+    "analyzer_bad_clean_pairs": 8,
+    "coverage_percent": 95.41,
+    "deterministic_cases": 204,
+    "deterministic_seed": 146040,
+    "elixir": "1.20.4",
+    "otp": "29.0.6",
+    "reports": {
+      "canaries": {
+        "captured_bytes": 621,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "e0b964a623497ff2bb478f184e6c238afa88d2b496eb969c1ad810acf8e4339f",
+        "seconds": 32.732,
+        "status": "passed"
+      },
+      "compile-durable_host": {
+        "captured_bytes": 25,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "bd364c33f85fbaca28666a37f50d4891a570e4ac67b5088b287846420e66cd17",
+        "seconds": 3.003,
+        "status": "passed"
+      },
+      "compile-minimal_host": {
+        "captured_bytes": 24,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "62ac10239807a71149064330c2cfc045f7688ae6bf5d9baefd67a2452e47789a",
+        "seconds": 1.048,
+        "status": "passed"
+      },
+      "coverage": {
+        "captured_bytes": 3707,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "88c45242d6d39b4b17080dcb0efd356b608230b0a00fd032bbc18ebffba18b5c",
+        "seconds": 89.353,
+        "status": "passed"
+      },
+      "deps": {
+        "captured_bytes": 732,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "715b95b58a1ba06fa6878e11294ff38d7b09b1f3ba1bfd6bb8e9bb83d5aadceb",
+        "seconds": 2.446,
+        "status": "passed"
+      },
+      "deps-audit-durable_host": {
+        "captured_bytes": 63,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "3ab3057a627dd4d27e401a315cd925f03734595fc285ddb8427aced7062273f1",
+        "seconds": 5.828,
+        "status": "passed"
+      },
+      "deps-audit-minimal_host": {
+        "captured_bytes": 63,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "3ab3057a627dd4d27e401a315cd925f03734595fc285ddb8427aced7062273f1",
+        "seconds": 3.841,
+        "status": "passed"
+      },
+      "deps-audit-root": {
+        "captured_bytes": 26,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "3016e51e4eac0d421674d2128bbbdefb2924b4646e0c14a1ab034977ad73fae5",
+        "seconds": 2.033,
+        "status": "passed"
+      },
+      "dialyzer-durable_host": {
+        "captured_bytes": 1837,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "40fe785a524e564617fc38bb743da26e85f6f852e820b54cf2912e959da6e3e5",
+        "seconds": 127.832,
+        "status": "passed"
+      },
+      "dialyzer-minimal_host": {
+        "captured_bytes": 1302,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "e6f3a3eeb11d724eedc14ee1eb7631ca7faafbf6bc6d14e081e548642aaab6e5",
+        "seconds": 95.388,
+        "status": "passed"
+      },
+      "doc-links": {
+        "captured_bytes": 60,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "4becb7fed09596d86e9f5b2d81c9c1f9bacb31d06c8e2cc7f47e322dad12dac6",
+        "seconds": 0.842,
+        "status": "passed"
+      },
+      "docs": {
+        "captured_bytes": 153,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "2c82202881a04d8ec7dcc208f385eef29553cf4c1fc7cc1e81bd0cf3331f0b7e",
+        "seconds": 4.61,
+        "status": "passed"
+      },
+      "hex-audit-durable_host": {
+        "captured_bytes": 47,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+        "seconds": 1.451,
+        "status": "passed"
+      },
+      "hex-audit-minimal_host": {
+        "captured_bytes": 47,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+        "seconds": 1.376,
+        "status": "passed"
+      },
+      "hex-audit-root": {
+        "captured_bytes": 47,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+        "seconds": 1.457,
+        "status": "passed"
+      },
+      "quality": {
+        "captured_bytes": 2141,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "84119a62ff6016e9a584254c24d816b09f4307068820918241e37876fbdd85fd",
+        "seconds": 106.9,
+        "status": "passed"
+      },
+      "tooling": {
+        "captured_bytes": 153,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "2aa5fbda041dd52c5634989f29c857aa2d8f179b35f7a03d98bf6f8833415164",
+        "seconds": 6.928,
+        "status": "passed"
+      },
+      "xref-durable_host": {
+        "captured_bytes": 16,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548",
+        "seconds": 1.138,
+        "status": "passed"
+      },
+      "xref-minimal_host": {
+        "captured_bytes": 16,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548",
+        "seconds": 0.944,
+        "status": "passed"
+      }
+    },
+    "source_commit": "adc0c27c8465d7c500bf5ef1b9466112b70009a1",
+    "tooling_cases": 23
+  },
+  "quality_checkpoint_4e5692f": {
+    "canary_pairs": 8,
+    "checks": {
+      "canaries": {
+        "captured_bytes": 621,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "e0b964a623497ff2bb478f184e6c238afa88d2b496eb969c1ad810acf8e4339f",
+        "seconds": 49.724,
+        "status": "passed"
+      },
+      "compile-durable_host": {
+        "captured_bytes": 24,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "03d47c6b429a076348282533b9725f493e889974a689133db39f187fac79a634",
+        "seconds": 2.296,
+        "status": "passed"
+      },
+      "compile-minimal_host": {
+        "captured_bytes": 23,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "d9904e527cccaec0e854b323b04ec7f0b408ecb02771ac243d1284fc624b3205",
+        "seconds": 2.068,
+        "status": "passed"
+      },
+      "coverage": {
+        "captured_bytes": 3707,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "38b8f8d8f14cb3518f49bced17df3c40da4b676c88ffb27cf800032180e6666a",
+        "seconds": 101.431,
+        "status": "passed"
+      },
+      "deps-audit-durable_host": {
+        "captured_bytes": 62,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "97ded97167511bf60ff91c193a7dd566aad8fe50374cef37b0ee6d2e290000e6",
+        "seconds": 2.73,
+        "status": "passed"
+      },
+      "deps-audit-minimal_host": {
+        "captured_bytes": 62,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "97ded97167511bf60ff91c193a7dd566aad8fe50374cef37b0ee6d2e290000e6",
+        "seconds": 3.449,
+        "status": "passed"
+      },
+      "deps-audit-root": {
+        "captured_bytes": 26,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "3016e51e4eac0d421674d2128bbbdefb2924b4646e0c14a1ab034977ad73fae5",
+        "seconds": 2.547,
+        "status": "passed"
+      },
+      "dialyzer-durable_host": {
+        "captured_bytes": 1673,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "39fd87c86c08de98d6fcfa987db8b0ec6a0d899f580867a1ec80a730823d102a",
+        "seconds": 153.285,
+        "status": "passed"
+      },
+      "dialyzer-minimal_host": {
+        "captured_bytes": 1136,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "8827051d9ed4f545dbf62a04df6d28d9f4ad0b99200a7aebe1092076cd2b8fd6",
+        "seconds": 50.619,
+        "status": "passed"
+      },
+      "doc-links": {
+        "captured_bytes": 60,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "4becb7fed09596d86e9f5b2d81c9c1f9bacb31d06c8e2cc7f47e322dad12dac6",
+        "seconds": 1.355,
+        "status": "passed"
+      },
+      "docs": {
+        "captured_bytes": 152,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "aae7135d7f0a37a3cd227d50e111b3f799daa99f6cfa30e5a2e60bca2d7bef5e",
+        "seconds": 5.907,
+        "status": "passed"
+      },
+      "hex-audit-durable_host": {
+        "captured_bytes": 47,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+        "seconds": 3.171,
+        "status": "passed"
+      },
+      "hex-audit-minimal_host": {
+        "captured_bytes": 47,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+        "seconds": 3.226,
+        "status": "passed"
+      },
+      "hex-audit-root": {
+        "captured_bytes": 47,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+        "seconds": 2.911,
+        "status": "passed"
+      },
+      "quality": {
+        "captured_bytes": 2141,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "6bf21693f73291647f4e64c26cdbc6f792bfb962408a8c4b584ccefbc95fe598",
+        "seconds": 122.818,
+        "status": "passed"
+      },
+      "tooling": {
+        "captured_bytes": 155,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "3ea1193c491a5105dde9bc7d68c8880d048a7724473cb01bf54c606cb791e4cc",
+        "seconds": 14.227,
+        "status": "passed"
+      },
+      "xref-durable_host": {
+        "captured_bytes": 16,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548",
+        "seconds": 3.732,
+        "status": "passed"
+      },
+      "xref-minimal_host": {
+        "captured_bytes": 16,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548",
+        "seconds": 1.871,
+        "status": "passed"
+      }
+    },
+    "coverage_percent": 95.41,
+    "deterministic_cases": 204,
+    "documentation_pages": 42,
+    "excluded_runtime_cases_not_counted": 14,
+    "scope": "Complete ordinary quality checkpoint after the CI port-close correction and bounded preparation fixture changes. No real runtime or adversarial workload executed by these checks; package consumers and default promotion remain separate.",
+    "seeds": {
+      "coverage": 761276,
+      "quality": 191098,
+      "tooling": 262455
+    },
+    "source_commit": "4e5692fb5aa4d68a21e384dbcad888ce6f6f20c1",
+    "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+    "tooling_cases": 23
+  },
+  "quality_checkpoint_5ea1e73": {
+    "canary_pairs": 8,
+    "checks": {
+      "canaries": {
+        "captured_bytes": 621,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "e0b964a623497ff2bb478f184e6c238afa88d2b496eb969c1ad810acf8e4339f",
+        "seconds": 16.357,
+        "status": "passed"
+      },
+      "compile-durable_host": {
+        "captured_bytes": 24,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "03d47c6b429a076348282533b9725f493e889974a689133db39f187fac79a634",
+        "seconds": 1.102,
+        "status": "passed"
+      },
+      "compile-minimal_host": {
+        "captured_bytes": 23,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "d9904e527cccaec0e854b323b04ec7f0b408ecb02771ac243d1284fc624b3205",
+        "seconds": 0.779,
+        "status": "passed"
+      },
+      "coverage": {
+        "captured_bytes": 3706,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "7ccdf97d64a4bfc9b6f49d439f8252d94c740a7545391a12cb47f1f0a521ff67",
+        "seconds": 79.98,
+        "status": "passed"
+      },
+      "deps-audit-durable_host": {
+        "captured_bytes": 62,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "97ded97167511bf60ff91c193a7dd566aad8fe50374cef37b0ee6d2e290000e6",
+        "seconds": 1.822,
+        "status": "passed"
+      },
+      "deps-audit-minimal_host": {
+        "captured_bytes": 62,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "97ded97167511bf60ff91c193a7dd566aad8fe50374cef37b0ee6d2e290000e6",
+        "seconds": 1.547,
+        "status": "passed"
+      },
+      "deps-audit-root": {
+        "captured_bytes": 26,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "3016e51e4eac0d421674d2128bbbdefb2924b4646e0c14a1ab034977ad73fae5",
+        "seconds": 1.278,
+        "status": "passed"
+      },
+      "dialyzer-durable_host": {
+        "captured_bytes": 1672,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "3e1ef5d6d998eebc062aa6656ed83fc0cc1ee4b3a604b467b4983fae51ed3bb2",
+        "seconds": 46.795,
+        "status": "passed"
+      },
+      "dialyzer-minimal_host": {
+        "captured_bytes": 1135,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "04b50d0cd3b03b43536654b5d1ecd41f81c399c1617af0df6a003ad2b92123ab",
+        "seconds": 13.908,
+        "status": "passed"
+      },
+      "doc-links": {
+        "captured_bytes": 60,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "4becb7fed09596d86e9f5b2d81c9c1f9bacb31d06c8e2cc7f47e322dad12dac6",
+        "seconds": 0.581,
+        "status": "passed"
+      },
+      "docs": {
+        "captured_bytes": 152,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "aae7135d7f0a37a3cd227d50e111b3f799daa99f6cfa30e5a2e60bca2d7bef5e",
+        "seconds": 2.073,
+        "status": "passed"
+      },
+      "hex-audit-durable_host": {
+        "captured_bytes": 47,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+        "seconds": 0.945,
+        "status": "passed"
+      },
+      "hex-audit-minimal_host": {
+        "captured_bytes": 47,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+        "seconds": 0.918,
+        "status": "passed"
+      },
+      "hex-audit-root": {
+        "captured_bytes": 47,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+        "seconds": 1.08,
+        "status": "passed"
+      },
+      "quality": {
+        "captured_bytes": 2139,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "a3d7d5bcd8d625f8b7e1ee48e289909e5a0b7a7ad5974151d1da850505edd71e",
+        "seconds": 88.951,
+        "status": "passed"
+      },
+      "tooling": {
+        "captured_bytes": 154,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "f7ddab1aecb84b8b647f4ad98aee0ca378b50a5e3e66f058594cd9b88aaae741",
+        "seconds": 6.397,
+        "status": "passed"
+      },
+      "xref-durable_host": {
+        "captured_bytes": 16,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548",
+        "seconds": 0.611,
+        "status": "passed"
+      },
+      "xref-minimal_host": {
+        "captured_bytes": 16,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548",
+        "seconds": 0.661,
+        "status": "passed"
+      }
+    },
+    "coverage_percent": 95.41,
+    "deterministic_cases": 204,
+    "documentation_pages": 42,
+    "excluded_runtime_cases_not_counted": 14,
+    "scope": "Final ordinary quality checks with the 1.16.0 default at committed candidate 5ea1e73. No real runtime or adversarial workloads executed by these gates; package and real-runtime acceptance have separate evidence.",
+    "seeds": {
+      "coverage": 333604,
+      "quality": 817538,
+      "tooling": 658523
+    },
+    "source_commit": "5ea1e73e32b3d1faf8a5881ac06d3ee6f029e871",
+    "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+    "tooling_cases": 23
+  },
+  "restart_process_identity": {
+    "actual_account": "lab",
+    "archive_sha256": "a2dd82befc8cde3adde10a8fc92d5ead190dc7f4ebf0b5714258eb14b418a164",
+    "enclosing_unit": {
+      "kill_mode": "control-group",
+      "main_pid_after": 0,
+      "result": "success",
+      "runtime_max_seconds": 600
+    },
+    "failed_probe_attempt": {
+      "captured_bytes": 228,
+      "exit_code": 1,
+      "failure": null,
+      "output_sha256": "7c8abc3c311ae788b6063a802aba284dfd62c1f92c86e55a621bf9967d2dc375",
+      "seconds": 18.384,
+      "status": "failed"
+    },
+    "kvm_fds_after_fixture_before_unit_stop": 0,
+    "probe_correction": "Unprivileged /proc executable-link inspection omitted the VMM. A guarded root inspector inside the disposable guest matched the exact owned runtime executable; no command-name assumption.",
+    "probe_sha256": "2d2fc85c6236eff8653c14c24d912a65975b714ee5087dd95966883e00337669",
+    "process_inspector_sha256": "22f9adcbac6c31b4fd5a9d94ffe5507250b7ccb00253be5ff2c6f251a1f49ea3",
+    "report": {
+      "cleanup": "verified_absent",
+      "cycles": [
+        {
+          "cycle": 1,
+          "dispatch_marker": "x",
+          "followup_exit": 0,
+          "followup_stdout": "42\n",
+          "server_pid": 7814,
+          "total_runtime_processes": 2,
+          "vm_birth": "Mon Sep 14 00:40:23 2026",
+          "vm_pid": 6866
+        },
+        {
+          "cycle": 2,
+          "dispatch_marker": "x",
+          "followup_exit": 0,
+          "followup_stdout": "42\n",
+          "server_pid": 8178,
+          "total_runtime_processes": 2,
+          "vm_birth": "Mon Sep 14 00:40:23 2026",
+          "vm_pid": 6866
+        },
+        {
+          "cycle": 3,
+          "dispatch_marker": "x",
+          "followup_exit": 0,
+          "followup_stdout": "42\n",
+          "server_pid": 8541,
+          "total_runtime_processes": 2,
+          "vm_birth": "Mon Sep 14 00:40:23 2026",
+          "vm_pid": 6866
+        }
+      ],
+      "external_cli_delete_while_server_down": true,
+      "runtime": "1.16.0",
+      "scope": "one ordinary VM, bounded nested Linux restart observations",
+      "stale_inventory_removed": true,
+      "status": "passed"
+    },
+    "runner": {
+      "captured_bytes": 133,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "36f75e0f61a3c8c98d88b70d713f954dd6d4302507c6efcba0bae5d273fdfbd5",
+      "seconds": 20.248,
+      "status": "passed"
+    },
+    "source_base": "adc0c27c8465d7c500bf5ef1b9466112b70009a1"
+  },
+  "runtime": "1.16.0",
+  "runtime_and_store": {
+    "runtime": {
+      "captured_bytes": 162,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "c577131b51f7726c4115075743fbfc689ce62c6cc11ebdcc0d83ab21a7902dd8",
+      "seconds": 420.645,
+      "status": "passed",
+      "tests": {
+        "passed": 14,
+        "seed": 453229
+      }
+    },
+    "source_commit": "6a4a6b6055d9c28c21c5bea01c7b1ab970f2ee5d",
+    "store": {
+      "captured_bytes": 160,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "60c1ebf7c5a72e18ded3a9b9fb567aa042af230e7262a115b26e0e002521333e",
+      "seconds": 3.505,
+      "status": "passed",
+      "tests": {
+        "passed": 16,
+        "seed": 980339
+      }
+    }
+  },
+  "scope": "Native Linux ordinary CI and disposable nested KVM runtime observations are separate configurations.",
+  "service_fixture_followup": {
+    "archive_sha256": "632df14d6a3431ceb9c5dbc10570ace0c205d718c7a3e138985adbb360d62a4e",
+    "diagnostic_rerun": {
+      "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+      "dispatch_attempts": 1,
+      "guest_marker": "single byte before recovery",
+      "guest_survived_api_server": true,
+      "operator_deleted_vm": false,
+      "outage_seconds": 0.052,
+      "partition": "restart-bcfefd32e8777943",
+      "platform": "linux",
+      "result": {
+        "absence_at_ms": 1789345205249,
+        "artifacts": [],
+        "cancel_requested_at_ms": null,
+        "cleanup": "complete",
+        "collection": "pending",
+        "evidence": "termination_confirmed",
+        "exit_code": null,
+        "id": "restart-bcfefd32e8777943",
+        "machine_name": "sbxexample-epplibysg6ex3zdboloj",
+        "reserved": false,
+        "scope": "example",
+        "state": "unknown",
+        "worker_id": "example-worker"
+      },
+      "retained_workspace": "/tmp/sbx-worker-restart-c9b4701103168b635e23cadc",
+      "runtime_version": "1.16.0",
+      "scenario": "restart",
+      "seconds": 92.041,
+      "status": "passed"
+    },
+    "diagnostic_rerun_changes": "Sanitized failure reason and expected phase; initial phase allowance still 30 seconds in this run.",
+    "disposal": {
+      "outer_guest_stopped_utc": "2026-09-14T00:21:12Z",
+      "recovery_marker_absent": true,
+      "subsequent_active_state": "inactive",
+      "subsequent_main_pid": 0,
+      "subsequent_result": "success"
+    },
+    "failed_attempt": {
+      "cleanup_errors": [
+        "ArgumentError"
+      ],
+      "failure": "ArgumentError",
+      "partition": "restart-0e05b0250c82560b",
+      "retained_workspace": "/tmp/sbx-worker-restart-1a6656989911f519dbfdb020",
+      "scenario": "restart",
+      "status": "failed"
+    },
+    "orphan": {
+      "account": "lab",
+      "command_name": "libkrun VM",
+      "observed_utc": "2026-09-14T00:21:04Z",
+      "pid": 26250,
+      "started_utc": "2026-09-14T00:14:10Z",
+      "uid": 1000,
+      "vcpu_descriptors": 1,
+      "vm_descriptors": 1
+    },
+    "orphan_observation_sha256": "b3d5ed885e4bd72c59c610ed868e815cee4d6a3d38e6c662ebb02a70ead1469d",
+    "scope": "Initial fixture cleanup failed and leaked a VMM until outer guest disposal. A later passing fixture does not erase that failure. Extended-unavailability and external-deletion fixtures were not part of this attempt; their later completion is recorded under service_recovery.",
+    "source_base": "adc0c27c8465d7c500bf5ef1b9466112b70009a1"
+  },
+  "service_recovery": {
+    "archive_sha256": "b0e049be129f4da154961335b61cba3e5b067da00259e58132a7e5fac13aba5d",
+    "descriptor_helper_sha256": "69bb955af9be85ffd99febc7edc98f295beb36fd0203c8ba2a5fcdc1ce6584a2",
+    "enclosing_unit": {
+      "kill_mode": "control-group",
+      "main_pid_after": 0,
+      "result": "success",
+      "runtime_max_seconds": 900
+    },
+    "failed_setup_attempts": [
+      {
+        "expected_phase": "phase:running",
+        "failure": "ArgumentError",
+        "partition": "restart-d273412589478bb3",
+        "reason": "controller_exited_before_phase",
+        "retained_workspace": "/tmp/sbx-worker-restart-26b651bb30bedf26cea131bf",
+        "scenario": "restart",
+        "status": "failed"
+      },
+      {
+        "expected_phase": "phase:running",
+        "failure": "ArgumentError",
+        "partition": "restart-130da16537587e44",
+        "reason": "controller_exited_before_phase",
+        "retained_workspace": "/tmp/sbx-worker-restart-14ef2e1fe5cc71ab3713835a",
+        "scenario": "restart",
+        "status": "failed"
+      }
+    ],
+    "fixture_sha256": "b079cc096e3cb1068bf2358cba05a71a5bff4581b14942b67c27a95ca7cc7fca",
+    "scenarios": {
+      "missing": {
+        "actual_account": "lab",
+        "kvm_fds_after_fixture_before_unit_stop": 0,
+        "report": {
+          "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+          "dispatch_attempts": 1,
+          "guest_marker": "single byte before recovery",
+          "guest_survived_api_server": true,
+          "operator_deleted_vm": true,
+          "outage_seconds": 0.051,
+          "partition": "restart-884039469633b48c",
+          "platform": "linux",
+          "result": {
+            "absence_at_ms": 1789346273948,
+            "artifacts": [],
+            "cancel_requested_at_ms": null,
+            "cleanup": "complete",
+            "collection": "pending",
+            "evidence": "termination_confirmed",
+            "exit_code": null,
+            "id": "restart-884039469633b48c",
+            "machine_name": "sbxexample-dhbg7hvvxz5segxw7g6u",
+            "reserved": false,
+            "scope": "example",
+            "state": "unknown",
+            "worker_id": "example-worker"
+          },
+          "retained_workspace": "/tmp/sbx-worker-restart-5fd0c9e41aa0c1bbf0c4a5af",
+          "runtime_version": "1.16.0",
+          "scenario": "missing",
+          "seconds": 16.878,
+          "status": "passed"
+        },
+        "runner": {
+          "captured_bytes": 795,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "99472933413786f10bbd3b36446370589d10ef5f2de4dbf0b4a7d83d1bad1fd1",
+          "seconds": 17.534,
+          "status": "passed"
+        }
+      },
+      "restart": {
+        "actual_account": "lab",
+        "kvm_fds_after_fixture_before_unit_stop": 0,
+        "report": {
+          "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+          "dispatch_attempts": 1,
+          "guest_marker": "single byte before recovery",
+          "guest_survived_api_server": true,
+          "operator_deleted_vm": false,
+          "outage_seconds": 0.051,
+          "partition": "restart-d4b17fa9b1dde5eb",
+          "platform": "linux",
+          "result": {
+            "absence_at_ms": 1789346117967,
+            "artifacts": [],
+            "cancel_requested_at_ms": null,
+            "cleanup": "complete",
+            "collection": "pending",
+            "evidence": "termination_confirmed",
+            "exit_code": null,
+            "id": "restart-d4b17fa9b1dde5eb",
+            "machine_name": "sbxexample-lbbyavp4c2bb5mmf4ya5",
+            "reserved": false,
+            "scope": "example",
+            "state": "unknown",
+            "worker_id": "example-worker"
+          },
+          "retained_workspace": "/tmp/sbx-worker-restart-f04410c29fef928272ba3159",
+          "runtime_version": "1.16.0",
+          "scenario": "restart",
+          "seconds": 90.679,
+          "status": "passed"
+        },
+        "runner": {
+          "captured_bytes": 796,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "80e91642a2fcf4bf25d1d78a82646db6eb3d63f3621f3b13b0bc5b4f9e05f9c8",
+          "seconds": 91.354,
+          "status": "passed"
+        }
+      },
+      "unavailable": {
+        "actual_account": "lab",
+        "kvm_fds_after_fixture_before_unit_stop": 0,
+        "report": {
+          "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+          "dispatch_attempts": 1,
+          "guest_marker": "single byte before recovery",
+          "guest_survived_api_server": true,
+          "operator_deleted_vm": true,
+          "outage_seconds": 89.915,
+          "partition": "restart-77985de5e79fef1b",
+          "platform": "linux",
+          "result": {
+            "absence_at_ms": 1789346255945,
+            "artifacts": [],
+            "cancel_requested_at_ms": 1789346133867,
+            "cleanup": "complete",
+            "collection": "pending",
+            "evidence": "termination_confirmed",
+            "exit_code": null,
+            "id": "restart-77985de5e79fef1b",
+            "machine_name": "sbxexample-w6vnqfduh7mstony2rj4",
+            "reserved": false,
+            "scope": "example",
+            "state": "unknown",
+            "worker_id": "example-worker"
+          },
+          "retained_workspace": "/tmp/sbx-worker-restart-bf16b4bd292a2f89be8dd8ab",
+          "runtime_version": "1.16.0",
+          "scenario": "unavailable",
+          "seconds": 136.702,
+          "status": "passed"
+        },
+        "runner": {
+          "captured_bytes": 810,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "ef2e194567753f58ee300326e6207a135bbee5bb0d9311434387f061b35f4ebc",
+          "seconds": 137.354,
+          "status": "passed"
+        }
+      }
+    },
+    "setup_correction": "Fresh guest database lacked the example schema. Controller failed before dispatch; existing ecto migrations applied before the passing run.",
+    "source_base": "adc0c27c8465d7c500bf5ef1b9466112b70009a1",
+    "status": "passed"
+  },
+  "shared_storage_cleanup": {
+    "controller_change_commit": "067b6ec",
+    "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
+    "detail": {
+      "absence_after_worker_restart": true,
+      "after_delete": {
+        "available_bytes": 536682496,
+        "total_bytes": 536870912,
+        "used_bytes": 188416
+      },
+      "after_fill": {
+        "available_bytes": 0,
+        "total_bytes": 536870912,
+        "used_bytes": 536870912
+      },
+      "after_stop": {
+        "available_bytes": 4096,
+        "total_bytes": 536870912,
+        "used_bytes": 536866816
+      },
+      "before_fill": {
+        "available_bytes": 351588352,
+        "total_bytes": 536870912,
+        "used_bytes": 185282560
+      },
+      "cgroup_after_delete": {
+        "cpu.stat": "usage_usec 11292990\nuser_usec 7113586\nsystem_usec 4179404\ncore_sched.force_idle_usec 0\nnr_periods 109\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "memory.peak": "871022592",
+        "pids.events": "max 0",
+        "pids.peak": "23"
+      },
+      "cgroup_before": {
+        "cpu.stat": "usage_usec 24436\nuser_usec 12707\nsystem_usec 11729\ncore_sched.force_idle_usec 0\nnr_periods 2\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "memory.peak": "5844992",
+        "pids.events": "max 0",
+        "pids.peak": "5"
+      },
+      "cgroup_final_worker": {
+        "cpu.stat": "usage_usec 12814319\nuser_usec 7685578\nsystem_usec 5128740\ncore_sched.force_idle_usec 0\nnr_periods 120\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "memory.peak": "378187776",
+        "pids.events": "max 0",
+        "pids.peak": "23"
+      },
+      "created": {
+        "cpus": 1,
+        "created_at": 1789344249,
+        "memory_mb": 256,
+        "name": "cleanup-gbkqqjs5aesuogg3urzj",
+        "overlay_gb": 10,
+        "state": "created",
+        "storage_gb": 20
+      },
+      "data_directory_absent": true,
+      "delete": {
+        "status": "ok"
+      },
+      "fill": {
+        "error": {
+          "errno": 5,
+          "message": "I/O error"
+        },
+        "written_bytes": 329252864
+      },
+      "final_storage": {
+        "available_bytes": 536719360,
+        "total_bytes": 536870912,
+        "used_bytes": 151552
+      },
+      "finished_utc": "2026-09-14T00:04:32.193753Z",
+      "label": "shared-storage-1160",
+      "limits": {
+        "cpu.max": "200000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "pids.max": "128"
+      },
+      "nested_kvm_descriptors": true,
+      "replacement": {
+        "cpus": 1,
+        "created_at": 1789344260,
+        "memory_mb": 256,
+        "name": "cleanup-p3nc5pgkj2cxzl25t2rl",
+        "overlay_gb": 10,
+        "state": "created",
+        "storage_gb": 20
+      },
+      "shared_filesystem": {
+        "device_ids": [
+          "52",
+          "52",
+          "52"
+        ],
+        "paths": [
+          "/srv/smolbox-cleanup/data",
+          "/srv/smolbox-cleanup/data/.local/share/smolvm/server/smolvm.db",
+          "/srv/smolbox-cleanup/data/.cache/smolvm/vms/6f70fd5e17187d4b"
+        ]
+      },
+      "started_utc": "2026-09-14T00:04:09.116453Z",
+      "status": "passed",
+      "subsequent_execution": "create/start/upload/exec/download/stop/delete/absence passed",
+      "version": "1.16.0"
+    },
+    "profile": {
+      "cpu_percent": 200,
+      "memory_max_bytes": 2147483648,
+      "shared_storage_bytes": 536870912,
+      "tasks_max": 128,
+      "vm_uid_drop": "off",
+      "worker_deadline_seconds": 300
+    },
+    "runner": {
+      "captured_bytes": 2564,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "78227d442d0f6f2ce17db4e8433a1e4e2eb2348c23c667400d4a68f90dd6e349",
+      "seconds": 24.374,
+      "status": "passed"
+    },
+    "scope": "Focused shared-registry/storage cleanup regression; separate from the stricter constrained deployment's isolation qualification.",
+    "source_base": "adc0c27c8465d7c500bf5ef1b9466112b70009a1"
+  },
+  "short_streaming_startup_diagnostic": {
+    "actual_account_descriptors_after_teardown": 0,
+    "archive_sha256": "7a91129b0aaa4a4aff836dc6eb402a3e0a636bf81b522d53e6e80e26cb935dc3",
+    "console_collection_limitation": "The diagnostic inspected the XDG cache path, but explicit SMOLVM_DATA_DIR relocates HOME and clears XDG overrides. File-absent observations at that path do not prove an absence of guest OOM or boot errors.",
+    "custom_transport_sha256": "59be947eaabb6b9390f9d191aea74182b50cd106342536fa23c87c73ad6ffd94",
+    "observations": {
+      "cases": [
+        {
+          "case_number": 1,
+          "console": {
+            "agent-console.log": [
+              "file absent"
+            ],
+            "agent-startup-error.log": [
+              "file absent"
+            ]
+          },
+          "create_ms": 601,
+          "exec_ms": 44953,
+          "memory_mb": 256,
+          "observed": {
+            "exit_code": 0,
+            "outcome": "returned",
+            "stdout": "startup-diagnostic\n"
+          }
+        },
+        {
+          "case_number": 2,
+          "console": {
+            "agent-console.log": [
+              "file absent"
+            ],
+            "agent-startup-error.log": [
+              "file absent"
+            ]
+          },
+          "create_ms": 383,
+          "exec_ms": 16893,
+          "memory_mb": 256,
+          "observed": {
+            "exit_code": 0,
+            "outcome": "returned",
+            "stdout": "startup-diagnostic\n"
+          }
+        },
+        {
+          "case_number": 3,
+          "console": {
+            "agent-console.log": [
+              "file absent"
+            ],
+            "agent-startup-error.log": [
+              "file absent"
+            ]
+          },
+          "create_ms": 421,
+          "exec_ms": 16100,
+          "memory_mb": 256,
+          "observed": {
+            "exit_code": 0,
+            "outcome": "returned",
+            "stdout": "startup-diagnostic\n"
+          }
+        }
+      ],
+      "status": "diagnostic_only"
+    },
+    "runner": {
+      "captured_bytes": 177,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "fd34c8570229de446256d65ac025517fcf0f0baad1d60d92f5dda6474ce7ae76",
+      "seconds": 83.329,
+      "status": "passed"
+    },
+    "scope": "Three fresh 256 MiB machines returned short streaming commands using a temporary diagnostic transport copied from Req with bounded error capture. This did not reproduce the failed long streaming setup and does not replace the required long-stream check or default transport qualification.",
+    "source_base": "4e5692fb5aa4d68a21e384dbcad888ce6f6f20c1",
+    "unit_properties_limitation": "The successful transient unit was unloaded before final systemctl show; subsequent LoadState was not-found. Its infinity/default property report does not describe the earlier running unit and is not enforcement evidence. No new resource qualification is claimed by this diagnostic."
+  },
+  "status": "runtime_and_platform_qualification_complete"
+}

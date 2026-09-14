@@ -1,0 +1,20 @@
+{
+  "blockIo": "sync",
+  "branchable": false,
+  "branchpointHeld": false,
+  "cpus": 1,
+  "createdAt": 1700000000,
+  "cuda": false,
+  "diskUsedMb": 124,
+  "forkable": false,
+  "forkpointHeld": false,
+  "gpu": false,
+  "memoryMb": 256,
+  "mounts": [],
+  "name": "fixture",
+  "network": false,
+  "overlayGb": 1,
+  "ports": [],
+  "state": "created",
+  "storageGb": 1
+}

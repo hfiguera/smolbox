@@ -3,8 +3,12 @@ defmodule SmolBox.CI.PreflightTest do
   alias SmolBox.CI.{Child, Preflight, Util}
 
   test "process executable inspection uses executable identity even with a spoofed argv zero" do
+    # macOS lsof can take about 30 seconds to enumerate executable mappings.
+    # Keep the owned fixture alive throughout inspection; cleanup still stops it.
     {:ok, child} =
-      Child.start_link(["bash", "-c", "sleep 0.2; exec -a smolbox-fake-name sleep 30"])
+      Child.start_link(["bash", "-c", "sleep 0.2; exec -a smolbox-fake-name sleep 120"],
+        timeout: 120_000
+      )
 
     try do
       pid = Child.os_pid(child)
@@ -39,6 +43,8 @@ defmodule SmolBox.CI.PreflightTest do
           {"worker_pid", true},
           {"runtime_version", "1.14.5"},
           {"runtime_version", "1.14.6-dev"},
+          {"runtime_version", "1.16.0-dev"},
+          {"runtime_version", "1.16.1"},
           {"database_port", 0},
           {"expires_at_unix", System.os_time(:second) - 1},
           {"expires_at_unix", System.os_time(:second) + 100_000}
@@ -55,8 +61,8 @@ defmodule SmolBox.CI.PreflightTest do
     end
   end
 
-  test "candidate preflight accepts the default and both explicit supported versions" do
-    for version <- [nil, "1.14.1", "1.14.6"] do
+  test "candidate preflight accepts the default and explicit supported versions" do
+    for version <- [nil, "1.14.1", "1.14.6", "1.16.0"] do
       manifest = if version, do: Map.put(manifest(), "runtime_version", version), else: manifest()
       assert Preflight.validate!(manifest, "linux", false, %{}).port == 19_470
 

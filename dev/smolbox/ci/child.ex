@@ -134,7 +134,7 @@ defmodule SmolBox.CI.Child do
 
   def handle_info(:kill, state) do
     signal(state.pid, "KILL")
-    if Port.info(state.port), do: Port.close(state.port)
+    close_port(state.port)
     {:noreply, finish(state)}
   end
 
@@ -148,6 +148,14 @@ defmodule SmolBox.CI.Child do
   @impl true
   def terminate(_reason, %{done: true}), do: :ok
   def terminate(_reason, state), do: signal(state.pid, "KILL")
+
+  defp close_port(port) do
+    # Exit can close the port between an info check and close. Already closed is
+    # the intended cleanup result; do not crash while finishing the report.
+    Port.close(port)
+  rescue
+    ArgumentError -> :ok
+  end
 
   defp cancel(%{done: true} = state, _), do: state
   defp cancel(%{kill_timer: timer} = state, _) when not is_nil(timer), do: state

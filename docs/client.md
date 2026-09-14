@@ -6,7 +6,8 @@ Use it when host code owns those responsibilities. For a complete managed
 execution, begin with [Getting started](getting-started.md). This guide describes
 the supported client contract and its development-qualified worker boundary.
 See [runtime selection](compatibility.md#runtime-selection) for the explicit
-Linux/macOS 1.14.6 candidate and retained 1.14.1 compatibility.
+Linux/macOS 1.16.0 default in this checkout and retained explicit 1.14.1 and
+1.14.6 compatibility. Published SmolBox 0.1.2 still defaults to 1.14.6.
 
 Install the pinned SmolVM release from [compatibility evidence](compatibility.md).
 Prepare an approved, architecture-matched `.smolmachine` artifact on the worker
@@ -14,7 +15,7 @@ host, verify its digest, and start a private `smolvm serve` endpoint. For bounde
 small-file workloads set `SMOLVM_FILE_TRANSFER_MAX_BYTES=1048576` before starting
 the server. SmolBox never enables guest networking to fetch an image.
 
-For SmolVM 1.14.6, verify the host's `resize2fs` before requesting disks smaller
+For SmolVM 1.14.6 and 1.16.0, verify the host's `resize2fs` before requesting disks smaller
 than its bundled templates. Our macOS run without that tool lost a workspace
 file after stop/start; health and successful execution alone did not detect the
 problem. See [runtime prerequisites](compatibility.md#macos-1-14-6-prerequisites).
@@ -93,6 +94,40 @@ A timeout, lost connection, malformed result, or output overflow after possible
 dispatch returns uncertainty. **Never replay exec automatically.** Disconnecting
 the stream does not cancel the guest. Stop an owned VM separately and verify its
 state; stopping a VM does not recover an unknown command exit code.
+
+## Execution and transport budgets
+
+`Command.new/2` accepts a guest timeout of 1–300 seconds. A managed command must
+also fit its profile's `execution_ms`, whose maximum is 300,000 ms. Configure
+the worker client's receive and total operation budgets separately: increasing
+a guest deadline does not extend either HTTP budget. A quiet stream can reach
+its receive timeout even while the guest continues working.
+
+For example, a 120-second command can use `receive_timeout_ms: 130_000` and
+`operation_timeout_ms: 150_000`, with a managed execution budget of at least
+120,000 ms. These explicit client settings are within the existing limits; they
+do not change the guest deadline. Allow for transport overhead and any separate
+worker lifetime when selecting budgets for your own deployment.
+
+A low-level exec can start a stopped VM before running the command. Its total
+operation budget must allow for that startup as well as execution and response
+collection. The command's 300-second maximum therefore does not bound the whole
+client operation; `operation_timeout_ms` supplies that separate finite limit.
+
+In smolvm 1.16.0, execution routes no longer inherit the generic five-minute
+server timeout. That upstream change does not extend SmolBox's public command
+maximum or remove its configured client deadlines. A buffered public exec
+operation including implicit startup completed in 357.460 seconds, with a guest
+command lasting 299.002 seconds. A streamed operation completed in 386.357
+seconds, delivering its first output at 87.357 seconds and exit event at 386.357
+seconds; its guest command lasted 299.000 seconds. These measurements include
+startup and do not establish guest commands exceeding five minutes. See
+[the qualification status](compatibility.md#smolvm-1-16-0-qualification) for the
+retained startup failure and remaining acceptance work.
+`SmolBox.await/3` has a separate caller wait budget. Expiring that wait does not
+cancel the command or replace a recorded outcome with a timeout result.
+
+## File operations
 
 File manifests use exact `/workspace` paths and opaque host artifact references.
 Low-level uploads accept at most 1 MiB, verify their source digest before I/O, and

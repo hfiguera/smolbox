@@ -317,8 +317,17 @@ defmodule SmolBox.ManagedRuntimeTest do
       |> :crypto.hash_final()
       |> Base.encode16(case: :lower)
 
-  defp wait_for(context, handle, predicate, attempts \\ 600)
-  defp wait_for(_context, _handle, _predicate, 0), do: flunk("managed state deadline elapsed")
+  defp wait_for(
+         context,
+         handle,
+         predicate,
+         attempts \\ div(SmolBox.LabCandidate.observation_ms(30_000), 50)
+       )
+
+  defp wait_for(context, {scope, id}, _predicate, 0) do
+    {:ok, record} = SmolBox.fetch(context.runtime, scope, id)
+    flunk("managed state deadline elapsed; last state=#{record.state}")
+  end
 
   defp wait_for(context, {scope, id} = handle, predicate, attempts) do
     {:ok, record} = SmolBox.fetch(context.runtime, scope, id)
