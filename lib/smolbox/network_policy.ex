@@ -11,6 +11,11 @@ defmodule SmolBox.NetworkPolicy do
   Approve a new profile revision when changing access. No inbound ports, host
   mounts or automatic image pulls are enabled. Upstream and deployment controls
   can deny additional destinations; an allowlist is not proof of reachability.
+
+  The upstream DNS gateway and authenticated rollout endpoint are infrastructure
+  exceptions to the allowlist. The server's strict egress floor is deployment
+  configuration, not a guarantee attested by this struct. See the controlled
+  network access guide for the tested platform and protocol boundaries.
   """
 
   alias SmolBox.{Error, Validation}

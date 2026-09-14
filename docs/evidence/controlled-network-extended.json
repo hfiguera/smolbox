@@ -1,0 +1,703 @@
+{
+  "artifacts": {
+    "linux_python_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+    "macos_python_sha256": "d4fdc417ae000a1b56c99a1e6d8ee216b094f1dbd5ba1bf3c9fb613d404d9120"
+  },
+  "branch": "controlled-network-access",
+  "cleanup": {
+    "host_status_log_sha256": "08e01db9ab10ca97c3d74e683b7cd1c6a75c31140d82bf133dcbce5dbe2e3481",
+    "linux_owned_kvm_descriptors": 0,
+    "macos_machines": 0,
+    "macos_worker": "stopped",
+    "outer_vm": "stopped and disposable overlay recovered"
+  },
+  "date": "2026-09-14",
+  "initial_failures_not_counted": {
+    "ci_first": "ex_dna found a duplicated DNS parser in the new fixture; extracted one shared parser and reran the analyzer and both live fixtures. Deterministic tests had passed before this failure.",
+    "dialyzer_dev": "An extra manual dev-environment invocation reported an EEx dependency warning; the required test-environment CI lane passed without suppressions.",
+    "linux_hosts_first": "The fixture initially assumed CLI local-floor behavior. Actual serve uses strict by default, and rebinding to the private address was denied. Reviewed tagged serve code, corrected the expectation, and reran."
+  },
+  "linux": {
+    "cases": {
+      "cidr4": {
+        "owned_kvm_descriptors_after_shutdown": 0,
+        "result": {
+          "mode": "cidr4",
+          "observations": {
+            "control_tcp": false,
+            "control_udp": false,
+            "dns_aaaa": null,
+            "dns_alternate_denied": null,
+            "dns_alternate_tcp": null,
+            "dns_denied_tcp": null,
+            "dns_denied_udp": null,
+            "dns_private6": null,
+            "dns_suffix": null,
+            "dns_tcp": null,
+            "dns_udp": null,
+            "gateway_tcp": false,
+            "gateway_udp": false,
+            "learned_private6_tcp": false,
+            "learned_private6_udp": false,
+            "learned_v4_tcp": true,
+            "learned_v4_udp": true,
+            "learned_v6_tcp": false,
+            "learned_v6_udp": false,
+            "loopback": {
+              "address": null,
+              "tcp": false,
+              "udp": false
+            },
+            "management_route": 404,
+            "mapped_allow_tcp": true,
+            "mapped_allow_udp": true,
+            "mapped_control_tcp": false,
+            "mapped_control_udp": false,
+            "mapped_deny_tcp": false,
+            "mapped_deny_udp": false,
+            "mapped_metadata_tcp": false,
+            "mapped_metadata_udp": false,
+            "metadata": {
+              "address": null,
+              "tcp": false,
+              "udp": false
+            },
+            "metadata_tcp": false,
+            "metadata_udp": false,
+            "private6_tcp": false,
+            "private6_udp": false,
+            "rebind": {
+              "address": null,
+              "tcp": false,
+              "udp": false
+            },
+            "rebind_second": {
+              "address": null,
+              "tcp": false,
+              "udp": false
+            },
+            "rollout_invalid_token": 401,
+            "rollout_unauthenticated": 401,
+            "v4_allow_tcp": true,
+            "v4_allow_udp": true,
+            "v4_deny_tcp": false,
+            "v4_deny_udp": false,
+            "v6_allow_tcp": false,
+            "v6_allow_udp": false,
+            "v6_deny_tcp": false,
+            "v6_deny_udp": false
+          },
+          "restart": {
+            "control_tcp": false,
+            "control_udp": false,
+            "mapped_allow_tcp": true,
+            "mapped_allow_udp": true,
+            "mapped_control_tcp": false,
+            "mapped_control_udp": false,
+            "mapped_deny_tcp": false,
+            "mapped_deny_udp": false,
+            "mapped_metadata_tcp": false,
+            "mapped_metadata_udp": false,
+            "metadata_tcp": false,
+            "metadata_udp": false,
+            "private6_tcp": false,
+            "private6_udp": false,
+            "v4_allow_tcp": true,
+            "v4_allow_udp": true,
+            "v4_deny_tcp": false,
+            "v4_deny_udp": false,
+            "v6_allow_tcp": false,
+            "v6_allow_udp": false,
+            "v6_deny_tcp": false,
+            "v6_deny_udp": false
+          },
+          "status": "passed"
+        },
+        "runner": {
+          "captured_bytes": 1347,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "1626edd54a1c987aacf1230093ae3b99624f4747afc884c43aed9be312002f66",
+          "seconds": 46.894,
+          "status": "passed"
+        }
+      },
+      "cidr6": {
+        "owned_kvm_descriptors_after_shutdown": 0,
+        "result": {
+          "mode": "cidr6",
+          "observations": {
+            "control_tcp": false,
+            "control_udp": false,
+            "dns_aaaa": null,
+            "dns_alternate_denied": null,
+            "dns_alternate_tcp": null,
+            "dns_denied_tcp": null,
+            "dns_denied_udp": null,
+            "dns_private6": null,
+            "dns_suffix": null,
+            "dns_tcp": null,
+            "dns_udp": null,
+            "gateway_tcp": false,
+            "gateway_udp": false,
+            "learned_private6_tcp": false,
+            "learned_private6_udp": false,
+            "learned_v4_tcp": false,
+            "learned_v4_udp": false,
+            "learned_v6_tcp": true,
+            "learned_v6_udp": true,
+            "loopback": {
+              "address": null,
+              "tcp": false,
+              "udp": false
+            },
+            "management_route": 404,
+            "mapped_allow_tcp": false,
+            "mapped_allow_udp": false,
+            "mapped_control_tcp": false,
+            "mapped_control_udp": false,
+            "mapped_deny_tcp": false,
+            "mapped_deny_udp": false,
+            "mapped_metadata_tcp": false,
+            "mapped_metadata_udp": false,
+            "metadata": {
+              "address": null,
+              "tcp": false,
+              "udp": false
+            },
+            "metadata_tcp": false,
+            "metadata_udp": false,
+            "private6_tcp": false,
+            "private6_udp": false,
+            "rebind": {
+              "address": null,
+              "tcp": false,
+              "udp": false
+            },
+            "rebind_second": {
+              "address": null,
+              "tcp": false,
+              "udp": false
+            },
+            "rollout_invalid_token": 401,
+            "rollout_unauthenticated": 401,
+            "v4_allow_tcp": false,
+            "v4_allow_udp": false,
+            "v4_deny_tcp": false,
+            "v4_deny_udp": false,
+            "v6_allow_tcp": true,
+            "v6_allow_udp": true,
+            "v6_deny_tcp": false,
+            "v6_deny_udp": false
+          },
+          "restart": {
+            "control_tcp": false,
+            "control_udp": false,
+            "mapped_allow_tcp": false,
+            "mapped_allow_udp": false,
+            "mapped_control_tcp": false,
+            "mapped_control_udp": false,
+            "mapped_deny_tcp": false,
+            "mapped_deny_udp": false,
+            "mapped_metadata_tcp": false,
+            "mapped_metadata_udp": false,
+            "metadata_tcp": false,
+            "metadata_udp": false,
+            "private6_tcp": false,
+            "private6_udp": false,
+            "v4_allow_tcp": false,
+            "v4_allow_udp": false,
+            "v4_deny_tcp": false,
+            "v4_deny_udp": false,
+            "v6_allow_tcp": true,
+            "v6_allow_udp": true,
+            "v6_deny_tcp": false,
+            "v6_deny_udp": false
+          },
+          "status": "passed"
+        },
+        "runner": {
+          "captured_bytes": 1349,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "962f2ef74db40a0e3ad497cf491d45fec95f07902c66deb0e7a348698aff72b5",
+          "seconds": 48.997,
+          "status": "passed"
+        }
+      },
+      "hosts": {
+        "owned_kvm_descriptors_after_shutdown": 0,
+        "result": {
+          "mode": "hosts",
+          "observations": {
+            "control_tcp": false,
+            "control_udp": false,
+            "dns_aaaa": "2001:db8::10",
+            "dns_alternate_denied": null,
+            "dns_alternate_tcp": null,
+            "dns_denied_tcp": null,
+            "dns_denied_udp": null,
+            "dns_private6": "fd00::10",
+            "dns_suffix": null,
+            "dns_tcp": "198.18.0.10",
+            "dns_udp": "198.18.0.10",
+            "gateway_tcp": false,
+            "gateway_udp": false,
+            "learned_private6_tcp": false,
+            "learned_private6_udp": false,
+            "learned_v4_tcp": true,
+            "learned_v4_udp": true,
+            "learned_v6_tcp": true,
+            "learned_v6_udp": true,
+            "loopback": {
+              "address": "127.0.0.1",
+              "tcp": false,
+              "udp": false
+            },
+            "management_route": 404,
+            "mapped_allow_tcp": false,
+            "mapped_allow_udp": false,
+            "mapped_control_tcp": false,
+            "mapped_control_udp": false,
+            "mapped_deny_tcp": false,
+            "mapped_deny_udp": false,
+            "mapped_metadata_tcp": false,
+            "mapped_metadata_udp": false,
+            "metadata": {
+              "address": "169.254.169.254",
+              "tcp": false,
+              "udp": false
+            },
+            "metadata_tcp": false,
+            "metadata_udp": false,
+            "private6_tcp": false,
+            "private6_udp": false,
+            "rebind": {
+              "address": "198.18.0.10",
+              "tcp": true,
+              "udp": true
+            },
+            "rebind_second": {
+              "address": "10.77.0.10",
+              "tcp": false,
+              "udp": false
+            },
+            "rollout_invalid_token": 401,
+            "rollout_unauthenticated": 401,
+            "v4_allow_tcp": false,
+            "v4_allow_udp": false,
+            "v4_deny_tcp": false,
+            "v4_deny_udp": false,
+            "v6_allow_tcp": false,
+            "v6_allow_udp": false,
+            "v6_deny_tcp": false,
+            "v6_deny_udp": false
+          },
+          "restart": {
+            "control_tcp": false,
+            "control_udp": false,
+            "mapped_allow_tcp": false,
+            "mapped_allow_udp": false,
+            "mapped_control_tcp": false,
+            "mapped_control_udp": false,
+            "mapped_deny_tcp": false,
+            "mapped_deny_udp": false,
+            "mapped_metadata_tcp": false,
+            "mapped_metadata_udp": false,
+            "metadata_tcp": false,
+            "metadata_udp": false,
+            "private6_tcp": false,
+            "private6_udp": false,
+            "v4_allow_tcp": false,
+            "v4_allow_udp": false,
+            "v4_deny_tcp": false,
+            "v4_deny_udp": false,
+            "v6_allow_tcp": false,
+            "v6_allow_udp": false,
+            "v6_deny_tcp": false,
+            "v6_deny_udp": false
+          },
+          "status": "passed"
+        },
+        "runner": {
+          "captured_bytes": 1418,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "b24d4ac5b5fcd18554a3a534084f26eaa380372cbdc84a96f0c017b3bc08eb22",
+          "seconds": 50.55,
+          "status": "passed"
+        }
+      },
+      "offline": {
+        "owned_kvm_descriptors_after_shutdown": 0,
+        "result": {
+          "mode": "offline",
+          "observations": {
+            "control_tcp": false,
+            "control_udp": false,
+            "dns_aaaa": null,
+            "dns_alternate_denied": null,
+            "dns_alternate_tcp": null,
+            "dns_denied_tcp": null,
+            "dns_denied_udp": null,
+            "dns_private6": null,
+            "dns_suffix": null,
+            "dns_tcp": null,
+            "dns_udp": null,
+            "gateway_tcp": false,
+            "gateway_udp": false,
+            "learned_private6_tcp": false,
+            "learned_private6_udp": false,
+            "learned_v4_tcp": false,
+            "learned_v4_udp": false,
+            "learned_v6_tcp": false,
+            "learned_v6_udp": false,
+            "loopback": {
+              "address": null,
+              "tcp": false,
+              "udp": false
+            },
+            "management_route": null,
+            "mapped_allow_tcp": false,
+            "mapped_allow_udp": false,
+            "mapped_control_tcp": false,
+            "mapped_control_udp": false,
+            "mapped_deny_tcp": false,
+            "mapped_deny_udp": false,
+            "mapped_metadata_tcp": false,
+            "mapped_metadata_udp": false,
+            "metadata": {
+              "address": null,
+              "tcp": false,
+              "udp": false
+            },
+            "metadata_tcp": false,
+            "metadata_udp": false,
+            "private6_tcp": false,
+            "private6_udp": false,
+            "rebind": {
+              "address": null,
+              "tcp": false,
+              "udp": false
+            },
+            "rebind_second": {
+              "address": null,
+              "tcp": false,
+              "udp": false
+            },
+            "rollout_invalid_token": null,
+            "rollout_unauthenticated": null,
+            "v4_allow_tcp": false,
+            "v4_allow_udp": false,
+            "v4_deny_tcp": false,
+            "v4_deny_udp": false,
+            "v6_allow_tcp": false,
+            "v6_allow_udp": false,
+            "v6_deny_tcp": false,
+            "v6_deny_udp": false
+          },
+          "restart": {
+            "control_tcp": false,
+            "control_udp": false,
+            "mapped_allow_tcp": false,
+            "mapped_allow_udp": false,
+            "mapped_control_tcp": false,
+            "mapped_control_udp": false,
+            "mapped_deny_tcp": false,
+            "mapped_deny_udp": false,
+            "mapped_metadata_tcp": false,
+            "mapped_metadata_udp": false,
+            "metadata_tcp": false,
+            "metadata_udp": false,
+            "private6_tcp": false,
+            "private6_udp": false,
+            "v4_allow_tcp": false,
+            "v4_allow_udp": false,
+            "v4_deny_tcp": false,
+            "v4_deny_udp": false,
+            "v6_allow_tcp": false,
+            "v6_allow_udp": false,
+            "v6_deny_tcp": false,
+            "v6_deny_udp": false
+          },
+          "status": "passed"
+        },
+        "runner": {
+          "captured_bytes": 1381,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "203d6a47a4dd42dc3c0d620232c25487a219b64d6b70ab310c6e81fed5a2b9a7",
+          "seconds": 30.547,
+          "status": "passed"
+        }
+      },
+      "strict": {
+        "owned_kvm_descriptors_after_shutdown": 0,
+        "result": {
+          "mode": "strict",
+          "observations": {
+            "control_tcp": false,
+            "control_udp": false,
+            "dns_aaaa": "2001:db8::10",
+            "dns_alternate_denied": null,
+            "dns_alternate_tcp": null,
+            "dns_denied_tcp": null,
+            "dns_denied_udp": null,
+            "dns_private6": "fd00::10",
+            "dns_suffix": null,
+            "dns_tcp": "198.18.0.10",
+            "dns_udp": "198.18.0.10",
+            "gateway_tcp": false,
+            "gateway_udp": false,
+            "learned_private6_tcp": false,
+            "learned_private6_udp": false,
+            "learned_v4_tcp": true,
+            "learned_v4_udp": true,
+            "learned_v6_tcp": true,
+            "learned_v6_udp": true,
+            "loopback": {
+              "address": "127.0.0.1",
+              "tcp": false,
+              "udp": false
+            },
+            "management_route": 404,
+            "mapped_allow_tcp": false,
+            "mapped_allow_udp": false,
+            "mapped_control_tcp": false,
+            "mapped_control_udp": false,
+            "mapped_deny_tcp": false,
+            "mapped_deny_udp": false,
+            "mapped_metadata_tcp": false,
+            "mapped_metadata_udp": false,
+            "metadata": {
+              "address": "169.254.169.254",
+              "tcp": false,
+              "udp": false
+            },
+            "metadata_tcp": false,
+            "metadata_udp": false,
+            "private6_tcp": false,
+            "private6_udp": false,
+            "rebind": {
+              "address": "198.18.0.10",
+              "tcp": true,
+              "udp": true
+            },
+            "rebind_second": {
+              "address": "10.77.0.10",
+              "tcp": false,
+              "udp": false
+            },
+            "rollout_invalid_token": 401,
+            "rollout_unauthenticated": 401,
+            "v4_allow_tcp": false,
+            "v4_allow_udp": false,
+            "v4_deny_tcp": false,
+            "v4_deny_udp": false,
+            "v6_allow_tcp": false,
+            "v6_allow_udp": false,
+            "v6_deny_tcp": false,
+            "v6_deny_udp": false
+          },
+          "restart": {
+            "control_tcp": false,
+            "control_udp": false,
+            "mapped_allow_tcp": false,
+            "mapped_allow_udp": false,
+            "mapped_control_tcp": false,
+            "mapped_control_udp": false,
+            "mapped_deny_tcp": false,
+            "mapped_deny_udp": false,
+            "mapped_metadata_tcp": false,
+            "mapped_metadata_udp": false,
+            "metadata_tcp": false,
+            "metadata_udp": false,
+            "private6_tcp": false,
+            "private6_udp": false,
+            "v4_allow_tcp": false,
+            "v4_allow_udp": false,
+            "v4_deny_tcp": false,
+            "v4_deny_udp": false,
+            "v6_allow_tcp": false,
+            "v6_allow_udp": false,
+            "v6_deny_tcp": false,
+            "v6_deny_udp": false
+          },
+          "status": "passed"
+        },
+        "runner": {
+          "captured_bytes": 1419,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "4acb8b0dd1f7c36bc38abdb29d26fe61bf96b8bb83e178f48745af6c312a08ad",
+          "seconds": 50.917,
+          "status": "passed"
+        }
+      }
+    },
+    "environment": "ssh linux, disposable nested Linux x86_64 KVM guest only",
+    "network": "Worker private namespace with loopback only; no external route. Nine TCP/UDP responders plus two DNS endpoints. Namespace-only 2606:4700:4700::1111:443 responds to upstream IPv6 readiness probe. No public traffic is involved.",
+    "original_and_managed_regression": {
+      "cidr": {
+        "captured_bytes": 74,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "969e356928414d6180dfd599df97db3f2767e4cab82ab0cda1e86d44284c1d33",
+        "seconds": 30.069,
+        "status": "passed"
+      },
+      "hosts": {
+        "captured_bytes": 75,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "f92a1d67b46380baef6c86c860c202991e8223bf74a201d234674a618ac7070d",
+        "seconds": 30.213,
+        "status": "passed"
+      },
+      "managed": {
+        "captured_bytes": 80,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "82d50e81d98eac470dea841b25aa20903f1e4bb2d269017782abbcd7cb1e8671",
+        "seconds": 8.422,
+        "status": "passed"
+      },
+      "offline": {
+        "captured_bytes": 77,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "0abb1ff4fa098d47c87af410212fda63acb37c04d59bed7ece6eac125dd8204d",
+        "seconds": 49.768,
+        "status": "passed"
+      }
+    },
+    "positive_controls": "Nine IPv4/IPv6 TCP and UDP endpoints, plus normal and alternate DNS over both UDP and TCP verified before each policy."
+  },
+  "macos": {
+    "cases": {
+      "cidr": {
+        "approved_ip": "172.66.147.243",
+        "observations": {
+          "initial": {
+            "allowed_ip": true,
+            "allowed_name": false,
+            "blocked_ip": false,
+            "blocked_name": false
+          },
+          "restart": {
+            "allowed_ip": true,
+            "allowed_name": false,
+            "blocked_ip": false,
+            "blocked_name": false
+          }
+        },
+        "policy": "cidr",
+        "status": "passed"
+      },
+      "hosts": {
+        "approved_ip": "172.66.147.243",
+        "observations": {
+          "initial": {
+            "allowed_ip": false,
+            "allowed_name": true,
+            "blocked_ip": false,
+            "blocked_name": false
+          },
+          "restart": {
+            "allowed_ip": false,
+            "allowed_name": true,
+            "blocked_ip": false,
+            "blocked_name": false
+          }
+        },
+        "policy": "hosts",
+        "status": "passed"
+      },
+      "offline": {
+        "approved_ip": "172.66.147.243",
+        "observations": {
+          "initial": {
+            "allowed_ip": false,
+            "allowed_name": false,
+            "blocked_ip": false,
+            "blocked_name": false
+          },
+          "restart": {
+            "allowed_ip": false,
+            "allowed_name": false,
+            "blocked_ip": false,
+            "blocked_name": false
+          }
+        },
+        "policy": "offline",
+        "status": "passed"
+      }
+    },
+    "final_inventory": {
+      "machines": []
+    },
+    "ipv6": "No IPv6 route available on this Mac. No live macOS IPv6 claim.",
+    "ipv6_route_check_log_sha256": "ce9818db2413382052fa6cc0af3c9fd279670037aa4f2d0969e0871b13007e0f",
+    "os": "macOS 26.6.2 (25G83), Apple Silicon",
+    "scope": "Ordinary bounded IPv4 TCP/DNS compatibility using example.com and Cloudflare; no adversarial or exhaustion work. Both TCP destinations checked from host first.",
+    "worker_stopped": true
+  },
+  "parent_commit": "857d76b1cbd41023d7126b9aac5e340b25c94259",
+  "quality": {
+    "checks": "Format, unused dependencies, compile warnings, xref cycles, 213 tests, Credo/ex_slop, ex_dna, Credence, Dialyzer, ExDoc and 44-page local link check.",
+    "ci_environment": "MIX_ENV=test, Elixir 1.20.4 / OTP 29.0.6",
+    "deterministic_tests": 213,
+    "logs": {
+      "ci-first.log": "6e9b707f9f058ae1c8a90744af02dce7f2c23d656bc8f7198fcb2c7b21e2d747",
+      "compile-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "credence-accepted.log": "6bff8c4a5d58de8645646e4021a80b9153f1be0b7e61d70cc76cfc07ac612a4a",
+      "credo-accepted.log": "b5a9b87220856888879e5410b28b4b6bfe475a7c0c06b0ba91d0e8e1a6e5f213",
+      "dialyzer-test-final.log": "59c52ed5829966280f3b95673f7e215033c9374e02b5101ac31e9afac6e5be24",
+      "dna-accepted.log": "d058f725e52e2c663885e825754607c2191240c479fc98a5187816729f19203c",
+      "doc-links-final.log": "277fe79a729bc3c4058b5b3a662b663ecfe046b92807fcf1cae3313312e5ff5f",
+      "docs-final.log": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+      "xref-final.log": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548"
+    },
+    "runtime_tests_excluded_from_deterministic_count": 14
+  },
+  "remaining_limits": [
+    "No macOS IPv6/UDP enforcement qualification; IPv6/UDP packet evidence is Linux-specific.",
+    "No exhaustive packet mutation, DNS attack, protocol, tenant or deployment proof.",
+    "Prior resource/exhaustion and durable-recovery campaign remains separate.",
+    "No new runtime enforcement or production resource guarantee is introduced by these tests."
+  ],
+  "runtime": {
+    "linux_distribution_sha256": "cb7d6ea34914b4d71958e16eafc8a3220fe9e8cd5b76fa983ef9f648159f4c9b",
+    "macos_distribution_checksums_log_sha256": "2a94016a16bdd78dd8df55c1475ec86f765b51211cc68608a84b43b48840c6ed",
+    "reviewed_tagged_files": {
+      "crates/smolvm-network/src/egress.rs": "5a7d3057892e090d612d6966c8db13231109b67590e6f8f13e1643a85a936c21",
+      "crates/smolvm-network/src/lib.rs": "52f421560a79a00b30f7a98ed886aa0e4a39602309f10beea64d70805abebd51",
+      "crates/smolvm-network/src/tcp_relay.rs": "3e01881b87067bf43ab73593c98fb955b503ab0c590c422f2cba53e937746131",
+      "src/api/guest_rollout.rs": "dfd55018e0e10f9082bf009998a18aa3d01ac89d6d3dbca25949e05994046580",
+      "src/cli/serve.rs": "b3487ec1cf5b92f4a66077166b8e7897a7f93250b5555f00314da676e9fb456a"
+    },
+    "upstream_tag_commit": "e1dd54bf7be6d144ad6bdef4ebf310f57809a6a6",
+    "version": "1.16.0"
+  },
+  "scope": "Controlled network compatibility and selected enforcement cases; not a general hostile-network security certification.",
+  "source_sha256": {
+    "lib/smolbox/network_policy.ex": "f64d48370a4a89987a45ae78cbaedb9373129a6dd808315df8426787be86261d",
+    "scripts/lab/network-access.exs": "2144914119a67f8b391fcfdbaac9c6c5e95ef9fd6463a8369a473a77f3c919ee",
+    "scripts/lab/network-access.sh": "99c5d2d1609ebfedfafb88107a0c8a4b1cec7f9fb2659ff1e147b5aaec64501e",
+    "scripts/lab/network-dns.exs": "d5a980df61d16cd29f7b28acd916ac7de5c397e8862019623a92d2943e709ee8",
+    "scripts/lab/network-endpoints.exs": "238159b9fda75017a8127130ff1b02c4cd62ae60848dc2cbc75952f2b6cab7f8",
+    "scripts/lab/network-extended-endpoints.exs": "45d4a8ab6c6d0da34148897fa53c04e6670c8da9d675e308395e9e1e6d940a2a",
+    "scripts/lab/network-extended-positive.exs": "165536475f3c5a632fb8ece12af5cb5f8780c17e2e494e2d43526e74067cbaad",
+    "scripts/lab/network-extended.exs": "7476da06fc241a827e5dc8b9aeda66b2ed6df01896668491ba66822712f6f15e",
+    "scripts/lab/network-extended.sh": "4ebdc991d7657fb69fad8bd6b9e82f872bb61c5726c38e4875afa2227497d5a5",
+    "scripts/lab/network-macos.exs": "f0b53f0d6da800fc1565931ba2d0feaba1def6cb77b985c136422d98cba418fd",
+    "scripts/lab/network-managed.exs": "8ff2cd62952aee768639fe71a0250f6624e24ea1a093fe36e4f47108842ab426",
+    "scripts/lab/network-probe.exs": "6fe0e471b41776af13c8e36bbc1762d39440a742c8cd0cea8364e4679912bb76"
+  },
+  "status": "passed_for_documented_scope",
+  "upstream_boundaries": {
+    "dns": "Hostnames authorize learned A/AAAA IPs, not HTTP or TLS identities. Targeted rebinding to private/control, loopback and metadata was denied; this is not exhaustive DNS attack validation.",
+    "gateway_exception": "Network-enabled guests can reach the dedicated rollout gateway on port 10081, independently of destination allowlists. Missing/invalid synthetic credentials returned 401; machine-management route returned 404. No valid lease credentials were used or provisioned.",
+    "strict_floor": "serve defaults to strict unless the operator overrides it; SmolBox does not attest the worker environment. Both default and explicit strict modes tested."
+  }
+}

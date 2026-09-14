@@ -17,21 +17,13 @@ end
 
 {:ok, dns} = :gen_udp.open(53, [:binary, ip: {1, 1, 1, 1}, active: false])
 
-parse_name = fn recurse, bytes, labels ->
-  case bytes do
-    <<0, rest::binary>> ->
-      {Enum.reverse(labels) |> Enum.join("."), rest}
-
-    <<size, label::binary-size(size), rest::binary>> when size in 1..63 ->
-      recurse.(recurse, rest, [label | labels])
-  end
-end
+Code.require_file("network-dns.exs", __DIR__)
 
 for _ <- 1..300 do
   {:ok, {source, port, <<id::16, _flags::16, 1::16, _::48, question::binary>>}} =
     :gen_udp.recv(dns, 512, 300_000)
 
-  {name, <<kind::16, 1::16>>} = parse_name.(parse_name, question, [])
+  {name, <<kind::16, 1::16>>} = SmolBox.Lab.NetworkDNS.question_name(question)
   last = if name in ["allowed.smolbox.test", "sub.allowed.smolbox.test"], do: 10, else: 11
 
   answer =

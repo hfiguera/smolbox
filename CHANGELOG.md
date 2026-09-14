@@ -4,6 +4,9 @@
 
 - Add explicit outbound hostname/CIDR policies for smolvm 1.16.0 while retaining
   offline defaults, profile approval and strict machine policy observations.
+- Extend network validation with Linux IPv6/UDP, DNS and synthetic boundary
+  checks, plus bounded macOS networking checks. Document upstream's strict
+  egress floor and authenticated guest gateway exception.
 - Write durable record schema v2; read exact legacy v1 offline records without
   changing their execution fingerprints. Coordinate controller upgrades before
   writing v2 records. See the controlled network access guide.

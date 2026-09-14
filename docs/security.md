@@ -4,6 +4,10 @@ The unreleased controlled-network feature permits explicit operator-approved
 outbound policies on smolvm 1.16.0. Existing offline defaults and prior offline
 qualification evidence remain unchanged. See [Controlled network access](network-access.md)
 for DNS/IP semantics, profile approval and the separate enforcement fixture.
+The server's strict egress floor must remain enabled when relying on the recorded
+private-address and DNS rebinding checks. SmolBox does not attest worker environment
+settings. Network-enabled guests can reach upstream's dedicated rollout gateway;
+its lease authentication is a separate boundary from the private management API.
 
 
 SmolBox relies on

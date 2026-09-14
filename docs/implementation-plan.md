@@ -4,7 +4,8 @@ Branch `controlled-network-access` adds explicit operator-approved outbound
 policies while retaining offline defaults. This is separate from the completed
 1.16.0 existing-contract qualification below. Work includes policy validation,
 wire observations, durable identity/schema migration, version admission,
-documentation and real enforcement checks confined to the disposable Linux lab.
+documentation, adversarial checks confined to the disposable Linux lab, and
+bounded macOS networking compatibility checks.
 Completed September 14, 2026. See [Controlled network access](network-access.md)
 and the [verification record](evidence/controlled-network-access.json).
 
@@ -23,10 +24,16 @@ and the [verification record](evidence/controlled-network-access.json).
   and allowed/denied checks after restart, managed execution and cleanup,
   17 PostgreSQL cases, all 14 existing runtime cases, and all 25 existing durable
   recovery cases. The latter two suites retain their offline profiles.
-- Enforcement evidence is limited to IPv4 TCP and DNS in the disposable Linux
-  lab. macOS networking, IPv6 enforcement, arbitrary UDP, DNS rebinding and
-  general hostile-network isolation are not qualified. No adversarial or real
-  runtime testing ran on the developer's Mac for this feature.
+- Extended enforcement checks cover Linux IPv4/IPv6 TCP and UDP, mapped addresses,
+  DNS over TCP/UDP and an alternate resolver, targeted DNS rebinding, synthetic
+  control/metadata/loopback boundaries, upstream rollout authentication, restart
+  and cleanup. The server's default and explicit strict floor are tested.
+- Bounded macOS checks cover offline, IPv4 CIDR and hostname behavior before and
+  after restart, with verified deletion. IPv6/UDP adversarial coverage remains
+  Linux-specific; no exhaustion or hostile payloads ran on macOS or the physical
+  Linux host. No general hostile-network security guarantee is claimed.
+- See `docs/evidence/controlled-network-extended.json` for follow-up evidence,
+  including the upstream gateway exception and qualification boundaries.
 
 # SmolBox implementation plan
 
