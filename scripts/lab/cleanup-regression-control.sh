@@ -19,25 +19,34 @@ stop_worker() {
 case "$action" in
   prepare)
     [[ ! -e $root ]] || { echo 'Refusing to overwrite an existing experiment.' >&2; exit 1; }
-    archive=/home/lab/input/smolvm-1.14.6-linux-x86_64.tar.gz
-    printf '%s  %s\n' 94a1edb0c42b20ac562c3759ed216bab2cab9e27c382f6560969144f7bd1dce3 "$archive" | sha256sum --check
+    version=${2:-1.14.6}
+    case "$version" in
+      1.14.6) digest=94a1edb0c42b20ac562c3759ed216bab2cab9e27c382f6560969144f7bd1dce3 ;;
+      1.16.0) digest=cb7d6ea34914b4d71958e16eafc8a3220fe9e8cd5b76fa983ef9f648159f4c9b ;;
+      *) exit 1 ;;
+    esac
+    archive=/home/lab/input/smolvm-$version-linux-x86_64.tar.gz
+    runtime=/opt/smolbox/cleanup-runtime-$version
+    printf '%s  %s\n' "$digest" "$archive" | sha256sum --check
     useradd --system --user-group --home-dir "$root/home" --shell /usr/sbin/nologin smolbox-cleanup
     install -d -m 0755 "$root"
     install -d -o smolbox-cleanup -g lab -m 0770 "$root/home" "$root/data" "$root/run"
-    install -d -m 0755 /opt/smolbox/cleanup-runtime-1.14.6
-    tar -xzf "$archive" --strip-components=1 -C /opt/smolbox/cleanup-runtime-1.14.6
-    zstd --decompress --sparse /opt/smolbox/cleanup-runtime-1.14.6/storage-template.ext4.zst
-    zstd --decompress --sparse /opt/smolbox/cleanup-runtime-1.14.6/overlay-template.ext4.zst
+    install -d -m 0755 "$runtime"
+    tar -xzf "$archive" --strip-components=1 -C "$runtime"
+    (cd "$runtime" && sha256sum --check checksums.txt)
+    zstd --decompress --sparse "$runtime/storage-template.ext4.zst"
+    zstd --decompress --sparse "$runtime/overlay-template.ext4.zst"
     # Keep both registry and VM data on this single bounded filesystem. The
     # previous separated-metadata deployment cannot reproduce this regression.
     mount -t tmpfs -o size=536870912,mode=0770,nodev,nosuid,uid="$(id -u smolbox-cleanup)",gid="$(id -g lab)" smolbox-cleanup "$root/data"
     mount -t tmpfs -o size=4194304,mode=0770,nodev,nosuid,uid="$(id -u smolbox-cleanup)",gid="$(id -g lab)" smolbox-cleanup-run "$root/run"
     ;;
   start)
-    version=${2:?Expected 1.14.1 or 1.14.6}
+    version=${2:?Expected 1.14.1, 1.14.6 or 1.16.0}
     case "$version" in
       1.14.1) runtime=/opt/smolbox/runtime ;;
       1.14.6) runtime=/opt/smolbox/cleanup-runtime-1.14.6 ;;
+      1.16.0) runtime=/opt/smolbox/cleanup-runtime-1.16.0 ;;
       *) exit 1 ;;
     esac
     stop_worker
@@ -79,7 +88,7 @@ NoNewPrivileges=yes
 ProtectSystem=strict
 ProtectHome=yes
 ReadWritePaths=$root
-ReadOnlyPaths=/opt/smolbox/runtime /opt/smolbox/cleanup-runtime-1.14.6 /opt/smolbox/catalog
+ReadOnlyPaths=$runtime /opt/smolbox/catalog
 TemporaryFileSystem=/tmp:rw,size=32M,mode=1777 /var/tmp:rw,size=32M,mode=1777
 PrivateNetwork=yes
 InaccessiblePaths=/run/dbus/system_bus_socket
