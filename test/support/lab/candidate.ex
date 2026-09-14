@@ -3,6 +3,12 @@ defmodule SmolBox.LabCandidate do
 
   def runtime_version, do: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.14.6")
 
+  # Cold artifact creation under the one-CPU cap exceeded the fixture's former
+  # 55-second receive budget. This remains within Profile's existing bounds.
+  def preparation_ms do
+    if System.get_env("SMOLBOX_LINUX_CANDIDATE") == "true", do: 120_000, else: 60_000
+  end
+
   # The standard suites keep their existing behavior unless the dedicated Linux
   # campaign explicitly selects this owned deployment. Reset never touches the
   # controller store and cannot authorize replay of an accepted command.
@@ -48,6 +54,6 @@ defmodule SmolBox.LabCandidate do
   end
 
   def observation_ms(default) do
-    if System.get_env("SMOLBOX_LINUX_CANDIDATE") == "true", do: 90_000, else: default
+    if System.get_env("SMOLBOX_LINUX_CANDIDATE") == "true", do: 180_000, else: default
   end
 end

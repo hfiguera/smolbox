@@ -9,7 +9,7 @@ defmodule SmolBox.DurableHost.RecoveryRuntimeTest do
   alias SmolBox.Telemetry.Dispatcher
 
   @moduletag :runtime
-  @moduletag timeout: 180_000
+  @moduletag timeout: 300_000
   # This waits for fixture setup and cold nested boot under the worker CPU cap.
   # Execution, lease, cancellation and cleanup deadlines are unchanged.
   @setup_timeout 30_000
@@ -57,6 +57,7 @@ defmodule SmolBox.DurableHost.RecoveryRuntimeTest do
       "fingerprint_key_file" => key_file(root, "fingerprint.key"),
       "encryption_key_file" => key_file(root, "encryption.key"),
       "ledger" => Path.join(root, "dispatch-attempts"),
+      "preparation_ms" => SmolBox.LabCandidate.preparation_ms(),
       "wait" => event == "first_output_record"
     }
 

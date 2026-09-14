@@ -60,8 +60,8 @@ if mode == "fault" do
   receive do
     :unused -> :ok
   after
-    85_000 ->
-      # Preserve bounded state evidence before the owner's 100-second deadline.
+    SmolBox.LabCandidate.observation_ms(100_000) - 15_000 ->
+      # Preserve bounded state evidence before the owner's observation deadline.
       # A missing fault boundary can be a preparation failure, not a slow test.
       {:ok, observed} = Store.fetch(store, handle)
 

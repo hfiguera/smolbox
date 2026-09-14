@@ -12,7 +12,9 @@ defmodule SmolBox.DurableHost.ControllerProcess do
       ])
 
     marker = if mode == "fault", do: "boundary:#{event}:#{phase}\n"
-    deadline = System.monotonic_time(:millisecond) + 100_000
+
+    deadline =
+      System.monotonic_time(:millisecond) + SmolBox.LabCandidate.observation_ms(100_000)
 
     try do
       collect(port, marker, "", deadline)
