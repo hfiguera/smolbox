@@ -1,6 +1,7 @@
 defmodule SmolBox.Profile do
   @moduledoc """
-  Immutable, host-selected policy for disposable offline executions.
+  Immutable, host-selected policy for disposable executions. Networking stays offline
+  unless an explicit `SmolBox.NetworkPolicy` is approved.
 
   `id` identifies this exact policy revision. CPU and memory are guest allocations;
   disk sizes are requested guest volumes, not worker filesystem quotas. The
@@ -17,6 +18,7 @@ defmodule SmolBox.Profile do
   alias SmolBox.{Error, MachineSpec, Validation}
 
   @schema [
+    network: [type: :any, default: :offline],
     cpus: [type: :pos_integer, default: 1],
     memory_mb: [type: :pos_integer, default: 256],
     storage_gb: [type: :pos_integer, default: 1],
@@ -32,7 +34,6 @@ defmodule SmolBox.Profile do
   ]
   @defaults Enum.map(@schema, fn {key, schema} -> {key, schema[:default]} end)
   @unsupported [
-    :network,
     :mounts,
     :ports,
     :gpu,
@@ -48,6 +49,7 @@ defmodule SmolBox.Profile do
 
   @type t :: %__MODULE__{
           id: String.t(),
+          network: :offline | SmolBox.NetworkPolicy.t(),
           cpus: pos_integer(),
           memory_mb: pos_integer(),
           storage_gb: pos_integer(),
@@ -67,6 +69,7 @@ defmodule SmolBox.Profile do
 
   | Option | Default | Range/meaning |
   |---|---|---|
+  | `:network` | `:offline` | Explicit `SmolBox.NetworkPolicy` allowlist |
   | `:cpus` | `1` | 1–64 guest vCPUs |
   | `:memory_mb` | `256` | 128–16,384 MiB guest allocation |
   | `:storage_gb` | `1` | 1–64 GiB storage allocation |
@@ -85,8 +88,9 @@ defmodule SmolBox.Profile do
   floor. Use the actual operator-verified floor, as in the example below.
 
   Give every changed policy a new `id`; managed submission matches the complete
-  profile against the worker's catalog. Unsupported hard quotas and networking,
-  mounts, ports, GPU, restart or background options return `:unsupported_capability`.
+  profile against the worker's catalog. Unsupported hard quotas, mounts, ports,
+  GPU, restart or background options return `:unsupported_capability`. Invalid
+  network policies, including boolean networking flags, return `:validation`.
 
   ## Example
 
@@ -122,7 +126,9 @@ defmodule SmolBox.Profile do
   def machine(profile, name, artifact_path) do
     with :ok <- validate(profile) do
       options =
-        profile |> Map.from_struct() |> Map.take([:cpus, :memory_mb, :storage_gb, :overlay_gb])
+        profile
+        |> Map.from_struct()
+        |> Map.take([:cpus, :memory_mb, :storage_gb, :overlay_gb, :network])
 
       MachineSpec.new(name, artifact_path, Map.to_list(options))
     end
@@ -131,6 +137,7 @@ defmodule SmolBox.Profile do
   defp validate_fields(profile) do
     checks = [
       Validation.identifier?(profile.id),
+      SmolBox.NetworkPolicy.valid?(profile.network),
       Validation.integer?(profile.cpus, 1, 64),
       Validation.integer?(profile.memory_mb, 128, 16_384),
       Validation.integer?(profile.storage_gb, 1, 64),

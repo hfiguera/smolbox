@@ -1,3 +1,33 @@
+# Controlled network access follow-up
+
+Branch `controlled-network-access` adds explicit operator-approved outbound
+policies while retaining offline defaults. This is separate from the completed
+1.16.0 existing-contract qualification below. Work includes policy validation,
+wire observations, durable identity/schema migration, version admission,
+documentation and real enforcement checks confined to the disposable Linux lab.
+Completed September 14, 2026. See [Controlled network access](network-access.md)
+and the [verification record](evidence/controlled-network-access.json).
+
+- Explicit hostname/CIDR policies require 1.16.0; offline defaults and explicit
+  older offline runtimes remain supported. Creation verifies the returned policy
+  and shares its timeout with version preflight. No automatic mutation replay.
+- Policies participate in catalog approval, execution identity and creation
+  evidence. Codec v2 reads exact v1 records with offline defaults; the old offline
+  fingerprint representation remains unchanged. Coordinate controller upgrades
+  because old readers cannot read v2 writes.
+- All 213 deterministic tests passed across the four supported Elixir/OTP pairs.
+  Coverage was 95.49%. All required analyzers, eight bad/clean canary pairs,
+  tooling checks, dependency audits, ExDoc links and current/minimum package
+  consumers passed. Both consumers used the same archive.
+- Real Linux validation passed: three network policies with six initial probes
+  and allowed/denied checks after restart, managed execution and cleanup,
+  17 PostgreSQL cases, all 14 existing runtime cases, and all 25 existing durable
+  recovery cases. The latter two suites retain their offline profiles.
+- Enforcement evidence is limited to IPv4 TCP and DNS in the disposable Linux
+  lab. macOS networking, IPv6 enforcement, arbitrary UDP, DNS rebinding and
+  general hostile-network isolation are not qualified. No adversarial or real
+  runtime testing ran on the developer's Mac for this feature.
+
 # SmolBox implementation plan
 
 ## smolvm 1.16.0 qualification in progress

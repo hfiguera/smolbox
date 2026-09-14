@@ -5,8 +5,9 @@ defmodule SmolBox.MachineSpec do
   The path is on the worker host, not the Elixir host. The operator must verify
   its immutable digest and architecture before approving it. SmolBox never
   enables networking to fetch a missing image. Starts use `/bin/true` and never
-  restart the workload automatically. No host mounts, sockets, GPU, or ports
-  are exposed by this contract.
+  restart the workload automatically. Networking is offline unless an explicit
+  `SmolBox.NetworkPolicy` is supplied. No host mounts, sockets, GPU, or ports are
+  exposed by this contract.
 
   Disk sizes are requests. SmolVM 1.14.1 copies larger disk templates without
   shrinking them, while its API still reports the request. Low-level callers
@@ -22,6 +23,7 @@ defmodule SmolBox.MachineSpec do
   alias SmolBox.Error
 
   @schema [
+    network: [type: :any, default: :offline],
     cpus: [type: :pos_integer, default: 1],
     memory_mb: [type: :pos_integer, default: 256],
     storage_gb: [type: :pos_integer, default: 1],
@@ -30,10 +32,19 @@ defmodule SmolBox.MachineSpec do
 
   @enforce_keys [:name, :artifact_path]
   @derive {Inspect, only: [:name, :cpus, :memory_mb]}
-  defstruct [:name, :artifact_path, cpus: 1, memory_mb: 256, storage_gb: 1, overlay_gb: 1]
+  defstruct [
+    :name,
+    :artifact_path,
+    network: :offline,
+    cpus: 1,
+    memory_mb: 256,
+    storage_gb: 1,
+    overlay_gb: 1
+  ]
 
   @type t :: %__MODULE__{
           name: String.t(),
+          network: :offline | SmolBox.NetworkPolicy.t(),
           artifact_path: String.t(),
           cpus: pos_integer(),
           memory_mb: pos_integer(),
@@ -46,7 +57,7 @@ defmodule SmolBox.MachineSpec do
 
   Names have at most 31 lowercase letters, digits, underscores or hyphens and
   start with a letter/digit; `SmolBox.Identity.machine_name/1` generates opaque
-  names. Options are `:cpus` (default 1, range 1–64), `:memory_mb` (256, 128–16,384),
+  names. Options include `:network` (offline or `SmolBox.NetworkPolicy`) and `:cpus` (default 1, range 1–64), `:memory_mb` (256, 128–16,384),
   `:storage_gb` and `:overlay_gb` (each 1, range 1–64). For the reference templates,
   explicitly request 20/10 GiB disks. Construction does not read the artifact.
 
@@ -70,6 +81,7 @@ defmodule SmolBox.MachineSpec do
   def validate(%__MODULE__{} = spec) do
     if SmolBox.Validation.struct_shape?(spec, __MODULE__) and
          valid_name?(spec.name) and artifact_path?(spec.artifact_path) and
+         SmolBox.NetworkPolicy.valid?(spec.network) and
          in_range?(spec.cpus, 1..64) and in_range?(spec.memory_mb, 128..16_384) and
          in_range?(spec.storage_gb, 1..64) and in_range?(spec.overlay_gb, 1..64) do
       :ok
@@ -86,28 +98,31 @@ defmodule SmolBox.MachineSpec do
     is_binary(name) and byte_size(name) <= 31 and Regex.match?(~r/\A[a-z0-9][a-z0-9_-]*\z/, name)
   end
 
-  @doc "Encode the pinned offline creation request after validation."
+  @doc "Encode the creation request and explicit network policy after validation."
   @spec to_wire(t()) :: {:ok, map()} | {:error, Error.t()}
   def to_wire(spec) do
     with :ok <- validate(spec) do
       {:ok,
-       %{
-         "name" => spec.name,
-         "from" => spec.artifact_path,
-         "cpus" => spec.cpus,
-         "memoryMb" => spec.memory_mb,
-         "storageGb" => spec.storage_gb,
-         "overlayGb" => spec.overlay_gb,
-         "network" => false,
-         "gpu" => false,
-         "cuda" => false,
-         "dockerSocket" => false,
-         "mounts" => [],
-         "ports" => [],
-         "entrypoint" => ["/bin/true"],
-         "cmd" => [],
-         "restart" => %{"policy" => "never"}
-       }}
+       Map.merge(
+         %{
+           "name" => spec.name,
+           "from" => spec.artifact_path,
+           "cpus" => spec.cpus,
+           "memoryMb" => spec.memory_mb,
+           "storageGb" => spec.storage_gb,
+           "overlayGb" => spec.overlay_gb,
+           "network" => false,
+           "gpu" => false,
+           "cuda" => false,
+           "dockerSocket" => false,
+           "mounts" => [],
+           "ports" => [],
+           "entrypoint" => ["/bin/true"],
+           "cmd" => [],
+           "restart" => %{"policy" => "never"}
+         },
+         SmolBox.NetworkPolicy.to_wire(spec.network)
+       )}
     end
   end
 

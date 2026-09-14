@@ -166,6 +166,10 @@ defmodule SmolBox.ExecutionSpec do
   defp scalar?(value), do: Validation.text?(value, 256)
 
   # Tagged shapes avoid map/list/tuple ambiguity. Sorting is explicit across OTP versions.
+  # Keep existing offline execution fingerprints stable across the policy upgrade.
+  defp canonical(%Profile{network: :offline} = value),
+    do: value |> Map.from_struct() |> Map.delete(:network) |> canonical()
+
   defp canonical(%_struct{} = value), do: value |> Map.from_struct() |> canonical()
 
   defp canonical(value) when is_map(value),

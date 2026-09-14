@@ -122,6 +122,10 @@ Before adopting the new default with an older worker, explicitly configure
 The package does not upgrade an external worker. A version mismatch prevents
 new execution; arbitrary upstream releases and automatic fallback are not accepted.
 
+This unreleased checkout also supports explicit outbound hostname/CIDR policies
+with smolvm 1.16.0. Offline remains the default. See
+[Controlled network access](docs/network-access.md) for setup and validation boundaries.
+
 SmolBox relies on SmolVM's isolation model for running untrusted code. Your
 deployment must protect worker access and configure host resource limits,
 networking, and credentials. A subsequent validation campaign tested these
@@ -149,6 +153,7 @@ about running programs from Elixir and managing their execution lifecycle.
 | [Getting started](docs/getting-started.md) | Connect, stage a Python program, submit it, read its result, and finish cleanup |
 | [Managed host integration](docs/host-integration.md) | Configure supervision, workers, profiles, storage, and execution specifications |
 | [Low-level client](docs/client.md) | Create machines, execute commands, stream output, and transfer files |
+| [Controlled network access](docs/network-access.md) | Approve outbound destinations while retaining offline defaults |
 | [Troubleshooting](docs/troubleshooting.md) | Interpret errors, unknown outcomes, queued work, and pending cleanup |
 | [Persistence and recovery](docs/recovery.md) | Use durable storage and recover after controller or worker failures |
 | [Telemetry](docs/telemetry.md) | Observe activity and inspect workers without treating notifications as receipts |

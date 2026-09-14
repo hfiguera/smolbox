@@ -1,0 +1,391 @@
+{
+  "branch": "controlled-network-access",
+  "date": "2026-09-14",
+  "environment": {
+    "dns": "1.1.1.1:53 exists only inside that namespace",
+    "execution": "disposable Linux x86_64 guest with nested KVM",
+    "fixture": "private worker network namespace with loopback only; no route to unrelated services or public Internet",
+    "host_access": "ssh linux",
+    "macos_adversarial_or_runtime_tests": false,
+    "positive_controls": [
+      "198.18.0.10:8088",
+      "198.18.0.11:8088"
+    ]
+  },
+  "failed_attempts_not_counted_as_passes": {
+    "network-cidr-runner": {
+      "reason": "The first fixture expected DNS names to resolve for a CIDR-only policy. Upstream explicitly denies names with an empty hostname allowlist; corrected the expectation and documented that behavior.",
+      "report": {
+        "captured_bytes": 531,
+        "exit_code": 1,
+        "failure": null,
+        "output_sha256": "a9af169610c7c350854ef562a5783307b5abf7e6259e20eb52c6f62df3dab0ac",
+        "seconds": 26.419,
+        "status": "failed"
+      }
+    },
+    "network-durable-recovery": {
+      "reason": "The initial recovery invocation omitted the required prepared Python artifact digest. No recovery case passed in that attempt.",
+      "report": {
+        "captured_bytes": 13734,
+        "exit_code": 2,
+        "failure": null,
+        "output_sha256": "1ee5b7ad30a27aa4d84980295c519d488cfce8f3503f6308d0ca6fa43fbcf47c",
+        "seconds": 15.505,
+        "status": "failed"
+      }
+    },
+    "network-managed-cleanupwait-runner": {
+      "reason": "The fixture treated the submit handle as a record. Corrected it to fetch and compare the original record.",
+      "report": {
+        "captured_bytes": 173,
+        "exit_code": 1,
+        "failure": null,
+        "output_sha256": "077adfda6202d8e59b9886b2404270b3ad804128989b025d241e822500f0b586",
+        "seconds": 8.169,
+        "status": "failed"
+      }
+    },
+    "network-managed-managed-runner": {
+      "reason": "The fixture checked cleanup immediately after await returned the execution outcome. Changed it to observe continuing cleanup through fetch.",
+      "report": {
+        "captured_bytes": 260,
+        "exit_code": 1,
+        "failure": null,
+        "output_sha256": "c5d522aec04afeac13858e7c241152aac753e6f88637b91d08ca6663b47de909",
+        "seconds": 8.071,
+        "status": "failed"
+      }
+    },
+    "network-offline-accepted-runner": {
+      "reason": "Archive extraction preserved source ownership that prevented Mix from updating a source timestamp in the fresh guest. Restored ownership to the dedicated lab account before rerunning.",
+      "report": {
+        "captured_bytes": 749,
+        "exit_code": 1,
+        "failure": null,
+        "output_sha256": "e9e6d28033d6eca9df8d40e37b286020ac3edfe354ed3e59eced0b8ce0074a2b",
+        "seconds": 0.826,
+        "status": "failed"
+      }
+    },
+    "network-postgres": {
+      "reason": "The fresh private database had no schema migrations. Applied the existing migrations before rerunning.",
+      "report": {
+        "captured_bytes": 11296,
+        "exit_code": 2,
+        "failure": null,
+        "output_sha256": "2c4f364d3563bc252dad747c1f23d6561e92292f9195731613de807b07d18aeb",
+        "seconds": 1.484,
+        "status": "failed"
+      }
+    }
+  },
+  "lab_cleanup": {
+    "outer_vm_stopped": true,
+    "owned_worker_kvm_descriptors": 0,
+    "recovery_marker_cleared": true,
+    "status_sha256": "08e01db9ab10ca97c3d74e683b7cd1c6a75c31140d82bf133dcbce5dbe2e3481"
+  },
+  "language_matrix": {
+    "118-27": {
+      "output_sha256": "6a256f0261345eb11aa56db7c54cd87216aa5d1041102b1d0d3b50dd810efb88",
+      "passed": 213,
+      "runtime_excluded_not_counted": 14
+    },
+    "119-28": {
+      "output_sha256": "10847a0c157bbc1c7174118029ba976357566cc8fe649fe478e0d90bc4d0abd5",
+      "passed": 213,
+      "runtime_excluded_not_counted": 14
+    },
+    "120-28": {
+      "output_sha256": "d2b807e636bbe9e1fc5a6747a98d33279ecc738d5238730e1a798340b5327fb1",
+      "passed": 213,
+      "runtime_excluded_not_counted": 14
+    },
+    "120-29": {
+      "output_sha256": "3b54b6890744be1c638ae49a560f2581b7004c9db27033488f37e94c1ea10335",
+      "passed": 213,
+      "runtime_excluded_not_counted": 14
+    }
+  },
+  "limitations": [
+    "Packet enforcement checks cover IPv4 TCP and DNS in the controlled Linux fixture.",
+    "No macOS network enforcement, IPv6 enforcement, arbitrary UDP, DNS rebinding or general hostile-network certification is claimed.",
+    "Hostnames allow subdomains and DNS-learned IPs; this is not URL, TLS identity or port filtering.",
+    "The worker control plane, host networking, credentials and resource enforcement remain operator responsibilities.",
+    "Codec v2 reads exact v1 records with offline defaults; older readers cannot read new v2 records. Controller upgrades must be coordinated."
+  ],
+  "linux_final_source_manifest": [
+    "653dc65977cbb0763b2a2e7117b12ec58cebcabcda593231bbb4dac05380d923  lib/smolbox/client.ex",
+    "7be8d9d697b5cd2920e4ccd4bcab4da286f82559db0fa6663a618a8eee0aa9e7  lib/smolbox/network_policy.ex",
+    "d8bd435563210d0e1b8d02b14faed9047787e39b940330ed7d6363eb3452ba94  lib/smolbox/profile.ex",
+    "028c32daba499909146a4d60b2c696ca38acf108f67975bbedb3ec4f0824da6e  lib/smolbox/machine.ex",
+    "0dca8d34cbfaec701784d46de0fc7a53c09044ef2bdf057ee48624d7a3d57723  lib/smolbox/machine_spec.ex",
+    "7abb14445c7de76fa33d88926fdf138985332de46086b7054b43f3981f3293f4  lib/smolbox/execution_spec.ex",
+    "89a53cad4e265d39f273a81bd33aba39d9bbdd187addd968ecb02af40f5f6aec  lib/smolbox/execution_validation.ex",
+    "8741a2ff634f3ab11a4d2e2eba82b06900a56ee40e2ee9571bd41db40093a5c0  lib/smolbox/store/codec.ex",
+    "2144914119a67f8b391fcfdbaac9c6c5e95ef9fd6463a8369a473a77f3c919ee  scripts/lab/network-access.exs",
+    "99c5d2d1609ebfedfafb88107a0c8a4b1cec7f9fb2659ff1e147b5aaec64501e  scripts/lab/network-access.sh",
+    "aa0aa04ac358d29c8bf1fda07e093291ea56d4c6be31e38073795e574f05cd67  scripts/lab/network-endpoints.exs",
+    "8ff2cd62952aee768639fe71a0250f6624e24ea1a093fe36e4f47108842ab426  scripts/lab/network-managed.exs",
+    "6fe0e471b41776af13c8e36bbc1762d39440a742c8cd0cea8364e4679912bb76  scripts/lab/network-probe.exs",
+    "28d2fc4e3adbb0a25f35abb25e85c64abeacbc605194ae96e40ed26f46d16eb7  scripts/lab/network-recovery-check.exs"
+  ],
+  "linux_reports": {
+    "network-cidr-release-runner": {
+      "captured_bytes": 74,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "969e356928414d6180dfd599df97db3f2767e4cab82ab0cda1e86d44284c1d33",
+      "seconds": 31.453,
+      "status": "passed"
+    },
+    "network-durable-accepted": {
+      "captured_bytes": 4564,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "5421c580a1ef59e986fe9e638bc7625644d94430c6ccecbafa52052b6373d086",
+      "seconds": 1047.441,
+      "status": "passed",
+      "tests": {
+        "passed": 25,
+        "seed": 913260
+      }
+    },
+    "network-hosts-release-runner": {
+      "captured_bytes": 75,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "f92a1d67b46380baef6c86c860c202991e8223bf74a201d234674a618ac7070d",
+      "seconds": 33.628,
+      "status": "passed"
+    },
+    "network-managed-release-runner": {
+      "captured_bytes": 80,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "82d50e81d98eac470dea841b25aa20903f1e4bb2d269017782abbcd7cb1e8671",
+      "seconds": 11.287,
+      "status": "passed"
+    },
+    "network-offline-regression": {
+      "captured_bytes": 162,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "f639899ba5d61977a5858f4a4dcc8e4bc1913d64e3b69f1099a7e259e4850e7f",
+      "seconds": 369.393,
+      "status": "passed",
+      "tests": {
+        "passed": 14,
+        "seed": 247895
+      }
+    },
+    "network-offline-release-runner": {
+      "captured_bytes": 101,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "c6bf3b2c72aea360de8810375482fac91a2b750c42239611f65b91aac0ddfae2",
+      "seconds": 50.588,
+      "status": "passed"
+    },
+    "network-postgres-accepted": {
+      "captured_bytes": 333,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "c396d00d00100557c03427a09a7ba24bd5955cc7cac56da86d18cc64ce9100c2",
+      "seconds": 3.122,
+      "status": "passed",
+      "tests": {
+        "passed": 17,
+        "seed": 25261
+      }
+    }
+  },
+  "network_observations": {
+    "cidr": {
+      "denied_after_restart": true,
+      "mode": "cidr",
+      "observations": {
+        "allowed_host": false,
+        "allowed_ip": true,
+        "allowed_subdomain": false,
+        "blocked_host": false,
+        "blocked_ip": false,
+        "suffix_attack": false
+      },
+      "policy_retained_after_restart": true,
+      "restart_observations": {
+        "allowed": true,
+        "blocked": false
+      },
+      "runtime": "1.16.0",
+      "status": "passed"
+    },
+    "hosts": {
+      "denied_after_restart": true,
+      "mode": "hosts",
+      "observations": {
+        "allowed_host": true,
+        "allowed_ip": false,
+        "allowed_subdomain": true,
+        "blocked_host": false,
+        "blocked_ip": false,
+        "suffix_attack": false
+      },
+      "policy_retained_after_restart": true,
+      "restart_observations": {
+        "allowed": true,
+        "blocked": false
+      },
+      "runtime": "1.16.0",
+      "status": "passed"
+    },
+    "managed": {
+      "cleanup": "complete",
+      "command_exit": 0,
+      "duplicate_submission": "same_execution",
+      "inventory": [],
+      "persisted_policy": true,
+      "runtime": "1.16.0",
+      "status": "passed"
+    },
+    "offline": {
+      "denied_after_restart": true,
+      "mode": "offline",
+      "observations": {
+        "allowed_host": false,
+        "allowed_ip": false,
+        "allowed_subdomain": false,
+        "blocked_host": false,
+        "blocked_ip": false,
+        "suffix_attack": false
+      },
+      "policy_retained_after_restart": true,
+      "restart_observations": {
+        "allowed": false,
+        "blocked": false
+      },
+      "runtime": "1.16.0",
+      "status": "passed"
+    }
+  },
+  "package_consumers": {
+    "current": {
+      "package_sha256": "cece7fea4fd4b4ecdf3d34418033eae8cb487c7f155cf26bb7bea9fa27e4285d",
+      "smoke": {
+        "client": true,
+        "legacy_1_14_6_explicit": "1.14.6",
+        "legacy_runtime_explicit": "1.14.1",
+        "network_policy": true,
+        "offline_default": true,
+        "runtime_default": "1.16.0",
+        "supervisor": true,
+        "versions": {
+          "jason": "1.4.5",
+          "nimble_options": "1.1.1",
+          "req": "0.7.4",
+          "telemetry": "1.4.2"
+        }
+      },
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)"
+    },
+    "minimum": {
+      "package_sha256": "cece7fea4fd4b4ecdf3d34418033eae8cb487c7f155cf26bb7bea9fa27e4285d",
+      "smoke": {
+        "client": true,
+        "legacy_1_14_6_explicit": "1.14.6",
+        "legacy_runtime_explicit": "1.14.1",
+        "network_policy": true,
+        "offline_default": true,
+        "runtime_default": "1.16.0",
+        "supervisor": true,
+        "versions": {
+          "jason": "1.4.0",
+          "nimble_options": "1.1.0",
+          "req": "0.7.4",
+          "telemetry": "1.3.0"
+        }
+      },
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)"
+    }
+  },
+  "quality": {
+    "canaries": "eight bad/clean pairs passed, including all required analyzers",
+    "ci": "format, unused dependencies, compiler warnings, cycles, tests, Credo with ex_slop, ex_dna, Credence and Dialyzer passed",
+    "coverage_percent": 95.49,
+    "dependency_audit": "no retired packages, advisories or vulnerabilities found",
+    "doc_links": "44 generated pages checked",
+    "log_sha256": {
+      "canaries-accepted.log": "e0b964a623497ff2bb478f184e6c238afa88d2b496eb969c1ad810acf8e4339f",
+      "coverage-qualified.log": "6aa53c6e4adaecc0f4b4049d8f4b2093c2e64eb4e54e5585ed6e03866b09d157",
+      "credence-qualified.log": "44350940efb1385e971a1f786ac63f4324644640d147ceed1dcedd68741c00b8",
+      "credo-lab-final.log": "c2704d6d93b8a1e0ef4143b81e4c147a1a2f9b698c6a8c50771e77ad76d1baaf",
+      "deps-audit.log": "3016e51e4eac0d421674d2128bbbdefb2924b4646e0c14a1ab034977ad73fae5",
+      "dna-qualified.log": "9384d48a7c3c5a0d78b567b4770023348417408137be1f9ba1f3501ae895710b",
+      "doc-links-ready.log": "277fe79a729bc3c4058b5b3a662b663ecfe046b92807fcf1cae3313312e5ff5f",
+      "docs-ready.log": "48429514fe92636c13e0adc66911459842ba774ea587852a5807fb6c8b568b8f",
+      "hex-audit.log": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+      "quality-final.log": "3b54b6890744be1c638ae49a560f2581b7004c9db27033488f37e94c1ea10335",
+      "tooling-accepted.log": "c3c24158ebb15919d8a18882a94a6bad6550e0a33a56a6982ee1f990403383a0"
+    },
+    "tooling_tests_passed": 23
+  },
+  "recovery_note": "The 25 existing recovery cases use offline profiles. Network persistence is additionally covered by the PostgreSQL policy test, record codec checks and the managed network execution fixture. The recovery runner has a bounded 30-minute budget inside a fresh 45-minute outer VM watchdog.",
+  "recovery_source_manifest": [
+    "84690683d42e8cc9558edf44a8f3b1d9b45a8fd0e0111a7a4c4447f4f16f5211  lib/smolbox/client.ex",
+    "7be8d9d697b5cd2920e4ccd4bcab4da286f82559db0fa6663a618a8eee0aa9e7  lib/smolbox/network_policy.ex",
+    "d8bd435563210d0e1b8d02b14faed9047787e39b940330ed7d6363eb3452ba94  lib/smolbox/profile.ex",
+    "028c32daba499909146a4d60b2c696ca38acf108f67975bbedb3ec4f0824da6e  lib/smolbox/machine.ex",
+    "250de7a7a080773b9f1ec9041f4f9520bd2baf3e3de9d3007450c2d195a6ee8f  lib/smolbox/machine_spec.ex",
+    "7abb14445c7de76fa33d88926fdf138985332de46086b7054b43f3981f3293f4  lib/smolbox/execution_spec.ex",
+    "89a53cad4e265d39f273a81bd33aba39d9bbdd187addd968ecb02af40f5f6aec  lib/smolbox/execution_validation.ex",
+    "8741a2ff634f3ab11a4d2e2eba82b06900a56ee40e2ee9571bd41db40093a5c0  lib/smolbox/store/codec.ex",
+    "9cfbabb789d9155b445d35b3b0e60fd04e939992e8ff094177a16c4412d612b0  scripts/lab/network-access.exs",
+    "99c5d2d1609ebfedfafb88107a0c8a4b1cec7f9fb2659ff1e147b5aaec64501e  scripts/lab/network-access.sh",
+    "aa0aa04ac358d29c8bf1fda07e093291ea56d4c6be31e38073795e574f05cd67  scripts/lab/network-endpoints.exs",
+    "8ff2cd62952aee768639fe71a0250f6624e24ea1a093fe36e4f47108842ab426  scripts/lab/network-managed.exs",
+    "6fe0e471b41776af13c8e36bbc1762d39440a742c8cd0cea8364e4679912bb76  scripts/lab/network-probe.exs",
+    "28d2fc4e3adbb0a25f35abb25e85c64abeacbc605194ae96e40ed26f46d16eb7  scripts/lab/network-recovery-check.exs"
+  ],
+  "runtime": {
+    "official_linux_x86_64_archive_sha256": "cb7d6ea34914b4d71958e16eafc8a3220fe9e8cd5b76fa983ef9f648159f4c9b",
+    "python_artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+    "tag_commit": "e1dd54bf7be6d144ad6bdef4ebf310f57809a6a6",
+    "version": "1.16.0"
+  },
+  "source_base_commit": "7a295cd952c37a11df29f73f19f56058fc1aec6c",
+  "source_files_sha256": {
+    "CHANGELOG.md": "399f75c3cac4db0ab92a3c4fbb7317cdc9cbea0f1fecdbc8bfb45f4d2243bce5",
+    "README.md": "2a0aab08aa224efd045b46aa68193086ee5c33f87418cf0fffecc039224fbf91",
+    "dev/smolbox/ci/package.ex": "79e89bf93f79d44caaefd4345d6d8a29572c30d0b2ab31f5c583baa8415e043c",
+    "docs/client.md": "fa68cffbaf87611e50325252e8f256b1b2ac20ba283321dfb940af3f391ad518",
+    "docs/host-integration.md": "3ae35fae1b6d91cfd603447219200454f44fbf31e1286b9e9dad45cdd3b5a90e",
+    "docs/implementation-plan.md": "849f58596d10eb3891de46ab204aa3be36d5462d013c3570d5c1813fe0dfa95d",
+    "docs/network-access.md": "7e1f709663c526a19e3f3ae6755f7a89a682fa7683d40b3315366bb7baf5d062",
+    "docs/recovery.md": "58c002fa856971b47d2fec9714ef60d93dc6f25330b1f48b391cd1552e4ff427",
+    "docs/security.md": "9e9f8ba096ece7b7dd0144a10caf0bf7c9ead9be074964d703c857aa718e345f",
+    "examples/durable_host/test/store_test.exs": "c74199445685eafbca018ff959d9055667135e14df4474ab82e7ec88ad37e810",
+    "lib/smolbox/client.ex": "653dc65977cbb0763b2a2e7117b12ec58cebcabcda593231bbb4dac05380d923",
+    "lib/smolbox/execution_spec.ex": "7abb14445c7de76fa33d88926fdf138985332de46086b7054b43f3981f3293f4",
+    "lib/smolbox/execution_validation.ex": "89a53cad4e265d39f273a81bd33aba39d9bbdd187addd968ecb02af40f5f6aec",
+    "lib/smolbox/machine.ex": "028c32daba499909146a4d60b2c696ca38acf108f67975bbedb3ec4f0824da6e",
+    "lib/smolbox/machine_spec.ex": "0dca8d34cbfaec701784d46de0fc7a53c09044ef2bdf057ee48624d7a3d57723",
+    "lib/smolbox/network_policy.ex": "7be8d9d697b5cd2920e4ccd4bcab4da286f82559db0fa6663a618a8eee0aa9e7",
+    "lib/smolbox/profile.ex": "d8bd435563210d0e1b8d02b14faed9047787e39b940330ed7d6363eb3452ba94",
+    "lib/smolbox/runtime/worker_config.ex": "7e97096ac7d96a0c1be7fa112926b29ac05065393cefeafc40c6a4a9fc3520b5",
+    "lib/smolbox/store/codec.ex": "8741a2ff634f3ab11a4d2e2eba82b06900a56ee40e2ee9571bd41db40093a5c0",
+    "mix.exs": "cc37ccad59b1e09cc6a53e76711d9115d2bb30f0d2a1aafdbaed53e1a1e412f8",
+    "scripts/lab/network-access.exs": "2144914119a67f8b391fcfdbaac9c6c5e95ef9fd6463a8369a473a77f3c919ee",
+    "scripts/lab/network-access.sh": "99c5d2d1609ebfedfafb88107a0c8a4b1cec7f9fb2659ff1e147b5aaec64501e",
+    "scripts/lab/network-endpoints.exs": "aa0aa04ac358d29c8bf1fda07e093291ea56d4c6be31e38073795e574f05cd67",
+    "scripts/lab/network-managed.exs": "8ff2cd62952aee768639fe71a0250f6624e24ea1a093fe36e4f47108842ab426",
+    "test/contract/client_test.exs": "e4d5b2a473e543d86ed7a730f65774e8913195923738ac20c6eb1e76a627b1c5",
+    "test/contract/runtime_test.exs": "f8929bd9d72e4b5139cb2a92a930703a11cbc3e37006cf344fc85e2456d0abf3",
+    "test/fixtures/ci/consumer.exs.template": "f6c70090d3bccd295cd48b63a37feaf758c44f0bcd1327f460b5f3909bdfbc71",
+    "test/support/managed_peer.ex": "e426a8083faaa73c6af87091fc2e650bd5641815fcc06dc548321d2527cfa569",
+    "test/support/runtime_fixture.ex": "39e4075235e574e77fd7ffe148cadf7bf8e77b98a2b32f0092fa4e96fa751320",
+    "test/unit/network_policy_test.exs": "4d85a6d0126547affd967cd02537a66b611d44b99837c0b029b493f58a88ad6f",
+    "test/unit/profile_test.exs": "9b6e6ffef135f24f9ae49ecbfe759ab6783402c30b4077821f367ff11e10d569"
+  },
+  "status": "passed_for_the_documented_scope"
+}

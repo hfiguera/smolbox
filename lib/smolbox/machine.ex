@@ -1,9 +1,9 @@
 defmodule SmolBox.Machine do
   @moduledoc """
-  Validated observation of an offline disposable machine.
+  Validated observation of a disposable machine and its network policy.
 
   Additive response fields are ignored. Safety-relevant fields must be present;
-  enabled networking, mounts, ports, GPU or CUDA fail decoding and cannot be
+  networking without explicit allowlists, mounts, ports, GPU or CUDA fail decoding and cannot be
   treated as an owned machine observation. `created_at` has only second precision upstream and
   is not a cryptographic or immutable ownership token.
   """
@@ -11,10 +11,20 @@ defmodule SmolBox.Machine do
   alias SmolBox.{Error, MachineSpec, Validation}
 
   @enforce_keys [:name, :state, :created_at, :cpus, :memory_mb, :storage_gb, :overlay_gb]
-  defstruct [:name, :state, :created_at, :cpus, :memory_mb, :storage_gb, :overlay_gb]
+  defstruct [
+    :name,
+    :state,
+    :created_at,
+    :cpus,
+    :memory_mb,
+    :storage_gb,
+    :overlay_gb,
+    network: :offline
+  ]
 
   @type t :: %__MODULE__{
           name: String.t(),
+          network: :offline | SmolBox.NetworkPolicy.t(),
           state: :created | :running | :stopped,
           created_at: non_neg_integer(),
           cpus: pos_integer(),
@@ -24,27 +34,31 @@ defmodule SmolBox.Machine do
         }
 
   @spec from_wire(term()) :: {:ok, t()} | {:error, Error.t()}
-  def from_wire(%{
-        "name" => name,
-        "state" => state,
-        "createdAt" => created,
-        "cpus" => cpus,
-        "memoryMb" => memory,
-        "storageGb" => storage,
-        "overlayGb" => overlay,
-        "network" => false,
-        "mounts" => [],
-        "ports" => [],
-        "gpu" => false,
-        "cuda" => false
-      }) do
-    if MachineSpec.valid_name?(name) and state in ["created", "running", "stopped"] and
-         Validation.integer?(created, 0, 253_402_300_799) and
-         Validation.integer?(cpus, 1, 64) and Validation.integer?(memory, 128, 16_384) and
-         Validation.integer?(storage, 1, 64) and Validation.integer?(overlay, 1, 64) do
+  def from_wire(
+        %{
+          "name" => name,
+          "state" => state,
+          "createdAt" => created,
+          "cpus" => cpus,
+          "memoryMb" => memory,
+          "storageGb" => storage,
+          "overlayGb" => overlay,
+          "mounts" => [],
+          "ports" => [],
+          "gpu" => false,
+          "cuda" => false
+        } = wire
+      ) do
+    with {:ok, network} <- SmolBox.NetworkPolicy.from_wire(wire),
+         true <-
+           MachineSpec.valid_name?(name) and state in ["created", "running", "stopped"] and
+             Validation.integer?(created, 0, 253_402_300_799) and
+             Validation.integer?(cpus, 1, 64) and Validation.integer?(memory, 128, 16_384) and
+             Validation.integer?(storage, 1, 64) and Validation.integer?(overlay, 1, 64) do
       {:ok,
        %__MODULE__{
          name: name,
+         network: network,
          state: state(state),
          created_at: created,
          cpus: cpus,
@@ -53,7 +67,7 @@ defmodule SmolBox.Machine do
          overlay_gb: overlay
        }}
     else
-      invalid()
+      _invalid -> invalid()
     end
   end
 

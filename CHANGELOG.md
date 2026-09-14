@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Add explicit outbound hostname/CIDR policies for smolvm 1.16.0 while retaining
+  offline defaults, profile approval and strict machine policy observations.
+- Write durable record schema v2; read exact legacy v1 offline records without
+  changing their execution fingerprints. Coordinate controller upgrades before
+  writing v2 records. See the controlled network access guide.
+
 - Default to smolvm **1.16.0** on Linux x86_64 and macOS Apple Silicon after
   platform qualification, retaining explicit 1.14.1 and 1.14.6 support. Applications
   using an older worker must retain its explicit `runtime_version` or upgrade the

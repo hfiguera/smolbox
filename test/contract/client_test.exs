@@ -91,6 +91,111 @@ defmodule SmolBox.ClientTest do
     assert_receive {:request, "DELETE", "/api/v1/machines/fixture", ""}
   end
 
+  test "network creation verifies runtime and exact returned policy without retry" do
+    {:ok, policy} = SmolBox.NetworkPolicy.new(hosts: ["api.example.com"])
+    {:ok, spec} = MachineSpec.new("fixture", "/approved/python.smolmachine", network: policy)
+    parent = self()
+
+    for mode <- [:matching, :missing, :different, :legacy] do
+      peer =
+        client(fn conn ->
+          if conn.request_path == "/health" do
+            version = if mode == :legacy, do: "1.14.6", else: "1.16.0"
+            TestPeer.json(conn, Map.put(fixture("health"), "version", version))
+          else
+            {:ok, body, conn} = TestPeer.body(conn)
+            send(parent, {:created, mode, Jason.decode!(body)})
+            response = Map.merge(fixture("created"), SmolBox.NetworkPolicy.to_wire(policy))
+
+            response =
+              case mode do
+                :matching -> response
+                :missing -> Map.delete(response, "allowedHosts")
+                :different -> Map.put(response, "allowedHosts", ["other.example.com"])
+              end
+
+            TestPeer.json(conn, response)
+          end
+        end)
+
+      case mode do
+        :matching ->
+          assert {:ok, %{network: ^policy}} = Client.create(peer, spec)
+
+        :legacy ->
+          assert {:error, %Error{category: :unsupported_capability}} = Client.create(peer, spec)
+
+        _ ->
+          assert {:error, %Error{evidence: :dispatch_uncertain}} = Client.create(peer, spec)
+      end
+
+      if mode == :legacy do
+        refute_receive {:created, ^mode, _}
+      else
+        assert_receive {:created, ^mode,
+                        %{
+                          "network" => true,
+                          "allowedHosts" => ["api.example.com"],
+                          "allowedCidrs" => [],
+                          "networkBackend" => "virtio-net"
+                        }}
+
+        refute_receive {:created, ^mode, _}
+      end
+    end
+  end
+
+  test "network preflight and create share one operation budget" do
+    parent = self()
+    {:ok, policy} = SmolBox.NetworkPolicy.new(hosts: ["api.example.com"])
+    {:ok, spec} = MachineSpec.new("fixture", "/approved/python.smolmachine", network: policy)
+
+    peer =
+      client(
+        fn conn ->
+          if conn.request_path == "/health" do
+            Process.sleep(250)
+            TestPeer.json(conn, Map.put(fixture("health"), "version", "1.16.0"))
+          else
+            send(parent, :create_dispatched)
+            Process.sleep(900)
+
+            TestPeer.json(
+              conn,
+              Map.merge(fixture("created"), SmolBox.NetworkPolicy.to_wire(policy))
+            )
+          end
+        end,
+        operation_timeout_ms: 1000
+      )
+
+    assert {:error, %Error{evidence: :dispatch_uncertain}} = Client.create(peer, spec)
+    assert_receive :create_dispatched
+    refute_receive :create_dispatched
+  end
+
+  test "a failed network preflight has not dispatched creation" do
+    parent = self()
+    {:ok, policy} = SmolBox.NetworkPolicy.new(hosts: ["api.example.com"])
+    {:ok, spec} = MachineSpec.new("fixture", "/approved/python.smolmachine", network: policy)
+
+    peer =
+      client(fn conn ->
+        send(parent, {:preflight_path, conn.request_path})
+        Plug.Conn.send_resp(conn, 503, "")
+      end)
+
+    assert {:error, %Error{operation: :create, evidence: :not_dispatched}} =
+             Client.create(peer, spec)
+
+    assert_receive {:preflight_path, "/health"}
+    refute_receive {:preflight_path, "/api/v1/machines"}
+
+    invalid = %{peer | worker: %{peer.worker | operation_timeout_ms: nil}}
+    assert {:error, %Error{category: :validation}} = Client.create(invalid, spec)
+    refute_receive {:preflight_path, _}
+  end
+
   test "exec preserves argv and byte-exact nonzero output without inventing shell semantics" do
     parent = self()
 

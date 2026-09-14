@@ -18,6 +18,7 @@ defmodule SmolBox.RuntimeFixture do
 
     {:ok, client} = Client.new(endpoint)
     spec = Contract.record().spec
+    spec = %{spec | profile: %{spec.profile | network: Keyword.get(options, :network, :offline)}}
 
     {:ok, worker} =
       WorkerConfig.new(

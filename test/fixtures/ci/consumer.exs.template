@@ -28,6 +28,11 @@ after
 end
 
 {:ok, profile} = SmolBox.Profile.new("consumer")
+:offline = profile.network
+{:ok, network} = SmolBox.NetworkPolicy.new(hosts: ["api.example.com"])
+{:ok, network_profile} = SmolBox.Profile.new("consumer-network", network: network)
+{:ok, network_machine} = SmolBox.Profile.machine(network_profile, "consumer-net", "/approved/python.smolmachine")
+{:ok, %{"network" => true, "networkBackend" => "virtio-net", "allowedHosts" => ["api.example.com"], "allowedCidrs" => []}} = SmolBox.MachineSpec.to_wire(network_machine)
 worker_options = [client: client, platform: :linux, architecture: "x86_64",
   profiles: [profile], allocation_floor: %{storage_gb: 1, overlay_gb: 1, host_overhead_mb: 256},
   capacity: %{slots: 1, cpus: 1, memory_mb: 1024, disk_gb: 2},
@@ -56,5 +61,6 @@ versions = Map.new([:req, :jason, :telemetry, :nimble_options], fn app ->
   {app, app |> Application.spec(:vsn) |> to_string()}
 end)
 File.write!("smoke.json", Jason.encode!(%{client: true, supervisor: true,
+  network_policy: true, offline_default: true,
   runtime_default: "1.16.0", legacy_runtime_explicit: "1.14.1",
   legacy_1_14_6_explicit: "1.14.6", versions: versions}))

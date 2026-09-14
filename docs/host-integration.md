@@ -199,7 +199,7 @@ The API sends one list request and read-only store lookups. It does not adopt,
 reserve, stop, delete, execute, or download files. Pages are separate observations,
 not an atomic snapshot; investigate and rescan before deciding on manual action.
 Foreign names are counted, not treated as owned candidates. A worker response
-outside the strict offline machine contract fails decoding rather than weakening
+outside the supported machine and network policy contract fails decoding rather than weakening
 that contract. A page has at most 100 candidates, a one-second list budget and
 500 ms per lookup with four lookups at a time. No code, environment, secrets,
 stdout/stderr, or artifact content appears in the report.

@@ -104,7 +104,8 @@ defmodule SmolBox.Runtime.WorkerConfig do
   @doc "Check exact profile/artifact approval and allocation floors; this is not a health probe."
   @spec supports?(t(), ExecutionSpec.t()) :: boolean()
   def supports?(worker, spec) do
-    spec.profile in worker.profiles and allocation_fits?(worker, spec.profile) and
+    (spec.profile.network == :offline or worker.runtime_version == "1.16.0") and
+      spec.profile in worker.profiles and allocation_fits?(worker, spec.profile) and
       worker.architecture == spec.artifact["architecture"] and
       Enum.any?(
         worker.artifacts,
