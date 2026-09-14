@@ -49,10 +49,9 @@ dependency can change while the example lockfile stays the same.
 Configure the worker, pinned Python artifact, private object directory,
 fingerprint key file, and execution ID described in `../minimal_host/README.md`.
 On Linux x86_64 or macOS Apple Silicon,
-omitting `SMOLBOX_RUNTIME_VERSION` selects 1.14.6. Set it to `1.14.1` for an
-existing older worker. This branch also accepts `1.16.0`; consult its
-[qualification status](../../docs/compatibility.md#smolvm-1-16-0-qualification)
-before selecting it. Supply the 1.14.6 or 1.16.0 host's `resize2fs` for smaller disk
+omitting `SMOLBOX_RUNTIME_VERSION` selects 1.16.0. Set it to `1.14.1` or `1.14.6`
+for an existing older worker. Consult the
+[qualification evidence](../../docs/compatibility.md#smolvm-1-16-0-qualification). Supply the 1.14.6 or 1.16.0 host's `resize2fs` for smaller disk
 requests; see [host prerequisites](../../docs/compatibility.md#macos-1-14-6-prerequisites).
 Child controllers inherit the selection and require an
 exact match with the server. Changing it does not upgrade the worker itself.
@@ -149,7 +148,7 @@ cases that preserve execution progress before/after SQL result persistence.
 
 The benchmark uses this host's real PostgreSQL store, directory adapter and a
 previously provisioned, initially idle SmolVM worker matching `SMOLBOX_RUNTIME_VERSION`
-(default 1.14.6). It provisions no
+(default 1.16.0). It provisions no
 service, changes no host quotas and clears no image/page cache. Apply the example
 migrations first. Use native approved artifacts, a new private object directory,
 fresh 32-byte fingerprint/encryption key files and a unique store partition for

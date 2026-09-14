@@ -79,8 +79,8 @@ creating machines, executing commands, streaming output, and transferring files.
 ## Installation and first run
 
 Published SmolBox **0.1.2** defaults to SmolVM **1.14.6** on Linux x86_64 and
-macOS Apple Silicon. This branch additionally qualifies explicit 1.16.0 support;
-see [the qualification status](docs/compatibility.md#smolvm-1-16-0-qualification).
+macOS Apple Silicon. This unreleased checkout defaults to **1.16.0** after
+platform qualification; see [the evidence and final-check status](docs/compatibility.md#smolvm-1-16-0-qualification).
 
 Add SmolBox to your application's `mix.exs`:
 
@@ -95,9 +95,10 @@ includes the guides below. A local checkout can instead be used with
 To run the local walkthrough, you need:
 
 - Elixir **1.18 or later**, using a [tested Elixir/OTP pair](docs/compatibility.md).
-- A dedicated worker: **SmolVM 1.14.6 or 1.14.1**, on Linux x86_64 with KVM or
-  macOS Apple Silicon. Explicit 1.16.0 selection currently requires this checkout.
-- The host's `resize2fs` tool for 1.14.6 disk requests below its template sizes.
+- A dedicated worker on Linux x86_64 with KVM or macOS Apple Silicon:
+  **SmolVM 1.16.0** for this checkout, or **1.14.6** for published SmolBox 0.1.2.
+  This checkout also supports explicitly configured 1.14.1 and 1.14.6 workers.
+- The host's `resize2fs` tool for 1.14.6 and 1.16.0 disk requests below template sizes.
   On macOS, install `e2fsprogs`; see the [runtime prerequisites](docs/compatibility.md#macos-1-14-6-prerequisites).
 - A prepared Python image for that worker's architecture, with its SHA-256
   recorded. The guide links to the image preparation commands and host capacity
@@ -113,10 +114,11 @@ is included in the repository.
 ## Current scope
 
 SmolBox has real execution and durable recovery tests on Linux x86_64 and macOS
-Apple Silicon with **SmolVM 1.14.1 and 1.14.6**; validation status is recorded in
-[Compatibility](docs/compatibility.md#runtime-selection). The 0.1.2 release
-defaults to **1.14.6**. Before upgrading an application that still uses a 1.14.1
-worker, explicitly configure `runtime_version: "1.14.1"` or follow the
+Apple Silicon with **SmolVM 1.14.1, 1.14.6 and 1.16.0**; results and remaining
+final checks are recorded in [Compatibility](docs/compatibility.md#runtime-selection).
+This checkout defaults to **1.16.0**; published 0.1.2 defaults to **1.14.6**.
+Before adopting the new default with an older worker, explicitly configure
+`runtime_version: "1.14.1"` or `"1.14.6"`, or follow the
 [worker upgrade procedure](docs/host-integration.md#upgrading-a-worker).
 The package does not upgrade an external worker. A version mismatch prevents
 new execution; arbitrary upstream releases and automatic fallback are not accepted.

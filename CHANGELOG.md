@@ -2,9 +2,10 @@
 
 ## Unreleased
 
-- Add explicit smolvm 1.16.0 selection for Linux x86_64 and macOS Apple Silicon
-  while retaining 1.14.1 and 1.14.6. The default remains 1.14.6 during qualification;
-  final acceptance and the default-version decision are pending.
+- Default to smolvm **1.16.0** on Linux x86_64 and macOS Apple Silicon after
+  platform qualification, retaining explicit 1.14.1 and 1.14.6 support. Applications
+  using an older worker must retain its explicit `runtime_version` or upgrade the
+  worker before adopting this default. Final candidate checks remain in progress.
 - Record the tagged API and packaging review, actual host resizing prerequisites,
   platform runtime/recovery results and repeated constrained Linux experiments.
   The existing public five-minute command limit remains unchanged.

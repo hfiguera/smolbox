@@ -55,25 +55,24 @@ final commit. Library source and production dependencies are unchanged from 0.1.
 the previous macOS results remain historical and must not be reported as a new
 0.1.1 run. See the release-specific scope in the implementation plan.
 
-## 0.1.2 runtime selection
+## Runtime selection
 
-SmolBox 0.1.2 defaults to SmolVM 1.14.6 on Linux x86_64 or macOS Apple Silicon.
+This checkout defaults to smolvm 1.16.0 on Linux x86_64 or macOS Apple Silicon.
+Published SmolBox 0.1.2 defaults to 1.14.6.
 Set `runtime_version` in the private worker manifest to select a version explicitly;
 preflight verifies that version's binary checksum and exports
 `SMOLBOX_RUNTIME_VERSION` for runtime tests, examples and service fault checks.
-An omitted field selects 1.14.6. Existing 1.14.1 fixtures must now declare
-`"runtime_version": "1.14.1"` in the manifest.
+An omitted field selects 1.16.0. Existing older fixtures must explicitly declare
+`"runtime_version": "1.14.1"` or `"runtime_version": "1.14.6"` in the manifest.
 Selecting a different version never installs it or accepts an unexpected server
 version. Initial candidate validation ran on Linux. The subsequent native macOS
 campaign is restricted to ordinary compatibility and controlled lifecycle checks;
 exhaustion and adversarial testing remain in the disposable Linux lab. See the
 implementation plan for the separate checkpoints and current acceptance status.
 
-This branch also recognizes `"runtime_version": "1.16.0"` in that manifest,
-using the official platform binary pins. The default remains 1.14.6 during
-qualification. Consult the [1.16.0 status](../../docs/compatibility.md#smolvm-1-16-0-qualification)
-before selecting it; recognition by preflight is not completed runtime
-qualification. No protected GitHub worker infrastructure was provisioned or
+Preflight uses the official platform binary pins for each supported version.
+Consult the [1.16.0 evidence and final-check status](../../docs/compatibility.md#smolvm-1-16-0-qualification).
+Manifest admission alone is not runtime qualification. No protected GitHub worker infrastructure was provisioned or
 executed by the local qualification campaign.
 
 The native macOS runtime command selects only the nine ordinary cases:
@@ -170,7 +169,7 @@ with actual observations; the sample deliberately does not pass preflight:
 {
   "schema": 1,
   "platform": "linux",
-  "runtime_version": "1.14.6",
+  "runtime_version": "1.16.0",
   "ephemeral_runner": true,
   "expires_at_unix": 0,
   "lifecycle_id": "scheduler-owned-unique-id",

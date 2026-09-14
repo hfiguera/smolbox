@@ -236,7 +236,7 @@
     "Bounded ordinary compatibility and controlled recovery only; no macOS exhaustion or adversarial testing.",
     "HTTP operations beyond five minutes were validated separately on Linux with 299-second guest commands; the public 300-second command and managed-execution limits remain unchanged.",
     "Nix packaging was reviewed, not installed or qualified.",
-    "The constrained Linux deployment has separate evidence; final default selection and final candidate acceptance remain pending."
+    "The constrained Linux deployment has separate evidence. The unreleased checkout default is now 1.16.0; final candidate acceptance remains pending."
   ],
   "platform": {
     "architecture": "arm64",

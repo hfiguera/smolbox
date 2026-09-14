@@ -6,8 +6,8 @@ Use it when host code owns those responsibilities. For a complete managed
 execution, begin with [Getting started](getting-started.md). This guide describes
 the supported client contract and its development-qualified worker boundary.
 See [runtime selection](compatibility.md#runtime-selection) for the explicit
-Linux/macOS 1.14.6 default, retained 1.14.1 compatibility, and the branch's
-additional 1.16.0 qualification.
+Linux/macOS 1.16.0 default in this checkout and retained explicit 1.14.1 and
+1.14.6 compatibility. Published SmolBox 0.1.2 still defaults to 1.14.6.
 
 Install the pinned SmolVM release from [compatibility evidence](compatibility.md).
 Prepare an approved, architecture-matched `.smolmachine` artifact on the worker

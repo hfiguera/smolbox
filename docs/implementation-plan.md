@@ -3,8 +3,9 @@
 ## smolvm 1.16.0 qualification in progress
 
 The maintainer authorized qualifying official 1.16.0 under the existing public
-contract on branch `support-smolvm-1.16.0`. The default remains 1.14.6 until Linux
-and native macOS acceptance passes. Exhaustion and adversarial checks run only
+contract on branch `support-smolvm-1.16.0`. Linux and native macOS platform
+qualification passed; the checkout now defaults to 1.16.0, with final validation
+of that configuration still required. Exhaustion and adversarial checks run only
 inside the disposable Linux lab. Tags, publication, pushes and PRs are excluded.
 The [qualification checklist](runtime-1.16.0-qualification.md) records the exact
 release inputs, progress and outstanding acceptance work. Historical completed
@@ -13,15 +14,19 @@ release records below do not count as evidence for this new runtime.
 The recorded checkpoint now includes both platforms' ordinary runtime and durable
 recovery suites, the repeated constrained Linux workload/control tests, three API
 service-failure cases, a live-VMM observation at the real worker deadline, and
-independent outer-VM recovery with a verified 1.16.0 replacement. Legacy Linux
-compatibility and final committed-candidate checks remain in progress. The
+independent outer-VM recovery with a verified 1.16.0 replacement. Legacy versions
+passed the ordinary suites and all 25 recovery cases on Linux and macOS. Commit
+`849557c` records that completed compatibility milestone. Final committed-candidate
+checks remain in progress. The
 buffered and streaming HTTP operations crossed five minutes through the public
 client while their guest commands stayed within the existing 300-second limit.
 An earlier streaming startup failure and the full legacy 1.14.6 recovery failure
 remain recorded; the legacy startup diagnostic captured an upstream HTTP 500
 from a timed-out agent response. No validation bound has been bypassed or enlarged.
 The [consumer compatibility guide](compatibility.md#smolvm-1-16-0-qualification)
-separates this branch's additional selection from the published 0.1.2 package.
+separates this checkout's 1.16.0 default from the published 0.1.2 package.
+Explicit 1.14.1 and 1.14.6 selections remain supported; no new public API or
+resource guarantee is added.
 
 ## 0.1.2 release
 

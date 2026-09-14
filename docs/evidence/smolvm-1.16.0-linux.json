@@ -1370,7 +1370,7 @@
   "limitations": [
     "Not final-commit validation.",
     "Buffered and streaming HTTP operations beyond five minutes passed with 299-second guest commands. Public command and managed-execution limits remain unchanged; earlier startup failures remain recorded.",
-    "No default runtime promotion or general security certification."
+    "The unreleased checkout default is now 1.16.0; final candidate validation remains required. No general security certification."
   ],
   "long_operation_first_attempt": {
     "archive_sha256": "aa35a0aa52d45c89d2fb92d570f513f4991a47bb124a7a4d449a0268e3ff98bd",

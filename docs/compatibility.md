@@ -6,9 +6,9 @@ release evidence below records the client/controller contract on Linux and macOS
 
 ## SmolVM 1.16.0 qualification
 
-This branch accepts explicit `runtime_version: "1.16.0"` on Linux x86_64 and
-macOS Apple Silicon. The default remains **1.14.6** while qualification is in
-progress. The published SmolBox 0.1.2 package does not include this additional
+This unreleased checkout defaults to `runtime_version: "1.16.0"` on Linux x86_64
+and macOS Apple Silicon after platform qualification. Explicit 1.14.1 and 1.14.6
+support remains. Final checks of the changed default are in progress. The published SmolBox 0.1.2 package does not include this additional
 selection; use this checkout to exercise it. No Linux ARM64 support is added.
 
 Testing uses official tag `v1.16.0`, commit
@@ -31,8 +31,8 @@ apply to that configured deployment. See the
 [Linux evidence](evidence/smolvm-1.16.0-linux.json) and
 [macOS evidence](evidence/smolvm-1.16.0-macos.json) for exact inputs, failed
 attempts, corrections and limits. Legacy runtime coverage now passes on both platforms, including all 25 durable
-recovery cases for each older version. Final default selection and candidate
-checks remain in progress.
+recovery cases for each older version. The default has been promoted to 1.16.0; final
+candidate checks remain in progress.
 
 ### Host preparation prerequisites
 
@@ -74,26 +74,27 @@ explicit bounded settings. No validation limits or public defaults were relaxed.
 
 ## Runtime selection
 
-SmolBox defaults to `runtime_version: "1.14.6"` for Linux x86_64 and
-macOS Apple Silicon.
-The Linux runtime and constrained deployment results are recorded below;
-exact-commit release acceptance is recorded separately in the repository's
-`docs/release-candidates/` directory.
-To keep using an existing 1.14.1 worker after upgrading SmolBox, explicitly set
-`runtime_version: "1.14.1"`. Otherwise upgrade the worker using the procedure
-below. Omitting the option changes the expected version to 1.14.6. A worker
-must report the exact configured version; supporting multiple versions does not
-allow automatic fallback or accepting an arbitrary `1.14.x` release.
+This checkout defaults to `runtime_version: "1.16.0"` for Linux x86_64 and
+macOS Apple Silicon. The published SmolBox 0.1.2 package defaults to 1.14.6 and
+does not include 1.16.0 support. Use an explicit `runtime_version: "1.14.1"` or
+`runtime_version: "1.14.6"` to retain an older worker when adopting this checkout.
+A worker must report the exact configured version. Multiple supported versions
+do not imply automatic fallback or acceptance of arbitrary upstream releases.
 
-Linux ARM64 remains unsupported for 1.14.6 and 1.16.0. A separate native macOS campaign
-checks ordinary compatibility and controlled lifecycle recovery. Exhaustion and
-adversarial testing remain in the disposable Linux lab. The older macOS 1.14.1
-results below remain historical evidence for that version.
+Linux ARM64 remains unsupported for 1.14.6 and 1.16.0. Native macOS testing covers
+ordinary compatibility and controlled lifecycle recovery. Exhaustion and
+adversarial testing remain in the disposable Linux lab.
 
-SmolVM is installed by the operator, separately from the Elixir dependency.
-Use the [upgrade procedure](host-integration.md#upgrading-a-worker) before
-changing a worker that owns executions. Keep existing allocation floors until
-the selected runtime and approved artifacts have measured replacement values.
+The operator installs smolvm separately from the Elixir dependency. Follow the
+[upgrade procedure](host-integration.md#upgrading-a-worker) before changing a
+worker that owns executions. Keep allocation floors until the selected runtime
+and approved artifacts have measured replacement values. Final candidate results
+must identify the exact source commit and installed runtime.
+
+### Published 0.1.2 runtime baseline
+
+The following 1.14.6 results are historical evidence for SmolBox 0.1.2. They do
+not replace the separate 1.16.0 qualification above.
 
 The new upstream identity is `v1.14.6`, commit
 `6c503014629bba91631152728c3081c944653f31`. The complete Linux x86_64 archive has

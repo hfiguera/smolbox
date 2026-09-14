@@ -1,9 +1,10 @@
 # smolvm 1.16.0 qualification
 
-Status: **in progress**. Branch `support-smolvm-1.16.0` starts from
-`b649bdb0f29c574f89caebd20ac8ca3c06495bfa`. The default remains 1.14.6;
-the explicit 1.16.0 selection on this branch is a candidate for testing, not
-completed platform qualification. No release or public API expansion is planned
+Status: **platform qualification passed; final candidate checks in progress**.
+Branch `support-smolvm-1.16.0` starts from
+`b649bdb0f29c574f89caebd20ac8ca3c06495bfa`. The unreleased checkout now defaults
+to 1.16.0 after Linux/macOS and legacy compatibility qualification. Final
+validation of the changed default remains required. No release or public API expansion is planned
 in this task. Existing runtime selections and execution semantics remain intact.
 
 ## Inputs and source review
@@ -692,7 +693,7 @@ the default and validating the final candidate remain separate work.
 - [x] Real backward compatibility for 1.14.1 and 1.14.6 on supported platforms.
 - [ ] Every ordinary CI gate, all analyzers and canaries, language lanes, example
   checks, documentation, minimum dependencies and fresh package consumers.
-- [ ] Final support/default decision and synchronized public documentation.
+- [x] Final support/default decision and synchronized public documentation.
 - [ ] Final committed candidate validation, evidence identities and owned cleanup.
 
 Raw preparation material is retained under ignored `.local/qualification-1.16.0/`.

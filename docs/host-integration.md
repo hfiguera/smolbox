@@ -304,28 +304,25 @@ to reconcile. Memory mode loses this authority when its store process stops.
 
 ## Upgrading a worker
 
-SmolBox 0.1.2 defaults to 1.14.6 on Linux x86_64 and macOS Apple Silicon.
-Before upgrading SmolBox against a worker that remains on 1.14.1, preserve its
-expected version explicitly:
+This unreleased checkout defaults to smolvm 1.16.0 on Linux x86_64 and macOS
+Apple Silicon. Published SmolBox 0.1.2 defaults to 1.14.6. Before adopting the new
+default with an older worker, preserve its expected version explicitly:
 
 ```elixir
 {:ok, worker} = SmolBox.Runtime.WorkerConfig.new(
-  Keyword.put(existing_worker_options, :runtime_version, "1.14.1")
+  Keyword.put(existing_worker_options, :runtime_version, "1.14.6")
 )
 ```
 
-Use 1.14.6 for new workers after consulting its
-[compatibility evidence](compatibility.md#runtime-selection).
-Omitting `:runtime_version` now expects `"1.14.6"`; an Elixir dependency update
-does not install SmolVM. If the server still reports 1.14.1, the runtime refuses
-new execution until the expected version and installed worker match.
-Unverified versions and 1.14.6 host combinations fail
-configuration validation. Health checks still require an exact version match.
+Use `"1.14.1"` instead for a worker still on that version. Omitting
+`:runtime_version` in this checkout expects `"1.16.0"`; updating the Elixir
+dependency does not install smolvm. A version mismatch prevents new execution.
+Unverified versions and unsupported host combinations fail configuration
+validation. Health checks require an exact version match, without fallback.
 
-This branch additionally accepts explicit `runtime_version: "1.16.0"` on those
-two host platforms. Its [qualification status](compatibility.md#smolvm-1-16-0-qualification)
-is separate from the published 0.1.2 release. The same drain, identity and
-prerequisite checks below apply when testing that selection.
+Consult the [1.16.0 qualification evidence](compatibility.md#smolvm-1-16-0-qualification)
+and preparation prerequisites before installing that worker. The same drain,
+identity and prerequisite checks below apply to each supported version.
 
 For an existing worker:
 
