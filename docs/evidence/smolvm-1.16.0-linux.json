@@ -1,4 +1,47 @@
 {
+  "ci_port_close_race": {
+    "failure": "A killed process closed its port between Port.info/1 and Port.close/1 in the CI supervisor; the leader/descendant cleanup test crashed.",
+    "fix": "Close the owned port directly and handle ArgumentError for an already-closed port, preserving report completion.",
+    "fix_commit": "0548717",
+    "fixed_child_sha256": "edb87fff8fd25c8b7d3b8f815453537edf1ea0b66037212897eb1f8a311003ad",
+    "initial_source_commit": "bc1a75569f224e9604f557d79c4d222e2af928cd",
+    "initial_tooling_result": {
+      "captured_bytes": 1163,
+      "exit_code": 2,
+      "failure": null,
+      "output_sha256": "285bcd8465e3a06fd5140f7cd7cc80e69e5c111348df24d7910ee5e1bdfa461b",
+      "seconds": 7.008,
+      "status": "failed"
+    },
+    "linux_tooling_with_fixed_file": {
+      "122257": {
+        "captured_bytes": 155,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "45254db6ca4f89ce642e5678c6cdf262408fbd9dff376d5d050f605685413496",
+        "seconds": 21.574,
+        "status": "passed",
+        "tests": {
+          "passed": 23,
+          "seed": 122257
+        }
+      },
+      "48192": {
+        "captured_bytes": 154,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "9f8e6ede74675ef271609332cb56fcb30ed12a570a7dfa19172f461751204a38",
+        "seconds": 16.285,
+        "status": "passed",
+        "tests": {
+          "passed": 23,
+          "seed": 48192
+        }
+      }
+    },
+    "raw_evidence_archive_sha256": "a7d3c8f6973e6ca54a02a3c55412421045363739d0efe67709ade6c62b734193",
+    "scope": "All 23 tooling cases rerun in an isolated Linux source snapshot with the single fixed Child file. This does not replace the remaining quality stages or runtime qualification."
+  },
   "durable_deployment": {
     "archive_sha256": "5d7484b13d9ab44eedacb919e542da0f5064ff8073c57ece6a8f74837997e187",
     "corrected_deadline": {
@@ -461,6 +504,157 @@
     "status": "passed",
     "workloads": 10
   },
+  "language_checkpoint_bc1a755": {
+    "archive_sha256": "9c066240e35e3ca40db654f5d48dc556be10b09d64ab4316a7586880830bdb1e",
+    "lanes": {
+      "1-18-4-otp-27": {
+        "checks": {
+          "compile": {
+            "captured_bytes": 46,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "b0cc35f6573070e737b9dca5526c23a28daf9e5abf8cb7427da3e686f9a5ac8f",
+            "seconds": 1.143,
+            "status": "passed"
+          },
+          "otp-patch": {
+            "captured_bytes": 11,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "e179d850f967cac2067c939df8f68553f2b0cef36116460d876502c654b988a3",
+            "seconds": 0.299,
+            "status": "passed"
+          },
+          "tests": {
+            "captured_bytes": 391,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "88534e0fced66b98f6b596016e4467ccaff423b09d46d2653533201de4155a35",
+            "seconds": 85.202,
+            "status": "passed"
+          },
+          "tooling": {
+            "captured_bytes": 155,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "d8c4e2ace182493751c6c39bd330a005b83c5c09f7c2972a41443e8303381f0b",
+            "seconds": 7.169,
+            "status": "passed"
+          },
+          "version": {
+            "captured_bytes": 143,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "05eebecc0c91193562bd5a1908ec38c35e750dcc168f15d26bbddd416c21f0fc",
+            "seconds": 0.252,
+            "status": "passed"
+          }
+        },
+        "deterministic_cases": 204,
+        "excluded_runtime_cases_not_counted": 14,
+        "otp_patch": "27.3.4.15",
+        "tooling_cases": 23
+      },
+      "1-19-5-otp-28": {
+        "checks": {
+          "compile": {
+            "captured_bytes": 46,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "b0cc35f6573070e737b9dca5526c23a28daf9e5abf8cb7427da3e686f9a5ac8f",
+            "seconds": 1.347,
+            "status": "passed"
+          },
+          "otp-patch": {
+            "captured_bytes": 6,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "669a552fb386db8c3dd5b5cc530eb9d11466a99bce4766efd4b4595945a66490",
+            "seconds": 0.452,
+            "status": "passed"
+          },
+          "tests": {
+            "captured_bytes": 393,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "3ed49319146b26d029d9ce9847ff8f71eb3bb5bdf85b96c54b2c2bceb86968a3",
+            "seconds": 92.916,
+            "status": "passed"
+          },
+          "tooling": {
+            "captured_bytes": 155,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "395aff4982553db89f756dc2776a91277e883a08b26359a63c28e49ba529f6ef",
+            "seconds": 10.652,
+            "status": "passed"
+          },
+          "version": {
+            "captured_bytes": 138,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "96b2616fe3236cc99ff4bd7aa74f16b29a7cd535d0ed302802fb2a7260e54657",
+            "seconds": 0.401,
+            "status": "passed"
+          }
+        },
+        "deterministic_cases": 204,
+        "excluded_runtime_cases_not_counted": 14,
+        "otp_patch": "28.5",
+        "tooling_cases": 23
+      },
+      "1-20-4-otp-28": {
+        "checks": {
+          "compile": {
+            "captured_bytes": 24,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "03d47c6b429a076348282533b9725f493e889974a689133db39f187fac79a634",
+            "seconds": 4.006,
+            "status": "passed"
+          },
+          "otp-patch": {
+            "captured_bytes": 6,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "669a552fb386db8c3dd5b5cc530eb9d11466a99bce4766efd4b4595945a66490",
+            "seconds": 1.205,
+            "status": "passed"
+          },
+          "tests": {
+            "captured_bytes": 402,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "97083b61dbe852e9ccefe6785af2cbecd97876cde677ab0f3910ec320b7e1cdf",
+            "seconds": 91.764,
+            "status": "passed"
+          },
+          "tooling": {
+            "captured_bytes": 154,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "452bdcd0405b6b8ea7866eb00cc78714bef84526a38ab5331dccf46cad4df356",
+            "seconds": 6.479,
+            "status": "passed"
+          },
+          "version": {
+            "captured_bytes": 138,
+            "exit_code": 0,
+            "failure": null,
+            "output_sha256": "b2ea3032afbde557454665d09f0aeac67792625513de862950d6c398d476ccc9",
+            "seconds": 1.163,
+            "status": "passed"
+          }
+        },
+        "deterministic_cases": 204,
+        "excluded_runtime_cases_not_counted": 14,
+        "otp_patch": "28.5",
+        "tooling_cases": 23
+      }
+    },
+    "scope": "Ordinary tests in a separate owned host checkout with two BEAM schedulers and lower process priority. Actual OTP patch files verified. No runtime, exhaustion or adversarial qualification implied.",
+    "source_commit": "bc1a75569f224e9604f557d79c4d222e2af928cd"
+  },
   "language_matrix": {
     "lanes": [
       {
@@ -623,6 +817,149 @@
     },
     "source_commit": "5abc0037bea19daf97d094f08eb773f5b9c61bff",
     "status": "passed"
+  },
+  "legacy_1_14_6_initial": {
+    "actual_account_kvm_fds_after_stop": 0,
+    "durable": {
+      "captured_bytes": 6102,
+      "exit_code": 2,
+      "failure": null,
+      "output_sha256": "60553b723c58359cad406aee2a395c9f2885ebcdb6a97ed4eb4c1d2218901835",
+      "seconds": 1412.273,
+      "status": "failed"
+    },
+    "durable_failed": 2,
+    "durable_passed": 23,
+    "failed_record_observations": [
+      {
+        "accepted_at_ms": 1789350390455,
+        "cleanup": "failed",
+        "created_machine_recorded": false,
+        "deadlines": {
+          "preparation": 1789350450548,
+          "queue": 1789350450455
+        },
+        "errors": [
+          {
+            "at_ms": 1789350445796,
+            "error": {
+              "category": "identity_conflict",
+              "evidence": "not_dispatched",
+              "operation": "create"
+            }
+          },
+          {
+            "at_ms": 1789350445667,
+            "error": {
+              "category": "transport",
+              "evidence": "dispatch_uncertain",
+              "operation": "create"
+            }
+          }
+        ],
+        "evidence": "not_dispatched",
+        "reservation_retained": true,
+        "state": "failed",
+        "updated_at_ms": 1789350445796
+      },
+      {
+        "accepted_at_ms": 1789350490118,
+        "cleanup": "failed",
+        "created_machine_recorded": false,
+        "deadlines": {
+          "preparation": 1789350550257,
+          "queue": 1789350550118
+        },
+        "errors": [
+          {
+            "at_ms": 1789350545325,
+            "error": {
+              "category": "identity_conflict",
+              "evidence": "not_dispatched",
+              "operation": "create"
+            }
+          },
+          {
+            "at_ms": 1789350545285,
+            "error": {
+              "category": "transport",
+              "evidence": "dispatch_uncertain",
+              "operation": "create"
+            }
+          }
+        ],
+        "evidence": "not_dispatched",
+        "reservation_retained": true,
+        "state": "failed",
+        "updated_at_ms": 1789350545325
+      }
+    ],
+    "interpretation": "Both failures occurred during create at the fixture's 55-second receive budget, before the requested fault boundary. Creation was unverified and capacity retained; no accepted command was replayed.",
+    "next_check": "Use a 120-second preparation budget and 115-second receive budget within the existing contract for the cold nested durable fixture; retain the original failure and rerun the two cases before the full suite.",
+    "pending_records": 2,
+    "raw_archive_sha256": "97a9e4e7b3917aa34b8e50198c1b44c5f028b9a4073d800711f8488047e07781",
+    "record_observations_sha256": "137bac5dbb3be6957b25ead44806f133b2528dc86e2450fc53b49be50fe9d929",
+    "reserved_slots": 2,
+    "runtime": {
+      "captured_bytes": 209,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "93a2f220e2a8b9749edd225c75565d71dd510995536b87bc90894a1dc460b278",
+      "seconds": 427.792,
+      "status": "passed",
+      "tests": {
+        "passed": 14,
+        "seed": 611407
+      }
+    },
+    "source_commit": "5abc0037bea19daf97d094f08eb773f5b9c61bff",
+    "status": "incomplete"
+  },
+  "legacy_1_14_6_target_selection_correction": {
+    "archive_sha256": "07fdf217ca2ecc2f7e57fd15ac0d514ac85fd63ca14096c1a70359a2fbf3c335",
+    "cleanup": "The remaining explicitly owned controller was stopped; evidence was exported before the disposable outer guest was rebuilt.",
+    "correction": "Use name-only filters without --include runtime, and require exactly 2 passing cases and 23 exclusions in the final ExUnit summary.",
+    "kvm_fds_after_owned_stop": 0,
+    "pending_records_after_interruption": 1,
+    "process_exit_is_not_suite_completion": true,
+    "raw_process_result": {
+      "captured_bytes": 1843,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "037d55b4eb6c9e8d216a41a732c277882ce10474a3f696f13e5518cafec885a6",
+      "seconds": 347.845,
+      "status": "passed"
+    },
+    "reason": "Adding --include runtime to name-only filters admitted unrelated runtime tests. The confirmed selection error was stopped deliberately before the intended two-case check could be accepted.",
+    "reserved_slots_after_interruption": 1,
+    "status": "interrupted_not_qualified",
+    "suite_summary_present": false
+  },
+  "legacy_1_14_6_targeted_corrected": {
+    "actual_account_kvm_fds_after_stop": 0,
+    "archive_sha256": "c7a50748eade056d2bcfc931d839839f9be37bc5bf75b7efbf43384b50657585",
+    "base_source_commit": "0548717",
+    "controller_observation_ms": 180000,
+    "excluded_cases_not_counted": 23,
+    "fixture_commit_with_identical_tested_files": "cfbe8ca7fe38d6bfe1b1519c5b30c7bc5ff87a54",
+    "operation_timeout_ms": 120000,
+    "passed_cases": 2,
+    "pending_records": 0,
+    "preparation_ms": 120000,
+    "receive_timeout_ms": 115000,
+    "reserved_slots": 0,
+    "runner": {
+      "captured_bytes": 4565,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "cce9f13686cd14639a67dbc59b006acea73a28b5bd937e8c5837bba02e76c628",
+      "seconds": 78.986,
+      "status": "passed"
+    },
+    "scope": "The two previously failed fault-boundary cases only. Full 25-case compatibility remains pending.",
+    "seed": 602028,
+    "status": "passed",
+    "worker_independent_lifetime_seconds": 300
   },
   "limitations": [
     "Not final-commit validation.",

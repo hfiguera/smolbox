@@ -452,8 +452,34 @@ At `5abc003`, the fresh Linux 1.14.1 compatibility campaign passed all fourteen
 runtime cases (174.198 seconds, seed 383893) and all twenty-five durable recovery
 cases (595.131 seconds, seed 63332). Tracked source remained unchanged during
 the run. Final checks found zero pending records, zero reserved slots and no KVM
-descriptors for the actual `smolbox-qual` account. The 1.14.6 Linux campaign is
-running separately in a fresh disposable guest.
+descriptors for the actual `smolbox-qual` account.
+
+The first 1.14.6 campaign at that same source passed all fourteen runtime cases
+(427.792 seconds, seed 611407), then passed 23 of 25 durable cases (1412.273
+seconds, seed 602028). Both failures happened before the requested fault boundary:
+stored error histories show a transport error during create approximately 55.2
+seconds after acceptance, matching the fixture's receive budget. Neither creation
+had been recorded as verified, and both reservations remained held. Final SQL
+counts were two pending records and two reserved slots; stopping the owned worker
+left no KVM descriptors for its actual account. These are retained failures,
+not a completed compatibility result. The disposable guest was stopped after
+exporting the reports and sanitized record histories, without exporting keys.
+
+The follow-up durable fixture uses 120 seconds for preparation and 115 seconds
+for receive, within the existing public configuration bounds. Its test observer
+allows 180 seconds to reach a boundary. The ordinary example's 60/55-second
+defaults, guest command deadline, collection and cleanup budgets, worker resource
+limits and 300-second independent worker lifetime are unchanged. With exactly
+those two cases selected, both passed (78.986 seconds, seed 602028), with zero
+pending records, zero reservations and no KVM descriptors after worker stop.
+The tested fixture files are committed in `cfbe8ca`; the full 25-case campaign
+is running against that commit before backward compatibility can be accepted.
+
+An earlier attempt combined broad runtime inclusion with the name filters and
+therefore admitted unrelated cases. It was deliberately stopped and its output
+retained as incomplete. The process exited zero after SIGTERM, but there was no
+final ExUnit summary; this is not a passing suite. The corrected selection omits
+the broad inclusion and requires exactly two passes and 23 exclusions.
 
 At documentation checkpoint `1ac5ff4`, the same newly built package archive
 passed current and exact-minimum dependency consumers on native macOS. The
@@ -464,6 +490,29 @@ default, and ordinary supervision. The archive SHA-256 is
 `56a145eaadfbc9ee48d7f88e8604c0be7fd8148c2b05ab2eaae8401aaa05b149`.
 These consumers test package contents and configuration without a real worker;
 they are not additional runtime tests or the final candidate archive.
+
+### Committed quality checkpoint and CI cleanup correction
+
+At `bc1a755`, native macOS passed all 204 deterministic cases, 95.52% coverage,
+the eight bad/clean analyzer canary pairs, all 23 tooling cases, root and example
+dependency security checks, example compilation/cycle/Dialyzer checks, and all
+42 documentation pages' local links. Fresh current and minimum dependency
+consumers passed against the same archive, SHA-256
+`929436886c4e832f26a10b92753bcd461652088e79c7f020fb9727764621b400`.
+These were ordinary quality checks with the default still at 1.14.6; they did not
+execute an additional real worker or qualify longer guest commands.
+
+The Linux quality run at that commit passed its canonical checks, analyzer
+canaries and coverage, then failed one of the 23 CI tooling cases. A killed
+process closed its port between the CI supervisor's `Port.info/1` check and
+`Port.close/1`, crashing the leader/descendant cleanup test. The original failure
+is retained. Commit `0548717` makes closing the owned port tolerate an already
+closed port, allowing cleanup reporting to finish. All 23 tooling cases passed
+on Linux with the original seed 122257 and another seed 48192, using an isolated
+source snapshot with that exact fixed file; macOS also passed all 23 with seed
+122257. Formatting, strict analyzers, Dialyzer and all eight canary pairs passed
+with the correction. This fixes development tooling, not the public execution
+contract. Remaining Linux quality stages still need to finish.
 
 ### Timeout scope conflict
 
