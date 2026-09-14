@@ -1308,6 +1308,168 @@
     "source_commit": "adc0c27c8465d7c500bf5ef1b9466112b70009a1",
     "tooling_cases": 23
   },
+  "quality_checkpoint_4e5692f": {
+    "canary_pairs": 8,
+    "checks": {
+      "canaries": {
+        "captured_bytes": 621,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "e0b964a623497ff2bb478f184e6c238afa88d2b496eb969c1ad810acf8e4339f",
+        "seconds": 49.724,
+        "status": "passed"
+      },
+      "compile-durable_host": {
+        "captured_bytes": 24,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "03d47c6b429a076348282533b9725f493e889974a689133db39f187fac79a634",
+        "seconds": 2.296,
+        "status": "passed"
+      },
+      "compile-minimal_host": {
+        "captured_bytes": 23,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "d9904e527cccaec0e854b323b04ec7f0b408ecb02771ac243d1284fc624b3205",
+        "seconds": 2.068,
+        "status": "passed"
+      },
+      "coverage": {
+        "captured_bytes": 3707,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "38b8f8d8f14cb3518f49bced17df3c40da4b676c88ffb27cf800032180e6666a",
+        "seconds": 101.431,
+        "status": "passed"
+      },
+      "deps-audit-durable_host": {
+        "captured_bytes": 62,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "97ded97167511bf60ff91c193a7dd566aad8fe50374cef37b0ee6d2e290000e6",
+        "seconds": 2.73,
+        "status": "passed"
+      },
+      "deps-audit-minimal_host": {
+        "captured_bytes": 62,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "97ded97167511bf60ff91c193a7dd566aad8fe50374cef37b0ee6d2e290000e6",
+        "seconds": 3.449,
+        "status": "passed"
+      },
+      "deps-audit-root": {
+        "captured_bytes": 26,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "3016e51e4eac0d421674d2128bbbdefb2924b4646e0c14a1ab034977ad73fae5",
+        "seconds": 2.547,
+        "status": "passed"
+      },
+      "dialyzer-durable_host": {
+        "captured_bytes": 1673,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "39fd87c86c08de98d6fcfa987db8b0ec6a0d899f580867a1ec80a730823d102a",
+        "seconds": 153.285,
+        "status": "passed"
+      },
+      "dialyzer-minimal_host": {
+        "captured_bytes": 1136,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "8827051d9ed4f545dbf62a04df6d28d9f4ad0b99200a7aebe1092076cd2b8fd6",
+        "seconds": 50.619,
+        "status": "passed"
+      },
+      "doc-links": {
+        "captured_bytes": 60,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "4becb7fed09596d86e9f5b2d81c9c1f9bacb31d06c8e2cc7f47e322dad12dac6",
+        "seconds": 1.355,
+        "status": "passed"
+      },
+      "docs": {
+        "captured_bytes": 152,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "aae7135d7f0a37a3cd227d50e111b3f799daa99f6cfa30e5a2e60bca2d7bef5e",
+        "seconds": 5.907,
+        "status": "passed"
+      },
+      "hex-audit-durable_host": {
+        "captured_bytes": 47,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+        "seconds": 3.171,
+        "status": "passed"
+      },
+      "hex-audit-minimal_host": {
+        "captured_bytes": 47,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+        "seconds": 3.226,
+        "status": "passed"
+      },
+      "hex-audit-root": {
+        "captured_bytes": 47,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "25ce35312da15695b9ab9e466ebdba2c1460f780ca6a14e164646fee228030d6",
+        "seconds": 2.911,
+        "status": "passed"
+      },
+      "quality": {
+        "captured_bytes": 2141,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "6bf21693f73291647f4e64c26cdbc6f792bfb962408a8c4b584ccefbc95fe598",
+        "seconds": 122.818,
+        "status": "passed"
+      },
+      "tooling": {
+        "captured_bytes": 155,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "3ea1193c491a5105dde9bc7d68c8880d048a7724473cb01bf54c606cb791e4cc",
+        "seconds": 14.227,
+        "status": "passed"
+      },
+      "xref-durable_host": {
+        "captured_bytes": 16,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548",
+        "seconds": 3.732,
+        "status": "passed"
+      },
+      "xref-minimal_host": {
+        "captured_bytes": 16,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548",
+        "seconds": 1.871,
+        "status": "passed"
+      }
+    },
+    "coverage_percent": 95.41,
+    "deterministic_cases": 204,
+    "documentation_pages": 42,
+    "excluded_runtime_cases_not_counted": 14,
+    "scope": "Complete ordinary quality checkpoint after the CI port-close correction and bounded preparation fixture changes. No real runtime or adversarial workload executed by these checks; package consumers and default promotion remain separate.",
+    "seeds": {
+      "coverage": 761276,
+      "quality": 191098,
+      "tooling": 262455
+    },
+    "source_commit": "4e5692fb5aa4d68a21e384dbcad888ce6f6f20c1",
+    "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+    "tooling_cases": 23
+  },
   "restart_process_identity": {
     "actual_account": "lab",
     "archive_sha256": "a2dd82befc8cde3adde10a8fc92d5ead190dc7f4ebf0b5714258eb14b418a164",

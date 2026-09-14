@@ -512,7 +512,15 @@ on Linux with the original seed 122257 and another seed 48192, using an isolated
 source snapshot with that exact fixed file; macOS also passed all 23 with seed
 122257. Formatting, strict analyzers, Dialyzer and all eight canary pairs passed
 with the correction. This fixes development tooling, not the public execution
-contract. Remaining Linux quality stages still need to finish.
+contract. The complete corrected quality run subsequently passed on both Linux
+and macOS at `4e5692f`: 204 deterministic cases, 95.41% coverage, all eight
+bad/clean analyzer pairs, all 23 tooling cases, root and example dependency
+security checks, example compilation/cycle/Dialyzer checks, and all 42
+documentation pages' local links. Each of the eighteen gate reports was checked
+against its captured output digest and relevant result assertions. Runtime
+exclusions were not counted as passes. This checkpoint includes the bounded
+preparation fixture correction; final package consumers and default selection
+remain separate acceptance work.
 
 ### Timeout scope conflict
 
