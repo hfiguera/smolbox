@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.3 (release preparation)
+## 0.1.3 — September 14, 2026
 
 **Upgrade notice:** this version changes the durable record format and the default
 worker version. Although numbered 0.1.3, it requires a coordinated upgrade for

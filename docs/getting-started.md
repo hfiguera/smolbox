@@ -17,9 +17,8 @@ In an existing Elixir Mix application, add this entry to `deps/0` in `mix.exs`:
 {:smolbox, "~> 0.1.3"}
 ```
 
-This guide targets the upcoming 0.1.3 release. Until it is published, use
-`{:smolbox, path: "../smolbox"}` with this checkout instead of the Hex entry.
-Run `mix deps.get` after adding the dependency. Version 0.1.3 defaults to smolvm
+Run `mix deps.get` after adding the dependency. A local checkout can instead be
+used with `{:smolbox, path: "../smolbox"}`. Version 0.1.3 defaults to smolvm
 1.16.0; see its [qualification evidence](compatibility.md#smolvm-1-16-0-qualification).
 Existing applications must follow [Upgrading to 0.1.3](recovery.md#upgrading-to-0-1-3)
 before sharing their durable store with this version.

@@ -78,10 +78,8 @@ creating machines, executing commands, streaming output, and transferring files.
 
 ## Installation and first run
 
-This checkout prepares **SmolBox 0.1.3**, with **smolvm 1.16.0** as the default
-on Linux x86_64 and macOS Apple Silicon. Version 0.1.3 has not been published yet;
-use a local path dependency to try this checkout. The Hex dependency below is for
-the upcoming release.
+SmolBox **0.1.3** defaults to **smolvm 1.16.0** on Linux x86_64 and macOS
+Apple Silicon.
 
 **Upgrading from 0.1.2:** coordinate all controllers sharing a durable store.
 Every codec write now uses record schema v2, including offline executions; old
@@ -95,9 +93,8 @@ Add SmolBox to your application's `mix.exs`:
 {:smolbox, "~> 0.1.3"}
 ```
 
-After publication, run `mix deps.get`. The [published API documentation](https://hexdocs.pm/smolbox/)
-describes the latest published version. This checkout includes the updated guides
-below. A local checkout can instead be used with
+Run `mix deps.get`. The [API documentation](https://hexdocs.pm/smolbox/0.1.3/)
+includes the guides below. A local checkout can instead be used with
 `{:smolbox, path: "../smolbox"}`.
 
 To run the local walkthrough, you need:
@@ -116,7 +113,7 @@ To run the local walkthrough, you need:
 stage a Python file, submit it, read its output file, and confirm cleanup. The
 walkthrough uses an in-memory store and needs no database. Applications that need
 restart recovery must provide a durable `SmolBox.Store` adapter; a complete
-[PostgreSQL host example](https://github.com/hfiguera/smolbox/tree/main/examples/durable_host)
+[PostgreSQL host example](https://github.com/hfiguera/smolbox/tree/v0.1.3/examples/durable_host)
 is included in the repository.
 
 ## Current scope
@@ -177,5 +174,4 @@ the compatibility guide. From this repository, `mix ci` runs deterministic check
 without contacting a real worker. Generate this site with
 `MIX_ENV=dev mix docs --warnings-as-errors`. Live worker tests are a separate opt-in
 operation described in the repository's
-[CI guide](https://github.com/hfiguera/smolbox/blob/main/scripts/ci/README.md).
-Release source links will resolve when the corresponding tag is published.
+[CI guide](https://github.com/hfiguera/smolbox/blob/v0.1.3/scripts/ci/README.md).

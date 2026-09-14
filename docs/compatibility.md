@@ -1,6 +1,6 @@
 # Compatibility evidence
 
-Version: `0.1.3` (release preparation). The library's supported qualification is
+Version: `0.1.3`. The library's supported qualification is
 `:development`; requested hard-control options remain unsupported. The original
 release evidence below records the client/controller contract on Linux and macOS.
 
