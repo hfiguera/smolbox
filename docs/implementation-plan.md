@@ -1,16 +1,24 @@
-# SmolBox 0.1.3 release preparation
+# SmolBox 0.1.3 publication
 
-The selected version is 0.1.3. Branch `release-0.1.3` prepares the merged runtime
-and networking work for release, with a prominent explanation of the durable
-record compatibility change despite the patch version number. Every codec write
-uses v2, including offline work; old readers cannot read it. See
-[Upgrading to 0.1.3](recovery.md#upgrading-to-0-1-3) for coordinated controller
-upgrades, worker version selection and rollback limits.
+Published and verified September 14, 2026. Tag `v0.1.3` points to
+`c62fe40974c33cba86bc7d52edfd5c5a2e0f1c46`. Hex, HexDocs and the GitHub release
+are available. See the [publication record](release-candidates/0.1.3-release.md)
+and [machine-readable results](release-candidates/0.1.3-release.json).
 
-Preparation and remaining publication steps are recorded in
-[the release checkpoint](release-candidates/0.1.3.md). No 0.1.3 tag or publication
-is implied by this preparation entry. Prior live evidence below retains its
-original revisions and platform limits.
+All 18 GitHub CI jobs passed at the release commit. Fresh macOS/Linux checks
+passed: 213 deterministic cases, 23 tooling cases, every required analyzer and
+canary, 95.49% coverage and 44 ExDoc pages. Both the prepared archive and the
+published archive passed current/minimum consumers on each canonical toolchain
+and minimum consumers on the oldest supported toolchain. Their archive ordering
+differs, but all 95 packaged file contents and normalized metadata match. Fresh
+registry installations and public documentation were verified on publication.
+The report preserves the initial concurrent docs failure and successful rerun.
+
+Every codec write uses v2, including offline work; old readers cannot read it.
+The release prominently documents [Upgrading to 0.1.3](recovery.md#upgrading-to-0-1-3),
+including coordinated controllers, worker version selection and rollback limits.
+Prior live evidence below retains its original revisions and platform limits;
+no new live or adversarial run is claimed for release documentation finalization.
 
 # Controlled network access follow-up
 
