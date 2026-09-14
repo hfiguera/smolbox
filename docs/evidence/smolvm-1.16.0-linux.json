@@ -1152,6 +1152,32 @@
     "transport_sha256": "de5a0e58edee0d719c55338668908cca54f5a49f9fcac70a596870ee280c561a",
     "worker_account_kvm_descriptors_after_stop": 0
   },
+  "legacy_1_14_6_full_suite_pass": {
+    "actual_lab_kvm_descriptors": 0,
+    "actual_qualification_kvm_descriptors": 0,
+    "pending_records": 0,
+    "raw_archive": "legacy-final-results.tar",
+    "raw_archive_sha256": "18099dab976f48aaab8b51e15a79b8e1709f97526174cd4afc8508a40a5a7a45",
+    "remaining_owned_beams": 0,
+    "remaining_owned_workers": 0,
+    "report": {
+      "captured_bytes": 4393,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "3eba46c87e9f4e8814d4bae1c93a03f5374ce74000a7f58d160be33dab78598e",
+      "seconds": 1265.343,
+      "status": "passed",
+      "tests": {
+        "passed": 25,
+        "seed": 602028
+      }
+    },
+    "reserved_slots": 0,
+    "runner_sha256": "9da30e47b424379a2b9c8ab1c586d32881ad622b8b054aa0630b245c798f6522",
+    "runtime_archive_sha256": "94a1edb0c42b20ac562c3759ed216bab2cab9e27c382f6560969144f7bd1dce3",
+    "scope": "All 25 durable recovery cases with seed 602028, original production transport and clean source. Fresh disposable guest, same one-CPU, 1536-MiB, 96-task, 300-second worker controls. Preparation 120 seconds, receive 115 seconds, observer 180 seconds, per-case 300 seconds; 2100-second whole-suite bound. Earlier failed runs remain; this pass does not establish their root cause.",
+    "source_commit": "4e5692fb5aa4d68a21e384dbcad888ce6f6f20c1"
+  },
   "legacy_1_14_6_initial": {
     "actual_account_kvm_fds_after_stop": 0,
     "durable": {
@@ -1343,8 +1369,7 @@
   },
   "limitations": [
     "Not final-commit validation.",
-    "The legacy Linux 1.14.6 campaign remains incomplete.",
-    "The longer-than-five-minute public-contract requirement remains unresolved.",
+    "Buffered and streaming HTTP operations beyond five minutes passed with 299-second guest commands. Public command and managed-execution limits remain unchanged; earlier startup failures remain recorded.",
     "No default runtime promotion or general security certification."
   ],
   "long_operation_first_attempt": {

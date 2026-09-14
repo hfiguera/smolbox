@@ -113,11 +113,130 @@
       "probe": "restart identity"
     }
   ],
+  "legacy_1_14_6_monitor_failure": {
+    "corrected_monitor_sha256": "d71ccb6b9b094a3f1a4a6130e497bdaf249f1cd00bb0953bd772fe9ae54ee268",
+    "guard_sha256": "48881c66880ef12b2cdc3575e309083fa4efbf10927c30c0dd3b898fc03331fe",
+    "guard_tests_sha256": "1c6ec4875648e8b6ab1d8927c0af5ac228b4d0e5949ba64d15128a36c4766421",
+    "original_monitor_sha256": "49fe4dfc3539da753a932eb1621b8f4b74c070ca41352a0ea4b2be649a61c686",
+    "scope": "The private monitor assumed du always exits zero. Concurrent removal during preparation returned exit 1 and crashed the monitor, stopping its owned worker. Six test failures were printed before manual termination of the verified test process group; no full passing ExUnit summary or cleanup claim. Private PostgreSQL subsequently stopped. An in-progress observation recorded three pending rows and one slot; no successful recovery is inferred. The corrected monitor retries failed scans at most three times with bounded subprocess output/time, fails closed if measurement remains unavailable, and preserves a worker stop report. Three guard fixture tests passed; these are harness checks, not runtime evidence. The generated BEAM crash dump remains private and was not inspected or exported.",
+    "source_commit": "a017864acf6071eea15037c8961ff93f3fc804e1",
+    "test_log_sha256": "d140f3d4f78da1fe045afb837d7767e03f716f4b507a31b7faa13eec0d401658",
+    "worker_driver_sha256": "61ee95128219d75cf5bb170025ac9fc9661e1590ae3b2c207e71951cc52c5fc9"
+  },
+  "legacy_compatibility": {
+    "durable": {
+      "1.14.1": {
+        "final_inventory": [],
+        "pending_records": 0,
+        "report": {
+          "captured_bytes": 173,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "db075f87035a1efdb62203888bf4c47c3ab7a3201dcef50bfbdab5fc88332b7a",
+          "seconds": 278.143,
+          "status": "passed",
+          "tests": {
+            "passed": 25,
+            "seed": 243606
+          }
+        },
+        "reserved_slots": 0,
+        "runtime_component_check": "smolvm: OK\nsmolvm-bin: OK\nlib/libMoltenVK.dylib: OK\nlib/libepoxy.0.dylib: OK\nlib/libkrun.dylib: OK\nlib/libkrunfw.5.dylib: OK\nlib/libkrunfw.dylib: OK\nlib/libvirglrenderer.1.dylib: OK\na63dbbdef8af68d175759c4b69b392541f42ffd9f756b25afef19ec0e1055c37  agent-rootfs/usr/local/bin/smolvm-agent\nsmolvm 1.14.1\n",
+        "source_commit": "a017864acf6071eea15037c8961ff93f3fc804e1",
+        "worker": {
+          "reason": ":requested",
+          "report": {
+            "captured_bytes": 253,
+            "exit_code": 0,
+            "failure": "stopped",
+            "output_sha256": "38c9d6dbbf0e1ef2a1cc7fcf73d947812dede8aae2b810e5bee312781792cf52",
+            "seconds": 281.61,
+            "status": "failed"
+          }
+        }
+      },
+      "1.14.6": {
+        "final_inventory": [],
+        "pending_records": 0,
+        "report": {
+          "captured_bytes": 347,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "945e7e96fcdbe9de7ed2d40ceffb27c2ce11665e58c1db5b7a429fece46c5419",
+          "seconds": 272.022,
+          "status": "passed",
+          "tests": {
+            "passed": 25,
+            "seed": 243606
+          }
+        },
+        "reserved_slots": 0,
+        "runtime_component_check": "smolvm: OK\nsmolvm-bin: OK\nlib/libMoltenVK.dylib: OK\nlib/libepoxy.0.dylib: OK\nlib/libkrun.dylib: OK\nlib/libkrunfw.5.dylib: OK\nlib/libkrunfw.dylib: OK\nlib/libvirglrenderer.1.dylib: OK\n5b67a95497e074923f34c9b6b41dffba3fcbf28a717f90b9da1f8d20b9453c00  agent-rootfs/usr/local/bin/smolvm-agent\nsmolvm 1.14.6\n",
+        "source_commit": "a017864acf6071eea15037c8961ff93f3fc804e1",
+        "worker": {
+          "reason": ":requested",
+          "report": {
+            "captured_bytes": 253,
+            "exit_code": 0,
+            "failure": "stopped",
+            "output_sha256": "dfd76c3e2087572a8aac02c7675e433fdb6a3539ac133af6a02be6cb0c4abb2b",
+            "seconds": 275.611,
+            "status": "failed"
+          }
+        }
+      }
+    },
+    "initial_1_14_6_setup_failure": {
+      "log_sha256": "2bf2bcbc2ae4858922b0acec7eb0f01d4ab407fab00031b51c408f3a437af6ff",
+      "scope": "Initial health setup failed before runtime work; four failures and five invalidated cases. Retained separately from the nine-case corrected pass."
+    },
+    "ordinary": {
+      "1.14.1": {
+        "log_sha256": "cecda0b3f869d8719af1b0928e60bd1eb62313a62f2500dbd22c817540196285",
+        "seconds": 28.1,
+        "seed": 763237,
+        "source_commit": "b65709fddffb67b173d91b2ba1a21462ccbead1d",
+        "tests": 9,
+        "worker": {
+          "reason": ":requested",
+          "report": {
+            "captured_bytes": 722,
+            "exit_code": 0,
+            "failure": "stopped",
+            "output_sha256": "3c2f57c232ada038624964c60847f66bec652d51bfdf46beec433333f13f530d",
+            "seconds": 102.511,
+            "status": "failed"
+          }
+        }
+      },
+      "1.14.6": {
+        "log_sha256": "5e277fbd958ff0806a768cebfc48729d78035bed260ca1b1c4cc5987087f93e5",
+        "seconds": 20.8,
+        "seed": 393358,
+        "source_commit": "b65709fddffb67b173d91b2ba1a21462ccbead1d",
+        "tests": 9,
+        "worker": {
+          "reason": ":requested",
+          "report": {
+            "captured_bytes": 722,
+            "exit_code": 0,
+            "failure": "stopped",
+            "output_sha256": "0be317e0db99ae64ed5d6d83397451033a73832610ade44926e0a8d2ff2cd4d5",
+            "seconds": 88.393,
+            "status": "failed"
+          }
+        }
+      }
+    },
+    "raw_archive": "macos-legacy-final-results.tar",
+    "raw_archive_sha256": "57cccb4cf83da7e182f01f38782be20bed7a440dfea54fc7ea53f1bebdbbb0c1",
+    "scope": "Nine ordinary runtime cases per legacy version at b65709f, plus all 25 durable controller recovery cases per version at a017864. Owned workers and private socket-only PostgreSQL; no macOS exhaustion or adversarial workloads. Worker stopped statuses are intentional fixture teardown, not failed commands. Final database shutdown verified separately."
+  },
   "limitations": [
     "Bounded ordinary compatibility and controlled recovery only; no macOS exhaustion or adversarial testing.",
-    "The longer-than-five-minute execution requirement remains open because the current public command/profile limits stop at five minutes.",
+    "HTTP operations beyond five minutes were validated separately on Linux with 299-second guest commands; the public 300-second command and managed-execution limits remain unchanged.",
     "Nix packaging was reviewed, not installed or qualified.",
-    "Linux deployment qualification and final default selection are separate and incomplete."
+    "The constrained Linux deployment has separate evidence; final default selection and final candidate acceptance remain pending."
   ],
   "platform": {
     "architecture": "arm64",

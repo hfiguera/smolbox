@@ -30,8 +30,9 @@ contained resource, isolation and independent recovery scenarios. Its conclusion
 apply to that configured deployment. See the
 [Linux evidence](evidence/smolvm-1.16.0-linux.json) and
 [macOS evidence](evidence/smolvm-1.16.0-macos.json) for exact inputs, failed
-attempts, corrections and limits. Legacy Linux suites and final candidate checks
-are still in progress.
+attempts, corrections and limits. Legacy runtime coverage now passes on both platforms, including all 25 durable
+recovery cases for each older version. Final default selection and candidate
+checks remain in progress.
 
 ### Host preparation prerequisites
 

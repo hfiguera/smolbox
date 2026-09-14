@@ -632,6 +632,44 @@ treating the former HTTP response timeout as an identical command deadline for
 both paths. Actual client operation duration, guest duration and stream event
 timing must be recorded separately when testing the five-minute boundary.
 
+### Full legacy recovery coverage
+
+The uninstrumented Linux 1.14.6 rerun at `4e5692f` passed all **25 durable
+recovery cases**, seed 602028, in **1265.343 seconds**. It used a fresh disposable
+guest and the same one-CPU, 1536-MiB, 96-task, 300-second worker boundary.
+Preparation, receive, observer and per-case limits remained 120, 115, 180 and
+300 seconds respectively; the complete suite had a 2100-second bound. Final
+checks found zero pending rows, zero reserved slots, no owned BEAM or worker
+processes and no KVM descriptors for either actual test account. The source tree
+was unchanged. The raw archive digest is
+`18099dab976f48aaab8b51e15a79b8e1709f97526174cd4afc8508a40a5a7a45`.
+Earlier failures and diagnostics remain recorded; this pass does not establish
+the cause of the previous startup failures. The outer VM was then stopped,
+with independent recovery finished and its recovery marker cleared.
+
+Native macOS 1.14.1 passed all **25 durable recovery cases** at `a017864`, seed
+243606, in **278.143 seconds**. Its private database had no pending work or slots,
+the worker inventory was empty, and intentional worker teardown completed.
+These supplement the nine ordinary runtime cases already recorded for each
+legacy version.
+
+The first Mac 1.14.6 recovery attempt was invalidated by a private test-monitor
+failure. A disk-usage scan overlapped removal of preparation directories, returned
+exit one, and crashed a monitor that assumed every scan succeeded. The owned
+worker stopped. Six test failures were printed before the test group was stopped;
+this run has no passing full-suite or cleanup result. Its logs remain separate.
+The replacement monitor bounds each measurement, retries a failed scan at most
+three times, and stops the worker with a report if measurement remains unavailable.
+Three fixture checks cover rescan success, repeated failure and the free-space
+threshold; they are harness tests, not runtime qualification.
+
+With that correction and a fresh private database and worker, Mac 1.14.6 passed
+all **25 cases**, seed 243606, in **272.022 seconds**, still at `a017864`.
+The final inventory was empty, pending rows and slots were zero, and the owned
+worker and PostgreSQL server were confirmed stopped. No exhaustion or adversarial
+workloads ran on macOS. This completes the legacy runtime coverage; changing
+the default and validating the final candidate remain separate work.
+
 ## Required evidence
 
 - [x] Create the requested branch; preserve the external checkout.
@@ -651,7 +689,7 @@ timing must be recorded separately when testing the five-minute boundary.
   external deletion reconciliation and duplicate VMM launch prevention.
 - [x] Complete contained Linux resource/isolation campaign, effective cgroups and
   independent worker/outer-VM recovery. No exhaustion or adversarial tests on Mac.
-- [ ] Real backward compatibility for 1.14.1 and 1.14.6 on supported platforms.
+- [x] Real backward compatibility for 1.14.1 and 1.14.6 on supported platforms.
 - [ ] Every ordinary CI gate, all analyzers and canaries, language lanes, example
   checks, documentation, minimum dependencies and fresh package consumers.
 - [ ] Final support/default decision and synchronized public documentation.
