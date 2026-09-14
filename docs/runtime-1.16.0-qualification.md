@@ -259,6 +259,45 @@ was restored. Together with the macOS observation, this confirms that consumers
 must verify the actual worker's resizing prerequisite rather than infer successful
 preparation from an accepted start response.
 
+The fresh Linux durable rerun subsequently passed all 25 cases with the original
+seed 1167, in 1,352.806 seconds. Its source was `adc0c27` plus the diagnostic-only
+controller change committed as `cd97ecf`; the executed controller file matched
+SHA-256 `0b9c7e7eda199b4d9873bb577ea8d8cba793623ad509afb08b0dbe83251ebec8`.
+The complete-suite observation budget was 30 minutes, while each controller's
+100-second observation deadline and all preparation, execution, lease and cleanup
+budgets stayed unchanged. The run included all original interruption boundaries;
+no cases were skipped or excluded. Final observation found zero pending database
+records, zero reserved slots and no KVM file descriptors. The earlier failed run
+remains evidence: this successful rerun does not establish why both earlier
+boundary waits failed or guarantee a startup latency under every host load.
+
+During that rerun, 600 additional samples captured 759 live process observations,
+all inside the candidate cgroup. This is sampled containment evidence, not an
+atomic guarantee about every process lifetime. An initial attempt to launch this
+diagnostic suite omitted the required artifact digest and failed fixture setup
+before executing any guest commands; its report is retained separately.
+
+The 1.16.0 shared-storage cleanup regression then passed in 24.374 seconds. Guest
+writes filled the 512 MiB shared registry/data filesystem to zero available bytes;
+stop left only 4 KiB free. API deletion succeeded, reclaimed more than 511 MiB,
+and removed the VM data directory. Absence survived an API server restart, and a
+replacement machine completed creation, upload, execution, collection and deletion.
+Final external teardown found no KVM file descriptors. This focused experiment
+used its separate 2 GiB / 200% CPU / 128-task profile with VM UID dropping disabled;
+it does not replace the stricter deployment's resource and isolation campaign.
+The version-selecting experiment controller is committed as `067b6ec`.
+
+The stricter candidate's external CPU, task and memory boundary probes also
+passed inside the disposable guest. The CPU counters recorded 80 throttled
+periods; the task controller recorded four limit events; memory exhaustion
+recorded one OOM kill and the unit result `oom-kill`. Each probe verified removal
+of the owned processes. All eleven negative startup cases were rejected, covering
+weakened limits and lifecycle policy, disabled Landlock/private networking,
+modified artifacts and a missing storage boundary. Restoring the expected
+configuration produced a healthy 1.16.0 worker. These deliberate injections test
+the external worker controls; the separate guest workload campaign is still
+required.
+
 At `adc0c27c8465d7c500bf5ef1b9466112b70009a1`, ordinary native Linux checks passed:
 204 deterministic cases (seed 146040), 95.41% coverage, all eight bad/clean analyzer
 canary pairs, all 23 CI tooling cases, dependency security checks, both examples'

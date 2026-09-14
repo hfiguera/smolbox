@@ -20,6 +20,94 @@
     "reserved_slots_after_teardown": 3,
     "source_commit": "6a4a6b6055d9c28c21c5bea01c7b1ab970f2ee5d"
   },
+  "durable_recovery": {
+    "child_observation_seconds": 100,
+    "controller_diagnostic_commit": "cd97ecf",
+    "controller_sha256": "0b9c7e7eda199b4d9873bb577ea8d8cba793623ad509afb08b0dbe83251ebec8",
+    "earlier_failure_scope": "Fresh rerun passed; root cause of the earlier two boundary waits is not established.",
+    "failed_harness_attempt": {
+      "captured_bytes": 17836,
+      "exit_code": 2,
+      "failure": null,
+      "output_sha256": "73fc70a94900c3ad3b6229d91aa5109a6796e5eee929f24d69f2267d9ebb4d4f",
+      "seconds": 18.814,
+      "status": "failed"
+    },
+    "failed_harness_cause": "Missing SMOLBOX_PYTHON_SHA256 prevented all fixture setups before execution.",
+    "kvm_fds_after_teardown": 0,
+    "pending_records_after_teardown": 0,
+    "production_budgets_changed": false,
+    "reserved_slots_after_teardown": 0,
+    "runner": {
+      "captured_bytes": 4565,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "64e9a9c65323625e32f861c281e0390555c6e7575db3196f23f6925b99c3b534",
+      "seconds": 1352.806,
+      "status": "passed",
+      "tests": {
+        "passed": 25,
+        "seed": 1167
+      }
+    },
+    "sampled_containment": {
+      "live_process_observations": 759,
+      "outside_candidate_cgroup": 0,
+      "samples": 600
+    },
+    "source_base": "adc0c27c8465d7c500bf5ef1b9466112b70009a1",
+    "status": "passed",
+    "suite_observation_seconds": 1800
+  },
+  "external_boundaries_and_admission": {
+    "cpu": "usage_usec 8328586\nuser_usec 2404228\nsystem_usec 5924357\ncore_sched.force_idle_usec 0\nnr_periods 86\nnr_throttled 80\nthrottled_usec 23965910\nnr_bursts 0\nburst_usec 0",
+    "memory": "low 0\nhigh 0\nmax 36\noom 1\noom_kill 1\noom_group_kill 0",
+    "memory_peak_bytes": 1610612736,
+    "oom_result": "oom-kill",
+    "reports": {
+      "admission-1160": {
+        "captured_bytes": 2451,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "27fed01cfbd1a2e3ca2329112e8b850da049b618c2144d0dd7a01595a5834644",
+        "seconds": 7.869,
+        "status": "passed"
+      },
+      "host-boundaries-1160": {
+        "captured_bytes": 458,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "0d9729e41b070f2b9f2c422732d2f177e2a0b844c73ef842d7029293d16f9fd6",
+        "seconds": 29.857,
+        "status": "passed"
+      }
+    },
+    "restored_health": {
+      "machines": {
+        "running": 0,
+        "total": 0
+      },
+      "status": "ok",
+      "uptime_seconds": 0,
+      "version": "1.16.0"
+    },
+    "scope": "Faults injected into the owned worker cgroup inside the disposable nested KVM guest; no physical-host or macOS exhaustion.",
+    "source_base": "adc0c27c8465d7c500bf5ef1b9466112b70009a1",
+    "startup_refusals": [
+      "weaker-memory: rejected",
+      "disabled-landlock: rejected",
+      "missing-private-network: rejected",
+      "RuntimeMaxSec:0: rejected",
+      "KillMode:process: rejected",
+      "Restart:always: rejected",
+      "CPUQuota:200%: rejected",
+      "TasksMax:192: rejected",
+      "MemorySwapMax:1G: rejected",
+      "altered-artifact: rejected",
+      "missing-storage-boundary: rejected"
+    ],
+    "tasks": "max 4"
+  },
   "language_matrix": {
     "lanes": [
       {
@@ -151,8 +239,8 @@
   },
   "limitations": [
     "Not final-commit validation.",
-    "Complete Linux durable recovery has not passed.",
-    "Linux containment, resource fault, isolation, legacy runtime and full language/package campaigns remain incomplete.",
+    "Guest workload, independent durable service-failure, outer-VM recovery and legacy Linux campaigns remain incomplete.",
+    "The longer-than-five-minute public-contract requirement remains unresolved.",
     "No default runtime promotion or general security certification."
   ],
   "missing_resize2fs": {
@@ -467,5 +555,130 @@
     }
   },
   "scope": "Native Linux ordinary CI and disposable nested KVM runtime observations are separate configurations.",
+  "shared_storage_cleanup": {
+    "controller_change_commit": "067b6ec",
+    "detail": {
+      "absence_after_worker_restart": true,
+      "after_delete": {
+        "available_bytes": 536682496,
+        "total_bytes": 536870912,
+        "used_bytes": 188416
+      },
+      "after_fill": {
+        "available_bytes": 0,
+        "total_bytes": 536870912,
+        "used_bytes": 536870912
+      },
+      "after_stop": {
+        "available_bytes": 4096,
+        "total_bytes": 536870912,
+        "used_bytes": 536866816
+      },
+      "before_fill": {
+        "available_bytes": 351588352,
+        "total_bytes": 536870912,
+        "used_bytes": 185282560
+      },
+      "cgroup_after_delete": {
+        "cpu.stat": "usage_usec 11292990\nuser_usec 7113586\nsystem_usec 4179404\ncore_sched.force_idle_usec 0\nnr_periods 109\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "memory.peak": "871022592",
+        "pids.events": "max 0",
+        "pids.peak": "23"
+      },
+      "cgroup_before": {
+        "cpu.stat": "usage_usec 24436\nuser_usec 12707\nsystem_usec 11729\ncore_sched.force_idle_usec 0\nnr_periods 2\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "memory.peak": "5844992",
+        "pids.events": "max 0",
+        "pids.peak": "5"
+      },
+      "cgroup_final_worker": {
+        "cpu.stat": "usage_usec 12814319\nuser_usec 7685578\nsystem_usec 5128740\ncore_sched.force_idle_usec 0\nnr_periods 120\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "memory.peak": "378187776",
+        "pids.events": "max 0",
+        "pids.peak": "23"
+      },
+      "created": {
+        "cpus": 1,
+        "created_at": 1789344249,
+        "memory_mb": 256,
+        "name": "cleanup-gbkqqjs5aesuogg3urzj",
+        "overlay_gb": 10,
+        "state": "created",
+        "storage_gb": 20
+      },
+      "data_directory_absent": true,
+      "delete": {
+        "status": "ok"
+      },
+      "fill": {
+        "error": {
+          "errno": 5,
+          "message": "I/O error"
+        },
+        "written_bytes": 329252864
+      },
+      "final_storage": {
+        "available_bytes": 536719360,
+        "total_bytes": 536870912,
+        "used_bytes": 151552
+      },
+      "finished_utc": "2026-09-14T00:04:32.193753Z",
+      "label": "shared-storage-1160",
+      "limits": {
+        "cpu.max": "200000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "pids.max": "128"
+      },
+      "nested_kvm_descriptors": true,
+      "replacement": {
+        "cpus": 1,
+        "created_at": 1789344260,
+        "memory_mb": 256,
+        "name": "cleanup-p3nc5pgkj2cxzl25t2rl",
+        "overlay_gb": 10,
+        "state": "created",
+        "storage_gb": 20
+      },
+      "shared_filesystem": {
+        "device_ids": [
+          "52",
+          "52",
+          "52"
+        ],
+        "paths": [
+          "/srv/smolbox-cleanup/data",
+          "/srv/smolbox-cleanup/data/.local/share/smolvm/server/smolvm.db",
+          "/srv/smolbox-cleanup/data/.cache/smolvm/vms/6f70fd5e17187d4b"
+        ]
+      },
+      "started_utc": "2026-09-14T00:04:09.116453Z",
+      "status": "passed",
+      "subsequent_execution": "create/start/upload/exec/download/stop/delete/absence passed",
+      "version": "1.16.0"
+    },
+    "kvm_fds_after_teardown": 0,
+    "profile": {
+      "cpu_percent": 200,
+      "memory_max_bytes": 2147483648,
+      "shared_storage_bytes": 536870912,
+      "tasks_max": 128,
+      "vm_uid_drop": "off",
+      "worker_deadline_seconds": 300
+    },
+    "runner": {
+      "captured_bytes": 2564,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "78227d442d0f6f2ce17db4e8433a1e4e2eb2348c23c667400d4a68f90dd6e349",
+      "seconds": 24.374,
+      "status": "passed"
+    },
+    "scope": "Focused shared-registry/storage cleanup regression; separate from the stricter constrained deployment's isolation qualification.",
+    "source_base": "adc0c27c8465d7c500bf5ef1b9466112b70009a1"
+  },
   "status": "partial; qualification incomplete"
 }
