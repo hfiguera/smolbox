@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="490" viewBox="0 0 1120 490" role="img" aria-labelledby="title desc">
+<title id="title">A network policy travels with the execution</title>
+<desc id="desc">Elixir approves a profile, SmolBox records the execution and verifies the reported policy, and smolvm applies outbound controls while a Python guest fetches the USGS feed. SmolBox collects report.json and verifies cleanup.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10" fill="#215bc7"/></marker></defs>
+<rect width="1120" height="490" rx="12" fill="#edf2fa"/>
+<g font-family="sans-serif">
+<text x="32" y="47" font-size="21" font-weight="700" fill="#215bc7">NETWORK POLICY + EXECUTION</text>
+<g fill="#fff" stroke="#d8e0eb"><rect x="32" y="78" width="302" height="200" rx="8"/><rect x="402" y="78" width="302" height="200" rx="8"/><rect x="772" y="78" width="316" height="200" rx="8"/></g>
+<g fill="#17304e" font-weight="700" font-size="28"><text x="54" y="121">Elixir application</text><text x="424" y="121">SmolBox</text><text x="794" y="121">smolvm worker</text></g>
+<g fill="#17304e" font-size="22"><text x="54" y="169">Approve a profile</text><text x="424" y="169">Record the execution</text><text x="794" y="169">Apply outbound controls</text></g>
+<g fill="#526478" font-size="20"><text x="54" y="211">earthquake.usgs.gov</text><text x="54" y="243">+ allocations and deadlines</text><text x="424" y="211">Verify reported policy</text><text x="424" y="243">Keep identity and outcome</text><text x="794" y="211">Disposable Python guest</text><text x="794" y="243">Fetch the USGS feed</text></g>
+<g stroke="#215bc7" stroke-width="3" fill="none" marker-end="url(#arrow)"><path d="M347 179H389"/><path d="M717 179H759"/></g>
+<rect x="32" y="318" width="1056" height="112" rx="8" fill="#17304e"/>
+<g fill="#fff" font-size="24" font-weight="600"><text x="61" y="364">Produce report.json</text><text x="427" y="364">Collect the result</text><text x="797" y="364">Verify cleanup</text></g>
+<g fill="#d5e3fa" font-size="19"><text x="61" y="399">Inside the guest</text><text x="427" y="399">In the artifact store</text><text x="797" y="399">Release the reservation</text></g>
+<path d="M327 371H379m-10-8 10 8-10 8M696 371H748m-10-8 10 8-10 8" fill="none" stroke="#d5e3fa" stroke-width="2"/>
+<text x="32" y="465" fill="#526478" font-size="18">Outbound policy follows upstream semantics and infrastructure exceptions.</text>
+</g></svg>

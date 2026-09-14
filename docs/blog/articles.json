@@ -1,5 +1,16 @@
 [
   {
+    "slug": "controlled-network-access-from-elixir",
+    "title": "Controlled network access for disposable VMs in Elixir",
+    "description": "Fetch a public dataset from a disposable Python VM, collect the report in Elixir, and keep its approved network policy with the execution. A working SmolBox 0.1.3 example.",
+    "published_on": "2026-09-14",
+    "updated_on": "2026-09-14",
+    "version": "0.1.3",
+    "category": "Practical integrations",
+    "image": "controlled-network.png",
+    "image_alt": "Approve the destinations, run the job, collect the report: an Elixir application gives a disposable VM an explicit outbound network policy."
+  },
+  {
     "slug": "from-a-full-disk-to-an-upstream-fix",
     "title": "From a full disk to an upstream fix",
     "description": "A cleanup failure in our Elixir integration, a fix from SmolVM's maintainer, and the tests that closed the loop. A small story of contributing to open source.",

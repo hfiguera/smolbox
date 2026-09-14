@@ -276,3 +276,26 @@ preserve those records when updating the article raster or social fallback.
 - **Don't** use amber for ordinary links or decorative emphasis; it identifies caveats.
 - **Don't** shrink the desktop lifecycle diagram into unreadable mobile labels.
 - **Don't** copy design notes into `assets/` or `media/`; both directories are published in full.
+
+## Controlled networking article review — September 14, 2026
+
+Added a practical article with two Elixir excerpts, a downloadable complete
+example and a recorded ordinary run against published SmolBox 0.1.3. A desktop
+policy/execution diagram and a separate vertical mobile composition reuse the
+existing palette, typography and caption treatment. The social PNG is rasterized
+from original SVG; origins are recorded in `media-provenance.md`.
+
+Reviewed the article and diagram at 1440px and 390px, and the social image at
+1200 × 630. Checked index, privacy and 404 layouts at both widths. No horizontal
+page overflow or unreadable diagram labels were found. Verified loaded images,
+Elixir highlighting, clipboard copying, keyboard skip navigation, section links,
+reduced-motion layout and article reading without JavaScript. Automated axe
+analysis was unavailable in the local dependency bundle and is not claimed.
+
+Verdict: ready for editorial review. Existing layout and stylesheet are unchanged.
+The post is a branch preview; publication remains a separate action.
+
+The networking article uses a dedicated closing callout linking directly to its
+complete network report script. The offline getting-started guide is a secondary
+setup reference. Verified the callout at desktop/mobile widths and checked that
+the download returns the exact validated example bytes.

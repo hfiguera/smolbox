@@ -52,3 +52,24 @@ social screenshots or third-party artwork are included.
 | `media/from-a-full-disk-to-an-upstream-fix/deletion-order-mobile.svg` | Vertical comparison at 390 × 670 for readable mobile labels. |
 | `media/from-a-full-disk-to-an-upstream-fix/upstream-cleanup-social.svg` | Original 1200 × 630 composition for article cards and sharing. |
 | `media/from-a-full-disk-to-an-upstream-fix/upstream-cleanup.png` | Chrome rasterization of `upstream-cleanup-social.svg`, at 1200 × 630. |
+
+## Controlled network access article
+
+The new diagrams are original SVG geometry using the existing blog palette.
+They show approved configuration, recorded execution, runtime enforcement,
+collection and cleanup. They are conceptual diagrams, not packet traces.
+
+- `media/controlled-network-access-from-elixir/network-policy.svg`: desktop diagram.
+- `media/controlled-network-access-from-elixir/network-policy-mobile.svg`: separate
+  mobile composition with readable labels.
+- `media/controlled-network-access-from-elixir/controlled-network-social.svg`:
+  original 1200 × 630 social artwork.
+- `media/controlled-network-access-from-elixir/controlled-network.png`: Chromium
+  rasterization of that SVG for article cards and social metadata.
+
+The same public directory contains `network-report.exs`, the runnable example,
+and `observed-run.json`, its sanitized ordinary macOS execution evidence. The
+JSON identifies the published library, worker version, artifact digest and source
+script digest, plus the retrieved public USGS feed's timestamp and content hash.
+It contains no account credentials or private host paths. It records a successful
+application example, not an additional isolation qualification.

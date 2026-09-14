@@ -35,8 +35,14 @@
     <article class="prose"><%= @article_html %></article>
   </div>
   <section class="next-step" aria-labelledby="next-title">
+    <%= if @article["slug"] == "controlled-network-access-from-elixir" do %>
+    <h2 id="next-title">Run the network report.</h2>
+    <p>The complete script fetches the USGS feed with an approved network profile, collects the report, and verifies cleanup. For worker and Python image preparation, see the <a href="https://hexdocs.pm/smolbox/<%= @article["version"] %>/getting-started.html">setup guide</a>.</p>
+    <a href="<%= @root %>media/controlled-network-access-from-elixir/network-report.exs" download>Download the complete network example <%= SmolBox.Blog.HTML.arrow(:right) %></a>
+    <% else %>
     <h2 id="next-title">Run the complete example.</h2>
     <p>The getting-started guide covers the worker, Python image, supervision, file transfer, and cleanup.</p>
     <a href="https://hexdocs.pm/smolbox/<%= @article["version"] %>/getting-started.html">Open the <%= @article["version"] %> walkthrough <%= SmolBox.Blog.HTML.arrow(:right) %></a>
+    <% end %>
   </section>
 </main>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+<title id="title">Approve the destinations. Keep the execution record.</title><desc id="desc">Controlled network access from Elixir with SmolBox 0.1.3 and smolvm. Approve a profile, fetch a dataset in a disposable VM, collect the report and verify cleanup.</desc>
+<rect width="1200" height="630" fill="#edf2fa"/>
+<g font-family="sans-serif">
+<text x="58" y="68" fill="#215bc7" font-size="23" font-weight="700">SMOLBOX 0.1.3 · PRACTICAL INTEGRATIONS</text>
+<text x="58" y="146" fill="#17304e" font-size="48" font-weight="700">Approve the destinations.</text>
+<text x="58" y="206" fill="#17304e" font-size="48" font-weight="700">Keep the execution record.</text>
+<text x="58" y="260" fill="#526478" font-size="27">Controlled network access for disposable VMs in Elixir</text>
+<rect x="58" y="310" width="1084" height="222" rx="10" fill="#17304e"/>
+<g font-size="25" font-weight="700" fill="#fff"><text x="88" y="360">Approve</text><text x="464" y="360">Execute</text><text x="833" y="360">Collect + clean up</text></g>
+<g font-size="22" fill="#d5e3fa"><text x="88" y="407">An explicit network policy</text><text x="464" y="407">A disposable Python VM</text><text x="833" y="407">A report in Elixir</text><text x="88" y="471">Elixir application</text><text x="464" y="471">SmolBox + smolvm</text><text x="833" y="471">A recorded outcome</text></g>
+<path d="M389 421h37m-9-8 9 8-9 8M755 421h37m-9-8 9 8-9 8" fill="none" stroke="#d5e3fa" stroke-width="3"/>
+<text x="58" y="588" fill="#526478" font-size="23">A working example with a public dataset. Offline remains the default.</text>
+</g></svg>
