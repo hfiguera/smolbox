@@ -73,7 +73,7 @@ explicitly approved equivalent storage policy. Unknown-schema or corrupt rows
 are errors requiring migration or investigation, never permission to start over.
 
 The reusable suite is in
-[`test/support/store/contract.ex`](https://github.com/hfiguera/smolbox/blob/v0.1.1/test/support/store/contract.ex).
+[`test/support/store/contract.ex`](https://github.com/hfiguera/smolbox/blob/main/test/support/store/contract.ex).
 It is repository test support, not part of the published library package. An adapter test module
 uses `SmolBox.Store.Contract` and supplies `adapter` and `store` in its setup
 context. It checks concurrent acceptance, conflicts, claims and CAS races, atomic
@@ -82,7 +82,7 @@ The suite alone does not certify durability; also run fresh-process database
 recovery, unavailable-database, corruption, and transaction-failure tests.
 
 The repository's
-[durable host example](https://github.com/hfiguera/smolbox/tree/v0.1.1/examples/durable_host)
+[durable host example](https://github.com/hfiguera/smolbox/tree/main/examples/durable_host)
 owns its Repo, schema migration,
 AES-256-GCM record encryption, and indexed projections. Mutations serialize on a
 partition row inside a SQL transaction. It demonstrates a small-pool adapter,
@@ -136,6 +136,49 @@ retains that exit: cancellation intent is not permission to replace observed
 evidence with a fabricated cancelled result. Collection may finish or fail
 depending on which file operations completed before cancellation was observed.
 
-The network-policy upgrade writes record schema v2 and explicitly reads legacy
-v1 offline records without changing their fingerprints. Coordinate readers and
-writers before upgrading; see [Controlled network access](network-access.md).
+## Upgrading to 0.1.3
+
+SmolBox 0.1.3 introduces record schema v2 to persist network policies. Despite the
+patch version number, this is a deployment compatibility change for applications
+using `SmolBox.Store.Codec`, including the PostgreSQL example. A **controller** is
+an Elixir application instance running SmolBox, not a smolvm worker.
+
+| Reader | Legacy v1 records | New v2 records |
+|---|---|---|
+| SmolBox 0.1.2 | Supported | Rejected |
+| SmolBox 0.1.3 | Supported as offline | Supported |
+
+**Every new codec write uses v2, even when networking stays offline.** Reading a
+valid v1 record adds offline defaults in memory without changing its execution
+fingerprint or immediately rewriting the stored bytes. Its next save uses v2.
+Upgrading the SQL schema alone cannot make an old reader understand those bytes.
+Custom adapters with their own serialization need an equivalent migration plan.
+
+For controllers sharing a durable store:
+
+1. Pause new submissions and drain active work, including collection, cleanup
+   and reservation release. Resolve retained or unknown work through the existing
+   recovery procedure; do not delete its records to make the upgrade proceed.
+2. Stop every old controller and any other process reading or writing these
+   records. Do not leave 0.1.2 instances running during a rolling deployment.
+3. Back up durable data and preserve the existing fingerprint key, encryption
+   configuration, execution identities and worker ownership information.
+4. Deploy 0.1.3 to all readers and writers. Its default worker version is 1.16.0;
+   follow the [worker upgrade procedure](host-integration.md#upgrading-a-worker)
+   or explicitly keep `runtime_version: "1.14.6"` or `"1.14.1"` for older workers.
+   The library does not install or upgrade smolvm. Network policies require 1.16.0.
+5. Verify existing records remain readable and duplicates retain their identity.
+   Resume submissions after confirming the configured workers pass version checks
+   and recovery is operating with the same durable state and keys.
+
+**Rollback:** before any v2 record is written, the record format does not prevent
+returning to 0.1.2, provided its worker configuration is still compatible. After
+v2 writes, there is no built-in downgrade to v1. Keep a compatible reader or plan
+an explicit, reviewed migration. Simply restoring an earlier database backup can
+lose evidence of commands already accepted by workers and lead to duplicate work.
+A decoding failure must remain an error, never be treated as a missing execution.
+
+The in-memory store is ephemeral and is not a persistence migration strategy.
+Restarting it loses execution records and may leave machines behind. Applications
+using only `SmolBox.Client` do not use this managed record format, but must still
+check their worker version and any persistence they own.

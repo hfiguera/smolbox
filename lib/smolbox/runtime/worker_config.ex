@@ -75,7 +75,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   (only `:development`), and `:draining` (default `false`). Artifact IDs must be
   unique and architectures must match this worker. Construction makes no worker
   request or remote digest check. Profiles below the floor cannot support execution.
-  The 1.16.0 default is unreleased; published 0.1.2 defaults to 1.14.6. See the
+  The 1.16.0 default starts with SmolBox 0.1.3; 0.1.2 defaults to 1.14.6. See the
   [qualification evidence](compatibility.html#smolvm-1-16-0-qualification) and
   upgrade the separately installed worker or retain its explicit version.
   See [Getting started](getting-started.html) for a complete configuration.

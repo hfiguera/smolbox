@@ -1,16 +1,16 @@
 # Compatibility evidence
 
-Version: `0.1.2`. The library's supported qualification is
+Version: `0.1.3` (release preparation). The library's supported qualification is
 `:development`; requested hard-control options remain unsupported. The original
 release evidence below records the client/controller contract on Linux and macOS.
 
 ## SmolVM 1.16.0 qualification
 
-This unreleased checkout defaults to `runtime_version: "1.16.0"` on Linux x86_64
+SmolBox 0.1.3 defaults to `runtime_version: "1.16.0"` on Linux x86_64
 and macOS Apple Silicon after platform qualification. Explicit 1.14.1 and 1.14.6
 support remains. The changed default passed runtime, durable recovery, quality
-and language-matrix checks on both platforms at `5ea1e73`. The published SmolBox 0.1.2 package does not include this additional
-selection; use this checkout to exercise it. No Linux ARM64 support is added.
+and language-matrix checks on both platforms at `5ea1e73`. SmolBox 0.1.2 does not include this additional
+selection. No Linux ARM64 support is added.
 
 Testing uses official tag `v1.16.0`, commit
 `e1dd54bf7be6d144ad6bdef4ebf310f57809a6a6`, and complete platform archives:
@@ -76,9 +76,9 @@ explicit bounded settings. No validation limits or public defaults were relaxed.
 
 ## Runtime selection
 
-This checkout defaults to `runtime_version: "1.16.0"` for Linux x86_64 and
-macOS Apple Silicon. The published SmolBox 0.1.2 package defaults to 1.14.6 and
-does not include 1.16.0 support. Use an explicit `runtime_version: "1.14.1"` or
+SmolBox 0.1.3 defaults to `runtime_version: "1.16.0"` for Linux x86_64 and
+macOS Apple Silicon. SmolBox 0.1.2 defaults to 1.14.6 and does not include 1.16.0
+support. Also follow the [record format upgrade procedure](recovery.md#upgrading-to-0-1-3). Use an explicit `runtime_version: "1.14.1"` or
 `runtime_version: "1.14.6"` to retain an older worker when adopting this checkout.
 A worker must report the exact configured version. Multiple supported versions
 do not imply automatic fallback or acceptance of arbitrary upstream releases.

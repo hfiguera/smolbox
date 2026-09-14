@@ -1,6 +1,23 @@
 # Changelog
 
-## Unreleased
+## 0.1.3 (release preparation)
+
+**Upgrade notice:** this version changes the durable record format and the default
+worker version. Although numbered 0.1.3, it requires a coordinated upgrade for
+controllers sharing a durable store; it is not a transparent rolling upgrade
+from 0.1.2.
+
+- Every `SmolBox.Store.Codec` write uses schema v2, including offline executions.
+  New readers accept legacy v1 records; 0.1.2 readers cannot read v2.
+- Stop all old controllers before starting new writers against the same store.
+  After v2 writes, reverting the dependency to 0.1.2 is not a supported rollback.
+- The default worker version changes from 1.14.6 to 1.16.0. Upgrade the separately
+  installed worker or explicitly retain `runtime_version: "1.14.6"` (or `"1.14.1"`).
+  Network policies require 1.16.0.
+
+Follow [Upgrading to 0.1.3](docs/recovery.md#upgrading-to-0-1-3) before deployment.
+
+### Changes
 
 - Add explicit outbound hostname/CIDR policies for smolvm 1.16.0 while retaining
   offline defaults, profile approval and strict machine policy observations.
@@ -17,7 +34,7 @@
   worker before adopting this default.
 - Record the tagged API and packaging review, actual host resizing prerequisites,
   platform runtime/recovery results and repeated constrained Linux experiments.
-  Final validation covers real runtime and durable recovery on both platforms,
+  The recorded runtime qualification covers real runtime and durable recovery on both platforms,
   the complete quality/language matrix and package consumers. The existing
   public five-minute command limit remains unchanged.
 - Correct the lab's account-specific cleanup observations, retain private bounded

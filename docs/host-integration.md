@@ -68,8 +68,8 @@ children = [
 ]
 ```
 
-This fragment explicitly selects Linux 1.14.6 with SmolBox 0.1.2.
-Omitting the field also selects 1.14.6. Use `"1.14.1"` explicitly
+This fragment explicitly retains a Linux 1.14.6 worker with SmolBox 0.1.3.
+Omitting the field selects 1.16.0. Use `"1.14.1"` explicitly
 for an existing worker. See [runtime selection](compatibility.md#runtime-selection).
 This is a host configuration fragment, not a self-provisioning script. The host
 must verify artifact bytes on the worker and retain that immutable artifact.
@@ -304,8 +304,9 @@ to reconcile. Memory mode loses this authority when its store process stops.
 
 ## Upgrading a worker
 
-This unreleased checkout defaults to smolvm 1.16.0 on Linux x86_64 and macOS
-Apple Silicon. Published SmolBox 0.1.2 defaults to 1.14.6. Before adopting the new
+SmolBox 0.1.3 defaults to smolvm 1.16.0 on Linux x86_64 and macOS
+Apple Silicon. SmolBox 0.1.2 defaults to 1.14.6. The controller upgrade also
+changes durable records; follow [Upgrading to 0.1.3](recovery.md#upgrading-to-0-1-3). Before adopting the new
 default with an older worker, preserve its expected version explicitly:
 
 ```elixir
