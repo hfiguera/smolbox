@@ -1059,6 +1059,63 @@
     "source_commit": "cfbe8ca7fe38d6bfe1b1519c5b30c7bc5ff87a54",
     "storage_observation": "Filesystem               1B-blocks       Used   Available Use% Mounted on\n/dev/vda1             102888095744 5604651008 97266667520   6% /\nsmolbox-qualification     67108864      73728    67035136   1% /srv/sbq/control\nsmolbox-qualification    805306368  141176832   664129536  18% /srv/sbq/cache\n"
   },
+  "legacy_1_14_6_direct_start_diagnostics": {
+    "durable_fixture_disk_sizes": [
+      {
+        "case_number": 1,
+        "create_seconds": 15.365953,
+        "final_http_status": 404,
+        "guest_memory_mb": 256,
+        "overlay_gb": 10,
+        "owned_kvm_descriptors_after_stop": 0,
+        "start_http_status": 200,
+        "start_seconds": 9.687582,
+        "storage_gb": 20
+      },
+      {
+        "case_number": 2,
+        "create_seconds": 16.61206,
+        "final_http_status": 404,
+        "guest_memory_mb": 256,
+        "overlay_gb": 10,
+        "owned_kvm_descriptors_after_stop": 0,
+        "start_http_status": 200,
+        "start_seconds": 8.388832,
+        "storage_gb": 20
+      }
+    ],
+    "durable_sizes_archive_sha256": "e21e0e90e8ccab0657aeae8c9bd3a73c0247fd7ac1cb6a6e56842e49df14aa93",
+    "initial_invalid_probe": "The first two start requests supplied a JSON content type with an empty body and returned HTTP 400 before startup. SmolBox sends an empty JSON object. Corrected probes supplied that object, used new identities, and retained the invalid requests separately; those 400 responses are not runtime failure evidence.",
+    "runtime": "1.14.6",
+    "scope": "Direct curl create/start/inspect/stop/delete requests against the same strict candidate service, without SmolBox or the durable controller and without guest command submission. Two 1/1 GiB cases and two 20/10 GiB cases returned HTTP 200 for start and 404 after deletion. These small samples do not resolve or replace the failed recovery suite and do not establish disk sizes as the cause.",
+    "small_and_invalid_archive_sha256": "6b4e5836f972b8220db90243f98cbee7d472e2b00275c209fb5d8ce0f61cc10d",
+    "small_disks": [
+      {
+        "case_number": 1,
+        "create_seconds": 0.133979,
+        "final_http_status": 404,
+        "guest_memory_mb": 256,
+        "overlay_gb": 1,
+        "owned_kvm_descriptors_after_stop": 0,
+        "start_http_status": 200,
+        "start_seconds": 25.016152,
+        "storage_gb": 1
+      },
+      {
+        "case_number": 2,
+        "create_seconds": 0.134987,
+        "final_http_status": 404,
+        "guest_memory_mb": 256,
+        "overlay_gb": 1,
+        "owned_kvm_descriptors_after_stop": 0,
+        "start_http_status": 200,
+        "start_seconds": 25.197459,
+        "storage_gb": 1
+      }
+    ],
+    "source_commit": "4e5692fb5aa4d68a21e384dbcad888ce6f6f20c1",
+    "status": "did_not_reproduce_startup_failure"
+  },
   "legacy_1_14_6_first_failure_diagnostic": {
     "archive_sha256": "41f17739b18a43ddabd1589ec13bd7c186bd1d7c3737669303a52bfc77525f34",
     "completed_cases": 2,

@@ -508,6 +508,14 @@ account KVM descriptor checks were empty after worker stop. This diagnostic is
 not a replacement for the required full suite; its transport instrumentation was
 removed afterward and its reports are preserved in the Linux evidence.
 
+Direct HTTP diagnostics without SmolBox subsequently started and deleted four
+fresh 1.14.6 machines under the same worker restrictions: two with 1/1 GiB disks
+and two with the durable fixture's 20/10 GiB disks. All four start responses were
+HTTP 200, followed by verified API absence and no owned KVM descriptors after
+worker stop. These small samples did not reproduce the startup error and do not
+resolve the failed recovery suite or identify disk size as its cause. An initial
+malformed request was rejected before startup and is retained separately.
+
 An earlier attempt combined broad runtime inclusion with the name filters and
 therefore admitted unrelated cases. It was deliberately stopped and its output
 retained as incomplete. The process exited zero after SIGTERM, but there was no
