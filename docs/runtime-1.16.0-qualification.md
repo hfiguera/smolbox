@@ -542,17 +542,38 @@ exclusions were not counted as passes. This checkpoint includes the bounded
 preparation fixture correction; final package consumers and default selection
 remain separate acceptance work.
 
-### Timeout scope conflict
+### HTTP operation duration and remaining streaming qualification
 
 The existing command maximum is 300 seconds and the managed execution budget
 maximum is 300,000 ms. A guest command allowed to run longer than five minutes
 cannot be expressed through the existing public contract. A low-level exec
 operation can also include implicit startup before the guest command begins;
 that total request duration is distinct from the command's allowed runtime.
-The maintainer has been asked
-whether to authorize extending only those maxima to fifteen minutes, with defaults
-unchanged, or retain the limits and restrict the longer test to upstream behavior.
-No validation bounds have been relaxed while that scope decision is pending.
+The original goal asks for qualification under that existing contract. This
+checklist previously described commands exceeding five minutes, which would
+require a different contract. The HTTP operation boundary can instead be tested
+through public `Client.exec/4`, including its real implicit startup. No public
+validation bounds or defaults have been relaxed.
+
+At `4e5692f`, buffered execution through the default production transport completed
+in **357.460 seconds**. Python measured **299.002 seconds** inside the guest, with
+a 300-second command deadline, exit code zero and the expected two-byte marker.
+Creation took 770 ms and was outside the recorded exec duration. The client used
+a 480-second receive budget and 540-second total operation budget. The enclosing
+ordinary-test worker had a separate 1200-second lifetime. This traverses the
+former five-minute HTTP boundary without claiming a guest command or managed
+execution budget longer than five minutes.
+
+The first attempt used a 360-second receive budget and returned an uncertain
+transport error; it did not establish a passing execution. Its report is retained.
+The larger bounded budget was used with a fresh machine identity, without
+replaying that command. After the successful buffered case, streamed execution
+failed after 55.419 seconds with a protocol error. The worker reported that image
+workload preparation after implicit startup timed out waiting for an agent
+response. No successful streaming command was observed in that attempt. Both
+machines completed the fixture's identity-checked API stop/delete/absence steps;
+after worker teardown, actual-account KVM descriptor checks were empty. The
+overall run remains failed, with the buffered proof recorded separately.
 
 The tagged buffered handler awaits guest execution before returning its response.
 The streaming handler instead starts an asynchronous execution task and returns
@@ -572,8 +593,11 @@ timing must be recorded separately when testing the five-minute boundary.
 - [x] Initial native macOS ordinary runtime suite, approved Python/Node artifacts and cleanup.
 - [x] Actual worker resize2fs environment, disk geometry, missing prerequisite behavior
   and file persistence across stop/start on both platforms.
-- [ ] Buffered and streamed commands exceeding five minutes through SmolBox;
-  shorter command/transport deadlines, await expiry and confirmed cancellation.
+- [x] Buffered public exec operation exceeding the former five-minute HTTP limit,
+  with guest and request durations recorded separately within existing limits.
+- [ ] Complete the corresponding streaming operation and event-timing check;
+  retain its startup failure rather than treating the buffered proof as both paths.
+- [x] Shorter command/transport deadlines, await expiry and confirmed cancellation.
 - [x] PostgreSQL store contract, durable recovery, database outage, worker failures,
   external deletion reconciliation and duplicate VMM launch prevention.
 - [x] Complete contained Linux resource/isolation campaign, effective cgroups and

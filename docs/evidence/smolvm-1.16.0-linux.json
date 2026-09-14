@@ -1208,6 +1208,94 @@
     "The longer-than-five-minute public-contract requirement remains unresolved.",
     "No default runtime promotion or general security certification."
   ],
+  "long_operation_first_attempt": {
+    "archive_sha256": "aa35a0aa52d45c89d2fb92d570f513f4991a47bb124a7a4d449a0268e3ff98bd",
+    "guest_command_seconds": 299,
+    "guest_deadline_seconds": 300,
+    "operation_timeout_ms": 390000,
+    "receive_timeout_ms": 360000,
+    "recovery": "The fixture identity-checked the created machine and completed its API stop/delete/absence assertions in the after block. The enclosing unit exited, and a fresh actual-account descriptor check was empty. Command outcome remains unknown; no replay.",
+    "report": {
+      "captured_bytes": 484,
+      "exit_code": 1,
+      "failure": null,
+      "output_sha256": "831ae9aa38f78cc3ac2213001734fea2343084a9a7f97ff79d693dba08a6a53d",
+      "seconds": 368.15,
+      "status": "failed"
+    },
+    "result": "Uncertain transport error during buffered execution. No successful execution or five-minute proof established; streaming was not reached.",
+    "runtime": "1.16.0",
+    "source_commit": "4e5692fb5aa4d68a21e384dbcad888ce6f6f20c1",
+    "timing_limitation": "The first fixture did not persist individual create/exec timing before its success assertion. Worker runtime of 362.244 seconds is consistent with expiry of the configured receive wait, but does not separately measure guest or startup duration.",
+    "unit_properties": "RuntimeMaxUSec=15min\nMainPID=0\nResult=exit-code\nCPUQuotaPerSecUSec=2s\nMemoryMax=2147483648\nMemorySwapMax=0\nTasksMax=128\nKillMode=control-group\nActiveState=failed\n",
+    "worker_report": {
+      "captured_bytes": 203,
+      "exit_code": 0,
+      "failure": "stopped",
+      "output_sha256": "43c13ebf68420c0a6235ca8d443d4d0352c527d965bf8a3f04dd69000a3f4108",
+      "seconds": 362.244,
+      "status": "failed"
+    }
+  },
+  "long_operation_v2": {
+    "archive_sha256": "60a353bf89caf56435595ed908248298c61daadfc93539c245238950147f82d5",
+    "buffered": {
+      "connect_timeout_ms": 5000,
+      "create_ms": 770,
+      "execution_operation_exceeded_300_seconds": true,
+      "execution_operation_ms": 357460,
+      "exit_code": 0,
+      "explicit_start_before_exec": false,
+      "guest_command_exceeded_five_minutes": false,
+      "guest_seconds": 299.002,
+      "guest_timeout_seconds": 300,
+      "initial_machine_state": "created",
+      "marker": "xy",
+      "mode": "buffered",
+      "operation_timeout_ms": 540000,
+      "receive_timeout_ms": 480000,
+      "runtime": "1.16.0",
+      "scope": "Public low-level exec duration includes implicit VM startup. This is not a guest command longer than five minutes.",
+      "source_commit": "4e5692fb5aa4d68a21e384dbcad888ce6f6f20c1",
+      "status": "passed",
+      "stream_events": [],
+      "worker_process_group_deadline_ms": 1140000
+    },
+    "cleanup": "Each reached machine was identity-checked and API stop/delete/absence assertions completed in the fixture after block. Worker and enclosing unit then exited. Final actual lab-account KVM descriptor check was empty. An uncertain streaming command was not replayed.",
+    "runner": {
+      "captured_bytes": 525,
+      "exit_code": 1,
+      "failure": null,
+      "output_sha256": "14c4ad81263ffb444dc6fde5dab82b4fe702669ce75506244b8404bfe72e4723",
+      "seconds": 420.783,
+      "status": "failed"
+    },
+    "scope": "Buffered Client.exec traversed the former 300-second HTTP operation boundary through the default production transport, with an existing 300-second guest deadline. This does not extend the guest command or managed execution maximum and does not establish streaming success. The enclosing worker had external 2 GiB/200% CPU/128-task limits and a 1200-second lifetime, separate from the strict 300-second deployment profile.",
+    "source_commit": "4e5692fb5aa4d68a21e384dbcad888ce6f6f20c1",
+    "status": "buffered proof passed; streaming failed during implicit startup",
+    "streamed": {
+      "create_ms": 1183,
+      "execution_operation_ms": 55419,
+      "mode": "streamed",
+      "observed": {
+        "category": "protocol",
+        "evidence": "dispatch_uncertain",
+        "operation": "exec_stream",
+        "outcome": "error"
+      }
+    },
+    "streaming_failure_observation": "Worker warning: failed to relaunch image workload after implicit start; pull image for workload timed out waiting for an agent response frame. No completed streaming command was observed.",
+    "unit_properties": "RuntimeMaxUSec=20min\nMainPID=0\nResult=exit-code\nCPUQuotaPerSecUSec=2s\nMemoryMax=2147483648\nMemorySwapMax=0\nTasksMax=128\nKillMode=control-group\nActiveState=failed\n",
+    "worker_log_sha256": "bbb26a11064bb042d55d25a6b40dfe583b86e768ee29f0585ab04554771a7d4e",
+    "worker_report": {
+      "captured_bytes": 679,
+      "exit_code": 0,
+      "failure": "stopped",
+      "output_sha256": "bbb26a11064bb042d55d25a6b40dfe583b86e768ee29f0585ab04554771a7d4e",
+      "seconds": 417.165,
+      "status": "failed"
+    }
+  },
   "missing_resize2fs": {
     "detail": {
       "cleanup": "empty inventory",
@@ -2161,6 +2249,85 @@
     },
     "scope": "Focused shared-registry/storage cleanup regression; separate from the stricter constrained deployment's isolation qualification.",
     "source_base": "adc0c27c8465d7c500bf5ef1b9466112b70009a1"
+  },
+  "short_streaming_startup_diagnostic": {
+    "actual_account_descriptors_after_teardown": 0,
+    "archive_sha256": "7a91129b0aaa4a4aff836dc6eb402a3e0a636bf81b522d53e6e80e26cb935dc3",
+    "console_collection_limitation": "The diagnostic inspected the XDG cache path, but explicit SMOLVM_DATA_DIR relocates HOME and clears XDG overrides. File-absent observations at that path do not prove an absence of guest OOM or boot errors.",
+    "custom_transport_sha256": "59be947eaabb6b9390f9d191aea74182b50cd106342536fa23c87c73ad6ffd94",
+    "observations": {
+      "cases": [
+        {
+          "case_number": 1,
+          "console": {
+            "agent-console.log": [
+              "file absent"
+            ],
+            "agent-startup-error.log": [
+              "file absent"
+            ]
+          },
+          "create_ms": 601,
+          "exec_ms": 44953,
+          "memory_mb": 256,
+          "observed": {
+            "exit_code": 0,
+            "outcome": "returned",
+            "stdout": "startup-diagnostic\n"
+          }
+        },
+        {
+          "case_number": 2,
+          "console": {
+            "agent-console.log": [
+              "file absent"
+            ],
+            "agent-startup-error.log": [
+              "file absent"
+            ]
+          },
+          "create_ms": 383,
+          "exec_ms": 16893,
+          "memory_mb": 256,
+          "observed": {
+            "exit_code": 0,
+            "outcome": "returned",
+            "stdout": "startup-diagnostic\n"
+          }
+        },
+        {
+          "case_number": 3,
+          "console": {
+            "agent-console.log": [
+              "file absent"
+            ],
+            "agent-startup-error.log": [
+              "file absent"
+            ]
+          },
+          "create_ms": 421,
+          "exec_ms": 16100,
+          "memory_mb": 256,
+          "observed": {
+            "exit_code": 0,
+            "outcome": "returned",
+            "stdout": "startup-diagnostic\n"
+          }
+        }
+      ],
+      "status": "diagnostic_only"
+    },
+    "runner": {
+      "captured_bytes": 177,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "fd34c8570229de446256d65ac025517fcf0f0baad1d60d92f5dda6474ce7ae76",
+      "seconds": 83.329,
+      "status": "passed"
+    },
+    "scope": "Three fresh 256 MiB machines returned short streaming commands using a temporary diagnostic transport copied from Req with bounded error capture. This did not reproduce the failed long streaming setup and does not replace the required long-stream check or default transport qualification.",
+    "source_base": "4e5692fb5aa4d68a21e384dbcad888ce6f6f20c1",
+    "unit_properties_limitation": "The successful transient unit was unloaded before final systemctl show; subsequent LoadState was not-found. Its infinity/default property report does not describe the earlier running unit and is not enforcement evidence. No new resource qualification is claimed by this diagnostic."
   },
   "status": "partial; qualification incomplete"
 }

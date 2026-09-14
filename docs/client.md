@@ -116,8 +116,9 @@ client operation; `operation_timeout_ms` supplies that separate finite limit.
 
 In smolvm 1.16.0, execution routes no longer inherit the generic five-minute
 server timeout. That upstream change does not extend SmolBox's public command
-maximum or remove its configured client deadlines. This branch has not yet
-validated an execution longer than five minutes through the public contract;
+maximum or remove its configured client deadlines. A buffered public exec
+operation including implicit startup completed in 357.460 seconds, with a guest
+command lasting 299.002 seconds. Streaming qualification remains incomplete;
 see [the qualification status](compatibility.md#smolvm-1-16-0-qualification).
 `SmolBox.await/3` has a separate caller wait budget. Expiring that wait does not
 cancel the command or replace a recorded outcome with a timeout result.

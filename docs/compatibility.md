@@ -58,10 +58,13 @@ establish that every distribution supplies a working resizing tool.
 
 The upstream release removes the generic five-minute server timeout from
 execution and other selected long operations. SmolBox still limits a command
-to 300 seconds and a managed execution budget to 300,000 ms. A public execution
-longer than five minutes is therefore not established by this qualification.
-The shorter-deadline, observation-timeout and independent Linux worker-deadline
-tests do not substitute for that requirement. See the
+to 300 seconds and a managed execution budget to 300,000 ms. A buffered public
+exec operation including implicit startup completed in 357.460 seconds, with
+299.002 seconds measured inside the guest and a 300-second command deadline.
+This verifies the longer HTTP operation, not a guest command exceeding five
+minutes. The corresponding streaming attempt failed during implicit preparation
+and remains under investigation. Shorter-deadline, observation-timeout and
+independent Linux worker-deadline tests are recorded separately. See the
 [client budget guidance](client.md#execution-and-transport-budgets) when choosing
 explicit bounded settings. No validation limits or public defaults were relaxed.
 
