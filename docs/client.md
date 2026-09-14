@@ -109,6 +109,11 @@ For example, a 120-second command can use `receive_timeout_ms: 130_000` and
 do not change the guest deadline. Allow for transport overhead and any separate
 worker lifetime when selecting budgets for your own deployment.
 
+A low-level exec can start a stopped VM before running the command. Its total
+operation budget must allow for that startup as well as execution and response
+collection. The command's 300-second maximum therefore does not bound the whole
+client operation; `operation_timeout_ms` supplies that separate finite limit.
+
 In smolvm 1.16.0, execution routes no longer inherit the generic five-minute
 server timeout. That upstream change does not extend SmolBox's public command
 maximum or remove its configured client deadlines. This branch has not yet

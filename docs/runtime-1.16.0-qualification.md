@@ -468,11 +468,22 @@ they are not additional runtime tests or the final candidate archive.
 ### Timeout scope conflict
 
 The existing command maximum is 300 seconds and the managed execution budget
-maximum is 300,000 ms. A real execution lasting longer than five minutes cannot
-be expressed through the existing public contract. The maintainer has been asked
+maximum is 300,000 ms. A guest command allowed to run longer than five minutes
+cannot be expressed through the existing public contract. A low-level exec
+operation can also include implicit startup before the guest command begins;
+that total request duration is distinct from the command's allowed runtime.
+The maintainer has been asked
 whether to authorize extending only those maxima to fifteen minutes, with defaults
 unchanged, or retain the limits and restrict the longer test to upstream behavior.
 No validation bounds have been relaxed while that scope decision is pending.
+
+The tagged buffered handler awaits guest execution before returning its response.
+The streaming handler instead starts an asynchronous execution task and returns
+an SSE response after VM startup and request setup. Its response body continues
+to deliver events while the command runs. Source review therefore does not support
+treating the former HTTP response timeout as an identical command deadline for
+both paths. Actual client operation duration, guest duration and stream event
+timing must be recorded separately when testing the five-minute boundary.
 
 ## Required evidence
 
