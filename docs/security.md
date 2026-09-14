@@ -1,5 +1,15 @@
 # Deployment and trust boundaries
 
+The unreleased controlled-network feature permits explicit operator-approved
+outbound policies on smolvm 1.16.0. Existing offline defaults and prior offline
+qualification evidence remain unchanged. See [Controlled network access](network-access.md)
+for DNS/IP semantics, profile approval and the separate enforcement fixture.
+The server's strict egress floor must remain enabled when relying on the recorded
+private-address and DNS rebinding checks. SmolBox does not attest worker environment
+settings. Network-enabled guests can reach upstream's dedicated rollout gateway;
+its lease authentication is a separate boundary from the private management API.
+
+
 SmolBox relies on
 [SmolVM's isolation model](https://github.com/smol-machines/smolvm/blob/e8d09ef616d363004d55b80a6cdb31a4e7e1842d/SECURITY.md)
 for running untrusted code. Each part of a deployment has a separate responsibility:
@@ -81,7 +91,7 @@ to another worker.
 ## Minimal configuration and current enforcement limits
 
 Managed execution rejects unsupported profiles and always requests no guest
-network, host mounts, forwarded ports, host sockets, GPU/CUDA or nested Docker.
+networking without explicit allowlists, host mounts, forwarded ports, host sockets, GPU/CUDA or nested Docker.
 It uses approved prepared artifacts with `/bin/true` and restart policy `never`.
 Image preparation happens separately under host policy; a failed offline execution
 never authorizes networking or an arbitrary image pull.

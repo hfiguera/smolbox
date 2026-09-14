@@ -135,3 +135,7 @@ recollect deleted guest files. Cancellation racing with a received exit also
 retains that exit: cancellation intent is not permission to replace observed
 evidence with a fabricated cancelled result. Collection may finish or fail
 depending on which file operations completed before cancellation was observed.
+
+The network-policy upgrade writes record schema v2 and explicitly reads legacy
+v1 offline records without changing their fingerprints. Coordinate readers and
+writers before upgrading; see [Controlled network access](network-access.md).

@@ -51,10 +51,14 @@ defmodule SmolBox.ExecutionValidation do
       machine.state in [:created, :running, :stopped] and
       Validation.integer?(machine.created_at, 0, 253_402_300_799) and
       machine.cpus == profile.cpus and machine.memory_mb == profile.memory_mb and
-      machine.storage_gb == profile.storage_gb and machine.overlay_gb == profile.overlay_gb
+      machine.storage_gb == profile.storage_gb and machine.overlay_gb == profile.overlay_gb and
+      network?(machine, profile)
   end
 
   defp machine?(_machine, _record), do: false
+
+  defp network?(machine, profile),
+    do: SmolBox.NetworkPolicy.valid?(machine.network) and machine.network == profile.network
 
   defp artifacts?(artifacts, spec) do
     Validation.list?(artifacts, 32) and Enum.all?(artifacts, &artifact?(&1, spec.outputs)) and

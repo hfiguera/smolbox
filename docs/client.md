@@ -41,14 +41,16 @@ authentication, TLS, deadline and byte-limit checks. JSON/SSE responses still
 require their own media types. These endpoints do not attest artifact digests,
 host quotas or isolation.
 
-Creation replies must match the requested name, CPU count, guest memory and both
-disk allocations. A mismatched allocation returns a protocol error with uncertain
+Creation replies must match the requested name, CPU count, guest memory, both
+disk allocations and network policy. A mismatch returns a protocol error with uncertain
 creation evidence. Managed execution does not start that guest or adopt it for
 automatic cleanup; the original reservation remains available for operator
 investigation. An erroneous worker reply must not silently change execution policy.
 
-An owned disposable machine starts from an approved artifact, with guest networking,
-mounts, sockets, GPU, ports, and workload restart disabled:
+By default an owned disposable machine starts from an approved artifact with
+guest networking disabled. Explicit outbound policies are described in
+[Controlled network access](network-access.md). Mounts, sockets, GPU, ports and
+workload restart remain disabled. This example uses the offline default:
 
 ```elixir
 {:ok, name} = SmolBox.Identity.machine_name("myapp")

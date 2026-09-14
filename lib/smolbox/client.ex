@@ -72,9 +72,11 @@ defmodule SmolBox.Client do
   end
 
   @doc """
-  Create an offline machine from an approved prepared artifact on the worker.
+  Create a machine from an approved prepared artifact on the worker, offline by default.
 
-  Returns the creation observation after matching name and requested allocations.
+  Returns creation evidence after matching name, allocations and network policy.
+  An enabled policy requires a 1.16.0 health observation. That preflight and the
+  create request share the configured operation timeout.
   Persist intent before this call and creation evidence before further mutations.
   A lost or mismatched response can leave creation uncertain; it does not authorize
   retry or deletion by name. See `SmolBox.MachineSpec.new/3` and the
@@ -83,9 +85,10 @@ defmodule SmolBox.Client do
   @spec create(t(), MachineSpec.t()) :: {:ok, Machine.t()} | {:error, Error.t()}
   def create(client, spec) do
     with {:ok, wire} <- MachineSpec.to_wire(spec),
+         {:ok, client} <- network_runtime(client, spec.network),
          {:ok, body} <- json(client, :post, "/api/v1/machines", wire, :create),
          {:ok, created} <- decode_machine(body, spec.name, :create) do
-      fields = [:cpus, :memory_mb, :storage_gb, :overlay_gb]
+      fields = [:cpus, :memory_mb, :storage_gb, :overlay_gb, :network]
 
       if Map.take(created, fields) == Map.take(spec, fields),
         do: {:ok, created},
@@ -93,10 +96,32 @@ defmodule SmolBox.Client do
     end
   end
 
+  defp network_runtime(client, :offline), do: {:ok, client}
+
+  defp network_runtime(client, _policy) do
+    with :ok <- Worker.validate(client.worker) do
+      deadline = System.monotonic_time(:millisecond) + client.worker.operation_timeout_ms
+
+      case health(client) do
+        {:ok, %{version: "1.16.0"}} -> remaining_create_budget(client, deadline)
+        {:ok, _health} -> error(:unsupported_capability, :create)
+        {:error, failure} -> {:error, %{failure | operation: :create, evidence: :not_dispatched}}
+      end
+    end
+  end
+
+  defp remaining_create_budget(client, deadline) do
+    remaining = deadline - System.monotonic_time(:millisecond)
+
+    if remaining > 0,
+      do: {:ok, %{client | worker: %{client.worker | operation_timeout_ms: remaining}}},
+      else: error(:expired, :create)
+  end
+
   @doc """
   Read up to 1024 machine observations from the configured worker.
 
-  All entries must satisfy the supported offline machine contract; an incompatible
+  All entries must satisfy the supported machine and network contract; an incompatible
   entry fails the result. Listing does not establish ownership or authorize cleanup.
   """
   @spec list(t()) :: {:ok, [Machine.t()]} | {:error, Error.t()}

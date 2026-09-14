@@ -16,6 +16,23 @@ defmodule SmolBox.DurableHost.StoreTest do
     %{adapter: Store, store: store}
   end
 
+  test "network policies survive encrypted storage and reject a changed execution identity", %{
+    store: store
+  } do
+    record = Contract.record()
+    {:ok, network} = SmolBox.NetworkPolicy.new(hosts: ["api.example.com"])
+    spec = %{record.spec | profile: %{record.spec.profile | network: network}}
+    {:ok, fingerprint} = SmolBox.ExecutionSpec.fingerprint(spec, :binary.copy(<<1>>, 32))
+    enabled = %{record | spec: spec, fingerprint: fingerprint}
+    assert {:ok, ^enabled, :inserted} = Store.accept(store, enabled, 10)
+    assert {:ok, ^enabled} = Store.fetch(store, {"contract", "one"})
+    assert {:ok, ^enabled, :existing} = Store.accept(store, enabled, 10)
+    assert {:error, _} = Store.accept(store, record, 10)
+    assert {:ok, cancelled} = Store.cancel(store, {"contract", "one"}, 1100)
+    assert cancelled.spec.profile.network == network
+    assert {:ok, ^cancelled} = Store.fetch(store, {"contract", "one"})
+  end
+
   test "records are authenticated and encrypted and cannot move across identities", %{
     store: store
   } do

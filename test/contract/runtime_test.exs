@@ -2,9 +2,33 @@ defmodule SmolBox.RuntimeTest do
   use ExUnit.Case, async: false
   alias SmolBox.{Error, ExecutionSpec, Files, ManagedPeer, Runtime}
   alias SmolBox.Runtime.Config
-  alias SmolBox.Store.Memory
+  alias SmolBox.Store.{Codec, Memory}
 
   defp setup_runtime(options \\ []), do: SmolBox.RuntimeFixture.start(options)
+
+  test "approved network policy survives managed execution, identity checks and cleanup" do
+    {:ok, policy} = SmolBox.NetworkPolicy.new(hosts: ["api.example.com"])
+    context = setup_runtime(network: policy)
+    assert {:ok, _} = SmolBox.submit(context.runtime, context.spec)
+
+    assert {:ok, record} =
+             SmolBox.await(context.runtime, {context.spec.scope, context.spec.id}, 5000)
+
+    assert record.created_machine.network == policy
+    assert record.spec.profile.network == policy
+
+    record =
+      eventually(fn ->
+        {:ok, current} = SmolBox.fetch(context.runtime, context.spec.scope, context.spec.id)
+        if current.cleanup == :complete, do: current
+      end)
+
+    assert record.cleanup == :complete
+    assert {:ok, bytes} = Codec.encode(record)
+    assert {:ok, ^record} = Codec.decode(bytes)
+    changed = %{context.spec | profile: %{context.spec.profile | network: :offline}}
+    assert {:error, _} = SmolBox.submit(context.runtime, changed)
+  end
 
   test "durable mode rejects an ephemeral or unavailable store before worker I/O" do
     context = setup_runtime()

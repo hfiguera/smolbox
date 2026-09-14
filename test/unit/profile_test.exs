@@ -16,7 +16,6 @@ defmodule SmolBox.ProfileTest do
 
   test "unverified hard controls cannot masquerade as supported configuration" do
     for key <- [
-          :network,
           :mounts,
           :ports,
           :gpu,
@@ -33,6 +32,7 @@ defmodule SmolBox.ProfileTest do
     for options <- [
           [],
           [cpus: 0],
+          [network: true],
           [memory_mb: 1],
           [execution_ms: 1],
           [host_overhead_mb: 1],

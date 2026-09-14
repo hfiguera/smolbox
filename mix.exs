@@ -32,6 +32,7 @@ defmodule SmolBox.MixProject do
           "docs/getting-started.md",
           "docs/troubleshooting.md",
           "docs/client.md",
+          "docs/network-access.md",
           "docs/host-integration.md",
           "docs/recovery.md",
           "docs/telemetry.md",
@@ -50,6 +51,7 @@ defmodule SmolBox.MixProject do
           "Start here": ["README.md", "docs/getting-started.md"],
           "Using SmolBox": [
             "docs/client.md",
+            "docs/network-access.md",
             "docs/host-integration.md",
             "docs/troubleshooting.md",
             "docs/telemetry.md"
@@ -68,7 +70,8 @@ defmodule SmolBox.MixProject do
             SmolBox.Runtime.WorkerConfig,
             SmolBox.ExecutionSpec,
             SmolBox.Execution,
-            SmolBox.Profile
+            SmolBox.Profile,
+            SmolBox.NetworkPolicy
           ],
           "Client and commands": [
             SmolBox.Client,
@@ -105,6 +108,7 @@ defmodule SmolBox.MixProject do
           "README.md",
           "docs/getting-started.md",
           "docs/client.md",
+          "docs/network-access.md",
           "docs/host-integration.md",
           "docs/troubleshooting.md",
           "docs/recovery.md",
