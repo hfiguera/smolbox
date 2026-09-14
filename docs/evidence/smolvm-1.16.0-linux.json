@@ -592,7 +592,7 @@
   },
   "limitations": [
     "Not final-commit validation.",
-    "Outer-VM recovery and legacy Linux campaigns remain incomplete.",
+    "Legacy Linux campaigns remain incomplete.",
     "The longer-than-five-minute public-contract requirement remains unresolved.",
     "No default runtime promotion or general security certification."
   ],
@@ -634,6 +634,64 @@
     },
     "source_commit": "6a4a6b6055d9c28c21c5bea01c7b1ab970f2ee5d",
     "tool_restored_sha256": "1a0ea5f6784285b82098fe7935c95bf1ac76713aec904cc9b43920fa85ebe35d"
+  },
+  "outer_vm_recovery": {
+    "host_archive_sha256": "c4044d19619fe2ef172afd49fe3b8bb7d77eb5ebe670efe9a5fecd5176dfb968",
+    "observer_sha256": "4f271f5180f971baf500bcda34db2b483f8a3bd52791c450142eafb834f1f4a4",
+    "probe_deadline_seconds": 30,
+    "replacement_archive_sha256": "52430e494a5cb3a57f64e15b5db4fce268883a68e5cc3c297d0a183ec8f2619f",
+    "replacement_runner": {
+      "captured_bytes": 132,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "bd965e74c6fc42e4c113c150fcf8fc85dadc57688d14ca4bf6e2fbab7d5b6da5",
+      "seconds": 24.157,
+      "status": "passed"
+    },
+    "replacement_smoke": {
+      "after_workload": "MainPID=1708\nResult=success\nMemoryPeak=479449088\nTasksCurrent=22\nActiveState=active\nInvocationID=beb5a35a5b0445d2b03c0502082d2124\nmemory.current\n478814208\nmemory.peak\n479449088\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 22981952\nuser_usec 19682903\nsystem_usec 3299048\ncore_sched.force_idle_usec 0\nnr_periods 237\nnr_throttled 80\nthrottled_usec 3219705\nnr_bursts 0\nburst_usec 0\npids.current\n22\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    176128  66932736   1% /srv/sbq/control\nsmolbox-qualification 805306368 190664704 614641664  24% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+      "before": "MainPID=1708\nResult=success\nMemoryPeak=256933888\nTasksCurrent=4\nActiveState=active\nInvocationID=beb5a35a5b0445d2b03c0502082d2124\nmemory.current\n256450560\nmemory.peak\n256933888\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 15591306\nuser_usec 15416356\nsystem_usec 174949\ncore_sched.force_idle_usec 0\nnr_periods 161\nnr_throttled 10\nthrottled_usec 7824\nnr_bursts 0\nburst_usec 0\npids.current\n4\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    172032  66936832   1% /srv/sbq/control\nsmolbox-qualification 805306368 136511488 668794880  17% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+      "cleanup": "verified_absent",
+      "elapsed_ms": 7822,
+      "machine": "qual-tr4mwzleqiwypibfgw4g",
+      "observations": {
+        "system": "Linux"
+      },
+      "runtime_version": "1.16.0",
+      "scenario": "smoke",
+      "source": "qualification-probe.exs",
+      "status": "passed",
+      "vm_boundary": "VMM PID 1952\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n"
+    },
+    "replacement_source": "adc0c27c8465d7c500bf5ef1b9466112b70009a1",
+    "report": {
+      "automatic_disk_rebuild": true,
+      "baseline_digest_verified": true,
+      "concurrent_start_rejected": true,
+      "exclusive_vm_lock_verified": true,
+      "frozen_at_unix": 1789347417,
+      "frozen_guest_runtime_scope": "baseline guest; no candidate execution",
+      "frozen_pid": 477505,
+      "guest_marker_absent_after_rebuild": true,
+      "host_deadline_result": "timeout",
+      "invocation": "cbc8a9112ece459bbe408b3e4f851c40",
+      "management_port_closed_before_replacement": true,
+      "operator_lingering": true,
+      "original_cgroup": "/system.slice/system-smolbox\\x2dlab.slice/smolbox-lab@probe.service",
+      "original_cgroup_absent": true,
+      "original_process_absent": true,
+      "periodic_capture_after_freeze": true,
+      "recovered_at_unix": 1789347477,
+      "replacement_inventory_empty": true,
+      "replacement_pid": 477865,
+      "replacement_runtime": "1.16.0",
+      "replacement_smoke_passed": true,
+      "replacement_worker_account_absent": true,
+      "replacement_worker_endpoint": "unix:///srv/sbq/run/api.sock",
+      "status": "passed",
+      "terminated_at_unix": 1789347438
+    },
+    "scope": "Frozen baseline guest proves independent host recovery; exact 1.16.0 explicitly installed and exercised in the clean replacement. No claim of a candidate execution in the frozen guest."
   },
   "package_consumers": {
     "failed_harness_attempt": "The first wrapper invoked nonexistent mix smolbox.ci.package; corrected command is elixir scripts/ci.exs package-consumer. Completed language lanes were not rerun.",
@@ -1040,7 +1098,7 @@
       "vm_descriptors": 1
     },
     "orphan_observation_sha256": "b3d5ed885e4bd72c59c610ed868e815cee4d6a3d38e6c662ebb02a70ead1469d",
-    "scope": "Initial fixture cleanup failed and leaked a VMM until outer guest disposal. A later passing fixture does not erase that failure. Extended-unavailability and external-deletion fixtures remain outstanding on Linux.",
+    "scope": "Initial fixture cleanup failed and leaked a VMM until outer guest disposal. A later passing fixture does not erase that failure. Extended-unavailability and external-deletion fixtures were not part of this attempt; their later completion is recorded under service_recovery.",
     "source_base": "adc0c27c8465d7c500bf5ef1b9466112b70009a1"
   },
   "service_recovery": {

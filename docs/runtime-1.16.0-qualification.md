@@ -144,7 +144,7 @@ lease, preparation and cleanup budgets are unchanged. All five affected cases
 passed in a targeted rerun with the same seed (156.8 seconds), including the two
 original failures. That run deliberately excluded the other twenty cases; the
 full-suite report validator correctly rejected its result. Its trace is retained
-as targeted evidence only, and a complete 25-case rerun remains required.
+as targeted evidence only; the later complete 25-case rerun is recorded below.
 
 Dependency retirement and vulnerability audits passed. Fresh package consumers
 passed with both current and exact minimum runtime dependency versions on the
@@ -201,8 +201,8 @@ retained for comparison with the complete rerun.
 
 At `6a4a6b6`, the complete Linux runtime suite passed fourteen cases (seed
 453229, 420.645 seconds), followed by sixteen PostgreSQL store cases (980339).
-The twenty-five-case durable run is still pending. The failed attempts have not
-been overwritten by these results.
+The accompanying durable attempt failed; the later complete rerun is recorded
+below. The failed attempts have not been overwritten by these results.
 
 The [partial macOS evidence](evidence/smolvm-1.16.0-macos.json) now records all
 three service recovery scenarios: server restart, extended unavailability, and
@@ -315,7 +315,7 @@ were allowed, so the host task limit is not a per-guest PID limit. Guest symlink
 can reference other guest paths; the file API does not promise a workspace-only
 boundary. The output probes used bounded producers and do not establish behavior
 for every possible output stream. Independent durable service-failure and outer
-VM recovery cases remain separate requirements.
+VM recovery evidence is recorded separately below.
 
 ### Service fixture failure and descriptor-check correction
 
@@ -405,6 +405,16 @@ capacity after verified absence. Final actual-account descriptor checks were
 empty. This establishes the recorded deadline scenario; the earlier weaker test
 remains separately identified.
 
+Independent outer-VM recovery also passed. The host stopped the frozen baseline
+guest at its configured 30-second probe deadline, removed its process and cgroup,
+closed the management port, and automatically rebuilt the disposable disk. The
+baseline checksum stayed unchanged and the guest marker was absent afterward.
+The frozen guest contained no candidate execution; this specifically tests the
+outer supervisor independently of smolvm. In the clean replacement, the verified
+official 1.16.0 archive was explicitly installed and selected. Its inventory was
+empty, a fresh Python execution and API cleanup passed (24.157-second runner),
+and external teardown verified absence of the candidate account's processes.
+
 At `adc0c27c8465d7c500bf5ef1b9466112b70009a1`, ordinary native Linux checks passed:
 204 deterministic cases (seed 146040), 95.41% coverage, all eight bad/clean analyzer
 canary pairs, all 23 CI tooling cases, dependency security checks, both examples'
@@ -457,9 +467,9 @@ No validation bounds have been relaxed while that scope decision is pending.
   and file persistence across stop/start on both platforms.
 - [ ] Buffered and streamed commands exceeding five minutes through SmolBox;
   shorter command/transport deadlines, await expiry and confirmed cancellation.
-- [ ] PostgreSQL store contract, durable recovery, database outage, worker failures,
+- [x] PostgreSQL store contract, durable recovery, database outage, worker failures,
   external deletion reconciliation and duplicate VMM launch prevention.
-- [ ] Complete contained Linux resource/isolation campaign, effective cgroups and
+- [x] Complete contained Linux resource/isolation campaign, effective cgroups and
   independent worker/outer-VM recovery. No exhaustion or adversarial tests on Mac.
 - [ ] Real backward compatibility for 1.14.1 and 1.14.6 on supported platforms.
 - [ ] Every ordinary CI gate, all analyzers and canaries, language lanes, example
