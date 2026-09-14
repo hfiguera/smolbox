@@ -10,6 +10,16 @@ The [qualification checklist](runtime-1.16.0-qualification.md) records the exact
 release inputs, progress and outstanding acceptance work. Historical completed
 release records below do not count as evidence for this new runtime.
 
+The recorded checkpoint now includes both platforms' ordinary runtime and durable
+recovery suites, the repeated constrained Linux workload/control tests, three API
+service-failure cases, a live-VMM observation at the real worker deadline, and
+independent outer-VM recovery with a verified 1.16.0 replacement. Legacy Linux
+compatibility and final committed-candidate checks remain in progress. The
+requested execution longer than five minutes conflicts with the existing public
+command/profile maxima; no validation bound has been bypassed or enlarged.
+The [consumer compatibility guide](compatibility.md#smolvm-1-16-0-qualification)
+separates this branch's additional selection from the published 0.1.2 package.
+
 ## 0.1.2 release
 
 Status: **published and verified**, September 10, 2026 (September 11 UTC).

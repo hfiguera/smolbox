@@ -322,6 +322,11 @@ new execution until the expected version and installed worker match.
 Unverified versions and 1.14.6 host combinations fail
 configuration validation. Health checks still require an exact version match.
 
+This branch additionally accepts explicit `runtime_version: "1.16.0"` on those
+two host platforms. Its [qualification status](compatibility.md#smolvm-1-16-0-qualification)
+is separate from the published 0.1.2 release. The same drain, identity and
+prerequisite checks below apply when testing that selection.
+
 For an existing worker:
 
 1. Pause submissions at the application boundary and persist its drain setting.
@@ -334,7 +339,7 @@ For an existing worker:
    the complete pinned distribution. Verify binary, agent, libkrun and artifact
    digests. Do not mix files from different distributions.
 4. Recheck the deployment controls and approved artifact/profile revisions.
-   Disk requests below the 1.14.6 templates require working `resize2fs` on the
+   Disk requests below the 1.14.6 or 1.16.0 templates require working `resize2fs` on the
    worker host (`brew install e2fsprogs` on macOS). Missing it caused file loss
    after restart in our macOS check, despite successful health/start/exec replies.
    Verify a small owned file survives stop/start before admitting work; see

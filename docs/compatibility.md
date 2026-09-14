@@ -4,6 +4,67 @@ Version: `0.1.2`. The library's supported qualification is
 `:development`; requested hard-control options remain unsupported. The original
 release evidence below records the client/controller contract on Linux and macOS.
 
+## SmolVM 1.16.0 qualification
+
+This branch accepts explicit `runtime_version: "1.16.0"` on Linux x86_64 and
+macOS Apple Silicon. The default remains **1.14.6** while qualification is in
+progress. The published SmolBox 0.1.2 package does not include this additional
+selection; use this checkout to exercise it. No Linux ARM64 support is added.
+
+Testing uses official tag `v1.16.0`, commit
+`e1dd54bf7be6d144ad6bdef4ebf310f57809a6a6`, and complete platform archives:
+
+| Platform | Archive SHA-256 |
+|---|---|
+| Linux x86_64 | `cb7d6ea34914b4d71958e16eafc8a3220fe9e8cd5b76fa983ef9f648159f4c9b` |
+| macOS Apple Silicon | `7be55af510b698bb95c9e9b103004c81f75cacfaa62b00aaf554441e9023353b` |
+
+Use the matching binary, agent, libkrun and libkrunfw from the
+[official release](https://github.com/smol-machines/smolvm/releases/tag/v1.16.0).
+Do not mix components or attribute changes after that tag to this version.
+
+The platform evidence records ordinary Python/Node execution, buffered and
+streaming output, guest users, files, stop/start persistence, cancellation,
+PostgreSQL recovery and API restarts. The Linux campaign also repeats the
+contained resource, isolation and independent recovery scenarios. Its conclusions
+apply to that configured deployment. See the
+[Linux evidence](evidence/smolvm-1.16.0-linux.json) and
+[macOS evidence](evidence/smolvm-1.16.0-macos.json) for exact inputs, failed
+attempts, corrections and limits. Legacy Linux suites and final candidate checks
+are still in progress.
+
+### Host preparation prerequisites
+
+Fresh 1/1 GiB requests produced the requested raw disk sizes on both tested
+platforms, with files retained through stop/start, when the worker could use
+`resize2fs`. Linux used Ubuntu's e2fsprogs 1.47.0 package; macOS used Homebrew
+e2fsprogs 1.47.4. Install the tool on the worker host (`brew install e2fsprogs`
+on macOS, or the distribution's `e2fsprogs` package on Linux) and verify access
+from the actual worker process environment.
+
+Without the tool, the controlled 1.16.0 probes still started a VM but exposed
+the larger 20/10 GiB disks, and could not download the staged file after a
+stop/start cycle. A successful health or start response is not a preparation
+check. Verify actual geometry and persistence on a fresh owned machine before
+admitting work, and retain conservative allocation floors until measured.
+
+The tagged Nix expression adds e2fsprogs on macOS, but its archive hashes still
+refer to 1.14.6 while its filenames select 1.16.0. Nix was reviewed as upstream
+source, not qualified as an installation path. These tests used the verified
+release archives with separately installed host prerequisites; they do not
+establish that every distribution supplies a working resizing tool.
+
+### Timeout qualification boundary
+
+The upstream release removes the generic five-minute server timeout from
+execution and other selected long operations. SmolBox still limits a command
+to 300 seconds and a managed execution budget to 300,000 ms. A public execution
+longer than five minutes is therefore not established by this qualification.
+The shorter-deadline, observation-timeout and independent Linux worker-deadline
+tests do not substitute for that requirement. See the
+[client budget guidance](client.md#execution-and-transport-budgets) when choosing
+explicit bounded settings. No validation limits or public defaults were relaxed.
+
 ## Runtime selection
 
 SmolBox defaults to `runtime_version: "1.14.6"` for Linux x86_64 and
@@ -14,10 +75,10 @@ exact-commit release acceptance is recorded separately in the repository's
 To keep using an existing 1.14.1 worker after upgrading SmolBox, explicitly set
 `runtime_version: "1.14.1"`. Otherwise upgrade the worker using the procedure
 below. Omitting the option changes the expected version to 1.14.6. A worker
-must report the exact configured version; supporting two versions does not
+must report the exact configured version; supporting multiple versions does not
 allow automatic fallback or accepting an arbitrary `1.14.x` release.
 
-Linux ARM64 remains unsupported for 1.14.6. A separate native macOS campaign
+Linux ARM64 remains unsupported for 1.14.6 and 1.16.0. A separate native macOS campaign
 checks ordinary compatibility and controlled lifecycle recovery. Exhaustion and
 adversarial testing remain in the disposable Linux lab. The older macOS 1.14.1
 results below remain historical evidence for that version.

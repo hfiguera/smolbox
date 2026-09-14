@@ -15,7 +15,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   still expose a larger guest disk. Admission rejects profiles below these
   floors. This declaration is not remotely attested or a host filesystem quota.
 
-  Version 1.14.6 requires working host `resize2fs` for disk requests below
+  Versions 1.14.6 and 1.16.0 require working host `resize2fs` for disk requests below
   template sizes. Verify file persistence across stop/start before admission;
   see [Compatibility](compatibility.html#macos-1-14-6-prerequisites).
 
@@ -75,6 +75,9 @@ defmodule SmolBox.Runtime.WorkerConfig do
   (only `:development`), and `:draining` (default `false`). Artifact IDs must be
   unique and architectures must match this worker. Construction makes no worker
   request or remote digest check. Profiles below the floor cannot support execution.
+  This branch also accepts explicit `"1.16.0"` on Linux x86_64 and macOS Apple
+  Silicon; see the [qualification status](compatibility.html#smolvm-1-16-0-qualification)
+  before selecting it. The published 0.1.2 package does not include that selection.
   See [Getting started](getting-started.html) for a complete configuration.
   """
   @spec new(keyword()) :: {:ok, t()} | {:error, Error.t()}

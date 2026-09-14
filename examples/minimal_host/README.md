@@ -33,9 +33,11 @@ MIX_ENV=test mix run scripts/demo.exs
 The object directory must already exist with mode `0700`. Use the exact version
 installed on the worker. Version 1.14.6 is the default on Linux x86_64 and macOS
 Apple Silicon. Set `SMOLBOX_RUNTIME_VERSION=1.14.1` for an existing older worker.
-For smaller 1.14.6 disk requests, supply the host's `resize2fs`; see
+This branch also accepts `SMOLBOX_RUNTIME_VERSION=1.16.0`; consult its
+[qualification status](../../docs/compatibility.md#smolvm-1-16-0-qualification)
+before selecting it. For smaller 1.14.6 or 1.16.0 disk requests, supply the host's `resize2fs`; see
 [host prerequisites](../../docs/compatibility.md#macos-1-14-6-prerequisites).
-The 0.1.2 compatibility candidate is not yet released. Keep key files private
+Version 0.1.2 is published; the additional 1.16.0 selection is unreleased. Keep key files private
 and stable; the example does not print their contents. For an authenticated
 HTTPS worker proxy, also configure `SMOLBOX_PROXY_TOKEN`; verified TLS remains
 enabled. Unauthenticated HTTP is accepted only for explicitly allowed loopback.

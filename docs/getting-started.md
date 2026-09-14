@@ -14,12 +14,14 @@ or its external host resource controls.
 In an existing Elixir Mix application, add this entry to `deps/0` in `mix.exs`:
 
 ```elixir
-{:smolbox, "~> 0.1.1"}
+{:smolbox, "~> 0.1.2"}
 ```
 
-Run `mix deps.get` to fetch the published package from Hex. The 0.1.2 candidate
-is not published; to use its SmolVM 1.14.6 default, use a sibling local checkout
-with `{:smolbox, path: "../smolbox"}`. Elixir 1.18 and later are accepted by the
+Run `mix deps.get` to fetch the published package from Hex. Version 0.1.2 defaults
+to SmolVM 1.14.6. The additional 1.16.0 qualification requires a sibling local
+checkout with `{:smolbox, path: "../smolbox"}`; check its
+[current status](compatibility.md#smolvm-1-16-0-qualification) before selecting it.
+Elixir 1.18 and later are accepted by the
 package; use one of the tested Elixir/OTP pairs in [Compatibility](compatibility.md).
 
 For a new application, run `mix new smolbox_demo` and `cd smolbox_demo` first.
@@ -33,7 +35,7 @@ application on the worker host so it can verify the local artifact file. Remote
 workers use a different host configuration; see [Managed host integration](host-integration.md).
 
 You need a **dedicated, empty worker**: select **SmolVM 1.14.6 on Linux x86_64 or
-macOS Apple Silicon** with the 0.1.2 candidate. Existing 1.14.1 deployments
+macOS Apple Silicon** with SmolBox 0.1.2. Existing 1.14.1 deployments
 require explicit `runtime_version: "1.14.1"` (or the environment setting below).
 Check the [1.14.6 host prerequisites](compatibility.md#macos-1-14-6-prerequisites),
 then use an approved native Python

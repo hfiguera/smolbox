@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- Add explicit smolvm 1.16.0 selection for Linux x86_64 and macOS Apple Silicon
+  while retaining 1.14.1 and 1.14.6. The default remains 1.14.6 during qualification;
+  final acceptance and the default-version decision are pending.
+- Record the tagged API and packaging review, actual host resizing prerequisites,
+  platform runtime/recovery results and repeated constrained Linux experiments.
+  The existing public five-minute command limit remains unchanged.
+- Correct the lab's account-specific cleanup observations, retain private bounded
+  service-fixture diagnostics, and require a live VMM near the real worker deadline.
+  Earlier failed or insufficient observations remain in the qualification record.
+
 ## 0.1.2
 
 - Default to SmolVM **1.14.6** for Linux x86_64 and

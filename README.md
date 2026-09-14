@@ -78,17 +78,17 @@ creating machines, executing commands, streaming output, and transferring files.
 
 ## Installation and first run
 
-This checkout prepares **0.1.2**, which is not published yet. Its explicit
-SmolVM 1.14.6 default targets Linux x86_64 and macOS Apple Silicon. Use a local path dependency to try the
-candidate; the published 0.1.1 package below retains its 1.14.1 contract.
+Published SmolBox **0.1.2** defaults to SmolVM **1.14.6** on Linux x86_64 and
+macOS Apple Silicon. This branch additionally qualifies explicit 1.16.0 support;
+see [the qualification status](docs/compatibility.md#smolvm-1-16-0-qualification).
 
 Add SmolBox to your application's `mix.exs`:
 
 ```elixir
-{:smolbox, "~> 0.1.1"}
+{:smolbox, "~> 0.1.2"}
 ```
 
-Then run `mix deps.get`. The [API documentation](https://hexdocs.pm/smolbox/0.1.1/)
+Then run `mix deps.get`. The [API documentation](https://hexdocs.pm/smolbox/0.1.2/)
 includes the guides below. A local checkout can instead be used with
 `{:smolbox, path: "../smolbox"}`.
 
@@ -96,7 +96,7 @@ To run the local walkthrough, you need:
 
 - Elixir **1.18 or later**, using a [tested Elixir/OTP pair](docs/compatibility.md).
 - A dedicated worker: **SmolVM 1.14.6 or 1.14.1**, on Linux x86_64 with KVM or
-  macOS Apple Silicon. Version 1.14.6 requires the 0.1.2 candidate.
+  macOS Apple Silicon. Explicit 1.16.0 selection currently requires this checkout.
 - The host's `resize2fs` tool for 1.14.6 disk requests below its template sizes.
   On macOS, install `e2fsprogs`; see the [runtime prerequisites](docs/compatibility.md#macos-1-14-6-prerequisites).
 - A prepared Python image for that worker's architecture, with its SHA-256
@@ -114,7 +114,7 @@ is included in the repository.
 
 SmolBox has real execution and durable recovery tests on Linux x86_64 and macOS
 Apple Silicon with **SmolVM 1.14.1 and 1.14.6**; validation status is recorded in
-[Compatibility](docs/compatibility.md#runtime-selection). The 0.1.2 candidate
+[Compatibility](docs/compatibility.md#runtime-selection). The 0.1.2 release
 defaults to **1.14.6**. Before upgrading an application that still uses a 1.14.1
 worker, explicitly configure `runtime_version: "1.14.1"` or follow the
 [worker upgrade procedure](docs/host-integration.md#upgrading-a-worker).
@@ -164,5 +164,5 @@ without contacting a real worker. Generate this site with
 `MIX_ENV=dev mix docs --warnings-as-errors`. Live worker tests are a separate opt-in
 operation described in the repository's
 [CI guide](https://github.com/hfiguera/smolbox/blob/v0.1.2/scripts/ci/README.md).
-These candidate source links become available when the release tag is published;
-until then, use the corresponding files in this checkout.
+The versioned source links describe the published release; use this checkout for
+the additional 1.16.0 qualification work.
