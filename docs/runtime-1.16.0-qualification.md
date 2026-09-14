@@ -495,6 +495,19 @@ The raw archive SHA-256 is
 This preserves the failed attempt; neither teardown nor the earlier two-case
 pass establishes the outstanding full backward compatibility result.
 
+A subsequent diagnostic at `4e5692f` stopped at the first failure, using the same
+seed and worker restrictions with bounded HTTP error capture added to a temporary
+transport copy. One case passed; `delete:before` failed because the recovered
+execution was failed rather than completed. The captured startup response was
+HTTP 500 with `INTERNAL_ERROR`: `io operation failed: timed out waiting for an
+agent response frame`. The cleanup fault boundary was reached while cleaning up
+that failed execution. Reaching a cleanup boundary does not prove the command ran
+successfully. The filtered console capture contained no matching error lines,
+which does not establish the cause of the missing agent response. Both actual
+account KVM descriptor checks were empty after worker stop. This diagnostic is
+not a replacement for the required full suite; its transport instrumentation was
+removed afterward and its reports are preserved in the Linux evidence.
+
 An earlier attempt combined broad runtime inclusion with the name filters and
 therefore admitted unrelated cases. It was deliberately stopped and its output
 retained as incomplete. The process exited zero after SIGTERM, but there was no

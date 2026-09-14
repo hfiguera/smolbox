@@ -1059,6 +1059,42 @@
     "source_commit": "cfbe8ca7fe38d6bfe1b1519c5b30c7bc5ff87a54",
     "storage_observation": "Filesystem               1B-blocks       Used   Available Use% Mounted on\n/dev/vda1             102888095744 5604651008 97266667520   6% /\nsmolbox-qualification     67108864      73728    67035136   1% /srv/sbq/control\nsmolbox-qualification    805306368  141176832   664129536  18% /srv/sbq/cache\n"
   },
+  "legacy_1_14_6_first_failure_diagnostic": {
+    "archive_sha256": "41f17739b18a43ddabd1589ec13bd7c186bd1d7c3737669303a52bfc77525f34",
+    "completed_cases": 2,
+    "console_capture": "9fb81462294663fb/agent-console.log\n9fb81462294663fb/agent-startup-error.log\n",
+    "console_limitation": "Only selected error/memory/timeout lines from the last 32768 bytes of each console file were captured. No matching lines were found; this does not prove absence of all guest failures or establish the cause of the missing agent response.",
+    "diagnostic_transport": "Temporary copy of production Req with bounded non-success HTTP body and console capture. Dispatch, retry, result and deadline behavior was unchanged; capture adds diagnostic latency. Restored after the run. This diagnostic does not replace the full uninstrumented compatibility suite.",
+    "failed_case": "delete:before",
+    "full_compatibility_pass": false,
+    "http_response": {
+      "method": "post",
+      "observed_at_ms": 1789356809965,
+      "path": "/api/v1/machines/sbxexample-zmmrurfs2unlvsaarteb/start",
+      "status": 500
+    },
+    "lab_account_kvm_descriptors_after_stop": 0,
+    "observation": "The startup endpoint returned an upstream agent-response timeout. The delete:before fault boundary was reached during cleanup of a failed execution; recovered cleanup completed but the expected successful command result was absent. Reaching a cleanup boundary alone does not establish successful execution.",
+    "passed_cases": 1,
+    "response_body": {
+      "code": "INTERNAL_ERROR",
+      "error": "io operation failed: timed out waiting for an agent response frame"
+    },
+    "runner": {
+      "captured_bytes": 1015,
+      "exit_code": 2,
+      "failure": null,
+      "output_sha256": "8616dd04163b01dda0ebc6a7e69238c0a8d0fc5b4e3ee8179387988343c56ab1",
+      "seconds": 238.862,
+      "status": "failed"
+    },
+    "runtime": "1.14.6",
+    "seed": 602028,
+    "selected_cases": 25,
+    "source_base": "4e5692fb5aa4d68a21e384dbcad888ce6f6f20c1",
+    "transport_sha256": "de5a0e58edee0d719c55338668908cca54f5a49f9fcac70a596870ee280c561a",
+    "worker_account_kvm_descriptors_after_stop": 0
+  },
   "legacy_1_14_6_initial": {
     "actual_account_kvm_fds_after_stop": 0,
     "durable": {
