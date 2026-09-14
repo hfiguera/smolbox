@@ -1,4 +1,110 @@
 {
+  "durable_deployment": {
+    "archive_sha256": "5d7484b13d9ab44eedacb919e542da0f5064ff8073c57ece6a8f74837997e187",
+    "corrected_deadline": {
+      "acceptance_complete": true,
+      "actual_account": "smolbox-qual",
+      "archive_sha256": "1d5108232152f3cc4d1bd1b3ae40d33e2273f0adc8ea8218c3349b139645779e",
+      "fixture_sha256": "0d81553841ee92307fed0e5f8b3c35e0f6cf7b94c5f46d89ab71614f1d0275b0",
+      "http_operation_ms": 300000,
+      "http_receive_ms": 300000,
+      "kvm_fds_after_teardown": 0,
+      "live_vm_trace": "uptime=1427.17 VMM PID 17910\nuptime=1428.46 VMM PID 17910\nuptime=1429.75 VMM PID 17910\nuptime=1431.03 VMM PID 17910\nuptime=1432.45 VMM PID 17910\nuptime=1433.74 VMM PID 17910\nuptime=1435.04 VMM PID 17910\nuptime=1436.32 VMM PID 17910\nuptime=1437.63 VMM PID 17910\nuptime=1438.92 VMM PID 17910\nuptime=1440.20 VMM PID 17910\nuptime=1441.65 VMM PID 17910\nuptime=1442.95 VMM PID 17910\nuptime=1444.24 VMM PID 17910\nuptime=1445.55 VMM PID 17910\nuptime=1446.85 VMM PID 17910\nuptime=1448.16 VMM PID 17910\nuptime=1449.49 VMM PID 17910\nuptime=1450.79 VMM PID 17910\nuptime=1452.09 VMM PID 17910\nuptime=1453.40 VMM PID 17910\nuptime=1454.69 VMM PID 17910\nuptime=1455.97 VMM PID 17910\nuptime=1457.26 VMM PID 17910\nlive_vm_samples=24\nresult=timeout\n",
+      "observer_sha256": "0e2c02f2cf83c5f0a0a2e718744bccfdf7c1e49e10a40a53df37ac5561e21005",
+      "public_limits_or_defaults_changed": false,
+      "report": {
+        "cleanup": "verified_absent",
+        "dispatches": 1,
+        "identity_preserved": true,
+        "reservation_retained_during_outage": true,
+        "result": "unknown",
+        "scenario": "worker_deadline",
+        "status": "passed"
+      },
+      "runner": {
+        "captured_bytes": 179,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "b436fcdb8729bec474db254b2e745e49d2663e0da26ece43f33028d82cbc0701",
+        "seconds": 304.92,
+        "status": "passed"
+      },
+      "source_base": "adc0c27c8465d7c500bf5ef1b9466112b70009a1",
+      "unit_deadline_seconds": 300,
+      "unit_started_monotonic_us_observed": 1157553089
+    },
+    "deadline_limitation": "Initial fixture passed unit expiry/recovery but did not establish a live VM at expiry. Actual-account inspection before unit expiry found no KVM descriptors. Its 60-second HTTP operation budget permitted earlier uncertainty and cleanup. The separate corrected_deadline entry supplies passing live-VM observation and recovery evidence.",
+    "scenarios": {
+      "database_outage": {
+        "acceptance_complete": true,
+        "actual_account": "smolbox-qual",
+        "kvm_fds_after_teardown": 0,
+        "report": {
+          "cleanup": "verified_absent",
+          "dispatches": 1,
+          "identity_preserved": true,
+          "reservation_retained_during_outage": true,
+          "result": "unknown",
+          "scenario": "database_outage",
+          "status": "passed"
+        },
+        "runner": {
+          "captured_bytes": 5499,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "0615d761758b81011a7473432c8aa74705cc1b1c14e16f66ad00b2da2d9c9a50",
+          "seconds": 37.517,
+          "status": "passed"
+        }
+      },
+      "worker_deadline": {
+        "acceptance_complete": false,
+        "actual_account": "smolbox-qual",
+        "kvm_fds_after_teardown": 0,
+        "report": {
+          "cleanup": "verified_absent",
+          "dispatches": 1,
+          "identity_preserved": true,
+          "reservation_retained_during_outage": true,
+          "result": "unknown",
+          "scenario": "worker_deadline",
+          "status": "passed"
+        },
+        "runner": {
+          "captured_bytes": 529,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "ccc20e43776a98035b2c6168d8e24a37573879a46bf972658d28e789594d3d2b",
+          "seconds": 304.238,
+          "status": "passed"
+        }
+      },
+      "worker_oom": {
+        "acceptance_complete": true,
+        "actual_account": "smolbox-qual",
+        "kvm_fds_after_teardown": 0,
+        "report": {
+          "cleanup": "verified_absent",
+          "dispatches": 1,
+          "identity_preserved": true,
+          "reservation_retained_during_outage": true,
+          "result": "unknown",
+          "scenario": "worker_oom",
+          "status": "passed"
+        },
+        "runner": {
+          "captured_bytes": 347,
+          "exit_code": 0,
+          "failure": null,
+          "output_sha256": "ca711d41137cbf715432085497f85875e75abcb52b1c26d0ed5e7fd083961bdd",
+          "seconds": 38.088,
+          "status": "passed"
+        }
+      }
+    },
+    "source_base": "adc0c27c8465d7c500bf5ef1b9466112b70009a1",
+    "status": "passed with corrected live-execution deadline fixture"
+  },
   "durable_failed_attempt": {
     "complete_suite_pass": false,
     "descriptor_check_correction": "Empty output inspected smolbox-worker, not this fixture's account; it is not independent teardown proof. Candidate/shared controllers separately checked actual account process absence.",
@@ -486,7 +592,7 @@
   },
   "limitations": [
     "Not final-commit validation.",
-    "Independent durable service-failure, outer-VM recovery and legacy Linux campaigns remain incomplete.",
+    "Outer-VM recovery and legacy Linux campaigns remain incomplete.",
     "The longer-than-five-minute public-contract requirement remains unresolved.",
     "No default runtime promotion or general security certification."
   ],
@@ -772,6 +878,77 @@
     },
     "source_commit": "adc0c27c8465d7c500bf5ef1b9466112b70009a1",
     "tooling_cases": 23
+  },
+  "restart_process_identity": {
+    "actual_account": "lab",
+    "archive_sha256": "a2dd82befc8cde3adde10a8fc92d5ead190dc7f4ebf0b5714258eb14b418a164",
+    "enclosing_unit": {
+      "kill_mode": "control-group",
+      "main_pid_after": 0,
+      "result": "success",
+      "runtime_max_seconds": 600
+    },
+    "failed_probe_attempt": {
+      "captured_bytes": 228,
+      "exit_code": 1,
+      "failure": null,
+      "output_sha256": "7c8abc3c311ae788b6063a802aba284dfd62c1f92c86e55a621bf9967d2dc375",
+      "seconds": 18.384,
+      "status": "failed"
+    },
+    "kvm_fds_after_fixture_before_unit_stop": 0,
+    "probe_correction": "Unprivileged /proc executable-link inspection omitted the VMM. A guarded root inspector inside the disposable guest matched the exact owned runtime executable; no command-name assumption.",
+    "probe_sha256": "2d2fc85c6236eff8653c14c24d912a65975b714ee5087dd95966883e00337669",
+    "process_inspector_sha256": "22f9adcbac6c31b4fd5a9d94ffe5507250b7ccb00253be5ff2c6f251a1f49ea3",
+    "report": {
+      "cleanup": "verified_absent",
+      "cycles": [
+        {
+          "cycle": 1,
+          "dispatch_marker": "x",
+          "followup_exit": 0,
+          "followup_stdout": "42\n",
+          "server_pid": 7814,
+          "total_runtime_processes": 2,
+          "vm_birth": "Mon Sep 14 00:40:23 2026",
+          "vm_pid": 6866
+        },
+        {
+          "cycle": 2,
+          "dispatch_marker": "x",
+          "followup_exit": 0,
+          "followup_stdout": "42\n",
+          "server_pid": 8178,
+          "total_runtime_processes": 2,
+          "vm_birth": "Mon Sep 14 00:40:23 2026",
+          "vm_pid": 6866
+        },
+        {
+          "cycle": 3,
+          "dispatch_marker": "x",
+          "followup_exit": 0,
+          "followup_stdout": "42\n",
+          "server_pid": 8541,
+          "total_runtime_processes": 2,
+          "vm_birth": "Mon Sep 14 00:40:23 2026",
+          "vm_pid": 6866
+        }
+      ],
+      "external_cli_delete_while_server_down": true,
+      "runtime": "1.16.0",
+      "scope": "one ordinary VM, bounded nested Linux restart observations",
+      "stale_inventory_removed": true,
+      "status": "passed"
+    },
+    "runner": {
+      "captured_bytes": 133,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "36f75e0f61a3c8c98d88b70d713f954dd6d4302507c6efcba0bae5d273fdfbd5",
+      "seconds": 20.248,
+      "status": "passed"
+    },
+    "source_base": "adc0c27c8465d7c500bf5ef1b9466112b70009a1"
   },
   "runtime": "1.16.0",
   "runtime_and_store": {

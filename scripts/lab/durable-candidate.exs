@@ -50,10 +50,12 @@ defmodule SmolBox.DurableCandidate do
     ledger = root <> "/attempts"
     FaultTransport.configure(worker.client.worker.id, nil, ledger)
 
+    client = deadline_client(worker.client, kind)
+
     worker = %{
       worker
       | profiles: [spec.profile],
-        client: %{worker.client | transport: FaultTransport}
+        client: %{client | transport: FaultTransport}
     }
 
     options = Keyword.put(options, :workers, [worker])
@@ -150,6 +152,15 @@ defmodule SmolBox.DurableCandidate do
     end
   end
 
+  defp deadline_client(client, "worker_deadline") do
+    # The unit's clock starts before guest preparation. Keep the transport alive
+    # long enough to observe that boundary instead of initiating earlier cleanup.
+    endpoint = %{client.worker | operation_timeout_ms: 300_000, receive_timeout_ms: 300_000}
+    %{client | worker: endpoint}
+  end
+
+  defp deadline_client(client, _kind), do: client
+
   defp fault("worker_oom", _runtime, _handle) do
     {_output, status} =
       System.cmd(
@@ -176,14 +187,15 @@ defmodule SmolBox.DurableCandidate do
     # RuntimeMaxSec is not mutable through set-property on systemd 255.
 
     {result, 0} =
-      System.cmd("timeout", [
+      System.cmd("sudo", [
+        "timeout",
         "310",
         "bash",
-        "-c",
-        "while systemctl is-active --quiet smolbox-qualification.service; do sleep 0.1; done; systemctl show smolbox-qualification.service -p Result --value"
+        "/opt/smolbox/source/scripts/lab/observe-worker-deadline.sh"
       ])
 
-    assert String.trim(result) == "timeout"
+    File.write!("/home/lab/qualification/worker-deadline-observation.txt", result)
+    assert String.ends_with?(String.trim(result), "result=timeout")
 
     command(["bash", "/opt/smolbox/source/scripts/lab/candidate-control.sh", "stop"])
     command(["bash", "/opt/smolbox/source/scripts/lab/candidate-control.sh", "deadline", "300"])

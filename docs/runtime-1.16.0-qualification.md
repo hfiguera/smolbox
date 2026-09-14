@@ -368,6 +368,43 @@ tests (seed 110013), all analyzers, 23 tooling cases, and documentation generati
 and link checks after these fixture changes. This is checkpoint evidence, not
 the final candidate validation.
 
+A separate Linux process-identity probe passed in 20.248 seconds. Three API
+restarts retained VMM PID 6866 and its original start time, with exactly one API
+process and one VMM at each observation. A new command returned `42` after every
+restart, and the original marker remained one byte. CLI deletion while the API
+was stopped removed the VM; the next API startup reconciled the stale inventory.
+No descriptors remained under the actual worker account after fixture cleanup.
+The initial probe failed because unprivileged executable-link inspection omitted
+the VMM. The corrected probe used a guarded root inspector matching only the
+owned runtime executable inside the disposable guest. Both reports are retained;
+this is a bounded observation of those restart paths, not proof against every
+possible duplicate-launch race.
+
+The strict deployment's durable worker-OOM and database-outage cases passed in
+38.088 and 37.517 seconds, respectively. Both preserved identity and one dispatch,
+retained the reservation during the outage, recovered an unknown result, and
+released capacity after verified cleanup.
+
+The first independent-deadline fixture returned a passing report after 304.238
+seconds, but an additional observation found no KVM descriptors while the API
+unit was still active before its deadline. That result proves unit expiry and
+durable recovery, not that expiry terminated a still-running guest command. Its
+60-second total HTTP budget allowed earlier transport uncertainty and cleanup.
+The report is retained with that limitation. The corrected fixture explicitly
+allows a bounded 300-second client operation and receive wait, within existing
+public limits, and requires live VMM observations during the final 30 seconds of
+the unit's actual five-minute lifetime. Production defaults and validation bounds
+remain unchanged.
+
+The corrected test passed in 304.920 seconds. It captured 24 observations of VMM
+PID 17910, each passing the cgroup/thread boundary checks, during the unit's final
+30 seconds. The last sample was approximately 0.3 seconds before the configured
+deadline. The observer then confirmed the unit result `timeout`. Durable recovery
+preserved identity and one dispatch, retained an unknown result, and released
+capacity after verified absence. Final actual-account descriptor checks were
+empty. This establishes the recorded deadline scenario; the earlier weaker test
+remains separately identified.
+
 At `adc0c27c8465d7c500bf5ef1b9466112b70009a1`, ordinary native Linux checks passed:
 204 deterministic cases (seed 146040), 95.41% coverage, all eight bad/clean analyzer
 canary pairs, all 23 CI tooling cases, dependency security checks, both examples'
