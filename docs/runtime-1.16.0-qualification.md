@@ -472,8 +472,28 @@ defaults, guest command deadline, collection and cleanup budgets, worker resourc
 limits and 300-second independent worker lifetime are unchanged. With exactly
 those two cases selected, both passed (78.986 seconds, seed 602028), with zero
 pending records, zero reservations and no KVM descriptors after worker stop.
-The tested fixture files are committed in `cfbe8ca`; the full 25-case campaign
-is running against that commit before backward compatibility can be accepted.
+The tested fixture files are committed in `cfbe8ca`. The subsequent full campaign
+against that commit reached its 35-minute harness deadline without completing.
+Its retained output contains nineteen completed case lines, four reported
+failures, one interrupted case and five cases that had not started. There is no
+final ExUnit summary, so it is not a passing compatibility suite.
+
+The four failures occurred before `notification:before`, `artifact_record:after`,
+`release:after` and `dispatch_intent:after`. Their diagnostics retained
+`not_dispatched` evidence and upstream start/delete protocol errors. The worker
+journal also reports VMs reachable over vsock without a PID to signal. Three
+records and reservations remained pending. These observations differ from the
+earlier 55-second create receive failures; increasing the suite deadline alone
+would not resolve them. Their cause remains under investigation.
+
+After the harness ended, the remaining owned controller process group was
+identified and terminated. The worker was inactive and actual-account KVM
+descriptor checks were empty for both `smolbox-qual` and `lab`. Reports and
+sanitized retained-record histories were exported before disposing the guest.
+The raw archive SHA-256 is
+`6588115599b7a43f0e066c54d5053fd5ee73bacddeaf2bb77b562b909c0e476d`.
+This preserves the failed attempt; neither teardown nor the earlier two-case
+pass establishes the outstanding full backward compatibility result.
 
 An earlier attempt combined broad runtime inclusion with the name filters and
 therefore admitted unrelated cases. It was deliberately stopped and its output

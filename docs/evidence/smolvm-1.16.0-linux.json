@@ -42,6 +42,20 @@
     "raw_evidence_archive_sha256": "a7d3c8f6973e6ca54a02a3c55412421045363739d0efe67709ade6c62b734193",
     "scope": "All 23 tooling cases rerun in an isolated Linux source snapshot with the single fixed Child file. This does not replace the remaining quality stages or runtime qualification."
   },
+  "database_unavailable_ci_checkpoint": {
+    "command": "MIX_ENV=test mix run --no-start --no-compile scripts/check_unavailable.exs",
+    "report": {
+      "captured_bytes": 31,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "f090dd47a12af3805d942e71d8b8fad0838b1a6893a1dea8fba04ae00e79c2bc",
+      "seconds": 18.911,
+      "status": "passed"
+    },
+    "scope": "Required CI script executed against an explicitly absent private Unix socket. Confirms store capabilities/fetch/accept and runtime startup return store errors. Actual database loss during accepted executions is covered separately by the disposable Linux recovery scenarios.",
+    "source_commit": "4e5692fb5aa4d68a21e384dbcad888ce6f6f20c1",
+    "working_directory": "examples/durable_host"
+  },
   "durable_deployment": {
     "archive_sha256": "5d7484b13d9ab44eedacb919e542da0f5064ff8073c57ece6a8f74837997e187",
     "corrected_deadline": {
@@ -817,6 +831,233 @@
     },
     "source_commit": "5abc0037bea19daf97d094f08eb773f5b9c61bff",
     "status": "passed"
+  },
+  "legacy_1_14_6_corrected_full_suite_attempt": {
+    "actual_worker_account_kvm_descriptors_after_stop": 0,
+    "archive_sha256": "6588115599b7a43f0e066c54d5053fd5ee73bacddeaf2bb77b562b909c0e476d",
+    "cases_not_started": 5,
+    "cleanup": "Harness reached 2100 seconds and stopped its process group. The remaining owned controller PID/PGID 7588 was verified as user lab in the durable example directory, then terminated. The owned worker was inactive; both account descriptor checks were empty. Reports were exported before disposing the outer VM. No accepted commands were replayed.",
+    "completed_case_lines": 19,
+    "completed_suite_pass": false,
+    "failed_boundaries": [
+      "notification:before",
+      "artifact_record:after",
+      "release:after",
+      "dispatch_intent:after"
+    ],
+    "harness_sha256_record": "132336c335ea3560fe3fc9e56b182af9d637106787b3188345c873f8b35bd0da  scripts/lab/run-check-legacy-35.exs",
+    "interrupted_case": "absence_record:before",
+    "journal_sha256": "ca559fd5dfd5ce55aa5e9a8b7405b0446d68a7cd24724bee83e30ae10119ceaf",
+    "lab_account_kvm_descriptors_after_stop": 0,
+    "observation": "Cases failed before the requested boundary with not_dispatched execution evidence and protocol errors from start/delete. Upstream journal includes VM still reachable via vsock after scope kill; no PID to signal. A longer suite deadline alone would not resolve the four observed failures.",
+    "pending_records_after_teardown": 3,
+    "report": {
+      "captured_bytes": 6844,
+      "exit_code": 0,
+      "failure": "deadline",
+      "output_sha256": "fc057347365dd9f889b813afa9ad5c90f50d5a87c1944580de430383b99d7c76",
+      "seconds": 2100.201,
+      "status": "failed"
+    },
+    "reported_case_failures": 4,
+    "reserved_slots_after_teardown": 3,
+    "sanitized_retained_records": [
+      {
+        "accepted_at_ms": 1789354045195,
+        "cleanup": "failed",
+        "created_machine_recorded": true,
+        "deadlines": {
+          "cleanup": 1789354159788,
+          "preparation": 1789354165423,
+          "queue": 1789354105195
+        },
+        "errors": [
+          {
+            "at_ms": 1789354131628,
+            "error": {
+              "category": "transport",
+              "evidence": "dispatch_uncertain",
+              "operation": "inspect"
+            }
+          },
+          {
+            "at_ms": 1789354131027,
+            "error": {
+              "category": "transport",
+              "evidence": "dispatch_uncertain",
+              "operation": "inspect"
+            }
+          },
+          {
+            "at_ms": 1789354130526,
+            "error": {
+              "category": "transport",
+              "evidence": "dispatch_uncertain",
+              "operation": "inspect"
+            }
+          },
+          {
+            "at_ms": 1789354130126,
+            "error": {
+              "category": "transport",
+              "evidence": "dispatch_uncertain",
+              "operation": "inspect"
+            }
+          },
+          {
+            "at_ms": 1789354129822,
+            "error": {
+              "category": "transport",
+              "evidence": "dispatch_uncertain",
+              "operation": "inspect"
+            }
+          },
+          {
+            "at_ms": 1789354129734,
+            "error": {
+              "category": "protocol",
+              "evidence": "dispatch_uncertain",
+              "operation": "start"
+            }
+          }
+        ],
+        "evidence": "not_dispatched",
+        "reservation_retained": true,
+        "state": "failed",
+        "updated_at_ms": 1789354191733
+      },
+      {
+        "accepted_at_ms": 1789353057210,
+        "cleanup": "failed",
+        "created_machine_recorded": true,
+        "deadlines": {
+          "cleanup": 1789353207520,
+          "preparation": 1789353177382,
+          "queue": 1789353117210
+        },
+        "errors": [
+          {
+            "at_ms": 1789353195154,
+            "error": {
+              "category": "protocol",
+              "evidence": "dispatch_uncertain",
+              "operation": "delete"
+            }
+          },
+          {
+            "at_ms": 1789353191422,
+            "error": {
+              "category": "protocol",
+              "evidence": "dispatch_uncertain",
+              "operation": "delete"
+            }
+          },
+          {
+            "at_ms": 1789353187777,
+            "error": {
+              "category": "protocol",
+              "evidence": "dispatch_uncertain",
+              "operation": "delete"
+            }
+          },
+          {
+            "at_ms": 1789353184309,
+            "error": {
+              "category": "protocol",
+              "evidence": "dispatch_uncertain",
+              "operation": "delete"
+            }
+          },
+          {
+            "at_ms": 1789353180835,
+            "error": {
+              "category": "protocol",
+              "evidence": "dispatch_uncertain",
+              "operation": "delete"
+            }
+          },
+          {
+            "at_ms": 1789353177440,
+            "error": {
+              "category": "expired",
+              "evidence": "not_dispatched",
+              "operation": "runtime"
+            }
+          }
+        ],
+        "evidence": "not_dispatched",
+        "reservation_retained": true,
+        "state": "failed",
+        "updated_at_ms": 1789353195154
+      },
+      {
+        "accepted_at_ms": 1789352692943,
+        "cleanup": "failed",
+        "created_machine_recorded": true,
+        "deadlines": {
+          "cleanup": 1789352843253,
+          "preparation": 1789352813092,
+          "queue": 1789352752943
+        },
+        "errors": [
+          {
+            "at_ms": 1789352831078,
+            "error": {
+              "category": "protocol",
+              "evidence": "dispatch_uncertain",
+              "operation": "delete"
+            }
+          },
+          {
+            "at_ms": 1789352827250,
+            "error": {
+              "category": "protocol",
+              "evidence": "dispatch_uncertain",
+              "operation": "delete"
+            }
+          },
+          {
+            "at_ms": 1789352823561,
+            "error": {
+              "category": "protocol",
+              "evidence": "dispatch_uncertain",
+              "operation": "delete"
+            }
+          },
+          {
+            "at_ms": 1789352820043,
+            "error": {
+              "category": "protocol",
+              "evidence": "dispatch_uncertain",
+              "operation": "delete"
+            }
+          },
+          {
+            "at_ms": 1789352816598,
+            "error": {
+              "category": "protocol",
+              "evidence": "dispatch_uncertain",
+              "operation": "delete"
+            }
+          },
+          {
+            "at_ms": 1789352813146,
+            "error": {
+              "category": "expired",
+              "evidence": "not_dispatched",
+              "operation": "runtime"
+            }
+          }
+        ],
+        "evidence": "not_dispatched",
+        "reservation_retained": true,
+        "state": "failed",
+        "updated_at_ms": 1789352831078
+      }
+    ],
+    "seed": 602028,
+    "source_commit": "cfbe8ca7fe38d6bfe1b1519c5b30c7bc5ff87a54",
+    "storage_observation": "Filesystem               1B-blocks       Used   Available Use% Mounted on\n/dev/vda1             102888095744 5604651008 97266667520   6% /\nsmolbox-qualification     67108864      73728    67035136   1% /srv/sbq/control\nsmolbox-qualification    805306368  141176832   664129536  18% /srv/sbq/cache\n"
   },
   "legacy_1_14_6_initial": {
     "actual_account_kvm_fds_after_stop": 0,
