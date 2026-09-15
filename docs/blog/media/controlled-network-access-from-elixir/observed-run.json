@@ -1,0 +1,31 @@
+{
+  "status": "passed",
+  "state": "completed",
+  "cleanup": "complete",
+  "platform": "macos",
+  "architecture": "aarch64",
+  "runtime_version": "1.16.0",
+  "network": {
+    "hosts": [
+      "earthquake.usgs.gov"
+    ],
+    "cidrs": []
+  },
+  "collection": "complete",
+  "library_version": "0.1.3",
+  "artifact_sha256": "d4fdc417ae000a1b56c99a1e6d8ee216b094f1dbd5ba1bf3c9fb613d404d9120",
+  "same_handle_on_duplicate": true,
+  "reservation_released": true,
+  "empty_worker": true,
+  "checked_at": "2026-09-14T22:04:06.792488Z",
+  "report": {
+    "source_url": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson",
+    "feed_generated_ms": 1789423444000,
+    "source_sha256": "769ca9b83d44c145f87b0e5f64a01024845922a132edc4bdbd535dade418e534",
+    "download_bytes": 25798,
+    "event_count": 36,
+    "maximum_magnitude": 5.6
+  },
+  "script_sha256": "9486f3342ea9f460f01e92aca14bfdf2c4a165701b75958070e110ab5ef5f86c",
+  "scope": "One ordinary macOS run against the public USGS feed; not an enforcement or adversarial campaign."
+}

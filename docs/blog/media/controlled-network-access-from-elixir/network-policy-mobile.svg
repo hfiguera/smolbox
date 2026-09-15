@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="720" viewBox="0 0 390 720" role="img" aria-labelledby="title desc">
+<title id="title">Keep the policy with the job</title><desc id="desc">Elixir approves destinations, SmolBox records execution identity and verifies the reported policy, and smolvm applies outbound controls. The report is collected before cleanup is verified.</desc>
+<rect width="390" height="720" rx="10" fill="#edf2fa"/>
+<g font-family="sans-serif">
+<text x="20" y="38" font-size="18" font-weight="700" fill="#215bc7">KEEP THE POLICY WITH THE JOB</text>
+<g fill="#fff" stroke="#d8e0eb"><rect x="20" y="60" width="350" height="142" rx="8"/><rect x="20" y="232" width="350" height="142" rx="8"/><rect x="20" y="404" width="350" height="142" rx="8"/></g>
+<g fill="#17304e" font-weight="700" font-size="25"><text x="40" y="99">Elixir application</text><text x="40" y="271">SmolBox</text><text x="40" y="443">smolvm worker</text></g>
+<g fill="#17304e" font-size="20"><text x="40" y="139">Approve a profile</text><text x="40" y="311">Record identity and outcome</text><text x="40" y="483">Apply outbound controls</text></g>
+<g fill="#526478" font-size="19"><text x="40" y="175">earthquake.usgs.gov</text><text x="40" y="347">Verify reported network policy</text><text x="40" y="519">Python guest fetches the feed</text></g>
+<path d="M195 208v17m-7-7 7 7 7-7M195 380v17m-7-7 7 7 7-7" fill="none" stroke="#215bc7" stroke-width="2"/>
+<rect x="20" y="571" width="350" height="90" rx="8" fill="#17304e"/>
+<text x="40" y="605" fill="#fff" font-size="21" font-weight="600">Collect report.json</text><text x="40" y="639" fill="#d5e3fa" font-size="19">Verify cleanup; release capacity</text>
+<text x="20" y="689" fill="#526478" font-size="15">Upstream policy semantics and infrastructure</text><text x="20" y="710" fill="#526478" font-size="15">exceptions still apply.</text>
+</g></svg>
