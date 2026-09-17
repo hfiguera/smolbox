@@ -1,5 +1,16 @@
 [
   {
+    "slug": "measuring-nested-kvm-overhead",
+    "title": "How much slower is nested KVM? Measuring our SmolBox lab",
+    "description": "A reader asked about nested virtualization overhead. Six paired tests showed why startup, guest execution and cleanup need separate clocks.",
+    "published_on": "2026-09-16",
+    "updated_on": "2026-09-16",
+    "version": "0.1.3",
+    "category": "Performance experiments",
+    "image": "nested-performance.png",
+    "image_alt": "Same workload, different waits: a comparison of direct and nested KVM execution in the SmolBox lab."
+  },
+  {
     "slug": "controlled-network-access-from-elixir",
     "title": "Controlled network access for disposable VMs in Elixir",
     "description": "Fetch a public dataset from a disposable Python VM, collect the report in Elixir, and keep its approved network policy with the execution. A working SmolBox 0.1.3 example.",

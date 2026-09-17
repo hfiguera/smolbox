@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <title>Same workload. Different waits.</title>
+  <desc>Six paired tests of direct and nested KVM in the SmolBox lab. Median startup to the first successful command was 1.43 seconds direct and 8.04 seconds nested.</desc>
+  <rect width="1200" height="630" fill="#fbfcfe"/>
+  <g font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+    <path d="M56 54h28v28H56z" fill="none" stroke="#215bc7" stroke-width="3"/>
+    <text x="99" y="77" font-size="26" font-weight="650" fill="#17304e">SmolBox</text>
+    <text x="56" y="176" font-size="19" font-weight="600" letter-spacing="2" fill="#526478">MEASURING NESTED KVM</text>
+    <text x="52" y="259" font-size="62" font-weight="700" letter-spacing="-2" fill="#17304e">Same workload.</text>
+    <text x="52" y="331" font-size="62" font-weight="700" letter-spacing="-2" fill="#17304e">Different waits.</text>
+    <text x="56" y="397" font-size="25" fill="#526478">Separate startup, work and cleanup.</text>
+    <rect x="615" y="139" width="529" height="333" rx="8" fill="#edf2fa"/>
+    <text x="647" y="184" font-size="23" font-weight="650" fill="#17304e">Startup to the first command</text>
+    <text x="647" y="237" font-size="22" fill="#526478">Direct Linux</text>
+    <text x="647" y="301" font-size="54" font-weight="700" fill="#17304e">1.43 s</text>
+    <path d="M648 324h430" stroke="#d8e0eb" stroke-width="2"/>
+    <text x="647" y="367" font-size="22" fill="#526478">Nested Linux</text>
+    <text x="647" y="433" font-size="54" font-weight="700" fill="#215bc7">8.04 s</text>
+    <path d="M56 533h1088" stroke="#d8e0eb" stroke-width="2"/>
+    <text x="56" y="577" font-size="21" fill="#526478">Six paired tests · medians · one Intel host</text>
+    <text x="920" y="577" font-size="21" fill="#215bc7">smolbox / field notes</text>
+  </g>
+</svg>

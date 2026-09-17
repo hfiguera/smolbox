@@ -96,6 +96,11 @@ p { margin: 0 0 1.4rem; }
 .prose table { display: block; overflow-x: auto; border-collapse: collapse; margin: 28px 0; font-size: 15px; font-variant-numeric: tabular-nums; }
 .prose th, .prose td { text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); padding: 12px; min-width: 130px; }
 .prose th { background: var(--wash); }
+.prose .benchmark-results { display: table; width: 100%; table-layout: fixed; }
+.prose .benchmark-results th, .prose .benchmark-results td { min-width: 0; padding: 12px 8px; }
+.prose .benchmark-results th:first-child { width: 50%; }
+.prose .benchmark-results tbody th { background: none; font-weight: 400; }
+.prose .benchmark-results td, .prose .benchmark-results thead th:not(:first-child) { text-align: right; white-space: nowrap; }
 .next-step { margin: 64px 0 80px 264px; max-width: var(--reading-width); border-top: 1px solid var(--line); padding-top: 32px; }
 .next-step h2 { font-size: 28px; margin: 0 0 16px; }
 .next-step p { color: var(--muted); }

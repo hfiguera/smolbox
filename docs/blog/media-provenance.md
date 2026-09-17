@@ -73,3 +73,27 @@ JSON identifies the published library, worker version, artifact digest and sourc
 script digest, plus the retrieved public USGS feed's timestamp and content hash.
 It contains no account credentials or private host paths. It records a successful
 application example, not an additional isolation qualification.
+
+## Nested KVM performance comparison
+
+Original SVG geometry reuses the blog's navy and cobalt palette. The diagram
+shows the two measured deployment layouts, with separate desktop and mobile
+compositions. It is a conceptual diagram rather than a trace or security claim.
+
+- `media/measuring-nested-kvm-overhead/comparison.svg`: desktop comparison,
+  1120 × 580.
+- `media/measuring-nested-kvm-overhead/comparison-mobile.svg`: vertical mobile
+  comparison, 390 × 800.
+- `media/measuring-nested-kvm-overhead/nested-performance-social.svg`: original
+  1200 × 630 sharing composition. Its startup figures are medians from the
+  six measured pairs in the accompanying evidence.
+- `media/measuring-nested-kvm-overhead/nested-performance.png`: Chromium
+  rasterization of that SVG, for article cards and social metadata.
+- `media/measuring-nested-kvm-overhead/measurements.json`: byte-identical public
+  copy of `docs/evidence/nested-kvm-performance.json`. It includes the measured
+  samples, warmups, methodology metadata, checksums and teardown observations.
+  Synchronize the public copy if the source evidence changes.
+
+No social screenshot, reader identity, external artwork or generated photograph
+is included. The reader's question is paraphrased from feedback supplied by the
+maintainer; the post does not attribute a name that was not provided.

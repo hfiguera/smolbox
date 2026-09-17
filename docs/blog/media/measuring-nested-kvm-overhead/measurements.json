@@ -1,0 +1,1285 @@
+{
+  "status": "passed",
+  "unit": "milliseconds",
+  "statistics": {
+    "cpu_client_ms": {
+      "direct": {
+        "max": 525.186,
+        "min": 442.495,
+        "median": 479.3055
+      },
+      "nested": {
+        "max": 585.741,
+        "min": 544.811,
+        "median": 567.892
+      },
+      "ratio_of_medians": 1.1848226235668067,
+      "paired_ratios": {
+        "max": 1.251268375913852,
+        "min": 1.1153020072888462,
+        "median": 1.1940099301576632
+      }
+    },
+    "cpu_guest_ms": {
+      "direct": {
+        "max": 353.005267,
+        "min": 286.564308,
+        "median": 311.38971549999997
+      },
+      "nested": {
+        "max": 336.884278,
+        "min": 283.534708,
+        "median": 308.9071975
+      },
+      "ratio_of_medians": 0.9920276172383735,
+      "paired_ratios": {
+        "max": 1.0771671467194721,
+        "min": 0.8962662376528836,
+        "median": 1.0054619359189192
+      }
+    },
+    "create_ms": {
+      "direct": {
+        "max": 559.753,
+        "min": 147.353,
+        "median": 149.8395
+      },
+      "nested": {
+        "max": 164.417,
+        "min": 152.099,
+        "median": 154.05599999999998
+      },
+      "ratio_of_medians": 1.0281401099176117,
+      "paired_ratios": {
+        "max": 1.0959680735602428,
+        "min": 0.27336878944820303,
+        "median": 1.028784590061774
+      }
+    },
+    "file_client_ms": {
+      "direct": {
+        "max": 542.607,
+        "min": 201.728,
+        "median": 215.8295
+      },
+      "nested": {
+        "max": 517.074,
+        "min": 478.213,
+        "median": 498.01800000000003
+      },
+      "ratio_of_medians": 2.307460286939459,
+      "paired_ratios": {
+        "max": 2.5023744844543145,
+        "min": 0.8813247893963773,
+        "median": 2.3221628747977245
+      }
+    },
+    "file_guest_ms": {
+      "direct": {
+        "max": 498.057206,
+        "min": 161.615587,
+        "median": 179.3001815
+      },
+      "nested": {
+        "max": 463.489504,
+        "min": 426.018372,
+        "median": 441.721809
+      },
+      "ratio_of_medians": 2.463588186607608,
+      "paired_ratios": {
+        "max": 2.7695874841577006,
+        "min": 0.8553603218020702,
+        "median": 2.504856121281492
+      }
+    },
+    "managed_cleanup_ms": {
+      "direct": {
+        "max": 3235.851,
+        "min": 2329.175,
+        "median": 3136.3914999999997
+      },
+      "nested": {
+        "max": 10724.096,
+        "min": 8845.467,
+        "median": 9319.017
+      },
+      "ratio_of_medians": 2.9712543858124856,
+      "paired_ratios": {
+        "max": 3.810293773546427,
+        "min": 2.8768216198073593,
+        "median": 3.0220991726662687
+      }
+    },
+    "managed_collected_ms": {
+      "direct": {
+        "max": 2476.584,
+        "min": 2108.573,
+        "median": 2408.6735
+      },
+      "nested": {
+        "max": 9314.25,
+        "min": 8455.991,
+        "median": 8899.402
+      },
+      "ratio_of_medians": 3.694731560753253,
+      "paired_ratios": {
+        "max": 4.010290845989207,
+        "min": 3.5721954110985137,
+        "median": 3.7123076441258505
+      }
+    },
+    "ready_ms": {
+      "direct": {
+        "max": 1798.2010000000002,
+        "min": 1378.675,
+        "median": 1430.8205
+      },
+      "nested": {
+        "max": 8941.49,
+        "min": 7532.3640000000005,
+        "median": 8044.7305
+      },
+      "ratio_of_medians": 5.622459630680438,
+      "paired_ratios": {
+        "max": 6.3976545842217485,
+        "min": 4.363666646495232,
+        "median": 5.477772173933204
+      }
+    },
+    "start_ms": {
+      "direct": {
+        "max": 1593.761,
+        "min": 1180.564,
+        "median": 1216.5965
+      },
+      "nested": {
+        "max": 8677.259,
+        "min": 7281.274,
+        "median": 7801.383
+      },
+      "ratio_of_medians": 6.412465431225553,
+      "paired_ratios": {
+        "max": 7.097672078851581,
+        "min": 4.701829195218103,
+        "median": 6.463209456505649
+      }
+    },
+    "tiny_client_ms": {
+      "direct": {
+        "max": 105.715,
+        "min": 56.46,
+        "median": 95.637
+      },
+      "nested": {
+        "max": 106.047,
+        "min": 59.686,
+        "median": 91.23599999999999
+      },
+      "ratio_of_medians": 0.9539822453652874,
+      "paired_ratios": {
+        "max": 1.8032235210768686,
+        "min": 0.6146099349205042,
+        "median": 0.956771497097261
+      }
+    }
+  },
+  "controls": {
+    "direct": {
+      "throttled_usec": 0,
+      "throttled_periods": 0,
+      "memory_limit_events": 0,
+      "oom_kills": 0,
+      "outer_throttled_usec": 0
+    },
+    "nested": {
+      "throttled_usec": 0,
+      "throttled_periods": 0,
+      "memory_limit_events": 0,
+      "oom_kills": 0,
+      "outer_throttled_usec": 0
+    }
+  },
+  "measured_pairs": 6,
+  "provenance": {
+    "agent_sha256": "4dff5e8e6a29e79fb4856e8043b8fc05b047044714149ce928f20f75ed18db7a",
+    "baseline_sha256": "4ff59594af008ff0efb517e9c70cb90d5cf7c240dc0f71d53a162c7b4a0eea2d",
+    "benchmark_script_sha256": "a04caa337a35989a4df9d88bab061037c178f45cf1b493c2445a2226e8e2f5fb",
+    "cache_state": "Prepared artifacts and decompressed templates; warm host caches, no cache dropping, no downloads timed; each lifecycle creates a new microVM.",
+    "consumer_lock_sha256": "adcd77a39eb5d0b8e05d45eaad3e287b61c49ca65ca4fb6fc28c66116540762f",
+    "cpu_affinity_pinned": false,
+    "cpu_governor": "powersave",
+    "date_local": "2026-09-16",
+    "direct_kernel": "7.1.5-76070105-generic",
+    "elixir": "1.20.4",
+    "execution_host": "ssh linux only; no macOS execution tests",
+    "guest_python": "3.12.14",
+    "hardware": "Intel Core i5-1135G7, four cores / eight threads, approximately 64 GiB RAM",
+    "libkrun_sha256": "2a58b2fcd8975972c6c1eba0aa687ad0e7844069209d9e56e3bdb4afe6e9fbf7",
+    "libkrunfw_sha256": "767495f52bd786e6e0b0fa1b04adf40dea44b80019f6953ca6eb6394cc90d264",
+    "measured_window_utc": [
+      "2026-09-17T02:24:40Z",
+      "2026-09-17T02:27:22Z"
+    ],
+    "microvm": {
+      "cpus": 1,
+      "memory_mb": 512,
+      "network": "offline",
+      "overlay_gb": 1,
+      "storage_gb": 1
+    },
+    "microvm_kernel": "6.12.95",
+    "nested_worker_kernel": "6.8.0-139-generic",
+    "otp": "29.0.6",
+    "outer_vm": {
+      "cpus": 4,
+      "disk_gib": 100,
+      "host_cpu_percent": 400,
+      "host_memory_gib": 12,
+      "memory_gib": 8
+    },
+    "raw_archive_sha256": "a64fa2e74180d5873c73c61224ebcfb9ba2713995e3a26be1a5507b899b38a7c",
+    "runtime_archive_sha256": "cb7d6ea34914b4d71958e16eafc8a3220fe9e8cd5b76fa983ef9f648159f4c9b",
+    "runtime_binary_sha256": "487f20b84053ce6441c67d4d8af35fc028d3bfc7fcfd2da4309c070930fe46a1",
+    "sample_design": "One completed warmup per configuration excluded; six alternating pairs, direct first on odd pairs and nested first on even pairs. No measured failure or sample exclusion.",
+    "scope": "Small trusted workloads on one Intel host, one job at a time. Different worker kernels and storage stacks, no CPU pinning or fixed frequency. No isolated causal estimate of KVM overhead, cold-cache storage claim, tail-latency guarantee, concurrency benchmark, or production qualification.",
+    "setup_attempts": "Before measurement: corrected noexec staging and stale user-manager group access; enabled guest user lingering; corrected descriptor traversal and dealt with protected direct descriptors. Five diagnostic low-level executions cleaned up but failed instrumentation assertions; no timing from them is included. Corrected trace output filtering produced explicit successful KVM_CREATE_VM and KVM_CREATE_VCPU calls in a separate direct pilot. All measured samples are untraced.",
+    "storage": {
+      "direct": "host ext4, noatime",
+      "nested": "ext4 with relatime and discard, inside QEMU qcow2 overlay on host lab ext4 volume"
+    },
+    "teardown": {
+      "both_final_inventories_empty": true,
+      "both_worker_cgroups_absent": true,
+      "original_host_worker_preserved": true,
+      "outer_vm_stopped": true,
+      "recovery_complete": true
+    },
+    "timezone": "America/Denver",
+    "turbo_enabled": true,
+    "worker_limits": {
+      "cpu_percent": 200,
+      "lifetime_seconds": 1800,
+      "memory_bytes": 4294967296,
+      "swap_bytes": 0,
+      "tasks": 192
+    }
+  },
+  "samples": [
+    {
+      "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+      "counters_after": {
+        "cpu.max": "200000 100000\n",
+        "cpu.stat": "usage_usec 8136185\nuser_usec 4892300\nsystem_usec 3243885\nnice_usec 0\ncore_sched.force_idle_usec 0\nnr_periods 209\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0\n",
+        "memory.max": "4294967296\n",
+        "memory.peak": "456212480\n"
+      },
+      "counters_before": {
+        "cpu.max": "200000 100000\n",
+        "cpu.stat": "usage_usec 4133601\nuser_usec 2462874\nsystem_usec 1670727\nnice_usec 0\ncore_sched.force_idle_usec 0\nnr_periods 148\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0\n",
+        "memory.max": "4294967296\n",
+        "memory.peak": "456212480\n"
+      },
+      "elixir": "1.20.4",
+      "host_kernel": "7.1.5-76070105-generic",
+      "label": "direct",
+      "library_version": "0.1.3",
+      "low_level": {
+        "cpu": {
+          "client_ms": 489.851,
+          "guest_ms": 336.183128,
+          "iterations": 2000000,
+          "kernel": "6.12.95",
+          "mode": "cpu",
+          "python": "3.12.14",
+          "value": 2666664666667000000
+        },
+        "create_ms": 559.753,
+        "file": {
+          "bytes": 37748736,
+          "client_ms": 226.141,
+          "guest_ms": 185.227666,
+          "kernel": "6.12.95",
+          "mode": "file",
+          "python": "3.12.14",
+          "sha256": "71b95e386e2cd1528baa69f1a206e039a50eafde3d2a4e1638c27cd70ce1e0fe"
+        },
+        "first_exec_ms": 27.805,
+        "kvm_descriptors": [
+          "797446 ioctl(13, KVM_CREATE_VM, 0)      = 14",
+          "797446 ioctl(14, KVM_CREATE_VCPU, 0)    = 25"
+        ],
+        "ready_ms": 1798.2010000000002,
+        "start_ms": 1210.643,
+        "tiny_client_ms": 94.793
+      },
+      "managed": {
+        "cleanup": "verified_absent",
+        "result": {
+          "bytes": 37748736,
+          "guest_ms": 466.45692,
+          "kernel": "6.12.95",
+          "mode": "file",
+          "python": "3.12.14",
+          "sha256": "71b95e386e2cd1528baa69f1a206e039a50eafde3d2a4e1638c27cd70ce1e0fe"
+        },
+        "submit_to_cleanup_ms": 3235.851,
+        "submit_to_collected_ms": 2476.584
+      },
+      "otp": "29",
+      "outer_cpu_delta": {
+        "nr_throttled": 0,
+        "throttled_usec": 0
+      },
+      "recorded_at": "2026-09-17T02:24:40.689486Z",
+      "runtime_version": "1.16.0",
+      "sample": "1",
+      "source_sha256": "3a315040e7978a64811ba88c774ca2fa91f9b0e418bf3a6ad41560a5c6c14a8e",
+      "status": "passed"
+    },
+    {
+      "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+      "counters_after": {
+        "cpu.max": "200000 100000\n",
+        "cpu.stat": "usage_usec 12018526\nuser_usec 7265926\nsystem_usec 4752600\nnice_usec 0\ncore_sched.force_idle_usec 0\nnr_periods 306\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0\n",
+        "memory.max": "4294967296\n",
+        "memory.peak": "458416128\n"
+      },
+      "counters_before": {
+        "cpu.max": "200000 100000\n",
+        "cpu.stat": "usage_usec 8156145\nuser_usec 4902450\nsystem_usec 3253694\nnice_usec 0\ncore_sched.force_idle_usec 0\nnr_periods 245\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0\n",
+        "memory.max": "4294967296\n",
+        "memory.peak": "456212480\n"
+      },
+      "elixir": "1.20.4",
+      "host_kernel": "7.1.5-76070105-generic",
+      "label": "direct",
+      "library_version": "0.1.3",
+      "low_level": {
+        "cpu": {
+          "client_ms": 484.381,
+          "guest_ms": 316.350986,
+          "iterations": 2000000,
+          "kernel": "6.12.95",
+          "mode": "cpu",
+          "python": "3.12.14",
+          "value": 2666664666667000000
+        },
+        "create_ms": 148.706,
+        "file": {
+          "bytes": 37748736,
+          "client_ms": 222.481,
+          "guest_ms": 185.704085,
+          "kernel": "6.12.95",
+          "mode": "file",
+          "python": "3.12.14",
+          "sha256": "71b95e386e2cd1528baa69f1a206e039a50eafde3d2a4e1638c27cd70ce1e0fe"
+        },
+        "first_exec_ms": 25.71,
+        "kvm_descriptors": [
+          "797446 ioctl(13, KVM_CREATE_VM, 0)      = 14",
+          "797446 ioctl(14, KVM_CREATE_VCPU, 0)    = 25"
+        ],
+        "ready_ms": 1768.177,
+        "start_ms": 1593.761,
+        "tiny_client_ms": 95.344
+      },
+      "managed": {
+        "cleanup": "verified_absent",
+        "result": {
+          "bytes": 37748736,
+          "guest_ms": 435.261254,
+          "kernel": "6.12.95",
+          "mode": "file",
+          "python": "3.12.14",
+          "sha256": "71b95e386e2cd1528baa69f1a206e039a50eafde3d2a4e1638c27cd70ce1e0fe"
+        },
+        "submit_to_cleanup_ms": 3121.209,
+        "submit_to_collected_ms": 2317.768
+      },
+      "otp": "29",
+      "outer_cpu_delta": {
+        "nr_throttled": 0,
+        "throttled_usec": 0
+      },
+      "recorded_at": "2026-09-17T02:25:28.457934Z",
+      "runtime_version": "1.16.0",
+      "sample": "2",
+      "source_sha256": "3a315040e7978a64811ba88c774ca2fa91f9b0e418bf3a6ad41560a5c6c14a8e",
+      "status": "passed"
+    },
+    {
+      "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+      "counters_after": {
+        "cpu.max": "200000 100000\n",
+        "cpu.stat": "usage_usec 15902570\nuser_usec 9630071\nsystem_usec 6272499\nnice_usec 0\ncore_sched.force_idle_usec 0\nnr_periods 364\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0\n",
+        "memory.max": "4294967296\n",
+        "memory.peak": "460382208\n"
+      },
+      "counters_before": {
+        "cpu.max": "200000 100000\n",
+        "cpu.stat": "usage_usec 12019774\nuser_usec 7265926\nsystem_usec 4753848\nnice_usec 0\ncore_sched.force_idle_usec 0\nnr_periods 308\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0\n",
+        "memory.max": "4294967296\n",
+        "memory.peak": "458416128\n"
+      },
+      "elixir": "1.20.4",
+      "host_kernel": "7.1.5-76070105-generic",
+      "label": "direct",
+      "library_version": "0.1.3",
+      "low_level": {
+        "cpu": {
+          "client_ms": 450.968,
+          "guest_ms": 289.439115,
+          "iterations": 2000000,
+          "kernel": "6.12.95",
+          "mode": "cpu",
+          "python": "3.12.14",
+          "value": 2666664666667000000
+        },
+        "create_ms": 147.353,
+        "file": {
+          "bytes": 37748736,
+          "client_ms": 201.728,
+          "guest_ms": 161.615587,
+          "kernel": "6.12.95",
+          "mode": "file",
+          "python": "3.12.14",
+          "sha256": "71b95e386e2cd1528baa69f1a206e039a50eafde3d2a4e1638c27cd70ce1e0fe"
+        },
+        "first_exec_ms": 72.667,
+        "kvm_descriptors": [
+          "797446 ioctl(13, KVM_CREATE_VM, 0)      = 14",
+          "797446 ioctl(14, KVM_CREATE_VCPU, 0)    = 25"
+        ],
+        "ready_ms": 1400.584,
+        "start_ms": 1180.564,
+        "tiny_client_ms": 97.112
+      },
+      "managed": {
+        "cleanup": "verified_absent",
+        "result": {
+          "bytes": 37748736,
+          "guest_ms": 434.456759,
+          "kernel": "6.12.95",
+          "mode": "file",
+          "python": "3.12.14",
+          "sha256": "71b95e386e2cd1528baa69f1a206e039a50eafde3d2a4e1638c27cd70ce1e0fe"
+        },
+        "submit_to_cleanup_ms": 3074.736,
+        "submit_to_collected_ms": 2369.642
+      },
+      "otp": "29",
+      "outer_cpu_delta": {
+        "nr_throttled": 0,
+        "throttled_usec": 0
+      },
+      "recorded_at": "2026-09-17T02:25:35.140226Z",
+      "runtime_version": "1.16.0",
+      "sample": "3",
+      "source_sha256": "3a315040e7978a64811ba88c774ca2fa91f9b0e418bf3a6ad41560a5c6c14a8e",
+      "status": "passed"
+    },
+    {
+      "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+      "counters_after": {
+        "cpu.max": "200000 100000\n",
+        "cpu.stat": "usage_usec 19952934\nuser_usec 12102549\nsystem_usec 7850384\nnice_usec 0\ncore_sched.force_idle_usec 0\nnr_periods 456\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0\n",
+        "memory.max": "4294967296\n",
+        "memory.peak": "462589952\n"
+      },
+      "counters_before": {
+        "cpu.max": "200000 100000\n",
+        "cpu.stat": "usage_usec 15922404\nuser_usec 9641191\nsystem_usec 6281212\nnice_usec 0\ncore_sched.force_idle_usec 0\nnr_periods 400\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0\n",
+        "memory.max": "4294967296\n",
+        "memory.peak": "460382208\n"
+      },
+      "elixir": "1.20.4",
+      "host_kernel": "7.1.5-76070105-generic",
+      "label": "direct",
+      "library_version": "0.1.3",
+      "low_level": {
+        "cpu": {
+          "client_ms": 442.495,
+          "guest_ms": 286.564308,
+          "iterations": 2000000,
+          "kernel": "6.12.95",
+          "mode": "cpu",
+          "python": "3.12.14",
+          "value": 2666664666667000000
+        },
+        "create_ms": 148.341,
+        "file": {
+          "bytes": 37748736,
+          "client_ms": 208.439,
+          "guest_ms": 173.372697,
+          "kernel": "6.12.95",
+          "mode": "file",
+          "python": "3.12.14",
+          "sha256": "71b95e386e2cd1528baa69f1a206e039a50eafde3d2a4e1638c27cd70ce1e0fe"
+        },
+        "first_exec_ms": 66.901,
+        "kvm_descriptors": [
+          "797446 ioctl(13, KVM_CREATE_VM, 0)      = 14",
+          "797446 ioctl(14, KVM_CREATE_VCPU, 0)    = 25"
+        ],
+        "ready_ms": 1461.057,
+        "start_ms": 1245.815,
+        "tiny_client_ms": 56.46
+      },
+      "managed": {
+        "cleanup": "verified_absent",
+        "result": {
+          "bytes": 37748736,
+          "guest_ms": 484.034019,
+          "kernel": "6.12.95",
+          "mode": "file",
+          "python": "3.12.14",
+          "sha256": "71b95e386e2cd1528baa69f1a206e039a50eafde3d2a4e1638c27cd70ce1e0fe"
+        },
+        "submit_to_cleanup_ms": 3188.36,
+        "submit_to_collected_ms": 2473.385
+      },
+      "otp": "29",
+      "outer_cpu_delta": {
+        "nr_throttled": 0,
+        "throttled_usec": 0
+      },
+      "recorded_at": "2026-09-17T02:26:21.249755Z",
+      "runtime_version": "1.16.0",
+      "sample": "4",
+      "source_sha256": "3a315040e7978a64811ba88c774ca2fa91f9b0e418bf3a6ad41560a5c6c14a8e",
+      "status": "passed"
+    },
+    {
+      "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+      "counters_after": {
+        "cpu.max": "200000 100000\n",
+        "cpu.stat": "usage_usec 23922361\nuser_usec 14545342\nsystem_usec 9377019\nnice_usec 0\ncore_sched.force_idle_usec 0\nnr_periods 514\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0\n",
+        "memory.max": "4294967296\n",
+        "memory.peak": "462589952\n"
+      },
+      "counters_before": {
+        "cpu.max": "200000 100000\n",
+        "cpu.stat": "usage_usec 19953996\nuser_usec 12103193\nsystem_usec 7850802\nnice_usec 0\ncore_sched.force_idle_usec 0\nnr_periods 458\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0\n",
+        "memory.max": "4294967296\n",
+        "memory.peak": "462589952\n"
+      },
+      "elixir": "1.20.4",
+      "host_kernel": "7.1.5-76070105-generic",
+      "label": "direct",
+      "library_version": "0.1.3",
+      "low_level": {
+        "cpu": {
+          "client_ms": 474.23,
+          "guest_ms": 306.428445,
+          "iterations": 2000000,
+          "kernel": "6.12.95",
+          "mode": "cpu",
+          "python": "3.12.14",
+          "value": 2666664666667000000
+        },
+        "create_ms": 151.257,
+        "file": {
+          "bytes": 37748736,
+          "client_ms": 209.178,
+          "guest_ms": 169.239334,
+          "kernel": "6.12.95",
+          "mode": "file",
+          "python": "3.12.14",
+          "sha256": "71b95e386e2cd1528baa69f1a206e039a50eafde3d2a4e1638c27cd70ce1e0fe"
+        },
+        "first_exec_ms": 23.995,
+        "kvm_descriptors": [
+          "797446 ioctl(13, KVM_CREATE_VM, 0)      = 14",
+          "797446 ioctl(14, KVM_CREATE_VCPU, 0)    = 25"
+        ],
+        "ready_ms": 1378.675,
+        "start_ms": 1203.423,
+        "tiny_client_ms": 105.715
+      },
+      "managed": {
+        "cleanup": "verified_absent",
+        "result": {
+          "bytes": 37748736,
+          "guest_ms": 467.613657,
+          "kernel": "6.12.95",
+          "mode": "file",
+          "python": "3.12.14",
+          "sha256": "71b95e386e2cd1528baa69f1a206e039a50eafde3d2a4e1638c27cd70ce1e0fe"
+        },
+        "submit_to_cleanup_ms": 3151.574,
+        "submit_to_collected_ms": 2447.705
+      },
+      "otp": "29",
+      "outer_cpu_delta": {
+        "nr_throttled": 0,
+        "throttled_usec": 0
+      },
+      "recorded_at": "2026-09-17T02:26:27.516002Z",
+      "runtime_version": "1.16.0",
+      "sample": "5",
+      "source_sha256": "3a315040e7978a64811ba88c774ca2fa91f9b0e418bf3a6ad41560a5c6c14a8e",
+      "status": "passed"
+    },
+    {
+      "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+      "counters_after": {
+        "cpu.max": "200000 100000\n",
+        "cpu.stat": "usage_usec 28004340\nuser_usec 17075817\nsystem_usec 10928523\nnice_usec 0\ncore_sched.force_idle_usec 0\nnr_periods 607\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0\n",
+        "memory.max": "4294967296\n",
+        "memory.peak": "463327232\n"
+      },
+      "counters_before": {
+        "cpu.max": "200000 100000\n",
+        "cpu.stat": "usage_usec 23943566\nuser_usec 14560993\nsystem_usec 9382572\nnice_usec 0\ncore_sched.force_idle_usec 0\nnr_periods 550\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0\n",
+        "memory.max": "4294967296\n",
+        "memory.peak": "462589952\n"
+      },
+      "elixir": "1.20.4",
+      "host_kernel": "7.1.5-76070105-generic",
+      "label": "direct",
+      "library_version": "0.1.3",
+      "low_level": {
+        "cpu": {
+          "client_ms": 525.186,
+          "guest_ms": 353.005267,
+          "iterations": 2000000,
+          "kernel": "6.12.95",
+          "mode": "cpu",
+          "python": "3.12.14",
+          "value": 2666664666667000000
+        },
+        "create_ms": 150.973,
+        "file": {
+          "bytes": 37748736,
+          "client_ms": 542.607,
+          "guest_ms": 498.057206,
+          "kernel": "6.12.95",
+          "mode": "file",
+          "python": "3.12.14",
+          "sha256": "71b95e386e2cd1528baa69f1a206e039a50eafde3d2a4e1638c27cd70ce1e0fe"
+        },
+        "first_exec_ms": 24.097,
+        "kvm_descriptors": [
+          "797446 ioctl(13, KVM_CREATE_VM, 0)      = 14",
+          "797446 ioctl(14, KVM_CREATE_VCPU, 0)    = 25"
+        ],
+        "ready_ms": 1397.62,
+        "start_ms": 1222.55,
+        "tiny_client_ms": 95.93
+      },
+      "managed": {
+        "cleanup": "verified_absent",
+        "result": {
+          "bytes": 37748736,
+          "guest_ms": 169.256184,
+          "kernel": "6.12.95",
+          "mode": "file",
+          "python": "3.12.14",
+          "sha256": "71b95e386e2cd1528baa69f1a206e039a50eafde3d2a4e1638c27cd70ce1e0fe"
+        },
+        "submit_to_cleanup_ms": 2329.175,
+        "submit_to_collected_ms": 2108.573
+      },
+      "otp": "29",
+      "outer_cpu_delta": {
+        "nr_throttled": 0,
+        "throttled_usec": 0
+      },
+      "recorded_at": "2026-09-17T02:27:16.201234Z",
+      "runtime_version": "1.16.0",
+      "sample": "6",
+      "source_sha256": "3a315040e7978a64811ba88c774ca2fa91f9b0e418bf3a6ad41560a5c6c14a8e",
+      "status": "passed"
+    },
+    {
+      "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+      "counters_after": {
+        "cpu.max": "200000 100000\n",
+        "cpu.stat": "usage_usec 34490480\nuser_usec 20782626\nsystem_usec 13707853\ncore_sched.force_idle_usec 0\nnr_periods 793\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "memory.max": "4294967296\n",
+        "memory.peak": "458170368\n"
+      },
+      "counters_before": {
+        "cpu.max": "200000 100000\n",
+        "cpu.stat": "usage_usec 17048096\nuser_usec 10100511\nsystem_usec 6947585\ncore_sched.force_idle_usec 0\nnr_periods 597\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "memory.max": "4294967296\n",
+        "memory.peak": "455274496\n"
+      },
+      "elixir": "1.20.4",
+      "host_kernel": "6.8.0-139-generic",
+      "label": "nested",
+      "library_version": "0.1.3",
+      "low_level": {
+        "cpu": {
+          "client_ms": 582.871,
+          "guest_ms": 336.884278,
+          "iterations": 2000000,
+          "kernel": "6.12.95",
+          "mode": "cpu",
+          "python": "3.12.14",
+          "value": 2666664666667000000
+        },
+        "create_ms": 153.019,
+        "file": {
+          "bytes": 37748736,
+          "client_ms": 511.722,
+          "guest_ms": 462.020419,
+          "kernel": "6.12.95",
+          "mode": "file",
+          "python": "3.12.14",
+          "sha256": "71b95e386e2cd1528baa69f1a206e039a50eafde3d2a4e1638c27cd70ce1e0fe"
+        },
+        "first_exec_ms": 89.864,
+        "kvm_descriptors": [
+          "2956 anon_inode:kvm-vm",
+          "2956 anon_inode:kvm-vcpu:0"
+        ],
+        "ready_ms": 8092.976,
+        "start_ms": 7850.093,
+        "tiny_client_ms": 91.223
+      },
+      "managed": {
+        "cleanup": "verified_absent",
+        "result": {
+          "bytes": 37748736,
+          "guest_ms": 482.041092,
+          "kernel": "6.12.95",
+          "mode": "file",
+          "python": "3.12.14",
+          "sha256": "71b95e386e2cd1528baa69f1a206e039a50eafde3d2a4e1638c27cd70ce1e0fe"
+        },
+        "submit_to_cleanup_ms": 9309.752,
+        "submit_to_collected_ms": 8846.842
+      },
+      "otp": "29",
+      "outer_cpu_delta": {
+        "nr_throttled": 0,
+        "throttled_usec": 0
+      },
+      "recorded_at": "2026-09-17T02:24:47.291554Z",
+      "runtime_version": "1.16.0",
+      "sample": "1",
+      "source_sha256": "3a315040e7978a64811ba88c774ca2fa91f9b0e418bf3a6ad41560a5c6c14a8e",
+      "status": "passed"
+    },
+    {
+      "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+      "counters_after": {
+        "cpu.max": "200000 100000\n",
+        "cpu.stat": "usage_usec 51716053\nuser_usec 31123780\nsystem_usec 20592273\ncore_sched.force_idle_usec 0\nnr_periods 993\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "memory.max": "4294967296\n",
+        "memory.peak": "458575872\n"
+      },
+      "counters_before": {
+        "cpu.max": "200000 100000\n",
+        "cpu.stat": "usage_usec 34491596\nuser_usec 20783492\nsystem_usec 13708104\ncore_sched.force_idle_usec 0\nnr_periods 797\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "memory.max": "4294967296\n",
+        "memory.peak": "458170368\n"
+      },
+      "elixir": "1.20.4",
+      "host_kernel": "6.8.0-139-generic",
+      "label": "nested",
+      "library_version": "0.1.3",
+      "low_level": {
+        "cpu": {
+          "client_ms": 567.597,
+          "guest_ms": 283.534708,
+          "iterations": 2000000,
+          "kernel": "6.12.95",
+          "mode": "cpu",
+          "python": "3.12.14",
+          "value": 2666664666667000000
+        },
+        "create_ms": 152.334,
+        "file": {
+          "bytes": 37748736,
+          "client_ms": 517.074,
+          "guest_ms": 463.489504,
+          "kernel": "6.12.95",
+          "mode": "file",
+          "python": "3.12.14",
+          "sha256": "71b95e386e2cd1528baa69f1a206e039a50eafde3d2a4e1638c27cd70ce1e0fe"
+        },
+        "first_exec_ms": 69.809,
+        "kvm_descriptors": [
+          "3528 anon_inode:kvm-vm",
+          "3528 anon_inode:kvm-vcpu:0"
+        ],
+        "ready_ms": 7715.735,
+        "start_ms": 7493.592,
+        "tiny_client_ms": 106.047
+      },
+      "managed": {
+        "cleanup": "verified_absent",
+        "result": {
+          "bytes": 37748736,
+          "guest_ms": 502.800564,
+          "kernel": "6.12.95",
+          "mode": "file",
+          "python": "3.12.14",
+          "sha256": "71b95e386e2cd1528baa69f1a206e039a50eafde3d2a4e1638c27cd70ce1e0fe"
+        },
+        "submit_to_cleanup_ms": 9733.39,
+        "submit_to_collected_ms": 9211.535
+      },
+      "otp": "29",
+      "outer_cpu_delta": {
+        "nr_throttled": 0,
+        "throttled_usec": 0
+      },
+      "recorded_at": "2026-09-17T02:25:07.687517Z",
+      "runtime_version": "1.16.0",
+      "sample": "2",
+      "source_sha256": "3a315040e7978a64811ba88c774ca2fa91f9b0e418bf3a6ad41560a5c6c14a8e",
+      "status": "passed"
+    },
+    {
+      "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+      "counters_after": {
+        "cpu.max": "200000 100000\n",
+        "cpu.stat": "usage_usec 69075285\nuser_usec 41844982\nsystem_usec 27230303\ncore_sched.force_idle_usec 0\nnr_periods 1198\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "memory.max": "4294967296\n",
+        "memory.peak": "461643776\n"
+      },
+      "counters_before": {
+        "cpu.max": "200000 100000\n",
+        "cpu.stat": "usage_usec 51725604\nuser_usec 31126302\nsystem_usec 20599302\ncore_sched.force_idle_usec 0\nnr_periods 1007\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "memory.max": "4294967296\n",
+        "memory.peak": "458575872\n"
+      },
+      "elixir": "1.20.4",
+      "host_kernel": "6.8.0-139-generic",
+      "label": "nested",
+      "library_version": "0.1.3",
+      "low_level": {
+        "cpu": {
+          "client_ms": 544.811,
+          "guest_ms": 292.296246,
+          "iterations": 2000000,
+          "kernel": "6.12.95",
+          "mode": "cpu",
+          "python": "3.12.14",
+          "value": 2666664666667000000
+        },
+        "create_ms": 152.099,
+        "file": {
+          "bytes": 37748736,
+          "client_ms": 504.799,
+          "guest_ms": 447.608507,
+          "kernel": "6.12.95",
+          "mode": "file",
+          "python": "3.12.14",
+          "sha256": "71b95e386e2cd1528baa69f1a206e039a50eafde3d2a4e1638c27cd70ce1e0fe"
+        },
+        "first_exec_ms": 96.53,
+        "kvm_descriptors": [
+          "4098 anon_inode:kvm-vm",
+          "4098 anon_inode:kvm-vcpu:0"
+        ],
+        "ready_ms": 8341.356,
+        "start_ms": 8092.727,
+        "tiny_client_ms": 59.686
+      },
+      "managed": {
+        "cleanup": "verified_absent",
+        "result": {
+          "bytes": 37748736,
+          "guest_ms": 460.217539,
+          "kernel": "6.12.95",
+          "mode": "file",
+          "python": "3.12.14",
+          "sha256": "71b95e386e2cd1528baa69f1a206e039a50eafde3d2a4e1638c27cd70ce1e0fe"
+        },
+        "submit_to_cleanup_ms": 8845.467,
+        "submit_to_collected_ms": 8482.261
+      },
+      "otp": "29",
+      "outer_cpu_delta": {
+        "nr_throttled": 0,
+        "throttled_usec": 0
+      },
+      "recorded_at": "2026-09-17T02:25:41.069032Z",
+      "runtime_version": "1.16.0",
+      "sample": "3",
+      "source_sha256": "3a315040e7978a64811ba88c774ca2fa91f9b0e418bf3a6ad41560a5c6c14a8e",
+      "status": "passed"
+    },
+    {
+      "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+      "counters_after": {
+        "cpu.max": "200000 100000\n",
+        "cpu.stat": "usage_usec 86091849\nuser_usec 52088297\nsystem_usec 34003552\ncore_sched.force_idle_usec 0\nnr_periods 1389\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "memory.max": "4294967296\n",
+        "memory.peak": "461873152\n"
+      },
+      "counters_before": {
+        "cpu.max": "200000 100000\n",
+        "cpu.stat": "usage_usec 69076405\nuser_usec 41845448\nsystem_usec 27230956\ncore_sched.force_idle_usec 0\nnr_periods 1201\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "memory.max": "4294967296\n",
+        "memory.peak": "461643776\n"
+      },
+      "elixir": "1.20.4",
+      "host_kernel": "6.8.0-139-generic",
+      "label": "nested",
+      "library_version": "0.1.3",
+      "low_level": {
+        "cpu": {
+          "client_ms": 553.68,
+          "guest_ms": 308.677658,
+          "iterations": 2000000,
+          "kernel": "6.12.95",
+          "mode": "cpu",
+          "python": "3.12.14",
+          "value": 2666664666667000000
+        },
+        "create_ms": 162.577,
+        "file": {
+          "bytes": 37748736,
+          "client_ms": 483.62,
+          "guest_ms": 435.835111,
+          "kernel": "6.12.95",
+          "mode": "file",
+          "python": "3.12.14",
+          "sha256": "71b95e386e2cd1528baa69f1a206e039a50eafde3d2a4e1638c27cd70ce1e0fe"
+        },
+        "first_exec_ms": 88.513,
+        "kvm_descriptors": [
+          "4609 anon_inode:kvm-vm",
+          "4609 anon_inode:kvm-vcpu:0"
+        ],
+        "ready_ms": 7532.3640000000005,
+        "start_ms": 7281.274,
+        "tiny_client_ms": 101.81
+      },
+      "managed": {
+        "cleanup": "verified_absent",
+        "result": {
+          "bytes": 37748736,
+          "guest_ms": 457.704597,
+          "kernel": "6.12.95",
+          "mode": "file",
+          "python": "3.12.14",
+          "sha256": "71b95e386e2cd1528baa69f1a206e039a50eafde3d2a4e1638c27cd70ce1e0fe"
+        },
+        "submit_to_cleanup_ms": 9328.282,
+        "submit_to_collected_ms": 8951.962
+      },
+      "otp": "29",
+      "outer_cpu_delta": {
+        "nr_throttled": 0,
+        "throttled_usec": 0
+      },
+      "recorded_at": "2026-09-17T02:26:01.299084Z",
+      "runtime_version": "1.16.0",
+      "sample": "4",
+      "source_sha256": "3a315040e7978a64811ba88c774ca2fa91f9b0e418bf3a6ad41560a5c6c14a8e",
+      "status": "passed"
+    },
+    {
+      "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+      "counters_after": {
+        "cpu.max": "200000 100000\n",
+        "cpu.stat": "usage_usec 103655416\nuser_usec 62624865\nsystem_usec 41030551\ncore_sched.force_idle_usec 0\nnr_periods 1610\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "memory.max": "4294967296\n",
+        "memory.peak": "462258176\n"
+      },
+      "counters_before": {
+        "cpu.max": "200000 100000\n",
+        "cpu.stat": "usage_usec 86100709\nuser_usec 52091229\nsystem_usec 34009479\ncore_sched.force_idle_usec 0\nnr_periods 1403\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "memory.max": "4294967296\n",
+        "memory.peak": "461873152\n"
+      },
+      "elixir": "1.20.4",
+      "host_kernel": "6.8.0-139-generic",
+      "label": "nested",
+      "library_version": "0.1.3",
+      "low_level": {
+        "cpu": {
+          "client_ms": 568.187,
+          "guest_ms": 309.136737,
+          "iterations": 2000000,
+          "kernel": "6.12.95",
+          "mode": "cpu",
+          "python": "3.12.14",
+          "value": 2666664666667000000
+        },
+        "create_ms": 155.093,
+        "file": {
+          "bytes": 37748736,
+          "client_ms": 491.237,
+          "guest_ms": 431.478788,
+          "kernel": "6.12.95",
+          "mode": "file",
+          "python": "3.12.14",
+          "sha256": "71b95e386e2cd1528baa69f1a206e039a50eafde3d2a4e1638c27cd70ce1e0fe"
+        },
+        "first_exec_ms": 88.719,
+        "kvm_descriptors": [
+          "5111 anon_inode:kvm-vm",
+          "5111 anon_inode:kvm-vcpu:0"
+        ],
+        "ready_ms": 7996.485,
+        "start_ms": 7752.673,
+        "tiny_client_ms": 90.94
+      },
+      "managed": {
+        "cleanup": "verified_absent",
+        "result": {
+          "bytes": 37748736,
+          "guest_ms": 686.41283,
+          "kernel": "6.12.95",
+          "mode": "file",
+          "python": "3.12.14",
+          "sha256": "71b95e386e2cd1528baa69f1a206e039a50eafde3d2a4e1638c27cd70ce1e0fe"
+        },
+        "submit_to_cleanup_ms": 10724.096,
+        "submit_to_collected_ms": 9314.25
+      },
+      "otp": "29",
+      "outer_cpu_delta": {
+        "nr_throttled": 0,
+        "throttled_usec": 0
+      },
+      "recorded_at": "2026-09-17T02:26:33.572477Z",
+      "runtime_version": "1.16.0",
+      "sample": "5",
+      "source_sha256": "3a315040e7978a64811ba88c774ca2fa91f9b0e418bf3a6ad41560a5c6c14a8e",
+      "status": "passed"
+    },
+    {
+      "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+      "counters_after": {
+        "cpu.max": "200000 100000\n",
+        "cpu.stat": "usage_usec 120657145\nuser_usec 73014935\nsystem_usec 47642210\ncore_sched.force_idle_usec 0\nnr_periods 1809\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "memory.max": "4294967296\n",
+        "memory.peak": "462258176\n"
+      },
+      "counters_before": {
+        "cpu.max": "200000 100000\n",
+        "cpu.stat": "usage_usec 103656564\nuser_usec 62625349\nsystem_usec 41031214\ncore_sched.force_idle_usec 0\nnr_periods 1612\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "memory.max": "4294967296\n",
+        "memory.peak": "462258176\n"
+      },
+      "elixir": "1.20.4",
+      "host_kernel": "6.8.0-139-generic",
+      "label": "nested",
+      "library_version": "0.1.3",
+      "low_level": {
+        "cpu": {
+          "client_ms": 585.741,
+          "guest_ms": 335.093757,
+          "iterations": 2000000,
+          "kernel": "6.12.95",
+          "mode": "cpu",
+          "python": "3.12.14",
+          "value": 2666664666667000000
+        },
+        "create_ms": 164.417,
+        "file": {
+          "bytes": 37748736,
+          "client_ms": 478.213,
+          "guest_ms": 426.018372,
+          "kernel": "6.12.95",
+          "mode": "file",
+          "python": "3.12.14",
+          "sha256": "71b95e386e2cd1528baa69f1a206e039a50eafde3d2a4e1638c27cd70ce1e0fe"
+        },
+        "first_exec_ms": 99.814,
+        "kvm_descriptors": [
+          "5666 anon_inode:kvm-vm",
+          "5666 anon_inode:kvm-vcpu:0"
+        ],
+        "ready_ms": 8941.49,
+        "start_ms": 8677.259,
+        "tiny_client_ms": 91.249
+      },
+      "managed": {
+        "cleanup": "verified_absent",
+        "result": {
+          "bytes": 37748736,
+          "guest_ms": 464.058611,
+          "kernel": "6.12.95",
+          "mode": "file",
+          "python": "3.12.14",
+          "sha256": "71b95e386e2cd1528baa69f1a206e039a50eafde3d2a4e1638c27cd70ce1e0fe"
+        },
+        "submit_to_cleanup_ms": 8874.841,
+        "submit_to_collected_ms": 8455.991
+      },
+      "otp": "29",
+      "outer_cpu_delta": {
+        "nr_throttled": 0,
+        "throttled_usec": 0
+      },
+      "recorded_at": "2026-09-17T02:26:55.238444Z",
+      "runtime_version": "1.16.0",
+      "sample": "6",
+      "source_sha256": "3a315040e7978a64811ba88c774ca2fa91f9b0e418bf3a6ad41560a5c6c14a8e",
+      "status": "passed"
+    }
+  ],
+  "warmups": [
+    {
+      "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+      "counters_after": {
+        "cpu.max": "200000 100000\n",
+        "cpu.stat": "usage_usec 4075337\nuser_usec 2439526\nsystem_usec 1635810\nnice_usec 0\ncore_sched.force_idle_usec 0\nnr_periods 71\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0\n",
+        "memory.max": "4294967296\n",
+        "memory.peak": "456212480\n"
+      },
+      "counters_before": {
+        "cpu.max": "200000 100000\n",
+        "cpu.stat": "usage_usec 27454\nuser_usec 10559\nsystem_usec 16895\nnice_usec 0\ncore_sched.force_idle_usec 0\nnr_periods 5\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0\n",
+        "memory.max": "4294967296\n",
+        "memory.peak": "6905856\n"
+      },
+      "elixir": "1.20.4",
+      "host_kernel": "7.1.5-76070105-generic",
+      "label": "direct",
+      "library_version": "0.1.3",
+      "low_level": {
+        "cpu": {
+          "client_ms": 481.399,
+          "guest_ms": 316.575215,
+          "iterations": 2000000,
+          "kernel": "6.12.95",
+          "mode": "cpu",
+          "python": "3.12.14",
+          "value": 2666664666667000000
+        },
+        "create_ms": 176.042,
+        "file": {
+          "bytes": 37748736,
+          "client_ms": 1706.643,
+          "guest_ms": 1665.281435,
+          "kernel": "6.12.95",
+          "mode": "file",
+          "python": "3.12.14",
+          "sha256": "71b95e386e2cd1528baa69f1a206e039a50eafde3d2a4e1638c27cd70ce1e0fe"
+        },
+        "first_exec_ms": 27.793,
+        "kvm_descriptors": [
+          "797446 ioctl(13, KVM_CREATE_VM, 0)      = 14",
+          "797446 ioctl(14, KVM_CREATE_VCPU, 0)    = 25"
+        ],
+        "ready_ms": 1469.8369999999998,
+        "start_ms": 1266.002,
+        "tiny_client_ms": 105.822
+      },
+      "managed": {
+        "cleanup": "verified_absent",
+        "result": {
+          "bytes": 37748736,
+          "guest_ms": 190.368351,
+          "kernel": "6.12.95",
+          "mode": "file",
+          "python": "3.12.14",
+          "sha256": "71b95e386e2cd1528baa69f1a206e039a50eafde3d2a4e1638c27cd70ce1e0fe"
+        },
+        "submit_to_cleanup_ms": 2486.844,
+        "submit_to_collected_ms": 2265.971
+      },
+      "otp": "29",
+      "recorded_at": "2026-09-17T02:23:36.325890Z",
+      "runtime_version": "1.16.0",
+      "sample": "warmup",
+      "source_sha256": "3a315040e7978a64811ba88c774ca2fa91f9b0e418bf3a6ad41560a5c6c14a8e",
+      "status": "passed"
+    },
+    {
+      "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+      "counters_after": {
+        "cpu.max": "200000 100000\n",
+        "cpu.stat": "usage_usec 17015171\nuser_usec 10084446\nsystem_usec 6930725\ncore_sched.force_idle_usec 0\nnr_periods 557\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "memory.max": "4294967296\n",
+        "memory.peak": "455274496\n"
+      },
+      "counters_before": {
+        "cpu.max": "200000 100000\n",
+        "cpu.stat": "usage_usec 291897\nuser_usec 120033\nsystem_usec 171864\ncore_sched.force_idle_usec 0\nnr_periods 367\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "memory.max": "4294967296\n",
+        "memory.peak": "5828608\n"
+      },
+      "elixir": "1.20.4",
+      "host_kernel": "6.8.0-139-generic",
+      "label": "nested",
+      "library_version": "0.1.3",
+      "low_level": {
+        "cpu": {
+          "client_ms": 567.839,
+          "guest_ms": 314.51954,
+          "iterations": 2000000,
+          "kernel": "6.12.95",
+          "mode": "cpu",
+          "python": "3.12.14",
+          "value": 2666664666667000000
+        },
+        "create_ms": 217.135,
+        "file": {
+          "bytes": 37748736,
+          "client_ms": 530.59,
+          "guest_ms": 479.478172,
+          "kernel": "6.12.95",
+          "mode": "file",
+          "python": "3.12.14",
+          "sha256": "71b95e386e2cd1528baa69f1a206e039a50eafde3d2a4e1638c27cd70ce1e0fe"
+        },
+        "first_exec_ms": 94.811,
+        "kvm_descriptors": [
+          "2359 anon_inode:kvm-vm",
+          "2359 anon_inode:kvm-vcpu:0"
+        ],
+        "ready_ms": 7859.871,
+        "start_ms": 7547.925,
+        "tiny_client_ms": 80.418
+      },
+      "managed": {
+        "cleanup": "verified_absent",
+        "result": {
+          "bytes": 37748736,
+          "guest_ms": 480.258973,
+          "kernel": "6.12.95",
+          "mode": "file",
+          "python": "3.12.14",
+          "sha256": "71b95e386e2cd1528baa69f1a206e039a50eafde3d2a4e1638c27cd70ce1e0fe"
+        },
+        "submit_to_cleanup_ms": 9001.578,
+        "submit_to_collected_ms": 8482.563
+      },
+      "otp": "29",
+      "recorded_at": "2026-09-17T02:23:53.387152Z",
+      "runtime_version": "1.16.0",
+      "sample": "warmup",
+      "source_sha256": "3a315040e7978a64811ba88c774ca2fa91f9b0e418bf3a6ad41560a5c6c14a8e",
+      "status": "passed"
+    }
+  ]
+}

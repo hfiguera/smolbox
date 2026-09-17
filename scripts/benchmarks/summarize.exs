@@ -24,6 +24,10 @@ defmodule BenchmarkSummary do
   def delta(report, file, key) do
     counter(report["counters_after"][file], key) - counter(report["counters_before"][file], key)
   end
+
+  def total_delta(rows, file, key) do
+    Enum.reduce(rows, 0, fn row, total -> total + delta(row, file, key) end)
+  end
 end
 
 reports =
@@ -56,7 +60,7 @@ reports =
   end
 
 for key <- ["artifact_sha256", "source_sha256", "elixir", "otp"] do
-  1 = reports |> Enum.map(&Map.fetch!(&1, key)) |> Enum.uniq() |> length()
+  1 = reports |> MapSet.new(&Map.fetch!(&1, key)) |> MapSet.size()
 end
 
 metrics = [
@@ -93,15 +97,14 @@ controls =
 
     {label,
      %{
-       throttled_usec:
-         Enum.sum(Enum.map(rows, &BenchmarkSummary.delta(&1, "cpu.stat", "throttled_usec"))),
-       throttled_periods:
-         Enum.sum(Enum.map(rows, &BenchmarkSummary.delta(&1, "cpu.stat", "nr_throttled"))),
-       memory_limit_events:
-         Enum.sum(Enum.map(rows, &BenchmarkSummary.delta(&1, "memory.events", "max"))),
-       oom_kills:
-         Enum.sum(Enum.map(rows, &BenchmarkSummary.delta(&1, "memory.events", "oom_kill"))),
-       outer_throttled_usec: Enum.sum(Enum.map(rows, & &1["outer_cpu_delta"]["throttled_usec"]))
+       throttled_usec: BenchmarkSummary.total_delta(rows, "cpu.stat", "throttled_usec"),
+       throttled_periods: BenchmarkSummary.total_delta(rows, "cpu.stat", "nr_throttled"),
+       memory_limit_events: BenchmarkSummary.total_delta(rows, "memory.events", "max"),
+       oom_kills: BenchmarkSummary.total_delta(rows, "memory.events", "oom_kill"),
+       outer_throttled_usec:
+         Enum.reduce(rows, 0, fn row, total ->
+           total + row["outer_cpu_delta"]["throttled_usec"]
+         end)
      }}
   end)
 
