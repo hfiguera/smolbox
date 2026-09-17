@@ -299,3 +299,28 @@ The networking article uses a dedicated closing callout linking directly to its
 complete network report script. The offline getting-started guide is a secondary
 setup reference. Verified the callout at desktop/mobile widths and checked that
 the download returns the exact validated example bytes.
+
+## Nested performance article review — September 16, 2026
+
+Added an article about the community question behind the direct/nested Linux
+comparison. The desktop diagram puts both configurations on one physical host;
+the separate mobile composition stacks them with readable labels. Original
+social artwork shows the measured startup medians and the six-pair sample size.
+
+The new `.benchmark-results` table uses a 50% description column and two numeric
+columns, with explicit row/column headers and tabular numbers. This scoped
+variant preserves both measurements on a phone without horizontal scrolling;
+other article tables retain their existing behavior. It uses the existing table
+colors and typography. No new global design tokens were introduced.
+
+Reviewed article, diagram, results table, index and closing callout at 1440px
+and 390px. Checked privacy/404 pages for overflow, reduced-motion rendering,
+keyboard skip/contents navigation, and reading without JavaScript. The public
+JSON download matches the committed measurement evidence byte for byte.
+Automated accessibility auditing was not run; these observations do not claim
+an automated accessibility pass.
+
+The closing callout links to this benchmark's method and results, rather than
+the unrelated introductory Python walkthrough. Repository links to the new
+report/scripts become public with the branch's eventual merge; this work is a
+local preview and does not publish the post.

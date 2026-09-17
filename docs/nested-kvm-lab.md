@@ -247,6 +247,11 @@ Broader compatibility and managed recovery tests are separate work.
 
 ## Recovery and removal
 
+For a later comparison of trusted workloads running directly on the physical
+Linux host and inside this lab, see [Direct and nested KVM performance](nested-kvm-performance.md).
+That smolvm 1.16.0 campaign separates startup, guest computation, file processing
+and managed cleanup timings from the failure experiments described here.
+
 Host-side teardown works when the guest worker, database, OS or management SSH
 fails. It cannot recover a failed physical-host kernel. The operator confirmed
 physical access to restart and recover that host. No physical-host crash or

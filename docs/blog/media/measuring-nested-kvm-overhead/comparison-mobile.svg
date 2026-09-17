@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="800" viewBox="0 0 390 800">
+  <title>Direct and nested configurations on one Linux host</title>
+  <desc>The same one CPU, 512 MiB Python microVM runs directly on Linux or inside a four CPU, eight GiB KVM lab guest. Jobs execute one at a time.</desc>
+  <defs><style>text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#17304e}.title{font-size:22px;font-weight:650}.label{font-size:20px;font-weight:650}.small{font-size:18px;fill:#526478}.white{fill:white}</style><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10" fill="none" stroke="#215bc7" stroke-width="1.5"/></marker></defs>
+  <rect width="390" height="800" rx="8" fill="#edf2fa"/>
+  <text x="20" y="36" class="title">Same physical Linux host</text>
+  <text x="20" y="65" class="small">One job at a time</text>
+  <rect x="16" y="89" width="358" height="283" rx="6" fill="white" stroke="#d8e0eb"/>
+  <text x="34" y="126" class="title">Direct on Linux</text>
+  <rect x="34" y="145" width="322" height="76" rx="5" fill="#17304e"/>
+  <text x="51" y="175" class="label white">Elixir controller + smolvm</text>
+  <text x="51" y="203" class="small white">Private Unix socket</text>
+  <path d="M195 229V263" stroke="#215bc7" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="218" y="251" class="small">KVM</text>
+  <rect x="34" y="278" width="322" height="75" rx="5" fill="#215bc7"/>
+  <text x="51" y="307" class="label white">Python microVM</text>
+  <text x="51" y="334" class="small white">1 vCPU · 512 MiB RAM</text>
+  <rect x="16" y="395" width="358" height="387" rx="6" fill="white" stroke="#d8e0eb"/>
+  <text x="34" y="433" class="title">Inside the lab VM</text>
+  <rect x="31" y="454" width="328" height="309" rx="5" fill="#edf2fa" stroke="#215bc7" stroke-width="1.5"/>
+  <text x="48" y="486" class="label">Outer KVM guest</text>
+  <text x="48" y="514" class="small">4 vCPUs · 8 GiB RAM</text>
+  <rect x="46" y="533" width="298" height="76" rx="5" fill="#17304e"/>
+  <text x="60" y="563" class="label white">Elixir controller + smolvm</text>
+  <text x="60" y="591" class="small white">Private Unix socket</text>
+  <path d="M181 618V654" stroke="#215bc7" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="205" y="642" class="small">Nested KVM</text>
+  <rect x="46" y="669" width="298" height="75" rx="5" fill="#215bc7"/>
+  <text x="62" y="699" class="label white">Python microVM</text>
+  <text x="62" y="727" class="small white">1 vCPU · 512 MiB RAM</text>
+</svg>
