@@ -1,13 +1,22 @@
-# SmolBox 0.1.4 release preparation
+# SmolBox 0.1.4 publication
 
-SmolBox 0.1.4 selects smolvm 1.16.1 by default on Linux x86_64 and macOS
-Apple Silicon. Explicit 1.16.0, 1.14.6 and 1.14.1 support remains. See the
-[qualification report](runtime-1.16.1-qualification.md) for the completed runtime
-and cleanup campaign and the subsequent default selection validation.
-Version 0.1.3 still defaults to 1.16.0. Release validation is recorded in
-[0.1.4 preparation](release-candidates/0.1.4.md). Upgrade the separately installed
-worker using the drain procedure, or explicitly configure its existing version
-before adopting this checkout. No new public API or record schema is introduced.
+Published and verified September 18, 2026. Tag `v0.1.4` points to
+`8c355d456f75c1915a410556d46ac0a36699b4d3`. Hex, HexDocs and the GitHub release
+are available. See the [publication record](release-candidates/0.1.4-release.md)
+and [machine-readable evidence](release-candidates/0.1.4-release.json).
+
+Version 0.1.4 defaults to smolvm 1.16.1 while retaining explicit 1.16.0, 1.14.6
+and 1.14.1 support. Managed cleanup separates disposal from preservation. Follow
+[Upgrading to 0.1.4](recovery.md#upgrading-to-0-1-4) for worker version selection;
+there is no additional record schema migration from 0.1.3.
+
+All 18 GitHub CI jobs passed at the exact release commit. Fresh Linux and macOS
+release checks passed 224 deterministic cases, 23 tooling cases, every required
+analyzer and canary, 95.93% coverage, and 44 ExDoc pages. The published archive
+passed six consumers, two fresh Hex registry installations, content/metadata
+comparison and public documentation checks. Earlier live qualification retains
+its actual revisions and limits; no new runtime or exhaustion run is claimed
+for version and documentation finalization.
 
 # SmolBox 0.1.3 publication
 

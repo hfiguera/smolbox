@@ -1,0 +1,628 @@
+{
+  "version": "0.1.4",
+  "status": "published and verified",
+  "checked_at": "2026-09-18T17:58:27.128051+00:00",
+  "release_commit": "8c355d456f75c1915a410556d46ac0a36699b4d3",
+  "tag": "v0.1.4",
+  "prepared_package": {
+    "status": "passed",
+    "sha256": "07cc7e51b9ff2a149c146a185ef570ec909194174efc0d89da17e23869c32ecb",
+    "release_commit": "8c355d456f75c1915a410556d46ac0a36699b4d3",
+    "file_count": 100,
+    "file_sha256": {
+      "lib/smolbox/transport/req.ex": "748485e5e9683cff55d8718905829cbf4b0ec89394f3066cf82c1c37b3a5a2ee",
+      "lib/smolbox/runtime/config.ex": "bfa68f5dda45888cfa78a7777e2140a35e144de08bd8cab28a2e8f1f17a76444",
+      "lib/smolbox/transport/capture.ex": "df828264adf33a5d96759b445f156189d7ade1b0c4666f66831442569cb084d4",
+      "lib/smolbox/runtime/cleanup.ex": "c22bb8097268644e970f602647b690f1656090230a5623bcf904f348e5f5908a",
+      "lib/smolbox/execution.ex": "2c730c8f4971bb6e447178fc62d02e910de711fe287eed6156608eb85b7158a0",
+      "lib/smolbox/client.ex": "c23ffaa335eab907b95057804e60d1d61ad1607dbefdd2836713ed3c7aab8781",
+      "lib/smolbox/validation.ex": "4df0e14313ffb67caefdf3a7e4b9d63a8a6588666b4142409b525d2955cc2530",
+      "docs/evidence/otp29-macos.json": "7322929a1839cb0cb5ea3d1b35add9ba99a294ea56836b8ceb3fbd4e81ca0800",
+      "lib/smolbox.ex": "ba8408a38d7a894d48220502291a00ad048994580a5cb9cff8ac614ca2eeb3d9",
+      "lib/smolbox/telemetry.ex": "ec28badc3bff5bd3d40f87350f840208be306a522a9bd600d6bfd49e3ebbf5f9",
+      "docs/evidence/phase8-cache-state.json": "376889039b073250945716266734b4037885eb2c0d9063c97efd10eb512f75fd",
+      "lib/smolbox/runtime/worker_config.ex": "d1c8d1bf62cf326533ae81a97d154050d1fd3157827cbb6301954552138c772b",
+      "lib/smolbox/identity.ex": "d2f0f9b2397119edbe90f98f00fa79977e46044ab485258880758fd36573fca7",
+      "docs/evidence/phase0-macos.json": "9cea2d7882f1e79ca3a80afcb36d4f9b631c16c838ba72c87627d5a46e5b0ac4",
+      "docs/security.md": "61a160cfaebfaacbe2ff49b8d342d6b55a25167185ecefe32dd38e1e1ecf34d2",
+      "docs/evidence/controlled-network-extended.json": "b9b85b77373ef0e008ea56515985bd9ea2cc9c612706bb0782e84406dc8a7d05",
+      "docs/recovery.md": "1fcdb1a22f6cc8ecb3e9d287f330c92ffff2d348b729eaebfcea77c20f7c46b2",
+      "docs/evidence/phase7-worker-health.json": "c1be74740dfd9e4c46982ee1fa8cafedb8cceba75e0a6ea305b74ad287f9c3f8",
+      "docs/evidence/phase3-client.json": "dbc9edc77c06412a3d27554db07573ff991be40a842c1272ef595239ca7d8acd",
+      "docs/evidence/phase1-scaffold.json": "60f2cdad2d4d1e580e8300fbe377d1b9d1b453f1d7e480e385bc5a7259eee9af",
+      "docs/telemetry.md": "0f8d8973923c1e63d80cfb9d7888c26464d6eb07e8c5418e2ad5a9ff801112ad",
+      "lib/smolbox/store/memory.ex": "027747ca4f7a32f243b0fc787acbac62f7832471b28531fa964e634a903f00b5",
+      "docs/evidence/phase9-package-consumer.json": "895dab035b7bb38aa7ef537f66d4254a8490de069caaff8bfa52b589b31870b1",
+      "docs/evidence/otp29-linux.json": "dcf8669fdc70a2b81781b9f077c72dad92325e551e8928e507a3c404b6d8fcb1",
+      "docs/evidence/phase6-controller-faults.json": "bf66b4708b18fc42310ad116dd0301cbcb0c734552092babb49ee93198185df3",
+      "docs/evidence/phase8-telemetry.json": "3fbaf61cd05037d17ccc31e39d04533cd7e57c176b7bd2ff7d1d899c3bc40113",
+      "docs/network-access.md": "6f44ee485a23404fb4419bc62aec1e96f835abb1c3552f94b6e12c64c75f402c",
+      "docs/evidence/phase6-service-faults.json": "9b1fe7f068f285f012011f9f067d9210468df7bfca7e3357bf278afda20bf603",
+      "mix.exs": "94f2760d27d153ebc0b81b2af2146685b18328680d2310877fe433883aa9b891",
+      "docs/evidence/phase2-identity.json": "197bc4bb7d73d34253309b8c9e5159904f84134426b9310c26911f0ac6140e4a",
+      "lib/smolbox/artifact_store.ex": "2d61ae4c7b6eeab70d6dbe822f390353565555b80b33a5602d3487b591128cbe",
+      "docs/evidence/phase8-boundaries.json": "a1b592d9c080d7012ceb7c4730306d0a6d8a450190a7bf718a10ffe7de0e85ed",
+      "lib/smolbox/runtime/files.ex": "1acecfe874e8397c4c13fbd40751e629808dbefb920ac640f06d09edb415fc55",
+      "docs/evidence/phase8-linux-containment.json": "c43527578042fda1b4f00e8d3c1a770550cf89c16e582e7df9d107e85f94f216",
+      "lib/smolbox/runtime/worker_health.ex": "fc19df3f3bf28dfda625b1f6f3b882e2a16b75421145442d2e8d77b6b935f1c0",
+      "docs/evidence/phase0-linux.json": "81d46301bc4f9c1c925af2f2e45ba9e10aa46760c9d3a689dba7bbcb61dd5053",
+      "docs/evidence/phase1-live-ci.json": "dbcc5fa81198680d1ba1e6752b4b688736cc7a97285a81d4aec87b967d01338b",
+      "lib/smolbox/wire/sse.ex": "00079b7972aa40bc733aa7dbe6a61c50b94367fd1f19ed00afdfcb0fda51dda1",
+      "docs/evidence/phase6-orphan-inspection.json": "aec7db1b68c9077faf50038db552519e158dc807c0eb5c077122b9ecd91dc811",
+      "lib/smolbox/store/codec.ex": "0028074913f9c8d8ec2f5fab6d190d1d061db57e3e0557831b1c1ebf782f16ed",
+      "lib/smolbox/runtime/inspection.ex": "de9270595036e946fe6ca90ad44467df6b24964324ca427931403ec2b7ec5dba",
+      "docs/host-integration.md": "35738c8ef6cd42a413b84f2ebb4db9842f80cb792f6b46d85eaf1127faf490bb",
+      "docs/evidence/nested-kvm-performance.json": "5fd5b775e98b8c9c8c927f5270ec3a6b57db4a8586533906905bebedb04c5877",
+      "docs/evidence/phase4-durable.json": "7c56679d56026116fa744d33b996e4105ed2560cbd0c202538b0f36aedc7538a",
+      "lib/smolbox/manifest.ex": "64bbfcabea90905d9cb0b3ac9399fa997486b4461d5e13989f3f892938bfeb10",
+      "lib/smolbox/execution_validation.ex": "89a53cad4e265d39f273a81bd33aba39d9bbdd187addd968ecb02af40f5f6aec",
+      "docs/evidence/smolvm-1.16.0-linux.json": "8bdb2d7a5a3e23b8c0a07474d93227276cf85b6a9f7595f11710f986b9024b1e",
+      "lib/smolbox/transport.ex": "ed6a497a1e746330bc7527becd8b520a5c9b8320a9102604633dfb13fa4802de",
+      "docs/evidence/smolvm-1.16.1.json": "1bd2359ec7db58b4e354fca376d7772580d08d0a49d42ef6217211ab8312f86e",
+      "lib/smolbox/store/record_ops.ex": "b293446ff1536a75cb86731a280908d9564a489a942ab53d454e67c5a2547050",
+      "docs/getting-started.md": "dc7b81ea8b5d099f8081909c47974aafe573c26faa3fe86c3b544b6ed2fd6048",
+      "docs/troubleshooting.md": "8423c70a26f6c0ba43bf6d468d3914dd0fb495478ce59b0fda7e86e98a76408b",
+      "docs/evidence/cleanup-preservation-disposal.json": "482093a2cf5c781dcbadf402a9afaf123f2c7aa144c9e178205ed9de6d6137e0",
+      "lib/smolbox/machine_spec.ex": "ec479f5e3fe888433a99197c20f4090035075d407edd48b1db50615ee5353244",
+      "docs/evidence/phase4-store-foundation.json": "e24b2f0747fce2da1298704a38676a8652dc2629d4148756a97d975052d1fdc9",
+      "docs/evidence/smolvm-1.16.0-macos.json": "4a452f419360d0b8c587eb3ba759c0da70ee6c388a8f08cbfbd39391c0e1cfe1",
+      "docs/evidence/phase8-benchmarks.json": "bb3801994ee91ab8dae31db4344e4a3123019edc5938c89037130f5bab397f9d",
+      "docs/evidence/smolvm-1.14.6-cleanup.json": "5ff6de3dea8c2c00d93972c10abd9e2eff05ad3d6f1bf69b578fa3cfd5f05838",
+      "docs/evidence/smolvm-1.16.1-admission.json": "6a2a607d16ed6e513de9c1d3171983920eecf2004332fecdbfc7432f482d4b4e",
+      "docs/evidence/controlled-network-access.json": "27812a1769decd799777f329d6a6c6620914b536c5c753821688a0dff8d429c8",
+      "lib/smolbox/worker.ex": "281f6be0b563eba81b25e3c8f9aca26b00f664f6333a830d80b983a5797913cf",
+      "docs/evidence/nested-kvm-lab.json": "ba236f2bfb24b8feef90907c7bc23c8e9ec7040d3b8d559173a5ec5451a3097d",
+      "lib/smolbox/runtime/coordinator.ex": "d6621ac53f756388682bfd4da44be5fc58bb3349c00ea1beb285d8939fc34bd7",
+      "lib/smolbox/error.ex": "f7965086db5ba5b0f3442acfef5f9a20bb6a9bbc4db6f5d33445d8e1beca9e07",
+      "docs/evidence/smolvm-1.16.1-default.json": "15c4c3415fe9462fb2b155672e4e47d92bd92d1b65fd8daba3eae10660e60d17",
+      "lib/smolbox/runtime.ex": "b4c0b5a7f03ef3612ebb3e885bfedc27e8d41104a63dbb21c5f1d2bce0af9915",
+      "lib/smolbox/result.ex": "09d0fb685331012e00690875734ee70bb51b0528eecb4c0ab236277343daeccf",
+      "LICENSE": "210d654cc505eadb7ab98860653dabc84cfdc8f6c450386028c21f1ece9f155d",
+      "lib/smolbox/telemetry/dispatcher.ex": "30a2513d3aaeb24e953011ff9ca651f9eac66b1d6105a8d491e8178d3796063b",
+      "README.md": "cda485cc750311bda0523e6aefdfba5a7483746cad04c52d6a5168f4db0ef346",
+      "lib/smolbox/execution_spec.ex": "7abb14445c7de76fa33d88926fdf138985332de46086b7054b43f3981f3293f4",
+      "docs/compatibility.md": "6b46d4081faaf61f7ea24d478f1c513657dce3f170003839d7046c1d2d98c0ce",
+      "lib/smolbox/artifact_store/directory.ex": "c8afa7093cef1962a0592d3333dd2de08ed2d284731b840df1d99b1ec73c7bdc",
+      "docs/evidence/smolvm-1.14.6-macos.json": "06cb6748e2a36db891526d16180061fea893cc1902790c5bb6c641c12071c899",
+      "docs/client.md": "d1cfe2b91ddab41b6d8866010d90994a98f9884873db01882564e98ea7067821",
+      "lib/smolbox/runtime/session.ex": "0de9f6a337225c4727fb939103bca8f82d3ed011e75a1b16ef0bf35a2de22767",
+      "lib/smolbox/runtime/work_supervisor.ex": "40e5cfd18c84e55c232272e38477e66b689ea77baf72661171329c50738b4743",
+      "lib/smolbox/health.ex": "a6bb8345d44ac721adc29fe1c328e763f58c76cbe197529a4c6a41cf72a5a03a",
+      "docs/evidence/phase7-resource-floor.json": "79500708780ea4cc196c899c349fbe4e1aa48dc09c1b44fbff6005f9ddd71085",
+      "lib/smolbox/runtime/observation.ex": "9409647db1e835e3d3f38c01de206daab37e78686d6c6b6ec595886af372795a",
+      "lib/smolbox/runtime/executor.ex": "0660e5fa5ef24a85f8c2ab05cd1274e84223bb38b0ae75ad16af57080d3ee72e",
+      "docs/evidence/phase2-contracts.json": "1d8b4e5a5a4dc12e15ff02e34c97c46fe33e70e3ff5e2b2c843abc7c5ed989f5",
+      "docs/evidence/phase6-durable-recovery.json": "f8c193a59a5f59500aaca9db27b7ed0d554e5693d3fcc077e8bdea42651211de",
+      "docs/evidence/phase8-macos-memory.json": "baea64fd6fa089689e92512919b1df7aff0244797c71517f656f48033a344397",
+      "docs/resource-qualification.md": "17a822596dfe0ccdb9711f2a0fbe434e5bf9223217d463e318c2f73803e84cf8",
+      "lib/smolbox/runtime/clock.ex": "a3b7bf21a90a4ccf4977791f97736137af01fdee4a2b3a5ebb3d6a0d18dbf114",
+      "docs/evidence/phase5-managed.json": "8cbddad328d367f648ef2e24dacc01fbe405aa4de1983379302e0f564cb95b27",
+      "docs/evidence/phase8-compatibility.json": "537bfd0ea5a1635571552013e821a00d8d99efac36c321b895e991e579f25dc1",
+      "lib/smolbox/profile.ex": "2e7b700071e18160f2836bf6fd638fb9ca7c2ce7da054b2ce93cbc1937b155b1",
+      "docs/evidence/phase7-allocation-policy.json": "1063d69a27b9c7590e1a2166d4d285406b15d007ba6f75d73d181f60602dae7a",
+      "lib/smolbox/machine.ex": "028c32daba499909146a4d60b2c696ca38acf108f67975bbedb3ec4f0824da6e",
+      "docs/evidence/phase6-worker-restart.json": "5c26c26e4e19bbdb2ca87dcb73ccaf66bc77562db2e9437b035db4f0a364181e",
+      "docs/evidence/smolvm-1.14.6-compatibility.json": "3ff19891e8aef8411f5be8e30831f25fc470c4196f715003661aba9a6d608173",
+      "CHANGELOG.md": "e16311d35b29d963eb8972eee93b369f86bc95b3a07c9cc997234fcf023160f0",
+      "docs/evidence/phase9-readiness.json": "36b4229ec6de396ab7aef136cc19ca90de43dad9de9e88c4039e4c344b7de474",
+      "lib/smolbox/network_policy.ex": "f5a1c53aa197a887a7804bbb6f925514bd9f6417fa924c0524a232a3067fc2db",
+      "lib/smolbox/command.ex": "ae5a7e9a9d885e30db49e967b693bd8afd00b1808998592dd25c2654d82ac63e",
+      "docs/evidence/linux-production-qualification.json": "16ab09cb0cbe1b0e3f998925c6567fdc922bd05d23798155521158bcbfc7aca8",
+      "lib/smolbox/files.ex": "15c2054bb8bd11b004de8a6c7a9dd707db4deccf001abdd70998e858ea6cf204",
+      "lib/smolbox/store.ex": "43c74543c44c8e961513e5ff30f69e2c88d24011b010aa3df4d3e6e122656648"
+    },
+    "executable_baseline": "8ccd1111301142d7eeb6599323ecc0fde8e87547",
+    "changed_files_within_executable_directories": [
+      "examples/durable_host/README.md",
+      "examples/minimal_host/README.md",
+      "lib/smolbox/runtime/worker_config.ex",
+      "mix.exs",
+      "scripts/ci/README.md"
+    ],
+    "comparison": "All files in executable directories unchanged except documentation and mix.exs version. Changed library modules have identical AST after removing doc attributes and line metadata.",
+    "library_modules_compared": 43,
+    "verified_source_links": 173,
+    "checked_at": "2026-09-18T17:29:21.924434Z"
+  },
+  "public_verification": {
+    "status": "passed",
+    "version": "0.1.4",
+    "package_sha256": "cb9d5c8dfa96ec25d5770d438a64bde8ea0ce8c059134ce8721da22f950b73f6",
+    "verified_files": 100,
+    "metadata_semantics_equal": true,
+    "archive_bytes_match_prepared": false,
+    "source_tag_verified": true,
+    "documentation_pages": 8,
+    "evidence_assets": 4,
+    "checked_at": "2026-09-18T17:57:07.674432Z"
+  },
+  "github_ci": {
+    "url": "https://github.com/hfiguera/smolbox/actions/runs/35374495508",
+    "headSha": "8c355d456f75c1915a410556d46ac0a36699b4d3",
+    "jobs": [
+      {
+        "name": "smolbox-ci-tools",
+        "conclusion": "success"
+      },
+      {
+        "name": "smolbox-format-compile",
+        "conclusion": "success"
+      },
+      {
+        "name": "smolbox-quality-canaries",
+        "conclusion": "success"
+      },
+      {
+        "name": "smolbox-docs-package",
+        "conclusion": "success"
+      },
+      {
+        "name": "smolbox-credo-ex-slop",
+        "conclusion": "success"
+      },
+      {
+        "name": "smolbox-tests",
+        "conclusion": "success"
+      },
+      {
+        "name": "smolbox-credence",
+        "conclusion": "success"
+      },
+      {
+        "name": "smolbox-minimal-host",
+        "conclusion": "success"
+      },
+      {
+        "name": "smolbox-store-contract",
+        "conclusion": "success"
+      },
+      {
+        "name": "smolbox-minimum-dependencies",
+        "conclusion": "success"
+      },
+      {
+        "name": "smolbox-ex-dna",
+        "conclusion": "success"
+      },
+      {
+        "name": "smolbox-dialyzer",
+        "conclusion": "success"
+      },
+      {
+        "name": "smolbox-coverage",
+        "conclusion": "success"
+      },
+      {
+        "name": "smolbox-compatibility (1.19.5, 28.5)",
+        "conclusion": "success"
+      },
+      {
+        "name": "smolbox-compatibility (1.20.4, 28.5)",
+        "conclusion": "success"
+      },
+      {
+        "name": "smolbox-compatibility (1.18.4, 27.3.4.15)",
+        "conclusion": "success"
+      },
+      {
+        "name": "smolbox-security",
+        "conclusion": "success"
+      },
+      {
+        "name": "smolbox-required",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "hosts": {
+    "macos": {
+      "checks": {
+        "quality": {
+          "seconds": 115.491,
+          "status": "passed",
+          "failure": null,
+          "exit_code": 0,
+          "captured_bytes": 2185,
+          "output_sha256": "aa43bfda377b9bed536eedb39dda53a52c11b857d6bd78895522a08cf3b58318"
+        },
+        "canaries": {
+          "seconds": 8.79,
+          "status": "passed",
+          "failure": null,
+          "exit_code": 0,
+          "captured_bytes": 621,
+          "output_sha256": "e0b964a623497ff2bb478f184e6c238afa88d2b496eb969c1ad810acf8e4339f"
+        },
+        "coverage": {
+          "seconds": 112.557,
+          "status": "passed",
+          "failure": null,
+          "tests": {
+            "passed": 224,
+            "doctests": 4,
+            "properties": 6,
+            "ordinary": 214,
+            "runtime_excluded_not_counted": 14
+          },
+          "exit_code": 0,
+          "captured_bytes": 3785,
+          "output_sha256": "6f743803716618e20cc56ca3e0af3a44c06511715639112304f8a9aaef95e547"
+        },
+        "tooling": {
+          "seconds": 29.852,
+          "status": "passed",
+          "failure": null,
+          "tests": {
+            "seed": 919264,
+            "passed": 23
+          },
+          "exit_code": 0,
+          "captured_bytes": 157,
+          "output_sha256": "4707560f61dce57800b16d753cb8e9e8b805b5f6315163954cc8fd9fffd6c4ea"
+        },
+        "docs": {
+          "seconds": 0.857,
+          "status": "passed",
+          "failure": null,
+          "exit_code": 0,
+          "captured_bytes": 128,
+          "output_sha256": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d"
+        },
+        "doc-links": {
+          "seconds": 0.347,
+          "status": "passed",
+          "failure": null,
+          "exit_code": 0,
+          "captured_bytes": 60,
+          "output_sha256": "277fe79a729bc3c4058b5b3a662b663ecfe046b92807fcf1cae3313312e5ff5f"
+        }
+      },
+      "coverage_percent": 95.93,
+      "published_archive_consumers": {
+        "package-current": {
+          "package_sha256": "cb9d5c8dfa96ec25d5770d438a64bde8ea0ce8c059134ce8721da22f950b73f6",
+          "files": 100,
+          "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+          "smoke": {
+            "client": true,
+            "legacy_1_14_6_explicit": "1.14.6",
+            "legacy_runtime_explicit": "1.14.1",
+            "network_policy": true,
+            "offline_default": true,
+            "runtime_1_16_0_explicit": "1.16.0",
+            "runtime_default": "1.16.1",
+            "supervisor": true,
+            "unqualified_runtime_rejected": "1.16.2",
+            "versions": {
+              "jason": "1.4.5",
+              "nimble_options": "1.1.1",
+              "req": "0.7.4",
+              "telemetry": "1.4.2"
+            }
+          }
+        },
+        "package-minimum": {
+          "package_sha256": "cb9d5c8dfa96ec25d5770d438a64bde8ea0ce8c059134ce8721da22f950b73f6",
+          "files": 100,
+          "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+          "smoke": {
+            "client": true,
+            "legacy_1_14_6_explicit": "1.14.6",
+            "legacy_runtime_explicit": "1.14.1",
+            "network_policy": true,
+            "offline_default": true,
+            "runtime_1_16_0_explicit": "1.16.0",
+            "runtime_default": "1.16.1",
+            "supervisor": true,
+            "unqualified_runtime_rejected": "1.16.2",
+            "versions": {
+              "jason": "1.4.0",
+              "nimble_options": "1.1.0",
+              "req": "0.7.4",
+              "telemetry": "1.3.0"
+            }
+          }
+        },
+        "package-otp27": {
+          "package_sha256": "cb9d5c8dfa96ec25d5770d438a64bde8ea0ce8c059134ce8721da22f950b73f6",
+          "files": 100,
+          "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+          "smoke": {
+            "client": true,
+            "legacy_1_14_6_explicit": "1.14.6",
+            "legacy_runtime_explicit": "1.14.1",
+            "network_policy": true,
+            "offline_default": true,
+            "runtime_1_16_0_explicit": "1.16.0",
+            "runtime_default": "1.16.1",
+            "supervisor": true,
+            "unqualified_runtime_rejected": "1.16.2",
+            "versions": {
+              "jason": "1.4.0",
+              "nimble_options": "1.1.0",
+              "req": "0.7.4",
+              "telemetry": "1.3.0"
+            }
+          }
+        }
+      },
+      "registry_consumer": {
+        "status": "passed",
+        "version": "0.1.4",
+        "otp": "29",
+        "elixir": "1.20.4",
+        "dependency": "hex",
+        "smoke": {
+          "client": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.16.1",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.5",
+            "nimble_options": "1.1.1",
+            "req": "0.7.4",
+            "telemetry": "1.4.2"
+          }
+        },
+        "package_sha256": "cb9d5c8dfa96ec25d5770d438a64bde8ea0ce8c059134ce8721da22f950b73f6",
+        "verified_files": 100
+      }
+    },
+    "linux": {
+      "checks": {
+        "quality": {
+          "seconds": 107.73,
+          "status": "passed",
+          "failure": null,
+          "exit_code": 0,
+          "captured_bytes": 2233,
+          "output_sha256": "c71ecd620559d21962bab294e980eda0d304176017c2e2925d6118701443776a"
+        },
+        "canaries": {
+          "seconds": 31.072,
+          "status": "passed",
+          "failure": null,
+          "exit_code": 0,
+          "captured_bytes": 621,
+          "output_sha256": "e0b964a623497ff2bb478f184e6c238afa88d2b496eb969c1ad810acf8e4339f"
+        },
+        "coverage": {
+          "seconds": 100.281,
+          "status": "passed",
+          "failure": null,
+          "tests": {
+            "passed": 224,
+            "doctests": 4,
+            "properties": 6,
+            "ordinary": 214,
+            "runtime_excluded_not_counted": 14
+          },
+          "exit_code": 0,
+          "captured_bytes": 3784,
+          "output_sha256": "68b189ffc7c33a6d8582d00631b32c03226a43590e9db27ca3fc02a8ea18c58e"
+        },
+        "tooling": {
+          "seconds": 6.26,
+          "status": "passed",
+          "failure": null,
+          "tests": {
+            "seed": 765510,
+            "passed": 23
+          },
+          "exit_code": 0,
+          "captured_bytes": 154,
+          "output_sha256": "384edf932cfcb6fc1ec62ceefcd8e2d48353662ac7f16a56deb63bd4d8591a83"
+        },
+        "docs": {
+          "seconds": 2.166,
+          "status": "passed",
+          "failure": null,
+          "exit_code": 0,
+          "captured_bytes": 175,
+          "output_sha256": "be7899467f36d59bd3f5c9c882abe374f4062a0efc0ca87bf04b98253e485d54"
+        },
+        "doc-links": {
+          "seconds": 0.493,
+          "status": "passed",
+          "failure": null,
+          "exit_code": 0,
+          "captured_bytes": 60,
+          "output_sha256": "277fe79a729bc3c4058b5b3a662b663ecfe046b92807fcf1cae3313312e5ff5f"
+        }
+      },
+      "coverage_percent": 95.93,
+      "published_archive_consumers": {
+        "package-current": {
+          "package_sha256": "cb9d5c8dfa96ec25d5770d438a64bde8ea0ce8c059134ce8721da22f950b73f6",
+          "files": 100,
+          "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+          "smoke": {
+            "client": true,
+            "legacy_1_14_6_explicit": "1.14.6",
+            "legacy_runtime_explicit": "1.14.1",
+            "network_policy": true,
+            "offline_default": true,
+            "runtime_1_16_0_explicit": "1.16.0",
+            "runtime_default": "1.16.1",
+            "supervisor": true,
+            "unqualified_runtime_rejected": "1.16.2",
+            "versions": {
+              "jason": "1.4.5",
+              "nimble_options": "1.1.1",
+              "req": "0.7.4",
+              "telemetry": "1.4.2"
+            }
+          }
+        },
+        "package-minimum": {
+          "package_sha256": "cb9d5c8dfa96ec25d5770d438a64bde8ea0ce8c059134ce8721da22f950b73f6",
+          "files": 100,
+          "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+          "smoke": {
+            "client": true,
+            "legacy_1_14_6_explicit": "1.14.6",
+            "legacy_runtime_explicit": "1.14.1",
+            "network_policy": true,
+            "offline_default": true,
+            "runtime_1_16_0_explicit": "1.16.0",
+            "runtime_default": "1.16.1",
+            "supervisor": true,
+            "unqualified_runtime_rejected": "1.16.2",
+            "versions": {
+              "jason": "1.4.0",
+              "nimble_options": "1.1.0",
+              "req": "0.7.4",
+              "telemetry": "1.3.0"
+            }
+          }
+        },
+        "package-otp27": {
+          "package_sha256": "cb9d5c8dfa96ec25d5770d438a64bde8ea0ce8c059134ce8721da22f950b73f6",
+          "files": 100,
+          "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+          "smoke": {
+            "client": true,
+            "legacy_1_14_6_explicit": "1.14.6",
+            "legacy_runtime_explicit": "1.14.1",
+            "network_policy": true,
+            "offline_default": true,
+            "runtime_1_16_0_explicit": "1.16.0",
+            "runtime_default": "1.16.1",
+            "supervisor": true,
+            "unqualified_runtime_rejected": "1.16.2",
+            "versions": {
+              "jason": "1.4.0",
+              "nimble_options": "1.1.0",
+              "req": "0.7.4",
+              "telemetry": "1.3.0"
+            }
+          }
+        }
+      },
+      "registry_consumer": {
+        "status": "passed",
+        "version": "0.1.4",
+        "otp": "29",
+        "elixir": "1.20.4",
+        "dependency": "hex",
+        "smoke": {
+          "client": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.16.1",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.5",
+            "nimble_options": "1.1.1",
+            "req": "0.7.4",
+            "telemetry": "1.4.2"
+          }
+        },
+        "package_sha256": "cb9d5c8dfa96ec25d5770d438a64bde8ea0ce8c059134ce8721da22f950b73f6",
+        "verified_files": 100
+      }
+    }
+  },
+  "hex_dry_run": {
+    "seconds": 1.73,
+    "status": "passed",
+    "failure": null,
+    "exit_code": 0,
+    "captured_bytes": 4558,
+    "output_sha256": "a538593f2718d0ccfab7ef20c15404ef2020f56c89ada9df71360570f24e15a5"
+  },
+  "github_release": {
+    "assets": [
+      {
+        "apiUrl": "https://api.github.com/repos/hfiguera/smolbox/releases/assets/573152696",
+        "contentType": "application/x-tar",
+        "createdAt": "2026-09-18T17:58:25Z",
+        "digest": "sha256:cb9d5c8dfa96ec25d5770d438a64bde8ea0ce8c059134ce8721da22f950b73f6",
+        "downloadCount": 0,
+        "id": "RA_kwDOURXFm84iKZ24",
+        "label": "",
+        "name": "smolbox-0.1.4.tar",
+        "size": 316928,
+        "state": "uploaded",
+        "updatedAt": "2026-09-18T17:58:26Z",
+        "url": "https://github.com/hfiguera/smolbox/releases/download/v0.1.4/smolbox-0.1.4.tar"
+      }
+    ],
+    "isDraft": false,
+    "isPrerelease": false,
+    "publishedAt": "2026-09-18T17:58:26Z",
+    "tagName": "v0.1.4",
+    "url": "https://github.com/hfiguera/smolbox/releases/tag/v0.1.4"
+  },
+  "live_evidence": {
+    "reused": [
+      "docs/evidence/smolvm-1.16.1.json",
+      "docs/evidence/cleanup-preservation-disposal.json",
+      "docs/evidence/smolvm-1.16.1-admission.json",
+      "docs/evidence/smolvm-1.16.1-default.json"
+    ],
+    "relationship": "All 43 executable library modules match the merged qualified baseline after excluding documentation attributes and line metadata. Version and documentation edits introduce no runtime changes. No new live, recovery, networking or exhaustion test is claimed for release finalization."
+  },
+  "limitations": [
+    "Failed graceful stops can retain unknown work for operator resolution; deletion is not an unconditional fallback.",
+    "macOS IPv6 and Linux ARM64 remain unqualified. No new isolation or hard resource guarantee.",
+    "The published archive may differ in serialization from the prepared archive; all 100 file contents and normalized metadata were compared, then the published archive was tested by six consumers and two fresh registry installations."
+  ],
+  "publication_notes": [
+    "The original interactive publish session was unavailable when the authenticator reply arrived. Hex returned HTTP 404 for 0.1.4 before the command was restarted; the subsequent package and documentation publication succeeded.",
+    "The Linux-published archive differs in serialization from the prepared macOS archive. All 100 file contents and normalized metadata match; no replacement publication was needed."
+  ],
+  "final_ci_runs": [
+    {
+      "conclusion": "success",
+      "databaseId": 35375061315,
+      "headBranch": "main",
+      "name": "SmolBox CI",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 35375061645,
+      "headBranch": "v0.1.4",
+      "name": "SmolBox CI",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 35375061593,
+      "headBranch": "v0.1.4",
+      "name": "SmolBox blog",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 35375061335,
+      "headBranch": "main",
+      "name": "SmolBox blog",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 35374495508,
+      "headBranch": "release-0.1.4",
+      "name": "SmolBox CI",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 35374495442,
+      "headBranch": "release-0.1.4",
+      "name": "SmolBox blog",
+      "status": "completed"
+    }
+  ]
+}
