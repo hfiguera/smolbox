@@ -6,7 +6,7 @@ remove the VM. If the worker stops responding, it also needs to distinguish a
 failed command from a result it could not observe.
 
 [SmolBox](https://hex.pm/packages/smolbox/0.1.0) is an Elixir client and supervised
-execution runtime for self-hosted SmolVM workers. It manages work independently
+execution runtime for self-hosted smolvm workers. It manages work independently
 of the process that submitted it, tracking execution identity, observed outcome,
 collected files, and cleanup status.
 
@@ -18,21 +18,21 @@ each language.
 
 ## Where SmolBox fits
 
-[Smol Machines](https://smolmachines.com/docs/) develops SmolVM, the open-source
+[Smol Machines](https://smolmachines.com/docs/) develops smolvm, the open-source
 engine that runs the machines. It uses
 [libkrun as its virtual machine monitor](https://github.com/smol-machines/smolvm#how-it-works)
-to run Linux guests through native host virtualization. SmolVM also provides
+to run Linux guests through native host virtualization. smolvm also provides
 tools for preparing reusable environments.
 
 Each managed SmolBox execution runs in its own Linux VM, giving the program a
 separate guest kernel and working environment for its dependencies and temporary
-files. This isolation is a reason to choose SmolVM workers when an embedded
-interpreter or local process does not meet your requirements. SmolVM provides
+files. This isolation is a reason to choose smolvm workers when an embedded
+interpreter or local process does not meet your requirements. smolvm provides
 the VM boundary; SmolBox coordinates execution and cleanup.
 
 [Firecracker](https://github.com/firecracker-microvm/firecracker#overview) was
 another option for the underlying VM runtime, but it requires Linux/KVM. We
-chose SmolVM for native development on macOS Apple Silicon and execution on
+chose smolvm for native development on macOS Apple Silicon and execution on
 Linux workers, with an existing machine, command, and file API. That let us
 concentrate SmolBox on execution management in Elixir.
 
@@ -42,7 +42,7 @@ worker's architecture. The
 exposes machine, command, and file operations over HTTP, letting us keep the VM
 engine in a separate worker process.
 
-SmolBox 0.1.0 targets the **self-hosted SmolVM 1.14.1 worker API**, tested on
+SmolBox 0.1.0 targets the **self-hosted smolvm 1.14.1 worker API**, tested on
 Linux x86_64/KVM and macOS Apple Silicon.
 
 SmolBox coordinates that lifecycle under your application's supervision tree.
@@ -54,7 +54,7 @@ execution identities, and store.
 <figure>
   <picture>
     <source media="(max-width: 600px)" srcset="../../media/running-python-from-elixir-with-smolbox/execution-lifecycle-mobile.svg" width="390" height="706">
-    <img src="../../media/running-python-from-elixir-with-smolbox/execution-lifecycle.svg" width="1200" height="630" alt="An Elixir application keeps execution records. SmolBox manages the lifecycle through a SmolVM worker API. Python runs in a disposable VM, and results return to Elixir.">
+    <img src="../../media/running-python-from-elixir-with-smolbox/execution-lifecycle.svg" width="1200" height="630" alt="An Elixir application keeps execution records. SmolBox manages the lifecycle through a smolvm worker API. Python runs in a disposable VM, and results return to Elixir.">
   </picture>
   <figcaption>The VM runs the program. The Elixir host keeps the execution record and coordinates observation and cleanup.</figcaption>
 </figure>
@@ -165,7 +165,7 @@ program only reverses three bytes: a deliberately small lifecycle demonstration,
 not a workload that needs a VM. It makes submission, file collection, and cleanup
 easy to inspect.
 
-Before running it, prepare a **dedicated, empty SmolVM 1.14.1 worker** and a
+Before running it, prepare a **dedicated, empty smolvm 1.14.1 worker** and a
 neutral-startup Python image using the
 [runtime preparation guide](https://hexdocs.pm/smolbox/0.1.0/client.html#preparing-the-reference-runtimes).
 Run this example on that worker's host: Linux x86_64 with KVM, or macOS Apple
@@ -236,7 +236,7 @@ worker failure. The
 records the configuration, results, evidence, and remaining limitations.
 
 SmolBox relies on
-[SmolVM's isolation model](https://github.com/smol-machines/smolvm/blob/e8d09ef616d363004d55b80a6cdb31a4e7e1842d/SECURITY.md)
+[smolvm's isolation model](https://github.com/smol-machines/smolvm/blob/e8d09ef616d363004d55b80a6cdb31a4e7e1842d/SECURITY.md)
 for running untrusted code. Production deployments must protect worker access
 and configure host resource limits, networking, and credentials.
 

@@ -148,7 +148,7 @@ cases that preserve execution progress before/after SQL result persistence.
 ## Opt-in durable benchmark
 
 The benchmark uses this host's real PostgreSQL store, directory adapter and a
-previously provisioned, initially idle SmolVM worker matching `SMOLBOX_RUNTIME_VERSION`
+previously provisioned, initially idle smolvm worker matching `SMOLBOX_RUNTIME_VERSION`
 (default 1.16.1). It provisions no
 service, changes no host quotas and clears no image/page cache. Apply the example
 migrations first. Use native approved artifacts, a new private object directory,

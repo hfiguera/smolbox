@@ -1,5 +1,5 @@
 A full disk can break more than the program writing to it. In an early bounded
-Linux test, SmolVM could stop a machine but could not finish deleting it: VM
+Linux test, smolvm could stop a machine but could not finish deleting it: VM
 data and the worker's database shared a filesystem, and that filesystem was full.
 
 That failure gave us a concrete requirement. Workload storage could run out,
@@ -14,7 +14,7 @@ resources, and run the next one?**
 ## What we wanted to learn
 
 [SmolBox](https://hexdocs.pm/smolbox/0.1.1/SmolBox.html) is an Elixir client and
-supervised execution runtime for SmolVM workers. SmolVM supplies the microVM
+supervised execution runtime for smolvm workers. smolvm supplies the microVM
 isolation. SmolBox tracks execution identity, results, collected files and
 cleanup. The [introductory article](../running-python-from-elixir-with-smolbox/)
 explains that integration with a Python example.
@@ -37,14 +37,14 @@ new benchmarks of the later 0.1.1 documentation release.
 ## A disposable worker environment
 
 The physical host ran QEMU with KVM acceleration. Inside its disposable Ubuntu
-guest, an Elixir controller communicated with SmolVM 1.14.1 through a private
-Unix socket. SmolVM created another Linux guest for each execution, using nested
+guest, an Elixir controller communicated with smolvm 1.14.1 through a private
+Unix socket. smolvm created another Linux guest for each execution, using nested
 KVM. Approved images supplied Python and Node.js.
 
 <figure>
   <picture>
     <source media="(max-width: 600px)" srcset="../../media/testing-smolbox-with-nested-kvm/nested-lab-mobile.svg" width="390" height="824">
-    <img src="../../media/testing-smolbox-with-nested-kvm/nested-lab.svg" width="1200" height="780" alt="A physical Linux host supervises a disposable QEMU guest. Inside that guest, the Elixir controller and PostgreSQL sit outside a bounded SmolVM worker. The worker runs an inner microVM. Host recovery can replace the outer guest independently.">
+    <img src="../../media/testing-smolbox-with-nested-kvm/nested-lab.svg" width="1200" height="780" alt="A physical Linux host supervises a disposable QEMU guest. Inside that guest, the Elixir controller and PostgreSQL sit outside a bounded smolvm worker. The worker runs an inner microVM. Host recovery can replace the outer guest independently.">
   </picture>
   <figcaption>The controller's records live outside the worker's writable storage. Recovery of the outer VM runs on the physical host.</figcaption>
 </figure>
@@ -102,7 +102,7 @@ acknowledged writes and total backing-filesystem usage measure different things;
 the latter also includes existing worker files and storage overhead.
 
 The correction was a deployment change. It preserved metadata capacity when
-VM storage filled; it did not alter SmolVM's behavior on a shared filesystem.
+VM storage filled; it did not alter smolvm's behavior on a shared filesystem.
 Because these mounts use tmpfs, their written pages also consume the worker's
 memory budget. Separate storage capacity does not remove that shared memory
 boundary.
@@ -232,7 +232,7 @@ hypervisor escape fuzzing or independent security review was performed.
 These observations cover the pinned nested Linux configuration. A different
 kernel, runtime or deployment needs its own validation.
 
-Those boundaries belong beside the results. SmolVM provides VM isolation,
+Those boundaries belong beside the results. smolvm provides VM isolation,
 the deployment enforces host policy, and SmolBox tracks execution and recovery.
 The tested controls did not become portable hard-limit options in the library.
 

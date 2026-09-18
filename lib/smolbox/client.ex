@@ -1,6 +1,6 @@
 defmodule SmolBox.Client do
   @moduledoc """
-  Low-level typed operations against an explicitly configured SmolVM worker.
+  Low-level typed operations against an explicitly configured smolvm worker.
 
   This API does not persist execution identity or authorize cleanup. Callers own
   machine ownership checks, admission, deadlines, and recovery. No operation is

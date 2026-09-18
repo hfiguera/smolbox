@@ -196,7 +196,7 @@ owned service-fault fixtures. The wrapper is derived from the selected process's
 distribution and checked against the release archive. The fault scenarios launch
 their own server on 19471, use the verified `SMOLVM_GUEST_ROLLOUT_HOST_PORT=19472`
 override, and refuse to stop an existing listener. Linux fault state uses a new
-job-owned directory. On macOS, SmolVM uses account-level state, which is another
+job-owned directory. On macOS, smolvm uses account-level state, which is another
 reason the account/host must be disposable and dedicated.
 
 `elixir scripts/ci.exs preflight` verifies the actual listener belongs to the selected account

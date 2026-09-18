@@ -35,7 +35,7 @@ claim generation, owner, and the current worker generation. Renewing a worker
 after expiry does not automatically revive an execution's old fence. Claims must
 be refreshed before dispatch intent can be committed.
 
-Fencing prevents stale **store writes**, not HTTP already sent to SmolVM. A
+Fencing prevents stale **store writes**, not HTTP already sent to smolvm. A
 replacement controller cannot replay dispatching, running, or unknown work.
 The selected worker API has no durable command receipt. An uncertain operation
 can remain unknown indefinitely even after its VM is confirmed stopped or absent.
@@ -138,7 +138,7 @@ name for recorded creation evidence.
 
 ## Worker and output-store failures
 
-An API-server restart is not a VM restart. SmolVM 1.14.1 keeps VMs running when
+An API-server restart is not a VM restart. smolvm 1.14.1 keeps VMs running when
 `smolvm serve` exits. The dedicated qualification script kills its own server
 after the durable controller records running work, waits for recorded uncertainty,
 then restarts the server against the same worker data. It verifies the original

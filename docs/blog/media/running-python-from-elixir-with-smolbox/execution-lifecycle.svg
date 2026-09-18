@@ -14,7 +14,7 @@
     <path d="M430 288h63m-10-8 10 8-10 8" fill="none" stroke="#215bc7" stroke-width="3"/>
     <path d="M493 374h-63m10-8-10 8 10 8" fill="none" stroke="#526478" stroke-width="3"/>
     <rect x="516" y="202" width="268" height="257" rx="8" fill="#fff" stroke="#a6b8ce"/>
-    <text x="542" y="245" font-size="25" font-weight="650">SmolVM worker</text>
+    <text x="542" y="245" font-size="25" font-weight="650">smolvm worker</text>
     <path d="M542 268h216" stroke="#d8e0eb"/>
     <text x="542" y="313" font-size="21">Create the VM</text>
     <text x="542" y="349" font-size="21">Run and observe</text>
@@ -28,6 +28,6 @@
     <text x="898" y="382" fill="#e4edff" font-size="21">One command</text>
     <text x="898" y="420" fill="#e4edff" font-size="19">An approved image</text>
     <text x="64" y="546" font-size="22" fill="#526478">Run on your hosts. Keep track from Elixir.</text>
-    <text x="64" y="584" font-size="18" fill="#526478">SmolBox 0.1.0 · SmolVM 1.14.1 · Development use</text>
+    <text x="64" y="584" font-size="18" fill="#526478">SmolBox 0.1.0 · smolvm 1.14.1 · Development use</text>
   </g>
 </svg>

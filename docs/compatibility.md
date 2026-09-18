@@ -59,7 +59,7 @@ override, deterministic admission tests and current/minimum package consumers.
 The default value is the only executable library change from the admission
 checkpoint; prior Linux qualification is reused, with no fresh Linux run claimed.
 
-## SmolVM 1.16.0 qualification
+## smolvm 1.16.0 qualification
 
 SmolBox 0.1.3 defaults to `runtime_version: "1.16.0"` on Linux x86_64
 and macOS Apple Silicon after platform qualification. Explicit 1.14.1 and 1.14.6
@@ -236,7 +236,7 @@ Disk requests below the bundled 20 GiB storage / 10 GiB overlay templates need
 working `resize2fs` on the worker host. On macOS, install it with
 `brew install e2fsprogs`; upstream searches Homebrew's e2fsprogs directory and
 then the worker's `PATH`. Our private validation environment used e2fsprogs
-1.47.4 without changing the existing SmolVM installation.
+1.47.4 without changing the existing smolvm installation.
 
 The first run without that tool passed eight of nine ordinary runtime cases,
 but a workspace file disappeared after stopping and restarting its VM. The
@@ -292,7 +292,7 @@ test, example and dependency-lock contents are identical between those commits.
 | Quality canaries | 8 bad/clean pairs passed | 8 bad/clean pairs passed |
 | Standalone maintainer tools | 22 passed | 22 passed |
 | PostgreSQL store contract | 16 passed, PostgreSQL 17.10 | 16 passed, PostgreSQL 16.15 |
-| Real SmolVM client/runtime suite | 14 passed | 14 passed |
+| Real smolvm client/runtime suite | 14 passed | 14 passed |
 | Durable restart recovery | 25 passed | 25 passed |
 | Exact getting-started walkthrough | Passed | Passed |
 | Host examples | Both compiled and passed forced Dialyzer | Both compiled and passed forced Dialyzer |
@@ -308,7 +308,7 @@ dependency selections used OTP 29; they do not replace minimum-toolchain testing
 See the [macOS evidence](evidence/otp29-macos.json) and
 [Linux evidence](evidence/otp29-linux.json) for source hashes, seeds, runtime
 report digests and toolchain identity. No library code changes were needed for
-this pair. Each worker used pinned SmolVM 1.14.1 and its previously qualified
+this pair. Each worker used pinned smolvm 1.14.1 and its previously qualified
 native Python/Node artifacts. Dedicated socket-only test databases were stopped
 after checking empty execution/identity tables; actual database-outage rejection
 passed. Worker inventories were empty and existing services were preserved.
@@ -362,7 +362,7 @@ remaining release requirements.
 
 ## Pinned upstream
 
-- SmolVM `v1.14.1`, commit `e8d09ef616d363004d55b80a6cdb31a4e7e1842d`.
+- smolvm `v1.14.1`, commit `e8d09ef616d363004d55b80a6cdb31a4e7e1842d`.
 - macOS arm64 release archive SHA-256:
   `27f2ae7057f235a67a58fd13d0657c268cf9a16f214f8b177427d29daab0ae2f`.
 - Linux x86_64 release archive SHA-256:
@@ -386,12 +386,12 @@ Linux x86_64: `ssh linux`, kernel `7.1.5-76070105-generic`, readable/writable KV
 health/version. Both platforms pass the initial Python/Node smoke probe below.
 
 The Linux runtime uses `/tmp/smolbox-qualification/data` as a dedicated data root.
-Its login shell initially had no Elixir, Mix, or SmolVM on PATH; the pinned
-SmolVM distribution was extracted in `/tmp/smolbox-qualification/runtime`.
+Its login shell initially had no Elixir, Mix, or smolvm on PATH; the pinned
+smolvm distribution was extracted in `/tmp/smolbox-qualification/runtime`.
 Elixir 1.20.4 / OTP 28.5 was installed under `/tmp/smolbox-qualification/mise`
 for library tests, without changing the account's global toolchain.
 macOS uses unique test machine
-names in the normal SmolVM state directory: `SMOLVM_DATA_DIR` is Linux-only in
+names in the normal smolvm state directory: `SMOLVM_DATA_DIR` is Linux-only in
 this release. Never delete machines belonging to another workload.
 
 ### Runtime smoke coverage
@@ -630,7 +630,7 @@ Eighteen real PostgreSQL-backed controller SIGKILL boundaries pass on each
 platform: Linux seed 271982 (267.5 seconds), macOS seed 791731 (260.2 seconds).
 Each case kills an owned child BEAM at a named boundary and recovers through a
 fresh BEAM using the original keys, store partition, spec and execution ID.
-These are real SmolVM calls and database commits, not mocked restart tests.
+These are real smolvm calls and database commits, not mocked restart tests.
 
 The suite covers dispatch intent, first output, result/artifact writes, completion,
 stop, delete, absence recording and reservation release. Lost result evidence
@@ -682,7 +682,7 @@ service restart and the remaining isolation/release gates are still pending.
 ## Allocation floor correction (September 7)
 
 The increment after `137ed09` corrects an admission assumption found by real
-resource probes. SmolVM 1.14.1 reports requested disk sizes even when it retains
+resource probes. smolvm 1.14.1 reports requested disk sizes even when it retains
 larger runtime templates. On both hosts a 1 GiB storage request exposed
 21,118,275,584 guest filesystem bytes. Linux raw disks were 20/10 GiB. See
 [resource qualification](resource-qualification.md) for source paths, cgroup

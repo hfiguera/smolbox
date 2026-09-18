@@ -3,8 +3,8 @@
 Run Python, JavaScript, and other programs in disposable microVMs from Elixir.
 
 SmolBox is an Elixir client and supervised execution runtime for
-[SmolVM](https://github.com/smol-machines/smolvm), which runs lightweight virtual
-machines on your own hosts. SmolVM provides the machines and worker API; SmolBox
+[smolvm](https://github.com/smol-machines/smolvm), which runs lightweight virtual
+machines on your own hosts. smolvm provides the machines and worker API; SmolBox
 tracks commands, results, and cleanup from your application's supervision tree.
 
 Use it when an Elixir application needs to call a Python library, run a JavaScript
@@ -121,7 +121,7 @@ is included in the repository.
 ## Current scope
 
 SmolBox has real execution and durable recovery tests on Linux x86_64 and macOS
-Apple Silicon with **SmolVM 1.14.1, 1.14.6, 1.16.0 and 1.16.1**; results are recorded in [Compatibility](docs/compatibility.md#runtime-selection).
+Apple Silicon with **smolvm 1.14.1, 1.14.6, 1.16.0 and 1.16.1**; results are recorded in [Compatibility](docs/compatibility.md#runtime-selection).
 SmolBox 0.1.3 defaults to **1.16.0**; 0.1.2 defaults to **1.14.6**.
 Before adopting this checkout’s **1.16.1** default with an older worker, explicitly
 configure `runtime_version: "1.16.0"`, `"1.14.6"` or `"1.14.1"`, or follow the
@@ -137,7 +137,7 @@ SmolBox 0.1.3 also supports explicit outbound hostname/CIDR policies
 with smolvm 1.16.0; this checkout also supports them with 1.16.1. Offline remains the default. See
 [Controlled network access](docs/network-access.md) for setup and validation boundaries.
 
-SmolBox relies on SmolVM's isolation model for running untrusted code. Your
+SmolBox relies on smolvm's isolation model for running untrusted code. Your
 deployment must protect worker access and configure host resource limits,
 networking, and credentials. A subsequent validation campaign tested these
 controls and failure recovery in one constrained Linux deployment; see
@@ -170,7 +170,7 @@ about running programs from Elixir and managing their execution lifecycle.
 | [Telemetry](docs/telemetry.md) | Observe activity and inspect workers without treating notifications as receipts |
 | [Deployment boundaries](docs/security.md) | Understand worker isolation, credentials, file boundaries, and operator responsibilities |
 | [Resource evidence](docs/resource-qualification.md) | Review the tested Linux deployment controls, historical experiments, and remaining limits |
-| [Compatibility](docs/compatibility.md) | Check the tested SmolVM, Elixir/OTP, OS, and artifact combinations |
+| [Compatibility](docs/compatibility.md) | Check the tested smolvm, Elixir/OTP, OS, and artifact combinations |
 
 ## Contributing
 

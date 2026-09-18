@@ -44,7 +44,7 @@ then use an approved native Python
 artifact with neutral `/bin/true` startup. Follow the
 [reference-runtime preparation instructions](client.md#preparing-the-reference-runtimes)
 to create `python.smolmachine`, record its SHA-256, and start the private worker
-with the 1 MiB file-transfer cap. The package does not install SmolVM or prepare
+with the 1 MiB file-transfer cap. The package does not install smolvm or prepare
 runtime images for you. Do not attach this ephemeral demo controller to a worker
 managed by another runtime or store.
 

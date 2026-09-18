@@ -1,6 +1,6 @@
 # Captured wire fixtures
 
-Captured from the official SmolVM v1.14.1 macOS arm64 distribution using a
+Captured from the official smolvm v1.14.1 macOS arm64 distribution using a
 prepared Python artifact with guest networking disabled, on 2026-09-06.
 Machine names, creation timestamps, and process IDs are normalized in lifecycle
 responses. Exec response bytes and SSE framing are retained exactly.

@@ -10,13 +10,13 @@ Linux/macOS 1.16.0 default in SmolBox 0.1.3 and retained explicit 1.14.1 and
 1.14.6 compatibility. This checkout defaults to 1.16.1 (unreleased), retaining
 explicit 1.16.0 support. SmolBox 0.1.2 defaults to 1.14.6.
 
-Install the pinned SmolVM release from [compatibility evidence](compatibility.md).
+Install the pinned smolvm release from [compatibility evidence](compatibility.md).
 Prepare an approved, architecture-matched `.smolmachine` artifact on the worker
 host, verify its digest, and start a private `smolvm serve` endpoint. For bounded
 small-file workloads set `SMOLVM_FILE_TRANSFER_MAX_BYTES=1048576` before starting
 the server. SmolBox never enables guest networking to fetch an image.
 
-For SmolVM 1.14.6, 1.16.0 and 1.16.1, verify the host's `resize2fs` before requesting disks smaller
+For smolvm 1.14.6, 1.16.0 and 1.16.1, verify the host's `resize2fs` before requesting disks smaller
 than its bundled templates. Our macOS run without that tool lost a workspace
 file after stop/start; health and successful execution alone did not detect the
 problem. See [runtime prerequisites](compatibility.md#macos-1-14-6-prerequisites).
@@ -152,7 +152,7 @@ contents at rest.
 
 ## Preparing the reference runtimes
 
-This is an operator step using upstream SmolVM, outside the library's execution
+This is an operator step using upstream smolvm, outside the library's execution
 API. It prepares a base language runtime; it does not build or publish user
 functions. Perform it on an isolated preparation host with the matching native
 architecture, sufficient disk/memory and the pinned installation. Preparation

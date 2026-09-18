@@ -2,7 +2,7 @@ defmodule SmolBox.Command do
   @moduledoc """
   A bounded argument-vector command. No shell is inserted by SmolBox.
 
-  Timeouts are positive whole seconds, matching SmolVM's `timeoutSecs` field.
+  Timeouts are positive whole seconds, matching smolvm's `timeoutSecs` field.
   The initial maximum is five minutes; managed execution can impose an earlier
   absolute deadline. `stdin` must be UTF-8 and SmolBox accepts it only for buffered
   execution. Arbitrary binary data belongs in staged files.

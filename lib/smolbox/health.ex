@@ -1,6 +1,6 @@
 defmodule SmolBox.Health do
   @moduledoc """
-  Bounded worker health observation from SmolVM's `/health` endpoint.
+  Bounded worker health observation from smolvm's `/health` endpoint.
 
   The version is reported by the server, not cryptographically attested. Missing
   machine counts indicate unavailable inventory; a successful HTTP status alone

@@ -19,7 +19,7 @@ Pop!_OS physical host (ssh linux)
     QEMU with KVM, private QMP socket and 1 MiB serial ring
       disposable Ubuntu guest: 4 vCPU, 8 GiB RAM, 100 GiB virtual disk
         Elixir 1.20.4 / OTP 29.0.6 + SmolBox source and locked dependencies
-        dedicated smolbox-worker account + SmolVM 1.14.1
+        dedicated smolbox-worker account + smolvm 1.14.1
           Python / Node microVM, using nested KVM
   operator's lingering systemd user manager
     recovery timer: stopped test VM -> capture status -> verify baseline -> new disk
@@ -36,13 +36,13 @@ Filesystem formatting must use `nodiscard` or it can release that reservation.
 
 These are different limits. Host tasks do not count each guest process. CPU
 bandwidth is not a per-command CPU-time budget. The outer limit applies to the
-whole disposable worker environment, not individually to each SmolVM machine.
+whole disposable worker environment, not individually to each smolvm machine.
 Installed host packages, small bootstrap/account/unit files and ordinary OS service
 journal metadata live outside the lab data volume. No host-wide logging policy is
 changed.
 
 One lock covers every QEMU mode. Only one lab VM can run at a time. The physical
-host's existing SmolVM worker and other workloads are separate and must remain
+host's existing smolvm worker and other workloads are separate and must remain
 untouched. This machine is not registered as a GitHub runner.
 
 ## Host installation
@@ -90,7 +90,7 @@ It copies, rather than modifies, the existing approved Linux artifacts:
 
 | Input | SHA-256 |
 | --- | --- |
-| SmolVM 1.14.1 release archive | `e91786c12808ce87655aa190eb5f6692672cd659a89367b5ec18dace5756af2f` |
+| smolvm 1.14.1 release archive | `e91786c12808ce87655aa190eb5f6692672cd659a89367b5ec18dace5756af2f` |
 | Python artifact | `76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2` |
 | Node artifact | `768b8d2158a75abd90ccc73a65a83717aebfe37e62ed91d0db0bb731584df776` |
 
@@ -163,7 +163,7 @@ Successful management commands prove that explicit inbound SSH still works.
 These are finite checks of the configured policy, not exhaustive network fuzzing.
 
 `nested-probe.exs` requires Linux/KVM, the pinned toolchain and an empty worker.
-It creates a real SmolVM machine through SmolBox, inspects live kernel VM/vCPU
+It creates a real smolvm machine through SmolBox, inspects live kernel VM/vCPU
 descriptors in the outer guest, stages Python and binary data, preserves a
 nonzero exit, collects binary output and verifies stop/delete/absence.
 libkrun can close its initial `/dev/kvm` descriptor after creating the VM; the
@@ -190,7 +190,7 @@ and keys out of Git; export only reviewed reports and hashes.
 
 ## Retesting shared storage cleanup
 
-The September 10, 2026 comparison of SmolVM 1.14.1 and 1.14.6 is recorded in
+The September 10, 2026 comparison of smolvm 1.14.1 and 1.14.6 is recorded in
 [Resource evidence](resource-qualification.md#shared-storage-cleanup-retest).
 It uses a new account and one shared 512 MiB tmpfs inside a disposable test VM.
 The candidate deployment's separate metadata mount would hide the original
@@ -296,7 +296,7 @@ cleanup and no-replay assertions retain their original limits; library code is
 unchanged. The original failure and the subsequent successful run are recorded.
 
 The lab VMs are stopped. A clean replacement disk and the pinned baseline remain,
-and the recovery timer remains enabled. The original physical-host SmolVM worker
+and the recovery timer remains enabled. The original physical-host smolvm worker
 is healthy at its original PID. The host retains the 128 GiB storage reservation.
 
 These initial checks qualify this lab for the recorded functional/recovery work. No

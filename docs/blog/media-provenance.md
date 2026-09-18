@@ -1,7 +1,7 @@
 # Blog asset provenance
 
 The lifecycle artwork is original, repository-authored geometry. It depicts the
-Elixir application, SmolBox, a SmolVM worker, and a disposable Python VM. It is a
+Elixir application, SmolBox, a smolvm worker, and a disposable Python VM. It is a
 conceptual architecture diagram, not a runtime trace or benchmark.
 
 | Asset | Origin |
@@ -42,7 +42,7 @@ between host limits, guest allocations and recovery deadlines.
 ## Upstream cleanup follow-up
 
 Original SVG geometry using the existing blog palette. The article diagrams
-simplify the HTTP deletion ordering changed in SmolVM PR #1219. The social
+simplify the HTTP deletion ordering changed in smolvm PR #1219. The social
 composition illustrates the collaboration, not a runtime trace. No portraits,
 social screenshots or third-party artwork are included.
 

@@ -9,12 +9,12 @@ defmodule SmolBox.MachineSpec do
   `SmolBox.NetworkPolicy` is supplied. No host mounts, sockets, GPU, or ports are
   exposed by this contract.
 
-  Disk sizes are requests. SmolVM 1.14.1 copies larger disk templates without
+  Disk sizes are requests. smolvm 1.14.1 copies larger disk templates without
   shrinking them, while its API still reports the request. Low-level callers
   must verify runtime/artifact disk geometry; managed workers require an
   explicit allocation floor. A matching create reply alone is not enforcement.
 
-  SmolVM 1.14.6, 1.16.0 and 1.16.1 need the host's `resize2fs` for requests
+  smolvm 1.14.6, 1.16.0 and 1.16.1 need the host's `resize2fs` for requests
   below template sizes. Missing it caused file loss after stop/start in validation. Verify
   the host prerequisite and persistence before admitting work; see
   [Compatibility](compatibility.html#macos-1-14-6-prerequisites).

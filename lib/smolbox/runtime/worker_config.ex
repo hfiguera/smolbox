@@ -11,7 +11,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   `allocation_floor` is a required operator declaration with `storage_gb`,
   `overlay_gb`, and `host_overhead_mb`. It must cover the largest actual disk
   templates across this worker's runtime and approved artifacts, and its VMM
-  overhead. SmolVM 1.14.1 only grows disk templates: a smaller API request can
+  overhead. smolvm 1.14.1 only grows disk templates: a smaller API request can
   still expose a larger guest disk. Admission rejects profiles below these
   floors. This declaration is not remotely attested or a host filesystem quota.
 

@@ -83,7 +83,7 @@ macOS `aarch64`. Linux arm64 remains unqualified.
 storage/overlay templates across the runtime installation and every approved
 artifact, plus VMM overhead, before registering a worker. The 1.14.1 release's
 supplied templates measured 20 GiB storage and 10 GiB overlay on both hosts.
-SmolVM 1.14.1 retains a larger template even when its API reports a 1 GiB request.
+smolvm 1.14.1 retains a larger template even when its API reports a 1 GiB request.
 Managed submission rejects profiles below the declared floor. Recovered work
 checks the current floor again before dispatch; raising it does not rewrite an
 existing specification or silently repeat a command. The low-level client cannot

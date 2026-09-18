@@ -1,6 +1,6 @@
 defmodule SmolBox do
   @moduledoc """
-  Standalone managed sandbox executions over pinned, host-operated SmolVM workers.
+  Standalone managed sandbox executions over pinned, host-operated smolvm workers.
 
   Start a named child with `child_spec/1`. Submit a validated immutable execution
   specification under a host-authorized scope. Acceptance is durable only with a

@@ -1,7 +1,7 @@
 # Upstream schema fixture
 
 `smolvm-v1.14.1-subset.json` is a mechanically extracted subset of the OpenAPI
-schema exported by the official SmolVM v1.14.1 macOS arm64 binary. It contains
+schema exported by the official smolvm v1.14.1 macOS arm64 binary. It contains
 eight selected paths and their recursively referenced component schemas.
 
 Source: https://github.com/smol-machines/smolvm/tree/v1.14.1
@@ -22,7 +22,7 @@ it in `src/api/handlers/health.rs` and both runtime distributions serve it. Its
 HTTP-200/empty-body contract is verified directly by the client runtime tests;
 no invented definition has been inserted into this exported fixture.
 
-## SmolVM 1.14.6
+## smolvm 1.14.6
 
 `smolvm-v1.14.6-subset.json` retains the same eight paths and their 19 recursively
 referenced schemas from the official Linux x86_64 binary's `serve openapi` output.

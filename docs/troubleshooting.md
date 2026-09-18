@@ -44,7 +44,7 @@ command result while recording unavailable outputs. `cleanup: :complete` and
 | `:admission_exhausted` | Check queued work and store limits. The memory store retains completed identities; its record/byte limits can fill even after guest cleanup. Do not discard a store that still owns work to make room. |
 | `:identity_conflict` | The same scoped ID was used with different semantic inputs, or an immutable artifact receipt conflicts. Recover the original specification. A deliberate changed execution needs a new authorized ID. |
 | `await/3` returns `:expired` | Only this caller's waiting budget expired. Fetch or await the same handle again. Request cancellation explicitly if that is your intention. |
-| `exec_stream/4` rejects stdin | SmolVM 1.14.1 ignores streaming stdin. Use `exec/4` for bounded UTF-8 stdin or stage a file. The managed runtime selects buffered exec when stdin is present. |
+| `exec_stream/4` rejects stdin | smolvm 1.14.1 ignores streaming stdin. Use `exec/4` for bounded UTF-8 stdin or stage a file. The managed runtime selects buffered exec when stdin is present. |
 | Output is incomplete or `:output_limit` is returned | Check both the worker response-byte limit and decoded output limit. Inspect `truncated`, `evidence`, and any known exit code. Capture limits do not stop the guest or justify replay. |
 | Collected output is missing | Check `collection`, `artifacts`, and `last_error`, then the artifact adapter. Restoring storage and resubmitting the same ID does not rerun the command or recreate deleted guest files. |
 | Cleanup or reservations remain pending | Check ownership evidence, worker availability, retention, and cleanup attempts. An unknown outcome normally retains its VM until the execution deadline plus `retention_ms` (24 hours by default). |
@@ -53,7 +53,7 @@ command result while recording unavailable outputs. `cleanup: :complete` and
 
 `reconcile/3` schedules another observation of existing evidence; it does not run
 the command again or reset exhausted deadlines. A stored `:unknown` outcome can
-remain unknown even after the VM is stopped and deleted. SmolVM 1.14.1 provides
+remain unknown even after the VM is stopped and deleted. smolvm 1.14.1 provides
 no durable command receipt or request fence from which to reconstruct that result.
 
 After an ambiguous submission error, keep the original spec and identity. Once
@@ -81,6 +81,6 @@ For an existing named runtime:
 
 These are host/operator APIs. Authorize access before exposing them. Full records
 returned by `fetch/3` can contain source arguments, stdin, environment and results;
-share redacted summaries when reporting an issue. Include the SmolBox/SmolVM and
+share redacted summaries when reporting an issue. Include the SmolBox/smolvm and
 Elixir/OTP versions, OS/architecture, error category/operation/evidence, execution
 state, collection and cleanup status, and whether the worker/store was restarted.

@@ -5,7 +5,7 @@ ephemeral memory store.
 The shared example setup lives in `../support/lib`; keep that directory when
 copying this example. Production consumers install the library separately.
 
-Prepare a neutral Python `.smolmachine` artifact using the pinned SmolVM version
+Prepare a neutral Python `.smolmachine` artifact using the pinned smolvm version
 and start a private worker as described in `../../docs/client.md`. Run this
 example on the worker host: it verifies the local artifact's SHA-256 before
 configuring its approved catalog. It does not build or publish artifacts.

@@ -1,6 +1,6 @@
 # Resource evidence and deployment boundaries
 
-SmolBox relies on SmolVM for VM isolation and on the deployment for host resource
+SmolBox relies on smolvm for VM isolation and on the deployment for host resource
 enforcement. Execution profiles declare guest allocations and controller admission
 reservations; the supported worker qualification remains `:development`.
 The library rejects requested CPU-time, host-RSS,
@@ -15,7 +15,7 @@ profile options or the results of the earlier experiments.
 
 ## Subsequent Linux deployment validation
 
-After the 0.1.0 release, we tested pinned SmolVM 1.14.1 and approved Python/Node
+After the 0.1.0 release, we tested pinned smolvm 1.14.1 and approved Python/Node
 artifacts in a disposable Linux x86_64 VM with nested KVM. The configuration runs
 one execution at a time, with no guest networking, host mounts or production
 secrets. It uses a dedicated worker account, private Unix API and network
@@ -57,10 +57,10 @@ records source identities, kernel counters, successful checks and retained faile
 attempts. Its scripts target that disposable lab; installing the Hex package or
 following Getting Started does not configure this deployment.
 
-## SmolVM 1.14.6 Linux deployment retest
+## smolvm 1.14.6 Linux deployment retest
 
 On September 10, 2026, the 0.1.2 compatibility work repeated the constrained
-campaign with the complete released Linux x86_64 SmolVM 1.14.6 distribution.
+campaign with the complete released Linux x86_64 smolvm 1.14.6 distribution.
 The original worker limits above were retained: 1.5 GiB charged memory with no
 swap, one CPU of bandwidth, 96 host tasks, separate bounded control/cache
 storage, and the independent 300-second deadline. The private API, network
@@ -83,7 +83,7 @@ macOS, Linux ARM64 or every possible kernel exploit. The library still rejects
 unsupported hard-control requests. These results qualify the recorded Linux
 configuration and workloads, not a portable security guarantee from SmolBox.
 
-## Disk template mismatch in SmolVM 1.14.1
+## Disk template mismatch in smolvm 1.14.1
 
 Pinned source is `e8d09ef616d363004d55b80a6cdb31a4e7e1842d`. The released Linux and
 macOS installations supply a 20 GiB storage template and a 10 GiB overlay
@@ -182,7 +182,7 @@ after every write. At 336,592,896 guest bytes it received `EIO`. The private hos
 mount was exactly full at 536,870,912 bytes. The parent unit's recorded memory
 peak was 866,095,104 bytes, with no cgroup OOM/max event. The guest could still be
 stopped, but the subsequent delete returned an uncertain protocol error.
-SmolVM's own log reported that committing VM removal failed because its database
+smolvm's own log reported that committing VM removal failed because its database
 or disk was full. Read-only inventory confirmed the same owned machine remained
 stopped. Source orders database removal before data-directory removal.
 
@@ -202,7 +202,7 @@ the failure for the tested storage layout; it does not repair or erase the
 earlier shared-storage result. See
 [Subsequent Linux deployment validation](#subsequent-linux-deployment-validation).
 
-A [September 10 retest of SmolVM 1.14.6](#shared-storage-cleanup-retest)
+A [September 10 retest of smolvm 1.14.6](#shared-storage-cleanup-retest)
 reproduced the original shared storage failure on 1.14.1 and verified the upstream
 deletion fix on 1.14.6. The historical measurements above remain unchanged.
 
@@ -228,7 +228,7 @@ qualification are unverified and outside the first release.
 On September 10, 2026, a targeted comparison ran inside the disposable nested
 Linux lab on `ssh linux`. It used SmolBox 0.1.1's unchanged production library,
 Elixir 1.20.4 / OTP 29.0.6, the approved Python image, and the complete official
-SmolVM 1.14.1 and 1.14.6 distributions. Their source and binary hashes, individual
+smolvm 1.14.1 and 1.14.6 distributions. Their source and binary hashes, individual
 reports, and fixture corrections are recorded in
 [the cleanup evidence](evidence/smolvm-1.14.6-cleanup.json).
 
@@ -239,7 +239,7 @@ a 300-second deadline. The outer QEMU retained the existing lab controls.
 The workload attempted at most 640 MiB in 1 MiB writes with `fsync` after every
 write. No host producer filled any remaining space.
 
-| Observation | SmolVM 1.14.1 | SmolVM 1.14.6 |
+| Observation | smolvm 1.14.1 | smolvm 1.14.6 |
 |---|---|---|
 | Shared filesystem after guest writes | All 536,870,912 bytes consumed | All 536,870,912 bytes consumed, in all three completed trials |
 | Guest result | `EIO` after 330,301,440 written bytes | `EIO` after 329,252,864 to 330,301,440 written bytes |
@@ -255,7 +255,7 @@ Guest acknowledged bytes also vary with filesystem overhead. Both comparison
 versions used the same lab layout and guest workload.
 
 [Upstream PR #1219](https://github.com/smol-machines/smolvm/pull/1219), included in
-[SmolVM 1.14.6](https://github.com/smol-machines/smolvm/releases/tag/v1.14.6), moves
+[smolvm 1.14.6](https://github.com/smol-machines/smolvm/releases/tag/v1.14.6), moves
 VM data removal before the registry write in the HTTP API deletion path. Removing
 that data frees space for the metadata transaction in this shared filesystem
 case. Our observation confirms the released behavior through `SmolBox.Client`;
@@ -318,7 +318,7 @@ The macOS host was an Apple M4 Max with 128 GiB memory and 16 online schedulers;
 its PostgreSQL 16.15 database was on the Linux host through a private SSH-forwarded
 Unix socket. Linux used an Intel i5-1135G7, eight online schedulers and roughly
 62.4 GiB OS-reported memory, with PostgreSQL through a local private Unix socket.
-Both used Elixir 1.20.4/OTP 28.5 and SmolVM 1.14.1/libkrun. The different machines
+Both used Elixir 1.20.4/OTP 28.5 and smolvm 1.14.1/libkrun. The different machines
 and database paths prevent attributing differences to the OS or hypervisor.
 The macOS outlier was the second sample, with 2.832 seconds in the start request;
 its cause was not established and the sample is retained.
