@@ -126,6 +126,8 @@ Before adopting the new default with an older worker, explicitly configure
 [worker upgrade procedure](docs/host-integration.md#upgrading-a-worker).
 The package does not upgrade an external worker. A version mismatch prevents
 new execution; arbitrary upstream releases and automatic fallback are not accepted.
+The [1.16.1 qualification attempt](docs/compatibility.md#smolvm-1-16-1-qualification)
+found a cleanup incompatibility under disk exhaustion; that version remains unsupported.
 
 SmolBox 0.1.3 also supports explicit outbound hostname/CIDR policies
 with smolvm 1.16.0. Offline remains the default. See

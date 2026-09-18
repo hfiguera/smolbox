@@ -62,7 +62,11 @@ SmolBox 0.1.3 introduces this default; 0.1.2 defaults to 1.14.6.
 Set `runtime_version` in the private worker manifest to select a version explicitly;
 preflight verifies that version's binary checksum and exports
 `SMOLBOX_RUNTIME_VERSION` for runtime tests, examples and service fault checks.
-An omitted field selects 1.16.0. Existing older fixtures must explicitly declare
+An omitted field selects 1.16.0. Maintainer preflight also recognizes the pinned
+1.16.1 candidate distribution, but public worker/network admission rejects it
+because qualification found a cleanup blocker. Reproducing managed candidate
+checks requires the temporary patch described in `docs/runtime-1.16.1-qualification.md`.
+Existing older fixtures must explicitly declare
 `"runtime_version": "1.14.1"` or `"runtime_version": "1.14.6"` in the manifest.
 Selecting a different version never installs it or accepts an unexpected server
 version. Initial candidate validation ran on Linux. The subsequent native macOS
@@ -70,7 +74,7 @@ campaign is restricted to ordinary compatibility and controlled lifecycle checks
 exhaustion and adversarial testing remain in the disposable Linux lab. See the
 implementation plan for the separate checkpoints and current acceptance status.
 
-Preflight uses the official platform binary pins for each supported version.
+Preflight uses exact official binary pins for supported versions and explicit qualification candidates.
 Consult the [1.16.0 qualification evidence](../../docs/compatibility.md#smolvm-1-16-0-qualification).
 Manifest admission alone is not runtime qualification. No protected GitHub worker infrastructure was provisioned or
 executed by the local qualification campaign.
@@ -83,7 +87,7 @@ mix test test/runtime/client_runtime_test.exs test/runtime/managed_runtime_test.
 
 The five cases in `security_runtime_test.exs` are outside this Mac campaign.
 They remain covered by the separate Linux runtime suite. Do not count excluded
-or unexecuted cases as macOS passes. Supply working `resize2fs` for 1.14.6 or 1.16.0 disk
+or unexecuted cases as macOS passes. Supply working `resize2fs` for 1.14.6, 1.16.0 or 1.16.1 disk
 requests below the templates; missing it caused file loss after stop/start in
 the initial Mac run. A successful health probe is insufficient. The unchanged
 file persistence test must pass on fresh VMs before recording compatibility.

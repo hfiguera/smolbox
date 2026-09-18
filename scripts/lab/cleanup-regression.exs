@@ -11,7 +11,7 @@ defmodule SmolBox.CleanupRegression do
   def run(version, label) do
     assert :os.type() == {:unix, :linux}
     assert {"smolbox-nested\n", 0} = System.cmd("hostname", [])
-    assert version in ["1.14.1", "1.14.6", "1.16.0"]
+    assert version in ["1.14.1", "1.14.6", "1.16.0", "1.16.1"]
     assert Regex.match?(~r/\A[a-z0-9-]{1,40}\z/, label)
     path = "/home/lab/cleanup-validation/reports/#{label}.json"
     refute File.exists?(path)

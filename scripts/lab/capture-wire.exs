@@ -9,7 +9,7 @@ defmodule SmolBox.CaptureWire do
   def run do
     assert {"smolbox-nested\n", 0} = System.cmd("hostname", [])
     version = System.fetch_env!("SMOLBOX_RUNTIME_VERSION")
-    assert version in ["1.14.1", "1.14.6", "1.16.0"]
+    assert version in ["1.14.1", "1.14.6", "1.16.0", "1.16.1"]
     directory = "/home/lab/qualification/wire-#{version}"
     File.mkdir!(directory)
 

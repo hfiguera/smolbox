@@ -9,6 +9,7 @@ defmodule SmolBox.WorkerPoolTest do
         {[runtime_version: "1.14.6"], :incompatible},
         {[runtime_version: "1.16.0", expected_runtime_version: "1.14.6"], :incompatible},
         {[runtime_version: "1.15.0"], :incompatible},
+        {[runtime_version: "1.16.1"], :incompatible},
         {[unready: true], :degraded},
         {[inventory_unavailable: true], :degraded}
       ] do

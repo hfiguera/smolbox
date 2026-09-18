@@ -2,11 +2,12 @@
 # Select a reviewed distribution only inside the stopped disposable candidate.
 set -euo pipefail
 [[ $EUID == 0 && $(hostname) == smolbox-nested && $(systemd-detect-virt) == kvm ]] || exit 1
-version=${1:?Expected 1.14.1, 1.14.6 or 1.16.0}
+version=${1:?Expected 1.14.1, 1.14.6, 1.16.0 or 1.16.1}
 case "$version" in
   1.14.1) runtime=/opt/smolbox/runtime ;;
   1.14.6) runtime=/opt/smolbox/runtime-1.14.6 ;;
   1.16.0) runtime=/opt/smolbox/runtime-1.16.0 ;;
+  1.16.1) runtime=/opt/smolbox/runtime-1.16.1 ;;
   *) exit 1 ;;
 esac
 unit=smolbox-qualification.service

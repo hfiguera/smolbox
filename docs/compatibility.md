@@ -4,6 +4,37 @@ Version: `0.1.3`. The library's supported qualification is
 `:development`; requested hard-control options remain unsupported. The original
 release evidence below records the client/controller contract on Linux and macOS.
 
+## smolvm 1.16.1 qualification
+
+**Blocked by a cleanup incompatibility; 1.16.1 remains unsupported.** The default
+and managed/network admission rules remain unchanged. The candidate passed the
+ordinary Linux/macOS execution, durable recovery and network enforcement suites,
+but failed two full-storage cleanup regressions in the disposable Linux lab.
+
+Version 1.16.1 requires confirmation that guest filesystems are synchronized
+before stopping a live VM. After storage exhaustion, synchronization returned an
+I/O error and stop failed, preserving the running VM. SmolBox correctly retained
+uncertainty; its existing cleanup sequence did not advance from stop to delete.
+Changing that sequence or automatically discarding a running VM is outside this
+qualification's scope.
+
+The same controlled comparison returned HTTP 200 and a stopped machine on
+1.16.0, versus HTTP 500 and a running machine on 1.16.1. An explicit diagnostic
+delete of the synthetic workload succeeded afterward; that does not establish
+that managed cleanup succeeds or justify bypassing evidence retention.
+
+The candidate's positive results include 14 Linux and nine ordinary macOS runtime
+cases, 17 PostgreSQL store cases and 25 durable recovery cases on each platform,
+and the existing Linux IPv4/IPv6 and macOS IPv4/DNS network checks. Linux API
+restart, unavailability and missing-machine scenarios also passed, as did their
+macOS equivalents. These results do not outweigh the cleanup blocker.
+
+See [the machine-readable evidence](evidence/smolvm-1.16.1.json) and the repository
+report `docs/runtime-1.16.1-qualification.md` for exact inputs, failures, the
+candidate patch and reproduction steps. The candidate admission changes were
+removed after testing; distribution pins remain available to maintainer tooling.
+No additional API, runtime default, record schema or production guarantee is introduced.
+
 ## SmolVM 1.16.0 qualification
 
 SmolBox 0.1.3 defaults to `runtime_version: "1.16.0"` on Linux x86_64

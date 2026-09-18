@@ -1,0 +1,239 @@
+diff --git a/lib/smolbox/client.ex b/lib/smolbox/client.ex
+--- a/lib/smolbox/client.ex
++++ b/lib/smolbox/client.ex
+@@ -75,7 +75,7 @@
+   Create a machine from an approved prepared artifact on the worker, offline by default.
+ 
+   Returns creation evidence after matching name, allocations and network policy.
+-  An enabled policy requires a 1.16.0 health observation. That preflight and the
++  An enabled policy requires a 1.16.0 or 1.16.1 health observation. That preflight and the
+   create request share the configured operation timeout.
+   Persist intent before this call and creation evidence before further mutations.
+   A lost or mismatched response can leave creation uncertain; it does not authorize
+@@ -103,9 +103,14 @@
+       deadline = System.monotonic_time(:millisecond) + client.worker.operation_timeout_ms
+ 
+       case health(client) do
+-        {:ok, %{version: "1.16.0"}} -> remaining_create_budget(client, deadline)
+-        {:ok, _health} -> error(:unsupported_capability, :create)
+-        {:error, failure} -> {:error, %{failure | operation: :create, evidence: :not_dispatched}}
++        {:ok, %{version: version}} when version in ["1.16.0", "1.16.1"] ->
++          remaining_create_budget(client, deadline)
++
++        {:ok, _health} ->
++          error(:unsupported_capability, :create)
++
++        {:error, failure} ->
++          {:error, %{failure | operation: :create, evidence: :not_dispatched}}
+       end
+     end
+   end
+diff --git a/lib/smolbox/runtime/worker_config.ex b/lib/smolbox/runtime/worker_config.ex
+--- a/lib/smolbox/runtime/worker_config.ex
++++ b/lib/smolbox/runtime/worker_config.ex
+@@ -15,7 +15,7 @@
+   still expose a larger guest disk. Admission rejects profiles below these
+   floors. This declaration is not remotely attested or a host filesystem quota.
+ 
+-  Versions 1.14.6 and 1.16.0 require working host `resize2fs` for disk requests below
++  Versions 1.14.6, 1.16.0 and 1.16.1 require working host `resize2fs` for disk requests below
+   template sizes. Verify file persistence across stop/start before admission;
+   see [Compatibility](compatibility.html#macos-1-14-6-prerequisites).
+ 
+@@ -71,7 +71,8 @@
+   | `:allocation_floor` | Atom-keyed map with `:storage_gb` and `:overlay_gb` (1–64 each), and `:host_overhead_mb` (128–16,384) |
+ 
+   Optional fields are `:runtime_version` (default `"1.16.0"` for Linux x86_64 or
+-  macOS Apple Silicon; explicitly select `"1.14.1"` or `"1.14.6"` for an existing worker), `:qualification`
++  macOS Apple Silicon; explicitly select `"1.16.1"`, `"1.14.1"` or `"1.14.6"`
++  for another supported worker), `:qualification`
+   (only `:development`), and `:draining` (default `false`). Artifact IDs must be
+   unique and architectures must match this worker. Construction makes no worker
+   request or remote digest check. Profiles below the floor cannot support execution.
+@@ -104,7 +105,7 @@
+   @doc "Check exact profile/artifact approval and allocation floors; this is not a health probe."
+   @spec supports?(t(), ExecutionSpec.t()) :: boolean()
+   def supports?(worker, spec) do
+-    (spec.profile.network == :offline or worker.runtime_version == "1.16.0") and
++    (spec.profile.network == :offline or worker.runtime_version in ["1.16.0", "1.16.1"]) and
+       spec.profile in worker.profiles and allocation_fits?(worker, spec.profile) and
+       worker.architecture == spec.artifact["architecture"] and
+       Enum.any?(
+@@ -132,7 +133,7 @@
+   defp supported_runtime?(%{runtime_version: "1.14.1"}), do: true
+ 
+   defp supported_runtime?(%{runtime_version: version, platform: platform, architecture: arch})
+-       when version in ["1.14.6", "1.16.0"],
++       when version in ["1.14.6", "1.16.0", "1.16.1"],
+        do: {platform, arch} in [{:linux, "x86_64"}, {:macos, "aarch64"}]
+ 
+   defp supported_runtime?(_worker), do: false
+diff --git a/test/contract/client_test.exs b/test/contract/client_test.exs
+--- a/test/contract/client_test.exs
++++ b/test/contract/client_test.exs
+@@ -97,12 +97,11 @@
+     parent = self()
+ 
+     supported_cases =
+-      for version <- ["1.16.0"],
++      for version <- ["1.16.0", "1.16.1"],
+           mode <- [:matching, :missing, :different],
+           do: {version, mode}
+ 
+-    for {version, mode} <-
+-          supported_cases ++ [{"1.14.6", :legacy}, {"1.16.1", :legacy}, {"1.16.2", :legacy}] do
++    for {version, mode} <- supported_cases ++ [{"1.14.6", :legacy}, {"1.16.2", :legacy}] do
+       peer =
+         client(fn conn ->
+           if conn.request_path == "/health" do
+diff --git a/test/contract/runtime_test.exs b/test/contract/runtime_test.exs
+--- a/test/contract/runtime_test.exs
++++ b/test/contract/runtime_test.exs
+@@ -6,28 +6,37 @@
+ 
+   defp setup_runtime(options \\ []), do: SmolBox.RuntimeFixture.start(options)
+ 
+-  test "approved network policy survives managed execution, identity checks and cleanup" do
+-    {:ok, policy} = SmolBox.NetworkPolicy.new(hosts: ["api.example.com"])
+-    context = setup_runtime(network: policy)
+-    assert {:ok, _} = SmolBox.submit(context.runtime, context.spec)
+-
+-    assert {:ok, record} =
+-             SmolBox.await(context.runtime, {context.spec.scope, context.spec.id}, 5000)
+-
+-    assert record.created_machine.network == policy
+-    assert record.spec.profile.network == policy
+-
+-    record =
+-      eventually(fn ->
+-        {:ok, current} = SmolBox.fetch(context.runtime, context.spec.scope, context.spec.id)
+-        if current.cleanup == :complete, do: current
+-      end)
+-
+-    assert record.cleanup == :complete
+-    assert {:ok, bytes} = Codec.encode(record)
+-    assert {:ok, ^record} = Codec.decode(bytes)
+-    changed = %{context.spec | profile: %{context.spec.profile | network: :offline}}
+-    assert {:error, _} = SmolBox.submit(context.runtime, changed)
++  for version <- ["1.16.0", "1.16.1"] do
++    test "#{version} approved network policy survives managed execution, identity checks and cleanup" do
++      {:ok, policy} = SmolBox.NetworkPolicy.new(hosts: ["api.example.com"])
++
++      context =
++        setup_runtime(
++          network: policy,
++          runtime_version: unquote(version),
++          expected_runtime_version: unquote(version)
++        )
++
++      assert {:ok, _} = SmolBox.submit(context.runtime, context.spec)
++
++      assert {:ok, record} =
++               SmolBox.await(context.runtime, {context.spec.scope, context.spec.id}, 5000)
++
++      assert record.created_machine.network == policy
++      assert record.spec.profile.network == policy
++
++      record =
++        eventually(fn ->
++          {:ok, current} = SmolBox.fetch(context.runtime, context.spec.scope, context.spec.id)
++          if current.cleanup == :complete, do: current
++        end)
++
++      assert record.cleanup == :complete
++      assert {:ok, bytes} = Codec.encode(record)
++      assert {:ok, ^record} = Codec.decode(bytes)
++      changed = %{context.spec | profile: %{context.spec.profile | network: :offline}}
++      assert {:error, _} = SmolBox.submit(context.runtime, changed)
++    end
+   end
+ 
+   test "durable mode rejects an ephemeral or unavailable store before worker I/O" do
+diff --git a/test/contract/worker_pool_test.exs b/test/contract/worker_pool_test.exs
+--- a/test/contract/worker_pool_test.exs
++++ b/test/contract/worker_pool_test.exs
+@@ -9,7 +9,6 @@
+         {[runtime_version: "1.14.6"], :incompatible},
+         {[runtime_version: "1.16.0", expected_runtime_version: "1.14.6"], :incompatible},
+         {[runtime_version: "1.15.0"], :incompatible},
+-        {[runtime_version: "1.16.1"], :incompatible},
+         {[unready: true], :degraded},
+         {[inventory_unavailable: true], :degraded}
+       ] do
+@@ -33,6 +32,7 @@
+ 
+   for {label, options} <- [
+         {"default 1.16.0", []},
++        {"explicit 1.16.1", [runtime_version: "1.16.1", expected_runtime_version: "1.16.1"]},
+         {"explicit 1.14.1", [runtime_version: "1.14.1", expected_runtime_version: "1.14.1"]},
+         {"explicit 1.14.6", [runtime_version: "1.14.6", expected_runtime_version: "1.14.6"]}
+       ] do
+diff --git a/test/unit/runtime_config_test.exs b/test/unit/runtime_config_test.exs
+--- a/test/unit/runtime_config_test.exs
++++ b/test/unit/runtime_config_test.exs
+@@ -80,10 +80,13 @@
+              WorkerConfig.new(Keyword.delete(context.options, :allocation_floor))
+   end
+ 
+-  test "runtime defaults to 1.16.0 and retains explicit legacy support",
++  test "runtime defaults to 1.16.0 and accepts only qualified explicit versions",
+        context do
+     assert context.worker.runtime_version == "1.16.0"
+ 
++    assert {:ok, %{runtime_version: "1.16.1"}} =
++             WorkerConfig.new(Keyword.put(context.options, :runtime_version, "1.16.1"))
++
+     assert {:ok, %{runtime_version: "1.14.1"}} =
+              WorkerConfig.new(Keyword.put(context.options, :runtime_version, "1.14.1"))
+ 
+@@ -92,10 +95,12 @@
+ 
+     assert :ok = WorkerConfig.validate(candidate)
+ 
+-    for {platform, architecture} <- [{:macos, "aarch64"}, {:linux, "aarch64"}] do
++    for version <- ["1.14.6", "1.16.0", "1.16.1"],
++        {platform, architecture} <- [{:macos, "aarch64"}, {:linux, "aarch64"}] do
+       worker = %{
+         candidate
+-        | platform: platform,
++        | runtime_version: version,
++          platform: platform,
+           architecture: architecture,
+           artifacts: Enum.map(candidate.artifacts, &Map.put(&1, "architecture", architecture))
+       }
+@@ -116,7 +121,6 @@
+           "1.14.6-dev",
+           "1.15.1",
+           "1.16.0-dev",
+-          "1.16.1",
+           "1.16.1-dev",
+           "1.16.2"
+         ] do
+diff --git a/test/fixtures/ci/consumer.exs.template b/test/fixtures/ci/consumer.exs.template
+--- a/test/fixtures/ci/consumer.exs.template
++++ b/test/fixtures/ci/consumer.exs.template
+@@ -39,12 +39,13 @@
+   artifacts: [%{"id" => "python", "sha256" => String.duplicate("a", 64),
+     "architecture" => "x86_64", "path" => "/approved/python.smolmachine"}]]
+ {:ok, %{runtime_version: "1.16.0"}} = SmolBox.Runtime.WorkerConfig.new(worker_options)
+-{:error, %SmolBox.Error{category: :validation}} = SmolBox.Runtime.WorkerConfig.new(
+-  Keyword.put(worker_options, :runtime_version, "1.16.1"))
+ {:ok, %{runtime_version: "1.14.1"}} = SmolBox.Runtime.WorkerConfig.new(
+   Keyword.put(worker_options, :runtime_version, "1.14.1"))
+ {:ok, %{runtime_version: "1.14.6"}} = SmolBox.Runtime.WorkerConfig.new(
+   Keyword.put(worker_options, :runtime_version, "1.14.6"))
++
++{:ok, %{runtime_version: "1.16.1"}} = SmolBox.Runtime.WorkerConfig.new(
++  Keyword.put(worker_options, :runtime_version, "1.16.1"))
+ 
+ children = [
+   {SmolBox.Store.Memory, name: Consumer.Store},
+@@ -63,6 +64,6 @@
+   {app, app |> Application.spec(:vsn) |> to_string()}
+ end)
+ File.write!("smoke.json", Jason.encode!(%{client: true, supervisor: true,
+-  network_policy: true, offline_default: true,
++  network_policy: true, offline_default: true, runtime_1_16_1_explicit: "1.16.1",
+   runtime_default: "1.16.0", legacy_runtime_explicit: "1.14.1",
+-  legacy_1_14_6_explicit: "1.14.6", unqualified_runtime_rejected: "1.16.1", versions: versions}))
++  legacy_1_14_6_explicit: "1.14.6", versions: versions}))

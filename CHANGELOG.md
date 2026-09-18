@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Record smolvm 1.16.1 compatibility and network enforcement results, including a
+  full-disk cleanup incompatibility. Keep 1.16.1 outside supported admission;
+  the default remains 1.16.0 and no public API or record format changes.
+- Add exact candidate distribution pins, captured wire/schema fixtures and a
+  reproducible comparison of 1.16.0 and 1.16.1 stop behavior under disk exhaustion.
+
 ## 0.1.3 — September 14, 2026
 
 **Upgrade notice:** this version changes the durable record format and the default

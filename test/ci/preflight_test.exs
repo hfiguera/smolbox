@@ -44,7 +44,8 @@ defmodule SmolBox.CI.PreflightTest do
           {"runtime_version", "1.14.5"},
           {"runtime_version", "1.14.6-dev"},
           {"runtime_version", "1.16.0-dev"},
-          {"runtime_version", "1.16.1"},
+          {"runtime_version", "1.16.1-dev"},
+          {"runtime_version", "1.16.2"},
           {"database_port", 0},
           {"expires_at_unix", System.os_time(:second) - 1},
           {"expires_at_unix", System.os_time(:second) + 100_000}
@@ -61,8 +62,8 @@ defmodule SmolBox.CI.PreflightTest do
     end
   end
 
-  test "candidate preflight accepts the default and explicit supported versions" do
-    for version <- [nil, "1.14.1", "1.14.6", "1.16.0"] do
+  test "candidate preflight recognizes pinned distributions without granting runtime admission" do
+    for version <- [nil, "1.14.1", "1.14.6", "1.16.0", "1.16.1"] do
       manifest = if version, do: Map.put(manifest(), "runtime_version", version), else: manifest()
       assert Preflight.validate!(manifest, "linux", false, %{}).port == 19_470
 

@@ -4,6 +4,10 @@ Controlled networking is introduced in SmolBox **0.1.3** and requires smolvm
 **1.16.0**. SmolBox 0.1.2 does not include it. Existing profiles and machines remain offline by default.
 Networking never enables image pulls, ports, mounts, or credential forwarding.
 
+The 1.16.1 candidate passed the recorded network checks but remains unsupported
+because a separate [cleanup regression](compatibility.md#smolvm-1-16-1-qualification)
+blocked qualification. Networking success alone does not qualify a runtime.
+
 ## Approve a policy
 
 ```elixir

@@ -109,7 +109,17 @@ defmodule SmolBox.RuntimeConfigTest do
       assert :ok = WorkerConfig.validate(%{worker | runtime_version: "1.14.1"})
     end
 
-    for version <- ["1.14.2", "1.14.5", "1.14.7", "1.14.6-dev", "1.15.1", "1.16.0-dev", "1.16.1"] do
+    for version <- [
+          "1.14.2",
+          "1.14.5",
+          "1.14.7",
+          "1.14.6-dev",
+          "1.15.1",
+          "1.16.0-dev",
+          "1.16.1",
+          "1.16.1-dev",
+          "1.16.2"
+        ] do
       assert {:error, %Error{category: :validation}} =
                WorkerConfig.validate(%{candidate | runtime_version: version})
     end
