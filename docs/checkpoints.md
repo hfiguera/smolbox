@@ -165,20 +165,58 @@ worker does not upgrade the controllers.
 A checkpoint avoids a fresh guest boot but adds checkpoint verification and
 restore work. Benefits depend on the captured state, artifact size, host caches
 and workload. `scripts/checkpoints/benchmark.exs` measures create, start, exec
-and delete separately against an equivalent cold VM pack. It uses five measured
-samples per source after warmup, alternating order. It does not measure image
-pulls or establish a universal speedup.
+and delete separately against an equivalent cold VM pack. It defaults to ten
+measured samples per source after warmup, alternating order, and can separately
+measure application preparation. The
+[benchmark protocol](https://github.com/hfiguera/smolbox/tree/main/scripts/checkpoints#checkpoint-examples-and-measurements)
+covers cache settings and an alternative image with precomputed data. It does
+not measure image pulls or establish a universal speedup.
 
 The [qualification record](evidence/checkpoint-executions.json) includes the raw
 samples and native runtime checks. In the tiny bare-guest benchmark, median time
 from creation through the command result was 598 ms for the image and 497 ms for
 the checkpoint on macOS; on Linux it was 457 ms and 407 ms. Creation includes the
 checkpoint client's version preflight. Startup improved, but checkpoint creation
-cost more. These are five samples per source with warm host caches; application
+cost more. Those original workers explicitly disabled Linux shared extraction;
+the figures do not describe an optimized cache configuration. These are five
+samples per source with warm host caches; application
 initialization, larger captures and cold caches can change the result. Normal native
 checks run on Linux x86_64 and macOS Apple Silicon; adversarial or exhaustion
 work belongs only in the disposable Linux lab. Networked checkpoint execution,
 cross-platform restoration and arbitrary resumed workloads are not supported.
+
+A [follow-up cache experiment](evidence/checkpoint-cache-benchmark.json) ran only
+inside the disposable nested Linux lab. An ordinary user worker restored the same
+artifacts with shared extraction disabled, enabled, enabled, then disabled. Each
+cell below contains ten measured samples after warmup. Values are median time
+from create through the command result, excluding capture and cleanup:
+
+| Workload | Image, cache enabled | Checkpoint, cache disabled | Checkpoint, cache enabled |
+| --- | ---: | ---: | ---: |
+| Read a small marker | 5,063 ms | 751 ms | 614 ms |
+| Aggregate a million readings, then query | 6,678 ms | 716 ms | 597 ms |
+| Load a precomputed table, then query | 5,388 ms | 777 ms | 644 ms |
+
+For the small marker, enabling shared extraction reduced checkpoint creation
+from 563 to 429 ms and time to result by about 18%. Server phase timings identify
+reductions in extraction and installation; verified shared paths confirm the
+worker used the cache. This needs worker configuration, not another SmolBox API:
+leave `SMOLVM_DISABLE_SHARED_EXTRACT` unset on Linux. Setting it to `0` still
+disables the cache. An ordinary user worker can use shared extraction; privileged
+workers use a different installation path and their samples are recorded separately.
+
+The dataset checkpoint preserved an idle table in RAM and skipped preparation.
+For fresh images, rebuilding that table took 2,753 ms; loading a serialized copy
+took 899 ms, including the first command's startup overhead. Precomputing data in
+an image is therefore a useful alternative. These fixtures preserve no Python
+interpreter, imported modules or running application.
+
+Fresh image boot was unusually slow in this nested configuration. Do not apply
+the large image/checkpoint ratios to native Linux or macOS, or combine them with
+the earlier native measurements. The experiment tests the existing checkpoint
+file API with warm host caches, not live branching, prepared `checkpoint://`
+references or durable managed runtime throughput. It demonstrates workload and
+configuration effects, not a universal performance promise.
 
 The [durable example validation](evidence/checkpoint-durable-example.json) separately
 covers PostgreSQL recovery across fresh BEAM processes in the disposable Linux
