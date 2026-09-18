@@ -190,8 +190,11 @@ its store process stops.
    durable example's authenticated index backfill instructions for its older schema.
 4. Pin and verify the new binary, schema and artifact bytes on a separate candidate
    worker. Recheck template sizes, VMM overhead, network behavior, proxy semantics,
-   host quotas and all advertised platform tests. SmolBox 0.1.1 admits
-   only the qualified SmolVM 1.14.1 contract; a different version is incompatible.
+   host quotas and all advertised platform tests. This checkout defaults to
+   smolvm 1.16.1 and retains explicit 1.16.0, 1.14.6 and 1.14.1 support, subject
+   to the [supported platform matrix](compatibility.md#runtime-selection).
+   Controlled networking requires 1.16.0 or 1.16.1. The worker must report the
+   exact configured version; there is no automatic fallback.
 5. Give changed artifacts/profiles new immutable revisions. Do not rewrite saved
    execution specifications or resubmit a changed specification under an existing
    identity. Recovery rechecks current approval before a prepared command dispatches;
