@@ -1,5 +1,10 @@
 # Minimal host example
 
+This example keeps the image-based path simple. For approved idle checkpoint
+execution with PostgreSQL and recovery across application processes, see the
+[durable checkpoint example](../durable_host/README.md#checkpoint-execution-and-recovery).
+Checkpoint support is unreleased and requires this checkout, not Hex 0.1.4.
+
 This Mix project runs SmolBox under a host supervisor with an explicitly
 ephemeral memory store.
 The shared example setup lives in `../support/lib`; keep that directory when

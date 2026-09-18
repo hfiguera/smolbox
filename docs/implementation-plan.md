@@ -18,13 +18,21 @@ This is a subsequent feature; the publication records below remain historical.
   fixture/example and a bounded comparative benchmark.
 - [x] Delete the owned fixture sources after identity checks, verify empty worker
   inventories and stop both dedicated workers. The private test database stopped.
+- [x] Extend the existing durable example with a checkpoint demo and v3 adoption
+  guidance; keep the minimal image example simple and link to that workflow.
+- [x] Validate independent restores, completed-record recovery and controller
+  SIGKILL before/after PostgreSQL result persistence in the disposable Linux lab.
+  Three focused live cases passed without replay, with verified cleanup/capacity
+  release. The runnable checkpoint demo also passed in two separate invocations.
 
 See [the guide](checkpoints.md) and [recorded evidence](evidence/checkpoint-executions.json).
 Native tests passed three cases per platform; 234 deterministic cases passed per
 platform, 18 PostgreSQL store cases passed, and macOS coverage was 95.90%.
-The native restart test retains an in-memory store; PostgreSQL tests separately
-verify encrypted v3 persistence. Neither is presented as a new full durable
-runtime crash campaign. The five-sample warmed benchmark showed modest gains in
+The native restart test retains an in-memory store. A subsequent
+[durable example validation](evidence/checkpoint-durable-example.json) exercises
+real PostgreSQL and separate BEAM processes in nested Linux. It covers completed
+identities and both sides of result persistence, not the full image fault campaign
+or macOS durable checkpoint recovery. The five-sample warmed benchmark showed modest gains in
 time to result, not a general performance guarantee. No exhaustion or adversarial
 work ran on either physical host. Networked checkpoints, capture APIs, arbitrary
 resumed workloads, live branching and pools remain excluded. No release or push

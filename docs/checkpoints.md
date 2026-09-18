@@ -57,6 +57,12 @@ This example runs on the worker host so it can hash the local file. Remote
 controllers use the digest verified by their operator instead. The demo uses
 an ephemeral store, prints both restored markers, and waits for cleanup.
 
+For PostgreSQL persistence, independent restores and recovery in a fresh
+application process, use the
+[durable checkpoint example](https://github.com/hfiguera/smolbox/tree/main/examples/durable_host#checkpoint-execution-and-recovery).
+It includes a focused controller interruption suite. Both examples require this
+unreleased checkout; the published 0.1.4 package does not include this feature.
+
 ## Register a checkpoint
 
 ```elixir
@@ -173,6 +179,14 @@ initialization, larger captures and cold caches can change the result. Normal na
 checks run on Linux x86_64 and macOS Apple Silicon; adversarial or exhaustion
 work belongs only in the disposable Linux lab. Networked checkpoint execution,
 cross-platform restoration and arbitrary resumed workloads are not supported.
+
+The [durable example validation](evidence/checkpoint-durable-example.json) separately
+covers PostgreSQL recovery across fresh BEAM processes in the disposable Linux
+lab: completed records, independent restores, and interruption immediately before
+and after the result commit. Those three cases verify no command replay, retained
+identity, the appropriate known or unknown outcome, and cleanup with capacity
+release. They do not constitute the full image recovery campaign or a macOS
+durable checkpoint qualification.
 
 Run the dedicated real checkpoint suite only after preparing and approving its
 fixture. The existing `test/runtime` suite continues to cover supported image

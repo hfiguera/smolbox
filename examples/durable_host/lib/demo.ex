@@ -1,15 +1,17 @@
 defmodule SmolBox.DurableHost.Demo do
   @moduledoc "Explicit durable host demonstration; database migrations remain host-owned."
   alias SmolBox.ArtifactStore.Directory
-  alias SmolBox.DurableHost.{Repo, Store}
+  alias SmolBox.DurableHost.{CheckpointDemo, Repo, Store}
   alias SmolBox.Example.Setup
 
   def configure(settings) do
     {:ok, store} =
       Store.new(Repo, settings["partition"], Setup.key(settings["encryption_key_file"]))
 
+    builder = if settings["source"] == "checkpoint", do: CheckpointDemo, else: Setup
+
     {options, spec, objects} =
-      Setup.build(settings, {Store, store}, :durable, SmolBox.DurableExample)
+      builder.build(settings, {Store, store}, :durable, SmolBox.DurableExample)
 
     {options, spec, objects, store}
   end
@@ -33,7 +35,7 @@ defmodule SmolBox.DurableHost.Demo do
           &(&1.cleanup == :complete and &1.reservation == nil)
         )
 
-      verify_outputs(objects, handle, record)
+      verify_outputs(settings, objects, handle, record)
       IO.puts(Jason.encode!(Setup.describe(record)))
       record
     after
@@ -41,10 +43,14 @@ defmodule SmolBox.DurableHost.Demo do
     end
   end
 
-  defp verify_outputs(objects, handle, %{state: :completed}) do
+  defp verify_outputs(%{"source" => "checkpoint"}, objects, handle, %{state: :completed}) do
+    CheckpointDemo.verify_outputs(objects, handle)
+  end
+
+  defp verify_outputs(_settings, objects, handle, %{state: :completed}) do
     {:ok, <<7, 255, 0>>} = Directory.read_output(objects, handle, "output", 32)
     {:ok, "x"} = Directory.read_output(objects, handle, "count", 32)
   end
 
-  defp verify_outputs(_objects, _handle, _record), do: :ok
+  defp verify_outputs(_settings, _objects, _handle, _record), do: :ok
 end

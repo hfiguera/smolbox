@@ -8,6 +8,9 @@
   submitting checkpoints. Image records retain schema v2 and existing fingerprints.
 - Checkpoints preserve captured processes and state. Arbitrary resumed workloads,
   networked checkpoints, capture, live branching and pools remain outside this API.
+- Extend the durable host example with independent checkpoint restores and
+  PostgreSQL recovery across fresh application processes, including interruption
+  before and after result persistence. Document the v3 controller upgrade boundary.
 
 ## 0.1.4 — September 18, 2026
 

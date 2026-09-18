@@ -1,0 +1,83 @@
+{
+  "feature": "Durable checkpoint example and focused recovery checks",
+  "status": "unreleased",
+  "date": "2026-09-18",
+  "base_commit": "216ebe1",
+  "environment": {
+    "host": "authorized ssh linux; tests inside disposable nested KVM guest",
+    "guest": "Ubuntu 24.04 x86_64, kernel 6.8.0-139-generic",
+    "elixir": "1.20.4",
+    "otp": "29.0.6",
+    "postgresql": "16.15",
+    "runtime": "smolvm 1.16.1",
+    "runtime_archive_sha256": "e49e5bbae6d65b039ecf1d8b236d20e77427b7bfd131907b27a0819fcdea3fed",
+    "worker_limits": {
+      "memory_max_bytes": 2147483648,
+      "cpu_quota_percent": 200,
+      "tasks_max": 256
+    },
+    "fixture_sha256": "6366fb547b63c302b310d619e5b380471659e046a226fb65f083bcb5b87fc612"
+  },
+  "results": {
+    "real_checkpoint_cases": 3,
+    "postgresql_store_cases": 18,
+    "ordinary_store_suite_excluded_live_cases": 28,
+    "case_details": [
+      "Separate BEAMs read completed v3 records without another dispatch; independent execution restores original RAM/disk despite previous child mutations.",
+      "SIGKILL before PostgreSQL result commit: original identity retained, outcome unknown, no command replay; actual retention observed before disposal.",
+      "SIGKILL after PostgreSQL result commit: known exit recovered and outputs collected without command replay."
+    ],
+    "cleanup": "All three cases required VM absence, cleanup complete and no reservation; unfinished records retain private evidence.",
+    "dispatch_evidence": "FaultTransport host ledger counts client attempts, not upstream acceptance receipts; combined with SQL identity/result, output markers and verified absence.",
+    "runnable_demo": "Two independent executions passed; a separate invocation produced exactly the same serialized records and verified existing outputs.",
+    "existing_image_demo": "Passed unchanged Python command, binary output and single execution marker; cleanup complete.",
+    "quality": "Root mix ci passed: 234 deterministic cases, Credo/ex_slop, ex_dna, Credence and Dialyzer. Final example compiled with warnings-as-errors and passed its own Dialyzer. Final Credo/Credence and formatting passed.",
+    "documentation": "ExDoc warnings-as-errors and local links/fragments: 46 pages passed."
+  },
+  "cleanup": {
+    "source": "Fixture source deleted after same-incarnation check; absence and empty inventory verified before tests.",
+    "worker": "Final inventory empty; dedicated service inactive, MainPID=0.",
+    "database": "Dedicated PostgreSQL instance stopped.",
+    "outer_lab": "Disposable nested test VM inactive; MainPID=0, Result=success."
+  },
+  "limitations": [
+    "Three focused cases, not the full image recovery fault matrix.",
+    "No macOS durable checkpoint recovery tested in this follow-up; earlier native ephemeral tests retain their scope.",
+    "No new exhaustion, adversarial network or production isolation qualification.",
+    "Checkpoints remain operator-approved idle/offline only; no live branching or arbitrary workload resume.",
+    "Feature is not in published Hex 0.1.4; no release or push performed."
+  ],
+  "source_sha256": {
+    "examples/durable_host/lib/demo.ex": "34ca85afd103d2f7b0f1f234738f259c48968f3e7fd1a1ca810cf5eb3228b785",
+    "examples/durable_host/lib/checkpoint_demo.ex": "c58857ff057ddd6b86556d885995aeaacfc3379cca36e648316af70721c2fd44",
+    "examples/durable_host/scripts/checkpoint_demo.exs": "3835a72c5aca6433208388905ea6e3a20b069494312cfb5c0fb3887b9f15b7bc",
+    "examples/durable_host/test/checkpoint_recovery_runtime_test.exs": "1eaf7c97fc3f5e69bfa7ec302163c1ec0ddde544716699c0abd60a76709d2409"
+  },
+  "log_sha256": {
+    "reports/compile.log": "1b35f1f3af71c54bd53bbcbe39354e2ceac0c26633e1a79375d398670ac67d4e",
+    "reports/database-stop.log": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "reports/demo-first.log": "20d0818e0e15cf97f2d8ab4d10cc7de3169a54707a25b2762e5c8eb6539dc6cd",
+    "reports/demo-restart.log": "20d0818e0e15cf97f2d8ab4d10cc7de3169a54707a25b2762e5c8eb6539dc6cd",
+    "reports/deps.log": "a3ecf53f353cc65f1dffe08e57360dac9de6c04bb4dfc719af91e8d7f4d88ca0",
+    "reports/dialyzer.log": "f9388b2e58be388bd5feaf5713030f883f1be4e533a983f364af0cffcc99349a",
+    "reports/final-inventory.json": "4115c93b07b494b0188c0899c545c6313d8dfda70cf8d2613984eae1976fb745",
+    "reports/image-demo.log": "c6080d71c0e9959eca1c7ae5aafad681fbbfb25892a03840d82a808d5cc7f28d",
+    "reports/initdb.log": "33275a6a6ec4cbe0e825951aceac7c838eacafeb6830fb7d83ae20ff4d47afc7",
+    "reports/migrate.log": "d61333af6f1c9985021cdbd148b681255b6862b0c0ef914e2af0016e7e649ac0",
+    "reports/postgres.log": "c3916c7f0090813d84029d53ac4c782a05c817699b723480750f35d515068b57",
+    "reports/recovery.log": "b3229e389c1e582c51a473b3c89375668b82fd2f577f2d71d2e701ddc8173631",
+    "reports/root-compile.log": "f8374f4ab6dd9b9bc6dc204538c8a0e4a07e5582321033942564dc72a51546ae",
+    "reports/root-deps.log": "b288133e3a32c4c0382253421bc3a5086cb3267678011752e220b18f486405a7",
+    "reports/source-cleanup.log": "2a941e02d6f03c206c4ffdae847ad681bdd43d5812467aca33efb18f0c14229a",
+    "reports/store-tests.log": "8929ffe9cd5979443ee2995f38f3b74cfc751f632739d4b57581cd64bd9809c4",
+    "reports/worker-stop.log": "a64fecb99a35e55c98d2d44288a904ae8994105b87529ee96c8043c211efb945"
+  },
+  "local_quality_log_sha256": {
+    "ci.log": "8cc733d1f46e789f857fb9fef6ef0f5f2bc92fbc6fba54e14100c9c603e51032",
+    "credo.log": "c8781134220518fdf40a57d599bd27c753ba58df2bcf8a7636f08a750973b96d",
+    "credence.log": "a9acc2392685511771e9783761a862ec33a1f9888445bae8eca1972dd06960d8",
+    "docs-final.log": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+    "doc-links-final.log": "4dc37ca964363f541ce0c5cbd04f287800d6091309f927d42de9ce1e6d1e703e",
+    "lab-status.log": "08e01db9ab10ca97c3d74e683b7cd1c6a75c31140d82bf133dcbce5dbe2e3481"
+  }
+}
