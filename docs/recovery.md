@@ -12,12 +12,12 @@ fencing to the upstream API or change the recovery contract below. See
 [Compatibility](compatibility.md) for recorded evidence and
 [Troubleshooting](troubleshooting.md) for common operational symptoms.
 
-## Checkpoint records (unreleased)
+## Checkpoint records (0.1.5)
 
 Checkpoint executions use schema v3 while image executions retain v2. Upgrade
 all controllers sharing a store before submitting checkpoints; older readers
 must not treat unreadable records as absent. See
-[Checkpoint upgrades](checkpoints.md#persistence-and-upgrades). Retention,
+[Upgrading to 0.1.5](#upgrading-to-0-1-5). Retention,
 uncertain outcomes and verified disposal follow the same rules below.
 
 ## Store contract
@@ -108,7 +108,7 @@ explicitly approved equivalent storage policy. Unknown-schema or corrupt rows
 are errors requiring migration or investigation, never permission to start over.
 
 The reusable suite is in
-[`test/support/store/contract.ex`](https://github.com/hfiguera/smolbox/blob/v0.1.4/test/support/store/contract.ex).
+[`test/support/store/contract.ex`](https://github.com/hfiguera/smolbox/blob/v0.1.5/test/support/store/contract.ex).
 It is repository test support, not part of the published library package. An adapter test module
 uses `SmolBox.Store.Contract` and supplies `adapter` and `store` in its setup
 context. It checks concurrent acceptance, conflicts, claims and CAS races, atomic
@@ -117,7 +117,7 @@ The suite alone does not certify durability; also run fresh-process database
 recovery, unavailable-database, corruption, and transaction-failure tests.
 
 The repository's
-[durable host example](https://github.com/hfiguera/smolbox/tree/v0.1.4/examples/durable_host)
+[durable host example](https://github.com/hfiguera/smolbox/tree/v0.1.5/examples/durable_host)
 owns its Repo, schema migration,
 AES-256-GCM record encryption, and indexed projections. Mutations serialize on a
 partition row inside a SQL transaction. It demonstrates a small-pool adapter,
@@ -171,6 +171,47 @@ retains that exit: cancellation intent is not permission to replace observed
 evidence with a fabricated cancelled result. Collection may finish or fail
 depending on which file operations completed before cancellation was observed.
 
+## Upgrading to 0.1.5
+
+Version 0.1.5 adds approved idle, offline checkpoint execution. It keeps smolvm
+1.16.1 as the default; no worker upgrade is needed from 0.1.4. Checkpoints require
+1.16.1 on Linux x86_64 or macOS Apple Silicon. Image executions retain explicit
+1.16.0, 1.14.6 and 1.14.1 support and their existing network/version restrictions.
+
+Image records continue to use schema v2 with unchanged fingerprints. Only
+checkpoint executions write schema v3. The 0.1.5 codec reads v1, v2 and v3; older
+controllers cannot read v3. A controller is an Elixir application running SmolBox,
+not a smolvm worker. This changes the stored payload, not the PostgreSQL example's
+SQL tables, encryption envelope or store adapter contract.
+
+Before enabling checkpoint submissions against a shared store:
+
+1. Keep checkpoint submissions disabled. Inventory every controller and other
+   process that reads or reconciles the store, including standby instances.
+2. Drain controllers through your normal upgrade procedure, preserving pending
+   cleanup, reservations and unknown outcomes. Back up the store and retain its
+   fingerprint and encryption keys; do not erase records to permit an upgrade.
+3. Upgrade every reader/controller to 0.1.5. Verify existing records can be read
+   and observation/cleanup resumes without replaying commands.
+4. Register an approved checkpoint on a compatible 1.16.1 worker. Validate one
+   execution through result collection, verified deletion and capacity release
+   before enabling checkpoint submissions for the application.
+
+Image-only use introduces no v3 records and does not require the checkpoint
+coordination step. Applications coming from 0.1.2 or earlier still need
+[the v2 record upgrade](#upgrading-to-0-1-3); applications coming from 0.1.3 must
+also review [the worker change in 0.1.4](#upgrading-to-0-1-4).
+
+**Rollback:** once any v3 records exist, disabling new checkpoint submissions is
+not enough to downgrade controllers. Completed checkpoint records are still v3.
+Retain compatible readers, or explicitly separate/migrate those records while
+preserving identity, deduplication and cleanup evidence. There is no automatic
+conversion to v2 and no supported blind rollback to 0.1.4.
+
+See [Checkpoint approval](checkpoints.md#prepare-and-approve-the-source) for
+captured-state restrictions and [checkpoint validation](checkpoints.md#performance-and-validation)
+for the measured behavior and platform boundaries.
+
 ## Upgrading to 0.1.4
 
 SmolBox 0.1.4 changes the default worker from smolvm 1.16.0 to **1.16.1**.
@@ -210,9 +251,10 @@ an Elixir application instance running SmolBox, not a smolvm worker.
 | Reader | Legacy v1 records | New v2 records |
 |---|---|---|
 | SmolBox 0.1.2 | Supported | Rejected |
-| SmolBox 0.1.3 and 0.1.4 | Supported as offline | Supported |
+| SmolBox 0.1.3–0.1.5 | Supported as offline | Supported |
 
-**Every new codec write uses v2, even when networking stays offline.** Reading a
+**In 0.1.3 and 0.1.4, every new codec write uses v2, even when networking stays offline.**
+Version 0.1.5 retains this format for images and adds v3 for checkpoints. Reading a
 valid v1 record adds offline defaults in memory without changing its execution
 fingerprint or immediately rewriting the stored bytes. Its next save uses v2.
 Upgrading the SQL schema alone cannot make an old reader understand those bytes.

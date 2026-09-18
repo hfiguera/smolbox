@@ -1,6 +1,6 @@
 # Executing from a checkpoint
 
-This unreleased feature restores a separate disposable machine from an
+SmolBox 0.1.5 restores a separate disposable machine from an
 operator-approved **idle, offline checkpoint**. Submission, input staging,
 command execution, output collection, cancellation and cleanup use the existing
 managed lifecycle. Each execution gets its own identity and machine.
@@ -59,9 +59,9 @@ an ephemeral store, prints both restored markers, and waits for cleanup.
 
 For PostgreSQL persistence, independent restores and recovery in a fresh
 application process, use the
-[durable checkpoint example](https://github.com/hfiguera/smolbox/tree/main/examples/durable_host#checkpoint-execution-and-recovery).
-It includes a focused controller interruption suite. Both examples require this
-unreleased checkout; the published 0.1.4 package does not include this feature.
+[durable checkpoint example](https://github.com/hfiguera/smolbox/tree/v0.1.5/examples/durable_host#checkpoint-execution-and-recovery).
+It includes a focused controller interruption suite. Both examples require SmolBox 0.1.5 or this
+checkout; version 0.1.4 does not include checkpoint execution.
 
 ## Register a checkpoint
 
@@ -154,6 +154,7 @@ Checkpoint records use **record schema v3**. This implementation reads existing
 v1/v2 image records and keeps writing image records as v2, preserving existing
 image fingerprints. Only checkpoint executions require v3.
 
+Follow [Upgrading to 0.1.5](recovery.md#upgrading-to-0-1-5).
 Upgrade every controller sharing a store before accepting checkpoint submissions.
 Older controllers cannot read v3 records; they must never treat them as absent.
 Once checkpoint records exist, rolling back to 0.1.4 requires separating or
@@ -168,7 +169,7 @@ and workload. `scripts/checkpoints/benchmark.exs` measures create, start, exec
 and delete separately against an equivalent cold VM pack. It defaults to ten
 measured samples per source after warmup, alternating order, and can separately
 measure application preparation. The
-[benchmark protocol](https://github.com/hfiguera/smolbox/tree/main/scripts/checkpoints#checkpoint-examples-and-measurements)
+[benchmark protocol](https://github.com/hfiguera/smolbox/tree/v0.1.5/scripts/checkpoints#checkpoint-examples-and-measurements)
 covers cache settings and an alternative image with precomputed data. It does
 not measure image pulls or establish a universal speedup.
 

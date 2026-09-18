@@ -1,6 +1,13 @@
 # Changelog
 
-## Unreleased
+## 0.1.5 — September 18, 2026
+
+**Checkpoint upgrade notice:** upgrade every controller sharing a store before
+submitting checkpoint executions. Their schema-v3 records cannot be read by
+older controllers, even after the executions finish. Image executions continue
+to write schema v2 with unchanged fingerprints. No SQL table migration or worker
+default change is introduced; smolvm 1.16.1 remains the default and is required
+for checkpoints. See [Upgrading to 0.1.5](docs/recovery.md#upgrading-to-0-1-5).
 
 - Add operator-approved idle, offline checkpoint sources on smolvm 1.16.1, using
   the existing HTTP client and managed lifecycle. Image execution is unchanged.
@@ -11,6 +18,9 @@
 - Extend the durable host example with independent checkpoint restores and
   PostgreSQL recovery across fresh application processes, including interruption
   before and after result persistence. Document the v3 controller upgrade boundary.
+- Add reproducible checkpoint benchmarks separating restore, startup, preparation,
+  execution and cleanup. Record Linux cache comparisons and a precomputed-image
+  baseline; nested-lab speedups are not universal or native-host performance claims.
 
 ## 0.1.4 — September 18, 2026
 

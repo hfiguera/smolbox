@@ -1,7 +1,7 @@
 # Deployment and trust boundaries
 
 The controlled networking feature introduced in 0.1.3 permits explicit operator-approved
-outbound policies on smolvm 1.16.0. SmolBox 0.1.4 defaults to 1.16.1,
+outbound policies on smolvm 1.16.0. SmolBox 0.1.5 defaults to 1.16.1,
 with support for those policies. Existing offline defaults and prior offline
 qualification evidence remain unchanged. See [Controlled network access](network-access.md)
 for DNS/IP semantics, profile approval and the separate enforcement fixture.
@@ -190,7 +190,7 @@ its store process stops.
    durable example's authenticated index backfill instructions for its older schema.
 4. Pin and verify the new binary, schema and artifact bytes on a separate candidate
    worker. Recheck template sizes, VMM overhead, network behavior, proxy semantics,
-   host quotas and all advertised platform tests. SmolBox 0.1.4 defaults to
+   host quotas and all advertised platform tests. SmolBox 0.1.5 defaults to
    smolvm 1.16.1 and retains explicit 1.16.0, 1.14.6 and 1.14.1 support, subject
    to the [supported platform matrix](compatibility.md#runtime-selection).
    Controlled networking requires 1.16.0 or 1.16.1. The worker must report the
@@ -235,7 +235,7 @@ metadata share an exhausted filesystem. See
 [Linux deployment validation](resource-qualification.md#subsequent-linux-deployment-validation)
 for the tested configuration and recovery evidence.
 
-## Approved checkpoint state (unreleased)
+## Approved checkpoint state (0.1.5)
 
 Checkpoints contain memory as well as disks. SmolBox accepts only operator-approved
 idle, offline checkpoints on the qualified 1.16.1 platform. An entrypoint override

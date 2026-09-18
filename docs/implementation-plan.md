@@ -1,3 +1,21 @@
+# SmolBox 0.1.5 preparation — September 18, 2026
+
+Branch `prepare-0.1.5` prepares the merged checkpoint feature for version 0.1.5.
+The package version, README, ExDoc guides, examples and changelog describe this
+release and its conditional schema-v3 adoption. Every controller sharing a store
+must upgrade before checkpoint submissions; image records retain v2. Completed
+v3 records still prevent a blind rollback. smolvm 1.16.1 remains the default.
+
+Local preparation passed full CI (234 deterministic cases), all 23 tooling cases,
+46 ExDoc pages and three consumers of the same 105-file archive, including minimum
+dependencies on Elixir 1.18.4/OTP 27.3.4.15. All 44 library modules match the merged
+feature. No new runtime or recovery validation is claimed for these metadata edits.
+
+See [the preparation record](release-candidates/0.1.5.md) for check results,
+retained qualification boundaries and the work remaining before publication.
+No publication, tag or push is authorized by this preparation step. The feature
+implementation and earlier release records below remain historical evidence.
+
 # Unreleased checkpoint execution — September 18, 2026
 
 Branch `checkpoint-executions` implements operator-approved idle, offline checkpoint

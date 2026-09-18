@@ -68,8 +68,8 @@ children = [
 ]
 ```
 
-This fragment explicitly retains a Linux 1.14.6 worker with SmolBox 0.1.4.
-Omitting the field selects 1.16.1 in SmolBox 0.1.4. Use `"1.16.0"`
+This fragment explicitly retains a Linux 1.14.6 worker with SmolBox 0.1.5.
+Omitting the field selects 1.16.1 in SmolBox 0.1.5. Use `"1.16.0"`
 explicitly to retain that worker, or `"1.14.1"`
 for an existing worker. See [runtime selection](compatibility.md#runtime-selection).
 This is a host configuration fragment, not a self-provisioning script. The host
@@ -309,9 +309,11 @@ to reconcile. Memory mode loses this authority when its store process stops.
 
 ## Upgrading a worker
 
-SmolBox 0.1.4 defaults to smolvm **1.16.1** on Linux x86_64 and macOS Apple
-Silicon. SmolBox 0.1.3 defaults to 1.16.0; 0.1.2 defaults
-to 1.14.6. This default change introduces no further record schema migration.
+SmolBox 0.1.5 defaults to smolvm **1.16.1** on Linux x86_64 and macOS Apple
+Silicon, retaining the 0.1.4 default. SmolBox 0.1.3 defaults to 1.16.0; 0.1.2
+defaults to 1.14.6. Worker selection does not migrate execution records.
+Before enabling checkpoints in 0.1.5, follow the separate
+[controller and schema-v3 upgrade procedure](recovery.md#upgrading-to-0-1-5).
 Applications upgrading from 0.1.2 still need the
 [0.1.3 record upgrade procedure](recovery.md#upgrading-to-0-1-3).
 Before updating the library with an existing worker, retain its version explicitly:
@@ -323,7 +325,7 @@ Before updating the library with an existing worker, retain its version explicit
 ```
 
 Use `"1.14.1"` or `"1.14.6"` instead for a worker still on either version. Omitting
-`:runtime_version` in 0.1.4 expects `"1.16.1"`; updating the Elixir
+`:runtime_version` in 0.1.5 expects `"1.16.1"`; updating the Elixir
 dependency does not install smolvm. A version mismatch prevents new execution.
 Unverified versions and unsupported host combinations fail configuration
 validation. Health checks require an exact version match, without fallback.

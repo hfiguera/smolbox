@@ -1,10 +1,10 @@
 # Compatibility evidence
 
-Version: `0.1.4`. The library's supported qualification is
+Version: `0.1.5`. The library's supported qualification is
 `:development`; requested hard-control options remain unsupported. The original
 release evidence below records the client/controller contract on Linux and macOS.
 
-## Unreleased checkpoint execution
+## Checkpoint execution in 0.1.5
 
 Operator-approved idle, offline checkpoints have a separate contract on smolvm
 1.16.1. Three ordinary native checkpoint cases passed on Linux x86_64 and macOS
@@ -15,9 +15,16 @@ persistence. See [the checkpoint guide](checkpoints.md) and
 networked checkpoint, arbitrary resume or cross-platform restore support, and no
 new exhaustion or adversarial validation is claimed.
 
+The [durable example evidence](evidence/checkpoint-durable-example.json) adds
+three focused cases across fresh BEAM processes and PostgreSQL in nested Linux,
+including interruption before and after result persistence. The
+[cache benchmark](evidence/checkpoint-cache-benchmark.json) records 284 executions
+including warmups in that lab. These retain their recorded source revisions;
+they are not new runs against release metadata or a macOS durable qualification.
+
 ## smolvm 1.16.1 qualification
 
-**Default in SmolBox 0.1.4.** Managed execution selects 1.16.1
+**Default since SmolBox 0.1.4, retained in 0.1.5.** Managed execution selects 1.16.1
 for a verified Linux x86_64 or macOS Apple Silicon worker. Controlled networking
 accepts it too. Explicit 1.16.0 support remains. The candidate passed the
 ordinary Linux/macOS execution, durable recovery and network enforcement suites,
@@ -149,7 +156,7 @@ support. Also follow the [record format upgrade procedure](recovery.md#upgrading
 A worker must report the exact configured version. Multiple supported versions
 do not imply automatic fallback or acceptance of arbitrary upstream releases.
 
-SmolBox 0.1.4 defaults to `runtime_version: "1.16.1"`; version 0.1.3 does not
+SmolBox 0.1.5 defaults to `runtime_version: "1.16.1"`; version 0.1.3 does not
 support it. Set `runtime_version: "1.16.0"` explicitly before
 upgrading the library if you need to retain that worker. Install the worker
 separately and configure the exact version on every controller that owns it.

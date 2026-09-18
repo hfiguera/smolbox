@@ -6,9 +6,9 @@ Use it when host code owns those responsibilities. For a complete managed
 execution, begin with [Getting started](getting-started.md). This guide describes
 the supported client contract and its development-qualified worker boundary.
 See [runtime selection](compatibility.md#runtime-selection) for the explicit
-Linux/macOS 1.16.1 default in SmolBox 0.1.4 and retained explicit 1.16.0,
+Linux/macOS 1.16.1 default in SmolBox 0.1.5 and retained explicit 1.16.0,
 1.14.6 and 1.14.1 compatibility. SmolBox 0.1.3 defaults to 1.16.0 and 0.1.2
-to 1.14.6. Follow [Upgrading to 0.1.4](recovery.md#upgrading-to-0-1-4) when
+to 1.14.6. Follow [Upgrading to 0.1.5](recovery.md#upgrading-to-0-1-5) when
 updating an existing application.
 
 Install the pinned smolvm release from [compatibility evidence](compatibility.md).

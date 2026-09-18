@@ -3,7 +3,7 @@
 This example keeps the image-based path simple. For approved idle checkpoint
 execution with PostgreSQL and recovery across application processes, see the
 [durable checkpoint example](../durable_host/README.md#checkpoint-execution-and-recovery).
-Checkpoint support is unreleased and requires this checkout, not Hex 0.1.4.
+Checkpoint support requires SmolBox 0.1.5 or this checkout.
 
 This Mix project runs SmolBox under a host supervisor with an explicitly
 ephemeral memory store.
@@ -41,7 +41,7 @@ Apple Silicon. Set `SMOLBOX_RUNTIME_VERSION` to `1.16.0`, `1.14.6` or `1.14.1` f
 existing older worker. Consult the
 [qualification evidence](../../docs/compatibility.md#smolvm-1-16-1-qualification). For smaller 1.14.6, 1.16.0 or 1.16.1 disk requests, supply the host's `resize2fs`; see
 [host prerequisites](../../docs/compatibility.md#macos-1-14-6-prerequisites).
-SmolBox 0.1.4 defaults to 1.16.1; 0.1.3 defaults to 1.16.0. Keep key files private
+SmolBox 0.1.5 defaults to 1.16.1; 0.1.3 defaults to 1.16.0. Keep key files private
 and stable; the example does not print their contents. For an authenticated
 HTTPS worker proxy, also configure `SMOLBOX_PROXY_TOKEN`; verified TLS remains
 enabled. Unauthenticated HTTP is accepted only for explicitly allowed loopback.
