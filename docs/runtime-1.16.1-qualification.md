@@ -1,6 +1,6 @@
 # smolvm 1.16.1 qualification
 
-Status: **cleanup separation validated; 1.16.1 admission remains held**.
+Status: **1.16.1 explicitly supported in this checkout; unreleased. Default remains 1.16.0.**
 
 Branch: `qualify-smolvm-1.16.1`, starting at
 `9c212ef29ed446307d45de8084c4acef336b68aa`. Campaign date: September 18, 2026 UTC.
@@ -8,8 +8,8 @@ Branch: `qualify-smolvm-1.16.1`, starting at
 The initial candidate passed normal execution, durable recovery and network enforcement
 checks on the tested platforms. Two disk-exhaustion regressions failed at stop,
 and a direct comparison confirmed different behavior from 1.16.0. Public
-worker/network admission therefore remains unchanged, with default runtime
-1.16.0. That initial campaign changed no package version, durable schema or
+worker/network admission was initially held, with default runtime 1.16.0.
+That initial campaign changed no package version, durable schema or
 lifecycle semantics. The cleanup follow-up below is a separate implementation change.
 
 ## Original blocker
@@ -50,7 +50,8 @@ The managed runtime now chooses preservation or disposal from persisted state,
 before issuing a mutation. Finished execution/collection and expired unknown
 retention select DELETE directly. Unknown work still within retention selects
 graceful stop and keeps its disks. A failed stop does not switch paths. The
-low-level stop API and public runtime admission remain unchanged.
+low-level stop API remains unchanged. Explicit public admission is enabled in
+the subsequent admission decision below.
 
 Both paths retain creation/incarnation checks, store claims, fixed deadlines and
 finite attempt budgets. A DELETE acknowledgment does not complete cleanup until
@@ -63,7 +64,8 @@ The new `scripts/lab/managed-discard.exs` exercises an entire managed execution
 against the real worker. A test transport observes free host backing space at
 the DELETE boundary and rejects any unexpected stop request in the completed
 case. It never substitutes a response for the worker. Run it only in the disposable
-Linux lab, with the recorded candidate admission patch applied in the test checkout:
+Linux lab. Current checkouts need no admission patch; earlier campaign checkouts
+used the historical patch described below:
 
 ```sh
 SMOLBOX_RUNTIME_VERSION=1.16.1 SMOLBOX_DISCARD_LABEL=discard-cache \
@@ -184,7 +186,7 @@ do not establish that an allowlist excludes every infrastructure endpoint.
 The candidate passed 215 deterministic cases, all configured analyzers and 95.49%
 coverage. Eight analyzer/coverage canary pairs exercised both detection and clean
 controls. Current and minimum dependency package consumers passed with candidate
-admission enabled. The final branch passed all 214 deterministic cases and the complete analyzer
+admission enabled. The initial held branch passed all 214 deterministic cases and the complete analyzer
 pipeline with 1.16.1 rejected after removing candidate admission.
 
 ## Reproducing the evidence
@@ -210,16 +212,16 @@ incompatibility was reproduced, not that 1.16.1 passed qualification. Existing
 successful-cleanup assertions and fail against this candidate.
 
 The temporary public-admission changes used by managed candidate tests are
-preserved in `scripts/lab/fixtures/smolvm-1.16.1-candidate.patch`. Apply that patch
-only to a separate qualification checkout to reproduce those tests. It is not
-applied on this branch, not included in the package, and not an operator opt-in.
-Pinned maintainer preflight recognizes the candidate distribution without
-claiming that the public library supports it.
+preserved in `scripts/lab/fixtures/smolvm-1.16.1-candidate.patch` for reproducing
+the earlier campaign at commit `189d6e6`. Its admission implementation is now
+included in this checkout, so do not apply it again. It is excluded from the
+package. Historical evidence retains the admission status at the time of each run.
 
 ## Corrections and limits
 
 - A stale negative CI fixture initially rejected the candidate version. Corrected
-  candidate fixtures passed; the final branch intentionally rejects it again.
+  candidate fixtures passed; the initial held branch intentionally rejected it
+  again until the cleanup follow-up and admission decision.
 - The first macOS geometry probe inspected a Linux-style cache path. The corrected
   native path produced real size/persistence evidence; the initial failure remains.
 - The first Linux store report expected 16 cases although all 17 passed. Correcting
@@ -235,10 +237,26 @@ claiming that the public library supports it.
   not replace those measurements.
 - Missing-`resize2fs` behavior and every older macOS artifact were not retested.
 
-## What would unblock admission
+## Admission decision
 
-The cleanup follow-up implements a separate disposal contract. Admission remains
-held for a separate decision reviewing the completed validation evidence alongside
-the initial qualification campaign. Any later admission change must account for the retained-unknown stop
-limitation rather than treating direct deletion as proof of graceful shutdown.
-The original failing stop-first tests must not be relabeled as passing.
+The validated cleanup follow-up separates disposal from preservation. The tested
+admission rules now accept exactly 1.16.1 on Linux x86_64 and macOS Apple Silicon,
+including network policies. Worker health must match the explicitly configured
+version; unknown versions and mismatches still prevent execution. The default
+remains 1.16.0 and the package version stays unchanged pending a separate release.
+
+Graceful stop can still fail when storage synchronization fails. Unknown work
+within retention keeps its disks and reservation; retry exhaustion can require
+operator resolution. This is the documented preservation contract, not an
+unconditional cleanup guarantee. The original failing stop-first probes remain
+failures and are not relabeled as passing.
+
+The [admission evidence](evidence/smolvm-1.16.1-admission.json) records 224 passing
+deterministic cases, 95.88% coverage, the full analyzer pipeline, nine fresh
+ordinary macOS runtime cases and successful current/minimum dependency package
+consumers. All 43 library modules match the qualified candidate implementation
+when documentation attributes and source locations are excluded from the AST
+comparison. The Linux comparison reconstructs the exact archived inputs plus the
+recorded admission patch and final cleanup source; original host copies match
+the recorded hashes. The real Linux results above are reused, not claimed as a
+new run. Historical evidence retains its original held-admission status.

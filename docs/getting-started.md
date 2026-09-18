@@ -69,7 +69,10 @@ iex -S mix
 separate from the runtime image and from all guest-accessible directories.
 Omitting `SMOLBOX_RUNTIME_VERSION` selects 1.16.0 in this walkthrough. Set it to
 `1.14.1` or `1.14.6` for an existing worker on either host. A library upgrade does not
-upgrade the worker; mismatched versions prevent admission.
+upgrade the worker; mismatched versions prevent admission. This checkout also
+accepts `SMOLBOX_RUNTIME_VERSION=1.16.1` after you install and verify that worker;
+this support is unreleased. See [the qualification and cleanup
+limitation](compatibility.md#smolvm-1-16-1-qualification).
 The walkthrough checks this explicit selection; it never adopts an arbitrary
 version from the health response.
 

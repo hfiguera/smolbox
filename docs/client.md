@@ -7,7 +7,8 @@ execution, begin with [Getting started](getting-started.md). This guide describe
 the supported client contract and its development-qualified worker boundary.
 See [runtime selection](compatibility.md#runtime-selection) for the explicit
 Linux/macOS 1.16.0 default in SmolBox 0.1.3 and retained explicit 1.14.1 and
-1.14.6 compatibility. SmolBox 0.1.2 defaults to 1.14.6.
+1.14.6 compatibility. This checkout also supports explicitly selected 1.16.1;
+that addition is unreleased. SmolBox 0.1.2 defaults to 1.14.6.
 
 Install the pinned SmolVM release from [compatibility evidence](compatibility.md).
 Prepare an approved, architecture-matched `.smolmachine` artifact on the worker
@@ -15,7 +16,7 @@ host, verify its digest, and start a private `smolvm serve` endpoint. For bounde
 small-file workloads set `SMOLVM_FILE_TRANSFER_MAX_BYTES=1048576` before starting
 the server. SmolBox never enables guest networking to fetch an image.
 
-For SmolVM 1.14.6 and 1.16.0, verify the host's `resize2fs` before requesting disks smaller
+For SmolVM 1.14.6, 1.16.0 and 1.16.1, verify the host's `resize2fs` before requesting disks smaller
 than its bundled templates. Our macOS run without that tool lost a workspace
 file after stop/start; health and successful execution alone did not detect the
 problem. See [runtime prerequisites](compatibility.md#macos-1-14-6-prerequisites).

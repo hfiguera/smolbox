@@ -33,6 +33,7 @@ defmodule SmolBox.WorkerPoolTest do
 
   for {label, options} <- [
         {"default 1.16.0", []},
+        {"explicit 1.16.1", [runtime_version: "1.16.1", expected_runtime_version: "1.16.1"]},
         {"explicit 1.14.1", [runtime_version: "1.14.1", expected_runtime_version: "1.14.1"]},
         {"explicit 1.14.6", [runtime_version: "1.14.6", expected_runtime_version: "1.14.6"]}
       ] do

@@ -1,5 +1,5 @@
 # Storage exhaustion: only run in the disposable, constrained Linux lab.
-# Apply the recorded candidate admission patch in that test checkout for 1.16.1.
+# Current checkouts admit 1.16.1 explicitly; only historical checkouts need the candidate patch.
 defmodule SmolBox.DiscardProbeTransport do
   @moduledoc false
   @behaviour SmolBox.Transport

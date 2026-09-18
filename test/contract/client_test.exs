@@ -97,12 +97,11 @@ defmodule SmolBox.ClientTest do
     parent = self()
 
     supported_cases =
-      for version <- ["1.16.0"],
+      for version <- ["1.16.0", "1.16.1"],
           mode <- [:matching, :missing, :different],
           do: {version, mode}
 
-    for {version, mode} <-
-          supported_cases ++ [{"1.14.6", :legacy}, {"1.16.1", :legacy}, {"1.16.2", :legacy}] do
+    for {version, mode} <- supported_cases ++ [{"1.14.6", :legacy}, {"1.16.2", :legacy}] do
       peer =
         client(fn conn ->
           if conn.request_path == "/health" do

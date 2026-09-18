@@ -75,7 +75,7 @@ defmodule SmolBox.Client do
   Create a machine from an approved prepared artifact on the worker, offline by default.
 
   Returns creation evidence after matching name, allocations and network policy.
-  An enabled policy requires a 1.16.0 health observation. That preflight and the
+  An enabled policy requires a 1.16.0 or 1.16.1 health observation. That preflight and the
   create request share the configured operation timeout.
   Persist intent before this call and creation evidence before further mutations.
   A lost or mismatched response can leave creation uncertain; it does not authorize
@@ -103,9 +103,14 @@ defmodule SmolBox.Client do
       deadline = System.monotonic_time(:millisecond) + client.worker.operation_timeout_ms
 
       case health(client) do
-        {:ok, %{version: "1.16.0"}} -> remaining_create_budget(client, deadline)
-        {:ok, _health} -> error(:unsupported_capability, :create)
-        {:error, failure} -> {:error, %{failure | operation: :create, evidence: :not_dispatched}}
+        {:ok, %{version: version}} when version in ["1.16.0", "1.16.1"] ->
+          remaining_create_budget(client, deadline)
+
+        {:ok, _health} ->
+          error(:unsupported_capability, :create)
+
+        {:error, failure} ->
+          {:error, %{failure | operation: :create, evidence: :not_dispatched}}
       end
     end
   end

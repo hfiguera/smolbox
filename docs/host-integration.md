@@ -327,7 +327,10 @@ validation. Health checks require an exact version match, without fallback.
 
 Consult the [1.16.0 qualification evidence](compatibility.md#smolvm-1-16-0-qualification)
 and preparation prerequisites before installing that worker. The same drain,
-identity and prerequisite checks below apply to each supported version.
+identity and prerequisite checks below apply to each supported version. This
+checkout also accepts an explicitly configured `runtime_version: "1.16.1"`;
+that addition is unreleased. Review its [qualification and preservation
+limitation](compatibility.md#smolvm-1-16-1-qualification) before upgrading.
 
 For an existing worker:
 
@@ -341,7 +344,7 @@ For an existing worker:
    the complete pinned distribution. Verify binary, agent, libkrun and artifact
    digests. Do not mix files from different distributions.
 4. Recheck the deployment controls and approved artifact/profile revisions.
-   Disk requests below the 1.14.6 or 1.16.0 templates require working `resize2fs` on the
+   Disk requests below the 1.14.6, 1.16.0 or 1.16.1 templates require working `resize2fs` on the
    worker host (`brew install e2fsprogs` on macOS). Missing it caused file loss
    after restart in our macOS check, despite successful health/start/exec replies.
    Verify a small owned file survives stop/start before admitting work; see
