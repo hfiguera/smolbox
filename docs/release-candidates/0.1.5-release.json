@@ -1,0 +1,496 @@
+{
+  "version": "0.1.5",
+  "status": "published and verified",
+  "date": "2026-09-18",
+  "release_commit": "14ff6ac9be701bb8054a3a5c1893d364c3544088",
+  "tag": "v0.1.5",
+  "checks": {
+    "macos": {
+      "canaries": {
+        "seconds": 8.726,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 621,
+        "output_sha256": "e0b964a623497ff2bb478f184e6c238afa88d2b496eb969c1ad810acf8e4339f"
+      },
+      "checkpoint-runtime": {
+        "seconds": 3.724,
+        "status": "passed",
+        "failure": null,
+        "tests": {
+          "seed": 344477,
+          "passed": 3
+        },
+        "exit_code": 0,
+        "captured_bytes": 146,
+        "output_sha256": "8ad26163522f55584e7ee08cd8cb50ce6830cf81596e3637e59f2c7909b42156"
+      },
+      "tooling": {
+        "seconds": 29.82,
+        "status": "passed",
+        "failure": null,
+        "tests": {
+          "seed": 813610,
+          "passed": 23
+        },
+        "exit_code": 0,
+        "captured_bytes": 156,
+        "output_sha256": "ea1bea3c8ec9e381c65df243ddb0d04066bfabe4c5e6fac35483a3b8f5a51e16"
+      },
+      "docs": {
+        "seconds": 0.884,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 128,
+        "output_sha256": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d"
+      },
+      "quality": {
+        "seconds": 116.315,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 2147,
+        "output_sha256": "d5e6ca1920a98ec58f074fc5d74a1536ce16d4bf3d8846a6b1ad9de983ffd894"
+      },
+      "package-current-runner": {
+        "seconds": 6.199,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 108,
+        "output_sha256": "a5f0b4bb69a1803f02684cdcc5bb204dd9e77a8a4ca6b6dc077031b25c79053e"
+      },
+      "durable-store": {
+        "seconds": 0.957,
+        "status": "passed",
+        "failure": null,
+        "tests": {
+          "seed": 943608,
+          "passed": 18
+        },
+        "exit_code": 0,
+        "captured_bytes": 163,
+        "output_sha256": "274e3ed9caf177cd1862c24671a98ad439aa90242cc218f5959930c9e54a7603"
+      },
+      "package-minimum-runner": {
+        "seconds": 6.048,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 108,
+        "output_sha256": "ae2e26df6b33e58552691fdb729755ffee593c7f913dd91260d19356e64a2cd5"
+      },
+      "package-otp27-runner": {
+        "seconds": 6.156,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 106,
+        "output_sha256": "a30d6ec540b8404de3818fca365a4e06602a178f439613adfa714e8792ea06c5"
+      },
+      "coverage": {
+        "seconds": 112.315,
+        "status": "passed",
+        "failure": null,
+        "tests": {
+          "passed": 234,
+          "doctests": 4,
+          "properties": 6,
+          "ordinary": 224,
+          "runtime_excluded_not_counted": 17
+        },
+        "exit_code": 0,
+        "captured_bytes": 3909,
+        "output_sha256": "37f573020d359f6d53e943c85088cada5e04e7b943d43e31fee176ed8528e8e2"
+      },
+      "doc-links": {
+        "seconds": 0.339,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 60,
+        "output_sha256": "4dc37ca964363f541ce0c5cbd04f287800d6091309f927d42de9ce1e6d1e703e"
+      },
+      "coverage_percent": 95.96,
+      "package_consumers": {
+        "package-current": {
+          "checkpoint": true,
+          "client": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.16.1",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.5",
+            "nimble_options": "1.1.1",
+            "req": "0.7.4",
+            "telemetry": "1.4.2"
+          }
+        },
+        "package-minimum": {
+          "checkpoint": true,
+          "client": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.16.1",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.0",
+            "nimble_options": "1.1.0",
+            "req": "0.7.4",
+            "telemetry": "1.3.0"
+          }
+        },
+        "package-otp27": {
+          "checkpoint": true,
+          "client": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.16.1",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.0",
+            "nimble_options": "1.1.0",
+            "req": "0.7.4",
+            "telemetry": "1.3.0"
+          }
+        }
+      }
+    },
+    "linux": {
+      "canaries": {
+        "seconds": 15.149,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 621,
+        "output_sha256": "e0b964a623497ff2bb478f184e6c238afa88d2b496eb969c1ad810acf8e4339f"
+      },
+      "checkpoint-runtime": {
+        "seconds": 6.474,
+        "status": "passed",
+        "failure": null,
+        "tests": {
+          "seed": 327367,
+          "passed": 3
+        },
+        "exit_code": 0,
+        "captured_bytes": 146,
+        "output_sha256": "75c528175a092bcdc7fcf0023572435f4138ad788a985edc8a0ec8bfed6fbe80"
+      },
+      "tooling": {
+        "seconds": 6.26,
+        "status": "passed",
+        "failure": null,
+        "tests": {
+          "seed": 535756,
+          "passed": 23
+        },
+        "exit_code": 0,
+        "captured_bytes": 154,
+        "output_sha256": "9587e6609551b1e6b8c74a2f594a6ab86ff837bc53baaf97224cea2eca1819d0"
+      },
+      "docs": {
+        "seconds": 35.707,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 8487,
+        "output_sha256": "5e9701e0775cc7c1c0286beee11cd6b574779c3ef57a70d36a2d00bce098aad8"
+      },
+      "quality": {
+        "seconds": 132.131,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 10954,
+        "output_sha256": "007849c523827cca368feab69d696d6a05591d81d2adfd4b27792f397b83b1ab"
+      },
+      "package-current-runner": {
+        "seconds": 9.026,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 118,
+        "output_sha256": "c9138fa3a692d5dc349e3f75e3c51595ff673c82ef6e18febcb946b7b8338ed6"
+      },
+      "durable-store": {
+        "seconds": 1.858,
+        "status": "passed",
+        "failure": null,
+        "tests": {
+          "seed": 86693,
+          "passed": 18
+        },
+        "exit_code": 0,
+        "captured_bytes": 334,
+        "output_sha256": "c7fd1148c9b3760ed739ae611930c49283fa75e3e2b28bae3e5a1dd60681d843"
+      },
+      "package-minimum-runner": {
+        "seconds": 9.415,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 118,
+        "output_sha256": "8d438897c196e985c5c033a70d716d71b5730a0419121b9ef4f165d70e170549"
+      },
+      "package-otp27-runner": {
+        "seconds": 9.399,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 116,
+        "output_sha256": "12bcef544442bd15edbc9df6b3c619c82791a878ffebb2126c2aafc52aa31010"
+      },
+      "coverage": {
+        "seconds": 90.505,
+        "status": "passed",
+        "failure": null,
+        "tests": {
+          "passed": 234,
+          "doctests": 4,
+          "properties": 6,
+          "ordinary": 224,
+          "runtime_excluded_not_counted": 17
+        },
+        "exit_code": 0,
+        "captured_bytes": 3907,
+        "output_sha256": "f2eeef3db0985f4a192a441593c576ccca021f8cf88e8b754a52c1e87c0aa69f"
+      },
+      "doc-links": {
+        "seconds": 0.507,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 60,
+        "output_sha256": "4dc37ca964363f541ce0c5cbd04f287800d6091309f927d42de9ce1e6d1e703e"
+      },
+      "coverage_percent": 95.9,
+      "package_consumers": {
+        "package-current": {
+          "checkpoint": true,
+          "client": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.16.1",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.5",
+            "nimble_options": "1.1.1",
+            "req": "0.7.4",
+            "telemetry": "1.4.2"
+          }
+        },
+        "package-minimum": {
+          "checkpoint": true,
+          "client": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.16.1",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.0",
+            "nimble_options": "1.1.0",
+            "req": "0.7.4",
+            "telemetry": "1.3.0"
+          }
+        },
+        "package-otp27": {
+          "checkpoint": true,
+          "client": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.16.1",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.0",
+            "nimble_options": "1.1.0",
+            "req": "0.7.4",
+            "telemetry": "1.3.0"
+          }
+        }
+      }
+    }
+  },
+  "package": {
+    "sha256": "e1b39a38d0658685125d0973351b1e27d2e19b1fcd693233ff10da8f559c44c4",
+    "file_contents_and_normalized_metadata_match_validated_mac_archive": true,
+    "file_count": 105,
+    "github_ci_jobs": 18
+  },
+  "github_ci": {
+    "url": "https://github.com/hfiguera/smolbox/actions/runs/35394539229",
+    "conclusion": "success",
+    "jobs": 18,
+    "tag_run": {
+      "url": "https://github.com/hfiguera/smolbox/actions/runs/35396002291",
+      "conclusion": "success"
+    }
+  },
+  "runtime": {
+    "version": "1.16.1",
+    "macos_binary_sha256": "d587f858cae14fd34025aaf627b0c63e1443d9e4059855a80597ae6a5b8d93be",
+    "linux_binary_sha256": "017f61853a8f19450472052080f95cd8ef5b80b61d1715e4524c67ea085f11a5",
+    "macos_checkpoint_sha256": "e386f76a26812af3942cad1127247e173ee934102c1e31e53e753efe28fdbf96",
+    "linux_checkpoint_sha256": "3bc845836f0f8beec8cdc7a7897dce407ed89bd9982e7ddddb4872413dc51338",
+    "worker_cache": "SMOLVM_DISABLE_SHARED_EXTRACT=1; ordinary functional checks, not new performance measurements",
+    "cleanup": "Both inventories empty; both dedicated workers and private databases stopped"
+  },
+  "retained_setup_failures": [
+    "Initial Linux consumer command used a literal $PWD path; corrected to the absolute archive path and all consumers passed.",
+    "Initial macOS durable invocation selected all example tests; 18 passed but strict report checker rejected 28 excluded runtime cases. Reran only store/index files: all 18 passed with no exclusions.",
+    "Linux had client tools but no PostgreSQL server. Extracted the official PostgreSQL 16 package under the private release directory without system installation; initialized an isolated Unix-socket-only database and all 18 tests passed.",
+    "Mac worker exited with the initial harness failure. Restarted the same dedicated worker to verify an empty inventory before stopping it.",
+    "Linux and macOS package metadata serialization/order differ. All 105 contents and normalized metadata match."
+  ],
+  "boundaries": [
+    "No new exhaustion or adversarial tests; fresh native suites exercised ordinary checkpoint lifecycle only.",
+    "Store contract tests are not a new full durable runtime failure campaign; earlier focused Linux checkpoint recovery keeps its own revision.",
+    "No full checkpoint failure matrix, macOS durable checkpoint recovery, macOS IPv6 or Linux ARM64 qualification.",
+    "Existing image runtime qualification retains its original revision; executable library matches the merged checkpoint implementation."
+  ],
+  "publication": {
+    "hex_url": "https://hex.pm/packages/smolbox/0.1.5",
+    "github": {
+      "assets": [
+        {
+          "apiUrl": "https://api.github.com/repos/hfiguera/smolbox/releases/assets/573483340",
+          "contentType": "application/x-tar",
+          "createdAt": "2026-09-18T21:24:35Z",
+          "digest": "sha256:e1b39a38d0658685125d0973351b1e27d2e19b1fcd693233ff10da8f559c44c4",
+          "downloadCount": 0,
+          "id": "RA_kwDOURXFm84iLqlM",
+          "label": "",
+          "name": "smolbox-0.1.5.tar",
+          "size": 357888,
+          "state": "uploaded",
+          "updatedAt": "2026-09-18T21:24:35Z",
+          "url": "https://github.com/hfiguera/smolbox/releases/download/v0.1.5/smolbox-0.1.5.tar"
+        }
+      ],
+      "isDraft": false,
+      "isPrerelease": false,
+      "publishedAt": "2026-09-18T21:24:36Z",
+      "tagName": "v0.1.5",
+      "url": "https://github.com/hfiguera/smolbox/releases/tag/v0.1.5"
+    },
+    "docs": {
+      "status": "passed",
+      "pages": [
+        {
+          "page": "readme",
+          "url": "https://smolbox.hexdocs.pm/0.1.5/readme.html",
+          "bytes": 25545
+        },
+        {
+          "page": "checkpoints",
+          "url": "https://smolbox.hexdocs.pm/0.1.5/checkpoints.html",
+          "bytes": 27437
+        },
+        {
+          "page": "recovery",
+          "url": "https://smolbox.hexdocs.pm/0.1.5/recovery.html",
+          "bytes": 27843
+        },
+        {
+          "page": "getting-started",
+          "url": "https://smolbox.hexdocs.pm/0.1.5/getting-started.html",
+          "bytes": 54226
+        },
+        {
+          "page": "SmolBox",
+          "url": "https://smolbox.hexdocs.pm/0.1.5/SmolBox.html",
+          "bytes": 33594
+        }
+      ],
+      "tagged_source_verified": true,
+      "evidence_assets": [
+        "https://hexdocs.pm/smolbox/0.1.5/evidence/checkpoint-executions.json",
+        "https://hexdocs.pm/smolbox/0.1.5/evidence/checkpoint-durable-example.json",
+        "https://hexdocs.pm/smolbox/0.1.5/evidence/checkpoint-cache-benchmark.json"
+      ]
+    },
+    "registry_consumers": {
+      "macos": {
+        "status": "passed",
+        "version": "0.1.5",
+        "otp": "29",
+        "elixir": "1.20.4",
+        "dependency": "hex",
+        "smoke": {
+          "checkpoint": true,
+          "client": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.16.1",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.5",
+            "nimble_options": "1.1.1",
+            "req": "0.7.4",
+            "telemetry": "1.4.2"
+          }
+        },
+        "package_sha256": "e1b39a38d0658685125d0973351b1e27d2e19b1fcd693233ff10da8f559c44c4",
+        "verified_files": 105
+      },
+      "linux": {
+        "status": "passed",
+        "version": "0.1.5",
+        "otp": "29",
+        "elixir": "1.20.4",
+        "dependency": "hex",
+        "smoke": {
+          "checkpoint": true,
+          "client": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.16.1",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.5",
+            "nimble_options": "1.1.1",
+            "req": "0.7.4",
+            "telemetry": "1.4.2"
+          }
+        },
+        "package_sha256": "e1b39a38d0658685125d0973351b1e27d2e19b1fcd693233ff10da8f559c44c4",
+        "verified_files": 105
+      }
+    }
+  }
+}

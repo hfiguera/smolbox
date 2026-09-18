@@ -1,3 +1,25 @@
+# SmolBox 0.1.5 publication — September 18, 2026
+
+Published and verified. Tag `v0.1.5` points to
+`14ff6ac9be701bb8054a3a5c1893d364c3544088`. Hex, HexDocs and the GitHub release
+are available. See the [publication record](release-candidates/0.1.5-release.md)
+and [machine-readable evidence](release-candidates/0.1.5-release.json).
+
+All 18 exact-commit CI jobs and tag CI passed. Fresh Linux and macOS checks passed
+the analyzers, canaries, coverage, documentation, package consumers, three native
+checkpoint cases and 18 private PostgreSQL store cases per host. Both fresh Hex
+registry consumers verified the published checksum and all 105 installed files.
+Dedicated workers and databases stopped after empty inventories were verified.
+
+Every controller sharing a store must upgrade before checkpoint submissions.
+Image records retain v2; checkpoint records use v3, including completed records
+that older readers cannot read. No SQL migration or worker default change is
+introduced. Earlier recovery/performance evidence retains its actual scope;
+this release does not add a general isolation or hard host quota guarantee.
+
+The preparation and feature sections below are historical records, superseded
+by the publication status above.
+
 # SmolBox 0.1.5 preparation — September 18, 2026
 
 Branch `prepare-0.1.5` prepares the merged checkpoint feature for version 0.1.5.
