@@ -1,6 +1,6 @@
 defmodule SmolBox.Runtime.Executor do
   @moduledoc false
-  alias SmolBox.{Client, Error, Execution, Identity, Machine, Profile, Telemetry}
+  alias SmolBox.{Client, Error, Execution, Identity, Machine, Telemetry}
   alias SmolBox.Runtime.{Cleanup, Files, Observation, Session, WorkerConfig, WorkerHealth}
 
   def run(config, key, eligible) do
@@ -114,11 +114,7 @@ defmodule SmolBox.Runtime.Executor do
 
   defp prepare_machine(session, record) do
     {:ok, spec} =
-      Profile.machine(
-        record.spec.profile,
-        record.machine_name,
-        WorkerConfig.artifact_path(session.worker, record.spec)
-      )
+      WorkerConfig.machine_spec(session.worker, record.spec, record.machine_name)
 
     with {:ok, created} <-
            Session.io(session, record, :preparation, fn ->

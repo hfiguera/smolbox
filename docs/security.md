@@ -234,3 +234,13 @@ for that storage layout. It does not change smolvm's behavior when data and
 metadata share an exhausted filesystem. See
 [Linux deployment validation](resource-qualification.md#subsequent-linux-deployment-validation)
 for the tested configuration and recovery evidence.
+
+## Approved checkpoint state (unreleased)
+
+Checkpoints contain memory as well as disks. SmolBox accepts only operator-approved
+idle, offline checkpoints on the qualified 1.16.1 platform. An entrypoint override
+cannot neutralize captured processes. Keep credentials, pending user workloads,
+connections and automatic restart out of the source. Protect the checkpoint path
+against replacement and restrict artifact access as sensitive data. Approval is
+an operator declaration, not a remote attestation of memory contents. See
+[Checkpoint execution](checkpoints.md) for the exact boundary.

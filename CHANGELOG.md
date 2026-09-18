@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Add operator-approved idle, offline checkpoint sources on smolvm 1.16.1, using
+  the existing HTTP client and managed lifecycle. Image execution is unchanged.
+- Checkpoint records use schema v3; upgrade all controllers sharing a store before
+  submitting checkpoints. Image records retain schema v2 and existing fingerprints.
+- Checkpoints preserve captured processes and state. Arbitrary resumed workloads,
+  networked checkpoints, capture, live branching and pools remain outside this API.
+
 ## 0.1.4 — September 18, 2026
 
 **Worker upgrade notice:** 0.1.4 expects smolvm 1.16.1 by default.

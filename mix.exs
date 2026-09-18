@@ -33,6 +33,7 @@ defmodule SmolBox.MixProject do
           "docs/troubleshooting.md",
           "docs/client.md",
           "docs/network-access.md",
+          "docs/checkpoints.md",
           "docs/host-integration.md",
           "docs/recovery.md",
           "docs/telemetry.md",
@@ -52,6 +53,7 @@ defmodule SmolBox.MixProject do
           "Using SmolBox": [
             "docs/client.md",
             "docs/network-access.md",
+            "docs/checkpoints.md",
             "docs/host-integration.md",
             "docs/troubleshooting.md",
             "docs/telemetry.md"
@@ -69,6 +71,7 @@ defmodule SmolBox.MixProject do
             SmolBox.Runtime,
             SmolBox.Runtime.WorkerConfig,
             SmolBox.ExecutionSpec,
+            SmolBox.Checkpoint,
             SmolBox.Execution,
             SmolBox.Profile,
             SmolBox.NetworkPolicy
@@ -109,6 +112,7 @@ defmodule SmolBox.MixProject do
           "docs/getting-started.md",
           "docs/client.md",
           "docs/network-access.md",
+          "docs/checkpoints.md",
           "docs/host-integration.md",
           "docs/troubleshooting.md",
           "docs/recovery.md",

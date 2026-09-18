@@ -20,6 +20,30 @@ defmodule SmolBox.RuntimeFixture do
     spec = Contract.record().spec
     spec = %{spec | profile: %{spec.profile | network: Keyword.get(options, :network, :offline)}}
 
+    checkpoint? = Keyword.get(options, :checkpoint, false)
+
+    spec =
+      if checkpoint?,
+        do: %{spec | artifact: Map.put(spec.artifact, "kind", "checkpoint")},
+        else: spec
+
+    checkpoints =
+      if checkpoint? do
+        {:ok, checkpoint} =
+          SmolBox.Checkpoint.new(
+            id: spec.artifact["id"],
+            sha256: spec.artifact["sha256"],
+            architecture: "x86_64",
+            platform: :linux,
+            path: "/approved/idle.smolcheckpoint",
+            profile: spec.profile
+          )
+
+        [checkpoint]
+      else
+        []
+      end
+
     {:ok, worker} =
       WorkerConfig.new(
         [
@@ -30,7 +54,12 @@ defmodule SmolBox.RuntimeFixture do
           allocation_floor: %{storage_gb: 1, overlay_gb: 1, host_overhead_mb: 256},
           capacity: Contract.capacity(),
           draining: Keyword.get(options, :draining, false),
-          artifacts: [Map.put(spec.artifact, "path", "/approved/python.smolmachine")]
+          artifacts:
+            if(checkpoint?,
+              do: [],
+              else: [Map.put(spec.artifact, "path", "/approved/python.smolmachine")]
+            ),
+          checkpoints: checkpoints
         ] ++
           case Keyword.fetch(options, :expected_runtime_version) do
             {:ok, version} -> [runtime_version: version]

@@ -61,6 +61,7 @@ defmodule SmolBox.ManagedPeer do
       |> File.read!()
       |> Jason.decode!()
       |> Map.put("name", input["name"])
+      |> Map.put("branchable", state.options[:checkpoint] == true)
       |> Map.merge(Map.take(input, ["network", "networkBackend", "allowedHosts", "allowedCidrs"]))
       |> Map.merge(Keyword.get(state.options, :created_allocations, %{}))
 

@@ -1,0 +1,479 @@
+{
+  "feature": "Approved idle offline checkpoint execution",
+  "status": "unreleased",
+  "date": "2026-09-18",
+  "base_commit": "2c4ce0b",
+  "upstream": {
+    "tag": "v1.16.1",
+    "commit": "c58f83ee26a18d2d2b61e7f4f32d7a6ea243252d",
+    "inspection_checkout_head": "adec01f0df99aaf820aa09d4e6e665a31ac3ec07",
+    "checkout_modified": false,
+    "transport": "POST /api/v1/machines with approved worker-local from path, then explicit start; no checkpoint upload"
+  },
+  "contract": {
+    "runtime": "1.16.1",
+    "network": "offline only",
+    "resume": "operator-approved idle state only",
+    "image_records": "v2, fingerprints unchanged",
+    "checkpoint_records": "v3",
+    "capture": "external operator step",
+    "trust": "operator verifies exact digest, captured idle state, no credentials/connections/automatic restart, native platform/CPU compatibility and immutable worker path; server response does not attest those facts"
+  },
+  "hosts": {
+    "mac": {
+      "cpu": "Apple M4 Max",
+      "ram_gib": 128,
+      "os": "macOS 26.6.2",
+      "architecture": "aarch64"
+    },
+    "linux": {
+      "cpu": "Intel Core i5-1135G7",
+      "kernel": "7.1.5-76070105-generic",
+      "architecture": "x86_64",
+      "worker_memory_max_bytes": 2147483648,
+      "worker_cpu_quota_percent": 200,
+      "worker_tasks_max": 256,
+      "nested": false
+    }
+  },
+  "checks": {
+    "ci-final-2": {
+      "status": "passed",
+      "log_sha256": "3c6ff47bce32e026769438bf9e61647433257b06e5a1f5ce944fc4717574dc70"
+    },
+    "linux-ci": {
+      "status": "passed",
+      "log_sha256": "a04abadcea872278bfe5692a048102181210e79d9e8cdec36cb73bdceb65c929"
+    },
+    "coverage": {
+      "status": "passed",
+      "log_sha256": "9d99036ad26fea39fd3efb988359f688be8e8736712db2d26987aa6b3cff1e95"
+    },
+    "durable": {
+      "status": "passed",
+      "log_sha256": "e662eb5a662b20b32a258fb4a95cd4d12d742bb532f6e9b4dc83f04c67ff5a57"
+    },
+    "mac-runtime-final": {
+      "status": "passed",
+      "log_sha256": "70d514d8ed8f95ae1ac361054fc84740ed70821b3cf9b2142be3b08fe051f267"
+    },
+    "linux-runtime-final": {
+      "status": "passed",
+      "log_sha256": "5866986868b50e54e981a2b54bae1f8159dc30110c403db8fe3a421e34f22f95"
+    },
+    "cleanup-final": {
+      "status": "passed",
+      "log_sha256": "299b8965fa52ce6662b5491933cfc503d81b07f60bf8803d509a7d533abf3fc3"
+    },
+    "mac-cleanup": {
+      "status": "passed",
+      "log_sha256": "793284f6666ea179f0e9706ea733d988fcaf485b75296df8a0bc35ab3f6b0547"
+    },
+    "linux-cleanup": {
+      "status": "passed",
+      "log_sha256": "fb089030a047f83612b4923157b112bff3b6f5a9bf73f5cadf4d4fe855835a77"
+    },
+    "example": {
+      "status": "passed",
+      "log_sha256": "15773cceef3141183ee23a36bbc9e1a8ceaab10fa6db3e192cb1434e217e4166"
+    },
+    "canaries": {
+      "status": "passed",
+      "log_sha256": "e0b964a623497ff2bb478f184e6c238afa88d2b496eb969c1ad810acf8e4339f"
+    },
+    "docs-final": {
+      "status": "passed",
+      "log_sha256": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d"
+    },
+    "doc-links": {
+      "status": "passed",
+      "log_sha256": "4dc37ca964363f541ce0c5cbd04f287800d6091309f927d42de9ce1e6d1e703e"
+    }
+  },
+  "counts": {
+    "deterministic_each_platform": 234,
+    "deterministic_excluded_opt_in_cases_not_counted": 17,
+    "runtime_checkpoint_each_platform": 3,
+    "postgres_store_macos": 18,
+    "postgres_excluded_existing_runtime_cases_not_counted": 25,
+    "coverage_percent_macos": 95.9,
+    "analyzer_bad_clean_pairs": 8,
+    "exdoc_pages": 46
+  },
+  "native_runtime_cases": [
+    "two independent restores retain the original RAM/disk markers despite mutations; input staging, output collection, duplicate submission and verified deletion",
+    "controller restart over retained memory store plus codec round trip returns completed execution without replacement",
+    "bounded guest timeout retains its outcome evidence and follows cleanup/retention rules"
+  ],
+  "deterministic_cases": [
+    "reference kind prevents image identity aliasing; v3 cannot be decoded through v1/v2 envelopes",
+    "approval rejects incompatible runtime/platform/profile, changed digest, non-idle and networked sources",
+    "lost creation response cannot cause start, replay or deletion without creation evidence",
+    "mismatched create response allocations, network, branchability or state prevent start",
+    "unknown checkpoint work retains capacity after failed stop; delete acknowledgment without absence retains capacity"
+  ],
+  "benchmark": {
+    "mac": {
+      "runtime": "1.16.1",
+      "platform": "{:unix, :darwin}",
+      "samples": [
+        {
+          "source": "image",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 207.068,
+          "start_ms": 381.633,
+          "exec_ms": 13.287,
+          "delete_ms": 48.345
+        },
+        {
+          "source": "checkpoint",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 423.102,
+          "start_ms": 109.431,
+          "exec_ms": 13.233,
+          "delete_ms": 12.709
+        },
+        {
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 362.436,
+          "start_ms": 122.192,
+          "exec_ms": 12.632,
+          "delete_ms": 13.774
+        },
+        {
+          "source": "image",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 205.795,
+          "start_ms": 380.1,
+          "exec_ms": 12.236,
+          "delete_ms": 46.279
+        },
+        {
+          "source": "image",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 295.121,
+          "start_ms": 391.186,
+          "exec_ms": 13.613,
+          "delete_ms": 46.361
+        },
+        {
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 405.702,
+          "start_ms": 105.386,
+          "exec_ms": 13.969,
+          "delete_ms": 15.005
+        },
+        {
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 365.0,
+          "start_ms": 108.73,
+          "exec_ms": 15.567,
+          "delete_ms": 12.759
+        },
+        {
+          "source": "image",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 205.781,
+          "start_ms": 373.468,
+          "exec_ms": 11.792,
+          "delete_ms": 51.127
+        },
+        {
+          "source": "image",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 207.359,
+          "start_ms": 381.01,
+          "exec_ms": 12.776,
+          "delete_ms": 48.24
+        },
+        {
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 382.976,
+          "start_ms": 105.42,
+          "exec_ms": 16.357,
+          "delete_ms": 13.271
+        },
+        {
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 366.673,
+          "start_ms": 108.353,
+          "exec_ms": 14.558,
+          "delete_ms": 12.984
+        },
+        {
+          "source": "image",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 196.396,
+          "start_ms": 362.732,
+          "exec_ms": 13.871,
+          "delete_ms": 47.104
+        }
+      ],
+      "limitations": "Five measured samples per source after one warmup each; warm host caches, bare guest and one tiny command; not an application benchmark or universal speedup.",
+      "medians_ms": {
+        "image": {
+          "create_ms": 205.795,
+          "start_ms": 380.1,
+          "exec_ms": 12.776,
+          "delete_ms": 47.104,
+          "create_to_result_ms": 598.131
+        },
+        "checkpoint": {
+          "create_ms": 366.673,
+          "start_ms": 108.353,
+          "exec_ms": 14.558,
+          "delete_ms": 13.271,
+          "create_to_result_ms": 497.26
+        }
+      }
+    },
+    "linux": {
+      "runtime": "1.16.1",
+      "platform": "{:unix, :linux}",
+      "samples": [
+        {
+          "source": "image",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 96.755,
+          "start_ms": 283.142,
+          "exec_ms": 22.16,
+          "delete_ms": 59.068
+        },
+        {
+          "source": "checkpoint",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 296.094,
+          "start_ms": 73.445,
+          "exec_ms": 12.598,
+          "delete_ms": 35.033
+        },
+        {
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 296.811,
+          "start_ms": 84.093,
+          "exec_ms": 14.509,
+          "delete_ms": 45.65
+        },
+        {
+          "source": "image",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 109.412,
+          "start_ms": 330.172,
+          "exec_ms": 17.177,
+          "delete_ms": 76.144
+        },
+        {
+          "source": "image",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 97.401,
+          "start_ms": 310.517,
+          "exec_ms": 51.022,
+          "delete_ms": 60.511
+        },
+        {
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 284.453,
+          "start_ms": 72.026,
+          "exec_ms": 12.979,
+          "delete_ms": 45.559
+        },
+        {
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 2543.932,
+          "start_ms": 82.637,
+          "exec_ms": 12.685,
+          "delete_ms": 34.983
+        },
+        {
+          "source": "image",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 110.265,
+          "start_ms": 298.302,
+          "exec_ms": 26.524,
+          "delete_ms": 57.121
+        },
+        {
+          "source": "image",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 97.721,
+          "start_ms": 299.605,
+          "exec_ms": 22.008,
+          "delete_ms": 57.776
+        },
+        {
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 321.497,
+          "start_ms": 72.364,
+          "exec_ms": 12.66,
+          "delete_ms": 34.697
+        },
+        {
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 443.991,
+          "start_ms": 82.826,
+          "exec_ms": 13.688,
+          "delete_ms": 35.375
+        },
+        {
+          "source": "image",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 1775.357,
+          "start_ms": 268.326,
+          "exec_ms": 18.191,
+          "delete_ms": 58.067
+        }
+      ],
+      "limitations": "Five measured samples per source after one warmup each; warm host caches, bare guest and one tiny command; not an application benchmark or universal speedup.",
+      "medians_ms": {
+        "image": {
+          "create_ms": 109.412,
+          "start_ms": 299.605,
+          "exec_ms": 22.008,
+          "delete_ms": 58.067,
+          "create_to_result_ms": 456.761
+        },
+        "checkpoint": {
+          "create_ms": 321.497,
+          "start_ms": 82.637,
+          "exec_ms": 12.979,
+          "delete_ms": 35.375,
+          "create_to_result_ms": 406.521
+        }
+      }
+    }
+  },
+  "limitations": [
+    "Only idle offline sources are supported; approval is a host trust decision, not inspection of captured memory",
+    "No new exhaustion, adversarial, networked checkpoint, cross-platform restore or Linux ARM64 qualification",
+    "Native runtime restart test uses retained in-memory store; PostgreSQL tests independently exercise encrypted schema-v3 persistence, not a fresh-BEAM runtime fault campaign",
+    "Benchmark is five samples per source after warmup with warm host caches, bare guest and tiny shell command; not arbitrary Python startup or universal speedup",
+    "No upstream source modified, no runtime pin or library release version changed, no publication",
+    "Final source differences after native execution and analyzer checks are documentation wording only; final docs generation and link checks were repeated."
+  ],
+  "source_sha256": {
+    "lib/smolbox/artifact_store/directory.ex": "c8afa7093cef1962a0592d3333dd2de08ed2d284731b840df1d99b1ec73c7bdc",
+    "lib/smolbox/artifact_store.ex": "2d61ae4c7b6eeab70d6dbe822f390353565555b80b33a5602d3487b591128cbe",
+    "lib/smolbox/checkpoint.ex": "3f7f4b4a38cf4cf2445ef92c2901b08f909d4f5dab878ab36a1569f8bb9ed3fd",
+    "lib/smolbox/client.ex": "377461c6ba8534125dc210700d49b1cab3d6171bcb974e716bb7d067aaa0d0d5",
+    "lib/smolbox/command.ex": "ae5a7e9a9d885e30db49e967b693bd8afd00b1808998592dd25c2654d82ac63e",
+    "lib/smolbox/error.ex": "f7965086db5ba5b0f3442acfef5f9a20bb6a9bbc4db6f5d33445d8e1beca9e07",
+    "lib/smolbox/execution.ex": "2c730c8f4971bb6e447178fc62d02e910de711fe287eed6156608eb85b7158a0",
+    "lib/smolbox/execution_spec.ex": "64bd78be15039d87eb13e00bf07fa23a80f4021948f29c9a8dcc6c7aca8460be",
+    "lib/smolbox/execution_validation.ex": "89a53cad4e265d39f273a81bd33aba39d9bbdd187addd968ecb02af40f5f6aec",
+    "lib/smolbox/files.ex": "15c2054bb8bd11b004de8a6c7a9dd707db4deccf001abdd70998e858ea6cf204",
+    "lib/smolbox/health.ex": "a6bb8345d44ac721adc29fe1c328e763f58c76cbe197529a4c6a41cf72a5a03a",
+    "lib/smolbox/identity.ex": "d2f0f9b2397119edbe90f98f00fa79977e46044ab485258880758fd36573fca7",
+    "lib/smolbox/machine.ex": "028c32daba499909146a4d60b2c696ca38acf108f67975bbedb3ec4f0824da6e",
+    "lib/smolbox/machine_spec.ex": "a4e4fa07720f92919279f1264c070eb0e98d93fee1c38587ae69c2b4ff65ff82",
+    "lib/smolbox/manifest.ex": "64bbfcabea90905d9cb0b3ac9399fa997486b4461d5e13989f3f892938bfeb10",
+    "lib/smolbox/network_policy.ex": "f5a1c53aa197a887a7804bbb6f925514bd9f6417fa924c0524a232a3067fc2db",
+    "lib/smolbox/profile.ex": "2e7b700071e18160f2836bf6fd638fb9ca7c2ce7da054b2ce93cbc1937b155b1",
+    "lib/smolbox/result.ex": "09d0fb685331012e00690875734ee70bb51b0528eecb4c0ab236277343daeccf",
+    "lib/smolbox/runtime/cleanup.ex": "c22bb8097268644e970f602647b690f1656090230a5623bcf904f348e5f5908a",
+    "lib/smolbox/runtime/clock.ex": "a3b7bf21a90a4ccf4977791f97736137af01fdee4a2b3a5ebb3d6a0d18dbf114",
+    "lib/smolbox/runtime/config.ex": "bfa68f5dda45888cfa78a7777e2140a35e144de08bd8cab28a2e8f1f17a76444",
+    "lib/smolbox/runtime/coordinator.ex": "d6621ac53f756388682bfd4da44be5fc58bb3349c00ea1beb285d8939fc34bd7",
+    "lib/smolbox/runtime/executor.ex": "7222a32789d65651fbd09943940edf079b5340ea0f1b53b22fab5ce8a56a531f",
+    "lib/smolbox/runtime/files.ex": "1acecfe874e8397c4c13fbd40751e629808dbefb920ac640f06d09edb415fc55",
+    "lib/smolbox/runtime/inspection.ex": "de9270595036e946fe6ca90ad44467df6b24964324ca427931403ec2b7ec5dba",
+    "lib/smolbox/runtime/observation.ex": "9409647db1e835e3d3f38c01de206daab37e78686d6c6b6ec595886af372795a",
+    "lib/smolbox/runtime/session.ex": "0de9f6a337225c4727fb939103bca8f82d3ed011e75a1b16ef0bf35a2de22767",
+    "lib/smolbox/runtime/work_supervisor.ex": "40e5cfd18c84e55c232272e38477e66b689ea77baf72661171329c50738b4743",
+    "lib/smolbox/runtime/worker_config.ex": "b92b3dc7964f249b5a7fc8fc0e1066cf6fc825defb3fc0895d88c70d77584393",
+    "lib/smolbox/runtime/worker_health.ex": "fc19df3f3bf28dfda625b1f6f3b882e2a16b75421145442d2e8d77b6b935f1c0",
+    "lib/smolbox/runtime.ex": "b4c0b5a7f03ef3612ebb3e885bfedc27e8d41104a63dbb21c5f1d2bce0af9915",
+    "lib/smolbox/store/codec.ex": "d656b03ad85f2f01a8f58ab418cc67ae2bbf5889ca539d396e883b8757163ec3",
+    "lib/smolbox/store/memory.ex": "027747ca4f7a32f243b0fc787acbac62f7832471b28531fa964e634a903f00b5",
+    "lib/smolbox/store/record_ops.ex": "b293446ff1536a75cb86731a280908d9564a489a942ab53d454e67c5a2547050",
+    "lib/smolbox/store.ex": "43c74543c44c8e961513e5ff30f69e2c88d24011b010aa3df4d3e6e122656648",
+    "lib/smolbox/telemetry/dispatcher.ex": "30a2513d3aaeb24e953011ff9ca651f9eac66b1d6105a8d491e8178d3796063b",
+    "lib/smolbox/telemetry.ex": "ec28badc3bff5bd3d40f87350f840208be306a522a9bd600d6bfd49e3ebbf5f9",
+    "lib/smolbox/transport/capture.ex": "df828264adf33a5d96759b445f156189d7ade1b0c4666f66831442569cb084d4",
+    "lib/smolbox/transport/req.ex": "748485e5e9683cff55d8718905829cbf4b0ec89394f3066cf82c1c37b3a5a2ee",
+    "lib/smolbox/transport.ex": "ed6a497a1e746330bc7527becd8b520a5c9b8320a9102604633dfb13fa4802de",
+    "lib/smolbox/validation.ex": "4df0e14313ffb67caefdf3a7e4b9d63a8a6588666b4142409b525d2955cc2530",
+    "lib/smolbox/wire/sse.ex": "00079b7972aa40bc733aa7dbe6a61c50b94367fd1f19ed00afdfcb0fda51dda1",
+    "lib/smolbox/worker.ex": "281f6be0b563eba81b25e3c8f9aca26b00f664f6333a830d80b983a5797913cf",
+    "lib/smolbox.ex": "ba8408a38d7a894d48220502291a00ad048994580a5cb9cff8ac614ca2eeb3d9"
+  },
+  "test_sha256": {
+    "test/checkpoint_runtime/checkpoint_execution_test.exs": "e791854ee2b3f857621af2b55dafbc0a3311ca3cb16af598c6a97175e8c849a9"
+  },
+  "consumers": {
+    "package-current": {
+      "checkpoint": true,
+      "client": true,
+      "legacy_1_14_6_explicit": "1.14.6",
+      "legacy_runtime_explicit": "1.14.1",
+      "network_policy": true,
+      "offline_default": true,
+      "runtime_1_16_0_explicit": "1.16.0",
+      "runtime_default": "1.16.1",
+      "supervisor": true,
+      "unqualified_runtime_rejected": "1.16.2",
+      "versions": {
+        "jason": "1.4.5",
+        "nimble_options": "1.1.1",
+        "req": "0.7.4",
+        "telemetry": "1.4.2"
+      }
+    },
+    "package-minimum-otp27": {
+      "checkpoint": true,
+      "client": true,
+      "legacy_1_14_6_explicit": "1.14.6",
+      "legacy_runtime_explicit": "1.14.1",
+      "network_policy": true,
+      "offline_default": true,
+      "runtime_1_16_0_explicit": "1.16.0",
+      "runtime_default": "1.16.1",
+      "supervisor": true,
+      "unqualified_runtime_rejected": "1.16.2",
+      "versions": {
+        "jason": "1.4.0",
+        "nimble_options": "1.1.0",
+        "req": "0.7.4",
+        "telemetry": "1.3.0"
+      }
+    }
+  },
+  "initial_failures": [
+    "An input manifest in the new runtime test used size_bytes instead of size/mode; corrected before both native suites passed",
+    "The first docs build used MIX_ENV=test and exposed hidden test modules; rebuilt in dev with warnings-as-errors",
+    "Formatting and Credo findings were corrected before final CI gates passed"
+  ]
+}

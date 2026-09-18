@@ -75,6 +75,9 @@ defmodule SmolBox.Client do
   Create a machine from an approved prepared artifact on the worker, offline by default.
 
   Returns creation evidence after matching name, allocations and network policy.
+  Checkpoint sources additionally require 1.16.1, a created branchable response,
+  and offline networking. Captured idle state and immutable source contents are
+  operator approvals, not remotely attested by this response.
   An enabled policy requires a 1.16.0 or 1.16.1 health observation. That preflight and the
   create request share the configured operation timeout.
   Persist intent before this call and creation evidence before further mutations.
@@ -85,35 +88,46 @@ defmodule SmolBox.Client do
   @spec create(t(), MachineSpec.t()) :: {:ok, Machine.t()} | {:error, Error.t()}
   def create(client, spec) do
     with {:ok, wire} <- MachineSpec.to_wire(spec),
-         {:ok, client} <- network_runtime(client, spec.network),
+         {:ok, client} <- creation_runtime(client, spec),
          {:ok, body} <- json(client, :post, "/api/v1/machines", wire, :create),
          {:ok, created} <- decode_machine(body, spec.name, :create) do
       fields = [:cpus, :memory_mb, :storage_gb, :overlay_gb, :network]
 
-      if Map.take(created, fields) == Map.take(spec, fields),
-        do: {:ok, created},
-        else: error(:protocol, :create, :dispatch_uncertain)
+      if Map.take(created, fields) == Map.take(spec, fields) and
+           (spec.source != :checkpoint or
+              (created.state == :created and body["branchable"] == true)),
+         do: {:ok, created},
+         else: error(:protocol, :create, :dispatch_uncertain)
     end
   end
 
-  defp network_runtime(client, :offline), do: {:ok, client}
+  defp creation_runtime(client, %{source: :checkpoint}),
+    do: creation_runtime_versions(client, ["1.16.1"])
 
-  defp network_runtime(client, _policy) do
+  defp creation_runtime(client, %{network: :offline}), do: {:ok, client}
+
+  defp creation_runtime(client, _spec),
+    do: creation_runtime_versions(client, ["1.16.0", "1.16.1"])
+
+  defp creation_runtime_versions(client, versions) do
     with :ok <- Worker.validate(client.worker) do
       deadline = System.monotonic_time(:millisecond) + client.worker.operation_timeout_ms
 
       case health(client) do
-        {:ok, %{version: version}} when version in ["1.16.0", "1.16.1"] ->
-          remaining_create_budget(client, deadline)
-
-        {:ok, _health} ->
-          error(:unsupported_capability, :create)
+        {:ok, %{version: version}} ->
+          supported_create_budget(client, version in versions, deadline)
 
         {:error, failure} ->
           {:error, %{failure | operation: :create, evidence: :not_dispatched}}
       end
     end
   end
+
+  defp supported_create_budget(client, true, deadline),
+    do: remaining_create_budget(client, deadline)
+
+  defp supported_create_budget(_client, false, _deadline),
+    do: error(:unsupported_capability, :create)
 
   defp remaining_create_budget(client, deadline) do
     remaining = deadline - System.monotonic_time(:millisecond)

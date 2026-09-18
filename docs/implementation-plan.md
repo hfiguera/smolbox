@@ -1,3 +1,35 @@
+# Unreleased checkpoint execution — September 18, 2026
+
+Branch `checkpoint-executions` implements operator-approved idle, offline checkpoint
+sources on the pinned smolvm 1.16.1, preserving the existing HTTP transport and
+managed identity, staging, observation, retention and verified disposal lifecycle.
+This is a subsequent feature; the publication records below remain historical.
+
+- [x] Inspect the pinned create/restore implementation, captured topology and
+  workload behavior without changing the upstream checkout.
+- [x] Add exact worker approval, source-kind identity, offline-only restore requests
+  and creation evidence checks before starting the restored guest.
+- [x] Preserve image fingerprints and v2 records; use v3 only for checkpoints and
+  document coordinated controller adoption before checkpoint submissions.
+- [x] Exercise deterministic failure/identity/retention cases, real native execution
+  on Linux x86_64 and macOS Apple Silicon, encrypted PostgreSQL persistence and
+  packaged consumer compatibility.
+- [x] Run all required analyzers, coverage and ExDoc validation; include a runnable
+  fixture/example and a bounded comparative benchmark.
+- [x] Delete the owned fixture sources after identity checks, verify empty worker
+  inventories and stop both dedicated workers. The private test database stopped.
+
+See [the guide](checkpoints.md) and [recorded evidence](evidence/checkpoint-executions.json).
+Native tests passed three cases per platform; 234 deterministic cases passed per
+platform, 18 PostgreSQL store cases passed, and macOS coverage was 95.90%.
+The native restart test retains an in-memory store; PostgreSQL tests separately
+verify encrypted v3 persistence. Neither is presented as a new full durable
+runtime crash campaign. The five-sample warmed benchmark showed modest gains in
+time to result, not a general performance guarantee. No exhaustion or adversarial
+work ran on either physical host. Networked checkpoints, capture APIs, arbitrary
+resumed workloads, live branching and pools remain excluded. No release or push
+is part of this checkpoint.
+
 # SmolBox 0.1.4 publication
 
 Published and verified September 18, 2026. Tag `v0.1.4` points to

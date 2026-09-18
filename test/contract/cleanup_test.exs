@@ -1,8 +1,8 @@
 defmodule SmolBox.CleanupTest do
   use ExUnit.Case, async: false
 
-  alias SmolBox.{Client, MachineSpec, ManagedPeer, Result, Runtime, RuntimeFixture}
-  alias SmolBox.Runtime.{Cleanup, Config, Session}
+  alias SmolBox.{Client, ManagedPeer, Result, Runtime, RuntimeFixture}
+  alias SmolBox.Runtime.{Cleanup, Config, Session, WorkerConfig}
   alias SmolBox.Store.{Contract, Memory}
 
   test "finished work is discarded without requiring a successful graceful stop" do
@@ -123,6 +123,23 @@ defmodule SmolBox.CleanupTest do
            ) == session.config.cleanup_attempts
   end
 
+  test "checkpoint uncertainty retains disks after a failed stop" do
+    {session, context} = prepare(:unknown, checkpoint: true, stop_failure: true)
+    assert {:ok, record} = Cleanup.run(session)
+    assert record.spec.artifact["kind"] == "checkpoint"
+    assert record.state == :unknown and record.reservation != nil
+    assert record.last_error.operation == :stop
+    refute deleted?(context)
+  end
+
+  test "checkpoint disposal releases capacity only after verified absence" do
+    {session, context} = prepare(:expired_retention, checkpoint: true, delete_retained: true)
+    assert {:ok, record} = Cleanup.run(session)
+    assert record.reservation != nil and record.cleanup == :in_progress
+    assert record.spec.artifact["kind"] == "checkpoint"
+    assert deleted?(context)
+  end
+
   defp prepare(outcome, options \\ []) do
     context = RuntimeFixture.start(options)
     stop_supervised!(Runtime)
@@ -131,9 +148,12 @@ defmodule SmolBox.CleanupTest do
     {:ok, config} = Config.new(Keyword.put(context.options, :store, {Memory, store}))
     now = System.system_time(:millisecond)
     accepted = if outcome == :expired_retention, do: now - 100_000, else: now
-    initial = Contract.record()
-    spec = %{initial.spec | retention_ms: 60_000}
-    {:ok, initial} = SmolBox.Execution.new(spec, initial.fingerprint, accepted)
+    spec = %{context.spec | retention_ms: 60_000}
+
+    {:ok, fingerprint} =
+      SmolBox.ExecutionSpec.fingerprint(spec, context.options[:fingerprint_key])
+
+    {:ok, initial} = SmolBox.Execution.new(spec, fingerprint, accepted)
     key = {spec.scope, spec.id}
     {:ok, _, :inserted} = Memory.accept(context.store, initial, 10)
     {:ok, _} = Memory.claim_worker(context.store, "peer", config.owner, accepted, 900_000)
@@ -149,7 +169,10 @@ defmodule SmolBox.CleanupTest do
       )
 
     client = hd(config.workers).client
-    {:ok, machine_spec} = MachineSpec.new("cleanup-owned", "/approved/python.smolmachine")
+
+    {:ok, machine_spec} =
+      WorkerConfig.machine_spec(hd(config.workers), spec, "cleanup-owned")
+
     {:ok, machine} = Client.create(client, machine_spec)
     {:ok, _} = Client.start(client, machine.name)
 

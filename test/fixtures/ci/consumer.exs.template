@@ -50,6 +50,19 @@ worker_options = [client: client, platform: :linux, architecture: "x86_64",
 {:error, %SmolBox.Error{category: :validation}} = SmolBox.Runtime.WorkerConfig.new(
   Keyword.put(worker_options, :runtime_version, "1.16.2"))
 
+{:ok, checkpoint} = SmolBox.Checkpoint.new(id: "idle", sha256: String.duplicate("b", 64),
+  architecture: "x86_64", platform: :linux, path: "/approved/idle.smolcheckpoint", profile: profile)
+{:ok, checkpoint_worker} = SmolBox.Runtime.WorkerConfig.new(
+  Keyword.merge(worker_options, artifacts: [], checkpoints: [checkpoint]))
+{:ok, checkpoint_command} = SmolBox.Command.new(["true"])
+{:ok, checkpoint_spec} = SmolBox.ExecutionSpec.new(scope: "consumer", id: "idle",
+  artifact: SmolBox.Checkpoint.artifact(checkpoint), command: checkpoint_command, profile: profile)
+true = SmolBox.Runtime.WorkerConfig.supports?(checkpoint_worker, checkpoint_spec)
+{:ok, checkpoint_fingerprint} = SmolBox.ExecutionSpec.fingerprint(checkpoint_spec, :binary.copy(<<1>>, 32))
+{:ok, checkpoint_record} = SmolBox.Execution.new(checkpoint_spec, checkpoint_fingerprint, 1000)
+{:ok, <<"smolbox-record-v3", 0, _::binary>> = checkpoint_bytes} = SmolBox.Store.Codec.encode(checkpoint_record)
+{:ok, ^checkpoint_record} = SmolBox.Store.Codec.decode(checkpoint_bytes)
+
 children = [
   {SmolBox.Store.Memory, name: Consumer.Store},
   {SmolBox, name: Consumer.Runtime, namespace: "consumer", mode: :ephemeral,
@@ -67,6 +80,6 @@ versions = Map.new([:req, :jason, :telemetry, :nimble_options], fn app ->
   {app, app |> Application.spec(:vsn) |> to_string()}
 end)
 File.write!("smoke.json", Jason.encode!(%{client: true, supervisor: true,
-  network_policy: true, offline_default: true, runtime_1_16_0_explicit: "1.16.0",
+  checkpoint: true, network_policy: true, offline_default: true, runtime_1_16_0_explicit: "1.16.0",
   unqualified_runtime_rejected: "1.16.2", runtime_default: "1.16.1", legacy_runtime_explicit: "1.14.1",
   legacy_1_14_6_explicit: "1.14.6", versions: versions}))

@@ -2,9 +2,11 @@ defmodule SmolBox.ExecutionSpec do
   @moduledoc """
   Immutable managed execution intent; host code supplies policy and artifact approval.
 
-  The runtime artifact map contains exactly `id`, `sha256`, and `architecture`
+  The image artifact map contains exactly `id`, `sha256`, and `architecture`
   (`x86_64` or `aarch64`). It is resolved against host configuration, never fetched
-  as a caller-provided image URL. The specification contains no endpoint overrides.
+  as a caller-provided image URL. An approved checkpoint reference adds exactly
+  `"kind" => "checkpoint"`; construct it with `SmolBox.Checkpoint.artifact/1`.
+  The specification contains no endpoint overrides.
 
   Queue budgets are relative at construction; the store must persist an absolute
   deadline on first acceptance. Repeated submission never resets that deadline.
@@ -52,7 +54,7 @@ defmodule SmolBox.ExecutionSpec do
   Required options are `:scope`, `:id`, `:command` (`SmolBox.Command`), `:profile`
   (`SmolBox.Profile`), and `:artifact`. Scope and ID are 1–128 ASCII letters,
   digits, dots, underscores, colons or hyphens, starting with a letter/digit.
-  The artifact has exactly string keys `"id"`, `"sha256"`, and `"architecture"`;
+  An image artifact has exactly string keys `"id"`, `"sha256"`, and `"architecture"`;
   its approved worker path is resolved from `SmolBox.Runtime.WorkerConfig`.
 
   | Optional field | Default | Meaning |
@@ -146,10 +148,14 @@ defmodule SmolBox.ExecutionSpec do
       spec.command.timeout_secs * 1000 <= spec.profile.execution_ms
   end
 
-  defp artifact?(%{"id" => id, "sha256" => digest, "architecture" => architecture} = artifact) do
-    map_size(artifact) == 3 and Validation.identifier?(id) and Validation.digest?(digest) and
+  defp artifact?(%{"id" => id, "sha256" => digest, "architecture" => architecture} = artifact)
+       when map_size(artifact) == 3 do
+    Validation.identifier?(id) and Validation.digest?(digest) and
       architecture in ["x86_64", "aarch64"]
   end
+
+  defp artifact?(%{"kind" => "checkpoint"} = artifact) when map_size(artifact) == 4,
+    do: artifact?(Map.delete(artifact, "kind"))
 
   defp artifact?(_artifact), do: false
 
