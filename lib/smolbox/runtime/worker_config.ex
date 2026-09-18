@@ -36,7 +36,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   ]
   @derive {Inspect, only: [:architecture, :platform, :runtime_version, :qualification]}
   defstruct @enforce_keys ++
-              [runtime_version: "1.16.0", qualification: :development, draining: false]
+              [runtime_version: "1.16.1", qualification: :development, draining: false]
 
   @type t :: %__MODULE__{
           client: Client.t(),
@@ -70,14 +70,15 @@ defmodule SmolBox.Runtime.WorkerConfig do
   | `:capacity` | Atom-keyed map with `:slots`, `:cpus`, `:memory_mb`, and `:disk_gb`; each 1–1,048,576 |
   | `:allocation_floor` | Atom-keyed map with `:storage_gb` and `:overlay_gb` (1–64 each), and `:host_overhead_mb` (128–16,384) |
 
-  Optional fields are `:runtime_version` (default `"1.16.0"` for Linux x86_64 or
-  macOS Apple Silicon; explicitly select `"1.16.1"`, `"1.14.1"` or `"1.14.6"`
+  Optional fields are `:runtime_version` (default `"1.16.1"` for Linux x86_64 or
+  macOS Apple Silicon; explicitly select `"1.16.0"`, `"1.14.1"` or `"1.14.6"`
   for another supported worker), `:qualification`
   (only `:development`), and `:draining` (default `false`). Artifact IDs must be
   unique and architectures must match this worker. Construction makes no worker
   request or remote digest check. Profiles below the floor cannot support execution.
-  The 1.16.0 default starts with SmolBox 0.1.3; 0.1.2 defaults to 1.14.6. See the
-  [qualification evidence](compatibility.html#smolvm-1-16-0-qualification) and
+  This checkout defaults to 1.16.1 (unreleased); published SmolBox 0.1.3 defaults
+  to 1.16.0 and 0.1.2 to 1.14.6. See the
+  [qualification evidence](compatibility.html#smolvm-1-16-1-qualification) and
   upgrade the separately installed worker or retain its explicit version.
   See [Getting started](getting-started.html) for a complete configuration.
   """

@@ -1,8 +1,8 @@
 # Deployment and trust boundaries
 
 The controlled networking feature introduced in 0.1.3 permits explicit operator-approved
-outbound policies on smolvm 1.16.0. This checkout also supports them on explicitly
-selected 1.16.1 workers (unreleased). Existing offline defaults and prior offline
+outbound policies on smolvm 1.16.0. This checkout defaults to 1.16.1 (unreleased),
+with support for those policies. Existing offline defaults and prior offline
 qualification evidence remain unchanged. See [Controlled network access](network-access.md)
 for DNS/IP semantics, profile approval and the separate enforcement fixture.
 The server's strict egress floor must remain enabled when relying on the recorded

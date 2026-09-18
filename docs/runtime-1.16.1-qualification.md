@@ -1,6 +1,6 @@
 # smolvm 1.16.1 qualification
 
-Status: **1.16.1 explicitly supported in this checkout; unreleased. Default remains 1.16.0.**
+Status: **1.16.1 is the default in this checkout; unreleased. Explicit 1.16.0 support remains.**
 
 Branch: `qualify-smolvm-1.16.1`, starting at
 `9c212ef29ed446307d45de8084c4acef336b68aa`. Campaign date: September 18, 2026 UTC.
@@ -242,8 +242,9 @@ package. Historical evidence retains the admission status at the time of each ru
 The validated cleanup follow-up separates disposal from preservation. The tested
 admission rules now accept exactly 1.16.1 on Linux x86_64 and macOS Apple Silicon,
 including network policies. Worker health must match the explicitly configured
-version; unknown versions and mismatches still prevent execution. The default
-remains 1.16.0 and the package version stays unchanged pending a separate release.
+version; unknown versions and mismatches still prevent execution. At that initial
+admission checkpoint, the default remained 1.16.0. The subsequent default change
+is recorded below; the package version remains unchanged pending a separate release.
 
 Graceful stop can still fail when storage synchronization fails. Unknown work
 within retention keeps its disks and reservation; retry exhaustion can require
@@ -260,3 +261,28 @@ comparison. The Linux comparison reconstructs the exact archived inputs plus the
 recorded admission patch and final cleanup source; original host copies match
 the recorded hashes. The real Linux results above are reused, not claimed as a
 new run. Historical evidence retains its original held-admission status.
+
+## Default selection follow-up
+
+On September 18, 2026, this checkout changed the default from 1.16.0 to 1.16.1.
+Explicit 1.16.0, 1.14.6 and 1.14.1 support remains. The library, maintainer
+preflight, runtime helpers and current host examples use the same default.
+Published SmolBox 0.1.3 is unchanged and still defaults to 1.16.0.
+
+A fresh macOS run removed `SMOLBOX_RUNTIME_VERSION` entirely: all nine ordinary
+runtime cases passed, including managed execution and verified cleanup. Current
+and minimum dependency consumers accepted the new default and explicit 1.16.0,
+and rejected an unqualified version. Deterministic tests also rejected a 1.16.0
+worker when the controller expected the new default.
+
+Comparison of all 43 library modules against the admission checkpoint found only
+the intended executable change to the `WorkerConfig` default. Linux runtime,
+network enforcement, durable recovery and exhaustion evidence above is reused;
+no fresh Linux run or additional isolation guarantee is claimed for this change.
+See the [default validation record](evidence/smolvm-1.16.1-default.json) for check
+results, source hashes and the exact package snapshots tested.
+
+Upgrade the separately installed worker using the drain and verification steps
+in [Managed host integration](host-integration.md#upgrading-a-worker), or set
+`runtime_version: "1.16.0"` before upgrading the library. The package does not
+upgrade workers or silently fall back. No additional record migration is needed.

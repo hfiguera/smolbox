@@ -4,7 +4,7 @@ defmodule Consumer.Transport do
   @impl true
   def request(_worker, %{method: :get, path: "/health"}) do
     send(self(), :fake_transport_called)
-    {:ok, ~s({"status":"ok","version":"1.16.0","machines":{"total":0,"running":0}})}
+    {:ok, ~s({"status":"ok","version":"1.16.1","machines":{"total":0,"running":0}})}
   end
 end
 
@@ -20,7 +20,7 @@ end
 [] = Application.spec(:smolbox, :mod)
 {:ok, endpoint} = SmolBox.Worker.new("consumer", "http://127.0.0.1:1", allow_insecure_loopback: true)
 {:ok, client} = SmolBox.Client.new(endpoint, transport: Consumer.Transport)
-{:ok, %{version: "1.16.0", total: 0, running: 0}} = SmolBox.Client.health(client)
+{:ok, %{version: "1.16.1", total: 0, running: 0}} = SmolBox.Client.health(client)
 receive do
   :fake_transport_called -> :ok
 after
@@ -38,14 +38,14 @@ worker_options = [client: client, platform: :linux, architecture: "x86_64",
   capacity: %{slots: 1, cpus: 1, memory_mb: 1024, disk_gb: 2},
   artifacts: [%{"id" => "python", "sha256" => String.duplicate("a", 64),
     "architecture" => "x86_64", "path" => "/approved/python.smolmachine"}]]
-{:ok, %{runtime_version: "1.16.0"}} = SmolBox.Runtime.WorkerConfig.new(worker_options)
+{:ok, %{runtime_version: "1.16.1"}} = SmolBox.Runtime.WorkerConfig.new(worker_options)
 {:ok, %{runtime_version: "1.14.1"}} = SmolBox.Runtime.WorkerConfig.new(
   Keyword.put(worker_options, :runtime_version, "1.14.1"))
 {:ok, %{runtime_version: "1.14.6"}} = SmolBox.Runtime.WorkerConfig.new(
   Keyword.put(worker_options, :runtime_version, "1.14.6"))
 
-{:ok, %{runtime_version: "1.16.1"}} = SmolBox.Runtime.WorkerConfig.new(
-  Keyword.put(worker_options, :runtime_version, "1.16.1"))
+{:ok, %{runtime_version: "1.16.0"}} = SmolBox.Runtime.WorkerConfig.new(
+  Keyword.put(worker_options, :runtime_version, "1.16.0"))
 
 {:error, %SmolBox.Error{category: :validation}} = SmolBox.Runtime.WorkerConfig.new(
   Keyword.put(worker_options, :runtime_version, "1.16.2"))
@@ -67,6 +67,6 @@ versions = Map.new([:req, :jason, :telemetry, :nimble_options], fn app ->
   {app, app |> Application.spec(:vsn) |> to_string()}
 end)
 File.write!("smoke.json", Jason.encode!(%{client: true, supervisor: true,
-  network_policy: true, offline_default: true, runtime_1_16_1_explicit: "1.16.1",
-  unqualified_runtime_rejected: "1.16.2", runtime_default: "1.16.0", legacy_runtime_explicit: "1.14.1",
+  network_policy: true, offline_default: true, runtime_1_16_0_explicit: "1.16.0",
+  unqualified_runtime_rejected: "1.16.2", runtime_default: "1.16.1", legacy_runtime_explicit: "1.14.1",
   legacy_1_14_6_explicit: "1.14.6", versions: versions}))

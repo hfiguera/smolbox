@@ -16,7 +16,7 @@ defmodule SmolBox.QualificationProbe do
       )
 
     {:ok, client} = Client.new(worker)
-    version = System.get_env("SMOLBOX_RUNTIME_VERSION", "1.16.0")
+    version = System.get_env("SMOLBOX_RUNTIME_VERSION", "1.16.1")
     assert version in ["1.14.1", "1.14.6", "1.16.0", "1.16.1"]
     assert {:ok, %{version: ^version, total: 0}} = Client.health(client)
     {:ok, name} = Identity.machine_name("qual")
@@ -156,7 +156,7 @@ defmodule SmolBox.QualificationProbe do
     actual = sizes |> String.split() |> Enum.map(&String.to_integer/1)
 
     expected =
-      if System.get_env("SMOLBOX_RUNTIME_VERSION", "1.16.0") in ["1.14.6", "1.16.0", "1.16.1"],
+      if System.get_env("SMOLBOX_RUNTIME_VERSION", "1.16.1") in ["1.14.6", "1.16.0", "1.16.1"],
         do: [1_073_741_824, 1_073_741_824],
         else: [21_474_836_480, 10_737_418_240]
 

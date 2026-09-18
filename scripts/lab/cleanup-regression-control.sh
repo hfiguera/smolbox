@@ -19,7 +19,7 @@ stop_worker() {
 case "$action" in
   prepare)
     [[ ! -e $root ]] || { echo 'Refusing to overwrite an existing experiment.' >&2; exit 1; }
-    version=${2:-1.16.0}
+    version=${2:-1.16.1}
     case "$version" in
       1.14.6) digest=94a1edb0c42b20ac562c3759ed216bab2cab9e27c382f6560969144f7bd1dce3 ;;
       1.16.1) digest=e49e5bbae6d65b039ecf1d8b236d20e77427b7bfd131907b27a0819fcdea3fed ;;

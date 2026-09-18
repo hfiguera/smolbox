@@ -69,7 +69,8 @@ children = [
 ```
 
 This fragment explicitly retains a Linux 1.14.6 worker with SmolBox 0.1.3.
-Omitting the field selects 1.16.0. Use `"1.14.1"` explicitly
+Omitting the field selects 1.16.1 in this checkout (unreleased). Use `"1.16.0"`
+explicitly to retain that worker, or `"1.14.1"`
 for an existing worker. See [runtime selection](compatibility.md#runtime-selection).
 This is a host configuration fragment, not a self-provisioning script. The host
 must verify artifact bytes on the worker and retain that immutable artifact.
@@ -308,29 +309,29 @@ to reconcile. Memory mode loses this authority when its store process stops.
 
 ## Upgrading a worker
 
-SmolBox 0.1.3 defaults to smolvm 1.16.0 on Linux x86_64 and macOS
-Apple Silicon. SmolBox 0.1.2 defaults to 1.14.6. The controller upgrade also
-changes durable records; follow [Upgrading to 0.1.3](recovery.md#upgrading-to-0-1-3). Before adopting the new
-default with an older worker, preserve its expected version explicitly:
+This checkout defaults to smolvm **1.16.1** on Linux x86_64 and macOS Apple
+Silicon (unreleased). Published SmolBox 0.1.3 defaults to 1.16.0; 0.1.2 defaults
+to 1.14.6. This default change introduces no further record schema migration.
+Applications upgrading from 0.1.2 still need the
+[0.1.3 record upgrade procedure](recovery.md#upgrading-to-0-1-3).
+Before updating the library with an existing worker, retain its version explicitly:
 
 ```elixir
 {:ok, worker} = SmolBox.Runtime.WorkerConfig.new(
-  Keyword.put(existing_worker_options, :runtime_version, "1.14.6")
+  Keyword.put(existing_worker_options, :runtime_version, "1.16.0")
 )
 ```
 
-Use `"1.14.1"` instead for a worker still on that version. Omitting
-`:runtime_version` in this checkout expects `"1.16.0"`; updating the Elixir
+Use `"1.14.1"` or `"1.14.6"` instead for a worker still on either version. Omitting
+`:runtime_version` in this checkout expects `"1.16.1"`; updating the Elixir
 dependency does not install smolvm. A version mismatch prevents new execution.
 Unverified versions and unsupported host combinations fail configuration
 validation. Health checks require an exact version match, without fallback.
 
-Consult the [1.16.0 qualification evidence](compatibility.md#smolvm-1-16-0-qualification)
-and preparation prerequisites before installing that worker. The same drain,
-identity and prerequisite checks below apply to each supported version. This
-checkout also accepts an explicitly configured `runtime_version: "1.16.1"`;
-that addition is unreleased. Review its [qualification and preservation
+Review the [1.16.1 qualification and preservation
 limitation](compatibility.md#smolvm-1-16-1-qualification) before upgrading.
+The same drain, identity and prerequisite checks below apply to each supported
+version. Configure the same expected version on every controller owning the worker.
 
 For an existing worker:
 

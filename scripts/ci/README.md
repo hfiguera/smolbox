@@ -57,17 +57,17 @@ the previous macOS results remain historical and must not be reported as a new
 
 ## Runtime selection
 
-This checkout defaults to smolvm 1.16.0 on Linux x86_64 or macOS Apple Silicon.
-SmolBox 0.1.3 introduces this default; 0.1.2 defaults to 1.14.6.
+This checkout defaults to smolvm 1.16.1 on Linux x86_64 or macOS Apple Silicon.
+This change is unreleased; published 0.1.3 defaults to 1.16.0 and 0.1.2 to 1.14.6.
 Set `runtime_version` in the private worker manifest to select a version explicitly;
 preflight verifies that version's binary checksum and exports
 `SMOLBOX_RUNTIME_VERSION` for runtime tests, examples and service fault checks.
-An omitted field selects 1.16.0. Maintainer preflight and public worker/network
-admission also support explicitly selected 1.16.1. No temporary admission patch
+An omitted field selects 1.16.1. Maintainer preflight and public worker/network
+admission also support explicitly selected 1.16.0. No temporary admission patch
 is needed on this checkout. The report `docs/runtime-1.16.1-qualification.md`
 documents the tested preservation/disposal contract and graceful-stop limitation.
 Existing older fixtures must explicitly declare
-`"runtime_version": "1.14.1"` or `"runtime_version": "1.14.6"` in the manifest.
+`"runtime_version": "1.16.0"`, `"1.14.6"` or `"1.14.1"` in the manifest.
 Selecting a different version never installs it or accepts an unexpected server
 version. Initial candidate validation ran on Linux. The subsequent native macOS
 campaign is restricted to ordinary compatibility and controlled lifecycle checks;
@@ -75,7 +75,7 @@ exhaustion and adversarial testing remain in the disposable Linux lab. See the
 implementation plan for the separate checkpoints and current acceptance status.
 
 Preflight uses exact official binary pins for supported versions and explicit qualification candidates.
-Consult the [1.16.0 qualification evidence](../../docs/compatibility.md#smolvm-1-16-0-qualification).
+Consult the [1.16.1 qualification evidence](../../docs/compatibility.md#smolvm-1-16-1-qualification).
 Manifest admission alone is not runtime qualification. No protected GitHub worker infrastructure was provisioned or
 executed by the local qualification campaign.
 
@@ -173,7 +173,7 @@ with actual observations; the sample deliberately does not pass preflight:
 {
   "schema": 1,
   "platform": "linux",
-  "runtime_version": "1.16.0",
+  "runtime_version": "1.16.1",
   "ephemeral_runner": true,
   "expires_at_unix": 0,
   "lifecycle_id": "scheduler-owned-unique-id",

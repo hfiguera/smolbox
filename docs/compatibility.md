@@ -6,10 +6,9 @@ release evidence below records the client/controller contract on Linux and macOS
 
 ## smolvm 1.16.1 qualification
 
-**Supported explicitly in this checkout; unreleased.** Set
-`runtime_version: "1.16.1"` for a verified Linux x86_64 or macOS Apple Silicon
-worker. Managed execution and controlled networking accept it; the default stays
-at 1.16.0. The candidate passed the
+**Default in this checkout; unreleased.** Managed execution selects 1.16.1
+for a verified Linux x86_64 or macOS Apple Silicon worker. Controlled networking
+accepts it too. Explicit 1.16.0 support remains. The candidate passed the
 ordinary Linux/macOS execution, durable recovery and network enforcement suites,
 but initially failed two full-storage cleanup regressions in the disposable Linux lab.
 
@@ -50,8 +49,15 @@ are now included in the library; no temporary patch is needed on this checkout.
 The [admission evidence](evidence/smolvm-1.16.1-admission.json) records the
 executable source comparison to the qualified candidate, fresh contract and macOS
 runtime tests, and package consumer checks. Linux evidence above is reused, not
-claimed as a new run. No additional API, runtime default, record schema or
-production guarantee is introduced.
+claimed as a new run. That checkpoint enabled explicit admission; the subsequent
+default selection change is recorded separately below. Neither introduces an
+additional API, record schema or production guarantee.
+
+The [default validation record](evidence/smolvm-1.16.1-default.json) covers the
+subsequent switch to 1.16.1: nine fresh macOS runtime cases without a version
+override, deterministic admission tests and current/minimum package consumers.
+The default value is the only executable library change from the admission
+checkpoint; prior Linux qualification is reused, with no fresh Linux run claimed.
 
 ## SmolVM 1.16.0 qualification
 
@@ -132,9 +138,10 @@ support. Also follow the [record format upgrade procedure](recovery.md#upgrading
 A worker must report the exact configured version. Multiple supported versions
 do not imply automatic fallback or acceptance of arbitrary upstream releases.
 
-This checkout additionally supports `runtime_version: "1.16.1"`; published 0.1.3
-does not. Install the worker separately and configure the exact version on every
-controller that owns it.
+This checkout defaults to `runtime_version: "1.16.1"` (unreleased); published
+0.1.3 does not support it. Set `runtime_version: "1.16.0"` explicitly before
+upgrading the library if you need to retain that worker. Install the worker
+separately and configure the exact version on every controller that owns it.
 
 Linux ARM64 remains unsupported for 1.14.6, 1.16.0 and 1.16.1. Native macOS testing covers
 ordinary compatibility and controlled lifecycle recovery. Exhaustion and

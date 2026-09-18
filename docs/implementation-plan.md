@@ -1,3 +1,13 @@
+# Unreleased smolvm 1.16.1 default
+
+This checkout now selects smolvm 1.16.1 by default on Linux x86_64 and macOS
+Apple Silicon. Explicit 1.16.0, 1.14.6 and 1.14.1 support remains. See the
+[qualification report](runtime-1.16.1-qualification.md) for the completed runtime
+and cleanup campaign and the subsequent default selection validation.
+Published SmolBox 0.1.3 still defaults to 1.16.0. Upgrade the separately installed
+worker using the drain procedure, or explicitly configure its existing version
+before adopting this checkout. No new public API or record schema is introduced.
+
 # SmolBox 0.1.3 publication
 
 Published and verified September 14, 2026. Tag `v0.1.3` points to
@@ -1289,7 +1299,7 @@ Necessary contract corrections found during implementation:
 - Due scans must retain records whose cleanup is complete but whose capacity release did not commit. Both store adapters now test this boundary.
 - Concurrent request timestamps can arrive out of order. Claims/cancellation keep `updated_at_ms` nondecreasing; CAS still rejects stale versions. Observer monotonic time bounds elapsed stages separately from persisted wall timestamps.
 - Unknown-outcome disks wait until the execution deadline plus evidence retention before deletion. Their fixed cleanup deadline includes this intentional wait plus the cleanup budget; it is not reset on restart. Whole-VM stop is attempted before that wait.
-- Unreleased follow-up for smolvm 1.16.1: finished execution/collection selects direct disposal after ownership verification. Unknown work retains graceful stop and preservation until its fixed retention deadline; expiry permits disposal only with remaining cleanup budget. DELETE responses still require observed absence before reservation release. See `docs/runtime-1.16.1-qualification.md`; explicit 1.16.1 admission follows the validated lifecycle change, with default 1.16.0 unchanged.
+- Unreleased follow-up for smolvm 1.16.1: finished execution/collection selects direct disposal after ownership verification. Unknown work retains graceful stop and preservation until its fixed retention deadline; expiry permits disposal only with remaining cleanup budget. DELETE responses still require observed absence before reservation release. See `docs/runtime-1.16.1-qualification.md`; 1.16.1 admission and default selection follow the validated lifecycle change, with explicit 1.16.0 support retained.
 - After cleanup mutation retries are exhausted, only bounded read-only inspection continues. Observing operator-resolved absence can still release the original reservation.
 
 Exit: a caller can disconnect and later retrieve the same execution; a nonzero exit and collection failure remain distinguishable.
