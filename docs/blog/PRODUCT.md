@@ -17,13 +17,13 @@ maintainer on September 7, 2026. HexDocs remains the reference documentation.
 ## Users and purpose
 
 Elixir developers evaluating a way to run Python, JavaScript, and other programs
-on self-hosted SmolVM workers. Help readers decide when that architecture fits,
+on self-hosted smolvm workers. Help readers decide when that architecture fits,
 understand what Smol Machines supplies and what SmolBox adds, and follow a real
 integration with the limits of the current release explicit.
 
 ## Capabilities and constraints
 
-SmolBox 0.1.0 supports the pinned SmolVM 1.14.1 worker API. Its release is tested
+SmolBox 0.1.0 supports the pinned smolvm 1.14.1 worker API. Its release is tested
 for development use on Linux x86_64/KVM and macOS Apple Silicon. It does not
 certify production isolation for hostile code or hard host resource quotas.
 The application operates workers, supplies approved images, and chooses storage.

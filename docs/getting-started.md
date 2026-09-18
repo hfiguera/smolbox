@@ -19,7 +19,8 @@ In an existing Elixir Mix application, add this entry to `deps/0` in `mix.exs`:
 
 Run `mix deps.get` after adding the dependency. A local checkout can instead be
 used with `{:smolbox, path: "../smolbox"}`. Version 0.1.3 defaults to smolvm
-1.16.0; see its [qualification evidence](compatibility.md#smolvm-1-16-0-qualification).
+1.16.0. The steps below target this checkout’s **1.16.1** default (unreleased).
+For the published package, use the [0.1.3 walkthrough](https://hexdocs.pm/smolbox/0.1.3/getting-started.html).
 Existing applications must follow [Upgrading to 0.1.3](recovery.md#upgrading-to-0-1-3)
 before sharing their durable store with this version.
 Elixir 1.18 and later are accepted by the
@@ -35,15 +36,15 @@ Use Linux x86_64 with KVM or macOS Apple Silicon. This walkthrough runs the Elix
 application on the worker host so it can verify the local artifact file. Remote
 workers use a different host configuration; see [Managed host integration](host-integration.md).
 
-You need a **dedicated, empty worker**: select **smolvm 1.16.0 on Linux x86_64 or
-macOS Apple Silicon**. Existing 1.14.1 or 1.14.6 deployments require an explicit
+You need a **dedicated, empty worker**: select **smolvm 1.16.1 on Linux x86_64 or
+macOS Apple Silicon**. Existing 1.14.1, 1.14.6 or 1.16.0 deployments require an explicit
 matching `runtime_version` (or the environment setting below).
 Check the [host preparation prerequisites](compatibility.md#host-preparation-prerequisites),
 then use an approved native Python
 artifact with neutral `/bin/true` startup. Follow the
 [reference-runtime preparation instructions](client.md#preparing-the-reference-runtimes)
 to create `python.smolmachine`, record its SHA-256, and start the private worker
-with the 1 MiB file-transfer cap. The package does not install SmolVM or prepare
+with the 1 MiB file-transfer cap. The package does not install smolvm or prepare
 runtime images for you. Do not attach this ephemeral demo controller to a worker
 managed by another runtime or store.
 
@@ -57,7 +58,7 @@ In your application directory, set these values using the artifact you approved:
 
 ```sh
 export SMOLBOX_RUNTIME_URL=http://127.0.0.1:19470
-export SMOLBOX_RUNTIME_VERSION=1.16.0
+export SMOLBOX_RUNTIME_VERSION=1.16.1
 export SMOLBOX_PYTHON_ARTIFACT=/absolute/path/to/python.smolmachine
 export SMOLBOX_PYTHON_SHA256=replace_with_the_approved_64_character_sha256
 export SMOLBOX_DEMO_DIR="$(mktemp -d)"
@@ -67,9 +68,10 @@ iex -S mix
 
 `SMOLBOX_DEMO_DIR` is a new private directory for input/output objects. Keep it
 separate from the runtime image and from all guest-accessible directories.
-Omitting `SMOLBOX_RUNTIME_VERSION` selects 1.16.0 in this walkthrough. Set it to
-`1.14.1` or `1.14.6` for an existing worker on either host. A library upgrade does not
-upgrade the worker; mismatched versions prevent admission.
+Omitting `SMOLBOX_RUNTIME_VERSION` selects 1.16.1 in this walkthrough. Set it to
+`1.16.0`, `1.14.6` or `1.14.1` to retain an existing worker on either host. A library
+upgrade does not upgrade the worker; mismatched versions prevent admission. See [the qualification and cleanup
+limitation](compatibility.md#smolvm-1-16-1-qualification).
 The walkthrough checks this explicit selection; it never adopts an arbitrary
 version from the health response.
 
@@ -127,7 +129,7 @@ worker_options =
   Worker.new("demo-worker", System.fetch_env!("SMOLBOX_RUNTIME_URL"), worker_options)
 
 {:ok, client} = SmolBox.Client.new(worker)
-runtime_version = System.get_env("SMOLBOX_RUNTIME_VERSION", "1.16.0")
+runtime_version = System.get_env("SMOLBOX_RUNTIME_VERSION", "1.16.1")
 {:ok, %{version: ^runtime_version}} = SmolBox.Client.health(client)
 :ok = SmolBox.Client.readiness(client)
 {:ok, []} = SmolBox.Client.list(client)

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="390" height="670" viewBox="0 0 390 670" role="img" aria-labelledby="title desc">
   <title id="title">The order that made room for cleanup</title>
-  <desc id="desc">Before: the registry write fails on a full filesystem, leaving VM data allocated. After: free VM data, then use the released space to write registry removal. A simplified view of SmolVM PR 1219.</desc>
+  <desc id="desc">Before: the registry write fails on a full filesystem, leaving VM data allocated. After: free VM data, then use the released space to write registry removal. A simplified view of smolvm PR 1219.</desc>
   <rect width="390" height="670" rx="8" fill="#edf2fa"/>
   <g font-family="sans-serif">
     <text x="22" y="42" font-size="26" font-weight="700" fill="#17304e">One full filesystem</text>
@@ -21,6 +21,6 @@
     <rect x="22" y="529" width="346" height="88" rx="6" fill="#fff" stroke="#215bc7" stroke-width="1.5"/>
     <text x="39" y="564" font-size="23" font-weight="700" fill="#17304e">Write registry removal</text>
     <text x="39" y="595" font-size="20" fill="#526478">Use the released space</text>
-    <text x="22" y="650" font-size="17" fill="#526478">HTTP deletion path · SmolVM PR #1219</text>
+    <text x="22" y="650" font-size="17" fill="#526478">HTTP deletion path · smolvm PR #1219</text>
   </g>
 </svg>

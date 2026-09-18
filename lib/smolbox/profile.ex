@@ -84,7 +84,7 @@ defmodule SmolBox.Profile do
   | `:cleanup_ms` | `30_000` | Cleanup mutation budget, separate from unknown-outcome retention |
 
   Each stage budget must be 1000–300,000 ms. A default profile is structurally
-  valid but its 1/1 GiB disks do **not** meet the reference SmolVM 1.14.1 template
+  valid but its 1/1 GiB disks do **not** meet the reference smolvm 1.14.1 template
   floor. Use the actual operator-verified floor, as in the example below.
 
   Give every changed policy a new `id`; managed submission matches the complete

@@ -5,7 +5,7 @@ defmodule SmolBox.Identity do
   Persist the generated name before creation. Names have 100 random bits and do
   not embed user identifiers. A namespace match identifies candidates for an
   orphan report, never authorization to delete. Creation evidence and exclusive
-  worker ownership are still required; SmolVM exposes no immutable generation ID.
+  worker ownership are still required; smolvm exposes no immutable generation ID.
   """
 
   alias SmolBox.Error

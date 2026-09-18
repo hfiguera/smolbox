@@ -4,6 +4,10 @@ Controlled networking is introduced in SmolBox **0.1.3** and requires smolvm
 **1.16.0**. SmolBox 0.1.2 does not include it. Existing profiles and machines remain offline by default.
 Networking never enables image pulls, ports, mounts, or credential forwarding.
 
+This checkout defaults to smolvm **1.16.1** (unreleased). Both 1.16.0 and 1.16.1
+support these policies; select 1.16.0 explicitly to retain that worker. See the
+[qualification results and cleanup limitation](compatibility.md#smolvm-1-16-1-qualification).
+
 ## Approve a policy
 
 ```elixir
@@ -62,7 +66,7 @@ CIDRs can grant very broad access. Operators must review the combined destinatio
 - Upstream platform rules, the worker network and external firewalls can deny
   additional destinations. Declaring an allowlist does not establish connectivity.
 - This is outbound control. There are no published guest ports in this feature.
-- `smolvm serve` 1.16.0 defaults to a strict egress floor that also denies private,
+- `smolvm serve` 1.16.0 and 1.16.1 default to a strict egress floor that also denies private,
   loopback and metadata destinations, including addresses learned from DNS. Keep
   that floor in deployments handling untrusted workloads. An operator can weaken
   it through the worker environment; SmolBox does not configure or attest it.

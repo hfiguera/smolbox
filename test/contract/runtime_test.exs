@@ -6,28 +6,37 @@ defmodule SmolBox.RuntimeTest do
 
   defp setup_runtime(options \\ []), do: SmolBox.RuntimeFixture.start(options)
 
-  test "approved network policy survives managed execution, identity checks and cleanup" do
-    {:ok, policy} = SmolBox.NetworkPolicy.new(hosts: ["api.example.com"])
-    context = setup_runtime(network: policy)
-    assert {:ok, _} = SmolBox.submit(context.runtime, context.spec)
+  for version <- ["1.16.0", "1.16.1"] do
+    test "#{version} approved network policy survives managed execution, identity checks and cleanup" do
+      {:ok, policy} = SmolBox.NetworkPolicy.new(hosts: ["api.example.com"])
 
-    assert {:ok, record} =
-             SmolBox.await(context.runtime, {context.spec.scope, context.spec.id}, 5000)
+      context =
+        setup_runtime(
+          network: policy,
+          runtime_version: unquote(version),
+          expected_runtime_version: unquote(version)
+        )
 
-    assert record.created_machine.network == policy
-    assert record.spec.profile.network == policy
+      assert {:ok, _} = SmolBox.submit(context.runtime, context.spec)
 
-    record =
-      eventually(fn ->
-        {:ok, current} = SmolBox.fetch(context.runtime, context.spec.scope, context.spec.id)
-        if current.cleanup == :complete, do: current
-      end)
+      assert {:ok, record} =
+               SmolBox.await(context.runtime, {context.spec.scope, context.spec.id}, 5000)
 
-    assert record.cleanup == :complete
-    assert {:ok, bytes} = Codec.encode(record)
-    assert {:ok, ^record} = Codec.decode(bytes)
-    changed = %{context.spec | profile: %{context.spec.profile | network: :offline}}
-    assert {:error, _} = SmolBox.submit(context.runtime, changed)
+      assert record.created_machine.network == policy
+      assert record.spec.profile.network == policy
+
+      record =
+        eventually(fn ->
+          {:ok, current} = SmolBox.fetch(context.runtime, context.spec.scope, context.spec.id)
+          if current.cleanup == :complete, do: current
+        end)
+
+      assert record.cleanup == :complete
+      assert {:ok, bytes} = Codec.encode(record)
+      assert {:ok, ^record} = Codec.decode(bytes)
+      changed = %{context.spec | profile: %{context.spec.profile | network: :offline}}
+      assert {:error, _} = SmolBox.submit(context.runtime, changed)
+    end
   end
 
   test "durable mode rejects an ephemeral or unavailable store before worker I/O" do

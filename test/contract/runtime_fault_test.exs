@@ -164,7 +164,7 @@ defmodule SmolBox.RuntimeFaultTest do
         id: :gate
       )
 
-    context = RuntimeFixture.start(faults: gate, hold: event == :first_output_record)
+    context = RuntimeFixture.start(faults: gate, hold: event in [:first_output_record, :stop])
 
     spec = %{
       context.spec

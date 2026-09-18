@@ -1,6 +1,6 @@
 defmodule SmolBox.Wire.SSE do
   @moduledoc """
-  Incremental parser for the pinned SmolVM exec SSE protocol.
+  Incremental parser for the pinned smolvm exec SSE protocol.
 
   stdout/stderr are plain lossy UTF-8 data; only exit/error payloads are JSON.
   Unknown additive events and keepalives are ignored. An exit is required for

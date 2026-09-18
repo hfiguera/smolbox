@@ -57,21 +57,25 @@ the previous macOS results remain historical and must not be reported as a new
 
 ## Runtime selection
 
-This checkout defaults to smolvm 1.16.0 on Linux x86_64 or macOS Apple Silicon.
-SmolBox 0.1.3 introduces this default; 0.1.2 defaults to 1.14.6.
+This checkout defaults to smolvm 1.16.1 on Linux x86_64 or macOS Apple Silicon.
+This change is unreleased; published 0.1.3 defaults to 1.16.0 and 0.1.2 to 1.14.6.
 Set `runtime_version` in the private worker manifest to select a version explicitly;
 preflight verifies that version's binary checksum and exports
 `SMOLBOX_RUNTIME_VERSION` for runtime tests, examples and service fault checks.
-An omitted field selects 1.16.0. Existing older fixtures must explicitly declare
-`"runtime_version": "1.14.1"` or `"runtime_version": "1.14.6"` in the manifest.
+An omitted field selects 1.16.1. Maintainer preflight and public worker/network
+admission also support explicitly selected 1.16.0. No temporary admission patch
+is needed on this checkout. The report `docs/runtime-1.16.1-qualification.md`
+documents the tested preservation/disposal contract and graceful-stop limitation.
+Existing older fixtures must explicitly declare
+`"runtime_version": "1.16.0"`, `"1.14.6"` or `"1.14.1"` in the manifest.
 Selecting a different version never installs it or accepts an unexpected server
 version. Initial candidate validation ran on Linux. The subsequent native macOS
 campaign is restricted to ordinary compatibility and controlled lifecycle checks;
 exhaustion and adversarial testing remain in the disposable Linux lab. See the
 implementation plan for the separate checkpoints and current acceptance status.
 
-Preflight uses the official platform binary pins for each supported version.
-Consult the [1.16.0 qualification evidence](../../docs/compatibility.md#smolvm-1-16-0-qualification).
+Preflight uses exact official binary pins for supported versions and explicit qualification candidates.
+Consult the [1.16.1 qualification evidence](../../docs/compatibility.md#smolvm-1-16-1-qualification).
 Manifest admission alone is not runtime qualification. No protected GitHub worker infrastructure was provisioned or
 executed by the local qualification campaign.
 
@@ -83,7 +87,7 @@ mix test test/runtime/client_runtime_test.exs test/runtime/managed_runtime_test.
 
 The five cases in `security_runtime_test.exs` are outside this Mac campaign.
 They remain covered by the separate Linux runtime suite. Do not count excluded
-or unexecuted cases as macOS passes. Supply working `resize2fs` for 1.14.6 or 1.16.0 disk
+or unexecuted cases as macOS passes. Supply working `resize2fs` for 1.14.6, 1.16.0 or 1.16.1 disk
 requests below the templates; missing it caused file loss after stop/start in
 the initial Mac run. A successful health probe is insufficient. The unchanged
 file persistence test must pass on fresh VMs before recording compatibility.
@@ -169,7 +173,7 @@ with actual observations; the sample deliberately does not pass preflight:
 {
   "schema": 1,
   "platform": "linux",
-  "runtime_version": "1.16.0",
+  "runtime_version": "1.16.1",
   "ephemeral_runner": true,
   "expires_at_unix": 0,
   "lifecycle_id": "scheduler-owned-unique-id",
@@ -192,7 +196,7 @@ owned service-fault fixtures. The wrapper is derived from the selected process's
 distribution and checked against the release archive. The fault scenarios launch
 their own server on 19471, use the verified `SMOLVM_GUEST_ROLLOUT_HOST_PORT=19472`
 override, and refuse to stop an existing listener. Linux fault state uses a new
-job-owned directory. On macOS, SmolVM uses account-level state, which is another
+job-owned directory. On macOS, smolvm uses account-level state, which is another
 reason the account/host must be disposable and dedicated.
 
 `elixir scripts/ci.exs preflight` verifies the actual listener belongs to the selected account

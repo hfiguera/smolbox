@@ -1,5 +1,27 @@
 # Changelog
 
+## Unreleased
+
+**Worker upgrade notice:** this checkout expects smolvm 1.16.1 by default.
+Upgrade the separately installed worker using the drain and verification
+procedure, or configure `runtime_version: "1.16.0"` before updating the library
+to retain that worker. There is no automatic fallback or additional record
+schema migration. The published 0.1.3 package still defaults to 1.16.0.
+
+- Separate managed disposal from graceful preservation. Finished executions and
+  unknown executions past retention can delete their verified owned VM without
+  a preliminary stop. Unknown work during retention still requires graceful
+  stop and keeps its disks on failure. Identity checks, finite mutation budgets,
+  observed absence and reservation accounting remain required.
+
+- Default to smolvm 1.16.1 on Linux x86_64 and macOS Apple Silicon, including
+  controlled networking. Explicit 1.16.0 support remains;
+  there are no public API or record format changes. Qualification includes the
+  disposal/preservation distinction above: graceful stop can still fail under
+  storage exhaustion, leaving unknown work retained for operator resolution.
+- Add exact candidate distribution pins, captured wire/schema fixtures and a
+  reproducible comparison of 1.16.0 and 1.16.1 stop behavior under disk exhaustion.
+
 ## 0.1.3 — September 14, 2026
 
 **Upgrade notice:** this version changes the durable record format and the default
@@ -43,12 +65,12 @@ Follow [Upgrading to 0.1.3](docs/recovery.md#upgrading-to-0-1-3) before deployme
 
 ## 0.1.2
 
-- Default to SmolVM **1.14.6** for Linux x86_64 and
+- Default to smolvm **1.14.6** for Linux x86_64 and
   macOS Apple Silicon workers.
   **Upgrade configuration:** applications with an existing 1.14.1 worker must
   explicitly set `runtime_version: "1.14.1"` or upgrade their worker before
   using the new default. Exact version checks reject mismatches; the library
-  does not install SmolVM. Explicit 1.14.1 support remains available.
+  does not install smolvm. Explicit 1.14.1 support remains available.
   Linux ARM64 1.14.6 is not qualified.
 - Document the host `resize2fs` prerequisite for 1.14.6 disk requests below
   template sizes, including the observed macOS file loss after restart when
@@ -70,13 +92,13 @@ Documentation and validation release. Library source, public APIs, persisted rec
 formats and production dependencies are unchanged from 0.1.0.
 
 - Update the README and operating guides with the division of responsibilities
-  between SmolBox, SmolVM and the deployment, and link the recorded Linux results.
+  between SmolBox, smolvm and the deployment, and link the recorded Linux results.
 - Include evidence of external resource enforcement and failure recovery in one
   constrained Linux deployment. These results do not add portable hard-control
   options or establish the same guarantees for other deployments.
 - Add repository-only tools for a disposable nested KVM lab and bounded Linux
   qualification, including separate worker data and control storage.
-- Allow the supplied host examples to use a configured SmolVM Unix socket.
+- Allow the supplied host examples to use a configured smolvm Unix socket.
 - Add the engineering blog and strengthen runtime fixtures and CI checks.
 
 Release validation runs on Linux. The earlier macOS results remain historical
@@ -84,13 +106,13 @@ evidence for the unchanged library; this patch does not claim a new macOS run.
 
 ## 0.1.0
 
-First release of the development-qualified SmolVM client and supervised execution
+First release of the development-qualified smolvm client and supervised execution
 runtime. Promotes RC2's API and behavior; public APIs and persisted record formats
 are unchanged. Production resource/isolation certification remains outside this
 release's scope, and unsupported hard controls remain rejected.
 
 - Publish installation through Hex and versioned API documentation through HexDocs.
-- Provide typed SmolVM 1.14.1 client operations and explicitly supervised execution
+- Provide typed smolvm 1.14.1 client operations and explicitly supervised execution
   with immutable identities, duplicate/conflict handling, bounded files/output,
   cancellation, recovery and cleanup. Uncertain accepted commands are never replayed.
 - Include managed-execution and troubleshooting guides, PostgreSQL and minimal
@@ -141,7 +163,7 @@ outside this release's scope. No production isolation profile is certified.
 
 ### Implemented
 
-- Typed client for pinned SmolVM 1.14.1 health/readiness, machine lifecycle,
+- Typed client for pinned smolvm 1.14.1 health/readiness, machine lifecycle,
   argument-vector commands, bounded buffered/SSE output and binary file transfer.
   Local loopback/Unix-socket policy and authenticated, verified TLS remote access
   are explicit. Mutations have no hidden retry or redirect behavior.
@@ -170,7 +192,7 @@ outside this release's scope. No production isolation profile is certified.
 
 Workers require an operator-verified `allocation_floor` covering runtime/artifact
 disk templates and VMM overhead. Profiles below it fail acceptance and recovered
-prepared dispatch. SmolVM 1.14.1 may retain 20/10 GiB templates while reporting a
+prepared dispatch. smolvm 1.14.1 may retain 20/10 GiB templates while reporting a
 smaller request; examples use profile revision v2 with those disk sizes and
 768 MiB host overhead. Existing saved specs are never rewritten. Inspect their
 original identities instead of resubmitting changed specs under the same key.
@@ -182,7 +204,7 @@ an explicitly evidenced operator recovery. Canonical workspace containment is
 also unsupported: packed-image reads can follow guest symlinks beyond the
 lexical workspace. No host path is extracted from guest archives.
 
-SmolVM provides no verified durable exec receipt or deduplication fence. An
+smolvm provides no verified durable exec receipt or deduplication fence. An
 original delayed request can start a VM after a successful stop; cleanup retains
 uncertain evidence and reservations through the configured deadline/retention
 policy. Stronger guarantees and unsupported hard controls are rejected or

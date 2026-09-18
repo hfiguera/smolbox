@@ -1,0 +1,1508 @@
+{
+  "status": "qualification_blocked_by_disk_cleanup",
+  "date_utc": "2026-09-18",
+  "base_commit": "9c212ef29ed446307d45de8084c4acef336b68aa",
+  "runtime_version": "1.16.1",
+  "default_runtime": "1.16.0",
+  "package_version_changed": false,
+  "upstream_commit": "9504e94e3581a1f52c414247edcbcd6d6b49a71a",
+  "archives": {
+    "linux_x86_64": "e49e5bbae6d65b039ecf1d8b236d20e77427b7bfd131907b27a0819fcdea3fed",
+    "darwin_arm64": "44b50573962b34ee979bb74a5756bd10583e20fd1d3739baa28147d13b5a26f3"
+  },
+  "archive_verification": "Matched official checksums.sha256 and GitHub release asset digests; used complete distributions.",
+  "schema": {
+    "full_export_sha256": "3486e00380443634f57ec7b1d11fa5da4bcfd9b1c427e8cb287f78178dc977be",
+    "subset_sha256": "29e03fa13f67ccdfa86b048fd24713172c80dfeda8431d7b218d893df39a2b94",
+    "used_paths": 8,
+    "referenced_schemas": 19,
+    "additive_change": "MachineInfo.image is optional"
+  },
+  "source": {
+    "linux_deployed_patch_sha256": "9a1fa1721d78f92f25dd7e29669bea94c97b86cadfa5bfe6beee1b5e681feec3",
+    "linux_worker_config_sha256": "dacdfdec10634ce3fbd6d714876d50367c6bd7adf9849f158a4210c1129a1692",
+    "candidate_patch_sha256": "cd4ac91b06b8bdb34bec36e4e2deafec0c6ca6babfc8f088be2e416092fd15ec",
+    "difference": "Live tests used temporary 1.16.1 admission. That admission is removed from the final branch; the candidate patch preserves the tested changes for isolated reproduction.",
+    "candidate_client_sha256": "caaf89e7345a767c011cf1a01ef8f1a2bca2f17c765e8165c0550977fe429eae",
+    "final_library_production_diff": "None relative to base commit; candidate admission is retained only as an unapplied maintainer patch."
+  },
+  "macos": {
+    "os": "macOS 26.6.2 (25G83)",
+    "architecture": "arm64",
+    "toolchain": "Elixir 1.20.4 / OTP 29.0.6",
+    "resize2fs": "Homebrew e2fsprogs 1.47.4",
+    "resize2fs_sha256": "2f5c1940c364b2cd451f09f37004c0b7a3eff4a822672acead493f4618e734f0",
+    "artifacts": {
+      "python": "4585196fbdf1de9bfd6c5c92d578ad0b1756cc92b64fe42b60674d279d74e03f",
+      "node": "c51800f44ca9e3d08a6ede9cbe84bfdaaeee254aa3e17f202b2646b417ca5267"
+    },
+    "artifact_preparation": "Fresh official 1.16.1 preparation with private HOME and empty Docker configuration.",
+    "runners": {
+      "prepare-python": {
+        "seconds": 12.159,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 1096,
+        "output_sha256": "5bf4bd4b6c7fa693fe6d8b6e8080e6c19ed343f7c4f8c4bee896230ff0ec6e67"
+      },
+      "prepare-node": {
+        "seconds": 8.072,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 1060,
+        "output_sha256": "a8b990dd9ba9fe165f435d0ed6b313694ecf7008451c0b1be755fcaaa4a2abc0"
+      },
+      "runtime": {
+        "seconds": 24.249,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 154,
+        "output_sha256": "5fb5000ea2e8a2e2f2ef67551b7b38d9467153a4fbf49581859ed5ace2da497f"
+      },
+      "network": {
+        "seconds": 26.346,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 97,
+        "output_sha256": "280a25ebbe72ed737846d22b72d03114aef371a77e309df95fabd4f633cefafa"
+      },
+      "store": {
+        "seconds": 2.02,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 161,
+        "output_sha256": "9802cfe51476af57cb07ce3a8cc20b099aaa10a0475dc567b22adaa73ecc2591"
+      },
+      "durable": {
+        "seconds": 278.478,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 346,
+        "output_sha256": "95b70fee952f92104bd3dc36646a088660c27d3ab5bb0d2b475832e6726147c0"
+      },
+      "geometry-corrected": {
+        "seconds": 4.066,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 0,
+        "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "tests": {
+      "ordinary_runtime": 9,
+      "store": 17,
+      "durable_recovery": 25
+    },
+    "geometry": {
+      "status": "passed",
+      "observations": {
+        "node": {
+          "disk_bytes": [
+            1073741824,
+            1073741824
+          ],
+          "persistence": true
+        },
+        "python": {
+          "disk_bytes": [
+            1073741824,
+            1073741824
+          ],
+          "persistence": true
+        }
+      },
+      "empty_inventory": true
+    },
+    "network": {
+      "offline": {
+        "status": "passed",
+        "policy": "offline",
+        "observations": {
+          "initial": {
+            "allowed_ip": false,
+            "allowed_name": false,
+            "blocked_ip": false,
+            "blocked_name": false
+          },
+          "restart": {
+            "allowed_ip": false,
+            "allowed_name": false,
+            "blocked_ip": false,
+            "blocked_name": false
+          }
+        },
+        "approved_ip": "172.66.147.243"
+      },
+      "cidr": {
+        "status": "passed",
+        "policy": "cidr",
+        "observations": {
+          "initial": {
+            "allowed_ip": true,
+            "allowed_name": false,
+            "blocked_ip": false,
+            "blocked_name": false
+          },
+          "restart": {
+            "allowed_ip": true,
+            "allowed_name": false,
+            "blocked_ip": false,
+            "blocked_name": false
+          }
+        },
+        "approved_ip": "172.66.147.243"
+      },
+      "hosts": {
+        "status": "passed",
+        "policy": "hosts",
+        "observations": {
+          "initial": {
+            "allowed_ip": false,
+            "allowed_name": true,
+            "blocked_ip": false,
+            "blocked_name": false
+          },
+          "restart": {
+            "allowed_ip": false,
+            "allowed_name": true,
+            "blocked_ip": false,
+            "blocked_name": false
+          }
+        },
+        "approved_ip": "172.66.147.243"
+      }
+    },
+    "service_recovery": {
+      "service-restart": {
+        "seconds": 67.147,
+        "status": "passed",
+        "partition": "restart-7821eabcf0311ade",
+        "result": {
+          "absence_at_ms": 1789710024526,
+          "artifacts": [],
+          "cancel_requested_at_ms": null,
+          "cleanup": "complete",
+          "collection": "pending",
+          "evidence": "termination_confirmed",
+          "exit_code": null,
+          "id": "restart-7821eabcf0311ade",
+          "machine_name": "sbxexample-stbzzavy4ster7io33rg",
+          "reserved": false,
+          "scope": "example",
+          "state": "unknown",
+          "worker_id": "example-worker"
+        },
+        "platform": "macos",
+        "scenario": "restart",
+        "dispatch_attempts": 1,
+        "guest_marker": "single byte before recovery",
+        "guest_survived_api_server": true,
+        "artifact_sha256": "4585196fbdf1de9bfd6c5c92d578ad0b1756cc92b64fe42b60674d279d74e03f",
+        "runtime_version": "1.16.1",
+        "outage_seconds": 0.153,
+        "operator_deleted_vm": false
+      },
+      "service-unavailable": {
+        "seconds": 128.818,
+        "status": "passed",
+        "partition": "restart-f6cfb24e4b226b3d",
+        "result": {
+          "absence_at_ms": 1789710153693,
+          "artifacts": [],
+          "cancel_requested_at_ms": 1789710031975,
+          "cleanup": "complete",
+          "collection": "pending",
+          "evidence": "termination_confirmed",
+          "exit_code": null,
+          "id": "restart-f6cfb24e4b226b3d",
+          "machine_name": "sbxexample-yz5azs4h5optwxozzd46",
+          "reserved": false,
+          "scope": "example",
+          "state": "unknown",
+          "worker_id": "example-worker"
+        },
+        "platform": "macos",
+        "scenario": "unavailable",
+        "dispatch_attempts": 1,
+        "guest_marker": "single byte before recovery",
+        "guest_survived_api_server": true,
+        "artifact_sha256": "4585196fbdf1de9bfd6c5c92d578ad0b1756cc92b64fe42b60674d279d74e03f",
+        "runtime_version": "1.16.1",
+        "outage_seconds": 90.069,
+        "operator_deleted_vm": true
+      },
+      "service-missing": {
+        "seconds": 9.201,
+        "status": "passed",
+        "partition": "restart-b54b1fe497ee84a7",
+        "result": {
+          "absence_at_ms": 1789710163294,
+          "artifacts": [],
+          "cancel_requested_at_ms": null,
+          "cleanup": "complete",
+          "collection": "pending",
+          "evidence": "termination_confirmed",
+          "exit_code": null,
+          "id": "restart-b54b1fe497ee84a7",
+          "machine_name": "sbxexample-t2uusodwjvbbylxxh3pf",
+          "reserved": false,
+          "scope": "example",
+          "state": "unknown",
+          "worker_id": "example-worker"
+        },
+        "platform": "macos",
+        "scenario": "missing",
+        "dispatch_attempts": 1,
+        "guest_marker": "single byte before recovery",
+        "guest_survived_api_server": true,
+        "artifact_sha256": "4585196fbdf1de9bfd6c5c92d578ad0b1756cc92b64fe42b60674d279d74e03f",
+        "runtime_version": "1.16.1",
+        "outage_seconds": 0.052,
+        "operator_deleted_vm": true
+      }
+    },
+    "probe_sources_sha256": {
+      "mac-worker.sh": "7f254ddd65e3dbf43ab1162d6eb1b8ec9ecf0dfb76c771d57501fea22a6ddcdf",
+      "mac-checks.exs": "beba106de4842a3af729f9e8859cd21199891b061c47765edb5a93a65dd6ef63",
+      "mac-durable.exs": "5479386501f19a407e33cb233f7a90fec07cdf235d1f8da62ed0e78805d5a7d7",
+      "mac-geometry.exs": "23494029a6be4a64d846ca9ca1188881b4505964c39b7e3e6b79db756e7dd696",
+      "mac-service.sh": "e256bacd9b214467d3220f7415e946ea4dc3e8a52929a98bdaa222df84872ab5",
+      "storage-guard.exs": "48881c66880ef12b2cdc3575e309083fa4efbf10927c30c0dd3b898fc03331fe"
+    }
+  },
+  "linux": {
+    "os": "Ubuntu 24.04.4 LTS",
+    "kernel": "6.8.0-139-generic",
+    "architecture": "x86_64",
+    "environment": "Disposable nested KVM guest on ssh linux, isolated 45 minute outer VM; adversarial/exhaustion cases confined here.",
+    "toolchain": "Elixir 1.20.4 / OTP 29.0.6",
+    "resize2fs": "e2fsprogs 1.47.0",
+    "resize2fs_sha256": "1a0ea5f6784285b82098fe7935c95bf1ac76713aec904cc9b43920fa85ebe35d",
+    "artifacts": {
+      "python": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+      "node": "768b8d2158a75abd90ccc73a65a83717aebfe37e62ed91d0db0bb731584df776"
+    },
+    "artifact_preparation": "Existing approved baseline artifacts reused.",
+    "runners": {
+      "runtime-1161": {
+        "seconds": 411.223,
+        "status": "passed",
+        "failure": null,
+        "tests": {
+          "seed": 360712,
+          "passed": 14
+        },
+        "exit_code": 0,
+        "captured_bytes": 162,
+        "output_sha256": "319ce23a9d2514d5805f67eeadbacdbb1a30c75cb44d42e4eb350c84778b8f2c"
+      },
+      "store-1161-corrected": {
+        "seconds": 3.359,
+        "status": "passed",
+        "failure": null,
+        "tests": {
+          "seed": 574871,
+          "passed": 17
+        },
+        "exit_code": 0,
+        "captured_bytes": 161,
+        "output_sha256": "ab442c727e0852be1f30e6ab5d920e77dc6afbbb56e457eb37ced425f6b739bc"
+      },
+      "durable-1161": {
+        "seconds": 1160.796,
+        "status": "passed",
+        "failure": null,
+        "tests": {
+          "seed": 440148,
+          "passed": 25
+        },
+        "exit_code": 0,
+        "captured_bytes": 349,
+        "output_sha256": "9a384565ec400f1196bf8d3c26c100c5e11b795dd8d135ff130c1efecc28c2b0"
+      },
+      "wire-1161": {
+        "seconds": 28.617,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 79,
+        "output_sha256": "b603387b1db6d728a90f2c986c8af8b2c60eebc357f659ea43a01ebb4816878d"
+      }
+    },
+    "network": {
+      "network-offline": {
+        "runtime": "1.16.1",
+        "status": "passed",
+        "mode": "offline",
+        "observations": {
+          "allowed_host": false,
+          "allowed_ip": false,
+          "allowed_subdomain": false,
+          "blocked_host": false,
+          "blocked_ip": false,
+          "suffix_attack": false
+        },
+        "restart_observations": {
+          "allowed": false,
+          "blocked": false
+        },
+        "policy_retained_after_restart": true,
+        "denied_after_restart": true
+      },
+      "network-cidr": {
+        "runtime": "1.16.1",
+        "status": "passed",
+        "mode": "cidr",
+        "observations": {
+          "allowed_host": false,
+          "allowed_ip": true,
+          "allowed_subdomain": false,
+          "blocked_host": false,
+          "blocked_ip": false,
+          "suffix_attack": false
+        },
+        "restart_observations": {
+          "allowed": true,
+          "blocked": false
+        },
+        "policy_retained_after_restart": true,
+        "denied_after_restart": true
+      },
+      "network-hosts": {
+        "runtime": "1.16.1",
+        "status": "passed",
+        "mode": "hosts",
+        "observations": {
+          "allowed_host": true,
+          "allowed_ip": false,
+          "allowed_subdomain": true,
+          "blocked_host": false,
+          "blocked_ip": false,
+          "suffix_attack": false
+        },
+        "restart_observations": {
+          "allowed": true,
+          "blocked": false
+        },
+        "policy_retained_after_restart": true,
+        "denied_after_restart": true
+      },
+      "network-managed": {
+        "runtime": "1.16.1",
+        "status": "passed",
+        "cleanup": "complete",
+        "command_exit": 0,
+        "duplicate_submission": "same_execution",
+        "persisted_policy": true,
+        "inventory": []
+      }
+    },
+    "extended_network": {
+      "network-extended-offline": {
+        "restart": {
+          "control_tcp": false,
+          "control_udp": false,
+          "mapped_allow_tcp": false,
+          "mapped_allow_udp": false,
+          "mapped_control_tcp": false,
+          "mapped_control_udp": false,
+          "mapped_deny_tcp": false,
+          "mapped_deny_udp": false,
+          "mapped_metadata_tcp": false,
+          "mapped_metadata_udp": false,
+          "metadata_tcp": false,
+          "metadata_udp": false,
+          "private6_tcp": false,
+          "private6_udp": false,
+          "v4_allow_tcp": false,
+          "v4_allow_udp": false,
+          "v4_deny_tcp": false,
+          "v4_deny_udp": false,
+          "v6_allow_tcp": false,
+          "v6_allow_udp": false,
+          "v6_deny_tcp": false,
+          "v6_deny_udp": false
+        },
+        "status": "passed",
+        "mode": "offline",
+        "observations": {
+          "learned_private6_tcp": false,
+          "dns_tcp": null,
+          "v6_deny_tcp": false,
+          "rebind_second": {
+            "address": null,
+            "tcp": false,
+            "udp": false
+          },
+          "mapped_metadata_udp": false,
+          "rollout_invalid_token": null,
+          "dns_denied_udp": null,
+          "dns_udp": null,
+          "rollout_unauthenticated": null,
+          "mapped_allow_tcp": false,
+          "control_tcp": false,
+          "mapped_control_udp": false,
+          "learned_v4_tcp": false,
+          "v4_allow_tcp": false,
+          "dns_private6": null,
+          "mapped_deny_udp": false,
+          "v4_deny_udp": false,
+          "learned_v4_udp": false,
+          "mapped_deny_tcp": false,
+          "v4_allow_udp": false,
+          "control_udp": false,
+          "mapped_allow_udp": false,
+          "private6_tcp": false,
+          "dns_aaaa": null,
+          "private6_udp": false,
+          "gateway_udp": false,
+          "rebind": {
+            "address": null,
+            "tcp": false,
+            "udp": false
+          },
+          "v4_deny_tcp": false,
+          "dns_denied_tcp": null,
+          "v6_allow_tcp": false,
+          "mapped_metadata_tcp": false,
+          "learned_v6_tcp": false,
+          "metadata_udp": false,
+          "gateway_tcp": false,
+          "loopback": {
+            "address": null,
+            "tcp": false,
+            "udp": false
+          },
+          "metadata_tcp": false,
+          "learned_private6_udp": false,
+          "metadata": {
+            "address": null,
+            "tcp": false,
+            "udp": false
+          },
+          "v6_deny_udp": false,
+          "learned_v6_udp": false,
+          "dns_alternate_tcp": null,
+          "v6_allow_udp": false,
+          "mapped_control_tcp": false,
+          "dns_alternate_denied": null,
+          "management_route": null,
+          "dns_suffix": null
+        }
+      },
+      "network-extended-cidr4": {
+        "restart": {
+          "control_tcp": false,
+          "control_udp": false,
+          "mapped_allow_tcp": true,
+          "mapped_allow_udp": true,
+          "mapped_control_tcp": false,
+          "mapped_control_udp": false,
+          "mapped_deny_tcp": false,
+          "mapped_deny_udp": false,
+          "mapped_metadata_tcp": false,
+          "mapped_metadata_udp": false,
+          "metadata_tcp": false,
+          "metadata_udp": false,
+          "private6_tcp": false,
+          "private6_udp": false,
+          "v4_allow_tcp": true,
+          "v4_allow_udp": true,
+          "v4_deny_tcp": false,
+          "v4_deny_udp": false,
+          "v6_allow_tcp": false,
+          "v6_allow_udp": false,
+          "v6_deny_tcp": false,
+          "v6_deny_udp": false
+        },
+        "status": "passed",
+        "mode": "cidr4",
+        "observations": {
+          "learned_private6_tcp": false,
+          "dns_tcp": null,
+          "v6_deny_tcp": false,
+          "rebind_second": {
+            "address": null,
+            "tcp": false,
+            "udp": false
+          },
+          "mapped_metadata_udp": false,
+          "rollout_invalid_token": 401,
+          "dns_denied_udp": null,
+          "dns_udp": null,
+          "rollout_unauthenticated": 401,
+          "mapped_allow_tcp": true,
+          "control_tcp": false,
+          "mapped_control_udp": false,
+          "learned_v4_tcp": true,
+          "v4_allow_tcp": true,
+          "dns_private6": null,
+          "mapped_deny_udp": false,
+          "v4_deny_udp": false,
+          "learned_v4_udp": true,
+          "mapped_deny_tcp": false,
+          "v4_allow_udp": true,
+          "control_udp": false,
+          "mapped_allow_udp": true,
+          "private6_tcp": false,
+          "dns_aaaa": null,
+          "private6_udp": false,
+          "gateway_udp": false,
+          "rebind": {
+            "address": null,
+            "tcp": false,
+            "udp": false
+          },
+          "v4_deny_tcp": false,
+          "dns_denied_tcp": null,
+          "v6_allow_tcp": false,
+          "mapped_metadata_tcp": false,
+          "learned_v6_tcp": false,
+          "metadata_udp": false,
+          "gateway_tcp": false,
+          "loopback": {
+            "address": null,
+            "tcp": false,
+            "udp": false
+          },
+          "metadata_tcp": false,
+          "learned_private6_udp": false,
+          "metadata": {
+            "address": null,
+            "tcp": false,
+            "udp": false
+          },
+          "v6_deny_udp": false,
+          "learned_v6_udp": false,
+          "dns_alternate_tcp": null,
+          "v6_allow_udp": false,
+          "mapped_control_tcp": false,
+          "dns_alternate_denied": null,
+          "management_route": 404,
+          "dns_suffix": null
+        }
+      },
+      "network-extended-cidr6": {
+        "restart": {
+          "control_tcp": false,
+          "control_udp": false,
+          "mapped_allow_tcp": false,
+          "mapped_allow_udp": false,
+          "mapped_control_tcp": false,
+          "mapped_control_udp": false,
+          "mapped_deny_tcp": false,
+          "mapped_deny_udp": false,
+          "mapped_metadata_tcp": false,
+          "mapped_metadata_udp": false,
+          "metadata_tcp": false,
+          "metadata_udp": false,
+          "private6_tcp": false,
+          "private6_udp": false,
+          "v4_allow_tcp": false,
+          "v4_allow_udp": false,
+          "v4_deny_tcp": false,
+          "v4_deny_udp": false,
+          "v6_allow_tcp": true,
+          "v6_allow_udp": true,
+          "v6_deny_tcp": false,
+          "v6_deny_udp": false
+        },
+        "status": "passed",
+        "mode": "cidr6",
+        "observations": {
+          "learned_private6_tcp": false,
+          "dns_tcp": null,
+          "v6_deny_tcp": false,
+          "rebind_second": {
+            "address": null,
+            "tcp": false,
+            "udp": false
+          },
+          "mapped_metadata_udp": false,
+          "rollout_invalid_token": 401,
+          "dns_denied_udp": null,
+          "dns_udp": null,
+          "rollout_unauthenticated": 401,
+          "mapped_allow_tcp": false,
+          "control_tcp": false,
+          "mapped_control_udp": false,
+          "learned_v4_tcp": false,
+          "v4_allow_tcp": false,
+          "dns_private6": null,
+          "mapped_deny_udp": false,
+          "v4_deny_udp": false,
+          "learned_v4_udp": false,
+          "mapped_deny_tcp": false,
+          "v4_allow_udp": false,
+          "control_udp": false,
+          "mapped_allow_udp": false,
+          "private6_tcp": false,
+          "dns_aaaa": null,
+          "private6_udp": false,
+          "gateway_udp": false,
+          "rebind": {
+            "address": null,
+            "tcp": false,
+            "udp": false
+          },
+          "v4_deny_tcp": false,
+          "dns_denied_tcp": null,
+          "v6_allow_tcp": true,
+          "mapped_metadata_tcp": false,
+          "learned_v6_tcp": true,
+          "metadata_udp": false,
+          "gateway_tcp": false,
+          "loopback": {
+            "address": null,
+            "tcp": false,
+            "udp": false
+          },
+          "metadata_tcp": false,
+          "learned_private6_udp": false,
+          "metadata": {
+            "address": null,
+            "tcp": false,
+            "udp": false
+          },
+          "v6_deny_udp": false,
+          "learned_v6_udp": true,
+          "dns_alternate_tcp": null,
+          "v6_allow_udp": true,
+          "mapped_control_tcp": false,
+          "dns_alternate_denied": null,
+          "management_route": 404,
+          "dns_suffix": null
+        }
+      },
+      "network-extended-hosts": {
+        "restart": {
+          "control_tcp": false,
+          "control_udp": false,
+          "mapped_allow_tcp": false,
+          "mapped_allow_udp": false,
+          "mapped_control_tcp": false,
+          "mapped_control_udp": false,
+          "mapped_deny_tcp": false,
+          "mapped_deny_udp": false,
+          "mapped_metadata_tcp": false,
+          "mapped_metadata_udp": false,
+          "metadata_tcp": false,
+          "metadata_udp": false,
+          "private6_tcp": false,
+          "private6_udp": false,
+          "v4_allow_tcp": false,
+          "v4_allow_udp": false,
+          "v4_deny_tcp": false,
+          "v4_deny_udp": false,
+          "v6_allow_tcp": false,
+          "v6_allow_udp": false,
+          "v6_deny_tcp": false,
+          "v6_deny_udp": false
+        },
+        "status": "passed",
+        "mode": "hosts",
+        "observations": {
+          "learned_private6_tcp": false,
+          "dns_tcp": "198.18.0.10",
+          "v6_deny_tcp": false,
+          "rebind_second": {
+            "address": "10.77.0.10",
+            "tcp": false,
+            "udp": false
+          },
+          "mapped_metadata_udp": false,
+          "rollout_invalid_token": 401,
+          "dns_denied_udp": null,
+          "dns_udp": "198.18.0.10",
+          "rollout_unauthenticated": 401,
+          "mapped_allow_tcp": false,
+          "control_tcp": false,
+          "mapped_control_udp": false,
+          "learned_v4_tcp": true,
+          "v4_allow_tcp": false,
+          "dns_private6": "fd00::10",
+          "mapped_deny_udp": false,
+          "v4_deny_udp": false,
+          "learned_v4_udp": true,
+          "mapped_deny_tcp": false,
+          "v4_allow_udp": false,
+          "control_udp": false,
+          "mapped_allow_udp": false,
+          "private6_tcp": false,
+          "dns_aaaa": "2001:db8::10",
+          "private6_udp": false,
+          "gateway_udp": false,
+          "rebind": {
+            "address": "198.18.0.10",
+            "tcp": true,
+            "udp": true
+          },
+          "v4_deny_tcp": false,
+          "dns_denied_tcp": null,
+          "v6_allow_tcp": false,
+          "mapped_metadata_tcp": false,
+          "learned_v6_tcp": true,
+          "metadata_udp": false,
+          "gateway_tcp": false,
+          "loopback": {
+            "address": "127.0.0.1",
+            "tcp": false,
+            "udp": false
+          },
+          "metadata_tcp": false,
+          "learned_private6_udp": false,
+          "metadata": {
+            "address": "169.254.169.254",
+            "tcp": false,
+            "udp": false
+          },
+          "v6_deny_udp": false,
+          "learned_v6_udp": true,
+          "dns_alternate_tcp": null,
+          "v6_allow_udp": false,
+          "mapped_control_tcp": false,
+          "dns_alternate_denied": null,
+          "management_route": 404,
+          "dns_suffix": null
+        }
+      },
+      "network-extended-strict": {
+        "restart": {
+          "control_tcp": false,
+          "control_udp": false,
+          "mapped_allow_tcp": false,
+          "mapped_allow_udp": false,
+          "mapped_control_tcp": false,
+          "mapped_control_udp": false,
+          "mapped_deny_tcp": false,
+          "mapped_deny_udp": false,
+          "mapped_metadata_tcp": false,
+          "mapped_metadata_udp": false,
+          "metadata_tcp": false,
+          "metadata_udp": false,
+          "private6_tcp": false,
+          "private6_udp": false,
+          "v4_allow_tcp": false,
+          "v4_allow_udp": false,
+          "v4_deny_tcp": false,
+          "v4_deny_udp": false,
+          "v6_allow_tcp": false,
+          "v6_allow_udp": false,
+          "v6_deny_tcp": false,
+          "v6_deny_udp": false
+        },
+        "status": "passed",
+        "mode": "strict",
+        "observations": {
+          "learned_private6_tcp": false,
+          "dns_tcp": "198.18.0.10",
+          "v6_deny_tcp": false,
+          "rebind_second": {
+            "address": "10.77.0.10",
+            "tcp": false,
+            "udp": false
+          },
+          "mapped_metadata_udp": false,
+          "rollout_invalid_token": 401,
+          "dns_denied_udp": null,
+          "dns_udp": "198.18.0.10",
+          "rollout_unauthenticated": 401,
+          "mapped_allow_tcp": false,
+          "control_tcp": false,
+          "mapped_control_udp": false,
+          "learned_v4_tcp": true,
+          "v4_allow_tcp": false,
+          "dns_private6": "fd00::10",
+          "mapped_deny_udp": false,
+          "v4_deny_udp": false,
+          "learned_v4_udp": true,
+          "mapped_deny_tcp": false,
+          "v4_allow_udp": false,
+          "control_udp": false,
+          "mapped_allow_udp": false,
+          "private6_tcp": false,
+          "dns_aaaa": "2001:db8::10",
+          "private6_udp": false,
+          "gateway_udp": false,
+          "rebind": {
+            "address": "198.18.0.10",
+            "tcp": true,
+            "udp": true
+          },
+          "v4_deny_tcp": false,
+          "dns_denied_tcp": null,
+          "v6_allow_tcp": false,
+          "mapped_metadata_tcp": false,
+          "learned_v6_tcp": true,
+          "metadata_udp": false,
+          "gateway_tcp": false,
+          "loopback": {
+            "address": "127.0.0.1",
+            "tcp": false,
+            "udp": false
+          },
+          "metadata_tcp": false,
+          "learned_private6_udp": false,
+          "metadata": {
+            "address": "169.254.169.254",
+            "tcp": false,
+            "udp": false
+          },
+          "v6_deny_udp": false,
+          "learned_v6_udp": true,
+          "dns_alternate_tcp": null,
+          "v6_allow_udp": false,
+          "mapped_control_tcp": false,
+          "dns_alternate_denied": null,
+          "management_route": 404,
+          "dns_suffix": null
+        }
+      }
+    },
+    "workload_runners": {
+      "workload-smoke": {
+        "seconds": 31.921,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 85,
+        "output_sha256": "6a1dca8725ee6e2c4d13065afee978db96610095d1a4e4c2cf366bc799a2e15f"
+      },
+      "workload-node": {
+        "seconds": 36.36,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 85,
+        "output_sha256": "4dfc2bd2c8a96f8436846a4e57ebe2124959cf10f3fc25f2bb5ae9ead811c9dc"
+      },
+      "workload-geometry": {
+        "seconds": 33.469,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 89,
+        "output_sha256": "5bc628f6c1d1e9aa64c020f158e0864f1f06d7145ab466c07142ddc201bd5a74"
+      },
+      "workload-memory": {
+        "seconds": 33.648,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 87,
+        "output_sha256": "31362e895d8a6b8b4308cdf0a88857e0756fda781fb3a1fd10878f2129e80fb9"
+      },
+      "workload-cpu": {
+        "seconds": 41.448,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 84,
+        "output_sha256": "f4551224490e69caf142909ac0dbe43797202e30f64f2c78ab378405c899c09f"
+      },
+      "workload-processes": {
+        "seconds": 36.775,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 90,
+        "output_sha256": "bb592525ab32d81e4786dff749322a5660cf6f386caef5f716d1ae02b056de71"
+      },
+      "workload-output": {
+        "seconds": 33.247,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 87,
+        "output_sha256": "c661de4373163b0c0f37b41bb228fe858ef74f82c5c8657b1210141112b666cf"
+      },
+      "workload-slow_reader": {
+        "seconds": 35.656,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 92,
+        "output_sha256": "524439b9610ddc239c9b081e6d0b1759792ab1e9be95af9fd86392da9a40ae45"
+      },
+      "workload-isolation": {
+        "seconds": 31.253,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 89,
+        "output_sha256": "96accf9d7187e3732943d8f6947fe0e8664028ae00638a11536e98574403ff2b"
+      },
+      "workload-files": {
+        "seconds": 34.463,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 86,
+        "output_sha256": "3760df5a04173af60afe3a7cd2ab1d554b92d2a0ce32c342400118316f783f0e"
+      }
+    },
+    "service_recovery": {
+      "linux-service-restart": {
+        "seconds": 100.761,
+        "status": "passed",
+        "partition": "restart-11756f7bcbfe9d8b",
+        "result": {
+          "absence_at_ms": 1789712262691,
+          "artifacts": [],
+          "cancel_requested_at_ms": null,
+          "cleanup": "complete",
+          "collection": "pending",
+          "evidence": "termination_confirmed",
+          "exit_code": null,
+          "id": "restart-11756f7bcbfe9d8b",
+          "machine_name": "sbxexample-cj7k2q3bdnwlzmv237p2",
+          "reserved": false,
+          "scope": "example",
+          "state": "unknown",
+          "worker_id": "example-worker"
+        },
+        "platform": "linux",
+        "scenario": "restart",
+        "dispatch_attempts": 1,
+        "guest_marker": "single byte before recovery",
+        "guest_survived_api_server": true,
+        "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+        "runtime_version": "1.16.1",
+        "outage_seconds": 0.051,
+        "operator_deleted_vm": false
+      },
+      "linux-service-unavailable": {
+        "seconds": 137.787,
+        "status": "passed",
+        "partition": "restart-5126013665da70bb",
+        "result": {
+          "absence_at_ms": 1789712401724,
+          "artifacts": [],
+          "cancel_requested_at_ms": 1789712279672,
+          "cleanup": "complete",
+          "collection": "pending",
+          "evidence": "termination_confirmed",
+          "exit_code": null,
+          "id": "restart-5126013665da70bb",
+          "machine_name": "sbxexample-2v35b6c3i5kakpnrtpzm",
+          "reserved": false,
+          "scope": "example",
+          "state": "unknown",
+          "worker_id": "example-worker"
+        },
+        "platform": "linux",
+        "scenario": "unavailable",
+        "dispatch_attempts": 1,
+        "guest_marker": "single byte before recovery",
+        "guest_survived_api_server": true,
+        "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+        "runtime_version": "1.16.1",
+        "outage_seconds": 89.964,
+        "operator_deleted_vm": true
+      },
+      "linux-service-missing": {
+        "seconds": 16.913,
+        "status": "passed",
+        "partition": "restart-e020516734118e23",
+        "result": {
+          "absence_at_ms": 1789712419912,
+          "artifacts": [],
+          "cancel_requested_at_ms": null,
+          "cleanup": "complete",
+          "collection": "pending",
+          "evidence": "termination_confirmed",
+          "exit_code": null,
+          "id": "restart-e020516734118e23",
+          "machine_name": "sbxexample-xfitf5zhuwd6v3jqzvd4",
+          "reserved": false,
+          "scope": "example",
+          "state": "unknown",
+          "worker_id": "example-worker"
+        },
+        "platform": "linux",
+        "scenario": "missing",
+        "dispatch_attempts": 1,
+        "guest_marker": "single byte before recovery",
+        "guest_survived_api_server": true,
+        "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+        "runtime_version": "1.16.1",
+        "outage_seconds": 0.051,
+        "operator_deleted_vm": true
+      }
+    },
+    "resource_observations": {
+      "smoke": {
+        "machine": "qual-owrbjmjgbgzbamgwnn5y",
+        "status": "passed",
+        "cleanup": "verified_absent",
+        "source": "qualification-probe.exs",
+        "scenario": "smoke",
+        "runtime_version": "1.16.1",
+        "before": "MainPID=2220\nResult=success\nMemoryPeak=156446720\nTasksCurrent=4\nActiveState=active\nInvocationID=8e153f909e2a4a6b815911b3b42190d1\nmemory.current\n155992064\nmemory.peak\n156446720\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 21800208\nuser_usec 21634264\nsystem_usec 165943\ncore_sched.force_idle_usec 0\nnr_periods 221\nnr_throttled 17\nthrottled_usec 17913\nnr_bursts 0\nburst_usec 0\npids.current\n4\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    172032  66936832   1% /srv/sbq/control\nsmolbox-qualification 805306368 136511488 668794880  17% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+        "observations": {
+          "system": "Linux"
+        },
+        "vm_boundary": "VMM PID 2369\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n",
+        "after_workload": "MainPID=2220\nResult=success\nMemoryPeak=374534144\nTasksCurrent=23\nActiveState=active\nInvocationID=8e153f909e2a4a6b815911b3b42190d1\nmemory.current\n374280192\nmemory.peak\n374534144\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 30784386\nuser_usec 26989052\nsystem_usec 3795333\ncore_sched.force_idle_usec 0\nnr_periods 313\nnr_throttled 105\nthrottled_usec 4005262\nnr_bursts 0\nburst_usec 0\npids.current\n23\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    176128  66932736   1% /srv/sbq/control\nsmolbox-qualification 805306368 189227008 616079360  24% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+        "elapsed_ms": 9534
+      },
+      "node": {
+        "machine": "qual-nrmep65ezyg4j343nqjx",
+        "status": "passed",
+        "cleanup": "verified_absent",
+        "source": "qualification-probe.exs",
+        "scenario": "node",
+        "runtime_version": "1.16.1",
+        "before": "MainPID=2898\nResult=success\nMemoryPeak=273391616\nTasksCurrent=4\nActiveState=active\nInvocationID=af6ae09dfbbf456c8b5d2ea30e31818b\nmemory.current\n272719872\nmemory.peak\n273391616\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 22022671\nuser_usec 21831699\nsystem_usec 190972\ncore_sched.force_idle_usec 0\nnr_periods 224\nnr_throttled 22\nthrottled_usec 17189\nnr_bursts 0\nburst_usec 0\npids.current\n4\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    172032  66936832   1% /srv/sbq/control\nsmolbox-qualification 805306368 252936192 552370176  32% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+        "observations": {
+          "node": "executed"
+        },
+        "vm_boundary": "VMM PID 3054\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n",
+        "after_workload": "MainPID=2898\nResult=success\nMemoryPeak=742371328\nTasksCurrent=22\nActiveState=active\nInvocationID=af6ae09dfbbf456c8b5d2ea30e31818b\nmemory.current\n741687296\nmemory.peak\n742371328\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 35074295\nuser_usec 29511649\nsystem_usec 5562646\ncore_sched.force_idle_usec 0\nnr_periods 358\nnr_throttled 150\nthrottled_usec 5450992\nnr_bursts 0\nburst_usec 0\npids.current\n22\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    176128  66932736   1% /srv/sbq/control\nsmolbox-qualification 805306368 432955392 372350976  54% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+        "elapsed_ms": 13806
+      },
+      "geometry": {
+        "machine": "qual-2pilphdolvoiaoayecnc",
+        "status": "passed",
+        "cleanup": "verified_absent",
+        "source": "qualification-probe.exs",
+        "scenario": "geometry",
+        "runtime_version": "1.16.1",
+        "before": "MainPID=3575\nResult=success\nMemoryPeak=140910592\nTasksCurrent=3\nActiveState=active\nInvocationID=86ae4866acb24079a9e35f86bda04080\nmemory.current\n138076160\nmemory.peak\n140910592\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 435000\nuser_usec 280890\nsystem_usec 154109\ncore_sched.force_idle_usec 0\nnr_periods 8\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\npids.current\n3\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    172032  66936832   1% /srv/sbq/control\nsmolbox-qualification 805306368 130867200 674439168  17% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+        "observations": {
+          "filesystem_bytes": 1038790656,
+          "raw_disk_bytes": [
+            1073741824,
+            1073741824
+          ],
+          "stop_start_persistence": true,
+          "uid": 0
+        },
+        "vm_boundary": "VMM PID 3673\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n",
+        "after_workload": "MainPID=3575\nResult=success\nMemoryPeak=374255616\nTasksCurrent=25\nActiveState=active\nInvocationID=86ae4866acb24079a9e35f86bda04080\nmemory.current\n305328128\nmemory.peak\n374255616\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 32052380\nuser_usec 27523120\nsystem_usec 4529260\ncore_sched.force_idle_usec 0\nnr_periods 329\nnr_throttled 254\nthrottled_usec 18528300\nnr_bursts 0\nburst_usec 0\npids.current\n25\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    184320  66924544   1% /srv/sbq/control\nsmolbox-qualification 805306368 200495104 604811264  25% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+        "elapsed_ms": 32448
+      },
+      "memory": {
+        "machine": "qual-rzpp5moc65hk753kvkzg",
+        "status": "passed",
+        "cleanup": "verified_absent",
+        "source": "qualification-probe.exs",
+        "scenario": "memory",
+        "runtime_version": "1.16.1",
+        "before": "MainPID=4218\nResult=success\nMemoryPeak=156524544\nTasksCurrent=4\nActiveState=active\nInvocationID=435ac0c55957479dae75c1ccc5c7f280\nmemory.current\n156020736\nmemory.peak\n156524544\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 22503002\nuser_usec 22327056\nsystem_usec 175946\ncore_sched.force_idle_usec 0\nnr_periods 229\nnr_throttled 13\nthrottled_usec 10962\nnr_bursts 0\nburst_usec 0\npids.current\n4\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    172032  66936832   1% /srv/sbq/control\nsmolbox-qualification 805306368 136511488 668794880  17% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+        "observations": {
+          "dmesg_exit": 0,
+          "oom_log": [
+            "[    9.914101] Out of memory: Killed process 459 (python) total-vm:208480kB, anon-rss:199424kB, file-rss:196kB, shmem-rss:0kB, UID:0 pgtables:444kB oom_score_adj:0"
+          ],
+          "returncode": -9
+        },
+        "vm_boundary": "VMM PID 4315\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n",
+        "after_workload": "MainPID=4218\nResult=success\nMemoryPeak=527441920\nTasksCurrent=22\nActiveState=active\nInvocationID=435ac0c55957479dae75c1ccc5c7f280\nmemory.current\n526794752\nmemory.peak\n527441920\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 32199076\nuser_usec 28412720\nsystem_usec 3786355\ncore_sched.force_idle_usec 0\nnr_periods 332\nnr_throttled 106\nthrottled_usec 3546553\nnr_bursts 0\nburst_usec 0\npids.current\n22\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    176128  66932736   1% /srv/sbq/control\nsmolbox-qualification 805306368 202924032 602382336  26% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+        "elapsed_ms": 10615
+      },
+      "cpu": {
+        "machine": "qual-7zroxz3izcffa65clfhj",
+        "status": "passed",
+        "cleanup": "verified_absent",
+        "source": "qualification-probe.exs",
+        "scenario": "cpu",
+        "runtime_version": "1.16.1",
+        "before": "MainPID=4832\nResult=success\nMemoryPeak=156418048\nTasksCurrent=4\nActiveState=active\nInvocationID=dd427a7e80724b97a2ca32b1306a06cd\nmemory.current\n155963392\nmemory.peak\n156418048\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 23073495\nuser_usec 22918500\nsystem_usec 154994\ncore_sched.force_idle_usec 0\nnr_periods 234\nnr_throttled 23\nthrottled_usec 12727\nnr_bursts 0\nburst_usec 0\npids.current\n4\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    172032  66936832   1% /srv/sbq/control\nsmolbox-qualification 805306368 136511488 668794880  17% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+        "observations": {
+          "exit_codes": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "seconds": 8.086777801
+        },
+        "vm_boundary": "VMM PID 4928\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n",
+        "after_workload": "MainPID=4832\nResult=success\nMemoryPeak=382476288\nTasksCurrent=23\nActiveState=active\nInvocationID=dd427a7e80724b97a2ca32b1306a06cd\nmemory.current\n381837312\nmemory.peak\n382476288\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 40336866\nuser_usec 36497916\nsystem_usec 3838949\ncore_sched.force_idle_usec 0\nnr_periods 409\nnr_throttled 194\nthrottled_usec 11924927\nnr_bursts 0\nburst_usec 0\npids.current\n23\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    176128  66932736   1% /srv/sbq/control\nsmolbox-qualification 805306368 190930944 614375424  24% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+        "elapsed_ms": 17822
+      },
+      "processes": {
+        "machine": "qual-gl3bnnmintfvnhjiofme",
+        "status": "passed",
+        "cleanup": "verified_absent",
+        "source": "qualification-probe.exs",
+        "scenario": "processes",
+        "runtime_version": "1.16.1",
+        "before": "MainPID=5507\nResult=success\nMemoryPeak=156512256\nTasksCurrent=4\nActiveState=active\nInvocationID=5e7796642d47469f91ecdf75dcd37580\nmemory.current\n156008448\nmemory.peak\n156512256\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 21370083\nuser_usec 21193140\nsystem_usec 176942\ncore_sched.force_idle_usec 0\nnr_periods 216\nnr_throttled 35\nthrottled_usec 10918\nnr_bursts 0\nburst_usec 0\npids.current\n4\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    172032  66936832   1% /srv/sbq/control\nsmolbox-qualification 805306368 136511488 668794880  17% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+        "observations": {
+          "children": 192,
+          "errno": null
+        },
+        "vm_boundary": "VMM PID 5603\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n",
+        "after_workload": "MainPID=5507\nResult=success\nMemoryPeak=421138432\nTasksCurrent=23\nActiveState=active\nInvocationID=5e7796642d47469f91ecdf75dcd37580\nmemory.current\n420360192\nmemory.peak\n421138432\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 31145304\nuser_usec 27133152\nsystem_usec 4012152\ncore_sched.force_idle_usec 0\nnr_periods 363\nnr_throttled 125\nthrottled_usec 4138120\nnr_bursts 0\nburst_usec 0\npids.current\n23\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    176128  66932736   1% /srv/sbq/control\nsmolbox-qualification 805306368 191586304 613720064  24% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+        "elapsed_ms": 14915
+      },
+      "output": {
+        "machine": "qual-c5ys5fiqlmfkt2lwfg2x",
+        "status": "passed",
+        "cleanup": "verified_absent",
+        "source": "qualification-probe.exs",
+        "scenario": "output",
+        "runtime_version": "1.16.1",
+        "before": "MainPID=6793\nResult=success\nMemoryPeak=156430336\nTasksCurrent=4\nActiveState=active\nInvocationID=783ffc9afb3e4865a7fe75e8ab1569cf\nmemory.current\n155979776\nmemory.peak\n156430336\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 22564369\nuser_usec 22402426\nsystem_usec 161942\ncore_sched.force_idle_usec 0\nnr_periods 231\nnr_throttled 20\nthrottled_usec 16969\nnr_bursts 0\nburst_usec 0\npids.current\n4\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    172032  66936832   1% /srv/sbq/control\nsmolbox-qualification 805306368 136511488 668794880  17% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+        "observations": {
+          "category": "output_limit",
+          "producer_upper_bound": 134217728,
+          "captured_limit": 65536,
+          "completed_transfer": false
+        },
+        "vm_boundary": "VMM PID 6893\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n",
+        "after_workload": "MainPID=6793\nResult=success\nMemoryPeak=371658752\nTasksCurrent=22\nActiveState=active\nInvocationID=783ffc9afb3e4865a7fe75e8ab1569cf\nmemory.current\n371449856\nmemory.peak\n371748864\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 31942202\nuser_usec 28069707\nsystem_usec 3872494\ncore_sched.force_idle_usec 0\nnr_periods 327\nnr_throttled 111\nthrottled_usec 3673509\nnr_bursts 0\nburst_usec 0\npids.current\n22\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    176128  66932736   1% /srv/sbq/control\nsmolbox-qualification 805306368 189620224 615686144  24% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+        "elapsed_ms": 10164
+      },
+      "slow_reader": {
+        "machine": "qual-ipx2dzp4rp6zysrxqgnf",
+        "status": "passed",
+        "cleanup": "verified_absent",
+        "source": "qualification-probe.exs",
+        "scenario": "slow_reader",
+        "runtime_version": "1.16.1",
+        "before": "MainPID=7462\nResult=success\nMemoryPeak=156262400\nTasksCurrent=4\nActiveState=active\nInvocationID=f93e5263b4304d959bbac31cd4496729\nmemory.current\n156188672\nmemory.peak\n156262400\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 23018482\nuser_usec 22841487\nsystem_usec 176995\ncore_sched.force_idle_usec 0\nnr_periods 236\nnr_throttled 32\nthrottled_usec 8587\nnr_bursts 0\nburst_usec 0\npids.current\n4\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    172032  66936832   1% /srv/sbq/control\nsmolbox-qualification 805306368 136511488 668794880  17% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+        "observations": {
+          "category": "transport",
+          "producer_upper_bound": 134217728,
+          "captured_limit": 65536,
+          "completed_transfer": false
+        },
+        "vm_boundary": "VMM PID 7620\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n",
+        "after_workload": "MainPID=7462\nResult=success\nMemoryPeak=373870592\nTasksCurrent=22\nActiveState=active\nInvocationID=f93e5263b4304d959bbac31cd4496729\nmemory.current\n373207040\nmemory.peak\n373870592\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 33060319\nuser_usec 28700526\nsystem_usec 4359792\ncore_sched.force_idle_usec 0\nnr_periods 349\nnr_throttled 131\nthrottled_usec 4711973\nnr_bursts 0\nburst_usec 0\npids.current\n22\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    176128  66932736   1% /srv/sbq/control\nsmolbox-qualification 805306368 190799872 614506496  24% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+        "elapsed_ms": 12121
+      },
+      "isolation": {
+        "machine": "qual-urfnkowix33hibobyxuy",
+        "status": "passed",
+        "cleanup": "verified_absent",
+        "source": "qualification-probe.exs",
+        "scenario": "isolation",
+        "runtime_version": "1.16.1",
+        "before": "MainPID=8137\nResult=success\nMemoryPeak=156708864\nTasksCurrent=4\nActiveState=active\nInvocationID=d0bbb6acf45b4663a955d71e36f09631\nmemory.current\n156004352\nmemory.peak\n156708864\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 21027883\nuser_usec 20846923\nsystem_usec 180960\ncore_sched.force_idle_usec 0\nnr_periods 216\nnr_throttled 35\nthrottled_usec 7595\nnr_bursts 0\nburst_usec 0\npids.current\n4\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    172032  66936832   1% /srv/sbq/control\nsmolbox-qualification 805306368 136511488 668794880  17% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+        "observations": {
+          "control_env_present": false,
+          "endpoints": {
+            "1.1.1.1:443": "101",
+            "10.0.2.2:22": "101",
+            "10.0.2.2:22460": "101",
+            "100.96.0.1:10081": "101",
+            "127.0.0.1:19470": "111",
+            "169.254.169.254:80": "101"
+          },
+          "host_paths": {
+            "/dev/kvm": false,
+            "/etc/smolbox-qualification-canary": false,
+            "/home/lab/.ssh/authorized_keys": false,
+            "/srv/sbq/control/smolvm/server/smolvm.db": false,
+            "/srv/sbq/run/api.sock": false,
+            "/var/lib/smolbox-lab/home/id_ed25519": false
+          },
+          "uid": 0,
+          "vsock": {
+            "10081": "None",
+            "6000": "104",
+            "6004": "104"
+          }
+        },
+        "vm_boundary": "VMM PID 8233\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n",
+        "after_workload": "MainPID=8137\nResult=success\nMemoryPeak=378458112\nTasksCurrent=23\nActiveState=active\nInvocationID=d0bbb6acf45b4663a955d71e36f09631\nmemory.current\n377610240\nmemory.peak\n378458112\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 29559678\nuser_usec 25784047\nsystem_usec 3775630\ncore_sched.force_idle_usec 0\nnr_periods 310\nnr_throttled 116\nthrottled_usec 3814142\nnr_bursts 0\nburst_usec 0\npids.current\n23\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    176128  66932736   1% /srv/sbq/control\nsmolbox-qualification 805306368 190275584 615030784  24% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+        "elapsed_ms": 9711
+      },
+      "files": {
+        "machine": "qual-awk2lylppbxo5qb2p3vf",
+        "status": "passed",
+        "cleanup": "verified_absent",
+        "source": "qualification-probe.exs",
+        "scenario": "files",
+        "runtime_version": "1.16.1",
+        "before": "MainPID=8751\nResult=success\nMemoryPeak=156700672\nTasksCurrent=4\nActiveState=active\nInvocationID=3d0cb5f101014558968d467f5001e0ad\nmemory.current\n155996160\nmemory.peak\n156700672\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 22493002\nuser_usec 22316010\nsystem_usec 176991\ncore_sched.force_idle_usec 0\nnr_periods 229\nnr_throttled 14\nthrottled_usec 16083\nnr_bursts 0\nburst_usec 0\npids.current\n4\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    172032  66936832   1% /srv/sbq/control\nsmolbox-qualification 805306368 136511488 668794880  17% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+        "observations": {
+          "symlink": "guest-only target readable; no workspace containment claim",
+          "fifo": "observation deadline; VM cleanup required"
+        },
+        "vm_boundary": "VMM PID 8846\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n",
+        "after_workload": "MainPID=8751\nResult=success\nMemoryPeak=378052608\nTasksCurrent=22\nActiveState=active\nInvocationID=3d0cb5f101014558968d467f5001e0ad\nmemory.current\n377495552\nmemory.peak\n378052608\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 32261248\nuser_usec 27862882\nsystem_usec 4398365\ncore_sched.force_idle_usec 0\nnr_periods 337\nnr_throttled 110\nthrottled_usec 4852316\nnr_bursts 0\nburst_usec 0\npids.current\n22\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    176128  66932736   1% /srv/sbq/control\nsmolbox-qualification 805306368 190279680 615026688  24% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+        "elapsed_ms": 11413
+      }
+    }
+  },
+  "corrected_attempts": [
+    {
+      "kind": "negative version fixture",
+      "observation": "Initial CI still rejected 1.16.1 in a stale negative test; replaced it with unsupported 1.16.1-dev/1.16.2 and added positive admission coverage. Corrected CI passed.",
+      "log_sha256": "6a812755b34c79a737c1f61a8a2ed686d8b63bec8a79eddfd5f14ca28696bae7"
+    },
+    {
+      "kind": "macOS geometry cache path",
+      "observation": "Initial probe looked in a Linux-style cache path; corrected to native macOS cache location. Corrected geometry/persistence passed; initial failure retained.",
+      "log_sha256": "ecdb81a266985d9ccfad409bd77ad033f7ab2cd0515fc2576068d0cbd135cbba"
+    },
+    {
+      "kind": "Linux store report count",
+      "observation": "17 cases passed, but report validator expected 16. Corrected count to 17 and reran successfully. Cleanup used an absolute path after the initial relative trap failed from the example directory.",
+      "log_sha256": "09d50c463c3803e83a378b0c012d0f9355e94ede045c5c07ac97a5792244b341"
+    },
+    {
+      "kind": "reproduction script lint",
+      "observation": "Credo rejected alias ordering in the new diagnostic script. Reordered aliases and reran canonical mix ci successfully.",
+      "log_sha256": "ff6f063a31b3a036cc5280f7d9b9e4d68f2f601672e3f526062e952fb4fc39be"
+    },
+    {
+      "kind": "manual analyzer environment",
+      "observation": "A standalone Dialyzer invocation used dev instead of the CI test environment and reported the existing blog EEx dependency. No suppression or library change was added. The canonical mix ci test-environment run passed.",
+      "log_sha256": "88822c82230b8954f020ba212ffd19abcd51aa30c23a12642fe6dae5cff27d9b"
+    }
+  ],
+  "limits": [
+    "Existing development qualification only; no hard host controls added to the public API.",
+    "No macOS exhaustion or adversarial testing; no macOS IPv6 or Linux ARM64 qualification.",
+    "Linux network fixtures verify reachable synthetic IPv4/IPv6 TCP/UDP endpoints, DNS, restart, strict private/control denial and unchanged gateway exceptions. They do not prove arbitrary-attack isolation.",
+    "No checkpoint, branching, GPU, SDK or Nix behavior qualified.",
+    "resize2fs positive geometry/persistence qualified; missing-tool behavior not repeated.",
+    "Short command/observation deadlines repeated; separate HTTP operations exceeding five minutes from the 1.16.0 campaign not repeated. Tagged exec/file handlers reviewed as unchanged.",
+    "Old macOS artifacts were unavailable; only newly prepared macOS artifacts qualified in this campaign.",
+    "No release, remote push or publication performed. 1.16.1 remains unsupported; successful candidate tests do not override the failed cleanup gate."
+  ],
+  "blocker": {
+    "classification": "Upstream graceful-stop preservation conflicts with existing stop-before-delete cleanup under storage exhaustion.",
+    "upstream_change": "3c5c37014dc666972e6b6a16d72f2ee69ead4a32",
+    "original_disk_runner": {
+      "seconds": 33.17,
+      "status": "failed",
+      "failure": null,
+      "exit_code": 1,
+      "captured_bytes": 180,
+      "output_sha256": "b70874bd7d0bd0b5fa22c5cb4435b7c2d2d95af50b245eafeb4e3080f6b706af"
+    },
+    "original_disk_observation": {
+      "machine": "qual-psxpfjunrmgkzkecbxmg",
+      "status": "failed",
+      "cleanup": "{:error, %SmolBox.Error{category: :protocol, operation: :stop, exit_code: nil, evidence: :dispatch_uncertain}}",
+      "source": "qualification-probe.exs",
+      "scenario": "disk",
+      "runtime_version": "1.16.1",
+      "before": "MainPID=6120\nResult=success\nMemoryPeak=156442624\nTasksCurrent=4\nActiveState=active\nInvocationID=9598f00d00d3497aa6f5087494221e37\nmemory.current\n155979776\nmemory.peak\n156442624\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 20476467\nuser_usec 20302498\nsystem_usec 173969\ncore_sched.force_idle_usec 0\nnr_periods 208\nnr_throttled 19\nthrottled_usec 7366\nnr_bursts 0\nburst_usec 0\npids.current\n4\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    172032  66936832   1% /srv/sbq/control\nsmolbox-qualification 805306368 136511488 668794880  17% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+      "observations": {
+        "errno": 5,
+        "written": 586153984
+      },
+      "vm_boundary": "VMM PID 6277\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\nCapEff:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t23\n",
+      "after_workload": "MainPID=6120\nResult=success\nMemoryPeak=1131077632\nTasksCurrent=22\nActiveState=active\nInvocationID=9598f00d00d3497aa6f5087494221e37\nmemory.current\n1130418176\nmemory.peak\n1131077632\nmemory.events\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nmemory.max\n1610612736\nmemory.swap.max\n0\ncpu.max\n100000 100000\ncpu.stat\nusage_usec 32042517\nuser_usec 27428755\nsystem_usec 4613762\ncore_sched.force_idle_usec 0\nnr_periods 329\nnr_throttled 130\nthrottled_usec 3813051\nnr_bursts 0\nburst_usec 0\npids.current\n22\npids.max\n96\npids.events\nmax 0\nFilesystem            1B-blocks      Used Available Use% Mounted on\nsmolbox-qualification  67108864    176128  66932736   1% /srv/sbq/control\nsmolbox-qualification 805306368 805306368         0 100% /srv/sbq/cache\nsmolbox-qualification   4194304         0   4194304   0% /srv/sbq/run\n",
+      "elapsed_ms": 12177
+    },
+    "shared_storage_runner": {
+      "seconds": 11.762,
+      "status": "failed",
+      "failure": null,
+      "exit_code": 1,
+      "captured_bytes": 1875,
+      "output_sha256": "27ddd0eb93c55c1a7629d5a26f096d954687d1852dce87c9ac0e8f6d32e34e2a"
+    },
+    "shared_storage_observation": {
+      "label": "shared-storage-1161",
+      "status": "failed",
+      "version": "1.16.1",
+      "failure": "\n\nmatch (=) failed\ncode:  assert {:ok, stopped} = Client.stop(client, created.name)\nleft:  {:ok, stopped}\nright: {:error, %SmolBox.Error{category: :protocol, operation: :stop, exit_code: nil, evidence: :dispatch_uncertain}}\n",
+      "started_utc": "2026-09-18T06:15:46.398763Z",
+      "created": {
+        "name": "cleanup-ptbqn3c7dsntxrlue6k5",
+        "state": "created",
+        "cpus": 1,
+        "memory_mb": 256,
+        "storage_gb": 20,
+        "overlay_gb": 10,
+        "network": "offline",
+        "created_at": 1789712146
+      },
+      "before_fill": {
+        "available_bytes": 351522816,
+        "total_bytes": 536870912,
+        "used_bytes": 185348096
+      },
+      "fill": {
+        "error": {
+          "errno": 5,
+          "message": "I/O error"
+        },
+        "written_bytes": 330301440
+      },
+      "after_fill": {
+        "available_bytes": 0,
+        "total_bytes": 536870912,
+        "used_bytes": 536870912
+      },
+      "finished_utc": "2026-09-18T06:15:57.200621Z",
+      "limits": {
+        "cpu.max": "200000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "pids.max": "128"
+      },
+      "cgroup_before": {
+        "cpu.stat": "usage_usec 23437\nuser_usec 11209\nsystem_usec 12228\ncore_sched.force_idle_usec 0\nnr_periods 2\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "memory.peak": "5795840",
+        "pids.events": "max 0",
+        "pids.peak": "5"
+      },
+      "shared_filesystem": {
+        "paths": [
+          "/srv/smolbox-cleanup/data",
+          "/srv/smolbox-cleanup/data/.local/share/smolvm/server/smolvm.db",
+          "/srv/smolbox-cleanup/data/.cache/smolvm/vms/48823e822c64247e"
+        ],
+        "device_ids": [
+          "43",
+          "43",
+          "43"
+        ]
+      },
+      "nested_kvm_descriptors": true
+    },
+    "comparison": {
+      "1.16.0": {
+        "fill": {
+          "errno": 5,
+          "written": 586153984
+        },
+        "runtime_version": "1.16.0",
+        "stop_http_status": 200,
+        "stop_body": {
+          "blockIo": "sync",
+          "branchable": false,
+          "branchpointHeld": false,
+          "cpus": 2,
+          "createdAt": 1789712465,
+          "cuda": false,
+          "diskUsedMb": 762,
+          "forkable": false,
+          "forkpointHeld": false,
+          "gpu": false,
+          "memoryMb": 256,
+          "mounts": [],
+          "name": "diskstop-c2hd2tcqqjdm5iqcfnuk",
+          "network": false,
+          "overlayGb": 10,
+          "ports": [],
+          "state": "stopped",
+          "storageGb": 20
+        },
+        "state_after_stop": "stopped",
+        "same_incarnation": true,
+        "direct_delete_is_diagnostic_only": true,
+        "diagnostic_discard_cleanup": "verified_absent"
+      },
+      "1.16.1": {
+        "fill": {
+          "errno": 5,
+          "written": 586153984
+        },
+        "runtime_version": "1.16.1",
+        "stop_http_status": 500,
+        "stop_body": {
+          "code": "INTERNAL_ERROR",
+          "error": "machine 'diskstop-r26f3cu6ocgcimypwu6l' process may still be running after stop attempt"
+        },
+        "state_after_stop": "running",
+        "same_incarnation": true,
+        "direct_delete_is_diagnostic_only": true,
+        "diagnostic_discard_cleanup": "verified_absent"
+      }
+    },
+    "comparison_runners": {
+      "disk-stop-1160-runner": {
+        "seconds": 29.418,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 128,
+        "output_sha256": "776289bfd547653efc88903de18266fa63177129902243c0a21e3b34bce24f73"
+      },
+      "disk-stop-1161-runner": {
+        "seconds": 31.092,
+        "status": "passed",
+        "failure": null,
+        "exit_code": 0,
+        "captured_bytes": 128,
+        "output_sha256": "eeee4ff0aec146dba888374c6e1d82ea19b453c09ec97dd648e4cf3388680da9"
+      }
+    },
+    "direct_delete_scope": "Explicit diagnostic discard after collecting this synthetic workload; not managed cleanup and not an implemented fallback.",
+    "managed_effect": "Source inspection: managed cleanup retries after a failed stop and does not proceed to delete. Full-disk managed reservation behavior was not separately measured.",
+    "upstream_journal": "Sep 18 06:11:48 smolbox-nested smolvm[6120]: smolvm API server listening on unix:///srv/sbq/run/api.sock\nSep 18 06:12:22 smolbox-nested smolvm[6120]: 2026-09-18T06:12:22.228639Z  WARN shutdown acknowledgment failed error=agent operation failed: shutdown ack: freeze /storage: I/O error (os error 5)\nSep 18 06:12:22 smolbox-nested smolvm[6120]: 2026-09-18T06:12:22.228673Z  WARN graceful stop failed; preserving the live VM for retry name=qual-psxpfjunrmgkzkecbxmg error=agent operation failed: stop agent: guest did not confirm filesystem synchronization; left the VM alive for retry: agent operation failed: shutdown ack: freeze /storage: I/O error (os error 5)\nSep 18 06:12:22 smolbox-nested smolvm[6120]: Shutting down server (VMs continue running)...\n"
+  },
+  "quality": {
+    "candidate_ci": {
+      "tests": 215,
+      "seed": 421143,
+      "status": "passed",
+      "log_sha256": "bc92229e3ab9417d528a01e74cafa388114feca8a4552982d91ecfb3cbfa0a4f"
+    },
+    "candidate_coverage": {
+      "percent": 95.49,
+      "log_sha256": "f6066cdba0e00669a590a731db41a29fb4bc7191a9ce628108baae577d6c7827"
+    },
+    "analyzers": [
+      "Dialyzer",
+      "Credo",
+      "ex_dna",
+      "ex_slop",
+      "Credence"
+    ],
+    "canaries": "All eight positive/negative analyzer and coverage pairs passed during the candidate campaign.",
+    "final_branch_ci": {
+      "status": "passed",
+      "tests": 214,
+      "seed": 226992,
+      "command": "mix ci (canonical test environment)",
+      "log_sha256": "42ea3d9bb32d491686858189ae5067311d490365196b25fa0b61a2afdcfbf910",
+      "runtime_admission": "1.16.1 rejected; default 1.16.0 unchanged"
+    }
+  },
+  "private_evidence_archives": {
+    "first-cycle-evidence.tar": "9cf9c793a89f37fa74bd878d39303dd1e2b0098cbb85001337ce5edfb916dfa6",
+    "second-cycle-evidence.tar": "ed7f73968f29ea4662d8ec82892cd963c4f72329fec43c5d02af2dde29c1da26"
+  },
+  "teardown": {
+    "network-extended-cidr4-kvm.txt": "",
+    "disk-stop-1161-kvm.txt": "",
+    "post-isolation-kvm-fds.txt": "",
+    "service-exit-kvm-fds.txt": "",
+    "disk-stop-1160-kvm.txt": "",
+    "cleanup-1161-kvm-after.txt": "",
+    "network-offline-kvm.txt": "",
+    "post-service-unavailable-kvm-fds.txt": "",
+    "post-processes-kvm-fds.txt": "",
+    "post-service-missing-kvm-fds.txt": "",
+    "post-slow_reader-kvm-fds.txt": "",
+    "post-disk-kvm-fds.txt": "",
+    "post-files-kvm-fds.txt": "",
+    "network-extended-strict-kvm.txt": "",
+    "1161-kvm-after.txt": "",
+    "network-cidr-kvm.txt": "",
+    "network-extended-cidr6-kvm.txt": "",
+    "network-extended-offline-kvm.txt": "",
+    "post-memory-kvm-fds.txt": "",
+    "post-node-kvm-fds.txt": "",
+    "post-output-kvm-fds.txt": "",
+    "network-extended-hosts-kvm.txt": "",
+    "post-smoke-kvm-fds.txt": "",
+    "pre-comparison-kvm.txt": "",
+    "post-service-restart-kvm-fds.txt": "",
+    "network-hosts-kvm.txt": "",
+    "post-geometry-kvm-fds.txt": "",
+    "pre-service-kvm-fds.txt": "",
+    "post-cpu-kvm-fds.txt": ""
+  },
+  "final_lab_recovery": "RuntimeMaxUSec=45min\nMainPID=0\nResult=success\nExecMainCode=0\nExecMainStatus=0\nControlGroup=\nMemoryPeak=[not set]\nCPUUsageNSec=[not set]\nCPUQuotaPerSecUSec=4s\nMemoryMax=12884901888\nMemorySwapMax=0\nTasksMax=256\nActiveState=inactive\nSubState=dead\nInvocationID=\n{\n    \"children\": [\n        {\n            \"name\": \"file\",\n            \"info\": {\n                \"children\": [\n                ],\n                \"virtual-size\": 198656,\n                \"filename\": \"/var/lib/smolbox-lab/images/run.qcow2\",\n                \"format\": \"file\",\n                \"actual-size\": 200704,\n                \"format-specific\": {\n                    \"type\": \"file\",\n                    \"data\": {\n                    }\n                },\n                \"dirty-flag\": false\n            }\n        }\n    ],\n    \"backing-filename-format\": \"qcow2\",\n    \"virtual-size\": 107374182400,\n    \"filename\": \"/var/lib/smolbox-lab/images/run.qcow2\",\n    \"cluster-size\": 65536,\n    \"format\": \"qcow2\",\n    \"actual-size\": 200704,\n    \"format-specific\": {\n        \"type\": \"qcow2\",\n        \"data\": {\n            \"compat\": \"1.1\",\n            \"compression-type\": \"zlib\",\n            \"lazy-refcounts\": false,\n            \"refcount-bits\": 16,\n            \"corrupt\": false,\n            \"extended-l2\": false\n        }\n    },\n    \"full-backing-filename\": \"/var/lib/smolbox-lab/images/baseline.qcow2\",\n    \"backing-filename\": \"/var/lib/smolbox-lab/images/baseline.qcow2\",\n    \"dirty-flag\": false\n}\n"
+}

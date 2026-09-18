@@ -55,17 +55,8 @@ defmodule SmolBox.Runtime.Cleanup do
   defp finish_observation(session, record, observed) do
     if record.created_machine != nil and
          Machine.same_incarnation?(record.created_machine, observed) do
-      with {:ok, record} <- acknowledge_restart(session, record, observed),
-           :ok <- stop(session, record, observed),
-           {:ok, stopped} <- inspect_machine(session, record),
-           true <-
-             Machine.same_incarnation?(record.created_machine, stopped) and
-               stopped.state != :running do
-        retain_or_delete(session, record)
-      else
-        false -> retry(session, %Error{category: :cleanup, operation: :stop})
-        {:error, %Error{category: :not_found}} -> complete(session)
-        {:error, error} -> retry(session, error)
+      with {:ok, record} <- acknowledge_restart(session, record, observed) do
+        dispose_or_preserve(session, record, observed)
       end
     else
       Session.patch(session,
@@ -75,6 +66,12 @@ defmodule SmolBox.Runtime.Cleanup do
         last_error: %Error{category: :identity_conflict, operation: :cleanup}
       )
     end
+  end
+
+  defp dispose_or_preserve(session, record, observed) do
+    if preserve?(session, record),
+      do: stop_and_preserve(session, record, observed),
+      else: delete(session, record)
   end
 
   defp acknowledge_restart(session, %{evidence: :termination_confirmed}, %{state: :running}) do
@@ -97,24 +94,31 @@ defmodule SmolBox.Runtime.Cleanup do
 
   defp stop(_session, _record, _stopped), do: :ok
 
-  defp retain_or_delete(session, %{state: :unknown} = record) do
-    retain_until =
-      Map.get(record.deadlines, :execution, record.accepted_at_ms) + record.spec.retention_ms
+  defp preserve?(session, %{state: :unknown} = record),
+    do: Session.now(session) < retention_until(record)
 
-    if Session.now(session) < retain_until do
+  defp preserve?(_session, _record), do: false
+
+  defp retention_until(record),
+    do: Map.get(record.deadlines, :execution, record.accepted_at_ms) + record.spec.retention_ms
+
+  defp stop_and_preserve(session, record, observed) do
+    with :ok <- stop(session, record, observed),
+         {:ok, stopped} <- inspect_machine(session, record),
+         true <- Machine.same_incarnation?(record.created_machine, stopped),
+         true <- stopped.state != :running do
       Session.patch(session,
         evidence: :termination_confirmed,
         cleanup_attempts: max(record.cleanup_attempts - 1, 0),
         next_due_at_ms:
-          min(retain_until, Session.now(session) + max(1000, session.config.poll_ms))
+          min(retention_until(record), Session.now(session) + max(1000, session.config.poll_ms))
       )
     else
-      with {:ok, confirmed} <- Session.patch(session, evidence: :termination_confirmed),
-           do: delete(session, confirmed)
+      false -> retry(session, %Error{category: :cleanup, operation: :stop})
+      {:error, %Error{category: :not_found}} -> complete(session)
+      {:error, error} -> retry(session, error)
     end
   end
-
-  defp retain_or_delete(session, record), do: delete(session, record)
 
   defp delete(session, record) do
     case Session.io(session, record, :cleanup, fn ->

@@ -4,7 +4,62 @@ Version: `0.1.3`. The library's supported qualification is
 `:development`; requested hard-control options remain unsupported. The original
 release evidence below records the client/controller contract on Linux and macOS.
 
-## SmolVM 1.16.0 qualification
+## smolvm 1.16.1 qualification
+
+**Default in this checkout; unreleased.** Managed execution selects 1.16.1
+for a verified Linux x86_64 or macOS Apple Silicon worker. Controlled networking
+accepts it too. Explicit 1.16.0 support remains. The candidate passed the
+ordinary Linux/macOS execution, durable recovery and network enforcement suites,
+but initially failed two full-storage cleanup regressions in the disposable Linux lab.
+
+Version 1.16.1 requires confirmation that guest filesystems are synchronized
+before stopping a live VM. After storage exhaustion, synchronization returned an
+I/O error and stop failed, preserving the running VM. SmolBox correctly retained
+uncertainty; the original cleanup sequence did not advance from stop to delete.
+The unreleased follow-up now separates disposal from preservation, as described
+in [the recovery guide](recovery.md#preservation-and-disposal). This is an explicit
+state-based choice, not a destructive fallback after a stop error.
+
+The same controlled comparison returned HTTP 200 and a stopped machine on
+1.16.0, versus HTTP 500 and a running machine on 1.16.1. An explicit diagnostic
+delete of the synthetic workload succeeded afterward; that does not establish
+that managed cleanup succeeds or justify bypassing evidence retention.
+
+The candidate's positive results include 14 Linux and nine ordinary macOS runtime
+cases, 17 PostgreSQL store cases and 25 durable recovery cases on each platform,
+and the existing Linux IPv4/IPv6 and macOS IPv4/DNS network checks. Linux API
+restart, unavailability and missing-machine scenarios also passed, as did their
+macOS equivalents. These are evidence from the initial campaign, before the
+cleanup follow-up; they do not by themselves qualify the changed implementation.
+
+The follow-up's real managed executions have completed deletion, absence checks
+and reservation release on both a full 768 MiB cache and a full 512 MiB shared
+registry/data filesystem. A separate cancelled execution kept its unknown outcome,
+live machine and reservation when graceful stop failed, with no DELETE request.
+These are distinct scenarios: successful disposal does not establish successful
+preservation under disk exhaustion. The changed implementation also passed all
+25 real Linux recovery cases and nine ordinary macOS runtime cases on each of
+1.16.0 and 1.16.1. See the [follow-up evidence](evidence/cleanup-preservation-disposal.json)
+for source hashes, intermediate failures and the final results.
+
+See [the machine-readable evidence](evidence/smolvm-1.16.1.json) and the repository
+report `docs/runtime-1.16.1-qualification.md` for exact inputs, failures, the
+historical candidate patch and reproduction steps. The tested admission rules
+are now included in the library; no temporary patch is needed on this checkout.
+The [admission evidence](evidence/smolvm-1.16.1-admission.json) records the
+executable source comparison to the qualified candidate, fresh contract and macOS
+runtime tests, and package consumer checks. Linux evidence above is reused, not
+claimed as a new run. That checkpoint enabled explicit admission; the subsequent
+default selection change is recorded separately below. Neither introduces an
+additional API, record schema or production guarantee.
+
+The [default validation record](evidence/smolvm-1.16.1-default.json) covers the
+subsequent switch to 1.16.1: nine fresh macOS runtime cases without a version
+override, deterministic admission tests and current/minimum package consumers.
+The default value is the only executable library change from the admission
+checkpoint; prior Linux qualification is reused, with no fresh Linux run claimed.
+
+## smolvm 1.16.0 qualification
 
 SmolBox 0.1.3 defaults to `runtime_version: "1.16.0"` on Linux x86_64
 and macOS Apple Silicon after platform qualification. Explicit 1.14.1 and 1.14.6
@@ -83,7 +138,12 @@ support. Also follow the [record format upgrade procedure](recovery.md#upgrading
 A worker must report the exact configured version. Multiple supported versions
 do not imply automatic fallback or acceptance of arbitrary upstream releases.
 
-Linux ARM64 remains unsupported for 1.14.6 and 1.16.0. Native macOS testing covers
+This checkout defaults to `runtime_version: "1.16.1"` (unreleased); published
+0.1.3 does not support it. Set `runtime_version: "1.16.0"` explicitly before
+upgrading the library if you need to retain that worker. Install the worker
+separately and configure the exact version on every controller that owns it.
+
+Linux ARM64 remains unsupported for 1.14.6, 1.16.0 and 1.16.1. Native macOS testing covers
 ordinary compatibility and controlled lifecycle recovery. Exhaustion and
 adversarial testing remain in the disposable Linux lab.
 
@@ -176,7 +236,7 @@ Disk requests below the bundled 20 GiB storage / 10 GiB overlay templates need
 working `resize2fs` on the worker host. On macOS, install it with
 `brew install e2fsprogs`; upstream searches Homebrew's e2fsprogs directory and
 then the worker's `PATH`. Our private validation environment used e2fsprogs
-1.47.4 without changing the existing SmolVM installation.
+1.47.4 without changing the existing smolvm installation.
 
 The first run without that tool passed eight of nine ordinary runtime cases,
 but a workspace file disappeared after stopping and restarting its VM. The
@@ -232,7 +292,7 @@ test, example and dependency-lock contents are identical between those commits.
 | Quality canaries | 8 bad/clean pairs passed | 8 bad/clean pairs passed |
 | Standalone maintainer tools | 22 passed | 22 passed |
 | PostgreSQL store contract | 16 passed, PostgreSQL 17.10 | 16 passed, PostgreSQL 16.15 |
-| Real SmolVM client/runtime suite | 14 passed | 14 passed |
+| Real smolvm client/runtime suite | 14 passed | 14 passed |
 | Durable restart recovery | 25 passed | 25 passed |
 | Exact getting-started walkthrough | Passed | Passed |
 | Host examples | Both compiled and passed forced Dialyzer | Both compiled and passed forced Dialyzer |
@@ -248,7 +308,7 @@ dependency selections used OTP 29; they do not replace minimum-toolchain testing
 See the [macOS evidence](evidence/otp29-macos.json) and
 [Linux evidence](evidence/otp29-linux.json) for source hashes, seeds, runtime
 report digests and toolchain identity. No library code changes were needed for
-this pair. Each worker used pinned SmolVM 1.14.1 and its previously qualified
+this pair. Each worker used pinned smolvm 1.14.1 and its previously qualified
 native Python/Node artifacts. Dedicated socket-only test databases were stopped
 after checking empty execution/identity tables; actual database-outage rejection
 passed. Worker inventories were empty and existing services were preserved.
@@ -302,7 +362,7 @@ remaining release requirements.
 
 ## Pinned upstream
 
-- SmolVM `v1.14.1`, commit `e8d09ef616d363004d55b80a6cdb31a4e7e1842d`.
+- smolvm `v1.14.1`, commit `e8d09ef616d363004d55b80a6cdb31a4e7e1842d`.
 - macOS arm64 release archive SHA-256:
   `27f2ae7057f235a67a58fd13d0657c268cf9a16f214f8b177427d29daab0ae2f`.
 - Linux x86_64 release archive SHA-256:
@@ -326,12 +386,12 @@ Linux x86_64: `ssh linux`, kernel `7.1.5-76070105-generic`, readable/writable KV
 health/version. Both platforms pass the initial Python/Node smoke probe below.
 
 The Linux runtime uses `/tmp/smolbox-qualification/data` as a dedicated data root.
-Its login shell initially had no Elixir, Mix, or SmolVM on PATH; the pinned
-SmolVM distribution was extracted in `/tmp/smolbox-qualification/runtime`.
+Its login shell initially had no Elixir, Mix, or smolvm on PATH; the pinned
+smolvm distribution was extracted in `/tmp/smolbox-qualification/runtime`.
 Elixir 1.20.4 / OTP 28.5 was installed under `/tmp/smolbox-qualification/mise`
 for library tests, without changing the account's global toolchain.
 macOS uses unique test machine
-names in the normal SmolVM state directory: `SMOLVM_DATA_DIR` is Linux-only in
+names in the normal smolvm state directory: `SMOLVM_DATA_DIR` is Linux-only in
 this release. Never delete machines belonging to another workload.
 
 ### Runtime smoke coverage
@@ -570,7 +630,7 @@ Eighteen real PostgreSQL-backed controller SIGKILL boundaries pass on each
 platform: Linux seed 271982 (267.5 seconds), macOS seed 791731 (260.2 seconds).
 Each case kills an owned child BEAM at a named boundary and recovers through a
 fresh BEAM using the original keys, store partition, spec and execution ID.
-These are real SmolVM calls and database commits, not mocked restart tests.
+These are real smolvm calls and database commits, not mocked restart tests.
 
 The suite covers dispatch intent, first output, result/artifact writes, completion,
 stop, delete, absence recording and reservation release. Lost result evidence
@@ -622,7 +682,7 @@ service restart and the remaining isolation/release gates are still pending.
 ## Allocation floor correction (September 7)
 
 The increment after `137ed09` corrects an admission assumption found by real
-resource probes. SmolVM 1.14.1 reports requested disk sizes even when it retains
+resource probes. smolvm 1.14.1 reports requested disk sizes even when it retains
 larger runtime templates. On both hosts a 1 GiB storage request exposed
 21,118,275,584 guest filesystem bytes. Linux raw disks were 20/10 GiB. See
 [resource qualification](resource-qualification.md) for source paths, cgroup

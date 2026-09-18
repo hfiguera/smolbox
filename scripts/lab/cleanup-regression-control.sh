@@ -19,9 +19,10 @@ stop_worker() {
 case "$action" in
   prepare)
     [[ ! -e $root ]] || { echo 'Refusing to overwrite an existing experiment.' >&2; exit 1; }
-    version=${2:-1.16.0}
+    version=${2:-1.16.1}
     case "$version" in
       1.14.6) digest=94a1edb0c42b20ac562c3759ed216bab2cab9e27c382f6560969144f7bd1dce3 ;;
+      1.16.1) digest=e49e5bbae6d65b039ecf1d8b236d20e77427b7bfd131907b27a0819fcdea3fed ;;
       1.16.0) digest=cb7d6ea34914b4d71958e16eafc8a3220fe9e8cd5b76fa983ef9f648159f4c9b ;;
       *) exit 1 ;;
     esac
@@ -42,10 +43,11 @@ case "$action" in
     mount -t tmpfs -o size=4194304,mode=0770,nodev,nosuid,uid="$(id -u smolbox-cleanup)",gid="$(id -g lab)" smolbox-cleanup-run "$root/run"
     ;;
   start)
-    version=${2:?Expected 1.14.1, 1.14.6 or 1.16.0}
+    version=${2:?Expected 1.14.1, 1.14.6, 1.16.0 or 1.16.1}
     case "$version" in
       1.14.1) runtime=/opt/smolbox/runtime ;;
       1.14.6) runtime=/opt/smolbox/cleanup-runtime-1.14.6 ;;
+      1.16.1) runtime=/opt/smolbox/cleanup-runtime-1.16.1 ;;
       1.16.0) runtime=/opt/smolbox/cleanup-runtime-1.16.0 ;;
       *) exit 1 ;;
     esac

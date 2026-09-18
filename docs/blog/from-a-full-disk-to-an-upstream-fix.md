@@ -2,7 +2,7 @@ We filled a worker's disk while testing SmolBox. The machine stopped, but
 deleting it failed: cleanup needed to update a database on the same full
 filesystem.
 
-We wrote about the failure. SmolVM's maintainer responded, changed the deletion
+We wrote about the failure. smolvm's maintainer responded, changed the deletion
 sequence, and pointed us to a new release. Then we returned to the lab to check
 what had changed.
 
@@ -12,7 +12,7 @@ include reproducing a failure and verifying someone else's fix.
 
 ## The failure was in cleanup
 
-[SmolBox][smolbox] manages execution on SmolVM workers from Elixir. SmolVM
+[SmolBox][smolbox] manages execution on smolvm workers from Elixir. smolvm
 provides the microVMs; SmolBox tracks execution identity, outcomes, collected
 files and cleanup. Our [previous article][previous-post] described testing that
 integration under resource pressure in a disposable Linux lab.
@@ -38,12 +38,12 @@ later experiment. It left the behavior on a shared filesystem unchanged.
 ## BinBin changed the deletion order
 
 After we shared the article on X, [BinBin He][binbin-x], the creator and maintainer
-of SmolVM, replied that he would fix cleanup. He later came back with a release and
+of smolvm, replied that he would fix cleanup. He later came back with a release and
 explained the change: perform the operation before recording it, so a full
 filesystem would not prevent the operation itself.
 
 The concrete change is in [upstream PR #1219][upstream-fix]. In the HTTP API's
-deletion path, SmolVM now removes the machine's data before committing removal
+deletion path, smolvm now removes the machine's data before committing removal
 of its registry entry. Releasing the VM files gives the database space to
 complete its transaction when both share the full filesystem.
 
@@ -55,7 +55,7 @@ complete its transaction when both share the full filesystem.
   <figcaption>The relevant ordering change in the HTTP deletion path. This simplifies the operation to show its storage dependency.</figcaption>
 </figure>
 
-BinBin implemented the fix, which shipped in [SmolVM 1.14.6][upstream-release].
+BinBin implemented the fix, which shipped in [smolvm 1.14.6][upstream-release].
 Our part was documenting the failure and testing the released behavior through
 SmolBox. The source and patch were available for inspection, so we could
 connect the observed failure to the operation that changed.
@@ -70,7 +70,7 @@ repeated.
 A successful delete on an empty worker would not test this fix. We needed VM
 data and registry metadata to compete for the same exhausted storage again.
 
-The [targeted comparison][cleanup-results] ran the official SmolVM 1.14.1 and
+The [targeted comparison][cleanup-results] ran the official smolvm 1.14.1 and
 1.14.6 distributions inside the disposable nested Linux lab. Both used the
 same workload and layout: a **512 MiB tmpfs shared by VM data and the registry**.
 We verified that the paths belonged to the same filesystem.
@@ -81,7 +81,7 @@ reached its full capacity on both versions. Stopping the machine released one
 4 KiB block in each case, which we recorded rather than hiding the difference
 between the state after writing and the state before deletion.
 
-| Observation | SmolVM 1.14.1 | SmolVM 1.14.6 |
+| Observation | smolvm 1.14.1 | smolvm 1.14.6 |
 |---|---|---|
 | Shared storage after guest writes | Full | Full |
 | Stop | Succeeded | Succeeded |
@@ -113,11 +113,11 @@ restart, durable recovery and explicit support for the older worker version.
 Exhaustion and adversarial testing stayed in the disposable Linux lab.
 
 The Mac work also found a preparation requirement worth documenting: disk
-requests smaller than SmolVM's bundled templates need working host `resize2fs`.
+requests smaller than smolvm's bundled templates need working host `resize2fs`.
 Without it, our initial setup lost a file after stop and restart. With the
 documented dependency available, the unchanged persistence test passed.
 
-[SmolBox 0.1.2][smolbox] now defaults to SmolVM 1.14.6 on the tested Linux and
+[SmolBox 0.1.2][smolbox] now defaults to smolvm 1.14.6 on the tested Linux and
 macOS platforms. Existing 1.14.1 workers remain supported through explicit
 configuration. The [compatibility guide][compatibility] records the prerequisites
 and results; updating the Elixir dependency does not upgrade a worker for you.
@@ -141,7 +141,7 @@ original failure conditions and what happens afterward. Report what worked
 and anything still unresolved.
 
 Thanks to BinBin for responding and implementing the change. The result was a
-fix available to other SmolVM users, plus a regression test we can run again when
+fix available to other smolvm users, plus a regression test we can run again when
 the runtime changes.
 
 A failed cleanup became a shared improvement because the conversation

@@ -1,3 +1,13 @@
+# Unreleased smolvm 1.16.1 default
+
+This checkout now selects smolvm 1.16.1 by default on Linux x86_64 and macOS
+Apple Silicon. Explicit 1.16.0, 1.14.6 and 1.14.1 support remains. See the
+[qualification report](runtime-1.16.1-qualification.md) for the completed runtime
+and cleanup campaign and the subsequent default selection validation.
+Published SmolBox 0.1.3 still defaults to 1.16.0. Upgrade the separately installed
+worker using the drain procedure, or explicitly configure its existing version
+before adopting this checkout. No new public API or record schema is introduced.
+
 # SmolBox 0.1.3 publication
 
 Published and verified September 14, 2026. Tag `v0.1.3` points to
@@ -123,7 +133,7 @@ retain their original identities and then-current release restrictions.
 ### Default runtime update
 
 Status: **scoped validation complete**, September 10, 2026. The maintainer authorized
-making SmolVM 1.14.6 the default after its native macOS and Linux validation.
+making smolvm 1.14.6 the default after its native macOS and Linux validation.
 Existing 1.14.1 workers remain supported through explicit configuration; omitted
 versions now expect 1.14.6 and mismatches prevent admission. The default change
 does not install a worker or change persisted execution records.
@@ -413,7 +423,7 @@ navigation and API search. Three regression tests prove that valid generated
 links pass and missing files/fragments or an absent site fail.
 
 The exact final walkthrough code block was extracted from the guide and run on
-the existing native macOS SmolVM 1.14.1 worker, with Python artifact SHA-256
+the existing native macOS smolvm 1.14.1 worker, with Python artifact SHA-256
 `d982cfdf0c59b862ad3e1b107446b127460f716c8407fd0e2b6b0de2a62fe18e`.
 It returned the original handle on duplicate submission, printed the expected
 message, collected `42\n`, and confirmed completed cleanup with no reservation.
@@ -450,7 +460,7 @@ advisory-checkout refreshes; failed parallel refresh output was not accepted.
 After the real suites, the task database had zero execution and machine-identity
 rows and no test triggers. The task-owned database was stopped and the actual
 database-outage probe printed `database-unavailable-confirmed`. The original
-SmolVM server remained running with an empty inventory. Source hashes, seeds and
+smolvm server remained running with an empty inventory. Source hashes, seeds and
 bounded runtime reports are in [the OTP 29 macOS evidence](evidence/otp29-macos.json).
 These development checks do not move or requalify the original RC tag.
 
@@ -486,7 +496,7 @@ file/fragment checks. Fresh current/minimum-dependency production consumers both
 passed on the Linux OTP 29 pair using one 83-file archive, SHA-256
 `7485995c1e0aa3ac65db44375836fb70a3f16da01f9bfc61cfd21024ad11c50f`.
 The database had zero execution/identity rows and no test triggers before the
-task-owned instance was stopped; the actual outage probe passed. Original SmolVM
+task-owned instance was stopped; the actual outage probe passed. Original smolvm
 and shared PostgreSQL services were preserved, and worker inventory was empty.
 [The Linux evidence](evidence/otp29-linux.json) records source hashes, seeds,
 bounded reports, package consumers and cleanup. This supplies the previously
@@ -524,7 +534,7 @@ Ship an independently usable library with optional, explicitly started supervise
 
 ### 1.1 Required first-release capabilities
 
-- A typed client for the verified subset of a pinned SmolVM local HTTP API.
+- A typed client for the verified subset of a pinned smolvm local HTTP API.
 - Local development through loopback or a protected Unix socket; remote worker access through authenticated TLS proxies.
 - Machine creation, inspection, start, stop, and deletion within a library-owned namespace.
 - Command execution with an argument vector, explicit environment, working directory, and deadline.
@@ -535,7 +545,7 @@ Ship an independently usable library with optional, explicitly started supervise
 - Stable request identities, duplicate-submission handling, persisted state through a host store, and reconciliation after restart.
 - Cancellation requests whose outcomes are confirmed by worker evidence, plus separately tracked cleanup.
 - Telemetry and structured errors that omit secrets and uploaded code by default.
-- Tests against controlled HTTP peers and real pinned SmolVM installations on Linux and macOS.
+- Tests against controlled HTTP peers and real pinned smolvm installations on Linux and macOS.
 - Required CI gates for Dialyzer, Credo, ex_dna, ex_slop, and Credence, alongside compilation, formatting, tests, dependency audits, documentation, and packaging.
 
 ### 1.2 Explicit exclusions
@@ -545,7 +555,7 @@ Do not implement the following in this package:
 - Python dependency resolution, JavaScript bundling, TypeScript compilation recipes, or language-specific function runners.
 - Application-level retries, approvals, or compensation for external effects.
 - A managed sandbox service, public worker API, billing, infrastructure provisioning, or autoscaling.
-- An embedded SmolVM NIF or the managed Smol Machines cloud API.
+- An embedded smolvm NIF or the managed Smol Machines cloud API.
 - Arbitrary host mounts, guest access to host credentials, GPU/CUDA, interactive terminals, or persistent developer workspaces in the first release.
 - Warm VM reuse, branching, checkpoints, or machine export as required first-release features. Add verified primitives later only for a concrete consumer.
 - Exactly-once external execution or recovery of live guest processes after host loss.
@@ -592,13 +602,13 @@ Treat `external-references/` as reference material, not package source; source i
 
 The selected project is `smol-machines/smolvm`, with its per-host `smolvm serve` API. Its documentation lists lifecycle, command execution, file transfer, and SSE operations. It also states that local API authentication and complete fleet management are outside that API's guarantees. [Local API](https://smolmachines.com/docs/local/local-api-smolvm-serve), [self-hosting](https://smolmachines.com/docs/local/self-hosting).
 
-Use SmolVM `v1.14.1` as the first compatibility-spike candidate, not as an already certified runtime. That release was visible during this review. Record the exact runtime version, source commit, binary checksum, host architecture, guest image digests, and generated OpenAPI checksum before accepting it. [Candidate release](https://github.com/smol-machines/smolvm/releases/tag/v1.14.1).
+Use smolvm `v1.14.1` as the first compatibility-spike candidate, not as an already certified runtime. That release was visible during this review. Record the exact runtime version, source commit, binary checksum, host architecture, guest image digests, and generated OpenAPI checksum before accepting it. [Candidate release](https://github.com/smol-machines/smolvm/releases/tag/v1.14.1).
 
 Source inspection of that tag confirms camelCase exec fields, including `timeoutSecs`, and an argument-vector command. Its buffered response includes byte-preserving base64 output alongside lossy text. This evidence should inform fixtures; it does not establish cancellation, output bounds, or durable execution receipts. [API types](https://github.com/smol-machines/smolvm/blob/v1.14.1/src/api/types.rs), [execution handlers](https://github.com/smol-machines/smolvm/blob/v1.14.1/src/api/handlers/exec.rs).
 
 #### Local upstream source checkout
 
-A local SmolVM source checkout is available at `external-references/smolvm`. Use this checkout when implementation work needs direct inspection of upstream API types, handlers, tests, or runtime behavior. The containing `external-references/` directory is ignored by Git.
+A local smolvm source checkout is available at `external-references/smolvm`. Use this checkout when implementation work needs direct inspection of upstream API types, handlers, tests, or runtime behavior. The containing `external-references/` directory is ignored by Git.
 
 Before relying on local source as compatibility evidence, record its commit and working-tree status and compare it with the selected release; do not assume the checkout matches `v1.14.1`. Inspect pinned source with read-only Git commands when needed, preserving the user's checkout. Source inspection informs the contract, but real-runtime tests must still verify operational guarantees.
 
@@ -721,7 +731,7 @@ flowchart TB
     Serve <--> Guest
 ```
 
-The worker proxy and SmolVM installation are operator-managed dependencies. SmolBox provides their deployment contract and integration tests; it does not implement a new generic proxy service. A basic authenticated proxy must not be described as supplying durable execution receipts or request deduplication.
+The worker proxy and smolvm installation are operator-managed dependencies. SmolBox provides their deployment contract and integration tests; it does not implement a new generic proxy service. A basic authenticated proxy must not be described as supplying durable execution receipts or request deduplication.
 
 ## 4. Public API and data contracts
 
@@ -785,7 +795,7 @@ Progress notifications are advisory. Consumers recover by fetching a snapshot; m
 
 ### 5.1 Threat and trust boundary
 
-Treat commands, guest output, files, image contents, and dependency-installation code as untrusted. The Elixir host, durable store, proxy configuration, SmolVM host account, VMM, host OS, and hypervisor are trusted infrastructure. Guest root must not be trusted to attest that execution happened only once or to enforce host safety limits.
+Treat commands, guest output, files, image contents, and dependency-installation code as untrusted. The Elixir host, durable store, proxy configuration, smolvm host account, VMM, host OS, and hypervisor are trusted infrastructure. Guest root must not be trusted to attest that execution happened only once or to enforce host safety limits.
 
 The managed API accepts policy selected by trusted application code. It must not merge caller-supplied Smolfile settings, host mounts, proxy credentials, or arbitrary endpoint overrides into a worker request.
 
@@ -1052,7 +1062,7 @@ The user has provided a Linux machine for SmolBox testing, accessible from the d
 ssh linux
 ```
 
-Use this host for the Linux compatibility spike and real-runtime integration tests. Access is authorized for that testing; the SSH alias does not establish its architecture, KVM availability, installed tooling, or readiness. Before the first run, verify the host architecture, kernel, `/dev/kvm` access, available CPU/memory/disk capacity, and installed SmolVM and Elixir/OTP versions. Match the pinned runtime and guest images to the verified architecture.
+Use this host for the Linux compatibility spike and real-runtime integration tests. Access is authorized for that testing; the SSH alias does not establish its architecture, KVM availability, installed tooling, or readiness. Before the first run, verify the host architecture, kernel, `/dev/kvm` access, available CPU/memory/disk capacity, and installed smolvm and Elixir/OTP versions. Match the pinned runtime and guest images to the verified architecture.
 
 Use a dedicated test workspace and per-run resource names, preserve unrelated host workloads, and collect bounded test reports with the exact SmolBox commit and runtime/image versions. Apply the isolation requirements above before disruptive or resource-abuse tests. Record the verified setup and repeatable commands in `docs/compatibility.md` during implementation.
 
@@ -1072,7 +1082,7 @@ Complete phases in dependency order. Each phase should be a focused PR or a smal
 
 Dependencies: none.
 
-- [x] Select the SmolVM release candidate and exact Elixir/OTP/tool pins.
+- [x] Select the smolvm release candidate and exact Elixir/OTP/tool pins.
 - [x] Inspect the local upstream checkout described in section 2.1, record its commit and working-tree status, and tie source-derived contract decisions to the selected release.
 - [x] Capture its OpenAPI schema, checksums, and minimal request/response/event fixtures. Attributed schema, lifecycle, buffered exec, and SSE fixtures are saved under `test/fixtures`.
 - [x] Connect with `ssh linux` and complete the Linux host preflight in section 10.2; record the architecture, virtualization access, tool versions, and dedicated test workspace.
@@ -1289,6 +1299,7 @@ Necessary contract corrections found during implementation:
 - Due scans must retain records whose cleanup is complete but whose capacity release did not commit. Both store adapters now test this boundary.
 - Concurrent request timestamps can arrive out of order. Claims/cancellation keep `updated_at_ms` nondecreasing; CAS still rejects stale versions. Observer monotonic time bounds elapsed stages separately from persisted wall timestamps.
 - Unknown-outcome disks wait until the execution deadline plus evidence retention before deletion. Their fixed cleanup deadline includes this intentional wait plus the cleanup budget; it is not reset on restart. Whole-VM stop is attempted before that wait.
+- Unreleased follow-up for smolvm 1.16.1: finished execution/collection selects direct disposal after ownership verification. Unknown work retains graceful stop and preservation until its fixed retention deadline; expiry permits disposal only with remaining cleanup budget. DELETE responses still require observed absence before reservation release. See `docs/runtime-1.16.1-qualification.md`; 1.16.1 admission and default selection follow the validated lifecycle change, with explicit 1.16.0 support retained.
 - After cleanup mutation retries are exhausted, only bounded read-only inspection continues. Observing operator-resolved absence can still release the original reservation.
 
 Exit: a caller can disconnect and later retrieve the same execution; a nonzero exit and collection failure remain distinguishable.
@@ -1365,7 +1376,7 @@ work. Mismatched creation replies remain unverified with their reservation;
 revoked approval never authorizes a command. See
 `docs/evidence/phase7-allocation-policy.json` for the checks and real managed runs.
 
-Resource correction from real qualification: SmolVM 1.14.1 copies disk templates
+Resource correction from real qualification: smolvm 1.14.1 copies disk templates
 without shrinking them. Both platforms returned `storageGb: 1` while the guest
 exposed a roughly 20 GiB filesystem; Linux also had 20/10 GiB raw disks. The
 required worker `allocation_floor` now makes this dependency explicit, rejects
@@ -1485,7 +1496,7 @@ Two independently bounded Linux experiments now add a real host-disk-full
 boundary and finite slow-reader behavior. Private namespace workers had verified
 2 GiB/no-swap/200%-CPU/128-task parent limits and 512 MiB tmpfs data mounts.
 The disk producer received `EIO` at 336,592,896 guest bytes when the host mount
-filled. Stop succeeded, but SmolVM could not commit deletion because its database
+filled. Stop succeeded, but smolvm could not commit deletion because its database
 was also full. The retained owned unit/mount was explicitly torn down after
 identity verification; this is not counted as successful API cleanup. A separate
 64 MiB-upper-bound producer with a blocked callback expired observation after
@@ -1934,7 +1945,7 @@ but do not certify production isolation or protected GitHub worker execution.
 - Run ordinary CI on every push and pull request, with an always-reported aggregate status and no runtime job dependencies. Retain the separate manual workflow as optional tooling for provisioned infrastructure. When dispatched, it records its checked-out candidate commit, passes that exact identity to both platforms, and requires candidate preparation and both platforms to succeed.
 - Use `erlef/setup-beam` and checkout/cache/upload actions pinned to reviewed full commit SHAs. Record the corresponding action versions in comments and automate reviewed updates. [setup-beam](https://github.com/erlef/setup-beam).
 - Keep permissions read-only by default. Publishing has a separate protected workflow and narrowly scoped credentials.
-- Use exact matrix entries and report actual `elixir --version`, OTP, dependency lock hash, and SmolVM/image versions in job artifacts.
+- Use exact matrix entries and report actual `elixir --version`, OTP, dependency lock hash, and smolvm/image versions in job artifacts.
 - Key dependency/build caches by package path, OS, architecture, OTP, Elixir, environment, and lock hash. Do not share test/dev/prod BEAM output blindly.
 - Set finite job timeouts and run steps under fail-fast shell behavior. Do not use `continue-on-error` for required analyzers or `|| true` around lint commands.
 - Run independent analyzer jobs separately so one failure does not hide the others. The aggregate must inspect failure/cancelled/skipped states explicitly.
@@ -2004,7 +2015,7 @@ milestones passed. The three workstreams excluded in section 1.4 are not blocker
 
 | Decision | Accepted first-release boundary |
 |---|---|
-| Exact SmolVM patch and API schema | 1.14.1 at the recorded source/binary/OpenAPI pins; real development-host suites pass on Linux x86_64 and macOS arm64 |
+| Exact smolvm patch and API schema | 1.14.1 at the recorded source/binary/OpenAPI pins; real development-host suites pass on Linux x86_64 and macOS arm64 |
 | Production hard resource profile | Outside first release; development allocations/accounting only, unsupported hard controls rejected |
 | Worker-side exec receipts | No verified durable receipt or fence; retain uncertainty and never replay exec automatically |
 | Runtime preparation without guest egress | Approved native prepared artifacts, neutral entrypoint, no workload restart or permission broadening |
@@ -2027,7 +2038,7 @@ disposable guest. No new macOS tests are part of this work.
 - [x] Verify a 4-vCPU, 8-GiB, 100-GiB guest and independent host controls: 400% CPU
   bandwidth, 12 GiB QEMU memory, zero swap, 256 host tasks and a physically reserved
   128 GiB volume for lab data.
-- [x] Provision and hash a disposable Ubuntu baseline with SmolVM 1.14.1, approved
+- [x] Provision and hash a disposable Ubuntu baseline with smolvm 1.14.1, approved
   Python/Node artifacts, Elixir 1.20.4, OTP 29.0.6 and locked test dependencies.
   Separate provisioning downloads from restricted test networking and private SSH.
 - [x] Verify actual nested KVM descriptors and real SmolBox execution, staging,

@@ -31,7 +31,7 @@ defmodule SmolBox.ClientTest do
 
     assert {:ok, %{version: "1.14.1", total: 0, running: 0}} = Client.health(peer)
 
-    for version <- ["1.14.6", "1.16.0"] do
+    for version <- ["1.14.6", "1.16.0", "1.16.1"] do
       upgraded = client(&TestPeer.json(&1, fixture(version <> "/health")))
       assert {:ok, %{version: ^version, total: 0, running: 0}} = Client.health(upgraded)
     end
@@ -96,11 +96,15 @@ defmodule SmolBox.ClientTest do
     {:ok, spec} = MachineSpec.new("fixture", "/approved/python.smolmachine", network: policy)
     parent = self()
 
-    for mode <- [:matching, :missing, :different, :legacy] do
+    supported_cases =
+      for version <- ["1.16.0", "1.16.1"],
+          mode <- [:matching, :missing, :different],
+          do: {version, mode}
+
+    for {version, mode} <- supported_cases ++ [{"1.14.6", :legacy}, {"1.16.2", :legacy}] do
       peer =
         client(fn conn ->
           if conn.request_path == "/health" do
-            version = if mode == :legacy, do: "1.14.6", else: "1.16.0"
             TestPeer.json(conn, Map.put(fixture("health"), "version", version))
           else
             {:ok, body, conn} = TestPeer.body(conn)

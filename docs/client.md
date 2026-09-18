@@ -7,15 +7,16 @@ execution, begin with [Getting started](getting-started.md). This guide describe
 the supported client contract and its development-qualified worker boundary.
 See [runtime selection](compatibility.md#runtime-selection) for the explicit
 Linux/macOS 1.16.0 default in SmolBox 0.1.3 and retained explicit 1.14.1 and
-1.14.6 compatibility. SmolBox 0.1.2 defaults to 1.14.6.
+1.14.6 compatibility. This checkout defaults to 1.16.1 (unreleased), retaining
+explicit 1.16.0 support. SmolBox 0.1.2 defaults to 1.14.6.
 
-Install the pinned SmolVM release from [compatibility evidence](compatibility.md).
+Install the pinned smolvm release from [compatibility evidence](compatibility.md).
 Prepare an approved, architecture-matched `.smolmachine` artifact on the worker
 host, verify its digest, and start a private `smolvm serve` endpoint. For bounded
 small-file workloads set `SMOLVM_FILE_TRANSFER_MAX_BYTES=1048576` before starting
 the server. SmolBox never enables guest networking to fetch an image.
 
-For SmolVM 1.14.6 and 1.16.0, verify the host's `resize2fs` before requesting disks smaller
+For smolvm 1.14.6, 1.16.0 and 1.16.1, verify the host's `resize2fs` before requesting disks smaller
 than its bundled templates. Our macOS run without that tool lost a workspace
 file after stop/start; health and successful execution alone did not detect the
 problem. See [runtime prerequisites](compatibility.md#macos-1-14-6-prerequisites).
@@ -72,10 +73,14 @@ source = "print('hello')\n"
 The example shows the successful path. Production callers must handle each typed
 error. A machine name or matching `createdAt` alone is insufficient ownership
 proof after a conflict or manual replacement. Use an exclusive managed namespace,
-save creation evidence, and refuse cleanup when identity differs. After authorized
-cleanup, verify a stopped state, delete the owned machine, then verify absence.
-No cleanup primitive should be placed in an unconditional `after` block without
-checking identity and preserving uncertain-execution evidence first.
+save creation evidence, and refuse cleanup when identity differs. To preserve a
+machine's disks, stop it and verify the same incarnation is no longer running.
+For authorized disposal after collection and any required retention, delete the
+verified owned machine and then inspect it to confirm absence. A failed stop
+alone does not authorize disposal. No cleanup primitive should be placed in an
+unconditional `after` block without checking identity and preserving uncertain
+execution evidence first. The managed runtime's rules are described in
+[preservation and disposal](recovery.md#preservation-and-disposal).
 
 `exec/4` returns byte-exact stdout/stderr from upstream base64 fields. Nonzero exit
 codes are observed results, not transport errors. `exec_stream/4` uses the actual
@@ -147,7 +152,7 @@ contents at rest.
 
 ## Preparing the reference runtimes
 
-This is an operator step using upstream SmolVM, outside the library's execution
+This is an operator step using upstream smolvm, outside the library's execution
 API. It prepares a base language runtime; it does not build or publish user
 functions. Perform it on an isolated preparation host with the matching native
 architecture, sufficient disk/memory and the pinned installation. Preparation

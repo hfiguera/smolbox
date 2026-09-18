@@ -16,12 +16,12 @@ defmodule SmolBox.MixProject do
       deps: deps(),
       aliases: aliases(),
       description:
-        "An Elixir client and supervised execution runtime for self-hosted SmolVM workers",
+        "An Elixir client and supervised execution runtime for self-hosted smolvm workers",
       package: [
         licenses: ["MIT"],
         links: %{
           "GitHub" => @source_url,
-          "SmolVM upstream" => "https://github.com/smol-machines/smolvm"
+          "smolvm upstream" => "https://github.com/smol-machines/smolvm"
         },
         files: [
           "lib",

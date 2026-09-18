@@ -11,11 +11,11 @@ defmodule SmolBox.Runtime.WorkerConfig do
   `allocation_floor` is a required operator declaration with `storage_gb`,
   `overlay_gb`, and `host_overhead_mb`. It must cover the largest actual disk
   templates across this worker's runtime and approved artifacts, and its VMM
-  overhead. SmolVM 1.14.1 only grows disk templates: a smaller API request can
+  overhead. smolvm 1.14.1 only grows disk templates: a smaller API request can
   still expose a larger guest disk. Admission rejects profiles below these
   floors. This declaration is not remotely attested or a host filesystem quota.
 
-  Versions 1.14.6 and 1.16.0 require working host `resize2fs` for disk requests below
+  Versions 1.14.6, 1.16.0 and 1.16.1 require working host `resize2fs` for disk requests below
   template sizes. Verify file persistence across stop/start before admission;
   see [Compatibility](compatibility.html#macos-1-14-6-prerequisites).
 
@@ -36,7 +36,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   ]
   @derive {Inspect, only: [:architecture, :platform, :runtime_version, :qualification]}
   defstruct @enforce_keys ++
-              [runtime_version: "1.16.0", qualification: :development, draining: false]
+              [runtime_version: "1.16.1", qualification: :development, draining: false]
 
   @type t :: %__MODULE__{
           client: Client.t(),
@@ -70,13 +70,15 @@ defmodule SmolBox.Runtime.WorkerConfig do
   | `:capacity` | Atom-keyed map with `:slots`, `:cpus`, `:memory_mb`, and `:disk_gb`; each 1–1,048,576 |
   | `:allocation_floor` | Atom-keyed map with `:storage_gb` and `:overlay_gb` (1–64 each), and `:host_overhead_mb` (128–16,384) |
 
-  Optional fields are `:runtime_version` (default `"1.16.0"` for Linux x86_64 or
-  macOS Apple Silicon; explicitly select `"1.14.1"` or `"1.14.6"` for an existing worker), `:qualification`
+  Optional fields are `:runtime_version` (default `"1.16.1"` for Linux x86_64 or
+  macOS Apple Silicon; explicitly select `"1.16.0"`, `"1.14.1"` or `"1.14.6"`
+  for another supported worker), `:qualification`
   (only `:development`), and `:draining` (default `false`). Artifact IDs must be
   unique and architectures must match this worker. Construction makes no worker
   request or remote digest check. Profiles below the floor cannot support execution.
-  The 1.16.0 default starts with SmolBox 0.1.3; 0.1.2 defaults to 1.14.6. See the
-  [qualification evidence](compatibility.html#smolvm-1-16-0-qualification) and
+  This checkout defaults to 1.16.1 (unreleased); published SmolBox 0.1.3 defaults
+  to 1.16.0 and 0.1.2 to 1.14.6. See the
+  [qualification evidence](compatibility.html#smolvm-1-16-1-qualification) and
   upgrade the separately installed worker or retain its explicit version.
   See [Getting started](getting-started.html) for a complete configuration.
   """
@@ -104,7 +106,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   @doc "Check exact profile/artifact approval and allocation floors; this is not a health probe."
   @spec supports?(t(), ExecutionSpec.t()) :: boolean()
   def supports?(worker, spec) do
-    (spec.profile.network == :offline or worker.runtime_version == "1.16.0") and
+    (spec.profile.network == :offline or worker.runtime_version in ["1.16.0", "1.16.1"]) and
       spec.profile in worker.profiles and allocation_fits?(worker, spec.profile) and
       worker.architecture == spec.artifact["architecture"] and
       Enum.any?(
@@ -132,7 +134,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   defp supported_runtime?(%{runtime_version: "1.14.1"}), do: true
 
   defp supported_runtime?(%{runtime_version: version, platform: platform, architecture: arch})
-       when version in ["1.14.6", "1.16.0"],
+       when version in ["1.14.6", "1.16.0", "1.16.1"],
        do: {platform, arch} in [{:linux, "x86_64"}, {:macos, "aarch64"}]
 
   defp supported_runtime?(_worker), do: false

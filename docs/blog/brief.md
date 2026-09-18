@@ -9,7 +9,7 @@ within that brief; no image mockup or new visual-selection round is needed.
 
 ## Direction contract
 
-THESIS: Explain why an Elixir application would choose SmolVM workers and make
+THESIS: Explain why an Elixir application would choose smolvm workers and make
 SmolBox's execution lifecycle understandable through a practical article and
 one accurate diagram.
 

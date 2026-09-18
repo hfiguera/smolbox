@@ -20,7 +20,7 @@
   <meta property="og:image" content="<%= @image %>">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="<%= SmolBox.Blog.HTML.escape(if @article, do: @article["image_alt"], else: "SmolBox's Elixir host manages a SmolVM worker and a disposable Python VM.") %>">
+  <meta property="og:image:alt" content="<%= SmolBox.Blog.HTML.escape(if @article, do: @article["image_alt"], else: "SmolBox's Elixir host manages a smolvm worker and a disposable Python VM.") %>">
   <meta name="twitter:card" content="summary_large_image">
   <%= if @article do %>
   <meta property="article:published_time" content="<%= @article["published_on"] %>">
@@ -48,7 +48,7 @@
   <footer class="site-footer">
     <div>
       <a class="footer-brand" href="<%= @root %>">SmolBox</a>
-      <p>An Elixir library for self-hosted SmolVM workers.</p>
+      <p>An Elixir library for self-hosted smolvm workers.</p>
     </div>
     <nav aria-label="Footer navigation">
       <a href="<%= @root %>feed.xml">RSS feed</a>

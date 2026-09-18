@@ -1,7 +1,8 @@
 # Deployment and trust boundaries
 
 The controlled networking feature introduced in 0.1.3 permits explicit operator-approved
-outbound policies on smolvm 1.16.0. Existing offline defaults and prior offline
+outbound policies on smolvm 1.16.0. This checkout defaults to 1.16.1 (unreleased),
+with support for those policies. Existing offline defaults and prior offline
 qualification evidence remain unchanged. See [Controlled network access](network-access.md)
 for DNS/IP semantics, profile approval and the separate enforcement fixture.
 The server's strict egress floor must remain enabled when relying on the recorded
@@ -11,12 +12,12 @@ its lease authentication is a separate boundary from the private management API.
 
 
 SmolBox relies on
-[SmolVM's isolation model](https://github.com/smol-machines/smolvm/blob/e8d09ef616d363004d55b80a6cdb31a4e7e1842d/SECURITY.md)
+[smolvm's isolation model](https://github.com/smol-machines/smolvm/blob/e8d09ef616d363004d55b80a6cdb31a4e7e1842d/SECURITY.md)
 for running untrusted code. Each part of a deployment has a separate responsibility:
 
 | Component | Responsibility |
 |---|---|
-| SmolVM and its virtualization stack | Run each workload in its own VM and defend the guest-to-host boundary under the upstream security model |
+| smolvm and its virtualization stack | Run each workload in its own VM and defend the guest-to-host boundary under the upstream security model |
 | SmolBox | Manage execution identity, admission, observation, bounded collection, uncertain outcomes and cleanup |
 | Application and deployment | Authorize access, approve images, protect worker interfaces, enforce host resource limits, configure networking and credentials, and operate durable storage and recovery |
 
@@ -44,7 +45,7 @@ Never expose arbitrary worker endpoints, artifact host paths or profile controls
 as user-editable request parameters.
 
 Guest commands, their dependencies, output and files may be hostile. The host OS,
-hypervisor, VMM, SmolVM server account, worker proxy, Elixir VM and configured store
+hypervisor, VMM, smolvm server account, worker proxy, Elixir VM and configured store
 adapters are trusted infrastructure. Guest root cannot attest exactly-once
 execution or enforce a host safety boundary. Telemetry handlers and artifact-store
 adapters are trusted host code; they do not execute inside a microVM.
@@ -189,8 +190,11 @@ its store process stops.
    durable example's authenticated index backfill instructions for its older schema.
 4. Pin and verify the new binary, schema and artifact bytes on a separate candidate
    worker. Recheck template sizes, VMM overhead, network behavior, proxy semantics,
-   host quotas and all advertised platform tests. SmolBox 0.1.1 admits
-   only the qualified SmolVM 1.14.1 contract; a different version is incompatible.
+   host quotas and all advertised platform tests. This checkout defaults to
+   smolvm 1.16.1 and retains explicit 1.16.0, 1.14.6 and 1.14.1 support, subject
+   to the [supported platform matrix](compatibility.md#runtime-selection).
+   Controlled networking requires 1.16.0 or 1.16.1. The worker must report the
+   exact configured version; there is no automatic fallback.
 5. Give changed artifacts/profiles new immutable revisions. Do not rewrite saved
    execution specifications or resubmit a changed specification under an existing
    identity. Recovery rechecks current approval before a prepared command dispatches;
@@ -209,7 +213,7 @@ confirmed guest termination.
 ## Worker storage exhaustion
 
 An earlier contained Linux 1.14.1 probe filled its private 512 MiB data mount. The guest
-observed a write I/O error and could be stopped, but SmolVM could not commit its
+observed a write I/O error and could be stopped, but smolvm could not commit its
 VM deletion because its database shared the full mount. SmolBox correctly
 reported uncertainty; an observed stop does not confirm cleanup. Retain the
 execution's reservation and ownership evidence through the normal cleanup path.
@@ -226,7 +230,7 @@ The subsequent nested Linux deployment separated its 768 MiB VM/cache mount
 from its 64 MiB control-metadata mount. Repeating disk exhaustion filled the
 VM/cache mount while metadata retained free space; owned stop, API deletion and
 absence inspection all succeeded. This resolves the observed cleanup problem
-for that storage layout. It does not change SmolVM's behavior when data and
+for that storage layout. It does not change smolvm's behavior when data and
 metadata share an exhausted filesystem. See
 [Linux deployment validation](resource-qualification.md#subsequent-linux-deployment-validation)
 for the tested configuration and recovery evidence.

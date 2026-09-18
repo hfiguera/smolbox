@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="780" viewBox="0 0 1200 780" role="img" aria-labelledby="title desc">
   <title id="title">Recovery at each layer</title>
-  <desc id="desc">The physical Linux host runs independent recovery outside a disposable QEMU guest. The guest contains an Elixir controller and PostgreSQL, alongside a bounded SmolVM worker that runs an inner Linux microVM using nested KVM.</desc>
+  <desc id="desc">The physical Linux host runs independent recovery outside a disposable QEMU guest. The guest contains an Elixir controller and PostgreSQL, alongside a bounded smolvm worker that runs an inner Linux microVM using nested KVM.</desc>
   <rect width="1200" height="780" fill="#edf2fa"/>
   <g font-family="sans-serif">
     <text x="52" y="62" font-size="36" font-weight="700" fill="#17304e">Recovery at each layer</text>
@@ -23,7 +23,7 @@
     <text x="485" y="479" font-size="20" fill="#526478">HTTP</text>
     <path d="M482 506h64m-10-8 10 8-10 8" fill="none" stroke="#215bc7" stroke-width="3"/>
     <rect x="568" y="350" width="548" height="329" rx="6" fill="#215bc7"/>
-    <text x="592" y="397" font-size="27" font-weight="700" fill="#fff">Bounded SmolVM worker</text>
+    <text x="592" y="397" font-size="27" font-weight="700" fill="#fff">Bounded smolvm worker</text>
     <text x="592" y="435" font-size="24" fill="#e4edff">1.5 GiB memory · 1 CPU · 96 tasks</text>
     <rect x="592" y="467" width="500" height="188" rx="6" fill="#edf2fa"/>
     <text x="616" y="511" font-size="27" font-weight="700" fill="#17304e">Inner Linux microVM</text>

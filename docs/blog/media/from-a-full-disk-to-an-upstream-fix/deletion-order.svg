@@ -22,6 +22,6 @@
     <rect x="724" y="287" width="432" height="121" rx="6" fill="#fff" stroke="#215bc7" stroke-width="2"/>
     <text x="749" y="330" font-size="28" font-weight="700" fill="#17304e">Write registry removal</text>
     <text x="749" y="371" font-size="24" fill="#526478">Use the released space</text>
-    <text x="42" y="477" font-size="23" fill="#526478">Simplified HTTP deletion path · SmolVM PR #1219</text>
+    <text x="42" y="477" font-size="23" fill="#526478">Simplified HTTP deletion path · smolvm PR #1219</text>
   </g>
 </svg>

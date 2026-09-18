@@ -1,6 +1,6 @@
 # Captured wire fixtures
 
-Captured from the official SmolVM v1.14.1 macOS arm64 distribution using a
+Captured from the official smolvm v1.14.1 macOS arm64 distribution using a
 prepared Python artifact with guest networking disabled, on 2026-09-06.
 Machine names, creation timestamps, and process IDs are normalized in lifecycle
 responses. Exec response bytes and SSE framing are retained exactly.
@@ -33,3 +33,12 @@ The same capture script, synthetic workloads, response cap and normalization
 rules apply. Buffered bytes and SSE framing remain verbatim. Capture completed
 with verified deletion and an empty inventory. These responses do not establish
 completion of the broader 1.16.0 qualification campaign.
+
+The `1.16.1/` fixtures were captured on September 18, 2026 (UTC) using the official
+Linux x86_64 release in the disposable nested KVM lab. Source commit:
+`9504e94e3581a1f52c414247edcbcd6d6b49a71a`; binary SHA-256:
+`017f61853a8f19450472052080f95cd8ef5b80b61d1715e4524c67ea085f11a5`.
+The same capture script, workloads, response cap and normalization rules apply.
+Buffered output and SSE framing remain verbatim. Capture finished with deletion
+verified and an empty inventory. The separate qualification report records the
+broader compatibility and network enforcement results.

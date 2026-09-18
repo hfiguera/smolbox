@@ -8,7 +8,7 @@ work takes place on `ssh linux`, inside its disposable outer VM.
 
 ## Candidate scope
 
-Linux x86_64, pinned SmolVM 1.14.1 and the existing approved Python/Node artifacts,
+Linux x86_64, pinned smolvm 1.14.1 and the existing approved Python/Node artifacts,
 one untrusted execution at a time, no external networking, no production secrets,
 no host mounts, no arbitrary images, no background jobs, and no machine reuse
 between executions. Trusted operators control artifacts, deployment and admission.
@@ -17,7 +17,7 @@ not an enforcement boundary. This work does not qualify macOS.
 
 The outer QEMU configuration and its immutable baseline remain a separate
 containment and recovery boundary. A nested result applies to that configuration;
-it is not evidence for an arbitrary bare-metal SmolVM installation.
+it is not evidence for an arbitrary bare-metal smolvm installation.
 
 ```text
 Physical Linux host
@@ -25,7 +25,7 @@ Physical Linux host
     └── Disposable Linux guest: 4 vCPUs, 8 GiB memory, 100 GiB virtual disk
         ├── Trusted Elixir controller, PostgreSQL and evidence
         └── Worker unit: 1.5 GiB charged memory, 100% CPU, 96 host tasks
-            ├── SmolVM API on a private Unix socket
+            ├── smolvm API on a private Unix socket
             └── VMM and its 256 MiB microVM running guest code
 ```
 
@@ -58,7 +58,7 @@ of one layer is not evidence that every other layer has been exhausted or tested
 
 Linux cgroup limits cover descendant host processes; guest process counts are a
 separate kernel domain. See the [kernel cgroup v2 documentation](https://docs.kernel.org/admin-guide/cgroup-v2.html).
-Installed systemd manuals and pinned SmolVM source are checked alongside actual
+Installed systemd manuals and pinned smolvm source are checked alongside actual
 behavior. Review source at `e8d09ef616d363004d55b80a6cdb31a4e7e1842d` without
 modifying the external reference checkout.
 

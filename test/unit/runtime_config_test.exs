@@ -80,9 +80,12 @@ defmodule SmolBox.RuntimeConfigTest do
              WorkerConfig.new(Keyword.delete(context.options, :allocation_floor))
   end
 
-  test "runtime defaults to 1.16.0 and retains explicit legacy support",
+  test "runtime defaults to 1.16.1 and accepts only qualified explicit versions",
        context do
-    assert context.worker.runtime_version == "1.16.0"
+    assert context.worker.runtime_version == "1.16.1"
+
+    assert {:ok, %{runtime_version: "1.16.0"}} =
+             WorkerConfig.new(Keyword.put(context.options, :runtime_version, "1.16.0"))
 
     assert {:ok, %{runtime_version: "1.14.1"}} =
              WorkerConfig.new(Keyword.put(context.options, :runtime_version, "1.14.1"))
@@ -92,10 +95,12 @@ defmodule SmolBox.RuntimeConfigTest do
 
     assert :ok = WorkerConfig.validate(candidate)
 
-    for {platform, architecture} <- [{:macos, "aarch64"}, {:linux, "aarch64"}] do
+    for version <- ["1.14.6", "1.16.0", "1.16.1"],
+        {platform, architecture} <- [{:macos, "aarch64"}, {:linux, "aarch64"}] do
       worker = %{
         candidate
-        | platform: platform,
+        | runtime_version: version,
+          platform: platform,
           architecture: architecture,
           artifacts: Enum.map(candidate.artifacts, &Map.put(&1, "architecture", architecture))
       }
@@ -109,14 +114,23 @@ defmodule SmolBox.RuntimeConfigTest do
       assert :ok = WorkerConfig.validate(%{worker | runtime_version: "1.14.1"})
     end
 
-    for version <- ["1.14.2", "1.14.5", "1.14.7", "1.14.6-dev", "1.15.1", "1.16.0-dev", "1.16.1"] do
+    for version <- [
+          "1.14.2",
+          "1.14.5",
+          "1.14.7",
+          "1.14.6-dev",
+          "1.15.1",
+          "1.16.0-dev",
+          "1.16.1-dev",
+          "1.16.2"
+        ] do
       assert {:error, %Error{category: :validation}} =
                WorkerConfig.validate(%{candidate | runtime_version: version})
     end
   end
 
-  test "1.16.0 default requires a supported platform", context do
-    assert context.worker.runtime_version == "1.16.0"
+  test "1.16.1 default requires a supported platform", context do
+    assert context.worker.runtime_version == "1.16.1"
 
     for {platform, architecture} <- [{:linux, "x86_64"}, {:macos, "aarch64"}] do
       artifacts = Enum.map(context.worker.artifacts, &Map.put(&1, "architecture", architecture))

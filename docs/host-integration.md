@@ -69,7 +69,8 @@ children = [
 ```
 
 This fragment explicitly retains a Linux 1.14.6 worker with SmolBox 0.1.3.
-Omitting the field selects 1.16.0. Use `"1.14.1"` explicitly
+Omitting the field selects 1.16.1 in this checkout (unreleased). Use `"1.16.0"`
+explicitly to retain that worker, or `"1.14.1"`
 for an existing worker. See [runtime selection](compatibility.md#runtime-selection).
 This is a host configuration fragment, not a self-provisioning script. The host
 must verify artifact bytes on the worker and retain that immutable artifact.
@@ -82,7 +83,7 @@ macOS `aarch64`. Linux arm64 remains unqualified.
 storage/overlay templates across the runtime installation and every approved
 artifact, plus VMM overhead, before registering a worker. The 1.14.1 release's
 supplied templates measured 20 GiB storage and 10 GiB overlay on both hosts.
-SmolVM 1.14.1 retains a larger template even when its API reports a 1 GiB request.
+smolvm 1.14.1 retains a larger template even when its API reports a 1 GiB request.
 Managed submission rejects profiles below the declared floor. Recovered work
 checks the current floor again before dispatch; raising it does not rewrite an
 existing specification or silently repeat a command. The low-level client cannot
@@ -238,7 +239,11 @@ budget. The original command is never resent. Retained or failed-cleanup machine
 continue to consume reservations.
 
 Cleanup checks creation evidence before stop/delete and verifies absence before
-releasing capacity. Failed cleanup does not rewrite successful command results.
+releasing capacity. Finished executions are deleted directly after collection;
+unknown executions retain their disks and use graceful stop until retention expires.
+A stop failure during retention never authorizes immediate disposal. See the
+[recovery guide](recovery.md#preservation-and-disposal) for the state and budget
+rules. Failed cleanup does not rewrite successful command results.
 Retries are bounded. After exhaustion, automatic work only inspects periodically;
 it sends no more mutations. `reconcile` can request earlier inspection and can
 confirm absence after an operator has resolved a resource whose creation was
@@ -304,26 +309,29 @@ to reconcile. Memory mode loses this authority when its store process stops.
 
 ## Upgrading a worker
 
-SmolBox 0.1.3 defaults to smolvm 1.16.0 on Linux x86_64 and macOS
-Apple Silicon. SmolBox 0.1.2 defaults to 1.14.6. The controller upgrade also
-changes durable records; follow [Upgrading to 0.1.3](recovery.md#upgrading-to-0-1-3). Before adopting the new
-default with an older worker, preserve its expected version explicitly:
+This checkout defaults to smolvm **1.16.1** on Linux x86_64 and macOS Apple
+Silicon (unreleased). Published SmolBox 0.1.3 defaults to 1.16.0; 0.1.2 defaults
+to 1.14.6. This default change introduces no further record schema migration.
+Applications upgrading from 0.1.2 still need the
+[0.1.3 record upgrade procedure](recovery.md#upgrading-to-0-1-3).
+Before updating the library with an existing worker, retain its version explicitly:
 
 ```elixir
 {:ok, worker} = SmolBox.Runtime.WorkerConfig.new(
-  Keyword.put(existing_worker_options, :runtime_version, "1.14.6")
+  Keyword.put(existing_worker_options, :runtime_version, "1.16.0")
 )
 ```
 
-Use `"1.14.1"` instead for a worker still on that version. Omitting
-`:runtime_version` in this checkout expects `"1.16.0"`; updating the Elixir
+Use `"1.14.1"` or `"1.14.6"` instead for a worker still on either version. Omitting
+`:runtime_version` in this checkout expects `"1.16.1"`; updating the Elixir
 dependency does not install smolvm. A version mismatch prevents new execution.
 Unverified versions and unsupported host combinations fail configuration
 validation. Health checks require an exact version match, without fallback.
 
-Consult the [1.16.0 qualification evidence](compatibility.md#smolvm-1-16-0-qualification)
-and preparation prerequisites before installing that worker. The same drain,
-identity and prerequisite checks below apply to each supported version.
+Review the [1.16.1 qualification and preservation
+limitation](compatibility.md#smolvm-1-16-1-qualification) before upgrading.
+The same drain, identity and prerequisite checks below apply to each supported
+version. Configure the same expected version on every controller owning the worker.
 
 For an existing worker:
 
@@ -337,7 +345,7 @@ For an existing worker:
    the complete pinned distribution. Verify binary, agent, libkrun and artifact
    digests. Do not mix files from different distributions.
 4. Recheck the deployment controls and approved artifact/profile revisions.
-   Disk requests below the 1.14.6 or 1.16.0 templates require working `resize2fs` on the
+   Disk requests below the 1.14.6, 1.16.0 or 1.16.1 templates require working `resize2fs` on the
    worker host (`brew install e2fsprogs` on macOS). Missing it caused file loss
    after restart in our macOS check, despite successful health/start/exec replies.
    Verify a small owned file survives stop/start before admitting work; see

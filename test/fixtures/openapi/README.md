@@ -1,7 +1,7 @@
 # Upstream schema fixture
 
 `smolvm-v1.14.1-subset.json` is a mechanically extracted subset of the OpenAPI
-schema exported by the official SmolVM v1.14.1 macOS arm64 binary. It contains
+schema exported by the official smolvm v1.14.1 macOS arm64 binary. It contains
 eight selected paths and their recursively referenced component schemas.
 
 Source: https://github.com/smol-machines/smolvm/tree/v1.14.1
@@ -22,7 +22,7 @@ it in `src/api/handlers/health.rs` and both runtime distributions serve it. Its
 HTTP-200/empty-body contract is verified directly by the client runtime tests;
 no invented definition has been inserted into this exported fixture.
 
-## SmolVM 1.14.6
+## smolvm 1.14.6
 
 `smolvm-v1.14.6-subset.json` retains the same eight paths and their 19 recursively
 referenced schemas from the official Linux x86_64 binary's `serve openapi` output.
@@ -54,3 +54,16 @@ Full exported schema SHA-256:
 `f3a0cf982a82acc125d1d02d09d707f0467b9867b4e17281d65a461a6b76ef99`.
 Extracted fixture SHA-256:
 `6c9f935f0a1e72c92eb49e5c382d54ebfb5f41ed3742683360667b0708d8cd26`.
+
+## smolvm 1.16.1
+
+The official Darwin ARM64 and Linux x86_64 binaries export identical schemas:
+`3486e00380443634f57ec7b1d11fa5da4bcfd9b1c427e8cb287f78178dc977be`.
+The new subset retains the same eight paths and nineteen referenced schemas.
+Only `MachineInfo` changes, adding optional `image`; the used paths are unchanged.
+
+Source: https://github.com/smol-machines/smolvm/tree/v1.16.1
+Commit: `9504e94e3581a1f52c414247edcbcd6d6b49a71a`.
+Subset SHA-256: `29e03fa13f67ccdfa86b048fd24713172c80dfeda8431d7b218d893df39a2b94`.
+Captured from the official archives during the September 17, 2026 campaign.
+As with older captures, exported schema metadata is not a runtime health check.
