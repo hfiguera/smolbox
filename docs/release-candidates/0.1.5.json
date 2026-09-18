@@ -1,0 +1,117 @@
+{
+  "version": "0.1.5",
+  "date": "2026-09-18",
+  "status": "prepared locally; not tagged or published",
+  "branch": "prepare-0.1.5",
+  "source_package_verification": {
+    "version": "0.1.5",
+    "source_base": "a3781deb69cb955cb5d981e5b766e6957e23af17",
+    "unchanged_library_modules": 44,
+    "changed_files_only_markdown_and_version": true,
+    "package_files": 105,
+    "package_contents_match_worktree": true,
+    "package_sha256": "55e7924d448d4c3019985916a063b2ec1f44eaf1863331cf115da2a63f6c76e3",
+    "local_tagged_source_line_links_checked": 179,
+    "note": "Tag does not exist; checked referenced paths and lines locally only."
+  },
+  "checks": {
+    "host": "macOS ARM64",
+    "main_toolchain": "Elixir 1.20.4 / OTP 29.0.6",
+    "mix_ci": "passed: format, unused dependency check, warnings-as-errors compilation, dependency cycles, deterministic tests, Credo/ex_slop, ex_dna, Credence, Dialyzer",
+    "deterministic_cases": 234,
+    "excluded_runtime_cases_not_counted_as_passes": 17,
+    "tooling_cases": 23,
+    "exdoc": "passed with warnings as errors",
+    "local_documentation_pages": 46,
+    "package_consumers": {
+      "package-current-final": {
+        "platform": "macos",
+        "architecture": "arm64",
+        "minimum": false,
+        "package_sha256": "55e7924d448d4c3019985916a063b2ec1f44eaf1863331cf115da2a63f6c76e3",
+        "smoke": {
+          "checkpoint": true,
+          "client": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.16.1",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.5",
+            "nimble_options": "1.1.1",
+            "req": "0.7.4",
+            "telemetry": "1.4.2"
+          }
+        }
+      },
+      "package-minimum-final": {
+        "platform": "macos",
+        "architecture": "arm64",
+        "minimum": true,
+        "package_sha256": "55e7924d448d4c3019985916a063b2ec1f44eaf1863331cf115da2a63f6c76e3",
+        "smoke": {
+          "checkpoint": true,
+          "client": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.16.1",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.0",
+            "nimble_options": "1.1.0",
+            "req": "0.7.4",
+            "telemetry": "1.3.0"
+          }
+        }
+      },
+      "package-otp27": {
+        "platform": "macos",
+        "architecture": "arm64",
+        "minimum": true,
+        "package_sha256": "55e7924d448d4c3019985916a063b2ec1f44eaf1863331cf115da2a63f6c76e3",
+        "smoke": {
+          "checkpoint": true,
+          "client": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.16.1",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.0",
+            "nimble_options": "1.1.0",
+            "req": "0.7.4",
+            "telemetry": "1.3.0"
+          }
+        }
+      }
+    }
+  },
+  "logs_sha256": {
+    "ci.log": "340aa3a0f1ab323165b99b33f0191ab97cba57c92e232e155e59d278243f17c4",
+    "tooling.log": "0efeeb2657101321500e4f9a592e85b17ba9b2d8e2e13c8bcafd4013f5a0d86a",
+    "docs.log": "d311128ec301c8ce1f1d9c997ea1b92dc20a950aa8b17a3bd7a9b7c5a4ff50e4",
+    "docs-links.log": "4dc37ca964363f541ce0c5cbd04f287800d6091309f927d42de9ce1e6d1e703e",
+    "package-current-final.log": "3c1b173ffda5df97ec737bd7cd22556aef8822f097ee98a8b9d5ebdf7cc95e0c",
+    "package-minimum-final.log": "a71d5cd3b30fc4118c162a40b4656ac2595eff609a9977cf4c9a13a8745cf4b8",
+    "package-otp27.log": "68f78122911a448172b68f852bf25b21dffa8f3848b1cae79cfc48e961d0936b"
+  },
+  "scope_notes": [
+    "Preparation changes Markdown and the package version only; all 44 library source files match merged checkpoint base.",
+    "No new live worker, database recovery, exhaustion, benchmark or coverage run in this preparation. Earlier qualification remains separately recorded at its own revisions.",
+    "No push, PR, tag, Hex publication or GitHub release performed.",
+    "Final release commit/archive validation and GitHub CI remain before publication.",
+    "Initial package consumers also passed; documentation was subsequently clarified, then the final archive was rebuilt and all three recorded consumers used that final archive."
+  ]
+}

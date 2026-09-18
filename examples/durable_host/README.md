@@ -50,7 +50,7 @@ dependency can change while the example lockfile stays the same.
 Configure the worker, pinned Python artifact, private object directory,
 fingerprint key file, and execution ID described in `../minimal_host/README.md`.
 On Linux x86_64 or macOS Apple Silicon,
-omitting `SMOLBOX_RUNTIME_VERSION` selects 1.16.1 with SmolBox 0.1.4
+omitting `SMOLBOX_RUNTIME_VERSION` selects 1.16.1 with SmolBox 0.1.5
 (0.1.3 defaults to 1.16.0). Set it to `1.16.0`, `1.14.6` or `1.14.1`
 for an existing older worker. Consult the
 [qualification evidence](../../docs/compatibility.md#smolvm-1-16-1-qualification). Supply the 1.14.6, 1.16.0 or 1.16.1 host's `resize2fs` for smaller disk
@@ -148,7 +148,7 @@ cases that preserve execution progress before/after SQL result persistence.
 
 ## Checkpoint execution and recovery
 
-This **unreleased** example requires the current checkout. Hex 0.1.4 does not
+This example requires SmolBox **0.1.5** or this checkout. Version 0.1.4 does not
 include checkpoint execution. This demo uses only the guest shell and the fixture in
 [`scripts/checkpoints/prepare-fixture.sh`](../../scripts/checkpoints/prepare-fixture.sh).
 It requires smolvm **1.16.1**, an approved idle offline checkpoint captured on the
@@ -316,7 +316,7 @@ together; old readers cannot read v2, and there is no built-in downgrade after
 v2 writes. Follow [Upgrading to 0.1.3](../../docs/recovery.md#upgrading-to-0-1-3).
 This payload change does not add a SQL migration or change the encryption envelope.
 
-The unreleased checkpoint feature additionally writes **record schema v3 for
+SmolBox 0.1.5 additionally writes **record schema v3 for
 checkpoint executions only**. Image executions retain v2 and existing image
 fingerprints; v1/v2 reads remain supported. Upgrade **every controller sharing
 the store before submitting checkpoint work**. An older controller cannot read

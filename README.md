@@ -78,24 +78,27 @@ creating machines, executing commands, streaming output, and transferring files.
 
 ## Installation and first run
 
-SmolBox **0.1.4** defaults to **smolvm 1.16.1** on Linux x86_64 and macOS
-Apple Silicon. Upgrade the separately installed worker or explicitly retain
-`runtime_version: "1.16.0"` before updating the library. See
-[Upgrading to 0.1.4](docs/recovery.md#upgrading-to-0-1-4).
+SmolBox **0.1.5** keeps **smolvm 1.16.1** as its default on Linux x86_64 and
+macOS Apple Silicon. Checkpoint execution requires this worker version.
 
-**Upgrading from 0.1.2:** coordinate all controllers sharing a durable store.
-Every codec write now uses record schema v2, including offline executions; old
-readers cannot read it. After v2 writes, reverting to 0.1.2 is not a supported
-rollback. Follow [the upgrade procedure](docs/recovery.md#upgrading-to-0-1-3),
-including the separate worker version change.
+**Before using checkpoints:** upgrade every controller sharing a store to 0.1.5.
+Checkpoint records use schema v3, which older controllers cannot read. Existing
+image executions keep schema v2 and their current behavior. See
+[Upgrading to 0.1.5](docs/recovery.md#upgrading-to-0-1-5), including worker selection
+when coming from an older release.
+
+**Upgrading from 0.1.2:** first complete the coordinated
+[v2 record upgrade](docs/recovery.md#upgrading-to-0-1-3), including the separate
+worker version change. Even offline image records now use v2; after those writes,
+reverting to 0.1.2 is not a supported rollback.
 
 Add SmolBox to your application's `mix.exs`:
 
 ```elixir
-{:smolbox, "~> 0.1.4"}
+{:smolbox, "~> 0.1.5"}
 ```
 
-Run `mix deps.get`. The [API documentation](https://hexdocs.pm/smolbox/0.1.4/)
+Run `mix deps.get`. The [API documentation](https://hexdocs.pm/smolbox/0.1.5/)
 includes the guides below. A local checkout can instead be used with
 `{:smolbox, path: "../smolbox"}`.
 
@@ -115,28 +118,28 @@ To run the local walkthrough, you need:
 stage a Python file, submit it, read its output file, and confirm cleanup. The
 walkthrough uses an in-memory store and needs no database. Applications that need
 restart recovery must provide a durable `SmolBox.Store` adapter; a complete
-[PostgreSQL host example](https://github.com/hfiguera/smolbox/tree/v0.1.4/examples/durable_host)
+[PostgreSQL host example](https://github.com/hfiguera/smolbox/tree/v0.1.5/examples/durable_host)
 is included in the repository.
 
-## Unreleased: checkpoint execution
+## Checkpoint execution
 
-The development branch can restore an operator-approved idle, offline checkpoint
+SmolBox 0.1.5 can restore an operator-approved idle, offline checkpoint
 into a separate disposable machine for each execution. See
 [Executing from a checkpoint](docs/checkpoints.md) for approval, examples and
-record schema v3 upgrade requirements. This is not available in Hex 0.1.4.
+record schema v3 upgrade requirements.
 
 ## Current scope
 
 SmolBox has real execution and durable recovery tests on Linux x86_64 and macOS
 Apple Silicon with **smolvm 1.14.1, 1.14.6, 1.16.0 and 1.16.1**; results are recorded in [Compatibility](docs/compatibility.md#runtime-selection).
-SmolBox 0.1.4 defaults to **1.16.1**; 0.1.3 defaults to **1.16.0** and
+SmolBox 0.1.5 defaults to **1.16.1**; 0.1.3 defaults to **1.16.0** and
 0.1.2 to **1.14.6**.
 Before adopting the **1.16.1** default with an older worker, explicitly
 configure `runtime_version: "1.16.0"`, `"1.14.6"` or `"1.14.1"`, or follow the
 [worker upgrade procedure](docs/host-integration.md#upgrading-a-worker).
 The package does not upgrade an external worker. A version mismatch prevents
 new execution; arbitrary upstream releases and automatic fallback are not accepted.
-Version 0.1.4 selects **1.16.1** by default after
+Since version 0.1.4, SmolBox selects **1.16.1** by default after
 [qualification](docs/compatibility.md#smolvm-1-16-1-qualification) and a cleanup change
 that separates disposal from preservation. A failed graceful stop can still leave
 unknown work retained; see the [recovery rules](docs/recovery.md#preservation-and-disposal).
@@ -188,4 +191,4 @@ the compatibility guide. From this repository, `mix ci` runs deterministic check
 without contacting a real worker. Generate this site with
 `MIX_ENV=dev mix docs --warnings-as-errors`. Live worker tests are a separate opt-in
 operation described in the repository's
-[CI guide](https://github.com/hfiguera/smolbox/blob/v0.1.4/scripts/ci/README.md).
+[CI guide](https://github.com/hfiguera/smolbox/blob/v0.1.5/scripts/ci/README.md).

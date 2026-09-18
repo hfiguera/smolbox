@@ -1,6 +1,6 @@
 # Checkpoint examples and measurements
 
-These scripts use the unreleased checkpoint feature and smolvm 1.16.1. Read
+These scripts require SmolBox 0.1.5 or this checkout and smolvm 1.16.1. Read
 [checkpoint approvals](../../docs/checkpoints.md) before restoring a fixture.
 Use a dedicated idle worker, private artifact paths and synthetic data. Do not
 use arbitrary application checkpoints or a shared production worker.
