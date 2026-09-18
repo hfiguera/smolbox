@@ -1,10 +1,11 @@
-# Unreleased smolvm 1.16.1 default
+# SmolBox 0.1.4 release preparation
 
-This checkout now selects smolvm 1.16.1 by default on Linux x86_64 and macOS
+SmolBox 0.1.4 selects smolvm 1.16.1 by default on Linux x86_64 and macOS
 Apple Silicon. Explicit 1.16.0, 1.14.6 and 1.14.1 support remains. See the
 [qualification report](runtime-1.16.1-qualification.md) for the completed runtime
 and cleanup campaign and the subsequent default selection validation.
-Published SmolBox 0.1.3 still defaults to 1.16.0. Upgrade the separately installed
+Version 0.1.3 still defaults to 1.16.0. Release validation is recorded in
+[0.1.4 preparation](release-candidates/0.1.4.md). Upgrade the separately installed
 worker using the drain procedure, or explicitly configure its existing version
 before adopting this checkout. No new public API or record schema is introduced.
 

@@ -1,12 +1,13 @@
 # Changelog
 
-## Unreleased
+## 0.1.4 — September 18, 2026
 
-**Worker upgrade notice:** this checkout expects smolvm 1.16.1 by default.
+**Worker upgrade notice:** 0.1.4 expects smolvm 1.16.1 by default.
 Upgrade the separately installed worker using the drain and verification
 procedure, or configure `runtime_version: "1.16.0"` before updating the library
 to retain that worker. There is no automatic fallback or additional record
-schema migration. The published 0.1.3 package still defaults to 1.16.0.
+schema migration. Version 0.1.3 defaults to 1.16.0. See
+[Upgrading to 0.1.4](docs/recovery.md#upgrading-to-0-1-4).
 
 - Separate managed disposal from graceful preservation. Finished executions and
   unknown executions past retention can delete their verified owned VM without

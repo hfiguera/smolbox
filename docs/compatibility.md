@@ -1,12 +1,12 @@
 # Compatibility evidence
 
-Version: `0.1.3`. The library's supported qualification is
+Version: `0.1.4`. The library's supported qualification is
 `:development`; requested hard-control options remain unsupported. The original
 release evidence below records the client/controller contract on Linux and macOS.
 
 ## smolvm 1.16.1 qualification
 
-**Default in this checkout; unreleased.** Managed execution selects 1.16.1
+**Default in SmolBox 0.1.4.** Managed execution selects 1.16.1
 for a verified Linux x86_64 or macOS Apple Silicon worker. Controlled networking
 accepts it too. Explicit 1.16.0 support remains. The candidate passed the
 ordinary Linux/macOS execution, durable recovery and network enforcement suites,
@@ -16,7 +16,7 @@ Version 1.16.1 requires confirmation that guest filesystems are synchronized
 before stopping a live VM. After storage exhaustion, synchronization returned an
 I/O error and stop failed, preserving the running VM. SmolBox correctly retained
 uncertainty; the original cleanup sequence did not advance from stop to delete.
-The unreleased follow-up now separates disposal from preservation, as described
+Version 0.1.4 separates disposal from preservation, as described
 in [the recovery guide](recovery.md#preservation-and-disposal). This is an explicit
 state-based choice, not a destructive fallback after a stop error.
 
@@ -134,12 +134,12 @@ explicit bounded settings. No validation limits or public defaults were relaxed.
 SmolBox 0.1.3 defaults to `runtime_version: "1.16.0"` for Linux x86_64 and
 macOS Apple Silicon. SmolBox 0.1.2 defaults to 1.14.6 and does not include 1.16.0
 support. Also follow the [record format upgrade procedure](recovery.md#upgrading-to-0-1-3). Use an explicit `runtime_version: "1.14.1"` or
-`runtime_version: "1.14.6"` to retain an older worker when adopting this checkout.
+`runtime_version: "1.14.6"` to retain an older worker when adopting 0.1.4.
 A worker must report the exact configured version. Multiple supported versions
 do not imply automatic fallback or acceptance of arbitrary upstream releases.
 
-This checkout defaults to `runtime_version: "1.16.1"` (unreleased); published
-0.1.3 does not support it. Set `runtime_version: "1.16.0"` explicitly before
+SmolBox 0.1.4 defaults to `runtime_version: "1.16.1"`; version 0.1.3 does not
+support it. Set `runtime_version: "1.16.0"` explicitly before
 upgrading the library if you need to retain that worker. Install the worker
 separately and configure the exact version on every controller that owns it.
 

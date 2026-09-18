@@ -1,6 +1,9 @@
 # smolvm 1.16.1 qualification
 
-Status: **1.16.1 is the default in this checkout; unreleased. Explicit 1.16.0 support remains.**
+Status: **1.16.1 is qualified and selected by default in SmolBox 0.1.4. Explicit 1.16.0 support remains.**
+
+The checkpoints below retain their original pre-release status and evidence.
+See [0.1.4 release validation](release-candidates/0.1.4.md) for the release scope.
 
 Branch: `qualify-smolvm-1.16.1`, starting at
 `9c212ef29ed446307d45de8084c4acef336b68aa`. Campaign date: September 18, 2026 UTC.

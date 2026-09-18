@@ -14,15 +14,15 @@ or its external host resource controls.
 In an existing Elixir Mix application, add this entry to `deps/0` in `mix.exs`:
 
 ```elixir
-{:smolbox, "~> 0.1.3"}
+{:smolbox, "~> 0.1.4"}
 ```
 
 Run `mix deps.get` after adding the dependency. A local checkout can instead be
-used with `{:smolbox, path: "../smolbox"}`. Version 0.1.3 defaults to smolvm
-1.16.0. The steps below target this checkout’s **1.16.1** default (unreleased).
-For the published package, use the [0.1.3 walkthrough](https://hexdocs.pm/smolbox/0.1.3/getting-started.html).
-Existing applications must follow [Upgrading to 0.1.3](recovery.md#upgrading-to-0-1-3)
-before sharing their durable store with this version.
+used with `{:smolbox, path: "../smolbox"}`. Version 0.1.4 defaults to smolvm
+**1.16.1**. Existing applications should follow
+[Upgrading to 0.1.4](recovery.md#upgrading-to-0-1-4); the library does not upgrade
+the worker. Applications coming from 0.1.2 or earlier also require the coordinated
+[record format upgrade](recovery.md#upgrading-to-0-1-3).
 Elixir 1.18 and later are accepted by the
 package; use one of the tested Elixir/OTP pairs in [Compatibility](compatibility.md).
 

@@ -78,8 +78,10 @@ creating machines, executing commands, streaming output, and transferring files.
 
 ## Installation and first run
 
-SmolBox **0.1.3** defaults to **smolvm 1.16.0** on Linux x86_64 and macOS
-Apple Silicon. This checkout defaults to **1.16.1** (unreleased).
+SmolBox **0.1.4** defaults to **smolvm 1.16.1** on Linux x86_64 and macOS
+Apple Silicon. Upgrade the separately installed worker or explicitly retain
+`runtime_version: "1.16.0"` before updating the library. See
+[Upgrading to 0.1.4](docs/recovery.md#upgrading-to-0-1-4).
 
 **Upgrading from 0.1.2:** coordinate all controllers sharing a durable store.
 Every codec write now uses record schema v2, including offline executions; old
@@ -90,10 +92,10 @@ including the separate worker version change.
 Add SmolBox to your application's `mix.exs`:
 
 ```elixir
-{:smolbox, "~> 0.1.3"}
+{:smolbox, "~> 0.1.4"}
 ```
 
-Run `mix deps.get`. The [API documentation](https://hexdocs.pm/smolbox/0.1.3/)
+Run `mix deps.get`. The [API documentation](https://hexdocs.pm/smolbox/0.1.4/)
 includes the guides below. A local checkout can instead be used with
 `{:smolbox, path: "../smolbox"}`.
 
@@ -101,10 +103,8 @@ To run the local walkthrough, you need:
 
 - Elixir **1.18 or later**, using a [tested Elixir/OTP pair](docs/compatibility.md).
 - A dedicated worker on Linux x86_64 with KVM or macOS Apple Silicon:
-  **smolvm 1.16.0** for SmolBox 0.1.3.
-  This checkout defaults to **1.16.1** and supports explicitly configured
-  1.14.1, 1.14.6 and 1.16.0 workers.
-  Support for 1.16.1 is unreleased; it is not included in the published 0.1.3 package.
+  **smolvm 1.16.1** by default, or explicitly configured 1.16.0, 1.14.6 or
+  1.14.1 workers.
 - The host's `resize2fs` tool for 1.14.6, 1.16.0 and 1.16.1 disk requests below template sizes.
   On macOS, install `e2fsprogs`; see the [runtime prerequisites](docs/compatibility.md#macos-1-14-6-prerequisites).
 - A prepared Python image for that worker's architecture, with its SHA-256
@@ -115,26 +115,27 @@ To run the local walkthrough, you need:
 stage a Python file, submit it, read its output file, and confirm cleanup. The
 walkthrough uses an in-memory store and needs no database. Applications that need
 restart recovery must provide a durable `SmolBox.Store` adapter; a complete
-[PostgreSQL host example](https://github.com/hfiguera/smolbox/tree/v0.1.3/examples/durable_host)
+[PostgreSQL host example](https://github.com/hfiguera/smolbox/tree/v0.1.4/examples/durable_host)
 is included in the repository.
 
 ## Current scope
 
 SmolBox has real execution and durable recovery tests on Linux x86_64 and macOS
 Apple Silicon with **smolvm 1.14.1, 1.14.6, 1.16.0 and 1.16.1**; results are recorded in [Compatibility](docs/compatibility.md#runtime-selection).
-SmolBox 0.1.3 defaults to **1.16.0**; 0.1.2 defaults to **1.14.6**.
-Before adopting this checkout’s **1.16.1** default with an older worker, explicitly
+SmolBox 0.1.4 defaults to **1.16.1**; 0.1.3 defaults to **1.16.0** and
+0.1.2 to **1.14.6**.
+Before adopting the **1.16.1** default with an older worker, explicitly
 configure `runtime_version: "1.16.0"`, `"1.14.6"` or `"1.14.1"`, or follow the
 [worker upgrade procedure](docs/host-integration.md#upgrading-a-worker).
 The package does not upgrade an external worker. A version mismatch prevents
 new execution; arbitrary upstream releases and automatic fallback are not accepted.
-This checkout selects **1.16.1** by default after
+Version 0.1.4 selects **1.16.1** by default after
 [qualification](docs/compatibility.md#smolvm-1-16-1-qualification) and a cleanup change
 that separates disposal from preservation. A failed graceful stop can still leave
 unknown work retained; see the [recovery rules](docs/recovery.md#preservation-and-disposal).
 
-SmolBox 0.1.3 also supports explicit outbound hostname/CIDR policies
-with smolvm 1.16.0; this checkout also supports them with 1.16.1. Offline remains the default. See
+SmolBox supports explicit outbound hostname/CIDR policies
+with smolvm 1.16.0 and 1.16.1. Offline remains the default. See
 [Controlled network access](docs/network-access.md) for setup and validation boundaries.
 
 SmolBox relies on smolvm's isolation model for running untrusted code. Your
@@ -180,4 +181,4 @@ the compatibility guide. From this repository, `mix ci` runs deterministic check
 without contacting a real worker. Generate this site with
 `MIX_ENV=dev mix docs --warnings-as-errors`. Live worker tests are a separate opt-in
 operation described in the repository's
-[CI guide](https://github.com/hfiguera/smolbox/blob/v0.1.3/scripts/ci/README.md).
+[CI guide](https://github.com/hfiguera/smolbox/blob/v0.1.4/scripts/ci/README.md).

@@ -100,7 +100,7 @@ explicitly approved equivalent storage policy. Unknown-schema or corrupt rows
 are errors requiring migration or investigation, never permission to start over.
 
 The reusable suite is in
-[`test/support/store/contract.ex`](https://github.com/hfiguera/smolbox/blob/v0.1.3/test/support/store/contract.ex).
+[`test/support/store/contract.ex`](https://github.com/hfiguera/smolbox/blob/v0.1.4/test/support/store/contract.ex).
 It is repository test support, not part of the published library package. An adapter test module
 uses `SmolBox.Store.Contract` and supplies `adapter` and `store` in its setup
 context. It checks concurrent acceptance, conflicts, claims and CAS races, atomic
@@ -109,7 +109,7 @@ The suite alone does not certify durability; also run fresh-process database
 recovery, unavailable-database, corruption, and transaction-failure tests.
 
 The repository's
-[durable host example](https://github.com/hfiguera/smolbox/tree/v0.1.3/examples/durable_host)
+[durable host example](https://github.com/hfiguera/smolbox/tree/v0.1.4/examples/durable_host)
 owns its Repo, schema migration,
 AES-256-GCM record encryption, and indexed projections. Mutations serialize on a
 partition row inside a SQL transaction. It demonstrates a small-pool adapter,
@@ -163,6 +163,35 @@ retains that exit: cancellation intent is not permission to replace observed
 evidence with a fabricated cancelled result. Collection may finish or fail
 depending on which file operations completed before cancellation was observed.
 
+## Upgrading to 0.1.4
+
+SmolBox 0.1.4 changes the default worker from smolvm 1.16.0 to **1.16.1**.
+Updating the Elixir dependency does not install or upgrade that worker. Before
+updating an application, choose one of these paths:
+
+- Retain an existing worker by setting `runtime_version: "1.16.0"` explicitly
+  in every controller that owns it. Explicit 1.14.6 and 1.14.1 offline workers
+  remain supported too.
+- Upgrade the worker using the [drain and verification procedure](host-integration.md#upgrading-a-worker).
+  Resolve existing work and preserve its state before replacing the complete
+  runtime distribution. Configure every owner to expect 1.16.1 and verify an
+  owned execution through cleanup before resuming submissions.
+
+Version checks require an exact match; there is no automatic fallback.
+Controlled networking works with 1.16.0 and 1.16.1 and remains offline by default.
+
+There is **no additional record schema migration from 0.1.3**: both versions read
+v1 records and write v2. Applications coming from 0.1.2 or earlier must also
+complete [the coordinated record upgrade below](#upgrading-to-0-1-3).
+
+Managed cleanup now separates disposal from preservation, as described in
+[Preservation and disposal](#preservation-and-disposal). Completed work can
+remove its owned machine without a preliminary graceful stop. Unknown work still
+retains its disks and reservation during its retention period. A failed graceful
+stop never automatically authorizes deletion, and retry exhaustion may still
+require operator resolution. Upgrading does not reset exhausted cleanup budgets
+or replay commands with uncertain outcomes.
+
 ## Upgrading to 0.1.3
 
 SmolBox 0.1.3 introduces record schema v2 to persist network policies. Despite the
@@ -173,7 +202,7 @@ an Elixir application instance running SmolBox, not a smolvm worker.
 | Reader | Legacy v1 records | New v2 records |
 |---|---|---|
 | SmolBox 0.1.2 | Supported | Rejected |
-| SmolBox 0.1.3 | Supported as offline | Supported |
+| SmolBox 0.1.3 and 0.1.4 | Supported as offline | Supported |
 
 **Every new codec write uses v2, even when networking stays offline.** Reading a
 valid v1 record adds offline defaults in memory without changing its execution

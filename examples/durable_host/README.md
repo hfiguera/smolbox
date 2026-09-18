@@ -49,8 +49,8 @@ dependency can change while the example lockfile stays the same.
 Configure the worker, pinned Python artifact, private object directory,
 fingerprint key file, and execution ID described in `../minimal_host/README.md`.
 On Linux x86_64 or macOS Apple Silicon,
-omitting `SMOLBOX_RUNTIME_VERSION` selects 1.16.1 (unreleased; published 0.1.3
-defaults to 1.16.0). Set it to `1.16.0`, `1.14.6` or `1.14.1`
+omitting `SMOLBOX_RUNTIME_VERSION` selects 1.16.1 with SmolBox 0.1.4
+(0.1.3 defaults to 1.16.0). Set it to `1.16.0`, `1.14.6` or `1.14.1`
 for an existing older worker. Consult the
 [qualification evidence](../../docs/compatibility.md#smolvm-1-16-1-qualification). Supply the 1.14.6, 1.16.0 or 1.16.1 host's `resize2fs` for smaller disk
 requests; see [host prerequisites](../../docs/compatibility.md#macos-1-14-6-prerequisites).
