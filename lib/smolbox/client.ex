@@ -139,21 +139,24 @@ defmodule SmolBox.Client do
   def start(client, name), do: lifecycle(client, name, :post, "/start", :start)
 
   @doc """
-  Stop an owned machine and return its observation.
+  Request a stop while preserving an owned machine's disks, and return its observation.
 
   This does not recover the command's exit code or fence an earlier delayed exec
   request. The caller must verify the returned state and continue appropriate
-  reconciliation. See [Recovery](recovery.html).
+  reconciliation. A failed stop can leave the machine running; it does not
+  authorize discarding its disks. See [Recovery](recovery.html).
   """
   @spec stop(t(), String.t()) :: {:ok, Machine.t()} | {:error, Error.t()}
   def stop(client, name), do: lifecycle(client, name, :post, "/stop", :stop)
 
   @doc """
-  Delete an owned machine and validate the worker's deletion acknowledgment.
+  Terminate and discard an owned machine, validating the worker's deletion acknowledgment.
 
-  Returns `:ok` on a matching acknowledgment. Establish ownership and termination
-  before calling; verify absence afterward with `inspect_machine/2`. This low-level
-  operation does not manage retention or release a managed execution's reservation.
+  Returns `:ok` on a matching acknowledgment. Verify ownership and authorize
+  disposal only after collection and any required retention; an earlier successful
+  stop is not required. Verify absence afterward with `inspect_machine/2`.
+  This low-level operation does not manage retention or release a managed
+  execution's reservation.
   """
   @spec delete(t(), String.t()) :: :ok | {:error, Error.t()}
   def delete(client, name) do

@@ -6,17 +6,18 @@ release evidence below records the client/controller contract on Linux and macOS
 
 ## smolvm 1.16.1 qualification
 
-**Blocked by a cleanup incompatibility; 1.16.1 remains unsupported.** The default
+**1.16.1 remains unsupported pending the cleanup follow-up review.** The default
 and managed/network admission rules remain unchanged. The candidate passed the
 ordinary Linux/macOS execution, durable recovery and network enforcement suites,
-but failed two full-storage cleanup regressions in the disposable Linux lab.
+but initially failed two full-storage cleanup regressions in the disposable Linux lab.
 
 Version 1.16.1 requires confirmation that guest filesystems are synchronized
 before stopping a live VM. After storage exhaustion, synchronization returned an
 I/O error and stop failed, preserving the running VM. SmolBox correctly retained
-uncertainty; its existing cleanup sequence did not advance from stop to delete.
-Changing that sequence or automatically discarding a running VM is outside this
-qualification's scope.
+uncertainty; the original cleanup sequence did not advance from stop to delete.
+The unreleased follow-up now separates disposal from preservation, as described
+in [the recovery guide](recovery.md#preservation-and-disposal). This is an explicit
+state-based choice, not a destructive fallback after a stop error.
 
 The same controlled comparison returned HTTP 200 and a stopped machine on
 1.16.0, versus HTTP 500 and a running machine on 1.16.1. An explicit diagnostic
@@ -27,7 +28,18 @@ The candidate's positive results include 14 Linux and nine ordinary macOS runtim
 cases, 17 PostgreSQL store cases and 25 durable recovery cases on each platform,
 and the existing Linux IPv4/IPv6 and macOS IPv4/DNS network checks. Linux API
 restart, unavailability and missing-machine scenarios also passed, as did their
-macOS equivalents. These results do not outweigh the cleanup blocker.
+macOS equivalents. These are evidence from the initial campaign, before the
+cleanup follow-up; they do not by themselves qualify the changed implementation.
+
+The follow-up's real managed executions have completed deletion, absence checks
+and reservation release on both a full 768 MiB cache and a full 512 MiB shared
+registry/data filesystem. A separate cancelled execution kept its unknown outcome,
+live machine and reservation when graceful stop failed, with no DELETE request.
+These are distinct scenarios: successful disposal does not establish successful
+preservation under disk exhaustion. The changed implementation also passed all
+25 real Linux recovery cases and nine ordinary macOS runtime cases on each of
+1.16.0 and 1.16.1. See the [follow-up evidence](evidence/cleanup-preservation-disposal.json)
+for source hashes, intermediate failures and the final results.
 
 See [the machine-readable evidence](evidence/smolvm-1.16.1.json) and the repository
 report `docs/runtime-1.16.1-qualification.md` for exact inputs, failures, the

@@ -2,9 +2,15 @@
 
 ## Unreleased
 
+- Separate managed disposal from graceful preservation. Finished executions and
+  unknown executions past retention can delete their verified owned VM without
+  a preliminary stop. Unknown work during retention still requires graceful
+  stop and keeps its disks on failure. Identity checks, finite mutation budgets,
+  observed absence and reservation accounting remain required.
+
 - Record smolvm 1.16.1 compatibility and network enforcement results, including a
   full-disk cleanup incompatibility. Keep 1.16.1 outside supported admission;
-  the default remains 1.16.0 and no public API or record format changes.
+  the default remains 1.16.0 and there are no public API or record format changes.
 - Add exact candidate distribution pins, captured wire/schema fixtures and a
   reproducible comparison of 1.16.0 and 1.16.1 stop behavior under disk exhaustion.
 

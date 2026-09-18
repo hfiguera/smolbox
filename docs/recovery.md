@@ -56,6 +56,33 @@ execution, collection, and cleanup budgets; repeated inspection never resets
 them. Due queries use bounded pages ordered by `{next_due_at_ms, scope, id}`.
 Records remain the authority when observers, callers or mailboxes disappear.
 
+## Preservation and disposal
+
+Managed cleanup chooses an operation from the persisted execution state:
+
+- After execution and collection have finished, it deletes the verified owned
+  machine directly. Failed preparation before dispatch is also eligible for
+  disposal. No graceful stop is required for disks that will be discarded.
+- While an unknown execution remains within its retention window, it attempts a
+  graceful stop, reinspects identity and stopped state, and preserves the disks.
+  A failed stop does not authorize deletion or establish termination.
+- After unknown retention expires, a cleanup attempt with remaining mutation
+  budget may delete the verified machine directly. Absence can establish
+  termination, but cannot recover the command's exit status.
+
+This is a choice made before mutation, not a delete fallback after any stop error.
+All disposal paths still require creation evidence and a matching observed
+incarnation. Successful DELETE responses must be followed by an absence check;
+only recorded absence permits reservation release. Output collection finishes or
+records its failure before a known execution becomes eligible for disposal.
+
+The low-level `SmolBox.Client.stop/2` remains a graceful stop. On smolvm 1.16.1,
+filesystem synchronization failure deliberately leaves a VM alive. That behavior
+is appropriate when disks must be preserved, but is not a prerequisite for
+explicit disposal. Bounded stop retries can still be exhausted during retention;
+expiry does not reset their budget. Such unresolved machines remain charged and
+require operator resolution as described below.
+
 ## Storage adapters
 
 `SmolBox.Store.Memory` is explicitly ephemeral. A process/VM restart loses its

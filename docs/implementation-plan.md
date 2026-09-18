@@ -1289,6 +1289,7 @@ Necessary contract corrections found during implementation:
 - Due scans must retain records whose cleanup is complete but whose capacity release did not commit. Both store adapters now test this boundary.
 - Concurrent request timestamps can arrive out of order. Claims/cancellation keep `updated_at_ms` nondecreasing; CAS still rejects stale versions. Observer monotonic time bounds elapsed stages separately from persisted wall timestamps.
 - Unknown-outcome disks wait until the execution deadline plus evidence retention before deletion. Their fixed cleanup deadline includes this intentional wait plus the cleanup budget; it is not reset on restart. Whole-VM stop is attempted before that wait.
+- Unreleased follow-up for smolvm 1.16.1: finished execution/collection selects direct disposal after ownership verification. Unknown work retains graceful stop and preservation until its fixed retention deadline; expiry permits disposal only with remaining cleanup budget. DELETE responses still require observed absence before reservation release. See `docs/runtime-1.16.1-qualification.md`; admission remains held separately from this lifecycle change.
 - After cleanup mutation retries are exhausted, only bounded read-only inspection continues. Observing operator-resolved absence can still release the original reservation.
 
 Exit: a caller can disconnect and later retrieve the same execution; a nonzero exit and collection failure remain distinguishable.

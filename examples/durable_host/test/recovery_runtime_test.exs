@@ -58,7 +58,7 @@ defmodule SmolBox.DurableHost.RecoveryRuntimeTest do
       "encryption_key_file" => key_file(root, "encryption.key"),
       "ledger" => Path.join(root, "dispatch-attempts"),
       "preparation_ms" => SmolBox.LabCandidate.preparation_ms(),
-      "wait" => event == "first_output_record"
+      "wait" => event in ["first_output_record", "stop"]
     }
 
     file = Path.join(root, "settings.json")
@@ -312,7 +312,9 @@ defmodule SmolBox.DurableHost.RecoveryRuntimeTest do
     if {event, phase} in [
          {"dispatch_intent", "after"},
          {"first_output_record", "after"},
-         {"result_write", "before"}
+         {"result_write", "before"},
+         {"stop", "before"},
+         {"stop", "after"}
        ] do
       assert record.state == :unknown
       assert record.result == nil

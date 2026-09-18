@@ -238,7 +238,11 @@ budget. The original command is never resent. Retained or failed-cleanup machine
 continue to consume reservations.
 
 Cleanup checks creation evidence before stop/delete and verifies absence before
-releasing capacity. Failed cleanup does not rewrite successful command results.
+releasing capacity. Finished executions are deleted directly after collection;
+unknown executions retain their disks and use graceful stop until retention expires.
+A stop failure during retention never authorizes immediate disposal. See the
+[recovery guide](recovery.md#preservation-and-disposal) for the state and budget
+rules. Failed cleanup does not rewrite successful command results.
 Retries are bounded. After exhaustion, automatic work only inspects periodically;
 it sends no more mutations. `reconcile` can request earlier inspection and can
 confirm absence after an operator has resolved a resource whose creation was

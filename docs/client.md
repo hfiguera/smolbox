@@ -72,10 +72,14 @@ source = "print('hello')\n"
 The example shows the successful path. Production callers must handle each typed
 error. A machine name or matching `createdAt` alone is insufficient ownership
 proof after a conflict or manual replacement. Use an exclusive managed namespace,
-save creation evidence, and refuse cleanup when identity differs. After authorized
-cleanup, verify a stopped state, delete the owned machine, then verify absence.
-No cleanup primitive should be placed in an unconditional `after` block without
-checking identity and preserving uncertain-execution evidence first.
+save creation evidence, and refuse cleanup when identity differs. To preserve a
+machine's disks, stop it and verify the same incarnation is no longer running.
+For authorized disposal after collection and any required retention, delete the
+verified owned machine and then inspect it to confirm absence. A failed stop
+alone does not authorize disposal. No cleanup primitive should be placed in an
+unconditional `after` block without checking identity and preserving uncertain
+execution evidence first. The managed runtime's rules are described in
+[preservation and disposal](recovery.md#preservation-and-disposal).
 
 `exec/4` returns byte-exact stdout/stderr from upstream base64 fields. Nonzero exit
 codes are observed results, not transport errors. `exec_stream/4` uses the actual

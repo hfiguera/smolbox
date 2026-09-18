@@ -77,23 +77,34 @@ defmodule SmolBox.ManagedPeer do
 
   defp machine_route("GET", [], _body, machine, state), do: {{:json, 200, machine}, state}
 
-  defp machine_route("POST", [operation], _body, machine, state)
-       when operation in ["start", "stop"] do
-    updated = Map.put(machine, "state", if(operation == "start", do: "running", else: "stopped"))
+  defp machine_route("POST", ["stop"], _body, machine, %{options: options} = state)
+       when is_list(options) do
+    if options[:stop_failure],
+      do: {{:json, 500, %{"error" => "guest did not confirm filesystem synchronization"}}, state},
+      else: update_machine_state(machine, state, "stopped")
+  end
 
-    {{:json, 200, updated},
-     %{state | machines: Map.put(state.machines, machine["name"], updated)}}
+  defp machine_route("POST", [operation], _body, machine, state)
+       when operation == "start" do
+    update_machine_state(machine, state, "running")
   end
 
   defp machine_route("DELETE", [], _body, machine, state) do
     failures = Keyword.get(state.options, :delete_failures, 0)
 
-    if failures > 0 do
-      {{:json, 503, %{}},
-       %{state | options: Keyword.put(state.options, :delete_failures, failures - 1)}}
-    else
-      {{:json, 200, %{"deleted" => machine["name"]}},
-       %{state | machines: Map.delete(state.machines, machine["name"])}}
+    cond do
+      state.options[:delete_retained] ->
+        {{:json, 200, %{"deleted" => machine["name"]}}, state}
+
+      failures > 0 ->
+        {{:json, 503, %{}},
+         %{state | options: Keyword.put(state.options, :delete_failures, failures - 1)}}
+
+      true ->
+        status = if state.options[:delete_lost], do: 503, else: 200
+
+        {{:json, status, %{"deleted" => machine["name"]}},
+         %{state | machines: Map.delete(state.machines, machine["name"])}}
     end
   end
 
@@ -119,6 +130,13 @@ defmodule SmolBox.ManagedPeer do
       {:ok, bytes} -> {{:bytes, bytes}, state}
       :error -> {{:json, 404, %{}}, state}
     end
+  end
+
+  defp update_machine_state(machine, state, status) do
+    updated = Map.put(machine, "state", status)
+
+    {{:json, 200, updated},
+     %{state | machines: Map.put(state.machines, machine["name"], updated)}}
   end
 
   defp respond(conn, {:json, status, body}, _agent), do: TestPeer.json(conn, body, status)

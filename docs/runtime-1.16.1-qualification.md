@@ -1,17 +1,18 @@
 # smolvm 1.16.1 qualification
 
-Status: **qualification blocked; 1.16.1 remains unsupported**.
+Status: **cleanup separation validated; 1.16.1 admission remains held**.
 
 Branch: `qualify-smolvm-1.16.1`, starting at
 `9c212ef29ed446307d45de8084c4acef336b68aa`. Campaign date: September 18, 2026 UTC.
 
-The candidate passed normal execution, durable recovery and network enforcement
+The initial candidate passed normal execution, durable recovery and network enforcement
 checks on the tested platforms. Two disk-exhaustion regressions failed at stop,
 and a direct comparison confirmed different behavior from 1.16.0. Public
 worker/network admission therefore remains unchanged, with default runtime
-1.16.0. No package version, durable schema or lifecycle semantics changed.
+1.16.0. That initial campaign changed no package version, durable schema or
+lifecycle semantics. The cleanup follow-up below is a separate implementation change.
 
-## The blocker
+## Original blocker
 
 Version 1.16.1 requires the guest to acknowledge filesystem synchronization before
 graceful shutdown. When the constrained worker's cache filled, the guest returned
@@ -33,15 +34,99 @@ A second comparison used the same prepared artifact, worker configuration and
 | Observed machine state afterward | stopped | running |
 | Explicit diagnostic deletion afterward | verified absent | verified absent |
 
-SmolBox's existing managed cleanup implementation stops and reinspects a machine
-before deleting it. A failed stop causes retry, so that implementation cannot
+SmolBox's original managed cleanup implementation stopped and reinspected a machine
+before deleting it. A failed stop caused retry, so that implementation could not
 advance to deletion in the observed state. The direct diagnostic deletion above
 was an intentional discard of a completed synthetic workload, not a change to
 managed cleanup and not proof that managed cleanup passed.
 
 This is a compatibility problem between a deliberate upstream safety change and
-SmolBox's current cleanup sequence. It is not evidence of a VM escape, failed
+SmolBox's original cleanup sequence. It is not evidence of a VM escape, failed
 network enforcement or general unreliability of 1.16.1.
+
+## Cleanup separation follow-up
+
+The managed runtime now chooses preservation or disposal from persisted state,
+before issuing a mutation. Finished execution/collection and expired unknown
+retention select DELETE directly. Unknown work still within retention selects
+graceful stop and keeps its disks. A failed stop does not switch paths. The
+low-level stop API and public runtime admission remain unchanged.
+
+Both paths retain creation/incarnation checks, store claims, fixed deadlines and
+finite attempt budgets. A DELETE acknowledgment does not complete cleanup until
+inspection observes absence and that evidence is stored; reservation release
+remains a separate guarded operation. No command is replayed, and discarded
+unknown work retains its unknown outcome. Retry exhaustion is still conservative:
+retention expiry does not reset attempts or authorize additional mutations.
+
+The new `scripts/lab/managed-discard.exs` exercises an entire managed execution
+against the real worker. A test transport observes free host backing space at
+the DELETE boundary and rejects any unexpected stop request in the completed
+case. It never substitutes a response for the worker. Run it only in the disposable
+Linux lab, with the recorded candidate admission patch applied in the test checkout:
+
+```sh
+SMOLBOX_RUNTIME_VERSION=1.16.1 SMOLBOX_DISCARD_LABEL=discard-cache \
+  mix run scripts/lab/managed-discard.exs
+# With the separately prepared shared-storage worker:
+SMOLBOX_RUNTIME_VERSION=1.16.1 SMOLBOX_DISCARD_LABEL=discard-shared \
+  SMOLBOX_RUNTIME_SOCKET=/srv/smolbox-cleanup/run/api.sock \
+  SMOLBOX_DISCARD_STORAGE=/srv/smolbox-cleanup/data \
+  mix run scripts/lab/managed-discard.exs
+# Reset the candidate before testing cancellation/preservation:
+SMOLBOX_RUNTIME_VERSION=1.16.1 SMOLBOX_DISCARD_LABEL=preserve-cache \
+  SMOLBOX_DISCARD_MODE=unknown mix run scripts/lab/managed-discard.exs
+```
+
+### Follow-up observations
+
+The [follow-up evidence](evidence/cleanup-preservation-disposal.json) records the
+changed source hashes, successful probes and the unsuccessful intermediate runs.
+
+These runs used the changed managed cleanup implementation, with the candidate
+admission patch confined to private test checkouts:
+
+| Scenario | Observed result |
+|---|---|
+| Completed workload, full 768 MiB cache | DELETE at zero available backing bytes; API absence, no owned KVM descriptors and reservation released |
+| Completed workload, full 512 MiB shared registry/data mount | Same disposal and accounting observations; no preliminary stop |
+| Cancelled workload with unknown outcome, full shared mount | Stop failed; same VM remained running, disks and reservation retained, no DELETE or invented exit result |
+| PostgreSQL store and real recovery cases | 17 store cases and all 25 recovery cases passed in the final Linux run |
+| Ordinary macOS runtime cases | Nine passed with 1.16.0 and nine with 1.16.1; no exhaustion tests on macOS |
+| Deterministic contract suite | 222 passed, including eight focused preservation/disposal cases; 95.88% coverage |
+| Quality and package checks | Dialyzer, Credo, ex_slop, ex_dna, Credence, documentation links and current dependency package consumer passed |
+
+Both completed storage workloads caught the guest I/O error and exited with a
+recorded status before disposal. The unknown workload was cancelled after its
+storage-error observation and before the command deadline. Its expected
+preservation result is deliberately different: the probe passes because SmolBox
+retains uncertainty and capacity, not because graceful stop succeeded. Owned
+worker teardown happens afterward and is not counted as managed cleanup.
+
+The first follow-up SQL recovery run passed 23 of 25 cases. Both failures were
+old completed-outcome assertions in the stop interruption fixtures: those fixtures
+now deliberately keep the command running so they exercise preservation and
+must expect an unknown outcome. After correcting the assertions, an intermediate
+full run reached its 20-minute runner deadline without a final test summary; it
+is retained as an incomplete run, not counted as passing. The final complete rerun
+passed all 25 cases in 1,313.739 seconds with a 30-minute runner budget inside a
+fresh lab, retaining the separate 45-minute outer VM limit. The owned worker
+was stopped afterward and no owned KVM descriptors remained. For a full recovery rerun under the constrained nested
+worker, use the existing bounded runner with an explicit budget, from
+`examples/durable_host` after configuring its test database and candidate worker:
+
+```sh
+elixir ../../scripts/ci.exs bounded \
+  --report /home/lab/qualification/recovery.json --timeout 1800 \
+  --expected-tests 25 -- mix test test/recovery_runtime_test.exs \
+  --include runtime --warnings-as-errors
+```
+
+The original stop-first probes deliberately retain their assertions and failure
+records. Graceful stop under these full-disk conditions is still expected to fail;
+the changed contract makes that operation unnecessary for disposable finished work.
+This does not establish that failed synchronization can safely preserve pending
+writes, or that retained unknown VMs can always be stopped.
 
 ## Inputs and review
 
@@ -152,10 +237,8 @@ claiming that the public library supports it.
 
 ## What would unblock admission
 
-Resolve the stop/delete incompatibility without silently discarding uncertain
-work or claiming termination before observing it. That requires either a
-solution compatible with upstream or a separately reviewed change to SmolBox's cleanup
-contract; this task does neither. Then repeat the original disk and shared-storage
-regressions, managed recovery and platform checks before enabling admission.
-The passing network and normal execution results remain useful evidence, but
-cannot substitute for that missing cleanup result.
+The cleanup follow-up implements a separate disposal contract. Admission remains
+held for a separate decision reviewing the completed validation evidence alongside
+the initial qualification campaign. Any later admission change must account for the retained-unknown stop
+limitation rather than treating direct deletion as proof of graceful shutdown.
+The original failing stop-first tests must not be relabeled as passing.

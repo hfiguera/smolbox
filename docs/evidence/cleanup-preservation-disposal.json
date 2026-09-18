@@ -1,0 +1,194 @@
+{
+  "campaign": "managed preservation and disposal separation",
+  "date": "2026-09-18",
+  "base_commit": "a3e04ab6d67d770353edad6a3b6757b2829d13f6",
+  "runtime_version": "1.16.1",
+  "runtime_revision": "9504e94e3581a1f52c414247edcbcd6d6b49a71a",
+  "reproducibility": {
+    "candidate_patch": "scripts/lab/fixtures/smolvm-1.16.1-candidate.patch",
+    "final_recovery_timeout_seconds": 1800,
+    "outer_vm_deadline_seconds": 2700
+  },
+  "runtime_admission": "unchanged; 1.16.1 rejected outside patched qualification checkouts",
+  "default_runtime": "1.16.0",
+  "package_version": "0.1.3 unchanged; unreleased changes",
+  "source_sha256": {
+    "lib/smolbox/runtime/cleanup.ex": "c22bb8097268644e970f602647b690f1656090230a5623bcf904f348e5f5908a",
+    "scripts/lab/managed-discard.exs": "28245ddb21ac76ff53af196f990193918d7449a8a41cc33975d53a3f30e389bc",
+    "test/contract/cleanup_test.exs": "c47bbd26e63b8afe2c9e84774f8a3e8925ae3b52919ccf96bf1dff0c6e9bd522",
+    "examples/durable_host/test/recovery_runtime_test.exs": "e2a4e6ff34f891026fc66c9cc7c5bc3cea858d0959e7c42522a59d798354c23b"
+  },
+  "linux": {
+    "environment": "disposable nested KVM lab accessed through ssh linux; never physical-host exhaustion",
+    "completed_cache_768_mib": {
+      "runtime": "1.16.1",
+      "status": "passed",
+      "mode": "completed",
+      "cleanup": "complete",
+      "fill": {
+        "errno": 5,
+        "written": 586153984
+      },
+      "evidence": "exited",
+      "command_exit": 0,
+      "available_bytes_before_delete": 0,
+      "stop_requests": 0,
+      "inventory": [],
+      "duplicate_submission": "same_execution",
+      "reservation_released": true,
+      "absence_observed": true,
+      "owned_kvm_descriptors": "absent"
+    },
+    "completed_shared_registry_storage_512_mib": {
+      "runtime": "1.16.1",
+      "status": "passed",
+      "mode": "completed",
+      "cleanup": "complete",
+      "fill": {
+        "errno": 5,
+        "written": 329252864
+      },
+      "evidence": "exited",
+      "command_exit": 0,
+      "available_bytes_before_delete": 0,
+      "stop_requests": 0,
+      "inventory": [],
+      "duplicate_submission": "same_execution",
+      "reservation_released": true,
+      "absence_observed": true,
+      "owned_kvm_descriptors": "absent"
+    },
+    "unknown_shared_registry_storage_512_mib": {
+      "runtime": "1.16.1",
+      "status": "passed",
+      "mode": "unknown",
+      "cleanup": "failed",
+      "fill": {
+        "errno": 5,
+        "written": 328204288
+      },
+      "evidence": "unknown",
+      "command_exit": null,
+      "stop_failed": true,
+      "delete_requests": 0,
+      "machine_state": "running",
+      "duplicate_submission": "same_execution",
+      "reservation_released": false,
+      "absence_observed": false,
+      "owned_kvm_descriptors": "present"
+    },
+    "store": {
+      "seconds": 3.192,
+      "status": "passed",
+      "failure": null,
+      "tests": {
+        "seed": 101238,
+        "passed": 17
+      },
+      "exit_code": 0,
+      "captured_bytes": 161,
+      "output_sha256": "f99e38d02c1feb123a11f64537ae23cbeea308534b166ae04ce6d043b9e519b4"
+    },
+    "initial_recovery_run": {
+      "seconds": 1108.176,
+      "status": "failed",
+      "failure": null,
+      "exit_code": 2,
+      "captured_bytes": 1051,
+      "output_sha256": "5b8de7fa06854eb20d7bcf7443f1a657ba0ddecc8839dbc2f2f793587f9d0042"
+    },
+    "incomplete_recovery_run": {
+      "seconds": 1200.065,
+      "status": "failed",
+      "failure": "deadline",
+      "exit_code": 0,
+      "captured_bytes": 478,
+      "output_sha256": "890fc9b27eb2df84cdd05fc17b4bd61edc1979223165fce38393da2f11dd23b6"
+    },
+    "final_recovery_suite": {
+      "seconds": 1313.739,
+      "status": "passed",
+      "failure": null,
+      "tests": {
+        "seed": 734054,
+        "passed": 25
+      },
+      "exit_code": 0,
+      "captured_bytes": 523,
+      "output_sha256": "a15833d14c2efec1bd2839d254d4af3d95820c0caa6a28c174d99edff302676f"
+    },
+    "final_store_suite": {
+      "seconds": 3.169,
+      "status": "passed",
+      "failure": null,
+      "tests": {
+        "seed": 9095,
+        "passed": 17
+      },
+      "exit_code": 0,
+      "captured_bytes": 332,
+      "output_sha256": "58c9024231dc9bb13853af0ec0af8759ceb3c157741bb1ffd90539c42de9072f"
+    },
+    "owned_worker_kvm_descriptors_after_teardown": "absent; empty 1161-kvm-after.txt",
+    "outer_lab": {
+      "status": "inactive",
+      "main_pid": 0,
+      "result": "success",
+      "baseline_recovery": "complete",
+      "runtime_max_seconds": 2700,
+      "status_log_sha256": "695cd1be48882b62c413da00093426120fd96885a05c519b4eee3df6b69f3b4c"
+    }
+  },
+  "macos": {
+    "candidate_ordinary_runtime_cases": 9,
+    "candidate_runner": {
+      "seconds": 42.565,
+      "status": "passed",
+      "failure": null,
+      "exit_code": 0,
+      "captured_bytes": 9195,
+      "output_sha256": "1ec2209d700480f53848209da6618f2777c2e774ee1a74dd64965347ee23817c"
+    },
+    "default_runtime": {
+      "seconds": 22.266,
+      "status": "passed",
+      "failure": null,
+      "exit_code": 0,
+      "captured_bytes": 154,
+      "output_sha256": "d2f63339352f7cac7cade099d4ceddfd9c18c14e1a9e6f184bb5a346243dee0b",
+      "tests": {
+        "passed": 9
+      },
+      "runtime_version": "1.16.0"
+    },
+    "exhaustion": false
+  },
+  "local_checks": {
+    "deterministic_cases": 222,
+    "cleanup_contract_cases": 8,
+    "coverage_percent": 95.88,
+    "analyzers": [
+      "Dialyzer",
+      "Credo",
+      "ex_slop via Credo plugin",
+      "ex_dna",
+      "Credence"
+    ],
+    "documentation_pages": 44,
+    "package_consumer": {
+      "status": "passed",
+      "package_sha256": "714010a11b1882ceeb451007c6bb13ddcad872501567d046cb6199a5d488f324",
+      "scope": "Current dependencies; archive contains the exact recorded cleanup source, before final documentation and evidence edits."
+    }
+  },
+  "limitations": [
+    "No runtime admission or default pin change is included.",
+    "Unknown work during retention can still fail graceful stop; there is no automatic destructive fallback.",
+    "Exhausted attempt budgets remain exhausted after retention expiry; unresolved reservations require operator resolution.",
+    "The first full recovery run used the pre-extraction version of the same disposal decision. The final complete recovery rerun uses the recorded final source hash.",
+    "Stop interruption fixtures now deliberately create unknown work; the initial full run passed 23 of 25 cases and failed only their two old completed-outcome assertions.",
+    "An intermediate full rerun reached its 1200-second runner deadline without a final ExUnit summary and is not counted as passed. The final rerun uses a 1800-second runner budget inside a fresh lab with the unchanged 45-minute host deadline.",
+    "The original stop-first exhaustion probes remain failures; disposal success is not graceful shutdown success.",
+    "No general hostile-code safety, filesystem durability, new platform or networking guarantee is established."
+  ]
+}
