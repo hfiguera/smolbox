@@ -11,7 +11,10 @@ defmodule SmolBox.Store.Codec do
   these bytes or use an explicitly approved equivalent secure storage policy.
   Schema v2 adds network policy. Exact v1 records are upgraded to offline defaults
   on read; offline fingerprints are unchanged. Old readers cannot read v2 writes.
-  Every write uses v2, including offline executions. Follow
+  Image writes use v2, including offline executions. Checkpoint records use v3;
+  v1/v2 envelopes cannot contain checkpoint references. Upgrade all controllers
+  sharing a store before accepting checkpoints; older readers cannot read v3.
+  See [Checkpoint upgrades](checkpoints.html#persistence-and-upgrades). Follow
   [Upgrading to 0.1.3](recovery.html#upgrading-to-0-1-3) across all controllers.
   Silently treating undecodable records as absent
   would permit replay and is forbidden.
@@ -21,6 +24,7 @@ defmodule SmolBox.Store.Codec do
 
   @max_bytes 16_777_216
   @prefix "smolbox-record-v2\0"
+  @checkpoint_prefix "smolbox-record-v3\0"
   @legacy_prefix "smolbox-record-v1\0"
   @record_modules [
     Execution,
@@ -37,7 +41,8 @@ defmodule SmolBox.Store.Codec do
   @spec encode(Execution.t()) :: {:ok, binary()} | {:error, Error.t()}
   def encode(record) do
     with :ok <- Execution.validate(record) do
-      bytes = @prefix <> :erlang.term_to_binary(record)
+      prefix = if checkpoint_record?(record), do: @checkpoint_prefix, else: @prefix
+      bytes = prefix <> :erlang.term_to_binary(record)
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
   end
@@ -45,14 +50,30 @@ defmodule SmolBox.Store.Codec do
   @spec decode(binary()) :: {:ok, Execution.t()} | {:error, Error.t()}
   def decode(<<@prefix, 131, tag, _rest::binary>> = bytes)
       when tag != 80 and byte_size(bytes) <= @max_bytes do
-    decode_payload(bytes, false)
+    decode_version(bytes, false, false)
   end
 
   def decode(<<@legacy_prefix, 131, tag, _rest::binary>> = bytes)
       when tag != 80 and byte_size(bytes) <= @max_bytes,
-      do: decode_payload(bytes, true)
+      do: decode_version(bytes, true, false)
+
+  def decode(<<@checkpoint_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_version(bytes, false, true)
 
   def decode(_bytes), do: invalid()
+
+  defp decode_version(bytes, legacy?, checkpoint?) do
+    with {:ok, record} <- decode_payload(bytes, legacy?),
+         true <- checkpoint_record?(record) == checkpoint? do
+      {:ok, record}
+    else
+      _invalid -> invalid()
+    end
+  end
+
+  defp checkpoint_record?(%{spec: %{artifact: %{"kind" => "checkpoint"}}}), do: true
+  defp checkpoint_record?(_record), do: false
 
   defp decode_payload(bytes, legacy?) do
     # A fresh BEAM must load the finite schema vocabulary before safe decoding;

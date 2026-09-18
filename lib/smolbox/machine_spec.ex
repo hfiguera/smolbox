@@ -2,7 +2,14 @@ defmodule SmolBox.MachineSpec do
   @moduledoc """
   Create a disposable machine from a host-approved prepared artifact.
 
-  The path is on the worker host, not the Elixir host. The operator must verify
+  The path is on the worker host, not the Elixir host. `source: :checkpoint`
+  selects an approved idle `.smolcheckpoint` instead of an image. It requires
+  smolvm 1.16.1 and offline networking. Captured CPU/memory/disks must match the
+  specification; disk and entrypoint override fields are omitted on the wire.
+  Checkpoints resume captured processes: the caller must approve their idle state,
+  no secrets and disabled workload restart before creation. See `SmolBox.Checkpoint`.
+
+  For the default `source: :image`, the operator must verify
   its immutable digest and architecture before approving it. SmolBox never
   enables networking to fetch a missing image. Starts use `/bin/true` and never
   restart the workload automatically. Networking is offline unless an explicit
@@ -23,6 +30,7 @@ defmodule SmolBox.MachineSpec do
   alias SmolBox.Error
 
   @schema [
+    source: [type: {:in, [:image, :checkpoint]}, default: :image],
     network: [type: :any, default: :offline],
     cpus: [type: :pos_integer, default: 1],
     memory_mb: [type: :pos_integer, default: 256],
@@ -35,6 +43,7 @@ defmodule SmolBox.MachineSpec do
   defstruct [
     :name,
     :artifact_path,
+    source: :image,
     network: :offline,
     cpus: 1,
     memory_mb: 256,
@@ -44,6 +53,7 @@ defmodule SmolBox.MachineSpec do
 
   @type t :: %__MODULE__{
           name: String.t(),
+          source: :image | :checkpoint,
           network: :offline | SmolBox.NetworkPolicy.t(),
           artifact_path: String.t(),
           cpus: pos_integer(),
@@ -53,7 +63,11 @@ defmodule SmolBox.MachineSpec do
         }
 
   @doc """
-  Describe a machine using a name and absolute `.smolmachine` path on the worker.
+  Describe a machine using a name and absolute artifact path on the worker.
+
+  `:source` defaults to `:image` (`.smolmachine`). `:checkpoint` requires an idle,
+  offline `.smolcheckpoint` and smolvm 1.16.1. Allocations describe its captured
+  topology; they cannot resize it.
 
   Names have at most 31 lowercase letters, digits, underscores or hyphens and
   start with a letter/digit; `SmolBox.Identity.machine_name/1` generates opaque
@@ -80,8 +94,8 @@ defmodule SmolBox.MachineSpec do
   @spec validate(term()) :: :ok | {:error, Error.t()}
   def validate(%__MODULE__{} = spec) do
     if SmolBox.Validation.struct_shape?(spec, __MODULE__) and
-         valid_name?(spec.name) and artifact_path?(spec.artifact_path) and
-         SmolBox.NetworkPolicy.valid?(spec.network) and
+         valid_name?(spec.name) and artifact_path?(spec.artifact_path, spec.source) and
+         network_valid?(spec) and
          in_range?(spec.cpus, 1..64) and in_range?(spec.memory_mb, 128..16_384) and
          in_range?(spec.storage_gb, 1..64) and in_range?(spec.overlay_gb, 1..64) do
       :ok
@@ -103,34 +117,51 @@ defmodule SmolBox.MachineSpec do
   def to_wire(spec) do
     with :ok <- validate(spec) do
       {:ok,
-       Map.merge(
-         %{
-           "name" => spec.name,
-           "from" => spec.artifact_path,
-           "cpus" => spec.cpus,
-           "memoryMb" => spec.memory_mb,
-           "storageGb" => spec.storage_gb,
-           "overlayGb" => spec.overlay_gb,
-           "network" => false,
-           "gpu" => false,
-           "cuda" => false,
-           "dockerSocket" => false,
-           "mounts" => [],
-           "ports" => [],
-           "entrypoint" => ["/bin/true"],
-           "cmd" => [],
-           "restart" => %{"policy" => "never"}
-         },
-         SmolBox.NetworkPolicy.to_wire(spec.network)
+       wire_source(
+         spec,
+         Map.merge(
+           %{
+             "name" => spec.name,
+             "from" => spec.artifact_path,
+             "cpus" => spec.cpus,
+             "memoryMb" => spec.memory_mb,
+             "storageGb" => spec.storage_gb,
+             "overlayGb" => spec.overlay_gb,
+             "network" => false,
+             "gpu" => false,
+             "cuda" => false,
+             "dockerSocket" => false,
+             "mounts" => [],
+             "ports" => [],
+             "entrypoint" => ["/bin/true"],
+             "cmd" => [],
+             "restart" => %{"policy" => "never"}
+           },
+           SmolBox.NetworkPolicy.to_wire(spec.network)
+         )
        )}
     end
   end
 
-  defp artifact_path?(path) do
+  defp wire_source(%{source: :checkpoint}, wire),
+    do: Map.drop(wire, ["storageGb", "overlayGb", "entrypoint", "cmd"])
+
+  defp wire_source(_spec, wire), do: wire
+
+  defp network_valid?(%{source: :checkpoint, network: network}), do: network == :offline
+  defp network_valid?(%{network: network}), do: SmolBox.NetworkPolicy.valid?(network)
+
+  defp artifact_path?(path, source) when source in [:image, :checkpoint] do
     is_binary(path) and byte_size(path) <= 1024 and String.valid?(path) and
-      String.starts_with?(path, "/") and String.ends_with?(path, ".smolmachine") and
+      String.starts_with?(path, "/") and
+      String.ends_with?(
+        path,
+        if(source == :checkpoint, do: ".smolcheckpoint", else: ".smolmachine")
+      ) and
       not String.contains?(path, ["\0", "/../", "/./", "//"])
   end
+
+  defp artifact_path?(_path, _source), do: false
 
   defp in_range?(value, range), do: is_integer(value) and value in range
   defp invalid, do: {:error, %Error{category: :validation, operation: :machine_spec}}

@@ -1,0 +1,5496 @@
+{
+  "date": "2026-09-18",
+  "scope": "Performance investigation of existing idle offline checkpoint-file restoration; no new public APIs or admission changes; unreleased checkpoint-executions branch.",
+  "source_base_commit": "4bfb867",
+  "source_files_sha256": {
+    "scripts/checkpoints/benchmark.exs": "e0e52443672aa26502a0ccd5e38380b4c0acf63a36eb4e83666299195a8eb2a2",
+    "scripts/checkpoints/prepare-dataset.sh": "2beb0350ee0f5a4d7466546eb6ef697add5e9f4b423f0639816f98d008f4cd26",
+    "scripts/checkpoints/prepare-fixture.sh": "f581ef379ba914df3fb546b36bfd726d724dbdab32ac90326a564f34338f27c2"
+  },
+  "runtime": {
+    "version": "1.16.1",
+    "tag_commit": "c58f83ee26a18d2d2b61e7f4f32d7a6ea243252d",
+    "linux_archive_sha256": "e49e5bbae6d65b039ecf1d8b236d20e77427b7bfd131907b27a0819fcdea3fed",
+    "upstream_checkout_modified": false
+  },
+  "environment": {
+    "location": "Disposable nested KVM lab on ssh linux; no workload measurements on macOS or the physical host",
+    "host_cpu": "Intel Core i5-1135G7 @ 2.40GHz, 4 cores / 8 threads",
+    "host_memory_mib": 63922,
+    "host_kernel": "7.1.5-76070105-generic",
+    "guest": "Ubuntu 24.04 x86_64, kernel 6.8.0-139-generic, 4 vCPUs, 8 GiB, no swap",
+    "outer_qemu_limits": {
+      "memory_gib": 12,
+      "cpu_percent": 400,
+      "tasks": 256,
+      "deadline_minutes": 45,
+      "reserved_lab_storage_gib": 128
+    },
+    "ordinary_worker_limits": {
+      "memory_gib": 3,
+      "swap": 0,
+      "cpu_percent": 200,
+      "tasks": 256,
+      "deadline_minutes_per_block": 15,
+      "user": "lab"
+    },
+    "privileged_worker_caveat": "The root service had the same nominal memory/CPU/task limits, but smolvm placed VMMs in separate per-VM systemd scopes. The service limit was not an aggregate VMM budget. The outer QEMU bound remained. Do not pool these samples with ordinary-user runs.",
+    "microvm": {
+      "cpus": 1,
+      "memory_mib": 256,
+      "storage_gib": 1,
+      "overlay_gib": 1,
+      "network": false
+    },
+    "toolchain": "Elixir 1.20.4 / OTP 29.0.6; ERL_FLAGS=+S 2:2",
+    "logging": "RUST_LOG=smolvm=info in all modes",
+    "controls_not_applied": [
+      "CPU pinning",
+      "frequency lock",
+      "host page-cache clearing",
+      "exclusive physical-host workloads"
+    ]
+  },
+  "protocol": {
+    "ordinary_user_abba": {
+      "rounds": [
+        6,
+        7,
+        8,
+        9
+      ],
+      "cache_modes": [
+        "disabled",
+        "enabled",
+        "enabled",
+        "disabled"
+      ],
+      "workloads": [
+        "bare",
+        "dataset",
+        "dataset-precomputed"
+      ],
+      "samples_per_source_per_block": 5,
+      "warmups_per_source_per_workload_per_block": 1,
+      "workload_order_reversed_in_rounds": [
+        8,
+        9
+      ]
+    },
+    "privileged_abba": {
+      "rounds": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "cache_modes": [
+        "disabled",
+        "enabled",
+        "enabled",
+        "disabled"
+      ],
+      "workloads": [
+        "bare",
+        "dataset"
+      ],
+      "samples_per_source_per_block": 5,
+      "workload_order_reversed_in_rounds": [
+        3,
+        4
+      ]
+    },
+    "privileged_precomputed": {
+      "rounds": [
+        5
+      ],
+      "cache_modes": [
+        "enabled"
+      ],
+      "workloads": [
+        "dataset",
+        "dataset-precomputed"
+      ],
+      "samples_per_source": 10,
+      "purpose": "Additional baseline after adding a serialized table to the fixture; kept separate from the original artifact pair."
+    },
+    "cache_configuration": "Disabled sets SMOLVM_DISABLE_SHARED_EXTRACT=1; enabled omits the variable entirely. Setting it to 0 still disables extraction. Separate root/user data roots, caches reused within each campaign.",
+    "cache_evidence": "Enabled worker logs contain vms/_shared/ paths and per-machine restore phase timings. Disabled logs do not. The upstream re-extracted evicted shared pack message can also appear for already materialized bare packs; it is not counted as proof of a cache miss.",
+    "ordering": "One excluded warmup per source, then alternate image/checkpoint order each iteration; no measured samples removed.",
+    "dataset": "One million deterministic CSV rows: station=i%1000, value=(i*37)%10000. Compress on disk, aggregate counts/sums for 1000 stations in /dev/shm. Every query returns 42 1000 5054000 followed by newline. Checkpoint captured only after preparation commands finished; no background application.",
+    "image_baselines": "dataset rebuilds the RAM table; dataset-precomputed copies the serialized table from the same image instead. Both assert no preexisting RAM table. Each artifact pair came from the same guest; capture then stop/export with workspace.",
+    "timing": "Low-level Client wall-clock milliseconds. Time to result sums create+start+preparation+query per sample. Checkpoint create includes worker-version preflight. Medians of individual phases must not be summed to infer median total.",
+    "excluded_costs": [
+      "fixture creation",
+      "checkpoint capture",
+      "image packing",
+      "artifact transfer/download",
+      "post-result identity inspection",
+      "cleanup (separately timed)"
+    ],
+    "phase_logs": "Server api_restore_* elapsed milliseconds joined by machine name; integer durations do not cover every client/HTTP/registration cost.",
+    "script_revision_note": "Rounds 1\u20134 used the extended benchmark before dataset-precomputed was added. Rounds 5\u20139 used the final hashed benchmark and final fixture script. Raw timings and matched server phases are retained for every sample."
+  },
+  "artifacts": {
+    "bare.smolcheckpoint": {
+      "sha256": "95bfcbb9c69fd4af153650073447a59e2fe151302b4a362187a374fdd3de35fe",
+      "bytes": 34756688
+    },
+    "dataset-ready.smolcheckpoint": {
+      "sha256": "c735e2c1ff328ed3019c2412c927649e8c0b3458093b4c2fefd214db50061012",
+      "bytes": 35030036
+    },
+    "dataset.smolcheckpoint": {
+      "sha256": "9aa5c97d02a5b11fe4486dbe6381a7f545ef3d6cbe9f89df14ab75d5a4907733",
+      "bytes": 34823076
+    },
+    "precomputed-ready.smolcheckpoint": {
+      "sha256": "7d90e1b870f05614fe435c00fc804f7baa8009272d63d734e43053cfd7e77995",
+      "bytes": 35092709
+    },
+    "precomputed.smolcheckpoint": {
+      "sha256": "766c4d8870e92d55f24b155944d6d4ff1fcc66b2b885a012b6ca8ec0de63fcf8",
+      "bytes": 34739739
+    },
+    "bare-cold.smolmachine": {
+      "sha256": "f9c4acb839f1b1769a22126cdc107cba7d48b52bfd27988b689ae4c09ebe1bb4",
+      "bytes": 14913518
+    },
+    "dataset-cold.smolmachine": {
+      "sha256": "56d2fd9ab2572e0d02484dc37acbba40e07ddc4e061062270aa9d518d86bb230",
+      "bytes": 14995855
+    },
+    "precomputed-cold.smolmachine": {
+      "sha256": "37b294bf789de8fee6319b655525bed4bba4c59a1c384737cd116a5d325e5195",
+      "bytes": 14999477
+    }
+  },
+  "validation": {
+    "runs": 22,
+    "executions_including_warmups": 284,
+    "measured_executions": 240,
+    "all_commands_returned_expected_output": true,
+    "all_completed_samples_verified_same_incarnation_before_delete_and_absence_after": true,
+    "all_benchmark_runs_started_and_ended_with_empty_inventory": true,
+    "final_inventory_reports": {
+      "final-inventory-6.json": {
+        "machines": []
+      },
+      "final-inventory-7.json": {
+        "machines": []
+      },
+      "final-inventory-8.json": {
+        "machines": []
+      },
+      "final-inventory-9.json": {
+        "machines": []
+      },
+      "final-inventory.json": {
+        "machines": []
+      }
+    }
+  },
+  "setup_issues": [
+    {
+      "issue": "First privileged fixture start returned HTTP 500 because the isolated VM uid could not read the runtime libraries extracted with private permissions.",
+      "resolution": "Made the nonsecret runtime distribution readable, identity-checked disposal of the failed source, and regenerated fixtures before any timed sample. No isolation controls disabled.",
+      "remaining_scope": "An empty systemd scope from that failed source remained active after all runs; its cgroup.procs was empty, then it was explicitly stopped."
+    },
+    {
+      "issue": "Initial local Dialyzer invocation used dev environment and reported missing EEx functions.",
+      "resolution": "Re-ran the required gate with MIX_ENV=test; zero errors. No code suppression added."
+    }
+  ],
+  "cleanup": {
+    "all_owned_worker_services_and_vm_scopes_stopped": true,
+    "no_smolvm_or_libkrun_processes_remaining_in_guest": true,
+    "outer_lab": "inactive/dead, MainPID=0, Result=success",
+    "evidence_exported_before_shutdown": true,
+    "physical_host_workloads_preserved": true
+  },
+  "limitations": [
+    "Nested fresh image boots were much slower than earlier native runs; do not infer native/macOS speedups from image/checkpoint ratios here.",
+    "Small warm-cache samples, variable shared-host scheduling, no confidence intervals or production tail-latency claim.",
+    "This tests local .smolcheckpoint file restores, not live branching or checkpoint:// prepared references.",
+    "Tiny serializable RAM table; no retained Python interpreter, imported libraries, server process or arbitrary resumed workload.",
+    "No durable store/controller overhead measured; no change to qualified isolation/resource guarantees.",
+    "Capture/preparation amortization depends on reuse count and is not measured.",
+    "Enabling shared extraction was tested for these fixtures, not a full new deployment security qualification."
+  ],
+  "quality_checks": {
+    "format": "passed",
+    "credo_and_ex_slop": "passed, 177 files / 100 checks",
+    "ex_dna": "passed, zero clones",
+    "credence": "passed",
+    "dialyzer": "MIX_ENV=test passed, zero errors",
+    "shellcheck": "passed on Linux",
+    "exdoc": "passed with warnings as errors",
+    "documentation_links": "passed, 46 generated pages"
+  },
+  "summaries": {
+    "ordinary_user_abba": [
+      {
+        "cache_mode": "disabled",
+        "workload": "bare",
+        "source": "checkpoint",
+        "n": 10,
+        "median_ms": {
+          "create_ms": 562.84,
+          "start_ms": 165.889,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.64,
+          "delete_ms": 29.276,
+          "create_to_result_ms": 751.178
+        },
+        "range_create_to_result_ms": [
+          688.109,
+          910.1170000000001
+        ],
+        "median_restore_phases_ms": {
+          "api_restore_verify": 6.0,
+          "api_restore_prepare": 0.0,
+          "api_restore_extract": 207.0,
+          "api_restore_seed": 0.0,
+          "api_restore_install": 340.5
+        }
+      },
+      {
+        "cache_mode": "disabled",
+        "workload": "bare",
+        "source": "image",
+        "n": 10,
+        "median_ms": {
+          "create_ms": 128.336,
+          "start_ms": 4531.886,
+          "prepare_ms": 0.0,
+          "exec_ms": 705.889,
+          "delete_ms": 60.885,
+          "create_to_result_ms": 5919.051
+        },
+        "range_create_to_result_ms": [
+          4440.063,
+          6398.3099999999995
+        ]
+      },
+      {
+        "cache_mode": "disabled",
+        "workload": "dataset",
+        "source": "checkpoint",
+        "n": 10,
+        "median_ms": {
+          "create_ms": 550.543,
+          "start_ms": 151.321,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.145,
+          "delete_ms": 28.941,
+          "create_to_result_ms": 716.177
+        },
+        "range_create_to_result_ms": [
+          671.619,
+          866.073
+        ],
+        "median_restore_phases_ms": {
+          "api_restore_verify": 5.5,
+          "api_restore_prepare": 0.0,
+          "api_restore_extract": 213.5,
+          "api_restore_seed": 0.0,
+          "api_restore_install": 337.5
+        }
+      },
+      {
+        "cache_mode": "disabled",
+        "workload": "dataset",
+        "source": "image",
+        "n": 10,
+        "median_ms": {
+          "create_ms": 143.653,
+          "start_ms": 3698.58,
+          "prepare_ms": 2692.407,
+          "exec_ms": 27.792,
+          "delete_ms": 65.34,
+          "create_to_result_ms": 6684.842
+        },
+        "range_create_to_result_ms": [
+          5993.82,
+          7807.111999999999
+        ]
+      },
+      {
+        "cache_mode": "disabled",
+        "workload": "dataset-precomputed",
+        "source": "checkpoint",
+        "n": 10,
+        "median_ms": {
+          "create_ms": 556.978,
+          "start_ms": 171.097,
+          "prepare_ms": 0.0,
+          "exec_ms": 22.37,
+          "delete_ms": 34.32,
+          "create_to_result_ms": 777.248
+        },
+        "range_create_to_result_ms": [
+          715.115,
+          924.6
+        ],
+        "median_restore_phases_ms": {
+          "api_restore_verify": 5.0,
+          "api_restore_prepare": 0.0,
+          "api_restore_extract": 228.5,
+          "api_restore_seed": 0.0,
+          "api_restore_install": 329.0
+        }
+      },
+      {
+        "cache_mode": "disabled",
+        "workload": "dataset-precomputed",
+        "source": "image",
+        "n": 10,
+        "median_ms": {
+          "create_ms": 183.739,
+          "start_ms": 3955.117,
+          "prepare_ms": 1087.03,
+          "exec_ms": 21.258,
+          "delete_ms": 64.499,
+          "create_to_result_ms": 5331.789
+        },
+        "range_create_to_result_ms": [
+          4558.779,
+          5923.072
+        ]
+      },
+      {
+        "cache_mode": "enabled",
+        "workload": "bare",
+        "source": "checkpoint",
+        "n": 10,
+        "median_ms": {
+          "create_ms": 428.585,
+          "start_ms": 160.215,
+          "prepare_ms": 0.0,
+          "exec_ms": 17.099,
+          "delete_ms": 34.579,
+          "create_to_result_ms": 614.278
+        },
+        "range_create_to_result_ms": [
+          489.831,
+          717.606
+        ],
+        "median_restore_phases_ms": {
+          "api_restore_verify": 7.0,
+          "api_restore_prepare": 0.0,
+          "api_restore_extract": 160.5,
+          "api_restore_seed": 0.0,
+          "api_restore_install": 251.5
+        }
+      },
+      {
+        "cache_mode": "enabled",
+        "workload": "bare",
+        "source": "image",
+        "n": 10,
+        "median_ms": {
+          "create_ms": 149.466,
+          "start_ms": 3646.769,
+          "prepare_ms": 0.0,
+          "exec_ms": 1268.062,
+          "delete_ms": 34.135,
+          "create_to_result_ms": 5063.394
+        },
+        "range_create_to_result_ms": [
+          4412.094,
+          5516.273
+        ]
+      },
+      {
+        "cache_mode": "enabled",
+        "workload": "dataset",
+        "source": "checkpoint",
+        "n": 10,
+        "median_ms": {
+          "create_ms": 429.351,
+          "start_ms": 153.575,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.868,
+          "delete_ms": 24.218,
+          "create_to_result_ms": 596.943
+        },
+        "range_create_to_result_ms": [
+          510.974,
+          643.044
+        ],
+        "median_restore_phases_ms": {
+          "api_restore_verify": 7.0,
+          "api_restore_prepare": 0.0,
+          "api_restore_extract": 149.5,
+          "api_restore_seed": 0.0,
+          "api_restore_install": 266.5
+        }
+      },
+      {
+        "cache_mode": "enabled",
+        "workload": "dataset",
+        "source": "image",
+        "n": 10,
+        "median_ms": {
+          "create_ms": 142.693,
+          "start_ms": 3821.838,
+          "prepare_ms": 2753.276,
+          "exec_ms": 16.137,
+          "delete_ms": 34.186,
+          "create_to_result_ms": 6678.32
+        },
+        "range_create_to_result_ms": [
+          5745.4310000000005,
+          7424.915
+        ]
+      },
+      {
+        "cache_mode": "enabled",
+        "workload": "dataset-precomputed",
+        "source": "checkpoint",
+        "n": 10,
+        "median_ms": {
+          "create_ms": 439.495,
+          "start_ms": 171.8,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.4,
+          "delete_ms": 28.854,
+          "create_to_result_ms": 643.831
+        },
+        "range_create_to_result_ms": [
+          548.472,
+          725.824
+        ],
+        "median_restore_phases_ms": {
+          "api_restore_verify": 7.5,
+          "api_restore_prepare": 0.0,
+          "api_restore_extract": 152.5,
+          "api_restore_seed": 0.0,
+          "api_restore_install": 276.5
+        }
+      },
+      {
+        "cache_mode": "enabled",
+        "workload": "dataset-precomputed",
+        "source": "image",
+        "n": 10,
+        "median_ms": {
+          "create_ms": 144.496,
+          "start_ms": 4229.746,
+          "prepare_ms": 899.46,
+          "exec_ms": 28.273,
+          "delete_ms": 34.449,
+          "create_to_result_ms": 5388.441
+        },
+        "range_create_to_result_ms": [
+          4528.954000000001,
+          5965.745
+        ]
+      }
+    ],
+    "privileged_abba": [
+      {
+        "cache_mode": "disabled",
+        "workload": "bare",
+        "source": "checkpoint",
+        "n": 10,
+        "median_ms": {
+          "create_ms": 898.046,
+          "start_ms": 142.186,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.334,
+          "delete_ms": 23.496,
+          "create_to_result_ms": 1062.081
+        },
+        "range_create_to_result_ms": [
+          660.8990000000001,
+          1353.137
+        ],
+        "median_restore_phases_ms": {
+          "api_restore_verify": 5.0,
+          "api_restore_prepare": 0.0,
+          "api_restore_extract": 181.5,
+          "api_restore_seed": 0.0,
+          "api_restore_install": 692.5
+        }
+      },
+      {
+        "cache_mode": "disabled",
+        "workload": "bare",
+        "source": "image",
+        "n": 10,
+        "median_ms": {
+          "create_ms": 114.731,
+          "start_ms": 3794.988,
+          "prepare_ms": 0.0,
+          "exec_ms": 618.995,
+          "delete_ms": 54.719,
+          "create_to_result_ms": 4279.008
+        },
+        "range_create_to_result_ms": [
+          3635.627,
+          5106.0740000000005
+        ]
+      },
+      {
+        "cache_mode": "disabled",
+        "workload": "dataset",
+        "source": "checkpoint",
+        "n": 10,
+        "median_ms": {
+          "create_ms": 1012.005,
+          "start_ms": 148.073,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.252,
+          "delete_ms": 34.924,
+          "create_to_result_ms": 1190.727
+        },
+        "range_create_to_result_ms": [
+          705.813,
+          1366.807
+        ],
+        "median_restore_phases_ms": {
+          "api_restore_verify": 5.5,
+          "api_restore_prepare": 0.0,
+          "api_restore_extract": 199.5,
+          "api_restore_seed": 0.0,
+          "api_restore_install": 748.0
+        }
+      },
+      {
+        "cache_mode": "disabled",
+        "workload": "dataset",
+        "source": "image",
+        "n": 10,
+        "median_ms": {
+          "create_ms": 116.808,
+          "start_ms": 3396.503,
+          "prepare_ms": 2026.36,
+          "exec_ms": 15.788,
+          "delete_ms": 51.198,
+          "create_to_result_ms": 5564.73
+        },
+        "range_create_to_result_ms": [
+          4869.555,
+          7392.04
+        ]
+      },
+      {
+        "cache_mode": "enabled",
+        "workload": "bare",
+        "source": "checkpoint",
+        "n": 10,
+        "median_ms": {
+          "create_ms": 348.465,
+          "start_ms": 143.26,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.399,
+          "delete_ms": 23.444,
+          "create_to_result_ms": 508.192
+        },
+        "range_create_to_result_ms": [
+          473.038,
+          597.632
+        ],
+        "median_restore_phases_ms": {
+          "api_restore_verify": 5.5,
+          "api_restore_prepare": 0.0,
+          "api_restore_extract": 132.5,
+          "api_restore_seed": 0.0,
+          "api_restore_install": 197.5
+        }
+      },
+      {
+        "cache_mode": "enabled",
+        "workload": "bare",
+        "source": "image",
+        "n": 10,
+        "median_ms": {
+          "create_ms": 132.137,
+          "start_ms": 3389.149,
+          "prepare_ms": 0.0,
+          "exec_ms": 765.542,
+          "delete_ms": 34.075,
+          "create_to_result_ms": 4158.824
+        },
+        "range_create_to_result_ms": [
+          3377.1569999999997,
+          5168.8009999999995
+        ]
+      },
+      {
+        "cache_mode": "enabled",
+        "workload": "dataset",
+        "source": "checkpoint",
+        "n": 10,
+        "median_ms": {
+          "create_ms": 392.125,
+          "start_ms": 148.377,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.758,
+          "delete_ms": 29.814,
+          "create_to_result_ms": 556.48
+        },
+        "range_create_to_result_ms": [
+          517.934,
+          589.77
+        ],
+        "median_restore_phases_ms": {
+          "api_restore_verify": 7.0,
+          "api_restore_prepare": 0.0,
+          "api_restore_extract": 145.5,
+          "api_restore_seed": 0.0,
+          "api_restore_install": 225.5
+        }
+      },
+      {
+        "cache_mode": "enabled",
+        "workload": "dataset",
+        "source": "image",
+        "n": 10,
+        "median_ms": {
+          "create_ms": 150.822,
+          "start_ms": 3507.351,
+          "prepare_ms": 1918.024,
+          "exec_ms": 15.585,
+          "delete_ms": 33.623,
+          "create_to_result_ms": 5584.779
+        },
+        "range_create_to_result_ms": [
+          5104.049,
+          5981.9310000000005
+        ]
+      }
+    ],
+    "privileged_precomputed": [
+      {
+        "cache_mode": "enabled",
+        "workload": "dataset",
+        "source": "checkpoint",
+        "n": 10,
+        "median_ms": {
+          "create_ms": 317.144,
+          "start_ms": 144.754,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.208,
+          "delete_ms": 34.331,
+          "create_to_result_ms": 479.26
+        },
+        "range_create_to_result_ms": [
+          460.343,
+          564.845
+        ],
+        "median_restore_phases_ms": {
+          "api_restore_verify": 7.0,
+          "api_restore_prepare": 0.0,
+          "api_restore_extract": 122.0,
+          "api_restore_seed": 0.0,
+          "api_restore_install": 185.0
+        }
+      },
+      {
+        "cache_mode": "enabled",
+        "workload": "dataset",
+        "source": "image",
+        "n": 10,
+        "median_ms": {
+          "create_ms": 118.931,
+          "start_ms": 4000.281,
+          "prepare_ms": 2222.634,
+          "exec_ms": 15.473,
+          "delete_ms": 34.191,
+          "create_to_result_ms": 5788.737
+        },
+        "range_create_to_result_ms": [
+          5463.778,
+          7905.561
+        ]
+      },
+      {
+        "cache_mode": "enabled",
+        "workload": "dataset-precomputed",
+        "source": "checkpoint",
+        "n": 10,
+        "median_ms": {
+          "create_ms": 321.878,
+          "start_ms": 208.037,
+          "prepare_ms": 0.0,
+          "exec_ms": 28.534,
+          "delete_ms": 35.576,
+          "create_to_result_ms": 558.155
+        },
+        "range_create_to_result_ms": [
+          487.652,
+          621.618
+        ],
+        "median_restore_phases_ms": {
+          "api_restore_verify": 8.0,
+          "api_restore_prepare": 0.0,
+          "api_restore_extract": 126.5,
+          "api_restore_seed": 0.0,
+          "api_restore_install": 180.5
+        }
+      },
+      {
+        "cache_mode": "enabled",
+        "workload": "dataset-precomputed",
+        "source": "image",
+        "n": 10,
+        "median_ms": {
+          "create_ms": 114.386,
+          "start_ms": 4022.969,
+          "prepare_ms": 880.597,
+          "exec_ms": 15.954,
+          "delete_ms": 34.184,
+          "create_to_result_ms": 4894.908
+        },
+        "range_create_to_result_ms": [
+          4383.5689999999995,
+          5923.616
+        ]
+      }
+    ]
+  },
+  "runs": [
+    {
+      "runtime": "1.16.1",
+      "workload": "bare",
+      "samples": [
+        {
+          "machine": "ckbench-lpukmnxri53abw5s7erg",
+          "source": "image",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 162.645,
+          "start_ms": 2854.653,
+          "prepare_ms": 0.0,
+          "exec_ms": 1095.009,
+          "delete_ms": 38.845,
+          "create_to_result_ms": 4112.307
+        },
+        {
+          "machine": "ckbench-qqlrcamleca3xorhfn2s",
+          "source": "checkpoint",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 530.602,
+          "start_ms": 139.74,
+          "prepare_ms": 0.0,
+          "exec_ms": 17.031,
+          "delete_ms": 34.964,
+          "create_to_result_ms": 687.3729999999999,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 168,
+            "api_restore_seed": 0,
+            "api_restore_install": 356
+          }
+        },
+        {
+          "machine": "ckbench-fvy44bh7c77f2dyvmdxs",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 1122.4,
+          "start_ms": 139.443,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.014,
+          "delete_ms": 35.569,
+          "create_to_result_ms": 1277.857,
+          "restore_phases_ms": {
+            "api_restore_verify": 7,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 169,
+            "api_restore_seed": 0,
+            "api_restore_install": 943
+          }
+        },
+        {
+          "machine": "ckbench-hycw3vws3b75flvyralv",
+          "source": "image",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 111.723,
+          "start_ms": 3018.879,
+          "prepare_ms": 0.0,
+          "exec_ms": 849.586,
+          "delete_ms": 43.73,
+          "create_to_result_ms": 3980.188
+        },
+        {
+          "machine": "ckbench-ngglgdfyaimygjk5sofw",
+          "source": "image",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 107.153,
+          "start_ms": 3874.06,
+          "prepare_ms": 0.0,
+          "exec_ms": 46.657,
+          "delete_ms": 44.531,
+          "create_to_result_ms": 4027.87
+        },
+        {
+          "machine": "ckbench-mo5qkrfhhk4ymryzfl2n",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 565.304,
+          "start_ms": 132.033,
+          "prepare_ms": 0.0,
+          "exec_ms": 17.43,
+          "delete_ms": 23.722,
+          "create_to_result_ms": 714.7669999999999,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 169,
+            "api_restore_seed": 0,
+            "api_restore_install": 389
+          }
+        },
+        {
+          "machine": "ckbench-v7znebrny4fcvgvv3ev7",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 1118.296,
+          "start_ms": 149.69,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.283,
+          "delete_ms": 23.152,
+          "create_to_result_ms": 1284.269,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 168,
+            "api_restore_seed": 0,
+            "api_restore_install": 941
+          }
+        },
+        {
+          "machine": "ckbench-w72bhlv4heglr2zin25a",
+          "source": "image",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 107.85,
+          "start_ms": 3493.619,
+          "prepare_ms": 0.0,
+          "exec_ms": 618.247,
+          "delete_ms": 45.763,
+          "create_to_result_ms": 4219.716
+        },
+        {
+          "machine": "ckbench-bs2uki6gul3vlhfc3n72",
+          "source": "image",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 106.742,
+          "start_ms": 3010.692,
+          "prepare_ms": 0.0,
+          "exec_ms": 799.397,
+          "delete_ms": 59.133,
+          "create_to_result_ms": 3916.831
+        },
+        {
+          "machine": "ckbench-rkpt5knug334xhbyduvx",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 552.613,
+          "start_ms": 140.725,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.4,
+          "delete_ms": 23.251,
+          "create_to_result_ms": 708.738,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 167,
+            "api_restore_seed": 0,
+            "api_restore_install": 378
+          }
+        },
+        {
+          "machine": "ckbench-hvldznitoivdgymoisvq",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 1090.444,
+          "start_ms": 130.38,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.394,
+          "delete_ms": 24.354,
+          "create_to_result_ms": 1237.218,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 170,
+            "api_restore_seed": 0,
+            "api_restore_install": 911
+          }
+        },
+        {
+          "machine": "ckbench-ijigqpga6yzr47q5fnts",
+          "source": "image",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 113.518,
+          "start_ms": 3000.652,
+          "prepare_ms": 0.0,
+          "exec_ms": 521.457,
+          "delete_ms": 42.839,
+          "create_to_result_ms": 3635.627
+        }
+      ],
+      "platform": "{:unix, :linux}",
+      "cache_mode": "disabled",
+      "limitations": "Alternating source order after one warmup each; warm host caches, local approved artifacts, no image download or checkpoint capture time. Low-level Client timings, not durable managed runtime latency. Cache mode is an operator declaration; verify actual cache use in server logs.",
+      "round": 1,
+      "report_file": "1-disabled-bare.json",
+      "worker_user": "root",
+      "artifact_pair": "bare",
+      "worker_log_sha256": "0f9d1ec6e7e44f662f7103475b3148d730580b90217384654c329f7e357e2977",
+      "shared_path_log_present": false
+    },
+    {
+      "runtime": "1.16.1",
+      "workload": "dataset",
+      "samples": [
+        {
+          "machine": "ckbench-wlhwzn3tly347crl2pge",
+          "source": "image",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 109.884,
+          "start_ms": 3196.494,
+          "prepare_ms": 1945.595,
+          "exec_ms": 15.577,
+          "delete_ms": 58.238,
+          "create_to_result_ms": 5267.55
+        },
+        {
+          "machine": "ckbench-hi3wfuy4ai7jq6z5s2w7",
+          "source": "checkpoint",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 569.469,
+          "start_ms": 132.008,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.351,
+          "delete_ms": 35.3,
+          "create_to_result_ms": 716.8280000000001,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 174,
+            "api_restore_seed": 0,
+            "api_restore_install": 389
+          }
+        },
+        {
+          "machine": "ckbench-qods5rzdskoqp6jrkgwh",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 1181.895,
+          "start_ms": 148.063,
+          "prepare_ms": 0.0,
+          "exec_ms": 28.033,
+          "delete_ms": 34.542,
+          "create_to_result_ms": 1357.991,
+          "restore_phases_ms": {
+            "api_restore_verify": 9,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 176,
+            "api_restore_seed": 0,
+            "api_restore_install": 992
+          }
+        },
+        {
+          "machine": "ckbench-y63hv7ysayq47x3ap2fy",
+          "source": "image",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 113.748,
+          "start_ms": 3632.806,
+          "prepare_ms": 1363.665,
+          "exec_ms": 15.141,
+          "delete_ms": 42.559,
+          "create_to_result_ms": 5125.36
+        },
+        {
+          "machine": "ckbench-garxuziwljt4wmwl37go",
+          "source": "image",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 110.34,
+          "start_ms": 3081.108,
+          "prepare_ms": 2033.843,
+          "exec_ms": 15.188,
+          "delete_ms": 46.123,
+          "create_to_result_ms": 5240.479
+        },
+        {
+          "machine": "ckbench-xyjm33njkseu2kjoqona",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 600.061,
+          "start_ms": 142.861,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.595,
+          "delete_ms": 23.427,
+          "create_to_result_ms": 759.517,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 176,
+            "api_restore_seed": 0,
+            "api_restore_install": 417
+          }
+        },
+        {
+          "machine": "ckbench-cdu67c67tdunr3xddqm2",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 1141.307,
+          "start_ms": 135.909,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.455,
+          "delete_ms": 34.454,
+          "create_to_result_ms": 1292.6709999999998,
+          "restore_phases_ms": {
+            "api_restore_verify": 5,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 178,
+            "api_restore_seed": 0,
+            "api_restore_install": 955
+          }
+        },
+        {
+          "machine": "ckbench-qeng5rhzqcqart4kbdkc",
+          "source": "image",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 110.875,
+          "start_ms": 3053.899,
+          "prepare_ms": 2123.549,
+          "exec_ms": 15.876,
+          "delete_ms": 57.434,
+          "create_to_result_ms": 5304.1990000000005
+        },
+        {
+          "machine": "ckbench-uzsuk7ukpbqgefljcckj",
+          "source": "image",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 113.084,
+          "start_ms": 2712.21,
+          "prepare_ms": 2028.752,
+          "exec_ms": 15.509,
+          "delete_ms": 58.907,
+          "create_to_result_ms": 4869.555
+        },
+        {
+          "machine": "ckbench-pz3kyfgnmlcoab5juntz",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 547.074,
+          "start_ms": 143.138,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.601,
+          "delete_ms": 45.691,
+          "create_to_result_ms": 705.813,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 176,
+            "api_restore_seed": 0,
+            "api_restore_install": 364
+          }
+        },
+        {
+          "machine": "ckbench-4hbeksutvitwb3h6czmh",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 1122.14,
+          "start_ms": 134.511,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.909,
+          "delete_ms": 32.988,
+          "create_to_result_ms": 1272.5600000000002,
+          "restore_phases_ms": {
+            "api_restore_verify": 9,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 184,
+            "api_restore_seed": 0,
+            "api_restore_install": 924
+          }
+        },
+        {
+          "machine": "ckbench-argquw3u673w6p6nkulv",
+          "source": "image",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 111.498,
+          "start_ms": 3379.664,
+          "prepare_ms": 1859.551,
+          "exec_ms": 15.018,
+          "delete_ms": 58.554,
+          "create_to_result_ms": 5365.731
+        }
+      ],
+      "platform": "{:unix, :linux}",
+      "cache_mode": "disabled",
+      "limitations": "Alternating source order after one warmup each; warm host caches, local approved artifacts, no image download or checkpoint capture time. Low-level Client timings, not durable managed runtime latency. Cache mode is an operator declaration; verify actual cache use in server logs.",
+      "round": 1,
+      "report_file": "1-disabled-dataset.json",
+      "worker_user": "root",
+      "artifact_pair": "dataset",
+      "worker_log_sha256": "0f9d1ec6e7e44f662f7103475b3148d730580b90217384654c329f7e357e2977",
+      "shared_path_log_present": false
+    },
+    {
+      "runtime": "1.16.1",
+      "workload": "bare",
+      "samples": [
+        {
+          "machine": "ckbench-2h2425tdpcmm3vlp2ryg",
+          "source": "image",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 436.573,
+          "start_ms": 3493.933,
+          "prepare_ms": 0.0,
+          "exec_ms": 398.959,
+          "delete_ms": 22.059,
+          "create_to_result_ms": 4329.465
+        },
+        {
+          "machine": "ckbench-dyix5hk6dg2xtmyfewvh",
+          "source": "checkpoint",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 591.508,
+          "start_ms": 148.137,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.123,
+          "delete_ms": 23.569,
+          "create_to_result_ms": 755.768,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 366,
+            "api_restore_seed": 0,
+            "api_restore_install": 217
+          }
+        },
+        {
+          "machine": "ckbench-eez2krobbeuf2yottuyz",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 432.635,
+          "start_ms": 148.319,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.678,
+          "delete_ms": 34.103,
+          "create_to_result_ms": 597.632,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 183,
+            "api_restore_seed": 0,
+            "api_restore_install": 239
+          }
+        },
+        {
+          "machine": "ckbench-zvxoard4iumiet25yls2",
+          "source": "image",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 182.385,
+          "start_ms": 2608.092,
+          "prepare_ms": 0.0,
+          "exec_ms": 586.68,
+          "delete_ms": 34.25,
+          "create_to_result_ms": 3377.1569999999997
+        },
+        {
+          "machine": "ckbench-43hqfhedxkqlyimxroaw",
+          "source": "image",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 133.799,
+          "start_ms": 2656.86,
+          "prepare_ms": 0.0,
+          "exec_ms": 802.26,
+          "delete_ms": 22.371,
+          "create_to_result_ms": 3592.919
+        },
+        {
+          "machine": "ckbench-acqmcoyyps2yrh2vi5y3",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 364.372,
+          "start_ms": 137.307,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.726,
+          "delete_ms": 22.771,
+          "create_to_result_ms": 518.405,
+          "restore_phases_ms": {
+            "api_restore_verify": 5,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 132,
+            "api_restore_seed": 0,
+            "api_restore_install": 223
+          }
+        },
+        {
+          "machine": "ckbench-df3jdljr727ujadpxyri",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 375.219,
+          "start_ms": 140.439,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.166,
+          "delete_ms": 23.492,
+          "create_to_result_ms": 531.8240000000001,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 176,
+            "api_restore_seed": 0,
+            "api_restore_install": 190
+          }
+        },
+        {
+          "machine": "ckbench-2lmkhsedhehm47vneik2",
+          "source": "image",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 174.893,
+          "start_ms": 2809.215,
+          "prepare_ms": 0.0,
+          "exec_ms": 728.824,
+          "delete_ms": 34.138,
+          "create_to_result_ms": 3712.9320000000002
+        },
+        {
+          "machine": "ckbench-ywyji6q5k32bgzkshver",
+          "source": "image",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 132.361,
+          "start_ms": 3224.151,
+          "prepare_ms": 0.0,
+          "exec_ms": 724.776,
+          "delete_ms": 34.033,
+          "create_to_result_ms": 4081.2879999999996
+        },
+        {
+          "machine": "ckbench-e2a4fwr6dudze2yjfrle",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 374.843,
+          "start_ms": 136.694,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.424,
+          "delete_ms": 22.688,
+          "create_to_result_ms": 527.961,
+          "restore_phases_ms": {
+            "api_restore_verify": 8,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 133,
+            "api_restore_seed": 0,
+            "api_restore_install": 228
+          }
+        },
+        {
+          "machine": "ckbench-q2x52j2igqslpqwesksk",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 415.98,
+          "start_ms": 146.081,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.984,
+          "delete_ms": 34.778,
+          "create_to_result_ms": 578.0450000000001,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 174,
+            "api_restore_seed": 0,
+            "api_restore_install": 234
+          }
+        },
+        {
+          "machine": "ckbench-vhh3n3ptxxqu5fiutbtm",
+          "source": "image",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 158.557,
+          "start_ms": 3797.593,
+          "prepare_ms": 0.0,
+          "exec_ms": 164.508,
+          "delete_ms": 22.179,
+          "create_to_result_ms": 4120.657999999999
+        }
+      ],
+      "platform": "{:unix, :linux}",
+      "cache_mode": "enabled",
+      "limitations": "Alternating source order after one warmup each; warm host caches, local approved artifacts, no image download or checkpoint capture time. Low-level Client timings, not durable managed runtime latency. Cache mode is an operator declaration; verify actual cache use in server logs.",
+      "round": 2,
+      "report_file": "2-enabled-bare.json",
+      "worker_user": "root",
+      "artifact_pair": "bare",
+      "worker_log_sha256": "056eb59ccc98a17a7ea311face45856d460f1460a7cc5bc3d0809e482785fc90",
+      "shared_path_log_present": true
+    },
+    {
+      "runtime": "1.16.1",
+      "workload": "dataset",
+      "samples": [
+        {
+          "machine": "ckbench-imawbpp2a5ge4hloqsmj",
+          "source": "image",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 413.724,
+          "start_ms": 2927.971,
+          "prepare_ms": 2358.354,
+          "exec_ms": 15.56,
+          "delete_ms": 32.407,
+          "create_to_result_ms": 5715.609
+        },
+        {
+          "machine": "ckbench-exp37cvctcn5thn2vwyx",
+          "source": "checkpoint",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 640.204,
+          "start_ms": 136.251,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.11,
+          "delete_ms": 22.756,
+          "create_to_result_ms": 792.5649999999999,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 401,
+            "api_restore_seed": 0,
+            "api_restore_install": 231
+          }
+        },
+        {
+          "machine": "ckbench-52j2tgilk53n5jywro73",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 425.775,
+          "start_ms": 148.192,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.803,
+          "delete_ms": 34.376,
+          "create_to_result_ms": 589.77,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 162,
+            "api_restore_seed": 0,
+            "api_restore_install": 255
+          }
+        },
+        {
+          "machine": "ckbench-k3nblah5cdumjmb6rdvs",
+          "source": "image",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 166.731,
+          "start_ms": 3207.196,
+          "prepare_ms": 1934.194,
+          "exec_ms": 15.154,
+          "delete_ms": 33.071,
+          "create_to_result_ms": 5323.275
+        },
+        {
+          "machine": "ckbench-p6hruj545dtity3ncb7v",
+          "source": "image",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 147.149,
+          "start_ms": 4302.964,
+          "prepare_ms": 1367.984,
+          "exec_ms": 15.593,
+          "delete_ms": 33.202,
+          "create_to_result_ms": 5833.69
+        },
+        {
+          "machine": "ckbench-oaiwwbrs4ma6pfx43fid",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 398.799,
+          "start_ms": 149.225,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.484,
+          "delete_ms": 34.782,
+          "create_to_result_ms": 563.508,
+          "restore_phases_ms": {
+            "api_restore_verify": 7,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 132,
+            "api_restore_seed": 0,
+            "api_restore_install": 255
+          }
+        },
+        {
+          "machine": "ckbench-muol5x7pldyprifpk2s4",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 391.098,
+          "start_ms": 150.086,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.713,
+          "delete_ms": 23.121,
+          "create_to_result_ms": 556.8969999999999,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 157,
+            "api_restore_seed": 0,
+            "api_restore_install": 224
+          }
+        },
+        {
+          "machine": "ckbench-2wbnplnz35fnubbxb3w3",
+          "source": "image",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 140.199,
+          "start_ms": 3031.905,
+          "prepare_ms": 2004.907,
+          "exec_ms": 15.578,
+          "delete_ms": 44.243,
+          "create_to_result_ms": 5192.589000000001
+        },
+        {
+          "machine": "ckbench-2b5bm6we6p2jmjeueil2",
+          "source": "image",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 134.587,
+          "start_ms": 3715.088,
+          "prepare_ms": 2008.26,
+          "exec_ms": 15.287,
+          "delete_ms": 34.045,
+          "create_to_result_ms": 5873.222000000001
+        },
+        {
+          "machine": "ckbench-vody7xbmhwp36kehc5nq",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 377.825,
+          "start_ms": 139.939,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.853,
+          "delete_ms": 23.75,
+          "create_to_result_ms": 533.617,
+          "restore_phases_ms": {
+            "api_restore_verify": 9,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 138,
+            "api_restore_seed": 0,
+            "api_restore_install": 226
+          }
+        },
+        {
+          "machine": "ckbench-vjb4qpmegpukawvnhjd6",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 425.1,
+          "start_ms": 137.39,
+          "prepare_ms": 0.0,
+          "exec_ms": 18.111,
+          "delete_ms": 25.253,
+          "create_to_result_ms": 580.601,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 177,
+            "api_restore_seed": 0,
+            "api_restore_install": 238
+          }
+        },
+        {
+          "machine": "ckbench-obfuokeolo4vtqek6yeg",
+          "source": "image",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 159.454,
+          "start_ms": 3603.486,
+          "prepare_ms": 1983.22,
+          "exec_ms": 15.047,
+          "delete_ms": 23.861,
+          "create_to_result_ms": 5761.206999999999
+        }
+      ],
+      "platform": "{:unix, :linux}",
+      "cache_mode": "enabled",
+      "limitations": "Alternating source order after one warmup each; warm host caches, local approved artifacts, no image download or checkpoint capture time. Low-level Client timings, not durable managed runtime latency. Cache mode is an operator declaration; verify actual cache use in server logs.",
+      "round": 2,
+      "report_file": "2-enabled-dataset.json",
+      "worker_user": "root",
+      "artifact_pair": "dataset",
+      "worker_log_sha256": "056eb59ccc98a17a7ea311face45856d460f1460a7cc5bc3d0809e482785fc90",
+      "shared_path_log_present": true
+    },
+    {
+      "runtime": "1.16.1",
+      "workload": "bare",
+      "samples": [
+        {
+          "machine": "ckbench-bjhheirkvcqogm3rj454",
+          "source": "image",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 140.42,
+          "start_ms": 5129.211,
+          "prepare_ms": 0.0,
+          "exec_ms": 225.156,
+          "delete_ms": 34.17,
+          "create_to_result_ms": 5494.787
+        },
+        {
+          "machine": "ckbench-y2vtlbnr5kibvng7p6fg",
+          "source": "checkpoint",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 394.787,
+          "start_ms": 149.781,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.404,
+          "delete_ms": 23.298,
+          "create_to_result_ms": 560.972,
+          "restore_phases_ms": {
+            "api_restore_verify": 8,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 154,
+            "api_restore_seed": 0,
+            "api_restore_install": 227
+          }
+        },
+        {
+          "machine": "ckbench-u7g5c6ivi3t5vn4zssec",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 321.577,
+          "start_ms": 149.647,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.533,
+          "delete_ms": 35.218,
+          "create_to_result_ms": 486.757,
+          "restore_phases_ms": {
+            "api_restore_verify": 5,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 131,
+            "api_restore_seed": 0,
+            "api_restore_install": 181
+          }
+        },
+        {
+          "machine": "ckbench-o6lda6intqata3676oy7",
+          "source": "image",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 131.913,
+          "start_ms": 3462.762,
+          "prepare_ms": 0.0,
+          "exec_ms": 1042.534,
+          "delete_ms": 34.006,
+          "create_to_result_ms": 4637.209000000001
+        },
+        {
+          "machine": "ckbench-voxjdlecvix2es2tlcgk",
+          "source": "image",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 101.006,
+          "start_ms": 3658.354,
+          "prepare_ms": 0.0,
+          "exec_ms": 437.63,
+          "delete_ms": 34.071,
+          "create_to_result_ms": 4196.99
+        },
+        {
+          "machine": "ckbench-mmxbhhl3xh26szsgj5tn",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 332.558,
+          "start_ms": 149.468,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.953,
+          "delete_ms": 23.397,
+          "create_to_result_ms": 497.9789999999999,
+          "restore_phases_ms": {
+            "api_restore_verify": 8,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 113,
+            "api_restore_seed": 0,
+            "api_restore_install": 205
+          }
+        },
+        {
+          "machine": "ckbench-mlvxwizbjqy2f7bmoquv",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 321.238,
+          "start_ms": 135.426,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.374,
+          "delete_ms": 22.834,
+          "create_to_result_ms": 473.038,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 132,
+            "api_restore_seed": 0,
+            "api_restore_install": 180
+          }
+        },
+        {
+          "machine": "ckbench-suy2kx3hv6hcsvmmkwbi",
+          "source": "image",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 117.426,
+          "start_ms": 4234.855,
+          "prepare_ms": 0.0,
+          "exec_ms": 816.52,
+          "delete_ms": 34.079,
+          "create_to_result_ms": 5168.8009999999995
+        },
+        {
+          "machine": "ckbench-ud743brol3arakqt64s2",
+          "source": "image",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 107.636,
+          "start_ms": 3315.535,
+          "prepare_ms": 0.0,
+          "exec_ms": 1200.412,
+          "delete_ms": 34.351,
+          "create_to_result_ms": 4623.583
+        },
+        {
+          "machine": "ckbench-pwntxh5daxfjgbvteg6s",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 312.814,
+          "start_ms": 155.975,
+          "prepare_ms": 0.0,
+          "exec_ms": 18.078,
+          "delete_ms": 23.218,
+          "create_to_result_ms": 486.86699999999996,
+          "restore_phases_ms": {
+            "api_restore_verify": 8,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 111,
+            "api_restore_seed": 0,
+            "api_restore_install": 189
+          }
+        },
+        {
+          "machine": "ckbench-zx42s5mpxrrfyr4mjix3",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 327.625,
+          "start_ms": 137.819,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.645,
+          "delete_ms": 34.927,
+          "create_to_result_ms": 482.08899999999994,
+          "restore_phases_ms": {
+            "api_restore_verify": 5,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 135,
+            "api_restore_seed": 0,
+            "api_restore_install": 184
+          }
+        },
+        {
+          "machine": "ckbench-d57yetm6457u7msre6gh",
+          "source": "image",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 127.344,
+          "start_ms": 3473.775,
+          "prepare_ms": 0.0,
+          "exec_ms": 1040.108,
+          "delete_ms": 34.277,
+          "create_to_result_ms": 4641.227
+        }
+      ],
+      "platform": "{:unix, :linux}",
+      "cache_mode": "enabled",
+      "limitations": "Alternating source order after one warmup each; warm host caches, local approved artifacts, no image download or checkpoint capture time. Low-level Client timings, not durable managed runtime latency. Cache mode is an operator declaration; verify actual cache use in server logs.",
+      "round": 3,
+      "report_file": "3-enabled-bare.json",
+      "worker_user": "root",
+      "artifact_pair": "bare",
+      "worker_log_sha256": "0111851c1d16639e8aba1dbe1320657fa4dfd3e8618cf90d1fee40babb85d1a5",
+      "shared_path_log_present": true
+    },
+    {
+      "runtime": "1.16.1",
+      "workload": "dataset",
+      "samples": [
+        {
+          "machine": "ckbench-2si47zj5q4zek33gih7s",
+          "source": "image",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 207.869,
+          "start_ms": 3760.978,
+          "prepare_ms": 1781.924,
+          "exec_ms": 15.839,
+          "delete_ms": 33.673,
+          "create_to_result_ms": 5766.610000000001
+        },
+        {
+          "machine": "ckbench-vrjwi6h3em6774d5rz5e",
+          "source": "checkpoint",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 366.12,
+          "start_ms": 149.286,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.004,
+          "delete_ms": 24.521,
+          "create_to_result_ms": 531.41,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 144,
+            "api_restore_seed": 0,
+            "api_restore_install": 211
+          }
+        },
+        {
+          "machine": "ckbench-y4guhdwgw7brxz3v2iju",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 399.02,
+          "start_ms": 148.561,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.632,
+          "delete_ms": 36.148,
+          "create_to_result_ms": 563.213,
+          "restore_phases_ms": {
+            "api_restore_verify": 8,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 163,
+            "api_restore_seed": 0,
+            "api_restore_install": 222
+          }
+        },
+        {
+          "machine": "ckbench-jcwyqs2d33wbdx3nv7g7",
+          "source": "image",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 154.663,
+          "start_ms": 3411.216,
+          "prepare_ms": 1721.777,
+          "exec_ms": 15.641,
+          "delete_ms": 44.133,
+          "create_to_result_ms": 5303.297
+        },
+        {
+          "machine": "ckbench-njrkdtpvczvimaiu64c7",
+          "source": "image",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 131.067,
+          "start_ms": 3909.486,
+          "prepare_ms": 1483.645,
+          "exec_ms": 16.712,
+          "delete_ms": 34.056,
+          "create_to_result_ms": 5540.910000000001
+        },
+        {
+          "machine": "ckbench-2gd6la5wjayid2ohixw4",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 368.896,
+          "start_ms": 149.343,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.538,
+          "delete_ms": 35.316,
+          "create_to_result_ms": 533.777,
+          "restore_phases_ms": {
+            "api_restore_verify": 7,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 132,
+            "api_restore_seed": 0,
+            "api_restore_install": 225
+          }
+        },
+        {
+          "machine": "ckbench-qsskydolh7qtxjomryb7",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 391.54,
+          "start_ms": 148.07,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.699,
+          "delete_ms": 23.021,
+          "create_to_result_ms": 555.309,
+          "restore_phases_ms": {
+            "api_restore_verify": 8,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 153,
+            "api_restore_seed": 0,
+            "api_restore_install": 225
+          }
+        },
+        {
+          "machine": "ckbench-elphilu4uxcx5imise56",
+          "source": "image",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 154.494,
+          "start_ms": 3031.898,
+          "prepare_ms": 1901.854,
+          "exec_ms": 15.803,
+          "delete_ms": 23.661,
+          "create_to_result_ms": 5104.049
+        },
+        {
+          "machine": "ckbench-bdo46dwxrglltqtjbgji",
+          "source": "image",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 126.418,
+          "start_ms": 3266.708,
+          "prepare_ms": 2572.163,
+          "exec_ms": 16.642,
+          "delete_ms": 23.663,
+          "create_to_result_ms": 5981.9310000000005
+        },
+        {
+          "machine": "ckbench-jj36m7q4gijoozcu3smw",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 392.71,
+          "start_ms": 147.49,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.863,
+          "delete_ms": 23.076,
+          "create_to_result_ms": 556.0630000000001,
+          "restore_phases_ms": {
+            "api_restore_verify": 7,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 133,
+            "api_restore_seed": 0,
+            "api_restore_install": 247
+          }
+        },
+        {
+          "machine": "ckbench-obwcczzippimzuybty3m",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 352.687,
+          "start_ms": 149.216,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.031,
+          "delete_ms": 34.489,
+          "create_to_result_ms": 517.934,
+          "restore_phases_ms": {
+            "api_restore_verify": 5,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 137,
+            "api_restore_seed": 0,
+            "api_restore_install": 207
+          }
+        },
+        {
+          "machine": "ckbench-gwychoy2joccnpttf4hs",
+          "source": "image",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 163.049,
+          "start_ms": 3910.996,
+          "prepare_ms": 1539.109,
+          "exec_ms": 15.493,
+          "delete_ms": 34.401,
+          "create_to_result_ms": 5628.647000000001
+        }
+      ],
+      "platform": "{:unix, :linux}",
+      "cache_mode": "enabled",
+      "limitations": "Alternating source order after one warmup each; warm host caches, local approved artifacts, no image download or checkpoint capture time. Low-level Client timings, not durable managed runtime latency. Cache mode is an operator declaration; verify actual cache use in server logs.",
+      "round": 3,
+      "report_file": "3-enabled-dataset.json",
+      "worker_user": "root",
+      "artifact_pair": "dataset",
+      "worker_log_sha256": "0111851c1d16639e8aba1dbe1320657fa4dfd3e8618cf90d1fee40babb85d1a5",
+      "shared_path_log_present": true
+    },
+    {
+      "runtime": "1.16.1",
+      "workload": "bare",
+      "samples": [
+        {
+          "machine": "ckbench-il7plqdtidmihgr3qnun",
+          "source": "image",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 131.587,
+          "start_ms": 3474.286,
+          "prepare_ms": 0.0,
+          "exec_ms": 1413.636,
+          "delete_ms": 57.213,
+          "create_to_result_ms": 5019.509
+        },
+        {
+          "machine": "ckbench-rfl7asn6ojopn5eev6iq",
+          "source": "checkpoint",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 504.581,
+          "start_ms": 143.71,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.375,
+          "delete_ms": 34.083,
+          "create_to_result_ms": 664.666,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 190,
+            "api_restore_seed": 0,
+            "api_restore_install": 307
+          }
+        },
+        {
+          "machine": "ckbench-wtctniz75evpqqpddgtw",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 994.065,
+          "start_ms": 143.321,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.385,
+          "delete_ms": 23.768,
+          "create_to_result_ms": 1153.771,
+          "restore_phases_ms": {
+            "api_restore_verify": 8,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 195,
+            "api_restore_seed": 0,
+            "api_restore_install": 787
+          }
+        },
+        {
+          "machine": "ckbench-kqvznfmm5gcvivlvqed4",
+          "source": "image",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 122.662,
+          "start_ms": 4036.799,
+          "prepare_ms": 0.0,
+          "exec_ms": 818.2,
+          "delete_ms": 58.358,
+          "create_to_result_ms": 4977.661
+        },
+        {
+          "machine": "ckbench-h3ygqn4746ju2kydoqwx",
+          "source": "image",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 115.943,
+          "start_ms": 3849.591,
+          "prepare_ms": 0.0,
+          "exec_ms": 941.69,
+          "delete_ms": 51.081,
+          "create_to_result_ms": 4907.224
+        },
+        {
+          "machine": "ckbench-62pum2bd6dpeu2az6h4p",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 502.158,
+          "start_ms": 141.714,
+          "prepare_ms": 0.0,
+          "exec_ms": 17.027,
+          "delete_ms": 22.619,
+          "create_to_result_ms": 660.8990000000001,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 193,
+            "api_restore_seed": 0,
+            "api_restore_install": 302
+          }
+        },
+        {
+          "machine": "ckbench-d5h74gqjm4lrx46qkh6g",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 802.027,
+          "start_ms": 152.476,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.888,
+          "delete_ms": 23.27,
+          "create_to_result_ms": 970.3910000000001,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 196,
+            "api_restore_seed": 0,
+            "api_restore_install": 598
+          }
+        },
+        {
+          "machine": "ckbench-eeahdw3j5ayf77mdiurr",
+          "source": "image",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 123.892,
+          "start_ms": 3740.385,
+          "prepare_ms": 0.0,
+          "exec_ms": 474.023,
+          "delete_ms": 69.684,
+          "create_to_result_ms": 4338.3
+        },
+        {
+          "machine": "ckbench-54szkcvzqxoifvvkexkx",
+          "source": "image",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 121.572,
+          "start_ms": 4364.759,
+          "prepare_ms": 0.0,
+          "exec_ms": 619.743,
+          "delete_ms": 59.42,
+          "create_to_result_ms": 5106.0740000000005
+        },
+        {
+          "machine": "ckbench-o7sv4iljimjp64hfg6zg",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 653.63,
+          "start_ms": 213.713,
+          "prepare_ms": 0.0,
+          "exec_ms": 29.311,
+          "delete_ms": 33.887,
+          "create_to_result_ms": 896.654,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 282,
+            "api_restore_seed": 0,
+            "api_restore_install": 364
+          }
+        },
+        {
+          "machine": "ckbench-ornckoiely4lgjix42i5",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 1194.579,
+          "start_ms": 142.658,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.9,
+          "delete_ms": 22.593,
+          "create_to_result_ms": 1353.137,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 235,
+            "api_restore_seed": 0,
+            "api_restore_install": 950
+          }
+        },
+        {
+          "machine": "ckbench-aued6nibehk6ocw3vom7",
+          "source": "image",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 122.214,
+          "start_ms": 4531.843,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.815,
+          "delete_ms": 58.727,
+          "create_to_result_ms": 4670.871999999999
+        }
+      ],
+      "platform": "{:unix, :linux}",
+      "cache_mode": "disabled",
+      "limitations": "Alternating source order after one warmup each; warm host caches, local approved artifacts, no image download or checkpoint capture time. Low-level Client timings, not durable managed runtime latency. Cache mode is an operator declaration; verify actual cache use in server logs.",
+      "round": 4,
+      "report_file": "4-disabled-bare.json",
+      "worker_user": "root",
+      "artifact_pair": "bare",
+      "worker_log_sha256": "6ef1d367e767c623de29ee6594fc4e9bede14cf9997e33cc88a4e3dccf430e6d",
+      "shared_path_log_present": false
+    },
+    {
+      "runtime": "1.16.1",
+      "workload": "dataset",
+      "samples": [
+        {
+          "machine": "ckbench-q4xel2sj3np3d7oqpieo",
+          "source": "image",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 178.01,
+          "start_ms": 4636.962,
+          "prepare_ms": 1703.996,
+          "exec_ms": 28.024,
+          "delete_ms": 67.127,
+          "create_to_result_ms": 6546.992000000001
+        },
+        {
+          "machine": "ckbench-73knrqqqnyntktmd2aib",
+          "source": "checkpoint",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 655.983,
+          "start_ms": 154.653,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.244,
+          "delete_ms": 24.1,
+          "create_to_result_ms": 826.88,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 303,
+            "api_restore_seed": 0,
+            "api_restore_install": 343
+          }
+        },
+        {
+          "machine": "ckbench-allotncjxwxfbesf26y3",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 1110.863,
+          "start_ms": 148.084,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.463,
+          "delete_ms": 22.924,
+          "create_to_result_ms": 1274.41,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 215,
+            "api_restore_seed": 0,
+            "api_restore_install": 885
+          }
+        },
+        {
+          "machine": "ckbench-uqp2p3wn3ryt7kadofeq",
+          "source": "image",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 119.867,
+          "start_ms": 3413.343,
+          "prepare_ms": 2214.556,
+          "exec_ms": 15.963,
+          "delete_ms": 42.5,
+          "create_to_result_ms": 5763.728999999999
+        },
+        {
+          "machine": "ckbench-v7aedd3dqxktcglsusbn",
+          "source": "image",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 121.821,
+          "start_ms": 3294.845,
+          "prepare_ms": 2846.606,
+          "exec_ms": 15.76,
+          "delete_ms": 57.212,
+          "create_to_result_ms": 6279.032
+        },
+        {
+          "machine": "ckbench-lbj6a7uveov2keq3mily",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 587.78,
+          "start_ms": 216.915,
+          "prepare_ms": 0.0,
+          "exec_ms": 30.451,
+          "delete_ms": 35.744,
+          "create_to_result_ms": 835.146,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 239,
+            "api_restore_seed": 0,
+            "api_restore_install": 341
+          }
+        },
+        {
+          "machine": "ckbench-qo7uqqiuyomxzkv67sav",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 1193.317,
+          "start_ms": 157.833,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.657,
+          "delete_ms": 35.635,
+          "create_to_result_ms": 1366.807,
+          "restore_phases_ms": {
+            "api_restore_verify": 9,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 286,
+            "api_restore_seed": 0,
+            "api_restore_install": 894
+          }
+        },
+        {
+          "machine": "ckbench-6la6dz4dgarzyz6ilgzt",
+          "source": "image",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 124.596,
+          "start_ms": 3965.675,
+          "prepare_ms": 2020.291,
+          "exec_ms": 15.817,
+          "delete_ms": 43.722,
+          "create_to_result_ms": 6126.379
+        },
+        {
+          "machine": "ckbench-7bpanenm7lvmlsjdco4o",
+          "source": "image",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 132.448,
+          "start_ms": 4561.947,
+          "prepare_ms": 1872.129,
+          "exec_ms": 15.97,
+          "delete_ms": 44.198,
+          "create_to_result_ms": 6582.494000000001
+        },
+        {
+          "machine": "ckbench-f5fh4rnj6o7tosv5lg6e",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 565.251,
+          "start_ms": 216.872,
+          "prepare_ms": 0.0,
+          "exec_ms": 29.611,
+          "delete_ms": 36.45,
+          "create_to_result_ms": 811.734,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 242,
+            "api_restore_seed": 0,
+            "api_restore_install": 316
+          }
+        },
+        {
+          "machine": "ckbench-jcxxlhbtjzn7cx7xzgau",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 913.148,
+          "start_ms": 168.101,
+          "prepare_ms": 0.0,
+          "exec_ms": 27.644,
+          "delete_ms": 35.306,
+          "create_to_result_ms": 1108.893,
+          "restore_phases_ms": {
+            "api_restore_verify": 8,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 290,
+            "api_restore_seed": 0,
+            "api_restore_install": 611
+          }
+        },
+        {
+          "machine": "ckbench-fvkojouqsycws2dbspw3",
+          "source": "image",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 141.765,
+          "start_ms": 5209.102,
+          "prepare_ms": 2023.968,
+          "exec_ms": 17.205,
+          "delete_ms": 56.274,
+          "create_to_result_ms": 7392.04
+        }
+      ],
+      "platform": "{:unix, :linux}",
+      "cache_mode": "disabled",
+      "limitations": "Alternating source order after one warmup each; warm host caches, local approved artifacts, no image download or checkpoint capture time. Low-level Client timings, not durable managed runtime latency. Cache mode is an operator declaration; verify actual cache use in server logs.",
+      "round": 4,
+      "report_file": "4-disabled-dataset.json",
+      "worker_user": "root",
+      "artifact_pair": "dataset",
+      "worker_log_sha256": "6ef1d367e767c623de29ee6594fc4e9bede14cf9997e33cc88a4e3dccf430e6d",
+      "shared_path_log_present": false
+    },
+    {
+      "runtime": "1.16.1",
+      "workload": "dataset-precomputed",
+      "samples": [
+        {
+          "machine": "ckbench-hlwxgsomtrhhqzr6jovc",
+          "source": "image",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 118.306,
+          "start_ms": 3749.566,
+          "prepare_ms": 390.489,
+          "exec_ms": 15.814,
+          "delete_ms": 34.056,
+          "create_to_result_ms": 4274.175
+        },
+        {
+          "machine": "ckbench-rpf26lutuxfsvdlmmeak",
+          "source": "checkpoint",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 298.066,
+          "start_ms": 143.127,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.798,
+          "delete_ms": 34.236,
+          "create_to_result_ms": 456.991,
+          "restore_phases_ms": {
+            "api_restore_verify": 8,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 107,
+            "api_restore_seed": 0,
+            "api_restore_install": 177
+          }
+        },
+        {
+          "machine": "ckbench-qzxdh3kzjj3yf5br7gpw",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 322.578,
+          "start_ms": 153.711,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.759,
+          "delete_ms": 35.294,
+          "create_to_result_ms": 492.048,
+          "restore_phases_ms": {
+            "api_restore_verify": 8,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 131,
+            "api_restore_seed": 0,
+            "api_restore_install": 179
+          }
+        },
+        {
+          "machine": "ckbench-r23jns4t4olqi7n4a3lr",
+          "source": "image",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 119.25,
+          "start_ms": 4304.479,
+          "prepare_ms": 440.29,
+          "exec_ms": 21.561,
+          "delete_ms": 34.057,
+          "create_to_result_ms": 4885.58
+        },
+        {
+          "machine": "ckbench-5ssvmcjmnu7npulkgot4",
+          "source": "image",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 109.06,
+          "start_ms": 3458.846,
+          "prepare_ms": 799.802,
+          "exec_ms": 15.861,
+          "delete_ms": 22.875,
+          "create_to_result_ms": 4383.5689999999995
+        },
+        {
+          "machine": "ckbench-oqxmgw6cnjuhah5wgdmb",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 309.781,
+          "start_ms": 218.311,
+          "prepare_ms": 0.0,
+          "exec_ms": 29.272,
+          "delete_ms": 35.952,
+          "create_to_result_ms": 557.364,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 110,
+            "api_restore_seed": 0,
+            "api_restore_install": 190
+          }
+        },
+        {
+          "machine": "ckbench-5ozzpx4akygrb4ytoj7b",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 338.712,
+          "start_ms": 210.322,
+          "prepare_ms": 0.0,
+          "exec_ms": 28.449,
+          "delete_ms": 34.502,
+          "create_to_result_ms": 577.483,
+          "restore_phases_ms": {
+            "api_restore_verify": 8,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 136,
+            "api_restore_seed": 0,
+            "api_restore_install": 189
+          }
+        },
+        {
+          "machine": "ckbench-tlhdql57gorj4acflm7c",
+          "source": "image",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 124.905,
+          "start_ms": 5167.241,
+          "prepare_ms": 237.818,
+          "exec_ms": 16.047,
+          "delete_ms": 44.21,
+          "create_to_result_ms": 5546.0109999999995
+        },
+        {
+          "machine": "ckbench-tkqsunfeocyipzynqgju",
+          "source": "image",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 109.522,
+          "start_ms": 3432.231,
+          "prepare_ms": 1451.74,
+          "exec_ms": 27.96,
+          "delete_ms": 35.08,
+          "create_to_result_ms": 5021.453
+        },
+        {
+          "machine": "ckbench-7hpxivsw2b4lnopgiple",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 312.396,
+          "start_ms": 217.697,
+          "prepare_ms": 0.0,
+          "exec_ms": 28.852,
+          "delete_ms": 36.215,
+          "create_to_result_ms": 558.945,
+          "restore_phases_ms": {
+            "api_restore_verify": 7,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 120,
+            "api_restore_seed": 0,
+            "api_restore_install": 180
+          }
+        },
+        {
+          "machine": "ckbench-rm5cfe7in7rp2g25jwjm",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 331.867,
+          "start_ms": 205.753,
+          "prepare_ms": 0.0,
+          "exec_ms": 28.618,
+          "delete_ms": 36.212,
+          "create_to_result_ms": 566.238,
+          "restore_phases_ms": {
+            "api_restore_verify": 9,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 137,
+            "api_restore_seed": 0,
+            "api_restore_install": 181
+          }
+        },
+        {
+          "machine": "ckbench-du67n4ggb33oo67gspcr",
+          "source": "image",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 157.033,
+          "start_ms": 4088.618,
+          "prepare_ms": 498.267,
+          "exec_ms": 15.63,
+          "delete_ms": 34.159,
+          "create_to_result_ms": 4759.548
+        },
+        {
+          "machine": "ckbench-p5vvti2i2jxsdqwuwfvy",
+          "source": "image",
+          "warmup": false,
+          "iteration": 6,
+          "create_ms": 101.811,
+          "start_ms": 4402.354,
+          "prepare_ms": 30.264,
+          "exec_ms": 29.19,
+          "delete_ms": 34.686,
+          "create_to_result_ms": 4563.619
+        },
+        {
+          "machine": "ckbench-bvxato4s2y5sn2czcwkj",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 6,
+          "create_ms": 308.239,
+          "start_ms": 280.02,
+          "prepare_ms": 0.0,
+          "exec_ms": 33.359,
+          "delete_ms": 46.998,
+          "create_to_result_ms": 621.618,
+          "restore_phases_ms": {
+            "api_restore_verify": 9,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 120,
+            "api_restore_seed": 0,
+            "api_restore_install": 173
+          }
+        },
+        {
+          "machine": "ckbench-rft75iyxeskkc3z6h7h7",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 7,
+          "create_ms": 321.178,
+          "start_ms": 218.959,
+          "prepare_ms": 0.0,
+          "exec_ms": 29.127,
+          "delete_ms": 35.858,
+          "create_to_result_ms": 569.2639999999999,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 131,
+            "api_restore_seed": 0,
+            "api_restore_install": 179
+          }
+        },
+        {
+          "machine": "ckbench-62u3lt6bb3lnq5f62dx5",
+          "source": "image",
+          "warmup": false,
+          "iteration": 7,
+          "create_ms": 126.56,
+          "start_ms": 4820.246,
+          "prepare_ms": 961.392,
+          "exec_ms": 15.418,
+          "delete_ms": 32.917,
+          "create_to_result_ms": 5923.616
+        },
+        {
+          "machine": "ckbench-lhewl26bhpdarkexa2tt",
+          "source": "image",
+          "warmup": false,
+          "iteration": 8,
+          "create_ms": 98.7,
+          "start_ms": 3090.743,
+          "prepare_ms": 1349.062,
+          "exec_ms": 15.567,
+          "delete_ms": 34.209,
+          "create_to_result_ms": 4554.071999999999
+        },
+        {
+          "machine": "ckbench-5lhlaxnjlkun6lyarp7y",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 8,
+          "create_ms": 327.044,
+          "start_ms": 167.666,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.08,
+          "delete_ms": 34.827,
+          "create_to_result_ms": 510.78999999999996,
+          "restore_phases_ms": {
+            "api_restore_verify": 9,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 116,
+            "api_restore_seed": 0,
+            "api_restore_install": 197
+          }
+        },
+        {
+          "machine": "ckbench-nqm6hma6tvpqn3emhfjx",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 9,
+          "create_ms": 315.848,
+          "start_ms": 156.119,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.685,
+          "delete_ms": 35.131,
+          "create_to_result_ms": 487.652,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 127,
+            "api_restore_seed": 0,
+            "api_restore_install": 177
+          }
+        },
+        {
+          "machine": "ckbench-ygi7h6fgggshfz5uttmr",
+          "source": "image",
+          "warmup": false,
+          "iteration": 9,
+          "create_ms": 119.71,
+          "start_ms": 3791.15,
+          "prepare_ms": 965.366,
+          "exec_ms": 28.009,
+          "delete_ms": 34.433,
+          "create_to_result_ms": 4904.235000000001
+        },
+        {
+          "machine": "ckbench-skg3grqf37f42uk24zmk",
+          "source": "image",
+          "warmup": false,
+          "iteration": 10,
+          "create_ms": 107.925,
+          "start_ms": 3957.32,
+          "prepare_ms": 1355.745,
+          "exec_ms": 15.795,
+          "delete_ms": 34.041,
+          "create_to_result_ms": 5436.785
+        },
+        {
+          "machine": "ckbench-6iqorlflzyba4i6tzvzz",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 10,
+          "create_ms": 345.493,
+          "start_ms": 155.287,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.362,
+          "delete_ms": 35.17,
+          "create_to_result_ms": 517.1419999999999,
+          "restore_phases_ms": {
+            "api_restore_verify": 9,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 126,
+            "api_restore_seed": 0,
+            "api_restore_install": 205
+          }
+        }
+      ],
+      "platform": "{:unix, :linux}",
+      "cache_mode": "enabled",
+      "limitations": "Alternating source order after one warmup each; warm host caches, local approved artifacts, no image download or checkpoint capture time. Low-level Client timings, not durable managed runtime latency. Cache mode is an operator declaration; verify actual cache use in server logs.",
+      "round": 5,
+      "report_file": "5-enabled-dataset-precomputed.json",
+      "worker_user": "root",
+      "artifact_pair": "precomputed",
+      "worker_log_sha256": "361d8ebc0ff3f6bfbd851a1d479cca6b16a5999e1d16c5766db868880b11e36b",
+      "shared_path_log_present": true
+    },
+    {
+      "runtime": "1.16.1",
+      "workload": "dataset",
+      "samples": [
+        {
+          "machine": "ckbench-tyffamprkmyqugorl5hy",
+          "source": "image",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 373.924,
+          "start_ms": 2836.264,
+          "prepare_ms": 2486.43,
+          "exec_ms": 15.647,
+          "delete_ms": 34.069,
+          "create_to_result_ms": 5712.265
+        },
+        {
+          "machine": "ckbench-xosnic3j6slmda5ckpo3",
+          "source": "checkpoint",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 583.645,
+          "start_ms": 142.914,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.135,
+          "delete_ms": 34.461,
+          "create_to_result_ms": 742.694,
+          "restore_phases_ms": {
+            "api_restore_verify": 8,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 379,
+            "api_restore_seed": 0,
+            "api_restore_install": 191
+          }
+        },
+        {
+          "machine": "ckbench-i3jgglahulzft2jbfful",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 344.342,
+          "start_ms": 146.87,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.447,
+          "delete_ms": 24.755,
+          "create_to_result_ms": 507.659,
+          "restore_phases_ms": {
+            "api_restore_verify": 8,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 131,
+            "api_restore_seed": 0,
+            "api_restore_install": 200
+          }
+        },
+        {
+          "machine": "ckbench-wdllemzvjimx56eicote",
+          "source": "image",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 120.549,
+          "start_ms": 3250.412,
+          "prepare_ms": 2227.604,
+          "exec_ms": 15.661,
+          "delete_ms": 34.116,
+          "create_to_result_ms": 5614.226
+        },
+        {
+          "machine": "ckbench-svtpnoxox7htfcmgj5sj",
+          "source": "image",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 102.951,
+          "start_ms": 4372.897,
+          "prepare_ms": 1363.797,
+          "exec_ms": 15.341,
+          "delete_ms": 33.33,
+          "create_to_result_ms": 5854.986000000001
+        },
+        {
+          "machine": "ckbench-svqymw74b4vvielrkn2w",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 301.208,
+          "start_ms": 142.456,
+          "prepare_ms": 0.0,
+          "exec_ms": 17.069,
+          "delete_ms": 35.145,
+          "create_to_result_ms": 460.733,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 108,
+            "api_restore_seed": 0,
+            "api_restore_install": 182
+          }
+        },
+        {
+          "machine": "ckbench-gyfny754zwiheofkyfst",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 323.587,
+          "start_ms": 143.773,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.7,
+          "delete_ms": 24.387,
+          "create_to_result_ms": 483.06,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 130,
+            "api_restore_seed": 0,
+            "api_restore_install": 182
+          }
+        },
+        {
+          "machine": "ckbench-p5eip3szbweqiq7b7ghu",
+          "source": "image",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 120.462,
+          "start_ms": 2992.015,
+          "prepare_ms": 2378.148,
+          "exec_ms": 15.571,
+          "delete_ms": 33.461,
+          "create_to_result_ms": 5506.196
+        },
+        {
+          "machine": "ckbench-e6yp5d3dxa7akx2v3qmd",
+          "source": "image",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 111.497,
+          "start_ms": 3900.185,
+          "prepare_ms": 1436.702,
+          "exec_ms": 15.394,
+          "delete_ms": 34.457,
+          "create_to_result_ms": 5463.778
+        },
+        {
+          "machine": "ckbench-ok2pqnmxc3lru6gr7kht",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 298.569,
+          "start_ms": 145.952,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.822,
+          "delete_ms": 34.15,
+          "create_to_result_ms": 460.343,
+          "restore_phases_ms": {
+            "api_restore_verify": 7,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 103,
+            "api_restore_seed": 0,
+            "api_restore_install": 184
+          }
+        },
+        {
+          "machine": "ckbench-4de64j3gdfkajl2upivw",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 345.276,
+          "start_ms": 141.094,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.87,
+          "delete_ms": 35.865,
+          "create_to_result_ms": 502.24,
+          "restore_phases_ms": {
+            "api_restore_verify": 7,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 126,
+            "api_restore_seed": 0,
+            "api_restore_install": 208
+          }
+        },
+        {
+          "machine": "ckbench-vui2m2lbuffjrbq6wfhv",
+          "source": "image",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 121.928,
+          "start_ms": 3566.101,
+          "prepare_ms": 2019.205,
+          "exec_ms": 15.253,
+          "delete_ms": 44.648,
+          "create_to_result_ms": 5722.487
+        },
+        {
+          "machine": "ckbench-q6vboki5ndiyujjjr2fn",
+          "source": "image",
+          "warmup": false,
+          "iteration": 6,
+          "create_ms": 117.302,
+          "start_ms": 3110.946,
+          "prepare_ms": 2415.706,
+          "exec_ms": 15.296,
+          "delete_ms": 34.121,
+          "create_to_result_ms": 5659.25
+        },
+        {
+          "machine": "ckbench-eu6ookiqatxdxzsjxdoc",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 6,
+          "create_ms": 310.295,
+          "start_ms": 142.29,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.577,
+          "delete_ms": 22.982,
+          "create_to_result_ms": 469.16200000000003,
+          "restore_phases_ms": {
+            "api_restore_verify": 8,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 111,
+            "api_restore_seed": 0,
+            "api_restore_install": 186
+          }
+        },
+        {
+          "machine": "ckbench-6ayxhpfyknh6mx44kvth",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 7,
+          "create_ms": 314.759,
+          "start_ms": 143.131,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.969,
+          "delete_ms": 34.511,
+          "create_to_result_ms": 473.859,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 124,
+            "api_restore_seed": 0,
+            "api_restore_install": 182
+          }
+        },
+        {
+          "machine": "ckbench-qiksjacdrnjqmw46x62t",
+          "source": "image",
+          "warmup": false,
+          "iteration": 7,
+          "create_ms": 123.66,
+          "start_ms": 4588.242,
+          "prepare_ms": 1448.756,
+          "exec_ms": 15.325,
+          "delete_ms": 33.838,
+          "create_to_result_ms": 6175.983
+        },
+        {
+          "machine": "ckbench-w3gmo62u2xovu4txovfe",
+          "source": "image",
+          "warmup": false,
+          "iteration": 8,
+          "create_ms": 103.931,
+          "start_ms": 4286.17,
+          "prepare_ms": 3499.536,
+          "exec_ms": 15.924,
+          "delete_ms": 34.261,
+          "create_to_result_ms": 7905.561
+        },
+        {
+          "machine": "ckbench-2cponyufzyoyl2n56dkn",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 8,
+          "create_ms": 319.528,
+          "start_ms": 183.943,
+          "prepare_ms": 0.0,
+          "exec_ms": 27.438,
+          "delete_ms": 25.143,
+          "create_to_result_ms": 530.909,
+          "restore_phases_ms": {
+            "api_restore_verify": 7,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 120,
+            "api_restore_seed": 0,
+            "api_restore_install": 187
+          }
+        },
+        {
+          "machine": "ckbench-l4dxf766oalsqkaaju3m",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 9,
+          "create_ms": 314.082,
+          "start_ms": 145.734,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.643,
+          "delete_ms": 36.038,
+          "create_to_result_ms": 475.45900000000006,
+          "restore_phases_ms": {
+            "api_restore_verify": 7,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 121,
+            "api_restore_seed": 0,
+            "api_restore_install": 181
+          }
+        },
+        {
+          "machine": "ckbench-6qvdkuzbu2f3zmjcs4kj",
+          "source": "image",
+          "warmup": false,
+          "iteration": 9,
+          "create_ms": 141.596,
+          "start_ms": 4595.166,
+          "prepare_ms": 2401.807,
+          "exec_ms": 28.146,
+          "delete_ms": 34.472,
+          "create_to_result_ms": 7166.715
+        },
+        {
+          "machine": "ckbench-257l66i6mabdiivjyhxa",
+          "source": "image",
+          "warmup": false,
+          "iteration": 10,
+          "create_ms": 117.4,
+          "start_ms": 4100.377,
+          "prepare_ms": 2217.664,
+          "exec_ms": 15.551,
+          "delete_ms": 34.568,
+          "create_to_result_ms": 6450.992000000001
+        },
+        {
+          "machine": "ckbench-zl7gcz5cgnnc5psameto",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 10,
+          "create_ms": 323.111,
+          "start_ms": 206.09,
+          "prepare_ms": 0.0,
+          "exec_ms": 35.644,
+          "delete_ms": 35.925,
+          "create_to_result_ms": 564.845,
+          "restore_phases_ms": {
+            "api_restore_verify": 7,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 123,
+            "api_restore_seed": 0,
+            "api_restore_install": 188
+          }
+        }
+      ],
+      "platform": "{:unix, :linux}",
+      "cache_mode": "enabled",
+      "limitations": "Alternating source order after one warmup each; warm host caches, local approved artifacts, no image download or checkpoint capture time. Low-level Client timings, not durable managed runtime latency. Cache mode is an operator declaration; verify actual cache use in server logs.",
+      "round": 5,
+      "report_file": "5-enabled-dataset.json",
+      "worker_user": "root",
+      "artifact_pair": "precomputed",
+      "worker_log_sha256": "361d8ebc0ff3f6bfbd851a1d479cca6b16a5999e1d16c5766db868880b11e36b",
+      "shared_path_log_present": true
+    },
+    {
+      "runtime": "1.16.1",
+      "workload": "bare",
+      "samples": [
+        {
+          "machine": "ckbench-gjjxwde2zv5qdayvwqc4",
+          "source": "image",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 128.994,
+          "start_ms": 4720.116,
+          "prepare_ms": 0.0,
+          "exec_ms": 356.01,
+          "delete_ms": 60.06,
+          "create_to_result_ms": 5205.12
+        },
+        {
+          "machine": "ckbench-g3iiewjrcswcke6vaej3",
+          "source": "checkpoint",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 568.738,
+          "start_ms": 150.382,
+          "prepare_ms": 0.0,
+          "exec_ms": 17.307,
+          "delete_ms": 32.801,
+          "create_to_result_ms": 736.4270000000001,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 208,
+            "api_restore_seed": 0,
+            "api_restore_install": 353
+          }
+        },
+        {
+          "machine": "ckbench-assk3ogvzeckvmyouosm",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 624.802,
+          "start_ms": 213.92,
+          "prepare_ms": 0.0,
+          "exec_ms": 28.592,
+          "delete_ms": 35.7,
+          "create_to_result_ms": 867.314,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 271,
+            "api_restore_seed": 0,
+            "api_restore_install": 346
+          }
+        },
+        {
+          "machine": "ckbench-cbbrwcwmfu3w6mgkfgso",
+          "source": "image",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 174.854,
+          "start_ms": 3548.44,
+          "prepare_ms": 0.0,
+          "exec_ms": 1851.544,
+          "delete_ms": 64.491,
+          "create_to_result_ms": 5574.838
+        },
+        {
+          "machine": "ckbench-zu32ubtymjh4m6lr7crg",
+          "source": "image",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 180.502,
+          "start_ms": 5595.18,
+          "prepare_ms": 0.0,
+          "exec_ms": 123.619,
+          "delete_ms": 63.239,
+          "create_to_result_ms": 5899.301
+        },
+        {
+          "machine": "ckbench-ztnzdeevcjkt2hkcp4hg",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 639.653,
+          "start_ms": 161.916,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.398,
+          "delete_ms": 34.134,
+          "create_to_result_ms": 817.967,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 289,
+            "api_restore_seed": 0,
+            "api_restore_install": 341
+          }
+        },
+        {
+          "machine": "ckbench-qacyojkchqj4j4p4l72p",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 572.311,
+          "start_ms": 163.56,
+          "prepare_ms": 0.0,
+          "exec_ms": 28.017,
+          "delete_ms": 35.224,
+          "create_to_result_ms": 763.8880000000001,
+          "restore_phases_ms": {
+            "api_restore_verify": 8,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 207,
+            "api_restore_seed": 0,
+            "api_restore_install": 353
+          }
+        },
+        {
+          "machine": "ckbench-ymbfviwyfmqxvlkggd2t",
+          "source": "image",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 123.412,
+          "start_ms": 4168.934,
+          "prepare_ms": 0.0,
+          "exec_ms": 147.717,
+          "delete_ms": 44.461,
+          "create_to_result_ms": 4440.063
+        },
+        {
+          "machine": "ckbench-svb2xfdd2vvfsf3u3j4c",
+          "source": "image",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 128.272,
+          "start_ms": 4830.792,
+          "prepare_ms": 0.0,
+          "exec_ms": 1119.925,
+          "delete_ms": 46.902,
+          "create_to_result_ms": 6078.9890000000005
+        },
+        {
+          "machine": "ckbench-dgsjekizrgerewxmsljg",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 529.671,
+          "start_ms": 142.826,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.612,
+          "delete_ms": 23.124,
+          "create_to_result_ms": 688.109,
+          "restore_phases_ms": {
+            "api_restore_verify": 5,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 206,
+            "api_restore_seed": 0,
+            "api_restore_install": 315
+          }
+        },
+        {
+          "machine": "ckbench-jwmhait5huj5qfko5tnv",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 545.334,
+          "start_ms": 142.586,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.207,
+          "delete_ms": 24.571,
+          "create_to_result_ms": 704.127,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 196,
+            "api_restore_seed": 0,
+            "api_restore_install": 339
+          }
+        },
+        {
+          "machine": "ckbench-x5mn7hdhemiihsm3bmjt",
+          "source": "image",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 128.279,
+          "start_ms": 3879.592,
+          "prepare_ms": 0.0,
+          "exec_ms": 503.218,
+          "delete_ms": 63.662,
+          "create_to_result_ms": 4511.089
+        }
+      ],
+      "platform": "{:unix, :linux}",
+      "cache_mode": "disabled",
+      "limitations": "Alternating source order after one warmup each; warm host caches, local approved artifacts, no image download or checkpoint capture time. Low-level Client timings, not durable managed runtime latency. Cache mode is an operator declaration; verify actual cache use in server logs.",
+      "round": 6,
+      "report_file": "6-disabled-bare.json",
+      "worker_user": "lab",
+      "artifact_pair": "bare",
+      "worker_log_sha256": "673fcadedb46c252a9c160a3bba59d04f7bc2ae367135f116dd2339364693cef",
+      "shared_path_log_present": false
+    },
+    {
+      "runtime": "1.16.1",
+      "workload": "dataset-precomputed",
+      "samples": [
+        {
+          "machine": "ckbench-gnrfuksdmkyd6el4hejj",
+          "source": "image",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 185.168,
+          "start_ms": 4330.752,
+          "prepare_ms": 818.266,
+          "exec_ms": 16.639,
+          "delete_ms": 44.648,
+          "create_to_result_ms": 5350.825
+        },
+        {
+          "machine": "ckbench-2uakegnwnq3f7vedqhv6",
+          "source": "checkpoint",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 559.013,
+          "start_ms": 163.004,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.454,
+          "delete_ms": 23.606,
+          "create_to_result_ms": 738.471,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 213,
+            "api_restore_seed": 0,
+            "api_restore_install": 338
+          }
+        },
+        {
+          "machine": "ckbench-ijbdsnscvqwedm4ifmds",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 617.918,
+          "start_ms": 210.555,
+          "prepare_ms": 0.0,
+          "exec_ms": 28.838,
+          "delete_ms": 34.68,
+          "create_to_result_ms": 857.3109999999999,
+          "restore_phases_ms": {
+            "api_restore_verify": 5,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 256,
+            "api_restore_seed": 0,
+            "api_restore_install": 352
+          }
+        },
+        {
+          "machine": "ckbench-maecupe2cgtragnnenmn",
+          "source": "image",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 189.604,
+          "start_ms": 3514.61,
+          "prepare_ms": 1681.765,
+          "exec_ms": 15.935,
+          "delete_ms": 45.935,
+          "create_to_result_ms": 5401.914000000001
+        },
+        {
+          "machine": "ckbench-zethfikzprijcrgoillq",
+          "source": "image",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 131.667,
+          "start_ms": 3652.003,
+          "prepare_ms": 790.343,
+          "exec_ms": 16.207,
+          "delete_ms": 47.534,
+          "create_to_result_ms": 4590.22
+        },
+        {
+          "machine": "ckbench-q6tvljcojob3ds544t7l",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 558.3,
+          "start_ms": 221.628,
+          "prepare_ms": 0.0,
+          "exec_ms": 29.506,
+          "delete_ms": 36.532,
+          "create_to_result_ms": 809.4339999999999,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 231,
+            "api_restore_seed": 0,
+            "api_restore_install": 320
+          }
+        },
+        {
+          "machine": "ckbench-zr4hdi2ybg7j3smgtthc",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 683.663,
+          "start_ms": 212.165,
+          "prepare_ms": 0.0,
+          "exec_ms": 28.772,
+          "delete_ms": 46.614,
+          "create_to_result_ms": 924.6,
+          "restore_phases_ms": {
+            "api_restore_verify": 9,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 301,
+            "api_restore_seed": 0,
+            "api_restore_install": 370
+          }
+        },
+        {
+          "machine": "ckbench-udfjqnzy4pdkblqnqaow",
+          "source": "image",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 192.674,
+          "start_ms": 5171.065,
+          "prepare_ms": 16.876,
+          "exec_ms": 25.978,
+          "delete_ms": 66.585,
+          "create_to_result_ms": 5406.593
+        },
+        {
+          "machine": "ckbench-ip5jjl7uqvh6lh2rb5u6",
+          "source": "image",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 184.144,
+          "start_ms": 3909.866,
+          "prepare_ms": 1059.008,
+          "exec_ms": 16.538,
+          "delete_ms": 45.364,
+          "create_to_result_ms": 5169.556
+        },
+        {
+          "machine": "ckbench-lpjtxwxjupkcuiidsrup",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 555.656,
+          "start_ms": 160.423,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.973,
+          "delete_ms": 35.353,
+          "create_to_result_ms": 732.0519999999999,
+          "restore_phases_ms": {
+            "api_restore_verify": 5,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 226,
+            "api_restore_seed": 0,
+            "api_restore_install": 322
+          }
+        },
+        {
+          "machine": "ckbench-ashdipeaelpumgmpy657",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 542.676,
+          "start_ms": 155.466,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.973,
+          "delete_ms": 33.464,
+          "create_to_result_ms": 715.115,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 205,
+            "api_restore_seed": 0,
+            "api_restore_install": 327
+          }
+        },
+        {
+          "machine": "ckbench-esq7fit24fah4ofevnlt",
+          "source": "image",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 124.58,
+          "start_ms": 4006.254,
+          "prepare_ms": 1115.052,
+          "exec_ms": 15.778,
+          "delete_ms": 63.107,
+          "create_to_result_ms": 5261.664
+        }
+      ],
+      "platform": "{:unix, :linux}",
+      "cache_mode": "disabled",
+      "limitations": "Alternating source order after one warmup each; warm host caches, local approved artifacts, no image download or checkpoint capture time. Low-level Client timings, not durable managed runtime latency. Cache mode is an operator declaration; verify actual cache use in server logs.",
+      "round": 6,
+      "report_file": "6-disabled-dataset-precomputed.json",
+      "worker_user": "lab",
+      "artifact_pair": "precomputed",
+      "worker_log_sha256": "673fcadedb46c252a9c160a3bba59d04f7bc2ae367135f116dd2339364693cef",
+      "shared_path_log_present": false
+    },
+    {
+      "runtime": "1.16.1",
+      "workload": "dataset",
+      "samples": [
+        {
+          "machine": "ckbench-jwci6q2jqwzf5spvxetm",
+          "source": "image",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 133.296,
+          "start_ms": 4324.152,
+          "prepare_ms": 2155.196,
+          "exec_ms": 28.389,
+          "delete_ms": 69.019,
+          "create_to_result_ms": 6641.033
+        },
+        {
+          "machine": "ckbench-q4ppw7jvcsywx5cakqu4",
+          "source": "checkpoint",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 556.168,
+          "start_ms": 161.015,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.169,
+          "delete_ms": 35.841,
+          "create_to_result_ms": 733.352,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 213,
+            "api_restore_seed": 0,
+            "api_restore_install": 334
+          }
+        },
+        {
+          "machine": "ckbench-7rsyo44mnq2dbmexdj5z",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 513.832,
+          "start_ms": 140.947,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.84,
+          "delete_ms": 24.006,
+          "create_to_result_ms": 671.619,
+          "restore_phases_ms": {
+            "api_restore_verify": 9,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 221,
+            "api_restore_seed": 0,
+            "api_restore_install": 280
+          }
+        },
+        {
+          "machine": "ckbench-u7yuavw2uucmsipn6klu",
+          "source": "image",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 124.741,
+          "start_ms": 4058.537,
+          "prepare_ms": 2500.463,
+          "exec_ms": 28.121,
+          "delete_ms": 67.64,
+          "create_to_result_ms": 6711.862
+        },
+        {
+          "machine": "ckbench-bywkqovkaozwmcc6awon",
+          "source": "image",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 183.896,
+          "start_ms": 4143.019,
+          "prepare_ms": 3464.556,
+          "exec_ms": 15.641,
+          "delete_ms": 55.404,
+          "create_to_result_ms": 7807.111999999999
+        },
+        {
+          "machine": "ckbench-44qcvr4hibsl5uplodoh",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 539.493,
+          "start_ms": 150.897,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.129,
+          "delete_ms": 34.402,
+          "create_to_result_ms": 706.5190000000001,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 204,
+            "api_restore_seed": 0,
+            "api_restore_install": 328
+          }
+        },
+        {
+          "machine": "ckbench-hzbuplb53ku62lyboda3",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 541.02,
+          "start_ms": 138.057,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.869,
+          "delete_ms": 34.04,
+          "create_to_result_ms": 694.946,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 195,
+            "api_restore_seed": 0,
+            "api_restore_install": 337
+          }
+        },
+        {
+          "machine": "ckbench-5miaevqbq4jizjeme2ye",
+          "source": "image",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 125.115,
+          "start_ms": 3397.785,
+          "prepare_ms": 2898.951,
+          "exec_ms": 28.144,
+          "delete_ms": 66.959,
+          "create_to_result_ms": 6449.995
+        },
+        {
+          "machine": "ckbench-sbeleoywtyvnhkqxdkyv",
+          "source": "image",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 137.003,
+          "start_ms": 3153.576,
+          "prepare_ms": 2884.35,
+          "exec_ms": 27.807,
+          "delete_ms": 66.927,
+          "create_to_result_ms": 6202.736
+        },
+        {
+          "machine": "ckbench-i7ujowdvyaskgbf45w2f",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 663.409,
+          "start_ms": 186.482,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.182,
+          "delete_ms": 33.875,
+          "create_to_result_ms": 866.073,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 299,
+            "api_restore_seed": 0,
+            "api_restore_install": 354
+          }
+        },
+        {
+          "machine": "ckbench-viblyk55ip255qwpd7rj",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 572.203,
+          "start_ms": 159.17,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.16,
+          "delete_ms": 37.015,
+          "create_to_result_ms": 747.5329999999999,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 215,
+            "api_restore_seed": 0,
+            "api_restore_install": 348
+          }
+        },
+        {
+          "machine": "ckbench-fdpefy5rlwhmx3k2725z",
+          "source": "image",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 150.303,
+          "start_ms": 3356.504,
+          "prepare_ms": 2471.395,
+          "exec_ms": 15.618,
+          "delete_ms": 46.389,
+          "create_to_result_ms": 5993.82
+        }
+      ],
+      "platform": "{:unix, :linux}",
+      "cache_mode": "disabled",
+      "limitations": "Alternating source order after one warmup each; warm host caches, local approved artifacts, no image download or checkpoint capture time. Low-level Client timings, not durable managed runtime latency. Cache mode is an operator declaration; verify actual cache use in server logs.",
+      "round": 6,
+      "report_file": "6-disabled-dataset.json",
+      "worker_user": "lab",
+      "artifact_pair": "precomputed",
+      "worker_log_sha256": "673fcadedb46c252a9c160a3bba59d04f7bc2ae367135f116dd2339364693cef",
+      "shared_path_log_present": false
+    },
+    {
+      "runtime": "1.16.1",
+      "workload": "bare",
+      "samples": [
+        {
+          "machine": "ckbench-3iizjz5zf2m2jxm55ko5",
+          "source": "image",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 478.872,
+          "start_ms": 3688.157,
+          "prepare_ms": 0.0,
+          "exec_ms": 1851.913,
+          "delete_ms": 34.227,
+          "create_to_result_ms": 6018.942000000001
+        },
+        {
+          "machine": "ckbench-jcokuuvf3ye63xzjvkp5",
+          "source": "checkpoint",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 607.43,
+          "start_ms": 154.272,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.965,
+          "delete_ms": 24.56,
+          "create_to_result_ms": 777.667,
+          "restore_phases_ms": {
+            "api_restore_verify": 8,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 364,
+            "api_restore_seed": 0,
+            "api_restore_install": 229
+          }
+        },
+        {
+          "machine": "ckbench-wmex5cxlr2s5motvitov",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 440.382,
+          "start_ms": 154.762,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.479,
+          "delete_ms": 34.697,
+          "create_to_result_ms": 610.623,
+          "restore_phases_ms": {
+            "api_restore_verify": 9,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 163,
+            "api_restore_seed": 0,
+            "api_restore_install": 264
+          }
+        },
+        {
+          "machine": "ckbench-psjghpn66s3tdex2nxj7",
+          "source": "image",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 167.547,
+          "start_ms": 2921.74,
+          "prepare_ms": 0.0,
+          "exec_ms": 1487.4,
+          "delete_ms": 34.05,
+          "create_to_result_ms": 4576.687
+        },
+        {
+          "machine": "ckbench-sfvamcrvtukz3t5mbhyl",
+          "source": "image",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 107.987,
+          "start_ms": 3883.786,
+          "prepare_ms": 0.0,
+          "exec_ms": 420.321,
+          "delete_ms": 34.14,
+          "create_to_result_ms": 4412.094
+        },
+        {
+          "machine": "ckbench-mcpjtqgedsi3c3piv55f",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 360.545,
+          "start_ms": 157.489,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.114,
+          "delete_ms": 34.78,
+          "create_to_result_ms": 534.148,
+          "restore_phases_ms": {
+            "api_restore_verify": 7,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 114,
+            "api_restore_seed": 0,
+            "api_restore_install": 234
+          }
+        },
+        {
+          "machine": "ckbench-j3b6t6b2wuuzudq6pavv",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 448.914,
+          "start_ms": 155.926,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.854,
+          "delete_ms": 22.498,
+          "create_to_result_ms": 621.694,
+          "restore_phases_ms": {
+            "api_restore_verify": 8,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 163,
+            "api_restore_seed": 0,
+            "api_restore_install": 273
+          }
+        },
+        {
+          "machine": "ckbench-k5rexyhp74ynukh2tfpp",
+          "source": "image",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 149.025,
+          "start_ms": 3174.009,
+          "prepare_ms": 0.0,
+          "exec_ms": 1739.619,
+          "delete_ms": 24.237,
+          "create_to_result_ms": 5062.653
+        },
+        {
+          "machine": "ckbench-rvfktcrut5tipslxvqwk",
+          "source": "image",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 118.848,
+          "start_ms": 3667.439,
+          "prepare_ms": 0.0,
+          "exec_ms": 1594.518,
+          "delete_ms": 34.129,
+          "create_to_result_ms": 5380.805
+        },
+        {
+          "machine": "ckbench-xjmvnjsp7uwtj3o5ytoi",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 381.388,
+          "start_ms": 222.059,
+          "prepare_ms": 0.0,
+          "exec_ms": 30.088,
+          "delete_ms": 45.315,
+          "create_to_result_ms": 633.535,
+          "restore_phases_ms": {
+            "api_restore_verify": 7,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 123,
+            "api_restore_seed": 0,
+            "api_restore_install": 246
+          }
+        },
+        {
+          "machine": "ckbench-hqvnkqilc4rfqfjliicp",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 426.781,
+          "start_ms": 162.941,
+          "prepare_ms": 0.0,
+          "exec_ms": 28.211,
+          "delete_ms": 24.778,
+          "create_to_result_ms": 617.933,
+          "restore_phases_ms": {
+            "api_restore_verify": 9,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 170,
+            "api_restore_seed": 0,
+            "api_restore_install": 243
+          }
+        },
+        {
+          "machine": "ckbench-l44dz36lk4mzmc7okflj",
+          "source": "image",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 169.109,
+          "start_ms": 3626.098,
+          "prepare_ms": 0.0,
+          "exec_ms": 1268.927,
+          "delete_ms": 34.21,
+          "create_to_result_ms": 5064.134
+        }
+      ],
+      "platform": "{:unix, :linux}",
+      "cache_mode": "enabled",
+      "limitations": "Alternating source order after one warmup each; warm host caches, local approved artifacts, no image download or checkpoint capture time. Low-level Client timings, not durable managed runtime latency. Cache mode is an operator declaration; verify actual cache use in server logs.",
+      "round": 7,
+      "report_file": "7-enabled-bare.json",
+      "worker_user": "lab",
+      "artifact_pair": "bare",
+      "worker_log_sha256": "1ae43dcf4515b8bd856ea9cec15064666ab3fb066c36ec2e1f1ba7c4cc957a0d",
+      "shared_path_log_present": true
+    },
+    {
+      "runtime": "1.16.1",
+      "workload": "dataset-precomputed",
+      "samples": [
+        {
+          "machine": "ckbench-cqeyh3lezpdz6uxalfat",
+          "source": "image",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 145.147,
+          "start_ms": 4336.041,
+          "prepare_ms": 1235.324,
+          "exec_ms": 27.999,
+          "delete_ms": 34.299,
+          "create_to_result_ms": 5744.511
+        },
+        {
+          "machine": "ckbench-dxzjyv3odfatlj7bda7s",
+          "source": "checkpoint",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 396.835,
+          "start_ms": 218.516,
+          "prepare_ms": 0.0,
+          "exec_ms": 28.586,
+          "delete_ms": 34.703,
+          "create_to_result_ms": 643.937,
+          "restore_phases_ms": {
+            "api_restore_verify": 9,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 127,
+            "api_restore_seed": 0,
+            "api_restore_install": 255
+          }
+        },
+        {
+          "machine": "ckbench-cewyosixvzma45fuqkpn",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 466.64,
+          "start_ms": 175.0,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.696,
+          "delete_ms": 36.043,
+          "create_to_result_ms": 658.336,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 163,
+            "api_restore_seed": 0,
+            "api_restore_install": 293
+          }
+        },
+        {
+          "machine": "ckbench-gepmvvz6lsvz7rdafmkj",
+          "source": "image",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 154.855,
+          "start_ms": 3984.822,
+          "prepare_ms": 1020.982,
+          "exec_ms": 28.445,
+          "delete_ms": 34.187,
+          "create_to_result_ms": 5189.103999999999
+        },
+        {
+          "machine": "ckbench-datr4f46775bwxpmuugm",
+          "source": "image",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 113.144,
+          "start_ms": 4090.326,
+          "prepare_ms": 1185.51,
+          "exec_ms": 28.101,
+          "delete_ms": 44.402,
+          "create_to_result_ms": 5417.081
+        },
+        {
+          "machine": "ckbench-3rebcekbyxtcqzj4ecum",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 400.214,
+          "start_ms": 217.797,
+          "prepare_ms": 0.0,
+          "exec_ms": 28.986,
+          "delete_ms": 35.789,
+          "create_to_result_ms": 646.997,
+          "restore_phases_ms": {
+            "api_restore_verify": 9,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 123,
+            "api_restore_seed": 0,
+            "api_restore_install": 263
+          }
+        },
+        {
+          "machine": "ckbench-xet7qv7cwvzofeqb7wt7",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 479.75,
+          "start_ms": 171.791,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.002,
+          "delete_ms": 23.164,
+          "create_to_result_ms": 667.5429999999999,
+          "restore_phases_ms": {
+            "api_restore_verify": 8,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 168,
+            "api_restore_seed": 0,
+            "api_restore_install": 298
+          }
+        },
+        {
+          "machine": "ckbench-nidcm4atr36pq7yqnfxf",
+          "source": "image",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 153.432,
+          "start_ms": 3702.627,
+          "prepare_ms": 720.483,
+          "exec_ms": 28.556,
+          "delete_ms": 34.138,
+          "create_to_result_ms": 4605.097999999999
+        },
+        {
+          "machine": "ckbench-bpo4ckqemxrnbmdpodxu",
+          "source": "image",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 114.459,
+          "start_ms": 5005.605,
+          "prepare_ms": 777.939,
+          "exec_ms": 16.2,
+          "delete_ms": 34.341,
+          "create_to_result_ms": 5914.2029999999995
+        },
+        {
+          "machine": "ckbench-htitrqftlxznvgh7spi5",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 394.329,
+          "start_ms": 171.81,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.104,
+          "delete_ms": 23.564,
+          "create_to_result_ms": 582.243,
+          "restore_phases_ms": {
+            "api_restore_verify": 8,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 123,
+            "api_restore_seed": 0,
+            "api_restore_install": 259
+          }
+        },
+        {
+          "machine": "ckbench-saqm3ugv5c37ghh75gnr",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 443.485,
+          "start_ms": 152.05,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.662,
+          "delete_ms": 23.154,
+          "create_to_result_ms": 611.1970000000001,
+          "restore_phases_ms": {
+            "api_restore_verify": 5,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 153,
+            "api_restore_seed": 0,
+            "api_restore_install": 281
+          }
+        },
+        {
+          "machine": "ckbench-z7lz646joio2vvsman3q",
+          "source": "image",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 142.684,
+          "start_ms": 3424.116,
+          "prepare_ms": 2042.239,
+          "exec_ms": 29.434,
+          "delete_ms": 34.557,
+          "create_to_result_ms": 5638.473000000001
+        }
+      ],
+      "platform": "{:unix, :linux}",
+      "cache_mode": "enabled",
+      "limitations": "Alternating source order after one warmup each; warm host caches, local approved artifacts, no image download or checkpoint capture time. Low-level Client timings, not durable managed runtime latency. Cache mode is an operator declaration; verify actual cache use in server logs.",
+      "round": 7,
+      "report_file": "7-enabled-dataset-precomputed.json",
+      "worker_user": "lab",
+      "artifact_pair": "precomputed",
+      "worker_log_sha256": "1ae43dcf4515b8bd856ea9cec15064666ab3fb066c36ec2e1f1ba7c4cc957a0d",
+      "shared_path_log_present": true
+    },
+    {
+      "runtime": "1.16.1",
+      "workload": "dataset",
+      "samples": [
+        {
+          "machine": "ckbench-yt74im2rd2ulols2rbiq",
+          "source": "image",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 394.888,
+          "start_ms": 3161.778,
+          "prepare_ms": 3061.952,
+          "exec_ms": 27.937,
+          "delete_ms": 34.343,
+          "create_to_result_ms": 6646.555
+        },
+        {
+          "machine": "ckbench-kiorlthjrsggulry7l6b",
+          "source": "checkpoint",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 719.171,
+          "start_ms": 172.577,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.348,
+          "delete_ms": 24.713,
+          "create_to_result_ms": 908.096,
+          "restore_phases_ms": {
+            "api_restore_verify": 9,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 458,
+            "api_restore_seed": 0,
+            "api_restore_install": 246
+          }
+        },
+        {
+          "machine": "ckbench-4xz6xhd5vmrnkl2qchui",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 429.676,
+          "start_ms": 149.959,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.692,
+          "delete_ms": 24.475,
+          "create_to_result_ms": 595.327,
+          "restore_phases_ms": {
+            "api_restore_verify": 7,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 154,
+            "api_restore_seed": 0,
+            "api_restore_install": 264
+          }
+        },
+        {
+          "machine": "ckbench-74z5cs7ss5yqoh3x4jzk",
+          "source": "image",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 151.171,
+          "start_ms": 4571.418,
+          "prepare_ms": 1949.633,
+          "exec_ms": 28.208,
+          "delete_ms": 44.509,
+          "create_to_result_ms": 6700.429999999999
+        },
+        {
+          "machine": "ckbench-liotwpbks32cnmtzponr",
+          "source": "image",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 119.952,
+          "start_ms": 3938.195,
+          "prepare_ms": 3351.071,
+          "exec_ms": 15.697,
+          "delete_ms": 23.049,
+          "create_to_result_ms": 7424.915
+        },
+        {
+          "machine": "ckbench-4iysn5kbvzkudrmnzr64",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 352.607,
+          "start_ms": 142.664,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.703,
+          "delete_ms": 22.739,
+          "create_to_result_ms": 510.974,
+          "restore_phases_ms": {
+            "api_restore_verify": 7,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 110,
+            "api_restore_seed": 0,
+            "api_restore_install": 232
+          }
+        },
+        {
+          "machine": "ckbench-2knb5cvtxy2563u6z5gq",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 440.567,
+          "start_ms": 154.706,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.044,
+          "delete_ms": 32.973,
+          "create_to_result_ms": 611.317,
+          "restore_phases_ms": {
+            "api_restore_verify": 5,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 152,
+            "api_restore_seed": 0,
+            "api_restore_install": 280
+          }
+        },
+        {
+          "machine": "ckbench-r2zs2q4zmumbtm4qlx7a",
+          "source": "image",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 142.14,
+          "start_ms": 3020.895,
+          "prepare_ms": 2766.096,
+          "exec_ms": 15.584,
+          "delete_ms": 34.375,
+          "create_to_result_ms": 5944.714999999999
+        },
+        {
+          "machine": "ckbench-74iktl2tmgyumiekyyhq",
+          "source": "image",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 115.209,
+          "start_ms": 3705.481,
+          "prepare_ms": 2740.457,
+          "exec_ms": 16.01,
+          "delete_ms": 23.302,
+          "create_to_result_ms": 6577.157
+        },
+        {
+          "machine": "ckbench-77slafc7cm7tntb4eapy",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 361.944,
+          "start_ms": 169.235,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.15,
+          "delete_ms": 23.962,
+          "create_to_result_ms": 547.3290000000001,
+          "restore_phases_ms": {
+            "api_restore_verify": 8,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 120,
+            "api_restore_seed": 0,
+            "api_restore_install": 230
+          }
+        },
+        {
+          "machine": "ckbench-vof62nkhb2yub4mfu374",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 442.194,
+          "start_ms": 153.015,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.543,
+          "delete_ms": 22.851,
+          "create_to_result_ms": 610.7520000000001,
+          "restore_phases_ms": {
+            "api_restore_verify": 7,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 150,
+            "api_restore_seed": 0,
+            "api_restore_install": 281
+          }
+        },
+        {
+          "machine": "ckbench-phy3ag3fwzza27pms27n",
+          "source": "image",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 143.246,
+          "start_ms": 3046.199,
+          "prepare_ms": 2976.941,
+          "exec_ms": 16.04,
+          "delete_ms": 33.975,
+          "create_to_result_ms": 6182.426
+        }
+      ],
+      "platform": "{:unix, :linux}",
+      "cache_mode": "enabled",
+      "limitations": "Alternating source order after one warmup each; warm host caches, local approved artifacts, no image download or checkpoint capture time. Low-level Client timings, not durable managed runtime latency. Cache mode is an operator declaration; verify actual cache use in server logs.",
+      "round": 7,
+      "report_file": "7-enabled-dataset.json",
+      "worker_user": "lab",
+      "artifact_pair": "precomputed",
+      "worker_log_sha256": "1ae43dcf4515b8bd856ea9cec15064666ab3fb066c36ec2e1f1ba7c4cc957a0d",
+      "shared_path_log_present": true
+    },
+    {
+      "runtime": "1.16.1",
+      "workload": "bare",
+      "samples": [
+        {
+          "machine": "ckbench-6qahlb7km7oew4gwmen4",
+          "source": "image",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 108.415,
+          "start_ms": 4405.286,
+          "prepare_ms": 0.0,
+          "exec_ms": 701.072,
+          "delete_ms": 32.613,
+          "create_to_result_ms": 5214.773
+        },
+        {
+          "machine": "ckbench-27b3cmudmot2utuq7dpu",
+          "source": "checkpoint",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 387.911,
+          "start_ms": 156.657,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.786,
+          "delete_ms": 34.909,
+          "create_to_result_ms": 561.354,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 136,
+            "api_restore_seed": 0,
+            "api_restore_install": 243
+          }
+        },
+        {
+          "machine": "ckbench-ldij6yrg5vp3dgyxfoxl",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 431.664,
+          "start_ms": 155.685,
+          "prepare_ms": 0.0,
+          "exec_ms": 17.344,
+          "delete_ms": 33.797,
+          "create_to_result_ms": 604.693,
+          "restore_phases_ms": {
+            "api_restore_verify": 8,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 160,
+            "api_restore_seed": 0,
+            "api_restore_install": 259
+          }
+        },
+        {
+          "machine": "ckbench-4fyvjhbdnep4tphtbsz5",
+          "source": "image",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 151.534,
+          "start_ms": 4975.973,
+          "prepare_ms": 0.0,
+          "exec_ms": 384.149,
+          "delete_ms": 34.531,
+          "create_to_result_ms": 5511.656
+        },
+        {
+          "machine": "ckbench-jktjetxmve4hr5bfw5fj",
+          "source": "image",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 105.028,
+          "start_ms": 3081.414,
+          "prepare_ms": 0.0,
+          "exec_ms": 1267.197,
+          "delete_ms": 34.246,
+          "create_to_result_ms": 4453.639
+        },
+        {
+          "machine": "ckbench-rgzysqvi6tcb2w5ah26s",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 387.745,
+          "start_ms": 221.447,
+          "prepare_ms": 0.0,
+          "exec_ms": 29.364,
+          "delete_ms": 34.461,
+          "create_to_result_ms": 638.556,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 133,
+            "api_restore_seed": 0,
+            "api_restore_install": 243
+          }
+        },
+        {
+          "machine": "ckbench-2nkwec23sevzdzerxdyf",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 465.155,
+          "start_ms": 223.186,
+          "prepare_ms": 0.0,
+          "exec_ms": 29.265,
+          "delete_ms": 35.424,
+          "create_to_result_ms": 717.606,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 170,
+            "api_restore_seed": 0,
+            "api_restore_install": 284
+          }
+        },
+        {
+          "machine": "ckbench-bwampgkv3nxmwtzmcfvq",
+          "source": "image",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 161.462,
+          "start_ms": 4485.375,
+          "prepare_ms": 0.0,
+          "exec_ms": 418.377,
+          "delete_ms": 22.86,
+          "create_to_result_ms": 5065.214
+        },
+        {
+          "machine": "ckbench-4a5xz5jdqv4zgk5z57pa",
+          "source": "image",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 110.881,
+          "start_ms": 5288.508,
+          "prepare_ms": 0.0,
+          "exec_ms": 116.884,
+          "delete_ms": 32.44,
+          "create_to_result_ms": 5516.273
+        },
+        {
+          "machine": "ckbench-4z5byu3aw5qqqnfusqcp",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 307.138,
+          "start_ms": 165.919,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.774,
+          "delete_ms": 34.902,
+          "create_to_result_ms": 489.831,
+          "restore_phases_ms": {
+            "api_restore_verify": 5,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 101,
+            "api_restore_seed": 0,
+            "api_restore_install": 198
+          }
+        },
+        {
+          "machine": "ckbench-enasxa2ovm4uflb3oleq",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 430.389,
+          "start_ms": 155.612,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.127,
+          "delete_ms": 23.055,
+          "create_to_result_ms": 602.1279999999999,
+          "restore_phases_ms": {
+            "api_restore_verify": 7,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 161,
+            "api_restore_seed": 0,
+            "api_restore_install": 257
+          }
+        },
+        {
+          "machine": "ckbench-boimdm6aiodwdydy7hdy",
+          "source": "image",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 149.908,
+          "start_ms": 3252.48,
+          "prepare_ms": 0.0,
+          "exec_ms": 1501.226,
+          "delete_ms": 44.388,
+          "create_to_result_ms": 4903.614
+        }
+      ],
+      "platform": "{:unix, :linux}",
+      "cache_mode": "enabled",
+      "limitations": "Alternating source order after one warmup each; warm host caches, local approved artifacts, no image download or checkpoint capture time. Low-level Client timings, not durable managed runtime latency. Cache mode is an operator declaration; verify actual cache use in server logs.",
+      "round": 8,
+      "report_file": "8-enabled-bare.json",
+      "worker_user": "lab",
+      "artifact_pair": "bare",
+      "worker_log_sha256": "d44e1e34a0a2dd0db6d5aec00268cb65168dda84a7f5b40acfa46f015f048024",
+      "shared_path_log_present": true
+    },
+    {
+      "runtime": "1.16.1",
+      "workload": "dataset-precomputed",
+      "samples": [
+        {
+          "machine": "ckbench-swifef267mskj42sprqs",
+          "source": "image",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 138.759,
+          "start_ms": 3717.505,
+          "prepare_ms": 750.054,
+          "exec_ms": 28.498,
+          "delete_ms": 34.696,
+          "create_to_result_ms": 4634.816
+        },
+        {
+          "machine": "ckbench-euwwltophgpaqwgseqei",
+          "source": "checkpoint",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 402.094,
+          "start_ms": 227.944,
+          "prepare_ms": 0.0,
+          "exec_ms": 29.809,
+          "delete_ms": 25.549,
+          "create_to_result_ms": 659.847,
+          "restore_phases_ms": {
+            "api_restore_verify": 9,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 135,
+            "api_restore_seed": 0,
+            "api_restore_install": 254
+          }
+        },
+        {
+          "machine": "ckbench-hofybz5soyrvr6gbmkws",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 468.815,
+          "start_ms": 227.603,
+          "prepare_ms": 0.0,
+          "exec_ms": 29.406,
+          "delete_ms": 23.935,
+          "create_to_result_ms": 725.824,
+          "restore_phases_ms": {
+            "api_restore_verify": 7,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 167,
+            "api_restore_seed": 0,
+            "api_restore_install": 289
+          }
+        },
+        {
+          "machine": "ckbench-2xel2ei7hom7u3xts4ef",
+          "source": "image",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 149.572,
+          "start_ms": 4382.679,
+          "prepare_ms": 774.366,
+          "exec_ms": 31.42,
+          "delete_ms": 35.206,
+          "create_to_result_ms": 5338.037
+        },
+        {
+          "machine": "ckbench-mkqedk32sdmil3dtgifn",
+          "source": "image",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 115.146,
+          "start_ms": 4766.463,
+          "prepare_ms": 462.534,
+          "exec_ms": 15.659,
+          "delete_ms": 44.713,
+          "create_to_result_ms": 5359.801999999999
+        },
+        {
+          "machine": "ckbench-l7j4yccw7gg5yp6z54ur",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 386.757,
+          "start_ms": 145.765,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.95,
+          "delete_ms": 35.321,
+          "create_to_result_ms": 548.472,
+          "restore_phases_ms": {
+            "api_restore_verify": 7,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 117,
+            "api_restore_seed": 0,
+            "api_restore_install": 257
+          }
+        },
+        {
+          "machine": "ckbench-vdybnxi4v3ddmj4cnvue",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 435.504,
+          "start_ms": 153.397,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.608,
+          "delete_ms": 24.002,
+          "create_to_result_ms": 604.509,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 152,
+            "api_restore_seed": 0,
+            "api_restore_install": 272
+          }
+        },
+        {
+          "machine": "ckbench-t2g26yj3bvrswi3ypojk",
+          "source": "image",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 146.309,
+          "start_ms": 3111.255,
+          "prepare_ms": 1242.351,
+          "exec_ms": 29.039,
+          "delete_ms": 34.924,
+          "create_to_result_ms": 4528.954000000001
+        },
+        {
+          "machine": "ckbench-3b2glyan2cd3micgl64c",
+          "source": "image",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 117.897,
+          "start_ms": 4975.327,
+          "prepare_ms": 413.34,
+          "exec_ms": 15.437,
+          "delete_ms": 22.897,
+          "create_to_result_ms": 5522.001
+        },
+        {
+          "machine": "ckbench-hwf5ma5ehswj52e5gjt4",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 391.473,
+          "start_ms": 219.573,
+          "prepare_ms": 0.0,
+          "exec_ms": 29.619,
+          "delete_ms": 46.14,
+          "create_to_result_ms": 640.6650000000001,
+          "restore_phases_ms": {
+            "api_restore_verify": 8,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 113,
+            "api_restore_seed": 0,
+            "api_restore_install": 266
+          }
+        },
+        {
+          "machine": "ckbench-yh3ncmazukyhwzmehlx5",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 470.422,
+          "start_ms": 169.807,
+          "prepare_ms": 0.0,
+          "exec_ms": 27.57,
+          "delete_ms": 33.706,
+          "create_to_result_ms": 667.7990000000001,
+          "restore_phases_ms": {
+            "api_restore_verify": 9,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 167,
+            "api_restore_seed": 0,
+            "api_restore_install": 290
+          }
+        },
+        {
+          "machine": "ckbench-qt2nt5d3oiktuio5xc6j",
+          "source": "image",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 146.886,
+          "start_ms": 4369.166,
+          "prepare_ms": 1434.056,
+          "exec_ms": 15.637,
+          "delete_ms": 22.596,
+          "create_to_result_ms": 5965.745
+        }
+      ],
+      "platform": "{:unix, :linux}",
+      "cache_mode": "enabled",
+      "limitations": "Alternating source order after one warmup each; warm host caches, local approved artifacts, no image download or checkpoint capture time. Low-level Client timings, not durable managed runtime latency. Cache mode is an operator declaration; verify actual cache use in server logs.",
+      "round": 8,
+      "report_file": "8-enabled-dataset-precomputed.json",
+      "worker_user": "lab",
+      "artifact_pair": "precomputed",
+      "worker_log_sha256": "d44e1e34a0a2dd0db6d5aec00268cb65168dda84a7f5b40acfa46f015f048024",
+      "shared_path_log_present": true
+    },
+    {
+      "runtime": "1.16.1",
+      "workload": "dataset",
+      "samples": [
+        {
+          "machine": "ckbench-27pk5qz4r63xlg5vjnic",
+          "source": "image",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 110.934,
+          "start_ms": 3810.746,
+          "prepare_ms": 2370.693,
+          "exec_ms": 15.974,
+          "delete_ms": 23.084,
+          "create_to_result_ms": 6308.347000000001
+        },
+        {
+          "machine": "ckbench-ytboqtzl2m43hffukgpk",
+          "source": "checkpoint",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 380.422,
+          "start_ms": 175.059,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.127,
+          "delete_ms": 45.588,
+          "create_to_result_ms": 571.608,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 110,
+            "api_restore_seed": 0,
+            "api_restore_install": 260
+          }
+        },
+        {
+          "machine": "ckbench-tqdru5eivdbzt3xw2ncr",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 473.661,
+          "start_ms": 153.653,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.73,
+          "delete_ms": 34.352,
+          "create_to_result_ms": 643.044,
+          "restore_phases_ms": {
+            "api_restore_verify": 7,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 160,
+            "api_restore_seed": 0,
+            "api_restore_install": 301
+          }
+        },
+        {
+          "machine": "ckbench-5gudnrfm4oh3i5mpnlm6",
+          "source": "image",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 148.814,
+          "start_ms": 3301.479,
+          "prepare_ms": 3177.092,
+          "exec_ms": 28.825,
+          "delete_ms": 34.019,
+          "create_to_result_ms": 6656.21
+        },
+        {
+          "machine": "ckbench-dvqg3roygamnaxhxvpw2",
+          "source": "image",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 117.312,
+          "start_ms": 4301.169,
+          "prepare_ms": 2837.575,
+          "exec_ms": 15.71,
+          "delete_ms": 34.552,
+          "create_to_result_ms": 7271.766
+        },
+        {
+          "machine": "ckbench-nnqvpxtzhxtkncrhi26a",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 384.783,
+          "start_ms": 173.273,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.964,
+          "delete_ms": 34.351,
+          "create_to_result_ms": 574.0200000000001,
+          "restore_phases_ms": {
+            "api_restore_verify": 7,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 118,
+            "api_restore_seed": 0,
+            "api_restore_install": 254
+          }
+        },
+        {
+          "machine": "ckbench-jdfg4uagwhp6pyvxjmhr",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 429.025,
+          "start_ms": 153.496,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.039,
+          "delete_ms": 23.208,
+          "create_to_result_ms": 598.56,
+          "restore_phases_ms": {
+            "api_restore_verify": 7,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 149,
+            "api_restore_seed": 0,
+            "api_restore_install": 269
+          }
+        },
+        {
+          "machine": "ckbench-7avgo6jsozcyxqrcouza",
+          "source": "image",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 146.25,
+          "start_ms": 4877.472,
+          "prepare_ms": 2156.628,
+          "exec_ms": 30.182,
+          "delete_ms": 44.497,
+          "create_to_result_ms": 7210.532
+        },
+        {
+          "machine": "ckbench-2raatwuqc7sraohew3kd",
+          "source": "image",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 124.062,
+          "start_ms": 4813.676,
+          "prepare_ms": 2044.263,
+          "exec_ms": 16.234,
+          "delete_ms": 34.013,
+          "create_to_result_ms": 6998.235000000001
+        },
+        {
+          "machine": "ckbench-rnvkmrtq2pmer45dt47r",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 365.094,
+          "start_ms": 151.382,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.772,
+          "delete_ms": 23.046,
+          "create_to_result_ms": 532.248,
+          "restore_phases_ms": {
+            "api_restore_verify": 8,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 113,
+            "api_restore_seed": 0,
+            "api_restore_install": 239
+          }
+        },
+        {
+          "machine": "ckbench-kckf5hfzxcopmq57wvli",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 447.584,
+          "start_ms": 167.208,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.852,
+          "delete_ms": 35.257,
+          "create_to_result_ms": 631.644,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 151,
+            "api_restore_seed": 0,
+            "api_restore_install": 289
+          }
+        },
+        {
+          "machine": "ckbench-dmgimdake3yxnr6p6pk2",
+          "source": "image",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 149.503,
+          "start_ms": 2842.186,
+          "prepare_ms": 2724.514,
+          "exec_ms": 29.228,
+          "delete_ms": 34.353,
+          "create_to_result_ms": 5745.4310000000005
+        }
+      ],
+      "platform": "{:unix, :linux}",
+      "cache_mode": "enabled",
+      "limitations": "Alternating source order after one warmup each; warm host caches, local approved artifacts, no image download or checkpoint capture time. Low-level Client timings, not durable managed runtime latency. Cache mode is an operator declaration; verify actual cache use in server logs.",
+      "round": 8,
+      "report_file": "8-enabled-dataset.json",
+      "worker_user": "lab",
+      "artifact_pair": "precomputed",
+      "worker_log_sha256": "d44e1e34a0a2dd0db6d5aec00268cb65168dda84a7f5b40acfa46f015f048024",
+      "shared_path_log_present": true
+    },
+    {
+      "runtime": "1.16.1",
+      "workload": "bare",
+      "samples": [
+        {
+          "machine": "ckbench-eftga2eenlnitqw6q5q2",
+          "source": "image",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 131.166,
+          "start_ms": 3880.357,
+          "prepare_ms": 0.0,
+          "exec_ms": 186.821,
+          "delete_ms": 49.3,
+          "create_to_result_ms": 4198.344
+        },
+        {
+          "machine": "ckbench-pfyiazw3ttn6nqwyujnt",
+          "source": "checkpoint",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 627.705,
+          "start_ms": 213.403,
+          "prepare_ms": 0.0,
+          "exec_ms": 30.01,
+          "delete_ms": 45.666,
+          "create_to_result_ms": 871.118,
+          "restore_phases_ms": {
+            "api_restore_verify": 5,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 269,
+            "api_restore_seed": 0,
+            "api_restore_install": 351
+          }
+        },
+        {
+          "machine": "ckbench-wssqu6cl7tfk2d7ptlro",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 657.587,
+          "start_ms": 214.323,
+          "prepare_ms": 0.0,
+          "exec_ms": 29.843,
+          "delete_ms": 35.143,
+          "create_to_result_ms": 901.7529999999999,
+          "restore_phases_ms": {
+            "api_restore_verify": 9,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 292,
+            "api_restore_seed": 0,
+            "api_restore_install": 352
+          }
+        },
+        {
+          "machine": "ckbench-cxmujqkov7mg53kfierq",
+          "source": "image",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 181.931,
+          "start_ms": 5377.164,
+          "prepare_ms": 0.0,
+          "exec_ms": 839.215,
+          "delete_ms": 60.875,
+          "create_to_result_ms": 6398.3099999999995
+        },
+        {
+          "machine": "ckbench-x5tn3nygw6geq4redjhv",
+          "source": "image",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 128.284,
+          "start_ms": 4389.637,
+          "prepare_ms": 0.0,
+          "exec_ms": 1694.57,
+          "delete_ms": 45.705,
+          "create_to_result_ms": 6212.490999999999
+        },
+        {
+          "machine": "ckbench-xrmstcwqvz52ileq6pb2",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 553.369,
+          "start_ms": 168.217,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.882,
+          "delete_ms": 33.882,
+          "create_to_result_ms": 738.468,
+          "restore_phases_ms": {
+            "api_restore_verify": 5,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 205,
+            "api_restore_seed": 0,
+            "api_restore_install": 340
+          }
+        },
+        {
+          "machine": "ckbench-xoyve5dlaum2chkaxjmo",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 533.103,
+          "start_ms": 143.958,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.951,
+          "delete_ms": 24.669,
+          "create_to_result_ms": 693.012,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 204,
+            "api_restore_seed": 0,
+            "api_restore_install": 319
+          }
+        },
+        {
+          "machine": "ckbench-cuzzd7ihg74nfnqoq7ms",
+          "source": "image",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 131.457,
+          "start_ms": 4460.632,
+          "prepare_ms": 0.0,
+          "exec_ms": 523.925,
+          "delete_ms": 61.184,
+          "create_to_result_ms": 5116.014
+        },
+        {
+          "machine": "ckbench-bg4xrev5uclzqhym4dwu",
+          "source": "image",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 128.301,
+          "start_ms": 5520.747,
+          "prepare_ms": 0.0,
+          "exec_ms": 572.564,
+          "delete_ms": 60.895,
+          "create_to_result_ms": 6221.612000000001
+        },
+        {
+          "machine": "ckbench-ks4he7qrchoplehrbpqc",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 518.335,
+          "start_ms": 186.301,
+          "prepare_ms": 0.0,
+          "exec_ms": 29.35,
+          "delete_ms": 23.626,
+          "create_to_result_ms": 733.986,
+          "restore_phases_ms": {
+            "api_restore_verify": 5,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 207,
+            "api_restore_seed": 0,
+            "api_restore_install": 304
+          }
+        },
+        {
+          "machine": "ckbench-yx5fm7si2e6oldlkyu63",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 670.754,
+          "start_ms": 223.066,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.297,
+          "delete_ms": 23.036,
+          "create_to_result_ms": 910.1170000000001,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 286,
+            "api_restore_seed": 0,
+            "api_restore_install": 375
+          }
+        },
+        {
+          "machine": "ckbench-mkfl2juxndcskqsfn666",
+          "source": "image",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 128.371,
+          "start_ms": 4603.139,
+          "prepare_ms": 0.0,
+          "exec_ms": 1207.292,
+          "delete_ms": 60.468,
+          "create_to_result_ms": 5938.802
+        }
+      ],
+      "platform": "{:unix, :linux}",
+      "cache_mode": "disabled",
+      "limitations": "Alternating source order after one warmup each; warm host caches, local approved artifacts, no image download or checkpoint capture time. Low-level Client timings, not durable managed runtime latency. Cache mode is an operator declaration; verify actual cache use in server logs.",
+      "round": 9,
+      "report_file": "9-disabled-bare.json",
+      "worker_user": "lab",
+      "artifact_pair": "bare",
+      "worker_log_sha256": "472263f16a7baa891d96744400a7812b56b898d899b82cf39ff95b6a235c3b66",
+      "shared_path_log_present": false
+    },
+    {
+      "runtime": "1.16.1",
+      "workload": "dataset-precomputed",
+      "samples": [
+        {
+          "machine": "ckbench-qcl7mwhccgtnw2qjgkw3",
+          "source": "image",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 176.687,
+          "start_ms": 3807.086,
+          "prepare_ms": 1077.39,
+          "exec_ms": 28.309,
+          "delete_ms": 67.341,
+          "create_to_result_ms": 5089.472
+        },
+        {
+          "machine": "ckbench-77apimotjdfwuhphtgxx",
+          "source": "checkpoint",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 651.817,
+          "start_ms": 161.092,
+          "prepare_ms": 0.0,
+          "exec_ms": 27.172,
+          "delete_ms": 23.132,
+          "create_to_result_ms": 840.081,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 298,
+            "api_restore_seed": 0,
+            "api_restore_install": 344
+          }
+        },
+        {
+          "machine": "ckbench-cjjyzn4kio3dw4wtsxi2",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 546.252,
+          "start_ms": 171.043,
+          "prepare_ms": 0.0,
+          "exec_ms": 27.767,
+          "delete_ms": 25.852,
+          "create_to_result_ms": 745.062,
+          "restore_phases_ms": {
+            "api_restore_verify": 5,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 213,
+            "api_restore_seed": 0,
+            "api_restore_install": 325
+          }
+        },
+        {
+          "machine": "ckbench-vtrwk5iu2sg7u6smx3qi",
+          "source": "image",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 132.676,
+          "start_ms": 2882.004,
+          "prepare_ms": 1516.134,
+          "exec_ms": 27.965,
+          "delete_ms": 67.381,
+          "create_to_result_ms": 4558.779
+        },
+        {
+          "machine": "ckbench-wzbfty5jketjswyocy3h",
+          "source": "image",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 184.56,
+          "start_ms": 5105.73,
+          "prepare_ms": 218.537,
+          "exec_ms": 15.927,
+          "delete_ms": 57.141,
+          "create_to_result_ms": 5524.754
+        },
+        {
+          "machine": "ckbench-zbb43cvyhb66pla2cjb6",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 537.11,
+          "start_ms": 171.151,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.349,
+          "delete_ms": 23.188,
+          "create_to_result_ms": 724.61,
+          "restore_phases_ms": {
+            "api_restore_verify": 5,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 213,
+            "api_restore_seed": 0,
+            "api_restore_install": 316
+          }
+        },
+        {
+          "machine": "ckbench-ns5rwyukg7osrm6llccm",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 611.335,
+          "start_ms": 211.362,
+          "prepare_ms": 0.0,
+          "exec_ms": 29.376,
+          "delete_ms": 46.582,
+          "create_to_result_ms": 852.073,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 272,
+            "api_restore_seed": 0,
+            "api_restore_install": 331
+          }
+        },
+        {
+          "machine": "ckbench-pcb35utsczmlvgahheqn",
+          "source": "image",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 186.191,
+          "start_ms": 4000.367,
+          "prepare_ms": 1708.381,
+          "exec_ms": 28.133,
+          "delete_ms": 77.653,
+          "create_to_result_ms": 5923.072
+        },
+        {
+          "machine": "ckbench-a7bzk5x22zra25nywm5b",
+          "source": "image",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 183.334,
+          "start_ms": 3531.23,
+          "prepare_ms": 1755.324,
+          "exec_ms": 27.913,
+          "delete_ms": 66.367,
+          "create_to_result_ms": 5497.8009999999995
+        },
+        {
+          "machine": "ckbench-s5ffobnc5wvifbyxkcuj",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 660.893,
+          "start_ms": 162.672,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.667,
+          "delete_ms": 33.242,
+          "create_to_result_ms": 840.2320000000001,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 299,
+            "api_restore_seed": 0,
+            "api_restore_install": 352
+          }
+        },
+        {
+          "machine": "ckbench-6sbnkktmzfbb36kskfrg",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 554.291,
+          "start_ms": 161.418,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.953,
+          "delete_ms": 33.961,
+          "create_to_result_ms": 732.662,
+          "restore_phases_ms": {
+            "api_restore_verify": 5,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 214,
+            "api_restore_seed": 0,
+            "api_restore_install": 333
+          }
+        },
+        {
+          "machine": "ckbench-6yubjql3g7ds5mpc2i2p",
+          "source": "image",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 134.792,
+          "start_ms": 4065.307,
+          "prepare_ms": 404.968,
+          "exec_ms": 28.002,
+          "delete_ms": 65.891,
+          "create_to_result_ms": 4633.069
+        }
+      ],
+      "platform": "{:unix, :linux}",
+      "cache_mode": "disabled",
+      "limitations": "Alternating source order after one warmup each; warm host caches, local approved artifacts, no image download or checkpoint capture time. Low-level Client timings, not durable managed runtime latency. Cache mode is an operator declaration; verify actual cache use in server logs.",
+      "round": 9,
+      "report_file": "9-disabled-dataset-precomputed.json",
+      "worker_user": "lab",
+      "artifact_pair": "precomputed",
+      "worker_log_sha256": "472263f16a7baa891d96744400a7812b56b898d899b82cf39ff95b6a235c3b66",
+      "shared_path_log_present": false
+    },
+    {
+      "runtime": "1.16.1",
+      "workload": "dataset",
+      "samples": [
+        {
+          "machine": "ckbench-tae2vwslqdrxdy6djrzn",
+          "source": "image",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 184.864,
+          "start_ms": 4108.927,
+          "prepare_ms": 2841.947,
+          "exec_ms": 16.244,
+          "delete_ms": 55.761,
+          "create_to_result_ms": 7151.981999999999
+        },
+        {
+          "machine": "ckbench-kl25jimaz62qgeqfgqh5",
+          "source": "checkpoint",
+          "warmup": true,
+          "iteration": 0,
+          "create_ms": 565.404,
+          "start_ms": 162.521,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.765,
+          "delete_ms": 22.779,
+          "create_to_result_ms": 744.6899999999999,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 212,
+            "api_restore_seed": 0,
+            "api_restore_install": 346
+          }
+        },
+        {
+          "machine": "ckbench-vqqzmwsmrc4ourswjgix",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 559.897,
+          "start_ms": 137.519,
+          "prepare_ms": 0.0,
+          "exec_ms": 15.939,
+          "delete_ms": 23.285,
+          "create_to_result_ms": 713.355,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 215,
+            "api_restore_seed": 0,
+            "api_restore_install": 338
+          }
+        },
+        {
+          "machine": "ckbench-xva6konhbd7lirvqhzum",
+          "source": "image",
+          "warmup": false,
+          "iteration": 1,
+          "create_ms": 126.107,
+          "start_ms": 3687.215,
+          "prepare_ms": 2386.831,
+          "exec_ms": 28.269,
+          "delete_ms": 65.765,
+          "create_to_result_ms": 6228.4220000000005
+        },
+        {
+          "machine": "ckbench-rxm5hbrz6sg3qwoglrri",
+          "source": "image",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 183.58,
+          "start_ms": 3709.945,
+          "prepare_ms": 3253.392,
+          "exec_ms": 15.779,
+          "delete_ms": 59.174,
+          "create_to_result_ms": 7162.696
+        },
+        {
+          "machine": "ckbench-iq6ic4fvfyebld5nsm2u",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 2,
+          "create_ms": 565.32,
+          "start_ms": 145.252,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.084,
+          "delete_ms": 23.033,
+          "create_to_result_ms": 726.6560000000001,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 212,
+            "api_restore_seed": 0,
+            "api_restore_install": 345
+          }
+        },
+        {
+          "machine": "ckbench-dzak7xp75gnvilozqpv2",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 529.348,
+          "start_ms": 151.745,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.828,
+          "delete_ms": 23.872,
+          "create_to_result_ms": 697.9209999999999,
+          "restore_phases_ms": {
+            "api_restore_verify": 5,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 206,
+            "api_restore_seed": 0,
+            "api_restore_install": 315
+          }
+        },
+        {
+          "machine": "ckbench-5t6oktskxo6dz5ro4tob",
+          "source": "image",
+          "warmup": false,
+          "iteration": 3,
+          "create_ms": 132.466,
+          "start_ms": 4746.271,
+          "prepare_ms": 1751.166,
+          "exec_ms": 27.918,
+          "delete_ms": 65.823,
+          "create_to_result_ms": 6657.821
+        },
+        {
+          "machine": "ckbench-5x5bq2csfa76da64msbq",
+          "source": "image",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 181.678,
+          "start_ms": 5482.197,
+          "prepare_ms": 1838.026,
+          "exec_ms": 27.778,
+          "delete_ms": 64.914,
+          "create_to_result_ms": 7529.679
+        },
+        {
+          "machine": "ckbench-p7x5yo6qoaa7zikwvizl",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 4,
+          "create_ms": 654.018,
+          "start_ms": 160.807,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.126,
+          "delete_ms": 34.555,
+          "create_to_result_ms": 830.951,
+          "restore_phases_ms": {
+            "api_restore_verify": 6,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 297,
+            "api_restore_seed": 0,
+            "api_restore_install": 347
+          }
+        },
+        {
+          "machine": "ckbench-m5w776jxxsi7tbr2qx64",
+          "source": "checkpoint",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 541.19,
+          "start_ms": 161.148,
+          "prepare_ms": 0.0,
+          "exec_ms": 16.66,
+          "delete_ms": 22.968,
+          "create_to_result_ms": 718.998,
+          "restore_phases_ms": {
+            "api_restore_verify": 4,
+            "api_restore_prepare": 0,
+            "api_restore_extract": 211,
+            "api_restore_seed": 0,
+            "api_restore_install": 322
+          }
+        },
+        {
+          "machine": "ckbench-r5eunbrbwa7pugsalr5h",
+          "source": "image",
+          "warmup": false,
+          "iteration": 5,
+          "create_ms": 179.716,
+          "start_ms": 3533.777,
+          "prepare_ms": 3388.048,
+          "exec_ms": 15.627,
+          "delete_ms": 45.191,
+          "create_to_result_ms": 7117.168
+        }
+      ],
+      "platform": "{:unix, :linux}",
+      "cache_mode": "disabled",
+      "limitations": "Alternating source order after one warmup each; warm host caches, local approved artifacts, no image download or checkpoint capture time. Low-level Client timings, not durable managed runtime latency. Cache mode is an operator declaration; verify actual cache use in server logs.",
+      "round": 9,
+      "report_file": "9-disabled-dataset.json",
+      "worker_user": "lab",
+      "artifact_pair": "precomputed",
+      "worker_log_sha256": "472263f16a7baa891d96744400a7812b56b898d899b82cf39ff95b6a235c3b66",
+      "shared_path_log_present": false
+    }
+  ],
+  "private_evidence_hashes": {
+    "perf-results.tar": "af48abde46fbcc10e8b60f7b215078cc942d0ffc484782b5510f995b7445afa0",
+    "perf-fixtures-evidence.tar": "787782bad4860497488e5ed9f819d36921c13fc0c09393eb3c0f18cc38ffffc6",
+    "guest-metadata.txt": "819a4910cddf3bf5a34b521c5d67678710beefdd1e7025a0b643cca50eb042d4",
+    "host-metadata.txt": "27731295b38546b41d6c708f577216ed29aa0eed0c33c611e093b36f51dd3a64",
+    "final-cleanup.txt": "6da5e669fec338f0723335dbef0b9cd80fba6afec931e0a7b122f28dfd1239da",
+    "lab-stopped.txt": "08e01db9ab10ca97c3d74e683b7cd1c6a75c31140d82bf133dcbce5dbe2e3481"
+  }
+}

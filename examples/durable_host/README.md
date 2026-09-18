@@ -2,7 +2,8 @@
 
 This standalone host owns an Ecto Repo and a PostgreSQL implementation of
 `SmolBox.Store`. It includes a managed Python execution demonstration and a
-real-worker process-kill recovery suite.
+real-worker process-kill recovery suite. A separate checkpoint demo restores
+approved idle guest state while using the same PostgreSQL adapter and lifecycle.
 Shared example setup lives in `../support/lib`; fault-test helpers are compiled
 only in the test environment from the repository's `test/support/fault` directory.
 
@@ -145,6 +146,76 @@ timestamp and observed exit to survive. These three tests use a real worker and
 PostgreSQL alongside 20 fresh-BEAM interruption cases and two dispatcher-failure
 cases that preserve execution progress before/after SQL result persistence.
 
+## Checkpoint execution and recovery
+
+This **unreleased** example requires the current checkout. Hex 0.1.4 does not
+include checkpoint execution. This demo uses only the guest shell and the fixture in
+[`scripts/checkpoints/prepare-fixture.sh`](../../scripts/checkpoints/prepare-fixture.sh).
+It requires smolvm **1.16.1**, an approved idle offline checkpoint captured on the
+same platform and compatible CPU, and the database configuration and migrations
+described above. Read [checkpoint approval and upgrades](../../docs/checkpoints.md)
+before registering the source. A digest verifies bytes, not whether captured
+processes are safe to resume.
+
+Run this example on the worker host. Prepare the fixture on a dedicated worker,
+inspect its saved creation/start/exec replies, and remove the source VM only after
+checking its creation identity. Preserve the checkpoint at an immutable approved
+path. It contains `warm` in `/dev/shm/smolbox-marker`, `baseline` in
+`/workspace/baseline`, and no pending user workload. The expected allocations are
+1 vCPU, 256 MiB guest RAM, 1 GiB storage and 1 GiB overlay. The example reserves
+another 256 MiB for host overhead; these are accounting values, not hard quotas.
+
+Configure a new private object directory, distinct private 32-byte fingerprint
+and encryption key files, and a dedicated store partition. Supply the digest
+you verified during approval; the demo checks the local file against it:
+
+```sh
+export SMOLBOX_CHECKPOINT_SOCKET=/private/worker/api.sock
+export SMOLBOX_CHECKPOINT_PATH=/approved/idle.smolcheckpoint
+export SMOLBOX_CHECKPOINT_SHA256=replace_with_verified_sha256
+export SMOLBOX_ARTIFACT_ROOT=/private/checkpoint-demo/objects
+export SMOLBOX_FINGERPRINT_KEY_FILE=/private/checkpoint-demo/fingerprint.key
+export SMOLBOX_ENCRYPTION_KEY_FILE=/private/checkpoint-demo/encryption.key
+export SMOLBOX_STORE_PARTITION=checkpoint-demo
+export SMOLBOX_EXECUTION_ID=restore-001
+MIX_ENV=test mix run scripts/checkpoint_demo.exs
+```
+
+This submits `restore-001-first` and `restore-001-second`. Each restores the RAM
+and disk markers, stages an input, writes a report of the original values, and
+mutates its own copies of the markers. SmolBox then collects the outputs. Both
+reports must still contain `warm`, `baseline` and `staged`.
+Each collected counter must contain exactly one `x`, and cleanup must complete
+before the demo finishes. The two records must have different machine names.
+
+Run the **same command again in a new process**, retaining the partition, keys,
+source approval and object directory. It retrieves the same execution records
+and outputs; it does not submit new work under new identities. Use a new
+`SMOLBOX_EXECUTION_ID` when you intentionally want another pair of executions.
+Keep the directory and keys if an operation fails so you can inspect or recover
+the records. Do not delete a partition to retry uncertain work.
+
+The separate real recovery suite uses disposable PostgreSQL partitions and a
+dedicated, otherwise idle worker. It needs only the three checkpoint environment
+variables above plus the database settings; it creates its own object directories
+and keys. Run fault testing in the disposable Linux lab:
+
+```sh
+MIX_ENV=test mix test test/checkpoint_recovery_runtime_test.exs \
+  --include runtime --trace --warnings-as-errors
+```
+
+It launches fresh BEAM processes for completed-record recovery and independent
+restores, then kills an owned controller immediately before or after the durable
+result write. Before the write, recovery must preserve an unknown outcome without
+replaying the command. After the write, it must recover the known result and
+collect outputs. Both cases preserve source and machine identity, wait through
+any real retention interval, verify VM absence and release capacity. The dispatch
+ledger counts client attempts, not upstream acceptance receipts. This is a focused
+checkpoint recovery check, not every failure boundary in the image suite above.
+Unfinished cases retain private evidence for operator inspection; the test never
+forces deletion after an uncertain stop.
+
 ## Opt-in durable benchmark
 
 The benchmark uses this host's real PostgreSQL store, directory adapter and a
@@ -244,6 +315,16 @@ legacy v1 records as offline. All controllers sharing this database must upgrade
 together; old readers cannot read v2, and there is no built-in downgrade after
 v2 writes. Follow [Upgrading to 0.1.3](../../docs/recovery.md#upgrading-to-0-1-3).
 This payload change does not add a SQL migration or change the encryption envelope.
+
+The unreleased checkpoint feature additionally writes **record schema v3 for
+checkpoint executions only**. Image executions retain v2 and existing image
+fingerprints; v1/v2 reads remain supported. Upgrade **every controller sharing
+the store before submitting checkpoint work**. An older controller cannot read
+v3 and must not treat an unreadable record as absent. Downgrading once v3 records
+exist requires an explicit separation or migration plan. See
+[checkpoint persistence and upgrades](../../docs/checkpoints.md#persistence-and-upgrades).
+This is another payload version, not a SQL table migration or a change to
+`Store.capabilities/1`'s adapter contract schema.
 
 The existing second SQL migration adds
 `smolbox_machine_identities` for bounded worker/name lookup, with a unique

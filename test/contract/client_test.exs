@@ -91,6 +91,36 @@ defmodule SmolBox.ClientTest do
     assert_receive {:request, "DELETE", "/api/v1/machines/fixture", ""}
   end
 
+  test "checkpoint creation requires its qualified runtime before dispatch" do
+    {:ok, spec} = MachineSpec.new("fixture", "/approved/idle.smolcheckpoint", source: :checkpoint)
+    parent = self()
+
+    for version <- ["1.14.1", "1.14.6", "1.16.0", "1.16.1", "1.16.2"] do
+      peer =
+        client(fn conn ->
+          if conn.request_path == "/health" do
+            TestPeer.json(conn, Map.put(fixture("health"), "version", version))
+          else
+            {:ok, body, conn} = TestPeer.body(conn)
+            send(parent, {:checkpoint_request, Jason.decode!(body)})
+            TestPeer.json(conn, Map.put(fixture("created"), "branchable", true))
+          end
+        end)
+
+      if version == "1.16.1" do
+        assert {:ok, %{state: :created}} = Client.create(peer, spec)
+        assert_receive {:checkpoint_request, wire}
+        refute Map.has_key?(wire, "storageGb")
+        refute Map.has_key?(wire, "entrypoint")
+      else
+        assert {:error, %Error{category: :unsupported_capability, evidence: :not_dispatched}} =
+                 Client.create(peer, spec)
+
+        refute_receive {:checkpoint_request, _}
+      end
+    end
+  end
+
   test "network creation verifies runtime and exact returned policy without retry" do
     {:ok, policy} = SmolBox.NetworkPolicy.new(hosts: ["api.example.com"])
     {:ok, spec} = MachineSpec.new("fixture", "/approved/python.smolmachine", network: policy)

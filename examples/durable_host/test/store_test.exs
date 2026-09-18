@@ -33,6 +33,22 @@ defmodule SmolBox.DurableHost.StoreTest do
     assert {:ok, ^cancelled} = Store.fetch(store, {"contract", "one"})
   end
 
+  test "checkpoint schema survives encrypted storage without aliasing image identity", %{
+    store: store
+  } do
+    image = Contract.record()
+    spec = %{image.spec | artifact: Map.put(image.spec.artifact, "kind", "checkpoint")}
+    {:ok, fingerprint} = SmolBox.ExecutionSpec.fingerprint(spec, :binary.copy(<<1>>, 32))
+    checkpoint = %{image | spec: spec, fingerprint: fingerprint}
+    assert {:ok, ^checkpoint, :inserted} = Store.accept(store, checkpoint, 10)
+    assert {:ok, ^checkpoint} = Store.fetch(store, {"contract", "one"})
+    assert {:ok, ^checkpoint, :existing} = Store.accept(store, checkpoint, 10)
+    assert {:error, _} = Store.accept(store, image, 10)
+    assert {:ok, cancelled} = Store.cancel(store, {"contract", "one"}, 1100)
+    assert cancelled.spec.artifact["kind"] == "checkpoint"
+    assert {:ok, ^cancelled} = Store.fetch(store, {"contract", "one"})
+  end
+
   test "records are authenticated and encrypted and cannot move across identities", %{
     store: store
   } do

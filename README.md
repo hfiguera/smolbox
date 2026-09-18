@@ -118,6 +118,13 @@ restart recovery must provide a durable `SmolBox.Store` adapter; a complete
 [PostgreSQL host example](https://github.com/hfiguera/smolbox/tree/v0.1.4/examples/durable_host)
 is included in the repository.
 
+## Unreleased: checkpoint execution
+
+The development branch can restore an operator-approved idle, offline checkpoint
+into a separate disposable machine for each execution. See
+[Executing from a checkpoint](docs/checkpoints.md) for approval, examples and
+record schema v3 upgrade requirements. This is not available in Hex 0.1.4.
+
 ## Current scope
 
 SmolBox has real execution and durable recovery tests on Linux x86_64 and macOS

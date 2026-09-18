@@ -4,6 +4,17 @@ Version: `0.1.4`. The library's supported qualification is
 `:development`; requested hard-control options remain unsupported. The original
 release evidence below records the client/controller contract on Linux and macOS.
 
+## Unreleased checkpoint execution
+
+Operator-approved idle, offline checkpoints have a separate contract on smolvm
+1.16.1. Three ordinary native checkpoint cases passed on Linux x86_64 and macOS
+Apple Silicon, including independent disk/RAM state, files, identity, controller
+restart and cleanup. PostgreSQL tests separately exercised encrypted v3 record
+persistence. See [the checkpoint guide](checkpoints.md) and
+[qualification evidence](evidence/checkpoint-executions.json). This does not add
+networked checkpoint, arbitrary resume or cross-platform restore support, and no
+new exhaustion or adversarial validation is claimed.
+
 ## smolvm 1.16.1 qualification
 
 **Default in SmolBox 0.1.4.** Managed execution selects 1.16.1

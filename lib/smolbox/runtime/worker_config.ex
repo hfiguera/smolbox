@@ -8,6 +8,11 @@ defmodule SmolBox.Runtime.WorkerConfig do
   before registering them. Managed admission compares the server-reported version
   and checks readiness; the worker API cannot attest artifact contents or isolation.
 
+  `checkpoints` optionally registers `SmolBox.Checkpoint` approvals. Each binds
+  an idle offline source to its exact profile, platform, architecture and 1.16.1
+  runtime. `artifacts: []` is accepted when checkpoints are configured. Approval
+  is supplied by the operator and is not remotely attested.
+
   `allocation_floor` is a required operator declaration with `storage_gb`,
   `overlay_gb`, and `host_overhead_mb`. It must cover the largest actual disk
   templates across this worker's runtime and approved artifacts, and its VMM
@@ -23,7 +28,16 @@ defmodule SmolBox.Runtime.WorkerConfig do
   hostile multi-tenant host quotas. Requested unsupported hard controls are
   rejected by `SmolBox.Profile`. Reachability alone does not qualify a worker.
   """
-  alias SmolBox.{Client, Error, ExecutionSpec, MachineSpec, Profile, Store, Validation}
+  alias SmolBox.{
+    Checkpoint,
+    Client,
+    Error,
+    ExecutionSpec,
+    MachineSpec,
+    Profile,
+    Store,
+    Validation
+  }
 
   @enforce_keys [
     :client,
@@ -36,13 +50,19 @@ defmodule SmolBox.Runtime.WorkerConfig do
   ]
   @derive {Inspect, only: [:architecture, :platform, :runtime_version, :qualification]}
   defstruct @enforce_keys ++
-              [runtime_version: "1.16.1", qualification: :development, draining: false]
+              [
+                runtime_version: "1.16.1",
+                qualification: :development,
+                draining: false,
+                checkpoints: []
+              ]
 
   @type t :: %__MODULE__{
           client: Client.t(),
           architecture: String.t(),
           platform: :linux | :macos,
           artifacts: [map()],
+          checkpoints: [Checkpoint.t()],
           profiles: [Profile.t()],
           capacity: Store.capacity(),
           allocation_floor: %{
@@ -65,12 +85,15 @@ defmodule SmolBox.Runtime.WorkerConfig do
   | `:client` | A validated `SmolBox.Client` |
   | `:platform` | `:linux` or `:macos`; initially qualified hosts are Linux x86_64 and macOS Apple Silicon |
   | `:architecture` | `"x86_64"` or `"aarch64"`; macOS requires `"aarch64"` |
-  | `:artifacts` | 1–32 maps with exactly string keys `"id"`, `"sha256"`, `"architecture"`, and absolute worker `"path"` ending in `.smolmachine` |
+  | `:artifacts` | 0–32 maps with exactly string keys `"id"`, `"sha256"`, `"architecture"`, and absolute worker `"path"` ending in `.smolmachine` |
   | `:profiles` | 1–32 valid `SmolBox.Profile` values with unique IDs |
   | `:capacity` | Atom-keyed map with `:slots`, `:cpus`, `:memory_mb`, and `:disk_gb`; each 1–1,048,576 |
   | `:allocation_floor` | Atom-keyed map with `:storage_gb` and `:overlay_gb` (1–64 each), and `:host_overhead_mb` (128–16,384) |
 
-  Optional fields are `:runtime_version` (default `"1.16.1"` for Linux x86_64 or
+  Optional `:checkpoints` defaults to `[]` and accepts up to 32 unique
+  `SmolBox.Checkpoint` approvals. At least one image or checkpoint is required.
+
+  Other optional fields are `:runtime_version` (default `"1.16.1"` for Linux x86_64 or
   macOS Apple Silicon; explicitly select `"1.16.0"`, `"1.14.1"` or `"1.14.6"`
   for another supported worker), `:qualification`
   (only `:development`), and `:draining` (default `false`). Artifact IDs must be
@@ -84,7 +107,10 @@ defmodule SmolBox.Runtime.WorkerConfig do
   """
   @spec new(keyword()) :: {:ok, t()} | {:error, Error.t()}
   def new(options) do
-    if Validation.keys?(options, @enforce_keys ++ [:runtime_version, :qualification, :draining]) and
+    if Validation.keys?(
+         options,
+         @enforce_keys ++ [:runtime_version, :qualification, :draining, :checkpoints]
+       ) and
          Enum.all?(@enforce_keys, &Keyword.has_key?(options, &1)) do
       worker = struct!(__MODULE__, options)
       with :ok <- validate(worker), do: {:ok, worker}
@@ -105,6 +131,13 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   @doc "Check exact profile/artifact approval and allocation floors; this is not a health probe."
   @spec supports?(t(), ExecutionSpec.t()) :: boolean()
+  def supports?(worker, %{artifact: %{"kind" => "checkpoint"}} = spec) do
+    spec.profile in worker.profiles and allocation_fits?(worker, spec.profile) and
+      Enum.any?(worker.checkpoints, fn checkpoint ->
+        Checkpoint.artifact(checkpoint) == spec.artifact and checkpoint.profile == spec.profile
+      end)
+  end
+
   def supports?(worker, spec) do
     (spec.profile.network == :offline or worker.runtime_version in ["1.16.0", "1.16.1"]) and
       spec.profile in worker.profiles and allocation_fits?(worker, spec.profile) and
@@ -115,13 +148,37 @@ defmodule SmolBox.Runtime.WorkerConfig do
       )
   end
 
-  @doc "Resolve the worker-local image path for a specification already accepted by `supports?/2`."
+  @doc "Resolve the worker-local artifact path for a specification already accepted by `supports?/2`."
   @spec artifact_path(t(), ExecutionSpec.t()) :: String.t()
+  def artifact_path(worker, %{artifact: %{"kind" => "checkpoint"}} = spec),
+    do: approved_checkpoint(worker, spec).path
+
   def artifact_path(worker, spec) do
     Enum.find(
       worker.artifacts,
       &(Map.take(&1, ["id", "sha256", "architecture"]) == spec.artifact)
     )["path"]
+  end
+
+  @doc false
+  def machine_spec(worker, %{artifact: %{"kind" => "checkpoint"}} = spec, name),
+    do: Checkpoint.machine(approved_checkpoint(worker, spec), name)
+
+  def machine_spec(worker, spec, name),
+    do: Profile.machine(spec.profile, name, artifact_path(worker, spec))
+
+  defp approved_checkpoint(worker, spec),
+    do: Enum.find(worker.checkpoints, &(Checkpoint.artifact(&1) == spec.artifact))
+
+  defp checkpoints?(worker) do
+    Validation.list?(worker.checkpoints, 32) and
+      Enum.all?(worker.checkpoints, fn checkpoint ->
+        Checkpoint.validate(checkpoint) == :ok and
+          checkpoint.platform == worker.platform and
+          checkpoint.architecture == worker.architecture and
+          checkpoint.runtime_version == worker.runtime_version and
+          checkpoint.profile in worker.profiles
+      end) and unique?(worker.checkpoints, & &1.id)
   end
 
   defp valid_fields?(worker) do
@@ -153,7 +210,8 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   defp catalogs?(worker) do
     profiles?(worker.profiles) and Validation.list?(worker.artifacts, 32) and
-      worker.artifacts != [] and Enum.all?(worker.artifacts, &artifact?(&1, worker.architecture)) and
+      (worker.artifacts != [] or worker.checkpoints != []) and checkpoints?(worker) and
+      Enum.all?(worker.artifacts, &artifact?(&1, worker.architecture)) and
       unique?(worker.artifacts, & &1["id"])
   end
 

@@ -103,6 +103,16 @@ dispatch returns uncertainty. **Never replay exec automatically.** Disconnecting
 the stream does not cancel the guest. Stop an owned VM separately and verify its
 state; stopping a VM does not recover an unknown command exit code.
 
+## Checkpoint sources
+
+An operator-approved idle checkpoint can be created with
+`MachineSpec.new(name, path, source: :checkpoint, ...)`. The explicit allocations
+must match the capture. This requires smolvm 1.16.1 and an offline source; creation
+must return a created branchable machine before it may be started. Captured
+processes resume on start, so a workload entrypoint override cannot neutralize
+an arbitrary checkpoint. See [Executing from a checkpoint](checkpoints.md) for
+approval, managed execution, examples and schema v3 upgrade requirements.
+
 ## Execution and transport budgets
 
 `Command.new/2` accepts a guest timeout of 1–300 seconds. A managed command must

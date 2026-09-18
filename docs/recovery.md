@@ -12,6 +12,14 @@ fencing to the upstream API or change the recovery contract below. See
 [Compatibility](compatibility.md) for recorded evidence and
 [Troubleshooting](troubleshooting.md) for common operational symptoms.
 
+## Checkpoint records (unreleased)
+
+Checkpoint executions use schema v3 while image executions retain v2. Upgrade
+all controllers sharing a store before submitting checkpoints; older readers
+must not treat unreadable records as absent. See
+[Checkpoint upgrades](checkpoints.md#persistence-and-upgrades). Retention,
+uncertain outcomes and verified disposal follow the same rules below.
+
 ## Store contract
 
 `SmolBox.Store` defines atomic acceptance, authoritative lookup, worker leases,
