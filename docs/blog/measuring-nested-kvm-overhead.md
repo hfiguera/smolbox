@@ -86,6 +86,15 @@ The CPU calculation tells a different story. Direct samples ranged from
 The slightly lower nested median is not evidence that nesting makes computation
 faster. Timings for the tiny command overlap too.
 
+<figure class="motion-figure" id="performance-motion">
+  <video class="motion-video" controls muted playsinline preload="none" width="960" height="540" poster="../../media/measuring-nested-kvm-overhead/performance-motion.png" aria-label="Startup medians were 1.43 s directly and 8.04 s nested. The CPU medians were 311 ms and 309 ms; observed ranges were 287–353 ms and 284–337 ms. Each configuration has six samples. The CPU axis is zoomed, and the ranges overlap. These configurations also differ in kernel and storage; the figures do not isolate the effect of nesting. Animation timing is illustrative; plotted values come from the recorded measurements." aria-describedby="performance-motion-caption">
+    <source src="../../media/measuring-nested-kvm-overhead/performance-motion.mp4" type="video/mp4">
+    <a href="../../media/measuring-nested-kvm-overhead/performance-motion.mp4">Watch the animation</a>.
+  </video>
+  <img class="motion-static" width="390" height="610" src="../../media/measuring-nested-kvm-overhead/performance-motion-mobile.svg" alt="Startup medians were 1.43 s directly and 8.04 s nested. The CPU medians were 311 ms and 309 ms; observed ranges were 287–353 ms and 284–337 ms. Each configuration has six samples. The CPU axis is zoomed, and the ranges overlap. These configurations also differ in kernel and storage; the figures do not isolate the effect of nesting. Animation timing is illustrative; plotted values come from the recorded measurements." loading="lazy">
+  <figcaption id="performance-motion-caption">Startup medians were 1.43 s directly and 8.04 s nested. The CPU medians were 311 ms and 309 ms; observed ranges were 287–353 ms and 284–337 ms. Each configuration has six samples. The CPU axis is zoomed, and the ranges overlap. These configurations also differ in kernel and storage; the figures do not isolate the effect of nesting. Animation timing is illustrative; plotted values come from the recorded measurements. <a class="motion-mobile-link" href="../../media/measuring-nested-kvm-overhead/performance-motion.mp4">Watch the animation</a></figcaption>
+</figure>
+
 There is another useful distinction: the CPU command's median *client round
 trip* was 479 ms directly and 568 ms nested. An application can wait longer
 even when the calculation measured inside its guest takes a similar time.

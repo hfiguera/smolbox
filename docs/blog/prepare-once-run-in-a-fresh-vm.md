@@ -107,6 +107,15 @@ not become the next job's starting state. Reusing an execution ID still means
 the same execution, not a request for another VM. A lost command response still
 does not authorize replay.
 
+<figure class="motion-figure" id="checkpoint-motion">
+  <video class="motion-video" controls muted playsinline preload="none" width="960" height="540" poster="../../media/prepare-once-run-in-a-fresh-vm/checkpoint-motion.png" aria-label="Job A edits its own restored table. The approved checkpoint and Job B keep the original. Job C restores afterward and also starts from the original table." aria-describedby="checkpoint-motion-caption">
+    <source src="../../media/prepare-once-run-in-a-fresh-vm/checkpoint-motion.mp4" type="video/mp4">
+    <a href="../../media/prepare-once-run-in-a-fresh-vm/checkpoint-motion.mp4">Watch the animation</a>.
+  </video>
+  <img class="motion-static" width="390" height="610" src="../../media/prepare-once-run-in-a-fresh-vm/checkpoint-preparation-mobile.svg" alt="Job A edits its own restored table. The approved checkpoint and Job B keep the original. Job C restores afterward and also starts from the original table." loading="lazy">
+  <figcaption id="checkpoint-motion-caption">Job A edits its own restored table. The approved checkpoint and Job B keep the original. Job C restores afterward and also starts from the original table. The nine-second sequence is illustrative, not measured timing. <a class="motion-mobile-link" href="../../media/prepare-once-run-in-a-fresh-vm/checkpoint-motion.mp4">Watch the animation</a></figcaption>
+</figure>
+
 ## What the measurements showed
 
 Before looking at the station workload in the nested lab, the

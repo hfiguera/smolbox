@@ -1,4 +1,6 @@
-output = Path.expand("_site")
+{options, [], []} = OptionParser.parse(System.argv(), strict: [output: :string, port: :integer])
+output = Path.expand(Keyword.get(options, :output, "_site"))
+port = Keyword.get(options, :port, 4173)
 true = File.regular?(Path.join(output, ".nojekyll"))
 Mix.ensure_application!(:inets)
 {:ok, _apps} = Application.ensure_all_started(:inets)
@@ -6,7 +8,7 @@ Mix.ensure_application!(:inets)
 {:ok, _server} =
   :inets.start(:httpd,
     bind_address: {127, 0, 0, 1},
-    port: 4173,
+    port: port,
     server_name: ~c"SmolBox blog preview",
     server_root: String.to_charlist(output),
     document_root: String.to_charlist(output),
@@ -19,8 +21,9 @@ Mix.ensure_application!(:inets)
       {~c"js", ~c"application/javascript"},
       {~c"svg", ~c"image/svg+xml"},
       {~c"png", ~c"image/png"},
+      {~c"mp4", ~c"video/mp4"},
       {~c"xml", ~c"application/xml"}
     ]
   )
 
-IO.puts("SmolBox blog preview: http://127.0.0.1:4173/smolbox/")
+IO.puts("SmolBox blog preview: http://127.0.0.1:#{port}/smolbox/")

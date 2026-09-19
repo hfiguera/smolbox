@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="730" viewBox="0 0 390 730" role="img" aria-labelledby="title desc">
+<title id="title">Recovery outside the frozen VM</title><desc id="desc">A host deadline terminates frozen QEMU. Host recovery verifies process and cgroup absence, verifies the baseline and rebuilds the overlay. A separate validation script boots the replacement and checks that the old marker is absent. This does not preserve execution records inside the lost VM.</desc>
+<rect width="390" height="730" fill="#edf2fa"/>
+<g font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" fill="#17304e">
+<text x="24" y="40" font-size="24" font-weight="700">Recovery outside</text><text x="24" y="70" font-size="24" font-weight="700">the frozen VM</text>
+<rect x="24" y="94" width="342" height="85" rx="6" fill="#fff0d9"/>
+<text x="42" y="126" font-size="20" fill="#86510f" font-weight="700">Outer QEMU guest: frozen</text><text x="42" y="155" font-size="16" fill="#86510f">SIGSTOP prevents guest-side progress.</text>
+<text x="24" y="220" font-size="20" font-weight="700">Physical host remains available</text>
+<path d="M34 248v212" stroke="#215bc7" stroke-width="2"/>
+<g fill="#215bc7"><circle cx="34" cy="256" r="5"/><circle cx="34" cy="332" r="5"/><circle cx="34" cy="410" r="5"/></g>
+<text x="52" y="261" font-size="19" font-weight="700">Terminate the frozen VM</text><text x="52" y="286" font-size="16">The host enforces its deadline.</text>
+<text x="52" y="337" font-size="19" font-weight="700">Verify resource removal</text><text x="52" y="362" font-size="16">Old process and cgroup are absent.</text>
+<text x="52" y="415" font-size="19" font-weight="700">Rebuild from the baseline</text><text x="52" y="440" font-size="16">Verify its digest; create a fresh overlay.</text>
+<rect x="24" y="476" width="342" height="123" rx="6" fill="#17304e"/>
+<text x="42" y="506" font-size="19" font-weight="700" fill="#fff">Separate validation step</text>
+<text x="42" y="536" font-size="16" fill="#fff">Explicitly boot the replacement.</text><text x="42" y="562" font-size="16" fill="#b9d1ff">Old marker absent; inventory empty.</text><text x="42" y="585" font-size="14" fill="#b9d1ff">The timer does not replay the test.</text>
+<text x="24" y="639" font-size="16">Lab reset does not preserve execution</text><text x="24" y="664" font-size="16">records stored inside the lost outer VM.</text>
+<text x="24" y="705" font-size="13" fill="#526478">Recorded Linux fixture · illustrative timing</text>
+</g></svg>

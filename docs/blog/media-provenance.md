@@ -1,5 +1,23 @@
 # Blog asset provenance
 
+## Article motion figures — September 19, 2026
+
+The checkpoint, lifecycle and cleanup `*-motion.mp4` videos and matching PNG
+posters are original diagrams rendered locally with Pillow
+and ffmpeg, using the blog palette and locally installed Arial / Andale Mono.
+No fonts are distributed. Each sequence is 960 × 540, 25 fps, nine seconds.
+The checkpoint sequence shows a local edit in Job A, an unchanged source and
+Job B, and a later Job C restore from the original table. The table cells are
+schematic, not a new runtime experiment.
+Timings and storage cells are illustrative, not measurements. Generation scripts
+and original GIF experiments remain in the local `motion-examples/` workspace,
+which is intentionally excluded from the repository.
+
+`checkpoint-preparation-mobile.svg` and `lifecycle-motion-mobile.svg` are original
+vertical diagrams. Cleanup reuses `deletion-order-mobile.svg` on phones.
+The article figures use manual playback, static posters, readable mobile SVGs,
+and mobile video links. No third-party artwork was added.
+
 ## Checkpoint preparation article
 
 Original SVG geometry uses the existing blog palette. One approved idle source
@@ -111,3 +129,35 @@ compositions. It is a conceptual diagram rather than a trace or security claim.
 No social screenshot, reader identity, external artwork or generated photograph
 is included. The reader's question is paraphrased from feedback supplied by the
 maintainer; the post does not attribute a name that was not provided.
+
+
+## Recovery, network controls, and performance motion figures
+
+Added `recovery-motion.mp4` / `.png`, `network-motion.mp4` / `.png`, and
+`performance-motion.mp4` / `.png` to their matching article media directories.
+All are original nine-second, 960 × 540 sequences rendered locally,
+with manual playback. The recovery and
+network figures use Pillow geometry; the performance plot uses matplotlib and
+reads the committed measurement JSON, validating summary statistics against the
+raw samples. No new runtime tests or measurements are represented.
+
+The recovery/network mobile SVGs are original vertical diagrams. The performance
+mobile SVG is exported from the same matplotlib/data source. DejaVu Sans glyph
+outlines preserve the chart typography; no font file is distributed.
+Evidence sources, relative to the repository root:
+
+- Recovery: `docs/evidence/nested-kvm-lab.json` (`checks.recovery`),
+  `scripts/lab/recovery-sweep.sh`, and `scripts/lab/verify-recovery.sh`.
+  Automatic disk rebuilding and explicit validation boot are separate steps;
+  the figure does not imply command replay or preservation of records in the lost VM.
+- Networking: `docs/network-access.md` (Validation),
+  `docs/evidence/controlled-network-access.json` (`network_observations`), and
+  `scripts/lab/network-access.sh`. A/B are schematic synthetic responder labels.
+  Moving dots are conceptual connections, not recorded packets or enforcement locations.
+- Performance: `docs/blog/media/measuring-nested-kvm-overhead/measurements.json`,
+  using `statistics.ready_ms` and `statistics.cpu_guest_ms`, checked against all
+  six raw samples per configuration. Range lines show observed min–max, not
+  confidence intervals. Overlap does not establish equivalence or a speedup;
+  the deployment comparison does not isolate nesting overhead.
+
+Existing architectural diagrams and social images are unchanged.

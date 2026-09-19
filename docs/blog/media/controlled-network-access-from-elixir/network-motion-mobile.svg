@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="650" viewBox="0 0 390 650" role="img" aria-labelledby="title desc">
+<title id="title">A failed connection needs a control</title><desc id="desc">In the Linux fixture, both synthetic TCP responders were reachable from the worker network namespace. Guest tests then observed responder A reachable and responder B denied by the configured policy. These are specific fixture observations, not a general network guarantee.</desc>
+<rect width="390" height="650" fill="#edf2fa"/>
+<g font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" fill="#17304e">
+<text x="24" y="42" font-size="24" font-weight="700">A failed connection</text><text x="24" y="73" font-size="24" font-weight="700">needs a control.</text>
+<text x="24" y="121" font-size="21" font-weight="700">1. Establish reachability</text><text x="24" y="149" font-size="15" fill="#526478">From the worker network namespace</text>
+<path d="M24 171h342" stroke="#d8e0eb"/>
+<text x="24" y="205" font-size="18">Responder A</text><text x="366" y="205" text-anchor="end" font-size="18" font-weight="700" fill="#215bc7">Reachable</text>
+<text x="24" y="247" font-size="18">Responder B</text><text x="366" y="247" text-anchor="end" font-size="18" font-weight="700" fill="#215bc7">Reachable</text>
+<path d="M195 273v37m-7-8 7 8 7-8" fill="none" stroke="#215bc7" stroke-width="2"/>
+<text x="24" y="351" font-size="21" font-weight="700">2. Test the guest policy</text><text x="24" y="379" font-size="15" fill="#526478">A is permitted; B is denied in this fixture.</text>
+<path d="M24 400h342" stroke="#d8e0eb"/>
+<text x="24" y="437" font-size="18">Responder A</text><text x="366" y="437" text-anchor="end" font-size="18" font-weight="700" fill="#215bc7">Reachable</text>
+<text x="24" y="479" font-size="18">Responder B</text><text x="366" y="479" text-anchor="end" font-size="18" font-weight="700" fill="#86510f">Denied</text>
+<text x="24" y="533" font-size="17" font-weight="700">A failed request alone is insufficient.</text><text x="24" y="562" font-size="15">smolvm and the deployment enforce access.</text>
+<text x="24" y="605" font-size="14" fill="#526478">Synthetic TCP endpoints · Linux · smolvm 1.16.0</text><text x="24" y="628" font-size="14" fill="#526478">Illustrative sequence, not a packet trace</text>
+</g></svg>

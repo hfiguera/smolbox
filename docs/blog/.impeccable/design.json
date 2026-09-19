@@ -220,7 +220,25 @@
         "name": "phone",
         "value": "480px"
       }
-    ]
+    ],
+    "articleMotion": {
+      "updatedAt": "2026-09-19",
+      "playback": "reader-initiated; pause offscreen, hidden, or on reduced-motion change",
+      "controls": "Play / Pause / Replay below video; native controls without JavaScript",
+      "mobileMaxWidth": 640,
+      "mobile": "vertical static SVG with video link",
+      "durationSeconds": 9,
+      "autoplay": false,
+      "loop": false,
+      "figures": [
+        "checkpoint",
+        "lifecycle",
+        "cleanup",
+        "recovery",
+        "network",
+        "performance"
+      ]
+    }
   },
   "components": [
     {

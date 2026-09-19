@@ -24,6 +24,8 @@ The builder refuses to overwrite a nonempty output directory. Before rebuilding,
 remove the generated `_site/` directory, or use a fresh directory with
 `--output /path/to/empty-directory` on both build and verification commands. The
 preview script serves `_site/`. Generated output is ignored by Git.
+Pass `--output /path/to/built-site --port 4183` to the preview script to inspect
+a separate build. MP4 animation figures are served as `video/mp4`.
 
 ## Add an article
 

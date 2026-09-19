@@ -324,3 +324,23 @@ The closing callout links to this benchmark's method and results, rather than
 the unrelated introductory Python walkthrough. Repository links to the new
 report/scripts become public with the branch's eventual merge; this work is a
 local preview and does not publish the post.
+
+## Article motion figures — September 19, 2026
+
+Three article figures use reader-initiated, silent nine-second MP4 sequences.
+Static PNG posters communicate the final state before playback. The enhanced
+Play/Pause/Replay button sits below each video so it cannot cover labels. Native
+controls remain available without JavaScript. Playback pauses when a figure
+leaves view, the document is hidden, or reduced motion is enabled. No autoplay
+or automatic loop runs for any motion preference.
+
+At 640px and below, figures show separate vertical SVG diagrams with a link to
+watch the video. Controls reuse paper, accent, line, wash and muted tokens, a
+4px radius, and 14px type. Article geometry and social previews are preserved.
+
+
+The same manual-playback figure is now used in all six posts. Additional figures
+explain independent host recovery, network positive controls, and the distinction
+between startup and CPU timings. Benchmark bars start at zero; CPU ranges use a
+separately labelled zoomed axis. Statistical marks fade in at their recorded
+positions. Source evidence and caveats are recorded in the captions and provenance.

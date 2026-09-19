@@ -93,6 +93,16 @@ p { margin: 0 0 1.4rem; }
 .prose figure { margin: 32px 0; }
 .prose figure img { width: 100%; }
 .prose figcaption { font-size: 14px; line-height: 1.55; margin-top: 12px; color: var(--muted); }
+.motion-video { display: block; width: 100%; height: auto; background: var(--paper); }
+.motion-controls { display: flex; align-items: center; gap: 16px; margin-top: 12px; font-size: 14px; color: var(--muted); }
+.motion-controls button { border: 1px solid var(--line); border-radius: 4px; padding: 8px 16px; background: var(--paper); color: var(--accent); font-weight: 650; }
+.motion-controls button:hover { border-color: var(--accent); background: var(--wash); }
+.prose .motion-static, .motion-mobile-link { display: none; }
+@media (max-width: 640px) {
+  .motion-video, .motion-controls { display: none; }
+  .prose .motion-static { display: block; }
+  .motion-mobile-link { display: inline; }
+}
 .prose table { display: block; overflow-x: auto; border-collapse: collapse; margin: 28px 0; font-size: 15px; font-variant-numeric: tabular-nums; }
 .prose th, .prose td { text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); padding: 12px; min-width: 130px; }
 .prose th { background: var(--wash); }
