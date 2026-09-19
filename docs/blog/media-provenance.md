@@ -1,5 +1,19 @@
 # Blog asset provenance
 
+## Checkpoint preparation article
+
+Original SVG geometry uses the existing blog palette. One approved idle source
+supplies the starting state for three separate executions. The composition
+illustrates the lifecycle; it is not a timing chart or a live branching claim.
+
+- `media/prepare-once-run-in-a-fresh-vm/checkpoint-preparation-social.svg`:
+  editable 1200 × 630 artwork for sharing.
+- `media/prepare-once-run-in-a-fresh-vm/checkpoint-preparation.png`:
+  Chromium rasterization of that SVG for article cards and social metadata.
+
+The article cites the published 0.1.5 checkpoint evidence and scripts. No new
+measurements, external artwork or reader identities are introduced.
+
 The lifecycle artwork is original, repository-authored geometry. It depicts the
 Elixir application, SmolBox, a smolvm worker, and a disposable Python VM. It is a
 conceptual architecture diagram, not a runtime trace or benchmark.
