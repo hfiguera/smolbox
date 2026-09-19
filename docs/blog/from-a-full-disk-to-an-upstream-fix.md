@@ -47,12 +47,13 @@ deletion path, smolvm now removes the machine's data before committing removal
 of its registry entry. Releasing the VM files gives the database space to
 complete its transaction when both share the full filesystem.
 
-<figure>
-  <picture>
-    <source media="(max-width: 600px)" srcset="../../media/from-a-full-disk-to-an-upstream-fix/deletion-order-mobile.svg" width="390" height="670">
-    <img src="../../media/from-a-full-disk-to-an-upstream-fix/deletion-order.svg" width="1200" height="520" alt="On a full shared filesystem, the old deletion path tried the registry write before freeing VM data and failed. The revised path frees VM data first, then writes the registry removal using the space released.">
-  </picture>
-  <figcaption>The relevant ordering change in the HTTP deletion path. This simplifies the operation to show its storage dependency.</figcaption>
+<figure class="motion-figure" id="cleanup-motion">
+  <video class="motion-video" controls muted playsinline preload="none" width="960" height="540" poster="../../media/from-a-full-disk-to-an-upstream-fix/cleanup-motion.png" aria-label="The revised deletion path frees VM data before committing registry removal. On the shared full filesystem, the released space lets that commit complete." aria-describedby="cleanup-motion-caption">
+    <source src="../../media/from-a-full-disk-to-an-upstream-fix/cleanup-motion.mp4" type="video/mp4">
+    <a href="../../media/from-a-full-disk-to-an-upstream-fix/cleanup-motion.mp4">Watch the animation</a>.
+  </video>
+  <img class="motion-static" width="390" height="670" src="../../media/from-a-full-disk-to-an-upstream-fix/deletion-order-mobile.svg" alt="The revised deletion path frees VM data before committing registry removal. On the shared full filesystem, the released space lets that commit complete." loading="lazy">
+  <figcaption id="cleanup-motion-caption">The revised deletion path frees VM data before committing registry removal. On the shared full filesystem, the released space lets that commit complete. The nine-second sequence is illustrative, not measured timing. <a class="motion-mobile-link" href="../../media/from-a-full-disk-to-an-upstream-fix/cleanup-motion.mp4">Watch the animation</a></figcaption>
 </figure>
 
 BinBin implemented the fix, which shipped in [smolvm 1.14.6][upstream-release].

@@ -157,6 +157,15 @@ connections from guests with different policies. That positive control makes a
 denial meaningful. The fixtures also checked policy behavior after restart,
 followed by deletion and confirmation that owned VM resources were gone.
 
+<figure class="motion-figure" id="network-motion">
+  <video class="motion-video" controls muted playsinline preload="none" width="960" height="540" poster="../../media/controlled-network-access-from-elixir/network-motion.png" aria-label="In the controlled Linux fixture, both synthetic TCP endpoints were reachable from the worker network namespace before guest denials were counted. Guest tests then checked permitted and denied connections. smolvm and the deployment enforce access; this schematic is not a packet capture or a claim about every destination. The nine-second timing is illustrative." aria-describedby="network-motion-caption">
+    <source src="../../media/controlled-network-access-from-elixir/network-motion.mp4" type="video/mp4">
+    <a href="../../media/controlled-network-access-from-elixir/network-motion.mp4">Watch the animation</a>.
+  </video>
+  <img class="motion-static" width="390" height="650" src="../../media/controlled-network-access-from-elixir/network-motion-mobile.svg" alt="In the controlled Linux fixture, both synthetic TCP endpoints were reachable from the worker network namespace before guest denials were counted. Guest tests then checked permitted and denied connections. smolvm and the deployment enforce access; this schematic is not a packet capture or a claim about every destination. The nine-second timing is illustrative." loading="lazy">
+  <figcaption id="network-motion-caption">In the controlled Linux fixture, both synthetic TCP endpoints were reachable from the worker network namespace before guest denials were counted. Guest tests then checked permitted and denied connections. smolvm and the deployment enforce access; this schematic is not a packet capture or a claim about every destination. The nine-second timing is illustrative. <a class="motion-mobile-link" href="../../media/controlled-network-access-from-elixir/network-motion.mp4">Watch the animation</a></figcaption>
+</figure>
+
 We tested allowed and denied connections in the disposable Linux lab, with
 additional IPv4 checks on macOS. The [networking guide][networking] records the
 tested configurations and remaining gaps.

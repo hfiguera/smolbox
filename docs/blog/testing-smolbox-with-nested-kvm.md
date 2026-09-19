@@ -163,6 +163,15 @@ created a fresh writable overlay. A replacement VM booted without the marker
 left in the previous guest. The timer prepared the replacement disk; it did
 not automatically start another test or replay the interrupted command.
 
+<figure class="motion-figure" id="recovery-motion">
+  <video class="motion-video" controls muted playsinline preload="none" width="960" height="540" poster="../../media/testing-smolbox-with-nested-kvm/recovery-motion.png" aria-label="The physical host terminates the frozen outer VM, verifies removal of its process and cgroup, and rebuilds an overlay from the verified baseline. A separate validation step boots the replacement and checks that the old marker is absent. The timer does not replay work; this lab reset does not preserve execution records inside the lost VM. The nine-second sequence compresses the recorded steps; it is not measured timing." aria-describedby="recovery-motion-caption">
+    <source src="../../media/testing-smolbox-with-nested-kvm/recovery-motion.mp4" type="video/mp4">
+    <a href="../../media/testing-smolbox-with-nested-kvm/recovery-motion.mp4">Watch the animation</a>.
+  </video>
+  <img class="motion-static" width="390" height="730" src="../../media/testing-smolbox-with-nested-kvm/recovery-motion-mobile.svg" alt="The physical host terminates the frozen outer VM, verifies removal of its process and cgroup, and rebuilds an overlay from the verified baseline. A separate validation step boots the replacement and checks that the old marker is absent. The timer does not replay work; this lab reset does not preserve execution records inside the lost VM. The nine-second sequence compresses the recorded steps; it is not measured timing." loading="lazy">
+  <figcaption id="recovery-motion-caption">The physical host terminates the frozen outer VM, verifies removal of its process and cgroup, and rebuilds an overlay from the verified baseline. A separate validation step boots the replacement and checks that the old marker is absent. The timer does not replay work; this lab reset does not preserve execution records inside the lost VM. The nine-second sequence compresses the recorded steps; it is not measured timing. <a class="motion-mobile-link" href="../../media/testing-smolbox-with-nested-kvm/recovery-motion.mp4">Watch the animation</a></figcaption>
+</figure>
+
 That sequence was [recorded in the initial lab evidence][lab-evidence]. After
 the later campaign, replacement validation also checked all 38 qualification
 source hashes and performed another real KVM execution and deletion.

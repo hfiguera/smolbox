@@ -134,6 +134,15 @@ already have been deleted. See the
 [result-handling guide](https://hexdocs.pm/smolbox/0.1.0/troubleshooting.html)
 for the concrete error and recovery cases.
 
+<figure class="motion-figure" id="lifecycle-motion">
+  <video class="motion-video" controls muted playsinline preload="none" width="960" height="540" poster="../../media/running-python-from-elixir-with-smolbox/lifecycle-motion.png" aria-label="The outcome is observed first, declared output is collected next, and cleanup is verified separately. The collected file remains after the VM is deleted." aria-describedby="lifecycle-motion-caption">
+    <source src="../../media/running-python-from-elixir-with-smolbox/lifecycle-motion.mp4" type="video/mp4">
+    <a href="../../media/running-python-from-elixir-with-smolbox/lifecycle-motion.mp4">Watch the animation</a>.
+  </video>
+  <img class="motion-static" width="390" height="630" src="../../media/running-python-from-elixir-with-smolbox/lifecycle-motion-mobile.svg" alt="The outcome is observed first, declared output is collected next, and cleanup is verified separately. The collected file remains after the VM is deleted." loading="lazy">
+  <figcaption id="lifecycle-motion-caption">The outcome is observed first, declared output is collected next, and cleanup is verified separately. The collected file remains after the VM is deleted. The nine-second sequence is illustrative, not measured timing. <a class="motion-mobile-link" href="../../media/running-python-from-elixir-with-smolbox/lifecycle-motion.mp4">Watch the animation</a></figcaption>
+</figure>
+
 ## A lost response is an unknown outcome
 
 Suppose the worker accepts a command and the connection drops before Elixir
