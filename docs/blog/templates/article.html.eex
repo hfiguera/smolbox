@@ -36,6 +36,10 @@
   </div>
   <section class="next-step" aria-labelledby="next-title">
     <%= cond do %>
+    <% @article["slug"] == "prepare-once-run-in-a-fresh-vm" -> %>
+    <h2 id="next-title">Try an approved checkpoint.</h2>
+    <p>The checkpoint guide covers preparing an idle source, registering it with a worker, and running a command through verified cleanup.</p>
+    <a href="https://hexdocs.pm/smolbox/<%= @article["version"] %>/checkpoints.html">Open the checkpoint walkthrough <%= SmolBox.Blog.HTML.arrow(:right) %></a>
     <% @article["slug"] == "measuring-nested-kvm-overhead" -> %>
     <h2 id="next-title">Inspect the measurements.</h2>
     <p>The benchmark report includes every sample, configuration details and the procedure for repeating the comparison.</p>

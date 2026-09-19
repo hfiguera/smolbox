@@ -1,5 +1,16 @@
 [
   {
+    "slug": "prepare-once-run-in-a-fresh-vm",
+    "title": "Prepare once, run in a fresh VM with SmolBox",
+    "description": "Restore prepared guest state for separate disposable executions. A station dataset shows what checkpoints preserve, what they cost, and when a prepared image is enough.",
+    "published_on": "2026-09-18",
+    "updated_on": "2026-09-18",
+    "version": "0.1.5",
+    "category": "Practical integrations",
+    "image": "checkpoint-preparation.png",
+    "image_alt": "Prepare once, restore separately: one approved idle checkpoint supplies the starting state for three independent disposable executions."
+  },
+  {
     "slug": "measuring-nested-kvm-overhead",
     "title": "How much slower is nested KVM? Measuring our SmolBox lab",
     "description": "A reader asked about nested virtualization overhead. Six paired tests showed why startup, guest execution and cleanup need separate clocks.",
