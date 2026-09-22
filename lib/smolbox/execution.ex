@@ -164,7 +164,7 @@ defmodule SmolBox.Execution do
           worker_generation: non_neg_integer() | nil,
           machine_name: String.t() | nil,
           created_machine: Machine.t() | nil,
-          result: Result.t() | LaunchResult.t() | nil,
+          result: Result.t() | LaunchResult.t() | SmolBox.Terminal.Result.t() | nil,
           last_error: Error.t() | nil,
           cancel_requested_at_ms: non_neg_integer() | nil,
           claim_owner: String.t() | nil,
@@ -360,7 +360,7 @@ defmodule SmolBox.Execution do
     budget =
       case record.state do
         :preparing -> {:preparation, record.spec.profile.preparation_ms}
-        :dispatching -> {:execution, record.spec.profile.execution_ms}
+        :dispatching -> {:execution, execution_budget(record.spec)}
         :collecting -> {:collection, record.spec.profile.collection_ms}
         _other -> nil
       end
@@ -377,6 +377,9 @@ defmodule SmolBox.Execution do
       do: Map.put_new(deadlines, :cleanup, cleanup_deadline(record, now)),
       else: deadlines
   end
+
+  defp execution_budget(%{command: %SmolBox.Terminal.Spec{session_ms: ms}}), do: ms
+  defp execution_budget(spec), do: spec.profile.execution_ms
 
   defp cleanup_deadline(record, now) do
     retention_until =
@@ -399,8 +402,16 @@ defmodule SmolBox.Execution do
       byte_size(result.stdout) + byte_size(result.stderr) <= max
   end
 
+  defp result?(%SmolBox.Terminal.Result{} = result, _max),
+    do: SmolBox.Terminal.Result.valid?(result)
+
   defp result?(%LaunchResult{} = result, _max), do: LaunchResult.valid?(result)
   defp result?(_result, _max), do: false
+
+  defp result_mode?(%{spec: %{command: %SmolBox.Terminal.Spec{}}, result: result} = record),
+    do:
+      (record.managed_machine != nil or record.state in [:accepted, :cancelled, :expired]) and
+        (result == nil or is_struct(result, SmolBox.Terminal.Result))
 
   defp result_mode?(%{spec: %{command: %{background: true}}, result: nil, state: state}),
     do: state not in [:running, :collecting, :completed, :collection_failed, :launched]

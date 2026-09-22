@@ -259,3 +259,17 @@ compared. A failure retains evidence and may require the resolution procedure.
 
 See [validation evidence](persistent-machines-validation.md) for the tested scope
 and remaining qualification limits.
+
+## Interactive use
+
+Use `SmolBox.Terminal.open/3` with an `ExecutionSpec` containing `Terminal.Spec`
+to submit an interactive session against an existing machine handle. It occupies
+the same durable command slot as ordinary commands, including while dispatch or
+termination is uncertain. Stop, delete, staging and collection cannot race it.
+Terminal executions reject file manifests; use separate commands before or after
+the session. Previously launched background processes can still access files.
+
+Confirmed terminal exit releases only the command slot. Machine disks, ownership
+and port reservations remain until verified deletion. Stop/start preserves supported
+files, but cannot preserve or reattach the PTY. See [Interactive terminals](interactive-terminals.md)
+for API examples, deduplication, consumer lifetime and conservative recovery.

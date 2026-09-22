@@ -79,6 +79,11 @@ defmodule SmolBox.ManagedPeer do
     end
   end
 
+  defp machine_route("GET", ["exec", "interactive"], _body, machine, state) do
+    {{:terminal, state.options},
+     %{state | commands: [{machine["name"], :terminal} | state.commands]}}
+  end
+
   defp machine_route("GET", [], _body, machine, state), do: {{:json, 200, machine}, state}
 
   defp machine_route("POST", ["stop"], _body, machine, %{options: options} = state)
@@ -152,6 +157,9 @@ defmodule SmolBox.ManagedPeer do
      %{state | machines: Map.put(state.machines, machine["name"], updated)}}
   end
 
+  defp respond(conn, {:terminal, options}, _agent),
+    do: Plug.Conn.upgrade_adapter(conn, :websocket, {SmolBox.TerminalPeer, options, []})
+
   defp respond(conn, {:json, status, body}, _agent), do: TestPeer.json(conn, body, status)
   defp respond(conn, {:empty, status}, _agent), do: Plug.Conn.send_resp(conn, status, "")
 
@@ -187,6 +195,8 @@ defmodule SmolBox.ManagedPeer do
     end
   end
 
+  defp event("GET", ["api", "v1", "machines", _name, "exec", "interactive"]), do: :terminal_open
+  defp event("GET", ["api", "v1", "machines", _name]), do: :inspect
   defp event("POST", ["api", "v1", "machines"]), do: :create
   defp event("POST", ["api", "v1", "machines", _name, "exec" | _suffix]), do: :exec
   defp event("POST", ["api", "v1", "machines", _name, "stop"]), do: :stop

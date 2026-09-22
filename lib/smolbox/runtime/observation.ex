@@ -1,7 +1,10 @@
 defmodule SmolBox.Runtime.Observation do
   @moduledoc false
   alias SmolBox.{Client, Error, LaunchResult, Result, Telemetry}
-  alias SmolBox.Runtime.Session
+  alias SmolBox.Runtime.{Session, TerminalObservation}
+
+  def run(session, %{spec: %{command: %SmolBox.Terminal.Spec{}}} = record),
+    do: TerminalObservation.run(session, record)
 
   def run(session, record) do
     Telemetry.span(session.config.telemetry_table, :execution, session.key, fn ->

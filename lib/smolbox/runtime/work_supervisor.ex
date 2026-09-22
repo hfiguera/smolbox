@@ -7,6 +7,11 @@ defmodule SmolBox.Runtime.WorkSupervisor do
 
   @impl Supervisor
   def init(config) do
+    config = %{
+      config
+      | terminal_table: :ets.new(__MODULE__, [:set, :public, read_concurrency: true])
+    }
+
     children = [
       {Task.Supervisor, max_children: config.max_active + 1},
       {Coordinator, {config, self()}}

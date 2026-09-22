@@ -819,3 +819,19 @@ macOS and minimum direct dependencies on Elixir 1.18.4/OTP 27.3.4.15 on both hos
 That archive predates this evidence and later documentation changes; it is not
 the final release artifact. Source hashes, seeds, counts, archive identity and
 limitations are recorded in [telemetry evidence](evidence/phase8-telemetry.json).
+
+## Interactive terminal compatibility
+
+The unreleased interactive API targets smolvm 1.17.0 image machines. It excludes
+checkpoint terminals, disposable execution, shared sessions and guest PTY
+reattachment. Foreground and background execution retain their existing behavior.
+The transport uses Mint and MintWebSocket; host authentication, verified TLS and
+Unix sockets remain supported. Custom HTTP adapters are not used for WebSockets.
+
+Interactive records use selective codec v7 and the optional
+`interactive_terminal: 1` store capability. Existing PostgreSQL payload columns
+are reused; no SQL migration is required. Upgrade readers and controllers together.
+See [Interactive terminals](interactive-terminals.md) for exact support and rollback
+constraints; worker persistence does not imply terminal persistence.
+See the [terminal validation report](interactive-terminals-validation.md) for
+platform-specific evidence and the observed disconnect/storage limitations.

@@ -1,0 +1,208 @@
+{
+  "date": "2026-09-22",
+  "qualification": "development",
+  "branch": "feature/interactive-terminal-sessions",
+  "base_commit": "5862f4523a5eb8b70d2f01fd04a7df6cd1b32a7f",
+  "upstream": {
+    "version": "1.17.0",
+    "reference_commit": "73d4b480dc703c86b676bb54f72318ef94f24e6a",
+    "tree": "493f7d59f6d7e2c024c1854b151e4875ff93ccd3",
+    "reattachment": false,
+    "ambiguous_exit_codes": [
+      -1,
+      124,
+      130
+    ]
+  },
+  "source": {
+    "final_files_sha256": {
+      "examples/durable_host/lib/terminal_demo.ex": "f335c671f6b4e8cec94331a5204fc2e935f0d05cdcbbf5de69ccfed943146dce",
+      "examples/support/lib/terminal_console.ex": "a44f624d0885e0b7db4975634fb847b720c37e3503d7d30518141696f7fdafd9",
+      "lib/smolbox.ex": "8930a4a53fec47cea8a32af9a7942a6b4de74a68fa976da6d196590296238e9f",
+      "lib/smolbox/client.ex": "aca3c6a9e1177a0f18115be16529fef0492746d9316cbacc087d08516f776d45",
+      "lib/smolbox/execution.ex": "7f28d7aaff5ce0a3406b3ab0a8557146d9c79f2fbadf34c8f1760819062c8705",
+      "lib/smolbox/execution_spec.ex": "1ccdb49515b111158b1fe14b0acd17a22533272017f26f19a82b48d6af67e571",
+      "lib/smolbox/execution_validation.ex": "1e58762f585bb7c167dbe5d1d92515c0df9f14bee3de62c53f5a9ce9c1ed0a06",
+      "lib/smolbox/runtime/config.ex": "d4705bcf4880967655372293168f026e4b253071b9cb6c8a5d9cc5cf96073b2c",
+      "lib/smolbox/runtime/execution_support.ex": "752509d5f59de54e96001f553cff72867c7088f182bef654d6f2ccf23011f72b",
+      "lib/smolbox/runtime/machines.ex": "97b129512fb72caa59d3d528b0ca5e4c91aeade7fad6f9cf03abf9992c960966",
+      "lib/smolbox/runtime/observation.ex": "55a69bd0115f936f50de279db5852ab5ee0fe42993bb6aab091d7bd70f1bb060",
+      "lib/smolbox/runtime/terminal_observation.ex": "7bc7e45ae0f7b2ed97c867fc1b764d81e00c81ff8495b3903c204edc687c2693",
+      "lib/smolbox/runtime/work_supervisor.ex": "668ef31fac8daa22006327160c8ea0883891a106073874f502d30d9dcbd83a4f",
+      "lib/smolbox/store.ex": "f4b17ac3d49d71e2d92d4597827f3fa4972e80540a435869717e88aaf12dc7fc",
+      "lib/smolbox/store/codec.ex": "01aba09b5a36b93d7baab668fabeea454c5a1de4b6814742a4e41406a2688904",
+      "lib/smolbox/store/memory.ex": "978bcd1225c480612e2199cd2f1f3f0d610bdb1deeec0a4fd01afc1b63e57a21",
+      "lib/smolbox/telemetry.ex": "40a2567fa2cc4ca8026436a902eec349cef916d7f609766dfcf03a36f0133898",
+      "lib/smolbox/terminal.ex": "6de91a326346bc375787ca8ec732a1a887802c2596c0b127719b0bfbb677ca0d",
+      "lib/smolbox/terminal/connection.ex": "245b0161904f47f6edc2d18fd355eb65880b4561780e87211830ab77965246e1",
+      "lib/smolbox/terminal/handle.ex": "53f534675961075ddc529b37c1a4f673dc3c3da6050dc7b888d1c8eab42e3663",
+      "lib/smolbox/terminal/result.ex": "a2fa2302f1832dbf4e081f63ebb6ae2bf170eb7ce1b4ca49476f0c046476a033",
+      "lib/smolbox/terminal/server.ex": "a20c8aec42f66c762b5be6a24e4f34bf853edc52f191f5eda48e883a85b59f12",
+      "lib/smolbox/terminal/spec.ex": "41170dbd771b1f07b0abf9232f96e8b00cfd12bed89338b0e51b9de224290301",
+      "lib/smolbox/terminal/wire.ex": "a347e06ca9628f9a4206431fea0e8b9d43b3e4dbbc996b4cc5d813c07e7f6908",
+      "scripts/lab/candidate-control.sh": "89274b314cf3e3df796801c71ab0e56a6c1f7f56af59f1b76aaf5acc4d91702e",
+      "scripts/lab/interactive-terminal.sh": "f470f8e5d5efee0dc91f6024f5dea82b70eb7983738de6abee9910244cbab405",
+      "test/terminal_runtime/terminal_runtime_test.exs": "3d45fd99b3a15d54460dfd3bd58ee32476945ce8437941502421810462521cf3"
+    },
+    "live_qualified_files_sha256": {
+      "examples/durable_host/lib/terminal_demo.ex": "f335c671f6b4e8cec94331a5204fc2e935f0d05cdcbbf5de69ccfed943146dce",
+      "examples/support/lib/terminal_console.ex": "a44f624d0885e0b7db4975634fb847b720c37e3503d7d30518141696f7fdafd9",
+      "lib/smolbox.ex": "8930a4a53fec47cea8a32af9a7942a6b4de74a68fa976da6d196590296238e9f",
+      "lib/smolbox/client.ex": "aca3c6a9e1177a0f18115be16529fef0492746d9316cbacc087d08516f776d45",
+      "lib/smolbox/execution.ex": "7f28d7aaff5ce0a3406b3ab0a8557146d9c79f2fbadf34c8f1760819062c8705",
+      "lib/smolbox/execution_spec.ex": "1ccdb49515b111158b1fe14b0acd17a22533272017f26f19a82b48d6af67e571",
+      "lib/smolbox/execution_validation.ex": "1e58762f585bb7c167dbe5d1d92515c0df9f14bee3de62c53f5a9ce9c1ed0a06",
+      "lib/smolbox/runtime/config.ex": "d4705bcf4880967655372293168f026e4b253071b9cb6c8a5d9cc5cf96073b2c",
+      "lib/smolbox/runtime/execution_support.ex": "752509d5f59de54e96001f553cff72867c7088f182bef654d6f2ccf23011f72b",
+      "lib/smolbox/runtime/machines.ex": "97b129512fb72caa59d3d528b0ca5e4c91aeade7fad6f9cf03abf9992c960966",
+      "lib/smolbox/runtime/observation.ex": "55a69bd0115f936f50de279db5852ab5ee0fe42993bb6aab091d7bd70f1bb060",
+      "lib/smolbox/runtime/terminal_observation.ex": "7bc7e45ae0f7b2ed97c867fc1b764d81e00c81ff8495b3903c204edc687c2693",
+      "lib/smolbox/runtime/work_supervisor.ex": "668ef31fac8daa22006327160c8ea0883891a106073874f502d30d9dcbd83a4f",
+      "lib/smolbox/store.ex": "f4b17ac3d49d71e2d92d4597827f3fa4972e80540a435869717e88aaf12dc7fc",
+      "lib/smolbox/store/codec.ex": "01aba09b5a36b93d7baab668fabeea454c5a1de4b6814742a4e41406a2688904",
+      "lib/smolbox/store/memory.ex": "978bcd1225c480612e2199cd2f1f3f0d610bdb1deeec0a4fd01afc1b63e57a21",
+      "lib/smolbox/telemetry.ex": "40a2567fa2cc4ca8026436a902eec349cef916d7f609766dfcf03a36f0133898",
+      "lib/smolbox/terminal.ex": "6de91a326346bc375787ca8ec732a1a887802c2596c0b127719b0bfbb677ca0d",
+      "lib/smolbox/terminal/connection.ex": "245b0161904f47f6edc2d18fd355eb65880b4561780e87211830ab77965246e1",
+      "lib/smolbox/terminal/handle.ex": "53f534675961075ddc529b37c1a4f673dc3c3da6050dc7b888d1c8eab42e3663",
+      "lib/smolbox/terminal/result.ex": "a2fa2302f1832dbf4e081f63ebb6ae2bf170eb7ce1b4ca49476f0c046476a033",
+      "lib/smolbox/terminal/server.ex": "be30bdf4c4d183dd4097a6eb3c0665aadf74e1ed5b2bbcaca079bd9e15f1d9a9",
+      "lib/smolbox/terminal/spec.ex": "41170dbd771b1f07b0abf9232f96e8b00cfd12bed89338b0e51b9de224290301",
+      "lib/smolbox/terminal/wire.ex": "a347e06ca9628f9a4206431fea0e8b9d43b3e4dbbc996b4cc5d813c07e7f6908",
+      "scripts/lab/candidate-control.sh": "89274b314cf3e3df796801c71ab0e56a6c1f7f56af59f1b76aaf5acc4d91702e",
+      "scripts/lab/interactive-terminal.sh": "f470f8e5d5efee0dc91f6024f5dea82b70eb7983738de6abee9910244cbab405",
+      "test/terminal_runtime/terminal_runtime_test.exs": "3d45fd99b3a15d54460dfd3bd58ee32476945ce8437941502421810462521cf3"
+    },
+    "post_live_changes": "Only a nonfunctional retire_entry/2 helper extraction in terminal/server.ex, unit-test alias/style, package smoke assertions and documentation changed after the final live campaign. Focused compatibility tests and repository checks cover the final code."
+  },
+  "deterministic": {
+    "root_full_suite": {
+      "passed": 336,
+      "excluded": 26,
+      "coverage_percent": 92.88,
+      "receipt": "coverage-lifecycle-fixed.log"
+    },
+    "final_affected_suites": {
+      "tests_per_lane": 72,
+      "lanes": [
+        "Elixir 1.18.4 / OTP 27.3.4.15",
+        "Elixir 1.19.5 / OTP 28.4.1",
+        "Elixir 1.20.4 / OTP 28.5"
+      ]
+    },
+    "protocol_coverage": [
+      "TLS CA and hostname verification",
+      "bearer authentication and redaction",
+      "Unix socket upgrades",
+      "binary/non-UTF-8 output and input",
+      "fragment and message limits",
+      "close/exit ordering",
+      "malformed frames",
+      "idle/session/attach/close budgets",
+      "slow-consumer bounds",
+      "store failure and competing controllers",
+      "pre-dispatch cancellation and post-dispatch uncertainty",
+      "safe fresh-BEAM v7 decoding"
+    ],
+    "protocol_coverage_is_simulated": true
+  },
+  "real_workers": {
+    "macos": {
+      "architecture": "arm64",
+      "postgresql": "17.11",
+      "native_python_sha256": "bb3ed187bc4cfc1cc6f7e4e09c8f96ac1c2d47dcd2902653e6c1bd2ba6ca017c",
+      "terminal_tests_passed": 3,
+      "postgresql_store_tests_passed": 32,
+      "durable_regression_tests_passed": 25,
+      "ordinary_runtime_cases_covered": 14,
+      "security_rerun_passed": 5,
+      "ctrl_c_observed_ms": 108,
+      "slow_consumer_process_bytes": 18584,
+      "slow_consumer_mailbox_messages": 0,
+      "durable_recovery": "passed with complete final phase receipts",
+      "console": "passed resize and confirmed exit 9"
+    },
+    "linux": {
+      "architecture": "x86_64",
+      "postgresql": "16",
+      "native_python_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+      "terminal_tests_passed": 3,
+      "postgresql_store_tests_passed": 32,
+      "durable_regression_tests_passed": 25,
+      "ordinary_runtime_tests_passed": 14,
+      "ctrl_c_observed_ms": 100,
+      "slow_consumer_process_bytes": 27320,
+      "slow_consumer_mailbox_messages": 0,
+      "durable_recovery": "Final campaign exit 0 and success message captured after all phase/cleanup assertions; complete earlier recovery receipts also exported. Final interruption/stop/recovery per-phase receipts lost during automatic lab reset."
+    }
+  },
+  "acceptance": {
+    "both_platforms": [
+      "initial 37x91 and resized 43x113 guest dimensions",
+      "incremental input/output and retained file",
+      "Ctrl-C interrupted sleep and shell remained usable",
+      "confirmed exit 7 then ordinary retained-file read",
+      "competing controller stop/delete/attach blocked",
+      "retained machine reservations until explicit deletion",
+      "PostgreSQL interruption, unknown blocking, explicit quiescent resolution, no replay, program launch counter 1",
+      "explicit deletion, absence, numerical reservations and SQL port ownership release",
+      "slow-consumer bounded memory with uncertain outcome",
+      "abrupt disconnect with changing detached-descendant heartbeat"
+    ],
+    "direct_child_probe_limit": "A remaining /proc entry cannot distinguish a live child from a zombie."
+  },
+  "cleanup": {
+    "macos": "Empty worker inventory, zero nondeleted terminal machines and port owners, dedicated worker terminated and private PostgreSQL stopped. Unrelated worker untouched.",
+    "linux": "Campaign stopped worker after empty inventory/no KVM descriptors. Outer 45-minute deadline later fired, automatic sweep verified baseline and rebuilt overlay. No VM process or lab SSH listener remained. Temporary uploaded source archives removed.",
+    "linux_deadline_result": "timeout; MainPID=0; baseline hash OK; overlay rebuilt at 2026-09-22T20:17:29Z"
+  },
+  "failure_findings": [
+    "Delayed observation could overwrite newly accepted machine stop; deterministic regression and lifecycle-intent comparison fix.",
+    "Killing running VM before recording stop allowed upstream startup disk garbage collection; recovery refused replacement. Campaign now records verified stop before worker drain, then verifies final quiescence before resolution.",
+    "Console initially shut controller down before durable result; now awaits persistence and slot release.",
+    "Initial macOS security fixture missing file-transfer cap; dedicated worker corrected and all five security cases passed."
+  ],
+  "limitations": [
+    "Development qualification, not production isolation or concurrent-tenant certification.",
+    "No reattachment, replay, transcripts, shared terminals, checkpoint PTYs, descendant supervision or disk-loss recovery.",
+    "TLS and Unix-socket protocol tests do not establish real-worker TLS qualification.",
+    "24-hour session maximum is a validation bound; no 24-hour soak performed.",
+    "Lost final Linux per-phase recovery logs are not represented as retained evidence."
+  ],
+  "persistence": {
+    "terminal_codec": 7,
+    "adapter_capabilities": {
+      "interactive_terminal": 1,
+      "extended_execution": 1
+    },
+    "sql_migration_required": false,
+    "upgrade": "Coordinate all controllers/readers/adapters before enabling terminals; retained v7 history prevents direct rollback to older readers."
+  },
+  "private_receipts_sha256": {
+    "coverage-lifecycle-fixed.log": "b8987549635094ae29438e9bb1e1496552283ca182037214d0ac118a7f729c6e",
+    "compat-audit-1.18.log": "35930fd8c70844f189561f150a828fe0bc98712c794d5fad7806892af4579fc8",
+    "compat-audit-1.19.log": "20619801803b8991830a6f9919595828d0c69e8ed15f446c64120270f963272d",
+    "compat-audit-1.20.log": "17556915a2c27b507d472d1f99b78c154b1abf6d3c928954eaab27d27aeb88c5",
+    "mac-terminal-qualified.log": "3a56acebb1d05eafc3fa12b00561ae5589a7096862e5bd0c090496fd713e396f",
+    "mac-durable-qualified-run.log": "ccb667969c738cc8a0642a0898d3eb1b35e827fc89914eb939488855e9405584",
+    "mac-durable-qualified-interrupt.log": "dec15a4596209dd940dc123aa448822ce8bf7d81876f8660b3bb91f33e852193",
+    "mac-durable-qualified-stop.log": "9207bee212fc7407f83d2c4415181e74c03d60fad6c884cbb8a10d41e494090b",
+    "mac-durable-qualified-recover.log": "44514ab6304dcc73d45ea42c9f113c2257aed99bde590796b0290e187dabfa87",
+    "mac-durable-regression.log": "f5324a5ab1bae97bed7a2490848207ea36e5c74a49dddf0857b6ae94476cc39a",
+    "mac-security-regression-final.log": "d12d006f2781440956a85011174f5de88444910a8712551441a4332b33a5e769",
+    "mac-console-second.log": "b9d6a86a0ee7a8dbe00348db15392dfcfbc09476f267ffff8bdeae9d27cd519d",
+    "mac-final-inventory.json": "4115c93b07b494b0188c0899c545c6313d8dfda70cf8d2613984eae1976fb745",
+    "mac-final-store-counts.txt": "52f96c26a39ed25108a6db43d6e11c6051eba8a498a5baab1891adfa7ac7c262",
+    "mac-postgres-stop.log": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "linux-final.log": "b3560a407974406c3c6a2beb62c1a078c5903c6d0cf862946c903f11070a216d",
+    "linux-cleanup-final.log": "417f7a24be217202906e946e4fa25b1f515fd5d02c10b17615edf9a90c34c907",
+    "linux-final-progress.tar.gz::terminal-final/runtime.log": "2e0bc514739237dc7dbff3370cead8c6f9309ff9e0e4f871c68ed7f799bc87e5",
+    "linux-final-progress.tar.gz::terminal-final/store.log": "b64a054d640a7e93653c7e97f4d5e8bf4c1cd04ececb5b9757afd4a038fcbedc",
+    "linux-final-progress.tar.gz::terminal-final/durable-run.log": "e62a3dd93ef6138dc7b07bf718ff04cc9a503e91e121426064ffe663dc2a2232",
+    "linux-before-final.tar.gz::terminal-second/durable-recover.log": "44514ab6304dcc73d45ea42c9f113c2257aed99bde590796b0290e187dabfa87",
+    "linux-before-final.tar.gz::terminal-second/inventory.json": "4115c93b07b494b0188c0899c545c6313d8dfda70cf8d2613984eae1976fb745",
+    "linux-before-final.tar.gz::terminal-regression/runtime.log": "02114321039054082152f3f3c58da60d81eb520be4b476e876b3601744e707e5",
+    "linux-before-final.tar.gz::terminal-regression/recovery.log": "75390aaf36fa6540d172be4d5a343e6a2b9ee14e3595f308e83a268aaf261a76"
+  },
+  "receipt_policy": "Raw receipts remain in ignored local storage. This report contains no tokens, terminal transcripts, database keys or raw archives."
+}

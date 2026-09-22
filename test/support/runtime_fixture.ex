@@ -77,6 +77,7 @@ defmodule SmolBox.RuntimeFixture do
       workers: [worker],
       poll_ms: 20,
       lease_ms: 1000,
+      max_active: Keyword.get(options, :max_active, 4),
       telemetry_max_pending: Keyword.get(options, :telemetry_max_pending, 128),
       telemetry_timeout_ms: Keyword.get(options, :telemetry_timeout_ms, 100),
       max_pending: Keyword.get(options, :max_pending, 128)

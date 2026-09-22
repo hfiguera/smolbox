@@ -221,3 +221,19 @@ configured `SMOLVM_DATA_DIR` can separate worker state. The pinned macOS build
 uses its normal account state directory; that environment variable does not
 isolate it. Use a dedicated account/host for a new macOS worker and never clear
 shared caches or inventories to simulate a fresh installation.
+
+## Interactive terminals
+
+`Client.open_terminal/3` opens a byte-preserving WebSocket PTY and returns a
+consumer-bound `SmolBox.Terminal.Handle`. Use `Terminal.input/2`, `next/2`,
+`resize/3` and `close/1`. The supported program is one executable, with initial
+columns and rows; ordinary argv, environment, stdin, user and workdir options
+are rejected. The PTY merges stdout and stderr. A successful handshake does not
+prove the guest program is ready.
+
+The low-level caller supplies ownership checks and lifecycle coordination. The
+upstream upgrade can start the machine, so use `Terminal.open/3` on a managed
+machine for persisted intent and the shared command slot. HTTP(S) and Unix sockets
+use the configured worker token and TLS verification. Custom HTTP transport
+adapters are rejected rather than bypassed. See [Interactive terminals](interactive-terminals.md)
+for deadlines, bounded streaming, cancellation and recovery.

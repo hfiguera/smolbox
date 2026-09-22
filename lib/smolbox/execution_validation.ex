@@ -121,6 +121,11 @@ defmodule SmolBox.ExecutionValidation do
         :stale_version
       ] and
       error.operation in [
+        :terminal,
+        :terminal_close,
+        :terminal_idle,
+        :terminal_session,
+        :terminal_consumer,
         :command,
         :worker,
         :machine_spec,

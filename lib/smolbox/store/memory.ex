@@ -109,6 +109,7 @@ defmodule SmolBox.Store.Memory do
           atomic: true,
           managed_machines: 1,
           managed_ports: 1,
+          interactive_terminal: 1,
           extended_execution: 1
         }}, state}
 

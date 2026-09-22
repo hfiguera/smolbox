@@ -303,9 +303,94 @@ defmodule SmolBox.Store.MachineContract do
     assert {:ok, ^gone} = adapter.find_machine(store, "worker", machine.machine_name)
   end
 
-  defp dispatched(adapter, store, machine_key) do
+  def terminal(adapter, store) do
+    machine = running(adapter, store, [%SmolBox.PortMapping{host: 28_731, guest: 8000}])
+    key = ManagedMachine.key(machine)
+    ordinary = Contract.record().spec
+    spec = %{ordinary | command: %SmolBox.Terminal.Spec{}, inputs: [], outputs: []}
+    {:ok, fingerprint} = SmolBox.ExecutionSpec.fingerprint(spec, :binary.copy(<<1>>, 32))
+    {:ok, initial} = Execution.new(spec, fingerprint, 1100)
+    command = dispatched(adapter, store, key, initial)
+    assert {:ok, ^command} = adapter.fetch(store, Execution.key(command))
+
+    assert {:error, _} =
+             adapter.write(
+               store,
+               Execution.key(command),
+               Contract.guard(command),
+               [
+                 state: :collecting,
+                 evidence: :exited,
+                 result: %Result{exit_code: 0, stdout: "", stderr: ""}
+               ],
+               1100
+             )
+
+    assert {:ok, collecting} =
+             adapter.write(
+               store,
+               Execution.key(command),
+               Contract.guard(command),
+               [
+                 state: :collecting,
+                 evidence: :exited,
+                 result: %SmolBox.Terminal.Result{exit_code: 9}
+               ],
+               1100
+             )
+
+    assert {:ok, completed} =
+             adapter.write(
+               store,
+               Execution.key(command),
+               Contract.guard(collecting),
+               [state: :completed, collection: :complete],
+               1100
+             )
+
+    assert {:ok, _} =
+             adapter.machine(store, :finish, [
+               Execution.key(command),
+               Contract.guard(completed),
+               1100
+             ])
+
+    assert {:ok, %{active_execution: nil, reserved_ports: [28_731]}} =
+             adapter.machine(store, :fetch, [key])
+
+    assert {:ok, %{slots: 1, disk_gb: 2}} = adapter.usage(store, "worker")
+
+    spec = %{spec | id: "uncertain-terminal"}
+    {:ok, fingerprint} = SmolBox.ExecutionSpec.fingerprint(spec, :binary.copy(<<1>>, 32))
+    {:ok, initial} = Execution.new(spec, fingerprint, 1100)
+    next = dispatched(adapter, store, key, initial)
+    error = %Error{category: :expired, operation: :terminal_session, evidence: :unknown}
+
+    assert {:ok, unknown} =
+             adapter.write(
+               store,
+               Execution.key(next),
+               Contract.guard(next),
+               [state: :unknown, evidence: :unknown, last_error: error],
+               1100
+             )
+
+    assert {:ok, blocked} =
+             adapter.machine(store, :finish, [Execution.key(next), Contract.guard(unknown), 1100])
+
+    assert blocked.cleanup == :failed
+    assert {:ok, ^blocked} = adapter.fetch(store, Execution.key(next))
+
+    assert {:error, %{category: :admission_exhausted}} =
+             adapter.machine(store, :submit, [key, Contract.record("later"), 10, 1100])
+
+    assert {:ok, %{reserved_ports: [28_731], reservation: %{slots: 1}}} =
+             adapter.machine(store, :fetch, [key])
+  end
+
+  defp dispatched(adapter, store, machine_key, initial \\ Contract.record()) do
     assert {:ok, command} =
-             adapter.machine(store, :submit, [machine_key, Contract.record(), 10, 1100])
+             adapter.machine(store, :submit, [machine_key, initial, 10, 1100])
 
     key = Execution.key(command)
     assert {:ok, command} = adapter.claim(store, key, "owner", 1100, 5000)

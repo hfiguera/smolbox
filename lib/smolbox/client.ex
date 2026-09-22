@@ -32,6 +32,8 @@ defmodule SmolBox.Client do
     Worker
   }
 
+  alias SmolBox.Terminal.{Handle, Server, Spec}
+
   @enforce_keys [:worker]
   @derive {Inspect, only: []}
   defstruct [:worker, transport: SmolBox.Transport.Req]
@@ -439,6 +441,36 @@ defmodule SmolBox.Client do
         is_nil(options[:on_event]) or is_function(options[:on_event], 1) -> :ok
         true -> error(:validation, :exec_stream)
       end
+    end
+  end
+
+  @doc "Open a single-consumer interactive terminal. Handshake success is not program readiness."
+  @spec open_terminal(t(), String.t(), Spec.t()) ::
+          {:ok, Handle.t()} | {:error, Error.t()}
+  def open_terminal(client, name, spec) do
+    with {:ok, prepared} <- terminal_preflight(client, name, spec),
+         do: Server.start(prepared, name, spec, self())
+  end
+
+  @doc false
+  def terminal_preflight(client, name, spec) do
+    budget = min(client.worker.operation_timeout_ms, 30_000)
+    client = %{client | worker: %{client.worker | operation_timeout_ms: budget}}
+    deadline = System.monotonic_time(:millisecond) + budget
+
+    with true <- client.transport == SmolBox.Transport.Req,
+         :ok <- Spec.validate(spec),
+         {:ok, path} <- machine_path(name),
+         :ok <- Worker.validate(client.worker),
+         {:ok, %{version: "1.17.0"}} <- health(client),
+         {:ok, client} <- remaining_create_budget(client, deadline),
+         :ok <- background_machine(client, path, %{background: true}),
+         {:ok, client} <- remaining_create_budget(client, deadline) do
+      {:ok, client}
+    else
+      false -> error(:unsupported_capability, :terminal)
+      {:ok, _unsupported} -> error(:unsupported_capability, :terminal)
+      {:error, failure} -> {:error, %{failure | operation: :terminal, evidence: :not_dispatched}}
     end
   end
 

@@ -641,6 +641,34 @@ defmodule SmolBox.PersistentMachinesTest do
     assert ManagedPeer.snapshot(fixture.peer).commands == []
   end
 
+  test "an older observation cannot postpone or overwrite a newly accepted stop" do
+    observer = self()
+
+    gate =
+      start_supervised!(
+        {Agent,
+         fn ->
+           %{event: :inspect, phase: :after, fired: true, observer: observer}
+         end},
+        id: :stale_observation_gate
+      )
+
+    fixture = RuntimeFixture.start(faults: gate)
+    handle = start_machine(fixture, [])
+    coordinator = SmolBox.Runtime.coordinator(fixture.runtime)
+    wait(fn -> {:ok, :sys.get_state(coordinator)} end, &(&1.active == %{}))
+    Agent.update(gate, &%{&1 | fired: false})
+    :ok = Machines.reconcile(fixture.runtime, handle)
+    assert_receive {:boundary, :inspect, :after, blocked}, 5000
+    {:ok, running} = Machines.inspect(fixture.runtime, handle)
+
+    assert {:ok, %{state: :stopping, phase: :pending}} =
+             Machines.stop(fixture.runtime, handle, running.version)
+
+    send(blocked, :release_boundary)
+    assert wait_machine(fixture, handle, &(&1.state == :stopped)).operation == nil
+  end
+
   defp assert_background_recovery(fixture, handle, execution, :unknown) do
     machine = wait_machine(fixture, handle, &(&1.state == :unknown))
     assert machine.reserved_ports == [28_731] and machine.reservation.slots == 1

@@ -6,13 +6,15 @@ defmodule SmolBox.CI.Package do
   @limit 64 * 1024 * 1024
   @minimum %{
     "req" => "0.7.4",
+    "mint" => "1.7.0",
+    "mint_web_socket" => "1.0.6",
     "jason" => "1.4.0",
     "telemetry" => "1.3.0",
     "nimble_options" => "1.1.0"
   }
   @forbidden ~w(credo ex_slop ex_dna credence dialyxir ex_doc mix_audit ecto ecto_sql postgrex stream_data plug bandit)
   @public ~w(mix.exs README.md CHANGELOG.md LICENSE)
-  @docs ~w(getting-started troubleshooting client host-integration recovery telemetry security resource-qualification compatibility network-access port-mappings port-mappings-validation long-running-exec long-running-exec-validation checkpoints persistent-machines persistent-machines-validation runtime-1.17.0-qualification)
+  @docs ~w(getting-started troubleshooting client host-integration recovery telemetry security resource-qualification compatibility network-access port-mappings port-mappings-validation long-running-exec long-running-exec-validation interactive-terminals interactive-terminals-validation checkpoints persistent-machines persistent-machines-validation runtime-1.17.0-qualification)
 
   def run(arguments) do
     {options, []} =

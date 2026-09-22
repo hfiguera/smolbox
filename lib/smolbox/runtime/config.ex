@@ -23,7 +23,8 @@ defmodule SmolBox.Runtime.Config do
 
   @enforce_keys Keyword.keys(@schema) ++ [:owner]
   @derive {Inspect, only: [:name, :namespace, :mode, :max_pending, :max_active]}
-  defstruct Keyword.keys(@schema) ++ [:owner, :telemetry_table, managed_machines: false]
+  defstruct Keyword.keys(@schema) ++
+              [:owner, :telemetry_table, :terminal_table, managed_machines: false]
 
   @type t :: %__MODULE__{
           name: atom(),
@@ -41,6 +42,7 @@ defmodule SmolBox.Runtime.Config do
           telemetry_max_pending: pos_integer(),
           telemetry_timeout_ms: pos_integer(),
           telemetry_table: :ets.tid() | nil,
+          terminal_table: :ets.tid() | nil,
           clock: module(),
           managed_machines: boolean(),
           owner: String.t()

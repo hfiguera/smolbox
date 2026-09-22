@@ -312,3 +312,21 @@ launch is `:launched`, with a typed PID result; it does not prove readiness or
 continued process life. Lost launch evidence stays unknown and must not be replayed.
 Background processes can overlap later file operations. Stop/start requires an
 explicit new service launch; cancellation does not perform PID-based termination.
+
+## Interactive session recovery
+
+Terminal executions use codec v7 and require `interactive_terminal: 1` plus
+`extended_execution: 1`. Upgrade every controller, reader and adapter together;
+retained v7 history prevents rollback to readers that do not understand it.
+Live handles and sockets are not persisted. Recovery preserves confirmed exits
+or unknown outcomes without opening another shell or replaying input. Unknown
+sessions retain the machine's command slot and reservations.
+
+Use [terminal recovery](interactive-terminals.md#recovering-after-controller-or-connection-loss)
+and the existing explicit quiescent resolution procedure. An expired lease or
+observed stop does not drain requests already sent to the worker. Upstream 1.17.0
+can delete the disks of formerly running machines whose processes died when its
+API restarts. If draining requires a worker restart, first record an ownership-verified
+stop to preserve supported disks, then drain old requests and verify the final
+stopped state before resolution. Missing disks are not recoverable through a new
+PTY; never silently replace the missing machine.

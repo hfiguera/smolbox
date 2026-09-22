@@ -9,7 +9,8 @@ defmodule SmolBox.MachineStoreTest do
         :lifecycle_race,
         :completion,
         :uncertainty,
-        :takeover
+        :takeover,
+        :terminal
       ] do
     test "memory machine contract: #{scenario}" do
       store = start_supervised!(Memory)

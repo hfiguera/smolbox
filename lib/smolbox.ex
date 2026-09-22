@@ -100,6 +100,9 @@ defmodule SmolBox do
     end
   end
 
+  defp disposable_command(%{command: %SmolBox.Terminal.Spec{}}),
+    do: Session.error(:unsupported_capability, :submit)
+
   defp disposable_command(%{command: %{background: true}}),
     do: Session.error(:unsupported_capability, :submit)
 

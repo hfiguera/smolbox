@@ -462,3 +462,21 @@ normal disposable cleanup and reservation release. Its fixture uses 2 GiB
 storage/overlay requests with qualified `resize2fs`; adjust the approved profile
 and floors for other artifacts. A controller interruption preserves durable
 uncertainty; rerunning an unknown identity does not replay its command.
+
+## Interactive terminal example
+
+After the database, worker, artifact and key setup above, select a fresh execution
+ID and store partition and run `MIX_ENV=test mix run scripts/terminal.exs run`.
+This demonstrates streamed terminal input/output, resize, exit, file retention and
+explicit deletion. `shell` provides a line console: `:resize COLS ROWS`,
+`:interrupt`, `:eof` and `:close`. It leaves the machine retained; `delete` removes
+an idle machine. Host terminal settings are not changed.
+
+For recovery, `interrupt` deliberately halts the controller with work active.
+Fence the old controller and drain its worker requests before asserting
+`SMOLBOX_TERMINAL_QUIESCED=true` and running `recover` with the same identity and
+keys. If restarting the dedicated worker is part of that drain, run
+`stop-for-drain` first: it verifies ownership and records a stop to preserve disks,
+without resolving the execution. Then drain/restart and run `recover`. Upstream
+1.17.0 removes formerly running machines whose processes died on API startup.
+See [Interactive terminals](../../docs/interactive-terminals.md) for the full contract.

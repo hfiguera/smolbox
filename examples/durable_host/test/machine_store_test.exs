@@ -21,7 +21,8 @@ defmodule SmolBox.DurableHost.MachineStoreTest do
         :lifecycle_race,
         :completion,
         :uncertainty,
-        :takeover
+        :takeover,
+        :terminal
       ] do
     test "PostgreSQL machine contract: #{scenario}", %{store: store} do
       apply(MachineContract, unquote(scenario), [Store, store])
