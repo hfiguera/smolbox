@@ -263,3 +263,17 @@ launch is `:launched`, with a typed PID result; it does not prove readiness or
 continued process life. Lost launch evidence stays unknown and must not be replayed.
 Background processes can overlap later file operations. Stop/start requires an
 explicit new service launch; cancellation does not perform PID-based termination.
+
+## Interactive terminal authority and privacy
+
+A terminal provides the guest authority of its configured executable. Host code
+must approve the machine, profile and caller before submitting it. The live handle
+is bound to one consuming BEAM process; it is not a shareable bearer token or a
+durable guest identity. Another controller cannot use it to attach to the PTY.
+
+Input and output are transient byte streams and are not stored as transcripts or
+in ordinary telemetry. They can contain credentials and terminal control sequences.
+Hosts that render or record them must apply their own terminal-rendering and data
+retention policy. Output, input and queues have explicit bounds; reaching a limit
+closes observation without proving guest termination. Closing the PTY does not
+guarantee termination of detached descendants. See [Interactive terminals](interactive-terminals.md).

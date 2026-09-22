@@ -302,7 +302,15 @@ defmodule SmolBox.Runtime.Machines do
 
   defp fresh_write(config, record, changes) do
     with {:ok, current} <- claim(config, ManagedMachine.key(record)),
-         do: write(config, current, changes)
+         # I/O may have overlapped a new lifecycle request or command. Renewed
+         # claims do not authorize applying the old observation to newer work.
+         fields = [:state, :operation, :phase, :last_request, :active_execution],
+         true <- Map.take(current, fields) == Map.take(record, fields) do
+      write(config, current, changes)
+    else
+      false -> Session.error(:stale_version, :machine)
+      error -> error
+    end
   end
 
   def worker(config, record) do

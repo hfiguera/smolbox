@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- Add interactive WebSocket PTY sessions on managed image machines and the low-level
+  client, with byte-preserving output, input, resize, typed exit evidence, bounded
+  flow control and conservative disconnect recovery.
+- Add selective codec v7 and `interactive_terminal: 1` store capability, preserving
+  older fingerprints and wire shapes. Upgrade shared controllers/readers/adapters
+  together; see `docs/interactive-terminals.md`.
+- Add Mint/MintWebSocket dependencies, durable terminal examples and Linux lab
+  qualification with disk-preserving worker restart.
+- Prevent older machine observations from overwriting a newer lifecycle request
+  or active-command assignment during reconciliation.
+
 - Add explicit foreground command timeouts up to 24 hours, with independently
   approved observation budgets and quiet extended buffered/streaming requests.
 - Add background launch on managed image machines, typed `LaunchResult` PID

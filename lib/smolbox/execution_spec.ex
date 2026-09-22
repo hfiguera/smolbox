@@ -8,6 +8,11 @@ defmodule SmolBox.ExecutionSpec do
   `"kind" => "checkpoint"`; construct it with `SmolBox.Checkpoint.artifact/1`.
   The specification contains no endpoint overrides.
 
+  `command` accepts `SmolBox.Command` or `SmolBox.Terminal.Spec`. Interactive
+  intent is supported only on managed image machines, rejects input/output
+  manifests, and must fit the host profile's execution and output-buffer budgets.
+  Its identity includes terminal options but never live input or a socket handle.
+
   Queue budgets are relative at construction; the store must persist an absolute
   deadline on first acceptance. Repeated submission never resets that deadline.
   `fingerprint/2` uses a stable host secret (at least 32 bytes) to prevent guessing
@@ -19,6 +24,8 @@ defmodule SmolBox.ExecutionSpec do
   """
 
   alias SmolBox.{Command, Error, Manifest, Profile, Validation}
+
+  alias SmolBox.Terminal.Spec, as: TerminalSpec
 
   @enforce_keys [:scope, :id, :artifact, :command, :profile]
   @derive {Inspect, only: [:scope, :id]}
@@ -39,7 +46,7 @@ defmodule SmolBox.ExecutionSpec do
           scope: String.t(),
           id: String.t(),
           artifact: %{String.t() => String.t()},
-          command: Command.t(),
+          command: Command.t() | TerminalSpec.t(),
           profile: Profile.t(),
           inputs: [Manifest.input()],
           outputs: [Manifest.output()],
@@ -112,7 +119,7 @@ defmodule SmolBox.ExecutionSpec do
   @spec validate(term()) :: :ok | {:error, Error.t()}
   def validate(%__MODULE__{} = spec) do
     with true <- Validation.struct_shape?(spec, __MODULE__),
-         :ok <- Command.validate(spec.command),
+         :ok <- command_validate(spec.command),
          :ok <- Profile.validate(spec.profile),
          :ok <- Manifest.validate(spec.inputs, spec.outputs, spec.profile),
          true <- fields?(spec) do
@@ -131,7 +138,7 @@ defmodule SmolBox.ExecutionSpec do
     with :ok <- validate(spec) do
       normalized = %{
         spec
-        | command: %{spec.command | env: Enum.sort(spec.command.env)},
+        | command: normalize_command(spec.command),
           inputs: Enum.sort_by(spec.inputs, & &1["path"]),
           outputs: Enum.sort_by(spec.outputs, & &1["path"])
       }
@@ -149,6 +156,19 @@ defmodule SmolBox.ExecutionSpec do
       Validation.integer?(spec.retention_ms, 60_000, 2_592_000_000) and metadata?(spec.metadata) and
       command_budget?(spec)
   end
+
+  defp command_validate(%TerminalSpec{} = command),
+    do: TerminalSpec.validate(command)
+
+  defp command_validate(command), do: Command.validate(command)
+  defp normalize_command(%Command{} = command), do: %{command | env: Enum.sort(command.env)}
+  defp normalize_command(command), do: command
+
+  defp command_budget?(%{command: %TerminalSpec{} = terminal} = spec),
+    do:
+      spec.inputs == [] and spec.outputs == [] and spec.artifact["kind"] != "checkpoint" and
+        terminal.session_ms <= spec.profile.execution_ms and
+        terminal.max_buffer_bytes <= spec.profile.max_output_bytes
 
   defp command_budget?(%{command: %{background: true}} = spec),
     do: spec.outputs == [] and spec.artifact["kind"] != "checkpoint"

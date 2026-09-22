@@ -107,3 +107,17 @@ launch is `:launched`, with a typed PID result; it does not prove readiness or
 continued process life. Lost launch evidence stays unknown and must not be replayed.
 Background processes can overlap later file operations. Stop/start requires an
 explicit new service launch; cancellation does not perform PID-based termination.
+
+## Interactive terminal problems
+
+- An open request returns a durable key; use `Terminal.attach/3` on the owning
+  runtime to claim its live connection. This does not reconnect a lost guest PTY.
+- A successful upgrade does not prove the executable started. Read events and
+  inspect the durable outcome. Unsupported executables can fail after upgrade.
+- `:output_limit` means a configured byte or queue bound was reached. Consume
+  output promptly and adjust only host-approved limits. The outcome can be unknown.
+- Local close, idle expiry, connection loss and upstream sentinel exit codes are
+  not confirmed guest completion. Check the record before submitting more work.
+- An unknown session blocks stop/delete and another command. Follow
+  [explicit recovery](interactive-terminals.md#recovering-after-controller-or-connection-loss);
+  do not retry with a fresh execution ID to bypass the block.

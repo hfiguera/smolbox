@@ -27,6 +27,9 @@ defmodule SmolBox.Store.Codec do
   `background: false`; ordinary writes omit that field to preserve prior formats.
   Old envelopes cannot contain extended budgets or background semantics. Upgrade
   readers/adapters together; see [Extended execution](long-running-exec.html#persistence-and-upgrades).
+  Interactive records selectively use v7 with `Terminal.Spec` and `Terminal.Result`;
+  older envelopes cannot contain interactive semantics. See
+  [Terminal upgrades](interactive-terminals.html#persistence-and-upgrades).
   Silently treating undecodable records as absent
   would permit replay and is forbidden.
   """
@@ -39,6 +42,7 @@ defmodule SmolBox.Store.Codec do
   @prefix "smolbox-record-v2\0"
   @checkpoint_prefix "smolbox-record-v3\0"
   @managed_prefix "smolbox-record-v4\0"
+  @terminal_prefix "smolbox-record-v7\0"
   @execution_prefix "smolbox-record-v6\0"
   @ports_prefix "smolbox-record-v5\0"
   @legacy_prefix "smolbox-record-v1\0"
@@ -55,18 +59,26 @@ defmodule SmolBox.Store.Codec do
     SmolBox.PortMapping,
     SmolBox.Result,
     SmolBox.LaunchResult,
+    SmolBox.Terminal.Spec,
+    SmolBox.Terminal.Result,
     Error
   ]
 
   @spec encode(Execution.t() | SmolBox.ManagedMachine.t()) ::
           {:ok, binary()} | {:error, Error.t()}
   def encode(%{spec: spec} = record) do
+    if ExecutionSupport.interactive?(spec),
+      do: encode_terminal(record),
+      else: encode_nonterminal(record)
+  end
+
+  def encode(_record), do: invalid()
+
+  defp encode_nonterminal(%{spec: spec} = record) do
     if ExecutionSupport.extended?(spec),
       do: encode_extended(record),
       else: encode_original(record)
   end
-
-  def encode(_record), do: invalid()
 
   defp encode_original(%SmolBox.ManagedMachine{} = record), do: encode_managed(record)
 
@@ -114,7 +126,38 @@ defmodule SmolBox.Store.Codec do
       when tag != 80 and byte_size(bytes) <= @max_bytes,
       do: decode_extended(bytes)
 
+  def decode(<<@terminal_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_terminal(bytes)
+
   def decode(_bytes), do: invalid()
+
+  defp encode_terminal(record) do
+    with :ok <- Execution.validate(record) do
+      bytes = @terminal_prefix <> :erlang.term_to_binary(record)
+      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
+    end
+  end
+
+  defp decode_terminal(bytes) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    payload =
+      binary_part(
+        bytes,
+        byte_size(@terminal_prefix),
+        byte_size(bytes) - byte_size(@terminal_prefix)
+      )
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <- used == byte_size(payload),
+         true <- ExecutionSupport.interactive?(record.spec),
+         :ok <- Execution.validate(record),
+         do: {:ok, record},
+         else: (_invalid -> invalid())
+  rescue
+    _invalid -> invalid()
+  end
 
   defp encode_extended(record) do
     with :ok <- validate_extended(record) do
@@ -136,7 +179,9 @@ defmodule SmolBox.Store.Codec do
     with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
          true <- used == byte_size(payload),
          :ok <- validate_extended(record),
-         true <- ExecutionSupport.extended?(record.spec) do
+         true <-
+           ExecutionSupport.extended?(record.spec) and
+             not ExecutionSupport.interactive?(record.spec) do
       {:ok, record}
     else
       _invalid -> invalid()

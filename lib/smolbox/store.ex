@@ -11,6 +11,11 @@ defmodule SmolBox.Store do
   and unknown-launch blocking. Ordinary record retention and reservations are unchanged.
   Mixed controller versions are unsupported; see the extended execution guide.
 
+  `interactive_terminal: 1` additionally requires codec v7, typed terminal intent
+  and exit evidence, and the same atomic managed command slot. Persist dispatch
+  before opening a potentially mutating WebSocket. Unknown sessions block reuse;
+  never replay input or reopen a PTY on recovery. Store no live socket or handle.
+
   Adapters advertising `managed_ports: 1` also atomically maintain unique
   `{worker_id, host_port}` ownership with machine assignment and reservations.
   Conflicting claims return `:port_conflict` and roll back the entire transaction.

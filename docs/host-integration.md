@@ -409,3 +409,17 @@ launch is `:launched`, with a typed PID result; it does not prove readiness or
 continued process life. Lost launch evidence stays unknown and must not be replayed.
 Background processes can overlap later file operations. Stop/start requires an
 explicit new service launch; cancellation does not perform PID-based termination.
+
+## Interactive session integration
+
+Approve finite terminal session and buffer limits through the selected profile,
+then submit a `Terminal.Spec` using `Terminal.open/3`. Claim the connection with
+`Terminal.attach/3` from the process that will consume it. The handle stays on that
+controller and process; route input and resize requests through that owner. Use
+pull-based `Terminal.next/2` to avoid accumulating streamed messages in a caller's
+mailbox. Handle its closed event separately from confirmed exit evidence.
+
+Live terminal buffers have bounded retention and may be retired when later sessions
+need runtime capacity. Durable execution history does not contain a transcript.
+See [Interactive terminals](interactive-terminals.md) and the durable host's
+`terminal.exs` example for configuration, line-input console and restart recovery.

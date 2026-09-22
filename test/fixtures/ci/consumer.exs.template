@@ -66,6 +66,16 @@ true = SmolBox.Runtime.WorkerConfig.supports?(checkpoint_worker, checkpoint_spec
 {:ok, <<"smolbox-record-v3", 0, _::binary>> = checkpoint_bytes} = SmolBox.Store.Codec.encode(checkpoint_record)
 {:ok, ^checkpoint_record} = SmolBox.Store.Codec.decode(checkpoint_bytes)
 
+{:ok, terminal} = SmolBox.Terminal.Spec.new()
+artifact = worker_options[:artifacts] |> hd() |> Map.take(["id", "sha256", "architecture"])
+{:ok, terminal_spec} = SmolBox.ExecutionSpec.new(scope: "consumer", id: "terminal",
+  artifact: artifact, command: terminal, profile: profile)
+{:ok, fingerprint} = SmolBox.ExecutionSpec.fingerprint(terminal_spec, :binary.copy(<<1>>, 32))
+{:ok, terminal_record} = SmolBox.Execution.new(terminal_spec, fingerprint, 1000)
+{:ok, <<"smolbox-record-v7", 0, _::binary>> = terminal_bytes} = SmolBox.Store.Codec.encode(terminal_record)
+{:ok, ^terminal_record} = SmolBox.Store.Codec.decode(terminal_bytes)
+{:error, %{category: :unsupported_capability}} = SmolBox.Client.open_terminal(client, "owned", terminal)
+
 children = [
   {SmolBox.Store.Memory, name: Consumer.Store},
   {SmolBox, name: Consumer.Runtime, namespace: "consumer", mode: :ephemeral,
@@ -79,10 +89,10 @@ children = [
 {:error, %{category: :not_found}} = SmolBox.cancel(Consumer.Runtime, "scope", "missing")
 :ok = Supervisor.stop(supervisor)
 nil = Process.whereis(Consumer.Runtime)
-versions = Map.new([:req, :jason, :telemetry, :nimble_options], fn app ->
+versions = Map.new([:req, :mint, :mint_web_socket, :jason, :telemetry, :nimble_options], fn app ->
   {app, app |> Application.spec(:vsn) |> to_string()}
 end)
 File.write!("smoke.json", Jason.encode!(%{client: true, supervisor: true,
-  checkpoint: true, network_policy: true, offline_default: true, runtime_1_16_0_explicit: "1.16.0",
+  checkpoint: true, interactive: true, network_policy: true, offline_default: true, runtime_1_16_0_explicit: "1.16.0",
   unqualified_runtime_rejected: "1.16.2", runtime_default: "1.17.0", legacy_runtime_explicit: "1.14.1",
   legacy_1_14_6_explicit: "1.14.6", versions: versions}))

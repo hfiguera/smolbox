@@ -5,7 +5,7 @@ set -euo pipefail
 root=/srv/sbq
 unit=smolbox-qualification.service
 group=/sys/fs/cgroup/system.slice/$unit
-action=${1:?Expected start, stop, metrics, deadline, or fault}
+action=${1:?Expected start, restart, stop, metrics, deadline, or fault}
 
 wait_stopped() {
   # systemd can return before init has reaped the last orphan. Observe absence;
@@ -47,6 +47,23 @@ case "$action" in
       sleep 0.1
     done
     echo 'Candidate did not become healthy before its setup deadline.' >&2
+    systemctl stop "$unit"
+    exit 1
+    ;;
+  restart)
+    # Fence old API/guest processes while retaining the private machine disks.
+    # Unlike start, this never resets the three qualification filesystems.
+    systemctl stop "$unit"
+    wait_stopped
+    rm -f "$root/run/api.sock"
+    if systemctl is-failed --quiet "$unit"; then systemctl reset-failed "$unit"; fi
+    systemctl start "$unit"
+    for ((attempt=0; attempt<50; attempt++)); do
+      if curl --fail --silent --max-time 1 --unix-socket "$root/run/api.sock" http://localhost/health > /dev/null; then
+        exit 0
+      fi
+      sleep 0.1
+    done
     systemctl stop "$unit"
     exit 1
     ;;

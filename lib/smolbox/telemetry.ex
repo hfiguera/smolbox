@@ -187,6 +187,7 @@ defmodule SmolBox.Telemetry do
   end
 
   defp result_measurements(nil), do: %{}
+  defp result_measurements(%SmolBox.Terminal.Result{exit_code: code}), do: %{exit_code: code}
   defp result_measurements(%SmolBox.LaunchResult{}), do: %{}
 
   defp result_measurements(result),
