@@ -197,9 +197,9 @@ defmodule SmolBox.TerminalTransportTest do
       parent = self()
       port = TestPeer.start(fn conn -> route(conn, test_pid: parent) end)
       {:ok, handle} = Client.open_terminal(client(port), "owned", %Spec{})
-      assert_receive {:terminal_peer, peer}
+      assert {:ok, {:output, "ready\r\n"}} = Terminal.next(handle)
+      assert_receive {:terminal_peer, peer}, 5000
       send(peer, {:frames, frame})
-      assert {:ok, {:output, _}} = Terminal.next(handle)
       assert {:ok, {:closed, {:error, %Error{}}}} = Terminal.next(handle)
     end
   end
@@ -241,9 +241,9 @@ defmodule SmolBox.TerminalTransportTest do
     parent = self()
     port = TestPeer.start(fn conn -> route(conn, test_pid: parent) end)
     {:ok, handle} = Client.open_terminal(client(port), "owned", %Spec{})
-    assert_receive {:terminal_peer, peer}
+    assert {:ok, {:output, "ready\r\n"}} = Terminal.next(handle)
+    assert_receive {:terminal_peer, peer}, 5000
     send(peer, {:frames, [{:text, ~s({"type":"exit","code":9})}, {:close, 1000, ""}]})
-    assert {:ok, {:output, _}} = Terminal.next(handle)
     assert {:ok, {:closed, {:ok, %Terminal.Result{exit_code: 9}}}} = Terminal.next(handle)
   end
 
