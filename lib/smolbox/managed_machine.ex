@@ -37,6 +37,7 @@ defmodule SmolBox.ManagedMachine do
                 :last_request,
                 :operation_deadline_ms,
                 :resolved_at_ms,
+                reserved_ports: [],
                 schema: 1,
                 version: 1,
                 generation: 0,
@@ -121,6 +122,7 @@ defmodule SmolBox.ManagedMachine do
          true <- record.state != :deleted or Keyword.get(changes, :state, :deleted) == :deleted do
       patch = Map.new(changes)
       patch = if patch[:state] == :deleted, do: Map.put(patch, :reservation, nil), else: patch
+      patch = if patch[:state] == :deleted, do: Map.put(patch, :reserved_ports, []), else: patch
       update(record, patch, now)
     else
       _invalid -> invalid()
@@ -177,8 +179,10 @@ defmodule SmolBox.ManagedMachine do
   defp ownership?(%{worker_id: nil} = r),
     do:
       r.machine_name == nil and r.worker_generation == nil and r.reservation == nil and
+        r.reserved_ports == [] and
         r.created_machine == nil and r.observed_machine == nil and
-        r.state in [:accepted, :deleted]
+        (r.state in [:accepted, :deleted] or
+           (r.state == :conflict and match?(%Error{category: :port_conflict}, r.last_error)))
 
   defp ownership?(r) do
     Enum.all?([
@@ -186,6 +190,7 @@ defmodule SmolBox.ManagedMachine do
       SmolBox.MachineSpec.valid_name?(r.machine_name),
       Validation.integer?(r.worker_generation, 1, 9_007_199_254_740_991),
       r.reservation == RecordOps.resources(r) or (r.state == :deleted and r.reservation == nil),
+      r.reserved_ports == if(r.state == :deleted, do: [], else: Enum.map(r.spec.ports, & &1.host)),
       observation?(r.created_machine, r),
       observation?(r.observed_machine, r),
       same_observation?(r)

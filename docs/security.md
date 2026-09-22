@@ -97,7 +97,11 @@ to another worker.
 ## Minimal configuration and current enforcement limits
 
 Managed execution rejects unsupported profiles and always requests no guest
-networking without explicit allowlists, host mounts, forwarded ports, host sockets, GPU/CUDA or nested Docker.
+networking without explicit allowlists, host mounts, host sockets, GPU/CUDA or nested Docker.
+Explicit fixed TCP [port mappings](port-mappings.md) are separately supported on
+managed image machines and the low-level client with smolvm 1.17.0. These expose
+guest services through worker listeners and require host authorization; they
+provide no TLS, authentication, firewall policy or readiness guarantee.
 It uses approved prepared artifacts with `/bin/true` and restart policy `never`.
 Image preparation happens separately under host policy; a failed offline execution
 never authorizes networking or an arbitrary image pull.

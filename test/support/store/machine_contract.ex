@@ -4,7 +4,7 @@ defmodule SmolBox.Store.MachineContract do
   alias SmolBox.{Error, Execution, Machine, ManagedMachine, ManagedMachineSpec, Result}
   alias SmolBox.Store.Contract
 
-  def record(id \\ "computer") do
+  def record(id \\ "computer", ports \\ []) do
     execution = Contract.record()
 
     {:ok, spec} =
@@ -12,7 +12,8 @@ defmodule SmolBox.Store.MachineContract do
         scope: "contract",
         id: id,
         artifact: execution.spec.artifact,
-        profile: execution.spec.profile
+        profile: execution.spec.profile,
+        ports: ports
       )
 
     {:ok, fingerprint} = ManagedMachineSpec.fingerprint(spec, :binary.copy(<<1>>, 32))
@@ -20,8 +21,8 @@ defmodule SmolBox.Store.MachineContract do
     record
   end
 
-  def running(adapter, store) do
-    record = record()
+  def running(adapter, store, ports \\ []) do
+    record = record("computer", ports)
     key = ManagedMachine.key(record)
     assert {:ok, _} = adapter.machine(store, :accept, [record, 10])
     assert {:ok, _} = adapter.claim_worker(store, "worker", "owner", 1000, 5000)
@@ -42,7 +43,8 @@ defmodule SmolBox.Store.MachineContract do
       cpus: 1,
       memory_mb: 256,
       storage_gb: 1,
-      overlay_gb: 1
+      overlay_gb: 1,
+      ports: ports
     }
 
     assert {:ok, running} =

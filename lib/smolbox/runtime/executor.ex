@@ -1,11 +1,25 @@
 defmodule SmolBox.Runtime.Executor do
   @moduledoc false
   alias SmolBox.{Client, Error, Execution, Identity, Machine, Telemetry}
-  alias SmolBox.Runtime.{Cleanup, Files, Observation, Session, WorkerConfig, WorkerHealth}
+
+  alias SmolBox.Runtime.{
+    Cleanup,
+    Files,
+    Machines,
+    Observation,
+    Session,
+    WorkerConfig,
+    WorkerHealth
+  }
 
   def run(config, key, eligible) do
     Session.safe(fn ->
       with {:ok, record} <- Session.store(config, :fetch, [key]),
+           :ok <-
+             Machines.port_support(
+               config,
+               if(record.created_machine, do: record.created_machine.ports, else: [])
+             ),
            session = Session.new(config, record),
            {:ok, claimed} <- Session.claim(session),
            {:ok, handled} <- route(session, claimed, eligible) do

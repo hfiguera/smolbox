@@ -6,6 +6,11 @@ defmodule SmolBox.Store do
   worker leases, capacity, and assignment uniqueness across both resource kinds.
   Managed commands reference their owning machine and carry no reservation of
   their own. Their completion releases a command slot atomically, not the machine.
+  Adapters advertising `managed_ports: 1` also atomically maintain unique
+  `{worker_id, host_port}` ownership with machine assignment and reservations.
+  Conflicting claims return `:port_conflict` and roll back the entire transaction.
+  Retain ports until verified deletion or quiescent absence resolution; stopped,
+  missing and uncertain machines keep them. Run the shared PortContract suite.
   The execution reservation rules below describe disposable work.
 
   Every mutation is one transaction. Failures must roll back record and worker

@@ -38,6 +38,24 @@ defmodule SmolBox.RuntimeConfigTest do
     %{worker: worker, options: options, config: config, spec: spec}
   end
 
+  test "fixed ports require 1.17.0 while the same no-port approval remains compatible", c do
+    {:ok, spec} =
+      SmolBox.ManagedMachineSpec.new(
+        scope: c.spec.scope,
+        id: "ports",
+        artifact: c.spec.artifact,
+        profile: c.spec.profile,
+        ports: [%SmolBox.PortMapping{host: 28_731, guest: 8000}]
+      )
+
+    assert WorkerConfig.supports?(c.worker, spec)
+    assert {:ok, machine} = WorkerConfig.machine_spec(c.worker, spec, "ports")
+    assert machine.ports == spec.ports
+    refute WorkerConfig.supports?(%{c.worker | runtime_version: "1.16.1"}, spec)
+    assert WorkerConfig.supports?(%{c.worker | runtime_version: "1.16.1"}, %{spec | ports: []})
+    refute WorkerConfig.supports?(%{c.worker | platform: :windows}, spec)
+  end
+
   test "worker registration rejects unsafe catalogs, endpoints and unqualified controls",
        context do
     refute inspect(context.worker) =~ "/approved/"

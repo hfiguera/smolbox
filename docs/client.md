@@ -49,15 +49,16 @@ require their own media types. These endpoints do not attest artifact digests,
 host quotas or isolation.
 
 Creation replies must match the requested name, CPU count, guest memory, both
-disk allocations and network policy. A mismatch returns a protocol error with uncertain
+disk allocations, network policy and canonical port mappings. A mismatch returns a protocol error with uncertain
 creation evidence. Managed execution does not start that guest or adopt it for
 automatic cleanup; the original reservation remains available for operator
 investigation. An erroneous worker reply must not silently change execution policy.
 
 By default an owned disposable machine starts from an approved artifact with
 guest networking disabled. Explicit outbound policies are described in
-[Controlled network access](network-access.md). Mounts, sockets, GPU, ports and
-workload restart remain disabled. This example uses the offline default:
+[Controlled network access](network-access.md). Optional fixed TCP mappings on
+smolvm 1.17.0 are described in [Port mappings](port-mappings.md). Mounts, Unix
+sockets, GPU and automatic workload restart remain disabled. This example uses the offline default:
 
 ```elixir
 {:ok, name} = SmolBox.Identity.machine_name("myapp")

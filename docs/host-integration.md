@@ -393,3 +393,10 @@ The same supervised runtime can serve `SmolBox.Machines` and disposable
 executions. The memory and PostgreSQL example adapters implement the extension.
 Read [Managed persistent machines](persistent-machines.md) before enabling it on
 shared workers, particularly the coordinated upgrade and capacity accounting.
+
+Mapped machines additionally require `managed_ports: 1` and smolvm 1.17.0. Their
+ports belong to the worker host, not necessarily this application's host. Use one
+stable worker ID and authoritative store, including across controller restarts.
+The PostgreSQL port-ownership index arbitrates fixed ports atomically; it does not
+reserve operating-system sockets against unrelated processes. Read the
+[port deployment and upgrade guide](port-mappings.md) before exposing services.

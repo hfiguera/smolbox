@@ -76,11 +76,12 @@ defmodule SmolBox.Transport.Req do
   end
 
   defp collector(request) do
-    initial = Capture.new(request)
-
     fn {:data, data}, {req, response} ->
-      with :ok <- response_status(response, request),
-           capture = Req.Response.get_private(response, :smolbox_capture, initial),
+      capture_request = capture_request(response, request)
+
+      with :ok <- response_status(response, capture_request),
+           capture =
+             Req.Response.get_private(response, :smolbox_capture, Capture.new(capture_request)),
            {:ok, capture} <- Capture.feed(capture, data) do
         {:cont, {req, Req.Response.put_private(response, :smolbox_capture, capture)}}
       else
@@ -90,13 +91,27 @@ defmodule SmolBox.Transport.Req do
     end
   end
 
+  defp capture_request(%{status: 409}, request),
+    do: %{
+      request
+      | mode: :buffer,
+        accept: "application/json",
+        max_bytes: min(request.max_bytes, 4096)
+    }
+
+  defp capture_request(_response, request), do: request
+
   defp finish(response, request) do
     case Req.Response.get_private(response, :smolbox_error) do
       nil ->
-        with :ok <- response_status(response, request) do
-          response
-          |> Req.Response.get_private(:smolbox_capture, Capture.new(request))
-          |> Capture.finish()
+        capture_request = capture_request(response, request)
+
+        with :ok <- response_status(response, capture_request),
+             {:ok, body} <-
+               response
+               |> Req.Response.get_private(:smolbox_capture, Capture.new(capture_request))
+               |> Capture.finish() do
+          finish_status(response.status, body)
         end
 
       error ->
@@ -104,12 +119,22 @@ defmodule SmolBox.Transport.Req do
     end
   end
 
+  defp finish_status(409, body) do
+    case Jason.decode(body) do
+      {:ok, %{"code" => "PORT_IN_USE"}} -> failure(:port_conflict)
+      _other -> failure(:identity_conflict)
+    end
+  end
+
+  defp finish_status(_status, body), do: {:ok, body}
+
   defp response_status(%{status: status}, _accept) when status in [401, 403],
     do: failure(:authentication)
 
   defp response_status(%{status: 404}, _accept), do: failure(:not_found)
-  defp response_status(%{status: 409}, _accept), do: failure(:identity_conflict)
-  defp response_status(%{status: status}, _accept) when status != 200, do: failure(:protocol)
+
+  defp response_status(%{status: status}, _accept) when status not in [200, 409],
+    do: failure(:protocol)
 
   defp response_status(response, request) do
     content_types = Req.Response.get_header(response, "content-type")

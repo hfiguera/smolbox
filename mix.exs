@@ -33,6 +33,8 @@ defmodule SmolBox.MixProject do
           "docs/troubleshooting.md",
           "docs/client.md",
           "docs/network-access.md",
+          "docs/port-mappings.md",
+          "docs/port-mappings-validation.md",
           "docs/checkpoints.md",
           "docs/persistent-machines.md",
           "docs/persistent-machines-validation.md",
@@ -56,6 +58,8 @@ defmodule SmolBox.MixProject do
           "Using SmolBox": [
             "docs/client.md",
             "docs/network-access.md",
+            "docs/port-mappings.md",
+            "docs/port-mappings-validation.md",
             "docs/checkpoints.md",
             "docs/persistent-machines.md",
             "docs/persistent-machines-validation.md",
@@ -90,6 +94,7 @@ defmodule SmolBox.MixProject do
             SmolBox.Worker,
             SmolBox.Command,
             SmolBox.MachineSpec,
+            SmolBox.PortMapping,
             SmolBox.Machine,
             SmolBox.Health,
             SmolBox.Result,
@@ -122,6 +127,8 @@ defmodule SmolBox.MixProject do
           "docs/getting-started.md",
           "docs/client.md",
           "docs/network-access.md",
+          "docs/port-mappings.md",
+          "docs/port-mappings-validation.md",
           "docs/checkpoints.md",
           "docs/persistent-machines.md",
           "docs/persistent-machines-validation.md",
@@ -158,7 +165,8 @@ defmodule SmolBox.MixProject do
           SmolBox.RuntimeProxy,
           SmolBox.TestTLS,
           SmolBox.Store.Contract,
-          SmolBox.Store.MachineContract
+          SmolBox.Store.MachineContract,
+          SmolBox.Store.PortContract
         ],
         summary: [threshold: 90]
       ]

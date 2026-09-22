@@ -18,6 +18,14 @@ The qualification remains `:development`; no production isolation certification
 or cross-version checkpoint portability is implied. Published 0.1.5 and the
 historical campaigns below retain their recorded versions and results.
 
+## Managed TCP port mappings
+
+The unreleased checkout supports fixed TCP mappings on managed image machines
+and the low-level client with smolvm 1.17.0. See [port-mapping validation](port-mappings-validation.md)
+for the real Linux/macOS HTTP acceptance, outbound controls, conflicts, durable
+ownership and regression evidence. This requires the coordinated codec-v5/store
+upgrade in the [port mapping guide](port-mappings.md#persistence-and-upgrades).
+
 ## Checkpoint execution in 0.1.5
 
 Operator-approved idle, offline checkpoints have a separate contract on smolvm

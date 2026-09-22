@@ -8,10 +8,21 @@ defmodule SmolBox.Runtime.Machines do
 
   def run(config, key, eligible) do
     Session.safe(fn ->
-      with {:ok, record} <- claim(config, key) do
+      with {:ok, record} <- claim(config, key),
+           :ok <- port_support(config, record.spec.ports) do
         route(config, record, eligible)
       end
     end)
+  end
+
+  def port_support(_config, []), do: :ok
+
+  def port_support(config, _ports) do
+    case Session.store(config, :capabilities, []) do
+      {:ok, %{managed_ports: 1}} -> :ok
+      {:ok, _unsupported} -> Session.error(:unsupported_capability, :machine)
+      error -> error
+    end
   end
 
   def claim(config, key),
@@ -28,6 +39,9 @@ defmodule SmolBox.Runtime.Machines do
 
   defp route(config, %{state: :accepted} = record, eligible),
     do: reserve(config, record, eligible)
+
+  defp route(config, %{state: :conflict, worker_id: nil} = record, _eligible),
+    do: write(config, record, next_due_at_ms: config.clock.now() + 60_000)
 
   defp route(_config, %{active_execution: key} = record, _eligible) when not is_nil(key),
     do: {:ok, record}
@@ -57,9 +71,24 @@ defmodule SmolBox.Runtime.Machines do
                ]) do
           {:halt, dispatch(config, reserved)}
         else
-          {:error, %Error{category: :admission_exhausted}} -> {:cont, {:ok, record}}
-          {:error, _error} = error -> {:halt, error}
-          _unready -> {:cont, {:ok, record}}
+          {:error, %Error{category: :admission_exhausted}} ->
+            {:cont, {:ok, record}}
+
+          {:error, %Error{category: :port_conflict} = error} ->
+            {:halt,
+             fresh_write(config, record,
+               state: :conflict,
+               operation: nil,
+               phase: nil,
+               last_error: error,
+               next_due_at_ms: config.clock.now() + 60_000
+             )}
+
+          {:error, _error} = error ->
+            {:halt, error}
+
+          _unready ->
+            {:cont, {:ok, record}}
         end
       end)
 

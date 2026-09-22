@@ -19,6 +19,7 @@ defmodule SmolBox.Error do
           | :protocol
           | :output_limit
           | :identity_conflict
+          | :port_conflict
           | :not_found
           | :store
           | :stale_claim

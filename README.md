@@ -11,7 +11,8 @@ Use it when an Elixir application needs to call a Python library, run a JavaScri
 processing step, or execute a script in a separate guest environment. You operate
 the workers and prepare images containing the languages and dependencies you need.
 The default execution API runs one command in its own disposable VM.
-`SmolBox.Machines` also manages retained machines that can run successive commands.
+`SmolBox.Machines` also manages retained machines that can run successive commands
+and expose TCP services through fixed [worker-host port mappings](docs/port-mappings.md).
 
 ## Why use SmolBox?
 

@@ -62,7 +62,9 @@ defmodule SmolBox.ManagedPeer do
       |> Jason.decode!()
       |> Map.put("name", input["name"])
       |> Map.put("branchable", state.options[:checkpoint] == true)
-      |> Map.merge(Map.take(input, ["network", "networkBackend", "allowedHosts", "allowedCidrs"]))
+      |> Map.merge(
+        Map.take(input, ["network", "networkBackend", "allowedHosts", "allowedCidrs", "ports"])
+      )
       |> Map.merge(Keyword.get(state.options, :created_allocations, %{}))
 
     response = if state.options[:create_lost], do: {:json, 503, %{}}, else: {:json, 200, machine}
@@ -87,7 +89,9 @@ defmodule SmolBox.ManagedPeer do
 
   defp machine_route("POST", [operation], _body, machine, state)
        when operation == "start" do
-    update_machine_state(machine, state, "running")
+    if state.options[:start_port_conflict],
+      do: {{:json, 409, %{"code" => "PORT_IN_USE"}}, state},
+      else: update_machine_state(machine, state, "running")
   end
 
   defp machine_route("DELETE", [], _body, machine, state) do

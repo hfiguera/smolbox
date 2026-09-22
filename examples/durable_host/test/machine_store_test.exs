@@ -72,4 +72,51 @@ defmodule SmolBox.DurableHost.MachineStoreTest do
 
     assert {:error, %{category: :store}} = Store.fetch(store, {"contract", "one"})
   end
+
+  for scenario <- [:competition, :retention, :completion] do
+    test "port ownership contract: #{scenario}", %{store: store} do
+      apply(SmolBox.Store.PortContract, unquote(scenario), [Store, store])
+    end
+  end
+
+  test "port ownership arbitrates across partitions and verifies its durable projection", %{
+    store: store
+  } do
+    alias SmolBox.Store.PortContract
+    {:ok, other} = Store.new(Repo, store.partition <> "-other", :crypto.strong_rand_bytes(32))
+
+    on_exit(fn ->
+      Database.query(other, "DELETE FROM smolbox_partitions WHERE partition=$1", [other.partition])
+    end)
+
+    claims =
+      for context <- [store, other] do
+        {:ok, _} = Store.claim_worker(context, "worker", "owner", 1000, 5000)
+        {context, PortContract.claim(Store, context, "same-identity")}
+      end
+
+    results =
+      claims
+      |> Task.async_stream(fn {context, record} ->
+        {context, PortContract.reserve(Store, context, record)}
+      end)
+      |> Enum.map(fn {:ok, value} -> value end)
+
+    assert [{winner, {:ok, record}}] = Enum.filter(results, &match?({_, {:ok, _}}, &1))
+
+    assert [{loser, {:error, %{category: :port_conflict}}}] =
+             Enum.reject(results, &match?({_, {:ok, _}}, &1))
+
+    assert {:ok, %{slots: 0}} = Store.usage(loser, "worker")
+
+    assert {:ok, %{reserved_ports: [], worker_id: nil}} =
+             Store.machine(loser, :fetch, [{record.scope, record.id}])
+
+    Database.query(winner, "DELETE FROM smolbox_port_owners WHERE partition=$1", [
+      winner.partition
+    ])
+
+    assert {:error, %{category: :store}} =
+             Store.machine(winner, :fetch, [{record.scope, record.id}])
+  end
 end

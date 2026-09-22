@@ -3,7 +3,7 @@ defmodule SmolBox.Machine do
   Validated observation of a worker machine and its network policy.
 
   Additive response fields are ignored. Safety-relevant fields must be present;
-  networking without explicit allowlists, mounts, ports, GPU or CUDA fail decoding and cannot be
+  networking without explicit allowlists, mounts, unsupported port mappings, GPU or CUDA fail decoding and cannot be
   treated as an owned machine observation. `created_at` has only second precision upstream and
   is not a cryptographic or immutable ownership token.
   """
@@ -19,12 +19,14 @@ defmodule SmolBox.Machine do
     :memory_mb,
     :storage_gb,
     :overlay_gb,
-    network: :offline
+    network: :offline,
+    ports: []
   ]
 
   @type t :: %__MODULE__{
           name: String.t(),
           network: :offline | SmolBox.NetworkPolicy.t(),
+          ports: [SmolBox.PortMapping.t()],
           state: :created | :running | :stopped,
           created_at: non_neg_integer(),
           cpus: pos_integer(),
@@ -44,12 +46,14 @@ defmodule SmolBox.Machine do
           "storageGb" => storage,
           "overlayGb" => overlay,
           "mounts" => [],
-          "ports" => [],
+          "ports" => wire_ports,
           "gpu" => false,
           "cuda" => false
         } = wire
       ) do
-    with {:ok, network} <- SmolBox.NetworkPolicy.from_wire(wire),
+    with {:ok, ports} <- SmolBox.PortMapping.from_wire(wire_ports),
+         true <- port_network?(ports, wire),
+         {:ok, network} <- SmolBox.NetworkPolicy.from_wire(wire),
          true <-
            MachineSpec.valid_name?(name) and state in ["created", "running", "stopped"] and
              Validation.integer?(created, 0, 253_402_300_799) and
@@ -59,6 +63,7 @@ defmodule SmolBox.Machine do
        %__MODULE__{
          name: name,
          network: network,
+         ports: ports,
          state: state(state),
          created_at: created,
          cpus: cpus,
@@ -72,6 +77,21 @@ defmodule SmolBox.Machine do
   end
 
   def from_wire(_body), do: invalid()
+
+  defp port_network?([], _wire), do: true
+
+  defp port_network?(_ports, %{"networkBackend" => "virtio-net", "network" => true}),
+    do: true
+
+  defp port_network?(_ports, %{
+         "networkBackend" => "virtio-net",
+         "network" => false,
+         "allowedHosts" => [],
+         "allowedCidrs" => []
+       }),
+       do: true
+
+  defp port_network?(_ports, _wire), do: false
 
   @doc "Compare creation evidence and allocations; requires exclusive namespace control."
   @spec same_incarnation?(t(), t()) :: boolean()

@@ -147,7 +147,7 @@ defmodule SmolBox.NetworkPolicyTest do
     legacy = %{
       record
       | spec: %{record.spec | profile: Map.delete(record.spec.profile, :network)},
-        created_machine: Map.delete(machine, :network)
+        created_machine: Map.drop(machine, [:network, :ports])
     }
 
     assert {:ok, ^record} = Codec.decode("smolbox-record-v1\0" <> :erlang.term_to_binary(legacy))

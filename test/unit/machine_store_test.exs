@@ -16,4 +16,11 @@ defmodule SmolBox.MachineStoreTest do
       apply(MachineContract, unquote(scenario), [Memory, store])
     end
   end
+
+  for scenario <- [:competition, :retention, :completion] do
+    test "port ownership contract: #{scenario}" do
+      store = start_supervised!(Memory)
+      apply(SmolBox.Store.PortContract, unquote(scenario), [Memory, store])
+    end
+  end
 end

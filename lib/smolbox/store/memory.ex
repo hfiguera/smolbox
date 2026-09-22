@@ -12,7 +12,7 @@ defmodule SmolBox.Store.Memory do
   @behaviour SmolBox.Store
 
   alias SmolBox.{Error, Execution, MachineSpec, ManagedMachine, Store, Validation}
-  alias SmolBox.Store.{Codec, MachineOps, RecordOps}
+  alias SmolBox.Store.{Codec, MachineOps, PortOwnership, RecordOps}
 
   @doc """
   Start an ephemeral store, optionally registered with `:name`.
@@ -50,6 +50,7 @@ defmodule SmolBox.Store.Memory do
          records: %{},
          machines: %{},
          machine_keys: %{},
+         port_owners: %{},
          sizes: %{},
          bytes: 0,
          leases: %{},
@@ -100,7 +101,9 @@ defmodule SmolBox.Store.Memory do
   end
 
   defp execute(:capabilities, state),
-    do: {{:ok, %{schema: 1, durable: false, atomic: true, managed_machines: 1}}, state}
+    do:
+      {{:ok, %{schema: 1, durable: false, atomic: true, managed_machines: 1, managed_ports: 1}},
+       state}
 
   defp execute({:machine, operation, arguments}, state) do
     case machine_operation(state, operation, arguments) do
@@ -465,7 +468,8 @@ defmodule SmolBox.Store.Memory do
 
   defp machine_save(state, record) do
     with {:ok, bytes} <- Codec.encode(record),
-         {:ok, index} <- managed_index(state.machine_keys, record) do
+         {:ok, index} <- managed_index(state.machine_keys, record),
+         {:ok, ports} <- PortOwnership.update(state.port_owners, record) do
       key = {:machine, ManagedMachine.key(record)}
       size = byte_size(bytes)
       total = state.bytes - Map.get(state.sizes, key, 0) + size
@@ -476,6 +480,7 @@ defmodule SmolBox.Store.Memory do
            state
            | machines: Map.put(state.machines, ManagedMachine.key(record), record),
              machine_keys: index,
+             port_owners: ports,
              sizes: Map.put(state.sizes, key, size),
              bytes: total
          }}

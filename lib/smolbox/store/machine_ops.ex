@@ -36,6 +36,7 @@ defmodule SmolBox.Store.MachineOps do
           worker_generation: lease.generation,
           machine_name: name,
           reservation: needed,
+          reserved_ports: Enum.map(record.spec.ports, & &1.host),
           state: :creating
         },
         now
@@ -92,7 +93,9 @@ defmodule SmolBox.Store.MachineOps do
 
   def request(_record, _action, _version, _now), do: error(:validation)
 
-  defp unassigned_delete?(%{state: :accepted, worker_id: nil}, :delete), do: true
+  defp unassigned_delete?(%{state: state, worker_id: nil}, :delete)
+       when state in [:accepted, :conflict], do: true
+
   defp unassigned_delete?(_record, _action), do: false
 
   def attach(machine, execution, now) do
@@ -149,6 +152,7 @@ defmodule SmolBox.Store.MachineOps do
              %{
                state: :deleted,
                reservation: nil,
+               reserved_ports: [],
                operation: nil,
                phase: nil,
                active_execution: nil,

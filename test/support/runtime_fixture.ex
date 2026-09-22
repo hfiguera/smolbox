@@ -52,7 +52,7 @@ defmodule SmolBox.RuntimeFixture do
           architecture: "x86_64",
           profiles: [spec.profile],
           allocation_floor: %{storage_gb: 1, overlay_gb: 1, host_overhead_mb: 256},
-          capacity: Contract.capacity(),
+          capacity: Contract.capacity(Keyword.get(options, :slots, 1)),
           draining: Keyword.get(options, :draining, false),
           artifacts:
             if(checkpoint?,

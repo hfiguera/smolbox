@@ -23,7 +23,7 @@ fencing to the upstream API or change the recovery contract below. See
 retain the VM and hold one exclusive command slot through preparation, execution,
 and collection. Cancellation and unknown outcomes never authorize automatic
 machine deletion. See [Managed persistent machines](persistent-machines.md) for
-operator quiescence, explicit absence resolution, and the coordinated v4/store
+operator quiescence, explicit absence resolution, and the coordinated v5/store
 upgrade. The disposal and unknown-retention rules below describe the original
 **disposable** execution API.
 
