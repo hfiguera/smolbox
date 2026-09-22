@@ -1,6 +1,6 @@
 defmodule SmolBox.DurableHost.MachineStore do
   @moduledoc false
-  alias SmolBox.DurableHost.{Database, MachineIndex}
+  alias SmolBox.DurableHost.{Database, MachineIndex, PortIndex}
   alias SmolBox.{Error, Execution, ManagedMachine, Validation}
   alias SmolBox.Store.{MachineOps, RecordOps}
 
@@ -175,7 +175,8 @@ defmodule SmolBox.DurableHost.MachineStore do
 
   defp persist(context, record) do
     with :ok <- exclusive_assignment(context, record),
-         {:ok, record} <- Database.write(context, record) do
+         {:ok, record} <- Database.write(context, record),
+         :ok <- PortIndex.sync(context, record) do
       Database.query(
         context,
         "UPDATE smolbox_managed_machines SET machine_name=$4 WHERE partition=$1 AND scope=$2 AND execution_id=$3",

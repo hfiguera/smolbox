@@ -6,7 +6,10 @@ can retain an explicit `runtime_version: "1.16.1"`. See the
 [1.17.0 qualification](compatibility.md#smolvm-1-17-0-qualification).
 
 Controlled networking was introduced in SmolBox **0.1.3** for smolvm **1.16.0**. SmolBox 0.1.2 does not include it. Existing profiles and machines remain offline by default.
-Networking never enables image pulls, ports, mounts, or credential forwarding.
+Outbound policy never enables image pulls, inbound mappings, mounts, or credential
+forwarding. Fixed TCP [port mappings](port-mappings.md) are configured separately
+on the machine specification. With mappings, `:offline` denies outbound traffic
+but attaches a virtio-net device for inbound forwarding.
 
 SmolBox **0.1.5** defaults to smolvm **1.16.1**. Both 1.16.0 and 1.16.1
 support these policies, as does 1.17.0 in this checkout. Select an older worker
@@ -70,7 +73,7 @@ CIDRs can grant very broad access. Operators must review the combined destinatio
   DNS-based data disclosure.
 - Upstream platform rules, the worker network and external firewalls can deny
   additional destinations. Declaring an allowlist does not establish connectivity.
-- This is outbound control. There are no published guest ports in this feature.
+- This is outbound control. Published guest ports are a separate [machine feature](port-mappings.md).
 - `smolvm serve` 1.16.0 and 1.16.1 default to a strict egress floor that also denies private,
   loopback and metadata destinations, including addresses learned from DNS. Keep
   that floor in deployments handling untrusted workloads. An operator can weaken

@@ -5,7 +5,7 @@ defmodule SmolBox.ManagedMachineTest do
 
   test "machine and command envelopes round trip while disposable bytes keep their prior shape" do
     machine = MachineContract.record()
-    assert {:ok, <<"smolbox-record-v4\0", _::binary>> = bytes} = Codec.encode(machine)
+    assert {:ok, <<"smolbox-record-v5\0", _::binary>> = bytes} = Codec.encode(machine)
     assert {:ok, ^machine} = Codec.decode(bytes)
     execution = Contract.record()
     assert {:ok, <<"smolbox-record-v2\0", payload::binary>> = bytes} = Codec.encode(execution)
@@ -17,7 +17,7 @@ defmodule SmolBox.ManagedMachineTest do
     {:ok, command} =
       Memory.machine(store, :submit, [ManagedMachine.key(running), execution, 10, 1100])
 
-    assert {:ok, <<"smolbox-record-v4\0", _::binary>> = bytes} = Codec.encode(command)
+    assert {:ok, <<"smolbox-record-v5\0", _::binary>> = bytes} = Codec.encode(command)
     assert {:ok, ^command} = Codec.decode(bytes)
     assert Execution.validate(command) == :ok
   end
@@ -36,7 +36,7 @@ defmodule SmolBox.ManagedMachineTest do
         ] do
       invalid = struct!(machine, patch)
       assert {:error, _} = ManagedMachine.validate(invalid)
-      assert {:error, _} = Codec.decode("smolbox-record-v4\0" <> :erlang.term_to_binary(invalid))
+      assert {:error, _} = Codec.decode("smolbox-record-v5\0" <> :erlang.term_to_binary(invalid))
     end
 
     assert {:error, _} = ManagedMachineSpec.validate(Map.put(machine.spec, :unexpected, true))
@@ -44,9 +44,9 @@ defmodule SmolBox.ManagedMachineTest do
     assert {:error, _} = Codec.decode(bytes <> "extra")
 
     assert {:error, _} =
-             Codec.decode("smolbox-record-v4\0" <> :erlang.term_to_binary(machine, compressed: 9))
+             Codec.decode("smolbox-record-v5\0" <> :erlang.term_to_binary(machine, compressed: 9))
 
-    assert {:error, _} = Codec.decode("smolbox-record-v5\0" <> :erlang.term_to_binary(machine))
+    assert {:error, _} = Codec.decode("smolbox-record-v6\0" <> :erlang.term_to_binary(machine))
   end
 
   test "machine and command records share memory bounds and failed transactions leave no busy slot" do

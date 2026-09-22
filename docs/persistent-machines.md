@@ -208,9 +208,9 @@ checks; adapters must supply atomicity. Run the reusable
 store suite. Existing adapters without the optional capability retain disposable
 support and reject the managed-machine API with `:unsupported_capability`.
 
-Managed machines and their command records use codec envelope **v4**. Disposable
+Managed machines and their command records use codec envelope **v5**. Disposable
 image/checkpoint records keep their previous v2/v3 byte shape; old records load with
-an empty managed-machine reference. Older controllers cannot read v4 and cannot
+an empty managed-machine reference. Exact v4 records gain empty mappings and reservations on read. Older controllers cannot read v5 and cannot
 account for retained reservations, even if they only run disposable work.
 
 Before enabling this feature on shared workers:
@@ -218,8 +218,9 @@ Before enabling this feature on shared workers:
 1. Drain and stop **all** controllers sharing the worker/store authority. Back up
    records and preserve fingerprint/encryption keys.
 2. Upgrade every reader and adapter. Apply the PostgreSQL example's
-   `20260922000000_managed_persistent_machines` migration. It adds the machine
-   table and execution association projection; existing payloads need no backfill.
+   `20260922000000_managed_persistent_machines` migration and `20260923000000_managed_port_ownership`. These add machine
+   and port-ownership tables and the execution association projection. Existing
+   v4 payloads need no backfill. See [Port persistence and rollback](port-mappings.md#persistence-and-upgrades).
 3. Restart upgraded controllers, verify capability checks and existing disposable
    recovery, then run a small persistent-machine acceptance test.
 

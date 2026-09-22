@@ -138,6 +138,38 @@ defmodule SmolBox.SecurityTransportTest do
     end
   end
 
+  test "port conflicts are bounded, redacted and never delivered as command events" do
+    parent = self()
+
+    for {body, type, category} <- [
+          {~s({"code":"PORT_IN_USE","message":"private socket details"}), "application/json",
+           :port_conflict},
+          {~s({"code":"OTHER"}), "application/json", :identity_conflict},
+          {"not-json", "application/json", :identity_conflict},
+          {String.duplicate("x", 4097), "application/json", :output_limit},
+          {~s({"code":"PORT_IN_USE"}), "text/plain", :protocol}
+        ] do
+      port =
+        TestPeer.start(fn conn ->
+          send(parent, :conflict_request)
+          conn = conn |> Plug.Conn.put_resp_content_type(type) |> Plug.Conn.send_chunked(409)
+          body |> String.graphemes() |> Enum.reduce_while(conn, &TestPeer.stream_chunk/2)
+        end)
+
+      {:ok, command} = Command.new(["true"])
+
+      assert {:error, %Error{category: ^category, evidence: :dispatch_uncertain} = error} =
+               Client.exec_stream(client(port), "fixture", command,
+                 on_event: &send(parent, {:unexpected_event, &1})
+               )
+
+      refute inspect(error) =~ "private socket"
+      assert_receive :conflict_request
+      refute_receive :conflict_request, 10
+      refute_receive {:unexpected_event, _}, 10
+    end
+  end
+
   test "outer and idle deadlines are finite and request bounds prevent dispatch" do
     parent = self()
 

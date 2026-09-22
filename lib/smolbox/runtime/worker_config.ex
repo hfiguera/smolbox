@@ -132,14 +132,17 @@ defmodule SmolBox.Runtime.WorkerConfig do
   @doc "Check exact profile/artifact approval and allocation floors; this is not a health probe."
   @spec supports?(t(), ExecutionSpec.t() | SmolBox.ManagedMachineSpec.t()) :: boolean()
   def supports?(worker, %{artifact: %{"kind" => "checkpoint"}} = spec) do
-    spec.profile in worker.profiles and allocation_fits?(worker, spec.profile) and
+    Map.get(spec, :ports, []) == [] and
+      spec.profile in worker.profiles and allocation_fits?(worker, spec.profile) and
       Enum.any?(worker.checkpoints, fn checkpoint ->
         Checkpoint.artifact(checkpoint) == spec.artifact and checkpoint.profile == spec.profile
       end)
   end
 
   def supports?(worker, spec) do
-    (spec.profile.network == :offline or worker.runtime_version in ["1.16.0", "1.16.1", "1.17.0"]) and
+    ports_supported?(worker, spec) and
+      (spec.profile.network == :offline or
+         worker.runtime_version in ["1.16.0", "1.16.1", "1.17.0"]) and
       spec.profile in worker.profiles and allocation_fits?(worker, spec.profile) and
       worker.architecture == spec.artifact["architecture"] and
       Enum.any?(
@@ -164,8 +167,18 @@ defmodule SmolBox.Runtime.WorkerConfig do
   def machine_spec(worker, %{artifact: %{"kind" => "checkpoint"}} = spec, name),
     do: Checkpoint.machine(approved_checkpoint(worker, spec), name)
 
-  def machine_spec(worker, spec, name),
-    do: Profile.machine(spec.profile, name, artifact_path(worker, spec))
+  def machine_spec(worker, spec, name) do
+    with {:ok, machine} <- Profile.machine(spec.profile, name, artifact_path(worker, spec)) do
+      machine = %{machine | ports: Map.get(spec, :ports, [])}
+      with :ok <- MachineSpec.validate(machine), do: {:ok, machine}
+    end
+  end
+
+  defp ports_supported?(worker, spec),
+    do:
+      Map.get(spec, :ports, []) == [] or
+        (worker.runtime_version == "1.17.0" and
+           {worker.platform, worker.architecture} in [{:linux, "x86_64"}, {:macos, "aarch64"}])
 
   defp approved_checkpoint(worker, spec),
     do: Enum.find(worker.checkpoints, &(Checkpoint.artifact(&1) == spec.artifact))

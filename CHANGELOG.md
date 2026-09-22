@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- Add fixed TCP `PortMapping` values to low-level and managed machine creation
+  on smolvm 1.17.0, with canonical identity, strict observations, independent
+  outbound allowlists, and durable worker-scoped port ownership.
+- Retain port reservations across commands, controller restart and stop/start;
+  block conflicts and uncertain operations without remapping or replaying.
+- Managed records now write codec v5; v4 loads with empty port defaults. Apply
+  the PostgreSQL port-ownership migration and upgrade all controllers together,
+  including deployments without mappings. See [upgrade details](docs/port-mappings.md#persistence-and-upgrades).
+- Add a PostgreSQL HTTP-service example covering controller restart, stop/start,
+  readiness, file persistence, explicit deletion and reservation release.
+
 - Default to smolvm 1.17.0 on Linux x86_64 and macOS Apple Silicon after
   execution, recovery, checkpoint, network and persistent-machine qualification.
   Retain explicit 1.16.1 and earlier supported workers. Install worker binaries
@@ -13,9 +24,10 @@
   commands, blocked uncertainty, and operator resolution.
 - Keep retained-machine reservations independent of commands, sharing worker
   capacity with disposable executions. Stopped machines retain full reservations.
-- Add optional store transactions, codec v4 managed records, and the PostgreSQL
-  machine table/association migration. Upgrade every controller sharing workers
-  and storage before enabling the feature; see `docs/persistent-machines.md`.
+- Add optional store transactions, codec v5 managed records with v4 read
+  compatibility, and PostgreSQL machine/port ownership migrations. Upgrade every
+  controller sharing workers and storage before enabling the feature; see
+  `docs/persistent-machines.md`.
 - Preserve disposable execution APIs and their v2/v3 serialized record shape.
 - Add shared memory/PostgreSQL concurrency tests and a two-process persistent-file
   demonstration. See `docs/persistent-machines-validation.md` for evidence.

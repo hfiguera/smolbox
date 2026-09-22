@@ -91,7 +91,7 @@ defmodule SmolBox.Client do
          {:ok, client} <- creation_runtime(client, spec),
          {:ok, body} <- json(client, :post, "/api/v1/machines", wire, :create),
          {:ok, created} <- decode_machine(body, spec.name, :create) do
-      fields = [:cpus, :memory_mb, :storage_gb, :overlay_gb, :network]
+      fields = [:cpus, :memory_mb, :storage_gb, :overlay_gb, :network, :ports]
 
       if Map.take(created, fields) == Map.take(spec, fields) and
            (spec.source != :checkpoint or
@@ -103,6 +103,9 @@ defmodule SmolBox.Client do
 
   defp creation_runtime(client, %{source: :checkpoint}),
     do: creation_runtime_versions(client, ["1.16.1", "1.17.0"])
+
+  defp creation_runtime(client, %{ports: [_ | _]}),
+    do: creation_runtime_versions(client, ["1.17.0"])
 
   defp creation_runtime(client, %{network: :offline}), do: {:ok, client}
 

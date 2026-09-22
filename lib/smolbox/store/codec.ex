@@ -16,7 +16,10 @@ defmodule SmolBox.Store.Codec do
   sharing a store before accepting checkpoints; older readers cannot read v3.
   See [Checkpoint upgrades](checkpoints.html#persistence-and-upgrades). Follow
   [Upgrading to 0.1.3](recovery.html#upgrading-to-0-1-3) across all controllers.
-  Managed machines and associated commands use v4. Disposable writes retain their
+  Managed machines and associated commands now use v5, including no-port records.
+  Exact v4 records gain empty port specifications and reservations on read.
+  Older readers cannot read v5; coordinate upgrades before any managed writes.
+  See [Port persistence](port-mappings.html#persistence-and-upgrades). Disposable writes retain their
   v2/v3 shape, omitting the empty managed-machine reference; old payloads gain that
   field on read. Upgrade every controller sharing workers before enabling retained
   reservations. See [Persistent-machine upgrades](persistent-machines.html#store-contract-and-upgrades).
@@ -25,11 +28,13 @@ defmodule SmolBox.Store.Codec do
   """
 
   alias SmolBox.{Error, Execution}
+  alias SmolBox.Store.CodecPorts
 
   @max_bytes 16_777_216
   @prefix "smolbox-record-v2\0"
   @checkpoint_prefix "smolbox-record-v3\0"
   @managed_prefix "smolbox-record-v4\0"
+  @ports_prefix "smolbox-record-v5\0"
   @legacy_prefix "smolbox-record-v1\0"
   @record_modules [
     Execution,
@@ -41,6 +46,7 @@ defmodule SmolBox.Store.Codec do
     SmolBox.Profile,
     SmolBox.NetworkPolicy,
     SmolBox.Machine,
+    SmolBox.PortMapping,
     SmolBox.Result,
     Error
   ]
@@ -55,7 +61,10 @@ defmodule SmolBox.Store.Codec do
   def encode(record) do
     with :ok <- Execution.validate(record) do
       prefix = if checkpoint_record?(record), do: @checkpoint_prefix, else: @prefix
-      bytes = prefix <> :erlang.term_to_binary(Map.delete(record, :managed_machine))
+
+      bytes =
+        prefix <> :erlang.term_to_binary(Map.delete(CodecPorts.strip(record), :managed_machine))
+
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
   end
@@ -76,7 +85,16 @@ defmodule SmolBox.Store.Codec do
       do: decode_version(bytes, false, true)
 
   def decode(<<@managed_prefix, 131, tag, _rest::binary>> = bytes)
-      when tag != 80 and byte_size(bytes) <= @max_bytes do
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_managed(bytes, false)
+
+  def decode(<<@ports_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_managed(bytes, true)
+
+  def decode(_bytes), do: invalid()
+
+  defp decode_managed(bytes, ports?) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
     payload =
@@ -88,6 +106,7 @@ defmodule SmolBox.Store.Codec do
 
     with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
          true <- used == byte_size(payload),
+         {:ok, record} <- if(ports?, do: {:ok, record}, else: CodecPorts.upgrade(record)),
          :ok <- validate_managed(record) do
       {:ok, record}
     else
@@ -97,11 +116,9 @@ defmodule SmolBox.Store.Codec do
     ArgumentError -> invalid()
   end
 
-  def decode(_bytes), do: invalid()
-
   defp encode_managed(record) do
     with :ok <- validate_managed(record) do
-      bytes = @managed_prefix <> :erlang.term_to_binary(record)
+      bytes = @ports_prefix <> :erlang.term_to_binary(record)
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
   end
@@ -135,6 +152,7 @@ defmodule SmolBox.Store.Codec do
     with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
          true <- used == byte_size(payload),
          {:ok, record} <- upgrade(record, legacy?),
+         {:ok, record} <- CodecPorts.upgrade(record),
          :ok <- Execution.validate(record),
          true <- record.managed_machine == nil do
       {:ok, record}
@@ -166,7 +184,8 @@ defmodule SmolBox.Store.Codec do
   defp legacy_field(nil, SmolBox.Machine), do: {:ok, nil}
 
   defp legacy_field(value, module) when is_map(value) do
-    expected = module |> struct() |> Map.keys() |> List.delete(:network) |> Enum.sort()
+    expected =
+      module |> struct() |> Map.keys() |> Enum.reject(&(&1 in [:network, :ports])) |> Enum.sort()
 
     if Map.get(value, :__struct__) == module and Enum.sort(Map.keys(value)) == expected,
       do: {:ok, Map.put(value, :network, :offline)},

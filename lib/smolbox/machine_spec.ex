@@ -1,6 +1,6 @@
 defmodule SmolBox.MachineSpec do
   @moduledoc """
-  Create a disposable machine from a host-approved prepared artifact.
+  Create a machine from a host-approved prepared artifact.
 
   The path is on the worker host, not the Elixir host. `source: :checkpoint`
   selects an approved idle `.smolcheckpoint` instead of an image. It requires
@@ -13,8 +13,10 @@ defmodule SmolBox.MachineSpec do
   its immutable digest and architecture before approving it. SmolBox never
   enables networking to fetch a missing image. Starts use `/bin/true` and never
   restart the workload automatically. Networking is offline unless an explicit
-  `SmolBox.NetworkPolicy` is supplied. No host mounts, sockets, GPU, or ports are
-  exposed by this contract.
+  `SmolBox.NetworkPolicy` is supplied. Optional `:ports` publishes fixed TCP
+  mappings on smolvm 1.17.0 using virtio-net, independently of outbound policy.
+  Offline with mappings means denied outbound, not absence of a network device.
+  No host mounts, Unix sockets or GPU are exposed. See [Port mappings](port-mappings.html).
 
   Disk sizes are requests. smolvm 1.14.1 copies larger disk templates without
   shrinking them, while its API still reports the request. Low-level callers
@@ -30,6 +32,7 @@ defmodule SmolBox.MachineSpec do
   alias SmolBox.Error
 
   @schema [
+    ports: [type: :any, default: []],
     source: [type: {:in, [:image, :checkpoint]}, default: :image],
     network: [type: :any, default: :offline],
     cpus: [type: :pos_integer, default: 1],
@@ -43,6 +46,7 @@ defmodule SmolBox.MachineSpec do
   defstruct [
     :name,
     :artifact_path,
+    ports: [],
     source: :image,
     network: :offline,
     cpus: 1,
@@ -54,6 +58,7 @@ defmodule SmolBox.MachineSpec do
   @type t :: %__MODULE__{
           name: String.t(),
           source: :image | :checkpoint,
+          ports: [SmolBox.PortMapping.t()],
           network: :offline | SmolBox.NetworkPolicy.t(),
           artifact_path: String.t(),
           cpus: pos_integer(),
@@ -71,7 +76,8 @@ defmodule SmolBox.MachineSpec do
 
   Names have at most 31 lowercase letters, digits, underscores or hyphens and
   start with a letter/digit; `SmolBox.Identity.machine_name/1` generates opaque
-  names. Options include `:network` (offline or `SmolBox.NetworkPolicy`) and `:cpus` (default 1, range 1–64), `:memory_mb` (256, 128–16,384),
+  names. Options include `:ports` (up to 32 `SmolBox.PortMapping` values, image sources
+  only), `:network` (offline or `SmolBox.NetworkPolicy`) and `:cpus` (default 1, range 1–64), `:memory_mb` (256, 128–16,384),
   `:storage_gb` and `:overlay_gb` (each 1, range 1–64). For the reference templates,
   explicitly request 20/10 GiB disks. Construction does not read the artifact.
 
@@ -82,6 +88,8 @@ defmodule SmolBox.MachineSpec do
   def new(name, artifact_path, options \\ []) do
     with true <- Keyword.keyword?(options),
          {:ok, options} <- NimbleOptions.validate(options, @schema),
+         {:ok, ports} <- SmolBox.PortMapping.normalize(options[:ports]),
+         options = Keyword.put(options, :ports, ports),
          spec = struct!(__MODULE__, [name: name, artifact_path: artifact_path] ++ options),
          :ok <- validate(spec) do
       {:ok, spec}
@@ -96,8 +104,8 @@ defmodule SmolBox.MachineSpec do
     if SmolBox.Validation.struct_shape?(spec, __MODULE__) and
          valid_name?(spec.name) and artifact_path?(spec.artifact_path, spec.source) and
          network_valid?(spec) and
-         in_range?(spec.cpus, 1..64) and in_range?(spec.memory_mb, 128..16_384) and
-         in_range?(spec.storage_gb, 1..64) and in_range?(spec.overlay_gb, 1..64) do
+         SmolBox.PortMapping.canonical?(spec.ports) and
+         allocations?(spec) do
       :ok
     else
       invalid()
@@ -105,6 +113,11 @@ defmodule SmolBox.MachineSpec do
   end
 
   def validate(_spec), do: invalid()
+
+  defp allocations?(spec),
+    do:
+      in_range?(spec.cpus, 1..64) and in_range?(spec.memory_mb, 128..16_384) and
+        in_range?(spec.storage_gb, 1..64) and in_range?(spec.overlay_gb, 1..64)
 
   @doc "Validate the single URL path segment used by machine operations."
   @spec valid_name?(term()) :: boolean()
@@ -132,12 +145,12 @@ defmodule SmolBox.MachineSpec do
              "cuda" => false,
              "dockerSocket" => false,
              "mounts" => [],
-             "ports" => [],
+             "ports" => SmolBox.PortMapping.to_wire(spec.ports),
              "entrypoint" => ["/bin/true"],
              "cmd" => [],
              "restart" => %{"policy" => "never"}
            },
-           SmolBox.NetworkPolicy.to_wire(spec.network)
+           network_wire(spec)
          )
        )}
     end
@@ -148,7 +161,19 @@ defmodule SmolBox.MachineSpec do
 
   defp wire_source(_spec, wire), do: wire
 
-  defp network_valid?(%{source: :checkpoint, network: network}), do: network == :offline
+  defp network_wire(%{ports: [_ | _], network: :offline}),
+    do: %{
+      "network" => false,
+      "networkBackend" => "virtio-net",
+      "allowedHosts" => [],
+      "allowedCidrs" => []
+    }
+
+  defp network_wire(spec), do: SmolBox.NetworkPolicy.to_wire(spec.network)
+
+  defp network_valid?(%{source: :checkpoint, network: network, ports: ports}),
+    do: network == :offline and ports == []
+
   defp network_valid?(%{network: network}), do: SmolBox.NetworkPolicy.valid?(network)
 
   defp artifact_path?(path, source) when source in [:image, :checkpoint] do

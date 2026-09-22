@@ -31,6 +31,7 @@ defmodule SmolBox.Machines do
   def create(runtime, spec) do
     with {:ok, config} <- config(runtime),
          :ok <- ManagedMachineSpec.validate(spec),
+         :ok <- Machines.port_support(config, spec.ports),
          {:ok, fingerprint} <- ManagedMachineSpec.fingerprint(spec, config.fingerprint_key) do
       case Machines.store(config, :fetch, [{spec.scope, spec.id}]) do
         {:ok, %{fingerprint: ^fingerprint} = record} -> {:ok, ManagedMachine.key(record)}
@@ -118,7 +119,13 @@ defmodule SmolBox.Machines do
   defp request(runtime, handle, action, version) do
     with :ok <- key(handle),
          {:ok, config} <- config(runtime),
+         :ok <- supported_machine(config, handle),
          do: Machines.store(config, :request, [handle, action, version, config.clock.now()])
+  end
+
+  defp supported_machine(config, handle) do
+    with {:ok, machine} <- Machines.store(config, :fetch, [handle]),
+         do: Machines.port_support(config, machine.spec.ports)
   end
 
   @doc "Accept one command on an idle running machine; identical duplicates return the original execution."
@@ -126,6 +133,7 @@ defmodule SmolBox.Machines do
     with :ok <- key(handle),
          {:ok, config} <- config(runtime),
          :ok <- ExecutionSpec.validate(spec),
+         :ok <- supported_machine(config, handle),
          {:ok, fingerprint} <- ExecutionSpec.fingerprint(spec, config.fingerprint_key),
          digest =
            :crypto.mac(
@@ -173,6 +181,7 @@ defmodule SmolBox.Machines do
              config.clock.now(),
              config.lease_ms
            ]),
+         :ok <- Machines.port_support(config, current.spec.ports),
          {:ok, worker} <- Machines.worker(config, current),
          observation =
            Machines.io(config, %{current | operation_deadline_ms: nil}, fn ->

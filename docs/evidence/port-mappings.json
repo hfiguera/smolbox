@@ -1,0 +1,406 @@
+{
+  "base_commit": "e6396fd647dc25bc99c72d39a6062d3d6a1686f0",
+  "branch": "feature/managed-port-mappings",
+  "date": "2026-09-22",
+  "deterministic": {
+    "checks": [
+      "format",
+      "warnings-as-errors",
+      "dependency-lock",
+      "zero-xref-cycles",
+      "Credo/ExSlop",
+      "zero-clones",
+      "Credence",
+      "Dialyzer",
+      "checker-canaries",
+      "Hex audit",
+      "dependency audit",
+      "PostgreSQL Dialyzer",
+      "PostgreSQL rollback guard"
+    ],
+    "compatibility": [
+      "Elixir 1.18.4 / OTP 27.3.4.15: 285 passed",
+      "Elixir 1.19.5 / OTP 28.5: 285 passed",
+      "Elixir 1.20.4 / OTP 28.5: 285 passed",
+      "Elixir 1.20.4 / OTP 29.0.6: 285 passed"
+    ],
+    "coverage": {
+      "minimum_percent": 90,
+      "passed": 284,
+      "percent": 93.51
+    },
+    "quality_pipeline": {
+      "log_sha256": "3c3c56d4a7e32a57c5174412c86299a3f03e03f4a9ca9c4775c6bf442831cf63",
+      "passed": 285
+    },
+    "tooling": {
+      "log_sha256": "34c718fd248d01f0bfad7fe30128951767d7738d77f7dc8f1329b0b3796f6ca6",
+      "passed": 23
+    }
+  },
+  "initial_failures_and_corrections": [
+    "Old macOS temporary artifact missing; preparation failed before machine creation. Fresh private artifacts prepared with bounded process/storage guard.",
+    "Legacy tests expected v4 and constructed old records with new fields; corrected to v5 writes and exact historical shapes, with assigned-machine/command upgrade checks.",
+    "Linux fixture initially bound immediately after observed stop; now requires actual socket release within five seconds before installing conflict listener. Typed conflicts remain required.",
+    "Simulated delete raced reconciliation version update; test now observes reconciliation completion before using its version.",
+    "Initial style/complexity and function-clause ordering findings corrected."
+  ],
+  "limits": [
+    "Fixed TCP on prepared images only; no checkpoint ports or UDP.",
+    "Loopback binding tested; widened worker binding documented from upstream, not public-internet qualification.",
+    "No port allocation, migration, service supervision, TLS/authentication/firewall provisioning or connection draining.",
+    "Database contract observations and deterministic fault scenarios are simulated; HTTP and port/ordinary/recovery/checkpoint runtime cases use real VMs.",
+    "Qualification is development-host behavior, not production-isolation certification."
+  ],
+  "linux": {
+    "checkpoint_recovery": {
+      "log_sha256": "5907d099fc43292e7291d23cf9a1d91ff798e860493833499223fdcf27995b26",
+      "passed": 3
+    },
+    "checkpoints": {
+      "log_sha256": "47aaea86acc2dcebc557bbb5c8d8f060a8876acc069b11e7d578f2e7e5c8ca09",
+      "passed": 3
+    },
+    "cleanup": {
+      "inventory": {
+        "machines": []
+      },
+      "outer_lab": {
+        "baseline_verified_and_overlay_reset": true,
+        "main_pid": 0,
+        "managed_history": "two deleted identities verified before isolated lab teardown",
+        "numerical_reservations": {
+          "cpus": 0,
+          "disk_gb": 0,
+          "memory_mb": 0,
+          "slots": 0
+        },
+        "port_owners": 0,
+        "result": "success",
+        "state": "inactive",
+        "worker_main_pid": 0,
+        "worker_state": "inactive"
+      },
+      "worker_kvm_fds": 0
+    },
+    "host": "Ubuntu 24.04.4 x86_64, nested KVM, kernel 6.8.0-139-generic",
+    "http": {
+      "prepare": {
+        "http_verified": true,
+        "machine_name": "sbxexample-4v3eo2co6nygdahdntdr",
+        "mappings": [
+          {
+            "guest": 8000,
+            "host": 28731
+          }
+        ],
+        "phase": "prepare",
+        "reservation_retained": true,
+        "state": "running"
+      },
+      "resume": {
+        "absence_verified": true,
+        "deduplication_retained": true,
+        "http_verified": true,
+        "machine_name": "sbxexample-4v3eo2co6nygdahdntdr",
+        "mappings": [
+          {
+            "guest": 8000,
+            "host": 28731
+          }
+        ],
+        "phase": "resume",
+        "ports_released": true,
+        "resources_released": true,
+        "same_machine": true,
+        "state": "deleted"
+      }
+    },
+    "listeners": [
+      {
+        "outbound_allowed": true,
+        "port_listener_addresses": [
+          "127.0.0.1:28732",
+          "[::1]:28732"
+        ]
+      }
+    ],
+    "ports": {
+      "log_sha256": "eed15b77773df18da4dabec22feedbe5152195ac7d9fdb2b5b83c83d685b5e9b",
+      "passed": 2
+    },
+    "postgresql": "16.15",
+    "python_artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+    "regression_source_sha256": {
+      "examples/durable_host/lib/application.ex": "b0149229e29910ad91c1d2c6637b7eedd50bb42e52734421e973363bb327bf02",
+      "examples/durable_host/lib/benchmark.ex": "cdf83884a280a23fe3a3b16c1a5b8c69bd0880ed2ba87448fd3eb1b6740dac0e",
+      "examples/durable_host/lib/benchmark_metrics.ex": "3ecc15a1044c13bff69d8f8b96731a0dbd629190f90d47cf5dfe849f95e7cfd1",
+      "examples/durable_host/lib/benchmark_sampler.ex": "d4227f5e8c796d525e01e328c1e7b444d5313646486a67c89add99d038d2c167",
+      "examples/durable_host/lib/checkpoint_demo.ex": "77b3ba038850667667953fcda91199faea3bd7a710b16dda44a31bee787bf1f3",
+      "examples/durable_host/lib/database.ex": "f1e9070739316a7cd68149f80eecc8dc2e2f13cac19f50b5ef2599d10f217d12",
+      "examples/durable_host/lib/demo.ex": "34ca85afd103d2f7b0f1f234738f259c48968f3e7fd1a1ca810cf5eb3228b785",
+      "examples/durable_host/lib/machine_index.ex": "6556db1ed01f8fdfa552310d8fb25aea8ee0b4939247e2639bae968d2f976677",
+      "examples/durable_host/lib/machine_store.ex": "8f0bb32bff920be60bcf441c564f6eb89197176b9cf10ac01c5b0e6dad43b1cb",
+      "examples/durable_host/lib/persistent_demo.ex": "abf0d51396dfbfcc4dc4efb4bf3e6ce2ee1fa3df50d09296638afb514c609ed8",
+      "examples/durable_host/lib/persistent_http_demo.ex": "dd3a2e95f37d2c6ffb05312c9fb8519d6e2671be1a4a0621e0b4bc2c9c91caac",
+      "examples/durable_host/lib/persistent_steps.ex": "5b3a36255e1813591dd2c2e174a605843d988137059413e8447afd7b74013373",
+      "examples/durable_host/lib/port_index.ex": "7053c85df0d5a2968bb6ecc18cc5b485e505969e100ef3f4997832ed5084073e",
+      "examples/durable_host/lib/record_crypto.ex": "7b693e27a82340c6eec1c4c1d760c87fd17716f2869ae7b42d84cb7515d0afb4",
+      "examples/durable_host/lib/repo.ex": "135981af1a6ad9747d227844b0cc9c1be7df83e4c4a0c4fe4bcd37047006296a",
+      "examples/durable_host/lib/store.ex": "6a4a362f3a5b1c430f736c243f427a0daeda6659c670e33b4959438be5dc347d",
+      "lib/smolbox.ex": "1e09ddd34e3e9984f02ce93f8ae0ead9181630ff2fc4048687aa71e7fd898239",
+      "lib/smolbox/artifact_store.ex": "2d61ae4c7b6eeab70d6dbe822f390353565555b80b33a5602d3487b591128cbe",
+      "lib/smolbox/artifact_store/directory.ex": "c8afa7093cef1962a0592d3333dd2de08ed2d284731b840df1d99b1ec73c7bdc",
+      "lib/smolbox/checkpoint.ex": "efb4ab7a5a52ec6e01eb739547b812f932d0f70df7ab9cdd8ce121671c345831",
+      "lib/smolbox/client.ex": "2b5ccf51354420d0907f862ed3a5188ed06cc67dc154d00c0d418dffe2605d29",
+      "lib/smolbox/command.ex": "ae5a7e9a9d885e30db49e967b693bd8afd00b1808998592dd25c2654d82ac63e",
+      "lib/smolbox/error.ex": "c482a0ad0c1d9ab86d42aa5dd1abe5dd165ba3b4b583c9bcd671f543607fb263",
+      "lib/smolbox/execution.ex": "cbe04277c064d9e3e62b407bd398c8dcee40dc69c920b4d8062db758539fac80",
+      "lib/smolbox/execution_spec.ex": "64bd78be15039d87eb13e00bf07fa23a80f4021948f29c9a8dcc6c7aca8460be",
+      "lib/smolbox/execution_validation.ex": "efd5b5079cc2c8ccd757c3e6fbf8703be3e82e808a84b0c8e5f67205dac0cc37",
+      "lib/smolbox/files.ex": "15c2054bb8bd11b004de8a6c7a9dd707db4deccf001abdd70998e858ea6cf204",
+      "lib/smolbox/health.ex": "a6bb8345d44ac721adc29fe1c328e763f58c76cbe197529a4c6a41cf72a5a03a",
+      "lib/smolbox/identity.ex": "d2f0f9b2397119edbe90f98f00fa79977e46044ab485258880758fd36573fca7",
+      "lib/smolbox/machine.ex": "1a59ebc0a9af7eed5b98a2d88480671f685832101de5b81280daaa7ea26d3b82",
+      "lib/smolbox/machine_spec.ex": "85333e3dfd1c5e55fa88ee0eaaa352ccce250a045d12df1a4b9b91f1e33f2051",
+      "lib/smolbox/machines.ex": "354179daf13361977d128de5a6d3d887b34c437832e752e66afef75a4a065fff",
+      "lib/smolbox/managed_machine.ex": "7db818e45ae3eeee123728679f88d71cca9c491886e97fe96dc2fa8c8f94243f",
+      "lib/smolbox/managed_machine_spec.ex": "1a1e06d2faf10acf4b991d37cab6b6f8dce4e55aabe97e02684bb5fbcd477798",
+      "lib/smolbox/manifest.ex": "64bbfcabea90905d9cb0b3ac9399fa997486b4461d5e13989f3f892938bfeb10",
+      "lib/smolbox/network_policy.ex": "905e5f69ebe2da6de2fb75b795a6de32f47e2e1a34d5af9b11f9e5a66d242ee1",
+      "lib/smolbox/port_mapping.ex": "e3ac86f7d25b6ad0d0a74c23b9d1ce433b012832744c87beeb2e747d5c8ea124",
+      "lib/smolbox/profile.ex": "2e7b700071e18160f2836bf6fd638fb9ca7c2ce7da054b2ce93cbc1937b155b1",
+      "lib/smolbox/result.ex": "09d0fb685331012e00690875734ee70bb51b0528eecb4c0ab236277343daeccf",
+      "lib/smolbox/runtime.ex": "b4c0b5a7f03ef3612ebb3e885bfedc27e8d41104a63dbb21c5f1d2bce0af9915",
+      "lib/smolbox/runtime/cleanup.ex": "f11db6b108bbd5650e66960ed3b57d9d5c93d6487808ff9f1e665edce32c221e",
+      "lib/smolbox/runtime/clock.ex": "a3b7bf21a90a4ccf4977791f97736137af01fdee4a2b3a5ebb3d6a0d18dbf114",
+      "lib/smolbox/runtime/config.ex": "72ad48cde99f38333a9dd66bd94dd33f8c72c59ab10d142ec4c59efdddd4188b",
+      "lib/smolbox/runtime/coordinator.ex": "9b7b5ae98ea153530e6c962c35d3a217862143fe55716fa3a58b67bbb4cad808",
+      "lib/smolbox/runtime/executor.ex": "a67f3fd62ccdc584a7967521910452e7adf0dcab8e7ddf2ed62cbc587883cad4",
+      "lib/smolbox/runtime/files.ex": "1acecfe874e8397c4c13fbd40751e629808dbefb920ac640f06d09edb415fc55",
+      "lib/smolbox/runtime/inspection.ex": "4e9d22ee3d91cb69c49250505b1884af88339e96ab468db04622eb6d28004c22",
+      "lib/smolbox/runtime/machines.ex": "0c1cab4a2eaf539dd55145d1239a6073fb39095e6232eb47e902197a054233ef",
+      "lib/smolbox/runtime/observation.ex": "9409647db1e835e3d3f38c01de206daab37e78686d6c6b6ec595886af372795a",
+      "lib/smolbox/runtime/session.ex": "e07b33065128a0e3c6f91f5a80474a7a4b2d2e331301c095af5be24932e113b7",
+      "lib/smolbox/runtime/work_supervisor.ex": "40e5cfd18c84e55c232272e38477e66b689ea77baf72661171329c50738b4743",
+      "lib/smolbox/runtime/worker_config.ex": "349577c52328a23b4d13953e78ee55bc4d9295755229a03a2f7aec5d268d6c98",
+      "lib/smolbox/runtime/worker_health.ex": "fc19df3f3bf28dfda625b1f6f3b882e2a16b75421145442d2e8d77b6b935f1c0",
+      "lib/smolbox/store.ex": "38a7c7fdafd038dc233562d9958f7b815cca3fd8df187fc8ff34cfad845d4515",
+      "lib/smolbox/store/codec.ex": "36b4e5be5b0864917f41398f2f027f4b4875f3f8afe3336a32db8b3f13c97393",
+      "lib/smolbox/store/codec_ports.ex": "2f8061b36135ffdf81918474c08d93a21381d6b816754272bc94150f352292e0",
+      "lib/smolbox/store/machine_ops.ex": "a43418312530883ad19db5826fd7ff2f2cf5e301039feab52e0893f2f74d9708",
+      "lib/smolbox/store/memory.ex": "92e098db9987ce8a9618e2ff8e8d660feb3ec30ea3b890fd30d718b984c03b3e",
+      "lib/smolbox/store/port_ownership.ex": "00cba213d22706c49edc28174182a6729cdb18d53cb7a860103f2e1271df8b59",
+      "lib/smolbox/store/record_ops.ex": "7ec2f3504a901460cfaaf5e03b7f599b84d5caf7a144e275d7b0d405f907c646",
+      "lib/smolbox/telemetry.ex": "ec28badc3bff5bd3d40f87350f840208be306a522a9bd600d6bfd49e3ebbf5f9",
+      "lib/smolbox/telemetry/dispatcher.ex": "30a2513d3aaeb24e953011ff9ca651f9eac66b1d6105a8d491e8178d3796063b",
+      "lib/smolbox/transport.ex": "ed6a497a1e746330bc7527becd8b520a5c9b8320a9102604633dfb13fa4802de",
+      "lib/smolbox/transport/capture.ex": "df828264adf33a5d96759b445f156189d7ade1b0c4666f66831442569cb084d4",
+      "lib/smolbox/transport/req.ex": "ab74798b6c4c27c89b72b6813ef5de7190d3380de1da075228d0533e3b36ebcd",
+      "lib/smolbox/validation.ex": "4df0e14313ffb67caefdf3a7e4b9d63a8a6588666b4142409b525d2955cc2530",
+      "lib/smolbox/wire/sse.ex": "00079b7972aa40bc733aa7dbe6a61c50b94367fd1f19ed00afdfcb0fda51dda1",
+      "lib/smolbox/worker.ex": "281f6be0b563eba81b25e3c8f9aca26b00f664f6333a830d80b983a5797913cf"
+    },
+    "regressions": {
+      "recovery": {
+        "captured_bytes": 871,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "88b9480198b4526bfd8d8bf88e028c4a9a86a79e4ed0e6f6fd1e4852f4dfed8e",
+        "seconds": 1153.67,
+        "status": "passed",
+        "tests": {
+          "passed": 25,
+          "seed": 993795
+        }
+      },
+      "runtime": {
+        "captured_bytes": 162,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "0a32db64317729fa160c6185fb1629af1125da9da4f4b6648dec20bbc0828cae",
+        "seconds": 366.347,
+        "status": "passed",
+        "tests": {
+          "passed": 14,
+          "seed": 989074
+        }
+      }
+    },
+    "runtime_binary_sha256": "40b9bc8f24f7cc77c371db4784742e6b6724f09a11b83d63776b944734b7912d",
+    "source_note": "Disposable/checkpoint regression snapshot precedes final public managed-machine capability guards; final port/HTTP run uses source_sha256 above. Relevant disposable/checkpoint implementation unchanged.",
+    "store_contracts": {
+      "log_sha256": "2b8667d3594707a30b2f1d507a4fbc5e6523a9ebadf7f082300d7d73963ad25f",
+      "passed": 31
+    },
+    "worker_limits": {
+      "cpu_quota_percent": 100,
+      "memory_max_bytes": 1610612736,
+      "private_network": true,
+      "runtime_max_seconds": 300,
+      "tasks_max": 96
+    }
+  },
+  "macos": {
+    "checkpoint_recovery": {
+      "log_sha256": "e5f675d9faca0b58c68a977519fb7b0531262ca508b8d046064dfb328b090e33",
+      "passed": 3
+    },
+    "checkpoints": {
+      "log_sha256": "226a59770b80b52dd87ecb6b30020ddcfb5a21b555d6037536b773b671d5a9d9",
+      "passed": 3
+    },
+    "cleanup": {
+      "machine_inventory_empty": true,
+      "managed_history": "three deleted identities retained",
+      "port_owners": 0,
+      "postgres_server_absent": true,
+      "published_listeners_absent": true,
+      "worker_server_absent": true
+    },
+    "durable_recovery": {
+      "log_sha256": "0f62321294b5234974a97615425e5c76eb2fa8dd4687327c08e45895a0881b63",
+      "passed": 25
+    },
+    "host": "macOS 26.6.2 (25G83), Apple Silicon",
+    "http": {
+      "prepare": {
+        "http_verified": true,
+        "machine_name": "sbxexample-43zr7hdniberw45sncvm",
+        "mappings": [
+          {
+            "guest": 8000,
+            "host": 28731
+          }
+        ],
+        "phase": "prepare",
+        "reservation_retained": true,
+        "state": "running"
+      },
+      "resume": {
+        "absence_verified": true,
+        "deduplication_retained": true,
+        "http_verified": true,
+        "machine_name": "sbxexample-43zr7hdniberw45sncvm",
+        "mappings": [
+          {
+            "guest": 8000,
+            "host": 28731
+          }
+        ],
+        "phase": "resume",
+        "ports_released": true,
+        "resources_released": true,
+        "same_machine": true,
+        "state": "deleted"
+      }
+    },
+    "listeners": [
+      {
+        "outbound_allowed": true,
+        "port_listener_addresses": [
+          "127.0.0.1:28732",
+          "[::1]:28732"
+        ]
+      }
+    ],
+    "ordinary_runtime": {
+      "log_sha256": "d53fdccb797d0efca25838e25055783174e1600f341bca5e3db70151295d6493",
+      "passed": 9
+    },
+    "ports": {
+      "log_sha256": "8c0c8c0dcd64211cb69d07f31549c32b87d43631a1116ee04c59f9a497a358ee",
+      "passed": 2
+    },
+    "postgresql": "17",
+    "python_artifact_sha256": "bb3ed187bc4cfc1cc6f7e4e09c8f96ac1c2d47dcd2902653e6c1bd2ba6ca017c",
+    "runtime_binary_sha256": "bee762e648f2c90e2339c6c3f37d6fd47d3645888e2b4d73963e511032d2195a",
+    "store_contracts": {
+      "log_sha256": "b91dd001020ba9d8cd59c87d9d297d78a9c25b8e91bd047f2f5092767f901fb2",
+      "passed": 31
+    }
+  },
+  "qualification": "development",
+  "schema": 1,
+  "source_aggregate_sha256": "d228ef8d087011600b3192b5b9e9953700794af8d504cda60d9d66d2e88c3090",
+  "source_sha256": {
+    "examples/durable_host/lib/application.ex": "b0149229e29910ad91c1d2c6637b7eedd50bb42e52734421e973363bb327bf02",
+    "examples/durable_host/lib/benchmark.ex": "cdf83884a280a23fe3a3b16c1a5b8c69bd0880ed2ba87448fd3eb1b6740dac0e",
+    "examples/durable_host/lib/benchmark_metrics.ex": "3ecc15a1044c13bff69d8f8b96731a0dbd629190f90d47cf5dfe849f95e7cfd1",
+    "examples/durable_host/lib/benchmark_sampler.ex": "d4227f5e8c796d525e01e328c1e7b444d5313646486a67c89add99d038d2c167",
+    "examples/durable_host/lib/checkpoint_demo.ex": "77b3ba038850667667953fcda91199faea3bd7a710b16dda44a31bee787bf1f3",
+    "examples/durable_host/lib/database.ex": "f1e9070739316a7cd68149f80eecc8dc2e2f13cac19f50b5ef2599d10f217d12",
+    "examples/durable_host/lib/demo.ex": "34ca85afd103d2f7b0f1f234738f259c48968f3e7fd1a1ca810cf5eb3228b785",
+    "examples/durable_host/lib/machine_index.ex": "6556db1ed01f8fdfa552310d8fb25aea8ee0b4939247e2639bae968d2f976677",
+    "examples/durable_host/lib/machine_store.ex": "8f0bb32bff920be60bcf441c564f6eb89197176b9cf10ac01c5b0e6dad43b1cb",
+    "examples/durable_host/lib/persistent_demo.ex": "abf0d51396dfbfcc4dc4efb4bf3e6ce2ee1fa3df50d09296638afb514c609ed8",
+    "examples/durable_host/lib/persistent_http_demo.ex": "dd3a2e95f37d2c6ffb05312c9fb8519d6e2671be1a4a0621e0b4bc2c9c91caac",
+    "examples/durable_host/lib/persistent_steps.ex": "5b3a36255e1813591dd2c2e174a605843d988137059413e8447afd7b74013373",
+    "examples/durable_host/lib/port_index.ex": "7053c85df0d5a2968bb6ecc18cc5b485e505969e100ef3f4997832ed5084073e",
+    "examples/durable_host/lib/record_crypto.ex": "7b693e27a82340c6eec1c4c1d760c87fd17716f2869ae7b42d84cb7515d0afb4",
+    "examples/durable_host/lib/repo.ex": "135981af1a6ad9747d227844b0cc9c1be7df83e4c4a0c4fe4bcd37047006296a",
+    "examples/durable_host/lib/store.ex": "6a4a362f3a5b1c430f736c243f427a0daeda6659c670e33b4959438be5dc347d",
+    "examples/durable_host/priv/repo/migrations/20260906000000_create_smolbox_store.exs": "c6dda670d2b7cefec2d935761b3cd9aed804b874bfceee8470195b66659b9630",
+    "examples/durable_host/priv/repo/migrations/20260907000000_index_machine_assignments.exs": "511f73fc3b9138d76415477b1f8603dc560d79f97b4b5b040e4e7669dfd847b4",
+    "examples/durable_host/priv/repo/migrations/20260922000000_managed_persistent_machines.exs": "c449900c469b35d59fa811d0207496ff2373c0f8750511f16956299d3e557c4a",
+    "examples/durable_host/priv/repo/migrations/20260923000000_managed_port_ownership.exs": "d225c74a9ca40fb99f4c56e5995356f8c2a3a5ac9bfb9f845e476e7611a77d70",
+    "lib/smolbox.ex": "1e09ddd34e3e9984f02ce93f8ae0ead9181630ff2fc4048687aa71e7fd898239",
+    "lib/smolbox/artifact_store.ex": "2d61ae4c7b6eeab70d6dbe822f390353565555b80b33a5602d3487b591128cbe",
+    "lib/smolbox/artifact_store/directory.ex": "c8afa7093cef1962a0592d3333dd2de08ed2d284731b840df1d99b1ec73c7bdc",
+    "lib/smolbox/checkpoint.ex": "efb4ab7a5a52ec6e01eb739547b812f932d0f70df7ab9cdd8ce121671c345831",
+    "lib/smolbox/client.ex": "2b5ccf51354420d0907f862ed3a5188ed06cc67dc154d00c0d418dffe2605d29",
+    "lib/smolbox/command.ex": "ae5a7e9a9d885e30db49e967b693bd8afd00b1808998592dd25c2654d82ac63e",
+    "lib/smolbox/error.ex": "c482a0ad0c1d9ab86d42aa5dd1abe5dd165ba3b4b583c9bcd671f543607fb263",
+    "lib/smolbox/execution.ex": "cbe04277c064d9e3e62b407bd398c8dcee40dc69c920b4d8062db758539fac80",
+    "lib/smolbox/execution_spec.ex": "64bd78be15039d87eb13e00bf07fa23a80f4021948f29c9a8dcc6c7aca8460be",
+    "lib/smolbox/execution_validation.ex": "efd5b5079cc2c8ccd757c3e6fbf8703be3e82e808a84b0c8e5f67205dac0cc37",
+    "lib/smolbox/files.ex": "15c2054bb8bd11b004de8a6c7a9dd707db4deccf001abdd70998e858ea6cf204",
+    "lib/smolbox/health.ex": "a6bb8345d44ac721adc29fe1c328e763f58c76cbe197529a4c6a41cf72a5a03a",
+    "lib/smolbox/identity.ex": "d2f0f9b2397119edbe90f98f00fa79977e46044ab485258880758fd36573fca7",
+    "lib/smolbox/machine.ex": "1a59ebc0a9af7eed5b98a2d88480671f685832101de5b81280daaa7ea26d3b82",
+    "lib/smolbox/machine_spec.ex": "85333e3dfd1c5e55fa88ee0eaaa352ccce250a045d12df1a4b9b91f1e33f2051",
+    "lib/smolbox/machines.ex": "d92c9f4cfe62da02f71f31cd9776b043bce8cafc0586c2eae7559500cc782cb1",
+    "lib/smolbox/managed_machine.ex": "7db818e45ae3eeee123728679f88d71cca9c491886e97fe96dc2fa8c8f94243f",
+    "lib/smolbox/managed_machine_spec.ex": "1a1e06d2faf10acf4b991d37cab6b6f8dce4e55aabe97e02684bb5fbcd477798",
+    "lib/smolbox/manifest.ex": "64bbfcabea90905d9cb0b3ac9399fa997486b4461d5e13989f3f892938bfeb10",
+    "lib/smolbox/network_policy.ex": "905e5f69ebe2da6de2fb75b795a6de32f47e2e1a34d5af9b11f9e5a66d242ee1",
+    "lib/smolbox/port_mapping.ex": "e3ac86f7d25b6ad0d0a74c23b9d1ce433b012832744c87beeb2e747d5c8ea124",
+    "lib/smolbox/profile.ex": "2e7b700071e18160f2836bf6fd638fb9ca7c2ce7da054b2ce93cbc1937b155b1",
+    "lib/smolbox/result.ex": "09d0fb685331012e00690875734ee70bb51b0528eecb4c0ab236277343daeccf",
+    "lib/smolbox/runtime.ex": "b4c0b5a7f03ef3612ebb3e885bfedc27e8d41104a63dbb21c5f1d2bce0af9915",
+    "lib/smolbox/runtime/cleanup.ex": "f11db6b108bbd5650e66960ed3b57d9d5c93d6487808ff9f1e665edce32c221e",
+    "lib/smolbox/runtime/clock.ex": "a3b7bf21a90a4ccf4977791f97736137af01fdee4a2b3a5ebb3d6a0d18dbf114",
+    "lib/smolbox/runtime/config.ex": "72ad48cde99f38333a9dd66bd94dd33f8c72c59ab10d142ec4c59efdddd4188b",
+    "lib/smolbox/runtime/coordinator.ex": "9b7b5ae98ea153530e6c962c35d3a217862143fe55716fa3a58b67bbb4cad808",
+    "lib/smolbox/runtime/executor.ex": "a67f3fd62ccdc584a7967521910452e7adf0dcab8e7ddf2ed62cbc587883cad4",
+    "lib/smolbox/runtime/files.ex": "1acecfe874e8397c4c13fbd40751e629808dbefb920ac640f06d09edb415fc55",
+    "lib/smolbox/runtime/inspection.ex": "4e9d22ee3d91cb69c49250505b1884af88339e96ab468db04622eb6d28004c22",
+    "lib/smolbox/runtime/machines.ex": "0c1cab4a2eaf539dd55145d1239a6073fb39095e6232eb47e902197a054233ef",
+    "lib/smolbox/runtime/observation.ex": "9409647db1e835e3d3f38c01de206daab37e78686d6c6b6ec595886af372795a",
+    "lib/smolbox/runtime/session.ex": "e07b33065128a0e3c6f91f5a80474a7a4b2d2e331301c095af5be24932e113b7",
+    "lib/smolbox/runtime/work_supervisor.ex": "40e5cfd18c84e55c232272e38477e66b689ea77baf72661171329c50738b4743",
+    "lib/smolbox/runtime/worker_config.ex": "349577c52328a23b4d13953e78ee55bc4d9295755229a03a2f7aec5d268d6c98",
+    "lib/smolbox/runtime/worker_health.ex": "fc19df3f3bf28dfda625b1f6f3b882e2a16b75421145442d2e8d77b6b935f1c0",
+    "lib/smolbox/store.ex": "38a7c7fdafd038dc233562d9958f7b815cca3fd8df187fc8ff34cfad845d4515",
+    "lib/smolbox/store/codec.ex": "36b4e5be5b0864917f41398f2f027f4b4875f3f8afe3336a32db8b3f13c97393",
+    "lib/smolbox/store/codec_ports.ex": "2f8061b36135ffdf81918474c08d93a21381d6b816754272bc94150f352292e0",
+    "lib/smolbox/store/machine_ops.ex": "a43418312530883ad19db5826fd7ff2f2cf5e301039feab52e0893f2f74d9708",
+    "lib/smolbox/store/memory.ex": "92e098db9987ce8a9618e2ff8e8d660feb3ec30ea3b890fd30d718b984c03b3e",
+    "lib/smolbox/store/port_ownership.ex": "00cba213d22706c49edc28174182a6729cdb18d53cb7a860103f2e1271df8b59",
+    "lib/smolbox/store/record_ops.ex": "7ec2f3504a901460cfaaf5e03b7f599b84d5caf7a144e275d7b0d405f907c646",
+    "lib/smolbox/telemetry.ex": "ec28badc3bff5bd3d40f87350f840208be306a522a9bd600d6bfd49e3ebbf5f9",
+    "lib/smolbox/telemetry/dispatcher.ex": "30a2513d3aaeb24e953011ff9ca651f9eac66b1d6105a8d491e8178d3796063b",
+    "lib/smolbox/transport.ex": "ed6a497a1e746330bc7527becd8b520a5c9b8320a9102604633dfb13fa4802de",
+    "lib/smolbox/transport/capture.ex": "df828264adf33a5d96759b445f156189d7ade1b0c4666f66831442569cb084d4",
+    "lib/smolbox/transport/req.ex": "ab74798b6c4c27c89b72b6813ef5de7190d3380de1da075228d0533e3b36ebcd",
+    "lib/smolbox/validation.ex": "4df0e14313ffb67caefdf3a7e4b9d63a8a6588666b4142409b525d2955cc2530",
+    "lib/smolbox/wire/sse.ex": "00079b7972aa40bc733aa7dbe6a61c50b94367fd1f19ed00afdfcb0fda51dda1",
+    "lib/smolbox/worker.ex": "281f6be0b563eba81b25e3c8f9aca26b00f664f6333a830d80b983a5797913cf"
+  },
+  "upstream": {
+    "inspected_commit": "73d4b480dc703c86b676bb54f72318ef94f24e6a",
+    "release_commit": "d33b5a4adeb844365922cd2a29a89d93a94008ad",
+    "tree": "493f7d59f6d7e2c024c1854b151e4875ff93ccd3",
+    "version": "1.17.0"
+  }
+}

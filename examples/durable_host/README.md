@@ -406,3 +406,30 @@ The persistent-machine walkthrough refreshes an inspected version and retries
 only `stale_version` / `not_dispatched` lifecycle conflicts, for up to five
 seconds. It does not retry uncertain worker mutations. Each refresh is a new
 lifecycle request; the walkthrough assumes one operator controls that handle.
+
+## Persistent HTTP service
+
+With the same durable configuration and a dedicated smolvm 1.17.0 worker, run:
+
+```sh
+mix ecto.migrate
+export SMOLBOX_HTTP_PORT=18080
+MIX_ENV=test mix run scripts/persistent_http.exs prepare
+MIX_ENV=test mix run scripts/persistent_http.exs resume
+```
+
+Keep the partition, execution ID, fingerprint key and encryption key unchanged
+between processes. Use fresh identities for another demonstration. The first
+process creates a fixed TCP mapping, writes a file, starts a guest HTTP server and
+verifies readiness and HTTP access. The second recovers the same machine, reaches
+the existing service, stops/starts it, restarts the service and reads the same file
+before verified deletion and release of all reservations. The worker's loopback
+port must be reachable from the example process; `SMOLBOX_HTTP_URL` may point to
+an operator-provided forwarding path ending in `/retained.txt`.
+
+Port forwarding does not provide service supervision, TLS or authentication.
+The guest process is restarted explicitly after VM stop/start. See the complete
+[port mapping guide](../../docs/port-mappings.md), including outbound semantics,
+worker binding, conflicts and recovery. Migrate and upgrade every controller
+before managed writes: codec v5 applies even without ports, and rollback is not
+safe merely because no new mapped machines are being created.

@@ -162,12 +162,26 @@ defmodule SmolBox.DurableHost.Database do
 
   defp decode(context, key, [bytes | projected], kind) do
     with {:ok, record} <- RecordCrypto.decrypt(bytes, context.key, context.partition, key, kind),
-         true <- projected == read_projection(record, kind) do
+         true <- projected == read_projection(record, kind),
+         true <- ports_match?(context, record) do
       {:ok, record}
     else
       _invalid -> error(:store)
     end
   end
+
+  defp ports_match?(context, %SmolBox.ManagedMachine{} = record) do
+    rows =
+      query(
+        context,
+        "SELECT worker_id,host_port FROM smolbox_port_owners WHERE partition=$1 AND scope=$2 AND execution_id=$3 ORDER BY host_port",
+        [context.partition, record.scope, record.id]
+      ).rows
+
+    rows == Enum.map(record.reserved_ports, &[record.worker_id, &1])
+  end
+
+  defp ports_match?(_context, _record), do: true
 
   defp projection(record) do
     resources = record.reservation || RecordOps.empty_usage()

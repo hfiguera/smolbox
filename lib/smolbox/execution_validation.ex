@@ -57,12 +57,25 @@ defmodule SmolBox.ExecutionValidation do
     Validation.struct_shape?(machine, Machine) and machine.name == record.machine_name and
       machine.state in [:created, :running, :stopped] and
       Validation.integer?(machine.created_at, 0, 253_402_300_799) and
-      machine.cpus == profile.cpus and machine.memory_mb == profile.memory_mb and
-      machine.storage_gb == profile.storage_gb and machine.overlay_gb == profile.overlay_gb and
+      allocations?(machine, profile) and
+      ports?(machine, record) and
       network?(machine, profile)
   end
 
   def machine?(_machine, _record), do: false
+
+  defp allocations?(machine, profile),
+    do:
+      machine.cpus == profile.cpus and machine.memory_mb == profile.memory_mb and
+        machine.storage_gb == profile.storage_gb and machine.overlay_gb == profile.overlay_gb
+
+  defp ports?(machine, %{managed_machine: key}) when not is_nil(key),
+    do: SmolBox.PortMapping.canonical?(machine.ports)
+
+  defp ports?(machine, record),
+    do:
+      SmolBox.PortMapping.canonical?(machine.ports) and
+        machine.ports == Map.get(record.spec, :ports, [])
 
   defp network?(machine, profile),
     do: SmolBox.NetworkPolicy.valid?(machine.network) and machine.network == profile.network
@@ -99,6 +112,7 @@ defmodule SmolBox.ExecutionValidation do
         :protocol,
         :output_limit,
         :identity_conflict,
+        :port_conflict,
         :not_found,
         :store,
         :unknown,

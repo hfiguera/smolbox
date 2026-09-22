@@ -49,6 +49,20 @@ command result while recording unavailable outputs. `cleanup: :complete` and
 | Collected output is missing | Check `collection`, `artifacts`, and `last_error`, then the artifact adapter. Restoring storage and resubmitting the same ID does not rerun the command or recreate deleted guest files. |
 | Cleanup or reservations remain pending | Check ownership evidence, worker availability, retention, and cleanup attempts. An unknown outcome normally retains its VM until the execution deadline plus `retention_ms` (24 hours by default). |
 
+## Mapped service problems
+
+For a retained machine, inspect `Machines.inspect/2`, including `spec.ports`,
+`reserved_ports`, state and `last_error`. A store `:port_conflict` leaves an
+unassigned request blocked without a worker mutation; delete that request and
+submit a new identity after resolving the conflict. A dispatched start conflict
+retains reservations and requires the existing quiescent recovery procedure.
+A reported stopped state can precede closure of the operating-system listener.
+
+If a mapping exists but HTTP fails, check readiness of the guest service and its
+listen address, then reachability of the worker host's listener. The caller's
+loopback address may identify a different host. Stop/start preserves files and
+mappings, but the service needs an explicit restart. See [Port mappings](port-mappings.md).
+
 ## Recover without repeating uncertain work
 
 `reconcile/3` schedules another observation of existing evidence; it does not run
