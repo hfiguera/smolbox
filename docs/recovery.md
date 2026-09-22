@@ -1,5 +1,10 @@
 # Persistence and recovery contract
 
+This unreleased checkout defaults to **smolvm 1.17.0** on Linux x86_64 and macOS
+Apple Silicon; published SmolBox 0.1.5 still defaults to 1.16.1. Existing workers
+can retain an explicit `runtime_version: "1.16.1"`. See the
+[1.17.0 qualification](compatibility.md#smolvm-1-17-0-qualification).
+
 Use a durable store when executions must survive an application restart. SmolBox
 persists intent and observations; the host adapter supplies transactions and
 durability. The included PostgreSQL example has real database and process-recovery

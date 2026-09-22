@@ -1,5 +1,10 @@
 # Getting started
 
+This unreleased checkout defaults to **smolvm 1.17.0** on Linux x86_64 and macOS
+Apple Silicon; published SmolBox 0.1.5 still defaults to 1.16.1. Existing workers
+can retain an explicit `runtime_version: "1.16.1"`. See the
+[1.17.0 qualification](compatibility.md#smolvm-1-17-0-qualification).
+
 This walkthrough runs a Python program in a disposable VM, reads its output file,
 and waits for cleanup. It uses an in-memory execution store so you can learn the
 API without a database. The final section explains what changes in an application
@@ -68,7 +73,8 @@ iex -S mix
 
 `SMOLBOX_DEMO_DIR` is a new private directory for input/output objects. Keep it
 separate from the runtime image and from all guest-accessible directories.
-Omitting `SMOLBOX_RUNTIME_VERSION` selects 1.16.1 in this walkthrough. Set it to
+The walkthrough explicitly selects 1.16.1 for compatibility with published 0.1.5.
+When using this checkout's example, omitting `SMOLBOX_RUNTIME_VERSION` selects 1.17.0. Set it to
 `1.16.0`, `1.14.6` or `1.14.1` to retain an existing worker on either host. A library
 upgrade does not upgrade the worker; mismatched versions prevent admission. See [the qualification and cleanup
 limitation](compatibility.md#smolvm-1-16-1-qualification).

@@ -125,7 +125,7 @@ try do
         restart_observations: restart,
         policy_retained_after_restart: true,
         denied_after_restart: true,
-        runtime: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.16.1")
+        runtime: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.17.0")
       },
       pretty: true
     )

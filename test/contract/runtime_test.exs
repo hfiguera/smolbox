@@ -6,7 +6,7 @@ defmodule SmolBox.RuntimeTest do
 
   defp setup_runtime(options \\ []), do: SmolBox.RuntimeFixture.start(options)
 
-  for version <- ["1.16.0", "1.16.1"] do
+  for version <- ["1.16.0", "1.16.1", "1.17.0"] do
     test "#{version} approved network policy survives managed execution, identity checks and cleanup" do
       {:ok, policy} = SmolBox.NetworkPolicy.new(hosts: ["api.example.com"])
 

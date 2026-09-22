@@ -238,7 +238,7 @@ refuses to drop tables while these records exist.
 The durable host example includes `scripts/persistent_machine.exs`.
 Configure the database and environment as in the durable host README, create a
 private artifact directory, and apply migrations. Use a dedicated, approved
-smolvm 1.16.1 worker with functioning `resize2fs`; this small demo requests 2 GiB
+smolvm 1.17.0 worker (or explicitly select 1.16.1) with functioning `resize2fs`; this small demo requests 2 GiB
 storage and 2 GiB overlay and requires an image qualified for those sizes.
 
 From `examples/durable_host`:

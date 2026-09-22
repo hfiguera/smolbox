@@ -79,6 +79,11 @@ creating machines, executing commands, streaming output, and transferring files.
 
 ## Installation and first run
 
+This unreleased checkout defaults to **smolvm 1.17.0** after real-worker
+[qualification on Linux and macOS](docs/compatibility.md#smolvm-1-17-0-qualification).
+Existing workers must remain explicitly pinned to their installed version, or be
+upgraded separately. Published package behavior below is unchanged.
+
 SmolBox **0.1.5** keeps **smolvm 1.16.1** as its default on Linux x86_64 and
 macOS Apple Silicon. Checkpoint execution requires this worker version.
 
@@ -107,9 +112,9 @@ To run the local walkthrough, you need:
 
 - Elixir **1.18 or later**, using a [tested Elixir/OTP pair](docs/compatibility.md).
 - A dedicated worker on Linux x86_64 with KVM or macOS Apple Silicon:
-  **smolvm 1.16.1** by default, or explicitly configured 1.16.0, 1.14.6 or
+  **smolvm 1.17.0** for this checkout, or explicitly configured 1.16.1, 1.16.0, 1.14.6 or
   1.14.1 workers.
-- The host's `resize2fs` tool for 1.14.6, 1.16.0 and 1.16.1 disk requests below template sizes.
+- The host's `resize2fs` tool for 1.14.6, 1.16.0, 1.16.1 and 1.17.0 disk requests below template sizes.
   On macOS, install `e2fsprogs`; see the [runtime prerequisites](docs/compatibility.md#macos-1-14-6-prerequisites).
 - A prepared Python image for that worker's architecture, with its SHA-256
   recorded. The guide links to the image preparation commands and host capacity
@@ -145,21 +150,21 @@ record schema v3 upgrade requirements.
 ## Current scope
 
 SmolBox has real execution and durable recovery tests on Linux x86_64 and macOS
-Apple Silicon with **smolvm 1.14.1, 1.14.6, 1.16.0 and 1.16.1**; results are recorded in [Compatibility](docs/compatibility.md#runtime-selection).
+Apple Silicon with **smolvm 1.14.1, 1.14.6, 1.16.0, 1.16.1 and 1.17.0**; results are recorded in [Compatibility](docs/compatibility.md#runtime-selection).
 SmolBox 0.1.5 defaults to **1.16.1**; 0.1.3 defaults to **1.16.0** and
 0.1.2 to **1.14.6**.
-Before adopting the **1.16.1** default with an older worker, explicitly
-configure `runtime_version: "1.16.0"`, `"1.14.6"` or `"1.14.1"`, or follow the
+Before adopting this checkout's **1.17.0** default with an older worker, explicitly
+configure `runtime_version: "1.16.1"`, `"1.16.0"`, `"1.14.6"` or `"1.14.1"`, or follow the
 [worker upgrade procedure](docs/host-integration.md#upgrading-a-worker).
 The package does not upgrade an external worker. A version mismatch prevents
 new execution; arbitrary upstream releases and automatic fallback are not accepted.
-Since version 0.1.4, SmolBox selects **1.16.1** by default after
+Published versions 0.1.4 and 0.1.5 select **1.16.1** by default after
 [qualification](docs/compatibility.md#smolvm-1-16-1-qualification) and a cleanup change
 that separates disposal from preservation. A failed graceful stop can still leave
 unknown work retained; see the [recovery rules](docs/recovery.md#preservation-and-disposal).
 
 SmolBox supports explicit outbound hostname/CIDR policies
-with smolvm 1.16.0 and 1.16.1. Offline remains the default. See
+with smolvm 1.16.0, 1.16.1 and 1.17.0. Offline remains the default. See
 [Controlled network access](docs/network-access.md) for setup and validation boundaries.
 
 SmolBox relies on smolvm's isolation model for running untrusted code. Your

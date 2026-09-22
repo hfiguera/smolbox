@@ -31,7 +31,7 @@ defmodule SmolBox.ClientTest do
 
     assert {:ok, %{version: "1.14.1", total: 0, running: 0}} = Client.health(peer)
 
-    for version <- ["1.14.6", "1.16.0", "1.16.1"] do
+    for version <- ["1.14.6", "1.16.0", "1.16.1", "1.17.0"] do
       upgraded = client(&TestPeer.json(&1, fixture(version <> "/health")))
       assert {:ok, %{version: ^version, total: 0, running: 0}} = Client.health(upgraded)
     end
@@ -95,7 +95,7 @@ defmodule SmolBox.ClientTest do
     {:ok, spec} = MachineSpec.new("fixture", "/approved/idle.smolcheckpoint", source: :checkpoint)
     parent = self()
 
-    for version <- ["1.14.1", "1.14.6", "1.16.0", "1.16.1", "1.16.2"] do
+    for version <- ["1.14.1", "1.14.6", "1.16.0", "1.16.1", "1.16.2", "1.17.0"] do
       peer =
         client(fn conn ->
           if conn.request_path == "/health" do
@@ -107,7 +107,7 @@ defmodule SmolBox.ClientTest do
           end
         end)
 
-      if version == "1.16.1" do
+      if version in ["1.16.1", "1.17.0"] do
         assert {:ok, %{state: :created}} = Client.create(peer, spec)
         assert_receive {:checkpoint_request, wire}
         refute Map.has_key?(wire, "storageGb")
@@ -127,7 +127,7 @@ defmodule SmolBox.ClientTest do
     parent = self()
 
     supported_cases =
-      for version <- ["1.16.0", "1.16.1"],
+      for version <- ["1.16.0", "1.16.1", "1.17.0"],
           mode <- [:matching, :missing, :different],
           do: {version, mode}
 

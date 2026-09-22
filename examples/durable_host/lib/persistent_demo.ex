@@ -40,7 +40,7 @@ defmodule SmolBox.DurableHost.PersistentDemo do
     machine = wait_machine(runtime, handle, &(&1.state in [:created, :running]))
 
     if machine.state == :created do
-      {:ok, _} = Machines.start(runtime, handle, machine.version)
+      {:ok, _} = lifecycle(runtime, handle, :start)
       wait_machine(runtime, handle, &(&1.state == :running))
     end
 
@@ -69,16 +69,14 @@ defmodule SmolBox.DurableHost.PersistentDemo do
   defp execute("resume", runtime, handle, base, store) do
     {:ok, original} = Machines.inspect(runtime, handle)
     command(runtime, handle, base, "read-after-restart", read_program(), "retained\n")
-    {:ok, machine} = Machines.inspect(runtime, handle)
-    {:ok, _} = Machines.stop(runtime, handle, machine.version)
+    {:ok, _} = lifecycle(runtime, handle, :stop)
     stopped = wait_machine(runtime, handle, &(&1.state == :stopped))
     true = stopped.reservation != nil
-    {:ok, _} = Machines.start(runtime, handle, stopped.version)
+    {:ok, _} = lifecycle(runtime, handle, :start)
     restarted = wait_machine(runtime, handle, &(&1.state == :running))
     true = restarted.machine_name == original.machine_name
     command(runtime, handle, base, "read-after-start", read_program(), "retained\n")
-    {:ok, machine} = Machines.inspect(runtime, handle)
-    {:ok, _} = Machines.delete(runtime, handle, machine.version)
+    {:ok, _} = lifecycle(runtime, handle, :delete)
     deleted = wait_machine(runtime, handle, &(&1.state == :deleted))
     {:ok, %{slots: 0, cpus: 0, memory_mb: 0, disk_gb: 0}} = Store.usage(store, deleted.worker_id)
 
@@ -117,6 +115,28 @@ defmodule SmolBox.DurableHost.PersistentDemo do
   defp read_program,
     do: "from pathlib import Path; print(Path('/workspace/persistent.txt').read_text())"
 
+  defp lifecycle(runtime, handle, operation),
+    do: lifecycle(runtime, handle, operation, System.monotonic_time(:millisecond) + 5_000)
+
+  defp lifecycle(runtime, handle, operation, deadline) do
+    {:ok, machine} = Machines.inspect(runtime, handle)
+
+    case apply(Machines, operation, [runtime, handle, machine.version]) do
+      {:error, %{category: :stale_version, evidence: :not_dispatched}} = error ->
+        # Reconciliation can update the version after inspection. Only retry a
+        # rejected store conflict, never an uncertain worker mutation.
+        if System.monotonic_time(:millisecond) < deadline do
+          Process.sleep(20)
+          lifecycle(runtime, handle, operation, deadline)
+        else
+          error
+        end
+
+      result ->
+        result
+    end
+  end
+
   def wait_machine(runtime, handle, predicate, timeout \\ 90_000),
     do: observe(runtime, handle, predicate, System.monotonic_time(:millisecond) + timeout)
 
@@ -139,7 +159,7 @@ defmodule SmolBox.DurableHost.PersistentDemo do
     end
   end
 
-  # This demo requires resize2fs-capable 1.16.1 workers and keeps disk requests
+  # This demo requires resize2fs-capable workers and keeps disk requests
   # small. Operators must qualify these floors for their prepared image.
   defp small_profile(options, base) do
     profile = %{base.profile | id: "persistent-demo-v1", storage_gb: 2, overlay_gb: 2}

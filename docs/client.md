@@ -1,5 +1,10 @@
 # Low-level client
 
+This unreleased checkout defaults to **smolvm 1.17.0** on Linux x86_64 and macOS
+Apple Silicon; published SmolBox 0.1.5 still defaults to 1.16.1. Existing workers
+can retain an explicit `runtime_version: "1.16.1"`. See the
+[1.17.0 qualification](compatibility.md#smolvm-1-17-0-qualification).
+
 This API performs one verified worker operation at a time. It does not persist
 request identities, reserve capacity, reconcile a crash, or authorize deletion.
 Use it when host code owns those responsibilities. For a complete managed
@@ -17,7 +22,7 @@ host, verify its digest, and start a private `smolvm serve` endpoint. For bounde
 small-file workloads set `SMOLVM_FILE_TRANSFER_MAX_BYTES=1048576` before starting
 the server. SmolBox never enables guest networking to fetch an image.
 
-For smolvm 1.14.6, 1.16.0 and 1.16.1, verify the host's `resize2fs` before requesting disks smaller
+For smolvm 1.14.6, 1.16.0, 1.16.1 and 1.17.0, verify the host's `resize2fs` before requesting disks smaller
 than its bundled templates. Our macOS run without that tool lost a workspace
 file after stop/start; health and successful execution alone did not detect the
 problem. See [runtime prerequisites](compatibility.md#macos-1-14-6-prerequisites).
@@ -107,7 +112,7 @@ state; stopping a VM does not recover an unknown command exit code.
 
 An operator-approved idle checkpoint can be created with
 `MachineSpec.new(name, path, source: :checkpoint, ...)`. The explicit allocations
-must match the capture. This requires smolvm 1.16.1 and an offline source; creation
+must match the capture. This requires smolvm 1.16.1 or 1.17.0 and an offline source; creation
 must return a created branchable machine before it may be started. Captured
 processes resume on start, so a workload entrypoint override cannot neutralize
 an arbitrary checkpoint. See [Executing from a checkpoint](checkpoints.md) for

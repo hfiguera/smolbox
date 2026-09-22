@@ -9,7 +9,7 @@ assert :os.type() == {:unix, :linux}
 assert {"smolbox-nested\n", 0} = System.cmd("hostname", [])
 assert {"kvm\n", 0} = System.cmd("systemd-detect-virt", [])
 version = System.fetch_env!("SMOLBOX_RUNTIME_VERSION")
-assert version in ["1.16.0", "1.16.1"]
+assert version in ["1.16.0", "1.16.1", "1.17.0"]
 path = "/home/lab/qualification/disk-stop-#{version}.json"
 refute File.exists?(path)
 socket = "/srv/sbq/run/api.sock"

@@ -1,5 +1,9 @@
 # Minimal host example
 
+This checkout defaults to smolvm **1.17.0**; published 0.1.5 retains 1.16.1.
+Set `SMOLBOX_RUNTIME_VERSION=1.16.1` explicitly for an existing 1.16.1 worker.
+See [qualification](../../docs/compatibility.md#smolvm-1-17-0-qualification).
+
 This example keeps the image-based path simple. For approved idle checkpoint
 execution with PostgreSQL and recovery across application processes, see the
 [durable checkpoint example](../durable_host/README.md#checkpoint-execution-and-recovery).
@@ -21,7 +25,7 @@ objects and a 32-byte fingerprint key from host secret storage, then set:
 
 ```sh
 export SMOLBOX_RUNTIME_URL=http://127.0.0.1:19470
-export SMOLBOX_RUNTIME_VERSION=1.16.1
+export SMOLBOX_RUNTIME_VERSION=1.17.0
 export SMOLBOX_PYTHON_ARTIFACT=/absolute/path/python.smolmachine
 export SMOLBOX_PYTHON_SHA256=the_verified_64_character_lowercase_digest
 export SMOLBOX_ARTIFACT_ROOT=/absolute/private/directory/objects
@@ -36,10 +40,10 @@ MIX_ENV=test mix run scripts/demo.exs
 ```
 
 The object directory must already exist with mode `0700`. Use the exact version
-installed on the worker. Version 1.16.1 is the default on Linux x86_64 and macOS
+installed on the worker. Version 1.17.0 is the default on Linux x86_64 and macOS
 Apple Silicon. Set `SMOLBOX_RUNTIME_VERSION` to `1.16.0`, `1.14.6` or `1.14.1` for an
 existing older worker. Consult the
-[qualification evidence](../../docs/compatibility.md#smolvm-1-16-1-qualification). For smaller 1.14.6, 1.16.0 or 1.16.1 disk requests, supply the host's `resize2fs`; see
+[qualification evidence](../../docs/compatibility.md#smolvm-1-17-0-qualification). For smaller 1.14.6, 1.16.0, 1.16.1 or 1.17.0 disk requests, supply the host's `resize2fs`; see
 [host prerequisites](../../docs/compatibility.md#macos-1-14-6-prerequisites).
 SmolBox 0.1.5 defaults to 1.16.1; 0.1.3 defaults to 1.16.0. Keep key files private
 and stable; the example does not print their contents. For an authenticated

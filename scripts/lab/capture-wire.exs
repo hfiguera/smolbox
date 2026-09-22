@@ -9,7 +9,7 @@ defmodule SmolBox.CaptureWire do
   def run do
     assert {"smolbox-nested\n", 0} = System.cmd("hostname", [])
     version = System.fetch_env!("SMOLBOX_RUNTIME_VERSION")
-    assert version in ["1.14.1", "1.14.6", "1.16.0", "1.16.1"]
+    assert version in ["1.14.1", "1.14.6", "1.16.0", "1.16.1", "1.17.0"]
     directory = "/home/lab/qualification/wire-#{version}"
     File.mkdir!(directory)
 
@@ -58,6 +58,14 @@ defmodule SmolBox.CaptureWire do
     assert {:ok, parser, [{:stdout, "café\n"}, {:exit, 0}]} = SSE.feed(%SSE{}, stream)
     assert :ok = SSE.finish(parser)
     File.write!(directory <> "/exec.sse", stream)
+
+    if version == "1.17.0" do
+      listing = request(worker, :get, root <> "/#{name}/files/workspace", nil)
+      assert %{"entries" => entries} = Jason.decode!(listing)
+      assert is_list(entries)
+      File.write!(directory <> "/directory.json", listing)
+      assert {:error, %{category: :protocol}} = Client.download(client, name, "/workspace", 1024)
+    end
 
     assert {:ok, observed} = Client.inspect_machine(client, name)
     assert Machine.same_incarnation?(original, observed)

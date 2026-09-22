@@ -42,3 +42,12 @@ The same capture script, workloads, response cap and normalization rules apply.
 Buffered output and SSE framing remain verbatim. Capture finished with deletion
 verified and an empty inventory. The separate qualification report records the
 broader compatibility and network enforcement results.
+
+The `1.17.0/` fixtures were captured on September 22, 2026 UTC from the official
+Linux x86_64 distribution in the disposable nested KVM lab. Source commit:
+`d33b5a4adeb844365922cd2a29a89d93a94008ad`; binary SHA-256:
+`40b9bc8f24f7cc77c371db4784742e6b6724f09a11b83d63776b944734b7912d`.
+The same workloads, response cap and lifecycle normalization apply. Buffered
+output and SSE bytes remain verbatim. `directory.json` captures the new JSON
+response for a directory; the capture also verifies that `Client.download/4`
+rejects it as a binary file. Deletion and empty inventory were verified.

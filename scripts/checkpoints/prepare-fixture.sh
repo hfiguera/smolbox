@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Ordinary bounded probe only. Use a dedicated, empty smolvm 1.16.1 worker.
+# Ordinary bounded probe only. Use a dedicated, empty smolvm 1.16.1 or 1.17.0 worker.
 # Captures an idle offline guest with synthetic disk and RAM data; no user code.
 set -euo pipefail
 umask 077

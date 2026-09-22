@@ -19,7 +19,7 @@ API to make interpreter initialization disappear.
 
 ## Prepare and approve the source
 
-Use a dedicated preparation worker running smolvm **1.16.1** on the same platform
+Use a dedicated preparation worker running smolvm **1.17.0** (or explicitly selected **1.16.1**) on the same platform
 and compatible CPU as the execution worker. Prepare a bare, offline guest with
 no host mounts, ports, sockets, devices, secret references or workload restart.
 Wait for all preparation commands to exit. Capture the idle guest using smolvm's
@@ -99,7 +99,10 @@ entries. The checkpoint's full profile must appear in the worker's profile
 catalog. Its runtime, platform and architecture must match that worker. Keep
 allocation floors consistent with actual captured disks and runtime overhead.
 
-Checkpoint execution currently requires 1.16.1. Existing image execution retains
+This checkout supports checkpoint execution on 1.17.0 (the default) and 1.16.1.
+Set `runtime_version: "1.16.1"` on both the checkpoint approval and worker for
+existing 1.16.1 captures. Published 0.1.5 requires 1.16.1. Captures must match their
+approved runtime; no cross-version restore compatibility is established. Existing image execution retains
 its other explicitly supported runtime versions and controlled networking.
 
 ## Submit a command

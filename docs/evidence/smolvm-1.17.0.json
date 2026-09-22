@@ -1,0 +1,664 @@
+{
+  "artifact_sha256": {
+    "linux_node": "768b8d2158a75abd90ccc73a65a83717aebfe37e62ed91d0db0bb731584df776",
+    "linux_python": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+    "macos_node": "c51800f44ca9e3d08a6ede9cbe84bfdaaeee254aa3e17f202b2646b417ca5267",
+    "macos_python": "4585196fbdf1de9bfd6c5c92d578ad0b1756cc92b64fe42b60674d279d74e03f"
+  },
+  "base_commit": "0165ac2e2b34cd57ad0215fc159871ee2263f015",
+  "binary_sha256": {
+    "darwin_arm64": "bee762e648f2c90e2339c6c3f37d6fd47d3645888e2b4d73963e511032d2195a",
+    "linux_x86_64": "40b9bc8f24f7cc77c371db4784742e6b6724f09a11b83d63776b944734b7912d"
+  },
+  "branch": "feature/qualify-smolvm-1.17.0",
+  "campaign": "smolvm 1.17.0 qualification and default selection",
+  "candidate_library_sha256": {
+    "lib/smolbox.ex": "1e09ddd34e3e9984f02ce93f8ae0ead9181630ff2fc4048687aa71e7fd898239",
+    "lib/smolbox/artifact_store.ex": "2d61ae4c7b6eeab70d6dbe822f390353565555b80b33a5602d3487b591128cbe",
+    "lib/smolbox/artifact_store/directory.ex": "c8afa7093cef1962a0592d3333dd2de08ed2d284731b840df1d99b1ec73c7bdc",
+    "lib/smolbox/checkpoint.ex": "ef8ccf20f26b10f96892c14ef140868a64e03e629842362e322d352347fab43e",
+    "lib/smolbox/client.ex": "4c94a0a1a567fdf0b2b5d20fe2e4728166b16b52379955ad71e4cd7159167c3e",
+    "lib/smolbox/command.ex": "ae5a7e9a9d885e30db49e967b693bd8afd00b1808998592dd25c2654d82ac63e",
+    "lib/smolbox/error.ex": "f7965086db5ba5b0f3442acfef5f9a20bb6a9bbc4db6f5d33445d8e1beca9e07",
+    "lib/smolbox/execution.ex": "cbe04277c064d9e3e62b407bd398c8dcee40dc69c920b4d8062db758539fac80",
+    "lib/smolbox/execution_spec.ex": "64bd78be15039d87eb13e00bf07fa23a80f4021948f29c9a8dcc6c7aca8460be",
+    "lib/smolbox/execution_validation.ex": "4d7feb5dc31ab4b8c628746c403cdabe52fce7c8acd13624934668409d094c73",
+    "lib/smolbox/files.ex": "15c2054bb8bd11b004de8a6c7a9dd707db4deccf001abdd70998e858ea6cf204",
+    "lib/smolbox/health.ex": "a6bb8345d44ac721adc29fe1c328e763f58c76cbe197529a4c6a41cf72a5a03a",
+    "lib/smolbox/identity.ex": "d2f0f9b2397119edbe90f98f00fa79977e46044ab485258880758fd36573fca7",
+    "lib/smolbox/machine.ex": "e257e67197997269b7db4e21719ee91866d4aa88bfc11f6d53d5ba145c1c3113",
+    "lib/smolbox/machine_spec.ex": "a4e4fa07720f92919279f1264c070eb0e98d93fee1c38587ae69c2b4ff65ff82",
+    "lib/smolbox/machines.ex": "0e0c1788bdac911bd1b1afe9686a7dd9d64444ef48831c8b7c83321e6a87af53",
+    "lib/smolbox/managed_machine.ex": "72065a0660472945585a5c95c75b9275d155d646ee82a4abb748969d0afb5e25",
+    "lib/smolbox/managed_machine_spec.ex": "fa20eb7e8358b9fdf70b69d576d56802e7840f19d02898b2fee21e42460fcdc4",
+    "lib/smolbox/manifest.ex": "64bbfcabea90905d9cb0b3ac9399fa997486b4461d5e13989f3f892938bfeb10",
+    "lib/smolbox/network_policy.ex": "f5a1c53aa197a887a7804bbb6f925514bd9f6417fa924c0524a232a3067fc2db",
+    "lib/smolbox/profile.ex": "2e7b700071e18160f2836bf6fd638fb9ca7c2ce7da054b2ce93cbc1937b155b1",
+    "lib/smolbox/result.ex": "09d0fb685331012e00690875734ee70bb51b0528eecb4c0ab236277343daeccf",
+    "lib/smolbox/runtime.ex": "b4c0b5a7f03ef3612ebb3e885bfedc27e8d41104a63dbb21c5f1d2bce0af9915",
+    "lib/smolbox/runtime/cleanup.ex": "f11db6b108bbd5650e66960ed3b57d9d5c93d6487808ff9f1e665edce32c221e",
+    "lib/smolbox/runtime/clock.ex": "a3b7bf21a90a4ccf4977791f97736137af01fdee4a2b3a5ebb3d6a0d18dbf114",
+    "lib/smolbox/runtime/config.ex": "72ad48cde99f38333a9dd66bd94dd33f8c72c59ab10d142ec4c59efdddd4188b",
+    "lib/smolbox/runtime/coordinator.ex": "9b7b5ae98ea153530e6c962c35d3a217862143fe55716fa3a58b67bbb4cad808",
+    "lib/smolbox/runtime/executor.ex": "dec523cd019bc8126f31822e61641ea7b7be6df2e307cd476491ad197fd4edab",
+    "lib/smolbox/runtime/files.ex": "1acecfe874e8397c4c13fbd40751e629808dbefb920ac640f06d09edb415fc55",
+    "lib/smolbox/runtime/inspection.ex": "4e9d22ee3d91cb69c49250505b1884af88339e96ab468db04622eb6d28004c22",
+    "lib/smolbox/runtime/machines.ex": "ab2d9bfbf53d5cc1e2e841a4bedb17e000049011bb04357125d1fc92f838585a",
+    "lib/smolbox/runtime/observation.ex": "9409647db1e835e3d3f38c01de206daab37e78686d6c6b6ec595886af372795a",
+    "lib/smolbox/runtime/session.ex": "e07b33065128a0e3c6f91f5a80474a7a4b2d2e331301c095af5be24932e113b7",
+    "lib/smolbox/runtime/work_supervisor.ex": "40e5cfd18c84e55c232272e38477e66b689ea77baf72661171329c50738b4743",
+    "lib/smolbox/runtime/worker_config.ex": "a65873bc84813d0a96957f36ea2c70e1c0e0e3d483a3cdee3926b988d595c013",
+    "lib/smolbox/runtime/worker_health.ex": "fc19df3f3bf28dfda625b1f6f3b882e2a16b75421145442d2e8d77b6b935f1c0",
+    "lib/smolbox/store.ex": "347169e9f29e1d4a0da1f6d1611c9bcbad67db8a5fb02b3e66c047f272d57413",
+    "lib/smolbox/store/codec.ex": "b4668c65916f3802daf0be23a2e843cc0c0232ddc3d67477be0d6e81afda7a15",
+    "lib/smolbox/store/machine_ops.ex": "5031e2121235160fa97d4c94b194dfa4a6abaeae0701bb6e570505ddffab020e",
+    "lib/smolbox/store/memory.ex": "ebe2b3450a05230ce2c4f906688aca41c95fd3554f3ef27cac935b178cc94b82",
+    "lib/smolbox/store/record_ops.ex": "7ec2f3504a901460cfaaf5e03b7f599b84d5caf7a144e275d7b0d405f907c646",
+    "lib/smolbox/telemetry.ex": "ec28badc3bff5bd3d40f87350f840208be306a522a9bd600d6bfd49e3ebbf5f9",
+    "lib/smolbox/telemetry/dispatcher.ex": "30a2513d3aaeb24e953011ff9ca651f9eac66b1d6105a8d491e8178d3796063b",
+    "lib/smolbox/transport.ex": "ed6a497a1e746330bc7527becd8b520a5c9b8320a9102604633dfb13fa4802de",
+    "lib/smolbox/transport/capture.ex": "df828264adf33a5d96759b445f156189d7ade1b0c4666f66831442569cb084d4",
+    "lib/smolbox/transport/req.ex": "748485e5e9683cff55d8718905829cbf4b0ec89394f3066cf82c1c37b3a5a2ee",
+    "lib/smolbox/validation.ex": "4df0e14313ffb67caefdf3a7e4b9d63a8a6588666b4142409b525d2955cc2530",
+    "lib/smolbox/wire/sse.ex": "00079b7972aa40bc733aa7dbe6a61c50b94367fd1f19ed00afdfcb0fda51dda1",
+    "lib/smolbox/worker.ex": "281f6be0b563eba81b25e3c8f9aca26b00f664f6333a830d80b983a5797913cf"
+  },
+  "date_utc": "2026-09-22",
+  "default_runtime": "1.17.0",
+  "distribution_sha256": {
+    "smolvm-1.17.0-darwin-arm64.tar.gz": "93829b337541e96780090755346221bb23fbf36f688e39c8008792c8affea84b",
+    "smolvm-1.17.0-linux-x86_64.tar.gz": "b648e6aa47dc4fee1ddc255f5c11401fc6aab41bab61335bde903ad2fc2e1bd1"
+  },
+  "final_checks": {
+    "docs_log_sha256": "e3efc57b53cf8e491bc3cbf94e2745e2acd08c14e3f90edcbca3b31c5a889df3",
+    "documentation_pages_checked": 53,
+    "durable_example_dialyzer": "passed after stale-version example correction",
+    "mix_ci": {
+      "checks": [
+        "format",
+        "unused dependencies",
+        "warnings-as-errors",
+        "xref cycles",
+        "ExUnit",
+        "Credo/ex_slop",
+        "ExDNA",
+        "Credence",
+        "Dialyzer"
+      ],
+      "log_sha256": "660c14d36cb9abfbaa7294e61b9516ee3df1ebe25e8d5c8bd4defbf2852cd748",
+      "passed": 259,
+      "runtime_excluded": 17
+    },
+    "package_archive_sha256": "2c20943e14de415d31f774cbcd23c6a6fbd51235377e9c4011b8f23b325d91b3",
+    "package_consumers": {
+      "current": {
+        "minimum": false,
+        "report_sha256": "0d788a098542ccfb89c7c23ab638315767ac1e334128c666c0fef5f7a79a7e14",
+        "smoke": {
+          "checkpoint": true,
+          "client": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.17.0",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.5",
+            "nimble_options": "1.1.1",
+            "req": "0.7.4",
+            "telemetry": "1.4.2"
+          }
+        }
+      },
+      "minimum": {
+        "minimum": true,
+        "report_sha256": "c587221e5a257ea671d30097ac0cef71118935c8578641438c6956af71299bcd",
+        "smoke": {
+          "checkpoint": true,
+          "client": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.17.0",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.0",
+            "nimble_options": "1.1.0",
+            "req": "0.7.4",
+            "telemetry": "1.3.0"
+          }
+        }
+      }
+    },
+    "package_scope": "Both consumers tested the same archive with final executable code; qualification receipts and guide wording were finalized afterward.",
+    "tooling_cases": 23,
+    "tooling_log_sha256": "1af55e1f15cab6036eeb65d6be08b405e807fe4ad03b41fe0e2db085e13e12cf"
+  },
+  "final_library_sha256": {
+    "lib/smolbox.ex": "1e09ddd34e3e9984f02ce93f8ae0ead9181630ff2fc4048687aa71e7fd898239",
+    "lib/smolbox/artifact_store.ex": "2d61ae4c7b6eeab70d6dbe822f390353565555b80b33a5602d3487b591128cbe",
+    "lib/smolbox/artifact_store/directory.ex": "c8afa7093cef1962a0592d3333dd2de08ed2d284731b840df1d99b1ec73c7bdc",
+    "lib/smolbox/checkpoint.ex": "efb4ab7a5a52ec6e01eb739547b812f932d0f70df7ab9cdd8ce121671c345831",
+    "lib/smolbox/client.ex": "39a17f2973e020925d86b478e9ab85acfc83792c6416dbc2357d803305001b72",
+    "lib/smolbox/command.ex": "ae5a7e9a9d885e30db49e967b693bd8afd00b1808998592dd25c2654d82ac63e",
+    "lib/smolbox/error.ex": "f7965086db5ba5b0f3442acfef5f9a20bb6a9bbc4db6f5d33445d8e1beca9e07",
+    "lib/smolbox/execution.ex": "cbe04277c064d9e3e62b407bd398c8dcee40dc69c920b4d8062db758539fac80",
+    "lib/smolbox/execution_spec.ex": "64bd78be15039d87eb13e00bf07fa23a80f4021948f29c9a8dcc6c7aca8460be",
+    "lib/smolbox/execution_validation.ex": "4d7feb5dc31ab4b8c628746c403cdabe52fce7c8acd13624934668409d094c73",
+    "lib/smolbox/files.ex": "15c2054bb8bd11b004de8a6c7a9dd707db4deccf001abdd70998e858ea6cf204",
+    "lib/smolbox/health.ex": "a6bb8345d44ac721adc29fe1c328e763f58c76cbe197529a4c6a41cf72a5a03a",
+    "lib/smolbox/identity.ex": "d2f0f9b2397119edbe90f98f00fa79977e46044ab485258880758fd36573fca7",
+    "lib/smolbox/machine.ex": "e257e67197997269b7db4e21719ee91866d4aa88bfc11f6d53d5ba145c1c3113",
+    "lib/smolbox/machine_spec.ex": "7b5e77b3427278ae6fe71d17836c7e27c76c82d72ed14c84dd69396df9a8eef0",
+    "lib/smolbox/machines.ex": "0e0c1788bdac911bd1b1afe9686a7dd9d64444ef48831c8b7c83321e6a87af53",
+    "lib/smolbox/managed_machine.ex": "72065a0660472945585a5c95c75b9275d155d646ee82a4abb748969d0afb5e25",
+    "lib/smolbox/managed_machine_spec.ex": "fa20eb7e8358b9fdf70b69d576d56802e7840f19d02898b2fee21e42460fcdc4",
+    "lib/smolbox/manifest.ex": "64bbfcabea90905d9cb0b3ac9399fa997486b4461d5e13989f3f892938bfeb10",
+    "lib/smolbox/network_policy.ex": "905e5f69ebe2da6de2fb75b795a6de32f47e2e1a34d5af9b11f9e5a66d242ee1",
+    "lib/smolbox/profile.ex": "2e7b700071e18160f2836bf6fd638fb9ca7c2ce7da054b2ce93cbc1937b155b1",
+    "lib/smolbox/result.ex": "09d0fb685331012e00690875734ee70bb51b0528eecb4c0ab236277343daeccf",
+    "lib/smolbox/runtime.ex": "b4c0b5a7f03ef3612ebb3e885bfedc27e8d41104a63dbb21c5f1d2bce0af9915",
+    "lib/smolbox/runtime/cleanup.ex": "f11db6b108bbd5650e66960ed3b57d9d5c93d6487808ff9f1e665edce32c221e",
+    "lib/smolbox/runtime/clock.ex": "a3b7bf21a90a4ccf4977791f97736137af01fdee4a2b3a5ebb3d6a0d18dbf114",
+    "lib/smolbox/runtime/config.ex": "72ad48cde99f38333a9dd66bd94dd33f8c72c59ab10d142ec4c59efdddd4188b",
+    "lib/smolbox/runtime/coordinator.ex": "9b7b5ae98ea153530e6c962c35d3a217862143fe55716fa3a58b67bbb4cad808",
+    "lib/smolbox/runtime/executor.ex": "dec523cd019bc8126f31822e61641ea7b7be6df2e307cd476491ad197fd4edab",
+    "lib/smolbox/runtime/files.ex": "1acecfe874e8397c4c13fbd40751e629808dbefb920ac640f06d09edb415fc55",
+    "lib/smolbox/runtime/inspection.ex": "4e9d22ee3d91cb69c49250505b1884af88339e96ab468db04622eb6d28004c22",
+    "lib/smolbox/runtime/machines.ex": "ab2d9bfbf53d5cc1e2e841a4bedb17e000049011bb04357125d1fc92f838585a",
+    "lib/smolbox/runtime/observation.ex": "9409647db1e835e3d3f38c01de206daab37e78686d6c6b6ec595886af372795a",
+    "lib/smolbox/runtime/session.ex": "e07b33065128a0e3c6f91f5a80474a7a4b2d2e331301c095af5be24932e113b7",
+    "lib/smolbox/runtime/work_supervisor.ex": "40e5cfd18c84e55c232272e38477e66b689ea77baf72661171329c50738b4743",
+    "lib/smolbox/runtime/worker_config.ex": "e888b56297a0e1818576389d4e2f6cc08b79f12d8c53ceb283a44717f339a1a5",
+    "lib/smolbox/runtime/worker_health.ex": "fc19df3f3bf28dfda625b1f6f3b882e2a16b75421145442d2e8d77b6b935f1c0",
+    "lib/smolbox/store.ex": "347169e9f29e1d4a0da1f6d1611c9bcbad67db8a5fb02b3e66c047f272d57413",
+    "lib/smolbox/store/codec.ex": "b4668c65916f3802daf0be23a2e843cc0c0232ddc3d67477be0d6e81afda7a15",
+    "lib/smolbox/store/machine_ops.ex": "5031e2121235160fa97d4c94b194dfa4a6abaeae0701bb6e570505ddffab020e",
+    "lib/smolbox/store/memory.ex": "ebe2b3450a05230ce2c4f906688aca41c95fd3554f3ef27cac935b178cc94b82",
+    "lib/smolbox/store/record_ops.ex": "7ec2f3504a901460cfaaf5e03b7f599b84d5caf7a144e275d7b0d405f907c646",
+    "lib/smolbox/telemetry.ex": "ec28badc3bff5bd3d40f87350f840208be306a522a9bd600d6bfd49e3ebbf5f9",
+    "lib/smolbox/telemetry/dispatcher.ex": "30a2513d3aaeb24e953011ff9ca651f9eac66b1d6105a8d491e8178d3796063b",
+    "lib/smolbox/transport.ex": "ed6a497a1e746330bc7527becd8b520a5c9b8320a9102604633dfb13fa4802de",
+    "lib/smolbox/transport/capture.ex": "df828264adf33a5d96759b445f156189d7ade1b0c4666f66831442569cb084d4",
+    "lib/smolbox/transport/req.ex": "748485e5e9683cff55d8718905829cbf4b0ec89394f3066cf82c1c37b3a5a2ee",
+    "lib/smolbox/validation.ex": "4df0e14313ffb67caefdf3a7e4b9d63a8a6588666b4142409b525d2955cc2530",
+    "lib/smolbox/wire/sse.ex": "00079b7972aa40bc733aa7dbe6a61c50b94367fd1f19ed00afdfcb0fda51dda1",
+    "lib/smolbox/worker.ex": "281f6be0b563eba81b25e3c8f9aca26b00f664f6333a830d80b983a5797913cf"
+  },
+  "final_support_source_sha256": {
+    "dev/smolbox/ci/preflight.ex": "1ea771090c67fa82bf48f8633ec8a96fe603b286bae65f7be2dec938d5fdb2d3",
+    "dev/smolbox/ci/runtime.ex": "029be28b719e252aa043fa258998af06a8e10135774f8c6cb2be6caab36b13f0",
+    "examples/durable_host/lib/checkpoint_demo.ex": "77b3ba038850667667953fcda91199faea3bd7a710b16dda44a31bee787bf1f3",
+    "examples/durable_host/lib/persistent_demo.ex": "dae29b0a6b641b258366dacdc3149c257707e941a428f66a8254c0f280df8cca",
+    "examples/support/lib/setup.ex": "b7a7ee6fb70a5fcf6eb254b74eadd16eab2c21d0bfac09ab2b0e3cf4fce5fd79",
+    "scripts/lab/capture-wire.exs": "0b81634af0cf778b09226b3c320347beeda1567ff558fe2dd6881a1197ba0680",
+    "scripts/lab/managed-discard.exs": "fe5315deee9b87ab95a294e5838fa1b729301a686c5b409906cccff3cc8429a3"
+  },
+  "initial_failures": [
+    {
+      "case": "macOS long private state path",
+      "resolution": "Dedicated worker recreated beneath short /tmp path; all nine cases passed.",
+      "result": "1/9 passed; libkrun SUN_LEN control-socket error"
+    },
+    {
+      "case": "candidate unit fixture loop",
+      "resolution": "Corrected loop then added actual Linux capture; focused fixture/admission suite passed 35 cases.",
+      "result": "Referenced 1.17.0 health fixture before capture"
+    },
+    {
+      "case": "Linux persistent example stop",
+      "resolution": "Example refreshes and retries only this rejected store conflict for up to five seconds; fresh acceptance passed. No production mutation semantics changed.",
+      "result": "stale_version / not_dispatched after concurrent record observation"
+    }
+  ],
+  "limitations": [
+    "Development-host qualification, not production isolation certification.",
+    "No Linux ARM64 or Windows qualification.",
+    "No in-place binary upgrade of an existing retained 1.16.1 machine tested.",
+    "No cross-version checkpoint portability or performance claim.",
+    "Cache exhaustion tested; shared registry/data filesystem exhaustion not rerun.",
+    "Native macOS ran ordinary compatibility and controlled recovery, not adversarial/storage exhaustion.",
+    "No protected GitHub real-worker workflow was run.",
+    "Initial failed persistent run and final unknown-storage synthetic VM used external lab teardown; this is not reported as managed deletion or reservation release."
+  ],
+  "linux": {
+    "checkpoint_cases": 3,
+    "checkpoint_recovery_cases": 3,
+    "controller_recovery": {
+      "captured_bytes": 697,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "d6314f890b904ee1f25dd80ea6c7e4bebb82f1b25c42190562d3c375cd28c654",
+      "seconds": 1202.479,
+      "status": "passed",
+      "tests": {
+        "passed": 25,
+        "seed": 242304
+      }
+    },
+    "default_selection": {
+      "environment_override": "SMOLBOX_RUNTIME_VERSION removed",
+      "final_inventory": {
+        "machines": []
+      },
+      "kvm_descriptors_after": "absent",
+      "persistent_acceptance": {
+        "absence_verified": true,
+        "machine_name": "sbxexample-gmh3k2bhrl6e4s3ofumn",
+        "phase": "resume",
+        "resources_released": true,
+        "same_machine": true,
+        "state": "deleted"
+      }
+    },
+    "full_768_mib_cache": {
+      "completed": {
+        "absence_observed": true,
+        "available_bytes_before_delete": 0,
+        "cleanup": "complete",
+        "command_exit": 0,
+        "duplicate_submission": "same_execution",
+        "evidence": "exited",
+        "fill": {
+          "errno": 5,
+          "written": 586153984
+        },
+        "inventory": [],
+        "mode": "completed",
+        "owned_kvm_descriptors": "absent",
+        "reservation_released": true,
+        "runtime": "1.17.0",
+        "status": "passed",
+        "stop_requests": 0
+      },
+      "unknown": {
+        "absence_observed": false,
+        "cleanup": "failed",
+        "command_exit": null,
+        "delete_requests": 0,
+        "duplicate_submission": "same_execution",
+        "evidence": "unknown",
+        "fill": {
+          "errno": 5,
+          "written": 586153984
+        },
+        "machine_state": "running",
+        "mode": "unknown",
+        "owned_kvm_descriptors": "present",
+        "reservation_released": false,
+        "runtime": "1.17.0",
+        "status": "passed",
+        "stop_failed": true
+      }
+    },
+    "kernel": "6.8.0-139",
+    "network": {
+      "cidr": {
+        "denied_after_restart": true,
+        "mode": "cidr",
+        "observations": {
+          "allowed_host": false,
+          "allowed_ip": true,
+          "allowed_subdomain": false,
+          "blocked_host": false,
+          "blocked_ip": false,
+          "suffix_attack": false
+        },
+        "policy_retained_after_restart": true,
+        "restart_observations": {
+          "allowed": true,
+          "blocked": false
+        },
+        "runtime": "1.17.0",
+        "status": "passed"
+      },
+      "hosts": {
+        "denied_after_restart": true,
+        "mode": "hosts",
+        "observations": {
+          "allowed_host": true,
+          "allowed_ip": false,
+          "allowed_subdomain": true,
+          "blocked_host": false,
+          "blocked_ip": false,
+          "suffix_attack": false
+        },
+        "policy_retained_after_restart": true,
+        "restart_observations": {
+          "allowed": true,
+          "blocked": false
+        },
+        "runtime": "1.17.0",
+        "status": "passed"
+      },
+      "managed": {
+        "cleanup": "complete",
+        "command_exit": 0,
+        "duplicate_submission": "same_execution",
+        "inventory": [],
+        "persisted_policy": true,
+        "runtime": "1.17.0",
+        "status": "passed"
+      },
+      "offline": {
+        "denied_after_restart": true,
+        "mode": "offline",
+        "observations": {
+          "allowed_host": false,
+          "allowed_ip": false,
+          "allowed_subdomain": false,
+          "blocked_host": false,
+          "blocked_ip": false,
+          "suffix_attack": false
+        },
+        "policy_retained_after_restart": true,
+        "restart_observations": {
+          "allowed": false,
+          "blocked": false
+        },
+        "runtime": "1.17.0",
+        "status": "passed"
+      }
+    },
+    "persistent_acceptance": {
+      "absence_verified": true,
+      "machine_name": "sbxexample-yp3z7u2bvsudv2mid3hh",
+      "phase": "resume",
+      "resources_released": true,
+      "same_machine": true,
+      "state": "deleted"
+    },
+    "platform": "disposable nested KVM x86_64 via ssh linux",
+    "postgresql": "16.15",
+    "runtime": {
+      "captured_bytes": 161,
+      "exit_code": 0,
+      "failure": null,
+      "output_sha256": "246d7b8bd5d2ced539d84889d1717b9f43de950c99ce63f2f51aa9417e7b6f54",
+      "seconds": 369.391,
+      "status": "passed",
+      "tests": {
+        "passed": 14,
+        "seed": 18614
+      }
+    },
+    "worker_faults": [
+      {
+        "dispatch_attempts": 1,
+        "guest_survived_api_server": true,
+        "operator_deleted_vm": false,
+        "platform": "linux",
+        "runtime_version": "1.17.0",
+        "scenario": "restart",
+        "status": "passed"
+      },
+      {
+        "dispatch_attempts": 1,
+        "guest_survived_api_server": true,
+        "operator_deleted_vm": true,
+        "platform": "linux",
+        "runtime_version": "1.17.0",
+        "scenario": "unavailable",
+        "status": "passed"
+      },
+      {
+        "dispatch_attempts": 1,
+        "guest_survived_api_server": true,
+        "operator_deleted_vm": true,
+        "platform": "linux",
+        "runtime_version": "1.17.0",
+        "scenario": "missing",
+        "status": "passed"
+      }
+    ]
+  },
+  "log_sha256": {
+    "mac-checkpoint-prepare.log": "51887409fdcc6361aaedce5661be10c1fafd15203408074195f1f1aac6f911fd",
+    "mac-checkpoint-recovery.log": "17d7744e6bc6896982ed90ef9300d52007726e83aa748ced3cd8083707e926e4",
+    "mac-checkpoints.log": "44ae8c43812a50b36b96364286ab2ec1d59ebe8f1ef41f5aa4d2e0d3a6c41e26",
+    "mac-component-checks.log": "2a94016a16bdd78dd8df55c1475ec86f765b51211cc68608a84b43b48840c6ed",
+    "mac-db-init.log": "3fbeebdee6ee1448657702c0976bf0951477f4bef74709af8a3b54a1bfbf25ed",
+    "mac-default-checkpoints.log": "feb5f5d082dd33951ad3a4bc609651e229bba77673bb7ba2a0eda86626c444db",
+    "mac-default-persistent-prepare.log": "3bc8a53fd7892f55b7b035fbe1731f9512eaf699d5a0f8030a29e430469a45d2",
+    "mac-default-persistent-resume.log": "24c45f67275bbe13e36c7c6c2b705690ad3b9fb554173601947d9e54e4fe6c2c",
+    "mac-default-runtime.log": "0d73d920d36f4856fa06dcff552765fea74bb613d71d828a74d7359d6aaa35a9",
+    "mac-default-worker.log": "5d523ec303d1a7eea4459421d1e5776a1992d678414a50f50f6dea75372cb3e5",
+    "mac-default.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "mac-followup.log": "ed122b6c2907f99eecfa8d1e3513be1623b9a0d4c51c4a114fc8ac51ddaf0deb",
+    "mac-migrate.log": "4c5be8d3e666f89f33c88d5504792c0251c8160675a54619f8dd0a8cb96fe666",
+    "mac-network.log": "280a25ebbe72ed737846d22b72d03114aef371a77e309df95fabd4f633cefafa",
+    "mac-persistent-prepare.log": "9e912e8f2543915b1c47207a4379b931df35ccd9887c38690209feaaf644c288",
+    "mac-persistent-resume.log": "1cbc456dbf73560ce9c9719ed198c3819fd9110835f9257f9b9bc99ce4cb8a79",
+    "mac-recovery.log": "30e384c93bcbdef6b89fd80e7e33d4024c8c1e069e7d0456e1b24f97c5417f12",
+    "mac-runtime-long-path-failed.log": "39a2fc21ebc743ec7165296947231f28316043bb99c996135e2959955a5911c0",
+    "mac-runtime.log": "d466403a32bf1978f3e05373aff62aa9d32e3a108f188e1a8fcf55a35ed78f62",
+    "mac-service-missing.log": "d5361c65cf5458a329c1bb28b4d749721db09e30ecaf7288f4874448cdd9b650",
+    "mac-service-restart.log": "64a295ab516442953241b22bfb832fc01cf4a5636b4229e7a980b225af5ebab4",
+    "mac-service-unavailable.log": "9b7e82543d5e7a881c93b46cdba764391e16b20e6d81c2b2062b18cff8716738",
+    "mac-service.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "mac-store.log": "3ce92f0e4c9ceef7fd88f77ac6b676d42aee6c127e2025a86dda96b0cd321ddf",
+    "mac-worker-short.log": "e0c026db185937956bac40931913252103557434e95da134ba5137a9a0b3d0ad",
+    "mac-worker.log": "2b0e0f791f4f605e86f3c65ea73680286506e6680b4ae496bb78d037decd28f4",
+    "reports/1170/checkpoint-prepare.log": "a1a8dc9ae052e917c09f60894005fa3cdd36bacd5623a2635b17902ec9529ab2",
+    "reports/1170/checkpoint-recovery.log": "e381c19a7931c1ff81bdf6c041dac28be7482a275249d213084ca4cd613bc523",
+    "reports/1170/checkpoints.log": "58446c87447f3155d5d50fd9a8767562714a7525dae5fe9a89ecbe56d3c96439",
+    "reports/1170/default-final-inventory.json": "4115c93b07b494b0188c0899c545c6313d8dfda70cf8d2613984eae1976fb745",
+    "reports/1170/default-kvm-after.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/1170/default-persistent-prepare.log": "45ec437ea3f21cc9bd512284df1d77ba2e8b1c4dce3974bcd9611e82fc474530",
+    "reports/1170/default-persistent-resume.log": "374030e47136e7313439339ddb413301e8a83149440a3c4ec29f59c43abe02be",
+    "reports/1170/idle.smolcheckpoint.create.json": "747b45dfd8a31e58eb001776c9497d25ed44130c805d29a3db0ed29cf3fd1807",
+    "reports/1170/idle.smolcheckpoint.exec.json": "dc44f7e4999cc1ec26ef0b2db75d91f2a5609e15c9e1a36b0249676269b92617",
+    "reports/1170/idle.smolcheckpoint.start.json": "166eca6aa5c9a54081575472e2e55e5f42d692d2c8179f1862acda9c53770f91",
+    "reports/1170/network.log": "687e7db9272fa8adb54e2553a7cb459f3bcc62e603c1791a2c2e383094996bf1",
+    "reports/1170/persistent-prepare-before-stale.log": "33c097f87b195574a898b2e4699984e6f3b405e6d56236fc3f58024964e70928",
+    "reports/1170/persistent-prepare.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/1170/persistent-resume-stale-version.log": "37627875e8d1838c273d8b0cdf38fabac11561e070e14b6d4de3a5a4fda23590",
+    "reports/1170/retry-final-inventory.json": "4115c93b07b494b0188c0899c545c6313d8dfda70cf8d2613984eae1976fb745",
+    "reports/1170/retry-kvm-after.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/1170/retry-persistent-prepare.log": "7c332d5b3f78b7bda0c7b0752dd8016b79fee654f38738ac8f12a2cf0b4f0221",
+    "reports/1170/retry-persistent-resume.log": "c049542a531815be456149465b058016233d8a166df01b2ab799dccc1174ade4",
+    "reports/1170/wire.log": "a1c3fa463b4d765bf0979ea8cfd35f664ec1e60085dab024fece1d607c6cac54",
+    "reports/durable-1170.json": "ebf2f6c5d33b8a405487429d9e9ee808766c21f06e54d49ca1ff96332102c323",
+    "reports/network-cidr-kvm.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/network-cidr-v1170-runner.json": "53dc306f1cf16942c6216879b77f9764d30f1022adad2927bfae88f2a3fd9715",
+    "reports/network-cidr-v1170-runner.log": "969e356928414d6180dfd599df97db3f2767e4cab82ab0cda1e86d44284c1d33",
+    "reports/network-cidr.json": "95b10790c61d9bd3bfac31487dc8df7d3cb6045e7f676682172553505539cf64",
+    "reports/network-hosts-kvm.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/network-hosts-v1170-runner.json": "8c71c5b136ae3e6f7192773cf40799b41721e593fa804bee2081c7e4af3e08da",
+    "reports/network-hosts-v1170-runner.log": "f92a1d67b46380baef6c86c860c202991e8223bf74a201d234674a618ac7070d",
+    "reports/network-hosts.json": "53381be8c1948de5ad37f9dac9c1874709b6296d9316c9354e76c4c47385c1e1",
+    "reports/network-managed-v1170-runner.json": "b0e2e1c466fb85395241ec0e5f01b4ea435a556bf60562a0f5b07a4d6e214928",
+    "reports/network-managed-v1170-runner.log": "82d50e81d98eac470dea841b25aa20903f1e4bb2d269017782abbcd7cb1e8671",
+    "reports/network-managed.json": "3fe8048a00f2369591760f38961c0477abbd4c2a8de42effb4513c66867c3c81",
+    "reports/network-offline-kvm.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/network-offline-v1170-runner.json": "f570a5ec61aa498549b7c1faac5c0135af53c5413d619c7c0ac19ec89dd337a0",
+    "reports/network-offline-v1170-runner.log": "0abb1ff4fa098d47c87af410212fda63acb37c04d59bed7ece6eac125dd8204d",
+    "reports/network-offline.json": "dde220983907e4cbbf0ee90574fbcfdd19c7d5f7eb4c25266da64349422ebd8d",
+    "reports/runtime-1170.json": "0d35a8555844e07507e8094d5ad74faf5004dba128357ef045a324549de59c85",
+    "reports/service-missing-1170.json": "80e962890d7ca82a71bf54018a4f815c18cdf817dd07ec3f341cba7643c5599a",
+    "reports/service-missing-1170.log": "80e962890d7ca82a71bf54018a4f815c18cdf817dd07ec3f341cba7643c5599a",
+    "reports/service-restart-1170.json": "93821833c043d5fe8b1f5fff92cf2049878fc241e293f8e2eca6c85d483df1f4",
+    "reports/service-restart-1170.log": "93821833c043d5fe8b1f5fff92cf2049878fc241e293f8e2eca6c85d483df1f4",
+    "reports/service-unavailable-1170.json": "afb4b01d4ad3b184e95d1aa41ba29a23c1b4199e29f21c0f1f43840047f7b6c9",
+    "reports/service-unavailable-1170.log": "afb4b01d4ad3b184e95d1aa41ba29a23c1b4199e29f21c0f1f43840047f7b6c9",
+    "reports/storage-completed-1170.json": "ddb6829a2d043d918dc41d5d584e7ffe8875cdef53a0745de236e4d3bbfc27a7",
+    "reports/storage-completed-1170.log": "2c364da20a2d2579c6138aac42ca1b7433810a76edb83b9b6589ce2cc5cc0088",
+    "reports/storage-unknown-1170.json": "5615acdcbd51d1d278bfbfef6da51de8b244cfa836c953de687ac8fbd6bf4766",
+    "reports/storage-unknown-1170.log": "fc2a781256d8ad63dd2e382201de040395a502ec0247b0b4728791f8c2377e87",
+    "reports/wire-1.17.0/created.json": "348c9362064a0fbf5ff62b8d23989211bb5853402fdcc73f4f5da3cbca28dfc3",
+    "reports/wire-1.17.0/directory.json": "d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
+    "reports/wire-1.17.0/exec.json": "f6ecb1547de4b9b5df626ed6b8163acd4ae0e4f02a0e9cf42ffffa87bae47739",
+    "reports/wire-1.17.0/health.json": "e8112e6c5e783de44acf8a4d9ee530ddeb7b34b2b0a1fb93621b79abdb9bbb5f",
+    "reports/wire-1.17.0/running.json": "303c1b5c89590298c1c6a797de6612ab3c52b571c51bcd1fc273e52d12904981"
+  },
+  "macos": {
+    "checkpoint_cases": 3,
+    "checkpoint_recovery_cases": 3,
+    "controller_recovery_cases": 25,
+    "default_selection": {
+      "checkpoint_cases": 3,
+      "environment_override": "SMOLBOX_RUNTIME_VERSION removed",
+      "final_inventory": {
+        "machines": []
+      },
+      "persistent_acceptance": {
+        "absence_verified": true,
+        "machine_name": "sbxexample-yrhkt5d46xct4s7nvg55",
+        "phase": "resume",
+        "resources_released": true,
+        "same_machine": true,
+        "state": "deleted"
+      },
+      "runtime": {
+        "captured_bytes": 179,
+        "exit_code": 0,
+        "failure": null,
+        "output_sha256": "16c017d02fb919a3fb6e0be29e2420b1d1e4cabb6742f0aa85e3c8fb78bb6339",
+        "seconds": 22.748,
+        "status": "passed",
+        "tests": {
+          "passed": 9,
+          "seed": 722778
+        }
+      }
+    },
+    "network": {
+      "cidr": {
+        "approved_ip": "172.66.147.243",
+        "observations": {
+          "initial": {
+            "allowed_ip": true,
+            "allowed_name": false,
+            "blocked_ip": false,
+            "blocked_name": false
+          },
+          "restart": {
+            "allowed_ip": true,
+            "allowed_name": false,
+            "blocked_ip": false,
+            "blocked_name": false
+          }
+        },
+        "policy": "cidr",
+        "status": "passed"
+      },
+      "hosts": {
+        "approved_ip": "172.66.147.243",
+        "observations": {
+          "initial": {
+            "allowed_ip": false,
+            "allowed_name": true,
+            "blocked_ip": false,
+            "blocked_name": false
+          },
+          "restart": {
+            "allowed_ip": false,
+            "allowed_name": true,
+            "blocked_ip": false,
+            "blocked_name": false
+          }
+        },
+        "policy": "hosts",
+        "status": "passed"
+      },
+      "offline": {
+        "approved_ip": "172.66.147.243",
+        "observations": {
+          "initial": {
+            "allowed_ip": false,
+            "allowed_name": false,
+            "blocked_ip": false,
+            "blocked_name": false
+          },
+          "restart": {
+            "allowed_ip": false,
+            "allowed_name": false,
+            "blocked_ip": false,
+            "blocked_name": false
+          }
+        },
+        "policy": "offline",
+        "status": "passed"
+      }
+    },
+    "persistent_acceptance": {
+      "absence_verified": true,
+      "machine_name": "sbxexample-fka3xxretbjna6r7cilb",
+      "phase": "resume",
+      "resources_released": true,
+      "same_machine": true,
+      "state": "deleted"
+    },
+    "platform": "native Apple Silicon",
+    "postgresql": "17",
+    "runtime_cases": 9,
+    "store_contract_cases": 27,
+    "store_runtime_exclusions": 28,
+    "worker_faults": [
+      {
+        "dispatch_attempts": 1,
+        "guest_survived_api_server": true,
+        "operator_deleted_vm": false,
+        "platform": "macos",
+        "runtime_version": "1.17.0",
+        "scenario": "restart",
+        "status": "passed"
+      },
+      {
+        "dispatch_attempts": 1,
+        "guest_survived_api_server": true,
+        "operator_deleted_vm": true,
+        "platform": "macos",
+        "runtime_version": "1.17.0",
+        "scenario": "unavailable",
+        "status": "passed"
+      },
+      {
+        "dispatch_attempts": 1,
+        "guest_survived_api_server": true,
+        "operator_deleted_vm": true,
+        "platform": "macos",
+        "runtime_version": "1.17.0",
+        "scenario": "missing",
+        "status": "passed"
+      }
+    ]
+  },
+  "package": "unreleased checkout; published 0.1.5 unchanged",
+  "previous_default": "1.16.1",
+  "release_verification": "Archive digests match official release; both full bundled component checksum sets passed.",
+  "runtime_tag_commit": "d33b5a4adeb844365922cd2a29a89d93a94008ad",
+  "schema_review": {
+    "binary_download_rejects_directory_json_live": true,
+    "changed_used_route": "GET /api/v1/machines/{id}/files/{path}: directory JSON",
+    "full_schema_sha256": "db59464fd2d2b8b95ad344ab6218b81cdf842c29bec5e099262db9d8468a4676",
+    "shared_schemas_unchanged": true,
+    "subset_components": 19,
+    "subset_paths": 8,
+    "subset_sha256": "c907bfb2020a58bf0468332c448f56068153aafe98bb56d4a5c39a96e43e0bcd"
+  },
+  "source_comparison": {
+    "equivalent_after_documentation_and_runtime_default_normalization": true,
+    "method": "Elixir AST comparison; remove doc/moduledoc and metadata; normalize runtime_version keyword defaults 1.16.1 to 1.17.0. All 49 production modules compared.",
+    "modules": 49,
+    "report_sha256": "c379d738941d5b464ec5ff15a5bc236b58e83c36eb0eed6cd76f934046ad9b2e"
+  },
+  "status": "passed; 1.17.0 selected by default in unreleased checkout",
+  "teardown": {
+    "linux": "candidate stopped, no candidate KVM descriptors, outer lab inactive/dead",
+    "linux_log_sha256": "e4f68690eb3431cab9ec1af2b5d08c7b1c6cb968e4f5b8348e9862e9e516d838",
+    "macos": "empty final inventory, dedicated worker and temporary PostgreSQL stopped",
+    "macos_postgres_log_sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+  },
+  "toolchain": {
+    "elixir": "1.20.4",
+    "otp": "29.0.6"
+  },
+  "working_tree_changes": true
+}

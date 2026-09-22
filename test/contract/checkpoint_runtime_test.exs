@@ -44,6 +44,16 @@ defmodule SmolBox.CheckpointRuntimeTest do
     end
 
     assert Checkpoint.artifact(checkpoint) == context.spec.artifact
+
+    for version <- ["1.16.1", "1.17.0"] do
+      approved = %{checkpoint | runtime_version: version}
+      matched = %{worker | runtime_version: version, checkpoints: [approved]}
+      assert :ok = WorkerConfig.validate(matched)
+      assert WorkerConfig.supports?(matched, context.spec)
+
+      other = if version == "1.16.1", do: "1.17.0", else: "1.16.1"
+      assert {:error, _} = WorkerConfig.validate(%{matched | runtime_version: other})
+    end
   end
 
   test "lost creation response never starts, replays or deletes a machine without evidence" do

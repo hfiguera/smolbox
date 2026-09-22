@@ -21,7 +21,8 @@ defmodule SmolBox.CheckpointExecutionTest do
       )
 
     {:ok, client} = Client.new(endpoint)
-    assert {:ok, %{version: "1.16.1"}} = Client.health(client)
+    version = SmolBox.LabCandidate.runtime_version()
+    assert {:ok, %{version: ^version}} = Client.health(client)
     {:ok, profile} = Profile.new("idle-checkpoint", preparation_ms: 60_000)
 
     digest =
@@ -33,6 +34,7 @@ defmodule SmolBox.CheckpointExecutionTest do
 
     {:ok, checkpoint} =
       Checkpoint.new(
+        runtime_version: version,
         id: "idle",
         path: path,
         sha256: digest,
@@ -43,6 +45,7 @@ defmodule SmolBox.CheckpointExecutionTest do
 
     {:ok, worker} =
       WorkerConfig.new(
+        runtime_version: version,
         client: client,
         architecture: architecture,
         platform: platform,
