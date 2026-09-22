@@ -1,0 +1,168 @@
+{
+  "date": "2026-09-22",
+  "qualification": "focused Linux development recovery qualification",
+  "source": {
+    "commit": "bf55ae1",
+    "archive_sha256": "6c6615ed6ff99cd35673d126c01d87c787e5e9a96ad7842ada5c6e5a58fb3653",
+    "verified_files": 506,
+    "verified_manifest_sha256": "84081cdff06c6c2903e5c38a3d6d88bb439d779ce4d5140a72999203b3fc9dad",
+    "only_overlay": "scripts/lab/interactive-terminal.sh",
+    "harness_sha256": "487c55f2e9d2383e8d3c239420ab4b135f03627d20531be3636debafec2b2cf3",
+    "full_commit": "bf55ae1180469fe6d6c3c86962bf56ea371df1d5",
+    "library_and_examples_unchanged": true
+  },
+  "upstream": {
+    "version": "1.17.0",
+    "platform": "Linux x86_64 nested KVM",
+    "archive_sha256": "b648e6aa47dc4fee1ddc255f5c11401fc6aab41bab61335bde903ad2fc2e1bd1",
+    "postgresql_major": 16
+  },
+  "capture": {
+    "exit_code": 0,
+    "reason": "completed",
+    "bytes": 2692,
+    "sha256": "0bffdde9feafb31457bcfd5ae97a7d103442a75b78f066ca235636880fdc1d8e",
+    "elapsed_seconds": 37.085,
+    "location": "physical Linux host, outside disposable VM",
+    "maximum_bytes": 16777216,
+    "deadline_seconds": 900,
+    "sync": "fsync after each received chunk",
+    "collector_sha256": "108c58a0a99d3fca171833a4a5f73463cb7a2a0146b1397431807cd891d96259",
+    "capture_receipt_sha256": "ebe29b71e92a02b7f09c93c6967791a8f6d09e58fe84b3ba9c53c86b259d206f"
+  },
+  "phases": [
+    {
+      "phase": "worker-start",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "phase": "limits",
+      "exit_code": 0,
+      "sha256": "e338201f0588714178616b5f9bbb161a030fa9ef76a883bea657893638c0c023",
+      "bytes": 75
+    },
+    {
+      "phase": "durable-interrupt",
+      "exit_code": 0,
+      "sha256": "5f996aa26e164f45db593a28f40bf9bb7087481ebd1ea52881ee2510accd06ad",
+      "bytes": 197
+    },
+    {
+      "phase": "durable-stop",
+      "exit_code": 0,
+      "sha256": "9207bee212fc7407f83d2c4415181e74c03d60fad6c884cbb8a10d41e494090b",
+      "bytes": 56
+    },
+    {
+      "phase": "worker-drain",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "phase": "durable-recover",
+      "exit_code": 0,
+      "sha256": "44514ab6304dcc73d45ea42c9f113c2257aed99bde590796b0290e187dabfa87",
+      "bytes": 166
+    },
+    {
+      "phase": "inventory",
+      "exit_code": 0,
+      "sha256": "4115c93b07b494b0188c0899c545c6313d8dfda70cf8d2613984eae1976fb745",
+      "bytes": 15
+    },
+    {
+      "phase": "final-metrics",
+      "exit_code": 0,
+      "sha256": "30e2fb809ae7e66d6057d9902816930d600df914a7266172b4ee07776fb98843",
+      "bytes": 796
+    },
+    {
+      "phase": "worker-stop",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "phase": "kvm-after",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  ],
+  "observations": {
+    "interrupt": {
+      "phase": "interrupt",
+      "execution": [
+        "terminal-demo",
+        "terminal-receipts001-recovery-terminal"
+      ],
+      "machine_name": "sbxexample-ie3xslgei5trzq3thc5v",
+      "dispatch_persisted": true,
+      "retained_file_written": true
+    },
+    "stop_before_drain": {
+      "phase": "stop-for-drain",
+      "uncertainty_resolved": false
+    },
+    "recovery": {
+      "phase": "recover",
+      "absence_verified": true,
+      "reservations_released": true,
+      "retained_file": true,
+      "deduplication_retained": true,
+      "no_replay": true,
+      "unknown_preserved": true
+    },
+    "final_inventory": {
+      "machines": []
+    },
+    "worker_stop_exit_code": 0,
+    "remaining_kvm_descriptors": 0,
+    "unknown_record_and_slot_preserved": true,
+    "duplicate_did_not_open_new_shell": true,
+    "attach_rejected_as_unknown": true,
+    "managed_delete_blocked_before_resolution": true,
+    "verified_incarnation_stopped_after_old_requests_drained": true,
+    "retained_file_read_after_resolution": true,
+    "program_launch_count": 1,
+    "reservation_and_sql_port_ownership_released": true,
+    "deduplication_preserved_after_deletion": true
+  },
+  "unchanged_controls": {
+    "outer_deadline_seconds": 2700,
+    "worker_deadline_seconds": 300,
+    "worker_memory_bytes": 1610612736,
+    "worker_cpu_percent": 100,
+    "worker_tasks": 96
+  },
+  "cleanup": {
+    "worker_stopped": true,
+    "outer_vm_main_pid": 0,
+    "outer_vm_result": "success",
+    "outer_vm_state": "inactive",
+    "lab_ssh_listener_absent": true,
+    "automatic_reset_completed_utc": "2026-09-22T20:46:32Z",
+    "baseline_hash_verified": true,
+    "replacement_overlay_actual_bytes": 200704,
+    "replacement_overlay_dirty": false,
+    "capture_hash_unchanged_after_reset": true,
+    "capture_receipt_hash_unchanged_after_reset": true,
+    "verification_receipt_sha256": "4670310b33ef35de15c140346cd76818fdd291f860c8f5ce2f496a465234b646"
+  },
+  "capture_checks": {
+    "tests_passed": 3,
+    "cases": [
+      "successful command",
+      "command exits 7 with preserved output",
+      "output limit retains prefix and fails",
+      "timeout retains partial output and fails"
+    ],
+    "real_setup_failure_retained": "Initial source-directory rename required sudo inside the disposable VM; failure receipt preserved, permissions corrected, setup succeeded. No terminal phase had run in that failed setup."
+  },
+  "conclusion": "The original final-campaign recovery receipt gap is closed by a successful focused rerun of the committed implementation, with complete verified phase output preserved across automatic VM reset. This does not expand the earlier qualification into production or full isolation certification.",
+  "scope_limit": "Recovery only; the earlier complete runtime/regression suite was not repeated. SSH transport failure can leave an incomplete capture; no retry or guest input replay is performed.",
+  "private_receipts_directory": ".local/terminal-recovery-receipts"
+}

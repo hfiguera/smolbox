@@ -256,5 +256,27 @@ the durable phases. Its worker restart retains private disks while stopping and
 verifying old processes; ordinary lab `start` resets those filesystems. The campaign
 keeps the existing CPU, memory, task, disk, worker and outer-VM deadlines.
 
+Capture the campaign on the **physical Linux host**, outside the disposable VM.
+Copy `scripts/lab/capture-terminal.py` there and run it with a new private evidence
+directory under `/var/lib/smolbox-lab/evidence`. For a focused recovery rerun:
+
+```sh
+python3 capture-terminal.py /var/lib/smolbox-lab/evidence/terminal-recovery-001 \
+  bash /home/humberto/smolbox-lab-bootstrap/guest-ssh.sh \
+  env SMOLBOX_TERMINAL_ATTEMPT=receipts001 SMOLBOX_TERMINAL_SCOPE=recovery \
+  bash /opt/smolbox/source/scripts/lab/interactive-terminal.sh
+```
+
+Omit `SMOLBOX_TERMINAL_SCOPE=recovery` for the full campaign. Use a fresh attempt
+and evidence directory each time; failed phases are never replayed automatically.
+Each phase streams output immediately, with its exit status and log SHA-256 at the
+end. The host capture syncs incoming output to disk, keeps partial failure output,
+and records its own exit status and digest in `capture.json`. It fails at 16 MiB or
+15 minutes; each guest phase is capped at 240 seconds and 2 MiB of log output.
+These bounds do not extend worker or VM deadlines. A lost connection remains a
+failed/incomplete capture even when earlier phases passed. Capture exit zero alone
+does not replace checking the phase results and final cleanup assertions. Guest
+keys and object archives are not exported by this mechanism.
+
 See [Validation evidence](interactive-terminals-validation.md) for real-worker
 scenarios, simulated coverage, failed attempts and qualification limits.

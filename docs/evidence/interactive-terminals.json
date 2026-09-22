@@ -204,5 +204,12 @@
     "linux-before-final.tar.gz::terminal-regression/runtime.log": "02114321039054082152f3f3c58da60d81eb520be4b476e876b3601744e707e5",
     "linux-before-final.tar.gz::terminal-regression/recovery.log": "75390aaf36fa6540d172be4d5a343e6a2b9ee14e3595f308e83a268aaf261a76"
   },
-  "receipt_policy": "Raw receipts remain in ignored local storage. This report contains no tokens, terminal transcripts, database keys or raw archives."
+  "receipt_policy": "Raw receipts remain in ignored local storage. This report contains no tokens, terminal transcripts, database keys or raw archives.",
+  "follow_up": {
+    "date": "2026-09-22",
+    "report": "interactive-terminal-recovery.json",
+    "commit": "bf55ae1",
+    "original_linux_recovery_receipt_gap_closed": true,
+    "complete_receipts_survived_automatic_vm_reset": true
+  }
 }

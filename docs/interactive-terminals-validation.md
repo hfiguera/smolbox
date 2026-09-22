@@ -127,3 +127,33 @@ final per-phase interruption/recovery logs had not yet been exported and were
 discarded by that reset. The captured successful campaign status, exported final
 terminal/store/normal-run logs, and the earlier complete recovery receipts are
 retained as separate evidence; no unexported log is represented as available.
+
+## Focused Linux recovery rerun
+
+The missing-receipt gap was closed later on September 22 with a focused rerun of
+commit `bf55ae1`. All 506 unchanged source files were checked against its Git
+archive; only the campaign script was overlaid to stream phase evidence and select
+recovery-only execution. Library and durable-example code were unchanged.
+
+The rerun completed in 37 seconds against the pinned Linux 1.17.0 worker and
+PostgreSQL 16. All ten phases completed successfully with verified output hashes.
+It preserved dispatch intent, interrupted the controller, recorded the owned stop
+without resolving uncertainty, drained/restarted the dedicated worker, and
+recovered an unknown session. Assertions verified blocked reuse, no new attachment
+or replay, explicit quiescent resolution, the retained file and launch count of
+one, deletion, released reservations/SQL port ownership and retained deduplication.
+Final worker inventory was empty and no worker KVM descriptors remained.
+
+Output was streamed and synced to bounded storage on the physical Linux host,
+including command exit statuses and per-phase log hashes. After stopping the VM,
+its automatic recovery verified the baseline and rebuilt the disposable overlay
+at `2026-09-22T20:46:32Z`. Both the campaign log and capture receipt still had their
+original hashes. This directly verifies that guest reset no longer destroys the
+captured evidence. The existing worker and VM deadlines were unchanged.
+
+The capture helper's fault checks passed for success, command failure, output
+overflow and timeout. It also retained an initial setup permission failure; that
+setup was corrected before running terminal phases. The previous lost logs remain
+lost; this new run supplies complete replacement evidence for the recovery
+scenario. See the [rerun evidence](evidence/interactive-terminal-recovery.json) and
+[capture instructions](interactive-terminals.md#runnable-examples-and-qualification).
