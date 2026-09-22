@@ -23,17 +23,23 @@ defmodule SmolBox.Store.Codec do
   v2/v3 shape, omitting the empty managed-machine reference; old payloads gain that
   field on read. Upgrade every controller sharing workers before enabling retained
   reservations. See [Persistent-machine upgrades](persistent-machines.html#store-contract-and-upgrades).
+  Background and extended-budget records use v6. Exact older commands gain
+  `background: false`; ordinary writes omit that field to preserve prior formats.
+  Old envelopes cannot contain extended budgets or background semantics. Upgrade
+  readers/adapters together; see [Extended execution](long-running-exec.html#persistence-and-upgrades).
   Silently treating undecodable records as absent
   would permit replay and is forbidden.
   """
 
   alias SmolBox.{Error, Execution}
-  alias SmolBox.Store.CodecPorts
+  alias SmolBox.Runtime.ExecutionSupport
+  alias SmolBox.Store.{CodecExecution, CodecPorts}
 
   @max_bytes 16_777_216
   @prefix "smolbox-record-v2\0"
   @checkpoint_prefix "smolbox-record-v3\0"
   @managed_prefix "smolbox-record-v4\0"
+  @execution_prefix "smolbox-record-v6\0"
   @ports_prefix "smolbox-record-v5\0"
   @legacy_prefix "smolbox-record-v1\0"
   @record_modules [
@@ -48,22 +54,34 @@ defmodule SmolBox.Store.Codec do
     SmolBox.Machine,
     SmolBox.PortMapping,
     SmolBox.Result,
+    SmolBox.LaunchResult,
     Error
   ]
 
   @spec encode(Execution.t() | SmolBox.ManagedMachine.t()) ::
           {:ok, binary()} | {:error, Error.t()}
-  def encode(%SmolBox.ManagedMachine{} = record), do: encode_managed(record)
+  def encode(%{spec: spec} = record) do
+    if ExecutionSupport.extended?(spec),
+      do: encode_extended(record),
+      else: encode_original(record)
+  end
 
-  def encode(%Execution{managed_machine: key} = record) when not is_nil(key),
+  def encode(_record), do: invalid()
+
+  defp encode_original(%SmolBox.ManagedMachine{} = record), do: encode_managed(record)
+
+  defp encode_original(%Execution{managed_machine: key} = record) when not is_nil(key),
     do: encode_managed(record)
 
-  def encode(record) do
+  defp encode_original(record) do
     with :ok <- Execution.validate(record) do
       prefix = if checkpoint_record?(record), do: @checkpoint_prefix, else: @prefix
 
       bytes =
-        prefix <> :erlang.term_to_binary(Map.delete(CodecPorts.strip(record), :managed_machine))
+        prefix <>
+          :erlang.term_to_binary(
+            Map.delete(CodecPorts.strip(CodecExecution.strip(record)), :managed_machine)
+          )
 
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
@@ -92,7 +110,43 @@ defmodule SmolBox.Store.Codec do
       when tag != 80 and byte_size(bytes) <= @max_bytes,
       do: decode_managed(bytes, true)
 
+  def decode(<<@execution_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_extended(bytes)
+
   def decode(_bytes), do: invalid()
+
+  defp encode_extended(record) do
+    with :ok <- validate_extended(record) do
+      bytes = @execution_prefix <> :erlang.term_to_binary(record)
+      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
+    end
+  end
+
+  defp decode_extended(bytes) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    payload =
+      binary_part(
+        bytes,
+        byte_size(@execution_prefix),
+        byte_size(bytes) - byte_size(@execution_prefix)
+      )
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <- used == byte_size(payload),
+         :ok <- validate_extended(record),
+         true <- ExecutionSupport.extended?(record.spec) do
+      {:ok, record}
+    else
+      _invalid -> invalid()
+    end
+  rescue
+    ArgumentError -> invalid()
+  end
+
+  defp validate_extended(%Execution{} = record), do: Execution.validate(record)
+  defp validate_extended(record), do: validate_managed(record)
 
   defp decode_managed(bytes, ports?) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
@@ -107,6 +161,7 @@ defmodule SmolBox.Store.Codec do
     with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
          true <- used == byte_size(payload),
          {:ok, record} <- if(ports?, do: {:ok, record}, else: CodecPorts.upgrade(record)),
+         {:ok, record} <- CodecExecution.upgrade(record),
          :ok <- validate_managed(record) do
       {:ok, record}
     else
@@ -118,7 +173,7 @@ defmodule SmolBox.Store.Codec do
 
   defp encode_managed(record) do
     with :ok <- validate_managed(record) do
-      bytes = @ports_prefix <> :erlang.term_to_binary(record)
+      bytes = @ports_prefix <> :erlang.term_to_binary(CodecExecution.strip(record))
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
   end
@@ -153,6 +208,7 @@ defmodule SmolBox.Store.Codec do
          true <- used == byte_size(payload),
          {:ok, record} <- upgrade(record, legacy?),
          {:ok, record} <- CodecPorts.upgrade(record),
+         {:ok, record} <- CodecExecution.upgrade(record),
          :ok <- Execution.validate(record),
          true <- record.managed_machine == nil do
       {:ok, record}

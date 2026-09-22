@@ -66,7 +66,9 @@ defmodule SmolBox.ExecutionSpec do
   | `:metadata` | `%{}` | Up to 16 string identifier keys with string (up to 256 bytes), bounded integer, boolean or nil values |
 
   The command timeout in seconds must fit the profile's execution budget in
-  milliseconds. Successful construction proves shape and bounds, not worker
+  milliseconds. Background launch requires no output manifests, nil command
+  timeout/stdin, and an image source. The profile then bounds launch observation.
+  Successful construction proves shape and bounds, not worker
   availability or artifact approval; `SmolBox.submit/2` checks configured support.
   All semantic fields participate in identity conflict detection.
 
@@ -145,8 +147,13 @@ defmodule SmolBox.ExecutionSpec do
     Validation.identifier?(spec.scope) and Validation.identifier?(spec.id) and
       artifact?(spec.artifact) and Validation.integer?(spec.queue_ms, 1, 86_400_000) and
       Validation.integer?(spec.retention_ms, 60_000, 2_592_000_000) and metadata?(spec.metadata) and
-      spec.command.timeout_secs * 1000 <= spec.profile.execution_ms
+      command_budget?(spec)
   end
+
+  defp command_budget?(%{command: %{background: true}} = spec),
+    do: spec.outputs == [] and spec.artifact["kind"] != "checkpoint"
+
+  defp command_budget?(spec), do: spec.command.timeout_secs * 1000 <= spec.profile.execution_ms
 
   defp artifact?(%{"id" => id, "sha256" => digest, "architecture" => architecture} = artifact)
        when map_size(artifact) == 3 do
@@ -173,6 +180,9 @@ defmodule SmolBox.ExecutionSpec do
 
   # Tagged shapes avoid map/list/tuple ambiguity. Sorting is explicit across OTP versions.
   # Keep existing offline execution fingerprints stable across the policy upgrade.
+  defp canonical(%Command{background: false} = value),
+    do: value |> Map.from_struct() |> Map.delete(:background) |> canonical()
+
   defp canonical(%Profile{network: :offline} = value),
     do: value |> Map.from_struct() |> Map.delete(:network) |> canonical()
 

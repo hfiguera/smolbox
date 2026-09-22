@@ -254,3 +254,12 @@ connections and automatic restart out of the source. Protect the checkpoint path
 against replacement and restrict artifact access as sensitive data. Approval is
 an operator declaration, not a remote attestation of memory contents. See
 [Checkpoint execution](checkpoints.md) for the exact boundary.
+
+## Long commands and background launch
+
+See [Long-running execution](long-running-exec.md) for coordinated codec-v6/store
+upgrades, extended observation budgets and background launch recovery. A confirmed
+launch is `:launched`, with a typed PID result; it does not prove readiness or
+continued process life. Lost launch evidence stays unknown and must not be replayed.
+Background processes can overlap later file operations. Stop/start requires an
+explicit new service launch; cancellation does not perform PID-based termination.

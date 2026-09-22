@@ -19,7 +19,18 @@ defmodule SmolBox.Client do
   symlink containment inside an untrusted guest. No archive extraction is done.
   """
 
-  alias SmolBox.{Command, Error, Files, Health, Machine, MachineSpec, Result, Validation, Worker}
+  alias SmolBox.{
+    Command,
+    Error,
+    Files,
+    Health,
+    LaunchResult,
+    Machine,
+    MachineSpec,
+    Result,
+    Validation,
+    Worker
+  }
 
   @enforce_keys [:worker]
   @derive {Inspect, only: []}
@@ -191,7 +202,8 @@ defmodule SmolBox.Client do
   end
 
   @doc """
-  Execute a command with buffered, byte-preserving stdout and stderr.
+  Execute a command with buffered, byte-preserving stdout and stderr, or launch
+  a background process and return `SmolBox.LaunchResult`.
 
   `:max_output_bytes` defaults to 1 MiB and accepts 1 byte–8 MiB combined output.
   The worker's encoded response cap also applies. Bounded UTF-8 stdin is supported
@@ -199,15 +211,25 @@ defmodule SmolBox.Client do
 
   Exec can start a stopped VM. A timeout or lost response does not prove the
   command failed or terminated; never automatically replay an uncertain exec.
-  An output-limit error may retain a known exit code; inspect its evidence.
+  An output-limit error may retain a known foreground exit code; inspect its evidence.
+  Background acknowledgment overflow or malformed PID always leaves launch uncertain.
+  Extended commands require smolvm 1.17.0; background requires a non-checkpoint
+  image machine. Their preflight shares the operation deadline and their receive
+  budget follows its remaining time. Background has no guest lifetime timeout.
+  See [Long-running execution](long-running-exec.html).
   """
-  @spec exec(t(), String.t(), Command.t(), keyword()) :: {:ok, Result.t()} | {:error, Error.t()}
+  @spec exec(t(), String.t(), Command.t(), keyword()) ::
+          {:ok, Result.t() | LaunchResult.t()} | {:error, Error.t()}
   def exec(client, name, command, options \\ []) do
     with {:ok, max} <- output_options(options, [:max_output_bytes]),
          {:ok, path} <- machine_path(name),
          {:ok, wire} <- Command.to_wire(command),
+         :ok <- Worker.validate(client.worker),
+         {:ok, client} <- execution_client(client, path, command),
          {:ok, body} <- json(client, :post, path <> "/exec", wire, :exec) do
-      Result.from_wire(body, max)
+      if command.background,
+        do: LaunchResult.from_wire(body, max),
+        else: Result.from_wire(body, max)
     end
   end
 
@@ -229,7 +251,9 @@ defmodule SmolBox.Client do
     with {:ok, max} <- output_options(options, [:max_output_bytes, :on_event]),
          :ok <- streaming_command(command, options),
          {:ok, path} <- machine_path(name),
-         {:ok, wire} <- Command.to_wire(command) do
+         {:ok, wire} <- Command.to_wire(command),
+         :ok <- Worker.validate(client.worker),
+         {:ok, client} <- execution_client(client, path, command) do
       mode = {:sse, max, Keyword.get(options, :on_event)}
 
       request(
@@ -410,10 +434,44 @@ defmodule SmolBox.Client do
   defp streaming_command(command, options) do
     with :ok <- Command.validate(command) do
       cond do
+        command.background -> error(:unsupported_capability, :exec_stream)
         not is_nil(command.stdin) -> error(:unsupported_capability, :exec_stream)
         is_nil(options[:on_event]) or is_function(options[:on_event], 1) -> :ok
         true -> error(:validation, :exec_stream)
       end
+    end
+  end
+
+  defp execution_client(client, path, command) do
+    if command.background or command.timeout_secs > 300 do
+      deadline = System.monotonic_time(:millisecond) + client.worker.operation_timeout_ms
+
+      with {:ok, %{version: "1.17.0"}} <- health(client),
+           {:ok, client} <- remaining_create_budget(client, deadline),
+           :ok <- background_machine(client, path, command),
+           {:ok, client} <- remaining_create_budget(client, deadline) do
+        {:ok,
+         %{
+           client
+           | worker: %{client.worker | receive_timeout_ms: client.worker.operation_timeout_ms}
+         }}
+      else
+        {:ok, _unsupported} -> error(:unsupported_capability, :exec)
+        {:error, failure} -> {:error, %{failure | operation: :exec, evidence: :not_dispatched}}
+      end
+    else
+      {:ok, client}
+    end
+  end
+
+  defp background_machine(_client, _path, %{background: false}), do: :ok
+
+  defp background_machine(client, "/api/v1/machines/" <> name = path, _command) do
+    with {:ok, body} <- json(client, :get, path, nil, :inspect),
+         {:ok, _machine} <- decode_machine(body, name, :inspect) do
+      if is_binary(body["image"]) and body["image"] != "" and body["branchable"] == false,
+        do: :ok,
+        else: error(:unsupported_capability, :exec)
     end
   end
 

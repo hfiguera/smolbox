@@ -56,8 +56,10 @@ The matches illustrate success; production callers must handle nonzero exits,
 unknown outcomes, collection failures, admission conflicts, and unavailable stores.
 An execution must match the machine's scope, artifact, and exact profile. Input
 and output manifests work as for disposable executions. Their staging and
-collection remain inside the machine's exclusive command slot. Guest processes
-started in the background by a command are not separate managed executions.
+collection remain inside the machine's exclusive command slot. Explicit background launch has its own execution identity and a typed launch
+result. Once launch is confirmed, the guest process continues independently of
+that execution record and can overlap later commands. See
+[Long-running commands and background launch](long-running-exec.md).
 
 ## Lifecycle and identity
 

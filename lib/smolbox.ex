@@ -21,6 +21,7 @@ defmodule SmolBox do
   machine lifecycle and only needs individual worker operations.
   """
   alias SmolBox.{Error, Execution, ExecutionSpec, Runtime, Validation}
+  alias SmolBox.Runtime.ExecutionSupport
   alias SmolBox.Runtime.{Inspection, Session, WorkerConfig}
 
   @type runtime :: Supervisor.supervisor()
@@ -87,6 +88,8 @@ defmodule SmolBox do
   def submit(runtime, spec) do
     with {:ok, config} <- config(runtime),
          :ok <- ExecutionSpec.validate(spec),
+         :ok <- disposable_command(spec),
+         :ok <- ExecutionSupport.check(config, spec),
          {:ok, fingerprint} <- ExecutionSpec.fingerprint(spec, config.fingerprint_key) do
       case Session.store(config, :fetch, [{spec.scope, spec.id}]) do
         {:ok, %{fingerprint: ^fingerprint} = record} -> {:ok, Execution.key(record)}
@@ -96,6 +99,11 @@ defmodule SmolBox do
       end
     end
   end
+
+  defp disposable_command(%{command: %{background: true}}),
+    do: Session.error(:unsupported_capability, :submit)
+
+  defp disposable_command(_spec), do: :ok
 
   defp accept(config, spec, fingerprint) do
     if Enum.any?(config.workers, &WorkerConfig.supports?(&1, spec)) do

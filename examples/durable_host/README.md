@@ -433,3 +433,32 @@ The guest process is restarted explicitly after VM stop/start. See the complete
 worker binding, conflicts and recovery. Migrate and upgrade every controller
 before managed writes: codec v5 applies even without ports, and rollback is not
 safe merely because no new mapped machines are being created.
+
+### Extended execution
+
+The persistent HTTP example now uses `Command.new(..., background: true)` and
+requires the upgraded adapter's `extended_execution: 1` capability. `prepare`
+stores a typed PID result under `:launched`, then checks readiness with another
+command. `resume` loads the original launch without replay, reaches the existing
+service, and explicitly creates a new launch after stop/start.
+
+Background and extended-budget records use codec v6; ordinary foreground records
+retain their prior shapes. Upgrade every shared controller/reader/adapter together.
+No new SQL migration is required beyond the existing migrations. Older binaries
+cannot read v6 history; disabling new launches does not make rollback safe.
+See [the guide](../../docs/long-running-exec.md) for semantics and recovery.
+
+For a foreground example that actually runs beyond five minutes, use the same
+environment, a fresh ID/partition, and a dedicated worker with at least ten minutes
+of remaining lifetime:
+
+```sh
+MIX_ENV=test mix run scripts/long_foreground.exs
+```
+
+It approves a six-minute execution profile, requests a 330-second guest timeout,
+runs a quiet 305-second Python command, checks output/exit status and verifies
+normal disposable cleanup and reservation release. Its fixture uses 2 GiB
+storage/overlay requests with qualified `resize2fs`; adjust the approved profile
+and floors for other artifacts. A controller interruption preserves durable
+uncertainty; rerunning an unknown identity does not replay its command.

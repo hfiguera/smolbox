@@ -38,6 +38,7 @@ defmodule SmolBox.Telemetry do
     :running,
     :collecting,
     :completed,
+    :launched,
     :collection_failed,
     :failed,
     :cancelled,
@@ -50,6 +51,7 @@ defmodule SmolBox.Telemetry do
     :dispatch_uncertain,
     :running_observed,
     :exited,
+    :launched,
     :termination_confirmed,
     :unknown
   ]
@@ -185,6 +187,7 @@ defmodule SmolBox.Telemetry do
   end
 
   defp result_measurements(nil), do: %{}
+  defp result_measurements(%SmolBox.LaunchResult{}), do: %{}
 
   defp result_measurements(result),
     do: %{

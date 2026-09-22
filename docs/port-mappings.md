@@ -116,8 +116,9 @@ against a different configuration.
 
 ## Persistence and upgrades
 
-Managed machines and associated commands now write codec **v5**, even when their
-port lists are empty. Exact v4 records load with `ports: []` and
+Ordinary managed machines and foreground commands write codec **v5**, even when
+their port lists are empty. Background launches and extended execution budgets
+use [codec v6](long-running-exec.md#persistence-and-upgrades). Exact v4 records load with `ports: []` and
 `reserved_ports: []`; their no-port fingerprints retain their original meaning.
 Old envelopes cannot contain new port fields. Disposable image/checkpoint writes
 retain their v2/v3 shape. Existing persisted specifications remain unmapped. New mappings require explicit,
@@ -168,8 +169,8 @@ path, set `SMOLBOX_HTTP_URL` to its complete `/retained.txt` URL. This does not
 change listener binding. Use a fresh `SMOLBOX_EXECUTION_ID` and
 `SMOLBOX_STORE_PARTITION` for each new demonstration; duplicates do not replay work.
 
-`prepare` writes a file, starts a detached Python HTTP server in a separate managed
-command, verifies guest readiness and host HTTP access, and exits the controller.
+`prepare` writes a file, launches a Python HTTP server through the typed background API in a separate managed
+launch, checks readiness in a subsequent command and host HTTP access, and exits the controller.
 `resume` recovers the same machine and mapping from PostgreSQL, reaches the existing
 service, stops/starts the VM, starts the guest service again, and reads the same
 file through the same host port. It explicitly deletes the VM, checks worker

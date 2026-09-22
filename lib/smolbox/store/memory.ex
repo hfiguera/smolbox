@@ -102,8 +102,15 @@ defmodule SmolBox.Store.Memory do
 
   defp execute(:capabilities, state),
     do:
-      {{:ok, %{schema: 1, durable: false, atomic: true, managed_machines: 1, managed_ports: 1}},
-       state}
+      {{:ok,
+        %{
+          schema: 1,
+          durable: false,
+          atomic: true,
+          managed_machines: 1,
+          managed_ports: 1,
+          extended_execution: 1
+        }}, state}
 
   defp execute({:machine, operation, arguments}, state) do
     case machine_operation(state, operation, arguments) do

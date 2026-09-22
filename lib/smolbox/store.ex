@@ -6,6 +6,11 @@ defmodule SmolBox.Store do
   worker leases, capacity, and assignment uniqueness across both resource kinds.
   Managed commands reference their owning machine and carry no reservation of
   their own. Their completion releases a command slot atomically, not the machine.
+  Adapters advertising `extended_execution: 1` must support codec v6, terminal
+  `:launched` execution evidence, atomic command-slot release after confirmed launch,
+  and unknown-launch blocking. Ordinary record retention and reservations are unchanged.
+  Mixed controller versions are unsupported; see the extended execution guide.
+
   Adapters advertising `managed_ports: 1` also atomically maintain unique
   `{worker_id, host_port}` ownership with machine assignment and reservations.
   Conflicting claims return `:port_conflict` and roll back the entire transaction.

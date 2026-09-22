@@ -1,0 +1,369 @@
+{
+  "date": "2026-09-22",
+  "qualification": "development",
+  "branch": "feature/long-running-background-exec",
+  "base_commit": "dc4a4ead22998d61b266f507ade79400d42b0495",
+  "upstream": {
+    "version": "1.17.0",
+    "reference_commit": "73d4b480dc703c86b676bb54f72318ef94f24e6a",
+    "release_commit": "d33b5a4adeb844365922cd2a29a89d93a94008ad",
+    "tree": "493f7d59f6d7e2c024c1854b151e4875ff93ccd3"
+  },
+  "source": {
+    "long_runtime_snapshot_sha256": "84a097cc92544b7a89f145287e5331a12dd0ecd12178a5f4b200db4785ec55ca",
+    "long_runtime_files": {
+      "examples/durable_host/lib/long_foreground_demo.ex": "36f2197e70af4102cd16023054957a556d2150870069337eb67fe8e361a74468",
+      "lib/smolbox/launch_result.ex": "f3600145b37ed1d9a348887b00d98e3b603751946df85b36cf698636236cdf45",
+      "lib/smolbox/runtime/execution_support.ex": "191b48e1cf98c478a4542b2aabab4c2f37070f5f87043d1ec00042a598aeb33e",
+      "lib/smolbox/store/codec_execution.ex": "76e2dcfc97118c98f81beb2840b9a9d2039e908b663f80f42c6864cf5560c79f",
+      "test/extended_runtime/extended_runtime_test.exs": "ff9c8edc50fbf9c4351509b810944acf5b0b14481dff25a111c15f7b2628cb94",
+      "examples/durable_host/lib/application.ex": "b0149229e29910ad91c1d2c6637b7eedd50bb42e52734421e973363bb327bf02",
+      "examples/durable_host/lib/benchmark.ex": "cdf83884a280a23fe3a3b16c1a5b8c69bd0880ed2ba87448fd3eb1b6740dac0e",
+      "examples/durable_host/lib/benchmark_metrics.ex": "3ecc15a1044c13bff69d8f8b96731a0dbd629190f90d47cf5dfe849f95e7cfd1",
+      "examples/durable_host/lib/benchmark_sampler.ex": "d4227f5e8c796d525e01e328c1e7b444d5313646486a67c89add99d038d2c167",
+      "examples/durable_host/lib/checkpoint_demo.ex": "77b3ba038850667667953fcda91199faea3bd7a710b16dda44a31bee787bf1f3",
+      "examples/durable_host/lib/database.ex": "f1e9070739316a7cd68149f80eecc8dc2e2f13cac19f50b5ef2599d10f217d12",
+      "examples/durable_host/lib/demo.ex": "34ca85afd103d2f7b0f1f234738f259c48968f3e7fd1a1ca810cf5eb3228b785",
+      "examples/durable_host/lib/machine_index.ex": "6556db1ed01f8fdfa552310d8fb25aea8ee0b4939247e2639bae968d2f976677",
+      "examples/durable_host/lib/machine_store.ex": "8f0bb32bff920be60bcf441c564f6eb89197176b9cf10ac01c5b0e6dad43b1cb",
+      "examples/durable_host/lib/persistent_demo.ex": "abf0d51396dfbfcc4dc4efb4bf3e6ce2ee1fa3df50d09296638afb514c609ed8",
+      "examples/durable_host/lib/persistent_http_demo.ex": "de5756fab1c46b39cf382d1b1248716d505b47d2ee40e454769e14d42b4971d5",
+      "examples/durable_host/lib/persistent_steps.ex": "5b3a36255e1813591dd2c2e174a605843d988137059413e8447afd7b74013373",
+      "examples/durable_host/lib/port_index.ex": "7053c85df0d5a2968bb6ecc18cc5b485e505969e100ef3f4997832ed5084073e",
+      "examples/durable_host/lib/record_crypto.ex": "7b693e27a82340c6eec1c4c1d760c87fd17716f2869ae7b42d84cb7515d0afb4",
+      "examples/durable_host/lib/repo.ex": "135981af1a6ad9747d227844b0cc9c1be7df83e4c4a0c4fe4bcd37047006296a",
+      "examples/durable_host/lib/store.ex": "3ed3ed3782e66a3b7b28c28dc5dc0714f795a96eecc5dba660708810ca3db927",
+      "lib/smolbox.ex": "86a8969dab9ae6aeb4904d2d9023f9819384a977d249879d71e6a5491b54014f",
+      "lib/smolbox/artifact_store.ex": "2d61ae4c7b6eeab70d6dbe822f390353565555b80b33a5602d3487b591128cbe",
+      "lib/smolbox/artifact_store/directory.ex": "c8afa7093cef1962a0592d3333dd2de08ed2d284731b840df1d99b1ec73c7bdc",
+      "lib/smolbox/checkpoint.ex": "efb4ab7a5a52ec6e01eb739547b812f932d0f70df7ab9cdd8ce121671c345831",
+      "lib/smolbox/client.ex": "9cb4fd29b308cb1cd2e55d9bb80663f11298ad9953f10fe5233d47bb9bf94954",
+      "lib/smolbox/command.ex": "0bd02845772681294e1d437472dafab6df8f58d8194e1a6217f5dde8ee1c7c53",
+      "lib/smolbox/error.ex": "c482a0ad0c1d9ab86d42aa5dd1abe5dd165ba3b4b583c9bcd671f543607fb263",
+      "lib/smolbox/execution.ex": "0eb70d4160d5bef7edc327e080aa1f178d2738c9c126b2590753b6f3127930ed",
+      "lib/smolbox/execution_spec.ex": "3f04b7b4469f1b71ea6b2895cf30d9f0effded34cbf35311c228201b5ccfd17a",
+      "lib/smolbox/execution_validation.ex": "efd5b5079cc2c8ccd757c3e6fbf8703be3e82e808a84b0c8e5f67205dac0cc37",
+      "lib/smolbox/files.ex": "15c2054bb8bd11b004de8a6c7a9dd707db4deccf001abdd70998e858ea6cf204",
+      "lib/smolbox/health.ex": "a6bb8345d44ac721adc29fe1c328e763f58c76cbe197529a4c6a41cf72a5a03a",
+      "lib/smolbox/identity.ex": "d2f0f9b2397119edbe90f98f00fa79977e46044ab485258880758fd36573fca7",
+      "lib/smolbox/machine.ex": "1a59ebc0a9af7eed5b98a2d88480671f685832101de5b81280daaa7ea26d3b82",
+      "lib/smolbox/machine_spec.ex": "85333e3dfd1c5e55fa88ee0eaaa352ccce250a045d12df1a4b9b91f1e33f2051",
+      "lib/smolbox/machines.ex": "c948a9e6499518d8dcf824f7e1abe19854f41bfae7b81203f2e918c948611ea4",
+      "lib/smolbox/managed_machine.ex": "7db818e45ae3eeee123728679f88d71cca9c491886e97fe96dc2fa8c8f94243f",
+      "lib/smolbox/managed_machine_spec.ex": "1a1e06d2faf10acf4b991d37cab6b6f8dce4e55aabe97e02684bb5fbcd477798",
+      "lib/smolbox/manifest.ex": "64bbfcabea90905d9cb0b3ac9399fa997486b4461d5e13989f3f892938bfeb10",
+      "lib/smolbox/network_policy.ex": "905e5f69ebe2da6de2fb75b795a6de32f47e2e1a34d5af9b11f9e5a66d242ee1",
+      "lib/smolbox/port_mapping.ex": "e3ac86f7d25b6ad0d0a74c23b9d1ce433b012832744c87beeb2e747d5c8ea124",
+      "lib/smolbox/profile.ex": "9ab2c48be80b33827f8be9862bdc9065345299ff71c1521f534e3df417811018",
+      "lib/smolbox/result.ex": "09d0fb685331012e00690875734ee70bb51b0528eecb4c0ab236277343daeccf",
+      "lib/smolbox/runtime.ex": "b4c0b5a7f03ef3612ebb3e885bfedc27e8d41104a63dbb21c5f1d2bce0af9915",
+      "lib/smolbox/runtime/cleanup.ex": "f11db6b108bbd5650e66960ed3b57d9d5c93d6487808ff9f1e665edce32c221e",
+      "lib/smolbox/runtime/clock.ex": "a3b7bf21a90a4ccf4977791f97736137af01fdee4a2b3a5ebb3d6a0d18dbf114",
+      "lib/smolbox/runtime/config.ex": "72ad48cde99f38333a9dd66bd94dd33f8c72c59ab10d142ec4c59efdddd4188b",
+      "lib/smolbox/runtime/coordinator.ex": "9b7b5ae98ea153530e6c962c35d3a217862143fe55716fa3a58b67bbb4cad808",
+      "lib/smolbox/runtime/executor.ex": "854e0c90bc27fa41fb9b103d967d05e4f4da65239a05446dc1b0e86374fa2c26",
+      "lib/smolbox/runtime/files.ex": "1acecfe874e8397c4c13fbd40751e629808dbefb920ac640f06d09edb415fc55",
+      "lib/smolbox/runtime/inspection.ex": "4e9d22ee3d91cb69c49250505b1884af88339e96ab468db04622eb6d28004c22",
+      "lib/smolbox/runtime/machines.ex": "c73bb6eae5dda287031342e3a8bad3e46d3eda097aa809c3ecf969e189c68ef6",
+      "lib/smolbox/runtime/observation.ex": "87e7d72e92e91725738aa50791ae83a6bcd44ce11119f51d65654f3ec5b92b21",
+      "lib/smolbox/runtime/session.ex": "e07b33065128a0e3c6f91f5a80474a7a4b2d2e331301c095af5be24932e113b7",
+      "lib/smolbox/runtime/work_supervisor.ex": "40e5cfd18c84e55c232272e38477e66b689ea77baf72661171329c50738b4743",
+      "lib/smolbox/runtime/worker_config.ex": "a40d90f4670ddefbfc88b69a612eb10b2debd699123491de5092e07fc5235692",
+      "lib/smolbox/runtime/worker_health.ex": "fc19df3f3bf28dfda625b1f6f3b882e2a16b75421145442d2e8d77b6b935f1c0",
+      "lib/smolbox/store.ex": "4c8258e06c31fa886d925b74f857fb5093ea3f62b17d4601e428ae6feaf76a68",
+      "lib/smolbox/store/codec.ex": "e32d2898a1f5c179764e4aa6e15864154ec51b7473d0026b8bea940991027bba",
+      "lib/smolbox/store/codec_ports.ex": "2f8061b36135ffdf81918474c08d93a21381d6b816754272bc94150f352292e0",
+      "lib/smolbox/store/machine_ops.ex": "fc949de610dd25da9d5e49a7cf6ee10a6c564b26952923e8931c9aa871b51bf2",
+      "lib/smolbox/store/memory.ex": "89f6c23b0d0ba0e3eef1bca49ce7f8a4a66504186ddc1059c06b51f35249c36e",
+      "lib/smolbox/store/port_ownership.ex": "00cba213d22706c49edc28174182a6729cdb18d53cb7a860103f2e1271df8b59",
+      "lib/smolbox/store/record_ops.ex": "7ec2f3504a901460cfaaf5e03b7f599b84d5caf7a144e275d7b0d405f907c646",
+      "lib/smolbox/telemetry.ex": "d0845c27166670f5bde668a125f7c61f4cccb288353ff38d9e268ef10159d1a7",
+      "lib/smolbox/telemetry/dispatcher.ex": "30a2513d3aaeb24e953011ff9ca651f9eac66b1d6105a8d491e8178d3796063b",
+      "lib/smolbox/transport.ex": "ed6a497a1e746330bc7527becd8b520a5c9b8320a9102604633dfb13fa4802de",
+      "lib/smolbox/transport/capture.ex": "df828264adf33a5d96759b445f156189d7ade1b0c4666f66831442569cb084d4",
+      "lib/smolbox/transport/req.ex": "ab74798b6c4c27c89b72b6813ef5de7190d3380de1da075228d0533e3b36ebcd",
+      "lib/smolbox/validation.ex": "4df0e14313ffb67caefdf3a7e4b9d63a8a6588666b4142409b525d2955cc2530",
+      "lib/smolbox/wire/sse.ex": "00079b7972aa40bc733aa7dbe6a61c50b94367fd1f19ed00afdfcb0fda51dda1",
+      "lib/smolbox/worker.ex": "d47f2c11de30bbf7e5d47833b71d887bbaaec04ff83e32dc8d53b23cd4627cef"
+    },
+    "final_files": {
+      "examples/durable_host/lib/long_foreground_demo.ex": "36f2197e70af4102cd16023054957a556d2150870069337eb67fe8e361a74468",
+      "lib/smolbox/launch_result.ex": "f3600145b37ed1d9a348887b00d98e3b603751946df85b36cf698636236cdf45",
+      "lib/smolbox/runtime/execution_support.ex": "191b48e1cf98c478a4542b2aabab4c2f37070f5f87043d1ec00042a598aeb33e",
+      "lib/smolbox/store/codec_execution.ex": "76e2dcfc97118c98f81beb2840b9a9d2039e908b663f80f42c6864cf5560c79f",
+      "test/extended_runtime/extended_runtime_test.exs": "dd31f00c6d1dd19e375a88d60c9ce78debf165a03a47720beac25c989999f685",
+      "examples/durable_host/lib/application.ex": "b0149229e29910ad91c1d2c6637b7eedd50bb42e52734421e973363bb327bf02",
+      "examples/durable_host/lib/benchmark.ex": "cdf83884a280a23fe3a3b16c1a5b8c69bd0880ed2ba87448fd3eb1b6740dac0e",
+      "examples/durable_host/lib/benchmark_metrics.ex": "3ecc15a1044c13bff69d8f8b96731a0dbd629190f90d47cf5dfe849f95e7cfd1",
+      "examples/durable_host/lib/benchmark_sampler.ex": "d4227f5e8c796d525e01e328c1e7b444d5313646486a67c89add99d038d2c167",
+      "examples/durable_host/lib/checkpoint_demo.ex": "77b3ba038850667667953fcda91199faea3bd7a710b16dda44a31bee787bf1f3",
+      "examples/durable_host/lib/database.ex": "f1e9070739316a7cd68149f80eecc8dc2e2f13cac19f50b5ef2599d10f217d12",
+      "examples/durable_host/lib/demo.ex": "34ca85afd103d2f7b0f1f234738f259c48968f3e7fd1a1ca810cf5eb3228b785",
+      "examples/durable_host/lib/machine_index.ex": "6556db1ed01f8fdfa552310d8fb25aea8ee0b4939247e2639bae968d2f976677",
+      "examples/durable_host/lib/machine_store.ex": "8f0bb32bff920be60bcf441c564f6eb89197176b9cf10ac01c5b0e6dad43b1cb",
+      "examples/durable_host/lib/persistent_demo.ex": "abf0d51396dfbfcc4dc4efb4bf3e6ce2ee1fa3df50d09296638afb514c609ed8",
+      "examples/durable_host/lib/persistent_http_demo.ex": "de5756fab1c46b39cf382d1b1248716d505b47d2ee40e454769e14d42b4971d5",
+      "examples/durable_host/lib/persistent_steps.ex": "5b3a36255e1813591dd2c2e174a605843d988137059413e8447afd7b74013373",
+      "examples/durable_host/lib/port_index.ex": "7053c85df0d5a2968bb6ecc18cc5b485e505969e100ef3f4997832ed5084073e",
+      "examples/durable_host/lib/record_crypto.ex": "7b693e27a82340c6eec1c4c1d760c87fd17716f2869ae7b42d84cb7515d0afb4",
+      "examples/durable_host/lib/repo.ex": "135981af1a6ad9747d227844b0cc9c1be7df83e4c4a0c4fe4bcd37047006296a",
+      "examples/durable_host/lib/store.ex": "3ed3ed3782e66a3b7b28c28dc5dc0714f795a96eecc5dba660708810ca3db927",
+      "lib/smolbox.ex": "86a8969dab9ae6aeb4904d2d9023f9819384a977d249879d71e6a5491b54014f",
+      "lib/smolbox/artifact_store.ex": "2d61ae4c7b6eeab70d6dbe822f390353565555b80b33a5602d3487b591128cbe",
+      "lib/smolbox/artifact_store/directory.ex": "c8afa7093cef1962a0592d3333dd2de08ed2d284731b840df1d99b1ec73c7bdc",
+      "lib/smolbox/checkpoint.ex": "efb4ab7a5a52ec6e01eb739547b812f932d0f70df7ab9cdd8ce121671c345831",
+      "lib/smolbox/client.ex": "973b14eb56f39a0558ead5f73d0d0c245e95c92a8ee4dd27df9759f4aadb4be6",
+      "lib/smolbox/command.ex": "0bd02845772681294e1d437472dafab6df8f58d8194e1a6217f5dde8ee1c7c53",
+      "lib/smolbox/error.ex": "c482a0ad0c1d9ab86d42aa5dd1abe5dd165ba3b4b583c9bcd671f543607fb263",
+      "lib/smolbox/execution.ex": "540c330b15739c5748bd7df9bbbb2642c7f10a2e9af81b0f1a9f1d2e1576a204",
+      "lib/smolbox/execution_spec.ex": "3f04b7b4469f1b71ea6b2895cf30d9f0effded34cbf35311c228201b5ccfd17a",
+      "lib/smolbox/execution_validation.ex": "efd5b5079cc2c8ccd757c3e6fbf8703be3e82e808a84b0c8e5f67205dac0cc37",
+      "lib/smolbox/files.ex": "15c2054bb8bd11b004de8a6c7a9dd707db4deccf001abdd70998e858ea6cf204",
+      "lib/smolbox/health.ex": "a6bb8345d44ac721adc29fe1c328e763f58c76cbe197529a4c6a41cf72a5a03a",
+      "lib/smolbox/identity.ex": "d2f0f9b2397119edbe90f98f00fa79977e46044ab485258880758fd36573fca7",
+      "lib/smolbox/machine.ex": "1a59ebc0a9af7eed5b98a2d88480671f685832101de5b81280daaa7ea26d3b82",
+      "lib/smolbox/machine_spec.ex": "85333e3dfd1c5e55fa88ee0eaaa352ccce250a045d12df1a4b9b91f1e33f2051",
+      "lib/smolbox/machines.ex": "c948a9e6499518d8dcf824f7e1abe19854f41bfae7b81203f2e918c948611ea4",
+      "lib/smolbox/managed_machine.ex": "7db818e45ae3eeee123728679f88d71cca9c491886e97fe96dc2fa8c8f94243f",
+      "lib/smolbox/managed_machine_spec.ex": "1a1e06d2faf10acf4b991d37cab6b6f8dce4e55aabe97e02684bb5fbcd477798",
+      "lib/smolbox/manifest.ex": "64bbfcabea90905d9cb0b3ac9399fa997486b4461d5e13989f3f892938bfeb10",
+      "lib/smolbox/network_policy.ex": "905e5f69ebe2da6de2fb75b795a6de32f47e2e1a34d5af9b11f9e5a66d242ee1",
+      "lib/smolbox/port_mapping.ex": "e3ac86f7d25b6ad0d0a74c23b9d1ce433b012832744c87beeb2e747d5c8ea124",
+      "lib/smolbox/profile.ex": "9ab2c48be80b33827f8be9862bdc9065345299ff71c1521f534e3df417811018",
+      "lib/smolbox/result.ex": "09d0fb685331012e00690875734ee70bb51b0528eecb4c0ab236277343daeccf",
+      "lib/smolbox/runtime.ex": "b4c0b5a7f03ef3612ebb3e885bfedc27e8d41104a63dbb21c5f1d2bce0af9915",
+      "lib/smolbox/runtime/cleanup.ex": "f11db6b108bbd5650e66960ed3b57d9d5c93d6487808ff9f1e665edce32c221e",
+      "lib/smolbox/runtime/clock.ex": "a3b7bf21a90a4ccf4977791f97736137af01fdee4a2b3a5ebb3d6a0d18dbf114",
+      "lib/smolbox/runtime/config.ex": "72ad48cde99f38333a9dd66bd94dd33f8c72c59ab10d142ec4c59efdddd4188b",
+      "lib/smolbox/runtime/coordinator.ex": "9b7b5ae98ea153530e6c962c35d3a217862143fe55716fa3a58b67bbb4cad808",
+      "lib/smolbox/runtime/executor.ex": "854e0c90bc27fa41fb9b103d967d05e4f4da65239a05446dc1b0e86374fa2c26",
+      "lib/smolbox/runtime/files.ex": "1acecfe874e8397c4c13fbd40751e629808dbefb920ac640f06d09edb415fc55",
+      "lib/smolbox/runtime/inspection.ex": "4e9d22ee3d91cb69c49250505b1884af88339e96ab468db04622eb6d28004c22",
+      "lib/smolbox/runtime/machines.ex": "c73bb6eae5dda287031342e3a8bad3e46d3eda097aa809c3ecf969e189c68ef6",
+      "lib/smolbox/runtime/observation.ex": "87e7d72e92e91725738aa50791ae83a6bcd44ce11119f51d65654f3ec5b92b21",
+      "lib/smolbox/runtime/session.ex": "e07b33065128a0e3c6f91f5a80474a7a4b2d2e331301c095af5be24932e113b7",
+      "lib/smolbox/runtime/work_supervisor.ex": "40e5cfd18c84e55c232272e38477e66b689ea77baf72661171329c50738b4743",
+      "lib/smolbox/runtime/worker_config.ex": "a40d90f4670ddefbfc88b69a612eb10b2debd699123491de5092e07fc5235692",
+      "lib/smolbox/runtime/worker_health.ex": "fc19df3f3bf28dfda625b1f6f3b882e2a16b75421145442d2e8d77b6b935f1c0",
+      "lib/smolbox/store.ex": "4c8258e06c31fa886d925b74f857fb5093ea3f62b17d4601e428ae6feaf76a68",
+      "lib/smolbox/store/codec.ex": "e32d2898a1f5c179764e4aa6e15864154ec51b7473d0026b8bea940991027bba",
+      "lib/smolbox/store/codec_ports.ex": "2f8061b36135ffdf81918474c08d93a21381d6b816754272bc94150f352292e0",
+      "lib/smolbox/store/machine_ops.ex": "fc949de610dd25da9d5e49a7cf6ee10a6c564b26952923e8931c9aa871b51bf2",
+      "lib/smolbox/store/memory.ex": "89f6c23b0d0ba0e3eef1bca49ce7f8a4a66504186ddc1059c06b51f35249c36e",
+      "lib/smolbox/store/port_ownership.ex": "00cba213d22706c49edc28174182a6729cdb18d53cb7a860103f2e1271df8b59",
+      "lib/smolbox/store/record_ops.ex": "7ec2f3504a901460cfaaf5e03b7f599b84d5caf7a144e275d7b0d405f907c646",
+      "lib/smolbox/telemetry.ex": "d0845c27166670f5bde668a125f7c61f4cccb288353ff38d9e268ef10159d1a7",
+      "lib/smolbox/telemetry/dispatcher.ex": "30a2513d3aaeb24e953011ff9ca651f9eac66b1d6105a8d491e8178d3796063b",
+      "lib/smolbox/transport.ex": "ed6a497a1e746330bc7527becd8b520a5c9b8320a9102604633dfb13fa4802de",
+      "lib/smolbox/transport/capture.ex": "df828264adf33a5d96759b445f156189d7ade1b0c4666f66831442569cb084d4",
+      "lib/smolbox/transport/req.ex": "ab74798b6c4c27c89b72b6813ef5de7190d3380de1da075228d0533e3b36ebcd",
+      "lib/smolbox/validation.ex": "4df0e14313ffb67caefdf3a7e4b9d63a8a6588666b4142409b525d2955cc2530",
+      "lib/smolbox/wire/sse.ex": "00079b7972aa40bc733aa7dbe6a61c50b94367fd1f19ed00afdfcb0fda51dda1",
+      "lib/smolbox/worker.ex": "d47f2c11de30bbf7e5d47833b71d887bbaaec04ff83e32dc8d53b23cd4627cef"
+    },
+    "changes_after_long_runtime_snapshot": [
+      "test/extended_runtime/extended_runtime_test.exs",
+      "lib/smolbox/client.ex",
+      "lib/smolbox/execution.ex"
+    ],
+    "scope": "The 305-second suites used the earlier snapshot. Final background options, two-process HTTP acceptance, regressions and deterministic suite used final files. Later changes strictly validate background record states and machine observations, and add option/negative tests; long deadline and dispatch code is unchanged."
+  },
+  "macos": {
+    "binary_sha256": "bee762e648f2c90e2339c6c3f37d6fd47d3645888e2b4d73963e511032d2195a",
+    "python_artifact_sha256": "bb3ed187bc4cfc1cc6f7e4e09c8f96ac1c2d47dcd2902653e6c1bd2ba6ca017c",
+    "long_runtime": [
+      {
+        "case": "timeouts",
+        "guest_exit_code": 124,
+        "process_outlived_observation": true
+      }
+    ],
+    "long_runtime_passed": 3,
+    "background_options": [
+      {
+        "pid": 191,
+        "case": "background-options",
+        "uid": 65534,
+        "env_and_workdir_verified": true
+      }
+    ],
+    "http": [
+      {
+        "state": "running",
+        "phase": "prepare",
+        "machine_name": "sbxexample-jzzszqxpoaqiahzztknp",
+        "http_verified": true,
+        "launch_id": "background-final-001-serve",
+        "launch_pid": 190,
+        "reservation_retained": true,
+        "mappings": [
+          {
+            "host": 28731,
+            "guest": 8000
+          }
+        ]
+      },
+      {
+        "state": "deleted",
+        "phase": "resume",
+        "machine_name": "sbxexample-jzzszqxpoaqiahzztknp",
+        "absence_verified": true,
+        "deduplication_retained": true,
+        "http_verified": true,
+        "ports_released": true,
+        "recovered_launch_id": "background-final-001-serve",
+        "recovered_launch_pid": 190,
+        "resources_released": true,
+        "restarted_launch_id": "background-final-001-serve-after-start",
+        "same_machine": true,
+        "mappings": [
+          {
+            "host": 28731,
+            "guest": 8000
+          }
+        ]
+      }
+    ],
+    "long_disposable_example": [
+      {
+        "id": "long-1170-001",
+        "scope": "long-foreground",
+        "state": "completed",
+        "cleanup": "complete",
+        "exit_code": 0,
+        "evidence": "exited",
+        "collection": "complete",
+        "artifacts": [],
+        "absence_at_ms": 1790090896538,
+        "worker_id": "example-worker",
+        "machine_name": "sbxexample-rv4nn6dorbj7osujenby",
+        "cancel_requested_at_ms": null,
+        "reserved": false
+      }
+    ],
+    "ordinary_runtime_passed": 9,
+    "ordinary_checkpoint_passed": 3,
+    "postgresql_contracts_passed": 31,
+    "durable_recovery_passed": 25,
+    "checkpoint_recovery_passed": 3,
+    "inventory": {
+      "machines": []
+    },
+    "reservation_query": "      partition       |     execution_id     |  state  | slots | cpus | memory_mb | disk_gb \n----------------------+----------------------+---------+-------+------+-----------+---------\n background-final-001 | background-final-001 | deleted |     0 |    0 |         0 |       0\n(1 row)\n\n      partition       |              execution_id              |   state   | slots | cpus | memory_mb | disk_gb \n----------------------+----------------------------------------+-----------+-------+------+-----------+---------\n background-final-001 | background-final-001-ready             | completed |     0 |    0 |         0 |       0\n long-1170-001        | long-1170-001                          | completed |     0 |    0 |         0 |       0\n background-final-001 | background-final-001-write             | completed |     0 |    0 |         0 |       0\n background-final-001 | background-final-001-serve             | launched  |     0 |    0 |         0 |       0\n background-final-001 | background-final-001-serve-after-start | launched  |     0 |    0 |         0 |       0\n background-final-001 | background-final-001-ready-after-start | completed |     0 |    0 |         0 |       0\n(6 rows)\n\n worker_id | host_port | partition | scope | execution_id \n-----------+-----------+-----------+-------+--------------\n(0 rows)\n\n",
+    "cleanup": {
+      "worker_stopped": true,
+      "private_postgresql_stopped": true,
+      "mapped_port_listener_absent": true
+    }
+  },
+  "linux": {
+    "binary_sha256": "40b9bc8f24f7cc77c371db4784742e6b6724f09a11b83d63776b944734b7912d",
+    "python_artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+    "long_runtime": [
+      {
+        "case": "long-managed-stream",
+        "exit_code": 9,
+        "elapsed_ms": 305245,
+        "quiet_seconds": 305,
+        "await_expiry_did_not_cancel": true
+      }
+    ],
+    "long_runtime_passed": 3,
+    "background_options": [
+      {
+        "pid": 476,
+        "case": "background-options",
+        "uid": 65534,
+        "env_and_workdir_verified": true
+      }
+    ],
+    "http": [
+      {
+        "state": "running",
+        "phase": "prepare",
+        "machine_name": "sbxexample-j2kl4ewcytmlidkdwjuo",
+        "http_verified": true,
+        "launch_id": "exec-final-serve",
+        "launch_pid": 492,
+        "reservation_retained": true,
+        "mappings": [
+          {
+            "host": 28731,
+            "guest": 8000
+          }
+        ]
+      },
+      {
+        "state": "deleted",
+        "phase": "resume",
+        "machine_name": "sbxexample-j2kl4ewcytmlidkdwjuo",
+        "absence_verified": true,
+        "deduplication_retained": true,
+        "http_verified": true,
+        "ports_released": true,
+        "recovered_launch_id": "exec-final-serve",
+        "recovered_launch_pid": 492,
+        "resources_released": true,
+        "restarted_launch_id": "exec-final-serve-after-start",
+        "same_machine": true,
+        "mappings": [
+          {
+            "host": 28731,
+            "guest": 8000
+          }
+        ]
+      }
+    ],
+    "ordinary_runtime_passed": 14,
+    "postgresql_contracts_passed": 31,
+    "inventory": {
+      "machines": []
+    },
+    "kvm_fds_after": "",
+    "worker_deadline_seconds_during_extended_suite": 900,
+    "worker_deadline_seconds_restored": 300,
+    "worker_cpu": 1,
+    "worker_memory_bytes": 1610612736,
+    "worker_tasks": 96,
+    "worker_cache_bytes": 805306368,
+    "outer_vm_deadline_seconds": 2700,
+    "cleanup": "/var/lib/smolbox-lab/images/baseline.qcow2: OK\nFormatting '/var/lib/smolbox-lab/images/run.qcow2', fmt=qcow2 cluster_size=65536 extended_l2=off compression_type=zlib size=107374182400 backing_file=/var/lib/smolbox-lab/images/baseline.qcow2 backing_fmt=qcow2 lazy_refcounts=off refcount_bits=16\nRuntimeMaxUSec=45min\nMainPID=0\nResult=success\nExecMainCode=0\nExecMainStatus=0\nControlGroup=\nMemoryPeak=[not set]\nCPUUsageNSec=[not set]\nCPUQuotaPerSecUSec=4s\nMemoryMax=12884901888\nMemorySwapMax=0\nTasksMax=256\nActiveState=inactive\nSubState=dead\nInvocationID=\nimage: /var/lib/smolbox-lab/images/run.qcow2\nfile format: qcow2\nvirtual size: 100 GiB (107374182400 bytes)\ndisk size: 196 KiB\ncluster_size: 65536\nbacking file: /var/lib/smolbox-lab/images/baseline.qcow2\nbacking file format: qcow2\nFormat specific information:\n    compat: 1.1\n    compression type: zlib\n    lazy refcounts: false\n    refcount bits: 16\n    corrupt: false\n    extended l2: false\nChild node '/file':\n    filename: /var/lib/smolbox-lab/images/run.qcow2\n    protocol type: file\n    file length: 194 KiB (198656 bytes)\n    disk size: 196 KiB\n",
+    "not_rerun": [
+      "Linux full durable recovery suite",
+      "Linux checkpoint suites"
+    ]
+  },
+  "checks": {
+    "deterministic_passed": 301,
+    "runtime_excluded": 23,
+    "coverage_percent": 93.75,
+    "coverage_floor_percent": 90,
+    "coverage_scope": "301-case run before final additional strict background validation assertions; final deterministic suite passed afterward.",
+    "language_matrix": [
+      "Elixir 1.18.4 / OTP 27.3.4.15",
+      "Elixir 1.19.5 / OTP 28.5",
+      "Elixir 1.20.4 / OTP 28.5",
+      "Elixir 1.20.4 / OTP 29.0.6"
+    ],
+    "ci_tool_tests_passed": 23,
+    "checker_canaries": "passed",
+    "root_ci": "passed",
+    "root_and_postgresql_dependency_audits": "passed",
+    "root_postgresql_and_minimal_example_dialyzer": "passed",
+    "documentation_pages": 59,
+    "package_consumers": {
+      "current": "passed",
+      "minimum": "passed",
+      "same_archive_sha256": "a5b0b67e2aadae34ca57e487e1d73a97315d1b96ad0102e37a2eaf3067e23110",
+      "scope": "Final implementation archive, before this report recorded its package qualification result."
+    }
+  },
+  "limitations": [
+    "305-second live execution verified; 24-hour ceiling validated as policy/type bounds, not a 24-hour soak test.",
+    "Background acknowledgment is historical launch evidence, not readiness, liveness, final exit, logs or safe termination.",
+    "No Linux full recovery/checkpoint rerun in this feature campaign; historical results remain separate.",
+    "Fault matrices, races, ownership mismatch and uncertain launch replies are simulated; real PostgreSQL contracts do not imply real-worker fault injection.",
+    "Development qualification, not production isolation certification."
+  ],
+  "private_evidence_policy": "Only selected JSON events, source hashes and non-secret cleanup output are published. Raw archives and database keys remain in ignored local storage."
+}

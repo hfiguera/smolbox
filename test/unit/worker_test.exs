@@ -36,7 +36,7 @@ defmodule SmolBox.WorkerTest do
           {"https://worker.example:0", [token: "token"]},
           {"https://worker.example", [token: "bad\r\nheader"]},
           {"https://worker.example", [token: "token", operation_timeout_ms: 0]},
-          {"https://worker.example", [token: "token", operation_timeout_ms: 900_001]},
+          {"https://worker.example", [token: "token", operation_timeout_ms: 86_460_001]},
           {"https://worker.example", [token: "token", max_response_bytes: 33_554_433]},
           {"https://worker.example", [token: "token", ca_cert_file: "/no/such/certificate"]},
           {"https://worker.example", [token: "token", unix_socket: "/tmp/socket"]},

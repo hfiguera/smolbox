@@ -13,6 +13,8 @@ the workers and prepare images containing the languages and dependencies you nee
 The default execution API runs one command in its own disposable VM.
 `SmolBox.Machines` also manages retained machines that can run successive commands
 and expose TCP services through fixed [worker-host port mappings](docs/port-mappings.md).
+[Long-running commands and background launch](docs/long-running-exec.md) support
+longer builds and persistent services, with explicit budgets and typed launch evidence.
 
 ## Why use SmolBox?
 

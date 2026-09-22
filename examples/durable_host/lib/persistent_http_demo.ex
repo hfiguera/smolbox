@@ -5,17 +5,23 @@ defmodule SmolBox.DurableHost.PersistentHTTPDemo do
   must be able to reach the worker's loopback listener (or configure a trusted
   forwarding path with SMOLBOX_HTTP_URL).
   """
-  alias SmolBox.{Client, Machines, ManagedMachineSpec, PortMapping, Runtime}
+  alias SmolBox.{
+    Client,
+    Command,
+    ExecutionSpec,
+    LaunchResult,
+    Machines,
+    ManagedMachineSpec,
+    PortMapping,
+    Runtime
+  }
+
   alias SmolBox.DurableHost.{Database, Repo, Store}
   alias SmolBox.Example.Setup
   import SmolBox.DurableHost.PersistentSteps
 
-  @service """
-  import pathlib, subprocess, time, urllib.request
-  log = open('/workspace/http.log', 'ab', buffering=0)
-  subprocess.Popen(['python', '-m', 'http.server', '8000', '--bind', '0.0.0.0',
-                    '--directory', '/workspace'], stdin=subprocess.DEVNULL,
-                   stdout=log, stderr=log, start_new_session=True)
+  @readiness """
+  import time, urllib.request
   for attempt in range(40):
       try:
           assert urllib.request.urlopen('http://127.0.0.1:8000/retained.txt', timeout=.1).read() == b'retained\\n'
@@ -92,16 +98,29 @@ defmodule SmolBox.DurableHost.PersistentHTTPDemo do
       "written\n"
     )
 
-    command(c.runtime, c.handle, c.base, "serve", @service, "ready\n")
+    launch = launch(c, "serve")
+    command(c.runtime, c.handle, c.base, "ready", @readiness, "ready\n")
     probe(c.url)
     {:ok, machine} = Machines.inspect(c.runtime, c.handle)
     true = machine.reserved_ports == [c.mapping.host]
-    report("prepare", machine, %{http_verified: true, reservation_retained: true})
+
+    report("prepare", machine, %{
+      http_verified: true,
+      reservation_retained: true,
+      launch_pid: launch.result.pid,
+      launch_id: launch.id
+    })
   end
 
   defp execute("resume", c) do
     {:ok, original} = Machines.inspect(c.runtime, c.handle)
     true = original.spec.ports == [c.mapping] and original.reserved_ports == [c.mapping.host]
+    {scope, id} = c.handle
+    {:ok, launch} = SmolBox.fetch(c.runtime, scope, id <> "-serve")
+    :launched = launch.state
+    %LaunchResult{} = launch.result
+    {:ok, duplicate} = Machines.submit(c.runtime, c.handle, launch.spec)
+    true = duplicate == {launch.scope, launch.id}
     probe(c.url)
     {:ok, _} = lifecycle(c.runtime, c.handle, :stop)
     stopped = wait_machine(c.runtime, c.handle, &(&1.state == :stopped))
@@ -109,7 +128,8 @@ defmodule SmolBox.DurableHost.PersistentHTTPDemo do
     {:ok, _} = lifecycle(c.runtime, c.handle, :start)
     restarted = wait_machine(c.runtime, c.handle, &(&1.state == :running))
     true = restarted.created_machine == original.created_machine
-    command(c.runtime, c.handle, c.base, "serve-after-start", @service, "ready\n")
+    restarted_launch = launch(c, "serve-after-start")
+    command(c.runtime, c.handle, c.base, "ready-after-start", @readiness, "ready\n")
     probe(c.url)
     {:ok, _} = lifecycle(c.runtime, c.handle, :delete)
     deleted = wait_machine(c.runtime, c.handle, &(&1.state == :deleted))
@@ -133,12 +153,42 @@ defmodule SmolBox.DurableHost.PersistentHTTPDemo do
 
     report("resume", deleted, %{
       http_verified: true,
+      recovered_launch_pid: launch.result.pid,
+      recovered_launch_id: launch.id,
+      restarted_launch_id: restarted_launch.id,
       same_machine: true,
       absence_verified: true,
       ports_released: true,
       resources_released: true,
       deduplication_retained: true
     })
+  end
+
+  defp launch(c, suffix) do
+    {scope, id} = c.handle
+
+    {:ok, command} =
+      Command.new(
+        ["python", "-m", "http.server", "8000", "--bind", "0.0.0.0", "--directory", "/workspace"],
+        background: true
+      )
+
+    {:ok, spec} =
+      ExecutionSpec.new(
+        scope: scope,
+        id: id <> "-" <> suffix,
+        artifact: c.base.artifact,
+        profile: c.base.profile,
+        command: command
+      )
+
+    {:ok, execution} = Machines.submit(c.runtime, c.handle, spec)
+
+    {:ok, %{state: :launched, result: %LaunchResult{}} = launched} =
+      SmolBox.await(c.runtime, execution, 90_000)
+
+    wait_machine(c.runtime, c.handle, &is_nil(&1.active_execution))
+    launched
   end
 
   defp probe(url) do

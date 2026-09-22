@@ -121,35 +121,24 @@ approval, managed execution, examples and schema v3 upgrade requirements.
 
 ## Execution and transport budgets
 
-`Command.new/2` accepts a guest timeout of 1–300 seconds. A managed command must
-also fit its profile's `execution_ms`, whose maximum is 300,000 ms. Configure
-the worker client's receive and total operation budgets separately: increasing
-a guest deadline does not extend either HTTP budget. A quiet stream can reach
-its receive timeout even while the guest continues working.
+Foreground timeouts accept 1–86,400 seconds. Commands exceeding 300 seconds require
+smolvm 1.17.0 and an explicitly extended client operation budget. Managed commands
+also require an approved profile whose `execution_ms` covers the guest timeout.
+Allow observation headroom for startup, transport and the final timeout result.
 
-For example, a 120-second command can use `receive_timeout_ms: 130_000` and
-`operation_timeout_ms: 150_000`, with a managed execution budget of at least
-120,000 ms. These explicit client settings are within the existing limits; they
-do not change the guest deadline. Allow for transport overhead and any separate
-worker lifetime when selecting budgets for your own deployment.
+Preparation, collection and cleanup keep separate budgets. Caller `await` expiry
+never cancels work. Extended exec uses its remaining operation budget for receive
+idle time, allowing quiet commands without changing global client defaults.
 
-A low-level exec can start a stopped VM before running the command. Its total
-operation budget must allow for that startup as well as execution and response
-collection. The command's 300-second maximum therefore does not bound the whole
-client operation; `operation_timeout_ms` supplies that separate finite limit.
+`background: true` uses buffered `Client.exec/4` on a non-checkpoint image machine
+and returns `%SmolBox.LaunchResult{pid: pid}`. It rejects stdin, non-nil guest timeout,
+and streaming. A PID confirms launch, not readiness, liveness or final exit status.
+See [Long-running commands and background launch](long-running-exec.md) for exact
+budgets, persistence, cancellation and examples.
 
-In smolvm 1.16.0, execution routes no longer inherit the generic five-minute
-server timeout. That upstream change does not extend SmolBox's public command
-maximum or remove its configured client deadlines. A buffered public exec
-operation including implicit startup completed in 357.460 seconds, with a guest
-command lasting 299.002 seconds. A streamed operation completed in 386.357
-seconds, delivering its first output at 87.357 seconds and exit event at 386.357
-seconds; its guest command lasted 299.000 seconds. These measurements include
-startup and do not establish guest commands exceeding five minutes. See
-[the qualification status](compatibility.md#smolvm-1-16-0-qualification) for the
-retained startup failure and remaining acceptance work.
-`SmolBox.await/3` has a separate caller wait budget. Expiring that wait does not
-cancel the command or replace a recorded outcome with a timeout result.
+Historical 1.16.0 qualification observed client operations over five minutes due
+to startup plus a guest command under 300 seconds. Those measurements do not
+establish longer guest execution; they remain in the historical qualification report.
 
 ## File operations
 

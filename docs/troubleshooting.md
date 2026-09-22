@@ -98,3 +98,12 @@ returned by `fetch/3` can contain source arguments, stdin, environment and resul
 share redacted summaries when reporting an issue. Include the SmolBox/smolvm and
 Elixir/OTP versions, OS/architecture, error category/operation/evidence, execution
 state, collection and cleanup status, and whether the worker/store was restarted.
+
+## Long commands and background launch
+
+See [Long-running execution](long-running-exec.md) for coordinated codec-v6/store
+upgrades, extended observation budgets and background launch recovery. A confirmed
+launch is `:launched`, with a typed PID result; it does not prove readiness or
+continued process life. Lost launch evidence stays unknown and must not be replayed.
+Background processes can overlap later file operations. Stop/start requires an
+explicit new service launch; cancellation does not perform PID-based termination.

@@ -112,7 +112,15 @@ defmodule SmolBox.NetworkPolicyTest do
     assert record.fingerprint ==
              "8c15bdeb56a1a710e230213b616051a87231d7f92c0a1d7620f66f326e9aa3a6"
 
-    legacy = %{record | spec: %{record.spec | profile: Map.delete(record.spec.profile, :network)}}
+    legacy = %{
+      record
+      | spec: %{
+          record.spec
+          | profile: Map.delete(record.spec.profile, :network),
+            command: Map.delete(record.spec.command, :background)
+        }
+    }
+
     bytes = "smolbox-record-v1\0" <> :erlang.term_to_binary(legacy)
     assert {:ok, ^record} = Codec.decode(bytes)
     assert {:error, _} = Codec.decode(bytes <> "extra")
@@ -146,7 +154,11 @@ defmodule SmolBox.NetworkPolicyTest do
 
     legacy = %{
       record
-      | spec: %{record.spec | profile: Map.delete(record.spec.profile, :network)},
+      | spec: %{
+          record.spec
+          | profile: Map.delete(record.spec.profile, :network),
+            command: Map.delete(record.spec.command, :background)
+        },
         created_machine: Map.drop(machine, [:network, :ports])
     }
 

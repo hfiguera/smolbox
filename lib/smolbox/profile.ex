@@ -83,7 +83,9 @@ defmodule SmolBox.Profile do
   | `:collection_ms` | `30_000` | Output collection budget |
   | `:cleanup_ms` | `30_000` | Cleanup mutation budget, separate from unknown-outcome retention |
 
-  Each stage budget must be 1000–300,000 ms. A default profile is structurally
+  Preparation, collection and cleanup budgets must be 1000–300,000 ms.
+  `execution_ms` accepts 1000–86,460,000 ms (24 hours plus observation headroom).
+  Background execution uses it only to observe launch, never to limit process life. A default profile is structurally
   valid but its 1/1 GiB disks do **not** meet the reference smolvm 1.14.1 template
   floor. Use the actual operator-verified floor, as in the example below.
 
@@ -155,9 +157,9 @@ defmodule SmolBox.Profile do
 
   defp budgets?(profile) do
     Enum.all?(
-      [profile.preparation_ms, profile.execution_ms, profile.collection_ms, profile.cleanup_ms],
+      [profile.preparation_ms, profile.collection_ms, profile.cleanup_ms],
       &Validation.integer?(&1, 1000, 300_000)
-    )
+    ) and Validation.integer?(profile.execution_ms, 1000, 86_460_000)
   end
 
   defp supported(options) do

@@ -13,6 +13,8 @@ defmodule SmolBox.Machines do
   Stop and delete reject active commands, including unresolved unknown commands.
   All APIs require host authorization for the scope; handles are not credentials.
   """
+  alias SmolBox.Runtime.ExecutionSupport
+
   alias SmolBox.{
     Error,
     Execution,
@@ -31,6 +33,7 @@ defmodule SmolBox.Machines do
   def create(runtime, spec) do
     with {:ok, config} <- config(runtime),
          :ok <- ManagedMachineSpec.validate(spec),
+         :ok <- ExecutionSupport.check(config, spec),
          :ok <- Machines.port_support(config, spec.ports),
          {:ok, fingerprint} <- ManagedMachineSpec.fingerprint(spec, config.fingerprint_key) do
       case Machines.store(config, :fetch, [{spec.scope, spec.id}]) do
@@ -125,7 +128,8 @@ defmodule SmolBox.Machines do
 
   defp supported_machine(config, handle) do
     with {:ok, machine} <- Machines.store(config, :fetch, [handle]),
-         do: Machines.port_support(config, machine.spec.ports)
+         :ok <- Machines.port_support(config, machine.spec.ports),
+         do: ExecutionSupport.check(config, machine.spec)
   end
 
   @doc "Accept one command on an idle running machine; identical duplicates return the original execution."
@@ -133,6 +137,7 @@ defmodule SmolBox.Machines do
     with :ok <- key(handle),
          {:ok, config} <- config(runtime),
          :ok <- ExecutionSpec.validate(spec),
+         :ok <- ExecutionSupport.check(config, spec),
          :ok <- supported_machine(config, handle),
          {:ok, fingerprint} <- ExecutionSpec.fingerprint(spec, config.fingerprint_key),
          digest =

@@ -3,16 +3,26 @@ defmodule SmolBox.Command do
   A bounded argument-vector command. No shell is inserted by SmolBox.
 
   Timeouts are positive whole seconds, matching smolvm's `timeoutSecs` field.
-  The initial maximum is five minutes; managed execution can impose an earlier
+  The maximum is 24 hours; managed execution can impose an earlier
   absolute deadline. `stdin` must be UTF-8 and SmolBox accepts it only for buffered
-  execution. Arbitrary binary data belongs in staged files.
+  foreground execution. Background launch requires nil timeout and stdin and uses
+  the separate client/profile launch-observation budget. Arbitrary binary data
+  belongs in staged files.
   """
 
   alias SmolBox.{Error, Files}
 
   @enforce_keys [:argv]
   @derive {Inspect, only: [:timeout_secs]}
-  defstruct [:argv, :stdin, :user, env: [], workdir: "/workspace", timeout_secs: 30]
+  defstruct [
+    :argv,
+    :stdin,
+    :user,
+    env: [],
+    workdir: "/workspace",
+    timeout_secs: 30,
+    background: false
+  ]
 
   @type t :: %__MODULE__{
           argv: [String.t()],
@@ -20,7 +30,8 @@ defmodule SmolBox.Command do
           user: String.t() | nil,
           env: [{String.t(), String.t()}],
           workdir: String.t(),
-          timeout_secs: pos_integer()
+          timeout_secs: pos_integer() | nil,
+          background: boolean()
         }
 
   @doc """
@@ -32,7 +43,8 @@ defmodule SmolBox.Command do
   | Option | Default | Meaning |
   |---|---|---|
   | `:workdir` | `"/workspace"` | Validated absolute guest workspace path |
-  | `:timeout_secs` | `30` | Upstream command timeout, a whole number from 1–300 seconds |
+  | `:timeout_secs` | `30` | Upstream command timeout, a whole number from 1–86,400 seconds; absent for background launch |
+  | `:background` | `false` | Launch on a retained image machine; returns launch evidence, not final output |
   | `:env` | `[]` | Up to 64 unique `{string_name, string_value}` pairs; names up to 128 bytes, values up to 8192 bytes |
   | `:stdin` | `nil` | Up to 64 KiB of UTF-8 text; buffered execution only |
   | `:user` | `nil` | Optional nonempty guest user string, at most 128 bytes |
@@ -50,6 +62,7 @@ defmodule SmolBox.Command do
   @spec new(term(), term()) :: {:ok, t()} | {:error, Error.t()}
   def new(argv, options \\ []) do
     if valid_options?(options) do
+      options = background_defaults(options)
       command = struct!(__MODULE__, Keyword.put(options, :argv, argv))
       with :ok <- validate(command), do: {:ok, command}
     else
@@ -76,12 +89,15 @@ defmodule SmolBox.Command do
         "env" =>
           Enum.map(command.env, fn {name, value} -> %{"name" => name, "value" => value} end),
         "workdir" => command.workdir,
-        "timeoutSecs" => command.timeout_secs,
-        "background" => false,
+        "background" => command.background,
         "secrets" => %{}
       }
 
-      {:ok, wire |> optional("stdin", command.stdin) |> optional("user", command.user)}
+      {:ok,
+       wire
+       |> optional("timeoutSecs", command.timeout_secs)
+       |> optional("stdin", command.stdin)
+       |> optional("user", command.user)}
     end
   end
 
@@ -91,7 +107,7 @@ defmodule SmolBox.Command do
       valid_env?(command.env),
       valid_stdin?(command.stdin),
       valid_user?(command.user),
-      valid_timeout?(command.timeout_secs),
+      valid_mode?(command),
       Files.validate_path(command.workdir) == :ok
     ]
 
@@ -99,8 +115,11 @@ defmodule SmolBox.Command do
   end
 
   defp valid_options?(options) do
-    within_limit?(options, 5) and Keyword.keyword?(options) and
-      Enum.all?(Keyword.keys(options), &(&1 in [:stdin, :user, :env, :workdir, :timeout_secs])) and
+    within_limit?(options, 6) and Keyword.keyword?(options) and
+      Enum.all?(
+        Keyword.keys(options),
+        &(&1 in [:stdin, :user, :env, :workdir, :timeout_secs, :background])
+      ) and
       length(Keyword.keys(options)) == MapSet.size(MapSet.new(Keyword.keys(options)))
   end
 
@@ -130,7 +149,19 @@ defmodule SmolBox.Command do
 
   defp valid_user?(nil), do: true
   defp valid_user?(user), do: text?(user, 128) and user != ""
-  defp valid_timeout?(timeout), do: is_integer(timeout) and timeout in 1..300
+
+  defp background_defaults(options) do
+    if options[:background] == true,
+      do: Keyword.put_new(options, :timeout_secs, nil),
+      else: options
+  end
+
+  defp valid_mode?(%{background: true, timeout_secs: nil, stdin: nil}), do: true
+
+  defp valid_mode?(%{background: false, timeout_secs: timeout}),
+    do: is_integer(timeout) and timeout in 1..86_400
+
+  defp valid_mode?(_command), do: false
 
   defp text?(value, limit) do
     is_binary(value) and byte_size(value) <= limit and String.valid?(value) and

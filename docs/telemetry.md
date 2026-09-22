@@ -70,7 +70,9 @@ or `:exception`. A returned attempt can still record an unknown or failed execut
 this category does not certify business success. No exception reason is emitted.
 
 Execution `:updated` metadata includes persisted `state`, `evidence`, `collection`
-and `cleanup`. This exposes dispatch intent, observed running/exit, unknown outcome,
+and `cleanup`. Background confirmation uses `state: :launched` and
+`evidence: :launched`, without fabricated exit/output measurements or PID labels.
+This exposes dispatch intent, observed running/exit, unknown outcome,
 collection failure and cleanup failure without suggesting that a notification is
 a worker receipt. Wall-clock differences are clamped at zero and depend on the
 host's clock discipline. They are not cross-host monotonic durations.

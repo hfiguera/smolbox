@@ -303,3 +303,12 @@ The in-memory store is ephemeral and is not a persistence migration strategy.
 Restarting it loses execution records and may leave machines behind. Applications
 using only `SmolBox.Client` do not use this managed record format, but must still
 check their worker version and any persistence they own.
+
+## Long commands and background launch
+
+See [Long-running execution](long-running-exec.md) for coordinated codec-v6/store
+upgrades, extended observation budgets and background launch recovery. A confirmed
+launch is `:launched`, with a typed PID result; it does not prove readiness or
+continued process life. Lost launch evidence stays unknown and must not be replayed.
+Background processes can overlap later file operations. Stop/start requires an
+explicit new service launch; cancellation does not perform PID-based termination.

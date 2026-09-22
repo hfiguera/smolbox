@@ -39,7 +39,14 @@ defmodule SmolBox.DurableHost.Store do
            %{} <- Database.query(context, "SELECT host_port FROM smolbox_port_owners LIMIT 0", []),
            do:
              {:ok,
-              %{schema: 1, durable: true, atomic: true, managed_machines: 1, managed_ports: 1}}
+              %{
+                schema: 1,
+                durable: true,
+                atomic: true,
+                managed_machines: 1,
+                managed_ports: 1,
+                extended_execution: 1
+              }}
     end)
   end
 

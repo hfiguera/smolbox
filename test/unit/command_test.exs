@@ -26,10 +26,10 @@ defmodule SmolBox.CommandTest do
   test "rejects invalid, duplicate, and unsupported options before transport" do
     for options <- [
           [timeout_secs: 0],
-          [timeout_secs: 301],
+          [timeout_secs: 86_401],
           [timeout_secs: 1.5],
           [timeout_secs: 1, timeout_secs: 2],
-          [background: true],
+          [background: true, timeout_secs: 30],
           [env: [{"A", "1"}, {"A", "2"}]],
           [env: [{"BAD=NAME", "x"}]],
           [env: [:invalid]],

@@ -61,6 +61,7 @@ defmodule SmolBox.ManagedPeer do
       |> File.read!()
       |> Jason.decode!()
       |> Map.put("name", input["name"])
+      |> Map.put("image", "python:fixture")
       |> Map.put("branchable", state.options[:checkpoint] == true)
       |> Map.merge(
         Map.take(input, ["network", "networkBackend", "allowedHosts", "allowedCidrs", "ports"])
@@ -119,8 +120,15 @@ defmodule SmolBox.ManagedPeer do
 
     machines = Map.put(state.machines, machine["name"], Map.put(machine, "state", "running"))
 
-    {{:exec, machine["name"], state.options},
-     %{state | commands: [command | state.commands], files: files, machines: machines}}
+    response =
+      if command["background"] do
+        stdout = Keyword.get(state.options, :launch_stdout, "pid=123\n")
+        {:json, 200, %{"exitCode" => 0, "stdoutB64" => Base.encode64(stdout), "stderrB64" => ""}}
+      else
+        {:exec, machine["name"], state.options}
+      end
+
+    {response, %{state | commands: [command | state.commands], files: files, machines: machines}}
   end
 
   defp machine_route("PUT", ["files" | file], body, machine, state) do
