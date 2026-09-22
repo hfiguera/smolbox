@@ -12,6 +12,16 @@ fencing to the upstream API or change the recovery contract below. See
 [Compatibility](compatibility.md) for recorded evidence and
 [Troubleshooting](troubleshooting.md) for common operational symptoms.
 
+## Retained machines (unreleased)
+
+`SmolBox.Machines` adds machine ownership independent of executions. Its commands
+retain the VM and hold one exclusive command slot through preparation, execution,
+and collection. Cancellation and unknown outcomes never authorize automatic
+machine deletion. See [Managed persistent machines](persistent-machines.md) for
+operator quiescence, explicit absence resolution, and the coordinated v4/store
+upgrade. The disposal and unknown-retention rules below describe the original
+**disposable** execution API.
+
 ## Checkpoint records (0.1.5)
 
 Checkpoint executions use schema v3 while image executions retain v2. Upgrade

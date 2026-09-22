@@ -3,7 +3,7 @@ defmodule SmolBox.Runtime.Coordinator do
   use GenServer
 
   alias SmolBox.{Execution, Telemetry}
-  alias SmolBox.Runtime.{Executor, Session, WorkerHealth}
+  alias SmolBox.Runtime.{Executor, Machines, Session, WorkerHealth}
   alias SmolBox.Telemetry.Dispatcher
 
   def start_link(options), do: GenServer.start_link(__MODULE__, options)
@@ -19,6 +19,8 @@ defmodule SmolBox.Runtime.Coordinator do
       health: %{},
       draining: MapSet.new(),
       cursor: nil,
+      machine_cursor: nil,
+      machines_first: false,
       health_at: nil
     }
 
@@ -105,7 +107,7 @@ defmodule SmolBox.Runtime.Coordinator do
   end
 
   def handle_info(
-        {reference, {:scan, health, records, cursor, refreshed}},
+        {reference, {:scan, health, records, cursor, machines, machine_cursor, refreshed}},
         %{scan: reference} = state
       ) do
     Process.demonitor(reference, [:flush])
@@ -115,6 +117,7 @@ defmodule SmolBox.Runtime.Coordinator do
       | scan: nil,
         health: health,
         cursor: cursor,
+        machine_cursor: machine_cursor,
         health_at: if(refreshed, do: state.config.clock.monotonic(), else: state.health_at)
     }
 
@@ -122,7 +125,16 @@ defmodule SmolBox.Runtime.Coordinator do
         status(state, worker) != status(next, worker),
         do: Telemetry.worker(state.config.telemetry_table, worker, status(next, worker))
 
-    {:noreply, Enum.reduce(records, next, &launch(&2, Execution.key(&1)))}
+    machine_keys = Enum.map(machines, &{:machine, {&1.scope, &1.id}})
+    command_keys = Enum.map(records, &Execution.key/1)
+
+    keys =
+      if state.machines_first,
+        do: machine_keys ++ command_keys,
+        else: command_keys ++ machine_keys
+
+    {:noreply,
+     Enum.reduce(keys, %{next | machines_first: not state.machines_first}, &launch(&2, &1))}
   end
 
   def handle_info({reference, _result}, state) when is_reference(reference) do
@@ -148,7 +160,7 @@ defmodule SmolBox.Runtime.Coordinator do
 
       task =
         Task.Supervisor.async_nolink(state.tasks, fn ->
-          Executor.run(state.config, key, eligible)
+          run_work(state.config, key, eligible)
         end)
 
       %{state | active: Map.put(state.active, task.ref, key)}
@@ -156,6 +168,9 @@ defmodule SmolBox.Runtime.Coordinator do
       state
     end
   end
+
+  defp run_work(config, {:machine, key}, eligible), do: Machines.run(config, key, eligible)
+  defp run_work(config, key, eligible), do: Executor.run(config, key, eligible)
 
   defp status(state, worker) do
     if worker.draining or MapSet.member?(state.draining, worker.client.worker.id),
@@ -167,7 +182,7 @@ defmodule SmolBox.Runtime.Coordinator do
         )
   end
 
-  defp scan(config, cursor, previous, refresh) do
+  defp scan(config, cursor, machine_cursor, previous, refresh) do
     health =
       config.workers
       |> Task.async_stream(&probe(config, &1, previous, refresh),
@@ -181,14 +196,27 @@ defmodule SmolBox.Runtime.Coordinator do
         {_failed, worker} -> {worker.client.worker.id, nil}
       end)
 
+    {machines, machine_next} =
+      if config.managed_machines do
+        case Machines.store(config, :due, [config.clock.now(), machine_cursor, 100]) do
+          {:ok, machines, next} -> {machines, next}
+          _failed -> {[], nil}
+        end
+      else
+        {[], nil}
+      end
+
     case Session.store(config, :due, [config.clock.now(), cursor, 100]) do
-      {:ok, records, next} -> {:scan, health, records, next, refresh}
-      _failed -> {:scan, health, [], nil, refresh}
+      {:ok, records, next} -> {:scan, health, records, next, machines, machine_next, refresh}
+      _failed -> {:scan, health, [], nil, machines, machine_next, refresh}
     end
   end
 
   defp scan_safely(state, refresh),
-    do: Session.safe(fn -> scan(state.config, state.cursor, state.health, refresh) end)
+    do:
+      Session.safe(fn ->
+        scan(state.config, state.cursor, state.machine_cursor, state.health, refresh)
+      end)
 
   defp probe(config, worker, previous, refresh) do
     id = worker.client.worker.id

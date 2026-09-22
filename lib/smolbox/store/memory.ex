@@ -11,8 +11,8 @@ defmodule SmolBox.Store.Memory do
   use GenServer
   @behaviour SmolBox.Store
 
-  alias SmolBox.{Error, Execution, MachineSpec, Store, Validation}
-  alias SmolBox.Store.{Codec, RecordOps}
+  alias SmolBox.{Error, Execution, MachineSpec, ManagedMachine, Store, Validation}
+  alias SmolBox.Store.{Codec, MachineOps, RecordOps}
 
   @doc """
   Start an ephemeral store, optionally registered with `:name`.
@@ -48,6 +48,7 @@ defmodule SmolBox.Store.Memory do
       {:ok,
        %{
          records: %{},
+         machines: %{},
          machine_keys: %{},
          sizes: %{},
          bytes: 0,
@@ -55,6 +56,9 @@ defmodule SmolBox.Store.Memory do
          max_records: config[:max_records],
          max_bytes: config[:max_bytes]
        }}
+
+  @impl Store
+  def machine(store, operation, arguments), do: call(store, {:machine, operation, arguments})
 
   @impl Store
   def capabilities(store), do: call(store, :capabilities)
@@ -96,7 +100,15 @@ defmodule SmolBox.Store.Memory do
   end
 
   defp execute(:capabilities, state),
-    do: {{:ok, %{schema: 1, durable: false, atomic: true}}, state}
+    do: {{:ok, %{schema: 1, durable: false, atomic: true, managed_machines: 1}}, state}
+
+  defp execute({:machine, operation, arguments}, state) do
+    case machine_operation(state, operation, arguments) do
+      {:ok, reply, next} -> {reply, next}
+      {:error, _error} = error -> {error, state}
+      _invalid -> {error(:validation), state}
+    end
+  end
 
   defp execute({:fetch, key}, state), do: {lookup(state, key), state}
 
@@ -104,6 +116,7 @@ defmodule SmolBox.Store.Memory do
     result =
       if Validation.identifier?(worker) and MachineSpec.valid_name?(name) do
         case Map.fetch(state.machine_keys, {worker, name}) do
+          {:ok, {:machine, key}} -> machine_lookup(state, key)
           {:ok, key} -> lookup(state, key)
           :error -> error(:not_found)
         end
@@ -138,6 +151,7 @@ defmodule SmolBox.Store.Memory do
 
   defp execute({:mutate, key, operation}, state) do
     with {:ok, record} <- lookup(state, key),
+         :ok <- active_command(state, record, operation),
          {:ok, updated} <- mutate(record, operation, state),
          {:ok, state} <- put_record(state, updated) do
       {{:ok, updated}, state}
@@ -181,7 +195,8 @@ defmodule SmolBox.Store.Memory do
   defp insert_record(state, record, max_pending) do
     pending = Enum.count(state.records, fn {_key, record} -> record.state == :accepted end)
 
-    if pending < max_pending and map_size(state.records) < state.max_records do
+    if pending < max_pending and
+         map_size(state.records) + map_size(state.machines) < state.max_records do
       case put_record(state, record) do
         {:ok, next} -> {{:ok, record, :inserted}, next}
         error -> {error, state}
@@ -249,6 +264,8 @@ defmodule SmolBox.Store.Memory do
     end
   end
 
+  defp machine_index(index, %{managed_machine: key}) when not is_nil(key), do: {:ok, index}
+
   defp machine_index(index, %{worker_id: nil}), do: {:ok, index}
 
   defp machine_index(index, record) do
@@ -263,13 +280,238 @@ defmodule SmolBox.Store.Memory do
   end
 
   defp used(state, worker) do
-    Enum.reduce(state.records, RecordOps.empty_usage(), fn {_key, record}, acc ->
-      if record.worker_id == worker and record.reservation != nil do
-        Map.merge(acc, record.reservation, &add_resource/3)
-      else
-        acc
+    Enum.reduce(
+      Map.values(state.records) ++ Map.values(state.machines),
+      RecordOps.empty_usage(),
+      fn record, acc ->
+        if record.worker_id == worker and record.reservation != nil do
+          Map.merge(acc, record.reservation, &add_resource/3)
+        else
+          acc
+        end
       end
-    end)
+    )
+  end
+
+  defp machine_operation(state, :fetch, [key]), do: {:ok, machine_lookup(state, key), state}
+
+  defp machine_operation(state, :accept, [record, max_pending]) do
+    with :ok <- MachineOps.initial(record),
+         true <- Validation.integer?(max_pending, 1, 10_000) do
+      case machine_lookup(state, ManagedMachine.key(record)) do
+        {:ok, %{fingerprint: fingerprint} = existing} when fingerprint == record.fingerprint ->
+          {:ok, {:ok, existing}, state}
+
+        {:ok, _conflict} ->
+          error(:identity_conflict)
+
+        {:error, %Error{category: :not_found}} ->
+          insert_machine(state, record, max_pending)
+      end
+    end
+  end
+
+  defp machine_operation(state, :list, [scope, cursor, limit]) do
+    if Validation.identifier?(scope) and (cursor == nil or Validation.identifier?(cursor)) and
+         Validation.integer?(limit, 1, 100) do
+      records =
+        state.machines
+        |> Map.values()
+        |> Enum.filter(&(&1.scope == scope and (cursor == nil or &1.id > cursor)))
+        |> Enum.sort_by(& &1.id)
+
+      page = Enum.take(records, limit)
+      next = if length(records) > limit, do: List.last(page).id
+      {:ok, {:ok, page, next}, state}
+    else
+      error(:validation)
+    end
+  end
+
+  defp machine_operation(state, :due, [now, cursor, limit]) do
+    if Validation.timestamp?(now) and valid_cursor?(cursor) and Validation.integer?(limit, 1, 100) do
+      records =
+        state.machines
+        |> Map.values()
+        |> Enum.filter(
+          &(ManagedMachine.due?(&1, now) and (cursor == nil or RecordOps.cursor(&1) > cursor))
+        )
+        |> Enum.sort_by(&RecordOps.cursor/1)
+
+      page = Enum.take(records, limit)
+      next = if length(records) > limit, do: RecordOps.cursor(List.last(page))
+      {:ok, {:ok, page, next}, state}
+    else
+      error(:validation)
+    end
+  end
+
+  defp machine_operation(state, :claim_version, [key, version, owner, now, ttl]) do
+    with {:ok, record} <- machine_lookup(state, key) do
+      if record.version == version,
+        do: machine_operation(state, :claim, [key, owner, now, ttl]),
+        else: error(:stale_version)
+    end
+  end
+
+  defp machine_operation(state, :claim, [key, owner, now, ttl]) do
+    with {:ok, record} <- machine_lookup(state, key),
+         {:ok, next} <- RecordOps.claim(record, state.leases[record.worker_id], owner, now, ttl),
+         do: machine_save(state, next)
+  end
+
+  defp machine_operation(state, :write, [key, guard, changes, now]) do
+    with {:ok, record} <- machine_guard(state, key, guard, now),
+         {:ok, next} <- ManagedMachine.transition(record, changes, now),
+         do: machine_save(state, next)
+  end
+
+  defp machine_operation(state, :reserve, [key, guard, {worker, name, capacity}, now]) do
+    with {:ok, record} <- machine_guard(state, key, guard, now),
+         {:ok, next} <-
+           MachineOps.reserve(
+             record,
+             worker,
+             name,
+             state.leases[worker],
+             capacity,
+             used(state, worker),
+             now
+           ),
+         do: machine_save(state, next)
+  end
+
+  defp machine_operation(state, :request, [key, action, version, now]) do
+    with {:ok, record} <- machine_lookup(state, key),
+         {:ok, next} <- MachineOps.request(record, action, version, now),
+         do: machine_save(state, next)
+  end
+
+  defp machine_operation(state, :submit, [key, execution, max_pending, now]) do
+    with :ok <- RecordOps.initial(execution),
+         true <- Validation.integer?(max_pending, 1, 10_000) do
+      machine_submit(state, key, execution, max_pending, now)
+    else
+      _invalid -> error(:validation)
+    end
+  end
+
+  defp machine_operation(state, :finish, [key, guard, now]) do
+    with {:ok, execution} <- lookup(state, key),
+         :ok <- RecordOps.guard(execution, guard, state.leases[execution.worker_id], now),
+         {:ok, machine} <- machine_lookup(state, execution.managed_machine),
+         {:ok, machine, execution} <- MachineOps.finish(machine, execution, now),
+         {:ok, state} <- put_record(state, execution),
+         {:ok, _reply, state} <- machine_save(state, machine),
+         do: {:ok, {:ok, execution}, state}
+  end
+
+  defp machine_operation(state, :resolve, [key, guard, observed, now]) do
+    with {:ok, machine} <- machine_guard(state, key, guard, now),
+         {:ok, command} <- active_record(state, machine),
+         {:ok, machine, command} <- MachineOps.resolve(machine, command, observed, now),
+         {:ok, state} <- put_optional_record(state, command),
+         do: machine_save(state, machine)
+  end
+
+  defp machine_operation(_state, _operation, _arguments), do: error(:validation)
+
+  defp insert_machine(state, record, max_pending) do
+    pending = Enum.count(state.machines, fn {_key, m} -> m.state == :accepted end)
+
+    if pending < max_pending and
+         map_size(state.records) + map_size(state.machines) < state.max_records,
+       do: machine_save(state, record),
+       else: error(:admission_exhausted)
+  end
+
+  defp machine_submit(state, key, execution, max_pending, now) do
+    case lookup(state, Execution.key(execution)) do
+      {:ok, existing} ->
+        if existing.fingerprint == execution.fingerprint and existing.managed_machine == key,
+          do: {:ok, {:ok, existing}, state},
+          else: error(:identity_conflict)
+
+      {:error, %Error{category: :not_found}} ->
+        with {:ok, machine} <- machine_lookup(state, key),
+             {:ok, machine, execution} <- MachineOps.attach(machine, execution, now),
+             {{:ok, execution, :inserted}, state} <- insert_record(state, execution, max_pending),
+             {:ok, _reply, state} <- machine_save(state, machine) do
+          {:ok, {:ok, execution}, state}
+        else
+          {{:error, error}, _state} -> {:error, error}
+          {:error, _error} = error -> error
+        end
+    end
+  end
+
+  defp active_record(_state, %{active_execution: nil}), do: {:ok, nil}
+  defp active_record(state, machine), do: lookup(state, machine.active_execution)
+  defp put_optional_record(state, nil), do: {:ok, state}
+  defp put_optional_record(state, record), do: put_record(state, record)
+
+  defp machine_guard(state, key, guard, now) do
+    with {:ok, record} <- machine_lookup(state, key),
+         :ok <- RecordOps.guard(record, guard, state.leases[record.worker_id], now),
+         do: {:ok, record}
+  end
+
+  defp machine_lookup(state, key) do
+    case Map.fetch(state.machines, key) do
+      {:ok, record} -> {:ok, record}
+      :error -> error(:not_found)
+    end
+  end
+
+  defp machine_save(state, record) do
+    with {:ok, bytes} <- Codec.encode(record),
+         {:ok, index} <- managed_index(state.machine_keys, record) do
+      key = {:machine, ManagedMachine.key(record)}
+      size = byte_size(bytes)
+      total = state.bytes - Map.get(state.sizes, key, 0) + size
+
+      if total <= state.max_bytes do
+        {:ok, {:ok, record},
+         %{
+           state
+           | machines: Map.put(state.machines, ManagedMachine.key(record), record),
+             machine_keys: index,
+             sizes: Map.put(state.sizes, key, size),
+             bytes: total
+         }}
+      else
+        error(:admission_exhausted)
+      end
+    end
+  end
+
+  defp managed_index(index, %{worker_id: nil}), do: {:ok, index}
+
+  defp managed_index(index, record) do
+    key = {record.worker_id, record.machine_name}
+    identity = {:machine, ManagedMachine.key(record)}
+
+    case Map.fetch(index, key) do
+      {:ok, ^identity} -> {:ok, index}
+      {:ok, _conflict} -> error(:identity_conflict)
+      :error -> {:ok, Map.put(index, key, identity)}
+    end
+  end
+
+  defp active_command(state, %{managed_machine: key} = record, operation) when not is_nil(key) do
+    if elem(operation, 0) in [:claim, :write] do
+      verify_active_command(state, key, Execution.key(record))
+    else
+      :ok
+    end
+  end
+
+  defp active_command(_state, _record, _operation), do: :ok
+
+  defp verify_active_command(state, key, execution) do
+    with {:ok, machine} <- machine_lookup(state, key) do
+      if machine.active_execution == execution, do: :ok, else: error(:stale_claim)
+    end
   end
 
   defp add_resource(_resource, current, amount), do: current + amount

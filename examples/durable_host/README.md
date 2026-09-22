@@ -362,3 +362,38 @@ These are accounting reservations, not hard host filesystem/RSS quotas. A host
 with different or larger artifact templates must requalify and update the floor.
 Existing v1 records retain their original spec: inspect their original handles;
 reusing their ID with the changed profile intentionally returns an identity conflict.
+
+## Persistent machines (unreleased)
+
+Apply the third migration, `20260922000000_managed_persistent_machines`, with all
+controllers sharing these workers stopped and upgraded. It adds a separately
+encrypted machine table and an execution association projection; prior disposable
+payloads remain readable. All reservation transactions share the existing
+partition lock. The down migration refuses to discard persistent identities.
+
+The runtime now advertises `managed_machines: 1`. Machine payloads are bound to a
+separate authenticated encryption domain, and indexed projections are checked
+against decoded records. Existing machine-assignment backfill still applies only
+to disposable assignments. Both assignment kinds remain available to inventory
+audit after deletion. Run `test/machine_store_test.exs` for the additional shared
+concurrency contract and encryption isolation check.
+
+For the two-process walkthrough, configure the database plus the same environment
+used by the image demonstration (`SMOLBOX_RUNTIME_URL`, optional
+`SMOLBOX_RUNTIME_SOCKET`, `SMOLBOX_PYTHON_ARTIFACT`, `SMOLBOX_PYTHON_SHA256`,
+`SMOLBOX_ARTIFACT_ROOT`, `SMOLBOX_FINGERPRINT_KEY_FILE`,
+`SMOLBOX_ENCRYPTION_KEY_FILE`, `SMOLBOX_STORE_PARTITION`, and
+`SMOLBOX_EXECUTION_ID`). The artifact directory must already exist with mode 0700;
+both key files must contain 32 bytes. Use a dedicated approved 1.16.1 worker and an
+image qualified for 2 GiB storage/overlay requests with working `resize2fs`.
+
+```sh
+MIX_ENV=test mix run scripts/persistent_machine.exs prepare
+MIX_ENV=test mix run scripts/persistent_machine.exs resume
+```
+
+Keep all environment settings unchanged between these independent BEAM processes.
+The first retains the machine and guest file. The second verifies file persistence
+across reconnection and stop/start, then explicitly deletes and checks released
+capacity. Failures leave durable evidence; do not erase records to start over.
+See [the feature guide](../../docs/persistent-machines.md) for resolution and rollback.

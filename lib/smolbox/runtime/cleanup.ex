@@ -1,10 +1,22 @@
 defmodule SmolBox.Runtime.Cleanup do
   @moduledoc false
   alias SmolBox.{Client, Error, Execution, Machine, Telemetry}
-  alias SmolBox.Runtime.Session
+  alias SmolBox.Runtime.{Machines, Session}
 
   def run(session) do
     with {:ok, record} <- Session.claim(session), do: run_record(session, record)
+  end
+
+  defp run_record(session, %{managed_machine: key} = record) when not is_nil(key) do
+    if Execution.terminal?(record) or record.state == :unknown do
+      Machines.store(session.config, :finish, [
+        session.key,
+        Session.guard(record),
+        Session.now(session)
+      ])
+    else
+      {:ok, record}
+    end
   end
 
   defp run_record(session, record) do

@@ -1,0 +1,155 @@
+{
+  "feature": "managed-persistent-machines",
+  "date_local": "2026-09-21",
+  "timezone": "America/Denver",
+  "source": {
+    "branch": "feature/managed-persistent-machines",
+    "base_commit": "d466338c5b908206f68204a9ab821bdbbc1e908c",
+    "uncommitted_feature_work": true
+  },
+  "environment": {
+    "platform": "macos",
+    "architecture": "aarch64",
+    "elixir": "1.20.4",
+    "otp": "29.0.6",
+    "postgresql_major": 17,
+    "smolvm": "1.16.1"
+  },
+  "live_worker": {
+    "image_sha256": "4585196fbdf1de9bfd6c5c92d578ad0b1756cc92b64fe42b60674d279d74e03f",
+    "machine_capacity": {
+      "slots": 1,
+      "cpus": 1,
+      "memory_mb": 1024,
+      "disk_gb": 4
+    },
+    "machine_disks_gb": {
+      "storage": 2,
+      "overlay": 2
+    },
+    "network": "offline",
+    "independent_beam_processes": true,
+    "prepare": {
+      "state": "running",
+      "phase": "prepare",
+      "machine_name": "sbxexample-3bg7kxxufy4zb54kbrdq",
+      "reservation_retained": true
+    },
+    "resume": {
+      "state": "deleted",
+      "phase": "resume",
+      "machine_name": "sbxexample-3bg7kxxufy4zb54kbrdq",
+      "absence_verified": true,
+      "resources_released": true,
+      "same_machine": true
+    },
+    "final_inventory": []
+  },
+  "disposable_regression": {
+    "test": "test/runtime/managed_runtime_test.exs:113",
+    "passed": 1,
+    "excluded_in_selected_file": 3
+  },
+  "database": {
+    "passed": 27,
+    "excluded_runtime_tests": 28,
+    "unavailable_probe": "database-unavailable-confirmed",
+    "type_analysis": "passed"
+  },
+  "limitations": [
+    "Development qualification only",
+    "No worker-disk loss restoration, migration, replication, or upstream execution fencing"
+  ],
+  "root_ci": {
+    "command": "mix ci",
+    "passed": 256,
+    "excluded_runtime_tests": 17,
+    "format": "passed",
+    "compile_warnings_as_errors": "passed",
+    "dependency_cycles": 0,
+    "credo": "passed",
+    "ex_dna_clones": 0,
+    "credence": "passed",
+    "dialyzer": "passed"
+  },
+  "documentation": {
+    "command": "mix docs --warnings-as-errors",
+    "result": "passed"
+  },
+  "linux_followup": {
+    "date_local": "2026-09-21",
+    "timezone": "America/Denver",
+    "source_commit": "cfda5f141ee8eb887cb621ebce4cd16337c9d036",
+    "environment": {
+      "platform": "linux",
+      "architecture": "x86_64",
+      "deployment": "Disposable nested KVM lab reached through ssh linux",
+      "kernel": "6.8.0-139-generic",
+      "elixir": "1.20.4",
+      "otp": "29.0.6",
+      "postgresql": "16.15",
+      "smolvm": "1.16.1"
+    },
+    "runtime_archive_sha256": "e49e5bbae6d65b039ecf1d8b236d20e77427b7bfd131907b27a0819fcdea3fed",
+    "image_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+    "live_worker": {
+      "independent_beam_processes": true,
+      "network": "offline",
+      "machine_capacity": {
+        "slots": 1,
+        "cpus": 1,
+        "memory_mb": 1024,
+        "disk_gb": 4
+      },
+      "machine_disks_gb": {
+        "storage": 2,
+        "overlay": 2
+      },
+      "prepare": {
+        "state": "running",
+        "phase": "prepare",
+        "machine_name": "sbxexample-gcp57n3snunsyvoxpiz5",
+        "reservation_retained": true
+      },
+      "resume": {
+        "state": "deleted",
+        "phase": "resume",
+        "machine_name": "sbxexample-gcp57n3snunsyvoxpiz5",
+        "absence_verified": true,
+        "resources_released": true,
+        "same_machine": true
+      },
+      "final_inventory": [],
+      "owned_kvm_descriptors_after_teardown": 0
+    },
+    "root_tests": {
+      "command": "mix test --warnings-as-errors",
+      "passed": 256,
+      "excluded_runtime_tests": 17
+    },
+    "database_tests": {
+      "command": "mix test --warnings-as-errors",
+      "passed": 27,
+      "excluded_runtime_tests": 28
+    },
+    "compilation": "Root and durable example compiled with warnings as errors",
+    "setup_notes": [
+      "The offline lab had an older Mint cache; staged the locked Mint 1.10.1 source before successful compilation.",
+      "The first inventory preflight used an incorrect endpoint and returned 404 before any machine was created. Corrected to /api/v1/machines and ran the complete acceptance scenario."
+    ],
+    "limitations": [
+      "One successful live persistence acceptance run on this nested Linux configuration; not a full Linux fault or containment campaign.",
+      "Existing development qualification is unchanged; no new production isolation or worker-disk recovery guarantee."
+    ],
+    "log_sha256": {
+      "environment.txt": "774f648a64dc7a697543b33b64df408b7e2f9586aef21fa2b5f2231b217c917a",
+      "root-tests.log": "74a2cf82d5b9999a2952d75493d8dacd5e243b29c47507ea72a07cbea44e3fa5",
+      "store-tests.log": "ca4c695e2c4a3fb23a0e1337efc89ca37db4dc7c4d9a42c3eb368bf49ab08281",
+      "migration.log": "af29db34476eb3ed1ae65e4abe4f83a05cb1409fb741ca10eb28f73e77261b86",
+      "prepare.log": "ab551f6c8d3bb30e5cea554bcc256e1260b7e146c28e5666cc663068c9dcbad2",
+      "resume.log": "068baa88b4b9de347e086e366ee01cf050c3f5b98bae9c6433c6a3100cfad0f6",
+      "final-inventory.json": "4115c93b07b494b0188c0899c545c6313d8dfda70cf8d2613984eae1976fb745",
+      "kvm-after.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}

@@ -130,7 +130,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   def validate(_worker), do: invalid()
 
   @doc "Check exact profile/artifact approval and allocation floors; this is not a health probe."
-  @spec supports?(t(), ExecutionSpec.t()) :: boolean()
+  @spec supports?(t(), ExecutionSpec.t() | SmolBox.ManagedMachineSpec.t()) :: boolean()
   def supports?(worker, %{artifact: %{"kind" => "checkpoint"}} = spec) do
     spec.profile in worker.profiles and allocation_fits?(worker, spec.profile) and
       Enum.any?(worker.checkpoints, fn checkpoint ->
@@ -149,7 +149,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   end
 
   @doc "Resolve the worker-local artifact path for a specification already accepted by `supports?/2`."
-  @spec artifact_path(t(), ExecutionSpec.t()) :: String.t()
+  @spec artifact_path(t(), ExecutionSpec.t() | SmolBox.ManagedMachineSpec.t()) :: String.t()
   def artifact_path(worker, %{artifact: %{"kind" => "checkpoint"}} = spec),
     do: approved_checkpoint(worker, spec).path
 

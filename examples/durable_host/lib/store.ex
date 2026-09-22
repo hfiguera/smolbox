@@ -9,7 +9,7 @@ defmodule SmolBox.DurableHost.Store do
   """
   @behaviour SmolBox.Store
 
-  alias SmolBox.DurableHost.{Database, MachineIndex}
+  alias SmolBox.DurableHost.{Database, MachineIndex, MachineStore}
   alias SmolBox.{Error, Execution, MachineSpec, Validation}
   alias SmolBox.Store.RecordOps
 
@@ -31,14 +31,18 @@ defmodule SmolBox.DurableHost.Store do
     safe(fn ->
       Database.query(
         context,
-        "SELECT e.payload,w.owner,p.partition FROM smolbox_partitions p LEFT JOIN smolbox_executions e USING(partition) LEFT JOIN smolbox_worker_leases w USING(partition) LIMIT 0",
+        "SELECT e.payload,e.managed_machine_id,m.payload,w.owner,p.partition FROM smolbox_partitions p LEFT JOIN smolbox_executions e USING(partition) LEFT JOIN smolbox_worker_leases w USING(partition) LEFT JOIN smolbox_managed_machines m USING(partition) LIMIT 0",
         []
       )
 
       with :ok <- MachineIndex.ready(context),
-           do: {:ok, %{schema: 1, durable: true, atomic: true}}
+           do: {:ok, %{schema: 1, durable: true, atomic: true, managed_machines: 1}}
     end)
   end
+
+  @impl SmolBox.Store
+  def machine(context, operation, arguments),
+    do: transaction(context, fn -> MachineStore.run(context, operation, arguments) end)
 
   @impl SmolBox.Store
   def accept(context, record, max_pending) do
@@ -81,7 +85,15 @@ defmodule SmolBox.DurableHost.Store do
   @impl SmolBox.Store
   def claim(context, key, owner, now, ttl) do
     mutate(context, key, fn record ->
-      RecordOps.claim(record, Database.worker_lease(context, record.worker_id), owner, now, ttl)
+      with :ok <- MachineStore.active?(context, record),
+           do:
+             RecordOps.claim(
+               record,
+               Database.worker_lease(context, record.worker_id),
+               owner,
+               now,
+               ttl
+             )
     end)
   end
 
@@ -150,7 +162,8 @@ defmodule SmolBox.DurableHost.Store do
 
   defp guarded(context, key, guard, now, function) do
     mutate(context, key, fn record ->
-      with :ok <-
+      with :ok <- MachineStore.active?(context, record),
+           :ok <-
              RecordOps.guard(record, guard, Database.worker_lease(context, record.worker_id), now),
            do: function.(record)
     end)

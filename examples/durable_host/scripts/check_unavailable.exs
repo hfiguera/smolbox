@@ -1,7 +1,7 @@
 alias SmolBox.{Error, Runtime}
 
 alias SmolBox.DurableHost.{Repo, Store}
-alias SmolBox.Store.Contract
+alias SmolBox.Store.{Contract, MachineContract}
 
 {:ok, _apps} = Application.ensure_all_started(:ex_unit)
 
@@ -13,6 +13,8 @@ ExUnit.CaptureLog.capture_log(fn ->
         Store.capabilities(store),
         Store.fetch(store, {"contract", "one"}),
         Store.accept(store, Contract.record(), 1),
+        Store.machine(store, :fetch, [{"contract", "computer"}]),
+        Store.machine(store, :accept, [MachineContract.record(), 1]),
         Runtime.start_link(
           name: SmolBox.UnavailableExample,
           namespace: "outage",

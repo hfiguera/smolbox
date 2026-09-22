@@ -34,6 +34,8 @@ defmodule SmolBox.MixProject do
           "docs/client.md",
           "docs/network-access.md",
           "docs/checkpoints.md",
+          "docs/persistent-machines.md",
+          "docs/persistent-machines-validation.md",
           "docs/host-integration.md",
           "docs/recovery.md",
           "docs/telemetry.md",
@@ -54,6 +56,8 @@ defmodule SmolBox.MixProject do
             "docs/client.md",
             "docs/network-access.md",
             "docs/checkpoints.md",
+            "docs/persistent-machines.md",
+            "docs/persistent-machines-validation.md",
             "docs/host-integration.md",
             "docs/troubleshooting.md",
             "docs/telemetry.md"
@@ -70,6 +74,9 @@ defmodule SmolBox.MixProject do
             SmolBox,
             SmolBox.Runtime,
             SmolBox.Runtime.WorkerConfig,
+            SmolBox.Machines,
+            SmolBox.ManagedMachineSpec,
+            SmolBox.ManagedMachine,
             SmolBox.ExecutionSpec,
             SmolBox.Checkpoint,
             SmolBox.Execution,
@@ -96,6 +103,7 @@ defmodule SmolBox.MixProject do
             SmolBox.Store,
             SmolBox.Store.Memory,
             SmolBox.Store.Codec,
+            SmolBox.Store.MachineOps,
             SmolBox.Store.RecordOps
           ],
           "Extensions and internals": [
@@ -113,6 +121,8 @@ defmodule SmolBox.MixProject do
           "docs/client.md",
           "docs/network-access.md",
           "docs/checkpoints.md",
+          "docs/persistent-machines.md",
+          "docs/persistent-machines-validation.md",
           "docs/host-integration.md",
           "docs/troubleshooting.md",
           "docs/recovery.md",
@@ -144,7 +154,8 @@ defmodule SmolBox.MixProject do
           SmolBox.LabCandidate,
           SmolBox.RuntimeProxy,
           SmolBox.TestTLS,
-          SmolBox.Store.Contract
+          SmolBox.Store.Contract,
+          SmolBox.Store.MachineContract
         ],
         summary: [threshold: 90]
       ]

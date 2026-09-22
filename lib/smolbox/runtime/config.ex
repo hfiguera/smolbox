@@ -23,7 +23,7 @@ defmodule SmolBox.Runtime.Config do
 
   @enforce_keys Keyword.keys(@schema) ++ [:owner]
   @derive {Inspect, only: [:name, :namespace, :mode, :max_pending, :max_active]}
-  defstruct Keyword.keys(@schema) ++ [:owner, :telemetry_table]
+  defstruct Keyword.keys(@schema) ++ [:owner, :telemetry_table, managed_machines: false]
 
   @type t :: %__MODULE__{
           name: atom(),
@@ -42,6 +42,7 @@ defmodule SmolBox.Runtime.Config do
           telemetry_timeout_ms: pos_integer(),
           telemetry_table: :ets.tid() | nil,
           clock: module(),
+          managed_machines: boolean(),
           owner: String.t()
         }
 
@@ -53,7 +54,7 @@ defmodule SmolBox.Runtime.Config do
          config = struct!(__MODULE__, [{:owner, owner} | values]),
          true <- valid?(config),
          :ok <- persistence(config) do
-      {:ok, config}
+      {:ok, %{config | managed_machines: machine_support?(config)}}
     else
       {:error, %Error{} = error} -> {:error, error}
       _invalid -> error(:validation)
@@ -75,11 +76,20 @@ defmodule SmolBox.Runtime.Config do
     :exit, _redacted -> error(:store)
   end
 
+  defp machine_support?(%{store: {adapter, context}}) do
+    function_exported?(adapter, :machine, 3) and
+      match?({:ok, %{managed_machines: 1}}, adapter.capabilities(context))
+  end
+
   defp valid?(config) do
     config.name not in [nil, true, false] and
       match?({:ok, _name}, Identity.machine_name(config.namespace)) and
       byte_size(config.fingerprint_key) in 32..4096 and
-      adapter?(config.store, SmolBox.Store.behaviour_info(:callbacks)) and
+      adapter?(
+        config.store,
+        SmolBox.Store.behaviour_info(:callbacks) --
+          SmolBox.Store.behaviour_info(:optional_callbacks)
+      ) and
       adapter?(config.artifact_store, SmolBox.ArtifactStore.behaviour_info(:callbacks)) and
       bounds?(config) and
       adapter?({config.clock, nil}, now: 0, monotonic: 0) and workers?(config.workers)

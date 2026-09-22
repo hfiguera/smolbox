@@ -1,6 +1,6 @@
 # SmolBox
 
-Run Python, JavaScript, and other programs in disposable microVMs from Elixir.
+Run Python, JavaScript, and other programs in disposable or retained microVMs from Elixir.
 
 SmolBox is an Elixir client and supervised execution runtime for
 [smolvm](https://github.com/smol-machines/smolvm), which runs lightweight virtual
@@ -10,7 +10,8 @@ tracks commands, results, and cleanup from your application's supervision tree.
 Use it when an Elixir application needs to call a Python library, run a JavaScript
 processing step, or execute a script in a separate guest environment. You operate
 the workers and prepare images containing the languages and dependencies you need.
-Each managed execution runs one command in its own disposable VM.
+The default execution API runs one command in its own disposable VM.
+`SmolBox.Machines` also manages retained machines that can run successive commands.
 
 ## Why use SmolBox?
 
@@ -121,6 +122,19 @@ restart recovery must provide a durable `SmolBox.Store` adapter; a complete
 [PostgreSQL host example](https://github.com/hfiguera/smolbox/tree/v0.1.5/examples/durable_host)
 is included in the repository.
 
+## Managed persistent machines (unreleased)
+
+`SmolBox.Machines` gives a machine its own durable identity, ownership, resource
+reservation, and create/start/stop/delete lifecycle. Run successive commands with
+independent execution identities while retaining guest files. With a durable
+store, a new controller reconnects to the same machine after an application restart.
+Machines remain until explicitly deleted; uncertain work blocks reuse without replay.
+
+See [Managed persistent machines](docs/persistent-machines.md) for the API,
+recovery procedures, the required coordinated store upgrade, and a two-process
+PostgreSQL walkthrough. This feature is on the development branch and is not in
+published 0.1.5. The existing disposable API remains supported.
+
 ## Checkpoint execution
 
 SmolBox 0.1.5 can restore an operator-approved idle, offline checkpoint
@@ -174,6 +188,7 @@ about running programs from Elixir and managing their execution lifecycle.
 |---|---|
 | [Getting started](docs/getting-started.md) | Connect, stage a Python program, submit it, read its result, and finish cleanup |
 | [Managed host integration](docs/host-integration.md) | Configure supervision, workers, profiles, storage, and execution specifications |
+| [Managed persistent machines](docs/persistent-machines.md) | Retain a machine across commands, recover management, and explicitly dispose of it |
 | [Low-level client](docs/client.md) | Create machines, execute commands, stream output, and transfer files |
 | [Controlled network access](docs/network-access.md) | Approve outbound destinations while retaining offline defaults |
 | [Troubleshooting](docs/troubleshooting.md) | Interpret errors, unknown outcomes, queued work, and pending cleanup |

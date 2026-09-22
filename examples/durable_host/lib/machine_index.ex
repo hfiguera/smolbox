@@ -6,7 +6,7 @@ defmodule SmolBox.DurableHost.MachineIndex do
   @unindexed """
   FROM smolbox_executions e
   LEFT JOIN smolbox_machine_identities i USING(partition, scope, execution_id)
-  WHERE e.partition=$1 AND e.worker_id IS NOT NULL AND i.scope IS NULL
+  WHERE e.partition=$1 AND e.worker_id IS NOT NULL AND e.managed_machine_id IS NULL AND i.scope IS NULL
   """
 
   def ready(context) do
@@ -16,9 +16,22 @@ defmodule SmolBox.DurableHost.MachineIndex do
     end
   end
 
+  def remember(_context, %{managed_machine: key}) when not is_nil(key), do: :ok
+
   def remember(_context, %{worker_id: nil}), do: :ok
 
   def remember(context, record) do
+    case Database.query(
+           context,
+           "SELECT 1 FROM smolbox_managed_machines WHERE partition=$1 AND worker_id=$2 AND machine_name=$3",
+           [context.partition, record.worker_id, record.machine_name]
+         ).rows do
+      [] -> remember_execution(context, record)
+      _conflict -> error(:identity_conflict)
+    end
+  end
+
+  defp remember_execution(context, record) do
     %{rows: [[scope, id]]} =
       Database.query(
         context,
@@ -69,7 +82,21 @@ defmodule SmolBox.DurableHost.MachineIndex do
          do: {:ok, :more}
   end
 
-  defp resolve(_context, [], _worker, _name), do: error(:not_found)
+  defp resolve(context, [], worker, name) do
+    case Database.query(
+           context,
+           "SELECT scope,execution_id FROM smolbox_managed_machines WHERE partition=$1 AND worker_id=$2 AND machine_name=$3",
+           [context.partition, worker, name]
+         ).rows do
+      [] ->
+        error(:not_found)
+
+      [[scope, id]] ->
+        with {:ok, record} <- Database.read(context, {scope, id}, :machine),
+             true <- record.worker_id == worker and record.machine_name == name,
+             do: {:ok, record}
+    end
+  end
 
   defp resolve(context, [[scope, id]], worker, name) do
     with {:ok, record} <- Database.read(context, {scope, id}) do
