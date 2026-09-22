@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- Add explicit foreground command timeouts up to 24 hours, with independently
+  approved observation budgets and quiet extended buffered/streaming requests.
+- Add background launch on managed image machines, typed `LaunchResult` PID
+  evidence, terminal `:launched` state, durable deduplication and conservative
+  unknown-launch recovery. Confirmed launch releases the command slot while
+  retaining the machine and its resources. No process supervision is implied.
+- Extended records use codec v6 and require store capability `extended_execution: 1`.
+  Ordinary foreground wire formats and fingerprints remain stable. Upgrade all
+  controllers/readers/adapters together; see `docs/long-running-exec.md`.
+
+
 - Add fixed TCP `PortMapping` values to low-level and managed machine creation
   on smolvm 1.17.0, with canonical identity, strict observations, independent
   outbound allowlists, and durable worker-scoped port ownership.

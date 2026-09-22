@@ -69,13 +69,14 @@ defmodule SmolBox.Worker do
   | `:allow_insecure_loopback` | `false` | Explicitly permit local HTTP on `localhost`, `127.0.0.1`, or `::1` |
   | `:unix_socket` | `nil` | Absolute local socket path, at most 100 bytes, with a loopback HTTP base URL |
   | `:connect_timeout_ms` | `1000` | Connection budget |
-  | `:receive_timeout_ms` | `15_000` | Receive-idle budget |
+  | `:receive_timeout_ms` | `15_000` | Receive-idle budget (up to 86,460,000 ms); extended exec uses remaining operation budget |
   | `:pool_timeout_ms` | `5000` | Connection-pool checkout budget |
-  | `:operation_timeout_ms` | `30_000` | Total client-operation budget, including streaming callbacks |
+  | `:operation_timeout_ms` | `30_000` | Total client-operation budget (up to 86,460,000 ms), including streaming callbacks |
   | `:max_request_bytes` | `1_048_576` | Encoded request body cap, at most 2 MiB |
   | `:max_response_bytes` | `16_777_216` | Encoded response/stream cap, at most 32 MiB |
 
-  All budgets are positive and at most 900,000 ms. Byte caps are positive. HTTPS
+  Connect/pool budgets are positive and at most 900,000 ms; receive and operation
+  budgets are positive and at most 86,460,000 ms. Byte caps are positive. HTTPS
   always requires peer/hostname verification. The worker's own file-transfer cap
   must be configured separately. Returns a typed `:validation` error for invalid
   options. See [Low-level client](client.html) for transport examples.
@@ -160,12 +161,12 @@ defmodule SmolBox.Worker do
     Enum.all?(
       [
         worker.connect_timeout_ms,
-        worker.receive_timeout_ms,
-        worker.pool_timeout_ms,
-        worker.operation_timeout_ms
+        worker.pool_timeout_ms
       ],
       &bounded?(&1, 900_000)
     ) and
+      bounded?(worker.receive_timeout_ms, 86_460_000) and
+      bounded?(worker.operation_timeout_ms, 86_460_000) and
       bounded?(worker.max_request_bytes, 2_097_152) and
       bounded?(worker.max_response_bytes, 33_554_432)
   end

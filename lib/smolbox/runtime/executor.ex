@@ -1,6 +1,7 @@
 defmodule SmolBox.Runtime.Executor do
   @moduledoc false
   alias SmolBox.{Client, Error, Execution, Identity, Machine, Telemetry}
+  alias SmolBox.Runtime.ExecutionSupport
 
   alias SmolBox.Runtime.{
     Cleanup,
@@ -15,6 +16,7 @@ defmodule SmolBox.Runtime.Executor do
   def run(config, key, eligible) do
     Session.safe(fn ->
       with {:ok, record} <- Session.store(config, :fetch, [key]),
+           :ok <- ExecutionSupport.check(config, record.spec),
            :ok <-
              Machines.port_support(
                config,

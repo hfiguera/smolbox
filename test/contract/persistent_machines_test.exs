@@ -1,6 +1,7 @@
 defmodule SmolBox.PersistentMachinesTest do
   use ExUnit.Case, async: false
   alias SmolBox.{Error, Machines, ManagedMachineSpec, ManagedPeer, RuntimeFixture}
+  alias SmolBox.Store.Codec
   alias SmolBox.Store.Memory
 
   defmodule LegacyStore do
@@ -15,7 +16,7 @@ defmodule SmolBox.PersistentMachinesTest do
 
     def capabilities(store) do
       {:ok, capabilities} = Memory.capabilities(store)
-      {:ok, Map.delete(capabilities, :managed_ports)}
+      {:ok, Map.drop(capabilities, [:managed_ports, :extended_execution])}
     end
   end
 
@@ -419,6 +420,252 @@ defmodule SmolBox.PersistentMachinesTest do
     assert resolved.reserved_ports == [28_731] and resolved.state == :created
     assert {:ok, _} = Machines.start(fixture.runtime, handle, resolved.version)
     wait_machine(fixture, handle, &(&1.state == :running))
+  end
+
+  test "background launch releases the command slot, persists launch evidence and retains reservations" do
+    fixture = RuntimeFixture.start()
+    handle = start_machine(fixture, [%SmolBox.PortMapping{host: 28_731, guest: 8000}])
+    {:ok, command} = SmolBox.Command.new(["python", "-m", "http.server"], background: true)
+    spec = %{fixture.spec | id: "server", command: command, outputs: []}
+
+    assert {:error, %Error{category: :unsupported_capability}} =
+             SmolBox.submit(fixture.runtime, spec)
+
+    assert {:ok, execution} = Machines.submit(fixture.runtime, handle, spec)
+
+    assert {:ok,
+            %{state: :launched, evidence: :launched, result: %SmolBox.LaunchResult{pid: 123}}} =
+             SmolBox.await(fixture.runtime, execution, 5000)
+
+    machine = wait_machine(fixture, handle, &is_nil(&1.active_execution))
+    assert machine.reserved_ports == [28_731] and machine.reservation.slots == 1
+    assert {:ok, ^execution} = Machines.submit(fixture.runtime, handle, spec)
+
+    assert {:error, %Error{category: :identity_conflict}} =
+             Machines.submit(fixture.runtime, handle, %{
+               spec
+               | command: %{command | argv: ["other"]}
+             })
+
+    {:ok, stored} = SmolBox.fetch(fixture.runtime, elem(execution, 0), elem(execution, 1))
+    assert {:ok, bytes} = Codec.encode(stored)
+    assert <<"smolbox-record-v6\0", _::binary>> = bytes
+    assert {:ok, ^stored} = Codec.decode(bytes)
+    assert {:error, _} = Codec.encode(%{stored | state: :completed, evidence: :exited})
+
+    assert {:error, _} =
+             Codec.encode(%{
+               stored
+               | result: %SmolBox.Result{exit_code: 0, stdout: "", stderr: ""}
+             })
+
+    assert {:ok, _} = SmolBox.cancel(fixture.runtime, elem(execution, 0), elem(execution, 1))
+    assert {:ok, next} = Machines.submit(fixture.runtime, handle, %{fixture.spec | id: "next"})
+    assert {:ok, %{state: :completed}} = SmolBox.await(fixture.runtime, next, 5000)
+    idle = wait_machine(fixture, handle, &is_nil(&1.active_execution))
+    assert {:ok, _} = Machines.delete(fixture.runtime, handle, idle.version)
+    deleted = wait_machine(fixture, handle, &(&1.state == :deleted))
+    assert deleted.reservation == nil and deleted.reserved_ports == []
+    assert {:ok, ^execution} = Machines.submit(fixture.runtime, handle, spec)
+    assert [_, _] = ManagedPeer.snapshot(fixture.peer).commands
+  end
+
+  test "malformed background acknowledgment remains unknown and is never replayed" do
+    fixture = RuntimeFixture.start(launch_stdout: "not-a-pid")
+    handle = start_machine(fixture, [])
+    {:ok, command} = SmolBox.Command.new(["server"], background: true)
+    spec = %{fixture.spec | command: command, outputs: []}
+    {:ok, execution} = Machines.submit(fixture.runtime, handle, spec)
+
+    assert {:ok, %{state: :unknown, result: nil}} =
+             SmolBox.await(fixture.runtime, execution, 5000)
+
+    machine = wait_machine(fixture, handle, &(&1.state == :unknown))
+    assert machine.active_execution == execution
+
+    assert {:error, %Error{category: :admission_exhausted}} =
+             Machines.submit(fixture.runtime, handle, %{spec | id: "second"})
+
+    assert {:error, %Error{category: :admission_exhausted}} =
+             Machines.stop(fixture.runtime, handle, machine.version)
+
+    assert {:error, %Error{category: :admission_exhausted}} =
+             Machines.delete(fixture.runtime, handle, machine.version)
+
+    assert {:ok, ^execution} = Machines.submit(fixture.runtime, handle, spec)
+    assert [_] = ManagedPeer.snapshot(fixture.peer).commands
+  end
+
+  for {event, phase, expected} <- [
+        {:dispatch_intent, :after, :unknown},
+        {:exec, :after, :unknown},
+        {:result_write, :before, :unknown},
+        {:result_write, :after, :launched}
+      ] do
+    @event event
+    @phase phase
+    @expected expected
+    test "background recovery at #{@event}/#{@phase} preserves #{@expected} without replay" do
+      observer = self()
+
+      gate =
+        start_supervised!(
+          {Agent, fn -> %{event: @event, phase: @phase, fired: false, observer: observer} end},
+          id: :gate
+        )
+
+      fixture = RuntimeFixture.start(faults: gate)
+      handle = start_machine(fixture, [%SmolBox.PortMapping{host: 28_731, guest: 8000}])
+      {:ok, command} = SmolBox.Command.new(["server"], background: true)
+      spec = %{fixture.spec | command: command, outputs: []}
+      {:ok, execution} = Machines.submit(fixture.runtime, handle, spec)
+      event = @event
+      phase = @phase
+      assert_receive {:boundary, ^event, ^phase, blocked}, 5000
+      stop_supervised!(SmolBox.Runtime)
+      send(blocked, :release_boundary)
+      runtime = start_supervised!({SmolBox.Runtime, fixture.options})
+      fixture = %{fixture | runtime: runtime}
+      expected = @expected
+      assert {:ok, %{state: ^expected}} = SmolBox.await(runtime, execution, 5000)
+      before = ManagedPeer.snapshot(fixture.peer).commands
+      assert {:ok, ^execution} = Machines.submit(runtime, handle, spec)
+      assert ManagedPeer.snapshot(fixture.peer).commands == before
+
+      assert_background_recovery(fixture, handle, execution, expected)
+    end
+  end
+
+  test "competing controllers cannot overlap launch or stop/delete while dispatch is pending" do
+    observer = self()
+
+    gate =
+      start_supervised!(
+        {Agent, fn -> %{event: :exec, phase: :after, fired: false, observer: observer} end},
+        id: :gate
+      )
+
+    fixture = RuntimeFixture.start(faults: gate)
+    handle = start_machine(fixture, [])
+    {:ok, command} = SmolBox.Command.new(["server"], background: true)
+    spec = %{fixture.spec | command: command, outputs: []}
+
+    other =
+      start_supervised!(
+        {SmolBox.Runtime, Keyword.put(fixture.options, :name, SmolBox.OtherBackgroundRuntime)},
+        id: :other_runtime
+      )
+
+    {:ok, execution} = Machines.submit(fixture.runtime, handle, spec)
+    assert_receive {:boundary, :exec, :after, blocked}, 5000
+    assert {:ok, ^execution} = Machines.submit(other, handle, spec)
+
+    assert {:error, %{category: :admission_exhausted}} =
+             Machines.submit(other, handle, %{spec | id: "competing"})
+
+    {:ok, busy} = Machines.inspect(other, handle)
+
+    assert {:error, %{category: :admission_exhausted}} =
+             Machines.stop(other, handle, busy.version)
+
+    assert {:error, %{category: :admission_exhausted}} =
+             Machines.delete(other, handle, busy.version)
+
+    assert {:ok, _} = SmolBox.cancel(other, elem(execution, 0), elem(execution, 1))
+    assert {:ok, %{state: :unknown}} = SmolBox.await(other, execution, 5000)
+    send(blocked, :release_boundary)
+    assert [_] = ManagedPeer.snapshot(fixture.peer).commands
+  end
+
+  test "a store without extended execution support rejects launch before staging or dispatch" do
+    fixture = RuntimeFixture.start()
+    handle = start_machine(fixture, [])
+    stop_supervised!(SmolBox.Runtime)
+
+    runtime =
+      start_supervised!(
+        {SmolBox.Runtime, Keyword.put(fixture.options, :store, {LegacyStore, fixture.store})}
+      )
+
+    {:ok, command} = SmolBox.Command.new(["server"], background: true)
+    spec = %{fixture.spec | command: command, outputs: []}
+    assert {:error, %{category: :unsupported_capability}} = Machines.submit(runtime, handle, spec)
+    assert ManagedPeer.snapshot(fixture.peer).commands == []
+    stop_supervised!(Memory)
+    assert {:error, %{category: :store}} = Machines.submit(runtime, handle, spec)
+  end
+
+  test "ownership mismatch prevents a background command from reaching the worker" do
+    fixture = RuntimeFixture.start()
+    handle = start_machine(fixture, [])
+    {:ok, owned} = Machines.inspect(fixture.runtime, handle)
+
+    Agent.update(fixture.peer, fn state ->
+      update_in(state.machines[owned.machine_name]["createdAt"], &(&1 + 1))
+    end)
+
+    {:ok, command} = SmolBox.Command.new(["server"], background: true)
+    spec = %{fixture.spec | command: command, outputs: []}
+    assert {:ok, execution} = Machines.submit(fixture.runtime, handle, spec)
+
+    assert {:ok, %{state: :failed, evidence: :not_dispatched}} =
+             SmolBox.await(fixture.runtime, execution, 5000)
+
+    assert ManagedPeer.snapshot(fixture.peer).commands == []
+    wait_machine(fixture, handle, &(&1.state == :unknown))
+  end
+
+  test "cancellation before background dispatch prevents launch and releases a clean slot" do
+    observer = self()
+
+    gate =
+      start_supervised!(
+        {Agent,
+         fn -> %{event: :dispatch_intent, phase: :before, fired: false, observer: observer} end},
+        id: :gate
+      )
+
+    fixture = RuntimeFixture.start(faults: gate)
+    handle = start_machine(fixture, [])
+    {:ok, command} = SmolBox.Command.new(["server"], background: true)
+    spec = %{fixture.spec | command: command, inputs: [], outputs: []}
+    {:ok, execution} = Machines.submit(fixture.runtime, handle, spec)
+    assert_receive {:boundary, :dispatch_intent, :before, blocked}, 5000
+    assert {:ok, _} = SmolBox.cancel(fixture.runtime, elem(execution, 0), elem(execution, 1))
+    send(blocked, :release_boundary)
+
+    assert {:ok, %{state: :cancelled, evidence: :not_dispatched, result: nil}} =
+             SmolBox.await(fixture.runtime, execution, 5000)
+
+    wait_machine(fixture, handle, &is_nil(&1.active_execution))
+    assert ManagedPeer.snapshot(fixture.peer).commands == []
+  end
+
+  defp assert_background_recovery(fixture, handle, execution, :unknown) do
+    machine = wait_machine(fixture, handle, &(&1.state == :unknown))
+    assert machine.reserved_ports == [28_731] and machine.reservation.slots == 1
+    assert {:error, _} = Machines.submit(fixture.runtime, handle, %{fixture.spec | id: "later"})
+
+    Agent.update(fixture.peer, fn state ->
+      put_in(state.machines[machine.machine_name]["state"], "stopped")
+    end)
+
+    {:ok, machine} = Machines.inspect(fixture.runtime, handle)
+
+    assert {:ok, resolved} =
+             Machines.resolve(fixture.runtime, handle, machine.version, quiesced: true)
+
+    assert resolved.state == :stopped and resolved.active_execution == nil
+    {:ok, unknown} = SmolBox.fetch(fixture.runtime, elem(execution, 0), elem(execution, 1))
+
+    assert unknown.state == :unknown and unknown.result == nil and
+             unknown.cleanup == :complete
+  end
+
+  defp assert_background_recovery(fixture, handle, execution, :launched) do
+    wait_machine(fixture, handle, &is_nil(&1.active_execution))
+    {:ok, launch} = SmolBox.fetch(fixture.runtime, elem(execution, 0), elem(execution, 1))
+    assert launch.result.pid == 123
   end
 
   defp start_machine(fixture, mappings) do

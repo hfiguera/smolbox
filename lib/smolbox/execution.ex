@@ -9,12 +9,24 @@ defmodule SmolBox.Execution do
   transforms records. A transition never sends a worker request. Dispatching may
   advance directly to collecting when buffered exec returns a known exit.
 
+  A confirmed background launch is terminal `:launched`, with a `LaunchResult`
+  and `:launched` evidence. Its PID is historical launch evidence, not final exit
+  status, readiness or continued liveness. Cleanup releases only the command slot.
+
   Absolute stage deadlines are set on first entry and never reset by observation
   or restart. Uncertain execution can have confirmed termination and completed
   cleanup while its original command outcome remains unknown.
   """
 
-  alias SmolBox.{Error, ExecutionSpec, ExecutionValidation, Machine, Result, Validation}
+  alias SmolBox.{
+    Error,
+    ExecutionSpec,
+    ExecutionValidation,
+    LaunchResult,
+    Machine,
+    Result,
+    Validation
+  }
 
   @states [
     :accepted,
@@ -24,6 +36,7 @@ defmodule SmolBox.Execution do
     :running,
     :collecting,
     :completed,
+    :launched,
     :collection_failed,
     :failed,
     :cancelled,
@@ -35,12 +48,13 @@ defmodule SmolBox.Execution do
     accepted: [:preparing, :cancelled, :expired],
     preparing: [:ready, :failed, :cancelled],
     ready: [:dispatching, :cancelled, :failed],
-    dispatching: [:running, :collecting, :unknown, :cancelling],
+    dispatching: [:launched, :running, :collecting, :unknown, :cancelling],
     running: [:collecting, :unknown, :cancelling],
     cancelling: [:collecting, :unknown],
     unknown: [:collecting, :cancelling],
     collecting: [:completed, :collection_failed],
     completed: [],
+    launched: [],
     collection_failed: [],
     failed: [],
     cancelled: [],
@@ -64,6 +78,7 @@ defmodule SmolBox.Execution do
     :dispatch_uncertain,
     :running_observed,
     :exited,
+    :launched,
     :termination_confirmed,
     :unknown
   ]
@@ -120,6 +135,7 @@ defmodule SmolBox.Execution do
           | :dispatching
           | :running
           | :collecting
+          | :launched
           | :completed
           | :collection_failed
           | :failed
@@ -148,7 +164,7 @@ defmodule SmolBox.Execution do
           worker_generation: non_neg_integer() | nil,
           machine_name: String.t() | nil,
           created_machine: Machine.t() | nil,
-          result: Result.t() | nil,
+          result: Result.t() | LaunchResult.t() | nil,
           last_error: Error.t() | nil,
           cancel_requested_at_ms: non_neg_integer() | nil,
           claim_owner: String.t() | nil,
@@ -215,7 +231,7 @@ defmodule SmolBox.Execution do
   @doc "States that require no further command dispatch or outcome observation."
   @spec terminal?(t()) :: boolean()
   def terminal?(record),
-    do: record.state in [:completed, :collection_failed, :failed, :cancelled, :expired]
+    do: record.state in [:launched, :completed, :collection_failed, :failed, :cancelled, :expired]
 
   @doc "Validate a persisted record after decoding it, including shapes that could contain BEAM resources."
   @spec validate(term()) :: :ok | {:error, Error.t()}
@@ -269,6 +285,7 @@ defmodule SmolBox.Execution do
       record.cleanup in [:pending, :in_progress, :complete, :failed],
       Validation.integer?(record.cleanup_attempts, 0, 1000),
       result?(record.result, record.spec.profile.max_output_bytes),
+      result_mode?(record),
       state_evidence?(record),
       collection_state?(record),
       record.cleanup != :complete or terminal?(record) or record.state == :unknown,
@@ -283,7 +300,7 @@ defmodule SmolBox.Execution do
   defp evidence_transition(previous, next) do
     valid =
       preserves?(previous, next, [:result, :created_machine, :absence_at_ms]) and
-        (previous.evidence != :exited or next.evidence == :exited) and
+        (previous.evidence not in [:exited, :launched] or next.evidence == previous.evidence) and
         (previous.evidence != :termination_confirmed or
            next.evidence in [:termination_confirmed, :exited] or
            reobserved_running?(previous, next)) and
@@ -303,6 +320,11 @@ defmodule SmolBox.Execution do
 
   defp preserves?(previous, next, fields),
     do: Enum.all?(fields, &(Map.fetch!(previous, &1) in [nil, Map.fetch!(next, &1)]))
+
+  defp state_evidence?(%{state: :launched} = record),
+    do:
+      record.evidence == :launched and is_struct(record.result, LaunchResult) and
+        record.managed_machine != nil and record.collection == :complete
 
   defp state_evidence?(%{state: state} = record)
        when state in [:accepted, :preparing, :ready, :cancelled, :expired, :failed],
@@ -377,7 +399,18 @@ defmodule SmolBox.Execution do
       byte_size(result.stdout) + byte_size(result.stderr) <= max
   end
 
+  defp result?(%LaunchResult{} = result, _max), do: LaunchResult.valid?(result)
   defp result?(_result, _max), do: false
+
+  defp result_mode?(%{spec: %{command: %{background: true}}, result: nil, state: state}),
+    do: state not in [:running, :collecting, :completed, :collection_failed, :launched]
+
+  defp result_mode?(%{spec: %{command: %{background: true}}, result: result, state: state}),
+    do: state == :launched and is_struct(result, LaunchResult)
+
+  defp result_mode?(%{result: nil}), do: true
+  defp result_mode?(%{result: result}), do: is_struct(result, Result)
+
   defp managed_key?(nil, _scope), do: true
   defp managed_key?({scope, id}, scope), do: Validation.identifier?(id)
   defp managed_key?(_key, _scope), do: false

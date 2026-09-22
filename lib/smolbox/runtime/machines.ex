@@ -1,6 +1,7 @@
 defmodule SmolBox.Runtime.Machines do
   @moduledoc false
   alias SmolBox.{Client, Error, Identity, Machine, ManagedMachine}
+  alias SmolBox.Runtime.ExecutionSupport
   alias SmolBox.Runtime.{Session, WorkerConfig, WorkerHealth}
 
   def store(config, operation, arguments),
@@ -9,7 +10,8 @@ defmodule SmolBox.Runtime.Machines do
   def run(config, key, eligible) do
     Session.safe(fn ->
       with {:ok, record} <- claim(config, key),
-           :ok <- port_support(config, record.spec.ports) do
+           :ok <- port_support(config, record.spec.ports),
+           :ok <- ExecutionSupport.check(config, record.spec) do
         route(config, record, eligible)
       end
     end)

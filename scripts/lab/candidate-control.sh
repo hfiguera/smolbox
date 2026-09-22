@@ -22,11 +22,11 @@ wait_stopped() {
 
 case "$action" in
   deadline)
-    seconds=${2:?Expected 300 seconds}
-    [[ $seconds == 300 ]] || exit 1
+    seconds=${2:?Expected 300 or 900 seconds}
+    [[ $seconds == 300 || $seconds == 900 ]] || exit 1
     [[ $(systemctl show "$unit" -p MainPID --value) == 0 ]] || exit 1
     mkdir -p "/run/systemd/system/$unit.d"
-    printf '[Service]\nRuntimeMaxSec=%ss\n' "$seconds" > "/run/systemd/system/$unit.d/60-qualification-deadline.conf"
+    printf '[Service]\nRuntimeMaxSec=%ss\nEnvironment=SMOLBOX_QUALIFICATION_SECONDS=%s\n' "$seconds" "$seconds" > "/run/systemd/system/$unit.d/60-qualification-deadline.conf"
     systemctl daemon-reload
     ;;
   start)

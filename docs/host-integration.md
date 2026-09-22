@@ -400,3 +400,12 @@ stable worker ID and authoritative store, including across controller restarts.
 The PostgreSQL port-ownership index arbitrates fixed ports atomically; it does not
 reserve operating-system sockets against unrelated processes. Read the
 [port deployment and upgrade guide](port-mappings.md) before exposing services.
+
+## Long commands and background launch
+
+See [Long-running execution](long-running-exec.md) for coordinated codec-v6/store
+upgrades, extended observation budgets and background launch recovery. A confirmed
+launch is `:launched`, with a typed PID result; it does not prove readiness or
+continued process life. Lost launch evidence stays unknown and must not be replayed.
+Background processes can overlap later file operations. Stop/start requires an
+explicit new service launch; cancellation does not perform PID-based termination.

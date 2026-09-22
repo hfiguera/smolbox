@@ -130,7 +130,7 @@ defmodule SmolBox.Example.Setup do
       reserved: record.reservation != nil,
       cancel_requested_at_ms: record.cancel_requested_at_ms,
       absence_at_ms: record.absence_at_ms,
-      exit_code: if(record.result, do: record.result.exit_code),
+      exit_code: if(record.result, do: Map.get(record.result, :exit_code)),
       artifacts: record.artifacts
     }
   end

@@ -205,7 +205,7 @@ defmodule SmolBox.Store.MachineOps do
       else: error(:admission_exhausted)
   end
 
-  defp safe_completion?(%{state: :completed}), do: true
+  defp safe_completion?(%{state: state}) when state in [:completed, :launched], do: true
 
   defp safe_completion?(%{state: state, spec: %{inputs: []}})
        when state in [:cancelled, :expired], do: true

@@ -18,6 +18,16 @@ The qualification remains `:development`; no production isolation certification
 or cross-version checkpoint portability is implied. Published 0.1.5 and the
 historical campaigns below retain their recorded versions and results.
 
+## Extended execution
+
+The unreleased checkout exposes foreground timeouts up to 24 hours and typed
+background launch on managed image machines with smolvm 1.17.0. Extended records
+use codec v6 and require `extended_execution: 1` from the store. See the
+[execution guide](long-running-exec.md) for supported combinations, upgrade
+requirements and the distinction between launch and process completion.
+The [validation report](long-running-exec-validation.md) records real Linux/macOS
+305-second commands, durable background HTTP acceptance and the limits of that evidence.
+
 ## Managed TCP port mappings
 
 The unreleased checkout supports fixed TCP mappings on managed image machines
@@ -155,7 +165,7 @@ establish that every distribution supplies a working resizing tool.
 ### Timeout qualification boundary
 
 The upstream release removes the generic five-minute server timeout from
-execution and other selected long operations. SmolBox still limits a command
+execution and other selected long operations. At that qualification, SmolBox limited a command
 to 300 seconds and a managed execution budget to 300,000 ms. A buffered public
 exec operation including implicit startup completed in 357.460 seconds, with
 299.002 seconds measured inside the guest and a 300-second command deadline.

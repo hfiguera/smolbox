@@ -1,6 +1,6 @@
 defmodule SmolBox.Runtime.Observation do
   @moduledoc false
-  alias SmolBox.{Client, Error, Result, Telemetry}
+  alias SmolBox.{Client, Error, LaunchResult, Result, Telemetry}
   alias SmolBox.Runtime.Session
 
   def run(session, record) do
@@ -53,7 +53,7 @@ defmodule SmolBox.Runtime.Observation do
 
     options = [max_output_bytes: record.spec.profile.max_output_bytes]
 
-    if record.spec.command.stdin == nil,
+    if record.spec.command.stdin == nil and not record.spec.command.background,
       do:
         Client.exec_stream(
           client,
@@ -101,6 +101,15 @@ defmodule SmolBox.Runtime.Observation do
       0 -> Session.claim(session)
     end
   end
+
+  defp outcome(session, {:ok, %LaunchResult{} = result}),
+    do:
+      Session.patch(session,
+        state: :launched,
+        evidence: :launched,
+        result: result,
+        collection: :complete
+      )
 
   defp outcome(session, {:ok, %Result{} = result}),
     do: Session.patch(session, state: :collecting, evidence: :exited, result: result)
