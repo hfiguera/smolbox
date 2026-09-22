@@ -31,6 +31,19 @@ defmodule SmolBox.Runtime.Executor do
            last_error: %Error{category: :unknown, operation: :exec_stream, evidence: :unknown}
          )
 
+  defp route(session, %{state: :collecting, managed_machine: key} = record, _eligible)
+       when not is_nil(key) do
+    if length(record.artifacts) == length(record.spec.outputs) do
+      Files.collect(session, record)
+    else
+      Session.write(session, record,
+        state: :collection_failed,
+        collection: if(record.artifacts == [], do: :failed, else: :partial),
+        last_error: %Error{category: :unknown, operation: :download, evidence: :unknown}
+      )
+    end
+  end
+
   defp route(session, %{state: :collecting} = record, _eligible),
     do: Files.collect(session, record)
 
@@ -44,8 +57,32 @@ defmodule SmolBox.Runtime.Executor do
       Execution.expired?(record, Session.now(session)) ->
         Session.patch(session, state: :expired, cleanup: :complete)
 
+      record.managed_machine != nil ->
+        prepare_existing(session, record)
+
       true ->
         reserve(session, record, eligible)
+    end
+  end
+
+  defp prepare_existing(session, record) do
+    with {:ok, preparing} <- Session.write(session, record, state: :preparing),
+         {:ok, observed} <-
+           Session.io(session, preparing, :preparation, fn ->
+             Client.inspect_machine(session.worker.client, record.machine_name)
+           end),
+         true <-
+           observed.state == :running and
+             Machine.same_incarnation?(record.created_machine, observed),
+         :ok <- Files.stage(session, preparing),
+         {:ok, ready} <- Session.patch(session, state: :ready) do
+      dispatch(session, ready)
+    else
+      false ->
+        fail_preparation(session, %Error{category: :identity_conflict, operation: :inspect})
+
+      {:error, error} ->
+        fail_preparation(session, error)
     end
   end
 

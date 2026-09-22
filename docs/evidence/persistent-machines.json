@@ -1,0 +1,80 @@
+{
+  "feature": "managed-persistent-machines",
+  "date_local": "2026-09-21",
+  "timezone": "America/Denver",
+  "source": {
+    "branch": "feature/managed-persistent-machines",
+    "base_commit": "d466338c5b908206f68204a9ab821bdbbc1e908c",
+    "uncommitted_feature_work": true
+  },
+  "environment": {
+    "platform": "macos",
+    "architecture": "aarch64",
+    "elixir": "1.20.4",
+    "otp": "29.0.6",
+    "postgresql_major": 17,
+    "smolvm": "1.16.1"
+  },
+  "live_worker": {
+    "image_sha256": "4585196fbdf1de9bfd6c5c92d578ad0b1756cc92b64fe42b60674d279d74e03f",
+    "machine_capacity": {
+      "slots": 1,
+      "cpus": 1,
+      "memory_mb": 1024,
+      "disk_gb": 4
+    },
+    "machine_disks_gb": {
+      "storage": 2,
+      "overlay": 2
+    },
+    "network": "offline",
+    "independent_beam_processes": true,
+    "prepare": {
+      "state": "running",
+      "phase": "prepare",
+      "machine_name": "sbxexample-3bg7kxxufy4zb54kbrdq",
+      "reservation_retained": true
+    },
+    "resume": {
+      "state": "deleted",
+      "phase": "resume",
+      "machine_name": "sbxexample-3bg7kxxufy4zb54kbrdq",
+      "absence_verified": true,
+      "resources_released": true,
+      "same_machine": true
+    },
+    "final_inventory": []
+  },
+  "disposable_regression": {
+    "test": "test/runtime/managed_runtime_test.exs:113",
+    "passed": 1,
+    "excluded_in_selected_file": 3
+  },
+  "database": {
+    "passed": 27,
+    "excluded_runtime_tests": 28,
+    "unavailable_probe": "database-unavailable-confirmed",
+    "type_analysis": "passed"
+  },
+  "limitations": [
+    "Development qualification only",
+    "No new Linux persistent-machine live qualification",
+    "No worker-disk loss restoration, migration, replication, or upstream execution fencing"
+  ],
+  "root_ci": {
+    "command": "mix ci",
+    "passed": 256,
+    "excluded_runtime_tests": 17,
+    "format": "passed",
+    "compile_warnings_as_errors": "passed",
+    "dependency_cycles": 0,
+    "credo": "passed",
+    "ex_dna_clones": 0,
+    "credence": "passed",
+    "dialyzer": "passed"
+  },
+  "documentation": {
+    "command": "mix docs --warnings-as-errors",
+    "result": "passed"
+  }
+}

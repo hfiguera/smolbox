@@ -54,6 +54,17 @@ defmodule SmolBox.Runtime.Inspection do
 
   defp lookup(config, worker, machine) do
     case Session.store(config, :find_machine, [worker, machine.name]) do
+      {:ok, %SmolBox.ManagedMachine{} = record} ->
+        if SmolBox.ManagedMachine.validate(record) == :ok and record.worker_id == worker and
+             record.machine_name == machine.name do
+          machine
+          |> finding(status(record, machine))
+          |> Map.put(:managed_machine, {record.scope, record.id})
+          |> Map.put(:record_version, record.version)
+        else
+          finding(machine, :unavailable)
+        end
+
       {:ok, %Execution{} = record} ->
         classify(record, worker, machine)
 
@@ -82,7 +93,7 @@ defmodule SmolBox.Runtime.Inspection do
   defp status(record, machine) do
     cond do
       not Machine.same_incarnation?(record.created_machine, machine) -> :conflict
-      record.cleanup == :complete -> :cleanup_conflict
+      Map.get(record, :cleanup) == :complete or record.state == :deleted -> :cleanup_conflict
       true -> :owned
     end
   end

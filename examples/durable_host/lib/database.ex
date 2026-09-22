@@ -5,7 +5,7 @@ defmodule SmolBox.DurableHost.Database do
   alias SmolBox.Error
   alias SmolBox.Store.RecordOps
 
-  @columns "payload, fingerprint, state, version, next_due_ms, needs_work, worker_id, slots, cpus, memory_mb, disk_gb"
+  @columns "payload, fingerprint, state, version, next_due_ms, needs_work, worker_id, slots, cpus, memory_mb, disk_gb, managed_machine_id"
 
   def query(context, sql, params),
     do: SQL.query!(context.repo, sql, params, log: false, timeout: 5000)
@@ -24,32 +24,34 @@ defmodule SmolBox.DurableHost.Database do
     :ok
   end
 
-  def read(context, {scope, id} = key) do
+  def read(context, {scope, id} = key, kind \\ :execution) do
     result =
       query(
         context,
-        "SELECT #{@columns} FROM smolbox_executions WHERE partition=$1 AND scope=$2 AND execution_id=$3",
+        "SELECT #{columns(kind)} FROM #{table(kind)} WHERE partition=$1 AND scope=$2 AND execution_id=$3",
         [context.partition, scope, id]
       )
 
     case result.rows do
       [] -> error(:not_found)
-      [row] -> decode(context, key, row)
+      [row] -> decode(context, key, row, kind)
     end
   end
 
   def write(context, record) do
+    kind = if is_struct(record, SmolBox.ManagedMachine), do: :machine, else: :execution
+
     with {:ok, bytes} <- RecordCrypto.encrypt(record, context.key, context.partition) do
       query(
         context,
         """
-        INSERT INTO smolbox_executions (partition, scope, execution_id, #{@columns})
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+        INSERT INTO #{table(kind)} (partition, scope, execution_id, #{@columns})
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
         ON CONFLICT (partition,scope,execution_id) DO UPDATE SET
           payload=EXCLUDED.payload, fingerprint=EXCLUDED.fingerprint,
           state=EXCLUDED.state, version=EXCLUDED.version, next_due_ms=EXCLUDED.next_due_ms,
           needs_work=EXCLUDED.needs_work, worker_id=EXCLUDED.worker_id,
-          slots=EXCLUDED.slots, cpus=EXCLUDED.cpus, memory_mb=EXCLUDED.memory_mb, disk_gb=EXCLUDED.disk_gb
+          slots=EXCLUDED.slots, cpus=EXCLUDED.cpus, memory_mb=EXCLUDED.memory_mb, disk_gb=EXCLUDED.disk_gb, managed_machine_id=EXCLUDED.managed_machine_id
         """,
         [context.partition, record.scope, record.id, bytes | projection(record)]
       )
@@ -58,11 +60,11 @@ defmodule SmolBox.DurableHost.Database do
     end
   end
 
-  def pending_count(context) do
+  def pending_count(context, kind \\ :execution) do
     %{rows: [[count]]} =
       query(
         context,
-        "SELECT count(*) FROM smolbox_executions WHERE partition=$1 AND state='accepted'",
+        "SELECT count(*) FROM #{table(kind)} WHERE partition=$1 AND state='accepted'",
         [context.partition]
       )
 
@@ -105,7 +107,11 @@ defmodule SmolBox.DurableHost.Database do
         context,
         """
         SELECT COALESCE(sum(slots),0), COALESCE(sum(cpus),0), COALESCE(sum(memory_mb),0), COALESCE(sum(disk_gb),0)
-        FROM smolbox_executions WHERE partition=$1 AND worker_id=$2
+        FROM (
+          SELECT slots,cpus,memory_mb,disk_gb FROM smolbox_executions WHERE partition=$1 AND worker_id=$2
+          UNION ALL
+          SELECT slots,cpus,memory_mb,disk_gb FROM smolbox_managed_machines WHERE partition=$1 AND worker_id=$2
+        ) reservations
         """,
         [context.partition, worker]
       )
@@ -113,7 +119,7 @@ defmodule SmolBox.DurableHost.Database do
     {:ok, %{slots: slots, cpus: cpus, memory_mb: memory, disk_gb: disk}}
   end
 
-  def due(context, now, cursor, limit) do
+  def due(context, now, cursor, limit, kind \\ :execution) do
     {tail, params} =
       case cursor do
         nil ->
@@ -128,22 +134,22 @@ defmodule SmolBox.DurableHost.Database do
     rows =
       query(
         context,
-        "SELECT scope,execution_id,#{@columns} FROM smolbox_executions WHERE partition=$1 AND needs_work AND next_due_ms<=$2 " <>
+        "SELECT scope,execution_id,#{columns(kind)} FROM #{table(kind)} WHERE partition=$1 AND needs_work AND next_due_ms<=$2 " <>
           tail,
         params
       ).rows
 
-    with {:ok, records} <- decode_rows(context, rows) do
+    with {:ok, records} <- decode_rows(context, rows, kind) do
       page = Enum.take(records, limit)
       next = if length(records) > limit, do: RecordOps.cursor(List.last(page))
       {:ok, page, next}
     end
   end
 
-  defp decode_rows(context, rows) do
+  defp decode_rows(context, rows, kind) do
     rows
     |> Enum.reduce_while({:ok, []}, fn [scope, id | row], {:ok, records} ->
-      case decode(context, {scope, id}, row) do
+      case decode(context, {scope, id}, row, kind) do
         {:ok, record} -> {:cont, {:ok, [record | records]}}
         error -> {:halt, error}
       end
@@ -154,9 +160,9 @@ defmodule SmolBox.DurableHost.Database do
     end
   end
 
-  defp decode(context, key, [bytes | projected]) do
-    with {:ok, record} <- RecordCrypto.decrypt(bytes, context.key, context.partition, key),
-         true <- projected == projection(record) do
+  defp decode(context, key, [bytes | projected], kind) do
+    with {:ok, record} <- RecordCrypto.decrypt(bytes, context.key, context.partition, key, kind),
+         true <- projected == read_projection(record, kind) do
       {:ok, record}
     else
       _invalid -> error(:store)
@@ -171,14 +177,46 @@ defmodule SmolBox.DurableHost.Database do
       Atom.to_string(record.state),
       record.version,
       record.next_due_at_ms,
-      RecordOps.needs_work?(record),
+      needs_work?(record),
       record.worker_id,
       resources.slots,
       resources.cpus,
       resources.memory_mb,
-      resources.disk_gb
+      resources.disk_gb,
+      case Map.get(record, :managed_machine) do
+        {_scope, id} -> id
+        nil -> nil
+      end
     ]
   end
+
+  def machine_page(context, scope, cursor, limit) do
+    rows =
+      query(
+        context,
+        "SELECT scope,execution_id,#{columns(:machine)} FROM smolbox_managed_machines WHERE partition=$1 AND scope=$2 AND ($3::varchar IS NULL OR execution_id>$3) ORDER BY execution_id LIMIT $4",
+        [context.partition, scope, cursor, limit + 1]
+      ).rows
+
+    with {:ok, records} <- decode_rows(context, rows, :machine) do
+      page = Enum.take(records, limit)
+      next = if length(records) > limit, do: List.last(page).id
+      {:ok, page, next}
+    end
+  end
+
+  defp columns(:machine), do: @columns <> ",machine_name"
+  defp columns(:execution), do: @columns
+  defp read_projection(record, :machine), do: projection(record) ++ [record.machine_name]
+  defp read_projection(record, :execution), do: projection(record)
+
+  defp table(:machine), do: "smolbox_managed_machines"
+  defp table(:execution), do: "smolbox_executions"
+
+  defp needs_work?(%SmolBox.ManagedMachine{} = record),
+    do: record.state != :deleted and record.active_execution == nil
+
+  defp needs_work?(record), do: RecordOps.needs_work?(record)
 
   defp error(category), do: {:error, %Error{category: category, operation: :store}}
 end

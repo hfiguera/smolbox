@@ -1,6 +1,12 @@
 defmodule SmolBox.Store do
   @moduledoc """
-  Atomic host-store boundary for managed execution.
+  Atomic host-store boundary for managed execution and optional retained machines.
+
+  Adapters advertising `managed_machines: 1` implement `c:machine/3` and must share
+  worker leases, capacity, and assignment uniqueness across both resource kinds.
+  Managed commands reference their owning machine and carry no reservation of
+  their own. Their completion releases a command slot atomically, not the machine.
+  The execution reservation rules below describe disposable work.
 
   Every mutation is one transaction. Failures must roll back record and worker
   changes together. Reads are authoritative and must never translate unavailable,
@@ -55,12 +61,22 @@ defmodule SmolBox.Store do
           disk_gb: non_neg_integer()
         }
 
+  @doc """
+  Optional retained-machine transaction boundary. Adapters implementing this must
+  advertise `managed_machines: 1` in capabilities. Mutations atomically coordinate
+  machine records, executions, assignment indexes, and shared worker reservations.
+  See `SmolBox.Store.Memory` and `SmolBox.Store.MachineOps` for the contract.
+  """
+  @callback machine(context(), atom(), list()) :: term()
+  @optional_callbacks machine: 3
+
   @callback capabilities(context()) ::
               {:ok, %{schema: 1, durable: boolean(), atomic: true}} | {:error, Error.t()}
   @callback accept(context(), Execution.t(), pos_integer()) ::
               {:ok, Execution.t(), :inserted | :existing} | {:error, Error.t()}
   @callback fetch(context(), Execution.key()) :: result()
-  @callback find_machine(context(), String.t(), String.t()) :: result()
+  @callback find_machine(context(), String.t(), String.t()) ::
+              {:ok, Execution.t() | SmolBox.ManagedMachine.t()} | {:error, Error.t()}
   @callback claim_worker(context(), String.t(), String.t(), non_neg_integer(), pos_integer()) ::
               {:ok, lease()} | {:error, Error.t()}
   @callback claim(context(), Execution.key(), String.t(), non_neg_integer(), pos_integer()) ::

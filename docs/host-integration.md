@@ -379,3 +379,12 @@ an independently verified worker-side fencing/quiescence mechanism. None is
 certified in this implementation. A configured execution deadline is an
 observation budget plus an upstream command timeout, not proof of bounded wall
 clock termination under those failures.
+
+## Retained machine integration (unreleased)
+
+The same supervised runtime can serve `SmolBox.Machines` and disposable
+`SmolBox.submit/2` work. Retained machines require the optional store capability
+`managed_machines: 1`; existing adapters without it continue to support disposable
+executions. The memory and PostgreSQL example adapters implement the extension.
+Read [Managed persistent machines](persistent-machines.md) before enabling it on
+shared workers, particularly the coordinated upgrade and capacity accounting.

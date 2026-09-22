@@ -1,6 +1,9 @@
 defmodule SmolBox do
   @moduledoc """
-  Standalone managed sandbox executions over pinned, host-operated smolvm workers.
+  Managed sandbox executions and retained machines over pinned, host-operated smolvm workers.
+
+  `SmolBox.Machines` manages retained machines independently of executions; its
+  commands use the result and observation APIs here. `submit/2` remains disposable.
 
   Start a named child with `child_spec/1`. Submit a validated immutable execution
   specification under a host-authorized scope. Acceptance is durable only with a
@@ -127,6 +130,9 @@ defmodule SmolBox do
   not proof the VM has stopped. After dispatch, missing exit evidence can remain
   unknown even after confirmed termination. A concurrently observed exit is
   preserved. Use `fetch/3` to follow termination, collection, and cleanup.
+  For commands submitted through `SmolBox.Machines`, cancellation never deletes
+  or automatically stops the VM. Uncertain work blocks reuse pending explicit
+  operator resolution; see the persistent-machine guide.
   """
   @spec cancel(runtime(), String.t(), String.t()) :: {:ok, handle()} | {:error, Error.t()}
   def cancel(runtime, scope, id) do

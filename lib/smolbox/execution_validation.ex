@@ -22,6 +22,13 @@ defmodule SmolBox.ExecutionValidation do
       end)
   end
 
+  defp reservation?(%{managed_machine: {scope, id}} = record) do
+    scope == record.scope and Validation.identifier?(id) and record.reservation == nil and
+      Validation.identifier?(record.worker_id) and MachineSpec.valid_name?(record.machine_name) and
+      Validation.integer?(record.worker_generation, 1, 9_007_199_254_740_991) and
+      record.created_machine != nil
+  end
+
   defp reservation?(%{worker_id: nil} = record) do
     record.reservation == nil and record.machine_name == nil and record.worker_generation == nil and
       record.created_machine == nil and record.state in [:accepted, :cancelled, :expired, :failed]
@@ -42,9 +49,9 @@ defmodule SmolBox.ExecutionValidation do
       Validation.integer?(record.worker_generation, 1, 9_007_199_254_740_991)
   end
 
-  defp machine?(nil, _record), do: true
+  def machine?(nil, _record), do: true
 
-  defp machine?(%Machine{} = machine, record) do
+  def machine?(%Machine{} = machine, record) do
     profile = record.spec.profile
 
     Validation.struct_shape?(machine, Machine) and machine.name == record.machine_name and
@@ -55,7 +62,7 @@ defmodule SmolBox.ExecutionValidation do
       network?(machine, profile)
   end
 
-  defp machine?(_machine, _record), do: false
+  def machine?(_machine, _record), do: false
 
   defp network?(machine, profile),
     do: SmolBox.NetworkPolicy.valid?(machine.network) and machine.network == profile.network
@@ -78,9 +85,9 @@ defmodule SmolBox.ExecutionValidation do
 
   defp artifact?(_artifact, _outputs), do: false
 
-  defp error?(nil), do: true
+  def error?(nil), do: true
 
-  defp error?(%Error{} = error) do
+  def error?(%Error{} = error) do
     Validation.struct_shape?(error, Error) and error.__exception__ == true and
       error.category in [
         :validation,
@@ -148,7 +155,7 @@ defmodule SmolBox.ExecutionValidation do
          Validation.integer?(error.exit_code, -2_147_483_648, 2_147_483_647))
   end
 
-  defp error?(_error), do: false
+  def error?(_error), do: false
 
   defp history?(errors), do: Validation.list?(errors, 8) and Enum.all?(errors, &history_entry?/1)
 

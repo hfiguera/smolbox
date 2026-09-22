@@ -3,6 +3,8 @@ defmodule SmolBox.Execution do
   Versioned persisted execution evidence, independent of caller processes.
 
   State, execution evidence, collection, and cleanup are separate dimensions.
+  A `managed_machine` reference binds a command to a retained machine: its cleanup
+  releases the command slot, not that machine or its reservation.
   Versioned store operations are the authority; this module only validates and
   transforms records. A transition never sends a worker request. Dispatching may
   advance directly to collecting when buffered exec returns a known exit.
@@ -85,6 +87,7 @@ defmodule SmolBox.Execution do
     :accepted_at_ms,
     :updated_at_ms,
     :next_due_at_ms,
+    :managed_machine,
     :worker_id,
     :worker_generation,
     :machine_name,
@@ -125,6 +128,7 @@ defmodule SmolBox.Execution do
           | :unknown
           | :cancelling
   @type t :: %__MODULE__{
+          managed_machine: SmolBox.ManagedMachine.key() | nil,
           schema: 1,
           scope: String.t(),
           id: String.t(),
@@ -231,6 +235,7 @@ defmodule SmolBox.Execution do
   defp fields?(record) do
     checks = [
       record.schema == 1,
+      managed_key?(record.managed_machine, record.scope),
       record.state in @states,
       Validation.digest?(record.fingerprint),
       Validation.integer?(record.version, 1, 9_007_199_254_740_991),
@@ -267,7 +272,8 @@ defmodule SmolBox.Execution do
       state_evidence?(record),
       collection_state?(record),
       record.cleanup != :complete or terminal?(record) or record.state == :unknown,
-      record.cleanup != :complete or record.worker_id == nil or record.absence_at_ms != nil,
+      record.cleanup != :complete or record.worker_id == nil or record.managed_machine != nil or
+        record.absence_at_ms != nil,
       timestamp?(record.next_due_at_ms)
     ]
 
@@ -372,6 +378,10 @@ defmodule SmolBox.Execution do
   end
 
   defp result?(_result, _max), do: false
+  defp managed_key?(nil, _scope), do: true
+  defp managed_key?({scope, id}, scope), do: Validation.identifier?(id)
+  defp managed_key?(_key, _scope), do: false
+
   defp optional_time?(nil), do: true
   defp optional_time?(value), do: timestamp?(value)
 

@@ -1,6 +1,6 @@
 defmodule SmolBox.Machine do
   @moduledoc """
-  Validated observation of a disposable machine and its network policy.
+  Validated observation of a worker machine and its network policy.
 
   Additive response fields are ignored. Safety-relevant fields must be present;
   networking without explicit allowlists, mounts, ports, GPU or CUDA fail decoding and cannot be

@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+- Add `SmolBox.Machines`, `ManagedMachineSpec`, and durable `ManagedMachine`
+  records, with explicit retention, versioned lifecycle requests, sequential
+  commands, blocked uncertainty, and operator resolution.
+- Keep retained-machine reservations independent of commands, sharing worker
+  capacity with disposable executions. Stopped machines retain full reservations.
+- Add optional store transactions, codec v4 managed records, and the PostgreSQL
+  machine table/association migration. Upgrade every controller sharing workers
+  and storage before enabling the feature; see `docs/persistent-machines.md`.
+- Preserve disposable execution APIs and their v2/v3 serialized record shape.
+- Add shared memory/PostgreSQL concurrency tests and a two-process persistent-file
+  demonstration. See `docs/persistent-machines-validation.md` for evidence.
+
 ## 0.1.5 — September 18, 2026
 
 **Checkpoint upgrade notice:** upgrade every controller sharing a store before

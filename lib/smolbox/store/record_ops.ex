@@ -6,6 +6,8 @@ defmodule SmolBox.Store.RecordOps do
 
   alias SmolBox.{Error, Execution, Store, Validation}
 
+  @type owned_record :: Execution.t() | SmolBox.ManagedMachine.t()
+
   @spec initial(Execution.t()) :: :ok | {:error, Error.t()}
   def initial(record) do
     with :ok <- Execution.validate(record),
@@ -30,8 +32,8 @@ defmodule SmolBox.Store.RecordOps do
     end
   end
 
-  @spec claim(Execution.t(), Store.lease() | nil, String.t(), non_neg_integer(), pos_integer()) ::
-          {:ok, Execution.t()} | {:error, Error.t()}
+  @spec claim(owned_record(), Store.lease() | nil, String.t(), non_neg_integer(), pos_integer()) ::
+          {:ok, owned_record()} | {:error, Error.t()}
   def claim(record, worker_lease, owner, now, ttl) do
     current =
       if record.claim_owner,
@@ -58,7 +60,7 @@ defmodule SmolBox.Store.RecordOps do
     end
   end
 
-  @spec guard(Execution.t(), Store.guard(), Store.lease() | nil, non_neg_integer()) ::
+  @spec guard(owned_record(), Store.guard(), Store.lease() | nil, non_neg_integer()) ::
           :ok | {:error, Error.t()}
   def guard(record, %{owner: owner, generation: generation, version: version}, worker_lease, now) do
     cond do
@@ -136,7 +138,7 @@ defmodule SmolBox.Store.RecordOps do
     )
   end
 
-  @spec resources(Execution.t()) :: Store.resources()
+  @spec resources(owned_record()) :: Store.resources()
   def resources(record) do
     profile = record.spec.profile
 
@@ -161,7 +163,7 @@ defmodule SmolBox.Store.RecordOps do
       not (record.cleanup == :complete and record.reservation == nil and
              (Execution.terminal?(record) or record.state == :unknown))
 
-  @spec cursor(Execution.t()) :: Store.cursor()
+  @spec cursor(owned_record()) :: Store.cursor()
   def cursor(record), do: {record.next_due_at_ms, record.scope, record.id}
 
   defp lease_owner(nil, owner, now, ttl),
@@ -222,7 +224,7 @@ defmodule SmolBox.Store.RecordOps do
                updated_at_ms: max(now, record.updated_at_ms)
              })
            ),
-         :ok <- Execution.validate(next) do
+         :ok <- record.__struct__.validate(next) do
       {:ok, next}
     else
       _invalid -> error(:validation)

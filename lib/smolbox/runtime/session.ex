@@ -48,7 +48,7 @@ defmodule SmolBox.Runtime.Session do
         max(now(session), record.updated_at_ms)
       ])
 
-  @spec guard(Execution.t()) :: SmolBox.Store.guard()
+  @spec guard(Execution.t() | SmolBox.ManagedMachine.t()) :: SmolBox.Store.guard()
   def guard(record),
     do: %{owner: record.claim_owner, generation: record.generation, version: record.version}
 
