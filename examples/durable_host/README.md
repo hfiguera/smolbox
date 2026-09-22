@@ -1,5 +1,9 @@
 # Durable host example
 
+This checkout defaults to smolvm **1.17.0**; published 0.1.5 retains 1.16.1.
+Set `SMOLBOX_RUNTIME_VERSION=1.16.1` explicitly for an existing 1.16.1 worker.
+See [qualification](../../docs/compatibility.md#smolvm-1-17-0-qualification).
+
 This standalone host owns an Ecto Repo and a PostgreSQL implementation of
 `SmolBox.Store`. It includes a managed Python execution demonstration and a
 real-worker process-kill recovery suite. A separate checkpoint demo restores
@@ -50,10 +54,10 @@ dependency can change while the example lockfile stays the same.
 Configure the worker, pinned Python artifact, private object directory,
 fingerprint key file, and execution ID described in `../minimal_host/README.md`.
 On Linux x86_64 or macOS Apple Silicon,
-omitting `SMOLBOX_RUNTIME_VERSION` selects 1.16.1 with SmolBox 0.1.5
-(0.1.3 defaults to 1.16.0). Set it to `1.16.0`, `1.14.6` or `1.14.1`
+omitting `SMOLBOX_RUNTIME_VERSION` selects 1.17.0 in this checkout
+(0.1.3 defaults to 1.16.0). Set it to `1.16.1`, `1.16.0`, `1.14.6` or `1.14.1`
 for an existing older worker. Consult the
-[qualification evidence](../../docs/compatibility.md#smolvm-1-16-1-qualification). Supply the 1.14.6, 1.16.0 or 1.16.1 host's `resize2fs` for smaller disk
+[qualification evidence](../../docs/compatibility.md#smolvm-1-17-0-qualification). Supply the 1.14.6, 1.16.0, 1.16.1 or 1.17.0 host's `resize2fs` for smaller disk
 requests; see [host prerequisites](../../docs/compatibility.md#macos-1-14-6-prerequisites).
 Child controllers inherit the selection and require an
 exact match with the server. Changing it does not upgrade the worker itself.
@@ -151,7 +155,7 @@ cases that preserve execution progress before/after SQL result persistence.
 This example requires SmolBox **0.1.5** or this checkout. Version 0.1.4 does not
 include checkpoint execution. This demo uses only the guest shell and the fixture in
 [`scripts/checkpoints/prepare-fixture.sh`](../../scripts/checkpoints/prepare-fixture.sh).
-It requires smolvm **1.16.1**, an approved idle offline checkpoint captured on the
+It requires smolvm **1.17.0** (or explicitly selected **1.16.1**), an approved idle offline checkpoint captured on the
 same platform and compatible CPU, and the database configuration and migrations
 described above. Read [checkpoint approval and upgrades](../../docs/checkpoints.md)
 before registering the source. A digest verifies bytes, not whether captured
@@ -220,7 +224,7 @@ forces deletion after an uncertain stop.
 
 The benchmark uses this host's real PostgreSQL store, directory adapter and a
 previously provisioned, initially idle smolvm worker matching `SMOLBOX_RUNTIME_VERSION`
-(default 1.16.1). It provisions no
+(default 1.17.0). It provisions no
 service, changes no host quotas and clears no image/page cache. Apply the example
 migrations first. Use native approved artifacts, a new private object directory,
 fresh 32-byte fingerprint/encryption key files and a unique store partition for
@@ -384,7 +388,7 @@ used by the image demonstration (`SMOLBOX_RUNTIME_URL`, optional
 `SMOLBOX_ARTIFACT_ROOT`, `SMOLBOX_FINGERPRINT_KEY_FILE`,
 `SMOLBOX_ENCRYPTION_KEY_FILE`, `SMOLBOX_STORE_PARTITION`, and
 `SMOLBOX_EXECUTION_ID`). The artifact directory must already exist with mode 0700;
-both key files must contain 32 bytes. Use a dedicated approved 1.16.1 worker and an
+both key files must contain 32 bytes. Use a dedicated approved 1.17.0 worker and an
 image qualified for 2 GiB storage/overlay requests with working `resize2fs`.
 
 ```sh
@@ -397,3 +401,8 @@ The first retains the machine and guest file. The second verifies file persisten
 across reconnection and stop/start, then explicitly deletes and checks released
 capacity. Failures leave durable evidence; do not erase records to start over.
 See [the feature guide](../../docs/persistent-machines.md) for resolution and rollback.
+
+The persistent-machine walkthrough refreshes an inspected version and retries
+only `stale_version` / `not_dispatched` lifecycle conflicts, for up to five
+seconds. It does not retry uncertain worker mutations. Each refresh is a new
+lifecycle request; the walkthrough assumes one operator controls that handle.

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Default to smolvm 1.17.0 on Linux x86_64 and macOS Apple Silicon after
+  execution, recovery, checkpoint, network and persistent-machine qualification.
+  Retain explicit 1.16.1 and earlier supported workers. Install worker binaries
+  separately; keep old checkpoint approvals pinned to their capture version.
+  See [compatibility evidence](docs/compatibility.md#smolvm-1-17-0-qualification).
+
 - Add `SmolBox.Machines`, `ManagedMachineSpec`, and durable `ManagedMachine`
   records, with explicit retention, versioned lifecycle requests, sequential
   commands, blocked uncertainty, and operator resolution.

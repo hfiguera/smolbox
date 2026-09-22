@@ -75,10 +75,10 @@ defmodule SmolBox.Client do
   Create a machine from an approved prepared artifact on the worker, offline by default.
 
   Returns creation evidence after matching name, allocations and network policy.
-  Checkpoint sources additionally require 1.16.1, a created branchable response,
+  Checkpoint sources additionally require 1.16.1 or 1.17.0, a created branchable response,
   and offline networking. Captured idle state and immutable source contents are
   operator approvals, not remotely attested by this response.
-  An enabled policy requires a 1.16.0 or 1.16.1 health observation. That preflight and the
+  An enabled policy requires a 1.16.0, 1.16.1 or 1.17.0 health observation. That preflight and the
   create request share the configured operation timeout.
   Persist intent before this call and creation evidence before further mutations.
   A lost or mismatched response can leave creation uncertain; it does not authorize
@@ -102,12 +102,12 @@ defmodule SmolBox.Client do
   end
 
   defp creation_runtime(client, %{source: :checkpoint}),
-    do: creation_runtime_versions(client, ["1.16.1"])
+    do: creation_runtime_versions(client, ["1.16.1", "1.17.0"])
 
   defp creation_runtime(client, %{network: :offline}), do: {:ok, client}
 
   defp creation_runtime(client, _spec),
-    do: creation_runtime_versions(client, ["1.16.0", "1.16.1"])
+    do: creation_runtime_versions(client, ["1.16.0", "1.16.1", "1.17.0"])
 
   defp creation_runtime_versions(client, versions) do
     with :ok <- Worker.validate(client.worker) do

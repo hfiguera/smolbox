@@ -4,6 +4,20 @@ Version: `0.1.5`. The library's supported qualification is
 `:development`; requested hard-control options remain unsupported. The original
 release evidence below records the client/controller contract on Linux and macOS.
 
+## smolvm 1.17.0 qualification
+
+**Default in the unreleased checkout.** Linux x86_64 and macOS Apple Silicon
+passed the real-worker execution, PostgreSQL recovery, checkpoint, persistent-file,
+network and worker-fault campaign. Explicit 1.16.1 support remains.
+See [the qualification report](runtime-1.17.0-qualification.md) and
+[machine-readable evidence](evidence/smolvm-1.17.0.json) for inputs and limits.
+
+Version selection neither upgrades a worker nor migrates a checkpoint. Pin existing
+workers and approvals explicitly, and follow the [worker upgrade procedure](host-integration.md#upgrading-a-worker).
+The qualification remains `:development`; no production isolation certification
+or cross-version checkpoint portability is implied. Published 0.1.5 and the
+historical campaigns below retain their recorded versions and results.
+
 ## Checkpoint execution in 0.1.5
 
 Operator-approved idle, offline checkpoints have a separate contract on smolvm
@@ -161,7 +175,7 @@ support it. Set `runtime_version: "1.16.0"` explicitly before
 upgrading the library if you need to retain that worker. Install the worker
 separately and configure the exact version on every controller that owns it.
 
-Linux ARM64 remains unsupported for 1.14.6, 1.16.0 and 1.16.1. Native macOS testing covers
+Linux ARM64 remains unsupported for 1.14.6, 1.16.0, 1.16.1 and 1.17.0. Native macOS testing covers
 ordinary compatibility and controlled lifecycle recovery. Exhaustion and
 adversarial testing remain in the disposable Linux lab.
 

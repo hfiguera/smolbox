@@ -40,6 +40,10 @@ defmodule SmolBox.CheckpointTest do
       assert {:error, _} = approval(options)
     end
 
+    for version <- ["1.16.1", "1.17.0"] do
+      assert {:ok, %{runtime_version: ^version}} = approval(runtime_version: version)
+    end
+
     assert {:error, _} = Checkpoint.new([])
     assert {:error, _} = Checkpoint.validate(%{})
     assert {:ok, _} = approval(platform: :macos, architecture: "aarch64")

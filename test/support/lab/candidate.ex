@@ -1,7 +1,7 @@
 defmodule SmolBox.LabCandidate do
   @moduledoc false
 
-  def runtime_version, do: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.16.1")
+  def runtime_version, do: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.17.0")
 
   # Cold artifact creation under the one-CPU cap exceeded the fixture's former
   # 55-second receive budget. This remains within Profile's existing bounds.

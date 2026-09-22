@@ -1,5 +1,10 @@
 # Deployment and trust boundaries
 
+This unreleased checkout defaults to **smolvm 1.17.0** on Linux x86_64 and macOS
+Apple Silicon; published SmolBox 0.1.5 still defaults to 1.16.1. Existing workers
+can retain an explicit `runtime_version: "1.16.1"`. See the
+[1.17.0 qualification](compatibility.md#smolvm-1-17-0-qualification).
+
 The controlled networking feature introduced in 0.1.3 permits explicit operator-approved
 outbound policies on smolvm 1.16.0. SmolBox 0.1.5 defaults to 1.16.1,
 with support for those policies. Existing offline defaults and prior offline
@@ -193,7 +198,7 @@ its store process stops.
    host quotas and all advertised platform tests. SmolBox 0.1.5 defaults to
    smolvm 1.16.1 and retains explicit 1.16.0, 1.14.6 and 1.14.1 support, subject
    to the [supported platform matrix](compatibility.md#runtime-selection).
-   Controlled networking requires 1.16.0 or 1.16.1. The worker must report the
+   Controlled networking requires 1.16.0, 1.16.1 or 1.17.0 in this checkout. The worker must report the
    exact configured version; there is no automatic fallback.
 5. Give changed artifacts/profiles new immutable revisions. Do not rewrite saved
    execution specifications or resubmit a changed specification under an existing
@@ -238,7 +243,8 @@ for the tested configuration and recovery evidence.
 ## Approved checkpoint state (0.1.5)
 
 Checkpoints contain memory as well as disks. SmolBox accepts only operator-approved
-idle, offline checkpoints on the qualified 1.16.1 platform. An entrypoint override
+idle, offline checkpoints on qualified 1.16.1 or 1.17.0 workers in this checkout
+(1.16.1 in published 0.1.5). An entrypoint override
 cannot neutralize captured processes. Keep credentials, pending user workloads,
 connections and automatic restart out of the source. Protect the checkpoint path
 against replacement and restrict artifact access as sensitive data. Approval is

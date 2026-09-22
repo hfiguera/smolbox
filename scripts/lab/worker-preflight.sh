@@ -44,6 +44,12 @@ case "${SMOLBOX_CANDIDATE_VERSION:-1.14.1}" in
     krun=60ba3b23ba12dee1fb31265d0ba8d69ad8b91b0c81634eb8748f116e0ea122b4
     agent=d83b7a0cda0af6351b463700c7268f0016443536d4396910b9dc21165fb790ea
     ;;
+  1.17.0)
+    runtime=/opt/smolbox/runtime-1.17.0
+    binary=40b9bc8f24f7cc77c371db4784742e6b6724f09a11b83d63776b944734b7912d
+    krun=02a694ac055703fe32f2412fd6d79a7387c15226be058db03aadb750dc32ba9e
+    agent=1a41b572dd0ad1767c31a38854d26c286e850646d2610eb770dc5e91579028ef
+    ;;
   *) exit 1 ;;
 esac
 [[ ! -w $runtime/smolvm-bin && ! -w /opt/smolbox/catalog/python.smolmachine ]] || exit 1

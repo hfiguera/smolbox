@@ -63,7 +63,7 @@ defmodule SmolBox.CI.PreflightTest do
   end
 
   test "candidate preflight recognizes pinned distributions without granting runtime admission" do
-    for version <- [nil, "1.14.1", "1.14.6", "1.16.0", "1.16.1"] do
+    for version <- [nil, "1.14.1", "1.14.6", "1.16.0", "1.16.1", "1.17.0"] do
       manifest = if version, do: Map.put(manifest(), "runtime_version", version), else: manifest()
       assert Preflight.validate!(manifest, "linux", false, %{}).port == 19_470
 

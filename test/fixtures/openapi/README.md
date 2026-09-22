@@ -67,3 +67,16 @@ Commit: `9504e94e3581a1f52c414247edcbcd6d6b49a71a`.
 Subset SHA-256: `29e03fa13f67ccdfa86b048fd24713172c80dfeda8431d7b218d893df39a2b94`.
 Captured from the official archives during the September 17, 2026 campaign.
 As with older captures, exported schema metadata is not a runtime health check.
+
+## smolvm 1.17.0
+
+Captured from the official Darwin ARM64 binary on September 22, 2026 UTC.
+The subset retains the same eight paths and nineteen referenced schemas.
+Shared schemas are unchanged; file GET now documents directory JSON alongside
+binary file responses. Definitions are retained verbatim.
+
+Source: https://github.com/smol-machines/smolvm/tree/v1.17.0
+Commit: `d33b5a4adeb844365922cd2a29a89d93a94008ad`.
+Full schema SHA-256: `db59464fd2d2b8b95ad344ab6218b81cdf842c29bec5e099262db9d8468a4676`.
+Subset SHA-256: `c907bfb2020a58bf0468332c448f56068153aafe98bb56d4a5c39a96e43e0bcd`.
+Runtime identity and file media types are checked independently against the worker.

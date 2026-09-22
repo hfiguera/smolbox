@@ -8,7 +8,7 @@ defmodule SmolBox.Wire.SSETest do
   @events [{:stdout, "café\nnext"}, {:stderr, "error"}, {:exit, 7}]
 
   test "decodes the captured upstream SSE framing including trailing newlines" do
-    for prefix <- ["", "1.14.6/", "1.16.0/", "1.16.1/"] do
+    for prefix <- ["", "1.14.6/", "1.16.0/", "1.16.1/", "1.17.0/"] do
       wire = File.read!("test/fixtures/wire/#{prefix}exec.sse")
       assert {:ok, state, [{:stdout, "café\n"}, {:exit, 0}]} = SSE.feed(%SSE{}, wire)
       assert :ok = SSE.finish(state)

@@ -62,7 +62,7 @@ Version 0.1.3 defaults to 1.16.0 and 0.1.2 to 1.14.6.
 Set `runtime_version` in the private worker manifest to select a version explicitly;
 preflight verifies that version's binary checksum and exports
 `SMOLBOX_RUNTIME_VERSION` for runtime tests, examples and service fault checks.
-An omitted field selects 1.16.1. Maintainer preflight and public worker/network
+An omitted field selects 1.17.0 in this checkout. Explicit 1.16.1 remains supported. Maintainer preflight and public worker/network
 admission also support explicitly selected 1.16.0. No temporary admission patch
 is needed on this checkout. The report `docs/runtime-1.16.1-qualification.md`
 documents the tested preservation/disposal contract and graceful-stop limitation.
@@ -173,7 +173,7 @@ with actual observations; the sample deliberately does not pass preflight:
 {
   "schema": 1,
   "platform": "linux",
-  "runtime_version": "1.16.1",
+  "runtime_version": "1.17.0",
   "ephemeral_runner": true,
   "expires_at_unix": 0,
   "lifecycle_id": "scheduler-owned-unique-id",

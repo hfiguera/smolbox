@@ -82,7 +82,7 @@ artifact = %{
 {:ok, worker} =
   WorkerConfig.new(
     client: client,
-    runtime_version: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.16.1"),
+    runtime_version: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.17.0"),
     platform: :linux,
     architecture: "x86_64",
     profiles: [profile],
@@ -239,7 +239,7 @@ report =
 report =
   Map.merge(report, %{
     status: "passed",
-    runtime: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.16.1"),
+    runtime: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.17.0"),
     mode: mode,
     cleanup: result.cleanup,
     evidence: result.evidence,

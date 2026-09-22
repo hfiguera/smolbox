@@ -1,6 +1,8 @@
 # Checkpoint examples and measurements
 
-These scripts require SmolBox 0.1.5 or this checkout and smolvm 1.16.1. Read
+These scripts default to smolvm 1.17.0 in this checkout. Set
+`SMOLBOX_RUNTIME_VERSION=1.16.1` for an existing 1.16.1 worker and matching
+checkpoint capture. Published SmolBox 0.1.5 supports 1.16.1 only. Read
 [checkpoint approvals](../../docs/checkpoints.md) before restoring a fixture.
 Use a dedicated idle worker, private artifact paths and synthetic data. Do not
 use arbitrary application checkpoints or a shared production worker.

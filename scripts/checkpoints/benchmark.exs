@@ -17,7 +17,8 @@ true = workload in ["bare", "dataset", "dataset-precomputed"]
   )
 
 {:ok, client} = Client.new(worker)
-{:ok, %{version: "1.16.1"}} = Client.health(client)
+version = System.get_env("SMOLBOX_RUNTIME_VERSION", "1.17.0")
+{:ok, %{version: ^version}} = Client.health(client)
 {:ok, []} = Client.list(client)
 
 argv =
@@ -94,7 +95,7 @@ rows =
 IO.puts(
   Jason.encode!(
     %{
-      runtime: "1.16.1",
+      runtime: version,
       platform: inspect(:os.type()),
       workload: workload,
       cache_mode: System.get_env("SMOLBOX_CHECKPOINT_CACHE_MODE", "unspecified"),
