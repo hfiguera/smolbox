@@ -71,15 +71,19 @@ defmodule SmolBox.TerminalTransportTest do
     {:ok, worker} =
       Worker.new("unix", "http://localhost",
         unix_socket: socket,
-        operation_timeout_ms: 200,
-        receive_timeout_ms: 100
+        operation_timeout_ms: 5000,
+        receive_timeout_ms: 1000
       )
 
     {:ok, client} = Client.new(worker)
-    {:ok, spec} = Spec.new(session_ms: 2000, idle_ms: 1000)
+    {:ok, spec} = Spec.new(session_ms: 30_000, idle_ms: 15_000)
     assert {:ok, handle} = Client.open_terminal(client, "owned", spec)
     assert {:ok, {:output, "ready\r\n"}} = Terminal.next(handle)
-    assert {:error, %Error{category: :expired}} = Terminal.next(handle, 300)
+    # Allow HTTP preflight time on loaded runners, then exceed that same budget
+    # on the established WebSocket to prove it does not inherit HTTP deadlines.
+    assert {:error, %Error{category: :expired}} =
+             Terminal.next(handle, worker.operation_timeout_ms + 100)
+
     assert :ok = Terminal.input(handle, "still-live")
     assert {:ok, {:output, "still-live"}} = Terminal.next(handle)
     assert :ok = Terminal.close(handle)
