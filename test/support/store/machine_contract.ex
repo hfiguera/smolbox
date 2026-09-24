@@ -64,6 +64,38 @@ defmodule SmolBox.Store.MachineContract do
     running
   end
 
+  def guest_files(adapter, store) do
+    old = record()
+    {:ok, paths} = SmolBox.GuestPaths.new(upload_roots: ["/app"], download_roots: ["/app"])
+
+    spec = %{
+      old.spec
+      | profile: %{old.spec.profile | guest_paths: paths, max_file_bytes: 2_097_152}
+    }
+
+    {:ok, fingerprint} = ManagedMachineSpec.fingerprint(spec, :binary.copy(<<1>>, 32))
+    {:ok, record} = ManagedMachine.new(spec, fingerprint, 1000)
+    assert {:ok, %{guest_files: 1}} = adapter.capabilities(store)
+    assert {:ok, ^record} = adapter.machine(store, :accept, [record, 10])
+    assert {:ok, ^record} = adapter.machine(store, :fetch, [ManagedMachine.key(record)])
+    assert {:error, %{category: :identity_conflict}} = adapter.machine(store, :accept, [old, 10])
+
+    assert {:ok, deleted} =
+             adapter.machine(store, :request, [
+               ManagedMachine.key(record),
+               :delete,
+               record.version,
+               1100
+             ])
+
+    assert deleted.spec.profile.guest_paths == paths
+    assert {:ok, ^deleted} = adapter.machine(store, :fetch, [ManagedMachine.key(deleted)])
+    execution = Contract.record()
+    execution = %{execution | spec: %{execution.spec | profile: spec.profile}}
+    assert {:ok, saved, :inserted} = adapter.accept(store, execution, 10)
+    assert {:ok, ^saved} = adapter.fetch(store, Execution.key(execution))
+  end
+
   def workload(adapter, store) do
     original = record()
     {:ok, workload} = SmolBox.Workload.new(cmd: ["server"], env: [{"TOKEN", "sensitive"}])

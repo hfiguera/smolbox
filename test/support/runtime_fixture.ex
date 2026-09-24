@@ -14,11 +14,28 @@ defmodule SmolBox.RuntimeFixture do
       )
 
     {:ok, endpoint} =
-      Worker.new("peer", "http://127.0.0.1:#{port}", allow_insecure_loopback: true)
+      Worker.new("peer", "http://127.0.0.1:#{port}",
+        allow_insecure_loopback: true,
+        max_request_bytes: Keyword.get(options, :max_file_bytes, 1_048_576)
+      )
 
-    {:ok, client} = Client.new(endpoint)
+    {:ok, client} =
+      Client.new(endpoint,
+        guest_paths: options[:guest_paths],
+        max_file_bytes: Keyword.get(options, :max_file_bytes, 1_048_576)
+      )
+
     spec = Contract.record().spec
     spec = %{spec | profile: %{spec.profile | network: Keyword.get(options, :network, :offline)}}
+
+    spec = %{
+      spec
+      | profile: %{
+          spec.profile
+          | guest_paths: options[:guest_paths],
+            max_file_bytes: Keyword.get(options, :max_file_bytes, 1_048_576)
+        }
+    }
 
     checkpoint? = Keyword.get(options, :checkpoint, false)
 

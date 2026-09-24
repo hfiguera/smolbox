@@ -1,7 +1,7 @@
 defmodule SmolBox.Runtime.Files do
   @moduledoc false
   alias SmolBox.{Client, Files, Machine, Telemetry}
-  alias SmolBox.Runtime.Session
+  alias SmolBox.Runtime.{Session, WorkerConfig}
 
   def stage(session, record) do
     Enum.reduce_while(record.spec.inputs, :ok, fn input, :ok ->
@@ -41,7 +41,8 @@ defmodule SmolBox.Runtime.Files do
   defp stage_input(session, record, input) do
     {adapter, context} = session.config.artifact_store
 
-    with {:ok, bytes} <-
+    with :ok <- approved(session, record),
+         {:ok, bytes} <-
            Session.io(session, record, :preparation, fn ->
              adapter.read(
                context,
@@ -83,7 +84,8 @@ defmodule SmolBox.Runtime.Files do
   defp collect_output(session, record, output) do
     {adapter, context} = session.config.artifact_store
 
-    with :ok <- running(session, record),
+    with :ok <- approved(session, record),
+         :ok <- running(session, record),
          {:ok, bytes} <-
            Session.io(session, record, :collection, fn ->
              Client.download(
@@ -106,6 +108,14 @@ defmodule SmolBox.Runtime.Files do
 
       Session.patch(session, artifacts: record.artifacts ++ [artifact])
     end
+  end
+
+  defp approved(%{worker: nil}, _record), do: Session.error(:unsupported_capability, :worker)
+
+  defp approved(session, record) do
+    if WorkerConfig.supports?(session.worker, record.spec),
+      do: :ok,
+      else: Session.error(:unsupported_capability, :worker)
   end
 
   defp running(session, record) do

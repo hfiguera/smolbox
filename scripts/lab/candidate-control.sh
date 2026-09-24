@@ -5,7 +5,7 @@ set -euo pipefail
 root=/srv/sbq
 unit=smolbox-qualification.service
 group=/sys/fs/cgroup/system.slice/$unit
-action=${1:?Expected start, restart, stop, metrics, deadline, or fault}
+action=${1:?Expected start, restart, stop, metrics, deadline, file-cap, or fault}
 
 wait_stopped() {
   # systemd can return before init has reaped the last orphan. Observe absence;
@@ -21,6 +21,14 @@ wait_stopped() {
 }
 
 case "$action" in
+  file-cap)
+    bytes=${2:?Expected 1048576 or 16777216 bytes}
+    [[ $bytes == 1048576 || $bytes == 16777216 ]] || exit 1
+    [[ $(systemctl show "$unit" -p MainPID --value) == 0 ]] || exit 1
+    mkdir -p "/run/systemd/system/$unit.d"
+    printf '[Service]\nEnvironment=SMOLVM_FILE_TRANSFER_MAX_BYTES=%s\nEnvironment=SMOLBOX_QUALIFICATION_FILE_BYTES=%s\n' "$bytes" "$bytes" > "/run/systemd/system/$unit.d/65-file-cap.conf"
+    systemctl daemon-reload
+    ;;
   deadline)
     seconds=${2:?Expected 300 or 900 seconds}
     [[ $seconds == 300 || $seconds == 900 ]] || exit 1

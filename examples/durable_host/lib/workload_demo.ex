@@ -1,6 +1,7 @@
 defmodule SmolBox.DurableHost.WorkloadDemo do
   @moduledoc "Immutable startup workload and console diagnostics across separate controllers."
-  alias SmolBox.{Client, Machines, ManagedMachineSpec, Runtime, Workload}
+  alias SmolBox.{Machines, ManagedMachineSpec, Runtime, Workload}
+
   alias SmolBox.DurableHost.{Repo, Store}
   alias SmolBox.Example.Setup
   import SmolBox.DurableHost.PersistentSteps
@@ -108,16 +109,7 @@ defmodule SmolBox.DurableHost.WorkloadDemo do
     execute("delete", c)
   end
 
-  defp execute("delete", c) do
-    {:ok, _} = lifecycle(c.runtime, c.handle, :delete)
-    deleted = wait_machine(c.runtime, c.handle, &(&1.state == :deleted))
-    {:error, %{category: :not_found}} = Client.inspect_machine(c.client, deleted.machine_name)
-    {:ok, %{slots: 0, disk_gb: 0}} = Store.usage(c.store, "example-worker")
-
-    IO.puts(
-      Jason.encode!(%{phase: "delete", absence_verified: true, reservations_released: true})
-    )
-  end
+  defp execute("delete", c), do: delete_machine(c)
 
   defp verify(c, suffix, count) do
     program =

@@ -339,3 +339,14 @@ before accepting workload intent. Tombstones retain the configuration, so deleti
 a machine does not make old-reader rollback safe. Follow the
 [workload upgrade procedure](workloads.md#persistence-and-upgrades). Console streams
 have no durable cursor or transcript and cannot establish application readiness.
+
+## Guest path policies and larger files
+
+Expanded path/file profiles selectively use codec v9 and store capability
+`guest_files: 1`. Upgrade every shared controller, reader and adapter before
+allowing these writes; no SQL migration is required. Ordinary v1–v8 records load
+with default paths and preserve their previous fingerprints/encodings. New policy
+is immutable and retained in tombstones; deletion does not make rollback safe.
+Recovery rechecks current worker approvals before file I/O. It cannot adopt a
+broader policy or silently downgrade a file budget. Unknown command outcomes
+remain blocked without replay. See [guest file recovery](guest-files.md#recovery-and-upgrades).

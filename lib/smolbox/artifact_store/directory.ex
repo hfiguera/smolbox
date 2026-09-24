@@ -11,8 +11,8 @@ defmodule SmolBox.ArtifactStore.Directory do
   durability, disk quotas, backup, and removal of unreferenced blobs/temp files.
 
   `seed/4` registers an approved input. `read_output/4` retrieves a stored output.
-  Each read is bounded to one MiB. Output replacement requires a distinct execution
-  identity. No archive extraction, globbing, URLs, or guest-selected host paths are
+  Each file is bounded to one MiB by default, configurable up to 16 MiB. Output
+  replacement requires a distinct execution identity. No archive extraction, globbing, URLs, or guest-selected host paths are
   supported. The adapter must not share its root with untrusted host processes.
   """
   @behaviour SmolBox.ArtifactStore
@@ -21,9 +21,9 @@ defmodule SmolBox.ArtifactStore.Directory do
 
   @enforce_keys [:root]
   @derive {Inspect, only: []}
-  defstruct [:root]
-  @type t :: %__MODULE__{root: String.t()}
-  @max 1_048_576
+  defstruct [:root, max_file_bytes: 1_048_576]
+  @type t :: %__MODULE__{root: String.t(), max_file_bytes: pos_integer()}
+  @max 16_777_216
 
   @doc """
   Configure an absolute existing private directory with mode `0700`.
@@ -31,25 +31,33 @@ defmodule SmolBox.ArtifactStore.Directory do
   The directory is not created by this call. Pass the returned context as
   `{SmolBox.ArtifactStore.Directory, context}` in the runtime's `:artifact_store`
   option. This adapter is not a process and needs no supervisor child.
+  `:max_file_bytes` defaults to 1 MiB and accepts 1 byte–16 MiB; coordinate it
+  with the profile and client limits. Reads and writes buffer each file in memory.
   """
+  @spec new(String.t(), keyword()) :: {:ok, t()} | {:error, Error.t()}
   @spec new(String.t()) :: {:ok, t()} | {:error, Error.t()}
-  def new(root) when is_binary(root) do
-    with true <- Path.type(root) == :absolute,
+  def new(root, options \\ [])
+
+  def new(root, options) when is_binary(root) do
+    with true <- Validation.keys?(options, [:max_file_bytes]),
+         max = Keyword.get(options, :max_file_bytes, 1_048_576),
+         true <- Validation.integer?(max, 1, @max),
+         true <- Path.type(root) == :absolute,
          {:ok, %{type: :directory, mode: mode}} <- File.lstat(root),
          true <- band(mode, 0o777) == 0o700 do
-      {:ok, %__MODULE__{root: root}}
+      {:ok, %__MODULE__{root: root, max_file_bytes: max}}
     else
       _invalid -> error(:validation)
     end
   end
 
-  def new(_root), do: error(:validation)
+  def new(_root, _options), do: error(:validation)
 
   @doc """
   Store approved input bytes under a scope and opaque source reference.
 
-  Bytes must fit within 1 MiB. The source reference is used as `"source"` in an
-  input manifest; it is not a filename. Repeating identical bytes succeeds;
+  Bytes must fit within the adapter's configured `max_file_bytes`. The source
+  reference is used as `"source"` in an input manifest; it is not a filename. Repeating identical bytes succeeds;
   different bytes under the same reference return an identity conflict.
   """
   @spec seed(t(), String.t(), String.t(), binary()) :: :ok | {:error, Error.t()}
@@ -68,8 +76,8 @@ defmodule SmolBox.ArtifactStore.Directory do
   @doc """
   Read a collected output using its execution handle and manifest destination.
 
-  `max` is a positive byte limit up to 1 MiB. This reads host artifact storage and
-  remains usable after VM cleanup. `:not_found` means no receipt/blob was found;
+  `max` is a positive byte limit up to the configured `max_file_bytes`. This reads
+  host artifact storage and remains usable after VM cleanup. `:not_found` means no receipt/blob was found;
   check the execution's collection state before expecting an output.
   """
   @spec read_output(t(), {String.t(), String.t()}, String.t(), pos_integer()) ::
@@ -79,8 +87,10 @@ defmodule SmolBox.ArtifactStore.Directory do
 
   defp save(store, key, bytes, digest) do
     with :ok <- validate_key(key),
-         true <- is_binary(bytes) and byte_size(bytes) <= @max and Files.sha256(bytes) == digest,
-         {:ok, _store} <- new(store.root),
+         true <-
+           is_binary(bytes) and byte_size(bytes) <= store.max_file_bytes and
+             Files.sha256(bytes) == digest,
+         {:ok, _store} <- new(store.root, max_file_bytes: store.max_file_bytes),
          :ok <- install(store, digest <> ".blob", bytes),
          :ok <- install(store, receipt(key), digest) do
       :ok
@@ -92,8 +102,8 @@ defmodule SmolBox.ArtifactStore.Directory do
 
   defp load(store, key, max) do
     with :ok <- validate_key(key),
-         true <- Validation.integer?(max, 1, @max),
-         {:ok, _store} <- new(store.root),
+         true <- Validation.integer?(max, 1, store.max_file_bytes),
+         {:ok, _store} <- new(store.root, max_file_bytes: store.max_file_bytes),
          {:ok, digest} <- bounded_read(Path.join(store.root, receipt(key)), 64),
          true <- Validation.digest?(digest),
          {:ok, bytes} <- bounded_read(Path.join(store.root, digest <> ".blob"), max),

@@ -1,7 +1,7 @@
 defmodule SmolBox.PortMappingTest do
   use ExUnit.Case, async: true
   alias SmolBox.{Machine, MachineSpec, ManagedMachineSpec, PortMapping}
-  alias SmolBox.Store.{Codec, CodecExecution, Contract, MachineContract, Memory}
+  alias SmolBox.Store.{Codec, CodecExecution, CodecFiles, Contract, MachineContract, Memory}
 
   test "fixed TCP mappings have bounded exact fields and canonical host identity" do
     {:ok, first} = PortMapping.new(host: 8080, guest: 80)
@@ -74,6 +74,7 @@ defmodule SmolBox.PortMappingTest do
 
     legacy =
       record
+      |> CodecFiles.strip()
       |> Map.delete(:reserved_ports)
       |> Map.update!(:spec, &Map.drop(&1, [:ports, :workload]))
 
@@ -90,6 +91,7 @@ defmodule SmolBox.PortMappingTest do
 
     old =
       record
+      |> CodecFiles.strip()
       |> Map.delete(:reserved_ports)
       |> Map.update!(:spec, &Map.drop(&1, [:ports, :workload]))
       |> Map.update!(:created_machine, &Map.delete(&1, :ports))
@@ -104,6 +106,7 @@ defmodule SmolBox.PortMappingTest do
       command
       |> Map.update!(:created_machine, &Map.delete(&1, :ports))
       |> CodecExecution.strip()
+      |> CodecFiles.strip()
 
     assert {:ok, ^command} =
              Codec.decode("smolbox-record-v4\0" <> :erlang.term_to_binary(old_command))

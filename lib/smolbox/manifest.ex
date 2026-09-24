@@ -8,9 +8,12 @@ defmodule SmolBox.Manifest do
   never URLs or host paths. Each direction allows at most 32 unique paths and
   references. Collection takes a byte snapshot of each file; a multi-file atomic
   snapshot is not promised. Neither archives nor recursive globs are interpreted.
+  The profile authorizes paths and per-file/per-direction byte budgets. Inputs
+  require both upload and download approval because staging verifies a readback;
+  outputs require download approval. Defaults remain `/workspace` and 1 MiB.
   """
 
-  alias SmolBox.{Error, Files, Profile, Validation}
+  alias SmolBox.{Error, GuestPaths, Profile, Validation}
 
   @type input :: %{
           required(String.t()) => String.t() | non_neg_integer()
@@ -19,8 +22,8 @@ defmodule SmolBox.Manifest do
 
   @spec validate(term(), term(), Profile.t()) :: :ok | {:error, Error.t()}
   def validate(inputs, outputs, %Profile{} = profile) do
-    if entries?(inputs, &input?(&1, profile.max_file_bytes), "source") and
-         entries?(outputs, &output?(&1, profile.max_file_bytes), "destination") and
+    if entries?(inputs, &input?(&1, profile), "source") and
+         entries?(outputs, &output?(&1, profile), "destination") and
          total(inputs, "size") <= profile.max_total_file_bytes and
          total(outputs, "max_bytes") <= profile.max_total_file_bytes do
       :ok
@@ -45,22 +48,28 @@ defmodule SmolBox.Manifest do
            "sha256" => digest,
            "mode" => "runtime_default"
          } = entry,
-         max
+         profile
        ) do
-    map_size(entry) == 5 and Validation.identifier?(source) and file_path?(path) and
-      Validation.integer?(size, 0, max) and Validation.digest?(digest)
+    map_size(entry) == 5 and Validation.identifier?(source) and file_path?(path, profile, :upload) and
+      GuestPaths.allowed?(profile.guest_paths, :download, path) and
+      Validation.integer?(size, 0, profile.max_file_bytes) and Validation.digest?(digest)
   end
 
   defp input?(_entry, _max), do: false
 
   defp output?(
          %{"destination" => destination, "path" => path, "max_bytes" => max_bytes} = entry,
-         max
+         profile
        ) do
-    map_size(entry) == 3 and Validation.identifier?(destination) and file_path?(path) and
-      Validation.integer?(max_bytes, 1, max)
+    map_size(entry) == 3 and Validation.identifier?(destination) and
+      file_path?(path, profile, :download) and
+      Validation.integer?(max_bytes, 1, profile.max_file_bytes)
   end
 
   defp output?(_entry, _max), do: false
-  defp file_path?(path), do: path != "/workspace" and Files.validate_path(path) == :ok
+
+  defp file_path?(path, profile, direction),
+    do:
+      path not in ["/", "/workspace"] and
+        GuestPaths.allowed?(profile.guest_paths, direction, path)
 end

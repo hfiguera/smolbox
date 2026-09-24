@@ -491,3 +491,25 @@ recovery, retained files, stop/start and explicit deletion with released capacit
 Automatic restart policies and app stdout/stderr capture are unsupported.
 See the [workload guide](../../docs/workloads.md) for v8 upgrade/rollback requirements.
 There is no new SQL migration; apply all existing migrations.
+
+## Guest paths and 16 MiB files
+
+After the normal PostgreSQL setup, use a private smolvm 1.17.0 image worker started
+with `SMOLVM_FILE_TRANSFER_MAX_BYTES=16777216`. Set a fresh execution ID and store
+partition, keeping the same artifact root and keys across both processes:
+
+```sh
+export SMOLBOX_EXECUTION_ID=guest-files-example-1
+export SMOLBOX_STORE_PARTITION=guest-files-example-1
+mix run scripts/guest_files.exs prepare
+mix run scripts/guest_files.exs resume
+```
+
+The example stages a binary in `/app/project` and configuration under
+`/home/dev/.config/smolbox`, executes in `/app/project`, collects/verifies 16 MiB,
+then reconnects from a fresh controller, verifies files, stops/starts and reads
+again. It explicitly deletes and verifies absence and released reservations.
+`mix run scripts/guest_files.exs delete` is a separate authorized cleanup path.
+The script uses immutable explicit path/byte approvals, 2/2 GiB artifact floors,
+and codec v9; see [the guide](../../docs/guest-files.md) for prerequisites and
+upgrade/rollback restrictions. File bodies are buffered, not streamed end to end.

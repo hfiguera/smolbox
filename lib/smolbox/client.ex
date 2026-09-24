@@ -15,7 +15,7 @@ defmodule SmolBox.Client do
   File transfers preserve bytes. Upload verifies the source digest before any I/O
   and checks the worker's acknowledgment, but upstream supplies no atomic rename
   or permission parameter. Managed preparation must verify completion before exec.
-  Path validation is lexical; the API does not provide race-free workspace-only
+  Path validation is lexical; the API does not provide race-free approved-root
   symlink containment inside an untrusted guest. No archive extraction is done.
   """
 
@@ -36,26 +36,49 @@ defmodule SmolBox.Client do
 
   @enforce_keys [:worker]
   @derive {Inspect, only: []}
-  defstruct [:worker, transport: SmolBox.Transport.Req]
-  @type t :: %__MODULE__{worker: Worker.t(), transport: module()}
+  defstruct [
+    :worker,
+    transport: SmolBox.Transport.Req,
+    guest_paths: nil,
+    max_file_bytes: 1_048_576
+  ]
+
+  @type t :: %__MODULE__{
+          worker: Worker.t(),
+          transport: module(),
+          guest_paths: SmolBox.GuestPaths.t() | nil,
+          max_file_bytes: pos_integer()
+        }
 
   @doc """
   Create a client from validated worker configuration without network I/O.
 
-  The only option is `:transport`, a module implementing `SmolBox.Transport`;
-  the default is `SmolBox.Transport.Req`. Client operations return typed
+  Options are `:transport` (default `SmolBox.Transport.Req`), `:guest_paths`
+  (`SmolBox.GuestPaths`, default nil for `/workspace`) and `:max_file_bytes`
+  (default 1 MiB, range 1 byte–16 MiB). Approve larger worker request/response
+  budgets separately. Broader paths and transfers over 1 MiB require image
+  machines on smolvm 1.17.0. Client operations return typed
   `SmolBox.Error` values and never automatically retry mutations. For managed
   execution identity, observation and cleanup, use `SmolBox` instead.
   """
   @spec new(Worker.t(), keyword()) :: {:ok, t()} | {:error, Error.t()}
   def new(worker, options \\ []) do
     with :ok <- Worker.validate(worker),
-         true <- Validation.keys?(options, [:transport]),
+         true <- Validation.keys?(options, [:transport, :guest_paths, :max_file_bytes]),
          transport = Keyword.get(options, :transport, SmolBox.Transport.Req),
          true <-
            is_atom(transport) and Code.ensure_loaded?(transport) and
              function_exported?(transport, :request, 2) do
-      {:ok, %__MODULE__{worker: worker, transport: transport}}
+      client = %__MODULE__{
+        worker: worker,
+        transport: transport,
+        guest_paths: Keyword.get(options, :guest_paths),
+        max_file_bytes: Keyword.get(options, :max_file_bytes, 1_048_576)
+      }
+
+      if SmolBox.FileAccess.client_valid?(client),
+        do: {:ok, client},
+        else: error(:validation, :client)
     else
       _invalid -> error(:validation, :client)
     end
@@ -229,6 +252,7 @@ defmodule SmolBox.Client do
     with {:ok, max} <- output_options(options, [:max_output_bytes]),
          {:ok, path} <- machine_path(name),
          {:ok, wire} <- Command.to_wire(command),
+         :ok <- SmolBox.FileAccess.authorize(client, :workdir, command.workdir),
          :ok <- Worker.validate(client.worker),
          {:ok, client} <- execution_client(client, path, command),
          {:ok, body} <- json(client, :post, path <> "/exec", wire, :exec) do
@@ -257,6 +281,7 @@ defmodule SmolBox.Client do
          :ok <- streaming_command(command, options),
          {:ok, path} <- machine_path(name),
          {:ok, wire} <- Command.to_wire(command),
+         :ok <- SmolBox.FileAccess.authorize(client, :workdir, command.workdir),
          :ok <- Worker.validate(client.worker),
          {:ok, client} <- execution_client(client, path, command) do
       mode = {:sse, max, Keyword.get(options, :on_event)}
@@ -275,7 +300,10 @@ defmodule SmolBox.Client do
   end
 
   @doc """
-  Upload up to 1 MiB of bytes to an exact guest workspace path.
+  Upload bytes to an exact path approved by the client upload roots.
+
+  The smaller of client `max_file_bytes` and worker `max_request_bytes` applies.
+  Both default to 1 MiB; explicit configuration supports up to 16 MiB.
 
   `sha256` is the lowercase digest from `SmolBox.Files.sha256/1`. The client verifies
   it before sending and checks the worker's path/size acknowledgment. This endpoint
@@ -284,8 +312,10 @@ defmodule SmolBox.Client do
   """
   @spec upload(t(), String.t(), String.t(), binary(), String.t()) :: :ok | {:error, Error.t()}
   def upload(client, name, guest_path, bytes, sha256) do
-    with :ok <- input_bytes(bytes, sha256),
-         {:ok, path} <- file_path(name, guest_path),
+    with :ok <- input_bytes(client, bytes, sha256),
+         :ok <- SmolBox.FileAccess.authorize(client, :upload, guest_path),
+         {:ok, path} <- file_path(client, name, guest_path, :upload),
+         {:ok, client} <- file_client(client, name, guest_path, byte_size(bytes)),
          {:ok, body} <-
            request(
              client,
@@ -306,9 +336,10 @@ defmodule SmolBox.Client do
   end
 
   @doc """
-  Download one exact guest workspace file, preserving its bytes.
+  Download one exact approved guest file, preserving its bytes.
 
-  `max_bytes` is required, from 1 byte through 1 MiB. The smaller of this limit and
+  `max_bytes` is required, from 1 byte through client `max_file_bytes` (default
+  1 MiB, configurable up to 16 MiB). The smaller of this limit and
   the worker response cap applies. Downloads can start a stopped machine, so they
   are not passive recovery probes. Lexical path checks do not establish symlink
   containment. Managed outputs should be read through the artifact adapter after
@@ -317,8 +348,11 @@ defmodule SmolBox.Client do
   @spec download(t(), String.t(), String.t(), pos_integer()) ::
           {:ok, binary()} | {:error, Error.t()}
   def download(client, name, guest_path, max_bytes) do
-    with true <- Validation.integer?(max_bytes, 1, 1_048_576),
-         {:ok, path} <- file_path(name, guest_path) do
+    with true <- SmolBox.FileAccess.client_valid?(client),
+         true <- Validation.integer?(max_bytes, 1, client.max_file_bytes),
+         :ok <- SmolBox.FileAccess.authorize(client, :download, guest_path),
+         {:ok, path} <- file_path(client, name, guest_path, :download),
+         {:ok, client} <- file_client(client, name, guest_path, max_bytes) do
       bounded = %{
         client
         | worker: %{
@@ -524,12 +558,14 @@ defmodule SmolBox.Client do
   end
 
   defp execution_client(client, path, command) do
-    if command.background or command.timeout_secs > 300 do
+    outside = Files.validate_path(command.workdir) != :ok
+
+    if command.background or command.timeout_secs > 300 or outside do
       deadline = System.monotonic_time(:millisecond) + client.worker.operation_timeout_ms
 
       with {:ok, %{version: "1.17.0"}} <- health(client),
            {:ok, client} <- remaining_create_budget(client, deadline),
-           :ok <- background_machine(client, path, command),
+           :ok <- background_machine(client, path, %{background: command.background or outside}),
            {:ok, client} <- remaining_create_budget(client, deadline) do
         {:ok,
          %{
@@ -556,8 +592,22 @@ defmodule SmolBox.Client do
     end
   end
 
-  defp input_bytes(bytes, digest) do
-    if is_binary(bytes) and byte_size(bytes) <= 1_048_576 and Validation.digest?(digest) and
+  defp file_client(client, name, path, bytes) do
+    if bytes > 1_048_576 or Files.validate_path(path) != :ok do
+      deadline = System.monotonic_time(:millisecond) + client.worker.operation_timeout_ms
+
+      with {:ok, client} <- creation_runtime_versions(client, ["1.17.0"]),
+           :ok <- background_machine(client, "/api/v1/machines/" <> name, %{background: true}),
+           do: remaining_create_budget(client, deadline)
+    else
+      {:ok, client}
+    end
+  end
+
+  defp input_bytes(client, bytes, digest) do
+    if SmolBox.FileAccess.client_valid?(client) and is_binary(bytes) and
+         byte_size(bytes) <= min(client.max_file_bytes, client.worker.max_request_bytes) and
+         Validation.digest?(digest) and
          Files.sha256(bytes) == digest do
       :ok
     else
@@ -565,8 +615,9 @@ defmodule SmolBox.Client do
     end
   end
 
-  defp file_path(name, guest_path) do
-    with {:ok, path} <- machine_path(name), {:ok, encoded} <- Files.encode_path(guest_path) do
+  defp file_path(client, name, guest_path, direction) do
+    with {:ok, path} <- machine_path(name),
+         {:ok, encoded} <- Files.encode_path(guest_path, client.guest_paths, direction) do
       {:ok, path <> "/files/" <> encoded}
     end
   end

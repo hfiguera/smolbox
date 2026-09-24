@@ -281,3 +281,13 @@ and working directory as immutable machine intent. Commands remain separate;
 stop/start relaunches the workload and preserves files. `Machines.logs/3` checks
 ownership before reading console diagnostics, without taking a command slot.
 See [workloads](workloads.md) for readiness limits and the required v8 store upgrade.
+
+## Project directories and larger files
+
+An immutable `Profile.guest_paths` policy permits project/home directories and
+ordinary command cwd beyond `/workspace`. Coordinated limits support files up to
+16 MiB. Inputs are uploaded and read back before command dispatch; collection
+finishes before the managed command slot is released. Controller restart retains
+the same policy. Background processes can still mutate files, so collection is
+not a consistent filesystem snapshot. See [guest files](guest-files.md) for the
+runnable PostgreSQL example, worker prerequisites and v9 upgrade requirements.

@@ -50,6 +50,7 @@ defmodule SmolBox.ManagedMachineSpec do
          true <- SmolBox.Workload.optional?(spec.workload),
          true <- spec.workload == nil or spec.artifact["kind"] != "checkpoint",
          true <- spec.ports == [] or spec.artifact["kind"] != "checkpoint",
+         :ok <- SmolBox.Profile.validate(spec.profile),
          {:ok, _spec} <- execution_spec(spec) do
       :ok
     else
@@ -61,7 +62,8 @@ defmodule SmolBox.ManagedMachineSpec do
 
   @doc false
   def execution_spec(spec) do
-    {:ok, command} = Command.new(["/bin/true"], timeout_secs: 1)
+    workdir = hd(SmolBox.GuestPaths.roots(spec.profile.guest_paths, :workdir))
+    {:ok, command} = Command.new(["/bin/true"], timeout_secs: 1, workdir: workdir)
     options = spec |> Map.from_struct() |> Map.take(@enforce_keys) |> Map.to_list()
     ExecutionSpec.new(options ++ [command: command])
   end
