@@ -13,7 +13,9 @@ defmodule SmolBox.ExtendedClientTest do
 
           ["api", "v1", "machines", "owned", "exec" | suffix] ->
             assert Jason.decode!(body)["timeoutSecs"] == 600
-            Process.sleep(1000)
+            # Exceed the normal receive timeout while leaving preflight enough
+            # scheduling headroom under concurrent coverage instrumentation.
+            Process.sleep(6000)
 
             if suffix == [] do
               TestPeer.json(conn, wire("finished"))
@@ -99,8 +101,8 @@ defmodule SmolBox.ExtendedClientTest do
     {:ok, worker} =
       Worker.new("extended", "http://127.0.0.1:#{port}",
         allow_insecure_loopback: true,
-        receive_timeout_ms: 500,
-        operation_timeout_ms: 10_000
+        receive_timeout_ms: 5000,
+        operation_timeout_ms: 30_000
       )
 
     {:ok, client} = Client.new(worker)
