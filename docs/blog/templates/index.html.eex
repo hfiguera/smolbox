@@ -5,8 +5,8 @@
       <p>Practical notes on Python, JavaScript, and the execution lifecycle in SmolBox.</p>
     </div>
     <aside class="project-note" aria-label="About this project">
-      <p>SmolBox runs programs in disposable microVMs and tracks their outcomes from your Elixir application.</p>
-      <a href="https://hexdocs.pm/smolbox/0.1.0/getting-started.html">Set up your first worker <%= SmolBox.Blog.HTML.arrow(:external) %></a>
+      <p>SmolBox manages disposable executions and persistent machines from your Elixir application.</p>
+      <a href="https://hexdocs.pm/smolbox/0.2.0/getting-started.html">Set up your first worker <%= SmolBox.Blog.HTML.arrow(:external) %></a>
     </aside>
   </section>
   <section class="articles" aria-labelledby="articles-title">

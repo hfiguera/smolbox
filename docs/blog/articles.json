@@ -1,5 +1,16 @@
 [
   {
+    "slug": "build-a-persistent-workspace",
+    "title": "Build a persistent workspace with Phoenix and SmolBox 0.2.0",
+    "description": "Edit a page, run successive commands, and restart Phoenix without losing the project. A runnable workspace teaches machine, command, and browser lifetimes.",
+    "published_on": "2026-09-24",
+    "updated_on": "2026-09-24",
+    "version": "0.2.0",
+    "category": "Practical integrations",
+    "image": "persistent-workspace.png",
+    "image_alt": "Write, run, and return: a retained machine keeps the project across commands and controller restarts."
+  },
+  {
     "slug": "prepare-once-run-in-a-fresh-vm",
     "title": "Prepare once, run in a fresh VM with SmolBox",
     "description": "Restore prepared guest state for separate disposable executions. A station dataset shows what checkpoints preserve, what they cost, and when a prepared image is enough.",

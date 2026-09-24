@@ -161,3 +161,32 @@ Evidence sources, relative to the repository root:
   the deployment comparison does not isolate nesting overhead.
 
 Existing architectural diagrams and social images are unchanged.
+
+
+## Persistent workspace — September 24, 2026
+
+- `media/build-a-persistent-workspace/lifecycle.svg` (1120 × 510) and
+  `lifecycle-mobile.svg` (390 × 690) are original geometric diagrams of command,
+  controller and machine lifetimes. Their arrows describe workflow, not timing.
+- `persistent-workspace-social.svg` is an original 1200 × 630 composition using
+  the existing blog colors and platform-compatible sans typography.
+  `persistent-workspace.png` is its local Sharp rasterization. No external
+  illustration, photograph or generated image is included.
+- `workspace-demo.mp4` is a silent, 32-second edited walkthrough, assembled with
+  FFmpeg from eight real internal-browser captures of a fresh, isolated macOS
+  demo. Each capture is held four seconds and has an editorial heading outside
+  the app image. The service capture is proportionally fitted to the same frame;
+  app content is not altered. Output is 1200 × 880 at 24 fps. This is not a
+  continuous recording and makes no startup or performance claim.
+- `workspace-demo.png` is the first composed frame. Native playback and seeking
+  remain available; mobile readers get the vertical lifecycle diagram and an
+  explicit video link. Nothing autoplays.
+- `walkthrough-evidence.json` records the observed results: successive commands,
+  downloaded bytes, the article API snippet against Hex 0.2.0, controller
+  restart, machine stop/start, and deletion with an empty worker and zero usage.
+  This bounded observation record is not a raw log or an automated test report.
+
+The captures contain only a new demo identity and authored project fixtures.
+The user's existing workspace, files, private configuration and keys are absent.
+The isolated demo machine was explicitly deleted, then its controller, worker
+and database processes were stopped. Linux app qualification was not performed.

@@ -2,6 +2,7 @@
 // Playback is reader initiated. Pause motion when the figure leaves view.
 const motionVideos = document.querySelectorAll(".motion-video");
 motionVideos.forEach((video) => {
+  if (video.hasAttribute("data-native-controls")) return;
   const controls = document.createElement("div");
   controls.className = "motion-controls";
   const button = document.createElement("button");
