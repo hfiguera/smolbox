@@ -515,3 +515,12 @@ again. It explicitly deletes and verifies absence and released reservations.
 The script uses immutable explicit path/byte approvals, 2/2 GiB artifact floors,
 and codec v9; see [the guide](../../docs/guest-files.md) for prerequisites and
 upgrade/rollback restrictions. File bodies are buffered, not streamed end to end.
+
+## Shared store and browser example
+
+The PostgreSQL adapter source now lives in `../support/store`; this project's
+`elixirc_paths` compiles it without changing its `SmolBox.DurableHost` namespace or
+store schema. Keep that directory when copying the example. Its migrations remain
+in this project's `priv/repo/migrations`. The
+[community workspace](../community_workspace/README.md) compiles the same adapter
+and demonstrates the published 0.2.0 API through Phoenix LiveView.

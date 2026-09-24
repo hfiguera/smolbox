@@ -104,7 +104,7 @@ jobs:
         run: |
           mix compile --warnings-as-errors
           elixir -e 'if Path.wildcard("lib/**/*.ex") == [], do: System.halt(1)'
-          mix ex_dna lib dev scripts test/support examples/durable_host/lib examples/durable_host/priv examples/durable_host/test/support examples/minimal_host/lib examples/support/lib --max-clones 0
+          mix ex_dna lib dev scripts test/support examples/durable_host/lib examples/durable_host/priv examples/durable_host/test/support examples/minimal_host/lib examples/support/lib examples/support/store --max-clones 0
       - name: Check tracked files were not modified
         run: git diff --exit-code
 
@@ -421,6 +421,43 @@ jobs:
           mix run --no-start --no-compile scripts/check_unavailable.exs
       - run: git diff --exit-code
 
+  smolbox-community-workspace:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: examples/community_workspace
+    env:
+      DATABASE_URL: ecto://postgres:postgres@127.0.0.1:5432/smolbox_workspace_test
+    services:
+      postgres:
+        image: postgres:16.15@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: smolbox_workspace_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
+        with:
+          otp-version: '29.0.6'
+          elixir-version: '1.20.4'
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - run: mix deps.get
+      - run: mix format --check-formatted
+      - run: mix compile --warnings-as-errors
+      - run: npm --prefix assets ci
+      - run: mix assets.build
+      - run: mix test --warnings-as-errors
+      - run: git diff --exit-code
+
   smolbox-required:
     if: always()
     runs-on: ubuntu-24.04
@@ -444,6 +481,7 @@ jobs:
       - smolbox-minimum-dependencies
       - smolbox-minimal-host
       - smolbox-store-contract
+      - smolbox-community-workspace
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:

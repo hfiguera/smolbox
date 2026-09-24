@@ -25,6 +25,7 @@ defmodule SmolBox.DurableHost.MixProject do
   defp paths(:test),
     do: [
       "lib",
+      Path.expand("../support/store", __DIR__),
       "test/support",
       Path.expand("../../test/support/store", __DIR__),
       Path.expand("../../test/support/fault", __DIR__),
@@ -32,5 +33,6 @@ defmodule SmolBox.DurableHost.MixProject do
       Path.expand("../support/lib", __DIR__)
     ]
 
-  defp paths(_env), do: ["lib", Path.expand("../support/lib", __DIR__)]
+  defp paths(_env),
+    do: ["lib", Path.expand("../support/lib", __DIR__), Path.expand("../support/store", __DIR__)]
 end

@@ -1,0 +1,38 @@
+{
+  "phase": "before-restart",
+  "checks": [
+    {
+      "name": "machine identity",
+      "value": "6860bbe6-354b-4dd9-a4d6-beb091010b42"
+    },
+    {
+      "name": "2 MiB browser upload",
+      "value": "5256ec18f11624025905d057d6befb03d77b243511ac5f77ed5e0221ce6d84b5"
+    },
+    {
+      "name": "2 MiB browser download hash matches",
+      "value": true
+    },
+    {
+      "name": "typed background launch evidence",
+      "value": "Launch confirmed · PID 273 · not supervised"
+    },
+    {
+      "name": "duplicate launch was not replayed",
+      "value": true
+    },
+    {
+      "name": "PTY input/output and resize",
+      "value": "/ # printf 'terminal-ready\\n'; stty size\nterminal-ready\n13 158\n/ # stty size\n13 114\n/ # \n \n \n \n \n \n \n "
+    },
+    {
+      "name": "PTY observed exit and keyboard escape",
+      "value": true
+    },
+    {
+      "name": "mapped startup service reachable",
+      "value": "http://127.0.0.1:19825/"
+    }
+  ],
+  "errors": []
+}

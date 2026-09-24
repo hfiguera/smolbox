@@ -1,0 +1,1 @@
+%{id: "6860bbe6-354b-4dd9-a4d6-beb091010b42", name: "sbxstudio-hgapyyjpfnhday5o5xby", state: :deleted, worker: "workspace-worker", usage: {:ok, %{slots: 0, cpus: 0, disk_gb: 0, memory_mb: 0}}, active_execution: nil, reservation: nil, absence_at_ms: 1790224774368}

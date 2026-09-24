@@ -1,0 +1,26 @@
+{
+  "phase": "after-restart",
+  "checks": [
+    {
+      "name": "machine identity",
+      "value": "6860bbe6-354b-4dd9-a4d6-beb091010b42"
+    },
+    {
+      "name": "same identity after controller restart",
+      "value": true
+    },
+    {
+      "name": "files retained and background launch not replayed after restart",
+      "value": true
+    },
+    {
+      "name": "machine stopped",
+      "value": true
+    },
+    {
+      "name": "stop/start retained files, restarted workload, did not replay background",
+      "value": true
+    }
+  ],
+  "errors": []
+}
