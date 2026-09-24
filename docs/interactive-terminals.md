@@ -280,3 +280,8 @@ keys and object archives are not exported by this mechanism.
 
 See [Validation evidence](interactive-terminals-validation.md) for real-worker
 scenarios, simulated coverage, failed attempts and qualification limits.
+
+When a record uses an explicit guest path policy or expanded file budget,
+[codec v9](guest-files.md#recovery-and-upgrades) supersedes its earlier envelope
+and additionally requires `guest_files: 1`. Other feature capabilities and
+retention rules still apply.

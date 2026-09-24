@@ -46,6 +46,7 @@ defmodule SmolBox.DurableHost.Store do
                 managed_machines: 1,
                 managed_ports: 1,
                 managed_workloads: 1,
+                guest_files: 1,
                 interactive_terminal: 1,
                 extended_execution: 1
               }}

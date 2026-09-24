@@ -142,9 +142,13 @@ establish longer guest execution; they remain in the historical qualification re
 
 ## File operations
 
-File manifests use exact `/workspace` paths and opaque host artifact references.
-Low-level uploads accept at most 1 MiB, verify their source digest before I/O, and
-validate the worker acknowledgment. Downloads have an explicit bound up to 1 MiB.
+File manifests use exact approved guest paths and opaque host artifact references.
+Defaults remain `/workspace` and 1 MiB. `GuestPaths` and coordinated profile, client,
+transport and artifact-store budgets allow broader directories and files up to
+16 MiB on image machines with smolvm 1.17.0. Uploads verify their source digest
+before I/O and validate the worker acknowledgment; downloads require an explicit
+byte limit. See [guest paths and larger files](guest-files.md) for setup, buffered
+memory costs, worker download caps and the v9 persistence upgrade.
 The pinned agent has an atomic file-install path, but the HTTP API offers no
 caller-controlled rename transaction or permissions. Symlink handling also depends
 on the agent's active guest namespace; lexical validation alone does not certify

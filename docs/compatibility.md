@@ -845,3 +845,12 @@ Silicon passed startup, PostgreSQL controller restart, stop/start, diagnostics a
 verified deletion; see [workload validation](workloads-validation.md). This remains
 development qualification, with codec-v8 upgrade requirements in the
 [workload guide](workloads.md).
+
+## Configurable guest paths and larger transfers
+
+This checkout supports expanded guest path policies and buffered files up to
+16 MiB on smolvm 1.17.0 **image** machines. Checkpoints and older workers retain the
+existing `/workspace` and 1 MiB contract. Startup workloads and PTY sessions keep
+their separate cwd contracts. Expanded managed records require codec v9 and the
+`guest_files: 1` store capability. See [the guide](guest-files.md) and
+[validation](guest-files-validation.md) for the qualified scope.

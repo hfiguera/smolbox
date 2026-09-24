@@ -1,0 +1,126 @@
+{
+  "qualification": "development",
+  "date_utc": "2026-09-24",
+  "feature": "configurable guest paths and buffered larger file transfers",
+  "runtime": "1.17.0",
+  "upstream_commit": "73d4b480",
+  "source": {
+    "base": "4184a6fb73cb81bb00706d85d0057003e636eb12",
+    "archive_sha256": "8ad8bfb884816d7d906944c6e7ea7ec2c12090f409b5d34c75a4d4f5f2161fd5",
+    "verified_files": 534,
+    "overlays": {},
+    "archived_library_manifest_sha256": "71acc3324179d6aa5279d6aac1eaa885c53f10ed99cc17f2b301e9bedaf18e69",
+    "post_campaign_changes": "Module/API documentation, guides/evidence, package consumer smoke, codec combination tests and example alias formatting; no library behavior change.",
+    "library_behavior_equivalence": {
+      "ignored": [
+        "docs",
+        "specs",
+        "source metadata"
+      ],
+      "library_files": 70,
+      "changed_behavior_asts": []
+    }
+  },
+  "limits": {
+    "default_file_bytes": 1048576,
+    "max_file_bytes": 16777216,
+    "max_manifest_direction_bytes": 67108864,
+    "worker_download_cap_bytes": 16777216,
+    "upstream_http_upload_ceiling_bytes": 104857600,
+    "streaming": false,
+    "lexical_roots_only": true,
+    "codec": 9,
+    "store_capability": {
+      "guest_files": 1
+    }
+  },
+  "linux": {
+    "platform": "x86_64 nested KVM",
+    "postgresql": "16",
+    "file_boundary_tests": 1,
+    "store_tests": 34,
+    "binary_bytes": 16777216,
+    "binary_sha256": "5e033aae0f529e46ba459e41e9b6e91dbff95474e13f258188a04aec0c14b62b",
+    "fresh_controller_recovery": true,
+    "same_machine_stop_start": true,
+    "verified_deletion_and_reservation_release": true,
+    "final_inventory": [],
+    "oom_kills": 0,
+    "worker_memory_peak_bytes": 696500224,
+    "worker_seconds": 300,
+    "worker_memory_limit_bytes": 1610612736,
+    "worker_tasks": 96,
+    "outer_lab_reset_verified": true,
+    "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+    "runtime_archive_sha256": "b648e6aa47dc4fee1ddc255f5c11401fc6aab41bab61335bde903ad2fc2e1bd1",
+    "capture": {
+      "exit_code": 0,
+      "reason": "completed",
+      "bytes": 3273,
+      "sha256": "796cd9daad0543fe2266b108ab7e9c2d3ecc5a41d8304c12411f3b474fcb4684",
+      "elapsed_seconds": 58.477
+    }
+  },
+  "macos": {
+    "platform": "Apple Silicon",
+    "postgresql": "17.11",
+    "file_boundary_tests": 1,
+    "store_tests": 34,
+    "binary_bytes": 16777216,
+    "fresh_controller_recovery": true,
+    "same_machine_stop_start": true,
+    "verified_deletion_and_reservation_release": true,
+    "final_inventory": [],
+    "worker_and_postgres_stopped": true,
+    "artifact_sha256": "bb3ed187bc4cfc1cc6f7e4e09c8f96ac1c2d47dcd2902653e6c1bd2ba6ca017c"
+  },
+  "simulated": {
+    "passed": 362,
+    "runtime_excluded": 28,
+    "elixir_1_18_4_otp_27_3_4_15_focused_tests": 13,
+    "coverage_percent": 93.05,
+    "ci_passed": true
+  },
+  "limitations": [
+    "Buffered bodies and bounded per-file/manifest budgets do not bound total RSS.",
+    "Approved lexical paths are not symlink containment or a sandbox for arbitrary guest commands.",
+    "Checkpoint expansion, recursive transfer, resumable uploads, snapshot consistency and production load qualification are excluded.",
+    "Worker read cap does not reduce upstream HTTP upload ceiling."
+  ],
+  "private_receipt_sha256": {
+    "linux-source-verification.json": "ca0b0bd121b66e8872d6069ee5fb6bc3941ed077eeeb395f7c34c7f5c1c3761f",
+    "linux-reset-verification.txt": "8dc54b478e5666e0f4f6ffa3ca605e9bdfcb50ee75fcac7f3a0ba0f64b70c76e",
+    "guest-files-20260923-initial/campaign.log": "796cd9daad0543fe2266b108ab7e9c2d3ecc5a41d8304c12411f3b474fcb4684",
+    "guest-files-20260923-initial/capture.json": "82d1ffb28765b2b9f6b717456e2f3e59fdee432efa3ea54da54f92d9e037a4c2",
+    "mac-campaign.log": "3db368131f35d71d7c2564d4f41596522cecdafba39b11da78ddfd0cf3c552bf",
+    "mac/boundaries.log": "49e6f8a88c3f8148dabc116e9afaec9dac06834484e17276b2e6547b844c38d9",
+    "mac/store.log": "9b5d007b6595f13ab7b6a6547eeb2a53d0fd096d87717362a7c7270e9094f95f",
+    "mac/prepare.log": "85d008f9f6cd256c931caf4368c34ecbc33580ba0a2340c849377630a808428d",
+    "mac/resume.log": "499a364b36c53a0bb3410f690e171fa7b4ba1958a4a22143b3dd5c3568168147",
+    "mac/api-inventory.json": "4115c93b07b494b0188c0899c545c6313d8dfda70cf8d2613984eae1976fb745",
+    "mac/final-inventory.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "example-dialyzer.log": "1a9d5529b2758118b6d14aee26ab26866645926552833d50aa0606b0847e22bc",
+    "elixir-1.18.log": "5956d2d7d96807e314a41056dfda5874e9504633b5c3331389b4fd953e05b2f3",
+    "credo-final.log": "bcd55d87569079542fcee8dada1779dde5a2118105d5672643ff48b445a2d8a9",
+    "exdna.log": "6d9a6a65d400026b919cb3a09043164633c8e4251d6639dc63b012d4273f8a3b",
+    "credence.log": "61ab37587ea71d33f58ffb87247eaf86a4133460db22f082b0606cc1852f5284",
+    "dialyzer-test.log": "c9ff24e55d5b7b5ec66e88687f0c26c44358a1b6a2301521332cdc5169ffa731",
+    "coverage.log": "ee9e419eae2de5694a42b8fed34cfa27264544bf6b20f3016edaf8febcd05f64",
+    "library-equivalence.json": "9d0c29326df55b36ae14a8b25306fe6b172c18fe13db39ee1236484ddd0463f7",
+    "docs-final.log": "b6c59373859502ebe1f7bf3c667e8ad4cc9e34de3d9ccb0b8b84f2dc6859c134",
+    "package-current.json": "bbfaab37afeb0e7c20bd3336e79c9e3ddbc8da90ff2cd98809096a0e1423bcca",
+    "package-current.log": "4345b0c403a6fb3baedfe11bdaabbc16f33c9e0f2a67cf72877b2474d1a949dd",
+    "package-minimum.json": "c8b48fc0e48a968b2c41d1eb119a56aa608ac5f14da4074cbc303885f62e5947",
+    "package-minimum.log": "cfbd1e28277b00fd4d7302e226a43fe89f97d376ac4d615e5c11acaab89e8bf4",
+    "ci-verified.log": "e1f2bb65cea232723e893da59e7d1f57961ad69eddd1c2beda381ebac98863f8"
+  },
+  "checks": {
+    "example_dialyzer_forced": "passed",
+    "docs_and_72_page_links": "passed",
+    "package_current": "passed",
+    "package_minimum": "passed",
+    "elixir_1_18_focused": "passed",
+    "diagnostic_note": "An exploratory dev-environment Dialyzer run reported EEx.eval_file/2 as unknown; the required test-environment run and full mix ci passed with zero errors. No unrelated dependency change was made.",
+    "mix_ci": "passed"
+  }
+}

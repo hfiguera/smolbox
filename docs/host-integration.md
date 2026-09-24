@@ -431,3 +431,12 @@ artifact, profile and scope. Require smolvm 1.17.0 and `managed_workloads: 1` on
 store; upgrade all shared readers first. Application readiness needs a separate
 probe. Console followers consume bounded worker connections and do not own machine
 lifetime. See [workloads](workloads.md) for configuration and operational limits.
+
+## Guest path and file approval
+
+Host-selected `GuestPaths` policies authorize uploads, downloads and ordinary
+command working directories independently. Register the immutable profile on the
+worker, approve a superset on its client, coordinate transport and artifact-store
+limits, and set a worker download cap before startup. Expanded profiles require
+image sources on smolvm 1.17.0 and store capability `guest_files: 1`. Defaults stay
+unchanged. See [guest files](guest-files.md) for code and the v9 upgrade procedure.

@@ -88,8 +88,13 @@ defmodule SmolBox.NetworkPolicyTest do
     assert {:ok, network_id} = ExecutionSpec.fingerprint(spec, :binary.copy(<<1>>, 32))
     refute offline_id == network_id
 
+    {:ok, endpoint} =
+      SmolBox.Worker.new("policy", "http://localhost", allow_insecure_loopback: true)
+
+    {:ok, client} = SmolBox.Client.new(endpoint)
+
     worker = %WorkerConfig{
-      client: nil,
+      client: client,
       platform: :linux,
       architecture: spec.artifact["architecture"],
       profiles: [profile],
@@ -116,7 +121,7 @@ defmodule SmolBox.NetworkPolicyTest do
       record
       | spec: %{
           record.spec
-          | profile: Map.delete(record.spec.profile, :network),
+          | profile: Map.drop(record.spec.profile, [:network, :guest_paths]),
             command: Map.delete(record.spec.command, :background)
         }
     }
@@ -156,7 +161,7 @@ defmodule SmolBox.NetworkPolicyTest do
       record
       | spec: %{
           record.spec
-          | profile: Map.delete(record.spec.profile, :network),
+          | profile: Map.drop(record.spec.profile, [:network, :guest_paths]),
             command: Map.delete(record.spec.command, :background)
         },
         created_machine: Map.drop(machine, [:network, :ports])

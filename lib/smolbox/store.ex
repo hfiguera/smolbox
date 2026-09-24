@@ -15,6 +15,10 @@ defmodule SmolBox.Store do
   preserved through every machine transaction, recovery and deleted tombstone.
   No additional SQL schema is required; all readers must understand v8 first.
 
+  `guest_files: 1` requires codec v9 and immutable path and byte-budget policy
+  preserved through execution/machine transactions, recovery and tombstones.
+  No SQL migration is needed; upgrade all readers before advertising support.
+
   `interactive_terminal: 1` additionally requires codec v7, typed terminal intent
   and exit evidence, and the same atomic managed command slot. Persist dispatch
   before opening a potentially mutating WebSocket. Unknown sessions block reuse;

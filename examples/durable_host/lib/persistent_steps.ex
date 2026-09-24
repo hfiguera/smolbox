@@ -1,6 +1,18 @@
 defmodule SmolBox.DurableHost.PersistentSteps do
   @moduledoc false
-  alias SmolBox.{Command, ExecutionSpec, Machines}
+  alias SmolBox.{Client, Command, ExecutionSpec, Machines}
+  alias SmolBox.DurableHost.Store
+
+  def delete_machine(c) do
+    {:ok, _} = lifecycle(c.runtime, c.handle, :delete)
+    deleted = wait_machine(c.runtime, c.handle, &(&1.state == :deleted))
+    {:error, %{category: :not_found}} = Client.inspect_machine(c.client, deleted.machine_name)
+    {:ok, %{slots: 0, disk_gb: 0}} = Store.usage(c.store, "example-worker")
+
+    IO.puts(
+      Jason.encode!(%{phase: "delete", absence_verified: true, reservations_released: true})
+    )
+  end
 
   def command(runtime, {scope, id} = handle, base, suffix, program, expected) do
     {:ok, command} = Command.new(["python", "-c", program], timeout_secs: 5)

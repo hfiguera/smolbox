@@ -86,6 +86,17 @@ artifact = worker_options[:artifacts] |> hd() |> Map.take(["id", "sha256", "arch
 {:error, %{category: :unsupported_capability}} = SmolBox.Workload.new(restart: :always)
 :console = %SmolBox.LogResult{}.source
 
+{:ok, paths} = SmolBox.GuestPaths.new(workdir_roots: ["/app", "/workspace"])
+{:ok, file_profile} = SmolBox.Profile.new("consumer-files", guest_paths: paths,
+  max_file_bytes: 16_777_216, max_total_file_bytes: 33_554_432)
+file_spec = %{workload_spec | profile: file_profile}
+{:ok, digest} = SmolBox.ManagedMachineSpec.fingerprint(file_spec, :binary.copy(<<1>>, 32))
+{:ok, file_record} = SmolBox.ManagedMachine.new(file_spec, digest, 1000)
+{:ok, <<"smolbox-record-v9", 0, _::binary>> = file_bytes} = SmolBox.Store.Codec.encode(file_record)
+{:ok, ^file_record} = SmolBox.Store.Codec.decode(file_bytes)
+true = SmolBox.GuestPaths.allowed?(paths, :workdir, "/app/project")
+false = SmolBox.GuestPaths.allowed?(paths, :upload, "/app/input")
+
 children = [
   {SmolBox.Store.Memory, name: Consumer.Store},
   {SmolBox, name: Consumer.Runtime, namespace: "consumer", mode: :ephemeral,
@@ -103,6 +114,6 @@ versions = Map.new([:req, :mint, :mint_web_socket, :jason, :telemetry, :nimble_o
   {app, app |> Application.spec(:vsn) |> to_string()}
 end)
 File.write!("smoke.json", Jason.encode!(%{client: true, supervisor: true,
-  workload: true, checkpoint: true, interactive: true, network_policy: true, offline_default: true, runtime_1_16_0_explicit: "1.16.0",
+  guest_files: true, workload: true, checkpoint: true, interactive: true, network_policy: true, offline_default: true, runtime_1_16_0_explicit: "1.16.0",
   unqualified_runtime_rejected: "1.16.2", runtime_default: "1.17.0", legacy_runtime_explicit: "1.14.1",
   legacy_1_14_6_explicit: "1.14.6", versions: versions}))

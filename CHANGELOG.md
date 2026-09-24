@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Add explicit `GuestPaths` upload/download/workdir roots, preserving `/workspace`
+  defaults. Image workers on smolvm 1.17.0 support buffered files up to 16 MiB and
+  manifests up to 64 MiB per direction with coordinated host-approved budgets.
+- Persist expanded file policy in selective codec v9, require `guest_files: 1`,
+  and recheck worker approval before staging/collection. Older records and
+  fingerprints remain compatible; shared readers/adapters require a coordinated
+  upgrade before v9 writes. No SQL migration.
+- Add a configurable directory artifact limit, durable file recovery example,
+  boundary tests and real-worker qualification; see [the guide](docs/guest-files.md).
+
 - Add optional immutable startup `Workload` configuration on smolvm 1.17.0 image
   machines, preserving neutral startup when omitted and rejecting automatic restarts.
 - Add bounded SSE console snapshots/follow through `Client.logs/3` and

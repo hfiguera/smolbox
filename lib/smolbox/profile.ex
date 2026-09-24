@@ -1,6 +1,6 @@
 defmodule SmolBox.Profile do
   @moduledoc """
-  Immutable, host-selected policy for disposable executions. Networking stays offline
+  Immutable, host-selected policy for disposable executions and retained machines. Networking stays offline
   unless an explicit `SmolBox.NetworkPolicy` is approved.
 
   `id` identifies this exact policy revision. CPU and memory are guest allocations;
@@ -18,6 +18,7 @@ defmodule SmolBox.Profile do
   alias SmolBox.{Error, MachineSpec, Validation}
 
   @schema [
+    guest_paths: [type: :any, default: nil],
     network: [type: :any, default: :offline],
     cpus: [type: :pos_integer, default: 1],
     memory_mb: [type: :pos_integer, default: 256],
@@ -49,6 +50,7 @@ defmodule SmolBox.Profile do
 
   @type t :: %__MODULE__{
           id: String.t(),
+          guest_paths: SmolBox.GuestPaths.t() | nil,
           network: :offline | SmolBox.NetworkPolicy.t(),
           cpus: pos_integer(),
           memory_mb: pos_integer(),
@@ -69,6 +71,7 @@ defmodule SmolBox.Profile do
 
   | Option | Default | Range/meaning |
   |---|---|---|
+  | `:guest_paths` | `nil` | `SmolBox.GuestPaths` policy; nil preserves `/workspace` roots |
   | `:network` | `:offline` | Explicit `SmolBox.NetworkPolicy` allowlist |
   | `:cpus` | `1` | 1–64 guest vCPUs |
   | `:memory_mb` | `256` | 128–16,384 MiB guest allocation |
@@ -76,8 +79,8 @@ defmodule SmolBox.Profile do
   | `:overlay_gb` | `1` | 1–64 GiB overlay allocation |
   | `:host_overhead_mb` | `256` | 128–16,384 MiB additional admission reservation |
   | `:max_output_bytes` | `1_048_576` | 1 byte–8 MiB of combined captured stdout/stderr |
-  | `:max_file_bytes` | `1_048_576` | 1 byte–1 MiB per declared file |
-  | `:max_total_file_bytes` | `4_194_304` | 1 byte–16 MiB per direction; must cover `:max_file_bytes` |
+  | `:max_file_bytes` | `1_048_576` | 1 byte–16 MiB per declared file; larger than 1 MiB requires explicit client/worker approval |
+  | `:max_total_file_bytes` | `4_194_304` | 1 byte–64 MiB per direction; must cover `:max_file_bytes` |
   | `:preparation_ms` | `60_000` | First preparation stage budget |
   | `:execution_ms` | `30_000` | Command observation budget |
   | `:collection_ms` | `30_000` | Output collection budget |
@@ -88,6 +91,10 @@ defmodule SmolBox.Profile do
   Background execution uses it only to observe launch, never to limit process life. A default profile is structurally
   valid but its 1/1 GiB disks do **not** meet the reference smolvm 1.14.1 template
   floor. Use the actual operator-verified floor, as in the example below.
+
+  Explicit guest path policies or enlarged file budgets require image machines on
+  smolvm 1.17.0 and the `guest_files: 1` store capability. Transfer bodies are
+  buffered; these budgets do not bound total controller or worker memory.
 
   Give every changed policy a new `id`; managed submission matches the complete
   profile against the worker's catalog. Unsupported hard quotas, mounts, ports,
@@ -139,6 +146,7 @@ defmodule SmolBox.Profile do
   defp validate_fields(profile) do
     checks = [
       Validation.identifier?(profile.id),
+      SmolBox.GuestPaths.valid?(profile.guest_paths),
       SmolBox.NetworkPolicy.valid?(profile.network),
       Validation.integer?(profile.cpus, 1, 64),
       Validation.integer?(profile.memory_mb, 128, 16_384),
@@ -146,8 +154,8 @@ defmodule SmolBox.Profile do
       Validation.integer?(profile.overlay_gb, 1, 64),
       Validation.integer?(profile.host_overhead_mb, 128, 16_384),
       Validation.integer?(profile.max_output_bytes, 1, 8_388_608),
-      Validation.integer?(profile.max_file_bytes, 1, 1_048_576),
-      Validation.integer?(profile.max_total_file_bytes, 1, 16_777_216),
+      Validation.integer?(profile.max_file_bytes, 1, 16_777_216),
+      Validation.integer?(profile.max_total_file_bytes, 1, 67_108_864),
       profile.max_file_bytes <= profile.max_total_file_bytes,
       budgets?(profile)
     ]

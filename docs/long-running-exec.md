@@ -210,3 +210,8 @@ observe workloads beyond five minutes; it is not a production isolation claim.
 
 See the [validation report](long-running-exec-validation.md) for measured Linux/macOS
 long execution, durable background HTTP acceptance, checks and remaining limits.
+
+When a record uses an explicit guest path policy or expanded file budget,
+[codec v9](guest-files.md#recovery-and-upgrades) supersedes its earlier envelope
+and additionally requires `guest_files: 1`. Other feature capabilities and
+retention rules still apply.

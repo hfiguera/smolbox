@@ -121,6 +121,7 @@ defmodule SmolBox.ExecutionSpec do
     with true <- Validation.struct_shape?(spec, __MODULE__),
          :ok <- command_validate(spec.command),
          :ok <- Profile.validate(spec.profile),
+         true <- command_path?(spec),
          :ok <- Manifest.validate(spec.inputs, spec.outputs, spec.profile),
          true <- fields?(spec) do
       :ok
@@ -156,6 +157,11 @@ defmodule SmolBox.ExecutionSpec do
       Validation.integer?(spec.retention_ms, 60_000, 2_592_000_000) and metadata?(spec.metadata) and
       command_budget?(spec)
   end
+
+  defp command_path?(%{command: %TerminalSpec{}}), do: true
+
+  defp command_path?(spec),
+    do: SmolBox.GuestPaths.allowed?(spec.profile.guest_paths, :workdir, spec.command.workdir)
 
   defp command_validate(%TerminalSpec{} = command),
     do: TerminalSpec.validate(command)
@@ -203,8 +209,12 @@ defmodule SmolBox.ExecutionSpec do
   defp canonical(%Command{background: false} = value),
     do: value |> Map.from_struct() |> Map.delete(:background) |> canonical()
 
-  defp canonical(%Profile{network: :offline} = value),
-    do: value |> Map.from_struct() |> Map.delete(:network) |> canonical()
+  defp canonical(%Profile{} = value) do
+    fields = Map.from_struct(value)
+    fields = if value.network == :offline, do: Map.delete(fields, :network), else: fields
+    fields = if value.guest_paths == nil, do: Map.delete(fields, :guest_paths), else: fields
+    canonical(fields)
+  end
 
   defp canonical(%_struct{} = value), do: value |> Map.from_struct() |> canonical()
 

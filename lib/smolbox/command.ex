@@ -10,7 +10,7 @@ defmodule SmolBox.Command do
   belongs in staged files.
   """
 
-  alias SmolBox.{Error, Files}
+  alias SmolBox.{Error, GuestPaths}
 
   @enforce_keys [:argv]
   @derive {Inspect, only: [:timeout_secs]}
@@ -42,7 +42,7 @@ defmodule SmolBox.Command do
 
   | Option | Default | Meaning |
   |---|---|---|
-  | `:workdir` | `"/workspace"` | Validated absolute guest workspace path |
+  | `:workdir` | `"/workspace"` | Validated absolute guest path; client/profile roots authorize its use |
   | `:timeout_secs` | `30` | Upstream command timeout, a whole number from 1–86,400 seconds; absent for background launch |
   | `:background` | `false` | Launch on a retained image machine; returns launch evidence, not final output |
   | `:env` | `[]` | Up to 64 unique `{string_name, string_value}` pairs; names up to 128 bytes, values up to 8192 bytes |
@@ -51,7 +51,10 @@ defmodule SmolBox.Command do
 
   Environment variable names use letters/digits/underscores and cannot begin
   with a digit. Binary inputs belong in files. In managed execution, the command
-  timeout must fit the profile's `execution_ms` budget.
+  timeout must fit the profile's `execution_ms` budget. `workdir` construction
+  validates syntax only; the default client and profile authorize `/workspace`.
+  Broader directories require explicit `SmolBox.GuestPaths` approval on both.
+  They must exist in the guest before command dispatch.
 
   ## Example
 
@@ -108,7 +111,7 @@ defmodule SmolBox.Command do
       valid_stdin?(command.stdin),
       valid_user?(command.user),
       valid_mode?(command),
-      Files.validate_path(command.workdir) == :ok
+      GuestPaths.absolute?(command.workdir)
     ]
 
     if Enum.all?(checks), do: :ok, else: invalid()

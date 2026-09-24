@@ -130,8 +130,11 @@ hard CPU-time, host-RSS, process-count or host-disk-byte setting is accepted by 
 current library.
 
 Configure `SMOLVM_FILE_TRANSFER_MAX_BYTES` on the worker before starting the
-server. The tested installation uses 1 MiB; the pinned release's default 4 GiB
-is inappropriate for this small-file contract. Client download limits protect
+server. The default qualification uses 1 MiB; the explicit larger-file campaign
+uses 16 MiB. This setting bounds agent reads/downloads, not the HTTP upload body
+ceiling (100 MiB upstream). SmolBox limits approved uploads independently to at
+most 16 MiB. The upstream default 4 GiB download allowance is inappropriate for
+this contract. Client download limits protect
 the controller after the server has performed its own work; they cannot replace
 server-side limits. The pinned SSE bridge uses an unbounded channel by message
 count and an 11 MiB aggregate relay cap plus a frame. This is not a proven total
@@ -140,7 +143,10 @@ all host-agent control paths are inaccessible to hostile guest code.
 
 ## Files and persistence
 
-Use exact validated `/workspace` paths and bounded manifests. SmolBox does not
+Use exact approved guest paths and bounded manifests; `/workspace` remains the
+default. See [guest paths](guest-files.md) for explicit directional roots and byte
+budgets. Root authorization governs file API calls and ordinary command cwd, not
+what an arbitrary guest command can read or write. SmolBox does not
 recursively unpack guest archives or select outputs with wildcards. Lexical path
 validation cannot establish race-free symlink containment inside an actively
 changing guest. Collected files are bounded individual snapshots, not an atomic

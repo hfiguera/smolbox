@@ -54,6 +54,18 @@ defmodule SmolBox.DirectoryTest do
     assert {:ok, ""} = Directory.read(store, "tenant", "empty", 1)
   end
 
+  test "larger snapshots require an explicit bounded adapter budget", %{root: root, store: old} do
+    {:ok, store} = Directory.new(root, max_file_bytes: 16_777_216)
+    bytes = :binary.copy(<<0, 255>>, 8_388_608)
+    assert {:error, _} = Directory.seed(old, "tenant", "big", bytes)
+    assert :ok = Directory.seed(store, "tenant", "big", bytes)
+    assert {:ok, ^bytes} = Directory.read(store, "tenant", "big", byte_size(bytes))
+    assert {:error, _} = Directory.read(old, "tenant", "big", 1_048_576)
+    assert {:error, _} = Directory.seed(store, "tenant", "over", bytes <> "x")
+    assert {:error, _} = Directory.new(root, max_file_bytes: 16_777_217)
+    assert {:error, _} = Directory.new(root, unknown: true)
+  end
+
   test "unapproved roots, references, oversized input and corrupt stored bytes fail", %{
     store: store,
     root: root

@@ -1,10 +1,10 @@
 defmodule SmolBox.Files do
   @moduledoc """
-  Guest workspace paths and byte digests.
+  Guest path encoding and byte digests.
 
-  File operations are confined lexically to `/workspace`. This validation does
-  not resolve guest symlinks; the file transport and host artifact store must
-  enforce their own filesystem boundary. Percent signs, backslashes, traversal,
+  `validate_path/1` retains the legacy lexical `/workspace` contract. Explicit
+  directional policies use `SmolBox.GuestPaths` and `encode_path/3`. Neither
+  resolves guest symlinks; approved roots are not a filesystem sandbox. Percent signs, backslashes, traversal,
   repeated separators, and non-UTF-8 paths are deliberately unsupported.
   """
 
@@ -26,8 +26,11 @@ defmodule SmolBox.Files do
 
   @doc "Encode a validated guest path for the worker's wildcard file route."
   @spec encode_path(term()) :: {:ok, String.t()} | {:error, Error.t()}
-  def encode_path(path) do
-    with :ok <- validate_path(path) do
+  def encode_path(path), do: encode_path(path, nil, :download)
+
+  @doc "Encode a path after explicit directional policy authorization."
+  def encode_path(path, policy, direction) do
+    if path != "/" and SmolBox.GuestPaths.allowed?(policy, direction, path) do
       encoded =
         path
         |> String.trim_leading("/")
@@ -35,6 +38,8 @@ defmodule SmolBox.Files do
         |> Enum.map_join("/", &URI.encode(&1, fn char -> URI.char_unreserved?(char) end))
 
       {:ok, encoded}
+    else
+      invalid()
     end
   end
 

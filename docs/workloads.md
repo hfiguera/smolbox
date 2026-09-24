@@ -177,3 +177,8 @@ stop/starts the same machine, verifies a second startup and preserved files,
 then deletes it and checks absence and released reservations. After a failed
 example, inspect evidence before deciding recovery; `delete` is an explicit
 cleanup phase. See [validation](workloads-validation.md) for real-worker evidence.
+
+When a record uses an explicit guest path policy or expanded file budget,
+[codec v9](guest-files.md#recovery-and-upgrades) supersedes its earlier envelope
+and additionally requires `guest_files: 1`. Other feature capabilities and
+retention rules still apply.

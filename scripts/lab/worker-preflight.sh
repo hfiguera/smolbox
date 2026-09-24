@@ -11,7 +11,10 @@ group=/sys/fs/cgroup/system.slice/smolbox-qualification.service
 [[ $(cat "$group/cpu.max") == '100000 100000' && $(cat "$group/pids.max") == 96 ]] || exit 1
 [[ $HOME == /srv/sbq/home && $XDG_CACHE_HOME == /srv/sbq/cache && $XDG_DATA_HOME == /srv/sbq/control ]] || exit 1
 [[ ${SMOLVM_DATA_DIR:-} == '' && $SMOLVM_SECCOMP == enforce && $SMOLVM_LANDLOCK == enforce ]] || exit 1
-[[ $SMOLVM_FILE_TRANSFER_MAX_BYTES == 1048576 && $SMOLVM_DISABLE_SHARED_EXTRACT == 1 ]] || exit 1
+file_cap=${SMOLBOX_QUALIFICATION_FILE_BYTES:-1048576}
+[[ $file_cap == 1048576 || $file_cap == 16777216 ]] || exit 1
+[[ $file_cap == 1048576 || ${SMOLBOX_CANDIDATE_VERSION:-} == 1.17.0 ]] || exit 1
+[[ $SMOLVM_FILE_TRANSFER_MAX_BYTES == "$file_cap" && $SMOLVM_DISABLE_SHARED_EXTRACT == 1 ]] || exit 1
 for item in control:67108864 cache:805306368 run:4194304; do
   path=/srv/sbq/${item%:*}
   [[ $(findmnt -n -o FSTYPE --target "$path") == tmpfs ]] || exit 1

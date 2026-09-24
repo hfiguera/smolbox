@@ -135,6 +135,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   @spec supports?(t(), ExecutionSpec.t() | SmolBox.ManagedMachineSpec.t()) :: boolean()
   def supports?(worker, %{artifact: %{"kind" => "checkpoint"}} = spec) do
     ExecutionSupport.worker?(worker, spec) and
+      not SmolBox.FileAccess.extended?(spec.profile) and
       Map.get(spec, :ports, []) == [] and
       Map.get(spec, :workload) == nil and
       spec.profile in worker.profiles and allocation_fits?(worker, spec.profile) and
@@ -146,9 +147,9 @@ defmodule SmolBox.Runtime.WorkerConfig do
   def supports?(worker, spec) do
     ExecutionSupport.worker?(worker, spec) and
       ports_supported?(worker, spec) and
+      file_support?(worker, spec) and
       workload_supported?(worker, spec) and
-      (spec.profile.network == :offline or
-         worker.runtime_version in ["1.16.0", "1.16.1", "1.17.0"]) and
+      network_supported?(worker, spec) and
       spec.profile in worker.profiles and allocation_fits?(worker, spec.profile) and
       worker.architecture == spec.artifact["architecture"] and
       Enum.any?(
@@ -179,6 +180,15 @@ defmodule SmolBox.Runtime.WorkerConfig do
       with :ok <- MachineSpec.validate(machine), do: {:ok, machine}
     end
   end
+
+  defp network_supported?(worker, spec),
+    do:
+      spec.profile.network == :offline or worker.runtime_version in ["1.16.0", "1.16.1", "1.17.0"]
+
+  defp file_support?(worker, spec),
+    do:
+      SmolBox.FileAccess.supports?(worker.client, spec.profile) and
+        (not SmolBox.FileAccess.extended?(spec.profile) or worker.runtime_version == "1.17.0")
 
   defp workload_supported?(worker, spec),
     do: Map.get(spec, :workload) == nil or worker.runtime_version == "1.17.0"
@@ -220,7 +230,14 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   defp valid_client?(%Client{} = client) do
     Validation.struct_shape?(client, Client) and
-      match?({:ok, _client}, Client.new(client.worker, transport: client.transport))
+      match?(
+        {:ok, _client},
+        Client.new(client.worker,
+          transport: client.transport,
+          guest_paths: client.guest_paths,
+          max_file_bytes: client.max_file_bytes
+        )
+      )
   end
 
   defp valid_client?(_client), do: false

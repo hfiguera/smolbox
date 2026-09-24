@@ -121,3 +121,17 @@ explicit new service launch; cancellation does not perform PID-based termination
 - An unknown session blocks stop/delete and another command. Follow
   [explicit recovery](interactive-terminals.md#recovering-after-controller-or-connection-loss);
   do not retry with a fresh execution ID to bypass the block.
+
+## Guest paths and file limits
+
+A path validation error can mean a denied direction, malformed absolute path, or
+missing download permission for an input's staging readback. A valid `Command`
+constructor does not itself authorize its working directory. Unsupported workers,
+checkpoint sources, stores without `guest_files: 1`, revoked profiles, or client
+limits smaller than an expanded profile reject use. A directory must exist before
+exec; staging may create parent directories but workdir selection does not.
+
+An upload/download timeout does not prove no file was written or the VM stopped.
+An HTTP error reading a large file may be the upstream download cap; client
+`max_bytes` protects only controller capture. See [guest files](guest-files.md) for
+coordinated budgets and recovery.

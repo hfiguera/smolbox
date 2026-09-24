@@ -72,7 +72,7 @@ defmodule SmolBox.Worker do
   | `:receive_timeout_ms` | `15_000` | Receive-idle budget (up to 86,460,000 ms); extended exec uses remaining operation budget |
   | `:pool_timeout_ms` | `5000` | Connection-pool checkout budget |
   | `:operation_timeout_ms` | `30_000` | Total client-operation budget (up to 86,460,000 ms), including streaming callbacks |
-  | `:max_request_bytes` | `1_048_576` | Encoded request body cap, at most 2 MiB |
+  | `:max_request_bytes` | `1_048_576` | Encoded request body cap, at most 16 MiB |
   | `:max_response_bytes` | `16_777_216` | Encoded response/stream cap, at most 32 MiB |
 
   Connect/pool budgets are positive and at most 900,000 ms; receive and operation
@@ -167,7 +167,7 @@ defmodule SmolBox.Worker do
     ) and
       bounded?(worker.receive_timeout_ms, 86_460_000) and
       bounded?(worker.operation_timeout_ms, 86_460_000) and
-      bounded?(worker.max_request_bytes, 2_097_152) and
+      bounded?(worker.max_request_bytes, 16_777_216) and
       bounded?(worker.max_response_bytes, 33_554_432)
   end
 

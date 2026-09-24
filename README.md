@@ -24,6 +24,11 @@ resizing and durable exit-or-uncertainty tracking on retained machines.
 [Long-running commands and background launch](docs/long-running-exec.md) support
 longer builds and persistent services, with explicit budgets and typed launch evidence.
 
+[Guest paths and larger files](docs/guest-files.md) authorize project and home
+directories and buffered files up to 16 MiB. Defaults remain `/workspace` and
+1 MiB. Policies persist through controller recovery and apply to ordinary command
+working directories too.
+
 ## Why use SmolBox?
 
 Executing a command is only part of integrating a worker. Your application also
