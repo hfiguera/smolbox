@@ -44,7 +44,7 @@ defmodule SmolBox.PersistentMachinesTest do
         assert map_size(ManagedPeer.snapshot(fixture.peer).machines) == 1
       end
 
-      {:ok, idle} = Machines.inspect(fixture.runtime, handle)
+      idle = RuntimeFixture.await_idle(fixture.runtime, handle)
       assert {:ok, stop} = Machines.stop(fixture.runtime, handle, idle.version)
       assert {:ok, duplicate} = Machines.stop(fixture.runtime, handle, idle.version)
       assert duplicate.last_request == stop.last_request
@@ -328,14 +328,11 @@ defmodule SmolBox.PersistentMachinesTest do
     wait_machine(fixture, handle, &(&1.state == :deleted))
     assert :ok = Machines.reconcile(fixture.runtime, contender)
 
-    wait_machine(
-      fixture,
-      contender,
-      &(&1.next_due_at_ms > System.system_time(:millisecond) + 30_000)
-    )
+    RuntimeFixture.await_idle(fixture.runtime, contender)
 
     {:ok, still_blocked} = Machines.await(fixture.runtime, contender, 5000)
     assert still_blocked.state == :conflict
+    assert still_blocked.worker_id == nil and still_blocked.reserved_ports == []
 
     assert {:ok, %{state: :deleted}} =
              Machines.delete(fixture.runtime, contender, still_blocked.version)
