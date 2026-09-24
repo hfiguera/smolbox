@@ -34,8 +34,7 @@ export SMOLBOX_ARTIFACT_ROOT=/absolute/private/directory/objects
 export SMOLBOX_FINGERPRINT_KEY_FILE=/absolute/private/directory/fingerprint.key
 export SMOLBOX_EXECUTION_ID=example-normal-001
 MIX_ENV=test mix deps.get
-MIX_ENV=test mix compile --warnings-as-errors
-MIX_ENV=test mix dialyzer --force-check
+mix quality
 MIX_ENV=test mix hex.audit
 MIX_ENV=test mix deps.audit
 MIX_ENV=test mix run scripts/demo.exs
@@ -89,3 +88,21 @@ These are accounting reservations, not hard host filesystem/RSS quotas. A host
 with different or larger artifact templates must requalify and update the floor.
 Existing v1 records retain their original spec: inspect their original handles;
 reusing their ID with the changed profile intentionally returns an identity conflict.
+
+## Example code-quality checks
+
+Run `mix deps.get`, then `mix quality` from this example directory. The alias
+selects `MIX_ENV=test` unless explicitly overridden and runs compilation with
+warnings as errors, strict Credo with the ExSlop plugin, ExDNA with a zero-clone
+budget, and Dialyzer with `--force-check`. CI runs the same alias. The tools are
+development/test dependencies and are not included in production runtimes.
+
+The local Credo configuration includes this app's source, tests, configuration,
+scripts and compiled shared example code. ExDNA checks implementation and support
+code with the repository's existing `min_mass: 30` threshold; repeated test-case
+bodies are outside its scope. Dialyzer analyzes the app's compiled test-environment
+modules against its own dependencies. Keep the local `.credo.exs` and `.ex_dna.exs`
+when copying an example. A first Dialyzer run builds a PLT and can take several
+minutes; subsequent local/CI runs reuse it while checking dependency changes.
+These static checks do not start a worker and do not replace the example's tests
+or real-worker qualification.

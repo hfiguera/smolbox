@@ -15,6 +15,11 @@ This walkthrough does not configure the separately
 [tested Linux deployment](resource-qualification.md#subsequent-linux-deployment-validation)
 or its external host resource controls.
 
+For a complete browser experience, run the
+[community workspace example](https://github.com/hfiguera/smolbox/tree/main/examples/community_workspace).
+It consumes the published 0.2.0 package and combines persistent machines, terminals,
+files, background launches and a mapped service with PostgreSQL recovery.
+
 ## 1. Install SmolBox
 
 In an existing Elixir Mix application, add this entry to `deps/0` in `mix.exs`:

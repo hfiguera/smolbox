@@ -7,7 +7,18 @@ defmodule SmolBox.DurableHost.MixProject do
       version: "0.1.0",
       elixir: "~> 1.18",
       elixirc_paths: paths(Mix.env()),
+      aliases: [
+        quality: [
+          "compile --warnings-as-errors",
+          "credo --strict",
+          "ex_dna lib config priv scripts test/support ../support/lib ../support/store --max-clones 0",
+          "dialyzer --force-check"
+        ]
+      ],
       deps: [
+        {:credo, "~> 1.7.19", only: [:dev, :test], runtime: false},
+        {:ex_slop, "~> 0.4.4", only: [:dev, :test], runtime: false},
+        {:ex_dna, "~> 1.5.4", only: [:dev, :test], runtime: false},
         {:smolbox, path: "../.."},
         {:ecto_sql, "~> 3.14.0"},
         {:postgrex, "~> 0.22.4"},
@@ -19,12 +30,15 @@ defmodule SmolBox.DurableHost.MixProject do
     ]
   end
 
+  def cli, do: [preferred_envs: [quality: :test]]
+
   def application,
     do: [extra_applications: [:logger, :crypto], mod: {SmolBox.DurableHost.Application, []}]
 
   defp paths(:test),
     do: [
       "lib",
+      Path.expand("../support/store", __DIR__),
       "test/support",
       Path.expand("../../test/support/store", __DIR__),
       Path.expand("../../test/support/fault", __DIR__),
@@ -32,5 +46,6 @@ defmodule SmolBox.DurableHost.MixProject do
       Path.expand("../support/lib", __DIR__)
     ]
 
-  defp paths(_env), do: ["lib", Path.expand("../support/lib", __DIR__)]
+  defp paths(_env),
+    do: ["lib", Path.expand("../support/lib", __DIR__), Path.expand("../support/store", __DIR__)]
 end

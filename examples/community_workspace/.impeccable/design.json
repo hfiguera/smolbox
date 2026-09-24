@@ -1,0 +1,548 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-24T04:41:24.828781+00:00",
+  "title": "Design System: SmolBox Workspace",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "tonalRamp": [
+          "oklch(15.00% 0.00802 98.88)",
+          "oklch(26.43% 0.00802 98.88)",
+          "oklch(37.86% 0.00802 98.88)",
+          "oklch(49.29% 0.00802 98.88)",
+          "oklch(60.71% 0.00802 98.88)",
+          "oklch(72.14% 0.00802 98.88)",
+          "oklch(83.57% 0.00802 98.88)",
+          "oklch(95.00% 0.00802 98.88)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Surface",
+        "tonalRamp": [
+          "oklch(15.00% 0.00666 97.35)",
+          "oklch(26.43% 0.00666 97.35)",
+          "oklch(37.86% 0.00666 97.35)",
+          "oklch(49.29% 0.00666 97.35)",
+          "oklch(60.71% 0.00666 97.35)",
+          "oklch(72.14% 0.00666 97.35)",
+          "oklch(83.57% 0.00666 97.35)",
+          "oklch(95.00% 0.00666 97.35)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.01502 124.13)",
+          "oklch(26.43% 0.01502 124.13)",
+          "oklch(37.86% 0.01502 124.13)",
+          "oklch(49.29% 0.01502 124.13)",
+          "oklch(60.71% 0.01502 124.13)",
+          "oklch(72.14% 0.01502 124.13)",
+          "oklch(83.57% 0.01502 124.13)",
+          "oklch(95.00% 0.01502 124.13)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "tonalRamp": [
+          "oklch(15.00% 0.02364 119.39)",
+          "oklch(26.43% 0.02364 119.39)",
+          "oklch(37.86% 0.02364 119.39)",
+          "oklch(49.29% 0.02364 119.39)",
+          "oklch(60.71% 0.02364 119.39)",
+          "oklch(72.14% 0.02364 119.39)",
+          "oklch(83.57% 0.02364 119.39)",
+          "oklch(95.00% 0.02364 119.39)"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Rule",
+        "tonalRamp": [
+          "oklch(15.00% 0.01626 114.40)",
+          "oklch(26.43% 0.01626 114.40)",
+          "oklch(37.86% 0.01626 114.40)",
+          "oklch(49.29% 0.01626 114.40)",
+          "oklch(60.71% 0.01626 114.40)",
+          "oklch(72.14% 0.01626 114.40)",
+          "oklch(83.57% 0.01626 114.40)",
+          "oklch(95.00% 0.01626 114.40)"
+        ]
+      },
+      "olive": {
+        "role": "primary",
+        "displayName": "Olive",
+        "tonalRamp": [
+          "oklch(15.00% 0.09800 117.63)",
+          "oklch(26.43% 0.09800 117.63)",
+          "oklch(37.86% 0.09800 117.63)",
+          "oklch(49.29% 0.09800 117.63)",
+          "oklch(60.71% 0.09800 117.63)",
+          "oklch(72.14% 0.09800 117.63)",
+          "oklch(83.57% 0.09800 117.63)",
+          "oklch(95.00% 0.09800 117.63)"
+        ]
+      },
+      "olive-ink": {
+        "role": "primary",
+        "displayName": "Olive Ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.06501 124.58)",
+          "oklch(26.43% 0.06501 124.58)",
+          "oklch(37.86% 0.06501 124.58)",
+          "oklch(49.29% 0.06501 124.58)",
+          "oklch(60.71% 0.06501 124.58)",
+          "oklch(72.14% 0.06501 124.58)",
+          "oklch(83.57% 0.06501 124.58)",
+          "oklch(95.00% 0.06501 124.58)"
+        ]
+      },
+      "danger": {
+        "role": "semantic",
+        "displayName": "Danger",
+        "tonalRamp": [
+          "oklch(15.00% 0.13888 30.28)",
+          "oklch(26.43% 0.13888 30.28)",
+          "oklch(37.86% 0.13888 30.28)",
+          "oklch(49.29% 0.13888 30.28)",
+          "oklch(60.71% 0.13888 30.28)",
+          "oklch(72.14% 0.13888 30.28)",
+          "oklch(83.57% 0.13888 30.28)",
+          "oklch(95.00% 0.13888 30.28)"
+        ]
+      },
+      "focus": {
+        "role": "primary",
+        "displayName": "Focus",
+        "tonalRamp": [
+          "oklch(15.00% 0.09457 127.21)",
+          "oklch(26.43% 0.09457 127.21)",
+          "oklch(37.86% 0.09457 127.21)",
+          "oklch(49.29% 0.09457 127.21)",
+          "oklch(60.71% 0.09457 127.21)",
+          "oklch(72.14% 0.09457 127.21)",
+          "oklch(83.57% 0.09457 127.21)",
+          "oklch(95.00% 0.09457 127.21)"
+        ]
+      },
+      "button-border": {
+        "role": "neutral",
+        "displayName": "Button Border",
+        "tonalRamp": [
+          "oklch(15.00% 0.02551 119.62)",
+          "oklch(26.43% 0.02551 119.62)",
+          "oklch(37.86% 0.02551 119.62)",
+          "oklch(49.29% 0.02551 119.62)",
+          "oklch(60.71% 0.02551 119.62)",
+          "oklch(72.14% 0.02551 119.62)",
+          "oklch(83.57% 0.02551 119.62)",
+          "oklch(95.00% 0.02551 119.62)"
+        ]
+      },
+      "button-hover": {
+        "role": "neutral",
+        "displayName": "Button Hover",
+        "tonalRamp": [
+          "oklch(15.00% 0.01886 116.59)",
+          "oklch(26.43% 0.01886 116.59)",
+          "oklch(37.86% 0.01886 116.59)",
+          "oklch(49.29% 0.01886 116.59)",
+          "oklch(60.71% 0.01886 116.59)",
+          "oklch(72.14% 0.01886 116.59)",
+          "oklch(83.57% 0.01886 116.59)",
+          "oklch(95.00% 0.01886 116.59)"
+        ]
+      },
+      "primary-hover": {
+        "role": "primary",
+        "displayName": "Primary Hover",
+        "tonalRamp": [
+          "oklch(15.00% 0.12678 118.98)",
+          "oklch(26.43% 0.12678 118.98)",
+          "oklch(37.86% 0.12678 118.98)",
+          "oklch(49.29% 0.12678 118.98)",
+          "oklch(60.71% 0.12678 118.98)",
+          "oklch(72.14% 0.12678 118.98)",
+          "oklch(83.57% 0.12678 118.98)",
+          "oklch(95.00% 0.12678 118.98)"
+        ]
+      },
+      "white": {
+        "role": "neutral",
+        "displayName": "White",
+        "tonalRamp": [
+          "oklch(15.00% 0.00000 89.88)",
+          "oklch(26.43% 0.00000 89.88)",
+          "oklch(37.86% 0.00000 89.88)",
+          "oklch(49.29% 0.00000 89.88)",
+          "oklch(60.71% 0.00000 89.88)",
+          "oklch(72.14% 0.00000 89.88)",
+          "oklch(83.57% 0.00000 89.88)",
+          "oklch(95.00% 0.00000 89.88)"
+        ]
+      },
+      "field-border": {
+        "role": "neutral",
+        "displayName": "Field Border",
+        "tonalRamp": [
+          "oklch(15.00% 0.02110 119.02)",
+          "oklch(26.43% 0.02110 119.02)",
+          "oklch(37.86% 0.02110 119.02)",
+          "oklch(49.29% 0.02110 119.02)",
+          "oklch(60.71% 0.02110 119.02)",
+          "oklch(72.14% 0.02110 119.02)",
+          "oklch(83.57% 0.02110 119.02)",
+          "oklch(95.00% 0.02110 119.02)"
+        ]
+      },
+      "field-background": {
+        "role": "neutral",
+        "displayName": "Field Background",
+        "tonalRamp": [
+          "oklch(15.00% 0.00798 114.22)",
+          "oklch(26.43% 0.00798 114.22)",
+          "oklch(37.86% 0.00798 114.22)",
+          "oklch(49.29% 0.00798 114.22)",
+          "oklch(60.71% 0.00798 114.22)",
+          "oklch(72.14% 0.00798 114.22)",
+          "oklch(83.57% 0.00798 114.22)",
+          "oklch(95.00% 0.00798 114.22)"
+        ]
+      },
+      "output-background": {
+        "role": "neutral",
+        "displayName": "Output Background",
+        "tonalRamp": [
+          "oklch(15.00% 0.00933 113.16)",
+          "oklch(26.43% 0.00933 113.16)",
+          "oklch(37.86% 0.00933 113.16)",
+          "oklch(49.29% 0.00933 113.16)",
+          "oklch(60.71% 0.00933 113.16)",
+          "oklch(72.14% 0.00933 113.16)",
+          "oklch(83.57% 0.00933 113.16)",
+          "oklch(95.00% 0.00933 113.16)"
+        ]
+      },
+      "tools-background": {
+        "role": "neutral",
+        "displayName": "Tools Background",
+        "tonalRamp": [
+          "oklch(15.00% 0.00791 106.55)",
+          "oklch(26.43% 0.00791 106.55)",
+          "oklch(37.86% 0.00791 106.55)",
+          "oklch(49.29% 0.00791 106.55)",
+          "oklch(60.71% 0.00791 106.55)",
+          "oklch(72.14% 0.00791 106.55)",
+          "oklch(83.57% 0.00791 106.55)",
+          "oklch(95.00% 0.00791 106.55)"
+        ]
+      },
+      "state-background": {
+        "role": "neutral",
+        "displayName": "State Background",
+        "tonalRamp": [
+          "oklch(15.00% 0.00936 113.16)",
+          "oklch(26.43% 0.00936 113.16)",
+          "oklch(37.86% 0.00936 113.16)",
+          "oklch(49.29% 0.00936 113.16)",
+          "oklch(60.71% 0.00936 113.16)",
+          "oklch(72.14% 0.00936 113.16)",
+          "oklch(83.57% 0.00936 113.16)",
+          "oklch(95.00% 0.00936 113.16)"
+        ]
+      },
+      "state-ink": {
+        "role": "neutral",
+        "displayName": "State Ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.02315 123.34)",
+          "oklch(26.43% 0.02315 123.34)",
+          "oklch(37.86% 0.02315 123.34)",
+          "oklch(49.29% 0.02315 123.34)",
+          "oklch(60.71% 0.02315 123.34)",
+          "oklch(72.14% 0.02315 123.34)",
+          "oklch(83.57% 0.02315 123.34)",
+          "oklch(95.00% 0.02315 123.34)"
+        ]
+      },
+      "success-background": {
+        "role": "semantic",
+        "displayName": "Success Background",
+        "tonalRamp": [
+          "oklch(15.00% 0.04208 120.39)",
+          "oklch(26.43% 0.04208 120.39)",
+          "oklch(37.86% 0.04208 120.39)",
+          "oklch(49.29% 0.04208 120.39)",
+          "oklch(60.71% 0.04208 120.39)",
+          "oklch(72.14% 0.04208 120.39)",
+          "oklch(83.57% 0.04208 120.39)",
+          "oklch(95.00% 0.04208 120.39)"
+        ]
+      },
+      "success-ink": {
+        "role": "semantic",
+        "displayName": "Success Ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.08260 128.58)",
+          "oklch(26.43% 0.08260 128.58)",
+          "oklch(37.86% 0.08260 128.58)",
+          "oklch(49.29% 0.08260 128.58)",
+          "oklch(60.71% 0.08260 128.58)",
+          "oklch(72.14% 0.08260 128.58)",
+          "oklch(83.57% 0.08260 128.58)",
+          "oklch(95.00% 0.08260 128.58)"
+        ]
+      },
+      "uncertain-background": {
+        "role": "semantic",
+        "displayName": "Uncertain Background",
+        "tonalRamp": [
+          "oklch(15.00% 0.04500 85.87)",
+          "oklch(26.43% 0.04500 85.87)",
+          "oklch(37.86% 0.04500 85.87)",
+          "oklch(49.29% 0.04500 85.87)",
+          "oklch(60.71% 0.04500 85.87)",
+          "oklch(72.14% 0.04500 85.87)",
+          "oklch(83.57% 0.04500 85.87)",
+          "oklch(95.00% 0.04500 85.87)"
+        ]
+      },
+      "uncertain-ink": {
+        "role": "semantic",
+        "displayName": "Uncertain Ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.09307 71.96)",
+          "oklch(26.43% 0.09307 71.96)",
+          "oklch(37.86% 0.09307 71.96)",
+          "oklch(49.29% 0.09307 71.96)",
+          "oklch(60.71% 0.09307 71.96)",
+          "oklch(72.14% 0.09307 71.96)",
+          "oklch(83.57% 0.09307 71.96)",
+          "oklch(95.00% 0.09307 71.96)"
+        ]
+      },
+      "terminal-background": {
+        "role": "neutral",
+        "displayName": "Terminal Background",
+        "tonalRamp": [
+          "oklch(15.00% 0.01401 131.74)",
+          "oklch(26.43% 0.01401 131.74)",
+          "oklch(37.86% 0.01401 131.74)",
+          "oklch(49.29% 0.01401 131.74)",
+          "oklch(60.71% 0.01401 131.74)",
+          "oklch(72.14% 0.01401 131.74)",
+          "oklch(83.57% 0.01401 131.74)",
+          "oklch(95.00% 0.01401 131.74)"
+        ]
+      },
+      "terminal-ink": {
+        "role": "neutral",
+        "displayName": "Terminal Ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.01471 115.04)",
+          "oklch(26.43% 0.01471 115.04)",
+          "oklch(37.86% 0.01471 115.04)",
+          "oklch(49.29% 0.01471 115.04)",
+          "oklch(60.71% 0.01471 115.04)",
+          "oklch(72.14% 0.01471 115.04)",
+          "oklch(83.57% 0.01471 115.04)",
+          "oklch(95.00% 0.01471 115.04)"
+        ]
+      },
+      "terminal-muted": {
+        "role": "neutral",
+        "displayName": "Terminal Muted",
+        "tonalRamp": [
+          "oklch(15.00% 0.03399 122.17)",
+          "oklch(26.43% 0.03399 122.17)",
+          "oklch(37.86% 0.03399 122.17)",
+          "oklch(49.29% 0.03399 122.17)",
+          "oklch(60.71% 0.03399 122.17)",
+          "oklch(72.14% 0.03399 122.17)",
+          "oklch(83.57% 0.03399 122.17)",
+          "oklch(95.00% 0.03399 122.17)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Responsive page heading."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Workspace heading."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Working-area heading."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Explanatory paragraphs."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Form labels."
+      },
+      "command": {
+        "displayName": "Command",
+        "purpose": "Literal command entry."
+      },
+      "output": {
+        "displayName": "Output",
+        "purpose": "Retained command output."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "control-fill",
+        "value": "background .14s ease-out",
+        "purpose": "Button hover feedback."
+      },
+      {
+        "name": "notice-reveal",
+        "value": "notice-in .18s cubic-bezier(.16,1,.3,1)",
+        "purpose": "Clip-path reveal from inset(0 0 18% 0) to inset(0 0 0 0). Reduced motion disables animation and transition."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact-desktop",
+        "value": "1050px"
+      },
+      {
+        "name": "stacked",
+        "value": "740px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Run command control; extracted from the current implementation.",
+      "html": "<button class=\"ds-button-primary\">Run command</button>",
+      "css": ".ds-button-primary{font-family:'DM Sans Variable',sans-serif;font-size:16px;font-weight:600;cursor:pointer;border:1px solid #b7bcaa;border-radius:7px;padding:10px 15px;transition:background .14s ease-out;background:var(--olive, #d7e69b);color:var(--olive-ink, #303d14);border-color:var(--olive, #d7e69b);}.ds-button-primary:hover{background:#c8dd7a}.ds-button-primary:focus-visible{outline:3px solid var(--focus, #496121);outline-offset:4px}.ds-button-primary:disabled{opacity:.48;cursor:not-allowed}@media(prefers-reduced-motion:reduce){.ds-button-primary{transition:none}}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "New run control; extracted from the current implementation.",
+      "html": "<button class=\"ds-button-secondary\">New run</button>",
+      "css": ".ds-button-secondary{font-family:'DM Sans Variable',sans-serif;font-size:16px;font-weight:600;cursor:pointer;border:1px solid #b7bcaa;border-radius:7px;padding:10px 15px;transition:background .14s ease-out;background:var(--surface, #fffef9);color:var(--ink, #252820);}.ds-button-secondary:hover{background:#e9ecde}.ds-button-secondary:focus-visible{outline:3px solid var(--focus, #496121);outline-offset:4px}.ds-button-secondary:disabled{opacity:.48;cursor:not-allowed}@media(prefers-reduced-motion:reduce){.ds-button-secondary{transition:none}}"
+    },
+    {
+      "name": "Destructive Confirmation",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Confirm deletion control; extracted from the current implementation.",
+      "html": "<button class=\"ds-button-danger\">Confirm deletion</button>",
+      "css": ".ds-button-danger{font-family:'DM Sans Variable',sans-serif;font-size:16px;font-weight:600;cursor:pointer;border:1px solid #b7bcaa;border-radius:7px;padding:10px 15px;transition:background .14s ease-out;background:var(--danger, #993326);color:#fff;border-color:var(--danger, #993326);}.ds-button-danger:hover{background:var(--danger, #993326)}.ds-button-danger:focus-visible{outline:3px solid var(--focus, #496121);outline-offset:4px}.ds-button-danger:disabled{opacity:.48;cursor:not-allowed}@media(prefers-reduced-motion:reduce){.ds-button-danger{transition:none}}"
+    },
+    {
+      "name": "Delete Action",
+      "kind": "button",
+      "refersTo": "button-danger-text",
+      "description": "Delete control; extracted from the current implementation.",
+      "html": "<button class=\"ds-button-danger-text\">Delete</button>",
+      "css": ".ds-button-danger-text{font-family:'DM Sans Variable',sans-serif;font-size:16px;font-weight:600;cursor:pointer;border:1px solid #b7bcaa;border-radius:7px;padding:10px 15px;transition:background .14s ease-out;background:transparent;color:var(--danger, #993326);border-color:transparent;}.ds-button-danger-text:hover{background:transparent}.ds-button-danger-text:focus-visible{outline:3px solid var(--focus, #496121);outline-offset:4px}.ds-button-danger-text:disabled{opacity:.48;cursor:not-allowed}@media(prefers-reduced-motion:reduce){.ds-button-danger-text{transition:none}}"
+    },
+    {
+      "name": "Labeled Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "A compact labeled path field.",
+      "html": "<label class=\"ds-label\">Working directory<input class=\"ds-input\" value=\"/app/project\"></label>",
+      "css": ".ds-label{font-family:'DM Sans Variable',sans-serif;display:block;font-size:12px;font-weight:550;line-height:1.5;color:var(--ink, #252820)}.ds-input{font-family:'DM Sans Variable',sans-serif;display:block;margin-top:6px;font-size:12px;font-weight:400;width:100%;min-width:0;border:1px solid #bfc3b4;border-radius:6px;background:var(--surface, #fffef9);color:var(--ink, #252820);padding:10px;caret-color:var(--focus, #496121)}.ds-input:focus-visible{outline:3px solid var(--focus, #496121);outline-offset:4px}"
+    },
+    {
+      "name": "Command Entry",
+      "kind": "input",
+      "refersTo": "command-input",
+      "description": "The resizable command field with a literal code face.",
+      "html": "<label class=\"ds-command-label\">Shell command<textarea class=\"ds-command\" rows=\"3\" spellcheck=\"false\">pwd; ls -lah; cat starts.txt</textarea></label>",
+      "css": ".ds-command-label{font-family:'DM Sans Variable',sans-serif;font-size:12px;color:var(--ink, #252820)}.ds-command{display:block;margin-top:6px;min-height:110px;resize:vertical;width:100%;border:1px solid #bfc3b4;border-radius:6px;background:#f7f8f2;color:var(--ink, #252820);padding:16px;font-family:\"JetBrains Mono Variable\",monospace;font-size:13px;line-height:1.7;caret-color:var(--focus, #496121)}.ds-command:focus-visible{outline:3px solid var(--focus, #496121);outline-offset:4px}"
+    },
+    {
+      "name": "State Badge",
+      "kind": "chip",
+      "refersTo": "state",
+      "description": "A noninteractive text status with neutral, confirmed, and uncertain examples.",
+      "html": "<span class=\"ds-state\">Completed</span> <span class=\"ds-state ds-running\">Running</span> <span class=\"ds-state ds-unknown\">Unknown</span>",
+      "css": ".ds-state{font-family:'DM Sans Variable',sans-serif;display:inline-block;font-size:11px;font-weight:650;line-height:1.5;border-radius:4px;padding:3px 7px;background:#edeee7;color:#515648;white-space:nowrap}.ds-running{background:#e4edce;color:#3b511c}.ds-unknown{background:#f8e9c9;color:#704700}"
+    },
+    {
+      "name": "Workspace Surface",
+      "kind": "card",
+      "refersTo": "workspace",
+      "description": "One bounded work area with a ruled header.",
+      "html": "<section class=\"ds-workspace\"><header class=\"ds-workspace-header\"><h2>My workspace</h2></header><div class=\"ds-workspace-body\">Commands, files, and retained activity.</div></section>",
+      "css": ".ds-workspace{font-family:'DM Sans Variable',sans-serif;background:var(--surface, #fffef9);color:var(--ink, #252820);border:1px solid var(--rule, #dcded2);border-radius:var(--radius,12px);overflow:hidden}.ds-workspace-header{padding:26px 30px 20px;border-bottom:1px solid var(--rule, #dcded2)}.ds-workspace h2{font-size:24px;font-weight:650;letter-spacing:-.025em;margin:0}.ds-workspace-body{padding:28px 30px;font-size:14px;line-height:1.6;color:var(--muted, #626657)}"
+    },
+    {
+      "name": "Mapped Service Link",
+      "kind": "custom",
+      "refersTo": "service-link",
+      "description": "A ruled external link, without an implied readiness indicator.",
+      "html": "<a class=\"ds-service\" href=\"#service\">Open service<svg viewBox=\"0 0 20 20\" aria-hidden=\"true\"><path d=\"M4 16 16 4M5 4h11v11\"/></svg></a>",
+      "css": ".ds-service{font-family:'DM Sans Variable',sans-serif;display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #b8bea7;color:var(--ink, #252820);font-size:15px;font-weight:650;text-decoration:none}.ds-service svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.6;flex:none}.ds-service:hover{color:var(--focus, #496121)}.ds-service:focus-visible{outline:3px solid var(--focus, #496121);outline-offset:4px}"
+    },
+    {
+      "name": "Terminal Surface",
+      "kind": "custom",
+      "refersTo": "terminal",
+      "description": "Visual shell only; the application binds this surface to a real PTY.",
+      "html": "<div class=\"ds-terminal\" tabindex=\"0\" aria-label=\"Terminal surface preview\"><span>Open a terminal to connect to your guest shell.</span></div>",
+      "css": ".ds-terminal{height:320px;min-height:180px;padding:16px;border-radius:7px;overflow:auto;resize:vertical;background:#22261f;color:#eff1e6;font-family:\"JetBrains Mono Variable\",monospace;font-size:13px;line-height:1.5}.ds-terminal span{color:#bfc7af}.ds-terminal:focus-visible{outline:3px solid var(--focus, #496121);outline-offset:4px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Developer Command Launcher",
+    "overview": "Warm paper, compact controls, and a steady typographic hierarchy make this workspace feel like a useful place to work. Olive marks the next action; near-black text and a dark terminal give commands and their results clear visual weight.\n\nThe interface uses flat surfaces, fine rules, and restrained corners. Information is dense where evidence matters, with ample separation between working areas. Plain developer language keeps status and uncertainty explicit.",
+    "keyCharacteristics": [
+      "Warm paper and a restrained olive accent.",
+      "DM Sans for interface text; JetBrains Mono for commands, code, and terminal output.",
+      "Flat, ruled working surfaces with modest corners.",
+      "Visible keyboard focus and explicit state labels."
+    ],
+    "rules": [
+      {
+        "name": "The Evidence Rule",
+        "body": "Pair state color with words; a machine state never implies service readiness.",
+        "section": "colors"
+      },
+      {
+        "name": "The Code Rule",
+        "body": "Reserve the monospace family for commands, code, identities, and output.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Surface Rule",
+        "body": "Separate working areas with fine rules and tonal changes, without drop shadows.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do use olive to identify the primary action in a working area.",
+      "Do pair every status treatment with a readable label.",
+      "Do preserve visible focus, polite status announcements, and the terminal Escape path.",
+      "Do keep code and request identities selectable and allow long values to wrap.",
+      "Do stack working areas in their existing reading order on narrow screens."
+    ],
+    "donts": [
+      "Don't use decorative cards, fabricated dashboards, or illustrative material costumes.",
+      "Don't imply a service is ready solely because the machine is running.",
+      "Don't remove request identity or uncertainty to make a screen look cleaner.",
+      "Don't add decorative animation to operational feedback."
+    ]
+  }
+}

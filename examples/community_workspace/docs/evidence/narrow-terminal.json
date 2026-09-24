@@ -1,0 +1,5 @@
+{
+  "viewport": 390,
+  "output": "/ # printf 'narrow-screen-ok\\n'; stty \nsize\nnarrow-screen-ok\n12 38\n/ # \n \n \n \n \n \n \n ",
+  "observed_exit": 0
+}

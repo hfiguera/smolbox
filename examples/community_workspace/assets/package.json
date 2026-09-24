@@ -1,0 +1,18 @@
+{
+  "private": true,
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "@xterm/xterm": "^6.0.0",
+    "@xterm/addon-fit": "^0.11.0",
+    "@fontsource-variable/dm-sans": "^5.2.0",
+    "@fontsource-variable/jetbrains-mono": "^5.2.0",
+    "phoenix": "file:../deps/phoenix",
+    "phoenix_live_view": "file:../deps/phoenix_live_view"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "@playwright/test": "^1.55.0"
+  }
+}

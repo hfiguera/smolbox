@@ -18,10 +18,9 @@ Use the package's pinned Elixir/OTP toolchain. From this directory, configure
 
 ```sh
 MIX_ENV=test mix deps.get
-MIX_ENV=test mix compile --warnings-as-errors
+mix quality
 MIX_ENV=test mix ecto.migrate
 MIX_ENV=test mix test --warnings-as-errors
-MIX_ENV=test mix dialyzer --force-check
 MIX_ENV=test mix hex.audit
 MIX_ENV=test mix deps.audit
 ```
@@ -515,3 +514,30 @@ again. It explicitly deletes and verifies absence and released reservations.
 The script uses immutable explicit path/byte approvals, 2/2 GiB artifact floors,
 and codec v9; see [the guide](../../docs/guest-files.md) for prerequisites and
 upgrade/rollback restrictions. File bodies are buffered, not streamed end to end.
+
+## Shared store and browser example
+
+The PostgreSQL adapter source now lives in `../support/store`; this project's
+`elixirc_paths` compiles it without changing its `SmolBox.DurableHost` namespace or
+store schema. Keep that directory when copying the example. Its migrations remain
+in this project's `priv/repo/migrations`. The
+[community workspace](../community_workspace/README.md) compiles the same adapter
+and demonstrates the published 0.2.0 API through Phoenix LiveView.
+
+## Example code-quality checks
+
+Run `mix deps.get`, then `mix quality` from this example directory. The alias
+selects `MIX_ENV=test` unless explicitly overridden and runs compilation with
+warnings as errors, strict Credo with the ExSlop plugin, ExDNA with a zero-clone
+budget, and Dialyzer with `--force-check`. CI runs the same alias. The tools are
+development/test dependencies and are not included in production runtimes.
+
+The local Credo configuration includes this app's source, tests, configuration,
+scripts and compiled shared example code. ExDNA checks implementation and support
+code with the repository's existing `min_mass: 30` threshold; repeated test-case
+bodies are outside its scope. Dialyzer analyzes the app's compiled test-environment
+modules against its own dependencies. Keep the local `.credo.exs` and `.ex_dna.exs`
+when copying an example. A first Dialyzer run builds a PLT and can take several
+minutes; subsequent local/CI runs reuse it while checking dependency changes.
+These static checks do not start a worker and do not replace the example's tests
+or real-worker qualification.
