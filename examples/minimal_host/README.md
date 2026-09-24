@@ -1,13 +1,15 @@
 # Minimal host example
 
-This checkout defaults to smolvm **1.17.0**; published 0.1.5 retains 1.16.1.
+SmolBox 0.2.0 defaults to smolvm **1.17.0**; 0.1.5 retains 1.16.1.
+Follow [the coordinated upgrade guide](../../docs/upgrading-to-0.2.0.md) before
+using new features against an existing store.
 Set `SMOLBOX_RUNTIME_VERSION=1.16.1` explicitly for an existing 1.16.1 worker.
 See [qualification](../../docs/compatibility.md#smolvm-1-17-0-qualification).
 
 This example keeps the image-based path simple. For approved idle checkpoint
 execution with PostgreSQL and recovery across application processes, see the
 [durable checkpoint example](../durable_host/README.md#checkpoint-execution-and-recovery).
-Checkpoint support requires SmolBox 0.1.5 or this checkout.
+Checkpoint support requires SmolBox 0.1.5 or later.
 
 This Mix project runs SmolBox under a host supervisor with an explicitly
 ephemeral memory store.

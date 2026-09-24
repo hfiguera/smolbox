@@ -1,8 +1,9 @@
 # Managed host integration
 
-This unreleased checkout defaults to **smolvm 1.17.0** on Linux x86_64 and macOS
-Apple Silicon; published SmolBox 0.1.5 still defaults to 1.16.1. Existing workers
-can retain an explicit `runtime_version: "1.16.1"`. See the
+SmolBox **0.2.0** defaults to **smolvm 1.17.0** on Linux x86_64 and macOS
+Apple Silicon. Existing workers can retain an explicit `runtime_version: "1.16.1"`.
+Follow [Upgrading to 0.2.0](upgrading-to-0.2.0.md) for coordinated controller/store
+upgrades and worker selection. See the
 [1.17.0 qualification](compatibility.md#smolvm-1-17-0-qualification).
 
 Start with [Getting started](getting-started.md) for a complete runnable example.
@@ -73,8 +74,8 @@ children = [
 ]
 ```
 
-This fragment explicitly retains a Linux 1.14.6 worker with SmolBox 0.1.5.
-Omitting the field selects 1.17.0 in this checkout (1.16.1 in published SmolBox 0.1.5). Use `"1.16.0"`
+This fragment explicitly retains a Linux 1.14.6 worker with SmolBox 0.2.0.
+Omitting the field selects 1.17.0 in 0.2.0 (1.16.1 in 0.1.5). Use `"1.16.0"`
 explicitly to retain that worker, or `"1.14.1"`
 for an existing worker. See [runtime selection](compatibility.md#runtime-selection).
 This is a host configuration fragment, not a self-provisioning script. The host
@@ -314,7 +315,7 @@ to reconcile. Memory mode loses this authority when its store process stops.
 
 ## Upgrading a worker
 
-This checkout defaults to smolvm **1.17.0** on Linux x86_64 and macOS Apple
+SmolBox 0.2.0 defaults to smolvm **1.17.0** on Linux x86_64 and macOS Apple
 Silicon. Published SmolBox 0.1.5 retains the 0.1.4 default, **1.16.1**. SmolBox 0.1.3 defaults to 1.16.0; 0.1.2
 defaults to 1.14.6. Worker selection does not migrate execution records.
 Before enabling checkpoints in 0.1.5, follow the separate
@@ -330,7 +331,7 @@ Before updating the library with an existing worker, retain its version explicit
 ```
 
 Use `"1.16.0"`, `"1.14.1"` or `"1.14.6"` instead for a worker still on either version. Omitting
-`:runtime_version` expects `"1.17.0"` in this checkout (`"1.16.1"` in published 0.1.5); updating the Elixir
+`:runtime_version` expects `"1.17.0"` in 0.2.0 (`"1.16.1"` in 0.1.5); updating the Elixir
 dependency does not install smolvm. A version mismatch prevents new execution.
 Unverified versions and unsupported host combinations fail configuration
 validation. Health checks require an exact version match, without fallback.
@@ -385,7 +386,7 @@ certified in this implementation. A configured execution deadline is an
 observation budget plus an upstream command timeout, not proof of bounded wall
 clock termination under those failures.
 
-## Retained machine integration (unreleased)
+## Retained machine integration (0.2.0)
 
 The same supervised runtime can serve `SmolBox.Machines` and disposable
 `SmolBox.submit/2` work. Retained machines require the optional store capability

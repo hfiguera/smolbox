@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+## 0.2.0
+
+SmolBox now supports retained, interactive development environments alongside
+disposable execution. This release adds persistent machines, mapped services,
+long-running and background commands, interactive terminals, startup workloads
+and configurable guest file policies. smolvm 1.17.0 becomes the default.
+
+**Coordinated upgrade required:** upgrade every shared controller, reader and
+store adapter before enabling new features. The PostgreSQL example adds machine
+and port-ownership migrations; feature records use schemas v5–v9. Worker binaries
+are upgraded separately, and existing checkpoint approvals stay pinned to their
+capture version. See [Upgrading to 0.2.0](docs/upgrading-to-0.2.0.md), including
+rollback restrictions and retained resource accounting.
+
 - Add explicit `GuestPaths` upload/download/workdir roots, preserving `/workspace`
   defaults. Image workers on smolvm 1.17.0 support buffered files up to 16 MiB and
   manifests up to 64 MiB per direction with coordinated host-approved budgets.
