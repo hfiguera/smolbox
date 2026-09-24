@@ -4,7 +4,7 @@ defmodule Workspace.Workspaces do
   alias SmolBox.{Command, ExecutionSpec, Machines, ManagedMachineSpec, PortMapping, Workload}
   alias SmolBox.DurableHost.Store
   alias SmolBox.Terminal.Spec
-  alias Workspace.{Connection, Ledger, Settings}
+  alias Workspace.{Collection, Connection, Ledger, Settings}
 
   def snapshot do
     safe(fn ->
@@ -107,6 +107,8 @@ defmodule Workspace.Workspaces do
            :ok <- authorize(c, id),
            {:ok, machine} <- Machines.inspect(Settings.runtime(), handle(id)),
            {:ok, command} <- build_command(params),
+           :ok <- workdir_allowed(machine, command),
+           {:ok, spec} <- execution(machine, token, command),
            {:ok, _} <-
              Ledger.reserve(
                c,
@@ -115,7 +117,6 @@ defmodule Workspace.Workspaces do
                "command",
                Map.take(params, ["command", "workdir", "mode", "timeout"])
              ),
-           {:ok, spec} <- execution(machine, token, command),
            do: record(c, token, Machines.submit(Settings.runtime(), handle(id), spec))
     end)
   end
@@ -127,6 +128,7 @@ defmodule Workspace.Workspaces do
            {:ok, c} <- Connection.context(),
            :ok <- authorize(c, id),
            {:ok, machine} <- Machines.inspect(Settings.runtime(), handle(id)),
+           :ok <- collection_path_available(path),
            true <- SmolBox.GuestPaths.allowed?(machine.spec.profile.guest_paths, :upload, path),
            digest = SmolBox.Files.sha256(bytes),
            {:ok, _} <-
@@ -159,18 +161,42 @@ defmodule Workspace.Workspaces do
            {:ok, c} <- Connection.context(),
            :ok <- authorize(c, id),
            {:ok, machine} <- Machines.inspect(Settings.runtime(), handle(id)),
+           :ok <- collection_path_available(path),
            true <- SmolBox.GuestPaths.allowed?(machine.spec.profile.guest_paths, :download, path),
            {:ok, _} <- Ledger.reserve(c, token, id, "download", %{"path" => path}),
-           {:ok, command} <- noop(),
+           {:ok, command} <- Collection.command(path),
            output = %{
              "destination" => "download",
-             "path" => path,
+             "path" => Collection.path(),
              "max_bytes" => Settings.max_file_bytes()
            },
            {:ok, spec} <- execution(machine, token, command, outputs: [output]) do
-        record(c, token, Machines.submit(Settings.runtime(), handle(id), spec))
+        record(c, token, submit_collection(id, token, spec))
       else
         false -> {:error, :file_policy}
+        error -> error
+      end
+    end)
+  end
+
+  defp submit_collection(id, token, spec) do
+    case SmolBox.fetch(Settings.runtime(), Settings.scope(), token) do
+      {:error, %{category: :not_found}} -> Machines.submit(Settings.runtime(), handle(id), spec)
+      result -> result
+    end
+  end
+
+  # Restore submitted values from the encrypted ledger, never browser storage.
+  # This reads an existing request; it cannot submit or replay it.
+  def intent(token, kind) when kind in ["command", "upload", "download"] do
+    safe(fn ->
+      with :ok <- token_valid(token),
+           {:ok, c} <- Connection.context(),
+           {:ok, %{kind: ^kind} = action} <- Ledger.action(c, token),
+           :ok <- authorize(c, action.machine_id) do
+        {:ok, action.payload}
+      else
+        {:ok, _} -> {:error, :not_found}
         error -> error
       end
     end)
@@ -181,7 +207,7 @@ defmodule Workspace.Workspaces do
       with :ok <- token_valid(token),
            {:ok, c} <- Connection.context(),
            {:ok, %{kind: "download", payload: payload}} <- Ledger.action(c, token),
-           {:ok, %{collection: :complete}} <-
+           {:ok, %{collection: :complete, result: %SmolBox.Result{exit_code: 0}}} <-
              SmolBox.fetch(Settings.runtime(), Settings.scope(), token),
            {:ok, bytes} <-
              Directory.read_output(
@@ -245,6 +271,16 @@ defmodule Workspace.Workspaces do
     _ -> {:error, :unavailable}
   catch
     :exit, _ -> {:error, :unavailable}
+  end
+
+  defp collection_path_available(path) do
+    if path == Collection.path(), do: {:error, :reserved_path}, else: :ok
+  end
+
+  defp workdir_allowed(machine, command) do
+    if SmolBox.GuestPaths.allowed?(machine.spec.profile.guest_paths, :workdir, command.workdir),
+      do: :ok,
+      else: {:error, :workdir_policy}
   end
 
   defp build_command(%{"command" => text, "workdir" => cwd, "mode" => mode, "timeout" => timeout}) do

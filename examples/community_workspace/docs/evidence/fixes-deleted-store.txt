@@ -1,0 +1,7 @@
+%{
+  id: "379aa298-219e-4811-8c14-b5bbccc9cb25",
+  state: :deleted,
+  usage: {:ok, %{slots: 0, cpus: 0, disk_gb: 0, memory_mb: 0}},
+  reservation: nil,
+  absence_at_ms: 1790229823396
+}

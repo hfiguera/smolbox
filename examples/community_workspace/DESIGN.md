@@ -228,6 +228,8 @@ Primary and secondary hover states change fill without movement. All interactive
 
 Ivory fields use a muted stroke, modest corners, full available width, and visible labels. The command field uses a faint green tint, monospace, generous padding, and vertical resize. Focus keeps the common outline and olive caret. Field errors use rust text plus an explicit message. The working directory spans the options grid at intermediate and narrow sizes.
 
+After a reload, restore submitted form values from the encrypted request ledger alongside their request identity; restoring values never submits work. Browser session storage keeps the identity, not command text. A fresh edit takes precedence over a pending restoration. Selecting a sample also sets its working directory to `/app/project`, keeping relative paths consistent with the sample’s description.
+
 ### State Badges
 
 Small rectangular labels with gently rounded corners and compact horizontal padding. State words remain visible in every palette treatment. These are informational badges, not filter chips or actions.
@@ -240,13 +242,19 @@ Major workspace, welcome, and setup surfaces share an ivory fill, pale rule, and
 
 The brand is a simple text-and-outline-SVG home link; the interface has no sidebar navigation or tab system. Documentation links use underlines; the mapped service uses a full-width ruled row and external-arrow SVG. Disclosure summaries progressively reveal request identity, earlier activity, samples, and diagnostics. Preserve keyboard focus on links and summaries.
 
+Collected-file links download the artifact while keeping the workspace page and its live controls connected.
+
 ### Activity and Feedback
 
 Keep the submitted command or file path next to its retained outcome, with request identity available beneath it. Results are literal output in a tinted monospace block. A persistent, polite, atomic status region announces changed machine and execution outcomes, including distinct request identity. Visible notices and explicit errors supplement that channel. The service heading is neutral: “Mapped service.”
 
+“Cancel command…” opens an inline confirmation explaining that cancellation after dispatch may leave the guest process running and require operator recovery. Offer “Keep waiting” before the explicit “Cancel anyway” action. Recovery messages explain which work is blocked and where the operator procedure lives; keep unknown outcomes visible.
+
 ### Terminal
 
 A real xterm surface uses the dark terminal palette and monospace family. The shell can resize vertically; Escape moves focus to the section's control button. Opening, reconnecting, disconnecting, and observed exit remain different states. Browser loss has a 30-second controller-local reconnect window; explicit disconnect requires confirmation. Terminal bytes are not presented as saved activity.
+
+Reconnect guidance applies only while a retained terminal can still reconnect. Once the previous operation has an unknown outcome, replace that guidance with the recovery path rather than suggesting another reconnection attempt.
 
 ## Do's and Don'ts
 

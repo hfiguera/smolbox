@@ -121,3 +121,58 @@ One intermediate run had a transient store error while restarting the controller
 in the sandboxed test; the same seed passed on rerun. The test now also waits for
 the completed command's machine slot to be released before shutting down. This
 matches the example's documented clean restart procedure.
+
+## Browser bug fixes — 2026-09-24
+
+A separate disposable workspace was tested with the **Codex internal browser**,
+PostgreSQL 17 and the native macOS smolvm 1.17.0 worker. The retained user workspace
+and its files were not used for destructive tests.
+
+- Clicking an actual 2 MiB download link while a PTY was attached preserved the
+  live page and shell input/output (`still-connected`, shell PID `7`). The downloaded
+  bytes matched SHA-256 `91d3beb88a9b2f778a6c44a1c53b63d3c79931845a9aef84b3fb414610bd1938`.
+- Reload restored a submitted custom command, `/home/dev` working directory and
+  45-second timeout. Unchanged resubmission kept the original request; a separate
+  `wc -l` command confirmed exactly one appended line.
+- `/etc` as a working directory returned an explicit validation message with no
+  prepared/unresolved receipt. Selecting the artifact sample restored `/app/project`
+  and wrote the file there.
+- Missing and 16 MiB + 1 byte files showed **Failed / Exit 1**, useful diagnostics,
+  no download link, and an available machine afterward. Reserved staging-path
+  collection was rejected before dispatch.
+- Exactly 16 MiB collected and downloaded successfully, with SHA-256
+  `a06c26cbac8b80704f420222dae5658b88ff2da96702d12ef7a4223e9361f7c1` matching the
+  generated input. The chosen collection path survived a full page reload.
+- **Cancel command…** showed the recovery consequence before cancellation.
+  **Keep waiting** let the real 20-second command complete normally.
+- A real terminal was left beyond its 30-second reconnect window. Reopening showed
+  an unknown outcome, disabled terminal entry and recovery instructions, with no
+  remaining promise to reconnect.
+- Desktop and 390px terminal layouts were inspected; the narrow document measured
+  390px with no horizontal overflow. Temporary viewport overrides were reset.
+
+The application suite now has **33 passing tests**. It adds invalid-directory
+receipt checks, authorized form restoration, failed-collection slot release,
+reserved-path rejection, compatibility with existing collection identities,
+recovery copy and download-link behavior. Local Python tests execute the actual
+snapshot program against binary, empty, oversized, missing, directory, FIFO and
+symlink cases; these are not VM evidence. The worker transport in ExUnit is still
+simulated. The repository suite also passed **362 checks** with 28 runtime checks
+excluded. App formatting, warnings-as-errors compilation, asset build, script
+syntax and diff-whitespace checks passed. An independent review caught the
+reserved staging-path collision; both upload and collection now reject it.
+
+The walkthrough uses the current **Disconnect…** label and an actual download
+click, rather than only an HTTP client fetch. The entire two-phase script and
+Linux live campaign were not repeated for this fix pass. No public library API,
+package version or database schema changed; existing durable history remains.
+
+After the expiry check, the disposable controller was stopped, the recorded owned
+incarnation was stopped, and the dedicated worker listener was fully stopped and
+restarted to drain old requests. Explicit quiesced resolution retained the unknown
+execution history. Final deletion verified absence and released all capacity;
+the independent worker inventory returned `{"machines":[]}`. The
+[final durable record](evidence/fixes-deleted-store.txt) was exported before the
+lab app, worker and PostgreSQL were stopped. The user's original app was restarted
+with these fixes at `localhost:4005`, with the same retained machine and no active
+terminal. Its browser reported no JavaScript errors after reload.

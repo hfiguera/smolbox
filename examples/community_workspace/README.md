@@ -123,8 +123,9 @@ Commands, Files, Terminal, and Activity links jump directly to their sections.
 Activity shows the latest two requests with earlier entries expandable. File
 collection defaults to `/app/project/starts.txt`, created by the startup workload;
 the chosen path persists across updates. Create the optional `artifact.bin` sample
-before collecting it. Removed or invalid guest files can still produce uncertain
-worker responses; the example does not bypass SmolBox's recovery requirements.
+before collecting it. Missing, unreadable, non-regular or oversized files produce
+**Failed / Exit 1** with a useful message, without blocking the workspace. Downloads
+keep the workspace and its terminal connected.
 
 ## Identity, retention and recovery
 
@@ -133,13 +134,29 @@ artifact-store APIs. The shared PostgreSQL adapter remains the only durable
 ownership, scheduling and capacity authority. `workspace_homes` stores the stable
 workspace/machine mapping; `workspace_actions` stores encrypted action payloads
 and durable request identities. Form identities survive reconnects in tab session
-storage. Unchanged resubmissions reuse the identity; edits or **New run** deliberately
+storage. After a reload, submitted command fields and file paths are restored from
+the encrypted ledger alongside that identity; command text is not saved in browser
+storage. Unsubmitted drafts and local file selections are not restored. Loading a
+sample selects `/app/project` as its working directory. Unchanged resubmissions
+reuse the identity; edits or **New run** deliberately
 create another. A changed payload under an existing ID is rejected. An unresolved
 lifecycle acceptance is recorded, displayed and never automatically resent.
 
 One managed command/terminal/file operation can occupy the machine at a time.
-Uploads stage an input manifest and downloads collect an output manifest through
-managed `/bin/true` executions, so they participate in the same durable exclusion.
+Uploads stage an input manifest with a managed `/bin/true` execution. Downloads use
+a managed Python command to take a bounded snapshot, then collect its output
+manifest under the same exclusive command slot. The snapshot always exists after
+an ordinary file error, but only a confirmed exit 0 exposes a download. One reserved
+staging file, `/home/dev/.config/.smolbox-collection`, is reused, holds at most 16 MiB,
+and is outside the project's HTTP document root. Uploading/collecting that exact
+path is rejected. A temporary snapshot may require another 16 MiB while copying;
+it is atomically replaced and cleaned up on normal completion. Interrupted commands
+can leave temporary files for inspection during recovery. Staging bytes remain
+on the retained disk until the next collection or explicit machine deletion.
+Guest commands can still modify these paths: they are not a sandbox. Concurrent
+background writers can change a source during copying, so this is not an atomic
+filesystem snapshot. Worker loss, damaged staging directories, or external
+interference can still make collection uncertain; recovery safeguards remain.
 Stop/delete cannot race active or uncertain work. A confirmed background launch
 releases its execution slot while the guest process can continue alongside later
 commands or file operations; stopping the VM interrupts that process. Confirmed not-dispatched stale
@@ -156,7 +173,9 @@ restored. This is browser reconnection to a live controller, not recovery of a l
 worker PTY. Controller restart, worker disconnect, explicit disconnect, or expiry
 can still leave an unknown outcome requiring operator recovery. Close shells with
 `exit` and wait for confirmed exit before planned controller restarts. The explicit
-disconnect action asks for confirmation. Output remains bounded by the existing
+disconnect and command cancellation actions explain this consequence and ask for
+confirmation. Expired or unknown work shows recovery guidance instead of offering
+reconnection. Output remains bounded by the existing
 64 KiB upstream buffer and one browser-acknowledged frame; slow connected consumers
 are disconnected. Session/idle budgets remain 10/5 minutes and do not reset on
 browser reconnect.

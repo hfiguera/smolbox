@@ -75,6 +75,98 @@ defmodule Workspace.WorkspacesTest do
     assert map_size(TestWorker.snapshot().machines) == 1
   end
 
+  test "invalid working directories never prepare a receipt or dispatch", %{c: c} do
+    id = Fixture.running(c)
+    token = Ecto.UUID.generate()
+
+    assert {:error, :workdir_policy} =
+             Workspaces.command(id, token, Map.put(params(), "workdir", "/etc"))
+
+    assert {:error, :not_found} = Ledger.action(c, token)
+    assert TestWorker.snapshot().commands == []
+  end
+
+  test "submitted form restoration reads only the matching authorized receipt", %{c: c} do
+    id = Fixture.running(c)
+    token = Ecto.UUID.generate()
+    assert {:ok, _} = Workspaces.command(id, token, params("echo restore-me"))
+    assert {:ok, restored} = Workspaces.intent(token, "command")
+    assert restored == params("echo restore-me")
+    refute match?({:ok, _}, Workspaces.intent(token, "download"))
+    assert {:error, :not_found} = Workspaces.intent(Ecto.UUID.generate(), "command")
+    foreign = Ecto.UUID.generate()
+    Ledger.reserve(c, foreign, Ecto.UUID.generate(), "command", params("other machine"))
+    assert {:error, :not_found} = Workspaces.intent(foreign, "command")
+  end
+
+  test "missing files have a known failure, no download, and release the command slot", %{c: c} do
+    id = Fixture.running(c)
+    token = Ecto.UUID.generate()
+    assert {:ok, _} = Workspaces.collect(id, token, "/app/project/missing")
+    result = Fixture.wait(fn -> Fixture.execution(token) end, &(&1.collection == :complete))
+    assert result.result.exit_code == 1
+    assert result.state == :completed
+    refute match?({:ok, _, _}, Workspaces.download(token))
+
+    Fixture.wait(
+      fn -> SmolBox.Machines.inspect(Settings.runtime(), Workspaces.handle(id)) end,
+      &is_nil(&1.active_execution)
+    )
+
+    assert {:ok, _} = Workspaces.command(id, Ecto.UUID.generate(), params())
+    assert {:ok, same} = Workspaces.collect(id, token, "/app/project/missing")
+    assert same.id == token
+    assert {:error, :identity_conflict} = Workspaces.collect(id, token, "/app/project/different")
+  end
+
+  test "reserved collection path is rejected before upload or collection dispatch", %{c: c} do
+    id = Fixture.running(c)
+    token = Ecto.UUID.generate()
+
+    assert {:error, :reserved_path} =
+             Workspaces.upload(id, token, Workspace.Collection.path(), "data")
+
+    assert {:error, :reserved_path} = Workspaces.collect(id, token, Workspace.Collection.path())
+    assert {:error, :not_found} = Ledger.action(c, token)
+    assert TestWorker.snapshot().commands == []
+  end
+
+  test "collection retries reuse pre-upgrade executions without changing their immutable spec", %{
+    c: c
+  } do
+    id = Fixture.running(c)
+    token = Ecto.UUID.generate()
+    path = "/app/project/old-download"
+    machine_name = hd(Map.keys(TestWorker.snapshot().machines))
+
+    TestWorker.configure(
+      files: %{{machine_name, ["app", "project", "old-download"]} => "old bytes"}
+    )
+
+    Ledger.reserve(c, token, id, "download", %{"path" => path})
+    {:ok, command} = SmolBox.Command.new(["/bin/true"], workdir: "/app/project", timeout_secs: 5)
+
+    {:ok, spec} =
+      SmolBox.ExecutionSpec.new(
+        scope: Settings.scope(),
+        id: token,
+        artifact: c.artifact,
+        profile: c.profile,
+        command: command,
+        retention_ms: 60_000,
+        outputs: [
+          %{"destination" => "download", "path" => path, "max_bytes" => Settings.max_file_bytes()}
+        ]
+      )
+
+    assert {:ok, _} = SmolBox.Machines.submit(Settings.runtime(), Workspaces.handle(id), spec)
+    Fixture.wait(fn -> Fixture.execution(token) end, &(&1.collection == :complete))
+    assert {:ok, same} = Workspaces.collect(id, token, path)
+    assert same.spec == spec
+    assert {:ok, "old-download", "old bytes"} = Workspaces.download(token)
+    assert [_] = TestWorker.snapshot().commands
+  end
+
   test "uploads and collections use managed executions and enforce path and size approvals", %{
     c: c
   } do

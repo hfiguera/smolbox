@@ -77,8 +77,9 @@ defmodule Workspace.TestWorker do
   defp machine(%{method: :delete}, [], m, s),
     do: {json(%{"deleted" => m["name"]}), %{s | machines: Map.delete(s.machines, m["name"])}}
 
-  defp machine(%{method: :post, body: body, mode: mode}, ["exec" | _], _m, s) do
+  defp machine(%{method: :post, body: body, mode: mode}, ["exec" | _], m, s) do
     input = Jason.decode!(body)
+    {s, exit_code, stderr} = snapshot_file(input["command"], m, s)
 
     result =
       cond do
@@ -92,17 +93,17 @@ defmodule Workspace.TestWorker do
         match?({:sse, _, _}, mode) ->
           {:ok,
            %SmolBox.Result{
-             exit_code: 0,
+             exit_code: exit_code,
              stdout: "simulated command output",
-             stderr: "",
+             stderr: stderr,
              encoding: :lossy_utf8
            }}
 
         true ->
           json(%{
-            "exitCode" => 0,
+            "exitCode" => exit_code,
             "stdoutB64" => Base.encode64("simulated command output"),
-            "stderrB64" => ""
+            "stderrB64" => Base.encode64(stderr)
           })
       end
 
@@ -126,6 +127,17 @@ defmodule Workspace.TestWorker do
 
   defp machine(%{method: :get}, ["logs"], _m, s),
     do: {{:ok, %SmolBox.LogResult{lines: ["simulated console"]}}, s}
+
+  # Only model the snapshot protocol here; CollectionTest runs the actual Python.
+  defp snapshot_file(["python3", "-c", _, source, destination, _], m, s) do
+    bytes = Map.get(s.files, {m["name"], String.split(source, "/", trim: true)})
+    files = Map.put(s.files, {m["name"], String.split(destination, "/", trim: true)}, bytes || "")
+
+    {%{s | files: files}, if(bytes, do: 0, else: 1),
+     if(bytes, do: "", else: "File not collected: missing")}
+  end
+
+  defp snapshot_file(_, _, s), do: {s, 0, ""}
 
   defp json(value), do: {:ok, Jason.encode!(value)}
 

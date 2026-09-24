@@ -16,7 +16,7 @@ async function command(text,mode='foreground') {
   await expect(page.locator('#command')).toBeEnabled({timeout:20000});
   await page.locator('#command').fill(text);
   await page.locator('#command-form [name=mode]').selectOption(mode);
-  await page.locator('#command-form [name=timeout]').evaluate(el=>el.value='30');
+  if (mode === 'foreground') await page.locator('#command-form [name=timeout]').fill('30');
   const token=await page.locator('#command-form [name=token]').inputValue();
   await page.locator('#command-form button[type=submit]').click();
   const activity=page.locator(`#action-${token}`);
@@ -52,6 +52,10 @@ try {
     await page.getByRole('button',{name:'Collect file'}).click();
     const link=page.locator(`#action-${collection}`).getByRole('link',{name:'Download collected file'});
     await expect(link).toBeVisible({timeout:30000});
+    const downloadEvent=page.waitForEvent('download');
+    await link.click();
+    await downloadEvent;
+    await expect(page.locator('.xterm')).toBeVisible();
     const response=await page.request.get(await link.getAttribute('href'));
     expect(createHash('sha256').update(await response.body()).digest('hex')).toBe(digest);
     record('2 MiB browser download hash matches');
@@ -68,7 +72,7 @@ try {
     record('duplicate launch was not replayed');
     await expect(page.getByRole('button',{name:'Open terminal'})).toBeEnabled();
     await page.getByRole('button',{name:'Open terminal'}).click();
-    await expect(page.getByRole('button',{name:'Disconnect terminal'})).toBeVisible({timeout:15000});
+    await expect(page.getByRole('button',{name:'Disconnect…',exact:true})).toBeVisible({timeout:15000});
     await expect(page.locator('.xterm-accessibility-tree')).toContainText('/ #',{timeout:15000});
     await page.locator('.xterm-helper-textarea').focus();
     await page.keyboard.type("printf 'terminal-ready\\n'; stty size");
@@ -81,7 +85,7 @@ try {
     await expect.poll(async()=> (await page.locator('.xterm-accessibility-tree').innerText()).match(/\b(\d+ \d+)\b/g)?.filter(size=>size!==firstSize).length || 0).toBeGreaterThan(0);
     record('PTY input/output and resize',await page.locator('.xterm-accessibility-tree').innerText());
     await page.keyboard.press('Escape');
-    await expect(page.getByRole('button',{name:'Disconnect terminal'})).toBeFocused();
+    await expect(page.getByRole('button',{name:'Disconnect…',exact:true})).toBeFocused();
     await page.locator('.xterm-helper-textarea').focus();
     await page.keyboard.type('exit'); await page.keyboard.press('Enter');
     await expect(page.locator('#notice')).toContainText('Terminal exited with code 0',{timeout:15000});

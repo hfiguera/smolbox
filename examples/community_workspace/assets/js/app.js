@@ -25,11 +25,27 @@ const Hooks = {
       };
       this.el.addEventListener('input', this.onInput, true);
       this.el.addEventListener('change', this.onInput, true);
+      this.el.addEventListener('submit', this.onInput, true);
+      // Bind the stored identity to its submitted payload after a full page reload.
+      // Keep command text out of sessionStorage; the encrypted ledger owns it.
+      const originalToken = this.token;
+      const originalSignature = this.lastSignature;
+      if (this.el.id !== 'terminal-form') this.pushEvent('restore-intent', {form:this.el.id, token:this.token}, ({fields}) => {
+        // An edit or sample selection while the read was in flight wins.
+        if (this.token !== originalToken || this.signature() !== originalSignature) return;
+        for (const [name,value] of Object.entries(fields || {})) {
+          const field = this.el.elements.namedItem(name);
+          if (field && field.type !== 'file') field.value = value;
+        }
+        this.lastSignature = this.signature();
+        this.save();
+        if (Object.keys(fields || {}).length) this.pushEvent(this.el.getAttribute('phx-change'), fields);
+      });
       this.handleEvent('new-intent', ({form}) => { if (form === this.el.id) this.newIntent(); });
       this.save();
     },
-    updated() { this.save(); },
-    destroyed() { this.el.removeEventListener('input', this.onInput, true); this.el.removeEventListener('change', this.onInput, true); }
+    updated() { this.lastSignature = this.signature(); this.save(); },
+    destroyed() { this.el.removeEventListener('input', this.onInput, true); this.el.removeEventListener('change', this.onInput, true); this.el.removeEventListener('submit', this.onInput, true); }
   },
   Terminal: {
     mounted() {

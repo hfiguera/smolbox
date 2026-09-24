@@ -20,6 +20,7 @@ defmodule WorkspaceWeb.WorkspaceLive do
        terminal_status: :closed,
        confirming_delete: false,
        confirming_disconnect: false,
+       confirming_cancel: nil,
        command: "pwd; ls -lah; cat starts.txt",
        cwd: "/app/project",
        mode: "foreground",
@@ -169,6 +170,25 @@ defmodule WorkspaceWeb.WorkspaceLive do
      )}
   end
 
+  def handle_event("restore-intent", %{"form" => form, "token" => token}, socket) do
+    kind =
+      %{"command-form" => "command", "upload-form" => "upload", "download-form" => "download"}[
+        form
+      ]
+
+    fields =
+      if kind do
+        case Workspaces.intent(token, kind) do
+          {:ok, payload} -> Map.take(payload, ~w(command workdir mode timeout path))
+          _ -> %{}
+        end
+      else
+        %{}
+      end
+
+    {:reply, %{fields: fields}, socket}
+  end
+
   def handle_event("new-command", _, socket),
     do: {:noreply, push_event(socket, "new-intent", %{form: "command-form"})}
 
@@ -179,7 +199,7 @@ defmodule WorkspaceWeb.WorkspaceLive do
 
         {:noreply,
          socket
-         |> assign(command: command, mode: mode, timeout: to_string(timeout))
+         |> assign(command: command, cwd: "/app/project", mode: mode, timeout: to_string(timeout))
          |> push_event("new-intent", %{form: "command-form"})}
 
       _ ->
@@ -213,9 +233,19 @@ defmodule WorkspaceWeb.WorkspaceLive do
   def handle_event("download-change", %{"path" => path}, socket),
     do: {:noreply, assign(socket, :download_path, path)}
 
-  def handle_event("cancel", %{"id" => token}, socket) do
-    id = workspace_id(socket)
-    mutate(socket, fn -> Workspaces.cancel(id, token) end)
+  def handle_event("cancel", %{"id" => token}, socket),
+    do: {:noreply, assign(socket, :confirming_cancel, token)}
+
+  def handle_event("keep-command", _, socket),
+    do: {:noreply, assign(socket, :confirming_cancel, nil)}
+
+  def handle_event("confirm-cancel", %{"id" => token}, socket) do
+    if socket.assigns.confirming_cancel == token do
+      id = workspace_id(socket)
+      mutate(assign(socket, :confirming_cancel, nil), fn -> Workspaces.cancel(id, token) end)
+    else
+      {:noreply, socket}
+    end
   end
 
   def handle_event("logs", _, socket) do
@@ -383,6 +413,13 @@ defmodule WorkspaceWeb.WorkspaceLive do
     do:
       "That request identity already belongs to different work. Keep the original record and use New run for an intentional new command."
 
+  defp error_message({:error, :reserved_path}),
+    do:
+      "That path is reserved for file collection. Choose another filename. No transfer was submitted."
+
+  defp error_message({:error, :workdir_policy}),
+    do: "Working directory must be under /app/project or /home/dev. No command was submitted."
+
   defp error_message({:error, :file_policy}),
     do: "Choose a path under /app/project or /home/dev/.config and a file no larger than 16 MiB."
 
@@ -421,6 +458,12 @@ defmodule WorkspaceWeb.WorkspaceLive do
       (previous == nil or execution_state(previous) != current)
   end
 
+  defp execution_state(%{
+         kind: "download",
+         execution: {:ok, %{collection: :complete, result: %SmolBox.Result{exit_code: code}}}
+       })
+       when code != 0, do: :failed
+
   defp execution_state(%{execution: {:ok, e}}), do: e.state
 
   defp execution_state(%{state: "submitted", kind: kind})
@@ -449,8 +492,19 @@ defmodule WorkspaceWeb.WorkspaceLive do
 
   defp result_label(%{execution: {:ok, %{result: %{exit_code: code}}}}), do: "Exit #{code}"
   defp result_label(_), do: nil
-  defp collected?(%{kind: "download", execution: {:ok, %{collection: :complete}}}), do: true
+
+  defp collected?(%{
+         kind: "download",
+         execution: {:ok, %{collection: :complete, result: %SmolBox.Result{exit_code: 0}}}
+       }),
+       do: true
+
   defp collected?(_), do: false
+
+  defp active_terminal?(%{active_execution: {_, id}}, %{history: history}),
+    do: Enum.any?(history, &(&1.id == id and &1.kind == "terminal"))
+
+  defp active_terminal?(_, _), do: false
 
   defp pending?(%{execution: {:ok, e}}),
     do: not SmolBox.Execution.terminal?(e) and e.state != :unknown
@@ -710,10 +764,18 @@ defmodule WorkspaceWeb.WorkspaceLive do
                 <p :if={@snapshot.history == []} class="empty-history">
                   Your first command starts the story. Results stay here when you reconnect.
                 </p>
-                <.activity :for={action <- Enum.take(@snapshot.history, 2)} action={action} />
+                <.activity
+                  :for={action <- Enum.take(@snapshot.history, 2)}
+                  action={action}
+                  confirming_cancel={@confirming_cancel}
+                />
                 <details :if={length(@snapshot.history) > 2} class="earlier-activity">
                   <summary>Earlier requests ({length(@snapshot.history) - 2})</summary>
-                  <.activity :for={action <- Enum.drop(@snapshot.history, 2)} action={action} />
+                  <.activity
+                    :for={action <- Enum.drop(@snapshot.history, 2)}
+                    action={action}
+                    confirming_cancel={@confirming_cancel}
+                  />
                 </details>
               </section>
             </div>
@@ -824,11 +886,26 @@ defmodule WorkspaceWeb.WorkspaceLive do
               <button type="button" phx-click="confirm-disconnect">Disconnect anyway</button>
             </div>
             <p
-              :if={@terminal_status == :closed && @machine && @machine.active_execution != nil}
+              :if={
+                @terminal_status == :closed && @machine && @machine.state == :running &&
+                  @machine.active_execution != nil
+              }
               class="field-note"
             >
-              Another command or terminal holds this machine’s command slot. If the terminal is
-              open in another tab, use it there. After closing that tab, return here within 30 seconds to reconnect.
+              <span :if={active_terminal?(@machine, @snapshot)}>
+                The terminal is open in another tab. Use it there, or close that tab and return here
+                within 30 seconds to reconnect while this app stays running.
+              </span>
+              <span :if={!active_terminal?(@machine, @snapshot)}>
+                A command or file transfer is using this machine. Wait for its outcome in Activity.
+              </span>
+            </p>
+            <p
+              :if={@terminal_status == :closed && @machine && @machine.state == :unknown}
+              class="field-note"
+            >
+              The previous operation has an unknown outcome. Reconnection is no longer available;
+              follow Console diagnostics &amp; recovery before opening another terminal.
             </p>
             <div
               id="terminal"
@@ -841,7 +918,7 @@ defmodule WorkspaceWeb.WorkspaceLive do
                 Your terminal will appear here.
               </div>
             </div>
-            <p class="field-note">
+            <p :if={!@machine || @machine.state != :unknown} class="field-note">
               Before refreshing or leaving, type <code>exit</code> and wait for “Terminal exited”.
               A page refresh or brief connection loss can reconnect to the same shell within 30 seconds
               while this app stays running. Longer interruptions or an app restart may need operator
@@ -889,7 +966,19 @@ defmodule WorkspaceWeb.WorkspaceLive do
           class="text-button"
           phx-click="cancel"
           phx-value-id={@action.id}
-        >Cancel command</button>
+        >Cancel command…</button>
+      </div>
+      <div
+        :if={@confirming_cancel == @action.id && pending?(@action)}
+        class="disconnect-confirm"
+        role="alert"
+      >
+        <p>Cancelling after dispatch stops observation, not necessarily the guest process.
+          The workspace may require operator recovery before you can run more work.</p>
+        <button type="button" phx-click="keep-command">Keep waiting</button>
+        <button type="button" phx-click="confirm-cancel" phx-value-id={@action.id}>
+          Cancel anyway
+        </button>
       </div>
       <code :if={@action.payload["command"]} class="command-text">
         {@action.payload["command"]}
@@ -910,7 +999,7 @@ defmodule WorkspaceWeb.WorkspaceLive do
       <p :if={execution_state(@action) == :accepted} class="field-note">
         Request accepted; completion has not been recorded. The current machine state is shown above.
       </p>
-      <a :if={collected?(@action)} class="text-link" href={"/downloads/#{@action.id}"}>
+      <a :if={collected?(@action)} class="text-link" href={"/downloads/#{@action.id}"} download>
         Download collected file
       </a>
       <details class="receipt">
