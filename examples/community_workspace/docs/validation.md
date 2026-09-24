@@ -91,3 +91,33 @@ These are separate from real-worker evidence:
 Ordinary CI now requires the community workspace job: Hex dependencies, PostgreSQL,
 format/compile, npm asset build, and the application tests. It does not need a VM.
 CI has been configured and locally exercised; no remote CI run is claimed here.
+
+## Usability follow-up — 2026-09-23
+
+The retained interactive workspace was checked again against the same native
+macOS smolvm 1.17.0 worker and PostgreSQL 17. The Codex internal browser verified
+section navigation, the default collection path, terminal input/output, explicit
+disconnect confirmation, clean shell exit, and desktop/390px layouts. The narrow
+page had no horizontal overflow and the browser recorded no console errors.
+
+A headless Chromium test accepted the unload prompt and refreshed an active
+terminal. The app reconnected to the existing PTY: a shell-local variable retained
+its value and the shell PID remained `10`. `exit` then produced confirmed code 0.
+This tests browser reconnection with a live controller, not controller restart or
+worker PTY recovery. The same test confirmed that stop/start receipts reach
+Completed and that collecting `/app/project/index.html` preserves the selected
+path. The machine was left running with no active shell for continued testing.
+
+The expanded application suite has 22 passing tests with PostgreSQL and simulated
+worker/terminal peers. New coverage checks live-consumer exclusion, unauthorized
+input/close/ack rejection, pending-frame delivery on reconnect, stale timers,
+reconnect expiry, late reconnect rejection, matching lifecycle receipt versions,
+path preservation, and removal of stale terminal warnings after recovery.
+Formatting, compilation with warnings as errors, and the asset build passed.
+An independent static review found no actionable correctness issues. Linux live
+qualification and prolonged network-outage behavior were not rerun in this pass.
+
+One intermediate run had a transient store error while restarting the controller
+in the sandboxed test; the same seed passed on rerun. The test now also waits for
+the completed command's machine slot to be released before shutting down. This
+matches the example's documented clean restart procedure.

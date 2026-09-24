@@ -11,6 +11,7 @@ defmodule Workspace.Workspaces do
       with {:ok, c} <- Connection.context() do
         home = Ledger.home(c)
         machine = inspect_home(home)
+        if match?({:ok, _}, machine), do: Ledger.observe_lifecycle(c, elem(machine, 1))
         history = history(c, home)
 
         {:ok,
@@ -89,6 +90,10 @@ defmodule Workspace.Workspaces do
         else
           _ -> record(c, token, {:error, :state_changed})
         end
+
+      {:ok, %{last_request: {^action, version}}} = result ->
+        Ledger.lifecycle_accepted(c, token, version)
+        result
 
       result ->
         record(c, token, result)

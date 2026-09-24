@@ -204,7 +204,7 @@ The centered shell has a maximum width of 1440px and desktop horizontal padding 
 
 At 1050px and below, shell padding becomes 28px, the tools column becomes 270px, and command options use two columns with the working directory spanning both. At 740px and below, shell padding becomes 16px, the masthead becomes 72px, the workspace stacks in reading order, and the tools border moves to the top. Supporting areas use roughly 20–24px internal padding. Command buttons share their row; lifecycle controls and section headings wrap.
 
-The spacing scale records observed values rather than imposing a synthetic grid. Commands and output wrap long content; output panes scroll beyond 280px, submitted command blocks beyond 100px. The first five activity entries remain visible, with earlier requests disclosed on demand. The terminal is 320px tall on desktop and 280px on narrow screens, with a minimum of 180px and vertical resizing.
+The spacing scale records observed values rather than imposing a synthetic grid. Commands and output wrap long content; output panes scroll beyond 280px, submitted command blocks beyond 100px. Commands, Files, Terminal, and Activity anchor links provide direct navigation. The first two activity entries remain visible, with earlier requests disclosed on demand. The terminal is 320px tall on desktop and 280px on narrow screens, with a minimum of 180px and vertical resizing.
 
 ## Elevation & Depth
 
@@ -246,7 +246,7 @@ Keep the submitted command or file path next to its retained outcome, with reque
 
 ### Terminal
 
-A real xterm surface uses the dark terminal palette and monospace family. The shell can resize vertically; Escape moves focus to the section's control button. Opening, disconnecting, and observed exit remain different states. Terminal bytes are not presented as saved activity.
+A real xterm surface uses the dark terminal palette and monospace family. The shell can resize vertically; Escape moves focus to the section's control button. Opening, reconnecting, disconnecting, and observed exit remain different states. Browser loss has a 30-second controller-local reconnect window; explicit disconnect requires confirmation. Terminal bytes are not presented as saved activity.
 
 ## Do's and Don'ts
 

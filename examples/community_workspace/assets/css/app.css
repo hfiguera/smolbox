@@ -4,3 +4,5 @@
 .earlier-activity{margin-top:20px;font-size:12px}.earlier-activity>summary{cursor:pointer;color:var(--muted)}.command-text{max-height:100px;overflow:auto}
 
 .arrow-icon{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.6;flex:none;vertical-align:middle}button.primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap}
+
+.workspace-nav{display:flex;gap:4px;flex-wrap:wrap;padding:10px 12px;border-bottom:1px solid var(--rule);background:var(--surface)}.workspace-nav a{display:inline-flex;align-items:center;min-height:44px;padding:8px;border-radius:6px;font-size:14px;font-weight:600;text-decoration:none}.workspace-nav a:hover{background:#e9ecde}#commands,#files,#shell,#activity{scroll-margin-top:20px}.disconnect-confirm{margin-bottom:18px;padding:16px;background:#f9ede2;border:1px solid #e7cbb6;border-radius:7px}.disconnect-confirm p{margin:0 0 12px}.disconnect-confirm button{margin:4px 8px 0 0}

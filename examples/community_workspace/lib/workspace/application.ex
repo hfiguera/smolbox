@@ -14,6 +14,7 @@ defmodule Workspace.Application do
           {Phoenix.PubSub, name: Workspace.PubSub},
           {Task.Supervisor, name: Workspace.Tasks},
           {DynamicSupervisor, name: Workspace.Runtimes, strategy: :one_for_one},
+          {Registry, keys: :unique, name: Workspace.TerminalRegistry},
           {DynamicSupervisor, name: Workspace.Terminals, strategy: :one_for_one},
           Workspace.Connection,
           WorkspaceWeb.Endpoint

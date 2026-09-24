@@ -13,17 +13,19 @@ defmodule WorkspaceWeb.WorkspaceLive do
        busy: false,
        refreshing: false,
        notice: nil,
+       terminal_warning: false,
        announcement: "",
        logs: nil,
        terminal: nil,
        terminal_status: :closed,
        confirming_delete: false,
+       confirming_disconnect: false,
        command: "pwd; ls -lah; cat starts.txt",
        cwd: "/app/project",
        mode: "foreground",
        timeout: "30",
        upload_path: "/app/project/notes.txt",
-       download_path: "/app/project/artifact.bin",
+       download_path: "/app/project/starts.txt",
        token: Ecto.UUID.generate()
      )
      |> allow_upload(:file,
@@ -44,12 +46,12 @@ defmodule WorkspaceWeb.WorkspaceLive do
     end
   end
 
-  def handle_info({:terminal_ready, pid}, socket),
+  def handle_info({:terminal_ready, pid, resumed}, socket),
     do:
       {:noreply,
        socket
-       |> assign(terminal: pid, terminal_status: :connected)
-       |> push_event("terminal-ready", %{})}
+       |> assign(terminal: pid, terminal_status: :connected, terminal_warning: false, notice: nil)
+       |> push_event("terminal-ready", %{resumed: resumed})}
 
   def handle_info({:terminal_output, seq, bytes}, socket),
     do: {:noreply, push_event(socket, "terminal-output", %{seq: seq, bytes: bytes})}
@@ -66,7 +68,13 @@ defmodule WorkspaceWeb.WorkspaceLive do
 
     {:noreply,
      socket
-     |> assign(terminal: nil, terminal_status: :closed, notice: message)
+     |> assign(
+       terminal: nil,
+       terminal_status: :closed,
+       notice: message,
+       confirming_disconnect: false,
+       terminal_warning: !match?({:ok, %{exit_code: _}}, outcome)
+     )
      |> push_event("terminal-closed", %{message: message})
      |> push_event("new-intent", %{form: "terminal-form"})}
   end
@@ -75,12 +83,15 @@ defmodule WorkspaceWeb.WorkspaceLive do
     announcement = announcement(socket.assigns.snapshot, snapshot)
 
     {:noreply,
-     assign(socket,
+     socket
+     |> assign(
        snapshot: snapshot,
        refreshing: false,
        announcement: announcement || socket.assigns.announcement,
        error: if(snapshot.connection == :ready, do: nil, else: snapshot.connection)
-     )}
+     )
+     |> reconcile_terminal_notice()
+     |> reconnect_terminal()}
   end
 
   def handle_async(:snapshot, {:ok, {:error, reason}}, socket),
@@ -195,8 +206,12 @@ defmodule WorkspaceWeb.WorkspaceLive do
 
   def handle_event("collect", params, socket) do
     id = workspace_id(socket)
+    socket = assign(socket, :download_path, params["path"])
     mutate(socket, fn -> Workspaces.collect(id, params["token"], params["path"]) end)
   end
+
+  def handle_event("download-change", %{"path" => path}, socket),
+    do: {:noreply, assign(socket, :download_path, path)}
 
   def handle_event("cancel", %{"id" => token}, socket) do
     id = workspace_id(socket)
@@ -217,13 +232,24 @@ defmodule WorkspaceWeb.WorkspaceLive do
   def handle_event("open-terminal", %{"token" => token}, socket) do
     case Workspaces.terminal(workspace_id(socket), token) do
       {:ok, execution} ->
-        {:ok, pid} =
-          DynamicSupervisor.start_child(
-            Workspace.Terminals,
-            {TerminalSession, {self(), execution}}
-          )
+        case DynamicSupervisor.start_child(
+               Workspace.Terminals,
+               {TerminalSession, {self(), execution}}
+             ) do
+          {:ok, pid} ->
+            {:noreply, assign(socket, terminal: pid, terminal_status: :connecting)}
 
-        {:noreply, assign(socket, terminal: pid, terminal_status: :connecting)}
+          {:error, {:already_started, _}} ->
+            {:noreply, reconnect_terminal(socket)}
+
+          _ ->
+            {:noreply,
+             assign(
+               socket,
+               :notice,
+               "The shell could not be attached. Check its recorded outcome before starting another."
+             )}
+        end
 
       error ->
         {:noreply, assign(socket, :notice, error_message(error))}
@@ -249,7 +275,22 @@ defmodule WorkspaceWeb.WorkspaceLive do
     {:noreply, socket}
   end
 
-  def handle_event("close-terminal", _, socket) do
+  def handle_event("resume-terminal", _, socket) do
+    if socket.assigns.terminal do
+      terminal_call(socket, &TerminalSession.reconnect_pid/1)
+      {:noreply, socket}
+    else
+      {:noreply, reconnect_terminal(socket)}
+    end
+  end
+
+  def handle_event("close-terminal", _, socket),
+    do: {:noreply, assign(socket, :confirming_disconnect, true)}
+
+  def handle_event("keep-terminal", _, socket),
+    do: {:noreply, assign(socket, :confirming_disconnect, false)}
+
+  def handle_event("confirm-disconnect", _, socket) do
     terminal_call(socket, &TerminalSession.close/1)
 
     {:noreply,
@@ -267,6 +308,36 @@ defmodule WorkspaceWeb.WorkspaceLive do
       do: Workspaces.safe(fn -> fun.(socket.assigns.terminal) end),
       else: {:error, :closed}
   end
+
+  defp reconnect_terminal(%{assigns: %{terminal: nil, error: nil}} = socket) do
+    case machine(socket.assigns.snapshot) do
+      %{state: :running, active_execution: {_, _} = key} ->
+        case Workspaces.safe(fn -> TerminalSession.reconnect(key) end) do
+          {:ok, pid} -> assign(socket, terminal: pid, terminal_status: :connecting)
+          _ -> socket
+        end
+
+      _ ->
+        socket
+    end
+  end
+
+  defp reconnect_terminal(socket), do: socket
+
+  defp reconcile_terminal_notice(%{assigns: %{terminal_warning: true}} = socket) do
+    if idle?(machine(socket.assigns.snapshot)) do
+      socket
+      |> assign(
+        terminal_warning: false,
+        notice: "Workspace available. The earlier terminal outcome remains in Activity."
+      )
+      |> push_event("terminal-recovered", %{})
+    else
+      socket
+    end
+  end
+
+  defp reconcile_terminal_notice(socket), do: socket
 
   defp mutate(%{assigns: %{error: error}} = socket, _) when error != nil, do: {:noreply, socket}
 
@@ -351,10 +422,17 @@ defmodule WorkspaceWeb.WorkspaceLive do
   end
 
   defp execution_state(%{execution: {:ok, e}}), do: e.state
+
+  defp execution_state(%{state: "submitted", kind: kind})
+       when kind in ["start", "stop", "delete"], do: :accepted
+
   defp execution_state(action), do: action.state
 
   defp output(%{execution: {:ok, %{result: %SmolBox.Result{} = r}}}) do
-    text(r.stdout <> if(r.stderr == "", do: "", else: "\n" <> r.stderr))
+    case r.stdout <> if(r.stderr == "", do: "", else: "\n" <> r.stderr) do
+      "" -> nil
+      bytes -> text(bytes)
+    end
   end
 
   defp output(_), do: nil
@@ -551,9 +629,13 @@ defmodule WorkspaceWeb.WorkspaceLive do
                                                                                                                             "retained"}. This identity will never create a replacement machine.
             </p>
           </div>
+          <nav class="workspace-nav" aria-label="Workspace sections">
+            <a href="#commands">Commands</a><a href="#files">Files</a>
+            <a href="#shell">Terminal</a><a href="#activity">Activity</a>
+          </nav>
           <div class="work-area">
             <div class="command-column">
-              <section aria-labelledby="command-title">
+              <section id="commands" aria-labelledby="command-title" tabindex="-1">
                 <div class="section-heading">
                   <h3 id="command-title">Run a command</h3>
                   <span class="subtle">One active command at a time</span>
@@ -620,7 +702,7 @@ defmodule WorkspaceWeb.WorkspaceLive do
                   <p>“Run beyond five minutes” takes 305 seconds. It is optional.</p>
                 </details>
               </section>
-              <section class="history" aria-labelledby="history-title">
+              <section id="activity" class="history" aria-labelledby="history-title" tabindex="-1">
                 <div class="section-heading">
                   <h3 id="history-title">Activity</h3>
                   <span class="subtle">Latest 50 durable requests</span>
@@ -628,10 +710,10 @@ defmodule WorkspaceWeb.WorkspaceLive do
                 <p :if={@snapshot.history == []} class="empty-history">
                   Your first command starts the story. Results stay here when you reconnect.
                 </p>
-                <.activity :for={action <- Enum.take(@snapshot.history, 5)} action={action} />
-                <details :if={length(@snapshot.history) > 5} class="earlier-activity">
-                  <summary>Earlier requests ({length(@snapshot.history) - 5})</summary>
-                  <.activity :for={action <- Enum.drop(@snapshot.history, 5)} action={action} />
+                <.activity :for={action <- Enum.take(@snapshot.history, 2)} action={action} />
+                <details :if={length(@snapshot.history) > 2} class="earlier-activity">
+                  <summary>Earlier requests ({length(@snapshot.history) - 2})</summary>
+                  <.activity :for={action <- Enum.drop(@snapshot.history, 2)} action={action} />
                 </details>
               </section>
             </div>
@@ -656,7 +738,7 @@ defmodule WorkspaceWeb.WorkspaceLive do
                   TCP {@snapshot.service_port} → 8000 · Availability depends on the workload. A running VM alone is not proof of readiness.
                 </p>
               </section>
-              <section class="files-panel">
+              <section id="files" class="files-panel" tabindex="-1">
                 <h3>Move a file</h3>
                 <p>Up to 16 MiB per file. Transfers use the same managed command slot.</p>
                 <form id="upload-form" phx-hook="Intent" phx-submit="upload" phx-change="file-change">
@@ -682,7 +764,12 @@ defmodule WorkspaceWeb.WorkspaceLive do
                     Upload to machine
                   </button>
                 </form>
-                <form id="download-form" phx-hook="Intent" phx-submit="collect">
+                <form
+                  id="download-form"
+                  phx-hook="Intent"
+                  phx-submit="collect"
+                  phx-change="download-change"
+                >
                   <input type="hidden" name="token" value={@token} />
                   <label>
                     Guest file to download<input name="path" value={@download_path} required />
@@ -692,13 +779,18 @@ defmodule WorkspaceWeb.WorkspaceLive do
                   </button>
                 </form>
                 <p class="field-note">
+                  Try <code>/app/project/starts.txt</code>, created when the machine starts.
+                  Collect an existing file; create <code>artifact.bin</code>
+                  with the sample command first.
+                </p>
+                <p class="field-note">
                   Approved roots: <code>/app/project</code>
                   and <code>/home/dev/.config</code>. Collected downloads appear in Activity.
                 </p>
               </section>
             </aside>
           </div>
-          <section class="terminal-section" aria-labelledby="terminal-title">
+          <section id="shell" class="terminal-section" aria-labelledby="terminal-title" tabindex="-1">
             <div class="section-heading">
               <div>
                 <h3 id="terminal-title">Interactive terminal</h3>
@@ -721,10 +813,23 @@ defmodule WorkspaceWeb.WorkspaceLive do
                   type="button"
                   phx-click="close-terminal"
                 >
-                  Disconnect terminal
+                  Disconnect…
                 </button>
               </form>
             </div>
+            <div :if={@confirming_disconnect} class="disconnect-confirm" role="alert">
+              <p>Disconnecting does not stop the shell and may require operator recovery.
+                To finish normally, type <code>exit</code> in the terminal.</p>
+              <button type="button" phx-click="keep-terminal">Keep terminal</button>
+              <button type="button" phx-click="confirm-disconnect">Disconnect anyway</button>
+            </div>
+            <p
+              :if={@terminal_status == :closed && @machine && @machine.active_execution != nil}
+              class="field-note"
+            >
+              Another command or terminal holds this machine’s command slot. If the terminal is
+              open in another tab, use it there. After closing that tab, return here within 30 seconds to reconnect.
+            </p>
             <div
               id="terminal"
               phx-hook="Terminal"
@@ -738,9 +843,9 @@ defmodule WorkspaceWeb.WorkspaceLive do
             </div>
             <p class="field-note">
               Before refreshing or leaving, type <code>exit</code> and wait for “Terminal exited”.
-              Disconnecting before the shell exits may block the workspace until an operator
-              recovers it. Your machine is retained, but the old shell cannot be reattached and
-              terminal output is not saved. Escape moves focus out of the terminal.
+              A page refresh or brief connection loss can reconnect to the same shell within 30 seconds
+              while this app stays running. Longer interruptions or an app restart may need operator
+              recovery. Previous terminal output is not saved. Escape moves focus out of the terminal.
             </p>
           </section>
           <details class="diagnostics">
@@ -801,6 +906,9 @@ defmodule WorkspaceWeb.WorkspaceLive do
       </p>
       <p :if={@action.error} class="field-note">
         {label(@action.error)} — inspect the outcome before retrying.
+      </p>
+      <p :if={execution_state(@action) == :accepted} class="field-note">
+        Request accepted; completion has not been recorded. The current machine state is shown above.
       </p>
       <a :if={collected?(@action)} class="text-link" href={"/downloads/#{@action.id}"}>
         Download collected file

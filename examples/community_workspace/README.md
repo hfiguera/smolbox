@@ -95,7 +95,8 @@ Do not regenerate keys to fix an error. Never place it in a guest-accessible pat
    browser or terminal area. Escape moves focus to the terminal control. Type
    `exit` and wait for “Terminal exited” before refreshing, leaving the page, or
    restarting the controller. The browser warns when leaving with an active shell
-   when it supports unload prompts; this does not protect against lost connections.
+   when it supports unload prompts. Brief browser interruptions can reconnect as
+   described below; an app restart still needs a clean shell exit.
 5. Choose the background sample and run it. Activity displays a typed
    `SmolBox.LaunchResult` PID. This confirms launch, not continued life, readiness,
    eventual exit, or supervision. The process appends a marker then sleeps.
@@ -117,6 +118,13 @@ Do not regenerate keys to fix an error. Never place it in a guest-accessible pat
 Console diagnostics are VM/worker console output. smolvm 1.17.0 discards the
 startup workload's stdout/stderr; the app does not label console bytes as
 application logs. A running VM alone does not prove the HTTP service is ready.
+
+Commands, Files, Terminal, and Activity links jump directly to their sections.
+Activity shows the latest two requests with earlier entries expandable. File
+collection defaults to `/app/project/starts.txt`, created by the startup workload;
+the chosen path persists across updates. Create the optional `artifact.bin` sample
+before collecting it. Removed or invalid guest files can still produce uncertain
+worker responses; the example does not bypass SmolBox's recovery requirements.
 
 ## Identity, retention and recovery
 
@@ -140,10 +148,18 @@ versions receive bounded retries only after refreshing and rechecking machine st
 Closing a tab, finishing/cancelling a command, or restarting the controller does
 not delete the machine. Cancellation can prevent undispatched work; after dispatch
 it ends observation without proving guest termination. An unknown outcome retains
-its command slot. Terminal disconnect closes the controller connection, has no
-reattachment guarantee, and may leave an unknown outcome. Terminal bytes are not
-saved. Output uses a bounded queue and one browser-acknowledged frame at a time;
-slow consumers are disconnected. Session/idle budgets are 10/5 minutes.
+its command slot. A browser refresh or lost browser consumer gets a **30-second reconnect window**
+on the same app/controller. The app retains the existing PTY attachment, permits
+one browser consumer, and resends at most one unacknowledged output frame; it never
+replays input or opens a replacement shell. Previously acknowledged output is not
+restored. This is browser reconnection to a live controller, not recovery of a lost
+worker PTY. Controller restart, worker disconnect, explicit disconnect, or expiry
+can still leave an unknown outcome requiring operator recovery. Close shells with
+`exit` and wait for confirmed exit before planned controller restarts. The explicit
+disconnect action asks for confirmation. Output remains bounded by the existing
+64 KiB upstream buffer and one browser-acknowledged frame; slow connected consumers
+are disconnected. Session/idle budgets remain 10/5 minutes and do not reset on
+browser reconnect.
 
 For an interrupted command/terminal, follow the
 [upstream fencing limitations and recovery contract](../../docs/persistent-machines.md#cancellation-and-uncertain-outcomes).
@@ -218,8 +234,15 @@ for the actual tested platform, failures found and final outcomes. The optional
 The app uses Hex `{:smolbox, "~> 0.2.0"}` with a lockfile, not repository library
 code. Shared adapter source moved to `examples/support/store`; the durable host
 compiles that same source. Existing store schemas/codecs are unchanged. Setup
-adds only `workspace_homes` and `workspace_actions` on top of the existing v5 store
-migrations. Use a dedicated DB; do not automatically upgrade a production store.
+adds `workspace_homes` and `workspace_actions` on top of the existing v5 store
+migrations. Migration `20260924000001` adds nullable `request_version` to workspace
+receipts so start/stop/delete completion is recorded only when SmolBox's
+`last_request` matches that accepted version and the target state is observed.
+Older receipts lack this evidence and display **Accepted**, never guessed completion.
+Run both UI migrations before starting the updated app. Stop the app before a
+rollback; retaining the nullable column is compatible with the previous example.
+Dropping that column discards receipt correlation evidence, so keep it and the DB
+backup when rolling back. Use a dedicated DB; do not automatically upgrade a production store.
 There is no app release or package release change.
 
 Before upgrading, stop controllers and back up the DB, private keys/object store

@@ -63,20 +63,49 @@ defmodule Workspace.Ledger do
 
   def actions(c, machine) do
     query(
-      "SELECT id,kind,payload,state,error,inserted_at FROM workspace_actions WHERE partition=$1 AND machine_id=$2 ORDER BY inserted_at DESC,id DESC LIMIT 50",
+      "SELECT id,kind,payload,state,error,inserted_at,request_version FROM workspace_actions WHERE partition=$1 AND machine_id=$2 ORDER BY inserted_at DESC,id DESC LIMIT 50",
       [c.store.partition, machine]
     ).rows
-    |> Enum.map(fn [id, kind, payload, state, error, at] ->
+    |> Enum.map(fn [id, kind, payload, state, error, at, version] ->
       %{
         id: id,
         kind: kind,
         payload: decrypt(c, id, payload),
         state: state,
         error: error,
-        inserted_at: at
+        inserted_at: at,
+        request_version: version
       }
     end)
   end
+
+  def lifecycle_accepted(c, id, version) do
+    query(
+      "UPDATE workspace_actions SET state='submitted',request_version=$3,updated_at=now() WHERE partition=$1 AND id=$2",
+      [c.store.partition, id, version]
+    )
+
+    :ok
+  end
+
+  def observe_lifecycle(c, %{
+        id: id,
+        last_request: {action, version},
+        operation: nil,
+        state: state
+      })
+      when (action == :start and state == :running) or
+             (action == :stop and state == :stopped) or
+             (action == :delete and state == :deleted) do
+    query(
+      "UPDATE workspace_actions SET state='completed',updated_at=now() WHERE partition=$1 AND kind=$2 AND request_version=$3 AND machine_id=$4 AND state='submitted'",
+      [c.store.partition, Atom.to_string(action), version, id]
+    )
+
+    :ok
+  end
+
+  def observe_lifecycle(_, _), do: :ok
 
   def action(c, id) do
     case query(

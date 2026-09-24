@@ -80,8 +80,10 @@ const Hooks = {
         this.inputQueue += data;
         this.flushInput();
       });
-      this.handleEvent('terminal-ready', () => {
-        this.active=true; this.term.clear(); this.fit.fit(); this.term.focus();
+      this.handleEvent('terminal-ready', ({resumed}) => {
+        this.active=true; this.pendingInput=false; this.inputQueue=''; this.term.clear(); this.fit.fit();
+        if (resumed) this.term.writeln('\r\nReconnected to the same shell. Previous output is not saved; press Enter for its prompt.');
+        else this.term.focus();
         this.pushEvent('terminal-resize',{cols:this.term.cols,rows:this.term.rows});
       });
       this.handleEvent('terminal-output', ({seq,bytes}) => {
@@ -91,8 +93,12 @@ const Hooks = {
       this.handleEvent('terminal-closed', ({message}) => {
         this.active=false; this.term.writeln(`\r\n\x1b[90m${message}\x1b[0m`);
       });
+      this.handleEvent('terminal-recovered', () => {
+        if (!this.active) { this.term.clear(); this.term.writeln('\r\nWorkspace available. Open a terminal to start a new shell.'); }
+      });
     },
     disconnected() { this.active=false; this.inputQueue=''; },
+    reconnected() { this.pushEvent('resume-terminal',{}); },
     destroyed() { window.removeEventListener('beforeunload', this.warnBeforeLeaving); this.resize.disconnect(); this.input.dispose(); this.term.dispose(); }
   }
 };

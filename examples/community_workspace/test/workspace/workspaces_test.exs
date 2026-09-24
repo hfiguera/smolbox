@@ -19,6 +19,12 @@ defmodule Workspace.WorkspacesTest do
     token = Ecto.UUID.generate()
     assert {:ok, _} = Workspaces.command(id, token, params())
     Fixture.wait(fn -> Fixture.execution(token) end, &(&1.state == :completed))
+
+    Fixture.wait(
+      fn -> SmolBox.Machines.inspect(Settings.runtime(), Workspaces.handle(id)) end,
+      &is_nil(&1.active_execution)
+    )
+
     stop_supervised!(SmolBox.Runtime)
     start_supervised!({SmolBox.Runtime, c.options})
     assert {:ok, ^id} = Workspaces.create()
@@ -198,6 +204,27 @@ defmodule Workspace.WorkspacesTest do
     )
 
     assert map_size(TestWorker.snapshot().machines) == 1
+  end
+
+  test "lifecycle completion requires the matching accepted request version", %{c: c} do
+    id = Fixture.running(c)
+    {:ok, before} = SmolBox.Machines.inspect(Settings.runtime(), Workspaces.handle(id))
+    token = Ecto.UUID.generate()
+    assert {:ok, _} = Workspaces.lifecycle(:stop, id, token)
+
+    stopped =
+      Fixture.wait(
+        fn -> SmolBox.Machines.inspect(Settings.runtime(), Workspaces.handle(id)) end,
+        &(&1.state == :stopped)
+      )
+
+    assert {:ok, %{state: "submitted"}} = Ledger.action(c, token)
+    Ledger.observe_lifecycle(c, %{stopped | last_request: {:stop, before.version - 1}})
+    assert {:ok, %{state: "submitted"}} = Ledger.action(c, token)
+    assert {:ok, _} = Workspaces.snapshot()
+    assert {:ok, %{state: "completed"}} = Ledger.action(c, token)
+    assert {:ok, _} = Workspaces.lifecycle(:start, id, Ecto.UUID.generate())
+    assert {:ok, %{state: "completed"}} = Ledger.action(c, token)
   end
 
   test "foreground budgets and background PID evidence use the public command types", %{c: c} do

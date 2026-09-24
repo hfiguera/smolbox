@@ -33,6 +33,23 @@ defmodule WorkspaceWeb.WorkspaceLiveTest do
     assert has_element?(view, "button[phx-click=stop][disabled]")
   end
 
+  test "download paths survive updates and stale terminal warnings clear after recovery", %{c: c} do
+    Fixture.running(c)
+    {:ok, view, _} = live(local_conn(), "/")
+    render_async(view)
+    assert has_element?(view, "#download-form input[value='/app/project/starts.txt']")
+    view |> form("#download-form", %{"path" => "/app/project/custom.txt"}) |> render_change()
+    send(view.pid, :refresh)
+    render_async(view)
+    assert has_element?(view, "#download-form input[value='/app/project/custom.txt']")
+    send(view.pid, {:terminal_closed, {:error, :lost}})
+    assert has_element?(view, "#notice", "Terminal disconnected")
+    send(view.pid, :refresh)
+    render_async(view)
+    assert has_element?(view, "#notice", "Workspace available")
+    assert has_element?(view, "nav[aria-label='Workspace sections'] a[href='#shell']")
+  end
+
   test "host checks and download identities reject unrelated requests" do
     conn = build_conn() |> Map.put(:host, "attacker.example") |> get("/")
     assert conn.status == 400
