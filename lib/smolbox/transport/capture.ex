@@ -1,7 +1,7 @@
 defmodule SmolBox.Transport.Capture do
   @moduledoc false
 
-  alias SmolBox.{Error, Result}
+  alias SmolBox.{Error, LogResult, Result}
   alias SmolBox.Wire.SSE
 
   defstruct [
@@ -12,6 +12,7 @@ defmodule SmolBox.Transport.Capture do
     :exit_code,
     bytes: 0,
     output_bytes: 0,
+    log_count: 0,
     chunks: [],
     stdout: [],
     stderr: [],
@@ -19,13 +20,14 @@ defmodule SmolBox.Transport.Capture do
   ]
 
   @type t :: %__MODULE__{
-          mode: :buffer | :empty | :sse,
+          mode: :buffer | :empty | :sse | :logs,
           max_bytes: pos_integer(),
           max_output: pos_integer() | nil,
           on_event: (SSE.event() -> any()) | nil,
           exit_code: integer() | nil,
           bytes: non_neg_integer(),
           output_bytes: non_neg_integer(),
+          log_count: non_neg_integer(),
           chunks: [binary()],
           stdout: [binary()],
           stderr: [binary()],
@@ -40,6 +42,16 @@ defmodule SmolBox.Transport.Capture do
     %__MODULE__{mode: :sse, max_bytes: max, max_output: max_output, on_event: callback}
   end
 
+  def new(%{mode: {:logs, max_output, callback}, max_bytes: max}) do
+    %__MODULE__{
+      mode: :logs,
+      max_bytes: max,
+      max_output: max_output,
+      on_event: callback,
+      parser: %SSE{mode: :logs}
+    }
+  end
+
   @spec feed(t(), binary()) :: {:ok, t()} | {:error, Error.t()}
   def feed(state, bytes) do
     if state.bytes + byte_size(bytes) <= state.max_bytes do
@@ -49,9 +61,14 @@ defmodule SmolBox.Transport.Capture do
     end
   end
 
-  @spec finish(t()) :: {:ok, binary() | Result.t()} | {:error, Error.t()}
+  @spec finish(t()) :: {:ok, binary() | Result.t() | LogResult.t()} | {:error, Error.t()}
   def finish(%{mode: :buffer} = state), do: {:ok, join(state.chunks)}
   def finish(%{mode: :empty}), do: {:ok, ""}
+
+  def finish(%{mode: :logs} = state) do
+    with :ok <- SSE.finish(state.parser),
+         do: {:ok, %LogResult{lines: Enum.reverse(state.chunks)}}
+  end
 
   def finish(%{mode: :sse} = state) do
     with :ok <- SSE.finish(state.parser) do
@@ -73,7 +90,7 @@ defmodule SmolBox.Transport.Capture do
   defp consume(%{mode: :empty}, _bytes),
     do: {:error, %Error{category: :protocol, operation: :readiness}}
 
-  defp consume(%{mode: :sse} = state, bytes) do
+  defp consume(%{mode: mode} = state, bytes) when mode in [:sse, :logs] do
     with {:ok, parser, events} <- SSE.feed(state.parser, bytes) do
       Enum.reduce_while(events, {:ok, %{state | parser: parser}}, &consume_event/2)
     end
@@ -84,6 +101,21 @@ defmodule SmolBox.Transport.Capture do
       {:ok, updated} -> {:cont, {:ok, notify(updated, event)}}
       {:error, _error} = error -> {:halt, error}
     end
+  end
+
+  defp event(state, {:log, line}) do
+    total = state.output_bytes + byte_size(line) + 1
+
+    if total <= state.max_output and state.log_count < 10_000,
+      do:
+        {:ok,
+         %{
+           state
+           | chunks: [line | state.chunks],
+             output_bytes: total,
+             log_count: state.log_count + 1
+         }},
+      else: limit()
   end
 
   defp event(state, {:exit, code}), do: {:ok, %{state | exit_code: code}}

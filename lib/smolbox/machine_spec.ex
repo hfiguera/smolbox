@@ -11,8 +11,9 @@ defmodule SmolBox.MachineSpec do
 
   For the default `source: :image`, the operator must verify
   its immutable digest and architecture before approving it. SmolBox never
-  enables networking to fetch a missing image. Starts use `/bin/true` and never
-  restart the workload automatically. Networking is offline unless an explicit
+  enables networking to fetch a missing image. Starts use `/bin/true` unless an
+  explicit `SmolBox.Workload` is supplied on smolvm 1.17.0. Automatic workload
+  restart is unsupported. Networking is offline unless an explicit
   `SmolBox.NetworkPolicy` is supplied. Optional `:ports` publishes fixed TCP
   mappings on smolvm 1.17.0 using virtio-net, independently of outbound policy.
   Offline with mappings means denied outbound, not absence of a network device.
@@ -33,6 +34,7 @@ defmodule SmolBox.MachineSpec do
 
   @schema [
     ports: [type: :any, default: []],
+    workload: [type: :any, default: nil],
     source: [type: {:in, [:image, :checkpoint]}, default: :image],
     network: [type: :any, default: :offline],
     cpus: [type: :pos_integer, default: 1],
@@ -47,6 +49,7 @@ defmodule SmolBox.MachineSpec do
     :name,
     :artifact_path,
     ports: [],
+    workload: nil,
     source: :image,
     network: :offline,
     cpus: 1,
@@ -59,6 +62,7 @@ defmodule SmolBox.MachineSpec do
           name: String.t(),
           source: :image | :checkpoint,
           ports: [SmolBox.PortMapping.t()],
+          workload: SmolBox.Workload.t() | nil,
           network: :offline | SmolBox.NetworkPolicy.t(),
           artifact_path: String.t(),
           cpus: pos_integer(),
@@ -105,6 +109,7 @@ defmodule SmolBox.MachineSpec do
          valid_name?(spec.name) and artifact_path?(spec.artifact_path, spec.source) and
          network_valid?(spec) and
          SmolBox.PortMapping.canonical?(spec.ports) and
+         workload_valid?(spec) and
          allocations?(spec) do
       :ok
     else
@@ -113,6 +118,11 @@ defmodule SmolBox.MachineSpec do
   end
 
   def validate(_spec), do: invalid()
+
+  defp workload_valid?(spec),
+    do:
+      SmolBox.Workload.optional?(spec.workload) and
+        (spec.workload == nil or spec.source == :image)
 
   defp allocations?(spec),
     do:
@@ -150,11 +160,14 @@ defmodule SmolBox.MachineSpec do
              "cmd" => [],
              "restart" => %{"policy" => "never"}
            },
-           network_wire(spec)
+           Map.merge(network_wire(spec), workload_wire(spec))
          )
        )}
     end
   end
+
+  defp workload_wire(%{workload: nil}), do: %{}
+  defp workload_wire(%{workload: workload}), do: SmolBox.Workload.to_wire(workload)
 
   defp wire_source(%{source: :checkpoint}, wire),
     do: Map.drop(wire, ["storageGb", "overlayGb", "entrypoint", "cmd"])

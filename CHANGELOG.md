@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Add optional immutable startup `Workload` configuration on smolvm 1.17.0 image
+  machines, preserving neutral startup when omitted and rejecting automatic restarts.
+- Add bounded SSE console snapshots/follow through `Client.logs/3` and
+  ownership-checked `Machines.logs/3`, with typed `LogResult`. Upstream discards
+  application stdout/stderr; console diagnostics do not prove application readiness.
+- Workload machines selectively use codec v8 and `managed_workloads: 1` store
+  capability. Upgrade controllers/readers/adapters together; no new SQL migration.
+  Add a durable startup/recovery example and workload guide.
+
 - Add interactive WebSocket PTY sessions on managed image machines and the low-level
   client, with byte-preserving output, input, resize, typed exit evidence, bounded
   flow control and conservative disconnect recovery.

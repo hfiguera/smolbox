@@ -277,3 +277,12 @@ Hosts that render or record them must apply their own terminal-rendering and dat
 retention policy. Output, input and queues have explicit bounds; reaching a limit
 closes observation without proving guest termination. Closing the PTY does not
 guarantee termination of detached descendants. See [Interactive terminals](interactive-terminals.md).
+
+## Startup workloads and console diagnostics
+
+Startup arguments and environment are persisted in machine records and retained
+after deletion. Encrypt/authenticate storage, backups and exports. Upstream console
+logs can contain full command arguments and working directories despite discarding
+application stdout/stderr. Authorize log readers by scope and protect callback
+sinks. Inspect redaction does not sanitize console content. The
+[workload guide](workloads.md) describes ownership checks and retention.

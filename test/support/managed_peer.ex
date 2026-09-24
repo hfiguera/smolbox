@@ -7,7 +7,14 @@ defmodule SmolBox.ManagedPeer do
       ExUnit.Callbacks.start_supervised!(
         {Agent,
          fn ->
-           %{machines: %{}, files: %{}, commands: [], operations: [], options: options}
+           %{
+             machines: %{},
+             files: %{},
+             commands: [],
+             creations: [],
+             operations: [],
+             options: options
+           }
          end},
         id: make_ref()
       )
@@ -69,7 +76,13 @@ defmodule SmolBox.ManagedPeer do
       |> Map.merge(Keyword.get(state.options, :created_allocations, %{}))
 
     response = if state.options[:create_lost], do: {:json, 503, %{}}, else: {:json, 200, machine}
-    {response, %{state | machines: Map.put(state.machines, machine["name"], machine)}}
+
+    {response,
+     %{
+       state
+       | machines: Map.put(state.machines, machine["name"], machine),
+         creations: [input | state.creations]
+     }}
   end
 
   defp route(method, ["api", "v1", "machines", name | suffix], body, state) do
@@ -85,6 +98,13 @@ defmodule SmolBox.ManagedPeer do
   end
 
   defp machine_route("GET", [], _body, machine, state), do: {{:json, 200, machine}, state}
+
+  defp machine_route("GET", ["logs"], _body, _machine, state) do
+    response =
+      if state.options[:no_logs], do: {:json, 404, %{}}, else: {:logs, "data: agent ready\n\n"}
+
+    {response, state}
+  end
 
   defp machine_route("POST", ["stop"], _body, machine, %{options: options} = state)
        when is_list(options) do
@@ -162,6 +182,12 @@ defmodule SmolBox.ManagedPeer do
 
   defp respond(conn, {:json, status, body}, _agent), do: TestPeer.json(conn, body, status)
   defp respond(conn, {:empty, status}, _agent), do: Plug.Conn.send_resp(conn, status, "")
+
+  defp respond(conn, {:logs, bytes}, _agent),
+    do:
+      conn
+      |> Plug.Conn.put_resp_content_type("text/event-stream")
+      |> Plug.Conn.send_resp(200, bytes)
 
   defp respond(conn, {:bytes, bytes}, _agent),
     do:

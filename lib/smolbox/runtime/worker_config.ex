@@ -4,7 +4,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   Artifact entries have `id`, `sha256`, `architecture`, and an absolute prepared
   `.smolmachine` `path` on this worker. The operator verifies artifact digests,
-  neutral `/bin/true` startup, disabled workload restart, and the pinned runtime
+  approved startup behavior, disabled automatic workload restart, and the pinned runtime
   before registering them. Managed admission compares the server-reported version
   and checks readiness; the worker API cannot attest artifact contents or isolation.
 
@@ -136,6 +136,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   def supports?(worker, %{artifact: %{"kind" => "checkpoint"}} = spec) do
     ExecutionSupport.worker?(worker, spec) and
       Map.get(spec, :ports, []) == [] and
+      Map.get(spec, :workload) == nil and
       spec.profile in worker.profiles and allocation_fits?(worker, spec.profile) and
       Enum.any?(worker.checkpoints, fn checkpoint ->
         Checkpoint.artifact(checkpoint) == spec.artifact and checkpoint.profile == spec.profile
@@ -145,6 +146,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   def supports?(worker, spec) do
     ExecutionSupport.worker?(worker, spec) and
       ports_supported?(worker, spec) and
+      workload_supported?(worker, spec) and
       (spec.profile.network == :offline or
          worker.runtime_version in ["1.16.0", "1.16.1", "1.17.0"]) and
       spec.profile in worker.profiles and allocation_fits?(worker, spec.profile) and
@@ -173,10 +175,13 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   def machine_spec(worker, spec, name) do
     with {:ok, machine} <- Profile.machine(spec.profile, name, artifact_path(worker, spec)) do
-      machine = %{machine | ports: Map.get(spec, :ports, [])}
+      machine = %{machine | ports: Map.get(spec, :ports, []), workload: Map.get(spec, :workload)}
       with :ok <- MachineSpec.validate(machine), do: {:ok, machine}
     end
   end
+
+  defp workload_supported?(worker, spec),
+    do: Map.get(spec, :workload) == nil or worker.runtime_version == "1.17.0"
 
   defp ports_supported?(worker, spec),
     do:

@@ -480,3 +480,14 @@ keys. If restarting the dedicated worker is part of that drain, run
 without resolving the execution. Then drain/restart and run `recover`. Upstream
 1.17.0 removes formerly running machines whose processes died on API startup.
 See [Interactive terminals](../../docs/interactive-terminals.md) for the full contract.
+
+## Startup workloads and console diagnostics
+
+With the environment above and smolvm 1.17.0, run
+`mix run scripts/workload.exs prepare`, then `mix run scripts/workload.exs resume`
+in a separate controller process with the same partition, ID and keys. The example
+verifies startup arguments, environment, working directory, console snapshot/follow,
+recovery, retained files, stop/start and explicit deletion with released capacity.
+Automatic restart policies and app stdout/stderr capture are unsupported.
+See the [workload guide](../../docs/workloads.md) for v8 upgrade/rollback requirements.
+There is no new SQL migration; apply all existing migrations.

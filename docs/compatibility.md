@@ -835,3 +835,13 @@ See [Interactive terminals](interactive-terminals.md) for exact support and roll
 constraints; worker persistence does not imply terminal persistence.
 See the [terminal validation report](interactive-terminals-validation.md) for
 platform-specific evidence and the observed disconnect/storage limitations.
+
+## Startup workloads and console diagnostics
+
+The unreleased checkout supports immutable startup workloads and bounded console
+SSE diagnostics on smolvm 1.17.0 image machines. Automatic restart policies and
+application stdout/stderr capture are unsupported. Linux x86_64 and macOS Apple
+Silicon passed startup, PostgreSQL controller restart, stop/start, diagnostics and
+verified deletion; see [workload validation](workloads-validation.md). This remains
+development qualification, with codec-v8 upgrade requirements in the
+[workload guide](workloads.md).

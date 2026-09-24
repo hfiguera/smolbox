@@ -114,6 +114,9 @@ defmodule SmolBox.Client do
     end
   end
 
+  defp creation_runtime(client, %{workload: %SmolBox.Workload{}}),
+    do: creation_runtime_versions(client, ["1.17.0"])
+
   defp creation_runtime(client, %{source: :checkpoint}),
     do: creation_runtime_versions(client, ["1.16.1", "1.17.0"])
 
@@ -440,6 +443,52 @@ defmodule SmolBox.Client do
         not is_nil(command.stdin) -> error(:unsupported_capability, :exec_stream)
         is_nil(options[:on_event]) or is_function(options[:on_event], 1) -> :ok
         true -> error(:validation, :exec_stream)
+      end
+    end
+  end
+
+  @doc """
+  Read console diagnostics or follow them with a synchronous `on_event` callback.
+
+  Options: `tail` (0–10,000, default 100), `follow` (false), `timeout_ms`
+  (1,000–300,000, default 30,000; also capped by the worker operation budget),
+  `max_output_bytes` (1–8 MiB, default 1 MiB), and `on_event` receiving `{:log, line}`.
+  Following requires a callback. At most 10,000 events are captured. The worker's
+  wire-response and receive limits also apply. No automatic reconnection occurs.
+
+  Requires 1.17.0. A missing log is not proof of an absent machine. This read never
+  starts/stops a VM and does not observe workload success. Application stdout and
+  stderr are discarded upstream; these are boot/agent console diagnostics.
+  """
+  @spec logs(t(), String.t(), keyword()) :: {:ok, SmolBox.LogResult.t()} | {:error, Error.t()}
+  def logs(client, name, options \\ []) do
+    with {:ok, options} <- SmolBox.LogOptions.validate(options),
+         {:ok, path} <- machine_path(name),
+         :ok <- Worker.validate(client.worker) do
+      worker = %{
+        client.worker
+        | operation_timeout_ms: min(client.worker.operation_timeout_ms, options.timeout_ms)
+      }
+
+      client = %{client | worker: worker}
+
+      case creation_runtime_versions(client, ["1.17.0"]) do
+        {:ok, client} ->
+          query = URI.encode_query(%{"tail" => options.tail, "follow" => options.follow})
+
+          request(
+            client,
+            :get,
+            path <> "/logs?" <> query,
+            "",
+            "application/json",
+            "text/event-stream",
+            {:logs, options.max, options.callback},
+            :logs
+          )
+
+        {:error, error} ->
+          {:error, %{error | operation: :logs}}
       end
     end
   end

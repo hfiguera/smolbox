@@ -330,3 +330,12 @@ API restarts. If draining requires a worker restart, first record an ownership-v
 stop to preserve supported disks, then drain old requests and verify the final
 stopped state before resolution. Missing disks are not recoverable through a new
 PTY; never silently replace the missing machine.
+
+## Startup workloads and console diagnostics
+
+Workload machines use codec v8; ordinary records retain their earlier formats.
+No SQL migration is added, but all shared readers/adapters must understand v8
+before accepting workload intent. Tombstones retain the configuration, so deleting
+a machine does not make old-reader rollback safe. Follow the
+[workload upgrade procedure](workloads.md#persistence-and-upgrades). Console streams
+have no durable cursor or transcript and cannot establish application readiness.

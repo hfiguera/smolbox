@@ -13,6 +13,11 @@ the workers and prepare images containing the languages and dependencies you nee
 The default execution API runs one command in its own disposable VM.
 `SmolBox.Machines` also manages retained machines that can run successive commands
 and expose TCP services through fixed [worker-host port mappings](docs/port-mappings.md).
+[Startup workloads and console diagnostics](docs/workloads.md) add immutable
+entrypoint, command, environment and working directory on managed image machines.
+Console snapshots and bounded streaming aid boot diagnosis; application stdout/stderr
+and automatic restart policies remain unsupported by qualified upstream behavior.
+
 [Interactive terminal sessions](docs/interactive-terminals.md) add bounded input/output,
 resizing and durable exit-or-uncertainty tracking on retained machines.
 

@@ -71,7 +71,12 @@ defmodule SmolBox.PortMappingTest do
 
   test "v4 machines migrate only absent port fields and v5 cannot masquerade as v4" do
     record = MachineContract.record()
-    legacy = record |> Map.delete(:reserved_ports) |> Map.update!(:spec, &Map.delete(&1, :ports))
+
+    legacy =
+      record
+      |> Map.delete(:reserved_ports)
+      |> Map.update!(:spec, &Map.drop(&1, [:ports, :workload]))
+
     bytes = "smolbox-record-v4\0" <> :erlang.term_to_binary(legacy)
     assert {:ok, ^record} = Codec.decode(bytes)
     assert {:ok, <<"smolbox-record-v5\0", payload::binary>>} = Codec.encode(record)
@@ -86,7 +91,7 @@ defmodule SmolBox.PortMappingTest do
     old =
       record
       |> Map.delete(:reserved_ports)
-      |> Map.update!(:spec, &Map.delete(&1, :ports))
+      |> Map.update!(:spec, &Map.drop(&1, [:ports, :workload]))
       |> Map.update!(:created_machine, &Map.delete(&1, :ports))
       |> Map.update!(:observed_machine, &Map.delete(&1, :ports))
 
