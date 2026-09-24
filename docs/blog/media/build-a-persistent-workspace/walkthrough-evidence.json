@@ -1,0 +1,65 @@
+{
+  "kind": "maintainer-observed live walkthrough; not a benchmark or Linux qualification",
+  "recorded_on": "2026-09-24",
+  "source_commit": "0149aa6",
+  "package": "SmolBox 0.2.0 from Hex",
+  "worker": "smolvm 1.17.0",
+  "platform": "native macOS Apple Silicon",
+  "database": "PostgreSQL 17, isolated demo database",
+  "machine_id": "de3dac50-a047-4f59-ad2c-97ca3cee08ce",
+  "observations": {
+    "terminal": {
+      "exit_code": 0,
+      "stdout": "Made in the first session.\n"
+    },
+    "service": {
+      "heading": "We can come back to this."
+    },
+    "second_command": {
+      "command": "wc -c note.txt > report.txt; cat report.txt",
+      "exit_code": 0,
+      "stdout": "27 note.txt\n"
+    },
+    "download": {
+      "guest_path": "/app/project/report.txt",
+      "bytes": 11,
+      "sha256": "38b5fd04392bdafc8db76f7758f90e27cb6ca071dc2350ab0f68f72a6b5ad706"
+    },
+    "article_api_snippet": {
+      "ran_against_published_package": true,
+      "stdout": "Made in the first session.\n",
+      "machine_idle_afterward": true
+    },
+    "controller_restart": {
+      "same_database_keys_worker_and_machine_id": true,
+      "command": "cat note.txt",
+      "exit_code": 0,
+      "stdout": "Made in the first session.\n"
+    },
+    "stop_start": {
+      "command": "cat note.txt; wc -l starts.txt",
+      "exit_code": 0,
+      "stdout": "Made in the first session.\n2 starts.txt\n"
+    },
+    "deletion": {
+      "durable_state": "deleted",
+      "reservation": null,
+      "active_execution": null,
+      "worker_list": [],
+      "store_usage": {
+        "slots": 0,
+        "cpus": 0,
+        "disk_gb": 0,
+        "memory_mb": 0
+      }
+    }
+  },
+  "media": {
+    "format": "eight real browser captures held four seconds each, with editorial step headings",
+    "duration_seconds": 32,
+    "continuous_recording": false,
+    "timing_measurement": false,
+    "fixtures": "fresh demo machine and authored note/page only; no user workspace data"
+  },
+  "teardown": "demo controller, worker and isolated PostgreSQL cluster stopped after verified deletion"
+}

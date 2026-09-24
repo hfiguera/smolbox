@@ -344,3 +344,31 @@ explain independent host recovery, network positive controls, and the distinctio
 between startup and CPU timings. Benchmark bars start at zero; CPU ranges use a
 separately labelled zoomed axis. Statistical marks fade in at their recorded
 positions. Source evidence and caveats are recorded in the captions and provenance.
+
+## Persistent workspace article review — September 24, 2026
+
+Added a practical Phoenix workspace walkthrough for SmolBox 0.2.0. Original
+desktop and mobile lifecycle SVGs separate command, controller and machine
+lifetimes; the social PNG is rasterized from original SVG. These assets reuse
+the existing palette, typography and figure treatment without changing the
+visual system. The index now describes persistent machines alongside disposable
+executions and links to the versioned 0.2.0 getting-started guide.
+
+The silent 32-second walkthrough holds eight real browser captures from an
+isolated macOS demo. Its caption identifies the edited format and makes no
+timing claim. The `data-native-controls` opt-out preserves native playback and
+seeking instead of applying the short-animation controls. Existing JavaScript
+still pauses video when offscreen, when the document is hidden, or when the
+reader enables reduced motion. Mobile readers receive the vertical diagram
+and an explicit video link. Provenance and bounded walkthrough observations
+are recorded alongside the article assets.
+
+Reviewed the article at 1440px and 390px with no horizontal page overflow;
+verified code copying and the mobile static-figure treatment. Blog verification
+and eight blog tests passed after correcting the sample loopback URLs. Native
+playback advanced through the 32-second video. Privacy and 404 pages also had
+no mobile page overflow. The final build verified ten pages, internal links,
+metadata, media, RSS and sitemap; public documentation links returned HTTP 200.
+The independent finish review approved the article after the playback fix.
+No new automated no-JavaScript or reduced-motion test pass is claimed. This
+branch preview does not publish the post.
