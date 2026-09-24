@@ -8,7 +8,7 @@ defmodule SmolBox.Transport do
   HTTP peers; replacing it transfers those obligations to the host adapter.
   """
 
-  alias SmolBox.{Error, Result, Worker}
+  alias SmolBox.{Error, LogResult, Result, Worker}
 
   @type request :: %{
           method: :get | :post | :put | :delete,
@@ -18,8 +18,12 @@ defmodule SmolBox.Transport do
           accept: String.t(),
           max_bytes: pos_integer(),
           mode:
-            :buffer | :empty | {:sse, pos_integer(), (SmolBox.Wire.SSE.event() -> any()) | nil}
+            :buffer
+            | :empty
+            | {:logs, pos_integer(), (SmolBox.Wire.SSE.event() -> any()) | nil}
+            | {:sse, pos_integer(), (SmolBox.Wire.SSE.event() -> any()) | nil}
         }
 
-  @callback request(Worker.t(), request()) :: {:ok, binary() | Result.t()} | {:error, Error.t()}
+  @callback request(Worker.t(), request()) ::
+              {:ok, binary() | Result.t() | LogResult.t()} | {:error, Error.t()}
 end

@@ -30,18 +30,22 @@ defmodule SmolBox.Store.Codec do
   Interactive records selectively use v7 with `Terminal.Spec` and `Terminal.Result`;
   older envelopes cannot contain interactive semantics. See
   [Terminal upgrades](interactive-terminals.html#persistence-and-upgrades).
+  Workload machines selectively use v8; older machines gain `workload: nil` on
+  read and retain prior encodings. Upgrade readers/adapters before advertising
+  `managed_workloads: 1`; see [Workload upgrades](workloads.html#persistence-and-upgrades).
   Silently treating undecodable records as absent
   would permit replay and is forbidden.
   """
 
   alias SmolBox.{Error, Execution}
   alias SmolBox.Runtime.ExecutionSupport
-  alias SmolBox.Store.{CodecExecution, CodecPorts}
+  alias SmolBox.Store.{CodecExecution, CodecPorts, CodecWorkload}
 
   @max_bytes 16_777_216
   @prefix "smolbox-record-v2\0"
   @checkpoint_prefix "smolbox-record-v3\0"
   @managed_prefix "smolbox-record-v4\0"
+  @workload_prefix "smolbox-record-v8\0"
   @terminal_prefix "smolbox-record-v7\0"
   @execution_prefix "smolbox-record-v6\0"
   @ports_prefix "smolbox-record-v5\0"
@@ -59,6 +63,7 @@ defmodule SmolBox.Store.Codec do
     SmolBox.PortMapping,
     SmolBox.Result,
     SmolBox.LaunchResult,
+    SmolBox.Workload,
     SmolBox.Terminal.Spec,
     SmolBox.Terminal.Result,
     Error
@@ -66,6 +71,9 @@ defmodule SmolBox.Store.Codec do
 
   @spec encode(Execution.t() | SmolBox.ManagedMachine.t()) ::
           {:ok, binary()} | {:error, Error.t()}
+  def encode(%SmolBox.ManagedMachine{spec: %{workload: %SmolBox.Workload{}}} = record),
+    do: encode_versioned(record, @workload_prefix)
+
   def encode(%{spec: spec} = record) do
     if ExecutionSupport.interactive?(spec),
       do: encode_terminal(record),
@@ -130,7 +138,31 @@ defmodule SmolBox.Store.Codec do
       when tag != 80 and byte_size(bytes) <= @max_bytes,
       do: decode_terminal(bytes)
 
+  def decode(<<@workload_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_workload(bytes)
+
   def decode(_bytes), do: invalid()
+
+  defp decode_workload(bytes) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    payload =
+      binary_part(
+        bytes,
+        byte_size(@workload_prefix),
+        byte_size(bytes) - byte_size(@workload_prefix)
+      )
+
+    with {%SmolBox.ManagedMachine{spec: %{workload: %SmolBox.Workload{}}} = record, used} <-
+           :erlang.binary_to_term(payload, [:safe, :used]),
+         true <- used == byte_size(payload),
+         :ok <- validate_managed(record),
+         do: {:ok, record},
+         else: (_invalid -> invalid())
+  rescue
+    _invalid -> invalid()
+  end
 
   defp encode_terminal(record) do
     with :ok <- Execution.validate(record) do
@@ -159,9 +191,11 @@ defmodule SmolBox.Store.Codec do
     _invalid -> invalid()
   end
 
-  defp encode_extended(record) do
+  defp encode_extended(record), do: encode_versioned(record, @execution_prefix)
+
+  defp encode_versioned(record, prefix) do
     with :ok <- validate_extended(record) do
-      bytes = @execution_prefix <> :erlang.term_to_binary(record)
+      bytes = prefix <> :erlang.term_to_binary(CodecWorkload.strip(record))
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
   end
@@ -178,6 +212,7 @@ defmodule SmolBox.Store.Codec do
 
     with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
          true <- used == byte_size(payload),
+         {:ok, record} <- CodecWorkload.upgrade(record),
          :ok <- validate_extended(record),
          true <-
            ExecutionSupport.extended?(record.spec) and
@@ -207,6 +242,7 @@ defmodule SmolBox.Store.Codec do
          true <- used == byte_size(payload),
          {:ok, record} <- if(ports?, do: {:ok, record}, else: CodecPorts.upgrade(record)),
          {:ok, record} <- CodecExecution.upgrade(record),
+         {:ok, record} <- CodecWorkload.upgrade(record),
          :ok <- validate_managed(record) do
       {:ok, record}
     else
@@ -218,7 +254,9 @@ defmodule SmolBox.Store.Codec do
 
   defp encode_managed(record) do
     with :ok <- validate_managed(record) do
-      bytes = @ports_prefix <> :erlang.term_to_binary(CodecExecution.strip(record))
+      bytes =
+        @ports_prefix <> :erlang.term_to_binary(CodecWorkload.strip(CodecExecution.strip(record)))
+
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
   end

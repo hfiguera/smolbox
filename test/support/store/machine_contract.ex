@@ -64,6 +64,36 @@ defmodule SmolBox.Store.MachineContract do
     running
   end
 
+  def workload(adapter, store) do
+    original = record()
+    {:ok, workload} = SmolBox.Workload.new(cmd: ["server"], env: [{"TOKEN", "sensitive"}])
+    spec = %{original.spec | workload: workload}
+    {:ok, fingerprint} = ManagedMachineSpec.fingerprint(spec, :binary.copy(<<1>>, 32))
+    {:ok, machine} = ManagedMachine.new(spec, fingerprint, 1000)
+    assert {:ok, %{managed_workloads: 1}} = adapter.capabilities(store)
+    assert {:ok, ^machine} = adapter.machine(store, :accept, [machine, 10])
+    assert {:ok, ^machine} = adapter.machine(store, :fetch, [ManagedMachine.key(machine)])
+    assert {:ok, ^machine} = adapter.machine(store, :accept, [machine, 10])
+
+    assert {:error, %{category: :identity_conflict}} =
+             adapter.machine(store, :accept, [original, 10])
+
+    assert {:ok, claimed} =
+             adapter.machine(store, :claim, [ManagedMachine.key(machine), "owner", 1000, 5000])
+
+    assert claimed.spec.workload == workload
+
+    assert {:ok, deleted} =
+             adapter.machine(store, :request, [
+               ManagedMachine.key(claimed),
+               :delete,
+               claimed.version,
+               1100
+             ])
+
+    assert deleted.spec.workload == workload
+  end
+
   def acceptance(adapter, store) do
     record = record()
 

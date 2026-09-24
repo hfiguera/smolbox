@@ -1,0 +1,103 @@
+{
+  "qualification": "development",
+  "date_utc": "2026-09-24",
+  "runtime": "1.17.0",
+  "upstream_commit": "73d4b480",
+  "source": {
+    "base": "e2f90267b06ec6d039882915a447c19465a32b1c",
+    "archive_sha256": "744fd2c5011f484ebdc55c7e39daad62f6389368d5a0546bdbecf80cc030d2e1",
+    "verified_files": 523,
+    "overlays": {
+      "examples/durable_host/lib/workload_demo.ex": "a5ec9a6cb91752dd556664434007a9f59e6a718ce728b3386013e0b1b558d565"
+    },
+    "library_manifest_sha256": "d19ad9b0ca44b62d3339558e87129324ff0f70b5191ed8377e47ed76a38a6c71"
+  },
+  "feature": "immutable startup workload configuration and console diagnostics",
+  "application_stdout_stderr": false,
+  "automatic_restart_policies": false,
+  "linux": {
+    "platform": "x86_64 nested KVM",
+    "postgresql": "16",
+    "startup_failure_test": 1,
+    "store_tests": 33,
+    "fresh_controller_recovery": true,
+    "same_machine_stop_start": true,
+    "startup_count": 2,
+    "console_snapshot_and_follow": true,
+    "verified_deletion_and_reservation_release": true,
+    "final_inventory": [],
+    "oom_kills": 0,
+    "worker_seconds": 300,
+    "worker_memory_bytes": 1610612736,
+    "worker_tasks": 96,
+    "outer_lab_reset_verified": true,
+    "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+    "runtime_archive_sha256": "b648e6aa47dc4fee1ddc255f5c11401fc6aab41bab61335bde903ad2fc2e1bd1"
+  },
+  "macos": {
+    "platform": "Apple Silicon",
+    "postgresql": "17.11",
+    "startup_failure_test": 1,
+    "store_tests": 33,
+    "fresh_controller_recovery": true,
+    "same_machine_stop_start": true,
+    "startup_count": 2,
+    "console_snapshot_and_follow": true,
+    "verified_deletion_and_reservation_release": true,
+    "final_inventory": [],
+    "artifact_sha256": "bb3ed187bc4cfc1cc6f7e4e09c8f96ac1c2d47dcd2902653e6c1bd2ba6ca017c"
+  },
+  "simulated": {
+    "passed": 350,
+    "runtime_excluded": 27,
+    "coverage_percent": 93.11,
+    "ci_passed": true,
+    "elixir_1_18_4_otp_27_3_4_15_focused_tests": 21
+  },
+  "limitations": [
+    "Console is not application stdout/stderr or a readiness signal.",
+    "No application restart supervision, durable log cursor, log persistence or automatic reconnect.",
+    "The first Linux example failed an invalid assertion that searched command text for a stdout marker; the corrected example and successful campaign are separately captured.",
+    "No production isolation or load qualification claimed."
+  ],
+  "private_receipt_sha256": {
+    "ci-final.log": "881488cdf6b1039488f4af50fb1dc8506f15a0ce91db39c442d1357a4fc4e3f1",
+    "coverage.log": "0b8e0a2327d8b2aeb1b2e25766c22726366b29ceeaa3e56469da9c46490665ca",
+    "final-static.log": "902f7c1d090b18c8732036155c8dad7048af4d71c6c56963fe199c3bae9891b5",
+    "example-dialyzer-final.log": "9f13d73697f81151c01915498892356ac3827d0c1e562f20bb8aabf1bb689258",
+    "edge-tests.log": "aa6fe84ee2c564b1938241585a97c6bf4b2036b11bb58312229e0acec3758743",
+    "docs.log": "f1f42be5e7c1d71dbd7c98c58041c417907ac48e192280ca811f00e34eddf744",
+    "mac-runtime.log": "0dc27042906f6d411690352f3f0b84d0ea908fb3b4e707284f7fc1fb4abcf809",
+    "mac-store.log": "bd6f2f56fed1943521ab0d2064d2701a10f04a908d646e174081e6806233c9f5",
+    "mac-prepare.log": "c6dc142e4e730bb759bc646a96c2c92da65da3c59f08ad6498c3b188d2c692d7",
+    "mac-resume.log": "3a5ff7872758cd0a0473a7be18a6ede4a3092304ee7dcd13fe51d0e71fda5a13",
+    "mac-final-inventory.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "linux-reset-verification.log": "e31893b5e54732af705a971514359fbc79eea0c6156d69f9aa0da3c645370a06",
+    "linux-console-fixture.log": "f15fd6f60df02f7315cb3d25aae65babf7e312510aca05c4eb057422010f9f18",
+    "workload-20260923-setup": {
+      "exit_code": 0,
+      "reason": "completed",
+      "bytes": 5289,
+      "sha256": "ff177469fb2c91ec8b6517827c567a918ca9ddd1734c2a9572ed565b6a695ae6",
+      "elapsed_seconds": 17.793
+    },
+    "workload-20260923-run": {
+      "exit_code": 1,
+      "reason": "completed",
+      "bytes": 1743,
+      "sha256": "8ff61f979972685b414c418bb3135230ebc2a970342776dbeaad2261ec821f2c",
+      "elapsed_seconds": 46.249
+    },
+    "workload-20260923-fixed": {
+      "exit_code": 0,
+      "reason": "completed",
+      "bytes": 3191,
+      "sha256": "2f17a978b0f634edbe6ee60e1c11a9fa0751df058db5fe73a5273d1d49b7dfa4",
+      "elapsed_seconds": 54.823
+    },
+    "elixir-118-final.log": "eb8154f031a4a23bb598bfc62452209a2f541a0c413f43f55915a815ef07f548",
+    "docs-final.log": "f25c9ea01919ffff47ccf304055765bae731a00b6c5b19a6d8cb68ade7467736",
+    "package-final-current.log": "9702ecf9b1079cc2193887048d16d60eba4325a6157503bfea509bca19a19611",
+    "package-minimum.log": "d4884d6d74971efca63772ae1f567fdbf278e892c69aabd121275d16538e3375"
+  }
+}

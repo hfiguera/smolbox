@@ -4,6 +4,7 @@ defmodule SmolBox.MachineStoreTest do
 
   for scenario <- [
         :acceptance,
+        :workload,
         :shared_capacity,
         :command_admission,
         :lifecycle_race,

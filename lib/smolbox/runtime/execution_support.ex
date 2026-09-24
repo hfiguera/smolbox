@@ -10,6 +10,14 @@ defmodule SmolBox.Runtime.ExecutionSupport do
   def extended?(%{profile: %{execution_ms: ms}}), do: is_integer(ms) and ms > 300_000
   def extended?(_invalid), do: false
 
+  def check(config, %{workload: %SmolBox.Workload{}} = spec) do
+    case Session.store(config, :capabilities, []) do
+      {:ok, %{managed_workloads: 1}} -> check_extended(config, spec)
+      {:ok, _unsupported} -> Session.error(:unsupported_capability, :machine)
+      error -> error
+    end
+  end
+
   def check(config, spec) do
     if interactive?(spec) do
       case Session.store(config, :capabilities, []) do

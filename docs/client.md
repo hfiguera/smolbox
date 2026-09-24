@@ -237,3 +237,11 @@ machine for persisted intent and the shared command slot. HTTP(S) and Unix socke
 use the configured worker token and TLS verification. Custom HTTP transport
 adapters are rejected rather than bypassed. See [Interactive terminals](interactive-terminals.md)
 for deadlines, bounded streaming, cancellation and recovery.
+
+## Startup workloads and console diagnostics
+
+`SmolBox.MachineSpec.new/3` accepts optional `workload: %SmolBox.Workload{}`
+on smolvm 1.17.0 image machines. `Client.logs/3` returns a console `LogResult`
+or follows bounded SSE events. These diagnostics exclude application stdout/stderr;
+automatic restart policies are rejected. See [workloads](workloads.md) for exact
+argument inheritance, stream bounds and cancellation behavior.

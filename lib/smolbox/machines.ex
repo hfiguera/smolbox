@@ -63,6 +63,33 @@ defmodule SmolBox.Machines do
   end
 
   @doc """
+  Read console diagnostics after verifying the recorded machine incarnation.
+
+  Accepts `SmolBox.Client.logs/3` options. Log observation takes no command slot,
+  persists no transcript, and never changes lifecycle intent or reservations.
+  It may run alongside commands; stop/delete are not blocked by a log follower.
+  Hosts must authorize scope access and protect log contents. Existing namespace
+  exclusivity remains required throughout the observation.
+  """
+  @spec logs(SmolBox.runtime(), handle(), keyword()) ::
+          {:ok, SmolBox.LogResult.t()} | {:error, Error.t()}
+  def logs(runtime, handle, options \\ []) do
+    with :ok <- key(handle),
+         {:ok, _} <- SmolBox.LogOptions.validate(options),
+         {:ok, config} <- config(runtime),
+         {:ok, record} <- Machines.store(config, :fetch, [handle]),
+         true <- record.state != :deleted and record.created_machine != nil,
+         {:ok, worker} <- Machines.worker(config, record),
+         {:ok, observed} <- SmolBox.Client.inspect_machine(worker.client, record.machine_name),
+         true <- SmolBox.Machine.same_incarnation?(record.created_machine, observed) do
+      SmolBox.Client.logs(worker.client, record.machine_name, options)
+    else
+      false -> Session.error(:identity_conflict, :logs)
+      error -> error
+    end
+  end
+
+  @doc """
   Wait for an idle lifecycle state or a blocked recovery state.
 
   Returns the stored record when no lifecycle operation or command remains active,

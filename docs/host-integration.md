@@ -423,3 +423,11 @@ Live terminal buffers have bounded retention and may be retired when later sessi
 need runtime capacity. Durable execution history does not contain a transcript.
 See [Interactive terminals](interactive-terminals.md) and the durable host's
 `terminal.exs` example for configuration, line-input console and restart recovery.
+
+## Startup workloads and console diagnostics
+
+Before allowing startup workloads, authorize their code and environment alongside
+artifact, profile and scope. Require smolvm 1.17.0 and `managed_workloads: 1` on the
+store; upgrade all shared readers first. Application readiness needs a separate
+probe. Console followers consume bounded worker connections and do not own machine
+lifetime. See [workloads](workloads.md) for configuration and operational limits.

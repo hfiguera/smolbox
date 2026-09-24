@@ -1,16 +1,18 @@
 defmodule SmolBox.Wire.SSE do
   @moduledoc """
-  Incremental parser for the pinned smolvm exec SSE protocol.
+  Incremental parser for the pinned smolvm exec and console SSE protocols.
 
   stdout/stderr are plain lossy UTF-8 data; only exit/error payloads are JSON.
   Unknown additive events and keepalives are ignored. An exit is required for
   successful completion. Terminal duplicates and output after exit are errors.
+  Console mode emits plain `{:log, line}` events and accepts clean EOF without exit.
   Frames and incoming chunks have explicit byte limits; no mailbox is involved.
   """
 
   alias SmolBox.Error
 
-  defstruct buffer: "",
+  defstruct mode: :exec,
+            buffer: "",
             event: "message",
             data: [],
             frame_bytes: 0,
@@ -19,8 +21,13 @@ defmodule SmolBox.Wire.SSE do
             max_chunk_bytes: 262_144
 
   @type event ::
-          {:stdout, String.t()} | {:stderr, String.t()} | {:exit, integer()} | {:error, :remote}
+          {:stdout, String.t()}
+          | {:stderr, String.t()}
+          | {:exit, integer()}
+          | {:error, :remote}
+          | {:log, String.t()}
   @type t :: %__MODULE__{
+          mode: :exec | :logs,
           buffer: binary(),
           event: binary(),
           data: [binary()],
@@ -40,8 +47,9 @@ defmodule SmolBox.Wire.SSE do
     end
   end
 
-  @doc "EOF is successful only after a complete exit event with no unfinished frame."
+  @doc "EOF requires complete frames; exec mode additionally requires an exit event."
   @spec finish(t()) :: :ok | {:error, Error.t()}
+  def finish(%__MODULE__{mode: :logs, buffer: "", data: [], frame_bytes: 0}), do: :ok
   def finish(%__MODULE__{buffer: "", data: [], frame_bytes: 0, terminal: :exit}), do: :ok
   def finish(%__MODULE__{}), do: invalid()
 
@@ -95,6 +103,11 @@ defmodule SmolBox.Wire.SSE do
   defp field(state, _field, _value), do: {:ok, state, []}
 
   defp dispatch(%{data: [], terminal: terminal}), do: {:ok, terminal, []}
+
+  defp dispatch(%{mode: :logs, event: "message"} = state),
+    do: text_event(:log, state.data |> Enum.reverse() |> Enum.join("\n"))
+
+  defp dispatch(%{mode: :logs, terminal: terminal}), do: {:ok, terminal, []}
 
   defp dispatch(%{event: event, terminal: terminal})
        when event not in ["stdout", "stderr", "exit", "error"], do: {:ok, terminal, []}

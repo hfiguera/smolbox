@@ -11,6 +11,10 @@ defmodule SmolBox.Store do
   and unknown-launch blocking. Ordinary record retention and reservations are unchanged.
   Mixed controller versions are unsupported; see the extended execution guide.
 
+  `managed_workloads: 1` requires codec v8 and immutable startup configuration
+  preserved through every machine transaction, recovery and deleted tombstone.
+  No additional SQL schema is required; all readers must understand v8 first.
+
   `interactive_terminal: 1` additionally requires codec v7, typed terminal intent
   and exit evidence, and the same atomic managed command slot. Persist dispatch
   before opening a potentially mutating WebSocket. Unknown sessions block reuse;

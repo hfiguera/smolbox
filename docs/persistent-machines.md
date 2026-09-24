@@ -273,3 +273,11 @@ Confirmed terminal exit releases only the command slot. Machine disks, ownership
 and port reservations remain until verified deletion. Stop/start preserves supported
 files, but cannot preserve or reattach the PTY. See [Interactive terminals](interactive-terminals.md)
 for API examples, deduplication, consumer lifetime and conservative recovery.
+
+## Startup workloads and console diagnostics
+
+Optional `ManagedMachineSpec.workload` persists entrypoint, command, environment
+and working directory as immutable machine intent. Commands remain separate;
+stop/start relaunches the workload and preserves files. `Machines.logs/3` checks
+ownership before reading console diagnostics, without taking a command slot.
+See [workloads](workloads.md) for readiness limits and the required v8 store upgrade.
