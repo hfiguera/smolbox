@@ -93,7 +93,7 @@ defmodule SmolBox.ManagedWorkloadTest do
     {:ok, execution} = Machines.submit(runtime, handle, fixture.spec)
     assert {:ok, %{lines: ["agent ready"]}} = Machines.logs(runtime, handle)
     assert {:ok, %{state: :completed}} = SmolBox.await(runtime, execution, 5000)
-    {:ok, idle} = Machines.await(runtime, handle, 5000)
+    idle = RuntimeFixture.await_idle(runtime, handle)
     assert {:ok, %{slots: 1}} = Memory.usage(fixture.store, "peer")
     {:ok, _} = Machines.stop(runtime, handle, idle.version)
     {:ok, stopped} = Machines.await(runtime, handle, 5000)

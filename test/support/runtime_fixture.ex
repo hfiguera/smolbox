@@ -1,5 +1,6 @@
 defmodule SmolBox.RuntimeFixture do
   @moduledoc false
+  import ExUnit.Assertions, only: [assert: 2]
   alias SmolBox.{Client, ManagedPeer, Runtime, TestArtifacts, Worker}
   alias SmolBox.Runtime.WorkerConfig
   alias SmolBox.Store.{Contract, Memory}
@@ -110,6 +111,25 @@ defmodule SmolBox.RuntimeFixture do
       spec: spec,
       options: config
     }
+  end
+
+  # Machine idle state can precede the scheduler's final claim/write. Tests
+  # issuing a versioned lifecycle request must wait for that work as well.
+  def await_idle(runtime, handle, deadline \\ System.monotonic_time(:millisecond) + 5000) do
+    coordinator = :sys.get_state(Runtime.coordinator(runtime))
+    {:ok, machine} = SmolBox.Machines.inspect(runtime, handle)
+
+    if coordinator.active == %{} and coordinator.scan == nil and
+         machine.active_execution == nil and machine.operation == nil and
+         machine.next_due_at_ms > System.system_time(:millisecond) do
+      machine
+    else
+      assert System.monotonic_time(:millisecond) < deadline,
+             "machine did not become quiescent: #{inspect({machine, coordinator.active, coordinator.scan})}"
+
+      Process.sleep(5)
+      await_idle(runtime, handle, deadline)
+    end
   end
 
   defp artifact_adapter(store, options) do
