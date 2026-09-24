@@ -1,6 +1,8 @@
 # Durable host example
 
-This checkout defaults to smolvm **1.17.0**; published 0.1.5 retains 1.16.1.
+SmolBox 0.2.0 defaults to smolvm **1.17.0**; 0.1.5 retains 1.16.1.
+Follow [the coordinated upgrade guide](../../docs/upgrading-to-0.2.0.md) before
+using new features against an existing store.
 Set `SMOLBOX_RUNTIME_VERSION=1.16.1` explicitly for an existing 1.16.1 worker.
 See [qualification](../../docs/compatibility.md#smolvm-1-17-0-qualification).
 
@@ -152,7 +154,7 @@ cases that preserve execution progress before/after SQL result persistence.
 
 ## Checkpoint execution and recovery
 
-This example requires SmolBox **0.1.5** or this checkout. Version 0.1.4 does not
+This example requires SmolBox **0.1.5 or later**. Version 0.1.4 does not
 include checkpoint execution. This demo uses only the guest shell and the fixture in
 [`scripts/checkpoints/prepare-fixture.sh`](../../scripts/checkpoints/prepare-fixture.sh).
 It requires smolvm **1.17.0** (or explicitly selected **1.16.1**), an approved idle offline checkpoint captured on the
@@ -367,7 +369,7 @@ with different or larger artifact templates must requalify and update the floor.
 Existing v1 records retain their original spec: inspect their original handles;
 reusing their ID with the changed profile intentionally returns an identity conflict.
 
-## Persistent machines (unreleased)
+## Persistent machines (0.2.0)
 
 Apply the third migration, `20260922000000_managed_persistent_machines`, with all
 controllers sharing these workers stopped and upgraded. It adds a separately

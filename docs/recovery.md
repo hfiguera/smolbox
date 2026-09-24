@@ -1,8 +1,9 @@
 # Persistence and recovery contract
 
-This unreleased checkout defaults to **smolvm 1.17.0** on Linux x86_64 and macOS
-Apple Silicon; published SmolBox 0.1.5 still defaults to 1.16.1. Existing workers
-can retain an explicit `runtime_version: "1.16.1"`. See the
+SmolBox **0.2.0** defaults to **smolvm 1.17.0** on Linux x86_64 and macOS
+Apple Silicon. Existing workers can retain an explicit `runtime_version: "1.16.1"`.
+Follow [Upgrading to 0.2.0](upgrading-to-0.2.0.md) for coordinated controller/store
+upgrades and worker selection. See the
 [1.17.0 qualification](compatibility.md#smolvm-1-17-0-qualification).
 
 Use a durable store when executions must survive an application restart. SmolBox
@@ -17,7 +18,14 @@ fencing to the upstream API or change the recovery contract below. See
 [Compatibility](compatibility.md) for recorded evidence and
 [Troubleshooting](troubleshooting.md) for common operational symptoms.
 
-## Retained machines (unreleased)
+## Upgrading to 0.2.0
+
+Follow the [consolidated upgrade guide](upgrading-to-0.2.0.md) for worker selection,
+controller quiescence, PostgreSQL migrations, capability/schema requirements and
+rollback restrictions. Historical upgrade sections below retain their original
+version-specific scope.
+
+## Retained machines (0.2.0)
 
 `SmolBox.Machines` adds machine ownership independent of executions. Its commands
 retain the VM and hold one exclusive command slot through preparation, execution,
@@ -123,7 +131,7 @@ explicitly approved equivalent storage policy. Unknown-schema or corrupt rows
 are errors requiring migration or investigation, never permission to start over.
 
 The reusable suite is in
-[`test/support/store/contract.ex`](https://github.com/hfiguera/smolbox/blob/v0.1.5/test/support/store/contract.ex).
+[`test/support/store/contract.ex`](https://github.com/hfiguera/smolbox/blob/v0.2.0/test/support/store/contract.ex).
 It is repository test support, not part of the published library package. An adapter test module
 uses `SmolBox.Store.Contract` and supplies `adapter` and `store` in its setup
 context. It checks concurrent acceptance, conflicts, claims and CAS races, atomic
@@ -132,7 +140,7 @@ The suite alone does not certify durability; also run fresh-process database
 recovery, unavailable-database, corruption, and transaction-failure tests.
 
 The repository's
-[durable host example](https://github.com/hfiguera/smolbox/tree/v0.1.5/examples/durable_host)
+[durable host example](https://github.com/hfiguera/smolbox/tree/v0.2.0/examples/durable_host)
 owns its Repo, schema migration,
 AES-256-GCM record encryption, and indexed projections. Mutations serialize on a
 partition row inside a SQL transaction. It demonstrates a small-pool adapter,

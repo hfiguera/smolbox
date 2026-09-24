@@ -1,12 +1,12 @@
 # Compatibility evidence
 
-Version: `0.1.5`. The library's supported qualification is
+Version: `0.2.0`. The library's supported qualification is
 `:development`; requested hard-control options remain unsupported. The original
 release evidence below records the client/controller contract on Linux and macOS.
 
 ## smolvm 1.17.0 qualification
 
-**Default in the unreleased checkout.** Linux x86_64 and macOS Apple Silicon
+**Default in SmolBox 0.2.0.** Linux x86_64 and macOS Apple Silicon
 passed the real-worker execution, PostgreSQL recovery, checkpoint, persistent-file,
 network and worker-fault campaign. Explicit 1.16.1 support remains.
 See [the qualification report](runtime-1.17.0-qualification.md) and
@@ -20,7 +20,7 @@ historical campaigns below retain their recorded versions and results.
 
 ## Extended execution
 
-The unreleased checkout exposes foreground timeouts up to 24 hours and typed
+SmolBox 0.2.0 exposes foreground timeouts up to 24 hours and typed
 background launch on managed image machines with smolvm 1.17.0. Extended records
 use codec v6 and require `extended_execution: 1` from the store. See the
 [execution guide](long-running-exec.md) for supported combinations, upgrade
@@ -30,7 +30,7 @@ The [validation report](long-running-exec-validation.md) records real Linux/macO
 
 ## Managed TCP port mappings
 
-The unreleased checkout supports fixed TCP mappings on managed image machines
+SmolBox 0.2.0 supports fixed TCP mappings on managed image machines
 and the low-level client with smolvm 1.17.0. See [port-mapping validation](port-mappings-validation.md)
 for the real Linux/macOS HTTP acceptance, outbound controls, conflicts, durable
 ownership and regression evidence. This requires the coordinated codec-v5/store
@@ -56,7 +56,7 @@ they are not new runs against release metadata or a macOS durable qualification.
 
 ## smolvm 1.16.1 qualification
 
-**Default since SmolBox 0.1.4, retained in 0.1.5.** Managed execution selects 1.16.1
+**Historical default in SmolBox 0.1.4–0.1.5.** Those releases select 1.16.1
 for a verified Linux x86_64 or macOS Apple Silicon worker. Controlled networking
 accepts it too. Explicit 1.16.0 support remains. The candidate passed the
 ordinary Linux/macOS execution, durable recovery and network enforcement suites,
@@ -822,7 +822,7 @@ limitations are recorded in [telemetry evidence](evidence/phase8-telemetry.json)
 
 ## Interactive terminal compatibility
 
-The unreleased interactive API targets smolvm 1.17.0 image machines. It excludes
+The interactive API in 0.2.0 targets smolvm 1.17.0 image machines. It excludes
 checkpoint terminals, disposable execution, shared sessions and guest PTY
 reattachment. Foreground and background execution retain their existing behavior.
 The transport uses Mint and MintWebSocket; host authentication, verified TLS and
@@ -838,7 +838,7 @@ platform-specific evidence and the observed disconnect/storage limitations.
 
 ## Startup workloads and console diagnostics
 
-The unreleased checkout supports immutable startup workloads and bounded console
+SmolBox 0.2.0 supports immutable startup workloads and bounded console
 SSE diagnostics on smolvm 1.17.0 image machines. Automatic restart policies and
 application stdout/stderr capture are unsupported. Linux x86_64 and macOS Apple
 Silicon passed startup, PostgreSQL controller restart, stop/start, diagnostics and
@@ -848,7 +848,7 @@ development qualification, with codec-v8 upgrade requirements in the
 
 ## Configurable guest paths and larger transfers
 
-This checkout supports expanded guest path policies and buffered files up to
+SmolBox 0.2.0 supports expanded guest path policies and buffered files up to
 16 MiB on smolvm 1.17.0 **image** machines. Checkpoints and older workers retain the
 existing `/workspace` and 1 MiB contract. Startup workloads and PTY sessions keep
 their separate cwd contracts. Expanded managed records require codec v9 and the

@@ -95,32 +95,24 @@ creating machines, executing commands, streaming output, and transferring files.
 
 ## Installation and first run
 
-This unreleased checkout defaults to **smolvm 1.17.0** after real-worker
-[qualification on Linux and macOS](docs/compatibility.md#smolvm-1-17-0-qualification).
-Existing workers must remain explicitly pinned to their installed version, or be
-upgraded separately. Published package behavior below is unchanged.
+SmolBox **0.2.0** defaults to **smolvm 1.17.0** on Linux x86_64 and macOS
+Apple Silicon, following [real-worker qualification](docs/compatibility.md#smolvm-1-17-0-qualification).
+It adds retained machines, services, terminals, startup configuration and larger
+file transfers while preserving the existing disposable execution API.
 
-SmolBox **0.1.5** keeps **smolvm 1.16.1** as its default on Linux x86_64 and
-macOS Apple Silicon. Checkpoint execution requires this worker version.
-
-**Before using checkpoints:** upgrade every controller sharing a store to 0.1.5.
-Checkpoint records use schema v3, which older controllers cannot read. Existing
-image executions keep schema v2 and their current behavior. See
-[Upgrading to 0.1.5](docs/recovery.md#upgrading-to-0-1-5), including worker selection
-when coming from an older release.
-
-**Upgrading from 0.1.2:** first complete the coordinated
-[v2 record upgrade](docs/recovery.md#upgrading-to-0-1-3), including the separate
-worker version change. Even offline image records now use v2; after those writes,
-reverting to 0.1.2 is not a supported rollback.
+**Upgrading from 0.1.x requires coordination.** Upgrade shared controllers and
+store adapters together, apply the example's machine/port migrations if using it,
+and upgrade workers separately or explicitly pin their installed versions.
+New record formats and retained tombstones constrain rollback. Start with
+[Upgrading to 0.2.0](docs/upgrading-to-0.2.0.md).
 
 Add SmolBox to your application's `mix.exs`:
 
 ```elixir
-{:smolbox, "~> 0.1.5"}
+{:smolbox, "~> 0.2.0"}
 ```
 
-Run `mix deps.get`. The [API documentation](https://hexdocs.pm/smolbox/0.1.5/)
+Run `mix deps.get`. The [API documentation](https://hexdocs.pm/smolbox/0.2.0/)
 includes the guides below. A local checkout can instead be used with
 `{:smolbox, path: "../smolbox"}`.
 
@@ -128,7 +120,7 @@ To run the local walkthrough, you need:
 
 - Elixir **1.18 or later**, using a [tested Elixir/OTP pair](docs/compatibility.md).
 - A dedicated worker on Linux x86_64 with KVM or macOS Apple Silicon:
-  **smolvm 1.17.0** for this checkout, or explicitly configured 1.16.1, 1.16.0, 1.14.6 or
+  **smolvm 1.17.0** by default, or explicitly configured 1.16.1, 1.16.0, 1.14.6 or
   1.14.1 workers.
 - The host's `resize2fs` tool for 1.14.6, 1.16.0, 1.16.1 and 1.17.0 disk requests below template sizes.
   On macOS, install `e2fsprogs`; see the [runtime prerequisites](docs/compatibility.md#macos-1-14-6-prerequisites).
@@ -140,10 +132,10 @@ To run the local walkthrough, you need:
 stage a Python file, submit it, read its output file, and confirm cleanup. The
 walkthrough uses an in-memory store and needs no database. Applications that need
 restart recovery must provide a durable `SmolBox.Store` adapter; a complete
-[PostgreSQL host example](https://github.com/hfiguera/smolbox/tree/v0.1.5/examples/durable_host)
+[PostgreSQL host example](https://github.com/hfiguera/smolbox/tree/v0.2.0/examples/durable_host)
 is included in the repository.
 
-## Managed persistent machines (unreleased)
+## Managed persistent machines
 
 `SmolBox.Machines` gives a machine its own durable identity, ownership, resource
 reservation, and create/start/stop/delete lifecycle. Run successive commands with
@@ -153,12 +145,11 @@ Machines remain until explicitly deleted; uncertain work blocks reuse without re
 
 See [Managed persistent machines](docs/persistent-machines.md) for the API,
 recovery procedures, the required coordinated store upgrade, and a two-process
-PostgreSQL walkthrough. This feature is on the development branch and is not in
-published 0.1.5. The existing disposable API remains supported.
+PostgreSQL walkthrough. The existing disposable API remains supported.
 
 ## Checkpoint execution
 
-SmolBox 0.1.5 can restore an operator-approved idle, offline checkpoint
+SmolBox can restore an operator-approved idle, offline checkpoint
 into a separate disposable machine for each execution. See
 [Executing from a checkpoint](docs/checkpoints.md) for approval, examples and
 record schema v3 upgrade requirements.
@@ -167,9 +158,9 @@ record schema v3 upgrade requirements.
 
 SmolBox has real execution and durable recovery tests on Linux x86_64 and macOS
 Apple Silicon with **smolvm 1.14.1, 1.14.6, 1.16.0, 1.16.1 and 1.17.0**; results are recorded in [Compatibility](docs/compatibility.md#runtime-selection).
-SmolBox 0.1.5 defaults to **1.16.1**; 0.1.3 defaults to **1.16.0** and
+SmolBox 0.2.0 defaults to **1.17.0**, while 0.1.4–0.1.5 default to **1.16.1**; 0.1.3 defaults to **1.16.0** and
 0.1.2 to **1.14.6**.
-Before adopting this checkout's **1.17.0** default with an older worker, explicitly
+Before adopting 0.2.0's **1.17.0** default with an older worker, explicitly
 configure `runtime_version: "1.16.1"`, `"1.16.0"`, `"1.14.6"` or `"1.14.1"`, or follow the
 [worker upgrade procedure](docs/host-integration.md#upgrading-a-worker).
 The package does not upgrade an external worker. A version mismatch prevents
@@ -227,4 +218,4 @@ the compatibility guide. From this repository, `mix ci` runs deterministic check
 without contacting a real worker. Generate this site with
 `MIX_ENV=dev mix docs --warnings-as-errors`. Live worker tests are a separate opt-in
 operation described in the repository's
-[CI guide](https://github.com/hfiguera/smolbox/blob/v0.1.5/scripts/ci/README.md).
+[CI guide](https://github.com/hfiguera/smolbox/blob/v0.2.0/scripts/ci/README.md).

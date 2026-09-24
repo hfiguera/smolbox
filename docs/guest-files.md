@@ -1,6 +1,6 @@
 # Configurable guest paths and larger file transfers
 
-This unreleased feature lets an application stage project files, install home
+SmolBox 0.2.0 lets an application stage project files, install home
 configuration and collect larger artifacts without forcing everything beneath
 `/workspace`. It adds explicit host-approved roots for uploads, downloads and
 ordinary command working directories. Existing defaults remain `/workspace`,

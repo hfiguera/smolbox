@@ -1,8 +1,9 @@
 # Low-level client
 
-This unreleased checkout defaults to **smolvm 1.17.0** on Linux x86_64 and macOS
-Apple Silicon; published SmolBox 0.1.5 still defaults to 1.16.1. Existing workers
-can retain an explicit `runtime_version: "1.16.1"`. See the
+SmolBox **0.2.0** defaults to **smolvm 1.17.0** on Linux x86_64 and macOS
+Apple Silicon. Existing workers can retain an explicit `runtime_version: "1.16.1"`.
+Follow [Upgrading to 0.2.0](upgrading-to-0.2.0.md) for coordinated controller/store
+upgrades and worker selection. See the
 [1.17.0 qualification](compatibility.md#smolvm-1-17-0-qualification).
 
 This API performs one verified worker operation at a time. It does not persist
@@ -13,7 +14,7 @@ the supported client contract and its development-qualified worker boundary.
 See [runtime selection](compatibility.md#runtime-selection) for the explicit
 Linux/macOS 1.16.1 default in SmolBox 0.1.5 and retained explicit 1.16.0,
 1.14.6 and 1.14.1 compatibility. SmolBox 0.1.3 defaults to 1.16.0 and 0.1.2
-to 1.14.6. Follow [Upgrading to 0.1.5](recovery.md#upgrading-to-0-1-5) when
+to 1.14.6. Follow [Upgrading to 0.2.0](upgrading-to-0.2.0.md) when
 updating an existing application.
 
 Install the pinned smolvm release from [compatibility evidence](compatibility.md).

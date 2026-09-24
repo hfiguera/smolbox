@@ -1,0 +1,301 @@
+{
+  "version": "0.2.0",
+  "status": "prepared and validated locally; not published or tagged",
+  "date_utc": "2026-09-24",
+  "branch": "release/0.2.0",
+  "base": "8ceeb1ca2a7370d4db17f4c88c563911c0e6e851",
+  "source": {
+    "archive_sha256": "7c820cbd8a605169921f8ddb4e1da2195abbb221353bb4368d7e517a841989a4",
+    "linux_verification": {
+      "compared_files": 540,
+      "overlays": {
+        "examples/durable_host/test/release_acceptance_test.exs": "27dd5abc01c4e4886b8ff142b45d76660c0ec54a16f37f44612289e8c9bb494a",
+        "scripts/lab/release-020.sh": "49bd8f3a29fd9d1e7d334802c5645f1f0b4521b512871cf5d547c309ba8364ed"
+      }
+    },
+    "library_equivalence": {
+      "base": "8ceeb1ca2a7370d4db17f4c88c563911c0e6e851",
+      "library_files": 70,
+      "changed_behavior_asts": []
+    }
+  },
+  "package": {
+    "sha256": "d5be093adea540893e460db4e71c9a9e113aab393200022f5539f3368fe5dc61",
+    "files": 153,
+    "working_tree_files_match": true,
+    "version_license_repository_verified": true,
+    "consumers": {
+      "package-current": {
+        "status": "passed",
+        "platform": "macos",
+        "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+        "minimum": false,
+        "smoke": {
+          "checkpoint": true,
+          "client": true,
+          "guest_files": true,
+          "interactive": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.17.0",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.5",
+            "mint": "1.10.1",
+            "mint_web_socket": "1.0.6",
+            "nimble_options": "1.1.1",
+            "req": "0.7.4",
+            "telemetry": "1.4.2"
+          },
+          "workload": true
+        },
+        "report_sha256": "1f8100fd8458cff2a7a36c62a33d54e8aecc6b3882323f9bd63c28c0162ebe20"
+      },
+      "package-minimum": {
+        "status": "passed",
+        "platform": "macos",
+        "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+        "minimum": true,
+        "smoke": {
+          "checkpoint": true,
+          "client": true,
+          "guest_files": true,
+          "interactive": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.17.0",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.0",
+            "mint": "1.7.0",
+            "mint_web_socket": "1.0.6",
+            "nimble_options": "1.1.0",
+            "req": "0.7.4",
+            "telemetry": "1.3.0"
+          },
+          "workload": true
+        },
+        "report_sha256": "0b3409c2161717a9abf5492aea1861209b4b772ef7fc6d7b38db8ecbfa2b0909"
+      },
+      "package-otp27": {
+        "status": "passed",
+        "platform": "macos",
+        "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+        "minimum": true,
+        "smoke": {
+          "checkpoint": true,
+          "client": true,
+          "guest_files": true,
+          "interactive": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.17.0",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.0",
+            "mint": "1.7.0",
+            "mint_web_socket": "1.0.6",
+            "nimble_options": "1.1.0",
+            "req": "0.7.4",
+            "telemetry": "1.3.0"
+          },
+          "workload": true
+        },
+        "report_sha256": "8094317832615166bca2c37dc8a16f0cc35efc1a5b1dec3ac2e274d55f935a09"
+      },
+      "linux-package-current": {
+        "status": "passed",
+        "platform": "linux",
+        "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+        "minimum": false,
+        "smoke": {
+          "checkpoint": true,
+          "client": true,
+          "guest_files": true,
+          "interactive": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.17.0",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.5",
+            "mint": "1.10.1",
+            "mint_web_socket": "1.0.6",
+            "nimble_options": "1.1.1",
+            "req": "0.7.4",
+            "telemetry": "1.4.2"
+          },
+          "workload": true
+        },
+        "report_sha256": "44eaead6ff8289d9938d9674f68b2d0d2030ffdb7e8cc205d1809ee278daf62a"
+      },
+      "linux-package-minimum": {
+        "status": "passed",
+        "platform": "linux",
+        "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+        "minimum": true,
+        "smoke": {
+          "checkpoint": true,
+          "client": true,
+          "guest_files": true,
+          "interactive": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.17.0",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.0",
+            "mint": "1.7.0",
+            "mint_web_socket": "1.0.6",
+            "nimble_options": "1.1.0",
+            "req": "0.7.4",
+            "telemetry": "1.3.0"
+          },
+          "workload": true
+        },
+        "report_sha256": "6e4a88479c7dd2deb87064e97573626c52fcc471dd0111246c2915cbaa214f8e"
+      }
+    }
+  },
+  "checks": {
+    "mix_ci": "passed",
+    "tests": 362,
+    "root_runtime_excluded": 28,
+    "coverage_percent": 93.05,
+    "tooling_tests": 23,
+    "analyzer_canary_pairs": 8,
+    "docs_pages_checked": 73,
+    "example_dialyzer_forced": "passed",
+    "base_ci_url": "https://github.com/hfiguera/smolbox/actions/runs/35947332127",
+    "base_ci_jobs": 18,
+    "base_ci_status": "success",
+    "release_commit_ci": "pending final commit/merge"
+  },
+  "runtime": {
+    "version": "1.17.0",
+    "macos": {
+      "platform": "native Apple Silicon",
+      "postgresql": "17.11",
+      "file_boundary_tests": 1,
+      "integrated_phases": [
+        "prepare",
+        "resume"
+      ],
+      "store_tests": 34,
+      "store_runtime_excluded": 29,
+      "inventory": [],
+      "services_stopped": true,
+      "artifact_sha256": "bb3ed187bc4cfc1cc6f7e4e09c8f96ac1c2d47dcd2902653e6c1bd2ba6ca017c"
+    },
+    "linux": {
+      "platform": "x86_64 nested KVM",
+      "postgresql": "16",
+      "file_boundary_tests": 1,
+      "integrated_phases": [
+        "prepare",
+        "resume"
+      ],
+      "store_tests": 34,
+      "store_runtime_excluded": 29,
+      "inventory": [],
+      "worker_memory_peak_bytes": 624099328,
+      "oom_kills": 0,
+      "worker_stopped": true,
+      "owned_kvm_descriptors_after": 0,
+      "outer_lab_reset_verified": true,
+      "artifact_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+      "runtime_archive_sha256": "b648e6aa47dc4fee1ddc255f5c11401fc6aab41bab61335bde903ad2fc2e1bd1"
+    },
+    "configured_foreground_timeout_secs": 301,
+    "new_long_duration_probe": false,
+    "file_bytes": 16777216
+  },
+  "linux_captures": {
+    "initial": {
+      "exit_code": 2,
+      "reason": "completed",
+      "bytes": 2030,
+      "sha256": "c71e60442f8fd145506e4adbb79a538a1f5ee6e8cbaf5414860d6f563c4b8c14",
+      "elapsed_seconds": 59.399
+    },
+    "corrected": {
+      "exit_code": 127,
+      "reason": "completed",
+      "bytes": 1540,
+      "sha256": "40836253169ddd262b236dd0ebf8000ef59c1c859711dfb908a8d534aaec203d",
+      "elapsed_seconds": 36.742
+    },
+    "final": {
+      "exit_code": 0,
+      "reason": "completed",
+      "bytes": 3846,
+      "sha256": "2931312633668b48b77d143d724332991984b8ba8f15be80b30226c5b4547dba",
+      "elapsed_seconds": 59.656
+    }
+  },
+  "private_receipt_sha256": {
+    "ci.log": "aa005f4f9a593eb691680ae1acf06939c5ecb271d2b9932220cb4786ed4bdc63",
+    "coverage.log": "b02d81d432acaa9e67b1ed1d2162f5fa9ff96b6c9dabd110791703a3bf4c6986",
+    "tooling.log": "42bb48d5c840e3899b0db3044c5daa37540b12f55f895c31d2c16e8e4c6e6f6b",
+    "canaries.log": "e0b964a623497ff2bb478f184e6c238afa88d2b496eb969c1ad810acf8e4339f",
+    "docs.log": "1f935a4a78acf4d3b2bebb2a698a037b304c9a68945f01ba40495390042d182e",
+    "credo-final.log": "46a69f0c9c5c628170df34ba049765aeb70ab3409a7c4bd3aa8e78df928dc2ce",
+    "example-dialyzer.log": "0751a9223cdf1a7d08dec74421fb42440a39cc3f5d0408ed7a6e420c32cda1f5",
+    "library-equivalence.json": "d447e9cdb816621386abc83285d11953e740e2eff2b0e6c70abf68c4bebe489b",
+    "linux-source-verification.json": "4fa828f0d149b78608483c99c2ef219a7a243cddde7b4a946e31d4dc227788cb",
+    "linux-initial-cleanup.log": "f253f0d77fb95b9870a8f67bb7ae9a396efa02fa7d5bb5a969f5db996861ec84",
+    "linux-reset-verification.txt": "5a5d2dc517f540e1cd14ef12fd7b134bb4dd98c795d61e5f382e50666d3dba5b",
+    "linux-after-reset-sha256.txt": "594abf4af52ac7e83e77df61d950d57b1c2a336fb45c7f985033d60b51e91282",
+    "linux-package.log": "2619395f2f8328ea80144b0a8f687300f972e1f253a89093464358e64fe40732",
+    "linux-package-offline.log": "0e3715dbadde17d2907f4d9fad91ad9e5f754e487aac1e199a6022ea403a61f9",
+    "mac-campaign.log": "805d95024b0e890ed3014ca415c38ceadee25461e8c5d063cfc99a9b2165f616",
+    "mac/boundaries.log": "17da73e539c2f27a70c114153070abd0d68b89705307bb4a52fca737fe36fd08",
+    "mac/store.log": "edd41de86979acc67be05997af49099ba27351d249b7734fb69f1692b8412158",
+    "mac/prepare.log": "75f8533b539955a7fd8787e14a64eaac5a6b099ce10879f3dd1486c26bf883ae",
+    "mac/resume.log": "c6098efbab0c69e44d8dab21789f6db5850c344c9ce692e84e0b695cf980d21b",
+    "mac/api-inventory.json": "4115c93b07b494b0188c0899c545c6313d8dfda70cf8d2613984eae1976fb745",
+    "mac/final-inventory.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "publish-dry-run.log": "cde672a44ce68e18541cac7bf7e3b09675720af60ecee2c840dbfe19bc5c2053"
+  },
+  "corrections": [
+    "Initial Linux HTTP readiness probe ran outside the worker network namespace; explicitly cleaned up its machine before retry.",
+    "Second Linux harness could not invoke a shell function through GNU timeout; changed to an explicit namespace command array.",
+    "Linux online package dependency fetch failed because the disposable lab has no DNS; isolated public-only offline Hex cache supplied the same current/minimum dependencies."
+  ],
+  "publication": {
+    "performed": false,
+    "hex_dry_run": "not completed: authentication required",
+    "linux_existing_hex_session": "expired; token_refresh_failed",
+    "next": [
+      "Review and commit/merge, verify exact release commit CI and file manifest",
+      "Refresh Hex authentication and complete dry run",
+      "Tag and publish reviewed release, then verify registry installation and hosted docs"
+    ]
+  },
+  "boundaries": [
+    "Library behavior and production dependency constraints unchanged from merged feature base.",
+    "New runtime evidence is integrated ordinary behavior and file boundaries, not the full previous adversarial/checkpoint/long-duration matrix.",
+    "Working-tree validation is not CI on a future merge SHA.",
+    "Development qualification only; no new production isolation or performance guarantee."
+  ]
+}

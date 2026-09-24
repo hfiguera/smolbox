@@ -2,7 +2,7 @@ defmodule SmolBox.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/hfiguera/smolbox"
-  @version "0.1.5"
+  @version "0.2.0"
 
   def project do
     [
@@ -48,6 +48,7 @@ defmodule SmolBox.MixProject do
           "docs/persistent-machines-validation.md",
           "docs/host-integration.md",
           "docs/recovery.md",
+          "docs/upgrading-to-0.2.0.md",
           "docs/telemetry.md",
           "docs/security.md",
           "docs/resource-qualification.md",
@@ -85,6 +86,7 @@ defmodule SmolBox.MixProject do
           ],
           "Operations and compatibility": [
             "docs/recovery.md",
+            "docs/upgrading-to-0.2.0.md",
             "docs/security.md",
             "docs/resource-qualification.md",
             "docs/compatibility.md",
@@ -167,6 +169,7 @@ defmodule SmolBox.MixProject do
           "docs/host-integration.md",
           "docs/troubleshooting.md",
           "docs/recovery.md",
+          "docs/upgrading-to-0.2.0.md",
           "docs/telemetry.md",
           "docs/security.md",
           "docs/resource-qualification.md",
