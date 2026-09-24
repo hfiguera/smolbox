@@ -57,17 +57,7 @@ defmodule Workspace.TerminalSession do
         {:stop, :normal, {:error, :expired}, state}
 
       true ->
-        if state.monitor, do: Process.demonitor(state.monitor, [:flush])
-        state = %{state | owner: owner, monitor: Process.monitor(owner), detached: nil}
-        send(owner, {:terminal_ready, self(), true})
-
-        state =
-          case state.awaiting do
-            nil -> schedule_read(state)
-            {_, bytes} -> deliver(%{state | awaiting: nil}, bytes)
-          end
-
-        {:reply, {:ok, self()}, state}
+        {:reply, {:ok, self()}, resume(state, owner)}
     end
   end
 
@@ -133,6 +123,17 @@ defmodule Workspace.TerminalSession do
   end
 
   def handle_info({:reconnect_timeout, _}, state), do: {:noreply, state}
+
+  defp resume(state, owner) do
+    if state.monitor, do: Process.demonitor(state.monitor, [:flush])
+    state = %{state | owner: owner, monitor: Process.monitor(owner), detached: nil}
+    send(owner, {:terminal_ready, self(), true})
+
+    case state.awaiting do
+      nil -> schedule_read(state)
+      {_, bytes} -> deliver(%{state | awaiting: nil}, bytes)
+    end
+  end
 
   defp schedule_read(state, delay \\ 0) do
     ref = make_ref()

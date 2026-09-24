@@ -176,3 +176,25 @@ the independent worker inventory returned `{"machines":[]}`. The
 lab app, worker and PostgreSQL were stopped. The user's original app was restarted
 with these fixes at `localhost:4005`, with the same retained machine and no active
 terminal. Its browser reported no JavaScript errors after reload.
+
+## Example quality gates — 2026-09-24
+
+The first PR CI run caught three strict Credo findings introduced after the
+original static-analysis pass: terminal reconnect complexity and nested lifecycle
+observation/reconnect logic. Small helper extraction and a `with` expression
+removed those findings without changing ownership checks, reconnect deadlines,
+pending-frame delivery or lifecycle evidence requirements.
+
+All three example applications now run `mix quality` locally and in their CI jobs:
+warning-free compilation, strict Credo with ExSlop, ExDNA with zero allowed clones,
+and Dialyzer with forced PLT validation. Each app has local scan configuration and
+locked development/test dependencies. The community workspace adds its own
+Dialyzer configuration and a CI dependency/build/PLT cache; the other two examples
+retain their existing Dialyzer coverage.
+
+The complete alias passed in minimal host, durable host and community workspace,
+with **zero Dialyzer errors and zero skipped warnings** in each. Root strict
+Credo, root/app formatting, 33 workspace tests, 23 CI-tool tests and diff checks
+also passed. No lint rules were disabled or thresholds relaxed. This follow-up
+changes checks and internal function structure; it does not claim a new live
+worker qualification campaign.

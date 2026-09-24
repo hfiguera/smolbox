@@ -6,7 +6,7 @@
     "scripts/**/*.exs",
     "examples/support/store/*.ex",
     "examples/*/mix.exs",
-    "examples/*/.formatter.exs",
+    "examples/*/.*.exs",
     "examples/*/{lib,config,test,priv,scripts}/**/*.{ex,exs}"
   ],
   excludes: [

@@ -11,7 +11,7 @@ defmodule Workspace.Workspaces do
       with {:ok, c} <- Connection.context() do
         home = Ledger.home(c)
         machine = inspect_home(home)
-        if match?({:ok, _}, machine), do: Ledger.observe_lifecycle(c, elem(machine, 1))
+        observe_lifecycle(c, machine)
         history = history(c, home)
 
         {:ok,
@@ -30,6 +30,9 @@ defmodule Workspace.Workspaces do
 
   defp inspect_home(nil), do: nil
   defp inspect_home(home), do: Machines.inspect(Settings.runtime(), handle(home.id))
+
+  defp observe_lifecycle(c, {:ok, machine}), do: Ledger.observe_lifecycle(c, machine)
+  defp observe_lifecycle(_, _), do: :ok
 
   defp history(_, nil), do: []
   defp history(c, home), do: Enum.map(Ledger.actions(c, home.id), &decorate/1)

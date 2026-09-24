@@ -340,15 +340,11 @@ defmodule WorkspaceWeb.WorkspaceLive do
   end
 
   defp reconnect_terminal(%{assigns: %{terminal: nil, error: nil}} = socket) do
-    case machine(socket.assigns.snapshot) do
-      %{state: :running, active_execution: {_, _} = key} ->
-        case Workspaces.safe(fn -> TerminalSession.reconnect(key) end) do
-          {:ok, pid} -> assign(socket, terminal: pid, terminal_status: :connecting)
-          _ -> socket
-        end
-
-      _ ->
-        socket
+    with %{state: :running, active_execution: {_, _} = key} <- machine(socket.assigns.snapshot),
+         {:ok, pid} <- Workspaces.safe(fn -> TerminalSession.reconnect(key) end) do
+      assign(socket, terminal: pid, terminal_status: :connecting)
+    else
+      _ -> socket
     end
   end
 

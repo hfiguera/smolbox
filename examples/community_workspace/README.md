@@ -220,7 +220,7 @@ deduplication; plan storage accordingly.
 createdb smolbox_workspace_test
 DATABASE_URL=ecto://localhost/smolbox_workspace_test MIX_ENV=test mix test --warnings-as-errors
 mix format --check-formatted
-mix compile --warnings-as-errors
+mix quality
 npm --prefix assets ci
 mix assets.build
 ```
@@ -276,3 +276,21 @@ DB and remove its private home if you intentionally want to discard all history.
 For another demo, use a fresh private home and dedicated database after releasing
 the old worker authority. There is no automatic expiry, purge, idle shutdown,
 multi-user authentication, image registry, process supervisor, or full IDE.
+
+## Example code-quality checks
+
+Run `mix deps.get`, then `mix quality` from this example directory. The alias
+selects `MIX_ENV=test` unless explicitly overridden and runs compilation with
+warnings as errors, strict Credo with the ExSlop plugin, ExDNA with a zero-clone
+budget, and Dialyzer with `--force-check`. CI runs the same alias. The tools are
+development/test dependencies and are not included in production runtimes.
+
+The local Credo configuration includes this app's source, tests, configuration,
+scripts and compiled shared example code. ExDNA checks implementation and support
+code with the repository's existing `min_mass: 30` threshold; repeated test-case
+bodies are outside its scope. Dialyzer analyzes the app's compiled test-environment
+modules against its own dependencies. Keep the local `.credo.exs` and `.ex_dna.exs`
+when copying an example. A first Dialyzer run builds a PLT and can take several
+minutes; subsequent local/CI runs reuse it while checking dependency changes.
+These static checks do not start a worker and do not replace the example's tests
+or real-worker qualification.

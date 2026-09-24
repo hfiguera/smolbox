@@ -8,8 +8,21 @@ defmodule Workspace.MixProject do
       elixir: "~> 1.18",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix_live_view] ++ Mix.compilers(),
-      aliases: ["assets.build": ["cmd --cd assets npm run build"]],
+      aliases: [
+        "assets.build": ["cmd --cd assets npm run build"],
+        quality: [
+          "compile --warnings-as-errors",
+          "credo --strict",
+          "ex_dna lib config priv test/support ../support/store --max-clones 0",
+          "dialyzer --force-check"
+        ]
+      ],
+      dialyzer: [plt_add_apps: [:mix, :ex_unit], plt_local_path: "_build/plts"],
       deps: [
+        {:dialyxir, "~> 1.4.8", only: [:dev, :test], runtime: false},
+        {:credo, "~> 1.7.19", only: [:dev, :test], runtime: false},
+        {:ex_slop, "~> 0.4.4", only: [:dev, :test], runtime: false},
+        {:ex_dna, "~> 1.5.4", only: [:dev, :test], runtime: false},
         {:smolbox, "~> 0.2.0"},
         {:phoenix, "~> 1.8.0"},
         {:phoenix_live_view, "~> 1.1.0"},
@@ -22,6 +35,8 @@ defmodule Workspace.MixProject do
       ]
     ]
   end
+
+  def cli, do: [preferred_envs: [quality: :test]]
 
   def application do
     [extra_applications: [:logger, :crypto], mod: {Workspace.Application, []}]

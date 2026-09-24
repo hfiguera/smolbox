@@ -1,3 +1,3 @@
 [
-  inputs: ["mix.exs", ".formatter.exs", "{lib,config,test,priv,scripts}/**/*.{ex,exs}"]
+  inputs: ["mix.exs", ".*.exs", "{lib,config,test,priv,scripts}/**/*.{ex,exs}"]
 ]

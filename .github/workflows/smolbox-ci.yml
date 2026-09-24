@@ -365,8 +365,7 @@ jobs:
           key: smolbox-minimal-${{ runner.os }}-${{ runner.arch }}-otp29.0.6-ex1.20.4-test-${{ hashFiles('examples/minimal_host/mix.lock', 'examples/minimal_host/mix.exs') }}
       - run: mix deps.get
       - run: elixir --version
-      - run: mix compile --warnings-as-errors
-      - run: mix dialyzer --force-check
+      - run: mix quality
       - run: mix hex.audit
       - run: mix deps.audit
       - run: git diff --exit-code
@@ -405,11 +404,10 @@ jobs:
           key: smolbox-durable-${{ runner.os }}-${{ runner.arch }}-otp29.0.6-ex1.20.4-test-${{ hashFiles('examples/durable_host/mix.lock', 'examples/durable_host/mix.exs') }}
       - run: mix deps.get
       - run: elixir --version
-      - run: mix compile --warnings-as-errors
+      - run: mix quality
       - run: mix ecto.migrate
       - run: mix xref graph --format cycles --fail-above 0
       - run: mix test --warnings-as-errors
-      - run: mix dialyzer --force-check
       - run: mix hex.audit
       - run: mix deps.audit
       - name: Verify unavailable database fails closed
@@ -423,7 +421,7 @@ jobs:
 
   smolbox-community-workspace:
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 35
     defaults:
       run:
         working-directory: examples/community_workspace
@@ -450,9 +448,15 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '22'
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            examples/community_workspace/deps
+            examples/community_workspace/_build
+          key: smolbox-workspace-${{ runner.os }}-${{ runner.arch }}-otp29.0.6-ex1.20.4-test-${{ hashFiles('examples/community_workspace/mix.lock', 'examples/community_workspace/mix.exs') }}
       - run: mix deps.get
       - run: mix format --check-formatted
-      - run: mix compile --warnings-as-errors
+      - run: mix quality
       - run: npm --prefix assets ci
       - run: mix assets.build
       - run: mix test --warnings-as-errors
