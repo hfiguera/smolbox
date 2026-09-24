@@ -34,6 +34,12 @@ const Hooks = {
   Terminal: {
     mounted() {
       this.active = false;
+      this.warnBeforeLeaving = event => {
+        if (!this.active) return;
+        event.preventDefault();
+        event.returnValue = '';
+      };
+      window.addEventListener('beforeunload', this.warnBeforeLeaving);
       this.pendingInput = false;
       this.inputQueue = '';
       this.fit = new FitAddon();
@@ -87,9 +93,20 @@ const Hooks = {
       });
     },
     disconnected() { this.active=false; this.inputQueue=''; },
-    destroyed() { this.resize.disconnect(); this.input.dispose(); this.term.dispose(); }
+    destroyed() { window.removeEventListener('beforeunload', this.warnBeforeLeaving); this.resize.disconnect(); this.input.dispose(); this.term.dispose(); }
   }
 };
 const csrfToken=document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-const liveSocket=new LiveSocket('/live',Socket,{params:{_csrf_token:csrfToken},hooks:Hooks});
+const liveSocket=new LiveSocket('/live',Socket,{
+  params:{_csrf_token:csrfToken},
+  hooks:Hooks,
+  dom:{
+    onBeforeElUpdated(fromEl,toEl) {
+      // Disclosure state belongs to the browser; keep live content updating inside it.
+      if (fromEl.tagName === 'DETAILS' && toEl.tagName === 'DETAILS') {
+        toEl.open = fromEl.open;
+      }
+    }
+  }
+});
 liveSocket.connect();

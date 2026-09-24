@@ -282,6 +282,15 @@ defmodule WorkspaceWeb.WorkspaceLive do
   defp state(nil), do: :none
   defp state(record), do: record.state
 
+  defp terminal_connection_lost?(%{active_execution: {_, id}}, %{history: history}) do
+    Enum.any?(history, fn
+      %{id: ^id, execution: {:ok, %{last_error: %{operation: :terminal_consumer}}}} -> true
+      _ -> false
+    end)
+  end
+
+  defp terminal_connection_lost?(_, _), do: false
+
   defp ready?(record),
     do:
       record != nil and record.state == :running and record.active_execution == nil and
@@ -516,9 +525,19 @@ defmodule WorkspaceWeb.WorkspaceLive do
             class="recovery-note"
             role="alert"
           >
-            <h3>Keep the evidence. Resolve before continuing.</h3>
+            <h3>Workspace needs recovery</h3>
+            <p :if={terminal_connection_lost?(@machine, @snapshot)}>
+              The terminal connection was lost before the shell’s exit was confirmed. The shell may
+              still be running, so new commands, terminals, and machine changes are blocked.
+            </p>
+            <p :if={!terminal_connection_lost?(@machine, @snapshot)}>
+              The app cannot confirm this machine’s state or the outcome of its last operation.
+              New work is blocked until an operator checks what happened.
+            </p>
             <p>
-              This workspace needs operator attention. Unknown commands are never replayed. A stopped observation alone cannot fence requests already sent to the worker. Follow the recovery guide with the original keys and identity.
+              The app has not deleted your machine. Ask the person running this app to follow the
+              operator recovery procedure in the example’s README. Recovery must stop any uncertain
+              work before this workspace can be used again; unknown commands are never replayed.
             </p>
           </div>
           <div :if={@machine && @machine.state == :deleted} class="deleted-note">
@@ -682,11 +701,10 @@ defmodule WorkspaceWeb.WorkspaceLive do
           <section class="terminal-section" aria-labelledby="terminal-title">
             <div class="section-heading">
               <div>
-                <h3 id="terminal-title">A shell, right here.</h3>
+                <h3 id="terminal-title">Interactive terminal</h3>
                 <p>
-                  Use <code>cd /app/project</code>
-                  to enter your project. Type <code>exit</code>
-                  for an observed shell exit.
+                  Open a shell on your machine. Use <code>cd /app/project</code>
+                  to enter your project directory.
                 </p>
               </div>
               <form id="terminal-form" phx-hook="Intent" phx-submit="open-terminal">
@@ -715,11 +733,14 @@ defmodule WorkspaceWeb.WorkspaceLive do
               aria-label="Interactive guest terminal"
             >
               <div class="terminal-placeholder">
-                Your terminal will appear here. The machine remains when you leave.
+                Your terminal will appear here.
               </div>
             </div>
             <p class="field-note">
-              Escape leaves terminal focus. Closing this tab closes its terminal connection, not the machine. Terminal bytes are not saved; reconnecting does not reattach the old shell.
+              Before refreshing or leaving, type <code>exit</code> and wait for “Terminal exited”.
+              Disconnecting before the shell exits may block the workspace until an operator
+              recovers it. Your machine is retained, but the old shell cannot be reattached and
+              terminal output is not saved. Escape moves focus out of the terminal.
             </p>
           </section>
           <details class="diagnostics">

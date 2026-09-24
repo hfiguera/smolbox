@@ -93,7 +93,9 @@ Do not regenerate keys to fix an error. Never place it in a guest-accessible pat
    Output is bounded to 64 KiB and appears on completion.
 4. Open the terminal, type `cd /app/project`, edit/read a file, and resize the
    browser or terminal area. Escape moves focus to the terminal control. Type
-   `exit` and wait for the observed exit before a planned controller restart.
+   `exit` and wait for “Terminal exited” before refreshing, leaving the page, or
+   restarting the controller. The browser warns when leaving with an active shell
+   when it supports unload prompts; this does not protect against lost connections.
 5. Choose the background sample and run it. Activity displays a typed
    `SmolBox.LaunchResult` PID. This confirms launch, not continued life, readiness,
    eventual exit, or supervision. The process appends a marker then sleeps.
