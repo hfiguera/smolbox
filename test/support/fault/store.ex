@@ -32,5 +32,6 @@ defmodule SmolBox.FaultStore do
     end
   end
 
+  defp event(:machine, [:claim, _arguments]), do: :machine_claim
   defp event(operation, _arguments), do: operation
 end

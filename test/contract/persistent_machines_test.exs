@@ -295,8 +295,7 @@ defmodule SmolBox.PersistentMachinesTest do
     end
 
     test "queued creation can be deleted without worker allocation and await has independent timeout (ports=#{inspect(@mappings)})" do
-      fixture = RuntimeFixture.start(__MODULE__, draining: true, wait_ready: false)
-      handle = create(fixture, @mappings)
+      {fixture, handle, blocked} = queued_before_claim(@mappings)
       assert {:error, %{category: :expired}} = Machines.await(fixture.runtime, handle, 0)
       assert {:error, %{category: :validation}} = Machines.await(fixture.runtime, handle, -1)
 
@@ -306,12 +305,38 @@ defmodule SmolBox.PersistentMachinesTest do
       {:ok, queued} = Machines.inspect(fixture.runtime, handle)
       assert {:ok, %{state: :deleted}} = Machines.delete(fixture.runtime, handle, queued.version)
 
+      # Let the already scheduled reconciliation finish after deletion. It must
+      # neither revive the queued machine nor allocate worker resources.
+      finish_claim(blocked)
+
       assert {:ok, %{state: :deleted, reservation: nil}} =
                Machines.await(fixture.runtime, handle, 0)
 
       assert ManagedPeer.snapshot(fixture.peer).machines == %{}
       assert {:ok, [deleted], nil} = Machines.list(fixture.runtime, "contract")
       assert deleted.state == :deleted
+    end
+
+    test "queued reconciliation invalidates an inspected deletion version (ports=#{inspect(@mappings)})" do
+      {fixture, handle, blocked} = queued_before_claim(@mappings)
+      {:ok, queued} = Machines.inspect(fixture.runtime, handle)
+
+      # Force the interleaving that previously depended on scheduler timing:
+      # inspect -> reconciliation claim/write -> delete using the old version.
+      finish_claim(blocked)
+      {:ok, reconciled} = Machines.inspect(fixture.runtime, handle)
+      assert reconciled.version > queued.version
+      assert reconciled.next_due_at_ms > queued.next_due_at_ms
+      assert reconciled.state == :accepted
+
+      assert {:error, %Error{category: :stale_version}} =
+               Machines.delete(fixture.runtime, handle, queued.version)
+
+      assert {:ok, %{state: :accepted, worker_id: nil, reservation: nil, reserved_ports: []}} =
+               Machines.inspect(fixture.runtime, handle)
+
+      assert {:ok, %{slots: 0, disk_gb: 0}} = Memory.usage(fixture.store, "peer")
+      assert ManagedPeer.snapshot(fixture.peer).machines == %{}
     end
   end
 
@@ -691,6 +716,28 @@ defmodule SmolBox.PersistentMachinesTest do
     wait_machine(fixture, handle, &is_nil(&1.active_execution))
     {:ok, launch} = SmolBox.fetch(fixture.runtime, elem(execution, 0), elem(execution, 1))
     assert launch.result.pid == 123
+  end
+
+  defp queued_before_claim(mappings) do
+    observer = self()
+
+    gate =
+      start_supervised!(
+        {Agent,
+         fn -> %{event: :machine_claim, phase: :before, fired: false, observer: observer} end},
+        id: :gate
+      )
+
+    fixture = RuntimeFixture.start(__MODULE__, draining: true, wait_ready: false, faults: gate)
+    handle = create(fixture, mappings)
+    assert_receive {:boundary, :machine_claim, :before, blocked}, 5000
+    {fixture, handle, blocked}
+  end
+
+  defp finish_claim(blocked) do
+    monitor = Process.monitor(blocked)
+    send(blocked, :release_boundary)
+    assert_receive {:DOWN, ^monitor, :process, ^blocked, :normal}, 5000
   end
 
   defp start_machine(fixture, mappings) do
