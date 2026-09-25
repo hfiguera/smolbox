@@ -1,5 +1,5 @@
 defmodule SmolBox.CleanupTest do
-  use ExUnit.Case, async: false
+  use ExUnit.Case, async: true
 
   alias SmolBox.{Client, ManagedPeer, Result, Runtime, RuntimeFixture}
   alias SmolBox.Runtime.{Cleanup, Config, Session, WorkerConfig}
@@ -141,7 +141,7 @@ defmodule SmolBox.CleanupTest do
   end
 
   defp prepare(outcome, options \\ []) do
-    context = RuntimeFixture.start(options)
+    context = RuntimeFixture.start(__MODULE__, options)
     stop_supervised!(Runtime)
     store = start_supervised!({Memory, []}, id: :cleanup_store)
     context = %{context | store: store}

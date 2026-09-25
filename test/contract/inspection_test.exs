@@ -1,5 +1,5 @@
 defmodule SmolBox.InspectionTest do
-  use ExUnit.Case, async: false
+  use ExUnit.Case, async: true
 
   alias SmolBox.{
     Client,

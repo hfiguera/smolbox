@@ -1,5 +1,5 @@
 defmodule SmolBox.TerminalTest do
-  use ExUnit.Case, async: false
+  use ExUnit.Case, async: true
 
   alias SmolBox.{
     Client,
@@ -51,7 +51,7 @@ defmodule SmolBox.TerminalTest do
   end
 
   test "managed terminal preserves bytes, resizes, confirms exit and releases only the command slot" do
-    f = RuntimeFixture.start(test_pid: self())
+    f = RuntimeFixture.start(__MODULE__, test_pid: self())
     {machine, _running} = machine(f)
     spec = spec(f)
     assert {:ok, key} = Terminal.open(f.runtime, machine, spec)
@@ -86,7 +86,7 @@ defmodule SmolBox.TerminalTest do
   for action <- ["sentinel", "lost"] do
     @action action
     test "#{action} stays unknown and blocks managed operations" do
-      f = RuntimeFixture.start()
+      f = RuntimeFixture.start(__MODULE__)
       {machine, _running} = machine(f)
       assert {:ok, key} = Terminal.open(f.runtime, machine, spec(f))
       assert {:ok, terminal} = Terminal.attach(f.runtime, key)
@@ -106,7 +106,7 @@ defmodule SmolBox.TerminalTest do
   end
 
   test "low level session is consumer-bound and slow consumers have bounded buffering" do
-    f = RuntimeFixture.start()
+    f = RuntimeFixture.start(__MODULE__)
     {_machine, running} = machine(f)
     {:ok, terminal_spec} = Spec.new(max_buffer_bytes: 1024)
     client = hd(f.options[:workers]).client
@@ -136,7 +136,7 @@ defmodule SmolBox.TerminalTest do
           id: :gate
         )
 
-      f = RuntimeFixture.start(faults: gate)
+      f = RuntimeFixture.start(__MODULE__, faults: gate)
       {machine, _} = machine(f)
       intent = spec(f)
       {:ok, key} = Terminal.open(f.runtime, machine, intent)
@@ -164,7 +164,7 @@ defmodule SmolBox.TerminalTest do
   end
 
   test "another controller cannot attach, overlap commands or race stop/delete; cancellation is uncertain" do
-    f = RuntimeFixture.start()
+    f = RuntimeFixture.start(__MODULE__)
     {machine, _} = machine(f)
     {:ok, key} = Terminal.open(f.runtime, machine, spec(f))
     {:ok, terminal} = Terminal.attach(f.runtime, key)
@@ -197,7 +197,7 @@ defmodule SmolBox.TerminalTest do
   end
 
   test "ownership mismatch and disposable submissions never open an interactive connection" do
-    f = RuntimeFixture.start()
+    f = RuntimeFixture.start(__MODULE__)
     {machine, running} = machine(f)
     intent = spec(f)
     assert {:error, %Error{category: :unsupported_capability}} = SmolBox.submit(f.runtime, intent)
@@ -216,7 +216,7 @@ defmodule SmolBox.TerminalTest do
   end
 
   test "consumer disappearance closes observation and preserves unknown durable outcome" do
-    f = RuntimeFixture.start()
+    f = RuntimeFixture.start(__MODULE__)
     {machine, _} = machine(f)
     {:ok, key} = Terminal.open(f.runtime, machine, spec(f))
     parent = self()
@@ -241,7 +241,7 @@ defmodule SmolBox.TerminalTest do
   end
 
   test "terminal capability absence and unavailable stores reject before opening" do
-    f = RuntimeFixture.start()
+    f = RuntimeFixture.start(__MODULE__)
     {machine, _} = machine(f)
     stop_supervised!(SmolBox.Runtime)
     options = Keyword.put(f.options, :store, {PreviousStore, f.store})
@@ -256,7 +256,7 @@ defmodule SmolBox.TerminalTest do
   end
 
   test "failure to persist a live exit cannot release the slot or replay the terminal" do
-    f = RuntimeFixture.start()
+    f = RuntimeFixture.start(__MODULE__)
     {machine, _} = machine(f)
     stop_supervised!(SmolBox.Runtime)
     options = Keyword.put(f.options, :store, {FailingResultStore, f.store})
@@ -284,7 +284,7 @@ defmodule SmolBox.TerminalTest do
         id: :gate
       )
 
-    f = RuntimeFixture.start(faults: gate)
+    f = RuntimeFixture.start(__MODULE__, faults: gate)
     {machine, _} = machine(f)
     {:ok, key} = Terminal.open(f.runtime, machine, spec(f))
     assert_receive {:boundary, :dispatch_intent, :before, blocked}, 5000
@@ -301,7 +301,7 @@ defmodule SmolBox.TerminalTest do
   end
 
   test "an unclaimed terminal expires without releasing its uncertain slot" do
-    f = RuntimeFixture.start()
+    f = RuntimeFixture.start(__MODULE__)
     {machine, _} = machine(f)
     intent = spec(f)
 
@@ -315,7 +315,7 @@ defmodule SmolBox.TerminalTest do
   end
 
   test "managed overall deadline preserves its cause and keeps the slot" do
-    f = RuntimeFixture.start()
+    f = RuntimeFixture.start(__MODULE__)
     {machine, _} = machine(f)
     intent = spec(f)
     intent = %{intent | command: %{intent.command | session_ms: 1000, idle_ms: 1000}}
@@ -334,7 +334,7 @@ defmodule SmolBox.TerminalTest do
   end
 
   test "sequential terminals retain ports and retire old closed buffers under runtime capacity" do
-    f = RuntimeFixture.start(max_active: 1)
+    f = RuntimeFixture.start(__MODULE__, max_active: 1)
     runtime = f.runtime
     {machine, _} = machine(f, [%SmolBox.PortMapping{host: 28_731, guest: 8000}])
     {:ok, first} = Terminal.open(runtime, machine, spec(f))

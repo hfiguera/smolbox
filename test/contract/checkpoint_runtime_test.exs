@@ -1,10 +1,10 @@
 defmodule SmolBox.CheckpointRuntimeTest do
-  use ExUnit.Case, async: false
+  use ExUnit.Case, async: true
   alias SmolBox.{Checkpoint, Error, ManagedPeer, RuntimeFixture}
   alias SmolBox.Runtime.WorkerConfig
 
   test "approved checkpoint reuses identity, collects outputs and verifies disposal" do
-    context = RuntimeFixture.start(checkpoint: true)
+    context = RuntimeFixture.start(__MODULE__, checkpoint: true)
     assert {:ok, handle} = SmolBox.submit(context.runtime, context.spec)
     assert {:ok, ^handle} = SmolBox.submit(context.runtime, context.spec)
     assert {:ok, record} = SmolBox.await(context.runtime, handle, 5000)
@@ -15,7 +15,7 @@ defmodule SmolBox.CheckpointRuntimeTest do
   end
 
   test "approval is bound to profile, platform, runtime, digest and source kind" do
-    context = RuntimeFixture.start(checkpoint: true)
+    context = RuntimeFixture.start(__MODULE__, checkpoint: true)
     [worker] = context.options[:workers]
     [checkpoint] = worker.checkpoints
     assert WorkerConfig.supports?(worker, context.spec)
@@ -57,7 +57,7 @@ defmodule SmolBox.CheckpointRuntimeTest do
   end
 
   test "lost creation response never starts, replays or deletes a machine without evidence" do
-    context = RuntimeFixture.start(checkpoint: true, create_lost: true)
+    context = RuntimeFixture.start(__MODULE__, checkpoint: true, create_lost: true)
     assert {:ok, handle} = SmolBox.submit(context.runtime, context.spec)
     assert {:ok, record} = SmolBox.await(context.runtime, handle, 5000)
     assert record.state == :failed
@@ -82,7 +82,7 @@ defmodule SmolBox.CheckpointRuntimeTest do
           %{"branchable" => false},
           %{"state" => "running"}
         ] do
-      context = RuntimeFixture.start(checkpoint: true, created_allocations: changes)
+      context = RuntimeFixture.start(__MODULE__, checkpoint: true, created_allocations: changes)
       assert {:ok, handle} = SmolBox.submit(context.runtime, context.spec)
       assert {:ok, record} = SmolBox.await(context.runtime, handle, 5000)
       assert record.state == :failed and record.created_machine == nil

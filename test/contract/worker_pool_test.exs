@@ -1,5 +1,5 @@
 defmodule SmolBox.WorkerPoolTest do
-  use ExUnit.Case, async: false
+  use ExUnit.Case, async: true
   alias SmolBox.{Client, Error, ManagedPeer, Runtime, RuntimeFixture, TestPeer, Worker}
   alias SmolBox.Runtime.{Clock, WorkerHealth}
 
@@ -15,7 +15,7 @@ defmodule SmolBox.WorkerPoolTest do
         {[inventory_unavailable: true], :degraded}
       ] do
     test "#{inspect(options)} prevents admission while allowing read-only inspection" do
-      context = RuntimeFixture.start(unquote(options))
+      context = RuntimeFixture.start(__MODULE__, unquote(options))
       status = unquote(status)
       wait_status(context.runtime, status)
       spec = %{context.spec | queue_ms: 50}
@@ -40,7 +40,7 @@ defmodule SmolBox.WorkerPoolTest do
         {"explicit 1.14.6", [runtime_version: "1.14.6", expected_runtime_version: "1.14.6"]}
       ] do
     test "#{label} admission preserves identity, collection and cleanup" do
-      context = RuntimeFixture.start(unquote(options))
+      context = RuntimeFixture.start(__MODULE__, unquote(options))
       wait_status(context.runtime, :ready)
       assert {:ok, handle} = SmolBox.submit(context.runtime, context.spec)
       assert {:ok, record} = SmolBox.await(context.runtime, handle, 5000)
@@ -53,7 +53,7 @@ defmodule SmolBox.WorkerPoolTest do
   end
 
   test "a healthy second worker receives work while a degraded first worker stays inspectable" do
-    context = RuntimeFixture.start(unready: true)
+    context = RuntimeFixture.start(__MODULE__, unready: true)
     stop_supervised!(Runtime)
     {second, port} = ManagedPeer.start()
 
@@ -77,7 +77,7 @@ defmodule SmolBox.WorkerPoolTest do
   end
 
   test "fresh admission checks reject a version changed after the cached readiness observation" do
-    context = RuntimeFixture.start()
+    context = RuntimeFixture.start(__MODULE__)
     wait_status(context.runtime, :ready)
 
     Agent.update(context.peer, fn state ->
@@ -92,7 +92,7 @@ defmodule SmolBox.WorkerPoolTest do
   end
 
   test "stale observations never authorize admission and unavailable probes are bounded" do
-    context = RuntimeFixture.start()
+    context = RuntimeFixture.start(__MODULE__)
     [worker] = context.options[:workers]
     report = WorkerHealth.observe(worker, Clock)
     assert WorkerHealth.status(report, report.checked_monotonic) == :ready
@@ -133,7 +133,7 @@ defmodule SmolBox.WorkerPoolTest do
         id: :prepared_gate
       )
 
-    context = RuntimeFixture.start(faults: gate)
+    context = RuntimeFixture.start(__MODULE__, faults: gate)
     assert {:ok, handle} = SmolBox.submit(context.runtime, context.spec)
     assert_receive {:boundary, :creation_record, :after, blocked}, 5000
 
@@ -152,7 +152,7 @@ defmodule SmolBox.WorkerPoolTest do
   end
 
   test "incorrect created allocations prevent guest startup and retain an unverified reservation" do
-    context = RuntimeFixture.start(created_allocations: %{"memoryMb" => 512})
+    context = RuntimeFixture.start(__MODULE__, created_allocations: %{"memoryMb" => 512})
     assert {:ok, handle} = SmolBox.submit(context.runtime, context.spec)
     assert {:ok, record} = SmolBox.await(context.runtime, handle, 5000)
     assert record.state == :failed and record.evidence == :not_dispatched
@@ -175,7 +175,7 @@ defmodule SmolBox.WorkerPoolTest do
   end
 
   test "a profile below the declared disk floor is rejected without accepting work or creating a VM" do
-    context = RuntimeFixture.start()
+    context = RuntimeFixture.start(__MODULE__)
     stop_supervised!(Runtime)
     [worker] = context.options[:workers]
 
@@ -207,7 +207,7 @@ defmodule SmolBox.WorkerPoolTest do
           id: :approval_gate
         )
 
-      context = RuntimeFixture.start(faults: gate)
+      context = RuntimeFixture.start(__MODULE__, faults: gate)
       assert {:ok, handle} = SmolBox.submit(context.runtime, context.spec)
       assert_receive {:boundary, :dispatch_intent, :before, _blocked}, 5000
       stop_supervised!(Runtime)

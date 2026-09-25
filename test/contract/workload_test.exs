@@ -1,5 +1,5 @@
 defmodule SmolBox.ManagedWorkloadTest do
-  use ExUnit.Case, async: false
+  use ExUnit.Case, async: true
   alias SmolBox.{Machines, ManagedPeer, Runtime, RuntimeFixture, Workload}
   alias SmolBox.Store.Memory
 
@@ -33,7 +33,7 @@ defmodule SmolBox.ManagedWorkloadTest do
   end
 
   test "unavailable durable evidence blocks log access before worker observation" do
-    fixture = RuntimeFixture.start()
+    fixture = RuntimeFixture.start(__MODULE__)
     stop_supervised!(Runtime)
 
     options =
@@ -69,7 +69,7 @@ defmodule SmolBox.ManagedWorkloadTest do
   end
 
   test "startup intent survives recovery; diagnostics coexist with commands and retain capacity" do
-    fixture = RuntimeFixture.start()
+    fixture = RuntimeFixture.start(__MODULE__)
     spec = spec(fixture)
     {:ok, handle} = Machines.create(fixture.runtime, spec)
     assert {:ok, created} = Machines.await(fixture.runtime, handle, 5000)
@@ -108,7 +108,7 @@ defmodule SmolBox.ManagedWorkloadTest do
   end
 
   test "log absence does not become machine absence; replaced incarnations are never read" do
-    fixture = RuntimeFixture.start(no_logs: true)
+    fixture = RuntimeFixture.start(__MODULE__, no_logs: true)
     {:ok, handle} = Machines.create(fixture.runtime, spec(fixture))
     {:ok, created} = Machines.await(fixture.runtime, handle, 5000)
     assert {:error, %{category: :not_found}} = Machines.logs(fixture.runtime, handle)
@@ -129,7 +129,11 @@ defmodule SmolBox.ManagedWorkloadTest do
   end
 
   test "old stores and workers reject workload admission without creation" do
-    fixture = RuntimeFixture.start(expected_runtime_version: "1.16.1", runtime_version: "1.16.1")
+    fixture =
+      RuntimeFixture.start(__MODULE__,
+        expected_runtime_version: "1.16.1",
+        runtime_version: "1.16.1"
+      )
 
     assert {:error, %{category: :unsupported_capability}} =
              Machines.create(fixture.runtime, spec(fixture))
