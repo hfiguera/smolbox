@@ -45,6 +45,12 @@ defmodule SmolBox.Runtime do
   end
 
   @doc false
+  @spec lookup_terminal(Supervisor.supervisor(), SmolBox.Execution.key()) ::
+          {:ok, SmolBox.Terminal.Handle.t()} | :pending
+  def lookup_terminal(runtime, key),
+    do: GenServer.call(coordinator(runtime), {:lookup_terminal, key})
+
+  @doc false
   @spec coordinator(Supervisor.supervisor()) :: pid()
   def coordinator(runtime) do
     {WorkSupervisor, work, :supervisor, _modules} =
