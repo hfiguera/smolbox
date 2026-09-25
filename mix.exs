@@ -233,7 +233,7 @@ defmodule SmolBox.MixProject do
       {:dialyxir, "~> 1.4.8", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.7.19", only: [:dev, :test], runtime: false},
       {:ex_dna, "~> 1.5.4", only: [:dev, :test], runtime: false},
-      {:ex_slop, "~> 0.4.4", only: [:dev, :test], runtime: false},
+      {:ex_slop, "~> 0.4.5", only: [:dev, :test], runtime: false},
       {:credence, "~> 0.8.1", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.40", only: [:dev, :test], runtime: false},
       {:makeup_syntect, "~> 0.1.4", only: [:dev, :test], runtime: false},

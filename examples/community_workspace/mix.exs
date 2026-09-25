@@ -21,7 +21,7 @@ defmodule Workspace.MixProject do
       deps: [
         {:dialyxir, "~> 1.4.8", only: [:dev, :test], runtime: false},
         {:credo, "~> 1.7.19", only: [:dev, :test], runtime: false},
-        {:ex_slop, "~> 0.4.4", only: [:dev, :test], runtime: false},
+        {:ex_slop, "~> 0.4.5", only: [:dev, :test], runtime: false},
         {:ex_dna, "~> 1.5.4", only: [:dev, :test], runtime: false},
         {:smolbox, "~> 0.2.0"},
         {:phoenix, "~> 1.8.0"},

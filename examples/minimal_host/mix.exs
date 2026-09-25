@@ -17,7 +17,7 @@ defmodule SmolBox.MinimalHost.MixProject do
       ],
       deps: [
         {:credo, "~> 1.7.19", only: [:dev, :test], runtime: false},
-        {:ex_slop, "~> 0.4.4", only: [:dev, :test], runtime: false},
+        {:ex_slop, "~> 0.4.5", only: [:dev, :test], runtime: false},
         {:ex_dna, "~> 1.5.4", only: [:dev, :test], runtime: false},
         {:smolbox, path: "../.."},
         {:jason, "~> 1.4"},
