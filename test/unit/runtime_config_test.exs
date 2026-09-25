@@ -1,8 +1,9 @@
 defmodule SmolBox.RuntimeConfigTest do
   use ExUnit.Case, async: true
-  alias SmolBox.{Client, Error, Worker}
+  alias SmolBox.{Client, Command, Error, Execution, ExecutionSpec, Worker}
   alias SmolBox.Runtime.{Config, WorkerConfig}
-  alias SmolBox.Store.{Contract, Memory}
+  alias SmolBox.Store.{Codec, Contract, Memory}
+  alias SmolBox.Terminal.Spec
 
   setup do
     store = start_supervised!(Memory)
@@ -54,6 +55,30 @@ defmodule SmolBox.RuntimeConfigTest do
     refute WorkerConfig.supports?(%{c.worker | runtime_version: "1.16.1"}, spec)
     assert WorkerConfig.supports?(%{c.worker | runtime_version: "1.16.1"}, %{spec | ports: []})
     refute WorkerConfig.supports?(%{c.worker | platform: :windows}, spec)
+  end
+
+  test "record formats and worker admission preserve execution feature boundaries", c do
+    {:ok, background} = Command.new(["server"], background: true)
+    {:ok, terminal} = Spec.new(max_buffer_bytes: 1024)
+
+    for {command, budget, version, legacy?} <- [
+          {c.spec.command, 300_000, "v2", true},
+          {c.spec.command, 300_001, "v6", false},
+          {background, 30_000, "v6", false},
+          {terminal, 30_000, "v7", false}
+        ] do
+      profile = %{c.spec.profile | execution_ms: budget}
+      spec = %{c.spec | command: command, profile: profile}
+      worker = %{c.worker | profiles: [profile]}
+      assert WorkerConfig.supports?(worker, spec)
+      assert WorkerConfig.supports?(%{worker | runtime_version: "1.16.1"}, spec) == legacy?
+
+      {:ok, fingerprint} = ExecutionSpec.fingerprint(spec, :binary.copy(<<1>>, 32))
+      {:ok, record} = Execution.new(spec, fingerprint, 1000)
+      assert {:ok, bytes} = Codec.encode(record)
+      assert String.starts_with?(bytes, "smolbox-record-" <> version <> <<0>>)
+      assert {:ok, ^record} = Codec.decode(bytes)
+    end
   end
 
   test "worker registration rejects unsafe catalogs, endpoints and unqualified controls",

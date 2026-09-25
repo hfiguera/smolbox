@@ -39,6 +39,16 @@ defmodule SmolBox.Runtime.Coordinator do
   @impl GenServer
   def handle_call(:config, _from, state), do: {:reply, {:ok, state.config}, state}
 
+  def handle_call({:lookup_terminal, key}, _from, state) do
+    result =
+      case :ets.lookup(state.config.terminal_table, key) do
+        [{^key, handle}] -> {:ok, handle}
+        [] -> :pending
+      end
+
+    {:reply, result, state}
+  end
+
   def handle_call(:telemetry_stats, _from, state),
     do: {:reply, {:ok, Dispatcher.stats(state.config.telemetry_table)}, state}
 

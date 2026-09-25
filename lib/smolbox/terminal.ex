@@ -39,9 +39,8 @@ defmodule SmolBox.Terminal do
 
   defp attach_until(runtime, {scope, id} = key, deadline) do
     with {:ok, record} <- SmolBox.fetch(runtime, scope, id),
-         true <- is_struct(record.spec.command, Spec),
-         {:ok, config} <- GenServer.call(Runtime.coordinator(runtime), :config) do
-      attach_record(runtime, key, config, record, deadline)
+         true <- is_struct(record.spec.command, Spec) do
+      attach_record(runtime, key, record, deadline)
     else
       false -> failure(:validation)
       error -> error
@@ -54,10 +53,10 @@ defmodule SmolBox.Terminal do
 
   defp attach_until(_runtime, _key, _deadline), do: failure(:validation)
 
-  defp attach_record(runtime, key, config, record, deadline) do
-    case :ets.lookup(config.terminal_table, key) do
-      [{^key, handle}] -> with :ok <- safe_call(handle, :bind), do: {:ok, handle}
-      [] -> attach_pending(runtime, key, record, deadline)
+  defp attach_record(runtime, key, record, deadline) do
+    case Runtime.lookup_terminal(runtime, key) do
+      {:ok, handle} -> with :ok <- safe_call(handle, :bind), do: {:ok, handle}
+      :pending -> attach_pending(runtime, key, record, deadline)
     end
   end
 

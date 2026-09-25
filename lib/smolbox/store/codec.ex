@@ -41,8 +41,7 @@ defmodule SmolBox.Store.Codec do
   would permit replay and is forbidden.
   """
 
-  alias SmolBox.{Error, Execution}
-  alias SmolBox.Runtime.ExecutionSupport
+  alias SmolBox.{Error, Execution, ExecutionFeatures}
   alias SmolBox.Store.{CodecExecution, CodecFiles, CodecPorts, CodecWorkload}
 
   @max_bytes 16_777_216
@@ -89,13 +88,13 @@ defmodule SmolBox.Store.Codec do
     do: encode_versioned(record, @workload_prefix)
 
   defp encode_existing(%{spec: spec} = record) do
-    if ExecutionSupport.interactive?(spec),
+    if ExecutionFeatures.interactive?(spec),
       do: encode_terminal(record),
       else: encode_nonterminal(record)
   end
 
   defp encode_nonterminal(%{spec: spec} = record) do
-    if ExecutionSupport.extended?(spec),
+    if ExecutionFeatures.extended?(spec),
       do: encode_extended(record),
       else: encode_original(record)
   end
@@ -227,7 +226,7 @@ defmodule SmolBox.Store.Codec do
     with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
          true <- used == byte_size(payload),
          {:ok, record} <- CodecFiles.upgrade(record),
-         true <- ExecutionSupport.interactive?(record.spec),
+         true <- ExecutionFeatures.interactive?(record.spec),
          :ok <- Execution.validate(record),
          do: {:ok, record},
          else: (_invalid -> invalid())
@@ -260,8 +259,8 @@ defmodule SmolBox.Store.Codec do
          {:ok, record} <- CodecWorkload.upgrade(record),
          :ok <- validate_extended(record),
          true <-
-           ExecutionSupport.extended?(record.spec) and
-             not ExecutionSupport.interactive?(record.spec) do
+           ExecutionFeatures.extended?(record.spec) and
+             not ExecutionFeatures.interactive?(record.spec) do
       {:ok, record}
     else
       _invalid -> invalid()

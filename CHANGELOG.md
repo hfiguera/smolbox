@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Decouple stored execution classification from runtime admission, and keep
+  terminal session lookup inside the runtime. Public APIs, consumer ownership,
+  stored record formats and recovery behavior remain unchanged.
+
 - Specify every managed-machine store operation's argument layout, result type,
   transaction requirements and recovery semantics. Existing `machine/3` adapters
   remain compatible; no record format or database migration changes.

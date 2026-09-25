@@ -57,6 +57,11 @@ defmodule SmolBox.TerminalTest do
     assert {:ok, key} = Terminal.open(f.runtime, machine, spec)
     assert {:ok, ^key} = Terminal.open(f.runtime, machine, spec)
     assert {:ok, terminal} = Terminal.attach(f.runtime, key)
+    assert {:ok, ^terminal} = Terminal.attach(f.runtime, key)
+
+    assert {:error, %Error{category: :identity_conflict}} =
+             Task.async(fn -> Terminal.attach(f.runtime, key) end) |> Task.await()
+
     assert {:ok, {:output, "ready\r\n"}} = Terminal.next(terminal)
     assert :ok = Terminal.input(terminal, <<0, 255, 128>>)
     assert {:ok, {:output, <<0, 255, 128>>}} = Terminal.next(terminal)
