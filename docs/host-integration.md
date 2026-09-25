@@ -38,6 +38,14 @@ The repository's Ecto/Postgres example owns its Repo and migrations separately.
 A custom store must implement the full behaviour and pass conformance tests;
 capability declarations alone do not certify its implementation.
 
+For retained machines, implement all operations documented in
+`c:SmolBox.Store.machine/3` before advertising `managed_machines: 1`. Its callback
+signatures distinguish machine records, execution records and paginated results;
+the operation table specifies each positional argument list. The callback remains
+`machine(context, operation, arguments)` and requires no adapter or schema migration.
+In particular, `:finish` takes an execution key and guard, while `:resolve` takes a
+machine key and guard. Both must update the machine and its command atomically.
+
 Configure worker endpoints with `SmolBox.Worker.new/3`, then construct a client
 with `SmolBox.Client.new/2`. Remote workers require verified HTTPS and a bearer
 token. Proxy tokens stay in trusted configuration, outside persisted records.

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Specify every managed-machine store operation's argument layout, result type,
+  transaction requirements and recovery semantics. Existing `machine/3` adapters
+  remain compatible; no record format or database migration changes.
+
 ## 0.2.0
 
 SmolBox now supports retained, interactive development environments alongside

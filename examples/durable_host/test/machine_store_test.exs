@@ -16,6 +16,8 @@ defmodule SmolBox.DurableHost.MachineStoreTest do
 
   for scenario <- [
         :acceptance,
+        :pagination,
+        :versioned_claim,
         :workload,
         :guest_files,
         :shared_capacity,

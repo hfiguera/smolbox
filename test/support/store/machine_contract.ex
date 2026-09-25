@@ -179,6 +179,53 @@ defmodule SmolBox.Store.MachineContract do
     assert {:ok, %{slots: 1, disk_gb: 2}} = adapter.usage(store, "worker")
   end
 
+  def pagination(adapter, store) do
+    for id <- ["c", "a", "b"] do
+      assert {:ok, _} = adapter.machine(store, :accept, [record(id), 10])
+    end
+
+    assert {:ok, b} = adapter.machine(store, :fetch, [{"contract", "b"}])
+
+    assert {:ok, deleted} =
+             adapter.machine(store, :request, [{"contract", "b"}, :delete, b.version, 1000])
+
+    assert {:ok, [a], "a"} = adapter.machine(store, :list, ["contract", nil, 1])
+    assert a.id == "a"
+    assert {:ok, [^deleted], "b"} = adapter.machine(store, :list, ["contract", "a", 1])
+    assert {:ok, [c], nil} = adapter.machine(store, :list, ["contract", "b", 1])
+    assert c.id == "c"
+    assert {:ok, [], nil} = adapter.machine(store, :list, ["contract", "c", 1])
+
+    assert {:ok, [], nil} = adapter.machine(store, :due, [999, nil, 1])
+
+    assert {:ok, [^a], {1000, "contract", "a"} = cursor} =
+             adapter.machine(store, :due, [1000, nil, 1])
+
+    assert {:ok, [^c], nil} = adapter.machine(store, :due, [1000, cursor, 1])
+    assert {:ok, [], nil} = adapter.machine(store, :due, [1000, {1000, "contract", "c"}, 1])
+  end
+
+  def versioned_claim(adapter, store) do
+    initial = record()
+    key = ManagedMachine.key(initial)
+    assert {:ok, ^initial} = adapter.machine(store, :accept, [initial, 10])
+
+    results =
+      ["first", "second"]
+      |> Task.async_stream(fn owner ->
+        adapter.machine(store, :claim_version, [key, initial.version, owner, 1000, 5000])
+      end)
+      |> Enum.map(fn {:ok, result} -> result end)
+
+    assert [{:ok, winner}] = Enum.filter(results, &match?({:ok, _}, &1))
+
+    assert [{:error, %{category: :stale_version}}] =
+             Enum.filter(results, &match?({:error, _}, &1))
+
+    assert winner.version == initial.version + 1
+    assert {:ok, ^winner} = adapter.machine(store, :fetch, [key])
+  end
+
   def command_admission(adapter, store) do
     machine = running(adapter, store)
     key = ManagedMachine.key(machine)
