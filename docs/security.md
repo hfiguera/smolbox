@@ -1,20 +1,21 @@
 # Deployment and trust boundaries
 
-This unreleased checkout defaults to **smolvm 1.17.0** on Linux x86_64 and macOS
-Apple Silicon; published SmolBox 0.1.5 still defaults to 1.16.1. Existing workers
-can retain an explicit `runtime_version: "1.16.1"`. See the
+SmolBox **0.2.0** defaults to **smolvm 1.17.0** on Linux x86_64 and macOS
+Apple Silicon. Existing workers can retain an explicit `runtime_version: "1.16.1"`.
+Upgrading from 0.1.x requires a coordinated controller/store upgrade; updating the
+library does not install or upgrade the worker. See
+[Upgrading to 0.2.0](upgrading-to-0.2.0.md) and the
 [1.17.0 qualification](compatibility.md#smolvm-1-17-0-qualification).
 
-The controlled networking feature introduced in 0.1.3 permits explicit operator-approved
-outbound policies on smolvm 1.16.0. SmolBox 0.1.5 defaults to 1.16.1,
-with support for those policies. Existing offline defaults and prior offline
-qualification evidence remain unchanged. See [Controlled network access](network-access.md)
-for DNS/IP semantics, profile approval and the separate enforcement fixture.
+Controlled networking permits explicit operator-approved outbound policies on
+smolvm 1.16.0, 1.16.1 and 1.17.0. Offline remains the default; enabling networking
+does not extend prior offline qualification evidence. See
+[Controlled network access](network-access.md) for DNS/IP semantics, profile
+approval and the separate enforcement fixture.
 The server's strict egress floor must remain enabled when relying on the recorded
 private-address and DNS rebinding checks. SmolBox does not attest worker environment
 settings. Network-enabled guests can reach upstream's dedicated rollout gateway;
 its lease authentication is a separate boundary from the private management API.
-
 
 SmolBox relies on
 [smolvm's isolation model](https://github.com/smol-machines/smolvm/blob/e8d09ef616d363004d55b80a6cdb31a4e7e1842d/SECURITY.md)
@@ -22,14 +23,22 @@ for running untrusted code. Each part of a deployment has a separate responsibil
 
 | Component | Responsibility |
 |---|---|
-| smolvm and its virtualization stack | Run each workload in its own VM and defend the guest-to-host boundary under the upstream security model |
-| SmolBox | Manage execution identity, admission, observation, bounded collection, uncertain outcomes and cleanup |
+| smolvm and its virtualization stack | Run VMs and defend the guest-to-host boundary under the upstream security model |
+| SmolBox | Manage execution and retained-machine identities, admission, ownership evidence, lifecycle, reservations, bounded collection, uncertain outcomes and recovery |
 | Application and deployment | Authorize access, approve images, protect worker interfaces, enforce host resource limits, configure networking and credentials, and operate durable storage and recovery |
 
 SmolBox does not provision a worker, proxy, database, image registry or hypervisor.
 The library's supported qualification remains `:development`; it does not install
 or attest host resource controls. Requested unsupported hard-control options
 remain rejected.
+
+Disposable executions get separate VMs with tracked cleanup. Retained machines
+share guest state across commands and remain until explicitly deleted. Their
+startup workload, background processes and later commands can share the same
+guest; separate execution identities do not create isolation between them.
+One active managed command is admitted per machine, but a confirmed background
+launch releases that command slot while its process may continue running.
+The host must choose who may reuse a machine and authorize its operations.
 
 After the 0.1.0 release, a Linux campaign verified external resource enforcement
 and failure recovery on one pinned nested deployment. See the
@@ -43,9 +52,10 @@ extend to arbitrary images, concurrent tenants or macOS host limits.
 ## What must be trusted
 
 The Elixir application authorizes users, assigns scopes and selects approved
-profiles and artifact revisions. A `{scope, execution_id}` handle is an identity,
-not a bearer authorization token. Keep the low-level client, worker configuration,
-orphan inspection and full stored execution records behind host authorization.
+profiles and artifact revisions. Execution and managed-machine handles are
+identities, not bearer authorization tokens. Keep the low-level client, worker
+configuration, orphan inspection and full stored execution and machine records
+behind host authorization.
 Never expose arbitrary worker endpoints, artifact host paths or profile controls
 as user-editable request parameters.
 
@@ -57,9 +67,12 @@ adapters are trusted host code; they do not execute inside a microVM.
 
 An approved prepared `.smolmachine` is also a trusted deployment input. Its guest
 code can be untrusted, but the host must verify its architecture, immutable bytes,
-neutral entrypoint, disabled restart policy and absence of embedded credentials or
-unexpected runtime configuration. A SHA-256 identifies bytes; it is not a security
-review. Store approved runtime artifacts in an operator-owned, non-writable catalog.
+effective startup configuration, disabled automatic restart and absence of embedded
+credentials or unexpected runtime configuration. Disposable executions require
+neutral `/bin/true` startup. Retained image machines may use an explicitly approved
+[startup workload](workloads.md), including any inherited image defaults.
+A SHA-256 identifies bytes; it is not a security review. Store approved runtime
+artifacts in an operator-owned, non-writable catalog.
 Do not accept a guest-uploaded archive as a worker artifact or unpack it on the host.
 
 ## Worker account and control interface
@@ -81,8 +94,9 @@ remain in the controller/proxy configuration, never guest command environment.
 
 The proxy must reject unauthorized requests before forwarding, validate backend
 routing, avoid following redirects, impose finite request/body/concurrency limits,
-and support the needed SSE response behavior. Disable automatic upstream retries
-and failover for mutations, especially exec. Bound queue time, connection lifetime
+and support the needed SSE responses and WebSocket upgrades for interactive
+terminals. Disable automatic upstream retries and failover for mutations,
+especially exec. Bound queue time, connection lifetime
 and idle time; record their interaction with the controller's budgets. Proxy logs
 must exclude authorization headers, command/file bodies and returned output.
 The disposable TLS test proxy is a qualification fixture, not deployment software.
@@ -102,7 +116,11 @@ Explicit fixed TCP [port mappings](port-mappings.md) are separately supported on
 managed image machines and the low-level client with smolvm 1.17.0. These expose
 guest services through worker listeners and require host authorization; they
 provide no TLS, authentication, firewall policy or readiness guarantee.
-It uses approved prepared artifacts with `/bin/true` and restart policy `never`.
+Neutral `/bin/true` startup remains the default. Explicit startup workloads on
+retained image machines require smolvm 1.17.0 and host approval; automatic restart
+policies remain unsupported. A running VM does not prove application readiness,
+and console diagnostics do not include application stdout/stderr. See
+[Workloads and console diagnostics](workloads.md).
 Image preparation happens separately under host policy; a failed offline execution
 never authorizes networking or an arbitrary image pull.
 
@@ -191,6 +209,15 @@ Never replace an unavailable store with memory or generate a new fingerprint key
 for old identities. Memory mode is explicitly ephemeral and loses authority when
 its store process stops.
 
+Retained-machine lifetime is separate from execution-record and artifact retention.
+Command completion, cancellation or caller loss does not delete the machine.
+Cancellation does not automatically stop it, and an unknown command blocks reuse
+until explicit resolution. Stopped, missing and uncertain machines keep their
+capacity and port reservations until verified deletion or resolved absence.
+Deleted identities remain for deduplication. Follow the
+[managed-machine recovery procedure](persistent-machines.md#cancellation-and-uncertain-outcomes);
+an observed stop alone does not establish operator quiescence.
+
 ## Upgrades and operator recovery
 
 1. Stop accepting new work for the target pool and persist its drain policy.
@@ -205,10 +232,10 @@ its store process stops.
    durable example's authenticated index backfill instructions for its older schema.
 4. Pin and verify the new binary, schema and artifact bytes on a separate candidate
    worker. Recheck template sizes, VMM overhead, network behavior, proxy semantics,
-   host quotas and all advertised platform tests. SmolBox 0.1.5 defaults to
-   smolvm 1.16.1 and retains explicit 1.16.0, 1.14.6 and 1.14.1 support, subject
+   host quotas and all advertised platform tests. SmolBox 0.2.0 defaults to
+   smolvm 1.17.0 and retains explicit 1.16.1, 1.16.0, 1.14.6 and 1.14.1 support, subject
    to the [supported platform matrix](compatibility.md#runtime-selection).
-   Controlled networking requires 1.16.0, 1.16.1 or 1.17.0 in this checkout. The worker must report the
+   Controlled networking requires 1.16.0, 1.16.1 or 1.17.0. The worker must report the
    exact configured version; there is no automatic fallback.
 5. Give changed artifacts/profiles new immutable revisions. Do not rewrite saved
    execution specifications or resubmit a changed specification under an existing
@@ -250,11 +277,10 @@ metadata share an exhausted filesystem. See
 [Linux deployment validation](resource-qualification.md#subsequent-linux-deployment-validation)
 for the tested configuration and recovery evidence.
 
-## Approved checkpoint state (0.1.5)
+## Approved checkpoint state
 
 Checkpoints contain memory as well as disks. SmolBox accepts only operator-approved
-idle, offline checkpoints on qualified 1.16.1 or 1.17.0 workers in this checkout
-(1.16.1 in published 0.1.5). An entrypoint override
+idle, offline checkpoints on qualified 1.16.1 or 1.17.0 workers. An entrypoint override
 cannot neutralize captured processes. Keep credentials, pending user workloads,
 connections and automatic restart out of the source. Protect the checkpoint path
 against replacement and restrict artifact access as sensitive data. Approval is
