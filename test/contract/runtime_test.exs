@@ -286,7 +286,9 @@ defmodule SmolBox.RuntimeTest do
 
     eventually(fn ->
       {:ok, record} = SmolBox.fetch(context.runtime, context.spec.scope, context.spec.id)
-      record.cleanup == :failed
+      coordinator = :sys.get_state(Runtime.coordinator(context.runtime))
+      # Reconcile acknowledges an already active task without launching another.
+      record.cleanup == :failed and coordinator.active == %{} and coordinator.scan == nil
     end)
 
     Agent.update(context.peer, &%{&1 | machines: %{}})
