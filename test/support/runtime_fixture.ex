@@ -5,7 +5,9 @@ defmodule SmolBox.RuntimeFixture do
   alias SmolBox.Runtime.WorkerConfig
   alias SmolBox.Store.{Contract, Memory}
 
-  def start(options \\ []) do
+  # Use the test module as the registered name so modules can run concurrently.
+  # Each fixture still owns its store, peer, and artifacts; restarts reuse this name.
+  def start(name, options \\ []) when is_atom(name) do
     {peer, port} = ManagedPeer.start(options)
     store = ExUnit.Callbacks.start_supervised!(Memory)
 
@@ -86,7 +88,7 @@ defmodule SmolBox.RuntimeFixture do
       )
 
     config = [
-      name: SmolBox.TestRuntime,
+      name: name,
       namespace: "runtest",
       store: store_adapter(store, options),
       mode: :ephemeral,

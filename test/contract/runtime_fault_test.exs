@@ -1,5 +1,5 @@
 defmodule SmolBox.RuntimeFaultTest do
-  use ExUnit.Case, async: false
+  use ExUnit.Case, async: true
   alias SmolBox.{Files, ManagedPeer, Runtime, RuntimeFixture}
 
   @boundaries [
@@ -60,7 +60,7 @@ defmodule SmolBox.RuntimeFaultTest do
           id: :cancel_gate
         )
 
-      context = RuntimeFixture.start(faults: gate)
+      context = RuntimeFixture.start(__MODULE__, faults: gate)
       assert {:ok, handle} = SmolBox.submit(context.runtime, context.spec)
       assert_receive {:boundary, :result_write, ^phase, blocked}, 6000
       assert {:ok, ^handle} = SmolBox.cancel(context.runtime, "contract", "one")
@@ -134,7 +134,7 @@ defmodule SmolBox.RuntimeFaultTest do
         id: :late_gate
       )
 
-    context = RuntimeFixture.start(faults: gate)
+    context = RuntimeFixture.start(__MODULE__, faults: gate)
     submission = Task.async(fn -> SmolBox.submit(context.runtime, context.spec) end)
     Process.unlink(submission.pid)
     assert_receive {:boundary, ^event, :before, blocked}, 6000
@@ -164,7 +164,8 @@ defmodule SmolBox.RuntimeFaultTest do
         id: :gate
       )
 
-    context = RuntimeFixture.start(faults: gate, hold: event in [:first_output_record, :stop])
+    context =
+      RuntimeFixture.start(__MODULE__, faults: gate, hold: event in [:first_output_record, :stop])
 
     spec = %{
       context.spec

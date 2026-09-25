@@ -1,4 +1,5 @@
 defmodule SmolBox.BlogTest do
+  # Rendering configures global application settings and the Makeup lexer registry.
   use ExUnit.Case, async: false
   import ExUnit.CaptureIO
   alias SmolBox.Blog

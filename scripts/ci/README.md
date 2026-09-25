@@ -122,6 +122,33 @@ the archive. Examples, tests, maintainer tooling and external references must no
 be in it. For a release, validate both current and minimum consumers against the
 same saved archive as described in the implementation plan.
 
+## Test concurrency
+
+Contract tests use `RuntimeFixture.start(__MODULE__, options)` to give each test
+module its own registered runtime name. Stores, artifact agents, and fake worker
+ports belong to each test. Controller restarts reuse the fixture's options and
+name. Tests within a module remain sequential; independent modules run with
+`async: true`. Do not reuse a registered name across async modules.
+
+Keep tests that change shared state synchronous: the HTTP tests modify
+`CURL_HOME`, the telemetry tests capture events from all runtimes, and the blog
+tests configure the global syntax highlighter registry. The dispatcher tests use
+a separate telemetry event and can run concurrently. Live worker tests remain
+synchronous and excluded from the ordinary suite.
+
+Compare elapsed time with the same scheduler count and concurrency limit, and
+check more than one test seed:
+
+```sh
+ERL_FLAGS='+S 4:4' MIX_ENV=test mix test --warnings-as-errors --max-cases 8 --seed 398333
+ERL_FLAGS='+S 4:4' MIX_ENV=test mix test --warnings-as-errors --max-cases 8 --seed 42
+```
+
+Use `--slowest` and `--slowest-modules` for diagnosis only. In the current
+toolchain they enable trace mode, which serializes execution; those totals are
+not comparable to an ordinary concurrent run. Preserve the existing assertions,
+deadlines, and recovery waits when changing test scheduling.
+
 ## Dependency cycles
 
 Run `MIX_ENV=test mix xref graph --format cycles --fail-above 0` from the repository

@@ -1,4 +1,5 @@
 defmodule SmolBox.TelemetryTest do
+  # Handlers observe all runtime events, including events from other test modules.
   use ExUnit.Case, async: false
   alias SmolBox.{Command, Error, Files, ManagedPeer, Runtime, RuntimeFixture, Telemetry}
   alias SmolBox.Store.Contract
@@ -6,7 +7,7 @@ defmodule SmolBox.TelemetryTest do
 
   test "managed events describe persisted stages and measurements without execution payloads" do
     attach(:forward)
-    context = RuntimeFixture.start()
+    context = RuntimeFixture.start(__MODULE__)
 
     {:ok, command} =
       Command.new(["true", "uploaded-code-secret"], env: [{"SECRET", "credential-secret"}])
@@ -78,7 +79,10 @@ defmodule SmolBox.TelemetryTest do
 
   test "blocking exporters cannot hold up execution, result persistence or cleanup" do
     attach(:block)
-    context = RuntimeFixture.start(telemetry_max_pending: 2, telemetry_timeout_ms: 1000)
+
+    context =
+      RuntimeFixture.start(__MODULE__, telemetry_max_pending: 2, telemetry_timeout_ms: 1000)
+
     assert {:ok, handle} = SmolBox.submit(context.runtime, context.spec)
     assert_receive {:event, _name, _measurements, _metadata}, 1000
     clean = clean_record(context.runtime, handle)
@@ -101,7 +105,7 @@ defmodule SmolBox.TelemetryTest do
         id: :cancellation_gate
       )
 
-    context = RuntimeFixture.start(faults: gate, hold: true)
+    context = RuntimeFixture.start(__MODULE__, faults: gate, hold: true)
     assert {:ok, handle} = SmolBox.submit(context.runtime, context.spec)
     assert_receive {:boundary, :first_output_record, :after, blocked}, 5000
     assert {:ok, ^handle} = SmolBox.cancel(context.runtime, context.spec.scope, context.spec.id)
@@ -133,7 +137,7 @@ defmodule SmolBox.TelemetryTest do
           id: :notification_gate
         )
 
-      context = RuntimeFixture.start(faults: gate)
+      context = RuntimeFixture.start(__MODULE__, faults: gate)
       assert {:ok, handle} = SmolBox.submit(context.runtime, context.spec)
       phase = unquote(phase)
       assert_receive {:boundary, :result_write, ^phase, blocked}, 5000

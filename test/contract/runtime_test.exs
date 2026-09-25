@@ -1,10 +1,10 @@
 defmodule SmolBox.RuntimeTest do
-  use ExUnit.Case, async: false
+  use ExUnit.Case, async: true
   alias SmolBox.{Error, ExecutionSpec, Files, ManagedPeer, Runtime}
   alias SmolBox.Runtime.Config
   alias SmolBox.Store.{Codec, Memory}
 
-  defp setup_runtime(options \\ []), do: SmolBox.RuntimeFixture.start(options)
+  defp setup_runtime(options \\ []), do: SmolBox.RuntimeFixture.start(__MODULE__, options)
 
   for version <- ["1.16.0", "1.16.1", "1.17.0"] do
     test "#{version} approved network policy survives managed execution, identity checks and cleanup" do

@@ -1,4 +1,5 @@
 defmodule SmolBox.CI.HTTPTest do
+  # The curl configuration test changes the shared CURL_HOME environment variable.
   use ExUnit.Case, async: false
   alias SmolBox.CI.{HTTP, Util}
 

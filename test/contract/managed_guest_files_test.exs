@@ -1,5 +1,5 @@
 defmodule SmolBox.ManagedGuestFilesTest do
-  use ExUnit.Case, async: false
+  use ExUnit.Case, async: true
 
   alias SmolBox.{
     Files,
@@ -42,7 +42,7 @@ defmodule SmolBox.ManagedGuestFilesTest do
 
   test "managed transfers verify bytes, preserve policy through restart and retain the machine" do
     {:ok, paths} = GuestPaths.new(upload_roots: ["/app"], download_roots: ["/app"])
-    fixture = RuntimeFixture.start(guest_paths: paths, max_file_bytes: 2_097_152)
+    fixture = RuntimeFixture.start(__MODULE__, guest_paths: paths, max_file_bytes: 2_097_152)
     bytes = :binary.copy(<<0, 255>>, 600_000)
     Agent.update(fixture.artifacts, &Map.put(&1, {"contract", "large"}, bytes))
     {:ok, spec} = machine_spec(fixture)
@@ -105,7 +105,7 @@ defmodule SmolBox.ManagedGuestFilesTest do
     {:ok, paths} = GuestPaths.new(upload_roots: ["/app"], download_roots: ["/app"])
 
     fixture =
-      RuntimeFixture.start(
+      RuntimeFixture.start(__MODULE__,
         guest_paths: paths,
         runtime_version: "1.16.1",
         expected_runtime_version: "1.16.1"

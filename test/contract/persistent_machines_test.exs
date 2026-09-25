@@ -1,5 +1,5 @@
 defmodule SmolBox.PersistentMachinesTest do
-  use ExUnit.Case, async: false
+  use ExUnit.Case, async: true
   alias SmolBox.{Error, Machines, ManagedMachineSpec, ManagedPeer, RuntimeFixture}
   alias SmolBox.Store.Codec
   alias SmolBox.Store.Memory
@@ -23,7 +23,7 @@ defmodule SmolBox.PersistentMachinesTest do
   for mappings <- [[], [%SmolBox.PortMapping{host: 28_731, guest: 8000}]] do
     @mappings mappings
     test "commands retain their machine, stop/start preserves files, and explicit delete releases capacity (ports=#{inspect(@mappings)})" do
-      fixture = RuntimeFixture.start()
+      fixture = RuntimeFixture.start(__MODULE__)
       handle = create(fixture, @mappings)
       created = wait_machine(fixture, handle, &(&1.state == :created))
       assert {:ok, ^handle} = Machines.create(fixture.runtime, created.spec)
@@ -71,7 +71,7 @@ defmodule SmolBox.PersistentMachinesTest do
     end
 
     test "active and unknown commands block commands and lifecycle operations without deleting (ports=#{inspect(@mappings)})" do
-      fixture = RuntimeFixture.start(hold: true)
+      fixture = RuntimeFixture.start(__MODULE__, hold: true)
       handle = create(fixture, @mappings)
       created = wait_machine(fixture, handle, &(&1.state == :created))
       {:ok, _} = Machines.start(fixture.runtime, handle, created.version)
@@ -103,7 +103,7 @@ defmodule SmolBox.PersistentMachinesTest do
     end
 
     test "lost creation response retains ownership uncertainty without adopting or recreating (ports=#{inspect(@mappings)})" do
-      fixture = RuntimeFixture.start(create_lost: true)
+      fixture = RuntimeFixture.start(__MODULE__, create_lost: true)
       handle = create(fixture, @mappings)
       unknown = wait_machine(fixture, handle, &(&1.state == :unknown))
       assert unknown.created_machine == nil
@@ -118,7 +118,7 @@ defmodule SmolBox.PersistentMachinesTest do
     end
 
     test "controller restart reconnects to the same idle machine (ports=#{inspect(@mappings)})" do
-      fixture = RuntimeFixture.start()
+      fixture = RuntimeFixture.start(__MODULE__)
       handle = start_machine(fixture, @mappings)
       {:ok, original} = Machines.inspect(fixture.runtime, handle)
       stop_supervised!(SmolBox.Runtime)
@@ -144,7 +144,7 @@ defmodule SmolBox.PersistentMachinesTest do
           id: :gate
         )
 
-      fixture = RuntimeFixture.start(faults: gate)
+      fixture = RuntimeFixture.start(__MODULE__, faults: gate)
       handle = start_machine(fixture, @mappings)
       {:ok, execution} = Machines.submit(fixture.runtime, handle, fixture.spec)
       assert_receive {:boundary, :dispatch_intent, :after, _blocked}, 5000
@@ -167,7 +167,7 @@ defmodule SmolBox.PersistentMachinesTest do
           id: :gate
         )
 
-      fixture = RuntimeFixture.start(faults: gate)
+      fixture = RuntimeFixture.start(__MODULE__, faults: gate)
       handle = start_machine(fixture, @mappings)
 
       spec = %{
@@ -192,7 +192,7 @@ defmodule SmolBox.PersistentMachinesTest do
     end
 
     test "failed stop stays blocked; explicit quiescent resolution preserves the machine (ports=#{inspect(@mappings)})" do
-      fixture = RuntimeFixture.start(stop_failure: true)
+      fixture = RuntimeFixture.start(__MODULE__, stop_failure: true)
       handle = start_machine(fixture, @mappings)
       {:ok, idle} = Machines.inspect(fixture.runtime, handle)
       {:ok, _} = Machines.stop(fixture.runtime, handle, idle.version)
@@ -223,7 +223,7 @@ defmodule SmolBox.PersistentMachinesTest do
     end
 
     test "lost delete acknowledgment reconciles absence without issuing another delete (ports=#{inspect(@mappings)})" do
-      fixture = RuntimeFixture.start(delete_lost: true)
+      fixture = RuntimeFixture.start(__MODULE__, delete_lost: true)
       handle = start_machine(fixture, @mappings)
       {:ok, idle} = Machines.inspect(fixture.runtime, handle)
       {:ok, _} = Machines.delete(fixture.runtime, handle, idle.version)
@@ -240,7 +240,7 @@ defmodule SmolBox.PersistentMachinesTest do
     end
 
     test "missing machines are not replaced and require explicit quiescent absence resolution (ports=#{inspect(@mappings)})" do
-      fixture = RuntimeFixture.start()
+      fixture = RuntimeFixture.start(__MODULE__)
       handle = start_machine(fixture, @mappings)
       Agent.update(fixture.peer, &%{&1 | machines: %{}})
       assert :ok = Machines.reconcile(fixture.runtime, handle)
@@ -264,7 +264,7 @@ defmodule SmolBox.PersistentMachinesTest do
     end
 
     test "ownership mismatch prevents lifecycle mutation (ports=#{inspect(@mappings)})" do
-      fixture = RuntimeFixture.start()
+      fixture = RuntimeFixture.start(__MODULE__)
       handle = start_machine(fixture, @mappings)
       {:ok, idle} = Machines.inspect(fixture.runtime, handle)
 
@@ -279,7 +279,7 @@ defmodule SmolBox.PersistentMachinesTest do
     end
 
     test "unavailable store cannot be mistaken for a missing machine (ports=#{inspect(@mappings)})" do
-      fixture = RuntimeFixture.start()
+      fixture = RuntimeFixture.start(__MODULE__)
       handle = start_machine(fixture, @mappings)
       stop_supervised!(Memory)
       assert {:error, %{category: :store}} = Machines.inspect(fixture.runtime, handle)
@@ -295,7 +295,7 @@ defmodule SmolBox.PersistentMachinesTest do
     end
 
     test "queued creation can be deleted without worker allocation and await has independent timeout (ports=#{inspect(@mappings)})" do
-      fixture = RuntimeFixture.start(draining: true)
+      fixture = RuntimeFixture.start(__MODULE__, draining: true)
       handle = create(fixture, @mappings)
       assert {:error, %{category: :expired}} = Machines.await(fixture.runtime, handle, 0)
       assert {:error, %{category: :validation}} = Machines.await(fixture.runtime, handle, -1)
@@ -316,7 +316,7 @@ defmodule SmolBox.PersistentMachinesTest do
   end
 
   test "store port conflicts remain unassigned and cannot silently retry on another worker" do
-    fixture = RuntimeFixture.start(slots: 2)
+    fixture = RuntimeFixture.start(__MODULE__, slots: 2)
     mappings = [%SmolBox.PortMapping{host: 28_731, guest: 8000}]
     handle = start_machine(fixture, mappings)
     {:ok, owner} = Machines.inspect(fixture.runtime, handle)
@@ -345,7 +345,7 @@ defmodule SmolBox.PersistentMachinesTest do
   end
 
   test "changed observed mappings prohibit delete even when name and creation timestamp match" do
-    fixture = RuntimeFixture.start()
+    fixture = RuntimeFixture.start(__MODULE__)
     handle = start_machine(fixture, [%SmolBox.PortMapping{host: 28_731, guest: 8000}])
     {:ok, original} = Machines.inspect(fixture.runtime, handle)
 
@@ -362,7 +362,7 @@ defmodule SmolBox.PersistentMachinesTest do
   end
 
   test "downgrading a store capability blocks mapped recovery and command admission" do
-    fixture = RuntimeFixture.start()
+    fixture = RuntimeFixture.start(__MODULE__)
     handle = start_machine(fixture, [%SmolBox.PortMapping{host: 28_731, guest: 8000}])
     {:ok, original} = Machines.inspect(fixture.runtime, handle)
     stop_supervised!(SmolBox.Runtime)
@@ -392,7 +392,7 @@ defmodule SmolBox.PersistentMachinesTest do
   end
 
   test "a dispatched port conflict retains ownership until explicit quiescent resolution" do
-    fixture = RuntimeFixture.start(start_port_conflict: true)
+    fixture = RuntimeFixture.start(__MODULE__, start_port_conflict: true)
     handle = create(fixture, [%SmolBox.PortMapping{host: 28_731, guest: 8000}])
     created = wait_machine(fixture, handle, &(&1.state == :created))
     {:ok, _} = Machines.start(fixture.runtime, handle, created.version)
@@ -420,7 +420,7 @@ defmodule SmolBox.PersistentMachinesTest do
   end
 
   test "background launch releases the command slot, persists launch evidence and retains reservations" do
-    fixture = RuntimeFixture.start()
+    fixture = RuntimeFixture.start(__MODULE__)
     handle = start_machine(fixture, [%SmolBox.PortMapping{host: 28_731, guest: 8000}])
     {:ok, command} = SmolBox.Command.new(["python", "-m", "http.server"], background: true)
     spec = %{fixture.spec | id: "server", command: command, outputs: []}
@@ -468,7 +468,7 @@ defmodule SmolBox.PersistentMachinesTest do
   end
 
   test "malformed background acknowledgment remains unknown and is never replayed" do
-    fixture = RuntimeFixture.start(launch_stdout: "not-a-pid")
+    fixture = RuntimeFixture.start(__MODULE__, launch_stdout: "not-a-pid")
     handle = start_machine(fixture, [])
     {:ok, command} = SmolBox.Command.new(["server"], background: true)
     spec = %{fixture.spec | command: command, outputs: []}
@@ -511,7 +511,7 @@ defmodule SmolBox.PersistentMachinesTest do
           id: :gate
         )
 
-      fixture = RuntimeFixture.start(faults: gate)
+      fixture = RuntimeFixture.start(__MODULE__, faults: gate)
       handle = start_machine(fixture, [%SmolBox.PortMapping{host: 28_731, guest: 8000}])
       {:ok, command} = SmolBox.Command.new(["server"], background: true)
       spec = %{fixture.spec | command: command, outputs: []}
@@ -542,7 +542,7 @@ defmodule SmolBox.PersistentMachinesTest do
         id: :gate
       )
 
-    fixture = RuntimeFixture.start(faults: gate)
+    fixture = RuntimeFixture.start(__MODULE__, faults: gate)
     handle = start_machine(fixture, [])
     {:ok, command} = SmolBox.Command.new(["server"], background: true)
     spec = %{fixture.spec | command: command, outputs: []}
@@ -575,7 +575,7 @@ defmodule SmolBox.PersistentMachinesTest do
   end
 
   test "a store without extended execution support rejects launch before staging or dispatch" do
-    fixture = RuntimeFixture.start()
+    fixture = RuntimeFixture.start(__MODULE__)
     handle = start_machine(fixture, [])
     stop_supervised!(SmolBox.Runtime)
 
@@ -593,7 +593,7 @@ defmodule SmolBox.PersistentMachinesTest do
   end
 
   test "ownership mismatch prevents a background command from reaching the worker" do
-    fixture = RuntimeFixture.start()
+    fixture = RuntimeFixture.start(__MODULE__)
     handle = start_machine(fixture, [])
     {:ok, owned} = Machines.inspect(fixture.runtime, handle)
 
@@ -622,7 +622,7 @@ defmodule SmolBox.PersistentMachinesTest do
         id: :gate
       )
 
-    fixture = RuntimeFixture.start(faults: gate)
+    fixture = RuntimeFixture.start(__MODULE__, faults: gate)
     handle = start_machine(fixture, [])
     {:ok, command} = SmolBox.Command.new(["server"], background: true)
     spec = %{fixture.spec | command: command, inputs: [], outputs: []}
@@ -650,7 +650,7 @@ defmodule SmolBox.PersistentMachinesTest do
         id: :stale_observation_gate
       )
 
-    fixture = RuntimeFixture.start(faults: gate)
+    fixture = RuntimeFixture.start(__MODULE__, faults: gate)
     handle = start_machine(fixture, [])
     coordinator = SmolBox.Runtime.coordinator(fixture.runtime)
     wait(fn -> {:ok, :sys.get_state(coordinator)} end, &(&1.active == %{}))
