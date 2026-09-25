@@ -295,7 +295,7 @@ defmodule SmolBox.PersistentMachinesTest do
     end
 
     test "queued creation can be deleted without worker allocation and await has independent timeout (ports=#{inspect(@mappings)})" do
-      fixture = RuntimeFixture.start(__MODULE__, draining: true)
+      fixture = RuntimeFixture.start(__MODULE__, draining: true, wait_ready: false)
       handle = create(fixture, @mappings)
       assert {:error, %{category: :expired}} = Machines.await(fixture.runtime, handle, 0)
       assert {:error, %{category: :validation}} = Machines.await(fixture.runtime, handle, -1)
@@ -459,7 +459,7 @@ defmodule SmolBox.PersistentMachinesTest do
     assert {:ok, _} = SmolBox.cancel(fixture.runtime, elem(execution, 0), elem(execution, 1))
     assert {:ok, next} = Machines.submit(fixture.runtime, handle, %{fixture.spec | id: "next"})
     assert {:ok, %{state: :completed}} = SmolBox.await(fixture.runtime, next, 5000)
-    idle = wait_machine(fixture, handle, &is_nil(&1.active_execution))
+    idle = RuntimeFixture.await_idle(fixture.runtime, handle)
     assert {:ok, _} = Machines.delete(fixture.runtime, handle, idle.version)
     deleted = wait_machine(fixture, handle, &(&1.state == :deleted))
     assert deleted.reservation == nil and deleted.reserved_ports == []

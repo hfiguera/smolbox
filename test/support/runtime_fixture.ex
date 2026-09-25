@@ -105,6 +105,9 @@ defmodule SmolBox.RuntimeFixture do
 
     runtime = ExUnit.Callbacks.start_supervised!({Runtime, config})
 
+    if Keyword.get(options, :wait_ready, true),
+      do: wait_ready(runtime, System.monotonic_time(:millisecond) + 10_000)
+
     %{
       runtime: runtime,
       peer: peer,
@@ -113,6 +116,23 @@ defmodule SmolBox.RuntimeFixture do
       spec: spec,
       options: config
     }
+  end
+
+  # Failed startup probes are cached for five seconds. Establish readiness before
+  # tests begin their command/machine observation budgets. Tests of unavailable
+  # or draining workers opt out explicitly with wait_ready: false.
+  defp wait_ready(runtime, deadline) do
+    case SmolBox.workers(runtime) do
+      {:ok, [%{status: :ready}]} ->
+        :ok
+
+      report ->
+        assert System.monotonic_time(:millisecond) < deadline,
+               "fixture worker did not become ready: #{inspect(report)}"
+
+        Process.sleep(20)
+        wait_ready(runtime, deadline)
+    end
   end
 
   # Machine idle state can precede the scheduler's final claim/write. Tests

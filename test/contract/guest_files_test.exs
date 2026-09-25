@@ -111,7 +111,7 @@ defmodule SmolBox.GuestFilesTest do
     end
   end
 
-  test "an uncertain upload is never replayed and observation deadlines bound a stalled download" do
+  test "an uncertain upload is never replayed and deadlines bound file observation" do
     parent = self()
 
     peer =
@@ -135,7 +135,10 @@ defmodule SmolBox.GuestFilesTest do
       )
 
     before = System.monotonic_time(:millisecond)
-    assert {:error, %{category: :transport}} = Client.download(peer, "app", "/out/file", 100)
+    assert {:error, %{category: category}} = Client.download(peer, "app", "/out/file", 100)
+    # Preflight shares the operation budget: it may expire before the stalled
+    # transfer starts, while expiry inside the transport is a transport error.
+    assert category in [:expired, :transport]
     assert System.monotonic_time(:millisecond) - before < 1500
   end
 end

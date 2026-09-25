@@ -15,7 +15,9 @@ defmodule SmolBox.WorkerPoolTest do
         {[inventory_unavailable: true], :degraded}
       ] do
     test "#{inspect(options)} prevents admission while allowing read-only inspection" do
-      context = RuntimeFixture.start(__MODULE__, unquote(options))
+      context =
+        RuntimeFixture.start(__MODULE__, Keyword.put(unquote(options), :wait_ready, false))
+
       status = unquote(status)
       wait_status(context.runtime, status)
       spec = %{context.spec | queue_ms: 50}
@@ -53,7 +55,7 @@ defmodule SmolBox.WorkerPoolTest do
   end
 
   test "a healthy second worker receives work while a degraded first worker stays inspectable" do
-    context = RuntimeFixture.start(__MODULE__, unready: true)
+    context = RuntimeFixture.start(__MODULE__, unready: true, wait_ready: false)
     stop_supervised!(Runtime)
     {second, port} = ManagedPeer.start()
 

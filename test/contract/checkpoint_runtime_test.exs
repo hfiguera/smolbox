@@ -97,15 +97,20 @@ defmodule SmolBox.CheckpointRuntimeTest do
     end
   end
 
-  defp wait_cleanup(runtime, handle, attempts \\ 100) do
-    {:ok, record} = SmolBox.fetch(runtime, elem(handle, 0), elem(handle, 1))
+  defp wait_cleanup(runtime, handle, attempts \\ 100)
 
-    if record.cleanup == :complete or attempts == 0,
-      do: record,
-      else:
-        (
-          Process.sleep(20)
-          wait_cleanup(runtime, handle, attempts - 1)
-        )
+  defp wait_cleanup(_runtime, _handle, 0),
+    do: flunk("checkpoint cleanup did not release capacity")
+
+  defp wait_cleanup(runtime, {scope, id} = handle, attempts) do
+    # Verified absence and capacity release are separate durable writes.
+    case SmolBox.fetch(runtime, scope, id) do
+      {:ok, %{cleanup: :complete, reservation: nil} = record} ->
+        record
+
+      _pending ->
+        Process.sleep(20)
+        wait_cleanup(runtime, handle, attempts - 1)
+    end
   end
 end

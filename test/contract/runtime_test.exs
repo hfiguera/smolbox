@@ -210,7 +210,7 @@ defmodule SmolBox.RuntimeTest do
   end
 
   test "draining, bounded pending admission, and pre-dispatch cancellation do no guest work" do
-    context = setup_runtime(draining: true, max_pending: 1)
+    context = setup_runtime(draining: true, max_pending: 1, wait_ready: false)
     assert {:ok, handle} = SmolBox.submit(context.runtime, context.spec)
     assert {:ok, ^handle} = SmolBox.submit(context.runtime, context.spec)
 
@@ -286,7 +286,9 @@ defmodule SmolBox.RuntimeTest do
 
     eventually(fn ->
       {:ok, record} = SmolBox.fetch(context.runtime, context.spec.scope, context.spec.id)
-      record.cleanup == :failed
+      coordinator = :sys.get_state(Runtime.coordinator(context.runtime))
+      # Reconcile acknowledges an already active task without launching another.
+      record.cleanup == :failed and coordinator.active == %{} and coordinator.scan == nil
     end)
 
     Agent.update(context.peer, &%{&1 | machines: %{}})
