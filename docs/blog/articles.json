@@ -1,5 +1,16 @@
 [
   {
+    "slug": "running-vm-ready-application",
+    "title": "Your VM is running. Is your application ready?",
+    "description": "Start an HTTP service, break its startup command, and check what a running VM actually tells you. A practical SmolBox guide to application readiness.",
+    "published_on": "2026-09-25",
+    "updated_on": "2026-09-25",
+    "version": "0.2.0",
+    "category": "Practical integrations",
+    "image": "readiness.png",
+    "image_alt": "A running machine and a ready application are separate observations. Check the expected HTTP response."
+  },
+  {
     "slug": "build-a-persistent-workspace",
     "title": "Build a persistent workspace with Phoenix and SmolBox 0.2.0",
     "description": "Edit a page, run successive commands, and restart Phoenix without losing the project. A runnable workspace teaches machine, command, and browser lifetimes.",
