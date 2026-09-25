@@ -65,7 +65,7 @@ defmodule SmolBox.Store do
   pass the adapter conformance suite and demonstrate their transaction semantics.
   """
 
-  alias SmolBox.{Error, Execution}
+  alias SmolBox.{Error, Execution, Machine, ManagedMachine}
   @type context :: term()
   @type guard :: %{owner: String.t(), generation: pos_integer(), version: pos_integer()}
   @type lease :: %{owner: String.t(), generation: pos_integer(), until_ms: non_neg_integer()}
@@ -84,13 +84,207 @@ defmodule SmolBox.Store do
           disk_gb: non_neg_integer()
         }
 
-  @doc """
-  Optional retained-machine transaction boundary. Adapters implementing this must
-  advertise `managed_machines: 1` in capabilities. Mutations atomically coordinate
-  machine records, executions, assignment indexes, and shared worker reservations.
-  See `SmolBox.Store.Memory` and `SmolBox.Store.MachineOps` for the contract.
+  @typedoc "Supported operations in the optional managed-machine transaction boundary."
+  @type machine_operation ::
+          :accept
+          | :fetch
+          | :list
+          | :due
+          | :claim
+          | :claim_version
+          | :write
+          | :reserve
+          | :request
+          | :submit
+          | :finish
+          | :resolve
+
+  @typedoc "The last machine ID in a scoped list page; nil starts or ends the scan."
+  @type machine_list_cursor :: String.t() | nil
+  @type machine_result :: {:ok, ManagedMachine.t()} | {:error, Error.t()}
+  @type machine_list_result ::
+          {:ok, [ManagedMachine.t()], machine_list_cursor()} | {:error, Error.t()}
+  @type machine_due_result ::
+          {:ok, [ManagedMachine.t()], cursor()} | {:error, Error.t()}
+  @type machine_action :: :start | :stop | :delete
+
+  @typedoc """
+  Verified absence or a matching created/stopped incarnation, supplied only after
+  operator quiescence. A store cannot establish quiescence from this value alone.
   """
-  @callback machine(context(), atom(), list()) :: term()
+  @type machine_resolution :: :absent | Machine.t()
+
+  @typedoc """
+  Mutable fields accepted by `:write`. Omitted fields retain their values.
+  Adapters must validate the resulting record with `SmolBox.ManagedMachine`;
+  these types do not authorize arbitrary lifecycle transitions. Creation evidence
+  and established absence cannot be replaced. Identity, specification, assignment,
+  claims, reservations and the command slot are not writable through this operation.
+  """
+  @type machine_changes :: [
+          state:
+            :accepted
+            | :creating
+            | :created
+            | :running
+            | :stopped
+            | :starting
+            | :stopping
+            | :deleting
+            | :unknown
+            | :missing
+            | :conflict
+            | :deleted,
+          operation: :create | machine_action() | nil,
+          phase: :pending | :dispatching | :uncertain | nil,
+          created_machine: Machine.t() | nil,
+          observed_machine: Machine.t() | nil,
+          next_due_at_ms: non_neg_integer(),
+          last_error: Error.t() | nil,
+          operation_deadline_ms: non_neg_integer() | nil,
+          absence_at_ms: non_neg_integer() | nil
+        ]
+
+  @doc """
+  Optional managed-machine transaction boundary.
+
+  Advertise `managed_machines: 1` only when all operations below are implemented.
+  Each operation has its own callback signature and result type. Arguments remain
+  positional lists for compatibility with existing adapters. Elixir list types
+  describe permitted elements, not their order or exact count; the following
+  argument layouts are normative. Times are nonnegative Unix milliseconds, versions
+  are positive integers, `owner` is a validated identifier and `ttl` is 1–900,000 ms.
+  `key` means `t:SmolBox.ManagedMachine.key/0` except for `:finish`, which uses an
+  execution key and execution guard. Guards contain owner, generation and version.
+
+  | Operation | Ordered arguments | Success |
+  |---|---|---|
+  | `:accept` | `[initial_machine, max_pending]` | `{:ok, machine}` |
+  | `:fetch` | `[key]` | `{:ok, machine}` |
+  | `:list` | `[scope, after_id_or_nil, limit]` | `{:ok, machines, next_id_or_nil}` |
+  | `:due` | `[now, after_cursor_or_nil, limit]` | `{:ok, machines, next_cursor_or_nil}` |
+  | `:claim` | `[key, owner, now, ttl]` | `{:ok, machine}` |
+  | `:claim_version` | `[key, expected_version, owner, now, ttl]` | `{:ok, machine}` |
+  | `:write` | `[key, guard, changes, now]` | `{:ok, machine}` |
+  | `:reserve` | `[key, guard, {worker_id, machine_name, capacity}, now]` | `{:ok, machine}` |
+  | `:request` | `[key, action, expected_version, now]` | `{:ok, machine}` |
+  | `:submit` | `[key, initial_execution, max_pending, now]` | `{:ok, execution}` |
+  | `:finish` | `[execution_key, execution_guard, now]` | `{:ok, execution}` |
+  | `:resolve` | `[key, guard, observation_or_absent, now]` | `{:ok, machine}` |
+
+  All operations may return `{:error, SmolBox.Error.t()}`. An absent identity is
+  `:not_found`; unavailable or corrupt storage is a store error, never absence.
+  Unsupported operation names or argument layouts return `:validation`.
+
+  ## Reading and accepting records
+
+  `:accept` validates an initial record and atomically deduplicates by scoped
+  identity and fingerprint. Matching duplicates return the existing record,
+  including a deleted tombstone, even when admission is full. Different
+  fingerprints return `:identity_conflict`. `max_pending` is 1–10,000 and bounds
+  accepted machines for `:accept`, or accepted executions for `:submit`.
+
+  `:fetch` includes deleted records. `:list` is scoped, sorted by ID and includes
+  tombstones. `:due` scans across scopes, sorted by `{next_due_at_ms, scope, id}`,
+  excluding deleted machines and machines with an active execution. Both scans
+  use exclusive cursors, limits of 1–100 and return nil when no further eligible
+  records remain. An empty page is `{:ok, [], nil}`, not `:not_found`.
+
+  ## Ownership and lifecycle
+
+  `:claim` acquires or renews the machine claim, checking the shared worker lease
+  when assigned. `:claim_version` additionally checks the expected record version
+  in the same transaction; mismatch returns `:stale_version` without changing it.
+  `:write`, `:reserve` and `:resolve` require a valid machine guard and worker lease.
+  Stale versions return `:stale_version`; invalid or expired claims return
+  `:stale_claim`. Store fencing never fences requests already sent to a worker.
+
+  `:write` applies `t:machine_changes/0`, increments the version and preserves
+  immutable evidence. `:reserve` assigns an accepted machine, accounting for
+  disposable and retained reservations together. Persist assignment, capacity and
+  any port claims atomically; capacity exhaustion returns `:admission_exhausted`,
+  assignment reuse `:identity_conflict`, and occupied ports `:port_conflict`.
+
+  `:request` persists start/stop/delete intent against the expected version.
+  Repeating the last `{action, expected_version}` returns the existing record;
+  a superseded version returns `:stale_version`. Active commands or lifecycle
+  work block new requests with `:admission_exhausted`. An unassigned accepted or
+  conflicted machine may be deleted without a worker mutation. Assigned machines
+  retain capacity and ports until verified deletion or resolved absence.
+
+  ## Commands and recovery
+
+  `:submit` atomically inserts an initial execution and occupies the machine's
+  single command slot. It requires an idle running machine and matching scope,
+  artifact and profile. Identical execution fingerprints for the same machine
+  return the existing execution even when busy; other duplicates return
+  `:identity_conflict`. Commands inherit assignment and creation evidence, carry
+  no reservation, and share execution admission with disposable work.
+
+  `:finish` guards the execution and updates both records atomically. Completed
+  commands, confirmed background launches, and cancelled/expired commands whose
+  specifications have no inputs release the command slot and mark cleanup complete.
+  Other terminal or unknown outcomes retain the slot, mark machine state unknown
+  and command cleanup failed. Machine capacity and ports remain reserved.
+
+  `:resolve` handles only unknown/missing/conflicted machines after the caller
+  has established operator quiescence and verified the observation. A matching
+  created/stopped incarnation permits reuse; `:absent` records deletion and
+  releases capacity and ports. Resolve any active terminal/unknown command in the
+  same transaction, preserving its outcome while completing cleanup. Never replay
+  work, delete identity history, or infer quiescence from a stopped observation.
+
+  Every mutation must roll back machine, execution, assignment, port and capacity
+  changes together on failure. `SmolBox.Store.MachineOps` and
+  `SmolBox.Store.RecordOps` supply pure checks, not transactions. Run the shared
+  MachineContract and PortContract suites against each adapter's actual storage.
+  This contract clarification changes no callback arity, wire format or schema.
+  """
+  @callback machine(context(), :accept, [ManagedMachine.t() | pos_integer()]) :: machine_result()
+  @callback machine(context(), :fetch, [ManagedMachine.key()]) :: machine_result()
+  @callback machine(context(), :list, [String.t() | machine_list_cursor() | pos_integer()]) ::
+              machine_list_result()
+  @callback machine(context(), :due, [non_neg_integer() | cursor() | pos_integer()]) ::
+              machine_due_result()
+  @callback machine(context(), :claim, [ManagedMachine.key() | String.t() | non_neg_integer()]) ::
+              machine_result()
+  @callback machine(
+              context(),
+              :claim_version,
+              [ManagedMachine.key() | String.t() | non_neg_integer()]
+            ) :: machine_result()
+  @callback machine(
+              context(),
+              :write,
+              [ManagedMachine.key() | guard() | machine_changes() | non_neg_integer()]
+            ) :: machine_result()
+  @callback machine(
+              context(),
+              :reserve,
+              [
+                ManagedMachine.key()
+                | guard()
+                | {String.t(), String.t(), capacity()}
+                | non_neg_integer()
+              ]
+            ) :: machine_result()
+  @callback machine(
+              context(),
+              :request,
+              [ManagedMachine.key() | machine_action() | non_neg_integer()]
+            ) :: machine_result()
+  @callback machine(
+              context(),
+              :submit,
+              [ManagedMachine.key() | Execution.t() | non_neg_integer()]
+            ) :: result()
+  @callback machine(context(), :finish, [Execution.key() | guard() | non_neg_integer()]) ::
+              result()
+  @callback machine(
+              context(),
+              :resolve,
+              [ManagedMachine.key() | guard() | machine_resolution() | non_neg_integer()]
+            ) :: machine_result()
   @optional_callbacks machine: 3
 
   @callback capabilities(context()) ::
