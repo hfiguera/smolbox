@@ -372,3 +372,46 @@ metadata, media, RSS and sitemap; public documentation links returned HTTP 200.
 The independent finish review approved the article after the playback fix.
 No new automated no-JavaScript or reduced-motion test pass is claimed. This
 branch preview does not publish the post.
+
+## Application readiness article review — September 25, 2026
+
+Added a practical SmolBox 0.2.0 article separating a running VM, a background
+launch receipt and an application readiness response. Its explanatory figure
+compares a working application with a missing executable in four steps. Readers
+can select a case, advance manually, play, pause or replay. Motion starts only
+after reader input and pauses offscreen or when the document is hidden. The
+caption distinguishes the animation from a recording or timing measurement.
+
+The figure reuses the existing palette, platform fonts, fine rules, panel and
+control radii. At the existing mobile figure breakpoint (640px), the request
+and response stack while the controls wrap. Its local headline uses a fluid
+size (26–36px); supporting text reuses sizes already present elsewhere in the
+stylesheet. Original social SVG and PNG provenance is in `media-provenance.md`.
+This is an extension of the technical field guide; the shared tokens and
+sidecar remain unchanged.
+
+Reviewed five captures at 1440 × 1000 and 390 × 844, including both ends of the
+mobile figure. Manual browser checks covered both cases, Next step, Back to
+start, four-step Replay, Pause and pausing offscreen. No horizontal page overflow
+was found. Source inspection confirms a meaningful static figure with hidden
+controls before JavaScript and suppression of animated paths under reduced
+motion. No new emulated reduced-motion, no-JavaScript or automated accessibility
+pass is claimed.
+
+The single detector run returned 35 advisories: 30 concern existing literal
+type sizes, supporting colors and radii outside the compact token frontmatter;
+five concern the figure's local type sizes. The latter reuse incumbent sizes
+or interpolate between them. These are documented implementation differences,
+with no new palette or radius drift; unrelated incumbent styles were preserved.
+
+The downloadable example and recorded evidence cover three live native macOS
+cases on smolvm 1.17.0: warmup 503 followed by the expected 200, a missing
+executable with a running VM and diagnostic exit 127, and an explicit background
+relaunch after stop/start. The working cases rejected the wrong instance and
+retained two startup-counter entries; every case verified deletion and released
+reservations. Eight blog tests, the 11-page build and verifier, the build with
+analytics enabled, JavaScript syntax and script formatting passed. These are
+functional observations, with no Linux or performance result implied.
+
+Independent finish review disposition: ship, with no material fixes. The post
+remains a local, unpublished preview on `feature/blog-application-readiness`.

@@ -1,0 +1,122 @@
+{
+  "recorded_on": "2026-09-25",
+  "platform": "macOS arm64, native virtualization",
+  "smolbox_version": "0.2.0 repository checkout",
+  "source_base": "56c5afd",
+  "smolvm_version": "1.17.0",
+  "storage": "PostgreSQL durable example, dedicated partition and stable keys",
+  "image_sha256": "bb3ed187bc4cfc1cc6f7e4e09c8f96ac1c2d47dcd2902653e6c1bd2ba6ca017c",
+  "profile": {
+    "storage_gib": 2,
+    "overlay_gib": 2
+  },
+  "mapping": {
+    "host": 19845,
+    "guest": 8000,
+    "probe": "host loopback /ready"
+  },
+  "script_sha256": "fbb4309b725ff6b79dc58ab4aa33c25f75176e11afacaada71d1ca53108a91ce",
+  "cases": {
+    "healthy": [
+      {
+        "scenario": "healthy",
+        "vm": "running"
+      },
+      {
+        "application": "ready",
+        "phase": "first start",
+        "observations": "[:unreachable, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, :ready]"
+      },
+      {
+        "wrong_instance_rejected": true
+      },
+      {
+        "application": "ready",
+        "phase": "after stop/start",
+        "observations": "[:unreachable, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, :ready]"
+      },
+      {
+        "startup_count": 2,
+        "retained_file": true
+      },
+      {
+        "phase": "delete",
+        "absence_verified": true,
+        "reservations_released": true
+      }
+    ],
+    "broken": [
+      {
+        "scenario": "broken",
+        "vm": "running"
+      },
+      {
+        "probe": "[:unreachable, :unreachable, :unreachable, :unreachable, :unreachable, :unreachable, :unreachable, :unreachable]",
+        "application": "not ready"
+      },
+      {
+        "console_lines": 20,
+        "console_is_application_stdout": false
+      },
+      {
+        "diagnostic_exit": 127,
+        "diagnostic_stderr": "/bin/sh: exec: line 0: /missing-readiness-app: not found\n"
+      },
+      {
+        "phase": "delete",
+        "absence_verified": true,
+        "reservations_released": true
+      }
+    ],
+    "background": [
+      {
+        "scenario": "background",
+        "vm": "running"
+      },
+      {
+        "launch_pid": 183,
+        "readiness": "not yet checked"
+      },
+      {
+        "application": "ready",
+        "phase": "first start",
+        "observations": "[:unreachable, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, :ready]"
+      },
+      {
+        "wrong_instance_rejected": true
+      },
+      {
+        "after_vm_restart": "background service absent"
+      },
+      {
+        "launch_pid": 184,
+        "readiness": "not yet checked"
+      },
+      {
+        "application": "ready",
+        "phase": "after stop/start",
+        "observations": "[:unreachable, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, {:http_status, 503}, :ready]"
+      },
+      {
+        "startup_count": 2,
+        "retained_file": true
+      },
+      {
+        "phase": "delete",
+        "absence_verified": true,
+        "reservations_released": true
+      }
+    ]
+  },
+  "limits": [
+    "These are functional observations, not timing measurements or a benchmark.",
+    "This script was exercised on native macOS, not Linux.",
+    "Uses repository durable-host helpers and locked dependencies, not a standalone Hex installation.",
+    "The animation explains the observations; it is not a recording."
+  ],
+  "preflight_corrections": [
+    "An initial worker data path exceeded the macOS VM control socket path limit. After draining the old worker requests, verifying ownership and resolving the operation with quiescence evidence, the failed machine was deleted and its reservation released. A shorter dedicated worker path was used for subsequent runs.",
+    "An early healthy run reached readiness across stop/start, but its foreground diagnostic exceeded the approved profile timeout at validation. That machine was explicitly deleted. The final script sets the diagnostic timeout to five seconds and was rerun in full.",
+    "The artifact directory was corrected to mode 0700 before worker dispatch. Req timeout options were updated to the locked 0.7.4 syntax."
+  ]
+}

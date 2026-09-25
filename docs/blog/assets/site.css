@@ -171,3 +171,58 @@ p { margin: 0 0 1.4rem; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition: none !important; }
 }
+
+/* Readiness is a separate observation from VM state. */
+.readiness-figure { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.readiness-controls { padding: 20px 24px; background: var(--wash); }
+.readiness-controls[hidden] { display: none; }
+.readiness-cases, .readiness-playback { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.readiness-figure button { border: 1px solid var(--line); border-radius: 4px; padding: 10px 14px; background: var(--paper); color: var(--ink); font: inherit; font-size: 14px; font-weight: 650; cursor: pointer; }
+.readiness-figure button[aria-pressed="true"], .readiness-figure .readiness-play { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.readiness-figure button:hover { border-color: var(--accent); }
+.readiness-stage { padding: 32px 24px 24px; --signal: var(--accent); }
+.prose .readiness-headline { font-size: clamp(26px, 3vw, 36px); line-height: 1.15; font-weight: 750; letter-spacing: -.025em; margin: 0 0 14px; }
+.prose .readiness-detail { font-size: 16px; line-height: 1.5; min-height: 48px; color: var(--muted); margin-bottom: 28px; }
+.readiness-lanes { display: grid; gap: 26px; margin: 0 0 32px; }
+.readiness-lane { display: grid; grid-template-columns: 105px 1fr 140px; gap: 16px; align-items: center; font-size: 15px; }
+.readiness-lane strong { font-size: 15px; }
+.readiness-rail { height: 4px; position: relative; background: var(--line); }
+.readiness-signal { position: absolute; inset: 0; background: var(--accent); transform-origin: left; transform: scaleX(0); transition: transform 700ms cubic-bezier(.16,1,.3,1), background-color 250ms; }
+.machine-signal { transform: scaleX(1); }
+.readiness-stage[data-phase="boot"] .machine-signal { transform: scaleX(.2); }
+.readiness-stage[data-phase="warm"] .app-signal { transform: scaleX(.55); }
+.readiness-stage[data-phase="ready"] .app-signal { transform: scaleX(1); }
+.readiness-stage[data-phase="broken"] .app-signal { transform: scaleX(.2); background: var(--amber); }
+.readiness-exchange { display: grid; grid-template-columns: 1fr 100px 1fr; gap: 12px; align-items: center; padding: 24px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.readiness-label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+.readiness-exchange code { font-size: 16px; }
+.readiness-response { display: block; font-size: 18px; line-height: 1.35; color: var(--signal); }
+.readiness-stage[data-phase="broken"], .readiness-stage[data-phase="warm"] { --signal: var(--amber); }
+.readiness-wire { width: 100%; overflow: visible; }
+.readiness-wire path { stroke-width: 2; fill: none; }
+.readiness-wire-base { stroke: var(--line); }
+.readiness-outgoing, .readiness-incoming { stroke: var(--signal); stroke-width: 4 !important; stroke-dasharray: 25 160; stroke-dashoffset: 190; opacity: 0; }
+.readiness-stage.is-moving .readiness-outgoing { animation: readiness-request 1.4s cubic-bezier(.16,1,.3,1) 1; }
+.readiness-stage.is-moving .readiness-incoming { animation: readiness-request 1.4s cubic-bezier(.16,1,.3,1) .7s 1; }
+.readiness-stage[data-phase="broken"] .readiness-incoming { animation: none; }
+@keyframes readiness-request { 0% { opacity: 0; stroke-dashoffset: 185; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; stroke-dashoffset: -25; } }
+.prose .readiness-explanation { font-size: 16px; line-height: 1.6; min-height: 78px; margin: 22px 0 0; }
+.readiness-step { color: var(--muted); font-size: 13px; }
+.prose .readiness-figure figcaption { padding: 0 24px 20px; margin-top: 20px; }
+@media (max-width: 640px) {
+  .readiness-controls, .readiness-stage { padding: 20px 16px; }
+  .readiness-cases { display: grid; grid-template-columns: 1fr 1fr; align-items: stretch; }
+  .readiness-cases button { padding: 10px 8px; }
+  .readiness-lane { grid-template-columns: 82px 1fr 98px; gap: 9px; }
+  .readiness-lane, .readiness-lane strong { font-size: 13px; }
+  .readiness-exchange { grid-template-columns: 1fr; gap: 6px; }
+  .readiness-wire { width: 100px; height: 30px; }
+  .prose .readiness-detail { min-height: 72px; }
+  .prose .readiness-headline { min-height: 2.3em; }
+  .prose .readiness-explanation { min-height: 128px; }
+  .prose .readiness-figure figcaption { padding-inline: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .readiness-signal { transition: background-color 150ms; }
+  .readiness-stage.is-moving .readiness-outgoing, .readiness-stage.is-moving .readiness-incoming { animation: none; }
+}

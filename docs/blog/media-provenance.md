@@ -190,3 +190,28 @@ The captures contain only a new demo identity and authored project fixtures.
 The user's existing workspace, files, private configuration and keys are absent.
 The isolated demo machine was explicitly deleted, then its controller, worker
 and database processes were stopped. Linux app qualification was not performed.
+
+## Application readiness — September 25, 2026
+
+- `media/running-vm-ready-application/readiness-social.svg` is an original
+  1200 × 630 geometric composition. `readiness.png` is its local Sharp
+  rasterization, with origin metadata embedded. No external imagery or
+  generative image model was used.
+- The article's inline HTML/SVG figure and CSS/JavaScript animate two authored
+  scenarios: a service warming up and a missing startup executable. The moving
+  request and response marks explain observations; they are not packet captures,
+  timing measurements or a screen recording. The caption states this distinction.
+- Playback starts only on request, ends after one sequence, and has Pause,
+  Replay and manual stepping controls. Offscreen and hidden documents pause it.
+  Reduced motion removes spatial transitions and packet motion. Without
+  JavaScript, the final static explanation remains visible and controls stay hidden.
+- `readiness.exs` runs three live scenarios using the repository's durable host
+  helpers. `validation.json` records their native macOS worker observations,
+  environment, script digest, preflight corrections and evidence limits.
+  All three final cases verified deletion and reservation release. Both working
+  services returned 503 before the expected 200, rejected the wrong instance,
+  and retained the startup counter across VM stop/start. The missing executable
+  left the VM running; a separate safe diagnostic execution returned 127.
+
+The fixture contains no user project data or private credentials. This article
+extends the existing blog visual system and introduces no external runtime assets.
