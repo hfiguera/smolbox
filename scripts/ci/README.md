@@ -130,6 +130,11 @@ ports belong to each test. Controller restarts reuse the fixture's options and
 name. Tests within a module remain sequential; independent modules run with
 `async: true`. Do not reuse a registered name across async modules.
 
+The runtime fixture waits for worker readiness before returning, so a cached
+startup health failure does not consume a test's command observation deadline.
+Tests that deliberately configure unavailable or draining workers must pass
+`wait_ready: false` and assert their expected worker state themselves.
+
 Keep tests that change shared state synchronous: the HTTP tests modify
 `CURL_HOME`, the telemetry tests capture events from all runtimes, and the blog
 tests configure the global syntax highlighter registry. The dispatcher tests use

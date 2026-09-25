@@ -4,7 +4,7 @@ defmodule SmolBox.CheckpointRuntimeTest do
   alias SmolBox.Runtime.WorkerConfig
 
   test "approved checkpoint reuses identity, collects outputs and verifies disposal" do
-    context = start_checkpoint()
+    context = RuntimeFixture.start(__MODULE__, checkpoint: true)
     assert {:ok, handle} = SmolBox.submit(context.runtime, context.spec)
     assert {:ok, ^handle} = SmolBox.submit(context.runtime, context.spec)
     assert {:ok, record} = SmolBox.await(context.runtime, handle, 5000)
@@ -15,7 +15,7 @@ defmodule SmolBox.CheckpointRuntimeTest do
   end
 
   test "approval is bound to profile, platform, runtime, digest and source kind" do
-    context = start_checkpoint()
+    context = RuntimeFixture.start(__MODULE__, checkpoint: true)
     [worker] = context.options[:workers]
     [checkpoint] = worker.checkpoints
     assert WorkerConfig.supports?(worker, context.spec)
@@ -57,7 +57,7 @@ defmodule SmolBox.CheckpointRuntimeTest do
   end
 
   test "lost creation response never starts, replays or deletes a machine without evidence" do
-    context = start_checkpoint(create_lost: true)
+    context = RuntimeFixture.start(__MODULE__, checkpoint: true, create_lost: true)
     assert {:ok, handle} = SmolBox.submit(context.runtime, context.spec)
     assert {:ok, record} = SmolBox.await(context.runtime, handle, 5000)
     assert record.state == :failed
@@ -82,7 +82,7 @@ defmodule SmolBox.CheckpointRuntimeTest do
           %{"branchable" => false},
           %{"state" => "running"}
         ] do
-      context = start_checkpoint(created_allocations: changes)
+      context = RuntimeFixture.start(__MODULE__, checkpoint: true, created_allocations: changes)
       assert {:ok, handle} = SmolBox.submit(context.runtime, context.spec)
       assert {:ok, record} = SmolBox.await(context.runtime, handle, 5000)
       assert record.state == :failed and record.created_machine == nil
@@ -94,28 +94,6 @@ defmodule SmolBox.CheckpointRuntimeTest do
       stop_supervised!(SmolBox.Runtime)
       stop_supervised!(SmolBox.Store.Memory)
       stop_supervised!(Agent)
-    end
-  end
-
-  defp start_checkpoint(options \\ []) do
-    context = RuntimeFixture.start(__MODULE__, Keyword.put(options, :checkpoint, true))
-    # A failed startup probe is cached for five seconds. Establish readiness
-    # before starting the independent five-second command observation budget.
-    wait_ready(context.runtime, System.monotonic_time(:millisecond) + 10_000)
-    context
-  end
-
-  defp wait_ready(runtime, deadline) do
-    case SmolBox.workers(runtime) do
-      {:ok, [%{status: :ready}]} ->
-        :ok
-
-      report ->
-        assert System.monotonic_time(:millisecond) < deadline,
-               "checkpoint worker did not become ready: #{inspect(report)}"
-
-        Process.sleep(20)
-        wait_ready(runtime, deadline)
     end
   end
 

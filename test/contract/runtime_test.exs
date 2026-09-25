@@ -210,7 +210,7 @@ defmodule SmolBox.RuntimeTest do
   end
 
   test "draining, bounded pending admission, and pre-dispatch cancellation do no guest work" do
-    context = setup_runtime(draining: true, max_pending: 1)
+    context = setup_runtime(draining: true, max_pending: 1, wait_ready: false)
     assert {:ok, handle} = SmolBox.submit(context.runtime, context.spec)
     assert {:ok, ^handle} = SmolBox.submit(context.runtime, context.spec)
 
