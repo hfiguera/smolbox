@@ -26,9 +26,15 @@ controls. Multi-tenant operation and macOS host enforcement are outside that
 campaign's scope.
 
 The host owns authorization, prepared runtime artifacts, worker installation,
-proxy credentials, persistence, and artifact retention. SmolBox owns one command
-per disposable machine, identity, observation, and evidence-based cleanup. It
-does not interpret JSON business results or build/publish language packages.
+proxy credentials, durable storage operation, and artifact retention. SmolBox
+manages identity, admission, ownership evidence, observation, and recovery for
+both disposable executions and retained machines. `SmolBox.submit/2` runs one
+command per disposable VM and tracks its cleanup. `SmolBox.Machines` gives a
+retained VM its own lifecycle and reservations, independent of successive commands;
+command completion or cancellation does not delete it. The host authorizes its
+explicit deletion and any recovery action. See
+[Retained machine integration](#retained-machine-integration-0-2-0).
+SmolBox does not interpret JSON business results or build/publish language packages.
 
 ## Explicit supervision
 
@@ -88,7 +94,9 @@ explicitly to retain that worker, or `"1.14.1"`
 for an existing worker. See [runtime selection](compatibility.md#runtime-selection).
 This is a host configuration fragment, not a self-provisioning script. The host
 must verify artifact bytes on the worker and retain that immutable artifact.
-Its image must have neutral `/bin/true` startup and no automatic workload restart.
+This disposable execution setup requires neutral `/bin/true` startup and no
+automatic workload restart. Retained image machines can instead use explicitly
+approved [startup workloads](workloads.md) on smolvm 1.17.0.
 Neither HTTP reachability nor a supplied digest proves those facts. `platform`
 is `:linux` or `:macos`; architectures initially tested are Linux `x86_64` and
 macOS `aarch64`. Linux arm64 remains unqualified.
@@ -167,10 +175,11 @@ stable across restarts and distinct from a database encryption key. Matching
 scoped duplicates return the original handle even if that worker/profile is
 later removed from configuration. Conflicting specifications fail.
 
-Preparation reserves CPU, guest memory plus declared host overhead, disk
-allocations, and a slot before VM creation. It persists an opaque machine name,
-creates the prepared VM, records creation evidence, starts its neutral workload,
-and stages inputs. Both the input read and a download after staging must match
+For the disposable execution above, preparation reserves CPU, guest memory plus
+declared host overhead, disk allocations, and a slot before VM creation. It
+persists an opaque machine name, creates the prepared VM, records creation
+evidence, starts its neutral workload, and stages inputs. Both the input read and
+a download after staging must match
 the declared size and SHA-256 before dispatch intent is written. An ambiguous
 creation without persisted creation evidence never authorizes adoption or deletion
 using the name alone. A missing-machine observation is also insufficient when
@@ -240,21 +249,22 @@ budget. Hosts must synchronize clocks across controllers. Concurrent store
 mutations keep `updated_at_ms` nondecreasing even if request timestamps arrive
 out of order. Deadlines are not reset on restart.
 
-Unknown executions are stopped promptly when ownership permits it. Their guest
-disks remain until the persisted execution deadline plus `retention_ms`; this is
-the evidence-retention policy, not a result-recovery promise. Retained unknown
-machines are checked periodically, including for a previously sent exec that
+For disposable executions, unknown work is stopped promptly when ownership permits
+it. Guest disks remain until the persisted execution deadline plus `retention_ms`;
+this is the evidence-retention policy, not a result-recovery promise. These
+disposable VMs are checked periodically, including for a previously sent exec that
 arrives after stop and implicitly starts the VM again. Stop is an observation of
 termination at that point in time; it does not fence pending worker requests.
 Reobserving a running VM revokes that current termination evidence until another
 stop is confirmed. The original command remains unknown and is never resent. For these records,
 the fixed cleanup deadline includes that intentional wait followed by the cleanup
-budget. The original command is never resent. Retained or failed-cleanup machines
+budget. Machines held for this evidence retention or failed cleanup
 continue to consume reservations.
 
 Cleanup checks creation evidence before stop/delete and verifies absence before
-releasing capacity. Finished executions are deleted directly after collection;
-unknown executions retain their disks and use graceful stop until retention expires.
+releasing capacity. Disposable VMs are deleted directly after command completion
+and collection; unknown executions retain their disks and use graceful stop until
+retention expires.
 A stop failure during retention never authorizes immediate disposal. See the
 [recovery guide](recovery.md#preservation-and-disposal) for the state and budget
 rules. Failed cleanup does not rewrite successful command results.
@@ -264,6 +274,17 @@ confirm absence after an operator has resolved a resource whose creation was
 already verified. Missing creation evidence requires separate operator resolution;
 a momentary 404 cannot authorize releasing that reservation. It cannot bypass
 ownership checks or authorize another command.
+
+Retained machines have a different lifetime. Cancelling a managed command does
+not automatically stop or delete its machine. An unknown command keeps the
+machine's command slot occupied until explicit recovery; neither a caller timeout
+nor an observed stop fences requests already sent to the worker. Machine retention
+does not use execution `retention_ms`: stopped, missing and uncertain machines
+keep their reservations. Release requires verified deletion or absence after
+operator quiescence. Follow the
+[managed-command recovery procedure](persistent-machines.md#cancellation-and-uncertain-outcomes)
+before permitting reuse. Execution history and deleted machine identities remain
+in the store for deduplication.
 
 `drain_worker` excludes a worker from subsequent admission-task launches in this
 runtime while preserving observation and cleanup. An admission task already in
@@ -324,8 +345,10 @@ to reconcile. Memory mode loses this authority when its store process stops.
 ## Upgrading a worker
 
 SmolBox 0.2.0 defaults to smolvm **1.17.0** on Linux x86_64 and macOS Apple
-Silicon. Published SmolBox 0.1.5 retains the 0.1.4 default, **1.16.1**. SmolBox 0.1.3 defaults to 1.16.0; 0.1.2
-defaults to 1.14.6. Worker selection does not migrate execution records.
+Silicon. SmolBox 0.1.4 and 0.1.5 default to **1.16.1**. SmolBox 0.1.3 defaults
+to 1.16.0; 0.1.2 defaults to 1.14.6. Worker selection does not migrate execution records.
+When upgrading controllers from 0.1.x, follow the coordinated
+[0.2.0 controller and store upgrade](upgrading-to-0.2.0.md) separately.
 Before enabling checkpoints in 0.1.5, follow the separate
 [controller and schema-v3 upgrade procedure](recovery.md#upgrading-to-0-1-5).
 Applications upgrading from 0.1.2 still need the
@@ -357,12 +380,17 @@ For an existing worker:
 2. Keep the original endpoint and store available until owned executions have
    finished observation, collection and verified cleanup. Resolve unknown work
    using its original identity; do not resubmit commands or discard reservations.
+   Retained machines do not expire when commands finish. This empty-worker
+   procedure also requires their explicitly authorized deletion and verified
+   absence. If they must be preserved, defer this procedure; SmolBox does not
+   migrate retained machines to another worker.
 3. Once the worker is empty and no requests remain in flight, stop it and install
    the complete pinned distribution. Verify binary, agent, libkrun and artifact
    digests. Do not mix files from different distributions.
 4. Recheck the deployment controls and approved artifact/profile revisions.
-   Disk requests below the 1.14.6, 1.16.0 or 1.16.1 templates require working `resize2fs` on the
-   worker host (`brew install e2fsprogs` on macOS). Missing it caused file loss
+   Disk requests below the 1.14.6, 1.16.0, 1.16.1 or 1.17.0 templates require
+   working `resize2fs` on the worker host (`brew install e2fsprogs` on macOS).
+   Missing it caused file loss
    after restart in our macOS check, despite successful health/start/exec replies.
    Verify a small owned file survives stop/start before admitting work; see
    [the observed failure](compatibility.md#macos-1-14-6-prerequisites).
@@ -386,8 +414,8 @@ already accepted by a proxy or worker. A delayed original request can arrive aft
 a stop; this is possible without SmolBox issuing any retry.
 
 Do not treat `termination_confirmed` as a guarantee that no queued request can
-subsequently start work. The runtime continues observation during unknown-outcome
-retention and stops a reobserved owned VM. Hard deadline/cancellation guarantees
+subsequently start work. For disposable executions, the runtime continues observation
+during unknown-outcome retention and stops a reobserved owned VM. Hard deadline/cancellation guarantees
 under arbitrary proxy queues, worker scheduler stalls, or controller loss require
 an independently verified worker-side fencing/quiescence mechanism. None is
 certified in this implementation. A configured execution deadline is an
