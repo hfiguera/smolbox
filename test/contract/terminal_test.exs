@@ -352,7 +352,7 @@ defmodule SmolBox.TerminalTest do
     assert_receive {:DOWN, ^monitor, :process, _, :normal}, 5000
     assert :ok = Terminal.input(live, "exit")
     assert {:ok, %{state: :completed}} = SmolBox.await(runtime, second, 5000)
-    {:ok, idle} = Machines.await(runtime, machine, 5000)
+    idle = RuntimeFixture.await_idle(runtime, machine)
     assert idle.reserved_ports == [28_731] and idle.reservation.slots == 1
     assert {:ok, _} = Machines.delete(runtime, machine, idle.version)
 

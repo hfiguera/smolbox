@@ -135,6 +135,11 @@ startup health failure does not consume a test's command observation deadline.
 Tests that deliberately configure unavailable or draining workers must pass
 `wait_ready: false` and assert their expected worker state themselves.
 
+Before a versioned machine mutation following command completion, use
+`RuntimeFixture.await_idle/2` to wait for the controller's final claim and write.
+A command result or a cleared command slot alone does not mean that the
+controller has finished updating the machine version.
+
 Keep tests that change shared state synchronous: the HTTP tests modify
 `CURL_HOME`, the telemetry tests capture events from all runtimes, and the blog
 tests configure the global syntax highlighter registry. The dispatcher tests use

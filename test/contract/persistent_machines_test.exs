@@ -459,7 +459,7 @@ defmodule SmolBox.PersistentMachinesTest do
     assert {:ok, _} = SmolBox.cancel(fixture.runtime, elem(execution, 0), elem(execution, 1))
     assert {:ok, next} = Machines.submit(fixture.runtime, handle, %{fixture.spec | id: "next"})
     assert {:ok, %{state: :completed}} = SmolBox.await(fixture.runtime, next, 5000)
-    idle = wait_machine(fixture, handle, &is_nil(&1.active_execution))
+    idle = RuntimeFixture.await_idle(fixture.runtime, handle)
     assert {:ok, _} = Machines.delete(fixture.runtime, handle, idle.version)
     deleted = wait_machine(fixture, handle, &(&1.state == :deleted))
     assert deleted.reservation == nil and deleted.reserved_ports == []
