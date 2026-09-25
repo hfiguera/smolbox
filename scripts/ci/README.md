@@ -140,6 +140,12 @@ Before a versioned machine mutation following command completion, use
 A command result or a cleared command slot alone does not mean that the
 controller has finished updating the machine version.
 
+Draining a worker prevents allocation, not claims or writes to queued records.
+Queued machines are not idle: use the `:machine_claim` fault boundary to control
+reconciliation around an inspect/delete pair. Cover both deletion before the
+claim and rejection of an old version after reconciliation; a sleep or a fresh
+inspection alone does not exclude a competing write.
+
 Keep tests that change shared state synchronous: the HTTP tests modify
 `CURL_HOME`, the telemetry tests capture events from all runtimes, and the blog
 tests configure the global syntax highlighter registry. The dispatcher tests use
