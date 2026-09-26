@@ -29,6 +29,12 @@ directories and buffered files up to 16 MiB. Defaults remain `/workspace` and
 1 MiB. Policies persist through controller recovery and apply to ordinary command
 working directories too.
 
+[Images and registry artifacts](docs/images-and-registry-artifacts.md) let retained
+machines provision from approved, digest-pinned registry artifacts or OCI images.
+Preparation identity survives controller recovery. OCI machines support managed
+image pulls with typed results and conservative handling of lost responses.
+Shared host caches remain an operator responsibility.
+
 Try the [community workspace app](https://github.com/hfiguera/smolbox/tree/main/examples/community_workspace) for a
 browser walkthrough of SmolBox 0.2.0: persistent machines, commands, a real
 terminal, larger file transfers, background launch evidence and a mapped service,

@@ -98,7 +98,9 @@ defmodule SmolBox.Store.RecordOps do
   def reservation(record, worker, machine, worker_lease, capacity, used, now) do
     needed = resources(record)
 
-    with :ok <- pending(record, now),
+    with false <- SmolBox.Source.remote?(record.spec.artifact),
+         false <- is_struct(record.spec.command, SmolBox.ImagePull),
+         :ok <- pending(record, now),
          true <- Validation.identifier?(worker) and SmolBox.MachineSpec.valid_name?(machine),
          :ok <- worker_owned(%{record | worker_id: worker}, worker_lease, record.claim_owner, now),
          true <- fits?(needed, used, capacity) do

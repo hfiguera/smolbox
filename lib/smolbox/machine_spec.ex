@@ -1,6 +1,11 @@
 defmodule SmolBox.MachineSpec do
   @moduledoc """
-  Create a machine from a host-approved prepared artifact.
+  Create a machine from a host-approved prepared artifact or pinned remote source.
+
+  A `SmolBox.Source` can replace the path argument. Registry artifacts download
+  on the worker host independently of guest networking. OCI images require an
+  explicit `SmolBox.NetworkPolicy` allowing their registry and download hosts;
+  SmolBox never enables networking implicitly. Remote sources require 1.19.0.
 
   The path is on the worker host, not the Elixir host. `source: :checkpoint`
   selects an approved idle `.smolcheckpoint` instead of an image. It requires
@@ -35,7 +40,7 @@ defmodule SmolBox.MachineSpec do
   @schema [
     ports: [type: :any, default: []],
     workload: [type: :any, default: nil],
-    source: [type: {:in, [:image, :checkpoint]}, default: :image],
+    source: [type: :any, default: :image],
     network: [type: :any, default: :offline],
     cpus: [type: :pos_integer, default: 1],
     memory_mb: [type: :pos_integer, default: 256],
@@ -60,11 +65,11 @@ defmodule SmolBox.MachineSpec do
 
   @type t :: %__MODULE__{
           name: String.t(),
-          source: :image | :checkpoint,
+          source: :image | :checkpoint | SmolBox.Source.t(),
           ports: [SmolBox.PortMapping.t()],
           workload: SmolBox.Workload.t() | nil,
           network: :offline | SmolBox.NetworkPolicy.t(),
-          artifact_path: String.t(),
+          artifact_path: String.t() | nil,
           cpus: pos_integer(),
           memory_mb: pos_integer(),
           storage_gb: pos_integer(),
@@ -72,7 +77,8 @@ defmodule SmolBox.MachineSpec do
         }
 
   @doc """
-  Describe a machine using a name and absolute artifact path on the worker.
+  Describe a machine using a name and absolute artifact path on the worker,
+  or a validated `SmolBox.Source` instead of the path.
 
   `:source` defaults to `:image` (`.smolmachine`). `:checkpoint` requires an idle,
   offline `.smolcheckpoint` and smolvm 1.16.1, 1.17.0 or 1.19.0. Allocations describe its captured
@@ -89,7 +95,20 @@ defmodule SmolBox.MachineSpec do
   and `SmolBox.ExecutionSpec` for managed submissions instead.
   """
   @spec new(term(), term(), term()) :: {:ok, t()} | {:error, Error.t()}
-  def new(name, artifact_path, options \\ []) do
+  def new(name, artifact_path, options \\ [])
+
+  def new(name, %SmolBox.Source{} = source, options) do
+    with :ok <- SmolBox.Source.validate(source),
+         true <- Keyword.keyword?(options) and not Keyword.has_key?(options, :source) do
+      if source.kind == :local,
+        do: new(name, source.path, options),
+        else: new(name, nil, Keyword.put(options, :source, source))
+    else
+      _invalid -> invalid()
+    end
+  end
+
+  def new(name, artifact_path, options) do
     with true <- Keyword.keyword?(options),
          {:ok, options} <- NimbleOptions.validate(options, @schema),
          {:ok, ports} <- SmolBox.PortMapping.normalize(options[:ports]),
@@ -122,7 +141,7 @@ defmodule SmolBox.MachineSpec do
   defp workload_valid?(spec),
     do:
       SmolBox.Workload.optional?(spec.workload) and
-        (spec.workload == nil or spec.source == :image)
+        (spec.workload == nil or spec.source != :checkpoint)
 
   defp allocations?(spec),
     do:
@@ -172,6 +191,12 @@ defmodule SmolBox.MachineSpec do
   defp wire_source(%{source: :checkpoint}, wire),
     do: Map.drop(wire, ["storageGb", "overlayGb", "entrypoint", "cmd"])
 
+  defp wire_source(%{source: %SmolBox.Source{kind: :registry} = source}, wire),
+    do: wire |> Map.delete("from") |> Map.put("registryRef", source.reference)
+
+  defp wire_source(%{source: %SmolBox.Source{kind: :oci} = source}, wire),
+    do: wire |> Map.delete("from") |> Map.put("image", source.reference)
+
   defp wire_source(_spec, wire), do: wire
 
   defp network_wire(%{ports: [_ | _], network: :offline}),
@@ -187,17 +212,16 @@ defmodule SmolBox.MachineSpec do
   defp network_valid?(%{source: :checkpoint, network: network, ports: ports}),
     do: network == :offline and ports == []
 
+  defp network_valid?(%{source: %SmolBox.Source{kind: :oci}, network: network}),
+    do: network != :offline and SmolBox.NetworkPolicy.valid?(network)
+
   defp network_valid?(%{network: network}), do: SmolBox.NetworkPolicy.valid?(network)
 
-  defp artifact_path?(path, source) when source in [:image, :checkpoint] do
-    is_binary(path) and byte_size(path) <= 1024 and String.valid?(path) and
-      String.starts_with?(path, "/") and
-      String.ends_with?(
-        path,
-        if(source == :checkpoint, do: ".smolcheckpoint", else: ".smolmachine")
-      ) and
-      not String.contains?(path, ["\0", "/../", "/./", "//"])
-  end
+  defp artifact_path?(path, source) when source in [:image, :checkpoint],
+    do: SmolBox.ArtifactPath.valid?(path, source)
+
+  defp artifact_path?(nil, %SmolBox.Source{kind: kind} = source)
+       when kind in [:registry, :oci], do: SmolBox.Source.validate(source) == :ok
 
   defp artifact_path?(_path, _source), do: false
 

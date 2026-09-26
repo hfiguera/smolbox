@@ -33,5 +33,14 @@ defmodule SmolBox.FaultStore do
   end
 
   defp event(:machine, [:claim, _arguments]), do: :machine_claim
+
+  defp event(:machine, [:write, [_key, _guard, changes, _now]]) do
+    cond do
+      changes[:phase] == :prepared -> :source_prepared
+      changes[:phase] == :preparing -> :source_preparing
+      true -> :machine_write
+    end
+  end
+
   defp event(operation, _arguments), do: operation
 end

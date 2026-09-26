@@ -37,6 +37,14 @@ explicit deletion and any recovery action. See
 [Retained machine integration](#retained-machine-integration-0-2-0).
 SmolBox does not interpret JSON business results or build/publish language packages.
 
+Hosts can also approve immutable registry artifacts and OCI sources through
+`WorkerConfig.sources`. Registry preparation has its own durable stage; shared
+cache storage and host registry access remain operator responsibilities. Managed
+OCI image pulls share the machine's command slot and preserve uncertain outcomes.
+Store adapters must implement `registry_sources: 1` and `managed_images: 1` before
+advertising them. See [Images and registry artifacts](images-and-registry-artifacts.md)
+for authentication boundaries, codec v10 and the runnable PostgreSQL example.
+
 ## Explicit supervision
 
 Start a conforming store and artifact adapter first. `SmolBox.Store.Memory` is

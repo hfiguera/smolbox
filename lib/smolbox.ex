@@ -103,7 +103,13 @@ defmodule SmolBox do
   defp disposable_command(%{command: %SmolBox.Terminal.Spec{}}),
     do: Session.error(:unsupported_capability, :submit)
 
+  defp disposable_command(%{command: %SmolBox.ImagePull{}}),
+    do: Session.error(:unsupported_capability, :submit)
+
   defp disposable_command(%{command: %{background: true}}),
+    do: Session.error(:unsupported_capability, :submit)
+
+  defp disposable_command(%{artifact: %{"kind" => kind}}) when kind in ["registry", "oci"],
     do: Session.error(:unsupported_capability, :submit)
 
   defp disposable_command(_spec), do: :ok

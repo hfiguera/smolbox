@@ -100,6 +100,7 @@ defmodule SmolBox.Store.MachineOps do
 
   def attach(machine, execution, now) do
     with :ok <- RecordOps.initial(execution),
+         true <- supported_operation?(machine, execution),
          true <- machine.state == :running and ManagedMachine.idle?(machine),
          true <-
            execution.scope == machine.scope and execution.spec.profile == machine.spec.profile and
@@ -121,6 +122,11 @@ defmodule SmolBox.Store.MachineOps do
       _busy -> error(:admission_exhausted)
     end
   end
+
+  defp supported_operation?(machine, %{spec: %{command: %SmolBox.ImagePull{}}}),
+    do: machine.spec.artifact["kind"] == "oci"
+
+  defp supported_operation?(_machine, _execution), do: true
 
   def finish(machine, execution, now) do
     with true <- machine.active_execution == Execution.key(execution),

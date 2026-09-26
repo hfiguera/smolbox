@@ -1,7 +1,10 @@
 defmodule SmolBox.Runtime.Observation do
   @moduledoc false
   alias SmolBox.{Client, Error, LaunchResult, Result, Telemetry}
-  alias SmolBox.Runtime.{Session, TerminalObservation}
+  alias SmolBox.Runtime.{ImageObservation, Session, TerminalObservation}
+
+  def run(session, %{spec: %{command: %SmolBox.ImagePull{}}} = record),
+    do: ImageObservation.run(session, record)
 
   def run(session, %{spec: %{command: %SmolBox.Terminal.Spec{}}} = record),
     do: TerminalObservation.run(session, record)

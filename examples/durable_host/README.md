@@ -542,3 +542,58 @@ when copying an example. A first Dialyzer run builds a PLT and can take several
 minutes; subsequent local/CI runs reuse it while checking dependency changes.
 These static checks do not start a worker and do not replace the example's tests
 or real-worker qualification.
+## Registry artifacts and machine images
+
+`SmolBox.DurableHost.RegistryDemo` consumes an operator-approved source and keeps
+its identity in PostgreSQL. It requires smolvm 1.19.0, a prepared environment with
+`/bin/sh` and `/bin/cat`, and the database setup described below. Use isolated
+worker data and store partitions for qualification. The declared 20 GiB storage,
+10 GiB overlay and 768 MiB VMM overhead must cover your actual worker templates.
+This example does not prepare or publish images.
+
+Keep these values identical between invocations. Provision private, persistent
+32-byte key files and a private artifact directory using your normal host setup.
+The key bytes must not be placed in the environment or printed.
+
+```sh
+export SMOLBOX_WORKER_URL='http://127.0.0.1:19480'
+export SMOLBOX_ALLOW_LOOPBACK=true
+export SMOLBOX_PLATFORM=linux
+export SMOLBOX_ARCHITECTURE=x86_64
+export SMOLBOX_SOURCE_KIND=registry
+export SMOLBOX_REGISTRY_REFERENCE='registry.example.com/team/environment@sha256:<platform-manifest-digest>'
+export SMOLBOX_REGISTRY_CONTENT_SHA256='<prepared-file-sha256>'
+export SMOLBOX_STORE_PARTITION=registry-demo
+export SMOLBOX_EXECUTION_ID=computer-1
+export SMOLBOX_ENCRYPTION_KEY_FILE=/private/keys/store.key
+export SMOLBOX_FINGERPRINT_KEY_FILE=/private/keys/fingerprint.key
+export SMOLBOX_ARTIFACT_DIR=/private/smolbox-objects
+
+mix run -e 'SmolBox.DurableHost.RegistryDemo.run("prepare")'
+# The first BEAM exits. Keep the worker and PostgreSQL running.
+mix run -e 'SmolBox.DurableHost.RegistryDemo.run("resume")'
+```
+
+Use `macos` and `aarch64` on Apple Silicon. The loopback option is for a local
+worker or protected tunnel; secure remote deployments require the worker's
+protected endpoint. Configure the worker's registry credentials separately.
+
+`prepare` creates and starts the machine, writes a file and reads it. `resume`
+checks the recorded source, reads the file in a new controller process, stops and
+starts the same machine, reads again, then explicitly deletes and verifies absence
+and capacity release. Output includes source and preparation evidence, never keys.
+Failures retain the original identity and machine for operator recovery.
+
+To demonstrate OCI creation and a managed image pull, start a **new** example
+identity with `SMOLBOX_SOURCE_KIND=oci`, set `SMOLBOX_REGISTRY_REFERENCE` to its
+approved OCI platform manifest and `SMOLBOX_PULL_REFERENCE` to a different approved
+OCI platform manifest. Set `SMOLBOX_REGISTRY_NETWORK_HOSTS` to the exact operator
+allowlist needed by those registries, as comma-separated DNS names. Registry
+authentication and content redirects may use additional hosts; SmolBox does not
+add them automatically. Run `prepare`, then `images`, then `resume` in separate
+BEAM invocations. The image step prints inventory counts and typed pull evidence;
+the later reads verify that pulling did not replace the machine's files.
+
+Managed image pulling is unavailable on prepared `.smolmachine` machines:
+upstream returns synthetic `packed` metadata instead of fetching the requested
+image. An empty inventory also cannot prove absence on a stopped VM.

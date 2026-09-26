@@ -37,6 +37,7 @@ defmodule SmolBox.ManagedMachine do
                 :last_request,
                 :operation_deadline_ms,
                 :resolved_at_ms,
+                preparation: nil,
                 reserved_ports: [],
                 schema: 1,
                 version: 1,
@@ -71,7 +72,8 @@ defmodule SmolBox.ManagedMachine do
     :next_due_at_ms,
     :last_error,
     :operation_deadline_ms,
-    :absence_at_ms
+    :absence_at_ms,
+    :preparation
   ]
 
   @spec new(ManagedMachineSpec.t(), String.t(), non_neg_integer()) ::
@@ -99,7 +101,8 @@ defmodule SmolBox.ManagedMachine do
   def validate(%__MODULE__{} = record) do
     with true <- Validation.struct_shape?(record, __MODULE__),
          :ok <- ManagedMachineSpec.validate(record.spec),
-         true <- fields?(record) and ownership?(record) and lifecycle?(record) do
+         true <-
+           fields?(record) and ownership?(record) and lifecycle?(record) and preparation?(record) do
       :ok
     else
       _invalid -> invalid()
@@ -119,6 +122,9 @@ defmodule SmolBox.ManagedMachine do
          true <-
            is_nil(record.absence_at_ms) or
              Keyword.get(changes, :absence_at_ms, record.absence_at_ms) == record.absence_at_ms,
+         true <-
+           record.preparation == nil or
+             Keyword.get(changes, :preparation, record.preparation) == record.preparation,
          true <- record.state != :deleted or Keyword.get(changes, :state, :deleted) == :deleted do
       patch = Map.new(changes)
       patch = if patch[:state] == :deleted, do: Map.put(patch, :reservation, nil), else: patch
@@ -213,13 +219,28 @@ defmodule SmolBox.ManagedMachine do
   defp lifecycle?(r) do
     Enum.all?([
       r.operation in [nil, :create, :start, :stop, :delete],
-      r.phase in [nil, :pending, :dispatching, :uncertain],
+      r.phase in [nil, :pending, :preparing, :prepared, :dispatching, :uncertain],
       r.operation == nil == (r.phase == nil),
       r.state not in [:created, :running, :stopped] or r.created_machine != nil,
       r.active_execution == nil or (r.operation == nil and r.state in [:running, :unknown]),
       deletion?(r)
     ])
   end
+
+  defp preparation?(r) do
+    (r.preparation == nil or
+       (r.worker_id != nil and
+          SmolBox.ArtifactPreparation.matches?(r.preparation, r.spec.artifact))) and
+      (r.phase not in [:preparing, :prepared] or
+         (r.operation == :create and r.spec.artifact["kind"] == "registry")) and
+      (r.phase != :prepared or r.preparation != nil) and source_intent?(r)
+  end
+
+  defp source_intent?(%{worker_id: worker, created_machine: nil, resolved_at_ms: nil} = record)
+       when not is_nil(worker),
+       do: not SmolBox.Source.remote?(record.spec.artifact) or record.operation == :create
+
+  defp source_intent?(_record), do: true
 
   defp deletion?(%{state: :deleted} = r),
     do:
