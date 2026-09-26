@@ -1,12 +1,12 @@
 # Compatibility evidence
 
-Version: `0.2.0`. The library's supported qualification is
+Version: `0.2.1`. The library's supported qualification is
 `:development`; requested hard-control options remain unsupported. The original
 release evidence below records the client/controller contract on Linux and macOS.
 
 ## smolvm 1.19.0 qualification
 
-**Default in this checkout.** Linux x86_64 and macOS Apple Silicon passed the
+**Default in SmolBox 0.2.1.** Linux x86_64 and macOS Apple Silicon passed the
 execution, recovery, checkpoint, persistent workspace, network and worker fault
 campaign. Explicit 1.17.0 and earlier supported workers remain admitted. Published
 0.2.0 keeps its 1.17.0 default and the historical results below.

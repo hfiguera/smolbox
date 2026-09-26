@@ -2,8 +2,25 @@
 
 ## Unreleased
 
+## 0.2.1
+
+**Worker default change:** SmolBox now expects smolvm **1.19.0** when the worker
+version is omitted. If your worker still runs 1.17.0, explicitly configure
+`runtime_version: "1.17.0"` before upgrading SmolBox, or upgrade the worker
+separately. No SmolBox store schema, codec or SQL migration is introduced when
+upgrading from 0.2.0. See [Upgrading to 0.2.1](docs/upgrading-to-0.2.1.md).
+
+- Add a Phoenix LiveView community workspace example demonstrating persistent
+  machines, commands, terminals, files, background services and durable recovery.
+  It retains its published 0.2.0 dependency lock and explicit smolvm 1.17.0 pin.
+- Run isolated contract test modules concurrently and fix lifecycle/deadline test
+  races. These improve test execution and reliability, not application throughput.
+- Clarify disposable and retained machine responsibilities and deployment limits.
+  Add practical articles about persistent workspaces and application readiness.
+- Update the development/test dependency ex_slop to 0.4.5.
+
 - Qualify smolvm 1.19.0 on Linux x86_64 and macOS Apple Silicon and make it the
-  checkout default. Retain explicit 1.17.0 and earlier supported workers. Expand
+  default. Retain explicit 1.17.0 and earlier supported workers. Expand
   runtime gates, wire/schema fixtures and recovery coverage without adding new
   upstream features or changing store schemas. Worker installation is separate;
   pin existing workers and checkpoint approvals to their actual runtime. See the

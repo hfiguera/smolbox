@@ -1,6 +1,7 @@
 # Minimal host example
 
-This checkout defaults to smolvm **1.19.0**; published 0.2.0 retains 1.17.0.
+SmolBox 0.2.1 defaults to smolvm **1.19.0**; 0.2.0 retains 1.17.0.
+See [Upgrading to 0.2.1](../../docs/upgrading-to-0.2.1.md) before updating an existing worker configuration.
 Follow [the coordinated upgrade guide](../../docs/upgrading-to-0.2.0.md) before
 using new features against an existing store.
 Set `SMOLBOX_RUNTIME_VERSION=1.16.1` explicitly for an existing 1.16.1 worker.
