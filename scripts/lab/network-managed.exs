@@ -33,7 +33,7 @@ artifact = %{
 {:ok, worker} =
   WorkerConfig.new(
     client: client,
-    runtime_version: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.17.0"),
+    runtime_version: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.19.0"),
     platform: :linux,
     architecture: "x86_64",
     profiles: [profile],
@@ -112,7 +112,7 @@ File.write!(
   Jason.encode!(
     %{
       status: "passed",
-      runtime: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.17.0"),
+      runtime: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.19.0"),
       command_exit: 0,
       cleanup: "complete",
       duplicate_submission: "same_execution",

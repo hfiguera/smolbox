@@ -1,14 +1,14 @@
 # Deployment and trust boundaries
 
-SmolBox **0.2.0** defaults to **smolvm 1.17.0** on Linux x86_64 and macOS
-Apple Silicon. Existing workers can retain an explicit `runtime_version: "1.16.1"`.
-Upgrading from 0.1.x requires a coordinated controller/store upgrade; updating the
-library does not install or upgrade the worker. See
-[Upgrading to 0.2.0](upgrading-to-0.2.0.md) and the
-[1.17.0 qualification](compatibility.md#smolvm-1-17-0-qualification).
+This checkout defaults to **smolvm 1.19.0** on Linux x86_64 and macOS Apple
+Silicon. Published SmolBox 0.2.0 still defaults to 1.17.0. Keep existing workers
+explicitly pinned to their installed version; updating SmolBox does not install
+smolvm. See the [1.19.0 qualification](runtime-1.19.0-qualification.md) for results,
+upgrade limits and checkpoint compatibility.
+
 
 Controlled networking permits explicit operator-approved outbound policies on
-smolvm 1.16.0, 1.16.1 and 1.17.0. Offline remains the default; enabling networking
+smolvm 1.16.0, 1.16.1, 1.17.0 and 1.19.0. Offline remains the default; enabling networking
 does not extend prior offline qualification evidence. See
 [Controlled network access](network-access.md) for DNS/IP semantics, profile
 approval and the separate enforcement fixture.
@@ -113,11 +113,11 @@ to another worker.
 Managed execution rejects unsupported profiles and always requests no guest
 networking without explicit allowlists, host mounts, host sockets, GPU/CUDA or nested Docker.
 Explicit fixed TCP [port mappings](port-mappings.md) are separately supported on
-managed image machines and the low-level client with smolvm 1.17.0. These expose
+managed image machines and the low-level client with smolvm 1.17.0 or 1.19.0. These expose
 guest services through worker listeners and require host authorization; they
 provide no TLS, authentication, firewall policy or readiness guarantee.
 Neutral `/bin/true` startup remains the default. Explicit startup workloads on
-retained image machines require smolvm 1.17.0 and host approval; automatic restart
+retained image machines require smolvm 1.17.0 or 1.19.0 and host approval; automatic restart
 policies remain unsupported. A running VM does not prove application readiness,
 and console diagnostics do not include application stdout/stderr. See
 [Workloads and console diagnostics](workloads.md).
@@ -232,10 +232,10 @@ an observed stop alone does not establish operator quiescence.
    durable example's authenticated index backfill instructions for its older schema.
 4. Pin and verify the new binary, schema and artifact bytes on a separate candidate
    worker. Recheck template sizes, VMM overhead, network behavior, proxy semantics,
-   host quotas and all advertised platform tests. SmolBox 0.2.0 defaults to
-   smolvm 1.17.0 and retains explicit 1.16.1, 1.16.0, 1.14.6 and 1.14.1 support, subject
+   host quotas and all advertised platform tests. This checkout defaults to
+   smolvm 1.19.0 and retains explicit 1.17.0, 1.16.1, 1.16.0, 1.14.6 and 1.14.1 support, subject
    to the [supported platform matrix](compatibility.md#runtime-selection).
-   Controlled networking requires 1.16.0, 1.16.1 or 1.17.0. The worker must report the
+   Controlled networking requires 1.16.0, 1.16.1, 1.17.0 or 1.19.0. The worker must report the
    exact configured version; there is no automatic fallback.
 5. Give changed artifacts/profiles new immutable revisions. Do not rewrite saved
    execution specifications or resubmit a changed specification under an existing
@@ -280,7 +280,7 @@ for the tested configuration and recovery evidence.
 ## Approved checkpoint state
 
 Checkpoints contain memory as well as disks. SmolBox accepts only operator-approved
-idle, offline checkpoints on qualified 1.16.1 or 1.17.0 workers. An entrypoint override
+idle, offline checkpoints on qualified 1.16.1, 1.17.0 or 1.19.0 workers. An entrypoint override
 cannot neutralize captured processes. Keep credentials, pending user workloads,
 connections and automatic restart out of the source. Protect the checkpoint path
 against replacement and restrict artifact access as sensitive data. Approval is

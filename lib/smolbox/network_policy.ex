@@ -1,6 +1,6 @@
 defmodule SmolBox.NetworkPolicy do
   @moduledoc """
-  Explicit outbound allowlist for smolvm 1.16.0, 1.16.1 and 1.17.0. Offline remains the default.
+  Explicit outbound allowlist for smolvm 1.16.0, 1.16.1, 1.17.0 and 1.19.0. Offline remains the default.
 
   Hosts are lowercase DNS names; a name also allows its subdomains upstream.
   smolvm learns destination IPs from DNS responses, so this is not HTTP hostname,

@@ -26,8 +26,8 @@ Branch `prepare-0.1.5` prepares the merged checkpoint feature for version 0.1.5.
 The package version, README, ExDoc guides, examples and changelog describe this
 release and its conditional schema-v3 adoption. Every controller sharing a store
 must upgrade before checkpoint submissions; image records retain v2. Completed
-v3 records still prevent a blind rollback. This checkout now defaults to smolvm 1.17.0; see the separate
-[runtime qualification](compatibility.md#smolvm-1-17-0-qualification).
+v3 records still prevent a blind rollback. This checkout now defaults to smolvm 1.19.0; see the separate
+[runtime qualification](runtime-1.19.0-qualification.md).
 
 Local preparation passed full CI (234 deterministic cases), all 23 tooling cases,
 46 ExDoc pages and three consumers of the same 105-file archive, including minimum

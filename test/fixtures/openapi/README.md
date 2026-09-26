@@ -80,3 +80,18 @@ Commit: `d33b5a4adeb844365922cd2a29a89d93a94008ad`.
 Full schema SHA-256: `db59464fd2d2b8b95ad344ab6218b81cdf842c29bec5e099262db9d8468a4676`.
 Subset SHA-256: `c907bfb2020a58bf0468332c448f56068153aafe98bb56d4a5c39a96e43e0bcd`.
 Runtime identity and file media types are checked independently against the worker.
+
+## smolvm 1.19.0
+
+Captured from the official Darwin ARM64 distribution during the September 25,
+2026 qualification. The subset retains the same eight paths and their twenty
+referenced schemas. Create adds optional credential policy and guest subnet;
+start adds an optional external interceptor. Existing required response fields
+are unchanged. These additional capabilities are not exposed by SmolBox.
+
+Source: https://github.com/smol-machines/smolvm/tree/v1.19.0
+Commit: `572bb694` (release tag, excluding subsequent main commits).
+Full schema SHA-256: `e4589b6a1a32973a79cde975785d614b56f8f7b38adae430d19803362adc7fa4`.
+Subset SHA-256: `8bc752e993a3152e85ae16e34201adf3c1eaf70eef23a0c6e09604cb10feda88`.
+Runtime health and unsupported paused states are checked separately; the schema's
+state description still lists only created, running and stopped.

@@ -1,10 +1,11 @@
 # Low-level client
 
-SmolBox **0.2.0** defaults to **smolvm 1.17.0** on Linux x86_64 and macOS
-Apple Silicon. Existing workers can retain an explicit `runtime_version: "1.16.1"`.
-Follow [Upgrading to 0.2.0](upgrading-to-0.2.0.md) for coordinated controller/store
-upgrades and worker selection. See the
-[1.17.0 qualification](compatibility.md#smolvm-1-17-0-qualification).
+This checkout defaults to **smolvm 1.19.0** on Linux x86_64 and macOS Apple
+Silicon. Published SmolBox 0.2.0 still defaults to 1.17.0. Keep existing workers
+explicitly pinned to their installed version; updating SmolBox does not install
+smolvm. See the [1.19.0 qualification](runtime-1.19.0-qualification.md) for results,
+upgrade limits and checkpoint compatibility.
+
 
 This API performs one verified worker operation at a time. It does not persist
 request identities, reserve capacity, reconcile a crash, or authorize deletion.
@@ -23,7 +24,7 @@ host, verify its digest, and start a private `smolvm serve` endpoint. For bounde
 small-file workloads set `SMOLVM_FILE_TRANSFER_MAX_BYTES=1048576` before starting
 the server. SmolBox never enables guest networking to fetch an image.
 
-For smolvm 1.14.6, 1.16.0, 1.16.1 and 1.17.0, verify the host's `resize2fs` before requesting disks smaller
+For smolvm 1.14.6, 1.16.0, 1.16.1, 1.17.0 and 1.19.0, verify the host's `resize2fs` before requesting disks smaller
 than its bundled templates. Our macOS run without that tool lost a workspace
 file after stop/start; health and successful execution alone did not detect the
 problem. See [runtime prerequisites](compatibility.md#macos-1-14-6-prerequisites).
@@ -58,7 +59,7 @@ investigation. An erroneous worker reply must not silently change execution poli
 By default an owned disposable machine starts from an approved artifact with
 guest networking disabled. Explicit outbound policies are described in
 [Controlled network access](network-access.md). Optional fixed TCP mappings on
-smolvm 1.17.0 are described in [Port mappings](port-mappings.md). Mounts, Unix
+smolvm 1.17.0 or 1.19.0 are described in [Port mappings](port-mappings.md). Mounts, Unix
 sockets, GPU and automatic workload restart remain disabled. This example uses the offline default:
 
 ```elixir
@@ -114,7 +115,7 @@ state; stopping a VM does not recover an unknown command exit code.
 
 An operator-approved idle checkpoint can be created with
 `MachineSpec.new(name, path, source: :checkpoint, ...)`. The explicit allocations
-must match the capture. This requires smolvm 1.16.1 or 1.17.0 and an offline source; creation
+must match the capture. This requires smolvm 1.16.1, 1.17.0 or 1.19.0 and an offline source; creation
 must return a created branchable machine before it may be started. Captured
 processes resume on start, so a workload entrypoint override cannot neutralize
 an arbitrary checkpoint. See [Executing from a checkpoint](checkpoints.md) for
@@ -123,7 +124,7 @@ approval, managed execution, examples and schema v3 upgrade requirements.
 ## Execution and transport budgets
 
 Foreground timeouts accept 1–86,400 seconds. Commands exceeding 300 seconds require
-smolvm 1.17.0 and an explicitly extended client operation budget. Managed commands
+smolvm 1.17.0 or 1.19.0 and an explicitly extended client operation budget. Managed commands
 also require an approved profile whose `execution_ms` covers the guest timeout.
 Allow observation headroom for startup, transport and the final timeout result.
 
@@ -146,7 +147,7 @@ establish longer guest execution; they remain in the historical qualification re
 File manifests use exact approved guest paths and opaque host artifact references.
 Defaults remain `/workspace` and 1 MiB. `GuestPaths` and coordinated profile, client,
 transport and artifact-store budgets allow broader directories and files up to
-16 MiB on image machines with smolvm 1.17.0. Uploads verify their source digest
+16 MiB on image machines with smolvm 1.17.0 or 1.19.0. Uploads verify their source digest
 before I/O and validate the worker acknowledgment; downloads require an explicit
 byte limit. See [guest paths and larger files](guest-files.md) for setup, buffered
 memory costs, worker download caps and the v9 persistence upgrade.
@@ -246,7 +247,7 @@ for deadlines, bounded streaming, cancellation and recovery.
 ## Startup workloads and console diagnostics
 
 `SmolBox.MachineSpec.new/3` accepts optional `workload: %SmolBox.Workload{}`
-on smolvm 1.17.0 image machines. `Client.logs/3` returns a console `LogResult`
+on smolvm 1.17.0 or 1.19.0 image machines. `Client.logs/3` returns a console `LogResult`
 or follows bounded SSE events. These diagnostics exclude application stdout/stderr;
 automatic restart policies are rejected. See [workloads](workloads.md) for exact
 argument inheritance, stream bounds and cancellation behavior.

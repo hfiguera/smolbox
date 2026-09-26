@@ -1,5 +1,11 @@
 # Getting started
 
+This checkout defaults to **smolvm 1.19.0** on Linux x86_64 and macOS Apple
+Silicon. Published SmolBox 0.2.0 still defaults to 1.17.0. Keep existing workers
+explicitly pinned to their installed version; updating SmolBox does not install
+smolvm. See the [1.19.0 qualification](runtime-1.19.0-qualification.md) for results,
+upgrade limits and checkpoint compatibility.
+
 SmolBox **0.2.0** defaults to **smolvm 1.17.0** on Linux x86_64 and macOS
 Apple Silicon. Existing workers can retain an explicit `runtime_version: "1.16.1"`.
 Follow [Upgrading to 0.2.0](upgrading-to-0.2.0.md) for coordinated controller/store

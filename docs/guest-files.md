@@ -6,7 +6,7 @@ configuration and collect larger artifacts without forcing everything beneath
 ordinary command working directories. Existing defaults remain `/workspace`,
 1 MiB per file and 4 MiB per manifest direction.
 
-Expanded policies require **smolvm 1.17.0 image machines**. Older workers and
+Expanded policies require **smolvm 1.17.0 or 1.19.0 image machines**. Older workers and
 checkpoints keep their existing contract. File bodies are buffered in the
 controller and worker; this is a bounded larger-file API, not streaming bulk
 storage. No recursive copy, globbing, archive extraction, resume, permission

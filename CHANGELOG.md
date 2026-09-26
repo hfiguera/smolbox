@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Qualify smolvm 1.19.0 on Linux x86_64 and macOS Apple Silicon and make it the
+  checkout default. Retain explicit 1.17.0 and earlier supported workers. Expand
+  runtime gates, wire/schema fixtures and recovery coverage without adding new
+  upstream features or changing store schemas. Worker installation is separate;
+  pin existing workers and checkpoint approvals to their actual runtime. See the
+  [qualification report](docs/runtime-1.19.0-qualification.md) for evidence and limits.
+
 - Decouple stored execution classification from runtime admission, and keep
   terminal session lookup inside the runtime. Public APIs, consumer ownership,
   stored record formats and recovery behavior remain unchanged.

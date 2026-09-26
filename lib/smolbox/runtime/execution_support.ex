@@ -52,5 +52,5 @@ defmodule SmolBox.Runtime.ExecutionSupport do
   end
 
   def worker?(worker, spec),
-    do: not ExecutionFeatures.extended?(spec) or worker.runtime_version == "1.17.0"
+    do: not ExecutionFeatures.extended?(spec) or worker.runtime_version in ["1.17.0", "1.19.0"]
 end

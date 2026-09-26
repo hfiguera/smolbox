@@ -1,6 +1,6 @@
 # Checkpoint examples and measurements
 
-These scripts default to smolvm 1.17.0 in this checkout. Set
+These scripts default to smolvm 1.19.0 in this checkout. Set
 `SMOLBOX_RUNTIME_VERSION=1.16.1` for an existing 1.16.1 worker and matching
 checkpoint capture. Published SmolBox 0.1.5 supports 1.16.1 only. Read
 [checkpoint approvals](../../docs/checkpoints.md) before restoring a fixture.

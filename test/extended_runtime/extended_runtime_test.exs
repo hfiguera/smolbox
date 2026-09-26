@@ -50,7 +50,8 @@ defmodule SmolBox.ExtendedRuntimeTest do
       Worker.new("extended-worker", System.fetch_env!("SMOLBOX_RUNTIME_URL"), endpoint)
 
     {:ok, client} = Client.new(worker)
-    assert {:ok, %{version: "1.17.0"}} = Client.health(client)
+    version = SmolBox.LabCandidate.runtime_version()
+    assert {:ok, %{version: ^version}} = Client.health(client)
 
     {:ok, profile} =
       Profile.new("extended-v1",
@@ -63,6 +64,7 @@ defmodule SmolBox.ExtendedRuntimeTest do
 
     {:ok, worker} =
       WorkerConfig.new(
+        runtime_version: SmolBox.LabCandidate.runtime_version(),
         client: client,
         architecture: architecture,
         platform: platform,

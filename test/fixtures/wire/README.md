@@ -51,3 +51,12 @@ The same workloads, response cap and lifecycle normalization apply. Buffered
 output and SSE bytes remain verbatim. `directory.json` captures the new JSON
 response for a directory; the capture also verifies that `Client.download/4`
 rejects it as a binary file. Deletion and empty inventory were verified.
+
+The `1.19.0/` fixtures were captured on September 26, 2026 UTC from the official
+Linux x86_64 distribution in the disposable nested KVM lab. Source commit:
+`572bb694d7dc6857d5de012c9e24a6e4a857ca27`; binary SHA-256:
+`9133f40b13e0d08bb0c7b1c939c0ee4d656681445fd739db9a37ed4b14500582`.
+The same bounded synthetic capture and lifecycle normalization apply. Buffered
+output and SSE bytes are verbatim; directory JSON remains rejected by binary
+download. Deletion and empty inventory were verified. Paused and pausing are
+unsupported observations, covered by separate rejection and retention tests.

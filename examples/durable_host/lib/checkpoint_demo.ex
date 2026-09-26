@@ -42,7 +42,7 @@ defmodule SmolBox.DurableHost.CheckpointDemo do
 
     {:ok, checkpoint} =
       Checkpoint.new(
-        runtime_version: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.17.0"),
+        runtime_version: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.19.0"),
         id: "idle-shell-v1",
         path: settings["checkpoint_path"],
         sha256: settings["checkpoint_sha256"],
@@ -65,7 +65,7 @@ defmodule SmolBox.DurableHost.CheckpointDemo do
         client: client,
         platform: platform,
         architecture: architecture,
-        runtime_version: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.17.0"),
+        runtime_version: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.19.0"),
         artifacts: [],
         checkpoints: [checkpoint],
         profiles: [profile],

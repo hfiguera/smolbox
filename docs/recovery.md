@@ -1,10 +1,11 @@
 # Persistence and recovery contract
 
-SmolBox **0.2.0** defaults to **smolvm 1.17.0** on Linux x86_64 and macOS
-Apple Silicon. Existing workers can retain an explicit `runtime_version: "1.16.1"`.
-Follow [Upgrading to 0.2.0](upgrading-to-0.2.0.md) for coordinated controller/store
-upgrades and worker selection. See the
-[1.17.0 qualification](compatibility.md#smolvm-1-17-0-qualification).
+This checkout defaults to **smolvm 1.19.0** on Linux x86_64 and macOS Apple
+Silicon. Published SmolBox 0.2.0 still defaults to 1.17.0. Keep existing workers
+explicitly pinned to their installed version; updating SmolBox does not install
+smolvm. See the [1.19.0 qualification](runtime-1.19.0-qualification.md) for results,
+upgrade limits and checkpoint compatibility.
+
 
 Use a durable store when executions must survive an application restart. SmolBox
 persists intent and observations; the host adapter supplies transactions and
@@ -332,7 +333,7 @@ sessions retain the machine's command slot and reservations.
 
 Use [terminal recovery](interactive-terminals.md#recovering-after-controller-or-connection-loss)
 and the existing explicit quiescent resolution procedure. An expired lease or
-observed stop does not drain requests already sent to the worker. Upstream 1.17.0
+observed stop does not drain requests already sent to the worker. Upstream 1.17.0 and 1.19.0
 can delete the disks of formerly running machines whose processes died when its
 API restarts. If draining requires a worker restart, first record an ownership-verified
 stop to preserve supported disks, then drain old requests and verify the final

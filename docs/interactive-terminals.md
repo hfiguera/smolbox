@@ -6,7 +6,7 @@ returns output and an exit result; background execution returns launch evidence;
 an interactive session provides an ongoing terminal byte stream.
 
 This API supports managed persistent **image machines** on qualified smolvm
-**1.17.0**, and a low-level client for hosts that manage lifetime themselves.
+**1.17.0 or 1.19.0**, and a low-level client for hosts that manage lifetime themselves.
 Disposable execution and checkpoint terminals are unsupported. No process
 supervisor, automatic reconnect, input replay or guest-session reattachment is
 provided.
@@ -198,7 +198,7 @@ stopped observation alone does not drain old worker requests. Do not infer confi
 absence from an unavailable worker or store.
 
 If draining uses a restart of the dedicated worker, record an ownership-verified
-stop before killing its guest processes. Upstream 1.17.0 startup deletes records
+stop before killing its guest processes. Upstream 1.17.0 and 1.19.0 startup deletes records
 and disks of formerly running machines whose processes have died. The preliminary
 stop preserves supported disks; it does **not** release the slot or establish
 quiescence. Drain old requests, restart, and verify the final stopped incarnation

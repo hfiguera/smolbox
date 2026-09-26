@@ -39,7 +39,8 @@ defmodule SmolBox.RuntimeConfigTest do
     %{worker: worker, options: options, config: config, spec: spec}
   end
 
-  test "fixed ports require 1.17.0 while the same no-port approval remains compatible", c do
+  test "fixed ports require 1.17.0 or 1.19.0 while the same no-port approval remains compatible",
+       c do
     {:ok, spec} =
       SmolBox.ManagedMachineSpec.new(
         scope: c.spec.scope,
@@ -50,6 +51,7 @@ defmodule SmolBox.RuntimeConfigTest do
       )
 
     assert WorkerConfig.supports?(c.worker, spec)
+    assert WorkerConfig.supports?(%{c.worker | runtime_version: "1.19.0"}, spec)
     assert {:ok, machine} = WorkerConfig.machine_spec(c.worker, spec, "ports")
     assert machine.ports == spec.ports
     refute WorkerConfig.supports?(%{c.worker | runtime_version: "1.16.1"}, spec)
@@ -71,6 +73,7 @@ defmodule SmolBox.RuntimeConfigTest do
       spec = %{c.spec | command: command, profile: profile}
       worker = %{c.worker | profiles: [profile]}
       assert WorkerConfig.supports?(worker, spec)
+      assert WorkerConfig.supports?(%{worker | runtime_version: "1.19.0"}, spec)
       assert WorkerConfig.supports?(%{worker | runtime_version: "1.16.1"}, spec) == legacy?
 
       {:ok, fingerprint} = ExecutionSpec.fingerprint(spec, :binary.copy(<<1>>, 32))
@@ -123,9 +126,9 @@ defmodule SmolBox.RuntimeConfigTest do
              WorkerConfig.new(Keyword.delete(context.options, :allocation_floor))
   end
 
-  test "runtime defaults to 1.17.0 and accepts only qualified explicit versions",
+  test "runtime defaults to 1.19.0 and accepts only qualified explicit versions",
        context do
-    assert context.worker.runtime_version == "1.17.0"
+    assert context.worker.runtime_version == "1.19.0"
 
     assert {:ok, %{runtime_version: "1.16.0"}} =
              WorkerConfig.new(Keyword.put(context.options, :runtime_version, "1.16.0"))
@@ -138,7 +141,7 @@ defmodule SmolBox.RuntimeConfigTest do
 
     assert :ok = WorkerConfig.validate(candidate)
 
-    for version <- ["1.14.6", "1.16.0", "1.16.1", "1.17.0"],
+    for version <- ["1.14.6", "1.16.0", "1.16.1", "1.17.0", "1.19.0"],
         {platform, architecture} <- [{:macos, "aarch64"}, {:linux, "aarch64"}] do
       worker = %{
         candidate
@@ -167,15 +170,19 @@ defmodule SmolBox.RuntimeConfigTest do
           "1.16.1-dev",
           "1.16.2",
           "1.17.0-dev",
-          "1.17.1"
+          "1.17.1",
+          "1.18.0",
+          "1.18.2",
+          "1.19.0-dev",
+          "1.19.1"
         ] do
       assert {:error, %Error{category: :validation}} =
                WorkerConfig.validate(%{candidate | runtime_version: version})
     end
   end
 
-  test "1.17.0 default requires a supported platform", context do
-    assert context.worker.runtime_version == "1.17.0"
+  test "1.19.0 default requires a supported platform", context do
+    assert context.worker.runtime_version == "1.19.0"
 
     for {platform, architecture} <- [{:linux, "x86_64"}, {:macos, "aarch64"}] do
       artifacts = Enum.map(context.worker.artifacts, &Map.put(&1, "architecture", architecture))

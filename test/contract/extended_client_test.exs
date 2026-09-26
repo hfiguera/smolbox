@@ -9,7 +9,7 @@ defmodule SmolBox.ExtendedClientTest do
 
         case conn.path_info do
           ["health"] ->
-            TestPeer.json(conn, %{"status" => "ok", "version" => "1.17.0"})
+            TestPeer.json(conn, %{"status" => "ok", "version" => "1.19.0"})
 
           ["api", "v1", "machines", "owned", "exec" | suffix] ->
             assert Jason.decode!(body)["timeoutSecs"] == 600
@@ -46,7 +46,7 @@ defmodule SmolBox.ExtendedClientTest do
 
         case conn.path_info do
           ["health"] ->
-            TestPeer.json(conn, %{"status" => "ok", "version" => "1.17.0"})
+            TestPeer.json(conn, %{"status" => "ok", "version" => "1.19.0"})
 
           ["api", "v1", "machines", "owned"] ->
             TestPeer.json(conn, machine("python"))
@@ -69,6 +69,9 @@ defmodule SmolBox.ExtendedClientTest do
   test "old runtimes and unsupported machine types reject before exec dispatch" do
     for {version, observation, category} <- [
           {"1.16.1", machine("python"), :unsupported_capability},
+          {"1.18.2", machine("python"), :unsupported_capability},
+          {"1.19.0", Map.put(machine("python"), "state", "paused"), :protocol},
+          {"1.19.0", Map.put(machine("python"), "state", "pausing"), :protocol},
           {"1.17.0", machine(nil), :unsupported_capability},
           {"1.17.0", Map.delete(machine("python"), "branchable"), :unsupported_capability},
           {"1.17.0", Map.put(machine("python"), "name", "other"), :identity_conflict},

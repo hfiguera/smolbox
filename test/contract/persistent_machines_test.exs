@@ -617,6 +617,44 @@ defmodule SmolBox.PersistentMachinesTest do
     assert {:error, %{category: :store}} = Machines.submit(runtime, handle, spec)
   end
 
+  for state <- ["paused", "pausing"] do
+    test "unsupported upstream #{state} state retains capacity and blocks dispatch" do
+      fixture =
+        RuntimeFixture.start(__MODULE__,
+          runtime_version: "1.19.0",
+          expected_runtime_version: "1.19.0"
+        )
+
+      handle = start_machine(fixture, [])
+      {:ok, owned} = Machines.inspect(fixture.runtime, handle)
+
+      Agent.update(fixture.peer, fn peer ->
+        put_in(peer.machines[owned.machine_name]["state"], unquote(state))
+      end)
+
+      {:ok, execution} = Machines.submit(fixture.runtime, handle, fixture.spec)
+
+      assert {:ok, %{state: :failed, evidence: :not_dispatched}} =
+               SmolBox.await(fixture.runtime, execution, 5000)
+
+      blocked = wait_machine(fixture, handle, &(&1.state == :unknown))
+      assert blocked.reservation == owned.reservation
+      assert {:error, _} = Machines.submit(fixture.runtime, handle, %{fixture.spec | id: "later"})
+
+      assert {:error, _} =
+               Machines.resolve(fixture.runtime, handle, blocked.version, quiesced: true)
+
+      peer = ManagedPeer.snapshot(fixture.peer)
+      assert peer.commands == []
+      assert map_size(peer.machines) == 1
+
+      refute Enum.any?(peer.operations, fn {method, path} ->
+               method == "DELETE" or String.ends_with?(path, "/stop") or
+                 String.ends_with?(path, "/resume")
+             end)
+    end
+  end
+
   test "ownership mismatch prevents a background command from reaching the worker" do
     fixture = RuntimeFixture.start(__MODULE__)
     handle = start_machine(fixture, [])
