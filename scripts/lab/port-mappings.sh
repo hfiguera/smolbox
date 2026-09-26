@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Run only in the disposable nested lab, with the qualified 1.17.0 candidate installed.
+# Run only in the disposable nested lab, with the selected qualified candidate installed.
 set -euo pipefail
 [[ $(hostname) == smolbox-nested && $(systemd-detect-virt) == kvm && $EUID != 0 ]] || exit 1
 source /etc/profile.d/smolbox-lab.sh
@@ -34,7 +34,7 @@ nsrun() {
   sudo nsenter -t "$pid" -n runuser -u lab -- env \
     ERL_ROOTDIR=/opt/toolchains/erlang/29.0.6 ERL_FLAGS='+S 4:4' MIX_ENV=test \
     PATH=/opt/toolchains/elixir/1.20.4-otp-29/bin:/opt/toolchains/erlang/29.0.6/bin:/usr/bin:/bin \
-    SMOLBOX_RUNTIME_VERSION=1.17.0 SMOLBOX_RUNTIME_URL=http://localhost \
+    SMOLBOX_RUNTIME_VERSION=${SMOLBOX_RUNTIME_VERSION:-1.19.0} SMOLBOX_RUNTIME_URL=http://localhost \
     SMOLBOX_RUNTIME_SOCKET=/srv/sbq/run/api.sock \
     SMOLBOX_PYTHON_ARTIFACT=/opt/smolbox/catalog/python.smolmachine \
     SMOLBOX_PYTHON_SHA256=76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2 \

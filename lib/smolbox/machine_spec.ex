@@ -4,7 +4,7 @@ defmodule SmolBox.MachineSpec do
 
   The path is on the worker host, not the Elixir host. `source: :checkpoint`
   selects an approved idle `.smolcheckpoint` instead of an image. It requires
-  smolvm 1.16.1 or 1.17.0 and offline networking. Captured CPU/memory/disks must match the
+  smolvm 1.16.1, 1.17.0 or 1.19.0 and offline networking. Captured CPU/memory/disks must match the
   specification; disk and entrypoint override fields are omitted on the wire.
   Checkpoints resume captured processes: the caller must approve their idle state,
   no secrets and disabled workload restart before creation. See `SmolBox.Checkpoint`.
@@ -12,10 +12,10 @@ defmodule SmolBox.MachineSpec do
   For the default `source: :image`, the operator must verify
   its immutable digest and architecture before approving it. SmolBox never
   enables networking to fetch a missing image. Starts use `/bin/true` unless an
-  explicit `SmolBox.Workload` is supplied on smolvm 1.17.0. Automatic workload
+  explicit `SmolBox.Workload` is supplied on smolvm 1.17.0 or 1.19.0. Automatic workload
   restart is unsupported. Networking is offline unless an explicit
   `SmolBox.NetworkPolicy` is supplied. Optional `:ports` publishes fixed TCP
-  mappings on smolvm 1.17.0 using virtio-net, independently of outbound policy.
+  mappings on smolvm 1.17.0 or 1.19.0 using virtio-net, independently of outbound policy.
   Offline with mappings means denied outbound, not absence of a network device.
   No host mounts, Unix sockets or GPU are exposed. See [Port mappings](port-mappings.html).
 
@@ -24,7 +24,7 @@ defmodule SmolBox.MachineSpec do
   must verify runtime/artifact disk geometry; managed workers require an
   explicit allocation floor. A matching create reply alone is not enforcement.
 
-  smolvm 1.14.6, 1.16.0, 1.16.1 and 1.17.0 need the host's `resize2fs` for requests
+  smolvm 1.14.6, 1.16.0, 1.16.1, 1.17.0 and 1.19.0 need the host's `resize2fs` for requests
   below template sizes. Missing it caused file loss after stop/start in validation. Verify
   the host prerequisite and persistence before admitting work; see
   [Compatibility](compatibility.html#macos-1-14-6-prerequisites).
@@ -75,7 +75,7 @@ defmodule SmolBox.MachineSpec do
   Describe a machine using a name and absolute artifact path on the worker.
 
   `:source` defaults to `:image` (`.smolmachine`). `:checkpoint` requires an idle,
-  offline `.smolcheckpoint` and smolvm 1.16.1 or 1.17.0. Allocations describe its captured
+  offline `.smolcheckpoint` and smolvm 1.16.1, 1.17.0 or 1.19.0. Allocations describe its captured
   topology; they cannot resize it.
 
   Names have at most 31 lowercase letters, digits, underscores or hyphens and

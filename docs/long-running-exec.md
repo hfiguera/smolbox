@@ -2,7 +2,7 @@
 
 SmolBox supports finite foreground command timeouts up to 24 hours and explicit
 background launch on managed persistent image machines. Both require the qualified
-smolvm 1.17.0 runtime. Background launch confirms a process was started; it is not
+smolvm 1.17.0 or 1.19.0 runtime. Background launch confirms a process was started; it is not
 process supervision, readiness, or the eventual exit status.
 
 ## Foreground deadlines

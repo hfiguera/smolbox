@@ -22,7 +22,7 @@ digest =
 
 {:ok, checkpoint} =
   Checkpoint.new(
-    runtime_version: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.17.0"),
+    runtime_version: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.19.0"),
     id: "idle",
     sha256: digest,
     architecture: architecture,
@@ -33,7 +33,7 @@ digest =
 
 {:ok, worker} =
   WorkerConfig.new(
-    runtime_version: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.17.0"),
+    runtime_version: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.19.0"),
     client: client,
     platform: platform,
     architecture: architecture,

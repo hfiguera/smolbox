@@ -57,7 +57,7 @@ defmodule SmolBox.Client do
   (`SmolBox.GuestPaths`, default nil for `/workspace`) and `:max_file_bytes`
   (default 1 MiB, range 1 byte–16 MiB). Approve larger worker request/response
   budgets separately. Broader paths and transfers over 1 MiB require image
-  machines on smolvm 1.17.0. Client operations return typed
+  machines on smolvm 1.17.0 or 1.19.0. Client operations return typed
   `SmolBox.Error` values and never automatically retry mutations. For managed
   execution identity, observation and cleanup, use `SmolBox` instead.
   """
@@ -111,10 +111,10 @@ defmodule SmolBox.Client do
   Create a machine from an approved prepared artifact on the worker, offline by default.
 
   Returns creation evidence after matching name, allocations and network policy.
-  Checkpoint sources additionally require 1.16.1 or 1.17.0, a created branchable response,
+  Checkpoint sources additionally require 1.16.1, 1.17.0 or 1.19.0, a created branchable response,
   and offline networking. Captured idle state and immutable source contents are
   operator approvals, not remotely attested by this response.
-  An enabled policy requires a 1.16.0, 1.16.1 or 1.17.0 health observation. That preflight and the
+  An enabled policy requires a 1.16.0, 1.16.1, 1.17.0 or 1.19.0 health observation. That preflight and the
   create request share the configured operation timeout.
   Persist intent before this call and creation evidence before further mutations.
   A lost or mismatched response can leave creation uncertain; it does not authorize
@@ -138,18 +138,18 @@ defmodule SmolBox.Client do
   end
 
   defp creation_runtime(client, %{workload: %SmolBox.Workload{}}),
-    do: creation_runtime_versions(client, ["1.17.0"])
+    do: creation_runtime_versions(client, ["1.17.0", "1.19.0"])
 
   defp creation_runtime(client, %{source: :checkpoint}),
-    do: creation_runtime_versions(client, ["1.16.1", "1.17.0"])
+    do: creation_runtime_versions(client, ["1.16.1", "1.17.0", "1.19.0"])
 
   defp creation_runtime(client, %{ports: [_ | _]}),
-    do: creation_runtime_versions(client, ["1.17.0"])
+    do: creation_runtime_versions(client, ["1.17.0", "1.19.0"])
 
   defp creation_runtime(client, %{network: :offline}), do: {:ok, client}
 
   defp creation_runtime(client, _spec),
-    do: creation_runtime_versions(client, ["1.16.0", "1.16.1", "1.17.0"])
+    do: creation_runtime_versions(client, ["1.16.0", "1.16.1", "1.17.0", "1.19.0"])
 
   defp creation_runtime_versions(client, versions) do
     with :ok <- Worker.validate(client.worker) do
@@ -241,7 +241,7 @@ defmodule SmolBox.Client do
   command failed or terminated; never automatically replay an uncertain exec.
   An output-limit error may retain a known foreground exit code; inspect its evidence.
   Background acknowledgment overflow or malformed PID always leaves launch uncertain.
-  Extended commands require smolvm 1.17.0; background requires a non-checkpoint
+  Extended commands require smolvm 1.17.0 or 1.19.0; background requires a non-checkpoint
   image machine. Their preflight shares the operation deadline and their receive
   budget follows its remaining time. Background has no guest lifetime timeout.
   See [Long-running execution](long-running-exec.html).
@@ -490,7 +490,7 @@ defmodule SmolBox.Client do
   Following requires a callback. At most 10,000 events are captured. The worker's
   wire-response and receive limits also apply. No automatic reconnection occurs.
 
-  Requires 1.17.0. A missing log is not proof of an absent machine. This read never
+  Requires 1.17.0 or 1.19.0. A missing log is not proof of an absent machine. This read never
   starts/stops a VM and does not observe workload success. Application stdout and
   stderr are discarded upstream; these are boot/agent console diagnostics.
   """
@@ -506,7 +506,7 @@ defmodule SmolBox.Client do
 
       client = %{client | worker: worker}
 
-      case creation_runtime_versions(client, ["1.17.0"]) do
+      case creation_runtime_versions(client, ["1.17.0", "1.19.0"]) do
         {:ok, client} ->
           query = URI.encode_query(%{"tail" => options.tail, "follow" => options.follow})
 
@@ -545,7 +545,7 @@ defmodule SmolBox.Client do
          :ok <- Spec.validate(spec),
          {:ok, path} <- machine_path(name),
          :ok <- Worker.validate(client.worker),
-         {:ok, %{version: "1.17.0"}} <- health(client),
+         {:ok, %{version: version}} when version in ["1.17.0", "1.19.0"] <- health(client),
          {:ok, client} <- remaining_create_budget(client, deadline),
          :ok <- background_machine(client, path, %{background: true}),
          {:ok, client} <- remaining_create_budget(client, deadline) do
@@ -563,7 +563,7 @@ defmodule SmolBox.Client do
     if command.background or command.timeout_secs > 300 or outside do
       deadline = System.monotonic_time(:millisecond) + client.worker.operation_timeout_ms
 
-      with {:ok, %{version: "1.17.0"}} <- health(client),
+      with {:ok, %{version: version}} when version in ["1.17.0", "1.19.0"] <- health(client),
            {:ok, client} <- remaining_create_budget(client, deadline),
            :ok <- background_machine(client, path, %{background: command.background or outside}),
            {:ok, client} <- remaining_create_budget(client, deadline) do
@@ -596,7 +596,7 @@ defmodule SmolBox.Client do
     if bytes > 1_048_576 or Files.validate_path(path) != :ok do
       deadline = System.monotonic_time(:millisecond) + client.worker.operation_timeout_ms
 
-      with {:ok, client} <- creation_runtime_versions(client, ["1.17.0"]),
+      with {:ok, client} <- creation_runtime_versions(client, ["1.17.0", "1.19.0"]),
            :ok <- background_machine(client, "/api/v1/machines/" <> name, %{background: true}),
            do: remaining_create_budget(client, deadline)
     else

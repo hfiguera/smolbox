@@ -1,5 +1,9 @@
 # A persistent SmolBox workspace
 
+This example explicitly pins smolvm **1.17.0**. The library checkout defaults to
+1.19.0, but does not upgrade this app’s configured worker. See the
+[qualification report](../../docs/runtime-1.19.0-qualification.md).
+
 A small Phoenix LiveView app that combines the **published SmolBox 0.2.0 package**
 with a real persistent machine. Create a workspace, move project files, run
 commands, use a browser terminal, open its Python service, leave, and return to

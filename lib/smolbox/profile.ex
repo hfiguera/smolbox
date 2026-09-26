@@ -93,7 +93,7 @@ defmodule SmolBox.Profile do
   floor. Use the actual operator-verified floor, as in the example below.
 
   Explicit guest path policies or enlarged file budgets require image machines on
-  smolvm 1.17.0 and the `guest_files: 1` store capability. Transfer bodies are
+  smolvm 1.17.0 or 1.19.0 and the `guest_files: 1` store capability. Transfer bodies are
   buffered; these budgets do not bound total controller or worker memory.
 
   Give every changed policy a new `id`; managed submission matches the complete

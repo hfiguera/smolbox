@@ -13,7 +13,7 @@ group=/sys/fs/cgroup/system.slice/smolbox-qualification.service
 [[ ${SMOLVM_DATA_DIR:-} == '' && $SMOLVM_SECCOMP == enforce && $SMOLVM_LANDLOCK == enforce ]] || exit 1
 file_cap=${SMOLBOX_QUALIFICATION_FILE_BYTES:-1048576}
 [[ $file_cap == 1048576 || $file_cap == 16777216 ]] || exit 1
-[[ $file_cap == 1048576 || ${SMOLBOX_CANDIDATE_VERSION:-} == 1.17.0 ]] || exit 1
+[[ $file_cap == 1048576 || ${SMOLBOX_CANDIDATE_VERSION:-} == 1.17.0 || ${SMOLBOX_CANDIDATE_VERSION:-} == 1.19.0 ]] || exit 1
 [[ $SMOLVM_FILE_TRANSFER_MAX_BYTES == "$file_cap" && $SMOLVM_DISABLE_SHARED_EXTRACT == 1 ]] || exit 1
 for item in control:67108864 cache:805306368 run:4194304; do
   path=/srv/sbq/${item%:*}
@@ -52,6 +52,12 @@ case "${SMOLBOX_CANDIDATE_VERSION:-1.14.1}" in
     binary=40b9bc8f24f7cc77c371db4784742e6b6724f09a11b83d63776b944734b7912d
     krun=02a694ac055703fe32f2412fd6d79a7387c15226be058db03aadb750dc32ba9e
     agent=1a41b572dd0ad1767c31a38854d26c286e850646d2610eb770dc5e91579028ef
+    ;;
+  1.19.0)
+    runtime=/opt/smolbox/runtime-1.19.0
+    binary=9133f40b13e0d08bb0c7b1c939c0ee4d656681445fd739db9a37ed4b14500582
+    krun=64aa19dcaf67e3fba981f6861cd08b9af341a7c06e7277f68d761cc4718fd393
+    agent=0e7f06cfb00d6701b96194f38b1d585e16f1471b24a4075af1c65ce870e9f091
     ;;
   *) exit 1 ;;
 esac

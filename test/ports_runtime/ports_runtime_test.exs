@@ -28,7 +28,8 @@ defmodule SmolBox.PortsRuntimeTest do
       )
 
     {:ok, client} = Client.new(worker)
-    assert {:ok, %{version: "1.17.0"}} = Client.health(client)
+    version = SmolBox.LabCandidate.runtime_version()
+    assert {:ok, %{version: ^version}} = Client.health(client)
     %{client: client, artifact: System.fetch_env!("SMOLBOX_PYTHON_ARTIFACT")}
   end
 

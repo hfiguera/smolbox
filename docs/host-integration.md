@@ -1,10 +1,11 @@
 # Managed host integration
 
-SmolBox **0.2.0** defaults to **smolvm 1.17.0** on Linux x86_64 and macOS
-Apple Silicon. Existing workers can retain an explicit `runtime_version: "1.16.1"`.
-Follow [Upgrading to 0.2.0](upgrading-to-0.2.0.md) for coordinated controller/store
-upgrades and worker selection. See the
-[1.17.0 qualification](compatibility.md#smolvm-1-17-0-qualification).
+This checkout defaults to **smolvm 1.19.0** on Linux x86_64 and macOS Apple
+Silicon. Published SmolBox 0.2.0 still defaults to 1.17.0. Keep existing workers
+explicitly pinned to their installed version; updating SmolBox does not install
+smolvm. See the [1.19.0 qualification](runtime-1.19.0-qualification.md) for results,
+upgrade limits and checkpoint compatibility.
+
 
 Start with [Getting started](getting-started.md) for a complete runnable example.
 This guide explains how to adapt that flow to your application's supervision,
@@ -89,14 +90,14 @@ children = [
 ```
 
 This fragment explicitly retains a Linux 1.14.6 worker with SmolBox 0.2.0.
-Omitting the field selects 1.17.0 in 0.2.0 (1.16.1 in 0.1.5). Use `"1.16.0"`
+Omitting the field selects 1.19.0 in this checkout, 1.17.0 in 0.2.0 (1.16.1 in 0.1.5). Use `"1.16.0"`
 explicitly to retain that worker, or `"1.14.1"`
 for an existing worker. See [runtime selection](compatibility.md#runtime-selection).
 This is a host configuration fragment, not a self-provisioning script. The host
 must verify artifact bytes on the worker and retain that immutable artifact.
 This disposable execution setup requires neutral `/bin/true` startup and no
 automatic workload restart. Retained image machines can instead use explicitly
-approved [startup workloads](workloads.md) on smolvm 1.17.0.
+approved [startup workloads](workloads.md) on smolvm 1.17.0 or 1.19.0.
 Neither HTTP reachability nor a supplied digest proves those facts. `platform`
 is `:linux` or `:macos`; architectures initially tested are Linux `x86_64` and
 macOS `aarch64`. Linux arm64 remains unqualified.
@@ -357,18 +358,18 @@ Before updating the library with an existing worker, retain its version explicit
 
 ```elixir
 {:ok, worker} = SmolBox.Runtime.WorkerConfig.new(
-  Keyword.put(existing_worker_options, :runtime_version, "1.16.1")
+  Keyword.put(existing_worker_options, :runtime_version, "1.17.0")
 )
 ```
 
-Use `"1.16.0"`, `"1.14.1"` or `"1.14.6"` instead for a worker still on either version. Omitting
-`:runtime_version` expects `"1.17.0"` in 0.2.0 (`"1.16.1"` in 0.1.5); updating the Elixir
+Use `"1.16.1"`, `"1.16.0"`, `"1.14.1"` or `"1.14.6"` instead for a worker still on either version. Omitting
+`:runtime_version` expects `"1.19.0"` in this checkout (`"1.17.0"` in 0.2.0) (`"1.16.1"` in 0.1.5); updating the Elixir
 dependency does not install smolvm. A version mismatch prevents new execution.
 Unverified versions and unsupported host combinations fail configuration
 validation. Health checks require an exact version match, without fallback.
 
-Review the [1.17.0 qualification and upgrade
-boundaries](compatibility.md#smolvm-1-17-0-qualification) before upgrading.
+Review the [1.19.0 qualification and upgrade
+boundaries](runtime-1.19.0-qualification.md) before upgrading.
 The same drain, identity and prerequisite checks below apply to each supported
 version. Configure the same expected version on every controller owning the worker.
 
@@ -388,7 +389,7 @@ For an existing worker:
    the complete pinned distribution. Verify binary, agent, libkrun and artifact
    digests. Do not mix files from different distributions.
 4. Recheck the deployment controls and approved artifact/profile revisions.
-   Disk requests below the 1.14.6, 1.16.0, 1.16.1 or 1.17.0 templates require
+   Disk requests below the 1.14.6, 1.16.0, 1.16.1, 1.17.0 or 1.19.0 templates require
    working `resize2fs` on the worker host (`brew install e2fsprogs` on macOS).
    Missing it caused file loss
    after restart in our macOS check, despite successful health/start/exec replies.
@@ -431,7 +432,7 @@ executions. The memory and PostgreSQL example adapters implement the extension.
 Read [Managed persistent machines](persistent-machines.md) before enabling it on
 shared workers, particularly the coordinated upgrade and capacity accounting.
 
-Mapped machines additionally require `managed_ports: 1` and smolvm 1.17.0. Their
+Mapped machines additionally require `managed_ports: 1` and smolvm 1.17.0 or 1.19.0. Their
 ports belong to the worker host, not necessarily this application's host. Use one
 stable worker ID and authoritative store, including across controller restarts.
 The PostgreSQL port-ownership index arbitrates fixed ports atomically; it does not
@@ -464,7 +465,7 @@ See [Interactive terminals](interactive-terminals.md) and the durable host's
 ## Startup workloads and console diagnostics
 
 Before allowing startup workloads, authorize their code and environment alongside
-artifact, profile and scope. Require smolvm 1.17.0 and `managed_workloads: 1` on the
+artifact, profile and scope. Require smolvm 1.17.0 or 1.19.0 and `managed_workloads: 1` on the
 store; upgrade all shared readers first. Application readiness needs a separate
 probe. Console followers consume bounded worker connections and do not own machine
 lifetime. See [workloads](workloads.md) for configuration and operational limits.
@@ -475,5 +476,5 @@ Host-selected `GuestPaths` policies authorize uploads, downloads and ordinary
 command working directories independently. Register the immutable profile on the
 worker, approve a superset on its client, coordinate transport and artifact-store
 limits, and set a worker download cap before startup. Expanded profiles require
-image sources on smolvm 1.17.0 and store capability `guest_files: 1`. Defaults stay
+image sources on smolvm 1.17.0 or 1.19.0 and store capability `guest_files: 1`. Defaults stay
 unchanged. See [guest files](guest-files.md) for code and the v9 upgrade procedure.

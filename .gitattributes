@@ -1,2 +1,3 @@
 # Preserve the captured SSE stream, including its empty data field and final frame.
 test/fixtures/wire/exec.sse binary
+test/fixtures/wire/*/exec.sse binary

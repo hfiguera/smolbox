@@ -28,7 +28,7 @@ cleanup() {
   exit "$status"
 }
 trap cleanup EXIT
-export SMOLBOX_RUNTIME_VERSION=1.17.0 SMOLBOX_RUNTIME_URL=http://localhost
+export SMOLBOX_RUNTIME_VERSION=${SMOLBOX_RUNTIME_VERSION:-1.19.0} SMOLBOX_RUNTIME_URL=http://localhost
 export SMOLBOX_RUNTIME_SOCKET=/srv/sbq/run/api.sock
 export SMOLBOX_PYTHON_ARTIFACT=/opt/smolbox/catalog/python.smolmachine
 export SMOLBOX_PYTHON_SHA256=76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2

@@ -4,6 +4,22 @@ Version: `0.2.0`. The library's supported qualification is
 `:development`; requested hard-control options remain unsupported. The original
 release evidence below records the client/controller contract on Linux and macOS.
 
+## smolvm 1.19.0 qualification
+
+**Default in this checkout.** Linux x86_64 and macOS Apple Silicon passed the
+execution, recovery, checkpoint, persistent workspace, network and worker fault
+campaign. Explicit 1.17.0 and earlier supported workers remain admitted. Published
+0.2.0 keeps its 1.17.0 default and the historical results below.
+
+See the [qualification report](runtime-1.19.0-qualification.md) and
+[machine-readable evidence](evidence/smolvm-1.19.0.json). No SmolBox store migration
+is introduced. Install the complete worker distribution separately; preserve
+existing checkpoint approvals and pin each worker to its installed version.
+Qualification remains `:development`. In-place worker upgrades, rollback of
+modified upstream state and cross-version checkpoint restores are not qualified.
+Paused machines, credential bindings, external interceptors and fork pools are
+not exposed by this change.
+
 ## smolvm 1.17.0 qualification
 
 **Default in SmolBox 0.2.0.** Linux x86_64 and macOS Apple Silicon

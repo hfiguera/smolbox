@@ -1,6 +1,6 @@
 defmodule SmolBox.Workload do
   @moduledoc """
-  Immutable startup workload for an approved image machine on smolvm 1.17.0.
+  Immutable startup workload for an approved image machine on smolvm 1.17.0 or 1.19.0.
 
   An empty entrypoint and command inherit the artifact's command. Otherwise their
   concatenation replaces it, without inserting a shell. Environment overrides

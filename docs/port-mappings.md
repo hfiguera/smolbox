@@ -7,7 +7,7 @@ command, and command completion or cancellation does not remove them. Forwarded
 connections and detached guest services do not acquire a managed command slot.
 Stop/delete can interrupt their traffic; SmolBox does not drain service connections.
 
-This requires smolvm **1.17.0** on Linux x86_64 or macOS Apple Silicon, an approved
+This requires smolvm **1.17.0 or 1.19.0** on Linux x86_64 or macOS Apple Silicon, an approved
 prepared image, and a store advertising `managed_ports: 1`. Checkpoint mappings
 are rejected. No-port images, disposable executions and checkpoints retain their
 existing behavior. Published packages predating this feature do not include it.
@@ -56,7 +56,7 @@ the retained machine is the place to configure them.
 ## Reachability and outbound policy
 
 The host port belongs to the **worker**, which may be a different machine or
-network namespace from the Elixir application. smolvm 1.17.0 binds IPv4 loopback
+network namespace from the Elixir application. smolvm 1.17.0 or 1.19.0 binds IPv4 loopback
 by default and attempts an IPv6 loopback listener on a best-effort basis. A local
 worker normally exposes the example at `http://127.0.0.1:18080` on that worker.
 Guest services must listen beyond guest loopback to receive forwarded traffic.

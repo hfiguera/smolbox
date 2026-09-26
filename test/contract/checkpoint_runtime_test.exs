@@ -45,7 +45,7 @@ defmodule SmolBox.CheckpointRuntimeTest do
 
     assert Checkpoint.artifact(checkpoint) == context.spec.artifact
 
-    for version <- ["1.16.1", "1.17.0"] do
+    for version <- ["1.16.1", "1.17.0", "1.19.0"] do
       approved = %{checkpoint | runtime_version: version}
       matched = %{worker | runtime_version: version, checkpoints: [approved]}
       assert :ok = WorkerConfig.validate(matched)

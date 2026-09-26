@@ -10,7 +10,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   `checkpoints` optionally registers `SmolBox.Checkpoint` approvals. Each binds
   an idle offline source to its exact profile, platform, architecture and declared
-  runtime (1.16.1 or 1.17.0). `artifacts: []` is accepted when checkpoints are configured. Approval
+  runtime (1.16.1, 1.17.0 or 1.19.0). `artifacts: []` is accepted when checkpoints are configured. Approval
   is supplied by the operator and is not remotely attested.
 
   `allocation_floor` is a required operator declaration with `storage_gb`,
@@ -20,7 +20,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   still expose a larger guest disk. Admission rejects profiles below these
   floors. This declaration is not remotely attested or a host filesystem quota.
 
-  Versions 1.14.6, 1.16.0, 1.16.1 and 1.17.0 require working host `resize2fs` for disk requests below
+  Versions 1.14.6, 1.16.0, 1.16.1, 1.17.0 and 1.19.0 require working host `resize2fs` for disk requests below
   template sizes. Verify file persistence across stop/start before admission;
   see [Compatibility](compatibility.html#macos-1-14-6-prerequisites).
 
@@ -53,7 +53,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   @derive {Inspect, only: [:architecture, :platform, :runtime_version, :qualification]}
   defstruct @enforce_keys ++
               [
-                runtime_version: "1.17.0",
+                runtime_version: "1.19.0",
                 qualification: :development,
                 draining: false,
                 checkpoints: []
@@ -95,15 +95,15 @@ defmodule SmolBox.Runtime.WorkerConfig do
   Optional `:checkpoints` defaults to `[]` and accepts up to 32 unique
   `SmolBox.Checkpoint` approvals. At least one image or checkpoint is required.
 
-  Other optional fields are `:runtime_version` (default `"1.17.0"` for Linux x86_64 or
-  macOS Apple Silicon; explicitly select `"1.16.1"`, `"1.16.0"`, `"1.14.1"` or `"1.14.6"`
+  Other optional fields are `:runtime_version` (default `"1.19.0"` for Linux x86_64 or
+  macOS Apple Silicon; explicitly select `"1.17.0"`, `"1.16.1"`, `"1.16.0"`, `"1.14.1"` or `"1.14.6"`
   for another supported worker), `:qualification`
   (only `:development`), and `:draining` (default `false`). Artifact IDs must be
   unique and architectures must match this worker. Construction makes no worker
   request or remote digest check. Profiles below the floor cannot support execution.
-  SmolBox 0.2.0 defaults to 1.17.0; versions 0.1.4 and 0.1.5 default to 1.16.1; SmolBox 0.1.3 defaults
+  This checkout defaults to 1.19.0; published SmolBox 0.2.0 defaults to 1.17.0; versions 0.1.4 and 0.1.5 default to 1.16.1; SmolBox 0.1.3 defaults
   to 1.16.0 and 0.1.2 to 1.14.6. See the
-  [qualification evidence](compatibility.html#smolvm-1-17-0-qualification) and
+  [qualification evidence](compatibility.html#smolvm-1-19-0-qualification) and
   upgrade the separately installed worker or retain its explicit version.
   See [Getting started](getting-started.html) for a complete configuration.
   """
@@ -183,20 +183,22 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   defp network_supported?(worker, spec),
     do:
-      spec.profile.network == :offline or worker.runtime_version in ["1.16.0", "1.16.1", "1.17.0"]
+      spec.profile.network == :offline or
+        worker.runtime_version in ["1.16.0", "1.16.1", "1.17.0", "1.19.0"]
 
   defp file_support?(worker, spec),
     do:
       SmolBox.FileAccess.supports?(worker.client, spec.profile) and
-        (not SmolBox.FileAccess.extended?(spec.profile) or worker.runtime_version == "1.17.0")
+        (not SmolBox.FileAccess.extended?(spec.profile) or
+           worker.runtime_version in ["1.17.0", "1.19.0"])
 
   defp workload_supported?(worker, spec),
-    do: Map.get(spec, :workload) == nil or worker.runtime_version == "1.17.0"
+    do: Map.get(spec, :workload) == nil or worker.runtime_version in ["1.17.0", "1.19.0"]
 
   defp ports_supported?(worker, spec),
     do:
       Map.get(spec, :ports, []) == [] or
-        (worker.runtime_version == "1.17.0" and
+        (worker.runtime_version in ["1.17.0", "1.19.0"] and
            {worker.platform, worker.architecture} in [{:linux, "x86_64"}, {:macos, "aarch64"}])
 
   defp approved_checkpoint(worker, spec),
@@ -223,7 +225,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   defp supported_runtime?(%{runtime_version: "1.14.1"}), do: true
 
   defp supported_runtime?(%{runtime_version: version, platform: platform, architecture: arch})
-       when version in ["1.14.6", "1.16.0", "1.16.1", "1.17.0"],
+       when version in ["1.14.6", "1.16.0", "1.16.1", "1.17.0", "1.19.0"],
        do: {platform, arch} in [{:linux, "x86_64"}, {:macos, "aarch64"}]
 
   defp supported_runtime?(_worker), do: false

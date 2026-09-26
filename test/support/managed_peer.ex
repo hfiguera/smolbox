@@ -45,7 +45,7 @@ defmodule SmolBox.ManagedPeer do
   defp route("GET", ["health"], _body, state) do
     body = %{
       "status" => "ok",
-      "version" => Keyword.get(state.options, :runtime_version, "1.17.0"),
+      "version" => Keyword.get(state.options, :runtime_version, "1.19.0"),
       "machines" => %{"total" => map_size(state.machines), "running" => 0},
       "uptime_seconds" => 0
     }

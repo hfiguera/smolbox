@@ -14,7 +14,7 @@ defmodule SmolBox.CI.Package do
   }
   @forbidden ~w(credo ex_slop ex_dna credence dialyxir ex_doc mix_audit ecto ecto_sql postgrex stream_data plug bandit)
   @public ~w(mix.exs README.md CHANGELOG.md LICENSE)
-  @docs ~w(getting-started troubleshooting client host-integration recovery upgrading-to-0.2.0 telemetry security resource-qualification compatibility network-access port-mappings port-mappings-validation long-running-exec long-running-exec-validation workloads workloads-validation guest-files guest-files-validation interactive-terminals interactive-terminals-validation checkpoints persistent-machines persistent-machines-validation runtime-1.17.0-qualification)
+  @docs ~w(getting-started troubleshooting client host-integration recovery upgrading-to-0.2.0 telemetry security resource-qualification compatibility network-access port-mappings port-mappings-validation long-running-exec long-running-exec-validation workloads workloads-validation guest-files guest-files-validation interactive-terminals interactive-terminals-validation checkpoints persistent-machines persistent-machines-validation runtime-1.17.0-qualification runtime-1.19.0-qualification)
 
   def run(arguments) do
     {options, []} =

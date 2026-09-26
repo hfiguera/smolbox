@@ -1,9 +1,11 @@
 # Controlled network access
 
-This unreleased checkout defaults to **smolvm 1.17.0** on Linux x86_64 and macOS
-Apple Silicon; published SmolBox 0.1.5 still defaults to 1.16.1. Existing workers
-can retain an explicit `runtime_version: "1.16.1"`. See the
-[1.17.0 qualification](compatibility.md#smolvm-1-17-0-qualification).
+This checkout defaults to **smolvm 1.19.0** on Linux x86_64 and macOS Apple
+Silicon. Published SmolBox 0.2.0 still defaults to 1.17.0. Keep existing workers
+explicitly pinned to their installed version; updating SmolBox does not install
+smolvm. See the [1.19.0 qualification](runtime-1.19.0-qualification.md) for results,
+upgrade limits and checkpoint compatibility.
+
 
 Controlled networking was introduced in SmolBox **0.1.3** for smolvm **1.16.0**. SmolBox 0.1.2 does not include it. Existing profiles and machines remain offline by default.
 Outbound policy never enables image pulls, inbound mappings, mounts, or credential
@@ -12,7 +14,7 @@ on the machine specification. With mappings, `:offline` denies outbound traffic
 but attaches a virtio-net device for inbound forwarding.
 
 SmolBox **0.1.5** defaults to smolvm **1.16.1**. Both 1.16.0 and 1.16.1
-support these policies, as does 1.17.0 in this checkout. Select an older worker
+support these policies, as do 1.17.0 and 1.19.0 in this checkout. Select an older worker
 version explicitly to retain it. See the
 [qualification results and cleanup limitation](compatibility.md#smolvm-1-16-1-qualification).
 
