@@ -17,6 +17,17 @@ defmodule SmolBox.InspectionTest do
   alias SmolBox.Runtime.{Config, Inspection, WorkerConfig}
   alias SmolBox.Store.{Contract, Memory}
 
+  defmodule InventoryTransport do
+    @moduledoc false
+    @behaviour SmolBox.Transport
+
+    @impl true
+    def request(_worker, %{method: :get, path: "/api/v1/machines", mode: :buffer}) do
+      send(self(), :inventory_requested)
+      {:ok, Process.get(__MODULE__)}
+    end
+  end
+
   setup do
     {peer, port} = ManagedPeer.start()
     store = start_supervised!(Memory)
@@ -107,7 +118,14 @@ defmodule SmolBox.InspectionTest do
   end
 
   test "unavailable and slow stores cannot turn candidate names into orphan proof", context do
-    machine(context, :candidate)
+    wire = machine(context, :candidate)
+    # The store deadline is under test here, not the independent HTTP deadline.
+    # Other inspection tests retain real HTTP coverage. Keep inventory local to
+    # this test process, and reject every transport operation except listing.
+    Process.put(InventoryTransport, Jason.encode!(%{"machines" => [wire]}))
+    [worker] = context.config.workers
+    worker = %{worker | client: %{worker.client | transport: InventoryTransport}}
+    inventory_config = %{context.config | workers: [worker]}
     parent = self()
 
     gate =
@@ -117,21 +135,23 @@ defmodule SmolBox.InspectionTest do
         id: :gate
       )
 
-    config = %{context.config | store: {FaultStore, %{store: context.store, faults: gate}}}
+    config = %{inventory_config | store: {FaultStore, %{store: context.store, faults: gate}}}
     started = System.monotonic_time(:millisecond)
 
     assert {:ok, %{candidates: [%{status: :unavailable}]}} =
              Inspection.page(config, "audit-worker", [])
 
     assert System.monotonic_time(:millisecond) - started < 2000
+    assert_received :inventory_requested
     assert_receive {:boundary, :find_machine, :before, blocked}
     refute Process.alive?(blocked)
     stop_supervised!(Memory)
 
     assert {:ok, %{candidates: [%{status: :unavailable}]}} =
-             Inspection.page(context.config, "audit-worker", [])
+             Inspection.page(inventory_config, "audit-worker", [])
 
-    assert Enum.all?(ManagedPeer.snapshot(context.peer).operations, &(elem(&1, 0) == "GET"))
+    assert_received :inventory_requested
+    assert ManagedPeer.snapshot(context.peer).operations == []
   end
 
   defp assignment(context, status) do
