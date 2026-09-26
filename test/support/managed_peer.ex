@@ -43,15 +43,14 @@ defmodule SmolBox.ManagedPeer do
   end
 
   defp route("GET", ["health"], _body, state) do
-    body = %{
-      "status" => "ok",
-      "version" => Keyword.get(state.options, :runtime_version, "1.19.0"),
-      "machines" => %{"total" => map_size(state.machines), "running" => 0},
-      "uptime_seconds" => 0
-    }
+    failures = Keyword.get(state.options, :health_failures, 0)
 
-    body = if state.options[:inventory_unavailable], do: Map.delete(body, "machines"), else: body
-    {{:json, 200, body}, state}
+    if failures > 0 do
+      {{:json, 503, %{}},
+       %{state | options: Keyword.put(state.options, :health_failures, failures - 1)}}
+    else
+      healthy_response(state)
+    end
   end
 
   defp route("GET", ["readyz"], _body, state),
@@ -90,6 +89,18 @@ defmodule SmolBox.ManagedPeer do
       {:ok, machine} -> machine_route(method, suffix, body, machine, state)
       :error -> {{:json, 404, %{}}, state}
     end
+  end
+
+  defp healthy_response(state) do
+    body = %{
+      "status" => "ok",
+      "version" => Keyword.get(state.options, :runtime_version, "1.19.0"),
+      "machines" => %{"total" => map_size(state.machines), "running" => 0},
+      "uptime_seconds" => 0
+    }
+
+    body = if state.options[:inventory_unavailable], do: Map.delete(body, "machines"), else: body
+    {{:json, 200, body}, state}
   end
 
   defp machine_route("GET", ["exec", "interactive"], _body, machine, state) do
