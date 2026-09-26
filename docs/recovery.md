@@ -1,10 +1,10 @@
 # Persistence and recovery contract
 
-This checkout defaults to **smolvm 1.19.0** on Linux x86_64 and macOS Apple
-Silicon. Published SmolBox 0.2.0 still defaults to 1.17.0. Keep existing workers
-explicitly pinned to their installed version; updating SmolBox does not install
-smolvm. See the [1.19.0 qualification](runtime-1.19.0-qualification.md) for results,
-upgrade limits and checkpoint compatibility.
+SmolBox **0.2.1** defaults to **smolvm 1.19.0** on Linux x86_64 and macOS Apple
+Silicon. Version 0.2.0 defaults to 1.17.0. Keep existing workers explicitly pinned
+to their installed version; updating SmolBox does not install smolvm. See
+[Upgrading to 0.2.1](upgrading-to-0.2.1.md) and the
+[1.19.0 qualification](runtime-1.19.0-qualification.md).
 
 
 Use a durable store when executions must survive an application restart. SmolBox
@@ -132,7 +132,7 @@ explicitly approved equivalent storage policy. Unknown-schema or corrupt rows
 are errors requiring migration or investigation, never permission to start over.
 
 The reusable suite is in
-[`test/support/store/contract.ex`](https://github.com/hfiguera/smolbox/blob/v0.2.0/test/support/store/contract.ex).
+[`test/support/store/contract.ex`](https://github.com/hfiguera/smolbox/blob/v0.2.1/test/support/store/contract.ex).
 It is repository test support, not part of the published library package. An adapter test module
 uses `SmolBox.Store.Contract` and supplies `adapter` and `store` in its setup
 context. It checks concurrent acceptance, conflicts, claims and CAS races, atomic
@@ -141,7 +141,7 @@ The suite alone does not certify durability; also run fresh-process database
 recovery, unavailable-database, corruption, and transaction-failure tests.
 
 The repository's
-[durable host example](https://github.com/hfiguera/smolbox/tree/v0.2.0/examples/durable_host)
+[durable host example](https://github.com/hfiguera/smolbox/tree/v0.2.1/examples/durable_host)
 owns its Repo, schema migration,
 AES-256-GCM record encryption, and indexed projections. Mutations serialize on a
 partition row inside a SQL transaction. It demonstrates a small-pool adapter,
