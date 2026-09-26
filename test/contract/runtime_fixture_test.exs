@@ -1,41 +1,16 @@
 defmodule SmolBox.RuntimeFixtureTest do
   use ExUnit.Case, async: true
-  alias SmolBox.RuntimeFixture
+  alias SmolBox.{ManagedPeer, RuntimeFixture}
 
   test "fixture waits for readiness after a failed initial health probe" do
-    observer =
-      Task.async(fn ->
-        assert_receive {:boundary, :http_read, :before, blocked}, 2000
-        wait_failed_probe(System.monotonic_time(:millisecond) + 2000)
-        send(blocked, :release_boundary)
-        :released
-      end)
-
-    gate =
-      start_supervised!(
-        {Agent,
-         fn -> %{event: :http_read, phase: :before, observer: observer.pid, fired: false} end},
-        id: :startup_probe
-      )
-
-    fixture = RuntimeFixture.start(__MODULE__, faults: gate)
-    assert Task.await(observer) == :released
+    # Fail the first probe explicitly instead of racing fixture startup against
+    # an observer timeout. The runtime must refresh its cached failed health.
+    fixture = RuntimeFixture.start(__MODULE__, health_failures: 1)
+    peer = ManagedPeer.snapshot(fixture.peer)
+    assert peer.options[:health_failures] == 0
+    assert Enum.count(peer.operations, &(&1 == {"GET", "/health"})) >= 2
     assert {:ok, [%{status: :ready}]} = SmolBox.workers(fixture.runtime)
     assert {:ok, handle} = SmolBox.submit(fixture.runtime, fixture.spec)
     assert {:ok, %{state: :completed}} = SmolBox.await(fixture.runtime, handle, 5000)
-  end
-
-  defp wait_failed_probe(deadline) do
-    {:ok, [worker]} = SmolBox.workers(__MODULE__)
-
-    if worker.status == :unavailable and worker.health_checked_at_ms != nil do
-      :ok
-    else
-      assert System.monotonic_time(:millisecond) < deadline,
-             "initial health probe did not report its timeout"
-
-      Process.sleep(10)
-      wait_failed_probe(deadline)
-    end
   end
 end
