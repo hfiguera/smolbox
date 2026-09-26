@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+<title id="title">Your browser disconnected. Is the command still running?</title><desc id="desc">A broken browser connection, a controller holding the execution identity, and a guest process whose outcome remains unknown.</desc>
+<rect width="1200" height="630" fill="#fbfcfe"/>
+<g font-family="Arial, Helvetica, sans-serif" fill="#17304e">
+<text x="60" y="104" font-size="54" font-weight="700">Your browser disconnected.</text>
+<text x="60" y="174" font-size="54" font-weight="700">Is the command still running?</text>
+<text x="62" y="227" font-size="24" fill="#526478">A lost connection is not an exit result.</text>
+<path d="M60 273H1140" stroke="#d8e0eb"/>
+<path d="M60 307H300 M450 307H720 M880 307H1140" stroke="#17304e" stroke-width="3"/>
+<text x="60" y="350" font-size="23">Browser</text><text x="60" y="395" font-size="30" font-weight="700" fill="#86510f">Disconnected</text>
+<path d="M314 368H362 M396 368H440" stroke="#86510f" stroke-width="3" stroke-dasharray="6 8"/>
+<path d="M365 357l16 22 m0-22l-16 22" stroke="#86510f" stroke-width="2"/>
+<text x="450" y="350" font-size="23">Controller</text><text x="450" y="395" font-size="30" font-weight="700">Keeps the identity</text>
+<path d="M736 368H861" stroke="#d8e0eb" stroke-width="3"/><path d="M779 368H807" stroke="#215bc7" stroke-width="3"/>
+<text x="880" y="350" font-size="23">Guest process</text><text x="880" y="395" font-size="30" font-weight="700" fill="#86510f">Needs evidence</text>
+<rect x="60" y="452" width="1080" height="101" rx="8" fill="#17304e"/>
+<text x="88" y="494" font-size="19" fill="#e7ecf4">Before you press “Run again”</text><text x="88" y="530" font-size="28" font-weight="700" fill="#fff">Find out what the first command left behind.</text>
+<text x="60" y="604" font-size="17" fill="#526478">SmolBox engineering notes · 0.2.1</text></g></svg>

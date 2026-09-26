@@ -226,3 +226,64 @@ p { margin: 0 0 1.4rem; }
   .readiness-signal { transition: background-color 150ms; }
   .readiness-stage.is-moving .readiness-outgoing, .readiness-stage.is-moving .readiness-incoming { animation: none; }
 }
+
+/* Terminal boundaries: an open circuit with separately observed endpoints. */
+.disconnect-figure { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.disconnect-controls { padding: 20px 24px; background: var(--wash); }
+.disconnect-controls[hidden] { display: none; }
+.disconnect-cases, .disconnect-playback { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.disconnect-controls button { font: inherit; font-size: 14px; line-height: 1.4; min-height: 44px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 4px; background: var(--paper); color: var(--ink); cursor: pointer; }
+.disconnect-controls button:hover { border-color: var(--accent); color: var(--accent); }
+.disconnect-cases button[aria-pressed="true"], .disconnect-play { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.disconnect-controls button[aria-pressed="true"]:hover, .disconnect-controls .disconnect-play:hover { background: var(--accent-hover); color: var(--paper); }
+.disconnect-stage { padding: 28px 24px; }
+.prose .disconnect-headline { font-size: 28px; font-weight: 700; line-height: 1.22; letter-spacing: -.025em; margin: 0 0 12px; min-height: 2.44em; text-wrap: balance; }
+.prose .disconnect-detail { font-size: 16px; color: var(--muted); margin: 0; min-height: 3.4em; }
+.disconnect-route { display: grid; grid-template-columns: minmax(0,1fr) 70px minmax(0,1.2fr) 70px minmax(0,1fr); align-items: center; margin: 20px 0 28px; }
+.disconnect-node { min-width: 0; align-self: stretch; padding: 16px 0; border-block: 2px solid var(--ink); display: flex; flex-direction: column; gap: 10px; }
+.disconnect-node span { font-size: 14px; color: var(--muted); }
+.disconnect-node strong { font-size: 19px; line-height: 1.3; min-height: 2.6em; }
+.disconnect-node small { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.guest-node { border-color: var(--accent); }
+.disconnect-link { align-self: center; min-width: 0; text-align: center; }
+.disconnect-link svg { width: 100%; height: 30px; display: block; overflow: visible; }
+.disconnect-link span { display: block; font-size: 13px; line-height: 1.4; padding: 0 3px; min-height: 3em; color: var(--muted); }
+.disconnect-track { fill: none; stroke: var(--line); stroke-width: 2; }
+.disconnect-packet { fill: none; stroke: var(--accent); stroke-width: 3; stroke-dasharray: 15 100; stroke-dashoffset: 115; opacity: 0; }
+.disconnect-stage.is-moving .disconnect-packet { animation: disconnect-flow 1.8s cubic-bezier(.16,1,.3,1) 2; }
+.disconnect-stage:is([data-phase="detached"], [data-phase="waiting"]) .browser-link .disconnect-track,
+.disconnect-stage:is([data-phase="lost"], [data-phase="recovered"], [data-phase="blocked"]) .worker-link .disconnect-track { stroke: var(--amber); stroke-dasharray: 4 7; clip-path: polygon(0 0, 40% 0, 40% 100%, 60% 100%, 60% 0, 100% 0, 100% 100%, 0 100%); }
+.disconnect-stage:is([data-phase="detached"], [data-phase="waiting"]) .browser-link .disconnect-packet,
+.disconnect-stage:is([data-phase="lost"], [data-phase="recovered"], [data-phase="blocked"], [data-phase="released"]) .worker-link .disconnect-packet { animation: none; }
+.disconnect-stage:is([data-phase="lost"], [data-phase="recovered"], [data-phase="blocked"]) .guest-node { border-color: var(--amber); }
+.disconnect-stage:is([data-phase="lost"], [data-phase="recovered"], [data-phase="blocked"]) .disconnect-guest { color: var(--amber); }
+.disconnect-record { background: var(--wash); padding: 14px 16px; display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; }
+.disconnect-record span { font-size: 13px; color: var(--muted); }
+.disconnect-record code { font-size: 13px; padding: 0; }
+.prose .disconnect-explanation { font-size: 16px; line-height: 1.6; margin: 20px 0 0; min-height: 4.8em; }
+.disconnect-step { font-size: 13px; color: var(--muted); flex-basis: 100%; }
+.prose .disconnect-figure figcaption { margin: 0; padding: 20px 24px; }
+@keyframes disconnect-flow { 0% { opacity: 0; stroke-dashoffset: 115; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { opacity: 0; stroke-dashoffset: 0; } }
+@media (max-width: 600px) {
+  .disconnect-stage, .disconnect-controls { padding: 20px 16px; }
+  .disconnect-figure { display: flex; flex-direction: column; }
+  .disconnect-cases { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; gap: 6px; }
+  .disconnect-playback { order: 1; padding-top: 0; }
+  .disconnect-stage { order: 2; }
+  .disconnect-figure figcaption { order: 3; }
+  .disconnect-cases button { padding: 8px 6px; font-size: 13px; text-align: center; }
+  .prose .disconnect-headline { font-size: 25px; min-height: 2.44em; }
+  .prose .disconnect-detail { min-height: 4.8em; line-height: 1.6; }
+  .disconnect-route { grid-template-columns: 1fr; margin: 16px 0 20px; }
+  .disconnect-node { display: grid; grid-template-columns: 1fr 1.2fr; gap: 5px 12px; padding: 12px 0; }
+  .disconnect-node strong { grid-column: 2; grid-row: 1 / 3; font-size: 18px; min-height: 0; align-self: center; }
+  .disconnect-node small { display: none; }
+  .disconnect-link { display: flex; height: 38px; align-items: center; margin-left: 22px; gap: 12px; }
+  .disconnect-link svg { width: 46px; height: 30px; transform: rotate(90deg); }
+  .disconnect-link span { text-align: left; min-height: 0; font-size: 12px; }
+  .prose .disconnect-explanation { min-height: 0; }
+  .prose .disconnect-figure figcaption { padding: 20px 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .disconnect-stage.is-moving .disconnect-packet { animation: none; }
+}

@@ -215,3 +215,14 @@ and database processes were stopped. Linux app qualification was not performed.
 
 The fixture contains no user project data or private credentials. This article
 extends the existing blog visual system and introduces no external runtime assets.
+
+## Terminal disconnect article — September 26, 2026
+
+`your-browser-disconnected/disconnect-social.svg` is an original geometric
+connection diagram using the blog palette and Arial/Helvetica fallback. Its
+1200 × 630 `disconnect.png` is rendered from that SVG with Sharp; no font files
+or third-party illustrations are distributed. The embedded PNG provenance names
+that source. The in-page figure is original HTML, CSS and JavaScript, with finite
+reader-initiated motion. It illustrates alternative outcomes and does not simulate
+or contact a worker. `validation.json` records fresh native macOS terminal results
+and distinguishes them from simulated browser owner tests.

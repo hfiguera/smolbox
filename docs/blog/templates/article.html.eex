@@ -36,6 +36,10 @@
   </div>
   <section class="next-step" aria-labelledby="next-title">
     <%= cond do %>
+    <% @article["slug"] == "your-browser-disconnected" -> %>
+    <h2 id="next-title">Try a terminal with an observed exit.</h2>
+    <p>Run the durable terminal example, inspect its result, and follow the recovery guide before experimenting with an uncertain session.</p>
+    <a href="https://github.com/hfiguera/smolbox/tree/v0.2.1/examples/durable_host#interactive-terminal-example">Open the terminal walkthrough <%= SmolBox.Blog.HTML.arrow(:right) %></a>
     <% @article["slug"] == "running-vm-ready-application" -> %>
     <h2 id="next-title">Try the startup experiment.</h2>
     <p>Run the working service, break its startup command, then compare a background launch. The article's setup uses the repository's durable host example.</p>

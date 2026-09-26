@@ -1,5 +1,16 @@
 [
   {
+    "slug": "your-browser-disconnected",
+    "title": "Your browser disconnected. Is the command still running?",
+    "description": "Follow a terminal session through a lost connection. Learn when you can reconnect, what an exit proves, and why an uncertain command should not be replayed.",
+    "published_on": "2026-09-26",
+    "updated_on": "2026-09-26",
+    "version": "0.2.1",
+    "category": "Failure and recovery",
+    "image": "disconnect.png",
+    "image_alt": "The browser connection is lost. The controller keeps the execution identity, but the guest outcome still needs evidence."
+  },
+  {
     "slug": "running-vm-ready-application",
     "title": "Your VM is running. Is your application ready?",
     "description": "Start an HTTP service, break its startup command, and check what a running VM actually tells you. A practical SmolBox guide to application readiness.",
