@@ -1,0 +1,52 @@
+{
+  "article": "your-browser-disconnected",
+  "smolbox": "0.2.1",
+  "library_commit": "3905ff039ec38d8cbcd9d7b868c2e86bee006416",
+  "smolvm": "1.19.0",
+  "platform": "macOS Apple Silicon",
+  "date": "2026-09-26",
+  "worker_binary_sha256": "aefa1fc34f22bfe287738ec82ea4b23030913a037f2805f76e56eca53942d5da",
+  "python_artifact_sha256": "bb3ed187bc4cfc1cc6f7e4e09c8f96ac1c2d47dcd2902653e6c1bd2ba6ca017c",
+  "live": {
+    "terminal_runtime": {
+      "passed": 3,
+      "observations": [
+        "Input, resize, Ctrl-C and observed exit 7; retained file read by a separate command.",
+        "Bounded slow consumer closes observation with an uncertain outcome.",
+        "A detached descendant heartbeat advanced after abrupt terminal loss."
+      ]
+    },
+    "durable_terminal_demo": {
+      "phase": "run",
+      "exit_code": 7,
+      "resize_verified": true,
+      "retained_file": true,
+      "absence_verified": true,
+      "reservations_released": true
+    }
+  },
+  "limits": [
+    "The animated browser scenarios are an explanatory model, not a recording.",
+    "The browser grace-period tests use a simulated terminal peer and do not qualify browser/network reconnection on a live worker.",
+    "No new Linux campaign or controller-crash recovery campaign was run for this article.",
+    "The community workspace keeps its published 0.2.0 dependency lock; its reconnect policy is application code, not a new 0.2.1 library feature."
+  ],
+  "logs": {
+    "terminal-runtime.log": "35e05b0e169829c2c6cef27a84ab7a608a5a2b2a4ca76f7d61458a705e34285e",
+    "durable-run.log": "e62a3dd93ef6138dc7b07bf718ff04cc9a503e91e121426064ffe663dc2a2232",
+    "browser-owner-tests.log": "4837bd8aed57f469cf391a65f846d9e9c1754de3d735ba3b049c583f34df7cba"
+  },
+  "simulated": {
+    "browser_owner_tests": {
+      "passed": 5,
+      "peer": "in-memory terminal peer",
+      "scope": [
+        "input and resize routing",
+        "surviving owner reconnect and pending output frame",
+        "grace expiry",
+        "late reconnect rejection",
+        "slow browser bound"
+      ]
+    }
+  }
+}
