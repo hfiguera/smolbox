@@ -1,9 +1,9 @@
 # Getting started
 
-SmolBox **0.2.1** defaults to **smolvm 1.19.0** on Linux x86_64 and macOS Apple
-Silicon. Version 0.2.0 defaults to 1.17.0. Keep existing workers explicitly pinned
+SmolBox **0.3.0** defaults to **smolvm 1.19.0** on Linux x86_64 and macOS Apple
+Silicon, unchanged from 0.2.1. Version 0.2.0 defaults to 1.17.0. Keep workers pinned
 to their installed version; updating SmolBox does not install smolvm. See
-[Upgrading to 0.2.1](upgrading-to-0.2.1.md) and the
+[Upgrading to 0.3.0](upgrading-to-0.3.0.md) and the
 [1.19.0 qualification](runtime-1.19.0-qualification.md).
 
 This walkthrough runs a Python program in a disposable VM, reads its output file,
@@ -25,13 +25,13 @@ files, background launches and a mapped service with PostgreSQL recovery.
 In an existing Elixir Mix application, add this entry to `deps/0` in `mix.exs`:
 
 ```elixir
-{:smolbox, "~> 0.2.1"}
+{:smolbox, "~> 0.3.0"}
 ```
 
 Run `mix deps.get` after adding the dependency. A local checkout can instead be
-used with `{:smolbox, path: "../smolbox"}`. Version 0.2.1 defaults to smolvm
+used with `{:smolbox, path: "../smolbox"}`. Version 0.3.0 defaults to smolvm
 **1.19.0**. Existing applications should follow
-[Upgrading to 0.2.1](upgrading-to-0.2.1.md); the library does not upgrade
+[Upgrading to 0.3.0](upgrading-to-0.3.0.md); the library does not upgrade
 the worker. Applications coming from 0.1.2 or earlier also require the coordinated
 [record format upgrade](recovery.md#upgrading-to-0-1-3).
 Elixir 1.18 and later are accepted by the
@@ -79,7 +79,7 @@ iex -S mix
 
 `SMOLBOX_DEMO_DIR` is a new private directory for input/output objects. Keep it
 separate from the runtime image and from all guest-accessible directories.
-The walkthrough selects 1.19.0, the default in 0.2.1. Explicitly select an older
+The walkthrough selects 1.19.0, the default in 0.3.0. Explicitly select an older
 supported worker version when retaining an existing installation; updating the
 Elixir dependency does not install a worker or migrate checkpoint artifacts.
 
