@@ -14,6 +14,12 @@ defmodule SmolBox.Runtime.WorkerConfig do
   Optional `:registry_credentials` is `{resolver_module, host_context}`; see
   `SmolBox.RegistryCredentials`. Only safe references appear in stored sources.
 
+  Optional `:export_destinations` approves exact `SmolBox.ExportDestination`
+  values for stopped-machine publication on 1.19.0. Each includes additional
+  helper resources, immutable tag policy, and a credential reference resolving
+  a scoped publication bearer. A successful response does not attest helper
+  cleanup; see `SmolBox.Exports` for explicit quiescence confirmation.
+
   Artifact entries have `id`, `sha256`, `architecture`, and an absolute prepared
   `.smolmachine` `path` on this worker. The operator verifies artifact digests,
   approved startup behavior, disabled automatic workload restart, and the pinned runtime
@@ -70,6 +76,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
                 draining: false,
                 checkpoints: [],
                 sources: [],
+                export_destinations: [],
                 registry_credentials: nil
               ]
 
@@ -81,6 +88,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
           checkpoints: [Checkpoint.t()],
           sources: [SmolBox.Source.t()],
           registry_credentials: {module(), term()} | nil,
+          export_destinations: [SmolBox.ExportDestination.t()],
           profiles: [Profile.t()],
           capacity: Store.capacity(),
           allocation_floor: %{
@@ -135,7 +143,8 @@ defmodule SmolBox.Runtime.WorkerConfig do
              :draining,
              :checkpoints,
              :sources,
-             :registry_credentials
+             :registry_credentials,
+             :export_destinations
            ]
        ) and
          Enum.all?(@enforce_keys, &Keyword.has_key?(options, &1)) do
@@ -271,8 +280,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
     valid_client?(worker.client) and supported_runtime?(worker) and
       worker.qualification == :development and valid_platform?(worker) and
       is_boolean(worker.draining) and capacity?(worker.capacity) and catalogs?(worker) and
-      allocation_floor?(worker.allocation_floor) and
-      SmolBox.RegistryCredentials.valid?(worker.registry_credentials)
+      allocation_floor?(worker.allocation_floor) and export_access?(worker)
   end
 
   defp supported_runtime?(%{runtime_version: "1.14.1"}), do: true
@@ -309,6 +317,17 @@ defmodule SmolBox.Runtime.WorkerConfig do
       Enum.all?(worker.artifacts, &artifact?(&1, worker.architecture)) and
       sources?(worker) and
       unique?(worker.artifacts, & &1["id"])
+  end
+
+  defp export_access?(worker),
+    do: exports?(worker) and SmolBox.RegistryCredentials.valid?(worker.registry_credentials)
+
+  defp exports?(worker) do
+    Validation.list?(worker.export_destinations, 32) and
+      Enum.all?(worker.export_destinations, fn destination ->
+        worker.runtime_version == "1.19.0" and
+          SmolBox.ExportDestination.validate(destination) == :ok
+      end) and unique?(worker.export_destinations, & &1.id)
   end
 
   defp sources?(worker) do

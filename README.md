@@ -216,6 +216,7 @@ about running programs from Elixir and managing their execution lifecycle.
 |---|---|
 | [Getting started](docs/getting-started.md) | Connect, stage a Python program, submit it, read its result, and finish cleanup |
 | [Managed host integration](docs/host-integration.md) | Configure supervision, workers, profiles, storage, and execution specifications |
+| [Stopped-machine exports](docs/machine-exports.md) | Publish supported disk state as a verified artifact for another managed machine |
 | [Managed persistent machines](docs/persistent-machines.md) | Retain a machine across commands, recover management, and explicitly dispose of it |
 | [Low-level client](docs/client.md) | Create machines, execute commands, stream output, and transfer files |
 | [Controlled network access](docs/network-access.md) | Approve outbound destinations while retaining offline defaults |

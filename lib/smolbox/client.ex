@@ -589,6 +589,44 @@ defmodule SmolBox.Client do
     end
   end
 
+  @doc """
+  Export a stopped machine to an explicitly approved registry destination.
+
+  Requires smolvm 1.19.0 and an ephemeral scoped OCI bearer. This low-level call
+  does not provide durable ownership, destination exclusion or publication
+  verification; use `SmolBox.Exports` for managed work. It returns only a worker
+  receipt. It never stops the source or retries. A lost response may conceal a
+  completed publication and continuing helper work.
+  """
+  @spec export_machine(t(), String.t(), SmolBox.ExportSpec.t(), String.t()) ::
+          {:ok, SmolBox.ExportReceipt.t()} | {:error, Error.t()}
+  def export_machine(client, name, spec, push_token) do
+    deadline = System.monotonic_time(:millisecond) + client.worker.operation_timeout_ms
+
+    with :ok <- SmolBox.ExportSpec.validate(spec),
+         true <- SmolBox.RegistryCredentials.token?(push_token),
+         {:ok, path} <- machine_path(name),
+         {:ok, client} <- creation_runtime_versions(client, ["1.19.0"]),
+         {:ok, observed} <- inspect_machine(client, name),
+         true <- observed.state == :stopped,
+         {:ok, client} <- remaining_create_budget(client, deadline) do
+      destination = spec.destination
+
+      wire = %{
+        "repo" => destination.repository,
+        "tag" => spec.tag,
+        "referenceHost" => destination.registry,
+        "pushToken" => push_token
+      }
+
+      with {:ok, body} <- json(client, :post, path <> "/export", wire, :export),
+           do: SmolBox.ExportReceipt.from_wire(body)
+    else
+      false -> error(:validation, :export, :not_dispatched)
+      {:error, failure} -> {:error, %{failure | operation: :export, evidence: :not_dispatched}}
+    end
+  end
+
   defp json(client, method, path, wire, operation) do
     encoded = if is_nil(wire), do: "", else: Jason.encode!(wire)
 

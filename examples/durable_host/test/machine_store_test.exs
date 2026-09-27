@@ -1,7 +1,7 @@
 defmodule SmolBox.DurableHost.MachineStoreTest do
   use ExUnit.Case, async: false
   alias SmolBox.DurableHost.{Database, Repo, Store}
-  alias SmolBox.Store.{Contract, ImageContract, MachineContract}
+  alias SmolBox.Store.{Contract, ExportContract, ImageContract, MachineContract}
 
   setup do
     partition = "machines-" <> Base.url_encode64(:crypto.strong_rand_bytes(12), padding: false)
@@ -14,8 +14,51 @@ defmodule SmolBox.DurableHost.MachineStoreTest do
     %{store: store}
   end
 
+  for scenario <- [
+        :admission,
+        :cancellation,
+        :uncertainty,
+        :competition,
+        :lifecycle_race,
+        :unsafe_release,
+        :destination_race
+      ] do
+    test "PostgreSQL export contract: #{scenario}", %{store: store} do
+      apply(SmolBox.Store.ExportContract, unquote(scenario), [Store, store])
+    end
+  end
+
   test "PostgreSQL image pull storage contract", %{store: store} do
     ImageContract.pull(Store, store)
+  end
+
+  test "export persistence failure rolls back history and its resource projection", %{
+    store: store
+  } do
+    machine = ExportContract.stopped(Store, store)
+
+    constraint =
+      "reject_export_reservation_" <> Integer.to_string(System.unique_integer([:positive]))
+
+    Database.query(
+      store,
+      "ALTER TABLE smolbox_managed_machines ADD CONSTRAINT #{constraint} CHECK (slots < 2 OR partition <> '#{store.partition}')",
+      []
+    )
+
+    on_exit(fn ->
+      Database.query(
+        store,
+        "ALTER TABLE smolbox_managed_machines DROP CONSTRAINT #{constraint}",
+        []
+      )
+    end)
+
+    assert {:error, %{category: :store}} =
+             ExportContract.accept(Store, store, machine)
+
+    assert {:ok, ^machine} = Store.machine(store, :fetch, [{machine.scope, machine.id}])
+    assert {:ok, %{slots: 1, disk_gb: 2}} = Store.usage(store, "worker")
   end
 
   for scenario <- [

@@ -49,6 +49,16 @@ defmodule SmolBox.Store do
   missing and uncertain machines keep them. Run the shared PortContract suite.
   The execution reservation rules below describe disposable work.
 
+  `managed_exports: 1` requires codec v11, atomic export history and resource
+  accounting. Each `SmolBox.Export` is a distinct record retained inside its
+  machine, including tombstones. Run `ExportContract`. The store must reserve
+  publication tag identities across all retained histories and keep the active
+  export's additional resources in worker usage until terminal resolution. No
+  SQL migration is needed in the example; upgrade every reader and projection
+  implementation before enabling this capability. Ordinary records keep their
+  previous codec and resource projection. History admits at most 256 exports per
+  machine; it never expires or evicts an identity to make room.
+
   Every mutation is one transaction. Failures must roll back record and worker
   changes together. Reads are authoritative and must never translate unavailable,
   corrupt, or unknown-schema storage into `not_found`. There is no fallback store.
@@ -116,6 +126,10 @@ defmodule SmolBox.Store do
           | :submit
           | :finish
           | :resolve
+          | :export_accept
+          | :export_advance
+          | :export_cancel
+          | :export_resolve
 
   @typedoc "The last machine ID in a scoped list page; nil starts or ends the scan."
   @type machine_list_cursor :: String.t() | nil
@@ -190,6 +204,10 @@ defmodule SmolBox.Store do
   | `:submit` | `[key, initial_execution, max_pending, now]` | `{:ok, execution}` |
   | `:finish` | `[execution_key, execution_guard, now]` | `{:ok, execution}` |
   | `:resolve` | `[key, guard, observation_or_absent, now]` | `{:ok, machine}` |
+  | `:export_accept` | `[key, spec, fingerprint, capacity, now]` | `{:ok, machine}` |
+  | `:export_advance` | `[key, guard, export_id, expected_state, changes, now]` | `{:ok, machine}` |
+  | `:export_cancel` | `[key, export_id, now]` | `{:ok, machine}` |
+  | `:export_resolve` | `[key, guard, export_id, stopped_observation_or_absent, now]` | `{:ok, machine}` |
 
   All operations may return `{:error, SmolBox.Error.t()}`. An absent identity is
   `:not_found`; unavailable or corrupt storage is a store error, never absence.
@@ -304,6 +322,46 @@ defmodule SmolBox.Store do
               :resolve,
               [ManagedMachine.key() | guard() | machine_resolution() | non_neg_integer()]
             ) :: machine_result()
+  @type export_changes :: [
+          state:
+            :dispatching
+            | :verifying
+            | :completed
+            | :published
+            | :failed
+            | :cancelled
+            | :unknown
+            | :resolved_unknown,
+          receipt: SmolBox.ExportReceipt.t(),
+          result: SmolBox.ExportResult.t(),
+          error: Error.t(),
+          resolved_at_ms: non_neg_integer()
+        ]
+  @callback machine(context(), :export_accept, [
+              ManagedMachine.key()
+              | SmolBox.ExportSpec.t()
+              | String.t()
+              | capacity()
+              | non_neg_integer()
+            ]) :: machine_result()
+  @callback machine(context(), :export_advance, [
+              ManagedMachine.key()
+              | guard()
+              | String.t()
+              | SmolBox.Export.state()
+              | export_changes()
+              | non_neg_integer()
+            ]) :: machine_result()
+  @callback machine(context(), :export_cancel, [
+              ManagedMachine.key() | String.t() | non_neg_integer()
+            ]) :: machine_result()
+  @callback machine(context(), :export_resolve, [
+              ManagedMachine.key()
+              | guard()
+              | String.t()
+              | machine_resolution()
+              | non_neg_integer()
+            ]) :: machine_result()
   @optional_callbacks machine: 3
 
   @callback capabilities(context()) ::

@@ -870,3 +870,13 @@ existing `/workspace` and 1 MiB contract. Startup workloads and PTY sessions kee
 their separate cwd contracts. Expanded managed records require codec v9 and the
 `guest_files: 1` store capability. See [the guide](guest-files.md) and
 [validation](guest-files-validation.md) for the qualified scope.
+
+## Managed stopped-machine exports
+
+Exports require smolvm 1.19.0 and a store advertising `managed_exports: 1`.
+Machines with export history use codec v11. The shared PostgreSQL example requires
+no additional SQL migration, but all controllers, readers, and resource projection
+writers must be upgraded together. Older versions cannot read the new records or
+account for export helper reservations. Do not discard history to enable rollback.
+See [export compatibility and recovery](machine-exports.md#durable-restart-and-compatibility)
+for the supported state boundary, upgrade sequence, and rollback implications.

@@ -13,10 +13,28 @@ defmodule SmolBox.FaultStore do
 
   defp invoke(context, operation, arguments) do
     event = event(operation, arguments)
-    FaultGate.hit(context.faults, event, :before)
-    result = apply(Map.get(context, :adapter, Memory), operation, [context.store | arguments])
-    FaultGate.hit(context.faults, event, :after)
-    result
+
+    with :ok <- failure(context.faults, event, :before) do
+      FaultGate.hit(context.faults, event, :before)
+      result = apply(Map.get(context, :adapter, Memory), operation, [context.store | arguments])
+      FaultGate.hit(context.faults, event, :after)
+      with :ok <- failure(context.faults, event, :after), do: result
+    end
+  end
+
+  defp failure(nil, _event, _phase), do: :ok
+
+  defp failure(gate, event, phase) do
+    Agent.get_and_update(gate, fn
+      %{failure: {^event, ^phase}, observer: observer} = state ->
+        send(observer, {:store_failure, event, phase})
+
+        {{:error, %SmolBox.Error{category: :store, operation: :store}},
+         Map.delete(state, :failure)}
+
+      state ->
+        {:ok, state}
+    end)
   end
 
   defp event(:write, [_key, _guard, changes, _now]) do
@@ -39,6 +57,15 @@ defmodule SmolBox.FaultStore do
       changes[:phase] == :prepared -> :source_prepared
       changes[:phase] == :preparing -> :source_preparing
       true -> :machine_write
+    end
+  end
+
+  defp event(:machine, [:export_advance, [_key, _guard, _id, _expected, changes, _now]]) do
+    case changes[:state] do
+      :dispatching -> :export_intent
+      :verifying -> :export_receipt
+      :published -> :export_result
+      _other -> :export_write
     end
   end
 

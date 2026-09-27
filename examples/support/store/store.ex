@@ -9,7 +9,7 @@ defmodule SmolBox.DurableHost.Store do
   """
   @behaviour SmolBox.Store
 
-  alias SmolBox.DurableHost.{Database, MachineIndex, MachineStore, SourceStore}
+  alias SmolBox.DurableHost.{Database, ExportStore, MachineIndex, MachineStore, SourceStore}
   alias SmolBox.{Error, Execution, MachineSpec, Validation}
   alias SmolBox.Store.RecordOps
 
@@ -51,7 +51,10 @@ defmodule SmolBox.DurableHost.Store do
                   interactive_terminal: 1,
                   extended_execution: 1
                 },
-                SourceStore.capabilities()
+                Map.merge(
+                  SourceStore.capabilities(),
+                  ExportStore.capabilities()
+                )
               )}
     end)
   end

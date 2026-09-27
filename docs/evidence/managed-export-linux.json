@@ -1,0 +1,64 @@
+{
+  "date": "2026-09-26",
+  "platform": "Linux x86_64",
+  "worker_version": "1.19.0",
+  "registry": "zot 2.1.21",
+  "authentication": "isolated scoped bearer proxy in front of real zot; not production identity-provider qualification",
+  "registry_policy": {
+    "registry": "zot2.1.21",
+    "auth": "scoped bearer test proxy",
+    "unauthenticated_write_rejected": true,
+    "authenticated_create_succeeded": true,
+    "tag_replacement_rejected": true,
+    "original_manifest_unchanged": true
+  },
+  "storage": "PostgreSQL encrypted shared adapter; separate prepare, confirm and reuse BEAM processes",
+  "scenario": {
+    "phase": "reused",
+    "absence_verified": true,
+    "file_preserved": true,
+    "independent_disks": true,
+    "reservations_released": true,
+    "retained_registry_reference": "127.0.0.1:19672/team/exports@sha256:0d3b76f1c2344e87c690ffad0db65e329ff301f14916a297f05e7bd8a60b5f88"
+  },
+  "cleanup_confirmation": {
+    "only_owned_worker_process_remaining": true,
+    "worker_pid": 1664821,
+    "scratch_empty": true
+  },
+  "artifact_verified_after_machine_deletion": true,
+  "downloaded_blob_sha256_verified": true,
+  "worker_inventory_empty": true,
+  "result": {
+    "reference": "127.0.0.1:19672/team/exports@sha256:0d3b76f1c2344e87c690ffad0db65e329ff301f14916a297f05e7bd8a60b5f88",
+    "platform": "linux/amd64",
+    "architecture": "x86_64",
+    "runtime_version": "1.19.0",
+    "content_sha256": "537a4f2c041650628c621dc240b067529fa5a276672dfdaa763c6b194ffe2a62",
+    "manifest_sha256": "0d3b76f1c2344e87c690ffad0db65e329ff301f14916a297f05e7bd8a60b5f88",
+    "size_bytes": 18463137,
+    "config_sha256": "32d7d1c6891f6f924b7918e4de453abfb7323f5b23e5be413066acf8ee56f513",
+    "verified_at_ms": 1790471754660
+  },
+  "negative_live_case": {
+    "worker_setting": "SMOLVM_FILE_TRANSFER_MAX_BYTES=1048576",
+    "outcome": "pack export rejected an 8090112 byte flattened layer; SmolBox retained unknown outcome and reservations",
+    "resolution": "worker requests fenced, helpers absent, staging empty, explicit unknown resolution, source deletion verified, reservations released"
+  },
+  "existing_real_worker_suite": {
+    "passed": 14,
+    "runtime_version": "1.19.0",
+    "file_transfer_cap_bytes": 1048576
+  },
+  "durable_linux_recovery_suite": {
+    "passed": 25,
+    "duration_seconds": 409.4,
+    "runtime_version": "1.19.0",
+    "storage": "isolated PostgreSQL test database"
+  },
+  "limitations": [
+    "Container Linux export acceptance only; bare VM and macOS export not live-qualified",
+    "Registry authentication uses a scoped test proxy, not an external identity provider",
+    "Helper cleanup requires an explicit host quiescence assertion; API success is insufficient"
+  ]
+}
