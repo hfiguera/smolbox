@@ -9,7 +9,7 @@ defmodule SmolBox.DurableHost.Store do
   """
   @behaviour SmolBox.Store
 
-  alias SmolBox.DurableHost.{Database, MachineIndex, MachineStore}
+  alias SmolBox.DurableHost.{Database, MachineIndex, MachineStore, SourceStore}
   alias SmolBox.{Error, Execution, MachineSpec, Validation}
   alias SmolBox.Store.RecordOps
 
@@ -39,19 +39,20 @@ defmodule SmolBox.DurableHost.Store do
            %{} <- Database.query(context, "SELECT host_port FROM smolbox_port_owners LIMIT 0", []),
            do:
              {:ok,
-              %{
-                schema: 1,
-                durable: true,
-                atomic: true,
-                managed_machines: 1,
-                managed_ports: 1,
-                managed_workloads: 1,
-                registry_sources: 1,
-                managed_images: 1,
-                guest_files: 1,
-                interactive_terminal: 1,
-                extended_execution: 1
-              }}
+              Map.merge(
+                %{
+                  schema: 1,
+                  durable: true,
+                  atomic: true,
+                  managed_machines: 1,
+                  managed_ports: 1,
+                  managed_workloads: 1,
+                  guest_files: 1,
+                  interactive_terminal: 1,
+                  extended_execution: 1
+                },
+                SourceStore.capabilities()
+              )}
     end)
   end
 

@@ -2,7 +2,7 @@ defmodule Workspace.WorkspacesTest do
   use ExUnit.Case, async: false
   alias Ecto.Adapters.SQL
   alias Ecto.Adapters.SQL.Sandbox
-  alias SmolBox.DurableHost.Store
+  alias SmolBox.DurableHost.{SourceStore, Store}
   alias Workspace.{Fixture, Ledger, Settings, TestWorker, Workspaces}
   setup do: %{c: Fixture.start()}
 
@@ -13,6 +13,19 @@ defmodule Workspace.WorkspacesTest do
       "mode" => "foreground",
       "timeout" => "30"
     }
+
+  test "published dependency does not advertise or accept unsupported registry sources", %{c: c} do
+    assert {:ok, capabilities} = Store.capabilities(c.store)
+    refute Map.has_key?(capabilities, :registry_sources)
+    refute Map.has_key?(capabilities, :managed_images)
+
+    for kind <- ["registry", "oci"] do
+      record = %{spec: %{artifact: %{"kind" => kind}}}
+
+      assert {:error, %SmolBox.Error{category: :validation}} =
+               SourceStore.available(c.store, record, "worker")
+    end
+  end
 
   test "workspace identity and completed execution survive a fresh controller", %{c: c} do
     id = Fixture.running(c)

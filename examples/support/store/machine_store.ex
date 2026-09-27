@@ -1,8 +1,8 @@
 defmodule SmolBox.DurableHost.MachineStore do
   @moduledoc false
-  alias SmolBox.DurableHost.{Database, MachineIndex, PortIndex}
+  alias SmolBox.DurableHost.{Database, MachineIndex, PortIndex, SourceStore}
   alias SmolBox.{Error, Execution, ManagedMachine, Validation}
-  alias SmolBox.Store.{MachineOps, RecordOps, SourceOwnership}
+  alias SmolBox.Store.{MachineOps, RecordOps}
 
   # Every entry runs under Store's partition transaction, including command
   # acceptance/completion and capacity accounting shared with disposable work.
@@ -71,7 +71,7 @@ defmodule SmolBox.DurableHost.MachineStore do
 
   def run(context, :reserve, [key, guard, {worker, name, capacity}, now]) do
     with {:ok, record} <- guarded(context, key, guard, now),
-         :ok <- source_available(context, record, worker),
+         :ok <- SourceStore.available(context, record, worker),
          {:ok, used} <- Database.usage(context, worker),
          {:ok, next} <-
            MachineOps.reserve(
@@ -185,30 +185,6 @@ defmodule SmolBox.DurableHost.MachineStore do
       )
 
       {:ok, record}
-    end
-  end
-
-  defp source_available(context, record, worker) do
-    if SmolBox.Source.remote?(record.spec.artifact) do
-      rows =
-        Database.query(
-          context,
-          "SELECT scope,execution_id FROM smolbox_managed_machines WHERE partition=$1 AND worker_id=$2",
-          [context.partition, worker]
-        ).rows
-
-      Enum.reduce_while(rows, :ok, fn key, :ok -> source_owner(context, record, worker, key) end)
-    else
-      :ok
-    end
-  end
-
-  defp source_owner(context, record, worker, [scope, id]) do
-    with {:ok, existing} <- Database.read(context, {scope, id}, :machine),
-         :ok <- SourceOwnership.available(record, worker, [existing]) do
-      {:cont, :ok}
-    else
-      failure -> {:halt, failure}
     end
   end
 
