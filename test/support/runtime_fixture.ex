@@ -82,7 +82,8 @@ defmodule SmolBox.RuntimeFixture do
           architecture: "x86_64",
           profiles: [spec.profile],
           allocation_floor: %{storage_gb: 1, overlay_gb: 1, host_overhead_mb: 256},
-          capacity: Contract.capacity(Keyword.get(options, :slots, 1)),
+          capacity:
+            Keyword.get(options, :capacity, Contract.capacity(Keyword.get(options, :slots, 1))),
           draining: Keyword.get(options, :draining, false),
           artifacts:
             if(checkpoint? or options[:source] != nil,
@@ -93,6 +94,7 @@ defmodule SmolBox.RuntimeFixture do
           sources:
             if(options[:source], do: [options[:source]], else: []) ++
               Keyword.get(options, :pull_sources, []),
+          export_destinations: Keyword.get(options, :export_destinations, []),
           registry_credentials: options[:registry_credentials]
         ] ++
           case Keyword.fetch(options, :expected_runtime_version) do
@@ -138,7 +140,7 @@ defmodule SmolBox.RuntimeFixture do
   # Failed startup probes are cached for five seconds. Establish readiness before
   # tests begin their command/machine observation budgets. Tests of unavailable
   # or draining workers opt out explicitly with wait_ready: false.
-  defp wait_ready(runtime, deadline) do
+  def wait_ready(runtime, deadline) do
     case SmolBox.workers(runtime) do
       {:ok, [%{status: :ready}]} ->
         :ok

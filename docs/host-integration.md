@@ -486,3 +486,13 @@ worker, approve a superset on its client, coordinate transport and artifact-stor
 limits, and set a worker download cap before startup. Expanded profiles require
 image sources on smolvm 1.17.0 or 1.19.0 and store capability `guest_files: 1`. Defaults stay
 unchanged. See [guest files](guest-files.md) for code and the v9 upgrade procedure.
+
+## Export approval and resource ownership
+
+The host approves export registries, immutable tag policy, scoped publication
+credentials, and additional helper capacity through `export_destinations` on each
+worker. Publication identity verification belongs to SmolBox; registry retention,
+artifact access controls, helper quiescence confirmation, and review of captured
+workload settings remain host responsibilities. Source deletion does not remove
+registry artifacts. Read [stopped-machine exports](machine-exports.md) before
+advertising `managed_exports: 1` on a shared store.

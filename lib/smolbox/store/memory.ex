@@ -12,7 +12,7 @@ defmodule SmolBox.Store.Memory do
   @behaviour SmolBox.Store
 
   alias SmolBox.{Error, Execution, MachineSpec, ManagedMachine, Store, Validation}
-  alias SmolBox.Store.{Codec, MachineOps, PortOwnership, RecordOps, SourceOwnership}
+  alias SmolBox.Store.{Codec, ExportOps, MachineOps, PortOwnership, RecordOps, SourceOwnership}
 
   @doc """
   Start an ephemeral store, optionally registered with `:name`.
@@ -112,6 +112,7 @@ defmodule SmolBox.Store.Memory do
           managed_workloads: 1,
           registry_sources: 1,
           managed_images: 1,
+          managed_exports: 1,
           guest_files: 1,
           interactive_terminal: 1,
           extended_execution: 1
@@ -300,7 +301,7 @@ defmodule SmolBox.Store.Memory do
       RecordOps.empty_usage(),
       fn record, acc ->
         if record.worker_id == worker and record.reservation != nil do
-          Map.merge(acc, record.reservation, &add_resource/3)
+          Map.merge(acc, RecordOps.accounted_resources(record), &add_resource/3)
         else
           acc
         end
@@ -429,6 +430,39 @@ defmodule SmolBox.Store.Memory do
          {:ok, machine, command} <- MachineOps.resolve(machine, command, observed, now),
          {:ok, state} <- put_optional_record(state, command),
          do: machine_save(state, machine)
+  end
+
+  defp machine_operation(state, :export_accept, [key, spec, fingerprint, capacity, now]) do
+    with {:ok, record} <- machine_lookup(state, key),
+         {:ok, next} <-
+           ExportOps.accept(
+             record,
+             spec,
+             fingerprint,
+             capacity,
+             used(state, record.worker_id),
+             Map.values(state.machines),
+             now
+           ),
+         do: machine_save(state, next)
+  end
+
+  defp machine_operation(state, :export_advance, [key, guard, id, expected, changes, now]) do
+    with {:ok, record} <- machine_guard(state, key, guard, now),
+         {:ok, next} <- ExportOps.advance(record, id, expected, changes, now),
+         do: machine_save(state, next)
+  end
+
+  defp machine_operation(state, :export_cancel, [key, id, now]) do
+    with {:ok, record} <- machine_lookup(state, key),
+         {:ok, next} <- ExportOps.cancel(record, id, now),
+         do: machine_save(state, next)
+  end
+
+  defp machine_operation(state, :export_resolve, [key, guard, id, observed, now]) do
+    with {:ok, record} <- machine_guard(state, key, guard, now),
+         {:ok, next} <- ExportOps.resolve(record, id, observed, now),
+         do: machine_save(state, next)
   end
 
   defp machine_operation(_state, _operation, _arguments), do: error(:validation)

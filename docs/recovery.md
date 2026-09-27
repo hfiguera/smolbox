@@ -366,3 +366,13 @@ is immutable and retained in tombstones; deletion does not make rollback safe.
 Recovery rechecks current worker approvals before file I/O. It cannot adopt a
 broader policy or silently downgrade a file budget. Unknown command outcomes
 remain blocked without replay. See [guest file recovery](guest-files.md#recovery-and-upgrades).
+
+## Uncertain exports and helper cleanup
+
+Managed exports persist their own intent and outcome. An unknown export keeps the
+source operation slot and helper resources, even when the source looks stopped.
+A verified `:published` result also keeps them: smolvm 1.19.0 may report publication
+success without proving its helper terminated. Fence pending requests and establish
+helper and staging quiescence before `SmolBox.Exports.resolve/4`. Never replay an
+uncertain export or delete its registry artifacts as automatic cleanup. Follow the
+[export recovery procedure](machine-exports.md#verify-cleanup-before-releasing-the-source).

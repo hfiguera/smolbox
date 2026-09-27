@@ -597,3 +597,81 @@ the later reads verify that pulling did not replace the machine's files.
 Managed image pulling is unavailable on prepared `.smolmachine` machines:
 upstream returns synthetic `packed` metadata instead of fetching the requested
 image. An empty inventory also cannot prove absence on a stopped VM.
+
+## Export a stopped machine and reuse its artifact
+
+`SmolBox.DurableHost.ExportDemo` runs three separate BEAM invocations against the
+same PostgreSQL partition and keys. It writes `/app/export-proof.txt`, exports the
+stopped machine, retrieves the durable result after restart, creates an explicitly
+approved copy, verifies independent file contents, and deletes both machines.
+
+Use an isolated, approved Alpine-compatible container artifact with `/bin/sh` and
+`/bin/cat`. This example declares 2 GiB storage, 2 GiB overlay, and 768 MiB host
+memory overhead; qualify those floors for your worker. Its export allowance is
+four CPUs, 4608 MiB memory, and 128 GiB disk, additional to source reservations.
+Ensure `SMOLVM_FILE_TRANSFER_MAX_BYTES` on the worker can accommodate the flattened
+export layer; this host override also controls pack exports. A 1 MiB worker cap
+used by security regression tests is unsuitable for this example.
+Adjust the example configuration if the actual layers, templates, helper settings,
+or staging needs exceed these declarations. Sparse disks still require enough
+backing space. The example is not a quota enforcement mechanism.
+
+First configure PostgreSQL as above, run `mix ecto.migrate`, and retain the same
+32-byte encryption and fingerprint key files across all phases. Provision a
+registry repository that rejects tag replacement. Its publisher token must be a
+scoped OCI bearer with read and push permission, not the identity token used by
+artifact warm. Keep the token in a private host file, outside version control.
+
+```sh
+export SMOLBOX_STORE_PARTITION=export-demo
+export SMOLBOX_ENCRYPTION_KEY_FILE=/private/export-demo/encryption.key
+export SMOLBOX_FINGERPRINT_KEY_FILE=/private/export-demo/fingerprint.key
+export SMOLBOX_ARTIFACT_DIR=/private/export-demo/objects # existing mode 0700
+export SMOLBOX_WORKER_URL=https://worker.example.com
+export SMOLBOX_PLATFORM=linux
+export SMOLBOX_ARCHITECTURE=x86_64
+export SMOLBOX_EXPORT_BASE_PATH=/approved/alpine.smolmachine
+export SMOLBOX_EXPORT_BASE_SHA256=<verified-prepared-artifact-sha256>
+export SMOLBOX_EXPORT_ID=environment-one # a new immutable registry tag
+export SMOLBOX_EXPORT_REGISTRY=registry.example.com
+export SMOLBOX_EXPORT_REPOSITORY=team/environments
+export SMOLBOX_EXPORT_TOKEN_FILE=/private/export-demo/publisher.token
+mix run -e 'SmolBox.DurableHost.ExportDemo.run("prepare")'
+```
+
+For an isolated loopback test only, `SMOLBOX_ALLOW_LOOPBACK=true` enables HTTP
+worker and registry endpoints. Worker authentication/TLS must be configured for
+your real deployment; extend the example's endpoint options as appropriate.
+The source and destination must already satisfy host approval requirements.
+
+The first invocation prints the verified identity and leaves the source stopped,
+with helper capacity still reserved. Inspect the worker host: fence pending export
+requests, confirm all export helpers have exited, and verify this export's staging
+cleanup. An HTTP 200 is not that evidence. Only after establishing quiescence:
+
+```sh
+SMOLBOX_EXPORT_QUIESCED=true mix run -e 'SmolBox.DurableHost.ExportDemo.run("confirm")'
+```
+
+Review the printed result and copy its complete digest reference as the explicit
+approval for the final invocation. Optionally set
+`SMOLBOX_EXPORT_READER_TOKEN_FILE` to a private identity-token file when the
+existing registry pull contract requires it. This differs from the publisher
+bearer; do not assume one token works for both. Public read access or worker-owned
+pull authentication can omit the reader reference.
+
+```sh
+export SMOLBOX_APPROVED_EXPORT_REFERENCE=registry.example.com/team/environments@sha256:<verified-platform-manifest-sha256>
+mix run -e 'SmolBox.DurableHost.ExportDemo.run("reuse")'
+```
+
+The final phase verifies that the copy initially contains `export-proof`, changes
+it to `changed-copy`, reads `export-proof` from the original, and checks absence
+and reservation release for both machines. It retains the export record and
+registry artifact. Independently inspect the registry's manifest and artifact blob
+after deletion; remove this test artifact only through an explicit registry
+cleanup action. Do not blindly rerun a failed phase: inspect the durable machine,
+command, and export records first, and resolve uncertain work before proceeding.
+
+See [the export guide](../../docs/machine-exports.md) for preserved paths, cleanup
+limitations, cancellation, immutable publication, and codec v11 upgrade/rollback.

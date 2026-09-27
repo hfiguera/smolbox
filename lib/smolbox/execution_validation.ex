@@ -121,6 +121,7 @@ defmodule SmolBox.ExecutionValidation do
         :stale_version
       ] and
       error.operation in [
+        :export,
         :source,
         :prepare_artifact,
         :registry_credentials,

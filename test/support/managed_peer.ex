@@ -123,6 +123,11 @@ defmodule SmolBox.ManagedPeer do
 
   defp machine_route("GET", [], _body, machine, state), do: {{:json, 200, machine}, state}
 
+  defp machine_route("POST", ["export"], body, _machine, state) do
+    response = state.options[:export_response].(Jason.decode!(body))
+    {{:json, if(state.options[:export_lost], do: 503, else: 200), response}, state}
+  end
+
   defp machine_route("GET", ["images"], _body, _machine, state),
     do: {{:json, 200, %{"images" => []}}, state}
 
@@ -267,12 +272,14 @@ defmodule SmolBox.ManagedPeer do
   defp event("GET", ["api", "v1", "machines", _name, "exec", "interactive"]), do: :terminal_open
   defp event("GET", ["api", "v1", "machines", _name]), do: :inspect
   defp event("POST", ["api", "v1", "machines"]), do: :create
+  defp event("POST", ["api", "v1", "machines", _name, "export"]), do: :export
   defp event("POST", ["artifacts", "warm"]), do: :prepare_artifact
   defp event("POST", ["api", "v1", "machines", _name, "images", "pull"]), do: :pull_image
   defp event("POST", ["api", "v1", "machines", _name, "exec" | _suffix]), do: :exec
   defp event("POST", ["api", "v1", "machines", _name, "stop"]), do: :stop
   defp event("DELETE", _segments), do: :delete
   defp event("PUT", _segments), do: :upload
+  defp event("GET", ["api", "v1", "machines", _name, "files" | _path]), do: :download
   defp event(_method, _segments), do: :http_read
 
   defp wait_stopped(agent, name, deadline) do

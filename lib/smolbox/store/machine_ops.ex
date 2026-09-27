@@ -150,7 +150,8 @@ defmodule SmolBox.Store.MachineOps do
   end
 
   def resolve(machine, command, :absent, now) do
-    with true <- machine.state in [:unknown, :missing, :conflict],
+    with true <- machine.active_export == nil,
+         true <- machine.state in [:unknown, :missing, :conflict],
          {:ok, command} <- resolve_command(command, now),
          {:ok, machine} <-
            ManagedMachine.update(
@@ -176,7 +177,8 @@ defmodule SmolBox.Store.MachineOps do
   end
 
   def resolve(machine, command, observed, now) do
-    with true <- machine.state in [:unknown, :missing, :conflict],
+    with true <- machine.active_export == nil,
+         true <- machine.state in [:unknown, :missing, :conflict],
          true <- machine.created_machine != nil,
          true <- observed.state in [:created, :stopped],
          true <- SmolBox.Machine.same_incarnation?(machine.created_machine, observed),

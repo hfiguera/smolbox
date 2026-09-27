@@ -22,7 +22,11 @@ defmodule SmolBox.Store.MachineContract do
   end
 
   def running(adapter, store, ports \\ [], profile \\ nil, artifact \\ nil) do
-    original = record("computer", ports)
+    running_named(adapter, store, "computer", ports, profile, artifact)
+  end
+
+  def running_named(adapter, store, id, ports \\ [], profile \\ nil, artifact \\ nil) do
+    original = record(id, ports)
 
     spec = %{
       original.spec
@@ -36,12 +40,14 @@ defmodule SmolBox.Store.MachineContract do
     assert {:ok, _} = adapter.machine(store, :accept, [record, 10])
     assert {:ok, _} = adapter.claim_worker(store, "worker", "owner", 1000, 5000)
     assert {:ok, claimed} = adapter.machine(store, :claim, [key, "owner", 1000, 5000])
+    name = if id == "computer", do: "persistent-vm", else: "persistent-vm-" <> id
+    capacity = Contract.capacity(if(id == "computer", do: 1, else: 20))
 
     assert {:ok, reserved} =
              adapter.machine(store, :reserve, [
                key,
                Contract.guard(claimed),
-               {"worker", "persistent-vm", Contract.capacity()},
+               {"worker", name, capacity},
                1000
              ])
 

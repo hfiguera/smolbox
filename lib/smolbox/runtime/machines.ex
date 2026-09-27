@@ -1,11 +1,10 @@
 defmodule SmolBox.Runtime.Machines do
   @moduledoc false
   alias SmolBox.{Client, Error, Identity, Machine, ManagedMachine}
-  alias SmolBox.Runtime.ExecutionSupport
+  alias SmolBox.Runtime.{ExecutionSupport, Exports}
   alias SmolBox.Runtime.{Session, WorkerConfig, WorkerHealth}
 
-  def store(config, operation, arguments),
-    do: Session.store(config, :machine, [operation, arguments])
+  defdelegate store(config, operation, arguments), to: SmolBox.Runtime.MachineSession
 
   def run(config, key, eligible) do
     Session.safe(fn ->
@@ -27,17 +26,11 @@ defmodule SmolBox.Runtime.Machines do
     end
   end
 
-  def claim(config, key),
-    do: store(config, :claim, [key, config.owner, config.clock.now(), config.lease_ms])
+  defdelegate claim(config, key), to: SmolBox.Runtime.MachineSession
+  defdelegate write(config, record, changes), to: SmolBox.Runtime.MachineSession
 
-  def write(config, record, changes),
-    do:
-      store(config, :write, [
-        ManagedMachine.key(record),
-        Session.guard(record),
-        changes,
-        config.clock.now()
-      ])
+  defp route(config, %{operation: :export} = record, _eligible),
+    do: Exports.run(config, record)
 
   defp route(config, %{state: :accepted} = record, eligible),
     do: reserve(config, record, eligible)
@@ -389,53 +382,6 @@ defmodule SmolBox.Runtime.Machines do
     end
   end
 
-  def worker(config, record) do
-    case Enum.find(config.workers, &(&1.client.worker.id == record.worker_id)) do
-      nil -> Session.error(:unsupported_capability, :worker)
-      worker -> {:ok, worker}
-    end
-  end
-
-  def io(config, record, function) do
-    deadline =
-      record.operation_deadline_ms || config.clock.now() + record.spec.profile.preparation_ms
-
-    if deadline <= config.clock.now(),
-      do: Session.error(:expired, :runtime),
-      else: start_io(config, record, function, deadline)
-  end
-
-  defp start_io(config, record, function, deadline) do
-    task = Task.async(fn -> Session.safe(function) end)
-
-    try do
-      await_io(config, record, task, deadline)
-    after
-      Task.shutdown(task, :brutal_kill)
-    end
-  end
-
-  defp await_io(config, record, task, deadline) do
-    budget = deadline - config.clock.now()
-
-    if budget <= 0 do
-      Session.error(:expired, :runtime)
-    else
-      case Task.yield(task, min(budget, config.poll_ms)) do
-        {:ok, result} ->
-          result
-
-        nil ->
-          renew_io(config, record, task, deadline)
-
-        _lost ->
-          Session.error(:unknown, :runtime)
-      end
-    end
-  end
-
-  defp renew_io(config, record, task, deadline) do
-    with {:ok, current} <- claim(config, ManagedMachine.key(record)),
-         do: await_io(config, current, task, deadline)
-  end
+  defdelegate worker(config, record), to: SmolBox.Runtime.MachineSession
+  defdelegate io(config, record, function), to: SmolBox.Runtime.MachineSession
 end

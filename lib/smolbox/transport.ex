@@ -11,7 +11,7 @@ defmodule SmolBox.Transport do
   alias SmolBox.{Error, LogResult, Result, Worker}
 
   @type request :: %{
-          method: :get | :post | :put | :delete,
+          method: :head | :get | :post | :put | :delete,
           path: String.t(),
           body: binary(),
           content_type: String.t(),

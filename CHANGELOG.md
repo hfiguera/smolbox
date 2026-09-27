@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- Add managed stopped-machine export to explicitly approved registry destinations,
+  typed publication identities, durable intent and recovery without unsafe replay.
+- Keep source ownership, conflicting operations, and helper capacity reserved through
+  uncertain export outcomes. Verified publication requires separate operator
+  quiescence confirmation before releasing helper resources.
+- Add codec v11 and `managed_exports: 1`, with permanent publication tag claims and
+  export history retained after machine deletion. The PostgreSQL example needs no
+  SQL migration, but shared readers and resource projection writers must be upgraded.
+- Add a durable export/reuse example with explicit source approval. Exported
+  container state excludes `/workspace`; no memory snapshot or live branch is implied.
+
 - Add immutable local, registry-artifact and OCI source types with exact worker
   approvals, explicit networking and host-owned registry credential resolution.
 - Persist registry preparation and serialize host-cache creation work across

@@ -38,6 +38,13 @@ defmodule SmolBox.DurableHost.Database do
     end
   end
 
+  def guarded_machine(context, key, guard, now) do
+    with {:ok, record} <- read(context, key, :machine),
+         :ok <-
+           RecordOps.guard(record, guard, worker_lease(context, record.worker_id), now),
+         do: {:ok, record}
+  end
+
   def write(context, record) do
     kind = if is_struct(record, SmolBox.ManagedMachine), do: :machine, else: :execution
 
@@ -184,7 +191,7 @@ defmodule SmolBox.DurableHost.Database do
   defp ports_match?(_context, _record), do: true
 
   defp projection(record) do
-    resources = record.reservation || RecordOps.empty_usage()
+    resources = resources(record)
 
     [
       record.fingerprint,
@@ -202,6 +209,12 @@ defmodule SmolBox.DurableHost.Database do
         nil -> nil
       end
     ]
+  end
+
+  if Code.ensure_loaded?(SmolBox.Store.ExportOps) do
+    defp resources(record), do: RecordOps.accounted_resources(record)
+  else
+    defp resources(record), do: record.reservation || RecordOps.empty_usage()
   end
 
   def machine_page(context, scope, cursor, limit) do

@@ -291,3 +291,12 @@ finishes before the managed command slot is released. Controller restart retains
 the same policy. Background processes can still mutate files, so collection is
 not a consistent filesystem snapshot. See [guest files](guest-files.md) for the
 runnable PostgreSQL example, worker prerequisites and v9 upgrade requirements.
+
+## Reuse a prepared environment
+
+A stopped managed machine can publish its supported disk state through
+`SmolBox.Exports`. Export has a durable identity and takes the same exclusive
+operation slot as commands and lifecycle changes. It leaves the source retained;
+creating a machine from its verified result creates a new identity. Container
+exports exclude `/workspace`. See [stopped-machine exports](machine-exports.md) for
+path preservation, explicit source approval, authentication, and helper cleanup.

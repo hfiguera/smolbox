@@ -64,13 +64,13 @@ defmodule SmolBox.DurableHost.MachineStore do
   end
 
   def run(context, :write, [key, guard, changes, now]) do
-    with {:ok, record} <- guarded(context, key, guard, now),
+    with {:ok, record} <- Database.guarded_machine(context, key, guard, now),
          {:ok, next} <- ManagedMachine.transition(record, changes, now),
          do: persist(context, next)
   end
 
   def run(context, :reserve, [key, guard, {worker, name, capacity}, now]) do
-    with {:ok, record} <- guarded(context, key, guard, now),
+    with {:ok, record} <- Database.guarded_machine(context, key, guard, now),
          :ok <- SourceStore.available(context, record, worker),
          {:ok, used} <- Database.usage(context, worker),
          {:ok, next} <-
@@ -126,11 +126,21 @@ defmodule SmolBox.DurableHost.MachineStore do
   end
 
   def run(context, :resolve, [key, guard, observed, now]) do
-    with {:ok, machine} <- guarded(context, key, guard, now),
+    with {:ok, machine} <- Database.guarded_machine(context, key, guard, now),
          {:ok, command} <- active_record(context, machine),
          {:ok, machine, command} <- MachineOps.resolve(machine, command, observed, now),
          :ok <- persist_optional(context, command),
          do: persist(context, machine)
+  end
+
+  if Code.ensure_loaded?(SmolBox.Store.ExportOps) do
+    alias SmolBox.DurableHost.ExportStore
+
+    def run(context, operation, arguments)
+        when operation in [:export_accept, :export_advance, :export_cancel, :export_resolve] do
+      with {:ok, next} <- ExportStore.run(context, operation, arguments),
+           do: persist(context, next)
+    end
   end
 
   def run(_context, _operation, _arguments), do: error(:validation)
@@ -165,13 +175,6 @@ defmodule SmolBox.DurableHost.MachineStore do
     else
       error(:admission_exhausted)
     end
-  end
-
-  defp guarded(context, key, guard, now) do
-    with {:ok, record} <- Database.read(context, key, :machine),
-         :ok <-
-           RecordOps.guard(record, guard, Database.worker_lease(context, record.worker_id), now),
-         do: {:ok, record}
   end
 
   defp persist(context, record) do

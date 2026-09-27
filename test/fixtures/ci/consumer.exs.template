@@ -97,6 +97,22 @@ file_spec = %{workload_spec | profile: file_profile}
 true = SmolBox.GuestPaths.allowed?(paths, :workdir, "/app/project")
 false = SmolBox.GuestPaths.allowed?(paths, :upload, "/app/input")
 
+{:ok, destination} = SmolBox.ExportDestination.new(id: "published", registry: "registry.example.com",
+  repository: "team/environments", credential_ref: "publisher", immutable_tags: true,
+  resources: %{slots: 1, cpus: 4, memory_mb: 4608, disk_gb: 128})
+{:ok, export_spec} = SmolBox.ExportSpec.new(id: "prepared", tag: "prepared", destination: destination)
+{:ok, receipt} = SmolBox.ExportReceipt.from_wire(%{"digest" => "sha256:" <> String.duplicate("a", 64),
+  "sizeBytes" => 4096, "platform" => "linux/amd64"})
+"linux/amd64" = receipt.platform
+%SmolBox.ExportSpec{timeout_ms: 900_000} = export_spec
+{:error, _} = SmolBox.ExportSpec.new(id: "prepared", tag: "../escape", destination: destination)
+{:ok, result_source} = SmolBox.ExportResult.source(%SmolBox.ExportResult{
+  reference: "registry.example.com/team/environments@sha256:" <> String.duplicate("a", 64),
+  manifest_sha256: String.duplicate("a", 64), config_sha256: String.duplicate("b", 64),
+  content_sha256: String.duplicate("c", 64), size_bytes: 4096, architecture: "x86_64",
+  platform: "linux/amd64", verified_at_ms: 1000}, id: "explicit-source")
+:registry = result_source.kind
+
 children = [
   {SmolBox.Store.Memory, name: Consumer.Store},
   {SmolBox, name: Consumer.Runtime, namespace: "consumer", mode: :ephemeral,
@@ -106,6 +122,8 @@ children = [
 ]
 {:ok, supervisor} = Supervisor.start_link(children, strategy: :one_for_one)
 {:ok, []} = SmolBox.workers(Consumer.Runtime)
+{:ok, %{managed_exports: 1}} = SmolBox.Store.Memory.capabilities(Consumer.Store)
+{:error, %{category: :not_found}} = SmolBox.Exports.fetch(Consumer.Runtime, {"scope", "missing", "export"})
 {:error, %{category: :not_found}} = SmolBox.fetch(Consumer.Runtime, "scope", "missing")
 {:error, %{category: :not_found}} = SmolBox.cancel(Consumer.Runtime, "scope", "missing")
 :ok = Supervisor.stop(supervisor)
@@ -114,6 +132,6 @@ versions = Map.new([:req, :mint, :mint_web_socket, :jason, :telemetry, :nimble_o
   {app, app |> Application.spec(:vsn) |> to_string()}
 end)
 File.write!("smoke.json", Jason.encode!(%{client: true, supervisor: true,
-  guest_files: true, workload: true, checkpoint: true, interactive: true, network_policy: true, offline_default: true, runtime_1_16_0_explicit: "1.16.0",
+  managed_exports: true, guest_files: true, workload: true, checkpoint: true, interactive: true, network_policy: true, offline_default: true, runtime_1_16_0_explicit: "1.16.0",
   unqualified_runtime_rejected: "1.16.2", runtime_default: "1.19.0", legacy_runtime_explicit: "1.14.1",
   legacy_1_14_6_explicit: "1.14.6", versions: versions}))
