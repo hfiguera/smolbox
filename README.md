@@ -110,15 +110,18 @@ creating machines, executing commands, streaming output, and transferring files.
 
 ## Installation and first run
 
-SmolBox **0.2.1** defaults to **smolvm 1.19.0** following Linux x86_64 and macOS
-Apple Silicon [qualification](docs/runtime-1.19.0-qualification.md). It preserves
-the disposable and retained execution APIs and clarifies the managed store contract.
+SmolBox **0.3.0** adds registry provisioning, managed exports, checkpoint capture
+and independent restore, and live branches. It keeps **smolvm 1.19.0** as the
+default, unchanged from 0.2.1. See the [feature and platform evidence](docs/compatibility.md)
+and [physical Linux comparisons](docs/provisioning-performance.md).
 
-**Upgrading from 0.2.0:** if your worker still runs 1.17.0, explicitly configure
-`runtime_version: "1.17.0"` before upgrading the library, or upgrade the worker
-separately. No SmolBox database migration is required. Read
-[Upgrading to 0.2.1](docs/upgrading-to-0.2.1.md), including the policy that 0.x patch
-releases may update the qualified worker default.
+**Upgrading from 0.2.x requires coordination before using the new features.**
+Upgrade every shared controller, reader and store adapter before writing the new
+records. The PostgreSQL example needs no additional SQL migration, but older
+releases cannot read the new formats, including retained history after deletion.
+Read [Upgrading to 0.3.0](docs/upgrading-to-0.3.0.md) for capabilities, accounting
+and rollback limits. Workers are installed separately; pin existing workers to
+their actual version.
 
 **Upgrading from 0.1.x requires coordination.** Upgrade shared controllers and
 store adapters together, apply the example's machine/port migrations if using it,
@@ -129,10 +132,10 @@ New record formats and retained tombstones constrain rollback. Start with
 Add SmolBox to your application's `mix.exs`:
 
 ```elixir
-{:smolbox, "~> 0.2.1"}
+{:smolbox, "~> 0.3.0"}
 ```
 
-Run `mix deps.get`. The [API documentation](https://hexdocs.pm/smolbox/0.2.1/)
+Run `mix deps.get`. The [API documentation](https://hexdocs.pm/smolbox/0.3.0/)
 includes the guides below. A local checkout can instead be used with
 `{:smolbox, path: "../smolbox"}`.
 
@@ -152,7 +155,7 @@ To run the local walkthrough, you need:
 stage a Python file, submit it, read its output file, and confirm cleanup. The
 walkthrough uses an in-memory store and needs no database. Applications that need
 restart recovery must provide a durable `SmolBox.Store` adapter; a complete
-[PostgreSQL host example](https://github.com/hfiguera/smolbox/tree/v0.2.1/examples/durable_host)
+[PostgreSQL host example](https://github.com/hfiguera/smolbox/tree/v0.3.0/examples/durable_host)
 is included in the repository.
 
 ## Managed persistent machines
@@ -187,9 +190,9 @@ record schema v3 upgrade requirements.
 
 SmolBox has real execution and durable recovery tests on Linux x86_64 and macOS
 Apple Silicon with **smolvm 1.14.1, 1.14.6, 1.16.0, 1.16.1, 1.17.0 and 1.19.0**; results are recorded in [Compatibility](docs/compatibility.md#runtime-selection).
-SmolBox 0.2.1 defaults to **1.19.0** and 0.2.0 to **1.17.0**, while 0.1.4–0.1.5 default to **1.16.1**; 0.1.3 defaults to **1.16.0** and
+SmolBox 0.3.0 and 0.2.1 default to **1.19.0** and 0.2.0 to **1.17.0**, while 0.1.4–0.1.5 default to **1.16.1**; 0.1.3 defaults to **1.16.0** and
 0.1.2 to **1.14.6**.
-Before adopting 0.2.1's **1.19.0** default with an older worker, explicitly
+Before adopting the **1.19.0** default with an older worker, explicitly
 configure `runtime_version: "1.17.0"`, `"1.16.1"`, `"1.16.0"`, `"1.14.6"` or `"1.14.1"`, or follow the
 [worker upgrade procedure](docs/host-integration.md#upgrading-a-worker).
 The package does not upgrade an external worker. A version mismatch prevents
@@ -248,4 +251,4 @@ the compatibility guide. From this repository, `mix ci` runs deterministic check
 without contacting a real worker. Generate this site with
 `MIX_ENV=dev mix docs --warnings-as-errors`. Live worker tests are a separate opt-in
 operation described in the repository's
-[CI guide](https://github.com/hfiguera/smolbox/blob/v0.2.1/scripts/ci/README.md).
+[CI guide](https://github.com/hfiguera/smolbox/blob/v0.3.0/scripts/ci/README.md).

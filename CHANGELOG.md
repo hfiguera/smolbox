@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+## 0.3.0
+
+SmolBox now manages reusable machine state: approved registry sources, stopped
+machine exports, checkpoint capture and independent restore, and live branches.
+The default worker remains smolvm **1.19.0**.
+
+**Coordinated upgrade required before enabling these features:** new records
+selectively use codec v10–v13 and require new store capabilities. The PostgreSQL
+example needs no additional SQL migration, but all shared readers, controllers
+and resource projection writers must understand the new records. Deleting a
+machine does not remove its durable history or make older readers compatible.
+See [Upgrading to 0.3.0](docs/upgrading-to-0.3.0.md).
+
+- Add a reproducible physical Linux comparison of fresh provisioning, exports,
+  checkpoints, branches and machine reuse, with raw evidence, verified results,
+  preparation costs and cleanup accounting. Measurements describe one small
+  workload with warm caches, not a universal performance ranking.
+- Improve fixture readiness and deterministic recovery/store test synchronization.
+  Add a practical article about terminal disconnects and uncertain command outcomes.
+
 - Add managed leaf branches from idle, offline bare sources on smolvm 1.19.0,
   including explicit held release, durable lineage and no replay after uncertainty.
 - Serialize source/child admission and retain backing allowances after child

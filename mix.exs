@@ -2,7 +2,7 @@ defmodule SmolBox.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/hfiguera/smolbox"
-  @version "0.2.1"
+  @version "0.3.0"
 
   def project do
     [
@@ -55,6 +55,7 @@ defmodule SmolBox.MixProject do
           "docs/recovery.md",
           "docs/upgrading-to-0.2.0.md",
           "docs/upgrading-to-0.2.1.md",
+          "docs/upgrading-to-0.3.0.md",
           "docs/telemetry.md",
           "docs/security.md",
           "docs/resource-qualification.md",
@@ -101,6 +102,7 @@ defmodule SmolBox.MixProject do
             "docs/recovery.md",
             "docs/upgrading-to-0.2.0.md",
             "docs/upgrading-to-0.2.1.md",
+            "docs/upgrading-to-0.3.0.md",
             "docs/security.md",
             "docs/resource-qualification.md",
             "docs/provisioning-performance.md",
@@ -214,6 +216,7 @@ defmodule SmolBox.MixProject do
           "docs/recovery.md",
           "docs/upgrading-to-0.2.0.md",
           "docs/upgrading-to-0.2.1.md",
+          "docs/upgrading-to-0.3.0.md",
           "docs/telemetry.md",
           "docs/security.md",
           "docs/resource-qualification.md",

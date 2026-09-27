@@ -1,19 +1,40 @@
 # Compatibility evidence
 
-Version: `0.2.1`. The library's supported qualification is
+Version: `0.3.0`. The library's supported qualification is
 `:development`; requested hard-control options remain unsupported. The original
 release evidence below records the client/controller contract on Linux and macOS.
 
+## Reusable machine state in 0.3.0
+
+New APIs keep provisioning, saved state and backing cleanup as separate lifecycles:
+
+- [Registry provisioning and machine images](images-and-registry-artifacts.md)
+  have [Linux and macOS evidence](images-and-registry-artifacts-validation.md).
+- [Stopped-machine exports](machine-exports.md),
+  [managed checkpoint capture and independent restore](managed-checkpoints.md),
+  and [live branches](managed-branches.md) document their own acceptance evidence,
+  recovery procedures and platform limits. Linux capture/branch results do not
+  establish macOS live qualification or portable snapshots.
+- [Physical Linux measurements](provisioning-performance.md) compare time to a
+  verified result, including durable controller work, preparation and cleanup.
+  They cover one workload on one host, with no macOS or nested comparison.
+
+The new features use selective codec v10–v13 and additional store capabilities.
+Follow [Upgrading to 0.3.0](upgrading-to-0.3.0.md) before enabling them. No additional
+PostgreSQL SQL migration is required from 0.2.x; a coordinated reader and adapter
+upgrade is still required. Qualification remains `:development`.
+
 ## smolvm 1.19.0 qualification
 
-**Default in SmolBox 0.2.1.** Linux x86_64 and macOS Apple Silicon passed the
+**Default since SmolBox 0.2.1, retained in 0.3.0.** Linux x86_64 and macOS Apple Silicon passed the
 execution, recovery, checkpoint, persistent workspace, network and worker fault
 campaign. Explicit 1.17.0 and earlier supported workers remain admitted. Published
 0.2.0 keeps its 1.17.0 default and the historical results below.
 
 See the [qualification report](runtime-1.19.0-qualification.md) and
-[machine-readable evidence](evidence/smolvm-1.19.0.json). No SmolBox store migration
-is introduced. Install the complete worker distribution separately; preserve
+[machine-readable evidence](evidence/smolvm-1.19.0.json). The 0.2.1 worker
+qualification introduced no SmolBox store migration. Install the complete worker
+distribution separately; preserve
 existing checkpoint approvals and pin each worker to its installed version.
 Qualification remains `:development`. In-place worker upgrades, rollback of
 modified upstream state and cross-version checkpoint restores are not qualified.

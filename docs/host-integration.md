@@ -1,9 +1,9 @@
 # Managed host integration
 
-SmolBox **0.2.1** defaults to **smolvm 1.19.0** on Linux x86_64 and macOS Apple
-Silicon. Version 0.2.0 defaults to 1.17.0. Keep existing workers explicitly pinned
+SmolBox **0.3.0** defaults to **smolvm 1.19.0** on Linux x86_64 and macOS Apple
+Silicon, unchanged from 0.2.1. Version 0.2.0 defaults to 1.17.0. Keep workers pinned
 to their installed version; updating SmolBox does not install smolvm. See
-[Upgrading to 0.2.1](upgrading-to-0.2.1.md) and the
+[Upgrading to 0.3.0](upgrading-to-0.3.0.md) and the
 [1.19.0 qualification](runtime-1.19.0-qualification.md).
 
 
@@ -98,7 +98,7 @@ children = [
 ```
 
 This fragment explicitly retains a Linux 1.14.6 worker with SmolBox 0.2.0.
-Omitting the field selects 1.19.0 in 0.2.1, 1.17.0 in 0.2.0 (1.16.1 in 0.1.5). Use `"1.16.0"`
+Omitting the field selects 1.19.0 in 0.3.0 and 0.2.1, 1.17.0 in 0.2.0 (1.16.1 in 0.1.5). Use `"1.16.0"`
 explicitly to retain that worker, or `"1.14.1"`
 for an existing worker. See [runtime selection](compatibility.md#runtime-selection).
 This is a host configuration fragment, not a self-provisioning script. The host
@@ -353,7 +353,7 @@ to reconcile. Memory mode loses this authority when its store process stops.
 
 ## Upgrading a worker
 
-SmolBox 0.2.1 defaults to smolvm **1.19.0**; 0.2.0 defaults to **1.17.0** on Linux x86_64 and macOS Apple
+SmolBox 0.3.0 and 0.2.1 default to smolvm **1.19.0**; 0.2.0 defaults to **1.17.0** on Linux x86_64 and macOS Apple
 Silicon. SmolBox 0.1.4 and 0.1.5 default to **1.16.1**. SmolBox 0.1.3 defaults
 to 1.16.0; 0.1.2 defaults to 1.14.6. Worker selection does not migrate execution records.
 When upgrading controllers from 0.1.x, follow the coordinated
@@ -371,7 +371,7 @@ Before updating the library with an existing worker, retain its version explicit
 ```
 
 Use `"1.16.1"`, `"1.16.0"`, `"1.14.1"` or `"1.14.6"` instead for a worker still on either version. Omitting
-`:runtime_version` expects `"1.19.0"` in 0.2.1 (`"1.17.0"` in 0.2.0) (`"1.16.1"` in 0.1.5); updating the Elixir
+`:runtime_version` expects `"1.19.0"` in 0.3.0 and 0.2.1 (`"1.17.0"` in 0.2.0) (`"1.16.1"` in 0.1.5); updating the Elixir
 dependency does not install smolvm. A version mismatch prevents new execution.
 Unverified versions and unsupported host combinations fail configuration
 validation. Health checks require an exact version match, without fallback.
