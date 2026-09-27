@@ -40,6 +40,10 @@ browser walkthrough of SmolBox 0.2.0: persistent machines, commands, a real
 terminal, larger file transfers, background launch evidence and a mapped service,
 with PostgreSQL-backed recovery.
 
+[Physical Linux provisioning measurements](docs/provisioning-performance.md) compare
+fresh machines, exports, checkpoints, branches and reuse, including preparation,
+resource use and verified cleanup.
+
 ## Why use SmolBox?
 
 Executing a command is only part of integrating a worker. Your application also

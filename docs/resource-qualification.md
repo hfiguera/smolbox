@@ -405,6 +405,14 @@ availability from OS-host startup. Network image acquisition, pristine-host boot
 and statistically broad cold-cache distributions remain unmeasured and are not
 part of the reported performance claim.
 
+## Managed provisioning comparison
+
+The [physical Linux comparison](provisioning-performance.md) measures exports,
+checkpoints, branches, fresh preparation and machine reuse through the managed
+PostgreSQL path. It separates preparation and cleanup from useful-result latency
+and preserves failed harness attempts alongside the completed campaign. Its
+workload and cache conditions differ from the historical numbers above.
+
 ## Evidence needed for stronger future claims
 
 The subsequent Linux campaign provides the enforcement and recovery evidence

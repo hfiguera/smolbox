@@ -29,6 +29,12 @@ jobs:
           otp-version: '29.0.6'
           elixir-version: '1.20.4'
       - run: elixir scripts/ci_test.exs
+      - name: Check provisioning benchmark harness and evidence
+        run: |
+          elixir scripts/benchmarks/provisioning/metrics_test.exs
+          python3 -m unittest discover -s scripts/benchmarks/provisioning -p 'test_*.py'
+          python3 scripts/benchmarks/provisioning/summarize.py docs/evidence/provisioning-2026-09-27/rows.jsonl --samples 20 > "$RUNNER_TEMP/provisioning-summary.json"
+          diff -u docs/evidence/provisioning-2026-09-27/summary.json "$RUNNER_TEMP/provisioning-summary.json"
 
   smolbox-format-compile:
     runs-on: ubuntu-24.04

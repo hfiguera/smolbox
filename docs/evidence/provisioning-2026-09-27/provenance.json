@@ -1,0 +1,75 @@
+{
+  "utc": "2026-09-27T14:06:05.937883+00:00",
+  "commit": "6c925c6d8a43eec555c959b91602c8d366be1e17",
+  "kernel": {
+    "status": 0,
+    "stdout": "Linux 7.1.5-76070105-generic x86_64 GNU/Linux"
+  },
+  "virtualization": {
+    "status": 1,
+    "stdout": "none"
+  },
+  "cpu": {
+    "status": 0,
+    "stdout": "{\n   \"lscpu\": [\n      {\n         \"field\": \"Architecture:\",\n         \"data\": \"x86_64\"\n      },{\n         \"field\": \"CPU op-mode(s):\",\n         \"data\": \"32-bit, 64-bit\"\n      },{\n         \"field\": \"Address sizes:\",\n         \"data\": \"39 bits physical, 48 bits virtual\"\n      },{\n         \"field\": \"Byte Order:\",\n         \"data\": \"Little Endian\"\n      },{\n         \"field\": \"CPU(s):\",\n         \"data\": \"8\"\n      },{\n         \"field\": \"On-line CPU(s) list:\",\n         \"data\": \"0-7\"\n      },{\n         \"field\": \"Vendor ID:\",\n         \"data\": \"GenuineIntel\"\n      },{\n         \"field\": \"Model name:\",\n         \"data\": \"11th Gen Intel(R) Core(TM) i5-1135G7 @ 2.40GHz\"\n      },{\n         \"field\": \"CPU family:\",\n         \"data\": \"6\"\n      },{\n         \"field\": \"Model:\",\n         \"data\": \"140\"\n      },{\n         \"field\": \"Thread(s) per core:\",\n         \"data\": \"2\"\n      },{\n         \"field\": \"Core(s) per socket:\",\n         \"data\": \"4\"\n      },{\n         \"field\": \"Socket(s):\",\n         \"data\": \"1\"\n      },{\n         \"field\": \"Stepping:\",\n         \"data\": \"1\"\n      },{\n         \"field\": \"CPU(s) scaling MHz:\",\n         \"data\": \"57%\"\n      },{\n         \"field\": \"CPU max MHz:\",\n         \"data\": \"4200.0000\"\n      },{\n         \"field\": \"CPU min MHz:\",\n         \"data\": \"400.0000\"\n      },{\n         \"field\": \"BogoMIPS:\",\n         \"data\": \"4838.40\"\n      },{\n         \"field\": \"Flags:\",\n         \"data\": \"fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l2 cdp_l2 ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb intel_pt avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves split_lock_detect user_shstk dtherm ida arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid movdiri movdir64b fsrm avx512_vp2intersect md_clear ibt flush_l1d arch_capabilities\"\n      },{\n         \"field\": \"Virtualization:\",\n         \"data\": \"VT-x\"\n      },{\n         \"field\": \"L1d cache:\",\n         \"data\": \"192 KiB (4 instances)\"\n      },{\n         \"field\": \"L1i cache:\",\n         \"data\": \"128 KiB (4 instances)\"\n      },{\n         \"field\": \"L2 cache:\",\n         \"data\": \"5 MiB (4 instances)\"\n      },{\n         \"field\": \"L3 cache:\",\n         \"data\": \"8 MiB (1 instance)\"\n      },{\n         \"field\": \"NUMA node(s):\",\n         \"data\": \"1\"\n      },{\n         \"field\": \"NUMA node0 CPU(s):\",\n         \"data\": \"0-7\"\n      },{\n         \"field\": \"Vulnerability Gather data sampling:\",\n         \"data\": \"Vulnerable\"\n      },{\n         \"field\": \"Vulnerability Ghostwrite:\",\n         \"data\": \"Not affected\"\n      },{\n         \"field\": \"Vulnerability Indirect target selection:\",\n         \"data\": \"Mitigation; Aligned branch/return thunks\"\n      },{\n         \"field\": \"Vulnerability Itlb multihit:\",\n         \"data\": \"Not affected\"\n      },{\n         \"field\": \"Vulnerability L1tf:\",\n         \"data\": \"Not affected\"\n      },{\n         \"field\": \"Vulnerability Mds:\",\n         \"data\": \"Not affected\"\n      },{\n         \"field\": \"Vulnerability Meltdown:\",\n         \"data\": \"Not affected\"\n      },{\n         \"field\": \"Vulnerability Mmio stale data:\",\n         \"data\": \"Not affected\"\n      },{\n         \"field\": \"Vulnerability Old microcode:\",\n         \"data\": \"Not affected\"\n      },{\n         \"field\": \"Vulnerability Reg file data sampling:\",\n         \"data\": \"Not affected\"\n      },{\n         \"field\": \"Vulnerability Retbleed:\",\n         \"data\": \"Not affected\"\n      },{\n         \"field\": \"Vulnerability Spec rstack overflow:\",\n         \"data\": \"Not affected\"\n      },{\n         \"field\": \"Vulnerability Spec store bypass:\",\n         \"data\": \"Mitigation; Speculative Store Bypass disabled via prctl\"\n      },{\n         \"field\": \"Vulnerability Spectre v1:\",\n         \"data\": \"Mitigation; usercopy/swapgs barriers and __user pointer sanitization\"\n      },{\n         \"field\": \"Vulnerability Spectre v2:\",\n         \"data\": \"Mitigation; Enhanced / Automatic IBRS; IBPB conditional; PBRSB-eIBRS SW sequence; BHI SW loop, KVM SW loop\"\n      },{\n         \"field\": \"Vulnerability Srbds:\",\n         \"data\": \"Not affected\"\n      },{\n         \"field\": \"Vulnerability Tsa:\",\n         \"data\": \"Not affected\"\n      },{\n         \"field\": \"Vulnerability Tsx async abort:\",\n         \"data\": \"Not affected\"\n      },{\n         \"field\": \"Vulnerability Vmscape:\",\n         \"data\": \"Not affected\"\n      }\n   ]\n}"
+  },
+  "filesystem": {
+    "status": 0,
+    "stdout": "Filesystem            Type    1B-blocks         Used    Available Use% Mounted on\n/dev/mapper/data-root ext4 978796793856 194149662720 734851518464  21% /"
+  },
+  "limits": {
+    "cpu.max": "400000 100000",
+    "memory.max": "8589934592",
+    "memory.swap.max": "0",
+    "pids.max": "256"
+  },
+  "kvm_fds": [
+    {
+      "pid": 1699261,
+      "fd": "anon_inode:kvm-vm",
+      "cgroup": "vm-1699261"
+    },
+    {
+      "pid": 1699261,
+      "fd": "anon_inode:kvm-vcpu:0",
+      "cgroup": "vm-1699261"
+    }
+  ],
+  "governors": [
+    "powersave"
+  ],
+  "artifacts": {
+    "bare-base.smolmachine": {
+      "bytes": 14912069,
+      "sha256": "6b9f4ed8e26abdc4b2165aa239510c2796b1960068d1c6dc157c7061b2cb1f18"
+    },
+    "seed.smolcheckpoint": {
+      "bytes": 34770873,
+      "sha256": "2657c5dd0e52a24ee55505fd3177887ae45f78c41f0c49aef245fae54cf30dfb"
+    }
+  },
+  "runtime": {
+    "status": 0,
+    "stdout": "smolvm 1.19.0"
+  },
+  "runtime_sha256": "8caeb3b6e7d834493a578b0fe8bd1e7aa02e68fba6d61bcf70fdbec41a27ce68",
+  "root": "/tmp/smolbox-provisioning.7folwqdv",
+  "cgroup": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/smolbox-provisioning-7folwqdv.service",
+  "partition": "campaign3",
+  "samples": 20,
+  "harness_sha256": {
+    "run.exs": "7987eb1471c73fbe7955bfa41a67a00654b95d2d2df7297e26a6eabebb728d1f",
+    "metrics_test.exs": "3341706274e7942a4d21f45dabcc288b161262647c1c50e3af27001810523fd3",
+    "config.exs": "12028a098f62372f44250dffbd3009b4e26de1d14435f6721ffc94b08af21fb8",
+    "metrics.exs": "7fcafb3d610677c1e2126a8699ae4bcf3f5f7bc245cd9fee6702de4f6a430dda"
+  },
+  "cache_note": "Worker restarted after sampler failure; disk/shared caches retained from pilot campaigns, no cache dropping.",
+  "controller": "Elixir 1.20.4 OTP 29.0.6 +S 4:4",
+  "postgres": "16.15",
+  "registry": "zot, loopback, public read/create only with private bearer write proxy",
+  "support_scripts_sha256": {
+    "fixture.py": "94134d30740107d05e54076a7e9d8b00a163ab008980b09aa8dabddd3d826df7",
+    "summarize.py": "df4ce923ea118c7be9dcb03ff0a720b8fc5a047eaab46d03c3fc9528fb284b36",
+    "test_summarize.py": "8c208d906ae18e369ebeeabb47dd5ba40cd9d22435c3b6450f1ad0a823220ab0"
+  }
+}

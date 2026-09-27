@@ -1,0 +1,25 @@
+{
+  "physical_linux": {
+    "measured_trials": 100,
+    "warmups": 5,
+    "new_trial_machines": 84,
+    "all_results_and_source_isolation_checks_passed": true,
+    "final_inventory_empty": true,
+    "all_attempt_reservations_zero": true,
+    "fixture_builder_second_worker_passed": true
+  },
+  "local_checks": {
+    "ci_planner_tests": 24,
+    "metric_parser_tests": 2,
+    "summary_tests": 3,
+    "credo_strict": "passed",
+    "ex_dna_zero_clone_budget": "passed",
+    "credence_strict": "passed",
+    "compile_warnings_as_errors": "passed",
+    "format": "passed",
+    "docs_warnings_as_errors": "passed",
+    "committed_summary_reproduced": "passed",
+    "full_library_suite": "not rerun; production library code unchanged"
+  },
+  "ci": "Workflow now runs harness tests and reproduces committed evidence; remote CI has not run on these uncommitted changes."
+}

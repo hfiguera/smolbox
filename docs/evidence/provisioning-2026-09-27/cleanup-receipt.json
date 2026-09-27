@@ -1,0 +1,25 @@
+{
+  "utc": "2026-09-27T14:11:57.503534+00:00",
+  "inventory": {
+    "machines": []
+  },
+  "scratch_entries": [],
+  "vm_directories": [],
+  "phase_markers": {
+    "prepare": "ok",
+    "measure": "ok",
+    "cleanup": "ok"
+  },
+  "reservations": {
+    "slots": 0,
+    "cpus": 0,
+    "memory_mb": 0,
+    "disk_gb": 0
+  },
+  "worker_disk_blocks": "1172733952",
+  "worker_final_memory_events": "low 0\nhigh 5808\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0\n",
+  "worker_final_cpu_stat": "usage_usec 136631646\nuser_usec 118262866\nsystem_usec 18368780\nnice_usec 0\ncore_sched.force_idle_usec 0\nnr_periods 3233\nnr_throttled 1\nthrottled_usec 3537\nnr_bursts 0\nburst_usec 0\n",
+  "retained_storage": "Private database, fixtures, caches and registry artifacts retained as lab evidence; managed capture artifacts removed.",
+  "smolbox-provisioning-7folwqdv": "inactive",
+  "smolbox-provisioning-7folwqdv-registry": "inactive"
+}

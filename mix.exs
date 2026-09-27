@@ -58,6 +58,7 @@ defmodule SmolBox.MixProject do
           "docs/telemetry.md",
           "docs/security.md",
           "docs/resource-qualification.md",
+          "docs/provisioning-performance.md",
           "docs/compatibility.md",
           "docs/runtime-1.17.0-qualification.md",
           "docs/runtime-1.19.0-qualification.md",
@@ -102,6 +103,7 @@ defmodule SmolBox.MixProject do
             "docs/upgrading-to-0.2.1.md",
             "docs/security.md",
             "docs/resource-qualification.md",
+            "docs/provisioning-performance.md",
             "docs/compatibility.md",
             "docs/runtime-1.17.0-qualification.md",
             "docs/runtime-1.19.0-qualification.md"
@@ -215,6 +217,7 @@ defmodule SmolBox.MixProject do
           "docs/telemetry.md",
           "docs/security.md",
           "docs/resource-qualification.md",
+          "docs/provisioning-performance.md",
           "docs/compatibility.md",
           "docs/runtime-1.17.0-qualification.md",
           "docs/runtime-1.19.0-qualification.md"

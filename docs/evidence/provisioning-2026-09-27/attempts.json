@@ -1,0 +1,44 @@
+{
+  "pilots": [
+    {
+      "id": "pilot1",
+      "outcome": "Harness corrections: namespace longer than library limit; then memory.peak read returned a charlist instead of a binary. Created machine explicitly deleted."
+    },
+    {
+      "id": "pilot2",
+      "outcome": "Local pack capture transferred complete bytes, but SmolBox rejected packed_layers, smolvm-packed-layers-v1 device profile and nonempty /bin/true entrypoint. Unknown capture was not adopted or replayed; source explicitly resolved and deleted. Native idle seed used thereafter."
+    },
+    {
+      "id": "pilot3",
+      "outcome": "Capture request failed before dispatch because the prior pilot occupied its fingerprint path. Partition-specific policy directories added; source deleted."
+    },
+    {
+      "id": "pilot4",
+      "outcome": "Capture completed; harness failed to JSON-encode nested Profile struct. Recursive evidence serialization added; source deleted."
+    },
+    {
+      "id": "pilot5",
+      "outcome": "All five warmups and one measured trial per mode passed. Final directory assertion treated upstream _cow-bases artifact cache as a VM directory. Cache handling corrected; verified deletion and all reservations released."
+    }
+  ],
+  "campaigns": [
+    {
+      "id": "campaign1",
+      "complete": false,
+      "include_in_summary": false,
+      "reason": "GNU du returned status 1 when a temporary artifact-source file vanished during scanning. Linked sampler task interrupted the controller at fresh sample 3. Raw prior rows retained in interrupted-rows.jsonl. No command was replayed. Worker service restarted to fence old requests; recorded ownership checked; remaining machines removed; durable absence resolution and backing/capture release produced zero reservations."
+    },
+    {
+      "id": "campaign2",
+      "complete": false,
+      "include_in_summary": false,
+      "reason": "Empty-inventory precondition rejected the run before machine creation because campaign1 recovery was not finished."
+    },
+    {
+      "id": "campaign3",
+      "complete": true,
+      "include_in_summary": true,
+      "reason": "Fresh durable partition after verified campaign1 cleanup. Worker disk/shared caches retained, no cold-cache claim."
+    }
+  ]
+}
