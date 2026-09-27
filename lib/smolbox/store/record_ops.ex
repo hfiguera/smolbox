@@ -154,11 +154,17 @@ defmodule SmolBox.Store.RecordOps do
 
   @doc false
   def accounted_resources(%{exports: _, active_export: _} = record) do
-    Map.merge(record.reservation || empty_usage(), SmolBox.Export.resources(record), fn _key,
-                                                                                        base,
-                                                                                        extra ->
-      base + extra
-    end)
+    Map.merge(
+      Map.merge(
+        record.reservation || empty_usage(),
+        SmolBox.CheckpointCapture.resources(record),
+        fn _key, a, b -> a + b end
+      ),
+      SmolBox.Export.resources(record),
+      fn _key, base, extra ->
+        base + extra
+      end
+    )
   end
 
   def accounted_resources(record), do: record.reservation || empty_usage()

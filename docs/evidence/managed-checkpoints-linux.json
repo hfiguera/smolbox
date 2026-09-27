@@ -1,0 +1,59 @@
+{
+  "date": "2026-09-26",
+  "platform": "Linux x86_64",
+  "runtime_version": "1.19.0",
+  "source": "Approved idle offline bare checkpoint; 1 CPU, 256 MiB RAM, 1 GiB storage and overlay",
+  "storage": "Encrypted PostgreSQL shared adapter, separate capture/confirm/restore/release BEAM processes",
+  "capture": {
+    "phase": "captured",
+    "sha256": "21bb0011074f9701c1bfdfbad87ef114fa3bcf0fadab22a40a319415a48bacf6",
+    "size_bytes": 34869108,
+    "quiescence_confirmation_required": true,
+    "bounded_manifest_verified": true
+  },
+  "host_observations": {
+    "source_remained_running": true,
+    "worker_staging_empty_before_confirmation": true,
+    "quiescence_confirmed": true
+  },
+  "restore": {
+    "phase": "restored",
+    "artifact_retained": true,
+    "disk_preserved": true,
+    "independent_copies": true,
+    "machines_absent": true,
+    "ram_preserved": true,
+    "source_unchanged": true,
+    "independent_machines": 2,
+    "retained_disk_allowance_gib": 1
+  },
+  "release": {
+    "phase": "released",
+    "history_retained": true,
+    "reservations_released": true
+  },
+  "limitations": [
+    "Managed macOS capture not live-qualified",
+    "Host asserted idle state and quiescence; HTTP does not attest these",
+    "No container image dependency retention, network restore, arbitrary application resume or live branches",
+    "No power-loss durability or hard host quota qualification"
+  ],
+  "validation_notes": [
+    "The first rerun exposed an empty JSON start-body regression. It was corrected, the fake peer now enforces JSON, and the full acceptance scenario passed again.",
+    "A rejected-start machine was explicitly resolved after verifying rejection before the worker handler, deleted and confirmed absent."
+  ],
+  "existing_checkpoint_runtime_tests": {
+    "passed": 3,
+    "transport": "Private UNIX socket proxy to the owned 1.19.0 HTTP worker",
+    "scenarios": [
+      "independent restores with file staging and collection",
+      "controller restart without replay",
+      "guest timeout and observed cleanup"
+    ]
+  },
+  "cleanup": {
+    "owned_machines_absent": true,
+    "owned_worker_stopped": true,
+    "owned_proxy_stopped": true
+  }
+}

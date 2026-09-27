@@ -10,6 +10,8 @@ defmodule SmolBox.Transport.Capture do
     :max_output,
     :on_event,
     :exit_code,
+    :io,
+    :hash,
     bytes: 0,
     output_bytes: 0,
     log_count: 0,
@@ -20,7 +22,9 @@ defmodule SmolBox.Transport.Capture do
   ]
 
   @type t :: %__MODULE__{
-          mode: :buffer | :empty | :sse | :logs,
+          mode: :buffer | :empty | :sse | :logs | :file,
+          io: pid() | nil,
+          hash: term(),
           max_bytes: pos_integer(),
           max_output: pos_integer() | nil,
           on_event: (SSE.event() -> any()) | nil,
@@ -36,6 +40,10 @@ defmodule SmolBox.Transport.Capture do
 
   @spec new(SmolBox.Transport.request()) :: t()
   def new(%{mode: :buffer, max_bytes: max}), do: %__MODULE__{mode: :buffer, max_bytes: max}
+
+  def new(%{mode: {:file, io}, max_bytes: max}),
+    do: %__MODULE__{mode: :file, io: io, hash: :crypto.hash_init(:sha256), max_bytes: max}
+
   def new(%{mode: :empty}), do: %__MODULE__{mode: :empty, max_bytes: 1}
 
   def new(%{mode: {:sse, max_output, callback}, max_bytes: max}) do
@@ -61,8 +69,15 @@ defmodule SmolBox.Transport.Capture do
     end
   end
 
-  @spec finish(t()) :: {:ok, binary() | Result.t() | LogResult.t()} | {:error, Error.t()}
+  @spec finish(t()) :: {:ok, binary() | Result.t() | LogResult.t() | map()} | {:error, Error.t()}
   def finish(%{mode: :buffer} = state), do: {:ok, join(state.chunks)}
+
+  def finish(%{mode: :file, bytes: bytes} = state) when bytes > 0,
+    do:
+      {:ok,
+       %{size_bytes: bytes, sha256: :crypto.hash_final(state.hash) |> Base.encode16(case: :lower)}}
+
+  def finish(%{mode: :file}), do: limit()
   def finish(%{mode: :empty}), do: {:ok, ""}
 
   def finish(%{mode: :logs} = state) do
@@ -80,6 +95,11 @@ defmodule SmolBox.Transport.Capture do
          encoding: :lossy_utf8
        }}
     end
+  end
+
+  defp consume(%{mode: :file} = state, bytes) do
+    with :ok <- IO.binwrite(state.io, bytes),
+         do: {:ok, %{state | hash: :crypto.hash_update(state.hash, bytes)}}
   end
 
   defp consume(%{mode: :buffer} = state, bytes),

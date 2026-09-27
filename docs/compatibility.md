@@ -880,3 +880,12 @@ writers must be upgraded together. Older versions cannot read the new records or
 account for export helper reservations. Do not discard history to enable rollback.
 See [export compatibility and recovery](machine-exports.md#durable-restart-and-compatibility)
 for the supported state boundary, upgrade sequence, and rollback implications.
+
+## Managed checkpoint capture
+
+[Managed checkpoints](managed-checkpoints.md) add explicit idle, offline bare-guest
+capture and independent restore on 1.19.0. A captured result does not attest worker
+quiescence; resolve only after fencing outstanding requests and confirming staging
+cleanup. Checkpoint storage remains accounted for after source deletion until
+explicit release. Opt-in machines/history use codec v12, requiring coordinated
+reader and resource projection upgrades but no SQL migration.

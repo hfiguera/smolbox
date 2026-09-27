@@ -143,6 +143,22 @@ defmodule SmolBox.DurableHost.MachineStore do
     end
   end
 
+  if Code.ensure_loaded?(SmolBox.Store.CaptureOps) do
+    alias SmolBox.DurableHost.CaptureStore
+
+    def run(context, operation, arguments)
+        when operation in [
+               :capture_accept,
+               :capture_advance,
+               :capture_cancel,
+               :capture_resolve,
+               :capture_release
+             ] do
+      with {:ok, next} <- CaptureStore.run(context, operation, arguments),
+           do: persist(context, next)
+    end
+  end
+
   def run(_context, _operation, _arguments), do: error(:validation)
 
   def active?(context, %{managed_machine: key} = record) when not is_nil(key) do

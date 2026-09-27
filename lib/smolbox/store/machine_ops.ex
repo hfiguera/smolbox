@@ -150,7 +150,7 @@ defmodule SmolBox.Store.MachineOps do
   end
 
   def resolve(machine, command, :absent, now) do
-    with true <- machine.active_export == nil,
+    with true <- machine.active_export == nil and machine.active_capture == nil,
          true <- machine.state in [:unknown, :missing, :conflict],
          {:ok, command} <- resolve_command(command, now),
          {:ok, machine} <-
@@ -177,7 +177,7 @@ defmodule SmolBox.Store.MachineOps do
   end
 
   def resolve(machine, command, observed, now) do
-    with true <- machine.active_export == nil,
+    with true <- machine.active_export == nil and machine.active_capture == nil,
          true <- machine.state in [:unknown, :missing, :conflict],
          true <- machine.created_machine != nil,
          true <- observed.state in [:created, :stopped],

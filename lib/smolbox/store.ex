@@ -204,10 +204,24 @@ defmodule SmolBox.Store do
   | `:submit` | `[key, initial_execution, max_pending, now]` | `{:ok, execution}` |
   | `:finish` | `[execution_key, execution_guard, now]` | `{:ok, execution}` |
   | `:resolve` | `[key, guard, observation_or_absent, now]` | `{:ok, machine}` |
+  | `:capture_accept` | `[key, spec, fingerprint, capacity, now]` | `{:ok, machine}` |
+  | `:capture_advance` | `[key, guard, capture_id, expected_state, changes, now]` | `{:ok, machine}` |
+  | `:capture_cancel` | `[key, capture_id, now]` | `{:ok, machine}` |
+  | `:capture_resolve` | `[key, guard, capture_id, running_or_stopped_observation_or_absent, now]` | `{:ok, machine}` |
+  | `:capture_release` | `[key, guard, capture_id, now]` | `{:ok, machine}` |
   | `:export_accept` | `[key, spec, fingerprint, capacity, now]` | `{:ok, machine}` |
   | `:export_advance` | `[key, guard, export_id, expected_state, changes, now]` | `{:ok, machine}` |
   | `:export_cancel` | `[key, export_id, now]` | `{:ok, machine}` |
   | `:export_resolve` | `[key, guard, export_id, stopped_observation_or_absent, now]` | `{:ok, machine}` |
+
+  `managed_checkpoints: 1` additionally requires every capture operation and
+  resource projection from `RecordOps.accounted_resources/1`, including
+  deleted machines with retained capture disks. Admission checks combined capacity;
+  advance compares the expected capture state as well as the machine guard.
+  Cancellation after dispatch retains uncertainty. Resolve requires caller-supplied
+  request/staging quiescence evidence and source ownership or verified absence.
+  Release requires host confirmation that retained copies were removed. Adapters
+  must persist history and the resource projection atomically; run CaptureContract.
 
   All operations may return `{:error, SmolBox.Error.t()}`. An absent identity is
   `:not_found`; unavailable or corrupt storage is a store error, never absence.
@@ -361,6 +375,40 @@ defmodule SmolBox.Store do
               | String.t()
               | machine_resolution()
               | non_neg_integer()
+            ]) :: machine_result()
+  @type capture_changes :: [
+          state: SmolBox.CheckpointCapture.state(),
+          result: SmolBox.CheckpointResult.t(),
+          error: Error.t(),
+          resolved_at_ms: non_neg_integer()
+        ]
+  @callback machine(context(), :capture_accept, [
+              ManagedMachine.key()
+              | SmolBox.CheckpointCaptureSpec.t()
+              | String.t()
+              | capacity()
+              | non_neg_integer()
+            ]) :: machine_result()
+  @callback machine(context(), :capture_advance, [
+              ManagedMachine.key()
+              | guard()
+              | String.t()
+              | SmolBox.CheckpointCapture.state()
+              | capture_changes()
+              | non_neg_integer()
+            ]) :: machine_result()
+  @callback machine(context(), :capture_cancel, [
+              ManagedMachine.key() | String.t() | non_neg_integer()
+            ]) :: machine_result()
+  @callback machine(context(), :capture_resolve, [
+              ManagedMachine.key()
+              | guard()
+              | String.t()
+              | machine_resolution()
+              | non_neg_integer()
+            ]) :: machine_result()
+  @callback machine(context(), :capture_release, [
+              ManagedMachine.key() | guard() | String.t() | non_neg_integer()
             ]) :: machine_result()
   @optional_callbacks machine: 3
 

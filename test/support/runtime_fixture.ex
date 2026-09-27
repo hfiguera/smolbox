@@ -94,6 +94,7 @@ defmodule SmolBox.RuntimeFixture do
           sources:
             if(options[:source], do: [options[:source]], else: []) ++
               Keyword.get(options, :pull_sources, []),
+          checkpoint_policies: Keyword.get(options, :checkpoint_policies, []),
           export_destinations: Keyword.get(options, :export_destinations, []),
           registry_credentials: options[:registry_credentials]
         ] ++

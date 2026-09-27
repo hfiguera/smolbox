@@ -14,6 +14,10 @@ defmodule SmolBox.Runtime.WorkerConfig do
   Optional `:registry_credentials` is `{resolver_module, host_context}`; see
   `SmolBox.RegistryCredentials`. Only safe references appear in stored sources.
 
+  Optional `:checkpoint_policies` approves exact `SmolBox.CheckpointPolicy` values
+  for private controller storage and additional capture resources on 1.19.0.
+  See `SmolBox.Checkpoints` for idle assertions, quiescence and artifact retention.
+
   Optional `:export_destinations` approves exact `SmolBox.ExportDestination`
   values for stopped-machine publication on 1.19.0. Each includes additional
   helper resources, immutable tag policy, and a credential reference resolving
@@ -77,6 +81,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
                 checkpoints: [],
                 sources: [],
                 export_destinations: [],
+                checkpoint_policies: [],
                 registry_credentials: nil
               ]
 
@@ -89,6 +94,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
           sources: [SmolBox.Source.t()],
           registry_credentials: {module(), term()} | nil,
           export_destinations: [SmolBox.ExportDestination.t()],
+          checkpoint_policies: [SmolBox.CheckpointPolicy.t()],
           profiles: [Profile.t()],
           capacity: Store.capacity(),
           allocation_floor: %{
@@ -144,7 +150,8 @@ defmodule SmolBox.Runtime.WorkerConfig do
              :checkpoints,
              :sources,
              :registry_credentials,
-             :export_destinations
+             :export_destinations,
+             :checkpoint_policies
            ]
        ) and
          Enum.all?(@enforce_keys, &Keyword.has_key?(options, &1)) do
@@ -167,6 +174,9 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   @doc "Check exact profile/artifact approval and allocation floors; this is not a health probe."
   @spec supports?(t(), ExecutionSpec.t() | SmolBox.ManagedMachineSpec.t()) :: boolean()
+  def supports?(%{runtime_version: version}, %{checkpointable: true}) when version != "1.19.0",
+    do: false
+
   def supports?(worker, %{artifact: %{"kind" => "checkpoint"}} = spec) do
     ExecutionSupport.worker?(worker, spec) and
       not SmolBox.FileAccess.extended?(spec.profile) and
@@ -320,7 +330,18 @@ defmodule SmolBox.Runtime.WorkerConfig do
   end
 
   defp export_access?(worker),
-    do: exports?(worker) and SmolBox.RegistryCredentials.valid?(worker.registry_credentials)
+    do:
+      exports?(worker) and capture_policies?(worker) and
+        SmolBox.RegistryCredentials.valid?(worker.registry_credentials)
+
+  defp capture_policies?(worker),
+    do:
+      Validation.list?(worker.checkpoint_policies, 32) and
+        Enum.all?(
+          worker.checkpoint_policies,
+          &(worker.runtime_version == "1.19.0" and SmolBox.CheckpointPolicy.validate(&1) == :ok)
+        ) and
+        unique?(worker.checkpoint_policies, & &1.id)
 
   defp exports?(worker) do
     Validation.list?(worker.export_destinations, 32) and

@@ -25,12 +25,21 @@ defmodule SmolBox.Store.MachineContract do
     running_named(adapter, store, "computer", ports, profile, artifact)
   end
 
-  def running_named(adapter, store, id, ports \\ [], profile \\ nil, artifact \\ nil) do
+  def running_named(
+        adapter,
+        store,
+        id,
+        ports \\ [],
+        profile \\ nil,
+        artifact \\ nil,
+        checkpointable \\ false
+      ) do
     original = record(id, ports)
 
     spec = %{
       original.spec
-      | profile: profile || original.spec.profile,
+      | checkpointable: checkpointable,
+        profile: profile || original.spec.profile,
         artifact: artifact || original.spec.artifact
     }
 

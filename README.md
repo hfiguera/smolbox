@@ -165,6 +165,8 @@ PostgreSQL walkthrough. The existing disposable API remains supported.
 
 ## Checkpoint execution
 
+Managed idle, offline bare guests can also [capture checkpoints and restore independent machines](docs/managed-checkpoints.md) on smolvm 1.19.0, with durable history and explicit retention.
+
 SmolBox can restore an operator-approved idle, offline checkpoint
 into a separate disposable machine for each execution. See
 [Executing from a checkpoint](docs/checkpoints.md) for approval, examples and
