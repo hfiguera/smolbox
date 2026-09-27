@@ -166,6 +166,7 @@ defmodule SmolBox.Machines do
          :ok <- ExecutionSpec.validate(spec),
          :ok <- ExecutionSupport.check(config, spec),
          :ok <- supported_machine(config, handle),
+         :ok <- approved_pull(config, handle, spec),
          {:ok, fingerprint} <- ExecutionSpec.fingerprint(spec, config.fingerprint_key),
          digest =
            :crypto.mac(
@@ -185,6 +186,89 @@ defmodule SmolBox.Machines do
            ]),
          do: {:ok, Execution.key(accepted)}
   end
+
+  @doc """
+  Submit a durable OCI pull on an idle, running retained machine.
+
+  `id` identifies this operation within the machine's scope. Identical retries
+  return its original execution handle; different intent with the same ID is an
+  identity conflict. Options are `:queue_ms`, `:retention_ms`, and `:metadata` as
+  in `SmolBox.ExecutionSpec`. The machine's execution budget bounds observation.
+  Use `SmolBox.await/3` to obtain `:completed`, `:image_pulled` evidence and a typed
+  `SmolBox.Image` result. Wait for `await/3` before submitting the next operation.
+
+  The source must be an exact OCI approval on the assigned worker. The machine
+  must originate from OCI and have an explicit network profile. Prepared artifacts
+  and checkpoints cannot support verified pulls upstream. Pulling uses the same slot as
+  commands, terminal sessions and their file transfers; stop/delete reject it.
+  It never changes the machine's creation source or runs a workload. Cancellation
+  after dispatch or a lost response leaves an unknown outcome and blocks reuse
+  until operator quiescence and `resolve/4`. Listing images cannot resolve it.
+  """
+  @spec pull_image(SmolBox.runtime(), handle(), String.t(), SmolBox.Source.t(), keyword()) ::
+          {:ok, SmolBox.handle()} | {:error, Error.t()}
+  def pull_image(runtime, handle, id, source, options \\ []) do
+    with true <- Validation.keys?(options, [:queue_ms, :retention_ms, :metadata]),
+         {:ok, machine} <- __MODULE__.inspect(runtime, handle),
+         :ok <- pull_machine(machine),
+         {:ok, pull} <- SmolBox.ImagePull.new(source),
+         {:ok, spec} <-
+           ExecutionSpec.new(
+             [
+               scope: machine.scope,
+               id: id,
+               artifact: machine.spec.artifact,
+               profile: machine.spec.profile,
+               command: pull
+             ] ++ options
+           ) do
+      submit(runtime, handle, spec)
+    else
+      false -> Session.error(:validation, :pull_image)
+      error -> error
+    end
+  end
+
+  @doc """
+  Observe machine-local images after verifying the recorded incarnation.
+
+  This passive read takes no active-operation slot and never starts a machine.
+  Empty inventories remain `:empty_or_unavailable`, including stopped machines.
+  A concurrent pull may still be in progress; listing is not completion evidence.
+  Namespace exclusivity remains required, as with `logs/3`.
+  """
+  @spec list_images(SmolBox.runtime(), handle()) ::
+          {:ok, SmolBox.ImageInventory.t()} | {:error, Error.t()}
+  def list_images(runtime, handle) do
+    with :ok <- key(handle),
+         {:ok, config} <- config(runtime),
+         {:ok, record} <- Machines.store(config, :fetch, [handle]),
+         true <- record.state != :deleted and record.created_machine != nil,
+         {:ok, worker} <- Machines.worker(config, record),
+         {:ok, observed} <- SmolBox.Client.inspect_machine(worker.client, record.machine_name),
+         true <- SmolBox.Machine.same_incarnation?(record.created_machine, observed) do
+      SmolBox.Client.list_images(worker.client, record.machine_name)
+    else
+      false -> Session.error(:identity_conflict, :images)
+      error -> error
+    end
+  end
+
+  defp approved_pull(config, handle, %{command: %SmolBox.ImagePull{}} = spec) do
+    with {:ok, record} <- Machines.store(config, :fetch, [handle]),
+         {:ok, worker} <- Machines.worker(config, record),
+         true <- WorkerConfig.supports?(worker, spec) do
+      :ok
+    else
+      false -> Session.error(:unsupported_capability, :pull_image)
+      error -> error
+    end
+  end
+
+  defp approved_pull(_config, _handle, _spec), do: :ok
+
+  defp pull_machine(%{spec: %{artifact: %{"kind" => "oci"}}}), do: :ok
+  defp pull_machine(_machine), do: Session.error(:unsupported_capability, :pull_image)
 
   @doc """
   Resolve blocked reuse after operator quiescence, preserving unknown outcomes.

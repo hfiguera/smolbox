@@ -12,7 +12,7 @@ defmodule SmolBox.Store.Memory do
   @behaviour SmolBox.Store
 
   alias SmolBox.{Error, Execution, MachineSpec, ManagedMachine, Store, Validation}
-  alias SmolBox.Store.{Codec, MachineOps, PortOwnership, RecordOps}
+  alias SmolBox.Store.{Codec, MachineOps, PortOwnership, RecordOps, SourceOwnership}
 
   @doc """
   Start an ephemeral store, optionally registered with `:name`.
@@ -110,6 +110,8 @@ defmodule SmolBox.Store.Memory do
           managed_machines: 1,
           managed_ports: 1,
           managed_workloads: 1,
+          registry_sources: 1,
+          managed_images: 1,
           guest_files: 1,
           interactive_terminal: 1,
           extended_execution: 1
@@ -381,6 +383,8 @@ defmodule SmolBox.Store.Memory do
 
   defp machine_operation(state, :reserve, [key, guard, {worker, name, capacity}, now]) do
     with {:ok, record} <- machine_guard(state, key, guard, now),
+         :ok <-
+           SourceOwnership.available(record, worker, Map.values(state.machines)),
          {:ok, next} <-
            MachineOps.reserve(
              record,

@@ -1,7 +1,7 @@
 defmodule SmolBox.DurableHost.MachineStoreTest do
   use ExUnit.Case, async: false
   alias SmolBox.DurableHost.{Database, Repo, Store}
-  alias SmolBox.Store.{Contract, MachineContract}
+  alias SmolBox.Store.{Contract, ImageContract, MachineContract}
 
   setup do
     partition = "machines-" <> Base.url_encode64(:crypto.strong_rand_bytes(12), padding: false)
@@ -12,6 +12,10 @@ defmodule SmolBox.DurableHost.MachineStoreTest do
     end)
 
     %{store: store}
+  end
+
+  test "PostgreSQL image pull storage contract", %{store: store} do
+    ImageContract.pull(Store, store)
   end
 
   for scenario <- [
@@ -30,6 +34,12 @@ defmodule SmolBox.DurableHost.MachineStoreTest do
       ] do
     test "PostgreSQL machine contract: #{scenario}", %{store: store} do
       apply(MachineContract, unquote(scenario), [Store, store])
+    end
+  end
+
+  for scenario <- [:acceptance, :exclusion, :preparation_history, :concurrent_reservations] do
+    test "PostgreSQL source contract: #{scenario}", %{store: store} do
+      apply(SmolBox.Store.SourceContract, unquote(scenario), [Store, store])
     end
   end
 

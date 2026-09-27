@@ -108,7 +108,15 @@ defmodule SmolBox.Client do
   end
 
   @doc """
-  Create a machine from an approved prepared artifact on the worker, offline by default.
+  Create from an approved local artifact or typed remote source.
+
+  Registry sources require smolvm 1.19.0. They are warmed and their expected
+  content digest checked before creation, within the operation deadline.
+  `:identity_token` is accepted only for registry artifacts and used transiently
+  for warming and creation. Serialize host cache preparation across callers;
+  upstream cold pulls share partial files and a timeout does not stop a download.
+  OCI sources require an explicit guest network policy and use upstream's guest
+  registry configuration, with no per-request authentication option here.
 
   Returns creation evidence after matching name, allocations and network policy.
   Checkpoint sources additionally require 1.16.1, 1.17.0 or 1.19.0, a created branchable response,
@@ -122,10 +130,38 @@ defmodule SmolBox.Client do
   [client lifecycle example](client.html).
   """
   @spec create(t(), MachineSpec.t()) :: {:ok, Machine.t()} | {:error, Error.t()}
-  def create(client, spec) do
+  @spec create(t(), MachineSpec.t(), keyword()) :: {:ok, Machine.t()} | {:error, Error.t()}
+  def create(client, spec, options \\ []) do
     with {:ok, wire} <- MachineSpec.to_wire(spec),
+         {:ok, wire} <- creation_credentials(spec, wire, options),
          {:ok, client} <- creation_runtime(client, spec),
-         {:ok, body} <- json(client, :post, "/api/v1/machines", wire, :create),
+         {:ok, client} <- prepare_creation(client, spec, options) do
+      send_create(client, spec, wire)
+    end
+  end
+
+  @doc false
+  def create_prepared(
+        client,
+        %MachineSpec{source: %SmolBox.Source{kind: :registry} = source} = spec,
+        prepared,
+        options
+      ) do
+    with {:ok, wire} <- MachineSpec.to_wire(spec),
+         true <- SmolBox.ArtifactPreparation.matches?(prepared, SmolBox.Source.artifact(source)),
+         {:ok, wire} <- creation_credentials(spec, wire, options),
+         {:ok, client} <- creation_runtime(client, spec) do
+      send_create(client, spec, wire)
+    else
+      false -> error(:validation, :create)
+      error -> error
+    end
+  end
+
+  def create_prepared(_client, _spec, _prepared, _options), do: error(:validation, :create)
+
+  defp send_create(client, spec, wire) do
+    with {:ok, body} <- json(client, :post, "/api/v1/machines", wire, :create),
          {:ok, created} <- decode_machine(body, spec.name, :create) do
       fields = [:cpus, :memory_mb, :storage_gb, :overlay_gb, :network, :ports]
 
@@ -136,6 +172,31 @@ defmodule SmolBox.Client do
          else: error(:protocol, :create, :dispatch_uncertain)
     end
   end
+
+  defp creation_credentials(%{source: %SmolBox.Source{kind: :registry}}, wire, options) do
+    with {:ok, credentials} <- registry_credentials(options),
+         do:
+           {:ok,
+            Map.merge(
+              wire,
+              Map.new(credentials, fn {_key, value} -> {"registryIdentityToken", value} end)
+            )}
+  end
+
+  defp creation_credentials(_spec, wire, []), do: {:ok, wire}
+  defp creation_credentials(_spec, _wire, _options), do: error(:validation, :create)
+
+  defp prepare_creation(client, %{source: %SmolBox.Source{kind: :registry} = source}, options) do
+    deadline = System.monotonic_time(:millisecond) + client.worker.operation_timeout_ms
+
+    with {:ok, _prepared} <- prepare_artifact(client, source, options),
+         do: remaining_create_budget(client, deadline)
+  end
+
+  defp prepare_creation(client, _spec, _options), do: {:ok, client}
+
+  defp creation_runtime(client, %{source: %SmolBox.Source{}}),
+    do: creation_runtime_versions(client, ["1.19.0"])
 
   defp creation_runtime(client, %{workload: %SmolBox.Workload{}}),
     do: creation_runtime_versions(client, ["1.17.0", "1.19.0"])
@@ -178,6 +239,115 @@ defmodule SmolBox.Client do
       do: {:ok, %{client | worker: %{client.worker | operation_timeout_ms: remaining}}},
       else: error(:expired, :create)
   end
+
+  @doc """
+  Prepare an approved registry artifact in the worker host cache on smolvm 1.19.0.
+
+  Accepts only `SmolBox.Source.registry/1` sources. Optional `:identity_token`
+  is an ephemeral registry bearer token; it is distinct from worker API and
+  workload authentication. It is sent only in the request body and never included
+  in results. Omit it to use upstream's operator-configured registry credentials.
+
+  The health preflight and warm request share the worker operation deadline.
+  A timeout does not cancel the upstream download, and this call never retries.
+  Guest network policy does not constrain this host download. The worker's
+  mirrors, redirects, cache permissions, and host quota remain operator policy.
+  The `/artifacts/warm` endpoint requires appropriate worker listener/proxy access.
+  Upstream rejects explicit identity tokens directed to private registry addresses.
+  """
+  @spec prepare_artifact(t(), SmolBox.Source.t(), keyword()) ::
+          {:ok, SmolBox.ArtifactPreparation.t()} | {:error, Error.t()}
+  def prepare_artifact(client, source, options \\ []) do
+    with :ok <- SmolBox.Source.validate(source),
+         true <- source.kind == :registry,
+         {:ok, credentials} <- registry_credentials(options),
+         {:ok, client} <- creation_runtime_versions(client, ["1.19.0"]),
+         wire = Map.merge(%{"reference" => source.reference}, credentials),
+         {:ok, body} <- json(client, :post, "/artifacts/warm", wire, :prepare_artifact) do
+      SmolBox.ArtifactPreparation.from_wire(source, body)
+    else
+      false -> error(:validation, :prepare_artifact)
+      {:error, failure} -> {:error, %{failure | operation: :prepare_artifact}}
+    end
+  end
+
+  defp registry_credentials(options) do
+    if Validation.keys?(options, [:identity_token]) do
+      case Keyword.fetch(options, :identity_token) do
+        :error -> {:ok, %{}}
+        {:ok, token} -> registry_token(token)
+      end
+    else
+      error(:validation, :prepare_artifact)
+    end
+  end
+
+  defp registry_token(token) do
+    if Validation.text?(token, 16_384) and Regex.match?(~r/\A[A-Za-z0-9._~+\/-]+=*\z/, token),
+      do: {:ok, %{"identityToken" => token}},
+      else: error(:validation, :prepare_artifact)
+  end
+
+  @doc """
+  Observe images inside one machine on smolvm 1.19.0, without starting it.
+
+  This is not a catalog of worker-host prepared artifacts. An empty response
+  remains `:empty_or_unavailable`; see `SmolBox.ImageInventory`. References in
+  observations do not grant approval to pull or create from them.
+  """
+  @spec list_images(t(), String.t()) :: {:ok, SmolBox.ImageInventory.t()} | {:error, Error.t()}
+  def list_images(client, name) do
+    with {:ok, path} <- machine_path(name),
+         {:ok, client} <- creation_runtime_versions(client, ["1.19.0"]),
+         {:ok, body} <- json(client, :get, path <> "/images", nil, :images) do
+      SmolBox.ImageInventory.from_wire(body)
+    else
+      {:error, failure} -> {:error, %{failure | operation: :images}}
+    end
+  end
+
+  @doc """
+  Pull an approved pinned OCI source into one machine on smolvm 1.19.0.
+
+  This mutation may start a stopped machine upstream. Callers must establish
+  ownership and exclude concurrent commands, file transfers and lifecycle changes.
+  A timeout leaves the outcome uncertain; it does not cancel the pull. No retry
+  or workload launch is performed by SmolBox.
+
+  The endpoint has no per-request registry authentication fields. It uses the
+  guest's upstream registry configuration. Worker API authentication and the
+  host-side `prepare_artifact/3` identity token are separate mechanisms.
+  Returned digest evidence is a configuration digest; see `SmolBox.Image`.
+  """
+  @spec pull_image(t(), String.t(), SmolBox.Source.t()) ::
+          {:ok, SmolBox.Image.t()} | {:error, Error.t()}
+  def pull_image(client, name, source) do
+    with :ok <- SmolBox.Source.validate(source),
+         true <- source.kind == :oci,
+         {:ok, path} <- machine_path(name),
+         {:ok, client} <- creation_runtime_versions(client, ["1.19.0"]),
+         wire = %{
+           "image" => source.reference,
+           "ociPlatform" => SmolBox.Source.oci_platform(source)
+         },
+         {:ok, body} <- json(client, :post, path <> "/images/pull", wire, :pull_image) do
+      decode_pulled_image(source, body)
+    else
+      false -> error(:validation, :pull_image)
+      {:error, failure} -> {:error, %{failure | operation: :pull_image}}
+    end
+  end
+
+  defp decode_pulled_image(source, %{"image" => body}) do
+    with {:ok, image} <- SmolBox.Image.from_wire(body),
+         true <- SmolBox.Image.matches?(image, source) do
+      {:ok, image}
+    else
+      _invalid -> error(:protocol, :pull_image, :dispatch_uncertain)
+    end
+  end
+
+  defp decode_pulled_image(_source, _body), do: error(:protocol, :pull_image, :dispatch_uncertain)
 
   @doc """
   Read up to 1024 machine observations from the configured worker.

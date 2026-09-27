@@ -19,10 +19,28 @@ defmodule SmolBox.Store do
   preserved through execution/machine transactions, recovery and tombstones.
   No SQL migration is needed; upgrade all readers before advertising support.
 
+  `registry_sources: 1` requires codec v10, immutable remote source identity and
+  preparation evidence, and atomic host-cache exclusion during remote creation.
+  In the reservation transaction, exclude another assigned remote machine whose
+  create intent remains unfinished on that worker. Lease expiry, missing worker
+  machines and preparation timeout do not release this exclusion. Confirmed
+  creation or explicit operator-quiescent resolution does. See
+  `SmolBox.Store.SourceOwnership`. Controllers sharing a physical worker cache
+  must share one worker identity and store authority. The PostgreSQL example
+  uses its existing partition transaction and indexed worker assignment scan;
+  no additional SQL migration is required, but every adapter must implement
+  the new transaction behavior before advertising the capability.
+
   `interactive_terminal: 1` additionally requires codec v7, typed terminal intent
   and exit evidence, and the same atomic managed command slot. Persist dispatch
   before opening a potentially mutating WebSocket. Unknown sessions block reuse;
   never replay input or reopen a PTY on recovery. Store no live socket or handle.
+
+  `managed_images: 1` requires codec v10, `SmolBox.ImagePull` intent and
+  `SmolBox.Image` results, `:image_pulled` evidence in completed executions, and
+  the same atomic managed-operation slot. Image pulls never reserve or release
+  machine capacity themselves. Unknown pulls block reuse like unknown commands.
+  Run the shared ImageContract; no additional SQL table is needed.
 
   Adapters advertising `managed_ports: 1` also atomically maintain unique
   `{worker_id, host_port}` ownership with machine assignment and reservations.
@@ -136,7 +154,8 @@ defmodule SmolBox.Store do
             | :conflict
             | :deleted,
           operation: :create | machine_action() | nil,
-          phase: :pending | :dispatching | :uncertain | nil,
+          phase: :pending | :preparing | :prepared | :dispatching | :uncertain | nil,
+          preparation: SmolBox.ArtifactPreparation.t() | nil,
           created_machine: Machine.t() | nil,
           observed_machine: Machine.t() | nil,
           next_due_at_ms: non_neg_integer(),

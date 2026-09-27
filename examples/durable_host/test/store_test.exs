@@ -53,7 +53,11 @@ defmodule SmolBox.DurableHost.StoreTest do
     store: store
   } do
     record = Contract.record("private", ["echo", "super-secret-fixture"])
-    assert {:ok, %{durable: true, atomic: true, schema: 1}} = Store.capabilities(store)
+
+    assert {:ok,
+            %{durable: true, atomic: true, schema: 1, registry_sources: 1, managed_images: 1}} =
+             Store.capabilities(store)
+
     assert {:ok, _, :inserted} = Store.accept(store, record, 10)
 
     %{rows: [[payload]]} =

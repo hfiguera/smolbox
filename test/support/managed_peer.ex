@@ -56,6 +56,19 @@ defmodule SmolBox.ManagedPeer do
   defp route("GET", ["readyz"], _body, state),
     do: {{:empty, if(state.options[:unready], do: 503, else: 200)}, state}
 
+  defp route("POST", ["artifacts", "warm"], _body, state) do
+    source = state.options[:source]
+
+    response = %{
+      "digest" => "sha256:" <> Keyword.get(state.options, :warm_digest, source.content_sha256),
+      "sizeBytes" => 4096,
+      "alreadyCached" => false
+    }
+
+    status = if state.options[:warm_lost], do: 503, else: 200
+    {{:json, status, response}, state}
+  end
+
   defp route("GET", ["api", "v1", "machines"], _body, state),
     do: {{:json, 200, %{"machines" => Map.values(state.machines)}}, state}
 
@@ -109,6 +122,25 @@ defmodule SmolBox.ManagedPeer do
   end
 
   defp machine_route("GET", [], _body, machine, state), do: {{:json, 200, machine}, state}
+
+  defp machine_route("GET", ["images"], _body, _machine, state),
+    do: {{:json, 200, %{"images" => []}}, state}
+
+  defp machine_route("POST", ["images", "pull"], body, _machine, state) do
+    input = Jason.decode!(body)
+
+    image = %{
+      "reference" => input["image"],
+      "digest" => "sha256:" <> String.duplicate("c", 64),
+      "size" => 4096,
+      "architecture" => "amd64",
+      "os" => "linux",
+      "layerCount" => 1
+    }
+
+    status = if state.options[:pull_lost], do: 503, else: 200
+    {{:json, status, %{"image" => image}}, state}
+  end
 
   defp machine_route("GET", ["logs"], _body, _machine, state) do
     response =
@@ -235,6 +267,8 @@ defmodule SmolBox.ManagedPeer do
   defp event("GET", ["api", "v1", "machines", _name, "exec", "interactive"]), do: :terminal_open
   defp event("GET", ["api", "v1", "machines", _name]), do: :inspect
   defp event("POST", ["api", "v1", "machines"]), do: :create
+  defp event("POST", ["artifacts", "warm"]), do: :prepare_artifact
+  defp event("POST", ["api", "v1", "machines", _name, "images", "pull"]), do: :pull_image
   defp event("POST", ["api", "v1", "machines", _name, "exec" | _suffix]), do: :exec
   defp event("POST", ["api", "v1", "machines", _name, "stop"]), do: :stop
   defp event("DELETE", _segments), do: :delete

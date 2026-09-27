@@ -47,6 +47,16 @@ defmodule SmolBox.RuntimeFixture do
         do: %{spec | artifact: Map.put(spec.artifact, "kind", "checkpoint")},
         else: spec
 
+    spec = source_spec(spec, options[:source])
+
+    spec = %{
+      spec
+      | profile: %{
+          spec.profile
+          | preparation_ms: Keyword.get(options, :preparation_ms, spec.profile.preparation_ms)
+        }
+    }
+
     checkpoints =
       if checkpoint? do
         {:ok, checkpoint} =
@@ -75,11 +85,15 @@ defmodule SmolBox.RuntimeFixture do
           capacity: Contract.capacity(Keyword.get(options, :slots, 1)),
           draining: Keyword.get(options, :draining, false),
           artifacts:
-            if(checkpoint?,
+            if(checkpoint? or options[:source] != nil,
               do: [],
               else: [Map.put(spec.artifact, "path", "/approved/python.smolmachine")]
             ),
-          checkpoints: checkpoints
+          checkpoints: checkpoints,
+          sources:
+            if(options[:source], do: [options[:source]], else: []) ++
+              Keyword.get(options, :pull_sources, []),
+          registry_credentials: options[:registry_credentials]
         ] ++
           case Keyword.fetch(options, :expected_runtime_version) do
             {:ok, version} -> [runtime_version: version]
@@ -117,6 +131,9 @@ defmodule SmolBox.RuntimeFixture do
       options: config
     }
   end
+
+  defp source_spec(spec, nil), do: spec
+  defp source_spec(spec, source), do: %{spec | artifact: SmolBox.Source.artifact(source)}
 
   # Failed startup probes are cached for five seconds. Establish readiness before
   # tests begin their command/machine observation budgets. Tests of unavailable

@@ -21,8 +21,17 @@ defmodule SmolBox.Store.MachineContract do
     record
   end
 
-  def running(adapter, store, ports \\ []) do
-    record = record("computer", ports)
+  def running(adapter, store, ports \\ [], profile \\ nil, artifact \\ nil) do
+    original = record("computer", ports)
+
+    spec = %{
+      original.spec
+      | profile: profile || original.spec.profile,
+        artifact: artifact || original.spec.artifact
+    }
+
+    {:ok, fingerprint} = ManagedMachineSpec.fingerprint(spec, :binary.copy(<<1>>, 32))
+    {:ok, record} = ManagedMachine.new(spec, fingerprint, 1000)
     key = ManagedMachine.key(record)
     assert {:ok, _} = adapter.machine(store, :accept, [record, 10])
     assert {:ok, _} = adapter.claim_worker(store, "worker", "owner", 1000, 5000)
@@ -44,6 +53,7 @@ defmodule SmolBox.Store.MachineContract do
       memory_mb: 256,
       storage_gb: 1,
       overlay_gb: 1,
+      network: record.spec.profile.network,
       ports: ports
     }
 

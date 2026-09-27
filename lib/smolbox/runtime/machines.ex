@@ -50,6 +50,7 @@ defmodule SmolBox.Runtime.Machines do
 
   defp route(_config, %{state: :deleted} = record, _eligible), do: {:ok, record}
   defp route(config, %{phase: :pending} = record, _eligible), do: dispatch(config, record)
+  defp route(config, %{phase: :prepared} = record, _eligible), do: dispatch(config, record)
   defp route(config, record, _eligible), do: observe(config, record)
 
   defp reserve(config, record, eligible) do
@@ -102,6 +103,13 @@ defmodule SmolBox.Runtime.Machines do
 
   defp defer_admission(_config, result), do: result
 
+  defp dispatch(
+         config,
+         %{phase: :pending, operation: :create, spec: %{artifact: %{"kind" => "registry"}}} =
+           record
+       ),
+       do: prepare(config, record)
+
   defp dispatch(config, record) do
     with {:ok, worker} <- worker(config, record),
          true <-
@@ -109,11 +117,13 @@ defmodule SmolBox.Runtime.Machines do
          %{status: :ready} <- WorkerHealth.observe(worker, config.clock),
          :ok <- verify_before(config, record, worker),
          {:ok, current} <- claim(config, ManagedMachine.key(record)),
-         true <- current.phase == :pending and current.active_execution == nil,
+         true <- current.phase in [:pending, :prepared] and current.active_execution == nil,
          {:ok, intent} <-
            write(config, current,
              phase: :dispatching,
-             operation_deadline_ms: config.clock.now() + record.spec.profile.preparation_ms
+             operation_deadline_ms:
+               current.operation_deadline_ms ||
+                 config.clock.now() + record.spec.profile.preparation_ms
            ) do
       result = io(config, intent, fn -> mutate(worker, intent) end)
       complete_response(config, intent, result)
@@ -128,6 +138,64 @@ defmodule SmolBox.Runtime.Machines do
         })
     end
   end
+
+  defp prepare(config, record) do
+    with {:ok, worker} <- worker(config, record),
+         true <- WorkerConfig.supports?(worker, record.spec),
+         %{status: :ready} <- WorkerHealth.observe(worker, config.clock),
+         {:ok, current} <- claim(config, ManagedMachine.key(record)),
+         true <- current.phase == :pending and current.operation == :create,
+         {:ok, intent} <-
+           write(config, current,
+             phase: :preparing,
+             operation_deadline_ms: config.clock.now() + record.spec.profile.preparation_ms
+           ) do
+      result = io(config, intent, fn -> warm(worker, intent) end)
+
+      prepared(config, intent, result)
+    else
+      {:error, error} ->
+        failed_observation(config, record, error)
+
+      _unready ->
+        failed_observation(config, record, %Error{
+          category: :unsupported_capability,
+          operation: :source
+        })
+    end
+  end
+
+  defp warm(worker, intent) do
+    with {:ok, source} <- SmolBox.Source.from_artifact(intent.spec.artifact),
+         {:ok, credentials} <-
+           SmolBox.RegistryCredentials.resolve(worker.registry_credentials, source),
+         do: Client.prepare_artifact(worker.client, source, credentials)
+  end
+
+  defp prepared(config, record, {:ok, %SmolBox.ArtifactPreparation{} = result}) do
+    with {:ok, current} <- claim(config, ManagedMachine.key(record)),
+         true <- current.phase == :preparing and current.operation == :create,
+         {:ok, saved} <- write(config, current, preparation: result, phase: :prepared) do
+      dispatch(config, saved)
+    else
+      false -> Session.error(:stale_version, :machine)
+      error -> error
+    end
+  end
+
+  defp prepared(config, record, {:error, %{evidence: :not_dispatched} = error}),
+    do:
+      fresh_write(config, record,
+        state: :unknown,
+        phase: :uncertain,
+        last_error: error,
+        next_due_at_ms: config.clock.now() + 60_000
+      )
+
+  defp prepared(config, record, {:error, error}), do: uncertain(config, record, error)
+
+  defp prepared(config, record, _invalid),
+    do: uncertain(config, record, %Error{category: :protocol, operation: :prepare_artifact})
 
   defp verify_before(_config, %{operation: :create, created_machine: nil}, _worker), do: :ok
 
@@ -146,11 +214,19 @@ defmodule SmolBox.Runtime.Machines do
 
   defp mutate(worker, %{operation: :create} = record) do
     with {:ok, spec} <- WorkerConfig.machine_spec(worker, record.spec, record.machine_name),
-         do: Client.create(worker.client, spec)
+         do: create(worker, spec, record.preparation)
   end
 
   defp mutate(worker, record),
     do: apply(Client, record.operation, [worker.client, record.machine_name])
+
+  defp create(worker, %{source: %SmolBox.Source{kind: :registry} = source} = spec, preparation) do
+    with {:ok, credentials} <-
+           SmolBox.RegistryCredentials.resolve(worker.registry_credentials, source),
+         do: Client.create_prepared(worker.client, spec, preparation, credentials)
+  end
+
+  defp create(worker, spec, _preparation), do: Client.create(worker.client, spec)
 
   defp complete_response(config, record, {:ok, %Machine{} = observed}) do
     with {:ok, current} <- claim(config, ManagedMachine.key(record)),
@@ -321,10 +397,16 @@ defmodule SmolBox.Runtime.Machines do
   end
 
   def io(config, record, function) do
-    task = Task.async(fn -> Session.safe(function) end)
-
     deadline =
       record.operation_deadline_ms || config.clock.now() + record.spec.profile.preparation_ms
+
+    if deadline <= config.clock.now(),
+      do: Session.error(:expired, :runtime),
+      else: start_io(config, record, function, deadline)
+  end
+
+  defp start_io(config, record, function, deadline) do
+    task = Task.async(fn -> Session.safe(function) end)
 
     try do
       await_io(config, record, task, deadline)

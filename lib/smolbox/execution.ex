@@ -13,6 +13,10 @@ defmodule SmolBox.Execution do
   and `:launched` evidence. Its PID is historical launch evidence, not final exit
   status, readiness or continued liveness. Cleanup releases only the command slot.
 
+  A managed image pull completes with `:image_pulled` evidence and a typed
+  `SmolBox.Image` result. It has no process exit status. Unknown pulls retain the
+  active machine slot until explicit recovery, like unknown commands.
+
   Absolute stage deadlines are set on first entry and never reset by observation
   or restart. Uncertain execution can have confirmed termination and completed
   cleanup while its original command outcome remains unknown.
@@ -48,7 +52,7 @@ defmodule SmolBox.Execution do
     accepted: [:preparing, :cancelled, :expired],
     preparing: [:ready, :failed, :cancelled],
     ready: [:dispatching, :cancelled, :failed],
-    dispatching: [:launched, :running, :collecting, :unknown, :cancelling],
+    dispatching: [:launched, :completed, :running, :collecting, :unknown, :cancelling],
     running: [:collecting, :unknown, :cancelling],
     cancelling: [:collecting, :unknown],
     unknown: [:collecting, :cancelling],
@@ -74,6 +78,7 @@ defmodule SmolBox.Execution do
     :absence_at_ms
   ]
   @evidence [
+    :image_pulled,
     :not_dispatched,
     :dispatch_uncertain,
     :running_observed,
@@ -164,7 +169,8 @@ defmodule SmolBox.Execution do
           worker_generation: non_neg_integer() | nil,
           machine_name: String.t() | nil,
           created_machine: Machine.t() | nil,
-          result: Result.t() | LaunchResult.t() | SmolBox.Terminal.Result.t() | nil,
+          result:
+            Result.t() | LaunchResult.t() | SmolBox.Terminal.Result.t() | SmolBox.Image.t() | nil,
           last_error: Error.t() | nil,
           cancel_requested_at_ms: non_neg_integer() | nil,
           claim_owner: String.t() | nil,
@@ -300,7 +306,8 @@ defmodule SmolBox.Execution do
   defp evidence_transition(previous, next) do
     valid =
       preserves?(previous, next, [:result, :created_machine, :absence_at_ms]) and
-        (previous.evidence not in [:exited, :launched] or next.evidence == previous.evidence) and
+        (previous.evidence not in [:exited, :launched, :image_pulled] or
+           next.evidence == previous.evidence) and
         (previous.evidence != :termination_confirmed or
            next.evidence in [:termination_confirmed, :exited] or
            reobserved_running?(previous, next)) and
@@ -325,6 +332,9 @@ defmodule SmolBox.Execution do
     do:
       record.evidence == :launched and is_struct(record.result, LaunchResult) and
         record.managed_machine != nil and record.collection == :complete
+
+  defp state_evidence?(%{state: :completed, spec: %{command: %SmolBox.ImagePull{}}} = record),
+    do: record.evidence == :image_pulled and record.result != nil
 
   defp state_evidence?(%{state: state} = record)
        when state in [:accepted, :preparing, :ready, :cancelled, :expired, :failed],
@@ -406,7 +416,15 @@ defmodule SmolBox.Execution do
     do: SmolBox.Terminal.Result.valid?(result)
 
   defp result?(%LaunchResult{} = result, _max), do: LaunchResult.valid?(result)
+  defp result?(%SmolBox.Image{} = result, _max), do: SmolBox.Image.validate(result) == :ok
   defp result?(_result, _max), do: false
+
+  defp result_mode?(%{spec: %{command: %SmolBox.ImagePull{source: source}}} = record),
+    do:
+      (record.managed_machine != nil or record.state in [:accepted, :cancelled, :expired]) and
+        record.state not in [:running, :collecting, :collection_failed, :launched] and
+        (record.result == nil or
+           (record.state == :completed and SmolBox.Image.matches?(record.result, source)))
 
   defp result_mode?(%{spec: %{command: %SmolBox.Terminal.Spec{}}, result: result} = record),
     do:

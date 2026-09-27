@@ -47,6 +47,7 @@ defmodule SmolBox.Telemetry do
     :cancelling
   ]
   @evidence [
+    :image_pulled,
     :not_dispatched,
     :dispatch_uncertain,
     :running_observed,

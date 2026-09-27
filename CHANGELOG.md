@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- Add immutable local, registry-artifact and OCI source types with exact worker
+  approvals, explicit networking and host-owned registry credential resolution.
+- Persist registry preparation and serialize host-cache creation work across
+  controllers. Preserve uncertainty without replay or adoption by machine name.
+- Add typed machine-local image inventories and managed OCI image pulls sharing
+  the active-operation slot. Reject pulls on prepared-artifact machines, where
+  upstream cannot provide verified download evidence.
+- Add codec v10 and `registry_sources: 1` / `managed_images: 1` store capabilities.
+  Existing local/checkpoint formats remain compatible; the PostgreSQL example
+  needs no additional SQL migration. Upgrade all shared-store readers before
+  enabling these capabilities; older releases cannot read v10 records.
+- Add a durable registry/OCI example and Linux/macOS qualification evidence.
+
 ## 0.2.1
 
 **Worker default change:** SmolBox now expects smolvm **1.19.0** when the worker

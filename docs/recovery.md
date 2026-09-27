@@ -1,5 +1,12 @@
 # Persistence and recovery contract
 
+Registry preparation and image pulls follow the same no-replay rule as uncertain
+commands. Preserve the source identity, preparation result and original operation
+handle. A `:prepared` registry result can continue creation within its original
+deadline. Interrupted preparation, creation or image pulling requires quiescence
+before resolution; a cache hit, image listing, expired lease or observed absence
+does not fence worker requests. See [registry recovery](images-and-registry-artifacts.md#recovery-and-resource-accounting).
+
 SmolBox **0.2.1** defaults to **smolvm 1.19.0** on Linux x86_64 and macOS Apple
 Silicon. Version 0.2.0 defaults to 1.17.0. Keep existing workers explicitly pinned
 to their installed version; updating SmolBox does not install smolvm. See

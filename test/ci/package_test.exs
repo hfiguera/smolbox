@@ -2,6 +2,35 @@ defmodule SmolBox.CI.PackageTest do
   use ExUnit.Case, async: true
   alias SmolBox.CI.{Package, Util}
 
+  test "registry documentation is accepted in the published package" do
+    root = Util.temporary("smolbox-registry-package")
+    on_exit(fn -> File.rm_rf!(root) end)
+
+    names =
+      ~w(mix.exs README.md CHANGELOG.md LICENSE lib/smolbox.ex lib/smolbox/runtime.ex docs/images-and-registry-artifacts.md docs/images-and-registry-artifacts-validation.md)
+
+    inner = Path.join(root, "contents.tar")
+    members = Enum.map(names, &{String.to_charlist(&1), "fixture"})
+    :ok = :erl_tar.create(String.to_charlist(inner), members, [])
+    outer = Path.join(root, "package.tar")
+
+    :ok =
+      :erl_tar.create(
+        String.to_charlist(outer),
+        [
+          {~c"VERSION", "3"},
+          {~c"CHECKSUM", "fixture"},
+          {~c"metadata.config", <<>>},
+          {~c"contents.tar.gz", :zlib.gzip(File.read!(inner))}
+        ],
+        []
+      )
+
+    output = Path.join(root, "output")
+    assert Enum.sort(Package.unpack!(outer, output)) == Enum.sort(names)
+    assert File.read!(Path.join(output, "docs/images-and-registry-artifacts.md")) == "fixture"
+  end
+
   test "truncated gzip fails before any package files are written" do
     root = Util.temporary("smolbox-truncated-package")
     on_exit(fn -> File.rm_rf!(root) end)
@@ -37,6 +66,7 @@ defmodule SmolBox.CI.PackageTest do
     File.ln_s!(target, link)
 
     for {label, members} <- [
+          {"unlisted-doc", [{~c"docs/private-notes.md", <<>>}]},
           {"traversal", [{~c"../escape.ex", <<>>}]},
           {"symlink", [{~c"lib/link.ex", String.to_charlist(link)}]},
           {"duplicate", [{~c"README.md", <<>>}, {~c"README.md", <<>>}]}

@@ -8,7 +8,16 @@ defmodule SmolBox.ExecutionSpec do
   `"kind" => "checkpoint"`; construct it with `SmolBox.Checkpoint.artifact/1`.
   The specification contains no endpoint overrides.
 
-  `command` accepts `SmolBox.Command` or `SmolBox.Terminal.Spec`. Interactive
+  A retained machine may instead use the immutable map returned by
+  `SmolBox.Source.artifact/1` for a registry artifact or OCI source. Commands
+  must use that same map. Remote provisioning is exposed through
+  `SmolBox.Machines.create/2`; disposable `SmolBox.submit/2` continues to require
+  an approved local artifact or checkpoint.
+
+  `command` accepts `SmolBox.Command`, `SmolBox.Terminal.Spec`, or
+  `SmolBox.ImagePull`. Image pulls require a retained running OCI machine, explicit
+  networking, an approved OCI target and empty input/output manifests.
+  The machine's creation artifact remains unchanged. Interactive
   intent is supported only on managed image machines, rejects input/output
   manifests, and must fit the host profile's execution and output-buffer budgets.
   Its identity includes terminal options but never live input or a socket handle.
@@ -46,7 +55,7 @@ defmodule SmolBox.ExecutionSpec do
           scope: String.t(),
           id: String.t(),
           artifact: %{String.t() => String.t()},
-          command: Command.t() | TerminalSpec.t(),
+          command: Command.t() | TerminalSpec.t() | SmolBox.ImagePull.t(),
           profile: Profile.t(),
           inputs: [Manifest.input()],
           outputs: [Manifest.output()],
@@ -159,6 +168,7 @@ defmodule SmolBox.ExecutionSpec do
   end
 
   defp command_path?(%{command: %TerminalSpec{}}), do: true
+  defp command_path?(%{command: %SmolBox.ImagePull{}}), do: true
 
   defp command_path?(spec),
     do: SmolBox.GuestPaths.allowed?(spec.profile.guest_paths, :workdir, spec.command.workdir)
@@ -166,9 +176,16 @@ defmodule SmolBox.ExecutionSpec do
   defp command_validate(%TerminalSpec{} = command),
     do: TerminalSpec.validate(command)
 
+  defp command_validate(%SmolBox.ImagePull{} = command), do: SmolBox.ImagePull.validate(command)
+
   defp command_validate(command), do: Command.validate(command)
   defp normalize_command(%Command{} = command), do: %{command | env: Enum.sort(command.env)}
   defp normalize_command(command), do: command
+
+  defp command_budget?(%{command: %SmolBox.ImagePull{source: source}} = spec),
+    do:
+      spec.inputs == [] and spec.outputs == [] and spec.artifact["kind"] != "checkpoint" and
+        spec.profile.network != :offline and source.architecture == spec.artifact["architecture"]
 
   defp command_budget?(%{command: %TerminalSpec{} = terminal} = spec),
     do:
@@ -189,6 +206,9 @@ defmodule SmolBox.ExecutionSpec do
 
   defp artifact?(%{"kind" => "checkpoint"} = artifact) when map_size(artifact) == 4,
     do: artifact?(Map.delete(artifact, "kind"))
+
+  defp artifact?(%{"kind" => kind} = artifact) when kind in ["registry", "oci"],
+    do: match?({:ok, _source}, SmolBox.Source.from_artifact(artifact))
 
   defp artifact?(_artifact), do: false
 

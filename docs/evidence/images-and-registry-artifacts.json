@@ -1,0 +1,239 @@
+{
+  "runtime": "1.19.0",
+  "qualification": "development",
+  "date": "2026-09-26",
+  "store": "PostgreSQL",
+  "controller_recovery": "separate BEAM invocations",
+  "registry_linux_cold": {
+    "runtime": "1.19.0",
+    "store": "PostgreSQL",
+    "result": "passed",
+    "source": {
+      "architecture": "x86_64",
+      "content_sha256": "27c813bc6611853f025ec12aa455c7ab3f1ea4e9be5a8af105d3119a86571698",
+      "id": "registry-alpine",
+      "kind": "registry",
+      "reference": "127.0.0.1:42981/qualification/app@sha256:670a8ca4bb4f14a9a770ba7fd82e4d65eeae8897a49a28636e77ad6f5ee11997",
+      "sha256": "670a8ca4bb4f14a9a770ba7fd82e4d65eeae8897a49a28636e77ad6f5ee11997"
+    },
+    "preparation": {
+      "reference": "127.0.0.1:42981/qualification/app@sha256:670a8ca4bb4f14a9a770ba7fd82e4d65eeae8897a49a28636e77ad6f5ee11997",
+      "content_sha256": "27c813bc6611853f025ec12aa455c7ab3f1ea4e9be5a8af105d3119a86571698",
+      "already_cached": false,
+      "manifest_sha256": "670a8ca4bb4f14a9a770ba7fd82e4d65eeae8897a49a28636e77ad6f5ee11997",
+      "size_bytes": 18462198
+    },
+    "machine_name": "reglive-kyguy3pj4qxl6k4b76vb",
+    "controller_restart": "separate BEAM invocation",
+    "retained_file": true,
+    "stop_start_preserved_file": true,
+    "absence_verified": true,
+    "reservations_released": true
+  },
+  "authenticated_registry": "not qualified; no operator-provided authenticated registry",
+  "prepared_machine_pull": "unsupported: upstream synthetic packed metadata; managed API rejects before dispatch",
+  "campaigns": {
+    "linux": {
+      "registry_prepare": {
+        "state": "running",
+        "source": {
+          "architecture": "x86_64",
+          "content_sha256": "27c813bc6611853f025ec12aa455c7ab3f1ea4e9be5a8af105d3119a86571698",
+          "id": "registry-environment",
+          "kind": "registry",
+          "reference": "127.0.0.1:42981/qualification/app@sha256:670a8ca4bb4f14a9a770ba7fd82e4d65eeae8897a49a28636e77ad6f5ee11997",
+          "sha256": "670a8ca4bb4f14a9a770ba7fd82e4d65eeae8897a49a28636e77ad6f5ee11997"
+        },
+        "phase": "prepare",
+        "machine_name": "regdemo-4i4vnfdngcbcsziut5fo",
+        "preparation": {
+          "reference": "127.0.0.1:42981/qualification/app@sha256:670a8ca4bb4f14a9a770ba7fd82e4d65eeae8897a49a28636e77ad6f5ee11997",
+          "size_bytes": 18462198,
+          "content_sha256": "27c813bc6611853f025ec12aa455c7ab3f1ea4e9be5a8af105d3119a86571698",
+          "already_cached": true,
+          "manifest_sha256": "670a8ca4bb4f14a9a770ba7fd82e4d65eeae8897a49a28636e77ad6f5ee11997"
+        },
+        "reservation_retained": true,
+        "absence_verified": false
+      },
+      "registry_resume": {
+        "state": "deleted",
+        "source": {
+          "architecture": "x86_64",
+          "content_sha256": "27c813bc6611853f025ec12aa455c7ab3f1ea4e9be5a8af105d3119a86571698",
+          "id": "registry-environment",
+          "kind": "registry",
+          "reference": "127.0.0.1:42981/qualification/app@sha256:670a8ca4bb4f14a9a770ba7fd82e4d65eeae8897a49a28636e77ad6f5ee11997",
+          "sha256": "670a8ca4bb4f14a9a770ba7fd82e4d65eeae8897a49a28636e77ad6f5ee11997"
+        },
+        "phase": "resume",
+        "machine_name": "regdemo-4i4vnfdngcbcsziut5fo",
+        "preparation": {
+          "reference": "127.0.0.1:42981/qualification/app@sha256:670a8ca4bb4f14a9a770ba7fd82e4d65eeae8897a49a28636e77ad6f5ee11997",
+          "content_sha256": "27c813bc6611853f025ec12aa455c7ab3f1ea4e9be5a8af105d3119a86571698",
+          "already_cached": true,
+          "manifest_sha256": "670a8ca4bb4f14a9a770ba7fd82e4d65eeae8897a49a28636e77ad6f5ee11997",
+          "size_bytes": 18462198
+        },
+        "absence_verified": true,
+        "reservation_retained": false
+      },
+      "registry_recovery_note": "Prepared-machine pull probe required explicit quiescent resolution; original unknown outcome retained.",
+      "oci_prepare": {
+        "state": "running",
+        "source": {
+          "architecture": "x86_64",
+          "id": "registry-environment",
+          "kind": "oci",
+          "reference": "docker.io/library/alpine@sha256:3c81aa9a3d770b316568f4499e30461a5cd3fbd7180bd89e28e34894c7845832",
+          "sha256": "3c81aa9a3d770b316568f4499e30461a5cd3fbd7180bd89e28e34894c7845832"
+        },
+        "phase": "prepare",
+        "machine_name": "regdemo-pxy3ktniemxzoa2exc7z",
+        "preparation": null,
+        "absence_verified": false,
+        "reservation_retained": true
+      },
+      "oci_images": {
+        "image": {
+          "os": "linux",
+          "reference": "docker.io/library/busybox@sha256:66a6306db78bf2dbf3487f293aa8d6990d8e506fdffab9cc43fe422becf886e4",
+          "digest": "sha256:30ecbe1509090b38ef3260f3609d64d8261230464eaa4d235901db496e9647fb",
+          "architecture": "amd64",
+          "size_bytes": 4421246,
+          "digest_kind": "configuration",
+          "layer_count": 1
+        },
+        "after_count": 2,
+        "before_count": 1
+      },
+      "oci_resume": {
+        "state": "deleted",
+        "source": {
+          "architecture": "x86_64",
+          "id": "registry-environment",
+          "kind": "oci",
+          "reference": "docker.io/library/alpine@sha256:3c81aa9a3d770b316568f4499e30461a5cd3fbd7180bd89e28e34894c7845832",
+          "sha256": "3c81aa9a3d770b316568f4499e30461a5cd3fbd7180bd89e28e34894c7845832"
+        },
+        "phase": "resume",
+        "machine_name": "regdemo-pxy3ktniemxzoa2exc7z",
+        "preparation": null,
+        "absence_verified": true,
+        "reservation_retained": false
+      },
+      "pull_configuration_matches_manifest": true
+    },
+    "mac": {
+      "registry_prepare": {
+        "state": "running",
+        "source": {
+          "architecture": "aarch64",
+          "content_sha256": "449962957c1b2cb037d9eec507ecc7715bb3aa092a112cea968851ec76eb89a4",
+          "id": "registry-environment",
+          "kind": "registry",
+          "reference": "127.0.0.1:61565/qualification/app@sha256:2792a3a3a2f9f3e08970b43a2996f11412cadba266870bcfd668ba5e46ece93e",
+          "sha256": "2792a3a3a2f9f3e08970b43a2996f11412cadba266870bcfd668ba5e46ece93e"
+        },
+        "phase": "prepare",
+        "machine_name": "regdemo-dhwtude53uwfkq7xvdwn",
+        "preparation": {
+          "reference": "127.0.0.1:61565/qualification/app@sha256:2792a3a3a2f9f3e08970b43a2996f11412cadba266870bcfd668ba5e46ece93e",
+          "content_sha256": "449962957c1b2cb037d9eec507ecc7715bb3aa092a112cea968851ec76eb89a4",
+          "already_cached": false,
+          "manifest_sha256": "2792a3a3a2f9f3e08970b43a2996f11412cadba266870bcfd668ba5e46ece93e",
+          "size_bytes": 18347266
+        },
+        "absence_verified": false,
+        "reservation_retained": true
+      },
+      "registry_resume": {
+        "state": "deleted",
+        "source": {
+          "architecture": "aarch64",
+          "content_sha256": "449962957c1b2cb037d9eec507ecc7715bb3aa092a112cea968851ec76eb89a4",
+          "id": "registry-environment",
+          "kind": "registry",
+          "reference": "127.0.0.1:61565/qualification/app@sha256:2792a3a3a2f9f3e08970b43a2996f11412cadba266870bcfd668ba5e46ece93e",
+          "sha256": "2792a3a3a2f9f3e08970b43a2996f11412cadba266870bcfd668ba5e46ece93e"
+        },
+        "phase": "resume",
+        "machine_name": "regdemo-dhwtude53uwfkq7xvdwn",
+        "preparation": {
+          "reference": "127.0.0.1:61565/qualification/app@sha256:2792a3a3a2f9f3e08970b43a2996f11412cadba266870bcfd668ba5e46ece93e",
+          "content_sha256": "449962957c1b2cb037d9eec507ecc7715bb3aa092a112cea968851ec76eb89a4",
+          "already_cached": false,
+          "manifest_sha256": "2792a3a3a2f9f3e08970b43a2996f11412cadba266870bcfd668ba5e46ece93e",
+          "size_bytes": 18347266
+        },
+        "absence_verified": true,
+        "reservation_retained": false
+      },
+      "oci_prepare": {
+        "state": "running",
+        "source": {
+          "architecture": "aarch64",
+          "id": "registry-environment",
+          "kind": "oci",
+          "reference": "docker.io/library/alpine@sha256:0a7ed0d449b9318548e66674610d757de19b7645759f74b587b610b59d6b43fd",
+          "sha256": "0a7ed0d449b9318548e66674610d757de19b7645759f74b587b610b59d6b43fd"
+        },
+        "phase": "prepare",
+        "machine_name": "regdemo-mmzw6xbgsc6odv23ydg7",
+        "preparation": null,
+        "absence_verified": false,
+        "reservation_retained": true
+      },
+      "oci_images": {
+        "image": {
+          "os": "linux",
+          "reference": "docker.io/library/busybox@sha256:d82c2ab94640ded77cf76514ce6a84870761105058a4a9e51b05a8a79be97a6c",
+          "digest": "sha256:ad4f11f7c85f87c0a6d6c0fe492ad53f9cdcff6e8c88b881360c70eff701c67b",
+          "architecture": "arm64",
+          "size_bytes": 4105238,
+          "digest_kind": "configuration",
+          "layer_count": 1
+        },
+        "after_count": 2,
+        "before_count": 1
+      },
+      "oci_resume": {
+        "state": "deleted",
+        "source": {
+          "architecture": "aarch64",
+          "id": "registry-environment",
+          "kind": "oci",
+          "reference": "docker.io/library/alpine@sha256:0a7ed0d449b9318548e66674610d757de19b7645759f74b587b610b59d6b43fd",
+          "sha256": "0a7ed0d449b9318548e66674610d757de19b7645759f74b587b610b59d6b43fd"
+        },
+        "phase": "resume",
+        "machine_name": "regdemo-mmzw6xbgsc6odv23ydg7",
+        "preparation": null,
+        "absence_verified": true,
+        "reservation_retained": false
+      },
+      "isolation": "Dedicated process home with initially empty registry blob cache; short macOS Unix socket paths",
+      "pull_configuration_matches_manifest": true
+    }
+  },
+  "checks": {
+    "library_ci": "425 passed; format, warnings-as-errors compile/tests, no dependency cycles, Credo, ex_dna, Credence and Dialyzer passed",
+    "postgres_suite": "41 passed; runtime-tagged historical campaigns excluded",
+    "exdoc": "passed with warnings as errors",
+    "minimal_host": "compiled; no tests defined"
+  },
+  "linux_low_level": {
+    "warm": "{\"digest\":\"sha256:27c813bc6611853f025ec12aa455c7ab3f1ea4e9be5a8af105d3119a86571698\",\"sizeBytes\":18462198,\"alreadyCached\":true}",
+    "cold": "{\"digest\":\"sha256:27c813bc6611853f025ec12aa455c7ab3f1ea4e9be5a8af105d3119a86571698\",\"sizeBytes\":18462198,\"alreadyCached\":false}",
+    "stopped_inventory": "empty_or_unavailable without starting",
+    "stopped_oci_pull": "implicit start observed; managed API prohibits it"
+  },
+  "cleanup": {
+    "owned_worker_inventories": "all empty before shutdown",
+    "owned_worker_servers": "stopped",
+    "fixture_registries": "stopped",
+    "ssh_tunnels": "stopped",
+    "qualification_postgresql": "stopped; encrypted history retained",
+    "shared_caches": "not cleared"
+  }
+}

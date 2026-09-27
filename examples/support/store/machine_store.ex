@@ -1,6 +1,6 @@
 defmodule SmolBox.DurableHost.MachineStore do
   @moduledoc false
-  alias SmolBox.DurableHost.{Database, MachineIndex, PortIndex}
+  alias SmolBox.DurableHost.{Database, MachineIndex, PortIndex, SourceStore}
   alias SmolBox.{Error, Execution, ManagedMachine, Validation}
   alias SmolBox.Store.{MachineOps, RecordOps}
 
@@ -71,6 +71,7 @@ defmodule SmolBox.DurableHost.MachineStore do
 
   def run(context, :reserve, [key, guard, {worker, name, capacity}, now]) do
     with {:ok, record} <- guarded(context, key, guard, now),
+         :ok <- SourceStore.available(context, record, worker),
          {:ok, used} <- Database.usage(context, worker),
          {:ok, next} <-
            MachineOps.reserve(

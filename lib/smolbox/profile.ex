@@ -131,7 +131,8 @@ defmodule SmolBox.Profile do
   def validate(_profile), do: invalid()
 
   @doc "Convert only the supported machine allocation controls."
-  @spec machine(t(), String.t(), String.t()) :: {:ok, MachineSpec.t()} | {:error, Error.t()}
+  @spec machine(t(), String.t(), String.t() | SmolBox.Source.t()) ::
+          {:ok, MachineSpec.t()} | {:error, Error.t()}
   def machine(profile, name, artifact_path) do
     with :ok <- validate(profile) do
       options =

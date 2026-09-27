@@ -1,5 +1,13 @@
 # Deployment and trust boundaries
 
+Registry provisioning requires exact operator-approved immutable sources. Guest
+network allowlists do not restrict worker-host registry downloads, redirects or
+mirrors. Protect host caches and budget cache and temporary space independently
+of machine reservations. Registry credentials come from host configuration or a
+`SmolBox.RegistryCredentials` resolver; only safe references belong in durable
+specifications. See [Images and registry artifacts](images-and-registry-artifacts.md)
+for authentication boundaries and cache integrity limits.
+
 SmolBox **0.2.1** defaults to **smolvm 1.19.0** on Linux x86_64 and macOS Apple
 Silicon. Version 0.2.0 defaults to 1.17.0. Keep existing workers explicitly pinned
 to their installed version; updating SmolBox does not install smolvm. See

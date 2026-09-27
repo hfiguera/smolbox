@@ -4,7 +4,32 @@ defmodule SmolBox.Runtime.ExecutionSupport do
   alias SmolBox.Runtime.Session
 
   def check(config, spec) do
-    with :ok <- file_capability(config, spec.profile), do: check_existing(config, spec)
+    with :ok <- image_capability(config, spec),
+         :ok <- source_capability(config, spec),
+         :ok <- file_capability(config, spec.profile),
+         do: check_existing(config, spec)
+  end
+
+  defp image_capability(config, %{command: %SmolBox.ImagePull{}}) do
+    case Session.store(config, :capabilities, []) do
+      {:ok, %{managed_images: 1}} -> :ok
+      {:ok, _unsupported} -> Session.error(:unsupported_capability, :pull_image)
+      error -> error
+    end
+  end
+
+  defp image_capability(_config, _spec), do: :ok
+
+  defp source_capability(config, spec) do
+    if SmolBox.Source.remote?(spec.artifact) do
+      case Session.store(config, :capabilities, []) do
+        {:ok, %{registry_sources: 1}} -> :ok
+        {:ok, _unsupported} -> Session.error(:unsupported_capability, :source)
+        error -> error
+      end
+    else
+      :ok
+    end
   end
 
   defp file_capability(config, profile) do

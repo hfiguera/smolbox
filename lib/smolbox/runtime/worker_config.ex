@@ -2,6 +2,18 @@ defmodule SmolBox.Runtime.WorkerConfig do
   @moduledoc """
   Host-approved managed worker, prepared artifacts, and exact profile revisions.
 
+  Optional `:sources` registers up to 32 exact remote `SmolBox.Source` approvals
+  on smolvm 1.19.0. Each must match this worker's guest architecture. An OCI
+  source also requires an explicit network profile. Registry artifacts download
+  on the worker host, independently of guest networking. Approving a source
+  authorizes that exact registry/repository/manifest/content identity, not an
+  arbitrary tag or registry-wide catalog. Use one worker identity and store
+  authority for each physical artifact cache; external mutations are outside
+  the store's preparation exclusion.
+
+  Optional `:registry_credentials` is `{resolver_module, host_context}`; see
+  `SmolBox.RegistryCredentials`. Only safe references appear in stored sources.
+
   Artifact entries have `id`, `sha256`, `architecture`, and an absolute prepared
   `.smolmachine` `path` on this worker. The operator verifies artifact digests,
   approved startup behavior, disabled automatic workload restart, and the pinned runtime
@@ -56,7 +68,9 @@ defmodule SmolBox.Runtime.WorkerConfig do
                 runtime_version: "1.19.0",
                 qualification: :development,
                 draining: false,
-                checkpoints: []
+                checkpoints: [],
+                sources: [],
+                registry_credentials: nil
               ]
 
   @type t :: %__MODULE__{
@@ -65,6 +79,8 @@ defmodule SmolBox.Runtime.WorkerConfig do
           platform: :linux | :macos,
           artifacts: [map()],
           checkpoints: [Checkpoint.t()],
+          sources: [SmolBox.Source.t()],
+          registry_credentials: {module(), term()} | nil,
           profiles: [Profile.t()],
           capacity: Store.capacity(),
           allocation_floor: %{
@@ -93,7 +109,8 @@ defmodule SmolBox.Runtime.WorkerConfig do
   | `:allocation_floor` | Atom-keyed map with `:storage_gb` and `:overlay_gb` (1–64 each), and `:host_overhead_mb` (128–16,384) |
 
   Optional `:checkpoints` defaults to `[]` and accepts up to 32 unique
-  `SmolBox.Checkpoint` approvals. At least one image or checkpoint is required.
+  `SmolBox.Checkpoint` approvals. At least one local image, checkpoint, or remote
+  source is required. `:sources` defaults to `[]`; `:registry_credentials` to nil.
 
   Other optional fields are `:runtime_version` (default `"1.19.0"` for Linux x86_64 or
   macOS Apple Silicon; explicitly select `"1.17.0"`, `"1.16.1"`, `"1.16.0"`, `"1.14.1"` or `"1.14.6"`
@@ -111,7 +128,15 @@ defmodule SmolBox.Runtime.WorkerConfig do
   def new(options) do
     if Validation.keys?(
          options,
-         @enforce_keys ++ [:runtime_version, :qualification, :draining, :checkpoints]
+         @enforce_keys ++
+           [
+             :runtime_version,
+             :qualification,
+             :draining,
+             :checkpoints,
+             :sources,
+             :registry_credentials
+           ]
        ) and
          Enum.all?(@enforce_keys, &Keyword.has_key?(options, &1)) do
       worker = struct!(__MODULE__, options)
@@ -138,7 +163,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
       not SmolBox.FileAccess.extended?(spec.profile) and
       Map.get(spec, :ports, []) == [] and
       Map.get(spec, :workload) == nil and
-      spec.profile in worker.profiles and allocation_fits?(worker, spec.profile) and
+      approved_profile?(worker, spec.profile) and
       Enum.any?(worker.checkpoints, fn checkpoint ->
         Checkpoint.artifact(checkpoint) == spec.artifact and checkpoint.profile == spec.profile
       end)
@@ -146,20 +171,29 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   def supports?(worker, spec) do
     ExecutionSupport.worker?(worker, spec) and
+      pull_supported?(worker, spec) and
       ports_supported?(worker, spec) and
       file_support?(worker, spec) and
       workload_supported?(worker, spec) and
       network_supported?(worker, spec) and
-      spec.profile in worker.profiles and allocation_fits?(worker, spec.profile) and
+      approved_profile?(worker, spec.profile) and
       worker.architecture == spec.artifact["architecture"] and
-      Enum.any?(
-        worker.artifacts,
-        &(Map.take(&1, ["id", "sha256", "architecture"]) == spec.artifact)
-      )
+      approved_artifact?(worker, spec)
   end
 
+  defp pull_supported?(worker, %{command: %SmolBox.ImagePull{source: source}} = spec),
+    do:
+      spec.artifact["kind"] == "oci" and worker.runtime_version == "1.19.0" and
+        source in worker.sources and
+        source.architecture == worker.architecture
+
+  defp pull_supported?(_worker, _spec), do: true
+
+  defp approved_profile?(worker, profile),
+    do: profile in worker.profiles and allocation_fits?(worker, profile)
+
   @doc "Resolve the worker-local artifact path for a specification already accepted by `supports?/2`."
-  @spec artifact_path(t(), ExecutionSpec.t() | SmolBox.ManagedMachineSpec.t()) :: String.t()
+  @spec artifact_path(t(), ExecutionSpec.t() | SmolBox.ManagedMachineSpec.t()) :: String.t() | nil
   def artifact_path(worker, %{artifact: %{"kind" => "checkpoint"}} = spec),
     do: approved_checkpoint(worker, spec).path
 
@@ -175,9 +209,27 @@ defmodule SmolBox.Runtime.WorkerConfig do
     do: Checkpoint.machine(approved_checkpoint(worker, spec), name)
 
   def machine_spec(worker, spec, name) do
-    with {:ok, machine} <- Profile.machine(spec.profile, name, artifact_path(worker, spec)) do
+    source =
+      if SmolBox.Source.remote?(spec.artifact),
+        do: Enum.find(worker.sources, &(SmolBox.Source.artifact(&1) == spec.artifact)),
+        else: artifact_path(worker, spec)
+
+    with {:ok, machine} <- Profile.machine(spec.profile, name, source) do
       machine = %{machine | ports: Map.get(spec, :ports, []), workload: Map.get(spec, :workload)}
       with :ok <- MachineSpec.validate(machine), do: {:ok, machine}
+    end
+  end
+
+  defp approved_artifact?(worker, spec) do
+    if SmolBox.Source.remote?(spec.artifact) do
+      worker.runtime_version == "1.19.0" and
+        (spec.artifact["kind"] != "oci" or spec.profile.network != :offline) and
+        Enum.any?(worker.sources, &(SmolBox.Source.artifact(&1) == spec.artifact))
+    else
+      Enum.any?(
+        worker.artifacts,
+        &(Map.take(&1, ["id", "sha256", "architecture"]) == spec.artifact)
+      )
     end
   end
 
@@ -219,7 +271,8 @@ defmodule SmolBox.Runtime.WorkerConfig do
     valid_client?(worker.client) and supported_runtime?(worker) and
       worker.qualification == :development and valid_platform?(worker) and
       is_boolean(worker.draining) and capacity?(worker.capacity) and catalogs?(worker) and
-      allocation_floor?(worker.allocation_floor)
+      allocation_floor?(worker.allocation_floor) and
+      SmolBox.RegistryCredentials.valid?(worker.registry_credentials)
   end
 
   defp supported_runtime?(%{runtime_version: "1.14.1"}), do: true
@@ -251,9 +304,19 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   defp catalogs?(worker) do
     profiles?(worker.profiles) and Validation.list?(worker.artifacts, 32) and
-      (worker.artifacts != [] or worker.checkpoints != []) and checkpoints?(worker) and
+      (worker.artifacts != [] or worker.checkpoints != [] or worker.sources != []) and
+      checkpoints?(worker) and
       Enum.all?(worker.artifacts, &artifact?(&1, worker.architecture)) and
+      sources?(worker) and
       unique?(worker.artifacts, & &1["id"])
+  end
+
+  defp sources?(worker) do
+    Validation.list?(worker.sources, 32) and
+      Enum.all?(worker.sources, fn source ->
+        SmolBox.Source.validate(source) == :ok and source.kind in [:registry, :oci] and
+          source.architecture == worker.architecture and worker.runtime_version == "1.19.0"
+      end) and unique?(worker.sources, & &1.id)
   end
 
   defp profiles?(profiles),
