@@ -124,7 +124,7 @@ defmodule SmolBox.RuntimeFixture do
     runtime = ExUnit.Callbacks.start_supervised!({Runtime, config})
 
     if Keyword.get(options, :wait_ready, true),
-      do: wait_ready(runtime, System.monotonic_time(:millisecond) + 10_000)
+      do: wait_ready(runtime, System.monotonic_time(:millisecond) + 30_000)
 
     %{
       runtime: runtime,
@@ -139,9 +139,10 @@ defmodule SmolBox.RuntimeFixture do
   defp source_spec(spec, nil), do: spec
   defp source_spec(spec, source), do: %{spec | artifact: SmolBox.Source.artifact(source)}
 
-  # Failed startup probes are cached for five seconds. Establish readiness before
-  # tests begin their command/machine observation budgets. Tests of unavailable
-  # or draining workers opt out explicitly with wait_ready: false.
+  # Failed startup probes are cached for five seconds. Allow several retries:
+  # two failures already put the third probe beyond a ten-second deadline.
+  # Return as soon as ready, before command/machine observation budgets begin.
+  # Unavailable/draining-worker tests opt out explicitly with wait_ready: false.
   def wait_ready(runtime, deadline) do
     case SmolBox.workers(runtime) do
       {:ok, [%{status: :ready}]} ->
