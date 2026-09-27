@@ -77,5 +77,22 @@ defmodule SmolBox.FaultStore do
     end
   end
 
+  defp event(:machine, [:branch_advance, [_key, _guard, _id, _expected, change, _now]]) do
+    case change do
+      :dispatching -> :branch_intent
+      {:observed, _} -> :branch_receipt
+      {:complete, _} -> :branch_complete
+      _ -> :branch_write
+    end
+  end
+
+  defp event(:machine, [:branch_release_advance, [_key, _guard, _expected, change, _now]]) do
+    case change do
+      :dispatching -> :release_intent
+      {:complete, _} -> :release_result
+      _ -> :release_write
+    end
+  end
+
   defp event(operation, _arguments), do: operation
 end

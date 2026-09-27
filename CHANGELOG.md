@@ -2,12 +2,21 @@
 
 ## Unreleased
 
+- Add managed leaf branches from idle, offline bare sources on smolvm 1.19.0,
+  including explicit held release, durable lineage and no replay after uncertainty.
+- Serialize source/child admission and retain backing allowances after child
+  deletion until source deletion and explicit host-confirmed cleanup.
+- Add selective codec v13 and `managed_branches: 1`, with atomic memory and
+  PostgreSQL storage. Upgrade shared readers and projection writers before use;
+  no SQL migration is required.
+- Add a durable branch example and Linux RAM/disk isolation and cleanup evidence.
+
 - Add managed idle, offline checkpoint capture and explicit independent restore
   on smolvm 1.19.0 bare guests. Opt-in startup, bounded streaming, durable identity,
   no replay after uncertainty, and source ownership/exclusion are explicit.
 - Preserve checkpoint artifact disk accounting after source deletion until explicit
-  release. Capture completion requires host quiescence confirmation; no live branch,
-  in-place rollback, automatic artifact deletion or container capture is added.
+  release. Capture completion requires host quiescence confirmation; capture does
+  not imply in-place rollback, automatic artifact deletion or container support.
 - Add selective codec v12 and `managed_checkpoints: 1`. Upgrade all shared readers
   and resource projection writers before opting in; no SQL migration is required.
 - Add a durable capture/restore example and Linux disk/RAM preservation evidence.

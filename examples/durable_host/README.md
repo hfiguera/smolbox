@@ -749,3 +749,53 @@ Release verifies the file digest before deleting it and retains durable identity
 history. The seed, directories and keys remain host-owned. See the
 [managed checkpoint guide](../../docs/managed-checkpoints.md) for unknown outcomes,
 quiescence assertions, storage requirements and codec v12 upgrade/rollback rules.
+
+## Managed branches
+
+`ManagedBranchDemo` uses the same approved idle bare seed, environment, private
+paths and stable keys as the checkpoint demo above. Select a fresh
+`SMOLBOX_CHECKPOINT_ID` and retain the same PostgreSQL partition across phases.
+It approves 8 GiB of extra backing capacity per child, separately from child
+allocation. These are example budgets, not filesystem quotas.
+
+```sh
+mix run -e 'SmolBox.DurableHost.ManagedBranchDemo.run("prepare")'
+mix run -e 'SmolBox.DurableHost.ManagedBranchDemo.run("verify")'
+```
+
+The first process prepares disk and RAM markers and creates two children. The
+second reconnects through PostgreSQL, verifies both copies, changes one, verifies
+source and sibling isolation, and tests child stop/start disk preservation. It
+then deletes both children and verifies that backing capacity remains reserved.
+
+After establishing that all previous requests are quiescent:
+
+```sh
+SMOLBOX_BRANCH_QUIESCED=true \
+  mix run -e 'SmolBox.DurableHost.ManagedBranchDemo.run("retire")'
+```
+
+This retires deleted child dependencies and deletes the source. Backing allowance
+still remains. Inspect the owned worker's source generations, child disks and
+staging paths and confirm their removal before asserting cleanup:
+
+```sh
+SMOLBOX_BRANCH_BACKING_REMOVED=true \
+  mix run -e 'SmolBox.DurableHost.ManagedBranchDemo.run("release-storage")'
+```
+
+The final phase verifies source/child absence and zero reservations while retaining
+history. Never set either assertion just to get past a blocked operation.
+
+For a separate held-release demonstration, use a fresh `SMOLBOX_CHECKPOINT_ID`:
+
+```sh
+mix run -e 'SmolBox.DurableHost.ManagedBranchDemo.run("held")'
+```
+
+This prepares the upstream `smolvm-branch-ready` guest boundary, creates one held
+child, verifies lifecycle exclusion, explicitly releases it, retries the original
+release version to check deduplication, reads disk/RAM state, and deletes the child.
+Run the same `retire` and `release-storage` phases with that identity afterward,
+only after the same quiescence and host cleanup checks. Do not replay whole phases
+after interruption; inspect durable records and follow [branch recovery](../../docs/managed-branches.md).

@@ -385,3 +385,19 @@ quiescence; resolve only after fencing outstanding requests and confirming stagi
 cleanup. Checkpoint storage remains accounted for after source deletion until
 explicit release. Opt-in machines/history use codec v12, requiring coordinated
 reader and resource projection upgrades but no SQL migration.
+
+## Managed branch dependencies
+
+[Managed branches](managed-branches.md) create same-worker leaf children from idle,
+offline bare sources on smolvm 1.19.0. They require `managed_branches: 1`, codec v13,
+and atomic source/child admission. Upgrade all shared readers and resource projection
+writers first; the PostgreSQL example needs no SQL migration. Retained v13 history
+prevents rollback to an older reader even after machines are deleted.
+
+A lost creation/release response is never replayed. Keeping an uncertain child needs
+persisted creation evidence; a cleared held flag cannot prove release. Explicitly
+retire deleted child dependencies before source lifecycle changes. Extra backing
+capacity remains until source deletion, verified absence and host-confirmed file
+cleanup through `Branches.release_storage/3`. Store fencing does not fence worker
+requests already sent. Follow the guide's recovery procedure before asserting
+quiescence or cleanup.

@@ -38,6 +38,9 @@ defmodule SmolBox.ManagedMachine do
                 :operation_deadline_ms,
                 :resolved_at_ms,
                 preparation: nil,
+                branch: nil,
+                branch_children: %{},
+                active_branch: nil,
                 captures: %{},
                 active_capture: nil,
                 exports: %{},
@@ -108,7 +111,8 @@ defmodule SmolBox.ManagedMachine do
          true <-
            fields?(record) and ownership?(record) and lifecycle?(record) and preparation?(record) and
              SmolBox.Export.history_valid?(record) and
-             SmolBox.CheckpointCapture.history_valid?(record) do
+             SmolBox.CheckpointCapture.history_valid?(record) and
+             SmolBox.Branch.valid_machine?(record) do
       :ok
     else
       _invalid -> invalid()
@@ -224,7 +228,18 @@ defmodule SmolBox.ManagedMachine do
 
   defp lifecycle?(r) do
     Enum.all?([
-      r.operation in [nil, :create, :start, :stop, :delete, :export, :capture],
+      r.operation in [
+        nil,
+        :create,
+        :start,
+        :stop,
+        :delete,
+        :export,
+        :capture,
+        :branch,
+        :branch_child,
+        :branch_release
+      ],
       r.phase in [nil, :pending, :preparing, :prepared, :dispatching, :uncertain],
       r.operation == nil == (r.phase == nil),
       r.state not in [:created, :running, :stopped] or r.created_machine != nil,

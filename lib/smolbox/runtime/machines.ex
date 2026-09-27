@@ -1,6 +1,7 @@
 defmodule SmolBox.Runtime.Machines do
   @moduledoc false
   alias SmolBox.{Client, Error, Identity, Machine, ManagedMachine}
+  alias SmolBox.Runtime.Branches
   alias SmolBox.Runtime.Checkpoints
   alias SmolBox.Runtime.{ExecutionSupport, Exports}
   alias SmolBox.Runtime.{Session, WorkerConfig, WorkerHealth}
@@ -11,7 +12,8 @@ defmodule SmolBox.Runtime.Machines do
     Session.safe(fn ->
       with {:ok, record} <- claim(config, key),
            :ok <- port_support(config, record.spec.ports),
-           :ok <- ExecutionSupport.check(config, record.spec) do
+           :ok <- ExecutionSupport.check(config, record.spec),
+           :ok <- Branches.supported(config, record) do
         route(config, record, eligible)
       end
     end)
@@ -29,6 +31,15 @@ defmodule SmolBox.Runtime.Machines do
 
   defdelegate claim(config, key), to: SmolBox.Runtime.MachineSession
   defdelegate write(config, record, changes), to: SmolBox.Runtime.MachineSession
+
+  defp route(config, %{operation: :branch} = record, _eligible),
+    do: Branches.run(config, record)
+
+  defp route(config, %{operation: :branch_child} = record, _eligible),
+    do: write(config, record, next_due_at_ms: config.clock.now() + 60_000)
+
+  defp route(config, %{operation: :branch_release} = record, _eligible),
+    do: Branches.release(config, record)
 
   defp route(config, %{operation: :capture} = record, _eligible),
     do: Checkpoints.run(config, record)

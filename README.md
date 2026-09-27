@@ -163,6 +163,13 @@ See [Managed persistent machines](docs/persistent-machines.md) for the API,
 recovery procedures, the required coordinated store upgrade, and a two-process
 PostgreSQL walkthrough. The existing disposable API remains supported.
 
+## Managed branches
+
+[Branch an idle, offline bare guest](docs/managed-branches.md) into independent
+running children on the same smolvm 1.19.0 worker. Memory and disks are copied,
+held release is explicit, and durable dependencies and backing capacity survive
+controller restarts.
+
 ## Checkpoint execution
 
 Managed idle, offline bare guests can also [capture checkpoints and restore independent machines](docs/managed-checkpoints.md) on smolvm 1.19.0, with durable history and explicit retention.

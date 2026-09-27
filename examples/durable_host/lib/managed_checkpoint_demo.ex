@@ -1,9 +1,11 @@
 defmodule SmolBox.DurableHost.ManagedCheckpointDemo do
   @moduledoc "Durable capture, operator confirmation, independent restores, and explicit artifact release."
-  alias SmolBox.{CheckpointCaptureSpec, Checkpoints, Client, Command, ExecutionSpec, Machines}
+  alias SmolBox.{CheckpointCaptureSpec, Checkpoints, Client, Machines}
   alias SmolBox.DurableHost.{ManagedCheckpointConfig, Store}
   alias SmolBox.Example.Setup
-  import SmolBox.DurableHost.PersistentSteps, only: [lifecycle: 3, wait_machine: 3]
+
+  import SmolBox.DurableHost.PersistentSteps,
+    only: [lifecycle: 3, wait_machine: 3, shell_command: 5]
 
   def run(phase) when phase in ["capture", "confirm", "restore", "release"] do
     c = ManagedCheckpointConfig.start(phase)
@@ -20,7 +22,7 @@ defmodule SmolBox.DurableHost.ManagedCheckpointDemo do
     wait_machine(c.runtime, handle, &(&1.state == :created))
     start(c, handle)
 
-    command(
+    shell_command(
       c,
       handle,
       "prepare",
@@ -28,7 +30,14 @@ defmodule SmolBox.DurableHost.ManagedCheckpointDemo do
       ""
     )
 
-    command(c, handle, "verify", "cat /workspace/disk /dev/shm/ram", "disk-statememory-state")
+    shell_command(
+      c,
+      handle,
+      "verify",
+      "cat /workspace/disk /dev/shm/ram",
+      "disk-statememory-state"
+    )
+
     {:ok, spec} = CheckpointCaptureSpec.new(id: "prepared", policy: c.policy, idle: true)
     {:ok, handle} = Checkpoints.capture(c.runtime, handle, spec)
     {:ok, %{state: :captured, result: r}} = Checkpoints.await(c.runtime, handle, 900_000)
@@ -69,11 +78,19 @@ defmodule SmolBox.DurableHost.ManagedCheckpointDemo do
 
         wait_machine(c.runtime, handle, &(&1.state == :created))
         start(c, handle)
-        command(c, handle, "verify", "cat /workspace/disk /dev/shm/ram", "disk-statememory-state")
+
+        shell_command(
+          c,
+          handle,
+          "verify",
+          "cat /workspace/disk /dev/shm/ram",
+          "disk-statememory-state"
+        )
+
         handle
       end)
 
-    command(
+    shell_command(
       c,
       hd(handles),
       "modify",
@@ -81,7 +98,7 @@ defmodule SmolBox.DurableHost.ManagedCheckpointDemo do
       ""
     )
 
-    command(
+    shell_command(
       c,
       List.last(handles),
       "unchanged",
@@ -89,7 +106,7 @@ defmodule SmolBox.DurableHost.ManagedCheckpointDemo do
       "disk-statememory-state"
     )
 
-    command(
+    shell_command(
       c,
       c.handle,
       "unchanged",
@@ -136,26 +153,5 @@ defmodule SmolBox.DurableHost.ManagedCheckpointDemo do
   defp start(c, handle) do
     {:ok, _} = lifecycle(c.runtime, handle, :start)
     wait_machine(c.runtime, handle, &(&1.state == :running and is_nil(&1.operation)))
-  end
-
-  defp command(c, {scope, id} = handle, suffix, program, expected) do
-    {:ok, machine} = Machines.inspect(c.runtime, handle)
-    {:ok, command} = Command.new(["/bin/sh", "-c", program])
-
-    {:ok, spec} =
-      ExecutionSpec.new(
-        scope: scope,
-        id: id <> ":" <> suffix,
-        artifact: machine.spec.artifact,
-        profile: machine.spec.profile,
-        command: command
-      )
-
-    {:ok, execution} = Machines.submit(c.runtime, handle, spec)
-
-    {:ok, %{state: :completed, result: %{exit_code: 0, stdout: ^expected}}} =
-      SmolBox.await(c.runtime, execution, 120_000)
-
-    wait_machine(c.runtime, handle, &is_nil(&1.active_execution))
   end
 end

@@ -124,7 +124,34 @@ defmodule SmolBox.ManagedPeer do
      %{state | commands: [{machine["name"], :terminal} | state.commands]}}
   end
 
-  defp machine_route("GET", [], _body, machine, state), do: {{:json, 200, machine}, state}
+  defp machine_route("GET", [], _body, machine, state) do
+    if state.options[:inspect_unavailable],
+      do: {{:json, 503, %{}}, state},
+      else: {{:json, 200, machine}, state}
+  end
+
+  defp machine_route("POST", ["branches"], body, machine, state) do
+    %{"name" => name, "branchable" => false, "hold" => hold, "freezeSource" => false} =
+      Jason.decode!(body)
+
+    child =
+      machine
+      |> Map.put("name", name)
+      |> Map.put("branchable", false)
+      |> Map.put("branchpointHeld", hold)
+
+    state = %{state | machines: Map.put(state.machines, name, child)}
+    response = if state.options[:branch_lost], do: {:json, 503, %{}}, else: {:json, 200, child}
+    {response, state}
+  end
+
+  defp machine_route("POST", ["branch-release"], body, machine, state) do
+    %{"env" => []} = Jason.decode!(body)
+    child = Map.put(machine, "branchpointHeld", false)
+    state = %{state | machines: Map.put(state.machines, child["name"], child)}
+    response = if state.options[:release_lost], do: {:json, 503, %{}}, else: {:json, 200, child}
+    {response, state}
+  end
 
   defp machine_route("POST", ["checkpoint"], _body, _machine, state) do
     {{:capture,
@@ -289,6 +316,8 @@ defmodule SmolBox.ManagedPeer do
   defp event("GET", ["api", "v1", "machines", _name, "exec", "interactive"]), do: :terminal_open
   defp event("GET", ["api", "v1", "machines", _name]), do: :inspect
   defp event("POST", ["api", "v1", "machines"]), do: :create
+  defp event("POST", ["api", "v1", "machines", _name, "branches"]), do: :branch
+  defp event("POST", ["api", "v1", "machines", _name, "branch-release"]), do: :branch_release
   defp event("POST", ["api", "v1", "machines", _name, "checkpoint"]), do: :capture
   defp event("POST", ["api", "v1", "machines", _name, "export"]), do: :export
   defp event("POST", ["artifacts", "warm"]), do: :prepare_artifact

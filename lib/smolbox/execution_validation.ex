@@ -123,6 +123,7 @@ defmodule SmolBox.ExecutionValidation do
       error.operation in [
         :export,
         :checkpoint,
+        :branch,
         :source,
         :prepare_artifact,
         :registry_credentials,

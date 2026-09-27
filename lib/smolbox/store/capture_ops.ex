@@ -32,7 +32,8 @@ defmodule SmolBox.Store.CaptureOps do
       2 * (profile.storage_gb + profile.overlay_gb) + div(profile.memory_mb + 1023, 1024) +
         div(spec.policy.max_bytes + 1_073_741_823, 1_073_741_824)
 
-    with true <- m.state == :running and ManagedMachine.idle?(m) and m.spec.checkpointable,
+    with true <- m.branch == nil and SmolBox.Branch.children_retired?(m),
+         true <- m.state == :running and ManagedMachine.idle?(m) and m.spec.checkpointable,
          true <- map_size(m.captures) < 256,
          true <- needed.disk_gb >= disk_floor and needed.memory_mb >= profile.memory_mb,
          true <- is_map(capacity) and Map.keys(capacity) == Map.keys(needed),

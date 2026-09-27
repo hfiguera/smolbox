@@ -159,7 +159,35 @@ defmodule SmolBox.DurableHost.MachineStore do
     end
   end
 
+  if Code.ensure_loaded?(SmolBox.Store.BranchOps) do
+    alias SmolBox.DurableHost.BranchStore
+
+    def run(context, operation, arguments)
+        when operation in [
+               :branch_accept,
+               :branch_advance,
+               :branch_resolve,
+               :branch_retire,
+               :branch_release_storage,
+               :branch_release,
+               :branch_release_advance
+             ] do
+      with {:ok, parent, child} <-
+             BranchStore.run(context, operation, arguments),
+           :ok <- persist_parent(context, parent),
+           do: persist(context, child)
+    end
+  end
+
   def run(_context, _operation, _arguments), do: error(:validation)
+
+  if Code.ensure_loaded?(SmolBox.Store.BranchOps) do
+    defp persist_parent(_, nil), do: :ok
+
+    defp persist_parent(context, parent) do
+      with {:ok, _} <- persist(context, parent), do: :ok
+    end
+  end
 
   def active?(context, %{managed_machine: key} = record) when not is_nil(key) do
     with {:ok, machine} <- Database.read(context, key, :machine) do

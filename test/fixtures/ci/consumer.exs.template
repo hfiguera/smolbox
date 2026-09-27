@@ -119,6 +119,12 @@ false = SmolBox.GuestPaths.allowed?(paths, :upload, "/app/input")
   id: "capture", policy: capture_policy, idle: true)
 {:error, _} = SmolBox.CheckpointCaptureSpec.new(id: "capture", policy: capture_policy, idle: false)
 
+{:ok, branch_policy} = SmolBox.BranchPolicy.new(id: "branches",
+  resources: %{slots: 1, cpus: 1, memory_mb: 1024, disk_gb: 8})
+{:ok, %SmolBox.BranchSpec{hold: true}} = SmolBox.BranchSpec.new(
+  id: "branch", policy: branch_policy, idle: true, hold: true)
+{:error, _} = SmolBox.BranchSpec.new(id: "branch", policy: branch_policy, idle: false)
+
 children = [
   {SmolBox.Store.Memory, name: Consumer.Store},
   {SmolBox, name: Consumer.Runtime, namespace: "consumer", mode: :ephemeral,
@@ -128,7 +134,7 @@ children = [
 ]
 {:ok, supervisor} = Supervisor.start_link(children, strategy: :one_for_one)
 {:ok, []} = SmolBox.workers(Consumer.Runtime)
-{:ok, %{managed_exports: 1, managed_checkpoints: 1}} = SmolBox.Store.Memory.capabilities(Consumer.Store)
+{:ok, %{managed_exports: 1, managed_checkpoints: 1, managed_branches: 1}} = SmolBox.Store.Memory.capabilities(Consumer.Store)
 {:error, %{category: :not_found}} = SmolBox.Checkpoints.fetch(Consumer.Runtime, {"scope", "missing", "capture"})
 {:error, %{category: :not_found}} = SmolBox.Exports.fetch(Consumer.Runtime, {"scope", "missing", "export"})
 {:error, %{category: :not_found}} = SmolBox.fetch(Consumer.Runtime, "scope", "missing")
@@ -139,6 +145,6 @@ versions = Map.new([:req, :mint, :mint_web_socket, :jason, :telemetry, :nimble_o
   {app, app |> Application.spec(:vsn) |> to_string()}
 end)
 File.write!("smoke.json", Jason.encode!(%{client: true, supervisor: true,
-  managed_checkpoints: true, managed_exports: true, guest_files: true, workload: true, checkpoint: true, interactive: true, network_policy: true, offline_default: true, runtime_1_16_0_explicit: "1.16.0",
+  managed_branches: true, managed_checkpoints: true, managed_exports: true, guest_files: true, workload: true, checkpoint: true, interactive: true, network_policy: true, offline_default: true, runtime_1_16_0_explicit: "1.16.0",
   unqualified_runtime_rejected: "1.16.2", runtime_default: "1.19.0", legacy_runtime_explicit: "1.14.1",
   legacy_1_14_6_explicit: "1.14.6", versions: versions}))

@@ -3,7 +3,8 @@
 Prepare useful state once, capture it, and restore independent managed machines.
 Unlike an export, a checkpoint includes memory and resumes captured processes.
 The first managed capture contract is deliberately **idle, offline, bare guests on
-smolvm 1.19.0**. It does not add live branches, arbitrary application resume,
+smolvm 1.19.0**. See [managed branches](managed-branches.md) for live copies.
+Capture does not add arbitrary application resume,
 network restoration, in-place rollback, migration or automatic backups.
 
 ## What is supported

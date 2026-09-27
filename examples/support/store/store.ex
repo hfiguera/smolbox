@@ -9,6 +9,7 @@ defmodule SmolBox.DurableHost.Store do
   """
   @behaviour SmolBox.Store
 
+  alias SmolBox.DurableHost.BranchStore
   alias SmolBox.DurableHost.CaptureStore
   alias SmolBox.DurableHost.{Database, ExportStore, MachineIndex, MachineStore, SourceStore}
   alias SmolBox.{Error, Execution, MachineSpec, Validation}
@@ -56,7 +57,10 @@ defmodule SmolBox.DurableHost.Store do
                   SourceStore.capabilities(),
                   Map.merge(
                     ExportStore.capabilities(),
-                    CaptureStore.capabilities()
+                    Map.merge(
+                      CaptureStore.capabilities(),
+                      BranchStore.capabilities()
+                    )
                   )
                 )
               )}

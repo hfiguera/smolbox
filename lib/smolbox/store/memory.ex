@@ -12,6 +12,7 @@ defmodule SmolBox.Store.Memory do
   @behaviour SmolBox.Store
 
   alias SmolBox.{Error, Execution, MachineSpec, ManagedMachine, Store, Validation}
+  alias SmolBox.Store.BranchOps
   alias SmolBox.Store.CaptureOps
   alias SmolBox.Store.{Codec, ExportOps, MachineOps, PortOwnership, RecordOps, SourceOwnership}
 
@@ -115,6 +116,7 @@ defmodule SmolBox.Store.Memory do
           managed_images: 1,
           managed_exports: 1,
           managed_checkpoints: 1,
+          managed_branches: 1,
           guest_files: 1,
           interactive_terminal: 1,
           extended_execution: 1
@@ -505,6 +507,71 @@ defmodule SmolBox.Store.Memory do
          do: machine_save(state, next)
   end
 
+  defp machine_operation(state, :branch_accept, [key, spec, fingerprint, name, capacity, now]) do
+    case Map.get(state.machines, {elem(key, 0), spec.id}) do
+      %{fingerprint: ^fingerprint, branch: %{source: ^key}} = child ->
+        {:ok, {:ok, child}, state}
+
+      nil ->
+        with :ok <- branch_room(state),
+             {:ok, parent} <- machine_lookup(state, key),
+             {:ok, parent, child} <-
+               BranchOps.accept(
+                 parent,
+                 spec,
+                 fingerprint,
+                 name,
+                 capacity,
+                 used(state, parent.worker_id),
+                 now
+               ),
+             do: branch_save(state, parent, child)
+
+      _ ->
+        error(:identity_conflict)
+    end
+  end
+
+  defp machine_operation(state, :branch_advance, [key, guard, id, expected, change, now]) do
+    with {:ok, p} <- machine_guard(state, key, guard, now),
+         {:ok, c} <- machine_lookup(state, {elem(key, 0), id}),
+         {:ok, p, c} <- BranchOps.advance(p, c, expected, change, now),
+         do: branch_save(state, p, c)
+  end
+
+  defp machine_operation(state, :branch_resolve, [key, guard, id, source, observed, now]) do
+    with {:ok, p} <- machine_guard(state, key, guard, now),
+         {:ok, c} <- machine_lookup(state, {elem(key, 0), id}),
+         {:ok, p, c} <- BranchOps.resolve(p, c, source, observed, now),
+         do: branch_save(state, p, c)
+  end
+
+  defp machine_operation(state, :branch_retire, [key, guard, id, now]) do
+    with {:ok, p} <- machine_guard(state, key, guard, now),
+         {:ok, c} <- machine_lookup(state, {elem(key, 0), id}),
+         {:ok, p, c} <- BranchOps.retire(p, c, now),
+         do: branch_save(state, p, c)
+  end
+
+  defp machine_operation(state, :branch_release_storage, [key, guard, id, now]) do
+    with {:ok, p} <- machine_guard(state, key, guard, now),
+         {:ok, c} <- machine_lookup(state, {elem(key, 0), id}),
+         {:ok, c} <- BranchOps.release_storage(p, c, now),
+         do: machine_save(state, c)
+  end
+
+  defp machine_operation(state, :branch_release, [key, version, now]) do
+    with {:ok, c} <- machine_lookup(state, key),
+         {:ok, c} <- BranchOps.release(c, version, now),
+         do: machine_save(state, c)
+  end
+
+  defp machine_operation(state, :branch_release_advance, [key, guard, expected, change, now]) do
+    with {:ok, c} <- machine_guard(state, key, guard, now),
+         {:ok, c} <- BranchOps.release_advance(c, expected, change, now),
+         do: machine_save(state, c)
+  end
+
   defp machine_operation(_state, _operation, _arguments), do: error(:validation)
 
   defp insert_machine(state, record, max_pending) do
@@ -540,6 +607,16 @@ defmodule SmolBox.Store.Memory do
   defp active_record(state, machine), do: lookup(state, machine.active_execution)
   defp put_optional_record(state, nil), do: {:ok, state}
   defp put_optional_record(state, record), do: put_record(state, record)
+
+  defp branch_room(state) do
+    if map_size(state.records) + map_size(state.machines) < state.max_records,
+      do: :ok,
+      else: error(:admission_exhausted)
+  end
+
+  defp branch_save(state, parent, child) do
+    with {:ok, _, state} <- machine_save(state, parent), do: machine_save(state, child)
+  end
 
   defp machine_guard(state, key, guard, now) do
     with {:ok, record} <- machine_lookup(state, key),

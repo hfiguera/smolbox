@@ -34,6 +34,27 @@ defmodule SmolBox.DurableHost.PersistentSteps do
     wait_machine(runtime, handle, &is_nil(&1.active_execution))
   end
 
+  def shell_command(c, {scope, id} = handle, suffix, program, expected) do
+    {:ok, machine} = Machines.inspect(c.runtime, handle)
+    {:ok, command} = Command.new(["/bin/sh", "-c", program])
+
+    {:ok, spec} =
+      ExecutionSpec.new(
+        scope: scope,
+        id: id <> ":" <> suffix,
+        artifact: machine.spec.artifact,
+        profile: machine.spec.profile,
+        command: command
+      )
+
+    {:ok, execution} = Machines.submit(c.runtime, handle, spec)
+
+    {:ok, %{state: :completed, result: %{exit_code: 0, stdout: ^expected}}} =
+      SmolBox.await(c.runtime, execution, 120_000)
+
+    wait_machine(c.runtime, handle, &is_nil(&1.active_execution))
+  end
+
   def lifecycle(runtime, handle, operation),
     do: lifecycle(runtime, handle, operation, System.monotonic_time(:millisecond) + 5_000)
 
