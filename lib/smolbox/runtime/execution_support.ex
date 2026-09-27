@@ -4,11 +4,22 @@ defmodule SmolBox.Runtime.ExecutionSupport do
   alias SmolBox.Runtime.Session
 
   def check(config, spec) do
-    with :ok <- image_capability(config, spec),
+    with :ok <- capture_capability(config, spec),
+         :ok <- image_capability(config, spec),
          :ok <- source_capability(config, spec),
          :ok <- file_capability(config, spec.profile),
          do: check_existing(config, spec)
   end
+
+  defp capture_capability(config, %{checkpointable: true}) do
+    case Session.store(config, :capabilities, []) do
+      {:ok, %{managed_checkpoints: 1}} -> :ok
+      {:ok, _} -> Session.error(:unsupported_capability, :checkpoint)
+      error -> error
+    end
+  end
+
+  defp capture_capability(_config, _spec), do: :ok
 
   defp image_capability(config, %{command: %SmolBox.ImagePull{}}) do
     case Session.store(config, :capabilities, []) do

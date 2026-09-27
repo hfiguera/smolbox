@@ -18,12 +18,18 @@ defmodule SmolBox.Transport do
           accept: String.t(),
           max_bytes: pos_integer(),
           mode:
-            :buffer
+            {:file, pid()}
+            | :buffer
             | :empty
             | {:logs, pos_integer(), (SmolBox.Wire.SSE.event() -> any()) | nil}
             | {:sse, pos_integer(), (SmolBox.Wire.SSE.event() -> any()) | nil}
         }
 
   @callback request(Worker.t(), request()) ::
-              {:ok, binary() | Result.t() | LogResult.t()} | {:error, Error.t()}
+              {:ok,
+               binary()
+               | Result.t()
+               | LogResult.t()
+               | %{size_bytes: pos_integer(), sha256: String.t()}}
+              | {:error, Error.t()}
 end

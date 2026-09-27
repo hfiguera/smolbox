@@ -1,6 +1,7 @@
 defmodule SmolBox.Runtime.Machines do
   @moduledoc false
   alias SmolBox.{Client, Error, Identity, Machine, ManagedMachine}
+  alias SmolBox.Runtime.Checkpoints
   alias SmolBox.Runtime.{ExecutionSupport, Exports}
   alias SmolBox.Runtime.{Session, WorkerConfig, WorkerHealth}
 
@@ -28,6 +29,9 @@ defmodule SmolBox.Runtime.Machines do
 
   defdelegate claim(config, key), to: SmolBox.Runtime.MachineSession
   defdelegate write(config, record, changes), to: SmolBox.Runtime.MachineSession
+
+  defp route(config, %{operation: :capture} = record, _eligible),
+    do: Checkpoints.run(config, record)
 
   defp route(config, %{operation: :export} = record, _eligible),
     do: Exports.run(config, record)
@@ -209,6 +213,9 @@ defmodule SmolBox.Runtime.Machines do
     with {:ok, spec} <- WorkerConfig.machine_spec(worker, record.spec, record.machine_name),
          do: create(worker, spec, record.preparation)
   end
+
+  defp mutate(worker, %{operation: :start, spec: %{checkpointable: true}} = record),
+    do: Client.start_checkpointable(worker.client, record.machine_name)
 
   defp mutate(worker, record),
     do: apply(Client, record.operation, [worker.client, record.machine_name])

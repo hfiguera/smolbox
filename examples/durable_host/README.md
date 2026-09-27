@@ -675,3 +675,77 @@ command, and export records first, and resolve uncertain work before proceeding.
 
 See [the export guide](../../docs/machine-exports.md) for preserved paths, cleanup
 limitations, cancellation, immutable publication, and codec v11 upgrade/rollback.
+
+## Managed checkpoint capture and restore
+
+This checkout adds `ManagedCheckpointDemo`. It uses four separate application
+processes with the same encrypted PostgreSQL store and keys. Run it on the worker
+host: the example hashes the approved seed and capture paths locally, then explicitly
+approves that same path for restore. Remote controllers must transfer the bytes and
+verify their digest on the target worker separately.
+
+Prepare and approve an **idle, offline bare** 1.19.0 checkpoint with 1 CPU,
+256 MiB RAM and 1 GiB storage/overlay disks using the existing checkpoint fixture
+procedure. No user processes, secrets, mounts or connections may be captured.
+This seed is only the starting environment; the demo writes fresh disk and RAM
+markers and captures a new managed checkpoint. Containers are not supported here.
+
+With the database configured and migrated as above, create private directories and
+stable 32-byte key files once, then retain them for every phase:
+
+```sh
+export SMOLBOX_STORE_PARTITION=checkpoint-demo
+export SMOLBOX_CHECKPOINT_ID=prepared-state-1
+export SMOLBOX_ENCRYPTION_KEY_FILE=/private/demo/encryption.key
+export SMOLBOX_FINGERPRINT_KEY_FILE=/private/demo/fingerprint.key
+export SMOLBOX_ARTIFACT_DIR=/private/demo/objects
+export SMOLBOX_CAPTURE_ROOT=/private/demo/captures
+export SMOLBOX_CHECKPOINT_SEED_PATH=/approved/idle.smolcheckpoint
+export SMOLBOX_CHECKPOINT_SEED_SHA256=ACTUAL_VERIFIED_SHA256
+export SMOLBOX_WORKER_URL=http://127.0.0.1:19680
+export SMOLBOX_ALLOW_LOOPBACK=true
+export SMOLBOX_PLATFORM=linux
+export SMOLBOX_ARCHITECTURE=x86_64
+
+mix run -e 'SmolBox.DurableHost.ManagedCheckpointDemo.run("capture")'
+```
+
+The capture root must already exist with mode 0700. The example reserves 16 GiB
+of additional capture headroom and streams at most 1 GiB. These illustrative
+values require host qualification; they are not enforced worker quotas. It sets
+both HTTP operation and receive timeouts to 15 minutes.
+
+After the capture process exits, fence pending requests and verify worker capture
+and temporary staging are finished. A successful response alone is insufficient:
+
+```sh
+SMOLBOX_CAPTURE_QUIESCED=true \
+  mix run -e 'SmolBox.DurableHost.ManagedCheckpointDemo.run("confirm")'
+```
+
+Review the captured state and copy the exact digest printed by the capture phase:
+
+```sh
+SMOLBOX_APPROVED_CHECKPOINT_SHA256=ACTUAL_CAPTURE_SHA256 \
+  mix run -e 'SmolBox.DurableHost.ManagedCheckpointDemo.run("restore")'
+```
+
+This restores two independent machines, reads both `/workspace/disk` and
+`/dev/shm/ram`, modifies the first copy, verifies the second and original remain
+unchanged, and deletes all three managed machines. The checkpoint stays on disk
+and its storage reservation remains. These commands are phase demonstrations, not
+a recovery script: on interruption inspect records and follow the recovery guide
+instead of replaying a whole phase.
+
+Finally, after verifying there are no other retained copies, explicitly remove
+this capture and release only its reservation:
+
+```sh
+SMOLBOX_REMOVE_CAPTURE=true \
+  mix run -e 'SmolBox.DurableHost.ManagedCheckpointDemo.run("release")'
+```
+
+Release verifies the file digest before deleting it and retains durable identity
+history. The seed, directories and keys remain host-owned. See the
+[managed checkpoint guide](../../docs/managed-checkpoints.md) for unknown outcomes,
+quiescence assertions, storage requirements and codec v12 upgrade/rollback rules.

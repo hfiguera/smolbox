@@ -1,5 +1,9 @@
 # Executing from a checkpoint
 
+For managed capture and independent retained restores on 1.19.0, see
+[Managed checkpoints](managed-checkpoints.md). This guide describes the existing
+approved checkpoint execution contract.
+
 SmolBox 0.1.5 restores a separate disposable machine from an
 operator-approved **idle, offline checkpoint**. Submission, input staging,
 command execution, output collection, cancellation and cleanup use the existing
@@ -12,8 +16,8 @@ or a later execution.
 
 A checkpoint also contains running processes. It is **not** just another image
 format. This first contract excludes captured user workloads, background tasks,
-credentials and network connections. It does not expose live branching, capture,
-pools or arbitrary resume through the managed API. A newly executed Python
+credentials and network connections. The execution API does not capture checkpoints or expose live branching, pools
+or arbitrary resume. Managed capture is a separate, explicit workflow. A newly executed Python
 process does not inherit another process's imported modules. Do not expect this
 API to make interpreter initialization disappear.
 

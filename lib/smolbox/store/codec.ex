@@ -49,6 +49,11 @@ defmodule SmolBox.Store.Codec do
   `exports` and nil `active_export` fields while keeping their old encodings.
   Upgrade every reader and resource projection writer before advertising
   `managed_exports: 1`; see [Export upgrades](machine-exports.html#durable-restart-and-compatibility).
+  Opted-in checkpointable machines and capture histories selectively use v12.
+  Earlier machines gain `checkpointable: false`, empty captures and nil active
+  capture. Preserve retained artifact projections even after source deletion;
+  coordinate all readers/writers before enabling `managed_checkpoints: 1`.
+  See [Managed checkpoint upgrades](managed-checkpoints.html#persistence-and-upgrades).
   Silently treating undecodable records as absent
   would permit replay and is forbidden.
   """
@@ -56,6 +61,7 @@ defmodule SmolBox.Store.Codec do
   alias SmolBox.{Error, Execution, ExecutionFeatures}
 
   alias SmolBox.Store.{
+    CodecCaptures,
     CodecExecution,
     CodecExports,
     CodecFiles,
@@ -65,6 +71,7 @@ defmodule SmolBox.Store.Codec do
   }
 
   @max_bytes 16_777_216
+  @captures_prefix "smolbox-record-v12\0"
   @exports_prefix "smolbox-record-v11\0"
   @sources_prefix "smolbox-record-v10\0"
   @prefix "smolbox-record-v2\0"
@@ -95,6 +102,10 @@ defmodule SmolBox.Store.Codec do
     SmolBox.Source,
     SmolBox.ImagePull,
     SmolBox.Image,
+    SmolBox.CheckpointCapture,
+    SmolBox.CheckpointCaptureSpec,
+    SmolBox.CheckpointPolicy,
+    SmolBox.CheckpointResult,
     SmolBox.Export,
     SmolBox.ExportSpec,
     SmolBox.ExportDestination,
@@ -109,6 +120,7 @@ defmodule SmolBox.Store.Codec do
           {:ok, binary()} | {:error, Error.t()}
   def encode(%{spec: %{profile: %SmolBox.Profile{} = profile}} = record) do
     cond do
+      CodecCaptures.required?(record) -> encode_captures(record)
       CodecExports.required?(record) -> encode_exports(record)
       CodecSources.required?(record) -> encode_sources(record)
       SmolBox.FileAccess.extended?(profile) -> encode_files(record)
@@ -157,6 +169,9 @@ defmodule SmolBox.Store.Codec do
 
   @spec decode(binary()) ::
           {:ok, Execution.t() | SmolBox.ManagedMachine.t()} | {:error, Error.t()}
+  def decode(<<@captures_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes, do: decode_captures(bytes)
+
   def decode(<<@exports_prefix, 131, tag, _rest::binary>> = bytes)
       when tag != 80 and byte_size(bytes) <= @max_bytes, do: decode_exports(bytes)
 
@@ -202,9 +217,28 @@ defmodule SmolBox.Store.Codec do
 
   def decode(_bytes), do: invalid()
 
+  defp encode_captures(record) do
+    with :ok <- validate_extended(record) do
+      bytes = @captures_prefix <> :erlang.term_to_binary(record)
+      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
+    end
+  end
+
+  defp decode_captures(<<@captures_prefix, payload::binary>>) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <- used == byte_size(payload) and CodecCaptures.required?(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
   defp encode_exports(record) do
     with :ok <- validate_extended(record) do
-      bytes = @exports_prefix <> :erlang.term_to_binary(record)
+      bytes = @exports_prefix <> :erlang.term_to_binary(CodecCaptures.strip(record))
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
   end
@@ -215,6 +249,7 @@ defmodule SmolBox.Store.Codec do
     with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
          true <- used == byte_size(payload),
          true <- CodecExports.required?(record),
+         record = CodecCaptures.upgrade(record),
          :ok <- validate_extended(record),
          do: {:ok, record},
          else: (_invalid -> invalid())
@@ -224,7 +259,9 @@ defmodule SmolBox.Store.Codec do
 
   defp encode_sources(record) do
     with :ok <- validate_extended(record) do
-      bytes = @sources_prefix <> :erlang.term_to_binary(CodecExports.strip(record))
+      bytes =
+        @sources_prefix <> :erlang.term_to_binary(CodecExports.strip(CodecCaptures.strip(record)))
+
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
   end
@@ -235,7 +272,7 @@ defmodule SmolBox.Store.Codec do
     with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
          true <- used == byte_size(payload),
          true <- CodecSources.required?(record),
-         record = CodecExports.upgrade(record),
+         record = CodecCaptures.upgrade(CodecExports.upgrade(record)),
          :ok <- validate_extended(record),
          do: {:ok, record},
          else: (_invalid -> invalid())
@@ -244,7 +281,8 @@ defmodule SmolBox.Store.Codec do
   end
 
   defp legacy_payload(record),
-    do: :erlang.term_to_binary(CodecExports.strip(CodecSources.strip(record)))
+    do:
+      :erlang.term_to_binary(CodecExports.strip(CodecSources.strip(CodecCaptures.strip(record))))
 
   defp encode_files(record) do
     with :ok <- validate_extended(record) do

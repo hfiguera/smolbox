@@ -12,6 +12,7 @@ defmodule SmolBox.Store.Memory do
   @behaviour SmolBox.Store
 
   alias SmolBox.{Error, Execution, MachineSpec, ManagedMachine, Store, Validation}
+  alias SmolBox.Store.CaptureOps
   alias SmolBox.Store.{Codec, ExportOps, MachineOps, PortOwnership, RecordOps, SourceOwnership}
 
   @doc """
@@ -113,6 +114,7 @@ defmodule SmolBox.Store.Memory do
           registry_sources: 1,
           managed_images: 1,
           managed_exports: 1,
+          managed_checkpoints: 1,
           guest_files: 1,
           interactive_terminal: 1,
           extended_execution: 1
@@ -300,7 +302,7 @@ defmodule SmolBox.Store.Memory do
       Map.values(state.records) ++ Map.values(state.machines),
       RecordOps.empty_usage(),
       fn record, acc ->
-        if record.worker_id == worker and record.reservation != nil do
+        if record.worker_id == worker do
           Map.merge(acc, RecordOps.accounted_resources(record), &add_resource/3)
         else
           acc
@@ -462,6 +464,44 @@ defmodule SmolBox.Store.Memory do
   defp machine_operation(state, :export_resolve, [key, guard, id, observed, now]) do
     with {:ok, record} <- machine_guard(state, key, guard, now),
          {:ok, next} <- ExportOps.resolve(record, id, observed, now),
+         do: machine_save(state, next)
+  end
+
+  defp machine_operation(state, :capture_accept, [key, spec, fingerprint, capacity, now]) do
+    with {:ok, record} <- machine_lookup(state, key),
+         {:ok, next} <-
+           CaptureOps.accept(
+             record,
+             spec,
+             fingerprint,
+             capacity,
+             used(state, record.worker_id),
+             now
+           ),
+         do: machine_save(state, next)
+  end
+
+  defp machine_operation(state, :capture_advance, [key, guard, id, expected, changes, now]) do
+    with {:ok, record} <- machine_guard(state, key, guard, now),
+         {:ok, next} <- CaptureOps.advance(record, id, expected, changes, now),
+         do: machine_save(state, next)
+  end
+
+  defp machine_operation(state, :capture_cancel, [key, id, now]) do
+    with {:ok, record} <- machine_lookup(state, key),
+         {:ok, next} <- CaptureOps.cancel(record, id, now),
+         do: machine_save(state, next)
+  end
+
+  defp machine_operation(state, :capture_resolve, [key, guard, id, observed, now]) do
+    with {:ok, record} <- machine_guard(state, key, guard, now),
+         {:ok, next} <- CaptureOps.resolve(record, id, observed, now),
+         do: machine_save(state, next)
+  end
+
+  defp machine_operation(state, :capture_release, [key, guard, id, now]) do
+    with {:ok, record} <- machine_guard(state, key, guard, now),
+         {:ok, next} <- CaptureOps.release(record, id, now),
          do: machine_save(state, next)
   end
 

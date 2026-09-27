@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Add managed idle, offline checkpoint capture and explicit independent restore
+  on smolvm 1.19.0 bare guests. Opt-in startup, bounded streaming, durable identity,
+  no replay after uncertainty, and source ownership/exclusion are explicit.
+- Preserve checkpoint artifact disk accounting after source deletion until explicit
+  release. Capture completion requires host quiescence confirmation; no live branch,
+  in-place rollback, automatic artifact deletion or container capture is added.
+- Add selective codec v12 and `managed_checkpoints: 1`. Upgrade all shared readers
+  and resource projection writers before opting in; no SQL migration is required.
+- Add a durable capture/restore example and Linux disk/RAM preservation evidence.
+
 - Add managed stopped-machine export to explicitly approved registry destinations,
   typed publication identities, durable intent and recovery without unsafe replay.
 - Keep source ownership, conflicting operations, and helper capacity reserved through

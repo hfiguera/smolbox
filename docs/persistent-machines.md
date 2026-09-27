@@ -300,3 +300,12 @@ operation slot as commands and lifecycle changes. It leaves the source retained;
 creating a machine from its verified result creates a new identity. Container
 exports exclude `/workspace`. See [stopped-machine exports](machine-exports.md) for
 path preservation, explicit source approval, authentication, and helper cleanup.
+
+## Managed checkpoint capture
+
+[Managed checkpoints](managed-checkpoints.md) add explicit idle, offline bare-guest
+capture and independent restore on 1.19.0. A captured result does not attest worker
+quiescence; resolve only after fencing outstanding requests and confirming staging
+cleanup. Checkpoint storage remains accounted for after source deletion until
+explicit release. Opt-in machines/history use codec v12, requiring coordinated
+reader and resource projection upgrades but no SQL migration.

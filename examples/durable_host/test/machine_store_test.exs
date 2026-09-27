@@ -28,6 +28,12 @@ defmodule SmolBox.DurableHost.MachineStoreTest do
     end
   end
 
+  for scenario <- [:admission, :cancellation, :unknown, :retention, :competition] do
+    test "PostgreSQL capture contract: #{scenario}", %{store: store} do
+      apply(SmolBox.Store.CaptureContract, unquote(scenario), [Store, store])
+    end
+  end
+
   test "PostgreSQL image pull storage contract", %{store: store} do
     ImageContract.pull(Store, store)
   end

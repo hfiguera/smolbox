@@ -4,6 +4,11 @@ defmodule SmolBox.ManagedMachineSpec do
 
   Scope and ID are host-authorized identities, not access tokens. Artifact and
   profile approvals have the same meaning as in `SmolBox.ExecutionSpec`.
+  Optional `checkpointable: true` opts an idle, offline bare guest into 1.19.0
+  checkpoint-capable startup. No ports, workloads or remote sources are admitted.
+  This changes immutable identity and requires codec v12/store capability
+  `managed_checkpoints: 1`. See `SmolBox.Checkpoints`.
+
   Optional `ports: [SmolBox.PortMapping.t()]` adds fixed TCP forwarding on image
   sources and smolvm 1.17.0 or 1.19.0. The constructor canonicalizes mappings; they are part
   of immutable identity, independent of commands and outbound profile policy.
@@ -18,7 +23,7 @@ defmodule SmolBox.ManagedMachineSpec do
 
   @enforce_keys [:scope, :id, :artifact, :profile]
   @derive {Inspect, only: [:scope, :id]}
-  defstruct @enforce_keys ++ [ports: [], workload: nil]
+  defstruct @enforce_keys ++ [ports: [], workload: nil, checkpointable: false]
 
   @type t :: %__MODULE__{
           scope: String.t(),
@@ -26,12 +31,13 @@ defmodule SmolBox.ManagedMachineSpec do
           artifact: map(),
           profile: SmolBox.Profile.t(),
           ports: [SmolBox.PortMapping.t()],
-          workload: SmolBox.Workload.t() | nil
+          workload: SmolBox.Workload.t() | nil,
+          checkpointable: boolean()
         }
 
   @spec new(keyword()) :: {:ok, t()} | {:error, Error.t()}
   def new(options) do
-    if Validation.keys?(options, @enforce_keys ++ [:ports, :workload]) and
+    if Validation.keys?(options, @enforce_keys ++ [:ports, :workload, :checkpointable]) and
          Enum.all?(@enforce_keys, &Keyword.has_key?(options, &1)) do
       with {:ok, ports} <- SmolBox.PortMapping.normalize(Keyword.get(options, :ports, [])),
            spec = struct!(__MODULE__, Keyword.put(options, :ports, ports)),
@@ -47,6 +53,12 @@ defmodule SmolBox.ManagedMachineSpec do
     with true <- Validation.struct_shape?(spec, __MODULE__),
          true <- SmolBox.PortMapping.canonical?(spec.ports),
          true <- is_map(spec.artifact),
+         :ok <- SmolBox.Profile.validate(spec.profile),
+         true <- is_boolean(spec.checkpointable),
+         true <-
+           not spec.checkpointable or
+             (spec.profile.network == :offline and spec.ports == [] and spec.workload == nil and
+                not SmolBox.Source.remote?(spec.artifact)),
          true <- SmolBox.Workload.optional?(spec.workload),
          true <- spec.workload == nil or spec.artifact["kind"] != "checkpoint",
          true <- spec.ports == [] or spec.artifact["kind"] != "checkpoint",
@@ -86,6 +98,11 @@ defmodule SmolBox.ManagedMachineSpec do
               {"smolbox-managed-workload-v1", payload,
                %{spec.workload | env: Enum.sort(spec.workload.env)}}
             )
+
+      payload =
+        if spec.checkpointable,
+          do: :erlang.term_to_binary({"smolbox-checkpointable-v1", payload}),
+          else: payload
 
       {:ok,
        :crypto.mac(:hmac, :sha256, key, payload)

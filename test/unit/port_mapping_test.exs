@@ -77,8 +77,8 @@ defmodule SmolBox.PortMappingTest do
       |> CodecFiles.strip()
       |> Map.delete(:reserved_ports)
       |> Map.delete(:preparation)
-      |> Map.drop([:exports, :active_export])
-      |> Map.update!(:spec, &Map.drop(&1, [:ports, :workload]))
+      |> Map.drop([:exports, :active_export, :captures, :active_capture])
+      |> Map.update!(:spec, &Map.drop(&1, [:ports, :workload, :checkpointable]))
 
     bytes = "smolbox-record-v4\0" <> :erlang.term_to_binary(legacy)
     assert {:ok, ^record} = Codec.decode(bytes)
@@ -96,8 +96,8 @@ defmodule SmolBox.PortMappingTest do
       |> CodecFiles.strip()
       |> Map.delete(:reserved_ports)
       |> Map.delete(:preparation)
-      |> Map.drop([:exports, :active_export])
-      |> Map.update!(:spec, &Map.drop(&1, [:ports, :workload]))
+      |> Map.drop([:exports, :active_export, :captures, :active_capture])
+      |> Map.update!(:spec, &Map.drop(&1, [:ports, :workload, :checkpointable]))
       |> Map.update!(:created_machine, &Map.delete(&1, :ports))
       |> Map.update!(:observed_machine, &Map.delete(&1, :ports))
 

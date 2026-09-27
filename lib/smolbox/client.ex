@@ -369,6 +369,73 @@ defmodule SmolBox.Client do
   @spec start(t(), String.t()) :: {:ok, Machine.t()} | {:error, Error.t()}
   def start(client, name), do: lifecycle(client, name, :post, "/start", :start)
 
+  @doc "Start an owned idle offline machine with checkpoint support on 1.19.0."
+  @spec start_checkpointable(t(), String.t()) :: {:ok, Machine.t()} | {:error, Error.t()}
+  def start_checkpointable(client, name) do
+    deadline = System.monotonic_time(:millisecond) + client.worker.operation_timeout_ms
+
+    with {:ok, path} <- machine_path(name),
+         {:ok, client} <- creation_runtime_versions(client, ["1.19.0"]),
+         {:ok, body} <- json(client, :get, path, nil, :inspect),
+         {:ok, %{network: :offline, ports: []}} <- decode_machine(body, name, :inspect),
+         true <- body["image"] in [nil, ""],
+         {:ok, client} <- remaining_create_budget(client, deadline) do
+      checkpoint_start(client, path, name)
+    else
+      {:error, _} = failure -> failure
+      _ -> error(:unsupported_capability, :checkpoint)
+    end
+  end
+
+  defp checkpoint_start(client, path, name) do
+    with {:ok, body} <- json(client, :post, path <> "/start?branchable=true", %{}, :start),
+         true <- body["branchable"] == true,
+         {:ok, machine} <- decode_machine(body, name, :start) do
+      {:ok, machine}
+    else
+      {:error, _} = failure -> failure
+      _ -> error(:protocol, :start, :dispatch_uncertain)
+    end
+  end
+
+  @doc false
+  def checkpoint_preflight(client, name) do
+    with {:ok, path} <- machine_path(name),
+         {:ok, client} <- creation_runtime_versions(client, ["1.19.0"]),
+         {:ok, body} <- json(client, :get, path, nil, :inspect),
+         true <- body["branchable"] == true and body["image"] in [nil, ""],
+         {:ok, %{state: :running, network: :offline, ports: []} = machine} <-
+           decode_machine(body, name, :inspect) do
+      {:ok, machine}
+    else
+      {:error, _} = failure -> failure
+      _ -> error(:unsupported_capability, :checkpoint)
+    end
+  end
+
+  @doc """
+  Stream a running idle checkpointable guest into a new private directory on the
+  controller. Returns the received byte hash and size; no automatic replay, cache
+  adoption or cleanup. The caller must verify ownership and output-path approval.
+  """
+  @spec capture_checkpoint(t(), String.t(), String.t(), pos_integer()) ::
+          {:ok, map()} | {:error, Error.t()}
+  def capture_checkpoint(client, name, path, max_bytes) do
+    deadline = System.monotonic_time(:millisecond) + client.worker.operation_timeout_ms
+
+    with true <-
+           SmolBox.CheckpointPolicy.path?(path) and String.ends_with?(path, ".smolcheckpoint") and
+             Validation.integer?(max_bytes, 1, 68_719_476_736),
+         {:ok, _} <- checkpoint_preflight(client, name),
+         {:ok, client} <- remaining_create_budget(client, deadline),
+         {:ok, endpoint} <- machine_path(name) do
+      SmolBox.CheckpointIO.receive_file(client, endpoint <> "/checkpoint", path, max_bytes)
+    else
+      {:error, failure} -> {:error, %{failure | evidence: :not_dispatched}}
+      _ -> error(:validation, :checkpoint)
+    end
+  end
+
   @doc """
   Request a stop while preserving an owned machine's disks, and return its observation.
 

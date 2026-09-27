@@ -80,8 +80,11 @@ defmodule SmolBox.ManagedPeer do
       |> File.read!()
       |> Jason.decode!()
       |> Map.put("name", input["name"])
-      |> Map.put("image", "python:fixture")
-      |> Map.put("branchable", state.options[:checkpoint] == true)
+      |> Map.put("image", if(state.options[:capture], do: nil, else: "python:fixture"))
+      |> Map.put(
+        "branchable",
+        state.options[:checkpoint] == true or state.options[:capture] == true
+      )
       |> Map.merge(
         Map.take(input, ["network", "networkBackend", "allowedHosts", "allowedCidrs", "ports"])
       )
@@ -123,6 +126,12 @@ defmodule SmolBox.ManagedPeer do
 
   defp machine_route("GET", [], _body, machine, state), do: {{:json, 200, machine}, state}
 
+  defp machine_route("POST", ["checkpoint"], _body, _machine, state) do
+    {{:capture,
+      Keyword.get_lazy(state.options, :capture_bytes, &SmolBox.CheckpointFixture.bytes/0),
+      state.options[:capture_lost]}, state}
+  end
+
   defp machine_route("POST", ["export"], body, _machine, state) do
     response = state.options[:export_response].(Jason.decode!(body))
     {{:json, if(state.options[:export_lost], do: 503, else: 200), response}, state}
@@ -161,8 +170,10 @@ defmodule SmolBox.ManagedPeer do
       else: update_machine_state(machine, state, "stopped")
   end
 
-  defp machine_route("POST", [operation], _body, machine, state)
+  defp machine_route("POST", [operation], body, machine, state)
        when operation == "start" do
+    %{} = Jason.decode!(body)
+
     if state.options[:start_port_conflict],
       do: {{:json, 409, %{"code" => "PORT_IN_USE"}}, state},
       else: update_machine_state(machine, state, "running")
@@ -225,6 +236,12 @@ defmodule SmolBox.ManagedPeer do
      %{state | machines: Map.put(state.machines, machine["name"], updated)}}
   end
 
+  defp respond(conn, {:capture, bytes, lost}, _agent) do
+    conn
+    |> Plug.Conn.put_resp_content_type("application/vnd.smolmachines.checkpoint")
+    |> Plug.Conn.send_resp(if(lost, do: 503, else: 200), bytes)
+  end
+
   defp respond(conn, {:terminal, options}, _agent),
     do: Plug.Conn.upgrade_adapter(conn, :websocket, {SmolBox.TerminalPeer, options, []})
 
@@ -272,6 +289,7 @@ defmodule SmolBox.ManagedPeer do
   defp event("GET", ["api", "v1", "machines", _name, "exec", "interactive"]), do: :terminal_open
   defp event("GET", ["api", "v1", "machines", _name]), do: :inspect
   defp event("POST", ["api", "v1", "machines"]), do: :create
+  defp event("POST", ["api", "v1", "machines", _name, "checkpoint"]), do: :capture
   defp event("POST", ["api", "v1", "machines", _name, "export"]), do: :export
   defp event("POST", ["artifacts", "warm"]), do: :prepare_artifact
   defp event("POST", ["api", "v1", "machines", _name, "images", "pull"]), do: :pull_image

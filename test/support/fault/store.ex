@@ -69,5 +69,13 @@ defmodule SmolBox.FaultStore do
     end
   end
 
+  defp event(:machine, [:capture_advance, [_key, _guard, _id, _expected, changes, _now]]) do
+    case changes[:state] do
+      :dispatching -> :capture_intent
+      :captured -> :capture_result
+      _ -> :capture_write
+    end
+  end
+
   defp event(operation, _arguments), do: operation
 end

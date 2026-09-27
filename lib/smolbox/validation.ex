@@ -1,6 +1,16 @@
 defmodule SmolBox.Validation do
   @moduledoc false
 
+  def construct(module, options, required, optional) do
+    if keys?(options, required ++ optional) and
+         Enum.all?(required, &Keyword.has_key?(options, &1)) do
+      spec = struct!(module, options)
+      with :ok <- module.validate(spec), do: {:ok, spec}
+    else
+      module.validate(nil)
+    end
+  end
+
   @spec text?(term(), pos_integer()) :: boolean()
   def text?(value, limit) do
     is_binary(value) and byte_size(value) <= limit and String.valid?(value) and

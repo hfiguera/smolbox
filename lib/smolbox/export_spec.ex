@@ -20,15 +20,7 @@ defmodule SmolBox.ExportSpec do
         }
 
   @spec new(keyword()) :: {:ok, t()} | {:error, Error.t()}
-  def new(options) do
-    if Validation.keys?(options, @enforce_keys ++ [:timeout_ms]) and
-         Enum.all?(@enforce_keys, &Keyword.has_key?(options, &1)) do
-      spec = struct!(__MODULE__, options)
-      with :ok <- validate(spec), do: {:ok, spec}
-    else
-      invalid()
-    end
-  end
+  def new(options), do: Validation.construct(__MODULE__, options, @enforce_keys, [:timeout_ms])
 
   @doc false
   def validate(%__MODULE__{} = spec) do

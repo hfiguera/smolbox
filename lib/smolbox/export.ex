@@ -50,18 +50,8 @@ defmodule SmolBox.Export do
   @terminal [:completed, :failed, :cancelled, :resolved_unknown]
 
   @doc false
-  def new(machine, spec, fingerprint, now) do
-    record = %__MODULE__{
-      machine: machine,
-      spec: spec,
-      fingerprint: fingerprint,
-      accepted_at_ms: now,
-      updated_at_ms: now,
-      deadline_ms: now + spec.timeout_ms
-    }
-
-    with :ok <- validate(record), do: {:ok, record}
-  end
+  def new(machine, spec, fingerprint, now),
+    do: SmolBox.OperationRecord.new(__MODULE__, machine, spec, fingerprint, now)
 
   @doc false
   def validate(%__MODULE__{} = record) do
