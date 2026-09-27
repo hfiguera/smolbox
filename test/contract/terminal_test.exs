@@ -389,7 +389,9 @@ defmodule SmolBox.TerminalTest do
       )
 
     {:ok, key} = Machines.create(f.runtime, spec)
-    {:ok, created} = Machines.await(f.runtime, key, 5000)
+    {:ok, %{state: :created}} = Machines.await(f.runtime, key, 5000)
+    # Await can return before the controller's final claim updates the version.
+    created = RuntimeFixture.await_idle(f.runtime, key)
     {:ok, _} = Machines.start(f.runtime, key, created.version)
     {:ok, running} = Machines.await(f.runtime, key, 5000)
     assert running.state == :running
