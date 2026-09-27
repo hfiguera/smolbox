@@ -2,7 +2,7 @@ defmodule Workspace.WorkspacesTest do
   use ExUnit.Case, async: false
   alias Ecto.Adapters.SQL
   alias Ecto.Adapters.SQL.Sandbox
-  alias SmolBox.DurableHost.{SourceStore, Store}
+  alias SmolBox.DurableHost.Store
   alias Workspace.{Fixture, Ledger, Settings, TestWorker, Workspaces}
   setup do: %{c: Fixture.start()}
 
@@ -14,17 +14,26 @@ defmodule Workspace.WorkspacesTest do
       "timeout" => "30"
     }
 
-  test "published dependency does not advertise or accept unsupported registry sources", %{c: c} do
+  test "legacy settings retain their worker version and single workspace budget", %{c: c} do
+    settings = Map.delete(c.settings, "runtime_version")
+    assert {:ok, legacy} = Settings.build(settings)
+    assert Settings.runtime_version(settings) == "1.17.0"
+    assert legacy.saved_state == nil
+    assert {:ok, nil} = Workspace.SavedState.snapshot(legacy)
+    [worker] = legacy.options[:workers]
+    assert worker.capacity == %{slots: 1, cpus: 1, memory_mb: 1024, disk_gb: 4}
+    assert worker.runtime_version == "1.17.0"
+  end
+
+  test "published 0.3.0 supports saved state contracts without approving registry sources", %{
+    c: c
+  } do
     assert {:ok, capabilities} = Store.capabilities(c.store)
-    refute Map.has_key?(capabilities, :registry_sources)
-    refute Map.has_key?(capabilities, :managed_images)
-
-    for kind <- ["registry", "oci"] do
-      record = %{spec: %{artifact: %{"kind" => kind}}}
-
-      assert {:error, %SmolBox.Error{category: :validation}} =
-               SourceStore.available(c.store, record, "worker")
-    end
+    assert capabilities.managed_checkpoints == 1
+    assert capabilities.managed_branches == 1
+    [worker] = c.options[:workers]
+    assert worker.sources == []
+    assert c.saved_state == nil
   end
 
   test "workspace identity and completed execution survive a fresh controller", %{c: c} do

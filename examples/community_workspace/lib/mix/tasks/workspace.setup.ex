@@ -17,7 +17,8 @@ defmodule Mix.Tasks.Workspace.Setup do
           service_port: :integer,
           preview_url: :string,
           platform: :string,
-          architecture: :string
+          architecture: :string,
+          runtime_version: :string
         ]
       )
 
@@ -69,6 +70,7 @@ defmodule Mix.Tasks.Workspace.Setup do
     port = opts[:service_port] || 18_080
 
     %{
+      "runtime_version" => opts[:runtime_version] || "1.19.0",
       "worker_url" => opts[:worker_url] || "http://127.0.0.1:19470",
       "image_path" => Path.expand(image),
       "image_sha256" => expected,

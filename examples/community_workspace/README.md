@@ -1,10 +1,16 @@
 # A persistent SmolBox workspace
 
-This example explicitly pins smolvm **1.17.0**. The library checkout defaults to
-1.19.0, but does not upgrade this app’s configured worker. See the
-[qualification report](../../docs/runtime-1.19.0-qualification.md).
+New configurations pin smolvm **1.19.0**. Existing configurations without a version
+field keep their original **1.17.0** pin; updating this app does not upgrade a worker.
+The separate Saved state walkthrough requires Linux and an explicitly approved
+idle bare checkpoint captured with 1.19.0.
 
-A small Phoenix LiveView app that combines the **published SmolBox 0.2.0 package**
+**Following the original blog walkthrough?** Use the
+[archived example at v0.3.0](https://github.com/hfiguera/smolbox/tree/v0.3.0/examples/community_workspace).
+That tag preserves the original SmolBox 0.2.0 dependency, smolvm 1.17.0 pin and UI.
+The current example keeps the everyday workspace and adds a separate saved state flow.
+
+A small Phoenix LiveView app that combines the **published SmolBox 0.3.0 package**
 with a real persistent machine. Create a workspace, move project files, run
 commands, use a browser terminal, open its Python service, leave, and return to
 the same computer. Stop/start preserves files; only explicit deletion removes it.
@@ -18,7 +24,7 @@ no memory-store fallback. Keep the repository's `examples/support/store` and
 
 - Elixir 1.18+ / compatible OTP; CI uses Elixir 1.20.4 / OTP 29.0.6.
 - Node.js 22+ and npm; PostgreSQL 16+ with a dedicated database.
-- Native smolvm **1.17.0**: Linux x86_64 with KVM, or macOS Apple Silicon.
+- Native smolvm **1.19.0** for new configurations: Linux x86_64 with KVM, or macOS Apple Silicon.
 - One approved native Python image ending in `.smolmachine`, containing `python3`,
   `/bin/sh`, `/bin/true`, and ordinary shell tools. Follow the repository's
   [artifact preparation](../../docs/client.md) and
@@ -119,7 +125,7 @@ Do not regenerate keys to fix an error. Never place it in a guest-accessible pat
    reservation release. Activity and collected downloads remain. This identity
    cannot create a new, empty replacement machine.
 
-Console diagnostics are VM/worker console output. smolvm 1.17.0 discards the
+Console diagnostics are VM/worker console output. smolvm 1.19.0 discards the
 startup workload's stdout/stderr; the app does not label console bytes as
 application logs. A running VM alone does not prove the HTTP service is ready.
 
@@ -130,6 +136,128 @@ the chosen path persists across updates. Create the optional `artifact.bin` samp
 before collecting it. Missing, unreadable, non-regular or oversized files produce
 **Failed / Exit 1** with a useful message, without blocking the workspace. Downloads
 keep the workspace and its terminal connected.
+
+## Saved state: prepare, checkpoint, branch, compare
+
+This is a separate section on the same page. The everyday workspace is a container
+with a service; it cannot be captured by the managed checkpoint API. The Saved
+state section owns a different bare VM, with no networking, ports, startup workload,
+terminal or arbitrary command entry. Its fixed commands write a recipe to disk and
+a note to `/dev/shm`, then change only the branch. It uses published public APIs,
+not a private worker protocol for application operations.
+
+### Approve the Linux seed
+
+Run the app on the worker host. Stop the app before changing its private settings.
+Use a dedicated smolvm **1.19.0** worker and an idle, offline **bare** checkpoint
+captured on the same compatible Linux x86_64 host/runtime. Its allocation must be
+**1 CPU, 256 MiB RAM, 1 GiB storage and 1 GiB overlay**. A container image or a
+checkpoint that depends on a packed container image is not an equivalent seed.
+The host approves that no user workload, credential or external connection awaits
+resume. See [managed checkpoints](../../docs/managed-checkpoints.md).
+
+For a new seed, create a bare VM with these allocations on your dedicated worker,
+start it with `branchable=true`, and capture it while idle. For example, with a
+loopback HTTP worker, `curl --fail --request POST --json` can submit these exact
+bodies to the worker API:
+
+```text
+POST /api/v1/machines
+{"name":"workspace-idle-seed-UNIQUE","cpus":1,"memoryMb":256,"storageGb":1,"overlayGb":1,"network":false}
+POST /api/v1/machines/workspace-idle-seed-UNIQUE/start?branchable=true
+{}
+POST /api/v1/machines/workspace-idle-seed-UNIQUE/checkpoint
+```
+
+Save the last response as a new private `.smolcheckpoint` file, using a bounded
+client timeout and a unique output path. The create request deliberately omits
+`from`/`image`, selecting a bare VM. Record the responses and original identity;
+if any request has an uncertain outcome, inspect and establish quiescence instead
+of repeating it. After verifying the complete capture and finished worker/helper
+work, explicitly delete this seed VM, verify absence, and inspect its owned
+staging/backing. Preserve the approved checkpoint file. This is operator fixture
+preparation outside the app's managed namespace.
+
+With the app stopped and the installed worker confirmed as 1.19.0:
+
+```sh
+mix workspace.saved_state.setup \
+  --seed /absolute/private/idle.smolcheckpoint \
+  --sha256 VERIFIED_LOWERCASE_SHA256 --approve-idle
+mix workspace.check
+mix phx.server
+```
+
+This command preserves keys, partition, everyday workspace identity and profile.
+It explicitly sets the worker pin to 1.19.0 and adds the seed approval. It refuses
+to replace an existing saved state approval. Do not use it to silently upgrade a
+retained 1.17.0 worker: follow the [worker upgrade guidance](../../docs/host-integration.md#upgrading-a-worker)
+or keep the old app/configuration with its existing worker. A fresh dedicated lab
+is the simplest way to try the new flow. No new SQL migration is introduced, but
+all controllers/readers using this store must support 0.3.0's records.
+
+The expanded worker budget is **4 slots, 4 CPUs, 4096 MiB and 32 GiB** across both
+examples. It covers the everyday VM, original, child and transient/retained
+allowances. The controller's private `captures` directory holds up to 1 GiB per
+capture; seed files, worker caches and staging need separate host storage budgets.
+Reservations are conservative admission accounting, not hard limits on host use.
+
+### Walk through it
+
+1. In **Saved state**, create the workspace, start the original, then **Prepare
+   sample files**. Wait for the command result: disk says “basil and lemon” and RAM
+   says “Prepared in memory”. Every button reads durable state before acting.
+2. Confirm that the original is idle and safe to capture, then **Save checkpoint**.
+   `Captured` means complete bytes were received, hashed and synced. It does not
+   yet prove all worker/helper work and staging are finished.
+3. On the host, establish capture quiescence and inspect/clean the operation's
+   worker staging. Then explicitly check the confirmation and choose **Confirm
+   capture finished**. The capture becomes `Completed`; its artifact reservation
+   remains. Never make this assertion just because the download finished.
+4. Confirm the original is still idle and **Create branch**. This copies the
+   running original on the same worker; it does **not** restore the checkpoint.
+   The saved checkpoint remains an independent reusable artifact.
+5. **Change branch recipe**, then **Read both machines**. Fresh command output
+   should show basil/lemon and the original RAM note on the original, ginger/lime
+   and the changed RAM note on the branch. Each output displays its request identity.
+6. Restart the app, preserving PostgreSQL, the worker, seed and private directory.
+   The same identities, saved file, branch lineage and command results reappear.
+   No action is automatically submitted on mount or refresh.
+
+The example intentionally has one original, one capture and one child per private
+configuration. Fixed identities deduplicate races and survive browser/app restarts.
+Failed or uncertain work does not create a replacement with an empty disk. Unknown
+capture/branch operations require the library's operator recovery procedures;
+there is no browser shortcut that guesses an outcome or replays a request.
+
+### Finish and clean up
+
+The retention table shows each object's state and the worker's total reservations,
+including the everyday workspace. Expand **Finish and clean up**:
+
+1. **Delete branch VM** and wait for verified deletion. The branch backing allowance
+   stays reserved. Verify no requests from current or old controllers can still
+   affect the child, then **Retire branch dependency**. A store lease or observed
+   stop is insufficient to fence a worker request already sent.
+2. **Delete original VM** and wait for verified absence. The checkpoint artifact
+   and extra branch allowance still have their own lifetime.
+3. On the host, inspect the recorded original/child machine names and remove only
+   their owned source generations, snapshots and staging once quiescent. Do not
+   remove shared runtime templates, the seed, other machines or other captures.
+   Only then confirm **Release backing allowance**. The library independently
+   verifies durable deletion and source/child absence; the checkbox is the host's
+   assertion about files the API cannot attest.
+4. The checkpoint evidence disclosure shows its exact private path and digest.
+   Once no consumer needs it, remove its complete file, partial output and any
+   retained copies on the host, then **Release checkpoint reservation**. This call
+   verifies local absence and releases accounting; it never removes files itself.
+
+There is no “delete everything” operation. Neither this cleanup nor a command
+completion deletes the everyday workspace. History and deduplication identities
+remain after reservations are released; do not delete database rows to reset the UI.
+The original seed remains separately approved host material. See the
+[checkpoint](../../docs/managed-checkpoints.md) and
+[branch recovery guides](../../docs/managed-branches.md) for uncertain operations.
 
 ## Identity, retention and recovery
 
@@ -249,14 +377,18 @@ mix workspace.recover inspect
 ```
 
 Export the JSON evidence before a lab reset. See [validation](docs/validation.md)
-for the actual tested platform, failures found and final outcomes. The optional
+for the original app’s tested platform, failures found and final outcomes. See
+[saved state validation](docs/saved-state-validation.md) for the separate 0.3.0
+Linux campaign, observed isolation and explicit cleanup accounting. The optional
 305-second sample is not required by this fast walkthrough.
 
 ## Migrations, cleanup and limitations
 
-The app uses Hex `{:smolbox, "~> 0.2.0"}` with a lockfile, not repository library
+The app uses Hex `{:smolbox, "~> 0.3.0"}` with a lockfile, not repository library
 code. Shared adapter source moved to `examples/support/store`; the durable host
-compiles that same source. Existing store schemas/codecs are unchanged. Setup
+compiles that same source. This app adds no store schema or codec changes beyond SmolBox 0.3.0. Coordinate
+all controllers on the 0.3.0 codec before writing capture or branch records;
+older library readers cannot safely consume these records. Setup
 adds `workspace_homes` and `workspace_actions` on top of the existing v5 store
 migrations. Migration `20260924000001` adds nullable `request_version` to workspace
 receipts so start/stop/delete completion is recorded only when SmolBox's

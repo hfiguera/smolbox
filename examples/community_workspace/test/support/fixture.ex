@@ -4,7 +4,7 @@ defmodule Workspace.Fixture do
   alias Ecto.Adapters.SQL.Sandbox
   alias Workspace.{Settings, Workspaces}
 
-  def start do
+  def start(options \\ []) do
     owner = Sandbox.start_owner!(Workspace.Repo, shared: true)
     ExUnit.Callbacks.on_exit(fn -> Sandbox.stop_owner(owner) end)
     root = Path.join(System.tmp_dir!(), "workspace-test-" <> Ecto.UUID.generate())
@@ -28,6 +28,19 @@ defmodule Workspace.Fixture do
       "fingerprint" => :crypto.strong_rand_bytes(32),
       "encryption" => :crypto.strong_rand_bytes(32)
     }
+
+    s = Map.put(s, "runtime_version", "1.19.0")
+
+    s =
+      if options[:saved_state] do
+        root |> Path.join("captures") |> File.mkdir_p!()
+        root |> Path.join("captures") |> File.chmod!(0o700)
+        seed = Path.join(root, "seed.smolcheckpoint")
+        File.write!(seed, "simulated seed")
+        Map.put(s, "saved_state", %{"path" => seed, "sha256" => Settings.digest(seed)})
+      else
+        s
+      end
 
     {:ok, c} = Settings.build(s)
     ExUnit.Callbacks.start_supervised!(Workspace.TestWorker)

@@ -17,8 +17,10 @@ or its external host resource controls.
 
 For a complete browser experience, run the
 [community workspace example](https://github.com/hfiguera/smolbox/tree/main/examples/community_workspace).
-It consumes the published 0.2.0 package and combines persistent machines, terminals,
-files, background launches and a mapped service with PostgreSQL recovery.
+It consumes the published 0.3.0 package and combines persistent machines, terminals,
+files, background launches and a mapped service with PostgreSQL recovery. Its
+separate saved state walkthrough demonstrates checkpoints, branch isolation and
+explicit cleanup on Linux.
 
 ## 1. Install SmolBox
 

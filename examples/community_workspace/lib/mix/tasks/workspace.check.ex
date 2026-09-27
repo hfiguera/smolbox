@@ -19,7 +19,8 @@ defmodule Mix.Tasks.Workspace.Check do
            :ok <- Workspace.Connection.database_ready(),
            {:ok, c} <- Workspace.Settings.build(settings),
            {:ok, _} <- Store.capabilities(c.store),
-           {:ok, %{version: "1.17.0"}} <- SmolBox.Client.health(c.client),
+           {:ok, %{version: version}} <- SmolBox.Client.health(c.client),
+           true <- version == Workspace.Settings.runtime_version(settings),
            do: SmolBox.Client.readiness(c.client)
 
     Supervisor.stop(repo)
@@ -27,7 +28,7 @@ defmodule Mix.Tasks.Workspace.Check do
     case result do
       :ok ->
         Mix.shell().info(
-          "Ready: private configuration, migrations, durable store, worker 1.17.0 and readiness. No machine was created or changed."
+          "Ready: private configuration, migrations, durable store, configured worker version and readiness. No machine was created or changed."
         )
 
       {:error, reason} when is_atom(reason) ->

@@ -54,7 +54,8 @@ defmodule Workspace.Connection do
   defp connect(context) do
     with :ok <- database_ready(),
          {:ok, _} <- Store.capabilities(context.store),
-         {:ok, %{version: "1.17.0"}} <- SmolBox.Client.health(health_client(context.client)) do
+         {:ok, %{version: version}} <- SmolBox.Client.health(health_client(context.client)),
+         true <- version == Settings.runtime_version(context.settings) do
       {:ok, context}
     else
       _ -> {:error, :worker_or_store_unavailable}
