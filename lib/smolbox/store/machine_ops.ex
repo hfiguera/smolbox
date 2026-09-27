@@ -64,7 +64,7 @@ defmodule SmolBox.Store.MachineOps do
           now
         )
 
-      not ManagedMachine.idle?(record) ->
+      not lifecycle_available?(record, action) ->
         error(:admission_exhausted)
 
       record.state == :deleted ->
@@ -93,6 +93,9 @@ defmodule SmolBox.Store.MachineOps do
 
   def request(_record, _action, _version, _now), do: error(:validation)
 
+  defp lifecycle_available?(record, action),
+    do: ManagedMachine.idle?(record) and SmolBox.Branch.lifecycle?(record, action)
+
   defp unassigned_delete?(%{state: state, worker_id: nil}, :delete)
        when state in [:accepted, :conflict], do: true
 
@@ -100,6 +103,7 @@ defmodule SmolBox.Store.MachineOps do
 
   def attach(machine, execution, now) do
     with :ok <- RecordOps.initial(execution),
+         true <- SmolBox.Branch.usable?(machine),
          true <- supported_operation?(machine, execution),
          true <- machine.state == :running and ManagedMachine.idle?(machine),
          true <-
@@ -150,7 +154,10 @@ defmodule SmolBox.Store.MachineOps do
   end
 
   def resolve(machine, command, :absent, now) do
-    with true <- machine.active_export == nil and machine.active_capture == nil,
+    with true <-
+           machine.active_export == nil and machine.active_capture == nil and
+             machine.active_branch == nil and
+             SmolBox.Branch.lifecycle?(machine, :delete),
          true <- machine.state in [:unknown, :missing, :conflict],
          {:ok, command} <- resolve_command(command, now),
          {:ok, machine} <-
@@ -177,7 +184,10 @@ defmodule SmolBox.Store.MachineOps do
   end
 
   def resolve(machine, command, observed, now) do
-    with true <- machine.active_export == nil and machine.active_capture == nil,
+    with true <-
+           machine.active_export == nil and machine.active_capture == nil and
+             machine.active_branch == nil and
+             SmolBox.Branch.usable?(machine) and SmolBox.Branch.children_retired?(machine),
          true <- machine.state in [:unknown, :missing, :conflict],
          true <- machine.created_machine != nil,
          true <- observed.state in [:created, :stopped],

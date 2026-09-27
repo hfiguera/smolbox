@@ -157,7 +157,11 @@ defmodule SmolBox.Store.RecordOps do
     Map.merge(
       Map.merge(
         record.reservation || empty_usage(),
-        SmolBox.CheckpointCapture.resources(record),
+        Map.merge(
+          SmolBox.CheckpointCapture.resources(record),
+          SmolBox.Branch.resources(record),
+          fn _, a, b -> a + b end
+        ),
         fn _key, a, b -> a + b end
       ),
       SmolBox.Export.resources(record),

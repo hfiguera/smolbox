@@ -181,7 +181,8 @@ defmodule SmolBox.Store do
   @doc """
   Optional managed-machine transaction boundary.
 
-  Advertise `managed_machines: 1` only when all operations below are implemented.
+  Advertise `managed_machines: 1` only when all core operations below are implemented.
+  Capture, export and branch operations additionally require their feature capabilities.
   Each operation has its own callback signature and result type. Arguments remain
   positional lists for compatibility with existing adapters. Elixir list types
   describe permitted elements, not their order or exact count; the following
@@ -213,6 +214,37 @@ defmodule SmolBox.Store do
   | `:export_advance` | `[key, guard, export_id, expected_state, changes, now]` | `{:ok, machine}` |
   | `:export_cancel` | `[key, export_id, now]` | `{:ok, machine}` |
   | `:export_resolve` | `[key, guard, export_id, stopped_observation_or_absent, now]` | `{:ok, machine}` |
+  | `:branch_accept` | `[source_key, spec, fingerprint, child_name, capacity, now]` | `{:ok, child}` |
+  | `:branch_advance` | `[source_key, source_guard, child_id, expected_state, change, now]` | `{:ok, child}` |
+  | `:branch_resolve` | `[source_key, source_guard, child_id, source_or_absent, child_or_absent, now]` | `{:ok, child}` |
+  | `:branch_retire` | `[source_key, source_guard, child_id, now]` | `{:ok, child}` |
+  | `:branch_release_storage` | `[source_key, source_guard, child_id, now]` | `{:ok, child}` |
+  | `:branch_release` | `[child_key, expected_version, now]` | `{:ok, child}` |
+  | `:branch_release_advance` | `[child_key, child_guard, expected_state, change, now]` | `{:ok, child}` |
+
+  `managed_branches: 1` additionally requires all branch operations. Admission
+  atomically locks both scoped identities, the source operation slot, worker name
+  ownership and combined worker capacity. Matching child fingerprint plus source
+  identity deduplicates even after deletion; any other occupied child ID conflicts.
+  Persist both records and resource projections in one transaction, rolling back
+  the source if child persistence fails. Guarded pair operations validate the
+  source guard, recorded relationship and expected child state, never trusting a
+  name alone. Release advances use the child's guard and expected branch state.
+  A repeated release with its original submitted version returns stored evidence.
+  These transactions must serialize with commands, files, PTYs, capture, export
+  and lifecycle admission across controllers sharing the store.
+
+  `BranchOps` defines branch transitions. Cancellation before dispatch unlocks the
+  source and releases extra capacity. After dispatch, uncertainty retains the lock
+  and resources. Resolve requires caller-confirmed quiescence plus verified
+  ownership or absence; it never manufactures a creation receipt or replays work.
+  Retirement requires child deletion and quiescence; it releases only the source
+  dependency. Storage release additionally requires source deletion and host
+  confirmation of backing cleanup. Both source and child absence are verified by
+  the caller. Project `RecordOps.accounted_resources/1` even for deleted children:
+  the full backing allowance remains until branch state `:closed`. Never garbage
+  collect tombstones or branch history. Run the shared `BranchContract` scenarios
+  against each adapter, including concurrent admission and transactional rollback.
 
   `managed_checkpoints: 1` additionally requires every capture operation and
   resource projection from `RecordOps.accounted_resources/1`, including
@@ -408,6 +440,53 @@ defmodule SmolBox.Store do
               | non_neg_integer()
             ]) :: machine_result()
   @callback machine(context(), :capture_release, [
+              ManagedMachine.key() | guard() | String.t() | non_neg_integer()
+            ]) :: machine_result()
+  @type branch_change ::
+          :dispatching
+          | :unknown
+          | :failed
+          | :cancelled
+          | {:observed, SmolBox.Machine.t()}
+          | {:complete, SmolBox.Machine.t()}
+  @callback machine(context(), :branch_accept, [
+              ManagedMachine.key()
+              | SmolBox.BranchSpec.t()
+              | String.t()
+              | capacity()
+              | non_neg_integer()
+            ]) :: machine_result()
+  @callback machine(context(), :branch_advance, [
+              ManagedMachine.key()
+              | guard()
+              | String.t()
+              | SmolBox.Branch.state()
+              | branch_change()
+              | non_neg_integer()
+            ]) :: machine_result()
+  @callback machine(context(), :branch_resolve, [
+              ManagedMachine.key()
+              | guard()
+              | String.t()
+              | SmolBox.Machine.t()
+              | :absent
+              | non_neg_integer()
+            ]) :: machine_result()
+  @callback machine(context(), :branch_retire, [
+              ManagedMachine.key() | guard() | String.t() | non_neg_integer()
+            ]) :: machine_result()
+  @callback machine(context(), :branch_release, [
+              ManagedMachine.key() | pos_integer() | non_neg_integer()
+            ]) :: machine_result()
+  @callback machine(context(), :branch_release_advance, [
+              ManagedMachine.key()
+              | guard()
+              | SmolBox.Branch.state()
+              | branch_change()
+              | non_neg_integer()
+            ]) :: machine_result()
+
+  @callback machine(context(), :branch_release_storage, [
               ManagedMachine.key() | guard() | String.t() | non_neg_integer()
             ]) :: machine_result()
   @optional_callbacks machine: 3

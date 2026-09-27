@@ -1,0 +1,161 @@
+{
+  "date": "2026-09-27",
+  "platform": "Linux x86_64",
+  "runtime_version": "1.19.0",
+  "runtime_sha256": "8caeb3b6e7d834493a578b0fe8bd1e7aa02e68fba6d61bcf70fdbec41a27ce68",
+  "source": "Approved idle offline bare checkpoint; 1 CPU, 256 MiB RAM, 1 GiB storage and overlay",
+  "seed_sha256": "a8e4ba5d97313dd2ed6bf353329190aab44913c7338e8560779cb8cead636b97",
+  "storage": "Encrypted PostgreSQL adapter; separate prepare/verify/retire/release-storage BEAM processes",
+  "acceptance": {
+    "running_leaf_children": 2,
+    "disk_and_ram_preserved": true,
+    "source_and_sibling_isolation": true,
+    "controller_restart_with_durable_store": true,
+    "child_stop_start_preserved_disk": true,
+    "source_delete_blocked_before_retirement": true,
+    "child_absence_verified": true,
+    "source_generation_retained_after_children_deleted": true,
+    "extra_backing_slots_after_child_deletion": 2,
+    "extra_backing_slots_after_dependency_retirement_and_source_deletion": 2,
+    "source_generation_absent_after_source_deletion": true,
+    "explicit_storage_release_zeroed_reservations": true,
+    "history_retained": true
+  },
+  "held": {
+    "guest_protocol": "smolvm-branch-ready",
+    "held_child_stop_rejected": true,
+    "explicit_release": true,
+    "duplicate_original_release_deduplicated": true,
+    "disk_and_ram_preserved": true,
+    "child_and_source_absence_verified": true,
+    "backing_removed_before_release": true,
+    "reservations_released": true
+  },
+  "host_observations": {
+    "final_machine_inventory": {
+      "machines": []
+    },
+    "remaining_machine_directories": [],
+    "temporary_staging_empty": true,
+    "shared_approved_seed_cache_retained": true
+  },
+  "phase_evidence": {
+    "linux-prepare.log": {
+      "sha256": "edfd936030f9db762557c92bb9bf7bcb7a5122fcab8ebc934196c4a2c622adc2",
+      "results": [
+        {
+          "source_name": "capture-5mlmrl4k5phb7loecagu",
+          "phase": "prepared",
+          "children": [
+            [
+              "checkpoint-demo",
+              "branches-demo-one"
+            ],
+            [
+              "checkpoint-demo",
+              "branches-demo-two"
+            ]
+          ],
+          "running_source": true
+        }
+      ]
+    },
+    "linux-verify.log": {
+      "sha256": "b8bc4c3dbc382379a15dfc9cab0cf65c4d21e2730bf8c259342bb3c38467f1b9",
+      "results": [
+        {
+          "source_name": "capture-5mlmrl4k5phb7loecagu",
+          "phase": "verified",
+          "children": [],
+          "backing_allowance_retained": true,
+          "child_absence_verified": true,
+          "disk_preserved": true,
+          "independent_copies": true,
+          "ram_preserved": true,
+          "source_unchanged": true
+        }
+      ]
+    },
+    "linux-retire.log": {
+      "sha256": "4ffaa7837d9a3e976cbdf44e12da76cf164c79c27d57a0b44a953e71cdd0f56a",
+      "results": [
+        {
+          "source_name": "capture-5mlmrl4k5phb7loecagu",
+          "phase": "retired",
+          "children": [],
+          "backing_allowance_retained": true,
+          "source_absence_verified": true,
+          "history_retained": true
+        }
+      ]
+    },
+    "linux-release-held.log": {
+      "sha256": "ed034f06143219900d13789f86eb570fc0554c911bb0e63fb4ceca7857e57ffb",
+      "results": [
+        {
+          "source_name": "capture-5mlmrl4k5phb7loecagu",
+          "phase": "storage-released",
+          "children": [],
+          "history_retained": true,
+          "reservations_released": true
+        },
+        {
+          "source_name": "capture-644rsnyuywrqchz2kkas",
+          "phase": "held-released",
+          "children": [],
+          "child_absence_verified": true,
+          "duplicate_release_deduplicated": true,
+          "explicit_release": true
+        }
+      ]
+    },
+    "linux-held-retire.log": {
+      "sha256": "02c66ef5d015f3a97517066052f98be29426f3656b0bb45b7a802a5e28c545f1",
+      "results": [
+        {
+          "source_name": "capture-644rsnyuywrqchz2kkas",
+          "phase": "retired",
+          "children": [],
+          "backing_allowance_retained": true,
+          "source_absence_verified": true,
+          "history_retained": true
+        }
+      ]
+    },
+    "linux-held-release-storage.log": {
+      "sha256": "357f1e8c72f5f259827f3c79dd7ee22f91c82d2c0dcdcfbbffe59af8289a2a1b",
+      "results": [
+        {
+          "source_name": "capture-644rsnyuywrqchz2kkas",
+          "phase": "storage-released",
+          "children": [],
+          "history_retained": true,
+          "reservations_released": true
+        }
+      ]
+    }
+  },
+  "simulated_coverage": [
+    "Lost creation and release HTTP responses",
+    "Store failures and controller restart at dispatch and receipt boundaries",
+    "Concurrent controller admission and cancellation with late responses",
+    "Ownership mismatch and unavailable observations",
+    "Atomic PostgreSQL source/child rollback and retained resource projections"
+  ],
+  "limitations": [
+    "Host asserts idle state, request quiescence and backing removal; HTTP cannot attest these",
+    "No macOS live branch campaign",
+    "No arbitrary application, container, network, nested-branch or cross-worker qualification",
+    "No power-loss durability or hard host quota qualification",
+    "Approved source artifact/cache lifetime remains separate from branch generations"
+  ],
+  "validation_notes": [
+    "Linux demonstrated source backing generations survive child deletion. Dependency retirement therefore keeps the full extra allowance until source deletion and explicit host-confirmed storage release."
+  ],
+  "cleanup": {
+    "owned_machines_absent": true,
+    "owned_worker_stopped": true,
+    "owned_database_backed_up_and_dropped": true,
+    "shared_database_server_untouched": true
+  }
+}

@@ -1,7 +1,7 @@
 defmodule SmolBox.DurableHost.MachineStoreTest do
   use ExUnit.Case, async: false
   alias SmolBox.DurableHost.{Database, Repo, Store}
-  alias SmolBox.Store.{Contract, ExportContract, ImageContract, MachineContract}
+  alias SmolBox.Store.{BranchContract, Contract, ExportContract, ImageContract, MachineContract}
 
   setup do
     partition = "machines-" <> Base.url_encode64(:crypto.strong_rand_bytes(12), padding: false)
@@ -32,6 +32,41 @@ defmodule SmolBox.DurableHost.MachineStoreTest do
     test "PostgreSQL capture contract: #{scenario}", %{store: store} do
       apply(SmolBox.Store.CaptureContract, unquote(scenario), [Store, store])
     end
+  end
+
+  for scenario <- [:admission, :cancellation, :unknown, :competition] do
+    test "PostgreSQL branch contract: #{scenario}", %{store: store} do
+      apply(SmolBox.Store.BranchContract, unquote(scenario), [Store, store])
+    end
+  end
+
+  test "failed child persistence rolls back the source lock and capacity", %{store: store} do
+    source = BranchContract.running(Store, store)
+    constraint = "reject_branch_child_" <> Integer.to_string(System.unique_integer([:positive]))
+
+    Database.query(
+      store,
+      "ALTER TABLE smolbox_managed_machines ADD CONSTRAINT #{constraint} CHECK (execution_id <> 'child' OR partition <> '#{store.partition}')",
+      []
+    )
+
+    on_exit(fn ->
+      Database.query(
+        store,
+        "ALTER TABLE smolbox_managed_machines DROP CONSTRAINT #{constraint}",
+        []
+      )
+    end)
+
+    assert {:error, %{category: :store}} =
+             BranchContract.accept(Store, store, source)
+
+    assert {:ok, ^source} = Store.machine(store, :fetch, [{source.scope, source.id}])
+
+    assert {:error, %{category: :not_found}} =
+             Store.machine(store, :fetch, [{source.scope, "child"}])
+
+    assert {:ok, %{slots: 1, disk_gb: 2}} = Store.usage(store, "worker")
   end
 
   test "PostgreSQL image pull storage contract", %{store: store} do

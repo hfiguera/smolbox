@@ -16,7 +16,7 @@ defmodule SmolBox.DurableHost.ManagedCheckpointConfig do
   alias SmolBox.Example.Setup
   alias SmolBox.Runtime.WorkerConfig
 
-  def start(phase) do
+  def start(phase, options \\ []) do
     {:ok, store} =
       Store.new(
         Repo,
@@ -67,7 +67,9 @@ defmodule SmolBox.DurableHost.ManagedCheckpointConfig do
         checkpoints: [seed] ++ List.wrap(approval),
         profiles: [profile],
         checkpoint_policies: [policy],
-        capacity: %{slots: 4, cpus: 4, memory_mb: 8192, disk_gb: 32},
+        branch_policies: Keyword.get(options, :branch_policies, []),
+        capacity:
+          Keyword.get(options, :capacity, %{slots: 4, cpus: 4, memory_mb: 8192, disk_gb: 32}),
         allocation_floor: %{storage_gb: 1, overlay_gb: 1, host_overhead_mb: 768}
       )
 

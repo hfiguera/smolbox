@@ -18,6 +18,10 @@ defmodule SmolBox.Runtime.WorkerConfig do
   for private controller storage and additional capture resources on 1.19.0.
   See `SmolBox.Checkpoints` for idle assertions, quiescence and artifact retention.
 
+  Optional `:branch_policies` approves exact `SmolBox.BranchPolicy` values for
+  same-worker leaf branches on 1.19.0. Extra backing allowances survive child
+  deletion and dependency retirement; see `SmolBox.Branches` for cleanup.
+
   Optional `:export_destinations` approves exact `SmolBox.ExportDestination`
   values for stopped-machine publication on 1.19.0. Each includes additional
   helper resources, immutable tag policy, and a credential reference resolving
@@ -82,6 +86,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
                 sources: [],
                 export_destinations: [],
                 checkpoint_policies: [],
+                branch_policies: [],
                 registry_credentials: nil
               ]
 
@@ -95,6 +100,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
           registry_credentials: {module(), term()} | nil,
           export_destinations: [SmolBox.ExportDestination.t()],
           checkpoint_policies: [SmolBox.CheckpointPolicy.t()],
+          branch_policies: [SmolBox.BranchPolicy.t()],
           profiles: [Profile.t()],
           capacity: Store.capacity(),
           allocation_floor: %{
@@ -151,7 +157,8 @@ defmodule SmolBox.Runtime.WorkerConfig do
              :sources,
              :registry_credentials,
              :export_destinations,
-             :checkpoint_policies
+             :checkpoint_policies,
+             :branch_policies
            ]
        ) and
          Enum.all?(@enforce_keys, &Keyword.has_key?(options, &1)) do
@@ -331,8 +338,16 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   defp export_access?(worker),
     do:
-      exports?(worker) and capture_policies?(worker) and
+      exports?(worker) and capture_policies?(worker) and branch_policies?(worker) and
         SmolBox.RegistryCredentials.valid?(worker.registry_credentials)
+
+  defp branch_policies?(worker),
+    do:
+      Validation.list?(worker.branch_policies, 32) and
+        Enum.all?(
+          worker.branch_policies,
+          &(worker.runtime_version == "1.19.0" and SmolBox.BranchPolicy.validate(&1) == :ok)
+        ) and unique?(worker.branch_policies, & &1.id)
 
   defp capture_policies?(worker),
     do:
