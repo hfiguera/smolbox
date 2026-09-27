@@ -5,7 +5,16 @@ defmodule Workspace.TestWorker do
     do:
       Agent.start_link(
         fn ->
-          %{machines: %{}, files: %{}, commands: [], unavailable: false, lost_exec: false}
+          %{
+            machines: %{},
+            files: %{},
+            commands: [],
+            unavailable: false,
+            lost_exec: false,
+            lost_capture: false,
+            lost_branch: false,
+            saved: %{}
+          }
         end,
         name: __MODULE__
       )
@@ -24,7 +33,7 @@ defmodule Workspace.TestWorker do
     do:
       {json(%{
          "status" => "ok",
-         "version" => "1.17.0",
+         "version" => "1.19.0",
          "machines" => %{"total" => map_size(s.machines), "running" => 0},
          "uptime_seconds" => 0
        }), s}
@@ -38,12 +47,18 @@ defmodule Workspace.TestWorker do
       Map.merge(
         %{
           "state" => "created",
+          "storageGb" => 1,
+          "overlayGb" => 1,
           "createdAt" => 1_700_000_000,
           "mounts" => [],
           "gpu" => false,
           "cuda" => false,
-          "branchable" => false,
-          "image" => input["from"]
+          "branchable" => String.ends_with?(input["from"] || "", ".smolcheckpoint"),
+          "image" =>
+            if(String.ends_with?(input["from"] || "", ".smolcheckpoint"),
+              do: nil,
+              else: input["from"]
+            )
         },
         Map.take(
           input,
@@ -55,7 +70,7 @@ defmodule Workspace.TestWorker do
   end
 
   defp route(r, s) do
-    case String.split(r.path, "/", trim: true) do
+    case String.split(URI.parse(r.path).path, "/", trim: true) do
       ["api", "v1", "machines", name | suffix] ->
         case Map.fetch(s.machines, name) do
           {:ok, machine} -> machine(r, suffix, machine, s)
@@ -69,9 +84,41 @@ defmodule Workspace.TestWorker do
 
   defp machine(%{method: :get}, [], m, s), do: {json(m), s}
 
-  defp machine(%{method: :post}, [op], m, s) when op in ["start", "stop"] do
-    updated = Map.put(m, "state", if(op == "start", do: "running", else: "stopped"))
+  defp machine(%{method: :post} = r, [op], m, s) when op in ["start", "stop"] do
+    updated =
+      m
+      |> Map.put("state", if(op == "start", do: "running", else: "stopped"))
+      |> Map.put(
+        "branchable",
+        String.contains?(r.path, "branchable=true") or m["branchable"]
+      )
+
     {json(updated), %{s | machines: Map.put(s.machines, m["name"], updated)}}
+  end
+
+  defp machine(%{method: :post, mode: {:file, io}}, ["checkpoint"], _m, s) do
+    bytes = Workspace.SavedStateFixture.bytes()
+    :ok = IO.binwrite(io, bytes)
+
+    result =
+      if s.lost_capture,
+        do: uncertain(:checkpoint),
+        else: {:ok, %{size_bytes: byte_size(bytes), sha256: SmolBox.Files.sha256(bytes)}}
+
+    {result, s}
+  end
+
+  defp machine(%{method: :post, body: body}, ["branches"], m, s) do
+    name = Jason.decode!(body)["name"]
+    child = Map.merge(m, %{"name" => name, "branchable" => false, "branchpointHeld" => false})
+
+    next = %{
+      s
+      | machines: Map.put(s.machines, name, child),
+        saved: Map.put(s.saved, name, s.saved[m["name"]])
+    }
+
+    {if(s.lost_branch, do: uncertain(:branch), else: json(child)), next}
   end
 
   defp machine(%{method: :delete}, [], m, s),
@@ -80,6 +127,7 @@ defmodule Workspace.TestWorker do
   defp machine(%{method: :post, body: body, mode: mode}, ["exec" | _], m, s) do
     input = Jason.decode!(body)
     {s, exit_code, stderr} = snapshot_file(input["command"], m, s)
+    {s, stdout} = saved_command(input["command"], m, s)
 
     result =
       cond do
@@ -94,7 +142,7 @@ defmodule Workspace.TestWorker do
           {:ok,
            %SmolBox.Result{
              exit_code: exit_code,
-             stdout: "simulated command output",
+             stdout: stdout,
              stderr: stderr,
              encoding: :lossy_utf8
            }}
@@ -102,7 +150,7 @@ defmodule Workspace.TestWorker do
         true ->
           json(%{
             "exitCode" => exit_code,
-            "stdoutB64" => Base.encode64("simulated command output"),
+            "stdoutB64" => Base.encode64(stdout),
             "stderrB64" => Base.encode64(stderr)
           })
       end
@@ -138,6 +186,27 @@ defmodule Workspace.TestWorker do
   end
 
   defp snapshot_file(_, _, s), do: {s, 0, ""}
+
+  defp saved_command(["/bin/sh", "-lc", text], m, s) do
+    value =
+      cond do
+        String.contains?(text, "printf 'Original recipe") ->
+          "Original recipe: basil and lemon\nPrepared in memory\n"
+
+        String.contains?(text, "printf 'Branch recipe") ->
+          "Branch recipe: ginger and lime\nChanged in branch memory\n"
+
+        true ->
+          s.saved[m["name"]]
+      end
+
+    {%{s | saved: Map.put(s.saved, m["name"], value)}, value || "simulated command output"}
+  end
+
+  defp saved_command(_, _, s), do: {s, "simulated command output"}
+
+  defp uncertain(op),
+    do: {:error, %SmolBox.Error{category: :unknown, operation: op, evidence: :dispatch_uncertain}}
 
   defp json(value), do: {:ok, Jason.encode!(value)}
 

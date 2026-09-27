@@ -25,6 +25,8 @@ defmodule Workspace.Settings do
 
   def build(s) do
     with true <- digest(s["image_path"]) == s["image_sha256"],
+         :ok <- verify_seed(s),
+         {:ok, saved_state} <- Workspace.SavedStateConfig.build(s, home()),
          {:ok, paths} <-
            GuestPaths.new(
              upload_roots: ["/app/project", "/home/dev/.config"],
@@ -46,7 +48,10 @@ defmodule Workspace.Settings do
            Directory.new(Path.join(home(), "objects"), max_file_bytes: max_file_bytes()),
          {:ok, endpoint} <- Worker.new("workspace-worker", s["worker_url"], worker_options()),
          {:ok, client} <-
-           Client.new(endpoint, guest_paths: paths, max_file_bytes: max_file_bytes()),
+           Client.new(endpoint,
+             guest_paths: client_paths(saved_state, paths),
+             max_file_bytes: max_file_bytes()
+           ),
          artifact = %{
            "id" => "workspace-python-v1",
            "architecture" => s["architecture"],
@@ -54,14 +59,14 @@ defmodule Workspace.Settings do
          },
          {:ok, worker} <-
            WorkerConfig.new(
-             client: client,
-             architecture: s["architecture"],
-             platform: platform(s["platform"]),
-             runtime_version: "1.17.0",
-             profiles: [profile],
-             artifacts: [Map.put(artifact, "path", s["image_path"])],
-             allocation_floor: %{storage_gb: 2, overlay_gb: 2, host_overhead_mb: 768},
-             capacity: %{slots: 1, cpus: 1, memory_mb: 1024, disk_gb: 4}
+             [
+               client: client,
+               architecture: s["architecture"],
+               platform: platform(s["platform"]),
+               runtime_version: runtime_version(s),
+               artifacts: [Map.put(artifact, "path", s["image_path"])]
+             ] ++
+               Workspace.SavedStateConfig.worker_options(saved_state, profile)
            ),
          {:ok, store} <- Store.new(Workspace.Repo, s["partition"], s["encryption"]) do
       options = [
@@ -84,7 +89,8 @@ defmodule Workspace.Settings do
          objects: objects,
          client: client,
          profile: profile,
-         artifact: artifact
+         artifact: artifact,
+         saved_state: saved_state
        }}
     else
       _ -> {:error, :configuration_invalid}
@@ -92,6 +98,27 @@ defmodule Workspace.Settings do
   rescue
     _ -> {:error, :configuration_invalid}
   end
+
+  defp client_paths(nil, paths), do: paths
+
+  defp client_paths(_, paths) do
+    {:ok, combined} =
+      GuestPaths.new(
+        upload_roots: ["/workspace" | paths.upload_roots],
+        download_roots: ["/workspace" | paths.download_roots],
+        workdir_roots: ["/workspace" | paths.workdir_roots]
+      )
+
+    combined
+  end
+
+  def runtime_version(s), do: Map.get(s, "runtime_version", "1.17.0")
+
+  defp verify_seed(%{"saved_state" => s}) do
+    if digest(s["path"]) == s["sha256"], do: :ok, else: {:error, :seed_digest_mismatch}
+  end
+
+  defp verify_seed(_), do: :ok
 
   def digest(path) do
     path
@@ -126,8 +153,8 @@ defmodule Workspace.Settings do
   defp worker_options do
     [
       allow_insecure_loopback: true,
-      operation_timeout_ms: 660_000,
-      receive_timeout_ms: 655_000,
+      operation_timeout_ms: 900_000,
+      receive_timeout_ms: 900_000,
       max_request_bytes: max_file_bytes(),
       max_response_bytes: 33_554_432
     ]

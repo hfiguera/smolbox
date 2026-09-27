@@ -2,9 +2,10 @@ defmodule Workspace.Fixture do
   @moduledoc false
   import ExUnit.Assertions
   alias Ecto.Adapters.SQL.Sandbox
+  alias SmolBox.Runtime
   alias Workspace.{Settings, Workspaces}
 
-  def start do
+  def start(options \\ []) do
     owner = Sandbox.start_owner!(Workspace.Repo, shared: true)
     ExUnit.Callbacks.on_exit(fn -> Sandbox.stop_owner(owner) end)
     root = Path.join(System.tmp_dir!(), "workspace-test-" <> Ecto.UUID.generate())
@@ -28,6 +29,19 @@ defmodule Workspace.Fixture do
       "fingerprint" => :crypto.strong_rand_bytes(32),
       "encryption" => :crypto.strong_rand_bytes(32)
     }
+
+    s = Map.put(s, "runtime_version", "1.19.0")
+
+    s =
+      if options[:saved_state] do
+        root |> Path.join("captures") |> File.mkdir_p!()
+        root |> Path.join("captures") |> File.chmod!(0o700)
+        seed = Path.join(root, "seed.smolcheckpoint")
+        File.write!(seed, "simulated seed")
+        Map.put(s, "saved_state", %{"path" => seed, "sha256" => Settings.digest(seed)})
+      else
+        s
+      end
 
     {:ok, c} = Settings.build(s)
     ExUnit.Callbacks.start_supervised!(Workspace.TestWorker)
@@ -80,6 +94,31 @@ defmodule Workspace.Fixture do
           Process.sleep(10)
           wait(fetch, predicate, deadline)
         )
+  end
+
+  # Killing a borrower inside an SQL Sandbox transaction disconnects its shared
+  # connection and rolls back the test's durable state. Pause dispatch, then let
+  # existing runtime tasks return the connection before a simulated restart.
+  def stop_runtime do
+    coordinator = Runtime.coordinator(Settings.runtime())
+    :ok = :sys.suspend(coordinator)
+    %{tasks: tasks} = :sys.get_state(coordinator)
+    await_tasks(tasks, System.monotonic_time(:millisecond) + 5000)
+    ExUnit.Callbacks.stop_supervised!(Runtime)
+  end
+
+  defp await_tasks(tasks, deadline) do
+    case Task.Supervisor.children(tasks) do
+      [] ->
+        :ok
+
+      children ->
+        assert System.monotonic_time(:millisecond) < deadline,
+               "runtime tasks did not finish before sandbox restart: #{inspect(children)}"
+
+        Process.sleep(10)
+        await_tasks(tasks, deadline)
+    end
   end
 
   def execution(token), do: SmolBox.fetch(Settings.runtime(), Settings.scope(), token)

@@ -23,7 +23,7 @@ defmodule Workspace.MixProject do
         {:credo, "~> 1.7.19", only: [:dev, :test], runtime: false},
         {:ex_slop, "~> 0.4.5", only: [:dev, :test], runtime: false},
         {:ex_dna, "~> 1.5.4", only: [:dev, :test], runtime: false},
-        {:smolbox, "~> 0.2.0"},
+        {:smolbox, "~> 0.3.0"},
         {:phoenix, "~> 1.8.0"},
         {:phoenix_live_view, "~> 1.1.0"},
         {:phoenix_html, "~> 4.3"},

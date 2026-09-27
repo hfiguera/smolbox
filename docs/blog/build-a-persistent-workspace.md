@@ -58,10 +58,11 @@ you need:
   Image preparation and host disk tools matter; follow the [example prerequisites][example].
 
 The new app lives in the repository, so clone it even if you already installed
-the Hex package:
+the Hex package. The tag below preserves this walkthrough’s original app,
+including its SmolBox 0.2.0 dependency and smolvm 1.17.0 worker pin:
 
 ```sh
-git clone https://github.com/hfiguera/smolbox.git
+git clone --branch v0.3.0 --depth 1 https://github.com/hfiguera/smolbox.git
 cd smolbox/examples/community_workspace
 mix deps.get
 npm --prefix assets ci
@@ -246,8 +247,8 @@ environment, or a place to reproduce bugs? [Open a discussion through an issue][
 with the workflow and the failure you most need it to handle.
 
 [hex]: https://hex.pm/packages/smolbox/0.2.0
-[example]: https://github.com/hfiguera/smolbox/tree/main/examples/community_workspace
-[recovery]: https://github.com/hfiguera/smolbox/tree/main/examples/community_workspace#identity-retention-and-recovery
-[validation]: https://github.com/hfiguera/smolbox/blob/main/examples/community_workspace/docs/validation.md
+[example]: https://github.com/hfiguera/smolbox/tree/v0.3.0/examples/community_workspace
+[recovery]: https://github.com/hfiguera/smolbox/tree/v0.3.0/examples/community_workspace#identity-retention-and-recovery
+[validation]: https://github.com/hfiguera/smolbox/blob/v0.3.0/examples/community_workspace/docs/validation.md
 [checkpoints]: ../prepare-once-run-in-a-fresh-vm/
 [issues]: https://github.com/hfiguera/smolbox/issues

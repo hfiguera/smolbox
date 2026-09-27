@@ -22,7 +22,8 @@ defmodule Workspace.Workspaces do
            preview_url: c.settings["preview_url"],
            service_port: c.settings["service_port"],
            connection: Connection.status(),
-           usage: Store.usage(c.store, "workspace-worker")
+           usage: Store.usage(c.store, "workspace-worker"),
+           saved_state: Workspace.SavedState.snapshot(c)
          }}
       end
     end)

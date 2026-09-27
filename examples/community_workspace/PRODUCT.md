@@ -8,7 +8,7 @@ web
 
 ## Stack
 
-Phoenix LiveView, PostgreSQL, published SmolBox ~> 0.2.0. The user chose code-first implementation with final browser review.
+Phoenix LiveView, PostgreSQL, published SmolBox ~> 0.3.0. The user chose code-first implementation with final browser review.
 
 ## Users
 
@@ -24,11 +24,11 @@ SmolBox owns machine lifetime independently of execution lifetime. The example e
 
 ## Operating Context
 
-A local browser on Linux or macOS, a separately provisioned smolvm 1.17.0 worker, one approved Python image and PostgreSQL. The app must survive its own restart. Worker and database prerequisites are explicit.
+A local browser on Linux or macOS, a separately provisioned smolvm worker (new configurations: 1.19.0; old pins preserved), one approved Python image and PostgreSQL. The app must survive its own restart. Worker and database prerequisites are explicit.
 
 ## Capabilities and Constraints
 
-Persistent lifecycle, foreground and background commands, browser PTY, approved file transfers, mapped HTTP service, startup workload and console diagnostics. No automatic workload restart policy, application log capture, multi-user hosting, image registry or process supervision. Terminal disconnect does not establish guest termination.
+Persistent lifecycle, foreground and background commands, browser PTY, approved file transfers, mapped HTTP service, startup workload and console diagnostics. A separate Linux saved state walkthrough uses an approved offline bare seed, checkpoint capture, one live branch, fixed disk/RAM comparison commands and explicit host-confirmed cleanup. No automatic workload restart policy, application log capture, multi-user hosting, image registry or process supervision. Terminal disconnect does not establish guest termination.
 
 ## Brand Commitments
 
@@ -36,7 +36,7 @@ SmolBox name; clear, candid developer language. No invented adoption claims or s
 
 ## Evidence on Hand
 
-Published 0.2.0 APIs, existing durable-host examples, platform qualification reports and release acceptance scenario. No customer or marketing proof is supplied.
+Published 0.3.0 APIs, existing durable-host examples, platform qualification reports and release acceptance scenario. No customer or marketing proof is supplied.
 
 ## Product Principles
 

@@ -36,9 +36,12 @@ image pulls with typed results and conservative handling of lost responses.
 Shared host caches remain an operator responsibility.
 
 Try the [community workspace app](https://github.com/hfiguera/smolbox/tree/main/examples/community_workspace) for a
-browser walkthrough of SmolBox 0.2.0: persistent machines, commands, a real
+browser walkthrough of SmolBox 0.3.0: persistent machines, commands, a real
 terminal, larger file transfers, background launch evidence and a mapped service,
-with PostgreSQL-backed recovery.
+with PostgreSQL-backed recovery. A separate saved state walkthrough lets you
+prepare an original, save a checkpoint, change a branch and compare both machines.
+The [original tutorial app](https://github.com/hfiguera/smolbox/tree/v0.3.0/examples/community_workspace)
+remains available for readers following the earlier blog post.
 
 [Physical Linux provisioning measurements](docs/provisioning-performance.md) compare
 fresh machines, exports, checkpoints, branches and reuse, including preparation,

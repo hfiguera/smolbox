@@ -13,6 +13,7 @@ defmodule WorkspaceWeb.WorkspaceLive do
        busy: false,
        refreshing: false,
        notice: nil,
+       saved_notice: nil,
        terminal_warning: false,
        announcement: "",
        logs: nil,
@@ -131,6 +132,25 @@ defmodule WorkspaceWeb.WorkspaceLive do
            "The response was interrupted. Inspect the recorded request; do not repeat uncertain work under a new identity."
        )}
 
+  def handle_async(:saved_state, {:ok, result}, socket) do
+    message =
+      case result do
+        {:ok, _} -> "Request recorded. The state below will update when confirmed."
+        error -> error_message(error)
+      end
+
+    {:noreply, assign(socket, busy: false, saved_notice: message)}
+  end
+
+  def handle_async(:saved_state, {:exit, _}, socket),
+    do:
+      {:noreply,
+       assign(socket,
+         busy: false,
+         saved_notice:
+           "Response interrupted. Read the durable state before continuing; no work is replayed."
+       )}
+
   def handle_async(:logs, {:ok, {:ok, result}}, socket),
     do: {:noreply, assign(socket, logs: Enum.join(result.lines, "\n"))}
 
@@ -140,6 +160,19 @@ defmodule WorkspaceWeb.WorkspaceLive do
        assign(socket,
          logs: "Console diagnostics are unavailable. This does not establish machine absence."
        )}
+
+  def handle_event("saved-state", %{"action" => action} = params, socket) do
+    if socket.assigns.busy or socket.assigns.error != nil do
+      {:noreply, socket}
+    else
+      confirmed = params["confirmed"] == "true"
+
+      {:noreply,
+       socket
+       |> assign(busy: true, saved_notice: nil)
+       |> start_async(:saved_state, fn -> Workspace.SavedState.act(action, confirmed) end)}
+    end
+  end
 
   def handle_event("create", _, socket), do: mutate(socket, &Workspaces.create/0)
 
@@ -516,16 +549,19 @@ defmodule WorkspaceWeb.WorkspaceLive do
         <a href="/" class="brand" aria-label="SmolBox workspace home">
           <svg viewBox="0 0 28 28" aria-hidden="true"><path d="M4 7h20v17H4zM4 7l5-4h10l5 4M10 13h8M10 18h5" /></svg>SmolBox<span>Workspace</span>
         </a>
-        <span class="local-note">Local example <span class="version">v0.2.0</span></span>
+        <span class="local-note">Local example <span class="version">v0.3.0</span></span>
       </header>
       <main id="main">
+        <nav class="workspace-nav page-nav" aria-label="Workspace examples">
+          <a href="#workspace-title">Everyday workspace</a><a href="#saved-state">Saved state</a>
+        </nav>
         <div class="page-heading">
           <div>
             <h1>A little room to build.</h1>
             <p>Run, explore, and come back. Your machine stays yours until you delete it.</p>
           </div>
           <a
-            href="https://hexdocs.pm/smolbox/0.2.0/"
+            href="https://hexdocs.pm/smolbox/0.3.0/"
             target="_blank"
             rel="noopener noreferrer"
             class="text-link"
@@ -554,7 +590,7 @@ defmodule WorkspaceWeb.WorkspaceLive do
             {label(@error)}. Your worker and database must be available before this app can manage a workspace.
           </p>
           <ol>
-            <li>Start PostgreSQL and your dedicated smolvm 1.17.0 worker.</li>
+            <li>Start PostgreSQL and your dedicated smolvm worker at its configured version.</li>
             <li>
               Set <code>DATABASE_URL</code>
               and run the example’s <code>mix workspace.setup</code>
@@ -939,6 +975,12 @@ defmodule WorkspaceWeb.WorkspaceLive do
             </p>
           </details>
         </section>
+        <WorkspaceWeb.SavedStatePanel.panel
+          :if={@snapshot}
+          result={Map.get(@snapshot, :saved_state, {:ok, nil})}
+          busy={@busy || @error != nil}
+          notice={@saved_notice}
+        />
         <div :if={!@snapshot && !@error} class="loading" role="status">
           Reading your durable workspace…
         </div>
