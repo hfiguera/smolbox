@@ -2,6 +2,7 @@ defmodule Workspace.Fixture do
   @moduledoc false
   import ExUnit.Assertions
   alias Ecto.Adapters.SQL.Sandbox
+  alias SmolBox.Runtime
   alias Workspace.{Settings, Workspaces}
 
   def start(options \\ []) do
@@ -93,6 +94,31 @@ defmodule Workspace.Fixture do
           Process.sleep(10)
           wait(fetch, predicate, deadline)
         )
+  end
+
+  # Killing a borrower inside an SQL Sandbox transaction disconnects its shared
+  # connection and rolls back the test's durable state. Pause dispatch, then let
+  # existing runtime tasks return the connection before a simulated restart.
+  def stop_runtime do
+    coordinator = Runtime.coordinator(Settings.runtime())
+    :ok = :sys.suspend(coordinator)
+    %{tasks: tasks} = :sys.get_state(coordinator)
+    await_tasks(tasks, System.monotonic_time(:millisecond) + 5000)
+    ExUnit.Callbacks.stop_supervised!(Runtime)
+  end
+
+  defp await_tasks(tasks, deadline) do
+    case Task.Supervisor.children(tasks) do
+      [] ->
+        :ok
+
+      children ->
+        assert System.monotonic_time(:millisecond) < deadline,
+               "runtime tasks did not finish before sandbox restart: #{inspect(children)}"
+
+        Process.sleep(10)
+        await_tasks(tasks, deadline)
+    end
   end
 
   def execution(token), do: SmolBox.fetch(Settings.runtime(), Settings.scope(), token)

@@ -27,20 +27,31 @@ defmodule Workspace.SavedStateTest do
     s =
       wait(
         c,
-        &(SavedState.success?(&1.commands["read-original"]) and
-            SavedState.success?(&1.commands["read-branch"]))
+        &Enum.all?(&1.commands, fn {_key, execution} ->
+          SavedState.success?(execution) and execution.cleanup == :complete
+        end)
       )
 
     assert SavedState.output(s.commands["read-original"]) =~ "basil and lemon"
     assert SavedState.output(s.commands["read-branch"]) =~ "ginger and lime"
     assert {:error, :saved_state_action_not_allowed} = SavedState.act("change")
     assert {:error, :saved_state_action_not_allowed} = SavedState.act("delete-source", true)
-    stop_supervised!(Runtime)
+    Fixture.stop_runtime()
     start_supervised!({Runtime, c.options})
     assert {:ok, restored} = SavedState.snapshot(c)
     assert restored.source.id == s.source.id
     assert restored.capture.result == s.capture.result
-    assert restored.commands == s.commands
+
+    for {key, before_restart} <- s.commands do
+      after_restart = Map.fetch!(restored.commands, key)
+      assert after_restart.id == before_restart.id
+      assert after_restart.scope == before_restart.scope
+      assert after_restart.result == before_restart.result
+      assert SavedState.success?(after_restart)
+      assert after_restart.cleanup == :complete
+    end
+
+    assert [_, _, _, _] = TestWorker.snapshot().commands
     assert {:ok, view, _} = live(Map.put(build_conn(), :host, "localhost"), "/")
     render_async(view)
     assert has_element?(view, "#saved-state", "Both reads complete")
@@ -74,7 +85,7 @@ defmodule Workspace.SavedStateTest do
     TestWorker.configure(lost_capture: true)
     assert {:ok, _} = SavedState.act("capture", true)
     wait(c, &match?(%{state: :unknown}, &1.capture))
-    stop_supervised!(Runtime)
+    Fixture.stop_runtime()
     start_supervised!({Runtime, c.options})
     assert {:error, :saved_state_action_not_allowed} = SavedState.act("capture", true)
     assert {:error, :saved_state_action_not_allowed} = SavedState.act("branch", true)
@@ -93,7 +104,7 @@ defmodule Workspace.SavedStateTest do
     s = wait(c, &match?(%{branch: %{state: :unknown}}, &1.child))
     assert {:ok, %{disk_gb: disk}} = s.usage
     assert disk >= 13
-    stop_supervised!(Runtime)
+    Fixture.stop_runtime()
     start_supervised!({Runtime, c.options})
 
     for action <- ~w(branch change compare delete-source delete-child) do
@@ -105,7 +116,7 @@ defmodule Workspace.SavedStateTest do
 
   test "unavailable controller cannot be mistaken for an empty walkthrough", %{c: c} do
     prepared(c)
-    stop_supervised!(Runtime)
+    Fixture.stop_runtime()
     assert {:error, _} = SavedState.snapshot(c)
     assert {:error, _} = SavedState.act("create")
     assert map_size(TestWorker.snapshot().machines) == 1

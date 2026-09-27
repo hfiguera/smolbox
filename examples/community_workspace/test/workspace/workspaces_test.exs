@@ -47,7 +47,7 @@ defmodule Workspace.WorkspacesTest do
       &is_nil(&1.active_execution)
     )
 
-    stop_supervised!(SmolBox.Runtime)
+    Fixture.stop_runtime()
     start_supervised!({SmolBox.Runtime, c.options})
     assert {:ok, ^id} = Workspaces.create()
     assert {:ok, _} = Workspaces.command(id, token, params())
