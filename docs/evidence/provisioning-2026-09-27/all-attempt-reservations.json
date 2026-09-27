@@ -1,0 +1,74 @@
+[
+  {
+    "partition": "pilot1",
+    "usage": {
+      "slots": 0,
+      "cpus": 0,
+      "memory_mb": 0,
+      "disk_gb": 0
+    }
+  },
+  {
+    "partition": "pilot2",
+    "usage": {
+      "slots": 0,
+      "cpus": 0,
+      "memory_mb": 0,
+      "disk_gb": 0
+    }
+  },
+  {
+    "partition": "pilot3",
+    "usage": {
+      "slots": 0,
+      "cpus": 0,
+      "memory_mb": 0,
+      "disk_gb": 0
+    }
+  },
+  {
+    "partition": "pilot4",
+    "usage": {
+      "slots": 0,
+      "cpus": 0,
+      "memory_mb": 0,
+      "disk_gb": 0
+    }
+  },
+  {
+    "partition": "pilot5",
+    "usage": {
+      "slots": 0,
+      "cpus": 0,
+      "memory_mb": 0,
+      "disk_gb": 0
+    }
+  },
+  {
+    "partition": "campaign1",
+    "usage": {
+      "slots": 0,
+      "cpus": 0,
+      "memory_mb": 0,
+      "disk_gb": 0
+    }
+  },
+  {
+    "partition": "campaign2",
+    "usage": {
+      "slots": 0,
+      "cpus": 0,
+      "memory_mb": 0,
+      "disk_gb": 0
+    }
+  },
+  {
+    "partition": "campaign3",
+    "usage": {
+      "slots": 0,
+      "cpus": 0,
+      "memory_mb": 0,
+      "disk_gb": 0
+    }
+  }
+]
