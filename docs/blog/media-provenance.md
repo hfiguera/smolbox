@@ -226,3 +226,24 @@ that source. The in-page figure is original HTML, CSS and JavaScript, with finit
 reader-initiated motion. It illustrates alternative outcomes and does not simulate
 or contact a worker. `validation.json` records fresh native macOS terminal results
 and distinguishes them from simulated browser owner tests.
+
+## Choosing reusable state — September 27, 2026
+
+`exports-checkpoints-or-branches/results.svg` and `results-mobile.svg` are
+original Matplotlib charts derived from
+`docs/evidence/provisioning-2026-09-27/summary.json`: cumulative RAM result
+medians and p95, converted from milliseconds to seconds. They use the same zero
+baseline and scale; the mobile version moves labels above each row. The linked
+campaign report supplies the methodology, preparation costs and limitations.
+These are existing physical Linux measurements, not a new campaign.
+
+`reusable-state-social.svg` is an original geometric composition, rendered to the
+1200 × 630 `reusable-state.png` with Matplotlib. The PNG embeds its origin. No
+external imagery or generated illustrations are used; no font files are shipped.
+
+The inline HTML/SVG diagram and scoped CSS/JavaScript are original explanatory
+material. Reader-controlled, finite playback distinguishes disk-only exports,
+disk/RAM checkpoints and live branches, including retained cleanup obligations.
+It does not contact a worker or visualize measured timings. Manual stepping,
+pause, visibility/offscreen pause and reduced motion are supported. The authored
+static export explanation remains visible without JavaScript.

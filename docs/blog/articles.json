@@ -1,5 +1,16 @@
 [
   {
+    "slug": "exports-checkpoints-or-branches",
+    "title": "Exports, checkpoints or branches: what should you reuse?",
+    "description": "Choose what your next machine inherits. Compare disk artifacts, saved memory and live copies, with real Linux measurements and the cleanup each choice leaves behind.",
+    "published_on": "2026-09-27",
+    "updated_on": "2026-09-27",
+    "version": "0.3.0",
+    "category": "Architecture and tradeoffs",
+    "image": "reusable-state.png",
+    "image_alt": "Exports preserve supported disk state; checkpoints save disk and RAM; branches create a child from a live source. Three different ways to reuse prepared work."
+  },
+  {
     "slug": "your-browser-disconnected",
     "title": "Your browser disconnected. Is the command still running?",
     "description": "Follow a terminal session through a lost connection. Learn when you can reconnect, what an exit proves, and why an uncertain command should not be replayed.",

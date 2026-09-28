@@ -36,6 +36,10 @@
   </div>
   <section class="next-step" aria-labelledby="next-title">
     <%= cond do %>
+    <% @article["slug"] == "exports-checkpoints-or-branches" -> %>
+    <h2 id="next-title">Make a change. Compare both machines.</h2>
+    <p>The saved state workspace walks through preparation, capture, a live branch and explicit cleanup. Its README includes the approved Linux seed and storage prerequisites.</p>
+    <a href="https://github.com/hfiguera/smolbox/tree/7cb98bfb62ccf9e72cd3dd82bd5d8c7177374bc0/examples/community_workspace#saved-state-prepare-checkpoint-branch-compare">Open the saved state walkthrough <%= SmolBox.Blog.HTML.arrow(:right) %></a>
     <% @article["slug"] == "your-browser-disconnected" -> %>
     <h2 id="next-title">Try a terminal with an observed exit.</h2>
     <p>Run the durable terminal example, inspect its result, and follow the recovery guide before experimenting with an uncertain session.</p>
