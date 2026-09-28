@@ -57,7 +57,13 @@ defmodule Workspace.SavedStateTest do
     assert has_element?(view, "#saved-state", "Both reads complete")
     assert has_element?(view, "#saved-state", "basil and lemon")
     assert has_element?(view, "#saved-state", "ginger and lime")
-    assert has_element?(view, "#saved-cleanup", "never delete host files")
+    assert has_element?(view, "#saved-cleanup", "everyday workspace stays untouched")
+    refute has_element?(view, "#saved-delete-capture")
+    assert has_element?(view, ".saved-capture-files", s.capture.result.path)
+    assert has_element?(view, ".saved-capture-files", "Still on disk")
+    render_submit(view, "saved-state", %{"action" => "release-capture", "confirmed" => "true"})
+    render_async(view)
+    assert has_element?(view, ".saved-notice", "still exists on the host")
     GenServer.stop(view.pid)
     wait(c, &SavedState.allowed?(&1, "delete-child"))
     assert {:ok, _} = SavedState.act("delete-child", true)
@@ -68,9 +74,23 @@ defmodule Workspace.SavedStateTest do
     s = wait(c, &SavedState.allowed?(&1, "release-backing"))
     assert {:ok, %{slots: 1, disk_gb: disk}} = s.usage
     assert disk > 8
-    assert {:error, _} = SavedState.act("release-capture", true)
+    assert {:error, :checkpoint_files_present} = SavedState.act("release-capture", true)
     assert {:ok, _} = SavedState.act("release-backing", true)
     File.rm!(s.capture.result.path)
+    File.write!(s.capture.result.path <> ".partial", "unfinished")
+    assert {:error, :checkpoint_files_present} = SavedState.act("release-capture", true)
+    assert {:ok, retained} = SavedState.snapshot(c)
+    assert [%{state: :absent}, %{state: :present}] = retained.capture_files
+    assert {:ok, %{disk_gb: retained_disk}} = retained.usage
+    assert retained_disk > 0
+    File.rm!(s.capture.result.path <> ".partial")
+    assert {:ok, view, _} = live(Map.put(build_conn(), :host, "localhost"), "/")
+    render_async(view)
+    assert has_element?(view, "#saved-release-capture button:not([disabled])")
+    assert has_element?(view, "#saved-release-capture input[required]")
+    assert has_element?(view, "#capture-cleanup-status", "Both recorded paths are absent")
+    assert {:error, :saved_state_action_not_allowed} = SavedState.act("release-capture")
+    GenServer.stop(view.pid)
     assert {:ok, _} = SavedState.act("release-capture", true)
     assert {:ok, final} = SavedState.snapshot(c)
     assert {:ok, %{slots: 0, disk_gb: 0}} = final.usage
@@ -91,6 +111,80 @@ defmodule Workspace.SavedStateTest do
     assert {:error, :saved_state_action_not_allowed} = SavedState.act("branch", true)
     assert {:error, :saved_state_action_not_allowed} = SavedState.act("delete-source", true)
     assert map_size(TestWorker.snapshot().machines) == 1
+  end
+
+  test "keep preserves the checkpoint and confirmed deletion completes cleanup", %{c: c} do
+    prepared(c)
+    assert {:ok, _} = SavedState.act("capture", true)
+    wait(c, &match?(%{state: :captured}, &1.capture))
+    assert {:ok, _} = SavedState.act("confirm-capture", true)
+    s = wait(c, &SavedState.allowed?(&1, "branch"))
+    assert {:error, :saved_state_action_not_allowed} = SavedState.act("delete-capture", true)
+    assert {:ok, _} = SavedState.act("delete-source", true)
+    wait(c, &SavedState.allowed?(&1, "delete-capture"))
+    assert {:ok, :checkpoint_kept} = SavedState.act("keep-capture")
+    assert File.exists?(s.capture.result.path)
+    assert {:ok, kept} = SavedState.snapshot(c)
+    assert kept.capture.released_at_ms == nil
+    assert {:error, :saved_state_action_not_allowed} = SavedState.act("delete-capture")
+
+    {:ok, view, _} = live(Map.put(build_conn(), :host, "localhost"), "/")
+    render_async(view)
+    assert has_element?(view, "#saved-keep-capture button", "Keep checkpoint")
+    assert has_element?(view, "#saved-delete-capture input[required]")
+    render_submit(view, "saved-state", %{"action" => "delete-capture", "confirmed" => "true"})
+    render_async(view)
+    assert has_element?(view, ".saved-notice", "Checkpoint deleted and reservation released")
+    refute File.exists?(s.capture.result.path)
+    assert {:ok, final} = SavedState.snapshot(c)
+    assert final.capture.released_at_ms
+    assert {:ok, %{disk_gb: 0, slots: 0}} = final.usage
+    assert File.exists?(c.settings["saved_state"]["path"])
+  end
+
+  test "unsafe checkpoint replacements cannot be deleted or release accounting", %{c: c} do
+    prepared(c)
+    assert {:ok, _} = SavedState.act("capture", true)
+    wait(c, &match?(%{state: :captured}, &1.capture))
+    assert {:ok, _} = SavedState.act("confirm-capture", true)
+    s = wait(c, &SavedState.allowed?(&1, "branch"))
+    assert {:ok, _} = SavedState.act("delete-source", true)
+    wait(c, &SavedState.allowed?(&1, "delete-capture"))
+    path = s.capture.result.path
+    bytes = File.read!(path)
+
+    assert {:error, :checkpoint_cleanup_failed} =
+             Workspace.CheckpointCleanup.delete(
+               %{s.capture | machine: {"workspace", "another-machine"}},
+               c.saved_state.capture_policy,
+               SavedState.handle(c, :source)
+             )
+
+    directory = Path.dirname(path)
+    File.rename!(directory, directory <> ".moved")
+    File.ln_s!(directory <> ".moved", directory)
+    assert {:error, :checkpoint_cleanup_failed} = SavedState.act("delete-capture", true)
+    assert File.read!(path) == bytes
+    File.rm!(directory)
+    File.rename!(directory <> ".moved", directory)
+    File.write!(path, "different artifact")
+    assert {:error, :checkpoint_cleanup_failed} = SavedState.act("delete-capture", true)
+    assert File.read!(path) == "different artifact"
+    File.rm!(path)
+    File.ln_s!(c.settings["saved_state"]["path"], path)
+    assert {:error, :checkpoint_cleanup_failed} = SavedState.act("delete-capture", true)
+    assert File.exists?(c.settings["saved_state"]["path"])
+    File.rm!(path)
+    File.write!(path, bytes)
+    File.mkdir!(path <> ".partial")
+    assert {:error, :checkpoint_cleanup_failed} = SavedState.act("delete-capture", true)
+    assert File.read!(path) == bytes
+    assert {:ok, retained} = SavedState.snapshot(c)
+    assert retained.capture.released_at_ms == nil
+    File.rmdir!(path <> ".partial")
+    File.write!(path <> ".partial", "leftover")
+    assert {:ok, :checkpoint_deleted} = SavedState.act("delete-capture", true)
+    assert File.lstat(path <> ".partial") == {:error, :enoent}
   end
 
   test "a lost branch response retains its identity and blocks subsequent work", %{c: c} do

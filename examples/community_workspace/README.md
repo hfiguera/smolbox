@@ -247,10 +247,26 @@ including the everyday workspace. Expand **Finish and clean up**:
    Only then confirm **Release backing allowance**. The library independently
    verifies durable deletion and source/child absence; the checkbox is the host's
    assertion about files the API cannot attest.
-4. The checkpoint evidence disclosure shows its exact private path and digest.
-   Once no consumer needs it, remove its complete file, partial output and any
-   retained copies on the host, then **Release checkpoint reservation**. This call
-   verifies local absence and releases accounting; it never removes files itself.
+4. Choose **Keep checkpoint** to finish with the artifact and its disk reservation
+   retained. This acknowledges the existing retention policy; it does not change
+   the durable capture or create another checkpoint. You can delete it later.
+5. Or expand **Delete checkpoint…** and confirm that no consumer needs the capture,
+   no delayed work can write its files, and no copies remain elsewhere. **Delete
+   checkpoint and release reservation** removes only this configuration's recorded
+   complete file and `.partial` output, verifies absence, then calls the public
+   release API. It is available only after original/child deletion and branch
+   backing release. The seed, other captures and history remain untouched.
+
+The app checks capture ownership, the configured private root, directory types
+and the complete file's recorded digest before deletion. It refuses changed files,
+symlinks and directories in place of files. Run it with private host storage that
+other processes cannot modify during cleanup; it is not a defense against a
+hostile process running as the same OS user. File status refreshes automatically.
+Deletion failures do not release accounting. If release is unconfirmed, inspect
+the durable status and the paths before retrying; when both files are already absent, **Release checkpoint
+reservation** completes accounting after confirmation about any external copies.
+The library release API itself never deletes files. This bounded example performs
+that explicit host operation before calling it.
 
 There is no “delete everything” operation. Neither this cleanup nor a command
 completion deletes the everyday workspace. History and deduplication identities

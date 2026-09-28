@@ -135,8 +135,17 @@ defmodule WorkspaceWeb.WorkspaceLive do
   def handle_async(:saved_state, {:ok, result}, socket) do
     message =
       case result do
-        {:ok, _} -> "Request recorded. The state below will update when confirmed."
-        error -> error_message(error)
+        {:ok, :checkpoint_kept} ->
+          "Walkthrough finished. Your checkpoint is kept, with its disk reservation. You can delete it here later."
+
+        {:ok, :checkpoint_deleted} ->
+          "Checkpoint deleted and reservation released. Walkthrough history is preserved."
+
+        {:ok, _} ->
+          "Request recorded. The state below will update when confirmed."
+
+        error ->
+          error_message(error)
       end
 
     {:noreply, assign(socket, busy: false, saved_notice: message)}
@@ -433,6 +442,22 @@ defmodule WorkspaceWeb.WorkspaceLive do
 
   defp label(value), do: value |> to_string() |> String.replace("_", " ") |> String.capitalize()
   defp error_message({:error, %{category: category}}), do: error_message({:error, category})
+
+  defp error_message({:error, :checkpoint_files_present}),
+    do:
+      "A checkpoint or partial file still exists on the host. Check the paths under Finish and clean up, remove the owned files, then confirm release. The reservation is still retained."
+
+  defp error_message({:error, :checkpoint_cleanup_failed}),
+    do:
+      "Checkpoint cleanup could not finish safely. The reservation is retained. Check the recorded paths and host permissions; changed files or symbolic links require manual inspection. Refresh the file status before trying again."
+
+  defp error_message({:error, :checkpoint_release_pending}),
+    do:
+      "The recorded files were removed, but reservation release was not confirmed. Check the current state below; if still reserved, use Release checkpoint reservation to finish."
+
+  defp error_message({:error, :checkpoint_files_unavailable}),
+    do:
+      "The app cannot verify checkpoint file cleanup. Check host access to the paths under Finish and clean up, then try again. The reservation is still retained."
 
   defp error_message({:error, :admission_exhausted}),
     do:
