@@ -148,7 +148,7 @@ defmodule WorkspaceWeb.SavedStatePanel do
         <details class="saved-cleanup" id="saved-cleanup">
           <summary>Finish and clean up</summary>
           <p>
-            Delete the child, confirm its requests are quiescent, then delete the original. Inspect the worker and remove owned backing and checkpoint files before releasing their reservations. These buttons never delete host files or the everyday workspace.
+            Delete the child, confirm its requests are quiescent, then delete the original. Inspect the worker and remove owned backing before releasing its allowance. The everyday workspace stays untouched. Checkpoint deletion is a separate, confirmed choice below.
           </p>
           <p>
             Only confirm host cleanup after following the README procedure. A successful delete response or an empty machine list is not sufficient evidence.
@@ -163,6 +163,17 @@ defmodule WorkspaceWeb.SavedStatePanel do
               busy={@busy}
             />
           </div>
+          <.capture_cleanup
+            :if={SavedState.allowed?(@data, "release-capture")}
+            files={@data.capture_files}
+            finished={SavedState.cleanup_finished?(@data)}
+            keep={SavedState.allowed?(@data, "keep-capture")}
+            notice={@notice}
+            busy={@busy}
+          />
+          <p :if={@data.capture && @data.capture.released_at_ms} role="status">
+            Checkpoint reservation released. Walkthrough history is preserved.
+          </p>
           <p>
             History remains after cleanup. This bounded walkthrough uses one original, one checkpoint and one branch per configuration; refreshing never starts a new run.
           </p>
@@ -171,6 +182,63 @@ defmodule WorkspaceWeb.SavedStatePanel do
     </section>
     """
   end
+
+  defp capture_cleanup(assigns) do
+    assigns = assign(assigns, :ready, Enum.map(assigns.files, & &1.state) == [:absent, :absent])
+
+    ~H"""
+    <section class="saved-capture-cleanup" aria-labelledby="capture-cleanup-title">
+      <h3 id="capture-cleanup-title">Finish with your checkpoint</h3>
+      <p :if={!@finished}>
+        Finish deleting the VMs and releasing their backing above, then choose whether to keep or
+        delete the checkpoint. It stays retained until you explicitly delete it.
+      </p>
+      <p :if={@finished && !@ready} id="capture-cleanup-status">
+        Your VMs are cleaned up. Keep the checkpoint for later, or delete its recorded files here.
+        Keeping it also keeps its disk reservation.
+      </p>
+      <p :if={@ready} id="capture-cleanup-status">
+        Both recorded paths are absent. Confirm that no copies remain elsewhere to release the reservation.
+      </p>
+      <p :if={@notice} class="notice" role="status">{@notice}</p>
+      <div :if={@keep} class="saved-actions">
+        <.action key="keep-capture" label="Keep checkpoint" confirmation={nil} busy={@busy} />
+      </div>
+      <details :if={@finished && !@ready} id="saved-delete-checkpoint">
+        <summary>Delete checkpoint…</summary>
+        <p>
+          This permanently deletes the checkpoint and any partial file listed below, then releases
+          its reservation. You will no longer be able to restore this saved state. The seed and other
+          captures stay untouched.
+        </p>
+        <.action
+          key="delete-capture"
+          label="Delete checkpoint and release reservation"
+          confirmation="Delete this checkpoint permanently. I verified no restore or other consumer needs it, no delayed work can write these files, and no copies remain elsewhere."
+          busy={@busy}
+        />
+      </details>
+      <ul class="saved-capture-files">
+        <li :for={file <- @files}>
+          <strong>{file_status(file.state)}</strong>
+          <code>{file.path}</code>
+        </li>
+      </ul>
+      <p>File status updates automatically. Copies outside these paths require manual cleanup.</p>
+      <.action
+        :if={@ready}
+        key="release-capture"
+        label="Release checkpoint reservation"
+        confirmation="I removed all checkpoint copies and partial files, including any copies elsewhere."
+        busy={@busy}
+      />
+    </section>
+    """
+  end
+
+  defp file_status(:present), do: "Still on disk"
+  defp file_status(:absent), do: "Absent"
+  defp file_status(:unavailable), do: "Cannot check this path; verify host access"
 
   defp action(assigns) do
     ~H"""
@@ -181,7 +249,9 @@ defmodule WorkspaceWeb.SavedStatePanel do
         <span>{@confirmation}</span>
       </label>
       <button
-        class={if @key in ~w(delete-child delete-source), do: "danger", else: "primary"}
+        class={
+          if @key in ~w(delete-child delete-source delete-capture), do: "danger", else: "primary"
+        }
         disabled={@busy}
         phx-disable-with="Recording…"
       >
@@ -213,9 +283,7 @@ defmodule WorkspaceWeb.SavedStatePanel do
       {"delete-source", "Delete original VM",
        "Delete the original and its guest files permanently. The checkpoint remains retained."},
       {"release-backing", "Release backing allowance",
-       "I verified all owned source generations, snapshots and temporary worker backing are removed, with no delayed requests remaining."},
-      {"release-capture", "Release checkpoint reservation",
-       "I removed all copies and partial checkpoint files on the host. This releases accounting and does not delete files."}
+       "I verified all owned source generations, snapshots and temporary worker backing are removed, with no delayed requests remaining."}
     ]
 
   defp preparation_state(s) do

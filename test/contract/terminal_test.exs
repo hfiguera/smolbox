@@ -97,7 +97,9 @@ defmodule SmolBox.TerminalTest do
       assert {:ok, terminal} = Terminal.attach(f.runtime, key)
       assert :ok = Terminal.input(terminal, @action)
       assert {:ok, %{state: :unknown, result: nil}} = SmolBox.await(f.runtime, key, 5000)
-      {:ok, busy} = Machines.inspect(f.runtime, machine)
+      # The execution outcome is stored before cleanup updates the machine version.
+      assert {:ok, %{state: :unknown, active_execution: ^key} = busy} =
+               Machines.await(f.runtime, machine, 5000)
 
       assert {:error, %Error{category: :admission_exhausted}} =
                Machines.stop(f.runtime, machine, busy.version)

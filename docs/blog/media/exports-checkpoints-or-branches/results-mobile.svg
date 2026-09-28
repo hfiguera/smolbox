@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="288pt" height="417.6pt" viewBox="0 0 288 417.6" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-09-27T11:02:10.171768</dc:date>
+    <dc:description>Original chart from SmolBox provisioning campaign 2026-09-27 summary.json. Bar median; dot p95. Full methodology linked in article.</dc:description>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 417.6 
+L 288 417.6 
+L 288 0 
+L 0 0 
+z
+" style="fill: #fbfcfe"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 17.28 342.432 
+L 267.84 342.432 
+L 267.84 66.816 
+L 17.28 66.816 
+z
+" style="fill: #fbfcfe"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 17.28 116.67744 
+L 223.597889 116.67744 
+L 223.597889 107.15616 
+L 17.28 107.15616 
+z
+" clip-path="url(#pd48a990465)" style="fill: #526478"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 17.28 166.78944 
+L 70.092859 166.78944 
+L 70.092859 157.26816 
+L 17.28 157.26816 
+z
+" clip-path="url(#pd48a990465)" style="fill: #215bc7"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 17.28 216.90144 
+L 57.058019 216.90144 
+L 57.058019 207.38016 
+L 17.28 207.38016 
+z
+" clip-path="url(#pd48a990465)" style="fill: #215bc7"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 17.28 267.01344 
+L 55.092586 267.01344 
+L 55.092586 257.49216 
+L 17.28 257.49216 
+z
+" clip-path="url(#pd48a990465)" style="fill: #215bc7"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 17.28 317.12544 
+L 37.097411 317.12544 
+L 37.097411 307.60416 
+L 17.28 307.60416 
+z
+" clip-path="url(#pd48a990465)" style="fill: #526478"/>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_1"/>
+     <g id="text_1">
+      <text style="font-size: 10px; font-family: 'Arial'; text-anchor: middle; fill: #526478" x="17.28" y="359.712273" transform="rotate(-0 17.28 359.712273)">0</text>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_2"/>
+     <g id="text_2">
+      <text style="font-size: 10px; font-family: 'Arial'; text-anchor: middle; fill: #526478" x="61.626903" y="359.712273" transform="rotate(-0 61.626903 359.712273)">1</text>
+     </g>
+    </g>
+    <g id="xtick_3">
+     <g id="line2d_3"/>
+     <g id="text_3">
+      <text style="font-size: 10px; font-family: 'Arial'; text-anchor: middle; fill: #526478" x="105.973805" y="359.712273" transform="rotate(-0 105.973805 359.712273)">2</text>
+     </g>
+    </g>
+    <g id="xtick_4">
+     <g id="line2d_4"/>
+     <g id="text_4">
+      <text style="font-size: 10px; font-family: 'Arial'; text-anchor: middle; fill: #526478" x="150.320708" y="359.712273" transform="rotate(-0 150.320708 359.712273)">3</text>
+     </g>
+    </g>
+    <g id="xtick_5">
+     <g id="line2d_5"/>
+     <g id="text_5">
+      <text style="font-size: 10px; font-family: 'Arial'; text-anchor: middle; fill: #526478" x="194.667611" y="359.712273" transform="rotate(-0 194.667611 359.712273)">4</text>
+     </g>
+    </g>
+    <g id="xtick_6">
+     <g id="line2d_6"/>
+     <g id="text_6">
+      <text style="font-size: 10px; font-family: 'Arial'; text-anchor: middle; fill: #526478" x="239.014513" y="359.712273" transform="rotate(-0 239.014513 359.712273)">5</text>
+     </g>
+    </g>
+    <g id="text_7">
+     <text style="font-size: 10px; font-family: 'Arial'; text-anchor: middle; fill: #526478" x="142.56" y="381.097039" transform="rotate(-0 142.56 381.097039)">Seconds to verified RAM result</text>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2"/>
+   <g id="line2d_7">
+    <path d="M 223.597889 111.9168 
+L 228.022734 111.9168 
+" clip-path="url(#pd48a990465)" style="fill: none; stroke: #17304e; stroke-width: 1.2; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_8">
+    <defs>
+     <path id="mb9824e2486" d="M 0 2 
+C 0.530406 2 1.03916 1.789267 1.414214 1.414214 
+C 1.789267 1.03916 2 0.530406 2 0 
+C 2 -0.530406 1.789267 -1.03916 1.414214 -1.414214 
+C 1.03916 -1.789267 0.530406 -2 0 -2 
+C -0.530406 -2 -1.03916 -1.789267 -1.414214 -1.414214 
+C -1.789267 -1.03916 -2 -0.530406 -2 0 
+C -2 0.530406 -1.789267 1.03916 -1.414214 1.414214 
+C -1.03916 1.789267 -0.530406 2 0 2 
+z
+" style="stroke: #17304e"/>
+    </defs>
+    <g clip-path="url(#pd48a990465)">
+     <use xlink:href="#mb9824e2486" x="228.022734" y="111.9168" style="fill: #17304e; stroke: #17304e"/>
+    </g>
+   </g>
+   <g id="line2d_9">
+    <path d="M 70.092859 162.0288 
+L 85.252094 162.0288 
+" clip-path="url(#pd48a990465)" style="fill: none; stroke: #17304e; stroke-width: 1.2; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_10">
+    <g clip-path="url(#pd48a990465)">
+     <use xlink:href="#mb9824e2486" x="85.252094" y="162.0288" style="fill: #17304e; stroke: #17304e"/>
+    </g>
+   </g>
+   <g id="line2d_11">
+    <path d="M 57.058019 212.1408 
+L 63.806154 212.1408 
+" clip-path="url(#pd48a990465)" style="fill: none; stroke: #17304e; stroke-width: 1.2; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_12">
+    <g clip-path="url(#pd48a990465)">
+     <use xlink:href="#mb9824e2486" x="63.806154" y="212.1408" style="fill: #17304e; stroke: #17304e"/>
+    </g>
+   </g>
+   <g id="line2d_13">
+    <path d="M 55.092586 262.2528 
+L 62.683734 262.2528 
+" clip-path="url(#pd48a990465)" style="fill: none; stroke: #17304e; stroke-width: 1.2; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_14">
+    <g clip-path="url(#pd48a990465)">
+     <use xlink:href="#mb9824e2486" x="62.683734" y="262.2528" style="fill: #17304e; stroke: #17304e"/>
+    </g>
+   </g>
+   <g id="line2d_15">
+    <path d="M 37.097411 312.3648 
+L 42.037545 312.3648 
+" clip-path="url(#pd48a990465)" style="fill: none; stroke: #17304e; stroke-width: 1.2; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_16">
+    <g clip-path="url(#pd48a990465)">
+     <use xlink:href="#mb9824e2486" x="42.037545" y="312.3648" style="fill: #17304e; stroke: #17304e"/>
+    </g>
+   </g>
+   <g id="patch_8">
+    <path d="M 17.28 342.432 
+L 267.84 342.432 
+" style="fill: none; stroke: #d8e0eb; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: start; fill: #17304e" x="17.28" y="97.38432" transform="rotate(-0 17.28 97.38432)">Fresh preparation</text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: start; fill: #17304e" x="232.457425" y="114.634085" transform="rotate(-0 232.457425 114.634085)">4.65</text>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: start; fill: #17304e" x="17.28" y="147.49632" transform="rotate(-0 17.28 147.49632)">Export</text>
+   </g>
+   <g id="text_11">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: start; fill: #17304e" x="89.686784" y="164.746085" transform="rotate(-0 89.686784 164.746085)">1.19</text>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: start; fill: #17304e" x="17.28" y="197.60832" transform="rotate(-0 17.28 197.60832)">Checkpoint restore</text>
+   </g>
+   <g id="text_13">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: start; fill: #17304e" x="68.240844" y="214.858085" transform="rotate(-0 68.240844 214.858085)">0.90</text>
+   </g>
+   <g id="text_14">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: start; fill: #17304e" x="17.28" y="247.72032" transform="rotate(-0 17.28 247.72032)">Live branch</text>
+   </g>
+   <g id="text_15">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: start; fill: #17304e" x="67.118424" y="264.970085" transform="rotate(-0 67.118424 264.970085)">0.85</text>
+   </g>
+   <g id="text_16">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: start; fill: #17304e" x="17.28" y="297.83232" transform="rotate(-0 17.28 297.83232)">Existing machine</text>
+   </g>
+   <g id="text_17">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: start; fill: #17304e" x="46.472236" y="315.082085" transform="rotate(-0 46.472236 315.082085)">0.45</text>
+   </g>
+  </g>
+  <g id="text_18">
+   <text style="font-weight: 700; font-size: 14px; font-family: 'Arial'; text-anchor: start; fill: #17304e" x="17.28" y="25.056" transform="rotate(-0 17.28 25.056)">Prepared state changes the wait</text>
+  </g>
+  <g id="text_19">
+   <text style="font-size: 9.2px; font-family: 'Arial'; text-anchor: start; fill: #526478" x="17.28" y="43.848" transform="rotate(-0 17.28 43.848)">Bar: median   •  Dot: p95   ·   20 trials per path</text>
+  </g>
+  <g id="text_20">
+   <text style="font-size: 9px; font-family: 'Arial'; text-anchor: start; fill: #526478" x="17.28" y="407.16" transform="rotate(-0 17.28 407.16)">Physical Linux · warm caches · one workload</text>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pd48a990465">
+   <rect x="17.28" y="66.816" width="250.56" height="275.616"/>
+  </clipPath>
+ </defs>
+</svg>

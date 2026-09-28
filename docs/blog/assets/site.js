@@ -229,3 +229,83 @@ document.querySelectorAll('.disconnect-figure').forEach((figure) => {
   cancelAnimationFrame(frame);
   figure.querySelectorAll('.disconnect-controls').forEach((controls) => { controls.hidden = false; });
 });
+
+// A reader-controlled explanation of state and retention, not worker activity.
+document.querySelectorAll('.reuse-figure').forEach((figure) => {
+  const stage = figure.querySelector('.reuse-stage');
+  const play = figure.querySelector('.reuse-play');
+  const next = figure.querySelector('.reuse-next');
+  const progress = figure.querySelector('.reuse-progress');
+  const choices = figure.querySelectorAll('[data-reuse-mode]');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const phases = ['Prepared state', 'Save or copy', 'Use the next machine', 'Account for cleanup'];
+  const paths = {
+    export: [
+      ['The table is ready in two places.', 'The source has a serialized table on disk and an aggregate in RAM. An export will keep supported disk contents.', 'Preparation finished', 'Table loaded', 'Registry artifact', 'Disk, without RAM', 'Next machine', 'Not created yet', 'Not created', 'Not created', 'The source stays yours until explicit deletion. The artifact will have its own lifetime.'],
+      ['Stop, then publish the disk state.', 'Preparation writes have finished. The stopped source can be exported to its approved registry destination.', 'Stopped for export', 'Not preserved', 'Published artifact', 'Disk, without RAM', 'Next machine', 'Not created yet', 'Not created', 'Not created', 'Publication and helper quiescence need confirmation. Publishing does not delete the source.'],
+      ['Boot and load the saved table.', 'A new guest boots from the artifact and loads the table from disk. It avoids rebuilding the aggregate from raw readings.', 'Still retained', 'Not preserved', 'Registry artifact', 'Disk, without RAM', 'New boot', 'A new managed identity', 'Saved table', 'Loaded from disk', 'The guest has its own state. The registry artifact and host caches remain independently retained.'],
+      ['The guests are gone. The artifact stays.', 'After explicit guest deletion, the published artifact can still supply another compatible machine.', 'Deleted explicitly', 'Gone', 'Registry artifact', 'Still published', 'Next machine', 'Deleted explicitly', 'Guest deleted', 'Gone', 'Registry deletion, copies and shared host caches are separate cleanup responsibilities. Guest deletion does not remove them.']
+    ],
+    checkpoint: [
+      ['Keep a prepared memory state.', 'The original is running, idle and offline. Its approved bare guest contains both the saved table and the RAM aggregate.', 'Running and idle', 'Table loaded', 'Checkpoint file', 'Disk and RAM', 'Next machine', 'Not restored yet', 'Not created', 'Not created', 'The host must establish that the state is safe to capture, including processes and credentials in memory.'],
+      ['Capture disk and memory together.', 'The worker briefly pauses the source during capture, then resumes it. The file is retained after complete bytes and quiescence are confirmed.', 'Resumed after capture', 'Table loaded', 'Saved checkpoint', 'Disk and RAM', 'Next machine', 'Not restored yet', 'Not created', 'Not created', 'The capture file has its own identity and disk allowance. Compatibility constraints travel with the saved state.'],
+      ['Restore into an independent machine.', 'Explicit restore creates a new identity from the approved file. This guest starts with the captured table already in RAM.', 'Still retained', 'Table loaded', 'Saved checkpoint', 'Disk and RAM', 'Independent restore', 'A new managed identity', 'Restored table', 'Captured table', 'Changes in this guest do not modify the capture. A normal stop/start later does not restore this RAM again.'],
+      ['The file outlives both machines.', 'Deleting the original and restored guest does not delete the captured file or release its retained artifact accounting.', 'Deleted explicitly', 'Gone', 'Saved checkpoint', 'Still retained', 'Restored machine', 'Deleted explicitly', 'Guest deleted', 'Gone', 'Remove complete, partial and extra capture copies when no consumer needs them, then explicitly release artifact accounting.']
+    ],
+    branch: [
+      ['Use the running original as the source.', 'The prepared guest is idle, offline and on the worker that will create the child. Its disk and RAM are ready to copy.', 'Running and idle', 'Table loaded', 'Live source', 'Disk and RAM', 'Next machine', 'Not branched yet', 'Not created', 'Not created', 'Approve the child allocation and additional backing resources. A saved checkpoint is not required for this branch.'],
+      ['Create a child on the same worker.', 'The branch inherits prepared disk and RAM from the running source. No reusable checkpoint file is created by this operation.', 'Running source', 'Table loaded', 'Source backing', 'Dependency retained', 'Live branch', 'Creation in progress', 'Inherited table', 'Inherited RAM', 'Creation excludes conflicting source work. Backing dependencies remain part of the managed lifecycle.'],
+      ['Change the child. Keep the original.', 'The child is ready for its own commands. Its guest disk and RAM changes do not change the original or sibling guests.', 'Original unchanged', 'Original table', 'Source backing', 'Dependency retained', 'Running child', 'Its own managed identity', 'Child changes', 'Child changes', 'The source can run commands again, but source stop/start/delete waits for child dependencies to be retired.'],
+      ['Deleting the child leaves a dependency.', 'Child deletion does not release its extra backing allowance. The original and backing still need deliberate management.', 'Still retained', 'Original table', 'Source backing', 'Still retained', 'Child machine', 'Deleted explicitly', 'Guest deleted', 'Gone', 'Retire the child dependency, delete the source, verify owned backing cleanup, then explicitly release the backing allowance.']
+    ]
+  };
+  const fields = ['.reuse-headline', '.reuse-detail', '.reuse-source-status', '.reuse-source-ram', '.reuse-carrier', '.reuse-carried', '.reuse-target-name', '.reuse-target-status', '.reuse-target-disk', '.reuse-target-ram', '.reuse-retention'];
+  let mode = 'export';
+  let step = 0;
+  let timer;
+  let frame;
+  function pause() {
+    clearTimeout(timer);
+    cancelAnimationFrame(frame);
+    timer = undefined;
+    stage.classList.remove('is-moving');
+    play.textContent = step === 3 ? 'Replay path' : 'Play path';
+  }
+  function render(animate = true) {
+    stage.dataset.mode = mode;
+    stage.dataset.step = String(step);
+    fields.forEach((selector, index) => { figure.querySelector(selector).textContent = paths[mode][step][index]; });
+    figure.querySelector('.reuse-source-disk').textContent = step === 3 && mode !== 'branch' ? 'Guest deleted' : 'Saved table';
+    progress.textContent = `Step ${step + 1} of 4. ${phases[step]}.`;
+    next.textContent = step === 3 ? 'Back to start' : 'Next step';
+    stage.classList.remove('is-moving');
+    cancelAnimationFrame(frame);
+    if (animate && !reduced.matches) frame = requestAnimationFrame(() => stage.classList.add('is-moving'));
+    if (!timer) play.textContent = step === 3 ? 'Replay path' : 'Play path';
+  }
+  function advance() {
+    step += 1;
+    render();
+    timer = setTimeout(step === 3 ? pause : advance, 4200);
+  }
+  play.addEventListener('click', () => {
+    if (timer) return pause();
+    if (step === 3) step = 0;
+    render();
+    play.textContent = 'Pause';
+    timer = setTimeout(advance, 4200);
+  });
+  next.addEventListener('click', () => { pause(); step = (step + 1) % 4; render(); });
+  choices.forEach((button) => button.addEventListener('click', () => {
+    pause(); mode = button.dataset.reuseMode; step = 0;
+    choices.forEach((choice) => choice.setAttribute('aria-pressed', String(choice === button)));
+    render();
+  }));
+  document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
+  reduced.addEventListener('change', pause);
+  if ('IntersectionObserver' in window) new IntersectionObserver((entries) => {
+    if (!entries[0].isIntersecting) pause();
+  }).observe(figure);
+  render(false);
+  figure.querySelector('.reuse-controls').hidden = false;
+});

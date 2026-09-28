@@ -12,7 +12,7 @@ defmodule Workspace.SavedState do
   }
 
   alias SmolBox.DurableHost.Store
-  alias Workspace.{Connection, Settings}
+  alias Workspace.{CheckpointCleanup, Connection, Settings}
 
   @capture "prepared-v1"
   @commands %{
@@ -23,7 +23,7 @@ defmodule Workspace.SavedState do
     "read-original" => "cat /workspace/recipe.txt /dev/shm/workspace-note",
     "read-branch" => "cat /workspace/recipe.txt /dev/shm/workspace-note"
   }
-  @confirmations ~w(capture branch confirm-capture delete-child retire-child delete-source release-backing release-capture)
+  @confirmations ~w(capture branch confirm-capture delete-child retire-child delete-source release-backing release-capture delete-capture)
 
   def snapshot(%{saved_state: nil}), do: {:ok, nil}
 
@@ -31,6 +31,7 @@ defmodule Workspace.SavedState do
     safe(fn ->
       source = read(Machines.inspect(Settings.runtime(), handle(c, :source)))
       child = read(Machines.inspect(Settings.runtime(), handle(c, :child)))
+      capture = if(source, do: source.captures[@capture])
 
       commands =
         Map.new(@commands, fn {key, _} ->
@@ -42,7 +43,8 @@ defmodule Workspace.SavedState do
          source: source,
          child: child,
          commands: commands,
-         capture: if(source, do: source.captures[@capture]),
+         capture: capture,
+         capture_files: capture_files(capture),
          source_id: elem(handle(c, :source), 1),
          child_id: elem(handle(c, :child), 1),
          usage: Store.usage(c.store, "workspace-worker")
@@ -106,13 +108,39 @@ defmodule Workspace.SavedState do
   def allowed?(s, "release-capture"),
     do: s.capture != nil and s.capture.state == :completed and s.capture.released_at_ms == nil
 
+  def allowed?(s, "keep-capture"),
+    do: allowed?(s, "delete-capture") and match?([%{state: :present}, _], s.capture_files)
+
+  def allowed?(s, "delete-capture"),
+    do: allowed?(s, "release-capture") and cleanup_finished?(s)
+
   def allowed?(_, _), do: false
+
+  def cleanup_finished?(s),
+    do:
+      s.source != nil and s.source.state == :deleted and
+        (s.child == nil or s.child.branch.state == :closed)
 
   def success?(%{state: :completed, result: %{exit_code: 0}}), do: true
   def success?(_), do: false
 
   def output(%{result: %SmolBox.Result{stdout: out}}), do: out
   def output(_), do: nil
+
+  def capture_files(%{result: %{path: path}}) do
+    Enum.map([path, path <> ".partial"], fn file ->
+      state =
+        case File.lstat(file) do
+          {:ok, _} -> :present
+          {:error, :enoent} -> :absent
+          {:error, _} -> :unavailable
+        end
+
+      %{path: file, state: state}
+    end)
+  end
+
+  def capture_files(_), do: []
 
   defp idle?(nil), do: false
 
@@ -185,8 +213,27 @@ defmodule Workspace.SavedState do
   defp perform("release-backing", c, _),
     do: Branches.release_storage(Settings.runtime(), handle(c, :child), backing_removed: true)
 
-  defp perform("release-capture", c, _),
-    do: Checkpoints.release(Settings.runtime(), capture_handle(c), artifacts_removed: true)
+  defp perform("release-capture", c, s) do
+    states = Enum.map(capture_files(s.capture), & &1.state)
+
+    cond do
+      :present in states -> {:error, :checkpoint_files_present}
+      states != [:absent, :absent] -> {:error, :checkpoint_files_unavailable}
+      true -> Checkpoints.release(Settings.runtime(), capture_handle(c), artifacts_removed: true)
+    end
+  end
+
+  defp perform("keep-capture", _c, _s), do: {:ok, :checkpoint_kept}
+
+  defp perform("delete-capture", c, s) do
+    with :ok <-
+           CheckpointCleanup.delete(s.capture, c.saved_state.capture_policy, handle(c, :source)) do
+      case perform("release-capture", c, s) do
+        {:ok, _} -> {:ok, :checkpoint_deleted}
+        _ -> {:error, :checkpoint_release_pending}
+      end
+    end
+  end
 
   defp submit(c, machine, key) do
     {:ok, command} = Command.new(["/bin/sh", "-lc", @commands[key]], timeout_secs: 30)
