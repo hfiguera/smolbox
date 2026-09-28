@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Require Mint 1.11 or later and update the example locks to address
+  CVE-2026-91043, CVE-2026-92103 and CVE-2026-94194. No data migration is required.
+- Update the community workspace's test-only `lazy_html` dependency to 0.1.13
+  to address CVE-2026-92106.
+
 ## 0.3.0
 
 SmolBox now manages reusable machine state: approved registry sources, stopped

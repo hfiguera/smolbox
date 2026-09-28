@@ -276,7 +276,7 @@ defmodule SmolBox.MixProject do
   defp deps do
     [
       {:req, "~> 0.7.4"},
-      {:mint, "~> 1.7"},
+      {:mint, "~> 1.11"},
       {:mint_web_socket, "~> 1.0.6"},
       {:jason, "~> 1.4"},
       {:telemetry, "~> 1.3"},

@@ -6,7 +6,7 @@ defmodule SmolBox.CI.Package do
   @limit 64 * 1024 * 1024
   @minimum %{
     "req" => "0.7.4",
-    "mint" => "1.7.0",
+    "mint" => "1.11.0",
     "mint_web_socket" => "1.0.6",
     "jason" => "1.4.0",
     "telemetry" => "1.3.0",
