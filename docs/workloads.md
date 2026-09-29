@@ -1,6 +1,6 @@
 # Workloads and console diagnostics
 
-Managed image machines on smolvm **1.17.0 or 1.19.0** can start an application whenever the
+Managed image machines on smolvm **1.17.0, 1.19.0 or 1.20.2** can start an application whenever the
 VM starts. Startup configuration belongs to the machine's immutable creation
 specification. Commands and terminal sessions remain separate executions.
 

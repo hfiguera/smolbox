@@ -146,9 +146,9 @@ To run the local walkthrough, you need:
 
 - Elixir **1.18 or later**, using a [tested Elixir/OTP pair](docs/compatibility.md).
 - A dedicated worker on Linux x86_64 with KVM or macOS Apple Silicon:
-  **smolvm 1.19.0** by default, or explicitly configured 1.17.0, 1.16.1, 1.16.0, 1.14.6 or
+  **smolvm 1.20.2** by default in this checkout, or explicitly configured 1.19.0, 1.17.0, 1.16.1, 1.16.0, 1.14.6 or
   1.14.1 workers.
-- The host's `resize2fs` tool for 1.14.6, 1.16.0, 1.16.1, 1.17.0 and 1.19.0 disk requests below template sizes.
+- The host's `resize2fs` tool for 1.14.6, 1.16.0, 1.16.1, 1.17.0, 1.19.0 and 1.20.2 disk requests below template sizes.
   On macOS, install `e2fsprogs`; see the [runtime prerequisites](docs/compatibility.md#macos-1-14-6-prerequisites).
 - A prepared Python image for that worker's architecture, with its SHA-256
   recorded. The guide links to the image preparation commands and host capacity
@@ -176,13 +176,13 @@ PostgreSQL walkthrough. The existing disposable API remains supported.
 ## Managed branches
 
 [Branch an idle, offline bare guest](docs/managed-branches.md) into independent
-running children on the same smolvm 1.19.0 worker. Memory and disks are copied,
+running children on the same smolvm 1.19.0 or 1.20.2 worker. Memory and disks are copied,
 held release is explicit, and durable dependencies and backing capacity survive
 controller restarts.
 
 ## Checkpoint execution
 
-Managed idle, offline bare guests can also [capture checkpoints and restore independent machines](docs/managed-checkpoints.md) on smolvm 1.19.0, with durable history and explicit retention.
+Managed idle, offline bare guests can also [capture checkpoints and restore independent machines](docs/managed-checkpoints.md) on smolvm 1.19.0 or 1.20.2, with durable history and explicit retention.
 
 SmolBox can restore an operator-approved idle, offline checkpoint
 into a separate disposable machine for each execution. See
@@ -192,10 +192,11 @@ record schema v3 upgrade requirements.
 ## Current scope
 
 SmolBox has real execution and durable recovery tests on Linux x86_64 and macOS
-Apple Silicon with **smolvm 1.14.1, 1.14.6, 1.16.0, 1.16.1, 1.17.0 and 1.19.0**; results are recorded in [Compatibility](docs/compatibility.md#runtime-selection).
+Apple Silicon with **smolvm 1.14.1, 1.14.6, 1.16.0, 1.16.1, 1.17.0, 1.19.0 and 1.20.2**; results are recorded in [Compatibility](docs/compatibility.md#runtime-selection).
 SmolBox 0.3.0 and 0.2.1 default to **1.19.0** and 0.2.0 to **1.17.0**, while 0.1.4–0.1.5 default to **1.16.1**; 0.1.3 defaults to **1.16.0** and
 0.1.2 to **1.14.6**.
-Before adopting the **1.19.0** default with an older worker, explicitly
+This checkout selects **1.20.2**; see the [qualification report](docs/runtime-1.20.2-qualification.md).
+Before adopting that default with an older worker, explicitly
 configure `runtime_version: "1.17.0"`, `"1.16.1"`, `"1.16.0"`, `"1.14.6"` or `"1.14.1"`, or follow the
 [worker upgrade procedure](docs/host-integration.md#upgrading-a-worker).
 The package does not upgrade an external worker. A version mismatch prevents
@@ -206,7 +207,7 @@ that separates disposal from preservation. A failed graceful stop can still leav
 unknown work retained; see the [recovery rules](docs/recovery.md#preservation-and-disposal).
 
 SmolBox supports explicit outbound hostname/CIDR policies
-with smolvm 1.16.0, 1.16.1, 1.17.0 and 1.19.0. Offline remains the default. See
+with smolvm 1.16.0, 1.16.1, 1.17.0, 1.19.0 and 1.20.2. Offline remains the default. See
 [Controlled network access](docs/network-access.md) for setup and validation boundaries.
 
 SmolBox relies on smolvm's isolation model for running untrusted code. Your

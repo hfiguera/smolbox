@@ -4,18 +4,18 @@ defmodule SmolBox.ManagedMachineSpec do
 
   Scope and ID are host-authorized identities, not access tokens. Artifact and
   profile approvals have the same meaning as in `SmolBox.ExecutionSpec`.
-  Optional `checkpointable: true` opts an idle, offline bare guest into 1.19.0
+  Optional `checkpointable: true` opts an idle, offline bare guest into 1.19.0 or 1.20.2
   checkpoint-capable startup. No ports, workloads or remote sources are admitted.
   This changes immutable identity and requires codec v12/store capability
   `managed_checkpoints: 1`. See `SmolBox.Checkpoints`.
 
   Optional `ports: [SmolBox.PortMapping.t()]` adds fixed TCP forwarding on image
-  sources and smolvm 1.17.0 or 1.19.0. The constructor canonicalizes mappings; they are part
+  sources and smolvm 1.17.0, 1.19.0 or 1.20.2. The constructor canonicalizes mappings; they are part
   of immutable identity, independent of commands and outbound profile policy.
   Changing a mapping requires a new machine identity. See [Port mappings](port-mappings.html).
 
   Optional `workload: SmolBox.Workload.t()` starts an immutable application on
-  image machines with smolvm 1.17.0 or 1.19.0. Omitting it preserves `/bin/true` startup.
+  image machines with smolvm 1.17.0, 1.19.0 or 1.20.2. Omitting it preserves `/bin/true` startup.
   Changes require a new identity. Values are persisted, including environment;
   the store must protect them. See [Workloads and diagnostics](workloads.html).
   """

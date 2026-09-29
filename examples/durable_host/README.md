@@ -1,12 +1,13 @@
 # Durable host example
 
-SmolBox 0.3.0 retains the smolvm **1.19.0** default introduced in 0.2.1.
+This checkout defaults to smolvm **1.20.2**. Published SmolBox 0.3.0 and
+0.2.1 retain their **1.19.0** default.
 Follow [Upgrading to 0.3.0](../../docs/upgrading-to-0.3.0.md) before enabling
 registry sources, exports, captures or branches against an existing store.
 Applications coming from 0.1.x must also follow the
 [0.2.0 migration guide](../../docs/upgrading-to-0.2.0.md).
 Set `SMOLBOX_RUNTIME_VERSION=1.16.1` explicitly for an existing 1.16.1 worker.
-See [qualification](../../docs/runtime-1.19.0-qualification.md).
+See [qualification](../../docs/runtime-1.20.2-qualification.md).
 
 This standalone host owns an Ecto Repo and a PostgreSQL implementation of
 `SmolBox.Store`. It includes a managed Python execution demonstration and a
@@ -57,10 +58,10 @@ dependency can change while the example lockfile stays the same.
 Configure the worker, pinned Python artifact, private object directory,
 fingerprint key file, and execution ID described in `../minimal_host/README.md`.
 On Linux x86_64 or macOS Apple Silicon,
-omitting `SMOLBOX_RUNTIME_VERSION` selects 1.19.0 in this checkout
+omitting `SMOLBOX_RUNTIME_VERSION` selects 1.20.2 in this checkout
 (0.1.3 defaults to 1.16.0). Set it to `1.16.1`, `1.16.0`, `1.14.6` or `1.14.1`
 for an existing older worker. Consult the
-[qualification evidence](../../docs/runtime-1.19.0-qualification.md). Supply the 1.14.6, 1.16.0, 1.16.1 or 1.17.0 host's `resize2fs` for smaller disk
+[qualification evidence](../../docs/runtime-1.20.2-qualification.md). Supply the 1.14.6, 1.16.0, 1.16.1 or 1.17.0 host's `resize2fs` for smaller disk
 requests; see [host prerequisites](../../docs/compatibility.md#macos-1-14-6-prerequisites).
 Child controllers inherit the selection and require an
 exact match with the server. Changing it does not upgrade the worker itself.
@@ -227,7 +228,7 @@ forces deletion after an uncertain stop.
 
 The benchmark uses this host's real PostgreSQL store, directory adapter and a
 previously provisioned, initially idle smolvm worker matching `SMOLBOX_RUNTIME_VERSION`
-(default 1.19.0). It provisions no
+(checkout default 1.20.2). It provisions no
 service, changes no host quotas and clears no image/page cache. Apply the example
 migrations first. Use native approved artifacts, a new private object directory,
 fresh 32-byte fingerprint/encryption key files and a unique store partition for
@@ -546,7 +547,7 @@ or real-worker qualification.
 ## Registry artifacts and machine images
 
 `SmolBox.DurableHost.RegistryDemo` consumes an operator-approved source and keeps
-its identity in PostgreSQL. It requires smolvm 1.19.0, a prepared environment with
+its identity in PostgreSQL. It requires smolvm 1.19.0 or 1.20.2, a prepared environment with
 `/bin/sh` and `/bin/cat`, and the database setup described below. Use isolated
 worker data and store partitions for qualification. The declared 20 GiB storage,
 10 GiB overlay and 768 MiB VMM overhead must cover your actual worker templates.
@@ -685,7 +686,7 @@ host: the example hashes the approved seed and capture paths locally, then expli
 approves that same path for restore. Remote controllers must transfer the bytes and
 verify their digest on the target worker separately.
 
-Prepare and approve an **idle, offline bare** 1.19.0 checkpoint with 1 CPU,
+Prepare and approve an **idle, offline bare** checkpoint captured with the selected worker runtime with 1 CPU,
 256 MiB RAM and 1 GiB storage/overlay disks using the existing checkpoint fixture
 procedure. No user processes, secrets, mounts or connections may be captured.
 This seed is only the starting environment; the demo writes fresh disk and RAM

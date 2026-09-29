@@ -6,7 +6,7 @@ returns output and an exit result; background execution returns launch evidence;
 an interactive session provides an ongoing terminal byte stream.
 
 This API supports managed persistent **image machines** on qualified smolvm
-**1.17.0 or 1.19.0**, and a low-level client for hosts that manage lifetime themselves.
+**1.17.0, 1.19.0 or 1.20.2**, and a low-level client for hosts that manage lifetime themselves.
 Disposable execution and checkpoint terminals are unsupported. No process
 supervisor, automatic reconnect, input replay or guest-session reattachment is
 provided.

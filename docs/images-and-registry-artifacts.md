@@ -4,7 +4,7 @@ Registry sources let a retained machine fetch an approved environment without an
 operator copying the prepared file to each worker first. Provisioning still has a
 durable identity, an approved worker and profile, and an explicit lifetime.
 
-The supported runtime for these operations is smolvm 1.19.0. The three operations
+These operations support smolvm 1.19.0 and 1.20.2. The three operations
 have different storage and authentication boundaries:
 
 | Operation | Where the content is fetched | Identity |
@@ -219,3 +219,8 @@ uses PostgreSQL and separate BEAM invocations. It preserves a guest file across
 recovery and stop/start, then verifies deletion and reservation release. Its OCI
 mode also demonstrates a managed pull of a different image. It consumes existing
 registry sources; it does not build or publish them.
+
+The [1.20.2 qualification](runtime-1.20.2-qualification.md) records the newer
+worker campaign separately from the original feature evidence above. Preserve the
+exact capture runtime on checkpoint approvals; changing a filename or version
+field does not migrate saved machine state.

@@ -5,7 +5,7 @@ defmodule SmolBox.Runtime.Branches do
 
   def approved?(worker, parent, spec),
     do:
-      worker.runtime_version == "1.19.0" and
+      worker.runtime_version in ["1.19.0", "1.20.2"] and
         spec.policy in worker.branch_policies and WorkerConfig.supports?(worker, parent.spec)
 
   def supported(_config, %{branch: nil, branch_children: children}) when map_size(children) == 0,
@@ -133,7 +133,8 @@ defmodule SmolBox.Runtime.Branches do
   end
 
   defp release_evidence(client, child) do
-    with {:ok, %{version: "1.19.0"}} <- Client.health(client),
+    with {:ok, %{version: version}} when version in ["1.19.0", "1.20.2"] <-
+           Client.health(client),
          do: BranchClient.inspect_child(client, child, true)
   end
 

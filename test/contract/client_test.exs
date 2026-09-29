@@ -31,9 +31,11 @@ defmodule SmolBox.ClientTest do
 
     assert {:ok, %{version: "1.14.1", total: 0, running: 0}} = Client.health(peer)
 
-    for version <- ["1.14.6", "1.16.0", "1.16.1", "1.17.0", "1.19.0"] do
+    for version <- ["1.14.6", "1.16.0", "1.16.1", "1.17.0", "1.19.0", "1.20.2"] do
       upgraded = client(&TestPeer.json(&1, fixture(version <> "/health")))
-      assert {:ok, %{version: ^version, total: 0, running: 0}} = Client.health(upgraded)
+      # The 1.20.2 capture was taken with its fixture machine running.
+      count = if version == "1.20.2", do: 1, else: 0
+      assert {:ok, %{version: ^version, total: ^count, running: ^count}} = Client.health(upgraded)
     end
 
     assert :ok = Client.readiness(peer)
@@ -107,7 +109,7 @@ defmodule SmolBox.ClientTest do
           end
         end)
 
-      if version in ["1.16.1", "1.17.0", "1.19.0"] do
+      if version in ["1.16.1", "1.17.0", "1.19.0", "1.20.2"] do
         assert {:ok, %{state: :created}} = Client.create(peer, spec)
         assert_receive {:checkpoint_request, wire}
         refute Map.has_key?(wire, "storageGb")
@@ -127,7 +129,7 @@ defmodule SmolBox.ClientTest do
     parent = self()
 
     supported_cases =
-      for version <- ["1.16.0", "1.16.1", "1.17.0", "1.19.0"],
+      for version <- ["1.16.0", "1.16.1", "1.17.0", "1.19.0", "1.20.2"],
           mode <- [:matching, :missing, :different],
           do: {version, mode}
 

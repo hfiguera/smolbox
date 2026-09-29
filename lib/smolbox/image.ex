@@ -2,7 +2,7 @@ defmodule SmolBox.Image do
   @moduledoc """
   A machine-local image observation, not a worker-host artifact cache entry.
 
-  smolvm 1.19.0 reports the OCI **configuration** digest in `digest`, not the
+  smolvm 1.19.0 or 1.20.2 reports the OCI **configuration** digest in `digest`, not the
   manifest digest supplied for a pull. Imported packed images instead report
   the literal `"packed"` and have no digest evidence. `digest_kind` makes this
   distinction explicit. Neither value attests the machine's mutable files.

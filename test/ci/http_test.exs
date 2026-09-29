@@ -58,7 +58,19 @@ defmodule SmolBox.CI.HTTPTest do
     end
   end
 
-  defp serve(response) do
+  test "an explicit mutation budget permits a response beyond the observation deadline" do
+    {url, server} =
+      serve("HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\nok", 3200)
+
+    assert HTTP.request(url, "POST", nil, 1024, 5000) == {200, "ok"}
+    assert Task.await(server) =~ "POST /probe HTTP/1.1"
+
+    for timeout <- [0, -1, 60_001, :infinity] do
+      assert_raise ArgumentError, fn -> HTTP.request(url, "POST", nil, 1024, timeout) end
+    end
+  end
+
+  defp serve(response, delay_ms \\ 0) do
     {:ok, listener} =
       :gen_tcp.listen(0, [:binary, active: false, ip: {127, 0, 0, 1}, reuseaddr: true])
 
@@ -68,6 +80,7 @@ defmodule SmolBox.CI.HTTPTest do
       Task.async(fn ->
         {:ok, socket} = :gen_tcp.accept(listener, 3_000)
         {:ok, request} = :gen_tcp.recv(socket, 0, 3_000)
+        Process.sleep(delay_ms)
         :gen_tcp.send(socket, response)
         :gen_tcp.close(socket)
         :gen_tcp.close(listener)

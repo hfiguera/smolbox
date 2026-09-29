@@ -5,7 +5,8 @@ defmodule SmolBox.CI.HTTP do
   # curl supplies HTTP framing across both supported hosts. Its output is bounded
   # by our owned child, including non-2xx responses. No redirects, proxies or
   # mutation retries are enabled. These maintainer probes only use loopback HTTP.
-  def request(url, method \\ "GET", body \\ nil, cap \\ 2_097_152) do
+  def request(url, method \\ "GET", body \\ nil, cap \\ 2_097_152, timeout_ms \\ 3000) do
+    Util.ensure!(is_integer(timeout_ms) and timeout_ms in 1..60_000, "invalid probe timeout")
     uri = URI.parse(url)
 
     Util.ensure!(
@@ -28,7 +29,7 @@ defmodule SmolBox.CI.HTTP do
           "--proto",
           "=http",
           "--max-time",
-          "3",
+          to_string(timeout_ms / 1000),
           "--connect-timeout",
           "3",
           "--request",
@@ -39,7 +40,7 @@ defmodule SmolBox.CI.HTTP do
           "\n%{http_code}"
         ] ++ body_args(body, directory)
 
-      {data, report} = Child.execute(arguments, timeout: 5_000, output_limit: cap + 4)
+      {data, report} = Child.execute(arguments, timeout: timeout_ms + 2000, output_limit: cap + 4)
 
       Util.ensure!(
         report.status == "passed" and byte_size(data) >= 4,
@@ -54,8 +55,8 @@ defmodule SmolBox.CI.HTTP do
     end
   end
 
-  def json!(url, method \\ "GET", body \\ nil, cap \\ 2_097_152) do
-    {status, bytes} = request(url, method, body, cap)
+  def json!(url, method \\ "GET", body \\ nil, cap \\ 2_097_152, timeout_ms \\ 3000) do
+    {status, bytes} = request(url, method, body, cap, timeout_ms)
     Util.ensure!(status in 200..299, "unexpected worker HTTP status #{status}")
     if bytes == "", do: nil, else: JSON.decode!(bytes)
   end

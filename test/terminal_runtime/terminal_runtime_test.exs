@@ -224,10 +224,10 @@ defmodule SmolBox.TerminalRuntimeTest do
     delete(c)
   end
 
-  test "abrupt terminal loss does not guarantee termination of detached descendants", c do
-    # An intentionally detached descendant gives a concrete counterexample to
-    # treating PTY disconnect as process-tree termination. All files/processes
-    # are confined to this test's verified disposable guest.
+  test "abrupt terminal loss remains unknown while descendant cleanup is observed", c do
+    # Observe an intentionally detached descendant without treating disconnect
+    # as a cancellation receipt. All files/processes are confined to this
+    # test's verified disposable guest.
     source = ~S"""
     import os, pathlib, signal, time
     root = pathlib.Path('/workspace')
@@ -242,6 +242,10 @@ defmodule SmolBox.TerminalRuntimeTest do
         while True:
             root.joinpath('terminal-heartbeat').write_text(str(time.monotonic_ns()))
             time.sleep(0.1)
+    deadline = time.monotonic() + 5
+    while not root.joinpath('terminal-heartbeat').exists():
+        if time.monotonic() >= deadline: raise RuntimeError('descendant not ready')
+        time.sleep(0.01)
     print('DESCENDANT_READY', flush=True)
     while True: time.sleep(1)
     """
@@ -273,15 +277,25 @@ defmodule SmolBox.TerminalRuntimeTest do
     child = int(root.joinpath('terminal-child.pid').read_text())
     print('descendant_active=' + str(before != after))
     print('direct_child_present=' + str(pathlib.Path('/proc/' + str(parent)).exists()))
-    os.kill(child, signal.SIGKILL)
+    try: os.kill(child, signal.SIGKILL)
+    except ProcessLookupError: pass
     """
 
     {:ok, command} = Command.new(["python3", "-c", check])
 
-    assert {:ok, %{exit_code: 0, stdout: observation}} =
-             Client.exec(c.client, c.machine.machine_name, command)
+    assert {:ok, result} = Client.exec(c.client, c.machine.machine_name, command)
+    assert result.exit_code == 0, "descendant observation: #{inspect(Map.from_struct(result))}"
+    observation = result.stdout
 
-    assert observation =~ "descendant_active=True"
+    # The 1.19.0 counterexample remains covered. Newer workers may reap this
+    # container's descendants; that observation is not a cancellation receipt.
+    if SmolBox.LabCandidate.runtime_version() == "1.20.2" do
+      assert observation =~ "descendant_active=False"
+    else
+      assert observation =~ "descendant_active=True"
+    end
+
+    assert {:error, %{category: :unknown}} = SmolBox.Terminal.next(terminal)
     IO.puts(Jason.encode!(%{case: "abrupt-disconnect", observation: observation}))
     delete(c)
   end

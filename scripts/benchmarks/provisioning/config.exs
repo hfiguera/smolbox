@@ -46,7 +46,8 @@ defmodule SmolBox.ProvisioningConfig do
       )
 
     {:ok, client} = Client.new(endpoint)
-    {:ok, %{version: "1.19.0"}} = Client.health(client)
+    version = Map.get(config, "runtime_version", "1.19.0")
+    {:ok, %{version: ^version}} = Client.health(client)
 
     capture_root = config["root"] <> "/captures/" <> config["partition"]
     File.mkdir_p!(capture_root)
@@ -85,12 +86,13 @@ defmodule SmolBox.ProvisioningConfig do
         profile: profile,
         architecture: "x86_64",
         platform: :linux,
-        runtime_version: "1.19.0"
+        runtime_version: version
       )
 
     {:ok, worker} =
       WorkerConfig.new(
         client: client,
+        runtime_version: version,
         platform: :linux,
         architecture: "x86_64",
         artifacts: [artifact],

@@ -157,3 +157,13 @@ setup was corrected before running terminal phases. The previous lost logs remai
 lost; this new run supplies complete replacement evidence for the recovery
 scenario. See the [rerun evidence](evidence/interactive-terminal-recovery.json) and
 [capture instructions](interactive-terminals.md#runnable-examples-and-qualification).
+
+## 1.20.2 compatibility observation
+
+The [1.20.2 campaign](runtime-1.20.2-qualification.md) repeated the abrupt
+disconnect probe. Its intentionally detached Python child stopped on both Linux
+x86_64 and macOS Apple Silicon. The same Python artifact on the macOS 1.19.0
+worker kept the child active. This is a bounded observation of one process tree,
+not a general cancellation guarantee: no exit notification reached the client,
+so SmolBox still reports an unknown outcome. The historical 1.19.0 evidence above
+and the conservative recovery procedure remain valid.

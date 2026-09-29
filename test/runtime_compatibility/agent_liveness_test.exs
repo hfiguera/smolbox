@@ -18,7 +18,8 @@ defmodule SmolBox.AgentLivenessRuntimeTest do
       )
 
     {:ok, client} = Client.new(endpoint)
-    assert {:ok, %{version: "1.19.0"}} = Client.health(client)
+    version = SmolBox.LabCandidate.runtime_version()
+    assert {:ok, %{version: ^version}} = Client.health(client)
     {:ok, name} = Identity.machine_name("liveness")
     {:ok, spec} = MachineSpec.new(name, System.fetch_env!("SMOLBOX_PYTHON_ARTIFACT"))
     assert {:ok, created} = Client.create(client, spec)

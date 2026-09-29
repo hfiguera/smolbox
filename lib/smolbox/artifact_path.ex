@@ -6,7 +6,7 @@ defmodule SmolBox.ArtifactPath do
       String.starts_with?(path, "/") and
       String.ends_with?(
         path,
-        if(kind == :checkpoint, do: ".smolcheckpoint", else: ".smolmachine")
+        if(kind == :checkpoint, do: [".smolcheckpoint", ".checkpoint"], else: ".smolmachine")
       ) and
       not String.contains?(path, ["\0", "/../", "/./", "//"])
   end

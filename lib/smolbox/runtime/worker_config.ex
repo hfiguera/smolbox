@@ -3,7 +3,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   Host-approved managed worker, prepared artifacts, and exact profile revisions.
 
   Optional `:sources` registers up to 32 exact remote `SmolBox.Source` approvals
-  on smolvm 1.19.0. Each must match this worker's guest architecture. An OCI
+  on smolvm 1.19.0 or 1.20.2. Each must match this worker's guest architecture. An OCI
   source also requires an explicit network profile. Registry artifacts download
   on the worker host, independently of guest networking. Approving a source
   authorizes that exact registry/repository/manifest/content identity, not an
@@ -15,15 +15,15 @@ defmodule SmolBox.Runtime.WorkerConfig do
   `SmolBox.RegistryCredentials`. Only safe references appear in stored sources.
 
   Optional `:checkpoint_policies` approves exact `SmolBox.CheckpointPolicy` values
-  for private controller storage and additional capture resources on 1.19.0.
+  for private controller storage and additional capture resources on 1.19.0 or 1.20.2.
   See `SmolBox.Checkpoints` for idle assertions, quiescence and artifact retention.
 
   Optional `:branch_policies` approves exact `SmolBox.BranchPolicy` values for
-  same-worker leaf branches on 1.19.0. Extra backing allowances survive child
+  same-worker leaf branches on 1.19.0 or 1.20.2. Extra backing allowances survive child
   deletion and dependency retirement; see `SmolBox.Branches` for cleanup.
 
   Optional `:export_destinations` approves exact `SmolBox.ExportDestination`
-  values for stopped-machine publication on 1.19.0. Each includes additional
+  values for stopped-machine publication on 1.19.0 or 1.20.2. Each includes additional
   helper resources, immutable tag policy, and a credential reference resolving
   a scoped publication bearer. A successful response does not attest helper
   cleanup; see `SmolBox.Exports` for explicit quiescence confirmation.
@@ -36,7 +36,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   `checkpoints` optionally registers `SmolBox.Checkpoint` approvals. Each binds
   an idle offline source to its exact profile, platform, architecture and declared
-  runtime (1.16.1, 1.17.0 or 1.19.0). `artifacts: []` is accepted when checkpoints are configured. Approval
+  runtime (1.16.1, 1.17.0, 1.19.0 or 1.20.2). `artifacts: []` is accepted when checkpoints are configured. Approval
   is supplied by the operator and is not remotely attested.
 
   `allocation_floor` is a required operator declaration with `storage_gb`,
@@ -46,7 +46,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   still expose a larger guest disk. Admission rejects profiles below these
   floors. This declaration is not remotely attested or a host filesystem quota.
 
-  Versions 1.14.6, 1.16.0, 1.16.1, 1.17.0 and 1.19.0 require working host `resize2fs` for disk requests below
+  Versions 1.14.6, 1.16.0, 1.16.1, 1.17.0, 1.19.0 and 1.20.2 require working host `resize2fs` for disk requests below
   template sizes. Verify file persistence across stop/start before admission;
   see [Compatibility](compatibility.html#macos-1-14-6-prerequisites).
 
@@ -79,7 +79,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   @derive {Inspect, only: [:architecture, :platform, :runtime_version, :qualification]}
   defstruct @enforce_keys ++
               [
-                runtime_version: "1.19.0",
+                runtime_version: "1.20.2",
                 qualification: :development,
                 draining: false,
                 checkpoints: [],
@@ -132,13 +132,13 @@ defmodule SmolBox.Runtime.WorkerConfig do
   `SmolBox.Checkpoint` approvals. At least one local image, checkpoint, or remote
   source is required. `:sources` defaults to `[]`; `:registry_credentials` to nil.
 
-  Other optional fields are `:runtime_version` (default `"1.19.0"` for Linux x86_64 or
+  Other optional fields are `:runtime_version` (default `"1.20.2"` for Linux x86_64 or
   macOS Apple Silicon; explicitly select `"1.17.0"`, `"1.16.1"`, `"1.16.0"`, `"1.14.1"` or `"1.14.6"`
   for another supported worker), `:qualification`
   (only `:development`), and `:draining` (default `false`). Artifact IDs must be
   unique and architectures must match this worker. Construction makes no worker
   request or remote digest check. Profiles below the floor cannot support execution.
-  SmolBox 0.3.0 and 0.2.1 default to 1.19.0; 0.2.0 defaults to 1.17.0; versions 0.1.4 and 0.1.5 default to 1.16.1; SmolBox 0.1.3 defaults
+  This checkout defaults to 1.20.2. Published SmolBox 0.3.0 and 0.2.1 default to 1.19.0; 0.2.0 defaults to 1.17.0; versions 0.1.4 and 0.1.5 default to 1.16.1; SmolBox 0.1.3 defaults
   to 1.16.0 and 0.1.2 to 1.14.6. See the
   [qualification evidence](compatibility.html#smolvm-1-19-0-qualification) and
   upgrade the separately installed worker or retain its explicit version.
@@ -181,8 +181,9 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   @doc "Check exact profile/artifact approval and allocation floors; this is not a health probe."
   @spec supports?(t(), ExecutionSpec.t() | SmolBox.ManagedMachineSpec.t()) :: boolean()
-  def supports?(%{runtime_version: version}, %{checkpointable: true}) when version != "1.19.0",
-    do: false
+  def supports?(%{runtime_version: version}, %{checkpointable: true})
+      when version not in ["1.19.0", "1.20.2"],
+      do: false
 
   def supports?(worker, %{artifact: %{"kind" => "checkpoint"}} = spec) do
     ExecutionSupport.worker?(worker, spec) and
@@ -209,7 +210,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   defp pull_supported?(worker, %{command: %SmolBox.ImagePull{source: source}} = spec),
     do:
-      spec.artifact["kind"] == "oci" and worker.runtime_version == "1.19.0" and
+      spec.artifact["kind"] == "oci" and worker.runtime_version in ["1.19.0", "1.20.2"] and
         source in worker.sources and
         source.architecture == worker.architecture
 
@@ -248,7 +249,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   defp approved_artifact?(worker, spec) do
     if SmolBox.Source.remote?(spec.artifact) do
-      worker.runtime_version == "1.19.0" and
+      worker.runtime_version in ["1.19.0", "1.20.2"] and
         (spec.artifact["kind"] != "oci" or spec.profile.network != :offline) and
         Enum.any?(worker.sources, &(SmolBox.Source.artifact(&1) == spec.artifact))
     else
@@ -262,21 +263,22 @@ defmodule SmolBox.Runtime.WorkerConfig do
   defp network_supported?(worker, spec),
     do:
       spec.profile.network == :offline or
-        worker.runtime_version in ["1.16.0", "1.16.1", "1.17.0", "1.19.0"]
+        worker.runtime_version in ["1.16.0", "1.16.1", "1.17.0", "1.19.0", "1.20.2"]
 
   defp file_support?(worker, spec),
     do:
       SmolBox.FileAccess.supports?(worker.client, spec.profile) and
         (not SmolBox.FileAccess.extended?(spec.profile) or
-           worker.runtime_version in ["1.17.0", "1.19.0"])
+           worker.runtime_version in ["1.17.0", "1.19.0", "1.20.2"])
 
   defp workload_supported?(worker, spec),
-    do: Map.get(spec, :workload) == nil or worker.runtime_version in ["1.17.0", "1.19.0"]
+    do:
+      Map.get(spec, :workload) == nil or worker.runtime_version in ["1.17.0", "1.19.0", "1.20.2"]
 
   defp ports_supported?(worker, spec),
     do:
       Map.get(spec, :ports, []) == [] or
-        (worker.runtime_version in ["1.17.0", "1.19.0"] and
+        (worker.runtime_version in ["1.17.0", "1.19.0", "1.20.2"] and
            {worker.platform, worker.architecture} in [{:linux, "x86_64"}, {:macos, "aarch64"}])
 
   defp approved_checkpoint(worker, spec),
@@ -303,7 +305,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   defp supported_runtime?(%{runtime_version: "1.14.1"}), do: true
 
   defp supported_runtime?(%{runtime_version: version, platform: platform, architecture: arch})
-       when version in ["1.14.6", "1.16.0", "1.16.1", "1.17.0", "1.19.0"],
+       when version in ["1.14.6", "1.16.0", "1.16.1", "1.17.0", "1.19.0", "1.20.2"],
        do: {platform, arch} in [{:linux, "x86_64"}, {:macos, "aarch64"}]
 
   defp supported_runtime?(_worker), do: false
@@ -346,7 +348,8 @@ defmodule SmolBox.Runtime.WorkerConfig do
       Validation.list?(worker.branch_policies, 32) and
         Enum.all?(
           worker.branch_policies,
-          &(worker.runtime_version == "1.19.0" and SmolBox.BranchPolicy.validate(&1) == :ok)
+          &(worker.runtime_version in ["1.19.0", "1.20.2"] and
+              SmolBox.BranchPolicy.validate(&1) == :ok)
         ) and unique?(worker.branch_policies, & &1.id)
 
   defp capture_policies?(worker),
@@ -354,14 +357,15 @@ defmodule SmolBox.Runtime.WorkerConfig do
       Validation.list?(worker.checkpoint_policies, 32) and
         Enum.all?(
           worker.checkpoint_policies,
-          &(worker.runtime_version == "1.19.0" and SmolBox.CheckpointPolicy.validate(&1) == :ok)
+          &(worker.runtime_version in ["1.19.0", "1.20.2"] and
+              SmolBox.CheckpointPolicy.validate(&1) == :ok)
         ) and
         unique?(worker.checkpoint_policies, & &1.id)
 
   defp exports?(worker) do
     Validation.list?(worker.export_destinations, 32) and
       Enum.all?(worker.export_destinations, fn destination ->
-        worker.runtime_version == "1.19.0" and
+        worker.runtime_version in ["1.19.0", "1.20.2"] and
           SmolBox.ExportDestination.validate(destination) == :ok
       end) and unique?(worker.export_destinations, & &1.id)
   end
@@ -370,7 +374,8 @@ defmodule SmolBox.Runtime.WorkerConfig do
     Validation.list?(worker.sources, 32) and
       Enum.all?(worker.sources, fn source ->
         SmolBox.Source.validate(source) == :ok and source.kind in [:registry, :oci] and
-          source.architecture == worker.architecture and worker.runtime_version == "1.19.0"
+          source.architecture == worker.architecture and
+          worker.runtime_version in ["1.19.0", "1.20.2"]
       end) and unique?(worker.sources, & &1.id)
   end
 

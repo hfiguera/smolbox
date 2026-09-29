@@ -45,7 +45,8 @@ defmodule SmolBox.Runtime.Exports do
   end
 
   def approved?(worker, spec) do
-    worker.runtime_version == "1.19.0" and spec.destination in worker.export_destinations
+    worker.runtime_version in ["1.19.0", "1.20.2"] and
+      spec.destination in worker.export_destinations
   end
 
   defp prepare(config, machine, export) do
@@ -145,7 +146,14 @@ defmodule SmolBox.Runtime.Exports do
                  worker.registry_credentials,
                  export.spec.destination.credential_ref
                ),
-             do: RegistryExport.verify(export.spec, export.receipt, token, config.clock.now()),
+             do:
+               RegistryExport.verify(
+                 export.spec,
+                 export.receipt,
+                 token,
+                 config.clock.now(),
+                 worker.runtime_version
+               ),
              else: (
                false -> Session.error(:unsupported_capability, :export)
                error -> error

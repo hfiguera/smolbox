@@ -24,6 +24,18 @@ Follow [Upgrading to 0.3.0](upgrading-to-0.3.0.md) before enabling them. No addi
 PostgreSQL SQL migration is required from 0.2.x; a coordinated reader and adapter
 upgrade is still required. Qualification remains `:development`.
 
+## smolvm 1.20.2 qualification
+
+**Default in this checkout; published 0.3.0 remains on 1.19.0.** See the
+[qualification report](runtime-1.20.2-qualification.md) for the exact release,
+live platform results, failed attempts and upgrade limits. Changes after the
+1.20.2 tag are excluded. Intermediate 1.19.x and 1.20.x releases are not admitted.
+Existing supported versions remain available through explicit configuration.
+
+No SQL migration or codec revision is added. Older controllers can still reject
+records carrying the new runtime version, so coordinate all readers before using
+1.20.2 and preserve capture-version pins. Qualification remains `:development`.
+
 ## smolvm 1.19.0 qualification
 
 **Default since SmolBox 0.2.1, retained in 0.3.0.** Linux x86_64 and macOS Apple Silicon passed the
@@ -217,6 +229,9 @@ independent Linux worker-deadline tests are recorded separately. See the
 explicit bounded settings. No validation limits or public defaults were relaxed.
 
 ## Runtime selection
+
+This checkout defaults to 1.20.2; published 0.3.0 and 0.2.1 default to 1.19.0.
+Both are supported on Linux x86_64 and macOS Apple Silicon.
 
 SmolBox 0.1.3 defaults to `runtime_version: "1.16.0"` for Linux x86_64 and
 macOS Apple Silicon. SmolBox 0.1.2 defaults to 1.14.6 and does not include 1.16.0

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Qualify official smolvm 1.20.2 and select it by default on Linux x86_64 and
+  macOS Apple Silicon. Explicit 1.19.0 and earlier supported versions remain.
+  See [qualification and upgrade boundaries](docs/runtime-1.20.2-qualification.md).
+  No SQL migration or codec revision is added; coordinate readers before storing
+  results with the new runtime version and preserve existing checkpoint pins.
+- Accept `.checkpoint` alongside `.smolcheckpoint` and record the actual worker
+  version in managed export results. Managed capture filenames stay unchanged.
+
 - Require Mint 1.11 or later and update the example locks to address
   CVE-2026-91043, CVE-2026-92103 and CVE-2026-94194. No data migration is required.
 - Update the community workspace's test-only `lazy_html` dependency to 0.1.13

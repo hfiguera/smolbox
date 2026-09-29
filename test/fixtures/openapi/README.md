@@ -95,3 +95,13 @@ Full schema SHA-256: `e4589b6a1a32973a79cde975785d614b56f8f7b38adae430d19803362a
 Subset SHA-256: `8bc752e993a3152e85ae16e34201adf3c1eaf70eef23a0c6e09604cb10feda88`.
 Runtime health and unsupported paused states are checked separately; the schema's
 state description still lists only created, running and stopped.
+
+## smolvm 1.20.2
+
+The new subset was exported by the official Darwin ARM64 distribution at
+`v1.20.2` (`59a2c2677ab7d6bfe01d1f2261efbbeea4d7dfb8`). It retains the same eight
+routes as the 1.19.0 subset and includes their transitive schema references.
+`MachineInfo.runtime` is additive; no existing response properties were removed.
+Linux and macOS exports have the same SHA-256. The decoder ignores that optional observation; it does not authorize live resize
+or change immutable resource reservations. See the
+[qualification report](../../../docs/runtime-1.20.2-qualification.md).
