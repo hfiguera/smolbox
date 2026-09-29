@@ -319,7 +319,11 @@ defmodule SmolBox.CI.WorkerFault do
           "cleanup identity conflict; resource retained"
         )
 
-        if current["state"] == "running", do: HTTP.json!(url <> "/stop", "POST", %{})
+        # A running guest may need time to synchronize its disks. Keep observations
+        # short, but allow this single owned mutation its normal bounded budget.
+        if current["state"] == "running",
+          do: HTTP.json!(url <> "/stop", "POST", %{}, 2_097_152, 60_000)
+
         stopped = HTTP.json!(url)
 
         Util.ensure!(

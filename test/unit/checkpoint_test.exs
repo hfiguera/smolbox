@@ -29,6 +29,8 @@ defmodule SmolBox.CheckpointTest do
           [profile: online],
           [resume: :running],
           [runtime_version: "1.16.0"],
+          [runtime_version: "1.20.1"],
+          [runtime_version: "1.20.3"],
           [architecture: "aarch64"],
           [platform: :windows],
           [path: "/tmp/a.smolmachine"],
@@ -40,13 +42,22 @@ defmodule SmolBox.CheckpointTest do
       assert {:error, _} = approval(options)
     end
 
-    for version <- ["1.16.1", "1.17.0", "1.19.0"] do
+    for version <- ["1.16.1", "1.17.0", "1.19.0", "1.20.2"] do
       assert {:ok, %{runtime_version: ^version}} = approval(runtime_version: version)
     end
 
     assert {:error, _} = Checkpoint.new([])
     assert {:error, _} = Checkpoint.validate(%{})
     assert {:ok, _} = approval(platform: :macos, architecture: "aarch64")
+  end
+
+  test "both checkpoint filenames preserve the approved runtime and wire path" do
+    for suffix <- [".checkpoint", ".smolcheckpoint"] do
+      path = "/approved/idle" <> suffix
+      assert {:ok, checkpoint} = approval(path: path, runtime_version: "1.20.2")
+      assert {:ok, machine} = Checkpoint.machine(checkpoint, "child")
+      assert {:ok, %{"from" => ^path}} = MachineSpec.to_wire(machine)
+    end
   end
 
   test "checkpoint request preserves captured topology without pretending to override entrypoint" do

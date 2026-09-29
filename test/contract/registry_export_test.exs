@@ -28,6 +28,20 @@ defmodule SmolBox.RegistryExportTest do
              RegistryExport.vacant(context.spec, "x86_64", context.token)
   end
 
+  test "publication records the selected runtime while preserving legacy receipts", context do
+    receipt = publish(context)
+
+    for version <- ["1.19.0", "1.20.2"] do
+      assert {:ok, %{runtime_version: ^version} = result} =
+               RegistryExport.verify(context.spec, receipt, context.token, 1000, version)
+
+      assert :ok = ExportResult.validate(result)
+    end
+
+    assert {:error, _} =
+             RegistryExport.verify(context.spec, receipt, context.token, 1000, "1.20.3")
+  end
+
   test "authentication failure is not absence and does not expose a token", context do
     token = "unrecognized-secret"
     assert {:error, error} = RegistryExport.vacant(context.spec, "x86_64", token)

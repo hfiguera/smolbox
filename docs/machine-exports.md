@@ -8,9 +8,9 @@ Export is **not a checkpoint or a live branch**. It does not preserve memory,
 running processes, open connections, or every mounted path. It does not provide
 backup scheduling, disaster recovery, migration, or automatic registry cleanup.
 
-## What smolvm 1.19.0 preserves
+## What an export preserves
 
-SmolBox uses `POST /api/v1/machines/:name/export` on the approved 1.19.0 worker.
+SmolBox uses `POST /api/v1/machines/:name/export` on an approved 1.19.0 or 1.20.2 worker.
 It requires a stopped machine and never stops one implicitly.
 
 | Source | Supported exported state | Excluded state |
@@ -203,7 +203,7 @@ Review and explicitly register this exact source in the target worker's `sources
 approvals. `source/2` constructs a value; it does not change runtime configuration.
 Omit `credential_ref` only when the existing pull authentication policy permits it.
 Create a new `ManagedMachineSpec` using `SmolBox.Source.artifact(source)` and the
-approved profile. Keep the source architecture, pinned 1.19.0 runtime, workload,
+approved profile. Keep the source architecture, pinned runtime version, workload,
 network, capacity, and destination requirements explicit. No universal portability
 is promised. The new machine has its own identity, disks, and deletion lifecycle.
 
@@ -274,3 +274,8 @@ real power-loss durability or a production registry's failure behavior.
 Export remains development-qualified. Bare VM exports and macOS exports were not
 live-qualified in this campaign. Host quotas, crash-consistent application state,
 universal artifact portability, and automatic helper cleanup are not certified.
+
+The [1.20.2 qualification](runtime-1.20.2-qualification.md) records the newer
+worker campaign separately from the original feature evidence above. Preserve the
+exact capture runtime on checkpoint approvals; changing a filename or version
+field does not migrate saved machine state.

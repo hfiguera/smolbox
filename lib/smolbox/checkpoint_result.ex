@@ -34,7 +34,7 @@ defmodule SmolBox.CheckpointResult do
          true <-
            Validation.digest?(result.sha256) and
              Validation.integer?(result.size_bytes, 1, 68_719_476_736),
-         true <- result.runtime_version == "1.19.0",
+         true <- result.runtime_version in ["1.19.0", "1.20.2"],
          {:ok, _} <- build_approval(result, id: "validation", worker_path: result.path) do
       :ok
     else

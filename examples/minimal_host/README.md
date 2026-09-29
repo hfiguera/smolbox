@@ -1,12 +1,13 @@
 # Minimal host example
 
-SmolBox 0.3.0 retains the smolvm **1.19.0** default introduced in 0.2.1.
+This checkout defaults to smolvm **1.20.2**. Published SmolBox 0.3.0 and
+0.2.1 retain their **1.19.0** default.
 Follow [Upgrading to 0.3.0](../../docs/upgrading-to-0.3.0.md) before enabling
 registry sources, exports, captures or branches against an existing store.
 Applications coming from 0.1.x must also follow the
 [0.2.0 migration guide](../../docs/upgrading-to-0.2.0.md).
 Set `SMOLBOX_RUNTIME_VERSION=1.16.1` explicitly for an existing 1.16.1 worker.
-See [qualification](../../docs/runtime-1.19.0-qualification.md).
+See [qualification](../../docs/runtime-1.20.2-qualification.md).
 
 This example keeps the image-based path simple. For approved idle checkpoint
 execution with PostgreSQL and recovery across application processes, see the
@@ -29,7 +30,7 @@ objects and a 32-byte fingerprint key from host secret storage, then set:
 
 ```sh
 export SMOLBOX_RUNTIME_URL=http://127.0.0.1:19470
-export SMOLBOX_RUNTIME_VERSION=1.19.0
+export SMOLBOX_RUNTIME_VERSION=1.20.2
 export SMOLBOX_PYTHON_ARTIFACT=/absolute/path/python.smolmachine
 export SMOLBOX_PYTHON_SHA256=the_verified_64_character_lowercase_digest
 export SMOLBOX_ARTIFACT_ROOT=/absolute/private/directory/objects
@@ -43,10 +44,10 @@ MIX_ENV=test mix run scripts/demo.exs
 ```
 
 The object directory must already exist with mode `0700`. Use the exact version
-installed on the worker. Version 1.19.0 is the default on Linux x86_64 and macOS
+installed on the worker. Version 1.20.2 is the checkout default on Linux x86_64 and macOS
 Apple Silicon. Set `SMOLBOX_RUNTIME_VERSION` to `1.16.0`, `1.14.6` or `1.14.1` for an
 existing older worker. Consult the
-[qualification evidence](../../docs/runtime-1.19.0-qualification.md). For smaller 1.14.6, 1.16.0, 1.16.1 or 1.17.0 disk requests, supply the host's `resize2fs`; see
+[qualification evidence](../../docs/runtime-1.20.2-qualification.md). For smaller 1.14.6, 1.16.0, 1.16.1 or 1.17.0 disk requests, supply the host's `resize2fs`; see
 [host prerequisites](../../docs/compatibility.md#macos-1-14-6-prerequisites).
 SmolBox 0.1.5 defaults to 1.16.1; 0.1.3 defaults to 1.16.0. Keep key files private
 and stable; the example does not print their contents. For an authenticated

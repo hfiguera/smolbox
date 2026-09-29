@@ -1,6 +1,6 @@
 defmodule SmolBox.Branches do
   @moduledoc """
-  Create managed leaf machines from idle offline bare sources on smolvm 1.19.0.
+  Create managed leaf machines from idle offline bare sources on smolvm 1.19.0 or 1.20.2.
 
   Source and child identity, exclusion and capacity are persisted atomically.
   Children run on the source worker and retain a disk dependency on it. Delete

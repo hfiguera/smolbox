@@ -3,7 +3,7 @@
 Prepare useful state once, capture it, and restore independent managed machines.
 Unlike an export, a checkpoint includes memory and resumes captured processes.
 The first managed capture contract is deliberately **idle, offline, bare guests on
-smolvm 1.19.0**. See [managed branches](managed-branches.md) for live copies.
+smolvm 1.19.0 or 1.20.2**. See [managed branches](managed-branches.md) for live copies.
 Capture does not add arbitrary application resume,
 network restoration, in-place rollback, migration or automatic backups.
 
@@ -178,7 +178,7 @@ the same byte digest there, and explicitly approve the captured idle state:
 ```
 
 Register that exact approval in the target worker's `checkpoints` catalog, including
-its exact profile and smolvm 1.19.0 platform/architecture. This function does not
+its exact profile, capture runtime and platform/architecture. This function does not
 copy files or change configuration. The original source approval remains in the
 catalog while its machine is managed.
 
@@ -246,3 +246,8 @@ preservation, deletion and retained artifact accounting. Simulated failure tests
 cover lost responses, store failures and controller restarts; those are not
 power-loss or production filesystem durability qualification. macOS managed capture
 has not been live-qualified in this campaign.
+
+The [1.20.2 qualification](runtime-1.20.2-qualification.md) records the newer
+worker campaign separately from the original feature evidence above. Preserve the
+exact capture runtime on checkpoint approvals; changing a filename or version
+field does not migrate saved machine state.

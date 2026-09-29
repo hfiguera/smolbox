@@ -1,6 +1,6 @@
 # Executing from a checkpoint
 
-For managed capture and independent retained restores on 1.19.0, see
+For managed capture and independent retained restores on 1.19.0 or 1.20.2, see
 [Managed checkpoints](managed-checkpoints.md). This guide describes the existing
 approved checkpoint execution contract.
 
@@ -23,7 +23,7 @@ API to make interpreter initialization disappear.
 
 ## Prepare and approve the source
 
-Use a dedicated preparation worker running smolvm **1.17.0 or 1.19.0** (or explicitly selected **1.16.1**) on the same platform
+Use a dedicated preparation worker running smolvm **1.17.0, 1.19.0 or 1.20.2** (or explicitly selected **1.16.1**) on the same platform
 and compatible CPU as the execution worker. Prepare a bare, offline guest with
 no host mounts, ports, sockets, devices, secret references or workload restart.
 Wait for all preparation commands to exit. Capture the idle guest using smolvm's
@@ -103,7 +103,7 @@ entries. The checkpoint's full profile must appear in the worker's profile
 catalog. Its runtime, platform and architecture must match that worker. Keep
 allocation floors consistent with actual captured disks and runtime overhead.
 
-This checkout supports checkpoint execution on 1.19.0 (the default), 1.17.0 and 1.16.1.
+This checkout supports checkpoint execution on 1.20.2 (the checkout default), 1.19.0, 1.17.0 and 1.16.1.
 Set `runtime_version: "1.17.0"` on both the checkpoint approval and worker for
 existing 1.17.0 captures. Published 0.1.5 requires 1.16.1. Captures must match their
 approved runtime; no cross-version restore compatibility is established. Existing image execution retains
@@ -243,3 +243,13 @@ SMOLBOX_CHECKPOINT_SOCKET=/private/worker/api.sock \
 SMOLBOX_CHECKPOINT_PATH=/approved/idle.smolcheckpoint \
 mix test test/checkpoint_runtime --include runtime --warnings-as-errors
 ```
+
+The [1.20.2 qualification](runtime-1.20.2-qualification.md) records the newer
+worker campaign separately from the original feature evidence above. Preserve the
+exact capture runtime on checkpoint approvals; changing a filename or version
+field does not migrate saved machine state.
+
+Both `.checkpoint` and `.smolcheckpoint` filenames are accepted. Managed captures
+keep `capture.smolcheckpoint` so existing durable paths remain stable. The
+filename does not determine format compatibility; metadata and the exact capture
+runtime still have to match the approval.

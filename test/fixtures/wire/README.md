@@ -60,3 +60,12 @@ The same bounded synthetic capture and lifecycle normalization apply. Buffered
 output and SSE bytes are verbatim; directory JSON remains rejected by binary
 download. Deletion and empty inventory were verified. Paused and pausing are
 unsupported observations, covered by separate rejection and retention tests.
+
+## 1.20.2 captures
+
+The `1.20.2/` directory contains actual official 1.20.2 Linux x86_64 responses
+from the September 29, 2026 qualification: health, create, running inspection,
+buffered execution, directory response and SSE. Health was captured with one
+fixture machine running. Inputs are synthetic; the owned machine was deleted
+after capture. These fixtures do not claim compatibility with later releases.
+See the [qualification report](../../../docs/runtime-1.20.2-qualification.md).

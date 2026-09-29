@@ -8,17 +8,18 @@ defmodule SmolBox.Checkpoint do
   mounts, ports, device forwarding or automatic workload restart. Restoring RAM
   resumes processes; setting an entrypoint cannot neutralize captured work.
 
-  smolvm 1.16.1, 1.17.0 and 1.19.0 are admitted; the default is 1.19.0.
+  smolvm 1.16.1, 1.17.0, 1.19.0 and 1.20.2 are admitted; the default is 1.20.2.
   Explicitly pin existing approvals to their original capture runtime. CPU compatibility is additionally
   checked by smolvm. Approval does not make a checkpoint portable across operating
   systems, architectures, CPU models or runtime versions. The file stays on the
-  worker and is never uploaded through the Elixir process.
+  worker and is never uploaded through the Elixir process. Both `.checkpoint` and
+  `.smolcheckpoint` paths are accepted; a renamed file retains its capture version.
   """
   alias SmolBox.{Error, MachineSpec, Profile, Validation}
 
   @enforce_keys [:id, :sha256, :architecture, :platform, :path, :profile]
   @derive {Inspect, only: [:id, :architecture, :platform]}
-  defstruct @enforce_keys ++ [runtime_version: "1.19.0", resume: :idle]
+  defstruct @enforce_keys ++ [runtime_version: "1.20.2", resume: :idle]
 
   @type t :: %__MODULE__{
           id: String.t(),
@@ -54,7 +55,7 @@ defmodule SmolBox.Checkpoint do
              {:macos, "aarch64"}
            ],
          true <-
-           checkpoint.runtime_version in ["1.16.1", "1.17.0", "1.19.0"] and
+           checkpoint.runtime_version in ["1.16.1", "1.17.0", "1.19.0", "1.20.2"] and
              checkpoint.resume == :idle,
          :ok <- Profile.validate(checkpoint.profile),
          true <- checkpoint.profile.network == :offline,

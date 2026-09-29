@@ -27,7 +27,8 @@ defmodule SmolBox.RegistryExport do
   # Hash raw registry representations before decoding. Descriptor claims alone
   # are not proof of downloaded sidecar bytes: HEAD establishes availability;
   # the normal source preparation path verifies bytes on download, trusts cache.
-  def verify(spec, receipt, token, now) do
+  # Keep the four-argument legacy call stable; controllers always pass their worker version.
+  def verify(spec, receipt, token, now, runtime_version \\ "1.19.0") do
     with :ok <- ExportSpec.validate(spec),
          :ok <- ExportReceipt.validate(receipt),
          {:ok, registry} <- ExportDestination.endpoint(spec.destination, token),
@@ -62,7 +63,8 @@ defmodule SmolBox.RegistryExport do
            size_bytes: receipt.size_bytes,
            architecture: architecture(receipt.platform),
            platform: receipt.platform,
-           verified_at_ms: now
+           verified_at_ms: now,
+           runtime_version: runtime_version
          },
          :ok <- ExportResult.validate(result) do
       {:ok, result}

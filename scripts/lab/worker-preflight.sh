@@ -13,7 +13,7 @@ group=/sys/fs/cgroup/system.slice/smolbox-qualification.service
 [[ ${SMOLVM_DATA_DIR:-} == '' && $SMOLVM_SECCOMP == enforce && $SMOLVM_LANDLOCK == enforce ]] || exit 1
 file_cap=${SMOLBOX_QUALIFICATION_FILE_BYTES:-1048576}
 [[ $file_cap == 1048576 || $file_cap == 16777216 ]] || exit 1
-[[ $file_cap == 1048576 || ${SMOLBOX_CANDIDATE_VERSION:-} == 1.17.0 || ${SMOLBOX_CANDIDATE_VERSION:-} == 1.19.0 ]] || exit 1
+[[ $file_cap == 1048576 || ${SMOLBOX_CANDIDATE_VERSION:-} == 1.17.0 || ${SMOLBOX_CANDIDATE_VERSION:-} == 1.19.0 || ${SMOLBOX_CANDIDATE_VERSION:-} == 1.20.2 ]] || exit 1
 [[ $SMOLVM_FILE_TRANSFER_MAX_BYTES == "$file_cap" && $SMOLVM_DISABLE_SHARED_EXTRACT == 1 ]] || exit 1
 for item in control:67108864 cache:805306368 run:4194304; do
   path=/srv/sbq/${item%:*}
@@ -22,6 +22,7 @@ for item in control:67108864 cache:805306368 run:4194304; do
   [[ $(stat -c %u "$path") == "$(id -u)" ]] || exit 1
 done
 [[ $(find /sys/class/net -mindepth 1 -maxdepth 1 -printf '%f\n') == lo ]] || exit 1
+firmware=767495f52bd786e6e0b0fa1b04adf40dea44b80019f6953ca6eb6394cc90d264
 case "${SMOLBOX_CANDIDATE_VERSION:-1.14.1}" in
   1.14.1)
     runtime=/opt/smolbox/runtime
@@ -59,6 +60,13 @@ case "${SMOLBOX_CANDIDATE_VERSION:-1.14.1}" in
     krun=64aa19dcaf67e3fba981f6861cd08b9af341a7c06e7277f68d761cc4718fd393
     agent=0e7f06cfb00d6701b96194f38b1d585e16f1471b24a4075af1c65ce870e9f091
     ;;
+  1.20.2)
+    runtime=/opt/smolbox/runtime-1.20.2
+    binary=af9ac1f9e9401ed5f56b2d1eba625edf64ddbe37391308d5b271fa450c6b3512
+    krun=024e51b41c69c3a58c6406571d6fc4e47e75ac4e8251a5e43d545944cae9b500
+    firmware=38dfd8d043290e6ec562774e501057e9e3e40718c31e651a491896d348f8f521
+    agent=a8701c852924c8705ef79626e2593f66759dc7b8094f65826d843f33970e75f3
+    ;;
   *) exit 1 ;;
 esac
 [[ ! -w $runtime/smolvm-bin && ! -w /opt/smolbox/catalog/python.smolmachine ]] || exit 1
@@ -66,7 +74,7 @@ printf '%s\n' \
   "8caeb3b6e7d834493a578b0fe8bd1e7aa02e68fba6d61bcf70fdbec41a27ce68  $runtime/smolvm" \
   "$binary  $runtime/smolvm-bin" \
   "$krun  $runtime/lib/libkrun.so" \
-  "767495f52bd786e6e0b0fa1b04adf40dea44b80019f6953ca6eb6394cc90d264  $runtime/lib/libkrunfw.so" \
+  "$firmware  $runtime/lib/libkrunfw.so" \
   "$agent  $runtime/agent-rootfs/usr/local/bin/smolvm-agent" \
   '76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2  /opt/smolbox/catalog/python.smolmachine' \
   '768b8d2158a75abd90ccc73a65a83717aebfe37e62ed91d0db0bb731584df776  /opt/smolbox/catalog/node.smolmachine' \

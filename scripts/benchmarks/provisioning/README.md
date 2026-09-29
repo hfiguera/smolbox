@@ -23,7 +23,9 @@ also inspect the host deployment and live KVM file descriptors. Do not run this
 against a shared worker. Linux access in the development environment is available
 through `ssh linux`; no nested VM or macOS series belongs in these results.
 
-Use smolvm 1.19.0, the repository's Elixir/OTP versions, Python 3, GNU `du`, cgroup
+The published baseline uses smolvm 1.19.0. For another qualified runtime, set
+`runtime_version` explicitly in the configuration and use its complete distribution.
+Use the repository's Elixir/OTP versions, Python 3, GNU `du`, cgroup
 v2 with writable per-file-descriptor `memory.peak` reset, PostgreSQL and a local OCI
 registry with **enforced create-only tags**, anonymous reads and a publisher bearer
 token. The registry must reject overwrites; `immutable_tags: true` is an operator
@@ -65,6 +67,7 @@ Save an absolute-path JSON configuration:
   "worker_url": "http://127.0.0.1:54897",
   "registry": "127.0.0.1:48123",
   "smolvm": "/approved/smolvm-1.19.0/smolvm",
+  "runtime_version": "1.19.0",
   "base_path": "/private/new-benchmark/bare-base.smolmachine",
   "seed_path": "/private/new-benchmark/seed.smolcheckpoint",
   "worker_data": "/private/new-benchmark/worker",
