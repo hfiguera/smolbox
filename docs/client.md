@@ -1,6 +1,6 @@
 # Low-level client
 
-This checkout defaults to **smolvm 1.20.2** on Linux x86_64 and macOS Apple
+SmolBox 0.3.1 defaults to **smolvm 1.20.2** on Linux x86_64 and macOS Apple
 Silicon. Published SmolBox 0.3.0 and 0.2.1 keep their 1.19.0 default; 0.2.0 keeps
 1.17.0. Pin existing workers and checkpoint approvals to their actual version.
 Updating SmolBox does not install smolvm. See the

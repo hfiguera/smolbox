@@ -1,6 +1,6 @@
 # smolvm 1.20.2 qualification
 
-This checkout selects **1.20.2** on Linux x86_64 and macOS Apple Silicon.
+SmolBox 0.3.1 selects **1.20.2** on Linux x86_64 and macOS Apple Silicon.
 Published SmolBox 0.3.0 and 0.2.1 keep their 1.19.0 default. Explicit older
 supported runtimes remain available; no intermediate release is admitted merely
 because its version lies between two qualified releases.

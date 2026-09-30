@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.3.1
+
+**Worker default change:** omitted runtime versions now select smolvm **1.20.2**.
+Keep existing 1.19.0 workers explicitly configured and preserve checkpoint capture
+pins. No SQL migration or codec revision is added, but shared readers must be
+upgraded before writing receipts containing the new runtime version. See
+[Upgrading to 0.3.1](docs/upgrading-to-0.3.1.md).
+
 - Qualify official smolvm 1.20.2 and select it by default on Linux x86_64 and
   macOS Apple Silicon. Explicit 1.19.0 and earlier supported versions remain.
   See [qualification and upgrade boundaries](docs/runtime-1.20.2-qualification.md).
@@ -14,6 +22,12 @@
   CVE-2026-91043, CVE-2026-92103 and CVE-2026-94194. No data migration is required.
 - Update the community workspace's test-only `lazy_html` dependency to 0.1.13
   to address CVE-2026-92106.
+
+- Add a separate community workspace walkthrough for SmolBox 0.3.0 saved state,
+  including checkpoint capture, branch comparison and verified cleanup. Keep its
+  published dependency lock and preserve the original tutorial through its archive.
+- Add an exports/checkpoints/branches comparison guide with interactive examples
+  and clarify checkpoint file deletion versus reservation release in the app.
 
 ## 0.3.0
 

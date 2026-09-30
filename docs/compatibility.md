@@ -1,6 +1,6 @@
 # Compatibility evidence
 
-Version: `0.3.0`. The library's supported qualification is
+Version: `0.3.1`. The library's supported qualification is
 `:development`; requested hard-control options remain unsupported. The original
 release evidence below records the client/controller contract on Linux and macOS.
 
@@ -26,7 +26,7 @@ upgrade is still required. Qualification remains `:development`.
 
 ## smolvm 1.20.2 qualification
 
-**Default in this checkout; published 0.3.0 remains on 1.19.0.** See the
+**Default since SmolBox 0.3.1; 0.3.0 remains on 1.19.0.** See the
 [qualification report](runtime-1.20.2-qualification.md) for the exact release,
 live platform results, failed attempts and upgrade limits. Changes after the
 1.20.2 tag are excluded. Intermediate 1.19.x and 1.20.x releases are not admitted.
@@ -230,7 +230,7 @@ explicit bounded settings. No validation limits or public defaults were relaxed.
 
 ## Runtime selection
 
-This checkout defaults to 1.20.2; published 0.3.0 and 0.2.1 default to 1.19.0.
+SmolBox 0.3.1 defaults to 1.20.2; published 0.3.0 and 0.2.1 default to 1.19.0.
 Both are supported on Linux x86_64 and macOS Apple Silicon.
 
 SmolBox 0.1.3 defaults to `runtime_version: "1.16.0"` for Linux x86_64 and
