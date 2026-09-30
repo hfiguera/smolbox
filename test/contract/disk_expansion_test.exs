@@ -24,22 +24,23 @@ defmodule SmolBox.DiskExpansionTest do
                overlay_gb: 2
              )
 
-    {:ok, grown} = Machines.await(f.runtime, handle, 10_000)
+    grown = RuntimeFixture.await_idle(f.runtime, handle)
     assert grown.disk_expansions["bigger"].state == :completed
     assert grown.created_machine == created.created_machine
     assert grown.observed_machine.storage_gb == 3
     stop_supervised!(Runtime)
     runtime = start_supervised!({Runtime, f.options})
     RuntimeFixture.wait_ready(runtime, System.monotonic_time(:millisecond) + 30_000)
-    assert {:ok, _} = Machines.start(runtime, handle, grown.version)
+    recovered = RuntimeFixture.await_idle(runtime, handle)
+    assert {:ok, _} = Machines.start(runtime, handle, recovered.version)
     assert {:ok, %{state: :running}} = Machines.await(runtime, handle, 10_000)
     assert {:ok, cmd} = Machines.submit(runtime, handle, %{f.spec | id: "after-growth"})
     assert {:ok, %{state: :completed}} = SmolBox.await(runtime, cmd, 10_000)
-    {:ok, idle} = Machines.await(runtime, handle, 10_000)
     assert {:ok, measured} = Machines.measurements(runtime, handle)
     assert measured.machine.storage_gb == 3
+    idle = RuntimeFixture.await_idle(runtime, handle)
     assert {:ok, _} = Machines.stop(runtime, handle, idle.version)
-    assert {:ok, %{state: :stopped} = stopped} = Machines.await(runtime, handle, 10_000)
+    assert %{state: :stopped} = stopped = RuntimeFixture.await_idle(runtime, handle)
     assert {:ok, _} = Machines.delete(runtime, handle, stopped.version)
     assert {:ok, %{state: :deleted}} = Machines.await(runtime, handle, 10_000)
     assert {:ok, %{disk_gb: 0}} = Memory.usage(f.store, "peer")
@@ -149,7 +150,7 @@ defmodule SmolBox.DiskExpansionTest do
     f = RuntimeFixture.start(__MODULE__, capacity: Contract.capacity(10))
     {handle, created} = machine(f)
     {:ok, _} = Machines.start(f.runtime, handle, created.version)
-    {:ok, running} = Machines.await(f.runtime, handle, 10_000)
+    running = RuntimeFixture.await_idle(f.runtime, handle)
 
     assert {:error, %{category: :admission_exhausted}} =
              Machines.expand_disks(f.runtime, handle, "running", running.version, storage_gb: 3)
