@@ -133,6 +133,12 @@ defmodule SmolBox.Transport.Req do
 
   defp response_status(%{status: 404}, _accept), do: failure(:not_found)
 
+  defp response_status(%{status: 204}, %{expected_status: 204, method: :delete, mode: :empty}),
+    do: :ok
+
+  defp response_status(%{status: status}, %{expected_status: 204}) when status != 409,
+    do: failure(:protocol)
+
   defp response_status(%{status: status}, _accept) when status not in [200, 409],
     do: failure(:protocol)
 

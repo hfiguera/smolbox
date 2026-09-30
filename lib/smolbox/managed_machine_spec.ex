@@ -18,18 +18,23 @@ defmodule SmolBox.ManagedMachineSpec do
   image machines with smolvm 1.17.0, 1.19.0 or 1.20.2. Omitting it preserves `/bin/true` startup.
   Changes require a new identity. Values are persisted, including environment;
   the store must protect them. See [Workloads and diagnostics](workloads.html).
+  Optional `volumes: [SmolBox.VolumeMount.t()]` attaches existing scoped local volumes
+  exclusively on their approved Linux 1.20.2 worker. Targets are canonicalized and
+  immutable. Checkpoint sources and checkpointable machines exclude volumes.
+  See [Local volumes](local-volumes.html).
   """
   alias SmolBox.{Command, Error, ExecutionSpec, Validation}
 
   @enforce_keys [:scope, :id, :artifact, :profile]
   @derive {Inspect, only: [:scope, :id]}
-  defstruct @enforce_keys ++ [ports: [], workload: nil, checkpointable: false]
+  defstruct @enforce_keys ++ [volumes: [], ports: [], workload: nil, checkpointable: false]
 
   @type t :: %__MODULE__{
           scope: String.t(),
           id: String.t(),
           artifact: map(),
           profile: SmolBox.Profile.t(),
+          volumes: [SmolBox.VolumeMount.t()],
           ports: [SmolBox.PortMapping.t()],
           workload: SmolBox.Workload.t() | nil,
           checkpointable: boolean()
@@ -37,10 +42,11 @@ defmodule SmolBox.ManagedMachineSpec do
 
   @spec new(keyword()) :: {:ok, t()} | {:error, Error.t()}
   def new(options) do
-    if Validation.keys?(options, @enforce_keys ++ [:ports, :workload, :checkpointable]) and
+    if Validation.keys?(options, @enforce_keys ++ [:ports, :workload, :checkpointable, :volumes]) and
          Enum.all?(@enforce_keys, &Keyword.has_key?(options, &1)) do
       with {:ok, ports} <- SmolBox.PortMapping.normalize(Keyword.get(options, :ports, [])),
-           spec = struct!(__MODULE__, Keyword.put(options, :ports, ports)),
+           {:ok, volumes} <- SmolBox.VolumeMount.normalize(Keyword.get(options, :volumes, [])),
+           spec = struct!(__MODULE__, Keyword.merge(options, ports: ports, volumes: volumes)),
            :ok <- validate(spec),
            do: {:ok, spec}
     else
@@ -55,6 +61,10 @@ defmodule SmolBox.ManagedMachineSpec do
          true <- is_map(spec.artifact),
          :ok <- SmolBox.Profile.validate(spec.profile),
          true <- is_boolean(spec.checkpointable),
+         true <- SmolBox.VolumeMount.valid_list?(spec.volumes),
+         true <-
+           spec.volumes == [] or
+             (not spec.checkpointable and spec.artifact["kind"] != "checkpoint"),
          true <-
            not spec.checkpointable or
              (spec.profile.network == :offline and spec.ports == [] and spec.workload == nil and
@@ -103,6 +113,11 @@ defmodule SmolBox.ManagedMachineSpec do
         if spec.checkpointable,
           do: :erlang.term_to_binary({"smolbox-checkpointable-v1", payload}),
           else: payload
+
+      payload =
+        if spec.volumes == [],
+          do: payload,
+          else: :erlang.term_to_binary({"smolbox-volumes-v1", payload, spec.volumes})
 
       {:ok,
        :crypto.mac(:hmac, :sha256, key, payload)

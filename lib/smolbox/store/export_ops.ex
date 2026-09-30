@@ -19,7 +19,8 @@ defmodule SmolBox.Store.ExportOps do
   end
 
   defp insert(machine, spec, fingerprint, capacity, usage, machines, now) do
-    with true <- machine.branch == nil and SmolBox.Branch.children_retired?(machine),
+    with true <- machine.spec.volumes == [],
+         true <- machine.branch == nil and SmolBox.Branch.children_retired?(machine),
          true <- machine.state == :stopped and ManagedMachine.idle?(machine),
          true <- machine.spec.artifact["kind"] != "checkpoint",
          true <- map_size(machine.exports) < 256,

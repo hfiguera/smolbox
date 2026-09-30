@@ -256,3 +256,13 @@ on smolvm 1.17.0, 1.19.0 or 1.20.2 image machines. `Client.logs/3` returns a con
 or follows bounded SSE events. These diagnostics exclude application stdout/stderr;
 automatic restart policies are rejected. See [workloads](workloads.md) for exact
 argument inheritance, stream bounds and cancellation behavior.
+
+## Local volumes and mounts
+
+On smolvm 1.20.2, `Client.provision_volume/3` and `Client.delete_volume/2` expose
+local provisioning and explicit deletion. `MachineSpec` accepts controlled
+`SmolBox.Mount` values; source, guest target and read-only state are decoded in
+observations. Low-level callers own host path approval and attachment cleanup.
+Use `SmolBox.Volumes` for durable ownership and reservations. See
+[local volumes](local-volumes.md) for the Linux policy, 204 deletion acknowledgment,
+permission limitations and the PostgreSQL walkthrough.

@@ -104,7 +104,7 @@ defmodule SmolBox.Branch do
 
   defp child_spec?(m),
     do:
-      m.branch_children == %{} and not m.spec.checkpointable and
+      m.spec.volumes == [] and m.branch_children == %{} and not m.spec.checkpointable and
         m.spec.workload == nil and m.spec.ports == [] and m.spec.profile.network == :offline
 
   defp phase?(%{branch: nil, operation: op}), do: op not in [:branch_child, :branch_release]

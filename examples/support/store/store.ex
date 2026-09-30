@@ -18,6 +18,7 @@ defmodule SmolBox.DurableHost.Store do
     MachineIndex,
     MachineStore,
     SourceStore,
+    VolumeStore,
     WorkerStore
   }
 
@@ -63,7 +64,13 @@ defmodule SmolBox.DurableHost.Store do
                   extended_execution: 1
                 },
                 Map.merge(
-                  Map.merge(SourceStore.capabilities(), WorkerStore.capabilities(context)),
+                  Map.merge(
+                    SourceStore.capabilities(),
+                    Map.merge(
+                      WorkerStore.capabilities(context),
+                      VolumeStore.capabilities(context)
+                    )
+                  ),
                   Map.merge(
                     ExportStore.capabilities(),
                     Map.merge(
@@ -88,6 +95,31 @@ defmodule SmolBox.DurableHost.Store do
       do:
         transaction(context, fn ->
           WorkerStore.maintenance(context, worker, cursor, limit, now)
+        end)
+  end
+
+  if Code.ensure_loaded?(SmolBox.Volume) do
+    @impl SmolBox.Store
+    def volume_fetch(context, key), do: safe(fn -> Database.read(context, key, :volume) end)
+    @impl SmolBox.Store
+    def volume_list(context, scope, cursor, limit),
+      do:
+        transaction(context, fn ->
+          VolumeStore.list(context, scope, cursor, limit)
+        end)
+
+    @impl SmolBox.Store
+    def volume_accept(context, v, capacity),
+      do:
+        transaction(context, fn ->
+          VolumeStore.accept(context, v, capacity)
+        end)
+
+    @impl SmolBox.Store
+    def volume_change(context, key, version, action, now),
+      do:
+        transaction(context, fn ->
+          VolumeStore.change(context, key, version, action, now)
         end)
   end
 

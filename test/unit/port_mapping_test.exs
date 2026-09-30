@@ -1,6 +1,7 @@
 defmodule SmolBox.PortMappingTest do
   use ExUnit.Case, async: true
   alias SmolBox.{Machine, MachineSpec, ManagedMachineSpec, PortMapping}
+  alias SmolBox.Store.CodecVolumes
 
   alias SmolBox.Store.{
     Codec,
@@ -138,6 +139,7 @@ defmodule SmolBox.PortMappingTest do
       |> Map.update!(:created_machine, &Map.delete(&1, :ports))
       |> CodecExecution.strip()
       |> CodecFiles.strip()
+      |> CodecVolumes.strip()
 
     assert {:ok, ^command} =
              Codec.decode("smolbox-record-v4\0" <> :erlang.term_to_binary(old_command))

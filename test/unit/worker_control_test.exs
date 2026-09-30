@@ -61,7 +61,8 @@ defmodule SmolBox.WorkerControlTest do
       assert WorkerControls.mode(config, "worker") == :unavailable
     end
 
-    refute WorkerMaintenance.valid_page?("worker", {2, "scope", "id"}, 1)
+    assert WorkerMaintenance.valid_page?("worker", {2, "scope", "id"}, 1)
+    refute WorkerMaintenance.valid_page?("worker", {3, "scope", "id"}, 1)
     refute WorkerMaintenance.valid_page?("worker", :invalid, 1)
   end
 end

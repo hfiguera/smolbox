@@ -75,7 +75,8 @@ defmodule SmolBox.DiskExpansion do
   @doc false
   def supported?(m),
     do:
-      not m.spec.checkpointable and m.spec.artifact["kind"] != "checkpoint" and
+      m.spec.volumes == [] and not m.spec.checkpointable and
+        m.spec.artifact["kind"] != "checkpoint" and
         m.branch == nil and m.branch_children == %{} and m.captures == %{}
 
   @doc false

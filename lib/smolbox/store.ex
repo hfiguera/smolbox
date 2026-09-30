@@ -59,6 +59,14 @@ defmodule SmolBox.Store do
   previous codec and resource projection. History admits at most 256 exports per
   machine; it never expires or evicts an identity to make room.
 
+  `local_volumes: 1` requires codec v15 and the optional volume callbacks below.
+  Atomically attach all scoped volume references with managed-machine acceptance,
+  pin the worker and resolved mounts, and retain exclusive attachment until verified
+  deletion. Volume disk allowance participates in every admission and drain gate;
+  stopping/deleting machines does not release that allowance. Keep tombstones for
+  deduplication. Never replay pending volume operations. Run `VolumeContract` and
+  coordinate all readers/projection writers plus the example volume migration.
+
   Every mutation is one transaction. Failures must roll back record and worker
   changes together. Reads are authoritative and must never translate unavailable,
   corrupt, or unknown-schema storage into `not_found`. There is no fallback store.
@@ -567,6 +575,27 @@ defmodule SmolBox.Store do
             ) ::
               {:ok, SmolBox.WorkerMaintenance.t()} | {:error, Error.t()}
   @optional_callbacks worker_control: 2, set_worker_mode: 5, worker_maintenance: 5
+
+  @doc "Atomically deduplicate volume identity and reserve worker disk budget, serialized with drain and every other admission."
+  @callback volume_accept(context(), SmolBox.Volume.t(), capacity()) ::
+              {:ok, SmolBox.Volume.t(), :inserted | :existing} | {:error, Error.t()}
+  @doc "Fetch a volume including its retained tombstone. Missing and unavailable are distinct."
+  @callback volume_fetch(context(), SmolBox.Volume.key()) ::
+              {:ok, SmolBox.Volume.t()} | {:error, Error.t()}
+  @doc "List a scoped page of volumes including deleted identities."
+  @callback volume_list(context(), String.t(), String.t() | nil, pos_integer()) ::
+              {:ok, [SmolBox.Volume.t()], String.t() | nil} | {:error, Error.t()}
+  @type volume_action ::
+          :delete | :resolve_delete | {:complete, :ready | :deleted} | {:unknown, Error.t()}
+  @doc "Compare-and-set a volume lifecycle transition. Never delete an attached volume; attachment is atomic with machine acceptance and released only on verified deletion."
+  @callback volume_change(
+              context(),
+              SmolBox.Volume.key(),
+              pos_integer(),
+              volume_action(),
+              non_neg_integer()
+            ) :: {:ok, SmolBox.Volume.t(), :changed | :existing} | {:error, Error.t()}
+  @optional_callbacks volume_accept: 3, volume_fetch: 2, volume_list: 4, volume_change: 5
 
   @callback capabilities(context()) ::
               {:ok, %{schema: 1, durable: boolean(), atomic: true}} | {:error, Error.t()}

@@ -3,7 +3,7 @@ defmodule SmolBox.Machine do
   Validated observation of a worker machine and its network policy.
 
   Additive response fields are ignored. Safety-relevant fields must be present;
-  networking without explicit allowlists, mounts, unsupported port mappings, GPU or CUDA fail decoding and cannot be
+  networking without explicit allowlists, unsupported mounts or port mappings, GPU or CUDA fail decoding and cannot be
   treated as an owned machine observation. `created_at` has only second precision upstream and
   is not a cryptographic or immutable ownership token.
   """
@@ -20,12 +20,14 @@ defmodule SmolBox.Machine do
     :storage_gb,
     :overlay_gb,
     network: :offline,
+    mounts: [],
     ports: []
   ]
 
   @type t :: %__MODULE__{
           name: String.t(),
           network: :offline | SmolBox.NetworkPolicy.t(),
+          mounts: [SmolBox.Mount.t()],
           ports: [SmolBox.PortMapping.t()],
           state: :created | :running | :stopped,
           created_at: non_neg_integer(),
@@ -45,13 +47,14 @@ defmodule SmolBox.Machine do
           "memoryMb" => memory,
           "storageGb" => storage,
           "overlayGb" => overlay,
-          "mounts" => [],
+          "mounts" => wire_mounts,
           "ports" => wire_ports,
           "gpu" => false,
           "cuda" => false
         } = wire
       ) do
-    with {:ok, ports} <- SmolBox.PortMapping.from_wire(wire_ports),
+    with {:ok, mounts} <- SmolBox.Mount.from_wire(wire_mounts),
+         {:ok, ports} <- SmolBox.PortMapping.from_wire(wire_ports),
          true <- port_network?(ports, wire),
          {:ok, network} <- SmolBox.NetworkPolicy.from_wire(wire),
          true <-
@@ -64,6 +67,7 @@ defmodule SmolBox.Machine do
          name: name,
          network: network,
          ports: ports,
+         mounts: mounts,
          state: state(state),
          created_at: created,
          cpus: cpus,

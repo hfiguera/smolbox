@@ -22,7 +22,10 @@ defmodule SmolBox.MachineSpec do
   `SmolBox.NetworkPolicy` is supplied. Optional `:ports` publishes fixed TCP
   mappings on smolvm 1.17.0, 1.19.0 or 1.20.2 using virtio-net, independently of outbound policy.
   Offline with mappings means denied outbound, not absence of a network device.
-  No host mounts, Unix sockets or GPU are exposed. See [Port mappings](port-mappings.html).
+  Explicit `:mounts` accepts approved host directories on smolvm 1.20.2; callers
+  authorize their paths and own attachment/cleanup. Managed machines use volume
+  references instead. Unix sockets and GPU are unsupported. See
+  [Local volumes](local-volumes.html) and [Port mappings](port-mappings.html).
 
   Disk sizes are requests. smolvm 1.14.1 copies larger disk templates without
   shrinking them, while its API still reports the request. Low-level callers
@@ -38,6 +41,7 @@ defmodule SmolBox.MachineSpec do
   alias SmolBox.Error
 
   @schema [
+    mounts: [type: :any, default: []],
     ports: [type: :any, default: []],
     workload: [type: :any, default: nil],
     source: [type: :any, default: :image],
@@ -53,6 +57,7 @@ defmodule SmolBox.MachineSpec do
   defstruct [
     :name,
     :artifact_path,
+    mounts: [],
     ports: [],
     workload: nil,
     source: :image,
@@ -66,6 +71,7 @@ defmodule SmolBox.MachineSpec do
   @type t :: %__MODULE__{
           name: String.t(),
           source: :image | :checkpoint | SmolBox.Source.t(),
+          mounts: [SmolBox.Mount.t()],
           ports: [SmolBox.PortMapping.t()],
           workload: SmolBox.Workload.t() | nil,
           network: :offline | SmolBox.NetworkPolicy.t(),
@@ -128,6 +134,7 @@ defmodule SmolBox.MachineSpec do
          valid_name?(spec.name) and artifact_path?(spec.artifact_path, spec.source) and
          network_valid?(spec) and
          SmolBox.PortMapping.canonical?(spec.ports) and
+         mounts_valid?(spec) and
          workload_valid?(spec) and
          allocations?(spec) do
       :ok
@@ -137,6 +144,10 @@ defmodule SmolBox.MachineSpec do
   end
 
   def validate(_spec), do: invalid()
+
+  defp mounts_valid?(spec),
+    do:
+      SmolBox.Mount.canonical?(spec.mounts) and (spec.mounts == [] or spec.source != :checkpoint)
 
   defp workload_valid?(spec),
     do:
@@ -173,7 +184,7 @@ defmodule SmolBox.MachineSpec do
              "gpu" => false,
              "cuda" => false,
              "dockerSocket" => false,
-             "mounts" => [],
+             "mounts" => SmolBox.Mount.to_wire(spec.mounts),
              "ports" => SmolBox.PortMapping.to_wire(spec.ports),
              "entrypoint" => ["/bin/true"],
              "cmd" => [],

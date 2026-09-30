@@ -87,10 +87,12 @@ defmodule SmolBox.Runtime.WorkerConfig do
                 export_destinations: [],
                 checkpoint_policies: [],
                 branch_policies: [],
+                volume_policy: nil,
                 registry_credentials: nil
               ]
 
   @type t :: %__MODULE__{
+          volume_policy: SmolBox.VolumePolicy.t() | nil,
           client: Client.t(),
           architecture: String.t(),
           platform: :linux | :macos,
@@ -158,7 +160,8 @@ defmodule SmolBox.Runtime.WorkerConfig do
              :registry_credentials,
              :export_destinations,
              :checkpoint_policies,
-             :branch_policies
+             :branch_policies,
+             :volume_policy
            ]
        ) and
          Enum.all?(@enforce_keys, &Keyword.has_key?(options, &1)) do
@@ -198,8 +201,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   def supports?(worker, spec) do
     ExecutionSupport.worker?(worker, spec) and
-      pull_supported?(worker, spec) and
-      ports_supported?(worker, spec) and
+      extensions_supported?(worker, spec) and
       file_support?(worker, spec) and
       workload_supported?(worker, spec) and
       network_supported?(worker, spec) and
@@ -207,6 +209,11 @@ defmodule SmolBox.Runtime.WorkerConfig do
       worker.architecture == spec.artifact["architecture"] and
       approved_artifact?(worker, spec)
   end
+
+  defp extensions_supported?(worker, spec),
+    do:
+      pull_supported?(worker, spec) and volume_supported?(worker, spec) and
+        ports_supported?(worker, spec)
 
   defp pull_supported?(worker, %{command: %SmolBox.ImagePull{source: source}} = spec),
     do:
@@ -275,6 +282,19 @@ defmodule SmolBox.Runtime.WorkerConfig do
     do:
       Map.get(spec, :workload) == nil or worker.runtime_version in ["1.17.0", "1.19.0", "1.20.2"]
 
+  defp volume_supported?(worker, spec),
+    do:
+      Map.get(spec, :volumes, []) == [] or
+        (worker.volume_policy != nil and worker.runtime_version == "1.20.2" and
+           worker.platform == :linux)
+
+  defp volume_policy?(%{volume_policy: nil}), do: true
+
+  defp volume_policy?(worker),
+    do:
+      worker.runtime_version == "1.20.2" and worker.platform == :linux and
+        SmolBox.VolumePolicy.valid?(worker.volume_policy)
+
   defp ports_supported?(worker, spec),
     do:
       Map.get(spec, :ports, []) == [] or
@@ -340,7 +360,8 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   defp export_access?(worker),
     do:
-      exports?(worker) and capture_policies?(worker) and branch_policies?(worker) and
+      volume_policy?(worker) and
+        exports?(worker) and capture_policies?(worker) and branch_policies?(worker) and
         SmolBox.RegistryCredentials.valid?(worker.registry_credentials)
 
   defp branch_policies?(worker),

@@ -42,6 +42,9 @@ Admission explanations identify shortages without changing capacity or retention
 across controllers sharing a store and exposes remaining maintenance blockers.
 [Disk expansion](docs/disk-expansion.md) grows stopped retained machines with
 durable capacity accounting and explicit recovery after uncertain outcomes.
+[Local volumes](docs/local-volumes.md) keep approved data independent of machine
+lifetime on Linux 1.20.2, with exclusive mounts, retained reservations and explicit
+cleanup. Host permissions and filesystem quotas remain operator responsibilities.
 
 Try the [community workspace app](https://github.com/hfiguera/smolbox/tree/main/examples/community_workspace) for a
 browser walkthrough of SmolBox 0.3.0: persistent machines, commands, a real

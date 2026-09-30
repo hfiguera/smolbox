@@ -63,6 +63,10 @@ defmodule SmolBox.Store.Codec do
   Earlier machines gain empty expansion history and no effective disk override.
   Upgrade every reader and resource projection writer before advertising
   `managed_disk_expansion: 1`; old readers cannot decode v14, even tombstones.
+  Local volumes, mounted managed machines and their command observations use v15.
+  Earlier records gain empty mounts and volume references without changing their
+  encodings. Coordinate all readers, attachment transactions and reservation
+  projections before advertising `local_volumes: 1`. See [Local volumes](local-volumes.html).
   Silently treating undecodable records as absent
   would permit replay and is forbidden.
   """
@@ -78,10 +82,12 @@ defmodule SmolBox.Store.Codec do
     CodecFiles,
     CodecPorts,
     CodecSources,
+    CodecVolumes,
     CodecWorkload
   }
 
   @max_bytes 16_777_216
+  @volumes_prefix "smolbox-record-v15\0"
   @expansion_prefix "smolbox-record-v14\0"
   @branches_prefix "smolbox-record-v13\0"
   @captures_prefix "smolbox-record-v12\0"
@@ -116,6 +122,10 @@ defmodule SmolBox.Store.Codec do
     SmolBox.ImagePull,
     SmolBox.Image,
     SmolBox.DiskExpansion,
+    SmolBox.Volume,
+    SmolBox.VolumePolicy,
+    SmolBox.VolumeMount,
+    SmolBox.Mount,
     SmolBox.Branch,
     SmolBox.BranchSpec,
     SmolBox.BranchPolicy,
@@ -133,10 +143,13 @@ defmodule SmolBox.Store.Codec do
     Error
   ]
 
-  @spec encode(Execution.t() | SmolBox.ManagedMachine.t()) ::
+  @spec encode(Execution.t() | SmolBox.ManagedMachine.t() | SmolBox.Volume.t()) ::
           {:ok, binary()} | {:error, Error.t()}
+  def encode(%SmolBox.Volume{} = record), do: encode_volumes(record)
+
   def encode(%{spec: %{profile: %SmolBox.Profile{} = profile}} = record) do
     cond do
+      CodecVolumes.required?(record) -> encode_volumes(record)
       CodecExpansion.required?(record) -> encode_expansion(record)
       CodecBranches.required?(record) -> encode_branches(record)
       CodecCaptures.required?(record) -> encode_captures(record)
@@ -187,7 +200,11 @@ defmodule SmolBox.Store.Codec do
   end
 
   @spec decode(binary()) ::
-          {:ok, Execution.t() | SmolBox.ManagedMachine.t()} | {:error, Error.t()}
+          {:ok, Execution.t() | SmolBox.ManagedMachine.t() | SmolBox.Volume.t()}
+          | {:error, Error.t()}
+  def decode(<<@volumes_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes, do: decode_volumes(bytes)
+
   def decode(<<@expansion_prefix, 131, tag, _rest::binary>> = bytes)
       when tag != 80 and byte_size(bytes) <= @max_bytes, do: decode_expansion(bytes)
 
@@ -242,9 +259,30 @@ defmodule SmolBox.Store.Codec do
 
   def decode(_bytes), do: invalid()
 
+  defp encode_volumes(record) do
+    with :ok <- validate_extended(record) do
+      bytes = @volumes_prefix <> :erlang.term_to_binary(record)
+      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
+    end
+  end
+
+  defp decode_volumes(<<@volumes_prefix, payload::binary>>) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <- used == byte_size(payload) and CodecVolumes.required?(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
   defp encode_expansion(record) do
     with :ok <- validate_extended(record) do
-      bytes = @expansion_prefix <> :erlang.term_to_binary(record)
+      bytes =
+        @expansion_prefix <> :erlang.term_to_binary(CodecVolumes.strip(record))
+
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
   end
@@ -254,6 +292,7 @@ defmodule SmolBox.Store.Codec do
 
     with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
          true <- used == byte_size(payload) and CodecExpansion.required?(record),
+         record = CodecVolumes.upgrade(record),
          :ok <- validate_extended(record),
          do: {:ok, record},
          else: (_ -> invalid())
@@ -478,6 +517,7 @@ defmodule SmolBox.Store.Codec do
     ArgumentError -> invalid()
   end
 
+  defp validate_extended(%SmolBox.Volume{} = record), do: SmolBox.Volume.validate(record)
   defp validate_extended(%Execution{} = record), do: Execution.validate(record)
   defp validate_extended(record), do: validate_managed(record)
 

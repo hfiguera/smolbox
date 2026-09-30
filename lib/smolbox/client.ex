@@ -223,7 +223,7 @@ defmodule SmolBox.Client do
   defp send_create(client, spec, wire) do
     with {:ok, body} <- json(client, :post, "/api/v1/machines", wire, :create),
          {:ok, created} <- decode_machine(body, spec.name, :create) do
-      fields = [:cpus, :memory_mb, :storage_gb, :overlay_gb, :network, :ports]
+      fields = [:cpus, :memory_mb, :storage_gb, :overlay_gb, :network, :ports, :mounts]
 
       if Map.take(created, fields) == Map.take(spec, fields) and
            (spec.source != :checkpoint or
@@ -254,6 +254,9 @@ defmodule SmolBox.Client do
   end
 
   defp prepare_creation(client, _spec, _options), do: {:ok, client}
+
+  defp creation_runtime(client, %{mounts: [_ | _]}),
+    do: creation_runtime_versions(client, ["1.20.2"])
 
   defp creation_runtime(client, %{source: %SmolBox.Source{}}),
     do: creation_runtime_versions(client, ["1.19.0", "1.20.2"])
@@ -815,6 +818,61 @@ defmodule SmolBox.Client do
       {:error, failure} -> {:error, %{failure | operation: :export, evidence: :not_dispatched}}
     end
   end
+
+  @doc "Provision an explicitly owned local volume ID. Size is advisory; no hard quota. Never retries."
+  @spec provision_volume(t(), String.t(), pos_integer()) ::
+          {:ok, String.t()} | {:error, Error.t()}
+  def provision_volume(client, id, size_gb) do
+    with true <- volume_id?(id) and Validation.integer?(size_gb, 1, 1024),
+         {:ok, client} <- creation_runtime_versions(client, ["1.20.2"]),
+         {:ok, body} <-
+           json(
+             client,
+             :post,
+             "/api/v1/volumes",
+             %{"id" => id, "size_gb" => size_gb, "backend" => "local"},
+             :volume
+           ) do
+      volume_path(body)
+    else
+      false -> error(:validation, :volume)
+      error -> error
+    end
+  end
+
+  defp volume_path(%{"node_path" => path}) do
+    if SmolBox.Mount.path?(path),
+      do: {:ok, path},
+      else: error(:protocol, :volume, :dispatch_uncertain)
+  end
+
+  defp volume_path(_), do: error(:protocol, :volume, :dispatch_uncertain)
+
+  @doc "Delete an owned, unattached local volume. Requires a 204 acknowledgment; a 404 is not proof of volume absence. No automatic retries."
+  @spec delete_volume(t(), String.t()) :: :ok | {:error, Error.t()}
+  def delete_volume(client, id) do
+    with true <- volume_id?(id),
+         {:ok, client} <- creation_runtime_versions(client, ["1.20.2"]),
+         {:ok, ""} <-
+           client.transport.request(client.worker, %{
+             method: :delete,
+             path: "/api/v1/volumes/" <> id,
+             body: "",
+             content_type: "application/json",
+             accept: "*/*",
+             mode: :empty,
+             expected_status: 204,
+             max_bytes: 1
+           }) do
+      :ok
+    else
+      false -> error(:validation, :volume)
+      {:error, e} -> {:error, %{e | operation: :volume}}
+      _ -> error(:protocol, :volume, :dispatch_uncertain)
+    end
+  end
+
+  defp volume_id?(id), do: is_binary(id) and Regex.match?(~r/\A[A-Za-z0-9_-]{1,128}\z/, id)
 
   defp json(client, method, path, wire, operation) do
     encoded = if is_nil(wire), do: "", else: Jason.encode!(wire)

@@ -827,3 +827,34 @@ Expansion requires codec v14 support in all readers and resource projection
 writers sharing the store. No additional SQL migration is introduced beyond the
 existing worker-control table. Old readers cannot decode expansion history,
 including deleted tombstones; do not roll back to incompatible code.
+
+### Local volumes
+
+Apply migration `20260930000000_local_volumes` with writers stopped. Upgrade all
+controllers and adapters to codec v15 and atomic `local_volumes: 1` support before
+enabling mounts. Down migration refuses to discard volume identities, including
+tombstones; rollback to old readers/writers with volume history is unsupported.
+
+With the environment from the setup section, an approved Python image, Linux
+smolvm 1.20.2 and a fresh execution ID/partition:
+
+```sh
+# Match the worker's actual canonical local volume directory.
+export SMOLBOX_VOLUME_ROOT=/srv/smolvm/.local/share/smolvm/volumes
+mix ecto.migrate
+mix run -e 'SmolBox.DurableHost.VolumeDemo.run("prepare")'
+mix run -e 'SmolBox.DurableHost.VolumeDemo.run("resume")'
+```
+
+Keep the same keys, ID, worker and partition between processes. `prepare` writes a
+file on a volume, verifies attached deletion is blocked and deletes the original
+machine. `resume` mounts it in a replacement, reads/modifies the file, verifies a
+read-only attachment and explicitly deletes the machines and volume. The final
+reservation is zero. Inspect records after interruption rather than replaying a
+whole phase blindly.
+
+The demo uses 2 GiB machine storage, 2 GiB overlay and a 2 GiB advisory volume
+reservation within a 10 GiB worker budget. Verify your fixture supports these
+allocations and your host permission policy supports replacement writes. This is
+not a filesystem quota or a multi-tenant isolation test. See [local volumes](../../docs/local-volumes.md)
+for permission requirements, recovery and the native Linux evidence.

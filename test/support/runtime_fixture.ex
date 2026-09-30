@@ -97,6 +97,7 @@ defmodule SmolBox.RuntimeFixture do
           checkpoint_policies: Keyword.get(options, :checkpoint_policies, []),
           branch_policies: Keyword.get(options, :branch_policies, []),
           export_destinations: Keyword.get(options, :export_destinations, []),
+          volume_policy: options[:volume_policy],
           registry_credentials: options[:registry_credentials]
         ] ++
           case Keyword.fetch(options, :expected_runtime_version) do

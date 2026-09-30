@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Add managed local volumes and controlled mounts on Linux smolvm 1.20.2.
+  Volume identities, disk reservations and exclusive attachments survive machine
+  deletion and controller restart. Add explicit deletion and fenced resolution
+  of uncertain outcomes, atomic attachment/drain admission and maintenance blockers.
+  Requires `local_volumes: 1`, codec v15 readers and the PostgreSQL example's
+  local-volumes migration. Size reservations are advisory, not filesystem quotas.
+  See [local volumes](docs/local-volumes.md) for permissions, retention and upgrades.
+
 - Add managed disk expansion for idle stopped/created ordinary machines on smolvm
   1.20.2, with absolute storage/overlay targets, atomic capacity and drain gates,
   immutable creation evidence, verified current allocations and explicit recovery

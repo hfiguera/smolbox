@@ -118,8 +118,15 @@ to another worker.
 
 ## Minimal configuration and current enforcement limits
 
-Managed execution rejects unsupported profiles and always requests no guest
-networking without explicit allowlists, host mounts, host sockets, GPU/CUDA or nested Docker.
+Managed execution rejects unsupported profiles. Guest networking requires explicit
+allowlists. Host sockets, GPU/CUDA and nested Docker remain unsupported. Default
+machines have no host mounts. Opted-in [local volumes](local-volumes.md) on Linux
+1.20.2 require an exclusive approved worker root, scoped attachment ownership and
+host-verified permissions. Targets are restricted to `/mnt/volumes/`; low-level
+mount callers separately authorize source paths. Volume size reservations are not
+quotas. Upstream creates local volume directories with mode `0777`; replacement
+write permissions and isolation depend on the worker's UID configuration. The
+unprivileged Linux demonstration does not qualify multi-tenant/root-worker isolation.
 Explicit fixed TCP [port mappings](port-mappings.md) are separately supported on
 managed image machines and the low-level client with smolvm 1.17.0, 1.19.0 or 1.20.2. These expose
 guest services through worker listeners and require host authorization; they

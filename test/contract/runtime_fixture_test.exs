@@ -15,6 +15,10 @@ defmodule SmolBox.RuntimeFixtureTest do
       )
 
     {:ok, handle} = Machines.create(f.runtime, spec)
+    # Establish the idle-machine precondition before another controller can claim
+    # its queued creation without owning the worker lease. This test exercises
+    # pending reconciliation claims, not competing admission during startup.
+    assert %{state: :created} = RuntimeFixture.await_idle(f.runtime, handle)
 
     second =
       start_supervised!({Runtime, Keyword.put(f.options, :name, SmolBox.IdleSecond)},

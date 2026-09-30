@@ -59,6 +59,7 @@ defmodule SmolBox.ExecutionValidation do
       Validation.integer?(machine.created_at, 0, 253_402_300_799) and
       allocations?(machine, profile, record) and
       ports?(machine, record) and
+      mounts?(machine, record) and
       network?(machine, profile)
   end
 
@@ -74,6 +75,13 @@ defmodule SmolBox.ExecutionValidation do
     do:
       machine.cpus == profile.cpus and machine.memory_mb == profile.memory_mb and
         machine.storage_gb == profile.storage_gb and machine.overlay_gb == profile.overlay_gb
+
+  defp mounts?(machine, %{managed_machine: key}) when not is_nil(key),
+    do: SmolBox.Mount.canonical?(machine.mounts)
+
+  defp mounts?(machine, record),
+    do:
+      SmolBox.Mount.canonical?(machine.mounts) and machine.mounts == Map.get(record, :mounts, [])
 
   defp ports?(machine, %{managed_machine: key}) when not is_nil(key),
     do: SmolBox.PortMapping.canonical?(machine.ports)
@@ -127,6 +135,7 @@ defmodule SmolBox.ExecutionValidation do
         :stale_version
       ] and
       error.operation in [
+        :volume,
         :expand_disks,
         :export,
         :checkpoint,

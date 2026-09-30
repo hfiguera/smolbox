@@ -1,6 +1,14 @@
 defmodule SmolBox.DurableHost.MachineStore do
   @moduledoc false
-  alias SmolBox.DurableHost.{Database, MachineIndex, PortIndex, SourceStore, WorkerStore}
+  alias SmolBox.DurableHost.{
+    Database,
+    MachineIndex,
+    PortIndex,
+    SourceStore,
+    VolumeStore,
+    WorkerStore
+  }
+
   alias SmolBox.{Error, Execution, ManagedMachine, Validation}
   alias SmolBox.Store.{MachineOps, RecordOps}
 
@@ -235,7 +243,7 @@ defmodule SmolBox.DurableHost.MachineStore do
 
   defp insert_machine(context, record, max_pending) do
     if Database.pending_count(context, :machine) < max_pending,
-      do: persist(context, record),
+      do: attach_and_persist(context, record),
       else: error(:admission_exhausted)
   end
 
@@ -251,8 +259,14 @@ defmodule SmolBox.DurableHost.MachineStore do
     end
   end
 
+  defp attach_and_persist(context, record) do
+    with {:ok, record} <- VolumeStore.attach(context, record),
+         do: persist(context, record)
+  end
+
   defp persist(context, record) do
-    with :ok <- exclusive_assignment(context, record),
+    with :ok <- VolumeStore.release(context, record),
+         :ok <- exclusive_assignment(context, record),
          {:ok, record} <- Database.write(context, record),
          :ok <- PortIndex.sync(context, record) do
       Database.query(

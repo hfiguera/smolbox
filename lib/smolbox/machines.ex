@@ -26,7 +26,7 @@ defmodule SmolBox.Machines do
     Validation
   }
 
-  alias SmolBox.Runtime.{Machines, Session, WorkerConfig}
+  alias SmolBox.Runtime.{Machines, Session, VolumeAccess, WorkerConfig}
 
   @type handle :: ManagedMachine.key()
 
@@ -47,6 +47,11 @@ defmodule SmolBox.Machines do
   end
 
   defp accept(config, spec, fingerprint) do
+    with :ok <- VolumeAccess.approved(config, spec, :new),
+         do: accept_approved(config, spec, fingerprint)
+  end
+
+  defp accept_approved(config, spec, fingerprint) do
     if Enum.any?(config.workers, &WorkerConfig.supports?(&1, spec)) do
       with {:ok, record} <- ManagedMachine.new(spec, fingerprint, config.clock.now()),
            {:ok, saved} <- Machines.store(config, :accept, [record, config.max_pending]),
