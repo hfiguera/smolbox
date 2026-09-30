@@ -1,8 +1,10 @@
 # Durable host example
 
-SmolBox 0.3.1 defaults to smolvm **1.20.2**. Published SmolBox 0.3.0 and
+SmolBox 0.4.0 defaults to smolvm **1.20.2**. Published SmolBox 0.3.0 and
 0.2.1 retain their **1.19.0** default.
-Follow [Upgrading to 0.3.0](../../docs/upgrading-to-0.3.0.md) before enabling
+Follow [Upgrading to 0.4.0](../../docs/upgrading-to-0.4.0.md) for coordinated
+store upgrades, the two PostgreSQL migrations and rollback constraints.
+For applications coming from 0.2.x, also follow [Upgrading to 0.3.0](../../docs/upgrading-to-0.3.0.md) before enabling
 registry sources, exports, captures or branches against an existing store.
 Applications coming from 0.1.x must also follow the
 [0.2.0 migration guide](../../docs/upgrading-to-0.2.0.md).

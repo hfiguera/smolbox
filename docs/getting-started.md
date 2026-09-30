@@ -1,6 +1,6 @@
 # Getting started
 
-SmolBox 0.3.1 defaults to **smolvm 1.20.2** on Linux x86_64 and macOS Apple
+SmolBox 0.4.0 defaults to **smolvm 1.20.2** on Linux x86_64 and macOS Apple
 Silicon. Published SmolBox 0.3.0 and 0.2.1 keep their 1.19.0 default; 0.2.0 keeps
 1.17.0. Pin existing workers and checkpoint approvals to their actual version.
 Updating SmolBox does not install smolvm. See the
@@ -27,13 +27,13 @@ explicit cleanup on Linux.
 In an existing Elixir Mix application, add this entry to `deps/0` in `mix.exs`:
 
 ```elixir
-{:smolbox, "~> 0.3.1"}
+{:smolbox, "~> 0.4.0"}
 ```
 
 Run `mix deps.get` after adding the dependency. A local checkout can instead be
-used with `{:smolbox, path: "../smolbox"}`. Version 0.3.1 defaults to smolvm
+used with `{:smolbox, path: "../smolbox"}`. Version 0.4.0 defaults to smolvm
 **1.20.2**. Existing applications should follow
-[Upgrading to 0.3.1](upgrading-to-0.3.1.md); the library does not upgrade
+[Upgrading to 0.4.0](upgrading-to-0.4.0.md); the library does not upgrade
 the worker. Applications coming from 0.1.2 or earlier also require the coordinated
 [record format upgrade](recovery.md#upgrading-to-0-1-3).
 Elixir 1.18 and later are accepted by the
@@ -81,7 +81,7 @@ iex -S mix
 
 `SMOLBOX_DEMO_DIR` is a new private directory for input/output objects. Keep it
 separate from the runtime image and from all guest-accessible directories.
-With SmolBox 0.3.1, the walkthrough selects 1.20.2. Explicitly select an older
+With SmolBox 0.4.0, the walkthrough selects 1.20.2. Explicitly select an older
 supported worker version when retaining an existing installation; updating the
 Elixir dependency does not install a worker or migrate checkpoint artifacts.
 

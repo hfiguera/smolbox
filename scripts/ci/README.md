@@ -63,7 +63,7 @@ Version 0.1.3 defaults to 1.16.0 and 0.1.2 to 1.14.6.
 Set `runtime_version` in the private worker manifest to select a version explicitly;
 preflight verifies that version's binary checksum and exports
 `SMOLBOX_RUNTIME_VERSION` for runtime tests, examples and service fault checks.
-An omitted field selects 1.20.2 in SmolBox 0.3.1. Explicit 1.19.0, 1.17.0 and 1.16.1 remain supported. Maintainer preflight and public worker/network
+An omitted field selects 1.20.2 in SmolBox 0.4.0. Explicit 1.19.0, 1.17.0 and 1.16.1 remain supported. Maintainer preflight and public worker/network
 admission also support explicitly selected 1.16.0. No temporary admission patch
 is needed on this checkout. The report `docs/runtime-1.16.1-qualification.md`
 documents the tested preservation/disposal contract and graceful-stop limitation.

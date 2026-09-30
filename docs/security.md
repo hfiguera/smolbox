@@ -8,7 +8,7 @@ of machine reservations. Registry credentials come from host configuration or a
 specifications. See [Images and registry artifacts](images-and-registry-artifacts.md)
 for authentication boundaries and cache integrity limits.
 
-SmolBox 0.3.1 defaults to **smolvm 1.20.2** on Linux x86_64 and macOS Apple
+SmolBox 0.4.0 defaults to **smolvm 1.20.2** on Linux x86_64 and macOS Apple
 Silicon. Published SmolBox 0.3.0 and 0.2.1 keep their 1.19.0 default; 0.2.0 keeps
 1.17.0. Pin existing workers and checkpoint approvals to their actual version.
 Updating SmolBox does not install smolvm. See the
@@ -247,7 +247,7 @@ an observed stop alone does not establish operator quiescence.
    durable example's authenticated index backfill instructions for its older schema.
 4. Pin and verify the new binary, schema and artifact bytes on a separate candidate
    worker. Recheck template sizes, VMM overhead, network behavior, proxy semantics,
-   host quotas and all advertised platform tests. SmolBox 0.3.1 defaults to
+   host quotas and all advertised platform tests. SmolBox 0.4.0 defaults to
    smolvm 1.20.2 and retains explicit 1.19.0, 1.17.0, 1.16.1, 1.16.0, 1.14.6 and 1.14.1 support, subject
    to the [supported platform matrix](compatibility.md#runtime-selection).
    Controlled networking requires 1.16.0, 1.16.1, 1.17.0, 1.19.0 or 1.20.2. The worker must report the
