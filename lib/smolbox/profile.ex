@@ -66,6 +66,17 @@ defmodule SmolBox.Profile do
           cleanup_ms: pos_integer()
         }
 
+  @doc "Configured reservation for one machine, including host overhead and both disks."
+  @spec resources(t()) :: SmolBox.Store.resources()
+  def resources(profile) do
+    %{
+      slots: 1,
+      cpus: profile.cpus,
+      memory_mb: profile.memory_mb + profile.host_overhead_mb,
+      disk_gb: profile.storage_gb + profile.overlay_gb
+    }
+  end
+
   @doc """
   Create an immutable host-approved profile revision.
 

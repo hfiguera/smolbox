@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Add typed machine measurements and worker capacity observations, bounded raw
+  Prometheus reads, and ownership-checked managed measurements. Worker reports
+  distinguish observed usage from durable reservations; advisory admission reports
+  explain status, unsupported specifications and resource shortages. No change to
+  admission, retention, drain behavior, store callbacks or durable schema.
+
 ## 0.3.1
 
 **Worker default change:** omitted runtime versions now select smolvm **1.20.2**.

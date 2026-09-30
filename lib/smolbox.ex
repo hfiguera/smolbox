@@ -22,7 +22,7 @@ defmodule SmolBox do
   """
   alias SmolBox.{Error, Execution, ExecutionSpec, Runtime, Validation}
   alias SmolBox.Runtime.ExecutionSupport
-  alias SmolBox.Runtime.{Inspection, Session, WorkerConfig}
+  alias SmolBox.Runtime.{Inspection, Machines, Session, WorkerConfig, WorkerReports}
 
   @type runtime :: Supervisor.supervisor()
   @type handle :: Execution.key()
@@ -176,10 +176,75 @@ defmodule SmolBox do
 
   Results include configured capacity, allocation floor, platform, architecture,
   version, qualification and status. Capacity is declared admission capacity,
-  not a live host free-memory/disk measurement. See [Telemetry](telemetry.html).
+  not a live host free-memory/disk measurement. Use `worker_report/2` for live
+  utilization and store accounting, or `admission_report/2` to explain a request.
+  See [Telemetry](telemetry.html).
   """
   @spec workers(runtime()) :: {:ok, [map()]} | {:error, Error.t()}
   def workers(runtime), do: call(runtime, :workers)
+
+  @doc """
+  Observe one worker's configured capacity, reservations and live utilization.
+
+  Calls run on the caller, not the coordinator. The `/capacity` GET has a maximum
+  500 ms operation budget and 8 KiB response cap, further limited by worker settings.
+  Store errors and worker errors remain separate in `SmolBox.WorkerReport`.
+  This performs no mutations, starts no polling and never changes admission.
+  """
+  @spec worker_report(runtime(), String.t()) ::
+          {:ok, SmolBox.WorkerReport.t()} | {:error, Error.t()}
+  def worker_report(runtime, id) do
+    with {:ok, config} <- config(runtime),
+         {:ok, snapshots} <- workers(runtime) do
+      case Enum.find(config.workers, &(&1.client.worker.id == id)) do
+        nil ->
+          Session.error(:not_found, :worker_report)
+
+        worker ->
+          snapshot = Enum.find(snapshots, &(&1.id == id))
+          {:ok, WorkerReports.observe(config, worker, snapshot)}
+      end
+    end
+  end
+
+  @doc """
+  Explain current worker eligibility and reservation headroom for a new machine.
+
+  Accepts `SmolBox.ExecutionSpec` for disposable execution or
+  `SmolBox.ManagedMachineSpec` for retained creation. Returns one
+  `SmolBox.AdmissionReport` per configured worker. Uses cached health and fresh store
+  usage; sends no worker request and neither accepts work nor reserves resources.
+  An empty blocker list is not admission authorization. See the report's limits.
+  """
+  @spec admission_report(runtime(), ExecutionSpec.t() | SmolBox.ManagedMachineSpec.t()) ::
+          {:ok, [SmolBox.AdmissionReport.t()]} | {:error, Error.t()}
+  def admission_report(runtime, spec) do
+    with :ok <- admission_spec(spec),
+         {:ok, config} <- config(runtime),
+         :ok <- admission_support(config, spec),
+         {:ok, snapshots} <- workers(runtime) do
+      {:ok, WorkerReports.admission(config, spec, snapshots)}
+    end
+  end
+
+  defp admission_support(config, %SmolBox.ManagedMachineSpec{} = spec) do
+    if config.managed_machines do
+      with :ok <- ExecutionSupport.check(config, spec),
+           do: Machines.port_support(config, spec.ports)
+    else
+      Session.error(:unsupported_capability, :machine)
+    end
+  end
+
+  defp admission_support(config, spec),
+    do: ExecutionSupport.check(config, spec)
+
+  defp admission_spec(%ExecutionSpec{} = spec), do: ExecutionSpec.validate(spec)
+
+  defp admission_spec(%SmolBox.ManagedMachineSpec{} = spec),
+    do: SmolBox.ManagedMachineSpec.validate(spec)
+
+  defp admission_spec(_spec), do: Session.error(:validation, :admission_report)
 
   @doc "Read ephemeral notification counters; an epoch change resets them."
   @spec telemetry_stats(runtime()) :: {:ok, map()} | {:error, Error.t()}

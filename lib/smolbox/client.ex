@@ -97,6 +97,66 @@ defmodule SmolBox.Client do
          do: Health.from_wire(body)
   end
 
+  @doc """
+  Read typed worker allocations and utilization from `/capacity`.
+
+  Qualified on smolvm 1.20.2. Older workers may return unavailable fields or an
+  unsupported endpoint. Errors are not zero capacity. This read uses the client's
+  normal response-size and deadline limits; it never authorizes admission.
+  """
+  @spec capacity(t()) :: {:ok, SmolBox.WorkerCapacity.t()} | {:error, Error.t()}
+  def capacity(client) do
+    with {:ok, body} <- json(client, :get, "/capacity", nil, :capacity),
+         do: SmolBox.WorkerCapacity.from_wire(body)
+  end
+
+  @doc """
+  Read bounded Prometheus text from `/metrics` without interpreting metric names.
+
+  Uses the worker's response-size and operation limits. The caller owns scraping,
+  retention and access control; metrics can contain operational information.
+  Malformed UTF-8, unexpected media types and oversized responses fail explicitly.
+  No collection process, retry, metric database or drain operation is started.
+  """
+  @spec metrics(t()) :: {:ok, String.t()} | {:error, Error.t()}
+  def metrics(client) do
+    with {:ok, body} <-
+           request(
+             client,
+             :get,
+             "/metrics",
+             "",
+             "application/json",
+             "text/plain",
+             :buffer,
+             :metrics
+           ) do
+      if Validation.text?(body, client.worker.max_response_bytes),
+        do: {:ok, body},
+        else: error(:protocol, :metrics)
+    end
+  end
+
+  @doc """
+  Read machine identity and volatile measurements in one inspection response.
+
+  Qualified measurement fields are documented in `SmolBox.MachineMeasurements`.
+  Absent fields remain unavailable on older workers. This GET never starts a
+  stopped guest. For a managed handle with ownership verification, use
+  `SmolBox.Machines.measurements/2`.
+  """
+  @spec machine_measurements(t(), String.t()) ::
+          {:ok, SmolBox.MachineMeasurements.t()} | {:error, Error.t()}
+  def machine_measurements(client, name) do
+    with {:ok, path} <- machine_path(name),
+         {:ok, body} <- json(client, :get, path, nil, :machine_measurements),
+         {:ok, measured} <- SmolBox.MachineMeasurements.from_wire(body) do
+      if measured.machine.name == name,
+        do: {:ok, measured},
+        else: error(:protocol, :machine_measurements)
+    end
+  end
+
   @doc "Checks the upstream blocking-pool probe; requires HTTP 200 with an empty body."
   @spec readiness(t()) :: :ok | {:error, Error.t()}
   def readiness(client) do
