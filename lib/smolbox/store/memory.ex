@@ -16,7 +16,16 @@ defmodule SmolBox.Store.Memory do
 
   alias SmolBox.Store.BranchOps
   alias SmolBox.Store.CaptureOps
-  alias SmolBox.Store.{Codec, ExportOps, MachineOps, PortOwnership, RecordOps, SourceOwnership}
+
+  alias SmolBox.Store.{
+    Codec,
+    ExpansionOps,
+    ExportOps,
+    MachineOps,
+    PortOwnership,
+    RecordOps,
+    SourceOwnership
+  }
 
   @doc """
   Start an ephemeral store, optionally registered with `:name`.
@@ -119,6 +128,7 @@ defmodule SmolBox.Store.Memory do
     do:
       {{:ok,
         %{
+          managed_disk_expansion: 1,
           worker_control: 1,
           schema: 1,
           durable: false,
@@ -460,6 +470,28 @@ defmodule SmolBox.Store.Memory do
              used(state, worker),
              now
            ),
+         do: machine_save(state, next)
+  end
+
+  defp machine_operation(state, :expansion_accept, [key, id, version, targets, capacity, now]) do
+    with {:ok, record} <- machine_lookup(state, key),
+         {:ok, next} <-
+           ExpansionOps.accept(
+             record,
+             id,
+             version,
+             targets,
+             capacity,
+             used(state, record.worker_id),
+             now
+           ),
+         :ok <- WorkerControl.admit_change(control(state, record.worker_id), record, next),
+         do: machine_save(state, next)
+  end
+
+  defp machine_operation(state, :expansion_advance, [key, guard, id, expected, outcome, now]) do
+    with {:ok, record} <- machine_guard(state, key, guard, now),
+         {:ok, next} <- ExpansionOps.advance(record, id, expected, outcome, now),
          do: machine_save(state, next)
   end
 

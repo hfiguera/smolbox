@@ -37,6 +37,9 @@ defmodule SmolBox.ManagedMachine do
                 :last_request,
                 :operation_deadline_ms,
                 :resolved_at_ms,
+                disk_sizes: nil,
+                disk_expansions: %{},
+                active_expansion: nil,
                 preparation: nil,
                 branch: nil,
                 branch_children: %{},
@@ -108,6 +111,7 @@ defmodule SmolBox.ManagedMachine do
   def validate(%__MODULE__{} = record) do
     with true <- Validation.struct_shape?(record, __MODULE__),
          :ok <- ManagedMachineSpec.validate(record.spec),
+         true <- SmolBox.DiskExpansion.valid_machine?(record),
          true <-
            fields?(record) and ownership?(record) and lifecycle?(record) and preparation?(record) and
              SmolBox.Export.history_valid?(record) and
@@ -208,7 +212,10 @@ defmodule SmolBox.ManagedMachine do
       r.reservation == RecordOps.resources(r) or (r.state == :deleted and r.reservation == nil),
       r.reserved_ports == if(r.state == :deleted, do: [], else: Enum.map(r.spec.ports, & &1.host)),
       observation?(r.created_machine, r),
-      observation?(r.observed_machine, r),
+      observation?(r.observed_machine, %{
+        r
+        | spec: %{r.spec | profile: SmolBox.DiskExpansion.profile(r)}
+      }),
       same_observation?(r)
     ])
   end
@@ -216,11 +223,8 @@ defmodule SmolBox.ManagedMachine do
   defp same_observation?(%{created_machine: nil}), do: true
   defp same_observation?(%{observed_machine: nil}), do: true
 
-  defp same_observation?(%{
-         created_machine: %Machine{} = created,
-         observed_machine: %Machine{} = observed
-       }),
-       do: Machine.same_incarnation?(created, observed)
+  defp same_observation?(%{observed_machine: %Machine{} = observed} = record),
+    do: SmolBox.DiskExpansion.matches?(record, observed)
 
   defp same_observation?(_record), do: false
 
@@ -238,7 +242,8 @@ defmodule SmolBox.ManagedMachine do
         :capture,
         :branch,
         :branch_child,
-        :branch_release
+        :branch_release,
+        :expand_disks
       ],
       r.phase in [nil, :pending, :preparing, :prepared, :dispatching, :uncertain],
       r.operation == nil == (r.phase == nil),

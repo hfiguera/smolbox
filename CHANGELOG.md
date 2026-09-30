@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Add managed disk expansion for idle stopped/created ordinary machines on smolvm
+  1.20.2, with absolute storage/overlay targets, atomic capacity and drain gates,
+  immutable creation evidence, verified current allocations and explicit recovery
+  after uncertain outcomes. Commands and export resource floors use grown disks.
+  Add the client API and a two-process PostgreSQL/Linux walkthrough.
+  Requires `managed_disk_expansion: 1` and coordinated codec v14 readers/writers;
+  no additional SQL migration. Checkpoint and branch machines remain unsupported.
+  See [disk expansion](docs/disk-expansion.md).
+
 - Persist worker drain/resume control across controllers with atomic admission
   gates and versioned resume. Add bounded maintenance reports without automatic
   shutdown, stopping or deletion. Requires the optional `worker_control: 1` store

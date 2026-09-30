@@ -3,6 +3,7 @@ defmodule SmolBox.Store.CodecSources do
   alias SmolBox.{ManagedMachine, Source}
   alias SmolBox.Store.CodecBranches
   alias SmolBox.Store.CodecCaptures
+  alias SmolBox.Store.CodecExpansion
   alias SmolBox.Store.CodecExports
 
   def required?(%{spec: %{command: %SmolBox.ImagePull{}}}), do: true
@@ -17,7 +18,9 @@ defmodule SmolBox.Store.CodecSources do
     {record, used} = :erlang.binary_to_term(payload, [:safe, :used])
     if required?(record), do: raise(ArgumentError)
 
-    {CodecBranches.upgrade(CodecCaptures.upgrade(CodecExports.upgrade(upgrade(record)))), used}
+    {CodecExpansion.upgrade(
+       CodecBranches.upgrade(CodecCaptures.upgrade(CodecExports.upgrade(upgrade(record))))
+     ), used}
   end
 
   defp upgrade(%ManagedMachine{} = record) do

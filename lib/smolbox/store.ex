@@ -130,6 +130,8 @@ defmodule SmolBox.Store do
           | :export_advance
           | :export_cancel
           | :export_resolve
+          | :expansion_accept
+          | :expansion_advance
 
   @typedoc "The last machine ID in a scoped list page; nil starts or ends the scan."
   @type machine_list_cursor :: String.t() | nil
@@ -193,6 +195,8 @@ defmodule SmolBox.Store do
 
   | Operation | Ordered arguments | Success |
   |---|---|---|
+  | `:expansion_accept` | `[key, id, version, targets, capacity, now]` | `{:ok, machine}` |
+  | `:expansion_advance` | `[key, guard, id, expected_state, outcome, now]` | `{:ok, machine}` |
   | `:accept` | `[initial_machine, max_pending]` | `{:ok, machine}` |
   | `:fetch` | `[key]` | `{:ok, machine}` |
   | `:list` | `[scope, after_id_or_nil, limit]` | `{:ok, machines, next_id_or_nil}` |
@@ -221,6 +225,13 @@ defmodule SmolBox.Store do
   | `:branch_release_storage` | `[source_key, source_guard, child_id, now]` | `{:ok, child}` |
   | `:branch_release` | `[child_key, expected_version, now]` | `{:ok, child}` |
   | `:branch_release_advance` | `[child_key, child_guard, expected_state, change, now]` | `{:ok, child}` |
+
+  Expansion acceptance atomically deduplicates operation identity, validates the
+  machine version and exclusion, reserves disk growth, and enforces durable drain.
+  Advance requires the existing machine guard. Unknown outcomes retain requested
+  disk sizes; no replay or release based on stale observations is permitted.
+  Advertise `managed_disk_expansion: 1` only with codec v14 and all resource
+  projection writers upgraded. Run ExpansionContract against the real adapter.
 
   `managed_branches: 1` additionally requires all branch operations. Admission
   atomically locks both scoped identities, the source operation slot, worker name
@@ -329,17 +340,19 @@ defmodule SmolBox.Store do
               machine_list_result()
   @callback machine(context(), :due, [non_neg_integer() | cursor() | pos_integer()]) ::
               machine_due_result()
-  @callback machine(context(), :claim, [ManagedMachine.key() | String.t() | non_neg_integer()]) ::
+  @callback machine(context(), :claim, [
+              SmolBox.ManagedMachine.key() | String.t() | non_neg_integer()
+            ]) ::
               machine_result()
   @callback machine(
               context(),
               :claim_version,
-              [ManagedMachine.key() | String.t() | non_neg_integer()]
+              [SmolBox.ManagedMachine.key() | String.t() | non_neg_integer()]
             ) :: machine_result()
   @callback machine(
               context(),
               :write,
-              [ManagedMachine.key() | guard() | machine_changes() | non_neg_integer()]
+              [SmolBox.ManagedMachine.key() | guard() | machine_changes() | non_neg_integer()]
             ) :: machine_result()
   @callback machine(
               context(),
@@ -354,19 +367,19 @@ defmodule SmolBox.Store do
   @callback machine(
               context(),
               :request,
-              [ManagedMachine.key() | machine_action() | non_neg_integer()]
+              [SmolBox.ManagedMachine.key() | machine_action() | non_neg_integer()]
             ) :: machine_result()
   @callback machine(
               context(),
               :submit,
-              [ManagedMachine.key() | Execution.t() | non_neg_integer()]
+              [SmolBox.ManagedMachine.key() | Execution.t() | non_neg_integer()]
             ) :: result()
   @callback machine(context(), :finish, [Execution.key() | guard() | non_neg_integer()]) ::
               result()
   @callback machine(
               context(),
               :resolve,
-              [ManagedMachine.key() | guard() | machine_resolution() | non_neg_integer()]
+              [SmolBox.ManagedMachine.key() | guard() | machine_resolution() | non_neg_integer()]
             ) :: machine_result()
   @type export_changes :: [
           state:
@@ -489,6 +502,22 @@ defmodule SmolBox.Store do
   @callback machine(context(), :branch_release_storage, [
               ManagedMachine.key() | guard() | String.t() | non_neg_integer()
             ]) :: machine_result()
+  @callback machine(context(), :expansion_accept, [
+              SmolBox.ManagedMachine.key()
+              | String.t()
+              | pos_integer()
+              | SmolBox.DiskExpansion.targets()
+              | capacity()
+              | non_neg_integer()
+            ]) :: machine_result()
+  @callback machine(context(), :expansion_advance, [
+              SmolBox.ManagedMachine.key()
+              | guard()
+              | String.t()
+              | SmolBox.DiskExpansion.state()
+              | SmolBox.DiskExpansion.outcome()
+              | non_neg_integer()
+            ]) :: machine_result()
   @optional_callbacks machine: 3
 
   @doc """
@@ -501,7 +530,7 @@ defmodule SmolBox.Store do
 
   @doc """
   Atomically change worker admission mode. Serialize this transaction with every
-  disposable/managed reservation, branch creation and new capture/export admission.
+  disposable/managed reservation, branch creation, disk expansion and new capture/export admission.
   `:any` is permitted only for draining. Resume requires the observed version;
   retries of the last identical versioned request return the stored result.
   Duplicate existing admissions still deduplicate while draining. Existing

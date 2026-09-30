@@ -4,7 +4,6 @@ defmodule SmolBox.Runtime.Exports do
     Client,
     Error,
     ExportReceipt,
-    Machine,
     ManagedMachine,
     RegistryCredentials,
     RegistryExport
@@ -74,7 +73,7 @@ defmodule SmolBox.Runtime.Exports do
          {:ok, observed} <- Client.inspect_machine(worker.client, machine.machine_name),
          true <-
            observed.state == :stopped and
-             Machine.same_incarnation?(machine.created_machine, observed),
+             SmolBox.DiskExpansion.matches?(machine, observed),
          {:ok, token} <-
            RegistryCredentials.publication(
              worker.registry_credentials,

@@ -60,6 +60,14 @@ defmodule SmolBox.FaultStore do
     end
   end
 
+  defp event(:machine, [:expansion_advance, [_key, _guard, _id, _expected, change, _now]]) do
+    case change do
+      :dispatch -> :expansion_intent
+      {:complete, _} -> :expansion_receipt
+      _ -> :expansion_write
+    end
+  end
+
   defp event(:machine, [:export_advance, [_key, _guard, _id, _expected, changes, _now]]) do
     case changes[:state] do
       :dispatching -> :export_intent

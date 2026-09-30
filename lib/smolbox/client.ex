@@ -425,6 +425,66 @@ defmodule SmolBox.Client do
   @doc "Read a named machine without starting it; absence is a typed `:not_found` error."
   @spec inspect_machine(t(), String.t()) :: {:ok, Machine.t()} | {:error, Error.t()}
   def inspect_machine(client, name), do: lifecycle(client, name, :get, "", :inspect)
+
+  @doc """
+  Grow disks of an observed stopped/created machine on smolvm 1.20.2.
+
+  Options are absolute `:storage_gb` and/or `:overlay_gb` targets (1–64 GiB).
+  Requires exclusive lifecycle control. Verifies the supplied observation before
+  mutation; the upstream request itself cannot assert stopped state atomically
+  against other API clients. Partial errors and lost responses are uncertain.
+  """
+  @spec expand_disks(t(), Machine.t(), keyword()) :: {:ok, Machine.t()} | {:error, Error.t()}
+  def expand_disks(client, %Machine{} = expected, options) do
+    deadline = System.monotonic_time(:millisecond) + client.worker.operation_timeout_ms
+
+    with {:ok, targets} <- SmolBox.DiskExpansion.targets(options),
+         true <- expected.state in [:created, :stopped],
+         true <- Enum.all?(targets, fn {k, n} -> n >= Map.fetch!(expected, k) end),
+         {:ok, client} <- creation_runtime_versions(client, ["1.20.2"]),
+         {:ok, client} <- remaining_create_budget(client, deadline),
+         :ok <- expansion_preflight(client, expected),
+         {:ok, client} <- remaining_create_budget(client, deadline) do
+      expand_request(client, expected, targets)
+    else
+      {:error, _} = error -> error
+      _ -> error(:validation, :expand_disks)
+    end
+  end
+
+  def expand_disks(_client, _expected, _options), do: error(:validation, :expand_disks)
+
+  defp expansion_preflight(client, expected) do
+    with {:ok, observed} <- inspect_machine(client, expected.name),
+         true <-
+           observed.state in [:created, :stopped] and
+             Machine.same_incarnation?(expected, observed),
+         do: :ok,
+         else: (
+           false -> error(:identity_conflict, :expand_disks)
+           error -> error
+         )
+  end
+
+  defp expand_request(client, expected, targets) do
+    body =
+      Map.new(targets, fn {k, n} ->
+        {if(k == :storage_gb, do: "storageGb", else: "overlayGb"), n}
+      end)
+
+    with {:ok, path} <- machine_path(expected.name),
+         {:ok, body} <- json(client, :post, path <> "/resize", body, :expand_disks),
+         {:ok, result} <- decode_machine(body, expected.name, :expand_disks),
+         true <-
+           result.state in [:created, :stopped] and
+             Machine.same_incarnation?(struct!(expected, targets), result),
+         do: {:ok, result},
+         else: (
+           false -> error(:protocol, :expand_disks, :dispatch_uncertain)
+           error -> error
+         )
+  end
+
   @doc "Start a machine and return its observation. The caller must establish ownership first."
   @spec start(t(), String.t()) :: {:ok, Machine.t()} | {:error, Error.t()}
   def start(client, name), do: lifecycle(client, name, :post, "/start", :start)

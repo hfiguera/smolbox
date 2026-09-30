@@ -200,6 +200,19 @@ defmodule SmolBox.ManagedPeer do
     {response, state}
   end
 
+  defp machine_route("POST", ["resize"], body, machine, state) do
+    targets = Jason.decode!(body)
+    keys = if state.options[:resize_partial], do: ["storageGb"], else: ["storageGb", "overlayGb"]
+    updated = Map.merge(machine, Map.take(targets, keys))
+
+    response =
+      if state.options[:resize_lost] || state.options[:resize_partial],
+        do: {:json, 503, %{}},
+        else: {:json, 200, updated}
+
+    {response, %{state | machines: Map.put(state.machines, machine["name"], updated)}}
+  end
+
   defp machine_route("POST", ["stop"], _body, machine, %{options: options} = state)
        when is_list(options) do
     if options[:stop_failure],
@@ -334,6 +347,7 @@ defmodule SmolBox.ManagedPeer do
   defp event("POST", ["artifacts", "warm"]), do: :prepare_artifact
   defp event("POST", ["api", "v1", "machines", _name, "images", "pull"]), do: :pull_image
   defp event("POST", ["api", "v1", "machines", _name, "exec" | _suffix]), do: :exec
+  defp event("POST", ["api", "v1", "machines", _name, "resize"]), do: :resize
   defp event("POST", ["api", "v1", "machines", _name, "stop"]), do: :stop
   defp event("DELETE", _segments), do: :delete
   defp event("PUT", _segments), do: :upload

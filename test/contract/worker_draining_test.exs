@@ -15,7 +15,7 @@ defmodule SmolBox.WorkerDrainingTest do
       )
 
     {:ok, handle} = Machines.create(f.runtime, spec)
-    created = RuntimeFixture.await_idle(f.runtime, handle)
+    RuntimeFixture.await_idle(f.runtime, handle)
     assert :ok = SmolBox.drain_worker(f.runtime, "peer")
 
     second =
@@ -40,11 +40,12 @@ defmodule SmolBox.WorkerDrainingTest do
     assert [_original] = ManagedPeer.snapshot(f.peer).creations
 
     # Draining does not prohibit starting an existing assignment or running a command.
-    assert {:ok, _} = Machines.start(restarted, handle, created.version)
+    recovered = RuntimeFixture.await_idle([restarted, second], handle)
+    assert {:ok, _} = Machines.start(restarted, handle, recovered.version)
     assert {:ok, %{state: :running}} = Machines.await(restarted, handle, 10_000)
     assert {:ok, command} = Machines.submit(restarted, handle, %{f.spec | id: "existing-command"})
     assert {:ok, %{state: :completed}} = SmolBox.await(restarted, command, 10_000)
-    {:ok, idle} = Machines.await(restarted, handle, 10_000)
+    idle = RuntimeFixture.await_idle([restarted, second], handle)
     assert {:ok, _} = Machines.delete(restarted, handle, idle.version)
     assert {:ok, %{state: :deleted}} = Machines.await(restarted, handle, 10_000)
     assert {:ok, report} = SmolBox.worker_maintenance(restarted, "peer")

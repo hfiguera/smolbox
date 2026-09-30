@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "date": "2026-09-30",
+  "platform": "linux",
+  "architecture": "x86_64",
+  "virtualization": "none",
+  "smolvm_version": "1.20.2",
+  "store": "PostgreSQL example",
+  "source_archive_sha256": "3cda1d02ca67f4d19f7348b59e16f3b96c690835c5ca4335fead10847b4ead39",
+  "scenario": "SmolBox.DurableHost.DiskExpansionDemo prepare, then resume in a separate BEAM",
+  "initial_disks_gib": {
+    "storage": 2,
+    "overlay": 2
+  },
+  "target_disks_gib": {
+    "storage": 4,
+    "overlay": 3
+  },
+  "observed_events": [
+    {
+      "machine": "sbxexample-i43gfobj5o45g62gf2nw",
+      "phase": "prepare",
+      "disks": {
+        "storage_gb": 4,
+        "overlay_gb": 3
+      },
+      "immutable_creation": true,
+      "reserved_disk_gb": 7
+    },
+    {
+      "phase": "delete",
+      "absence_verified": true,
+      "reservations_released": true
+    },
+    {
+      "phase": "resume",
+      "files_preserved": true,
+      "guest_filesystems_grew": true,
+      "recovered": true
+    }
+  ],
+  "final_inventory": {
+    "machines": []
+  },
+  "test_service": [
+    "MainPID=0",
+    "ActiveState=inactive",
+    "SubState=dead"
+  ],
+  "limits": [
+    "No macOS VM campaign",
+    "No checkpoint/branch expansion",
+    "No running-machine growth",
+    "No host out-of-space fault campaign",
+    "Simulation, not live-worker evidence, covers lost responses and store failure boundaries"
+  ]
+}

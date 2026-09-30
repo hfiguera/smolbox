@@ -25,10 +25,10 @@ defmodule SmolBox.PersistentMachinesTest do
     test "commands retain their machine, stop/start preserves files, and explicit delete releases capacity (ports=#{inspect(@mappings)})" do
       fixture = RuntimeFixture.start(__MODULE__)
       handle = create(fixture, @mappings)
-      created = wait_machine(fixture, handle, &(&1.state == :created))
+      assert %{state: :created} = created = RuntimeFixture.await_idle(fixture.runtime, handle)
       assert {:ok, ^handle} = Machines.create(fixture.runtime, created.spec)
       assert {:ok, _} = Machines.start(fixture.runtime, handle, created.version)
-      running = wait_machine(fixture, handle, &(&1.state == :running))
+      assert %{state: :running} = running = RuntimeFixture.await_idle(fixture.runtime, handle)
       assert running.reservation.slots == 1
 
       for id <- ["first", "second"] do
@@ -48,14 +48,14 @@ defmodule SmolBox.PersistentMachinesTest do
       assert {:ok, stop} = Machines.stop(fixture.runtime, handle, idle.version)
       assert {:ok, duplicate} = Machines.stop(fixture.runtime, handle, idle.version)
       assert duplicate.last_request == stop.last_request
-      stopped = wait_machine(fixture, handle, &(&1.state == :stopped))
+      assert %{state: :stopped} = stopped = RuntimeFixture.await_idle(fixture.runtime, handle)
       assert {:ok, %{slots: 1}} = Memory.usage(fixture.store, "peer")
 
       assert {:error, %Error{category: :admission_exhausted}} =
                Machines.submit(fixture.runtime, handle, %{fixture.spec | id: "stopped"})
 
       assert {:ok, _} = Machines.start(fixture.runtime, handle, stopped.version)
-      running = wait_machine(fixture, handle, &(&1.state == :running))
+      assert %{state: :running} = running = RuntimeFixture.await_idle(fixture.runtime, handle)
 
       assert ManagedPeer.snapshot(fixture.peer).files[
                {running.machine_name, ["workspace", "out.bin"]}
@@ -73,7 +73,7 @@ defmodule SmolBox.PersistentMachinesTest do
     test "active and unknown commands block commands and lifecycle operations without deleting (ports=#{inspect(@mappings)})" do
       fixture = RuntimeFixture.start(__MODULE__, hold: true)
       handle = create(fixture, @mappings)
-      created = wait_machine(fixture, handle, &(&1.state == :created))
+      assert %{state: :created} = created = RuntimeFixture.await_idle(fixture.runtime, handle)
       {:ok, _} = Machines.start(fixture.runtime, handle, created.version)
       wait_machine(fixture, handle, &(&1.state == :running))
       {:ok, execution} = Machines.submit(fixture.runtime, handle, fixture.spec)
@@ -419,7 +419,7 @@ defmodule SmolBox.PersistentMachinesTest do
   test "a dispatched port conflict retains ownership until explicit quiescent resolution" do
     fixture = RuntimeFixture.start(__MODULE__, start_port_conflict: true)
     handle = create(fixture, [%SmolBox.PortMapping{host: 28_731, guest: 8000}])
-    created = wait_machine(fixture, handle, &(&1.state == :created))
+    assert %{state: :created} = created = RuntimeFixture.await_idle(fixture.runtime, handle)
     {:ok, _} = Machines.start(fixture.runtime, handle, created.version)
     blocked = wait_machine(fixture, handle, &(&1.state == :unknown))
     assert blocked.last_error.category == :port_conflict
@@ -780,9 +780,9 @@ defmodule SmolBox.PersistentMachinesTest do
 
   defp start_machine(fixture, mappings) do
     handle = create(fixture, mappings)
-    created = wait_machine(fixture, handle, &(&1.state == :created))
+    assert %{state: :created} = created = RuntimeFixture.await_idle(fixture.runtime, handle)
     {:ok, _} = Machines.start(fixture.runtime, handle, created.version)
-    wait_machine(fixture, handle, &(&1.state == :running))
+    assert %{state: :running} = RuntimeFixture.await_idle(fixture.runtime, handle)
     handle
   end
 

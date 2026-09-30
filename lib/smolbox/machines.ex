@@ -13,6 +13,7 @@ defmodule SmolBox.Machines do
   Stop and delete reject active commands, including unresolved unknown commands.
   All APIs require host authorization for the scope; handles are not credentials.
   """
+  alias SmolBox.Runtime.DiskExpansions
   alias SmolBox.Runtime.ExecutionSupport
 
   alias SmolBox.{
@@ -81,7 +82,7 @@ defmodule SmolBox.Machines do
          true <- record.state != :deleted and record.created_machine != nil,
          {:ok, worker} <- Machines.worker(config, record),
          {:ok, observed} <- SmolBox.Client.inspect_machine(worker.client, record.machine_name),
-         true <- SmolBox.Machine.same_incarnation?(record.created_machine, observed) do
+         true <- SmolBox.DiskExpansion.matches?(record, observed) do
       SmolBox.Client.logs(worker.client, record.machine_name, options)
     else
       false -> Session.error(:identity_conflict, :logs)
@@ -107,7 +108,7 @@ defmodule SmolBox.Machines do
          {:ok, worker} <- Machines.worker(config, record),
          {:ok, measured} <-
            SmolBox.Client.machine_measurements(worker.client, record.machine_name),
-         true <- SmolBox.Machine.same_incarnation?(record.created_machine, measured.machine) do
+         true <- SmolBox.DiskExpansion.matches?(record, measured.machine) do
       {:ok, measured}
     else
       false -> Session.error(:identity_conflict, :machine_measurements)
@@ -161,6 +162,84 @@ defmodule SmolBox.Machines do
       ])
     else
       false -> Session.error(:validation, :list)
+      error -> error
+    end
+  end
+
+  @doc """
+  Accept durable disk growth on an idle stopped or created machine.
+
+  Supply a unique operation `id`, the inspected machine `version`, and absolute
+  `:storage_gb` and/or `:overlay_gb` targets (1–64 GiB). Identical retries return
+  existing history, including after deletion. Conflicting reuse of an ID fails.
+  Growth reserves capacity before dispatch and is blocked by durable draining.
+  Requires smolvm 1.20.2 and `managed_disk_expansion: 1` store support.
+
+  Creation identity stays immutable. Await with `await/3`, then inspect
+  `record.disk_expansions[id]`. Unknown outcomes block reuse and retain capacity;
+  resolve them explicitly with `resolve_disk_expansion/5`. Checkpointable,
+  checkpoint-restored and branch machines are unsupported in this first version.
+  """
+  @spec expand_disks(SmolBox.runtime(), handle(), String.t(), pos_integer(), keyword()) ::
+          {:ok, ManagedMachine.t()} | {:error, Error.t()}
+  def expand_disks(runtime, handle, id, version, options) do
+    with :ok <- key(handle),
+         {:ok, targets} <- SmolBox.DiskExpansion.targets(options),
+         {:ok, config} <- config(runtime),
+         :ok <- DiskExpansions.supported(config),
+         {:ok, record} <- Machines.store(config, :fetch, [handle]),
+         {:ok, worker} <- Machines.worker(config, record),
+         true <- worker.runtime_version == "1.20.2" do
+      Machines.store(config, :expansion_accept, [
+        handle,
+        id,
+        version,
+        targets,
+        worker.capacity,
+        config.clock.now()
+      ])
+    else
+      false -> Session.error(:unsupported_capability, :expand_disks)
+      error -> error
+    end
+  end
+
+  @doc """
+  Resolve an unknown expansion only after operator quiescence.
+
+  Set `quiesced: true` after fencing old controllers and outstanding worker
+  requests. For `disposition: :stopped` (default), first verify both actual disk
+  files and worker metadata reached the complete target; partial growth or an old
+  size observation is insufficient. This API verifies owned stopped target sizes.
+  With `disposition: :deleted`, remove the resource after quiescence; verified
+  absence releases accounting. Neither disposition sends a worker mutation.
+  """
+  def resolve_disk_expansion(runtime, handle, id, version, options) do
+    with true <-
+           Validation.keys?(options, [:quiesced, :disposition]) and options[:quiesced] == true,
+         disposition = Keyword.get(options, :disposition, :stopped),
+         true <- disposition in [:stopped, :deleted],
+         :ok <- key(handle),
+         {:ok, config} <- config(runtime),
+         :ok <- DiskExpansions.supported(config),
+         {:ok, current} <-
+           Machines.store(config, :claim_version, [
+             handle,
+             version,
+             config.owner,
+             config.clock.now(),
+             config.lease_ms
+           ]),
+         true <- current.active_expansion == id and current.phase == :uncertain,
+         {:ok, worker} <- Machines.worker(config, current),
+         result =
+           Machines.io(config, %{current | operation_deadline_ms: nil}, fn ->
+             SmolBox.Client.inspect_machine(worker.client, current.machine_name)
+           end),
+         {:ok, observed} <- resolution_observation(result, disposition) do
+      DiskExpansions.advance(config, current, {:resolve, observed})
+    else
+      false -> Session.error(:validation, :expand_disks)
       error -> error
     end
   end
@@ -272,7 +351,7 @@ defmodule SmolBox.Machines do
          true <- record.state != :deleted and record.created_machine != nil,
          {:ok, worker} <- Machines.worker(config, record),
          {:ok, observed} <- SmolBox.Client.inspect_machine(worker.client, record.machine_name),
-         true <- SmolBox.Machine.same_incarnation?(record.created_machine, observed) do
+         true <- SmolBox.DiskExpansion.matches?(record, observed) do
       SmolBox.Client.list_images(worker.client, record.machine_name)
     else
       false -> Session.error(:identity_conflict, :images)
