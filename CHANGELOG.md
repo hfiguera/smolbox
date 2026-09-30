@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Persist worker drain/resume control across controllers with atomic admission
+  gates and versioned resume. Add bounded maintenance reports without automatic
+  shutdown, stopping or deletion. Requires the optional `worker_control: 1` store
+  capability; unsupported adapters no longer silently drain only one controller.
+  The PostgreSQL example requires the new worker-control migration and coordinated
+  writer upgrade. No machine/execution codec change is added. See
+  [durable draining](docs/worker-draining.md) for upgrade and rollback constraints.
+
 - Add typed machine measurements and worker capacity observations, bounded raw
   Prometheus reads, and ownership-checked managed measurements. Worker reports
   distinguish observed usage from durable reservations; advisory admission reports

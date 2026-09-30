@@ -138,10 +138,12 @@ and `reservation` to distinguish command outcome, output availability and remain
 resource ownership. Do not expose the full record to an unauthenticated client.
 
 `SmolBox.workers/1` gives version/qualification, architecture/platform, recent
-health, drain status, allocation floors and configured capacity. Capacity is a
+health, current store admission mode, allocation floors and configured capacity. Capacity is a
 host declaration, not measured free resources. `SmolBox.audit_worker/3` provides
 bounded read-only orphan inspection; it never adopts or deletes resources.
-`fetch`, `workers`, `telemetry_stats` and `audit_worker` are observational.
+`worker_maintenance` adds a bounded store inventory for maintenance; it never
+certifies shutdown safety. `fetch`, `workers`, `worker_maintenance`, `telemetry_stats`
+and `audit_worker` are observational. Drain/resume change admission only.
 `cancel` records intent that can lead to owned-guest termination. `reconcile`
 advances observation/cleanup of existing evidence and never authorizes replay.
 A new authorized execution requires a new identity via `submit`.

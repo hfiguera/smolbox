@@ -131,11 +131,11 @@ The host owns scheduling, storage, access control and any export to monitoring
 systems. Worker reports and raw metrics are operator data, not tenant APIs.
 SmolBox's [lifecycle telemetry](telemetry.md) remains separate from worker metrics.
 
-`SmolBox.drain_worker/2` retains its existing behavior: exclude that worker from
-new admission-task launches in the current controller. It is not durable across
-restarts or shared across controllers, and work already launched can continue.
-The upstream `/drain` endpoint stops running machines across the worker; these new
-read APIs never call it. Durable maintenance/draining is a separate feature.
+[Durable worker draining](worker-draining.md) persists admission mode across
+controllers sharing a capable store. It gates new reservations, not requests
+already sent or work on existing assignments. Use maintenance reports and explicit
+versioned resume for operator workflows. Upstream `/drain` stops running machines
+across the worker; these APIs never call it.
 
 ## Validation
 

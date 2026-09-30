@@ -11,7 +11,16 @@ defmodule SmolBox.DurableHost.Store do
 
   alias SmolBox.DurableHost.BranchStore
   alias SmolBox.DurableHost.CaptureStore
-  alias SmolBox.DurableHost.{Database, ExportStore, MachineIndex, MachineStore, SourceStore}
+
+  alias SmolBox.DurableHost.{
+    Database,
+    ExportStore,
+    MachineIndex,
+    MachineStore,
+    SourceStore,
+    WorkerStore
+  }
+
   alias SmolBox.{Error, Execution, MachineSpec, Validation}
   alias SmolBox.Store.RecordOps
 
@@ -54,7 +63,7 @@ defmodule SmolBox.DurableHost.Store do
                   extended_execution: 1
                 },
                 Map.merge(
-                  SourceStore.capabilities(),
+                  Map.merge(SourceStore.capabilities(), WorkerStore.capabilities(context)),
                   Map.merge(
                     ExportStore.capabilities(),
                     Map.merge(
@@ -65,6 +74,21 @@ defmodule SmolBox.DurableHost.Store do
                 )
               )}
     end)
+  end
+
+  if Code.ensure_loaded?(SmolBox.WorkerControl) do
+    @impl SmolBox.Store
+    def worker_control(context, worker), do: safe(fn -> WorkerStore.read(context, worker) end)
+    @impl SmolBox.Store
+    def set_worker_mode(context, worker, mode, expected, now),
+      do: transaction(context, fn -> WorkerStore.change(context, worker, mode, expected, now) end)
+
+    @impl SmolBox.Store
+    def worker_maintenance(context, worker, cursor, limit, now),
+      do:
+        transaction(context, fn ->
+          WorkerStore.maintenance(context, worker, cursor, limit, now)
+        end)
   end
 
   @impl SmolBox.Store
@@ -134,15 +158,17 @@ defmodule SmolBox.DurableHost.Store do
     guarded(context, key, guard, now, fn record ->
       {:ok, used} = Database.usage(context, worker)
 
-      RecordOps.reservation(
-        record,
-        worker,
-        machine,
-        Database.worker_lease(context, worker),
-        capacity,
-        used,
-        now
-      )
+      with :ok <- WorkerStore.admit(context, worker),
+           do:
+             RecordOps.reservation(
+               record,
+               worker,
+               machine,
+               Database.worker_lease(context, worker),
+               capacity,
+               used,
+               now
+             )
     end)
   end
 

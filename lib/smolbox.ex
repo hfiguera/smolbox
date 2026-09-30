@@ -22,7 +22,15 @@ defmodule SmolBox do
   """
   alias SmolBox.{Error, Execution, ExecutionSpec, Runtime, Validation}
   alias SmolBox.Runtime.ExecutionSupport
-  alias SmolBox.Runtime.{Inspection, Machines, Session, WorkerConfig, WorkerReports}
+
+  alias SmolBox.Runtime.{
+    Inspection,
+    Machines,
+    Session,
+    WorkerConfig,
+    WorkerControls,
+    WorkerReports
+  }
 
   @type runtime :: Supervisor.supervisor()
   @type handle :: Execution.key()
@@ -167,21 +175,81 @@ defmodule SmolBox do
     end
   end
 
-  @doc "Exclude a worker from new admission-task launches; already active work may continue."
+  @doc """
+  Persist exclusion from new worker reservations across controllers sharing a store.
+
+  Requires `worker_control: 1`; no silent local fallback. Repeated drains are
+  idempotent while draining. Existing assignments, commands and cleanup continue.
+  This never calls upstream `/drain`, stops machines or proves shutdown safety.
+  See `worker_maintenance/3` and `resume_worker/3`.
+  """
   @spec drain_worker(runtime(), String.t()) :: :ok | {:error, Error.t()}
-  def drain_worker(runtime, worker_id), do: call(runtime, {:drain, worker_id})
+  def drain_worker(runtime, worker_id) do
+    with {:ok, config} <- config(runtime),
+         {:ok, _control} <- WorkerControls.change(config, worker_id, :draining, :any),
+         do: :ok
+  end
 
   @doc """
-  Read configured workers and their latest controller health/drain observations.
+  Establish a new drain revision using an observed control version.
+
+  Use this form to invalidate an outstanding resume even when the worker is already
+  draining. The two-argument form only ensures draining and is idempotent while
+  already in that mode. Retry this exact version to recover an uncertain response.
+  """
+  @spec drain_worker(runtime(), String.t(), non_neg_integer()) ::
+          {:ok, SmolBox.WorkerControl.t()} | {:error, Error.t()}
+  def drain_worker(runtime, worker_id, version) do
+    with {:ok, config} <- config(runtime),
+         do: WorkerControls.change(config, worker_id, :draining, version)
+  end
+
+  @doc """
+  Resume new reservations using the version read from a maintenance report.
+
+  Stale requests cannot undo a later drain. A retry of the last identical resume
+  returns the existing result. A statically configured `draining: true` worker
+  must be reconfigured before resuming. Admission still requires health and capacity.
+  """
+  @spec resume_worker(runtime(), String.t(), non_neg_integer()) ::
+          {:ok, SmolBox.WorkerControl.t()} | {:error, Error.t()}
+  def resume_worker(runtime, worker_id, version) do
+    with {:ok, config} <- config(runtime),
+         do: WorkerControls.change(config, worker_id, :active, version)
+  end
+
+  @doc """
+  Inspect a store-consistent maintenance page across all scopes on a worker.
+
+  Options: `:limit` (1–100, default 20) and `:cursor` from the previous report.
+  The host must authorize this operator API. It exposes no command contents and
+  performs no worker mutation. An empty report requires operator quiescence and
+  worker verification, never automatic shutdown. Reads run outside the coordinator.
+  """
+  @spec worker_maintenance(runtime(), String.t(), keyword()) ::
+          {:ok, SmolBox.WorkerMaintenance.t()} | {:error, Error.t()}
+  def worker_maintenance(runtime, worker_id, options \\ []) do
+    with {:ok, config} <- config(runtime),
+         do: WorkerControls.maintenance(config, worker_id, options)
+  end
+
+  @doc """
+  Read configured workers, cached health and current store admission modes.
 
   Results include configured capacity, allocation floor, platform, architecture,
   version, qualification and status. Capacity is declared admission capacity,
   not a live host free-memory/disk measurement. Use `worker_report/2` for live
   utilization and store accounting, or `admission_report/2` to explain a request.
+  Store control failures make admission unavailable. Reads run outside the coordinator;
+  adapters without worker control retain health/configuration reporting only.
   See [Telemetry](telemetry.html).
   """
   @spec workers(runtime()) :: {:ok, [map()]} | {:error, Error.t()}
-  def workers(runtime), do: call(runtime, :workers)
+  def workers(runtime) do
+    with {:ok, config} <- config(runtime),
+         {:ok, snapshots} <- call(runtime, :workers),
+         do: {:ok, WorkerControls.reports(config, snapshots)}
+  end
 
   @doc """
   Observe one worker's configured capacity, reservations and live utilization.

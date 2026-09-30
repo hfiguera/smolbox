@@ -3,7 +3,7 @@ defmodule SmolBox.WorkerReport do
   On-demand worker diagnostics, with independent accounting and measurement results.
 
   `worker` is the existing `SmolBox.workers/1` health/configuration report; its
-  status concerns new admission-task launches, not ongoing commands or cleanup.
+  status concerns new reservations, not ongoing commands or cleanup.
   `reserved` comes from the store's combined resource projection, including retained
   disks and helper resources. `remaining` is configured capacity minus reservations,
   clamped at zero, not free host resources. A store failure leaves both `nil`.

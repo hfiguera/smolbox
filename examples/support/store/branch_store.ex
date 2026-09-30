@@ -1,7 +1,7 @@
 defmodule SmolBox.DurableHost.BranchStore do
   @moduledoc false
   if Code.ensure_loaded?(SmolBox.Store.BranchOps) do
-    alias SmolBox.DurableHost.Database
+    alias SmolBox.DurableHost.{Database, WorkerStore}
     alias SmolBox.Store.BranchOps
     def capabilities, do: %{managed_branches: 1}
 
@@ -12,6 +12,7 @@ defmodule SmolBox.DurableHost.BranchStore do
 
         {:error, %{category: :not_found}} ->
           with {:ok, p} <- Database.read(context, key, :machine),
+               :ok <- WorkerStore.admit(context, p.worker_id),
                {:ok, usage} <- Database.usage(context, p.worker_id),
                do: BranchOps.accept(p, spec, fingerprint, name, capacity, usage, now)
 
