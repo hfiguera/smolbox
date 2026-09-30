@@ -24,7 +24,13 @@ defmodule SmolBox.Runtime.Config do
   @enforce_keys Keyword.keys(@schema) ++ [:owner]
   @derive {Inspect, only: [:name, :namespace, :mode, :max_pending, :max_active]}
   defstruct Keyword.keys(@schema) ++
-              [:owner, :telemetry_table, :terminal_table, managed_machines: false]
+              [
+                :owner,
+                :telemetry_table,
+                :terminal_table,
+                managed_machines: false,
+                worker_control: false
+              ]
 
   @type t :: %__MODULE__{
           name: atom(),
@@ -45,6 +51,7 @@ defmodule SmolBox.Runtime.Config do
           terminal_table: :ets.tid() | nil,
           clock: module(),
           managed_machines: boolean(),
+          worker_control: boolean(),
           owner: String.t()
         }
 
@@ -55,8 +62,14 @@ defmodule SmolBox.Runtime.Config do
          {:ok, owner} <- Identity.machine_name("owner"),
          config = struct!(__MODULE__, [{:owner, owner} | values]),
          true <- valid?(config),
-         :ok <- persistence(config) do
-      {:ok, %{config | managed_machines: machine_support?(config)}}
+         :ok <- persistence(config),
+         {:ok, worker_control} <- worker_control_support(config) do
+      {:ok,
+       %{
+         config
+         | managed_machines: machine_support?(config),
+           worker_control: worker_control
+       }}
     else
       {:error, %Error{} = error} -> {:error, error}
       _invalid -> error(:validation)
@@ -81,6 +94,29 @@ defmodule SmolBox.Runtime.Config do
   defp machine_support?(%{store: {adapter, context}}) do
     function_exported?(adapter, :machine, 3) and
       match?({:ok, %{managed_machines: 1}}, adapter.capabilities(context))
+  end
+
+  defp worker_control_support(%{store: {adapter, context}}) do
+    case adapter.capabilities(context) do
+      {:ok, %{worker_control: 1}} ->
+        callbacks = [worker_control: 2, set_worker_mode: 5, worker_maintenance: 5]
+
+        if adapter?({adapter, nil}, callbacks),
+          do: {:ok, true},
+          else: error(:unsupported_capability)
+
+      {:ok, capabilities} when is_map(capabilities) ->
+        if Map.has_key?(capabilities, :worker_control),
+          do: error(:unsupported_capability),
+          else: {:ok, false}
+
+      _ ->
+        error(:store)
+    end
+  rescue
+    _ -> error(:store)
+  catch
+    :exit, _ -> error(:store)
   end
 
   defp valid?(config) do

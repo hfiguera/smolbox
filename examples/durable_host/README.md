@@ -801,3 +801,16 @@ release version to check deduplication, reads disk/RAM state, and deletes the ch
 Run the same `retire` and `release-storage` phases with that identity afterward,
 only after the same quiescence and host cleanup checks. Do not replay whole phases
 after interruption; inspect durable records and follow [branch recovery](../../docs/managed-branches.md).
+
+## Durable worker admission controls
+
+Apply `20260929000000_worker_admission_controls` with every writer stopped, then
+upgrade all controllers before relying on durable draining. The adapter now
+advertises `worker_control: 1` and checks admission in the same partition transaction
+as drain/resume changes. Missing schema fails startup capability checks.
+
+Control rows are separate from worker leases and encrypted machine/execution
+payloads; there is no codec revision. The down migration refuses to discard control
+history. Old writers can bypass these gates, so mixed versions and rollback during
+maintenance are unsupported. See [worker draining](../../docs/worker-draining.md)
+for the API, bounded maintenance pages, validation and safe rollout boundaries.

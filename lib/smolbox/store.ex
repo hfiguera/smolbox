@@ -491,6 +491,54 @@ defmodule SmolBox.Store do
             ]) :: machine_result()
   @optional_callbacks machine: 3
 
+  @doc """
+  Optional durable worker admission state (`worker_control: 1`). Return the
+  implicit active version-zero record only for a confirmed absent control row.
+  Unavailable/corrupt storage must return an error. Never expire or delete modes.
+  """
+  @callback worker_control(context(), String.t()) ::
+              {:ok, SmolBox.WorkerControl.t()} | {:error, Error.t()}
+
+  @doc """
+  Atomically change worker admission mode. Serialize this transaction with every
+  disposable/managed reservation, branch creation and new capture/export admission.
+  `:any` is permitted only for draining. Resume requires the observed version;
+  retries of the last identical versioned request return the stored result.
+  Duplicate existing admissions still deduplicate while draining. Existing
+  assignments, commands, lifecycle operations and cleanup may continue.
+
+  All controllers and adapters sharing the worker must enforce this contract.
+  Mixed old writers bypass the gate and are unsupported. No worker request is
+  fenced by this transaction. Run WorkerControlContract for each adapter.
+  """
+  @callback set_worker_mode(
+              context(),
+              String.t(),
+              SmolBox.WorkerControl.mode(),
+              non_neg_integer() | :any,
+              non_neg_integer()
+            ) ::
+              {:ok, SmolBox.WorkerControl.t()} | {:error, Error.t()}
+
+  @doc """
+  Store-consistent bounded maintenance page across scopes. In the same snapshot,
+  read control, total resource accounting and remaining assignments ordered by
+  `{kind, scope, id}` (execution=0, machine=1). Include assigned records for which
+  `WorkerMaintenance.relevant?/1` is true, including tombstones retaining resources.
+  Return redacted entries; never command data or credentials. The supplied `now`
+  stamps the report, not the freshness of worker observations. Errors are not empty
+  inventories. Each page is separate; no result establishes worker quiescence.
+  """
+  @callback worker_maintenance(
+              context(),
+              String.t(),
+              SmolBox.WorkerMaintenance.cursor(),
+              pos_integer(),
+              non_neg_integer()
+            ) ::
+              {:ok, SmolBox.WorkerMaintenance.t()} | {:error, Error.t()}
+  @optional_callbacks worker_control: 2, set_worker_mode: 5, worker_maintenance: 5
+
   @callback capabilities(context()) ::
               {:ok, %{schema: 1, durable: boolean(), atomic: true}} | {:error, Error.t()}
   @callback accept(context(), Execution.t(), pos_integer()) ::

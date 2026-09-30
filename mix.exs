@@ -58,6 +58,7 @@ defmodule SmolBox.MixProject do
           "docs/upgrading-to-0.3.0.md",
           "docs/upgrading-to-0.3.1.md",
           "docs/worker-measurements.md",
+          "docs/worker-draining.md",
           "docs/telemetry.md",
           "docs/security.md",
           "docs/resource-qualification.md",
@@ -100,6 +101,7 @@ defmodule SmolBox.MixProject do
             "docs/host-integration.md",
             "docs/troubleshooting.md",
             "docs/worker-measurements.md",
+            "docs/worker-draining.md",
             "docs/telemetry.md"
           ],
           "Operations and compatibility": [
@@ -162,6 +164,8 @@ defmodule SmolBox.MixProject do
             SmolBox.MachineMeasurements,
             SmolBox.WorkerCapacity,
             SmolBox.WorkerReport,
+            SmolBox.WorkerControl,
+            SmolBox.WorkerMaintenance,
             SmolBox.AdmissionReport,
             SmolBox.Health,
             SmolBox.Result,
@@ -229,6 +233,7 @@ defmodule SmolBox.MixProject do
           "docs/upgrading-to-0.3.0.md",
           "docs/upgrading-to-0.3.1.md",
           "docs/worker-measurements.md",
+          "docs/worker-draining.md",
           "docs/telemetry.md",
           "docs/security.md",
           "docs/resource-qualification.md",
@@ -267,6 +272,7 @@ defmodule SmolBox.MixProject do
           SmolBox.LabCandidate,
           SmolBox.RuntimeProxy,
           SmolBox.TestTLS,
+          SmolBox.Store.WorkerControlContract,
           SmolBox.Store.Contract,
           SmolBox.Store.MachineContract,
           SmolBox.Store.PortContract

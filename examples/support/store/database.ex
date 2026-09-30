@@ -232,6 +232,38 @@ defmodule SmolBox.DurableHost.Database do
     end
   end
 
+  # Called inside the partition transaction. Select at most limit+1 candidates
+  # from each kind, then authenticate every payload and its projections.
+  def worker_records(context, worker, cursor, limit) do
+    with {:ok, executions} <- worker_kind(context, worker, cursor, limit, :execution, 0),
+         {:ok, machines} <- worker_kind(context, worker, cursor, limit, :machine, 1),
+         do: {:ok, executions ++ machines}
+  end
+
+  defp worker_kind(_context, _worker, {kind, _, _}, _limit, _record_kind, rank) when kind > rank,
+    do: {:ok, []}
+
+  defp worker_kind(context, worker, cursor, limit, kind, rank) do
+    {scope, id} =
+      case cursor do
+        {^rank, scope, id} -> {scope, id}
+        _ -> {nil, nil}
+      end
+
+    remaining = if kind == :machine, do: "state <> 'deleted'", else: "needs_work"
+
+    rows =
+      query(
+        context,
+        "SELECT scope,execution_id,#{columns(kind)} FROM #{table(kind)} WHERE partition=$1 AND worker_id=$2 " <>
+          "AND (#{remaining} OR slots>0 OR cpus>0 OR memory_mb>0 OR disk_gb>0) " <>
+          "AND ($3::varchar IS NULL OR (scope,execution_id)>($3,$4)) ORDER BY scope,execution_id LIMIT $5",
+        [context.partition, worker, scope, id, limit + 1]
+      ).rows
+
+    decode_rows(context, rows, kind)
+  end
+
   defp columns(:machine), do: @columns <> ",machine_name"
   defp columns(:execution), do: @columns
   defp read_projection(record, :machine), do: projection(record) ++ [record.machine_name]

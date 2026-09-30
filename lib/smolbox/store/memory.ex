@@ -12,6 +12,8 @@ defmodule SmolBox.Store.Memory do
   @behaviour SmolBox.Store
 
   alias SmolBox.{Error, Execution, MachineSpec, ManagedMachine, Store, Validation}
+  alias SmolBox.{WorkerControl, WorkerMaintenance}
+
   alias SmolBox.Store.BranchOps
   alias SmolBox.Store.CaptureOps
   alias SmolBox.Store.{Codec, ExportOps, MachineOps, PortOwnership, RecordOps, SourceOwnership}
@@ -56,9 +58,20 @@ defmodule SmolBox.Store.Memory do
          sizes: %{},
          bytes: 0,
          leases: %{},
+         worker_controls: %{},
          max_records: config[:max_records],
          max_bytes: config[:max_bytes]
        }}
+
+  @impl Store
+  def worker_control(store, worker), do: call(store, {:worker_control, worker})
+  @impl Store
+  def set_worker_mode(store, worker, mode, expected, now),
+    do: call(store, {:set_worker_mode, worker, mode, expected, now})
+
+  @impl Store
+  def worker_maintenance(store, worker, cursor, limit, now),
+    do: call(store, {:worker_maintenance, worker, cursor, limit, now})
 
   @impl Store
   def machine(store, operation, arguments), do: call(store, {:machine, operation, arguments})
@@ -106,6 +119,7 @@ defmodule SmolBox.Store.Memory do
     do:
       {{:ok,
         %{
+          worker_control: 1,
           schema: 1,
           durable: false,
           atomic: true,
@@ -121,6 +135,50 @@ defmodule SmolBox.Store.Memory do
           interactive_terminal: 1,
           extended_execution: 1
         }}, state}
+
+  defp execute({:worker_control, worker}, state) do
+    reply =
+      if Validation.identifier?(worker),
+        do: {:ok, control(state, worker)},
+        else: error(:validation)
+
+    {reply, state}
+  end
+
+  defp execute({:set_worker_mode, worker, mode, expected, now}, state) do
+    with true <-
+           Map.has_key?(state.worker_controls, worker) or map_size(state.worker_controls) < 64,
+         {:ok, next} <- WorkerControl.change(control(state, worker), mode, expected, now) do
+      {{:ok, next}, put_in(state.worker_controls[worker], next)}
+    else
+      false -> {error(:admission_exhausted), state}
+      error -> {error, state}
+    end
+  end
+
+  defp execute({:worker_maintenance, worker, cursor, limit, now}, state) do
+    if WorkerMaintenance.valid_page?(worker, cursor, limit) and Validation.timestamp?(now) do
+      records =
+        Enum.filter(
+          Map.values(state.records) ++ Map.values(state.machines),
+          &(&1.worker_id == worker)
+        )
+
+      report =
+        WorkerMaintenance.page(
+          control(state, worker),
+          used(state, worker),
+          records,
+          cursor,
+          limit,
+          now
+        )
+
+      {{:ok, report}, state}
+    else
+      {error(:validation), state}
+    end
+  end
 
   defp execute({:machine, operation, arguments}, state) do
     case machine_operation(state, operation, arguments) do
@@ -242,7 +300,8 @@ defmodule SmolBox.Store.Memory do
   end
 
   defp mutate(record, {:reserve, guard, {worker, machine, capacity}, now}, state) do
-    with :ok <- RecordOps.guard(record, guard, state.leases[record.worker_id], now) do
+    with :ok <- RecordOps.guard(record, guard, state.leases[record.worker_id], now),
+         :ok <- WorkerControl.admit(control(state, worker)) do
       RecordOps.reservation(
         record,
         worker,
@@ -388,6 +447,7 @@ defmodule SmolBox.Store.Memory do
 
   defp machine_operation(state, :reserve, [key, guard, {worker, name, capacity}, now]) do
     with {:ok, record} <- machine_guard(state, key, guard, now),
+         :ok <- WorkerControl.admit(control(state, worker)),
          :ok <-
            SourceOwnership.available(record, worker, Map.values(state.machines)),
          {:ok, next} <-
@@ -448,6 +508,7 @@ defmodule SmolBox.Store.Memory do
              Map.values(state.machines),
              now
            ),
+         :ok <- WorkerControl.admit_change(control(state, record.worker_id), record, next),
          do: machine_save(state, next)
   end
 
@@ -480,6 +541,7 @@ defmodule SmolBox.Store.Memory do
              used(state, record.worker_id),
              now
            ),
+         :ok <- WorkerControl.admit_change(control(state, record.worker_id), record, next),
          do: machine_save(state, next)
   end
 
@@ -515,6 +577,7 @@ defmodule SmolBox.Store.Memory do
       nil ->
         with :ok <- branch_room(state),
              {:ok, parent} <- machine_lookup(state, key),
+             :ok <- WorkerControl.admit(control(state, parent.worker_id)),
              {:ok, parent, child} <-
                BranchOps.accept(
                  parent,
@@ -607,6 +670,9 @@ defmodule SmolBox.Store.Memory do
   defp active_record(state, machine), do: lookup(state, machine.active_execution)
   defp put_optional_record(state, nil), do: {:ok, state}
   defp put_optional_record(state, record), do: put_record(state, record)
+
+  defp control(state, worker),
+    do: Map.get(state.worker_controls, worker, WorkerControl.initial(worker))
 
   defp branch_room(state) do
     if map_size(state.records) + map_size(state.machines) < state.max_records,

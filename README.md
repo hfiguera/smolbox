@@ -38,6 +38,8 @@ Shared host caches remain an operator responsibility.
 [Machine measurements and worker reports](docs/worker-measurements.md) expose CPU,
 memory, disk and outbound network observations alongside durable reservations.
 Admission explanations identify shortages without changing capacity or retention.
+[Durable worker draining](docs/worker-draining.md) pauses new resource admissions
+across controllers sharing a store and exposes remaining maintenance blockers.
 
 Try the [community workspace app](https://github.com/hfiguera/smolbox/tree/main/examples/community_workspace) for a
 browser walkthrough of SmolBox 0.3.0: persistent machines, commands, a real

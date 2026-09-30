@@ -177,6 +177,12 @@ defmodule SmolBox.Store.CaptureContract do
     assert {:ok, %{slots: 0, disk_gb: 1}} = adapter.usage(store, "worker")
     assert m.captures["one"].result == r
 
+    if function_exported?(adapter, :worker_maintenance, 5) do
+      assert {:ok, report} = adapter.worker_maintenance(store, "worker", nil, 20, 1300)
+      assert [%{state: :deleted, reserved: %{disk_gb: 1}}] = report.records
+      assert report.assessment == :blocked
+    end
+
     assert {:ok, _} =
              adapter.machine(store, :capture_release, [
                ManagedMachine.key(m),

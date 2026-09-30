@@ -1,6 +1,6 @@
 defmodule SmolBox.DurableHost.MachineStore do
   @moduledoc false
-  alias SmolBox.DurableHost.{Database, MachineIndex, PortIndex, SourceStore}
+  alias SmolBox.DurableHost.{Database, MachineIndex, PortIndex, SourceStore, WorkerStore}
   alias SmolBox.{Error, Execution, ManagedMachine, Validation}
   alias SmolBox.Store.{MachineOps, RecordOps}
 
@@ -71,6 +71,7 @@ defmodule SmolBox.DurableHost.MachineStore do
 
   def run(context, :reserve, [key, guard, {worker, name, capacity}, now]) do
     with {:ok, record} <- Database.guarded_machine(context, key, guard, now),
+         :ok <- WorkerStore.admit(context, worker),
          :ok <- SourceStore.available(context, record, worker),
          {:ok, used} <- Database.usage(context, worker),
          {:ok, next} <-
@@ -139,6 +140,7 @@ defmodule SmolBox.DurableHost.MachineStore do
     def run(context, operation, arguments)
         when operation in [:export_accept, :export_advance, :export_cancel, :export_resolve] do
       with {:ok, next} <- ExportStore.run(context, operation, arguments),
+           :ok <- admission_change(context, operation, arguments, next),
            do: persist(context, next)
     end
   end
@@ -155,6 +157,7 @@ defmodule SmolBox.DurableHost.MachineStore do
                :capture_release
              ] do
       with {:ok, next} <- CaptureStore.run(context, operation, arguments),
+           :ok <- admission_change(context, operation, arguments, next),
            do: persist(context, next)
     end
   end
@@ -202,6 +205,14 @@ defmodule SmolBox.DurableHost.MachineStore do
       do: {:ok, existing},
       else: error(:identity_conflict)
   end
+
+  defp admission_change(context, operation, [key | _], next)
+       when operation in [:capture_accept, :export_accept] do
+    with {:ok, previous} <- Database.read(context, key, :machine),
+         do: WorkerStore.admit_change(context, previous, next)
+  end
+
+  defp admission_change(_context, _operation, _arguments, _next), do: :ok
 
   defp insert_machine(context, record, max_pending) do
     if Database.pending_count(context, :machine) < max_pending,

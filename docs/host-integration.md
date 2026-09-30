@@ -295,11 +295,11 @@ operator quiescence. Follow the
 before permitting reuse. Execution history and deleted machine identities remain
 in the store for deduplication.
 
-`drain_worker` excludes a worker from subsequent admission-task launches in this
-runtime while preserving observation and cleanup. An admission task already in
-flight may finish assigning work; draining is not an atomic worker-side fence or
-cancellation request. Persist intended drain configuration in the host and use
-`draining: true` when restarting; the convenience call itself is runtime-local.
+[Durable worker draining](worker-draining.md) persists admission intent in a
+capable store. Every new machine or helper admission checks that intent in its
+reservation transaction. Work already assigned and requests already sent may
+continue; this is not a worker-side fence or cancellation. Maintenance reports
+expose remaining records and resources without certifying shutdown safety.
 
 Worker reports include the host-approved version/qualification, the latest typed
 health observation and its wall-clock timestamp. Health age uses monotonic time.
@@ -314,7 +314,7 @@ can therefore be withheld conservatively. Long probes never run in the coordinat
 | `degraded` | The server responded, but inventory or blocking-pool readiness was unavailable |
 | `incompatible` | The server reported a different runtime version |
 | `unavailable` | No current valid probe or worker ownership claim is available |
-| `draining` | Host configuration or this runtime's drain flag excludes new task launches |
+| `draining` | Host configuration or durable store admission mode excludes new reservations |
 
 Admission tries matching workers in configured order, with fresh health/readiness
 checks before reservation. It rechecks cancellation and the original queue deadline
@@ -383,9 +383,9 @@ version. Configure the same expected version on every controller owning the work
 
 For an existing worker:
 
-1. Pause submissions at the application boundary and persist its drain setting.
-   Drain all controllers sharing the authoritative configuration. The convenience
-   drain call cannot retract an admission or request already in flight.
+1. Pause submissions at the application boundary and establish a durable drain
+   revision across the shared store. Coordinate all mutating clients. Draining
+   cannot retract an assignment or request already in flight.
 2. Keep the original endpoint and store available until owned executions have
    finished observation, collection and verified cleanup. Resolve unknown work
    using its original identity; do not resubmit commands or discard reservations.

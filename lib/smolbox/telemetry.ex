@@ -128,6 +128,9 @@ defmodule SmolBox.Telemetry do
          :cancel,
          :due,
          :usage,
+         :worker_control,
+         :set_worker_mode,
+         :worker_maintenance,
          :capabilities
        ] do
       offer(
