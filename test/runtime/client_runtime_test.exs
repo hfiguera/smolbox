@@ -167,14 +167,23 @@ defmodule SmolBox.ClientRuntimeTest do
     assert {:ok, measured} = Client.machine_measurements(context.client, name)
     assert Machine.same_incarnation?(before_measurements.machine, measured.machine)
     assert measured.cpu_millis >= before_measurements.cpu_millis
-    assert is_integer(measured.disk_used_mb)
+    assert_disk_usage(measured.disk_used_mb)
     # This fixture is offline: absent network telemetry must not become zero traffic.
     assert measured.egress_bytes == nil
     assert {:ok, _} = Client.stop(context.client, name)
     assert {:ok, stopped} = Client.machine_measurements(context.client, name)
     assert stopped.machine.state == :stopped
     assert stopped.cpu_millis == nil and stopped.rss_mb == nil
-    assert is_integer(stopped.disk_used_mb)
+    assert_disk_usage(stopped.disk_used_mb)
+  end
+
+  defp assert_disk_usage(value) do
+    # smolvm 1.20.2 measures allocated disk blocks only on Linux. Preserve the
+    # unavailable macOS observation instead of interpreting it as zero usage.
+    case :os.type() do
+      {:unix, :linux} -> assert is_integer(value) and value >= 0
+      {:unix, :darwin} -> assert is_nil(value)
+    end
   end
 
   test "JavaScript, streamed events, timeout and guest network denial", context do
