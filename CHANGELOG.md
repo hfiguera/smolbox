@@ -2,9 +2,24 @@
 
 ## Unreleased
 
+## 0.4.0
+
+SmolBox now reports worker usage, coordinates maintenance admission, grows retained
+machine disks and keeps local volume data across machine replacement. The default
+worker remains **smolvm 1.20.2**; qualification remains `:development`.
+
+**Coordinated store upgrade required:** the PostgreSQL example adds worker-control
+and volume migrations. Upgrade all controllers, readers and resource projection
+writers together. Disk expansion and volumes selectively use codec v14 and v15;
+retained history constrains rollback even after deletion. Adapters without durable
+worker control now return `:unsupported_capability` for drain operations instead
+of silently changing only one controller. See
+[Upgrading to 0.4.0](docs/upgrading-to-0.4.0.md).
+
 - Add managed local volumes and controlled mounts on Linux smolvm 1.20.2.
-  Volume identities, disk reservations and exclusive attachments survive machine
-  deletion and controller restart. Add explicit deletion and fenced resolution
+  Volume identities and disk reservations survive machine deletion. Exclusive
+  attachments survive controller restart until verified machine deletion.
+  Add explicit deletion and fenced resolution
   of uncertain outcomes, atomic attachment/drain admission and maintenance blockers.
   Requires `local_volumes: 1`, codec v15 readers and the PostgreSQL example's
   local-volumes migration. Size reservations are advisory, not filesystem quotas.

@@ -1,15 +1,30 @@
 # Compatibility evidence
 
-Version: `0.3.1`. The library's supported qualification is
+Version: `0.4.0`. The library's supported qualification is
 `:development`; requested hard-control options remain unsupported. The original
 release evidence below records the client/controller contract on Linux and macOS.
 
-## Unreleased measurements
+## Worker operations and storage in 0.4.0
 
-[Machine measurements and worker reports](worker-measurements.md#validation) have
-physical Linux x86_64 evidence on smolvm 1.20.2. Optional counters can be unavailable;
-macOS has not been rerun for these APIs. These read-only additions do not change
-admission, release reservations or add a store migration.
+The default remains smolvm **1.20.2**. Each feature has separate evidence and limits:
+
+| Feature | Evidence and boundaries |
+| --- | --- |
+| [Measurements and worker reports](worker-measurements.md#validation) | Physical Linux x86_64 on 1.20.2. Optional counters can be unavailable; observations do not increase admission capacity or release reservations. |
+| [Durable draining](worker-draining.md#validation) | Linux/PostgreSQL recovery across separate controllers, with simulated concurrent admission and rollback coverage. Draining does not stop machines or fence requests already sent. |
+| [Disk expansion](disk-expansion.md#runnable-linux-walkthrough) | Physical Linux/PostgreSQL stop, grow, controller restart, file preservation and guest filesystem growth on 1.20.2. No macOS growth campaign or checkpoint/branch expansion is claimed. |
+| [Local volumes](local-volumes.md#runnable-example-and-validation) | Linux 1.20.2 only. PostgreSQL recovery, replacement writes and read-only attachment with an unprivileged worker; no host quota or root-worker UID isolation qualification. |
+
+The new APIs have not been qualified live on macOS. Earlier Linux and macOS
+campaigns remain evidence for their original feature scope, not these additions.
+The feature campaigns are separate runs, not a single combined maintenance test
+or validation of the final 0.4.0 release artifact.
+
+The PostgreSQL example requires two new migrations. Disk expansion and volumes
+selectively use codec v14/v15; durable draining adds an optional store contract
+without changing the machine codec. Follow
+[Upgrading to 0.4.0](upgrading-to-0.4.0.md) before deploying shared writers or
+enabling these features. Qualification remains `:development`.
 
 ## Reusable machine state in 0.3.0
 
@@ -39,7 +54,7 @@ live platform results, failed attempts and upgrade limits. Changes after the
 1.20.2 tag are excluded. Intermediate 1.19.x and 1.20.x releases are not admitted.
 Existing supported versions remain available through explicit configuration.
 
-No SQL migration or codec revision is added. Older controllers can still reject
+The 0.3.1 runtime qualification added no SQL migration or codec revision. Older controllers can still reject
 records carrying the new runtime version, so coordinate all readers before using
 1.20.2 and preserve capture-version pins. Qualification remains `:development`.
 
@@ -237,7 +252,7 @@ explicit bounded settings. No validation limits or public defaults were relaxed.
 
 ## Runtime selection
 
-SmolBox 0.3.1 defaults to 1.20.2; published 0.3.0 and 0.2.1 default to 1.19.0.
+SmolBox 0.4.0 and 0.3.1 default to 1.20.2; published 0.3.0 and 0.2.1 default to 1.19.0.
 Both are supported on Linux x86_64 and macOS Apple Silicon.
 
 SmolBox 0.1.3 defaults to `runtime_version: "1.16.0"` for Linux x86_64 and
