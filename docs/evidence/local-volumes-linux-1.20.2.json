@@ -1,0 +1,27 @@
+{
+  "campaign": "managed-local-volumes",
+  "runtime_version": "1.20.2",
+  "platform": "linux",
+  "architecture": "x86_64",
+  "virtualization": "none",
+  "worker_user": "unprivileged uid 1000",
+  "date": "2026-09-30T18:08:52.214097+00:00",
+  "storage": "PostgreSQL, two separate BEAM processes with the same partition and keys",
+  "checks": {
+    "original_machine_deleted": true,
+    "disk_gb_after_original_delete": 2,
+    "files_modified": true,
+    "files_preserved": true,
+    "readonly_enforced": true,
+    "reserved_disk_gb": 0,
+    "restarted_controller": true,
+    "final_machine_inventory_empty": true,
+    "volume_path_absent": true
+  },
+  "limitations": [
+    "No filesystem quota enforcement",
+    "Root-run workers with per-machine UID isolation were not qualified",
+    "macOS local volumes were not qualified",
+    "No hot attach, shared attachments, migration or remote volumes"
+  ]
+}

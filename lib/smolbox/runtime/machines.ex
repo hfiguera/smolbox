@@ -5,7 +5,7 @@ defmodule SmolBox.Runtime.Machines do
   alias SmolBox.Runtime.Checkpoints
   alias SmolBox.Runtime.DiskExpansions
   alias SmolBox.Runtime.{ExecutionSupport, Exports}
-  alias SmolBox.Runtime.{Session, WorkerConfig, WorkerHealth}
+  alias SmolBox.Runtime.{Session, VolumeAccess, WorkerConfig, WorkerHealth}
 
   defdelegate store(config, operation, arguments), to: SmolBox.Runtime.MachineSession
 
@@ -69,7 +69,9 @@ defmodule SmolBox.Runtime.Machines do
     workers =
       Enum.filter(
         config.workers,
-        &(&1.client.worker.id in eligible and WorkerConfig.supports?(&1, record.spec))
+        &(&1.client.worker.id in eligible and
+            record.volume_worker_id in [nil, &1.client.worker.id] and
+            WorkerConfig.supports?(&1, record.spec))
       )
 
     result =
@@ -126,6 +128,7 @@ defmodule SmolBox.Runtime.Machines do
     with {:ok, worker} <- worker(config, record),
          true <-
            record.operation in [:stop, :delete] or WorkerConfig.supports?(worker, record.spec),
+         :ok <- volume_policy(config, record),
          %{status: :ready} <- WorkerHealth.observe(worker, config.clock),
          :ok <- verify_before(config, record, worker),
          {:ok, current} <- claim(config, ManagedMachine.key(record)),
@@ -151,9 +154,13 @@ defmodule SmolBox.Runtime.Machines do
     end
   end
 
+  defp volume_policy(_, %{operation: op}) when op in [:stop, :delete], do: :ok
+  defp volume_policy(config, record), do: VolumeAccess.approved(config, record.spec)
+
   defp prepare(config, record) do
     with {:ok, worker} <- worker(config, record),
          true <- WorkerConfig.supports?(worker, record.spec),
+         :ok <- volume_policy(config, record),
          %{status: :ready} <- WorkerHealth.observe(worker, config.clock),
          {:ok, current} <- claim(config, ManagedMachine.key(record)),
          true <- current.phase == :pending and current.operation == :create,
@@ -226,7 +233,7 @@ defmodule SmolBox.Runtime.Machines do
 
   defp mutate(worker, %{operation: :create} = record) do
     with {:ok, spec} <- WorkerConfig.machine_spec(worker, record.spec, record.machine_name),
-         do: create(worker, spec, record.preparation)
+         do: create(worker, %{spec | mounts: record.mounts}, record.preparation)
   end
 
   defp mutate(worker, %{operation: :start, spec: %{checkpointable: true}} = record),

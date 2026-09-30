@@ -8,7 +8,8 @@ defmodule SmolBox.AdmissionReport do
   means only that these checks found no blocker at observation time.
 
   This neither accepts nor reserves work. Queue limits, deduplication, port claims,
-  artifact preparation and concurrent changes can still prevent admission. Existing
+  volume readiness/attachment claims, artifact preparation and concurrent changes
+  can still prevent admission. Existing
   managed commands, branches, captures and exports have different accounting and
   are not assessed here. Measured CPU/memory utilization is never substituted for
   durable reservations. Poll explicitly to refresh; snapshots have no validity lease.

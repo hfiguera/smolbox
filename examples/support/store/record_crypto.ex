@@ -3,7 +3,13 @@ defmodule SmolBox.DurableHost.RecordCrypto do
   alias SmolBox.{Error, Execution}
   alias SmolBox.Store.Codec
 
-  @spec encrypt(Execution.t() | SmolBox.ManagedMachine.t(), binary(), String.t()) ::
+  if Code.ensure_loaded?(SmolBox.Volume) do
+    @type stored_record :: Execution.t() | SmolBox.ManagedMachine.t() | SmolBox.Volume.t()
+  else
+    @type stored_record :: Execution.t() | SmolBox.ManagedMachine.t()
+  end
+
+  @spec encrypt(stored_record(), binary(), String.t()) ::
           {:ok, binary()} | {:error, Error.t()}
   def encrypt(record, key, partition) when byte_size(key) == 32 do
     with {:ok, bytes} <- Codec.encode(record) do
@@ -25,7 +31,9 @@ defmodule SmolBox.DurableHost.RecordCrypto do
   end
 
   @spec decrypt(binary(), binary(), String.t(), Execution.key()) ::
-          {:ok, Execution.t() | SmolBox.ManagedMachine.t()} | {:error, Error.t()}
+          {:ok, stored_record()} | {:error, Error.t()}
+  @spec decrypt(binary(), binary(), String.t(), Execution.key(), :execution | :machine | :volume) ::
+          {:ok, stored_record()} | {:error, Error.t()}
   def decrypt(bytes, key, partition, identity, kind \\ :execution)
 
   def decrypt(
@@ -60,8 +68,15 @@ defmodule SmolBox.DurableHost.RecordCrypto do
 
   def decrypt(_bytes, _key, _partition, _identity, _kind), do: invalid()
 
+  if Code.ensure_loaded?(SmolBox.Volume) do
+    defp kind(%{__struct__: SmolBox.Volume}), do: :volume
+  end
+
   defp kind(%SmolBox.ManagedMachine{}), do: :machine
   defp kind(%Execution{}), do: :execution
+
+  defp aad(partition, {scope, id}, :volume),
+    do: :erlang.term_to_binary({"smolbox-host-volume-v1", partition, scope, id})
 
   defp aad(partition, {scope, id}, :machine),
     do: :erlang.term_to_binary({"smolbox-host-machine-v1", partition, scope, id})

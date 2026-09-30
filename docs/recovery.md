@@ -401,3 +401,14 @@ capacity remains until source deletion, verified absence and host-confirmed file
 cleanup through `Branches.release_storage/3`. Store fencing does not fence worker
 requests already sent. Follow the guide's recovery procedure before asserting
 quiescence or cleanup.
+
+## Uncertain local volumes
+
+Keep volume records and reservations when provisioning or deletion is uncertain.
+Upstream has no volume observation/ownership-token API. SmolBox never adopts a
+directory from its path, replays provisioning or silently creates empty data.
+After fencing pending requests and releasing any machine attachment through the
+normal verified deletion path, use `Volumes.resolve_delete/4` with the inspected
+version and `quiesced: true`. This explicitly deletes storage; preserve needed data
+first. A stopped observation or expired controller lease is not worker fencing.
+See [local volume recovery](local-volumes.md#uncertain-outcomes-and-recovery).

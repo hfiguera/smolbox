@@ -46,7 +46,7 @@ defmodule SmolBox.DurableHost.Database do
   end
 
   def write(context, record) do
-    kind = if is_struct(record, SmolBox.ManagedMachine), do: :machine, else: :execution
+    kind = record_kind(record)
 
     with {:ok, bytes} <- RecordCrypto.encrypt(record, context.key, context.partition) do
       query(
@@ -108,6 +108,18 @@ defmodule SmolBox.DurableHost.Database do
     {:ok, lease}
   end
 
+  if Code.ensure_loaded?(SmolBox.Volume) do
+    defp volume_usage_sql,
+      do:
+        "UNION ALL SELECT slots,cpus,memory_mb,disk_gb FROM smolbox_volumes WHERE partition=$1 AND worker_id=$2"
+
+    defp volume_records(context, worker, cursor, limit),
+      do: worker_kind(context, worker, cursor, limit, :volume, 2)
+  else
+    defp volume_usage_sql, do: ""
+    defp volume_records(_, _, _, _), do: {:ok, []}
+  end
+
   def usage(context, worker) do
     %{rows: [[slots, cpus, memory, disk]]} =
       query(
@@ -118,6 +130,7 @@ defmodule SmolBox.DurableHost.Database do
           SELECT slots,cpus,memory_mb,disk_gb FROM smolbox_executions WHERE partition=$1 AND worker_id=$2
           UNION ALL
           SELECT slots,cpus,memory_mb,disk_gb FROM smolbox_managed_machines WHERE partition=$1 AND worker_id=$2
+          #{volume_usage_sql()}
         ) reservations
         """,
         [context.partition, worker]
@@ -197,7 +210,7 @@ defmodule SmolBox.DurableHost.Database do
       record.fingerprint,
       Atom.to_string(record.state),
       record.version,
-      record.next_due_at_ms,
+      Map.get(record, :next_due_at_ms, record.updated_at_ms),
       needs_work?(record),
       record.worker_id,
       resources.slots,
@@ -217,15 +230,15 @@ defmodule SmolBox.DurableHost.Database do
     defp resources(record), do: record.reservation || RecordOps.empty_usage()
   end
 
-  def machine_page(context, scope, cursor, limit) do
+  def machine_page(context, scope, cursor, limit, kind \\ :machine) do
     rows =
       query(
         context,
-        "SELECT scope,execution_id,#{columns(:machine)} FROM smolbox_managed_machines WHERE partition=$1 AND scope=$2 AND ($3::varchar IS NULL OR execution_id>$3) ORDER BY execution_id LIMIT $4",
+        "SELECT scope,execution_id,#{columns(kind)} FROM #{table(kind)} WHERE partition=$1 AND scope=$2 AND ($3::varchar IS NULL OR execution_id>$3) ORDER BY execution_id LIMIT $4",
         [context.partition, scope, cursor, limit + 1]
       ).rows
 
-    with {:ok, records} <- decode_rows(context, rows, :machine) do
+    with {:ok, records} <- decode_rows(context, rows, kind) do
       page = Enum.take(records, limit)
       next = if length(records) > limit, do: List.last(page).id
       {:ok, page, next}
@@ -237,7 +250,8 @@ defmodule SmolBox.DurableHost.Database do
   def worker_records(context, worker, cursor, limit) do
     with {:ok, executions} <- worker_kind(context, worker, cursor, limit, :execution, 0),
          {:ok, machines} <- worker_kind(context, worker, cursor, limit, :machine, 1),
-         do: {:ok, executions ++ machines}
+         {:ok, volumes} <- volume_records(context, worker, cursor, limit),
+         do: {:ok, executions ++ machines ++ volumes}
   end
 
   defp worker_kind(_context, _worker, {kind, _, _}, _limit, _record_kind, rank) when kind > rank,
@@ -250,7 +264,7 @@ defmodule SmolBox.DurableHost.Database do
         _ -> {nil, nil}
       end
 
-    remaining = if kind == :machine, do: "state <> 'deleted'", else: "needs_work"
+    remaining = if kind != :execution, do: "state <> 'deleted'", else: "needs_work"
 
     rows =
       query(
@@ -265,12 +279,26 @@ defmodule SmolBox.DurableHost.Database do
   end
 
   defp columns(:machine), do: @columns <> ",machine_name"
+  defp columns(:volume), do: @columns
   defp columns(:execution), do: @columns
   defp read_projection(record, :machine), do: projection(record) ++ [record.machine_name]
+  defp read_projection(record, :volume), do: projection(record)
   defp read_projection(record, :execution), do: projection(record)
 
   defp table(:machine), do: "smolbox_managed_machines"
+  defp table(:volume), do: "smolbox_volumes"
   defp table(:execution), do: "smolbox_executions"
+
+  if Code.ensure_loaded?(SmolBox.Volume) do
+    defp record_kind(%{__struct__: SmolBox.Volume}), do: :volume
+  end
+
+  defp record_kind(%SmolBox.ManagedMachine{}), do: :machine
+  defp record_kind(_), do: :execution
+
+  if Code.ensure_loaded?(SmolBox.Volume) do
+    defp needs_work?(%{__struct__: SmolBox.Volume, state: state}), do: state != :deleted
+  end
 
   defp needs_work?(%SmolBox.ManagedMachine{} = record),
     do: record.state != :deleted and record.active_execution == nil

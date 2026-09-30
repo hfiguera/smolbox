@@ -521,3 +521,14 @@ capacity remains until source deletion, verified absence and host-confirmed file
 cleanup through `Branches.release_storage/3`. Store fencing does not fence worker
 requests already sent. Follow the guide's recovery procedure before asserting
 quiescence or cleanup.
+
+## Independently retained local volumes
+
+The host approves each worker's canonical volume root and verifies permissions
+across replacement machines. SmolBox persists volume identity, exclusive attachment
+and disk allowance independently of executions and machines. A stopped machine
+keeps its attachment; verified deletion releases it but retains the volume. Only
+explicit successful volume deletion releases the allowance. Draining includes
+retained volumes in maintenance blockers. The host still enforces filesystem
+quotas and fences uncertain worker requests before destructive resolution. See
+[local volumes](local-volumes.md) for coordinated store/codec upgrades.

@@ -21,6 +21,7 @@ defmodule SmolBox.Store.MachineOps do
     needed = RecordOps.resources(record)
 
     with true <- record.state == :accepted and record.worker_id == nil,
+         true <- record.volume_worker_id in [nil, worker],
          true <- Validation.identifier?(worker) and SmolBox.MachineSpec.valid_name?(name),
          true <- is_map(lease) and lease.owner == record.claim_owner and lease.until_ms > now,
          true <- Enum.sort(Map.keys(capacity)) == Enum.sort(Map.keys(needed)),

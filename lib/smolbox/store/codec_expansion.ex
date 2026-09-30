@@ -2,6 +2,8 @@ defmodule SmolBox.Store.CodecExpansion do
   @moduledoc false
   alias SmolBox.{Execution, ManagedMachine}
 
+  alias SmolBox.Store.CodecVolumes
+
   def required?(%ManagedMachine{disk_expansions: history}), do: history != %{}
 
   def required?(%Execution{managed_machine: key, created_machine: m, spec: %{profile: p}})
@@ -10,13 +12,18 @@ defmodule SmolBox.Store.CodecExpansion do
 
   def required?(_), do: false
 
-  def strip(%ManagedMachine{disk_expansions: h, disk_sizes: nil, active_expansion: nil} = m)
-      when map_size(h) == 0,
-      do: Map.drop(m, [:disk_expansions, :disk_sizes, :active_expansion])
+  def strip(record), do: record |> strip_existing() |> CodecVolumes.strip()
+  def upgrade(record), do: record |> upgrade_existing() |> CodecVolumes.upgrade()
 
-  def strip(record), do: record
+  defp strip_existing(
+         %ManagedMachine{disk_expansions: h, disk_sizes: nil, active_expansion: nil} = m
+       )
+       when map_size(h) == 0,
+       do: Map.drop(m, [:disk_expansions, :disk_sizes, :active_expansion])
 
-  def upgrade(%ManagedMachine{} = m) do
+  defp strip_existing(record), do: record
+
+  defp upgrade_existing(%ManagedMachine{} = m) do
     if Enum.any?([:disk_expansions, :disk_sizes, :active_expansion], &Map.has_key?(m, &1)),
       do: raise(ArgumentError)
 
@@ -26,7 +33,7 @@ defmodule SmolBox.Store.CodecExpansion do
     |> Map.put(:active_expansion, nil)
   end
 
-  def upgrade(record) do
+  defp upgrade_existing(record) do
     if required?(record), do: raise(ArgumentError)
     record
   end

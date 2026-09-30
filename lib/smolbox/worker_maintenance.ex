@@ -26,12 +26,12 @@ defmodule SmolBox.WorkerMaintenance do
     :assessment
   ]
   defstruct @enforce_keys
-  @type cursor :: {0 | 1, String.t(), String.t()} | nil
+  @type cursor :: {0 | 1 | 2, String.t(), String.t()} | nil
   @type entry :: %{
-          kind: :execution | :machine,
+          kind: :execution | :machine | :volume,
           scope: String.t(),
           id: String.t(),
-          machine_name: String.t(),
+          machine_name: String.t() | nil,
           state: atom(),
           operation: atom() | nil,
           active_execution: Execution.key() | nil,
@@ -79,6 +79,8 @@ defmodule SmolBox.WorkerMaintenance do
   defp assessment(_, _, _, _, _), do: :blocked
 
   @doc false
+  def relevant?(%SmolBox.Volume{} = v), do: v.state != :deleted
+
   def relevant?(%ManagedMachine{} = record),
     do: record.state != :deleted or resources?(record)
 
@@ -89,15 +91,20 @@ defmodule SmolBox.WorkerMaintenance do
     do: Enum.any?(RecordOps.accounted_resources(record), fn {_, n} -> n > 0 end)
 
   @doc false
+  def position(%SmolBox.Volume{} = v), do: {2, v.scope, v.id}
   def position(%ManagedMachine{} = record), do: {1, record.scope, record.id}
   def position(%Execution{} = record), do: {0, record.scope, record.id}
 
+  defp kind(%SmolBox.Volume{}), do: :volume
+  defp kind(%ManagedMachine{}), do: :machine
+  defp kind(%Execution{}), do: :execution
+
   defp entry(record) do
     %{
-      kind: if(is_struct(record, ManagedMachine), do: :machine, else: :execution),
+      kind: kind(record),
       scope: record.scope,
       id: record.id,
-      machine_name: record.machine_name,
+      machine_name: Map.get(record, :machine_name),
       state: record.state,
       operation: Map.get(record, :operation),
       active_execution: Map.get(record, :active_execution),
@@ -117,7 +124,7 @@ defmodule SmolBox.WorkerMaintenance do
 
   defp valid_cursor?({kind, scope, id}),
     do:
-      kind in [0, 1] and
+      kind in [0, 1, 2] and
         SmolBox.Validation.identifier?(scope) and SmolBox.Validation.identifier?(id)
 
   defp valid_cursor?(_), do: false

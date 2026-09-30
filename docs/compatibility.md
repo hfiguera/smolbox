@@ -948,3 +948,14 @@ capacity remains until source deletion, verified absence and host-confirmed file
 cleanup through `Branches.release_storage/3`. Store fencing does not fence worker
 requests already sent. Follow the guide's recovery procedure before asserting
 quiescence or cleanup.
+
+## Managed local volumes
+
+Opt-in local volumes require Linux smolvm 1.20.2 and a worker `VolumePolicy`.
+[Native Linux evidence](evidence/local-volumes-linux-1.20.2.json) covers PostgreSQL
+recovery, replacement-machine read/write, read-only mounts and explicit cleanup
+with an unprivileged worker. macOS and root workers with per-VM UIDs are not
+qualified. Volumes are host directories with advisory sizes, not quota-enforced
+disks. Mounted machines currently exclude export, checkpoint, branch and disk
+expansion operations. See [local volumes](local-volumes.md) for codec v15 and the
+required PostgreSQL example migration; ordinary records retain earlier encodings.

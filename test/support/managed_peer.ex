@@ -9,6 +9,7 @@ defmodule SmolBox.ManagedPeer do
          fn ->
            %{
              machines: %{},
+             volumes: %{},
              files: %{},
              commands: [],
              creations: [],
@@ -79,6 +80,19 @@ defmodule SmolBox.ManagedPeer do
     {{:json, status, response}, state}
   end
 
+  defp route("POST", ["api", "v1", "volumes"], body, state) do
+    input = Jason.decode!(body)
+    path = "/approved/volumes/" <> input["id"]
+    next = %{state | volumes: Map.put(state.volumes, input["id"], path)}
+    status = if state.options[:volume_create_lost], do: 503, else: 200
+    {{:json, status, %{"node_path" => path}}, next}
+  end
+
+  defp route("DELETE", ["api", "v1", "volumes", id], _, state) do
+    next = %{state | volumes: Map.delete(state.volumes, id)}
+    {{:empty, if(state.options[:volume_delete_lost], do: 503, else: 204)}, next}
+  end
+
   defp route("GET", ["api", "v1", "machines"], _body, state),
     do: {{:json, 200, %{"machines" => Map.values(state.machines)}}, state}
 
@@ -96,7 +110,14 @@ defmodule SmolBox.ManagedPeer do
         state.options[:checkpoint] == true or state.options[:capture] == true
       )
       |> Map.merge(
-        Map.take(input, ["network", "networkBackend", "allowedHosts", "allowedCidrs", "ports"])
+        Map.take(input, [
+          "network",
+          "networkBackend",
+          "allowedHosts",
+          "allowedCidrs",
+          "ports",
+          "mounts"
+        ])
       )
       |> Map.merge(Keyword.get(state.options, :created_allocations, %{}))
 

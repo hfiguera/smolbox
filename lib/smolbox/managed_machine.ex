@@ -11,6 +11,8 @@ defmodule SmolBox.ManagedMachine do
   alias SmolBox.{Error, Machine, ManagedMachineSpec, Validation}
   alias SmolBox.Store.RecordOps
 
+  alias SmolBox.Store.VolumeAttachments
+
   @enforce_keys [
     :scope,
     :id,
@@ -49,6 +51,8 @@ defmodule SmolBox.ManagedMachine do
                 exports: %{},
                 active_export: nil,
                 reserved_ports: [],
+                mounts: [],
+                volume_worker_id: nil,
                 schema: 1,
                 version: 1,
                 generation: 0,
@@ -175,6 +179,7 @@ defmodule SmolBox.ManagedMachine do
     Enum.all?([
       r.scope == r.spec.scope and r.id == r.spec.id,
       r.schema == 1,
+      VolumeAttachments.valid?(r),
       Validation.digest?(r.fingerprint),
       r.state in @states,
       Validation.integer?(r.version, 1, 9_007_199_254_740_991),

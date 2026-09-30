@@ -22,9 +22,11 @@ defmodule SmolBox.Store.Memory do
     ExpansionOps,
     ExportOps,
     MachineOps,
+    MemoryVolumes,
     PortOwnership,
     RecordOps,
-    SourceOwnership
+    SourceOwnership,
+    VolumeOps
   }
 
   @doc """
@@ -62,6 +64,7 @@ defmodule SmolBox.Store.Memory do
        %{
          records: %{},
          machines: %{},
+         volumes: %{},
          machine_keys: %{},
          port_owners: %{},
          sizes: %{},
@@ -71,6 +74,18 @@ defmodule SmolBox.Store.Memory do
          max_records: config[:max_records],
          max_bytes: config[:max_bytes]
        }}
+
+  @impl Store
+  def volume_fetch(store, key), do: call(store, {:volume, {:fetch, key}})
+  @impl Store
+  def volume_list(store, scope, cursor, limit),
+    do: call(store, {:volume, {:list, scope, cursor, limit}})
+
+  @impl Store
+  def volume_accept(store, record, capacity), do: call(store, {:volume_accept, record, capacity})
+  @impl Store
+  def volume_change(store, key, version, action, now),
+    do: call(store, {:volume, {:change, key, version, action, now}})
 
   @impl Store
   def worker_control(store, worker), do: call(store, {:worker_control, worker})
@@ -124,11 +139,21 @@ defmodule SmolBox.Store.Memory do
     {:reply, reply, state}
   end
 
+  defp execute({:volume_accept, record, capacity}, state) do
+    case SmolBox.Volume.validate(record) do
+      :ok -> MemoryVolumes.run({:accept, record, capacity, used(state, record.worker_id)}, state)
+      e -> {e, state}
+    end
+  end
+
+  defp execute({:volume, request}, state), do: MemoryVolumes.run(request, state)
+
   defp execute(:capabilities, state),
     do:
       {{:ok,
         %{
           managed_disk_expansion: 1,
+          local_volumes: 1,
           worker_control: 1,
           schema: 1,
           durable: false,
@@ -170,7 +195,7 @@ defmodule SmolBox.Store.Memory do
     if WorkerMaintenance.valid_page?(worker, cursor, limit) and Validation.timestamp?(now) do
       records =
         Enum.filter(
-          Map.values(state.records) ++ Map.values(state.machines),
+          Map.values(state.records) ++ Map.values(state.machines) ++ Map.values(state.volumes),
           &(&1.worker_id == worker)
         )
 
@@ -284,7 +309,8 @@ defmodule SmolBox.Store.Memory do
     pending = Enum.count(state.records, fn {_key, record} -> record.state == :accepted end)
 
     if pending < max_pending and
-         map_size(state.records) + map_size(state.machines) < state.max_records do
+         map_size(state.records) + map_size(state.machines) + map_size(state.volumes) <
+           state.max_records do
       case put_record(state, record) do
         {:ok, next} -> {{:ok, record, :inserted}, next}
         error -> {error, state}
@@ -370,7 +396,7 @@ defmodule SmolBox.Store.Memory do
 
   defp used(state, worker) do
     Enum.reduce(
-      Map.values(state.records) ++ Map.values(state.machines),
+      Map.values(state.records) ++ Map.values(state.machines) ++ Map.values(state.volumes),
       RecordOps.empty_usage(),
       fn record, acc ->
         if record.worker_id == worker do
@@ -670,10 +696,24 @@ defmodule SmolBox.Store.Memory do
   defp machine_operation(_state, _operation, _arguments), do: error(:validation)
 
   defp insert_machine(state, record, max_pending) do
+    with {:ok, record, volumes} <-
+           VolumeOps.attach(record, state.volumes, record.accepted_at_ms),
+         :ok <- volume_admission(state, record),
+         {:ok, state} <- MemoryVolumes.persist(state, volumes),
+         do: insert_attached_machine(state, record, max_pending)
+  end
+
+  defp volume_admission(_state, %{volume_worker_id: nil}), do: :ok
+
+  defp volume_admission(state, record),
+    do: WorkerControl.admit(control(state, record.volume_worker_id))
+
+  defp insert_attached_machine(state, record, max_pending) do
     pending = Enum.count(state.machines, fn {_key, m} -> m.state == :accepted end)
 
     if pending < max_pending and
-         map_size(state.records) + map_size(state.machines) < state.max_records,
+         map_size(state.records) + map_size(state.machines) + map_size(state.volumes) <
+           state.max_records,
        do: machine_save(state, record),
        else: error(:admission_exhausted)
   end
@@ -707,9 +747,10 @@ defmodule SmolBox.Store.Memory do
     do: Map.get(state.worker_controls, worker, WorkerControl.initial(worker))
 
   defp branch_room(state) do
-    if map_size(state.records) + map_size(state.machines) < state.max_records,
-      do: :ok,
-      else: error(:admission_exhausted)
+    if map_size(state.records) + map_size(state.machines) + map_size(state.volumes) <
+         state.max_records,
+       do: :ok,
+       else: error(:admission_exhausted)
   end
 
   defp branch_save(state, parent, child) do
@@ -730,7 +771,9 @@ defmodule SmolBox.Store.Memory do
   end
 
   defp machine_save(state, record) do
-    with {:ok, bytes} <- Codec.encode(record),
+    with {:ok, volumes} <- VolumeOps.release(record, state.volumes),
+         {:ok, state} <- MemoryVolumes.persist(state, volumes),
+         {:ok, bytes} <- Codec.encode(record),
          {:ok, index} <- managed_index(state.machine_keys, record),
          {:ok, ports} <- PortOwnership.update(state.port_owners, record) do
       key = {:machine, ManagedMachine.key(record)}
