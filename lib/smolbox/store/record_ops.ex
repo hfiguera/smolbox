@@ -141,6 +141,12 @@ defmodule SmolBox.Store.RecordOps do
   end
 
   @spec resources(owned_record()) :: Store.resources()
+  def resources(%{disk_expansions: _} = record),
+    do: %{
+      SmolBox.Profile.resources(record.spec.profile)
+      | disk_gb: SmolBox.DiskExpansion.reserved_disk(record)
+    }
+
   def resources(record), do: SmolBox.Profile.resources(record.spec.profile)
 
   @doc false

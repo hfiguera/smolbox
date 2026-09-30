@@ -115,7 +115,7 @@ defmodule SmolBox.Store.MachineOps do
              worker_id: machine.worker_id,
              worker_generation: machine.worker_generation,
              machine_name: machine.machine_name,
-             created_machine: machine.created_machine
+             created_machine: SmolBox.DiskExpansion.expected(machine)
          },
          :ok <- Execution.validate(command),
          {:ok, machine} <-
@@ -155,7 +155,8 @@ defmodule SmolBox.Store.MachineOps do
 
   def resolve(machine, command, :absent, now) do
     with true <-
-           machine.active_export == nil and machine.active_capture == nil and
+           machine.active_expansion == nil and machine.active_export == nil and
+             machine.active_capture == nil and
              machine.active_branch == nil and
              SmolBox.Branch.lifecycle?(machine, :delete),
          true <- machine.state in [:unknown, :missing, :conflict],
@@ -185,13 +186,14 @@ defmodule SmolBox.Store.MachineOps do
 
   def resolve(machine, command, observed, now) do
     with true <-
-           machine.active_export == nil and machine.active_capture == nil and
+           machine.active_expansion == nil and machine.active_export == nil and
+             machine.active_capture == nil and
              machine.active_branch == nil and
              SmolBox.Branch.usable?(machine) and SmolBox.Branch.children_retired?(machine),
          true <- machine.state in [:unknown, :missing, :conflict],
          true <- machine.created_machine != nil,
          true <- observed.state in [:created, :stopped],
-         true <- SmolBox.Machine.same_incarnation?(machine.created_machine, observed),
+         true <- SmolBox.DiskExpansion.matches?(machine, observed),
          {:ok, command} <- resolve_command(command, now),
          {:ok, machine} <-
            ManagedMachine.update(

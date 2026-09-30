@@ -3,6 +3,7 @@ defmodule SmolBox.Runtime.Machines do
   alias SmolBox.{Client, Error, Identity, Machine, ManagedMachine}
   alias SmolBox.Runtime.Branches
   alias SmolBox.Runtime.Checkpoints
+  alias SmolBox.Runtime.DiskExpansions
   alias SmolBox.Runtime.{ExecutionSupport, Exports}
   alias SmolBox.Runtime.{Session, WorkerConfig, WorkerHealth}
 
@@ -31,6 +32,9 @@ defmodule SmolBox.Runtime.Machines do
 
   defdelegate claim(config, key), to: SmolBox.Runtime.MachineSession
   defdelegate write(config, record, changes), to: SmolBox.Runtime.MachineSession
+
+  defp route(config, %{operation: :expand_disks} = record, _eligible),
+    do: DiskExpansions.run(config, record)
 
   defp route(config, %{operation: :branch} = record, _eligible),
     do: Branches.run(config, record)
@@ -212,7 +216,7 @@ defmodule SmolBox.Runtime.Machines do
            io(config, record, fn -> Client.inspect_machine(worker.client, record.machine_name) end),
          true <-
            record.created_machine != nil and
-             Machine.same_incarnation?(record.created_machine, observed) do
+             SmolBox.DiskExpansion.matches?(record, observed) do
       :ok
     else
       false -> Session.error(:identity_conflict, :inspect)
@@ -242,7 +246,12 @@ defmodule SmolBox.Runtime.Machines do
   defp complete_response(config, record, {:ok, %Machine{} = observed}) do
     with {:ok, current} <- claim(config, ManagedMachine.key(record)),
          creation = current.created_machine || if(current.operation == :create, do: observed),
-         true <- creation != nil and Machine.same_incarnation?(creation, observed),
+         true <-
+           creation != nil and
+             if(current.created_machine,
+               do: SmolBox.DiskExpansion.matches?(current, observed),
+               else: Machine.same_incarnation?(creation, observed)
+             ),
          {:ok, saved} <-
            write(config, current, created_machine: creation, observed_machine: observed) do
       confirm(config, saved)
@@ -288,7 +297,7 @@ defmodule SmolBox.Runtime.Machines do
     expected = %{start: :running, stop: :stopped, create: observed.state}[record.operation]
 
     if record.created_machine != nil and
-         Machine.same_incarnation?(record.created_machine, observed) and
+         SmolBox.DiskExpansion.matches?(record, observed) and
          observed.state == expected do
       fresh_write(config, record,
         state: observed.state,
@@ -321,7 +330,7 @@ defmodule SmolBox.Runtime.Machines do
       record.created_machine == nil ->
         uncertain(config, record, %Error{category: :unknown, operation: :create})
 
-      not Machine.same_incarnation?(record.created_machine, observed) ->
+      not SmolBox.DiskExpansion.matches?(record, observed) ->
         failed_observation(config, record, %Error{
           category: :identity_conflict,
           operation: :inspect

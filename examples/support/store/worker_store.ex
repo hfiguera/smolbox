@@ -12,7 +12,13 @@ defmodule SmolBox.DurableHost.WorkerStore do
         []
       )
 
-      %{worker_control: 1}
+      Map.merge(
+        %{worker_control: 1},
+        if(Code.ensure_loaded?(SmolBox.DiskExpansion),
+          do: %{managed_disk_expansion: 1},
+          else: %{}
+        )
+      )
     end
 
     # Callers hold the partition lock for changes, admission gates and reports.

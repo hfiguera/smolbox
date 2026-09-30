@@ -57,14 +57,20 @@ defmodule SmolBox.ExecutionValidation do
     Validation.struct_shape?(machine, Machine) and machine.name == record.machine_name and
       machine.state in [:created, :running, :stopped] and
       Validation.integer?(machine.created_at, 0, 253_402_300_799) and
-      allocations?(machine, profile) and
+      allocations?(machine, profile, record) and
       ports?(machine, record) and
       network?(machine, profile)
   end
 
   def machine?(_machine, _record), do: false
 
-  defp allocations?(machine, profile),
+  defp allocations?(machine, profile, %{managed_machine: key}) when not is_nil(key),
+    do:
+      machine.cpus == profile.cpus and machine.memory_mb == profile.memory_mb and
+        Validation.integer?(machine.storage_gb, profile.storage_gb, 64) and
+        Validation.integer?(machine.overlay_gb, profile.overlay_gb, 64)
+
+  defp allocations?(machine, profile, _record),
     do:
       machine.cpus == profile.cpus and machine.memory_mb == profile.memory_mb and
         machine.storage_gb == profile.storage_gb and machine.overlay_gb == profile.overlay_gb
@@ -121,6 +127,7 @@ defmodule SmolBox.ExecutionValidation do
         :stale_version
       ] and
       error.operation in [
+        :expand_disks,
         :export,
         :checkpoint,
         :branch,

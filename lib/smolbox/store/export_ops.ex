@@ -23,7 +23,8 @@ defmodule SmolBox.Store.ExportOps do
          true <- machine.state == :stopped and ManagedMachine.idle?(machine),
          true <- machine.spec.artifact["kind"] != "checkpoint",
          true <- map_size(machine.exports) < 256,
-         true <- resource_floor?(spec.destination.resources, machine.spec.profile),
+         true <-
+           resource_floor?(spec.destination.resources, SmolBox.DiskExpansion.profile(machine)),
          true <- fits?(spec.destination.resources, capacity, usage),
          true <- vacant?(spec, machine.spec.artifact["architecture"], machines),
          {:ok, export} <- Export.new(ManagedMachine.key(machine), spec, fingerprint, now) do
@@ -128,7 +129,7 @@ defmodule SmolBox.Store.ExportOps do
     with %Export{state: state} <- machine.exports[id],
          true <- state in [:unknown, :published],
          true <- observed.state == :stopped,
-         true <- SmolBox.Machine.same_incarnation?(machine.created_machine, observed),
+         true <- SmolBox.DiskExpansion.matches?(machine, observed),
          {:ok, saved} <-
            advance(
              machine,

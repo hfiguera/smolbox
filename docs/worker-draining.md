@@ -51,7 +51,7 @@ controller snapshot cannot reserve a new machine after the drain commits.
 | --- | --- |
 | New disposable machine reservation | Blocked; accepted requests can wait, expire or use another eligible worker |
 | New retained machine or checkpoint restore assignment | Blocked |
-| New branch, checkpoint capture or export helper admission | Blocked |
+| New disk growth, branch, checkpoint capture or export helper admission | Blocked |
 | Retry of an existing identity/history entry | Returns existing evidence; it does not create another resource |
 | Work whose assignment or helper admission committed before draining | May continue, including later worker requests |
 | Commands, PTYs, image pulls and start/stop on existing machines | Allowed under the usual ownership and lifecycle rules |

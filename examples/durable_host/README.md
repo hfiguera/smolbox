@@ -814,3 +814,16 @@ payloads; there is no codec revision. The down migration refuses to discard cont
 history. Old writers can bypass these gates, so mixed versions and rollback during
 maintenance are unsupported. See [worker draining](../../docs/worker-draining.md)
 for the API, bounded maintenance pages, validation and safe rollout boundaries.
+
+### Disk expansion
+
+See [disk expansion](../../docs/disk-expansion.md) for the two-process
+`SmolBox.DurableHost.DiskExpansionDemo` walkthrough. It grows a stopped ordinary
+machine from 2/2 to 4/3 GiB, preserves a guest file across controller restart,
+verifies both guest filesystems and explicitly deletes the machine. Use a fresh
+execution ID and partition and preserve the same keys between phases.
+
+Expansion requires codec v14 support in all readers and resource projection
+writers sharing the store. No additional SQL migration is introduced beyond the
+existing worker-control table. Old readers cannot decode expansion history,
+including deleted tombstones; do not roll back to incompatible code.

@@ -87,6 +87,25 @@ defmodule SmolBox.DurableHost.MachineStore do
          do: persist(context, next)
   end
 
+  if Code.ensure_loaded?(SmolBox.DiskExpansion) do
+    alias SmolBox.Store.ExpansionOps
+
+    def run(context, :expansion_accept, [key, id, version, targets, capacity, now]) do
+      with {:ok, record} <- Database.read(context, key, :machine),
+           {:ok, usage} <- Database.usage(context, record.worker_id),
+           {:ok, next} <-
+             ExpansionOps.accept(record, id, version, targets, capacity, usage, now),
+           :ok <- WorkerStore.admit_change(context, record, next),
+           do: persist(context, next)
+    end
+
+    def run(context, :expansion_advance, [key, guard, id, expected, outcome, now]) do
+      with {:ok, record} <- Database.guarded_machine(context, key, guard, now),
+           {:ok, next} <- ExpansionOps.advance(record, id, expected, outcome, now),
+           do: persist(context, next)
+    end
+  end
+
   def run(context, :request, [key, action, version, now]) do
     with {:ok, record} <- Database.read(context, key, :machine),
          {:ok, next} <- MachineOps.request(record, action, version, now),
