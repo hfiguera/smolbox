@@ -158,21 +158,25 @@ defmodule SmolBox.RuntimeFixture do
   end
 
   # Machine idle state can precede the scheduler's final claim/write. Tests
-  # issuing a versioned lifecycle request must wait for that work as well.
-  def await_idle(runtime, handle, deadline \\ System.monotonic_time(:millisecond) + 5000) do
-    coordinator = :sys.get_state(Runtime.coordinator(runtime))
+  # issuing a versioned lifecycle request must wait for that work on every
+  # controller sharing the store, then read a version that stayed unchanged.
+  def await_idle(runtimes, handle, deadline \\ System.monotonic_time(:millisecond) + 5000) do
+    [runtime | _] = runtimes = List.wrap(runtimes)
     {:ok, machine} = SmolBox.Machines.inspect(runtime, handle)
+    coordinators = Enum.map(runtimes, &:sys.get_state(Runtime.coordinator(&1)))
+    {:ok, fresh} = SmolBox.Machines.inspect(runtime, handle)
 
-    if coordinator.active == %{} and coordinator.scan == nil and
+    if Enum.all?(coordinators, &(&1.active == %{} and &1.scan == nil)) and
+         machine.version == fresh.version and
          machine.active_execution == nil and machine.operation == nil and
          machine.next_due_at_ms > System.system_time(:millisecond) do
-      machine
+      fresh
     else
       assert System.monotonic_time(:millisecond) < deadline,
-             "machine did not become quiescent: #{inspect({machine, coordinator.active, coordinator.scan})}"
+             "machine did not become quiescent: #{inspect({machine, Enum.map(coordinators, &{&1.active, &1.scan})})}"
 
       Process.sleep(5)
-      await_idle(runtime, handle, deadline)
+      await_idle(runtimes, handle, deadline)
     end
   end
 
