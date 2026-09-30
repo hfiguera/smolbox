@@ -194,7 +194,7 @@ API behavior; this example adapter still requires its new migration when upgrade
 
 ## Runnable example and validation
 
-The [durable host example](../examples/durable_host/README.md#local-volumes) includes
+The [durable host example](https://github.com/hfiguera/smolbox/tree/main/examples/durable_host#local-volumes) includes
 `SmolBox.DurableHost.VolumeDemo`. Run `prepare` and `resume` in separate BEAM processes
 with the same PostgreSQL partition, keys and volume policy. The flow writes a file,
 deletes the original, reconnects after restart, reads/modifies it in a replacement,
