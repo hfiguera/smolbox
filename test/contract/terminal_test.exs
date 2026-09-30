@@ -120,8 +120,9 @@ defmodule SmolBox.TerminalTest do
     assert {:ok, terminal} = Client.open_terminal(client, running.machine_name, terminal_spec)
     result = Task.async(fn -> Terminal.input(terminal, "unauthorized") end) |> Task.await()
     assert {:error, %Error{category: :authentication}} = result
-    assert :ok = Terminal.input(terminal, "noise")
+    # Overflow discards unread output. Observe the welcome frame before provoking it.
     assert {:ok, {:output, _ready}} = Terminal.next(terminal)
+    assert :ok = Terminal.input(terminal, "noise")
     assert {:ok, {:closed, {:error, %Error{category: :output_limit}}}} = Terminal.next(terminal)
   end
 

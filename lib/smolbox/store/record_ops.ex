@@ -141,16 +141,7 @@ defmodule SmolBox.Store.RecordOps do
   end
 
   @spec resources(owned_record()) :: Store.resources()
-  def resources(record) do
-    profile = record.spec.profile
-
-    %{
-      slots: 1,
-      cpus: profile.cpus,
-      memory_mb: profile.memory_mb + profile.host_overhead_mb,
-      disk_gb: profile.storage_gb + profile.overlay_gb
-    }
-  end
+  def resources(record), do: SmolBox.Profile.resources(record.spec.profile)
 
   @doc false
   def accounted_resources(%{exports: _, active_export: _} = record) do

@@ -111,6 +111,11 @@ dispatch returns uncertainty. **Never replay exec automatically.** Disconnecting
 the stream does not cancel the guest. Stop an owned VM separately and verify its
 state; stopping a VM does not recover an unknown command exit code.
 
+For read-only CPU, memory, disk and network snapshots, use
+`Client.machine_measurements/2`. `Client.capacity/1` returns typed worker usage;
+`Client.metrics/1` returns bounded Prometheus text. See
+[measurement units, availability and admission boundaries](worker-measurements.md).
+
 ## Checkpoint sources
 
 An operator-approved idle checkpoint can be created with

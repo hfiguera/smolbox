@@ -35,6 +35,10 @@ Preparation identity survives controller recovery. OCI machines support managed
 image pulls with typed results and conservative handling of lost responses.
 Shared host caches remain an operator responsibility.
 
+[Machine measurements and worker reports](docs/worker-measurements.md) expose CPU,
+memory, disk and outbound network observations alongside durable reservations.
+Admission explanations identify shortages without changing capacity or retention.
+
 Try the [community workspace app](https://github.com/hfiguera/smolbox/tree/main/examples/community_workspace) for a
 browser walkthrough of SmolBox 0.3.0: persistent machines, commands, a real
 terminal, larger file transfers, background launch evidence and a mapped service,

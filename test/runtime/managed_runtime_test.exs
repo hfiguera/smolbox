@@ -164,6 +164,11 @@ defmodule SmolBox.ManagedRuntimeTest do
     assert {:ok, expired} = SmolBox.await(context.runtime, handle, 5000)
     assert expired.state == :expired and expired.machine_name == nil
     assert {:ok, [%{status: :draining}]} = SmolBox.workers(context.runtime)
+    assert {:ok, report} = SmolBox.worker_report(context.runtime, "managed")
+    assert report.reserved == %{slots: 0, cpus: 0, memory_mb: 0, disk_gb: 0}
+    assert report.capacity_error == nil and report.usage_error == nil
+    assert report.observed_capacity.allocated_cpus == 0
+    assert {:ok, [%{blockers: [:draining]}]} = SmolBox.admission_report(context.runtime, queued)
     assert {:ok, %{candidates: []}} = SmolBox.audit_worker(context.runtime, "managed")
   end
 

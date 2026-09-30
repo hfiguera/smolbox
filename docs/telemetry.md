@@ -12,6 +12,10 @@ Use `SmolBox.Telemetry.events/0` to register a handler with
 attachment, detachment, export and retention. A handler should finish promptly;
 any downstream queue or service it uses needs its own bounds and redaction policy.
 
+For live machine counters, worker capacity, raw Prometheus metrics and advisory
+admission reports, see [Machine measurements and worker capacity](worker-measurements.md).
+These on-demand reads are separate from lifecycle notifications.
+
 ## Attach a handler
 
 This complete example logs event names at debug level without exposing execution

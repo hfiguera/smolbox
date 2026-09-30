@@ -90,6 +90,32 @@ defmodule SmolBox.Machines do
   end
 
   @doc """
+  Read live measurements for a retained machine after checking recorded ownership.
+
+  Takes no command slot and persists no measurements. May run during commands or
+  while draining; it never starts/stops a guest, clears uncertainty or releases
+  reservations. Hosts must authorize the handle's scope. Deletion or replacement
+  can race any observation; this is evidence from one response, not a lifecycle lock.
+  """
+  @spec measurements(SmolBox.runtime(), handle()) ::
+          {:ok, SmolBox.MachineMeasurements.t()} | {:error, Error.t()}
+  def measurements(runtime, handle) do
+    with :ok <- key(handle),
+         {:ok, config} <- config(runtime),
+         {:ok, record} <- Machines.store(config, :fetch, [handle]),
+         true <- record.state != :deleted and record.created_machine != nil,
+         {:ok, worker} <- Machines.worker(config, record),
+         {:ok, measured} <-
+           SmolBox.Client.machine_measurements(worker.client, record.machine_name),
+         true <- SmolBox.Machine.same_incarnation?(record.created_machine, measured.machine) do
+      {:ok, measured}
+    else
+      false -> Session.error(:identity_conflict, :machine_measurements)
+      error -> error
+    end
+  end
+
+  @doc """
   Wait for an idle lifecycle state or a blocked recovery state.
 
   Returns the stored record when no lifecycle operation or command remains active,

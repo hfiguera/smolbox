@@ -4,6 +4,13 @@ Version: `0.3.1`. The library's supported qualification is
 `:development`; requested hard-control options remain unsupported. The original
 release evidence below records the client/controller contract on Linux and macOS.
 
+## Unreleased measurements
+
+[Machine measurements and worker reports](worker-measurements.md#validation) have
+physical Linux x86_64 evidence on smolvm 1.20.2. Optional counters can be unavailable;
+macOS has not been rerun for these APIs. These read-only additions do not change
+admission, release reservations or add a store migration.
+
 ## Reusable machine state in 0.3.0
 
 New APIs keep provisioning, saved state and backing cleanup as separate lifecycles:

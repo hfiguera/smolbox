@@ -53,6 +53,16 @@ defmodule SmolBox.ManagedPeer do
     end
   end
 
+  defp route("GET", ["capacity"], _body, state) do
+    response =
+      case Keyword.fetch(state.options, :observed_capacity) do
+        {:ok, body} -> {:json, 200, body}
+        :error -> {:json, 503, %{}}
+      end
+
+    {response, state}
+  end
+
   defp route("GET", ["readyz"], _body, state),
     do: {{:empty, if(state.options[:unready], do: 503, else: 200)}, state}
 
@@ -313,6 +323,7 @@ defmodule SmolBox.ManagedPeer do
     end
   end
 
+  defp event("GET", ["capacity"]), do: :capacity
   defp event("GET", ["api", "v1", "machines", _name, "exec", "interactive"]), do: :terminal_open
   defp event("GET", ["api", "v1", "machines", _name]), do: :inspect
   defp event("POST", ["api", "v1", "machines"]), do: :create
