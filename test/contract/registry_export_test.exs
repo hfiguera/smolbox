@@ -31,7 +31,7 @@ defmodule SmolBox.RegistryExportTest do
   test "publication records the selected runtime while preserving legacy receipts", context do
     receipt = publish(context)
 
-    for version <- ["1.19.0", "1.20.2"] do
+    for version <- ["1.19.0", "1.20.2", "1.22.0"] do
       assert {:ok, %{runtime_version: ^version} = result} =
                RegistryExport.verify(context.spec, receipt, context.token, 1000, version)
 

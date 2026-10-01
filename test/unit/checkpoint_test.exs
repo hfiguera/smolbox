@@ -42,7 +42,7 @@ defmodule SmolBox.CheckpointTest do
       assert {:error, _} = approval(options)
     end
 
-    for version <- ["1.16.1", "1.17.0", "1.19.0", "1.20.2"] do
+    for version <- ["1.16.1", "1.17.0", "1.19.0", "1.20.2", "1.22.0"] do
       assert {:ok, %{runtime_version: ^version}} = approval(runtime_version: version)
     end
 

@@ -1,10 +1,10 @@
 # Getting started
 
-SmolBox 0.4.0 defaults to **smolvm 1.20.2** on Linux x86_64 and macOS Apple
-Silicon. Published SmolBox 0.3.0 and 0.2.1 keep their 1.19.0 default; 0.2.0 keeps
-1.17.0. Pin existing workers and checkpoint approvals to their actual version.
-Updating SmolBox does not install smolvm. See the
-[1.20.2 qualification and upgrade boundaries](runtime-1.20.2-qualification.md).
+This checkout defaults to **smolvm 1.22.0** on Linux x86_64 and macOS Apple
+Silicon. Published SmolBox 0.4.0 and 0.3.1 keep their 1.20.2 default. Pin existing
+workers and checkpoint approvals to their actual version. Updating SmolBox does
+not install smolvm. See the
+[1.22.0 qualification and upgrade boundaries](runtime-1.22.0-qualification.md).
 
 This walkthrough runs a Python program in a disposable VM, reads its output file,
 and waits for cleanup. It uses an in-memory execution store so you can learn the
@@ -49,7 +49,7 @@ Use Linux x86_64 with KVM or macOS Apple Silicon. This walkthrough runs the Elix
 application on the worker host so it can verify the local artifact file. Remote
 workers use a different host configuration; see [Managed host integration](host-integration.md).
 
-You need a **dedicated, empty worker**. Select **smolvm 1.20.2
+You need a **dedicated, empty worker**. For this checkout, select **smolvm 1.22.0
 on Linux x86_64 or macOS Apple Silicon**. Existing 1.19.0, 1.17.0 and other supported deployments require an explicit
 matching `runtime_version` (or the environment setting below).
 Check the [host preparation prerequisites](compatibility.md#host-preparation-prerequisites),
@@ -71,7 +71,7 @@ In your application directory, set these values using the artifact you approved:
 
 ```sh
 export SMOLBOX_RUNTIME_URL=http://127.0.0.1:19470
-export SMOLBOX_RUNTIME_VERSION=1.20.2
+export SMOLBOX_RUNTIME_VERSION=1.22.0
 export SMOLBOX_PYTHON_ARTIFACT=/absolute/path/to/python.smolmachine
 export SMOLBOX_PYTHON_SHA256=replace_with_the_approved_64_character_sha256
 export SMOLBOX_DEMO_DIR="$(mktemp -d)"
@@ -81,7 +81,7 @@ iex -S mix
 
 `SMOLBOX_DEMO_DIR` is a new private directory for input/output objects. Keep it
 separate from the runtime image and from all guest-accessible directories.
-With SmolBox 0.4.0, the walkthrough selects 1.20.2. Explicitly select an older
+This checkout selects 1.22.0; published SmolBox 0.4.0 requires 1.20.2. Explicitly select an older
 supported worker version when retaining an existing installation; updating the
 Elixir dependency does not install a worker or migrate checkpoint artifacts.
 
@@ -139,7 +139,7 @@ worker_options =
   Worker.new("demo-worker", System.fetch_env!("SMOLBOX_RUNTIME_URL"), worker_options)
 
 {:ok, client} = SmolBox.Client.new(worker)
-runtime_version = System.get_env("SMOLBOX_RUNTIME_VERSION", "1.20.2")
+runtime_version = System.get_env("SMOLBOX_RUNTIME_VERSION", "1.22.0")
 {:ok, %{version: ^runtime_version}} = SmolBox.Client.health(client)
 :ok = SmolBox.Client.readiness(client)
 {:ok, []} = SmolBox.Client.list(client)

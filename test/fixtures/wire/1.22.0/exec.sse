@@ -1,0 +1,7 @@
+event: stdout
+data: café
+data: 
+
+event: exit
+data: {"exitCode":0}
+

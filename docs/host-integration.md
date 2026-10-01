@@ -1,10 +1,10 @@
 # Managed host integration
 
-SmolBox 0.4.0 defaults to **smolvm 1.20.2** on Linux x86_64 and macOS Apple
-Silicon. Published SmolBox 0.3.0 and 0.2.1 keep their 1.19.0 default; 0.2.0 keeps
-1.17.0. Pin existing workers and checkpoint approvals to their actual version.
-Updating SmolBox does not install smolvm. See the
-[1.20.2 qualification and upgrade boundaries](runtime-1.20.2-qualification.md).
+This checkout defaults to **smolvm 1.22.0** on Linux x86_64 and macOS Apple
+Silicon. Published SmolBox 0.4.0 and 0.3.1 keep their 1.20.2 default. Pin existing
+workers and checkpoint approvals to their actual version. Updating SmolBox does
+not install smolvm. See the
+[1.22.0 qualification and upgrade boundaries](runtime-1.22.0-qualification.md).
 
 
 Start with [Getting started](getting-started.md) for a complete runnable example.
@@ -102,14 +102,14 @@ children = [
 ```
 
 This fragment explicitly retains a Linux 1.14.6 worker with SmolBox 0.2.0.
-Omitting the field selects 1.20.2 in 0.4.0 and 0.3.1, 1.19.0 in 0.3.0 and 0.2.1, 1.17.0 in 0.2.0 (1.16.1 in 0.1.5). Use `"1.16.0"`
+Omitting the field selects 1.22.0 in this checkout, 1.20.2 in 0.4.0 and 0.3.1, 1.19.0 in 0.3.0 and 0.2.1, 1.17.0 in 0.2.0 (1.16.1 in 0.1.5). Use `"1.16.0"`
 explicitly to retain that worker, or `"1.14.1"`
 for an existing worker. See [runtime selection](compatibility.md#runtime-selection).
 This is a host configuration fragment, not a self-provisioning script. The host
 must verify artifact bytes on the worker and retain that immutable artifact.
 This disposable execution setup requires neutral `/bin/true` startup and no
 automatic workload restart. Retained image machines can instead use explicitly
-approved [startup workloads](workloads.md) on smolvm 1.17.0, 1.19.0 or 1.20.2.
+approved [startup workloads](workloads.md) on smolvm 1.17.0, 1.19.0, 1.20.2 or 1.22.0.
 Neither HTTP reachability nor a supplied digest proves those facts. `platform`
 is `:linux` or `:macos`; architectures initially tested are Linux `x86_64` and
 macOS `aarch64`. Linux arm64 remains unqualified.
@@ -357,7 +357,7 @@ to reconcile. Memory mode loses this authority when its store process stops.
 
 ## Upgrading a worker
 
-SmolBox 0.4.0 defaults to **1.20.2**. Published SmolBox 0.3.0 and 0.2.1 default to smolvm **1.19.0**; 0.2.0 defaults to **1.17.0** on Linux x86_64 and macOS Apple
+This checkout defaults to **1.22.0**. Published SmolBox 0.4.0 defaults to **1.20.2**. Published SmolBox 0.3.0 and 0.2.1 default to smolvm **1.19.0**; 0.2.0 defaults to **1.17.0** on Linux x86_64 and macOS Apple
 Silicon. SmolBox 0.1.4 and 0.1.5 default to **1.16.1**. SmolBox 0.1.3 defaults
 to 1.16.0; 0.1.2 defaults to 1.14.6. Worker selection does not migrate execution records.
 When upgrading controllers from 0.1.x, follow the coordinated
@@ -375,13 +375,13 @@ Before updating the library with an existing worker, retain its version explicit
 ```
 
 Use `"1.19.0"`, `"1.16.1"`, `"1.16.0"`, `"1.14.1"` or `"1.14.6"` instead for a worker still on either version. Omitting
-`:runtime_version` expects `"1.20.2"` in 0.4.0 and 0.3.1, `"1.19.0"` in 0.3.0 and 0.2.1 (`"1.17.0"` in 0.2.0) (`"1.16.1"` in 0.1.5); updating the Elixir
+`:runtime_version` expects `"1.22.0"` in this checkout, `"1.20.2"` in 0.4.0 and 0.3.1, `"1.19.0"` in 0.3.0 and 0.2.1 (`"1.17.0"` in 0.2.0) (`"1.16.1"` in 0.1.5); updating the Elixir
 dependency does not install smolvm. A version mismatch prevents new execution.
 Unverified versions and unsupported host combinations fail configuration
 validation. Health checks require an exact version match, without fallback.
 
-Review the [1.20.2 qualification and upgrade
-boundaries](runtime-1.20.2-qualification.md) before upgrading.
+Review the [1.22.0 qualification and upgrade
+boundaries](runtime-1.22.0-qualification.md) before upgrading.
 The same drain, identity and prerequisite checks below apply to each supported
 version. Configure the same expected version on every controller owning the worker.
 
@@ -401,7 +401,7 @@ For an existing worker:
    the complete pinned distribution. Verify binary, agent, libkrun and artifact
    digests. Do not mix files from different distributions.
 4. Recheck the deployment controls and approved artifact/profile revisions.
-   Disk requests below the 1.14.6, 1.16.0, 1.16.1, 1.17.0, 1.19.0 or 1.20.2 templates require
+   Disk requests below the 1.14.6, 1.16.0, 1.16.1, 1.17.0, 1.19.0, 1.20.2 or 1.22.0 templates require
    working `resize2fs` on the worker host (`brew install e2fsprogs` on macOS).
    Missing it caused file loss
    after restart in our macOS check, despite successful health/start/exec replies.
@@ -444,7 +444,7 @@ executions. The memory and PostgreSQL example adapters implement the extension.
 Read [Managed persistent machines](persistent-machines.md) before enabling it on
 shared workers, particularly the coordinated upgrade and capacity accounting.
 
-Mapped machines additionally require `managed_ports: 1` and smolvm 1.17.0, 1.19.0 or 1.20.2. Their
+Mapped machines additionally require `managed_ports: 1` and smolvm 1.17.0, 1.19.0, 1.20.2 or 1.22.0. Their
 ports belong to the worker host, not necessarily this application's host. Use one
 stable worker ID and authoritative store, including across controller restarts.
 The PostgreSQL port-ownership index arbitrates fixed ports atomically; it does not
@@ -477,7 +477,7 @@ See [Interactive terminals](interactive-terminals.md) and the durable host's
 ## Startup workloads and console diagnostics
 
 Before allowing startup workloads, authorize their code and environment alongside
-artifact, profile and scope. Require smolvm 1.17.0, 1.19.0 or 1.20.2 and `managed_workloads: 1` on the
+artifact, profile and scope. Require smolvm 1.17.0, 1.19.0, 1.20.2 or 1.22.0 and `managed_workloads: 1` on the
 store; upgrade all shared readers first. Application readiness needs a separate
 probe. Console followers consume bounded worker connections and do not own machine
 lifetime. See [workloads](workloads.md) for configuration and operational limits.
@@ -488,7 +488,7 @@ Host-selected `GuestPaths` policies authorize uploads, downloads and ordinary
 command working directories independently. Register the immutable profile on the
 worker, approve a superset on its client, coordinate transport and artifact-store
 limits, and set a worker download cap before startup. Expanded profiles require
-image sources on smolvm 1.17.0, 1.19.0 or 1.20.2 and store capability `guest_files: 1`. Defaults stay
+image sources on smolvm 1.17.0, 1.19.0, 1.20.2 or 1.22.0 and store capability `guest_files: 1`. Defaults stay
 unchanged. See [guest files](guest-files.md) for code and the v9 upgrade procedure.
 
 ## Export approval and resource ownership
@@ -504,7 +504,7 @@ advertising `managed_exports: 1` on a shared store.
 ## Managed checkpoint capture
 
 [Managed checkpoints](managed-checkpoints.md) add explicit idle, offline bare-guest
-capture and independent restore on 1.19.0 or 1.20.2. A captured result does not attest worker
+capture and independent restore on 1.19.0, 1.20.2 or 1.22.0. A captured result does not attest worker
 quiescence; resolve only after fencing outstanding requests and confirming staging
 cleanup. Checkpoint storage remains accounted for after source deletion until
 explicit release. Opt-in machines/history use codec v12, requiring coordinated
@@ -513,7 +513,7 @@ reader and resource projection upgrades but no SQL migration.
 ## Managed branch dependencies
 
 [Managed branches](managed-branches.md) create same-worker leaf children from idle,
-offline bare sources on smolvm 1.19.0 or 1.20.2. They require `managed_branches: 1`, codec v13,
+offline bare sources on smolvm 1.19.0, 1.20.2 or 1.22.0. They require `managed_branches: 1`, codec v13,
 and atomic source/child admission. Upgrade all shared readers and resource projection
 writers first; the PostgreSQL example needs no SQL migration. Retained v13 history
 prevents rollback to an older reader even after machines are deleted.

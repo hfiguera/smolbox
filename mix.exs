@@ -70,6 +70,7 @@ defmodule SmolBox.MixProject do
           "docs/runtime-1.17.0-qualification.md",
           "docs/runtime-1.19.0-qualification.md",
           "docs/runtime-1.20.2-qualification.md",
+          "docs/runtime-1.22.0-qualification.md",
           "docs/evidence/*.json"
         ]
       ],
@@ -122,7 +123,8 @@ defmodule SmolBox.MixProject do
             "docs/compatibility.md",
             "docs/runtime-1.17.0-qualification.md",
             "docs/runtime-1.19.0-qualification.md",
-            "docs/runtime-1.20.2-qualification.md"
+            "docs/runtime-1.20.2-qualification.md",
+            "docs/runtime-1.22.0-qualification.md"
           ]
         ],
         groups_for_modules: [
@@ -256,7 +258,8 @@ defmodule SmolBox.MixProject do
           "docs/compatibility.md",
           "docs/runtime-1.17.0-qualification.md",
           "docs/runtime-1.19.0-qualification.md",
-          "docs/runtime-1.20.2-qualification.md"
+          "docs/runtime-1.20.2-qualification.md",
+          "docs/runtime-1.22.0-qualification.md"
         ]
       ],
       dialyzer: [

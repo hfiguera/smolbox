@@ -1,10 +1,10 @@
 # Low-level client
 
-SmolBox 0.4.0 defaults to **smolvm 1.20.2** on Linux x86_64 and macOS Apple
-Silicon. Published SmolBox 0.3.0 and 0.2.1 keep their 1.19.0 default; 0.2.0 keeps
-1.17.0. Pin existing workers and checkpoint approvals to their actual version.
-Updating SmolBox does not install smolvm. See the
-[1.20.2 qualification and upgrade boundaries](runtime-1.20.2-qualification.md).
+This checkout defaults to **smolvm 1.22.0** on Linux x86_64 and macOS Apple
+Silicon. Published SmolBox 0.4.0 and 0.3.1 keep their 1.20.2 default. Pin existing
+workers and checkpoint approvals to their actual version. Updating SmolBox does
+not install smolvm. See the
+[1.22.0 qualification and upgrade boundaries](runtime-1.22.0-qualification.md).
 
 
 This API performs one verified worker operation at a time. It does not persist
@@ -59,7 +59,7 @@ investigation. An erroneous worker reply must not silently change execution poli
 By default an owned disposable machine starts from an approved artifact with
 guest networking disabled. Explicit outbound policies are described in
 [Controlled network access](network-access.md). Optional fixed TCP mappings on
-smolvm 1.17.0, 1.19.0 or 1.20.2 are described in [Port mappings](port-mappings.md). Mounts, Unix
+smolvm 1.17.0, 1.19.0, 1.20.2 or 1.22.0 are described in [Port mappings](port-mappings.md). Mounts, Unix
 sockets, GPU and automatic workload restart remain disabled. This example uses the offline default:
 
 ```elixir
@@ -120,7 +120,7 @@ For read-only CPU, memory, disk and network snapshots, use
 
 An operator-approved idle checkpoint can be created with
 `MachineSpec.new(name, path, source: :checkpoint, ...)`. The explicit allocations
-must match the capture. This requires smolvm 1.16.1, 1.17.0, 1.19.0 or 1.20.2 and an offline source; creation
+must match the capture. This requires smolvm 1.16.1, 1.17.0, 1.19.0, 1.20.2 or 1.22.0 and an offline source; creation
 must return a created branchable machine before it may be started. Captured
 processes resume on start, so a workload entrypoint override cannot neutralize
 an arbitrary checkpoint. See [Executing from a checkpoint](checkpoints.md) for
@@ -129,7 +129,7 @@ approval, managed execution, examples and schema v3 upgrade requirements.
 ## Execution and transport budgets
 
 Foreground timeouts accept 1–86,400 seconds. Commands exceeding 300 seconds require
-smolvm 1.17.0, 1.19.0 or 1.20.2 and an explicitly extended client operation budget. Managed commands
+smolvm 1.17.0, 1.19.0, 1.20.2 or 1.22.0 and an explicitly extended client operation budget. Managed commands
 also require an approved profile whose `execution_ms` covers the guest timeout.
 Allow observation headroom for startup, transport and the final timeout result.
 
@@ -152,7 +152,7 @@ establish longer guest execution; they remain in the historical qualification re
 File manifests use exact approved guest paths and opaque host artifact references.
 Defaults remain `/workspace` and 1 MiB. `GuestPaths` and coordinated profile, client,
 transport and artifact-store budgets allow broader directories and files up to
-16 MiB on image machines with smolvm 1.17.0, 1.19.0 or 1.20.2. Uploads verify their source digest
+16 MiB on image machines with smolvm 1.17.0, 1.19.0, 1.20.2 or 1.22.0. Uploads verify their source digest
 before I/O and validate the worker acknowledgment; downloads require an explicit
 byte limit. See [guest paths and larger files](guest-files.md) for setup, buffered
 memory costs, worker download caps and the v9 persistence upgrade.
@@ -252,14 +252,14 @@ for deadlines, bounded streaming, cancellation and recovery.
 ## Startup workloads and console diagnostics
 
 `SmolBox.MachineSpec.new/3` accepts optional `workload: %SmolBox.Workload{}`
-on smolvm 1.17.0, 1.19.0 or 1.20.2 image machines. `Client.logs/3` returns a console `LogResult`
+on smolvm 1.17.0, 1.19.0, 1.20.2 or 1.22.0 image machines. `Client.logs/3` returns a console `LogResult`
 or follows bounded SSE events. These diagnostics exclude application stdout/stderr;
 automatic restart policies are rejected. See [workloads](workloads.md) for exact
 argument inheritance, stream bounds and cancellation behavior.
 
 ## Local volumes and mounts
 
-On smolvm 1.20.2, `Client.provision_volume/3` and `Client.delete_volume/2` expose
+On smolvm 1.20.2 or 1.22.0, `Client.provision_volume/3` and `Client.delete_volume/2` expose
 local provisioning and explicit deletion. `MachineSpec` accepts controlled
 `SmolBox.Mount` values; source, guest target and read-only state are decoded in
 observations. Low-level callers own host path approval and attachment cleanup.

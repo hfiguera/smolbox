@@ -4,7 +4,7 @@ A branch creates another running machine from a prepared source, including its
 memory and disks. Prepare once, then give separate tasks their own copies. Changes
 to one child's guest memory or disks do not change its siblings or source.
 
-This first contract supports **idle, offline bare guests on smolvm 1.19.0 or 1.20.2**, on the
+This first contract supports **idle, offline bare guests on smolvm 1.19.0, 1.20.2 or 1.22.0**, on the
 source's worker. It creates one leaf child per request. It does not add nested
 branches, source freezing, migration, branch pools, network restoration or arbitrary
 application cloning. A branch is a managed machine, not a Git branch or a portable
@@ -230,3 +230,6 @@ The [1.20.2 qualification](runtime-1.20.2-qualification.md) records the newer
 worker campaign separately from the original feature evidence above. Preserve the
 exact capture runtime on checkpoint approvals; changing a filename or version
 field does not migrate saved machine state.
+
+For the current checkout default, see the [1.22.0 qualification](runtime-1.22.0-qualification.md).
+Earlier validation sections above retain their original scope.

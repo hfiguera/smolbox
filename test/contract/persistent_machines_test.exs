@@ -20,6 +20,54 @@ defmodule SmolBox.PersistentMachinesTest do
     end
   end
 
+  for version <- ["1.20.2", "1.22.0"] do
+    test "creation accepts a stopped confirmation before any start request on #{version}" do
+      observer = self()
+
+      gate =
+        start_supervised!(
+          {Agent, fn -> %{event: :create, phase: :after, fired: false, observer: observer} end},
+          id: :creation_confirmation_gate
+        )
+
+      fixture =
+        RuntimeFixture.start(__MODULE__,
+          faults: gate,
+          runtime_version: unquote(version),
+          expected_runtime_version: unquote(version)
+        )
+
+      handle = create(fixture, [])
+      assert_receive {:boundary, :create, :after, blocked}, 5000
+
+      Agent.update(fixture.peer, fn state ->
+        machines =
+          Map.new(state.machines, fn {name, machine} ->
+            {name, Map.put(machine, "state", "stopped")}
+          end)
+
+        %{state | machines: machines}
+      end)
+
+      send(blocked, :release_boundary)
+
+      assert %{state: :stopped, operation: nil} =
+               stopped = RuntimeFixture.await_idle(fixture.runtime, handle)
+
+      assert stopped.created_machine.state == :created
+      assert stopped.last_request == nil
+
+      refute Enum.any?(ManagedPeer.snapshot(fixture.peer).operations, fn {_, path} ->
+               String.ends_with?(path, "/start")
+             end)
+
+      assert {:ok, _} = Machines.start(fixture.runtime, handle, stopped.version)
+      assert %{state: :running} = running = RuntimeFixture.await_idle(fixture.runtime, handle)
+      assert {:ok, _} = Machines.delete(fixture.runtime, handle, running.version)
+      assert wait_machine(fixture, handle, &(&1.state == :deleted)).reservation == nil
+    end
+  end
+
   for mappings <- [[], [%SmolBox.PortMapping{host: 28_731, guest: 8000}]] do
     @mappings mappings
     test "commands retain their machine, stop/start preserves files, and explicit delete releases capacity (ports=#{inspect(@mappings)})" do

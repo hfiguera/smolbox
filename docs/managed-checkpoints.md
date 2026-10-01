@@ -3,7 +3,7 @@
 Prepare useful state once, capture it, and restore independent managed machines.
 Unlike an export, a checkpoint includes memory and resumes captured processes.
 The first managed capture contract is deliberately **idle, offline, bare guests on
-smolvm 1.19.0 or 1.20.2**. See [managed branches](managed-branches.md) for live copies.
+smolvm 1.19.0, 1.20.2 or 1.22.0**. See [managed branches](managed-branches.md) for live copies.
 Capture does not add arbitrary application resume,
 network restoration, in-place rollback, migration or automatic backups.
 
@@ -251,3 +251,6 @@ The [1.20.2 qualification](runtime-1.20.2-qualification.md) records the newer
 worker campaign separately from the original feature evidence above. Preserve the
 exact capture runtime on checkpoint approvals; changing a filename or version
 field does not migrate saved machine state.
+
+For the current checkout default, see the [1.22.0 qualification](runtime-1.22.0-qualification.md).
+Earlier validation sections above retain their original scope.

@@ -6,7 +6,7 @@ to undo a durable reservation.
 
 These APIs are additive. They require no store migration, codec change or new
 adapter callback. Existing `SmolBox.workers/1`, admission, retention and cleanup
-keep their behavior. Wire measurements are qualified against smolvm 1.20.2;
+keep their behavior. Wire measurements are qualified against smolvm 1.20.2 and 1.22.0;
 older workers can omit optional fields or reject endpoints.
 
 ## Observe a machine
@@ -164,3 +164,6 @@ fixture also omitted egress. Decoder tests cover numeric values for those option
 fields, but this run does not establish live branch PSS or virtio-net traffic
 accuracy. These new APIs have not been rerun on macOS. No benchmark, hard quota or
 automatic admission policy is claimed.
+
+The [1.22.0 qualification](runtime-1.22.0-qualification.md) records the newer
+platform checks. The historical validation above still describes its original run.

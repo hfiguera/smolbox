@@ -69,3 +69,12 @@ buffered execution, directory response and SSE. Health was captured with one
 fixture machine running. Inputs are synthetic; the owned machine was deleted
 after capture. These fixtures do not claim compatibility with later releases.
 See the [qualification report](../../../docs/runtime-1.20.2-qualification.md).
+
+## 1.22.0 captures
+
+The `1.22.0/` fixtures were captured from the official Apple Silicon distribution
+on September 30, 2026. Health was captured with an empty inventory. Create,
+running inspection, buffered execution, directory JSON and SSE use the existing
+synthetic Python workloads; response bytes are retained without alteration.
+The owned machine was deleted after capture. The same capture also ran on
+physical Linux. See the [qualification report](../../../docs/runtime-1.22.0-qualification.md).

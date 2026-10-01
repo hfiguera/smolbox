@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Qualify official smolvm 1.22.0 and select it by default on Linux x86_64 and
+  macOS Apple Silicon. Explicit 1.20.2 and earlier supported versions remain.
+  See [qualification and upgrade boundaries](docs/runtime-1.22.0-qualification.md).
+  No SQL migration or codec revision is added. Coordinate readers before storing
+  results with the new runtime version and preserve existing checkpoint pins.
+
+- Fix the provisioning benchmark timing out while waiting for `created` when the
+  worker supervisor has already marked an unstarted machine `stopped`.
+
 ## 0.4.0
 
 SmolBox now reports worker usage, coordinates maintenance admission, grows retained

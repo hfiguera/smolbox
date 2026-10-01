@@ -1,0 +1,1 @@
+{"name":"wire-a36ea992d1a0","image":"python:3.12-alpine","state":"created","cpus":1,"memoryMb":256,"mounts":[],"ports":[],"network":false,"gpu":false,"cuda":false,"storageGb":1,"overlayGb":1,"blockIo":"sync","branchable":false,"forkable":false,"branchpointHeld":false,"forkpointHeld":false,"createdAt":1790817032}

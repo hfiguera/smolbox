@@ -1,6 +1,6 @@
 defmodule SmolBox.CheckpointPolicy do
   @moduledoc """
-  Host approval for idle, offline capture on smolvm 1.19.0 or 1.20.2.
+  Host approval for idle, offline capture on smolvm 1.19.0, 1.20.2 or 1.22.0.
 
   `root` is a private existing directory on the controller host, shared at the
   same path by controllers using the store. The host protects it from replacement

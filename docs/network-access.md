@@ -14,7 +14,7 @@ on the machine specification. With mappings, `:offline` denies outbound traffic
 but attaches a virtio-net device for inbound forwarding.
 
 SmolBox **0.1.5** defaults to smolvm **1.16.1**. Both 1.16.0 and 1.16.1
-support these policies, as do 1.17.0, 1.19.0 and 1.20.2 in SmolBox 0.4.0. Select an older worker
+support these policies, as do 1.17.0, 1.19.0, 1.20.2 and 1.22.0 in SmolBox 0.4.0. Select an older worker
 version explicitly to retain it. See the
 [qualification results and cleanup limitation](compatibility.md#smolvm-1-16-1-qualification).
 
@@ -172,3 +172,6 @@ case via `SMOLBOX_NETWORK_MANAGED=true`. The bounded Mac script is
 `scripts/lab/network-macos.exs`; it requires a dedicated empty worker at
 `$SMOLBOX_NETWORK_MAC_ROOT/api.sock` and an approved `$SMOLBOX_PYTHON_ARTIFACT`.
 These fixtures are not a general network security certification.
+
+For the current checkout default, see the [1.22.0 qualification](runtime-1.22.0-qualification.md).
+Earlier validation sections above retain their original scope.

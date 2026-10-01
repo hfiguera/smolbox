@@ -4,9 +4,21 @@ Version: `0.4.0`. The library's supported qualification is
 `:development`; requested hard-control options remain unsupported. The original
 release evidence below records the client/controller contract on Linux and macOS.
 
+## smolvm 1.22.0 qualification
+
+**Default in this checkout; published 0.4.0 remains on 1.20.2.** See the
+[qualification report](runtime-1.22.0-qualification.md) for exact inputs, real worker
+results, failed attempts and upgrade boundaries. Only the released 1.22.0 is
+added; 1.21.x and later versions are not implicitly admitted. Existing supported
+versions remain available through explicit configuration.
+
+No SQL migration, store callback change or codec revision is introduced. Upgrade
+all readers before storing results with the new runtime version and preserve
+existing checkpoint capture pins. Qualification remains `:development`.
+
 ## Worker operations and storage in 0.4.0
 
-The default remains smolvm **1.20.2**. Each feature has separate evidence and limits:
+Published 0.4.0 uses smolvm **1.20.2**. Each feature has separate evidence and limits:
 
 | Feature | Evidence and boundaries |
 | --- | --- |
@@ -15,7 +27,7 @@ The default remains smolvm **1.20.2**. Each feature has separate evidence and li
 | [Disk expansion](disk-expansion.md#runnable-linux-walkthrough) | Physical Linux/PostgreSQL stop, grow, controller restart, file preservation and guest filesystem growth on 1.20.2. No macOS growth campaign or checkpoint/branch expansion is claimed. |
 | [Local volumes](local-volumes.md#runnable-example-and-validation) | Linux 1.20.2 only. PostgreSQL recovery, replacement writes and read-only attachment with an unprivileged worker; no host quota or root-worker UID isolation qualification. |
 
-The new APIs have not been qualified live on macOS. Earlier Linux and macOS
+The 0.4.0 feature campaigns did not qualify the new APIs live on macOS. Earlier Linux and macOS
 campaigns remain evidence for their original feature scope, not these additions.
 The feature campaigns are separate runs, not a single combined maintenance test
 or validation of the final 0.4.0 release artifact.
@@ -252,8 +264,8 @@ explicit bounded settings. No validation limits or public defaults were relaxed.
 
 ## Runtime selection
 
-SmolBox 0.4.0 and 0.3.1 default to 1.20.2; published 0.3.0 and 0.2.1 default to 1.19.0.
-Both are supported on Linux x86_64 and macOS Apple Silicon.
+This checkout defaults to 1.22.0. Published SmolBox 0.4.0 and 0.3.1 default to 1.20.2; published 0.3.0 and 0.2.1 default to 1.19.0.
+These runtime versions are supported on Linux x86_64 and macOS Apple Silicon.
 
 SmolBox 0.1.3 defaults to `runtime_version: "1.16.0"` for Linux x86_64 and
 macOS Apple Silicon. SmolBox 0.1.2 defaults to 1.14.6 and does not include 1.16.0
@@ -966,7 +978,7 @@ quiescence or cleanup.
 
 ## Managed local volumes
 
-Opt-in local volumes require Linux smolvm 1.20.2 and a worker `VolumePolicy`.
+Opt-in local volumes require Linux smolvm 1.20.2 or 1.22.0 and a worker `VolumePolicy`.
 [Native Linux evidence](evidence/local-volumes-linux-1.20.2.json) covers PostgreSQL
 recovery, replacement-machine read/write, read-only mounts and explicit cleanup
 with an unprivileged worker. macOS and root workers with per-VM UIDs are not

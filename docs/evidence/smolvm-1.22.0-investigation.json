@@ -1,0 +1,458 @@
+{
+  "campaign": "Investigation of smolvm 1.22.0 qualification failures",
+  "date": "2026-09-30",
+  "qualification_commit": "4c9a8ee64464a25a2d5296ef30eb62bd7e7c0a6c",
+  "default_decision": "select 1.22.0 after review of full qualification and matched follow-up evidence; retain unexplained one-off macOS failure as a non-blocking observation",
+  "linux": {
+    "result": "confirmed pre-start benchmark state assumption, reproduced on both versions",
+    "supervisor_source_unchanged": "git diff v1.20.2 v1.22.0 -- src/api/supervisor.rs is empty",
+    "original_record": {
+      "state": "stopped",
+      "operation": null,
+      "last_request": null,
+      "created_machine_state": "created",
+      "observed_machine_state": "stopped"
+    },
+    "live_probes": [
+      {
+        "version": "1.20.2",
+        "attempt": 0,
+        "create_state": "created",
+        "without_start_after_6s": "stopped",
+        "last_state_after_explicit_start": "running",
+        "command": {
+          "exitCode": 0,
+          "stdout": "ready",
+          "stderr": "",
+          "stdoutB64": "cmVhZHk=",
+          "stderrB64": ""
+        },
+        "absence": true
+      },
+      {
+        "version": "1.20.2",
+        "attempt": 1,
+        "create_state": "created",
+        "without_start_after_6s": "stopped",
+        "last_state_after_explicit_start": "running",
+        "command": {
+          "exitCode": 0,
+          "stdout": "ready",
+          "stderr": "",
+          "stdoutB64": "cmVhZHk=",
+          "stderrB64": ""
+        },
+        "absence": true
+      },
+      {
+        "version": "1.22.0",
+        "attempt": 0,
+        "create_state": "created",
+        "without_start_after_6s": "stopped",
+        "last_state_after_explicit_start": "running",
+        "command": {
+          "exitCode": 0,
+          "stdout": "ready",
+          "stderr": "",
+          "stdoutB64": "cmVhZHk=",
+          "stderrB64": ""
+        },
+        "absence": true
+      },
+      {
+        "version": "1.22.0",
+        "attempt": 1,
+        "create_state": "created",
+        "without_start_after_6s": "stopped",
+        "last_state_after_explicit_start": "running",
+        "command": {
+          "exitCode": 0,
+          "stdout": "ready",
+          "stderr": "",
+          "stdoutB64": "cmVhZHk=",
+          "stderrB64": ""
+        },
+        "absence": true
+      }
+    ],
+    "physical_host": true,
+    "final_inventories_empty": true,
+    "private_workers_stopped": true
+  },
+  "macos": {
+    "result": "original HTTP 500 creation cause unresolved; no claim of a fix",
+    "original_create_error_timestamp_utc": "2026-10-01T01:12:49.016589Z",
+    "original_error_body_available": false,
+    "instrumented_replay": {
+      "runtime": "1.22.0",
+      "seed": 194898,
+      "passed": 14,
+      "failed": 0,
+      "create_errors": 0,
+      "http_500s": "expected oversized/missing file reads"
+    },
+    "alternating_python_node_cycles": [
+      {
+        "version": "1.22.0",
+        "iteration": 0,
+        "image": "python",
+        "create_start_exec_stop_delete": "passed"
+      },
+      {
+        "version": "1.22.0",
+        "iteration": 1,
+        "image": "node",
+        "create_start_exec_stop_delete": "passed"
+      },
+      {
+        "version": "1.22.0",
+        "iteration": 2,
+        "image": "python",
+        "create_start_exec_stop_delete": "passed"
+      },
+      {
+        "version": "1.22.0",
+        "iteration": 3,
+        "image": "node",
+        "create_start_exec_stop_delete": "passed"
+      },
+      {
+        "version": "1.22.0",
+        "iteration": 4,
+        "image": "python",
+        "create_start_exec_stop_delete": "passed"
+      },
+      {
+        "version": "1.22.0",
+        "iteration": 5,
+        "image": "node",
+        "create_start_exec_stop_delete": "passed"
+      },
+      {
+        "version": "1.22.0",
+        "iteration": 6,
+        "image": "python",
+        "create_start_exec_stop_delete": "passed"
+      },
+      {
+        "version": "1.22.0",
+        "iteration": 7,
+        "image": "node",
+        "create_start_exec_stop_delete": "passed"
+      },
+      {
+        "version": "1.22.0",
+        "iteration": 8,
+        "image": "python",
+        "create_start_exec_stop_delete": "passed"
+      },
+      {
+        "version": "1.22.0",
+        "iteration": 9,
+        "image": "node",
+        "create_start_exec_stop_delete": "passed"
+      },
+      {
+        "version": "1.22.0",
+        "iteration": 10,
+        "image": "python",
+        "create_start_exec_stop_delete": "passed"
+      },
+      {
+        "version": "1.22.0",
+        "iteration": 11,
+        "image": "node",
+        "create_start_exec_stop_delete": "passed"
+      },
+      {
+        "version": "1.20.2",
+        "iteration": 0,
+        "image": "python",
+        "create_start_exec_stop_delete": "passed"
+      },
+      {
+        "version": "1.20.2",
+        "iteration": 1,
+        "image": "node",
+        "create_start_exec_stop_delete": "passed"
+      },
+      {
+        "version": "1.20.2",
+        "iteration": 2,
+        "image": "python",
+        "create_start_exec_stop_delete": "passed"
+      },
+      {
+        "version": "1.20.2",
+        "iteration": 3,
+        "image": "node",
+        "create_start_exec_stop_delete": "passed"
+      },
+      {
+        "version": "1.20.2",
+        "iteration": 4,
+        "image": "python",
+        "create_start_exec_stop_delete": "passed"
+      },
+      {
+        "version": "1.20.2",
+        "iteration": 5,
+        "image": "node",
+        "create_start_exec_stop_delete": "passed"
+      },
+      {
+        "version": "1.20.2",
+        "iteration": 6,
+        "image": "python",
+        "create_start_exec_stop_delete": "passed"
+      },
+      {
+        "version": "1.20.2",
+        "iteration": 7,
+        "image": "node",
+        "create_start_exec_stop_delete": "passed"
+      },
+      {
+        "version": "1.20.2",
+        "iteration": 8,
+        "image": "python",
+        "create_start_exec_stop_delete": "passed"
+      },
+      {
+        "version": "1.20.2",
+        "iteration": 9,
+        "image": "node",
+        "create_start_exec_stop_delete": "passed"
+      },
+      {
+        "version": "1.20.2",
+        "iteration": 10,
+        "image": "python",
+        "create_start_exec_stop_delete": "passed"
+      },
+      {
+        "version": "1.20.2",
+        "iteration": 11,
+        "image": "node",
+        "create_start_exec_stop_delete": "passed"
+      }
+    ],
+    "native_apple_silicon": true,
+    "final_inventories_empty": true,
+    "private_workers_stopped": true
+  },
+  "regression_coverage": {
+    "kind": "simulated contract tests",
+    "versions": [
+      "1.20.2",
+      "1.22.0"
+    ],
+    "behavior": "create response blocked while observation becomes stopped; no premature start; explicit start succeeds; deletion releases reservation"
+  },
+  "evidence_note": "Private probe scripts, response captures and logs are retained locally. Hashes identify that evidence, not downloadable files. Passing macOS replays do not explain the initial creation error.",
+  "private_evidence_sha256": {
+    "creation-contract.log": "987afc3b714ffdecb0e8ab6ad9e497410a1666f6c40b77c72aa8ae0ef28fe6bb",
+    "linux-created-results.json": "5de7ed61c3ef3f1acdc2078a0dcb7147ed770cb68a68bbe50432a75e20ecb59a",
+    "linux-created.log": "89e521b4391304401874457a694e3f79dfd7dde83b7937b0dc62db54cb0a5e84",
+    "linux-created.py": "5d37b1758abd84327019e0a2cfd377aa6b53a46677b9f66a772eb5336dddf772",
+    "mac-1220-final-inventory.json": "4115c93b07b494b0188c0899c545c6313d8dfda70cf8d2613984eae1976fb745",
+    "mac-1220-lab.json": "9527c1468606e1ec4f573b9f81ac1b00cc335e27e16c7e1059ad8a01fb4422d2",
+    "mac-1220-wire.log": "a25a9213476a18700bcb2d11e1b341892e2b76fdfaf99cba8a165b4de5a72a17",
+    "mac-1220-worker.log": "f3425fb676d6639e3747e712bc29babb6d5fd4a47897a61b652d869eec34daee",
+    "mac-churn-1.20.2-worker.log": "c43de49cd116aed49600aea91b326a64eab5c75d408594eccd73601431c0cb67",
+    "mac-churn-1.22.0-worker.log": "72d2edd9d46499911a3b35f91e94a3b7a902fd7e860c9770f68ba484233ac619",
+    "mac-churn-results.json": "8bd9b4f4d4ef3e4de46d77f8c60131210ad0ad7bd939f47102c10ee171874ab4",
+    "mac-churn.log": "70fd123aeba5012214db378d1e02870299dc4e0f67a324f6e5ef99fee0b44ac6",
+    "mac-churn.py": "590090037e6ba65baaea49bd408a53b20a9efbbb1919dc2b595817eb3b4feea8",
+    "mac-replay-1220.log": "08d6d393145cf81212ca4e784177a972056323d1e184038ae52ac7c9f460506d",
+    "mac-replay-driver.log": "cfcf97324099c757e594d3240f50dba4b04212e9a19e066d12c2a8545a294f5e",
+    "mac-replay.py": "ed0adb712ad6ad2d9b79ea3b80b325a2c5112ac17daeb2c18fdabc46127a65ce",
+    "mac-system-disk.log": "ee1829d4dfcd1aefa8107bd62f7db3226ed0d38b9dc66a2b63d514814c7d17e3",
+    "proxy.py": "e69788b9bc5c1939e1a80abf33987676c848ca2ff1a5cd12b38bbc5812587125",
+    "ci.log": "e84ffc7757a8e277309cfea4d683aace4e7587eb5ce0612299feab7727cbbc35",
+    "tooling.log": "2642c116f537236832890f598f00e9cee03c9242a3ada8336507b30d490bec0a",
+    "docs.log": "aae7135d7f0a37a3cd227d50e111b3f799daa99f6cfa30e5a2e60bca2d7bef5e",
+    "docs-links.log": "ff7a0b37daafe8c7e37f6882f69cf00d2a1806c1bd308aa460b0b475c95e5838",
+    "package-current.log": "4c2bec1407c639eb70aa25df0741558f0b660c245e51fcab8ccc555c631cc9dd",
+    "package-minimum.log": "f860f5b442c7bf33bceecd9917d3cd8fada50241acbfe77093c4f99ee2e7710c",
+    "package-current.json": "5dc86958e63751988aa4bb4b603d295bc58b86a233b95936468aca469b73d27a",
+    "package-minimum.json": "ee0647e019b7f25116a37bd0ba9b27067f7c61cc38bdc0eb5642f65dbbb9ae65",
+    "mac-diagnose-http.jsonl": "609ff1bb4e11fd6cc91161dee34f5c6559ff884b459858e243b0c3c2c73e950a",
+    "mac-diagnose-hdiutil.jsonl": "d5288a4a03ca5dc802096ffdfec18c919dfd20705c0fac0c904c5854eb9898af",
+    "mac-diagnose-final-inventory.json": "e73cc7e93d2a8a056394b7b711b2a077c62958e12c28021762641081e6d2abcb",
+    "mac-diagnose-result.json": "b0dc31fe2a076c756883d467b863e1a4e5aca307d66c2e9d1d7c90d6828137fa",
+    "mac-diagnose.log": "24d254b766a47688eab9721fecef87b6818533c46f3f26031217426ea9a526a8",
+    "mac-diagnose-worker.log": "657f2b7d9b602421dbe8f60cee06d58088b4d2d50a294b0eb75c870e9ea34a99",
+    "mac-diagnose.py": "b866eeaf121c9a698d2d693ac55ed2728cc374327d30425e6f8aa4586c1dcaba",
+    "mac-faithful.log": "eab6786998e3452b769ab0e6c19e829aa94571fc0e36dba5c0e3e8a8df460ec6",
+    "mac-faithful-worker.log": "657464343d3dc4d8e578b178cb4411f04df131af9bc3b1c35cb6ce924758ff60",
+    "mac-faithful.py": "46a70cf914332a80fb15e437a262a5b32e982915fe60962b0f04d58d59a6d5a2",
+    "mac-faithful-0.log": "891d20bce271687cddff27351c54c3f17066f6cd3e96e5f32de99812a1c0269b",
+    "mac-faithful-1.log": "8bc8daf88cc4d2814af7c61067ecd382ec8bb4876420d4091647f6e7d979441d",
+    "mac-faithful-final-inventory.json": "e73cc7e93d2a8a056394b7b711b2a077c62958e12c28021762641081e6d2abcb",
+    "mac-faithful-2.log": "24ab20a25476d50ccdeb1911bad5deaa839a64294d6aa1e5e883f3b659844112",
+    "mac-faithful-result.json": "b0ebf9548f10f57c7bf29e5b696097b208e1ef166a92391b10346c9d66224429",
+    "mac-faithful-wire.log": "bdaa14987034558692393c2bf43d76d6b37216137c3d24cd8936ce8af74957d4",
+    "mac-faithful-hdiutil.jsonl": "0d94b58ce3cef92fc217d902da8d9e8d5d607c0d951986519abde02899134ca0",
+    "mac-disk-detailed.log": "1d2b57b767c5c807ed8c935a7f787331641524e032b7335217e8f5004fc7a843",
+    "mac-storage-kernel.log": "27a823c6b67d1aef950832fe8ad00089ccefbf6b8589dbf7be6511f7609aa99e",
+    "terminal_original_expectation_test.exs": "a5ba6e1ad7d40415b6d2bea59469c1295c88f16b761a40c750b8ae8c48e14145",
+    "baseline-1.20.2/mac-diagnose-final-inventory.json": "e73cc7e93d2a8a056394b7b711b2a077c62958e12c28021762641081e6d2abcb",
+    "baseline-1.20.2/mac-diagnose-hdiutil.jsonl": "8768d5f1f0bbc7c2e79a67fe08485778956ee720112373efe259bb88174e46ed",
+    "baseline-1.20.2/mac-diagnose-http.jsonl": "c985479cc6039477acb7f97503a249fd6c5126a6cc8e233ee6e32599c272eb48",
+    "baseline-1.20.2/mac-diagnose-result.json": "f835b13adefdf6096203fa6231cde083789b62d7006ddbd566b3c85107ec1d10",
+    "baseline-1.20.2/mac-diagnose-worker.log": "74bb56c33c504caeac619346ef5f41e2308a75f21616d4390c4b625768fb7a5c",
+    "baseline-1.20.2/mac-diagnose.log": "d0160bd0027b8d22a3d9af85f390b0763f80307a15d0edd185b6fce7aa9d26d7",
+    "baseline-1.20.2/mac-diagnose.py": "c57955791e84db66e9d52fb676c57fe039c7c159f768b8fd721e2e1206929bf3",
+    "baseline-1.20.2/mac-faithful-0.log": "1e1e6b75c89c5a47dace4236b3a8e40318dafc4607010a84003c2e8bf62e5083",
+    "baseline-1.20.2/mac-faithful-1.log": "033d2c72db7ea2a39ac490ead5f41ed7395788f6c8f269b32c35310165729eea",
+    "baseline-1.20.2/mac-faithful-2.log": "5855a53394cfc14bf366a72c881ed607eaac7c198bde26c55424ff9f4a779e36",
+    "baseline-1.20.2/mac-faithful-final-inventory.json": "e73cc7e93d2a8a056394b7b711b2a077c62958e12c28021762641081e6d2abcb",
+    "baseline-1.20.2/mac-faithful-hdiutil.jsonl": "107393e4f71d0c4f38d87f03f11b41fe42530e30c667c35fe62647899cf7d2e8",
+    "baseline-1.20.2/mac-faithful-result.json": "e5758787274ce34c44873f4dbd7bc1be53fe2394c5e079ada618e532a0162c40",
+    "baseline-1.20.2/mac-faithful-wire.log": "22b84bd9ad9fafc2cca4b9c70b2ce80a9ff1436ce1bcd4ad1470d3c18c5435b7",
+    "baseline-1.20.2/mac-faithful-worker.log": "ea35e9b561323aa8ab9ab48235e7444d36f9c46cd617287e89066795a3b66f17",
+    "baseline-1.20.2/mac-faithful.log": "d9365a35474600d97202bc878fbf15fb002a60273305cd463c9d3c3b0a0cf603",
+    "baseline-1.20.2/mac-faithful.py": "5f91c27fe577db46c2ed85127d4137d7506346aecba99138f8fcc1e21d78fd0a",
+    "baseline-1.20.2/proxy.py": "e69788b9bc5c1939e1a80abf33987676c848ca2ff1a5cd12b38bbc5812587125",
+    "baseline-1.20.2/terminal_original_expectation_test.exs": "25d79cf44b6be4ae45c0e6a841b6d1ae5425e9bfd9ba0f4ab6c3bb9e6e761501"
+  },
+  "validation": {
+    "mix_ci": {
+      "passed": 610,
+      "doctests": 4,
+      "properties": 6,
+      "tests": 600,
+      "live_excluded": 29,
+      "quality_gates": "format, compile, xref, Credo/ex_slop, ExDNA, Credence, Dialyzer passed"
+    },
+    "maintainer_tests": 25,
+    "package_consumers": [
+      "current dependencies on Elixir 1.20.4 / OTP 29.0.6",
+      "minimum dependencies on Elixir 1.18.4 / OTP 27.3.4.15"
+    ],
+    "docs_local_pages": 127,
+    "package_note": "Consumer checks use the same archive of implementation and documentation, built before final validation results were appended to the investigation report and receipt.",
+    "scope": "Investigation validation before final default promotion."
+  },
+  "changed_source_sha256": {
+    "dev/smolbox/ci/preflight.ex": "46ac0d05a2d46f678f5f5c14e94de278f794113a392634513033e3f7a4b57173",
+    "dev/smolbox/ci/runtime.ex": "85fccab5ea8dc6695cafe9899ae83ab3bb35f626d86945103713b1678d3d6f07",
+    "examples/durable_host/lib/benchmark.ex": "d6b7bdcb5f628bebedd51b09d7cc13e5daec0f220cca4330093ff93b39b038fc",
+    "examples/durable_host/lib/checkpoint_demo.ex": "13d7e000ff3cfc2ae7db039620ba82de31a1d725a6d5302cf5ef0daf4a0e2448",
+    "examples/durable_host/lib/export_demo_config.ex": "cfe84b59f4000a6c8e68e7175fabce14c7397dd27b28eef503aead9b0bfbfbd9",
+    "examples/durable_host/lib/managed_checkpoint_config.ex": "38d1d3761d2c7a7ec95d6603b7a19c2b93b4a83c77de4ac06e28e6251d4ea931",
+    "examples/durable_host/lib/registry_demo.ex": "917a976769a834443a2d660e80f5646ef46bff1993e0079f317a6e00ae7fbdbb",
+    "examples/support/lib/setup.ex": "60507d4802851e5fe125fff4fe0827755ed42d5234e0777ab444d906ec660b2c",
+    "lib/smolbox/checkpoint.ex": "50b3fbb88e089592c7763bb4aca41c27339429d037f3ee965eed3e6d9be8771b",
+    "lib/smolbox/runtime/worker_config.ex": "f008d019579e3f71a1e9d96de1e4cffc4c6407c50aac1d148cd270c6deb86b83",
+    "scripts/benchmarks/provisioning/run.exs": "7e55c87c757d4ad9f43260318fb5b5df32aac3fb4a3a7e716173c2df23f7c19c",
+    "scripts/checkpoints/benchmark.exs": "31d650aebcd8165acc47fab346e28edb513bf679f19b0a5c2b7d8e9e72e9f405",
+    "scripts/checkpoints/run.exs": "518ff50f662c949a0dc95bea9c9c2a0da82991450bfbf090c89595aadf0c79bb",
+    "test/contract/persistent_machines_test.exs": "d1e2f6853d82eaec0d18a4e405c42111d5e9513e079b49c0969500e810d76abe",
+    "test/contract/worker_pool_test.exs": "aea9a6b89e5bc38825ec6ea239beacbfd149b8b720b09ae02aa530313a5df489",
+    "test/fixtures/ci/consumer.exs.template": "9af9531e4de801628dff117d8de6467146e5d2cb5e361921a22c6567db0451bd",
+    "test/support/checkpoint_fixture.ex": "6338920fab1a69760b624e5d1f3fdf64d685c294999e7001aa13324db89a6d4d",
+    "test/support/lab/candidate.ex": "7c1de8ccd7ff9c5c4f7206300fd0501ee9504adf2619d44e955fa4f1cc24a469",
+    "test/support/managed_peer.ex": "ba7ad6091a8d62632a8c83d40a42e9d842f8230510514fd905d40075921ea2f2",
+    "test/unit/checkpoint_artifact_test.exs": "27371c3a014d4022c3fb43819d02b6fb5357cd53ad6651ce5091c6a4464a0b3e",
+    "test/unit/runtime_config_test.exs": "cde6fc5c57d83d70ef78af92acb2ee132f27a546e0abb902aebfdc7959e5e3dd"
+  },
+  "additional_macos_investigation": {
+    "status": "original creation root cause still unproven",
+    "commit_before_followup": "e57ab3b",
+    "official_binary_unchanged": true,
+    "instrumentation": "private HTTP response capture and PATH wrapper forwarding hdiutil stdout/stderr and exit status unchanged; timing may differ",
+    "alternating_python_node_lifecycles": 50,
+    "hdiutil_calls": 250,
+    "hdiutil_failures": 0,
+    "original_failure_path_replays": {
+      "runs": 3,
+      "seed": 194898,
+      "tests_per_run": 14,
+      "passed_per_run": 13,
+      "intentional_failure_per_run": "old descendant_active=True assertion, restored in a private test copy to exercise original on_exit cleanup",
+      "http_create_responses": 45,
+      "http_create_failures": 0,
+      "hdiutil_calls": 231,
+      "hdiutil_failures": 0
+    },
+    "original_host_log_review": "Recovered disk-image, APFS and kernel logs for original failure window; no specific cause could be tied to request. Filesystem activity is not proof of creation failure cause.",
+    "final_inventories_empty": true,
+    "private_workers_stopped": true,
+    "remaining_requirement": "Capture a recurring create failure with its HTTP error body and corresponding worker/helper logs; successful reruns cannot reconstruct the missing original response."
+  },
+  "matched_macos_baseline": {
+    "runtime": "1.20.2",
+    "binary_sha256": "382e5353dccf13e4503ef8a4c41b6ee23b24ac00e0f9fb77a8a8d40ff79df6a8",
+    "result": "creation failure not reproduced",
+    "same_artifacts_and_instrumentation_as_candidate": true,
+    "alternating_python_node_lifecycles": 50,
+    "hdiutil_calls": 250,
+    "hdiutil_failures": 0,
+    "original_failure_path_replays": {
+      "runs": 3,
+      "seed": 194898,
+      "tests_per_run": 14,
+      "passed_per_run": 13,
+      "intentional_failure_per_run": "old descendant_active=True assertion restored in private copy to exercise original on_exit cleanup",
+      "http_create_responses": 45,
+      "http_create_failures": 0,
+      "hdiutil_calls": 231,
+      "hdiutil_failures": 0
+    },
+    "final_inventories_empty": true,
+    "private_workers_stopped": true,
+    "interpretation": "No reproduction on 1.20.2, and no proof that 1.22.0 introduced the failure. Both matched campaigns passed creation checks. Final decision: proceed with 1.22.0 as default, retaining the unexplained observation."
+  },
+  "changed_source_sha256_scope": "Investigation sources before final default promotion; retained as historical evidence.",
+  "final_promotion_validation": {
+    "runtime_default": "1.22.0",
+    "mix_ci": {
+      "passed": 610,
+      "doctests": 4,
+      "properties": 6,
+      "tests": 600,
+      "live_excluded": 29,
+      "quality_gates": "format, compile, xref, Credo/ex_slop, ExDNA, Credence, Dialyzer passed"
+    },
+    "package_consumers": [
+      "current dependencies on Elixir 1.20.4 / OTP 29.0.6",
+      "minimum dependencies on Elixir 1.18.4 / OTP 27.3.4.15"
+    ],
+    "docs": "ExDoc warnings-as-errors and local links/fragments in 127 pages passed",
+    "package_note": "Both consumers used the same archive, built before these final validation results were appended to the report and receipt.",
+    "private_log_sha256": {
+      "ci-promoted.log": "87431381c202d482d672c29865eaed6d2ed18ab3f8ceb8688dbb305b13b524ce",
+      "package-promoted-current.log": "3bee65c7adeb7b2602b6e7937bdb40c3b7b539b9311f56eb168b88d569837f85",
+      "package-promoted-current.json": "915ab40022c26b7f47dc6a030d7cb1db96422b844ceb7d9fa8b83fea4e5ff7e4",
+      "package-promoted-minimum.log": "afdc4001728afacd286c011e8616c2a9dc53d72c1670eb70729e7556cac77d78",
+      "package-promoted-minimum.json": "065f4d81a6cf595c7bfafb4c8f65db4c2e22bd14a96525e8a357f705df2e2890",
+      "docs-promoted.log": "aae7135d7f0a37a3cd227d50e111b3f799daa99f6cfa30e5a2e60bca2d7bef5e",
+      "docs-links-promoted.log": "ff7a0b37daafe8c7e37f6882f69cf00d2a1806c1bd308aa460b0b475c95e5838"
+    },
+    "changed_source_sha256": {
+      "dev/smolbox/ci/preflight.ex": "2a9286647164f61f6ad228a62f9fdf103f03a16e41b540f682880a4f17a55266",
+      "dev/smolbox/ci/runtime.ex": "ae7e06ac87d968928a66940657ecc0bfc4851073a5008a7992c6dda4735f73fb",
+      "examples/durable_host/lib/benchmark.ex": "5e3ef911b20b737841d8119669f14963289cf728343df96e0bb23818406102d6",
+      "examples/durable_host/lib/checkpoint_demo.ex": "a1550de395d7263ce135e8836c58016341e7b01ab18e28abb2c9fee9e8850fc6",
+      "examples/durable_host/lib/export_demo_config.ex": "6408aacd2e3052fb3134164626f69cd41c5c770202ee539a68c80a33adb2a5f7",
+      "examples/durable_host/lib/managed_checkpoint_config.ex": "4dceb543dad4efedefcb28573b1cc7c44204f09c89fc6ca4b3fcf45ec957d377",
+      "examples/durable_host/lib/registry_demo.ex": "ace9529fc5fdadfb269012851c094e705c3de20e26388f6f585e428f697f3605",
+      "examples/support/lib/setup.ex": "d24c387714acba8a522bb63b68d2567a53353731769f7fa65e2fd64d1e667aad",
+      "lib/smolbox/checkpoint.ex": "d57b62664130820b325b387acd1eaadfce6e02abc00044105299355ca6677f3f",
+      "lib/smolbox/runtime/worker_config.ex": "623efa424ea89157d4742827672028515b6c3641993d6718a2538c2a9d0fc077",
+      "scripts/benchmarks/provisioning/run.exs": "7e55c87c757d4ad9f43260318fb5b5df32aac3fb4a3a7e716173c2df23f7c19c",
+      "scripts/checkpoints/benchmark.exs": "ac39b391f60fe79c2da13556237590968f3088a8c05628db84f83e8262e4723a",
+      "scripts/checkpoints/run.exs": "8a7453f15cc041b6216af3b6cefb2d7798c4ac7668a7b1595f8cde87a9f7f58c",
+      "test/contract/persistent_machines_test.exs": "d1e2f6853d82eaec0d18a4e405c42111d5e9513e079b49c0969500e810d76abe",
+      "test/contract/worker_pool_test.exs": "3211b559f8601cad820a0a17a47944e890c83c45ebac97f29a94f2c6f858f417",
+      "test/fixtures/ci/consumer.exs.template": "68f0f29f3453a9f17655d3ba2c349c1d6d4fe956b6d667ffc4dd93a3eec6c419",
+      "test/support/checkpoint_fixture.ex": "d8c620764400dcdfa1a1e8112019f50708071a48b5213d6090ab10fb70465c95",
+      "test/support/lab/candidate.ex": "67d1501cc8ae106caea3114932909d59ee85703ca7006ec0f9fdee8318f124bc",
+      "test/support/managed_peer.ex": "76442e40a7a1489edc8be89f4ea660d97f9daa3dd2324c3763d59e6d96b2bfe8",
+      "test/unit/checkpoint_artifact_test.exs": "08ec34922296efa16fb95659a59a0eec786ec2ae9269c4d61e036abfd6bf7761",
+      "test/unit/runtime_config_test.exs": "cf036fcd2f180cc3a9b3e65d92d6525f40c07a77cf1306c785c2879521a58db3"
+    }
+  }
+}

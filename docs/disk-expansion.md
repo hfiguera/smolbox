@@ -2,7 +2,7 @@
 
 A project can outgrow its initial disk allocation without needing a new machine.
 SmolBox can grow the storage disk, overlay disk, or both on an idle stopped or
-created managed machine. The first version supports smolvm **1.20.2**, with
+created managed machine. The current implementation supports smolvm **1.20.2 and 1.22.0**, with
 absolute target sizes from **1 to 64 GiB per disk**. It never shrinks a disk,
 resizes CPU/RAM, automatically stops a machine, or starts it after growth.
 
@@ -188,3 +188,6 @@ deduplication, drain exclusion, partial outcomes, retained reservations and code
 compatibility. Simulated controller tests cover restarts, no replay, mismatched
 ownership, explicit resolution and commands after growth. No macOS VM qualification,
 checkpoint/branch expansion, live growth or out-of-space fault campaign is claimed.
+
+The [1.22.0 qualification](runtime-1.22.0-qualification.md) records the newer
+platform checks. The historical validation above still describes its original run.

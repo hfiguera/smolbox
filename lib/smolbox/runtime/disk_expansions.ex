@@ -39,7 +39,7 @@ defmodule SmolBox.Runtime.DiskExpansions do
 
   defp dispatch(config, m) do
     with {:ok, worker} <- Machines.worker(config, m),
-         true <- worker.runtime_version == "1.20.2",
+         true <- worker.runtime_version in ["1.20.2", "1.22.0"],
          %{status: :ready} <- WorkerHealth.observe(worker, config.clock),
          {:ok, observed} <-
            Machines.io(config, m, fn ->

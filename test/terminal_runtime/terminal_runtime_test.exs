@@ -289,7 +289,7 @@ defmodule SmolBox.TerminalRuntimeTest do
 
     # The 1.19.0 counterexample remains covered. Newer workers may reap this
     # container's descendants; that observation is not a cancellation receipt.
-    if SmolBox.LabCandidate.runtime_version() == "1.20.2" do
+    if SmolBox.LabCandidate.runtime_version() in ["1.20.2", "1.22.0"] do
       assert observation =~ "descendant_active=False"
     else
       assert observation =~ "descendant_active=True"

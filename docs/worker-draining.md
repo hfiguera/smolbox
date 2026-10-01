@@ -174,3 +174,6 @@ test history removed, rollback and reapplication succeeded. The ordinary library
 PostgreSQL adapter and published-dependency community example suites, package
 consumer check and static quality checks cover compatibility independently of this
 live scenario. No macOS VM campaign was run for this feature.
+
+The [1.22.0 qualification](runtime-1.22.0-qualification.md) records the newer
+platform checks. The historical validation above still describes its original run.
