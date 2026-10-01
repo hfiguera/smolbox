@@ -1,6 +1,6 @@
 # Getting started
 
-This checkout defaults to **smolvm 1.22.0** on Linux x86_64 and macOS Apple
+SmolBox 0.4.1 defaults to **smolvm 1.22.0** on Linux x86_64 and macOS Apple
 Silicon. Published SmolBox 0.4.0 and 0.3.1 keep their 1.20.2 default. Pin existing
 workers and checkpoint approvals to their actual version. Updating SmolBox does
 not install smolvm. See the
@@ -27,13 +27,13 @@ explicit cleanup on Linux.
 In an existing Elixir Mix application, add this entry to `deps/0` in `mix.exs`:
 
 ```elixir
-{:smolbox, "~> 0.4.0"}
+{:smolbox, "~> 0.4.1"}
 ```
 
 Run `mix deps.get` after adding the dependency. A local checkout can instead be
-used with `{:smolbox, path: "../smolbox"}`. Version 0.4.0 defaults to smolvm
-**1.20.2**. Existing applications should follow
-[Upgrading to 0.4.0](upgrading-to-0.4.0.md); the library does not upgrade
+used with `{:smolbox, path: "../smolbox"}`. Version 0.4.1 defaults to smolvm
+**1.22.0**. Existing applications should follow
+[Upgrading to 0.4.1](upgrading-to-0.4.1.md); the library does not upgrade
 the worker. Applications coming from 0.1.2 or earlier also require the coordinated
 [record format upgrade](recovery.md#upgrading-to-0-1-3).
 Elixir 1.18 and later are accepted by the
@@ -49,8 +49,8 @@ Use Linux x86_64 with KVM or macOS Apple Silicon. This walkthrough runs the Elix
 application on the worker host so it can verify the local artifact file. Remote
 workers use a different host configuration; see [Managed host integration](host-integration.md).
 
-You need a **dedicated, empty worker**. For this checkout, select **smolvm 1.22.0
-on Linux x86_64 or macOS Apple Silicon**. Existing 1.19.0, 1.17.0 and other supported deployments require an explicit
+You need a **dedicated, empty worker**. For 0.4.1, select **smolvm 1.22.0
+on Linux x86_64 or macOS Apple Silicon**. Existing 1.20.2, 1.19.0, 1.17.0 and other supported deployments require an explicit
 matching `runtime_version` (or the environment setting below).
 Check the [host preparation prerequisites](compatibility.md#host-preparation-prerequisites),
 then use an approved native Python
@@ -81,7 +81,7 @@ iex -S mix
 
 `SMOLBOX_DEMO_DIR` is a new private directory for input/output objects. Keep it
 separate from the runtime image and from all guest-accessible directories.
-This checkout selects 1.22.0; published SmolBox 0.4.0 requires 1.20.2. Explicitly select an older
+SmolBox 0.4.1 selects 1.22.0; SmolBox 0.4.0 defaults to 1.20.2. Explicitly select an older
 supported worker version when retaining an existing installation; updating the
 Elixir dependency does not install a worker or migrate checkpoint artifacts.
 

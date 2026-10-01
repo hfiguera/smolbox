@@ -1,12 +1,12 @@
 # Compatibility evidence
 
-Version: `0.4.0`. The library's supported qualification is
+Version: `0.4.1`. The library's supported qualification is
 `:development`; requested hard-control options remain unsupported. The original
 release evidence below records the client/controller contract on Linux and macOS.
 
 ## smolvm 1.22.0 qualification
 
-**Default in this checkout; published 0.4.0 remains on 1.20.2.** See the
+**Default in SmolBox 0.4.1; 0.4.0 remains on 1.20.2.** See the
 [qualification report](runtime-1.22.0-qualification.md) for exact inputs, real worker
 results, failed attempts and upgrade boundaries. Only the released 1.22.0 is
 added; 1.21.x and later versions are not implicitly admitted. Existing supported
@@ -14,7 +14,8 @@ versions remain available through explicit configuration.
 
 No SQL migration, store callback change or codec revision is introduced. Upgrade
 all readers before storing results with the new runtime version and preserve
-existing checkpoint capture pins. Qualification remains `:development`.
+existing checkpoint capture pins. See [Upgrading to 0.4.1](upgrading-to-0.4.1.md).
+Qualification remains `:development`.
 
 ## Worker operations and storage in 0.4.0
 
@@ -264,7 +265,7 @@ explicit bounded settings. No validation limits or public defaults were relaxed.
 
 ## Runtime selection
 
-This checkout defaults to 1.22.0. Published SmolBox 0.4.0 and 0.3.1 default to 1.20.2; published 0.3.0 and 0.2.1 default to 1.19.0.
+SmolBox 0.4.1 defaults to 1.22.0. Published SmolBox 0.4.0 and 0.3.1 default to 1.20.2; published 0.3.0 and 0.2.1 default to 1.19.0.
 These runtime versions are supported on Linux x86_64 and macOS Apple Silicon.
 
 SmolBox 0.1.3 defaults to `runtime_version: "1.16.0"` for Linux x86_64 and
