@@ -6,7 +6,7 @@ configuration and collect larger artifacts without forcing everything beneath
 ordinary command working directories. Existing defaults remain `/workspace`,
 1 MiB per file and 4 MiB per manifest direction.
 
-Expanded policies require **smolvm 1.17.0, 1.19.0 or 1.20.2 image machines**. Older workers and
+Expanded policies require **smolvm 1.17.0, 1.19.0, 1.20.2 or 1.22.0 image machines**. Older workers and
 checkpoints keep their existing contract. File bodies are buffered in the
 controller and worker; this is a bounded larger-file API, not streaming bulk
 storage. No recursive copy, globbing, archive extraction, resume, permission
@@ -231,3 +231,6 @@ machine and policy, reads the files, stops/starts, reads again, then explicitly
 deletes and verifies absence and released reservations. The `delete` phase is
 available for explicit cleanup of an interrupted demonstration. Test coverage and
 real-worker receipts are in [validation](guest-files-validation.md).
+
+For the current checkout default, see the [1.22.0 qualification](runtime-1.22.0-qualification.md).
+Earlier validation sections above retain their original scope.

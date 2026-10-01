@@ -1,6 +1,6 @@
 # Workloads and console diagnostics
 
-Managed image machines on smolvm **1.17.0, 1.19.0 or 1.20.2** can start an application whenever the
+Managed image machines on smolvm **1.17.0, 1.19.0, 1.20.2 or 1.22.0** can start an application whenever the
 VM starts. Startup configuration belongs to the machine's immutable creation
 specification. Commands and terminal sessions remain separate executions.
 
@@ -182,3 +182,6 @@ When a record uses an explicit guest path policy or expanded file budget,
 [codec v9](guest-files.md#recovery-and-upgrades) supersedes its earlier envelope
 and additionally requires `guest_files: 1`. Other feature capabilities and
 retention rules still apply.
+
+For the current checkout default, see the [1.22.0 qualification](runtime-1.22.0-qualification.md).
+Earlier validation sections above retain their original scope.

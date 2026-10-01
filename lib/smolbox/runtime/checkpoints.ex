@@ -30,7 +30,8 @@ defmodule SmolBox.Runtime.Checkpoints do
 
   def approved?(worker, spec),
     do:
-      worker.runtime_version in ["1.19.0", "1.20.2"] and spec.policy in worker.checkpoint_policies
+      worker.runtime_version in ["1.19.0", "1.20.2", "1.22.0"] and
+        spec.policy in worker.checkpoint_policies
 
   def advance(config, machine, capture, changes) do
     with {:ok, current} <- MachineSession.claim(config, ManagedMachine.key(machine)),

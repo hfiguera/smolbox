@@ -178,7 +178,7 @@ defmodule SmolBox.Machines do
   `:storage_gb` and/or `:overlay_gb` targets (1–64 GiB). Identical retries return
   existing history, including after deletion. Conflicting reuse of an ID fails.
   Growth reserves capacity before dispatch and is blocked by durable draining.
-  Requires smolvm 1.20.2 and `managed_disk_expansion: 1` store support.
+  Requires smolvm 1.20.2 or 1.22.0 and `managed_disk_expansion: 1` store support.
 
   Creation identity stays immutable. Await with `await/3`, then inspect
   `record.disk_expansions[id]`. Unknown outcomes block reuse and retain capacity;
@@ -194,7 +194,7 @@ defmodule SmolBox.Machines do
          :ok <- DiskExpansions.supported(config),
          {:ok, record} <- Machines.store(config, :fetch, [handle]),
          {:ok, worker} <- Machines.worker(config, record),
-         true <- worker.runtime_version == "1.20.2" do
+         true <- worker.runtime_version in ["1.20.2", "1.22.0"] do
       Machines.store(config, :expansion_accept, [
         handle,
         id,

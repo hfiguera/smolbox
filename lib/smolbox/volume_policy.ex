@@ -1,6 +1,6 @@
 defmodule SmolBox.VolumePolicy do
   @moduledoc """
-  Operator approval of one worker's exclusive local volume root on smolvm 1.20.2.
+  Operator approval of one worker's exclusive local volume root on smolvm 1.20.2 or 1.22.0.
   The root must be the canonical upstream volumes directory, free of symlink
   substitution and external writers. The operator must verify file permissions
   across replacement machines. `size_gb` reservations are advisory, not quotas.

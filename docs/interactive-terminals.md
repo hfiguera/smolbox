@@ -6,7 +6,7 @@ returns output and an exit result; background execution returns launch evidence;
 an interactive session provides an ongoing terminal byte stream.
 
 This API supports managed persistent **image machines** on qualified smolvm
-**1.17.0, 1.19.0 or 1.20.2**, and a low-level client for hosts that manage lifetime themselves.
+**1.17.0, 1.19.0, 1.20.2 or 1.22.0**, and a low-level client for hosts that manage lifetime themselves.
 Disposable execution and checkpoint terminals are unsupported. No process
 supervisor, automatic reconnect, input replay or guest-session reattachment is
 provided.
@@ -285,3 +285,6 @@ When a record uses an explicit guest path policy or expanded file budget,
 [codec v9](guest-files.md#recovery-and-upgrades) supersedes its earlier envelope
 and additionally requires `guest_files: 1`. Other feature capabilities and
 retention rules still apply.
+
+For the current checkout default, see the [1.22.0 qualification](runtime-1.22.0-qualification.md).
+Earlier validation sections above retain their original scope.

@@ -1,6 +1,6 @@
 defmodule SmolBox.WorkerCapacity do
   @moduledoc """
-  Read-only `/capacity` snapshot, qualified against smolvm 1.20.2.
+  Read-only `/capacity` snapshot, qualified against smolvm 1.20.2 and 1.22.0.
 
   This is not configured admission capacity or the store's durable reservations.
   Allocations cover running machines; stopped machines and retained artifacts can

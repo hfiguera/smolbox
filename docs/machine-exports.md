@@ -10,7 +10,7 @@ backup scheduling, disaster recovery, migration, or automatic registry cleanup.
 
 ## What an export preserves
 
-SmolBox uses `POST /api/v1/machines/:name/export` on an approved 1.19.0 or 1.20.2 worker.
+SmolBox uses `POST /api/v1/machines/:name/export` on an approved 1.19.0, 1.20.2 or 1.22.0 worker.
 It requires a stopped machine and never stops one implicitly.
 
 | Source | Supported exported state | Excluded state |
@@ -279,3 +279,6 @@ The [1.20.2 qualification](runtime-1.20.2-qualification.md) records the newer
 worker campaign separately from the original feature evidence above. Preserve the
 exact capture runtime on checkpoint approvals; changing a filename or version
 field does not migrate saved machine state.
+
+For the current checkout default, see the [1.22.0 qualification](runtime-1.22.0-qualification.md).
+Earlier validation sections above retain their original scope.

@@ -44,7 +44,7 @@ defmodule SmolBox.Runtime.Exports do
   end
 
   def approved?(worker, spec) do
-    worker.runtime_version in ["1.19.0", "1.20.2"] and
+    worker.runtime_version in ["1.19.0", "1.20.2", "1.22.0"] and
       spec.destination in worker.export_destinations
   end
 

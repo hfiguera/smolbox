@@ -62,7 +62,7 @@ defmodule SmolBox.ExportResult do
            ),
          true <- Validation.integer?(result.size_bytes, 1, 9_223_372_036_854_775_807),
          true <- Validation.timestamp?(result.verified_at_ms),
-         true <- result.runtime_version in ["1.19.0", "1.20.2"],
+         true <- result.runtime_version in ["1.19.0", "1.20.2", "1.22.0"],
          true <-
            {result.architecture, result.platform} in [
              {"x86_64", "linux/amd64"},

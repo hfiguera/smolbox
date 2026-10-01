@@ -120,7 +120,7 @@ defmodule SmolBox.DurableHost.ManagedCheckpointConfig do
     {:ok, seed} =
       Checkpoint.new(
         id: "idle-seed",
-        runtime_version: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.20.2"),
+        runtime_version: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.22.0"),
         path: path,
         sha256: digest,
         profile: profile,

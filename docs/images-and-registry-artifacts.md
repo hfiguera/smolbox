@@ -4,17 +4,25 @@ Registry sources let a retained machine fetch an approved environment without an
 operator copying the prepared file to each worker first. Provisioning still has a
 durable identity, an approved worker and profile, and an explicit lifetime.
 
-These operations support smolvm 1.19.0 and 1.20.2. The three operations
+These operations support smolvm 1.19.0, 1.20.2 and 1.22.0. The three operations
 have different storage and authentication boundaries:
 
 | Operation | Where the content is fetched | Identity |
 | --- | --- | --- |
 | Registry `.smolmachine` creation | Worker host blob cache, then machine preparation | Platform manifest digest plus prepared file content digest |
-| OCI creation | Registry probe on the host; container content pulled inside the VM | Approved OCI platform manifest digest |
+| OCI creation | Host registry metadata; content in the machine or a shared image seed builder | Approved OCI platform manifest digest |
 | Machine image list/pull | An existing machine's image storage | Observed configuration digest, or `packed` for imported images |
 
 An image list is not a worker-wide artifact catalog. It does not enumerate the
 host's prepared artifact cache.
+
+On 1.22.0, eligible OCI creation can prepare or reuse a shared image seed. The
+worker resolves metadata on the host and can launch a temporary network-enabled
+builder before the requested machine. Budget that builder and retained seed cache
+separately from SmolBox's machine reservations; the guest network policy does not
+constrain host preparation. Set `SMOLVM_IMAGE_SEEDS=0` in the **worker's environment**
+to disable this path. See the [qualification report](runtime-1.22.0-qualification.md)
+for the tested configurations and limits.
 
 ## Approve an immutable source
 
@@ -224,3 +232,6 @@ The [1.20.2 qualification](runtime-1.20.2-qualification.md) records the newer
 worker campaign separately from the original feature evidence above. Preserve the
 exact capture runtime on checkpoint approvals; changing a filename or version
 field does not migrate saved machine state.
+
+For the current checkout default, see the [1.22.0 qualification](runtime-1.22.0-qualification.md).
+Earlier validation sections above retain their original scope.

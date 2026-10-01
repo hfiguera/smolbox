@@ -3,6 +3,10 @@ defmodule SmolBox.CI.Runtime do
   alias SmolBox.CI.Util
 
   @pins %{
+    {"linux", "1.22.0"} =>
+      {"x86_64", "05c8992647761640176b4a56dbc1ea2bbc0ed07d38370a598fb9b0822fa3d31b"},
+    {"macos", "1.22.0"} =>
+      {"arm64", "0a66ca6e8a6437008847e3d42de17d24fa23129f4029529593ae806216cfb448"},
     {"linux", "1.20.2"} =>
       {"x86_64", "af9ac1f9e9401ed5f56b2d1eba625edf64ddbe37391308d5b271fa450c6b3512"},
     {"macos", "1.20.2"} =>
@@ -38,5 +42,5 @@ defmodule SmolBox.CI.Runtime do
     Map.fetch!(@pins, {platform, version})
   end
 
-  def selected_version, do: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.20.2")
+  def selected_version, do: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.22.0")
 end

@@ -4,7 +4,7 @@ A retained machine keeps its own disks until deletion. A managed local volume ha
 its own identity and lifetime: delete the machine, then attach the same data to a
 replacement on the same worker. Use this for project data or a reusable cache.
 
-This initial implementation supports **Linux workers running smolvm 1.20.2**, one
+This implementation supports **Linux workers running smolvm 1.20.2 or 1.22.0**, one
 exclusive machine attachment per volume, and guest targets below `/mnt/volumes/`.
 Read-only attachments are exclusive too. The default remains no mounts.
 
@@ -210,3 +210,6 @@ competing attachments, identity conflicts, drain gates, atomic rollback, store
 failures before/after persistence, lost responses, interrupted callers, changed
 mount observations, record limits and malformed codec/wire inputs. These are
 failure-injection coverage, not evidence of host quotas or multi-tenant isolation.
+
+The [1.22.0 qualification](runtime-1.22.0-qualification.md) records the newer
+platform checks. The historical validation above still describes its original run.

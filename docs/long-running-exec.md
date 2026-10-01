@@ -2,7 +2,7 @@
 
 SmolBox supports finite foreground command timeouts up to 24 hours and explicit
 background launch on managed persistent image machines. Both require the qualified
-smolvm 1.17.0, 1.19.0 or 1.20.2 runtime. Background launch confirms a process was started; it is not
+smolvm 1.17.0, 1.19.0, 1.20.2 or 1.22.0 runtime. Background launch confirms a process was started; it is not
 process supervision, readiness, or the eventual exit status.
 
 ## Foreground deadlines
@@ -215,3 +215,6 @@ When a record uses an explicit guest path policy or expanded file budget,
 [codec v9](guest-files.md#recovery-and-upgrades) supersedes its earlier envelope
 and additionally requires `guest_files: 1`. Other feature capabilities and
 retention rules still apply.
+
+For the current checkout default, see the [1.22.0 qualification](runtime-1.22.0-qualification.md).
+Earlier validation sections above retain their original scope.

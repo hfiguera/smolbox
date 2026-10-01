@@ -3,7 +3,7 @@ defmodule SmolBox.Checkpoints do
   Managed capture of idle offline memory and disks, and explicit independent restore.
 
   Source machines opt in with `checkpointable: true` and start on an approved
-  1.19.0 or 1.20.2 worker. Captures have durable identities independent of executions.
+  1.19.0, 1.20.2 or 1.22.0 worker. Captures have durable identities independent of executions.
   A captured result still holds the operation slot until the host confirms that
   pending requests and worker staging are quiescent. There is no automatic replay,
   checkpoint expiry, artifact deletion, live branching or in-place rollback.

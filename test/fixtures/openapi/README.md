@@ -105,3 +105,14 @@ routes as the 1.19.0 subset and includes their transitive schema references.
 Linux and macOS exports have the same SHA-256. The decoder ignores that optional observation; it does not authorize live resize
 or change immutable resource reservations. See the
 [qualification report](../../../docs/runtime-1.20.2-qualification.md).
+
+## smolvm 1.22.0
+
+The official Darwin ARM64 and Linux x86_64 binaries export identical schemas.
+The same eight paths and 21 recursively referenced schemas are unchanged from
+1.20.2. The fixture preserves their definitions; it does not imply support for
+other upstream endpoints.
+
+Source commit: `f40f42c337319b724e221e8d3f809f7b186340c2`.
+Full schema SHA-256: `d1d183b89b28646bd8d1a9e5bd3120d845f1fd4f7670539b515a6ca85bf0ba36`.
+Subset SHA-256: `7b61b87bf60a920b623d6faf9e11d8484d93e064bdf34e4ea9f0dcf51b885cb8`.
