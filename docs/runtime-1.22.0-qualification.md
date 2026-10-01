@@ -2,8 +2,10 @@
 
 This campaign compares the previously qualified **1.20.2** with the official
 **1.22.0** release on physical Linux x86_64 and native macOS Apple Silicon.
-This checkout selects **1.22.0** by default. Qualification remains `:development`.
-Published SmolBox 0.4.0 selects 1.20.2;
+This checkout retains **1.20.2** as the default. Version **1.22.0** requires
+explicit configuration while the macOS creation failure described below remains
+unresolved. Qualification remains `:development`. Published SmolBox 0.4.0 also
+selects 1.20.2;
 updating a library never installs or upgrades its workers.
 
 ## Exact inputs
@@ -124,16 +126,17 @@ campaign, not a new performance claim.
 - The first combined feature runs used the older terminal child-liveness
   expectation. The version-specific assertion now includes 1.22.0; unknown-outcome
   expectations are unchanged. Focused terminal tests passed on both platforms.
-- One initial macOS Node creation returned HTTP 500. A direct follow-up, three
-  fresh-worker/cache creations and the complete 14-test feature rerun passed.
-  The original error's cause remains unconfirmed; the reruns do not prove a fix.
-- The first Linux composition run observed a fresh machine stopped before its
-  expected running state. Three isolated creations subsequently passed. The
-  failed run was retained and its owned machines and capture cleaned through
-  explicit verified operations. A complete five-mode run with separate durable
-  identities then passed five samples per mode plus warmup, with zero final
-  reservations. The initial stopped observation remains unexplained; this is
-  recorded as a failed attempt, not a fixed defect.
+- One initial macOS Node creation returned HTTP 500. The response body was not
+  retained and the worker warning log only records the status and latency.
+  Three fresh-worker/cache creations and the original complete feature rerun
+  passed. The investigation below adds evidence but does not establish a cause.
+- The first Linux composition run timed out **before submitting start**, waiting
+  for `created`. Its retained record had `state: :stopped`, no active operation
+  and no lifecycle request; the create response itself was `created`. The
+  benchmark assumption was wrong. The investigation below reproduces the
+  transition on both versions and fixes that wait. The failed run's owned
+  resources were cleaned through verified operations. A subsequent complete
+  five-mode run passed five samples per mode plus warmup, with zero reservations.
 - The first macOS OCI probe mistakenly supplied the Linux x86_64 platform digest
   while declaring ARM64. The worker returned an exec-format error. Native pinned
   ARM64 manifests passed. Source architecture is an operator approval, not a
@@ -141,6 +144,49 @@ campaign, not a new performance claim.
 - Initial harness attempts needed the database migrated, correct socket/environment
   settings and the minimum toolchain's own Hex/Rebar installation. These setup
   failures are retained in the private evidence and are not counted as passes.
+
+### Investigation outcome
+
+**Linux: confirmed benchmark race, not a 1.22.0 start regression.** The upstream
+supervisor checks machines every five seconds. An unstarted machine has no live
+manager; with restart policy `never`, the supervisor records it as `stopped`.
+The supervisor source is unchanged between v1.20.2 and v1.22.0. Two fresh machines
+per version reproduced `created` → `stopped` after six seconds without a start
+request on physical Linux. Every machine then started explicitly, ran a command,
+and was deleted with verified absence. Ownership identity remained unchanged.
+
+The provisioning harness now accepts confirmed `created` or `stopped` with no
+pending operation before submitting start. It still requires confirmed `running`
+afterward. Two deterministic contract tests, one per version, hold the create
+response while the worker observation changes to `stopped`; they verify that no
+start was sent, explicit start succeeds and deletion releases the reservation.
+These tests use the simulated worker; the four reproductions used official live
+Linux binaries.
+
+**macOS: unresolved, so default promotion is deferred.** An instrumented replay
+of the original 14-test feature sequence with seed 194898 passed. The proxy
+captured HTTP response status and error bodies; its only HTTP 500 responses were
+expected file-read failures, with no create failure. A separate alternating
+Python/Node workload completed 12 create/start/exec/stop/delete cycles on 1.22.0
+and 12 on 1.20.2. Both final inventories were empty. The probes used native Apple
+Silicon and official binaries with separate private worker homes.
+
+The original Node request used a `.smolmachine` pack, which does not take the new
+image-seed preparation path. That rules out attributing this failure to that path
+without further evidence. Host disk logs did not establish a cause. Passing
+replays do not establish whether the original failure was environmental or a
+worker defect, nor do they prove a fix. No retry was added to hide creation errors.
+
+The remaining diagnostic requirement is the **actual create-error response body**
+and corresponding worker/host logs if the failure recurs. Private investigation
+scripts and logs were retained with hashes in
+[`smolvm-1.22.0-investigation.json`](evidence/smolvm-1.22.0-investigation.json).
+All investigation machines were deleted and their private workers stopped.
+The earlier campaign receipt remains historical; its source hashes and counts
+refer to commit `4c9a8ee`, before this investigation and default reversal. Follow-up validation passed 610
+ordinary checks (29 live tests excluded), all `mix ci` quality gates, 25 maintainer
+tests, package consumers on current and minimum toolchains, and local links in
+127 generated documentation pages.
 
 ## Limits
 

@@ -11,7 +11,7 @@ defmodule SmolBox.WorkerPoolTest do
         {[runtime_version: "1.15.0"], :incompatible},
         {[runtime_version: "1.19.0"], :incompatible},
         {[runtime_version: "1.20.1"], :incompatible},
-        {[runtime_version: "1.20.2"], :incompatible},
+        {[runtime_version: "1.22.0"], :incompatible},
         {[runtime_version: "1.20.3"], :incompatible},
         {[runtime_version: "1.16.0"], :incompatible},
         {[runtime_version: "1.16.1"], :incompatible},
@@ -40,7 +40,7 @@ defmodule SmolBox.WorkerPoolTest do
   end
 
   for {label, options} <- [
-        {"default 1.22.0", []},
+        {"default 1.20.2", []},
         {"explicit 1.17.0", [runtime_version: "1.17.0", expected_runtime_version: "1.17.0"]},
         {"explicit 1.22.0", [runtime_version: "1.22.0", expected_runtime_version: "1.22.0"]},
         {"explicit 1.20.2", [runtime_version: "1.20.2", expected_runtime_version: "1.20.2"]},
@@ -81,7 +81,7 @@ defmodule SmolBox.WorkerPoolTest do
     assert ManagedPeer.snapshot(context.peer).commands == []
     assert match?([_command], ManagedPeer.snapshot(second).commands)
     assert {:ok, reports} = SmolBox.workers(runtime)
-    assert [first_report, %{status: :ready, health: %{version: "1.22.0"}}] = reports
+    assert [first_report, %{status: :ready, health: %{version: "1.20.2"}}] = reports
     assert first_report.status in [:degraded, :unavailable]
     assert {:ok, %{candidates: []}} = SmolBox.audit_worker(runtime, "peer")
     assert wait_cleanup(runtime, handle).reservation == nil

@@ -7,7 +7,7 @@ defmodule SmolBox.CheckpointFixture do
       "mode" => "vm",
       "platform" => "linux/amd64",
       "host_platform" => "linux/amd64",
-      "smolvm_version" => "1.22.0",
+      "smolvm_version" => "1.20.2",
       "network" => false,
       "gpu" => false,
       "cuda" => false,

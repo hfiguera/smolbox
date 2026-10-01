@@ -1,10 +1,10 @@
 # Low-level client
 
-This checkout defaults to **smolvm 1.22.0** on Linux x86_64 and macOS Apple
-Silicon. Published SmolBox 0.4.0 and 0.3.1 keep their 1.20.2 default. Pin existing
-workers and checkpoint approvals to their actual version. Updating SmolBox does
-not install smolvm. See the
-[1.22.0 qualification and upgrade boundaries](runtime-1.22.0-qualification.md).
+This checkout retains **smolvm 1.20.2** as its default on Linux x86_64 and macOS
+Apple Silicon. Version 1.22.0 requires explicit configuration while a macOS
+creation failure remains unresolved. See the [qualification and investigation](runtime-1.22.0-qualification.md).
+Pin workers and checkpoint approvals to their actual version; updating SmolBox
+does not install smolvm.
 
 
 This API performs one verified worker operation at a time. It does not persist

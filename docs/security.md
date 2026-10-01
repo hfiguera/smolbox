@@ -8,11 +8,11 @@ of machine reservations. Registry credentials come from host configuration or a
 specifications. See [Images and registry artifacts](images-and-registry-artifacts.md)
 for authentication boundaries and cache integrity limits.
 
-This checkout defaults to **smolvm 1.22.0** on Linux x86_64 and macOS Apple
-Silicon. Published SmolBox 0.4.0 and 0.3.1 keep their 1.20.2 default. Pin existing
-workers and checkpoint approvals to their actual version. Updating SmolBox does
-not install smolvm. See the
-[1.22.0 qualification and upgrade boundaries](runtime-1.22.0-qualification.md).
+This checkout retains **smolvm 1.20.2** as its default on Linux x86_64 and macOS
+Apple Silicon. Version 1.22.0 requires explicit configuration while a macOS
+creation failure remains unresolved. See the [qualification and investigation](runtime-1.22.0-qualification.md).
+Pin workers and checkpoint approvals to their actual version; updating SmolBox
+does not install smolvm.
 
 
 Controlled networking permits explicit operator-approved outbound policies on
@@ -247,8 +247,7 @@ an observed stop alone does not establish operator quiescence.
    durable example's authenticated index backfill instructions for its older schema.
 4. Pin and verify the new binary, schema and artifact bytes on a separate candidate
    worker. Recheck template sizes, VMM overhead, network behavior, proxy semantics,
-   host quotas and all advertised platform tests. This checkout defaults to
-   smolvm 1.22.0 and retains explicit 1.20.2, 1.19.0, 1.17.0, 1.16.1, 1.16.0, 1.14.6 and 1.14.1 support, subject
+   host quotas and all advertised platform tests. This checkout retains the smolvm 1.20.2 default and admits explicit 1.22.0, 1.19.0, 1.17.0, 1.16.1, 1.16.0, 1.14.6 and 1.14.1 support, subject
    to the [supported platform matrix](compatibility.md#runtime-selection).
    Controlled networking requires 1.16.0, 1.16.1, 1.17.0, 1.19.0, 1.20.2 or 1.22.0. The worker must report the
    exact configured version; there is no automatic fallback.

@@ -84,7 +84,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   @derive {Inspect, only: [:architecture, :platform, :runtime_version, :qualification]}
   defstruct @enforce_keys ++
               [
-                runtime_version: "1.22.0",
+                runtime_version: "1.20.2",
                 qualification: :development,
                 draining: false,
                 checkpoints: [],
@@ -139,13 +139,13 @@ defmodule SmolBox.Runtime.WorkerConfig do
   `SmolBox.Checkpoint` approvals. At least one local image, checkpoint, or remote
   source is required. `:sources` defaults to `[]`; `:registry_credentials` to nil.
 
-  Other optional fields are `:runtime_version` (default `"1.22.0"` for Linux x86_64 or
-  macOS Apple Silicon; explicitly select `"1.20.2"`, `"1.19.0"`, `"1.17.0"`, `"1.16.1"`, `"1.16.0"`, `"1.14.1"` or `"1.14.6"`
+  Other optional fields are `:runtime_version` (default `"1.20.2"` for Linux x86_64 or
+  macOS Apple Silicon; explicitly select `"1.22.0"`, `"1.19.0"`, `"1.17.0"`, `"1.16.1"`, `"1.16.0"`, `"1.14.1"` or `"1.14.6"`
   for another supported worker), `:qualification`
   (only `:development`), and `:draining` (default `false`). Artifact IDs must be
   unique and architectures must match this worker. Construction makes no worker
   request or remote digest check. Profiles below the floor cannot support execution.
-  This checkout defaults to 1.22.0. Published SmolBox 0.4.0 defaults to 1.20.2. Published SmolBox 0.3.0 and 0.2.1 default to 1.19.0; 0.2.0 defaults to 1.17.0; versions 0.1.4 and 0.1.5 default to 1.16.1; SmolBox 0.1.3 defaults
+  This checkout retains the 1.20.2 default pending the 1.22.0 qualification follow-up. Published SmolBox 0.4.0 defaults to 1.20.2. Published SmolBox 0.3.0 and 0.2.1 default to 1.19.0; 0.2.0 defaults to 1.17.0; versions 0.1.4 and 0.1.5 default to 1.16.1; SmolBox 0.1.3 defaults
   to 1.16.0 and 0.1.2 to 1.14.6. See the
   [qualification evidence](compatibility.html#smolvm-1-22-0-qualification) and
   upgrade the separately installed worker or retain its explicit version.

@@ -313,7 +313,9 @@ defmodule SmolBox.ProvisioningBenchmark do
       )
 
     {:ok, ^handle} = Machines.create(c.runtime, spec)
-    wait_machine(c.runtime, handle, &(&1.state == :created and &1.operation == nil))
+    # The worker supervisor can mark an unstarted machine stopped before our
+    # first observation. Both states permit an explicit start after creation.
+    wait_machine(c.runtime, handle, &(&1.state in [:created, :stopped] and &1.operation == nil))
     {:ok, _} = lifecycle(c.runtime, handle, :start)
     wait_machine(c.runtime, handle, &(&1.state == :running and &1.operation == nil))
   end

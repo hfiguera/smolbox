@@ -17,7 +17,7 @@ true = workload in ["bare", "dataset", "dataset-precomputed"]
   )
 
 {:ok, client} = Client.new(worker)
-version = System.get_env("SMOLBOX_RUNTIME_VERSION", "1.22.0")
+version = System.get_env("SMOLBOX_RUNTIME_VERSION", "1.20.2")
 {:ok, %{version: ^version}} = Client.health(client)
 {:ok, []} = Client.list(client)
 

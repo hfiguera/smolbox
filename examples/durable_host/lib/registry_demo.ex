@@ -60,7 +60,7 @@ defmodule SmolBox.DurableHost.RegistryDemo do
     {:ok, worker} =
       WorkerConfig.new(
         client: client,
-        runtime_version: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.22.0"),
+        runtime_version: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.20.2"),
         architecture: architecture,
         platform: platform(),
         artifacts: [],

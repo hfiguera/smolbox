@@ -126,9 +126,9 @@ defmodule SmolBox.RuntimeConfigTest do
              WorkerConfig.new(Keyword.delete(context.options, :allocation_floor))
   end
 
-  test "runtime defaults to 1.22.0 and accepts only qualified explicit versions",
+  test "runtime defaults to 1.20.2 and accepts only qualified explicit versions",
        context do
-    assert context.worker.runtime_version == "1.22.0"
+    assert context.worker.runtime_version == "1.20.2"
 
     assert {:ok, %{runtime_version: "1.16.0"}} =
              WorkerConfig.new(Keyword.put(context.options, :runtime_version, "1.16.0"))
@@ -188,8 +188,8 @@ defmodule SmolBox.RuntimeConfigTest do
     end
   end
 
-  test "1.22.0 default requires a supported platform", context do
-    assert context.worker.runtime_version == "1.22.0"
+  test "1.20.2 default requires a supported platform", context do
+    assert context.worker.runtime_version == "1.20.2"
 
     for {platform, architecture} <- [{:linux, "x86_64"}, {:macos, "aarch64"}] do
       artifacts = Enum.map(context.worker.artifacts, &Map.put(&1, "architecture", architecture))

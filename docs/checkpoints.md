@@ -103,7 +103,7 @@ entries. The checkpoint's full profile must appear in the worker's profile
 catalog. Its runtime, platform and architecture must match that worker. Keep
 allocation floors consistent with actual captured disks and runtime overhead.
 
-This checkout supports checkpoint execution on 1.22.0 (the default), 1.20.2, 1.19.0, 1.17.0 and 1.16.1.
+This checkout supports checkpoint execution on 1.20.2 (the default), explicitly selected 1.22.0, 1.19.0, 1.17.0 and 1.16.1.
 Set `runtime_version: "1.17.0"` on both the checkpoint approval and worker for
 existing 1.17.0 captures. Published 0.1.5 requires 1.16.1. Captures must match their
 approved runtime; no cross-version restore compatibility is established. Existing image execution retains
