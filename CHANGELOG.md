@@ -2,9 +2,8 @@
 
 ## Unreleased
 
-- Add explicit smolvm 1.22.0 configuration with Linux and macOS qualification
-  evidence. Keep 1.20.2 as the default while a macOS creation failure remains
-  unresolved. Earlier supported versions remain available.
+- Qualify official smolvm 1.22.0 and select it by default on Linux x86_64 and
+  macOS Apple Silicon. Explicit 1.20.2 and earlier supported versions remain.
   See [qualification and upgrade boundaries](docs/runtime-1.22.0-qualification.md).
   No SQL migration or codec revision is added. Coordinate readers before storing
   results with the new runtime version and preserve existing checkpoint pins.

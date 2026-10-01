@@ -6,7 +6,7 @@ release evidence below records the client/controller contract on Linux and macOS
 
 ## smolvm 1.22.0 qualification
 
-**Explicit configuration only; the default remains 1.20.2.** See the
+**Default in this checkout; published 0.4.0 remains on 1.20.2.** See the
 [qualification report](runtime-1.22.0-qualification.md) for exact inputs, real worker
 results, failed attempts and upgrade boundaries. Only the released 1.22.0 is
 added; 1.21.x and later versions are not implicitly admitted. Existing supported
@@ -264,7 +264,7 @@ explicit bounded settings. No validation limits or public defaults were relaxed.
 
 ## Runtime selection
 
-This checkout retains the 1.20.2 default. Published SmolBox 0.4.0 and 0.3.1 default to 1.20.2; published 0.3.0 and 0.2.1 default to 1.19.0.
+This checkout defaults to 1.22.0. Published SmolBox 0.4.0 and 0.3.1 default to 1.20.2; published 0.3.0 and 0.2.1 default to 1.19.0.
 These runtime versions are supported on Linux x86_64 and macOS Apple Silicon.
 
 SmolBox 0.1.3 defaults to `runtime_version: "1.16.0"` for Linux x86_64 and

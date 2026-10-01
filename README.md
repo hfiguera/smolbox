@@ -157,7 +157,7 @@ To run the local walkthrough, you need:
 
 - Elixir **1.18 or later**, using a [tested Elixir/OTP pair](docs/compatibility.md).
 - A dedicated worker on Linux x86_64 with KVM or macOS Apple Silicon:
-  **smolvm 1.20.2** by default in this checkout, or explicitly configured 1.22.0, 1.19.0, 1.17.0, 1.16.1, 1.16.0, 1.14.6 or
+  **smolvm 1.22.0** by default in this checkout, or explicitly configured 1.20.2, 1.19.0, 1.17.0, 1.16.1, 1.16.0, 1.14.6 or
   1.14.1 workers.
 - The host's `resize2fs` tool for 1.14.6, 1.16.0, 1.16.1, 1.17.0, 1.19.0, 1.20.2 and 1.22.0 disk requests below template sizes.
   On macOS, install `e2fsprogs`; see the [runtime prerequisites](docs/compatibility.md#macos-1-14-6-prerequisites).
@@ -206,11 +206,10 @@ SmolBox has real execution and durable recovery tests on Linux x86_64 and macOS
 Apple Silicon with **smolvm 1.14.1, 1.14.6, 1.16.0, 1.16.1, 1.17.0, 1.19.0, 1.20.2 and 1.22.0**; results are recorded in [Compatibility](docs/compatibility.md#runtime-selection).
 SmolBox 0.3.0 and 0.2.1 default to **1.19.0** and 0.2.0 to **1.17.0**, while 0.1.4–0.1.5 default to **1.16.1**; 0.1.3 defaults to **1.16.0** and
 0.1.2 to **1.14.6**.
-This checkout retains **1.20.2** as the default. Version **1.22.0** is opt-in while
-a macOS creation failure remains unresolved.
+This checkout selects **1.22.0**; published SmolBox 0.4.0 and 0.3.1 retain **1.20.2**.
 See the [1.22.0 qualification and upgrade boundaries](docs/runtime-1.22.0-qualification.md).
 Before adopting that default with an older worker, explicitly
-configure `runtime_version: "1.19.0"`, `"1.17.0"`, `"1.16.1"`, `"1.16.0"`, `"1.14.6"` or `"1.14.1"`, or follow the
+configure `runtime_version: "1.20.2"`, `"1.19.0"`, `"1.17.0"`, `"1.16.1"`, `"1.16.0"`, `"1.14.6"` or `"1.14.1"`, or follow the
 [worker upgrade procedure](docs/host-integration.md#upgrading-a-worker).
 The package does not upgrade an external worker. A version mismatch prevents
 new execution; arbitrary upstream releases and automatic fallback are not accepted.

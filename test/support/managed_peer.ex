@@ -141,7 +141,7 @@ defmodule SmolBox.ManagedPeer do
   defp healthy_response(state) do
     body = %{
       "status" => "ok",
-      "version" => Keyword.get(state.options, :runtime_version, "1.20.2"),
+      "version" => Keyword.get(state.options, :runtime_version, "1.22.0"),
       "machines" => %{"total" => map_size(state.machines), "running" => 0},
       "uptime_seconds" => 0
     }

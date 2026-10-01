@@ -31,7 +31,7 @@ defmodule SmolBox.CheckpointArtifactTest do
 
     on_exit(fn -> File.rm(path) end)
     {:ok, profile} = Profile.new("test")
-    worker = %{platform: :linux, architecture: "x86_64", runtime_version: "1.20.2"}
+    worker = %{platform: :linux, architecture: "x86_64", runtime_version: "1.22.0"}
     valid = CheckpointFixture.bytes()
 
     verify = fn bytes, size ->

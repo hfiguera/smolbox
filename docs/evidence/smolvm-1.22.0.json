@@ -1,6 +1,6 @@
 {
   "campaign": "Official smolvm 1.22.0 qualification and default selection",
-  "status": "historical campaign; default promotion deferred after investigation",
+  "status": "historical campaign; final decision selects 1.22.0 after follow-up investigation",
   "date": "2026-09-30",
   "branch": "feature/smolvm-1.22.0-qualification",
   "base_commit": "2486a267dcf1bd962bb854c548d22af802f539ff",

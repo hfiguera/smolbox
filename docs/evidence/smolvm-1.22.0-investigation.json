@@ -2,7 +2,7 @@
   "campaign": "Investigation of smolvm 1.22.0 qualification failures",
   "date": "2026-09-30",
   "qualification_commit": "4c9a8ee64464a25a2d5296ef30eb62bd7e7c0a6c",
-  "default_decision": "retain 1.20.2; 1.22.0 requires explicit configuration",
+  "default_decision": "select 1.22.0 after review of full qualification and matched follow-up evidence; retain unexplained one-off macOS failure as a non-blocking observation",
   "linux": {
     "result": "confirmed pre-start benchmark state assumption, reproduced on both versions",
     "supervisor_source_unchanged": "git diff v1.20.2 v1.22.0 -- src/api/supervisor.rs is empty",
@@ -296,7 +296,26 @@
     "mac-faithful-hdiutil.jsonl": "0d94b58ce3cef92fc217d902da8d9e8d5d607c0d951986519abde02899134ca0",
     "mac-disk-detailed.log": "1d2b57b767c5c807ed8c935a7f787331641524e032b7335217e8f5004fc7a843",
     "mac-storage-kernel.log": "27a823c6b67d1aef950832fe8ad00089ccefbf6b8589dbf7be6511f7609aa99e",
-    "terminal_original_expectation_test.exs": "a5ba6e1ad7d40415b6d2bea59469c1295c88f16b761a40c750b8ae8c48e14145"
+    "terminal_original_expectation_test.exs": "a5ba6e1ad7d40415b6d2bea59469c1295c88f16b761a40c750b8ae8c48e14145",
+    "baseline-1.20.2/mac-diagnose-final-inventory.json": "e73cc7e93d2a8a056394b7b711b2a077c62958e12c28021762641081e6d2abcb",
+    "baseline-1.20.2/mac-diagnose-hdiutil.jsonl": "8768d5f1f0bbc7c2e79a67fe08485778956ee720112373efe259bb88174e46ed",
+    "baseline-1.20.2/mac-diagnose-http.jsonl": "c985479cc6039477acb7f97503a249fd6c5126a6cc8e233ee6e32599c272eb48",
+    "baseline-1.20.2/mac-diagnose-result.json": "f835b13adefdf6096203fa6231cde083789b62d7006ddbd566b3c85107ec1d10",
+    "baseline-1.20.2/mac-diagnose-worker.log": "74bb56c33c504caeac619346ef5f41e2308a75f21616d4390c4b625768fb7a5c",
+    "baseline-1.20.2/mac-diagnose.log": "d0160bd0027b8d22a3d9af85f390b0763f80307a15d0edd185b6fce7aa9d26d7",
+    "baseline-1.20.2/mac-diagnose.py": "c57955791e84db66e9d52fb676c57fe039c7c159f768b8fd721e2e1206929bf3",
+    "baseline-1.20.2/mac-faithful-0.log": "1e1e6b75c89c5a47dace4236b3a8e40318dafc4607010a84003c2e8bf62e5083",
+    "baseline-1.20.2/mac-faithful-1.log": "033d2c72db7ea2a39ac490ead5f41ed7395788f6c8f269b32c35310165729eea",
+    "baseline-1.20.2/mac-faithful-2.log": "5855a53394cfc14bf366a72c881ed607eaac7c198bde26c55424ff9f4a779e36",
+    "baseline-1.20.2/mac-faithful-final-inventory.json": "e73cc7e93d2a8a056394b7b711b2a077c62958e12c28021762641081e6d2abcb",
+    "baseline-1.20.2/mac-faithful-hdiutil.jsonl": "107393e4f71d0c4f38d87f03f11b41fe42530e30c667c35fe62647899cf7d2e8",
+    "baseline-1.20.2/mac-faithful-result.json": "e5758787274ce34c44873f4dbd7bc1be53fe2394c5e079ada618e532a0162c40",
+    "baseline-1.20.2/mac-faithful-wire.log": "22b84bd9ad9fafc2cca4b9c70b2ce80a9ff1436ce1bcd4ad1470d3c18c5435b7",
+    "baseline-1.20.2/mac-faithful-worker.log": "ea35e9b561323aa8ab9ab48235e7444d36f9c46cd617287e89066795a3b66f17",
+    "baseline-1.20.2/mac-faithful.log": "d9365a35474600d97202bc878fbf15fb002a60273305cd463c9d3c3b0a0cf603",
+    "baseline-1.20.2/mac-faithful.py": "5f91c27fe577db46c2ed85127d4137d7506346aecba99138f8fcc1e21d78fd0a",
+    "baseline-1.20.2/proxy.py": "e69788b9bc5c1939e1a80abf33987676c848ca2ff1a5cd12b38bbc5812587125",
+    "baseline-1.20.2/terminal_original_expectation_test.exs": "25d79cf44b6be4ae45c0e6a841b6d1ae5425e9bfd9ba0f4ab6c3bb9e6e761501"
   },
   "validation": {
     "mix_ci": {
@@ -313,7 +332,8 @@
       "minimum dependencies on Elixir 1.18.4 / OTP 27.3.4.15"
     ],
     "docs_local_pages": 127,
-    "package_note": "Consumer checks use the same archive of implementation and documentation, built before final validation results were appended to the investigation report and receipt."
+    "package_note": "Consumer checks use the same archive of implementation and documentation, built before final validation results were appended to the investigation report and receipt.",
+    "scope": "Investigation validation before final default promotion."
   },
   "changed_source_sha256": {
     "dev/smolbox/ci/preflight.ex": "46ac0d05a2d46f678f5f5c14e94de278f794113a392634513033e3f7a4b57173",
@@ -361,5 +381,78 @@
     "final_inventories_empty": true,
     "private_workers_stopped": true,
     "remaining_requirement": "Capture a recurring create failure with its HTTP error body and corresponding worker/helper logs; successful reruns cannot reconstruct the missing original response."
+  },
+  "matched_macos_baseline": {
+    "runtime": "1.20.2",
+    "binary_sha256": "382e5353dccf13e4503ef8a4c41b6ee23b24ac00e0f9fb77a8a8d40ff79df6a8",
+    "result": "creation failure not reproduced",
+    "same_artifacts_and_instrumentation_as_candidate": true,
+    "alternating_python_node_lifecycles": 50,
+    "hdiutil_calls": 250,
+    "hdiutil_failures": 0,
+    "original_failure_path_replays": {
+      "runs": 3,
+      "seed": 194898,
+      "tests_per_run": 14,
+      "passed_per_run": 13,
+      "intentional_failure_per_run": "old descendant_active=True assertion restored in private copy to exercise original on_exit cleanup",
+      "http_create_responses": 45,
+      "http_create_failures": 0,
+      "hdiutil_calls": 231,
+      "hdiutil_failures": 0
+    },
+    "final_inventories_empty": true,
+    "private_workers_stopped": true,
+    "interpretation": "No reproduction on 1.20.2, and no proof that 1.22.0 introduced the failure. Both matched campaigns passed creation checks. Final decision: proceed with 1.22.0 as default, retaining the unexplained observation."
+  },
+  "changed_source_sha256_scope": "Investigation sources before final default promotion; retained as historical evidence.",
+  "final_promotion_validation": {
+    "runtime_default": "1.22.0",
+    "mix_ci": {
+      "passed": 610,
+      "doctests": 4,
+      "properties": 6,
+      "tests": 600,
+      "live_excluded": 29,
+      "quality_gates": "format, compile, xref, Credo/ex_slop, ExDNA, Credence, Dialyzer passed"
+    },
+    "package_consumers": [
+      "current dependencies on Elixir 1.20.4 / OTP 29.0.6",
+      "minimum dependencies on Elixir 1.18.4 / OTP 27.3.4.15"
+    ],
+    "docs": "ExDoc warnings-as-errors and local links/fragments in 127 pages passed",
+    "package_note": "Both consumers used the same archive, built before these final validation results were appended to the report and receipt.",
+    "private_log_sha256": {
+      "ci-promoted.log": "87431381c202d482d672c29865eaed6d2ed18ab3f8ceb8688dbb305b13b524ce",
+      "package-promoted-current.log": "3bee65c7adeb7b2602b6e7937bdb40c3b7b539b9311f56eb168b88d569837f85",
+      "package-promoted-current.json": "915ab40022c26b7f47dc6a030d7cb1db96422b844ceb7d9fa8b83fea4e5ff7e4",
+      "package-promoted-minimum.log": "afdc4001728afacd286c011e8616c2a9dc53d72c1670eb70729e7556cac77d78",
+      "package-promoted-minimum.json": "065f4d81a6cf595c7bfafb4c8f65db4c2e22bd14a96525e8a357f705df2e2890",
+      "docs-promoted.log": "aae7135d7f0a37a3cd227d50e111b3f799daa99f6cfa30e5a2e60bca2d7bef5e",
+      "docs-links-promoted.log": "ff7a0b37daafe8c7e37f6882f69cf00d2a1806c1bd308aa460b0b475c95e5838"
+    },
+    "changed_source_sha256": {
+      "dev/smolbox/ci/preflight.ex": "2a9286647164f61f6ad228a62f9fdf103f03a16e41b540f682880a4f17a55266",
+      "dev/smolbox/ci/runtime.ex": "ae7e06ac87d968928a66940657ecc0bfc4851073a5008a7992c6dda4735f73fb",
+      "examples/durable_host/lib/benchmark.ex": "5e3ef911b20b737841d8119669f14963289cf728343df96e0bb23818406102d6",
+      "examples/durable_host/lib/checkpoint_demo.ex": "a1550de395d7263ce135e8836c58016341e7b01ab18e28abb2c9fee9e8850fc6",
+      "examples/durable_host/lib/export_demo_config.ex": "6408aacd2e3052fb3134164626f69cd41c5c770202ee539a68c80a33adb2a5f7",
+      "examples/durable_host/lib/managed_checkpoint_config.ex": "4dceb543dad4efedefcb28573b1cc7c44204f09c89fc6ca4b3fcf45ec957d377",
+      "examples/durable_host/lib/registry_demo.ex": "ace9529fc5fdadfb269012851c094e705c3de20e26388f6f585e428f697f3605",
+      "examples/support/lib/setup.ex": "d24c387714acba8a522bb63b68d2567a53353731769f7fa65e2fd64d1e667aad",
+      "lib/smolbox/checkpoint.ex": "d57b62664130820b325b387acd1eaadfce6e02abc00044105299355ca6677f3f",
+      "lib/smolbox/runtime/worker_config.ex": "623efa424ea89157d4742827672028515b6c3641993d6718a2538c2a9d0fc077",
+      "scripts/benchmarks/provisioning/run.exs": "7e55c87c757d4ad9f43260318fb5b5df32aac3fb4a3a7e716173c2df23f7c19c",
+      "scripts/checkpoints/benchmark.exs": "ac39b391f60fe79c2da13556237590968f3088a8c05628db84f83e8262e4723a",
+      "scripts/checkpoints/run.exs": "8a7453f15cc041b6216af3b6cefb2d7798c4ac7668a7b1595f8cde87a9f7f58c",
+      "test/contract/persistent_machines_test.exs": "d1e2f6853d82eaec0d18a4e405c42111d5e9513e079b49c0969500e810d76abe",
+      "test/contract/worker_pool_test.exs": "3211b559f8601cad820a0a17a47944e890c83c45ebac97f29a94f2c6f858f417",
+      "test/fixtures/ci/consumer.exs.template": "68f0f29f3453a9f17655d3ba2c349c1d6d4fe956b6d667ffc4dd93a3eec6c419",
+      "test/support/checkpoint_fixture.ex": "d8c620764400dcdfa1a1e8112019f50708071a48b5213d6090ab10fb70465c95",
+      "test/support/lab/candidate.ex": "67d1501cc8ae106caea3114932909d59ee85703ca7006ec0f9fdee8318f124bc",
+      "test/support/managed_peer.ex": "76442e40a7a1489edc8be89f4ea660d97f9daa3dd2324c3763d59e6d96b2bfe8",
+      "test/unit/checkpoint_artifact_test.exs": "08ec34922296efa16fb95659a59a0eec786ec2ae9269c4d61e036abfd6bf7761",
+      "test/unit/runtime_config_test.exs": "cf036fcd2f180cc3a9b3e65d92d6525f40c07a77cf1306c785c2879521a58db3"
+    }
   }
 }

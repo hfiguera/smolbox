@@ -1,6 +1,6 @@
 # Durable host example
 
-This checkout retains smolvm **1.20.2** as the default. Published SmolBox 0.4.0 keeps **1.20.2**. Published SmolBox 0.3.0 and
+This checkout defaults to smolvm **1.22.0**. Published SmolBox 0.4.0 keeps **1.20.2**. Published SmolBox 0.3.0 and
 0.2.1 retain their **1.19.0** default.
 Follow [Upgrading to 0.4.0](../../docs/upgrading-to-0.4.0.md) for coordinated
 store upgrades, the two PostgreSQL migrations and rollback constraints.
@@ -60,7 +60,7 @@ dependency can change while the example lockfile stays the same.
 Configure the worker, pinned Python artifact, private object directory,
 fingerprint key file, and execution ID described in `../minimal_host/README.md`.
 On Linux x86_64 or macOS Apple Silicon,
-omitting `SMOLBOX_RUNTIME_VERSION` selects 1.20.2 in this checkout
+omitting `SMOLBOX_RUNTIME_VERSION` selects 1.22.0 in this checkout
 (0.1.3 defaults to 1.16.0). Set it to `1.16.1`, `1.16.0`, `1.14.6` or `1.14.1`
 for an existing older worker. Consult the
 [qualification evidence](../../docs/runtime-1.22.0-qualification.md). Supply the 1.14.6, 1.16.0, 1.16.1 or 1.17.0 host's `resize2fs` for smaller disk
@@ -230,7 +230,7 @@ forces deletion after an uncertain stop.
 
 The benchmark uses this host's real PostgreSQL store, directory adapter and a
 previously provisioned, initially idle smolvm worker matching `SMOLBOX_RUNTIME_VERSION`
-(checkout default 1.20.2). It provisions no
+(checkout default 1.22.0). It provisions no
 service, changes no host quotas and clears no image/page cache. Apply the example
 migrations first. Use native approved artifacts, a new private object directory,
 fresh 32-byte fingerprint/encryption key files and a unique store partition for

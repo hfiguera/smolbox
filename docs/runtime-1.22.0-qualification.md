@@ -2,11 +2,10 @@
 
 This campaign compares the previously qualified **1.20.2** with the official
 **1.22.0** release on physical Linux x86_64 and native macOS Apple Silicon.
-This checkout retains **1.20.2** as the default. Version **1.22.0** requires
-explicit configuration while the macOS creation failure described below remains
-unresolved. Qualification remains `:development`. Published SmolBox 0.4.0 also
-selects 1.20.2;
-updating a library never installs or upgrades its workers.
+This checkout selects **1.22.0** by default. Qualification remains `:development`.
+The one-off macOS creation failure remains documented below; it is not treated
+as a blocker after the follow-up investigation. Published SmolBox 0.4.0 selects
+1.20.2; updating a library never installs or upgrades its workers.
 
 ## Exact inputs
 
@@ -163,7 +162,7 @@ start was sent, explicit start succeeds and deletion releases the reservation.
 These tests use the simulated worker; the four reproductions used official live
 Linux binaries.
 
-**macOS: unresolved, so default promotion is deferred.** An instrumented replay
+**macOS: unresolved; default promotion was initially deferred.** An instrumented replay
 of the original 14-test feature sequence with seed 194898 passed. The proxy
 captured HTTP response status and error bodies; its only HTTP 500 responses were
 expected file-read failures, with no create failure. A separate alternating
@@ -206,8 +205,36 @@ Recovered disk-image, APFS and kernel logs from the original failure window did
 not identify an error that could be tied conclusively to the create request.
 **The original macOS root cause remains unproven.** Its error response was not
 retained, and the failure has not recurred with response capture. No speculative
-runtime fix or automatic create retry was added. The 1.20.2 default stays in place.
+runtime fix or automatic create retry was added. At this stage, the default
+remained 1.20.2 pending review of the evidence.
 Both additional private worker inventories were empty before shutdown.
+
+### Matched 1.20.2 baseline
+
+The same diagnostic campaign was repeated with the official, checksum-verified
+1.20.2 macOS binary and the same artifacts. All 50 alternating Python/Node
+lifecycles and their 250 disk-image commands succeeded. Three original-sequence
+replays again produced only the deliberately restored terminal assertion failure
+(13 of 14 tests passed per run); all 45 creation requests succeeded.
+Both private worker inventories were empty at shutdown.
+
+This did **not** reproduce the creation failure on 1.20.2. It also does not prove
+that 1.22.0 introduced the failure: the matched candidate campaign passed too.
+The original event remains unexplained. The condition of reproducing it on the
+baseline before reconsidering default promotion was not met. Following review
+of the complete qualification and matched follow-up campaigns, the decision is
+to proceed with **1.22.0 as the default**. The isolated HTTP 500 remains an
+unexplained observation, not a confirmed regression or a fixed defect.
+
+### Final default validation
+
+After selecting 1.22.0 again, `mix ci` passed all 610 ordinary checks
+(4 doctests, 6 properties and 600 tests; 29 live tests excluded), including all
+quality gates. Package consumers passed on both the current and minimum
+Elixir/OTP pairs using the same archive. ExDoc passed with warnings treated as
+errors, and local links and fragments passed across 127 pages. These checks
+supplement the live qualification and investigation above; they do not establish
+a cause for the isolated macOS failure.
 
 ## Limits
 
