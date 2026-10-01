@@ -188,6 +188,27 @@ ordinary checks (29 live tests excluded), all `mix ci` quality gates, 25 maintai
 tests, package consumers on current and minimum toolchains, and local links in
 127 generated documentation pages.
 
+### Additional macOS investigation
+
+A second investigation completed 50 alternating Python/Node machine lifecycles
+on the official 1.22.0 binary. Private instrumentation captured HTTP errors and
+forwarded each `hdiutil` command while recording its status and stderr. All 50
+lifecycles and all 250 disk-image commands succeeded.
+
+Three further runs replayed the original 14-test sequence and seed, restoring the
+old terminal assertion in a private test copy. This deliberately reproduces the
+earlier assertion failure and its `on_exit` cleanup path. Each run had 13 passes
+and that one intentional assertion failure; Node creation succeeded in all three.
+These are diagnostic runs, not three clean test-suite passes. The instrumentation
+can affect timing, so it does not exclude a timing-dependent failure.
+
+Recovered disk-image, APFS and kernel logs from the original failure window did
+not identify an error that could be tied conclusively to the create request.
+**The original macOS root cause remains unproven.** Its error response was not
+retained, and the failure has not recurred with response capture. No speculative
+runtime fix or automatic create retry was added. The 1.20.2 default stays in place.
+Both additional private worker inventories were empty before shutdown.
+
 ## Limits
 
 No Windows, Linux ARM64, nested Linux, root-worker UID isolation, hostile

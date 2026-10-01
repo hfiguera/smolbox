@@ -276,7 +276,27 @@
     "package-current.log": "4c2bec1407c639eb70aa25df0741558f0b660c245e51fcab8ccc555c631cc9dd",
     "package-minimum.log": "f860f5b442c7bf33bceecd9917d3cd8fada50241acbfe77093c4f99ee2e7710c",
     "package-current.json": "5dc86958e63751988aa4bb4b603d295bc58b86a233b95936468aca469b73d27a",
-    "package-minimum.json": "ee0647e019b7f25116a37bd0ba9b27067f7c61cc38bdc0eb5642f65dbbb9ae65"
+    "package-minimum.json": "ee0647e019b7f25116a37bd0ba9b27067f7c61cc38bdc0eb5642f65dbbb9ae65",
+    "mac-diagnose-http.jsonl": "609ff1bb4e11fd6cc91161dee34f5c6559ff884b459858e243b0c3c2c73e950a",
+    "mac-diagnose-hdiutil.jsonl": "d5288a4a03ca5dc802096ffdfec18c919dfd20705c0fac0c904c5854eb9898af",
+    "mac-diagnose-final-inventory.json": "e73cc7e93d2a8a056394b7b711b2a077c62958e12c28021762641081e6d2abcb",
+    "mac-diagnose-result.json": "b0dc31fe2a076c756883d467b863e1a4e5aca307d66c2e9d1d7c90d6828137fa",
+    "mac-diagnose.log": "24d254b766a47688eab9721fecef87b6818533c46f3f26031217426ea9a526a8",
+    "mac-diagnose-worker.log": "657f2b7d9b602421dbe8f60cee06d58088b4d2d50a294b0eb75c870e9ea34a99",
+    "mac-diagnose.py": "b866eeaf121c9a698d2d693ac55ed2728cc374327d30425e6f8aa4586c1dcaba",
+    "mac-faithful.log": "eab6786998e3452b769ab0e6c19e829aa94571fc0e36dba5c0e3e8a8df460ec6",
+    "mac-faithful-worker.log": "657464343d3dc4d8e578b178cb4411f04df131af9bc3b1c35cb6ce924758ff60",
+    "mac-faithful.py": "46a70cf914332a80fb15e437a262a5b32e982915fe60962b0f04d58d59a6d5a2",
+    "mac-faithful-0.log": "891d20bce271687cddff27351c54c3f17066f6cd3e96e5f32de99812a1c0269b",
+    "mac-faithful-1.log": "8bc8daf88cc4d2814af7c61067ecd382ec8bb4876420d4091647f6e7d979441d",
+    "mac-faithful-final-inventory.json": "e73cc7e93d2a8a056394b7b711b2a077c62958e12c28021762641081e6d2abcb",
+    "mac-faithful-2.log": "24ab20a25476d50ccdeb1911bad5deaa839a64294d6aa1e5e883f3b659844112",
+    "mac-faithful-result.json": "b0ebf9548f10f57c7bf29e5b696097b208e1ef166a92391b10346c9d66224429",
+    "mac-faithful-wire.log": "bdaa14987034558692393c2bf43d76d6b37216137c3d24cd8936ce8af74957d4",
+    "mac-faithful-hdiutil.jsonl": "0d94b58ce3cef92fc217d902da8d9e8d5d607c0d951986519abde02899134ca0",
+    "mac-disk-detailed.log": "1d2b57b767c5c807ed8c935a7f787331641524e032b7335217e8f5004fc7a843",
+    "mac-storage-kernel.log": "27a823c6b67d1aef950832fe8ad00089ccefbf6b8589dbf7be6511f7609aa99e",
+    "terminal_original_expectation_test.exs": "a5ba6e1ad7d40415b6d2bea59469c1295c88f16b761a40c750b8ae8c48e14145"
   },
   "validation": {
     "mix_ci": {
@@ -317,5 +337,29 @@
     "test/support/managed_peer.ex": "ba7ad6091a8d62632a8c83d40a42e9d842f8230510514fd905d40075921ea2f2",
     "test/unit/checkpoint_artifact_test.exs": "27371c3a014d4022c3fb43819d02b6fb5357cd53ad6651ce5091c6a4464a0b3e",
     "test/unit/runtime_config_test.exs": "cde6fc5c57d83d70ef78af92acb2ee132f27a546e0abb902aebfdc7959e5e3dd"
+  },
+  "additional_macos_investigation": {
+    "status": "original creation root cause still unproven",
+    "commit_before_followup": "e57ab3b",
+    "official_binary_unchanged": true,
+    "instrumentation": "private HTTP response capture and PATH wrapper forwarding hdiutil stdout/stderr and exit status unchanged; timing may differ",
+    "alternating_python_node_lifecycles": 50,
+    "hdiutil_calls": 250,
+    "hdiutil_failures": 0,
+    "original_failure_path_replays": {
+      "runs": 3,
+      "seed": 194898,
+      "tests_per_run": 14,
+      "passed_per_run": 13,
+      "intentional_failure_per_run": "old descendant_active=True assertion, restored in a private test copy to exercise original on_exit cleanup",
+      "http_create_responses": 45,
+      "http_create_failures": 0,
+      "hdiutil_calls": 231,
+      "hdiutil_failures": 0
+    },
+    "original_host_log_review": "Recovered disk-image, APFS and kernel logs for original failure window; no specific cause could be tied to request. Filesystem activity is not proof of creation failure cause.",
+    "final_inventories_empty": true,
+    "private_workers_stopped": true,
+    "remaining_requirement": "Capture a recurring create failure with its HTTP error body and corresponding worker/helper logs; successful reruns cannot reconstruct the missing original response."
   }
 }
