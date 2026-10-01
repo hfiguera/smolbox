@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.4.1
+
+**Worker default change:** omitted runtime versions now select smolvm **1.22.0**.
+Keep existing 1.20.2 workers explicitly configured and preserve checkpoint capture
+pins. This patch adds no SQL migration or codec revision, but shared readers must
+be upgraded before writing records containing the new runtime version. See
+[Upgrading to 0.4.1](docs/upgrading-to-0.4.1.md).
+
 - Qualify official smolvm 1.22.0 and select it by default on Linux x86_64 and
   macOS Apple Silicon. Explicit 1.20.2 and earlier supported versions remain.
   See [qualification and upgrade boundaries](docs/runtime-1.22.0-qualification.md).

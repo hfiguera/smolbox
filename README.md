@@ -124,11 +124,14 @@ creating machines, executing commands, streaming output, and transferring files.
 
 ## Installation and first run
 
-SmolBox **0.4.0** adds machine measurements, durable worker draining, disk
-expansion and local volumes. It keeps **smolvm 1.20.2** as the default. These
-features help explain resource usage, prepare workers for maintenance and keep
-project data as machines grow or are replaced. See the
-[feature and platform evidence](docs/compatibility.md).
+SmolBox **0.4.1** qualifies **smolvm 1.22.0** and selects it by default on Linux
+x86_64 and macOS Apple Silicon. It also fixes a timing assumption in the
+provisioning benchmark. See the [qualification evidence](docs/runtime-1.22.0-qualification.md).
+
+**Keeping a 1.20.2 worker? Set `runtime_version: "1.20.2"` explicitly before
+upgrading.** Preserve checkpoint approvals at their capture version. This patch
+adds no SQL migration or codec revision; upgrade shared readers before storing
+records with the new runtime version. Follow [Upgrading to 0.4.1](docs/upgrading-to-0.4.1.md).
 
 **Upgrading from 0.3.x requires a coordinated store upgrade.** The PostgreSQL
 example adds worker-control and volume migrations. Disk expansion and volume
@@ -146,10 +149,10 @@ actual runtime, including 1.19.0 installations retained from 0.3.0.
 Add SmolBox to your application's `mix.exs`:
 
 ```elixir
-{:smolbox, "~> 0.4.0"}
+{:smolbox, "~> 0.4.1"}
 ```
 
-Run `mix deps.get`. The [API documentation](https://hexdocs.pm/smolbox/0.4.0/)
+Run `mix deps.get`. The [API documentation](https://hexdocs.pm/smolbox/0.4.1/)
 includes the guides below. A local checkout can instead be used with
 `{:smolbox, path: "../smolbox"}`.
 
@@ -157,7 +160,7 @@ To run the local walkthrough, you need:
 
 - Elixir **1.18 or later**, using a [tested Elixir/OTP pair](docs/compatibility.md).
 - A dedicated worker on Linux x86_64 with KVM or macOS Apple Silicon:
-  **smolvm 1.22.0** by default in this checkout, or explicitly configured 1.20.2, 1.19.0, 1.17.0, 1.16.1, 1.16.0, 1.14.6 or
+  **smolvm 1.22.0** by default in 0.4.1, or explicitly configured 1.20.2, 1.19.0, 1.17.0, 1.16.1, 1.16.0, 1.14.6 or
   1.14.1 workers.
 - The host's `resize2fs` tool for 1.14.6, 1.16.0, 1.16.1, 1.17.0, 1.19.0, 1.20.2 and 1.22.0 disk requests below template sizes.
   On macOS, install `e2fsprogs`; see the [runtime prerequisites](docs/compatibility.md#macos-1-14-6-prerequisites).
@@ -169,7 +172,7 @@ To run the local walkthrough, you need:
 stage a Python file, submit it, read its output file, and confirm cleanup. The
 walkthrough uses an in-memory store and needs no database. Applications that need
 restart recovery must provide a durable `SmolBox.Store` adapter; a complete
-[PostgreSQL host example](https://github.com/hfiguera/smolbox/tree/v0.4.0/examples/durable_host)
+[PostgreSQL host example](https://github.com/hfiguera/smolbox/tree/v0.4.1/examples/durable_host)
 is included in the repository.
 
 ## Managed persistent machines
@@ -206,7 +209,7 @@ SmolBox has real execution and durable recovery tests on Linux x86_64 and macOS
 Apple Silicon with **smolvm 1.14.1, 1.14.6, 1.16.0, 1.16.1, 1.17.0, 1.19.0, 1.20.2 and 1.22.0**; results are recorded in [Compatibility](docs/compatibility.md#runtime-selection).
 SmolBox 0.3.0 and 0.2.1 default to **1.19.0** and 0.2.0 to **1.17.0**, while 0.1.4–0.1.5 default to **1.16.1**; 0.1.3 defaults to **1.16.0** and
 0.1.2 to **1.14.6**.
-This checkout selects **1.22.0**; published SmolBox 0.4.0 and 0.3.1 retain **1.20.2**.
+SmolBox 0.4.1 selects **1.22.0**; published SmolBox 0.4.0 and 0.3.1 retain **1.20.2**.
 See the [1.22.0 qualification and upgrade boundaries](docs/runtime-1.22.0-qualification.md).
 Before adopting that default with an older worker, explicitly
 configure `runtime_version: "1.20.2"`, `"1.19.0"`, `"1.17.0"`, `"1.16.1"`, `"1.16.0"`, `"1.14.6"` or `"1.14.1"`, or follow the
@@ -267,4 +270,4 @@ the compatibility guide. From this repository, `mix ci` runs deterministic check
 without contacting a real worker. Generate this site with
 `MIX_ENV=dev mix docs --warnings-as-errors`. Live worker tests are a separate opt-in
 operation described in the repository's
-[CI guide](https://github.com/hfiguera/smolbox/blob/v0.4.0/scripts/ci/README.md).
+[CI guide](https://github.com/hfiguera/smolbox/blob/v0.4.1/scripts/ci/README.md).

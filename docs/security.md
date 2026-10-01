@@ -8,7 +8,7 @@ of machine reservations. Registry credentials come from host configuration or a
 specifications. See [Images and registry artifacts](images-and-registry-artifacts.md)
 for authentication boundaries and cache integrity limits.
 
-This checkout defaults to **smolvm 1.22.0** on Linux x86_64 and macOS Apple
+SmolBox 0.4.1 defaults to **smolvm 1.22.0** on Linux x86_64 and macOS Apple
 Silicon. Published SmolBox 0.4.0 and 0.3.1 keep their 1.20.2 default. Pin existing
 workers and checkpoint approvals to their actual version. Updating SmolBox does
 not install smolvm. See the

@@ -1,20 +1,20 @@
 # Managed host integration
 
-This checkout defaults to **smolvm 1.22.0** on Linux x86_64 and macOS Apple
+SmolBox 0.4.1 defaults to **smolvm 1.22.0** on Linux x86_64 and macOS Apple
 Silicon. Published SmolBox 0.4.0 and 0.3.1 keep their 1.20.2 default. Pin existing
 workers and checkpoint approvals to their actual version. Updating SmolBox does
 not install smolvm. See the
 [1.22.0 qualification and upgrade boundaries](runtime-1.22.0-qualification.md).
-
 
 Start with [Getting started](getting-started.md) for a complete runnable example.
 This guide explains how to adapt that flow to your application's supervision,
 authorization, durable storage, and worker configuration. Constructor options are
 documented in `SmolBox.child_spec/1` and `SmolBox.Runtime.WorkerConfig.new/1`.
 
-For an existing deployment, follow [Upgrading to 0.4.0](upgrading-to-0.4.0.md)
-before enabling the new store capabilities. It consolidates the PostgreSQL
-migrations, coordinated writer upgrade and retained-history rollback limits.
+For an existing deployment, follow [Upgrading to 0.4.1](upgrading-to-0.4.1.md)
+for worker selection and reader compatibility. Deployments coming from 0.3.x
+must also follow [Upgrading to 0.4.0](upgrading-to-0.4.0.md) for PostgreSQL
+migrations, coordinated writer upgrades and retained-history rollback limits.
 
 See [telemetry and inspection](telemetry.md) for bounded lifecycle observations,
 notification failure semantics, and authoritative operator fields.
@@ -102,7 +102,7 @@ children = [
 ```
 
 This fragment explicitly retains a Linux 1.14.6 worker with SmolBox 0.2.0.
-Omitting the field selects 1.22.0 in this checkout, 1.20.2 in 0.4.0 and 0.3.1, 1.19.0 in 0.3.0 and 0.2.1, 1.17.0 in 0.2.0 (1.16.1 in 0.1.5). Use `"1.16.0"`
+Omitting the field selects 1.22.0 in 0.4.1, 1.20.2 in 0.4.0 and 0.3.1, 1.19.0 in 0.3.0 and 0.2.1, 1.17.0 in 0.2.0 (1.16.1 in 0.1.5). Use `"1.16.0"`
 explicitly to retain that worker, or `"1.14.1"`
 for an existing worker. See [runtime selection](compatibility.md#runtime-selection).
 This is a host configuration fragment, not a self-provisioning script. The host
@@ -357,7 +357,7 @@ to reconcile. Memory mode loses this authority when its store process stops.
 
 ## Upgrading a worker
 
-This checkout defaults to **1.22.0**. Published SmolBox 0.4.0 defaults to **1.20.2**. Published SmolBox 0.3.0 and 0.2.1 default to smolvm **1.19.0**; 0.2.0 defaults to **1.17.0** on Linux x86_64 and macOS Apple
+SmolBox 0.4.1 defaults to **1.22.0**. Published SmolBox 0.4.0 defaults to **1.20.2**. Published SmolBox 0.3.0 and 0.2.1 default to smolvm **1.19.0**; 0.2.0 defaults to **1.17.0** on Linux x86_64 and macOS Apple
 Silicon. SmolBox 0.1.4 and 0.1.5 default to **1.16.1**. SmolBox 0.1.3 defaults
 to 1.16.0; 0.1.2 defaults to 1.14.6. Worker selection does not migrate execution records.
 When upgrading controllers from 0.1.x, follow the coordinated
@@ -375,7 +375,7 @@ Before updating the library with an existing worker, retain its version explicit
 ```
 
 Use `"1.19.0"`, `"1.16.1"`, `"1.16.0"`, `"1.14.1"` or `"1.14.6"` instead for a worker still on either version. Omitting
-`:runtime_version` expects `"1.22.0"` in this checkout, `"1.20.2"` in 0.4.0 and 0.3.1, `"1.19.0"` in 0.3.0 and 0.2.1 (`"1.17.0"` in 0.2.0) (`"1.16.1"` in 0.1.5); updating the Elixir
+`:runtime_version` expects `"1.22.0"` in 0.4.1, `"1.20.2"` in 0.4.0 and 0.3.1, `"1.19.0"` in 0.3.0 and 0.2.1 (`"1.17.0"` in 0.2.0) (`"1.16.1"` in 0.1.5); updating the Elixir
 dependency does not install smolvm. A version mismatch prevents new execution.
 Unverified versions and unsupported host combinations fail configuration
 validation. Health checks require an exact version match, without fallback.

@@ -1,8 +1,9 @@
 # Minimal host example
 
-This checkout defaults to smolvm **1.22.0**. Published SmolBox 0.4.0 keeps **1.20.2**. Published SmolBox 0.3.0 and
+SmolBox 0.4.1 defaults to smolvm **1.22.0**. Published SmolBox 0.4.0 keeps **1.20.2**. Published SmolBox 0.3.0 and
 0.2.1 retain their **1.19.0** default.
-Follow [Upgrading to 0.4.0](../../docs/upgrading-to-0.4.0.md) for coordinated
+Follow [Upgrading to 0.4.1](../../docs/upgrading-to-0.4.1.md) for the worker default
+change and [Upgrading to 0.4.0](../../docs/upgrading-to-0.4.0.md) for coordinated
 store upgrades, the two PostgreSQL migrations and rollback constraints.
 For applications coming from 0.2.x, also follow [Upgrading to 0.3.0](../../docs/upgrading-to-0.3.0.md) before enabling
 registry sources, exports, captures or branches against an existing store.
