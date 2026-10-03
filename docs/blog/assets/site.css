@@ -352,3 +352,49 @@ p { margin: 0 0 1.4rem; }
   .reuse-stage.is-moving .reuse-transfer,
   .reuse-stage.is-moving .reuse-target .reuse-state { animation: none; }
 }
+
+/* The volume is a fixed anchor; only its attachment changes. */
+.volume-figure { margin: 2rem 0; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.volume-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+.volume-controls[hidden] { display: none; }
+.volume-controls button { font: inherit; font-size: 15px; font-weight: 650; padding: 8px 12px; color: var(--accent); background: var(--paper); border: 1px solid var(--line); border-radius: 4px; cursor: pointer; min-height: 44px; }
+.volume-controls button:hover { border-color: var(--accent); background: var(--wash); }
+.volume-progress { flex-basis: 100%; font-size: 14px; line-height: 1.5; color: var(--muted); min-height: 42px; }
+.volume-scene { padding: 24px; background: var(--paper); }
+.prose .volume-headline { font-size: 24px; font-weight: 750; letter-spacing: -.025em; line-height: 1.3; margin: 0 0 24px; min-height: 63px; }
+.volume-machine { display: flex; align-items: center; gap: 16px; min-height: 106px; padding: 16px; border: 1px solid var(--accent); border-radius: 4px; background: var(--wash); }
+.volume-machine > svg { flex: 0 0 44px; width: 44px; height: 40px; fill: none; stroke: var(--accent); stroke-width: 1.7; }
+.volume-machine strong, .volume-machine span { display: block; }
+.volume-machine strong { font-size: 19px; }
+.volume-machine-state { color: var(--muted); font-size: 14px; line-height: 1.5; }
+.volume-connection { position: relative; height: 86px; display: grid; place-items: center; }
+.volume-connection > svg { width: 40px; height: 44px; stroke: var(--accent); stroke-width: 1.5; fill: none; position: absolute; left: 50%; top: 42px; transform: translateX(-50%); }
+.volume-mount-label { color: var(--muted); font-size: 14px; line-height: 1.5; align-self: start; margin-top: 10px; text-align: center; }
+.volume-data { border: 2px solid var(--accent); border-radius: 4px; padding: 18px; background: var(--wash); }
+.volume-data-heading { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; }
+.volume-data-heading > strong { font-size: 19px; }
+.volume-reservation { font-size: 14px; color: var(--muted); }
+.volume-file { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; padding: 12px 0; margin-top: 10px; border-top: 1px solid var(--line); }
+.volume-file > span { font-size: 15px; }
+.prose .volume-file code { color: var(--accent); background: var(--paper); font-size: 16px; padding: 2px 8px; }
+.prose .volume-retention { font-size: 14px; color: var(--muted); line-height: 1.5; margin: 0; min-height: 42px; }
+.prose .volume-detail { font-size: 16px; margin: 20px 0 0; min-height: 108px; }
+.prose .volume-figure figcaption { padding: 16px 20px; border-top: 1px solid var(--line); margin: 0; font-size: 14px; line-height: 1.6; color: var(--muted); }
+.volume-scene:is([data-step="1"], [data-step="2"], [data-step="5"]) .volume-machine { border-style: dashed; border-color: var(--muted); background: transparent; }
+.volume-scene:is([data-step="1"], [data-step="2"], [data-step="5"]) .volume-connection > svg { stroke-dasharray: 3 5; stroke: var(--muted); }
+.volume-scene[data-step="4"] .volume-connection > svg { transform: translateX(-50%) rotate(180deg); }
+.volume-scene[data-step="5"] .volume-data { border-color: var(--muted); border-style: dashed; background: transparent; }
+.volume-scene[data-step="5"] .volume-value { text-decoration: line-through; color: var(--muted); }
+@keyframes volume-arrive { from { opacity: .25; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
+@keyframes volume-write { from { box-shadow: inset 0 -2px var(--accent); } to { box-shadow: inset 0 0 transparent; } }
+@media (prefers-reduced-motion: no-preference) {
+  .volume-scene.is-moving .volume-machine { animation: volume-arrive 550ms ease-out; }
+  .volume-scene.is-moving[data-step="3"] .volume-value { animation: volume-write 1100ms ease-out; }
+}
+@media (max-width: 480px) {
+  .volume-scene { padding: 18px; }
+  .prose .volume-headline { font-size: 23px; min-height: 90px; }
+  .volume-machine { min-height: 122px; gap: 12px; padding: 12px; }
+  .volume-data { padding: 14px; }
+  .prose .volume-detail { min-height: 164px; }
+}

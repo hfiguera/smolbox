@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#fbfcfe"/>
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17304e">
+    <path d="M58 51l17-10 17 10v21L75 82 58 72Zm0 0 17 10 17-10M75 61v21" fill="none" stroke="#215bc7" stroke-width="2"/>
+    <text x="109" y="72" font-size="27" font-weight="700">SmolBox</text>
+    <text x="58" y="161" font-size="54" font-weight="700" letter-spacing="-1.7">Replace the machine.</text>
+    <text x="58" y="225" font-size="54" font-weight="700" letter-spacing="-1.7">Keep the project.</text>
+    <rect x="60" y="282" width="450" height="95" rx="4" fill="none" stroke="#526478" stroke-width="2" stroke-dasharray="6 6"/>
+    <text x="86" y="322" font-size="24" font-weight="700">Original machine</text>
+    <text x="86" y="351" font-size="20" fill="#526478">Deleted. Attachment released.</text>
+    <rect x="690" y="282" width="450" height="95" rx="4" fill="#edf2fa" stroke="#215bc7" stroke-width="2"/>
+    <text x="716" y="322" font-size="24" font-weight="700">Replacement machine</text>
+    <text x="716" y="351" font-size="20" fill="#526478">A new identity. The same project.</text>
+    <path d="M285 377v66h315" fill="none" stroke="#526478" stroke-width="2" stroke-dasharray="5 6"/>
+    <path d="M915 377v66H600m9-7-9 7 9 7" fill="none" stroke="#215bc7" stroke-width="3"/>
+    <rect x="280" y="463" width="640" height="110" rx="4" fill="#edf2fa" stroke="#215bc7" stroke-width="2"/>
+    <path d="M600 443v20" stroke="#215bc7" stroke-width="2"/>
+    <text x="600" y="504" text-anchor="middle" font-size="26" font-weight="700">One retained project volume</text>
+    <text x="600" y="540" text-anchor="middle" font-size="21" fill="#526478">Same worker · kept until explicit deletion</text>
+  </g>
+</svg>

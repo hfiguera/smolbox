@@ -1,0 +1,69 @@
+{
+  "date": "2026-10-03",
+  "kind": "live Linux walkthrough, not a simulated test",
+  "smolbox": {
+    "version": "0.4.1",
+    "commit": "d83073fb4137adc8d4a85563f29e9cddb126d622"
+  },
+  "smolvm": {
+    "version": "1.22.0",
+    "smolvm_bin_sha256": "05c8992647761640176b4a56dbc1ea2bbc0ed07d38370a598fb9b0822fa3d31b"
+  },
+  "environment": {
+    "platform": "Linux x86_64",
+    "kernel": "7.1.5-76070105-generic",
+    "cpu": "Intel Core i5-1135G7",
+    "systemd_detect_virt": "none",
+    "worker_identity": "unprivileged, same host UID",
+    "store": "fresh PostgreSQL 16 database, released durable host adapter"
+  },
+  "commands": [
+    "mix ecto.migrate",
+    "mix run -e 'SmolBox.DurableHost.VolumeDemo.run(\"prepare\")'",
+    "mix run -e 'SmolBox.DurableHost.VolumeDemo.run(\"resume\")'"
+  ],
+  "observations": {
+    "original_deleted": true,
+    "between_processes": {
+      "file": "kept.txt",
+      "content": "original",
+      "original_deleted": true,
+      "reserved_disk_gb": 2
+    },
+    "replacement_read_original": true,
+    "replacement_wrote_replacement": true,
+    "readonly_guest_read_replacement": true,
+    "readonly_guest_overwrite_rejected": true,
+    "final_machine_inventory": {
+      "machines": []
+    },
+    "volume_directory_absent": true,
+    "volume_root_empty": true,
+    "final_disk_gb": 0,
+    "final_slots": 0,
+    "worker_stopped": true,
+    "postgres_stopped": true
+  },
+  "attempts": [
+    {
+      "result": "setup failure",
+      "reason": "Approved volume root did not match the worker canonical volume directory. Create returned an unknown record; no machine was created. The incorrect run was not resumed. Its worker and database were stopped; the verified empty directory was removed separately."
+    },
+    {
+      "result": "passed",
+      "change": "A fresh isolated run used the verified worker volume root. Released demo code was unchanged."
+    }
+  ],
+  "limitations": [
+    "One small file and one host configuration, not a benchmark or general isolation qualification.",
+    "No macOS, nested virtualization, root-run worker with per-VM UIDs, host quota, replication or cross-worker migration claims.",
+    "Public receipt omits private paths and key material. Raw output hashes identify the retained local evidence."
+  ],
+  "raw_output_sha256": {
+    "volume-prepare.log": "c70166b414285c48db5090045870cd7698ecd183237779779c615324eb7e6208",
+    "volume-resume.log": "d39ff5967d02a5ea7a94116eebf6095cc7d05fa70109f9fc9c5f5b64d777a3ca",
+    "between-controllers.json": "4ca70352e419c21d5a7a05eeca30a16fbba92b6b27b1fae96cb2f7be0c290fca",
+    "volume-absence.json": "2ad57081ffd38a7435d22b51a9224648d51d8b397490d38ec2d545908ed166f1",
+    "final-inventory.json": "4115c93b07b494b0188c0899c545c6313d8dfda70cf8d2613984eae1976fb745"
+  }
+}

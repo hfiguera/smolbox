@@ -309,3 +309,62 @@ document.querySelectorAll('.reuse-figure').forEach((figure) => {
   render(false);
   figure.querySelector('.reuse-controls').hidden = false;
 });
+
+// The volume stays in place while its exclusive machine attachment changes.
+document.querySelectorAll('.volume-figure').forEach((figure) => {
+  const scene = figure.querySelector('.volume-scene');
+  const play = figure.querySelector('.volume-play');
+  const next = figure.querySelector('.volume-next');
+  const progress = figure.querySelector('.volume-progress');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const steps = [
+    ['The first machine writes the file.', 'Original machine', 'Running · can read and write', 'Mounted at /mnt/volumes/data', '2 GiB reserved', 'original', 'Its own identity. Kept until explicit deletion.', 'The file lives on the volume. The machine’s other files and processes have their own lifetime.'],
+    ['The machine is gone. The project stays.', 'Original deleted', 'Verified absent · attachment released', 'No machine attached', '2 GiB reserved', 'original', 'Retained, even with no machines left.', 'Deleting the machine releases its resources. The volume and its disk reservation remain.'],
+    ['A new controller finds the same volume.', 'Controller restarted', 'Recovered from PostgreSQL', 'No machine attached', '2 GiB reserved', 'original', 'Same volume identity. Same worker directory.', 'The first Elixir process has exited. The next process recovers the record, without provisioning an empty replacement volume.'],
+    ['A replacement reads, then changes the file.', 'Replacement machine', 'Running · can read and write', 'Mounted at /mnt/volumes/data', '2 GiB reserved', 'replacement', 'Same volume. A new value in the file.', 'The new machine first verifies “original”, then writes “replacement”. Its own disks start from the approved image.'],
+    ['Read the project without changing it.', 'Read-only machine', 'Replacement deleted before this attachment', 'Read-only at /mnt/volumes/data', '2 GiB reserved', 'replacement', 'One exclusive attachment, even for reads.', 'This guest reads the updated file and cannot overwrite it. Read-only does not permit concurrent sharing.'],
+    ['Now the data is deliberately removed.', 'All machines deleted', 'Verified absent · no attachment', 'Volume deleted explicitly', '0 GiB reserved', 'File deleted', 'Identity history remains in the store.', 'After the last machine is deleted, volume deletion removes its directory. The demo finishes with zero disk and slot reservations.']
+  ];
+  const selectors = ['.volume-headline', '.volume-machine-name', '.volume-machine-state', '.volume-mount-label', '.volume-reservation', '.volume-value', '.volume-retention', '.volume-detail'];
+  let step = 0;
+  let timer;
+  let frame;
+  function pause() {
+    clearTimeout(timer);
+    cancelAnimationFrame(frame);
+    timer = undefined;
+    scene.classList.remove('is-moving');
+    play.textContent = step === steps.length - 1 ? 'Replay walkthrough' : 'Play walkthrough';
+  }
+  function render(animate = true) {
+    scene.dataset.step = String(step);
+    selectors.forEach((selector, i) => { figure.querySelector(selector).textContent = steps[step][i]; });
+    progress.textContent = `Step ${step + 1} of ${steps.length}. ${steps[step][0]}`;
+    next.textContent = step === steps.length - 1 ? 'Back to start' : 'Next step';
+    scene.classList.remove('is-moving');
+    cancelAnimationFrame(frame);
+    if (animate && !reduced.matches) frame = requestAnimationFrame(() => scene.classList.add('is-moving'));
+    if (!timer) play.textContent = step === steps.length - 1 ? 'Replay walkthrough' : 'Play walkthrough';
+  }
+  function advance() {
+    step += 1;
+    render();
+    if (step === steps.length - 1) pause();
+    else timer = setTimeout(advance, 5000);
+  }
+  play.addEventListener('click', () => {
+    if (timer) return pause();
+    if (step === steps.length - 1) step = 0;
+    render();
+    play.textContent = 'Pause';
+    timer = setTimeout(advance, 5000);
+  });
+  next.addEventListener('click', () => { pause(); step = (step + 1) % steps.length; render(); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
+  reduced.addEventListener('change', pause);
+  if ('IntersectionObserver' in window) new IntersectionObserver((entries) => {
+    if (!entries[0].isIntersecting) pause();
+  }).observe(figure);
+  render(false);
+  figure.querySelector('.volume-controls').hidden = false;
+});
