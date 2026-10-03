@@ -36,6 +36,10 @@
   </div>
   <section class="next-step" aria-labelledby="next-title">
     <%= cond do %>
+    <% @article["slug"] == "replace-the-machine-keep-the-project" -> %>
+    <h2 id="next-title">Prove it with one file.</h2>
+    <p>Run prepare and resume in separate Elixir processes. Verify the file survives, then finish with explicit machine and volume cleanup.</p>
+    <a href="https://github.com/hfiguera/smolbox/tree/v0.4.1/examples/durable_host#local-volumes">Open the volume walkthrough <%= SmolBox.Blog.HTML.arrow(:right) %></a>
     <% @article["slug"] == "exports-checkpoints-or-branches" -> %>
     <h2 id="next-title">Make a change. Compare both machines.</h2>
     <p>The saved state workspace walks through preparation, capture, a live branch and explicit cleanup. Its README includes the approved Linux seed and storage prerequisites.</p>

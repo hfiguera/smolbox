@@ -247,3 +247,21 @@ disk/RAM checkpoints and live branches, including retained cleanup obligations.
 It does not contact a worker or visualize measured timings. Manual stepping,
 pause, visibility/offscreen pause and reduced motion are supported. The authored
 static export explanation remains visible without JavaScript.
+
+## Replace the machine, keep the project — October 3, 2026
+
+`replace-the-machine-keep-the-project/project-volume-social.svg` is an original
+geometric diagram using the existing blog palette and Arial/Helvetica fallback.
+Sharp renders its 1200 × 630 `project-volume.png`; the PNG embeds its origin.
+No external imagery, generated illustrations or font files are distributed.
+
+The inline figure is original HTML/SVG with scoped CSS and JavaScript. Its fixed
+volume position explains a changing exclusive attachment, not file transfer.
+Playback is finite and reader initiated, with manual stepping, pause, offscreen
+and visibility pause, and reduced motion. A static original attachment remains
+without JavaScript. It is an explanatory model, not live worker telemetry.
+
+`validation.json` is a sanitized receipt of the released 0.4.1 durable volume demo
+on physical Linux with smolvm 1.22.0 and PostgreSQL. It records a setup failure and
+the corrected successful run, independent host file/absence checks, cleanup and
+limitations. Private keys, host paths and raw logs are not published.

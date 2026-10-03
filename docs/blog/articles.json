@@ -1,5 +1,16 @@
 [
   {
+    "slug": "replace-the-machine-keep-the-project",
+    "title": "Replace the machine. Keep the project.",
+    "description": "Delete a machine without losing its project files. Follow a managed volume through a controller restart, a replacement machine, read-only access and explicit cleanup.",
+    "published_on": "2026-10-03",
+    "updated_on": "2026-10-03",
+    "version": "0.4.1",
+    "category": "Practical integrations",
+    "image": "project-volume.png",
+    "image_alt": "The original machine is deleted. A replacement attaches to the same retained project volume on the Linux worker."
+  },
+  {
     "slug": "exports-checkpoints-or-branches",
     "title": "Exports, checkpoints or branches: what should you reuse?",
     "description": "Choose what your next machine inherits. Compare disk artifacts, saved memory and live copies, with real Linux measurements and the cleanup each choice leaves behind.",
