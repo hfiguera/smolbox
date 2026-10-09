@@ -19,6 +19,96 @@ defmodule SmolBox.ClientTest do
 
   defp fixture(name), do: "test/fixtures/wire/#{name}.json" |> File.read!() |> Jason.decode!()
 
+  test "healthy worker rejects an unsupported inventory entry with redacted list diagnostics" do
+    parent = self()
+    supported = fixture("1.22.0/created")
+
+    unsupported =
+      Map.merge(supported, %{
+        "name" => "private-machine",
+        "network" => true,
+        "privateMetadata" => "secret-response-data"
+      })
+
+    peer =
+      client(fn conn ->
+        send(parent, {:inventory_request, conn.method, conn.request_path})
+
+        case conn.request_path do
+          "/health" ->
+            TestPeer.json(conn, %{
+              "status" => "ok",
+              "version" => "1.22.0",
+              "machines" => %{"total" => 2, "running" => 0}
+            })
+
+          "/readyz" ->
+            Plug.Conn.send_resp(conn, 200, "")
+
+          "/api/v1/machines" ->
+            TestPeer.json(conn, %{"machines" => [supported, unsupported]})
+        end
+      end)
+
+    assert {:ok, %{version: "1.22.0", total: 2}} = Client.health(peer)
+    assert :ok = Client.readiness(peer)
+
+    assert {:error,
+            %Error{
+              category: :unsupported_network_policy,
+              operation: :list,
+              evidence: :dispatch_uncertain
+            } = error} = Client.list(peer)
+
+    assert_receive {:inventory_request, "GET", "/health"}
+    assert_receive {:inventory_request, "GET", "/readyz"}
+    assert_receive {:inventory_request, "GET", "/api/v1/machines"}
+    refute_receive {:inventory_request, _, _}
+
+    for rendered <- [inspect(error), Exception.message(error)] do
+      refute rendered =~ "private-machine"
+      refute rendered =~ "secret-response-data"
+    end
+  end
+
+  test "list decoding failures use post-request evidence without weakening validation" do
+    supported = fixture("1.22.0/created")
+
+    for {body, category} <- [
+          {%{}, :protocol},
+          {%{"machines" => [%{}]}, :protocol},
+          {%{"machines" => [Map.put(supported, "state", "paused")]}, :protocol},
+          {%{"machines" => List.duplicate(supported, 1025)}, :output_limit}
+        ] do
+      peer = client(&TestPeer.json(&1, body))
+
+      assert {:error,
+              %Error{
+                category: ^category,
+                operation: :list,
+                evidence: :dispatch_uncertain
+              }} = Client.list(peer)
+    end
+
+    assert {:ok, []} = Client.list(client(&TestPeer.json(&1, %{"machines" => []})))
+    assert {:ok, [_]} = Client.list(client(&TestPeer.json(&1, %{"machines" => [supported]})))
+  end
+
+  test "invalid worker still reports list failure before dispatch" do
+    parent = self()
+
+    peer =
+      client(fn conn ->
+        send(parent, :unexpected_list_request)
+        TestPeer.json(conn, %{"machines" => []})
+      end)
+
+    invalid = %{peer | worker: %{peer.worker | max_response_bytes: 0}}
+
+    assert {:error, %Error{operation: :list, evidence: :not_dispatched}} = Client.list(invalid)
+    refute_receive :unexpected_list_request
+  end
+
   test "health and empty readiness responses use distinct strict wire contracts" do
     peer =
       client(fn conn ->

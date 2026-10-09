@@ -61,6 +61,13 @@ with the 1 MiB file-transfer cap. The package does not install smolvm or prepare
 runtime images for you. Do not attach this ephemeral demo controller to a worker
 managed by another runtime or store.
 
+Health and readiness checks establish availability; they do not validate every
+machine in the worker inventory. The example also requires `Client.list/1` to
+return `{:ok, []}`. An existing machine with an unsupported network policy or
+another invalid observation can reject the whole list. See
+[Machine inventory problems](troubleshooting.md#machine-inventory-problems) before
+changing or removing any existing machines.
+
 The example uses the measured reference allocation floor: 20 GiB storage,
 10 GiB overlay, and 768 MiB VMM overhead per execution. Check available host
 capacity and your actual templates before using it. These are allocation and

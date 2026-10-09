@@ -49,6 +49,40 @@ command result while recording unavailable outputs. `cleanup: :complete` and
 | Collected output is missing | Check `collection`, `artifacts`, and `last_error`, then the artifact adapter. Restoring storage and resubmitting the same ID does not rerun the command or recreate deleted guest files. |
 | Cleanup or reservations remain pending | Check ownership evidence, worker availability, retention, and cleanup attempts. An unknown outcome normally retains its VM until the execution deadline plus `retention_ms` (24 hours by default). |
 
+## Machine inventory problems
+
+Health and readiness can succeed while `SmolBox.Client.list/1` fails. The list
+validates every returned machine, including machines created outside SmolBox.
+One unsupported or malformed entry rejects the whole inventory; valid entries
+are not returned as a partial result.
+
+An error with `operation: :list` and `category: :unsupported_network_policy`
+identifies an unsupported machine network policy. An observation with networking enabled
+must declare the `virtio-net` backend and explicit `allowedHosts` and
+`allowedCidrs` arrays containing a supported nonempty allowlist. Unrestricted
+networking is rejected. Offline observations must have empty or absent allowlists;
+published ports have additional backend requirements. See
+[Controlled network access](network-access.md) and [Port mappings](port-mappings.md).
+Other malformed machine fields, such as unsupported states or missing resource
+allocations, return `:protocol`.
+
+These decoding errors use `evidence: :dispatch_uncertain`: the GET was sent,
+but no supported inventory observation was obtained. This is not proof that a
+request was rejected before dispatch, and it does not authorize command replay.
+Errors omit machine names, response bodies, and other remote values.
+
+For the local TCP worker in the getting-started guide, inspect its raw inventory:
+
+```sh
+curl -i http://127.0.0.1:19470/api/v1/machines
+```
+
+For a local Unix socket, use `curl --unix-socket "$SMOLBOX_RUNTIME_SOCKET" -i
+http://localhost/api/v1/machines` instead. Redact sensitive paths, hostnames, and
+other remote values before sharing a response. Preserve the current inventory
+while investigating; use a separately provisioned, dedicated empty worker for
+the demo rather than clearing machines owned by another runtime or application.
+
 ## Mapped service problems
 
 For a retained machine, inspect `Machines.inspect/2`, including `spec.ports`,

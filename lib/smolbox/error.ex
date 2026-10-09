@@ -4,6 +4,9 @@ defmodule SmolBox.Error do
 
   Errors contain no remote response bodies, credentials, commands, or file data.
   A transport failure with `:dispatch_uncertain` never authorizes command replay.
+  Machine list decoding failures use `:dispatch_uncertain`; `:not_dispatched`
+  is reserved for failures before the request is sent. `:unsupported_network_policy`
+  identifies a rejected machine network policy without retaining its remote fields.
   """
 
   @enforce_keys [:category, :operation]
@@ -12,6 +15,7 @@ defmodule SmolBox.Error do
   @type category ::
           :validation
           | :unsupported_capability
+          | :unsupported_network_policy
           | :authentication
           | :admission_exhausted
           | :expired
