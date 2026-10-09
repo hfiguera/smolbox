@@ -1,5 +1,16 @@
 [
   {
+    "slug": "from-registry-image-to-working-environment",
+    "title": "From a registry image to a working environment in Elixir",
+    "description": "Start with an approved OCI image, run a small workload and verify its result. Learn when to use a prepared machine artifact, what a digest fixes, and what you still need to manage.",
+    "published_on": "2026-10-05",
+    "updated_on": "2026-10-05",
+    "version": "0.4.1",
+    "category": "Practical integrations",
+    "image": "registry-environment.png",
+    "image_alt": "A pinned Alpine registry image becomes a retained machine. A second command verifies the report: three orders and nine units."
+  },
+  {
     "slug": "replace-the-machine-keep-the-project",
     "title": "Replace the machine. Keep the project.",
     "description": "Delete a machine without losing its project files. Follow a managed volume through a controller restart, a replacement machine, read-only access and explicit cleanup.",
