@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-05",
+  "smolbox_version": "0.4.1",
+  "smolvm_version": "1.22.0",
+  "platform": "Linux x86_64",
+  "virtualization": "systemd-detect-virt: none",
+  "store": "fresh PostgreSQL 16 database",
+  "transport": "local Unix socket; PostgreSQL via local Unix socket",
+  "image_seeds": false,
+  "source": {
+    "manifest_digest": "sha256:3c81aa9a3d770b316568f4499e30461a5cd3fbd7180bd89e28e34894c7845832",
+    "media_type": "application/vnd.oci.image.manifest.v1+json",
+    "configuration_digest": "sha256:9cb701c20b595f4442ba074b2ec924f396f4c474084608116901ce3098ebfe3d",
+    "architecture": "amd64",
+    "os": "linux",
+    "layers": 1
+  },
+  "script_sha256": "1432e9581b13a370bfa30927c97e27cb6cc1a1057d12a6fc479bc17194d1c093",
+  "attempts": [
+    {
+      "prepare": "passed",
+      "cleanup": "passed"
+    }
+  ],
+  "checks": {
+    "initial_machine_inventory_empty": true,
+    "report_verified_by_second_execution": "orders=3\nunits=9\n",
+    "machine_running_after_prepare": true,
+    "reservation_retained_after_prepare": true,
+    "cleanup_in_separate_beam_process": true,
+    "worker_absence_verified": true,
+    "slot_and_disk_reservations_zero": true,
+    "final_machine_inventory_empty": true,
+    "worker_stopped": true,
+    "postgres_stopped": true
+  },
+  "limitations": [
+    "One public Alpine platform manifest and an isolated physical Linux worker.",
+    "No private registry credentials, registry artifact creation or shared image seed validation in this walkthrough.",
+    "Worker caches are separate from machine reservations and are not claimed to be purged.",
+    "The article shows a TCP PostgreSQL URL; the live fixture used a local PostgreSQL Unix socket.",
+    "No startup performance or universal reproducibility claim."
+  ]
+}

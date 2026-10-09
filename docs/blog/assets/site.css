@@ -398,3 +398,40 @@ p { margin: 0 0 1.4rem; }
   .volume-data { padding: 14px; }
   .prose .volume-detail { min-height: 164px; }
 }
+
+/* Registry identity stays fixed while the machine and its result change. */
+.registry-figure { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin: 40px 0; }
+.registry-controls { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px; border-bottom: 1px solid var(--line); }
+.registry-controls[hidden] { display: none; }
+.registry-controls button { border: 1px solid var(--line); border-radius: 4px; background: var(--paper); color: var(--accent); padding: 10px 14px; font: inherit; font-weight: 650; cursor: pointer; }
+.registry-controls button:hover { background: var(--wash); }
+.registry-progress { flex-basis: 100%; color: var(--muted); font-size: 14px; }
+.registry-scene { padding: 28px; }
+.registry-headline { font-size: 24px; font-weight: 700; line-height: 1.3; margin: 0 0 28px !important; }
+.registry-source { display: grid; gap: 7px; border-top: 2px solid var(--accent); padding: 20px 0; }
+.registry-source span, .registry-source small, .registry-state { font-size: 14px; color: var(--muted); }
+.registry-source strong { font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; font-size: 18px; overflow-wrap: anywhere; }
+.registry-route { display: flex; align-items: center; gap: 18px; padding: 2px 0 18px; color: var(--muted); font-size: 15px; }
+.registry-route svg { width: 40px; height: 56px; flex: 0 0 40px; stroke: var(--accent); stroke-width: 2; fill: none; }
+.registry-target { border: 1px solid var(--line); border-radius: 4px; background: var(--wash); padding: 20px; }
+.registry-target-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; }
+.registry-output { background: transparent !important; border: 0 !important; color: var(--ink) !important; padding: 18px 0 0 !important; margin: 0 !important; font-size: 17px; line-height: 1.7; min-height: 5em; white-space: pre-wrap; overflow-wrap: anywhere; }
+.registry-detail { font-size: 16px; line-height: 1.6; min-height: 5em; margin: 24px 0 0 !important; }
+.registry-figure figcaption { padding: 18px 20px; border-top: 1px solid var(--line); margin: 0; font-size: 14px; color: var(--muted); }
+.registry-scene[data-step="2"] .registry-target { border-color: var(--accent); }
+.registry-scene[data-step="3"] .registry-route svg { stroke: var(--muted); }
+.registry-scene.is-moving .registry-route path { stroke-dasharray: 80; animation: registry-route 1.2s cubic-bezier(.16, 1, .3, 1) both; }
+.registry-scene.is-moving .registry-output { animation: registry-receipt 1.2s cubic-bezier(.16, 1, .3, 1) both; }
+@keyframes registry-route { from { stroke-dashoffset: 80; } to { stroke-dashoffset: 0; } }
+@keyframes registry-receipt { from { clip-path: inset(0 0 80% 0); } to { clip-path: inset(0); } }
+@media (max-width: 480px) {
+  .registry-scene { padding: 20px 16px; }
+  .registry-controls { padding: 16px; }
+  .registry-headline { font-size: 22px; }
+  .registry-source strong { font-size: 16px; }
+  .registry-target { padding: 16px; }
+  .registry-detail { min-height: 8em; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .registry-scene.is-moving .registry-route path, .registry-scene.is-moving .registry-output { animation: none; }
+}

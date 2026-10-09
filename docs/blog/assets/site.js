@@ -368,3 +368,60 @@ document.querySelectorAll('.volume-figure').forEach((figure) => {
   render(false);
   figure.querySelector('.volume-controls').hidden = false;
 });
+
+// Keep the approved source fixed; creation, execution and deletion change separately.
+document.querySelectorAll('.registry-figure').forEach((figure) => {
+  const scene = figure.querySelector('.registry-scene');
+  const play = figure.querySelector('.registry-play');
+  const next = figure.querySelector('.registry-next');
+  const progress = figure.querySelector('.registry-progress');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const steps = [
+    ['Approve the starting image.', 'Explicit source and network approval', 'No machine yet', 'Approved source', 'Image identity is known.\nThe report has not run.', 'The registry supplies the starting environment. It does not supply a successful result for your workload.'],
+    ['Create and start the environment.', 'Fetch content; observe the running machine', 'report-one', 'Running · retained', 'Shell and awk available.\nReady to submit the report command.', 'The machine has its own durable identity. A successful creation is still separate from a successful command.'],
+    ['A second command verifies the report.', 'Same approved source; same machine', 'report-one', 'Result verified', 'orders=3\nunits=9', 'One execution writes the report. Another reads its exact bytes with exit code zero. The machine remains after the controller exits.'],
+    ['Delete deliberately. Verify absence.', 'Image identity remains in durable history', 'report-one deleted', 'Reservation released', 'Machine absent.\nSlot and disk reservations: 0', 'The report on the machine’s disk is gone. Host registry caches have a separate lifetime; deletion is not a cache purge.']
+  ];
+  const selectors = ['.registry-headline', '.registry-route-label', '.registry-machine', '.registry-state', '.registry-output', '.registry-detail'];
+  let step = 0;
+  let timer;
+  let frame;
+  function pause() {
+    clearTimeout(timer);
+    cancelAnimationFrame(frame);
+    timer = undefined;
+    scene.classList.remove('is-moving');
+    play.textContent = step === steps.length - 1 ? 'Replay walkthrough' : 'Play walkthrough';
+  }
+  function render(animate = true) {
+    scene.dataset.step = String(step);
+    selectors.forEach((selector, i) => { figure.querySelector(selector).textContent = steps[step][i]; });
+    progress.textContent = `Step ${step + 1} of ${steps.length}. ${steps[step][0]}`;
+    next.textContent = step === steps.length - 1 ? 'Back to start' : 'Next step';
+    scene.classList.remove('is-moving');
+    cancelAnimationFrame(frame);
+    if (animate && !reduced.matches) frame = requestAnimationFrame(() => scene.classList.add('is-moving'));
+    if (!timer) play.textContent = step === steps.length - 1 ? 'Replay walkthrough' : 'Play walkthrough';
+  }
+  function advance() {
+    step += 1;
+    render();
+    if (step === steps.length - 1) pause();
+    else timer = setTimeout(advance, 5000);
+  }
+  play.addEventListener('click', () => {
+    if (timer) return pause();
+    if (step === steps.length - 1) step = 0;
+    render();
+    play.textContent = 'Pause';
+    timer = setTimeout(advance, 5000);
+  });
+  next.addEventListener('click', () => { pause(); step = (step + 1) % steps.length; render(); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
+  reduced.addEventListener('change', pause);
+  if ('IntersectionObserver' in window) new IntersectionObserver((entries) => {
+    if (!entries[0].isIntersecting) pause();
+  }).observe(figure);
+  render(false);
+  figure.querySelector('.registry-controls').hidden = false;
+});

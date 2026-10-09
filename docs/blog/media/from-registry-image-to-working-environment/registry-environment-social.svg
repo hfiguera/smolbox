@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+<rect width="1200" height="630" fill="#fbfcfe"/>
+<g font-family="Arial, Helvetica, sans-serif" fill="#17304e">
+<text x="64" y="70" font-size="24">SmolBox · Elixir + microVMs</text>
+<text x="64" y="152" font-size="48" font-weight="700">From a registry image</text>
+<text x="64" y="210" font-size="48" font-weight="700">to a working environment</text>
+<path d="M64 250H1136" stroke="#d8e0eb"/>
+<text x="64" y="306" font-size="23">Approve the image.</text>
+<text x="688" y="306" font-size="23">Verify the result.</text>
+<rect x="64" y="336" width="420" height="170" rx="8" fill="#edf2fa" stroke="#d8e0eb"/>
+<text x="88" y="383" font-size="25" font-weight="700">Alpine · Linux AMD64</text>
+<text x="88" y="431" font-size="23" font-family="monospace">sha256:3c81…5832</text>
+<text x="88" y="474" font-size="18" fill="#526478">Pinned platform manifest</text>
+<path d="M518 419H650m-12-12 12 12-12 12" fill="none" stroke="#215bc7" stroke-width="3"/>
+<rect x="688" y="336" width="448" height="170" rx="8" fill="#edf2fa" stroke="#215bc7"/>
+<text x="712" y="383" font-size="25" font-weight="700">Retained machine</text>
+<text x="712" y="432" font-family="monospace" font-size="24">orders=3</text>
+<text x="712" y="471" font-family="monospace" font-size="24">units=9</text>
+<text x="64" y="576" font-size="22" fill="#526478">Run from Elixir. Check the bytes. Choose when to delete.</text>
+</g></svg>

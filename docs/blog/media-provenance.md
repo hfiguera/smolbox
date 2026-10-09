@@ -265,3 +265,25 @@ without JavaScript. It is an explanatory model, not live worker telemetry.
 on physical Linux with smolvm 1.22.0 and PostgreSQL. It records a setup failure and
 the corrected successful run, independent host file/absence checks, cleanup and
 limitations. Private keys, host paths and raw logs are not published.
+
+## From a registry image to a working environment — October 5, 2026
+
+`from-registry-image-to-working-environment/registry-environment-social.svg` is
+an original geometric diagram in the existing palette. Sharp renders its
+1200 × 630 `registry-environment.png`, with origin embedded. No external imagery
+or fonts are distributed.
+
+The inline HTML/SVG diagram has original scoped CSS and reader-controlled finite
+JavaScript playback. A fixed source identity contrasts with changing machine and
+result states. It supports stepping, pause/replay, reduced motion, offscreen and
+visibility pause, and a useful static no-JavaScript state. It represents semantics,
+not live worker telemetry or measured timings.
+
+`registry-report.exs` adapts the released 0.4.1 durable registry example to a
+specific public Alpine image and a verified CSV summary. `validation.json` records
+a physical Linux run against released SmolBox 0.4.1 and smolvm 1.22.0, with shared
+image seeds disabled, a fresh PostgreSQL store, separate prepare/cleanup processes,
+verified result bytes, machine absence, released reservations and stopped lab
+services. The platform manifest was independently retrieved and its digest and
+configuration architecture checked against Docker Hub. Keys and raw logs remain
+outside public assets.

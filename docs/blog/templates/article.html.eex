@@ -36,6 +36,10 @@
   </div>
   <section class="next-step" aria-labelledby="next-title">
     <%= cond do %>
+    <% @article["slug"] == "from-registry-image-to-working-environment" -> %>
+    <h2 id="next-title">Start with an image. Finish with evidence.</h2>
+    <p>Run the report against the approved Alpine image, verify its output, and delete the retained machine explicitly when you are done.</p>
+    <a href="<%= @root %>media/from-registry-image-to-working-environment/registry-report.exs" download>Download the complete registry example <%= SmolBox.Blog.HTML.arrow(:right) %></a>
     <% @article["slug"] == "replace-the-machine-keep-the-project" -> %>
     <h2 id="next-title">Prove it with one file.</h2>
     <p>Run prepare and resume in separate Elixir processes. Verify the file survives, then finish with explicit machine and volume cleanup.</p>
