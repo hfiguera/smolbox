@@ -63,12 +63,67 @@ defmodule SmolBox.CI.PreflightTest do
   end
 
   test "candidate preflight recognizes pinned distributions without granting runtime admission" do
-    for version <- [nil, "1.14.1", "1.14.6", "1.16.0", "1.16.1", "1.17.0"] do
+    for version <- [
+          nil,
+          "1.14.1",
+          "1.14.6",
+          "1.16.0",
+          "1.16.1",
+          "1.17.0",
+          "1.19.0",
+          "1.20.2",
+          "1.22.0"
+        ] do
       manifest = if version, do: Map.put(manifest(), "runtime_version", version), else: manifest()
       assert Preflight.validate!(manifest, "linux", false, %{}).port == 19_470
 
       assert Preflight.validate!(Map.put(manifest, "platform", "macos"), "macos", false, %{}).port ==
                19_470
+    end
+  end
+
+  test "official launchers qualify only for their pinned release on both platforms" do
+    root = Util.temporary("smolbox-wrapper-test")
+    on_exit(fn -> File.rm_rf!(root) end)
+    executable = Path.join(root, "smolvm-bin")
+    wrapper = Path.join(root, "smolvm")
+
+    for version <- ~w(1.14.1 1.14.6 1.16.0 1.16.1 1.17.0 1.19.0 1.20.2 1.22.0),
+        platform <- ~w(linux macos) do
+      fixture_version = if version == "1.22.0", do: version, else: "1.20.2"
+      fixture = Path.expand("../fixtures/ci/launchers/#{fixture_version}.fixture", __DIR__)
+      File.cp!(fixture, wrapper)
+      assert Preflight.wrapper!(executable, platform, version) == Util.digest(fixture)
+
+      other_version = if version == "1.22.0", do: "1.20.2", else: "1.22.0"
+
+      assert_raise ArgumentError, "worker wrapper differs from pinned release", fn ->
+        Preflight.wrapper!(executable, platform, other_version)
+      end
+
+      File.write!(wrapper, "\n# modified\n", [:append])
+
+      assert_raise ArgumentError, "worker wrapper differs from pinned release", fn ->
+        Preflight.wrapper!(executable, platform, version)
+      end
+    end
+  end
+
+  test "wrapper qualification rejects unsupported pairs and nonregular files" do
+    root = Util.temporary("smolbox-wrapper-test")
+    on_exit(fn -> File.rm_rf!(root) end)
+    executable = Path.join(root, "smolvm-bin")
+    fixture = Path.expand("../fixtures/ci/launchers/1.22.0.fixture", __DIR__)
+    File.ln_s!(fixture, Path.join(root, "smolvm"))
+
+    assert_raise ArgumentError, "expected bounded absolute regular fixture", fn ->
+      Preflight.wrapper!(executable, "linux", "1.22.0")
+    end
+
+    for {platform, version} <- [{"linux", "1.22.1"}, {"windows", "1.22.0"}] do
+      assert_raise ArgumentError, "unsupported runtime/platform pair", fn ->
+        Preflight.wrapper!(executable, platform, version)
+      end
     end
   end
 
