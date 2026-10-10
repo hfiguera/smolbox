@@ -1,7 +1,7 @@
 # Getting started with SmolBox
 
 ```elixir
-Mix.install([{:smolbox, "~> 0.4.1"}])
+Mix.install([{:smolbox, "~> 0.4.2"}])
 ```
 
 ## Prepare the worker

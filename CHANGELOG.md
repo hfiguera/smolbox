@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.4.2
+
+**Shared store upgrade:** upgrade all controllers and readers before allowing
+records with `:unsupported_network_policy`. No SQL migration or codec revision
+is added; older readers reject this new category. See
+[Upgrading to 0.4.2](docs/upgrading-to-0.4.2.md). The default worker remains
+smolvm **1.22.0**.
+
 - Getting Started now includes complete image preparation and Linux worker
   isolation commands, explains network restrictions before execution, and
   provides a downloadable Livebook in HexDocs and the package.

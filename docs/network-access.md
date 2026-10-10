@@ -1,9 +1,9 @@
 # Controlled network access
 
-SmolBox 0.4.1 defaults to **smolvm 1.22.0** on Linux x86_64 and macOS Apple
+SmolBox 0.4.2 retains the default of **smolvm 1.22.0** on Linux x86_64 and macOS Apple
 Silicon. Published 0.3.0 and 0.2.1 keep 1.19.0; 0.2.0 keeps 1.17.0. Keep workers pinned
 to their installed version; updating SmolBox does not install smolvm. See
-[Upgrading to 0.4.1](upgrading-to-0.4.1.md) and the
+[Upgrading to 0.4.2](upgrading-to-0.4.2.md) and the
 [1.20.2 qualification](runtime-1.20.2-qualification.md).
 
 
