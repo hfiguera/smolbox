@@ -2,6 +2,19 @@ defmodule SmolBox.CI.Runtime do
   @moduledoc false
   alias SmolBox.CI.Util
 
+  @legacy_wrapper "8caeb3b6e7d834493a578b0fe8bd1e7aa02e68fba6d61bcf70fdbec41a27ce68"
+  # Verified in both qualified platform archives; unknown versions fail closed.
+  @wrapper_pins %{
+    "1.22.0" => "b67b25f363403e19deceb6897e5a4d94be30a079f8cb751372782f17fc99003a",
+    "1.20.2" => @legacy_wrapper,
+    "1.19.0" => @legacy_wrapper,
+    "1.17.0" => @legacy_wrapper,
+    "1.16.1" => @legacy_wrapper,
+    "1.16.0" => @legacy_wrapper,
+    "1.14.6" => @legacy_wrapper,
+    "1.14.1" => @legacy_wrapper
+  }
+
   @pins %{
     {"linux", "1.22.0"} =>
       {"x86_64", "05c8992647761640176b4a56dbc1ea2bbc0ed07d38370a598fb9b0822fa3d31b"},
@@ -43,4 +56,9 @@ defmodule SmolBox.CI.Runtime do
   end
 
   def selected_version, do: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.22.0")
+
+  def wrapper_pin!(platform, version) do
+    pin!(platform, version)
+    Map.fetch!(@wrapper_pins, version)
+  end
 end

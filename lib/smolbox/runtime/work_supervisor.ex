@@ -13,7 +13,8 @@ defmodule SmolBox.Runtime.WorkSupervisor do
     }
 
     children = [
-      {Task.Supervisor, max_children: config.max_active + 1},
+      # Execution observers plus one maintenance task and one scan.
+      {Task.Supervisor, max_children: config.max_active + 2},
       {Coordinator, {config, self()}}
     ]
 

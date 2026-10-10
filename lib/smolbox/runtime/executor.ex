@@ -13,9 +13,15 @@ defmodule SmolBox.Runtime.Executor do
     WorkerHealth
   }
 
-  def run(config, key, eligible) do
+  def maintenance?(record, now),
+    do:
+      record.cancel_requested_at_ms != nil or Execution.expired?(record, now) or
+        record.state not in [:accepted, :preparing, :ready, :dispatching, :running, :cancelling]
+
+  def run(config, key, eligible, lane \\ :execution) do
     Session.safe(fn ->
       with {:ok, record} <- Session.store(config, :fetch, [key]),
+           true <- lane == :execution or maintenance?(record, config.clock.now()),
            :ok <- ExecutionSupport.check(config, record.spec),
            :ok <-
              Machines.port_support(
@@ -224,9 +230,9 @@ defmodule SmolBox.Runtime.Executor do
 
   defp observe_dispatch_health(session, record) do
     case Session.io(session, record, :preparation, fn ->
-           WorkerHealth.observe(session.worker, session.config.clock)
+           WorkerHealth.check(session.worker, session.config.clock)
          end) do
-      %{status: :ready} -> :ok
+      :ok -> :ok
       _unqualified -> Session.error(:unsupported_capability, :worker)
     end
   end

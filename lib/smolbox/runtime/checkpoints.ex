@@ -11,7 +11,7 @@ defmodule SmolBox.Runtime.Checkpoints do
     ManagedMachine
   }
 
-  alias SmolBox.Runtime.{MachineSession, Session}
+  alias SmolBox.Runtime.{MachineSession, Session, WorkerHealth}
 
   def run(config, machine) do
     capture = machine.captures[machine.active_capture]
@@ -67,6 +67,7 @@ defmodule SmolBox.Runtime.Checkpoints do
   defp preflight(config, m, c) do
     with {:ok, worker} <- MachineSession.worker(config, m),
          true <- approved?(worker, c.spec),
+         :ok <- WorkerHealth.check(worker, config.clock),
          {:ok, observed} <- Client.checkpoint_preflight(worker.client, m.machine_name),
          true <- Machine.same_incarnation?(m.created_machine, observed),
          :ok <- CheckpointIO.vacant?(c) do

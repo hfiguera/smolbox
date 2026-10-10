@@ -1,7 +1,6 @@
 defmodule SmolBox.CI.Preflight do
   @moduledoc false
   alias SmolBox.CI.{HTTP, Runtime, Util}
-  @wrapper "8caeb3b6e7d834493a578b0fe8bd1e7aa02e68fba6d61bcf70fdbec41a27ce68"
 
   def validate!(manifest, platform, development, environment \\ System.get_env()) do
     Util.ensure!(
@@ -89,6 +88,17 @@ defmodule SmolBox.CI.Preflight do
     )
   end
 
+  def wrapper!(executable, platform, version) do
+    pin = Runtime.wrapper_pin!(platform, version)
+
+    Util.ensure!(
+      fixture_digest!(Path.join(Path.dirname(executable), "smolvm")) == pin,
+      "worker wrapper differs from pinned release"
+    )
+
+    pin
+  end
+
   def run(arguments) do
     {options, []} =
       Util.options!(
@@ -134,10 +144,7 @@ defmodule SmolBox.CI.Preflight do
     executable = executable!(manifest["worker_pid"], platform)
     Util.ensure!(fixture_digest!(executable) == pin, "worker binary differs from pinned release")
 
-    Util.ensure!(
-      fixture_digest!(Path.join(Path.dirname(executable), "smolvm")) == @wrapper,
-      "worker wrapper differs from pinned release"
-    )
+    wrapper_pin = wrapper!(executable, platform, version)
 
     for language <- ~w(python javascript) do
       Util.ensure!(
@@ -180,6 +187,7 @@ defmodule SmolBox.CI.Preflight do
        logical_cpus: :erlang.system_info(:logical_processors),
        worker_version: version,
        worker_binary_sha256: pin,
+       worker_wrapper_sha256: wrapper_pin,
        python_sha256: manifest["python_sha256"],
        javascript_sha256: manifest["javascript_sha256"],
        lifecycle_id: manifest["lifecycle_id"],

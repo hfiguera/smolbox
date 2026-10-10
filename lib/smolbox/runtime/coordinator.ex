@@ -15,6 +15,7 @@ defmodule SmolBox.Runtime.Coordinator do
       parent: parent,
       tasks: nil,
       active: %{},
+      maintenance: MapSet.new(),
       scan: nil,
       health: %{},
       cursor: nil,
@@ -74,16 +75,18 @@ defmodule SmolBox.Runtime.Coordinator do
     {:reply, {:ok, reports}, state}
   end
 
-  def handle_call({:reconcile, key}, _from, state) do
+  def handle_call({:reconcile, key, record}, _from, state) do
+    lane = lane(record, state.config.clock.now())
+
     cond do
       key in Map.values(state.active) ->
         {:reply, :ok, state}
 
-      map_size(state.active) >= state.config.max_active ->
+      not available?(state, lane) ->
         {:reply, Session.error(:admission_exhausted, :reconcile), state}
 
       true ->
-        {:reply, :ok, launch(state, key)}
+        {:reply, :ok, launch(state, {key, lane})}
     end
   end
 
@@ -124,8 +127,8 @@ defmodule SmolBox.Runtime.Coordinator do
         status(state, worker) != status(next, worker),
         do: Telemetry.worker(state.config.telemetry_table, worker, status(next, worker))
 
-    machine_keys = Enum.map(machines, &{:machine, {&1.scope, &1.id}})
-    command_keys = Enum.map(records, &Execution.key/1)
+    machine_keys = Enum.map(machines, &{{:machine, {&1.scope, &1.id}}, :maintenance})
+    command_keys = Enum.map(records, &{Execution.key(&1), lane(&1, state.config.clock.now())})
 
     keys =
       if state.machines_first,
@@ -147,11 +150,15 @@ defmodule SmolBox.Runtime.Coordinator do
   defp forget(state, reference) do
     if state.scan == reference,
       do: %{state | scan: nil},
-      else: %{state | active: Map.delete(state.active, reference)}
+      else: %{
+        state
+        | active: Map.delete(state.active, reference),
+          maintenance: MapSet.delete(state.maintenance, reference)
+      }
   end
 
-  defp launch(state, key) do
-    if map_size(state.active) < state.config.max_active and key not in Map.values(state.active) do
+  defp launch(state, {key, lane}) do
+    if available?(state, lane) and key not in Map.values(state.active) do
       eligible =
         for worker <- state.config.workers,
             status(state, worker) == :ready,
@@ -159,17 +166,35 @@ defmodule SmolBox.Runtime.Coordinator do
 
       task =
         Task.Supervisor.async_nolink(state.tasks, fn ->
-          run_work(state.config, key, eligible)
+          run_work(state.config, key, eligible, lane)
         end)
 
-      %{state | active: Map.put(state.active, task.ref, key)}
+      maintenance =
+        if lane == :maintenance,
+          do: MapSet.put(state.maintenance, task.ref),
+          else: state.maintenance
+
+      %{state | active: Map.put(state.active, task.ref, key), maintenance: maintenance}
     else
       state
     end
   end
 
-  defp run_work(config, {:machine, key}, eligible), do: Machines.run(config, key, eligible)
-  defp run_work(config, key, eligible), do: Executor.run(config, key, eligible)
+  # One bounded maintenance slot is independent of long-lived execution observers.
+  defp available?(state, :maintenance), do: MapSet.size(state.maintenance) < 1
+
+  defp available?(state, :execution),
+    do: map_size(state.active) - MapSet.size(state.maintenance) < state.config.max_active
+
+  defp lane(%SmolBox.ManagedMachine{}, _now), do: :maintenance
+
+  defp lane(record, now),
+    do: if(Executor.maintenance?(record, now), do: :maintenance, else: :execution)
+
+  defp run_work(config, {:machine, key}, eligible, _lane),
+    do: Machines.run(config, key, eligible)
+
+  defp run_work(config, key, eligible, lane), do: Executor.run(config, key, eligible, lane)
 
   defp status(state, worker) do
     mode = get_in(state.health, [worker.client.worker.id, :admission_mode])

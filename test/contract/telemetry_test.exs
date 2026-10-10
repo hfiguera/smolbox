@@ -5,6 +5,51 @@ defmodule SmolBox.TelemetryTest do
   alias SmolBox.Store.Contract
   alias SmolBox.Telemetry.Dispatcher
 
+  test "a completed managed image pull emits its state without command result fields" do
+    attach(:forward)
+    {:ok, network} = SmolBox.NetworkPolicy.new(hosts: ["registry.example.com"])
+
+    {:ok, source} =
+      SmolBox.Source.oci(
+        id: "telemetry-image",
+        reference: "registry.example.com/team/alpine@sha256:" <> String.duplicate("a", 64),
+        architecture: "x86_64"
+      )
+
+    base = %{
+      source
+      | id: "telemetry-base",
+        reference: String.replace(source.reference, "/alpine@", "/base@")
+    }
+
+    f = RuntimeFixture.start(__MODULE__, network: network, source: base, pull_sources: [source])
+
+    {:ok, spec} =
+      SmolBox.ManagedMachineSpec.new(
+        scope: f.spec.scope,
+        id: "telemetry-machine",
+        artifact: f.spec.artifact,
+        profile: f.spec.profile
+      )
+
+    {:ok, machine} = SmolBox.Machines.create(f.runtime, spec)
+    current = RuntimeFixture.await_idle(f.runtime, machine)
+    {:ok, _} = SmolBox.Machines.start(f.runtime, machine, current.version)
+    RuntimeFixture.await_idle(f.runtime, machine)
+    {:ok, execution} = SmolBox.Machines.pull_image(f.runtime, machine, "telemetry-pull", source)
+
+    assert {:ok, %{state: :completed, result: %SmolBox.Image{}}} =
+             SmolBox.await(f.runtime, execution, 5000)
+
+    assert_receive {:event, [:smolbox, :execution, :updated], measurements,
+                    %{execution_id: "telemetry-pull", state: :completed, evidence: :image_pulled}},
+                   1000
+
+    refute Map.has_key?(measurements, :exit_code)
+    refute Map.has_key?(measurements, :stdout_bytes)
+    refute Map.has_key?(measurements, :stderr_bytes)
+  end
+
   test "managed events describe persisted stages and measurements without execution payloads" do
     attach(:forward)
     context = RuntimeFixture.start(__MODULE__)

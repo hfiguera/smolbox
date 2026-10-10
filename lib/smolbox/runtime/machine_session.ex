@@ -1,7 +1,7 @@
 defmodule SmolBox.Runtime.MachineSession do
   @moduledoc false
   alias SmolBox.ManagedMachine
-  alias SmolBox.Runtime.Session
+  alias SmolBox.Runtime.{Deadline, Session}
 
   def store(config, operation, arguments),
     do: Session.store(config, :machine, [operation, arguments])
@@ -26,26 +26,28 @@ defmodule SmolBox.Runtime.MachineSession do
   end
 
   def io(config, record, function) do
-    deadline =
-      record.operation_deadline_ms || config.clock.now() + record.spec.profile.preparation_ms
+    anchor = {config.clock.now(), config.clock.monotonic()}
 
-    if deadline <= config.clock.now(),
+    deadline =
+      record.operation_deadline_ms || elem(anchor, 0) + record.spec.profile.preparation_ms
+
+    if Deadline.remaining(config.clock, deadline, anchor) <= 0,
       do: Session.error(:expired, :runtime),
-      else: start_io(config, record, function, deadline)
+      else: start_io(config, record, function, deadline, anchor)
   end
 
-  defp start_io(config, record, function, deadline) do
+  defp start_io(config, record, function, deadline, anchor) do
     task = Task.async(fn -> Session.safe(function) end)
 
     try do
-      await_io(config, record, task, deadline)
+      await_io(config, record, task, deadline, anchor)
     after
       Task.shutdown(task, :brutal_kill)
     end
   end
 
-  defp await_io(config, record, task, deadline) do
-    budget = deadline - config.clock.now()
+  defp await_io(config, record, task, deadline, anchor) do
+    budget = Deadline.remaining(config.clock, deadline, anchor)
 
     if budget <= 0 do
       Session.error(:expired, :runtime)
@@ -55,7 +57,7 @@ defmodule SmolBox.Runtime.MachineSession do
           result
 
         nil ->
-          renew_io(config, record, task, deadline)
+          renew_io(config, record, task, deadline, anchor)
 
         _lost ->
           Session.error(:unknown, :runtime)
@@ -63,8 +65,8 @@ defmodule SmolBox.Runtime.MachineSession do
     end
   end
 
-  defp renew_io(config, record, task, deadline) do
+  defp renew_io(config, record, task, deadline, anchor) do
     with {:ok, current} <- claim(config, ManagedMachine.key(record)),
-         do: await_io(config, current, task, deadline)
+         do: await_io(config, current, task, deadline, anchor)
   end
 end
