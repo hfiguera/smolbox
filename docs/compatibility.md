@@ -1,12 +1,22 @@
 # Compatibility evidence
 
-Version: `0.4.1`. The library's supported qualification is
+Version: `0.4.2`. The library's supported qualification is
 `:development`; requested hard-control options remain unsupported. The original
 release evidence below records the client/controller contract on Linux and macOS.
 
+## SmolBox 0.4.2 inventory diagnostics and onboarding
+
+The worker default remains smolvm **1.22.0**. Inventory validation remains strict;
+unsupported network policies now produce a specific redacted error category.
+Upgrade shared readers before persisting that category; see
+[Upgrading to 0.4.2](upgrading-to-0.4.2.md). The
+[Getting Started Livebook verification](evidence/getting-started-livebook-0.4.2.json)
+records the separate Linux package check. The earlier platform qualification
+results below retain their original versions and limits.
+
 ## smolvm 1.22.0 qualification
 
-**Default in SmolBox 0.4.1; 0.4.0 remains on 1.20.2.** See the
+**Default since SmolBox 0.4.1; 0.4.0 remains on 1.20.2.** See the
 [qualification report](runtime-1.22.0-qualification.md) for exact inputs, real worker
 results, failed attempts and upgrade boundaries. Only the released 1.22.0 is
 added; 1.21.x and later versions are not implicitly admitted. Existing supported

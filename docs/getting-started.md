@@ -2,7 +2,7 @@
 
 Run a Python program in a disposable VM, read `42` from its output file, and
 wait for the VM to be deleted. You can use the downloadable Livebook or a Mix
-application. Both run the same example with SmolBox **0.4.1** and smolvm **1.22.0**.
+application. Both run the same example with SmolBox **0.4.2** and smolvm **1.22.0**.
 
 You need Elixir 1.18 or later and smolvm installed on the same host as the Elixir
 runtime. The Linux instructions below require **x86_64 with working KVM**. For
@@ -11,7 +11,7 @@ macOS Apple Silicon, see [macOS worker setup](#macos-worker-setup). Check
 not ready. SmolBox does not install smolvm.
 
 This is a local demo with an in-memory store. For existing applications, use
-[Upgrading to 0.4.1](upgrading-to-0.4.1.md); for deployment controls and host
+[Upgrading to 0.4.2](upgrading-to-0.4.2.md); for deployment controls and host
 resource limits, see [Deployment boundaries](security.md).
 
 ## 1. Install SmolBox
@@ -24,7 +24,7 @@ host; a hosted Livebook cannot use that host's loopback endpoint or artifact pat
 the following to `deps/0` in `mix.exs`. Then run `mix deps.get`.
 
 ```elixir
-{:smolbox, "~> 0.4.1"}
+{:smolbox, "~> 0.4.2"}
 ```
 
 ## 2. Prepare one local worker
@@ -118,7 +118,9 @@ local Livebook. It includes the worker setup instructions, configuration and all
 execution cells. Paste the directory and SHA256 from step 2 into its configuration
 cell, check the worker URL, and evaluate all cells. Livebook 0.19.10 with
 Elixir 1.20.4/OTP 29.0.6 is the tested notebook environment; see the
-[Linux verification record](evidence/getting-started-livebook.json).
+[Linux verification record](evidence/getting-started-livebook.json). That run
+used published SmolBox 0.4.1; the [0.4.2 package verification](evidence/getting-started-livebook-0.4.2.json)
+checks the release candidate separately.
 
 ### In a Mix application
 

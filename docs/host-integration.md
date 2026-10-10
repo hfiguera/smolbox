@@ -1,6 +1,6 @@
 # Managed host integration
 
-SmolBox 0.4.1 defaults to **smolvm 1.22.0** on Linux x86_64 and macOS Apple
+SmolBox 0.4.2 retains the default of **smolvm 1.22.0** on Linux x86_64 and macOS Apple
 Silicon. Published SmolBox 0.4.0 and 0.3.1 keep their 1.20.2 default. Pin existing
 workers and checkpoint approvals to their actual version. Updating SmolBox does
 not install smolvm. See the
@@ -11,8 +11,10 @@ This guide explains how to adapt that flow to your application's supervision,
 authorization, durable storage, and worker configuration. Constructor options are
 documented in `SmolBox.child_spec/1` and `SmolBox.Runtime.WorkerConfig.new/1`.
 
-For an existing deployment, follow [Upgrading to 0.4.1](upgrading-to-0.4.1.md)
-for worker selection and reader compatibility. Deployments coming from 0.3.x
+For an existing deployment, follow [Upgrading to 0.4.2](upgrading-to-0.4.2.md)
+for the new error category and shared reader compatibility. If coming from an
+older worker default, also follow [Upgrading to 0.4.1](upgrading-to-0.4.1.md)
+for worker selection. Deployments coming from 0.3.x
 must also follow [Upgrading to 0.4.0](upgrading-to-0.4.0.md) for PostgreSQL
 migrations, coordinated writer upgrades and retained-history rollback limits.
 
