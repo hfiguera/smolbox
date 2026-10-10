@@ -56,6 +56,19 @@ jobs:
         run: >-
           elixir scripts/ci.exs bounded --report "$RUNNER_TEMP/smolbox-live-reports/dependencies.json"
           --timeout 1200 -- mix deps.get
+      - name: Install the pinned notebook verifier runtime
+        run: >-
+          elixir scripts/ci.exs bounded --report "$RUNNER_TEMP/smolbox-live-reports/livebook-install.json"
+          --timeout 1200 -- mix escript.install hex livebook 0.19.10 --force
+        env:
+          HEX_HTTP_CONCURRENCY: '1'
+          HEX_HTTP_TIMEOUT: '120'
+      - name: Require the public Livebook execution, output and cleanup
+        run: >-
+          elixir scripts/ci.exs livebook --livebook "$(elixir -e 'IO.write(Mix.path_for(:escripts))')/livebook"
+          --worker-pid "$SMOLBOX_WORKER_PID" --url "$SMOLBOX_RUNTIME_URL"
+          --python "$SMOLBOX_PYTHON_ARTIFACT" --sha256 "$SMOLBOX_PYTHON_SHA256"
+          --report "$RUNNER_TEMP/smolbox-live-reports/livebook.json"
       - name: Require all real client/runtime cases
         run: >-
           elixir scripts/ci.exs bounded --report "$RUNNER_TEMP/smolbox-live-reports/runtime.json"

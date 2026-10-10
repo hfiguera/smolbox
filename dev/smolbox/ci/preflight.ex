@@ -297,6 +297,7 @@ defmodule SmolBox.CI.Preflight do
   defp export_environment(manifest, executable) do
     if file = System.get_env("GITHUB_ENV") do
       values = %{
+        "SMOLBOX_WORKER_PID" => manifest["worker_pid"],
         "SMOLBOX_SMOLVM_CLI" => Path.join(Path.dirname(executable), "smolvm"),
         "SMOLBOX_RUNTIME_URL" => manifest["worker_url"],
         "SMOLBOX_RUNTIME_VERSION" => Map.get(manifest, "runtime_version", "1.22.0"),
