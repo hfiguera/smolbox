@@ -251,7 +251,8 @@ The manifest's external isolation and teardown declarations are trusted operator
 inputs, not remote attestation. macOS virtualization is established by actual VM
 tests, not by checking an OS name. A preflight pass never counts as a live-suite pass.
 
-The live workflow runs all 14 current client/runtime cases, all 25 durable
+The live workflow evaluates the public Getting Started Livebook against a freshly
+built candidate package, then runs all 14 current client/runtime cases, all 25 durable
 recovery cases, and restart/prolonged-unavailability/missing-VM service scenarios.
 The client/runtime suite includes finite output overflow, blocked observers,
 file-transfer caps, packed-image symlink behavior, guest FIFO reads and selected
@@ -286,6 +287,68 @@ the independent teardown. No package publication occurs in these workflows.
 The two entry workflows and shared worker workflow live in `.github/workflows/`.
 Library jobs run from the repository root, and example jobs run from their
 respective `examples/` directories.
+
+## Public Livebook verification
+
+Run this on Linux x86_64 with KVM or macOS Apple Silicon, using Elixir 1.20.4,
+OTP 29.0.6 and a prepared smolvm 1.22.0 worker. Follow the notebook's terminal
+setup first. The worker must belong to your account, use a dedicated empty
+inventory, and remain running throughout verification. On macOS, use a dedicated
+account for image preparation, the worker and this command; changing a port or
+`SMOLVM_DATA_DIR` does not isolate that version's macOS state.
+
+Install the pinned Livebook version in that account, then pass the actual worker
+PID and the image digest approved during preparation:
+
+```bash
+HEX_HTTP_CONCURRENCY=1 HEX_HTTP_TIMEOUT=120 \
+  mix escript.install hex livebook 0.19.10 --force
+
+elixir scripts/ci.exs livebook \
+  --livebook "$(elixir -e 'IO.write(Mix.path_for(:escripts))')/livebook" \
+  --worker-pid "$SMOLBOX_WORKER_PID" \
+  --url http://127.0.0.1:19471 \
+  --python "$SMOLBOX_DEMO_ROOT/images/python.smolmachine" \
+  --sha256 "$SMOLBOX_PYTHON_SHA256" \
+  --report /absolute/path/to/new-livebook-report.json
+```
+
+`SMOLBOX_WORKER_PID` is the PID of the worker owning that listener, not the shell
+which launched it. `SMOLBOX_PYTHON_SHA256` is the digest printed by preparation.
+Protected CI exports these values through its operator preflight. The report path
+must be new; an existing report prevents any execution.
+
+The default command builds and validates a Hex archive from the current checkout.
+It imports `docs/notebooks/getting-started.livemd` into a separate Livebook with a
+standalone runtime, changes only the dependency to that unpacked package and fills
+the three documented configuration values. `--archive /absolute/path/smolbox.tar`
+uses an existing candidate archive and requires its notebook to match the checkout.
+`--published` instead keeps the public `Mix.install` dependency unchanged and
+verifies the Hex version users receive. Run both modes when qualifying a release;
+each needs a separate report path and an empty worker.
+
+Every Elixir cell must evaluate without errors or import/export warnings. An added
+verification cell asserts exit status zero, exact stdout, the collected `42\n` file,
+completed cleanup, a released reservation, an empty worker and a stopped demo
+supervisor. The command checks worker identity, readiness, version, image digest
+and empty inventory before and after evaluation. Livebook is pinned because the
+session evaluator uses its private APIs; a version change requires qualification.
+
+The verifier bounds startup, evaluation, subprocess time and captured output. It
+closes its session and stops only its own Livebook and EPMD process groups. It does
+not stop the supplied worker or delete arbitrary machines. On failure, inspect the
+private workspace printed by the command and verify the dedicated worker's guest
+cleanup before reuse. A failed or timed out evaluation never counts as successful
+cleanup; CI still relies on its independent disposable worker lifecycle.
+
+Reports contain cell statuses, assertion results and source/package/image digests.
+Raw output, evaluated notebooks and process logs stay in a private temporary
+workspace; remove that workspace after inspection. CI uploads only the bounded
+JSON report. This verifies the notebook's Elixir path; operator provisioning and
+the notebook's Bash installer and image preparation remain separate prerequisites.
+The protected workflow runs the candidate check on both supported platforms and
+fails qualification if either run fails. Ordinary pull request CI tests the verifier's
+failure detection without starting VMs.
 
 The separately authorized [nested Linux lab](../../docs/nested-kvm-lab.md) uses
 `scripts/lab/` and the same bounded runtime test runner on `ssh linux`. Its host

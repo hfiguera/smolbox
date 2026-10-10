@@ -1,11 +1,12 @@
 defmodule SmolBox.CI.CLI do
   @moduledoc false
-  alias SmolBox.CI.{Bounded, Gate, Package, Preflight, WorkerFault}
+  alias SmolBox.CI.{Bounded, Gate, Livebook, Package, Preflight, WorkerFault}
 
   def run(["bounded" | arguments]), do: Bounded.run(arguments)
   def run(["package-consumer" | arguments]), do: Package.run(arguments)
   def run(["preflight" | arguments]), do: Preflight.run(arguments)
   def run(["worker-fault" | arguments]), do: WorkerFault.run(arguments)
+  def run(["livebook" | arguments]), do: Livebook.run(arguments)
 
   def run([command]) when command in ~w(required runtime-required) do
     results = System.fetch_env!("NEEDS_JSON") |> JSON.decode!()
@@ -26,6 +27,6 @@ defmodule SmolBox.CI.CLI do
     do:
       raise(
         ArgumentError,
-        "expected bounded, package-consumer, preflight, worker-fault, required or runtime-required"
+        "expected bounded, package-consumer, preflight, worker-fault, livebook, required or runtime-required"
       )
 end
