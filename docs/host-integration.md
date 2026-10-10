@@ -57,7 +57,7 @@ token. Proxy tokens stay in trusted configuration, outside persisted records.
   client: client,
   platform: :linux,
   architecture: "x86_64",
-  runtime_version: "1.14.6",
+  runtime_version: "1.22.0",
   profiles: [profile],
   artifacts: [%{
     "id" => "python-v1",
@@ -82,10 +82,11 @@ children = [
 ]
 ```
 
-This fragment explicitly retains a Linux 1.14.6 worker with SmolBox 0.2.0.
-Omitting the field selects 1.22.0 in 0.4.1, 1.20.2 in 0.4.0 and 0.3.1, 1.19.0 in 0.3.0 and 0.2.1, 1.17.0 in 0.2.0 (1.16.1 in 0.1.5). Use `"1.16.0"`
-explicitly to retain that worker, or `"1.14.1"`
-for an existing worker. See [worker selection](supported-platforms.md#worker-hosts-and-versions).
+Set `runtime_version` to the version installed on the worker. This example uses
+1.22.0, matching Getting Started. See
+[Supported platforms](supported-platforms.md#worker-hosts-and-versions) for other
+selectable versions and their feature limits, or [Upgrading SmolBox](upgrading.md)
+when changing an existing deployment.
 This is a host configuration fragment, not a self-provisioning script. The host
 must verify artifact bytes on the worker and retain that immutable artifact.
 This disposable execution setup requires neutral `/bin/true` startup and no

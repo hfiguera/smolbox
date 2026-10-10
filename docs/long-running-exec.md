@@ -216,5 +216,5 @@ When a record uses an explicit guest path policy or expanded file budget,
 and additionally requires `guest_files: 1`. Other feature capabilities and
 retention rules still apply.
 
-For the current checkout default, see the [1.22.0 qualification](runtime-1.22.0-qualification.md).
-Earlier validation sections above retain their original scope.
+See [Supported platforms](supported-platforms.md) for current worker selection
+and [Testing reports](testing.md) for recorded checks and their limits.

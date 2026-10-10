@@ -164,5 +164,5 @@ case via `SMOLBOX_NETWORK_MANAGED=true`. The bounded Mac script is
 `$SMOLBOX_NETWORK_MAC_ROOT/api.sock` and an approved `$SMOLBOX_PYTHON_ARTIFACT`.
 These fixtures are not a general network security certification.
 
-For the current checkout default, see the [1.22.0 qualification](runtime-1.22.0-qualification.md).
-Earlier validation sections above retain their original scope.
+See [Supported platforms](supported-platforms.md) for current worker selection
+and [Testing reports](testing.md) for recorded checks and their limits.

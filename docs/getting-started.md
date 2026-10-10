@@ -4,23 +4,28 @@ Run a Python program in a disposable VM, read `42` from its output file, and
 wait for the VM to be deleted. You can use the downloadable Livebook or a Mix
 application. Both run the same example with SmolBox **0.4.2** and smolvm **1.22.0**.
 
-You need Elixir 1.18 or later. Install smolvm on the same host as the Elixir
-runtime using step 1 below. The Linux instructions require **x86_64 with working KVM**. For
-macOS Apple Silicon, see [macOS worker setup](#macos-worker-setup). Check
-[Supported platforms](supported-platforms.md#host-prerequisites) if the host is
-not ready. SmolBox does not install smolvm.
+Choose one path before preparing the worker:
 
-This is a local demo with an in-memory store. For existing applications, use
-[Upgrading SmolBox](upgrading.md); for deployment controls and host
-resource limits, see [Deployment boundaries](security.md).
+- **Livebook:** [download the notebook](notebooks/getting-started.livemd), import
+  it into your local Livebook and follow the notebook from the beginning. It
+  includes installation, worker setup and all execution cells. No Mix project is
+  needed; you can use the notebook without following the steps below.
+- **Mix application:** follow the numbered steps on this page.
+
+You need Elixir 1.18 or later and a worker on the same host as the Elixir runtime.
+Choose **Linux x86_64 with working KVM** or **macOS Apple Silicon**. On macOS,
+log into a dedicated account with no existing smolvm machines before starting.
+Run installation, image preparation, the worker and IEx or Livebook in that same
+account. The demo directory is private, so a session under another account cannot
+read it. A different port or `SMOLVM_DATA_DIR` does not isolate macOS worker state.
+
+This is a local demo with an in-memory store. See
+[Supported platforms](supported-platforms.md#host-prerequisites) for host
+requirements. Existing deployments should use [Upgrading SmolBox](upgrading.md).
 
 ## 1. Install smolvm and SmolBox
 
 ### Install smolvm 1.22.0
-
-On macOS, first log into the dedicated account described in
-[macOS worker setup](#macos-worker-setup). Install the worker and run Livebook
-or IEx in that account too.
 
 If `smolvm --version` already reports `1.22.0`, skip installation. Otherwise,
 run the [upstream installer from the 1.22.0 release](https://github.com/smol-machines/smolvm/blob/v1.22.0/scripts/install.sh)
@@ -54,12 +59,8 @@ and [host prerequisites](supported-platforms.md#host-prerequisites).
 
 ### Install the Elixir dependency
 
-**Livebook:** the [notebook](notebooks/getting-started.livemd) installs SmolBox
-with `Mix.install/1`. No Mix project is needed. Run Livebook locally on the worker
-host; a hosted Livebook cannot use that host's loopback endpoint or artifact path.
-
-**Mix application:** run `mix new smolbox_demo`, enter that directory, and add
-the following to `deps/0` in `mix.exs`. Then run `mix deps.get`.
+Run `mix new smolbox_demo`, enter that directory, and add the following to `deps/0`
+in `mix.exs`. Then run `mix deps.get`.
 
 ```elixir
 {:smolbox, "~> 0.4.2"}
@@ -76,9 +77,10 @@ when you want to allow specific destinations later.
 
 ### Linux worker setup
 
-Run these commands in **Bash on the worker host**, inside your Nix development
-shell if applicable. `smolvm --version` should report `1.22.0`. Use a new directory
-for the image, worker state and demo output:
+For Linux, run these commands in **Bash on the worker host**, inside your Nix
+development shell if applicable. macOS users should use the separate recipe below.
+`smolvm --version` should report `1.22.0`. Use a new directory for the image, worker
+state and demo output:
 
 ```bash
 export SMOLBOX_DEMO_ROOT="$(mktemp -d)"
@@ -127,44 +129,50 @@ existing inventory intact. See
 
 ### macOS worker setup
 
-Use a dedicated macOS account or host with no existing smolvm machines. On the
-pinned macOS build, `SMOLVM_DATA_DIR` does **not** isolate worker state.
+Use the dedicated account selected above. The commands below prepare the image
+and keep demo files private. Run them in Bash:
 
-Log into that account and run image preparation, the worker, and Livebook or IEx
-there. The demo directory has private permissions, so a Livebook session running
-under your usual account cannot read it. Stop any existing Livebook session you
-intend to use for this demo and launch a new one in the dedicated account.
-Keep the directory permissions private.
+```bash
+export SMOLBOX_DEMO_ROOT="$(mktemp -d)"
+chmod 700 "$SMOLBOX_DEMO_ROOT"
+mkdir -m 700 "$SMOLBOX_DEMO_ROOT/images" "$SMOLBOX_DEMO_ROOT/objects"
+cd "$SMOLBOX_DEMO_ROOT/images"
 
-In that account, use the directory and image preparation commands above. Omit the
-`export SMOLVM_DATA_DIR` line and replace the `sha256sum` line with:
+smolvm pack create --image python:3.12-alpine --entrypoint /bin/true \
+  --cpus 1 --mem 256 --staging-dir ./staging --output ./python
 
-```sh
+printf 'Demo directory: %s\n' "$SMOLBOX_DEMO_ROOT"
 shasum -a 256 "$SMOLBOX_DEMO_ROOT/images/python.smolmachine"
 ```
 
-Then start the worker without the Linux state override:
+Record the printed directory and SHA256. Image preparation downloads Python;
+the guest later runs offline. Allow space for the runtime image and the 20 GiB
+storage and 10 GiB overlay allocations.
 
-```sh
+In the **same terminal**, start the worker and leave it running:
+
+```bash
 SMOLVM_GUEST_ROLLOUT_HOST_PORT=19472 \
   SMOLVM_FILE_TRANSFER_MAX_BYTES=1048576 \
   smolvm serve start --listen 127.0.0.1:19471
 ```
 
-Check for `{"machines":[]}` with the same curl command before continuing.
+If either port is occupied, choose unused ports and update the HTTP URL in step 3.
+In a **second terminal in the same account**, check the inventory:
+
+```sh
+curl --fail http://127.0.0.1:19471/api/v1/machines
+```
+
+Continue only when it returns `{"machines":[]}`. Keep existing machines intact;
+see [Machine inventory problems](troubleshooting.md#machine-inventory-problems)
+if this check fails.
 
 ## 3. Run the complete example
 
-### In Livebook
-
-[Download the Livebook](notebooks/getting-started.livemd) and import it into your
-local Livebook. It includes the worker setup instructions, configuration and all
-execution cells. Paste the directory and SHA256 from step 2 into its configuration
-cell, check the worker URL, and evaluate all cells. Livebook 0.19.10 with
-Elixir 1.20.4/OTP 29.0.6 is the tested notebook environment. Recorded checks
-and their limits are available separately in [Testing reports](testing.md#feature-checks).
-
-### In a Mix application
+This section continues the Mix application path. For Livebook, use the complete
+[notebook](notebooks/getting-started.livemd) instead. Recorded checks are available
+separately in [Testing reports](testing.md#feature-checks).
 
 In your application's terminal, set the directory printed in step 2 and its
 approved digest:
@@ -180,8 +188,8 @@ unset SMOLBOX_RUNTIME_SOCKET
 iex -S mix
 ```
 
-Save the block below as `smolbox_demo.exs` and run
-`Code.require_file("smolbox_demo.exs")` in IEx. If execution fails after the
+Save the block below as `smolbox_demo.exs` in the Mix project directory.
+Then run `Code.require_file("smolbox_demo.exs")` in IEx. If execution fails after the
 supervisor starts, keep the session open and inspect it with
 [Troubleshooting](troubleshooting.md) before running it again.
 

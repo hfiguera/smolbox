@@ -228,10 +228,5 @@ recovery and stop/start, then verifies deletion and reservation release. Its OCI
 mode also demonstrates a managed pull of a different image. It consumes existing
 registry sources; it does not build or publish them.
 
-The [1.20.2 qualification](runtime-1.20.2-qualification.md) records the newer
-worker campaign separately from the original feature evidence above. Preserve the
-exact capture runtime on checkpoint approvals; changing a filename or version
-field does not migrate saved machine state.
-
-For the current checkout default, see the [1.22.0 qualification](runtime-1.22.0-qualification.md).
-Earlier validation sections above retain their original scope.
+See [Supported platforms](supported-platforms.md) for current worker selection
+and [Testing reports](testing.md) for recorded checks and their limits.

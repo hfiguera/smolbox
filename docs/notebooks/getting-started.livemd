@@ -11,14 +11,14 @@ cleanup. Run Livebook locally on the worker host. The Linux recipe requires
 x86_64 with working KVM, smolvm 1.22.0 and enough space for the runtime image and
 20/10 GiB disk allocations.
 
-For macOS Apple Silicon, log into a dedicated account with no existing smolvm
-machines. Install smolvm and run image preparation, the worker and Livebook in
-that same account. The demo directory is private; a Livebook session running
-under another account cannot read it. Launch a new Livebook session under the
-dedicated account, then import this notebook there. Follow the
-[macOS worker setup](https://hexdocs.pm/smolbox/getting-started.html#macos-worker-setup)
-instead of the Linux shell commands below; `SMOLVM_DATA_DIR` does not isolate
-worker state on the pinned macOS build.
+Choose the worker setup for your host below. For macOS Apple Silicon, log into
+a dedicated account with no existing smolvm machines. Install smolvm and run
+image preparation, the worker and Livebook in that same account. The demo files
+are private, so a Livebook session under another account cannot read them. Launch
+Livebook under the dedicated account and import this notebook there.
+A different port or `SMOLVM_DATA_DIR` does not isolate macOS worker state.
+
+### Install smolvm
 
 If `smolvm --version` does not already report `1.22.0`, run the
 [upstream installer from the 1.22.0 release](https://github.com/smol-machines/smolvm/blob/v1.22.0/scripts/install.sh)
@@ -51,7 +51,10 @@ The guest runs offline. SmolBox rejects inventory entries with networking enable
 without explicit allowlists, including machines created outside SmolBox. Give
 this demo its own worker state and endpoint, keeping your existing machines intact.
 
-Run this in a Bash terminal on the worker host (inside your Nix shell if used):
+### Linux worker setup
+
+On Linux, run this in a Bash terminal on the worker host (inside your Nix shell
+if used). macOS users should use the separate recipe below:
 
 ```bash
 export SMOLBOX_DEMO_ROOT="$(mktemp -d)"
@@ -87,6 +90,46 @@ If either port is occupied, choose unused HTTP and guest rollout ports; update
 `runtime_url` below to match the HTTP port. Preparation downloads the Python
 image, but execution remains offline. For controlled network access later, see
 [Network access](https://hexdocs.pm/smolbox/network-access.html).
+
+### macOS worker setup
+
+Under the dedicated account selected above, run this in Bash:
+
+```bash
+export SMOLBOX_DEMO_ROOT="$(mktemp -d)"
+chmod 700 "$SMOLBOX_DEMO_ROOT"
+mkdir -m 700 "$SMOLBOX_DEMO_ROOT/images" "$SMOLBOX_DEMO_ROOT/objects"
+cd "$SMOLBOX_DEMO_ROOT/images"
+
+smolvm pack create --image python:3.12-alpine --entrypoint /bin/true \
+  --cpus 1 --mem 256 --staging-dir ./staging --output ./python
+
+printf 'Demo directory: %s\n' "$SMOLBOX_DEMO_ROOT"
+shasum -a 256 "$SMOLBOX_DEMO_ROOT/images/python.smolmachine"
+```
+
+Record the printed directory and SHA256. Image preparation downloads Python;
+the guest later runs offline. Allow space for the runtime image and the 20 GiB
+storage and 10 GiB overlay allocations.
+
+In the **same terminal**, start the worker and leave it running:
+
+```bash
+SMOLVM_GUEST_ROLLOUT_HOST_PORT=19472 \
+  SMOLVM_FILE_TRANSFER_MAX_BYTES=1048576 \
+  smolvm serve start --listen 127.0.0.1:19471
+```
+
+If either port is occupied, choose unused ports and update `runtime_url` in the configuration cell below.
+In a **second terminal in the same account**, check the inventory:
+
+```sh
+curl --fail http://127.0.0.1:19471/api/v1/machines
+```
+
+Continue only when it returns `{"machines":[]}`. Keep existing machines intact;
+see [Machine inventory problems](https://hexdocs.pm/smolbox/troubleshooting.html#machine-inventory-problems)
+if this check fails.
 
 ## Configure the demo
 

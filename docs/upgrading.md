@@ -24,7 +24,7 @@ the target library once, after accounting for all intervening requirements.
 SQL migrations belong to the supplied PostgreSQL example. Custom stores need
 equivalent atomic behavior rather than those particular tables. Applications
 coming from 0.1.2 or earlier must also account for the
-[older execution record transition](recovery.md#upgrading-to-0-1-3).
+[upgrades within 0.1.x](upgrading-within-0.1.x.md).
 
 ## Before changing the dependency
 

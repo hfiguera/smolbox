@@ -11,26 +11,21 @@ containing the languages and dependencies your programs need.
 
 ## Start here
 
-Add SmolBox to your application's `mix.exs`, then run `mix deps.get`:
+You need Elixir 1.18 or later and smolvm **1.22.0** on Linux x86_64 with KVM
+or macOS Apple Silicon. Worker installation is included in the walkthrough; the
+Elixir dependency does not install smolvm.
 
-```elixir
-{:smolbox, "~> 0.4.2"}
-```
+Choose one path to your first execution:
 
-Follow [Getting started](docs/getting-started.md) for the complete setup: prepare
-an image, start a separate worker, run Python, collect `42` from its output file
-and confirm VM cleanup. The guide includes a
-[downloadable Livebook](https://hexdocs.pm/smolbox/0.4.2/notebooks/getting-started.livemd) and uses an
-in-memory store, so you do not need a database for the first run.
+- **Livebook:** [download the notebook](docs/notebooks/getting-started.livemd),
+  import it into a local Livebook and follow its setup instructions. No Mix project
+  or database is needed.
+- **Mix application:** follow [Getting started](docs/getting-started.md) to install
+  the dependencies, prepare an image, start a separate worker, run Python and
+  confirm output collection and VM cleanup.
 
-The walkthrough needs Elixir 1.18 or later and smolvm **1.22.0** on Linux x86_64
-with KVM or macOS Apple Silicon. See [Supported platforms](docs/supported-platforms.md)
-for host prerequisites and older worker versions. Workers are installed
-separately; adding the Elixir dependency does not install or upgrade smolvm.
-
-For an existing application, start with [Upgrading SmolBox](docs/upgrading.md).
-In 0.4.2, every controller and reader sharing a durable store must accept the new
-`:unsupported_network_policy` error category before an upgraded writer records it.
+See [Supported platforms](docs/supported-platforms.md) for host prerequisites.
+For an existing application, use [Upgrading SmolBox](docs/upgrading.md).
 
 ## Why use SmolBox?
 
@@ -49,8 +44,9 @@ needs to handle duplicate requests, lost responses, restarts and leftover VMs.
 ## What execution looks like
 
 After the [Getting started](docs/getting-started.md) setup, your application has a
-supervised runtime, an approved Python image and an execution profile. With a
-runtime named `MyApp.Sandboxes`:
+supervised runtime, an approved Python image and an execution profile. With
+`SmolBoxDemo.Runtime` running and `artifact` and `profile` from setup, submitting
+a command looks like this:
 
 ```elixir
 alias SmolBox.{Command, ExecutionSpec}
@@ -62,16 +58,16 @@ argv = ["python", "-c", "print(6 * 7)"]
   ExecutionSpec.new(
     scope: "demo",
     id: "answer-001",
-    artifact: python_artifact,
+    artifact: Map.drop(artifact, ["path"]),
     profile: profile,
     command: command
   )
 
-{:ok, handle} = SmolBox.submit(MyApp.Sandboxes, spec)
-{:ok, ^handle} = SmolBox.submit(MyApp.Sandboxes, spec)
+{:ok, handle} = SmolBox.submit(SmolBoxDemo.Runtime, spec)
+{:ok, ^handle} = SmolBox.submit(SmolBoxDemo.Runtime, spec)
 
 {:ok, execution} =
-  SmolBox.await(MyApp.Sandboxes, handle, 90_000)
+  SmolBox.await(SmolBoxDemo.Runtime, handle, 90_000)
 
 %{state: :completed, result: result} = execution
 %{exit_code: 0, stdout: stdout} = result
@@ -80,9 +76,8 @@ IO.write(stdout)
 # Prints: 42
 ```
 
-The second submission reuses the execution. Here, `python_artifact` is the approved
-image identity map (`"id"`, `"sha256"`, `"architecture"`) and `profile` is a
-registered `SmolBox.Profile`. Handle errors, nonzero exits and unknown outcomes
+The second submission reuses the execution. The specification uses the image identity from
+`artifact` and the registered `profile` created during setup. Handle errors, nonzero exits and unknown outcomes
 in application code. An `await/3` timeout does not cancel the command. Inspect
 cleanup with `SmolBox.fetch/3`; see [Troubleshooting](docs/troubleshooting.md).
 

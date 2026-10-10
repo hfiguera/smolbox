@@ -231,5 +231,5 @@ deletes and verifies absence and released reservations. The `delete` phase is
 available for explicit cleanup of an interrupted demonstration. Test coverage and
 real-worker receipts are in [validation](guest-files-validation.md).
 
-For the current checkout default, see the [1.22.0 qualification](runtime-1.22.0-qualification.md).
-Earlier validation sections above retain their original scope.
+See [Supported platforms](supported-platforms.md) for current worker selection
+and [Testing reports](testing.md) for recorded checks and their limits.

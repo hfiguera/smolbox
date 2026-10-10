@@ -30,6 +30,7 @@ defmodule SmolBox.MixProject do
           "CHANGELOG.md",
           "LICENSE",
           "docs/upgrading.md",
+          "docs/upgrading-within-0.1.x.md",
           "docs/supported-platforms.md",
           "docs/testing.md",
           "docs/getting-started.md",
@@ -84,11 +85,17 @@ defmodule SmolBox.MixProject do
         main: "readme",
         source_ref: "v#{@version}",
         filter_modules: ~r/^Elixir\.SmolBox(?:\.|$)/,
-        assets: %{"docs/evidence" => "evidence", "docs/notebooks" => "notebooks"},
+        # Keep repository-relative README downloads and guide downloads on the same source.
+        assets: %{
+          "docs/evidence" => "evidence",
+          "docs/notebooks" => "notebooks",
+          Path.expand("docs/notebooks", __DIR__) => "docs/notebooks"
+        },
         groups_for_extras: [
           "Start here": [
             "README.md",
-            "docs/getting-started.md"
+            "docs/getting-started.md",
+            "docs/supported-platforms.md"
           ],
           "Run programs": [
             "docs/host-integration.md",
@@ -119,10 +126,10 @@ defmodule SmolBox.MixProject do
             "docs/security.md"
           ],
           "Upgrades and compatibility": [
-            "docs/upgrading.md",
-            "docs/supported-platforms.md"
+            "docs/upgrading.md"
           ],
           "Upgrade history": [
+            "docs/upgrading-within-0.1.x.md",
             "docs/upgrading-to-0.2.0.md",
             "docs/upgrading-to-0.2.1.md",
             "docs/upgrading-to-0.3.0.md",
@@ -241,6 +248,7 @@ defmodule SmolBox.MixProject do
         extras: [
           "README.md",
           "docs/getting-started.md",
+          "docs/supported-platforms.md",
           {"docs/host-integration.md", title: "Host integration"},
           {"docs/persistent-machines.md", title: "Persistent machines"},
           "docs/client.md",
@@ -264,7 +272,7 @@ defmodule SmolBox.MixProject do
           {"docs/telemetry.md", title: "Telemetry"},
           {"docs/security.md", title: "Deployment boundaries"},
           "docs/upgrading.md",
-          "docs/supported-platforms.md",
+          "docs/upgrading-within-0.1.x.md",
           "docs/upgrading-to-0.2.0.md",
           "docs/upgrading-to-0.2.1.md",
           "docs/upgrading-to-0.3.0.md",

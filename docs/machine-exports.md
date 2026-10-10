@@ -275,10 +275,5 @@ Export remains development-qualified. Bare VM exports and macOS exports were not
 live-qualified in this campaign. Host quotas, crash-consistent application state,
 universal artifact portability, and automatic helper cleanup are not certified.
 
-The [1.20.2 qualification](runtime-1.20.2-qualification.md) records the newer
-worker campaign separately from the original feature evidence above. Preserve the
-exact capture runtime on checkpoint approvals; changing a filename or version
-field does not migrate saved machine state.
-
-For the current checkout default, see the [1.22.0 qualification](runtime-1.22.0-qualification.md).
-Earlier validation sections above retain their original scope.
+See [Supported platforms](supported-platforms.md) for current worker selection
+and [Testing reports](testing.md) for recorded checks and their limits.
