@@ -2,12 +2,12 @@ defmodule SmolBox.CI.PackageTest do
   use ExUnit.Case, async: true
   alias SmolBox.CI.{Package, Util}
 
-  test "release, registry and provisioning documentation is accepted in the published package" do
+  test "public documentation and the onboarding notebook are accepted in the published package" do
     root = Util.temporary("smolbox-registry-package")
     on_exit(fn -> File.rm_rf!(root) end)
 
     names =
-      ~w(mix.exs README.md CHANGELOG.md LICENSE lib/smolbox.ex lib/smolbox/runtime.ex docs/images-and-registry-artifacts.md docs/images-and-registry-artifacts-validation.md docs/provisioning-performance.md docs/upgrading-to-0.3.0.md)
+      ~w(mix.exs README.md CHANGELOG.md LICENSE lib/smolbox.ex lib/smolbox/runtime.ex docs/notebooks/getting-started.livemd docs/images-and-registry-artifacts.md docs/images-and-registry-artifacts-validation.md docs/provisioning-performance.md docs/upgrading-to-0.3.0.md)
 
     inner = Path.join(root, "contents.tar")
     members = Enum.map(names, &{String.to_charlist(&1), "fixture"})
@@ -31,6 +31,7 @@ defmodule SmolBox.CI.PackageTest do
     assert File.read!(Path.join(output, "docs/images-and-registry-artifacts.md")) == "fixture"
     assert File.read!(Path.join(output, "docs/provisioning-performance.md")) == "fixture"
     assert File.read!(Path.join(output, "docs/upgrading-to-0.3.0.md")) == "fixture"
+    assert File.read!(Path.join(output, "docs/notebooks/getting-started.livemd")) == "fixture"
   end
 
   test "truncated gzip fails before any package files are written" do
@@ -69,6 +70,7 @@ defmodule SmolBox.CI.PackageTest do
 
     for {label, members} <- [
           {"unlisted-doc", [{~c"docs/private-notes.md", <<>>}]},
+          {"unlisted-notebook", [{~c"docs/notebooks/private-notes.livemd", <<>>}]},
           {"traversal", [{~c"../escape.ex", <<>>}]},
           {"symlink", [{~c"lib/link.ex", String.to_charlist(link)}]},
           {"duplicate", [{~c"README.md", <<>>}, {~c"README.md", <<>>}]}
