@@ -19,7 +19,8 @@ Choose one path to your first execution:
 
 - **Livebook:** [download the notebook](docs/notebooks/getting-started.livemd),
   import it into a local Livebook and follow its setup instructions. No Mix project
-  or database is needed.
+  or database is needed. New to Livebook? See
+  [installation and import instructions](docs/getting-started.md#open-the-livebook).
 - **Mix application:** follow [Getting started](docs/getting-started.md) to install
   the dependencies, prepare an image, start a separate worker, run Python and
   confirm output collection and VM cleanup.
@@ -43,10 +44,12 @@ needs to handle duplicate requests, lost responses, restarts and leftover VMs.
 
 ## What execution looks like
 
-After the [Getting started](docs/getting-started.md) setup, your application has a
-supervised runtime, an approved Python image and an execution profile. With
-`SmolBoxDemo.Runtime` running and `artifact` and `profile` from setup, submitting
-a command looks like this:
+This fragment illustrates submitting a command to an already configured runtime.
+It assumes `SmolBoxDemo.Runtime` is running and `artifact` and `profile` are
+available in the same code context. For a complete runnable example, use
+[Getting started](docs/getting-started.md) or the notebook. Those walkthroughs
+stop their demo supervisor after cleanup, so this fragment is not a next step
+to paste into IEx after finishing them.
 
 ```elixir
 alias SmolBox.{Command, ExecutionSpec}

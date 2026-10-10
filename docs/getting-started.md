@@ -9,7 +9,8 @@ Choose one path before preparing the worker:
 - **Livebook:** [download the notebook](notebooks/getting-started.livemd), import
   it into your local Livebook and follow the notebook from the beginning. It
   includes installation, worker setup and all execution cells. No Mix project is
-  needed; you can use the notebook without following the steps below.
+  needed. See [Open the Livebook](#open-the-livebook) for installation and import;
+  then follow the notebook's worker setup instead of the Mix steps below.
 - **Mix application:** follow the numbered steps on this page.
 
 You need Elixir 1.18 or later and a worker on the same host as the Elixir runtime.
@@ -22,6 +23,21 @@ read it. A different port or `SMOLVM_DATA_DIR` does not isolate macOS worker sta
 This is a local demo with an in-memory store. See
 [Supported platforms](supported-platforms.md#host-prerequisites) for host
 requirements. Existing deployments should use [Upgrading SmolBox](upgrading.md).
+
+## Open the Livebook
+
+1. [Install Livebook locally](https://livebook.dev/#install) using the desktop app
+   or the local Mix installation from its [installation guide](https://hexdocs.pm/livebook/readme.html#installation).
+   Run its Elixir runtime on the worker host, in the same account as the worker.
+   On macOS, use the dedicated account selected above.
+2. [Download `getting-started.livemd`](notebooks/getting-started.livemd). On GitHub,
+   use **Download raw file** to save the notebook rather than the HTML page.
+3. Open Livebook, choose **Open → File upload**, select the downloaded `.livemd`
+   file and click **Import**. Follow its terminal setup instructions, fill the
+   demo directory and SHA256 in the configuration cell, then evaluate the Elixir
+   cells from top to bottom. The Bash blocks run in your terminal.
+
+The Mix steps below are the alternative path; the notebook includes its own setup.
 
 ## 1. Install smolvm and SmolBox
 
@@ -77,6 +93,10 @@ when you want to allow specific destinations later.
 
 ### Linux worker setup
 
+Before preparing the image, allow host disk space for the Python image, layers
+and templates, plus the demo profile's 20 GiB storage and 10 GiB overlay allocations.
+Preparation downloads Python; the demo guest later runs offline.
+
 For Linux, run these commands in **Bash on the worker host**, inside your Nix
 development shell if applicable. macOS users should use the separate recipe below.
 `smolvm --version` should report `1.22.0`. Use a new directory for the image, worker
@@ -96,11 +116,8 @@ printf 'Demo directory: %s\n' "$SMOLBOX_DEMO_ROOT"
 sha256sum "$SMOLBOX_DEMO_ROOT/images/python.smolmachine"
 ```
 
-Record the printed directory and SHA256 for step 3. Preparation downloads the
-Python image; the demo guest later runs without network access. The artifact
-must match the host architecture. The profile uses 20 GiB storage and 10 GiB
-overlay allocations; allow space for image layers and templates too. For artifact
-approval and reproducible production images, see
+Record the printed directory and SHA256 for step 3. The artifact must match the
+host architecture. For artifact approval and reproducible production images, see
 [Preparing the reference runtimes](client.md#preparing-the-reference-runtimes).
 
 In the **same terminal**, start the demo worker and leave it running:
@@ -129,6 +146,10 @@ existing inventory intact. See
 
 ### macOS worker setup
 
+Before preparing the image, allow host disk space for the Python image, layers
+and templates, plus the demo profile's 20 GiB storage and 10 GiB overlay allocations.
+Preparation downloads Python; the demo guest later runs offline.
+
 Use the dedicated account selected above. The commands below prepare the image
 and keep demo files private. Run them in Bash:
 
@@ -145,9 +166,7 @@ printf 'Demo directory: %s\n' "$SMOLBOX_DEMO_ROOT"
 shasum -a 256 "$SMOLBOX_DEMO_ROOT/images/python.smolmachine"
 ```
 
-Record the printed directory and SHA256. Image preparation downloads Python;
-the guest later runs offline. Allow space for the runtime image and the 20 GiB
-storage and 10 GiB overlay allocations.
+Record the printed directory and SHA256 for step 3.
 
 In the **same terminal**, start the worker and leave it running:
 

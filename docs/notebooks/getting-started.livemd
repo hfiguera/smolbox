@@ -6,10 +6,20 @@ Mix.install([{:smolbox, "~> 0.4.2"}])
 
 ## Prepare the worker
 
+Open this notebook with a local Livebook installed from the
+[official installation guide](https://hexdocs.pm/livebook/readme.html#installation).
+Use the desktop app or a local Mix installation, with its Elixir runtime on the
+worker host and in the same account as the worker. To import a downloaded copy,
+choose **Open → File upload**, select the `.livemd` file and click **Import**.
+Complete the terminal setup below and fill the configuration cell before evaluating
+the Elixir cells from top to bottom. Run Bash blocks in your terminal.
+
 This notebook runs Python, collects `42` from an output file and waits for VM
-cleanup. Run Livebook locally on the worker host. The Linux recipe requires
-x86_64 with working KVM, smolvm 1.22.0 and enough space for the runtime image and
-20/10 GiB disk allocations.
+cleanup. Linux requires x86_64 with working KVM; macOS requires Apple Silicon.
+Both recipes use smolvm 1.22.0. Before image preparation, allow host disk space
+for the Python image, layers and templates, plus the demo profile's 20 GiB
+storage and 10 GiB overlay allocations. Preparation downloads Python; the
+demo guest later runs offline.
 
 Choose the worker setup for your host below. For macOS Apple Silicon, log into
 a dedicated account with no existing smolvm machines. Install smolvm and run
@@ -87,8 +97,7 @@ curl --fail http://127.0.0.1:19471/api/v1/machines
 ```
 
 If either port is occupied, choose unused HTTP and guest rollout ports; update
-`runtime_url` below to match the HTTP port. Preparation downloads the Python
-image, but execution remains offline. For controlled network access later, see
+`runtime_url` below to match the HTTP port. For controlled network access later, see
 [Network access](https://hexdocs.pm/smolbox/network-access.html).
 
 ### macOS worker setup
@@ -108,9 +117,7 @@ printf 'Demo directory: %s\n' "$SMOLBOX_DEMO_ROOT"
 shasum -a 256 "$SMOLBOX_DEMO_ROOT/images/python.smolmachine"
 ```
 
-Record the printed directory and SHA256. Image preparation downloads Python;
-the guest later runs offline. Allow space for the runtime image and the 20 GiB
-storage and 10 GiB overlay allocations.
+Record the printed directory and SHA256 for the configuration cell below.
 
 In the **same terminal**, start the worker and leave it running:
 
