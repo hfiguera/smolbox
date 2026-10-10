@@ -197,13 +197,15 @@ defmodule SmolBox.RegistryClientTest do
             :release -> TestPeer.json(conn, response(false))
           end
         end,
-        operation_timeout_ms: 1000
+        # Allow health preflight under concurrent CI load. The warm response
+        # remains withheld until this bounded operation deadline expires.
+        operation_timeout_ms: 5000
       )
 
     {:ok, spec} = MachineSpec.new("fixture", source())
     task = Task.async(fn -> Client.create(client, spec) end)
-    assert_receive {:waiting, peer, "/artifacts/warm"}, 2000
-    assert {:error, %Error{evidence: :dispatch_uncertain}} = Task.await(task, 3000)
+    assert_receive {:waiting, peer, "/artifacts/warm"}, 7000
+    assert {:error, %Error{evidence: :dispatch_uncertain}} = Task.await(task, 7000)
     send(peer, :release)
     refute_received {:waiting, _, "/api/v1/machines"}
     refute_received {:waiting, _, "/artifacts/warm"}

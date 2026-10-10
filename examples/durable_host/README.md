@@ -1,8 +1,8 @@
 # Durable host example
 
-SmolBox 0.4.2 retains the default of smolvm **1.22.0**. Published SmolBox 0.4.0 keeps **1.20.2**. Published SmolBox 0.3.0 and
+SmolBox 0.4.3 retains the default of smolvm **1.22.0**. Published SmolBox 0.4.0 keeps **1.20.2**. Published SmolBox 0.3.0 and
 0.2.1 retain their **1.19.0** default.
-Follow [Upgrading to 0.4.2](../../docs/upgrading-to-0.4.2.md) for shared reader
+Follow [Upgrading SmolBox](../../docs/upgrading.md) for controller, adapter and shared reader
 compatibility and [Upgrading to 0.4.1](../../docs/upgrading-to-0.4.1.md) for the worker default
 change and [Upgrading to 0.4.0](../../docs/upgrading-to-0.4.0.md) for coordinated
 store upgrades, the two PostgreSQL migrations and rollback constraints.

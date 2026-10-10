@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+## 0.4.3
+
+Runtime reliability and documentation improvements. The default worker remains
+**smolvm 1.22.0**. No SQL migration, codec revision, error category or store
+capability is added. See [Upgrading to 0.4.3](docs/upgrading-to-0.4.3.md).
+
+- Keep cancellation, queue expiry, retained-machine lifecycle work and cleanup
+  progressing when execution slots are occupied. One independently bounded
+  maintenance task runs alongside the execution slots and scan task; it cannot
+  admit additional executions beyond the configured limits.
+- Require the configured worker version and readiness before branch creation,
+  recovery and release, and checkpoint preflight. Account for monotonic elapsed
+  time during execution and machine I/O so wall clock rollback cannot extend an
+  active attempt.
+- Handle image completion telemetry without reading command-only result fields.
+  Restore a missing runtime during refresh in the community workspace example
+  before reporting readiness; the example retains its published 0.3.0 dependency.
+- Simplify documentation navigation, separate testing reports from usage guides,
+  and make upgrade instructions focus on deployment actions. Clarify complete
+  Linux and macOS setup and the downloadable Getting Started Livebook.
+- Add maintained Livebook execution, output collection and cleanup verification
+  to the protected Linux and macOS qualification workflow. Correct maintainer
+  preflight launcher pins for the official supported worker distributions.
+
 ## 0.4.2
 
 **Shared store upgrade:** upgrade all controllers and readers before allowing

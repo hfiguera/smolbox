@@ -7,8 +7,8 @@ below describe actions needed when crossing each release boundary.
 
 ## Choose your upgrade path
 
-When upgrading to 0.4.2, follow applicable steps in release order. For example,
-a 0.3.1 application needs the 0.4.0, 0.4.1 and 0.4.2 instructions. You can deploy
+When upgrading to 0.4.3, follow applicable steps in release order. For example,
+a 0.3.1 application needs the 0.4.0, 0.4.1, 0.4.2 and 0.4.3 instructions. You can deploy
 the target library once, after accounting for all intervening requirements.
 
 | If your application predates | Required action | Detailed instructions |
@@ -20,6 +20,7 @@ the target library once, after accounting for all intervening requirements.
 | 0.4.0 | Apply the PostgreSQL example's worker-control and volume migrations; coordinate all shared writers | [Upgrade to 0.4.0](upgrading-to-0.4.0.md) |
 | 0.4.1 | Pin workers and checkpoint approvals, or separately adopt smolvm 1.22.0; coordinate readers of runtime receipts | [Upgrade to 0.4.1](upgrading-to-0.4.1.md) |
 | 0.4.2 | Upgrade every shared reader and custom error decoder before recording `:unsupported_network_policy` | [Upgrade to 0.4.2](upgrading-to-0.4.2.md) |
+| 0.4.3 | Update and restart controllers; account for the independent maintenance task if monitoring task counts | [Upgrade to 0.4.3](upgrading-to-0.4.3.md) |
 
 SQL migrations belong to the supplied PostgreSQL example. Custom stores need
 equivalent atomic behavior rather than those particular tables. Applications
