@@ -425,6 +425,9 @@ defmodule SmolBox.Client do
 
   All entries must satisfy the supported machine and network contract; an incompatible
   entry fails the result. Listing does not establish ownership or authorize cleanup.
+  An unsupported network policy returns `:unsupported_network_policy`. Decoding
+  failures retain operation `:list` and use `:dispatch_uncertain` because the request
+  has been sent; they do not expose machine names or raw response fields.
   """
   @spec list(t()) :: {:ok, [Machine.t()]} | {:error, Error.t()}
   def list(client) do
@@ -776,16 +779,19 @@ defmodule SmolBox.Client do
         error -> error
       end
     else
-      error(:output_limit, :list)
+      error(:output_limit, :list, :dispatch_uncertain)
     end
   end
 
-  defp decode_list(_body), do: error(:protocol, :list)
+  defp decode_list(_body), do: error(:protocol, :list, :dispatch_uncertain)
 
   defp decode_entry(entry, {:ok, acc}) do
     case Machine.from_wire(entry) do
-      {:ok, machine} -> {:cont, {:ok, [machine | acc]}}
-      {:error, _error} = error -> {:halt, error}
+      {:ok, machine} ->
+        {:cont, {:ok, [machine | acc]}}
+
+      {:error, error} ->
+        {:halt, {:error, %{error | operation: :list, evidence: :dispatch_uncertain}}}
     end
   end
 

@@ -5,6 +5,46 @@ defmodule SmolBox.MachineTest do
 
   defp fixture(name), do: "test/fixtures/wire/#{name}.json" |> File.read!() |> Jason.decode!()
 
+  test "unsupported network policies have a specific reason without remote fields" do
+    body = fixture("1.22.0/created")
+
+    for network <- [
+          %{"network" => true},
+          %{
+            "network" => true,
+            "networkBackend" => "virtio-net",
+            "allowedHosts" => [],
+            "allowedCidrs" => []
+          },
+          %{
+            "network" => true,
+            "networkBackend" => "tsi",
+            "allowedHosts" => ["api.example.com"],
+            "allowedCidrs" => []
+          },
+          %{"network" => false, "allowedHosts" => ["api.example.com"]}
+        ] do
+      assert {:error,
+              %SmolBox.Error{
+                category: :unsupported_network_policy,
+                operation: :machine,
+                evidence: :not_dispatched
+              }} = Machine.from_wire(Map.merge(body, network))
+    end
+
+    assert {:ok, %{network: :offline}} = Machine.from_wire(body)
+
+    assert {:ok, %{network: %SmolBox.NetworkPolicy{hosts: ["api.example.com"]}}} =
+             Machine.from_wire(
+               Map.merge(body, %{
+                 "network" => true,
+                 "networkBackend" => "virtio-net",
+                 "allowedHosts" => ["api.example.com"],
+                 "allowedCidrs" => []
+               })
+             )
+  end
+
   test "captured lifecycle observations retain weak creation evidence across states" do
     for prefix <- ["", "1.14.6/", "1.16.0/", "1.16.1/", "1.17.0/", "1.19.0/", "1.20.2/"] do
       assert {:ok, created} = Machine.from_wire(fixture(prefix <> "created"))

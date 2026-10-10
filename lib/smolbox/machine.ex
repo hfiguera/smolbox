@@ -55,8 +55,7 @@ defmodule SmolBox.Machine do
       ) do
     with {:ok, mounts} <- SmolBox.Mount.from_wire(wire_mounts),
          {:ok, ports} <- SmolBox.PortMapping.from_wire(wire_ports),
-         true <- port_network?(ports, wire),
-         {:ok, network} <- SmolBox.NetworkPolicy.from_wire(wire),
+         {:ok, network} <- decode_network(ports, wire),
          true <-
            MachineSpec.valid_name?(name) and state in ["created", "running", "stopped"] and
              Validation.integer?(created, 0, 253_402_300_799) and
@@ -76,11 +75,21 @@ defmodule SmolBox.Machine do
          overlay_gb: overlay
        }}
     else
+      {:error, %Error{category: :unsupported_network_policy}} = error -> error
       _invalid -> invalid()
     end
   end
 
   def from_wire(_body), do: invalid()
+
+  defp decode_network(ports, wire) do
+    with true <- port_network?(ports, wire),
+         {:ok, network} <- SmolBox.NetworkPolicy.from_wire(wire) do
+      {:ok, network}
+    else
+      _invalid -> invalid(:unsupported_network_policy)
+    end
+  end
 
   defp port_network?([], _wire), do: true
 
@@ -106,5 +115,7 @@ defmodule SmolBox.Machine do
   defp state("created"), do: :created
   defp state("running"), do: :running
   defp state("stopped"), do: :stopped
-  defp invalid, do: {:error, %Error{category: :protocol, operation: :machine}}
+
+  defp invalid(category \\ :protocol),
+    do: {:error, %Error{category: category, operation: :machine}}
 end

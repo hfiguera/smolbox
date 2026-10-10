@@ -27,6 +27,18 @@ defmodule SmolBox.ExecutionTest do
     record
   end
 
+  test "redacted network policy diagnostics survive durable record encoding" do
+    error = %Error{
+      category: :unsupported_network_policy,
+      operation: :list,
+      evidence: :dispatch_uncertain
+    }
+
+    record = %{record() | last_error: error, errors: [%{at_ms: 1000, error: error}]}
+    assert {:ok, bytes} = Codec.encode(record)
+    assert {:ok, ^record} = Codec.decode(bytes)
+  end
+
   defp dispatching do
     record = record()
 

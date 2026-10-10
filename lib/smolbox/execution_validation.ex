@@ -119,6 +119,7 @@ defmodule SmolBox.ExecutionValidation do
       error.category in [
         :validation,
         :unsupported_capability,
+        :unsupported_network_policy,
         :authentication,
         :admission_exhausted,
         :expired,

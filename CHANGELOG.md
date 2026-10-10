@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Machine list decoding failures now retain operation `:list` and report
+  `:dispatch_uncertain` after the GET, instead of `:not_dispatched`. Unsupported
+  machine network policies return the redacted category `:unsupported_network_policy`;
+  strict inventory validation is unchanged. Add inventory troubleshooting guidance.
+  The error struct and codec formats are unchanged, but upgrade readers sharing
+  a store before persisting the new error category; older readers reject it.
+
 ## 0.4.1
 
 **Worker default change:** omitted runtime versions now select smolvm **1.22.0**.
