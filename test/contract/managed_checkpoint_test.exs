@@ -13,6 +13,20 @@ defmodule SmolBox.ManagedCheckpointTest do
 
   alias SmolBox.Store.Memory
 
+  for {reason, changes} <- [version: [runtime_version: "1.20.2"], readiness: [unready: true]] do
+    test "#{reason} drift rejects capture before dispatch or artifact publication" do
+      {f, machine, spec} = fixture()
+      Agent.update(f.peer, &%{&1 | options: Keyword.merge(&1.options, unquote(changes))})
+      assert {:ok, capture} = Checkpoints.capture(f.runtime, machine, spec)
+
+      assert {:ok, %{state: :failed, error: %{evidence: :not_dispatched}, result: nil}} =
+               Checkpoints.await(f.runtime, capture, 5000)
+
+      assert count(f.peer) == 0
+      assert File.ls!(spec.policy.root) == []
+    end
+  end
+
   defmodule LegacyStore do
     @moduledoc false
     alias SmolBox.Store.Memory

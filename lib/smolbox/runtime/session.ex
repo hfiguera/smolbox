@@ -1,7 +1,7 @@
 defmodule SmolBox.Runtime.Session do
   @moduledoc false
   alias SmolBox.{Error, Execution, Telemetry}
-  alias SmolBox.Runtime.{Config, WorkerConfig}
+  alias SmolBox.Runtime.{Config, Deadline, WorkerConfig}
 
   @enforce_keys [:config, :key, :worker, :wall, :monotonic]
   defstruct @enforce_keys
@@ -70,8 +70,10 @@ defmodule SmolBox.Runtime.Session do
   @spec remaining(t(), Execution.t(), atom()) :: integer()
   def remaining(session, record, stage),
     do:
-      Map.fetch!(record.deadlines, stage) -
-        max(now(session), session.wall + session.config.clock.monotonic() - session.monotonic)
+      Deadline.remaining(session.config.clock, Map.fetch!(record.deadlines, stage), {
+        session.wall,
+        session.monotonic
+      })
 
   @spec patch(t(), keyword(), non_neg_integer()) :: SmolBox.Store.result()
   def patch(session, changes, retries \\ 2) do

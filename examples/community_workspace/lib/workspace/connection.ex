@@ -42,8 +42,7 @@ defmodule Workspace.Connection do
          :ok <- database_ready(),
          {:ok, context} <- Settings.build(settings),
          {:ok, _} <- Store.capabilities(context.store),
-         {:ok, _pid} <-
-           DynamicSupervisor.start_child(Workspace.Runtimes, {SmolBox.Runtime, context.options}) do
+         :ok <- ensure_runtime(context) do
       {:ok, context}
     else
       {:error, reason} when is_atom(reason) -> {:error, reason}
@@ -55,11 +54,26 @@ defmodule Workspace.Connection do
     with :ok <- database_ready(),
          {:ok, _} <- Store.capabilities(context.store),
          {:ok, %{version: version}} <- SmolBox.Client.health(health_client(context.client)),
-         true <- version == Settings.runtime_version(context.settings) do
+         true <- version == Settings.runtime_version(context.settings),
+         :ok <- ensure_runtime(context) do
       {:ok, context}
     else
       _ -> {:error, :worker_or_store_unavailable}
     end
+  end
+
+  defp ensure_runtime(context) do
+    if Process.whereis(Settings.runtime()) do
+      :ok
+    else
+      case DynamicSupervisor.start_child(Workspace.Runtimes, {SmolBox.Runtime, context.options}) do
+        {:ok, _pid} -> :ok
+        {:error, {:already_started, _pid}} -> :ok
+        _ -> {:error, :runtime_unavailable}
+      end
+    end
+  catch
+    :exit, _ -> {:error, :runtime_unavailable}
   end
 
   defp health_client(client),

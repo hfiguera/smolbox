@@ -1,7 +1,7 @@
 defmodule SmolBox.Runtime.Branches do
   @moduledoc false
-  alias SmolBox.{BranchClient, Client, ManagedMachine}
-  alias SmolBox.Runtime.{MachineSession, Session, WorkerConfig}
+  alias SmolBox.{BranchClient, ManagedMachine}
+  alias SmolBox.Runtime.{MachineSession, Session, WorkerConfig, WorkerHealth}
 
   def approved?(worker, parent, spec),
     do:
@@ -49,7 +49,7 @@ defmodule SmolBox.Runtime.Branches do
          true <- not worker.draining and approved?(worker, parent, child.branch.spec),
          :ok <-
            MachineSession.io(config, parent, fn ->
-             preflight(worker.client, parent, child)
+             preflight(worker, parent, child, config.clock)
            end) do
       dispatch(config, parent, child, worker)
     else
@@ -75,9 +75,10 @@ defmodule SmolBox.Runtime.Branches do
 
   defp received(config, parent, child, _), do: advance(config, parent, child, :unknown)
 
-  defp preflight(client, parent, child) do
-    with {:ok, _} <- BranchClient.source(client, parent),
-         {:ok, :absent} <- BranchClient.absent(client, child.machine_name),
+  defp preflight(worker, parent, child, clock) do
+    with :ok <- WorkerHealth.check(worker, clock),
+         {:ok, _} <- BranchClient.source(worker.client, parent),
+         {:ok, :absent} <- BranchClient.absent(worker.client, child.machine_name),
          do: :ok
   end
 
@@ -85,7 +86,7 @@ defmodule SmolBox.Runtime.Branches do
     with {:ok, worker} <- MachineSession.worker(config, parent),
          {:ok, source} <-
            MachineSession.io(config, parent, fn ->
-             completed_evidence(worker.client, parent, child)
+             completed_evidence(worker, parent, child, config.clock)
            end) do
       advance(config, parent, child, {:complete, source})
     else
@@ -93,9 +94,10 @@ defmodule SmolBox.Runtime.Branches do
     end
   end
 
-  defp completed_evidence(client, parent, child) do
-    with {:ok, source} <- BranchClient.source(client, parent),
-         {:ok, _} <- BranchClient.inspect_child(client, child, child.branch.spec.hold),
+  defp completed_evidence(worker, parent, child, clock) do
+    with :ok <- WorkerHealth.check(worker, clock),
+         {:ok, source} <- BranchClient.source(worker.client, parent),
+         {:ok, _} <- BranchClient.inspect_child(worker.client, child, child.branch.spec.hold),
          do: {:ok, source}
   end
 
@@ -112,7 +114,7 @@ defmodule SmolBox.Runtime.Branches do
          true <- approved?(worker, child, child.branch.spec),
          {:ok, _} <-
            MachineSession.io(config, child, fn ->
-             release_evidence(worker.client, child)
+             release_evidence(worker, child, config.clock)
            end),
          {:ok, pending} <- release_advance(config, child, :dispatching) do
       result =
@@ -132,10 +134,9 @@ defmodule SmolBox.Runtime.Branches do
     end
   end
 
-  defp release_evidence(client, child) do
-    with {:ok, %{version: version}} when version in ["1.19.0", "1.20.2", "1.22.0"] <-
-           Client.health(client),
-         do: BranchClient.inspect_child(client, child, true)
+  defp release_evidence(worker, child, clock) do
+    with :ok <- WorkerHealth.check(worker, clock),
+         do: BranchClient.inspect_child(worker.client, child, true)
   end
 
   def release_advance(config, child, change) do

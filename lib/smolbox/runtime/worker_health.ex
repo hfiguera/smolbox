@@ -1,6 +1,17 @@
 defmodule SmolBox.Runtime.WorkerHealth do
   @moduledoc false
-  alias SmolBox.Client
+  alias SmolBox.{Client, Error}
+
+  def check(worker, clock) do
+    case observe(worker, clock) do
+      %{status: :ready} ->
+        :ok
+
+      _ ->
+        {:error,
+         %Error{category: :unsupported_capability, operation: :worker, evidence: :not_dispatched}}
+    end
+  end
 
   def observe(worker, clock) do
     client = %{

@@ -13,6 +13,28 @@ defmodule SmolBox.ManagedBranchTest do
 
   alias SmolBox.Store.{MachineOps, Memory}
 
+  for {reason, changes} <- [version: [runtime_version: "1.20.2"], readiness: [unready: true]] do
+    test "#{reason} drift rejects a branch before dispatch" do
+      {f, source, spec} = fixture()
+      Agent.update(f.peer, &%{&1 | options: Keyword.merge(&1.options, unquote(changes))})
+      assert {:ok, child} = Branches.create(f.runtime, source, spec)
+      assert {:ok, %{branch: %{state: :failed}}} = Branches.await(f.runtime, child, 5000)
+      assert count(f.peer, "/branches") == 0
+    end
+
+    test "#{reason} drift cannot release a held branch" do
+      {f, source, spec} = fixture()
+      assert {:ok, child} = Branches.create(f.runtime, source, %{spec | hold: true})
+      assert {:ok, %{branch: %{state: :held}}} = Branches.await(f.runtime, child, 5000)
+      current = RuntimeFixture.await_idle(f.runtime, child)
+      Agent.update(f.peer, &%{&1 | options: Keyword.merge(&1.options, unquote(changes))})
+      assert {:ok, _} = Branches.release(f.runtime, child, current.version)
+      assert {:ok, %{branch: %{state: :unknown}}} = Branches.await(f.runtime, child, 5000)
+      assert count(f.peer, "/branch-release") == 0
+      assert {:ok, %{slots: 3}} = Memory.usage(f.store, "peer")
+    end
+  end
+
   defmodule LegacyStore do
     @moduledoc false
     alias SmolBox.Store.Memory

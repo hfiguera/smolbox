@@ -59,7 +59,7 @@ defmodule SmolBox do
   | `:workers` | `[]` | Up to 64 `SmolBox.Runtime.WorkerConfig` values with unique worker IDs/endpoints; an empty list permits inspection but cannot admit new work |
   | `:mode` | `:durable` | `:ephemeral` explicitly permits a non-durable store such as `SmolBox.Store.Memory` |
   | `:max_pending` | `128` | Pending-queue bound, 1–10,000 |
-  | `:max_active` | `4` | Concurrent runtime work tasks, 1–64; worker reservations separately bound admitted guests |
+  | `:max_active` | `4` | Concurrent execution tasks, 1–64; one additional maintenance task and one scan are independently bounded; worker reservations separately bound admitted guests |
   | `:poll_ms` | `250` | Scan interval, 10–5000 ms |
   | `:lease_ms` | `30_000` | Ownership lease, 1000–900,000 ms and at least four times `:poll_ms` |
   | `:cleanup_attempts` | `5` | Automatic cleanup-attempt budget, 1–20 |
@@ -170,8 +170,8 @@ defmodule SmolBox do
   @doc "Schedule existing evidence for observation; this never authorizes command replay."
   @spec reconcile(runtime(), String.t(), String.t()) :: :ok | {:error, Error.t()}
   def reconcile(runtime, scope, id) do
-    with {:ok, _record} <- fetch(runtime, scope, id) do
-      call(runtime, {:reconcile, {scope, id}})
+    with {:ok, record} <- fetch(runtime, scope, id) do
+      call(runtime, {:reconcile, {scope, id}, record})
     end
   end
 

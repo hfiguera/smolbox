@@ -429,8 +429,8 @@ defmodule SmolBox.Machines do
 
   @doc "Schedule read-only recovery observation; this does not authorize replay of uncertain requests."
   def reconcile(runtime, handle) do
-    with {:ok, _record} <- __MODULE__.inspect(runtime, handle) do
-      GenServer.call(Runtime.coordinator(runtime), {:reconcile, {:machine, handle}})
+    with {:ok, record} <- __MODULE__.inspect(runtime, handle) do
+      GenServer.call(Runtime.coordinator(runtime), {:reconcile, {:machine, handle}, record})
     end
   end
 
