@@ -185,13 +185,9 @@ export SMOLBOX_PYTHON_ARTIFACT="$SMOLBOX_DEMO_ROOT/images/python.smolmachine"
 export SMOLBOX_PYTHON_SHA256=paste_the_sha256_printed_in_step_2
 export SMOLBOX_DEMO_DIR="$SMOLBOX_DEMO_ROOT/objects"
 unset SMOLBOX_RUNTIME_SOCKET
-iex -S mix
 ```
 
-Save the block below as `smolbox_demo.exs` in the Mix project directory.
-Then run `Code.require_file("smolbox_demo.exs")` in IEx. If execution fails after the
-supervisor starts, keep the session open and inspect it with
-[Troubleshooting](troubleshooting.md) before running it again.
+Save the following block as `smolbox_demo.exs` in the Mix project directory:
 
 ```elixir
 alias SmolBox.{Command, ExecutionSpec, Files, Profile, Worker}
@@ -361,6 +357,17 @@ IO.inspect(Map.take(cleaned, [:state, :collection, :cleanup, :reservation]),
 
 :ok = Supervisor.stop(supervisor)
 ```
+
+From the Mix project directory, start IEx in the terminal where you set the
+environment variables:
+
+```sh
+iex -S mix
+```
+
+Then run `Code.require_file("smolbox_demo.exs")` in IEx. If execution fails after
+the supervisor starts, keep the session open and inspect it with
+[Troubleshooting](troubleshooting.md) before running it again.
 
 Expected output is `hello from SmolBox`, followed by `state: :completed`,
 `collection: :complete`, `cleanup: :complete`, and `reservation: nil`. The script

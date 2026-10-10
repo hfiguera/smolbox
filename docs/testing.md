@@ -36,6 +36,9 @@ Performance measurements describe their particular workload and host.
 | --- | --- |
 | [Getting Started Livebook on 0.4.1](evidence/getting-started-livebook.json) | Livebook 0.19.10 with Elixir 1.20.4/OTP 29.0.6 on Linux, using the published 0.4.1 package |
 | [Getting Started example on the 0.4.2 candidate](evidence/getting-started-livebook-0.4.2.json) | The Linux 0.4.2 package candidate's execution, output collection and cleanup; its configuration and limits are recorded in the JSON |
+| [Network access](network-access-validation.md) | Allowed and denied connections, DNS policy and platform limits |
+| [Measurements and capacity](worker-measurements-validation.md) | Optional counters, reservation reports and the recorded Linux checks |
+| [Worker draining](worker-draining-validation.md) | Shared admission, controller recovery and PostgreSQL rollback |
 | [Persistent machines](persistent-machines-validation.md) | Retained files, stop/start, controller recovery and deletion |
 | [Port mappings](port-mappings-validation.md) | Guest HTTP service access, ownership and conflicts |
 | [Long commands and background launch](long-running-exec-validation.md) | Command budgets, background launch and recovery |
