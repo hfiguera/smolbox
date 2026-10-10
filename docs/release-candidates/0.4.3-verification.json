@@ -100,5 +100,23 @@
   "scope_limits": [
     "Normal workload verification; not the full resource abuse, saved-state or PostgreSQL recovery campaign.",
     "Historical worker qualification reports retain their original versions and scope."
-  ]
+  ],
+  "ci_followup": {
+    "advisory": "CVE-2026-97853",
+    "patched_decimal": "3.1.2",
+    "changed_lockfiles": [
+      "examples/durable_host/mix.lock",
+      "examples/community_workspace/mix.lock"
+    ],
+    "core_archive_unchanged": true,
+    "durable_host_tests": 78,
+    "community_workspace_tests": 49,
+    "example_quality_checks": "passed",
+    "example_hex_and_dependency_audits": "passed",
+    "unavailable_database_check": "passed",
+    "registry_timeout_fixture": "5 second operation budget; warm response remains withheld until expiry; no creation or retry permitted",
+    "root_checks_after_fix": 636,
+    "registry_checks_elixir_1_20_4_otp_28_5": 8,
+    "reproduced_ci_seed": 707150
+  }
 }
