@@ -185,5 +185,5 @@ ports and a private database partition. Do not run it against an unrelated servi
 See [validation evidence](port-mappings-validation.md) for the tested platforms,
 source/runtime identities, initial failures and cleanup.
 
-For the current checkout default, see the [1.22.0 qualification](runtime-1.22.0-qualification.md).
-Earlier validation sections above retain their original scope.
+See [Supported platforms](supported-platforms.md) for current worker selection
+and [Testing reports](testing.md) for recorded checks and their limits.

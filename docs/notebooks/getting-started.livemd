@@ -6,17 +6,65 @@ Mix.install([{:smolbox, "~> 0.4.2"}])
 
 ## Prepare the worker
 
+Open this notebook with a local Livebook installed from the
+[official installation guide](https://hexdocs.pm/livebook/readme.html#installation).
+Use the desktop app or a local Mix installation, with its Elixir runtime on the
+worker host and in the same account as the worker. To import a downloaded copy,
+choose **Open → File upload**, select the `.livemd` file and click **Import**.
+Complete the terminal setup below and fill the configuration cell before evaluating
+the Elixir cells from top to bottom. Run Bash blocks in your terminal.
+
 This notebook runs Python, collects `42` from an output file and waits for VM
-cleanup. Run Livebook locally on the worker host. The Linux recipe requires
-x86_64 with working KVM, smolvm 1.22.0 and enough space for the runtime image and
-20/10 GiB disk allocations. For macOS Apple Silicon, use the separate account
-instructions in the [Getting Started guide](https://hexdocs.pm/smolbox/getting-started.html#macos-worker-setup).
+cleanup. Linux requires x86_64 with working KVM; macOS requires Apple Silicon.
+Both recipes use smolvm 1.22.0. Before image preparation, allow host disk space
+for the Python image, layers and templates, plus the demo profile's 20 GiB
+storage and 10 GiB overlay allocations. Preparation downloads Python; the
+demo guest later runs offline.
+
+Choose the worker setup for your host below. For macOS Apple Silicon, log into
+a dedicated account with no existing smolvm machines. Install smolvm and run
+image preparation, the worker and Livebook in that same account. The demo files
+are private, so a Livebook session under another account cannot read them. Launch
+Livebook under the dedicated account and import this notebook there.
+A different port or `SMOLVM_DATA_DIR` does not isolate macOS worker state.
+
+### Install smolvm
+
+If `smolvm --version` does not already report `1.22.0`, run the
+[upstream installer from the 1.22.0 release](https://github.com/smol-machines/smolvm/blob/v1.22.0/scripts/install.sh)
+in a Bash terminal as your normal user, with `curl` and `tar` available:
+
+```bash
+SMOLBOX_INSTALLER="$(mktemp)"
+curl -fsSL https://raw.githubusercontent.com/smol-machines/smolvm/v1.22.0/scripts/install.sh \
+  -o "$SMOLBOX_INSTALLER" &&
+  bash "$SMOLBOX_INSTALLER" --version 1.22.0
+export PATH="$HOME/.local/bin:$PATH"
+smolvm --version
+```
+
+Continue only when the version reports `1.22.0`. This installs the matching
+distribution, including libraries, agent and disk templates. The Elixir dependency
+does not install a worker. The installer replaces this account's smolvm installation;
+use a separate account to preserve another installed version.
+
+On Linux, check KVM access before preparing the image:
+
+```bash
+test -r /dev/kvm && test -w /dev/kvm && echo "KVM access ready"
+```
+
+Continue only when this prints `KVM access ready`. Otherwise, resolve KVM
+availability and permissions on the worker host first.
 
 The guest runs offline. SmolBox rejects inventory entries with networking enabled
 without explicit allowlists, including machines created outside SmolBox. Give
 this demo its own worker state and endpoint, keeping your existing machines intact.
 
-Run this in a Bash terminal on the worker host (inside your Nix shell if used):
+### Linux worker setup
+
+On Linux, run this in a Bash terminal on the worker host (inside your Nix shell
+if used). macOS users should use the separate recipe below:
 
 ```bash
 export SMOLBOX_DEMO_ROOT="$(mktemp -d)"
@@ -49,9 +97,46 @@ curl --fail http://127.0.0.1:19471/api/v1/machines
 ```
 
 If either port is occupied, choose unused HTTP and guest rollout ports; update
-`runtime_url` below to match the HTTP port. Preparation downloads the Python
-image, but execution remains offline. For controlled network access later, see
+`runtime_url` below to match the HTTP port. For controlled network access later, see
 [Network access](https://hexdocs.pm/smolbox/network-access.html).
+
+### macOS worker setup
+
+Under the dedicated account selected above, run this in Bash:
+
+```bash
+export SMOLBOX_DEMO_ROOT="$(mktemp -d)"
+chmod 700 "$SMOLBOX_DEMO_ROOT"
+mkdir -m 700 "$SMOLBOX_DEMO_ROOT/images" "$SMOLBOX_DEMO_ROOT/objects"
+cd "$SMOLBOX_DEMO_ROOT/images"
+
+smolvm pack create --image python:3.12-alpine --entrypoint /bin/true \
+  --cpus 1 --mem 256 --staging-dir ./staging --output ./python
+
+printf 'Demo directory: %s\n' "$SMOLBOX_DEMO_ROOT"
+shasum -a 256 "$SMOLBOX_DEMO_ROOT/images/python.smolmachine"
+```
+
+Record the printed directory and SHA256 for the configuration cell below.
+
+In the **same terminal**, start the worker and leave it running:
+
+```bash
+SMOLVM_GUEST_ROLLOUT_HOST_PORT=19472 \
+  SMOLVM_FILE_TRANSFER_MAX_BYTES=1048576 \
+  smolvm serve start --listen 127.0.0.1:19471
+```
+
+If either port is occupied, choose unused ports and update `runtime_url` in the configuration cell below.
+In a **second terminal in the same account**, check the inventory:
+
+```sh
+curl --fail http://127.0.0.1:19471/api/v1/machines
+```
+
+Continue only when it returns `{"machines":[]}`. Keep existing machines intact;
+see [Machine inventory problems](https://hexdocs.pm/smolbox/troubleshooting.html#machine-inventory-problems)
+if this check fails.
 
 ## Configure the demo
 

@@ -4,7 +4,7 @@ For managed capture and independent retained restores on 1.19.0, 1.20.2 or 1.22.
 [Managed checkpoints](managed-checkpoints.md). This guide describes the existing
 approved checkpoint execution contract.
 
-SmolBox 0.1.5 restores a separate disposable machine from an
+SmolBox restores a separate disposable machine from an
 operator-approved **idle, offline checkpoint**. Submission, input staging,
 command execution, output collection, cancellation and cleanup use the existing
 managed lifecycle. Each execution gets its own identity and machine.
@@ -244,15 +244,10 @@ SMOLBOX_CHECKPOINT_PATH=/approved/idle.smolcheckpoint \
 mix test test/checkpoint_runtime --include runtime --warnings-as-errors
 ```
 
-The [1.20.2 qualification](runtime-1.20.2-qualification.md) records the newer
-worker campaign separately from the original feature evidence above. Preserve the
-exact capture runtime on checkpoint approvals; changing a filename or version
-field does not migrate saved machine state.
-
 Both `.checkpoint` and `.smolcheckpoint` filenames are accepted. Managed captures
 keep `capture.smolcheckpoint` so existing durable paths remain stable. The
 filename does not determine format compatibility; metadata and the exact capture
 runtime still have to match the approval.
 
-For the current checkout default, see the [1.22.0 qualification](runtime-1.22.0-qualification.md).
-Earlier validation sections above retain their original scope.
+See [Supported platforms](supported-platforms.md) for current worker selection
+and [Testing reports](testing.md) for recorded checks and their limits.

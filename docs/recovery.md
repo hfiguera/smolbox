@@ -1,55 +1,36 @@
 # Persistence and recovery contract
 
-Registry preparation and image pulls follow the same no-replay rule as uncertain
-commands. Preserve the source identity, preparation result and original operation
-handle. A `:prepared` registry result can continue creation within its original
-deadline. Interrupted preparation, creation or image pulling requires quiescence
-before resolution; a cache hit, image listing, expired lease or observed absence
-does not fence worker requests. See [registry recovery](images-and-registry-artifacts.md#recovery-and-resource-accounting).
+Use a durable store when execution records must survive an application restart.
+SmolBox records intent and observations; your store adapter supplies transactions
+and durability. A restart can resume observation and cleanup, but it cannot turn
+an unknown command outcome into a known one.
 
-SmolBox **0.3.0** defaults to **smolvm 1.19.0** on Linux x86_64 and macOS Apple
-Silicon, unchanged from 0.2.1. Version 0.2.0 defaults to 1.17.0. Keep workers pinned
-to their installed version; updating SmolBox does not install smolvm. See
-[Upgrading to 0.3.0](upgrading-to-0.3.0.md) and the
-[1.19.0 qualification](runtime-1.19.0-qualification.md).
+The same no-replay rule applies to uncertain registry preparation and image pulls.
+Preserve the source identity and original operation handle; follow
+[registry recovery](images-and-registry-artifacts.md#recovery-and-resource-accounting)
+before resolving them. A cache hit, expired lease or observed absence cannot
+cancel a request already sent to the worker.
 
+For an existing deployment, follow [Upgrading SmolBox](upgrading.md). See
+[Troubleshooting](troubleshooting.md) for common symptoms and
+[Testing reports](testing.md) for the recorded recovery checks.
 
-Use a durable store when executions must survive an application restart. SmolBox
-persists intent and observations; the host adapter supplies transactions and
-durability. The included PostgreSQL example has real database and process-recovery
-coverage on Linux and macOS. A subsequent
-[constrained Linux deployment](resource-qualification.md#subsequent-linux-deployment-validation)
-also passed worker OOM, database-outage and independent worker-deadline tests.
-Those tests preserved execution identity and unknown outcomes without replay,
-retaining capacity until owned absence was verified. They do not add execution
-fencing to the upstream API or change the recovery contract below. See
-[Compatibility](compatibility.md) for recorded evidence and
-[Troubleshooting](troubleshooting.md) for common operational symptoms.
+<a id="retained-machines-0-2-0"></a>
 
-## Upgrading to 0.2.0
-
-Follow the [consolidated upgrade guide](upgrading-to-0.2.0.md) for worker selection,
-controller quiescence, PostgreSQL migrations, capability/schema requirements and
-rollback restrictions. Historical upgrade sections below retain their original
-version-specific scope.
-
-## Retained machines (0.2.0)
+## Retained machines
 
 `SmolBox.Machines` adds machine ownership independent of executions. Its commands
 retain the VM and hold one exclusive command slot through preparation, execution,
 and collection. Cancellation and unknown outcomes never authorize automatic
 machine deletion. See [Managed persistent machines](persistent-machines.md) for
-operator quiescence, explicit absence resolution, and the coordinated v5/store
-upgrade. The disposal and unknown-retention rules below describe the original
-**disposable** execution API.
+operator quiescence and explicit absence resolution. The disposal and unknown
+retention rules below describe **disposable** executions.
 
-## Checkpoint records (0.1.5)
+## Checkpoint execution
 
-Checkpoint executions use schema v3 while image executions retain v2. Upgrade
-all controllers sharing a store before submitting checkpoints; older readers
-must not treat unreadable records as absent. See
-[Upgrading to 0.1.5](#upgrading-to-0-1-5). Retention,
-uncertain outcomes and verified disposal follow the same rules below.
+Checkpoint executions preserve the same identity, uncertain-outcome and cleanup
+rules described below. Keep approvals pinned to the original capture runtime and
+platform. See [Checkpoint execution](checkpoints.md) for source approval.
 
 ## Store contract
 
@@ -202,124 +183,6 @@ retains that exit: cancellation intent is not permission to replace observed
 evidence with a fabricated cancelled result. Collection may finish or fail
 depending on which file operations completed before cancellation was observed.
 
-## Upgrading to 0.1.5
-
-Version 0.1.5 adds approved idle, offline checkpoint execution. It keeps smolvm
-1.16.1 as the default; no worker upgrade is needed from 0.1.4. Checkpoints require
-1.16.1 on Linux x86_64 or macOS Apple Silicon. Image executions retain explicit
-1.16.0, 1.14.6 and 1.14.1 support and their existing network/version restrictions.
-
-Image records continue to use schema v2 with unchanged fingerprints. Only
-checkpoint executions write schema v3. The 0.1.5 codec reads v1, v2 and v3; older
-controllers cannot read v3. A controller is an Elixir application running SmolBox,
-not a smolvm worker. This changes the stored payload, not the PostgreSQL example's
-SQL tables, encryption envelope or store adapter contract.
-
-Before enabling checkpoint submissions against a shared store:
-
-1. Keep checkpoint submissions disabled. Inventory every controller and other
-   process that reads or reconciles the store, including standby instances.
-2. Drain controllers through your normal upgrade procedure, preserving pending
-   cleanup, reservations and unknown outcomes. Back up the store and retain its
-   fingerprint and encryption keys; do not erase records to permit an upgrade.
-3. Upgrade every reader/controller to 0.1.5. Verify existing records can be read
-   and observation/cleanup resumes without replaying commands.
-4. Register an approved checkpoint on a compatible 1.16.1 worker. Validate one
-   execution through result collection, verified deletion and capacity release
-   before enabling checkpoint submissions for the application.
-
-Image-only use introduces no v3 records and does not require the checkpoint
-coordination step. Applications coming from 0.1.2 or earlier still need
-[the v2 record upgrade](#upgrading-to-0-1-3); applications coming from 0.1.3 must
-also review [the worker change in 0.1.4](#upgrading-to-0-1-4).
-
-**Rollback:** once any v3 records exist, disabling new checkpoint submissions is
-not enough to downgrade controllers. Completed checkpoint records are still v3.
-Retain compatible readers, or explicitly separate/migrate those records while
-preserving identity, deduplication and cleanup evidence. There is no automatic
-conversion to v2 and no supported blind rollback to 0.1.4.
-
-See [Checkpoint approval](checkpoints.md#prepare-and-approve-the-source) for
-captured-state restrictions and [checkpoint validation](checkpoints.md#performance-and-validation)
-for the measured behavior and platform boundaries.
-
-## Upgrading to 0.1.4
-
-SmolBox 0.1.4 changes the default worker from smolvm 1.16.0 to **1.16.1**.
-Updating the Elixir dependency does not install or upgrade that worker. Before
-updating an application, choose one of these paths:
-
-- Retain an existing worker by setting `runtime_version: "1.16.0"` explicitly
-  in every controller that owns it. Explicit 1.14.6 and 1.14.1 offline workers
-  remain supported too.
-- Upgrade the worker using the [drain and verification procedure](host-integration.md#upgrading-a-worker).
-  Resolve existing work and preserve its state before replacing the complete
-  runtime distribution. Configure every owner to expect 1.16.1 and verify an
-  owned execution through cleanup before resuming submissions.
-
-Version checks require an exact match; there is no automatic fallback.
-Controlled networking works with 1.16.0 and 1.16.1 and remains offline by default.
-
-There is **no additional record schema migration from 0.1.3**: both versions read
-v1 records and write v2. Applications coming from 0.1.2 or earlier must also
-complete [the coordinated record upgrade below](#upgrading-to-0-1-3).
-
-Managed cleanup now separates disposal from preservation, as described in
-[Preservation and disposal](#preservation-and-disposal). Completed work can
-remove its owned machine without a preliminary graceful stop. Unknown work still
-retains its disks and reservation during its retention period. A failed graceful
-stop never automatically authorizes deletion, and retry exhaustion may still
-require operator resolution. Upgrading does not reset exhausted cleanup budgets
-or replay commands with uncertain outcomes.
-
-## Upgrading to 0.1.3
-
-SmolBox 0.1.3 introduces record schema v2 to persist network policies. Despite the
-patch version number, this is a deployment compatibility change for applications
-using `SmolBox.Store.Codec`, including the PostgreSQL example. A **controller** is
-an Elixir application instance running SmolBox, not a smolvm worker.
-
-| Reader | Legacy v1 records | New v2 records |
-|---|---|---|
-| SmolBox 0.1.2 | Supported | Rejected |
-| SmolBox 0.1.3–0.1.5 | Supported as offline | Supported |
-
-**In 0.1.3 and 0.1.4, every new codec write uses v2, even when networking stays offline.**
-Version 0.1.5 retains this format for images and adds v3 for checkpoints. Reading a
-valid v1 record adds offline defaults in memory without changing its execution
-fingerprint or immediately rewriting the stored bytes. Its next save uses v2.
-Upgrading the SQL schema alone cannot make an old reader understand those bytes.
-Custom adapters with their own serialization need an equivalent migration plan.
-
-For controllers sharing a durable store:
-
-1. Pause new submissions and drain active work, including collection, cleanup
-   and reservation release. Resolve retained or unknown work through the existing
-   recovery procedure; do not delete its records to make the upgrade proceed.
-2. Stop every old controller and any other process reading or writing these
-   records. Do not leave 0.1.2 instances running during a rolling deployment.
-3. Back up durable data and preserve the existing fingerprint key, encryption
-   configuration, execution identities and worker ownership information.
-4. Deploy 0.1.3 to all readers and writers. Its default worker version is 1.16.0;
-   follow the [worker upgrade procedure](host-integration.md#upgrading-a-worker)
-   or explicitly keep `runtime_version: "1.14.6"` or `"1.14.1"` for older workers.
-   The library does not install or upgrade smolvm. Network policies require 1.16.0.
-5. Verify existing records remain readable and duplicates retain their identity.
-   Resume submissions after confirming the configured workers pass version checks
-   and recovery is operating with the same durable state and keys.
-
-**Rollback:** before any v2 record is written, the record format does not prevent
-returning to 0.1.2, provided its worker configuration is still compatible. After
-v2 writes, there is no built-in downgrade to v1. Keep a compatible reader or plan
-an explicit, reviewed migration. Simply restoring an earlier database backup can
-lose evidence of commands already accepted by workers and lead to duplicate work.
-A decoding failure must remain an error, never be treated as a missing execution.
-
-The in-memory store is ephemeral and is not a persistence migration strategy.
-Restarting it loses execution records and may leave machines behind. Applications
-using only `SmolBox.Client` do not use this managed record format, but must still
-check their worker version and any persistence they own.
-
 ## Long commands and background launch
 
 See [Long-running execution](long-running-exec.md) for coordinated codec-v6/store
@@ -412,3 +275,30 @@ normal verified deletion path, use `Volumes.resolve_delete/4` with the inspected
 version and `quiesced: true`. This explicitly deletes storage; preserve needed data
 first. A stopped observation or expired controller lease is not worker fencing.
 See [local volume recovery](local-volumes.md#uncertain-outcomes-and-recovery).
+
+## Earlier upgrades
+
+For release transitions, use [Upgrading SmolBox](upgrading.md). These links retain
+older bookmarks; the instructions are kept in the upgrade documentation.
+
+## Upgrading to 0.2.0
+
+Follow the [consolidated upgrade guide](upgrading-to-0.2.0.md) for worker selection,
+controller quiescence, PostgreSQL migrations, capability/schema requirements and
+rollback restrictions.
+
+### Upgrading to 0.1.3
+
+See [Upgrade to 0.1.3](upgrading-within-0.1.x.md#upgrading-to-0-1-3).
+
+### Upgrading to 0.1.4
+
+See [Upgrade to 0.1.4](upgrading-within-0.1.x.md#upgrading-to-0-1-4).
+
+### Upgrading to 0.1.5
+
+See [Upgrade to 0.1.5](upgrading-within-0.1.x.md#upgrading-to-0-1-5).
+
+### Checkpoint records (0.1.5)
+
+See [the checkpoint record transition](upgrading-within-0.1.x.md#upgrading-to-0-1-5).

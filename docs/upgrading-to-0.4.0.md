@@ -1,17 +1,10 @@
-# Upgrading to SmolBox 0.4.0
+# Upgrade to 0.4.0
 
-SmolBox 0.4.0 adds machine measurements, durable worker draining, disk expansion
-and local volumes. The default worker remains **smolvm 1.20.2**. Updating the
-Elixir package does not install a worker, resize a disk or enable mounts.
-
-```elixir
-{:smolbox, "~> 0.4.0"}
-```
-
-Existing disposable execution and ordinary retained-machine APIs remain available.
-The store upgrade requires coordination even when application code is unchanged.
-In particular, draining now requires a capable store instead of changing only the
-current controller's admission state.
+When crossing from 0.3.1, coordinate shared controllers and adapters and apply the
+PostgreSQL example's two migrations before reopening admission. Draining now
+requires a capable store rather than changing only the current controller's state.
+The default worker stays **smolvm 1.20.2**. Use
+[Upgrading SmolBox](upgrading.md) for steps from other releases.
 
 ## What changes in storage
 
@@ -106,28 +99,19 @@ to their capture runtime. The supported runtime list does not change from 0.3.1.
 Hosts coming from 0.3.0 must also follow [Upgrading to 0.3.1](upgrading-to-0.3.1.md)
 before relying on the 1.20.2 default or writing receipts with that runtime.
 
-- [Measurements](worker-measurements.md) distinguish optional observed counters
-  from reservations. Missing observations are not zero usage, host quotas or
-  permission to admit more work.
-- [Draining](worker-draining.md) blocks new resource admissions. Existing work,
-  commands and cleanup can continue; it never invokes upstream's worker-wide stop.
-- [Disk expansion](disk-expansion.md) requires an idle stopped/created machine on
-  1.20.2. It grows disks only, retains increased accounting after uncertainty and
-  requires a later boot to verify usable guest filesystem space.
-- [Local volumes](local-volumes.md) require Linux 1.20.2 and an approved canonical
-  volume root. Each volume has one exclusive attachment, including read-only
-  mounts. Verified machine deletion frees the attachment; explicit volume deletion
-  frees its separate reservation. `size_gb` is advisory accounting, not a quota.
+Before enabling new operations, follow the corresponding guide:
 
-Mounted machines cannot currently be exported, checkpointed, restored from a
-checkpoint, branched or expanded. Checkpoint and branch machines also remain
-outside disk expansion support. No worker migration, automatic expiry or pool
-management is introduced.
+- [Measurements](worker-measurements.md): observations do not change reservations.
+- [Draining](worker-draining.md): pause admissions and use explicit versioned resume.
+- [Disk expansion](disk-expansion.md): approve growth of an idle stopped/created
+  machine and verify usable space after a later boot.
+- [Local volumes](local-volumes.md): approve a canonical Linux worker volume root,
+  account for exclusive attachments and explicitly delete retained volumes.
 
-The new feature campaigns ran on native Linux. They do not establish macOS disk
-growth or volume support, host quota enforcement, root-worker volume UID isolation
-or production certification. Qualification remains `:development`; see
-[Compatibility](compatibility.md#worker-operations-and-storage-in-0-4-0).
+The original growth and volume checks used Linux 1.20.2; they did not qualify
+macOS growth or mounts. Mounted machines cannot be exported, checkpointed,
+branched or expanded. Follow [Supported platforms](supported-platforms.md) and
+the feature guides for current worker and platform restrictions.
 
 ## Rollback
 

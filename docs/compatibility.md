@@ -1,8 +1,12 @@
-# Compatibility evidence
+# Compatibility test history
 
-Version: `0.4.2`. The library's supported qualification is
-`:development`; requested hard-control options remain unsupported. The original
-release evidence below records the client/controller contract on Linux and macOS.
+For current worker selection and host prerequisites, use
+[Supported platforms](supported-platforms.md). For deployment changes, use
+[Upgrading SmolBox](upgrading.md).
+
+This page retains runtime and toolchain results from their original source
+revisions. Each section identifies its scope; older runs are not tests of every
+later release. Supported use remains `:development`.
 
 ## SmolBox 0.4.2 inventory diagnostics and onboarding
 

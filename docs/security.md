@@ -1,30 +1,5 @@
 # Deployment and trust boundaries
 
-Registry provisioning requires exact operator-approved immutable sources. Guest
-network allowlists do not restrict worker-host registry downloads, redirects or
-mirrors. Protect host caches and budget cache and temporary space independently
-of machine reservations. Registry credentials come from host configuration or a
-`SmolBox.RegistryCredentials` resolver; only safe references belong in durable
-specifications. See [Images and registry artifacts](images-and-registry-artifacts.md)
-for authentication boundaries and cache integrity limits.
-
-SmolBox 0.4.2 retains the default of **smolvm 1.22.0** on Linux x86_64 and macOS Apple
-Silicon. Published SmolBox 0.4.0 and 0.3.1 keep their 1.20.2 default. Pin existing
-workers and checkpoint approvals to their actual version. Updating SmolBox does
-not install smolvm. See the
-[1.22.0 qualification and upgrade boundaries](runtime-1.22.0-qualification.md).
-
-
-Controlled networking permits explicit operator-approved outbound policies on
-smolvm 1.16.0, 1.16.1, 1.17.0, 1.19.0, 1.20.2 and 1.22.0. Offline remains the default; enabling networking
-does not extend prior offline qualification evidence. See
-[Controlled network access](network-access.md) for DNS/IP semantics, profile
-approval and the separate enforcement fixture.
-The server's strict egress floor must remain enabled when relying on the recorded
-private-address and DNS rebinding checks. SmolBox does not attest worker environment
-settings. Network-enabled guests can reach upstream's dedicated rollout gateway;
-its lease authentication is a separate boundary from the private management API.
-
 SmolBox relies on
 [smolvm's isolation model](https://github.com/smol-machines/smolvm/blob/e8d09ef616d363004d55b80a6cdb31a4e7e1842d/SECURITY.md)
 for running untrusted code. Each part of a deployment has a separate responsibility:
@@ -34,6 +9,10 @@ for running untrusted code. Each part of a deployment has a separate responsibil
 | smolvm and its virtualization stack | Run VMs and defend the guest-to-host boundary under the upstream security model |
 | SmolBox | Manage execution and retained-machine identities, admission, ownership evidence, lifecycle, reservations, bounded collection, uncertain outcomes and recovery |
 | Application and deployment | Authorize access, approve images, protect worker interfaces, enforce host resource limits, configure networking and credentials, and operate durable storage and recovery |
+
+Use [Supported platforms](supported-platforms.md) for worker versions and host
+prerequisites, and [Upgrading SmolBox](upgrading.md) before changing an existing
+deployment. The library dependency does not install a worker.
 
 SmolBox does not provision a worker, proxy, database, image registry or hypervisor.
 The library's supported qualification remains `:development`; it does not install
@@ -83,6 +62,14 @@ A SHA-256 identifies bytes; it is not a security review. Store approved runtime
 artifacts in an operator-owned, non-writable catalog.
 Do not accept a guest-uploaded archive as a worker artifact or unpack it on the host.
 
+Registry provisioning requires exact operator-approved immutable sources. Guest
+network allowlists do not restrict worker-host registry downloads, redirects or
+mirrors. Protect host caches and budget cache and temporary space independently
+of machine reservations. Registry credentials come from host configuration or a
+`SmolBox.RegistryCredentials` resolver; only safe references belong in durable
+specifications. See [Images and registry artifacts](images-and-registry-artifacts.md)
+for authentication boundaries and cache integrity limits.
+
 ## Worker account and control interface
 
 Use a dedicated worker account and private state/storage locations. Keep it away
@@ -115,6 +102,18 @@ controller. Stop/delete observations cannot prove that a delayed exec will never
 start a VM. Preserve unknown outcomes and reservations under the documented
 [recovery rules](recovery.md); do not automatically fail over an uncertain command
 to another worker.
+
+## Outbound networking
+
+Controlled networking permits explicit operator-approved outbound policies on
+smolvm 1.16.0, 1.16.1, 1.17.0, 1.19.0, 1.20.2 and 1.22.0. Offline remains the
+default. See [Network access](network-access.md) for DNS/IP semantics and profile
+approval, and [Testing reports](testing.md) for the recorded checks and their limits.
+The server's strict egress floor must remain enabled when relying on the recorded
+private-address and DNS rebinding checks. SmolBox does not attest worker environment
+settings. Network-enabled guests can reach upstream's dedicated rollout gateway;
+its lease authentication is a separate boundary from the private management API.
+Prior offline test results do not establish isolation with networking enabled.
 
 ## Minimal configuration and current enforcement limits
 
@@ -249,7 +248,7 @@ an observed stop alone does not establish operator quiescence.
    worker. Recheck template sizes, VMM overhead, network behavior, proxy semantics,
    host quotas and all advertised platform tests. This checkout defaults to
    smolvm 1.22.0 and retains explicit 1.20.2, 1.19.0, 1.17.0, 1.16.1, 1.16.0, 1.14.6 and 1.14.1 support, subject
-   to the [supported platform matrix](compatibility.md#runtime-selection).
+   to the [supported platform matrix](supported-platforms.md#worker-hosts-and-versions).
    Controlled networking requires 1.16.0, 1.16.1, 1.17.0, 1.19.0, 1.20.2 or 1.22.0. The worker must report the
    exact configured version; there is no automatic fallback.
 5. Give changed artifacts/profiles new immutable revisions. Do not rewrite saved

@@ -1,22 +1,13 @@
 # Controlled network access
 
-SmolBox 0.4.2 retains the default of **smolvm 1.22.0** on Linux x86_64 and macOS Apple
-Silicon. Published 0.3.0 and 0.2.1 keep 1.19.0; 0.2.0 keeps 1.17.0. Keep workers pinned
-to their installed version; updating SmolBox does not install smolvm. See
-[Upgrading to 0.4.2](upgrading-to-0.4.2.md) and the
-[1.20.2 qualification](runtime-1.20.2-qualification.md).
+Approve specific outbound destinations when a guest needs network access.
+Offline remains the default. These policies require a supported smolvm version
+from **1.16.0** onward; see [Supported platforms](supported-platforms.md).
 
-
-Controlled networking was introduced in SmolBox **0.1.3** for smolvm **1.16.0**. SmolBox 0.1.2 does not include it. Existing profiles and machines remain offline by default.
-Outbound policy never enables image pulls, inbound mappings, mounts, or credential
-forwarding. Fixed TCP [port mappings](port-mappings.md) are configured separately
-on the machine specification. With mappings, `:offline` denies outbound traffic
-but attaches a virtio-net device for inbound forwarding.
-
-SmolBox **0.1.5** defaults to smolvm **1.16.1**. Both 1.16.0 and 1.16.1
-support these policies, as do 1.17.0, 1.19.0, 1.20.2 and 1.22.0 in SmolBox 0.4.1. Select an older worker
-version explicitly to retain it. See the
-[qualification results and cleanup limitation](compatibility.md#smolvm-1-16-1-qualification).
+Outbound policy does not enable host image downloads, inbound mappings, mounts
+or credential forwarding. Configure fixed TCP [port mappings](port-mappings.md)
+separately. With mappings, `:offline` denies outbound traffic while attaching a
+virtio-net device for inbound forwarding.
 
 ## Approve a policy
 
@@ -99,79 +90,23 @@ A changed or missing policy is not accepted as the same machine incarnation.
 An uncertain create is not replayed, even if policy verification fails. Recovery
 keeps the existing ownership and cleanup rules.
 
-The record codec now writes schema v2. It reads exact v1 records by adding only
-explicit offline defaults to the old profile and machine observation shapes.
+Network policy was introduced in record schema v2. The codec reads exact v1
+records by adding only explicit offline defaults to the old profile and machine
+observation shapes.
 Offline execution fingerprints retain their previous representation, so resubmitting
 an old execution does not acquire a new identity. Malformed v1 records and v1
 records containing network fields are rejected. Do not downgrade a store writer
 or run old readers after v2 records have been written; coordinate this upgrade
-across controllers, including offline users. Follow [Upgrading to 0.1.3](recovery.md#upgrading-to-0-1-3).
+across controllers, including offline users. Follow [Upgrading to 0.1.3](upgrading-within-0.1.x.md#upgrading-to-0-1-3).
 Custom store formats need equivalent explicit migration.
 
 ## Validation
 
-The controlled Linux fixture uses the disposable nested KVM lab. Allowed and
-blocked TCP responders and a DNS responder live exclusively in the worker's
-private network namespace. Both TCP endpoints are checked from that namespace
-before guest denials are counted. The fixture checks offline behavior, CIDR
-rules, hostname and subdomain rules, unrelated names, and policy retention across
-stop/start. On September 14, 2026, all three policies passed with official smolvm
-1.16.0 on Linux x86_64: six probes per policy, followed by allowed/denied checks
-after restart, deletion and absence of owned KVM descriptors. Managed execution
-also completed an allowed request, retained its policy through record encoding,
-recognized a duplicate submission and finished cleanup with an empty worker.
+These checks cover specific policies and environments, not every protocol, DNS
+attack or platform combination. For the recorded Linux and macOS runs, their
+limits and reproduction commands, see [Network access tests](network-access-validation.md).
 
 ### Extended checks
 
-The follow-up campaign tested five Linux configurations: offline, IPv4 CIDR,
-IPv6 CIDR, hostname with the server default, and hostname with an explicit
-`SMOLVM_EGRESS_FLOOR=strict`. Each configuration used reachable synthetic endpoints
-and checked:
-
-- Allowed and denied TCP connections and UDP request/reply traffic over IPv4
-  and IPv6, plus IPv4-mapped IPv6 addresses. An IPv4-only policy did not open
-  IPv6 access; the converse also held.
-- DNS over UDP and TCP, denied names, a misleading suffix, an alternate resolver,
-  and IP learning from both A and AAAA replies.
-- An approved DNS name changing from an allowed address to a synthetic private
-  control address, plus names resolving to loopback and metadata addresses.
-- Access to a synthetic control service and the gateway. The separate rollout
-  endpoint rejected missing and invalid credentials with HTTP 401; a request for
-  its machine-management route returned 404.
-- Address policy behavior after restart, deletion, and absence of owned KVM
-  descriptors after worker shutdown.
-
-The responders include both permitted and denied destinations. Positive controls
-establish that the worker can reach them before guest denials count. IPv6 is
-entirely local to the namespace: a synthetic responder satisfies upstream's
-IPv6 connectivity probe without opening an Internet route. DNS rebinding results
-apply to the tested private, loopback and metadata targets under the strict floor;
-they do not establish that every possible DNS attack is prevented.
-
-Bounded macOS Apple Silicon checks also exercised offline, IPv4 CIDR and hostname
-policies using ordinary TCP connections to public services. All three passed
-before and after restart, with each machine deleted. These checks used the
-verified official 1.16.0 distribution and an approved Python artifact. They did
-not run hostile payloads or exhaustion tests on the Mac.
-
-Linux evidence now includes IPv6 and UDP enforcement; macOS evidence covers
-IPv4 TCP and DNS compatibility; this Mac had no IPv6 route, so no live macOS
-IPv6 result is claimed. The campaign does not qualify every protocol,
-packet mutation, DNS attack, macOS IPv6/UDP combination, external API, browser
-automation workload or tenant configuration. The resource/exhaustion campaign
-remains a separate qualification. No adversarial networking ran on the physical
-Linux host or developer's Mac.
-
-The repository's `docs/evidence/controlled-network-access.json` preserves the
-initial campaign. `docs/evidence/controlled-network-extended.json` records the
-follow-up reports, runtime/artifact pins, source hashes and final cleanup.
-Reproduce the isolated Linux checks with `scripts/lab/network-extended.sh`,
-setting a unique `SMOLBOX_NETWORK_ATTEMPT`, only inside the prepared disposable
-lab. The original `scripts/lab/network-access.sh` retains its managed execution
-case via `SMOLBOX_NETWORK_MANAGED=true`. The bounded Mac script is
-`scripts/lab/network-macos.exs`; it requires a dedicated empty worker at
-`$SMOLBOX_NETWORK_MAC_ROOT/api.sock` and an approved `$SMOLBOX_PYTHON_ARTIFACT`.
-These fixtures are not a general network security certification.
-
-For the current checkout default, see the [1.22.0 qualification](runtime-1.22.0-qualification.md).
-Earlier validation sections above retain their original scope.
+The [extended test report](network-access-validation.md#extended-checks) records
+IPv4/IPv6, TCP/UDP and DNS scenarios with reachable positive controls.

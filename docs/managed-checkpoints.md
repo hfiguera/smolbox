@@ -27,7 +27,6 @@ unknown, preserves the file and reservations, and requires explicit recovery.
 Manifest inspection does not prove that guest RAM is idle or free of secrets,
 nor replace upstream payload integrity and CPU compatibility checks at restore.
 
-
 Starting an opted-in machine uses `POST /api/v1/machines/:name/start?branchable=true`.
 Capture uses `POST /api/v1/machines/:name/checkpoint` with no cache key or upload URL.
 Upstream requires a running checkpointable source, briefly pauses it to save memory
@@ -247,10 +246,5 @@ cover lost responses, store failures and controller restarts; those are not
 power-loss or production filesystem durability qualification. macOS managed capture
 has not been live-qualified in this campaign.
 
-The [1.20.2 qualification](runtime-1.20.2-qualification.md) records the newer
-worker campaign separately from the original feature evidence above. Preserve the
-exact capture runtime on checkpoint approvals; changing a filename or version
-field does not migrate saved machine state.
-
-For the current checkout default, see the [1.22.0 qualification](runtime-1.22.0-qualification.md).
-Earlier validation sections above retain their original scope.
+See [Supported platforms](supported-platforms.md) for current worker selection
+and [Testing reports](testing.md) for recorded checks and their limits.

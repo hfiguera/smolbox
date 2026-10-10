@@ -1,12 +1,11 @@
-# Upgrading to 0.3.0
+# Upgrade to 0.3.0
 
-SmolBox 0.3.0 adds approved registry provisioning, machine image operations,
-managed exports, checkpoint capture and independent restore, and live branches.
-The default worker remains **smolvm 1.19.0**, unchanged from 0.2.1.
-
-Existing disposable and retained execution APIs remain available. New features
-are explicit opt-ins with additional approvals, store capabilities and resource
-requirements. Updating the library does not install or upgrade a worker.
+Before enabling registry sources, exports, managed checkpoint capture or branches,
+upgrade all controllers, readers and adapters sharing their store. From 0.2.x,
+no additional PostgreSQL SQL migration is needed, but the new records and
+transactions still require coordinated deployment. The default stays
+**smolvm 1.19.0** from 0.2.1. Use [Upgrading SmolBox](upgrading.md) for the complete
+path from your installed release.
 
 ## Coordinate storage before using new features
 
@@ -104,15 +103,11 @@ Worker rollback and in-place upgrades of retained disks are not qualified. Keep
 checkpoint approvals pinned to the capture runtime and platform; these releases
 do not establish cross-version or cross-platform snapshot portability.
 
-## What to expect from saved state
+## Verify the features you enable
 
-An export prepares disk state for a new boot; it does not retain RAM, and container
-exports exclude `/workspace`. A managed checkpoint restores an independent machine
-from approved idle, offline bare guest state. A branch creates a child on the
-source worker and retains a backing relationship with its source. Neither is an
-in-place rollback or cross-worker migration API.
-
-Read the [compatibility evidence](compatibility.md) for platform limits. The
-[physical Linux comparison](provisioning-performance.md) helps choose between
-these paths for one measured workload; it is not a general performance promise.
-The library's qualification remains `:development`.
+Run the relevant [registry](images-and-registry-artifacts.md),
+[export](machine-exports.md), [checkpoint](managed-checkpoints.md) or
+[branch](managed-branches.md) workflow on a machine you own. Verify controller
+recovery and the feature's separate retention and release steps. Keep checkpoints
+pinned to their capture runtime and platform; these operations do not establish
+restore across platforms or worker versions.
