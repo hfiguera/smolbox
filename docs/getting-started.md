@@ -4,8 +4,8 @@ Run a Python program in a disposable VM, read `42` from its output file, and
 wait for the VM to be deleted. You can use the downloadable Livebook or a Mix
 application. Both run the same example with SmolBox **0.4.2** and smolvm **1.22.0**.
 
-You need Elixir 1.18 or later and smolvm installed on the same host as the Elixir
-runtime. The Linux instructions below require **x86_64 with working KVM**. For
+You need Elixir 1.18 or later. Install smolvm on the same host as the Elixir
+runtime using step 1 below. The Linux instructions require **x86_64 with working KVM**. For
 macOS Apple Silicon, see [macOS worker setup](#macos-worker-setup). Check
 [Supported platforms](supported-platforms.md#host-prerequisites) if the host is
 not ready. SmolBox does not install smolvm.
@@ -14,7 +14,45 @@ This is a local demo with an in-memory store. For existing applications, use
 [Upgrading SmolBox](upgrading.md); for deployment controls and host
 resource limits, see [Deployment boundaries](security.md).
 
-## 1. Install SmolBox
+## 1. Install smolvm and SmolBox
+
+### Install smolvm 1.22.0
+
+On macOS, first log into the dedicated account described in
+[macOS worker setup](#macos-worker-setup). Install the worker and run Livebook
+or IEx in that account too.
+
+If `smolvm --version` already reports `1.22.0`, skip installation. Otherwise,
+run the [upstream installer from the 1.22.0 release](https://github.com/smol-machines/smolvm/blob/v1.22.0/scripts/install.sh)
+in a Bash terminal as your normal user, with `curl` and `tar` available:
+
+```bash
+SMOLBOX_INSTALLER="$(mktemp)"
+curl -fsSL https://raw.githubusercontent.com/smol-machines/smolvm/v1.22.0/scripts/install.sh \
+  -o "$SMOLBOX_INSTALLER" &&
+  bash "$SMOLBOX_INSTALLER" --version 1.22.0
+export PATH="$HOME/.local/bin:$PATH"
+smolvm --version
+```
+
+Continue only when the version reports `1.22.0`. The installer selects the host
+distribution and installs its matching libraries, agent and disk templates.
+It replaces the smolvm installation for this account. To preserve a different
+installed version, use a separate account or follow
+[Upgrading a worker](host-integration.md#upgrading-a-worker).
+
+On Linux, confirm that this account can access KVM:
+
+```bash
+test -r /dev/kvm && test -w /dev/kvm && echo "KVM access ready"
+```
+
+If the check does not print `KVM access ready`, resolve KVM availability and
+permissions before preparing the image. See the
+[upstream platform requirements](https://github.com/smol-machines/smolvm/blob/v1.22.0/README.md#platform-support)
+and [host prerequisites](supported-platforms.md#host-prerequisites).
+
+### Install the Elixir dependency
 
 **Livebook:** the [notebook](notebooks/getting-started.livemd) installs SmolBox
 with `Mix.install/1`. No Mix project is needed. Run Livebook locally on the worker
@@ -92,6 +130,12 @@ existing inventory intact. See
 Use a dedicated macOS account or host with no existing smolvm machines. On the
 pinned macOS build, `SMOLVM_DATA_DIR` does **not** isolate worker state.
 
+Log into that account and run image preparation, the worker, and Livebook or IEx
+there. The demo directory has private permissions, so a Livebook session running
+under your usual account cannot read it. Stop any existing Livebook session you
+intend to use for this demo and launch a new one in the dedicated account.
+Keep the directory permissions private.
+
 In that account, use the directory and image preparation commands above. Omit the
 `export SMOLVM_DATA_DIR` line and replace the `sha256sum` line with:
 
@@ -117,10 +161,8 @@ Check for `{"machines":[]}` with the same curl command before continuing.
 local Livebook. It includes the worker setup instructions, configuration and all
 execution cells. Paste the directory and SHA256 from step 2 into its configuration
 cell, check the worker URL, and evaluate all cells. Livebook 0.19.10 with
-Elixir 1.20.4/OTP 29.0.6 is the tested notebook environment; see the
-[Linux verification record](evidence/getting-started-livebook.json). That run
-used published SmolBox 0.4.1; the [0.4.2 package verification](evidence/getting-started-livebook-0.4.2.json)
-checks the release candidate separately.
+Elixir 1.20.4/OTP 29.0.6 is the tested notebook environment. Recorded checks
+and their limits are available separately in [Testing reports](testing.md#feature-checks).
 
 ### In a Mix application
 

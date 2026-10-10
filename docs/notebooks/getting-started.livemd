@@ -9,8 +9,43 @@ Mix.install([{:smolbox, "~> 0.4.2"}])
 This notebook runs Python, collects `42` from an output file and waits for VM
 cleanup. Run Livebook locally on the worker host. The Linux recipe requires
 x86_64 with working KVM, smolvm 1.22.0 and enough space for the runtime image and
-20/10 GiB disk allocations. For macOS Apple Silicon, use the separate account
-instructions in the [Getting Started guide](https://hexdocs.pm/smolbox/getting-started.html#macos-worker-setup).
+20/10 GiB disk allocations.
+
+For macOS Apple Silicon, log into a dedicated account with no existing smolvm
+machines. Install smolvm and run image preparation, the worker and Livebook in
+that same account. The demo directory is private; a Livebook session running
+under another account cannot read it. Launch a new Livebook session under the
+dedicated account, then import this notebook there. Follow the
+[macOS worker setup](https://hexdocs.pm/smolbox/getting-started.html#macos-worker-setup)
+instead of the Linux shell commands below; `SMOLVM_DATA_DIR` does not isolate
+worker state on the pinned macOS build.
+
+If `smolvm --version` does not already report `1.22.0`, run the
+[upstream installer from the 1.22.0 release](https://github.com/smol-machines/smolvm/blob/v1.22.0/scripts/install.sh)
+in a Bash terminal as your normal user, with `curl` and `tar` available:
+
+```bash
+SMOLBOX_INSTALLER="$(mktemp)"
+curl -fsSL https://raw.githubusercontent.com/smol-machines/smolvm/v1.22.0/scripts/install.sh \
+  -o "$SMOLBOX_INSTALLER" &&
+  bash "$SMOLBOX_INSTALLER" --version 1.22.0
+export PATH="$HOME/.local/bin:$PATH"
+smolvm --version
+```
+
+Continue only when the version reports `1.22.0`. This installs the matching
+distribution, including libraries, agent and disk templates. The Elixir dependency
+does not install a worker. The installer replaces this account's smolvm installation;
+use a separate account to preserve another installed version.
+
+On Linux, check KVM access before preparing the image:
+
+```bash
+test -r /dev/kvm && test -w /dev/kvm && echo "KVM access ready"
+```
+
+Continue only when this prints `KVM access ready`. Otherwise, resolve KVM
+availability and permissions on the worker host first.
 
 The guest runs offline. SmolBox rejects inventory entries with networking enabled
 without explicit allowlists, including machines created outside SmolBox. Give

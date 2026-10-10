@@ -1,8 +1,9 @@
 # Supported platforms
 
 Use this page to choose an Elixir toolchain, worker host and smolvm version for
-SmolBox 0.4.2. For installation and a complete first run, follow
-[Getting started](getting-started.md). For an existing deployment, follow
+SmolBox 0.4.2. To install smolvm, follow
+[Install smolvm 1.22.0](getting-started.md#install-smolvm-1-22-0), then continue
+with the complete [Getting started](getting-started.md) example. For an existing deployment, follow
 [Upgrading SmolBox](upgrading.md).
 
 ## Elixir and Erlang
