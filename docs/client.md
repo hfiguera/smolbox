@@ -1,33 +1,16 @@
 # Low-level client
 
-SmolBox 0.4.2 retains the default of **smolvm 1.22.0** on Linux x86_64 and macOS Apple
-Silicon. Published SmolBox 0.4.0 and 0.3.1 keep their 1.20.2 default. Pin existing
-workers and checkpoint approvals to their actual version. Updating SmolBox does
-not install smolvm. See the
-[1.22.0 qualification and upgrade boundaries](runtime-1.22.0-qualification.md).
-
-
 This API performs one verified worker operation at a time. It does not persist
-request identities, reserve capacity, reconcile a crash, or authorize deletion.
-Use it when host code owns those responsibilities. For a complete managed
-execution, begin with [Getting started](getting-started.md). This guide describes
-the supported client contract and its development-qualified worker boundary.
-See [runtime selection](compatibility.md#runtime-selection) for the explicit
-Linux/macOS 1.16.1 default in SmolBox 0.1.5 and retained explicit 1.16.0,
-1.14.6 and 1.14.1 compatibility. SmolBox 0.1.3 defaults to 1.16.0 and 0.1.2
-to 1.14.6. Follow [Upgrading to 0.2.0](upgrading-to-0.2.0.md) when
-updating an existing application.
+request identities, reserve capacity, reconcile a crash or authorize deletion.
+Use it when your application owns those responsibilities. For a complete managed
+execution, begin with [Getting started](getting-started.md).
 
-Install the pinned smolvm release from [compatibility evidence](compatibility.md).
-Prepare an approved, architecture-matched `.smolmachine` artifact on the worker
-host, verify its digest, and start a private `smolvm serve` endpoint. For bounded
-small-file workloads set `SMOLVM_FILE_TRANSFER_MAX_BYTES=1048576` before starting
-the server. SmolBox never enables guest networking to fetch an image.
-
-For smolvm 1.14.6, 1.16.0, 1.16.1, 1.17.0 and 1.19.0, verify the host's `resize2fs` before requesting disks smaller
-than its bundled templates. Our macOS run without that tool lost a workspace
-file after stop/start; health and successful execution alone did not detect the
-problem. See [runtime prerequisites](compatibility.md#macos-1-14-6-prerequisites).
+Install a [supported worker](supported-platforms.md), prepare an approved image
+for its architecture and start a private `smolvm serve` endpoint. For bounded
+small-file workloads, set `SMOLVM_FILE_TRANSFER_MAX_BYTES=1048576` before starting
+the server. Check [host prerequisites](supported-platforms.md#host-prerequisites),
+including `resize2fs`, before requesting disks below the worker's template sizes.
+For an existing deployment, follow [Upgrading SmolBox](upgrading.md).
 
 ```elixir
 {:ok, worker} = SmolBox.Worker.new("worker-1", "https://worker.internal.example",

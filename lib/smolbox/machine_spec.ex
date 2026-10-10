@@ -35,7 +35,7 @@ defmodule SmolBox.MachineSpec do
   smolvm 1.14.6, 1.16.0, 1.16.1, 1.17.0, 1.19.0, 1.20.2 and 1.22.0 need the host's `resize2fs` for requests
   below template sizes. Missing it caused file loss after stop/start in validation. Verify
   the host prerequisite and persistence before admitting work; see
-  [Compatibility](compatibility.html#macos-1-14-6-prerequisites).
+  [Supported platforms](supported-platforms.html#host-prerequisites).
   """
 
   alias SmolBox.Error

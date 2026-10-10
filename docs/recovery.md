@@ -1,30 +1,19 @@
 # Persistence and recovery contract
 
-Registry preparation and image pulls follow the same no-replay rule as uncertain
-commands. Preserve the source identity, preparation result and original operation
-handle. A `:prepared` registry result can continue creation within its original
-deadline. Interrupted preparation, creation or image pulling requires quiescence
-before resolution; a cache hit, image listing, expired lease or observed absence
-does not fence worker requests. See [registry recovery](images-and-registry-artifacts.md#recovery-and-resource-accounting).
+Use a durable store when execution records must survive an application restart.
+SmolBox records intent and observations; your store adapter supplies transactions
+and durability. A restart can resume observation and cleanup, but it cannot turn
+an unknown command outcome into a known one.
 
-SmolBox **0.3.0** defaults to **smolvm 1.19.0** on Linux x86_64 and macOS Apple
-Silicon, unchanged from 0.2.1. Version 0.2.0 defaults to 1.17.0. Keep workers pinned
-to their installed version; updating SmolBox does not install smolvm. See
-[Upgrading to 0.3.0](upgrading-to-0.3.0.md) and the
-[1.19.0 qualification](runtime-1.19.0-qualification.md).
+The same no-replay rule applies to uncertain registry preparation and image pulls.
+Preserve the source identity and original operation handle; follow
+[registry recovery](images-and-registry-artifacts.md#recovery-and-resource-accounting)
+before resolving them. A cache hit, expired lease or observed absence cannot
+cancel a request already sent to the worker.
 
-
-Use a durable store when executions must survive an application restart. SmolBox
-persists intent and observations; the host adapter supplies transactions and
-durability. The included PostgreSQL example has real database and process-recovery
-coverage on Linux and macOS. A subsequent
-[constrained Linux deployment](resource-qualification.md#subsequent-linux-deployment-validation)
-also passed worker OOM, database-outage and independent worker-deadline tests.
-Those tests preserved execution identity and unknown outcomes without replay,
-retaining capacity until owned absence was verified. They do not add execution
-fencing to the upstream API or change the recovery contract below. See
-[Compatibility](compatibility.md) for recorded evidence and
-[Troubleshooting](troubleshooting.md) for common operational symptoms.
+For an existing deployment, follow [Upgrading SmolBox](upgrading.md). See
+[Troubleshooting](troubleshooting.md) for common symptoms and
+[Testing reports](testing.md) for the recorded recovery checks.
 
 ## Upgrading to 0.2.0
 

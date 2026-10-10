@@ -4,7 +4,7 @@ For managed capture and independent retained restores on 1.19.0, 1.20.2 or 1.22.
 [Managed checkpoints](managed-checkpoints.md). This guide describes the existing
 approved checkpoint execution contract.
 
-SmolBox 0.1.5 restores a separate disposable machine from an
+SmolBox restores a separate disposable machine from an
 operator-approved **idle, offline checkpoint**. Submission, input staging,
 command execution, output collection, cancellation and cleanup use the existing
 managed lifecycle. Each execution gets its own identity and machine.

@@ -7,11 +7,11 @@ application. Both run the same example with SmolBox **0.4.2** and smolvm **1.22.
 You need Elixir 1.18 or later and smolvm installed on the same host as the Elixir
 runtime. The Linux instructions below require **x86_64 with working KVM**. For
 macOS Apple Silicon, see [macOS worker setup](#macos-worker-setup). Check
-[Compatibility](compatibility.md#host-preparation-prerequisites) if the host is
+[Supported platforms](supported-platforms.md#host-prerequisites) if the host is
 not ready. SmolBox does not install smolvm.
 
 This is a local demo with an in-memory store. For existing applications, use
-[Upgrading to 0.4.2](upgrading-to-0.4.2.md); for deployment controls and host
+[Upgrading SmolBox](upgrading.md); for deployment controls and host
 resource limits, see [Deployment boundaries](security.md).
 
 ## 1. Install SmolBox

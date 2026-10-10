@@ -1,30 +1,18 @@
-# Upgrading to SmolBox 0.2.0
+# Upgrade to 0.2.0
 
-Version 0.2.0 adds managed persistent machines, TCP port mappings, long-running
-and background execution, interactive terminals, startup workloads with console
-diagnostics, and configurable guest paths with larger files. It keeps the
-existing disposable execution API and defaults to **smolvm 1.17.0**.
+When crossing from 0.1.x, coordinate all controllers and store adapters before
+writing managed-machine records. This release defaults to **smolvm 1.17.0**;
+pin an existing supported worker to its installed version or upgrade it separately.
+Use [Upgrading SmolBox](upgrading.md) for steps through later releases.
 
-This is a coordinated controller/store upgrade, not a transparent rolling update
-from 0.1.x. Upgrade worker binaries separately. A library version change does not
-install a worker, redistribute artifacts, or migrate captured checkpoints.
+## Required changes
 
-## What changes
-
-| Area | 0.2.0 behavior | Deployment action |
-| --- | --- | --- |
-| Default worker | smolvm 1.17.0 on Linux x86_64 and macOS Apple Silicon | Upgrade the worker separately or explicitly retain its installed supported version |
-| Disposable executions | Existing image/checkpoint APIs and v2/v3 record formats remain for ordinary profiles | Verify existing records and recovery before enabling new features |
-| Retained machines | Machine identity, ownership and reservations survive commands and controller restarts | Implement the managed store contract; account for retained and stopped machines |
-| Shared ports | Worker-wide port ownership persists through stop/start and uncertainty | Apply the example's port migration or equivalent atomic adapter support |
-| New record kinds | Selective v5–v9 envelopes | Upgrade all readers and writers sharing the store before new writes |
-| Dependencies | Mint and MintWebSocket support PTY transport | Refresh the dependency lock and validate the packaged application |
-| Qualification | Development qualification remains the supported level | Retain deployment-specific resource controls and qualification limits |
-
-The default file policy remains `/workspace`, 1 MiB per file and 4 MiB per
-manifest direction. Foreground command timeout still defaults to 30 seconds.
-Offline networking and neutral startup remain the defaults. New capabilities
-require explicit configuration and do not appear merely by updating a dependency.
+- Apply the PostgreSQL example's managed-machine and port-ownership migrations,
+  or implement the equivalent atomic contracts in a custom adapter.
+- Upgrade every reader and writer before enabling records using codec v5–v9.
+  The store capability table below identifies which contracts each feature needs.
+- Refresh dependencies and verify packaged application recovery before resuming
+  admission. Keep worker IDs, keys, approvals and retained resource accounting.
 
 ## Upgrade sequence
 
@@ -93,26 +81,19 @@ adapters must preserve intent, typed outcomes, deduplication, claims, command sl
 and tombstones through every transaction. See the shared store contracts and
 [recovery](recovery.md) before advertising capability flags.
 
-## Retention and operational changes
+## Account for retained work
 
-Retained machines survive command success, failure, cancellation and caller
-exit. There is no automatic expiry or idle shutdown. Stopped, missing and uncertain
-machines conservatively retain reservations, including disks and mapped ports.
-Command completion releases its active slot, not the machine's resources. Explicit
-deletion requires ownership evidence and verified absence before capacity release.
-Budget worker capacity for this retention instead of assuming disposable cleanup.
+Budget retained machines, disks and mapped ports after commands finish; release
+requires explicit deletion and verified absence. Missing or uncertain machines
+still retain their reservations. Background launch confirms a PID, not final exit
+status. Follow [Persistent machines](persistent-machines.md) and
+[Long commands](long-running-exec.md) before enabling these operations.
 
-A confirmed background PID is launch evidence, not final exit status or process
-supervision. Unknown launches and disconnected terminals can block further commands.
-Use the documented quiescence/resolution path, preserving uncertainty without
-inventing an outcome or replaying work. Startup workloads and background processes
-may change files outside an active managed command, so collection is not an atomic
-filesystem snapshot.
-
-The supported workload diagnostics are **console diagnostics**, not application
-stdout/stderr. Automatic workload restart policies remain rejected. File roots
-are lexical authorization, not symlink containment or a sandbox for arbitrary
-commands. Larger transfers remain buffered with a 16 MiB per-file maximum.
+Unknown launches and disconnected terminals can block further commands. Use the
+feature's resolution procedure without inventing an outcome or replaying work.
+Startup and background processes can change files outside a managed command;
+collection is not an atomic filesystem snapshot. File roots authorize lexical
+paths and do not establish symlink containment.
 
 ## Checkpoints and worker rollback
 

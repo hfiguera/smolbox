@@ -1,36 +1,15 @@
 # Managed host integration
 
-SmolBox 0.4.2 retains the default of **smolvm 1.22.0** on Linux x86_64 and macOS Apple
-Silicon. Published SmolBox 0.4.0 and 0.3.1 keep their 1.20.2 default. Pin existing
-workers and checkpoint approvals to their actual version. Updating SmolBox does
-not install smolvm. See the
-[1.22.0 qualification and upgrade boundaries](runtime-1.22.0-qualification.md).
-
 Start with [Getting started](getting-started.md) for a complete runnable example.
-This guide explains how to adapt that flow to your application's supervision,
-authorization, durable storage, and worker configuration. Constructor options are
-documented in `SmolBox.child_spec/1` and `SmolBox.Runtime.WorkerConfig.new/1`.
+This guide adapts that flow to your application's supervision, authorization,
+durable storage and worker configuration. Constructor options are documented in
+`SmolBox.child_spec/1` and `SmolBox.Runtime.WorkerConfig.new/1`.
 
-For an existing deployment, follow [Upgrading to 0.4.2](upgrading-to-0.4.2.md)
-for the new error category and shared reader compatibility. If coming from an
-older worker default, also follow [Upgrading to 0.4.1](upgrading-to-0.4.1.md)
-for worker selection. Deployments coming from 0.3.x
-must also follow [Upgrading to 0.4.0](upgrading-to-0.4.0.md) for PostgreSQL
-migrations, coordinated writer upgrades and retained-history rollback limits.
-
-See [telemetry and inspection](telemetry.md) for bounded lifecycle observations,
-notification failure semantics, and authoritative operator fields.
-See [deployment boundaries](security.md) for worker/proxy setup, artifact trust,
-storage responsibilities and upgrade/recovery procedures.
-
-The managed runtime has real Linux/macOS execution and durable fault recovery
-coverage. A subsequent
-[Linux deployment campaign](resource-qualification.md#subsequent-linux-deployment-validation)
-also verified external worker resource limits and failure recovery in one
-constrained nested configuration. The library's supported qualification remains
-`:development`; the host configuration below does not install those external
-controls. Multi-tenant operation and macOS host enforcement are outside that
-campaign's scope.
+Use [Supported platforms](supported-platforms.md) to select a worker and
+[Upgrading SmolBox](upgrading.md) for an existing deployment. Worker installation
+is separate from the library dependency. Read [Deployment boundaries](security.md)
+for access controls and host resource limits; this guide does not install them.
+See [Telemetry](telemetry.md) for lifecycle observations and operator inspection.
 
 The host owns authorization, prepared runtime artifacts, worker installation,
 proxy credentials, durable storage operation, and artifact retention. SmolBox
@@ -106,7 +85,7 @@ children = [
 This fragment explicitly retains a Linux 1.14.6 worker with SmolBox 0.2.0.
 Omitting the field selects 1.22.0 in 0.4.1, 1.20.2 in 0.4.0 and 0.3.1, 1.19.0 in 0.3.0 and 0.2.1, 1.17.0 in 0.2.0 (1.16.1 in 0.1.5). Use `"1.16.0"`
 explicitly to retain that worker, or `"1.14.1"`
-for an existing worker. See [runtime selection](compatibility.md#runtime-selection).
+for an existing worker. See [worker selection](supported-platforms.md#worker-hosts-and-versions).
 This is a host configuration fragment, not a self-provisioning script. The host
 must verify artifact bytes on the worker and retain that immutable artifact.
 This disposable execution setup requires neutral `/bin/true` startup and no

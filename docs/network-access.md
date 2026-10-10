@@ -1,22 +1,13 @@
 # Controlled network access
 
-SmolBox 0.4.2 retains the default of **smolvm 1.22.0** on Linux x86_64 and macOS Apple
-Silicon. Published 0.3.0 and 0.2.1 keep 1.19.0; 0.2.0 keeps 1.17.0. Keep workers pinned
-to their installed version; updating SmolBox does not install smolvm. See
-[Upgrading to 0.4.2](upgrading-to-0.4.2.md) and the
-[1.20.2 qualification](runtime-1.20.2-qualification.md).
+Approve specific outbound destinations when a guest needs network access.
+Offline remains the default. These policies require a supported smolvm version
+from **1.16.0** onward; see [Supported platforms](supported-platforms.md).
 
-
-Controlled networking was introduced in SmolBox **0.1.3** for smolvm **1.16.0**. SmolBox 0.1.2 does not include it. Existing profiles and machines remain offline by default.
-Outbound policy never enables image pulls, inbound mappings, mounts, or credential
-forwarding. Fixed TCP [port mappings](port-mappings.md) are configured separately
-on the machine specification. With mappings, `:offline` denies outbound traffic
-but attaches a virtio-net device for inbound forwarding.
-
-SmolBox **0.1.5** defaults to smolvm **1.16.1**. Both 1.16.0 and 1.16.1
-support these policies, as do 1.17.0, 1.19.0, 1.20.2 and 1.22.0 in SmolBox 0.4.1. Select an older worker
-version explicitly to retain it. See the
-[qualification results and cleanup limitation](compatibility.md#smolvm-1-16-1-qualification).
+Outbound policy does not enable host image downloads, inbound mappings, mounts
+or credential forwarding. Configure fixed TCP [port mappings](port-mappings.md)
+separately. With mappings, `:offline` denies outbound traffic while attaching a
+virtio-net device for inbound forwarding.
 
 ## Approve a policy
 

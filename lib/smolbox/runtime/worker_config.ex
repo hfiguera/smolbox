@@ -53,7 +53,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   Versions 1.14.6, 1.16.0, 1.16.1, 1.17.0, 1.19.0, 1.20.2 and 1.22.0 require working host `resize2fs` for disk requests below
   template sizes. Verify file persistence across stop/start before admission;
-  see [Compatibility](compatibility.html#macos-1-14-6-prerequisites).
+  see [Supported platforms](supported-platforms.html#host-prerequisites).
 
   The initial qualification is explicitly `:development`; it does not certify
   hostile multi-tenant host quotas. Requested unsupported hard controls are
@@ -145,10 +145,10 @@ defmodule SmolBox.Runtime.WorkerConfig do
   (only `:development`), and `:draining` (default `false`). Artifact IDs must be
   unique and architectures must match this worker. Construction makes no worker
   request or remote digest check. Profiles below the floor cannot support execution.
-  SmolBox 0.4.1 and 0.4.2 default to 1.22.0. Published SmolBox 0.4.0 defaults to 1.20.2. Published SmolBox 0.3.0 and 0.2.1 default to 1.19.0; 0.2.0 defaults to 1.17.0; versions 0.1.4 and 0.1.5 default to 1.16.1; SmolBox 0.1.3 defaults
-  to 1.16.0 and 0.1.2 to 1.14.6. See the
-  [qualification evidence](compatibility.html#smolvm-1-22-0-qualification) and
-  upgrade the separately installed worker or retain its explicit version.
+  Set `:runtime_version` to the version installed on the worker; the library does
+  not install or upgrade it. See [Supported platforms](supported-platforms.html)
+  for host prerequisites and feature limits, and [Upgrading SmolBox](upgrading.html)
+  before changing an existing deployment.
   See [Getting started](getting-started.html) for a complete configuration.
   """
   @spec new(keyword()) :: {:ok, t()} | {:error, Error.t()}

@@ -1,88 +1,56 @@
 # SmolBox
 
-Run Python, JavaScript, and other programs in disposable or retained microVMs from Elixir.
+Run Python, JavaScript and other programs in disposable or retained Linux VMs
+from Elixir.
 
-SmolBox is an Elixir client and supervised execution runtime for
-[smolvm](https://github.com/smol-machines/smolvm), which runs lightweight virtual
-machines on your own hosts. smolvm provides the machines and worker API; SmolBox
-tracks commands, results, and cleanup from your application's supervision tree.
+SmolBox is a client and supervised execution runtime for
+[smolvm](https://github.com/smol-machines/smolvm). smolvm runs the machines on your
+hosts; SmolBox tracks command identity, results and cleanup under your
+application's supervision tree. You install the workers and prepare the images
+containing the languages and dependencies your programs need.
 
-Use it when an Elixir application needs to call a Python library, run a JavaScript
-processing step, or execute a script in a separate guest environment. You operate
-the workers and prepare images containing the languages and dependencies you need.
-The default execution API runs one command in its own disposable VM.
-`SmolBox.Machines` also manages retained machines that can run successive commands
-and expose TCP services through fixed [worker-host port mappings](docs/port-mappings.md).
-[Startup workloads and console diagnostics](docs/workloads.md) add immutable
-entrypoint, command, environment and working directory on managed image machines.
-Console snapshots and bounded streaming aid boot diagnosis; application stdout/stderr
-and automatic restart policies remain unsupported by qualified upstream behavior.
+## Start here
 
-[Interactive terminal sessions](docs/interactive-terminals.md) add bounded input/output,
-resizing and durable exit-or-uncertainty tracking on retained machines.
+Add SmolBox to your application's `mix.exs`, then run `mix deps.get`:
 
-[Long-running commands and background launch](docs/long-running-exec.md) support
-longer builds and persistent services, with explicit budgets and typed launch evidence.
+```elixir
+{:smolbox, "~> 0.4.2"}
+```
 
-[Guest paths and larger files](docs/guest-files.md) authorize project and home
-directories and buffered files up to 16 MiB. Defaults remain `/workspace` and
-1 MiB. Policies persist through controller recovery and apply to ordinary command
-working directories too.
+Follow [Getting started](docs/getting-started.md) for the complete setup: prepare
+an image, start a separate worker, run Python, collect `42` from its output file
+and confirm VM cleanup. The guide includes a
+[downloadable Livebook](https://hexdocs.pm/smolbox/0.4.2/notebooks/getting-started.livemd) and uses an
+in-memory store, so you do not need a database for the first run.
 
-[Images and registry artifacts](docs/images-and-registry-artifacts.md) let retained
-machines provision from approved, digest-pinned registry artifacts or OCI images.
-Preparation identity survives controller recovery. OCI machines support managed
-image pulls with typed results and conservative handling of lost responses.
-Shared host caches remain an operator responsibility.
+The walkthrough needs Elixir 1.18 or later and smolvm **1.22.0** on Linux x86_64
+with KVM or macOS Apple Silicon. See [Supported platforms](docs/supported-platforms.md)
+for host prerequisites and older worker versions. Workers are installed
+separately; adding the Elixir dependency does not install or upgrade smolvm.
 
-[Machine measurements and worker reports](docs/worker-measurements.md) expose CPU,
-memory, disk and outbound network observations alongside durable reservations.
-Admission explanations identify shortages without changing capacity or retention.
-[Durable worker draining](docs/worker-draining.md) pauses new resource admissions
-across controllers sharing a store and exposes remaining maintenance blockers.
-[Disk expansion](docs/disk-expansion.md) grows stopped retained machines with
-durable capacity accounting and explicit recovery after uncertain outcomes.
-[Local volumes](docs/local-volumes.md) keep approved data independent of machine
-lifetime on Linux 1.20.2 or 1.22.0, with exclusive mounts, retained reservations and explicit
-cleanup. Host permissions and filesystem quotas remain operator responsibilities.
-
-Try the [community workspace app](https://github.com/hfiguera/smolbox/tree/main/examples/community_workspace) for a
-browser walkthrough of SmolBox 0.3.0: persistent machines, commands, a real
-terminal, larger file transfers, background launch evidence and a mapped service,
-with PostgreSQL-backed recovery. A separate saved state walkthrough lets you
-prepare an original, save a checkpoint, change a branch and compare both machines.
-The [original tutorial app](https://github.com/hfiguera/smolbox/tree/v0.3.0/examples/community_workspace)
-remains available for readers following the earlier blog post.
-
-[Physical Linux provisioning measurements](docs/provisioning-performance.md) compare
-fresh machines, exports, checkpoints, branches and reuse, including preparation,
-resource use and verified cleanup.
+For an existing application, start with [Upgrading SmolBox](docs/upgrading.md).
+In 0.4.2, every controller and reader sharing a durable store must accept the new
+`:unsupported_network_policy` error category before an upgraded writer records it.
 
 ## Why use SmolBox?
 
 Executing a command is only part of integrating a worker. Your application also
-needs to handle duplicate requests, lost responses, restarts, and leftover VMs.
-SmolBox provides that execution lifecycle:
+needs to handle duplicate requests, lost responses, restarts and leftover VMs.
 
-- **Keep one identity for a request.** Submitting the same scoped ID and
-  specification returns the existing handle. A different specification under
-  that ID is rejected.
-- **Track work across application restarts.** A durable store adapter preserves
-  execution records so the runtime can resume observation and cleanup. When a
-  command may have run but its result was lost, SmolBox records an unknown outcome
-  instead of automatically running it again.
-- **Manage files and machine lifecycle.** The runtime stages input files, limits
-  captured output and file sizes, and tracks cancellation and cleanup separately
-  from the command's exit status.
+- **Reuse a request's identity.** Submitting the same scoped ID and specification
+  returns its existing handle. A different specification under that ID is rejected.
+- **Recover after a restart.** A durable store preserves execution records for
+  observation and cleanup. A command that may have run remains unknown when its
+  result is lost; SmolBox does not automatically run it again.
+- **Track results and cleanup separately.** Input staging, output collection,
+  cancellation and VM deletion have their own states. Command success does not
+  imply that its machine has already been deleted.
 
 ## What execution looks like
 
-This example assumes a supervised runtime named `MyApp.Sandboxes` is already
-configured. `python_artifact` is the registered Python image's identity map
-(`"id"`, `"sha256"`, `"architecture"`), and `profile` is one of the runtime's
-allowed execution profiles. [Getting started](docs/getting-started.md) walks
-through the complete worker and runtime setup.
-It includes a downloadable Livebook and commands for a separate demo worker.
+After the [Getting started](docs/getting-started.md) setup, your application has a
+supervised runtime, an approved Python image and an execution profile. With a
+runtime named `MyApp.Sandboxes`:
 
 ```elixir
 alias SmolBox.{Command, ExecutionSpec}
@@ -112,168 +80,50 @@ IO.write(stdout)
 # Prints: 42
 ```
 
-The second submission reuses the execution; it does not start another command.
-The matches above show a successful run. In your application, handle errors,
-nonzero exits, and unknown outcomes explicitly. Cleanup can still be pending when
-`await/3` returns, and its wait timeout does not cancel the command. Keep the
-runtime supervised and inspect the record with `SmolBox.fetch/3`; see
-[result handling and troubleshooting](docs/troubleshooting.md).
+The second submission reuses the execution. Here, `python_artifact` is the approved
+image identity map (`"id"`, `"sha256"`, `"architecture"`) and `profile` is a
+registered `SmolBox.Profile`. Handle errors, nonzero exits and unknown outcomes
+in application code. An `await/3` timeout does not cancel the command. Inspect
+cleanup with `SmolBox.fetch/3`; see [Troubleshooting](docs/troubleshooting.md).
 
-If your application already owns machine lifecycle and persistence,
-[`SmolBox.Client`](docs/client.md) exposes individual worker operations for
-creating machines, executing commands, streaming output, and transferring files.
+## Choose your next step
 
-## Installation and first run
+| What you want to do | Guide |
+| --- | --- |
+| Add supervision, profiles and durable storage | [Host integration](docs/host-integration.md) |
+| Keep a machine and its files across commands | [Persistent machines](docs/persistent-machines.md) |
+| Manage the lifecycle yourself | [Low-level client](docs/client.md) |
+| Use registry images or prepared artifacts | [Images and registry artifacts](docs/images-and-registry-artifacts.md) |
+| Run longer commands, background processes or a terminal | [Long commands](docs/long-running-exec.md) · [Terminals](docs/interactive-terminals.md) |
+| Transfer files or retain data after machine deletion | [Guest files](docs/guest-files.md) · [Local volumes](docs/local-volumes.md) |
+| Reuse prepared disk or memory state | [Exports](docs/machine-exports.md) · [Checkpoints](docs/managed-checkpoints.md) · [Branches](docs/managed-branches.md) |
+| Configure networking or expose a guest service | [Network access](docs/network-access.md) · [Port mappings](docs/port-mappings.md) |
+| Recover from failures or prepare maintenance | [Recovery](docs/recovery.md) · [Draining](docs/worker-draining.md) |
+| Upgrade an existing deployment | [Upgrading SmolBox](docs/upgrading.md) |
 
-SmolBox **0.4.2** improves inventory errors and provides a complete Getting
-Started guide with a downloadable Livebook. The default worker remains
-**smolvm 1.22.0** on Linux x86_64 and macOS Apple Silicon.
+The [community workspace app](https://github.com/hfiguera/smolbox/tree/main/examples/community_workspace)
+provides a Phoenix walkthrough using its pinned SmolBox 0.3.0 dependency. It includes
+persistent machines, commands, a terminal and PostgreSQL recovery. The
+[engineering blog](https://hfiguera.github.io/smolbox/) has longer worked examples.
 
-**Sharing a durable store? Upgrade all controllers and readers before recording
-the new `:unsupported_network_policy` error category.** This patch adds no SQL
-migration or codec revision, but older readers reject the new category. Follow
-[Upgrading to 0.4.2](docs/upgrading-to-0.4.2.md).
+## Deployment and support
 
-**Keeping an older worker? Set its `runtime_version` explicitly.** Preserve
-checkpoint approvals at their capture version. The default changed in 0.4.1; see
-[Upgrading to 0.4.1](docs/upgrading-to-0.4.1.md) and the
-[qualification evidence](docs/runtime-1.22.0-qualification.md).
+SmolBox relies on smolvm for VM isolation. Your deployment controls worker access,
+image approval, host resource limits, networking, credentials and storage.
+Admission reservations do not enforce host quotas. Offline networking is the
+default, and retained machines remain until explicitly deleted. Read
+[Deployment boundaries](docs/security.md) before operating workers.
 
-**Upgrading from 0.3.x requires a coordinated store upgrade.** The PostgreSQL
-example adds worker-control and volume migrations. Disk expansion and volume
-records use new formats; every shared controller, reader and resource projection
-writer must be upgraded before enabling them. Deleted history still constrains
-rollback. Read [Upgrading to 0.4.0](docs/upgrading-to-0.4.0.md) for the deployment
-sequence, custom adapter requirements and drain API compatibility change.
-
-Applications coming from 0.2.x must also follow
-[Upgrading to 0.3.0](docs/upgrading-to-0.3.0.md); applications coming from 0.1.x
-must first follow [Upgrading to 0.2.0](docs/upgrading-to-0.2.0.md). Workers are
-installed separately. Keep workers and checkpoint approvals pinned to their
-actual runtime, including 1.19.0 installations retained from 0.3.0.
-
-Add SmolBox to your application's `mix.exs`:
-
-```elixir
-{:smolbox, "~> 0.4.2"}
-```
-
-Run `mix deps.get`. The [API documentation](https://hexdocs.pm/smolbox/0.4.2/)
-includes the guides below. A local checkout can instead be used with
-`{:smolbox, path: "../smolbox"}`.
-
-To run the local walkthrough, you need:
-
-- Elixir **1.18 or later**, using a [tested Elixir/OTP pair](docs/compatibility.md).
-- A dedicated worker on Linux x86_64 with KVM or macOS Apple Silicon:
-  **smolvm 1.22.0** by default since 0.4.1, or explicitly configured 1.20.2, 1.19.0, 1.17.0, 1.16.1, 1.16.0, 1.14.6 or
-  1.14.1 workers.
-- The host's `resize2fs` tool for 1.14.6, 1.16.0, 1.16.1, 1.17.0, 1.19.0, 1.20.2 and 1.22.0 disk requests below template sizes.
-  On macOS, install `e2fsprogs`; see the [runtime prerequisites](docs/compatibility.md#macos-1-14-6-prerequisites).
-- A prepared Python image for that worker's architecture, with its SHA-256
-  recorded. The guide includes image preparation commands and host capacity
-  requirements.
-
-**Follow [Getting started](docs/getting-started.md)** to configure supervision,
-stage a Python file, submit it, read its output file, and confirm cleanup. The
-walkthrough uses an in-memory store and needs no database. Applications that need
-restart recovery must provide a durable `SmolBox.Store` adapter; a complete
-[PostgreSQL host example](https://github.com/hfiguera/smolbox/tree/v0.4.2/examples/durable_host)
-is included in the repository.
-
-## Managed persistent machines
-
-`SmolBox.Machines` gives a machine its own durable identity, ownership, resource
-reservation, and create/start/stop/delete lifecycle. Run successive commands with
-independent execution identities while retaining guest files. With a durable
-store, a new controller reconnects to the same machine after an application restart.
-Machines remain until explicitly deleted; uncertain work blocks reuse without replay.
-
-See [Managed persistent machines](docs/persistent-machines.md) for the API,
-recovery procedures, the required coordinated store upgrade, and a two-process
-PostgreSQL walkthrough. The existing disposable API remains supported.
-
-## Managed branches
-
-[Branch an idle, offline bare guest](docs/managed-branches.md) into independent
-running children on the same smolvm 1.19.0, 1.20.2 or 1.22.0 worker. Memory and disks are copied,
-held release is explicit, and durable dependencies and backing capacity survive
-controller restarts.
-
-## Checkpoint execution
-
-Managed idle, offline bare guests can also [capture checkpoints and restore independent machines](docs/managed-checkpoints.md) on smolvm 1.19.0, 1.20.2 or 1.22.0, with durable history and explicit retention.
-
-SmolBox can restore an operator-approved idle, offline checkpoint
-into a separate disposable machine for each execution. See
-[Executing from a checkpoint](docs/checkpoints.md) for approval, examples and
-record schema v3 upgrade requirements.
-
-## Current scope
-
-SmolBox has real execution and durable recovery tests on Linux x86_64 and macOS
-Apple Silicon with **smolvm 1.14.1, 1.14.6, 1.16.0, 1.16.1, 1.17.0, 1.19.0, 1.20.2 and 1.22.0**; results are recorded in [Compatibility](docs/compatibility.md#runtime-selection).
-SmolBox 0.3.0 and 0.2.1 default to **1.19.0** and 0.2.0 to **1.17.0**, while 0.1.4–0.1.5 default to **1.16.1**; 0.1.3 defaults to **1.16.0** and
-0.1.2 to **1.14.6**.
-SmolBox 0.4.1 and 0.4.2 select **1.22.0**; published SmolBox 0.4.0 and 0.3.1 retain **1.20.2**.
-See the [1.22.0 qualification and upgrade boundaries](docs/runtime-1.22.0-qualification.md).
-Before adopting that default with an older worker, explicitly
-configure `runtime_version: "1.20.2"`, `"1.19.0"`, `"1.17.0"`, `"1.16.1"`, `"1.16.0"`, `"1.14.6"` or `"1.14.1"`, or follow the
-[worker upgrade procedure](docs/host-integration.md#upgrading-a-worker).
-The package does not upgrade an external worker. A version mismatch prevents
-new execution; arbitrary upstream releases and automatic fallback are not accepted.
-Published versions 0.1.4 and 0.1.5 select **1.16.1** by default after
-[qualification](docs/compatibility.md#smolvm-1-16-1-qualification) and a cleanup change
-that separates disposal from preservation. A failed graceful stop can still leave
-unknown work retained; see the [recovery rules](docs/recovery.md#preservation-and-disposal).
-
-SmolBox supports explicit outbound hostname/CIDR policies
-with smolvm 1.16.0, 1.16.1, 1.17.0, 1.19.0, 1.20.2 and 1.22.0. Offline remains the default. See
-[Controlled network access](docs/network-access.md) for setup and validation boundaries.
-
-SmolBox relies on smolvm's isolation model for running untrusted code. Your
-deployment must protect worker access and configure host resource limits,
-networking, and credentials. A subsequent validation campaign tested these
-controls and failure recovery in one constrained Linux deployment; see
-[Linux deployment validation](docs/resource-qualification.md#subsequent-linux-deployment-validation)
-for its results and limits. The walkthrough does not configure that deployment.
-
-The library's supported qualification remains `:development`. Its allocation
-settings and admission reservations do not enforce host quotas; unsupported
-hard-control options remain rejected. Read
-[Deployment boundaries](docs/security.md) when configuring your workers.
-
-Worker installation, runtime image preparation, authentication, and host storage
-remain application/operator responsibilities. SmolBox runs programs already
-available in the prepared image. TypeScript needs a compiler or runner in that
-image; SmolBox does not build or publish user functions.
-
-## Guides
-
-The [engineering blog](https://hfiguera.github.io/smolbox/) has practical articles
-about running programs from Elixir and managing their execution lifecycle.
-
-| Guide | What you will learn |
-|---|---|
-| [Getting started](docs/getting-started.md) | Connect, stage a Python program, submit it, read its result, and finish cleanup |
-| [Managed host integration](docs/host-integration.md) | Configure supervision, workers, profiles, storage, and execution specifications |
-| [Stopped-machine exports](docs/machine-exports.md) | Publish supported disk state as a verified artifact for another managed machine |
-| [Managed persistent machines](docs/persistent-machines.md) | Retain a machine across commands, recover management, and explicitly dispose of it |
-| [Low-level client](docs/client.md) | Create machines, execute commands, stream output, and transfer files |
-| [Controlled network access](docs/network-access.md) | Approve outbound destinations while retaining offline defaults |
-| [Troubleshooting](docs/troubleshooting.md) | Interpret errors, unknown outcomes, queued work, and pending cleanup |
-| [Persistence and recovery](docs/recovery.md) | Use durable storage and recover after controller or worker failures |
-| [Telemetry](docs/telemetry.md) | Observe activity and inspect workers without treating notifications as receipts |
-| [Deployment boundaries](docs/security.md) | Understand worker isolation, credentials, file boundaries, and operator responsibilities |
-| [Resource evidence](docs/resource-qualification.md) | Review the tested Linux deployment controls, historical experiments, and remaining limits |
-| [Compatibility](docs/compatibility.md) | Check the tested smolvm, Elixir/OTP, OS, and artifact combinations |
+Supported use remains `:development`. [Supported platforms](docs/supported-platforms.md)
+describes usable combinations and feature limits. [Testing reports](docs/testing.md)
+collects recorded worker checks, performance measurements and historical results,
+with their original versions and limits.
 
 ## Contributing
 
-Source: [hfiguera/smolbox](https://github.com/hfiguera/smolbox). Maintainer toolchain
-versions are in `.tool-versions`; tested consumer combinations are recorded in
-the compatibility guide. From this repository, `mix ci` runs deterministic checks
-without contacting a real worker. Generate this site with
-`MIX_ENV=dev mix docs --warnings-as-errors`. Live worker tests are a separate opt-in
-operation described in the repository's
-[CI guide](https://github.com/hfiguera/smolbox/blob/v0.4.2/scripts/ci/README.md).
+Source: [hfiguera/smolbox](https://github.com/hfiguera/smolbox). Toolchain pins are in
+`.tool-versions`. Run `mix ci` for deterministic checks without a real worker.
+Build the documentation with `MIX_ENV=dev mix docs --warnings-as-errors`, then run
+`MIX_ENV=dev mix smolbox.ci.docs` to check local links and fragments.
+Live worker checks are a separate operation described in the repository's
+[CI guide](https://github.com/hfiguera/smolbox/blob/main/scripts/ci/README.md).
