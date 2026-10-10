@@ -34,7 +34,7 @@ command result while recording unavailable outputs. `cleanup: :complete` and
 
 | Symptom | What to check and do |
 |---|---|
-| Dependency cannot be fetched | For the current walkthrough, use `{:smolbox, "~> 0.4.2"}` and check connectivity to Hex. For an existing application, follow [Upgrading SmolBox](upgrading.md) before changing its dependency. For a Git dependency, verify the repository URL and requested tag. |
+| Dependency cannot be fetched | For the current walkthrough, use `{:smolbox, "~> 0.4.3"}` and check connectivity to Hex. For an existing application, follow [Upgrading SmolBox](upgrading.md) before changing its dependency. For a Git dependency, verify the repository URL and requested tag. |
 | `Worker.new/3` returns `:validation` | Remote endpoints need HTTPS, a nonempty bearer token, and valid certificate configuration. Local HTTP needs explicit loopback permission or a Unix socket. Base URLs cannot contain an API path. |
 | `Directory.new/1` returns `:validation` | Supply an absolute existing directory with mode `0700`, owned and controlled by the host. Creating the adapter does not create the directory. |
 | Runtime startup rejects the memory store | Set `mode: :ephemeral` for a deliberate local demo. Durable mode requires a conforming durable adapter and never falls back to memory. |

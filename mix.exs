@@ -2,7 +2,7 @@ defmodule SmolBox.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/hfiguera/smolbox"
-  @version "0.4.2"
+  @version "0.4.3"
 
   def project do
     [
@@ -68,6 +68,7 @@ defmodule SmolBox.MixProject do
           "docs/upgrading-to-0.4.0.md",
           "docs/upgrading-to-0.4.1.md",
           "docs/upgrading-to-0.4.2.md",
+          "docs/upgrading-to-0.4.3.md",
           "docs/worker-measurements.md",
           "docs/worker-draining.md",
           "docs/disk-expansion.md",
@@ -139,7 +140,8 @@ defmodule SmolBox.MixProject do
             "docs/upgrading-to-0.3.1.md",
             "docs/upgrading-to-0.4.0.md",
             "docs/upgrading-to-0.4.1.md",
-            "docs/upgrading-to-0.4.2.md"
+            "docs/upgrading-to-0.4.2.md",
+            "docs/upgrading-to-0.4.3.md"
           ],
           "Testing reports": [
             "docs/testing.md",
@@ -286,6 +288,7 @@ defmodule SmolBox.MixProject do
           "docs/upgrading-to-0.4.0.md",
           "docs/upgrading-to-0.4.1.md",
           "docs/upgrading-to-0.4.2.md",
+          "docs/upgrading-to-0.4.3.md",
           "docs/testing.md",
           "docs/compatibility.md",
           {"docs/persistent-machines-validation.md", title: "Persistent machine tests"},

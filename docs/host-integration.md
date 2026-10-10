@@ -338,7 +338,7 @@ to reconcile. Memory mode loses this authority when its store process stops.
 
 ## Upgrading a worker
 
-SmolBox 0.4.2 defaults to **smolvm 1.22.0**. Updating the Elixir dependency
+SmolBox 0.4.3 defaults to **smolvm 1.22.0**. Updating the Elixir dependency
 does not install smolvm or migrate worker state. Before updating the library,
 pin each existing worker to the version actually installed. For example, keep
 a worker on 1.20.2 with:

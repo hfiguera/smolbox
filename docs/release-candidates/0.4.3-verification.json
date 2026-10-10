@@ -1,0 +1,104 @@
+{
+  "version": "0.4.3",
+  "status": "candidate_verified",
+  "date_utc": "2026-10-10T20:08:09.608496+00:00",
+  "base_main_commit": "a8a85fe3d547f8bd67b26f0a8c090b2c64bf4c12",
+  "branch": "release/0.4.3",
+  "source_state": "uncommitted release preparation",
+  "package_sha256": "2de553a8f481626b55c9b51e96992a2bdd20e638432c59edfc0de2cd9c0a0251",
+  "public_notebook_sha256": "4cf2077c9c21b1c6bea9b8f047c3c2f111fd1d22a3d818391cdc022be08b6cad",
+  "worker_version": "1.22.0",
+  "livebook_version": "0.19.10",
+  "platforms": {
+    "linux": {
+      "platform": "Linux-7.1.5-76070105-generic-x86_64-with-glibc2.39",
+      "architecture": "x86_64",
+      "dedicated_account": false,
+      "livebook_cells": 6,
+      "livebook_checks": {
+        "cleanup": true,
+        "collection": true,
+        "execution": true,
+        "inventory": true,
+        "reservation": true,
+        "stdout": true,
+        "supervisor": true
+      },
+      "runtime_tests": 9,
+      "runtime_code_matches_archive": true,
+      "worker_inventory_empty": true,
+      "owned_verifier_processes_stopped": true
+    },
+    "macos": {
+      "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+      "architecture": "arm64",
+      "dedicated_account": true,
+      "livebook_cells": 6,
+      "livebook_checks": {
+        "cleanup": true,
+        "collection": true,
+        "execution": true,
+        "inventory": true,
+        "reservation": true,
+        "stdout": true,
+        "supervisor": true
+      },
+      "runtime_tests": 9,
+      "runtime_code_matches_archive": true,
+      "worker_inventory_empty": true,
+      "owned_verifier_processes_stopped": true
+    }
+  },
+  "deterministic_ci": {
+    "linux": 636,
+    "macos": 636,
+    "excluded_live_tests_per_host": 29,
+    "standalone_ci_tools": 31,
+    "quality_checks": "passed"
+  },
+  "documentation": {
+    "warnings": 0,
+    "local_pages_checked": 137
+  },
+  "consumer_checks": [
+    {
+      "platform": "macos",
+      "architecture": "arm64",
+      "minimum": false,
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "package_sha256": "2de553a8f481626b55c9b51e96992a2bdd20e638432c59edfc0de2cd9c0a0251"
+    },
+    {
+      "platform": "macos",
+      "architecture": "arm64",
+      "minimum": true,
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "package_sha256": "2de553a8f481626b55c9b51e96992a2bdd20e638432c59edfc0de2cd9c0a0251"
+    },
+    {
+      "platform": "linux",
+      "architecture": "x86_64",
+      "minimum": false,
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "package_sha256": "2de553a8f481626b55c9b51e96992a2bdd20e638432c59edfc0de2cd9c0a0251"
+    }
+  ],
+  "dependency_audits": "no advisories or vulnerabilities",
+  "macos_cleanup": {
+    "test_account_removed": true,
+    "test_home_removed": true,
+    "test_marker_removed": true,
+    "preexisting_apple_services_untouched": true,
+    "apple_caches_untouched": true
+  },
+  "harness_correction": "The first runs passed their Livebooks and all nine runtime tests but a temporary reporting parser rejected the Elixir 1.20 success summary. The corrected parser and both retries passed. No production fix was needed.",
+  "pending": [
+    "final release commit CI",
+    "tagging and Hex publication",
+    "published package and documentation verification"
+  ],
+  "scope_limits": [
+    "Normal workload verification; not the full resource abuse, saved-state or PostgreSQL recovery campaign.",
+    "Historical worker qualification reports retain their original versions and scope."
+  ]
+}

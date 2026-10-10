@@ -8,7 +8,7 @@ defmodule SmolBox.CI.LivebookTest do
     configured =
       Livebook.configure!(@source, "/tmp/demo", "approved", "http://127.0.0.1:9999", nil)
 
-    assert configured =~ ~s|Mix.install([{:smolbox, "~> 0.4.2"}])|
+    assert configured =~ ~s|Mix.install([{:smolbox, "~> 0.4.3"}])|
 
     restored =
       configured

@@ -7,7 +7,7 @@ defmodule SmolBox.CI.PackageTest do
     on_exit(fn -> File.rm_rf!(root) end)
 
     names =
-      ~w(mix.exs README.md CHANGELOG.md LICENSE lib/smolbox.ex lib/smolbox/runtime.ex docs/notebooks/getting-started.livemd docs/images-and-registry-artifacts.md docs/images-and-registry-artifacts-validation.md docs/provisioning-performance.md docs/upgrading-to-0.3.0.md docs/upgrading.md docs/upgrading-within-0.1.x.md docs/supported-platforms.md docs/testing.md docs/network-access-validation.md docs/worker-measurements-validation.md docs/worker-draining-validation.md)
+      ~w(mix.exs README.md CHANGELOG.md LICENSE lib/smolbox.ex lib/smolbox/runtime.ex docs/notebooks/getting-started.livemd docs/images-and-registry-artifacts.md docs/images-and-registry-artifacts-validation.md docs/provisioning-performance.md docs/upgrading-to-0.3.0.md docs/upgrading-to-0.4.3.md docs/upgrading.md docs/upgrading-within-0.1.x.md docs/supported-platforms.md docs/testing.md docs/network-access-validation.md docs/worker-measurements-validation.md docs/worker-draining-validation.md)
 
     inner = Path.join(root, "contents.tar")
     members = Enum.map(names, &{String.to_charlist(&1), "fixture"})

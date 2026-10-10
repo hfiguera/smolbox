@@ -2,7 +2,7 @@
 
 Run a Python program in a disposable VM, read `42` from its output file, and
 wait for the VM to be deleted. You can use the downloadable Livebook or a Mix
-application. Both run the same example with SmolBox **0.4.2** and smolvm **1.22.0**.
+application. Both run the same example with SmolBox **0.4.3** and smolvm **1.22.0**.
 
 Choose one path before preparing the worker:
 
@@ -79,7 +79,7 @@ Run `mix new smolbox_demo`, enter that directory, and add the following to `deps
 in `mix.exs`. Then run `mix deps.get`.
 
 ```elixir
-{:smolbox, "~> 0.4.2"}
+{:smolbox, "~> 0.4.3"}
 ```
 
 ## 2. Prepare one local worker

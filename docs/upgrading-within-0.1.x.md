@@ -1,6 +1,6 @@
 # Upgrades within 0.1.x
 
-These instructions apply to the original 0.1.x releases. For a target of 0.4.2,
+These instructions apply to the original 0.1.x releases. For a target of 0.4.3,
 account for these early transitions and then follow [Upgrading SmolBox](upgrading.md).
 Install the target dependency after coordinating all applicable requirements.
 The worker versions and defaults below describe each historical release.
