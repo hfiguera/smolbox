@@ -74,7 +74,7 @@ Errors omit machine names, response bodies, and other remote values.
 For the local TCP worker in the getting-started guide, inspect its raw inventory:
 
 ```sh
-curl -i http://127.0.0.1:19470/api/v1/machines
+curl -i http://127.0.0.1:19471/api/v1/machines
 ```
 
 For a local Unix socket, use `curl --unix-socket "$SMOLBOX_RUNTIME_SOCKET" -i
@@ -82,6 +82,9 @@ http://localhost/api/v1/machines` instead. Redact sensitive paths, hostnames, an
 other remote values before sharing a response. Preserve the current inventory
 while investigating; use a separately provisioned, dedicated empty worker for
 the demo rather than clearing machines owned by another runtime or application.
+The [worker setup commands](getting-started.md#linux-worker-setup) give the Linux
+demo its own state directory and endpoint. A different listen port alone does
+not separate the inventory.
 
 ## Mapped service problems
 

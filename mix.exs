@@ -30,6 +30,7 @@ defmodule SmolBox.MixProject do
           "CHANGELOG.md",
           "LICENSE",
           "docs/getting-started.md",
+          "docs/notebooks/getting-started.livemd",
           "docs/troubleshooting.md",
           "docs/client.md",
           "docs/network-access.md",
@@ -79,7 +80,7 @@ defmodule SmolBox.MixProject do
         main: "readme",
         source_ref: "v#{@version}",
         filter_modules: ~r/^Elixir\.SmolBox(?:\.|$)/,
-        assets: %{"docs/evidence" => "evidence"},
+        assets: %{"docs/evidence" => "evidence", "docs/notebooks" => "notebooks"},
         groups_for_extras: [
           "Start here": ["README.md", "docs/getting-started.md"],
           "Using SmolBox": [

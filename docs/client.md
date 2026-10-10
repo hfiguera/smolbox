@@ -169,6 +169,10 @@ contents at rest.
 
 ## Preparing the reference runtimes
 
+For a first Python execution, follow [Getting started](getting-started.md). It
+includes image preparation, a separate demo worker and a downloadable Livebook.
+The recipes below also cover Node and production artifact approval.
+
 This is an operator step using upstream smolvm, outside the library's execution
 API. It prepares a base language runtime; it does not build or publish user
 functions. Perform it on an isolated preparation host with the matching native

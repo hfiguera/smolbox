@@ -1,110 +1,145 @@
 # Getting started
 
-SmolBox 0.4.1 defaults to **smolvm 1.22.0** on Linux x86_64 and macOS Apple
-Silicon. Published SmolBox 0.4.0 and 0.3.1 keep their 1.20.2 default. Pin existing
-workers and checkpoint approvals to their actual version. Updating SmolBox does
-not install smolvm. See the
-[1.22.0 qualification and upgrade boundaries](runtime-1.22.0-qualification.md).
+Run a Python program in a disposable VM, read `42` from its output file, and
+wait for the VM to be deleted. You can use the downloadable Livebook or a Mix
+application. Both run the same example with SmolBox **0.4.1** and smolvm **1.22.0**.
 
-This walkthrough runs a Python program in a disposable VM, reads its output file,
-and waits for cleanup. It uses an in-memory execution store so you can learn the
-API without a database. The final section explains what changes in an application
-that needs restart recovery.
+You need Elixir 1.18 or later and smolvm installed on the same host as the Elixir
+runtime. The Linux instructions below require **x86_64 with working KVM**. For
+macOS Apple Silicon, see [macOS worker setup](#macos-worker-setup). Check
+[Compatibility](compatibility.md#host-preparation-prerequisites) if the host is
+not ready. SmolBox does not install smolvm.
 
-This walkthrough does not configure the separately
-[tested Linux deployment](resource-qualification.md#subsequent-linux-deployment-validation)
-or its external host resource controls.
-
-For a complete browser experience, run the
-[community workspace example](https://github.com/hfiguera/smolbox/tree/main/examples/community_workspace).
-It consumes the published 0.3.0 package and combines persistent machines, terminals,
-files, background launches and a mapped service with PostgreSQL recovery. Its
-separate saved state walkthrough demonstrates checkpoints, branch isolation and
-explicit cleanup on Linux.
+This is a local demo with an in-memory store. For existing applications, use
+[Upgrading to 0.4.1](upgrading-to-0.4.1.md); for deployment controls and host
+resource limits, see [Deployment boundaries](security.md).
 
 ## 1. Install SmolBox
 
-In an existing Elixir Mix application, add this entry to `deps/0` in `mix.exs`:
+**Livebook:** the [notebook](notebooks/getting-started.livemd) installs SmolBox
+with `Mix.install/1`. No Mix project is needed. Run Livebook locally on the worker
+host; a hosted Livebook cannot use that host's loopback endpoint or artifact path.
+
+**Mix application:** run `mix new smolbox_demo`, enter that directory, and add
+the following to `deps/0` in `mix.exs`. Then run `mix deps.get`.
 
 ```elixir
 {:smolbox, "~> 0.4.1"}
 ```
 
-Run `mix deps.get` after adding the dependency. A local checkout can instead be
-used with `{:smolbox, path: "../smolbox"}`. Version 0.4.1 defaults to smolvm
-**1.22.0**. Existing applications should follow
-[Upgrading to 0.4.1](upgrading-to-0.4.1.md); the library does not upgrade
-the worker. Applications coming from 0.1.2 or earlier also require the coordinated
-[record format upgrade](recovery.md#upgrading-to-0-1-3).
-Elixir 1.18 and later are accepted by the
-package; use one of the tested Elixir/OTP pairs in [Compatibility](compatibility.md).
-
-For a new application, run `mix new smolbox_demo` and `cd smolbox_demo` first.
-SmolBox's application starts its ordinary dependencies, but you explicitly start
-each managed runtime under supervision.
-
 ## 2. Prepare one local worker
 
-Use Linux x86_64 with KVM or macOS Apple Silicon. This walkthrough runs the Elixir
-application on the worker host so it can verify the local artifact file. Remote
-workers use a different host configuration; see [Managed host integration](host-integration.md).
+The demo uses **offline execution** and needs a **dedicated, empty worker**.
+SmolBox validates every machine returned by the worker, including machines created
+outside SmolBox. Networking enabled without explicit allowlists is unsupported;
+other invalid machine observations also reject the whole list. Health and
+readiness alone do not check this. See [Controlled network access](network-access.md)
+when you want to allow specific destinations later.
 
-You need a **dedicated, empty worker**. For 0.4.1, select **smolvm 1.22.0
-on Linux x86_64 or macOS Apple Silicon**. Existing 1.20.2, 1.19.0, 1.17.0 and other supported deployments require an explicit
-matching `runtime_version` (or the environment setting below).
-Check the [host preparation prerequisites](compatibility.md#host-preparation-prerequisites),
-then use an approved native Python
-artifact with neutral `/bin/true` startup. Follow the
-[reference-runtime preparation instructions](client.md#preparing-the-reference-runtimes)
-to create `python.smolmachine`, record its SHA-256, and start the private worker
-with the 1 MiB file-transfer cap. The package does not install smolvm or prepare
-runtime images for you. Do not attach this ephemeral demo controller to a worker
-managed by another runtime or store.
+### Linux worker setup
 
-Health and readiness checks establish availability; they do not validate every
-machine in the worker inventory. The example also requires `Client.list/1` to
-return `{:ok, []}`. An existing machine with an unsupported network policy or
-another invalid observation can reject the whole list. See
-[Machine inventory problems](troubleshooting.md#machine-inventory-problems) before
-changing or removing any existing machines.
+Run these commands in **Bash on the worker host**, inside your Nix development
+shell if applicable. `smolvm --version` should report `1.22.0`. Use a new directory
+for the image, worker state and demo output:
 
-The example uses the measured reference allocation floor: 20 GiB storage,
-10 GiB overlay, and 768 MiB VMM overhead per execution. Check available host
-capacity and your actual templates before using it. These are allocation and
-admission values, not certified host resource quotas. Workers currently have
-development qualification; see [Deployment boundaries](security.md).
+```bash
+export SMOLBOX_DEMO_ROOT="$(mktemp -d)"
+chmod 700 "$SMOLBOX_DEMO_ROOT"
+mkdir -m 700 "$SMOLBOX_DEMO_ROOT/images" "$SMOLBOX_DEMO_ROOT/worker" "$SMOLBOX_DEMO_ROOT/objects"
+cd "$SMOLBOX_DEMO_ROOT/images"
+export SMOLVM_DATA_DIR="$SMOLBOX_DEMO_ROOT/worker"
 
-In your application directory, set these values using the artifact you approved:
+smolvm pack create --image python:3.12-alpine --entrypoint /bin/true \
+  --cpus 1 --mem 256 --staging-dir ./staging --output ./python
 
-```sh
-export SMOLBOX_RUNTIME_URL=http://127.0.0.1:19470
-export SMOLBOX_RUNTIME_VERSION=1.22.0
-export SMOLBOX_PYTHON_ARTIFACT=/absolute/path/to/python.smolmachine
-export SMOLBOX_PYTHON_SHA256=replace_with_the_approved_64_character_sha256
-export SMOLBOX_DEMO_DIR="$(mktemp -d)"
-chmod 700 "$SMOLBOX_DEMO_DIR"
-iex -S mix
+printf 'Demo directory: %s\n' "$SMOLBOX_DEMO_ROOT"
+sha256sum "$SMOLBOX_DEMO_ROOT/images/python.smolmachine"
 ```
 
-`SMOLBOX_DEMO_DIR` is a new private directory for input/output objects. Keep it
-separate from the runtime image and from all guest-accessible directories.
-SmolBox 0.4.1 selects 1.22.0; SmolBox 0.4.0 defaults to 1.20.2. Explicitly select an older
-supported worker version when retaining an existing installation; updating the
-Elixir dependency does not install a worker or migrate checkpoint artifacts.
+Record the printed directory and SHA256 for step 3. Preparation downloads the
+Python image; the demo guest later runs without network access. The artifact
+must match the host architecture. The profile uses 20 GiB storage and 10 GiB
+overlay allocations; allow space for image layers and templates too. For artifact
+approval and reproducible production images, see
+[Preparing the reference runtimes](client.md#preparing-the-reference-runtimes).
 
-For a local Unix endpoint, set `SMOLBOX_RUNTIME_URL=http://localhost` and
-`SMOLBOX_RUNTIME_SOCKET=/absolute/path/to/smolvm.sock` instead. The example's
-60-second operation and 55-second receive budgets allow cold preparation;
-the execution profile still controls each stage's deadline separately.
+In the **same terminal**, start the demo worker and leave it running:
+
+```bash
+env SMOLVM_DATA_DIR="$SMOLBOX_DEMO_ROOT/worker" \
+  SMOLVM_GUEST_ROLLOUT_HOST_PORT=19472 \
+  SMOLVM_FILE_TRANSFER_MAX_BYTES=1048576 \
+  smolvm serve start --listen 127.0.0.1:19471
+```
+
+The state directory keeps this worker separate from your existing machines.
+The HTTP and guest rollout ports are also separate; if `19471` or `19472` is
+already in use, choose unused ports and update the HTTP URL in step 3.
+
+In a **second terminal**, check the inventory:
+
+```sh
+curl --fail http://127.0.0.1:19471/api/v1/machines
+```
+
+It must return `{"machines":[]}`. If it contains machines or the request fails,
+check the worker's startup output and endpoint before continuing. Keep any
+existing inventory intact. See
+[Machine inventory problems](troubleshooting.md#machine-inventory-problems).
+
+### macOS worker setup
+
+Use a dedicated macOS account or host with no existing smolvm machines. On the
+pinned macOS build, `SMOLVM_DATA_DIR` does **not** isolate worker state.
+
+In that account, use the directory and image preparation commands above. Omit the
+`export SMOLVM_DATA_DIR` line and replace the `sha256sum` line with:
+
+```sh
+shasum -a 256 "$SMOLBOX_DEMO_ROOT/images/python.smolmachine"
+```
+
+Then start the worker without the Linux state override:
+
+```sh
+SMOLVM_GUEST_ROLLOUT_HOST_PORT=19472 \
+  SMOLVM_FILE_TRANSFER_MAX_BYTES=1048576 \
+  smolvm serve start --listen 127.0.0.1:19471
+```
+
+Check for `{"machines":[]}` with the same curl command before continuing.
 
 ## 3. Run the complete example
 
-Save the following block as `smolbox_demo.exs` in the consuming application, then
-run `Code.require_file("smolbox_demo.exs")` in that IEx session. This is the success
-path: each match deliberately stops the walkthrough if an assumption fails.
-If it fails after runtime startup, keep IEx open, inspect the execution, and use
-[Troubleshooting](troubleshooting.md). Do not repeatedly rerun the script or clear
-the worker inventory to hide a failure.
+### In Livebook
+
+[Download the Livebook](notebooks/getting-started.livemd) and import it into your
+local Livebook. It includes the worker setup instructions, configuration and all
+execution cells. Paste the directory and SHA256 from step 2 into its configuration
+cell, check the worker URL, and evaluate all cells. Livebook 0.19.10 with
+Elixir 1.20.4/OTP 29.0.6 is the tested notebook environment; see the
+[Linux verification record](evidence/getting-started-livebook.json).
+
+### In a Mix application
+
+In your application's terminal, set the directory printed in step 2 and its
+approved digest:
+
+```bash
+export SMOLBOX_DEMO_ROOT=/absolute/path/printed/in_step_2
+export SMOLBOX_RUNTIME_URL=http://127.0.0.1:19471
+export SMOLBOX_RUNTIME_VERSION=1.22.0
+export SMOLBOX_PYTHON_ARTIFACT="$SMOLBOX_DEMO_ROOT/images/python.smolmachine"
+export SMOLBOX_PYTHON_SHA256=paste_the_sha256_printed_in_step_2
+export SMOLBOX_DEMO_DIR="$SMOLBOX_DEMO_ROOT/objects"
+unset SMOLBOX_RUNTIME_SOCKET
+iex -S mix
+```
+
+Save the block below as `smolbox_demo.exs` and run
+`Code.require_file("smolbox_demo.exs")` in IEx. If execution fails after the
+supervisor starts, keep the session open and inspect it with
+[Troubleshooting](troubleshooting.md) before running it again.
 
 ```elixir
 alias SmolBox.{Command, ExecutionSpec, Files, Profile, Worker}
@@ -149,7 +184,17 @@ worker_options =
 runtime_version = System.get_env("SMOLBOX_RUNTIME_VERSION", "1.22.0")
 {:ok, %{version: ^runtime_version}} = SmolBox.Client.health(client)
 :ok = SmolBox.Client.readiness(client)
-{:ok, []} = SmolBox.Client.list(client)
+case SmolBox.Client.list(client) do
+  {:ok, []} ->
+    :ok
+
+  {:ok, _machines} ->
+    raise "This demo needs an empty worker. Use the separate worker from step 2."
+
+  {:error, error} ->
+    raise "Could not validate the demo worker inventory: #{inspect(error)}. " <>
+            "Check the endpoint and use the separate worker from step 2."
+end
 
 {:ok, profile} =
   Profile.new("demo-offline-v1", storage_gb: 20, overlay_gb: 10, host_overhead_mb: 768)
@@ -265,49 +310,41 @@ IO.inspect(Map.take(cleaned, [:state, :collection, :cleanup, :reservation]),
 :ok = Supervisor.stop(supervisor)
 ```
 
-Expected program output is `hello from SmolBox`, followed by a summary containing
-`state: :completed`, `collection: :complete`, `cleanup: :complete`, and
-`reservation: nil`. The second submission returns the same handle; it does not
-create a second execution. The output file is read through the artifact adapter,
-not directly from the worker after cleanup.
+Expected output is `hello from SmolBox`, followed by `state: :completed`,
+`collection: :complete`, `cleanup: :complete`, and `reservation: nil`. The script
+also checks that the collected file contains `42`. A second submission of the
+same request returns the same handle.
 
-The demo stops its supervisor only after cleanup and capacity release are
-confirmed. Its in-memory execution records are then lost. The private object
-directory still contains the demo's input/output objects; remove that specific
-directory yourself when you no longer need them.
+The supervisor stops after cleanup. The in-memory execution records are then
+lost, while the demo directory retains the input/output files and Python image.
+Stop the demo worker with Ctrl+C when finished. Keep the printed directory until
+you have inspected the results; remove only that demo directory when no longer
+needed.
 
 ## 4. Understand the result
 
-`SmolBox.await/3` returning `{:ok, record}` means a stored outcome is available.
-It does not mean your program exited zero. Inspect `record.state`,
-`record.result.exit_code` when a result exists, `record.collection`, and
-`record.cleanup` independently. A nonzero program exit is still an observed result.
-An unknown outcome can have `record.result == nil`.
+`SmolBox.await/3` returns an execution outcome, which may include a nonzero exit
+code. Inspect `record.state`, `record.result`, `record.collection` and
+`record.cleanup` separately. Collection or cleanup may remain incomplete even
+when the guest command finishes.
 
-An `:expired` error from `await/3` ends only that wait. The runtime keeps working;
-use `SmolBox.fetch/3` to inspect the original identity. `SmolBox.cancel/3` records
-cancellation intent, and later observations establish termination and cleanup.
-See [Troubleshooting](troubleshooting.md) for concrete result-handling examples.
+An `:expired` error ends the wait; it does not cancel the execution. Use
+`SmolBox.fetch/3` to inspect it or `SmolBox.cancel/3` to request cancellation.
+See [Troubleshooting](troubleshooting.md) for result handling.
 
 ## 5. Move into your application
 
-- Put `SmolBox.child_spec/1` under your application's supervision tree. Configure
-  workers and approved profiles once in trusted host code.
-- Replace `SmolBox.Store.Memory` with a durable adapter when executions must
-  survive a restart. Keep the store and fingerprint key stable. The randomly
-  generated key above is only for this new ephemeral demo.
-- Persist an execution ID for each authorized request. Reuse that ID for the
-  same submission; use a new ID only for a deliberately authorized new execution.
-- Choose an artifact adapter that meets your storage and retention requirements.
-  The directory adapter is a small local implementation.
+- Put `SmolBox.child_spec/1` under your application's supervision tree.
+- Configure approved artifacts, workers and profiles once in trusted host code.
+- Use a durable store and retain the fingerprint key for restart recovery.
+- Reuse the same scoped request ID for retries; use a new ID for new work.
+- Choose an artifact adapter that suits your storage and retention requirements.
 
-Continue with [Managed host integration](host-integration.md) and
-[Persistence and recovery](recovery.md). The repository's
-[minimal host](https://github.com/hfiguera/smolbox/tree/v0.1.1/examples/minimal_host)
-and [PostgreSQL host](https://github.com/hfiguera/smolbox/tree/v0.1.1/examples/durable_host)
-are complete applications; they are source examples, not modules shipped in the
-library package.
+Continue with [Managed host integration](host-integration.md),
+[Persistence and recovery](recovery.md), or the
+[community workspace](https://github.com/hfiguera/smolbox/tree/main/examples/community_workspace)
+for a Phoenix example with terminals, files and PostgreSQL recovery.
 
-For JavaScript, prepare and approve the Node artifact from the client guide, stage
-a `.js` file, and use `Command.new(["node", "/workspace/main.js"])`. TypeScript
-needs a compiler or runner in the approved image; SmolBox does not transpile it.
+For JavaScript, prepare the Node artifact from the client guide and run
+`Command.new(["node", "/workspace/main.js"])`. The approved image must supply any
+compiler or runner needed for TypeScript.

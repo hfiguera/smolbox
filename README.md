@@ -82,6 +82,7 @@ configured. `python_artifact` is the registered Python image's identity map
 (`"id"`, `"sha256"`, `"architecture"`), and `profile` is one of the runtime's
 allowed execution profiles. [Getting started](docs/getting-started.md) walks
 through the complete worker and runtime setup.
+It includes a downloadable Livebook and commands for a separate demo worker.
 
 ```elixir
 alias SmolBox.{Command, ExecutionSpec}

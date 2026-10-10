@@ -1,0 +1,38 @@
+{
+  "verified_at_utc": "2026-10-10T01:38:45Z",
+  "platform": "physical Linux x86_64 with KVM, Pop!_OS 24.04",
+  "elixir": "1.20.4",
+  "erlang_otp": "29.0.6",
+  "livebook": "0.19.10",
+  "livebook_runtime": "Livebook.Runtime.Standalone",
+  "smolbox": "published Hex 0.4.1",
+  "smolvm": "official 1.22.0",
+  "notebook_sha256": "97ea4fe02f2ea6595eb7bd238cc7ac4afc210171adef915020927cf613d4edf1",
+  "artifact_sha256": "58f2621a93f5bec9cbc17147c7706de84ff36250c86b5ccbdb1a2c94f4cffa33",
+  "preparation": "Fresh directory and Python artifact using the Bash preparation block in Getting Started.",
+  "configuration": "Only demo_root and approved_sha256 placeholders filled in; an additional verification cell checked package version and final inventory.",
+  "notebook_cells": 5,
+  "additional_verification_cells": 1,
+  "results": {
+    "notebook_cells_passed": 5,
+    "verification_cell_passed": true,
+    "python_exit_code": 0,
+    "collected_output": "42\n",
+    "state": "completed",
+    "collection": "complete",
+    "cleanup": "complete",
+    "reservation": null,
+    "inventory_empty_after_cleanup": true,
+    "mix_example_passed": true,
+    "unsupported_inventory_explained_before_execution": true,
+    "port_alone_did_not_isolate_inventory": true,
+    "control_machine_preserved_during_demo": true,
+    "all_test_processes_stopped": true
+  },
+  "limits": [
+    "NixOS and the reporter flake were not executed.",
+    "The conflicting inventory control was stopped; coexistence with the reporter running Docker workload was not tested.",
+    "The macOS instructions were reviewed against the existing documented platform boundary, but this run did not execute macOS.",
+    "These are local development results, not deployment resource or isolation guarantees."
+  ]
+}

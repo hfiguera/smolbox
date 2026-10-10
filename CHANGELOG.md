@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Getting Started now includes complete image preparation and Linux worker
+  isolation commands, explains network restrictions before execution, and
+  provides a downloadable Livebook in HexDocs and the package.
+
 - Machine list decoding failures now retain operation `:list` and report
   `:dispatch_uncertain` after the GET, instead of `:not_dispatched`. Unsupported
   machine network policies return the redacted category `:unsupported_network_policy`;
