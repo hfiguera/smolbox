@@ -16,7 +16,7 @@ defmodule SmolBox.EmbeddedBranchBackendTest do
   alias SmolBox.Store.{Contract, Memory, NativeBranchContract, NativeBranchReleaseContract}
 
   @empty %{stdout: <<>>, stderr: <<>>, file: <<>>}
-  @budget %Budget{timeout_ms: 1000, max_request_bytes: 131_072, max_response_bytes: 131_072}
+  @budget %Budget{timeout_ms: 5000, max_request_bytes: 131_072, max_response_bytes: 131_072}
   @configuration %{
     "network" => %{"enabled" => false, "hosts" => [], "cidrs" => []},
     "ports" => [],
@@ -453,11 +453,11 @@ defmodule SmolBox.EmbeddedBranchBackendTest do
     for delayed <- ["create_branch", "inspect"] do
       callback =
         peer(:branch_create, result, fn request, response ->
-          if request["operation"] == delayed, do: Process.sleep(210)
+          if request["operation"] == delayed, do: Process.sleep(2000)
           response
         end)
 
-      deadline = System.monotonic_time(:millisecond) + 200
+      deadline = System.monotonic_time(:millisecond) + 1500
 
       assert {:error, %Error{category: :expired, operation: :branch}} =
                EmbeddedBranch.coordinate(

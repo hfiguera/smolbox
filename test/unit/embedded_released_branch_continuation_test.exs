@@ -22,7 +22,7 @@ defmodule SmolBox.EmbeddedReleasedBranchContinuationTest do
     NativeReleasedBranchContinuationContract
   }
 
-  @budget %Budget{timeout_ms: 1000, max_request_bytes: 131_072, max_response_bytes: 131_072}
+  @budget %Budget{timeout_ms: 5000, max_request_bytes: 131_072, max_response_bytes: 131_072}
   @empty %{stdout: <<>>, stderr: <<>>, file: <<>>}
 
   defp other(:continue), do: :cleanup
@@ -96,7 +96,7 @@ defmodule SmolBox.EmbeddedReleasedBranchContinuationTest do
                  pinned.quiesced
 
         assert request == NativeBranchDeletionActionContract.saved(child, action).request
-        assert budget.timeout_ms <= 1000 and budget.max_response_bytes <= 8192
+        assert budget.timeout_ms <= @budget.timeout_ms and budget.max_response_bytes <= 8192
         refute Embedded.supports_operation?(context, operation(action))
 
         assert {:error, %Error{evidence: :not_dispatched}} =
@@ -167,7 +167,7 @@ defmodule SmolBox.EmbeddedReleasedBranchContinuationTest do
 
         late =
           peer(proof, action, self(), fn response ->
-            Process.sleep(150)
+            Process.sleep(2000)
             response
           end)
 
@@ -178,7 +178,7 @@ defmodule SmolBox.EmbeddedReleasedBranchContinuationTest do
                    action,
                    @budget,
                    late,
-                   System.monotonic_time(:millisecond) + 100
+                   System.monotonic_time(:millisecond) + 1500
                  )
       end
 

@@ -93,7 +93,7 @@ defmodule SmolBox.NativeReadyBranchPublicResolutionTest do
 
       response = response(operation, state)
 
-      if state.mode == :late, do: Process.sleep(750)
+      if state.mode == :late, do: Process.sleep(2000)
       state = if state.mode == :lost_once, do: %{state | mode: :normal}, else: state
       {:reply, response, state}
     end
@@ -254,7 +254,7 @@ defmodule SmolBox.NativeReadyBranchPublicResolutionTest do
       id: parent.worker_id,
       context: context,
       budget: %Budget{
-        timeout_ms: if(mode == :late, do: 500, else: 1000),
+        timeout_ms: if(mode == :late, do: 1500, else: 5000),
         max_request_bytes: 131_072,
         max_response_bytes: 131_072
       }

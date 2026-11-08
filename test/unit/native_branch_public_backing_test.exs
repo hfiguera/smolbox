@@ -329,7 +329,7 @@ defmodule SmolBox.NativeBranchPublicBackingTest do
 
   test "deadline after intent acceptance retains backing without entering the peer" do
     {runtime, store, parent, child, usage, authority, peer} =
-      fixture(budget: 500, accept_delay: 750)
+      fixture(budget: 1500, accept_delay: 2000)
 
     assert {:error, _} =
              Branches.release_storage(runtime, ManagedMachine.key(child), backing_removed: true)

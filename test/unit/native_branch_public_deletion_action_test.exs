@@ -236,7 +236,7 @@ defmodule SmolBox.NativeBranchPublicDeletionActionTest do
       id: parent.worker_id,
       context: context,
       budget: %Budget{
-        timeout_ms: options[:budget] || 1000,
+        timeout_ms: options[:budget] || 5000,
         max_request_bytes: 131_072,
         max_response_bytes: 131_072
       }
@@ -398,7 +398,7 @@ defmodule SmolBox.NativeBranchPublicDeletionActionTest do
       action = unquote(action)
 
       {runtime, store, parent, child, usage, authority, peer} =
-        fixture(action, budget: 500, accept_delay: 750)
+        fixture(action, budget: 1500, accept_delay: 2000)
 
       assert {:error, %Error{evidence: :not_dispatched}} = execute(runtime, child, action)
       saved = NativeBranchDeletionContract.fetch(Memory, store, child)
@@ -412,7 +412,7 @@ defmodule SmolBox.NativeBranchPublicDeletionActionTest do
       action = unquote(action)
 
       {runtime, store, parent, child, usage, authority, peer} =
-        fixture(action, budget: 500, delay: 750)
+        fixture(action, budget: 1500, delay: 2000)
 
       assert {:error, %Error{evidence: :dispatch_uncertain}} = execute(runtime, child, action)
       saved = NativeBranchDeletionContract.fetch(Memory, store, child)

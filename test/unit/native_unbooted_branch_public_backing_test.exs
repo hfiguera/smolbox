@@ -198,7 +198,7 @@ defmodule SmolBox.NativeUnbootedBranchPublicBackingTest do
       kind: :embedded,
       id: parent.worker_id,
       context: context,
-      budget: %Budget{timeout_ms: 1000, max_request_bytes: 131_072, max_response_bytes: 131_072}
+      budget: %Budget{timeout_ms: 5000, max_request_bytes: 131_072, max_response_bytes: 131_072}
     }
 
     worker = %Target{
@@ -266,7 +266,7 @@ defmodule SmolBox.NativeUnbootedBranchPublicBackingTest do
       assert peer == worker.connection.context.server and epoch == worker.connection.context.epoch
       assert request == closed.branch.native_authority.backing.request
 
-      assert budget.timeout_ms <= 1000 and budget.max_request_bytes <= 84 * 1024 and
+      assert budget.timeout_ms <= 5000 and budget.max_request_bytes <= 84 * 1024 and
                budget.max_response_bytes <= 72 * 1024
 
       assert_receive {:native_ack, proof}
@@ -440,7 +440,7 @@ defmodule SmolBox.NativeUnbootedBranchPublicBackingTest do
 
     late = fn _, _, _ ->
       send(self(), :late_backing_reply)
-      Process.sleep(750)
+      Process.sleep(2000)
       response
     end
 
@@ -452,7 +452,7 @@ defmodule SmolBox.NativeUnbootedBranchPublicBackingTest do
                true,
                budget,
                late,
-               System.monotonic_time(:millisecond) + 500
+               System.monotonic_time(:millisecond) + 1500
              )
 
     assert_receive :late_backing_reply

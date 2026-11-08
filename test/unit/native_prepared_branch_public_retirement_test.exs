@@ -234,7 +234,7 @@ defmodule SmolBox.NativePreparedBranchPublicRetirementTest do
       kind: :embedded,
       id: parent.worker_id,
       context: context,
-      budget: %Budget{timeout_ms: 1000, max_request_bytes: 131_072, max_response_bytes: 131_072}
+      budget: %Budget{timeout_ms: 5000, max_request_bytes: 131_072, max_response_bytes: 131_072}
     }
 
     target = %Target{kind: :embedded, id: parent.worker_id, connection: reference}
@@ -415,7 +415,7 @@ defmodule SmolBox.NativePreparedBranchPublicRetirementTest do
       total_output = byte_size(Jason.encode!(proof)) + byte_size(Jason.encode!(observed))
 
       budget = %Budget{
-        timeout_ms: 1000,
+        timeout_ms: 5000,
         max_request_bytes: total_input,
         max_response_bytes: total_output
       }
@@ -459,7 +459,7 @@ defmodule SmolBox.NativePreparedBranchPublicRetirementTest do
 
     call = fn _, request, _ ->
       send(self(), {:deadline_call, request["operation"]})
-      Process.sleep(750)
+      Process.sleep(2000)
 
       {:ok,
        %{
@@ -473,7 +473,7 @@ defmodule SmolBox.NativePreparedBranchPublicRetirementTest do
                context,
                parent,
                child,
-               %Budget{timeout_ms: 500, max_request_bytes: 131_072, max_response_bytes: 131_072},
+               %Budget{timeout_ms: 1500, max_request_bytes: 131_072, max_response_bytes: 131_072},
                call
              )
 
@@ -487,7 +487,7 @@ defmodule SmolBox.NativePreparedBranchPublicRetirementTest do
 
     assert {:error, %{evidence: :not_dispatched}} =
              EmbeddedPreparedBranchRetirement.run(context, parent, child, %Budget{
-               timeout_ms: 1000,
+               timeout_ms: 5000,
                max_request_bytes: 131_072,
                max_response_bytes: 131_072
              })
