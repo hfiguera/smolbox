@@ -2,18 +2,29 @@ defmodule SmolBox.Runtime.Inspection do
   alias SmolBox.Runtime.Target
   @moduledoc false
   alias SmolBox.{Backend, Error, Execution, Identity, Machine, MachineSpec, Validation}
-  alias SmolBox.Runtime.Session
+  alias SmolBox.Runtime.{NativeInspection, Session}
 
   def page(config, worker_id, options) do
-    with true <- Validation.identifier?(worker_id) and options?(options),
+    with true <- Validation.identifier?(worker_id) and common_options?(options),
          worker when worker != nil <-
-           Enum.find(config.workers, &(Target.id(&1) == worker_id)),
-         {:ok, machines} <- Backend.list(bounded_client(Target.connection(worker))) do
-      report(config, worker_id, machines, options)
+           Enum.find(config.workers, &(Target.id(&1) == worker_id)) do
+      inspect_target(config, worker, options)
     else
       false -> Session.error(:validation, :inspect)
       nil -> Session.error(:not_found, :worker)
-      {:error, _error} = error -> error
+    end
+  end
+
+  defp inspect_target(config, %{kind: :embedded} = worker, options),
+    do: NativeInspection.page(config, worker, options)
+
+  defp inspect_target(config, worker, options) do
+    with true <- options?(options),
+         {:ok, machines} <- Backend.list(bounded_client(Target.connection(worker))) do
+      report(config, Target.id(worker), machines, options)
+    else
+      false -> Session.error(:validation, :inspect)
+      error -> error
     end
   end
 
@@ -105,9 +116,11 @@ defmodule SmolBox.Runtime.Inspection do
   defp bounded_client(client),
     do: Backend.bounded(client, timeout_ms: 1000, max_response_bytes: 2_097_152)
 
-  defp options?(options) do
+  defp common_options?(options) do
     Validation.keys?(options, [:cursor, :limit]) and
-      Validation.integer?(Keyword.get(options, :limit, 20), 1, 100) and
-      (Keyword.get(options, :cursor) == nil or MachineSpec.valid_name?(options[:cursor]))
+      Validation.integer?(Keyword.get(options, :limit, 20), 1, 100)
   end
+
+  defp options?(options),
+    do: Keyword.get(options, :cursor) == nil or MachineSpec.valid_name?(options[:cursor])
 end

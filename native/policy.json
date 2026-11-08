@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "port_protocol_minor": 4,
+  "native_cancel_grace_ms": 3000,
+  "sdk_source": "unmodified",
+  "domain_ownership": "exclusive_cooperating_owner",
+  "sdk_observation_schema": 1,
+  "transfer_supervisor": 1,
+  "boot_owner_guard": 1,
+  "asset_preparation": 2,
+  "rustler_enabled": false
+}

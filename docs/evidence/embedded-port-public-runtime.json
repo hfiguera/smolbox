@@ -1,0 +1,400 @@
+{
+  "baseline_commit": "590434b203f589b3874f0042ebffccd10d48c5c2",
+  "cleanup": {
+    "disposable_linux_lab_stopped": true,
+    "linux_mixed_http_sdk_inventory": [],
+    "linux_native_sdk_inventory": [],
+    "linux_regression_http_sdk_inventory": [],
+    "macos_sdk_inventory": [],
+    "normal_runtime_and_service_shutdown": true,
+    "owned_vm_deletion_verified": true
+  },
+  "consumers": [
+    {
+      "evidence": {
+        "crash_handling_qualified": false,
+        "deliberate_process_interruption": false,
+        "disposable_exit": 7,
+        "drain_blocks_new_assignments": true,
+        "drain_survives_runtime_restart": true,
+        "existing_command_while_draining": true,
+        "file_bytes": 1048593,
+        "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+        "final_reserved_slots": 0,
+        "http_workers_exercised_while_native_draining": 0,
+        "identity": {
+          "architecture": "aarch64",
+          "assets_sha256": "881b505275b72ac4f7acaa79fd538e944265b02e55dbefacf84beb4b2ffe0055",
+          "build_sha256": "64d5e4daeb5246ef13dd393135c0a2e272b7e9dee8ccc6c6d145a49a90dc5491",
+          "engine_version": "0.1.0",
+          "platform": "macos",
+          "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+          "source_sha256": "e303886b242f160006bf6da73735e52f2276fe48b2a5f68b686f4ebc3df1e70b"
+        },
+        "inventory_after": [],
+        "inventory_before": [],
+        "owned_deleted": true,
+        "package_manifest_sha256": "6f47e8db94475ab62d6a457ed47392692a2dbd7e30a4789ef21c36d772c0c89f",
+        "proof": "passed",
+        "public_native_admission_enabled": true,
+        "resume_version_checked": true,
+        "retained_after_normal_runtime_restart": true,
+        "retained_write_exit": 7,
+        "scope": "public-port-package-consumer",
+        "store_mode": "ephemeral",
+        "without_rust": true
+      },
+      "lane": "current",
+      "minimum": false,
+      "package_sha256": "24ca00f3342a8ea2b6d360a051ec20733156fd1052c0b394e0da82136826ecf4",
+      "platform": "macos",
+      "proof_tool_sha256": {
+        "config.example.exs": "9a0178a7249aba9b4a7990a36162564bf77c39c355c7a5a9f57defae4b6330f3",
+        "demo.ex": "dbe800600eb4fc18af636a0ac6c48c427d290c39c666130d2d5c849b0f066938",
+        "native-proof.exs": "3bf30d07d96f1c7b50bd696c0a5ca7193b01266e77cd97450e4f61db3946209e",
+        "native_proof.py": "2853d7fb944597c3f939270042a597145743f73447bf42d38bceb6d4b6b4601e"
+      },
+      "runtime_dependencies": [
+        "finch",
+        "hpax",
+        "jason",
+        "mime",
+        "mint",
+        "mint_web_socket",
+        "nimble_options",
+        "nimble_pool",
+        "req",
+        "telemetry"
+      ],
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "without_rust": true
+    },
+    {
+      "evidence": {
+        "crash_handling_qualified": false,
+        "deliberate_process_interruption": false,
+        "disposable_exit": 7,
+        "drain_blocks_new_assignments": true,
+        "drain_survives_runtime_restart": true,
+        "existing_command_while_draining": true,
+        "file_bytes": 1048593,
+        "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+        "final_reserved_slots": 0,
+        "http_workers_exercised_while_native_draining": 0,
+        "identity": {
+          "architecture": "aarch64",
+          "assets_sha256": "881b505275b72ac4f7acaa79fd538e944265b02e55dbefacf84beb4b2ffe0055",
+          "build_sha256": "64d5e4daeb5246ef13dd393135c0a2e272b7e9dee8ccc6c6d145a49a90dc5491",
+          "engine_version": "0.1.0",
+          "platform": "macos",
+          "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+          "source_sha256": "e303886b242f160006bf6da73735e52f2276fe48b2a5f68b686f4ebc3df1e70b"
+        },
+        "inventory_after": [],
+        "inventory_before": [],
+        "owned_deleted": true,
+        "package_manifest_sha256": "6f47e8db94475ab62d6a457ed47392692a2dbd7e30a4789ef21c36d772c0c89f",
+        "proof": "passed",
+        "public_native_admission_enabled": true,
+        "resume_version_checked": true,
+        "retained_after_normal_runtime_restart": true,
+        "retained_write_exit": 7,
+        "scope": "public-port-package-consumer",
+        "store_mode": "ephemeral",
+        "without_rust": true
+      },
+      "lane": "minimum",
+      "minimum": true,
+      "package_sha256": "24ca00f3342a8ea2b6d360a051ec20733156fd1052c0b394e0da82136826ecf4",
+      "platform": "macos",
+      "proof_tool_sha256": {
+        "config.example.exs": "9a0178a7249aba9b4a7990a36162564bf77c39c355c7a5a9f57defae4b6330f3",
+        "demo.ex": "dbe800600eb4fc18af636a0ac6c48c427d290c39c666130d2d5c849b0f066938",
+        "native-proof.exs": "3bf30d07d96f1c7b50bd696c0a5ca7193b01266e77cd97450e4f61db3946209e",
+        "native_proof.py": "2853d7fb944597c3f939270042a597145743f73447bf42d38bceb6d4b6b4601e"
+      },
+      "runtime_dependencies": [
+        "finch",
+        "hpax",
+        "jason",
+        "mime",
+        "mint",
+        "mint_web_socket",
+        "nimble_options",
+        "nimble_pool",
+        "req",
+        "telemetry"
+      ],
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "without_rust": true
+    },
+    {
+      "evidence": {
+        "crash_handling_qualified": false,
+        "deliberate_process_interruption": false,
+        "disposable_exit": 7,
+        "drain_blocks_new_assignments": true,
+        "drain_survives_runtime_restart": true,
+        "existing_command_while_draining": true,
+        "file_bytes": 1048593,
+        "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+        "final_reserved_slots": 0,
+        "http_workers_exercised_while_native_draining": 0,
+        "identity": {
+          "architecture": "x86_64",
+          "assets_sha256": "a58df94b5a35f25fe647d56f9945d6cbdbab5d3ff77abc777200729b9d22274d",
+          "build_sha256": "f39c061cab3132ab2196925591cfa4a69290e2fd36979b061ba9b73491d33535",
+          "engine_version": "0.1.0",
+          "platform": "linux",
+          "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+          "source_sha256": "e303886b242f160006bf6da73735e52f2276fe48b2a5f68b686f4ebc3df1e70b"
+        },
+        "inventory_after": [],
+        "inventory_before": [],
+        "owned_deleted": true,
+        "package_manifest_sha256": "1af1bd1db8e73f81729162fb367c9fc2d9131bf05c0f327f46d27b74c46aa2ca",
+        "proof": "passed",
+        "public_native_admission_enabled": true,
+        "resume_version_checked": true,
+        "retained_after_normal_runtime_restart": true,
+        "retained_write_exit": 7,
+        "scope": "public-port-package-consumer",
+        "store_mode": "ephemeral",
+        "without_rust": true
+      },
+      "lane": "current",
+      "minimum": false,
+      "package_sha256": "24ca00f3342a8ea2b6d360a051ec20733156fd1052c0b394e0da82136826ecf4",
+      "platform": "linux",
+      "proof_tool_sha256": {
+        "config.example.exs": "9a0178a7249aba9b4a7990a36162564bf77c39c355c7a5a9f57defae4b6330f3",
+        "demo.ex": "dbe800600eb4fc18af636a0ac6c48c427d290c39c666130d2d5c849b0f066938",
+        "native-proof.exs": "3bf30d07d96f1c7b50bd696c0a5ca7193b01266e77cd97450e4f61db3946209e",
+        "native_proof.py": "2853d7fb944597c3f939270042a597145743f73447bf42d38bceb6d4b6b4601e"
+      },
+      "runtime_dependencies": [
+        "finch",
+        "hpax",
+        "jason",
+        "mime",
+        "mint",
+        "mint_web_socket",
+        "nimble_options",
+        "nimble_pool",
+        "req",
+        "telemetry"
+      ],
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "without_rust": true
+    },
+    {
+      "evidence": {
+        "crash_handling_qualified": false,
+        "deliberate_process_interruption": false,
+        "disposable_exit": 7,
+        "drain_blocks_new_assignments": true,
+        "drain_survives_runtime_restart": true,
+        "existing_command_while_draining": true,
+        "file_bytes": 1048593,
+        "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+        "final_reserved_slots": 0,
+        "http_workers_exercised_while_native_draining": 0,
+        "identity": {
+          "architecture": "x86_64",
+          "assets_sha256": "a58df94b5a35f25fe647d56f9945d6cbdbab5d3ff77abc777200729b9d22274d",
+          "build_sha256": "f39c061cab3132ab2196925591cfa4a69290e2fd36979b061ba9b73491d33535",
+          "engine_version": "0.1.0",
+          "platform": "linux",
+          "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+          "source_sha256": "e303886b242f160006bf6da73735e52f2276fe48b2a5f68b686f4ebc3df1e70b"
+        },
+        "inventory_after": [],
+        "inventory_before": [],
+        "owned_deleted": true,
+        "package_manifest_sha256": "1af1bd1db8e73f81729162fb367c9fc2d9131bf05c0f327f46d27b74c46aa2ca",
+        "proof": "passed",
+        "public_native_admission_enabled": true,
+        "resume_version_checked": true,
+        "retained_after_normal_runtime_restart": true,
+        "retained_write_exit": 7,
+        "scope": "public-port-package-consumer",
+        "store_mode": "ephemeral",
+        "without_rust": true
+      },
+      "lane": "minimum",
+      "minimum": true,
+      "package_sha256": "24ca00f3342a8ea2b6d360a051ec20733156fd1052c0b394e0da82136826ecf4",
+      "platform": "linux",
+      "proof_tool_sha256": {
+        "config.example.exs": "9a0178a7249aba9b4a7990a36162564bf77c39c355c7a5a9f57defae4b6330f3",
+        "demo.ex": "dbe800600eb4fc18af636a0ac6c48c427d290c39c666130d2d5c849b0f066938",
+        "native-proof.exs": "3bf30d07d96f1c7b50bd696c0a5ca7193b01266e77cd97450e4f61db3946209e",
+        "native_proof.py": "2853d7fb944597c3f939270042a597145743f73447bf42d38bceb6d4b6b4601e"
+      },
+      "runtime_dependencies": [
+        "finch",
+        "hpax",
+        "jason",
+        "mime",
+        "mint",
+        "mint_web_socket",
+        "nimble_options",
+        "nimble_pool",
+        "req",
+        "telemetry"
+      ],
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "without_rust": true
+    }
+  ],
+  "crash_handling_qualified": false,
+  "date": "2026-10-11",
+  "deliberate_process_interruption": false,
+  "failed_trials": [
+    {
+      "case": "input-manifest-admission",
+      "cleanup": "Exact stopped fixture from our own isolated trial removed using operator CLI after verifying immutable row digest; no receipt fabricated or native adoption attempted.",
+      "fix": "Validate input size separately from output max_bytes; public binary file regression added.",
+      "outcome": "failed, excluded from qualification"
+    },
+    {
+      "case": "example-stale-lifecycle-version",
+      "cleanup": "Original codec-preserved creation receipt authenticated and used for normal helper stop/delete before rerun.",
+      "fix": "Bounded refresh only for stale_version with not_dispatched evidence.",
+      "outcome": "failed, excluded from qualification"
+    },
+    {
+      "case": "CI-option-test-exception",
+      "fix": "Assert documented ArgumentError; final full CI and standalone tooling passed.",
+      "outcome": "initial CI failed, excluded"
+    }
+  ],
+  "final_http_regression": {
+    "artifacts": {
+      "node.smolmachine": "768b8d2158a75abd90ccc73a65a83717aebfe37e62ed91d0db0bb731584df776",
+      "python.smolmachine": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2"
+    },
+    "cold_setup_allowance": true,
+    "deliberate_process_interruption": false,
+    "inventory_after": [],
+    "inventory_before": [],
+    "normal_service_shutdown": true,
+    "pristine_database_absent": true,
+    "proof": "passed",
+    "runtime_sha256": "b67b25f363403e19deceb6897e5a4d94be30a079f8cb751372782f17fc99003a",
+    "runtime_version": "1.22.0",
+    "scope": "ordinary-http-regression",
+    "selected_tests": 3,
+    "source_overlay_sha256": "04a45f07d01140e9cc31d7ea5172e2782b4d222e62e9675a345226ba40e944d2"
+  },
+  "future_backends": {
+    "kubernetes": "not implemented; backend boundary retained",
+    "rustler": "not implemented; additive bridge design retained"
+  },
+  "linux_public_first_enrollment": {
+    "crash_handling_qualified": false,
+    "deliberate_process_interruption": false,
+    "disposable_exit": 7,
+    "drain_blocks_new_assignments": true,
+    "drain_survives_runtime_restart": true,
+    "existing_command_while_draining": true,
+    "file_bytes": 1048593,
+    "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+    "final_reserved_slots": 0,
+    "http_workers_exercised_while_native_draining": 0,
+    "identity": {
+      "architecture": "x86_64",
+      "assets_sha256": "a58df94b5a35f25fe647d56f9945d6cbdbab5d3ff77abc777200729b9d22274d",
+      "build_sha256": "f39c061cab3132ab2196925591cfa4a69290e2fd36979b061ba9b73491d33535",
+      "engine_version": "0.1.0",
+      "platform": "linux",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "e303886b242f160006bf6da73735e52f2276fe48b2a5f68b686f4ebc3df1e70b"
+    },
+    "owned_deleted": true,
+    "package_manifest_sha256": "1af1bd1db8e73f81729162fb367c9fc2d9131bf05c0f327f46d27b74c46aa2ca",
+    "proof": "passed",
+    "public_native_admission_enabled": true,
+    "resume_version_checked": true,
+    "retained_after_normal_runtime_restart": true,
+    "retained_write_exit": 7,
+    "scope": "public-managed-port-lifecycle",
+    "store_mode": "ephemeral"
+  },
+  "linux_public_postgresql_and_http": {
+    "crash_handling_qualified": false,
+    "deliberate_process_interruption": false,
+    "disposable_exit": 7,
+    "drain_blocks_new_assignments": true,
+    "drain_survives_runtime_restart": true,
+    "existing_command_while_draining": true,
+    "file_bytes": 1048593,
+    "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+    "final_reserved_slots": 0,
+    "http_workers_exercised_while_native_draining": 1,
+    "identity": {
+      "architecture": "x86_64",
+      "assets_sha256": "a58df94b5a35f25fe647d56f9945d6cbdbab5d3ff77abc777200729b9d22274d",
+      "build_sha256": "f39c061cab3132ab2196925591cfa4a69290e2fd36979b061ba9b73491d33535",
+      "engine_version": "0.1.0",
+      "platform": "linux",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "e303886b242f160006bf6da73735e52f2276fe48b2a5f68b686f4ebc3df1e70b"
+    },
+    "owned_deleted": true,
+    "package_manifest_sha256": "1af1bd1db8e73f81729162fb367c9fc2d9131bf05c0f327f46d27b74c46aa2ca",
+    "proof": "passed",
+    "public_native_admission_enabled": true,
+    "resume_version_checked": true,
+    "retained_after_normal_runtime_restart": true,
+    "retained_write_exit": 7,
+    "scope": "public-managed-port-lifecycle",
+    "store_mode": "durable"
+  },
+  "milestone": "public-development-port-runtime",
+  "mixed_inventory": {
+    "deliberate_process_interruption": false,
+    "http": [],
+    "native": [],
+    "normal_http_shutdown": true,
+    "separate_sdk_domains": true
+  },
+  "private_exports_sha256": {
+    "linux_http": "0c022856d1f038f3f6cae28887101d8b6f9b78b9d0b9b2a2fdd5f0c74a8e7c93",
+    "linux_public": "20c61ad3b6175ac700346d6bf19f934f27e524ac627e9a145bda69821bae105f"
+  },
+  "public_native_admission_enabled": true,
+  "qualification": "development",
+  "release_qualification_complete": false,
+  "remaining_release_gates": [
+    "Deferred live helper/BEAM loss, pre-main boot and watcher failure campaign; durable crash-boundary faults.",
+    "Remaining independent SDK CLI race qualification.",
+    "Exact native library/firmware/kernel/guest source correspondence and required license/source delivery.",
+    "Publisher authentication, distribution signing/notarization and consumer rerun against exact signed bytes."
+  ],
+  "schema": 1,
+  "source": {
+    "library_and_project_bytes_match_all_consumer_archives": true,
+    "library_files": 172,
+    "library_tree_algorithm": "SHA256(sorted relative path + NUL + lowercase file SHA256 + LF)",
+    "library_tree_sha256": "a93e30aeb8eb958547631c10f4edca9271b12430e76da1336e398d4b87ca3c94",
+    "mix_exs_sha256": "095d3b5e61f74078947a99030b43e3026f03d2bdc8c583a8ce286ae65ad3a641",
+    "notes": "Consumer archive predates evidence and final documentation edits; its lib/ and mix.exs bytes match the final implementation. This does not qualify an unpublished final archive as a signed release.",
+    "source_overlay_sha256": "04a45f07d01140e9cc31d7ea5172e2782b4d222e62e9675a345226ba40e944d2"
+  },
+  "validation": {
+    "elixir_ci": {
+      "format_compile_xref_credo_exdna_credence_dialyzer": "passed",
+      "passed": 746,
+      "runtime_excluded": 29
+    },
+    "example_inclusive_clone_check": "passed",
+    "native_contracts": "Prior 590434b qualification: 84 Rust and four Python integrity tests; native sources/packages unchanged.",
+    "native_package_rebuilt": false,
+    "native_source_changed": false,
+    "public_docs_warnings_as_errors": "passed",
+    "standalone_ci_tools": {
+      "passed": 32
+    }
+  }
+}

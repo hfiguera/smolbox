@@ -3,12 +3,15 @@ defmodule SmolBox.ExecutionValidation do
 
   alias SmolBox.{Error, Machine, MachineSpec, Validation}
 
+  alias SmolBox.Backend.Assignment
+  alias SmolBox.Embedded.Identity
+
   # The caller validates the record's struct shape, spec and scalar fields first.
   @spec metadata?(map()) :: boolean()
   def metadata?(record) do
     deadlines?(record) and reservation?(record) and machine?(record.created_machine, record) and
       artifacts?(record.artifacts, record.spec) and error?(record.last_error) and
-      history?(record.errors)
+      history?(record.errors) and Assignment.record_valid?(record)
   end
 
   defp deadlines?(record) do
@@ -56,7 +59,7 @@ defmodule SmolBox.ExecutionValidation do
 
     Validation.struct_shape?(machine, Machine) and machine.name == record.machine_name and
       machine.state in [:created, :running, :stopped] and
-      Validation.integer?(machine.created_at, 0, 253_402_300_799) and
+      machine_identity?(machine, record) and
       allocations?(machine, profile, record) and
       ports?(machine, record) and
       mounts?(machine, record) and
@@ -64,6 +67,20 @@ defmodule SmolBox.ExecutionValidation do
   end
 
   def machine?(_machine, _record), do: false
+
+  defp machine_identity?(%{backend_identity: nil} = machine, %{backend_assignment: nil}),
+    do: Validation.integer?(machine.created_at, 0, 253_402_300_799)
+
+  defp machine_identity?(machine, %{backend_assignment: assignment}) when not is_nil(assignment),
+    do:
+      machine.created_at == nil and
+        Identity.matches?(machine.backend_identity, assignment) and
+        pid_state?(machine.state, machine.backend_identity.pid_identity)
+
+  defp machine_identity?(_machine, _record), do: false
+
+  defp pid_state?(:running, pid), do: pid != nil
+  defp pid_state?(_state, pid), do: pid == nil
 
   defp allocations?(machine, profile, %{managed_machine: key}) when not is_nil(key),
     do:

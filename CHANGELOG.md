@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Add development support for an embedded smolvm Port target through the public
+  supervised Runtime, alongside existing HTTP workers. Require an approved native
+  package, enrolled domain and a store with backend binding and recovery support.
+  Rust is unnecessary for consumers. Rustler and Kubernetes remain future options.
+- Support offline disposable and retained execution, bounded binary files, worker
+  draining and normal Runtime restart with surviving native ownership records.
+  Native records use codec version 16; upgrade every store reader before use.
+  Live interruption qualification and native distribution approval remain pending.
+- Correct embedded input admission to validate the input manifest's `size` field.
+
 ## 0.4.3
 
 Runtime reliability and documentation improvements. The default worker remains

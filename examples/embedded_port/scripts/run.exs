@@ -1,0 +1,5 @@
+Code.require_file(Path.expand("../lib/demo.ex", __DIR__))
+{target, _bindings} = Code.eval_file(Path.expand("../config.example.exs", __DIR__))
+root = System.fetch_env!("SMOLBOX_EMBEDDED_RUN_DIRECTORY")
+evidence = SmolBox.Example.EmbeddedPort.run(target, root)
+IO.puts(Jason.encode!(evidence))

@@ -96,6 +96,10 @@ defmodule SmolBox.Store.RecordOps do
           non_neg_integer()
         ) :: {:ok, Execution.t()} | {:error, Error.t()}
   def reservation(record, worker, machine, worker_lease, capacity, used, now) do
+    reservation(record, worker, machine, worker_lease, capacity, used, now, nil)
+  end
+
+  def reservation(record, worker, machine, worker_lease, capacity, used, now, assignment) do
     needed = resources(record)
 
     with false <- SmolBox.Source.remote?(record.spec.artifact),
@@ -106,7 +110,8 @@ defmodule SmolBox.Store.RecordOps do
          true <- fits?(needed, used, capacity) do
       reserved = %{
         record
-        | worker_id: worker,
+        | backend_assignment: assignment,
+          worker_id: worker,
           machine_name: machine,
           worker_generation: worker_lease.generation,
           reservation: needed

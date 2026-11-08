@@ -3,6 +3,8 @@ defmodule SmolBox.NetworkPolicyTest do
 
   alias SmolBox.{ExecutionSpec, Machine, MachineSpec, NetworkPolicy, Profile}
   alias SmolBox.Runtime.WorkerConfig
+  alias SmolBox.Store.CodecNative
+
   alias SmolBox.Store.{Codec, Contract}
 
   test "bounded explicit policies canonicalize order and reject unrestricted or ambiguous inputs" do
@@ -126,6 +128,7 @@ defmodule SmolBox.NetworkPolicyTest do
         }
     }
 
+    legacy = CodecNative.strip(legacy)
     bytes = "smolbox-record-v1\0" <> :erlang.term_to_binary(legacy)
     assert {:ok, ^record} = Codec.decode(bytes)
     assert {:error, _} = Codec.decode(bytes <> "extra")
@@ -167,6 +170,7 @@ defmodule SmolBox.NetworkPolicyTest do
         created_machine: Map.drop(machine, [:network, :ports, :mounts])
     }
 
+    legacy = CodecNative.strip(legacy)
     assert {:ok, ^record} = Codec.decode("smolbox-record-v1\0" <> :erlang.term_to_binary(legacy))
     {:ok, policy} = NetworkPolicy.new(hosts: ["api.example.com"])
     assert {:error, _} = Codec.encode(%{record | created_machine: %{machine | network: policy}})

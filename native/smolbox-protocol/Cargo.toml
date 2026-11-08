@@ -1,0 +1,11 @@
+[package]
+name = "smolbox-protocol"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+base64.workspace = true

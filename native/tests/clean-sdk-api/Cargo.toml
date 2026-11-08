@@ -1,0 +1,13 @@
+[package]
+name = "smolbox-clean-sdk-api-check"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+# Independent public API/resolver check against the same verified clean input.
+[workspace]
+
+[dependencies]
+smolvm = { path = "../../target/upstream/smolvm-clean", version = "=1.22.0" }
+smolvm-pack = { path = "../../target/upstream/smolvm-clean/crates/smolvm-pack", version = "=1.22.0" }
+

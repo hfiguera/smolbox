@@ -2,7 +2,7 @@ defmodule SmolBox.CI.Gate do
   @moduledoc false
 
   @runtime ~w(smolbox-runtime-candidate smolbox-linux-runtime smolbox-macos-runtime)
-  @ordinary ~w(smolbox-ci-tools smolbox-format-compile smolbox-credo-ex-slop
+  @ordinary ~w(smolbox-native smolbox-ci-tools smolbox-format-compile smolbox-credo-ex-slop
     smolbox-ex-dna smolbox-credence smolbox-dialyzer smolbox-tests
     smolbox-coverage smolbox-quality-canaries smolbox-security smolbox-docs-package
     smolbox-compatibility smolbox-minimum-dependencies smolbox-minimal-host smolbox-store-contract smolbox-community-workspace)

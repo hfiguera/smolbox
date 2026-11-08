@@ -118,6 +118,7 @@ defmodule SmolBox.Execution do
     :claim_owner,
     :claim_until_ms,
     :absence_at_ms,
+    backend_assignment: nil,
     schema: 1,
     version: 1,
     generation: 0,
@@ -150,6 +151,7 @@ defmodule SmolBox.Execution do
           | :cancelling
   @type t :: %__MODULE__{
           managed_machine: SmolBox.ManagedMachine.key() | nil,
+          backend_assignment: SmolBox.Backend.Assignment.t() | nil,
           schema: 1,
           scope: String.t(),
           id: String.t(),
@@ -213,7 +215,7 @@ defmodule SmolBox.Execution do
          true <- Validation.keys?(changes, @mutable),
          true <- timestamp?(now) and now >= record.updated_at_ms,
          next = struct!(record, changes),
-         true <- next.state == record.state or next.state in @edges[record.state],
+         true <- transition_allowed?(record, next),
          :ok <- evidence_transition(record, next),
          :ok <- validate(next) do
       next = %{next | version: record.version + 1, updated_at_ms: now}
@@ -229,6 +231,25 @@ defmodule SmolBox.Execution do
       _invalid -> invalid()
     end
   end
+
+  defp transition_allowed?(record, next),
+    do:
+      next.state == record.state or next.state in @edges[record.state] or
+        (record.backend_assignment != nil and record.state in [:accepted, :preparing, :ready] and
+           next.state == :unknown) or admission_rejection?(record, next)
+
+  defp admission_rejection?(%{state: :accepted, reservation: nil, worker_id: nil}, %{
+         state: :failed,
+         cleanup: :complete,
+         last_error: %Error{
+           operation: :prepare_artifact,
+           evidence: :not_dispatched,
+           category: category
+         }
+       }),
+       do: category in [:unsupported_capability, :validation]
+
+  defp admission_rejection?(_record, _next), do: false
 
   @doc "Atomic store acceptance must call this before admission; queue expiry never dispatches."
   @spec expired?(t(), non_neg_integer()) :: boolean()

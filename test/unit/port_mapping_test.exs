@@ -3,6 +3,8 @@ defmodule SmolBox.PortMappingTest do
   alias SmolBox.{Machine, MachineSpec, ManagedMachineSpec, PortMapping}
   alias SmolBox.Store.CodecVolumes
 
+  alias SmolBox.Store.CodecNative
+
   alias SmolBox.Store.{
     Codec,
     CodecExecution,
@@ -84,6 +86,7 @@ defmodule SmolBox.PortMappingTest do
 
     legacy =
       record
+      |> CodecNative.strip()
       |> CodecFiles.strip()
       |> CodecExpansion.strip()
       |> Map.delete(:reserved_ports)
@@ -112,6 +115,7 @@ defmodule SmolBox.PortMappingTest do
 
     old =
       record
+      |> CodecNative.strip()
       |> CodecFiles.strip()
       |> CodecExpansion.strip()
       |> Map.delete(:reserved_ports)
@@ -136,6 +140,7 @@ defmodule SmolBox.PortMappingTest do
 
     old_command =
       command
+      |> CodecNative.strip()
       |> Map.update!(:created_machine, &Map.delete(&1, :ports))
       |> CodecExecution.strip()
       |> CodecFiles.strip()

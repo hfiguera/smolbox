@@ -1,0 +1,26 @@
+{
+  "type": "request",
+  "epoch": "abababababababababababababababab",
+  "id": 1,
+  "budget_ms": 1000,
+  "initial_credit": 262144,
+  "initial_event_credit": 64,
+  "operation": {
+    "operation": "exec",
+    "receipt": {
+      "target_id": "embedded-local",
+      "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+      "name": "owned",
+      "owner_token": "6767676767676767676767676767676767676767676767676767676767676767",
+      "incarnation": "89898989898989898989898989898989",
+      "material_sha256": "abababababababababababababababababababababababababababababababab"
+    },
+    "command": {
+      "argv": ["/bin/sh", "-c", "printf witness"],
+      "env": {"KEY": ""},
+      "workdir": "/workspace",
+      "user": "65534:65534",
+      "max_output_bytes": 1024
+    }
+  }
+}

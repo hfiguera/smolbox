@@ -1,6 +1,8 @@
 defmodule SmolBox.Runtime.Target do
   @moduledoc false
-  alias SmolBox.Backend.HTTP
+  alias SmolBox.Backend.{Assignment, Embedded, HTTP}
+  alias SmolBox.Embedded.{Config, Port}
+  alias SmolBox.{Error, MachineSpec}
   alias SmolBox.Runtime.WorkerConfig
 
   @worker_fields [
@@ -24,7 +26,7 @@ defmodule SmolBox.Runtime.Target do
   ]
   @derive {Inspect,
            only: [:kind, :id, :architecture, :platform, :runtime_version, :qualification]}
-  defstruct [:kind, :id, :connection, :domain_binding] ++ @worker_fields
+  defstruct [:kind, :id, :connection, :domain_binding, :native_config] ++ @worker_fields
 
   @type t :: %__MODULE__{}
 
@@ -37,13 +39,75 @@ defmodule SmolBox.Runtime.Target do
 
   def normalize(%__MODULE__{} = target), do: target
 
+  def normalize(%Config{} = config) do
+    case Embedded.reference(config, {:global, {Port, node()}}) do
+      {:ok, reference} ->
+        struct!(
+          __MODULE__,
+          Map.take(Map.from_struct(config), [
+            :architecture,
+            :platform,
+            :artifacts,
+            :profiles,
+            :capacity,
+            :allocation_floor,
+            :qualification,
+            :draining
+          ])
+          |> Map.merge(%{
+            kind: :embedded,
+            id: config.id,
+            connection: reference,
+            domain_binding: Config.domain_binding(config),
+            native_config: config,
+            runtime_version: config.package_identity["engine_version"],
+            checkpoints: [],
+            sources: [],
+            export_destinations: [],
+            checkpoint_policies: [],
+            branch_policies: []
+          })
+        )
+
+      {:error, error} ->
+        raise error
+    end
+  end
+
   # Keep the original HTTP client in normalized targets for existing host tooling.
   # Managed code obtains its adapter reference here, never through worker fields.
   def connection(%{kind: :http, client: client}), do: HTTP.reference(client)
   def connection(%{__struct__: WorkerConfig, client: client}), do: HTTP.reference(client)
   def connection(%__MODULE__{connection: connection}), do: connection
 
+  def connection(target, record), do: target |> connection() |> SmolBox.Backend.assigned(record)
+
+  def require_operation(target, operation),
+    do: target |> connection() |> SmolBox.Backend.require_operation(operation)
+
+  # Operational references stay in the task's configuration, never in a record.
+  # Preserve an existing pin, including unavailable pins, across every stage.
+  def pin(%__MODULE__{kind: :embedded} = target),
+    do: %{target | connection: SmolBox.Backend.pin(target.connection)}
+
+  def pin(target), do: target
+
+  def pin_config(config, record, eligible) do
+    workers =
+      Enum.map(config.workers, fn worker ->
+        selected =
+          if record.worker_id,
+            do: id(worker) == record.worker_id,
+            else: id(worker) in eligible and supports?(worker, record.spec)
+
+        if selected, do: pin(worker), else: worker
+      end)
+
+    %{config | workers: workers}
+  end
+
   def id(%__MODULE__{id: id}), do: id
+  def id(%Config{id: id}), do: id
   def id(%{client: %{worker: %{id: id}}}), do: id
 
   def endpoint(%{kind: :http, client: client}),
@@ -53,8 +117,10 @@ defmodule SmolBox.Runtime.Target do
     do: {:http, client.worker.base_url, client.worker.unix_socket}
 
   def endpoint(%__MODULE__{kind: kind, domain_binding: domain}), do: {kind, domain}
+  def endpoint(%Config{} = config), do: {:embedded, Config.domain_binding(config)}
 
   def validate(%{__struct__: WorkerConfig} = worker), do: WorkerConfig.validate(worker)
+  def validate(%Config{} = config), do: Config.validate(config)
 
   def validate(%__MODULE__{kind: :http} = target) do
     worker = target |> Map.take(@worker_fields) |> then(&struct!(WorkerConfig, &1))
@@ -62,16 +128,60 @@ defmodule SmolBox.Runtime.Target do
     with true <- SmolBox.Validation.struct_shape?(target, __MODULE__),
          :ok <- WorkerConfig.validate(worker),
          true <- target.id == worker.client.worker.id,
-         true <- target.connection == nil and target.domain_binding == nil do
+         true <-
+           target.connection == nil and target.domain_binding == nil and
+             target.native_config == nil do
       :ok
     else
       _ -> {:error, %SmolBox.Error{category: :validation, operation: :worker}}
     end
   end
 
+  def validate(%__MODULE__{kind: :embedded, native_config: config} = target) do
+    with :ok <- Config.validate(config),
+         true <- SmolBox.Validation.struct_shape?(target, __MODULE__),
+         true <- target == normalize(config),
+         do: :ok,
+         else: (_invalid -> {:error, %Error{category: :validation, operation: :worker}})
+  end
+
   def validate(_), do: {:error, %SmolBox.Error{category: :validation, operation: :worker}}
 
+  def supports?(%__MODULE__{kind: :embedded, native_config: config}, spec),
+    do: Assignment.supports?(config, spec)
+
+  def supports?(%Config{} = config, spec), do: Assignment.supports?(config, spec)
   def supports?(target, spec), do: WorkerConfig.supports?(worker_definition(target), spec)
+
+  def allocation(%__MODULE__{kind: :embedded, native_config: config} = target, spec, name) do
+    with {:ok, assignment} <- Assignment.new(config, spec, name),
+         do: {:ok, {target.id, name, target.capacity, assignment}}
+  end
+
+  def allocation(target, _spec, name), do: {:ok, {id(target), name, target.capacity}}
+
+  def qualify(%__MODULE__{kind: :embedded} = target, spec),
+    do: target |> connection() |> SmolBox.Backend.qualify_creation(spec)
+
+  def qualify(_target, _spec), do: :ok
+
+  def machine_spec(%__MODULE__{kind: :embedded, native_config: config}, spec, name) do
+    if Assignment.supports?(config, spec) do
+      artifact =
+        Enum.find(config.artifacts, &(Map.take(&1, ~w(id sha256 architecture)) == spec.artifact))
+
+      profile = spec.profile
+
+      MachineSpec.new(name, artifact["path"],
+        cpus: profile.cpus,
+        memory_mb: profile.memory_mb,
+        storage_gb: profile.storage_gb,
+        overlay_gb: profile.overlay_gb
+      )
+    else
+      {:error, %Error{category: :unsupported_capability, operation: :create}}
+    end
+  end
 
   def machine_spec(target, spec, name),
     do: WorkerConfig.machine_spec(worker_definition(target), spec, name)

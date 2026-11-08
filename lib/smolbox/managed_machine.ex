@@ -9,6 +9,8 @@ defmodule SmolBox.ManagedMachine do
   mutations require explicit operator resolution before the machine can be reused.
   """
   alias SmolBox.{Error, Machine, ManagedMachineSpec, Validation}
+
+  alias SmolBox.Backend.Assignment
   alias SmolBox.Store.RecordOps
 
   alias SmolBox.Store.VolumeAttachments
@@ -39,6 +41,7 @@ defmodule SmolBox.ManagedMachine do
                 :last_request,
                 :operation_deadline_ms,
                 :resolved_at_ms,
+                backend_assignment: nil,
                 disk_sizes: nil,
                 disk_expansions: %{},
                 active_expansion: nil,
@@ -118,6 +121,7 @@ defmodule SmolBox.ManagedMachine do
          true <- SmolBox.DiskExpansion.valid_machine?(record),
          true <-
            fields?(record) and ownership?(record) and lifecycle?(record) and preparation?(record) and
+             Assignment.record_valid?(record) and
              SmolBox.Export.history_valid?(record) and
              SmolBox.CheckpointCapture.history_valid?(record) and
              SmolBox.Branch.valid_machine?(record) do
@@ -207,7 +211,7 @@ defmodule SmolBox.ManagedMachine do
         r.reserved_ports == [] and
         r.created_machine == nil and r.observed_machine == nil and
         (r.state in [:accepted, :deleted] or
-           (r.state == :conflict and match?(%Error{category: :port_conflict}, r.last_error)))
+           (r.state == :conflict and unreserved_conflict?(r.last_error)))
 
   defp ownership?(r) do
     Enum.all?([
@@ -224,6 +228,18 @@ defmodule SmolBox.ManagedMachine do
       same_observation?(r)
     ])
   end
+
+  defp unreserved_conflict?(%Error{category: :port_conflict}), do: true
+
+  defp unreserved_conflict?(%Error{
+         operation: :prepare_artifact,
+         evidence: :not_dispatched,
+         category: category
+       })
+       when category in [:unsupported_capability, :validation],
+       do: true
+
+  defp unreserved_conflict?(_error), do: false
 
   defp same_observation?(%{created_machine: nil}), do: true
   defp same_observation?(%{observed_machine: nil}), do: true

@@ -26,6 +26,10 @@ Choose one path to your first execution:
   confirm output collection and VM cleanup.
 
 See [Supported platforms](docs/supported-platforms.md) for host prerequisites.
+
+The [embedded Port setup guide](docs/embedded-port.md) describes development
+support for local execution through the public Runtime API, available from this
+source checkout with a separately approved native package.
 For an existing application, use [Upgrading SmolBox](docs/upgrading.md).
 
 ## Why use SmolBox?

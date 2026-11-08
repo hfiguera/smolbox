@@ -4,7 +4,17 @@ defmodule SmolBox.Runtime.Coordinator do
   use GenServer
 
   alias SmolBox.{Execution, Telemetry}
-  alias SmolBox.Runtime.{Executor, Machines, Session, WorkerControls, WorkerHealth}
+
+  alias SmolBox.Runtime.{
+    Executor,
+    Machines,
+    NativeRecovery,
+    NativeSupport,
+    Session,
+    WorkerControls,
+    WorkerHealth
+  }
+
   alias SmolBox.Telemetry.Dispatcher
 
   def start_link(options), do: GenServer.start_link(__MODULE__, options)
@@ -16,6 +26,10 @@ defmodule SmolBox.Runtime.Coordinator do
       parent: parent,
       tasks: nil,
       active: %{},
+      task_targets: %{},
+      native_frozen: MapSet.new(NativeSupport.targets(config), &Target.id/1),
+      native_holders: %{},
+      coordinator: self(),
       maintenance: MapSet.new(),
       scan: nil,
       health: %{},
@@ -39,6 +53,61 @@ defmodule SmolBox.Runtime.Coordinator do
 
   @impl GenServer
   def handle_call(:config, _from, state), do: {:reply, {:ok, state.config}, state}
+
+  def handle_call({:native_available, id}, _from, state),
+    do: {:reply, not MapSet.member?(state.native_frozen, id), state}
+
+  def handle_call({:native_acquire, id}, {caller, _tag}, state) do
+    cond do
+      not native_target?(state, id) ->
+        {:reply, Session.error(:validation, :reconcile), state}
+
+      Map.has_key?(state.native_holders, id) or native_busy?(state, id) ->
+        {:reply, Session.error(:admission_exhausted, :reconcile), state}
+
+      true ->
+        holder = {caller, Process.monitor(caller)}
+
+        {:reply, :ok,
+         %{
+           state
+           | native_holders: Map.put(state.native_holders, id, holder),
+             native_frozen: MapSet.put(state.native_frozen, id)
+         }}
+    end
+  end
+
+  def handle_call({:native_release, id}, {caller, _tag}, state) do
+    case state.native_holders[id] do
+      {^caller, monitor} ->
+        Process.demonitor(monitor, [:flush])
+        {:reply, :ok, %{state | native_holders: Map.delete(state.native_holders, id)}}
+
+      _ ->
+        {:reply, Session.error(:stale_claim, :reconcile), state}
+    end
+  end
+
+  def handle_call({:native_quiesce, id}, _from, state) do
+    if native_target?(state, id) do
+      state = %{state | native_frozen: MapSet.put(state.native_frozen, id)}
+      busy = native_busy?(state, id)
+      result = if busy, do: Session.error(:admission_exhausted, :reconcile), else: :ok
+      {:reply, result, state}
+    else
+      {:reply, Session.error(:validation, :reconcile), state}
+    end
+  end
+
+  def handle_call({:native_ready, id}, {caller, _tag}, state) do
+    case state.native_holders[id] do
+      {^caller, _monitor} ->
+        {:reply, :ok, %{state | native_frozen: MapSet.delete(state.native_frozen, id)}}
+
+      _ ->
+        {:reply, Session.error(:stale_claim, :reconcile), state}
+    end
+  end
 
   def handle_call({:lookup_terminal, key}, _from, state) do
     result =
@@ -87,7 +156,7 @@ defmodule SmolBox.Runtime.Coordinator do
         {:reply, Session.error(:admission_exhausted, :reconcile), state}
 
       true ->
-        {:reply, :ok, launch(state, {key, lane})}
+        {:reply, :ok, launch(state, {key, lane, record.worker_id})}
     end
   end
 
@@ -128,8 +197,11 @@ defmodule SmolBox.Runtime.Coordinator do
         status(state, worker) != status(next, worker),
         do: Telemetry.worker(state.config.telemetry_table, worker, status(next, worker))
 
-    machine_keys = Enum.map(machines, &{{:machine, {&1.scope, &1.id}}, :maintenance})
-    command_keys = Enum.map(records, &{Execution.key(&1), lane(&1, state.config.clock.now())})
+    machine_keys =
+      Enum.map(machines, &{{:machine, {&1.scope, &1.id}}, :maintenance, &1.worker_id})
+
+    command_keys =
+      Enum.map(records, &{Execution.key(&1), lane(&1, state.config.clock.now()), &1.worker_id})
 
     keys =
       if state.machines_first,
@@ -145,8 +217,18 @@ defmodule SmolBox.Runtime.Coordinator do
     {:noreply, forget(state, reference)}
   end
 
-  def handle_info({:DOWN, reference, :process, _pid, _reason}, state),
-    do: {:noreply, forget(state, reference)}
+  def handle_info({:DOWN, reference, :process, _pid, _reason}, state) do
+    holders =
+      Map.reject(state.native_holders, fn {_id, {_owner, monitor}} -> monitor == reference end)
+
+    {:noreply, forget(%{state | native_holders: holders}, reference)}
+  end
+
+  defp native_target?(state, id),
+    do: Enum.any?(state.config.workers, &match?(%{kind: :embedded, id: ^id}, &1))
+
+  defp native_busy?(state, id),
+    do: Enum.any?(state.task_targets, fn {_ref, ids} -> id in ids end)
 
   defp forget(state, reference) do
     if state.scan == reference,
@@ -154,12 +236,14 @@ defmodule SmolBox.Runtime.Coordinator do
       else: %{
         state
         | active: Map.delete(state.active, reference),
+          task_targets: Map.delete(state.task_targets, reference),
           maintenance: MapSet.delete(state.maintenance, reference)
       }
   end
 
-  defp launch(state, {key, lane}) do
-    if available?(state, lane) and key not in Map.values(state.active) do
+  defp launch(state, {key, lane, assigned}) do
+    if available?(state, lane) and key not in Map.values(state.active) and
+         not MapSet.member?(state.native_frozen, assigned) do
       eligible =
         for worker <- state.config.workers,
             status(state, worker) == :ready,
@@ -175,7 +259,14 @@ defmodule SmolBox.Runtime.Coordinator do
           do: MapSet.put(state.maintenance, task.ref),
           else: state.maintenance
 
-      %{state | active: Map.put(state.active, task.ref, key), maintenance: maintenance}
+      targets = if assigned, do: [assigned], else: eligible
+
+      %{
+        state
+        | active: Map.put(state.active, task.ref, key),
+          maintenance: maintenance,
+          task_targets: Map.put(state.task_targets, task.ref, targets)
+      }
     else
       state
     end
@@ -201,23 +292,27 @@ defmodule SmolBox.Runtime.Coordinator do
     mode = get_in(state.health, [Target.id(worker), :admission_mode])
 
     cond do
+      MapSet.member?(state.native_frozen, Target.id(worker)) -> :unavailable
       worker.draining or mode == :draining -> :draining
       mode == :unavailable -> :unavailable
       true -> health_status(state, worker)
     end
   end
 
-  defp health_status(state, worker),
-    do:
-      WorkerHealth.status(
-        Map.get(state.health, Target.id(worker)),
-        state.config.clock.monotonic()
-      )
+  defp health_status(state, worker) do
+    if MapSet.member?(state.native_frozen, Target.id(worker)),
+      do: :unavailable,
+      else:
+        WorkerHealth.status(
+          Map.get(state.health, Target.id(worker)),
+          state.config.clock.monotonic()
+        )
+  end
 
-  defp scan(config, cursor, machine_cursor, previous, refresh) do
+  defp scan(config, cursor, machine_cursor, previous, refresh, coordinator) do
     health =
       config.workers
-      |> Task.async_stream(&probe(config, &1, previous, refresh),
+      |> Task.async_stream(&probe(config, &1, previous, refresh, coordinator),
         max_concurrency: 4,
         timeout: config.lease_ms,
         on_timeout: :kill_task
@@ -247,10 +342,17 @@ defmodule SmolBox.Runtime.Coordinator do
   defp scan_safely(state, refresh),
     do:
       Session.safe(fn ->
-        scan(state.config, state.cursor, state.machine_cursor, state.health, refresh)
+        scan(
+          state.config,
+          state.cursor,
+          state.machine_cursor,
+          state.health,
+          refresh,
+          state.coordinator
+        )
       end)
 
-  defp probe(config, worker, previous, refresh) do
+  defp probe(config, worker, previous, refresh, coordinator) do
     id = Target.id(worker)
 
     observation =
@@ -261,9 +363,7 @@ defmodule SmolBox.Runtime.Coordinator do
              config.lease_ms
            ]) do
         {:ok, _lease} ->
-          if refresh,
-            do: WorkerHealth.observe(worker, config.clock),
-            else: Map.get(previous, id)
+          observe_worker(config, worker, previous, refresh, coordinator)
 
         _failed ->
           nil
@@ -271,4 +371,20 @@ defmodule SmolBox.Runtime.Coordinator do
 
     Map.put(observation || %{}, :admission_mode, WorkerControls.mode(config, id))
   end
+
+  defp observe_worker(config, %{kind: :embedded} = worker, previous, _refresh, coordinator),
+    do:
+      NativeRecovery.observe(
+        config,
+        worker,
+        get_in(previous, [worker.id, :recovery]),
+        coordinator
+      )
+
+  defp observe_worker(config, worker, previous, refresh, _coordinator),
+    do:
+      if(refresh,
+        do: WorkerHealth.observe(worker, config.clock),
+        else: Map.get(previous, Target.id(worker))
+      )
 end

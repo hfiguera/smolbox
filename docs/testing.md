@@ -20,6 +20,13 @@ JSON records supply the exact inputs and outcomes behind a report. They are
 optional supporting material; you do not need to understand them to run a guide.
 Performance measurements describe their particular workload and host.
 
+The embedded Port [setup guide](embedded-port.md) describes its development
+qualification scope and public Runtime setup. Ordinary proofs do not qualify
+deliberate process-loss boundaries. In disposable nested Linux HTTP runs,
+`SMOLBOX_SLOW_SETUP=true` increases cold fixture setup/observation allowances
+without selecting candidate deployment controls. Individual command deadlines
+and cancellation scenarios keep their explicit overrides.
+
 ## Worker versions
 
 | Report | What it covers |

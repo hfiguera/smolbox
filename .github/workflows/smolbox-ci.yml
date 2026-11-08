@@ -17,6 +17,27 @@ env:
   MIX_ENV: test
 
 jobs:
+  smolbox-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      RUSTUP_TOOLCHAIN: '1.98.1'
+      CARGO_BUILD_JOBS: '2'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Install the qualified Rust toolchain
+        run: rustup toolchain install 1.98.1 --profile minimal --component clippy --component rustfmt
+      - name: Check pinned source, framing, engine and helper contracts
+        run: |
+          python3 --version
+          rustc --version
+          cargo --version
+          bash native/check.sh
+      - name: Check tracked files were not modified
+        run: git diff --exit-code
+
   smolbox-ci-tools:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
@@ -476,6 +497,7 @@ jobs:
       run:
         working-directory: .
     needs:
+      - smolbox-native
       - smolbox-ci-tools
       - smolbox-format-compile
       - smolbox-credo-ex-slop

@@ -13,6 +13,7 @@ defmodule SmolBox.Runtime.Machines do
   def run(config, key, eligible) do
     Session.safe(fn ->
       with {:ok, record} <- claim(config, key),
+           config = Target.pin_config(config, record, eligible),
            :ok <- port_support(config, record.spec.ports),
            :ok <- ExecutionSupport.check(config, record.spec),
            :ok <- Branches.supported(config, record) do
@@ -78,13 +79,15 @@ defmodule SmolBox.Runtime.Machines do
     result =
       Enum.reduce_while(workers, {:ok, record}, fn worker, _previous ->
         with %{status: :ready} <- WorkerHealth.observe(worker, config.clock),
+             :ok <- Target.qualify(worker, record.spec),
              {:ok, current} <- claim(config, ManagedMachine.key(record)),
              {:ok, name} <- Identity.machine_name(config.namespace),
+             {:ok, allocation} <- Target.allocation(worker, current.spec, name),
              {:ok, reserved} <-
                store(config, :reserve, [
                  ManagedMachine.key(record),
                  Session.guard(current),
-                 {Target.id(worker), name, worker.capacity},
+                 allocation,
                  config.clock.now()
                ]) do
           {:halt, dispatch(config, reserved)}
@@ -99,6 +102,19 @@ defmodule SmolBox.Runtime.Machines do
                operation: nil,
                phase: nil,
                last_error: error,
+               next_due_at_ms: config.clock.now() + 60_000
+             )}
+
+          {:error,
+           %Error{operation: :qualify_creation, evidence: :not_dispatched, category: category} =
+               error}
+          when category in [:unsupported_capability, :validation] ->
+            {:halt,
+             fresh_write(config, record,
+               state: :conflict,
+               operation: nil,
+               phase: nil,
+               last_error: %{error | operation: :prepare_artifact},
                next_due_at_ms: config.clock.now() + 60_000
              )}
 
@@ -189,7 +205,7 @@ defmodule SmolBox.Runtime.Machines do
     with {:ok, source} <- SmolBox.Source.from_artifact(intent.spec.artifact),
          {:ok, credentials} <-
            SmolBox.RegistryCredentials.resolve(worker.registry_credentials, source),
-         do: Backend.prepare_artifact(Target.connection(worker), source, credentials)
+         do: Backend.prepare_artifact(Target.connection(worker, intent), source, credentials)
   end
 
   defp prepared(config, record, {:ok, %SmolBox.ArtifactPreparation{} = result}) do
@@ -222,7 +238,7 @@ defmodule SmolBox.Runtime.Machines do
   defp verify_before(config, record, worker) do
     with {:ok, observed} <-
            io(config, record, fn ->
-             Backend.inspect_machine(Target.connection(worker), record.machine_name)
+             Backend.inspect_machine(Target.connection(worker, record), record.machine_name)
            end),
          true <-
            record.created_machine != nil and
@@ -236,22 +252,33 @@ defmodule SmolBox.Runtime.Machines do
 
   defp mutate(worker, %{operation: :create} = record) do
     with {:ok, spec} <- Target.machine_spec(worker, record.spec, record.machine_name),
-         do: create(worker, %{spec | mounts: record.mounts}, record.preparation)
+         do:
+           create(
+             worker,
+             Target.connection(worker, record),
+             %{spec | mounts: record.mounts},
+             record.preparation
+           )
   end
 
   defp mutate(worker, %{operation: :start, spec: %{checkpointable: true}} = record),
-    do: Backend.start_checkpointable(Target.connection(worker), record.machine_name)
+    do: Backend.start_checkpointable(Target.connection(worker, record), record.machine_name)
 
   defp mutate(worker, record),
-    do: apply(Backend, record.operation, [Target.connection(worker), record.machine_name])
+    do: apply(Backend, record.operation, [Target.connection(worker, record), record.machine_name])
 
-  defp create(worker, %{source: %SmolBox.Source{kind: :registry} = source} = spec, preparation) do
+  defp create(
+         worker,
+         reference,
+         %{source: %SmolBox.Source{kind: :registry} = source} = spec,
+         preparation
+       ) do
     with {:ok, credentials} <-
            SmolBox.RegistryCredentials.resolve(worker.registry_credentials, source),
-         do: Backend.create_prepared(Target.connection(worker), spec, preparation, credentials)
+         do: Backend.create_prepared(reference, spec, preparation, credentials)
   end
 
-  defp create(worker, spec, _preparation), do: Backend.create(Target.connection(worker), spec)
+  defp create(_worker, reference, spec, _preparation), do: Backend.create(reference, spec)
 
   defp complete_response(config, record, {:ok, %Machine{} = observed}) do
     with {:ok, current} <- claim(config, ManagedMachine.key(record)),
@@ -336,7 +363,7 @@ defmodule SmolBox.Runtime.Machines do
   defp inspect(config, record, worker),
     do:
       io(config, record, fn ->
-        Backend.inspect_machine(Target.connection(worker), record.machine_name)
+        Backend.inspect_machine(Target.connection(worker, record), record.machine_name)
       end)
 
   defp observe_present(config, record, observed) do

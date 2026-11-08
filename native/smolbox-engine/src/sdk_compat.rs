@@ -1,0 +1,413 @@
+//! Revision-specific SDK path/schema knowledge lives here, never in a bridge.
+//! Source compatibility: 9f446ae00219148ca4a703914f44a8e2fab11655.
+use crate::host::unredirected;
+use crate::{Error, ErrorCode, Result};
+use std::fs::{File, OpenOptions};
+use std::os::fd::AsRawFd;
+use std::os::unix::fs::{MetadataExt, OpenOptionsExt};
+use std::path::Path;
+
+pub const OBSERVATION_SCHEMA: u32 = 1;
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct Schema {
+    schema: u32,
+    revision: String,
+    user_version: i64,
+    objects: Vec<SchemaObject>,
+}
+#[derive(serde::Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
+struct SchemaObject {
+    kind: String,
+    name: String,
+    table: String,
+    sql: String,
+}
+
+/// Observational snapshot, never a reservation API or SDK writer connection.
+/// The caller holds account/domain ownership and its per-name gate, quiesces
+/// old actors and verifies host material while this consistent read is open.
+pub(crate) fn observe_absence(
+    database: &Path,
+    identity: (u64, u64),
+    name: &str,
+    verify_material: impl FnOnce() -> Result<bool>,
+) -> Result<bool> {
+    if !crate::domain::valid_id(name) {
+        return Err(Error::before(ErrorCode::Validation));
+    }
+    with_observation(database, identity, |transaction| {
+        let present: bool = transaction
+            .query_row(
+                "SELECT EXISTS(SELECT 1 FROM vms WHERE name = ?1)
+                OR EXISTS(SELECT 1 FROM vm_create_reservations WHERE name = ?1)",
+                [name],
+                |row| row.get(0),
+            )
+            .map_err(|_| Error::before(ErrorCode::Database))?;
+        Ok(!present && verify_material()?)
+    })
+}
+
+pub(crate) fn validate_database(database: &Path, identity: (u64, u64)) -> Result<()> {
+    with_observation(database, identity, |_| Ok(()))
+}
+
+fn with_observation<T>(
+    database: &Path,
+    identity: (u64, u64),
+    action: impl FnOnce(&rusqlite::Connection) -> Result<T>,
+) -> Result<T> {
+    // Hold the enrolled inode open, preventing inode reuse during path checks.
+    let pinned = open_database_inode(database, identity)?;
+    check_sidecars(database)?;
+    let mut connection = rusqlite::Connection::open_with_flags(
+        database,
+        rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY
+            | rusqlite::OpenFlags::SQLITE_OPEN_NO_MUTEX
+            | rusqlite::OpenFlags::SQLITE_OPEN_NOFOLLOW,
+    )
+    .map_err(|_| Error::before(ErrorCode::Database))?;
+    connection
+        .busy_timeout(std::time::Duration::ZERO)
+        .map_err(|_| Error::before(ErrorCode::Database))?;
+    connection
+        .execute_batch("PRAGMA query_only=ON; PRAGMA trusted_schema=OFF;")
+        .map_err(|_| Error::before(ErrorCode::Database))?;
+    let transaction = connection
+        .transaction_with_behavior(rusqlite::TransactionBehavior::Deferred)
+        .map_err(|_| Error::before(ErrorCode::Database))?;
+    verify_schema(&transaction)?;
+    let integrity: String = transaction
+        .query_row("PRAGMA quick_check(1)", [], |row| row.get(0))
+        .map_err(|_| Error::before(ErrorCode::Database))?;
+    if integrity != "ok" {
+        return Err(Error::before(ErrorCode::Database));
+    }
+    let observation = action(&transaction)?;
+    open_database_inode(database, identity)?;
+    check_sidecars(database)?;
+    transaction
+        .rollback()
+        .map_err(|_| Error::before(ErrorCode::Database))?;
+    drop(connection);
+    open_database_inode(database, identity)?;
+    drop(pinned);
+    Ok(observation)
+}
+
+fn verify_schema(connection: &rusqlite::Connection) -> Result<()> {
+    let schema: Schema = serde_json::from_str(include_str!("sdk_schema.json"))
+        .map_err(|_| Error::before(ErrorCode::Unsupported))?;
+    let version: i64 = connection
+        .query_row("PRAGMA user_version", [], |row| row.get(0))
+        .map_err(|_| Error::before(ErrorCode::Database))?;
+    if schema.schema != OBSERVATION_SCHEMA
+        || schema.revision != crate::SMOLVM_REVISION
+        || version != schema.user_version
+    {
+        return Err(Error::before(ErrorCode::Unsupported));
+    }
+    let mut statement = connection
+        .prepare(
+            "SELECT substr(type,1,17),substr(name,1,129),substr(tbl_name,1,129),substr(sql,1,16385)
+            FROM sqlite_schema WHERE sql IS NOT NULL ORDER BY type,name LIMIT 65",
+        )
+        .map_err(|_| Error::before(ErrorCode::Database))?;
+    let objects = statement
+        .query_map([], |row| {
+            let sql: String = row.get(3)?;
+            Ok(SchemaObject {
+                kind: row.get(0)?,
+                name: row.get(1)?,
+                table: row.get(2)?,
+                sql: sql.split_whitespace().collect::<Vec<_>>().join(" "),
+            })
+        })
+        .map_err(|_| Error::before(ErrorCode::Database))?
+        .collect::<std::result::Result<Vec<_>, _>>()
+        .map_err(|_| Error::before(ErrorCode::Database))?;
+    if objects != schema.objects {
+        return Err(Error::before(ErrorCode::Unsupported));
+    }
+    Ok(())
+}
+
+fn open_database_inode(database: &Path, identity: (u64, u64)) -> Result<File> {
+    // A missing DB is an error, never an empty SQLite database.
+    let metadata =
+        std::fs::symlink_metadata(database).map_err(|_| Error::before(ErrorCode::Database))?;
+    if !metadata.is_file()
+        || (metadata.dev(), metadata.ino()) != identity
+        || metadata.uid() != unsafe { libc::geteuid() }
+        || metadata.mode() & 0o022 != 0
+    {
+        return Err(Error::before(ErrorCode::Ownership));
+    }
+    unredirected(database)?;
+    let file = OpenOptions::new()
+        .read(true)
+        .custom_flags(libc::O_NOFOLLOW | libc::O_CLOEXEC | libc::O_NONBLOCK)
+        .open(database)
+        .map_err(|_| Error::before(ErrorCode::Database))?;
+    let metadata = file
+        .metadata()
+        .map_err(|_| Error::before(ErrorCode::Database))?;
+    if !metadata.is_file() || (metadata.dev(), metadata.ino()) != identity {
+        return Err(Error::before(ErrorCode::Ownership));
+    }
+    Ok(file)
+}
+fn check_sidecars(database: &Path) -> Result<()> {
+    for suffix in ["-wal", "-shm", "-journal"] {
+        let path = database.with_file_name(format!(
+            "{}{suffix}",
+            database
+                .file_name()
+                .and_then(|name| name.to_str())
+                .ok_or(Error::before(ErrorCode::Validation))?
+        ));
+        match std::fs::symlink_metadata(path) {
+            Ok(metadata)
+                if !metadata.is_file()
+                    || metadata.uid() != unsafe { libc::geteuid() }
+                    || metadata.mode() & 0o022 != 0 =>
+            {
+                return Err(Error::before(ErrorCode::Ownership))
+            }
+            Ok(_) => {}
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+            Err(_) => return Err(Error::before(ErrorCode::Database)),
+        }
+    }
+    Ok(())
+}
+
+pub(crate) struct SourceLease {
+    _file: File,
+}
+pub(crate) fn source_lease(vm_root: &Path, name: &str) -> Result<SourceLease> {
+    if !crate::domain::valid_id(name) {
+        return Err(Error::before(ErrorCode::Validation));
+    }
+    // Clean SDK agent/fork.rs uses the VM directory's parent and exact logical
+    // name. Both hash-based VM directories and these sibling locks share vm_root.
+    unredirected(vm_root)?;
+    let path = vm_root.join(format!(".{name}.fork-operation.lock"));
+    let file = OpenOptions::new()
+        .create(true)
+        .write(true)
+        .truncate(false)
+        .mode(0o600)
+        .custom_flags(libc::O_NOFOLLOW | libc::O_CLOEXEC | libc::O_NONBLOCK)
+        .open(path)
+        .map_err(|_| Error::before(ErrorCode::Io))?;
+    let metadata = file.metadata().map_err(|_| Error::before(ErrorCode::Io))?;
+    if !metadata.is_file()
+        || metadata.uid() != unsafe { libc::geteuid() }
+        || metadata.mode() & 0o022 != 0
+    {
+        return Err(Error::before(ErrorCode::Ownership));
+    }
+    if unsafe { libc::flock(file.as_raw_fd(), libc::LOCK_EX | libc::LOCK_NB) } != 0 {
+        return Err(Error::before(ErrorCode::Conflict));
+    }
+    Ok(SourceLease { _file: file })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    fn database() -> (
+        tempfile::TempDir,
+        smolvm::db::SmolvmDb,
+        std::path::PathBuf,
+        (u64, u64),
+    ) {
+        let temporary = tempfile::tempdir().unwrap();
+        let path = temporary.path().canonicalize().unwrap().join("db");
+        let db = smolvm::db::SmolvmDb::open_at(&path).unwrap();
+        let metadata = std::fs::metadata(&path).unwrap();
+        (temporary, db, path, (metadata.dev(), metadata.ino()))
+    }
+    #[test]
+    fn clean_schema_and_readonly_policy_preserve_rows_and_consistent_wal_snapshot() {
+        let (_temporary, _db, path, identity) = database();
+        let writer = rusqlite::Connection::open(&path).unwrap();
+        with_observation(&path, identity, |reader| {
+            assert!(reader.is_readonly(rusqlite::DatabaseName::Main).unwrap());
+            assert!(reader
+                .execute("INSERT INTO config VALUES ('reader', 'forbidden')", [])
+                .is_err());
+            let count: i64 = reader
+                .query_row("SELECT count(*) FROM config", [], |row| row.get(0))
+                .unwrap();
+            assert_eq!(count, 0);
+            // A deterministic temporary-DB writer illustrates WAL consistency.
+            // Read-only observation does not promise an independent-writer lock.
+            writer
+                .execute("INSERT INTO config VALUES ('writer', 'ordinary')", [])
+                .unwrap();
+            let count: i64 = reader
+                .query_row("SELECT count(*) FROM config", [], |row| row.get(0))
+                .unwrap();
+            assert_eq!(count, 0);
+            Ok(())
+        })
+        .unwrap();
+        assert_eq!(
+            writer
+                .query_row("SELECT value FROM config WHERE key='writer'", [], |row| row
+                    .get::<_, String>(0))
+                .unwrap(),
+            "ordinary"
+        );
+        validate_database(&path, identity).unwrap();
+        assert!(observe_absence(&path, identity, "absent", || Ok(true)).unwrap());
+    }
+    #[test]
+    fn stale_reservation_and_corrupt_record_presence_are_never_reaped_or_adopted() {
+        let (_temporary, _db, path, identity) = database();
+        let writer = rusqlite::Connection::open(&path).unwrap();
+        writer
+            .execute(
+                "INSERT INTO vm_create_reservations VALUES ('stale', 'foreign', -1, 0)",
+                [],
+            )
+            .unwrap();
+        writer
+            .execute("INSERT INTO vms VALUES ('broken', X'00')", [])
+            .unwrap();
+        for name in ["stale", "broken"] {
+            assert!(!observe_absence(&path, identity, name, || panic!(
+                "present name reached host absence probe"
+            ))
+            .unwrap());
+        }
+        assert_eq!(
+            writer
+                .query_row(
+                    "SELECT owner_token FROM vm_create_reservations",
+                    [],
+                    |row| row.get::<_, String>(0)
+                )
+                .unwrap(),
+            "foreign"
+        );
+        assert_eq!(
+            writer
+                .query_row("SELECT data FROM vms", [], |row| row.get::<_, Vec<u8>>(0))
+                .unwrap(),
+            [0]
+        );
+    }
+    #[test]
+    fn unsupported_schema_version_table_or_trigger_is_rejected_without_repair() {
+        for change in [
+            "PRAGMA user_version=1",
+            "DROP TABLE vm_create_reservations",
+            "CREATE TABLE future_data (data BLOB)",
+            "CREATE TRIGGER future_trigger AFTER INSERT ON config BEGIN SELECT 1; END",
+        ] {
+            let (_temporary, _db, path, identity) = database();
+            let writer = rusqlite::Connection::open(&path).unwrap();
+            writer.execute_batch(change).unwrap();
+            assert_eq!(
+                validate_database(&path, identity).unwrap_err().code,
+                ErrorCode::Unsupported
+            );
+            assert_eq!(
+                observe_absence(&path, identity, "absent", || panic!(
+                    "unsupported schema reached material check"
+                ))
+                .unwrap_err()
+                .code,
+                ErrorCode::Unsupported
+            );
+            let version: i64 = writer
+                .query_row("PRAGMA user_version", [], |row| row.get(0))
+                .unwrap();
+            assert_eq!(version, i64::from(change == "PRAGMA user_version=1"));
+            if change.starts_with("DROP") {
+                assert!(writer
+                    .prepare("SELECT * FROM vm_create_reservations")
+                    .is_err());
+            }
+        }
+    }
+    #[test]
+    fn corrupt_missing_replaced_or_redirected_database_never_becomes_absence() {
+        let (_temporary, db, path, identity) = database();
+        drop(db);
+        let saved = path.with_extension("saved");
+        std::fs::rename(&path, &saved).unwrap();
+        assert_eq!(
+            observe_absence(&path, identity, "absent", || Ok(true))
+                .unwrap_err()
+                .code,
+            ErrorCode::Database
+        );
+        assert!(!path.exists());
+        std::fs::write(&path, b"foreign replacement").unwrap();
+        assert_eq!(
+            observe_absence(&path, identity, "absent", || Ok(true))
+                .unwrap_err()
+                .code,
+            ErrorCode::Ownership
+        );
+        std::fs::remove_file(&path).unwrap();
+        std::os::unix::fs::symlink(&saved, &path).unwrap();
+        assert_eq!(
+            observe_absence(&path, identity, "absent", || Ok(true))
+                .unwrap_err()
+                .code,
+            ErrorCode::Ownership
+        );
+        std::fs::remove_file(&path).unwrap();
+        std::fs::rename(saved, &path).unwrap();
+        std::fs::write(&path, b"invalid database").unwrap();
+        assert_eq!(
+            observe_absence(&path, identity, "absent", || Ok(true))
+                .unwrap_err()
+                .code,
+            ErrorCode::Database
+        );
+    }
+    #[test]
+    fn exclusive_sqlite_contention_is_an_error_and_never_an_absence_result() {
+        let (_temporary, db, path, identity) = database();
+        drop(db);
+        let writer = rusqlite::Connection::open(&path).unwrap();
+        writer
+            .execute_batch("PRAGMA journal_mode=DELETE; BEGIN EXCLUSIVE;")
+            .unwrap();
+        assert_eq!(
+            observe_absence(&path, identity, "absent", || panic!(
+                "busy DB reached material check"
+            ))
+            .unwrap_err()
+            .code,
+            ErrorCode::Database
+        );
+        writer.execute_batch("ROLLBACK;").unwrap();
+        assert!(observe_absence(&path, identity, "absent", || Ok(true)).unwrap());
+    }
+    #[test]
+    fn source_contention_rejects_without_waiting_or_replacing_sdk_lock() {
+        let directory = tempfile::tempdir().unwrap();
+        let root = directory.path().canonicalize().unwrap();
+        let first = source_lease(&root, "owned").unwrap();
+        let path = root.join(".owned.fork-operation.lock");
+        let original = std::fs::metadata(&path).unwrap().ino();
+        assert_eq!(
+            source_lease(&root, "owned").err().unwrap().code,
+            ErrorCode::Conflict
+        );
+        source_lease(&root, "sibling").unwrap();
+        drop(first);
+        source_lease(&root, "owned").unwrap();
+        assert_eq!(std::fs::metadata(&path).unwrap().ino(), original);
+    }
+}

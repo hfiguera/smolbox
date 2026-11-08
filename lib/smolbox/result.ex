@@ -2,8 +2,10 @@ defmodule SmolBox.Result do
   @moduledoc """
   Observed command output and exit status. A nonzero exit is still an observed result.
 
-  Buffered execution uses `:bytes`; SSE output uses `:lossy_utf8` and must not
-  be used to preserve arbitrary binary output. This result does not
+  Buffered execution and the embedded bridge use `:bytes`; HTTP SSE output uses
+  `:lossy_utf8` and must not be used to preserve arbitrary binary output. A native
+  completion error can accompany a truncated result when an actual Exit was
+  observed. This result does not
   assert application success, artifact collection, or machine cleanup.
   """
 

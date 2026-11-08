@@ -1,7 +1,7 @@
 defmodule SmolBox.Store.MemoryVolumes do
   @moduledoc false
   alias SmolBox.{Error, Validation, Volume, WorkerControl}
-  alias SmolBox.Store.{Codec, VolumeOps}
+  alias SmolBox.Store.{BackendBindings, Codec, VolumeOps}
 
   def run({:fetch, key}, state), do: {fetch(state, key), state}
 
@@ -30,7 +30,8 @@ defmodule SmolBox.Store.MemoryVolumes do
         {error(:identity_conflict), state}
 
       {:error, %{category: :not_found}} ->
-        with :ok <-
+        with :ok <- BackendBindings.http(state.backend_bindings[v.worker_id]),
+             :ok <-
                WorkerControl.admit(
                  Map.get(state.worker_controls, v.worker_id, WorkerControl.initial(v.worker_id))
                ),
