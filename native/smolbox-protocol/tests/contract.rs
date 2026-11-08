@@ -1248,6 +1248,7 @@ fn compact_payload_rejects_truncation_trailing_data_large_counts_and_duplicate_e
 #[test]
 fn creation_features_require_each_explicit_sdk_gate_before_dispatch() {
     let query = Operation::QualifyCreation {
+        checkpointable: None,
         artifact: Artifact {
             path: "/approved.smolmachine".into(),
             sha256: "ef".repeat(32),
@@ -1364,6 +1365,7 @@ fn network_observation_and_port_conflict_cannot_be_mislabelled_legacy() {
     invalid["observation"]["configuration"] = Value::Null;
     assert!(serde_json::from_value::<Outcome>(invalid).is_err());
     let query = Operation::QualifyCreation {
+        checkpointable: None,
         artifact: Artifact {
             path: "/approved.smolmachine".into(),
             sha256: "ef".repeat(32),
@@ -1664,6 +1666,7 @@ fn material_proof_requires_exact_shape_root_hash_bounds_and_correlated_transitio
 #[test]
 fn qualification_has_no_receipt_or_stream_and_cannot_satisfy_a_command() {
     let operation = Operation::QualifyCreation {
+        checkpointable: None,
         features: None,
         artifact: Artifact {
             path: "/approved.smolmachine".into(),
@@ -1701,6 +1704,7 @@ fn unknown() -> Outcome {
 #[test]
 fn intent_presence_is_streamless_and_cannot_mint_receipts_or_satisfy_commands() {
     let create = Create {
+        checkpointable: None,
         volume_mounts: None,
         features: None,
         name: "candidate".into(),
@@ -1927,6 +1931,7 @@ fn cross_domain_receipts_fail_before_scheduling_and_do_not_mint_authority() {
         }
     ));
     let create = Create {
+        checkpointable: None,
         volume_mounts: None,
         features: None,
         name: "owned".into(),
@@ -2531,6 +2536,7 @@ fn registry_cached_creation_binds_fresh_receipt_and_absence_has_no_ownership_aut
     receipt.target_id = h.domain.target_id.clone();
     receipt.domain_generation = h.domain.generation.clone();
     let create = RegistryCreate {
+        checkpointable: None,
         name: receipt.name.clone(),
         owner_token: receipt.owner_token.clone(),
         incarnation: receipt.incarnation.clone(),
@@ -2643,6 +2649,7 @@ fn registry_qualification_is_bounded_and_does_not_accept_creation_authority() {
         .insert("compact_creation".into(), 1);
     h.capabilities = h.sdk.as_ref().unwrap().capabilities();
     let operation = Operation::QualifyRegistryCreation {
+        checkpointable: None,
         source: RegistryIdentity {
             kind: "registry".into(),
             id: "pack".into(),

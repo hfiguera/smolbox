@@ -19,6 +19,7 @@ use serde::{Deserialize, Serialize};
 
 #[path = "volume_deletion.rs"]
 mod deletion;
+pub(crate) use deletion::remove_tree;
 pub use deletion::{
     VolumeDeletionPresence, VolumeDeletionReceipt, VolumeStagingAbortPresence,
     VolumeStagingAbortReceipt,

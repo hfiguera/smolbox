@@ -3,7 +3,7 @@ defmodule SmolBox.Embedded.PortTest do
   alias SmolBox.{Backend, Error}
   alias SmolBox.Backend.Budget
   alias SmolBox.Backend.Embedded, as: EmbeddedBackend
-  alias SmolBox.Embedded.{Config, Health, Port, Protocol, Supervisor}
+  alias SmolBox.Embedded.{Config, Health, Port, Protocol, Request, Supervisor}
   alias SmolBox.Test.EmbeddedPackage, as: Package
 
   defp package(options \\ []) do
@@ -60,6 +60,47 @@ defmodule SmolBox.Embedded.PortTest do
     wait_until(fn -> match?({:ok, %{status: :stopped}}, Port.health(pid)) end)
   end
 
+  test "checkpoint requests are valid wire shapes but disabled by the installed descriptor" do
+    config = package(protocol_major: 2, backend: true)
+    pid = owner(config)
+    receipt = Package.receipt(config)
+
+    creation =
+      Map.merge(Map.take(receipt, ~w(name owner_token incarnation)), %{
+        "source" => %{
+          "kind" => "checkpoint",
+          "id" => "idle-v1",
+          "sha256" => String.duplicate("a", 64),
+          "architecture" => "aarch64"
+        },
+        "resources" => %{"cpus" => 1, "memory_mib" => 256, "storage_gib" => 1, "overlay_gib" => 1},
+        "labels" => %{}
+      })
+
+    requests = [
+      %{"operation" => "create_checkpoint", "create" => creation},
+      %{"operation" => "inspect_checkpoint_creation", "create" => creation},
+      Map.put(
+        Map.take(creation, ~w(source resources)),
+        "operation",
+        "qualify_checkpoint_creation"
+      ),
+      %{"operation" => "start_checkpointable", "receipt" => receipt},
+      %{"operation" => "checkpoint_preflight", "receipt" => receipt}
+    ]
+
+    for request <- requests do
+      assert Request.valid?(request, 5000, 2)
+
+      assert {:error, %Error{category: :unsupported_capability, evidence: :not_dispatched}} =
+               Port.submit(pid, request, budget(), self())
+    end
+
+    refute Enum.any?(Package.received(config), &(&1["type"] == "request"))
+    assert :ok = Port.shutdown(pid)
+    wait_until(fn -> match?({:ok, %{status: :stopped}}, Port.health(pid)) end)
+  end
+
   test "unavailable notice quarantines admission without losing the current owner or terminal" do
     config = package(protocol_minor: 4)
     pid = owner(config)
@@ -76,6 +117,7 @@ defmodule SmolBox.Embedded.PortTest do
     wait_until(fn -> match?({:ok, %{status: :quarantined}}, Port.health(pid)) end)
     assert {:ok, %{epoch: ^epoch, status: :quarantined}} = Port.health(pid)
     assert is_port(:sys.get_state(pid).port)
+    assert {:error, %Error{category: :identity_conflict}} = Port.quiesce(pid, epoch)
 
     assert {:error, %Error{evidence: :not_dispatched}} =
              Port.submit(pid, Package.command(config, "echo"), budget(), self())
@@ -99,6 +141,8 @@ defmodule SmolBox.Embedded.PortTest do
     assert_receive {:smolbox_embedded, ^handle, {:terminal, outcome, nil}}, 1000
     assert outcome["completion"] == "unknown"
     wait_until(fn -> match?({:ok, %{status: :quarantined}}, Port.health(pid)) end)
+    assert :ok = Port.quiesce(pid, epoch)
+    assert {:ok, %{status: :quarantined, epoch: ^epoch}} = Port.health(pid)
     assert {:ok, %SmolBox.Health{}} = Backend.invoke(reference, :health, [])
 
     assert {:error, %Error{evidence: :not_dispatched}} =

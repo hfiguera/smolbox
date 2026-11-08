@@ -70,8 +70,8 @@ defmodule SmolBox.Runtime.Checkpoints do
          true <- approved?(worker, c.spec),
          :ok <- WorkerHealth.check(worker, config.clock),
          {:ok, observed} <-
-           Backend.checkpoint_preflight(Target.connection(worker), m.machine_name),
-         true <- Machine.same_incarnation?(m.created_machine, observed),
+           Backend.checkpoint_preflight(Target.connection(worker, m), m.machine_name),
+         true <- source_matches?(m, observed),
          :ok <- CheckpointIO.vacant?(c) do
       :ok
     else
@@ -87,7 +87,7 @@ defmodule SmolBox.Runtime.Checkpoints do
 
       result =
         MachineSession.io(config, intent, fn ->
-          {:operation_result, capture(worker, m, c)}
+          {:operation_result, capture(worker, intent, pending)}
         end)
 
       receive_result(config, intent, pending, worker, result)
@@ -99,7 +99,7 @@ defmodule SmolBox.Runtime.Checkpoints do
 
     with {:ok, receipt} <-
            Backend.capture_checkpoint(
-             Target.connection(worker),
+             Target.connection(worker, machine),
              machine.machine_name,
              path,
              capture.spec.policy.max_bytes
@@ -121,7 +121,7 @@ defmodule SmolBox.Runtime.Checkpoints do
     }
 
     with :ok <- CheckpointResult.validate(result),
-         do: advance(config, m, c, state: :captured, result: result)
+         do: advance(config, m, c, captured_changes(m, receipt, result))
   end
 
   defp receive_result(
@@ -138,4 +138,18 @@ defmodule SmolBox.Runtime.Checkpoints do
 
   defp unknown(config, m, c, error),
     do: advance(config, m, c, state: :unknown, error: %{error | evidence: :unknown})
+
+  defp captured_changes(%{backend_assignment: %{version: 2}}, receipt, result),
+    do: [
+      state: :captured,
+      result: result,
+      native_transition: Map.get(receipt, :native_transition)
+    ]
+
+  defp captured_changes(_m, _receipt, result), do: [state: :captured, result: result]
+
+  def source_matches?(%{backend_assignment: %{version: 2}} = m, observed),
+    do: SmolBox.DiskExpansion.matches?(m, observed)
+
+  def source_matches?(m, observed), do: Machine.same_incarnation?(m.created_machine, observed)
 end

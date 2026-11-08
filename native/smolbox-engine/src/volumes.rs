@@ -16,6 +16,7 @@ pub const VOLUME_OBSERVATION_METADATA_BYTES: u64 = 128 * 1024;
 
 #[path = "volume_staging.rs"]
 mod staging;
+pub(crate) use staging::remove_tree as remove_owned_tree;
 #[cfg(test)]
 pub(crate) use staging::{foreign_handle, owned_handle};
 pub use staging::{

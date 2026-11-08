@@ -1,6 +1,7 @@
 defmodule SmolBox.CheckpointArtifact do
   @moduledoc false
   alias SmolBox.Error
+  alias SmolBox.Runtime.Target
 
   # Read only the bounded manifest, never unpack assets or execute artifact code.
   # The upstream restore still validates payload integrity and CPU compatibility.
@@ -47,7 +48,7 @@ defmodule SmolBox.CheckpointArtifact do
       "mode" => "vm",
       "platform" => platform,
       "host_platform" => platform,
-      "smolvm_version" => worker.runtime_version,
+      "smolvm_version" => Target.sdk_version(worker),
       "network" => false,
       "gpu" => false,
       "cuda" => false

@@ -1,0 +1,190 @@
+[
+  {
+    "schema": 1,
+    "previous": {
+      "target_id": "fixture-local",
+      "domain_generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "name": "fixture-owned",
+      "owner_token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "incarnation": "cccccccccccccccccccccccccccccccc",
+      "material_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "material": {
+        "schema": 2,
+        "revision": 0,
+        "record_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "chain_sha256": "d86653329d4d4931f336e9d780b424031a7422cbe805fac8b20a22dc2d22b076",
+        "operation_id": null,
+        "request_sha256": null
+      }
+    },
+    "receipt": {
+      "target_id": "fixture-local",
+      "domain_generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "name": "fixture-owned",
+      "owner_token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "incarnation": "cccccccccccccccccccccccccccccccc",
+      "material_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "material": {
+        "schema": 2,
+        "revision": 1,
+        "record_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "chain_sha256": "0d3a096bf38a061ddb90ef6809841042f2c51f8bbc2d950e7ef359e63b937a3d",
+        "operation_id": "resolve-1",
+        "request_sha256": "3d4a2b9f0484ffa7af9495bb4a015131b2fb76f5b5d8a194e9ff788982c17cc5"
+      }
+    },
+    "change": {
+      "intent": {
+        "operation_id": "resolve-1",
+        "request": {
+          "max_bytes": 1048576,
+          "idle": true
+        },
+        "previous": {
+          "schema": 2,
+          "revision": 0,
+          "record_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "chain_sha256": "d86653329d4d4931f336e9d780b424031a7422cbe805fac8b20a22dc2d22b076",
+          "operation_id": null,
+          "request_sha256": null
+        },
+        "immutable_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "previous_head": null,
+        "source_pid": [
+          123,
+          456
+        ],
+        "growth_immutable_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+      },
+      "checkpoint_head": null,
+      "growth_immutable_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+    }
+  },
+  {
+    "schema": 1,
+    "previous": {
+      "target_id": "fixture-local",
+      "domain_generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "name": "fixture-owned",
+      "owner_token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "incarnation": "cccccccccccccccccccccccccccccccc",
+      "material_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "material": {
+        "schema": 2,
+        "revision": 1,
+        "record_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "chain_sha256": "0d3a096bf38a061ddb90ef6809841042f2c51f8bbc2d950e7ef359e63b937a3d",
+        "operation_id": "resolve-1",
+        "request_sha256": "3d4a2b9f0484ffa7af9495bb4a015131b2fb76f5b5d8a194e9ff788982c17cc5"
+      }
+    },
+    "receipt": {
+      "target_id": "fixture-local",
+      "domain_generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "name": "fixture-owned",
+      "owner_token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "incarnation": "cccccccccccccccccccccccccccccccc",
+      "material_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "material": {
+        "schema": 2,
+        "revision": 2,
+        "record_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+        "chain_sha256": "a6b72c25e78a4b3823bb5416ef5109ce7da3d18d66d006c4cdadd8362ff01616",
+        "operation_id": "after-resolution",
+        "request_sha256": "3d4a2b9f0484ffa7af9495bb4a015131b2fb76f5b5d8a194e9ff788982c17cc5"
+      }
+    },
+    "change": {
+      "intent": {
+        "operation_id": "after-resolution",
+        "request": {
+          "max_bytes": 1048576,
+          "idle": true
+        },
+        "previous": {
+          "schema": 2,
+          "revision": 1,
+          "record_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "chain_sha256": "0d3a096bf38a061ddb90ef6809841042f2c51f8bbc2d950e7ef359e63b937a3d",
+          "operation_id": "resolve-1",
+          "request_sha256": "3d4a2b9f0484ffa7af9495bb4a015131b2fb76f5b5d8a194e9ff788982c17cc5"
+        },
+        "immutable_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "previous_head": null,
+        "source_pid": [
+          123,
+          456
+        ],
+        "growth_immutable_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+      },
+      "artifact": {
+        "sha256": "7e2bbc751b0718df20893e1920872df5ef8f6703b4ecb9535f1556a94796b3cf",
+        "size_bytes": 512,
+        "head": "dddddddddddddddddddddddddddddddd",
+        "parent": null
+      },
+      "growth_immutable_sha256": "3333333333333333333333333333333333333333333333333333333333333333"
+    }
+  },
+  {
+    "schema": 1,
+    "previous": {
+      "target_id": "fixture-local",
+      "domain_generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "name": "fixture-owned",
+      "owner_token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "incarnation": "cccccccccccccccccccccccccccccccc",
+      "material_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "material": {
+        "schema": 2,
+        "revision": 1,
+        "record_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "chain_sha256": "0d3a096bf38a061ddb90ef6809841042f2c51f8bbc2d950e7ef359e63b937a3d",
+        "operation_id": "resolve-1",
+        "request_sha256": "3d4a2b9f0484ffa7af9495bb4a015131b2fb76f5b5d8a194e9ff788982c17cc5"
+      }
+    },
+    "receipt": {
+      "target_id": "fixture-local",
+      "domain_generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "name": "fixture-owned",
+      "owner_token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "incarnation": "cccccccccccccccccccccccccccccccc",
+      "material_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "material": {
+        "schema": 2,
+        "revision": 2,
+        "record_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+        "chain_sha256": "23b31cbb5e151ab020dc1b8b66ffa6f65b32a6db9ab00beaffa82a7d7a1a70f2",
+        "operation_id": "resolve-2",
+        "request_sha256": "3d4a2b9f0484ffa7af9495bb4a015131b2fb76f5b5d8a194e9ff788982c17cc5"
+      }
+    },
+    "change": {
+      "intent": {
+        "operation_id": "resolve-2",
+        "request": {
+          "max_bytes": 1048576,
+          "idle": true
+        },
+        "previous": {
+          "schema": 2,
+          "revision": 1,
+          "record_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "chain_sha256": "0d3a096bf38a061ddb90ef6809841042f2c51f8bbc2d950e7ef359e63b937a3d",
+          "operation_id": "resolve-1",
+          "request_sha256": "3d4a2b9f0484ffa7af9495bb4a015131b2fb76f5b5d8a194e9ff788982c17cc5"
+        },
+        "immutable_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "previous_head": "dddddddddddddddddddddddddddddddd",
+        "source_pid": [
+          123,
+          456
+        ],
+        "growth_immutable_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+      },
+      "checkpoint_head": "dddddddddddddddddddddddddddddddd",
+      "growth_immutable_sha256": "3333333333333333333333333333333333333333333333333333333333333333"
+    }
+  }
+]

@@ -1,0 +1,124 @@
+[
+  {
+    "schema": 1,
+    "previous": {
+      "target_id": "fixture-local",
+      "domain_generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "name": "fixture-owned",
+      "owner_token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "incarnation": "cccccccccccccccccccccccccccccccc",
+      "material_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "material": {
+        "schema": 2,
+        "revision": 0,
+        "record_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "chain_sha256": "d86653329d4d4931f336e9d780b424031a7422cbe805fac8b20a22dc2d22b076",
+        "operation_id": null,
+        "request_sha256": null
+      }
+    },
+    "receipt": {
+      "target_id": "fixture-local",
+      "domain_generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "name": "fixture-owned",
+      "owner_token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "incarnation": "cccccccccccccccccccccccccccccccc",
+      "material_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "material": {
+        "schema": 2,
+        "revision": 1,
+        "record_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "chain_sha256": "0d3a096bf38a061ddb90ef6809841042f2c51f8bbc2d950e7ef359e63b937a3d",
+        "operation_id": "resolve-1",
+        "request_sha256": "3d4a2b9f0484ffa7af9495bb4a015131b2fb76f5b5d8a194e9ff788982c17cc5"
+      }
+    },
+    "change": {
+      "intent": {
+        "operation_id": "resolve-1",
+        "request": {
+          "max_bytes": 1048576,
+          "idle": true
+        },
+        "previous": {
+          "schema": 2,
+          "revision": 0,
+          "record_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "chain_sha256": "d86653329d4d4931f336e9d780b424031a7422cbe805fac8b20a22dc2d22b076",
+          "operation_id": null,
+          "request_sha256": null
+        },
+        "immutable_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "previous_head": null,
+        "source_pid": [
+          123,
+          456
+        ],
+        "growth_immutable_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+      },
+      "checkpoint_head": null,
+      "growth_immutable_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+    }
+  },
+  {
+    "schema": 1,
+    "previous": {
+      "target_id": "fixture-local",
+      "domain_generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "name": "fixture-owned",
+      "owner_token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "incarnation": "cccccccccccccccccccccccccccccccc",
+      "material_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "material": {
+        "schema": 2,
+        "revision": 0,
+        "record_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "chain_sha256": "d86653329d4d4931f336e9d780b424031a7422cbe805fac8b20a22dc2d22b076",
+        "operation_id": null,
+        "request_sha256": null
+      }
+    },
+    "receipt": {
+      "target_id": "fixture-local",
+      "domain_generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "name": "fixture-owned",
+      "owner_token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "incarnation": "cccccccccccccccccccccccccccccccc",
+      "material_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "material": {
+        "schema": 2,
+        "revision": 1,
+        "record_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+        "chain_sha256": "d9bc84b2f7b8c5c4ecec54aaa84936880d209bb9bfada7f2916a0a735337f8db",
+        "operation_id": "resolve-2",
+        "request_sha256": "3d4a2b9f0484ffa7af9495bb4a015131b2fb76f5b5d8a194e9ff788982c17cc5"
+      }
+    },
+    "change": {
+      "intent": {
+        "operation_id": "resolve-2",
+        "request": {
+          "max_bytes": 1048576,
+          "idle": true
+        },
+        "previous": {
+          "schema": 2,
+          "revision": 0,
+          "record_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "chain_sha256": "d86653329d4d4931f336e9d780b424031a7422cbe805fac8b20a22dc2d22b076",
+          "operation_id": null,
+          "request_sha256": null
+        },
+        "immutable_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "previous_head": null,
+        "source_pid": [
+          123,
+          456
+        ],
+        "growth_immutable_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+      },
+      "checkpoint_head": "dddddddddddddddddddddddddddddddd",
+      "growth_immutable_sha256": "3333333333333333333333333333333333333333333333333333333333333333"
+    }
+  }
+]

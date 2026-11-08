@@ -20,7 +20,19 @@ defmodule SmolBox.DurableHost.BackendStore do
     alias SmolBox.Backend.Binding
     alias SmolBox.DurableHost.Database
     alias SmolBox.Error
-    alias SmolBox.Store.{BackendBindings, CodecGrowth, CodecMaterial, CodecNativeSources}
+
+    alias SmolBox.Store.{
+      BackendBindings,
+      CodecCheckpointable,
+      CodecGrowth,
+      CodecMaterial,
+      CodecNativeCaptureAbortSources,
+      CodecNativeCaptureCleanup,
+      CodecNativeCaptureResolutions,
+      CodecNativeCaptures,
+      CodecNativeCheckpoints,
+      CodecNativeSources
+    }
 
     def capabilities(context) do
       Database.query(context, "SELECT kind,generation FROM smolbox_backend_bindings LIMIT 0", [])
@@ -41,6 +53,7 @@ defmodule SmolBox.DurableHost.BackendStore do
       |> terminal_capabilities()
       |> growth_capabilities()
       |> source_capabilities()
+      |> checkpoint_capabilities()
     end
 
     if Code.ensure_loaded?(CodecMaterial) and
@@ -85,6 +98,78 @@ defmodule SmolBox.DurableHost.BackendStore do
         do: Map.put(capabilities, :native_sources, CodecNativeSources.reader())
     else
       defp source_capabilities(capabilities), do: capabilities
+    end
+
+    if Code.ensure_loaded?(CodecNativeCheckpoints) and
+         function_exported?(CodecNativeCheckpoints, :reader, 0) do
+      defp checkpoint_capabilities(capabilities),
+        do:
+          checkpointable_capabilities(
+            Map.put(capabilities, :native_checkpoint_sources, CodecNativeCheckpoints.reader())
+          )
+    else
+      defp checkpoint_capabilities(capabilities), do: capabilities
+    end
+
+    if Code.ensure_loaded?(CodecCheckpointable) and
+         function_exported?(CodecCheckpointable, :reader, 0) do
+      defp checkpointable_capabilities(capabilities),
+        do:
+          capture_capabilities(
+            Map.put(capabilities, :native_checkpointable, CodecCheckpointable.reader())
+          )
+    else
+      defp checkpointable_capabilities(capabilities), do: capabilities
+    end
+
+    if Code.ensure_loaded?(CodecNativeCaptures) and
+         function_exported?(CodecNativeCaptures, :reader, 0) do
+      defp capture_capabilities(capabilities),
+        do:
+          capture_resolution_capabilities(
+            Map.put(capabilities, :native_capture_histories, CodecNativeCaptures.reader())
+          )
+    else
+      defp capture_capabilities(capabilities), do: capabilities
+    end
+
+    if Code.ensure_loaded?(CodecNativeCaptureResolutions) and
+         function_exported?(CodecNativeCaptureResolutions, :reader, 0) do
+      defp capture_resolution_capabilities(capabilities),
+        do:
+          capture_cleanup_capabilities(
+            Map.put(
+              capabilities,
+              :native_capture_resolutions,
+              CodecNativeCaptureResolutions.reader()
+            )
+          )
+    else
+      defp capture_resolution_capabilities(capabilities), do: capabilities
+    end
+
+    if Code.ensure_loaded?(CodecNativeCaptureCleanup) and
+         function_exported?(CodecNativeCaptureCleanup, :reader, 0) do
+      defp capture_cleanup_capabilities(capabilities),
+        do:
+          capture_abort_source_capabilities(
+            Map.put(capabilities, :native_capture_cleanup, CodecNativeCaptureCleanup.reader())
+          )
+    else
+      defp capture_cleanup_capabilities(capabilities), do: capabilities
+    end
+
+    if Code.ensure_loaded?(CodecNativeCaptureAbortSources) and
+         function_exported?(CodecNativeCaptureAbortSources, :reader, 0) do
+      defp capture_abort_source_capabilities(capabilities),
+        do:
+          Map.put(
+            capabilities,
+            :native_capture_abort_sources,
+            CodecNativeCaptureAbortSources.reader()
+          )
+    else
+      defp capture_abort_source_capabilities(capabilities), do: capabilities
     end
 
     def reserve_execution(record, worker, name, lease, capacity, used, now, assignment),

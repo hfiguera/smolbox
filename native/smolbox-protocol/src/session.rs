@@ -98,6 +98,13 @@ impl Session {
                         || self.hello.sdk.as_ref().is_none_or(|sdk| {
                             sdk.feature_versions.get("remote_sources") != Some(&1)
                         })))
+                || (operation.requires_checkpoints()
+                    && (self.hello.major != 2
+                        || self
+                            .hello
+                            .sdk
+                            .as_ref()
+                            .is_none_or(|sdk| sdk.feature_versions.get("checkpoints") != Some(&1))))
                 || operation
                     .creation_features()
                     .is_some_and(|features| !features.approved(&self.hello))
@@ -328,6 +335,9 @@ impl Session {
                 command.max_output_bytes
             }
             Operation::ReadFile { options, .. } if stream == Stream::File => options.max_bytes,
+            Operation::CaptureCheckpoint { request, .. } if stream == Stream::Checkpoint => {
+                request.max_bytes
+            }
             Operation::ExecBuffered { command, .. } | Operation::ExecStream { command, .. }
                 if matches!(stream, Stream::Stdout | Stream::Stderr) =>
             {
@@ -338,11 +348,20 @@ impl Session {
             _ => return Err(InvalidMessage),
         };
         let length = bytes.len() as u64;
+        if let Operation::CaptureCheckpoint {
+            chunk_bytes: Some(limit),
+            ..
+        } = pending.operation
+        {
+            check(length <= limit)?;
+        }
         check(length <= pending.credit && length <= limit.saturating_sub(pending.output_bytes))?;
         check(pending.event_credit > 0)?;
         check(
             pending.sequence
-                < if matches!(pending.operation, Operation::TerminalOpen { .. }) {
+                < if matches!(pending.operation, Operation::CaptureCheckpoint { .. }) {
+                    MAX_CAPTURE_EVENTS
+                } else if matches!(pending.operation, Operation::TerminalOpen { .. }) {
                     MAX_SAFE_INTEGER - 1
                 } else {
                     MAX_EVENTS_PER_REQUEST
@@ -405,6 +424,89 @@ impl Session {
                 check(pending.output_bytes == 0)?;
                 if let Some(transition) = transition {
                     transition.matches(receipt, operation_id, *request, *previous)?;
+                }
+            }
+            (
+                Operation::CaptureCheckpoint {
+                    receipt,
+                    operation_id,
+                    request,
+                    ..
+                },
+                Outcome::Captured { transition },
+            ) => {
+                transition.matches(receipt, operation_id, request)?;
+                check(transition.change.artifact.size_bytes == pending.output_bytes)?;
+            }
+            (
+                Operation::QualifyAbortedCaptureSource {
+                    receipt,
+                    operation_id,
+                    request,
+                    ..
+                },
+                Outcome::AbortedCaptureSourceQualified { qualification },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                qualification.matches(receipt, operation_id, request)?;
+            }
+            (
+                Operation::CleanupCaptureStaging {
+                    receipt,
+                    operation_id,
+                    request,
+                    ..
+                },
+                Outcome::CaptureStagingCleaned { cleanup },
+            )
+            | (
+                Operation::AbortCaptureStaging {
+                    receipt,
+                    operation_id,
+                    request,
+                    ..
+                },
+                Outcome::CaptureStagingAborted { cleanup },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                cleanup.matches(receipt, operation_id, request)?;
+            }
+            (
+                Operation::ResolveCapture {
+                    receipt,
+                    operation_id,
+                    request,
+                    ..
+                },
+                Outcome::CaptureResolved { transition },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                transition.matches(receipt, operation_id, request)?;
+            }
+            (
+                Operation::InspectCaptureResolution {
+                    receipt,
+                    operation_id,
+                    request,
+                },
+                Outcome::CaptureResolutionPresence { transition },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                if let Some(transition) = transition {
+                    transition.matches(receipt, operation_id, request)?;
+                }
+            }
+            (
+                Operation::InspectCapture {
+                    receipt,
+                    operation_id,
+                    request,
+                },
+                Outcome::CapturePresence { transition },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                if let Some(transition) = transition {
+                    transition.matches(receipt, operation_id, request)?;
                 }
             }
             (
@@ -475,13 +577,15 @@ impl Session {
             (
                 Operation::QualifyCreation { .. }
                 | Operation::QualifyOciCreation { .. }
-                | Operation::QualifyRegistryCreation { .. },
+                | Operation::QualifyRegistryCreation { .. }
+                | Operation::QualifyCheckpointCreation { .. },
                 Outcome::Qualified,
             ) => {}
             (
                 Operation::InspectCreation { .. }
                 | Operation::InspectOciCreation { .. }
-                | Operation::InspectRegistryCreation { .. },
+                | Operation::InspectRegistryCreation { .. }
+                | Operation::InspectCheckpointCreation { .. },
                 Outcome::CreationPresence { .. },
             ) => {}
             (_, Outcome::Error { dispatch, .. }) => {
@@ -506,6 +610,16 @@ impl Session {
                         && receipt.incarnation == create.incarnation,
                 )?;
             }
+            (Operation::CreateCheckpoint { create }, Outcome::Created { receipt }) => {
+                check(pending.output_bytes == 0)?;
+                receipt.validate_for(2)?;
+                check(
+                    receipt.matches_domain(&self.hello.domain)
+                        && receipt.name == create.name
+                        && receipt.owner_token == create.owner_token
+                        && receipt.incarnation == create.incarnation,
+                )?;
+            }
             (Operation::CreateOci { create }, Outcome::Created { receipt }) => {
                 check(pending.output_bytes == 0)?;
                 receipt.validate_for(2)?;
@@ -516,8 +630,14 @@ impl Session {
                         && receipt.incarnation == create.incarnation,
                 )?;
             }
+            (Operation::CheckpointPreflight { .. }, Outcome::Observed { observation }) => {
+                check(
+                    pending.output_bytes == 0 && observation.state == crate::ObservedState::Running,
+                )?;
+            }
             (
                 Operation::StartOci { .. }
+                | Operation::StartCheckpointable { .. }
                 | Operation::Inspect { .. }
                 | Operation::Start { .. }
                 | Operation::Stop { .. }

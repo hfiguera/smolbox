@@ -25,9 +25,56 @@ pub struct Config {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub approved_registry_sources: Option<Vec<RegistryApproval>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approved_checkpoints: Option<Vec<CheckpointApproval>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub approved_volume_policy: Option<smolbox_engine::LocalVolumePolicy>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub publish_address: Option<String>,
+}
+
+/// Operator-only checkpoint paths. Requests carry just the immutable identity.
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CheckpointApproval {
+    pub source: smolbox_protocol::CheckpointIdentity,
+    pub path: PathBuf,
+    pub max_bytes: u64,
+    pub sdk_version: String,
+    pub host_platform: String,
+    pub resources: smolbox_protocol::Resources,
+}
+impl CheckpointApproval {
+    pub fn matches(
+        &self,
+        source: &smolbox_protocol::CheckpointIdentity,
+        resources: &smolbox_protocol::Resources,
+    ) -> bool {
+        self.source == *source && self.resources == *resources
+    }
+    pub fn engine(&self) -> Result<smolbox_engine::ApprovedCheckpoint, SafeCode> {
+        self.source.validate().map_err(|_| SafeCode::Validation)?;
+        self.resources
+            .validate()
+            .map_err(|_| SafeCode::Validation)?;
+        let approval = smolbox_engine::ApprovedCheckpoint {
+            artifact: smolbox_engine::ApprovedCheckpointArtifact {
+                path: self.path.clone(),
+                sha256: self.source.sha256.clone(),
+                max_bytes: self.max_bytes,
+                guest_platform: self.source.guest_platform().into(),
+            },
+            sdk_version: self.sdk_version.clone(),
+            host_platform: self.host_platform.clone(),
+            resources: smolbox_engine::Resources {
+                cpus: self.resources.cpus,
+                memory_mib: self.resources.memory_mib,
+                storage_gib: self.resources.storage_gib,
+                overlay_gib: self.resources.overlay_gib,
+            },
+        };
+        approval.validate().map_err(|_| SafeCode::Validation)?;
+        Ok(approval)
+    }
 }
 
 /// Non-secret source/policy catalog. Tokens arrive separately per operation.
@@ -176,6 +223,18 @@ pub fn read_config(path: &Path) -> Result<Config, SafeCode> {
     }
     if let Some(policy) = &config.approved_volume_policy {
         policy.validate().map_err(|_| SafeCode::Validation)?;
+    }
+    if let Some(checkpoints) = &config.approved_checkpoints {
+        if checkpoints.is_empty() || checkpoints.len() > 32 {
+            return Err(SafeCode::Validation);
+        }
+        let mut seen = BTreeSet::new();
+        for checkpoint in checkpoints {
+            checkpoint.engine()?;
+            if !seen.insert(&checkpoint.source.id) {
+                return Err(SafeCode::Validation);
+            }
+        }
     }
     if config.publish_address.as_ref().is_some_and(|value| {
         value
@@ -796,6 +855,75 @@ mod tests {
         assert!(verify(&root.path().join("smolbox-port"), &"0".repeat(64)).is_err());
     }
     #[test]
+    fn checkpoint_catalog_is_exact_bounded_and_operator_only() {
+        let root = tempfile::tempdir().unwrap();
+        let path = root.path().join("config.json");
+        let base = serde_json::json!({"schema":2,"target_id":"test","generation":"ab".repeat(16),"allow_initialize":false,"package_manifest_sha256":"cd".repeat(32),"approved_artifacts":[]});
+        let host = smolvm::platform::Platform::current().host_oci_platform();
+        let architecture = if host == "linux/amd64" {
+            "x86_64"
+        } else {
+            "aarch64"
+        };
+        let approval = serde_json::json!({
+            "source":{"kind":"checkpoint","id":"idle-v1","sha256":"a".repeat(64),"architecture":architecture},
+            "path":"/operator/idle.smolcheckpoint","max_bytes":smolbox_engine::CHECKPOINT_ARTIFACT_BYTES,
+            "sdk_version":smolvm::VERSION,"host_platform":host,
+            "resources":{"cpus":1,"memory_mib":256,"storage_gib":1,"overlay_gib":1}
+        });
+        std::fs::write(&path, serde_json::to_vec(&base).unwrap()).unwrap();
+        assert_eq!(
+            serde_json::to_value(read_config(&path).ok().unwrap()).unwrap(),
+            base
+        );
+        let mut value = base.clone();
+        value["approved_checkpoints"] = serde_json::json!([approval.clone()]);
+        std::fs::write(&path, serde_json::to_vec(&value).unwrap()).unwrap();
+        let config = read_config(&path).ok().unwrap();
+        let engine = config.approved_checkpoints.unwrap()[0]
+            .engine()
+            .ok()
+            .unwrap();
+        assert_eq!(
+            engine.artifact.path,
+            Path::new("/operator/idle.smolcheckpoint")
+        );
+        assert_eq!(engine.resources.memory_mib, 256);
+        // Catalog parsing validates approval without opening the operator's file.
+        for (key, invalid) in [
+            ("path", serde_json::json!("relative")),
+            ("max_bytes", serde_json::json!(0)),
+            (
+                "max_bytes",
+                serde_json::json!(smolbox_engine::CHECKPOINT_ARTIFACT_BYTES + 1),
+            ),
+            ("sdk_version", serde_json::json!("1.20.2")),
+            ("host_platform", serde_json::json!("other/host")),
+            ("credential", serde_json::json!("forbidden")),
+        ] {
+            let mut entry = approval.clone();
+            entry[key] = invalid;
+            value["approved_checkpoints"] = serde_json::json!([entry]);
+            std::fs::write(&path, serde_json::to_vec(&value).unwrap()).unwrap();
+            assert!(read_config(&path).is_err(), "{key}");
+        }
+        let mut crossed = approval.clone();
+        crossed["source"]["sha256"] = serde_json::json!("b".repeat(64));
+        for entries in [
+            vec![],
+            vec![approval.clone(); 33],
+            vec![approval.clone(), crossed],
+        ] {
+            value["approved_checkpoints"] = serde_json::json!(entries);
+            std::fs::write(&path, serde_json::to_vec(&value).unwrap()).unwrap();
+            assert!(read_config(&path).is_err());
+        }
+        let mut request = approval["source"].clone();
+        request["path"] = serde_json::json!("/caller/input");
+        assert!(serde_json::from_value::<smolbox_protocol::CheckpointIdentity>(request).is_err());
+    }
+
+    #[test]
     fn registry_catalog_keeps_tokens_out_and_has_exact_coherent_bounded_policy() {
         let root = tempfile::tempdir().unwrap();
         let path = root.path().join("config.json");
@@ -962,6 +1090,18 @@ mod tests {
             smolbox_protocol::Limits::for_sdk(&sdk_identity().ok().unwrap())
                 .volumes
                 .is_none()
+        );
+    }
+
+    #[test]
+    fn capture_resolution_has_the_exact_independent_material_control_allowance() {
+        assert_eq!(
+            smolbox_protocol::CAPTURE_RESOLUTION_METADATA_BYTES,
+            smolbox_engine::JOB_MATERIAL_CONTROL_METADATA_BYTES
+        );
+        assert_eq!(
+            smolbox_protocol::CAPTURE_RESOLUTION_METADATA_BYTES,
+            32 * 1024 * 1024
         );
     }
 

@@ -592,7 +592,7 @@ fn set_errno_zero() {
     }
 }
 
-pub(super) fn remove_tree(volume: &File, budget: &ReadBudget, max_entries: usize) -> Result<()> {
+pub(crate) fn remove_tree(volume: &File, budget: &ReadBudget, max_entries: usize) -> Result<()> {
     let device = volume
         .metadata()
         .map_err(|_| Error::before(ErrorCode::Io))?

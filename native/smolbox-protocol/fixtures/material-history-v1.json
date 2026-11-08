@@ -1,0 +1,178 @@
+[
+  {
+    "schema": 1,
+    "previous": {
+      "target_id": "fixture-local",
+      "domain_generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "name": "fixture-owned",
+      "owner_token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "incarnation": "cccccccccccccccccccccccccccccccc",
+      "material_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "material": {
+        "schema": 2,
+        "revision": 0,
+        "record_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "chain_sha256": "d86653329d4d4931f336e9d780b424031a7422cbe805fac8b20a22dc2d22b076",
+        "operation_id": null,
+        "request_sha256": null
+      }
+    },
+    "receipt": {
+      "target_id": "fixture-local",
+      "domain_generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "name": "fixture-owned",
+      "owner_token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "incarnation": "cccccccccccccccccccccccccccccccc",
+      "material_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "material": {
+        "schema": 2,
+        "revision": 1,
+        "record_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "chain_sha256": "d9b14f3989f62bb5e8b75a08dda42b84520bb47119f2b9f9dfb7e808d771af7e",
+        "operation_id": "grow.1",
+        "request_sha256": "c5a54cb1ac82a52cd55392a6b9c2374d86455aa2a135227f2a3775e0acef4875"
+      }
+    },
+    "change": {
+      "operation_id": "grow.1",
+      "request": {
+        "storage_gib": 2,
+        "overlay_gib": null
+      },
+      "previous": {
+        "schema": 2,
+        "revision": 0,
+        "record_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "chain_sha256": "d86653329d4d4931f336e9d780b424031a7422cbe805fac8b20a22dc2d22b076",
+        "operation_id": null,
+        "request_sha256": null
+      },
+      "immutable_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "previous_storage_gib": 1,
+      "previous_overlay_gib": 1,
+      "storage_gib": 2,
+      "overlay_gib": 1
+    }
+  },
+  {
+    "schema": 1,
+    "previous": {
+      "target_id": "fixture-local",
+      "domain_generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "name": "fixture-owned",
+      "owner_token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "incarnation": "cccccccccccccccccccccccccccccccc",
+      "material_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "material": {
+        "schema": 2,
+        "revision": 1,
+        "record_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "chain_sha256": "d9b14f3989f62bb5e8b75a08dda42b84520bb47119f2b9f9dfb7e808d771af7e",
+        "operation_id": "grow.1",
+        "request_sha256": "c5a54cb1ac82a52cd55392a6b9c2374d86455aa2a135227f2a3775e0acef4875"
+      }
+    },
+    "receipt": {
+      "target_id": "fixture-local",
+      "domain_generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "name": "fixture-owned",
+      "owner_token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "incarnation": "cccccccccccccccccccccccccccccccc",
+      "material_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "material": {
+        "schema": 2,
+        "revision": 2,
+        "record_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+        "chain_sha256": "4677cdf9631666fe73b1691db0f9ae901f5c397dbbf2a1da22da65baa2588f62",
+        "operation_id": "capture-mid",
+        "request_sha256": "3d4a2b9f0484ffa7af9495bb4a015131b2fb76f5b5d8a194e9ff788982c17cc5"
+      }
+    },
+    "change": {
+      "intent": {
+        "operation_id": "capture-mid",
+        "request": {
+          "max_bytes": 1048576,
+          "idle": true
+        },
+        "previous": {
+          "schema": 2,
+          "revision": 1,
+          "record_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "chain_sha256": "d9b14f3989f62bb5e8b75a08dda42b84520bb47119f2b9f9dfb7e808d771af7e",
+          "operation_id": "grow.1",
+          "request_sha256": "c5a54cb1ac82a52cd55392a6b9c2374d86455aa2a135227f2a3775e0acef4875"
+        },
+        "immutable_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "previous_head": null,
+        "source_pid": [
+          123,
+          456
+        ],
+        "growth_immutable_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      },
+      "artifact": {
+        "sha256": "7e2bbc751b0718df20893e1920872df5ef8f6703b4ecb9535f1556a94796b3cf",
+        "size_bytes": 512,
+        "head": "dddddddddddddddddddddddddddddddd",
+        "parent": null
+      },
+      "growth_immutable_sha256": "3333333333333333333333333333333333333333333333333333333333333333"
+    }
+  },
+  {
+    "schema": 1,
+    "previous": {
+      "target_id": "fixture-local",
+      "domain_generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "name": "fixture-owned",
+      "owner_token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "incarnation": "cccccccccccccccccccccccccccccccc",
+      "material_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "material": {
+        "schema": 2,
+        "revision": 2,
+        "record_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+        "chain_sha256": "4677cdf9631666fe73b1691db0f9ae901f5c397dbbf2a1da22da65baa2588f62",
+        "operation_id": "capture-mid",
+        "request_sha256": "3d4a2b9f0484ffa7af9495bb4a015131b2fb76f5b5d8a194e9ff788982c17cc5"
+      }
+    },
+    "receipt": {
+      "target_id": "fixture-local",
+      "domain_generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "name": "fixture-owned",
+      "owner_token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "incarnation": "cccccccccccccccccccccccccccccccc",
+      "material_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "material": {
+        "schema": 2,
+        "revision": 3,
+        "record_sha256": "5555555555555555555555555555555555555555555555555555555555555555",
+        "chain_sha256": "216ee32f7ed903f25672696af2207d88a935228fb48890293eb4bce108d79297",
+        "operation_id": "grow-after-capture",
+        "request_sha256": "3365869298f3b930c81523bdb02ff6714dd4ba85a1867b23e370e6f80b832ce9"
+      }
+    },
+    "change": {
+      "operation_id": "grow-after-capture",
+      "request": {
+        "storage_gib": 3,
+        "overlay_gib": 2
+      },
+      "previous": {
+        "schema": 2,
+        "revision": 2,
+        "record_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+        "chain_sha256": "4677cdf9631666fe73b1691db0f9ae901f5c397dbbf2a1da22da65baa2588f62",
+        "operation_id": "capture-mid",
+        "request_sha256": "3d4a2b9f0484ffa7af9495bb4a015131b2fb76f5b5d8a194e9ff788982c17cc5"
+      },
+      "immutable_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+      "previous_storage_gib": 2,
+      "previous_overlay_gib": 1,
+      "storage_gib": 3,
+      "overlay_gib": 2
+    }
+  }
+]

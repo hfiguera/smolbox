@@ -718,3 +718,409 @@ uncertain retained work. Guest image context continues using SDK runtime mount
 tags and read-only flags. Port's policy-aware path forwards the original credited
 output callback. Terminal integration and ordinary Linux guest/resource
 qualification remain pending; no volume capability is activated by these models.
+
+### Checkpoint restore ownership boundary
+
+Unmodified portable_checkpoint::restore_from_path_at validates compatibility, then
+selects its own SDK reservation token, constructs an internal restored record,
+commits it and removes partial VM storage on error. Calling it beneath an already
+reserved SmolBox create would conflict with the reservation; observing its record
+cannot supply lost SmolBox authority. The selected integration uses public
+materialize_for_restore, install and discard_transport_pack under fresh SmolBox
+reservation and neutral bare record construction, rather than copying the private
+restored_record function or adopting SDK inventory. Owned installation/start and
+uncertainty handling are still pending.
+
+The shared approval type now checks current exact SDK and host/guest platform,
+captured allocations, basic idle bare topology and forbidden workload, packed-layer,
+credential and network dependencies. It represents classic and chunked SDK
+checkpoint header versions and delegates actual CPU/hypervisor compatibility to
+the SDK. Checkpoint artifact allowance is separately bounded at the public capture
+policy's 64 GiB; ordinary pack/command/file caps stay unchanged. Header eligibility
+is not byte integrity, captured-process attestation, ownership or a successful
+restore. Fresh private assets/history preparation and ordinary acceptance remain pending.
+
+Read-only Engine inspection now verifies the approved whole-file SHA-256 and
+bounded sidecar footer/manifest through a no-follow regular descriptor. Public
+verify_sidecar_checksum_file checks that same descriptor; input inode, length,
+permissions, owner and modification/change versions must still match the named
+path afterward. SDK compatibility is checked before decompressing assets. No
+operator path is reopened for checksum verification, no SDK record is created
+and no materialized artifact or reusable restore authority is returned.
+
+The existing streaming tar validator checks complete classic inventories,
+state/layout hashes, optional sparse memory/disk digests and exact disk mapping
+with the public 64-file chain limit and top-level storage/overlay targets.
+Expansion is charged to the declared captured profile
+plus the existing nested guest-rootfs allowance, instead of inheriting the pack
+cap for large sparse disks. History transport validation accepts only declared
+index paths and regular content-addressed objects: 8 MiB per index, 16 MiB of
+indexes total, 32,768 entries, 1 MiB decoded per object with a bounded zstd window.
+This is an envelope check; scaled history bounds and disk format/chain semantics
+remain required before restore admission. Request-private preparation separately
+validates the indexes/references described below.
+
+Artifact reads have one finite checkpoint deadline and cancellation checks at
+stream reads. Native work metadata/descriptors remain leased by the executing
+thread after read-only caller retirement, while sibling control admission stays
+available. Mutation observers retain their existing quarantine/uncertainty
+semantics. These non-VM checks do not qualify capture, restore, package bytes or
+public checkpoint capability admission.
+
+### Checkpointable startup and capture material changes
+
+Unmodified EmbeddedRuntime::start_forkable_machine updates VmRecord.forkable;
+portable_checkpoint::capture_to_path updates checkpoint_head after publication.
+Both fields remain in SmolBox's material hash. set_checkpoint_head logs a warning
+on database failure instead of propagating it into CaptureResult, so SDK capture
+success alone cannot prove a correlated source material transition.
+
+Fresh local/qualified-registry checkpointable creation now sets forkable before
+original receipt/material publication. It rejects container/layered/dependency
+packs and network/port/workload combinations. Ordinary start already honors that
+persisted flag, so Engine::start_checkpointable checks original authority without
+using the SDK convenience start to promote existing records. Read-only preflight
+requires an authenticated running source, exact enrolled runtime PID/birth,
+verified templates and the public SDK capture-profile check. It grants no guest
+idle assertion, artifact publication or material-transition authority.
+
+Capture now has a distinct entered-intent/material-transition journal foundation;
+its coordinator still needs separately bounded staging/worker
+collection and successor proof binding the exact published artifact/lineage and
+verified source resume. Do not interpret a growth proof as capture evidence, drop
+checkpoint_head from the material hash, infer completion from inventory or replay
+capture after a lost result. Core/Port source-operation models do not qualify a
+running VMM or activate the public checkpoint feature. Crash validation stays
+deferred.
+
+The capture transition binds the original material proof, source PID/birth and
+previous checkpoint head to an explicit idle assertion/byte bound. Completion
+records an independently verified artifact digest/size/head/parent and permits
+only the corresponding source checkpoint-head change with source state/PID
+preserved. Capture and growth links retain distinct proof domains in one ordered
+revision chain. Full file-version compare-and-replace rejects in-place changes;
+permits bind their original directory. These journal interfaces currently have
+only non-VM boundary models; no SDK capture call or output stream is connected.
+
+### Request-private checkpoint preparation
+
+Engine::prepare_checkpoint_artifact copies only approved bytes under the existing
+private owner domain, checks stable source identity and authenticates the copied
+artifact independently. Input files become mode 0400 under mode-0700 staging; no
+SDK row/reservation or global restore cache is created. PreparedCheckpoint is
+opaque, retains its native lease/domain and rejects cross-domain reuse or changed
+private input versions. Inspection cannot construct it.
+
+History extraction uses public unpack_checkpoint_history after bounded envelope
+validation. Public checkpoint_store::read_manifest/read_manifest_at validate the
+SDK index. The independent managed policy reader uses public StoredFile serde and
+crates/smolvm-checkpoint/FORMAT.md, not a copied private index implementation. It
+requires exact manifest file inventories, checks each referenced object’s decoded
+length/content hash, verifies reconstructed declared digests (including zero
+chunks), and binds head/ancestor lineage plus nonzero data summaries. Head
+resources bind the target approval; retained ancestors use their captured
+allocations, allowing history across stopped growth.
+
+Preparation charges copied input plus the bounded history object/index allowance
+against a separate aggregate 128-GiB checkpoint staging cap. A separate 128-MiB
+SDK-parser allowance supplements normal work metadata without consuming reserved
+control headroom or widening registry/command budgets. These allowances survive
+caller retirement and prepared-input lifetime. Recognized private-root cleanup
+releases them; a substituted/unknown root remains untouched and fences work with
+its allowance retained. SDK-written classic/history fixtures and deterministic
+metadata/resource models exercise these boundaries without starting a VM.
+
+The format specification and SDK disk_target implementation agree on 64 files per
+chain and storage.raw/storage.qcow2 or overlay.raw/overlay.qcow2 at index zero.
+Backing indexes use the reserved .smolcheckpoint namespace. Previous synthetic
+fixtures did not expose the top-level naming bug; source policy and fixtures now
+match the public SDK contract. SDK materialization/installation, disk semantics,
+fresh creation/material authority, first-start consumption and bridge/store
+integration remain pending. No checkpoint capability is activated.
+
+### Owned checkpoint materialization worker
+
+Engine::materialize_checkpoint_artifact consumes opaque prepared input through
+the existing owned worker supervisor. Classic input uses public
+extract_checkpoint_sidecar; history uses checkpoint_store::materialize with no
+restore base/global cache. No SDK machine record/reservation or VM dispatch is
+performed. A protected metadata witness binds source/root/file versions, exact
+profile, selected manifest and one caller deadline. Metadata serialization is
+bounded at 16 MiB. The source token owns the promoted native lease inside the
+collection lease box, so worker retirement retains its domain/files/allowances.
+
+The worker environment fixes SMOLVM_CHECKPOINT_THREADS=4 and supplies only a
+fixed system PATH plus the approved library path. SDK CPU fingerprinting invokes
+sysctl on macOS; checkpoint inspection/preparation reserve one conservative
+metadata child, and materialization reserves that floor plus its owned worker.
+This is public SDK metadata behavior, not a smolvm CLI fallback. No BEAM/NIF
+process environment or umask is changed.
+
+Decoded staging has a separate finite 2-TiB aggregate cap (the SDK store’s logical
+size ceiling), charged from the selected manifest before child entry. One atomic
+promotion accounts for the worker, descriptors and witness spool; exact child
+collection and spool cleanup precede demotion. Source/decoded allowances and
+metadata headroom remain with MaterializedCheckpoint until owned cleanup.
+Retirement uses close/retain without signals, replay or late-result promotion.
+
+The distinct CheckpointMaterialized event must match both source and metadata
+hashes. Parent re-observation checks output root identity, exact file inventory,
+file versions, logical sizes and declared digests. SDK extraction applies 0755
+to its fresh output root; the worker tightens that owned directory through a
+no-follow descriptor under the still-private source root before proof creation.
+It never repairs an existing VM directory. Disk format/geometry and captured
+state semantics still require installation/start qualification.
+
+An explicitly selected ordinary non-VM worker fixture exercises both classic and
+SDK-written history input, normal helper collection, private cleanup and empty
+SDK machine inventory. Three deterministic contracts cover material proof/extra
+or redirected files, correlated/retired event rejection and atomic resource
+promotion/collection. SDK install, fresh creation/material proof and first-start
+consumption remain pending. No public checkpoint feature is enabled.
+
+### Fresh checkpoint installation authority
+
+Engine::create_checkpoint consumes opaque MaterializedCheckpoint, validates the
+creation identity and disk top capacities, checks approved templates/domain and
+locks the generated machine name. Existing SDK rows or material directories
+reject. After SDK-name reservation, exclusive mode-0700 directory creation and a
+no-clobber mode-0400 ticket bind name/owner/incarnation plus source/material hashes.
+The ticket is not inventory-derived ownership and cannot replace a creation receipt.
+
+A new CheckpointInstall worker kind uses public portable_checkpoint::install and
+discard_transport_pack beneath that exact ticketed directory. It verifies source
+material, original source/target directory identities and ticket before entry,
+then checks pending inputs, exact storage/overlay virtual capacities and protected
+installed-file identities. Its distinct expected/installed proof binds the
+protected metadata and ticket; generic, crossed or duplicate acknowledgements
+cannot promote success. QCOW backing/format semantics remain SDK installer
+responsibility; the independent capacity check does not claim filesystem validity.
+
+One atomic install promotion retains decoded source allowance and charges a
+separate finite prospective installation allowance, bounded at 2 TiB, plus one
+worker and a 2-MiB metadata spool. The collection box owns source, machine gate
+and SDK reservation. No signals or late-result promotion are used; unresolved
+collection retains the leases, and errors do not delete or replay partial VM
+material. SDK preparation reservation release is separate from durable caller
+capacity. Parent verification of exact collected output precedes record/receipt
+and material-journal publication.
+
+The record uses public MachineSpec::to_record with exact approved resources,
+owner/incarnation and checkpoint hash labels, offline bare topology and neutral
+cold-start command/env. Explicit forkable/host-UID-owner/history fields bind the
+new machine’s own SDK routing. No private restored_record implementation is copied,
+no SDK-created row is adopted and no source-machine UID/ownership is reused.
+Worker restore COW/tmpfs choices are fixed within the child environment so the
+selected path uses private disks and the owned disk-backed VM namespace. These
+settings do not modify a BEAM/NIF process or source checkout.
+
+The ordinary macOS development fixture installs synthetic state and sparse disks
+without booting a VM, commits only a fresh owned stopped row with original receipt
+and material proof, checks pending inputs/resource sizes/neutral routing, and
+collects/cleans source work. It does not qualify RAM/device restoration, first
+start, helper replacement or public admission. Existing SDK start code explicitly
+finalizes and consumes pending live restores; SmolBox first-start proof/uncertainty
+integration and ordinary qualification still need completion before capability
+activation.
+
+### First-start consumption and uncertainty
+
+SDK embedded/control::launch_from_record detects public pending_dir before
+launch and, after agent startup, calls public finalize_live_restore and consume.
+SmolBox does not copy that implementation or independently consume RAM during
+ordinary start. A private checkpoint-start journal adds controller intent and
+correlation: pending, entered with a fresh operation nonce, and consumed with
+the same operation and observed enrolled PID/birth.
+
+Its immutable root binds target/domain/name/owner/incarnation, selected source,
+captured resources and installation evidence. Root SHA-256 is a material SDK
+record label; validation additionally matches the supplied receipt to the SDK
+record. Journal reads are no-follow, owner/mode/size constrained (64 KiB) and
+bind file versions. Writes are atomic no-clobber or compare-existing-version
+updates with synced file/directory. Unknown/missing/crossed journals cannot be
+created from inventory or relaxed into cold-start permission. Legacy records
+without checkpoint labels/journal retain their existing lifecycle.
+
+SDK-installed readonly files can be hard-linked to private staging on macOS;
+removing staging changes target ctime. Initial lifecycle evidence is therefore
+re-observed after authorized staging cleanup, with native allowance, SDK name
+reservation and machine gate still retained. Independent owner/material/lifecycle
+control files are excluded from the SDK installed-byte fingerprint and validated
+through their own authority. Full file-version checks remain in use.
+
+Before SDK start, complete pending inputs/captured sizes must still match. Entered
+intent is durable before dispatch; SDK failure, cancellation, late observation or
+missing completion never permits replay. Only explicit SDK success plus matched
+live cached-handle PID/birth and absent consumed inputs publishes consumed state.
+Later starts require consumed state and reject reintroduced pending input. Read-only
+inspection classifies entered state IdentityUnknown without repairing it.
+
+Normal stop/shutdown can still address an entered restore only when this engine
+holds its original enrolled handle and matching live SDK PID/birth. It does not
+resolve the journal, claim restoration success or release durable storage capacity.
+Explicit quiesced resolution and expanded bridge/store histories remain pending.
+Non-VM models use SDK consume on synthetic local files only; no VMM loss, signal
+campaign, store interruption or independent CLI race is exercised. Real captured
+RAM/device qualification and public checkpoint admission remain pending.
+
+### Owned capture coordinator and worker
+
+`Engine::capture_checkpoint` now takes an exact creation/material receipt,
+operation ID, explicit idle assertion, byte limit and one caller budget. It
+preflights checkpointable source eligibility, holds the machine gate and native
+work/staging allowances, prepares private metadata, and persists entered capture
+intent before dispatch. The worker receives exact SDK domain paths through its
+private environment; it independently checks the default SDK DB/VM paths, private
+directory and DB identity, entered source intent and live enrolled PID/birth.
+It calls the unmodified public `EmbeddedRuntime::checkpoint_machine` without
+another SDK source flock. Capture uses private staging and zero prepared-cache
+retention. The SDK owns source pause/resume; neither preflight nor the idle
+assertion attests actual guest idleness.
+
+The capture-specific terminal proof binds metadata/operation, exact output
+identity and digest/size, lineage, and resumed source material/PID. Generic file
+acknowledgments, crossed proofs and retired events cannot complete capture.
+Collection must finish normally before parent source rechecks, independent output
+hash/version checks, and the journal transition publish a new receipt. Output is
+an opaque `CapturedCheckpoint` retaining native allowances and private bytes;
+one-time chunk streaming shares cancellation/deadline and validates hash/version.
+This is an engine boundary, not yet a public Port capture or durable-store API.
+
+Entered uncertainty keeps staging and its charged allowance; it cannot replay or
+invent success from SDK inventory. The source gate releases after collection so
+the same enrolled engine may stop the exact source normally. Stop leaves capture
+and durable material unknown and grants no storage release. Pre-entry retirement
+cleans trusted private staging; unknown/replaced staging is preserved and fences
+admission. Capture workers follow the supervisor's no-signal collection path.
+SDK capture may stage complete disk chains and RAM, so its separate conservative
+decoded-material allowance is retained in addition to the bounded artifact limit;
+these admission allowances are not filesystem quotas.
+
+Deterministic tests cover distinct proof correlation/retirement, prepared abort
+versus entered fencing, exact source-stop predicates, private cleanup/replacement,
+stream cancellation, failed consumer and replay rejection. No live capture VM or
+crash campaign establishes qualification here. Public routing/publication and
+saved histories, ordinary running-source resume and exact-package platform/public
+consumer qualification remain pending; public checkpoint admission stays disabled.
+
+### Exact completed capture observation
+
+Protocol-2 `inspect_capture` takes the original receipt, operation ID and exact
+capture request. It is an observation under the existing inspect capability and
+separate checkpoint feature gate. The engine validates its domain/database,
+original incarnation marker and bounded journal while holding the observation
+allowance and source gate; cancellation is checked before and after the read.
+`capture_presence` returns only the recorded correlated capture transition, or
+null when no matching completed entry exists. Null supplies no quiescence,
+artifact absence, mutation or replay authority. No source/SDK row is adopted.
+
+Rust wire and Elixir `CaptureTransition` reproduce canonical SDK-independent
+engine evidence without rewriting its hashes. They validate request bounds/idle
+assertion, source PID/birth, distinct lineage, original root, consecutive revision,
+request digest, capture-specific chain digest and immutable origin. Helper and
+BEAM channel correlation reject crossed previous receipts/IDs/requests and any
+output bytes. Optional lineage parents and nullable completion are explicitly
+present; omission/unknown fields are rejected. Shared synthetic fixtures validate
+against the engine too. This prepares durable lost-result observation; public
+capture streaming, identity/store histories and resolution still need integration.
+
+### Capture checkpoint byte transfer
+
+Protocol-2 `capture_checkpoint` uses an original receipt, operation ID and typed
+capture request. It remains checkpoint-feature gated and uses the existing read
+capability. The Port adapter calls the shared engine and forwards private captured
+bytes through a dedicated `checkpoint` stream. Its `captured` terminal carries
+the exact capture transition. Both channels bind that transition to the original
+request and require emitted byte count equal to the artifact's declared size.
+After SDK capture, any stream/metadata/deadline failure is uncertain, even if no
+byte was emitted. No transfer error can authorize capture replay.
+
+Checkpoint output has a separate bounded 1,048,577-event allowance for the
+64-GiB artifact cap. Existing 64-KiB chunks, frame size, queue bounds and byte/event
+credits remain unchanged; ordinary command/file total limits stay fixed. Errors
+after a long checkpoint stream may carry its extended sequence, but request
+correlation and ordinary-stream event limits still apply.
+
+`CaptureStream` hashes delivered chunks incrementally. `Call` requires a consumer
+before submission, emits only checkpoint chunks, and acknowledges credit only
+after an explicit `:ok` consumer return. Failed/throwing consumers, oversized
+chunks, over-limit artifacts and wrong streams retire capture; the final transfer
+requires exact digest/size and original operation binding. No whole-artifact
+buffer is returned. A deterministic peer proves total transfer can exceed the
+ordinary response buffer while each accepted chunk remains bounded, and that no
+credit follows consumer failure. These tests perform no SDK/helper/VM launch.
+
+Public backend policy/destination selection, no-clobber local artifact publication,
+durable source/capture histories and lost-result resolution remain pending.
+Ordinary live SDK capture/source resume/platform/public consumer qualification is
+still pending, and the current public SDK descriptor does not enable checkpoints.
+
+### Durable capture receipt evolution
+
+Elixir material history now preserves ordered growth and capture proof domains,
+canonical roots, receipt/revision continuity, unique operation IDs, geometry,
+lineage and the respective immutable witnesses. `Identity.material_history`
+retains the complete chain when capture evidence is present, including on attached
+commands. Original creation stays immutable; native capture updates only current
+source observation and its typed captured history. Post-growth captured profiles
+are computed from their position in the history. Structural mixed-history tests
+do not change the HTTP-compatible public exclusion of checkpointable growth.
+
+`CaptureOps` accepts native captured success only with the exact correlated
+transition and original source PID/birth. Result/transition/current observation
+publish in one guarded store mutation. Rejected proofs keep old intent/material
+and all reservations. HTTP records reject native transition evidence. Codecs use
+v24 only for native capture histories or inherited chains, preserve older default
+bytes, and reject new-field presence in earlier envelopes. Runtime requires the
+separate capture-history reader before a future checkpoint-capable helper may
+enroll. Memory and PostgreSQL share an ordinary atomic capture contract; these
+models never call SDK capture or launch a VM. Public publication/routing,
+unknown-result resolution and actual running-source qualification remain pending.
+
+### Scoped capture destination and publication
+
+The embedded backend now binds its active capture snapshot to the exact operator
+policy and fingerprint output path, original checkpointable source and current
+receipt. Runtime uses assigned pinned references for preflight/dispatch and carries
+the native proof into atomic store advancement. Follow-up capture preflight uses
+current material authority, while initial creation remains immutable. Manifest
+verification compares SDK version independently of engine health identity.
+
+Controller publication independently hashes its retained descriptor, checks
+private root/directory and named-file identity, bounds consumer bytes and keeps
+partial evidence on failure. Exclusive creation and no-clobber hard-link
+publication preserve existing output. File and directory metadata are synced;
+directory descriptors use the documented
+[OTP 27 directory mode](https://www.erlang.org/docs/27/apps/kernel/file.html#open/2).
+No controller path crosses the native protocol. The public policy contract still
+requires the operator to protect the approved root from path replacement.
+
+An optional transport chunk limit allows smaller response windows without
+changing material hashes. Nonempty artifact bytes bound finite lifetime sequence
+count by 64 GiB plus framing allowance; fixed ordinary event limits and all
+per-chunk/queue/credit limits remain unchanged. Synthetic publication/channel
+models establish these controller boundaries, not live SDK source qualification.
+Public checkpoint admission remains disabled; unknown-result resolution and
+ordinary package/platform/public consumer qualification remain pending.
+
+### Completed-proof unknown capture resolution
+
+Backend capture observation looks up only the exact completed native journal
+operation before inspecting with its new receipt. Complete material history and
+prior receipt/ID/request must match; null conveys no completion, adoption or replay
+authority. Promotion is ephemeral. Automatic recovery may classify the owned
+source but retains interrupted/unknown capture intent, original stored receipt and
+reservations without importing a recovered proof.
+
+Explicit public resolution freezes native dispatch, serializes with reconciliation,
+verifies source observation and applies one guarded store transaction. A matching
+completed transition may advance the source even when artifact delivery stayed
+unknown. Result remains nil, state is resolved_unknown and retained artifact disk
+allowance survives. No byte/file presence supplies captured success, and duplicate
+intent never replays. Deterministic running/stopped source contracts pass Memory
+and PostgreSQL without a helper/VM launch or persistence interruption.
+
+Entered source capture without completed journal evidence remains unresolved and
+fenced. Explicit retained-stage/native-budget and material resolution still need
+implementation and qualification; source stop alone cannot complete capture.
+Public checkpoint feature admission remains disabled.

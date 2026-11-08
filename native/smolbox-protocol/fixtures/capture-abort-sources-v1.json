@@ -1,0 +1,108 @@
+[
+  {
+    "schema": 1,
+    "cleanup": {
+      "schema": 1,
+      "previous": {
+        "target_id": "fixture-local",
+        "domain_generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "name": "fixture-owned",
+        "owner_token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "incarnation": "cccccccccccccccccccccccccccccccc",
+        "material_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "material": {
+          "schema": 2,
+          "revision": 0,
+          "record_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "chain_sha256": "d86653329d4d4931f336e9d780b424031a7422cbe805fac8b20a22dc2d22b076",
+          "operation_id": null,
+          "request_sha256": null
+        }
+      },
+      "operation_id": "resolve-1",
+      "request": {
+        "max_bytes": 1048576,
+        "idle": true
+      },
+      "stage_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    },
+    "intent": {
+      "operation_id": "resolve-1",
+      "request": {
+        "max_bytes": 1048576,
+        "idle": true
+      },
+      "previous": {
+        "schema": 2,
+        "revision": 0,
+        "record_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "chain_sha256": "d86653329d4d4931f336e9d780b424031a7422cbe805fac8b20a22dc2d22b076",
+        "operation_id": null,
+        "request_sha256": null
+      },
+      "immutable_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "previous_head": null,
+      "source_pid": [
+        123,
+        456
+      ],
+      "growth_immutable_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+    },
+    "state": "running",
+    "record_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "proof_sha256": "756513295cfa82d7da85860b1705b2eccfc4e29b5f798b378a7be0d8610dbf2f"
+  },
+  {
+    "schema": 1,
+    "cleanup": {
+      "schema": 1,
+      "previous": {
+        "target_id": "fixture-local",
+        "domain_generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "name": "fixture-owned",
+        "owner_token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "incarnation": "cccccccccccccccccccccccccccccccc",
+        "material_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "material": {
+          "schema": 2,
+          "revision": 0,
+          "record_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "chain_sha256": "d86653329d4d4931f336e9d780b424031a7422cbe805fac8b20a22dc2d22b076",
+          "operation_id": null,
+          "request_sha256": null
+        }
+      },
+      "operation_id": "resolve-1",
+      "request": {
+        "max_bytes": 1048576,
+        "idle": true
+      },
+      "stage_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    },
+    "intent": {
+      "operation_id": "resolve-1",
+      "request": {
+        "max_bytes": 1048576,
+        "idle": true
+      },
+      "previous": {
+        "schema": 2,
+        "revision": 0,
+        "record_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "chain_sha256": "d86653329d4d4931f336e9d780b424031a7422cbe805fac8b20a22dc2d22b076",
+        "operation_id": null,
+        "request_sha256": null
+      },
+      "immutable_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "previous_head": null,
+      "source_pid": [
+        123,
+        456
+      ],
+      "growth_immutable_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+    },
+    "state": "stopped",
+    "record_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "proof_sha256": "de32ad5a029fba0ea26c624befa0f7221a6b744b5831681ef30ed6e03079dc9c"
+  }
+]

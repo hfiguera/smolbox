@@ -197,7 +197,20 @@ struct Journal {
     history: Vec<Completed>,
     pending: Option<Pending>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    capture_history: Option<Vec<crate::capture_material::Completed>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    capture_pending: Option<crate::capture_material::Pending>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    capture_resolutions: Option<Vec<crate::capture_resolution::Resolved>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     mounts: Option<crate::MountMaterial>,
+}
+impl Journal {
+    fn history_len(&self) -> usize {
+        self.history.len()
+            + self.capture_history.as_ref().map_or(0, Vec::len)
+            + self.capture_resolutions.as_ref().map_or(0, Vec::len)
+    }
 }
 
 pub(crate) struct MaterialJournal {
@@ -210,6 +223,394 @@ pub(crate) struct Permit {
 }
 
 impl MaterialJournal {
+    pub(crate) fn capture_dispatch(
+        &self,
+        receipt: &CreationReceipt,
+        operation_id: &str,
+        request: &crate::CaptureRequest,
+        record: &VmRecord,
+    ) -> Result<(i32, u64)> {
+        let (journal, _) = self.load()?;
+        check_origin(&journal.origin, receipt)?;
+        let pending = journal
+            .capture_pending
+            .ok_or(Error::before(ErrorCode::State))?;
+        if !pending.entered
+            || receipt.material.as_ref() != Some(&pending.intent.previous)
+            || journal.head != pending.intent.previous
+            || record.state != smolvm::config::RecordState::Running
+            || record.pid.zip(record.pid_start_time) != Some(pending.intent.source_pid)
+            || capture_immutable_hash(record)? != pending.intent.immutable_sha256
+            || pending.intent.operation_id != operation_id
+            || pending.intent.request != *request
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        Ok(pending.intent.source_pid)
+    }
+    /// Only this exact entered source may be stopped by its enrolled engine.
+    /// This grants no current material receipt, completion or storage release.
+    pub(crate) fn entered_capture_source(
+        &self,
+        receipt: &CreationReceipt,
+        record: &VmRecord,
+    ) -> Result<bool> {
+        let (journal, _) = self.load()?;
+        check_origin(&journal.origin, receipt)?;
+        let Some(pending) = journal.capture_pending else {
+            return Ok(false);
+        };
+        Ok(pending.entered
+            && receipt.material.as_ref() == Some(&pending.intent.previous)
+            && journal.head == pending.intent.previous
+            && record.state == smolvm::config::RecordState::Running
+            && record.pid.zip(record.pid_start_time) == Some(pending.intent.source_pid)
+            && capture_immutable_hash(record)? == pending.intent.immutable_sha256)
+    }
+    // Capture entry is persisted before the owned SDK worker is dispatched.
+    pub(crate) fn prepare_capture(
+        &self,
+        receipt: &CreationReceipt,
+        operation_id: &str,
+        request: crate::CaptureRequest,
+        record: &VmRecord,
+    ) -> Result<crate::capture_material::Permit> {
+        self.verify(receipt)?;
+        request.validate()?;
+        crate::checkpoint_capture::validate_record(record)?;
+        let (mut journal, inode) = self.load()?;
+        if !record.forkable
+            || record.state != smolvm::config::RecordState::Running
+            || material_hash(record)? != journal.head.record_sha256
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        let intent = capture_source_intent(receipt, operation_id, request, record)?;
+        if !intent.valid()
+            || journal.history_len() >= MAX_HISTORY
+            || journal
+                .history
+                .iter()
+                .any(|entry| entry.change.operation_id == operation_id)
+            || journal.capture_history.as_ref().is_some_and(|entries| {
+                entries
+                    .iter()
+                    .any(|entry| entry.change.operation_id() == operation_id)
+            })
+            || journal.capture_resolutions.as_ref().is_some_and(|entries| {
+                entries
+                    .iter()
+                    .any(|entry| entry.change.operation_id() == operation_id)
+            })
+        {
+            return Err(Error::before(ErrorCode::Conflict));
+        }
+        journal.capture_pending = Some(crate::capture_material::Pending {
+            intent: intent.clone(),
+            entered: false,
+        });
+        self.write(&journal, Some(inode))?;
+        Ok(crate::capture_material::Permit {
+            intent,
+            directory: self.directory_identity()?,
+        })
+    }
+
+    pub(crate) fn abort_prepared_capture(
+        &self,
+        permit: &crate::capture_material::Permit,
+    ) -> Result<()> {
+        if self.directory_identity()? != permit.directory {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        let (mut journal, version) = self.load()?;
+        let pending = journal
+            .capture_pending
+            .as_ref()
+            .ok_or(Error::before(ErrorCode::State))?;
+        if pending.entered || pending.intent != permit.intent {
+            return Err(Error::before(ErrorCode::State));
+        }
+        journal.capture_pending = None;
+        self.write(&journal, Some(version))
+    }
+
+    /// Exact pre-entry stage retirement. A protected stage and source gate are
+    /// required by the caller; absent pending state never resolves SDK entry.
+    pub(crate) fn abort_capture_stage(
+        &self,
+        receipt: &CreationReceipt,
+        operation_id: &str,
+        request: &crate::CaptureRequest,
+    ) -> Result<()> {
+        request.validate()?;
+        if !crate::domain::valid_id(operation_id) {
+            return Err(Error::before(ErrorCode::Validation));
+        }
+        let (mut journal, version) = self.load()?;
+        check_origin(&journal.origin, receipt)?;
+        if journal.capture_history.as_ref().is_some_and(|entries| {
+            entries.iter().any(|entry| {
+                entry.change.operation_id() == operation_id
+                    && receipt.material.as_ref() == Some(&entry.change.intent.previous)
+            })
+        }) || journal.capture_resolutions.as_ref().is_some_and(|entries| {
+            entries.iter().any(|entry| {
+                entry.change.intent.operation_id == operation_id
+                    && receipt.material.as_ref() == Some(&entry.change.intent.previous)
+            })
+        }) {
+            return Err(Error::before(ErrorCode::State));
+        }
+        let Some(pending) = &journal.capture_pending else {
+            return Ok(());
+        };
+        // A later/different operation may already own this source. Retiring
+        // the original private stage cannot consume or alter that operation.
+        if pending.intent.operation_id != operation_id {
+            return Ok(());
+        }
+        if pending.entered
+            || pending.intent.request != *request
+            || receipt.material.as_ref() != Some(&pending.intent.previous)
+            || pending.intent.previous != journal.head
+        {
+            return Err(Error::before(ErrorCode::State));
+        }
+        journal.capture_pending = None;
+        self.write(&journal, Some(version))
+    }
+
+    pub(crate) fn enter_capture(&self, permit: &crate::capture_material::Permit) -> Result<()> {
+        if self.directory_identity()? != permit.directory {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        let (mut journal, inode) = self.load()?;
+        let pending = journal
+            .capture_pending
+            .as_mut()
+            .ok_or(Error::before(ErrorCode::State))?;
+        if pending.entered || pending.intent != permit.intent {
+            return Err(Error::before(ErrorCode::State));
+        }
+        pending.entered = true;
+        self.write(&journal, Some(inode))
+    }
+
+    pub(crate) fn complete_capture(
+        &self,
+        receipt: &CreationReceipt,
+        permit: &crate::capture_material::Permit,
+        artifact: crate::CaptureArtifact,
+        record: &VmRecord,
+    ) -> Result<crate::CaptureTransition> {
+        if self.directory_identity().map_err(after_entry)? != permit.directory {
+            return Err(Error::uncertain(ErrorCode::Ownership));
+        }
+        let (mut journal, inode) = self.load().map_err(after_entry)?;
+        check_origin(&journal.origin, receipt).map_err(after_entry)?;
+        let pending = journal
+            .capture_pending
+            .as_ref()
+            .ok_or(Error::uncertain(ErrorCode::State))?;
+        if !pending.entered
+            || pending.intent != permit.intent
+            || journal.head != permit.intent.previous
+            || receipt.material.as_ref() != Some(&permit.intent.previous)
+            || capture_immutable_hash(record).map_err(after_entry)?
+                != permit.intent.immutable_sha256
+            || record.state != smolvm::config::RecordState::Running
+            || record.pid.zip(record.pid_start_time) != Some(permit.intent.source_pid)
+            || record.checkpoint_head.as_ref() != Some(&artifact.head)
+        {
+            return Err(Error::uncertain(ErrorCode::Ownership));
+        }
+        let change = crate::CaptureChange {
+            intent: permit.intent.clone(),
+            artifact,
+            growth_immutable_sha256: immutable_hash(record).map_err(after_entry)?,
+        };
+        let proof = crate::capture_material::next_proof(
+            &change,
+            material_hash(record).map_err(after_entry)?,
+        )
+        .map_err(after_entry)?;
+        let transition = crate::CaptureTransition {
+            schema: 1,
+            previous: receipt.clone(),
+            receipt: with_proof(&journal.origin, proof.clone()),
+            change: change.clone(),
+        };
+        transition.validate().map_err(after_entry)?;
+        journal.capture_history.get_or_insert_with(Vec::new).push(
+            crate::capture_material::Completed {
+                change,
+                proof: proof.clone(),
+            },
+        );
+        journal.head = proof;
+        journal.capture_pending = None;
+        self.write(&journal, Some(inode)).map_err(after_entry)?;
+        Ok(transition)
+    }
+
+    pub(crate) fn completed_capture(
+        &self,
+        receipt: &CreationReceipt,
+        operation_id: &str,
+        request: &crate::CaptureRequest,
+    ) -> Result<Option<crate::CaptureTransition>> {
+        let (journal, _) = self.load()?;
+        check_origin(&journal.origin, receipt)?;
+        let entry = journal.capture_history.as_ref().and_then(|entries| {
+            entries
+                .iter()
+                .find(|entry| entry.change.operation_id() == operation_id)
+        });
+        let Some(entry) = entry else {
+            return Ok(None);
+        };
+        if entry.change.request() != request
+            || receipt.material.as_ref() != Some(&entry.change.intent.previous)
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        let transition = crate::CaptureTransition {
+            schema: 1,
+            previous: receipt.clone(),
+            receipt: with_proof(&journal.origin, entry.proof.clone()),
+            change: entry.change.clone(),
+        };
+        transition.validate()?;
+        Ok(Some(transition))
+    }
+
+    #[cfg(test)]
+    pub(crate) fn resolve_entered_capture(
+        &self,
+        receipt: &CreationReceipt,
+        operation_id: &str,
+        request: &crate::CaptureRequest,
+        record: &VmRecord,
+    ) -> Result<crate::CaptureResolutionTransition> {
+        let pid = self.entered_capture_pid(receipt, operation_id, request)?;
+        let authority = crate::capture_resolution::SourceAuthority::verify(
+            record,
+            pid,
+            crate::capture_resolution::SourceFacts {
+                owner: None,
+                runtime_pid: None,
+                original_alive: false,
+                observed_birth: None,
+                excluded: false,
+            },
+        )?;
+        self.resolve_entered_capture_authorized(receipt, operation_id, request, record, &authority)
+    }
+
+    /// The caller holds the source gate after worker collection. Only an opaque
+    /// engine/cache/process permit authorizes stopped or exact live source state.
+    pub(crate) fn resolve_entered_capture_authorized(
+        &self,
+        receipt: &CreationReceipt,
+        operation_id: &str,
+        request: &crate::CaptureRequest,
+        record: &VmRecord,
+        authority: &crate::capture_resolution::SourceAuthority,
+    ) -> Result<crate::CaptureResolutionTransition> {
+        request.validate()?;
+        let (mut journal, version) = self.load()?;
+        check_origin(&journal.origin, receipt)?;
+        let pending = journal
+            .capture_pending
+            .as_ref()
+            .ok_or(Error::before(ErrorCode::State))?;
+        if !pending.entered
+            || pending.intent.operation_id != operation_id
+            || pending.intent.request != *request
+            || receipt.material.as_ref() != Some(&pending.intent.previous)
+            || journal.head != pending.intent.previous
+            || !authority.matches(record, pending.intent.source_pid)
+            || capture_immutable_hash(record)? != pending.intent.immutable_sha256
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        let change = crate::CaptureResolutionChange {
+            intent: pending.intent.clone(),
+            checkpoint_head: record.checkpoint_head.clone(),
+            growth_immutable_sha256: immutable_hash(record)?,
+        };
+        let proof = crate::capture_resolution::next_proof(&change, material_hash(record)?)?;
+        let transition = crate::CaptureResolutionTransition {
+            schema: 1,
+            previous: receipt.clone(),
+            receipt: with_proof(&journal.origin, proof.clone()),
+            change: change.clone(),
+        };
+        transition.validate()?;
+        journal
+            .capture_resolutions
+            .get_or_insert_with(Vec::new)
+            .push(crate::capture_resolution::Resolved {
+                change,
+                proof: proof.clone(),
+            });
+        journal.head = proof;
+        journal.capture_pending = None;
+        self.write(&journal, Some(version)).map_err(after_entry)?;
+        Ok(transition)
+    }
+
+    pub(crate) fn resolved_capture(
+        &self,
+        receipt: &CreationReceipt,
+        operation_id: &str,
+        request: &crate::CaptureRequest,
+    ) -> Result<Option<crate::CaptureResolutionTransition>> {
+        let (journal, _) = self.load()?;
+        check_origin(&journal.origin, receipt)?;
+        let entry = journal.capture_resolutions.as_ref().and_then(|entries| {
+            entries
+                .iter()
+                .find(|entry| entry.change.operation_id() == operation_id)
+        });
+        let Some(entry) = entry else { return Ok(None) };
+        if entry.change.request() != request
+            || receipt.material.as_ref() != Some(&entry.change.intent.previous)
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        let transition = crate::CaptureResolutionTransition {
+            schema: 1,
+            previous: receipt.clone(),
+            receipt: with_proof(&journal.origin, entry.proof.clone()),
+            change: entry.change.clone(),
+        };
+        transition.validate()?;
+        Ok(Some(transition))
+    }
+
+    pub(crate) fn entered_capture_pid(
+        &self,
+        receipt: &CreationReceipt,
+        operation_id: &str,
+        request: &crate::CaptureRequest,
+    ) -> Result<(i32, u64)> {
+        let (journal, _) = self.load()?;
+        check_origin(&journal.origin, receipt)?;
+        let pending = journal
+            .capture_pending
+            .ok_or(Error::before(ErrorCode::State))?;
+        if !pending.entered
+            || pending.intent.operation_id != operation_id
+            || pending.intent.request != *request
+            || receipt.material.as_ref() != Some(&pending.intent.previous)
+            || journal.head != pending.intent.previous
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        Ok(pending.intent.source_pid)
+    }
     pub(crate) fn at(directory: &Path) -> Self {
         Self {
             directory: directory.to_path_buf(),
@@ -254,6 +655,9 @@ impl MaterialJournal {
             head: head.clone(),
             history: Vec::new(),
             pending: None,
+            capture_history: None,
+            capture_pending: None,
+            capture_resolutions: None,
             mounts,
         };
         self.write(&journal, None)?;
@@ -268,7 +672,7 @@ impl MaterialJournal {
                 if journal.head != *proof {
                     return Err(Error::before(ErrorCode::Ownership));
                 }
-                if journal.pending.is_some() {
+                if journal.pending.is_some() || journal.capture_pending.is_some() {
                     return Err(Error::before(ErrorCode::State));
                 }
                 Ok(())
@@ -358,11 +762,21 @@ impl MaterialJournal {
         self.verify_mount_record(receipt, record)?;
         let (mut journal, inode) = self.load()?;
         if !valid_id(operation_id)
-            || journal.history.len() >= MAX_HISTORY
+            || journal.history_len() >= MAX_HISTORY
             || journal
                 .history
                 .iter()
                 .any(|entry| entry.change.operation_id == operation_id)
+            || journal.capture_history.as_ref().is_some_and(|entries| {
+                entries
+                    .iter()
+                    .any(|entry| entry.change.operation_id() == operation_id)
+            })
+            || journal.capture_resolutions.as_ref().is_some_and(|entries| {
+                entries
+                    .iter()
+                    .any(|entry| entry.change.operation_id() == operation_id)
+            })
         {
             return Err(Error::before(ErrorCode::Conflict));
         }
@@ -603,7 +1017,7 @@ impl MaterialJournal {
         )
     }
 
-    fn load(&self) -> Result<(Journal, (u64, u64))> {
+    fn load(&self) -> Result<(Journal, crate::checkpoint_materialize::FileVersion)> {
         let directory = self.directory_identity()?;
         let path = self.directory.join(FILE_NAME);
         let mut file = OpenOptions::new()
@@ -628,17 +1042,29 @@ impl MaterialJournal {
             .map_err(|_| Error::before(ErrorCode::Io))?;
         if bytes.len() as u64 > MAX_BYTES
             || self.directory_identity()? != directory
-            || inode_at(&path)? != (metadata.dev(), metadata.ino())
+            || inode_at(&path)? != crate::checkpoint_materialize::FileVersion::of(&metadata)
+            || crate::checkpoint_materialize::FileVersion::of(
+                &file
+                    .metadata()
+                    .map_err(|_| Error::before(ErrorCode::Ownership))?,
+            ) != crate::checkpoint_materialize::FileVersion::of(&metadata)
         {
             return Err(Error::before(ErrorCode::Ownership));
         }
         let journal: Journal =
             serde_json::from_slice(&bytes).map_err(|_| Error::before(ErrorCode::Ownership))?;
         validate_journal(&journal)?;
-        Ok((journal, (metadata.dev(), metadata.ino())))
+        Ok((
+            journal,
+            crate::checkpoint_materialize::FileVersion::of(&metadata),
+        ))
     }
 
-    fn write(&self, journal: &Journal, expected: Option<(u64, u64)>) -> Result<()> {
+    fn write(
+        &self,
+        journal: &Journal,
+        expected: Option<crate::checkpoint_materialize::FileVersion>,
+    ) -> Result<()> {
         validate_journal(journal)?;
         let directory = self.directory_identity()?;
         let path = self.directory.join(FILE_NAME);
@@ -686,7 +1112,7 @@ impl MaterialJournal {
     }
 }
 
-fn inode_at(path: &Path) -> Result<(u64, u64)> {
+fn inode_at(path: &Path) -> Result<crate::checkpoint_materialize::FileVersion> {
     let metadata =
         std::fs::symlink_metadata(path).map_err(|_| Error::before(ErrorCode::Ownership))?;
     if !metadata.is_file()
@@ -695,7 +1121,7 @@ fn inode_at(path: &Path) -> Result<(u64, u64)> {
     {
         return Err(Error::before(ErrorCode::Ownership));
     }
-    Ok((metadata.dev(), metadata.ino()))
+    Ok(crate::checkpoint_materialize::FileVersion::of(&metadata))
 }
 
 fn with_proof(origin: &CreationReceipt, proof: MaterialProof) -> CreationReceipt {
@@ -704,7 +1130,7 @@ fn with_proof(origin: &CreationReceipt, proof: MaterialProof) -> CreationReceipt
     receipt
 }
 
-fn check_origin(origin: &CreationReceipt, receipt: &CreationReceipt) -> Result<()> {
+pub(crate) fn check_origin(origin: &CreationReceipt, receipt: &CreationReceipt) -> Result<()> {
     let mut supplied = receipt.clone();
     supplied.material = None;
     if *origin != supplied {
@@ -713,7 +1139,7 @@ fn check_origin(origin: &CreationReceipt, receipt: &CreationReceipt) -> Result<(
     Ok(())
 }
 
-fn root_proof(origin: &CreationReceipt) -> Result<MaterialProof> {
+pub(crate) fn root_proof(origin: &CreationReceipt) -> Result<MaterialProof> {
     Ok(MaterialProof {
         schema: 2,
         revision: 0,
@@ -737,7 +1163,40 @@ fn next_proof(change: &GrowthChange, record_sha256: String) -> Result<MaterialPr
     })
 }
 
-fn immutable_hash(record: &VmRecord) -> Result<String> {
+pub(crate) fn capture_source_intent(
+    receipt: &CreationReceipt,
+    operation_id: &str,
+    request: crate::CaptureRequest,
+    record: &VmRecord,
+) -> Result<crate::capture_material::Intent> {
+    request.validate()?;
+    crate::checkpoint_capture::validate_record(record)?;
+    let intent = crate::capture_material::Intent {
+        operation_id: operation_id.into(),
+        request,
+        previous: receipt
+            .material
+            .clone()
+            .ok_or(Error::before(ErrorCode::Ownership))?,
+        immutable_sha256: capture_immutable_hash(record)?,
+        previous_head: record.checkpoint_head.clone(),
+        source_pid: record
+            .pid
+            .zip(record.pid_start_time)
+            .ok_or(Error::before(ErrorCode::Ownership))?,
+        growth_immutable_sha256: immutable_hash(record)?,
+    };
+    if !intent.valid()
+        || !record.forkable
+        || record.state != smolvm::config::RecordState::Running
+        || material_hash(record)? != intent.previous.record_sha256
+    {
+        return Err(Error::before(ErrorCode::Ownership));
+    }
+    Ok(intent)
+}
+
+pub(crate) fn immutable_hash(record: &VmRecord) -> Result<String> {
     let mut value = material_value(record)?;
     let fields = value
         .as_object_mut()
@@ -747,41 +1206,154 @@ fn immutable_hash(record: &VmRecord) -> Result<String> {
     hash(&value)
 }
 
-fn hash(value: &impl Serialize) -> Result<String> {
+pub(crate) fn capture_immutable_hash(record: &VmRecord) -> Result<String> {
+    let mut value = material_value(record)?;
+    value
+        .as_object_mut()
+        .ok_or(Error::before(ErrorCode::Ownership))?
+        .remove("checkpoint_head");
+    hash(&value)
+}
+
+pub(crate) fn hash(value: &impl Serialize) -> Result<String> {
     let bytes = serde_json::to_vec(value).map_err(|_| Error::before(ErrorCode::Io))?;
     Ok(hex::encode(Sha256::digest(bytes)))
 }
 
 fn validate_journal(journal: &Journal) -> Result<()> {
+    let captures = journal.capture_history.as_deref().unwrap_or(&[]);
+    let resolutions = journal.capture_resolutions.as_deref().unwrap_or(&[]);
     if journal.schema != 2
         || journal.origin.material.is_some()
-        || journal.history.len() > MAX_HISTORY
+        || journal.history_len() > MAX_HISTORY
+        || journal.capture_history.as_ref().is_some_and(Vec::is_empty)
+        || journal
+            .capture_resolutions
+            .as_ref()
+            .is_some_and(Vec::is_empty)
+        || (journal.pending.is_some() && journal.capture_pending.is_some())
+        || journal
+            .history
+            .windows(2)
+            .any(|pair| pair[0].proof.revision >= pair[1].proof.revision)
+        || captures
+            .windows(2)
+            .any(|pair| pair[0].proof.revision >= pair[1].proof.revision)
+        || resolutions
+            .windows(2)
+            .any(|pair| pair[0].proof.revision >= pair[1].proof.revision)
     {
         return Err(Error::before(ErrorCode::Ownership));
     }
     if let Some(mounts) = &journal.mounts {
         mounts.validate(&journal.origin)?;
     }
+    enum Event<'a> {
+        Grow(&'a Completed),
+        Capture(&'a crate::capture_material::Completed),
+        Resolve(&'a crate::capture_resolution::Resolved),
+    }
+    let mut events = std::collections::BTreeMap::new();
+    for entry in &journal.history {
+        if events
+            .insert(entry.proof.revision, Event::Grow(entry))
+            .is_some()
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+    }
+    for entry in captures {
+        if events
+            .insert(entry.proof.revision, Event::Capture(entry))
+            .is_some()
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+    }
+    for entry in resolutions {
+        if events
+            .insert(entry.proof.revision, Event::Resolve(entry))
+            .is_some()
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+    }
     let mut previous = root_proof(&journal.origin)?;
     previous.validate()?;
     let mut ids = std::collections::BTreeSet::new();
     let mut immutable = None;
-    for entry in &journal.history {
-        if !valid_change(&entry.change)
-            || entry.change.previous != previous
-            || !ids.insert(&entry.change.operation_id)
-            || immutable.is_some_and(|hash| hash != &entry.change.immutable_sha256)
-            || entry.proof != next_proof(&entry.change, entry.proof.record_sha256.clone())?
-            || entry
-                .qualified_geometry_sha256
-                .as_ref()
-                .is_some_and(|value| !valid_hex(value, 64))
-        {
-            return Err(Error::before(ErrorCode::Ownership));
+    let mut capture_immutable = None;
+    // None means unobserved; Some(None) means a recorded absent head.
+    let mut checkpoint_head: Option<Option<&String>> = None;
+    for event in events.values() {
+        match event {
+            Event::Grow(entry) => {
+                if !valid_change(&entry.change)
+                    || entry.change.previous != previous
+                    || !ids.insert(&entry.change.operation_id)
+                    || immutable.is_some_and(|hash| hash != &entry.change.immutable_sha256)
+                    || entry.proof != next_proof(&entry.change, entry.proof.record_sha256.clone())?
+                    || entry
+                        .qualified_geometry_sha256
+                        .as_ref()
+                        .is_some_and(|value| !valid_hex(value, 64))
+                {
+                    return Err(Error::before(ErrorCode::Ownership));
+                }
+                entry.proof.validate()?;
+                immutable = Some(&entry.change.immutable_sha256);
+                capture_immutable = None;
+                previous = entry.proof.clone();
+            }
+            Event::Capture(entry) => {
+                if !entry.change.valid()
+                    || entry.change.intent.previous != previous
+                    || !ids.insert(&entry.change.intent.operation_id)
+                    || immutable
+                        .is_some_and(|hash| hash != &entry.change.intent.growth_immutable_sha256)
+                    || capture_immutable
+                        .is_some_and(|hash| hash != &entry.change.intent.immutable_sha256)
+                    || checkpoint_head
+                        .is_some_and(|head| head != entry.change.intent.previous_head.as_ref())
+                    || entry.proof
+                        != crate::capture_material::next_proof(
+                            &entry.change,
+                            entry.proof.record_sha256.clone(),
+                        )?
+                {
+                    return Err(Error::before(ErrorCode::Ownership));
+                }
+                entry.proof.validate()?;
+                immutable = Some(&entry.change.growth_immutable_sha256);
+                capture_immutable = Some(&entry.change.intent.immutable_sha256);
+                checkpoint_head = Some(Some(&entry.change.artifact.head));
+                previous = entry.proof.clone();
+            }
+            Event::Resolve(entry) => {
+                if !entry.change.valid()
+                    || entry.change.intent.previous != previous
+                    || !ids.insert(&entry.change.intent.operation_id)
+                    || immutable
+                        .is_some_and(|hash| hash != &entry.change.intent.growth_immutable_sha256)
+                    || capture_immutable
+                        .is_some_and(|hash| hash != &entry.change.intent.immutable_sha256)
+                    || checkpoint_head
+                        .is_some_and(|head| head != entry.change.intent.previous_head.as_ref())
+                    || entry.proof
+                        != crate::capture_resolution::next_proof(
+                            &entry.change,
+                            entry.proof.record_sha256.clone(),
+                        )?
+                {
+                    return Err(Error::before(ErrorCode::Ownership));
+                }
+                entry.proof.validate()?;
+                immutable = Some(&entry.change.growth_immutable_sha256);
+                capture_immutable = Some(&entry.change.intent.immutable_sha256);
+                checkpoint_head = Some(entry.change.checkpoint_head.as_ref());
+                previous = entry.proof.clone();
+            }
         }
-        entry.proof.validate()?;
-        immutable = Some(&entry.change.immutable_sha256);
-        previous = entry.proof.clone();
     }
     if journal.head != previous
         || journal.pending.as_ref().is_some_and(|pending| {
@@ -793,6 +1365,14 @@ fn validate_journal(journal: &Journal) -> Result<()> {
                     .geometry
                     .as_ref()
                     .is_some_and(|value| !value.bound(&pending.change))
+        })
+        || journal.capture_pending.as_ref().is_some_and(|pending| {
+            !pending.intent.valid()
+                || pending.intent.previous != previous
+                || ids.contains(&pending.intent.operation_id)
+                || immutable.is_some_and(|hash| hash != &pending.intent.growth_immutable_sha256)
+                || capture_immutable.is_some_and(|hash| hash != &pending.intent.immutable_sha256)
+                || checkpoint_head.is_some_and(|head| head != pending.intent.previous_head.as_ref())
         })
     {
         return Err(Error::before(ErrorCode::Ownership));
@@ -831,6 +1411,616 @@ fn after_entry(error: Error) -> Error {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn capture_fixture() -> (
+        tempfile::TempDir,
+        MaterialJournal,
+        CreationReceipt,
+        VmRecord,
+    ) {
+        capture_fixture_with_head(None)
+    }
+
+    fn capture_fixture_with_head(
+        head: Option<String>,
+    ) -> (
+        tempfile::TempDir,
+        MaterialJournal,
+        CreationReceipt,
+        VmRecord,
+    ) {
+        let directory = tempfile::tempdir().unwrap();
+        let journal = MaterialJournal::at(&directory.path().canonicalize().unwrap());
+        let mut record = VmRecord::new("capture-source".into(), 1, 512, vec![], vec![], false);
+        record.storage_gb = Some(1);
+        record.overlay_gb = Some(1);
+        record.forkable = true;
+        record.checkpoint_head = head;
+        record.entrypoint = vec!["/bin/true".into()];
+        record.cmd.clear();
+        record.env.clear();
+        record.workdir = Some("/".into());
+        record.user = None;
+        // Synthetic SDK-result boundary; no process is launched or interrupted.
+        record.state = smolvm::config::RecordState::Running;
+        record.pid = Some(123);
+        record.pid_start_time = Some(456);
+        record.labels.insert("smolbox.owner".into(), "b".repeat(64));
+        record
+            .labels
+            .insert("smolbox.incarnation".into(), "c".repeat(32));
+        let origin = CreationReceipt {
+            target_id: "local".into(),
+            domain_generation: "a".repeat(32),
+            name: record.name.clone(),
+            owner_token: "b".repeat(64),
+            incarnation: "c".repeat(32),
+            material_sha256: material_hash(&record).unwrap(),
+            material: None,
+        };
+        let receipt = journal.initialize(&origin).unwrap();
+        (directory, journal, receipt, record)
+    }
+    fn capture_request() -> crate::CaptureRequest {
+        crate::CaptureRequest {
+            max_bytes: 1024,
+            idle: true,
+        }
+    }
+    fn capture_artifact(parent: Option<String>) -> crate::CaptureArtifact {
+        crate::CaptureArtifact {
+            sha256: "a".repeat(64),
+            size_bytes: 512,
+            head: "d".repeat(32),
+            parent,
+        }
+    }
+
+    #[test]
+    fn capture_requires_entered_intent_exact_lineage_and_correlated_source_resume() {
+        let (_dir, journal, receipt, mut record) = capture_fixture();
+        let request = capture_request();
+        let permit = journal
+            .prepare_capture(&receipt, "capture-1", request.clone(), &record)
+            .unwrap();
+        assert_eq!(journal.verify(&receipt).unwrap_err().code, ErrorCode::State);
+        assert!(journal
+            .completed_capture(&receipt, "capture-1", &request)
+            .unwrap()
+            .is_none());
+        let artifact = capture_artifact(None);
+        assert!(journal
+            .complete_capture(&receipt, &permit, artifact.clone(), &record)
+            .is_err());
+        journal.enter_capture(&permit).unwrap();
+        assert!(journal.enter_capture(&permit).is_err());
+        // An SDK persistence warning leaves the old head: artifact existence
+        // and SDK CaptureResult alone cannot complete source authority.
+        assert!(journal
+            .complete_capture(&receipt, &permit, artifact.clone(), &record)
+            .is_err());
+        record.checkpoint_head = Some(artifact.head.clone());
+        for case in 0..4 {
+            let mut changed = record.clone();
+            match case {
+                0 => changed.pid_start_time = Some(999),
+                1 => changed.state = smolvm::config::RecordState::Stopped,
+                2 => changed.cpus = 2,
+                _ => changed.env.push(("SECRET".into(), "private".into())),
+            }
+            assert!(journal
+                .complete_capture(&receipt, &permit, artifact.clone(), &changed)
+                .is_err());
+        }
+        let transition = journal
+            .complete_capture(&receipt, &permit, artifact, &record)
+            .unwrap();
+        transition.validate().unwrap();
+        journal.verify(&transition.receipt).unwrap();
+        assert!(transition.receipt.matches(&record).unwrap());
+        assert!(!receipt.matches(&record).unwrap());
+        assert_eq!(
+            journal
+                .completed_capture(&receipt, "capture-1", &request)
+                .unwrap()
+                .unwrap(),
+            transition
+        );
+        assert!(journal
+            .completed_capture(&transition.receipt, "capture-1", &request)
+            .is_err());
+        let mut crossed = transition.clone();
+        crossed.change.artifact.sha256 = "f".repeat(64);
+        assert!(crossed.validate().is_err());
+        assert!(journal
+            .prepare_capture(&transition.receipt, "capture-1", request, &record)
+            .is_err());
+    }
+
+    #[test]
+    fn capture_and_growth_are_one_ordered_chain_with_distinct_operation_proofs() {
+        let (_dir, journal, receipt, mut record) = capture_fixture();
+        let growth = journal
+            .prepare(&receipt, "grow-1", grow(), &record)
+            .unwrap();
+        journal.enter(&growth).unwrap();
+        record.storage_gb = Some(2);
+        let grown = journal.complete(&receipt, &growth, &record).unwrap();
+        let capture = journal
+            .prepare_capture(&grown, "capture-1", capture_request(), &record)
+            .unwrap();
+        assert!(journal
+            .prepare(
+                &grown,
+                "grow-2",
+                GrowDisks {
+                    storage_gib: Some(3),
+                    overlay_gib: None
+                },
+                &record
+            )
+            .is_err());
+        journal.enter_capture(&capture).unwrap();
+        let artifact = capture_artifact(None);
+        record.checkpoint_head = Some(artifact.head.clone());
+        let captured = journal
+            .complete_capture(&grown, &capture, artifact, &record)
+            .unwrap();
+        let request = GrowDisks {
+            storage_gib: Some(3),
+            overlay_gib: None,
+        };
+        let growth = journal
+            .prepare(&captured.receipt, "grow-2", request, &record)
+            .unwrap();
+        journal.enter(&growth).unwrap();
+        record.storage_gb = Some(3);
+        let latest = journal
+            .complete(&captured.receipt, &growth, &record)
+            .unwrap();
+        assert_eq!(latest.material.as_ref().unwrap().revision, 3);
+        journal.verify(&latest).unwrap();
+        journal
+            .completed_transition(&captured.receipt, "grow-2", request)
+            .unwrap()
+            .unwrap()
+            .validate()
+            .unwrap();
+        assert!(journal
+            .completed_transition(&grown, "capture-1", request)
+            .unwrap()
+            .is_none());
+        assert!(journal
+            .completed_capture(&receipt, "grow-1", &capture_request())
+            .unwrap()
+            .is_none());
+    }
+
+    #[test]
+    fn capture_permits_and_journal_writes_bind_original_directory_and_full_file_version() {
+        let (directory, journal, receipt, record) = capture_fixture();
+        let permit = journal
+            .prepare_capture(&receipt, "capture", capture_request(), &record)
+            .unwrap();
+        let other = tempfile::tempdir().unwrap();
+        std::fs::copy(
+            directory.path().join(FILE_NAME),
+            other.path().join(FILE_NAME),
+        )
+        .unwrap();
+        let crossed = MaterialJournal::at(other.path());
+        assert_eq!(
+            crossed.enter_capture(&permit).unwrap_err().code,
+            ErrorCode::Ownership
+        );
+        let (saved, version) = journal.load().unwrap();
+        let path = directory.path().join(FILE_NAME);
+        let bytes = std::fs::read(&path).unwrap();
+        let mut changed = bytes.clone();
+        changed.push(b' ');
+        std::fs::write(&path, &changed).unwrap();
+        assert_eq!(
+            journal.write(&saved, Some(version)).unwrap_err().code,
+            ErrorCode::Ownership
+        );
+        assert_eq!(std::fs::read(&path).unwrap(), changed);
+        // An independently reread valid pending journal still cannot complete
+        // capture without its entered intent and explicit result evidence.
+        assert!(journal
+            .completed_capture(&receipt, "capture", &capture_request())
+            .unwrap()
+            .is_none());
+    }
+
+    #[test]
+    fn prepared_capture_can_abort_but_entered_capture_only_grants_exact_source_stop_predicate() {
+        let (_directory, journal, receipt, mut record) = capture_fixture();
+        let permit = journal
+            .prepare_capture(&receipt, "capture", capture_request(), &record)
+            .unwrap();
+        assert!(!journal.entered_capture_source(&receipt, &record).unwrap());
+        journal.abort_prepared_capture(&permit).unwrap();
+        journal.verify(&receipt).unwrap();
+        let permit = journal
+            .prepare_capture(&receipt, "capture", capture_request(), &record)
+            .unwrap();
+        journal.enter_capture(&permit).unwrap();
+        assert!(journal.abort_prepared_capture(&permit).is_err());
+        record.checkpoint_head = Some("d".repeat(32));
+        assert!(journal.entered_capture_source(&receipt, &record).unwrap());
+        assert!(journal
+            .capture_dispatch(&receipt, "other", &capture_request(), &record)
+            .is_err());
+        assert!(journal.verify(&receipt).is_err());
+        record.pid_start_time = Some(999);
+        assert!(!journal.entered_capture_source(&receipt, &record).unwrap());
+        record.pid_start_time = Some(456);
+        record.network = true;
+        assert!(!journal.entered_capture_source(&receipt, &record).unwrap());
+    }
+
+    #[test]
+    fn capture_history_cannot_reorder_duplicate_or_change_proof_and_legacy_fields_stay_omitted() {
+        let (directory, journal, receipt, mut record) = capture_fixture();
+        let legacy = std::fs::read(directory.path().join(FILE_NAME)).unwrap();
+        let value: serde_json::Value = serde_json::from_slice(&legacy).unwrap();
+        assert!(value.get("capture_history").is_none());
+        assert!(value.get("capture_pending").is_none());
+        assert!(value.get("capture_resolutions").is_none());
+        let first = journal
+            .prepare_capture(&receipt, "first", capture_request(), &record)
+            .unwrap();
+        journal.enter_capture(&first).unwrap();
+        let artifact = capture_artifact(None);
+        record.checkpoint_head = Some(artifact.head.clone());
+        let first = journal
+            .complete_capture(&receipt, &first, artifact, &record)
+            .unwrap();
+        let second = journal
+            .prepare_capture(&first.receipt, "second", capture_request(), &record)
+            .unwrap();
+        journal.enter_capture(&second).unwrap();
+        let mut artifact = capture_artifact(record.checkpoint_head.clone());
+        artifact.head = "e".repeat(32);
+        record.checkpoint_head = Some(artifact.head.clone());
+        let second = journal
+            .complete_capture(&first.receipt, &second, artifact, &record)
+            .unwrap();
+        let (saved, _) = journal.load().unwrap();
+        for case in 0..3 {
+            let mut changed = saved.clone();
+            let history = changed.capture_history.as_mut().unwrap();
+            match case {
+                0 => history.reverse(),
+                1 => history[1] = history[0].clone(),
+                _ => history[1].change.artifact.sha256 = "f".repeat(64),
+            }
+            assert!(validate_journal(&changed).is_err());
+        }
+        journal.verify(&second.receipt).unwrap();
+        assert!(journal
+            .prepare(&second.receipt, "first", grow(), &record)
+            .is_err());
+        let mut crossed = second.clone();
+        crossed.previous.target_id = "other".into();
+        assert!(crossed.validate().is_err());
+    }
+
+    #[test]
+    fn entered_capture_resolution_retires_id_without_artifact_or_success_for_old_and_changed_heads()
+    {
+        for (previous_head, head) in [
+            (None, None),
+            (None, Some("d".repeat(32))),
+            (Some("c".repeat(32)), Some("c".repeat(32))),
+            (Some("c".repeat(32)), Some("d".repeat(32))),
+        ] {
+            let (_directory, journal, receipt, mut record) =
+                capture_fixture_with_head(previous_head);
+            let request = capture_request();
+            let permit = journal
+                .prepare_capture(&receipt, "unknown", request.clone(), &record)
+                .unwrap();
+            // Prepared intent and running inventory are never resolution proof.
+            assert!(journal
+                .resolve_entered_capture(&receipt, "unknown", &request, &record)
+                .is_err());
+            journal.enter_capture(&permit).unwrap();
+            assert!(journal
+                .resolve_entered_capture(&receipt, "unknown", &request, &record)
+                .is_err());
+            record.state = smolvm::config::RecordState::Stopped;
+            record.pid = None;
+            record.pid_start_time = None;
+            record.checkpoint_head = head.clone();
+            let resolution = journal
+                .resolve_entered_capture(&receipt, "unknown", &request, &record)
+                .unwrap();
+            resolution.validate().unwrap();
+            assert_eq!(resolution.change.checkpoint_head, head);
+            assert_eq!(resolution.receipt.material.as_ref().unwrap().revision, 1);
+            journal.verify(&resolution.receipt).unwrap();
+            assert!(resolution.receipt.matches(&record).unwrap());
+            assert_eq!(
+                journal
+                    .resolved_capture(&receipt, "unknown", &request)
+                    .unwrap(),
+                Some(resolution.clone())
+            );
+            assert!(journal
+                .resolved_capture(&resolution.receipt, "unknown", &request)
+                .is_err());
+            assert!(journal
+                .completed_capture(&receipt, "unknown", &request)
+                .unwrap()
+                .is_none());
+            assert!(journal
+                .complete_capture(&receipt, &permit, capture_artifact(None), &record)
+                .is_err());
+            assert!(journal
+                .resolve_entered_capture(&receipt, "unknown", &request, &record)
+                .is_err());
+            assert!(journal
+                .prepare(&resolution.receipt, "unknown", grow(), &record)
+                .is_err());
+            record.state = smolvm::config::RecordState::Running;
+            record.pid = Some(321);
+            record.pid_start_time = Some(654);
+            assert!(journal
+                .prepare_capture(&resolution.receipt, "unknown", request.clone(), &record)
+                .is_err());
+            // A different operation may capture against the resolved source's
+            // actual head; the old artifact is never imported or synthesized.
+            let next = journal
+                .prepare_capture(&resolution.receipt, "next", request, &record)
+                .unwrap();
+            journal.enter_capture(&next).unwrap();
+            let mut artifact = capture_artifact(record.checkpoint_head.clone());
+            artifact.head = "e".repeat(32);
+            record.checkpoint_head = Some(artifact.head.clone());
+            let captured = journal
+                .complete_capture(&resolution.receipt, &next, artifact, &record)
+                .unwrap();
+            journal.verify(&captured.receipt).unwrap();
+            assert_eq!(captured.receipt.material.as_ref().unwrap().revision, 2);
+            let encoded = serde_json::to_value(&resolution).unwrap();
+            assert!(encoded["change"].get("artifact").is_none());
+            assert!(serde_json::from_value::<crate::CaptureTransition>(encoded).is_err());
+        }
+    }
+
+    #[test]
+    fn capture_resolution_rejects_crossed_requests_foreign_material_and_nonquiescent_records() {
+        let (directory, journal, receipt, mut record) = capture_fixture();
+        let request = capture_request();
+        let permit = journal
+            .prepare_capture(&receipt, "unknown", request.clone(), &record)
+            .unwrap();
+        journal.enter_capture(&permit).unwrap();
+        record.state = smolvm::config::RecordState::Stopped;
+        record.pid = None;
+        record.pid_start_time = None;
+        record.checkpoint_head = Some("d".repeat(32));
+        let before = std::fs::read(directory.path().join(FILE_NAME)).unwrap();
+        for case in 0..7 {
+            let mut changed = record.clone();
+            match case {
+                0 => changed.pid = Some(123),
+                1 => changed.pid_start_time = Some(456),
+                2 => changed.state = smolvm::config::RecordState::Failed,
+                3 => changed.cpus = 2,
+                4 => changed.forkable = false,
+                5 => changed.storage_gb = Some(2),
+                _ => changed.checkpoint_head = Some("not-a-head".into()),
+            }
+            assert!(journal
+                .resolve_entered_capture(&receipt, "unknown", &request, &changed)
+                .is_err());
+        }
+        assert!(journal
+            .resolve_entered_capture(&receipt, "crossed", &request, &record)
+            .is_err());
+        let mut changed_request = request.clone();
+        changed_request.max_bytes += 1;
+        assert!(journal
+            .resolve_entered_capture(&receipt, "unknown", &changed_request, &record)
+            .is_err());
+        let mut foreign = receipt.clone();
+        foreign.incarnation = "f".repeat(32);
+        assert!(journal
+            .resolve_entered_capture(&foreign, "unknown", &request, &record)
+            .is_err());
+        assert_eq!(
+            std::fs::read(directory.path().join(FILE_NAME)).unwrap(),
+            before
+        );
+        assert!(journal.verify(&receipt).is_err());
+        assert!(journal
+            .resolved_capture(&receipt, "unknown", &request)
+            .unwrap()
+            .is_none());
+    }
+
+    #[test]
+    fn entered_running_resolution_requires_the_matching_opaque_source_permit_and_retires_without_snapshot(
+    ) {
+        let (_directory, journal, receipt, mut record) = capture_fixture();
+        let request = capture_request();
+        let permit = journal
+            .prepare_capture(&receipt, "running-unknown", request.clone(), &record)
+            .unwrap();
+        journal.enter_capture(&permit).unwrap();
+        record.checkpoint_head = Some("d".repeat(32));
+        let authority = crate::capture_resolution::SourceAuthority::verify(
+            &record,
+            (123, 456),
+            crate::capture_resolution::SourceFacts {
+                owner: Some(true),
+                runtime_pid: Some(123),
+                original_alive: true,
+                observed_birth: Some(456),
+                excluded: false,
+            },
+        )
+        .unwrap();
+        let mut wrong = record.clone();
+        wrong.pid_start_time = Some(999);
+        assert!(journal
+            .resolve_entered_capture_authorized(
+                &receipt,
+                "running-unknown",
+                &request,
+                &wrong,
+                &authority
+            )
+            .is_err());
+        let proof = journal
+            .resolve_entered_capture_authorized(
+                &receipt,
+                "running-unknown",
+                &request,
+                &record,
+                &authority,
+            )
+            .unwrap();
+        proof.validate().unwrap();
+        assert_eq!(record.state, smolvm::config::RecordState::Running);
+        assert_eq!(record.pid.zip(record.pid_start_time), Some((123, 456)));
+        assert!(proof.receipt.matches(&record).unwrap());
+        journal.verify(&proof.receipt).unwrap();
+        assert!(journal
+            .completed_capture(&receipt, "running-unknown", &request)
+            .unwrap()
+            .is_none());
+        assert!(journal
+            .prepare_capture(&proof.receipt, "running-unknown", request, &record)
+            .is_err());
+    }
+
+    #[test]
+    fn capture_resolution_chain_cannot_be_changed_duplicated_or_reinterpreted() {
+        let (_directory, journal, receipt, mut record) = capture_fixture();
+        let request = capture_request();
+        let permit = journal
+            .prepare_capture(&receipt, "unknown", request.clone(), &record)
+            .unwrap();
+        journal.enter_capture(&permit).unwrap();
+        record.state = smolvm::config::RecordState::Stopped;
+        record.pid = None;
+        record.pid_start_time = None;
+        record.checkpoint_head = Some("d".repeat(32));
+        let resolution = journal
+            .resolve_entered_capture(&receipt, "unknown", &request, &record)
+            .unwrap();
+        let (saved, _) = journal.load().unwrap();
+        for case in 0..4 {
+            let mut changed = saved.clone();
+            let entries = changed.capture_resolutions.as_mut().unwrap();
+            match case {
+                0 => entries[0].change.checkpoint_head = Some("e".repeat(32)),
+                1 => entries[0].proof.chain_sha256 = "f".repeat(64),
+                2 => entries.push(entries[0].clone()),
+                _ => entries.clear(),
+            }
+            assert!(validate_journal(&changed).is_err());
+        }
+        let mut changed = resolution.clone();
+        changed.previous.owner_token = "f".repeat(64);
+        assert!(changed.validate().is_err());
+        let mut changed = resolution.clone();
+        changed.change.intent.request.max_bytes += 1;
+        assert!(changed.validate().is_err());
+        let mut changed = resolution;
+        changed.change.intent.previous_head = Some("e".repeat(32));
+        changed.change.checkpoint_head = None;
+        assert!(changed.validate().is_err());
+    }
+
+    #[test]
+    fn resolution_chain_preserves_known_absent_heads_instead_of_unknown_placeholders() {
+        let values: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/capture-resolution-history-v1.json"
+        ))
+        .unwrap();
+        let first: crate::CaptureResolutionTransition =
+            serde_json::from_value(values[0].clone()).unwrap();
+        let captured: crate::CaptureTransition = serde_json::from_value(values[1].clone()).unwrap();
+        let wrong: crate::CaptureResolutionTransition =
+            serde_json::from_value(values[2].clone()).unwrap();
+        first.validate().unwrap();
+        captured.validate().unwrap();
+        wrong.validate().unwrap();
+        let mut origin = first.previous.clone();
+        origin.material = None;
+        let mut journal = Journal {
+            schema: 2,
+            origin,
+            head: captured.receipt.material.clone().unwrap(),
+            history: vec![],
+            pending: None,
+            capture_pending: None,
+            mounts: None,
+            capture_history: Some(vec![crate::capture_material::Completed {
+                change: captured.change,
+                proof: captured.receipt.material.unwrap(),
+            }]),
+            capture_resolutions: Some(vec![crate::capture_resolution::Resolved {
+                change: first.change,
+                proof: first.receipt.material.unwrap(),
+            }]),
+        };
+        validate_journal(&journal).unwrap();
+        journal.capture_history = None;
+        journal.head = wrong.receipt.material.clone().unwrap();
+        journal
+            .capture_resolutions
+            .as_mut()
+            .unwrap()
+            .push(crate::capture_resolution::Resolved {
+                change: wrong.change,
+                proof: wrong.receipt.material.unwrap(),
+            });
+        assert!(validate_journal(&journal).is_err());
+    }
+
+    #[test]
+    fn capture_request_bounds_parent_and_original_authority_fail_closed() {
+        let (_dir, journal, receipt, mut record) = capture_fixture();
+        for request in [
+            crate::CaptureRequest {
+                max_bytes: 0,
+                idle: true,
+            },
+            crate::CaptureRequest {
+                max_bytes: 1024,
+                idle: false,
+            },
+            crate::CaptureRequest {
+                max_bytes: crate::CHECKPOINT_ARTIFACT_BYTES + 1,
+                idle: true,
+            },
+        ] {
+            assert!(journal
+                .prepare_capture(&receipt, "capture", request, &record)
+                .is_err());
+        }
+        let mut crossed = receipt.clone();
+        crossed.owner_token = "f".repeat(64);
+        assert!(journal
+            .prepare_capture(&crossed, "capture", capture_request(), &record)
+            .is_err());
+        let permit = journal
+            .prepare_capture(&receipt, "capture", capture_request(), &record)
+            .unwrap();
+        journal.enter_capture(&permit).unwrap();
+        let mut artifact = capture_artifact(None);
+        record.checkpoint_head = Some(artifact.head.clone());
+        artifact.parent = Some("e".repeat(32));
+        assert!(journal
+            .complete_capture(&receipt, &permit, artifact, &record)
+            .is_err());
+        assert!(journal.verify(&receipt).is_err());
+    }
 
     fn mounted_fixture() -> (
         tempfile::TempDir,

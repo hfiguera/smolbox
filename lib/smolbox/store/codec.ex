@@ -115,6 +115,40 @@ defmodule SmolBox.Store.Codec do
   mode. Earlier HTTP/native envelopes omit the empty native_mounts default and
   reject even explicit empty new fields. Install every reader and atomic attachment/
   release writer before activation; v21 alone enables no mount or SDK feature.
+  Native checkpoint restore-source assignments selectively use v22, retaining
+  immutable source identity and captured allocations separately from operator
+  paths. Earlier native envelopes reject these shapes; HTTP checkpoint records
+  retain their exact envelopes. Upgrade every reader and atomic reservation
+  writer before advertising native_checkpoint_sources: 1. This marker enables
+  neither capture histories nor public checkpoint feature admission.
+  Explicit native checkpointable creation opt-in selectively uses v23. The true
+  marker is immutable and retained by attached commands; earlier native envelopes
+  reject its presence. Omission keeps ordinary native and HTTP bytes unchanged.
+  Upgrade every reader and reservation writer before advertising
+  native_checkpointable: 1; this marker does not activate capture or its histories.
+  Native capture histories and attached mixed material evidence selectively use
+  v24. Original creation receipts remain immutable; ordered growth/capture links
+  prove current material separately. Earlier envelopes omit new nil defaults and
+  reject their presence. Upgrade every reader and atomic history/identity writer
+  before advertising native_capture_histories: 1. HTTP and native records without
+  capture histories keep their earlier bytes. This marker does not enable public
+  capture admission or establish native platform qualification.
+  Source-only entered-capture resolution histories selectively use v25. The typed
+  resolution proof cannot be decoded as capture completion or carried in older
+  envelopes. Upgrade every reader and atomic source/history/resource writer
+  before advertising native_capture_resolutions: 1. V24 captured histories and
+  all earlier supported HTTP/native records preserve their encodings. The reader
+  marker activates neither checkpoint dispatch nor staging cleanup.
+  Native captures accepted with a frozen source receipt, and records containing
+  native cleanup authority, selectively use v26. Upgrade every reader and guarded
+  cleanup/accounting writer before advertising native_capture_cleanup: 1. Older
+  envelopes strip new nil defaults and reject their presence. HTTP, v24 capture
+  histories and v25 resolution histories without these fields keep their bytes.
+  Pre-entry aborted-source qualifications selectively use v27, preserving material
+  history and artifact accounting. Upgrade every reader and atomic resolution
+  writer before advertising native_capture_abort_sources: 1; older envelopes
+  reject the new field even when nil. Records without qualification retain v26
+  or their earlier compatible envelopes.
   """
 
   alias SmolBox.{Error, Execution, ExecutionFeatures}
@@ -122,6 +156,7 @@ defmodule SmolBox.Store.Codec do
   alias SmolBox.Store.{
     CodecBranches,
     CodecCaptures,
+    CodecCheckpointable,
     CodecExecution,
     CodecExpansion,
     CodecExports,
@@ -129,6 +164,11 @@ defmodule SmolBox.Store.Codec do
     CodecGrowth,
     CodecMaterial,
     CodecNative,
+    CodecNativeCaptureAbortSources,
+    CodecNativeCaptureCleanup,
+    CodecNativeCaptureResolutions,
+    CodecNativeCaptures,
+    CodecNativeCheckpoints,
     CodecNativeMounts,
     CodecNativeSources,
     CodecNativeVolumes,
@@ -145,6 +185,12 @@ defmodule SmolBox.Store.Codec do
   @native_sources_prefix "smolbox-record-v19\0"
   @native_volumes_prefix "smolbox-record-v20\0"
   @native_mounts_prefix "smolbox-record-v21\0"
+  @native_checkpoints_prefix "smolbox-record-v22\0"
+  @native_captures_prefix "smolbox-record-v24\0"
+  @native_capture_abort_sources_prefix "smolbox-record-v27\0"
+  @native_capture_cleanup_prefix "smolbox-record-v26\0"
+  @native_capture_resolutions_prefix "smolbox-record-v25\0"
+  @checkpointable_prefix "smolbox-record-v23\0"
   @volumes_prefix "smolbox-record-v15\0"
   @expansion_prefix "smolbox-record-v14\0"
   @branches_prefix "smolbox-record-v13\0"
@@ -166,6 +212,11 @@ defmodule SmolBox.Store.Codec do
     SmolBox.Backend.Assignment,
     SmolBox.Embedded.Identity,
     SmolBox.Embedded.GrowthTransition,
+    SmolBox.Embedded.CaptureTransition,
+    SmolBox.Embedded.CaptureResolutionTransition,
+    SmolBox.Embedded.CaptureStagingCleanupReceipt,
+    SmolBox.Embedded.NativeCaptureCleanup,
+    SmolBox.Embedded.CaptureAbortSourceQualification,
     SmolBox.Embedded.VolumeAuthority,
     SmolBox.Embedded.VolumeAttachment,
     SmolBox.ManagedMachine,
@@ -194,6 +245,7 @@ defmodule SmolBox.Store.Codec do
     SmolBox.BranchSpec,
     SmolBox.BranchPolicy,
     SmolBox.CheckpointCapture,
+    SmolBox.Checkpoint,
     SmolBox.CheckpointCaptureSpec,
     SmolBox.CheckpointPolicy,
     SmolBox.CheckpointResult,
@@ -218,9 +270,26 @@ defmodule SmolBox.Store.Codec do
 
   def encode(%{spec: %{profile: %SmolBox.Profile{} = profile}} = record) do
     cond do
-      CodecNativeMounts.required?(record) -> encode_native_mounts(record)
-      CodecNative.required?(record) -> encode_native(record)
-      true -> encode_compatible(record, profile)
+      CodecNativeCaptureAbortSources.required?(record) ->
+        encode_native_capture_abort_sources(record)
+
+      CodecNativeCaptureCleanup.required?(record) ->
+        encode_native_capture_cleanup(record)
+
+      CodecNativeCaptureResolutions.required?(record) ->
+        encode_native_capture_resolutions(record)
+
+      CodecNativeCaptures.required?(record) ->
+        encode_native_captures(record)
+
+      CodecNativeMounts.required?(record) ->
+        encode_native_mounts(record)
+
+      CodecNative.required?(record) ->
+        encode_native(record)
+
+      true ->
+        encode_compatible(record, profile)
     end
   end
 
@@ -279,6 +348,27 @@ defmodule SmolBox.Store.Codec do
   @spec decode(binary()) ::
           {:ok, Execution.t() | SmolBox.ManagedMachine.t() | SmolBox.Volume.t()}
           | {:error, Error.t()}
+  def decode(<<@native_capture_abort_sources_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_native_capture_abort_sources(bytes)
+
+  def decode(<<@native_capture_cleanup_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_native_capture_cleanup(bytes)
+
+  def decode(<<@native_capture_resolutions_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_native_capture_resolutions(bytes)
+
+  def decode(<<@native_captures_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes, do: decode_native_captures(bytes)
+
+  def decode(<<@checkpointable_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes, do: decode_checkpointable(bytes)
+
+  def decode(<<@native_checkpoints_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes, do: decode_native_checkpoints(bytes)
+
   def decode(<<@native_mounts_prefix, 131, tag, _rest::binary>> = bytes)
       when tag != 80 and byte_size(bytes) <= @max_bytes, do: decode_native_mounts(bytes)
 
@@ -354,23 +444,120 @@ defmodule SmolBox.Store.Codec do
 
   def decode(_bytes), do: invalid()
 
+  defp old_payload(record), do: record |> CodecNativeCaptures.strip() |> :erlang.term_to_binary()
+
+  defp old_term(payload) do
+    {record, used} = :erlang.binary_to_term(payload, [:safe, :used])
+    {CodecNativeCaptures.upgrade(record), used}
+  end
+
+  defp encode_native_capture_abort_sources(record) do
+    with :ok <- validate_extended(record) do
+      bytes = @native_capture_abort_sources_prefix <> :erlang.term_to_binary(record)
+      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
+    end
+  end
+
+  defp decode_native_capture_abort_sources(
+         <<@native_capture_abort_sources_prefix, payload::binary>>
+       ) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <- used == byte_size(payload) and CodecNativeCaptureAbortSources.required?(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
+  defp encode_native_capture_cleanup(record) do
+    with :ok <- validate_extended(record) do
+      bytes =
+        @native_capture_cleanup_prefix <>
+          :erlang.term_to_binary(CodecNativeCaptureAbortSources.strip(record))
+
+      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
+    end
+  end
+
+  defp decode_native_capture_cleanup(<<@native_capture_cleanup_prefix, payload::binary>>) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         record = CodecNativeCaptureAbortSources.upgrade(record),
+         true <- used == byte_size(payload) and CodecNativeCaptureCleanup.required?(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
+  defp encode_native_captures(record),
+    do: encode_capture_history(record, @native_captures_prefix)
+
+  defp encode_native_capture_resolutions(record),
+    do: encode_capture_history(record, @native_capture_resolutions_prefix)
+
+  defp encode_capture_history(record, prefix) do
+    with :ok <- validate_extended(record) do
+      bytes = prefix <> :erlang.term_to_binary(CodecNativeCaptureCleanup.strip(record))
+      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
+    end
+  end
+
+  defp decode_native_capture_resolutions(<<@native_capture_resolutions_prefix, payload::binary>>) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         record = CodecNativeCaptureCleanup.upgrade(record),
+         true <- used == byte_size(payload) and CodecNativeCaptureResolutions.required?(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
+  defp decode_native_captures(<<@native_captures_prefix, payload::binary>>) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         record = CodecNativeCaptureCleanup.upgrade(record),
+         true <- used == byte_size(payload) and CodecNativeCaptures.required?(record),
+         false <- CodecNativeCaptureResolutions.required?(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
   defp encode_native(record) do
     with :ok <- validate_extended(record) do
       bytes =
         cond do
+          CodecCheckpointable.required?(record) ->
+            @checkpointable_prefix <> old_payload(CodecNativeMounts.strip(record))
+
+          CodecNativeCheckpoints.required?(record) ->
+            @native_checkpoints_prefix <> old_payload(CodecNativeMounts.strip(record))
+
           CodecNativeSources.required?(record) ->
-            @native_sources_prefix <> :erlang.term_to_binary(CodecNativeMounts.strip(record))
+            @native_sources_prefix <> old_payload(CodecNativeMounts.strip(record))
 
           CodecGrowth.required?(record) ->
-            @growth_prefix <> :erlang.term_to_binary(CodecNativeMounts.strip(record))
+            @growth_prefix <> old_payload(CodecNativeMounts.strip(record))
 
           CodecMaterial.required?(record) ->
             @material_prefix <>
-              :erlang.term_to_binary(record |> CodecGrowth.strip() |> CodecNativeMounts.strip())
+              old_payload(record |> CodecGrowth.strip() |> CodecNativeMounts.strip())
 
           true ->
             @native_prefix <>
-              :erlang.term_to_binary(record |> CodecMaterial.strip() |> CodecNativeMounts.strip())
+              old_payload(record |> CodecMaterial.strip() |> CodecNativeMounts.strip())
         end
 
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
@@ -380,8 +567,9 @@ defmodule SmolBox.Store.Codec do
   defp decode_native(<<@native_prefix, payload::binary>>) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- old_term(payload),
          record = CodecNativeMounts.upgrade(record),
+         false <- CodecCheckpointable.required?(record),
          record = CodecMaterial.upgrade(record),
          true <- used == byte_size(payload) and CodecNative.required?(record),
          false <- CodecNativeSources.required?(record),
@@ -401,7 +589,7 @@ defmodule SmolBox.Store.Codec do
 
   defp encode_native_mounts(record) do
     with :ok <- validate_extended(record) do
-      bytes = @native_mounts_prefix <> :erlang.term_to_binary(record)
+      bytes = @native_mounts_prefix <> old_payload(record)
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
   end
@@ -409,7 +597,7 @@ defmodule SmolBox.Store.Codec do
   defp decode_native_mounts(<<@native_mounts_prefix, payload::binary>>) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- old_term(payload),
          true <- used == byte_size(payload) and CodecNativeMounts.required?(record),
          :ok <- validate_extended(record),
          do: {:ok, record},
@@ -420,7 +608,7 @@ defmodule SmolBox.Store.Codec do
 
   defp encode_native_volume(record) do
     with :ok <- validate_extended(record) do
-      bytes = @native_volumes_prefix <> :erlang.term_to_binary(record)
+      bytes = @native_volumes_prefix <> old_payload(record)
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
   end
@@ -428,7 +616,7 @@ defmodule SmolBox.Store.Codec do
   defp decode_native_volume(<<@native_volumes_prefix, payload::binary>>) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- old_term(payload),
          true <- used == byte_size(payload) and CodecNativeVolumes.required?(record),
          :ok <- validate_extended(record),
          do: {:ok, record},
@@ -440,8 +628,9 @@ defmodule SmolBox.Store.Codec do
   defp decode_material(<<@material_prefix, payload::binary>>) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- old_term(payload),
          record = CodecNativeMounts.upgrade(record),
+         false <- CodecCheckpointable.required?(record),
          record = CodecGrowth.upgrade(record),
          true <- used == byte_size(payload) and CodecMaterial.required?(record),
          true <- CodecNative.required?(record),
@@ -456,8 +645,9 @@ defmodule SmolBox.Store.Codec do
   defp decode_growth(<<@growth_prefix, payload::binary>>) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- old_term(payload),
          record = CodecNativeMounts.upgrade(record),
+         false <- CodecCheckpointable.required?(record),
          true <- used == byte_size(payload) and CodecGrowth.required?(record),
          true <- CodecMaterial.required?(record) and CodecNative.required?(record),
          false <- CodecNativeSources.required?(record),
@@ -471,9 +661,40 @@ defmodule SmolBox.Store.Codec do
   defp decode_native_sources(<<@native_sources_prefix, payload::binary>>) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- old_term(payload),
          record = CodecNativeMounts.upgrade(record),
+         false <- CodecCheckpointable.required?(record),
+         false <- CodecNativeCheckpoints.required?(record),
          true <- used == byte_size(payload) and CodecNativeSources.required?(record),
+         true <- CodecMaterial.required?(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
+  defp decode_native_checkpoints(<<@native_checkpoints_prefix, payload::binary>>) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- old_term(payload),
+         record = CodecNativeMounts.upgrade(record),
+         false <- CodecCheckpointable.required?(record),
+         true <- used == byte_size(payload) and CodecNativeCheckpoints.required?(record),
+         true <- CodecMaterial.required?(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
+  defp decode_checkpointable(<<@checkpointable_prefix, payload::binary>>) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- old_term(payload),
+         record = CodecNativeMounts.upgrade(record),
+         true <- used == byte_size(payload) and CodecCheckpointable.required?(record),
          true <- CodecMaterial.required?(record),
          :ok <- validate_extended(record),
          do: {:ok, record},

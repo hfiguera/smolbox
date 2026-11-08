@@ -5,7 +5,19 @@
 use serde_json::Value;
 use std::io::{self, Read, Write};
 
+mod capture;
+mod capture_abort_source;
+pub use capture_abort_source::{CaptureAbortSourceQualification, CaptureAbortSourceState};
+mod capture_staging;
+pub use capture_staging::CaptureStagingCleanupReceipt;
+mod capture_resolution;
+pub use capture_resolution::{
+    CaptureResolutionChange, CaptureResolutionTransition, CAPTURE_RESOLUTION_METADATA_BYTES,
+};
 mod command_payload;
+pub use capture::{
+    CaptureArtifact, CaptureChange, CaptureIntent, CaptureRequest, CaptureTransition,
+};
 mod creation_payload;
 pub use command_payload::COMMAND_PAYLOAD_BYTES;
 mod growth;
@@ -126,6 +138,281 @@ mod tests {
     use super::*;
     use serde_json::json;
     use std::io::Cursor;
+
+    #[test]
+    fn checkpointable_creation_marker_omits_legacy_default_rejects_false_and_requires_feature() {
+        let mut operation = Operation::QualifyCreation {
+            artifact: Artifact {
+                path: "/approved.smolmachine".into(),
+                sha256: "a".repeat(64),
+                max_bytes: 1024,
+                guest_platform: "linux/arm64".into(),
+            },
+            resources: Resources {
+                cpus: 1,
+                memory_mib: 256,
+                storage_gib: 1,
+                overlay_gib: 1,
+            },
+            user: None,
+            features: None,
+            checkpointable: None,
+        };
+        let legacy = serde_json::to_value(&operation).unwrap();
+        assert!(legacy.get("checkpointable").is_none());
+        assert!(operation.validate(1000).is_ok());
+        if let Operation::QualifyCreation { checkpointable, .. } = &mut operation {
+            *checkpointable = Some(false);
+        }
+        assert!(operation.validate(1000).is_err());
+        if let Operation::QualifyCreation { checkpointable, .. } = &mut operation {
+            *checkpointable = Some(true);
+        }
+        assert!(operation.requires_checkpoints());
+        assert!(operation.validate(1000).is_ok());
+        let mut nullable = legacy;
+        nullable["checkpointable"] = serde_json::Value::Null;
+        assert!(serde_json::from_value::<Operation>(nullable).is_err());
+        let ServerMessage::Hello { hello } = ServerMessage::decode(
+            serde_json::from_str(include_str!("../fixtures/hello-v2.json")).unwrap(),
+        )
+        .unwrap() else {
+            unreachable!()
+        };
+        let mut session = Session::new(*hello.clone()).ok().unwrap();
+        session.approve(&hello).ok().unwrap();
+        assert!(matches!(
+            session.admit(ClientMessage::Request {
+                epoch: hello.epoch.clone(),
+                id: 1,
+                budget_ms: 1000,
+                initial_credit: 0,
+                initial_event_credit: 0,
+                operation
+            }),
+            Ok(ServerMessage::Terminal {
+                outcome: Outcome::Error {
+                    code: SafeCode::Unsupported,
+                    dispatch: Dispatch::NotDispatched
+                },
+                ..
+            })
+        ));
+    }
+
+    #[test]
+    fn checkpoint_start_and_preflight_require_new_feature_and_preflight_running_evidence() {
+        let ServerMessage::Hello { hello } = ServerMessage::decode(
+            serde_json::from_str(include_str!("../fixtures/hello-v2.json")).unwrap(),
+        )
+        .unwrap() else {
+            unreachable!()
+        };
+        let mut hello = *hello;
+        let ServerMessage::Terminal {
+            outcome: Outcome::Created { receipt },
+            ..
+        } = ServerMessage::decode(
+            serde_json::from_str(include_str!("../fixtures/created-v2.json")).unwrap(),
+        )
+        .unwrap()
+        else {
+            unreachable!()
+        };
+        let operations = [
+            Operation::StartCheckpointable {
+                receipt: receipt.clone(),
+            },
+            Operation::CheckpointPreflight { receipt },
+        ];
+        for enabled in [false, true] {
+            if enabled {
+                hello
+                    .sdk
+                    .as_mut()
+                    .unwrap()
+                    .feature_versions
+                    .insert("checkpoints".into(), 1);
+            }
+            let mut session = Session::new(hello.clone()).ok().unwrap();
+            session.approve(&hello).ok().unwrap();
+            for (i, operation) in operations.iter().enumerate() {
+                let request = ClientMessage::Request {
+                    epoch: hello.epoch.clone(),
+                    id: i as u64 + 1,
+                    budget_ms: 1000,
+                    initial_credit: 0,
+                    initial_event_credit: 0,
+                    operation: operation.clone(),
+                };
+                let reply = session.admit(request).ok().unwrap();
+                if enabled {
+                    assert!(matches!(reply, ServerMessage::Accepted { .. }));
+                } else {
+                    assert!(matches!(
+                        reply,
+                        ServerMessage::Terminal {
+                            outcome: Outcome::Error {
+                                code: SafeCode::Unsupported,
+                                dispatch: Dispatch::NotDispatched
+                            },
+                            ..
+                        }
+                    ));
+                }
+            }
+            if enabled {
+                let observed = |state, pid_identity| Outcome::Observed {
+                    observation: Observation {
+                        state,
+                        resources: Some(Resources {
+                            cpus: 1,
+                            memory_mib: 256,
+                            storage_gib: 1,
+                            overlay_gib: 1,
+                        }),
+                        pid_identity,
+                        configuration: None,
+                    },
+                };
+                assert!(session
+                    .terminal(2, observed(ObservedState::Stopped, None))
+                    .is_err());
+                assert!(session
+                    .terminal(2, observed(ObservedState::Running, Some((123, 456))))
+                    .is_ok());
+                assert!(session
+                    .terminal(1, observed(ObservedState::Running, Some((123, 456))))
+                    .is_ok());
+            }
+        }
+        assert!(operations[1].validate(30001).is_err());
+        assert!(operations[0].validate(86400000).is_ok());
+    }
+
+    #[test]
+    fn checkpoint_requests_are_path_free_feature_gated_and_receipt_correlated() {
+        let ServerMessage::Hello { hello } = ServerMessage::decode(
+            serde_json::from_str(include_str!("../fixtures/hello-v2.json")).unwrap(),
+        )
+        .unwrap() else {
+            unreachable!()
+        };
+        let mut hello = *hello;
+        let create = CheckpointCreate {
+            checkpointable: None,
+            name: "owned".into(),
+            owner_token: "67".repeat(32),
+            incarnation: "89".repeat(16),
+            source: CheckpointIdentity {
+                kind: "checkpoint".into(),
+                id: "idle-v1".into(),
+                sha256: "a".repeat(64),
+                architecture: "aarch64".into(),
+            },
+            resources: Resources {
+                cpus: 1,
+                memory_mib: 256,
+                storage_gib: 1,
+                overlay_gib: 1,
+            },
+            labels: Default::default(),
+        };
+        let operations = [
+            Operation::QualifyCheckpointCreation {
+                checkpointable: None,
+                source: create.source.clone(),
+                resources: create.resources.clone(),
+            },
+            Operation::CreateCheckpoint {
+                create: create.clone(),
+            },
+            Operation::InspectCheckpointCreation {
+                create: create.clone(),
+            },
+        ];
+        for operation in &operations {
+            assert!(operation.validate(1000).is_ok());
+            let mut value = serde_json::to_value(operation).unwrap();
+            if let Some(create) = value.get_mut("create") {
+                create["source"]["path"] = json!("/caller/input");
+            } else {
+                value["source"]["path"] = json!("/caller/input");
+            }
+            assert!(serde_json::from_value::<Operation>(value).is_err());
+        }
+        let request = |id, operation| ClientMessage::Request {
+            epoch: hello.epoch.clone(),
+            id,
+            budget_ms: 1000,
+            initial_credit: 0,
+            initial_event_credit: 0,
+            operation,
+        };
+        let mut session = Session::new(hello.clone()).ok().unwrap();
+        session.approve(&hello).ok().unwrap();
+        for (i, operation) in operations.iter().enumerate() {
+            assert!(matches!(
+                session.admit(request(i as u64 + 1, operation.clone())),
+                Ok(ServerMessage::Terminal {
+                    outcome: Outcome::Error {
+                        code: SafeCode::Unsupported,
+                        dispatch: Dispatch::NotDispatched
+                    },
+                    ..
+                })
+            ));
+        }
+        hello
+            .sdk
+            .as_mut()
+            .unwrap()
+            .feature_versions
+            .insert("checkpoints".into(), 1);
+        let mut session = Session::new(hello.clone()).ok().unwrap();
+        session.approve(&hello).ok().unwrap();
+        // Requests retain the same epoch after changing only feature policy.
+        for (i, operation) in operations.iter().enumerate() {
+            let request = ClientMessage::Request {
+                epoch: hello.epoch.clone(),
+                id: i as u64 + 1,
+                budget_ms: 1000,
+                initial_credit: 0,
+                initial_event_credit: 0,
+                operation: operation.clone(),
+            };
+            assert!(matches!(
+                session.admit(request),
+                Ok(ServerMessage::Accepted { .. })
+            ));
+        }
+        assert!(session.terminal(1, Outcome::Qualified).is_ok());
+        assert!(session
+            .terminal(
+                3,
+                Outcome::CreationPresence {
+                    presence: CreationPresence::Unverified
+                }
+            )
+            .is_ok());
+        let ServerMessage::Terminal {
+            outcome: Outcome::Created { receipt },
+            ..
+        } = ServerMessage::decode(
+            serde_json::from_str(include_str!("../fixtures/created-v2.json")).unwrap(),
+        )
+        .unwrap()
+        else {
+            unreachable!()
+        };
+        let mut crossed = receipt.clone();
+        crossed.incarnation = "a".repeat(32);
+        assert!(session
+            .terminal(2, Outcome::Created { receipt: crossed })
+            .is_err());
+        assert!(session.terminal(2, Outcome::Created { receipt }).is_ok());
+        assert!(operations[2].validate(30001).is_err());
+    }
 
     #[test]
     fn unavailable_notice_has_only_a_valid_epoch_and_cannot_carry_result_authority() {

@@ -29,6 +29,16 @@ defmodule SmolBox.DurableHost.CaptureStore do
       with {:ok, m} <- Database.guarded_machine(context, key, guard, now),
            do: CaptureOps.release(m, id, now)
     end
+
+    if function_exported?(CaptureOps, :release, 4) do
+      def run(context, :capture_release, [key, guard, id, proof, now]) do
+        with {:ok, m} <- Database.guarded_machine(context, key, guard, now),
+             do: CaptureOps.release(m, id, proof, now)
+      end
+    else
+      def run(_context, :capture_release, [_key, _guard, _id, _proof, _now]),
+        do: {:error, %SmolBox.Error{category: :unsupported_capability, operation: :store}}
+    end
   else
     def capabilities, do: %{}
 

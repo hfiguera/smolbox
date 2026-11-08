@@ -171,6 +171,12 @@ defmodule SmolBox.Store.Memory do
           native_terminal_sessions: 1,
           native_disk_growth: 1,
           native_sources: 1,
+          native_checkpoint_sources: 1,
+          native_checkpointable: 1,
+          native_capture_histories: 1,
+          native_capture_resolutions: 1,
+          native_capture_cleanup: 1,
+          native_capture_abort_sources: 1,
           local_volumes: 1,
           worker_control: 1,
           schema: 1,
@@ -689,6 +695,12 @@ defmodule SmolBox.Store.Memory do
   defp machine_operation(state, :capture_release, [key, guard, id, now]) do
     with {:ok, record} <- machine_guard(state, key, guard, now),
          {:ok, next} <- CaptureOps.release(record, id, now),
+         do: machine_save(state, next)
+  end
+
+  defp machine_operation(state, :capture_release, [key, guard, id, proof, now]) do
+    with {:ok, record} <- machine_guard(state, key, guard, now),
+         {:ok, next} <- CaptureOps.release(record, id, proof, now),
          do: machine_save(state, next)
   end
 

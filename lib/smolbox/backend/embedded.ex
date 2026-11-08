@@ -4,6 +4,10 @@ defmodule SmolBox.Backend.Embedded do
   alias SmolBox.Backend.{
     Assignment,
     Budget,
+    EmbeddedCapture,
+    EmbeddedCaptureCleanup,
+    EmbeddedCaptureObservation,
+    EmbeddedCaptureResolution,
     EmbeddedContext,
     EmbeddedGrowthObservation,
     EmbeddedObservation,
@@ -73,6 +77,26 @@ defmodule SmolBox.Backend.Embedded do
   def supports_operation?(nil, :expand_disks), do: true
   def supports_operation?(nil, :qualify_growth), do: true
 
+  def supports_operation?(nil, operation)
+      when operation in [
+             :start_checkpointable,
+             :checkpoint_preflight,
+             :capture_checkpoint,
+             :qualify_capture,
+             :cleanup_capture
+           ],
+      do: true
+
+  def supports_operation?(%{__struct__: EmbeddedContext, config: config}, operation)
+      when operation in [
+             :start_checkpointable,
+             :checkpoint_preflight,
+             :capture_checkpoint,
+             :qualify_capture,
+             :cleanup_capture
+           ],
+      do: Features.supports?(config, :checkpoints)
+
   def supports_operation?(nil, operation) when operation in [:provision_volume, :delete_volume],
     do: true
 
@@ -136,6 +160,9 @@ defmodule SmolBox.Backend.Embedded do
   def invoke(context, :prepare_artifact, arguments, budget),
     do: EmbeddedPreparation.run(context, arguments, budget)
 
+  def invoke(context, :capture_checkpoint, arguments, budget),
+    do: EmbeddedCapture.run(context, arguments, budget)
+
   def invoke(%{volume: volume} = context, :provision_volume, [id, size], budget) do
     with true <- volume != nil and volume.worker_volume_id == id and volume.size_gb == size,
          {:ok, %{"volume" => %{"status" => "provisioned"}}} <-
@@ -163,9 +190,29 @@ defmodule SmolBox.Backend.Embedded do
          do: Server.start_connection(source, name, spec, consumer, observer)
   end
 
+  def invoke(context, :cleanup_capture, [capture, true], budget),
+    do: EmbeddedCaptureCleanup.run(context, capture, budget)
+
+  def invoke(_context, :cleanup_capture, _arguments, _budget),
+    do:
+      {:error,
+       %SmolBox.Error{category: :validation, operation: :checkpoint, evidence: :not_dispatched}}
+
+  def invoke(context, :qualify_capture, [true], budget),
+    do: EmbeddedCaptureResolution.run(context, context.name, budget)
+
+  def invoke(_context, :qualify_capture, _arguments, _budget),
+    do:
+      {:error,
+       %SmolBox.Error{category: :validation, operation: :checkpoint, evidence: :not_dispatched}}
+
   def invoke(%{growth: %{state: state}} = context, :inspect_machine, [name], budget)
       when state in [:dispatching, :unknown],
       do: EmbeddedGrowthObservation.run(context, name, budget)
+
+  def invoke(%{capture: %{state: state}} = context, :inspect_machine, [name], budget)
+      when state in [:dispatching, :unknown],
+      do: EmbeddedCaptureObservation.run(context, name, budget)
 
   def invoke(context, operation, arguments, budget) do
     with {:ok, request, budget, input, callback} <-

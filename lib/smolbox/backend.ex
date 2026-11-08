@@ -78,7 +78,9 @@ defmodule SmolBox.Backend do
     observe_health: 2,
     qualify_creation: 2,
     inspect_creation: 1,
-    qualify_growth: 2
+    qualify_growth: 2,
+    qualify_capture: 2,
+    cleanup_capture: 3
   ]
 
   @doc false

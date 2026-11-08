@@ -16,6 +16,8 @@ defmodule SmolBox.Backend.EmbeddedContext do
     :spec,
     :epoch,
     growth: nil,
+    capture: nil,
+    history: nil,
     volume: nil,
     managed_machine: nil,
     pinned: false
@@ -40,6 +42,8 @@ defmodule SmolBox.Backend.EmbeddedContext do
              name: nil,
              spec: nil,
              growth: nil,
+             capture: nil,
+             history: nil,
              managed_machine: nil
          }},
       else: error()
@@ -62,6 +66,8 @@ defmodule SmolBox.Backend.EmbeddedContext do
            assignment: record.backend_assignment,
            identity: current_identity(record),
            growth: NativeGrowth.intent(record),
+           capture: capture_intent(record),
+           history: material_history(record),
            profile: record.spec.profile,
            spec: record.spec,
            managed_machine: Map.get(record, :managed_machine),
@@ -71,6 +77,12 @@ defmodule SmolBox.Backend.EmbeddedContext do
       _mismatch -> error()
     end
   end
+
+  defp capture_intent(%ManagedMachine{active_capture: id, captures: captures})
+       when not is_nil(id),
+       do: captures[id]
+
+  defp capture_intent(_), do: nil
 
   def scoped?(%__MODULE__{} = context),
     do:
@@ -93,7 +105,7 @@ defmodule SmolBox.Backend.EmbeddedContext do
     do:
       volume_approved?(volume, context.config) and
         Enum.all?(
-          ~w(assignment identity profile name spec growth managed_machine)a,
+          ~w(assignment identity profile name spec growth capture history managed_machine)a,
           &(Map.fetch!(context, &1) == nil)
         )
 
@@ -145,6 +157,15 @@ defmodule SmolBox.Backend.EmbeddedContext do
     {:ok, identity} = NativeGrowth.current_identity(record)
     identity
   end
+
+  defp material_history(%ManagedMachine{} = record) do
+    case NativeGrowth.transitions(record) do
+      {:ok, history} -> history
+      _ -> nil
+    end
+  end
+
+  defp material_history(_record), do: nil
 
   def bridge(%__MODULE__{config: %{bridge: :port}}), do: Port
   defp server?(pid) when is_pid(pid), do: node(pid) == node()

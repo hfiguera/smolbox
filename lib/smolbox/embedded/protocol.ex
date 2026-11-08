@@ -1,6 +1,11 @@
 defmodule SmolBox.Embedded.Protocol do
   @moduledoc false
   alias SmolBox.Embedded.{
+    CaptureAbortSourceQualification,
+    CaptureResolutionTransition,
+    CaptureStagingCleanupReceipt,
+    CaptureStream,
+    CaptureTransition,
     CommandPayload,
     CreationFeatures,
     CreationPayload,
@@ -244,7 +249,11 @@ defmodule SmolBox.Embedded.Protocol do
         Validation.integer?(
           sequence,
           1,
-          if(event["stream"] == "terminal", do: TerminalContract.max_sequence() - 1, else: 65_536)
+          cond do
+            event["stream"] == "checkpoint" -> CaptureStream.max_events()
+            event["stream"] == "terminal" -> TerminalContract.max_sequence() - 1
+            true -> 65_536
+          end
         ) and event?(event, major)
 
   defp server?(
@@ -256,14 +265,19 @@ defmodule SmolBox.Embedded.Protocol do
            Validation.integer?(
              sequence,
              0,
-             if(outcome["result"] == "terminal",
-               do: TerminalContract.max_sequence(),
-               else: 65_537
-             )
+             terminal_limit(outcome, major)
            ) and outcome?(outcome, major) and
            terminal_sequence?(sequence, outcome)
 
   defp server?(_message, _major), do: false
+
+  defp terminal_limit(%{"result" => "terminal"}, _major), do: TerminalContract.max_sequence()
+  defp terminal_limit(%{"result" => "captured"}, 2), do: CaptureStream.max_events() + 1
+
+  defp terminal_limit(%{"result" => "error", "dispatch" => "may_have_dispatched"}, 2),
+    do: CaptureStream.max_events() + 1
+
+  defp terminal_limit(_outcome, _major), do: 65_537
 
   defp terminal_sequence?(0, %{"result" => "error", "dispatch" => "not_dispatched"}), do: true
   defp terminal_sequence?(sequence, _outcome), do: sequence > 0
@@ -335,7 +349,7 @@ defmodule SmolBox.Embedded.Protocol do
     do:
       Shape.keys?(event, ~w(stream data_base64)) and
         (event["stream"] in ~w(stdout stderr file) or
-           (major == 2 and event["stream"] in ~w(log terminal))) and
+           (major == 2 and event["stream"] in ~w(log terminal checkpoint))) and
         match?({:ok, _bytes}, Shape.chunk(event["data_base64"]))
 
   defp outcome?(%{"result" => "terminal"} = outcome, 2), do: TerminalContract.outcome?(outcome)
@@ -362,6 +376,48 @@ defmodule SmolBox.Embedded.Protocol do
     do:
       Shape.keys?(outcome, ~w(result transition)) and
         (transition == nil or match?({:ok, _}, GrowthTransition.from_wire(transition)))
+
+  defp outcome?(%{"result" => "capture_presence", "transition" => transition} = outcome, 2),
+    do:
+      Shape.keys?(outcome, ~w(result transition)) and
+        (transition == nil or match?({:ok, _}, CaptureTransition.from_wire(transition)))
+
+  defp outcome?(
+         %{"result" => "aborted_capture_source_qualified", "qualification" => proof} = outcome,
+         2
+       ),
+       do:
+         Shape.keys?(outcome, ~w(result qualification)) and
+           match?({:ok, _}, CaptureAbortSourceQualification.from_wire(proof))
+
+  defp outcome?(%{"result" => "capture_staging_aborted", "cleanup" => cleanup} = outcome, 2),
+    do:
+      Shape.keys?(outcome, ~w(result cleanup)) and
+        match?({:ok, _}, CaptureStagingCleanupReceipt.from_wire(cleanup))
+
+  defp outcome?(%{"result" => "capture_staging_cleaned", "cleanup" => cleanup} = outcome, 2),
+    do:
+      Shape.keys?(outcome, ~w(result cleanup)) and
+        match?({:ok, _}, CaptureStagingCleanupReceipt.from_wire(cleanup))
+
+  defp outcome?(%{"result" => "capture_resolved", "transition" => transition} = outcome, 2),
+    do:
+      Shape.keys?(outcome, ~w(result transition)) and
+        match?({:ok, _}, CaptureResolutionTransition.from_wire(transition))
+
+  defp outcome?(
+         %{"result" => "capture_resolution_presence", "transition" => transition} = outcome,
+         2
+       ),
+       do:
+         Shape.keys?(outcome, ~w(result transition)) and
+           (transition == nil or
+              match?({:ok, _}, CaptureResolutionTransition.from_wire(transition)))
+
+  defp outcome?(%{"result" => "captured", "transition" => transition} = outcome, 2),
+    do:
+      Shape.keys?(outcome, ~w(result transition)) and
+        match?({:ok, _}, CaptureTransition.from_wire(transition))
 
   defp outcome?(%{"result" => "created", "receipt" => receipt} = outcome, major),
     do: Shape.keys?(outcome, ~w(result receipt)) and Shape.receipt?(receipt, major)

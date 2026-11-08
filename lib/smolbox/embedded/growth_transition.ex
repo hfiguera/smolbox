@@ -1,6 +1,6 @@
 defmodule SmolBox.Embedded.GrowthTransition do
   @moduledoc false
-  alias SmolBox.Embedded.{MaterialProof, Shape}
+  alias SmolBox.Embedded.{MaterialProof, MaterialTransition, Shape}
   alias SmolBox.Validation
 
   @enforce_keys [:schema, :previous, :receipt, :change]
@@ -8,33 +8,15 @@ defmodule SmolBox.Embedded.GrowthTransition do
   defstruct @enforce_keys
   @type t :: %__MODULE__{schema: 1, previous: map(), receipt: map(), change: map()}
 
-  @receipt ~w(target_id domain_generation name owner_token incarnation material_sha256)
-  @proof ~w(schema revision record_sha256 chain_sha256 operation_id request_sha256)
   @change ~w(operation_id request previous immutable_sha256 previous_storage_gib previous_overlay_gib storage_gib overlay_gib)
   @request ~w(storage_gib overlay_gib)
 
-  def from_wire(value) do
-    if Shape.keys?(value, ~w(schema previous receipt change)) do
-      transition =
-        struct!(
-          __MODULE__,
-          Map.new(value, fn {key, field} -> {String.to_existing_atom(key), field} end)
-        )
+  def from_wire(value), do: MaterialTransition.from_wire(value, __MODULE__)
 
-      if valid?(transition), do: {:ok, transition}, else: :error
-    else
-      :error
-    end
-  end
-
-  def valid?(%__MODULE__{} = transition) do
-    Validation.struct_shape?(transition, __MODULE__) and transition.schema == 1 and
-      Shape.receipt?(transition.previous, 2) and Shape.receipt?(transition.receipt, 2) and
-      Map.take(transition.previous, @receipt) == Map.take(transition.receipt, @receipt) and
-      change?(transition.change) and proof?(transition)
-  end
-
-  def valid?(_transition), do: false
+  def valid?(transition),
+    do:
+      MaterialTransition.valid?(transition, __MODULE__) and
+        change?(transition.change) and proof?(transition)
 
   # This binds the correlated helper result to already persisted intent. Hashes
   # are history checks, not signatures or authority to adopt current inventory.
@@ -57,11 +39,7 @@ defmodule SmolBox.Embedded.GrowthTransition do
     end
   end
 
-  def root?(receipt) do
-    Shape.receipt?(receipt, 2) and receipt["material"]["revision"] == 0 and
-      receipt["material"]["chain_sha256"] ==
-        digest(["smolbox-material-origin-v2", ordered(receipt, @receipt)])
-  end
+  defdelegate root?(receipt), to: MaterialTransition
 
   defp link(transition, {:ok, previous, old_sizes, ids, immutable}) do
     if valid?(transition) do
@@ -114,35 +92,15 @@ defmodule SmolBox.Embedded.GrowthTransition do
       end)
   end
 
-  defp proof?(transition) do
-    old = transition.previous["material"]
-    next = transition.receipt["material"]
-    change = transition.change
-
-    old == change["previous"] and next["revision"] == old["revision"] + 1 and
-      (old["revision"] != 0 or root?(transition.previous)) and
-      next["operation_id"] == change["operation_id"] and
-      next["request_sha256"] == digest(ordered(change["request"], @request)) and
-      next["chain_sha256"] ==
-        digest([
-          "smolbox-material-transition-v2",
-          change_payload(change),
-          next["record_sha256"]
-        ])
-  end
-
-  defp change_payload(change) do
-    change
-    |> Map.put("request", ordered(change["request"], @request))
-    |> Map.put("previous", ordered(change["previous"], @proof))
-    |> ordered(@change)
-  end
-
-  # Match the existing Rust serde struct order, including null omitted targets.
-  defp ordered(value, fields),
-    do: %Jason.OrderedObject{values: Enum.map(fields, &{&1, Map.fetch!(value, &1)})}
-
-  defp digest(value),
+  defp proof?(transition),
     do:
-      value |> Jason.encode!() |> then(&:crypto.hash(:sha256, &1)) |> Base.encode16(case: :lower)
+      MaterialTransition.proof?(
+        transition,
+        transition.change,
+        @request,
+        "smolbox-material-transition-v2",
+        payload(transition.change)
+      )
+
+  defp payload(change), do: MaterialTransition.order_intent(change, @request, @change)
 end

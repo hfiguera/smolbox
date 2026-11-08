@@ -1,6 +1,10 @@
 defmodule SmolBox.Embedded.Channel do
   @moduledoc false
   alias SmolBox.Embedded.{
+    CaptureAbortSourceQualification,
+    CaptureResolutionTransition,
+    CaptureStagingCleanupReceipt,
+    CaptureTransition,
     GrowthTransition,
     ImageContract,
     Protocol,
@@ -36,7 +40,7 @@ defmodule SmolBox.Embedded.Channel do
 
   def register(channel, operation, bytes, events) do
     with true <-
-           not channel.unavailable or (channel.major == 2 and Request.observation?(operation)),
+           not channel.unavailable or (channel.major == 2 and Request.control?(operation)),
          true <- map_size(channel.pending) < 32,
          true <- channel.last_id < 9_007_199_254_740_991,
          true <- Request.valid?(operation, 1, channel.major),
@@ -234,6 +238,7 @@ defmodule SmolBox.Embedded.Channel do
     with {:ok, bytes} <- Shape.chunk(event["data_base64"]),
          true <- pending.operation["operation"] != "terminal_open" or pending.terminal_opened,
          {:ok, stream, limit} <- stream(pending.operation, event["stream"]),
+         true <- chunk_matches?(pending.operation, bytes),
          true <- byte_size(bytes) <= pending.credit and pending.event_credit > 0,
          true <- pending.output_bytes + byte_size(bytes) <= limit do
       updated = %{
@@ -280,12 +285,20 @@ defmodule SmolBox.Embedded.Channel do
   defp stream(%{"operation" => "read_file", "options" => options}, "file"),
     do: {:ok, :file, options["max_bytes"]}
 
+  defp stream(%{"operation" => "capture_checkpoint", "request" => request}, "checkpoint"),
+    do: {:ok, :checkpoint, request["max_bytes"]}
+
   defp stream(%{"operation" => "list_images"}, "file"), do: {:ok, :file, 8_388_608}
 
   defp stream(%{"operation" => "list"}, "file"), do: {:ok, :file, 4_194_304}
   defp stream(%{"operation" => "logs", "max_bytes" => max}, "log"), do: {:ok, :log, max + 30_000}
 
   defp stream(_operation, _stream), do: :error
+
+  defp chunk_matches?(%{"operation" => "capture_checkpoint", "chunk_bytes" => limit}, bytes),
+    do: byte_size(bytes) <= limit
+
+  defp chunk_matches?(_operation, _bytes), do: true
 
   defp terminal_matches?(_domain, pending, %{"result" => "error", "dispatch" => dispatch}),
     do: dispatch != "not_dispatched" or pending.output_bytes == 0
@@ -359,8 +372,146 @@ defmodule SmolBox.Embedded.Channel do
   defp terminal_matches?(_domain, %{operation: %{"operation" => name}}, %{
          "result" => "qualified"
        })
-       when name in ~w(qualify_creation qualify_oci_creation qualify_registry_creation),
+       when name in ~w(qualify_creation qualify_oci_creation qualify_registry_creation qualify_checkpoint_creation),
        do: true
+
+  defp terminal_matches?(
+         _domain,
+         %{operation: %{"operation" => "capture_checkpoint"} = request, output_bytes: bytes},
+         %{"result" => "captured", "transition" => transition}
+       ) do
+    case CaptureTransition.from_wire(transition) do
+      {:ok, proof} ->
+        CaptureTransition.bound?(
+          proof,
+          request["receipt"],
+          request["operation_id"],
+          request["request"]
+        ) and proof.change["artifact"]["size_bytes"] == bytes
+
+      :error ->
+        false
+    end
+  end
+
+  defp terminal_matches?(
+         _domain,
+         %{
+           operation: %{"operation" => "qualify_aborted_capture_source"} = request,
+           output_bytes: 0
+         },
+         %{"result" => "aborted_capture_source_qualified", "qualification" => qualification}
+       ) do
+    case CaptureAbortSourceQualification.from_wire(qualification) do
+      {:ok, proof} ->
+        CaptureAbortSourceQualification.bound?(
+          proof,
+          request["receipt"],
+          request["operation_id"],
+          request["request"]
+        )
+
+      :error ->
+        false
+    end
+  end
+
+  defp terminal_matches?(
+         _domain,
+         %{operation: %{"operation" => "abort_capture_staging"} = request, output_bytes: 0},
+         %{"result" => "capture_staging_aborted", "cleanup" => cleanup}
+       ) do
+    case CaptureStagingCleanupReceipt.from_wire(cleanup) do
+      {:ok, proof} ->
+        CaptureStagingCleanupReceipt.bound?(
+          proof,
+          request["receipt"],
+          request["operation_id"],
+          request["request"]
+        )
+
+      :error ->
+        false
+    end
+  end
+
+  defp terminal_matches?(
+         _domain,
+         %{operation: %{"operation" => "cleanup_capture_staging"} = request, output_bytes: 0},
+         %{"result" => "capture_staging_cleaned", "cleanup" => cleanup}
+       ) do
+    case CaptureStagingCleanupReceipt.from_wire(cleanup) do
+      {:ok, proof} ->
+        CaptureStagingCleanupReceipt.bound?(
+          proof,
+          request["receipt"],
+          request["operation_id"],
+          request["request"]
+        )
+
+      :error ->
+        false
+    end
+  end
+
+  defp terminal_matches?(
+         _domain,
+         %{operation: %{"operation" => "resolve_capture"} = request, output_bytes: 0},
+         %{"result" => "capture_resolved", "transition" => transition}
+       ) do
+    case CaptureResolutionTransition.from_wire(transition) do
+      {:ok, proof} ->
+        CaptureResolutionTransition.bound?(
+          proof,
+          request["receipt"],
+          request["operation_id"],
+          request["request"]
+        )
+
+      :error ->
+        false
+    end
+  end
+
+  defp terminal_matches?(
+         _domain,
+         %{operation: %{"operation" => "inspect_capture_resolution"} = request, output_bytes: 0},
+         %{"result" => "capture_resolution_presence", "transition" => transition}
+       ) do
+    transition == nil or
+      case CaptureResolutionTransition.from_wire(transition) do
+        {:ok, proof} ->
+          CaptureResolutionTransition.bound?(
+            proof,
+            request["receipt"],
+            request["operation_id"],
+            request["request"]
+          )
+
+        :error ->
+          false
+      end
+  end
+
+  defp terminal_matches?(
+         _domain,
+         %{operation: %{"operation" => "inspect_capture"} = request, output_bytes: 0},
+         %{"result" => "capture_presence", "transition" => transition}
+       ) do
+    transition == nil or
+      case CaptureTransition.from_wire(transition) do
+        {:ok, proof} ->
+          CaptureTransition.bound?(
+            proof,
+            request["receipt"],
+            request["operation_id"],
+            request["request"]
+          )
+
+        :error ->
+          false
+      end
+  end
 
   defp terminal_matches?(
          _domain,
@@ -394,7 +545,7 @@ defmodule SmolBox.Embedded.Channel do
            "receipt" => receipt
          }
        )
-       when name in ~w(create create_oci create_registry_prepared),
+       when name in ~w(create create_oci create_registry_prepared create_checkpoint),
        do:
          (name == "create" or bytes == 0) and domain_matches?(domain, receipt) and
            Enum.all?(~w(name owner_token incarnation), &(receipt[&1] == create[&1]))
@@ -402,11 +553,18 @@ defmodule SmolBox.Embedded.Channel do
   defp terminal_matches?(_domain, %{operation: %{"operation" => name}}, %{
          "result" => "creation_presence"
        })
-       when name in ~w(inspect_creation inspect_oci_creation inspect_registry_creation),
+       when name in ~w(inspect_creation inspect_oci_creation inspect_registry_creation inspect_checkpoint_creation),
+       do: true
+
+  defp terminal_matches?(
+         _domain,
+         %{operation: %{"operation" => "checkpoint_preflight"}, output_bytes: 0},
+         %{"result" => "observed", "observation" => %{"state" => "running"}}
+       ),
        do: true
 
   defp terminal_matches?(_domain, %{operation: %{"operation" => name}}, %{"result" => "observed"})
-       when name in ~w(inspect start start_oci stop delete), do: true
+       when name in ~w(inspect start start_oci start_checkpointable stop delete), do: true
 
   defp terminal_matches?(
          _domain,

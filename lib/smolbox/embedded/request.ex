@@ -1,6 +1,8 @@
 defmodule SmolBox.Embedded.Request do
   @moduledoc false
   alias SmolBox.Embedded.{
+    CaptureTransition,
+    CheckpointContract,
     CreationFeatures,
     ImageContract,
     MountContract,
@@ -20,9 +22,15 @@ defmodule SmolBox.Embedded.Request do
 
   def observation?(%{"operation" => name}),
     do:
-      name in ~w(health capacity metrics readiness list measurements inspect_growth inspect_oci_creation inspect_registry_creation)
+      name in ~w(health capacity metrics readiness list measurements inspect_growth inspect_capture inspect_capture_resolution inspect_oci_creation inspect_registry_creation inspect_checkpoint_creation checkpoint_preflight)
 
   def observation?(_request), do: false
+
+  def control?(%{"operation" => name, "quiesced" => true} = request)
+      when name in ~w(resolve_capture cleanup_capture_staging abort_capture_staging qualify_aborted_capture_source),
+      do: valid?(request, 1, 2)
+
+  def control?(request), do: observation?(request)
 
   def reconciliation?(
         %{
@@ -35,9 +43,13 @@ defmodule SmolBox.Embedded.Request do
 
   def reconciliation?(%{"operation" => "volume"} = request), do: observation?(request)
 
+  def reconciliation?(%{"operation" => name, "quiesced" => true} = request)
+      when name in ~w(resolve_capture cleanup_capture_staging abort_capture_staging qualify_aborted_capture_source),
+      do: valid?(request, 1, 2)
+
   def reconciliation?(%{"operation" => name}),
     do:
-      name in ~w(inspect inspect_creation inspect_oci_creation inspect_registry_creation inspect_growth qualify_growth)
+      name in ~w(inspect inspect_creation inspect_oci_creation inspect_registry_creation inspect_checkpoint_creation inspect_growth inspect_capture inspect_capture_resolution qualify_growth)
 
   def reconciliation?(_request), do: false
 
@@ -79,6 +91,28 @@ defmodule SmolBox.Embedded.Request do
     do:
       Shape.keys?(operation, ~w(operation request)) and
         VolumeContract.request?(operation["request"], budget)
+
+  defp operation?(%{"operation" => name} = operation, budget, 2)
+       when name in ~w(inspect_capture inspect_capture_resolution capture_checkpoint),
+       do:
+         Shape.keys?(
+           operation,
+           ~w(operation receipt operation_id request) ++
+             if(name == "capture_checkpoint" and Map.has_key?(operation, "chunk_bytes"),
+               do: ~w(chunk_bytes),
+               else: []
+             )
+         ) and
+           Shape.receipt?(operation["receipt"], 2) and Shape.id?(operation["operation_id"]) and
+           CaptureTransition.request?(operation["request"]) and
+           (name == "capture_checkpoint" or budget <= 30_000) and capture_chunk?(operation)
+
+  defp operation?(%{"operation" => name, "quiesced" => true} = operation, budget, 2)
+       when name in ~w(resolve_capture cleanup_capture_staging abort_capture_staging qualify_aborted_capture_source),
+       do:
+         Shape.keys?(operation, ~w(operation receipt operation_id request quiesced)) and
+           Shape.receipt?(operation["receipt"], 2) and Shape.id?(operation["operation_id"]) and
+           CaptureTransition.request?(operation["request"]) and budget <= 30_000
 
   defp operation?(%{"operation" => "terminal_open"} = operation, budget, 2),
     do:
@@ -124,6 +158,39 @@ defmodule SmolBox.Embedded.Request do
       Shape.keys?(operation, ~w(operation receipt source)) and
         Shape.receipt?(operation["receipt"], 2) and
         NativeSource.artifact?(operation["source"])
+
+  defp operation?(
+         %{"operation" => "start_checkpointable", "receipt" => receipt} = operation,
+         _budget,
+         2
+       ),
+       do: Shape.keys?(operation, ~w(operation receipt)) and Shape.receipt?(receipt, 2)
+
+  defp operation?(
+         %{"operation" => "checkpoint_preflight", "receipt" => receipt} = operation,
+         budget,
+         2
+       ),
+       do:
+         Shape.keys?(operation, ~w(operation receipt)) and budget <= 30_000 and
+           Shape.receipt?(receipt, 2)
+
+  defp operation?(%{"operation" => "create_checkpoint"} = operation, _budget, 2),
+    do:
+      Shape.keys?(operation, ~w(operation create)) and
+        CheckpointContract.creation?(operation["create"])
+
+  defp operation?(%{"operation" => "inspect_checkpoint_creation"} = operation, budget, 2),
+    do:
+      Shape.keys?(operation, ~w(operation create)) and budget <= 30_000 and
+        CheckpointContract.creation?(operation["create"])
+
+  defp operation?(%{"operation" => "qualify_checkpoint_creation"} = operation, _budget, 2),
+    do:
+      CheckpointContract.marker?(operation, 2) and
+        Shape.keys?(Map.delete(operation, "checkpointable"), ~w(operation source resources)) and
+        CheckpointContract.source?(operation["source"]) and
+        Shape.resources?(operation["resources"])
 
   defp operation?(%{"operation" => "create_registry_prepared"} = operation, _budget, 2),
     do:
@@ -250,6 +317,9 @@ defmodule SmolBox.Embedded.Request do
 
   defp operation?(_operation, _budget, _major), do: false
 
+  defp capture_chunk?(%{"chunk_bytes" => bytes}), do: Validation.integer?(bytes, 1, 65_536)
+  defp capture_chunk?(_), do: true
+
   defp create?(create, major) do
     MountContract.creation_keys?(
       create,
@@ -262,9 +332,12 @@ defmodule SmolBox.Embedded.Request do
   end
 
   defp feature_keys?(value, keys, major) do
-    Shape.keys?(value, keys) or
-      (major == 2 and Shape.keys?(value, keys ++ ["features"]) and
-         CreationFeatures.valid?(value["features"]))
+    plain = Map.delete(value, "checkpointable")
+
+    CheckpointContract.marker?(value, major) and
+      (Shape.keys?(plain, keys) or
+         (major == 2 and Shape.keys?(plain, keys ++ ["features"]) and
+            CreationFeatures.valid?(value["features"])))
   end
 
   defp artifact?(artifact),

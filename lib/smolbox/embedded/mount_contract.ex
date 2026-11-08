@@ -1,7 +1,7 @@
 defmodule SmolBox.Embedded.MountContract do
   @moduledoc false
   alias SmolBox.Backend.Features
-  alias SmolBox.Embedded.{CreationFeatures, Shape, VolumeContract}
+  alias SmolBox.Embedded.{CheckpointContract, CreationFeatures, Shape, VolumeContract}
   alias SmolBox.{ExecutionSpec, Mount, Validation}
 
   def approved?(create, config) do
@@ -90,9 +90,10 @@ defmodule SmolBox.Embedded.MountContract do
         end)
 
   def creation_keys?(creation, keys, major) when is_map(creation) do
-    (not Map.has_key?(creation, "volume_mounts") or
-       (major == 2 and valid?(creation["volume_mounts"]))) and
-      feature_keys?(Map.delete(creation, "volume_mounts"), keys, major)
+    CheckpointContract.marker?(creation, major) and
+      (not Map.has_key?(creation, "volume_mounts") or
+         (major == 2 and valid?(creation["volume_mounts"]))) and
+      feature_keys?(Map.drop(creation, ["volume_mounts", "checkpointable"]), keys, major)
   end
 
   def creation_keys?(_, _, _), do: false

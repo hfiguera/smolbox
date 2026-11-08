@@ -16,6 +16,8 @@ pub const MAX_EVENTS_PER_REQUEST: u64 = 65536;
 pub const INITIAL_CREDIT_BYTES: u64 = 256 * 1024;
 pub const INITIAL_CREDIT_EVENTS: u64 = 64;
 pub const MAX_TRANSFER_BYTES: u64 = 16 * 1024 * 1024;
+/// Separate bounded artifact allowance; ordinary command/file caps stay fixed.
+pub const MAX_CAPTURE_EVENTS: u64 = 64 * 1024 * 1024 * 1024 + 1;
 pub const MAX_SAFE_INTEGER: u64 = (1 << 53) - 1;
 
 /// Redacted wire validation error, independent of native diagnostics.
@@ -723,6 +725,12 @@ pub struct Create {
         skip_serializing_if = "Option::is_none",
         deserialize_with = "present_optional"
     )]
+    pub checkpointable: Option<bool>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "present_optional"
+    )]
     pub features: Option<Box<CreationFeatures>>,
     #[serde(
         default,
@@ -764,6 +772,58 @@ impl OciIdentity {
                 .map(|(_, digest)| digest)
                 == Some(self.sha256.as_str()),
         )
+    }
+}
+
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CheckpointIdentity {
+    pub kind: String,
+    pub id: String,
+    pub sha256: String,
+    pub architecture: String,
+}
+
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CheckpointCreate {
+    pub name: String,
+    pub owner_token: String,
+    pub incarnation: String,
+    pub source: CheckpointIdentity,
+    pub resources: Resources,
+    pub labels: BTreeMap<String, String>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "present_optional"
+    )]
+    pub checkpointable: Option<bool>,
+}
+impl CheckpointCreate {
+    pub fn validate(&self) -> Result<()> {
+        id(&self.name)?;
+        hex(&self.owner_token, 64)?;
+        hex(&self.incarnation, 32)?;
+        self.source.validate()?;
+        self.resources.validate()?;
+        require(self.labels.is_empty())
+            .and_then(|()| checkpointable_mode(self.checkpointable, None, None))
+    }
+}
+impl CheckpointIdentity {
+    pub fn validate(&self) -> Result<()> {
+        require(self.kind == "checkpoint")?;
+        id(&self.id)?;
+        hex(&self.sha256, 64)?;
+        require(matches!(self.architecture.as_str(), "x86_64" | "aarch64"))
+    }
+    pub fn guest_platform(&self) -> &str {
+        match self.architecture.as_str() {
+            "x86_64" => "linux/amd64",
+            "aarch64" => "linux/arm64",
+            _ => "",
+        }
     }
 }
 
@@ -848,6 +908,12 @@ pub struct RegistryCreate {
         skip_serializing_if = "Option::is_none",
         deserialize_with = "present_optional"
     )]
+    pub checkpointable: Option<bool>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "present_optional"
+    )]
     pub features: Option<Box<CreationFeatures>>,
     #[serde(
         default,
@@ -864,6 +930,11 @@ impl RegistryCreate {
         self.source.validate()?;
         self.resources.validate()?;
         require(self.labels.is_empty())?;
+        checkpointable_mode(
+            self.checkpointable,
+            self.features.as_deref(),
+            self.volume_mounts.as_deref(),
+        )?;
         if let Some(features) = &self.features {
             features.validate()?;
         }
@@ -1304,6 +1375,73 @@ impl ImageObservation {
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "operation", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Operation {
+    QualifyAbortedCaptureSource {
+        receipt: Receipt,
+        operation_id: String,
+        request: crate::CaptureRequest,
+        quiesced: bool,
+    },
+    AbortCaptureStaging {
+        receipt: Receipt,
+        operation_id: String,
+        request: crate::CaptureRequest,
+        quiesced: bool,
+    },
+    CleanupCaptureStaging {
+        receipt: Receipt,
+        operation_id: String,
+        request: crate::CaptureRequest,
+        quiesced: bool,
+    },
+    ResolveCapture {
+        receipt: Receipt,
+        operation_id: String,
+        request: crate::CaptureRequest,
+        quiesced: bool,
+    },
+    InspectCaptureResolution {
+        receipt: Receipt,
+        operation_id: String,
+        request: crate::CaptureRequest,
+    },
+    CaptureCheckpoint {
+        receipt: Receipt,
+        operation_id: String,
+        request: crate::CaptureRequest,
+        #[serde(
+            default,
+            skip_serializing_if = "Option::is_none",
+            deserialize_with = "present_optional"
+        )]
+        chunk_bytes: Option<u64>,
+    },
+    InspectCapture {
+        receipt: Receipt,
+        operation_id: String,
+        request: crate::CaptureRequest,
+    },
+    StartCheckpointable {
+        receipt: Receipt,
+    },
+    CheckpointPreflight {
+        receipt: Receipt,
+    },
+    QualifyCheckpointCreation {
+        source: CheckpointIdentity,
+        resources: Resources,
+        #[serde(
+            default,
+            skip_serializing_if = "Option::is_none",
+            deserialize_with = "present_optional"
+        )]
+        checkpointable: Option<bool>,
+    },
+    CreateCheckpoint {
+        create: CheckpointCreate,
+    },
+    InspectCheckpointCreation {
+        create: CheckpointCreate,
+    },
     Volume {
         request: crate::VolumeRequest,
     },
@@ -1311,6 +1449,12 @@ pub enum Operation {
         source: RegistryIdentity,
         resources: Resources,
         user: Option<String>,
+        #[serde(
+            default,
+            skip_serializing_if = "Option::is_none",
+            deserialize_with = "present_optional"
+        )]
+        checkpointable: Option<bool>,
         #[serde(
             default,
             skip_serializing_if = "Option::is_none",
@@ -1426,6 +1570,12 @@ pub enum Operation {
             skip_serializing_if = "Option::is_none",
             deserialize_with = "present_optional"
         )]
+        checkpointable: Option<bool>,
+        #[serde(
+            default,
+            skip_serializing_if = "Option::is_none",
+            deserialize_with = "present_optional"
+        )]
         features: Option<Box<CreationFeatures>>,
     },
     Create {
@@ -1461,6 +1611,20 @@ pub enum Operation {
     },
 }
 impl Operation {
+    pub fn checkpointable(&self) -> Option<bool> {
+        match self {
+            Self::QualifyCreation { checkpointable, .. }
+            | Self::QualifyRegistryCreation { checkpointable, .. }
+            | Self::QualifyCheckpointCreation { checkpointable, .. } => *checkpointable,
+            Self::Create { create } | Self::InspectCreation { create } => create.checkpointable,
+            Self::CreateRegistryPrepared { create, .. }
+            | Self::InspectRegistryCreation { create } => create.checkpointable,
+            Self::CreateCheckpoint { create } | Self::InspectCheckpointCreation { create } => {
+                create.checkpointable
+            }
+            _ => None,
+        }
+    }
     pub fn sanitized(&self) -> Self {
         match self {
             Self::PrepareArtifact {
@@ -1478,6 +1642,17 @@ impl Operation {
     pub fn registry_source(&self) -> Option<&RegistrySource> {
         match self {
             Self::PrepareArtifact { source, .. } => Some(source),
+            _ => None,
+        }
+    }
+    pub fn checkpoint_source(&self) -> Option<(&CheckpointIdentity, &Resources)> {
+        match self {
+            Self::QualifyCheckpointCreation {
+                source, resources, ..
+            } => Some((source, resources)),
+            Self::CreateCheckpoint { create } | Self::InspectCheckpointCreation { create } => {
+                Some((&create.source, &create.resources))
+            }
             _ => None,
         }
     }
@@ -1512,6 +1687,22 @@ impl Operation {
                 | Self::InspectOciCreation { .. }
                 | Self::QualifyOciCreation { .. }
         )
+    }
+    pub fn requires_checkpoints(&self) -> bool {
+        self.checkpoint_source().is_some()
+            || self.checkpointable() == Some(true)
+            || matches!(
+                self,
+                Self::StartCheckpointable { .. }
+                    | Self::CheckpointPreflight { .. }
+                    | Self::InspectCapture { .. }
+                    | Self::InspectCaptureResolution { .. }
+                    | Self::ResolveCapture { .. }
+                    | Self::QualifyAbortedCaptureSource { .. }
+                    | Self::AbortCaptureStaging { .. }
+                    | Self::CleanupCaptureStaging { .. }
+                    | Self::CaptureCheckpoint { .. }
+            )
     }
     pub fn command_limit(&self) -> Option<u64> {
         match self {
@@ -1552,6 +1743,18 @@ impl Operation {
     }
     pub fn capability(&self) -> Capability {
         match self {
+            Self::InspectCapture { .. }
+            | Self::InspectCaptureResolution { .. }
+            | Self::ResolveCapture { .. }
+            | Self::QualifyAbortedCaptureSource { .. }
+            | Self::AbortCaptureStaging { .. }
+            | Self::CleanupCaptureStaging { .. } => Capability::Inspect,
+            Self::CaptureCheckpoint { .. } => Capability::ReadFile,
+            Self::StartCheckpointable { .. } => Capability::Start,
+            Self::CheckpointPreflight { .. } => Capability::Inspect,
+            Self::QualifyCheckpointCreation { .. } => Capability::QualifyCreation,
+            Self::CreateCheckpoint { .. } => Capability::Create,
+            Self::InspectCheckpointCreation { .. } => Capability::InspectCreation,
             Self::Volume { .. } => Capability::Volumes,
             Self::QualifyRegistryCreation { .. } => Capability::QualifyCreation,
             Self::CreateRegistryPrepared { .. } => Capability::Create,
@@ -1591,6 +1794,9 @@ impl Operation {
     }
     pub fn receipt(&self) -> Option<&Receipt> {
         match self {
+            Self::QualifyCheckpointCreation { .. }
+            | Self::CreateCheckpoint { .. }
+            | Self::InspectCheckpointCreation { .. } => None,
             Self::Volume { .. } => None,
             Self::QualifyRegistryCreation { .. } => None,
             Self::CreateRegistryPrepared { .. } | Self::InspectRegistryCreation { .. } => None,
@@ -1603,6 +1809,15 @@ impl Operation {
                 None
             }
             Self::StartOci { receipt, .. }
+            | Self::InspectCapture { receipt, .. }
+            | Self::InspectCaptureResolution { receipt, .. }
+            | Self::ResolveCapture { receipt, .. }
+            | Self::QualifyAbortedCaptureSource { receipt, .. }
+            | Self::AbortCaptureStaging { receipt, .. }
+            | Self::CleanupCaptureStaging { receipt, .. }
+            | Self::CaptureCheckpoint { receipt, .. }
+            | Self::StartCheckpointable { receipt }
+            | Self::CheckpointPreflight { receipt }
             | Self::PullImage { receipt, .. }
             | Self::ListImages { receipt }
             | Self::ExpandDisks { receipt, .. }
@@ -1625,6 +1840,11 @@ impl Operation {
     }
     pub fn validate(&self, budget_ms: u64) -> Result<()> {
         require(budget_ms > 0 && budget_ms <= 86_400_000)?;
+        checkpointable_mode(
+            self.checkpointable(),
+            self.creation_features(),
+            self.creation_mounts(),
+        )?;
         if let Some(receipt) = self.receipt() {
             receipt.validate()?;
         }
@@ -1635,6 +1855,79 @@ impl Operation {
             features.validate()?;
         }
         match self {
+            Self::StartCheckpointable { receipt } => receipt.validate_for(2)?,
+            Self::CheckpointPreflight { receipt } => {
+                receipt.validate_for(2)?;
+                require(budget_ms <= 30000)?;
+            }
+            Self::InspectCapture {
+                receipt,
+                operation_id,
+                request,
+            }
+            | Self::InspectCaptureResolution {
+                receipt,
+                operation_id,
+                request,
+            } => {
+                receipt.validate_for(2)?;
+                id(operation_id)?;
+                request.validate()?;
+                require(budget_ms <= 30000)?;
+            }
+            Self::ResolveCapture {
+                receipt,
+                operation_id,
+                request,
+                quiesced,
+            }
+            | Self::QualifyAbortedCaptureSource {
+                receipt,
+                operation_id,
+                request,
+                quiesced,
+            }
+            | Self::AbortCaptureStaging {
+                receipt,
+                operation_id,
+                request,
+                quiesced,
+            }
+            | Self::CleanupCaptureStaging {
+                receipt,
+                operation_id,
+                request,
+                quiesced,
+            } => {
+                receipt.validate_for(2)?;
+                id(operation_id)?;
+                request.validate()?;
+                require(*quiesced && budget_ms <= 30000)?;
+            }
+            Self::CaptureCheckpoint {
+                receipt,
+                operation_id,
+                request,
+                chunk_bytes,
+            } => {
+                receipt.validate_for(2)?;
+                id(operation_id)?;
+                request.validate()?;
+                require(
+                    chunk_bytes.is_none_or(|limit| limit > 0 && limit <= MAX_CHUNK_BYTES as u64),
+                )?;
+            }
+            Self::QualifyCheckpointCreation {
+                source, resources, ..
+            } => {
+                source.validate()?;
+                resources.validate()?;
+            }
+            Self::CreateCheckpoint { create } => create.validate()?,
+            Self::InspectCheckpointCreation { create } => {
+                create.validate()?;
+                require(budget_ms <= 30000)?;
+            }
             Self::Volume { request } => request.validate(budget_ms)?,
             Self::QualifyRegistryCreation {
                 source,
@@ -2061,6 +2354,29 @@ pub struct MachineCounters {
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "result", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Outcome {
+    AbortedCaptureSourceQualified {
+        qualification: Box<crate::CaptureAbortSourceQualification>,
+    },
+    CaptureStagingAborted {
+        cleanup: Box<crate::CaptureStagingCleanupReceipt>,
+    },
+    CaptureStagingCleaned {
+        cleanup: Box<crate::CaptureStagingCleanupReceipt>,
+    },
+    CaptureResolved {
+        transition: Box<crate::CaptureResolutionTransition>,
+    },
+    CaptureResolutionPresence {
+        #[serde(deserialize_with = "required_nullable")]
+        transition: Option<Box<crate::CaptureResolutionTransition>>,
+    },
+    Captured {
+        transition: Box<crate::CaptureTransition>,
+    },
+    CapturePresence {
+        #[serde(deserialize_with = "required_nullable")]
+        transition: Option<Box<crate::CaptureTransition>>,
+    },
     Volume {
         volume: crate::VolumeResult,
     },
@@ -2191,6 +2507,24 @@ impl Outcome {
                 )
             }
             Self::GrowthPresence { transition } => {
+                if let Some(transition) = transition {
+                    transition.validate()?;
+                }
+                Ok(())
+            }
+            Self::CapturePresence { transition } => {
+                if let Some(transition) = transition {
+                    transition.validate()?;
+                }
+                Ok(())
+            }
+            Self::AbortedCaptureSourceQualified { qualification } => qualification.validate(),
+            Self::Captured { transition } => transition.validate(),
+            Self::CaptureResolved { transition } => transition.validate(),
+            Self::CaptureStagingCleaned { cleanup } | Self::CaptureStagingAborted { cleanup } => {
+                cleanup.validate()
+            }
+            Self::CaptureResolutionPresence { transition } => {
                 if let Some(transition) = transition {
                     transition.validate()?;
                 }
@@ -2327,6 +2661,13 @@ impl Outcome {
                 | Self::Grown { .. }
                 | Self::GrowthQualified { .. }
                 | Self::GrowthPresence { .. }
+                | Self::CapturePresence { .. }
+                | Self::Captured { .. }
+                | Self::CaptureResolved { .. }
+                | Self::CaptureStagingCleaned { .. }
+                | Self::AbortedCaptureSourceQualified { .. }
+                | Self::CaptureStagingAborted { .. }
+                | Self::CaptureResolutionPresence { .. }
                 | Self::Health { .. }
                 | Self::Terminal { .. }
                 | Self::Logs { .. }
@@ -2357,6 +2698,7 @@ impl Outcome {
 #[derive(Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Stream {
+    Checkpoint,
     Terminal,
     Log,
     Stdout,
@@ -2438,7 +2780,9 @@ impl ServerMessage {
                 require(
                     *sequence > 0
                         && *sequence
-                            <= if event.stream == Stream::Terminal {
+                            <= if event.stream == Stream::Checkpoint {
+                                MAX_CAPTURE_EVENTS
+                            } else if event.stream == Stream::Terminal {
                                 MAX_SAFE_INTEGER - 1
                             } else {
                                 MAX_EVENTS_PER_REQUEST
@@ -2455,7 +2799,16 @@ impl ServerMessage {
                 correlation(epoch, *id)?;
                 require(
                     *sequence
-                        <= if matches!(outcome, Outcome::Terminal { .. }) {
+                        <= if matches!(
+                            outcome,
+                            Outcome::Captured { .. }
+                                | Outcome::Error {
+                                    dispatch: Dispatch::MayHaveDispatched,
+                                    ..
+                                }
+                        ) {
+                            MAX_CAPTURE_EVENTS + 1
+                        } else if matches!(outcome, Outcome::Terminal { .. }) {
                             MAX_SAFE_INTEGER
                         } else {
                             MAX_EVENTS_PER_REQUEST + 1
@@ -2506,6 +2859,23 @@ pub(crate) fn hex(value: &str, length: usize) -> Result<()> {
                 .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b)),
     )
 }
+fn checkpointable_mode(
+    flag: Option<bool>,
+    features: Option<&CreationFeatures>,
+    mounts: Option<&[crate::VolumeMount]>,
+) -> Result<()> {
+    require(flag.is_none_or(|value| value))?;
+    if flag == Some(true) {
+        require(
+            mounts.is_none()
+                && features.is_none_or(|value| {
+                    !value.network.enabled && value.ports.is_empty() && value.workload.is_none()
+                }),
+        )?;
+    }
+    Ok(())
+}
+
 pub(crate) fn id(value: &str) -> Result<()> {
     require(
         !value.is_empty()

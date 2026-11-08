@@ -11,6 +11,7 @@ defmodule SmolBox.ManagedMachine do
   alias SmolBox.{Error, Machine, ManagedMachineSpec, Validation}
 
   alias SmolBox.Backend.Assignment
+  alias SmolBox.Embedded.NativeCapture
   alias SmolBox.Store.RecordOps
 
   alias SmolBox.Store.VolumeAttachments
@@ -124,7 +125,7 @@ defmodule SmolBox.ManagedMachine do
            fields?(record) and ownership?(record) and lifecycle?(record) and preparation?(record) and
              Assignment.record_valid?(record) and
              SmolBox.Export.history_valid?(record) and
-             SmolBox.CheckpointCapture.history_valid?(record) and
+             NativeCapture.history_valid?(record) and
              SmolBox.Branch.valid_machine?(record) do
       :ok
     else

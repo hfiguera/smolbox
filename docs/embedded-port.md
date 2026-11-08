@@ -308,6 +308,147 @@ original saved geometry after operator repair; it may publish an engine proof,
 but never resizes disks, changes SDK metadata or overrides retained work fences.
 Older entered journal entries without an original witness remain blocked.
 
+Store readers recognize selective v22 native checkpoint restore-source assignments.
+Upgrade every reader and atomic reservation writer before advertising
+`native_checkpoint_sources: 1`; Memory and the PostgreSQL example include that
+reader. An assignment retains the immutable checkpoint identity, captured guest
+allocations and generated ownership/incarnation tokens. Operator paths stay in
+configuration. A restore approval must match its original offline profile and
+cannot add ports, startup workloads or volume attachments. Retained commands keep
+that same assignment and do not issue another restore creation request.
+
+HTTP checkpoint records and existing native envelopes retain their encodings.
+Earlier native envelopes reject checkpoint restore-source assignments. This
+reader and managed-routing foundation does not enable public embedded checkpoints:
+capture/history integration, uncertainty resolution and ordinary restored-VM/
+package qualification remain pending. Crash validation remains deferred.
+Checkpointable startup/preflight now have shared-engine and Port foundations that
+require original forkable material and an enrolled live source. They cannot
+convert an ordinary record from inventory, and preflight does not attest guest
+idleness. Fresh creation opt-in now uses an optional true marker and selective
+codec v23. Upgrade every reader/reservation writer before advertising
+`native_checkpointable: 1`; Memory and the PostgreSQL example include it. Ordinary
+requests omit the field; false/null values and mounts/network/workload combinations
+are rejected. Capture's authenticated lineage transition and ordinary source/package
+qualification remain required before these operations become publicly available.
+
+Native capture histories and attached material histories selectively use codec
+v24. Upgrade every reader and atomic source-identity/history writer before
+advertising `native_capture_histories: 1`; Memory and the PostgreSQL example now
+provide this reader. Runtime requires it alongside the checkpoint-source and
+checkpointable readers before enrolling a future checkpoint-capable helper.
+
+Original creation receipts stay immutable. A correlated capture proof and
+current source receipt are stored atomically, and attached commands retain the
+complete ordered material history. Old envelopes omit new nil defaults and
+reject their presence; HTTP and native records without capture histories keep
+their prior encodings. These deterministic store foundations do not enable
+public capture admission. Ordinary live capture qualification and public retained
+staging release integration remain pending. Public growth
+on checkpointable machines remains unsupported, as in the HTTP backend.
+
+Source-only entered-capture resolution and commands carrying that history
+selectively use codec v25. Install every reader and atomic source/history/resource
+writer before advertising `native_capture_resolutions: 1`; Memory and the
+PostgreSQL example include this reader. Runtime requires it for future checkpoint
+targets. Older envelopes reject resolution proofs, while existing v24 captured
+histories and earlier HTTP/native records keep their encodings. Resolution keeps
+artifact result unknown, original creation immutable and artifact capacity charged
+until explicit release. Public retained staging release consumes native cleanup
+authority; ordinary qualification remains pending. This reader does not
+activate the currently disabled checkpoint capability or qualify a native package.
+
+New native captures freeze their source receipt at acceptance. These records and
+native cleanup receipts selectively use codec v26. Upgrade every reader and the
+guarded cleanup/accounting writer before advertising `native_capture_cleanup: 1`;
+Memory and the PostgreSQL example provide it. Runtime requires it for future
+checkpoint targets. Native reservation release requires the exact cleanup receipt
+and persists proof/accounting together; repeated consumption is idempotent.
+HTTP, v24 capture histories and v25 resolution histories without these fields keep
+their previous encodings. Embedded public release now obtains and atomically
+consumes scoped helper cleanup evidence. These store capabilities do not enable
+the public checkpoint descriptor without ordinary qualification.
+
+Scoped capture routing now binds an active dispatched capture, its approved
+policy and exact fingerprint destination. The controller opens an exclusive
+private partial file, verifies received bytes against the correlated transition,
+syncs file/directory metadata and creates the final artifact without overwriting
+an existing destination. Partial or ambiguous publication remains uncertain;
+no capture is replayed. Transport-only chunk limits fit response windows without
+changing capture material hashes, ordinary transfer limits or queue credits.
+These implemented foundations remain gated by the checkpoint descriptor; public
+retained staging release integration and ordinary live package/platform/consumer
+qualification still precede public activation.
+
+Unknown captures with exact completed native journal evidence can now recover
+source observation and resolve under the explicit native quiescence boundary.
+The source receipt/history advances atomically while capture state becomes
+`resolved_unknown`, result remains nil and the artifact allowance stays retained.
+No local file is adopted and no capture is replayed. Null completion evidence
+grants no new authority. Public explicit unknown resolution now routes native-only
+`qualify_capture` after owner/epoch quiescence and version claim. It first looks up
+completed or already recorded resolution evidence, then explicitly resolves an
+entered owned source if neither exists. Both inspection and explicit resolution
+can recover recorded source-only evidence without importing it automatically.
+The artifact stays unknown and reserved; capture is never replayed. Quarantined
+protocol-2 helpers admit this bounded control operation without restoring ordinary
+work. Running resolution requires original engine-start enrollment, receipt,
+SDK PID and OS PID/birth; inventory or a copied receipt cannot substitute them.
+The source keeps running, while stopped resolution requires original-process
+absence. Public retained staging release integration and ordinary live qualification
+remain pending. The public checkpoint descriptor stays disabled.
+
+The native engine and Port protocol now support explicit cleanup of a protected,
+collected capture stage with exact original capture authority and correlated
+completed/resolved source evidence. Cleanup removes only that recorded private
+stage and releases its native reservation after synchronized completion. It
+returns a path-free cleanup receipt, preserves quarantine, and cannot turn an
+unknown artifact into a successful capture. Public checkpoint release still needs
+to consume this evidence. A stopped source's
+authorized deletion records cleanup authority before removing its material
+journal. Cleanup after deletion requires that authority and verified source
+absence, and rejects a recreated or partially removed source. Existing missing
+sources without enrollment do not qualify. Deterministic cleanup models do not
+qualify live deleted-source behavior or crash handling, or enable public
+checkpoints.
+
+Prepared-stage abort is implemented in the engine and Port protocol, with a
+separate abort receipt. It requires exact pre-entry authority and quiescence,
+retires only that stage and its unentered source intent, and leaves later source
+operations unchanged. Entered captures require source resolution. Automatic
+pre-entry cleanup keeps reservations recoverable on failure. Public resolution/
+release integration and ordinary qualification remain pending; these foundations
+do not enable public checkpoint admission.
+
+Completed capture cleanup now leaves a durable native cleanup receipt after
+removing the private stage and releasing its reservation. Normal helper/registry
+replacement can observe that receipt. Cleanup keeps the source gate until
+closeout; missing source proof or a substituted root keeps capacity reserved and
+work quarantined. Explicit cleanup requires exact source and original stage
+authority. Public release pins/quiesces that helper and consumes this receipt with
+released accounting after rechecking host artifact/partial absence. An already
+released capture needs no further helper contact. A resolved transition-free
+capture may select the distinct prepared-abort operation after an exact
+pre-dispatch state reply; uncertainty preserves accounting. Host files are never
+removed by release. Active unknown captures still need source resolution first;
+the engine now has distinct pre-entry source qualification requiring recorded
+original process evidence and actual running ownership or verified process
+absence. Protocol 2 now carries a distinct `qualify_aborted_capture_source`
+control and `aborted_capture_source_qualified` proof, correlated to the original
+receipt/request with zero output. Rust and Elixir validate the same canonical
+proof domain; staging cleanup cannot substitute for source qualification. Public
+resolution consumes the qualified observation and proof atomically, preserving
+source material/history, marking the result unknown and retaining artifact disk
+capacity until explicit release. It verifies exact original running PID/birth or
+a stopped observation with no PID. After completed/resolved lookups are empty,
+resolution first attempts exact owned pre-entry abort; an exact pre-dispatch
+state/ownership refusal selects entered-source resolution without replaying capture.
+Uncertainty, output, crossed proof or an expired absolute deadline cannot unlock
+the source. These source proofs selectively use codec v27 and require every reader/
+guarded writer to advertise `native_capture_abort_sources: 1`; HTTP and older
+native records retain their compatible envelopes. Ordinary feature/package qualification still
+precedes activation.
+
 Previously approved engine 0.1.0 manifest schema 2 binds protocol 1.4 and SmolBox's ownership, observation,
 worker, asset and boot-guard policies. The bridge requires at least 4000 ms of
 cancellation grace for protocol 1.4 and 2.0 (the default). An epoch-bound unavailable
