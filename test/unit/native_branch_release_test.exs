@@ -120,7 +120,7 @@ defmodule SmolBox.NativeBranchReleaseTest do
     File.write!(path, bytes, [:exclusive])
     File.chmod!(path, 0o600)
     on_exit(fn -> File.rm(path) end)
-    paths = Path.wildcard(Path.expand("_build/test/lib/*/ebin"))
+    paths = Path.wildcard(Path.join(Mix.Project.build_path(), "lib/*/ebin"))
 
     code =
       ~S/[path] = System.argv(); case path |> File.read!() |> SmolBox.Store.Codec.decode() do / <>

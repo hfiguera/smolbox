@@ -149,10 +149,18 @@ pub(crate) fn run(
     if &metadata.request != expected {
         return Err(Error::before(ErrorCode::Ownership));
     }
-    execute(&request.socket, &metadata)
+    let registry = match &request.kind {
+        crate::transfer_worker::Kind::Pull { registry, .. } => registry.as_ref(),
+        _ => return Err(Error::before(ErrorCode::Validation)),
+    };
+    execute_with_registry(&request.socket, &metadata, registry)
 }
 
-pub(crate) fn execute(socket: &std::path::Path, metadata: &Metadata) -> Result<ImageObservation> {
+pub(crate) fn execute_with_registry(
+    socket: &std::path::Path,
+    metadata: &Metadata,
+    registry: Option<&crate::guest_registry::Plan>,
+) -> Result<ImageObservation> {
     let expected = &metadata.request;
     metadata.remaining()?;
     let mut connection = crate::agent_io::BoundedAgent::connect_pull(socket)?;
@@ -160,15 +168,19 @@ pub(crate) fn execute(socket: &std::path::Path, metadata: &Metadata) -> Result<I
         .client
         .set_extended_read_timeout(metadata.remaining()?)
         .map_err(|_| Error::uncertain(ErrorCode::Native))?;
-    connection
-        .client
-        .send_raw(&smolvm_protocol::AgentRequest::Pull {
+    let pull = match registry {
+        Some(registry) => registry.request(expected)?,
+        None => smolvm_protocol::AgentRequest::Pull {
             image: metadata.request.reference.clone(),
             oci_platform: Some(metadata.request.platform.clone()),
             auth: None,
             proxy: None,
             no_proxy: None,
-        })
+        },
+    };
+    connection
+        .client
+        .send_raw(&pull)
         .map_err(|_| Error::uncertain(ErrorCode::Native))?;
     // The relay consumes bounded progress without exposing strings, settings or
     // credentials. It delivers only one validated and projected final response.
@@ -255,13 +267,38 @@ impl crate::Engine {
             request.clone(),
             deadline_ns,
         )?;
-        before()?;
-        let crate::transfer_supervisor::RunResult::Collected(collected) = supervisor.run(
-            prepared,
-            Box::new((machine, source, self.domain.clone())),
+        let account = self.registry_account_enabled();
+        let jobs = self.jobs.clone();
+        let domain = self.domain.clone();
+        let actor_cancel = cancel.clone();
+        let selected_source = request.clone();
+        let (prepared, leases) = crate::oci_start::observe_owned(
+            self.jobs.clone(),
             deadline,
-            &cancel,
-        )?
+            cancel.clone(),
+            move || {
+                // Keep both the prepared worker's admission and source/lifecycle
+                // leases with actual credential work after caller retirement.
+                let ownership = (machine, source, domain);
+                let selected = if account {
+                    Some(crate::guest_registry::Plan::resolve(
+                        &selected_source,
+                        &crate::registry_account::Context {
+                            deadline,
+                            cancel: &actor_cancel,
+                            pool: &jobs,
+                        },
+                    )?)
+                } else {
+                    None
+                };
+                let prepared = prepared.with_registry(selected)?;
+                Ok((prepared, Box::new(ownership) as Box<dyn Send>))
+            },
+        )?;
+        before()?;
+        let crate::transfer_supervisor::RunResult::Collected(collected) =
+            supervisor.run(prepared, leases, deadline, &cancel)?
         else {
             return Err(Error::uncertain(ErrorCode::Native));
         };

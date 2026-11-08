@@ -21,6 +21,21 @@ defmodule SmolBox.NativeVolumeRecoveryTest do
     def volume_list(_, _, _, _), do: raise("reader verification must not list")
   end
 
+  defmodule LegacyVolumeStore do
+    def capabilities(store) do
+      {:ok, capabilities} = Memory.capabilities(store)
+      {:ok, Map.delete(capabilities, :native_volumes)}
+    end
+
+    defdelegate bind_backend(s, w, b), to: Memory
+    defdelegate backend_assignments(s, w, c, l), to: Memory
+    defdelegate machine(s, a, r), to: Memory
+    defdelegate volume_accept(s, v, c), to: Memory
+    defdelegate volume_fetch(s, k), to: Memory
+    defdelegate volume_list(s, n, c, l), to: Memory
+    defdelegate volume_change(s, k, v, a, n), to: Memory
+  end
+
   defp fixture do
     {:ok, fixture} =
       File.read!("native/smolbox-protocol/fixtures/volume-authority.json") |> JSON.decode()
@@ -240,7 +255,7 @@ defmodule SmolBox.NativeVolumeRecoveryTest do
              )
   end
 
-  test "future volume descriptors reject enrollment before every store reader and transaction supports them" do
+  test "native volume readers require both the marker and every callback before enrollment" do
     store = start_supervised!(Memory)
     config = Package.create(protocol_major: 2)
     on_exit(fn -> File.rm_rf!(config.package_path) end)
@@ -249,14 +264,16 @@ defmodule SmolBox.NativeVolumeRecoveryTest do
     target = %Target{kind: :embedded, native_config: config}
     assert {:error, _} = Config.validate(config)
 
+    assert :ok = NativeSupport.verify(%{workers: [target], store: {Memory, store}})
+
     assert {:error, %{category: :unsupported_capability}} =
-             NativeSupport.verify(%{workers: [target], store: {Memory, store}})
+             NativeSupport.verify(%{workers: [target], store: {LegacyVolumeStore, store}})
 
     assert {:error, %{category: :unsupported_capability}} =
              NativeSupport.verify(%{workers: [target], store: {IncompleteVolumeStore, store}})
 
     assert {:ok, caps} = Memory.capabilities(store)
-    refute Map.has_key?(caps, :native_volumes)
+    assert caps.native_volumes == 1
     assert {:ok, [], nil} = Memory.backend_assignments(store, "worker", nil, 10)
   end
 end

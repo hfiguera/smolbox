@@ -14,8 +14,13 @@ existing behavior. Published packages predating this feature do not include it.
 
 The embedded Port implementation now translates mapped-port intent and uses the
 same durable store reservations. Its protocol-2 package must declare `ports: 1`;
-trusted configuration supplies `publish_address:` (loopback by default). Actual
-new-package listener/traffic qualification remains pending. See
+trusted configuration supplies `publish_address:` (loopback by default). One
+[exact Linux package](evidence/embedded-port-http-parity-linux-network-0e35c3f.json)
+passes offline/CIDR inbound traffic, loopback publishing and current/minimum
+public no-Rust consumers. Memory-store checks verify port conflict rollback and
+retained reservations/draining across stop and graceful Runtime replacement,
+then release after owned deletion. Native PostgreSQL, OS-listener start-conflict,
+changed macOS packages and broader resource/interference checks remain pending. See
 [Embedded Port setup](embedded-port.md) for its current development status.
 
 ## Create and use

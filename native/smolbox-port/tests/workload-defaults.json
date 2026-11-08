@@ -1,0 +1,16 @@
+{
+  "entrypoint": [
+    "python"
+  ],
+  "cmd": [
+    "-c",
+    "import json,os,pathlib,sys\nvalue={'kind':'baked','argv':sys.argv[1:],'cwd':os.getcwd(),'uid':os.geteuid(),\n       'inherited':os.environ.get('SMOLBOX_INHERITED'),\n       'override':os.environ.get('SMOLBOX_OVERRIDE'),'extra':os.environ.get('SMOLBOX_EXTRA')}\nwith pathlib.Path('/workspace/startup-events.jsonl').open('a') as stream:\n    stream.write(json.dumps(value)+'\\n')\nsys.exit(7)\n",
+    "baked literal; text"
+  ],
+  "env": [
+    "SMOLBOX_INHERITED=baked",
+    "SMOLBOX_OVERRIDE=baked"
+  ],
+  "workdir": "/workspace",
+  "user": "root"
+}

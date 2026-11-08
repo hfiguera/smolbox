@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "status": "cold-proof-loader-current-and-minimum-passed",
+  "implementation": "compile-each-workflow-and-control-together-with-empty-compile-and-runtime-diagnostics",
+  "production_library_changed": false,
+  "native_engine_or_sdk_changed": false,
+  "validation": {
+    "cold_loader_cases": [
+      {
+        "lane": "current",
+        "entrypoint": "growth",
+        "expected_sentinel_exit": 1,
+        "no_compile_warnings": true,
+        "sdk_or_vm_opened": false
+      },
+      {
+        "lane": "current",
+        "entrypoint": "images",
+        "expected_sentinel_exit": 1,
+        "no_compile_warnings": true,
+        "sdk_or_vm_opened": false
+      },
+      {
+        "lane": "current",
+        "entrypoint": "durable-growth-first-loader-form-only",
+        "exit": 0,
+        "no_compile_warnings": true,
+        "sdk_or_vm_opened": false
+      },
+      {
+        "lane": "minimum",
+        "entrypoint": "growth",
+        "expected_sentinel_exit": 1,
+        "no_compile_warnings": true,
+        "sdk_or_vm_opened": false
+      },
+      {
+        "lane": "minimum",
+        "entrypoint": "images",
+        "expected_sentinel_exit": 1,
+        "no_compile_warnings": true,
+        "sdk_or_vm_opened": false
+      },
+      {
+        "lane": "minimum",
+        "entrypoint": "durable-growth-first-loader-form-only",
+        "exit": 0,
+        "no_compile_warnings": true,
+        "sdk_or_vm_opened": false
+      }
+    ],
+    "full_public_cli_config_sentinel_cases": 4,
+    "durable_loader_first_form_only_cases": 2,
+    "focused_tests_passed": 35,
+    "credo_diff_new_issues": 0,
+    "sdk_or_vm_opened": false,
+    "without_rust": true
+  },
+  "input_sha256": {
+    "scripts/embedded-growth-runtime-proof.exs": "79d51cb8ec3177e3ff1f627cadfa47a41a829420d20959dc3e83a9d707d1c5c4",
+    "scripts/embedded-images-runtime-proof.exs": "2bce8cf77035b4a0611619dc80d1e320b39da64a88e20e0d6898222b467d82f3",
+    "examples/durable_host/scripts/embedded-growth.exs": "17484f544634b595419a09219d60171003d85288c312a347bcd53e313e7aae6f"
+  },
+  "private_log_sha256": {
+    "loader-final-verification.log": "1c079ae2d7bd570d1761e145844b894f7f053027504be415316135d0406bcd01",
+    "loader-focused-final.log": "0f2f137e6a2138d9501964d83ae811b6696b7f66b219263f0d5770118cf2a22c",
+    "loader-credo-final.log": "2da2352d145f93c183ded37c200fa59354e1ece4fee55247a71dd5c809852355"
+  },
+  "intermediate_findings": [
+    "parallel-compiler-default-return-emits-an-Elixir-1.20-deprecation-warning",
+    "explicit-return_diagnostics-uses-the-same-empty-diagnostic-map-on-both-supported-toolchains"
+  ],
+  "scope": {
+    "frozen_live_consumers_hotpatched": false,
+    "past_qualification_logs_rewritten": false,
+    "live_vm_qualification_transferred": false,
+    "parity_complete": false,
+    "crash_validation_deferred": true,
+    "crash_handling_qualified": false,
+    "distribution_approved": false
+  }
+}

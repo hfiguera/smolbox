@@ -75,3 +75,20 @@ From a checkout, `mix ci` runs deterministic checks without a worker. Use
 to build the site and verify local links and fragments. Real worker checks require
 a prepared, isolated host; follow the repository's
 [CI guide](https://github.com/hfiguera/smolbox/blob/main/scripts/ci/README.md).
+
+
+Fresh-BEAM codec tests use Mix's configured build path. To check an isolated
+minimum-toolchain build, select that Elixir/OTP on PATH and use a separate
+`MIX_BUILD_PATH`, for example:
+
+```sh
+MIX_BUILD_PATH="$PWD/.local/minimum-codec-build" mix test \
+  test/unit/native_codec_test.exs \
+  test/unit/native_capture_history_test.exs \
+  test/unit/native_growth_history_test.exs \
+  --exclude runtime --exclude deferred_crash
+```
+
+These are codec/record and synthetic Port-peer checks. They open no smolvm SDK
+domain or VM and do not qualify native platform behavior. Keep the runtime and
+deferred-crash exclusions when selecting them explicitly.

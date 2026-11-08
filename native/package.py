@@ -35,6 +35,15 @@ def compact(value):
     return json.dumps(value, ensure_ascii=False, separators=(',', ':')).encode()
 
 
+def policy_path():
+    # Match the target-specific policy compiled into smolbox-port. There is no
+    # operator switch that can enable a feature on an unsupported platform.
+    system = platform.system()
+    if system not in ('Linux', 'Darwin'):
+        raise ValueError('unsupported native package platform')
+    return ROOT / ('policy-linux.json' if system == 'Linux' else 'policy.json')
+
+
 def resize_tool():
     prefixes = ['/opt/homebrew/opt/e2fsprogs/sbin', '/usr/local/opt/e2fsprogs/sbin', '/opt/homebrew/sbin', '/usr/local/sbin', '/sbin', '/usr/sbin']
     prefixes += os.environ.get('PATH', '').split(os.pathsep)
@@ -162,13 +171,13 @@ def build(executable, assets, output, signing_identity=None):
         shutil.copy2(ROOT / 'target/upstream/smolvm/LICENSE', staging / 'SMOLVM-LICENSE')
         shutil.copy2(ROOT / 'target/upstream/smolvm/Licenses.md', staging / 'SMOLVM-LICENSES.md')
         shutil.copy2(ROOT / 'vendor/source.json', staging / 'NATIVE-SOURCE.json')
-        shutil.copy2(ROOT / 'policy.json', staging / 'SMOLBOX-POLICY.json')
+        shutil.copy2(policy_path(), staging / 'SMOLBOX-POLICY.json')
         entries = inventory(staging)
         identity = {'engine_version': ENGINE_VERSION, 'smolvm_revision': source['revision'], 'source_sha256': digest(ROOT / 'vendor/source.json'),
                     'build_sha256': digest(staging / 'smolbox-port'), 'assets_sha256': hashlib.sha256(compact(entries)).hexdigest(),
                     'platform': 'macos' if platform.system() == 'Darwin' else 'linux',
                     'architecture': {'arm64': 'aarch64', 'x86_64': 'x86_64'}[platform.machine()]}
-        manifest = {'schema': 3, 'policy': json.loads((ROOT / 'policy.json').read_bytes()),
+        manifest = {'schema': 3, 'policy': json.loads(policy_path().read_bytes()),
                     'identity': identity, 'assets': entries, 'host_tools': [{'path': str(tool), 'sha256': digest(tool)}]}
         body = compact(manifest)
         if len(body) > MAX_METADATA:

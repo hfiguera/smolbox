@@ -3192,3 +3192,54 @@ capability, zero output, 30-second reserved control admission, 132-KiB requests 
 four-KiB proofs. Durable/public cleanup acceptance and ordinary SDK/platform
 qualification remain pending. No capability admission or package approval is
 enabled, and crash validation stays deferred.
+
+
+## Packed startup separates boot ownership from application acknowledgement
+
+The ordinary Linux workload attempt in
+`docs/evidence/embedded-port-http-parity-linux-workload-eb68e4d.json` demonstrates
+that the public EmbeddedRuntime convenience start stops its VM after a workload
+launch error. SmolBox HTTP instead permits that VM to remain running. The shared
+image-start coordinator now handles packed images through public AgentManager
+opening/launch APIs and LaunchFeatures::with_packed_layers, retaining the actual
+manager and original opaque boot enrollment. It preserves receipt-bound resources,
+ports, egress and qualified mounts, without implicit disk growth, image egress,
+portable restore or a convenience restart. Bare/checkpoint starts retain their
+separate qualified path.
+
+Packed startup uses the bounded bootstrap worker with an explicit packed origin.
+It never sends an OCI Pull or fabricates ImageObservation. One public AgentClient
+Run request carries frozen resolved argv/env/workdir/user and persistent overlay.
+The bounded relay discards progress/diagnostics and projects a known rejection
+separately from container acknowledgement. Only packed startup may accept that
+rejection as an application-launch outcome before independently proving the VM
+is running. Missing/malformed/late replies cannot manufacture that evidence,
+retry an application or retire its original owner/budget. A mutex-protected entry
+fence also prevents a cancelled unentered worker from booting after registration
+is retired. Direct-manager stop uses its original enrollment for actual collection.
+
+The current ordinary models, exact non-VM SDK-agent worker cases, shared host
+contracts and strict Rust checks pass; see the progress record for exact counts.
+They establish no changed-package VM, platform or public consumer qualification.
+New exact packages and the entire ordinary workload campaign remain required.
+The verified SDK stays unmodified; no CLI/server fallback or Rustler backend is
+introduced, and crash validation remains deferred.
+
+
+## Receipt-bound terminal eligibility
+
+`Engine::terminal_preflight` reuses the protected native receipt, bounded
+revision-specific read-only SDK-record projection, shared machine gate and
+observation pool. `VmRecord::image` must be nonempty and
+`VmRecord::forkable_on_start()` false, matching the pinned HTTP machine response
+and SmolBox Client's background-image predicate; held records also reject.
+There is no running-state prerequisite, manager construction, agent connection,
+terminal demand, spool or PTY. The engine itself rejects read budgets exceeding
+30 seconds, independently of bridge validation. The exact zero-output `ready`
+response is separately capability-negotiated and cannot emit terminal events or
+accept terminal controls. Elixir validates the stored terminal specification,
+returns an opaque original-owner/epoch source, and preserves the one absolute
+budget before opening through the existing terminal connection. Its read-only
+errors have terminal `not_dispatched` evidence, matching HTTP preflight.
+Legacy descriptors receive no new capability implicitly, persisted records/codecs
+are unchanged, and physical qualification of changed helper bytes remains open.

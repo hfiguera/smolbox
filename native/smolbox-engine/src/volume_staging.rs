@@ -169,6 +169,47 @@ fn observe(
     intent: &LocalVolumeIntent,
     budget: &ReadBudget,
 ) -> Result<VolumeStagingPresence> {
+    observe_inner(root, binding, domain, intent, None, budget)
+}
+
+// Only an exact protected completed provision can relax the original staging
+// mode check. Supplied receipt fields or a directory alone never select this path.
+fn observe_provisioned(
+    root: &QualifiedVolumeRoot,
+    binding: &DomainBinding,
+    domain: &std::path::Path,
+    intent: &LocalVolumeIntent,
+    provision: &VolumeProvisionReceipt,
+    budget: &ReadBudget,
+) -> Result<VolumeStagingPresence> {
+    budget.check()?;
+    intent.validate()?;
+    root.verify(budget)?;
+    provision.validate()?;
+    if provision.account != VolumeAccount::current()? {
+        return Err(Error::before(ErrorCode::Ownership));
+    }
+    let ledger = existing_ledger(domain)?.ok_or(Error::before(ErrorCode::Ownership))?;
+    let saved: Option<VolumeProvisionReceipt> = read_record(
+        &ledger,
+        &cstring(&format!("{}.provisioned.json", intent.worker_volume_id))?,
+        budget,
+    )?;
+    if saved.as_ref() != Some(provision) {
+        return Err(Error::before(ErrorCode::Ownership));
+    }
+    ledger.verify()?;
+    observe_inner(root, binding, domain, intent, Some(provision), budget)
+}
+
+fn observe_inner(
+    root: &QualifiedVolumeRoot,
+    binding: &DomainBinding,
+    domain: &std::path::Path,
+    intent: &LocalVolumeIntent,
+    provision: Option<&VolumeProvisionReceipt>,
+    budget: &ReadBudget,
+) -> Result<VolumeStagingPresence> {
     intent.validate()?;
     root.verify(budget)?;
     let id = cstring(&intent.worker_volume_id)?;
@@ -223,7 +264,12 @@ fn observe(
                 let metadata = child
                     .metadata()
                     .map_err(|_| Error::before(ErrorCode::Ownership))?;
-                if (metadata.dev(), metadata.ino()) != (receipt.device, receipt.inode)
+                if let Some(provision) = provision {
+                    if provision.backing != receipt {
+                        return Err(Error::before(ErrorCode::Ownership));
+                    }
+                    access::verify_completed_backing(&child, provision)?;
+                } else if (metadata.dev(), metadata.ino()) != (receipt.device, receipt.inode)
                     || metadata.uid() != unsafe { libc::geteuid() }
                     || metadata.mode() & 0o7777 != receipt.mode
                 {
@@ -1280,6 +1326,79 @@ mod tests {
                 & 0o7777,
             0o700
         );
+    }
+
+    #[test]
+    fn completed_volume_permission_evolution_preserves_original_records_without_repair() {
+        let f = fixture();
+        let Some(receipt) = provision_run(&f) else {
+            return;
+        };
+        let records = ["intent", "backing", "staged", "provisioned"].map(|kind| {
+            (
+                record_path(&f, kind),
+                std::fs::read(record_path(&f, kind)).unwrap(),
+            )
+        });
+        for mode in [0o700, 0o710, 0o740, 0o750, 0o755] {
+            std::fs::set_permissions(receipt.node_path(), std::fs::Permissions::from_mode(mode))
+                .unwrap();
+            assert_eq!(
+                inspect_provision(&f).unwrap(),
+                VolumeProvisionPresence::Provisioned(Box::new(receipt.clone()))
+            );
+            assert_eq!(
+                std::fs::metadata(receipt.node_path()).unwrap().mode() & 0o7777,
+                mode
+            );
+            assert_eq!(receipt.backing.mode, 0o700);
+        }
+        for mode in [0o770, 0o777, 0o1700, 0o600] {
+            std::fs::set_permissions(receipt.node_path(), std::fs::Permissions::from_mode(mode))
+                .unwrap();
+            assert_eq!(
+                inspect_provision(&f).unwrap_err().code,
+                ErrorCode::Ownership
+            );
+            assert_eq!(
+                std::fs::metadata(receipt.node_path()).unwrap().mode() & 0o7777,
+                mode
+            );
+        }
+        std::fs::set_permissions(receipt.node_path(), std::fs::Permissions::from_mode(0o700))
+            .unwrap();
+        for (path, before) in records {
+            assert_eq!(std::fs::read(path).unwrap(), before);
+        }
+    }
+
+    #[test]
+    fn incomplete_staging_cannot_use_a_supplied_provision_to_relax_mode_validation() {
+        let f = fixture();
+        let backing = run(&f).unwrap();
+        let account = match VolumeAccount::current() {
+            Ok(account) => account,
+            Err(_) => return,
+        };
+        let supplied = VolumeProvisionReceipt {
+            schema: 1,
+            backing,
+            account,
+        };
+        let path = supplied.node_path();
+        std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o755)).unwrap();
+        assert!(inspect_provision(&f).is_err());
+        assert!(observe_provisioned(
+            &f.root,
+            &f.binding,
+            &f.domain,
+            &f.intent,
+            &supplied,
+            &super::super::tests::budget()
+        )
+        .is_err());
+        assert!(!record_path(&f, "provisioned").exists());
+        assert_eq!(std::fs::metadata(&path).unwrap().mode() & 0o7777, 0o755);
     }
 
     #[test]

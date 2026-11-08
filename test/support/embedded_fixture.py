@@ -5,6 +5,7 @@ import os
 import secrets
 import struct
 import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).parent
@@ -16,6 +17,10 @@ QUARANTINED = False
 VM_PATH = ROOT / "vm.json"
 VM = json.loads(VM_PATH.read_text()) if META.get("persistent_backend") and VM_PATH.exists() else None
 FILES = {}
+VOLUMES_PATH = ROOT / "volumes.json"
+VOLUMES = json.loads(VOLUMES_PATH.read_text()) if META.get("persistent_backend") and VOLUMES_PATH.exists() else {}
+PREPARED_PATH = ROOT / "prepared.json"
+PREPARED = set(json.loads(PREPARED_PATH.read_text())) if META.get("persistent_backend") and PREPARED_PATH.exists() else set()
 
 
 def save_vm():
@@ -23,14 +28,72 @@ def save_vm():
         VM_PATH.write_text(json.dumps(VM))
 
 
+def volume_outcome(request):
+    # Synthetic protocol/store evidence only: no SDK, backing paths or host
+    # directories are opened by this peer.
+    assert META["sdk"]["feature_versions"]["volumes"] == 1
+    assert META["identity"]["platform"] == "linux"
+    policy = CONFIG.get("approved_volume_policy")
+    if not policy or policy["id"] != request["policy_id"]:
+        return dict(result="error", code="ownership", dispatch="not_dispatched")
+    intent, action = request["intent"], request["action"]["action"]
+    identifier = intent["worker_volume_id"]
+    entry = VOLUMES.get(identifier)
+    if action == "provision":
+        time.sleep(META.get("volume_delay_ms", 0) / 1000)
+        if entry is None:
+            backing = dict(schema=1, target_id=CONFIG["target_id"],
+                domain_generation=CONFIG["generation"], policy=policy, intent=intent,
+                owner_token=secrets.token_hex(32), root_device=1, root_inode=2,
+                device=1, inode=10 + len(VOLUMES), mode=448)
+            entry = dict(state="ready", proof=dict(schema=1, backing=backing,
+                account=dict(uid=1000, gid=1000)))
+            VOLUMES[identifier] = entry
+        assert entry["proof"]["backing"]["intent"] == intent
+        assert entry["state"] == "ready"
+        VOLUMES_PATH.write_text(json.dumps(VOLUMES))
+        proof = json.loads(json.dumps(entry["proof"]))
+        if META.get("volume_mode") == "crossed":
+            proof["backing"]["domain_generation"] = "f" * 32
+        return dict(result="volume", volume=dict(status="provisioned", proof=proof))
+    if action == "inspect_provision":
+        if entry is None:
+            return dict(result="volume", volume=dict(status="absent"))
+        if entry["state"] == "ready":
+            return dict(result="volume", volume=dict(status="provisioned", proof=entry["proof"]))
+    if action == "inspect_deletion" and entry and entry["state"] == "deleted":
+        return dict(result="volume", volume=dict(status="deleted", proof=entry["deletion"]))
+    if action.startswith("inspect_"):
+        return dict(result="volume", volume=dict(status="unverified"))
+    if entry is None:
+        return dict(result="error", code="ownership", dispatch="not_dispatched")
+    if VM and any(mount["source"] == policy["root"] + "/" + identifier for mount in VM.get("mounts", [])):
+        return dict(result="error", code="busy", dispatch="not_dispatched")
+    if action == "qualify_deletion":
+        return dict(result="volume", volume=dict(status="qualified", proof=entry["proof"]))
+    assert action in ("delete", "resolve_deletion")
+    if action == "resolve_deletion":
+        assert request["action"]["quiesced"] is True
+    if entry["state"] != "deleted":
+        entry["deletion"] = dict(schema=1, operation_id=secrets.token_hex(16), provision=entry["proof"])
+        entry["state"] = "deleted"
+        VOLUMES_PATH.write_text(json.dumps(VOLUMES))
+    return dict(result="volume", volume=dict(status="deleted", proof=entry["deletion"]))
+
+
 def observation():
     state = VM["state"] if VM else "missing"
     value = dict(state=state, resources=VM["resources"] if VM else None,
                  pid_identity=[4242, 123456] if state == "running" else None)
     features = VM.get("features") if VM else None
-    if features and (features["network"]["enabled"] or features["ports"]):
-        value["configuration"] = dict(network=features["network"], ports=features["ports"],
-                                      backend="virtio-net")
+    mounts = VM.get("mounts", []) if VM else []
+    networked = bool(features and (features["network"]["enabled"] or features["ports"]))
+    if networked or mounts:
+        value["configuration"] = dict(network=features["network"] if features else dict(enabled=False, hosts=[], cidrs=[]),
+                                      ports=features["ports"] if features else [],
+                                      backend="virtio-net" if networked else None)
+        if mounts:
+            value["configuration"]["mounts"] = mounts
     return value
 
 
@@ -268,7 +331,7 @@ try:
                             cpus=resources["cpus"], memoryMb=resources["memory_mib"], storageGb=resources["storage_gib"],
                             overlayGb=resources["overlay_gib"], network=network["enabled"], networkBackend=configured.get("backend"),
                             allowedHosts=network["hosts"], allowedCidrs=network["cidrs"], gpu=False, cuda=False,
-                            mounts=[], ports=configured.get("ports", [])))
+                            mounts=configured.get("mounts", []), ports=configured.get("ports", [])))
                     data = json.dumps(machines).encode()
                     send(correlated("event", identifier, 1, event=dict(stream="file", data_base64=base64.b64encode(data).decode())))
                     send(correlated("terminal", identifier, 2, outcome=dict(result="inventory", count=len(machines), bytes=len(data))))
@@ -280,19 +343,45 @@ try:
                         counters=dict(cpu_seconds=1 if running else None, cpu_millis=1500 if running else None,
                             rss_mb=64 if running else None, pss_mb=None, private_memory_mb=None,
                             shared_memory_mapped_mb=None, disk_used_mb=3 if VM else None, egress_bytes=None))))
-                elif operation["operation"] == "qualify_creation":
+                elif operation["operation"] in ("qualify_creation", "qualify_oci_creation", "qualify_registry_creation"):
+                    if operation["operation"] == "qualify_oci_creation" and VM and VM.get("pulled"):
+                        send(correlated("terminal", identifier, 1, outcome=dict(result="error", code="overload", dispatch="not_dispatched")))
+                        continue
                     if META.get("reject_qualification") or (META.get("vm_artifact") and
                             (operation["user"] is not None or operation.get("features", {}).get("workload") is not None)):
                         send(correlated("terminal", identifier, 1, outcome=dict(result="error", code="unsupported", dispatch="not_dispatched")))
                     else:
                         send(correlated("terminal", identifier, 1, outcome=dict(result="qualified")))
-                elif META.get("backend") and operation["operation"] == "inspect_creation":
+                elif META.get("backend") and operation["operation"] in ("inspect_creation", "inspect_oci_creation", "inspect_registry_creation"):
                     send(correlated("terminal", identifier, 1, outcome=dict(
                         result="creation_presence", presence="unverified" if VM else "absent")))
-                elif META.get("backend") and operation["operation"] == "create":
+                elif META.get("backend") and operation["operation"] == "volume":
+                    send(correlated("terminal", identifier, 1, outcome=volume_outcome(operation["request"])))
+                elif META.get("backend") and operation["operation"] == "prepare_artifact":
+                    # Semantic cache evidence only: no SDK, registry or VM exists.
+                    if META.get("prepare_error"):
+                        send(correlated("terminal", identifier, 1, outcome=dict(result="error", code="unsupported", dispatch="not_dispatched")))
+                        continue
+                    source = operation["source"]
+                    key = json.dumps(source, sort_keys=True)
+                    cached = key in PREPARED
+                    PREPARED.add(key)
+                    if META.get("persistent_backend"):
+                        PREPARED_PATH.write_text(json.dumps(sorted(PREPARED)))
+                    send(correlated("terminal", identifier, 1, outcome=dict(result="prepared_artifact",
+                        source=source, size_bytes=123, already_cached=cached)))
+                elif META.get("backend") and operation["operation"] in ("create", "create_oci", "create_registry_prepared"):
                     create = operation["create"]
+                    mounts = []
+                    for mount in create.get("volume_mounts", []):
+                        backing = mount["proof"]["backing"]
+                        entry = VOLUMES[backing["intent"]["worker_volume_id"]]
+                        assert entry["state"] == "ready" and entry["proof"] == mount["proof"]
+                        assert backing["policy"] == CONFIG["approved_volume_policy"]
+                        mounts.append(dict(source=backing["policy"]["root"] + "/" + backing["intent"]["worker_volume_id"],
+                                           target=mount["target"], readonly=mount["readonly"], staged=False))
                     VM = dict(name=create["name"], resources=create["resources"], state="stopped", started=False,
-                              features=create.get("features"))
+                              features=create.get("features"), mounts=mounts)
                     save_vm()
                     receipt = dict(target_id=CONFIG["target_id"], domain_generation=CONFIG["generation"],
                                    name=create["name"], owner_token=create["owner_token"],
@@ -302,14 +391,31 @@ try:
                                                    chain_sha256="a" * 64, operation_id=None,
                                                    request_sha256=None)
                     send(correlated("terminal", identifier, 1, outcome=dict(result="created", receipt=receipt)))
-                elif META.get("backend") and operation["operation"] in ("inspect", "start", "stop", "delete"):
-                    action = operation["operation"]
+                elif META.get("backend") and operation["operation"] == "pull_image":
+                    assert VM and VM["state"] == "running"
+                    if META.get("pull_error"):
+                        send(correlated("terminal", identifier, 1, outcome=dict(result="error", code="overload", dispatch="not_dispatched")))
+                        continue
+                    VM["pulled"] = True
+                    save_vm()
+                    image = dict(reference=operation["source"]["reference"], digest="sha256:" + "b" * 64,
+                                 size=123, architecture=operation["source"]["platform"].split("/")[1],
+                                 os="linux", layerCount=2)
+                    send(correlated("terminal", identifier, 1, outcome=dict(result="pulled", image=image)))
+                elif META.get("backend") and operation["operation"] in ("inspect", "start", "start_oci", "stop", "delete"):
+                    action = "start" if operation["operation"] == "start_oci" else operation["operation"]
+                    if (action == "inspect" and operation["receipt"].get("material", {}).get("revision", 0)
+                            < META.get("minimum_material_revision", 0)):
+                        send(correlated("terminal", identifier, 1, outcome=dict(
+                            result="error", code="ownership", dispatch="not_dispatched")))
+                        continue
                     if action == "delete":
                         # The native engine refuses deletion of running/unknown VMs.
                         assert not VM or VM["state"] == "stopped"
                         VM = None
                     elif VM and action in ("start", "stop"):
-                        VM["state"] = "running" if action == "start" else "stopped"
+                        if action != "stop" or not META.get("stop_no_change"):
+                            VM["state"] = "running" if action == "start" else "stopped"
                         if action == "start": VM["started"] = True
                     save_vm()
                     send(correlated("terminal", identifier, 1, outcome=dict(result="observed",
@@ -340,6 +446,15 @@ try:
                             result="error", code="native", dispatch="may_have_dispatched")))
                     else:
                         send(correlated("terminal", identifier, 1, outcome=dict(result="launched", pid=4242)))
+                elif META.get("backend") and operation["operation"] == "terminal_preflight":
+                    if VM is None:
+                        send(correlated("terminal", identifier, 1, outcome=dict(
+                            result="error", code="not_found", dispatch="not_dispatched")))
+                    elif META.get("reject_terminal_preflight") or META.get("vm_artifact"):
+                        send(correlated("terminal", identifier, 1, outcome=dict(
+                            result="error", code="unsupported", dispatch="not_dispatched")))
+                    else:
+                        send(correlated("terminal", identifier, 1, outcome=dict(result="ready")))
                 elif META.get("backend") and operation["operation"] == "terminal_open":
                     assert VM and VM["state"] == "running"
                     if META.get("vm_artifact"):

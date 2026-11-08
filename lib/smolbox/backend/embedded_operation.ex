@@ -188,7 +188,8 @@ defmodule SmolBox.Backend.EmbeddedOperation do
          :ok <- Source.validate(source),
          true <- source in context.config.sources and context.profile.network != :offline,
          %{command: %ImagePull{source: ^source}} <- context.spec,
-         %{spec: %{artifact: %{"kind" => "oci"}}} <- context.managed_machine,
+         {scope, id} when is_binary(scope) and is_binary(id) <- context.managed_machine,
+         %{"kind" => "oci"} <- context.spec.artifact,
          {:ok, receipt} <- EmbeddedContext.receipt(context),
          {:ok, budget} <-
            Budget.constrain(budget,
@@ -422,5 +423,7 @@ defmodule SmolBox.Backend.EmbeddedOperation do
 
   defp ready(request, budget), do: {:ok, request, budget, <<>>, nil}
   defp error(category, :list_images), do: {:error, %Error{category: category, operation: :images}}
+  defp error(category, :inspect_machine), do: error(category, :inspect)
+  defp error(category, :create_prepared), do: error(category, :create)
   defp error(category, operation), do: {:error, %Error{category: category, operation: operation}}
 end

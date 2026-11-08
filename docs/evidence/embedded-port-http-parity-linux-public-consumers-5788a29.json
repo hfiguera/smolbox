@@ -1,0 +1,353 @@
+{
+  "schema": 1,
+  "status": "scoped-ordinary-linux-public-consumers",
+  "source_commit": "5788a29ba45b3cc386fb17a69c8cae2ac855a565",
+  "source_files_verified": 1576,
+  "package": {
+    "manifest_sha256": "36ed1c49f45cec1753099a7b4fa240af3c74d7f70318c0805eca41b2efcbbba9",
+    "helper_sha256": "7c81a6bf68fdf8f42bd668e28ffa7f466ec1e796a9fb087e29715beb8783a950",
+    "assets_sha256": "64a20a93a48f11b62b74692c356dc460ce7fcf01b87be57ea5db9b5d7ea59d66",
+    "assets_verified": 806,
+    "host_tools_verified": true,
+    "platform": "linux",
+    "architecture": "x86_64",
+    "engine_version": "0.2.0",
+    "sdk_version": "1.22.0",
+    "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "sdk_source_unmodified": true,
+    "cli_or_sdk_http_fallback": false
+  },
+  "fixture_sha256": "339995f33fe84c2ed5a4e212a0acb9afab22df972bf2c2b4aa8e412ea0af5bc4",
+  "consumer_archive_sha256": "5042a357670da626637fc7b9cdc3f65a72f86d9945bb24a68701cb37abd97722",
+  "consumers": [
+    {
+      "lane": "current",
+      "report_sha256": "a2cd781adf835344845d892a46ab0a555b8a8218000fe4bea299297e50b45b79",
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "minimum": false,
+      "package_sha256": "5042a357670da626637fc7b9cdc3f65a72f86d9945bb24a68701cb37abd97722",
+      "without_rust": true,
+      "native": {
+        "scope": "public-port-package-consumer",
+        "evidence": {
+          "crash_handling_qualified": false,
+          "deliberate_process_interruption": false,
+          "disposable_exit": 7,
+          "drain_blocks_new_assignments": true,
+          "drain_survives_runtime_restart": true,
+          "existing_command_while_draining": true,
+          "file_bytes": 1048593,
+          "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+          "final_reserved_slots": 0,
+          "fixture_sha256": "339995f33fe84c2ed5a4e212a0acb9afab22df972bf2c2b4aa8e412ea0af5bc4",
+          "http_workers_exercised_while_native_draining": 0,
+          "identity": {
+            "architecture": "x86_64",
+            "assets_sha256": "64a20a93a48f11b62b74692c356dc460ce7fcf01b87be57ea5db9b5d7ea59d66",
+            "build_sha256": "7c81a6bf68fdf8f42bd668e28ffa7f466ec1e796a9fb087e29715beb8783a950",
+            "engine_version": "0.2.0",
+            "platform": "linux",
+            "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+            "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+          },
+          "inventory_after": [],
+          "inventory_before": [],
+          "owned_deleted": true,
+          "package_manifest_sha256": "36ed1c49f45cec1753099a7b4fa240af3c74d7f70318c0805eca41b2efcbbba9",
+          "proof": "passed",
+          "public_native_admission_enabled": true,
+          "resume_version_checked": true,
+          "retained_after_normal_runtime_restart": true,
+          "retained_write_exit": 7,
+          "scope": "public-port-package-consumer",
+          "store_mode": "ephemeral",
+          "terminal": {
+            "exercised": false
+          },
+          "without_rust": true
+        },
+        "exercised": true,
+        "proof_tool_sha256": {
+          "config.example.exs": "e0b36e130d076afee72455ccbd23dcae85dc04142d411397be3869c307235bec",
+          "demo.ex": "030504ee5e7c78f25267172e29989ad1ee7a606777dfb41e4e7b91b7c46c16f9",
+          "native-proof.exs": "8e68ef45f8fd3019bdf90de342174c6deb522207251ce7f7ffaf8a7df7a1bfef",
+          "native_proof.py": "952265ccbf230fd4ec1b2b9f48e0e40db402222b5f2b10f95f2393bd64d23dc9"
+        }
+      }
+    },
+    {
+      "lane": "baseline-v4-minimum",
+      "report_sha256": "bfe8d1916edf8b6647db9c33195ff1370b79dbf4c895499b36c385d62a13396c",
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "minimum": true,
+      "package_sha256": "5042a357670da626637fc7b9cdc3f65a72f86d9945bb24a68701cb37abd97722",
+      "without_rust": true,
+      "native": {
+        "scope": "public-port-package-consumer",
+        "evidence": {
+          "crash_handling_qualified": false,
+          "deliberate_process_interruption": false,
+          "disposable_exit": 7,
+          "drain_blocks_new_assignments": true,
+          "drain_survives_runtime_restart": true,
+          "existing_command_while_draining": true,
+          "file_bytes": 1048593,
+          "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+          "final_reserved_slots": 0,
+          "fixture_sha256": "339995f33fe84c2ed5a4e212a0acb9afab22df972bf2c2b4aa8e412ea0af5bc4",
+          "http_workers_exercised_while_native_draining": 0,
+          "identity": {
+            "architecture": "x86_64",
+            "assets_sha256": "64a20a93a48f11b62b74692c356dc460ce7fcf01b87be57ea5db9b5d7ea59d66",
+            "build_sha256": "7c81a6bf68fdf8f42bd668e28ffa7f466ec1e796a9fb087e29715beb8783a950",
+            "engine_version": "0.2.0",
+            "platform": "linux",
+            "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+            "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+          },
+          "inventory_after": [],
+          "inventory_before": [],
+          "owned_deleted": true,
+          "package_manifest_sha256": "36ed1c49f45cec1753099a7b4fa240af3c74d7f70318c0805eca41b2efcbbba9",
+          "proof": "passed",
+          "public_native_admission_enabled": true,
+          "resume_version_checked": true,
+          "retained_after_normal_runtime_restart": true,
+          "retained_write_exit": 7,
+          "scope": "public-port-package-consumer",
+          "store_mode": "ephemeral",
+          "terminal": {
+            "exercised": false
+          },
+          "without_rust": true
+        },
+        "exercised": true,
+        "proof_tool_sha256": {
+          "config.example.exs": "e0b36e130d076afee72455ccbd23dcae85dc04142d411397be3869c307235bec",
+          "demo.ex": "030504ee5e7c78f25267172e29989ad1ee7a606777dfb41e4e7b91b7c46c16f9",
+          "native-proof.exs": "8e68ef45f8fd3019bdf90de342174c6deb522207251ce7f7ffaf8a7df7a1bfef",
+          "native_proof.py": "952265ccbf230fd4ec1b2b9f48e0e40db402222b5f2b10f95f2393bd64d23dc9"
+        }
+      }
+    },
+    {
+      "lane": "terminal-current",
+      "report_sha256": "aea0ce9282ee7f9c8b416b0b3eaf39484189d02fade498701927d9d0829dc7a5",
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "minimum": false,
+      "package_sha256": "5042a357670da626637fc7b9cdc3f65a72f86d9945bb24a68701cb37abd97722",
+      "without_rust": true,
+      "native": {
+        "scope": "public-port-package-consumer",
+        "evidence": {
+          "crash_handling_qualified": false,
+          "deliberate_process_interruption": false,
+          "disposable_exit": 7,
+          "drain_blocks_new_assignments": true,
+          "drain_survives_runtime_restart": true,
+          "existing_command_while_draining": true,
+          "file_bytes": 1048593,
+          "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+          "final_reserved_slots": 0,
+          "fixture_sha256": "339995f33fe84c2ed5a4e212a0acb9afab22df972bf2c2b4aa8e412ea0af5bc4",
+          "http_workers_exercised_while_native_draining": 0,
+          "identity": {
+            "architecture": "x86_64",
+            "assets_sha256": "64a20a93a48f11b62b74692c356dc460ce7fcf01b87be57ea5db9b5d7ea59d66",
+            "build_sha256": "7c81a6bf68fdf8f42bd668e28ffa7f466ec1e796a9fb087e29715beb8783a950",
+            "engine_version": "0.2.0",
+            "platform": "linux",
+            "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+            "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+          },
+          "inventory_after": [],
+          "inventory_before": [],
+          "owned_deleted": true,
+          "package_manifest_sha256": "36ed1c49f45cec1753099a7b4fa240af3c74d7f70318c0805eca41b2efcbbba9",
+          "proof": "passed",
+          "public_native_admission_enabled": true,
+          "resume_version_checked": true,
+          "retained_after_normal_runtime_restart": true,
+          "retained_write_exit": 7,
+          "scope": "public-port-package-consumer",
+          "store_mode": "ephemeral",
+          "terminal": {
+            "binary_input_bytes": 3,
+            "binary_output_verified": true,
+            "codec": 17,
+            "deliberate_process_interruption": false,
+            "duplicate_open_reuses_execution": true,
+            "exercised": true,
+            "observed_exit": 7,
+            "resize": {
+              "cols": 120,
+              "rows": 43
+            },
+            "scope": "ordinary-public-retained-image-pty",
+            "slot_released": true,
+            "transcript_persisted": false
+          },
+          "without_rust": true
+        },
+        "exercised": true,
+        "proof_tool_sha256": {
+          "config.example.exs": "e0b36e130d076afee72455ccbd23dcae85dc04142d411397be3869c307235bec",
+          "demo.ex": "030504ee5e7c78f25267172e29989ad1ee7a606777dfb41e4e7b91b7c46c16f9",
+          "native-proof.exs": "8e68ef45f8fd3019bdf90de342174c6deb522207251ce7f7ffaf8a7df7a1bfef",
+          "native_proof.py": "952265ccbf230fd4ec1b2b9f48e0e40db402222b5f2b10f95f2393bd64d23dc9"
+        }
+      }
+    },
+    {
+      "lane": "terminal-minimum",
+      "report_sha256": "2a90138c8b19943fedd7749f5258927c6289cc779ec5105439665d05d83b9500",
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "minimum": true,
+      "package_sha256": "5042a357670da626637fc7b9cdc3f65a72f86d9945bb24a68701cb37abd97722",
+      "without_rust": true,
+      "native": {
+        "scope": "public-port-package-consumer",
+        "evidence": {
+          "crash_handling_qualified": false,
+          "deliberate_process_interruption": false,
+          "disposable_exit": 7,
+          "drain_blocks_new_assignments": true,
+          "drain_survives_runtime_restart": true,
+          "existing_command_while_draining": true,
+          "file_bytes": 1048593,
+          "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+          "final_reserved_slots": 0,
+          "fixture_sha256": "339995f33fe84c2ed5a4e212a0acb9afab22df972bf2c2b4aa8e412ea0af5bc4",
+          "http_workers_exercised_while_native_draining": 0,
+          "identity": {
+            "architecture": "x86_64",
+            "assets_sha256": "64a20a93a48f11b62b74692c356dc460ce7fcf01b87be57ea5db9b5d7ea59d66",
+            "build_sha256": "7c81a6bf68fdf8f42bd668e28ffa7f466ec1e796a9fb087e29715beb8783a950",
+            "engine_version": "0.2.0",
+            "platform": "linux",
+            "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+            "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+          },
+          "inventory_after": [],
+          "inventory_before": [],
+          "owned_deleted": true,
+          "package_manifest_sha256": "36ed1c49f45cec1753099a7b4fa240af3c74d7f70318c0805eca41b2efcbbba9",
+          "proof": "passed",
+          "public_native_admission_enabled": true,
+          "resume_version_checked": true,
+          "retained_after_normal_runtime_restart": true,
+          "retained_write_exit": 7,
+          "scope": "public-port-package-consumer",
+          "store_mode": "ephemeral",
+          "terminal": {
+            "binary_input_bytes": 3,
+            "binary_output_verified": true,
+            "codec": 17,
+            "deliberate_process_interruption": false,
+            "duplicate_open_reuses_execution": true,
+            "exercised": true,
+            "observed_exit": 7,
+            "resize": {
+              "cols": 120,
+              "rows": 43
+            },
+            "scope": "ordinary-public-retained-image-pty",
+            "slot_released": true,
+            "transcript_persisted": false
+          },
+          "without_rust": true
+        },
+        "exercised": true,
+        "proof_tool_sha256": {
+          "config.example.exs": "e0b36e130d076afee72455ccbd23dcae85dc04142d411397be3869c307235bec",
+          "demo.ex": "030504ee5e7c78f25267172e29989ad1ee7a606777dfb41e4e7b91b7c46c16f9",
+          "native-proof.exs": "8e68ef45f8fd3019bdf90de342174c6deb522207251ce7f7ffaf8a7df7a1bfef",
+          "native_proof.py": "952265ccbf230fd4ec1b2b9f48e0e40db402222b5f2b10f95f2393bd64d23dc9"
+        }
+      }
+    }
+  ],
+  "pre_dispatch_runner_corrections": {
+    "volatile_tmp_lock_absence_after_reboot": true,
+    "offline_minimum_package_archives_supplied": 3,
+    "minimum_uses_bundled_otp27_rebar": true,
+    "original_failures_retained": true,
+    "failed_lanes_entered_native_work": false
+  },
+  "custody": {
+    "domain_unchanged": true,
+    "sdk_counts": {
+      "vms": 0,
+      "vm_create_reservations": 0,
+      "vm_pause_operations": 0,
+      "vm_resize_intents": 0,
+      "vm_resize_receipts": 0
+    },
+    "native_and_beam_processes": [],
+    "native_and_beam_zombies": [],
+    "account_lock_available": true,
+    "vm_caches_empty": true,
+    "checked_utc": "2026-10-16T19:32:40.222768+00:00",
+    "sdk_state_copied": false
+  },
+  "account": {
+    "uid": 1005,
+    "genuine_os_account": true,
+    "reused_empty_approved_domain": true,
+    "home_or_xdg_redirect": false,
+    "domain_or_receipts_reset": false
+  },
+  "private_archive": {
+    "sha256": "cd31caf4fcf9e0eade66f650d54f241bbbee130a63e957874bdea67551a8a1e2",
+    "bytes": 482456079,
+    "custody_matches": true,
+    "driver_and_four_consumers_exit_zero": true,
+    "local_and_outer_verified": true
+  },
+  "normal_shutdown": {
+    "units": {
+      "smolbox-lab@provision.service": {
+        "MainPID": "0",
+        "Result": "success",
+        "ExecMainStatus": "0",
+        "ActiveState": "inactive",
+        "SubState": "dead"
+      },
+      "smolbox-lab@test.service": {
+        "MainPID": "0",
+        "Result": "success",
+        "ExecMainStatus": "0",
+        "ActiveState": "inactive",
+        "SubState": "dead"
+      }
+    },
+    "observed_utc": "2026-10-16T19:34:43.106932+00:00",
+    "original_run_disk": {
+      "bytes": 24766644224,
+      "mtime": 1792169349,
+      "unchanged": true
+    },
+    "provision_disk": {
+      "bytes": 4660133888,
+      "mtime": 1792179276,
+      "retained": true
+    },
+    "seal_or_reset": false
+  },
+  "validation": {
+    "http_client_registry_image_extended_draining_and_coverage_tests_passed": 39
+  },
+  "scope": {
+    "public_offline_memory_lifecycle": true,
+    "binary_file_bytes": 1048593,
+    "draining_and_graceful_stopped_runtime_replacement": true,
+    "current_minimum_managed_terminals": true,
+    "public_image_registry_workflows_qualified": false,
+    "guest_registry_credentials_qualified": false,
+    "other_platform_source_resource_combinations_qualified": false,
+    "parity_complete": false,
+    "crash_validation_deferred": true,
+    "crash_handling_qualified": false,
+    "distribution_approved": false
+  }
+}

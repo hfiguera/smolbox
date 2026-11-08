@@ -107,8 +107,9 @@ defmodule SmolBox.Store.Codec do
   bytes and acquire nil native_authority on read. Earlier envelopes reject even
   an explicitly nil new field. Bare readiness/deletion acknowledgments cannot
   complete native records. Install every reader, projection writer, native
-  recovery and attachment transaction before enabling native volume admission;
-  this codec foundation does not advertise a native volume reader capability.
+  recovery and attachment transaction before advertising `native_volumes: 1`.
+  Run `NativeVolumeContract` against every adapter before that reader marker;
+  it grants no helper capability, ownership adoption or mutation replay authority.
   Machines holding native volume attachments selectively use v21, including
   pre-allocation records and retirement tombstones. Each attachment retains its
   volume key, enrolled binding, exact provision proof, guest target and read-only

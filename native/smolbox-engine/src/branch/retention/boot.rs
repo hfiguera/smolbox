@@ -213,9 +213,11 @@ impl BarePack {
         self.root.verify()?;
         let named = crate::artifact::open_regular(&self.path)?;
         for file in [&self.file, &named] {
-            if crate::checkpoint_materialize::FileVersion::of(
-                &file.metadata().map_err(|_| Error::before(ErrorCode::Io))?,
-            ) != self.version
+            let metadata = file.metadata().map_err(|_| Error::before(ErrorCode::Io))?;
+            // Link creation need not advance ctime within the same filesystem
+            // clock tick. Version equality alone cannot preserve single custody.
+            if metadata.nlink() != 1
+                || crate::checkpoint_materialize::FileVersion::of(&metadata) != self.version
             {
                 return Err(Error::before(ErrorCode::Ownership));
             }

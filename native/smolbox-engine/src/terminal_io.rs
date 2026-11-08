@@ -350,6 +350,54 @@ mod tests {
     }
 
     #[test]
+    fn natural_agent_exit_preserves_final_output_without_input_close() {
+        for _ in 0..16 {
+            let directory = tempfile::tempdir_in("/tmp").unwrap();
+            let root = directory.path().canonicalize().unwrap();
+            std::fs::set_permissions(&root, std::fs::Permissions::from_mode(0o700)).unwrap();
+            let listener = UnixListener::bind(root.join("agent.sock")).unwrap();
+            let (_input, receiver) = mpsc::channel();
+            let peer = std::thread::spawn(move || {
+                let mut socket = accept(&listener);
+                assert!(matches!(read(&mut socket), Some(AgentRequest::Run { .. })));
+                socket
+                    .write_all(&encode_message(&AgentResponse::Started).unwrap())
+                    .unwrap();
+                assert!(matches!(
+                    read(&mut socket),
+                    Some(AgentRequest::Resize { .. })
+                ));
+                socket
+                    .write_all(
+                        &[
+                            encode_message(&AgentResponse::Stdout {
+                                data: vec![0, 255, 128],
+                            })
+                            .unwrap(),
+                            encode_message(&AgentResponse::Exited {
+                                exit_code: 7,
+                                oom: false,
+                            })
+                            .unwrap(),
+                        ]
+                        .concat(),
+                    )
+                    .unwrap();
+            });
+            let mut bytes = vec![];
+            let proof = run_terminal_agent(request(root), receiver, |output| {
+                bytes.extend(output.bytes);
+                Ok(())
+            })
+            .unwrap();
+            peer.join().unwrap();
+            assert_eq!(bytes, [0, 255, 128]);
+            assert_eq!(proof.observed_exit, Some(7));
+            assert_eq!(proof.failure, None);
+        }
+    }
+
+    #[test]
     fn sdk_channels_preserve_context_initial_resize_binary_input_eof_exit_and_large_streams() {
         let directory = tempfile::tempdir_in("/tmp").unwrap();
         let root = directory.path().canonicalize().unwrap();

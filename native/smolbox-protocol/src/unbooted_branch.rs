@@ -72,10 +72,10 @@ impl UnbootedBranchDisposalIntent {
         check(
             self.quiesced
                 && self.operation_id != creation.child.operation_id
-                && !creation
+                && creation
                     .initial_release
                     .as_ref()
-                    .is_some_and(|r| r.operation_id == self.operation_id)
+                    .is_none_or(|r| r.operation_id != self.operation_id)
                 && self.request_sha256
                     == hash(&(
                         "smolbox-unbooted-branch-disposal-request-v1",
@@ -191,10 +191,10 @@ impl UnbootedBranchBackingReleaseRequest {
                 && self.backing_removed
                 && self.operation_id != creation.child.operation_id
                 && self.operation_id != self.disposal.request.operation_id
-                && !creation
+                && creation
                     .initial_release
                     .as_ref()
-                    .is_some_and(|r| r.operation_id == self.operation_id)
+                    .is_none_or(|r| r.operation_id != self.operation_id)
                 && self.request_sha256
                     == hash(&(
                         "smolbox-unbooted-branch-backing-request-v1",

@@ -753,6 +753,7 @@ fn is_observation(operation: &wire::Operation) -> bool {
             | wire::Operation::Readiness
             | wire::Operation::List
             | wire::Operation::Measurements { .. }
+            | wire::Operation::TerminalPreflight { .. }
             | wire::Operation::InspectGrowth { .. }
             | wire::Operation::InspectExport { .. }
             | wire::Operation::InspectCapture { .. }
@@ -1448,6 +1449,8 @@ fn spawn_worker(
                                     | wire::Operation::ExecBuffered { .. }
                                     | wire::Operation::ExecStream { .. }
                                     | wire::Operation::ExecBackground { .. }
+                                    | wire::Operation::ReadFile { .. }
+                                    | wire::Operation::WriteFile { .. }
                             ) && config.approved_volume_policy.is_some() =>
                     {
                         match &config.approved_volume_policy {
@@ -1718,6 +1721,7 @@ mod tests {
         started: Sender<()>,
         calls: AtomicUsize,
         uploaded: Mutex<Vec<u8>>,
+        file_policy_calls: AtomicUsize,
     }
     impl Native for Fake {
         fn branch(
@@ -2137,6 +2141,8 @@ mod tests {
                         | wire::Operation::ExecBuffered { .. }
                         | wire::Operation::ExecStream { .. }
                         | wire::Operation::ExecBackground { .. }
+                        | wire::Operation::ReadFile { .. }
+                        | wire::Operation::WriteFile { .. }
                 ));
             }
             self.calls.fetch_add(1, Ordering::AcqRel);
@@ -2155,6 +2161,38 @@ mod tests {
                     observed_exit: Some(0),
                     running_observed: true,
                     output_bytes: 3,
+                };
+            }
+            if matches!(
+                &operation,
+                wire::Operation::ReadFile { .. } | wire::Operation::WriteFile { .. }
+            ) {
+                assert_eq!(policy.id, "local");
+                assert_eq!(policy.root, std::path::Path::new("/srv/smolvm/volumes"));
+                self.file_policy_calls.fetch_add(1, Ordering::AcqRel);
+                match operation {
+                    wire::Operation::ReadFile { options, .. } => {
+                        assert_eq!(options.guest_path, "/mnt/volumes/data/value");
+                        _emit(wire::Stream::File, &[0, 255, 128]).unwrap();
+                    }
+                    wire::Operation::WriteFile {
+                        options,
+                        total_bytes,
+                        ..
+                    } => {
+                        assert_eq!(options.guest_path, "/mnt/volumes/data/value");
+                        let mut data = vec![];
+                        _upload.unwrap().take(32).read_to_end(&mut data).unwrap();
+                        assert_eq!(total_bytes, data.len() as u64);
+                        *self.uploaded.lock().unwrap() = data;
+                    }
+                    _ => unreachable!(),
+                }
+                return wire::Outcome::File {
+                    completion: wire::Completion::Completed,
+                    dispatch: wire::Dispatch::MayHaveDispatched,
+                    observed_bytes: 3,
+                    native_acknowledged: true,
                 };
             }
             before(wire::SafeCode::Native)
@@ -2629,6 +2667,16 @@ mod tests {
             }
         }
     }
+    // These protocol peers use explicit macOS fixture identities even when the
+    // test executable is compiled on Linux. Their descriptor must belong to that
+    // modeled platform, not inherit optional capabilities of the test host.
+    // package::tests separately checks the actual compiled platform policy.
+    fn model_sdk_identity() -> Result<wire::SdkIdentity, serde_json::Error> {
+        let policy: serde_json::Value =
+            serde_json::from_slice(include_bytes!("../../policy.json"))?;
+        serde_json::from_value(policy["sdk"].clone())
+    }
+
     fn hello() -> wire::Hello {
         wire::Hello {
             major: 1,
@@ -3190,6 +3238,7 @@ mod tests {
             started: started_sender,
             calls: AtomicUsize::new(0),
             uploaded: Mutex::new(Vec::new()),
+            file_policy_calls: AtomicUsize::new(0),
         });
         let native = fake.clone();
         let config = Config {
@@ -3303,6 +3352,126 @@ mod tests {
         assert!(matches!(
             receive(&mut client),
             wire::ServerMessage::Accepted { .. }
+        ));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Terminal {
+                outcome: wire::Outcome::Ready,
+                ..
+            }
+        ));
+        shutdown(client, thread);
+    }
+
+    #[test]
+    fn policy_file_dispatch_preserves_binary_credit_and_stages_exact_upload_before_entry() {
+        let mut h = terminal_hello();
+        let sdk = h.sdk.as_mut().unwrap();
+        sdk.feature_versions
+            .extend([("volumes".into(), 1), ("compact_creation".into(), 1)]);
+        h.capabilities = sdk.capabilities();
+        h.limits = wire::Limits::for_sdk(sdk);
+        h.package.platform = "linux".into();
+        h.package.architecture = "x86_64".into();
+        let mut supplied = serde_json::from_slice::<Vec<wire::GrowthTransition>>(include_bytes!(
+            "../../smolbox-protocol/fixtures/growth-transitions-v1.json"
+        ))
+        .unwrap()
+        .remove(0)
+        .previous;
+        supplied.target_id = h.domain.target_id.clone();
+        supplied.domain_generation = h.domain.generation.clone();
+        let policy = smolbox_engine::LocalVolumePolicy {
+            id: "local".into(),
+            root: "/srv/smolvm/volumes".into(),
+        };
+        let (mut client, fake, _, thread) =
+            start_with_all_catalogs(h.clone(), None, None, Some(policy));
+        let options = wire::FileOptions {
+            guest_path: "/mnt/volumes/data/value".into(),
+            max_bytes: 1024,
+            mode: None,
+        };
+        send(
+            &mut client,
+            request(
+                1,
+                wire::Operation::ReadFile {
+                    receipt: supplied.clone(),
+                    options: options.clone(),
+                },
+            ),
+        );
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Accepted { id: 1, .. }
+        ));
+        assert!(
+            matches!(receive(&mut client), wire::ServerMessage::Event {event, ..} if event.stream==wire::Stream::File && wire::decode_chunk(&event.data_base64).unwrap()==[0,255,128])
+        );
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Terminal {
+                outcome: wire::Outcome::File {
+                    native_acknowledged: true,
+                    observed_bytes: 3,
+                    ..
+                },
+                ..
+            }
+        ));
+        send(
+            &mut client,
+            request(
+                2,
+                wire::Operation::WriteFile {
+                    receipt: supplied,
+                    options,
+                    total_bytes: 3,
+                },
+            ),
+        );
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Accepted { id: 2, .. }
+        ));
+        send(
+            &mut client,
+            wire::ClientMessage::Upload {
+                epoch: h.epoch.clone(),
+                id: 2,
+                offset: 0,
+                data_base64: wire::encode_chunk(&[0]).unwrap(),
+            },
+        );
+        std::thread::sleep(Duration::from_millis(20));
+        assert_eq!(fake.file_policy_calls.load(Ordering::Acquire), 1);
+        send(
+            &mut client,
+            wire::ClientMessage::Upload {
+                epoch: h.epoch,
+                id: 2,
+                offset: 1,
+                data_base64: wire::encode_chunk(&[255, 128]).unwrap(),
+            },
+        );
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Terminal {
+                outcome: wire::Outcome::File {
+                    native_acknowledged: true,
+                    observed_bytes: 3,
+                    ..
+                },
+                ..
+            }
+        ));
+        assert_eq!(fake.file_policy_calls.load(Ordering::Acquire), 2);
+        assert_eq!(*fake.uploaded.lock().unwrap(), [0, 255, 128]);
+        send(&mut client, request(3, wire::Operation::Readiness));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Accepted { id: 3, .. }
         ));
         assert!(matches!(
             receive(&mut client),
@@ -4118,8 +4287,7 @@ mod tests {
                 for policy in 0..4 {
                     let wanted: wire::BranchCreateRequest =
                         serde_json::from_value(row["request"].clone()).unwrap();
-                    let mut sdk =
-                        crate::package::sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                    let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                     if policy != 0 {
                         sdk.feature_versions.insert("branches".into(), 1);
                     }
@@ -4236,8 +4404,7 @@ mod tests {
                 for policy in 0..4 {
                     let wanted: wire::BranchHeldReleaseRequest =
                         serde_json::from_value(row["request"].clone()).unwrap();
-                    let mut sdk =
-                        crate::package::sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                    let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                     if policy != 0 {
                         sdk.feature_versions.insert("branches".into(), 1);
                     }
@@ -4337,8 +4504,7 @@ mod tests {
             let wanted: wire::BranchChildAbsenceRequest =
                 serde_json::from_value(row["request"].clone()).unwrap();
             for policy in 0..4 {
-                let mut sdk =
-                    crate::package::sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                 }
@@ -4425,8 +4591,7 @@ mod tests {
             let wanted: wire::BranchBackingReleaseRequest =
                 serde_json::from_value(row["request"].clone()).unwrap();
             for policy in 0..4 {
-                let mut sdk =
-                    crate::package::sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                 }
@@ -4513,8 +4678,7 @@ mod tests {
             let wanted: wire::ReleasedBranchDeletionContinuationRequest =
                 serde_json::from_value(row["request"].clone()).unwrap();
             for policy in 0..4 {
-                let mut sdk =
-                    crate::package::sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                 }
@@ -4601,8 +4765,7 @@ mod tests {
             let wanted: wire::ReleasedBranchDeletionCleanupRequest =
                 serde_json::from_value(row["request"].clone()).unwrap();
             for policy in 0..4 {
-                let mut sdk =
-                    crate::package::sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                 }
@@ -4689,8 +4852,7 @@ mod tests {
             let wanted: wire::BranchDeletionCollectionRequest =
                 serde_json::from_value(row["request"].clone()).unwrap();
             for policy in 0..4 {
-                let mut sdk =
-                    crate::package::sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                 }
@@ -4777,8 +4939,7 @@ mod tests {
             let wanted: wire::ReleasedBranchDeletionRequest =
                 serde_json::from_value(row["request"].clone()).unwrap();
             for policy in 0..4 {
-                let mut sdk =
-                    crate::package::sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                 }
@@ -4865,8 +5026,7 @@ mod tests {
             let wanted: wire::HeldBranchDeletionRequest =
                 serde_json::from_value(row["request"].clone()).unwrap();
             for policy in 0..4 {
-                let mut sdk =
-                    crate::package::sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                 }
@@ -4953,8 +5113,7 @@ mod tests {
             let wanted: wire::UnbootedBranchChildAbsenceRequest =
                 serde_json::from_value(row["proof"]["request"].clone()).unwrap();
             for policy in 0..5 {
-                let mut sdk =
-                    crate::package::sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                 }
@@ -5066,8 +5225,7 @@ mod tests {
             let wanted: wire::BranchCreateRequest =
                 serde_json::from_value(row["creation"].clone()).unwrap();
             for policy in 0..5 {
-                let mut sdk =
-                    crate::package::sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                 }
@@ -5179,8 +5337,7 @@ mod tests {
             let wanted: wire::PreparedBranchRetirementRequest =
                 serde_json::from_value(row["request"].clone()).unwrap();
             for policy in 0..5 {
-                let mut sdk =
-                    crate::package::sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                 }
@@ -5273,8 +5430,7 @@ mod tests {
                 serde_json::from_value(row["request"].clone()).unwrap();
             for kind in 0..3 {
                 for policy in 0..5 {
-                    let mut sdk =
-                        crate::package::sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                    let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                     if policy != 0 {
                         sdk.feature_versions.insert("branches".into(), 1);
                     }
@@ -5394,8 +5550,7 @@ mod tests {
             let wanted: wire::HeldBranchDeletionActionRequest =
                 serde_json::from_value(row["request"].clone()).unwrap();
             for policy in 0..5 {
-                let mut sdk =
-                    crate::package::sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                 }
@@ -5497,8 +5652,8 @@ mod tests {
             serde_json::from_value(fixture["operation"].clone()).unwrap();
         assert!(!is_observation(&operation) && !is_control(&operation));
         for enabled in [false, true] {
-            let mut sdk = crate::package::sdk_identity()
-                .unwrap_or_else(|_| panic!("invalid compiled SDK policy"));
+            let mut sdk =
+                model_sdk_identity().unwrap_or_else(|_| panic!("invalid compiled SDK policy"));
             if enabled {
                 sdk.feature_versions.insert("branches".into(), 1);
             }
@@ -5555,8 +5710,8 @@ mod tests {
         ))
         .unwrap();
         let proof = &proofs[0];
-        let mut sdk = crate::package::sdk_identity()
-            .unwrap_or_else(|_| panic!("invalid compiled SDK policy"));
+        let mut sdk =
+            model_sdk_identity().unwrap_or_else(|_| panic!("invalid compiled SDK policy"));
         sdk.feature_versions.insert("checkpoints".into(), 1);
         let mut approved = hello();
         approved.major = wire::PARITY_PROTOCOL_MAJOR;
@@ -5802,8 +5957,7 @@ mod tests {
 
     #[test]
     fn full_work_queue_preserves_observation_dispatch_and_graceful_control() {
-        let sdk = crate::package::sdk_identity()
-            .unwrap_or_else(|_| panic!("invalid compiled SDK policy"));
+        let sdk = model_sdk_identity().unwrap_or_else(|_| panic!("invalid compiled SDK policy"));
         let mut approved = hello();
         approved.major = wire::PARITY_PROTOCOL_MAJOR;
         approved.minor = wire::PARITY_PROTOCOL_MINOR;
@@ -5899,8 +6053,7 @@ mod tests {
 
     #[test]
     fn protocol_two_bridge_rejects_stripped_proofs_before_native_dispatch() {
-        let sdk = crate::package::sdk_identity()
-            .unwrap_or_else(|_| panic!("invalid compiled SDK policy"));
+        let sdk = model_sdk_identity().unwrap_or_else(|_| panic!("invalid compiled SDK policy"));
         let mut approved = hello();
         approved.major = wire::PARITY_PROTOCOL_MAJOR;
         approved.minor = wire::PARITY_PROTOCOL_MINOR;
@@ -6012,8 +6165,7 @@ mod tests {
 
     #[test]
     fn parity_quarantine_preserves_bounded_observations_without_restoring_work_or_readiness() {
-        let sdk = crate::package::sdk_identity()
-            .unwrap_or_else(|_| panic!("invalid compiled SDK policy"));
+        let sdk = model_sdk_identity().unwrap_or_else(|_| panic!("invalid compiled SDK policy"));
         let mut approved = hello();
         approved.major = wire::PARITY_PROTOCOL_MAJOR;
         approved.minor = wire::PARITY_PROTOCOL_MINOR;

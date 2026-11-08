@@ -29,3 +29,8 @@ strip = true
 # Line tables retain useful backtraces without the SDK's full dependency DWARF.
 [profile.dev]
 debug = 1
+
+# Full SDK test harnesses can exceed the executable approval bound even with
+# limited dependency DWARF. Keep the production bound and release profile intact.
+[profile.test]
+debug = 0

@@ -43,6 +43,7 @@ defmodule SmolBox.EmbeddedPortProof do
         package_path: package,
         package_manifest_sha256: hash(manifest_bytes),
         package_identity: identity,
+        sdk_identity: get_in(manifest, ["policy", "sdk"]),
         domain_generation: domain["generation"],
         platform: platform(identity["platform"]),
         architecture: identity["architecture"],

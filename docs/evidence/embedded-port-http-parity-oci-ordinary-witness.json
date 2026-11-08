@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "scope": "explicit-ordinary-engine-oci-image-witness-and-shared-owner-retention",
+  "baseline_commit": "09c716c",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "inputs": [
+    {
+      "path": "native/smolbox-engine/examples/oci-guest-proof.rs",
+      "sha256": "bc24336f517629b9988a5b503d6c3f4ddd90bad35d1b935ff60f8e1488ff626d"
+    },
+    {
+      "path": "native/smolbox-engine/examples/proof_support/mod.rs",
+      "sha256": "49f4d9e6bfeceb7fcdc6ce495d987fd5d358acb0bb2f67ce2f59ab6873b0d401"
+    },
+    {
+      "path": "native/smolbox-engine/examples/volume_guest/support.rs",
+      "sha256": "05d9f847b875e4c228c6af01432eea78101fa253e830f86e57633bd76f107497"
+    },
+    {
+      "path": "native/smolbox-engine/examples/volume-guest-proof.rs",
+      "sha256": "576e24c5dab1b2db45d4fb0e5599380a4a75c0b3d584319c613039483b74a28b"
+    },
+    {
+      "path": "native/check.sh",
+      "sha256": "2f09c90d5f94216b5e2b9230d792a7a5ca8de6aa25ad0b259eddf47bb2864e6b"
+    },
+    {
+      "path": "native/tests/test_deferred_selection.py",
+      "sha256": "523d75353d413ddc7b6430f07f58dd921cf736b4c64011010356e7b49ee4066b"
+    }
+  ],
+  "validation": [
+    {
+      "lane": "pure-oci-approval-models",
+      "passed": 2,
+      "log_sha256": "ac543d6833f0bc1c70a38cec206c57e4d96013dbd22bfea07ed1c7fce62e72e7"
+    },
+    {
+      "lane": "shared-owner-retention-and-volume-diagnostic-models",
+      "passed": 2,
+      "log_sha256": "ac543d6833f0bc1c70a38cec206c57e4d96013dbd22bfea07ed1c7fce62e72e7"
+    },
+    {
+      "lane": "native-python",
+      "run": 47,
+      "skipped": 4,
+      "log_sha256": "5b6939cfbe98c111349758db08bdc7a667996a87c113242662a141485797374b"
+    },
+    {
+      "lane": "strict-clippy-all-targets",
+      "status": "passed",
+      "log_sha256": "12258b03b3f899980a684df55247c342e3af607bd26f9907908c855b14cba9a9"
+    },
+    {
+      "lane": "both-unmodified-sdk-inventories",
+      "status": "passed",
+      "log_sha256": "d72ab76a473fec0ec8090dd05aafb648f33a6601c9fed487c68e6d41e7223d94"
+    },
+    {
+      "lane": "documentation-warnings-as-errors",
+      "status": "passed",
+      "log_sha256": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d"
+    }
+  ],
+  "behavior": [
+    "Explicit Linux x86_64 run/control CLI, never selected by the default native check.",
+    "Exact operator-approved package/default-domain setup shared with the existing volume witness; initialization remains disabled.",
+    "Distinct native-platform pinned OCI sources and explicit unchanged guest network policy; no local artifact or per-request registry credential/proxy input.",
+    "Normal metadata/create/start/command/list/pull/stop/restart/owned-delete workflow with stage evidence and original returned receipt.",
+    "Failure retains the same engine/managers; bounded socket controls permit explicit normal cleanup without signals, saved-name adoption or automatic lifecycle replay."
+  ],
+  "production_engine_or_port_code_changed": false,
+  "native_package_built_or_qualified": false,
+  "vm_launched": false,
+  "public_oci_admission_enabled": false,
+  "parity_complete": false,
+  "crash_validation_performed": false,
+  "distribution_approved": false,
+  "remaining": [
+    "Run the explicit witness against exact approved Linux package/default domain and inspect any actual SDK gaps.",
+    "Complete P4 registry/source/credential/image public activation and acceptance, then remaining P0-P9 gates.",
+    "Legitimate isolated macOS qualification and final distribution review; crash qualification stays deferred."
+  ]
+}

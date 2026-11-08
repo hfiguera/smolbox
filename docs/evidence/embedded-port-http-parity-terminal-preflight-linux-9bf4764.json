@@ -1,0 +1,258 @@
+{
+  "schema": 1,
+  "scope": "ordinary-linux-standalone-terminal-preflight-and-public-pty",
+  "native_source_commit": "9bf4764bb0462f754ba9144ffe3e9e043f285991",
+  "public_source_commit": "570d419f29cbe69fa24249b95826819cd319af8a",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "native_package_manifest_sha256": "6d6cb984a11ef4934b9759934437cddf2a85130f649023849736dcb02cf8d564",
+  "helper_sha256": "fae80cb8803b657c5db35dad21785ef40912d31944ee4562089cdbb24b33c15b",
+  "package_identity": {
+    "engine_version": "0.2.0",
+    "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+    "build_sha256": "fae80cb8803b657c5db35dad21785ef40912d31944ee4562089cdbb24b33c15b",
+    "assets_sha256": "39d92d2c64ca8fef2ea27578ce1f5224e977e045407663c40d251e4c8d2232c4",
+    "platform": "linux",
+    "architecture": "x86_64"
+  },
+  "sdk_identity": {
+    "sdk_version": "1.22.0",
+    "source_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "feature_versions": {
+      "lifecycle": 1,
+      "foreground_exec": 1,
+      "extended_exec": 1,
+      "files": 1,
+      "extended_files": 1,
+      "material_proofs": 2,
+      "observability": 1,
+      "networking": 1,
+      "ports": 1,
+      "workloads": 1,
+      "compact_creation": 1,
+      "job_resources": 1,
+      "buffered_exec": 1,
+      "background_exec": 1,
+      "logs": 1,
+      "streaming_exec": 1,
+      "terminals": 1,
+      "volumes": 1,
+      "disk_growth": 1,
+      "terminal_preflight": 1
+    }
+  },
+  "build_toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "public_consumers": [
+    {
+      "lane": "current",
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "archive_sha256": "a4edb3cde38ef49db984b620a85eaca1c72d8c7047ff881c8d0842247c789b24",
+      "report_sha256": "191801395bf61999eefd3c81070e52cbcb0d442a865bb545297f38377ce3793c",
+      "without_rust": true,
+      "terminal": {
+        "binary_input_bytes": 3,
+        "binary_output_verified": true,
+        "codec": 17,
+        "deliberate_process_interruption": false,
+        "duplicate_open_reuses_execution": true,
+        "exercised": true,
+        "observed_exit": 7,
+        "resize": {
+          "cols": 120,
+          "rows": 43
+        },
+        "scope": "ordinary-public-retained-image-pty",
+        "slot_released": true,
+        "transcript_persisted": false
+      },
+      "owned_deleted": true,
+      "final_reserved_slots": 0,
+      "draining_blocks_new_assignments": true,
+      "existing_command_while_draining": true,
+      "retained_after_normal_runtime_restart": true,
+      "drain_survives_runtime_restart": true,
+      "proof_tool_sha256": {
+        "config.example.exs": "e0b36e130d076afee72455ccbd23dcae85dc04142d411397be3869c307235bec",
+        "demo.ex": "030504ee5e7c78f25267172e29989ad1ee7a606777dfb41e4e7b91b7c46c16f9",
+        "native-proof.exs": "8e68ef45f8fd3019bdf90de342174c6deb522207251ce7f7ffaf8a7df7a1bfef",
+        "native_proof.py": "952265ccbf230fd4ec1b2b9f48e0e40db402222b5f2b10f95f2393bd64d23dc9"
+      }
+    },
+    {
+      "lane": "minimum",
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "archive_sha256": "a4edb3cde38ef49db984b620a85eaca1c72d8c7047ff881c8d0842247c789b24",
+      "report_sha256": "98ddbf7281ed667e661358aa5d0f005b2e800d2289932002eecde7401548ea34",
+      "without_rust": true,
+      "terminal": {
+        "binary_input_bytes": 3,
+        "binary_output_verified": true,
+        "codec": 17,
+        "deliberate_process_interruption": false,
+        "duplicate_open_reuses_execution": true,
+        "exercised": true,
+        "observed_exit": 7,
+        "resize": {
+          "cols": 120,
+          "rows": 43
+        },
+        "scope": "ordinary-public-retained-image-pty",
+        "slot_released": true,
+        "transcript_persisted": false
+      },
+      "owned_deleted": true,
+      "final_reserved_slots": 0,
+      "draining_blocks_new_assignments": true,
+      "existing_command_while_draining": true,
+      "retained_after_normal_runtime_restart": true,
+      "drain_survives_runtime_restart": true,
+      "proof_tool_sha256": {
+        "config.example.exs": "e0b36e130d076afee72455ccbd23dcae85dc04142d411397be3869c307235bec",
+        "demo.ex": "030504ee5e7c78f25267172e29989ad1ee7a606777dfb41e4e7b91b7c46c16f9",
+        "native-proof.exs": "8e68ef45f8fd3019bdf90de342174c6deb522207251ce7f7ffaf8a7df7a1bfef",
+        "native_proof.py": "952265ccbf230fd4ec1b2b9f48e0e40db402222b5f2b10f95f2393bd64d23dc9"
+      }
+    }
+  ],
+  "standalone_preflight": {
+    "states": [
+      {
+        "state": "stopped",
+        "no_stream_events": true,
+        "sdk_records_unchanged": true,
+        "owned_children_unchanged": true
+      },
+      {
+        "state": "running",
+        "no_stream_events": true,
+        "sdk_records_unchanged": true,
+        "owned_children_unchanged": true
+      },
+      {
+        "state": "stopped",
+        "no_stream_events": true,
+        "sdk_records_unchanged": true,
+        "owned_children_unchanged": true
+      },
+      {
+        "state": "stopped",
+        "no_stream_events": true,
+        "sdk_records_unchanged": true,
+        "owned_children_unchanged": true
+      },
+      {
+        "state": "missing",
+        "no_stream_events": true,
+        "sdk_records_unchanged": true,
+        "owned_children_unchanged": true
+      }
+    ],
+    "no_stream_events": true,
+    "no_sdk_record_mutation": true,
+    "owned_children_unchanged": true,
+    "normal_stopped_helper_replacement": true,
+    "fresh_epoch": true,
+    "owned_deleted": true,
+    "evidence_sha256": "f38929adbbd21d314de9bfb4adca2f01b30a6e310008e038f05b5660a83dc29a"
+  },
+  "bare_ineligibility": {
+    "scope": "ordinary-bare-terminal-ineligibility",
+    "proof": "passed",
+    "manifest_sha256": "6d6cb984a11ef4934b9759934437cddf2a85130f649023849736dcb02cf8d564",
+    "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+    "ready_or_pty_opened": false,
+    "sdk_records_unchanged_by_preflight": true,
+    "no_children_created": true,
+    "owned_deleted": true,
+    "crash_validation_performed": false
+  },
+  "custody": {
+    "source_commit": "9bf4764bb0462f754ba9144ffe3e9e043f285991",
+    "source_files_verified": 1547,
+    "manifest_sha256": "6d6cb984a11ef4934b9759934437cddf2a85130f649023849736dcb02cf8d564",
+    "helper_sha256": "fae80cb8803b657c5db35dad21785ef40912d31944ee4562089cdbb24b33c15b",
+    "assets_sha256": "39d92d2c64ca8fef2ea27578ce1f5224e977e045407663c40d251e4c8d2232c4",
+    "assets_verified": 806,
+    "old_package_assets_unchanged": true,
+    "sdk_table_counts": {
+      "vms": 0,
+      "vm_create_reservations": 0,
+      "vm_pause_operations": 0,
+      "vm_resize_intents": 0,
+      "vm_resize_receipts": 0
+    },
+    "native_processes": [],
+    "per_vm_cache_directories": 0,
+    "empty_sdk_fork_gate_files": 17,
+    "immutable_input_bases_retained": [
+      {
+        "role": "storage",
+        "logical_bytes": 1073741824,
+        "allocated_bytes": 4206592,
+        "sha256": "fe909fae214718834a74724b99a224ab03994e795856adb2fb62067ab4c01403",
+        "immutable_mode": "0444",
+        "artifact_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1"
+      },
+      {
+        "role": "overlay",
+        "logical_bytes": 1073741824,
+        "allocated_bytes": 4206592,
+        "sha256": "cd6d0fc9fcca2076840c5c209cd8b5072ce1ef28b141ecf7bc0cece47afebe21",
+        "immutable_mode": "0444",
+        "artifact_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1"
+      }
+    ],
+    "shared_input_cache_retained": true,
+    "crash_validation_performed": false
+  },
+  "private_archive_sha256": "0724a5b9b5788cb80a2417e40e7d95d62adcdb2e8384f3a6ec0fab62f0ab6ee5",
+  "private_archive_bytes": 243994050,
+  "parity_complete": false,
+  "crash_validation_performed": false,
+  "distribution_approved": false,
+  "remaining": [
+    "Changed macOS package qualification in a legitimate isolated account/domain.",
+    "Other required terminal source, durable-store and resource/close cases; complete P6 exit gate remains pending.",
+    "P4/P8 admission and remaining P0-P9 source/platform/resource/upgrade gates."
+  ],
+  "logs": {
+    "release-build.log": "de4d15f792f5ee7d8d5aeb2dd541ad61b95686db0779558641db6a49493c24ca",
+    "sdk-before.log": "1b50e6d5c64d89e3c65963495188108dd77dd99bfec86af8e113fcc5f1291b53",
+    "sdk-after.log": "d72ab76a473fec0ec8090dd05aafb648f33a6601c9fed487c68e6d41e7223d94",
+    "python-native.log": "d8b02578c04773e43c9a2831045cf7e47351855fb66640b1c910ac5014b09305",
+    "raw-driver.log": "5599e63e416a3cce179c0157dc9fa855edb0eab64e54c51f50063f3bfd9b485f",
+    "bare-driver.log": "12def55c34f26e074f88b9fd72d8b27257e34f87c1c4c1ddc5ea9cbaa4f284d1",
+    "public-current-driver.log": "f8304c95c95f1bef9f1793d82d279b238374e5d960a6d7e384d2c6492a505af6",
+    "public-minimum-driver.log": "e6c7d9de6eaeff65fb1507e356c3113047d9a68c4d7f93f501355d5ab90502b4",
+    "sdk-final.log": "d72ab76a473fec0ec8090dd05aafb648f33a6601c9fed487c68e6d41e7223d94"
+  },
+  "normal_shutdown": {
+    "observed_utc": "2026-10-16T13:35:17Z",
+    "active_state": "inactive",
+    "sub_state": "dead",
+    "result": "success",
+    "exit_status": 0,
+    "main_pid": 0,
+    "recovery_marker_archived_before_shutdown": true,
+    "run_disk_retained": true,
+    "run_disk_bytes": 12023431168,
+    "outer_observation_log_sha256": "39c457374651390b660cab936ec3c8daeac07cf7e9d0423cfba996eeb416ef89"
+  },
+  "private_archive_custody": {
+    "mode": "0600",
+    "copied_and_verified_locally": true,
+    "verified_on_outer_host_before_shutdown": true,
+    "includes_stopped_sdk_data_and_cache": true,
+    "receipts_and_keys_committed": false
+  },
+  "custody_check_corrections": {
+    "feature_checks_repeated": false,
+    "reason": "Initial audit classified only shared pack extraction and fork gates. SDK bare creation additionally retains immutable COW input bases, a cache lock, and storage.ext4 template metadata. Read-only SDK source and final metadata/modes/digests establish their exact input-cache classification. Both initial audit failures remain in the private archive.",
+    "sdk_cache_deleted": false
+  },
+  "documentation": {
+    "warnings_as_errors": true,
+    "passed": true,
+    "log_sha256": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d"
+  }
+}

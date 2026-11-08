@@ -453,6 +453,10 @@ pub fn run_with_policy(
         },
         // Interactive controls require the dedicated runtime TerminalBridge;
         // the ordinary one-way adapter cannot dispatch a terminal session.
+        wire::Operation::TerminalPreflight { receipt: supplied } => {
+            observation_budget().and_then(|budget| engine.terminal_preflight(&receipt(&supplied), &budget))
+                .map(|()| wire::Outcome::Ready)
+        },
         wire::Operation::TerminalOpen { .. } => Err(engine::Error { code: engine::ErrorCode::Unsupported, dispatch: engine::Dispatch::NotDispatched }),
         wire::Operation::Logs {receipt: r, tail, follow, max_bytes} => {
             let mut wire_bytes = 0;
@@ -649,14 +653,16 @@ pub fn run_with_policy(
         wire::Operation::ReadFile {
             receipt: r,
             options,
-        } => engine
-            .read_file(
-                &receipt(&r),
-                file_options(&options, remaining),
-                cancel,
+        } => match &policy {
+            Some(policy) => engine.read_file_with_volume_policy(
+                &receipt(&r), file_options(&options, remaining), cancel,
+                |bytes| emit(wire::Stream::File, &bytes), policy,
+            ),
+            None => engine.read_file(
+                &receipt(&r), file_options(&options, remaining), cancel,
                 |bytes| emit(wire::Stream::File, &bytes),
-            )
-            .map(file),
+            ),
+        }.map(file),
         wire::Operation::WriteFile {
             receipt: r,
             options,
@@ -668,15 +674,14 @@ pub fn run_with_policy(
                     dispatch: wire::Dispatch::NotDispatched,
                 };
             };
-            engine
-                .write_file_from_reader(
-                    &receipt(&r),
-                    file_options(&options, remaining),
-                    upload,
-                    total_bytes,
-                    cancel,
-                )
-                .map(file)
+            match &policy {
+                Some(policy) => engine.write_file_from_reader_with_volume_policy(
+                    &receipt(&r), file_options(&options, remaining), upload, total_bytes, cancel, policy,
+                ),
+                None => engine.write_file_from_reader(
+                    &receipt(&r), file_options(&options, remaining), upload, total_bytes, cancel,
+                ),
+            }.map(file)
         }
     };
     result.unwrap_or_else(error)

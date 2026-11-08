@@ -5,7 +5,7 @@ defmodule SmolBox.Embedded.SDKIdentity do
 
   @features ~w(lifecycle foreground_exec extended_exec files extended_files material_proofs
                observability networking ports workloads compact_creation job_resources buffered_exec remote_sources images background_exec
-               logs streaming_exec terminals volumes disk_growth checkpoints exports branches)
+               logs streaming_exec terminals terminal_preflight volumes disk_growth checkpoints exports branches)
 
   # This is the implemented package contract, not all APIs present in the SDK.
   # Launch and Hello must both bind it to the exact locally approved package.
@@ -42,7 +42,22 @@ defmodule SmolBox.Embedded.SDKIdentity do
         Shape.text?(sdk["sdk_version"], 64, false) and Shape.hex?(sdk["source_revision"], 40) and
         features?(sdk["feature_versions"])
 
-  def approved?(sdk, version, revision) do
+  # Optional platform features are accepted only with explicit platform context.
+  # The default descriptor stays compatible with existing approved packages.
+  def approved?(sdk, version, revision, platform \\ nil) do
+    implemented =
+      if platform == :linux,
+        do:
+          Map.merge(@implemented, %{
+            "volumes" => 1,
+            "disk_growth" => 1,
+            "remote_sources" => 1,
+            "images" => 1
+          }),
+        else: @implemented
+
+    implemented = Map.put(implemented, "terminal_preflight", 1)
+
     valid?(sdk) and sdk["sdk_version"] == version and sdk["source_revision"] == revision and
       Map.take(
         sdk["feature_versions"],
@@ -52,7 +67,7 @@ defmodule SmolBox.Embedded.SDKIdentity do
           @implemented,
           ~w(lifecycle foreground_exec extended_exec files extended_files material_proofs)
         ) and
-      Enum.all?(sdk["feature_versions"], fn {name, value} -> @implemented[name] == value end)
+      Enum.all?(sdk["feature_versions"], fn {name, value} -> implemented[name] == value end)
   end
 
   defp features?(features),
@@ -73,6 +88,7 @@ defmodule SmolBox.Embedded.SDKIdentity do
           {"logs", "buffered_exec"},
           {"streaming_exec", "buffered_exec"},
           {"terminals", "buffered_exec"},
+          {"terminal_preflight", "terminals"},
           {"disk_growth", "job_resources"},
           {"exports", "job_resources"},
           {"exports", "buffered_exec"},

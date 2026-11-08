@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "status": "passed-scoped-ordinary-engine-oci-images",
+  "scope": "Linux x86_64 shared-engine anonymous pinned OCI creation and image workflow; public P4 admission remains pending",
+  "source_commit": "293cd24593838a570a9e3600237ea9691f5b4e29",
+  "source_files_verified": 1563,
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "sdk_version": "1.22.0",
+  "sdk_source_unmodified_before_and_after": true,
+  "engine_version": "0.2.0",
+  "manifest_schema": 3,
+  "protocol_major": 2,
+  "native_manifest_sha256": "f6d11e57baa9c91da89224b39668860e4eccf5da29461584df5356ab62dcd392",
+  "native_identity": {
+    "engine_version": "0.2.0",
+    "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+    "build_sha256": "2f6c2a26890e22d0a4d196c185dd7f2c1b9bd595fa387f1c09131a5079a7a2ce",
+    "assets_sha256": "64a20a93a48f11b62b74692c356dc460ce7fcf01b87be57ea5db9b5d7ea59d66",
+    "platform": "linux",
+    "architecture": "x86_64"
+  },
+  "witness_executable_sha256": "262b1996251e1be0fdb454d44c84def6e180a1fdec797fd296fbe11ec02c6458",
+  "rust_toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "approved_environment": {
+    "separate_network_enabled_provisioning_clone": true,
+    "genuine_fresh_os_account_and_default_sdk_domain": true,
+    "original_sdk_state_copied": false,
+    "original_run_disk_unchanged": true,
+    "original_test_network_boundary_unchanged": true,
+    "seal_or_reset_performed": false,
+    "actual_provision_watchdog_seconds": 7200,
+    "artificial_sdk_namespace_override": false
+  },
+  "ordinary_workflow": {
+    "crash_validation_performed": false,
+    "data_retained": true,
+    "data_sha256": "5ca45c8ba181df5bc4bbb6e785039da60cd79a422d242b249630a02861b0d20c",
+    "distribution_approved": false,
+    "guest_image_inventory": true,
+    "guest_network": {
+      "cidrs": [],
+      "enabled": true,
+      "hosts": [
+        "cloudflarestorage.com",
+        "docker.com",
+        "docker.io"
+      ]
+    },
+    "managed_image_pull": true,
+    "normal_owner_shutdown": true,
+    "original_source_restart": true,
+    "owned_deleted": true,
+    "package_manifest_sha256": "f6d11e57baa9c91da89224b39668860e4eccf5da29461584df5356ab62dcd392",
+    "public_oci_admission_enabled": false,
+    "pull_source": {
+      "platform": "linux/amd64",
+      "reference": "docker.io/library/busybox@sha256:66a6306db78bf2dbf3487f293aa8d6990d8e506fdffab9cc43fe422becf886e4"
+    },
+    "scope": "ordinary-owned-engine-oci-images",
+    "source": {
+      "platform": "linux/amd64",
+      "reference": "docker.io/library/alpine@sha256:3c81aa9a3d770b316568f4499e30461a5cd3fbd7180bd89e28e34894c7845832"
+    },
+    "startup_workload_behavior_qualified": false,
+    "startup_workload_configured": false,
+    "status": "passed"
+  },
+  "exit_status": 0,
+  "finished_utc": "2026-10-16T17:11:22.346296+00:00",
+  "custody": {
+    "source_commit": "293cd24593838a570a9e3600237ea9691f5b4e29",
+    "source_files_verified": 1563,
+    "manifest_sha256": "f6d11e57baa9c91da89224b39668860e4eccf5da29461584df5356ab62dcd392",
+    "helper_sha256": "2f6c2a26890e22d0a4d196c185dd7f2c1b9bd595fa387f1c09131a5079a7a2ce",
+    "example_sha256": "262b1996251e1be0fdb454d44c84def6e180a1fdec797fd296fbe11ec02c6458",
+    "assets_verified": 806,
+    "host_tools_verified": true,
+    "sdk_counts": {
+      "vms": 0,
+      "vm_create_reservations": 0,
+      "vm_pause_operations": 0,
+      "vm_resize_intents": 0,
+      "vm_resize_receipts": 0
+    },
+    "native_processes": [],
+    "native_zombies": [],
+    "account_lock_available": true,
+    "ordinary_oci_workflow_passed": true,
+    "normal_owner_shutdown": true,
+    "owned_deleted": true,
+    "fresh_real_account": true,
+    "crash_validation_performed": false
+  },
+  "validation": {
+    "linux_registry_models_passed": 12,
+    "local_ordinary_rust_passed": 1094,
+    "local_ordinary_rust_ignored": 24,
+    "local_elixir_passed": 1639,
+    "local_elixir_excluded": 42,
+    "python_native_tests": 47,
+    "python_expected_skips": 4,
+    "strict_clippy_workspace_all_targets": true,
+    "documentation_warnings_as_errors": true,
+    "coverage_manifest_checks": 4
+  },
+  "local_validation_logs_sha256": {
+    "models": "431f2e3f04cbec4c0ca46e161338ba23d2fce7b042c6688a5fc362633dd32af0",
+    "workspace": "960227506b5f5f05d1566d98c037e3508c6ac1978b2a767bb1d4ee92558f1aff",
+    "clippy": "1b96975a2b0b90957d1961787e3d3179b1e6a2dac8cafc8ef43f3f29a2a6e93d",
+    "elixir": "e4f7255b8db658f9c266f5a55e009a4eb2b078f39f5395136300899e29029956",
+    "python": "e35fd33fdf0ae92ddc9b15c85c954ea8ca0ada59be67cc4582a8fb795fab385b",
+    "sdk": "d72ab76a473fec0ec8090dd05aafb648f33a6601c9fed487c68e6d41e7223d94",
+    "docs": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+    "coverage": "d5e0ca2246ef1bde30e1754e70d05b5f0d0259504a37fa8de72d2237cea47d8a"
+  },
+  "linux_build_logs_sha256": {
+    "build.log": "81647f22b6da3e6c4a983642d1e5a16fe35fa27c7589898296b55a980a0fcefa",
+    "registry-tests.log": "3fe597d80a68110421ebd37dd435c2a694475f91034a7d4f20e348f0d70175d3",
+    "sdk-before.log": "1b50e6d5c64d89e3c65963495188108dd77dd99bfec86af8e113fcc5f1291b53",
+    "sdk-after.log": "d72ab76a473fec0ec8090dd05aafb648f33a6601c9fed487c68e6d41e7223d94"
+  },
+  "private_archive_sha256": "b24f953b80eedda3be1151dd178c413a538e249855bc42317a474080dbdb22cd",
+  "private_archive_bytes": 266536792,
+  "private_archive_verified_locally_and_outer": true,
+  "private_archive_final_mode": "0600",
+  "normal_lab_shutdown": {
+    "observed_utc": "2026-10-16T17:13:17Z",
+    "active_state": "inactive",
+    "result": "success",
+    "exit_status": 0,
+    "main_pid": 0,
+    "original_run_disk_retained": true,
+    "original_run_disk_bytes": 24766644224,
+    "original_run_disk_size_and_mtime_unchanged": true,
+    "separate_provision_disk_retained": true,
+    "separate_provision_disk_bytes": 1231028224
+  },
+  "current_minimum_public_consumers_qualified_on_this_package": false,
+  "startup_workload_behavior_qualified": false,
+  "public_oci_admission_enabled": false,
+  "parity_complete": false,
+  "crash_validation_performed": false,
+  "distribution_approved": false,
+  "remaining": [
+    "Configured startup workload behavior, other approved OCI/source/resource/platform combinations and registry-artifact/credential qualification.",
+    "Current/minimum public consumers and required regressions on the changed package.",
+    "Remaining P0-P9 phase gates, public feature admission and distribution review; crash validation stays deferred."
+  ],
+  "final_documentation_logs_sha256": {
+    "docs": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+    "coverage": "b54e06a7f4872b3f7307593f7383b8bfa977ea8980ffe4d6543e63d135efe6e4"
+  }
+}

@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "scope": "public-volume-runtime-coordination-with-persistent-non-vm-peer",
+  "source_commit": "55390548432d09495e7859db0c413ff7d9f2e5d2",
+  "elixir_archive_sha256": "a0af770ce56ed901ecc2040159cf8f9648757fbeb429e24f7f92fa04481dae1a",
+  "public_models": {
+    "count": 3,
+    "sdk_or_vm_opened": false,
+    "linux_descriptor_explicit": true,
+    "macos_and_default_descriptor_unchanged": true,
+    "exact_launch_limits": true,
+    "proof_and_uncertainty_retention": true,
+    "exclusive_readonly_attachment": true,
+    "independent_allowance": true,
+    "retained_commands": true,
+    "normal_stopped_runtime_replacement": true,
+    "running_sibling_preserved_without_startup_rescan": true,
+    "explicit_quiesced_resolution": true
+  },
+  "validation": {
+    "ordinary_root_passed": 1600,
+    "runtime_and_deferred_excluded": 42,
+    "focused_passed": 70,
+    "exdoc_warnings_as_errors": "passed",
+    "credo": {
+      "changed_file_findings": 0,
+      "repository_findings_elsewhere": 50,
+      "repository_run_clean": false
+    },
+    "unmodified_sdk_caches_verified": 2
+  },
+  "package_consumers": [
+    {
+      "mode": "current",
+      "report_sha256": "74a4d6621f6cff88095b07314f4d3c91f90f399dcf43a30e4b618ded5032a997",
+      "platform": "macos",
+      "architecture": "arm64",
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "without_rust": true,
+      "native_assets": false,
+      "native_exercised": false,
+      "smoke": {
+        "checkpoint": true,
+        "client": true,
+        "guest_files": true,
+        "interactive": true,
+        "legacy_1_14_6_explicit": "1.14.6",
+        "legacy_runtime_explicit": "1.14.1",
+        "managed_branches": true,
+        "managed_checkpoints": true,
+        "managed_exports": true,
+        "network_policy": true,
+        "offline_default": true,
+        "runtime_1_16_0_explicit": "1.16.0",
+        "runtime_default": "1.22.0",
+        "supervisor": true,
+        "unqualified_runtime_rejected": "1.16.2",
+        "versions": {
+          "jason": "1.4.5",
+          "mint": "1.11.0",
+          "mint_web_socket": "1.0.6",
+          "nimble_options": "1.1.1",
+          "req": "0.7.5",
+          "telemetry": "1.4.2"
+        },
+        "without_rust": true,
+        "workload": true
+      },
+      "package_file_count": 462
+    },
+    {
+      "mode": "minimum",
+      "report_sha256": "8869a187bb042bdf6dc548a3b6e35582e988f303cfe7439c4484b435d65c8ca3",
+      "platform": "macos",
+      "architecture": "arm64",
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "without_rust": true,
+      "native_assets": false,
+      "native_exercised": false,
+      "smoke": {
+        "checkpoint": true,
+        "client": true,
+        "guest_files": true,
+        "interactive": true,
+        "legacy_1_14_6_explicit": "1.14.6",
+        "legacy_runtime_explicit": "1.14.1",
+        "managed_branches": true,
+        "managed_checkpoints": true,
+        "managed_exports": true,
+        "network_policy": true,
+        "offline_default": true,
+        "runtime_1_16_0_explicit": "1.16.0",
+        "runtime_default": "1.22.0",
+        "supervisor": true,
+        "unqualified_runtime_rejected": "1.16.2",
+        "versions": {
+          "jason": "1.4.0",
+          "mint": "1.11.0",
+          "mint_web_socket": "1.0.6",
+          "nimble_options": "1.1.0",
+          "req": "0.7.4",
+          "telemetry": "1.3.0"
+        },
+        "without_rust": true,
+        "workload": true
+      },
+      "package_file_count": 462
+    }
+  ],
+  "private_log_sha256": {
+    "native-volume-public-model-final-full.log": "b58e6bc9786e5901fefa39ee91450db36671b921542f630dcc4080d24fed7134",
+    "native-volume-public-model-final-focus.log": "af129e8b6f54ee79631e93d8557506c2bce2df39e30c9fe0218580ee92b6e166",
+    "native-volume-public-model-final-credo.json": "cdb2165e750ef10d8a56a45340bf44f1d8260e22fe406a8472967353f800994b",
+    "native-volume-public-model-docs.log": "131096cf6bdee794ec56a85fdaeae2fc628e28e00c53235960cd4e5c455e7134",
+    "native-volume-public-model-source.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+    "native-volume-public-model-source-clean.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+  },
+  "qualification": {
+    "helper_volume_policy_enabled": false,
+    "real_public_native_volume_acceptance_complete": false,
+    "historical_native_package_qualification_transferred": false,
+    "crash_validation_deferred": true,
+    "live_forced_termination_campaign_run": false,
+    "full_parity_complete": false,
+    "distribution_approved": false
+  },
+  "terminal": {
+    "linux_lab_started": false,
+    "postgresql_started": false,
+    "macos_sdk_owner_opened": false
+  },
+  "next_action": "Build and qualify an exact Linux-specific volume-enabled package through public Runtime and durable-store workflows; finish remaining P7-P9 acceptance."
+}

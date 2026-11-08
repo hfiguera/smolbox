@@ -1,0 +1,239 @@
+{
+  "schema": 1,
+  "status": "linux-oci-memory-growth-current-minimum-public-consumers-passed",
+  "client": {
+    "source_commit": "ff0ed3ecb634c5ffeaa4137871a8e6335655e2bf",
+    "source_archive_sha256": "ca0cd90e32af83454eae4686d079f0539569cfcc979d201ff155c0d72c899b4c",
+    "hex_archive_sha256": "5cd0cb21bac8e7a79e9476f1dafa7ff8d50635b6d1f8aefb4d360135f7280182",
+    "source_files": 1598
+  },
+  "native": {
+    "source_commit": "30239b6fe99c6166c748cc9790b0a5c1301919ed",
+    "manifest_sha256": "e7387c9cf607605d2a2af40333cfc4da9c8f4d3320d447cbd8182613ca1b3db4",
+    "helper_sha256": "19e3981b3a475470b28cb51b4c4e363399b47e554d8aa52bfc5a759b62272fca",
+    "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "sdk_unmodified": true,
+    "assets_per_account": 806,
+    "engine_version": "0.2.0",
+    "protocol_major": 2,
+    "manifest_schema": 3
+  },
+  "cases": [
+    {
+      "lane": "current",
+      "native_exit_code": 0,
+      "native_finished_utc": "2026-10-16T23:15:04.243397+00:00",
+      "http_only_exit_code": 0,
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "dependency_versions": {
+        "jason": "1.4.5",
+        "mint": "1.11.0",
+        "mint_web_socket": "1.0.6",
+        "nimble_options": "1.1.1",
+        "req": "0.7.5",
+        "telemetry": "1.4.2"
+      },
+      "store_mode": "ephemeral",
+      "source": {
+        "architecture": "x86_64",
+        "id": "growth-alpine",
+        "kind": "oci",
+        "reference": "docker.io/library/alpine@sha256:3c81aa9a3d770b316568f4499e30461a5cd3fbd7180bd89e28e34894c7845832",
+        "sha256": "3c81aa9a3d770b316568f4499e30461a5cd3fbd7180bd89e28e34894c7845832"
+      },
+      "fixture_sha256": null,
+      "retained_binary_bytes": 65554,
+      "retained_binary_sha256": "25ac6018e1a86a5aa310d7cd70d12c517e89e42b33afb021d07ca3c0ce909638",
+      "checks": {
+        "owned_deleted": true,
+        "stopped_runtime_replacement": true,
+        "growth_history_retained": true,
+        "immutable_creation_retained": true,
+        "growth_budget_rejected_before_dispatch": true,
+        "running_growth_rejected": true,
+        "drain_retained": true,
+        "duplicate_growth_retained": true,
+        "conflicting_growth_rejected": true,
+        "storage_filesystem_growth": true,
+        "overlay_geometry_verified": true,
+        "omitted_target_retained": true,
+        "material_chain_retained": true
+      },
+      "final_reserved_slots": 0,
+      "final_reserved_disk_gb": 0,
+      "inventory_before": [],
+      "inventory_after": [],
+      "sdk_counts": {
+        "vms": 0,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0
+      },
+      "account_lock_available": true,
+      "native_and_beam_processes": [],
+      "native_and_beam_zombies": [],
+      "domain_and_host_tools_unchanged": true,
+      "source_files_verified": 1598,
+      "assets_verified": 806,
+      "without_rust": true,
+      "http_only_no_native_exercised": true
+    },
+    {
+      "lane": "minimum",
+      "native_exit_code": 0,
+      "native_finished_utc": "2026-10-16T23:18:02.354509+00:00",
+      "http_only_exit_code": 0,
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "dependency_versions": {
+        "jason": "1.4.0",
+        "mint": "1.11.0",
+        "mint_web_socket": "1.0.6",
+        "nimble_options": "1.1.0",
+        "req": "0.7.4",
+        "telemetry": "1.3.0"
+      },
+      "store_mode": "ephemeral",
+      "source": {
+        "architecture": "x86_64",
+        "id": "growth-alpine",
+        "kind": "oci",
+        "reference": "docker.io/library/alpine@sha256:3c81aa9a3d770b316568f4499e30461a5cd3fbd7180bd89e28e34894c7845832",
+        "sha256": "3c81aa9a3d770b316568f4499e30461a5cd3fbd7180bd89e28e34894c7845832"
+      },
+      "fixture_sha256": null,
+      "retained_binary_bytes": 65554,
+      "retained_binary_sha256": "25ac6018e1a86a5aa310d7cd70d12c517e89e42b33afb021d07ca3c0ce909638",
+      "checks": {
+        "owned_deleted": true,
+        "stopped_runtime_replacement": true,
+        "growth_history_retained": true,
+        "immutable_creation_retained": true,
+        "growth_budget_rejected_before_dispatch": true,
+        "running_growth_rejected": true,
+        "drain_retained": true,
+        "duplicate_growth_retained": true,
+        "conflicting_growth_rejected": true,
+        "storage_filesystem_growth": true,
+        "overlay_geometry_verified": true,
+        "omitted_target_retained": true,
+        "material_chain_retained": true
+      },
+      "final_reserved_slots": 0,
+      "final_reserved_disk_gb": 0,
+      "inventory_before": [],
+      "inventory_after": [],
+      "sdk_counts": {
+        "vms": 0,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0
+      },
+      "account_lock_available": true,
+      "native_and_beam_processes": [],
+      "native_and_beam_zombies": [],
+      "domain_and_host_tools_unchanged": true,
+      "source_files_verified": 1598,
+      "assets_verified": 806,
+      "without_rust": true,
+      "http_only_no_native_exercised": true
+    }
+  ],
+  "package_and_tooling_verification": {
+    "results": [
+      {
+        "lane": "current",
+        "proof_inputs_verified": 7,
+        "public_package_files_verified_against_frozen_source": 513,
+        "public_library_files_verified": 313
+      },
+      {
+        "lane": "minimum",
+        "proof_inputs_verified": 7,
+        "public_package_files_verified_against_frozen_source": 513,
+        "public_library_files_verified": 313
+      }
+    ]
+  },
+  "offline_records": {
+    "verification": "actual SmolBox Codec decode/encode roundtrip and NativeGrowth linked-identity checks; SDK not opened",
+    "results": [
+      {
+        "lane": "current",
+        "checkpoint_records": 6,
+        "final_records": 11,
+        "all_codec_roundtrips_valid": true,
+        "original_creation_and_source_retained": true,
+        "growth_chain_links": 2,
+        "final_state": "deleted",
+        "final_reservation": null
+      },
+      {
+        "lane": "minimum",
+        "checkpoint_records": 6,
+        "final_records": 11,
+        "all_codec_roundtrips_valid": true,
+        "original_creation_and_source_retained": true,
+        "growth_chain_links": 2,
+        "final_state": "deleted",
+        "final_reservation": null
+      }
+    ]
+  },
+  "archive": {
+    "local_and_outer_archive_sha256": "550e8581fec02e41115ef81e84a973f6b2fdd0b5143239c8406403f33286bb5b",
+    "archive_bytes": 638194454,
+    "selected_members_verified": 4846,
+    "frozen_source_files_per_account": 1598,
+    "native_assets_per_account": 806,
+    "two_private_account_roots_verified": true,
+    "private_record_and_key_modes_verified": true,
+    "sdk_state_restored": false
+  },
+  "lab": {
+    "checked_utc": "2026-10-16T23:23:02.228226+00:00",
+    "service": {
+      "RuntimeMaxUSec": "2h",
+      "MainPID": "0",
+      "Result": "success",
+      "ExecMainCode": "0",
+      "ExecMainStatus": "0",
+      "ActiveState": "inactive",
+      "SubState": "dead",
+      "ActiveEnterTimestamp": "",
+      "InactiveEnterTimestamp": ""
+    },
+    "original_run_image_metadata_unchanged": true,
+    "forced_signal_or_guard_expiry": false
+  },
+  "older_state": {
+    "preserved_disks_rehashed_before_and_after_cases": 4,
+    "sdk_inventories_revalidated_read_only": true,
+    "archived_memory_records_restored_as_authority": false,
+    "old_accounts_replayed_or_adopted": false,
+    "stale_pid_approvals_used": false,
+    "prior_guard_interruption_graceful_collection_still_unverified": true
+  },
+  "scope": {
+    "ordinary_linux_oci_growth_memory_qualified_for_recorded_bytes": true,
+    "durable_remote_growth_qualified": false,
+    "registry_growth_qualified": false,
+    "macos_growth_qualified": false,
+    "public_owned_stop_control_exercised": false,
+    "production_library_or_native_changed": false,
+    "full_parity_complete": false,
+    "all_full_parity_acceptance_rows_still_pending": true,
+    "crash_validation_deferred": true,
+    "crash_handling_qualified": false,
+    "distribution_approved": false,
+    "pushed_or_published": false
+  },
+  "remaining": [
+    "ordinary registry growth and durable remote-source growth",
+    "current packed, mounted and other required source/store/platform/resource histories",
+    "explicit cancellation, sibling/resource/interference/reaping qualification",
+    "remaining capture/export/branch implementation and acceptance gates",
+    "final shared Memory/PostgreSQL/HTTP, upgrades/draining/codec and public setup/provenance/license gates"
+  ]
+}

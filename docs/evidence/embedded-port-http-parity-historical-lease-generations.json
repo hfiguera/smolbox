@@ -1,0 +1,139 @@
+{
+  "schema": 1,
+  "scope": "historical-collected-command-independent-worker-lease-generations",
+  "cause": "Worker lease generation is updated independently by RecordOps.claim. It fences active operations, while a collected historical command has no reservation or current ownership.",
+  "change": "Require exact managed parent key, worker, machine, immutable native assignment, source/spec and validated material prefix; validate but do not equate independent worker lease generations.",
+  "files": [
+    {
+      "path": "lib/smolbox/embedded/historical_execution.ex",
+      "sha256": "c1083a8033c74e7a328c12c7b2d0bad35e2dae9afa2fcb056c1683140d001a68"
+    },
+    {
+      "path": "test/unit/native_growth_history_test.exs",
+      "sha256": "82ce522e48f320562b78040317a74b405d6368590661c7cefd5e98f7d0808e4f"
+    }
+  ],
+  "validation": [
+    {
+      "toolchain": "current",
+      "passed": 31,
+      "excluded": 3,
+      "log_sha256": "6ba4937ebc38790c60c30db405df225b89fb5a5f2c842ea8258658e71cd50edf"
+    },
+    {
+      "toolchain": "minimum",
+      "passed": 31,
+      "excluded": 3,
+      "log_sha256": "135fa2dffaa122a2401818a0a4241e0b4f2de7e83936ce0b6620e593182e3e35"
+    }
+  ],
+  "ordinary_physical_fix_qualification": false,
+  "codec_shape_changed": false,
+  "http_behavior_changed": false,
+  "crash_validation_performed": false,
+  "broader_regression": {
+    "status": "failed",
+    "reason": "A branch-deletion 50ms deadline test expires before acceptance under full-suite load; isolated unchanged test file passes all 11 cases. This is not a clean full-suite result.",
+    "log_sha256": "794ced5e0e9df6ff93d00050045a3ebd8612919d9a89a6c44c3a52f6b354fcd2",
+    "isolated_log_sha256": "cac0fbac38072fea4a9b481e349479443b5cb41596a9c7bfdd5188b4daf3be33"
+  },
+  "source_commit": "0b2028137b612fb274735ae5877e55e4bc6b2efd",
+  "http_only_consumers": [
+    {
+      "toolchain_mode": "current",
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "archive_sha256": "cafa7e8f8a9c1c49c4187caaeb70ae095983008cdf4a203afd4c4cf45dd47bfe",
+      "report_sha256": "a81282b8fbe02d38cf358de216b506ddbf5ecee2e1dbec64afd5f248f0813766",
+      "without_rust": true,
+      "native_assets_exercised": false,
+      "smoke": {
+        "checkpoint": true,
+        "client": true,
+        "guest_files": true,
+        "interactive": true,
+        "legacy_1_14_6_explicit": "1.14.6",
+        "legacy_runtime_explicit": "1.14.1",
+        "managed_branches": true,
+        "managed_checkpoints": true,
+        "managed_exports": true,
+        "network_policy": true,
+        "offline_default": true,
+        "runtime_1_16_0_explicit": "1.16.0",
+        "runtime_default": "1.22.0",
+        "supervisor": true,
+        "unqualified_runtime_rejected": "1.16.2",
+        "versions": {
+          "jason": "1.4.5",
+          "mint": "1.11.0",
+          "mint_web_socket": "1.0.6",
+          "nimble_options": "1.1.1",
+          "req": "0.7.5",
+          "telemetry": "1.4.2"
+        },
+        "without_rust": true,
+        "workload": true
+      }
+    },
+    {
+      "toolchain_mode": "minimum",
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "archive_sha256": "cafa7e8f8a9c1c49c4187caaeb70ae095983008cdf4a203afd4c4cf45dd47bfe",
+      "report_sha256": "7ea379834fe0259fc8a0caa28f5e4969a1da731eccbd43418b99b3d291090227",
+      "without_rust": true,
+      "native_assets_exercised": false,
+      "smoke": {
+        "checkpoint": true,
+        "client": true,
+        "guest_files": true,
+        "interactive": true,
+        "legacy_1_14_6_explicit": "1.14.6",
+        "legacy_runtime_explicit": "1.14.1",
+        "managed_branches": true,
+        "managed_checkpoints": true,
+        "managed_exports": true,
+        "network_policy": true,
+        "offline_default": true,
+        "runtime_1_16_0_explicit": "1.16.0",
+        "runtime_default": "1.22.0",
+        "supervisor": true,
+        "unqualified_runtime_rejected": "1.16.2",
+        "versions": {
+          "jason": "1.4.0",
+          "mint": "1.11.0",
+          "mint_web_socket": "1.0.6",
+          "nimble_options": "1.1.0",
+          "req": "0.7.4",
+          "telemetry": "1.3.0"
+        },
+        "without_rust": true,
+        "workload": true
+      }
+    }
+  ],
+  "documentation": {
+    "warnings_as_errors": true,
+    "log_sha256": "48429514fe92636c13e0adc66911459842ba774ea587852a5807fb6c8b568b8f"
+  },
+  "credo": {
+    "strict_findings": 50,
+    "new_findings": 0,
+    "changed_source_findings": 0,
+    "log_sha256": "cdb2165e750ef10d8a56a45340bf44f1d8260e22fe406a8472967353f800994b"
+  },
+  "broader_regression_followup": {
+    "status": "passed",
+    "maximum_concurrent_cases": 4,
+    "passed": 1622,
+    "excluded_runtime_or_deferred": 42,
+    "log_sha256": "59f658142c349f00261d77c76707bc1b387ce2ea7436815cc0bf16adbca99478",
+    "earlier_default_concurrency_failures_retained": true,
+    "deadline_test_sources_changed": false
+  },
+  "additional_default_concurrency_run": {
+    "status": "failed",
+    "reason": "A separate branch-deletion-action 50ms observation model timed out before reaching its peer under suite load.",
+    "log_sha256": "08da6ed75e60b07ef9c652fb7eb38685d75812ae134daca25937411f355ad9f1",
+    "temporary_acceptance_test_margin_trial_reverted": true,
+    "production_source_unchanged": true
+  }
+}

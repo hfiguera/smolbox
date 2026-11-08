@@ -174,6 +174,8 @@ defmodule SmolBox.Embedded.Protocol do
         do: ~w(expand_disks inspect_growth qualify_growth),
         else: []
 
+    preflight = preflight_capabilities(sdk)
+
     terminals =
       if match?(%{"feature_versions" => %{"terminals" => 1}}, sdk),
         do: ["terminal_open"],
@@ -198,9 +200,14 @@ defmodule SmolBox.Embedded.Protocol do
         else: values
 
     if match?(%{"feature_versions" => %{"buffered_exec" => 1}}, sdk),
-      do: images ++ growth ++ terminals ++ stream ++ ["exec_buffered" | values],
-      else: images ++ growth ++ terminals ++ stream ++ values
+      do: images ++ growth ++ preflight ++ terminals ++ stream ++ ["exec_buffered" | values],
+      else: images ++ growth ++ preflight ++ terminals ++ stream ++ values
   end
+
+  defp preflight_capabilities(%{"feature_versions" => %{"terminal_preflight" => 1}}),
+    do: ["terminal_preflight"]
+
+  defp preflight_capabilities(_sdk), do: []
 
   defp preparation(%{"feature_versions" => %{"remote_sources" => 1}}), do: ["prepare_artifact"]
   defp preparation(_sdk), do: []

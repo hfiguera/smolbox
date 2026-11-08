@@ -1,0 +1,492 @@
+{
+  "schema": 1,
+  "scope": "exact-linux-package-ordinary-offline-cidr-network-and-mapped-ports",
+  "checked_at_utc": "2026-10-16T02:36:14Z",
+  "native_source_commit": "0e35c3f6a281f192fb7402fd706858431705442d",
+  "qualification_tool_source_commit": "42c9763ed362108a0c07c58c4bb0d53bbe4e0fe8",
+  "native_bundle": {
+    "manifest_schema": 3,
+    "package_manifest_sha256": "47fb386421462de60266a7812fbebb73a7bb5b8a2d690ac78579193efac34603",
+    "identity": {
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "c1d85441a63ddec54fae0abcddf2bfa9820ea164f5b17561f3ce4db561e7b07f",
+      "assets_sha256": "ffd234d5f3a6633e2aa207556b35a92b43700690685fe431c8d4cf5353eb3200",
+      "platform": "linux",
+      "architecture": "x86_64"
+    },
+    "sdk_source_verified_unmodified": true
+  },
+  "fixture": {
+    "bytes": 41680838,
+    "fixture_sha256": "691a2c6ab685c447ef64a47445825eb6fa51ccea64aaa37eb8a64ffbc727a780",
+    "image_digest": "sha256:28eb0cb65acb65b970e85c0dc57d10067868fae8dd00d072413df273132123ac",
+    "layer_content": [
+      {
+        "tar_bytes": 50860544,
+        "uncompressed_tar_sha256": "7bae6c8cef01a129cc3a9eb16f37cf8e4deb84085586ab425377bcedf30a411b",
+        "upstream_layer_digest": "sha256:c5680ba2a701892cf5e9304fcdc601ebc8df014c6f6354b451614c98917e4c64"
+      }
+    ],
+    "package_manifest_sha256": "47fb386421462de60266a7812fbebb73a7bb5b8a2d690ac78579193efac34603",
+    "scope": "ordinary-python-container-fixture",
+    "sdk_source_modified": false,
+    "sdk_vm_started": false,
+    "source_fixture_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+    "status": "created",
+    "storage_template_included": false,
+    "preparation_tool_sha256": "30a780e3527b75af6a94f8539c67f76c7b4deadf8f77e170a1333d0d152e2c3a",
+    "retained_privately": true,
+    "published": false
+  },
+  "raw_port": {
+    "proof": "passed",
+    "scope": "ordinary-raw-port-network-mappings",
+    "cases": [
+      {
+        "network": {
+          "enabled": false,
+          "hosts": [],
+          "cidrs": []
+        },
+        "ports": [
+          {
+            "host": 28732,
+            "guest": 8000
+          }
+        ],
+        "observed_backend": "virtio-net",
+        "cycles": [
+          {
+            "outbound_reached": [
+              false,
+              false
+            ],
+            "host_positive_controls": [
+              true,
+              true
+            ],
+            "inbound_reply_verified": true,
+            "listener_addresses": [
+              "127.0.0.1:28732",
+              "[::1]:28732"
+            ],
+            "ordinary_background_launch_acknowledged": true
+          },
+          {
+            "outbound_reached": [
+              false,
+              false
+            ],
+            "host_positive_controls": [
+              true,
+              true
+            ],
+            "inbound_reply_verified": true,
+            "listener_addresses": [
+              "127.0.0.1:28732",
+              "[::1]:28732"
+            ],
+            "ordinary_background_launch_acknowledged": true
+          }
+        ],
+        "owned_deleted": true,
+        "retained_after_stop_start": true
+      },
+      {
+        "network": {
+          "enabled": true,
+          "hosts": [],
+          "cidrs": [
+            "198.18.0.10/32"
+          ]
+        },
+        "ports": [
+          {
+            "host": 28732,
+            "guest": 8000
+          }
+        ],
+        "observed_backend": "virtio-net",
+        "cycles": [
+          {
+            "outbound_reached": [
+              true,
+              false
+            ],
+            "host_positive_controls": [
+              true,
+              true
+            ],
+            "inbound_reply_verified": true,
+            "listener_addresses": [
+              "127.0.0.1:28732",
+              "[::1]:28732"
+            ],
+            "ordinary_background_launch_acknowledged": true
+          },
+          {
+            "outbound_reached": [
+              true,
+              false
+            ],
+            "host_positive_controls": [
+              true,
+              true
+            ],
+            "inbound_reply_verified": true,
+            "listener_addresses": [
+              "127.0.0.1:28732",
+              "[::1]:28732"
+            ],
+            "ordinary_background_launch_acknowledged": true
+          }
+        ],
+        "owned_deleted": true,
+        "retained_after_stop_start": true
+      }
+    ],
+    "normal_stop_child_reaping": [
+      {
+        "stopped_helper_children": 0
+      },
+      {
+        "stopped_helper_children": 0
+      },
+      {
+        "stopped_helper_children": 0
+      },
+      {
+        "stopped_helper_children": 0
+      }
+    ],
+    "inventory_restored": true,
+    "proof_tool_sha256": {
+      "network_fixture.py": "9eceef406d1dd803553fca477bfaa6fbb5c08beca645593548e6e791b9c53f1a",
+      "network_proof.py": "95c507c4bf511e046c02dccb5142ad8d8df53765b4376b7fcef5fdb49ad1cb48",
+      "native_proof.py": "43fdb6e7f20bc6a05acfefde2f23bb708e5db3c92cd4509744bc1dbe0a32548d",
+      "ordinary_proof.py": "b07539d4dd07526ebbcd41810c2a33dc87b4ea7b18b6e66a57c389356e3e5b74"
+    },
+    "public_managed_reservations_qualified": false,
+    "workload_startup_qualified": false
+  },
+  "public_consumers": {
+    "current": {
+      "status": "passed",
+      "minimum": false,
+      "without_rust": true,
+      "source_archive_sha256": "b2cbd6526b7cc13629207219b9d3d2ecd1a0d5e2dd94615b144c6055ed2778ae",
+      "package_file_count": 448,
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "dependencies": {
+        "jason": "1.4.5",
+        "mint": "1.11.0",
+        "mint_web_socket": "1.0.6",
+        "nimble_options": "1.1.1",
+        "req": "0.7.5",
+        "telemetry": "1.4.2"
+      },
+      "proof_tool_sha256": {
+        "native-proof.exs": "b88e132b4abd9a1404ca3533c52209ea9bb281ad1f9494f20a04d06b99c330f3",
+        "native_proof.py": "43fdb6e7f20bc6a05acfefde2f23bb708e5db3c92cd4509744bc1dbe0a32548d",
+        "network_fixture.py": "9eceef406d1dd803553fca477bfaa6fbb5c08beca645593548e6e791b9c53f1a",
+        "network_proof.py": "95c507c4bf511e046c02dccb5142ad8d8df53765b4376b7fcef5fdb49ad1cb48",
+        "ordinary_proof.py": "b07539d4dd07526ebbcd41810c2a33dc87b4ea7b18b6e66a57c389356e3e5b74"
+      },
+      "evidence": {
+        "scope": "public-port-package-consumer",
+        "campaign": "ordinary-public-native-network-mappings",
+        "without_rust": true,
+        "public_native_admission_enabled": true,
+        "public_memory_port_reservations_qualified": true,
+        "cases": [
+          {
+            "conflict_rolls_back_before_dispatch": true,
+            "cycles": [
+              {
+                "host_positive_controls": [
+                  true,
+                  true
+                ],
+                "inbound_reply_verified": true,
+                "loopback_listeners": [
+                  "127.0.0.1:28732",
+                  "[::1]:28732"
+                ],
+                "outbound_reached": [
+                  false,
+                  false
+                ]
+              },
+              {
+                "host_positive_controls": [
+                  true,
+                  true
+                ],
+                "inbound_reply_verified": true,
+                "loopback_listeners": [
+                  "127.0.0.1:28732",
+                  "[::1]:28732"
+                ],
+                "outbound_reached": [
+                  false,
+                  false
+                ]
+              }
+            ],
+            "draining_survives_runtime_replacement": true,
+            "duplicate_create_reuses_identity": true,
+            "network": "offline",
+            "owned_deleted": true,
+            "reservation_survives_stop_and_runtime_replacement": true
+          },
+          {
+            "conflict_rolls_back_before_dispatch": true,
+            "cycles": [
+              {
+                "host_positive_controls": [
+                  true,
+                  true
+                ],
+                "inbound_reply_verified": true,
+                "loopback_listeners": [
+                  "127.0.0.1:28732",
+                  "[::1]:28732"
+                ],
+                "outbound_reached": [
+                  true,
+                  false
+                ]
+              },
+              {
+                "host_positive_controls": [
+                  true,
+                  true
+                ],
+                "inbound_reply_verified": true,
+                "loopback_listeners": [
+                  "127.0.0.1:28732",
+                  "[::1]:28732"
+                ],
+                "outbound_reached": [
+                  true,
+                  false
+                ]
+              }
+            ],
+            "draining_survives_runtime_replacement": true,
+            "duplicate_create_reuses_identity": true,
+            "network": "cidr",
+            "owned_deleted": true,
+            "reservation_survives_stop_and_runtime_replacement": true
+          }
+        ],
+        "final_reserved_slots": 0,
+        "owned_deleted": true,
+        "inventory_restored": true,
+        "workload_startup_qualified": false,
+        "native_postgresql_qualified": false,
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false
+      }
+    },
+    "minimum": {
+      "status": "passed",
+      "minimum": true,
+      "without_rust": true,
+      "source_archive_sha256": "b2cbd6526b7cc13629207219b9d3d2ecd1a0d5e2dd94615b144c6055ed2778ae",
+      "package_file_count": 448,
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "dependencies": {
+        "jason": "1.4.0",
+        "mint": "1.11.0",
+        "mint_web_socket": "1.0.6",
+        "nimble_options": "1.1.0",
+        "req": "0.7.4",
+        "telemetry": "1.3.0"
+      },
+      "proof_tool_sha256": {
+        "native-proof.exs": "b88e132b4abd9a1404ca3533c52209ea9bb281ad1f9494f20a04d06b99c330f3",
+        "native_proof.py": "43fdb6e7f20bc6a05acfefde2f23bb708e5db3c92cd4509744bc1dbe0a32548d",
+        "network_fixture.py": "9eceef406d1dd803553fca477bfaa6fbb5c08beca645593548e6e791b9c53f1a",
+        "network_proof.py": "95c507c4bf511e046c02dccb5142ad8d8df53765b4376b7fcef5fdb49ad1cb48",
+        "ordinary_proof.py": "b07539d4dd07526ebbcd41810c2a33dc87b4ea7b18b6e66a57c389356e3e5b74"
+      },
+      "evidence": {
+        "scope": "public-port-package-consumer",
+        "campaign": "ordinary-public-native-network-mappings",
+        "without_rust": true,
+        "public_native_admission_enabled": true,
+        "public_memory_port_reservations_qualified": true,
+        "cases": [
+          {
+            "conflict_rolls_back_before_dispatch": true,
+            "cycles": [
+              {
+                "host_positive_controls": [
+                  true,
+                  true
+                ],
+                "inbound_reply_verified": true,
+                "loopback_listeners": [
+                  "127.0.0.1:28732",
+                  "[::1]:28732"
+                ],
+                "outbound_reached": [
+                  false,
+                  false
+                ]
+              },
+              {
+                "host_positive_controls": [
+                  true,
+                  true
+                ],
+                "inbound_reply_verified": true,
+                "loopback_listeners": [
+                  "127.0.0.1:28732",
+                  "[::1]:28732"
+                ],
+                "outbound_reached": [
+                  false,
+                  false
+                ]
+              }
+            ],
+            "draining_survives_runtime_replacement": true,
+            "duplicate_create_reuses_identity": true,
+            "network": "offline",
+            "owned_deleted": true,
+            "reservation_survives_stop_and_runtime_replacement": true
+          },
+          {
+            "conflict_rolls_back_before_dispatch": true,
+            "cycles": [
+              {
+                "host_positive_controls": [
+                  true,
+                  true
+                ],
+                "inbound_reply_verified": true,
+                "loopback_listeners": [
+                  "127.0.0.1:28732",
+                  "[::1]:28732"
+                ],
+                "outbound_reached": [
+                  true,
+                  false
+                ]
+              },
+              {
+                "host_positive_controls": [
+                  true,
+                  true
+                ],
+                "inbound_reply_verified": true,
+                "loopback_listeners": [
+                  "127.0.0.1:28732",
+                  "[::1]:28732"
+                ],
+                "outbound_reached": [
+                  true,
+                  false
+                ]
+              }
+            ],
+            "draining_survives_runtime_replacement": true,
+            "duplicate_create_reuses_identity": true,
+            "network": "cidr",
+            "owned_deleted": true,
+            "reservation_survives_stop_and_runtime_replacement": true
+          }
+        ],
+        "final_reserved_slots": 0,
+        "owned_deleted": true,
+        "inventory_restored": true,
+        "workload_startup_qualified": false,
+        "native_postgresql_qualified": false,
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false
+      }
+    }
+  },
+  "validation": {
+    "python_ordinary_deferred_network_guards": 22,
+    "ci_package_unit_cases": 6,
+    "python_compilation": "passed",
+    "rust_strict_clippy_all_targets": "passed",
+    "rust_format": "passed",
+    "sdk_source_checks_primary_and_independent": "passed",
+    "rust_production_code_changed": false,
+    "application_store_code_changed": false,
+    "previous_998_native_units_56_contracts_not_rerun_for_tooling_only_changes": true,
+    "credo_baseline_findings": 50,
+    "credo_added_findings": 0,
+    "credo_removed_findings": 0,
+    "post_campaign_tooling_style_cleanup": {
+      "source_commit": "40de07b2f10556a5ec46679ecfc8c897855756fd",
+      "changes": [
+        "module aliases",
+        "numeric separators",
+        "equivalent two-element-list validation"
+      ],
+      "ci_package_tests": "passed",
+      "live_report_tool_hashes_retained": true,
+      "native_package_bytes_changed": false
+    }
+  },
+  "preserved_initial_failures": [
+    {
+      "scope": "namespace metadata access",
+      "sdk_owner_started": false,
+      "resolution": "privileged setup verifies default-namespace separation and hands its own identity to the unprivileged child"
+    },
+    {
+      "scope": "bare fixture missing application tools",
+      "vm_started": true,
+      "normal_helper_shutdown": true,
+      "explicit_stopped_full_receipt_cleanup": "passed",
+      "sdk_inventory_restored": true,
+      "resolution": "prepared an approved Python-container test fixture through public SDK packing APIs"
+    },
+    {
+      "scope": "fixture producer layer-label assumption",
+      "sdk_vm_started": false,
+      "resolution": "preserve upstream OCI label and record uncompressed tar hash separately"
+    },
+    {
+      "scope": "public proof namespace too long",
+      "sdk_machine_created": false,
+      "resolution": "use a namespace within the public Identity contract"
+    }
+  ],
+  "lab_teardown": {
+    "sdk_inventory_empty": true,
+    "native_owner_processes_absent": true,
+    "all_qualification_handles_terminal": true,
+    "privileged_read_only_process_verification": true,
+    "forced_termination": false,
+    "crash_handling_qualified": false,
+    "normal_guest_shutdown": true,
+    "host_unit_active_state": "inactive",
+    "host_unit_result": "success",
+    "host_unit_exit_status": 0,
+    "run_disk_and_enrolled_domain_retained": true,
+    "fixture_and_raw_evidence_retained_privately": true,
+    "automatic_fault_reset_avoided_by_archiving_verified_normal_shutdown_marker": true
+  },
+  "limitations": [
+    "Exact Linux x86_64 package and Python container fixture only",
+    "Two fixed reachable local IPv4 TCP destinations and one approved CIDR; hostname/DNS and infrastructure exceptions remain unqualified",
+    "Memory-store public reservation checks; native PostgreSQL remains pending",
+    "Configured startup workloads and workload inheritance/failure behavior remain pending",
+    "OS-listener start conflicts and broader resource/interference combinations remain pending",
+    "No OCI registry/image-management, mounts, growth or saved-state/branch feature acceptance",
+    "Changed macOS package qualification remains pending; its original export custody is untouched"
+  ],
+  "full_parity_acceptance": "pending",
+  "public_native_branch_admission_enabled": false,
+  "crash_handling_qualified": false,
+  "distribution_approved": false
+}

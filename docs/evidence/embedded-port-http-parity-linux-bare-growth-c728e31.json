@@ -1,0 +1,288 @@
+{
+  "schema": 1,
+  "status": "scoped-current-minimum-linux-bare-memory-growth-accepted",
+  "client": {
+    "source_commit": "c728e31088acfae4e8aa9741eb897c72564cdb36",
+    "source_archive_sha256": "5ad1afffae0d9940691d66c51924614a2b41ba2a2099be8a9545ab01c4e28d48",
+    "hex_archive_sha256": "0a8c759c43a1aacccfdfecbef93b3754aff2f47bbc55e528de43ad9cb6565968",
+    "native_source_commit": "30239b6fe99c6166c748cc9790b0a5c1301919ed",
+    "manifest_sha256": "e7387c9cf607605d2a2af40333cfc4da9c8f4d3320d447cbd8182613ca1b3db4",
+    "source_files_verified": 1591,
+    "native_production_sources_unchanged": true
+  },
+  "native": {
+    "source_commit": "30239b6fe99c6166c748cc9790b0a5c1301919ed",
+    "manifest_sha256": "e7387c9cf607605d2a2af40333cfc4da9c8f4d3320d447cbd8182613ca1b3db4",
+    "helper_sha256": "19e3981b3a475470b28cb51b4c4e363399b47e554d8aa52bfc5a759b62272fca",
+    "assets_sha256": "f4f2a5ff4d8783e226dbceab2759c12f2b9db19153fed9c04e22e10c6d734c3b",
+    "assets": 806
+  },
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "sdk_unmodified": true,
+  "native_production_sources_unchanged": true,
+  "platform": "linux-x86_64",
+  "source_kind": "local-bare-vm-pack",
+  "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+  "store_mode": "ephemeral-memory",
+  "native_consumers": [
+    {
+      "lane": "current",
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "without_rust": true,
+      "report_sha256": "886151d6b7dbc41473aac477212a9322ffb353304393ce851c94b8a215cc4f2b",
+      "proof_tool_sha256": {
+        "config.example.exs": "e0b36e130d076afee72455ccbd23dcae85dc04142d411397be3869c307235bec",
+        "growth_control.ex": "effcbd37f9318ad2ed4065e73e9d78536392383a684d7d759475d767eb7627a6",
+        "growth_demo.ex": "4639314656cd7670ca380ebf6055f6f9f46b29c322cd67aa170d3b5c84219f48",
+        "native-proof.exs": "42a19822d776ae6bb453e68714c74b386f4d2dfca7299136ad852621db8fe5a4",
+        "native_proof.py": "952265ccbf230fd4ec1b2b9f48e0e40db402222b5f2b10f95f2393bd64d23dc9",
+        "owned_control.ex": "e93165e2893487b96a35fea9dbd0ced1c4fd343865d707c5e36616caac4ea625"
+      },
+      "evidence": {
+        "campaign": "ordinary-public-native-growth",
+        "conflicting_growth_rejected": true,
+        "crash_handling_qualified": false,
+        "deliberate_process_interruption": false,
+        "drain_retained": true,
+        "duplicate_growth_retained": true,
+        "file_bytes": 65554,
+        "file_sha256": "25ac6018e1a86a5aa310d7cd70d12c517e89e42b33afb021d07ca3c0ce909638",
+        "final_reserved_disk_gb": 0,
+        "final_reserved_slots": 0,
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "growth_budget_rejected_before_dispatch": true,
+        "growth_history_retained": true,
+        "identity": {
+          "architecture": "x86_64",
+          "assets_sha256": "f4f2a5ff4d8783e226dbceab2759c12f2b9db19153fed9c04e22e10c6d734c3b",
+          "build_sha256": "19e3981b3a475470b28cb51b4c4e363399b47e554d8aa52bfc5a759b62272fca",
+          "engine_version": "0.2.0",
+          "platform": "linux",
+          "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+          "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+        },
+        "immutable_creation_retained": true,
+        "inventory_after": [],
+        "inventory_before": [],
+        "material_chain_retained": true,
+        "omitted_target_retained": true,
+        "overlay_geometry_verified": true,
+        "owned_deleted": true,
+        "package_manifest_sha256": "e7387c9cf607605d2a2af40333cfc4da9c8f4d3320d447cbd8182613ca1b3db4",
+        "phase": "single",
+        "public_native_admission_enabled": true,
+        "running_growth_rejected": true,
+        "scope": "public-port-package-consumer",
+        "stopped_runtime_replacement": true,
+        "storage_filesystem_growth": true,
+        "store_mode": "ephemeral",
+        "without_rust": true,
+        "worker_capacity": {
+          "cpus": 1,
+          "disk_gb": 8,
+          "memory_mb": 768,
+          "slots": 1
+        }
+      },
+      "custody": {
+        "source_commit": "c728e31088acfae4e8aa9741eb897c72564cdb36",
+        "native_source_commit": "30239b6fe99c6166c748cc9790b0a5c1301919ed",
+        "source_files_verified": 1591,
+        "manifest_sha256": "e7387c9cf607605d2a2af40333cfc4da9c8f4d3320d447cbd8182613ca1b3db4",
+        "helper_sha256": "19e3981b3a475470b28cb51b4c4e363399b47e554d8aa52bfc5a759b62272fca",
+        "assets_verified": 806,
+        "host_tools_verified": true,
+        "domain_unchanged": true,
+        "sdk_counts": {
+          "vms": 0,
+          "vm_create_reservations": 0,
+          "vm_pause_operations": 0,
+          "vm_resize_intents": 0,
+          "vm_resize_receipts": 0
+        },
+        "native_and_beam_processes": [],
+        "native_and_beam_zombies": [],
+        "account_lock_available": true,
+        "vm_caches_empty": true,
+        "checked_utc": "2026-10-16T22:07:50.314300+00:00",
+        "crash_validation_performed": false,
+        "sdk_state_copied": false
+      },
+      "private_custody_report_sha256": "5785d45fd3d56c3ab92bf3921dfe9ef00b42488f9da43a23996137b1790aa02c"
+    },
+    {
+      "lane": "minimum",
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "without_rust": true,
+      "report_sha256": "6b60d065b660813a3b2c86bd4a04c1580283bf3e76dc7d16f6c5eb8535da8539",
+      "proof_tool_sha256": {
+        "config.example.exs": "e0b36e130d076afee72455ccbd23dcae85dc04142d411397be3869c307235bec",
+        "growth_control.ex": "effcbd37f9318ad2ed4065e73e9d78536392383a684d7d759475d767eb7627a6",
+        "growth_demo.ex": "4639314656cd7670ca380ebf6055f6f9f46b29c322cd67aa170d3b5c84219f48",
+        "native-proof.exs": "42a19822d776ae6bb453e68714c74b386f4d2dfca7299136ad852621db8fe5a4",
+        "native_proof.py": "952265ccbf230fd4ec1b2b9f48e0e40db402222b5f2b10f95f2393bd64d23dc9",
+        "owned_control.ex": "e93165e2893487b96a35fea9dbd0ced1c4fd343865d707c5e36616caac4ea625"
+      },
+      "evidence": {
+        "campaign": "ordinary-public-native-growth",
+        "conflicting_growth_rejected": true,
+        "crash_handling_qualified": false,
+        "deliberate_process_interruption": false,
+        "drain_retained": true,
+        "duplicate_growth_retained": true,
+        "file_bytes": 65554,
+        "file_sha256": "25ac6018e1a86a5aa310d7cd70d12c517e89e42b33afb021d07ca3c0ce909638",
+        "final_reserved_disk_gb": 0,
+        "final_reserved_slots": 0,
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "growth_budget_rejected_before_dispatch": true,
+        "growth_history_retained": true,
+        "identity": {
+          "architecture": "x86_64",
+          "assets_sha256": "f4f2a5ff4d8783e226dbceab2759c12f2b9db19153fed9c04e22e10c6d734c3b",
+          "build_sha256": "19e3981b3a475470b28cb51b4c4e363399b47e554d8aa52bfc5a759b62272fca",
+          "engine_version": "0.2.0",
+          "platform": "linux",
+          "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+          "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+        },
+        "immutable_creation_retained": true,
+        "inventory_after": [],
+        "inventory_before": [],
+        "material_chain_retained": true,
+        "omitted_target_retained": true,
+        "overlay_geometry_verified": true,
+        "owned_deleted": true,
+        "package_manifest_sha256": "e7387c9cf607605d2a2af40333cfc4da9c8f4d3320d447cbd8182613ca1b3db4",
+        "phase": "single",
+        "public_native_admission_enabled": true,
+        "running_growth_rejected": true,
+        "scope": "public-port-package-consumer",
+        "stopped_runtime_replacement": true,
+        "storage_filesystem_growth": true,
+        "store_mode": "ephemeral",
+        "without_rust": true,
+        "worker_capacity": {
+          "cpus": 1,
+          "disk_gb": 8,
+          "memory_mb": 768,
+          "slots": 1
+        }
+      },
+      "custody": {
+        "source_commit": "c728e31088acfae4e8aa9741eb897c72564cdb36",
+        "native_source_commit": "30239b6fe99c6166c748cc9790b0a5c1301919ed",
+        "source_files_verified": 1591,
+        "manifest_sha256": "e7387c9cf607605d2a2af40333cfc4da9c8f4d3320d447cbd8182613ca1b3db4",
+        "helper_sha256": "19e3981b3a475470b28cb51b4c4e363399b47e554d8aa52bfc5a759b62272fca",
+        "assets_verified": 806,
+        "host_tools_verified": true,
+        "domain_unchanged": true,
+        "sdk_counts": {
+          "vms": 0,
+          "vm_create_reservations": 0,
+          "vm_pause_operations": 0,
+          "vm_resize_intents": 0,
+          "vm_resize_receipts": 0
+        },
+        "native_and_beam_processes": [],
+        "native_and_beam_zombies": [],
+        "account_lock_available": true,
+        "vm_caches_empty": true,
+        "checked_utc": "2026-10-16T22:10:48.500147+00:00",
+        "crash_validation_performed": false,
+        "sdk_state_copied": false
+      },
+      "private_custody_report_sha256": "b2fe619793cceb72899aa8bf50401b7d8a643ff1d72a3ced72361d9fe88d242d"
+    }
+  ],
+  "http_only_consumers": [
+    {
+      "lane": "current",
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "without_rust": true,
+      "native": {
+        "scope": "not-requested",
+        "exercised": false
+      },
+      "report_sha256": "0788357d3197f895c1dc63c095cf96f819554da71749bd821f12a015bcfac3ce"
+    },
+    {
+      "lane": "minimum",
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "without_rust": true,
+      "native": {
+        "scope": "not-requested",
+        "exercised": false
+      },
+      "report_sha256": "484972da9a2a61b15f816bd7d84edf316afe3fccf786f71de9e759d94cc319d6"
+    }
+  ],
+  "private_record_verification": {
+    "offline_private_records_verified": [
+      {
+        "lane": "current",
+        "final_records": 11,
+        "checkpoint_records": 6,
+        "all_codec_roundtrips_valid": true,
+        "original_creation_retained": true,
+        "growth_chain_links": 2,
+        "stopped_checkpoint_reserved_disk_gb": 5,
+        "final_reservation": null,
+        "final_state": "deleted"
+      },
+      {
+        "lane": "minimum",
+        "final_records": 11,
+        "checkpoint_records": 6,
+        "all_codec_roundtrips_valid": true,
+        "original_creation_retained": true,
+        "growth_chain_links": 2,
+        "stopped_checkpoint_reserved_disk_gb": 5,
+        "final_reservation": null,
+        "final_state": "deleted"
+      }
+    ],
+    "sdk_or_vm_opened": false
+  },
+  "record_verification_log_sha256": "9b399758b2c80a32ddc072f1c170ba2e5083c327e7fd1597209fb1dea232d0ea",
+  "private_archive": {
+    "local_and_outer_archive_sha256": "499cce965c92e292f4cd5a83de151916b2e264a1566fbbfb3deba14bcd29d331",
+    "archive_bytes": 729467329,
+    "selected_members_verified": 4814,
+    "frozen_source_files_per_account": 1591,
+    "native_assets_per_account": 806,
+    "two_private_account_roots_verified": true,
+    "private_record_and_key_modes_verified": true,
+    "sdk_state_restored": false
+  },
+  "qualification_loader": {
+    "consumers_exited_successfully": true,
+    "forward_reference_warning": "growth_control loads before Workflow.stop_owned/3 is compiled",
+    "warning_cleanup_pending": true,
+    "live_stop_owned_control_exercised": false
+  },
+  "retained_older_state": {
+    "old_failed_registry_owners": "separate-scoped-teardown-approval-pending",
+    "prior_v6_v7_sdk_disks_and_rows": "retained-not-operated-by-this-campaign",
+    "lab": "running-original-hard-limit-unchanged",
+    "lab_shutdown_qualified_by_this_campaign": false
+  },
+  "remaining": [
+    "current-package PostgreSQL growth with separate normal BEAMs",
+    "packed and OCI/registry source growth on current package",
+    "remaining source/platform/resource combinations",
+    "ordinary live stop_owned control acceptance",
+    "qualification loader forward-reference warning cleanup",
+    "all full-parity operation/arity/specification acceptance gates"
+  ],
+  "scope": {
+    "historical_failed_evidence_rewritten": false,
+    "old_failed_start_root_cause_claimed": false,
+    "p7_complete": false,
+    "parity_complete": false,
+    "crash_validation_deferred": true,
+    "crash_handling_qualified": false,
+    "distribution_approved": false
+  }
+}

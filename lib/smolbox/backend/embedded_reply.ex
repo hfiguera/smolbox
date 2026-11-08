@@ -32,6 +32,20 @@ defmodule SmolBox.Backend.EmbeddedReply do
 
   defp response(
          context,
+         :terminal_preflight,
+         %{"operation" => "terminal_preflight", "receipt" => receipt},
+         %{"result" => "ready"} = outcome,
+         %{stdout: <<>>, stderr: <<>>, file: <<>>},
+         nil
+       ) do
+    with {:ok, ^receipt} <- EmbeddedContext.receipt(context),
+         true <- Protocol.valid_outcome?(outcome, 2),
+         do: :ok,
+         else: (_ -> error(:protocol, :terminal, :not_dispatched))
+  end
+
+  defp response(
+         context,
          :branch_source,
          %{"operation" => "branch_preflight", "receipt" => receipt},
          %{"result" => "observed", "observation" => observed} = outcome,
@@ -423,6 +437,7 @@ defmodule SmolBox.Backend.EmbeddedReply do
 
   # Persist the established public error vocabulary, shared with the HTTP adapter.
   defp error_operation(:inspect_machine), do: :inspect
+  defp error_operation(:terminal_preflight), do: :terminal
   defp error_operation(:create_prepared), do: :create
   defp error_operation(:inspect_creation), do: :inspect
   defp error_operation(:list_images), do: :images

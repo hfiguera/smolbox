@@ -1,0 +1,27 @@
+{
+  "type": "request",
+  "epoch": "abababababababababababababababab",
+  "id": 1,
+  "budget_ms": 30000,
+  "initial_credit": 1024,
+  "initial_event_credit": 64,
+  "operation": {
+    "operation": "terminal_preflight",
+    "receipt": {
+      "target_id": "embedded-local",
+      "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+      "name": "owned",
+      "owner_token": "6767676767676767676767676767676767676767676767676767676767676767",
+      "incarnation": "89898989898989898989898989898989",
+      "material_sha256": "abababababababababababababababababababababababababababababababab",
+      "material": {
+        "schema": 2,
+        "revision": 0,
+        "record_sha256": "abababababababababababababababababababababababababababababababab",
+        "chain_sha256": "bcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbc",
+        "operation_id": null,
+        "request_sha256": null
+      }
+    }
+  }
+}

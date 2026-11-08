@@ -106,6 +106,19 @@ pub(crate) struct Prepared {
     _conversion: Option<Spool>,
 }
 impl Prepared {
+    pub(crate) fn with_registry(
+        mut self,
+        selected: Option<crate::guest_registry::Plan>,
+    ) -> Result<Self> {
+        match &mut self.request.kind {
+            Kind::Pull { registry, .. } | Kind::Bootstrap { registry, .. } => *registry = selected,
+            _ => return Err(Error::before(ErrorCode::Validation)),
+        }
+        // Validate the full private frame before spawning; no secret spool is
+        // created and no public worker event/frame limit is widened.
+        ipc::encode_request(&self.request)?;
+        Ok(self)
+    }
     pub(crate) fn verify_unentered_branch(&self) -> Result<()> {
         let Kind::BranchPrepare { metadata, expected } = &self.request.kind else {
             return Err(Error::before(ErrorCode::Validation));
@@ -398,6 +411,7 @@ impl TransferSupervisor {
         let spool = Spool::new(directory)?;
         let request = Request {
             schema: 1,
+            file_activation: None,
             operation: selected.grant.worker_operation,
             owner: self.owner,
             socket: selected.source_directory.join("agent.sock"),
@@ -446,21 +460,97 @@ impl TransferSupervisor {
         options: &FileOptions,
         kind: Kind,
     ) -> Result<Prepared> {
+        self.prepare_file(directory, socket, options, kind, None)
+    }
+
+    pub(crate) fn prepare_file(
+        &self,
+        directory: &Path,
+        socket: PathBuf,
+        options: &FileOptions,
+        kind: Kind,
+        activation: Option<&crate::buffered::Metadata>,
+    ) -> Result<Prepared> {
+        let permit = self
+            .pool
+            .acquire(Self::file_demand(options, &kind, activation)?)?;
+        self.prepare_file_reserved(permit, directory, socket, options, kind, activation)
+    }
+
+    pub(crate) fn file_demand(
+        options: &FileOptions,
+        kind: &Kind,
+        activation: Option<&crate::buffered::Metadata>,
+    ) -> Result<crate::jobs::Demand> {
+        Ok(Self::file_plan(options, kind, activation)?.0)
+    }
+
+    fn file_plan(
+        options: &FileOptions,
+        kind: &Kind,
+        activation: Option<&crate::buffered::Metadata>,
+    ) -> Result<(crate::jobs::Demand, Option<Vec<u8>>)> {
         options.validate(matches!(kind, Kind::Write { .. }))?;
-        let permit = self.pool.acquire(
-            if matches!(kind, Kind::Pull { .. } | Kind::Bootstrap { .. }) {
-                crate::jobs::Demand::image_pull()
-            } else if matches!(kind, Kind::Images { .. }) {
-                crate::jobs::Demand::images()
-            } else {
-                crate::jobs::Demand::transfer(options.max_bytes)?
-            },
-        )?;
+        let activation_bytes = activation
+            .map(|metadata| {
+                metadata.file_activation_deadline()?;
+                if !matches!(kind, Kind::Read | Kind::Write { .. }) {
+                    return Err(Error::before(ErrorCode::Validation));
+                }
+                serde_json::to_vec(metadata).map_err(|_| Error::before(ErrorCode::Validation))
+            })
+            .transpose()?;
+        let demand = if let Some(bytes) = &activation_bytes {
+            crate::jobs::Demand::image_transfer(options.max_bytes, bytes.len() as u64)?
+        } else if matches!(kind, Kind::Pull { .. } | Kind::Bootstrap { .. }) {
+            crate::jobs::Demand::image_pull()
+        } else if matches!(kind, Kind::Images { .. }) {
+            crate::jobs::Demand::images()
+        } else {
+            crate::jobs::Demand::transfer(options.max_bytes)?
+        };
+        Ok((demand, activation_bytes))
+    }
+
+    pub(crate) fn prepare_file_reserved(
+        &self,
+        permit: crate::jobs::JobLease,
+        directory: &Path,
+        socket: PathBuf,
+        options: &FileOptions,
+        kind: Kind,
+        activation: Option<&crate::buffered::Metadata>,
+    ) -> Result<Prepared> {
+        let (_, activation_bytes) = Self::file_plan(options, &kind, activation)?;
+        let metadata = activation_bytes
+            .as_ref()
+            .map(|bytes| {
+                let mut spool = Spool::new(directory)?;
+                spool
+                    .file
+                    .write_all(bytes)
+                    .map_err(|_| Error::before(ErrorCode::Io))?;
+                spool
+                    .file
+                    .set_permissions(std::fs::Permissions::from_mode(0o400))
+                    .and_then(|()| spool.file.sync_all())
+                    .map_err(|_| Error::before(ErrorCode::Io))?;
+                Ok::<_, Error>(spool)
+            })
+            .transpose()?;
         let spool = Spool::new(directory)?;
         let mut nonce = [0; 16];
         getrandom::fill(&mut nonce).map_err(|_| Error::before(ErrorCode::Native))?;
         let request = Request {
             schema: 1,
+            file_activation: metadata.as_ref().zip(activation_bytes.as_ref()).map(
+                |(spool, bytes)| ipc::Blob {
+                    path: spool.path.clone(),
+                    device: spool.identity.0,
+                    inode: spool.identity.1,
+                    bytes: bytes.len() as u64,
+                },
+            ),
             operation: hex::encode(nonce),
             owner: self.owner,
             socket,
@@ -476,7 +566,7 @@ impl TransferSupervisor {
             request,
             spool,
             _permit: Some(permit),
-            _metadata: None,
+            _metadata: metadata,
             _conversion: None,
         })
     }
@@ -524,6 +614,7 @@ impl TransferSupervisor {
         getrandom::fill(&mut nonce).map_err(|_| Error::before(ErrorCode::Native))?;
         let request = Request {
             schema: 1,
+            file_activation: None,
             operation: hex::encode(nonce),
             owner: self.owner,
             socket,
@@ -535,6 +626,7 @@ impl TransferSupervisor {
             kind: Kind::Bootstrap {
                 metadata: blob,
                 expected,
+                registry: None,
             },
         };
         request.validate()?;
@@ -606,6 +698,7 @@ impl TransferSupervisor {
         getrandom::fill(&mut nonce).map_err(|_| Error::before(ErrorCode::Native))?;
         let request = Request {
             schema: 1,
+            file_activation: None,
             operation: hex::encode(nonce),
             owner: self.owner,
             socket,
@@ -617,6 +710,7 @@ impl TransferSupervisor {
             kind: Kind::Pull {
                 metadata: blob,
                 expected: request,
+                registry: None,
             },
         };
         request.validate()?;
@@ -711,6 +805,7 @@ impl TransferSupervisor {
         getrandom::fill(&mut nonce).map_err(|_| Error::before(ErrorCode::Native))?;
         let request = Request {
             schema: 1,
+            file_activation: None,
             operation: hex::encode(nonce),
             owner: self.owner,
             socket,
@@ -767,6 +862,7 @@ impl TransferSupervisor {
         getrandom::fill(&mut nonce).map_err(|_| Error::before(ErrorCode::Native))?;
         let request = Request {
             schema: 1,
+            file_activation: None,
             operation: hex::encode(nonce),
             owner: self.owner,
             socket: directory.join("agent.sock"),
@@ -822,6 +918,7 @@ impl TransferSupervisor {
         getrandom::fill(&mut nonce).map_err(|_| Error::before(ErrorCode::Native))?;
         let request = Request {
             schema: 1,
+            file_activation: None,
             operation: hex::encode(nonce),
             owner: self.owner,
             socket: source.join("agent.sock"),
@@ -885,6 +982,7 @@ impl TransferSupervisor {
         getrandom::fill(&mut nonce).map_err(|_| Error::before(ErrorCode::Native))?;
         let request = Request {
             schema: 1,
+            file_activation: None,
             operation: hex::encode(nonce),
             owner: self.owner,
             socket,
@@ -941,6 +1039,7 @@ impl TransferSupervisor {
         getrandom::fill(&mut nonce).map_err(|_| Error::before(ErrorCode::Native))?;
         let request = Request {
             schema: 1,
+            file_activation: None,
             operation: hex::encode(nonce),
             owner: self.owner,
             socket: target.join("agent.sock"),
@@ -1009,6 +1108,7 @@ impl TransferSupervisor {
         getrandom::fill(&mut nonce).map_err(|_| Error::before(ErrorCode::Native))?;
         let request = Request {
             schema: 1,
+            file_activation: None,
             operation: hex::encode(nonce),
             owner: self.owner,
             socket,
@@ -1067,7 +1167,7 @@ impl TransferSupervisor {
         check_budget(deadline, cancel)?;
         verified_executable(&self.executable)?;
         check_budget(deadline, cancel)?;
-        let request_bytes = ipc::encode(&prepared.request)?;
+        let request_bytes = ipc::encode_request(&prepared.request)?;
         let mut command = Command::new(&self.executable.path);
         command
             .arg(
@@ -1553,6 +1653,54 @@ fn check_budget(deadline: Instant, cancel: &Cancellation) -> Result<()> {
 mod tests {
     use super::*;
     use sha2::{Digest, Sha256};
+
+    fn registry_plan(
+        source: &crate::ImagePullRequest,
+        secret: &str,
+    ) -> crate::guest_registry::Plan {
+        serde_json::from_value(serde_json::json!({"source":source,"effective_reference":source.reference,"auth":{"username":"<token>","password":secret}})).unwrap()
+    }
+
+    #[test]
+    fn guest_registry_credentials_never_enter_pull_or_bootstrap_spools() {
+        let temp = tempfile::tempdir().unwrap();
+        let root = root(&temp);
+        let supervisor = supervisor(&root, std::env::current_exe().unwrap());
+        let bootstrap = crate::bootstrap::tests::plan(false);
+        let expected = bootstrap.expected().unwrap();
+        for startup in [false, true] {
+            let prepared = if startup {
+                supervisor
+                    .prepare_bootstrap(&root, root.join("agent.sock"), &bootstrap)
+                    .unwrap()
+            } else {
+                supervisor
+                    .prepare_pull(&root, root.join("agent.sock"), expected.source.clone(), 1)
+                    .unwrap()
+            }
+            .with_registry(Some(registry_plan(
+                &expected.source,
+                "PRIVATE-GUEST-CREDENTIAL",
+            )))
+            .unwrap();
+            let bytes = ipc::encode_request(&prepared.request).unwrap();
+            assert!(String::from_utf8_lossy(&bytes).contains("PRIVATE-GUEST-CREDENTIAL"));
+            for entry in std::fs::read_dir(&root).unwrap() {
+                let path = entry.unwrap().path();
+                if path.is_file() {
+                    assert!(!String::from_utf8_lossy(&std::fs::read(path).unwrap())
+                        .contains("PRIVATE-GUEST-CREDENTIAL"));
+                }
+            }
+            assert_eq!(supervisor.pool.counts().children, 1);
+            drop(prepared);
+        }
+        assert_eq!(
+            bootstrap.expected().unwrap().metadata_sha256,
+            expected.metadata_sha256
+        );
+        assert_eq!(supervisor.pool.counts(), crate::jobs::Counts::default());
+    }
     #[test]
     #[ignore = "requires a built helper; explicit ordinary non-VM branch namespace rejection"]
     fn ordinary_branch_worker_rejects_unentered_fixture_and_collects_original_leases() {
@@ -2465,19 +2613,35 @@ mod tests {
         let root = root(&directory);
         let executable = std::env::var_os("SMOLBOX_TEST_FILE_WORKER").expect("built helper path");
         let supervisor = supervisor(&root, executable.into());
-        for (empty, failed) in [(false, false), (false, true), (true, false)] {
+        for (packed, empty, failed, credentials) in [
+            (false, false, false, false),
+            (false, false, true, false),
+            (false, true, false, false),
+            (true, false, false, false),
+            (true, false, true, false),
+            (true, true, false, false),
+            (false, false, false, true),
+            (false, true, false, true),
+        ] {
             let socket = root.join("agent.sock");
             let listener = UnixListener::bind(&socket).unwrap();
             listener.set_nonblocking(true).unwrap();
-            let plan = crate::bootstrap::tests::plan(empty);
+            let plan = if packed {
+                crate::bootstrap::tests::packed_plan(empty)
+            } else {
+                crate::bootstrap::tests::plan(empty)
+            };
             let expected = plan.expected().unwrap();
+            let secret = format!("PRIVATE-GUEST-{}", "\n".repeat(16000));
             let prepared = supervisor
                 .prepare_bootstrap(&root, socket.clone(), &plan)
+                .unwrap()
+                .with_registry(credentials.then(|| registry_plan(&expected.source, &secret)))
                 .unwrap();
             let deadline = Instant::now() + Duration::from_secs(30);
             std::thread::scope(|scope| {
                 let peer = scope.spawn(|| {
-                    for stage in 0..if empty { 1 } else { 2 } {
+                    for stage in (if packed { 1 } else { 0 })..(if empty { 1 } else { 2 }) {
                         let mut stream = loop {
                             match listener.accept() {
                                 Ok((stream, _)) => break stream,
@@ -2501,7 +2665,11 @@ mod tests {
                             let AgentRequest::Pull { image, oci_platform, auth, proxy, no_proxy } = request.body else { panic!() };
                             assert_eq!(image, expected.source.reference);
                             assert_eq!(oci_platform.as_deref(), Some(expected.source.platform.as_str()));
-                            assert!(auth.is_none() && proxy.is_none() && no_proxy.is_none());
+                            assert!(proxy.is_none() && no_proxy.is_none());
+                            if credentials {
+                                let auth=auth.expect("parent-supplied guest credentials");
+                                assert!(auth.username=="<token>" && auth.password==secret);
+                            } else { assert!(auth.is_none()); }
                             let info = serde_json::json!({
                                 "reference": expected.source.reference,
                                 "digest": format!("sha256:{}", "b".repeat(64)), "size": 123,
@@ -2543,13 +2711,15 @@ mod tests {
                     panic!("ordinary worker must be collected")
                 };
                 assert!(!collected.termination_requested);
-                assert_eq!(collected.outcome.success(), !failed);
-                if failed {
+                assert_eq!(collected.outcome.success(), packed || !failed);
+                if failed && !packed {
                     assert!(collected.bootstrapped.is_none());
                 } else {
                     let proof = collected.bootstrapped.as_ref().unwrap();
                     assert!(proof.matches(&expected));
-                    assert_eq!(proof.container_id.is_none(), empty);
+                    assert_eq!(proof.container_id.is_none(), empty || failed);
+                    assert_eq!(proof.launch_rejected, packed && failed);
+                    assert_eq!(proof.image.is_none(), packed);
                 }
                 peer.join().unwrap();
             });
@@ -2572,14 +2742,37 @@ mod tests {
             reference: format!("registry.example/app@sha256:{}", "a".repeat(64)),
             platform: "linux/arm64".into(),
         };
-        for reply in ["valid", "packed", "different", "error"] {
+        for (reply, credentials) in [
+            ("valid", false),
+            ("packed", false),
+            ("different", false),
+            ("error", false),
+            ("valid", true),
+            ("packed", true),
+            ("different", true),
+            ("error", true),
+            ("mirror", true),
+        ] {
             let socket = root.join("agent.sock");
             let listener = UnixListener::bind(&socket).unwrap();
             listener.set_nonblocking(true).unwrap();
             let deadline = Instant::now() + Duration::from_secs(30);
             let deadline_ns = crate::buffered::monotonic_ns().unwrap() + 30_000_000_000;
+            let secret = format!("PRIVATE-GUEST-{}", "\n".repeat(16000));
+            let mut registry = serde_json::to_value(registry_plan(&expected, &secret)).unwrap();
+            let effective = if reply == "mirror" {
+                expected
+                    .reference
+                    .replace("registry.example", "mirror.example/prefix")
+            } else {
+                expected.reference.clone()
+            };
+            registry["effective_reference"] = effective.clone().into();
+            let registry = serde_json::from_value(registry).unwrap();
             let prepared = supervisor
                 .prepare_pull(&root, socket.clone(), expected.clone(), deadline_ns)
+                .unwrap()
+                .with_registry(credentials.then_some(registry))
                 .unwrap();
             std::thread::scope(|scope| {
                 let peer = scope.spawn(|| {
@@ -2601,15 +2794,19 @@ mod tests {
                     stream.read_exact(&mut body).unwrap();
                     let request: Envelope<AgentRequest> = serde_json::from_slice(&body).unwrap();
                     let AgentRequest::Pull { image, oci_platform, auth, proxy, no_proxy } = request.body else { panic!() };
-                    assert_eq!(image, expected.reference);
+                    assert_eq!(image, effective);
                     assert_eq!(oci_platform.as_deref(), Some("linux/arm64"));
-                    assert!(auth.is_none() && proxy.is_none() && no_proxy.is_none());
+                    assert!(proxy.is_none() && no_proxy.is_none());
+                    if credentials {
+                        let auth=auth.expect("parent-supplied guest credentials");
+                        assert!(auth.username=="<token>" && auth.password==secret);
+                    } else { assert!(auth.is_none()); }
                     let progress = serde_json::json!({"status":"progress","message":"PRIVATE=discard"});
                     let result = if reply == "error" {
                         serde_json::json!({"status":"error","message":"PRIVATE=discard"})
                     } else {
                         serde_json::json!({"status":"ok","data":{
-                            "reference":if reply == "different" {"registry.example/other"} else {&expected.reference},
+                            "reference":if reply == "different" {"registry.example/other"} else if reply=="mirror" {&effective} else {&expected.reference},
                             "digest":if reply == "packed" {"packed".to_string()} else {format!("sha256:{}", "b".repeat(64))},
                             "size":123,"architecture":"arm64","os":"linux","layer_count":2,
                             "env":["PRIVATE=discard"],"layers":["discard"]}})
@@ -2955,7 +3152,60 @@ mod tests {
             .map(|index| (index % 256) as u8)
             .collect::<Vec<_>>();
         assert!(binary.len() as u64 <= MAX_TRANSFER);
-        for write in [true, false] {
+        // Plain files, activated image files, rejected activation, malformed
+        // acknowledgement and an ordinary observation deadline (no signals).
+        for (write, activation_case) in [
+            (true, "bare"),
+            (false, "bare"),
+            (true, "ok"),
+            (false, "ok"),
+            (true, "mounted"),
+            (false, "mounted"),
+            (false, "nonzero"),
+            (false, "verbose"),
+            (true, "rejected"),
+            (false, "malformed"),
+            (false, "deadline"),
+            (false, "transfer-deadline"),
+            (false, "output-limit"),
+        ] {
+            let expires = Instant::now()
+                + if matches!(activation_case, "deadline" | "transfer-deadline") {
+                    Duration::from_secs(2)
+                } else {
+                    Duration::from_secs(30)
+                };
+            let successful = matches!(
+                activation_case,
+                "bare" | "ok" | "nonzero" | "verbose" | "mounted"
+            );
+            let mut record =
+                smolvm::config::VmRecord::new("original".into(), 1, 512, vec![], vec![], false);
+            record.image = Some("local-dir:/fixture".into());
+            record.fork_overlay_owner = Some("original-overlay".into());
+            let mounted = activation_case == "mounted";
+            if mounted {
+                record.mounts = vec![(
+                    "/approved/backing".into(),
+                    "/mnt/volumes/data".into(),
+                    !write,
+                )];
+            }
+            let expected_mounts = smolvm::workload::record_mounts_to_bindings(&record);
+            let volume_gate = std::sync::Arc::new(crate::gate::MachineGate::default());
+            let volume_guard = mounted.then(|| volume_gate.try_lock().unwrap());
+            let expected_path = if mounted {
+                "/mnt/volumes/data/value"
+            } else {
+                "/workspace/data"
+            };
+            let mut file_options = options();
+            file_options.guest_path = expected_path.into();
+            let activation = if activation_case == "bare" {
+                None
+            } else {
+                crate::buffered::Metadata::file_activation(&record, expires).unwrap()
+            };
             let socket = root.join("agent.sock");
             let listener = UnixListener::bind(&socket).unwrap();
             listener.set_nonblocking(true).unwrap();
@@ -2967,9 +3217,50 @@ mod tests {
             } else {
                 Kind::Read
             };
-            let mut prepared = supervisor
-                .prepare(&root, socket.clone(), &options(), kind)
-                .unwrap();
+            let controls = mounted.then(|| {
+                [
+                    supervisor
+                        .pool
+                        .acquire(crate::jobs::Demand::volume_observation())
+                        .unwrap(),
+                    supervisor
+                        .pool
+                        .acquire(crate::jobs::Demand::volume_observation())
+                        .unwrap(),
+                ]
+            });
+            let mut prepared = if mounted {
+                let mut permit = supervisor
+                    .pool
+                    .acquire(crate::jobs::Demand::volume_mounts(1).unwrap())
+                    .unwrap();
+                permit
+                    .promote_mount_worker(
+                        TransferSupervisor::file_demand(&file_options, &kind, activation.as_ref())
+                            .unwrap(),
+                    )
+                    .unwrap();
+                supervisor
+                    .prepare_file_reserved(
+                        permit,
+                        &root,
+                        socket.clone(),
+                        &file_options,
+                        kind,
+                        activation.as_ref(),
+                    )
+                    .unwrap()
+            } else {
+                supervisor
+                    .prepare_file(
+                        &root,
+                        socket.clone(),
+                        &file_options,
+                        kind,
+                        activation.as_ref(),
+                    )
+                    .unwrap()
+            };
             if write {
                 prepared
                     .upload(
@@ -2997,10 +3288,72 @@ mod tests {
                     stream.set_nonblocking(false).unwrap();
                     stream.set_read_timeout(Some(Duration::from_secs(10))).unwrap();
                     stream.set_write_timeout(Some(Duration::from_secs(10))).unwrap();
+                    if activation_case != "bare" {
+                        match message(&mut stream) {
+                            AgentRequest::Run { image, command, env, workdir, user, mounts,
+                                timeout_ms, interactive, tty, detached, persistent_overlay_id,
+                                stdin_data, background, stop_vm_on_exit, .. } => {
+                                assert_eq!(image, "local-dir:/fixture");
+                                assert_eq!(command, ["/bin/true"]);
+                                assert!(env.is_empty());
+                                assert_eq!(mounts, expected_mounts);
+                                if mounted {
+                                    assert!(volume_gate.try_lock().is_err());
+                                    assert_eq!(supervisor.pool.counts().work, 1);
+                                    assert_eq!(supervisor.pool.counts().children, 1);
+                                }
+                                assert!(workdir.is_none() && user.is_none() && stdin_data.is_none());
+                                assert_eq!(persistent_overlay_id.as_deref(), Some("original-overlay"));
+                                assert!(timeout_ms.is_some() && interactive && !tty && !detached && !background && !stop_vm_on_exit);
+                            }
+                            _ => panic!("expected only fixed activation, never pull or lifecycle"),
+                        }
+                        if activation_case == "malformed" {
+                            stream.write_all(&encode_message(&AgentResponse::Ok { data: None }).unwrap()).unwrap();
+                            return;
+                        }
+                        if activation_case == "rejected" {
+                            stream.write_all(&encode_message(&AgentResponse::Error { message: "activation rejected".into(), code: None }).unwrap()).unwrap();
+                            return;
+                        }
+                        stream.write_all(&encode_message(&AgentResponse::Started).unwrap()).unwrap();
+                        if activation_case == "deadline" {
+                            // The deadline closes observation; the fake peer exits normally.
+                            assert_eq!(stream.read(&mut [0; 1]).unwrap(), 0);
+                            return;
+                        }
+                        if activation_case == "output-limit" {
+                            let frame = encode_message(&AgentResponse::Stdout { data: vec![0; 64 * 1024] }).unwrap();
+                            for _ in 0..=crate::buffered::FILE_ACTIVATION_OUTPUT_BYTES / (64 * 1024) {
+                                stream.write_all(&frame).unwrap();
+                            }
+                            assert_eq!(stream.read(&mut [0; 1]).unwrap(), 0);
+                            return;
+                        }
+                        if activation_case == "verbose" {
+                            stream.write_all(&encode_message(&AgentResponse::Stderr { data: vec![0; 8193] }).unwrap()).unwrap();
+                        }
+                        stream.write_all(&encode_message(&AgentResponse::Exited { exit_code: if matches!(activation_case, "nonzero" | "verbose") { 7 } else { 0 }, oom: false }).unwrap()).unwrap();
+                        drop(stream);
+                        if activation_case == "rejected" { return; }
+                        stream = loop {
+                            match listener.accept() {
+                                Ok((stream, _)) => break stream,
+                                Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                                    assert!(Instant::now() < until, "file worker did not reconnect");
+                                    std::thread::sleep(POLL);
+                                }
+                                Err(error) => panic!("file fixture accept failed: {error}"),
+                            }
+                        };
+                        stream.set_nonblocking(false).unwrap();
+                        stream.set_read_timeout(Some(Duration::from_secs(10))).unwrap();
+                        stream.set_write_timeout(Some(Duration::from_secs(10))).unwrap();
+                    }
                     if write {
                         match message(&mut stream) {
                             AgentRequest::FileWriteBegin { path, mode, total_size, .. } => {
-                                assert_eq!(path, "/workspace/data"); assert_eq!(mode, Some(0o600));
+                                assert_eq!(path, expected_path); assert_eq!(mode, Some(0o600));
                                 assert_eq!(total_size, binary.len() as u64);
                             }
                             _ => panic!("expected SDK streaming upload initialization"),
@@ -3015,7 +3368,11 @@ mod tests {
                         }
                         assert_eq!(observed, binary);
                     } else {
-                        assert!(matches!(message(&mut stream), AgentRequest::FileRead { path } if path == "/workspace/data"));
+                        assert!(matches!(message(&mut stream), AgentRequest::FileRead { path } if path == expected_path));
+                        if activation_case == "transfer-deadline" {
+                            assert_eq!(stream.read(&mut [0; 1]).unwrap(), 0);
+                            return;
+                        }
                         let chunks = binary.chunks(ipc::CHUNK as usize).collect::<Vec<_>>();
                         for (index, bytes) in chunks.iter().enumerate() {
                             let frame = encode_message(&AgentResponse::DataChunk {
@@ -3029,7 +3386,7 @@ mod tests {
                 let result = supervisor
                     .run(
                         prepared,
-                        Box::new(()),
+                        Box::new(volume_guard),
                         Instant::now() + Duration::from_secs(30),
                         &Cancellation::new(),
                     )
@@ -3037,11 +3394,14 @@ mod tests {
                 let RunResult::Collected(mut collected) = result else {
                     panic!("normal transfer was not collected");
                 };
-                assert!(collected.outcome.success());
-                assert!(collected.outcome.native_acknowledged);
-                assert_eq!(collected.outcome.observed_bytes, binary.len() as u64);
+                assert_eq!(collected.outcome.success(), successful);
+                assert_eq!(collected.outcome.native_acknowledged, successful);
+                assert_eq!(
+                    collected.outcome.observed_bytes,
+                    if successful { binary.len() as u64 } else { 0 }
+                );
                 assert!(!collected.termination_requested);
-                if !write {
+                if successful && !write {
                     collected.prepared.spool.verify().unwrap();
                     collected
                         .prepared
@@ -3058,8 +3418,18 @@ mod tests {
                         .unwrap();
                     assert_eq!(observed, binary);
                 }
+                if mounted {
+                    assert!(volume_gate.try_lock().is_err());
+                }
                 peer.join().unwrap();
+                assert!(
+                    matches!(listener.accept(), Err(error) if error.kind() == std::io::ErrorKind::WouldBlock),
+                    "unexpected guest request after collection"
+                );
             });
+            assert!(volume_gate.try_lock().is_ok());
+            drop(controls);
+            assert_eq!(supervisor.pool.counts().work, 0);
             std::fs::remove_file(socket).unwrap();
         }
         assert_eq!(supervisor.pool.counts().work, 0);

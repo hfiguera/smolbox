@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "status": "external-provisioning-runtime-limit-expired-not-graceful-qualification",
+  "observed_utc": "2026-10-16T22:55:00Z",
+  "guard_stop_utc": "2026-10-16T22:54:41Z",
+  "unit_state": {
+    "active": "failed",
+    "substate": "failed",
+    "result": "timeout",
+    "main_pid": 0,
+    "exec_main_code": 1,
+    "exec_main_status": 0
+  },
+  "agent_sent_process_signals": false,
+  "agent_requested_vm_shutdown": false,
+  "agent_extended_runtime_guard": false,
+  "older_registry_proof_owners_at_last_check": {
+    "count": 2,
+    "checked_utc": "2026-10-16T22:32:40Z",
+    "both_exact_original_pids_and_births_live": true,
+    "sdk_all_five_tables_each": 0,
+    "vmm_children_observed": 0,
+    "authority_and_frozen_source_archives_rehashed": true
+  },
+  "older_owner_graceful_collection_verified": false,
+  "earlier_pid_cleanup_request": "superseded-stale-do-not-apply-to-new-process-instances",
+  "completed_new_runs": {
+    "sdk_and_postgresql_runs_normally_exited_before_guard": true,
+    "private_memory_archive_sha256": "499cce965c92e292f4cd5a83de151916b2e264a1566fbbfb3deba14bcd29d331",
+    "private_postgresql_archive_sha256": "cad4b36dc881494fa070b93cebd966ee263d0aaeec07ee8ec0d5ac0337a186d3",
+    "local_and_outer_archives_verified": true
+  },
+  "disk_metadata_after_guard": {
+    "checked_utc": "2026-10-16T22:56:13Z",
+    "original_run": {
+      "bytes": 24766644224,
+      "mtime": 1792169349,
+      "unchanged_size_and_mtime": true
+    },
+    "provisioning": {
+      "present": true,
+      "bytes": 13933412352,
+      "mtime": 1792191240
+    },
+    "guest_filesystem_or_sdk_disks_after_guard_revalidated": false
+  },
+  "private_status_log_sha256": "ba31e62ef71996cb0fd2987a12dd2089f50747ba4d262654e0d8006648f4d3b1",
+  "scope": {
+    "normal_lab_shutdown_proved": false,
+    "sdk_or_record_adoption_authorized": false,
+    "crash_validation_deferred": true,
+    "crash_handling_qualified": false,
+    "parity_complete": false,
+    "distribution_approved": false
+  }
+}

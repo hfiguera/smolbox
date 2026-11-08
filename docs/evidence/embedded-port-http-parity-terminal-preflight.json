@@ -1,0 +1,292 @@
+{
+  "schema": 1,
+  "scope": "standalone-terminal-preflight-source-and-deterministic-contracts",
+  "baseline_commit": "ee7c6e65a19eeddc3837d66008d27962b20f52eb",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "source_inputs": [
+    {
+      "path": "lib/smolbox/backend/embedded.ex",
+      "sha256": "4468f8353c1e5fe47b753fcef20d6be71319624a01db145ed1a649ac7b83abd3"
+    },
+    {
+      "path": "lib/smolbox/backend/embedded_reply.ex",
+      "sha256": "8661d9ce837815cc1a3257ebf7eea441ecc5e2c23a4d2043b1b690f2ab71f70a"
+    },
+    {
+      "path": "lib/smolbox/backend/features.ex",
+      "sha256": "d0a7f1b00e80c648d55d9172e69a1f46acb5dc5e33b0cf30105ee1e0db7c5d18"
+    },
+    {
+      "path": "lib/smolbox/embedded/channel.ex",
+      "sha256": "8651af1bde677264549f352883dff21f0a7c04b78715cbea0644e136f7e1ff53"
+    },
+    {
+      "path": "lib/smolbox/embedded/port.ex",
+      "sha256": "14852130d8bc43a6493fd54b48a7a68b5abc3c1f386136e9b687dad9943eb13f"
+    },
+    {
+      "path": "lib/smolbox/embedded/protocol.ex",
+      "sha256": "f3e59e8fa82f1363a64d209c809041b5b23c205df06836d7707fe78872500833"
+    },
+    {
+      "path": "lib/smolbox/embedded/request.ex",
+      "sha256": "04a7346d44bd937bb2395baf65964c87fb77eba7f583bb7be12f1b687377d444"
+    },
+    {
+      "path": "lib/smolbox/embedded/sdk_identity.ex",
+      "sha256": "286e589aa22d6c6ed816b02055b215d8bbc9a09240bad44176ad60bdc7ab5c60"
+    },
+    {
+      "path": "lib/smolbox/terminal/connection/embedded.ex",
+      "sha256": "7f0570d25f3ed0e0f6216efae05a149529847871458511fe129ff576ca4ff5bb"
+    },
+    {
+      "path": "native/README.md",
+      "sha256": "1f9ea59fe82e787e0799a1191d8c86f9f6dc398cf14d55ea9c26b2d23a732c7d"
+    },
+    {
+      "path": "native/http-parity-api-boundaries.md",
+      "sha256": "f0f170b5e70f1a1deb1edab22ea942ff3547cdee5aaad9ddfdbc19338782050a"
+    },
+    {
+      "path": "native/policy-linux.json",
+      "sha256": "0a13b0d03ca2091a4cbc37fe261a345cdeb9e53ce31d52990fe84a26cd4daedd"
+    },
+    {
+      "path": "native/policy.json",
+      "sha256": "a9b95768e2baba7d6515585e6fa8791782ddd4988e8cefde6a58f4d7d0e780f7"
+    },
+    {
+      "path": "native/smolbox-engine/src/terminal_supervisor.rs",
+      "sha256": "915a0a160a2ac2c441d66ac7ab9e71895c3e105b1d5e1e756a4be7848cd67ef8"
+    },
+    {
+      "path": "native/smolbox-port/src/adapter.rs",
+      "sha256": "cd7efd808a1d6da01e8afa93aa1d538a84abc10f830687eede3f1742720d37e2"
+    },
+    {
+      "path": "native/smolbox-port/src/package.rs",
+      "sha256": "69095219f3c6bc697d26607cb32baaa955c8282215133bd2ec2d57311d5d927c"
+    },
+    {
+      "path": "native/smolbox-port/src/runtime.rs",
+      "sha256": "e2374d427106d791d3186d7fe532a399eba769741deed09b351925c9e3e58f72"
+    },
+    {
+      "path": "native/smolbox-port/tests/native_proof.py",
+      "sha256": "952265ccbf230fd4ec1b2b9f48e0e40db402222b5f2b10f95f2393bd64d23dc9"
+    },
+    {
+      "path": "native/smolbox-protocol/fixtures/hello-v2-linux-terminal-preflight.json",
+      "sha256": "149e7c0a1f6e7dc37abf6668c6ec12f6cccebc9375fab5b25c0015da34188493"
+    },
+    {
+      "path": "native/smolbox-protocol/fixtures/hello-v2-terminal-preflight.json",
+      "sha256": "0db81b1c38640c08cdc7dd6bbebab4e2586b654011e60ae1f44fdf1a769fe965"
+    },
+    {
+      "path": "native/smolbox-protocol/fixtures/terminal-preflight-request.json",
+      "sha256": "d688db5b41b0cc1cf9d4e375b1f514ebd153d5e173d8701cfefa8b7da60b7937"
+    },
+    {
+      "path": "native/smolbox-protocol/src/session.rs",
+      "sha256": "c99441aa3ca8ef3101c720d6283dd0b76bed1a9481b454d5c40e633d0715ec70"
+    },
+    {
+      "path": "native/smolbox-protocol/src/wire.rs",
+      "sha256": "2fe5806a3bcf91efed9111e3f51c4fc19bb52007bee44763b591ab89e8cb8654"
+    },
+    {
+      "path": "native/smolbox-protocol/tests/contract.rs",
+      "sha256": "da4020278a18bb3f9bc6fec9200c98999fd886f6d4847e426ff865be8872e6d2"
+    },
+    {
+      "path": "test/support/embedded_fixture.py",
+      "sha256": "8d6b26386e26972860bf881632ff02b1018cec4fa68f11c5e892d814ebfb24fb"
+    },
+    {
+      "path": "test/support/embedded_package.ex",
+      "sha256": "e83bde3e3ecbdb405b2c64ab66a8721e6aabdd94ee1030609dee66a9a15cf4f4"
+    },
+    {
+      "path": "test/unit/embedded_backend_test.exs",
+      "sha256": "67345db333c35b8df73c647b37d8ac5aa3d558d930ca34a7f0d68a342cb57184"
+    },
+    {
+      "path": "test/unit/embedded_package_activation_test.exs",
+      "sha256": "e43c54ec3fa193b9e2d31662976cc44402fdf7b9f0b7c37a64259a0781a16181"
+    },
+    {
+      "path": "test/unit/embedded_terminal_contract_test.exs",
+      "sha256": "b4b3595b62f21b37750ca014b73dac715faee061c27d59af91593040f627fd09"
+    },
+    {
+      "path": "test/unit/embedded_terminal_runtime_test.exs",
+      "sha256": "895cab04b80b460f8a982e7f28b0facb3df1369a03820d3dbcf0871ffd59af0a"
+    }
+  ],
+  "semantics": [
+    "Read-only original-receipt image eligibility; no machine start, worker, terminal reservation, agent probe or PTY.",
+    "Stopped images remain eligible. Bare, empty image, branchable and held records reject without dispatch.",
+    "Managed terminal source pins the original owner and epoch; later open independently validates current state.",
+    "Separately negotiated terminal_preflight:1 requires terminals:1; old approved descriptors retain their existing open path.",
+    "Wire and engine enforce a 30-second observation ceiling; no persistent codec shape change."
+  ],
+  "validation": [
+    {
+      "check": "rust_release",
+      "log_sha256": "63e92ee1d457b6d46767c4ca6d57307fb3fd78ff51b46fd63f555a0a6b1d30ec",
+      "engine_passed": 865,
+      "port_passed": 78,
+      "protocol_unit_passed": 77,
+      "protocol_contract_passed": 58,
+      "ignored": 24
+    },
+    {
+      "check": "elixir_root",
+      "log_sha256": "60ae323f19e00c132893e7bf08611d198c9b1a86903e7490c75749c5a0961605",
+      "passed": 1632,
+      "excluded_runtime_or_deferred": 42,
+      "max_cases": 4
+    },
+    {
+      "check": "elixir_focused_current",
+      "log_sha256": "967135504aabd59fa3edf108dfe98fc40cb3028dc1a1626697e0c3e434e47954",
+      "passed": 46,
+      "excluded": 2
+    },
+    {
+      "check": "elixir_focused_minimum",
+      "log_sha256": "b67ca908642e58fa35ab8382784807f7849ea294d326ce207fd286291fb15e8b",
+      "passed": 46,
+      "excluded": 2
+    },
+    {
+      "check": "clippy",
+      "log_sha256": "de859ae032e589845541e6c5dec7c1f5771a5b5f184de073f27fa5c4a477a4e0",
+      "strict": true,
+      "passed": true
+    },
+    {
+      "check": "credo",
+      "log_sha256": "cdb2165e750ef10d8a56a45340bf44f1d8260e22fe406a8472967353f800994b",
+      "strict_findings": 50,
+      "new_findings": 0
+    },
+    {
+      "check": "documentation",
+      "warnings_as_errors": true,
+      "passed": true,
+      "log_sha256": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d"
+    }
+  ],
+  "sdk_source_inventory_checks": [
+    "native/bootstrap.py --check",
+    "native/bootstrap.py --clean --check"
+  ],
+  "ordinary_changed_native_package_qualification": false,
+  "http_only_consumers": [
+    {
+      "toolchain_mode": "current",
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "archive_sha256": "a4edb3cde38ef49db984b620a85eaca1c72d8c7047ff881c8d0842247c789b24",
+      "report_sha256": "9799a664aa0b41e82e3585b9818fb3e41abd4eb6d9c85c6247eb865f18b77111",
+      "without_rust": true,
+      "native_assets_exercised": false,
+      "smoke": {
+        "checkpoint": true,
+        "client": true,
+        "guest_files": true,
+        "interactive": true,
+        "legacy_1_14_6_explicit": "1.14.6",
+        "legacy_runtime_explicit": "1.14.1",
+        "managed_branches": true,
+        "managed_checkpoints": true,
+        "managed_exports": true,
+        "network_policy": true,
+        "offline_default": true,
+        "runtime_1_16_0_explicit": "1.16.0",
+        "runtime_default": "1.22.0",
+        "supervisor": true,
+        "unqualified_runtime_rejected": "1.16.2",
+        "versions": {
+          "jason": "1.4.5",
+          "mint": "1.11.0",
+          "mint_web_socket": "1.0.6",
+          "nimble_options": "1.1.1",
+          "req": "0.7.5",
+          "telemetry": "1.4.2"
+        },
+        "without_rust": true,
+        "workload": true
+      }
+    },
+    {
+      "toolchain_mode": "minimum",
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "archive_sha256": "a4edb3cde38ef49db984b620a85eaca1c72d8c7047ff881c8d0842247c789b24",
+      "report_sha256": "1d6f147660f2ed0e3b1c08c6f84dd218559ffbbe5e254dc95e8c1d2031abf7be",
+      "without_rust": true,
+      "native_assets_exercised": false,
+      "smoke": {
+        "checkpoint": true,
+        "client": true,
+        "guest_files": true,
+        "interactive": true,
+        "legacy_1_14_6_explicit": "1.14.6",
+        "legacy_runtime_explicit": "1.14.1",
+        "managed_branches": true,
+        "managed_checkpoints": true,
+        "managed_exports": true,
+        "network_policy": true,
+        "offline_default": true,
+        "runtime_1_16_0_explicit": "1.16.0",
+        "runtime_default": "1.22.0",
+        "supervisor": true,
+        "unqualified_runtime_rejected": "1.16.2",
+        "versions": {
+          "jason": "1.4.0",
+          "mint": "1.11.0",
+          "mint_web_socket": "1.0.6",
+          "nimble_options": "1.1.0",
+          "req": "0.7.4",
+          "telemetry": "1.3.0"
+        },
+        "without_rust": true,
+        "workload": true
+      }
+    }
+  ],
+  "parity_complete": false,
+  "crash_validation_performed": false,
+  "distribution_approved": false,
+  "limitations": [
+    "Fixture Port tests use deterministic Python peers; they are not native VM qualification.",
+    "Changed helper and package identities require fresh ordinary platform acceptance.",
+    "All complete parity matrix rows remain pending."
+  ],
+  "source_commit": "570d419f29cbe69fa24249b95826819cd319af8a",
+  "ordinary_runner_validation": {
+    "initial_result": "three stale exact-policy fixture expectations failed; retained privately, then corrected to the new explicit fixtures",
+    "initial_log_sha256": "ba07008a4d0fb44d03b951caec94c1ebb430b7712c0cba26636b44abf91eab7f",
+    "final_passed": 43,
+    "skipped_asset_dependent": 4,
+    "final_log_sha256": "c8aa040b37f435ca3616d0d1b9daa9b6f84c2df2547e00fe82f353e4ab727361",
+    "ordinary_live_run_performed": false,
+    "inputs": [
+      {
+        "path": "native/smolbox-port/tests/ordinary_proof.py",
+        "sha256": "a2c4d7c1e7a4678c4332021600a48587a50a3c24971148ea5b3ba8dc3199a396"
+      },
+      {
+        "path": "native/tests/test_ordinary_runner.py",
+        "sha256": "ace3c5ca14e2aa77438f477cb24bf184f806db4c3b79f601f7aff22a0e1239cd"
+      },
+      {
+        "path": "native/tests/test_package_metadata.py",
+        "sha256": "e2fb05ed092ad8eb879fc4c9ccfef376c0e2c7d66eefe11d14dade289fbf0354"
+      }
+    ]
+  },
+  "ordinary_linux_followup": "docs/evidence/embedded-port-http-parity-terminal-preflight-linux-9bf4764.json"
+}

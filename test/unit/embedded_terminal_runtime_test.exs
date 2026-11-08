@@ -1,6 +1,6 @@
 defmodule SmolBox.EmbeddedTerminalRuntimeTest do
   use ExUnit.Case, async: false
-  alias SmolBox.Embedded.Port
+  alias SmolBox.Embedded.{Port, SDKIdentity}
   alias SmolBox.{ExecutionSpec, Machines, ManagedMachineSpec, Runtime, Terminal, TestArtifacts}
   alias SmolBox.Runtime.Config, as: RuntimeConfig
   alias SmolBox.Store.{Codec, Memory}
@@ -22,8 +22,26 @@ defmodule SmolBox.EmbeddedTerminalRuntimeTest do
     end
   end
 
-  setup do
-    native = Package.create(protocol_major: 2, backend: true, persistent_backend: true)
+  setup context do
+    sdk =
+      SDKIdentity.implemented(
+        "1.22.0",
+        "9f446ae00219148ca4a703914f44a8e2fab11655"
+      )
+
+    sdk =
+      if context[:terminal_preflight],
+        do: put_in(sdk, ["feature_versions", "terminal_preflight"], 1),
+        else: sdk
+
+    native =
+      Package.create(
+        protocol_major: 2,
+        backend: true,
+        persistent_backend: true,
+        sdk_identity: sdk
+      )
+
     native = %{native | budget: %{native.budget | max_response_bytes: 4096}}
     on_exit(fn -> File.rm_rf!(native.package_path) end)
     store = start_supervised!(Memory)
@@ -44,6 +62,7 @@ defmodule SmolBox.EmbeddedTerminalRuntimeTest do
     %{native: native, store: store, options: options}
   end
 
+  @tag terminal_preflight: true
   test "public terminal preserves binary credit resize Exit and durable machine accounting",
        context do
     runtime = runtime(context.options)
@@ -58,6 +77,11 @@ defmodule SmolBox.EmbeddedTerminalRuntimeTest do
              Task.async(fn -> Terminal.input(terminal, "foreign") end) |> Task.await()
 
     assert {:ok, {:output, "ready\r\n"}} = Terminal.next(terminal)
+    operations = requests(context.native) |> Enum.map(& &1["operation"])
+
+    assert Enum.find_index(operations, &(&1 == "terminal_preflight")) <
+             Enum.find_index(operations, &(&1 == "terminal_open"))
+
     assert :ok = Terminal.input(terminal, <<0, 255, 128>>)
     assert {:ok, {:output, <<0, 255, 128>>}} = Terminal.next(terminal)
     assert :ok = Terminal.resize(terminal, 120, 43)

@@ -6,7 +6,12 @@ defmodule SmolBox.CI.NativeConsumer do
   @native_options ~w(native_package native_fixture native_sha256 native_domain_json native_output)a
 
   def validate_options!(options) do
+    validate_images!(options)
+    validate_growth!(options)
+    validate_volume!(options)
     validate_terminal!(options)
+    validate_workload!(options)
+    validate_network!(options)
 
     Util.ensure!(
       !(options[:native_ordinary] || options[:native_public]) or options[:native_package] != nil,
@@ -56,7 +61,7 @@ defmodule SmolBox.CI.NativeConsumer do
     tooling = Path.join(consumer, "proof-tooling")
     File.mkdir!(tooling)
 
-    files = proof_files(consumer, tooling, options[:native_public])
+    files = proof_files(consumer, tooling, options)
 
     hashes =
       Map.new(files, fn {source, destination} ->
@@ -64,6 +69,8 @@ defmodule SmolBox.CI.NativeConsumer do
         File.cp!(source, destination)
         {Path.basename(destination), Util.digest(destination)}
       end)
+
+    {options, hashes} = copy_settings(tooling, options, hashes)
 
     arguments = [
       "mix",
@@ -97,6 +104,7 @@ defmodule SmolBox.CI.NativeConsumer do
         termination: :retain
       )
 
+    retain_source(consumer, result)
     File.write!(log_path, log, [:exclusive])
     File.chmod!(log_path, 0o600)
 
@@ -127,7 +135,12 @@ defmodule SmolBox.CI.NativeConsumer do
       )
     end
 
+    verify_growth(evidence, options)
+    verify_volume(evidence, options)
     verify_terminal(evidence, options)
+    verify_network(evidence, options)
+    verify_workload(evidence, options)
+    verify_images(evidence, options)
 
     %{
       scope: scope(options),
@@ -135,6 +148,232 @@ defmodule SmolBox.CI.NativeConsumer do
       proof_tool_sha256: hashes,
       evidence: evidence
     }
+  end
+
+  @doc false
+  def retain_source(consumer, %{retained: true} = result) do
+    # Set the in-process guard before diagnostic I/O: even a full disk must not
+    # make the caller remove code still used by the retained qualification owner.
+    Process.put({__MODULE__, :retained_source, consumer}, true)
+
+    marker = %{
+      scope: "retained-native-consumer-source",
+      child: Map.take(result, [:running, :diagnostic_os_pid]),
+      cleanup_authority: false
+    }
+
+    path = Path.join(consumer, ".native-consumer-retained.json")
+    File.write!(path, JSON.encode!(marker), [:exclusive])
+    File.chmod!(path, 0o600)
+    :ok
+  rescue
+    _ -> :diagnostic_unavailable
+  end
+
+  def retain_source(_consumer, _result), do: :ok
+
+  @doc false
+  def retained_source?(consumer),
+    do:
+      Process.get({__MODULE__, :retained_source, consumer}, false) or
+        File.lstat(Path.join(consumer, ".native-consumer-retained.json")) != {:error, :enoent}
+
+  defp validate_volume!(options) do
+    Util.ensure!(
+      !options[:native_volume] or options[:native_public] == true,
+      "--native-volume requires explicit --native-public"
+    )
+
+    Util.ensure!(
+      !options[:native_volume] or
+        !(options[:native_terminal] || options[:native_network] || options[:native_workload]),
+      "native volume, terminal, workload and network campaigns must run separately"
+    )
+
+    if options[:native_volume] do
+      root = options[:native_volume_root]
+
+      Util.ensure!(
+        is_binary(root) and Path.type(root) == :absolute,
+        "--native-volume requires an explicit absolute --native-volume-root"
+      )
+    else
+      Util.ensure!(
+        !Keyword.has_key?(options, :native_volume_root),
+        "native volume root requires --native-volume"
+      )
+    end
+  end
+
+  defp validate_images!(options) do
+    Util.ensure!(
+      !options[:native_images] or options[:native_public] == true,
+      "--native-images requires explicit --native-public"
+    )
+
+    if options[:native_images] do
+      Util.ensure!(
+        !Enum.any?(
+          ~w(native_growth native_volume native_terminal native_network native_workload)a,
+          &options[&1]
+        ),
+        "native image and other campaigns must run separately"
+      )
+
+      file = options[:native_images_settings]
+
+      Util.ensure!(
+        is_binary(file) and Path.type(file) == :absolute,
+        "--native-images requires explicit absolute --native-images-settings"
+      )
+
+      Util.private_file!(file, 65_536)
+    else
+      Util.ensure!(
+        !Keyword.has_key?(options, :native_images_settings),
+        "native image settings require --native-images"
+      )
+    end
+  end
+
+  defp verify_images(evidence, options) do
+    if options[:native_images] do
+      Util.ensure!(
+        evidence["campaign"] == "ordinary-public-native-images" and
+          evidence["store_mode"] == "ephemeral" and evidence["final_reserved_slots"] == 0 and
+          evidence["retained_binary_bytes"] == 65_537 and
+          evidence["stopped_runtime_replacement"] == true and
+          evidence["immutable_creation_retained"] == true,
+        "native consumer did not qualify public source lifecycle"
+      )
+
+      case evidence["source_kind"] do
+        "oci" ->
+          Util.ensure!(
+            get_in(evidence, ["image_operations", "approved_pull_observed"]) == true and
+              get_in(evidence, ["image_operations", "duplicate_pull_reused"]) == true and
+              get_in(evidence, ["image_operations", "creation_source_unchanged"]) == true,
+            "native consumer did not qualify approved OCI image operations"
+          )
+
+          Util.ensure!(
+            !evidence["configured_startup"] or evidence["startup_counts"] == [1, 2],
+            "native consumer did not qualify configured OCI startup"
+          )
+
+        "registry" ->
+          Util.ensure!(
+            evidence["cold_warm_registry"] == true and
+              get_in(evidence, ["image_operations", "imported_pull_rejected"]) == true,
+            "native consumer did not qualify cold/warm registry preparation"
+          )
+
+        _ ->
+          raise ArgumentError, "native source consumer reported an unsupported source"
+      end
+    end
+  end
+
+  defp validate_growth!(options) do
+    Util.ensure!(
+      !options[:native_growth] or options[:native_public] == true,
+      "--native-growth requires explicit --native-public"
+    )
+
+    Util.ensure!(
+      !options[:native_growth] or
+        !(options[:native_volume] || options[:native_terminal] ||
+            options[:native_network] || options[:native_workload]),
+      "native growth, volume, terminal, workload and network campaigns must run separately"
+    )
+
+    if Keyword.has_key?(options, :native_growth_settings) do
+      Util.ensure!(
+        options[:native_growth] == true,
+        "native growth settings require --native-growth"
+      )
+
+      file = options[:native_growth_settings]
+
+      Util.ensure!(
+        is_binary(file) and Path.type(file) == :absolute,
+        "native growth settings require an explicit absolute path"
+      )
+
+      Util.private_file!(file, 65_536)
+    end
+  end
+
+  defp copy_settings(tooling, options, hashes) do
+    Enum.reduce(
+      [
+        {:native_images_settings, "images-settings.json"},
+        {:native_growth_settings, "growth-settings.json"}
+      ],
+      {options, hashes},
+      fn {key, name}, {options, hashes} ->
+        if file = options[key] do
+          path = Path.join(tooling, name)
+          File.write!(path, Util.private_file!(file, 65_536), [:exclusive])
+          File.chmod!(path, 0o600)
+          {Keyword.put(options, key, path), Map.put(hashes, name, Util.digest(path))}
+        else
+          {options, hashes}
+        end
+      end
+    )
+  end
+
+  defp verify_growth(evidence, options) do
+    if options[:native_growth] do
+      expected = %{
+        "campaign" => "ordinary-public-native-growth",
+        "phase" => "single",
+        "store_mode" => "ephemeral",
+        "growth_history_retained" => true,
+        "immutable_creation_retained" => true,
+        "growth_budget_rejected_before_dispatch" => true,
+        "running_growth_rejected" => true,
+        "drain_retained" => true,
+        "duplicate_growth_retained" => true,
+        "conflicting_growth_rejected" => true,
+        "storage_filesystem_growth" => true,
+        "overlay_geometry_verified" => true,
+        "omitted_target_retained" => true,
+        "material_chain_retained" => true,
+        "stopped_runtime_replacement" => true,
+        "final_reserved_slots" => 0,
+        "final_reserved_disk_gb" => 0
+      }
+
+      Util.ensure!(
+        Enum.all?(expected, fn {key, value} -> evidence[key] == value end),
+        "native consumer did not qualify the requested public stopped-growth workflow"
+      )
+    end
+  end
+
+  defp verify_volume(evidence, options) do
+    if options[:native_volume] do
+      expected = %{
+        "campaign" => "ordinary-public-native-volumes",
+        "phase" => "single",
+        "store_mode" => "ephemeral",
+        "competing_attachment_rejected" => true,
+        "volume_budget_rejected_before_dispatch" => true,
+        "readonly_reattachment" => true,
+        "stopped_runtime_replacement" => true,
+        "proof_retained" => true,
+        "running_sibling_preserved" => true,
+        "final_reserved_slots" => 0,
+        "final_reserved_disk_gb" => 0
+      }
+
+      Util.ensure!(
+        Enum.all?(expected, fn {key, value} -> evidence[key] == value end),
+        "native consumer did not qualify the requested public mounted-volume workflow"
+      )
+    end
   end
 
   defp validate_terminal!(options),
@@ -145,9 +384,138 @@ defmodule SmolBox.CI.NativeConsumer do
       )
 
   defp mode_arguments(options) do
-    ordinary = if options[:native_ordinary], do: ["--ordinary"], else: []
+    ordinary =
+      if options[:native_ordinary] || options[:native_growth], do: ["--ordinary"], else: []
+
     terminal = if options[:native_terminal], do: ["--terminal"], else: []
-    ordinary ++ terminal
+
+    network =
+      if options[:native_network] do
+        [
+          "--host-port",
+          Integer.to_string(options[:native_host_port]),
+          "--namespace-identity",
+          options[:namespace_identity],
+          "--manifest-sha256",
+          Util.digest(Path.join(options[:native_package], "package.json"))
+        ]
+      else
+        []
+      end
+
+    workload =
+      if options[:native_workload] do
+        [
+          "--startup-workloads",
+          "--namespace-identity",
+          options[:namespace_identity],
+          "--manifest-sha256",
+          Util.digest(Path.join(options[:native_package], "package.json"))
+        ]
+      else
+        []
+      end
+
+    volume =
+      if options[:native_volume], do: ["--volume-root", options[:native_volume_root]], else: []
+
+    images =
+      if options[:native_images],
+        do: ["--ordinary", "--settings", options[:native_images_settings]],
+        else: []
+
+    growth =
+      if file = options[:native_growth_settings], do: ["--settings", file], else: []
+
+    ordinary ++ terminal ++ network ++ workload ++ volume ++ images ++ growth
+  end
+
+  defp validate_network!(options) do
+    Util.ensure!(
+      !options[:native_network] or options[:native_public] == true,
+      "--native-network requires explicit --native-public"
+    )
+
+    Util.ensure!(
+      !(options[:native_network] && options[:native_terminal]),
+      "native network and terminal campaigns must run separately"
+    )
+
+    if options[:native_network] do
+      Util.ensure!(
+        is_integer(options[:native_host_port]) and options[:native_host_port] in 1024..65_535,
+        "--native-network requires an explicit --native-host-port from 1024 to 65535"
+      )
+
+      Util.ensure!(
+        is_binary(options[:namespace_identity]) and
+          Regex.match?(~r/\Anet:\[[0-9]+\]\z/, options[:namespace_identity]),
+        "--native-network requires the verified namespace identity from network_fixture.py"
+      )
+    else
+      Util.ensure!(
+        !Keyword.has_key?(options, :native_host_port) and
+          (options[:native_workload] == true or !Keyword.has_key?(options, :namespace_identity)),
+        "native network fixture options require --native-network"
+      )
+    end
+  end
+
+  defp validate_workload!(options) do
+    Util.ensure!(
+      !options[:native_workload] or options[:native_public] == true,
+      "--native-workload requires explicit --native-public"
+    )
+
+    Util.ensure!(
+      !(options[:native_workload] && (options[:native_terminal] || options[:native_network])),
+      "native workload, network and terminal campaigns must run separately"
+    )
+
+    if options[:native_workload] do
+      Util.ensure!(
+        is_binary(options[:namespace_identity]) and
+          Regex.match?(~r/\Anet:\[[0-9]+\]\z/, options[:namespace_identity]),
+        "--native-workload requires the verified namespace identity from network_fixture.py"
+      )
+    end
+  end
+
+  defp verify_workload(evidence, options) do
+    if options[:native_workload] do
+      cases = evidence["cases"] || []
+
+      Util.ensure!(
+        evidence["campaign"] == "ordinary-public-native-workloads" and
+          evidence["workload_startup_qualified"] == true and
+          Enum.map(cases, & &1["kind"]) == ["neutral", "inherited", "override", "missing"] and
+          Enum.all?(
+            cases,
+            &(&1["owned_deleted"] == true and
+                &1["changed_workload_rejected_before_dispatch"] == true and
+                &1["retained_across_stopped_runtime_replacement"] == true)
+          ),
+        "native consumer did not qualify ordinary public startup workload behavior"
+      )
+    end
+  end
+
+  defp verify_network(evidence, options) do
+    if options[:native_network] do
+      cases = evidence["cases"] || []
+
+      Util.ensure!(
+        evidence["campaign"] == "ordinary-public-native-network-mappings" and
+          evidence["public_memory_port_reservations_qualified"] == true and match?([_, _], cases) and
+          Enum.all?(
+            cases,
+            &(&1["owned_deleted"] == true and
+                &1["conflict_rolls_back_before_dispatch"] == true and
+                &1["reservation_survives_stop_and_runtime_replacement"] == true)
+          ),
+        "native consumer did not qualify ordinary public network/port reservation behavior"
+      )
+    end
   end
 
   defp verify_terminal(evidence, options) do
@@ -169,22 +537,76 @@ defmodule SmolBox.CI.NativeConsumer do
 
   defp preserve_retained(_result, _log_path), do: :ok
 
-  defp proof_files(consumer, tooling, public) do
-    script = if public, do: "embedded-runtime-proof.exs", else: "embedded-port-proof.exs"
+  defp proof_files(consumer, tooling, options) do
+    script = proof_script(options)
 
     files = [
       {"scripts/#{script}", Path.join(consumer, "native-proof.exs")},
       {"native/smolbox-port/tests/native_proof.py", Path.join(tooling, "native_proof.py")}
     ]
 
-    if public do
-      files ++
-        [
-          {"examples/embedded_port/lib/demo.ex", Path.join(tooling, "demo.ex")},
-          {"examples/embedded_port/config.example.exs", Path.join(tooling, "config.example.exs")}
-        ]
-    else
-      files
+    proof_support(files, tooling, options)
+  end
+
+  defp proof_script(options) do
+    cond do
+      options[:native_images] -> "embedded-images-runtime-proof.exs"
+      options[:native_growth] -> "embedded-growth-runtime-proof.exs"
+      options[:native_volume] -> "embedded-volume-runtime-proof.exs"
+      options[:native_network] || options[:native_workload] -> "embedded-network-proof.exs"
+      options[:native_public] -> "embedded-runtime-proof.exs"
+      true -> "embedded-port-proof.exs"
+    end
+  end
+
+  defp proof_support(files, tooling, options) do
+    cond do
+      options[:native_images] ->
+        files ++
+          Enum.map(~w(images_demo.ex images_control.ex owned_control.ex), fn name ->
+            {"examples/embedded_port/lib/#{name}", Path.join(tooling, name)}
+          end) ++
+          [
+            {"examples/embedded_port/config.example.exs",
+             Path.join(tooling, "config.example.exs")}
+          ]
+
+      options[:native_growth] ->
+        files ++
+          Enum.map(~w(growth_demo.ex growth_control.ex owned_control.ex), fn name ->
+            {"examples/embedded_port/lib/#{name}", Path.join(tooling, name)}
+          end) ++
+          [
+            {"examples/embedded_port/config.example.exs",
+             Path.join(tooling, "config.example.exs")}
+          ]
+
+      options[:native_volume] ->
+        files ++
+          Enum.map(~w(volume_demo.ex volume_control.ex), fn name ->
+            {"examples/embedded_port/lib/#{name}", Path.join(tooling, name)}
+          end) ++
+          [
+            {"examples/embedded_port/config.example.exs",
+             Path.join(tooling, "config.example.exs")}
+          ]
+
+      options[:native_network] || options[:native_workload] ->
+        files ++
+          Enum.map(~w(ordinary_proof network_fixture network_proof), fn name ->
+            {"native/smolbox-port/tests/#{name}.py", Path.join(tooling, "#{name}.py")}
+          end)
+
+      options[:native_public] ->
+        files ++
+          [
+            {"examples/embedded_port/lib/demo.ex", Path.join(tooling, "demo.ex")},
+            {"examples/embedded_port/config.example.exs",
+             Path.join(tooling, "config.example.exs")}
+          ]
+
+      true ->
+        files
     end
   end
 

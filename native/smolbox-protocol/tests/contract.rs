@@ -36,6 +36,34 @@ fn hello() -> Hello {
         sdk: None,
     }
 }
+
+#[test]
+fn linux_image_descriptor_preserves_the_previous_platform_contract() {
+    let current: ServerMessage =
+        serde_json::from_str(include_str!("../fixtures/hello-v2-linux-images.json")).unwrap();
+    let previous: ServerMessage = serde_json::from_str(include_str!(
+        "../fixtures/hello-v2-linux-terminal-preflight.json"
+    ))
+    .unwrap();
+    let ServerMessage::Hello { hello: current } = current else {
+        unreachable!()
+    };
+    let ServerMessage::Hello { hello: previous } = previous else {
+        unreachable!()
+    };
+    current.validate().unwrap();
+    previous.validate().unwrap();
+    assert!(current.capabilities == current.sdk.as_ref().unwrap().capabilities());
+    assert!(current.capabilities.contains(&Capability::PrepareArtifact));
+    assert!(current.capabilities.contains(&Capability::ListImages));
+    assert!(current.capabilities.contains(&Capability::PullImage));
+    assert!(!previous.capabilities.contains(&Capability::PrepareArtifact));
+    assert!(current.limits == previous.limits);
+    let mut sdk = current.sdk.as_ref().unwrap().as_ref().clone();
+    sdk.feature_versions.remove("remote_sources");
+    sdk.feature_versions.remove("images");
+    assert!(&sdk == previous.sdk.as_deref().unwrap());
+}
 fn receipt() -> Receipt {
     Receipt {
         target_id: "embedded-local".into(),
@@ -405,6 +433,31 @@ fn volume_hello_declares_exact_limits_platform_and_dependencies_without_changing
     assert!(hello().limits.volumes.is_none());
     let baseline = parity_hello();
     assert!(baseline.limits.volumes.is_none());
+}
+
+#[test]
+fn linux_storage_hello_adds_growth_without_changing_volume_only_approval() {
+    let current: ServerMessage =
+        serde_json::from_str(include_str!("../fixtures/hello-v2-linux-current.json")).unwrap();
+    let older: ServerMessage =
+        serde_json::from_str(include_str!("../fixtures/hello-v2-volumes.json")).unwrap();
+    let ServerMessage::Hello { hello: current } = current else {
+        unreachable!()
+    };
+    let ServerMessage::Hello { hello: older } = older else {
+        unreachable!()
+    };
+    current.validate().unwrap();
+    older.validate().unwrap();
+    assert!(current.capabilities == current.sdk.as_ref().unwrap().capabilities());
+    assert!(current.limits == older.limits);
+    assert!(current.capabilities.contains(&Capability::ExpandDisks));
+    assert!(current.capabilities.contains(&Capability::InspectGrowth));
+    assert!(current.capabilities.contains(&Capability::QualifyGrowth));
+    assert!(!older.capabilities.contains(&Capability::ExpandDisks));
+    let mut sdk = current.sdk.as_ref().unwrap().as_ref().clone();
+    sdk.feature_versions.remove("disk_growth");
+    assert!(&sdk == older.sdk.as_deref().unwrap());
 }
 fn growth_operation(inspect: bool) -> Operation {
     let proof = growth_fixture();
@@ -2879,4 +2932,83 @@ fn mounted_observations_are_exact_bounded_and_protocol_two_only() {
             serde_json::from_value::<Outcome>(changed).map_or(true, |v| v.validate_for(2).is_err())
         );
     }
+}
+
+#[test]
+fn terminal_preflight_negotiates_separately_and_cannot_open_or_stream_a_terminal() {
+    let ServerMessage::Hello { hello } = ServerMessage::decode(
+        serde_json::from_str(include_str!("../fixtures/hello-v2-terminal-preflight.json")).unwrap(),
+    )
+    .unwrap() else {
+        unreachable!()
+    };
+    let mut h = *hello;
+    let message = ClientMessage::decode(
+        serde_json::from_str(include_str!("../fixtures/terminal-preflight-request.json")).unwrap(),
+    )
+    .unwrap();
+    let ClientMessage::Request { operation, .. } = &message else {
+        unreachable!()
+    };
+    operation.validate(30000).unwrap();
+    assert!(operation.validate(30001).is_err());
+    h.domain = DomainIdentity {
+        target_id: operation.receipt().unwrap().target_id.clone(),
+        generation: operation.receipt().unwrap().domain_generation.clone(),
+    };
+    let mut legacy = h.clone();
+    legacy
+        .sdk
+        .as_mut()
+        .unwrap()
+        .feature_versions
+        .remove("terminal_preflight");
+    legacy.capabilities = legacy.sdk.as_ref().unwrap().capabilities();
+    let mut session = Session::new(legacy.clone()).unwrap();
+    session.approve(&legacy).unwrap();
+    let mut request = message.clone();
+    if let ClientMessage::Request { epoch, .. } = &mut request {
+        *epoch = legacy.epoch.clone();
+    }
+    assert!(matches!(
+        session.admit(request.clone()).unwrap(),
+        ServerMessage::Terminal {
+            outcome: Outcome::Error {
+                code: SafeCode::Unsupported,
+                dispatch: Dispatch::NotDispatched
+            },
+            ..
+        }
+    ));
+    let mut admitted = Session::new(h.clone()).unwrap();
+    admitted.approve(&h).unwrap();
+    assert!(matches!(
+        admitted.admit(request).unwrap(),
+        ServerMessage::Accepted { .. }
+    ));
+    assert!(admitted.terminal_opened(1).is_err());
+    assert!(admitted.event(1, Stream::Terminal, b"forbidden").is_err());
+    assert!(admitted
+        .terminal(
+            1,
+            Outcome::Observed {
+                observation: Observation {
+                    state: ObservedState::Stopped,
+                    resources: None,
+                    pid_identity: None,
+                    configuration: None,
+                }
+            }
+        )
+        .is_err());
+    admitted.terminal(1, Outcome::Ready).unwrap();
+    assert!(admitted.terminal(1, Outcome::Ready).is_err());
+    let mut invalid = h;
+    invalid
+        .sdk
+        .as_mut()
+        .unwrap()
+        .feature_versions
+        .remove("terminals");
+    assert!(invalid.validate().is_err());
 }

@@ -67,6 +67,14 @@ defmodule SmolBox.Store do
   deduplication. Never replay pending volume operations. Run `VolumeContract` and
   coordinate all readers/projection writers plus the example volume migration.
 
+  `native_volumes: 1` additionally requires native volume proof/history readers
+  (v20) and mounted machine/command readers (v21), exact backend binding on
+  acceptance, atomic proof-bound attachment/release and independent accounting.
+  Native recovery pages include volume tombstones and pending intents without
+  importing proofs or replaying mutations. Run `NativeVolumeContract` against
+  every adapter before advertising this marker. Reader support does not enable
+  a helper's volume descriptor or approve a native package.
+
   Every mutation is one transaction. Failures must roll back record and worker
   changes together. Reads are authoritative and must never translate unavailable,
   corrupt, or unknown-schema storage into `not_found`. There is no fallback store.

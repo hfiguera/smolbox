@@ -1,9 +1,12 @@
 defmodule SmolBox.EmbeddedBackendTest do
   use ExUnit.Case, async: false
   alias SmolBox.Backend.{Assignment, Embedded, HTTP}
-  alias SmolBox.Embedded.{Config, Port}
+  alias SmolBox.Embedded.{Config, Port, SDKIdentity}
+  alias SmolBox.Execution
   alias SmolBox.Runtime.Session
-  alias SmolBox.Store.{Contract, Memory}
+  alias SmolBox.Store.{Contract, MachineOps, Memory}
+  alias SmolBox.Terminal.Connection.Embedded, as: TerminalConnection
+  alias SmolBox.Terminal.Spec, as: TerminalSpec
 
   alias SmolBox.{
     Backend,
@@ -63,8 +66,23 @@ defmodule SmolBox.EmbeddedBackendTest do
     assert Package.received(context.config) == before
   end
 
-  setup do
-    config = Package.create(backend: true)
+  setup context do
+    options =
+      if context[:terminal_preflight] do
+        sdk =
+          SDKIdentity.implemented("1.22.0", "9f446ae00219148ca4a703914f44a8e2fab11655")
+          |> put_in(["feature_versions", "terminal_preflight"], 1)
+
+        [
+          protocol_major: 2,
+          sdk_identity: sdk,
+          reject_terminal_preflight: context[:reject_terminal_preflight] || false
+        ]
+      else
+        []
+      end
+
+    config = Package.create([backend: true] ++ options)
     on_exit(fn -> File.rm_rf!(config.package_path) end)
     owner = start_supervised!(Supervisor.child_spec({Port, config}, restart: :temporary))
     wait(owner)
@@ -121,6 +139,125 @@ defmodule SmolBox.EmbeddedBackendTest do
       _other ->
         flunk("native fixture owner did not become reconciling")
     end
+  end
+
+  defp terminal_reference(context) do
+    {parent, _reference} = running(context)
+    {:ok, terminal} = TerminalSpec.new(session_ms: 5000, idle_ms: 5000)
+
+    {:ok, spec} =
+      ExecutionSpec.new(
+        scope: parent.scope,
+        id: "preflight",
+        profile: parent.spec.profile,
+        artifact: parent.spec.artifact,
+        command: terminal
+      )
+
+    {:ok, fingerprint} = ExecutionSpec.fingerprint(spec, String.duplicate("k", 32))
+    {:ok, execution} = Execution.new(spec, fingerprint, 1300)
+    {:ok, _parent, attached} = MachineOps.attach(parent, execution, 1300)
+    {parent, Backend.assigned(context.reference, attached), terminal}
+  end
+
+  @tag terminal_preflight: true
+  test "preflight qualifies a stopped owned image without starting a PTY and keeps the original pin",
+       context do
+    {parent, reference, spec} = terminal_reference(context)
+    assert {:ok, %{state: :stopped}} = Backend.stop(reference, parent.machine_name)
+    before = length(Package.received(context.config))
+
+    assert {:ok, {TerminalConnection, source}} =
+             Backend.terminal_preflight(reference, parent.machine_name, spec)
+
+    assert source.owner == context.owner
+    assert {:ok, health} = Port.health(context.owner)
+    assert source.epoch == health.epoch
+    assert source.budget.timeout_ms <= spec.session_ms
+
+    operations =
+      Package.received(context.config)
+      |> Enum.drop(before)
+      |> Enum.filter(&(&1["type"] == "request"))
+
+    assert Enum.map(operations, & &1["operation"]["operation"]) == ["terminal_preflight"]
+    assert hd(operations)["budget_ms"] <= min(reference.budget.timeout_ms, 30_000)
+    assert {:ok, %{state: :stopped}} = Backend.inspect_machine(reference, parent.machine_name)
+
+    assert {:error, %Error{}} =
+             TerminalConnection.open(
+               %{source | epoch: String.duplicate("f", 32)},
+               parent.machine_name,
+               spec
+             )
+
+    refute Enum.any?(
+             Package.received(context.config),
+             &(&1["operation"]["operation"] == "terminal_open")
+           )
+  end
+
+  @tag terminal_preflight: true
+  test "invalid terminal specifications and foreign names fail before qualification dispatch",
+       context do
+    {parent, reference, spec} = terminal_reference(context)
+    before = Package.received(context.config)
+
+    assert {:error,
+            %Error{category: :validation, operation: :terminal, evidence: :not_dispatched}} =
+             Backend.terminal_preflight(reference, parent.machine_name, %{spec | cols: 0})
+
+    assert {:error, %Error{category: :identity_conflict, evidence: :not_dispatched}} =
+             Backend.terminal_preflight(reference, "foreign", spec)
+
+    assert Package.received(context.config) == before
+  end
+
+  @tag terminal_preflight: true, reject_terminal_preflight: true
+  test "native preflight rejection has terminal non-dispatch evidence and cannot start a session",
+       context do
+    {parent, reference, spec} = terminal_reference(context)
+
+    assert {:error,
+            %Error{
+              category: :unsupported_capability,
+              operation: :terminal,
+              evidence: :not_dispatched
+            }} =
+             Backend.terminal_preflight(reference, parent.machine_name, spec)
+
+    refute Enum.any?(
+             Package.received(context.config),
+             &(&1["operation"]["operation"] == "terminal_open")
+           )
+  end
+
+  @tag terminal_preflight: true
+  test "a missing retained image is not recreated by terminal preflight", context do
+    {parent, reference, spec} = terminal_reference(context)
+    assert {:ok, _} = Backend.stop(reference, parent.machine_name)
+    assert :ok = Backend.delete(reference, parent.machine_name)
+
+    assert {:error, %Error{category: :not_found, operation: :terminal, evidence: :not_dispatched}} =
+             Backend.terminal_preflight(reference, parent.machine_name, spec)
+
+    refute Enum.any?(
+             Package.received(context.config),
+             &(&1["operation"]["operation"] == "terminal_open")
+           )
+
+    assert {:error, %{category: :not_found}} =
+             Backend.inspect_machine(reference, parent.machine_name)
+  end
+
+  test "legacy helpers do not gain standalone terminal preflight implicitly", context do
+    {:ok, spec} = TerminalSpec.new()
+    before = Package.received(context.config)
+
+    assert {:error, %Error{category: :unsupported_capability, evidence: :not_dispatched}} =
+             Backend.terminal_preflight(context.reference, "fixture-vm", spec)
+
+    assert Package.received(context.config) == before
   end
 
   defp running(context) do

@@ -54,7 +54,7 @@ def capabilities(manifest):
     for feature, operation in [('volumes', 'volumes'), ('remote_sources', 'prepare_artifact'),
                                ('logs', 'logs'), ('background_exec', 'exec_background'),
                                ('buffered_exec', 'exec_buffered'), ('streaming_exec', 'exec_stream'),
-                               ('terminals', 'terminal_open'), ('disk_growth', 'qualify_growth'), ('disk_growth', 'inspect_growth'),
+                               ('terminals', 'terminal_open'), ('terminal_preflight', 'terminal_preflight'), ('disk_growth', 'qualify_growth'), ('disk_growth', 'inspect_growth'),
                                ('disk_growth', 'expand_disks'), ('images', 'pull_image'), ('images', 'list_images')]:
         if features.get(feature) == 1:
             values.insert(0, operation)

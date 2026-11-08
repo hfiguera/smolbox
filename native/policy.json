@@ -22,7 +22,8 @@
       "background_exec": 1,
       "logs": 1,
       "streaming_exec": 1,
-      "terminals": 1
+      "terminals": 1,
+      "terminal_preflight": 1
     }
   },
   "observation_limits": {

@@ -6,8 +6,12 @@ store capability `native_background_launches: 1` after all native v17 readers
 support the launch combination. Launch returns `LaunchResult` and durable
 `:launched` evidence; uncertainty retains the command slot and reservation and
 never authorizes automatic replay. Streaming background execution and stdin
-remain unsupported. Public/codec and ordinary non-VM SDK checks pass; ordinary
-Linux/macOS guest and exact-package qualification remain pending. See
+remain unsupported. Public/codec and ordinary non-VM SDK checks pass. The
+[exact Linux network campaign](evidence/embedded-port-http-parity-linux-network-0e35c3f.json)
+also exercises ordinary retained-container background service launch through raw
+Port and current/minimum public consumers, then checks application readiness
+separately. Broader background bounds/interference, native PostgreSQL and changed
+macOS package qualification remain pending. See
 [Embedded setup](embedded-port.html) for package and reader approval.
 
 SmolBox supports finite foreground command timeouts up to 24 hours and explicit

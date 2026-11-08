@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "status": "remote-source-growth-composition-models-passed-ordinary-qualification-pending",
+  "new_cases": [
+    "OCI and prepared registry sources preserve original intent and preparation through two growth proofs in selective v19",
+    "unknown remote-source growth retains the full increase and requires proof-qualified explicit resolution",
+    "retained remote-source commands preserve exact historical material prefixes and original profile/source identity"
+  ],
+  "rejections": [
+    "older envelope relabeling",
+    "crossed source reference",
+    "crossed prepared registry content",
+    "dropped OCI network observation",
+    "target-size-only inventory as resolution",
+    "stripped command growth proof"
+  ],
+  "validation": {
+    "current": {
+      "elixir": "1.20.4",
+      "otp": "29.0.6",
+      "passed": 36
+    },
+    "minimum": {
+      "elixir": "1.18.4",
+      "otp": "27.3.4.15",
+      "passed": 36
+    },
+    "credo_diff_new_issues": 0,
+    "live_sdk_or_vm_opened": false,
+    "canonical_protocol_fixture_provenance_attested_as_sdk_source": false
+  },
+  "input_sha256": {
+    "test/unit/native_growth_history_test.exs": "eac06835d33f855eb5472405c69c82567854d18dc4eaab9723a936aaf5b5aea0",
+    "native/smolbox-protocol/fixtures/growth-transitions-v1.json": "c937f9308b9de259a3a7e896ba59e71d09a85a62a5cbf49ad1e24126f036c189"
+  },
+  "private_log_sha256": {
+    "remote-growth-models-current-final.log": "9230671d64726839697ca50d38c8bb911c9d66209739d8fe026ae6a7d719377d",
+    "remote-growth-models-minimum-final.log": "2ce3ca2b7296d95cd0fa54e3da6749bd78a822e1120035e6401b0434dba7648c",
+    "remote-growth-credo.log": "ab3e9ee4665990bed3c4c5fff0973b42319d0c569ac0f5f757f5512281c1ba45"
+  },
+  "scope": {
+    "production_implementation_changed": false,
+    "codec_version_added": false,
+    "native_engine_or_sdk_changed": false,
+    "remote_source_growth_ordinary_qualified": false,
+    "p7_complete": false,
+    "parity_complete": false,
+    "crash_validation_deferred": true,
+    "crash_handling_qualified": false,
+    "distribution_approved": false
+  },
+  "next_requirement": "extend the ordinary growth workflow to select approved remote sources and qualify actual SDK growth per required source/store/platform/resource combination"
+}

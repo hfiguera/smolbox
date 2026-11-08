@@ -1,0 +1,648 @@
+{
+  "schema": 1,
+  "scope": "ordinary-linux-public-pty-files-and-workloads",
+  "checked_at_utc": "2026-10-16T04:58:22Z",
+  "source_commit": "2785e1882c0f58711637d05e6271a82e6f0ba207",
+  "implementation_commits": [
+    "52065c9",
+    "2785e18"
+  ],
+  "native_inputs": {
+    "files_verified": 261,
+    "archive_sha256": "6f163f08a47a47ad54cec94c60a2c209f20fc164464c5c00aa1168c3385aadba",
+    "inventory_sha256": "92994b94f55a6defa851826ed8e51bb21463e6ec626687b069d364a3cd39fc9b"
+  },
+  "native_bundle": {
+    "manifest_schema": 3,
+    "package_manifest_sha256": "af4bc9ff5d86580dd712d6947bf2d0ba7c3a021c91939a0a67fcef21b88660f4",
+    "identity": {
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "fbc1a792b79873e12c8081ddcbaaa3979d4030c6e63d5ca478383d9530c3c471",
+      "assets_sha256": "ffd234d5f3a6633e2aa207556b35a92b43700690685fe431c8d4cf5353eb3200",
+      "platform": "linux",
+      "architecture": "x86_64"
+    },
+    "sdk_version": "1.22.0",
+    "sdk_source_verified_unmodified": true,
+    "rust_toolchain": "1.98.1",
+    "retained_privately": true,
+    "published": false
+  },
+  "fixture": {
+    "bytes": 41681345,
+    "fixture_defaults_sha256": "674595033254d389947f5ee19db405ddcfb3404a49e92c14934e48a5ac8dbecd",
+    "fixture_sha256": "339995f33fe84c2ed5a4e212a0acb9afab22df972bf2c2b4aa8e412ea0af5bc4",
+    "image_digest": "sha256:28eb0cb65acb65b970e85c0dc57d10067868fae8dd00d072413df273132123ac",
+    "layer_content": [
+      {
+        "tar_bytes": 50860544,
+        "uncompressed_tar_sha256": "7bae6c8cef01a129cc3a9eb16f37cf8e4deb84085586ab425377bcedf30a411b",
+        "upstream_layer_digest": "sha256:c5680ba2a701892cf5e9304fcdc601ebc8df014c6f6354b451614c98917e4c64"
+      }
+    ],
+    "package_manifest_sha256": "af4bc9ff5d86580dd712d6947bf2d0ba7c3a021c91939a0a67fcef21b88660f4",
+    "scope": "ordinary-python-container-fixture",
+    "sdk_source_modified": false,
+    "sdk_vm_started": false,
+    "source_fixture_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+    "status": "created",
+    "storage_template_included": false
+  },
+  "implementation": [
+    "Image-root activation and file transfer share one collected bounded worker and original machine/source/domain leases.",
+    "No secondary SDK runtime manager or new boot enrollment is created by file access.",
+    "Fixed argv, immutable private metadata and original image/mount/overlay lineage are verified before dispatch.",
+    "One absolute deadline closes only observation sockets; unknown collection retains admission and leases.",
+    "Like HTTP files, a normal activation Exit may be nonzero; activation output is discarded through bounded frames with the SDK 11-MiB ceiling.",
+    "Only a correlated file acknowledgement proves transfer success; agent errors, malformed replies, deadlines and overflow prevent file dispatch.",
+    "Strict stopped-PID verification, public command/file limits and public protocol/store codecs are unchanged."
+  ],
+  "validation": {
+    "macos": {
+      "full_regression_stage": "initial file-worker implementation before final cleanup, added admission contract and HTTP alignment",
+      "full_regression_units_passed": 1006,
+      "protocol_contracts_passed": 56,
+      "ignored_opt_ins": 22,
+      "unchanged_sparse_test_filtered": 1,
+      "final_source_focused_cases_passed": 21,
+      "final_source_ordinary_non_vm_worker_cases": 11,
+      "final_source_strict_clippy_all_targets": "passed",
+      "shared_elixir_file_backend_codec_contracts_passed": 35,
+      "shared_runtime_cases_excluded": 2,
+      "sdk_vm_started": false
+    },
+    "linux": {
+      "full_regression_source_commit": "52065c9",
+      "full_regression_units_passed": 1007,
+      "protocol_contracts_passed": 56,
+      "ignored_opt_ins": 22,
+      "unchanged_sparse_test_filtered": 1,
+      "final_source_focused_cases_passed": 21,
+      "final_source_ordinary_non_vm_worker_cases": 11,
+      "final_source_strict_clippy_all_targets": "passed",
+      "optimized_helper_build": "passed",
+      "data_only_fixture_preparation": "passed",
+      "full_suite_repeated_after_final_http_alignment": false
+    }
+  },
+  "consumers": [
+    {
+      "campaign": "pty-files",
+      "consumer": "current",
+      "proof": "passed",
+      "without_rust": true,
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "source_archive_sha256": "b2cbd6526b7cc13629207219b9d3d2ecd1a0d5e2dd94615b144c6055ed2778ae",
+      "report_sha256": "808e5d4ce63ab52ff0cae697d4f93414a3c6e9eaa9058ec0dc248eac43604aaa",
+      "proof_tool_sha256": {
+        "config.example.exs": "9a0178a7249aba9b4a7990a36162564bf77c39c355c7a5a9f57defae4b6330f3",
+        "demo.ex": "030504ee5e7c78f25267172e29989ad1ee7a606777dfb41e4e7b91b7c46c16f9",
+        "native-proof.exs": "8e68ef45f8fd3019bdf90de342174c6deb522207251ce7f7ffaf8a7df7a1bfef",
+        "native_proof.py": "43fdb6e7f20bc6a05acfefde2f23bb708e5db3c92cd4509744bc1dbe0a32548d"
+      },
+      "evidence": {
+        "disposable_exit": 7,
+        "drain_blocks_new_assignments": true,
+        "drain_survives_runtime_restart": true,
+        "existing_command_while_draining": true,
+        "file_bytes": 1048593,
+        "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+        "final_reserved_slots": 0,
+        "http_workers_exercised_while_native_draining": 0,
+        "inventory_after": [],
+        "inventory_before": [],
+        "owned_deleted": true,
+        "resume_version_checked": true,
+        "retained_after_normal_runtime_restart": true,
+        "retained_write_exit": 7,
+        "store_mode": "ephemeral",
+        "terminal": {
+          "binary_input_bytes": 3,
+          "binary_output_verified": true,
+          "codec": 17,
+          "deliberate_process_interruption": false,
+          "duplicate_open_reuses_execution": true,
+          "exercised": true,
+          "observed_exit": 7,
+          "resize": {
+            "cols": 120,
+            "rows": 43
+          },
+          "scope": "ordinary-public-retained-image-pty",
+          "slot_released": true,
+          "transcript_persisted": false
+        },
+        "without_rust": true
+      }
+    },
+    {
+      "campaign": "pty-files",
+      "consumer": "minimum",
+      "proof": "passed",
+      "without_rust": true,
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "source_archive_sha256": "b2cbd6526b7cc13629207219b9d3d2ecd1a0d5e2dd94615b144c6055ed2778ae",
+      "report_sha256": "02a9e217ef86c5b8ec0629dd41815f7f9a35c9d270a87bfad0c090b82cede3ed",
+      "proof_tool_sha256": {
+        "config.example.exs": "9a0178a7249aba9b4a7990a36162564bf77c39c355c7a5a9f57defae4b6330f3",
+        "demo.ex": "030504ee5e7c78f25267172e29989ad1ee7a606777dfb41e4e7b91b7c46c16f9",
+        "native-proof.exs": "8e68ef45f8fd3019bdf90de342174c6deb522207251ce7f7ffaf8a7df7a1bfef",
+        "native_proof.py": "43fdb6e7f20bc6a05acfefde2f23bb708e5db3c92cd4509744bc1dbe0a32548d"
+      },
+      "evidence": {
+        "disposable_exit": 7,
+        "drain_blocks_new_assignments": true,
+        "drain_survives_runtime_restart": true,
+        "existing_command_while_draining": true,
+        "file_bytes": 1048593,
+        "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+        "final_reserved_slots": 0,
+        "http_workers_exercised_while_native_draining": 0,
+        "inventory_after": [],
+        "inventory_before": [],
+        "owned_deleted": true,
+        "resume_version_checked": true,
+        "retained_after_normal_runtime_restart": true,
+        "retained_write_exit": 7,
+        "store_mode": "ephemeral",
+        "terminal": {
+          "binary_input_bytes": 3,
+          "binary_output_verified": true,
+          "codec": 17,
+          "deliberate_process_interruption": false,
+          "duplicate_open_reuses_execution": true,
+          "exercised": true,
+          "observed_exit": 7,
+          "resize": {
+            "cols": 120,
+            "rows": 43
+          },
+          "scope": "ordinary-public-retained-image-pty",
+          "slot_released": true,
+          "transcript_persisted": false
+        },
+        "without_rust": true
+      }
+    },
+    {
+      "campaign": "workload",
+      "consumer": "current",
+      "proof": "passed",
+      "without_rust": true,
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "source_archive_sha256": "b2cbd6526b7cc13629207219b9d3d2ecd1a0d5e2dd94615b144c6055ed2778ae",
+      "report_sha256": "5cc5ee9783c2c0f07119fcf08031a3f5deb8dad632ff37f824090552ff4b272f",
+      "proof_tool_sha256": {
+        "native-proof.exs": "d5c77f23f1726cfbc027738d2287935189674c73f6a393cebe9fda3d2330b3bb",
+        "native_proof.py": "43fdb6e7f20bc6a05acfefde2f23bb708e5db3c92cd4509744bc1dbe0a32548d",
+        "network_fixture.py": "9eceef406d1dd803553fca477bfaa6fbb5c08beca645593548e6e791b9c53f1a",
+        "network_proof.py": "95c507c4bf511e046c02dccb5142ad8d8df53765b4376b7fcef5fdb49ad1cb48",
+        "ordinary_proof.py": "b07539d4dd07526ebbcd41810c2a33dc87b4ea7b18b6e66a57c389356e3e5b74"
+      },
+      "evidence": {
+        "cases": [
+          {
+            "changed_workload_rejected_before_dispatch": true,
+            "cycles": [
+              {
+                "console_lines": 100,
+                "console_snapshot_completed": true,
+                "repeated_execution_does_not_relaunch": true,
+                "startup_event_count": 0,
+                "startup_events": [],
+                "vm_running_observed": true
+              },
+              {
+                "console_lines": 100,
+                "console_snapshot_completed": true,
+                "repeated_execution_does_not_relaunch": true,
+                "startup_event_count": 0,
+                "startup_events": [],
+                "vm_running_observed": true
+              }
+            ],
+            "duplicate_create_reuses_identity": true,
+            "kind": "neutral",
+            "owned_deleted": true,
+            "retained_across_stopped_runtime_replacement": true,
+            "startup_exit_status_attested": false
+          },
+          {
+            "changed_workload_rejected_before_dispatch": true,
+            "cycles": [
+              {
+                "console_lines": 100,
+                "console_snapshot_completed": true,
+                "repeated_execution_does_not_relaunch": true,
+                "startup_event_count": 1,
+                "startup_events": [
+                  {
+                    "argv": [
+                      "baked literal; text"
+                    ],
+                    "cwd": "/workspace",
+                    "extra": null,
+                    "inherited": "baked",
+                    "kind": "baked",
+                    "override": "baked",
+                    "uid": 0
+                  }
+                ],
+                "vm_running_observed": true
+              },
+              {
+                "console_lines": 100,
+                "console_snapshot_completed": true,
+                "repeated_execution_does_not_relaunch": true,
+                "startup_event_count": 2,
+                "startup_events": [
+                  {
+                    "argv": [
+                      "baked literal; text"
+                    ],
+                    "cwd": "/workspace",
+                    "extra": null,
+                    "inherited": "baked",
+                    "kind": "baked",
+                    "override": "baked",
+                    "uid": 0
+                  },
+                  {
+                    "argv": [
+                      "baked literal; text"
+                    ],
+                    "cwd": "/workspace",
+                    "extra": null,
+                    "inherited": "baked",
+                    "kind": "baked",
+                    "override": "baked",
+                    "uid": 0
+                  }
+                ],
+                "vm_running_observed": true
+              }
+            ],
+            "duplicate_create_reuses_identity": true,
+            "kind": "inherited",
+            "owned_deleted": true,
+            "retained_across_stopped_runtime_replacement": true,
+            "startup_exit_status_attested": false
+          },
+          {
+            "changed_workload_rejected_before_dispatch": true,
+            "cycles": [
+              {
+                "console_lines": 100,
+                "console_snapshot_completed": true,
+                "repeated_execution_does_not_relaunch": true,
+                "startup_event_count": 1,
+                "startup_events": [
+                  {
+                    "argv": [
+                      "replacement literal; text"
+                    ],
+                    "cwd": "/",
+                    "extra": "explicit",
+                    "inherited": "baked",
+                    "kind": "override",
+                    "override": "override",
+                    "uid": 0
+                  }
+                ],
+                "vm_running_observed": true
+              },
+              {
+                "console_lines": 100,
+                "console_snapshot_completed": true,
+                "repeated_execution_does_not_relaunch": true,
+                "startup_event_count": 2,
+                "startup_events": [
+                  {
+                    "argv": [
+                      "replacement literal; text"
+                    ],
+                    "cwd": "/",
+                    "extra": "explicit",
+                    "inherited": "baked",
+                    "kind": "override",
+                    "override": "override",
+                    "uid": 0
+                  },
+                  {
+                    "argv": [
+                      "replacement literal; text"
+                    ],
+                    "cwd": "/",
+                    "extra": "explicit",
+                    "inherited": "baked",
+                    "kind": "override",
+                    "override": "override",
+                    "uid": 0
+                  }
+                ],
+                "vm_running_observed": true
+              }
+            ],
+            "duplicate_create_reuses_identity": true,
+            "kind": "override",
+            "owned_deleted": true,
+            "retained_across_stopped_runtime_replacement": true,
+            "startup_exit_status_attested": false
+          },
+          {
+            "changed_workload_rejected_before_dispatch": true,
+            "cycles": [
+              {
+                "console_lines": 100,
+                "console_snapshot_completed": true,
+                "repeated_execution_does_not_relaunch": true,
+                "startup_event_count": 0,
+                "startup_events": [],
+                "vm_running_observed": true
+              },
+              {
+                "console_lines": 100,
+                "console_snapshot_completed": true,
+                "repeated_execution_does_not_relaunch": true,
+                "startup_event_count": 0,
+                "startup_events": [],
+                "vm_running_observed": true
+              }
+            ],
+            "duplicate_create_reuses_identity": true,
+            "kind": "missing",
+            "owned_deleted": true,
+            "retained_across_stopped_runtime_replacement": true,
+            "startup_exit_status_attested": false
+          }
+        ],
+        "inventory_before": [],
+        "inventory_after": [],
+        "inventory_restored": true,
+        "owned_deleted": true,
+        "final_reserved_slots": 0,
+        "workload_startup_qualified": true
+      }
+    },
+    {
+      "campaign": "workload",
+      "consumer": "minimum",
+      "proof": "passed",
+      "without_rust": true,
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "source_archive_sha256": "b2cbd6526b7cc13629207219b9d3d2ecd1a0d5e2dd94615b144c6055ed2778ae",
+      "report_sha256": "8058cc571441f79a0d9a1cd25fa3edb2aeeedd337073128cb37d76df82c70d1e",
+      "proof_tool_sha256": {
+        "native-proof.exs": "d5c77f23f1726cfbc027738d2287935189674c73f6a393cebe9fda3d2330b3bb",
+        "native_proof.py": "43fdb6e7f20bc6a05acfefde2f23bb708e5db3c92cd4509744bc1dbe0a32548d",
+        "network_fixture.py": "9eceef406d1dd803553fca477bfaa6fbb5c08beca645593548e6e791b9c53f1a",
+        "network_proof.py": "95c507c4bf511e046c02dccb5142ad8d8df53765b4376b7fcef5fdb49ad1cb48",
+        "ordinary_proof.py": "b07539d4dd07526ebbcd41810c2a33dc87b4ea7b18b6e66a57c389356e3e5b74"
+      },
+      "evidence": {
+        "cases": [
+          {
+            "changed_workload_rejected_before_dispatch": true,
+            "cycles": [
+              {
+                "console_lines": 100,
+                "console_snapshot_completed": true,
+                "repeated_execution_does_not_relaunch": true,
+                "startup_event_count": 0,
+                "startup_events": [],
+                "vm_running_observed": true
+              },
+              {
+                "console_lines": 100,
+                "console_snapshot_completed": true,
+                "repeated_execution_does_not_relaunch": true,
+                "startup_event_count": 0,
+                "startup_events": [],
+                "vm_running_observed": true
+              }
+            ],
+            "duplicate_create_reuses_identity": true,
+            "kind": "neutral",
+            "owned_deleted": true,
+            "retained_across_stopped_runtime_replacement": true,
+            "startup_exit_status_attested": false
+          },
+          {
+            "changed_workload_rejected_before_dispatch": true,
+            "cycles": [
+              {
+                "console_lines": 100,
+                "console_snapshot_completed": true,
+                "repeated_execution_does_not_relaunch": true,
+                "startup_event_count": 1,
+                "startup_events": [
+                  {
+                    "argv": [
+                      "baked literal; text"
+                    ],
+                    "cwd": "/workspace",
+                    "extra": null,
+                    "inherited": "baked",
+                    "kind": "baked",
+                    "override": "baked",
+                    "uid": 0
+                  }
+                ],
+                "vm_running_observed": true
+              },
+              {
+                "console_lines": 100,
+                "console_snapshot_completed": true,
+                "repeated_execution_does_not_relaunch": true,
+                "startup_event_count": 2,
+                "startup_events": [
+                  {
+                    "argv": [
+                      "baked literal; text"
+                    ],
+                    "cwd": "/workspace",
+                    "extra": null,
+                    "inherited": "baked",
+                    "kind": "baked",
+                    "override": "baked",
+                    "uid": 0
+                  },
+                  {
+                    "argv": [
+                      "baked literal; text"
+                    ],
+                    "cwd": "/workspace",
+                    "extra": null,
+                    "inherited": "baked",
+                    "kind": "baked",
+                    "override": "baked",
+                    "uid": 0
+                  }
+                ],
+                "vm_running_observed": true
+              }
+            ],
+            "duplicate_create_reuses_identity": true,
+            "kind": "inherited",
+            "owned_deleted": true,
+            "retained_across_stopped_runtime_replacement": true,
+            "startup_exit_status_attested": false
+          },
+          {
+            "changed_workload_rejected_before_dispatch": true,
+            "cycles": [
+              {
+                "console_lines": 100,
+                "console_snapshot_completed": true,
+                "repeated_execution_does_not_relaunch": true,
+                "startup_event_count": 1,
+                "startup_events": [
+                  {
+                    "argv": [
+                      "replacement literal; text"
+                    ],
+                    "cwd": "/",
+                    "extra": "explicit",
+                    "inherited": "baked",
+                    "kind": "override",
+                    "override": "override",
+                    "uid": 0
+                  }
+                ],
+                "vm_running_observed": true
+              },
+              {
+                "console_lines": 100,
+                "console_snapshot_completed": true,
+                "repeated_execution_does_not_relaunch": true,
+                "startup_event_count": 2,
+                "startup_events": [
+                  {
+                    "argv": [
+                      "replacement literal; text"
+                    ],
+                    "cwd": "/",
+                    "extra": "explicit",
+                    "inherited": "baked",
+                    "kind": "override",
+                    "override": "override",
+                    "uid": 0
+                  },
+                  {
+                    "argv": [
+                      "replacement literal; text"
+                    ],
+                    "cwd": "/",
+                    "extra": "explicit",
+                    "inherited": "baked",
+                    "kind": "override",
+                    "override": "override",
+                    "uid": 0
+                  }
+                ],
+                "vm_running_observed": true
+              }
+            ],
+            "duplicate_create_reuses_identity": true,
+            "kind": "override",
+            "owned_deleted": true,
+            "retained_across_stopped_runtime_replacement": true,
+            "startup_exit_status_attested": false
+          },
+          {
+            "changed_workload_rejected_before_dispatch": true,
+            "cycles": [
+              {
+                "console_lines": 100,
+                "console_snapshot_completed": true,
+                "repeated_execution_does_not_relaunch": true,
+                "startup_event_count": 0,
+                "startup_events": [],
+                "vm_running_observed": true
+              },
+              {
+                "console_lines": 100,
+                "console_snapshot_completed": true,
+                "repeated_execution_does_not_relaunch": true,
+                "startup_event_count": 0,
+                "startup_events": [],
+                "vm_running_observed": true
+              }
+            ],
+            "duplicate_create_reuses_identity": true,
+            "kind": "missing",
+            "owned_deleted": true,
+            "retained_across_stopped_runtime_replacement": true,
+            "startup_exit_status_attested": false
+          }
+        ],
+        "inventory_before": [],
+        "inventory_after": [],
+        "inventory_restored": true,
+        "owned_deleted": true,
+        "final_reserved_slots": 0,
+        "workload_startup_qualified": true
+      }
+    }
+  ],
+  "preserved_failures": [
+    {
+      "scope": "earlier package eed7ec01 PTY/file campaign",
+      "reference": "embedded-port-http-parity-linux-consumers-1b47717.json",
+      "cause": "File activation cached a secondary runtime manager PID; strict stop rejected the stale PID.",
+      "failed_public_record_resolved": false,
+      "new_fresh_campaigns_do_not_resolve_old_record": true
+    },
+    {
+      "scope": "initial final-package consumer compile before native dispatch",
+      "cause": "Rebar escript invoked under rebar3-otp27 fails undefined main/1; dependency resolution itself passes.",
+      "native_proof_started": false,
+      "sdk_vm_started": false,
+      "same_rebar_bytes_under_existing_correct_basename": "passed",
+      "successful_retry": "current PTY/files consumer",
+      "initial_cache_diagnosis": "retracted after direct compile diagnostic"
+    },
+    {
+      "scope": "first private evidence archive attempt",
+      "cause": "A new root-owned scan report was unreadable to the archive user.",
+      "resolution": "Changed only that newly created report to the intended test-account owner and wrote a fresh archive.",
+      "sdk_or_qualification_state_changed": false
+    }
+  ],
+  "private_evidence": {
+    "archive_sha256": "92129f7ecb92845c0137957b73d8e2c636ac423899c43b7e228ed669e265ff26",
+    "archive_bytes": 111197792,
+    "receipts_keys_codecs_packages_and_raw_logs_excluded_from_git": true
+  },
+  "lab_teardown": {
+    "all_qualification_handles_terminal": true,
+    "sdk_inventory_empty": true,
+    "native_owner_processes_absent": true,
+    "privileged_read_only_process_verification": true,
+    "forced_termination": false,
+    "crash_handling_qualified": false,
+    "normal_guest_shutdown": true,
+    "host_unit_active_state": "inactive",
+    "host_unit_result": "success",
+    "host_unit_exit_status": 0,
+    "host_unit_main_pid": 0,
+    "run_disk_and_enrolled_domain_retained": true,
+    "normal_shutdown_marker_archived": true
+  },
+  "pending": [
+    "Exact final-package current/minimum network and mapping consumers, planned in a fresh guarded window.",
+    "Changed macOS native VM qualification; earlier export custody remains untouched.",
+    "Native PostgreSQL, hostname/DNS/infrastructure exceptions, OS-listener conflicts and broader resource/platform combinations.",
+    "Remaining source, volume, saved-state, branch, upgrade and full P0-P9 acceptance gates in the completion audit."
+  ],
+  "full_parity_acceptance": "pending",
+  "public_native_branch_admission_enabled": false,
+  "native_postgresql_qualified": false,
+  "crash_handling_qualified": false,
+  "deliberate_process_interruption": false,
+  "distribution_approved": false,
+  "qualification_does_not_transfer_to_changed_bytes": true,
+  "later_exact_package_network_evidence": "embedded-port-http-parity-linux-network-2785e18.json"
+}

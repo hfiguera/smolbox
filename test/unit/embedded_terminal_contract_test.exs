@@ -40,13 +40,68 @@ defmodule SmolBox.EmbeddedTerminalContractTest do
     refute TerminalContract.action?(%{"action" => "input", "data_base64" => ""})
   end
 
-  test "actual helper capability order and negotiated limits match the shared current Hello" do
+  test "existing terminal-only descriptors keep their historical Hello and limits" do
     path = Path.expand("../../native/smolbox-protocol/fixtures/hello-v2-current.json", __DIR__)
     assert {:ok, %{"hello" => hello}} = Protocol.decode(File.read!(path), 2)
     sdk = SDKIdentity.implemented("1.22.0", hello["sdk"]["source_revision"])
     assert hello["sdk"] == sdk
     assert hello["capabilities"] == Protocol.capabilities(sdk)
     assert hello["limits"] == Protocol.limits(2, 0, sdk)
+  end
+
+  test "standalone preflight is separately negotiated and returns only zero-output readiness" do
+    base = Path.expand("../../native/smolbox-protocol/fixtures", __DIR__)
+
+    assert {:ok, %{"hello" => hello}} =
+             Protocol.decode(File.read!(Path.join(base, "hello-v2-terminal-preflight.json")), 2)
+
+    sdk = hello["sdk"]
+    assert SDKIdentity.approved?(sdk, "1.22.0", sdk["source_revision"])
+    assert hello["capabilities"] == Protocol.capabilities(sdk)
+    legacy = update_in(sdk, ["feature_versions"], &Map.delete(&1, "terminal_preflight"))
+    refute "terminal_preflight" in Protocol.capabilities(legacy)
+    assert "terminal_open" in Protocol.capabilities(legacy)
+    refute SDKIdentity.valid?(update_in(sdk, ["feature_versions"], &Map.delete(&1, "terminals")))
+
+    fixture =
+      Path.join(base, "terminal-preflight-request.json") |> File.read!() |> Jason.decode!()
+
+    request = fixture["operation"]
+    assert Request.valid?(request, 30_000, 2)
+    assert Request.observation?(request)
+    refute Request.valid?(request, 30_001, 2)
+    refute Request.valid?(request, 1000, 1)
+    refute Request.valid?(Map.put(request, "terminal", %{}), 1000, 2)
+    receipt = request["receipt"]
+
+    channel =
+      Channel.new(%{
+        "epoch" => fixture["epoch"],
+        "major" => 2,
+        "minor" => 0,
+        "domain" => %{
+          "target_id" => receipt["target_id"],
+          "generation" => receipt["domain_generation"]
+        }
+      })
+
+    assert {:ok, 1, channel} = Channel.register(channel, request, 1024, 64)
+
+    assert {:ok, channel, {1, :accepted}} =
+             Channel.receive_message(
+               channel,
+               %{"type" => "accepted", "epoch" => fixture["epoch"], "id" => 1, "sequence" => 0}
+             )
+
+    assert :error = Channel.receive_message(channel, opened(fixture))
+    assert :error = Channel.receive_message(channel, event(fixture, 1, "forbidden"))
+    assert :error = Channel.terminal_control(channel, 1, 1, %{"action" => "attach"})
+
+    assert {:ok, _, {1, {:terminal, %{"result" => "ready"}}}} =
+             Channel.receive_message(
+               channel,
+               terminal(fixture, 1, %{"result" => "ready"})
+             )
   end
 
   test "open attach input resize close and completion have separate correlation and evidence" do

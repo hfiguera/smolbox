@@ -10,11 +10,14 @@ Read-only attachments are exclusive too. The default remains no mounts.
 
 Embedded Port volumes remain disabled while integration and qualification are
 in progress. Native host provisioning binds an unprivileged dedicated account
-to private `0700` backing. Linux guest/replacement writes, mount behavior,
-and deletion still require ordinary acceptance. Managed native provisioning and
-explicit cleanup now preserve pinned owner identity, durable intent and exact
-completion proof, with bounded read-only startup validation. Mount integration,
-reader activation and platform qualification remain pending; existing HTTP
+to private `0700` backing. One [exact Linux package](evidence/embedded-port-http-parity-linux-mounted-guest-7993b53.json)
+passes ordinary local-container mounted IO, read-only enforcement, stopped-owner
+replacement with retained/new writes and original owned deletion. Managed native
+provisioning and explicit cleanup preserve pinned owner identity, durable intent
+and exact completion proof, with bounded read-only startup validation. Memory and
+the PostgreSQL example advertise `native_volumes: 1` after shared native proof,
+attachment, command-reader and accounting contracts. Public mounted Runtime
+acceptance and other source/platform combinations remain pending; existing HTTP
 qualification does not qualify the changed native helper.
 
 ## Approve the worker storage boundary
@@ -51,6 +54,16 @@ Approval means the operator has verified:
 The native Linux campaign used an unprivileged worker with one host UID. It does
 not qualify isolation or replacement writes under root-run workers with separate
 VM UIDs. Do not broaden host permissions blindly to make a replacement work.
+
+The same unprivileged virtiofs server used by both HTTP and embedded execution
+limits host-share writes to guest root or its own host UID/GID. An unrelated
+numeric guest user can run and access guest-disk files, but creating a host-volume
+file may return EPERM even in a 0777 subdirectory. This is separate from ordinary
+directory permissions. Qualify the workload's actual UID/GID with its operator
+policy; do not assume that accepting a numeric execution user grants host identity
+switching. The [pinned libkrun credential check](https://github.com/smol-machines/libkrun/blob/3285db7404144ed61faf0848bb424c0f82743f41/src/devices/src/virtio/fs/linux/passthrough.rs#L1257)
+implements this boundary for shares without virtual ownership. Privileged or
+otherwise mapped worker configurations require their own qualification.
 
 The managed API never accepts a caller's host source path. Scope authorization is
 still the application's responsibility. A scoped volume ID is not an access token.

@@ -408,16 +408,7 @@ fn finish_removal(
 }
 
 fn verify_backing(volume: &File, provision: &VolumeProvisionReceipt) -> Result<()> {
-    let metadata = volume
-        .metadata()
-        .map_err(|_| Error::before(ErrorCode::Ownership))?;
-    if (metadata.dev(), metadata.ino()) != (provision.backing.device, provision.backing.inode)
-        || metadata.uid() != provision.account.uid
-        || metadata.mode() & 0o7777 != provision.backing.mode
-    {
-        return Err(Error::before(ErrorCode::Ownership));
-    }
-    Ok(())
+    super::verify_completed_backing(volume, provision)
 }
 
 pub(super) fn observe_deleted(
@@ -726,6 +717,28 @@ mod tests {
     }
 
     #[test]
+    fn completed_safe_mode_evolution_still_allows_original_owned_deletion() {
+        let Some(f) = fixture() else {
+            return;
+        };
+        let path = f.provision.node_path();
+        std::fs::write(path.join("owned"), b"data").unwrap();
+        let foreign = f.root.policy.root.join("unrelated");
+        std::fs::create_dir(&foreign).unwrap();
+        std::fs::write(foreign.join("keep"), b"foreign").unwrap();
+        std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o755)).unwrap();
+        let result = run(&f).unwrap();
+        assert_eq!(result.provision, f.provision);
+        assert_eq!(result.provision.backing.mode, 0o700);
+        assert!(!path.exists());
+        assert_eq!(
+            inspect_deleted(&f).unwrap(),
+            VolumeDeletionPresence::Deleted(Box::new(result))
+        );
+        assert_eq!(std::fs::read(foreign.join("keep")).unwrap(), b"foreign");
+    }
+
+    #[test]
     fn descriptor_tree_removes_nested_contents_without_following_links_or_touching_hardlink_targets(
     ) {
         let temporary = tempfile::tempdir().unwrap();
@@ -749,7 +762,20 @@ mod tests {
         std::fs::hard_link(outside.join("keep"), volume.join("hard-link")).unwrap();
         let fifo = cstring(volume.join("fifo").to_str().unwrap()).unwrap();
         assert_eq!(unsafe { libc::mkfifo(fifo.as_ptr(), 0o600) }, 0);
-        remove_tree(&File::open(&volume).unwrap(), &budget(), MAX_ENTRIES).unwrap();
+        // This is a traversal/containment contract, not a two-second storage
+        // latency assertion. Preserve the ordinary budget ceiling while allowing
+        // nested Linux filesystems to finish alongside other journal models.
+        let traversal_budget = ReadBudget::new(
+            std::time::Duration::from_secs(30),
+            crate::Cancellation::default(),
+        )
+        .unwrap();
+        remove_tree(
+            &File::open(&volume).unwrap(),
+            &traversal_budget,
+            MAX_ENTRIES,
+        )
+        .unwrap();
         assert_eq!(std::fs::read_dir(&volume).unwrap().count(), 0);
         assert_eq!(std::fs::read(outside.join("keep")).unwrap(), b"outside");
         assert_eq!(std::fs::metadata(outside.join("keep")).unwrap().nlink(), 1);

@@ -1,7 +1,7 @@
 defmodule SmolBox.Terminal.Connection.Embedded do
   @moduledoc false
   @behaviour SmolBox.Terminal.Connection.Transport
-  alias SmolBox.Backend.{Budget, EmbeddedContext, Features}
+  alias SmolBox.Backend.{Budget, EmbeddedContext, EmbeddedReply, Features}
   alias SmolBox.Embedded.{Call, TerminalContract}
   alias SmolBox.Error
   alias SmolBox.Terminal.{Result, Spec}
@@ -11,6 +11,67 @@ defmodule SmolBox.Terminal.Connection.Embedded do
     @enforce_keys [:owner, :bridge, :epoch, :binding, :request, :budget, :name, :spec, :deadline]
     @derive {Inspect, only: []}
     defstruct @enforce_keys
+  end
+
+  # Qualification consumes the same absolute budget and pins the same owner as
+  # a later open. Success is eligibility only, never a PTY or launch result.
+  def preflight(context, name, spec, budget) do
+    deadline = now() + min(budget.timeout_ms, 30_000)
+
+    result =
+      with :ok <- preflight_supported(context),
+           :ok <- Spec.validate(spec),
+           {:ok, {__MODULE__, source} = prepared} <- source(context, name, spec, budget),
+           :ok <- preflight_ready(source),
+           {:ok, remaining} <- preflight_budget(source, deadline),
+           pinned = %{context | pinned: true, server: source.owner, epoch: source.epoch},
+           request =
+             Map.take(source.request, ["receipt"]) |> Map.put("operation", "terminal_preflight"),
+           :ok <-
+             EmbeddedReply.decode(
+               pinned,
+               :terminal_preflight,
+               request,
+               Call.run(pinned, request, remaining)
+             ) do
+        {:ok, prepared}
+      else
+        {:error, %Error{} = error} -> {:error, error}
+        _ -> failure(:protocol)
+      end
+
+    case result do
+      {:error, %Error{} = error} ->
+        # Like HTTP preflight, read-only qualification cannot dispatch a PTY.
+        {:error, %{error | operation: :terminal, evidence: :not_dispatched}}
+
+      qualified ->
+        qualified
+    end
+  end
+
+  defp preflight_supported(context) do
+    if Features.supports?(context.config, :terminal_preflight),
+      do: :ok,
+      else: failure(:unsupported_capability)
+  end
+
+  defp preflight_ready(source) do
+    with {:ok, health} <- call(source, :health, [], 1000),
+         true <- health_matches?(source, health) do
+      :ok
+    else
+      {:error, %Error{} = error} -> {:error, error}
+      _ -> failure(:identity_conflict)
+    end
+  end
+
+  defp preflight_budget(source, deadline) do
+    remaining = min(source.deadline, deadline) - now()
+
+    if remaining > 0,
+      do: {:ok, %{source.budget | timeout_ms: remaining}},
+      else: failure(:expired)
   end
 
   # Only the assigned backend constructs a source, after durable admission.

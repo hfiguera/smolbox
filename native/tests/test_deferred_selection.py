@@ -34,10 +34,14 @@ class DeferredSelectionTests(unittest.TestCase):
         expected = {
             'transfer_supervisor::tests::ordinary_worker_process_connects_without_initializing_runtime_ownership',
             'transfer_supervisor::tests::ordinary_worker_binary_transfers_use_public_agent_api',
+            'terminal_supervisor::tests::ordinary_terminal_supervisor_holds_leases_until_exact_normal_collection',
+            'terminal_supervisor::tests::ordinary_terminal_natural_exit_preserves_final_output_and_collected_exit',
+            'terminal_supervisor::tests::ordinary_terminal_eof_and_ambiguous_exit_do_not_confirm_completion',
             'checkpoint_source::tests::ordinary_worker_checkpoint_installation_commits_only_fresh_owned_material',
             'checkpoint_source::tests::ordinary_worker_checkpoint_materializes_sdk_files_and_collects_without_vm_dispatch',
             'transfer_supervisor::tests::ordinary_conversion_worker_collects_and_rehashes_both_spools_with_original_leases',
             'transfer_supervisor::tests::ordinary_imported_conversion_worker_preserves_source_gate_and_spools',
+            'transfer_supervisor::tests::ordinary_growth_worker_collects_raw_and_qcow_sdk_geometry_with_owned_leases',
             'transfer_supervisor::tests::ordinary_branch_worker_rejects_unentered_fixture_and_collects_original_leases',
             'epoch::tests::ordinary_boot_guard_enrolls_before_sdk_and_collects_normal_exit',
         }
@@ -49,9 +53,14 @@ class DeferredSelectionTests(unittest.TestCase):
         self.assertIn('--exact --ignored', ignored[0])
         self.assertIn('--workspace --lib --bins --test contract --locked', source)
         self.assertIn('--test child_reaping --locked', source)
+        self.assertNotIn('cargo run', source)
+        self.assertNotIn('run-registry', source)
+        self.assertNotIn('registry_fixture.py', source)
         commands = {line.strip() for line in source.splitlines() if line.strip().startswith('cargo test ')}
         self.assertEqual(commands, {
             'cargo test --manifest-path "$native_manifest" --workspace --lib --bins --test contract --locked',
+            'cargo test --manifest-path "$native_manifest" -p smolbox-engine --example volume-guest-proof --locked',
+            'cargo test --manifest-path "$native_manifest" -p smolbox-engine --example oci-guest-proof --locked',
             'cargo test --manifest-path "$native_manifest" -p smolbox-engine --test child_reaping --locked',
             'cargo test --manifest-path "$native_manifest" -p smolbox-engine --lib "$native_ordinary_fixture" --locked -- --exact --ignored',
             'cargo test --manifest-path "$native_clean_fixture/Cargo.toml" --lib parity::tests --offline',

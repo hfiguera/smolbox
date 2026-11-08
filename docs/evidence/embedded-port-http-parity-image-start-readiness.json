@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "scope": "same-enrolled-image-boot-control-readiness-before-bootstrap",
+  "baseline_commit": "b9e20fb",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "inputs": [
+    {
+      "path": "native/smolbox-engine/src/oci_start.rs",
+      "sha256": "e9b0defc9a5886fe08a639dc18f75471fbb53109d96271995013f7ac95e6eaae"
+    },
+    {
+      "path": "native/smolbox-engine/src/oci_start/readiness_tests.rs",
+      "sha256": "8b86954f38103ed55c6a011ddbc896bf9b8c5359083ffc0ead6f001a746242ab"
+    }
+  ],
+  "behavior": [
+    "One SDK start and original opaque enrollment for both direct OCI and packed-image starts.",
+    "Wait for control-agent Ping before image/workload bootstrap using the original deadline and cancellation, without retrying SDK start, pull or launch.",
+    "Before and after successful readiness, match the original receipt, incarnation marker, live row PID/birth and retained manager against the returned boot enrollment.",
+    "Recheck the same authority after bootstrap and verify the material/mount journal against that same final row snapshot.",
+    "Close parent mount backing descriptors before the relay or bootstrap worker; retain existing gates, proof and executing work allowances.",
+    "Late/cancelled, mismatched and unknown outcomes retain enrollment and resource metadata without automatic stop or replay."
+  ],
+  "validation": [
+    {
+      "lane": "oci-start-models",
+      "passed": 14,
+      "new_cases": 4,
+      "log_sha256": "4fb0b583bc9358fec5bf61e1e9d529e6e3654e94f85db0ff37f3a2e97c80a6b7"
+    },
+    {
+      "lane": "ordinary-rust-workspace",
+      "passed": 1093,
+      "ignored": 24,
+      "engine_passed": 880,
+      "port_passed": 78,
+      "protocol_passed": 77,
+      "contracts_passed": 58,
+      "log_sha256": "21336036716328ec6bba12f51d98d7e1da930eeabc4f28d4ade6760af084a8d0"
+    },
+    {
+      "lane": "strict-clippy-all-workspace-targets",
+      "status": "passed",
+      "log_sha256": "dcdea9e49007250f8d42a140f2bd7d21ba0801182bf9e06f526c1d754ac23658"
+    },
+    {
+      "lane": "rust-format",
+      "status": "passed",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "lane": "unmodified-sdk-default-inventory",
+      "status": "passed",
+      "log_sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+    },
+    {
+      "lane": "unmodified-sdk-clean-inventory",
+      "status": "passed",
+      "log_sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+    },
+    {
+      "lane": "parity-coverage-manifest",
+      "status": "passed",
+      "log_sha256": "4e7828bf43112a0d6ef519e052172697f1d1f386c602c84b1544a5055db8b06b",
+      "passed": 4
+    },
+    {
+      "lane": "documentation-warnings-as-errors",
+      "status": "passed",
+      "log_sha256": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d"
+    }
+  ],
+  "models": "Private SQLite/marker/enrollment fixtures use only read-only PID/birth observations of the current test process. No SDK manager, VM, signal or lifecycle action runs.",
+  "remaining": [
+    "Build and ordinarily qualify exact changed Linux/macOS packages, including OCI and packed-image bootstrap/restart with current/minimum no-Rust consumers.",
+    "P4 registry/OCI/image public activation, ordinary source/cache/credential acceptance, and remaining P0-P9 platform/resource/durable/upgrade gates.",
+    "Final setup, signing/provenance/license and distribution review."
+  ],
+  "native_package_built_or_qualified": false,
+  "public_oci_admission_enabled": false,
+  "parity_complete": false,
+  "crash_validation_performed": false,
+  "distribution_approved": false
+}

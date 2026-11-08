@@ -20,6 +20,56 @@ with patch.dict(sys.modules, {'native_proof': proof}):
 
 
 class OrdinaryRunnerTests(unittest.TestCase):
+    def test_terminal_preflight_requires_exact_nonstreaming_unmutated_evidence(self):
+        receipt = {'name': 'owned-model'}
+        port = Mock()
+        with patch.object(ordinary.os, 'uname', return_value=Mock(sysname='Linux')), \
+                patch.object(ordinary, 'children', return_value={23}), \
+                patch.object(ordinary, 'snapshot', return_value=['original']), \
+                patch.object(ordinary, 'observed') as inspect_state:
+            port.call.return_value = ({'result': 'ready'}, [])
+            evidence = ordinary.terminal_preflight(port, receipt, 'stopped')
+            self.assertTrue(evidence['owned_children_unchanged'])
+            port.call.assert_called_once_with(
+                {'operation': 'terminal_preflight', 'receipt': receipt}, budget=2000)
+            inspect_state.assert_called_once_with(port, 'inspect', receipt, 'stopped')
+            port.call.return_value = ({'result': 'ready'}, [('stdout', b'unexpected')])
+            with self.assertRaisesRegex(AssertionError, 'events'):
+                ordinary.terminal_preflight(port, receipt, 'stopped')
+            port.call.return_value = ({'result': 'ready'}, [])
+            with patch.object(ordinary, 'snapshot', side_effect=[['original'], ['changed']]):
+                with self.assertRaisesRegex(AssertionError, 'records'):
+                    ordinary.terminal_preflight(port, receipt, 'stopped')
+            with patch.object(ordinary, 'children', side_effect=[{23}, {23, 24}]):
+                with self.assertRaisesRegex(AssertionError, 'children'):
+                    ordinary.terminal_preflight(port, receipt, 'stopped')
+            port.call.return_value = ({'result': 'error', 'code': 'not_found',
+                                      'dispatch': 'not_dispatched'}, [])
+            ordinary.terminal_preflight(port, receipt, 'missing')
+            port.call.return_value = ({'result': 'ready'}, [])
+            with self.assertRaises(AssertionError):
+                ordinary.terminal_preflight(port, receipt, 'missing')
+        port.process.kill.assert_not_called()
+        port.process.terminate.assert_not_called()
+
+    def test_observability_qualification_rejects_a_successful_but_inconsistent_inventory(self):
+        port = Mock()
+        port.call.side_effect = [
+            ({'result': 'health', 'snapshot': {'total': 1, 'running': 0}}, []),
+            ({'result': 'capacity', 'snapshot': {'allocated_cpus': 0, 'allocated_memory_mb': 0}}, []),
+            ({'result': 'metrics', 'text': 'smolbox_native_machines 1\n'
+              'smolbox_native_running_machines 0\nsmolbox_native_allocated_cpus 0\n'
+              'smolbox_native_allocated_memory_mb 0\n'}, []),
+            ({'result': 'ready'}, []),
+            ({'result': 'inventory', 'count': 1, 'bytes': 2}, [('file', b'[]')])]
+        with self.assertRaises(AssertionError):
+            ordinary.observe_native(port, 'stopped', {'cpus': 1, 'memory_mib': 512},
+                                    {'name': 'owned-model'})
+        # A successful terminal alone cannot turn contradictory inventory into
+        # lifecycle evidence, and observer failure never signals its owner.
+        port.process.kill.assert_not_called()
+        port.process.terminate.assert_not_called()
+
     def test_export_sdk_qualification_is_opt_in_and_never_redirects_a_database_fixture(self):
         root = Path(__file__).resolve().parents[1]
         main = (root / 'smolbox-port/src/main.rs').read_text()
@@ -84,9 +134,21 @@ class OrdinaryRunnerTests(unittest.TestCase):
         self.assertLess(capabilities.index('prepare_artifact'), capabilities.index('volumes'))
         self.assertNotIn('prepare_artifact', proof.capabilities(current))
 
+    def test_linux_package_policy_advertises_exact_storage_handshake(self):
+        root = Path(__file__).resolve().parents[1]
+        hello = json.loads((root / 'smolbox-protocol/fixtures/hello-v2-linux-images.json').read_bytes())['hello']
+        policy = json.loads((root / 'policy-linux.json').read_bytes())
+        manifest = {'schema': 3, 'identity': hello['package'], 'policy': policy}
+        self.assertEqual(proof.capabilities(manifest), hello['capabilities'])
+        self.assertEqual(proof.limits(manifest), hello['limits'])
+        self.assertEqual(policy['volume_limits'], hello['limits']['volumes'])
+        self.assertEqual(proof.capabilities(manifest)[:5],
+                         ['list_images', 'pull_image', 'expand_disks', 'inspect_growth', 'qualify_growth'])
+        self.assertNotIn('branches', policy['sdk']['feature_versions'])
+
     def test_current_handshake_matches_shared_fixture_and_older_descriptors_stay_smaller(self):
         root = Path(__file__).resolve().parents[1]
-        hello = json.loads((root / 'smolbox-protocol/fixtures/hello-v2-current.json').read_bytes())['hello']
+        hello = json.loads((root / 'smolbox-protocol/fixtures/hello-v2-terminal-preflight.json').read_bytes())['hello']
         policy = json.loads((root / 'policy.json').read_bytes())
         manifest = {'schema': 3, 'identity': hello['package'], 'policy': policy}
         self.assertEqual(proof.capabilities(manifest), hello['capabilities'])
@@ -102,8 +164,19 @@ class OrdinaryRunnerTests(unittest.TestCase):
         self.assertNotIn('expand_disks', proof.capabilities(manifest))
         future['policy']['sdk']['feature_versions']['images'] = 1
         self.assertEqual(proof.capabilities(future)[0], 'list_images')
-        self.assertEqual(len(proof.capabilities(future)), 26)
+        self.assertEqual(len(proof.capabilities(future)), 27)
         self.assertNotIn('list_images', proof.capabilities(manifest))
+
+    def test_preflight_does_not_reinterpret_older_terminal_descriptors(self):
+        root = Path(__file__).resolve().parents[1]
+        for name in ['hello-v2-current.json', 'hello-v2-linux-current.json']:
+            hello = json.loads((root / 'smolbox-protocol/fixtures' / name).read_bytes())['hello']
+            manifest = {'schema': 3, 'identity': hello['package'],
+                        'policy': {'schema': 2, 'port_protocol_major': 2,
+                                   'port_protocol_minor': 0, 'sdk': hello['sdk']}}
+            self.assertEqual(proof.capabilities(manifest), hello['capabilities'])
+            self.assertNotIn('terminal_preflight', proof.capabilities(manifest))
+            self.assertIn('terminal_open', proof.capabilities(manifest))
 
     def test_manifest_selection_binds_protocol_config_sdk_and_engine(self):
         revision = '9f446ae00219148ca4a703914f44a8e2fab11655'

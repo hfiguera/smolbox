@@ -443,7 +443,9 @@ pub(crate) mod tests {
                 record.workdir = Some("/".into());
                 record.forkable = true;
                 record.state = smolvm::config::RecordState::Running;
-                record.pid = Some(123);
+                // A low PID can name a root-owned kernel worker on Linux;
+                // permission refusal must never become model absence evidence.
+                record.pid = Some(2_000_000_000);
                 record.pid_start_time = Some(456);
             });
         let record = engine.db.get_vm(&receipt.name).unwrap().unwrap();
@@ -480,12 +482,25 @@ pub(crate) mod tests {
     use std::os::unix::fs::DirBuilderExt;
 
     #[test]
+    fn private_source_identity_is_absent_without_relying_on_system_process_permissions() {
+        let (_root, metadata, _) = fixture();
+        let source = metadata.grant.intent.source_pid;
+        assert!(crate::epoch::gone(OwnerIdentity {
+            pid: source.0,
+            birth: source.1,
+            uid: unsafe { libc::geteuid() },
+        })
+        .unwrap());
+    }
+
+    #[test]
     fn metadata_and_expected_bind_owner_nonce_source_and_absolute_deadline() {
         let (_root, metadata, expected) = fixture();
         let (bytes, _) = metadata.encode().unwrap();
         assert!(bytes.len() as u64 <= METADATA_BYTES);
         let mut query = Request {
             schema: 1,
+            file_activation: None,
             operation: metadata.grant.worker_operation.clone(),
             owner: metadata.grant.owner,
             socket: metadata.source_directory.join("agent.sock"),

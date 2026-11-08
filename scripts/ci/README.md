@@ -136,6 +136,49 @@ absent from PATH. This copies the public Runtime example into the fresh consumer
 records its source hashes, checks the native inventory before/after, and verifies
 owned deletion. `--minimum` selects the minimum dependency/toolchain lane.
 `--native-public` and the internal `--native-ordinary` mode are mutually exclusive.
+The separate `--native-images --native-images-settings /private/settings.json`
+campaign requires `--native-public`, a fresh output path and the ordinary native
+package/domain/fixture options. It cannot combine with terminal, network, workload,
+growth or volume campaigns. Settings must be an owned private regular file of at
+most 64 KiB. The runner copies and hashes them before native dispatch. They contain
+source approvals and limits only; registry credential fields are rejected.
+
+For OCI, settings contain `source` and `pull_source` objects with `kind: "oci"`,
+`id`, `reference` and `architecture`, plus an explicit `network` with `hosts` and
+`cidrs`. References must pin platform-manifest SHA-256 digests. Optional boolean
+`startup_workload: true` selects the fixed argv/env/workdir/default-UID-0 fixture
+and checks startup counters one then two across ordinary restart. The approved
+image must provide `/bin/sh` and the fixture's utilities. This is not an arbitrary
+workload input interface.
+
+For registry artifacts, `source` uses `kind: "registry"` and also requires
+`content_sha256`. `cache_policy` requires `max_download_bytes`, `max_cache_bytes`
+and `max_cache_files`. The guest remains offline. Start with a fresh account cache:
+the first public creation must report a cold preparation and a second distinct
+creation must report a verified warm cache. Operator-account auth/mirrors remain
+outside these settings. Both modes verify retained binary data, immutable creation,
+graceful stopped Runtime replacement and owned deletion. OCI mode also verifies
+typed image inventory/pull and duplicate pull reuse. Failure retains the original
+Runtime and Memory store, with private one-shot exact-version control in
+`examples/embedded_port/lib/images_control.ex`; no process-loss campaign runs.
+Its `stop_owned_machine` action uses the original helper and saved receipt to
+stop an unknown machine blocked by a command. It requires the current machine
+version and a drained original epoch; it preserves the unknown execution and
+capacity until separate explicit resolution and verified deletion. Wait for
+worker readiness after resolution before deletion. No process signal is part
+of this control. Deterministic coverage does not qualify its live path.
+Growth uses the same receipt-bound stop control for its scoped `original`
+machine. Image and growth consumer staging includes the shared `owned_control.ex`
+source in the private tooling inventory. Existing parked consumers retain their
+original frozen code; no live runner is patched.
+The image/growth CLI launchers and durable growth script compile their workflow
+and control modules together before SDK setup. Both compile/runtime diagnostic
+lists must be empty; separate loading otherwise reports a false undefined-function
+warning for the forward reference. Current/minimum cold bootstrap checks stop
+before SDK access. Existing frozen qualification inputs retain their original code
+and logs. See the [loader evidence](../../docs/evidence/embedded-port-http-parity-proof-loader.json).
+This runner's presence does not qualify a package or activate an older descriptor.
+
 Add `--native-terminal` only with `--native-public` to request the ordinary
 retained-image PTY proof from a terminal-capable package. It requires the native
 terminal reader gate, verifies binary input/output, resizing, Exit and slot
@@ -150,6 +193,36 @@ cleanup authority. The collector retires only after normal child collection.
 Public mode performs ordinary lifecycle operations and normal Runtime shutdown;
 it does not run deliberate process-interruption qualification. Private logs and
 codec records must not be uploaded as public evidence.
+
+For the separate disposable Linux network campaign, add `--native-network
+--native-host-port 28732` with `--native-public` and all native package/fixture
+options. Use an approved Python container sidecar and run the whole consumer
+command through `native/smolbox-port/tests/network_fixture.py` in `unshare --net`,
+with its `/usr/sbin/runuser -u lab --` child. The privileged fixture configures only
+its new loopback namespace and supplies the required `--namespace-identity`; the
+consumer and SDK run unprivileged with Rust absent from PATH. The network and
+terminal campaign flags are mutually exclusive.
+
+This mode copies `embedded-network-proof.exs` and its fixed Python observation
+helpers into the fresh public consumer. It verifies offline/CIDR traffic, inbound
+replies, loopback publishing, atomic port conflict rollback without SDK mutation,
+retained reservations and draining across graceful Runtime replacement, resume,
+background service launch and final owned deletion. Private codec records and the
+fingerprint key are retained before shutdown so failures preserve original
+authority. This Memory-store campaign does not establish PostgreSQL, hostname/DNS,
+workload startup, macOS or resource-interference acceptance. No timeout signal or
+fault runner is introduced; incomplete child collection remains retained.
+
+The separate `--native-workload` campaign also requires `--native-public`, all
+native inputs and that isolated namespace wrapper. Use a fresh container fixture
+prepared with `native/smolbox-port/tests/workload-defaults.json`. Omit
+`--native-host-port`; workload, network and terminal campaigns are mutually
+exclusive. The workload campaign checks neutral startup when no workload is
+supplied, image-default inheritance, explicit argv/environment/directory
+overrides, missing-program behavior, immutable creation identity, retained state
+through normal Runtime replacement and owned deletion. Guest markers establish
+only the startup behavior actually observed; neither application exit status nor
+readiness is inferred from running VM state or console logs.
 
 ## Test concurrency
 
@@ -421,3 +494,11 @@ If local macOS forwards the Linux PostgreSQL socket, run the two durable suites
 sequentially. The 20-connection prerequisite is per job; sharing that database
 between simultaneous suites can exhaust it. Protected CI jobs require separate
 dedicated database instances.
+
+A retained native consumer also retains its temporary package, compiled code and
+proof-tool source. The wrapper sets an in-process guard before writing diagnostics
+and a private `.native-consumer-retained.json` marker. A failed marker write must
+not trigger source deletion. The marker is diagnostic and grants no signalling,
+SDK deletion or ownership authority. Preserve that tree until the original child
+is normally collected and evidence custody is complete; normal completed consumer
+runs still remove their temporary source.

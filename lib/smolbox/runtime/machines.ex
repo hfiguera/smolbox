@@ -348,6 +348,21 @@ defmodule SmolBox.Runtime.Machines do
     end
   end
 
+  # A native name/intent cannot replace a missing creation receipt. Automatic
+  # observation must stay uncertain; only explicit quiesced creation inspection
+  # may prove absence. Defer normally so versioned resolution can acquire it.
+  defp observe(
+         config,
+         %{backend_assignment: %SmolBox.Backend.Assignment{}, created_machine: nil} = record
+       ) do
+    fresh_write(config, record,
+      state: :unknown,
+      phase: if(record.operation, do: :uncertain),
+      last_error: %Error{category: :unknown, operation: :inspect, evidence: :not_dispatched},
+      next_due_at_ms: config.clock.now() + 60_000
+    )
+  end
+
   defp observe(config, record) do
     record = %{record | operation_deadline_ms: nil}
 

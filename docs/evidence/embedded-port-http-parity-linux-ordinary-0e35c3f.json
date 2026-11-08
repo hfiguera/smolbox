@@ -1,0 +1,348 @@
+{
+  "schema": 1,
+  "scope": "exact-linux-package-ordinary-lifecycle-observability-public-consumers-and-compatible-upgrade",
+  "checked_at_utc": "2026-10-16T01:49:55Z",
+  "native_source_commit": "0e35c3f6a281f192fb7402fd706858431705442d",
+  "qualification_tool_source_commit": "1569b5718ba298cd6945d237d23e772f1a0177d6",
+  "native_input_manifest": {
+    "files_verified": 256,
+    "sha256": "584ea1c240719c896b6cc53cc53502e6382157fd8e3ba4949363df1778cb2dd5"
+  },
+  "native_bundle": {
+    "status": "ordinarily-qualified-for-recorded-linux-scopes",
+    "manifest_schema": 3,
+    "package_manifest_sha256": "47fb386421462de60266a7812fbebb73a7bb5b8a2d690ac78579193efac34603",
+    "identity": {
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "c1d85441a63ddec54fae0abcddf2bfa9820ea164f5b17561f3ce4db561e7b07f",
+      "assets_sha256": "ffd234d5f3a6633e2aa207556b35a92b43700690685fe431c8d4cf5353eb3200",
+      "platform": "linux",
+      "architecture": "x86_64"
+    },
+    "rust_toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+    "cargo_toolchain": "cargo 1.98.1 (797e8a9bc 2026-08-05)",
+    "sdk_source_verified_unmodified": true,
+    "ordinary_native_lifecycle_qualified": true,
+    "public_native_consumers_qualified": true
+  },
+  "fixture_sha256": "8ac12958bc166344f1ffeb4c518c883c750fece358bf177f13f6ded7953cfe5b",
+  "native_workspace_sweep": {
+    "status": "passed",
+    "engine_units": 844,
+    "port_units": 77,
+    "protocol_units": 77,
+    "protocol_contracts": 56,
+    "ignored_units": 22,
+    "filtered_ordinary_sparse_template_case": 1,
+    "unfiltered_ignored_selection": false,
+    "private_creation_mask": "077"
+  },
+  "ordinary_lifecycle": {
+    "proof": "passed",
+    "scope": "ordinary-native-lifecycle",
+    "observed_exit": 7,
+    "file_bytes": 1048593,
+    "file_sha256": "b863256dee74effc15743dff63a34ea93bb1f6778b22f6c971469c259638dd41",
+    "retained_after_stop_start": true,
+    "retained_after_stopped_helper_shutdown": true,
+    "fresh_epoch": true,
+    "owned_deleted": true,
+    "normal_stop_child_reaping": [
+      {
+        "stopped_helper_children": 0
+      },
+      {
+        "stopped_helper_children": 0
+      },
+      {
+        "stopped_helper_children": 0
+      }
+    ],
+    "deliberate_process_interruption": false,
+    "crash_handling_qualified": false
+  },
+  "proof_tool_sha256": {
+    "initial_ordinary_proof.py": "bfea7e6689429cc64fe9db7fee5296a76e342ab317b4073e4776f11fd5386bfd",
+    "observability_ordinary_proof.py": "b07539d4dd07526ebbcd41810c2a33dc87b4ea7b18b6e66a57c389356e3e5b74"
+  },
+  "ordinary_observability": {
+    "status": "passed",
+    "scope": "raw-port-ordinary-state-correlated-observations",
+    "operations": [
+      "health",
+      "capacity",
+      "metrics",
+      "readiness",
+      "list",
+      "measurements"
+    ],
+    "witnesses": [
+      {
+        "state": "empty",
+        "total": 0,
+        "running": 0,
+        "allocated_cpus": 0,
+        "allocated_memory_mb": 0,
+        "inventory_count": 0,
+        "running_process_sampled": null,
+        "metrics_bound_to_lifecycle": true,
+        "readiness": true
+      },
+      {
+        "state": "stopped",
+        "total": 1,
+        "running": 0,
+        "allocated_cpus": 0,
+        "allocated_memory_mb": 0,
+        "inventory_count": 1,
+        "running_process_sampled": false,
+        "metrics_bound_to_lifecycle": true,
+        "readiness": true
+      },
+      {
+        "state": "running",
+        "total": 1,
+        "running": 1,
+        "allocated_cpus": 1,
+        "allocated_memory_mb": 512,
+        "inventory_count": 1,
+        "running_process_sampled": true,
+        "metrics_bound_to_lifecycle": true,
+        "readiness": true
+      },
+      {
+        "state": "stopped",
+        "total": 1,
+        "running": 0,
+        "allocated_cpus": 0,
+        "allocated_memory_mb": 0,
+        "inventory_count": 1,
+        "running_process_sampled": false,
+        "metrics_bound_to_lifecycle": true,
+        "readiness": true
+      },
+      {
+        "state": "stopped",
+        "total": 1,
+        "running": 0,
+        "allocated_cpus": 0,
+        "allocated_memory_mb": 0,
+        "inventory_count": 1,
+        "running_process_sampled": false,
+        "metrics_bound_to_lifecycle": true,
+        "readiness": true
+      },
+      {
+        "state": "missing",
+        "total": 0,
+        "running": 0,
+        "allocated_cpus": 0,
+        "allocated_memory_mb": 0,
+        "inventory_count": 0,
+        "running_process_sampled": false,
+        "metrics_bound_to_lifecycle": true,
+        "readiness": true
+      }
+    ],
+    "running_cpu_and_rss_observed": true,
+    "stopped_and_missing_process_counters_unavailable": true,
+    "authority_from_observations": false
+  },
+  "public_consumers": {
+    "current": {
+      "status": "passed",
+      "minimum": false,
+      "without_rust": true,
+      "source_archive_sha256": "b2cbd6526b7cc13629207219b9d3d2ecd1a0d5e2dd94615b144c6055ed2778ae",
+      "package_file_count": 448,
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "dependencies": {
+        "jason": "1.4.5",
+        "mint": "1.11.0",
+        "mint_web_socket": "1.0.6",
+        "nimble_options": "1.1.1",
+        "req": "0.7.5",
+        "telemetry": "1.4.2"
+      },
+      "proof_tool_sha256": {
+        "config.example.exs": "9a0178a7249aba9b4a7990a36162564bf77c39c355c7a5a9f57defae4b6330f3",
+        "demo.ex": "030504ee5e7c78f25267172e29989ad1ee7a606777dfb41e4e7b91b7c46c16f9",
+        "native-proof.exs": "8e68ef45f8fd3019bdf90de342174c6deb522207251ce7f7ffaf8a7df7a1bfef",
+        "native_proof.py": "43fdb6e7f20bc6a05acfefde2f23bb708e5db3c92cd4509744bc1dbe0a32548d"
+      },
+      "evidence": {
+        "scope": "public-port-package-consumer",
+        "proof": "passed",
+        "without_rust": true,
+        "public_native_admission_enabled": true,
+        "disposable_exit": 7,
+        "retained_write_exit": 7,
+        "file_bytes": 1048593,
+        "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+        "drain_blocks_new_assignments": true,
+        "existing_command_while_draining": true,
+        "retained_after_normal_runtime_restart": true,
+        "drain_survives_runtime_restart": true,
+        "resume_version_checked": true,
+        "owned_deleted": true,
+        "final_reserved_slots": 0,
+        "terminal": {
+          "binary_input_bytes": 3,
+          "binary_output_verified": true,
+          "codec": 17,
+          "deliberate_process_interruption": false,
+          "duplicate_open_reuses_execution": true,
+          "exercised": true,
+          "observed_exit": 7,
+          "resize": {
+            "cols": 120,
+            "rows": 43
+          },
+          "scope": "ordinary-public-retained-image-pty",
+          "slot_released": true,
+          "transcript_persisted": false
+        },
+        "crash_handling_qualified": false,
+        "deliberate_process_interruption": false
+      }
+    },
+    "minimum": {
+      "status": "passed",
+      "minimum": true,
+      "without_rust": true,
+      "source_archive_sha256": "b2cbd6526b7cc13629207219b9d3d2ecd1a0d5e2dd94615b144c6055ed2778ae",
+      "package_file_count": 448,
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "dependencies": {
+        "jason": "1.4.0",
+        "mint": "1.11.0",
+        "mint_web_socket": "1.0.6",
+        "nimble_options": "1.1.0",
+        "req": "0.7.4",
+        "telemetry": "1.3.0"
+      },
+      "proof_tool_sha256": {
+        "config.example.exs": "9a0178a7249aba9b4a7990a36162564bf77c39c355c7a5a9f57defae4b6330f3",
+        "demo.ex": "030504ee5e7c78f25267172e29989ad1ee7a606777dfb41e4e7b91b7c46c16f9",
+        "native-proof.exs": "8e68ef45f8fd3019bdf90de342174c6deb522207251ce7f7ffaf8a7df7a1bfef",
+        "native_proof.py": "43fdb6e7f20bc6a05acfefde2f23bb708e5db3c92cd4509744bc1dbe0a32548d"
+      },
+      "evidence": {
+        "scope": "public-port-package-consumer",
+        "proof": "passed",
+        "without_rust": true,
+        "public_native_admission_enabled": true,
+        "disposable_exit": 7,
+        "retained_write_exit": 7,
+        "file_bytes": 1048593,
+        "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+        "drain_blocks_new_assignments": true,
+        "existing_command_while_draining": true,
+        "retained_after_normal_runtime_restart": true,
+        "drain_survives_runtime_restart": true,
+        "resume_version_checked": true,
+        "owned_deleted": true,
+        "final_reserved_slots": 0,
+        "terminal": {
+          "binary_input_bytes": 3,
+          "binary_output_verified": true,
+          "codec": 17,
+          "deliberate_process_interruption": false,
+          "duplicate_open_reuses_execution": true,
+          "exercised": true,
+          "observed_exit": 7,
+          "resize": {
+            "cols": 120,
+            "rows": 43
+          },
+          "scope": "ordinary-public-retained-image-pty",
+          "slot_released": true,
+          "transcript_persisted": false
+        },
+        "crash_handling_qualified": false,
+        "deliberate_process_interruption": false
+      }
+    }
+  },
+  "compatible_package_upgrade": {
+    "status": "passed",
+    "from_manifest_sha256": "58a08bf8330c7a6b9e512318c73005093b8c0d6652e4444e13291d208f8d9bfa",
+    "to_manifest_sha256": "47fb386421462de60266a7812fbebb73a7bb5b8a2d690ac78579193efac34603",
+    "from_identity": {
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "bbe8a332d604ad00d9661112aa4bc0bb5e12c840f3042db9ef089e5fc5e942ea",
+      "assets_sha256": "9145807302068baa2df7fee25c7269dc3276a1808611ff3755b24220d1259784",
+      "platform": "linux",
+      "architecture": "x86_64"
+    },
+    "to_identity": {
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "c1d85441a63ddec54fae0abcddf2bfa9820ea164f5b17561f3ce4db561e7b07f",
+      "assets_sha256": "ffd234d5f3a6633e2aa207556b35a92b43700690685fe431c8d4cf5353eb3200",
+      "platform": "linux",
+      "architecture": "x86_64"
+    },
+    "retained_full_receipt": true,
+    "domain_generation_unchanged": true,
+    "old_assets_retained_during_upgrade": true,
+    "codec_rollback_qualified": false,
+    "retained_after_stop_start": true,
+    "owned_deleted": true,
+    "normal_stop_child_reaping": [
+      {
+        "stopped_helper_children": 0
+      },
+      {
+        "stopped_helper_children": 0
+      },
+      {
+        "stopped_helper_children": 0
+      }
+    ],
+    "preflight_copy_mode_rejection": {
+      "preserved": true,
+      "vm_created": false,
+      "corrected_by_separate_original_archive_extraction": true
+    },
+    "previous_package_verification": {
+      "status": "passed",
+      "manifest_sha256": "58a08bf8330c7a6b9e512318c73005093b8c0d6652e4444e13291d208f8d9bfa",
+      "asset_entries": 806,
+      "asset_hashes_sizes_modes_and_links_verified": true,
+      "executable_sha256": "bbe8a332d604ad00d9661112aa4bc0bb5e12c840f3042db9ef089e5fc5e942ea"
+    }
+  },
+  "lab_teardown": {
+    "sdk_inventory_empty": true,
+    "native_owner_processes_absent": true,
+    "all_qualification_handles_terminal": true,
+    "privileged_read_only_process_verification": true,
+    "forced_termination": false,
+    "crash_handling_qualified": false,
+    "normal_guest_shutdown": true,
+    "host_unit_active_state": "inactive",
+    "host_unit_result": "success",
+    "host_unit_exit_status": 0,
+    "run_disk_and_enrolled_domain_retained": true,
+    "automatic_fault_reset_avoided_by_archiving_verified_normal_shutdown_marker": true
+  },
+  "limitations": [
+    "Linux x86_64 only for this exact native package",
+    "Offline approved bare-artifact lifecycle and managed retained-image terminal scopes only",
+    "Observability is direct Port qualification; it does not close every public operation/arity acceptance row",
+    "No current-byte native PostgreSQL/durable expanded-history campaign",
+    "No ordinary network/ports/workload, registry preparation, mounts, OCI image-management, disk-growth or saved-state/branch feature acceptance",
+    "Compatible upgrade evidence applies only to the recorded package pair; codec rollback remains unqualified",
+    "Retained macOS export custody is untouched; changed macOS package qualification remains pending"
+  ],
+  "full_parity_acceptance": "pending",
+  "public_native_branch_admission_enabled": false,
+  "crash_handling_qualified": false,
+  "distribution_approved": false
+}

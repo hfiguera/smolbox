@@ -42,6 +42,32 @@ pub struct TerminalRequest {
     pub cancel: Cancellation,
 }
 impl crate::Engine {
+    /// Receipt-bound image eligibility only. This neither starts a stopped VM
+    /// nor reserves a terminal/worker, probes an agent or opens a PTY. Opening
+    /// must independently recheck the original authority and current state.
+    pub fn terminal_preflight(
+        &self,
+        receipt: &crate::CreationReceipt,
+        budget: &crate::ReadBudget,
+    ) -> Result<()> {
+        budget.check()?;
+        if budget.deadline().saturating_duration_since(Instant::now()) > Duration::from_secs(30) {
+            return Err(Error::before(ErrorCode::Validation));
+        }
+        receipt.validate(self.binding())?;
+        let _permit = self.jobs.acquire(crate::jobs::Demand::observation())?;
+        let gate = self.observation_gate(&receipt.name)?;
+        let _guard = gate
+            .try_lock()
+            .map_err(|_| Error::before(ErrorCode::Conflict))?;
+        let record = self
+            .observation_record(&receipt.name, budget)?
+            .ok_or(Error::before(ErrorCode::NotFound))?;
+        self.verify_record(receipt, &record)?;
+        terminal_eligibility(&record)?;
+        budget.check()
+    }
+
     pub fn terminal_owned(
         &self,
         receipt: &crate::CreationReceipt,
@@ -76,9 +102,7 @@ impl crate::Engine {
             .deadline
             .min(Instant::now() + request.options.session);
         let record = self.guest_work_record(receipt)?;
-        if record.image.is_none() || record.forkable_on_start() {
-            return Err(Error::before(ErrorCode::Unsupported));
-        }
+        terminal_eligibility(&record)?;
         let command = crate::BufferedCommand {
             argv: vec![request.options.program.clone()],
             env: vec![],
@@ -151,6 +175,16 @@ impl crate::Engine {
             &mut output,
         )
     }
+}
+
+fn terminal_eligibility(record: &smolvm::config::VmRecord) -> Result<()> {
+    if record.forkpoint_held {
+        return Err(Error::before(ErrorCode::State));
+    }
+    if record.image.as_ref().is_none_or(|image| image.is_empty()) || record.forkable_on_start() {
+        return Err(Error::before(ErrorCode::Unsupported));
+    }
+    Ok(())
 }
 pub(crate) struct Prepared {
     startup: Startup,
@@ -358,7 +392,12 @@ impl TransferSupervisor {
                     TerminalFailure::SessionDeadline
                 });
             }
-            if reason.is_none() && ready && sent == pending.len() && proof.is_none() {
+            if reason.is_none()
+                && ready
+                && owned.input.is_some()
+                && sent == pending.len()
+                && proof.is_none()
+            {
                 match controls() {
                     Ok(Some(payload))
                         if !matches!(
@@ -390,7 +429,7 @@ impl TransferSupervisor {
                 retirement = Some(now);
                 owned.input.take();
             }
-            if reason.is_none() && sent < pending.len() {
+            if reason.is_none() && owned.input.is_some() && sent < pending.len() {
                 match owned.input.as_mut().unwrap().write(&pending[sent..]) {
                     Ok(0) => reason = Some(TerminalFailure::Native),
                     Ok(n) => {
@@ -402,6 +441,18 @@ impl TransferSupervisor {
                             e.kind(),
                             std::io::ErrorKind::WouldBlock | std::io::ErrorKind::Interrupted
                         ) => {}
+                    Err(e) if ready && e.kind() == std::io::ErrorKind::BrokenPipe => {
+                        // A normally exiting worker can close its control pipe
+                        // before we send the last output credit. Keep draining
+                        // its result pipe: only a valid correlated End and
+                        // successful exact-child collection can confirm Exit.
+                        // No more controls can be delivered; bound that final
+                        // drain by the existing retirement grace and deadline.
+                        owned.input.take();
+                        pending.clear();
+                        sent = 0;
+                        retirement = Some(now);
+                    }
                     Err(_) => reason = Some(TerminalFailure::Native),
                 }
             }
@@ -574,9 +625,154 @@ mod tests {
         Arc, Mutex,
     };
 
+    fn preflight_budget() -> crate::ReadBudget {
+        crate::ReadBudget::new(Duration::from_secs(5), Cancellation::default()).unwrap()
+    }
+
+    #[test]
+    fn stopped_image_preflight_reads_original_authority_without_allocating_terminal_work() {
+        let root = tempfile::tempdir().unwrap();
+        let (native, receipt) = crate::export_source::tests::fixture(root.path(), true);
+        let before = serde_json::to_vec(&native.db.get_vm(&receipt.name).unwrap()).unwrap();
+        let work = (0..crate::JOB_WORK_SLOTS)
+            .map(|_| {
+                native
+                    .jobs
+                    .acquire(crate::jobs::Demand::streaming())
+                    .unwrap()
+            })
+            .collect::<Vec<_>>();
+        let counts = native.jobs.counts();
+        assert!(native.transfers.is_none());
+        native
+            .terminal_preflight(&receipt, &preflight_budget())
+            .unwrap();
+        assert_eq!(native.jobs.counts(), counts);
+        assert_eq!(
+            before,
+            serde_json::to_vec(&native.db.get_vm(&receipt.name).unwrap()).unwrap()
+        );
+        assert_eq!(native.runtime_pid(&receipt.name), None);
+        assert!(native.owned_managers.lock().unwrap().is_empty());
+        drop(work);
+    }
+
+    #[test]
+    fn preflight_rejects_bare_empty_image_branchable_and_held_records_without_mutation() {
+        for kind in 0..4 {
+            let root = tempfile::tempdir().unwrap();
+            let (native, receipt) =
+                crate::export_source::tests::fixture_record(root.path(), kind != 0, |record| {
+                    match kind {
+                        1 => record.image = Some(String::new()),
+                        2 => record.forkable = true,
+                        3 => record.forkpoint_held = true,
+                        _ => {}
+                    }
+                });
+            let before = serde_json::to_vec(&native.db.get_vm(&receipt.name).unwrap()).unwrap();
+            let error = native
+                .terminal_preflight(&receipt, &preflight_budget())
+                .unwrap_err();
+            assert_eq!(error.dispatch, Dispatch::NotDispatched);
+            assert!(matches!(
+                error.code,
+                ErrorCode::Unsupported | ErrorCode::State
+            ));
+            assert_eq!(
+                before,
+                serde_json::to_vec(&native.db.get_vm(&receipt.name).unwrap()).unwrap()
+            );
+            assert_eq!(native.jobs.counts(), crate::jobs::Counts::default());
+        }
+    }
+
+    #[test]
+    fn preflight_bounds_cancellation_rows_and_machine_conflicts_and_rejects_foreign_authority() {
+        let root = tempfile::tempdir().unwrap();
+        let (native, receipt) = crate::export_source::tests::fixture(root.path(), true);
+        let long =
+            crate::ReadBudget::for_volume_work(Duration::from_secs(3600), Cancellation::default())
+                .unwrap();
+        assert_eq!(
+            native.terminal_preflight(&receipt, &long).unwrap_err().code,
+            ErrorCode::Validation
+        );
+        let mut missing = receipt.clone();
+        missing.name = "missing".into();
+        assert_eq!(
+            native
+                .terminal_preflight(&missing, &preflight_budget())
+                .unwrap_err()
+                .code,
+            ErrorCode::NotFound
+        );
+        assert!(!native.vm_directory(&missing.name).exists());
+        let cancel = Cancellation::default();
+        let budget = crate::ReadBudget::new(Duration::from_secs(5), cancel.clone()).unwrap();
+        cancel.cancel();
+        assert!(native.terminal_preflight(&receipt, &budget).is_err());
+        let gate = native.observation_gate(&receipt.name).unwrap();
+        let held = gate.try_lock().unwrap();
+        assert_eq!(
+            native
+                .terminal_preflight(&receipt, &preflight_budget())
+                .unwrap_err()
+                .code,
+            ErrorCode::Conflict
+        );
+        drop(held);
+        let mut foreign = receipt.clone();
+        foreign.owner_token = "f".repeat(64);
+        assert_eq!(
+            native
+                .terminal_preflight(&foreign, &preflight_budget())
+                .unwrap_err()
+                .code,
+            ErrorCode::Ownership
+        );
+        native
+            .db
+            .update_vm(&receipt.name, |record| {
+                record.env.push((
+                    "oversized".into(),
+                    "x".repeat(crate::observations::MAX_RECORD_BYTES + 1),
+                ));
+            })
+            .unwrap();
+        assert_eq!(
+            native
+                .terminal_preflight(&receipt, &preflight_budget())
+                .unwrap_err()
+                .code,
+            ErrorCode::OutputLimit
+        );
+        assert_eq!(native.jobs.counts(), crate::jobs::Counts::default());
+    }
+
     #[test]
     #[ignore = "requires built helper; explicit ordinary non-VM supervised terminal peer"]
     fn ordinary_terminal_supervisor_holds_leases_until_exact_normal_collection() {
+        ordinary_terminal_peer(false, Some(7));
+    }
+
+    #[test]
+    #[ignore = "requires built helper; explicit ordinary non-VM terminal natural-exit peer"]
+    fn ordinary_terminal_natural_exit_preserves_final_output_and_collected_exit() {
+        for _ in 0..16 {
+            ordinary_terminal_peer(true, Some(7));
+        }
+    }
+
+    #[test]
+    #[ignore = "requires built helper; explicit ordinary non-VM terminal result peer"]
+    fn ordinary_terminal_eof_and_ambiguous_exit_do_not_confirm_completion() {
+        for exit in [None, Some(124), Some(130)] {
+            ordinary_terminal_peer(true, exit);
+        }
+    }
+
+    fn ordinary_terminal_peer(natural_exit: bool, exit: Option<i32>) {
         fn read(socket: &mut UnixStream) -> AgentRequest {
             let mut header = [0; 4];
             socket.read_exact(&mut header).unwrap();
@@ -679,14 +875,25 @@ mod tests {
                     rows: 37
                 }
             ));
-            socket
-                .write_all(
-                    &encode_message(&AgentResponse::Stdout {
-                        data: vec![0, 255, 128],
-                    })
-                    .unwrap(),
-                )
-                .unwrap();
+            let output = encode_message(&AgentResponse::Stdout {
+                data: vec![0, 255, 128],
+            })
+            .unwrap();
+            if natural_exit {
+                let mut frames = output;
+                if let Some(exit_code) = exit {
+                    frames.extend(
+                        encode_message(&AgentResponse::Exited {
+                            exit_code,
+                            oom: false,
+                        })
+                        .unwrap(),
+                    );
+                }
+                socket.write_all(&frames).unwrap();
+                return;
+            }
+            socket.write_all(&output).unwrap();
             assert!(matches!(read(&mut socket), AgentRequest::Stdin { data } if data == [255, 0]));
             assert!(matches!(read(&mut socket), AgentRequest::Stdin { data } if data.is_empty()));
             socket
@@ -734,14 +941,27 @@ mod tests {
                         sequence: output.sequence,
                         bytes: 3,
                     });
-                    queue.push_back(Payload::Input(vec![255, 0]));
-                    queue.push_back(Payload::Close);
+                    if !natural_exit {
+                        queue.push_back(Payload::Input(vec![255, 0]));
+                        queue.push_back(Payload::Close);
+                    }
                     Ok(())
                 },
             )
             .unwrap();
         assert!(result.collected);
-        assert_eq!(result.outcome.confirmed_exit(), Some(7));
+        if exit == Some(7) {
+            assert_eq!(
+                result.outcome.confirmed_exit(),
+                Some(7),
+                "exit={:?}, failure={:?}",
+                result.outcome.observed_exit,
+                result.outcome.failure
+            );
+        } else {
+            assert_eq!(result.outcome.confirmed_exit(), None);
+            assert!(result.outcome.failure.is_some());
+        }
         assert!(released.load(Ordering::Acquire));
         assert_eq!(pool.counts(), crate::jobs::Counts::default());
         peer.join().unwrap();

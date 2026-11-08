@@ -57,6 +57,24 @@ defmodule SmolBox.Runtime.Coordinator do
   def handle_call({:native_available, id}, _from, state),
     do: {:reply, not MapSet.member?(state.native_frozen, id), state}
 
+  def handle_call({:native_activity, id}, _from, state),
+    do:
+      {:reply,
+       %{
+         ready: not MapSet.member?(state.native_frozen, id),
+         held: Map.has_key?(state.native_holders, id)
+       }, state}
+
+  def handle_call({:native_acquire_operation, id}, from, state) do
+    case handle_call({:native_acquire, id}, from, state) do
+      {:reply, :ok, next} ->
+        {:reply, {:ok, not MapSet.member?(state.native_frozen, id)}, next}
+
+      result ->
+        result
+    end
+  end
+
   def handle_call({:native_acquire, id}, {caller, _tag}, state) do
     cond do
       not native_target?(state, id) ->

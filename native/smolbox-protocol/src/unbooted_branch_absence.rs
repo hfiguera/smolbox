@@ -34,10 +34,10 @@ impl UnbootedBranchChildAbsenceRequest {
             self.quiesced
                 && self.operation_id != creation.child.operation_id
                 && self.operation_id != self.disposal.request.operation_id
-                && !creation
+                && creation
                     .initial_release
                     .as_ref()
-                    .is_some_and(|release| release.operation_id == self.operation_id)
+                    .is_none_or(|release| release.operation_id != self.operation_id)
                 && self.request_sha256 == self.digest()?
                 && serde_json::to_vec(self).map_err(|_| InvalidMessage)?.len()
                     <= UNBOOTED_BRANCH_ABSENCE_BYTES,

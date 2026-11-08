@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "scope": "linux-package-build-http-consumers-and-native-contract-portability",
+  "checked_at_utc": "2026-10-16T01:31:17Z",
+  "source_commit": "0e35c3f6a281f192fb7402fd706858431705442d",
+  "build_input": {
+    "base_commit": "fd3af47",
+    "portability_overlay_sha256": "a2d4be50c58d8d2c0f074ae56f9d0a6706ecc9fcdcae3e447c2daad234972767",
+    "volume_budget_overlay_sha256": "507dbd70e0bace3d23e88a5a6e103c3aa8c40f1a283d9a9d31c14feb04cf51b2"
+  },
+  "native_bundle": {
+    "status": "built-and-file-modes-checked",
+    "manifest_schema": 3,
+    "package_manifest_sha256": "47fb386421462de60266a7812fbebb73a7bb5b8a2d690ac78579193efac34603",
+    "identity": {
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "c1d85441a63ddec54fae0abcddf2bfa9820ea164f5b17561f3ce4db561e7b07f",
+      "assets_sha256": "ffd234d5f3a6633e2aa207556b35a92b43700690685fe431c8d4cf5353eb3200",
+      "platform": "linux",
+      "architecture": "x86_64"
+    },
+    "rust_toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+    "cargo_toolchain": "cargo 1.98.1 (797e8a9bc 2026-08-05)",
+    "sdk_source_verified_unmodified": true,
+    "ordinary_native_lifecycle_qualified": false,
+    "public_native_consumers_qualified": false
+  },
+  "http_source_archive_sha256": "b2cbd6526b7cc13629207219b9d3d2ecd1a0d5e2dd94615b144c6055ed2778ae",
+  "http_consumers": {
+    "current": {
+      "status": "passed",
+      "minimum": false,
+      "without_rust": true,
+      "without_native_runtime_assets": true,
+      "native_runtime_exercised": false,
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "dependencies": {
+        "jason": "1.4.5",
+        "mint": "1.11.0",
+        "mint_web_socket": "1.0.6",
+        "nimble_options": "1.1.1",
+        "req": "0.7.5",
+        "telemetry": "1.4.2"
+      },
+      "package_file_count": 448,
+      "smoke_checks": [
+        "checkpoint",
+        "client",
+        "guest_files",
+        "interactive",
+        "legacy_1_14_6_explicit",
+        "legacy_runtime_explicit",
+        "managed_branches",
+        "managed_checkpoints",
+        "managed_exports",
+        "network_policy",
+        "offline_default",
+        "runtime_1_16_0_explicit",
+        "runtime_default",
+        "supervisor",
+        "unqualified_runtime_rejected",
+        "workload"
+      ]
+    },
+    "minimum": {
+      "status": "passed",
+      "minimum": true,
+      "without_rust": true,
+      "without_native_runtime_assets": true,
+      "native_runtime_exercised": false,
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "dependencies": {
+        "jason": "1.4.0",
+        "mint": "1.11.0",
+        "mint_web_socket": "1.0.6",
+        "nimble_options": "1.1.0",
+        "req": "0.7.4",
+        "telemetry": "1.3.0"
+      },
+      "package_file_count": 448,
+      "smoke_checks": [
+        "checkpoint",
+        "client",
+        "guest_files",
+        "interactive",
+        "legacy_1_14_6_explicit",
+        "legacy_runtime_explicit",
+        "managed_branches",
+        "managed_checkpoints",
+        "managed_exports",
+        "network_policy",
+        "offline_default",
+        "runtime_1_16_0_explicit",
+        "runtime_default",
+        "supervisor",
+        "unqualified_runtime_rejected",
+        "workload"
+      ]
+    }
+  },
+  "linux_native_contracts": {
+    "full_workspace_sweep_passed": false,
+    "engine_sweep": {
+      "passed": 841,
+      "failed": 3,
+      "ignored": 20,
+      "filtered": 1,
+      "failure_cause": "owned cached test executable retained mode 0775 from an earlier shared-group build"
+    },
+    "executable_mode_correction": {
+      "before": "0775",
+      "after": "0700",
+      "content_changed": false,
+      "production_guard_changed": false
+    },
+    "targeted_failed_case_rechecks": {
+      "passed": 3,
+      "failed": 0
+    },
+    "port_units": {
+      "passed": 77,
+      "ignored": 2
+    },
+    "protocol_units": {
+      "passed": 77
+    },
+    "protocol_contracts": {
+      "passed": 56
+    },
+    "clean_full_sweep_still_required": true
+  },
+  "macos_native_contracts": {
+    "preceding_full_sweep_units_passed": 998,
+    "protocol_contracts_passed": 56,
+    "later_success_budget_only_adjustment_targeted_passed": 1,
+    "strict_clippy_passed_before_that_budget_adjustment": true,
+    "sdk_vm_qualification": false
+  },
+  "lab_teardown": {
+    "sdk_state_absent": true,
+    "native_owner_processes_absent": true,
+    "build_test_processes_absent_before_shutdown": true,
+    "normal_guest_shutdown": true,
+    "host_unit_active_state": "inactive",
+    "host_unit_result": "success",
+    "host_unit_exit_status": 0,
+    "retained_run_disk": true,
+    "automatic_fault_reset_avoided_by_archiving_verified_normal_shutdown_marker": true,
+    "actual_sdk_vm_workloads_started": false,
+    "forced_termination": false
+  },
+  "full_parity_acceptance": "pending",
+  "public_native_branch_admission_enabled": false,
+  "crash_handling_qualified": false,
+  "distribution_approved": false
+}

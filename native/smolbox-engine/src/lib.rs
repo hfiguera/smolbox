@@ -160,13 +160,16 @@ pub use terminal_supervisor::{
     TerminalEvent, TerminalMessage, TerminalOutput, TerminalRequest, TerminalRunResult,
 };
 pub use terminal_worker::run_terminal_worker;
+mod guest_registry;
 mod machine;
 mod material;
 mod observations;
 mod oci;
 mod oci_start;
+mod registry_account;
 mod registry_artifact;
 mod registry_credentials;
+mod registry_provider;
 pub use registry_credentials::RegistryIdentityCredential;
 mod mount_material;
 mod registry_io;

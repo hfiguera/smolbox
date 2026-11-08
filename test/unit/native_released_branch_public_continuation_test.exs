@@ -409,7 +409,7 @@ defmodule SmolBox.NativeReleasedBranchPublicContinuationTest do
         action = unquote(action)
 
         {runtime, store, parent, child, usage, authority, peer} =
-          fixture(unquote(origin), action, budget: 50, delay: 100)
+          fixture(unquote(origin), action, budget: 500, delay: 700)
 
         assert {:error, %Error{evidence: :dispatch_uncertain}} = execute(runtime, child, action)
         saved = NativeBranchDeletionContract.fetch(Memory, store, child)

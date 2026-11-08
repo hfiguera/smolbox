@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "status": "shared-original-owner-stop-control-models-passed-live-acceptance-pending",
+  "sdk_unmodified": true,
+  "native_engine_changed": false,
+  "public_library_changed": false,
+  "control": {
+    "name": "stop_owned_machine",
+    "shared_module": "SmolBox.Example.EmbeddedOwnedControl",
+    "image_ids": [
+      "original",
+      "warm"
+    ],
+    "growth_ids": [
+      "original"
+    ],
+    "growth_scope": "original-configured-scope",
+    "exact_version_required": true,
+    "original_runtime_and_epoch_required": true,
+    "coordinator_dispatch_frozen": true,
+    "original_native_work_must_drain": true,
+    "saved_creation_and_current_material_required": true,
+    "separate_resolution_required": true,
+    "unknown_work_replayed": false,
+    "command_exit_inferred": false,
+    "reservation_released_by_stop": false,
+    "unconfirmed_stop_remains_uncertain": true,
+    "process_signals_used": false,
+    "existing_live_runners_patched": false
+  },
+  "validation": {
+    "current": {
+      "elixir": "1.20.4",
+      "otp": "29.0.6",
+      "passed": 90,
+      "excluded": 3
+    },
+    "minimum": {
+      "elixir": "1.18.4",
+      "otp": "27.3.4.15",
+      "passed": 90,
+      "excluded": 3
+    },
+    "coverage_tests_included": 4,
+    "credo_diff_against": "501a252",
+    "credo_new_issues": 0,
+    "whole_repository_credo": "failed-existing-findings-remain",
+    "minimum_initial_relative_build_path": "dependency-compilation-failed-before-tests",
+    "minimum_corrected_absolute_build_path": "passed",
+    "live_sdk_or_vm_opened_by_models": false,
+    "live_control_qualified": false,
+    "format": "passed",
+    "docs_warnings_as_errors": "passed"
+  },
+  "input_sha256": {
+    "examples/embedded_port/lib/owned_control.ex": "e93165e2893487b96a35fea9dbd0ced1c4fd343865d707c5e36616caac4ea625",
+    "examples/embedded_port/lib/growth_control.ex": "effcbd37f9318ad2ed4065e73e9d78536392383a684d7d759475d767eb7627a6",
+    "examples/embedded_port/lib/growth_demo.ex": "4639314656cd7670ca380ebf6055f6f9f46b29c322cd67aa170d3b5c84219f48",
+    "examples/embedded_port/lib/images_demo.ex": "8baf29de98de96972f0d9bf8a5623adf1efe56a8f64bc752e7157860b3ff040d",
+    "dev/smolbox/ci/native_consumer.ex": "7ec4711223a68bd2290f6abc9eac9b9b878f78257b74633df20f4157dff7fa86",
+    "test/unit/embedded_growth_example_test.exs": "892859266dec07babc4bf9db9922effe3f61706182968c96890242f15540d772",
+    "test/unit/embedded_images_runtime_test.exs": "22b19050fb0e7efcdd0d75d7f5e0015e6563e2d5ec651eba2b0ee2ac381aaa9a"
+  },
+  "private_log_sha256": {
+    "growth-owned-control-current-accepted.log": "6575a6b34edf6267d3e935156f0244428e0c9d92ed0d4e97ef271a532a18d690",
+    "growth-owned-control-minimum-accepted.log": "ee4d3911246368749bbe6cd34bb31f452dc8cc044f7db3d674ddddbaf1f8892e",
+    "growth-owned-control-credo-final.log": "2ebcd7efbb7047a306955fcce862fd0a727f8179516f81a8453a149a1565363c",
+    "growth-owned-control-docs.log": "48429514fe92636c13e0adc66911459842ba774ea587852a5807fb6c8b568b8f",
+    "growth-owned-control-format.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "growth-owned-control-coverage-final.log": "ccaed0f504c50d91a869ab29b5c41330b939adaaffe10482a8c582975b68b88d"
+  },
+  "scope": {
+    "bare_growth_restart_qualified": false,
+    "p7_complete": false,
+    "parity_complete": false,
+    "crash_validation_deferred": true,
+    "crash_handling_qualified": false,
+    "distribution_approved": false
+  }
+}

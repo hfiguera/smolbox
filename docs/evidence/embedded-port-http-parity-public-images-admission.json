@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "status": "linux-public-images-source-candidate-not-native-qualified",
+  "base_commit": "2c2f774",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "sdk_unmodified": true,
+  "platform": "linux",
+  "feature_versions_added": {
+    "remote_sources": 1,
+    "images": 1
+  },
+  "default_macos_policy_unchanged": true,
+  "legacy_hello_fixtures_unchanged": true,
+  "new_hello_fixture": "native/smolbox-protocol/fixtures/hello-v2-linux-images.json",
+  "validation": {
+    "rust_workspace_passed": 1120,
+    "rust_ignored": 24,
+    "rust_protocol_passed": 136,
+    "strict_all_target_clippy": "passed",
+    "elixir_focused_passed": 72,
+    "final_proof_runner_focused_passed": 28,
+    "python_tests": 50,
+    "python_expected_skips": 4,
+    "docs_warnings_as_errors": "passed",
+    "initial_test_assertion_and_syntax_failures_corrected": true,
+    "native_domain_or_vm_opened": false,
+    "generated_local_doc_links": "passed",
+    "broader_elixir_sweep_before_final_runner_refinements": {
+      "passed": 1646,
+      "excluded": 13
+    }
+  },
+  "input_sha256": {
+    "lib/smolbox/embedded/sdk_identity.ex": "9730d5e6a867d94c635e8f3be3ae5be4864115697ed2709bc4d01f3986aa03e9",
+    "lib/smolbox/embedded/config.ex": "5c068832a39478e16e3d45e53e3f0462b3b74c29cd33447b6eea8c2c66eb5e59",
+    "native/policy-linux.json": "d936a2c89d2300613f3561b46f82a82758665c17fb80a6b866baf2c36fd359d4",
+    "native/smolbox-port/src/package.rs": "325a4964f51a47615439d89d146adc0af4b7b730c0fcf74b0e1a2c4789845d63",
+    "native/smolbox-protocol/fixtures/hello-v2-linux-images.json": "23a8c6afd8753bcb793b2192661a1f9bd1c47f6d82805d9b671104d64f1e57f6",
+    "native/smolbox-protocol/tests/contract.rs": "5d642e0638bc21eb2e9d57e9710dcaeab9e7f87524574412c54f138272565a62",
+    "native/tests/test_package_metadata.py": "84debb92e192456f517201eb7b3b364f6c1732cc66ef8a59a22a9d870fb3f36d",
+    "native/tests/test_ordinary_runner.py": "a8fae7965ce4dc03830d2135cf44d850ccaec3d772ba1e4970fe36de9293007a",
+    "dev/smolbox/ci/package.ex": "cd03cec0b92b4a6a4accfa0c2e8f0315f9f58d7d9baf19d37f6f2b7b945e3b24",
+    "dev/smolbox/ci/native_consumer.ex": "87b63ffb6a2d0dddd19a117e2cf5693e641d870cbd950e8285df34a73b321ef8",
+    "examples/embedded_port/lib/images_demo.ex": "7a5f0c3efce1de20a2c4f2990c03bea3d4c073e274936f79afdf0c13dea450fb",
+    "examples/embedded_port/lib/images_control.ex": "806d82b1ea2e9ccb611deecf9e35c0a8411f81471be3b5fb0f31ae2a1978cd54",
+    "scripts/embedded-images-runtime-proof.exs": "b3742a14578596a09444001a07eb0f5be67f4c4734a386606df8e051e238d223",
+    "test/unit/embedded_images_example_test.exs": "637e5c2f8f4d7cdb964ea53b37b7877f81be1bd81d4c417a62b23293215a0128",
+    "test/unit/embedded_package_activation_test.exs": "6b61381964e4e9f78ed76e0ab42579bbca5dee9276ef25954bbc0a841a81f6e2",
+    "test/ci/package_test.exs": "d71eee00a07f4e3a604e25d81796917f5110af0adbed3eb89eb2b4997dea4e17"
+  },
+  "private_log_sha256": {
+    "workspace.log": "6ced10dc9456f4fa480cc4547cb0fb013fc76e3e450659fde26cff6951bb6583",
+    "protocol.log": "f689e9d78f7c58a979f4849d7316943f004699162862df25186c8604dc96ec03",
+    "clippy.log": "a96e00f410d62bfe1ba290b56d0e51994fe096609f4d9784e0858605c48a5e60",
+    "elixir-v3.log": "10709cc38929aa2edf87e532913660883b6938c30cacac533b6bc63a50f99e33",
+    "elixir-full.log": "eb8872468c0c2c3bbc5fb394c27d39392e9c109fe7b90b1c8e969182e4523c39",
+    "python.log": "6b6f2cab07bed75daad9c1e4701024b3729f3f2b8727cd05d6bb4e49bb7201ca",
+    "sdk.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+    "docs.log": "aae7135d7f0a37a3cd227d50e111b3f799daa99f6cfa30e5a2e60bca2d7bef5e",
+    "final-focused-v3.log": "972521228385964ca33bb1657fef6493291774aaa03961e6e2f8a1b6ffe86857",
+    "sdk-after.log": "d72ab76a473fec0ec8090dd05aafb648f33a6601c9fed487c68e6d41e7223d94",
+    "docs-final.log": "94ac2a95a39c24d78740996b723144c4aa891b7f3347b115ea557a5c711699d2"
+  },
+  "scope": {
+    "changed_package_rebuilt": false,
+    "changed_package_ordinary_public_qualified": false,
+    "registry_guest_credentials_qualified": false,
+    "historical_qualification_transferred": false,
+    "parity_complete": false,
+    "crash_validation_deferred": true,
+    "crash_handling_qualified": false,
+    "distribution_approved": false
+  },
+  "admission_commit": "dc84365409cbe3ae331d93e172bd5cbdcfe87c0e",
+  "public_consumer_contract": {
+    "explicit_selection": [
+      "native-public",
+      "native-images"
+    ],
+    "ordinary_only": true,
+    "private_settings_max_bytes": 65536,
+    "settings_copied_and_hashed": true,
+    "source_settings_reject_credentials": true,
+    "oci_explicit_guest_network_required": true,
+    "registry_host_cache_separate_from_offline_guest": true,
+    "cold_warm_creation": true,
+    "typed_inventory_and_approved_pull": true,
+    "duplicate_pull_reuse": true,
+    "configured_startup_fixed_fixture": true,
+    "stopped_runtime_replacement": true,
+    "retained_binary_data": true,
+    "owned_cleanup": true,
+    "original_owner_retained_on_failure": true,
+    "control_exact_versions_and_one_shot_request_ids": true,
+    "resolution_requires_explicit_quiescence_and_disposition": true,
+    "diagnostic_failure_does_not_unwind_owner": true,
+    "close_drains_and_checks_unassigned_workflow_identities": true
+  }
+}

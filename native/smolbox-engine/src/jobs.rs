@@ -183,8 +183,10 @@ impl Demand {
         }
         Ok(Self {
             lane: Lane::Work,
-            children: 0,
-            descriptors: 16,
+            // Optional operator credential provider precedes network/cache I/O.
+            // Include all three pipes and spawn error-pipe transient descriptors.
+            children: 1,
+            descriptors: 20,
             staging: 0,
             registry_staging: bytes,
             checkpoint_staging: 0,
@@ -219,8 +221,8 @@ impl Demand {
     pub(crate) fn oci_metadata() -> Self {
         Self {
             lane: Lane::Work,
-            children: 0,
-            descriptors: 12,
+            children: 1,
+            descriptors: 20,
             registry_staging: 0,
             checkpoint_staging: 0,
             checkpoint_metadata: 0,
@@ -245,7 +247,7 @@ impl Demand {
             lane: Lane::Work,
             children: 2, // the enrolled VMM and the agent bootstrap worker
             // Launch and bootstrap are sequential. Retained manager handles
-            // coexist with the bootstrap's 21-descriptor demand.
+            // coexist with the bootstrap/provider's 24-descriptor demand.
             descriptors: 24,
             registry_staging: 0,
             checkpoint_staging: 0,
@@ -276,7 +278,9 @@ impl Demand {
         Self {
             lane: Lane::Work,
             children: 1,
-            descriptors: 21,
+            // Parent-side credential provider and guest worker are sequential.
+            // Metadata/source guards remain held across both phases.
+            descriptors: 24,
             registry_staging: 0,
             checkpoint_staging: 0,
             checkpoint_metadata: 0,
@@ -359,6 +363,18 @@ impl Demand {
             checkpoint_install: 0,
             staging: options.total_input_bytes * 3,
             metadata: metadata + options.max_buffer_bytes * 4 + 8 * 1024 * 1024,
+        })
+    }
+    pub(crate) fn image_transfer(bytes: u64, metadata: u64) -> Result<Self> {
+        if metadata == 0 || metadata > crate::buffered::COMMAND_METADATA_BYTES {
+            return Err(Error::before(ErrorCode::Validation));
+        }
+        Ok(Self {
+            // One worker, sequential activation/file relays, private metadata,
+            // lifecycle/source descriptors and bounded parser/watch stacks.
+            descriptors: 24,
+            metadata: metadata + 8 * 1024 * 1024,
+            ..Self::transfer(bytes)?
         })
     }
     pub(crate) fn transfer(bytes: u64) -> Result<Self> {
@@ -1554,6 +1570,32 @@ mod tests {
     }
 
     #[test]
+    fn mounted_file_promotion_keeps_one_job_and_both_control_observers() {
+        let pool = JobPool::default();
+        let mut mount = pool.acquire(Demand::volume_mounts(8).unwrap()).unwrap();
+        let controls = [
+            pool.acquire(Demand::volume_observation()).unwrap(),
+            pool.acquire(Demand::volume_observation()).unwrap(),
+        ];
+        let demand = Demand::image_transfer(16 * 1024 * 1024, 1024).unwrap();
+        mount.promote_mount_worker(demand).unwrap();
+        let counts = pool.counts();
+        assert_eq!(counts.work, 1);
+        assert_eq!(counts.children, 1);
+        assert_eq!(counts.staging, 16 * 1024 * 1024);
+        assert_eq!(counts.work_descriptors, 24);
+        assert_eq!(counts.work_metadata, JOB_METADATA_BYTES);
+        mount.promote_mount_worker(demand).unwrap();
+        assert_eq!(pool.counts(), counts);
+        pool.quarantine();
+        assert!(pool.acquire(Demand::transfer(1).unwrap()).is_err());
+        assert_eq!(pool.counts(), counts);
+        drop(controls);
+        drop(mount);
+        assert_eq!(pool.counts(), Counts::default());
+    }
+
+    #[test]
     fn mount_oci_promotion_keeps_one_job_two_children_and_both_control_observers() {
         let pool = JobPool::default();
         let mut mount = pool.acquire(Demand::volume_mounts(8).unwrap()).unwrap();
@@ -1867,6 +1909,34 @@ mod tests {
     }
 
     #[test]
+    fn registry_provider_reservation_preserves_two_control_observers_during_retirement() {
+        for demand in [
+            Demand::oci_metadata(),
+            Demand::registry_download(1).unwrap(),
+        ] {
+            let pool = JobPool::default();
+            let work = pool.acquire(demand).unwrap();
+            assert_eq!(pool.counts().children, 1);
+            assert_eq!(pool.counts().work_descriptors, 20);
+            assert_eq!(pool.counts().work_metadata, JOB_METADATA_BYTES);
+            pool.quarantine();
+            let controls = [
+                pool.acquire(Demand::observation()).unwrap(),
+                pool.acquire(Demand::observation()).unwrap(),
+            ];
+            assert_eq!(pool.counts().children, 1);
+            assert_eq!(pool.counts().control, 2);
+            assert!(pool.acquire(Demand::oci_metadata()).is_err());
+            drop(work); // modeled exact-child + both-pipe collection, never timeout
+            assert_eq!(pool.counts().children, 0);
+            assert_eq!(pool.counts().control, 2);
+            assert!(!pool.available());
+            drop(controls);
+            assert_eq!(pool.counts(), Counts::default());
+        }
+    }
+
+    #[test]
     fn growth_qualification_reserves_journal_memory_without_a_child_or_control_starvation() {
         let pool = JobPool::default();
         let repair = pool.acquire(Demand::growth_repair()).unwrap();
@@ -1983,6 +2053,32 @@ mod tests {
         drop(controls);
         assert_eq!(pool.counts(), Counts::default());
     }
+    #[test]
+    fn activated_file_job_retains_metadata_and_descriptors_while_control_stays_available() {
+        let pool = JobPool::default();
+        let lease = pool
+            .acquire(Demand::image_transfer(16 * 1024 * 1024, 1024).unwrap())
+            .unwrap();
+        let charged = pool.counts();
+        assert_eq!(charged.children, 1);
+        assert_eq!(charged.work, 1);
+        assert_eq!(charged.staging, 16 * 1024 * 1024);
+        assert_eq!(charged.metadata, 8 * 1024 * 1024 + 1024);
+        assert_eq!(charged.work_descriptors, 24);
+        assert!(pool.acquire(Demand::image_transfer(1, 1).unwrap()).is_err());
+        assert!(Demand::image_transfer(1, 0).is_err());
+        assert!(Demand::image_transfer(1, crate::buffered::COMMAND_METADATA_BYTES + 1).is_err());
+        let controls = [
+            pool.acquire(Demand::observation()).unwrap(),
+            pool.acquire(Demand::observation()).unwrap(),
+        ];
+        assert_eq!(pool.counts().work_descriptors, charged.work_descriptors);
+        drop(controls);
+        assert_eq!(pool.counts(), charged);
+        drop(lease);
+        assert_eq!(pool.counts(), Counts::default());
+    }
+
     #[test]
     fn transfers_and_streams_share_work_admission_while_control_remains_independent() {
         let pool = JobPool::default();

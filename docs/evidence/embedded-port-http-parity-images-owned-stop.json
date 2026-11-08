@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "status": "future-original-owner-stop-control-models-passed-live-acceptance-pending",
+  "sdk_unmodified": true,
+  "control": {
+    "name": "stop_owned_machine",
+    "ids": [
+      "original",
+      "warm"
+    ],
+    "exact_version_required": true,
+    "original_runtime_and_epoch_required": true,
+    "coordinator_dispatch_frozen": true,
+    "original_native_work_must_drain": true,
+    "normal_stop_uses_saved_creation_receipt": true,
+    "unknown_execution_replayed": false,
+    "command_exit_inferred": false,
+    "reservation_released_by_stop": false,
+    "separate_explicit_resolution_required": true,
+    "worker_ready_required_before_delete": true,
+    "unconfirmed_stop_remains_uncertain": true,
+    "process_signals_used": false
+  },
+  "validation": {
+    "deterministic_os_port_models_passed": 44,
+    "excluded": 3,
+    "backend_parity_coverage_passed": 4,
+    "format": "passed",
+    "docs_warnings_as_errors": "passed",
+    "live_sdk_or_vm_opened_by_models": false,
+    "live_control_qualified": false
+  },
+  "input_sha256": {
+    "examples/embedded_port/lib/images_control.ex": "3b68514bf435f0880861ca57817821cf3b85eeb6380504183aef75f48dbf20df",
+    "examples/embedded_port/lib/images_demo.ex": "a28f6bec5185ae27a6e9e13daf788e0b611f3ac85f265c989b3364ee5c1914ff",
+    "test/support/embedded_fixture.py": "80662f03e52562f6b0e3c4dc6a4785eab7ec922ebd5b2dd7d1cf1e7ce6c11761",
+    "test/support/embedded_package.ex": "bfbf282fb166f7eb504dfdb2b7f90ef8c10aea60e9983c1273c5e9979294eb50",
+    "test/unit/embedded_images_example_test.exs": "68872135f5e7355faef5c1705a1038e32f892ddab02c38c97a37ecaa89dcdc5f",
+    "test/unit/embedded_images_runtime_test.exs": "f4db7e1039f78f6bf9e09f8d28896d55c7659ca183b6e7b72f9d71fce1b21dcb"
+  },
+  "private_log_sha256": {
+    "owned-stop-final.log": "3863d5d2e24266512637e66b2178f8bf556dc669539fdcc9a352ff7af16b1feb",
+    "owned-stop-coverage-final.log": "5cb6ca3286b7e75e1c1a3415029a8e5d3efdff16579e215009d327d238e1bec1",
+    "owned-stop-docs.log": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d"
+  },
+  "scope": {
+    "public_images_qualified": false,
+    "parity_complete": false,
+    "crash_validation_deferred": true,
+    "crash_handling_qualified": false,
+    "distribution_approved": false
+  }
+}

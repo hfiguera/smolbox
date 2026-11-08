@@ -144,7 +144,7 @@ defmodule SmolBox.Embedded.ConfigTest do
     assert Target.sdk_version(%{runtime_version: "1.19.0"}) == "1.19.0"
   end
 
-  test "volume root enters helper config only under future volume capability" do
+  test "volume root enters helper config only under an explicitly approved Linux descriptor" do
     {:ok, policy} = SmolBox.VolumePolicy.new("local", "/srv/smolvm/volumes")
     options = options()
 
@@ -170,7 +170,7 @@ defmodule SmolBox.Embedded.ConfigTest do
     sdk = SDKIdentity.implemented("1.22.0", package["smolvm_revision"])
     sdk = put_in(sdk, ["feature_versions", "volumes"], 1)
     future = %{dormant | package_identity: package, sdk_identity: sdk}
-    assert {:error, _} = Config.validate(future)
+    assert :ok = Config.validate(future)
 
     assert Launch.helper_config(future)["approved_volume_policy"] ==
              %{"id" => "local", "root" => "/srv/smolvm/volumes"}

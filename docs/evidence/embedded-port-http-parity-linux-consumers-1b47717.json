@@ -1,0 +1,675 @@
+{
+  "schema": 1,
+  "scope": "ordinary-linux-public-workload-and-network-consumers",
+  "checked_at_utc": "2026-10-16T04:13:00Z",
+  "source_commit": "1b477174aedcafa52b56043dd14927f6ba539993",
+  "native_bundle": {
+    "manifest_schema": 3,
+    "package_manifest_sha256": "eed7ec014072565f33f7dafd173897c39118b391fb69dc3daac24253181e22aa",
+    "identity": {
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "fedcfdaf92efbf8c35ce6c3780231ac72a7b402bff7171fdf55bf51547986664",
+      "assets_sha256": "ffd234d5f3a6633e2aa207556b35a92b43700690685fe431c8d4cf5353eb3200",
+      "platform": "linux",
+      "architecture": "x86_64"
+    },
+    "sdk_version": "1.22.0",
+    "sdk_source_verified_unmodified": true,
+    "rust_toolchain": "1.98.1",
+    "retained_privately": true,
+    "published": false
+  },
+  "fixture": {
+    "bytes": 41681356,
+    "fixture_defaults_sha256": "674595033254d389947f5ee19db405ddcfb3404a49e92c14934e48a5ac8dbecd",
+    "fixture_sha256": "04b8d781af26f2e6133a0974deea745d44e5109be21e1213df23a6cbb0bd2747",
+    "image_digest": "sha256:28eb0cb65acb65b970e85c0dc57d10067868fae8dd00d072413df273132123ac",
+    "layer_content": [
+      {
+        "tar_bytes": 50860544,
+        "uncompressed_tar_sha256": "7bae6c8cef01a129cc3a9eb16f37cf8e4deb84085586ab425377bcedf30a411b",
+        "upstream_layer_digest": "sha256:c5680ba2a701892cf5e9304fcdc601ebc8df014c6f6354b451614c98917e4c64"
+      }
+    ],
+    "package_manifest_sha256": "eed7ec014072565f33f7dafd173897c39118b391fb69dc3daac24253181e22aa",
+    "scope": "ordinary-python-container-fixture",
+    "sdk_source_modified": false,
+    "sdk_vm_started": false,
+    "source_fixture_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+    "status": "created",
+    "storage_template_included": false,
+    "retained_privately": true,
+    "published": false
+  },
+  "consumers": [
+    {
+      "campaign": "ordinary-public-native-workloads",
+      "consumer": "current",
+      "without_rust": true,
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "report_sha256": "ba350c16b3d2a7121f14cb046f580caa0cf6423f7a9cd4d93729de9520d169eb",
+      "source_archive_sha256": "b2cbd6526b7cc13629207219b9d3d2ecd1a0d5e2dd94615b144c6055ed2778ae",
+      "cases": [
+        {
+          "changed_workload_rejected_before_dispatch": true,
+          "cycles": [
+            {
+              "console_lines": 100,
+              "console_snapshot_completed": true,
+              "repeated_execution_does_not_relaunch": true,
+              "startup_event_count": 0,
+              "startup_events": [],
+              "vm_running_observed": true
+            },
+            {
+              "console_lines": 100,
+              "console_snapshot_completed": true,
+              "repeated_execution_does_not_relaunch": true,
+              "startup_event_count": 0,
+              "startup_events": [],
+              "vm_running_observed": true
+            }
+          ],
+          "duplicate_create_reuses_identity": true,
+          "kind": "neutral",
+          "owned_deleted": true,
+          "retained_across_stopped_runtime_replacement": true,
+          "startup_exit_status_attested": false
+        },
+        {
+          "changed_workload_rejected_before_dispatch": true,
+          "cycles": [
+            {
+              "console_lines": 100,
+              "console_snapshot_completed": true,
+              "repeated_execution_does_not_relaunch": true,
+              "startup_event_count": 1,
+              "startup_events": [
+                {
+                  "argv": [
+                    "baked literal; text"
+                  ],
+                  "cwd": "/workspace",
+                  "extra": null,
+                  "inherited": "baked",
+                  "kind": "baked",
+                  "override": "baked",
+                  "uid": 0
+                }
+              ],
+              "vm_running_observed": true
+            },
+            {
+              "console_lines": 100,
+              "console_snapshot_completed": true,
+              "repeated_execution_does_not_relaunch": true,
+              "startup_event_count": 2,
+              "startup_events": [
+                {
+                  "argv": [
+                    "baked literal; text"
+                  ],
+                  "cwd": "/workspace",
+                  "extra": null,
+                  "inherited": "baked",
+                  "kind": "baked",
+                  "override": "baked",
+                  "uid": 0
+                },
+                {
+                  "argv": [
+                    "baked literal; text"
+                  ],
+                  "cwd": "/workspace",
+                  "extra": null,
+                  "inherited": "baked",
+                  "kind": "baked",
+                  "override": "baked",
+                  "uid": 0
+                }
+              ],
+              "vm_running_observed": true
+            }
+          ],
+          "duplicate_create_reuses_identity": true,
+          "kind": "inherited",
+          "owned_deleted": true,
+          "retained_across_stopped_runtime_replacement": true,
+          "startup_exit_status_attested": false
+        },
+        {
+          "changed_workload_rejected_before_dispatch": true,
+          "cycles": [
+            {
+              "console_lines": 100,
+              "console_snapshot_completed": true,
+              "repeated_execution_does_not_relaunch": true,
+              "startup_event_count": 1,
+              "startup_events": [
+                {
+                  "argv": [
+                    "replacement literal; text"
+                  ],
+                  "cwd": "/",
+                  "extra": "explicit",
+                  "inherited": "baked",
+                  "kind": "override",
+                  "override": "override",
+                  "uid": 0
+                }
+              ],
+              "vm_running_observed": true
+            },
+            {
+              "console_lines": 100,
+              "console_snapshot_completed": true,
+              "repeated_execution_does_not_relaunch": true,
+              "startup_event_count": 2,
+              "startup_events": [
+                {
+                  "argv": [
+                    "replacement literal; text"
+                  ],
+                  "cwd": "/",
+                  "extra": "explicit",
+                  "inherited": "baked",
+                  "kind": "override",
+                  "override": "override",
+                  "uid": 0
+                },
+                {
+                  "argv": [
+                    "replacement literal; text"
+                  ],
+                  "cwd": "/",
+                  "extra": "explicit",
+                  "inherited": "baked",
+                  "kind": "override",
+                  "override": "override",
+                  "uid": 0
+                }
+              ],
+              "vm_running_observed": true
+            }
+          ],
+          "duplicate_create_reuses_identity": true,
+          "kind": "override",
+          "owned_deleted": true,
+          "retained_across_stopped_runtime_replacement": true,
+          "startup_exit_status_attested": false
+        },
+        {
+          "changed_workload_rejected_before_dispatch": true,
+          "cycles": [
+            {
+              "console_lines": 100,
+              "console_snapshot_completed": true,
+              "repeated_execution_does_not_relaunch": true,
+              "startup_event_count": 0,
+              "startup_events": [],
+              "vm_running_observed": true
+            },
+            {
+              "console_lines": 100,
+              "console_snapshot_completed": true,
+              "repeated_execution_does_not_relaunch": true,
+              "startup_event_count": 0,
+              "startup_events": [],
+              "vm_running_observed": true
+            }
+          ],
+          "duplicate_create_reuses_identity": true,
+          "kind": "missing",
+          "owned_deleted": true,
+          "retained_across_stopped_runtime_replacement": true,
+          "startup_exit_status_attested": false
+        }
+      ],
+      "proof_tool_sha256": {
+        "native-proof.exs": "d5c77f23f1726cfbc027738d2287935189674c73f6a393cebe9fda3d2330b3bb",
+        "native_proof.py": "43fdb6e7f20bc6a05acfefde2f23bb708e5db3c92cd4509744bc1dbe0a32548d",
+        "network_fixture.py": "9eceef406d1dd803553fca477bfaa6fbb5c08beca645593548e6e791b9c53f1a",
+        "network_proof.py": "95c507c4bf511e046c02dccb5142ad8d8df53765b4376b7fcef5fdb49ad1cb48",
+        "ordinary_proof.py": "b07539d4dd07526ebbcd41810c2a33dc87b4ea7b18b6e66a57c389356e3e5b74"
+      },
+      "inventory_restored": true,
+      "owned_deleted": true,
+      "final_reserved_slots": 0
+    },
+    {
+      "campaign": "ordinary-public-native-workloads",
+      "consumer": "minimum",
+      "without_rust": true,
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "report_sha256": "e49633899f3ce03910268005bd946ea39c4da93229935e5bd3c8ab0588c5b1a6",
+      "source_archive_sha256": "b2cbd6526b7cc13629207219b9d3d2ecd1a0d5e2dd94615b144c6055ed2778ae",
+      "cases": [
+        {
+          "changed_workload_rejected_before_dispatch": true,
+          "cycles": [
+            {
+              "console_lines": 100,
+              "console_snapshot_completed": true,
+              "repeated_execution_does_not_relaunch": true,
+              "startup_event_count": 0,
+              "startup_events": [],
+              "vm_running_observed": true
+            },
+            {
+              "console_lines": 100,
+              "console_snapshot_completed": true,
+              "repeated_execution_does_not_relaunch": true,
+              "startup_event_count": 0,
+              "startup_events": [],
+              "vm_running_observed": true
+            }
+          ],
+          "duplicate_create_reuses_identity": true,
+          "kind": "neutral",
+          "owned_deleted": true,
+          "retained_across_stopped_runtime_replacement": true,
+          "startup_exit_status_attested": false
+        },
+        {
+          "changed_workload_rejected_before_dispatch": true,
+          "cycles": [
+            {
+              "console_lines": 100,
+              "console_snapshot_completed": true,
+              "repeated_execution_does_not_relaunch": true,
+              "startup_event_count": 1,
+              "startup_events": [
+                {
+                  "argv": [
+                    "baked literal; text"
+                  ],
+                  "cwd": "/workspace",
+                  "extra": null,
+                  "inherited": "baked",
+                  "kind": "baked",
+                  "override": "baked",
+                  "uid": 0
+                }
+              ],
+              "vm_running_observed": true
+            },
+            {
+              "console_lines": 100,
+              "console_snapshot_completed": true,
+              "repeated_execution_does_not_relaunch": true,
+              "startup_event_count": 2,
+              "startup_events": [
+                {
+                  "argv": [
+                    "baked literal; text"
+                  ],
+                  "cwd": "/workspace",
+                  "extra": null,
+                  "inherited": "baked",
+                  "kind": "baked",
+                  "override": "baked",
+                  "uid": 0
+                },
+                {
+                  "argv": [
+                    "baked literal; text"
+                  ],
+                  "cwd": "/workspace",
+                  "extra": null,
+                  "inherited": "baked",
+                  "kind": "baked",
+                  "override": "baked",
+                  "uid": 0
+                }
+              ],
+              "vm_running_observed": true
+            }
+          ],
+          "duplicate_create_reuses_identity": true,
+          "kind": "inherited",
+          "owned_deleted": true,
+          "retained_across_stopped_runtime_replacement": true,
+          "startup_exit_status_attested": false
+        },
+        {
+          "changed_workload_rejected_before_dispatch": true,
+          "cycles": [
+            {
+              "console_lines": 100,
+              "console_snapshot_completed": true,
+              "repeated_execution_does_not_relaunch": true,
+              "startup_event_count": 1,
+              "startup_events": [
+                {
+                  "argv": [
+                    "replacement literal; text"
+                  ],
+                  "cwd": "/",
+                  "extra": "explicit",
+                  "inherited": "baked",
+                  "kind": "override",
+                  "override": "override",
+                  "uid": 0
+                }
+              ],
+              "vm_running_observed": true
+            },
+            {
+              "console_lines": 100,
+              "console_snapshot_completed": true,
+              "repeated_execution_does_not_relaunch": true,
+              "startup_event_count": 2,
+              "startup_events": [
+                {
+                  "argv": [
+                    "replacement literal; text"
+                  ],
+                  "cwd": "/",
+                  "extra": "explicit",
+                  "inherited": "baked",
+                  "kind": "override",
+                  "override": "override",
+                  "uid": 0
+                },
+                {
+                  "argv": [
+                    "replacement literal; text"
+                  ],
+                  "cwd": "/",
+                  "extra": "explicit",
+                  "inherited": "baked",
+                  "kind": "override",
+                  "override": "override",
+                  "uid": 0
+                }
+              ],
+              "vm_running_observed": true
+            }
+          ],
+          "duplicate_create_reuses_identity": true,
+          "kind": "override",
+          "owned_deleted": true,
+          "retained_across_stopped_runtime_replacement": true,
+          "startup_exit_status_attested": false
+        },
+        {
+          "changed_workload_rejected_before_dispatch": true,
+          "cycles": [
+            {
+              "console_lines": 100,
+              "console_snapshot_completed": true,
+              "repeated_execution_does_not_relaunch": true,
+              "startup_event_count": 0,
+              "startup_events": [],
+              "vm_running_observed": true
+            },
+            {
+              "console_lines": 100,
+              "console_snapshot_completed": true,
+              "repeated_execution_does_not_relaunch": true,
+              "startup_event_count": 0,
+              "startup_events": [],
+              "vm_running_observed": true
+            }
+          ],
+          "duplicate_create_reuses_identity": true,
+          "kind": "missing",
+          "owned_deleted": true,
+          "retained_across_stopped_runtime_replacement": true,
+          "startup_exit_status_attested": false
+        }
+      ],
+      "proof_tool_sha256": {
+        "native-proof.exs": "d5c77f23f1726cfbc027738d2287935189674c73f6a393cebe9fda3d2330b3bb",
+        "native_proof.py": "43fdb6e7f20bc6a05acfefde2f23bb708e5db3c92cd4509744bc1dbe0a32548d",
+        "network_fixture.py": "9eceef406d1dd803553fca477bfaa6fbb5c08beca645593548e6e791b9c53f1a",
+        "network_proof.py": "95c507c4bf511e046c02dccb5142ad8d8df53765b4376b7fcef5fdb49ad1cb48",
+        "ordinary_proof.py": "b07539d4dd07526ebbcd41810c2a33dc87b4ea7b18b6e66a57c389356e3e5b74"
+      },
+      "inventory_restored": true,
+      "owned_deleted": true,
+      "final_reserved_slots": 0
+    },
+    {
+      "campaign": "ordinary-public-native-network-mappings",
+      "consumer": "current",
+      "without_rust": true,
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "report_sha256": "77ba191db9f30eb2e8f751cc66b1849d8c21e402c6bd9939e220ad9ef70846e9",
+      "source_archive_sha256": "b2cbd6526b7cc13629207219b9d3d2ecd1a0d5e2dd94615b144c6055ed2778ae",
+      "cases": [
+        {
+          "conflict_rolls_back_before_dispatch": true,
+          "cycles": [
+            {
+              "host_positive_controls": [
+                true,
+                true
+              ],
+              "inbound_reply_verified": true,
+              "loopback_listeners": [
+                "127.0.0.1:28732",
+                "[::1]:28732"
+              ],
+              "outbound_reached": [
+                false,
+                false
+              ]
+            },
+            {
+              "host_positive_controls": [
+                true,
+                true
+              ],
+              "inbound_reply_verified": true,
+              "loopback_listeners": [
+                "127.0.0.1:28732",
+                "[::1]:28732"
+              ],
+              "outbound_reached": [
+                false,
+                false
+              ]
+            }
+          ],
+          "draining_survives_runtime_replacement": true,
+          "duplicate_create_reuses_identity": true,
+          "network": "offline",
+          "owned_deleted": true,
+          "reservation_survives_stop_and_runtime_replacement": true
+        },
+        {
+          "conflict_rolls_back_before_dispatch": true,
+          "cycles": [
+            {
+              "host_positive_controls": [
+                true,
+                true
+              ],
+              "inbound_reply_verified": true,
+              "loopback_listeners": [
+                "127.0.0.1:28732",
+                "[::1]:28732"
+              ],
+              "outbound_reached": [
+                true,
+                false
+              ]
+            },
+            {
+              "host_positive_controls": [
+                true,
+                true
+              ],
+              "inbound_reply_verified": true,
+              "loopback_listeners": [
+                "127.0.0.1:28732",
+                "[::1]:28732"
+              ],
+              "outbound_reached": [
+                true,
+                false
+              ]
+            }
+          ],
+          "draining_survives_runtime_replacement": true,
+          "duplicate_create_reuses_identity": true,
+          "network": "cidr",
+          "owned_deleted": true,
+          "reservation_survives_stop_and_runtime_replacement": true
+        }
+      ],
+      "proof_tool_sha256": {
+        "native-proof.exs": "d5c77f23f1726cfbc027738d2287935189674c73f6a393cebe9fda3d2330b3bb",
+        "native_proof.py": "43fdb6e7f20bc6a05acfefde2f23bb708e5db3c92cd4509744bc1dbe0a32548d",
+        "network_fixture.py": "9eceef406d1dd803553fca477bfaa6fbb5c08beca645593548e6e791b9c53f1a",
+        "network_proof.py": "95c507c4bf511e046c02dccb5142ad8d8df53765b4376b7fcef5fdb49ad1cb48",
+        "ordinary_proof.py": "b07539d4dd07526ebbcd41810c2a33dc87b4ea7b18b6e66a57c389356e3e5b74"
+      },
+      "inventory_restored": true,
+      "owned_deleted": true,
+      "final_reserved_slots": 0
+    },
+    {
+      "campaign": "ordinary-public-native-network-mappings",
+      "consumer": "minimum",
+      "without_rust": true,
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "report_sha256": "b2cabc6b953d43b38b52cfe3bd4439ec636393144d86fa5213a10c2d05f11687",
+      "source_archive_sha256": "b2cbd6526b7cc13629207219b9d3d2ecd1a0d5e2dd94615b144c6055ed2778ae",
+      "cases": [
+        {
+          "conflict_rolls_back_before_dispatch": true,
+          "cycles": [
+            {
+              "host_positive_controls": [
+                true,
+                true
+              ],
+              "inbound_reply_verified": true,
+              "loopback_listeners": [
+                "127.0.0.1:28732",
+                "[::1]:28732"
+              ],
+              "outbound_reached": [
+                false,
+                false
+              ]
+            },
+            {
+              "host_positive_controls": [
+                true,
+                true
+              ],
+              "inbound_reply_verified": true,
+              "loopback_listeners": [
+                "127.0.0.1:28732",
+                "[::1]:28732"
+              ],
+              "outbound_reached": [
+                false,
+                false
+              ]
+            }
+          ],
+          "draining_survives_runtime_replacement": true,
+          "duplicate_create_reuses_identity": true,
+          "network": "offline",
+          "owned_deleted": true,
+          "reservation_survives_stop_and_runtime_replacement": true
+        },
+        {
+          "conflict_rolls_back_before_dispatch": true,
+          "cycles": [
+            {
+              "host_positive_controls": [
+                true,
+                true
+              ],
+              "inbound_reply_verified": true,
+              "loopback_listeners": [
+                "127.0.0.1:28732",
+                "[::1]:28732"
+              ],
+              "outbound_reached": [
+                true,
+                false
+              ]
+            },
+            {
+              "host_positive_controls": [
+                true,
+                true
+              ],
+              "inbound_reply_verified": true,
+              "loopback_listeners": [
+                "127.0.0.1:28732",
+                "[::1]:28732"
+              ],
+              "outbound_reached": [
+                true,
+                false
+              ]
+            }
+          ],
+          "draining_survives_runtime_replacement": true,
+          "duplicate_create_reuses_identity": true,
+          "network": "cidr",
+          "owned_deleted": true,
+          "reservation_survives_stop_and_runtime_replacement": true
+        }
+      ],
+      "proof_tool_sha256": {
+        "native-proof.exs": "d5c77f23f1726cfbc027738d2287935189674c73f6a393cebe9fda3d2330b3bb",
+        "native_proof.py": "43fdb6e7f20bc6a05acfefde2f23bb708e5db3c92cd4509744bc1dbe0a32548d",
+        "network_fixture.py": "9eceef406d1dd803553fca477bfaa6fbb5c08beca645593548e6e791b9c53f1a",
+        "network_proof.py": "95c507c4bf511e046c02dccb5142ad8d8df53765b4376b7fcef5fdb49ad1cb48",
+        "ordinary_proof.py": "b07539d4dd07526ebbcd41810c2a33dc87b4ea7b18b6e66a57c389356e3e5b74"
+      },
+      "inventory_restored": true,
+      "owned_deleted": true,
+      "final_reserved_slots": 0
+    }
+  ],
+  "terminal_file_campaign": {
+    "status": "failed",
+    "consumer": "current",
+    "minimum_consumer": "not-run",
+    "qualified": false,
+    "completed_before_failure": [
+      "disposable execution exit 7 and cleanup",
+      "retained PTY attach, binary input/output, resize 120x43, observed Exit 7 and slot release",
+      "1048593-byte binary upload and matching draining download",
+      "draining queue expiry and HTTP check"
+    ],
+    "failure": "Normal retained-machine stop returns unknown with identity_conflict; SDK row is Stopped with no PID.",
+    "source_analysis": "File activation calls EmbeddedRuntime.connect_machine, caching a second manager whose raw child PID remains after the original owned manager is normally collected. Strict stopped verification rejects this stale PID.",
+    "resolution_pending": "Activate the image root through the same bounded file worker without opening another runtime manager; preserve original opaque enrollment and strict stopped verification.",
+    "full_saved_receipt_explicit_cleanup": true,
+    "sdk_inventory_restored": true,
+    "failed_public_record_resolved": false
+  },
+  "lab_teardown": {
+    "all_handles_terminal": true,
+    "sdk_inventory_empty": true,
+    "native_owner_processes_absent": true,
+    "privileged_read_only_process_verification": true,
+    "normal_guest_shutdown": true,
+    "host_unit_active_state": "inactive",
+    "host_unit_result": "success",
+    "host_unit_exit_status": 0,
+    "run_disk_and_enrolled_domain_retained": true,
+    "normal_shutdown_marker_archived": true,
+    "forced_termination": false
+  },
+  "evidence_private": true,
+  "native_postgresql_qualified": false,
+  "public_native_branch_admission_enabled": false,
+  "full_parity_acceptance": "pending",
+  "crash_handling_qualified": false,
+  "deliberate_process_interruption": false,
+  "distribution_approved": false,
+  "qualification_does_not_transfer_to_changed_bytes": true
+}

@@ -43,6 +43,189 @@ fn enrolled(engine: &Engine, receipt: &CreationReceipt, epoch: &ActorEpoch) -> A
         .unwrap();
     owned
 }
+
+fn running(child: crate::OwnerIdentity) -> Observation {
+    Observation {
+        state: crate::ObservedState::Running,
+        pid_identity: Some((child.pid, child.birth)),
+        configuration: None,
+        resources: None,
+    }
+}
+
+#[test]
+fn readiness_retries_only_probes_and_rechecks_the_original_enrollment_after_success() {
+    let (_root, engine, receipt, _actors, epoch) = fixture();
+    let owned = enrolled(&engine, &receipt, &epoch);
+    let child = owned.enrolled().unwrap().child();
+    let observation = running(child);
+    let probes = Cell::new(0);
+    let snapshots = Cell::new(0);
+    let deadline = budget();
+    let counts = engine.jobs.counts();
+    let after = wait_until_ready(
+        &deadline,
+        || {
+            snapshots.set(snapshots.get() + 1);
+            owned.verify_running(&receipt, &observation, Some(child.pid))?;
+            Ok(observation.clone())
+        },
+        |attempt| {
+            assert!(attempt.deadline <= deadline.deadline);
+            probes.set(probes.get() + 1);
+            if probes.get() < 3 {
+                Err(Error::uncertain(ErrorCode::Native))
+            } else {
+                Ok(())
+            }
+        },
+    )
+    .unwrap();
+    assert_eq!(after, observation);
+    assert_eq!(probes.get(), 3);
+    assert_eq!(snapshots.get(), 4);
+    assert_eq!(engine.jobs.counts().branch_metadata, counts.branch_metadata);
+    assert!(engine.runtime_boots.contains(&receipt.name).unwrap());
+}
+
+#[test]
+fn readiness_rejects_replacement_stopped_missing_and_foreign_identity_without_probe() {
+    let (_root, engine, receipt, _actors, epoch) = fixture();
+    let owned = enrolled(&engine, &receipt, &epoch);
+    let child = owned.enrolled().unwrap().child();
+    let original = running(child);
+    let mut cases = Vec::new();
+    for state in [
+        crate::ObservedState::Stopped,
+        crate::ObservedState::Missing,
+        crate::ObservedState::IdentityUnknown,
+        crate::ObservedState::Unreachable,
+    ] {
+        let mut changed = original.clone();
+        changed.state = state;
+        cases.push(changed);
+    }
+    let mut replaced = original.clone();
+    replaced.pid_identity = Some((child.pid, child.birth + 1));
+    cases.push(replaced);
+    for changed in cases {
+        let error = wait_until_ready(
+            &budget(),
+            || {
+                owned.verify_running(&receipt, &changed, Some(child.pid))?;
+                Ok(changed.clone())
+            },
+            |_| panic!("invalid boot was probed"),
+        )
+        .unwrap_err();
+        assert_eq!(error, Error::uncertain(ErrorCode::Ownership));
+    }
+    assert!(owned.verify_running(&receipt, &original, None).is_err());
+    assert!(owned
+        .verify_running(&receipt, &original, Some(child.pid + 1))
+        .is_err());
+    let mut foreign = receipt.clone();
+    foreign.owner_token = "different-owner".into();
+    assert!(owned
+        .verify_running(&foreign, &original, Some(child.pid))
+        .is_err());
+}
+
+#[test]
+fn readiness_cancel_and_late_success_keep_original_authority_and_metadata() {
+    let (_root, engine, receipt, _actors, epoch) = fixture();
+    let owned = enrolled(&engine, &receipt, &epoch);
+    let original = running(owned.enrolled().unwrap().child());
+    let counts = engine.jobs.counts();
+    for succeeds in [false, true] {
+        let deadline = budget();
+        let probes = Cell::new(0);
+        let error = wait_until_ready(
+            &deadline,
+            || Ok(original.clone()),
+            |_| {
+                probes.set(probes.get() + 1);
+                deadline.cancel.cancel();
+                if succeeds {
+                    Ok(())
+                } else {
+                    Err(Error::uncertain(ErrorCode::Native))
+                }
+            },
+        )
+        .unwrap_err();
+        assert_eq!(error, Error::uncertain(ErrorCode::State));
+        assert_eq!(probes.get(), 1);
+        assert!(engine.runtime_boots.contains(&receipt.name).unwrap());
+        assert_eq!(engine.jobs.counts().branch_metadata, counts.branch_metadata);
+    }
+}
+
+#[test]
+fn readiness_does_not_retry_protocol_identity_or_admission_errors() {
+    let (_root, engine, receipt, _actors, epoch) = fixture();
+    let owned = enrolled(&engine, &receipt, &epoch);
+    let original = running(owned.enrolled().unwrap().child());
+    for code in [
+        ErrorCode::Unsupported,
+        ErrorCode::Admission,
+        ErrorCode::Ownership,
+        ErrorCode::Io,
+    ] {
+        let calls = Cell::new(0);
+        let error = wait_until_ready(
+            &budget(),
+            || Ok(original.clone()),
+            |_| {
+                calls.set(calls.get() + 1);
+                Err(Error::uncertain(code))
+            },
+        )
+        .unwrap_err();
+        assert_eq!(calls.get(), 1);
+        assert_eq!(error, Error::uncertain(code));
+        assert!(engine.runtime_boots.contains(&receipt.name).unwrap());
+    }
+}
+
+#[test]
+fn readiness_never_refreshes_deadline_or_accepts_identity_change_during_ping() {
+    let (_root, engine, receipt, _actors, epoch) = fixture();
+    let owned = enrolled(&engine, &receipt, &epoch);
+    let original = running(owned.enrolled().unwrap().child());
+    let deadline = ReadBudget::new(
+        std::time::Duration::from_millis(60),
+        crate::Cancellation::default(),
+    )
+    .unwrap();
+    let expires = deadline.deadline;
+    let error = wait_until_ready(
+        &deadline,
+        || Ok(original.clone()),
+        |attempt| {
+            assert!(attempt.deadline <= expires);
+            Err(Error::uncertain(ErrorCode::Native))
+        },
+    )
+    .unwrap_err();
+    assert_eq!(error, Error::uncertain(ErrorCode::State));
+    assert_eq!(deadline.deadline, expires);
+    let snapshots = Cell::new(0);
+    let error = wait_until_ready(
+        &budget(),
+        || {
+            snapshots.set(snapshots.get() + 1);
+            let mut observation = original.clone();
+            if snapshots.get() > 1 {
+                observation.pid_identity = None;
+            }
+            Ok(observation)
+        },
+        |_| Ok(()),
+    )
+    .unwrap_err();
+    assert_eq!(error, Error::uncertain(ErrorCode::Ownership));
+}
 #[test]
 fn pending_entry_is_charged_but_has_no_sdk_stop_authority_or_stopped_acknowledgement() {
     let (_root, engine, receipt, _actors, epoch) = fixture();
@@ -116,6 +299,71 @@ fn returned_sdk_error_keeps_original_enrollment_and_budget_for_explicit_retry() 
         .call(&receipt, &epoch, None, &budget(), || Ok(()))
         .unwrap();
     assert!(owned.enrollment.get().is_some());
+}
+
+#[test]
+fn failed_created_boot_with_original_exited_enrollment_can_enter_normal_fenced_cleanup() {
+    let (_root, engine, receipt, _actors, epoch) = fixture();
+    let owned = enrolled(&engine, &receipt, &epoch);
+    let counts = engine.jobs.counts();
+    let mut row = engine.record(&receipt).unwrap();
+    row.state = smolvm::config::RecordState::Created;
+    owned.verify_before(&receipt, &row).unwrap();
+    for partial in [
+        (Some(owned.enrolled().unwrap().child().pid), None),
+        (None, Some(1)),
+    ] {
+        let mut crossed = row.clone();
+        crossed.pid = partial.0;
+        crossed.pid_start_time = partial.1;
+        assert!(owned.verify_before(&receipt, &crossed).is_err());
+    }
+    let before = row.clone();
+    owned
+        .call(&receipt, &epoch, None, &budget(), || {
+            assert!(!epoch.quiescent_for(&receipt.name).unwrap());
+            assert!(epoch
+                .collect_enrolled(&receipt.name, owned.enrolled().unwrap())
+                .is_err());
+            row.state = smolvm::config::RecordState::Stopped;
+            Ok(())
+        })
+        .unwrap();
+    let mut stopped = before;
+    stopped.state = smolvm::config::RecordState::Stopped;
+    verify_stopped(&receipt, &stopped, &row, None).unwrap();
+    assert_eq!(engine.jobs.counts(), counts);
+    assert!(engine.runtime_boots.contains(&receipt.name).unwrap());
+    owned.collected(&receipt, &epoch, &budget()).unwrap();
+}
+
+#[test]
+fn created_row_without_original_enrollment_or_with_a_live_original_actor_has_no_cleanup_authority()
+{
+    let (_root, engine, receipt, _actors, epoch) = fixture();
+    let owned = engine
+        .runtime_boots
+        .reserve(&receipt, &engine.jobs)
+        .unwrap();
+    let mut row = engine.record(&receipt).unwrap();
+    row.state = smolvm::config::RecordState::Created;
+    assert!(owned.verify_before(&receipt, &row).is_err());
+    let actor = crate::OwnerIdentity::capture().unwrap();
+    owned
+        .enroll(
+            crate::epoch::tests::complete_model_with_child(
+                epoch.begin_boot(&receipt.name).unwrap(),
+                actor,
+            ),
+            &epoch,
+        )
+        .unwrap();
+    assert!(owned.verify_before(&receipt, &row).is_err());
+    row.pid = Some(actor.pid);
+    row.pid_start_time = Some(actor.birth);
+    assert!(owned.verify_before(&receipt, &row).is_err());
+    assert!(engine.runtime_boots.contains(&receipt.name).unwrap());
+    // This live identity is observed only. No SDK closure or signal runs.
 }
 #[test]
 fn runtime_success_without_positive_collection_cannot_retire_current_boot_authority() {
@@ -309,4 +557,67 @@ fn cancellation_after_pending_publication_cannot_enter_sdk_or_claim_sdk_return()
     assert!(epoch.available());
     owned.collected(&receipt, &epoch, &budget()).unwrap();
     assert!(engine.runtime_boots.contains(&receipt.name).unwrap());
+}
+
+#[cfg(target_os = "linux")]
+#[test]
+fn failed_created_child_normal_exit_keeps_wait_status_for_sdk_collection() {
+    use std::{
+        io::Write,
+        process::{Command, Stdio},
+        time::{Duration, Instant},
+    };
+    let (_root, engine, receipt, _actors, epoch) = fixture();
+    let mut child = Command::new("/bin/sh")
+        .args(["-c", "read release; exit 23"])
+        .stdin(Stdio::piped())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn()
+        .unwrap();
+    let actor = crate::OwnerIdentity {
+        pid: child.id() as i32,
+        birth: smolvm::process::process_start_time(child.id() as i32).unwrap(),
+        uid: unsafe { libc::geteuid() },
+    };
+    let owned = engine
+        .runtime_boots
+        .reserve(&receipt, &engine.jobs)
+        .unwrap();
+    owned
+        .enroll(
+            crate::epoch::tests::complete_model_with_child(
+                epoch.begin_boot(&receipt.name).unwrap(),
+                actor,
+            ),
+            &epoch,
+        )
+        .unwrap();
+    let mut row = engine.record(&receipt).unwrap();
+    row.state = smolvm::config::RecordState::Created;
+    assert!(owned.verify_before(&receipt, &row).is_err());
+    child
+        .stdin
+        .take()
+        .unwrap()
+        .write_all(b"normal release\n")
+        .unwrap();
+    let deadline = Instant::now() + Duration::from_secs(3);
+    while smolvm::process::is_alive(actor.pid) {
+        assert!(Instant::now() < deadline);
+        std::thread::sleep(Duration::from_millis(5));
+    }
+    owned.verify_before(&receipt, &row).unwrap();
+    assert_eq!(
+        smolvm::process::process_start_time(actor.pid),
+        Some(actor.birth)
+    );
+    owned
+        .call(&receipt, &epoch, Some(actor.pid), &budget(), || {
+            assert!(!epoch.quiescent_for(&receipt.name).unwrap());
+            assert_eq!(child.wait().unwrap().code(), Some(23));
+            Ok(())
+        })
+        .unwrap();
+    owned.collected(&receipt, &epoch, &budget()).unwrap();
 }

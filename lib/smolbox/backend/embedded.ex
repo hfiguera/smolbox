@@ -62,6 +62,11 @@ defmodule SmolBox.Backend.Embedded do
 
   def supports_operation?(_context, operation) when operation in @observations, do: false
 
+  def supports_operation?(nil, :terminal_preflight), do: true
+
+  def supports_operation?(%{__struct__: EmbeddedContext, config: config}, :terminal_preflight),
+    do: Features.supports?(config, :terminal_preflight)
+
   def supports_operation?(nil, :open_managed_terminal), do: true
 
   def supports_operation?(%{__struct__: EmbeddedContext, config: config}, :open_managed_terminal),
@@ -298,8 +303,16 @@ defmodule SmolBox.Backend.Embedded do
          )
   end
 
+  def invoke(context, :terminal_preflight, [name, spec], budget),
+    do: TerminalConnection.preflight(context, name, spec, budget)
+
   def invoke(context, :open_managed_terminal, [name, spec, consumer, observer], budget) do
-    with {:ok, source} <- TerminalConnection.source(context, name, spec, budget),
+    prepare =
+      if Features.supports?(context.config, :terminal_preflight),
+        do: &TerminalConnection.preflight/4,
+        else: &TerminalConnection.source/4
+
+    with {:ok, source} <- prepare.(context, name, spec, budget),
          do: Server.start_connection(source, name, spec, consumer, observer)
   end
 

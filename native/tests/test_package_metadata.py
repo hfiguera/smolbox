@@ -26,6 +26,7 @@ class PackageMetadataTests(unittest.TestCase):
                 (upstream / name).write_text('upstream licenses')
             (builder / 'vendor/source.json').write_text(json.dumps({'revision': 'a' * 40}))
             (builder / 'policy.json').write_text('{}')
+            (builder / 'policy-linux.json').write_text('{"linux_fixture":true}')
             assets = root / 'assets'
             (assets / 'lib').mkdir(parents=True)
             (assets / 'lib/libkrunfw.so').write_bytes(b'firmware')
@@ -52,12 +53,33 @@ class PackageMetadataTests(unittest.TestCase):
                     result = package.build(executable, assets, output)
                 finally:
                     os.umask(original_umask)
+            self.assertEqual(json.loads((output / 'SMOLBOX-POLICY.json').read_bytes()), {'linux_fixture': True})
+            self.assertEqual(json.loads((output / 'package.json').read_bytes())['policy'], {'linux_fixture': True})
             self.assertEqual(output.stat().st_mode & 0o777, 0o755)
             self.assertEqual((output / 'smolbox-port').stat().st_mode & 0o777, 0o755)
             self.assertEqual(executable.stat().st_mode & 0o777, 0o775)
             self.assertEqual((output / 'smolbox-port').read_bytes(), executable.read_bytes())
             self.assertEqual(result['identity']['build_sha256'], package.digest(executable))
             self.assertEqual(result['manifest_sha256'], package.digest(output / 'package.json'))
+
+    def test_platform_policy_matches_exact_shared_descriptor_and_linux_storage_delta(self):
+        common = json.loads((package.ROOT / 'policy.json').read_bytes())
+        linux = json.loads((package.ROOT / 'policy-linux.json').read_bytes())
+        hello = json.loads((package.ROOT / 'smolbox-protocol/fixtures/hello-v2-linux-images.json').read_bytes())['hello']
+        expected = json.loads(json.dumps(common))
+        expected['sdk']['feature_versions']['volumes'] = 1
+        expected['sdk']['feature_versions']['disk_growth'] = 1
+        expected['sdk']['feature_versions']['remote_sources'] = 1
+        expected['sdk']['feature_versions']['images'] = 1
+        expected['volume_limits'] = hello['limits']['volumes']
+        self.assertEqual(linux, expected)
+        self.assertEqual(linux['sdk'], hello['sdk'])
+        for system, filename in [('Linux', 'policy-linux.json'), ('Darwin', 'policy.json')]:
+            with self.subTest(system=system), mock.patch.object(package.platform, 'system', return_value=system):
+                self.assertEqual(package.policy_path(), package.ROOT / filename)
+        with mock.patch.object(package.platform, 'system', return_value='Windows'):
+            with self.assertRaisesRegex(ValueError, 'unsupported'):
+                package.policy_path()
 
     def test_policy_and_source_are_independently_hash_bound_assets(self):
         with tempfile.TemporaryDirectory() as temporary:

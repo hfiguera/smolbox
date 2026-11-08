@@ -5,8 +5,23 @@ operator copying the prepared file to each worker first. Provisioning still has 
 durable identity, an approved worker and profile, and an explicit lifetime.
 
 HTTP targets support these operations on smolvm 1.19.0, 1.20.2 and 1.22.0.
-Current embedded Port packages do not admit image/registry workflows; their
-parity acceptance remains pending. Approving a source catalog does not enable an absent package capability.
+The exactly approved Linux package `e7387c9c`, with Elixir source `4efcf6c`, now
+passes current/minimum public no-Rust OCI and bare registry workflows. These
+cover typed image pull/list, duplicate pull reuse, one configured startup/restart
+case, host registry bearer/mirror/rotation, cold/warm preparation, binary data,
+stopped Runtime replacement and owned deletion. Public offline/PTY consumers also
+pass. [Scoped evidence](evidence/embedded-port-http-parity-linux-public-images-4efcf6c.json)
+binds the exact client/native bytes and final empty account inventories.
+Other credential/source/platform and durable/resource cases remain required.
+The [32698dc follow-up](evidence/embedded-port-http-parity-linux-recovery-consumers-32698dc.json)
+repeats those success consumers and verifies ordinary artifact-limit rejection,
+reserved unknown intent, stable observation, explicit quiesced absence resolution
+and normal owner close on both toolchains. No VM is created in a rejection case;
+its expected nonzero consumer exit is recorded separately. Older packages retain their exact capability/qualification
+scopes; no full-parity or distribution claim follows from these checks.
+Local embedded worker checks also cover guest credentials over private IPC;
+guest credential VM/package acceptance remains pending.
+Approving a source catalog does not enable an absent package capability.
 The three operations have different storage and authentication boundaries:
 
 | Operation | Where the content is fetched | Identity |

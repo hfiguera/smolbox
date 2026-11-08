@@ -1,0 +1,305 @@
+{
+  "schema": 1,
+  "scope": "ordinary-linux-local-container-mounted-io-stopped-owner-replacement-and-public-pty-consumers",
+  "source_commit": "7993b53d96b77265f75f57a9b3ef08aa18da5fa1",
+  "native_inputs": {
+    "files_verified": 265,
+    "archive_sha256": "1eb163a3d23eacad54e6ab3ddc32db6c5fa4377f5cf7a238d17133c00b7be0b4",
+    "inventory_sha256": "52755683726533d520ce5d0c822b12e5215479c75f5345e81a2da0025c659fbd"
+  },
+  "package_manifest_sha256": "81d9d92c740afef2b9c3a46ca3c46f41bf8e916e976e2098380f7963400edcc6",
+  "identity": {
+    "architecture": "x86_64",
+    "assets_sha256": "d05190f3ac57574fa28484f2354595373fa3040bdd7f6b1027d5896304153d55",
+    "build_sha256": "c9cf275ecdf81bb792bbf43daf1389ed6dc457fd007c28d55a51c943785fbc5d",
+    "engine_version": "0.2.0",
+    "platform": "linux",
+    "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+  },
+  "sdk": {
+    "version": "1.22.0",
+    "revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "unmodified": true,
+    "verified_caches": 2
+  },
+  "witness_executable_sha256": "a43de06fd847d243e6e2479bfeebb3903529c050ccabbad8f7787cb17fe7b62e",
+  "fixture_sha256": "339995f33fe84c2ed5a4e212a0acb9afab22df972bf2c2b4aa8e412ea0af5bc4",
+  "validation": {
+    "linux_rust": "1.98.1",
+    "macos_rust": "1.99.0",
+    "both_platforms_targeted": {
+      "terminal_units": 30,
+      "port_units": 78,
+      "protocol_units": 77,
+      "protocol_contracts": 56,
+      "exact_non_vm_terminal_supervisor_fixtures": 3,
+      "natural_exit_iterations": 16,
+      "missing_and_ambiguous_exit_rejected": true,
+      "strict_all_target_clippy": "passed",
+      "deferred_selection_guards": 3
+    },
+    "linux_witness_models": 2,
+    "optimized_linux_helper_and_witness_builds": "passed",
+    "regression_failed_before_fix_and_passed_after_with_same_worker_bytes": true,
+    "full_workspace_unit_sweep_repeated": false,
+    "changed_macos_native_vm_qualification": false
+  },
+  "mounted": {
+    "source": "approved-local-offline-python-container-pack",
+    "worker": "unprivileged-single-host-account",
+    "volumes": 2,
+    "writable_and_readonly": true,
+    "stopped_attachment_blocks_volume_deletion": true,
+    "first_owner": {
+      "commands_streaming_buffered_background_terminal_files": true,
+      "guest_mode_evolution": true,
+      "normal_owner_shutdown": true,
+      "normal_stop": true,
+      "numeric_nonroot_user": true,
+      "offline": true,
+      "public_volume_admission_enabled": false,
+      "ready_for_normal_owner_replacement": true,
+      "source": "local-container-pack",
+      "stopped_attachments_exclude_delete": true,
+      "writable_and_readonly_volumes": true
+    },
+    "second_owner": {
+      "commands_streaming_buffered_background_terminal_files": true,
+      "crash_validation_run": false,
+      "guest_mode_evolution": true,
+      "normal_owner_shutdown": true,
+      "numeric_nonroot_user": true,
+      "original_receipt_and_volume_proofs": true,
+      "owned_machine_and_volumes_deleted": true,
+      "public_volume_admission_enabled": false,
+      "replacement_guest_writes": true,
+      "retained_guest_data": true,
+      "separate_process_stopped_owner_replacement": true,
+      "writable_and_readonly_volumes": true
+    },
+    "first_owner_io": {
+      "background_exit_claimed": false,
+      "background_launch_and_guest_bytes_observed": true,
+      "buffered_stdin_verified": true,
+      "guest_mode": "0755",
+      "guest_root_uid": 0,
+      "host_backing_bytes_verified": true,
+      "mapped_volume_gid": 1000,
+      "mapped_volume_uid": 1000,
+      "original_device_inode_uid_gid_preserved": true,
+      "readonly_binary_read_bytes": 4096,
+      "readonly_errno": "EROFS",
+      "readonly_file_write_rejected": true,
+      "streaming_command_exit": 0,
+      "terminal_observed_exit": 7,
+      "terminal_resize": {
+        "cols": 120,
+        "rows": 43
+      },
+      "unrelated_guest_storage_write_verified": true,
+      "unrelated_guest_uid": 65534,
+      "unrelated_host_volume_write_errno": "EPERM",
+      "upload_bytes": 65553
+    },
+    "second_owner_io": {
+      "background_exit_claimed": false,
+      "background_launch_and_guest_bytes_observed": true,
+      "buffered_stdin_verified": true,
+      "guest_mode": "0755",
+      "guest_root_uid": 0,
+      "host_backing_bytes_verified": true,
+      "mapped_volume_gid": 1000,
+      "mapped_volume_uid": 1000,
+      "original_device_inode_uid_gid_preserved": true,
+      "readonly_binary_read_bytes": 4096,
+      "readonly_errno": "EROFS",
+      "readonly_file_write_rejected": true,
+      "streaming_command_exit": 0,
+      "terminal_observed_exit": 7,
+      "terminal_resize": {
+        "cols": 120,
+        "rows": 43
+      },
+      "unrelated_guest_storage_write_verified": true,
+      "unrelated_guest_uid": 65534,
+      "unrelated_host_volume_write_errno": "EPERM",
+      "upload_bytes": 65553
+    },
+    "terminal_results": [
+      {
+        "collected": true,
+        "completion_marker_observed": true,
+        "dispatch": "MayHaveDispatched",
+        "failure": null,
+        "observed_exit": 7,
+        "output_bytes": 43,
+        "output_sha256": "d5e219824db7c8915708d6e90a2eb06be1a9f81fadd29d9f31bd2fb89fe81d37",
+        "truncated": false
+      },
+      {
+        "collected": true,
+        "completion_marker_observed": true,
+        "dispatch": "MayHaveDispatched",
+        "failure": null,
+        "observed_exit": 7,
+        "output_bytes": 59,
+        "output_sha256": "75b8e82ae9885e6b494acf8f19a1164569892ebfa7255eddad09d8028405fef9",
+        "truncated": false
+      }
+    ],
+    "proof_report_sha256": {
+      "first-completed.json": "b4e7b679e2337e3c3682745d2f09b6e98d51c303abe480d6e2a727aa80654790",
+      "second-completed.json": "cd5ccd0ca795e6056dcea78bbd9bc16f001b87838d00a5890a38809ec0c616d3",
+      "first-io.json": "ca3827cfbcbc6ca4764d74e0f457dafc321e15f197390d4d5d4f317e4284cf56",
+      "second-io.json": "ca3827cfbcbc6ca4764d74e0f457dafc321e15f197390d4d5d4f317e4284cf56",
+      "machine-deleted.json": "8dc941e2e150799587ef9ecb13ee7e36cc5c2a06b43460a6f1279489d212f2fe",
+      "volume-0-deleted.json": "a311b21a5d8dc81d5e5f7ec9dd7dc4fae6b068529690d286590cb167139b0eff",
+      "volume-1-deleted.json": "c2f483b965569e73acfdf2a29b81dff4ce5023771df5ef5fa4ac2455884b054a"
+    }
+  },
+  "public_consumers": [
+    {
+      "mode": "current",
+      "report_sha256": "ba1b07dcbd65df247bbe8ddf8638be67a626093f1eba9774faccb78f5711548d",
+      "elixir_package_sha256": "b2cbd6526b7cc13629207219b9d3d2ecd1a0d5e2dd94615b144c6055ed2778ae",
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "without_rust": true,
+      "scope": "public-port-package-consumer",
+      "store_mode": "ephemeral",
+      "disposable_exit": 7,
+      "retained_write_exit": 7,
+      "binary_file_bytes": 1048593,
+      "binary_file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+      "drain_blocks_new_assignments": true,
+      "existing_command_while_draining": true,
+      "retained_after_normal_runtime_restart": true,
+      "drain_survives_runtime_restart": true,
+      "resume_version_checked": true,
+      "owned_deleted": true,
+      "final_reserved_slots": 0,
+      "http_workers_exercised_while_native_draining": 0,
+      "sdk_inventory_empty_before_and_after": true,
+      "terminal": {
+        "binary_input_bytes": 3,
+        "binary_output_verified": true,
+        "codec": 17,
+        "deliberate_process_interruption": false,
+        "duplicate_open_reuses_execution": true,
+        "exercised": true,
+        "observed_exit": 7,
+        "resize": {
+          "cols": 120,
+          "rows": 43
+        },
+        "scope": "ordinary-public-retained-image-pty",
+        "slot_released": true,
+        "transcript_persisted": false
+      },
+      "proof_tool_sha256": {
+        "config.example.exs": "9a0178a7249aba9b4a7990a36162564bf77c39c355c7a5a9f57defae4b6330f3",
+        "demo.ex": "030504ee5e7c78f25267172e29989ad1ee7a606777dfb41e4e7b91b7c46c16f9",
+        "native-proof.exs": "8e68ef45f8fd3019bdf90de342174c6deb522207251ce7f7ffaf8a7df7a1bfef",
+        "native_proof.py": "43fdb6e7f20bc6a05acfefde2f23bb708e5db3c92cd4509744bc1dbe0a32548d"
+      }
+    },
+    {
+      "mode": "minimum",
+      "report_sha256": "4a4f77c34500404110c88e48615e57e9bee330459271acf569b2d7eb8206b40a",
+      "elixir_package_sha256": "b2cbd6526b7cc13629207219b9d3d2ecd1a0d5e2dd94615b144c6055ed2778ae",
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "without_rust": true,
+      "scope": "public-port-package-consumer",
+      "store_mode": "ephemeral",
+      "disposable_exit": 7,
+      "retained_write_exit": 7,
+      "binary_file_bytes": 1048593,
+      "binary_file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+      "drain_blocks_new_assignments": true,
+      "existing_command_while_draining": true,
+      "retained_after_normal_runtime_restart": true,
+      "drain_survives_runtime_restart": true,
+      "resume_version_checked": true,
+      "owned_deleted": true,
+      "final_reserved_slots": 0,
+      "http_workers_exercised_while_native_draining": 0,
+      "sdk_inventory_empty_before_and_after": true,
+      "terminal": {
+        "binary_input_bytes": 3,
+        "binary_output_verified": true,
+        "codec": 17,
+        "deliberate_process_interruption": false,
+        "duplicate_open_reuses_execution": true,
+        "exercised": true,
+        "observed_exit": 7,
+        "resize": {
+          "cols": 120,
+          "rows": 43
+        },
+        "scope": "ordinary-public-retained-image-pty",
+        "slot_released": true,
+        "transcript_persisted": false
+      },
+      "proof_tool_sha256": {
+        "config.example.exs": "9a0178a7249aba9b4a7990a36162564bf77c39c355c7a5a9f57defae4b6330f3",
+        "demo.ex": "030504ee5e7c78f25267172e29989ad1ee7a606777dfb41e4e7b91b7c46c16f9",
+        "native-proof.exs": "8e68ef45f8fd3019bdf90de342174c6deb522207251ce7f7ffaf8a7df7a1bfef",
+        "native_proof.py": "43fdb6e7f20bc6a05acfefde2f23bb708e5db3c92cd4509744bc1dbe0a32548d"
+      }
+    }
+  ],
+  "elixir_archive_reuse": {
+    "library_and_application_code_unchanged_since": "74badb0",
+    "current_public_code_and_runner_files_verified": 332,
+    "historical_documentation_bytes_not_relabelled_as_current_release": true
+  },
+  "final_custody": {
+    "at_utc": "2026-10-16T07:49:55.428899+00:00",
+    "sdk_table_counts": {
+      "vms": 0,
+      "vm_create_reservations": 0,
+      "vm_pause_operations": 0,
+      "vm_resize_intents": 0,
+      "vm_resize_receipts": 0
+    },
+    "native_owners": [],
+    "volume_root_empty": true
+  },
+  "lab": {
+    "terminal_observed_at_utc": "2026-10-16T07:50:42Z",
+    "shutdown": "normal-guest-shutdown",
+    "state": "inactive",
+    "result": "success",
+    "exit_status": 0,
+    "main_pid": 0,
+    "normal_shutdown_marker_archived": true,
+    "retained_enrolled_domain_and_run_disk": true,
+    "macos_export_custody_untouched": true
+  },
+  "private_archive": {
+    "sha256": "f5d461431163f88a1a50c33c1416352d6e999f58f160a51f6f1b80609957010f",
+    "bytes": 73219483,
+    "mode": "0600",
+    "copied_digest_verified": true,
+    "complete_native_package_and_original_proofs_retained": true
+  },
+  "qualification": {
+    "this_linux_mounted_local_container_contract_passed": true,
+    "public_current_minimum_pty_files_consumers_passed": true,
+    "public_volume_admission_enabled": false,
+    "public_branch_admission_enabled": false,
+    "native_volume_durable_store_acceptance_complete": false,
+    "all_mount_source_platform_combinations_qualified": false,
+    "historical_qualification_transferred_to_changed_bytes": false,
+    "crash_validation_deferred": true,
+    "crash_handling_qualified": false,
+    "live_forced_termination_campaign_run": false,
+    "distribution_approved": false,
+    "full_parity_complete": false
+  },
+  "remaining": [
+    "Complete public/durable volume attachment, reader activation, source/platform/resource combinations and the remaining P7 acceptance.",
+    "Complete remaining approved remote-source, growth, saved-state, branch, durable-store and upgrade/platform acceptance.",
+    "Run final HTTP regressions and complete the full P0-P9 matrix audit; keep crash validation deferred."
+  ]
+}

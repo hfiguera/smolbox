@@ -14,6 +14,8 @@ defmodule SmolBox.Test.EmbeddedPackage do
 
     major = Keyword.get(options, :protocol_major, 1)
     minor = Keyword.get(options, :protocol_minor, if(major == 2, do: 0, else: 3))
+    platform = Keyword.get(options, :platform, :macos)
+    architecture = if platform == :linux, do: "x86_64", else: "aarch64"
 
     identity = %{
       "engine_version" => if(major == 2, do: "0.2.0", else: "0.1.0"),
@@ -21,8 +23,8 @@ defmodule SmolBox.Test.EmbeddedPackage do
       "source_sha256" => String.duplicate("2", 64),
       "build_sha256" => hash(File.read!(executable)),
       "assets_sha256" => String.duplicate("4", 64),
-      "platform" => "macos",
-      "architecture" => "aarch64"
+      "platform" => Atom.to_string(platform),
+      "architecture" => architecture
     }
 
     sdk = options[:sdk_identity] || SDKIdentity.implemented("1.22.0", identity["smolvm_revision"])
@@ -55,19 +57,20 @@ defmodule SmolBox.Test.EmbeddedPackage do
         package_manifest_sha256: hash(manifest),
         package_identity: identity,
         domain_generation: String.duplicate("5", 32),
-        platform: :macos,
-        architecture: "aarch64",
+        platform: platform,
+        architecture: architecture,
         artifacts: [
           %{
             "id" => "image",
             "sha256" => String.duplicate("6", 64),
-            "architecture" => "aarch64",
+            "architecture" => architecture,
             "path" => root <> "/image.smolmachine",
             "max_bytes" => 1_048_576
           }
         ],
         profiles: [profile],
-        capacity: %{slots: 1, cpus: 1, memory_mb: 512, disk_gb: 2},
+        capacity: options[:capacity] || %{slots: 1, cpus: 1, memory_mb: 512, disk_gb: 2},
+        volume_policy: options[:volume_policy],
         allocation_floor: %{storage_gb: 1, overlay_gb: 1, host_overhead_mb: 256},
         limits: limits,
         sdk_identity: if(major == 2, do: sdk, else: nil)
@@ -143,9 +146,24 @@ defmodule SmolBox.Test.EmbeddedPackage do
       "persistent_backend" => options[:persistent_backend] || false,
       "ignore_shutdown" => options[:ignore_shutdown] || false,
       "reject_qualification" => options[:reject_qualification] || false,
-      "vm_artifact" => options[:vm_artifact] || false
+      "vm_artifact" => options[:vm_artifact] || false,
+      "minimum_material_revision" => Keyword.get(options, :minimum_material_revision, 0),
+      "pull_error" => Keyword.get(options, :pull_error, false),
+      "prepare_error" => Keyword.get(options, :prepare_error, false),
+      "stop_no_change" => Keyword.get(options, :stop_no_change, false)
     }
+    |> Map.merge(volume_metadata(options))
+    |> Map.put(
+      "reject_terminal_preflight",
+      Keyword.get(options, :reject_terminal_preflight, false)
+    )
   end
+
+  defp volume_metadata(options),
+    do: %{
+      "volume_mode" => options[:volume_mode],
+      "volume_delay_ms" => options[:volume_delay_ms] || 0
+    }
 
   defp manifest_metadata(2, 0, sdk) do
     policy = "native/policy.json" |> File.read!() |> Jason.decode!() |> Map.put("sdk", sdk)
@@ -174,6 +192,11 @@ defmodule SmolBox.Test.EmbeddedPackage do
       if sdk["feature_versions"]["logs"] == 1,
         do: Map.put(policy, "log_limits", Protocol.limits(2, 0, sdk)["logs"]),
         else: Map.delete(policy, "log_limits")
+
+    policy =
+      if sdk["feature_versions"]["volumes"] == 1,
+        do: Map.put(policy, "volume_limits", Protocol.limits(2, 0, sdk)["volumes"]),
+        else: Map.delete(policy, "volume_limits")
 
     %{"schema" => 3, "policy" => policy}
   end

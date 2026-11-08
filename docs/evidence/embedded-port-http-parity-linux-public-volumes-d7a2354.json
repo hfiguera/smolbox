@@ -1,0 +1,524 @@
+{
+  "schema": 1,
+  "scope": "linux-volume-policy-baseline-and-public-mounted-memory-consumers",
+  "source_commit": "d7a2354c4236b6a8c6ff288270c9355847381a71",
+  "native_input_archive_sha256": "9ba2f85fa8340f617f84a788de5a0b27f583fed353e98362c4a4a864eaeaa1bd",
+  "native_input_files": 267,
+  "public_input_archive_sha256": "9589063f92da43f6dbf9495ea44ffe248d5e6e3de9d765881f3fe350acbad7b4",
+  "public_input_files": 1252,
+  "elixir_archive_sha256": "2eb0788105f95f6bd92c8bda7311f847b9d8fc4752ba5531a56ca13a091d0fa9",
+  "package_manifest_sha256": "efe9cedccf39bdebf4aad745f5ae5c4375d3477f12474c65000627f14149aa0c",
+  "identity": {
+    "engine_version": "0.2.0",
+    "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+    "build_sha256": "9e85dedd2e0f88889218d858cf6b5112a007ce46050a53491446864a65e7c352",
+    "assets_sha256": "26ffe7cd5750bd11bf8e97f826ad96b2e01df59dce90f0d88f25a354ea93f0d2",
+    "platform": "linux",
+    "architecture": "x86_64"
+  },
+  "sdk": {
+    "sdk_version": "1.22.0",
+    "source_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "feature_versions": {
+      "lifecycle": 1,
+      "foreground_exec": 1,
+      "extended_exec": 1,
+      "files": 1,
+      "extended_files": 1,
+      "material_proofs": 2,
+      "observability": 1,
+      "networking": 1,
+      "ports": 1,
+      "workloads": 1,
+      "compact_creation": 1,
+      "job_resources": 1,
+      "buffered_exec": 1,
+      "background_exec": 1,
+      "logs": 1,
+      "streaming_exec": 1,
+      "terminals": 1,
+      "volumes": 1
+    }
+  },
+  "volume_limits": {
+    "work_ms": 86400000,
+    "observation_ms": 30000,
+    "record_bytes": 16384,
+    "delete_entries": 1000000,
+    "ancestor_bytes": 4096,
+    "control_metadata_bytes": 262144,
+    "observation_metadata_bytes": 131072
+  },
+  "validation": {
+    "linux_port_protocol_passed": 155,
+    "opt_in_ignored": 2,
+    "linux_strict_clippy": "passed",
+    "unmodified_sdk_caches_verified": 2,
+    "public_archive_files_verified_unchanged": 463,
+    "linux_worker_uid": 1000
+  },
+  "baseline_consumers": [
+    {
+      "mode": "current",
+      "report_sha256": "4d8ce6975224a3e6df0c9923f9a27aa33b35b0246d5818e4caabcd8cb295aa26",
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "minimum": false,
+      "without_rust": true,
+      "package_sha256": "2eb0788105f95f6bd92c8bda7311f847b9d8fc4752ba5531a56ca13a091d0fa9",
+      "smoke": {
+        "checkpoint": true,
+        "client": true,
+        "guest_files": true,
+        "interactive": true,
+        "legacy_1_14_6_explicit": "1.14.6",
+        "legacy_runtime_explicit": "1.14.1",
+        "managed_branches": true,
+        "managed_checkpoints": true,
+        "managed_exports": true,
+        "network_policy": true,
+        "offline_default": true,
+        "runtime_1_16_0_explicit": "1.16.0",
+        "runtime_default": "1.22.0",
+        "supervisor": true,
+        "unqualified_runtime_rejected": "1.16.2",
+        "versions": {
+          "jason": "1.4.5",
+          "mint": "1.11.0",
+          "mint_web_socket": "1.0.6",
+          "nimble_options": "1.1.1",
+          "req": "0.7.5",
+          "telemetry": "1.4.2"
+        },
+        "without_rust": true,
+        "workload": true
+      },
+      "native": {
+        "scope": "public-port-package-consumer",
+        "exercised": true,
+        "proof_tool_sha256": {
+          "config.example.exs": "e0b36e130d076afee72455ccbd23dcae85dc04142d411397be3869c307235bec",
+          "demo.ex": "030504ee5e7c78f25267172e29989ad1ee7a606777dfb41e4e7b91b7c46c16f9",
+          "native-proof.exs": "8e68ef45f8fd3019bdf90de342174c6deb522207251ce7f7ffaf8a7df7a1bfef",
+          "native_proof.py": "43fdb6e7f20bc6a05acfefde2f23bb708e5db3c92cd4509744bc1dbe0a32548d"
+        },
+        "evidence": {
+          "crash_handling_qualified": false,
+          "deliberate_process_interruption": false,
+          "disposable_exit": 7,
+          "drain_blocks_new_assignments": true,
+          "drain_survives_runtime_restart": true,
+          "existing_command_while_draining": true,
+          "file_bytes": 1048593,
+          "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+          "final_reserved_slots": 0,
+          "fixture_sha256": "339995f33fe84c2ed5a4e212a0acb9afab22df972bf2c2b4aa8e412ea0af5bc4",
+          "http_workers_exercised_while_native_draining": 0,
+          "identity": {
+            "architecture": "x86_64",
+            "assets_sha256": "26ffe7cd5750bd11bf8e97f826ad96b2e01df59dce90f0d88f25a354ea93f0d2",
+            "build_sha256": "9e85dedd2e0f88889218d858cf6b5112a007ce46050a53491446864a65e7c352",
+            "engine_version": "0.2.0",
+            "platform": "linux",
+            "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+            "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+          },
+          "inventory_after": [],
+          "inventory_before": [],
+          "owned_deleted": true,
+          "package_manifest_sha256": "efe9cedccf39bdebf4aad745f5ae5c4375d3477f12474c65000627f14149aa0c",
+          "proof": "passed",
+          "public_native_admission_enabled": true,
+          "resume_version_checked": true,
+          "retained_after_normal_runtime_restart": true,
+          "retained_write_exit": 7,
+          "scope": "public-port-package-consumer",
+          "store_mode": "ephemeral",
+          "terminal": {
+            "binary_input_bytes": 3,
+            "binary_output_verified": true,
+            "codec": 17,
+            "deliberate_process_interruption": false,
+            "duplicate_open_reuses_execution": true,
+            "exercised": true,
+            "observed_exit": 7,
+            "resize": {
+              "cols": 120,
+              "rows": 43
+            },
+            "scope": "ordinary-public-retained-image-pty",
+            "slot_released": true,
+            "transcript_persisted": false
+          },
+          "without_rust": true
+        }
+      }
+    },
+    {
+      "mode": "minimum",
+      "report_sha256": "63d93d9bcce08f2df75d51f5a623197bf251ecde010b9d1821588dce06eec4ae",
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "minimum": true,
+      "without_rust": true,
+      "package_sha256": "2eb0788105f95f6bd92c8bda7311f847b9d8fc4752ba5531a56ca13a091d0fa9",
+      "smoke": {
+        "checkpoint": true,
+        "client": true,
+        "guest_files": true,
+        "interactive": true,
+        "legacy_1_14_6_explicit": "1.14.6",
+        "legacy_runtime_explicit": "1.14.1",
+        "managed_branches": true,
+        "managed_checkpoints": true,
+        "managed_exports": true,
+        "network_policy": true,
+        "offline_default": true,
+        "runtime_1_16_0_explicit": "1.16.0",
+        "runtime_default": "1.22.0",
+        "supervisor": true,
+        "unqualified_runtime_rejected": "1.16.2",
+        "versions": {
+          "jason": "1.4.0",
+          "mint": "1.11.0",
+          "mint_web_socket": "1.0.6",
+          "nimble_options": "1.1.0",
+          "req": "0.7.4",
+          "telemetry": "1.3.0"
+        },
+        "without_rust": true,
+        "workload": true
+      },
+      "native": {
+        "scope": "public-port-package-consumer",
+        "exercised": true,
+        "proof_tool_sha256": {
+          "config.example.exs": "e0b36e130d076afee72455ccbd23dcae85dc04142d411397be3869c307235bec",
+          "demo.ex": "030504ee5e7c78f25267172e29989ad1ee7a606777dfb41e4e7b91b7c46c16f9",
+          "native-proof.exs": "8e68ef45f8fd3019bdf90de342174c6deb522207251ce7f7ffaf8a7df7a1bfef",
+          "native_proof.py": "43fdb6e7f20bc6a05acfefde2f23bb708e5db3c92cd4509744bc1dbe0a32548d"
+        },
+        "evidence": {
+          "crash_handling_qualified": false,
+          "deliberate_process_interruption": false,
+          "disposable_exit": 7,
+          "drain_blocks_new_assignments": true,
+          "drain_survives_runtime_restart": true,
+          "existing_command_while_draining": true,
+          "file_bytes": 1048593,
+          "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+          "final_reserved_slots": 0,
+          "fixture_sha256": "339995f33fe84c2ed5a4e212a0acb9afab22df972bf2c2b4aa8e412ea0af5bc4",
+          "http_workers_exercised_while_native_draining": 0,
+          "identity": {
+            "architecture": "x86_64",
+            "assets_sha256": "26ffe7cd5750bd11bf8e97f826ad96b2e01df59dce90f0d88f25a354ea93f0d2",
+            "build_sha256": "9e85dedd2e0f88889218d858cf6b5112a007ce46050a53491446864a65e7c352",
+            "engine_version": "0.2.0",
+            "platform": "linux",
+            "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+            "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+          },
+          "inventory_after": [],
+          "inventory_before": [],
+          "owned_deleted": true,
+          "package_manifest_sha256": "efe9cedccf39bdebf4aad745f5ae5c4375d3477f12474c65000627f14149aa0c",
+          "proof": "passed",
+          "public_native_admission_enabled": true,
+          "resume_version_checked": true,
+          "retained_after_normal_runtime_restart": true,
+          "retained_write_exit": 7,
+          "scope": "public-port-package-consumer",
+          "store_mode": "ephemeral",
+          "terminal": {
+            "binary_input_bytes": 3,
+            "binary_output_verified": true,
+            "codec": 17,
+            "deliberate_process_interruption": false,
+            "duplicate_open_reuses_execution": true,
+            "exercised": true,
+            "observed_exit": 7,
+            "resize": {
+              "cols": 120,
+              "rows": 43
+            },
+            "scope": "ordinary-public-retained-image-pty",
+            "slot_released": true,
+            "transcript_persisted": false
+          },
+          "without_rust": true
+        }
+      }
+    }
+  ],
+  "mounted_consumers": [
+    {
+      "mode": "current",
+      "report_sha256": "5a9a7bfa82cc7827f0ced11b5349e798ab47c736b0bd6c1d73f0af31c104d13a",
+      "runner_sha256": "dc32fd4c29fd399d8703a42ea6eec9279a81b76f3a501c9c2a45e6ab15e50cc0",
+      "evidence": {
+        "scope": "public-linux-mounted-runtime-memory",
+        "identity": {
+          "architecture": "x86_64",
+          "assets_sha256": "26ffe7cd5750bd11bf8e97f826ad96b2e01df59dce90f0d88f25a354ea93f0d2",
+          "build_sha256": "9e85dedd2e0f88889218d858cf6b5112a007ce46050a53491446864a65e7c352",
+          "engine_version": "0.2.0",
+          "platform": "linux",
+          "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+          "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+        },
+        "package_manifest_sha256": "efe9cedccf39bdebf4aad745f5ae5c4375d3477f12474c65000627f14149aa0c",
+        "fixture_sha256": "339995f33fe84c2ed5a4e212a0acb9afab22df972bf2c2b4aa8e412ea0af5bc4",
+        "file_bytes": 65554,
+        "file_sha256": "25ac6018e1a86a5aa310d7cd70d12c517e89e42b33afb021d07ca3c0ce909638",
+        "readonly_reattachment": true,
+        "stopped_runtime_replacement": true,
+        "drain_retained": true,
+        "running_sibling_preserved": true,
+        "proof_retained": true,
+        "owned_deleted": true,
+        "store_mode": "ephemeral",
+        "without_rust": true,
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gb": 0,
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false
+      }
+    },
+    {
+      "mode": "minimum",
+      "report_sha256": "5a9a7bfa82cc7827f0ced11b5349e798ab47c736b0bd6c1d73f0af31c104d13a",
+      "runner_sha256": "7857c363d0ff9c38577f09efc57fd1e24be515e6d9c0c5b7248238846b683a2e",
+      "evidence": {
+        "scope": "public-linux-mounted-runtime-memory",
+        "identity": {
+          "architecture": "x86_64",
+          "assets_sha256": "26ffe7cd5750bd11bf8e97f826ad96b2e01df59dce90f0d88f25a354ea93f0d2",
+          "build_sha256": "9e85dedd2e0f88889218d858cf6b5112a007ce46050a53491446864a65e7c352",
+          "engine_version": "0.2.0",
+          "platform": "linux",
+          "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+          "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+        },
+        "package_manifest_sha256": "efe9cedccf39bdebf4aad745f5ae5c4375d3477f12474c65000627f14149aa0c",
+        "fixture_sha256": "339995f33fe84c2ed5a4e212a0acb9afab22df972bf2c2b4aa8e412ea0af5bc4",
+        "file_bytes": 65554,
+        "file_sha256": "25ac6018e1a86a5aa310d7cd70d12c517e89e42b33afb021d07ca3c0ce909638",
+        "readonly_reattachment": true,
+        "stopped_runtime_replacement": true,
+        "drain_retained": true,
+        "running_sibling_preserved": true,
+        "proof_retained": true,
+        "owned_deleted": true,
+        "store_mode": "ephemeral",
+        "without_rust": true,
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gb": 0,
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false
+      }
+    }
+  ],
+  "final_custody": {
+    "sdk_inventory": [],
+    "canonical_volume_root_entries": [],
+    "privileged_native_owners": [],
+    "ordinary_current_minimum_mounted_cleanup": true,
+    "sdk_table_rows": {
+      "vms": 0,
+      "vm_create_reservations": 0,
+      "vm_pause_operations": 0,
+      "vm_resize_intents": 0,
+      "vm_resize_receipts": 0
+    }
+  },
+  "private_log_sha256": {
+    "linux-volume-policy-d7a2354-clippy.log": "218e34df253f7dc6ce4795d23306d1cc4910416852c30573f56aff570de24b6b",
+    "linux-volume-policy-d7a2354-consumer-current-final.log": "c80258fb86fae5a99cb0fc20285d04834610e4579316b0768d581b48dca3c1f9",
+    "linux-volume-policy-d7a2354-consumer-current.log": "b1cba1156c9a32f4eabf5ec12344613f866f3064ffb93b76976ad7cc0d3e49bc",
+    "linux-volume-policy-d7a2354-consumer-minimum.log": "201706516452b09813587ae2e600bfdd117f5c5090630440ae3b2e89acb987c9",
+    "linux-volume-policy-d7a2354-mounted-current-final.log": "55df5ac962bb78b63cf42c2313b71c252ee194bd2ad72ab17429e08e912f5d25",
+    "linux-volume-policy-d7a2354-mounted-current.log": "3f749ce8bd8646c46a40891a0695ef42cb9eee9b3e6d11f2fbc0b8c9d040e9a4",
+    "linux-volume-policy-d7a2354-mounted-minimum-final.log": "55df5ac962bb78b63cf42c2313b71c252ee194bd2ad72ab17429e08e912f5d25",
+    "linux-volume-policy-d7a2354-mounted-minimum.log": "b449fa5a01a06f40809096cc8d8300242b200a8561b53802f48100404f92465b",
+    "linux-volume-policy-d7a2354-package.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "linux-volume-policy-d7a2354-port-wire.log": "97bfe1ed4cf28bee574b7ff33fd0efc05dd3a31e0f4b762cb324d78f4ce4b62b",
+    "linux-volume-policy-d7a2354-public-current-final.log": "d6b186dc7b46fbedc453b4dfe6a4422f599158bc1313121c99d0cf5e7ec7e8c0",
+    "linux-volume-policy-d7a2354-public-minimum.log": "d6b186dc7b46fbedc453b4dfe6a4422f599158bc1313121c99d0cf5e7ec7e8c0",
+    "linux-volume-policy-d7a2354-release.log": "e5853f67ca28ea21c833aff476ca3c627fea3542ccdcc3973e0e7869eb5cb8a4",
+    "linux-volume-policy-d7a2354-source-clean.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+    "linux-volume-policy-d7a2354-source.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+    "linux-volume-policy-e695a08-port-wire.log": "53c89d4c00935b408709c4a295bdebc1ec886098378175fe8e6609d880688b12",
+    "linux-volume-policy-e695a08-source-clean.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+    "linux-volume-policy-e695a08-source.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+  },
+  "qualification": {
+    "public_volume_enabled_package_tested": true,
+    "mounted_source": "approved-offline-local-container-python-pack",
+    "mounted_store": "Memory",
+    "postgresql_mounted_qualification_run": false,
+    "all_source_platform_resource_combinations_complete": false,
+    "historical_package_qualification_transferred": false,
+    "full_parity_complete": false,
+    "crash_validation_deferred": true,
+    "live_forced_termination_campaign_run": false,
+    "distribution_approved": false
+  },
+  "observed_failed_attempts": [
+    {
+      "scope": "initial-linux-synthetic-bridge-tests",
+      "result": "19 macOS model peers rejected compiled Linux-only descriptor; corrected to explicit model descriptor"
+    },
+    {
+      "scope": "first-current-consumer-preparation",
+      "result": "offline cache not selected; no SDK owner opened"
+    },
+    {
+      "scope": "initial-mounted-runner-configuration",
+      "result": "invalid runtime namespace rejected before SDK owner opened"
+    },
+    {
+      "scope": "first-minimum-mounted-runner",
+      "result": "safe stale_version/not_dispatched cleanup rejection; original Runtime retained and explicit normal owned cleanup completed before rerun"
+    }
+  ],
+  "private_archive": {
+    "sha256": "8ae1fdf939378b11f25f7f3479f30fcb0e5bfd5773bc6a560362a3289474a539",
+    "bytes": 77834398,
+    "mode": "0600",
+    "copied_and_digest_verified": true,
+    "summary_sha256": "6bce63f644e552258b6b5f345e1f6cfae08373cd9b62d95b83b15e9877f428fe"
+  },
+  "terminal": {
+    "linux_lab_shutdown": "normal-guest-shutdown",
+    "observed_utc": "2026-10-16T09:20:39Z",
+    "active_state": "inactive",
+    "result": "success",
+    "main_pid": 0,
+    "exit_status": 0,
+    "enrolled_domain_and_run_disk_retained": true,
+    "recovery_marker_archived": true,
+    "macos_sdk_custody_untouched": true,
+    "postgresql_started": false
+  },
+  "runner_provenance": {
+    "scope": "explicit-private-ordinary-public-api-witness",
+    "frozen_runner_in_private_archive": true,
+    "committed_ci_runner": false,
+    "minimum_stale_version_retry": "bounded fresh-version reinspection only after stale_version and not_dispatched; entered mutations are never replayed",
+    "failed_minimum_original_owner_cleanup": "explicit stop, delete machine, delete volume, then close after zero reservations; no forced termination"
+  },
+  "next_action": "Qualify public mounted volumes with the durable PostgreSQL store, finish remaining source/platform/resource combinations and volume runner CI integration, then complete growth/saved-state/branch and P9 acceptance.",
+  "http_only_consumers": [
+    {
+      "mode": "current",
+      "platform": "macos",
+      "architecture": "arm64",
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "report_sha256": "67eb82f80da8cf6282c58ecb43b1ff44ceb8c4c160ad4b8f903f190b0e7fb3a9",
+      "package_sha256": "2eb0788105f95f6bd92c8bda7311f847b9d8fc4752ba5531a56ca13a091d0fa9",
+      "without_rust": true,
+      "native_assets": false,
+      "native_exercised": false,
+      "package_file_count": 463,
+      "smoke": {
+        "checkpoint": true,
+        "client": true,
+        "guest_files": true,
+        "interactive": true,
+        "legacy_1_14_6_explicit": "1.14.6",
+        "legacy_runtime_explicit": "1.14.1",
+        "managed_branches": true,
+        "managed_checkpoints": true,
+        "managed_exports": true,
+        "network_policy": true,
+        "offline_default": true,
+        "runtime_1_16_0_explicit": "1.16.0",
+        "runtime_default": "1.22.0",
+        "supervisor": true,
+        "unqualified_runtime_rejected": "1.16.2",
+        "versions": {
+          "jason": "1.4.5",
+          "mint": "1.11.0",
+          "mint_web_socket": "1.0.6",
+          "nimble_options": "1.1.1",
+          "req": "0.7.5",
+          "telemetry": "1.4.2"
+        },
+        "without_rust": true,
+        "workload": true
+      }
+    },
+    {
+      "mode": "minimum",
+      "platform": "macos",
+      "architecture": "arm64",
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "report_sha256": "82bc6f6d6ca814e6bbe04e5966776ac6afa0a1662d6674cee4266b71618517b1",
+      "package_sha256": "2eb0788105f95f6bd92c8bda7311f847b9d8fc4752ba5531a56ca13a091d0fa9",
+      "without_rust": true,
+      "native_assets": false,
+      "native_exercised": false,
+      "package_file_count": 463,
+      "smoke": {
+        "checkpoint": true,
+        "client": true,
+        "guest_files": true,
+        "interactive": true,
+        "legacy_1_14_6_explicit": "1.14.6",
+        "legacy_runtime_explicit": "1.14.1",
+        "managed_branches": true,
+        "managed_checkpoints": true,
+        "managed_exports": true,
+        "network_policy": true,
+        "offline_default": true,
+        "runtime_1_16_0_explicit": "1.16.0",
+        "runtime_default": "1.22.0",
+        "supervisor": true,
+        "unqualified_runtime_rejected": "1.16.2",
+        "versions": {
+          "jason": "1.4.0",
+          "mint": "1.11.0",
+          "mint_web_socket": "1.0.6",
+          "nimble_options": "1.1.0",
+          "req": "0.7.4",
+          "telemetry": "1.3.0"
+        },
+        "without_rust": true,
+        "workload": true
+      }
+    }
+  ],
+  "build_identities": {
+    "compiler_comments": [
+      "Linker: LLD 22.1.8 (/checkout/src/llvm-project/llvm 52ed14fcd56afc30f9cccd8ca8ce237c2eef7e04)",
+      "rustc version 1.98.1 (48a229cea 2026-09-01)",
+      "GCC: (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+    ],
+    "host_tools": [
+      {
+        "path": "/sbin/resize2fs",
+        "sha256": "1a0ea5f6784285b82098fe7935c95bf1ac76713aec904cc9b43920fa85ebe35d"
+      }
+    ],
+    "compiler_identity_source": "ELF .comment section from the digest-verified exact packaged helper"
+  },
+  "local_checks": {
+    "python_native_cases": 45,
+    "python_platform_only_skips": 4,
+    "macos_port_protocol_cases_before_model_fixture_correction": 155,
+    "macos_port_cases_after_model_fixture_correction": 78,
+    "opt_in_native_cases_ignored": 2,
+    "strict_clippy": "passed",
+    "exdoc_warnings_as_errors": "passed"
+  },
+  "local_check_log_sha256": {
+    "linux-volume-policy-python.log": "6552aac8585a888f2ab318744a49ab48e8c591ff623f8a47a9bfd5f541a29b78",
+    "linux-volume-policy-macos-wire-port.log": "551d1da510ba1b17ee3ff6448f4e3c358e5530a46f27b830850c10697739c7cc",
+    "linux-volume-policy-macos-model-peers.log": "1e738f8807a9a9e7b242327970d9c6bac87adce695e5833b0d3d998a350c0111",
+    "linux-volume-policy-macos-model-clippy.log": "38cbd2b12175b1b9078ee541aad308126a6c41d3ed4d8fbd5cf813604615636d",
+    "linux-volume-policy-source.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+    "linux-volume-policy-source-clean.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+    "linux-public-volumes-d7a2354-final-docs.log": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+    "linux-public-volumes-d7a2354-final-docs-complete.log": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d"
+  }
+}
