@@ -19,6 +19,18 @@ use std::os::unix::fs::{MetadataExt, OpenOptionsExt};
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, Weak};
 
+fn creation_read_budget(
+    deadline: std::time::Instant,
+    cancel: &Cancellation,
+) -> Result<crate::ReadBudget> {
+    crate::ReadBudget::new(
+        deadline
+            .saturating_duration_since(std::time::Instant::now())
+            .min(std::time::Duration::from_secs(30)),
+        cancel.clone(),
+    )
+}
+
 #[derive(Clone)]
 pub struct CreateRequest {
     pub name: String,
@@ -138,8 +150,34 @@ impl Engine {
         deadline: std::time::Instant,
         cancel: &Cancellation,
     ) -> Result<CreationReceipt> {
+        self.create_registry_cached_mode(intent, (size, policy), None, deadline, cancel)
+    }
+
+    pub fn create_registry_cached_with_mount_selection(
+        &self,
+        intent: RegistryCreationIntent,
+        cache: (u64, crate::RegistryCachePolicy),
+        mounts: crate::VolumeMountSelection,
+        deadline: std::time::Instant,
+        cancel: &Cancellation,
+    ) -> Result<CreationReceipt> {
+        self.create_registry_cached_mode(intent, cache, Some(mounts), deadline, cancel)
+    }
+
+    fn create_registry_cached_mode(
+        &self,
+        intent: RegistryCreationIntent,
+        cache: (u64, crate::RegistryCachePolicy),
+        mounts: Option<crate::VolumeMountSelection>,
+        deadline: std::time::Instant,
+        cancel: &Cancellation,
+    ) -> Result<CreationReceipt> {
         if cancel.is_cancelled() || std::time::Instant::now() >= deadline {
             return Err(Error::before(ErrorCode::State));
+        }
+        let (size, policy) = cache;
+        if let Some(mounts) = &mounts {
+            mounts.validate(self.binding())?;
         }
         validate_creation_identity(
             &intent.name,
@@ -159,18 +197,25 @@ impl Engine {
             deadline,
             cancel.clone(),
         )?;
-        self.create_registry_prepared(
-            CreateRegistryRequest {
-                name: intent.name,
-                owner_token: intent.owner_token,
-                incarnation: intent.incarnation,
-                artifact,
-                labels: intent.labels,
-                features: intent.features,
-            },
-            deadline,
-            cancel,
-        )
+        let request = CreateRegistryRequest {
+            name: intent.name,
+            owner_token: intent.owner_token,
+            incarnation: intent.incarnation,
+            artifact,
+            labels: intent.labels,
+            features: intent.features,
+        };
+        match mounts {
+            Some(mounts) => {
+                let mounts = self.qualify_volume_mounts(
+                    &mounts.policy,
+                    &mounts.requests,
+                    &creation_read_budget(deadline, cancel)?,
+                )?;
+                self.create_registry_with_volume_mounts(request, mounts, deadline, cancel)
+            }
+            None => self.create_registry_prepared(request, deadline, cancel),
+        }
     }
 
     /// Read-only absence; never contacts registry/cache, adopts a row or issues
@@ -237,25 +282,55 @@ impl Engine {
         deadline: std::time::Instant,
         cancel: &Cancellation,
     ) -> Result<CreationReceipt> {
+        self.create_oci_intent_mode(intent, None, deadline, cancel)
+    }
+
+    pub fn create_oci_intent_with_mount_selection(
+        &self,
+        intent: OciCreationIntent,
+        mounts: crate::VolumeMountSelection,
+        deadline: std::time::Instant,
+        cancel: &Cancellation,
+    ) -> Result<CreationReceipt> {
+        self.create_oci_intent_mode(intent, Some(mounts), deadline, cancel)
+    }
+
+    fn create_oci_intent_mode(
+        &self,
+        intent: OciCreationIntent,
+        mounts: Option<crate::VolumeMountSelection>,
+        deadline: std::time::Instant,
+        cancel: &Cancellation,
+    ) -> Result<CreationReceipt> {
         if cancel.is_cancelled() || std::time::Instant::now() >= deadline {
             return Err(Error::before(ErrorCode::State));
+        }
+        if let Some(mounts) = &mounts {
+            mounts.validate(self.binding())?;
         }
         self.validate_oci_intent(&intent)?;
         self.verify_templates()?;
         let source = self.prepare_oci_metadata(intent.source, deadline, cancel.clone())?;
-        self.create_oci(
-            CreateOciRequest {
-                name: intent.name,
-                owner_token: intent.owner_token,
-                incarnation: intent.incarnation,
-                resources: intent.resources,
-                labels: intent.labels,
-                features: intent.features,
-                source,
-            },
-            deadline,
-            cancel,
-        )
+        let request = CreateOciRequest {
+            name: intent.name,
+            owner_token: intent.owner_token,
+            incarnation: intent.incarnation,
+            resources: intent.resources,
+            labels: intent.labels,
+            features: intent.features,
+            source,
+        };
+        match mounts {
+            Some(mounts) => {
+                let mounts = self.qualify_volume_mounts(
+                    &mounts.policy,
+                    &mounts.requests,
+                    &creation_read_budget(deadline, cancel)?,
+                )?;
+                self.create_oci_with_volume_mounts(request, mounts, deadline, cancel)
+            }
+            None => self.create_oci(request, deadline, cancel),
+        }
     }
 
     /// Qualification is bounded source observation, never machine creation.
@@ -518,12 +593,12 @@ impl Engine {
     }
 
     pub fn create(&self, request: CreateRequest) -> Result<CreationReceipt> {
-        self.create_mode(request, false, None)
+        self.create_mode(request, false, None, None, None)
     }
 
     /// Fresh protocol-2 authority. An existing v1 receipt is never promoted.
     pub fn create_versioned(&self, request: CreateRequest) -> Result<CreationReceipt> {
-        self.create_mode(request, true, None)
+        self.create_mode(request, true, None, None, None)
     }
 
     pub fn create_with_features(
@@ -531,7 +606,26 @@ impl Engine {
         request: CreateRequest,
         features: crate::CreationFeatures,
     ) -> Result<CreationReceipt> {
-        self.create_mode(request, true, Some(&features))
+        self.create_mode(request, true, Some(&features), None, None)
+    }
+
+    /// Mounted fresh local-pack creation. Retains qualified volume gates and
+    /// descriptors, binds full proof into material and keeps one absolute budget.
+    pub fn create_with_volume_mounts(
+        &self,
+        request: CreateRequest,
+        features: crate::CreationFeatures,
+        mounts: crate::QualifiedVolumeMounts,
+        deadline: std::time::Instant,
+        cancel: &Cancellation,
+    ) -> Result<CreationReceipt> {
+        self.create_mode(
+            request,
+            true,
+            Some(&features),
+            Some(mounts),
+            Some((deadline, cancel)),
+        )
     }
 
     fn create_mode(
@@ -539,8 +633,30 @@ impl Engine {
         request: CreateRequest,
         versioned: bool,
         features: Option<&crate::CreationFeatures>,
+        mut mounts: Option<crate::QualifiedVolumeMounts>,
+        budget: Option<(std::time::Instant, &Cancellation)>,
     ) -> Result<CreationReceipt> {
+        let check = || {
+            if budget.is_some_and(|(deadline, cancel)| {
+                cancel.is_cancelled() || std::time::Instant::now() >= deadline
+            }) {
+                Err(Error::before(ErrorCode::State))
+            } else {
+                Ok(())
+            }
+        };
+        check()?;
+        if budget.is_some_and(|(deadline, _)| {
+            deadline.saturating_duration_since(std::time::Instant::now())
+                > std::time::Duration::from_secs(86400)
+        }) {
+            return Err(Error::before(ErrorCode::Validation));
+        }
         validate_request(&request)?;
+        if let Some(mounts) = &mut mounts {
+            let (deadline, cancel) = budget.ok_or(Error::before(ErrorCode::Ownership))?;
+            self.promote_creation_mounts(mounts, deadline, cancel)?;
+        }
         if let Some(features) = features {
             features.validate()?;
         }
@@ -555,6 +671,7 @@ impl Engine {
         if let Some(features) = features {
             features.qualify(&prepared.manifest)?;
         }
+        check()?;
         if self
             .db
             .get_vm(&request.name)
@@ -578,15 +695,19 @@ impl Engine {
         // From here on partial storage may exist. Errors are uncertain and
         // cannot authorize reservation release or a replayed create.
         let result = self
-            .create_reserved(&request, prepared, features, None, None)
+            .create_reserved(&request, prepared, features, None, budget, mounts.as_ref())
             .and_then(|receipt| {
-                if versioned {
+                if versioned && receipt.material.is_none() {
                     crate::material::MaterialJournal::at(&self.vm_directory(&receipt.name))
                         .initialize(&receipt)
                         .map_err(|error| Error::uncertain(error.code))
                 } else {
                     Ok(receipt)
                 }
+            })
+            .and_then(|receipt| {
+                check().map_err(|error| Error::uncertain(error.code))?;
+                Ok(receipt)
             });
         // Releasing the upstream preparation lock is distinct from releasing
         // SmolBox's durable capacity reservation. Never remove partial storage.
@@ -596,12 +717,45 @@ impl Engine {
         result
     }
 
+    fn promote_creation_mounts(
+        &self,
+        mounts: &mut crate::QualifiedVolumeMounts,
+        deadline: std::time::Instant,
+        cancel: &Cancellation,
+    ) -> Result<()> {
+        let budget = creation_read_budget(deadline, cancel)?;
+        self.volume_record_mounts(mounts, &budget)?;
+        mounts.promote_creation()
+    }
+
     /// Materialize a qualified registry pack under fresh versioned authority.
     /// SDK extraction/disk I/O is owned work and may outlive caller observation;
     /// no expired operation returns success or authorizes replay/absence.
     pub fn create_registry_prepared(
         &self,
         request: CreateRegistryRequest,
+        deadline: std::time::Instant,
+        cancel: &Cancellation,
+    ) -> Result<CreationReceipt> {
+        self.create_registry_mode(request, None, deadline, cancel)
+    }
+
+    /// Prepared registry creation retains the same qualified mount authority and
+    /// composite job lease as local creation; it does not reacquire work capacity.
+    pub fn create_registry_with_volume_mounts(
+        &self,
+        request: CreateRegistryRequest,
+        mounts: crate::QualifiedVolumeMounts,
+        deadline: std::time::Instant,
+        cancel: &Cancellation,
+    ) -> Result<CreationReceipt> {
+        self.create_registry_mode(request, Some(mounts), deadline, cancel)
+    }
+
+    fn create_registry_mode(
+        &self,
+        request: CreateRegistryRequest,
+        mut mounts: Option<crate::QualifiedVolumeMounts>,
         deadline: std::time::Instant,
         cancel: &Cancellation,
     ) -> Result<CreationReceipt> {
@@ -639,7 +793,12 @@ impl Engine {
         if artifact.prepared.manifest.platform != artifact.source.platform {
             return Err(Error::before(ErrorCode::Validation));
         }
-        let _job = self.jobs.acquire(crate::jobs::Demand::oci_create())?;
+        let _job = if let Some(mounts) = &mut mounts {
+            self.promote_creation_mounts(mounts, deadline, cancel)?;
+            None
+        } else {
+            Some(self.jobs.acquire(crate::jobs::Demand::oci_create())?)
+        };
         self.domain.verify()?;
         let cache = crate::registry_artifact::RegistryCache::open(&self.domain.directory)?;
         if artifact.prepared.path != cache.path(&artifact.source)
@@ -701,11 +860,16 @@ impl Engine {
                 Some(&features),
                 Some(&artifact.source.reference),
                 Some((deadline, cancel)),
+                mounts.as_ref(),
             )?;
             self.domain.verify().map_err(|e| Error::uncertain(e.code))?;
-            let receipt = crate::material::MaterialJournal::at(&self.vm_directory(&receipt.name))
-                .initialize(&receipt)
-                .map_err(|e| Error::uncertain(e.code))?;
+            let receipt = if receipt.material.is_none() {
+                crate::material::MaterialJournal::at(&self.vm_directory(&receipt.name))
+                    .initialize(&receipt)
+                    .map_err(|e| Error::uncertain(e.code))?
+            } else {
+                receipt
+            };
             check().map_err(|e| Error::uncertain(e.code))?;
             Ok(receipt)
         })();
@@ -723,14 +887,40 @@ impl Engine {
         deadline: std::time::Instant,
         cancel: &Cancellation,
     ) -> Result<CreationReceipt> {
+        self.create_oci_mode(request, None, deadline, cancel)
+    }
+
+    /// Fresh direct OCI storage creation with retained, proof-bound mounts.
+    pub fn create_oci_with_volume_mounts(
+        &self,
+        request: CreateOciRequest,
+        mounts: crate::QualifiedVolumeMounts,
+        deadline: std::time::Instant,
+        cancel: &Cancellation,
+    ) -> Result<CreationReceipt> {
+        self.create_oci_mode(request, Some(mounts), deadline, cancel)
+    }
+
+    fn create_oci_mode(
+        &self,
+        request: CreateOciRequest,
+        mut mounts: Option<crate::QualifiedVolumeMounts>,
+        deadline: std::time::Instant,
+        cancel: &Cancellation,
+    ) -> Result<CreationReceipt> {
         let check = || {
-            if cancel.is_cancelled() || std::time::Instant::now() >= deadline {
+            if cancel.is_cancelled() || std::time::Instant::now() >= deadline || !self.available() {
                 Err(Error::before(ErrorCode::State))
             } else {
                 Ok(())
             }
         };
         check()?;
+        if deadline.saturating_duration_since(std::time::Instant::now())
+            > std::time::Duration::from_secs(86400)
+        {
+            return Err(Error::before(ErrorCode::Validation));
+        }
         validate_creation_identity(
             &request.name,
             &request.owner_token,
@@ -739,7 +929,12 @@ impl Engine {
             &request.labels,
         )?;
         request.source.qualify(&request.features)?;
-        let _job = self.jobs.acquire(crate::jobs::Demand::oci_create())?;
+        let _job = if let Some(mounts) = &mut mounts {
+            self.promote_creation_mounts(mounts, deadline, cancel)?;
+            None
+        } else {
+            Some(self.jobs.acquire(crate::jobs::Demand::oci_create())?)
+        };
         let gate = self.gate(&request.name)?;
         let _machine = gate
             .try_lock()
@@ -781,19 +976,33 @@ impl Engine {
             let mut labels = request.labels.clone();
             labels.insert("smolbox.owner".into(), request.owner_token.clone());
             labels.insert("smolbox.incarnation".into(), request.incarnation.clone());
-            let record = request
+            let mut record = request
                 .source
                 .record(&request.name, request.resources, labels, &request.features)
                 .map_err(|e| Error::uncertain(e.code))?;
+            let material = if let Some(mounts) = &mounts {
+                let budget =
+                    creation_read_budget(deadline, cancel).map_err(|e| Error::uncertain(e.code))?;
+                Some(
+                    self.bind_volume_mount_material(mounts, &mut record, &budget)
+                        .map_err(|e| Error::uncertain(e.code))?,
+                )
+            } else {
+                None
+            };
+            check().map_err(|e| Error::uncertain(e.code))?;
             let receipt = self.commit_created_record(
                 &request.name,
                 &request.owner_token,
                 &request.incarnation,
                 &record,
             )?;
-            let receipt = crate::material::MaterialJournal::at(&self.vm_directory(&receipt.name))
-                .initialize(&receipt)
-                .map_err(|e| Error::uncertain(e.code))?;
+            let journal = crate::material::MaterialJournal::at(&self.vm_directory(&receipt.name));
+            let receipt = match material {
+                Some(material) => journal.initialize_mounted(&receipt, &record, material),
+                None => journal.initialize(&receipt),
+            }
+            .map_err(|e| Error::uncertain(e.code))?;
             check().map_err(|e| Error::uncertain(e.code))?;
             Ok(receipt)
         })();
@@ -886,6 +1095,7 @@ impl Engine {
         features: Option<&crate::CreationFeatures>,
         registry_reference: Option<&str>,
         budget: Option<(std::time::Instant, &Cancellation)>,
+        mounts: Option<&crate::QualifiedVolumeMounts>,
     ) -> Result<CreationReceipt> {
         let check = || {
             if budget.is_some_and(|(deadline, cancel)| {
@@ -941,14 +1151,37 @@ impl Engine {
         if !prepared.verified.covers(&prepared.path) {
             return Err(Error::uncertain(ErrorCode::Validation));
         }
-        let record = prepared_pack_record(request, &prepared, features, registry_reference)?;
+        let mut record = prepared_pack_record(request, &prepared, features, registry_reference)?;
+        let material = if let Some(mounts) = mounts {
+            let (deadline, cancel) = budget.ok_or(Error::uncertain(ErrorCode::Ownership))?;
+            let read_budget = crate::ReadBudget::new(
+                deadline
+                    .saturating_duration_since(std::time::Instant::now())
+                    .min(std::time::Duration::from_secs(30)),
+                cancel.clone(),
+            )
+            .map_err(|error| Error::uncertain(error.code))?;
+            Some(
+                self.bind_volume_mount_material(mounts, &mut record, &read_budget)
+                    .map_err(|error| Error::uncertain(error.code))?,
+            )
+        } else {
+            None
+        };
         check()?;
-        self.commit_created_record(
+        let receipt = self.commit_created_record(
             &request.name,
             &request.owner_token,
             &request.incarnation,
             &record,
-        )
+        )?;
+        if let Some(material) = material {
+            crate::material::MaterialJournal::at(&self.vm_directory(&receipt.name))
+                .initialize_mounted(&receipt, &record, material)
+                .map_err(|error| Error::uncertain(error.code))
+        } else {
+            Ok(receipt)
+        }
     }
 
     fn commit_created_record(
@@ -1136,7 +1369,9 @@ impl Engine {
         {
             return Err(Error::before(ErrorCode::Ownership));
         }
-        crate::material::MaterialJournal::at(&self.vm_directory(&receipt.name)).verify(receipt)?;
+        let journal = crate::material::MaterialJournal::at(&self.vm_directory(&receipt.name));
+        journal.verify(receipt)?;
+        journal.verify_mount_record(receipt, record)?;
         Ok(())
     }
 
@@ -1504,6 +1739,70 @@ impl Engine {
     }
 
     pub fn start(&self, receipt: &CreationReceipt) -> Result<Observation> {
+        self.start_mode(receipt, None, None)
+    }
+
+    /// Select saved mount proof only after receipt verification and against the
+    /// bridge's current operator policy; a record path cannot grant admission.
+    pub fn start_with_volume_policy(
+        &self,
+        receipt: &CreationReceipt,
+        policy: &crate::LocalVolumePolicy,
+        deadline: std::time::Instant,
+        cancel: &Cancellation,
+    ) -> Result<Observation> {
+        let budget = creation_read_budget(deadline, cancel)?;
+        budget.check()?;
+        let record = self.record(receipt)?;
+        let journal = crate::material::MaterialJournal::at(&self.vm_directory(&receipt.name));
+        match journal.mount_material(receipt, &record)? {
+            Some(material) => {
+                let mounts = self.qualify_volume_mounts(policy, &material.mounts, &budget)?;
+                self.start_with_volume_mounts(receipt, mounts, deadline, cancel)
+            }
+            None => self.start_mode(receipt, None, Some((deadline, cancel))),
+        }
+    }
+
+    /// Start an authenticated mounted pack while retaining qualified backing
+    /// descriptors and volume gates through SDK launch and final observation.
+    pub fn start_with_volume_mounts(
+        &self,
+        receipt: &CreationReceipt,
+        mounts: crate::QualifiedVolumeMounts,
+        deadline: std::time::Instant,
+        cancel: &Cancellation,
+    ) -> Result<Observation> {
+        self.start_mode(receipt, Some(mounts), Some((deadline, cancel)))
+    }
+
+    fn start_mode(
+        &self,
+        receipt: &CreationReceipt,
+        mut mounts: Option<crate::QualifiedVolumeMounts>,
+        budget: Option<(std::time::Instant, &Cancellation)>,
+    ) -> Result<Observation> {
+        let check = || {
+            if budget.is_some_and(|(deadline, cancel)| {
+                cancel.is_cancelled() || std::time::Instant::now() >= deadline
+            }) {
+                Err(Error::before(ErrorCode::State))
+            } else {
+                Ok(())
+            }
+        };
+        check()?;
+        if budget.is_some_and(|(deadline, _)| {
+            deadline.saturating_duration_since(std::time::Instant::now())
+                > std::time::Duration::from_secs(86400)
+        }) {
+            return Err(Error::before(ErrorCode::Validation));
+        }
+        if let Some(mounts) = &mut mounts {
+            let (deadline, cancel) = budget.ok_or(Error::before(ErrorCode::Ownership))?;
+            self.volume_record_mounts(mounts, &creation_read_budget(deadline, cancel)?)?;
+            mounts.promote_start()?;
+        }
         let gate = self.gate(&receipt.name)?;
         let _guard = gate
             .try_lock()
@@ -1513,19 +1812,48 @@ impl Engine {
             ObservedState::Stopped => {}
             _ => return Err(Error::before(ErrorCode::State)),
         }
-        reject_unqualified_oci_boot(&self.record(receipt)?)?;
+        let record = self.record(receipt)?;
+        reject_unqualified_oci_boot(&record)?;
+        match &mounts {
+            Some(mounts) => {
+                let (deadline, cancel) = budget.ok_or(Error::before(ErrorCode::Ownership))?;
+                self.verify_machine_mounts(
+                    receipt,
+                    &record,
+                    mounts,
+                    &creation_read_budget(deadline, cancel)?,
+                )?;
+            }
+            None if record.mounts.is_empty() && record.staged_mounts.is_empty() => {}
+            None => return Err(Error::before(ErrorCode::Ownership)),
+        }
         self.verify_templates()?;
         let boot = self.boot_epoch()?;
         self.verify_lifecycle_preconditions(receipt, &expected)?;
+        if let Some(mounts) = &mounts {
+            let (deadline, cancel) = budget.ok_or(Error::before(ErrorCode::Ownership))?;
+            self.verify_machine_mounts(
+                receipt,
+                &self.record(receipt)?,
+                mounts,
+                &creation_read_budget(deadline, cancel)?,
+            )?;
+        }
         self.track_handle(receipt)?;
+        check()?;
         let dispatch = boot.begin_boot(&receipt.name)?;
         let result = self.runtime.start_machine(&receipt.name);
         dispatch
             .finish(self.runtime.pid(&receipt.name))
             .map_err(|error| Error::uncertain(error.code))?;
         result.map_err(|error| Error::uncertain(crate::sdk_compat::launch_error(&error)))?;
+        check().map_err(|error| Error::uncertain(error.code))?;
         self.inspect(receipt)
             .map_err(|error| Error::uncertain(error.code))
+            .and_then(|observation| {
+                check().map_err(|error| Error::uncertain(error.code))?;
+                Ok(observation)
+            })
     }
 
     pub fn stop(&self, receipt: &CreationReceipt) -> Result<Observation> {
@@ -1664,6 +1992,36 @@ impl Engine {
         Ok(())
     }
 
+    pub fn exec_with_volume_policy(
+        &self,
+        receipt: &CreationReceipt,
+        command: Command,
+        cancel: Cancellation,
+        consumer: impl FnMut(Output) -> std::result::Result<(), ()>,
+        policy: &crate::LocalVolumePolicy,
+    ) -> Result<CommandOutcome> {
+        let record = self.record(receipt)?;
+        if record.mounts.is_empty() {
+            self.exec(receipt, command, cancel, consumer)
+        } else {
+            self.exec_stream_owned_with_volume_policy(
+                receipt,
+                crate::BufferedCommand {
+                    argv: command.argv,
+                    env: command.env.into_iter().collect(),
+                    workdir: command.workdir,
+                    user: command.user,
+                    stdin: None,
+                    timeout: command.timeout,
+                    max_output_bytes: command.max_output_bytes,
+                },
+                cancel,
+                consumer,
+                policy,
+            )
+        }
+    }
+
     pub fn exec(
         &self,
         receipt: &CreationReceipt,
@@ -1678,6 +2036,9 @@ impl Engine {
             .map_err(|_| Error::before(ErrorCode::Database))?
             .ok_or(Error::before(ErrorCode::State))?;
         self.verify_record(receipt, &record)?;
+        if !record.mounts.is_empty() || !record.staged_mounts.is_empty() {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
         command.validate(record.image.is_some())?;
         let _job = self.jobs.acquire(crate::jobs::Demand::streaming())?;
         let gate = self.gate(&receipt.name)?;
@@ -2836,7 +3197,13 @@ mod tests {
             storage_gib: 1,
             overlay_gib: 1,
         };
-        for scenario in ["cancel", "templates", "crossed"] {
+        for scenario in [
+            "cancel",
+            "templates",
+            "crossed",
+            "foreign_mounts",
+            "mounted_cancel",
+        ] {
             let blob = crate::registry_artifact::tests::sidecar_fixture(
                 &engine.domain.directory,
                 crate::oci::native_oci_platform(),
@@ -2853,7 +3220,7 @@ mod tests {
                 artifact.source.content_sha256 = "c".repeat(64);
             }
             let cancel = Cancellation::new();
-            if scenario == "cancel" {
+            if matches!(scenario, "cancel" | "mounted_cancel") {
                 cancel.cancel();
             }
             let request = CreateRegistryRequest {
@@ -2872,15 +3239,27 @@ mod tests {
                     workload: None,
                 },
             };
-            let error = engine
-                .create_registry_prepared(request, Instant::now() + Duration::from_secs(3), &cancel)
-                .err()
-                .unwrap();
+            let result = if matches!(scenario, "foreign_mounts" | "mounted_cancel") {
+                let (_directory, mounts) = crate::volumes::foreign_handle();
+                engine.create_registry_with_volume_mounts(
+                    request,
+                    mounts,
+                    Instant::now() + Duration::from_secs(3),
+                    &cancel,
+                )
+            } else {
+                engine.create_registry_prepared(
+                    request,
+                    Instant::now() + Duration::from_secs(3),
+                    &cancel,
+                )
+            };
+            let error = result.err().unwrap();
             assert_eq!(error.dispatch, crate::Dispatch::NotDispatched);
             assert_eq!(
                 error.code,
                 match scenario {
-                    "cancel" => ErrorCode::State,
+                    "cancel" | "mounted_cancel" => ErrorCode::State,
                     "templates" => ErrorCode::Unsupported,
                     _ => ErrorCode::Ownership,
                 }
@@ -3170,6 +3549,425 @@ mod tests {
 
     fn install_record(engine: &Engine) -> CreationReceipt {
         install_named_record(engine, "owned")
+    }
+
+    #[test]
+    fn mounted_commands_require_policy_and_running_backing_before_worker_or_sdk_entry() {
+        let temp = tempfile::tempdir().unwrap();
+        let engine = test_engine(temp.path());
+        let (_volume_directory, mounts) = crate::volumes::owned_handle(&engine);
+        let name = "mounted-command";
+        let owner = "b".repeat(64);
+        let incarnation = "c".repeat(32);
+        let directory = engine.vm_directory(name);
+        std::fs::create_dir_all(&directory).unwrap();
+        let mut record = VmRecord::new(name.into(), 1, 256, vec![], vec![], false);
+        record.storage_gb = Some(1);
+        record.overlay_gb = Some(1);
+        record.image = Some(format!("registry.example/app@sha256:{}", "d".repeat(64)));
+        record.labels.insert("smolbox.owner".into(), owner.clone());
+        record
+            .labels
+            .insert("smolbox.incarnation".into(), incarnation.clone());
+        let material = engine
+            .bind_volume_mount_material(&mounts, &mut record, &read_budget())
+            .unwrap();
+        let policy = material.mounts[0].proof.backing.policy.clone();
+        assert!(engine.db.reserve_vm_create(name, &owner).unwrap());
+        let origin = engine
+            .commit_created_record(name, &owner, &incarnation, &record)
+            .unwrap();
+        let receipt = crate::material::MaterialJournal::at(&directory)
+            .initialize_mounted(&origin, &record, material)
+            .unwrap();
+        assert!(engine
+            .worker_mounts(&receipt, &record, None, &read_budget())
+            .is_err());
+        let error = engine
+            .reserve_mounted_worker(
+                &receipt,
+                Some(mounts),
+                crate::jobs::Demand::command(1024, 1024).unwrap(),
+                &read_budget(),
+            )
+            .err()
+            .unwrap();
+        assert_eq!(error.code, ErrorCode::State);
+        assert_eq!(engine.jobs.counts(), crate::jobs::Counts::default());
+        let before = serde_json::to_vec(&engine.db.get_vm(name).unwrap()).unwrap();
+        let command = crate::BufferedCommand {
+            argv: vec!["true".into()],
+            env: vec![],
+            workdir: None,
+            user: None,
+            stdin: None,
+            timeout: std::time::Duration::from_secs(1),
+            max_output_bytes: 1024,
+        };
+        for error in [
+            engine
+                .exec_buffered(&receipt, command.clone(), Cancellation::new(), |_| Ok(()))
+                .err()
+                .unwrap(),
+            engine
+                .exec_stream_owned(&receipt, command.clone(), Cancellation::new(), |_| Ok(()))
+                .err()
+                .unwrap(),
+            engine
+                .exec_background(&receipt, command.clone(), Cancellation::new())
+                .err()
+                .unwrap(),
+            engine
+                .exec(
+                    &receipt,
+                    Command {
+                        argv: vec!["true".into()],
+                        env: vec![],
+                        workdir: None,
+                        user: None,
+                        timeout: std::time::Duration::from_secs(1),
+                        max_output_bytes: 1024,
+                    },
+                    Cancellation::new(),
+                    |_| Ok(()),
+                )
+                .err()
+                .unwrap(),
+        ] {
+            assert_eq!(error.code, ErrorCode::Ownership);
+            assert_eq!(error.dispatch, crate::Dispatch::NotDispatched);
+        }
+        for error in [
+            engine
+                .exec_buffered_with_volume_policy(
+                    &receipt,
+                    command.clone(),
+                    Cancellation::new(),
+                    |_| Ok(()),
+                    &policy,
+                )
+                .err()
+                .unwrap(),
+            engine
+                .exec_stream_owned_with_volume_policy(
+                    &receipt,
+                    command.clone(),
+                    Cancellation::new(),
+                    |_| Ok(()),
+                    &policy,
+                )
+                .err()
+                .unwrap(),
+            engine
+                .exec_background_with_volume_policy(&receipt, command, Cancellation::new(), &policy)
+                .err()
+                .unwrap(),
+        ] {
+            assert_eq!(error.dispatch, crate::Dispatch::NotDispatched);
+        }
+        let request = || crate::TerminalRequest {
+            options: crate::TerminalOptions {
+                program: "/bin/sh".into(),
+                cols: 80,
+                rows: 24,
+                session: std::time::Duration::from_secs(1),
+                idle: std::time::Duration::from_secs(1),
+                attach: std::time::Duration::from_millis(100),
+                close: std::time::Duration::from_millis(1),
+                max_buffer_bytes: 1024,
+                max_input_bytes: 65536,
+                total_input_bytes: 1048576,
+            },
+            deadline: std::time::Instant::now() + std::time::Duration::from_secs(1),
+            cancel: Cancellation::new(),
+        };
+        let controls = std::cell::Cell::new(0);
+        let output = std::cell::Cell::new(0);
+        let error = engine
+            .terminal_owned(
+                &receipt,
+                request(),
+                || {
+                    controls.set(controls.get() + 1);
+                    Ok(None)
+                },
+                |_| {
+                    output.set(output.get() + 1);
+                    Ok(())
+                },
+            )
+            .err()
+            .unwrap();
+        assert_eq!(error.code, ErrorCode::Ownership);
+        assert_eq!(error.dispatch, crate::Dispatch::NotDispatched);
+        let error = engine
+            .terminal_owned_with_volume_policy(
+                &receipt,
+                request(),
+                || {
+                    controls.set(controls.get() + 1);
+                    Ok(None)
+                },
+                |_| {
+                    output.set(output.get() + 1);
+                    Ok(())
+                },
+                &policy,
+            )
+            .err()
+            .unwrap();
+        assert_eq!(error.dispatch, crate::Dispatch::NotDispatched);
+        assert_eq!(controls.get(), 0);
+        assert_eq!(output.get(), 0);
+        assert_eq!(
+            serde_json::to_vec(&engine.db.get_vm(name).unwrap()).unwrap(),
+            before
+        );
+        assert_eq!(engine.jobs.counts(), crate::jobs::Counts::default());
+        assert!(engine.owned_handles.lock().unwrap().is_empty());
+        assert!(!engine.domain.directory.join("transfers").exists());
+    }
+
+    #[test]
+    fn mounted_oci_handoff_keeps_volume_gate_and_job_until_explicit_drop() {
+        let temp = tempfile::tempdir().unwrap();
+        let engine = test_engine(temp.path());
+        let (_volume_directory, mut mounts) = crate::volumes::owned_handle(&engine);
+        let gate = engine
+            .gate(&format!("volume:sbv-{}", "c".repeat(32)))
+            .unwrap();
+        assert!(gate.try_lock().is_err());
+        let permit = mounts.take_oci_lease().unwrap();
+        mounts.recheck_before_launch(&read_budget()).unwrap();
+        let before = engine.jobs.counts();
+        assert_eq!(before.work, 1);
+        assert_eq!(before.children, 2);
+        let authority = mounts.into_worker_authority().unwrap();
+        assert_eq!(engine.jobs.counts(), before);
+        assert!(gate.try_lock().is_err());
+        drop(authority);
+        assert!(gate.try_lock().is_ok());
+        assert_eq!(engine.jobs.counts(), before);
+        drop(permit);
+        assert_eq!(engine.jobs.counts(), crate::jobs::Counts::default());
+        // A second fixture uses a fresh private ledger rather than replaying
+        // the already completed provision under the same generated intent.
+        let temp = tempfile::tempdir().unwrap();
+        let engine = test_engine(temp.path());
+        let (_volume_directory, mounts) = crate::volumes::owned_handle(&engine);
+        assert!(mounts.into_worker_authority().is_err());
+        assert_eq!(engine.jobs.counts(), crate::jobs::Counts::default());
+    }
+
+    #[test]
+    fn mounted_start_requires_full_saved_proof_and_retains_admission_before_sdk_entry() {
+        use std::time::{Duration, Instant};
+        for changed_proof in [false, true] {
+            let temp = tempfile::tempdir().unwrap();
+            let engine = test_engine(temp.path());
+            let (_volume_directory, mounts) = crate::volumes::owned_handle(&engine);
+            let name = "mounted-owned";
+            let owner = "b".repeat(64);
+            let incarnation = "c".repeat(32);
+            let directory = engine.vm_directory(name);
+            std::fs::create_dir_all(&directory).unwrap();
+            let mut record = VmRecord::new(name.into(), 1, 256, vec![], vec![], false);
+            record.storage_gb = Some(1);
+            record.overlay_gb = Some(1);
+            record.labels.insert("smolbox.owner".into(), owner.clone());
+            record
+                .labels
+                .insert("smolbox.incarnation".into(), incarnation.clone());
+            let mut material = engine
+                .bind_volume_mount_material(&mounts, &mut record, &read_budget())
+                .unwrap();
+            if changed_proof {
+                material.mounts[0].proof.backing.inode += 1;
+                record.labels.insert(
+                    crate::mount_material::MOUNT_LABEL.into(),
+                    material.digest().unwrap(),
+                );
+            }
+            assert!(engine.db.reserve_vm_create(name, &owner).unwrap());
+            let origin = engine
+                .commit_created_record(name, &owner, &incarnation, &record)
+                .unwrap();
+            let receipt = crate::material::MaterialJournal::at(&directory)
+                .initialize_mounted(&origin, &record, material)
+                .unwrap();
+            let before = serde_json::to_vec(&engine.db.get_vm(name).unwrap()).unwrap();
+            assert_eq!(
+                engine.start(&receipt).err().unwrap().code,
+                ErrorCode::Ownership
+            );
+            let verified = engine.verify_machine_mounts(&receipt, &record, &mounts, &read_budget());
+            assert_eq!(verified.is_ok(), !changed_proof);
+            let error = engine
+                .start_with_volume_mounts(
+                    &receipt,
+                    mounts,
+                    Instant::now() + Duration::from_secs(1),
+                    &Cancellation::new(),
+                )
+                .err()
+                .unwrap();
+            assert_eq!(error.dispatch, crate::Dispatch::NotDispatched);
+            assert_eq!(
+                error.code,
+                if changed_proof {
+                    ErrorCode::Ownership
+                } else {
+                    ErrorCode::Unsupported
+                }
+            );
+            assert_eq!(
+                serde_json::to_vec(&engine.db.get_vm(name).unwrap()).unwrap(),
+                before
+            );
+            assert_eq!(engine.jobs.counts(), crate::jobs::Counts::default());
+            assert!(engine.owned_handles.lock().unwrap().is_empty());
+            assert!(engine.owned_oci.lock().unwrap().is_empty());
+        }
+    }
+
+    #[test]
+    fn mounted_start_cancel_and_foreign_handle_reject_before_record_or_sdk_entry() {
+        use std::time::{Duration, Instant};
+        let temp = tempfile::tempdir().unwrap();
+        let engine = test_engine(temp.path());
+        let receipt = install_record(&engine);
+        let before = serde_json::to_vec(&engine.db.get_vm(&receipt.name).unwrap()).unwrap();
+        for cancelled in [true, false] {
+            let (_directory, mounts) = crate::volumes::foreign_handle();
+            let cancel = Cancellation::new();
+            if cancelled {
+                cancel.cancel();
+            }
+            let error = engine
+                .start_with_volume_mounts(
+                    &receipt,
+                    mounts,
+                    Instant::now() + Duration::from_secs(1),
+                    &cancel,
+                )
+                .err()
+                .unwrap();
+            assert_eq!(error.dispatch, crate::Dispatch::NotDispatched);
+            assert_eq!(
+                error.code,
+                if cancelled {
+                    ErrorCode::State
+                } else {
+                    ErrorCode::Ownership
+                }
+            );
+            assert_eq!(engine.jobs.counts(), crate::jobs::Counts::default());
+        }
+        assert_eq!(
+            serde_json::to_vec(&engine.db.get_vm(&receipt.name).unwrap()).unwrap(),
+            before
+        );
+        assert!(engine.owned_handles.lock().unwrap().is_empty());
+    }
+
+    #[test]
+    fn mounted_source_preparation_rejects_crossed_authority_and_cancel_without_cache_or_jobs() {
+        use std::time::{Duration, Instant};
+        let temp = tempfile::tempdir().unwrap();
+        let engine = test_engine(temp.path());
+        let receipt = install_record(&engine);
+        let before = serde_json::to_vec(&engine.db.get_vm(&receipt.name).unwrap()).unwrap();
+        let value: serde_json::Value = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/mounted-creation-request.json"
+        ))
+        .unwrap();
+        let selection = || {
+            let requests: Vec<crate::VolumeMountRequest> =
+                serde_json::from_value(value["operation"]["create"]["volume_mounts"].clone())
+                    .unwrap();
+            crate::VolumeMountSelection {
+                policy: requests[0].proof.backing.policy.clone(),
+                requests,
+            }
+        };
+        for cancelled in [false, true] {
+            let cancel = Cancellation::new();
+            if cancelled {
+                cancel.cancel();
+            }
+            let resources = Resources {
+                cpus: 1,
+                memory_mib: 256,
+                storage_gib: 1,
+                overlay_gib: 1,
+            };
+            let oci = OciCreationIntent {
+                name: "mounted-fresh".into(),
+                owner_token: "b".repeat(64),
+                incarnation: "c".repeat(32),
+                resources,
+                labels: BTreeMap::new(),
+                source: crate::oci::tests::verified().source().clone(),
+                features: crate::oci::tests::features(),
+            };
+            let registry = RegistryCreationIntent {
+                name: oci.name.clone(),
+                owner_token: oci.owner_token.clone(),
+                incarnation: oci.incarnation.clone(),
+                resources,
+                labels: BTreeMap::new(),
+                features: oci.features.clone(),
+                source: crate::RegistryArtifactSource {
+                    reference: oci.source.reference.clone(),
+                    platform: oci.source.platform.clone(),
+                    content_sha256: "d".repeat(64),
+                },
+            };
+            let expected = if cancelled {
+                ErrorCode::State
+            } else {
+                ErrorCode::Ownership
+            };
+            for error in [
+                engine
+                    .create_oci_intent_with_mount_selection(
+                        oci,
+                        selection(),
+                        Instant::now() + Duration::from_secs(1),
+                        &cancel,
+                    )
+                    .err()
+                    .unwrap(),
+                engine
+                    .create_registry_cached_with_mount_selection(
+                        registry,
+                        (
+                            1024,
+                            crate::RegistryCachePolicy {
+                                max_bytes: 1024,
+                                max_files: 1,
+                            },
+                        ),
+                        selection(),
+                        Instant::now() + Duration::from_secs(1),
+                        &cancel,
+                    )
+                    .err()
+                    .unwrap(),
+            ] {
+                assert_eq!(error.code, expected);
+                assert_eq!(error.dispatch, crate::Dispatch::NotDispatched);
+            }
+            assert_eq!(engine.jobs.counts(), crate::jobs::Counts::default());
+            assert!(!engine.vm_directory("mounted-fresh").exists());
+            assert!(!engine.domain.directory.join("registry-blobs").exists());
+            assert!(!engine.domain.directory.join("artifacts").exists());
+        }
+        assert_eq!(
+            serde_json::to_vec(&engine.db.get_vm(&receipt.name).unwrap()).unwrap(),
+            before
+        );
+        assert!(engine.owned_handles.lock().unwrap().is_empty());
     }
 
     #[test]
@@ -3527,6 +4325,32 @@ mod tests {
                 .dispatch,
             crate::Dispatch::NotDispatched
         );
+        for cancelled in [true, false] {
+            let (_directory, mounts) = crate::volumes::foreign_handle();
+            let cancel = Cancellation::new();
+            if cancelled {
+                cancel.cancel();
+            }
+            let error = engine
+                .create_oci_with_volume_mounts(
+                    request.clone(),
+                    mounts,
+                    std::time::Instant::now() + std::time::Duration::from_secs(1),
+                    &cancel,
+                )
+                .err()
+                .unwrap();
+            assert_eq!(error.dispatch, crate::Dispatch::NotDispatched);
+            assert_eq!(
+                error.code,
+                if cancelled {
+                    ErrorCode::State
+                } else {
+                    ErrorCode::Ownership
+                }
+            );
+            assert_eq!(engine.jobs.counts(), crate::jobs::Counts::default());
+        }
         let mut invalid = request.clone();
         invalid.owner_token = "wrong".into();
         assert_eq!(

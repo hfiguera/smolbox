@@ -39,7 +39,7 @@ dependency; its source is covered by the same complete inventory.
 | OCI image list/pull | `EmbeddedRuntime::{list_images,pull_image}` and public agent APIs | Existing-running-agent preflight; typed image identity, source eligibility and seeds disabled until separately accounted |
 | Checkpoint capture/restore | `EmbeddedRuntime::{start_forkable_machine,checkpoint_machine,restore_checkpoint_machine}`, portable checkpoint APIs | Approved bare/offline eligibility, portable/CPU compatibility, material transitions, capture streaming/resources and authenticated restore intent |
 | Stopped disk growth | `storage::expand_disk::<Storage/Overlay>`, public disk resolve/open APIs | Stopped/source proof, format/geometry checks, durable increased reservation, SDK record update and authorized material proof |
-| Local volumes/mounts | Public SDK record/mount conversion; HTTP volume handler performs filesystem operations directly | SmolBox-owned descriptor-bound filesystem control under exact Linux volume policy, exclusive attachment, mode/UID and unknown-outcome contract |
+| Local volumes/mounts | Public SDK record/mount conversion; HTTP volume handler performs filesystem operations directly; public vm_uid_drop_active confirms the unprivileged VMM retains its account | Protected account-bound provision, bounded observations and descriptor-relative deletion exist with retained native authority and SDK mount exclusion. Explicit caller-fenced resolution resumes matching entered deletion or starts first cleanup of completed provisioning; no normal observation/startup replay or absence adoption. These are non-VM contracts, not guest qualification. Schema-2 staging records exact temporary inode before no-replacement public rename, with distinct final evidence and schema-1 read compatibility. Explicit fenced abort now cleans only matching protected temporary or published unready backing, with SDK mount exclusion for both paths and separate abort evidence. Typed protocol/helper action routing and immutable operator-root catalog selection now exist behind disabled volume admission. Caller mutation deadlines and bounded observation deadlines remain distinct. Exact volume limits and Linux-only/dependency negotiation now agree across Rust/Elixir and engine-constant checks. Elixir request/reply/store authority, unproved temporary cleanup, long/large-tree acceptance, exclusive mount creation/attachment, guest/replacement/mode qualification and public/store integration remain pending. |
 | Export | Public pack asset collector, SDK `pack_export`/manifest seeding and registry push | Approved stopped source, exact container/bare preservation, bounded tool/auxiliary-VM policy, verified publication receipt |
 | Branch/held release | Public `agent::fork::{prepare_fork,prepare_held_fork,activate_held_fork}`, `AgentManager::start_with_full_config` | Source/child identity, ordered gates, child boot enrollment, hold metadata, parent dependency and additional backing reservations |
 
@@ -674,3 +674,47 @@ startup rejection and nonmutating engine absence checks pass. These are not live
 OCI platform/public-consumer qualification. Remaining private credentials/auth
 combinations, registry pack/cache paths, platform/source/resource acceptance and
 exact-package approval remain pending before public source activation.
+
+### Mounted OCI launch and bootstrap phase boundary
+
+Unmodified SDK AgentManager::start_with_full_config delegates to subprocess launch;
+finalize_launch waits for agent readiness before returning success. The engine's
+mounted OCI path keeps root/backing descriptors and exact saved/current proof
+through that call. It promotes its existing mount lease to the same 24 work-FD,
+two-child, bounded-staging and 32-MiB metadata demand used by OCI launch/bootstrap.
+It does not acquire another work lease or increase the global 32-FD declaration
+and eight-FD control headroom.
+
+Mounted bootstrap retains a bounded in-memory plan without opening spools or
+spawning its worker during VMM launch. Only after SDK readiness does it close
+parent root/backing descriptors, while carrying volume gates, domain guard and
+full proof into the supervisor's retained lease box. Bootstrap spools and worker
+then use that reserved job. Collected results retain the job and gates through
+final record/material/actual-mount verification; unresolved collection retains
+them in the supervisor. Unmounted OCI preserves its earlier spool preparation.
+Guest bootstrap uses SDK runtime mount tags and read-only mode, never host paths.
+
+Non-VM admission, handoff, pending-plan, wire dispatch and guest-binding contracts
+cover these boundaries. They are not measurements of live Linux FD peaks, guest
+mount readiness, replacement-write behavior or changed-package qualification.
+Those ordinary checks remain pending before volume/source capability activation.
+Crash qualification stays deferred and SDK source remains unmodified.
+
+### Retained mounted commands
+
+Buffered, owned streaming and background command entry points now accept current
+operator volume policy. They qualify journal-bound mount proof before the machine
+gate, preserving volume/machine gate order, and recheck full proof plus confirmed
+running state before worker dispatch. No command starts a stopped machine or
+selects a host path from its guest arguments. Unqualified mounted command calls
+reject before SDK entry; the legacy direct streaming entry uses the owned worker
+when an approved mounted machine is selected.
+
+The retained mount lease promotes atomically to one worker child and exact bounded
+output staging while retaining the whole work metadata/FD allowance. Parent
+backing descriptors close before worker spool/pipe preparation; volume gates,
+domain and full proof stay in the supervisor's lease box through collection or
+uncertain retained work. Guest image context continues using SDK runtime mount
+tags and read-only flags. Port's policy-aware path forwards the original credited
+output callback. Terminal integration and ordinary Linux guest/resource
+qualification remain pending; no volume capability is activated by these models.

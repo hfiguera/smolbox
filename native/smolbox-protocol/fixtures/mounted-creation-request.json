@@ -1,0 +1,61 @@
+{
+  "type": "request",
+  "epoch": "abababababababababababababababab",
+  "id": 1,
+  "budget_ms": 1000,
+  "initial_credit": 262144,
+  "initial_event_credit": 64,
+  "operation": {
+    "operation": "create",
+    "create": {
+      "name": "owned",
+      "owner_token": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "incarnation": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "artifact": {
+        "path": "/private/approved/app.smolmachine",
+        "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "max_bytes": 1024,
+        "guest_platform": "linux/amd64"
+      },
+      "resources": {
+        "cpus": 1,
+        "memory_mib": 256,
+        "storage_gib": 1,
+        "overlay_gib": 1
+      },
+      "labels": {},
+      "volume_mounts": [
+        {
+          "proof": {
+            "schema": 1,
+            "backing": {
+              "schema": 1,
+              "target_id": "embedded-local",
+              "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+              "policy": {
+                "id": "local",
+                "root": "/srv/smolvm/volumes"
+              },
+              "intent": {
+                "worker_volume_id": "sbv-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "size_gb": 4
+              },
+              "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "root_device": 1,
+              "root_inode": 18446744073709551615,
+              "device": 1,
+              "inode": 18446744073709551614,
+              "mode": 448
+            },
+            "account": {
+              "uid": 1000,
+              "gid": 1000
+            }
+          },
+          "target": "/mnt/volumes/data",
+          "readonly": false
+        }
+      ]
+    }
+  }
+}

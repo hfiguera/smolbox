@@ -4,9 +4,18 @@ A retained machine keeps its own disks until deletion. A managed local volume ha
 its own identity and lifetime: delete the machine, then attach the same data to a
 replacement on the same worker. Use this for project data or a reusable cache.
 
-This implementation supports **Linux workers running smolvm 1.20.2 or 1.22.0**, one
+The HTTP backend supports **Linux workers running smolvm 1.20.2 or 1.22.0**, one
 exclusive machine attachment per volume, and guest targets below `/mnt/volumes/`.
 Read-only attachments are exclusive too. The default remains no mounts.
+
+Embedded Port volumes remain disabled while integration and qualification are
+in progress. Native host provisioning binds an unprivileged dedicated account
+to private `0700` backing. Linux guest/replacement writes, mount behavior,
+and deletion still require ordinary acceptance. Managed native provisioning and
+explicit cleanup now preserve pinned owner identity, durable intent and exact
+completion proof, with bounded read-only startup validation. Mount integration,
+reader activation and platform qualification remain pending; existing HTTP
+qualification does not qualify the changed native helper.
 
 ## Approve the worker storage boundary
 

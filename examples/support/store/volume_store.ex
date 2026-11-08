@@ -11,7 +11,8 @@ defmodule SmolBox.DurableHost.VolumeStore do
     end
 
     def accept(context, v, capacity) do
-      with :ok <- Volume.validate(v) do
+      with :ok <- Volume.validate(v),
+           :ok <- BackendStore.volume(context, v) do
         case Database.read(context, Volume.key(v), :volume) do
           {:ok, %{fingerprint: fp} = current} when fp == v.fingerprint ->
             {:ok, current, :existing}
@@ -29,8 +30,7 @@ defmodule SmolBox.DurableHost.VolumeStore do
     end
 
     defp insert(context, v, capacity) do
-      with :ok <- BackendStore.http(context, v.worker_id),
-           :ok <- WorkerStore.admit(context, v.worker_id),
+      with :ok <- WorkerStore.admit(context, v.worker_id),
            {:ok, usage} <- Database.usage(context, v.worker_id),
            {:ok, v} <- VolumeOps.accept(v, capacity, usage),
            {:ok, saved} <- Database.write(context, v),
@@ -60,7 +60,11 @@ defmodule SmolBox.DurableHost.VolumeStore do
     end
 
     defp admit(_, %{volume_worker_id: nil}), do: :ok
-    defp admit(context, m), do: WorkerStore.admit(context, m.volume_worker_id)
+
+    defp admit(context, m) do
+      with :ok <- BackendStore.mounts(context, m),
+           do: WorkerStore.admit(context, m.volume_worker_id)
+    end
 
     def release(context, %{state: :deleted} = m) do
       with {:ok, vs} <- references(context, m),

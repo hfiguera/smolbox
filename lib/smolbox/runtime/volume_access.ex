@@ -40,14 +40,28 @@ defmodule SmolBox.Runtime.VolumeAccess do
   def worker(config, id) do
     case Enum.find(config.workers, &(Target.id(&1) == id)) do
       %{platform: :linux} = worker ->
-        if Target.supports_feature?(worker, :volumes),
-          do: {:ok, worker},
-          else: error(:unsupported_capability)
+        with true <- Target.supports_feature?(worker, :volumes),
+             :ok <- native_reader(config, worker),
+             do: {:ok, worker},
+             else: (_ -> error(:unsupported_capability))
 
       _ ->
         error(:unsupported_capability)
     end
   end
+
+  defp native_reader(%{store: {adapter, _}} = config, %{kind: :embedded}) do
+    with {:ok, %{local_volumes: 1, native_volumes: 1}} <- Session.store(config, :capabilities, []),
+         true <-
+           Enum.all?(
+             [volume_accept: 3, volume_fetch: 2, volume_list: 4, volume_change: 5],
+             fn {name, arity} -> function_exported?(adapter, name, arity) end
+           ),
+         do: :ok,
+         else: (_ -> error(:unsupported_capability))
+  end
+
+  defp native_reader(_config, _worker), do: :ok
 
   defp error(category), do: {:error, %Error{category: category, operation: :volume}}
 end

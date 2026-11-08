@@ -31,6 +31,8 @@ cargo fmt --manifest-path "$native_manifest" -p smolbox-engine -p smolbox-protoc
 cargo test --manifest-path "$native_manifest" --workspace --lib --bins --locked
 cargo test --manifest-path "$native_manifest" -p smolbox-engine --test child_reaping --locked
 cargo build --manifest-path "$native_manifest" -p smolbox-port --locked
+SMOLBOX_UMASK_HELPER="${CARGO_TARGET_DIR:-$native_root/target}/debug/smolbox-port" \
+  python3 "$native_root/tests/test_port_umask.py" -v
 # Only these two ignored fixtures are ordinary checks: private worker entry and
 # binary transfers to a local SDK-protocol peer. Neither launches a VM or forces
 # child termination. Never select all ignored tests.

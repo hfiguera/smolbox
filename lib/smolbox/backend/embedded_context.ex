@@ -1,8 +1,8 @@
 defmodule SmolBox.Backend.EmbeddedContext do
   @moduledoc false
-  alias SmolBox.Backend.Assignment
+  alias SmolBox.Backend.{Assignment, Features}
   alias SmolBox.Embedded.{Config, Identity, NativeGrowth, Port, Request, Shape}
-  alias SmolBox.{Error, Execution, ManagedMachine}
+  alias SmolBox.{Error, Execution, ManagedMachine, Volume}
 
   @enforce_keys [:config, :server]
   @derive {Inspect, only: []}
@@ -16,6 +16,7 @@ defmodule SmolBox.Backend.EmbeddedContext do
     :spec,
     :epoch,
     growth: nil,
+    volume: nil,
     managed_machine: nil,
     pinned: false
   ]
@@ -23,6 +24,24 @@ defmodule SmolBox.Backend.EmbeddedContext do
   def new(config, server) do
     if Config.validate(config) == :ok and server?(server),
       do: {:ok, %__MODULE__{config: config, server: server}},
+      else: error()
+  end
+
+  def assign(%__MODULE__{} = context, %Volume{} = volume) do
+    if volume_approved?(volume, context.config),
+      do:
+        {:ok,
+         %{
+           context
+           | volume: volume,
+             assignment: nil,
+             identity: nil,
+             profile: nil,
+             name: nil,
+             spec: nil,
+             growth: nil,
+             managed_machine: nil
+         }},
       else: error()
   end
 
@@ -39,7 +58,8 @@ defmodule SmolBox.Backend.EmbeddedContext do
       {:ok,
        %{
          context
-         | assignment: record.backend_assignment,
+         | volume: nil,
+           assignment: record.backend_assignment,
            identity: current_identity(record),
            growth: NativeGrowth.intent(record),
            profile: record.spec.profile,
@@ -54,12 +74,13 @@ defmodule SmolBox.Backend.EmbeddedContext do
 
   def scoped?(%__MODULE__{} = context),
     do:
-      Assignment.approved?(
-        context.assignment,
-        context.config,
-        context.spec,
-        context.managed_machine
-      ) and
+      context.volume == nil and
+        Assignment.approved?(
+          context.assignment,
+          context.config,
+          context.spec,
+          context.managed_machine
+        ) and
         (context.managed_machine == nil or context.identity != nil) and
         context.profile == context.spec.profile and
         context.name == context.assignment.creation["name"] and
@@ -67,6 +88,27 @@ defmodule SmolBox.Backend.EmbeddedContext do
         growth_scope?(context)
 
   def scoped?(_context), do: false
+
+  def volume_scoped?(%__MODULE__{volume: %Volume{} = volume} = context),
+    do:
+      volume_approved?(volume, context.config) and
+        Enum.all?(
+          ~w(assignment identity profile name spec growth managed_machine)a,
+          &(Map.fetch!(context, &1) == nil)
+        )
+
+  def volume_scoped?(_), do: false
+
+  defp volume_approved?(volume, config),
+    do:
+      Volume.validate(volume) == :ok and config.platform == :linux and
+        Features.supports?(config, :volumes) and volume.worker_id == config.id and
+        volume.policy == config.volume_policy and
+        match?(
+          %{binding: %{target_id: target, generation: generation}}
+          when target == config.id and generation == config.domain_generation,
+          volume.native_authority
+        )
 
   def receipt(%__MODULE__{identity: %Identity{} = identity}), do: {:ok, identity.receipt}
   def receipt(_context), do: error()

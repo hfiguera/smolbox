@@ -1,6 +1,4 @@
 defmodule SmolBox.Volumes do
-  alias SmolBox.Runtime.Target
-
   @moduledoc """
   Managed local volumes independent of machine lifetime. Hosts authorize scopes.
 
@@ -14,10 +12,8 @@ defmodule SmolBox.Volumes do
   exclusive even for read-only mounts and remain through stop and uncertainty.
   Verified machine deletion releases attachment, but retains volume and budget.
   """
-  alias SmolBox.{Backend, Error, Runtime, Validation, Volume, VolumePolicy}
-  alias SmolBox.Runtime.Session
-
-  alias SmolBox.Runtime.VolumeAccess
+  alias SmolBox.{Error, Runtime, Validation, Volume, VolumePolicy}
+  alias SmolBox.Runtime.{Session, VolumeAccess, VolumeAttempt}
 
   @spec create(SmolBox.runtime(), keyword()) :: {:ok, Volume.key()} | {:error, Error.t()}
   def create(runtime, options) do
@@ -27,37 +23,59 @@ defmodule SmolBox.Volumes do
          {:ok, config} <- configuration(runtime),
          {:ok, worker} <- VolumeAccess.worker(config, options[:worker_id]),
          true <- VolumePolicy.valid?(worker.volume_policy) do
-      now = config.clock.now()
+      volume = definition(config, worker, options)
 
-      fingerprint =
-        :crypto.mac(
-          :hmac,
-          :sha256,
-          config.fingerprint_key,
-          :erlang.term_to_binary({"smolbox-volume-v1", Enum.sort(options), worker.volume_policy})
-        )
-        |> Base.encode16(case: :lower)
-
-      v =
-        struct!(
-          Volume,
-          Map.merge(Map.new(options), %{
-            worker_volume_id:
-              "sbv-" <> Base.encode16(:crypto.strong_rand_bytes(16), case: :lower),
-            policy: worker.volume_policy,
-            fingerprint: fingerprint,
-            accepted_at_ms: now,
-            updated_at_ms: now
-          })
-        )
-
-      case accept(config, worker, v) do
-        {:ok, saved, :existing} -> {:ok, Volume.key(saved)}
-        {:ok, saved, :inserted} -> provision(config, worker, saved)
-        error -> error
-      end
+      admit_create(runtime, config, worker, volume)
     else
       false -> error(:validation)
+      error -> error
+    end
+  end
+
+  defp admit_create(runtime, config, worker, volume) do
+    case VolumeAttempt.existing(config, worker, volume) do
+      {:ok, saved} ->
+        {:ok, Volume.key(saved)}
+
+      :new ->
+        VolumeAttempt.run(runtime, config, worker, :create, fn worker, deadline ->
+          create_attempt(config, worker, volume, deadline)
+        end)
+
+      error ->
+        error
+    end
+  end
+
+  defp definition(config, worker, options) do
+    now = config.clock.now()
+
+    fingerprint =
+      :crypto.mac(
+        :hmac,
+        :sha256,
+        config.fingerprint_key,
+        :erlang.term_to_binary(VolumeAttempt.fingerprint_input(worker, options))
+      )
+      |> Base.encode16(case: :lower)
+
+    struct!(
+      Volume,
+      Map.merge(Map.new(options), %{
+        worker_volume_id: "sbv-" <> Base.encode16(:crypto.strong_rand_bytes(16), case: :lower),
+        policy: worker.volume_policy,
+        native_authority: VolumeAttempt.authority(worker),
+        fingerprint: fingerprint,
+        accepted_at_ms: now,
+        updated_at_ms: now
+      })
+    )
+  end
+
+  defp create_attempt(config, worker, v, deadline) do
+    case accept(config, worker, v) do
+      {:ok, saved, :existing} -> {:ok, Volume.key(saved)}
+      {:ok, saved, :inserted} -> provision(config, worker, saved, deadline)
       error -> error
     end
   end
@@ -73,25 +91,10 @@ defmodule SmolBox.Volumes do
 
   defp accept(config, worker, v), do: Session.store(config, :volume_accept, [v, worker.capacity])
 
-  defp provision(config, worker, v) do
-    result =
-      case Backend.provision_volume(Target.connection(worker), v.worker_volume_id, v.size_gb) do
-        {:ok, path} ->
-          if path == Volume.path(v),
-            do: {:complete, :ready},
-            else: {:unknown, %Error{category: :identity_conflict, operation: :volume}}
+  defp provision(config, worker, volume, deadline) do
+    result = VolumeAttempt.provision(worker, volume, deadline)
 
-        {:error, e} ->
-          {:unknown, %{e | operation: :volume}}
-      end
-
-    with {:ok, saved, _} <-
-           Session.store(config, :volume_change, [
-             Volume.key(v),
-             v.version,
-             result,
-             config.clock.now()
-           ]),
+    with {:ok, saved, _} <- VolumeAttempt.finish(config, volume, result),
          do: {:ok, Volume.key(saved)}
   end
 
@@ -136,8 +139,10 @@ defmodule SmolBox.Volumes do
   Resolve an uncertain provisioning/deletion attempt by deleting its backing storage.
   Requires `[quiesced: true]`: the host must fence pending upstream requests first.
   An expired store claim, controller restart or stopped VM is insufficient.
-  Success requires the worker's deletion acknowledgment. No ready adoption or
-  automatic replay is supported because upstream has no volume inspection API.
+  HTTP success requires the worker's deletion acknowledgment; native success
+  requires correlated protected deletion or staging-abort proof. No ready adoption
+  or automatic replay occurs. Native startup observations cannot complete an
+  uncertain attempt or release its reservation.
   """
   @spec resolve_delete(SmolBox.runtime(), Volume.key(), pos_integer(), keyword()) ::
           {:ok, Volume.t()} | {:error, Error.t()}
@@ -151,33 +156,31 @@ defmodule SmolBox.Volumes do
     with {:ok, v} <- __MODULE__.inspect(runtime, key),
          {:ok, config} <- configuration(runtime),
          {:ok, worker} <- VolumeAccess.worker(config, v.worker_id),
-         true <- worker.volume_policy == v.policy,
-         {:ok, intent, status} <-
-           Session.store(config, :volume_change, [key, version, action, config.clock.now()]) do
-      delete_attempt(config, worker, intent, status)
+         true <- VolumeAttempt.bound?(worker, v) do
+      if VolumeAttempt.repeated?(worker, v, version),
+        do: {:ok, v},
+        else: remove_attempt(runtime, config, worker, key, version, action)
     else
       false -> error(:identity_conflict)
       e -> e
     end
   end
 
-  defp delete_attempt(_, _, intent, :existing), do: {:ok, intent}
-
-  defp delete_attempt(config, worker, intent, :changed) do
-    result =
-      case Backend.delete_volume(Target.connection(worker), intent.worker_volume_id) do
-        :ok -> {:complete, :deleted}
-        {:error, e} -> {:unknown, e}
+  defp remove_attempt(runtime, config, worker, key, version, action) do
+    VolumeAttempt.run(runtime, config, worker, action, fn worker, deadline ->
+      with {:ok, intent, status} <-
+             Session.store(config, :volume_change, [key, version, action, config.clock.now()]) do
+        delete_attempt(config, worker, intent, status, action, deadline)
       end
+    end)
+  end
 
-    with {:ok, saved, _} <-
-           Session.store(config, :volume_change, [
-             Volume.key(intent),
-             intent.version,
-             result,
-             config.clock.now()
-           ]),
-         do: {:ok, saved}
+  defp delete_attempt(_, _, intent, :existing, _action, _deadline), do: {:ok, intent}
+
+  defp delete_attempt(config, worker, intent, :changed, action, deadline) do
+    result = VolumeAttempt.delete(worker, intent, action, deadline)
+
+    with {:ok, saved, _} <- VolumeAttempt.finish(config, intent, result), do: {:ok, saved}
   end
 
   defp configuration(runtime) do

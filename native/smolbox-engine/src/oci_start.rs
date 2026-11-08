@@ -7,6 +7,32 @@ use std::time::{Duration, Instant};
 
 const POLL: Duration = Duration::from_millis(5);
 
+enum BootstrapPlan {
+    Prepared(Box<crate::transfer_supervisor::Prepared>),
+    Pending {
+        permit: crate::jobs::JobLease,
+        directory: std::path::PathBuf,
+        socket: std::path::PathBuf,
+        metadata: Box<crate::bootstrap::Metadata>,
+    },
+}
+impl BootstrapPlan {
+    fn prepare(
+        self,
+        supervisor: &crate::transfer_supervisor::TransferSupervisor,
+    ) -> Result<crate::transfer_supervisor::Prepared> {
+        match self {
+            Self::Prepared(prepared) => Ok(*prepared),
+            Self::Pending {
+                permit,
+                directory,
+                socket,
+                metadata,
+            } => supervisor.prepare_bootstrap_reserved(permit, &directory, socket, &metadata),
+        }
+    }
+}
+
 fn check(deadline: Instant, cancel: &Cancellation) -> Result<()> {
     if cancel.is_cancelled() || Instant::now() >= deadline {
         Err(Error::before(ErrorCode::State))
@@ -56,14 +82,19 @@ pub(crate) fn observe_owned<T: Send + 'static>(
     }
 }
 
+#[cfg(test)]
 fn launch_features(record: &VmRecord) -> Result<LaunchFeatures> {
+    launch_features_qualified(record, false)
+}
+
+fn launch_features_qualified(record: &VmRecord, mounted: bool) -> Result<LaunchFeatures> {
     // This first direct-OCI path has no auxiliary device, source, restore,
     // secret resolver, shell init, or implicit lifecycle behavior. Other parity
     // combinations remain pending until their approvals/owners are integrated.
     if record.source_smolmachine.is_some()
         || record.image.is_none()
         || !record.network
-        || !record.mounts.is_empty()
+        || (!mounted && !record.mounts.is_empty())
         || !record.staged_mounts.is_empty()
         || !record.disks.is_empty()
         || !record.published_sockets.is_empty()
@@ -133,7 +164,7 @@ impl crate::Engine {
         cancel: Cancellation,
     ) -> Result<Observation> {
         source.validate()?;
-        self.start_oci_inner(receipt, Some(source), deadline, cancel)
+        self.start_oci_inner(receipt, Some(source), None, deadline, cancel)
     }
 
     /// Owned direct-OCI boot and one bounded agent bootstrap. The bridge must
@@ -145,13 +176,47 @@ impl crate::Engine {
         deadline: Instant,
         cancel: Cancellation,
     ) -> Result<Observation> {
-        self.start_oci_inner(receipt, None, deadline, cancel)
+        self.start_oci_inner(receipt, None, None, deadline, cancel)
+    }
+
+    /// OCI launch with current operator policy and fresh journal-bound backing
+    /// authority. Mount descriptors are retained until the SDK confirms readiness.
+    pub fn start_oci_source_with_volume_policy(
+        &self,
+        receipt: &CreationReceipt,
+        source: &crate::ImagePullRequest,
+        policy: &crate::LocalVolumePolicy,
+        deadline: Instant,
+        cancel: Cancellation,
+    ) -> Result<Observation> {
+        check(deadline, &cancel)?;
+        source.validate()?;
+        if deadline.saturating_duration_since(Instant::now()) > Duration::from_secs(86400) {
+            return Err(Error::before(ErrorCode::Validation));
+        }
+        let budget = crate::ReadBudget::new(
+            deadline
+                .saturating_duration_since(Instant::now())
+                .min(Duration::from_secs(30)),
+            cancel.clone(),
+        )?;
+        let record = self.record(receipt)?;
+        let material = crate::material::MaterialJournal::at(&self.vm_directory(&receipt.name))
+            .mount_material(receipt, &record)?;
+        let mounts = match material {
+            Some(material) => {
+                Some(self.qualify_volume_mounts(policy, &material.mounts, &budget)?)
+            }
+            None => None,
+        };
+        self.start_oci_inner(receipt, Some(source), mounts, deadline, cancel)
     }
 
     fn start_oci_inner(
         &self,
         receipt: &CreationReceipt,
         approved_source: Option<&crate::ImagePullRequest>,
+        mut mounts: Option<crate::QualifiedVolumeMounts>,
         deadline: Instant,
         cancel: Cancellation,
     ) -> Result<Observation> {
@@ -166,7 +231,15 @@ impl crate::Engine {
             .as_ref()
             .ok_or(Error::before(ErrorCode::Unsupported))?
             .clone();
-        let permit = self.jobs.acquire(crate::jobs::Demand::oci_start())?;
+        let permit = match &mut mounts {
+            Some(mounts) => {
+                let budget =
+                    crate::ReadBudget::new(remaining.min(Duration::from_secs(30)), cancel.clone())?;
+                self.volume_record_mounts(mounts, &budget)?;
+                mounts.take_oci_lease()?
+            }
+            None => self.jobs.acquire(crate::jobs::Demand::oci_start())?,
+        };
         let gate = self.gate(&receipt.name)?;
         let machine = gate
             .try_lock()
@@ -192,7 +265,12 @@ impl crate::Engine {
             platform: crate::oci::native_oci_platform().into(),
         };
         self.qualified_pull_record(receipt, &intent, &budget)?;
-        let features = launch_features(&record)?;
+        match &mounts {
+            Some(mounts) => self.verify_machine_mounts(receipt, &record, mounts, &budget)?,
+            None if record.mounts.is_empty() => {}
+            None => return Err(Error::before(ErrorCode::Ownership)),
+        }
+        let features = launch_features_qualified(&record, mounts.is_some())?;
         let expected = self.inspect(receipt)?;
         if expected.state != ObservedState::Stopped {
             return Err(Error::before(ErrorCode::State));
@@ -218,15 +296,25 @@ impl crate::Engine {
             .ok_or(Error::before(ErrorCode::Validation))?;
         let metadata = crate::bootstrap::Metadata::from_record(&record, deadline_ns)?;
         let proof_intent = metadata.expected()?;
-        let prepared = supervisor.prepare_bootstrap_reserved(
-            permit,
-            &self.transfer_directory()?,
-            directory.join("agent.sock"),
-            &metadata,
-        )?;
-        // The protected spool now owns the plan bytes; do not keep a second
-        // in-memory workload copy across SDK launch and worker execution.
-        drop(metadata);
+        let transfer_directory = self.transfer_directory()?;
+        let plan = if mounts.is_some() {
+            // Keep the reserved job, but do not open bootstrap spools or spawn
+            // its worker while parent backing descriptors are held for launch.
+            BootstrapPlan::Pending {
+                permit,
+                directory: transfer_directory,
+                socket: directory.join("agent.sock"),
+                metadata: Box::new(metadata),
+            }
+        } else {
+            // Preserve existing pre-launch spool publication for unmounted OCI.
+            BootstrapPlan::Prepared(Box::new(supervisor.prepare_bootstrap_reserved(
+                permit,
+                &transfer_directory,
+                directory.join("agent.sock"),
+                &metadata,
+            )?))
+        };
         check(deadline, &cancel)?;
         let manager = Arc::new(Mutex::new(
             AgentManager::for_vm_with_sizes(&record.name, record.storage_gb, record.overlay_gb)
@@ -242,6 +330,9 @@ impl crate::Engine {
             }
             handles.insert(record.name.clone(), manager.clone());
         }
+        if let Some(mounts) = &mounts {
+            self.verify_machine_mounts(receipt, &self.record(receipt)?, mounts, &budget)?;
+        }
         self.track_handle(receipt)?;
         let db = self.db.clone();
         let database = self.binding().database.clone();
@@ -251,6 +342,15 @@ impl crate::Engine {
         let work_cancel = cancel.clone();
         observe_owned(self.jobs.clone(), deadline, cancel, move || {
             check(deadline, &work_cancel)?;
+            if let Some(mounts) = &mounts {
+                let budget = crate::ReadBudget::new(
+                    deadline
+                        .saturating_duration_since(Instant::now())
+                        .min(Duration::from_secs(30)),
+                    work_cancel.clone(),
+                )?;
+                mounts.recheck_before_launch(&budget)?;
+            }
             let dispatch = epoch.begin_boot(&receipt.name)?;
             let (started, pid) = {
                 let manager = manager
@@ -281,9 +381,18 @@ impl crate::Engine {
             .map_err(|_| Error::uncertain(ErrorCode::Database))?
             .ok_or(Error::uncertain(ErrorCode::Ownership))?;
             check(deadline, &work_cancel).map_err(|e| Error::uncertain(e.code))?;
+            // SDK success includes agent readiness. Close mount descriptors before
+            // spawning the bootstrap worker; volume gates/proof follow collection.
+            let mount_authority = mounts
+                .map(|mounts| mounts.into_worker_authority())
+                .transpose()
+                .map_err(|e| Error::uncertain(e.code))?;
+            let prepared = plan
+                .prepare(&supervisor)
+                .map_err(|e| Error::uncertain(e.code))?;
             let crate::transfer_supervisor::RunResult::Collected(collected) = supervisor.run(
                 prepared,
-                Box::new((machine, source, domain.clone())),
+                Box::new((machine, source, domain.clone(), mount_authority)),
                 deadline,
                 &work_cancel,
             )?
@@ -321,7 +430,9 @@ impl crate::Engine {
             {
                 return Err(Error::uncertain(ErrorCode::Ownership));
             }
-            crate::material::MaterialJournal::at(&directory).verify(&receipt)?;
+            let journal = crate::material::MaterialJournal::at(&directory);
+            journal.verify(&receipt)?;
+            journal.verify_mount_record(&receipt, &after)?;
             budget.check().map_err(|e| Error::uncertain(e.code))?;
             Ok(Observation {
                 state: ObservedState::Running,
@@ -347,6 +458,29 @@ impl crate::Engine {
 mod tests {
     use super::*;
 
+    #[test]
+    fn pending_mounted_bootstrap_keeps_admission_without_opening_spools() {
+        let pool = crate::jobs::JobPool::default();
+        let mut permit = pool
+            .acquire(crate::jobs::Demand::volume_mounts(8).unwrap())
+            .unwrap();
+        permit.promote_mount_oci_start().unwrap();
+        let directory = tempfile::tempdir().unwrap();
+        let metadata = crate::bootstrap::Metadata::from_record(&record(), 1).unwrap();
+        let plan = BootstrapPlan::Pending {
+            permit,
+            directory: directory.path().into(),
+            socket: directory.path().join("agent.sock"),
+            metadata: Box::new(metadata),
+        };
+        assert_eq!(std::fs::read_dir(directory.path()).unwrap().count(), 0);
+        assert_eq!(pool.counts().work, 1);
+        assert_eq!(pool.counts().children, 2);
+        drop(plan);
+        assert_eq!(pool.counts(), crate::jobs::Counts::default());
+        assert_eq!(std::fs::read_dir(directory.path()).unwrap().count(), 0);
+    }
+
     fn record() -> VmRecord {
         crate::oci::tests::verified()
             .record(
@@ -361,6 +495,28 @@ mod tests {
                 &crate::oci::tests::features(),
             )
             .unwrap()
+    }
+
+    #[test]
+    fn mounted_launch_and_bootstrap_preserve_guest_bindings_without_extra_devices() {
+        let mut record = record();
+        record.mounts = vec![("/approved/volume".into(), "/mnt/volumes/data".into(), true)];
+        assert!(launch_features(&record).is_err());
+        let features = launch_features_qualified(&record, true).unwrap();
+        assert_eq!(features.watch_parent, Some(true));
+        assert!(features.extra_disks.is_empty() && features.packed_layers_dir.is_none());
+        let metadata = crate::bootstrap::Metadata::from_record(&record, 1).unwrap();
+        let value = serde_json::to_value(metadata).unwrap();
+        let bytes = serde_json::to_string(&value).unwrap();
+        assert!(!bytes.contains("/approved/volume"));
+        assert_eq!(
+            value["launch"]["mounts"],
+            serde_json::json!([["smolvm0", "/mnt/volumes/data", true]])
+        );
+        record
+            .staged_mounts
+            .push((0, "/staged".into(), "/mnt/volumes/staged".into()));
+        assert!(launch_features_qualified(&record, true).is_err());
     }
 
     #[test]

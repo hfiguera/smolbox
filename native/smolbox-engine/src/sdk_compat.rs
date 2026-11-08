@@ -67,6 +67,135 @@ pub(crate) fn validate_database(database: &Path, identity: (u64, u64)) -> Result
     with_observation(database, identity, |_| Ok(()))
 }
 
+/// Exclude every retained SDK mount, including stopped and read-only records.
+/// Single-row bounded projection avoids a complete VM inventory allocation and
+/// never initializes/repairs SDK state. Caller must serialize volume attachments
+/// through its volume gate and durable attachment authority before deletion.
+pub(crate) fn volume_unattached(
+    database: &Path,
+    identity: (u64, u64),
+    source: &Path,
+    budget: &crate::ReadBudget,
+) -> Result<bool> {
+    let source = source
+        .to_str()
+        .ok_or(Error::before(ErrorCode::Validation))?;
+    if !mount_path(source) {
+        return Err(Error::before(ErrorCode::Validation));
+    }
+    with_observation_budget(database, identity, budget, |connection| {
+        let mut query = connection.prepare(
+            "SELECT name,length(CAST(data AS BLOB)),substr(CAST(data AS BLOB),1,?1) FROM vms ORDER BY name LIMIT 1025")
+            .map_err(|_| Error::before(ErrorCode::Database))?;
+        let mut rows = query
+            .query([crate::observations::MAX_RECORD_BYTES + 1])
+            .map_err(|_| Error::before(ErrorCode::Database))?;
+        let mut count = 0;
+        let mut total = 0;
+        while let Some(row) = rows
+            .next()
+            .map_err(|_| Error::before(ErrorCode::Database))?
+        {
+            budget.check()?;
+            count += 1;
+            let length: usize = row.get(1).map_err(|_| Error::before(ErrorCode::Database))?;
+            if count > crate::observations::MAX_RECORDS
+                || length > crate::observations::MAX_RECORD_BYTES
+                || length > crate::observations::MAX_SNAPSHOT_BYTES - total
+            {
+                return Err(Error::before(ErrorCode::OutputLimit));
+            }
+            total += length;
+            let name = row
+                .get_ref(0)
+                .map_err(|_| Error::before(ErrorCode::Database))?
+                .as_str()
+                .map_err(|_| Error::before(ErrorCode::Database))?;
+            let data = row
+                .get_ref(2)
+                .map_err(|_| Error::before(ErrorCode::Database))?;
+            let record: VolumeMountProjection = serde_json::from_slice(
+                data.as_blob()
+                    .map_err(|_| Error::before(ErrorCode::Database))?,
+            )
+            .map_err(|_| Error::before(ErrorCode::Database))?;
+            if record.name != name
+                || !crate::domain::valid_id(name)
+                || record
+                    .mounts
+                    .iter()
+                    .any(|(host, guest, _)| !mount_path(host) || !mount_path(guest))
+                || record
+                    .staged_mounts
+                    .iter()
+                    .any(|(_, host, guest)| !mount_path(host) || !mount_path(guest))
+            {
+                return Err(Error::before(ErrorCode::Database));
+            }
+            if record.mounts.iter().any(|(host, _, _)| host == source)
+                || record
+                    .staged_mounts
+                    .iter()
+                    .any(|(_, host, _)| host == source)
+            {
+                return Ok(false);
+            }
+        }
+        budget.check()?;
+        Ok(true)
+    })
+}
+
+fn mount_path(path: &str) -> bool {
+    path.starts_with('/')
+        && path.len() <= 4096
+        && !path.contains('\0')
+        && !path.contains('\\')
+        && !path.contains("//")
+        && (path == "/" || !path.ends_with('/'))
+        && !path.split('/').any(|part| matches!(part, "." | ".."))
+}
+
+#[derive(serde::Deserialize)]
+struct VolumeMountProjection {
+    name: String,
+    #[serde(default, deserialize_with = "bounded_mounts")]
+    mounts: Vec<(String, String, bool)>,
+    #[serde(default, deserialize_with = "bounded_mounts")]
+    staged_mounts: Vec<(usize, String, String)>,
+}
+
+fn bounded_mounts<'de, D, T>(deserializer: D) -> std::result::Result<Vec<T>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+    T: serde::Deserialize<'de>,
+{
+    struct Visitor<T>(std::marker::PhantomData<T>);
+    impl<'de, T: serde::Deserialize<'de>> serde::de::Visitor<'de> for Visitor<T> {
+        type Value = Vec<T>;
+        fn expecting(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            f.write_str("bounded SDK mount list")
+        }
+        fn visit_seq<A: serde::de::SeqAccess<'de>>(
+            self,
+            mut sequence: A,
+        ) -> std::result::Result<Self::Value, A::Error> {
+            let mut values = Vec::new();
+            for _ in 0..1024 {
+                let Some(value) = sequence.next_element()? else {
+                    return Ok(values);
+                };
+                values.push(value);
+            }
+            if sequence.next_element::<serde::de::IgnoredAny>()?.is_some() {
+                return Err(serde::de::Error::custom("SDK mount count bound"));
+            }
+            Ok(values)
+        }
+    }
+    deserializer.deserialize_seq(Visitor(std::marker::PhantomData))
+}
+
 fn with_observation<T>(
     database: &Path,
     identity: (u64, u64),
@@ -408,6 +537,140 @@ mod tests {
         let db = smolvm::db::SmolvmDb::open_at(&path).unwrap();
         let metadata = std::fs::metadata(&path).unwrap();
         (temporary, db, path, (metadata.dev(), metadata.ino()))
+    }
+
+    fn volume_budget() -> crate::ReadBudget {
+        crate::ReadBudget::new(
+            std::time::Duration::from_secs(2),
+            crate::Cancellation::default(),
+        )
+        .unwrap()
+    }
+
+    #[test]
+    fn volume_mount_guard_includes_stopped_readonly_and_staged_sdk_records() {
+        use smolvm::config::{RecordState, VmRecord};
+        let source = Path::new("/srv/smolvm/volumes/sbv-00000000000000000000000000000000");
+        for state in [
+            RecordState::Created,
+            RecordState::Stopped,
+            RecordState::Running,
+            RecordState::Failed,
+        ] {
+            for read_only in [false, true] {
+                let (_temporary, db, path, identity) = database();
+                let mut record = VmRecord::new(
+                    "machine".into(),
+                    1,
+                    128,
+                    vec![(
+                        source.to_str().unwrap().into(),
+                        "/mnt/volumes/data".into(),
+                        read_only,
+                    )],
+                    vec![],
+                    false,
+                );
+                record.state = state.clone();
+                db.insert_vm("machine", &record).unwrap();
+                let before = serde_json::to_vec(&db.get_vm("machine").unwrap()).unwrap();
+                assert!(!volume_unattached(&path, identity, source, &volume_budget()).unwrap());
+                assert_eq!(
+                    serde_json::to_vec(&db.get_vm("machine").unwrap()).unwrap(),
+                    before
+                );
+            }
+        }
+        let (_temporary, db, path, identity) = database();
+        let mut record = VmRecord::new("staged".into(), 1, 128, vec![], vec![], false);
+        record.staged_mounts = vec![(
+            0,
+            source.to_str().unwrap().into(),
+            "/mnt/volumes/data".into(),
+        )];
+        db.insert_vm("staged", &record).unwrap();
+        assert!(!volume_unattached(&path, identity, source, &volume_budget()).unwrap());
+    }
+
+    #[test]
+    fn volume_mount_guard_distinguishes_exact_sources_without_adopting_other_rows() {
+        let (_temporary, db, path, identity) = database();
+        let source = Path::new("/srv/volumes/owned");
+        assert!(volume_unattached(&path, identity, source, &volume_budget()).unwrap());
+        let record = smolvm::config::VmRecord::new(
+            "foreign".into(),
+            1,
+            128,
+            vec![("/srv/volumes/owned-other".into(), "/mnt/data".into(), false)],
+            vec![],
+            false,
+        );
+        db.insert_vm("foreign", &record).unwrap();
+        assert!(volume_unattached(&path, identity, source, &volume_budget()).unwrap());
+        assert_eq!(db.list_vms().unwrap().len(), 1);
+        assert!(
+            volume_unattached(&path, identity, Path::new("relative"), &volume_budget()).is_err()
+        );
+    }
+
+    #[test]
+    fn volume_mount_guard_fails_closed_on_malformed_ambiguous_or_unbounded_inventory() {
+        let (_temporary, _db, path, identity) = database();
+        let writer = rusqlite::Connection::open(&path).unwrap();
+        for data in [
+            serde_json::json!({"name":"other","mounts":[]}),
+            serde_json::json!({"name":"machine","mounts":[["/host/../other","/guest",false]]}),
+            serde_json::json!({"name":"machine","mounts":[["/host","/guest","wrong"]]}),
+            serde_json::json!({"name":"machine","mounts":vec![("/host","/guest",false); 1025]}),
+        ] {
+            writer
+                .execute(
+                    "INSERT OR REPLACE INTO vms VALUES ('machine', ?1)",
+                    [serde_json::to_string(&data).unwrap()],
+                )
+                .unwrap();
+            assert_eq!(
+                volume_unattached(
+                    &path,
+                    identity,
+                    Path::new("/srv/volumes/owned"),
+                    &volume_budget()
+                )
+                .unwrap_err()
+                .code,
+                ErrorCode::Database
+            );
+        }
+        writer
+            .execute(
+                "UPDATE vms SET data=zeroblob(?1)",
+                [crate::observations::MAX_RECORD_BYTES + 1],
+            )
+            .unwrap();
+        assert_eq!(
+            volume_unattached(
+                &path,
+                identity,
+                Path::new("/srv/volumes/owned"),
+                &volume_budget()
+            )
+            .unwrap_err()
+            .code,
+            ErrorCode::OutputLimit
+        );
+    }
+
+    #[test]
+    fn volume_mount_guard_cancellation_is_readonly_and_not_dispatched() {
+        let (_temporary, db, path, identity) = database();
+        let cancel = crate::Cancellation::default();
+        cancel.cancel();
+        let budget = crate::ReadBudget::new(std::time::Duration::from_secs(2), cancel).unwrap();
+        let error = volume_unattached(&path, identity, Path::new("/srv/volumes/owned"), &budget)
+            .unwrap_err();
+        assert_eq!(error.code, ErrorCode::State);
+        assert_eq!(error.dispatch, crate::Dispatch::NotDispatched);
+        assert!(db.list_vms().unwrap().is_empty());
     }
     #[test]
     fn clean_schema_and_readonly_policy_preserve_rows_and_consistent_wal_snapshot() {

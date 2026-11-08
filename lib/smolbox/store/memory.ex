@@ -771,7 +771,11 @@ defmodule SmolBox.Store.Memory do
   defp volume_admission(_state, %{volume_worker_id: nil}), do: :ok
 
   defp volume_admission(state, record),
-    do: WorkerControl.admit(control(state, record.volume_worker_id))
+    do:
+      with(
+        :ok <- BackendBindings.mounts(state.backend_bindings[record.volume_worker_id], record),
+        do: WorkerControl.admit(control(state, record.volume_worker_id))
+      )
 
   defp insert_attached_machine(state, record, max_pending) do
     pending = Enum.count(state.machines, fn {_key, m} -> m.state == :accepted end)

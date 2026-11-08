@@ -104,6 +104,7 @@ fn oci_create() -> OciCreate {
             overlay_gib: 1,
         },
         labels: Default::default(),
+        volume_mounts: None,
         features: None,
     }
 }
@@ -276,6 +277,134 @@ fn growth_hello() -> Hello {
     sdk.feature_versions.insert("disk_growth".into(), 1);
     hello.capabilities = sdk.capabilities();
     hello
+}
+
+#[test]
+fn volume_sessions_require_protocol_feature_and_exact_nonstreaming_correlated_proof() {
+    let mut h = growth_hello();
+    let sdk = h.sdk.as_mut().unwrap();
+    sdk.feature_versions.insert("volumes".into(), 1);
+    h.capabilities = sdk.capabilities();
+    h.limits = Limits::for_sdk(sdk);
+    h.package.platform = "linux".into();
+    h.package.architecture = "x86_64".into();
+    let request_body = VolumeRequest {
+        policy_id: "local".into(),
+        intent: VolumeIntent {
+            worker_volume_id: format!("sbv-{}", "a".repeat(32)),
+            size_gb: 4,
+        },
+        action: VolumeAction::InspectProvision,
+    };
+    assert!(matches!(
+        session()
+            .admit(request(
+                1,
+                Operation::Volume {
+                    request: request_body.clone()
+                }
+            ))
+            .unwrap(),
+        ServerMessage::Terminal {
+            outcome: Outcome::Error {
+                code: SafeCode::Unsupported,
+                ..
+            },
+            ..
+        }
+    ));
+    let mut s = Session::new(h.clone()).unwrap();
+    s.approve(&h).unwrap();
+    assert!(matches!(
+        s.admit(request(
+            1,
+            Operation::Volume {
+                request: request_body.clone()
+            }
+        ))
+        .unwrap(),
+        ServerMessage::Accepted { .. }
+    ));
+    assert!(s
+        .terminal(
+            1,
+            Outcome::Volume {
+                volume: VolumeResult::Unverified
+            }
+        )
+        .is_ok());
+    let mut wrong = request_body.clone();
+    wrong.action = VolumeAction::Provision;
+    s.admit(request(2, Operation::Volume { request: wrong }))
+        .unwrap();
+    assert!(s
+        .terminal(
+            2,
+            Outcome::Volume {
+                volume: VolumeResult::Unverified
+            }
+        )
+        .is_err());
+    assert!(Outcome::Volume {
+        volume: VolumeResult::Absent
+    }
+    .validate_for(1)
+    .is_err());
+    let mut value = serde_json::to_value(request(
+        3,
+        Operation::Volume {
+            request: request_body,
+        },
+    ))
+    .unwrap();
+    value["request"]["root"] = json!("/caller/path");
+    assert!(ClientMessage::decode(value).is_err());
+}
+
+#[test]
+fn volume_hello_declares_exact_limits_platform_and_dependencies_without_changing_legacy() {
+    let value: Value =
+        serde_json::from_slice(include_bytes!("../fixtures/hello-v2-volumes.json")).unwrap();
+    let ServerMessage::Hello { hello: h } = ServerMessage::decode(value.clone()).unwrap() else {
+        unreachable!()
+    };
+    assert!(h.limits == Limits::for_sdk(h.sdk.as_ref().unwrap()));
+    assert!(h.limits.volumes.is_some());
+    let limits = h.limits.volumes.as_ref().unwrap();
+    assert_eq!(limits.control_metadata_bytes, 262_144);
+    for key in [
+        "work_ms",
+        "observation_ms",
+        "record_bytes",
+        "delete_entries",
+        "ancestor_bytes",
+        "control_metadata_bytes",
+        "observation_metadata_bytes",
+    ] {
+        let mut changed = value.clone();
+        changed["hello"]["limits"]["volumes"][key] = json!(0);
+        assert!(ServerMessage::decode(changed).is_err());
+    }
+    let mut changed = value.clone();
+    changed["hello"]["limits"]
+        .as_object_mut()
+        .unwrap()
+        .remove("volumes");
+    assert!(ServerMessage::decode(changed).is_err());
+    let mut changed = value.clone();
+    changed["hello"]["package"]["platform"] = json!("macos");
+    assert!(ServerMessage::decode(changed).is_err());
+    for feature in ["job_resources", "buffered_exec", "compact_creation"] {
+        let mut changed = value.clone();
+        changed["hello"]["sdk"]["feature_versions"]
+            .as_object_mut()
+            .unwrap()
+            .remove(feature);
+        assert!(ServerMessage::decode(changed).is_err());
+    }
+    assert!(hello().limits.volumes.is_none());
+    let baseline = parity_hello();
+    assert!(baseline.limits.volumes.is_none());
 }
 fn growth_operation(inspect: bool) -> Operation {
     let proof = growth_fixture();
@@ -1219,6 +1348,7 @@ fn network_observation_and_port_conflict_cannot_be_mislabelled_legacy() {
                 network: creation_features().network,
                 ports: creation_features().ports,
                 backend: Some("virtio-net".into()),
+                mounts: None,
             })),
         },
     };
@@ -1571,6 +1701,7 @@ fn unknown() -> Outcome {
 #[test]
 fn intent_presence_is_streamless_and_cannot_mint_receipts_or_satisfy_commands() {
     let create = Create {
+        volume_mounts: None,
         features: None,
         name: "candidate".into(),
         owner_token: "ab".repeat(32),
@@ -1796,6 +1927,7 @@ fn cross_domain_receipts_fail_before_scheduling_and_do_not_mint_authority() {
         }
     ));
     let create = Create {
+        volume_mounts: None,
         features: None,
         name: "owned".into(),
         owner_token: receipt().owner_token,
@@ -2418,6 +2550,7 @@ fn registry_cached_creation_binds_fresh_receipt_and_absence_has_no_ownership_aut
             overlay_gib: 1,
         },
         labels: Default::default(),
+        volume_mounts: None,
         features: None,
     };
     let operation = Operation::CreateRegistryPrepared {
@@ -2601,4 +2734,142 @@ fn registry_token_is_bounded_paired_redacted_and_removed_from_bookkeeping() {
             },
         )
         .unwrap();
+}
+
+#[test]
+fn shared_volume_authority_fixture_preserves_unsigned_identity_and_correlation() {
+    let fixture: Value =
+        serde_json::from_str(include_str!("../fixtures/volume-authority.json")).unwrap();
+    let domain: DomainIdentity = serde_json::from_value(fixture["domain"].clone()).unwrap();
+    let request: VolumeRequest = serde_json::from_value(fixture["request"].clone()).unwrap();
+    request.validate(86_400_000).unwrap();
+    let outcome: Outcome = serde_json::from_value(fixture["outcome"].clone()).unwrap();
+    outcome.validate_for(2).unwrap();
+    assert!(outcome.validate_for(1).is_err());
+    let Outcome::Volume { volume } = outcome else {
+        panic!("expected volume proof")
+    };
+    volume.matches(&request, &domain).unwrap();
+    assert_eq!(volume.backing().unwrap().root_inode, u64::MAX);
+    assert_eq!(volume.backing().unwrap().inode, u64::MAX - 1);
+    assert_eq!(
+        serde_json::to_value(Outcome::Volume { volume }).unwrap(),
+        fixture["outcome"]
+    );
+}
+
+#[test]
+fn mounted_creation_fixture_is_exact_domain_bound_and_requires_future_volume_admission() {
+    let value: Value =
+        serde_json::from_str(include_str!("../fixtures/mounted-creation-request.json")).unwrap();
+    let message = ClientMessage::decode(value.clone()).unwrap();
+    let ClientMessage::Request { operation, .. } = &message else {
+        panic!("request")
+    };
+    let mounts = operation.creation_mounts().unwrap();
+    assert_eq!(mounts[0].proof.backing.inode, u64::MAX - 1);
+    let future: ServerMessage =
+        serde_json::from_str(include_str!("../fixtures/hello-v2-volumes.json")).unwrap();
+    let ServerMessage::Hello { hello: boxed } = future else {
+        panic!("hello")
+    };
+    let h = *boxed;
+    VolumeMount::bound(mounts, &h.domain).unwrap();
+    let mut session = Session::new(h.clone()).unwrap();
+    session.approve(&h).unwrap();
+    assert!(matches!(
+        session.admit(message).unwrap(),
+        ServerMessage::Accepted { .. }
+    ));
+    let mut changed = value.clone();
+    changed["operation"]["create"]["volume_mounts"][0]["proof"]["backing"]["domain_generation"] =
+        json!("f".repeat(32));
+    let mut session = Session::new(h.clone()).unwrap();
+    session.approve(&h).unwrap();
+    assert!(matches!(
+        session
+            .admit(ClientMessage::decode(changed).unwrap())
+            .unwrap(),
+        ServerMessage::Terminal {
+            outcome: Outcome::Error {
+                dispatch: Dispatch::NotDispatched,
+                ..
+            },
+            ..
+        }
+    ));
+    let mut old = h.clone();
+    old.sdk.as_mut().unwrap().feature_versions.remove("volumes");
+    old.capabilities = old.sdk.as_ref().unwrap().capabilities();
+    old.limits = Limits::for_sdk(old.sdk.as_ref().unwrap());
+    let mut session = Session::new(old.clone()).unwrap();
+    session.approve(&old).unwrap();
+    assert!(matches!(
+        session
+            .admit(ClientMessage::decode(value.clone()).unwrap())
+            .unwrap(),
+        ServerMessage::Terminal {
+            outcome: Outcome::Error {
+                dispatch: Dispatch::NotDispatched,
+                ..
+            },
+            ..
+        }
+    ));
+    for field in [json!(null), json!([])] {
+        let mut changed = value.clone();
+        changed["operation"]["create"]["volume_mounts"] = field;
+        assert!(ClientMessage::decode(changed).is_err());
+    }
+    let mut changed = value.clone();
+    changed["operation"]["create"]["volume_mounts"][0]["source"] = json!("/caller/path");
+    assert!(ClientMessage::decode(changed).is_err());
+    let mut changed = value.clone();
+    changed["operation"]["create"]["volume_mounts"][0]["target"] = json!("/etc");
+    assert!(ClientMessage::decode(changed).is_err());
+    let mut changed = value;
+    let duplicate = changed["operation"]["create"]["volume_mounts"][0].clone();
+    changed["operation"]["create"]["volume_mounts"]
+        .as_array_mut()
+        .unwrap()
+        .push(duplicate);
+    assert!(ClientMessage::decode(changed).is_err());
+}
+
+#[test]
+fn mounted_observations_are_exact_bounded_and_protocol_two_only() {
+    let value: Value =
+        serde_json::from_str(include_str!("../fixtures/mounted-observation-v2.json")).unwrap();
+    let outcome: Outcome = serde_json::from_value(value.clone()).unwrap();
+    assert!(outcome.validate_for(2).is_ok());
+    assert!(outcome.validate_for(1).is_err());
+    assert_eq!(serde_json::to_value(&outcome).unwrap(), value);
+    for invalid in [
+        Value::Null,
+        json!([]),
+        json!(vec![
+            value["observation"]["configuration"]["mounts"][0]
+                .clone();
+            9
+        ]),
+    ] {
+        let mut changed = value.clone();
+        changed["observation"]["configuration"]["mounts"] = invalid;
+        assert!(
+            serde_json::from_value::<Outcome>(changed).map_or(true, |v| v.validate_for(2).is_err())
+        );
+    }
+    for (field, invalid) in [
+        ("source", json!("/foreign/../data")),
+        ("target", json!("/etc")),
+        ("readonly", json!(1)),
+        ("staged", json!(true)),
+        ("unknown", json!(false)),
+    ] {
+        let mut changed = value.clone();
+        changed["observation"]["configuration"]["mounts"][0][field] = invalid;
+        assert!(
+            serde_json::from_value::<Outcome>(changed).map_or(true, |v| v.validate_for(2).is_err())
+        );
+    }
 }

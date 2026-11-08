@@ -102,6 +102,19 @@ defmodule SmolBox.Store.Codec do
   before advertising native_sources: 1 alongside registry_sources: 1 (and
   managed_images: 1 for image operations). Reader support alone enables neither
   a source catalog assignment nor preparation, creation or startup dispatch.
+  Native volumes selectively use v20, retaining an enrolled owner binding and
+  exact provision/deletion/abort authority. HTTP volumes retain identical v15
+  bytes and acquire nil native_authority on read. Earlier envelopes reject even
+  an explicitly nil new field. Bare readiness/deletion acknowledgments cannot
+  complete native records. Install every reader, projection writer, native
+  recovery and attachment transaction before enabling native volume admission;
+  this codec foundation does not advertise a native volume reader capability.
+  Machines holding native volume attachments selectively use v21, including
+  pre-allocation records and retirement tombstones. Each attachment retains its
+  volume key, enrolled binding, exact provision proof, guest target and read-only
+  mode. Earlier HTTP/native envelopes omit the empty native_mounts default and
+  reject even explicit empty new fields. Install every reader and atomic attachment/
+  release writer before activation; v21 alone enables no mount or SDK feature.
   """
 
   alias SmolBox.{Error, Execution, ExecutionFeatures}
@@ -116,7 +129,9 @@ defmodule SmolBox.Store.Codec do
     CodecGrowth,
     CodecMaterial,
     CodecNative,
+    CodecNativeMounts,
     CodecNativeSources,
+    CodecNativeVolumes,
     CodecPorts,
     CodecSources,
     CodecVolumes,
@@ -128,6 +143,8 @@ defmodule SmolBox.Store.Codec do
   @material_prefix "smolbox-record-v17\0"
   @growth_prefix "smolbox-record-v18\0"
   @native_sources_prefix "smolbox-record-v19\0"
+  @native_volumes_prefix "smolbox-record-v20\0"
+  @native_mounts_prefix "smolbox-record-v21\0"
   @volumes_prefix "smolbox-record-v15\0"
   @expansion_prefix "smolbox-record-v14\0"
   @branches_prefix "smolbox-record-v13\0"
@@ -149,6 +166,8 @@ defmodule SmolBox.Store.Codec do
     SmolBox.Backend.Assignment,
     SmolBox.Embedded.Identity,
     SmolBox.Embedded.GrowthTransition,
+    SmolBox.Embedded.VolumeAuthority,
+    SmolBox.Embedded.VolumeAttachment,
     SmolBox.ManagedMachine,
     SmolBox.ManagedMachineSpec,
     SmolBox.ExecutionSpec,
@@ -190,12 +209,19 @@ defmodule SmolBox.Store.Codec do
 
   @spec encode(Execution.t() | SmolBox.ManagedMachine.t() | SmolBox.Volume.t()) ::
           {:ok, binary()} | {:error, Error.t()}
-  def encode(%SmolBox.Volume{} = record), do: encode_volumes(record)
+  def encode(%SmolBox.Volume{} = record),
+    do:
+      if(CodecNativeVolumes.required?(record),
+        do: encode_native_volume(record),
+        else: encode_volumes(record)
+      )
 
   def encode(%{spec: %{profile: %SmolBox.Profile{} = profile}} = record) do
-    if CodecNative.required?(record),
-      do: encode_native(record),
-      else: encode_compatible(record, profile)
+    cond do
+      CodecNativeMounts.required?(record) -> encode_native_mounts(record)
+      CodecNative.required?(record) -> encode_native(record)
+      true -> encode_compatible(record, profile)
+    end
   end
 
   def encode(_record), do: invalid()
@@ -253,6 +279,12 @@ defmodule SmolBox.Store.Codec do
   @spec decode(binary()) ::
           {:ok, Execution.t() | SmolBox.ManagedMachine.t() | SmolBox.Volume.t()}
           | {:error, Error.t()}
+  def decode(<<@native_mounts_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes, do: decode_native_mounts(bytes)
+
+  def decode(<<@native_volumes_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes, do: decode_native_volume(bytes)
+
   def decode(<<@native_sources_prefix, 131, tag, _rest::binary>> = bytes)
       when tag != 80 and byte_size(bytes) <= @max_bytes, do: decode_native_sources(bytes)
 
@@ -327,16 +359,18 @@ defmodule SmolBox.Store.Codec do
       bytes =
         cond do
           CodecNativeSources.required?(record) ->
-            @native_sources_prefix <> :erlang.term_to_binary(record)
+            @native_sources_prefix <> :erlang.term_to_binary(CodecNativeMounts.strip(record))
 
           CodecGrowth.required?(record) ->
-            @growth_prefix <> :erlang.term_to_binary(record)
+            @growth_prefix <> :erlang.term_to_binary(CodecNativeMounts.strip(record))
 
           CodecMaterial.required?(record) ->
-            @material_prefix <> :erlang.term_to_binary(CodecGrowth.strip(record))
+            @material_prefix <>
+              :erlang.term_to_binary(record |> CodecGrowth.strip() |> CodecNativeMounts.strip())
 
           true ->
-            @native_prefix <> :erlang.term_to_binary(CodecMaterial.strip(record))
+            @native_prefix <>
+              :erlang.term_to_binary(record |> CodecMaterial.strip() |> CodecNativeMounts.strip())
         end
 
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
@@ -347,6 +381,7 @@ defmodule SmolBox.Store.Codec do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
     with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         record = CodecNativeMounts.upgrade(record),
          record = CodecMaterial.upgrade(record),
          true <- used == byte_size(payload) and CodecNative.required?(record),
          false <- CodecNativeSources.required?(record),
@@ -364,10 +399,49 @@ defmodule SmolBox.Store.Codec do
     end
   end
 
+  defp encode_native_mounts(record) do
+    with :ok <- validate_extended(record) do
+      bytes = @native_mounts_prefix <> :erlang.term_to_binary(record)
+      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
+    end
+  end
+
+  defp decode_native_mounts(<<@native_mounts_prefix, payload::binary>>) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <- used == byte_size(payload) and CodecNativeMounts.required?(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
+  defp encode_native_volume(record) do
+    with :ok <- validate_extended(record) do
+      bytes = @native_volumes_prefix <> :erlang.term_to_binary(record)
+      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
+    end
+  end
+
+  defp decode_native_volume(<<@native_volumes_prefix, payload::binary>>) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <- used == byte_size(payload) and CodecNativeVolumes.required?(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
   defp decode_material(<<@material_prefix, payload::binary>>) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
     with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         record = CodecNativeMounts.upgrade(record),
          record = CodecGrowth.upgrade(record),
          true <- used == byte_size(payload) and CodecMaterial.required?(record),
          true <- CodecNative.required?(record),
@@ -383,6 +457,7 @@ defmodule SmolBox.Store.Codec do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
     with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         record = CodecNativeMounts.upgrade(record),
          true <- used == byte_size(payload) and CodecGrowth.required?(record),
          true <- CodecMaterial.required?(record) and CodecNative.required?(record),
          false <- CodecNativeSources.required?(record),
@@ -397,6 +472,7 @@ defmodule SmolBox.Store.Codec do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
     with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         record = CodecNativeMounts.upgrade(record),
          true <- used == byte_size(payload) and CodecNativeSources.required?(record),
          true <- CodecMaterial.required?(record),
          :ok <- validate_extended(record),

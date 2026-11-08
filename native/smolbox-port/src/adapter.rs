@@ -90,6 +90,22 @@ fn observation(observation: engine::Observation) -> wire::Outcome {
             }),
             pid_identity: observation.pid_identity,
             configuration: observation.configuration.map(|value| {
+                let mounts = if value.mounts.is_empty() {
+                    None
+                } else {
+                    Some(
+                        value
+                            .mounts
+                            .into_iter()
+                            .map(|mount| wire::ObservedMount {
+                                source: mount.source,
+                                target: mount.target,
+                                readonly: mount.readonly,
+                                staged: mount.staged,
+                            })
+                            .collect(),
+                    )
+                };
                 Box::new(wire::MachineConfiguration {
                     network: wire::NetworkPolicy {
                         enabled: value.network.enabled,
@@ -105,6 +121,7 @@ fn observation(observation: engine::Observation) -> wire::Outcome {
                         })
                         .collect(),
                     backend: value.backend,
+                    mounts,
                 })
             }),
         },
@@ -175,12 +192,29 @@ pub fn run(
     remaining: Duration,
     cancel: engine::Cancellation,
     upload: Option<File>,
+    emit: impl FnMut(wire::Stream, &[u8]) -> Result<(), ()>,
+) -> wire::Outcome {
+    run_with_policy(engine, operation, None, remaining, cancel, upload, emit)
+}
+
+pub fn run_with_policy(
+    engine: &engine::Engine,
+    operation: wire::Operation,
+    policy: Option<engine::LocalVolumePolicy>,
+    remaining: Duration,
+    cancel: engine::Cancellation,
+    upload: Option<File>,
     mut emit: impl FnMut(wire::Stream, &[u8]) -> Result<(), ()>,
 ) -> wire::Outcome {
+    let mounts = match mount_selection(operation.creation_mounts(), policy.as_ref()) {
+        Ok(mounts) => mounts,
+        Err(failure) => return error(failure),
+    };
     let operation_deadline = Instant::now().checked_add(remaining);
     let observation_budget =
         || engine::ReadBudget::new(remaining.min(Duration::from_secs(30)), cancel.clone());
     let result = match operation {
+        wire::Operation::Volume { .. } => return wire::Outcome::Error {code:wire::SafeCode::Unsupported,dispatch:wire::Dispatch::NotDispatched},
         wire::Operation::QualifyRegistryCreation {source,resources:requested,user,features}=>observation_budget().and_then(|budget| {
             let source=source.request();engine.qualify_registry_intent(&engine::RegistryArtifactSource {reference:source.reference,platform:source.platform,content_sha256:source.content_sha256},resources(&requested),user.as_deref(),&effective_features(features),&budget)
         }).map(|()|wire::Outcome::Qualified),
@@ -191,15 +225,20 @@ pub fn run(
             operation_deadline.ok_or(engine::Error { code: engine::ErrorCode::Validation,
                 dispatch: engine::Dispatch::NotDispatched }).and_then(|deadline| {
                 let source = source.request();
-                engine.start_oci_source_owned(&receipt(&supplied), &engine::ImagePullRequest {
-                    reference: source.reference, platform: source.platform,
-                }, deadline, cancel.clone())
+                let source = engine::ImagePullRequest { reference: source.reference, platform: source.platform };
+                match &policy {
+                    Some(policy) => engine.start_oci_source_with_volume_policy(&receipt(&supplied), &source, policy, deadline, cancel.clone()),
+                    None => engine.start_oci_source_owned(&receipt(&supplied), &source, deadline, cancel.clone()),
+                }
             }).map(observation)
         }
         wire::Operation::CreateOci { create } => {
             operation_deadline.ok_or(engine::Error { code: engine::ErrorCode::Validation,
                 dispatch: engine::Dispatch::NotDispatched })
-                .and_then(|deadline| engine.create_oci_intent(oci_intent(create), deadline, &cancel))
+                .and_then(|deadline| match mounts {
+                    Some(mounts) => engine.create_oci_intent_with_mount_selection(oci_intent(create), mounts, deadline, &cancel),
+                    None => engine.create_oci_intent(oci_intent(create), deadline, &cancel),
+                })
                 .map(|receipt| wire::Outcome::Created { receipt: receipt_wire(receipt) })
         }
         wire::Operation::InspectOciCreation { create } => {
@@ -377,9 +416,17 @@ pub fn run(
                 resources: resources(&create.resources),
                 labels: create.labels,
             };
-            let result = match requested {
-                Some(features) => engine.create_with_features(request, features),
-                None => engine.create_versioned(request),
+            let result = match mounts {
+                Some(mounts) => operation_deadline.ok_or(engine::Error { code: engine::ErrorCode::Validation, dispatch: engine::Dispatch::NotDispatched })
+                    .and_then(|deadline| {
+                        let budget = engine::ReadBudget::new(deadline.saturating_duration_since(Instant::now()).min(Duration::from_secs(30)), cancel.clone())?;
+                        let qualified = engine.qualify_volume_mounts(&mounts.policy, &mounts.requests, &budget)?;
+                        engine.create_with_volume_mounts(request, requested.unwrap_or_else(|| effective_features(None)), qualified, deadline, &cancel)
+                    }),
+                None => match requested {
+                    Some(features) => engine.create_with_features(request, features),
+                    None => engine.create_versioned(request),
+                },
             };
             result
             .map(|r| wire::Outcome::Created {
@@ -387,13 +434,20 @@ pub fn run(
             })
         },
         wire::Operation::Inspect { receipt: r } => engine.inspect(&receipt(&r)).map(observation),
-        wire::Operation::Start { receipt: r } => engine.start(&receipt(&r)).map(observation),
+        wire::Operation::Start { receipt: r } => match policy {
+            Some(policy) => operation_deadline.ok_or(engine::Error { code: engine::ErrorCode::Validation, dispatch: engine::Dispatch::NotDispatched })
+                .and_then(|deadline| engine.start_with_volume_policy(&receipt(&r), &policy, deadline, &cancel)),
+            None => engine.start(&receipt(&r)),
+        }.map(observation),
         wire::Operation::Stop { receipt: r } => engine.stop(&receipt(&r)).map(observation),
         wire::Operation::Delete { receipt: r } => engine.delete(&receipt(&r)).map(observation),
-        wire::Operation::ExecBackground {receipt:r,command} => engine.exec_background(&receipt(&r),
+        wire::Operation::ExecBackground {receipt:r,command} => match &policy { Some(policy) => engine.exec_background_with_volume_policy(&receipt(&r),
             engine::BufferedCommand {argv:command.argv,env:command.env.into_iter().collect(),workdir:command.workdir,
                 user:command.user,stdin:command.stdin,timeout:remaining,max_output_bytes:command.max_output_bytes},cancel
-        ).map(|value| {
+        ,policy), None => engine.exec_background(&receipt(&r),
+            engine::BufferedCommand {argv:command.argv,env:command.env.into_iter().collect(),workdir:command.workdir,
+                user:command.user,stdin:command.stdin,timeout:remaining,max_output_bytes:command.max_output_bytes},cancel
+        ) }.map(|value| {
             if value.transfer.success() {
                 if let Some(pid) = value.pid { return wire::Outcome::Launched { pid }; }
             }
@@ -407,42 +461,33 @@ pub fn run(
                 dispatch: dispatch(value.transfer.dispatch),
             }
         }),
-        wire::Operation::ExecStream {receipt:r,command} => engine.exec_stream_owned(&receipt(&r),
+        wire::Operation::ExecStream {receipt:r,command} => match &policy { Some(policy) => engine.exec_stream_owned_with_volume_policy(&receipt(&r),
             engine::BufferedCommand {argv:command.argv,env:command.env.into_iter().collect(),workdir:command.workdir,
                 user:command.user,stdin:command.stdin,timeout:remaining,max_output_bytes:command.max_output_bytes},cancel,
             |output|emit(match output.stream {engine::Stream::Stdout=>wire::Stream::Stdout,engine::Stream::Stderr=>wire::Stream::Stderr},&output.bytes)
-        ).map(command_outcome),
-        wire::Operation::ExecBuffered {receipt:r,command} => engine.exec_buffered(&receipt(&r),
+        ,policy), None => engine.exec_stream_owned(&receipt(&r),
             engine::BufferedCommand {argv:command.argv,env:command.env.into_iter().collect(),workdir:command.workdir,
                 user:command.user,stdin:command.stdin,timeout:remaining,max_output_bytes:command.max_output_bytes},cancel,
             |output|emit(match output.stream {engine::Stream::Stdout=>wire::Stream::Stdout,engine::Stream::Stderr=>wire::Stream::Stderr},&output.bytes)
-        ).map(command_outcome),
-        wire::Operation::Exec {
-            receipt: r,
-            command,
-        } => engine
-            .exec(
-                &receipt(&r),
-                engine::Command {
-                    argv: command.argv,
-                    env: command.env.into_iter().collect(),
-                    workdir: command.workdir,
-                    user: command.user,
-                    timeout: remaining,
-                    max_output_bytes: command.max_output_bytes,
-                },
-                cancel,
-                |output| {
-                    emit(
-                        match output.stream {
-                            engine::Stream::Stdout => wire::Stream::Stdout,
-                            engine::Stream::Stderr => wire::Stream::Stderr,
-                        },
-                        &output.bytes,
-                    )
-                },
-            )
-            .map(command_outcome),
+        ) }.map(command_outcome),
+        wire::Operation::ExecBuffered {receipt:r,command} => match &policy { Some(policy) => engine.exec_buffered_with_volume_policy(&receipt(&r),
+            engine::BufferedCommand {argv:command.argv,env:command.env.into_iter().collect(),workdir:command.workdir,
+                user:command.user,stdin:command.stdin,timeout:remaining,max_output_bytes:command.max_output_bytes},cancel,
+            |output|emit(match output.stream {engine::Stream::Stdout=>wire::Stream::Stdout,engine::Stream::Stderr=>wire::Stream::Stderr},&output.bytes)
+        ,policy), None => engine.exec_buffered(&receipt(&r),
+            engine::BufferedCommand {argv:command.argv,env:command.env.into_iter().collect(),workdir:command.workdir,
+                user:command.user,stdin:command.stdin,timeout:remaining,max_output_bytes:command.max_output_bytes},cancel,
+            |output|emit(match output.stream {engine::Stream::Stdout=>wire::Stream::Stdout,engine::Stream::Stderr=>wire::Stream::Stderr},&output.bytes)
+        ) }.map(command_outcome),
+        wire::Operation::Exec { receipt: r, command } => {
+            let command = engine::Command { argv: command.argv, env: command.env.into_iter().collect(),
+                workdir: command.workdir, user: command.user, timeout: remaining, max_output_bytes: command.max_output_bytes };
+            let consumer = |output: engine::Output| emit(match output.stream { engine::Stream::Stdout => wire::Stream::Stdout, engine::Stream::Stderr => wire::Stream::Stderr }, &output.bytes);
+            match &policy {
+                Some(policy) => engine.exec_with_volume_policy(&receipt(&r), command, cancel, consumer, policy),
+                None => engine.exec(&receipt(&r), command, cancel, consumer),
+            }.map(command_outcome)
+        },
         wire::Operation::ReadFile {
             receipt: r,
             options,
@@ -477,6 +522,129 @@ pub fn run(
         }
     };
     result.unwrap_or_else(error)
+}
+
+pub fn volume(
+    native: &engine::Engine,
+    policy: engine::LocalVolumePolicy,
+    request: wire::VolumeRequest,
+    remaining: Duration,
+    cancel: engine::Cancellation,
+) -> wire::Outcome {
+    let execute = || -> engine::Result<wire::VolumeResult> {
+        if policy.id != request.policy_id {
+            return Err(engine::Error {
+                code: engine::ErrorCode::Unsupported,
+                dispatch: engine::Dispatch::NotDispatched,
+            });
+        }
+        let budget = if request.is_observation() {
+            engine::ReadBudget::new(remaining, cancel)
+        } else {
+            engine::ReadBudget::for_volume_work(remaining, cancel)
+        }?;
+        let intent = engine::LocalVolumeIntent {
+            worker_volume_id: request.intent.worker_volume_id,
+            size_gb: request.intent.size_gb,
+        };
+        Ok(match request.action {
+            wire::VolumeAction::Provision => wire::VolumeResult::Provisioned {
+                proof: Box::new(volume_dto(
+                    &native.provision_volume(&policy, &intent, &budget)?,
+                )?),
+            },
+            wire::VolumeAction::Delete => wire::VolumeResult::Deleted {
+                proof: Box::new(volume_dto(
+                    &native.delete_volume(&policy, &intent, &budget)?,
+                )?),
+            },
+            wire::VolumeAction::ResolveDeletion { quiesced } => wire::VolumeResult::Deleted {
+                proof: Box::new(volume_dto(
+                    &native.resolve_volume_deletion(&policy, &intent, quiesced, &budget)?,
+                )?),
+            },
+            wire::VolumeAction::AbortStaging { quiesced } => wire::VolumeResult::Aborted {
+                proof: Box::new(volume_dto(
+                    &native.abort_volume_staging(&policy, &intent, quiesced, &budget)?,
+                )?),
+            },
+            wire::VolumeAction::InspectProvision => {
+                match native.inspect_volume_provision(&policy, &intent, &budget)? {
+                    engine::VolumeProvisionPresence::Absent => wire::VolumeResult::Absent,
+                    engine::VolumeProvisionPresence::Unverified => wire::VolumeResult::Unverified,
+                    engine::VolumeProvisionPresence::Provisioned(proof) => {
+                        wire::VolumeResult::Provisioned {
+                            proof: Box::new(volume_dto(&*proof)?),
+                        }
+                    }
+                }
+            }
+            wire::VolumeAction::InspectDeletion => {
+                match native.inspect_volume_deletion(&policy, &intent, &budget)? {
+                    engine::VolumeDeletionPresence::Unverified => wire::VolumeResult::Unverified,
+                    engine::VolumeDeletionPresence::Deleted(proof) => wire::VolumeResult::Deleted {
+                        proof: Box::new(volume_dto(&*proof)?),
+                    },
+                }
+            }
+            wire::VolumeAction::InspectAbort => match native
+                .inspect_volume_staging_abort(&policy, &intent, &budget)?
+            {
+                engine::VolumeStagingAbortPresence::Unverified => wire::VolumeResult::Unverified,
+                engine::VolumeStagingAbortPresence::Aborted(proof) => wire::VolumeResult::Aborted {
+                    proof: Box::new(volume_dto(&*proof)?),
+                },
+            },
+            wire::VolumeAction::QualifyDeletion => wire::VolumeResult::Qualified {
+                proof: Box::new(volume_dto(
+                    native
+                        .qualify_volume_deletion(&policy, &intent, &budget)?
+                        .receipt(),
+                )?),
+            },
+        })
+    };
+    match execute() {
+        Ok(volume) => wire::Outcome::Volume { volume },
+        Err(failure) => error(failure),
+    }
+}
+
+fn volume_dto<T: serde::Serialize, U: serde::de::DeserializeOwned>(value: &T) -> engine::Result<U> {
+    serde_json::to_value(value)
+        .and_then(serde_json::from_value)
+        .map_err(|_| engine::Error {
+            code: engine::ErrorCode::Native,
+            dispatch: engine::Dispatch::MayHaveDispatched,
+        })
+}
+
+fn mount_selection(
+    mounts: Option<&[wire::VolumeMount]>,
+    policy: Option<&engine::LocalVolumePolicy>,
+) -> engine::Result<Option<engine::VolumeMountSelection>> {
+    let Some(mounts) = mounts else {
+        return Ok(None);
+    };
+    let reject = || engine::Error {
+        code: engine::ErrorCode::Ownership,
+        dispatch: engine::Dispatch::NotDispatched,
+    };
+    let policy = policy.ok_or_else(reject)?;
+    wire::VolumeMount::validate_set(mounts).map_err(|_| reject())?;
+    let requests: Vec<engine::VolumeMountRequest> = serde_json::to_value(mounts)
+        .and_then(serde_json::from_value)
+        .map_err(|_| reject())?;
+    if requests
+        .iter()
+        .any(|request| request.proof.backing.policy != *policy)
+    {
+        return Err(reject());
+    }
+    Ok(Some(engine::VolumeMountSelection {
+        policy: policy.clone(),
+        requests,
+    }))
 }
 
 pub fn prepare_artifact(
@@ -558,6 +726,22 @@ pub fn create_registry_prepared(
     remaining: Duration,
     cancel: engine::Cancellation,
 ) -> wire::Outcome {
+    create_registry_with_policy(engine, create, size, approval, None, remaining, cancel)
+}
+
+pub fn create_registry_with_policy(
+    engine: &engine::Engine,
+    create: wire::RegistryCreate,
+    size: u64,
+    approval: crate::package::RegistryApproval,
+    policy: Option<engine::LocalVolumePolicy>,
+    remaining: Duration,
+    cancel: engine::Cancellation,
+) -> wire::Outcome {
+    let mounts = match mount_selection(create.volume_mounts.as_deref(), policy.as_ref()) {
+        Ok(mounts) => mounts,
+        Err(failure) => return error(failure),
+    };
     let Some(deadline) = Instant::now().checked_add(remaining) else {
         return wire::Outcome::Error {
             code: wire::SafeCode::Validation,
@@ -570,13 +754,23 @@ pub fn create_registry_prepared(
             dispatch: wire::Dispatch::NotDispatched,
         };
     }
-    match engine.create_registry_cached(
-        registry_intent(create),
-        size,
-        approval.cache_policy,
-        deadline,
-        &cancel,
-    ) {
+    let result = match mounts {
+        Some(mounts) => engine.create_registry_cached_with_mount_selection(
+            registry_intent(create),
+            (size, approval.cache_policy),
+            mounts,
+            deadline,
+            &cancel,
+        ),
+        None => engine.create_registry_cached(
+            registry_intent(create),
+            size,
+            approval.cache_policy,
+            deadline,
+            &cancel,
+        ),
+    };
+    match result {
         Ok(receipt) => wire::Outcome::Created {
             receipt: receipt_wire(receipt),
         },
@@ -676,6 +870,7 @@ pub fn terminal(
     engine: &engine::Engine,
     proof: wire::Receipt,
     spec: wire::TerminalSpec,
+    policy: Option<engine::LocalVolumePolicy>,
     remaining: Duration,
     cancel: engine::Cancellation,
     bridge: &mut dyn crate::runtime::TerminalBridge,
@@ -694,24 +889,32 @@ pub fn terminal(
     };
     let bridge = std::cell::RefCell::new(bridge);
     let bytes = std::cell::Cell::new(0u64);
-    match engine.terminal_owned(
-        &receipt(&proof),
-        engine::TerminalRequest {
-            options,
-            deadline: Instant::now() + remaining,
-            cancel,
-        },
-        || bridge.borrow_mut().control(),
-        |event| match event {
-            engine::TerminalEvent::Opened => bridge.borrow_mut().opened(),
-            engine::TerminalEvent::Output(output) => {
-                let n = output.bytes.len() as u64;
-                bridge.borrow_mut().output(output)?;
-                bytes.set(bytes.get() + n);
-                Ok(())
-            }
-        },
-    ) {
+    let request = engine::TerminalRequest {
+        options,
+        deadline: Instant::now() + remaining,
+        cancel,
+    };
+    let controls = || bridge.borrow_mut().control();
+    let output = |event| match event {
+        engine::TerminalEvent::Opened => bridge.borrow_mut().opened(),
+        engine::TerminalEvent::Output(output) => {
+            let n = output.bytes.len() as u64;
+            bridge.borrow_mut().output(output)?;
+            bytes.set(bytes.get() + n);
+            Ok(())
+        }
+    };
+    let result = match policy {
+        Some(policy) => engine.terminal_owned_with_volume_policy(
+            &receipt(&proof),
+            request,
+            controls,
+            output,
+            &policy,
+        ),
+        None => engine.terminal_owned(&receipt(&proof), request, controls, output),
+    };
+    match result {
         Ok(result) => wire::Outcome::Terminal {
             completion: match result.outcome.failure {
                 None if result.collected => wire::Completion::Exited,
@@ -753,5 +956,40 @@ mod growth_tests {
             converted.validate().unwrap();
             assert_eq!(serde_json::to_value(converted).unwrap(), expected);
         }
+    }
+}
+
+#[cfg(test)]
+mod mount_tests {
+    use super::*;
+
+    #[test]
+    fn mount_selection_preserves_full_proof_and_requires_exact_operator_policy() {
+        let value: serde_json::Value = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/mounted-creation-request.json"
+        ))
+        .unwrap();
+        let mounts: Vec<wire::VolumeMount> =
+            serde_json::from_value(value["operation"]["create"]["volume_mounts"].clone()).unwrap();
+        let policy = engine::LocalVolumePolicy {
+            id: mounts[0].proof.backing.policy.id.clone(),
+            root: mounts[0].proof.backing.policy.root.clone().into(),
+        };
+        let selected = mount_selection(Some(&mounts), Some(&policy))
+            .unwrap()
+            .unwrap();
+        assert_eq!(
+            serde_json::to_value(selected.requests).unwrap(),
+            serde_json::to_value(&mounts).unwrap()
+        );
+        assert!(selected.policy == policy);
+        assert!(mount_selection(Some(&mounts), None).is_err());
+        let other = engine::LocalVolumePolicy {
+            root: "/foreign".into(),
+            ..policy
+        };
+        assert!(mount_selection(Some(&mounts), Some(&other)).is_err());
+        assert!(mount_selection(Some(&[]), Some(&other)).is_err());
+        assert!(mount_selection(None, None).unwrap().is_none());
     }
 }

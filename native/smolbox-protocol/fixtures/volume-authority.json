@@ -1,0 +1,48 @@
+{
+  "domain": {
+    "target_id": "worker",
+    "generation": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "request": {
+    "policy_id": "local",
+    "intent": {
+      "worker_volume_id": "sbv-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "size_gb": 4
+    },
+    "action": {
+      "action": "provision"
+    }
+  },
+  "outcome": {
+    "result": "volume",
+    "volume": {
+      "status": "provisioned",
+      "proof": {
+        "schema": 1,
+        "backing": {
+          "schema": 1,
+          "target_id": "worker",
+          "domain_generation": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "policy": {
+            "id": "local",
+            "root": "/srv/smolvm/volumes"
+          },
+          "intent": {
+            "worker_volume_id": "sbv-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "size_gb": 4
+          },
+          "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "root_device": 1,
+          "root_inode": 18446744073709551615,
+          "device": 1,
+          "inode": 18446744073709551614,
+          "mode": 448
+        },
+        "account": {
+          "uid": 1000,
+          "gid": 1000
+        }
+      }
+    }
+  }
+}

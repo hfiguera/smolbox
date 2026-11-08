@@ -86,7 +86,8 @@ def prove(args):
     port = Port(package, config, output / 'first.stderr')
     try:
         created, events = port.call({'operation': 'create', 'create': create})
-        assert created['result'] == 'created' and not events
+        save(output / 'create-result.json', created)
+        assert created['result'] == 'created' and not events, created
         receipt = created['receipt']
         save(output / 'receipt.json', receipt)
         observed(port, 'start', receipt, 'running')

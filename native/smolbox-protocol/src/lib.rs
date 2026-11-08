@@ -9,6 +9,8 @@ mod command_payload;
 mod creation_payload;
 pub use command_payload::COMMAND_PAYLOAD_BYTES;
 mod growth;
+mod volume;
+pub use volume::*;
 mod json;
 pub use growth::{DiskSizes, GrowDisks, GrowthChange, GrowthTransition};
 mod terminal;

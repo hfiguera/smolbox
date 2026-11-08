@@ -365,7 +365,7 @@
       ],
       "contract": "volumes",
       "http_supported": true,
-      "port_operation_supported": false,
+      "port_operation_supported": true,
       "parity_status": "pending",
       "acceptance": [
         "volumes:validation-and-dispatch",
@@ -380,7 +380,7 @@
       ],
       "contract": "volumes",
       "http_supported": true,
-      "port_operation_supported": false,
+      "port_operation_supported": true,
       "parity_status": "pending",
       "acceptance": [
         "volumes:validation-and-dispatch",

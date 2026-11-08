@@ -7,7 +7,8 @@ defmodule SmolBox.Embedded.Channel do
     RegistryContract,
     Request,
     Shape,
-    TerminalContract
+    TerminalContract,
+    VolumeContract
   }
 
   alias SmolBox.Validation
@@ -288,6 +289,13 @@ defmodule SmolBox.Embedded.Channel do
 
   defp terminal_matches?(_domain, pending, %{"result" => "error", "dispatch" => dispatch}),
     do: dispatch != "not_dispatched" or pending.output_bytes == 0
+
+  defp terminal_matches?(
+         domain,
+         %{operation: %{"operation" => "volume", "request" => request}, output_bytes: 0},
+         %{"result" => "volume"} = outcome
+       ),
+       do: VolumeContract.matches?(outcome, request, domain)
 
   defp terminal_matches?(
          _domain,

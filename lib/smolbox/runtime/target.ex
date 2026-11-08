@@ -166,6 +166,17 @@ defmodule SmolBox.Runtime.Target do
   def supports?(%Config{} = config, spec), do: Assignment.supports?(config, spec)
   def supports?(target, spec), do: WorkerConfig.supports?(worker_definition(target), spec)
 
+  def allocation_record(
+        %__MODULE__{kind: :embedded, native_config: config} = target,
+        record,
+        name
+      ) do
+    with {:ok, assignment} <- Assignment.new(config, record.spec, name, record.native_mounts),
+         do: {:ok, {target.id, name, target.capacity, assignment}}
+  end
+
+  def allocation_record(target, record, name), do: allocation(target, record.spec, name)
+
   def allocation(%__MODULE__{kind: :embedded, native_config: config} = target, spec, name) do
     with {:ok, assignment} <- Assignment.new(config, spec, name),
          do: {:ok, {target.id, name, target.capacity, assignment}}

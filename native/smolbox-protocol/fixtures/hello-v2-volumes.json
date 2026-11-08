@@ -1,0 +1,157 @@
+{
+  "type": "hello",
+  "hello": {
+    "major": 2,
+    "minor": 0,
+    "epoch": "abababababababababababababababab",
+    "domain": {
+      "target_id": "embedded-local",
+      "generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd"
+    },
+    "package": {
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "0101010101010101010101010101010101010101010101010101010101010101",
+      "build_sha256": "2323232323232323232323232323232323232323232323232323232323232323",
+      "assets_sha256": "4545454545454545454545454545454545454545454545454545454545454545",
+      "platform": "linux",
+      "architecture": "x86_64"
+    },
+    "capabilities": [
+      "terminal_open",
+      "exec_stream",
+      "exec_buffered",
+      "exec_background",
+      "logs",
+      "volumes",
+      "health",
+      "capacity",
+      "metrics",
+      "readiness",
+      "list",
+      "measurements",
+      "create",
+      "inspect",
+      "start",
+      "stop",
+      "delete",
+      "exec",
+      "read_file",
+      "write_file",
+      "qualify_creation",
+      "inspect_creation"
+    ],
+    "limits": {
+      "frame_bytes": 1048576,
+      "chunk_bytes": 65536,
+      "in_flight": 32,
+      "events_per_request": 65536,
+      "work_workers": 4,
+      "control_workers": 2,
+      "input_queue_encoded_bytes": 4194304,
+      "upload_spool_bytes": 134217728,
+      "credit_grace_ms": 1000,
+      "writer_grace_ms": 5000,
+      "initial_credit_bytes": 262144,
+      "initial_credit_events": 64,
+      "event_queue_decoded_bytes": 8388608,
+      "event_queue_encoded_bytes": 12582912,
+      "transfer_bytes": 16777216,
+      "command_ms": 86400000,
+      "file_ms": 600000,
+      "cpus_min": 1,
+      "cpus_max": 16,
+      "memory_mib_min": 64,
+      "memory_mib_max": 65536,
+      "disk_gib_min": 1,
+      "disk_gib_max": 1024,
+      "cancel_grace_ms": 3000,
+      "observations": {
+        "records": 1024,
+        "record_bytes": 8388608,
+        "snapshot_bytes": 33554432,
+        "cpu_sample_ms": 25,
+        "disk_entries": 65536,
+        "disk_depth": 32
+      },
+      "creation": {
+        "schema": 1,
+        "payload_bytes": 655360,
+        "chunks": 10,
+        "chunk_bytes": 65536
+      },
+      "jobs": {
+        "work_slots": 4,
+        "observation_slots": 2,
+        "worker_children": 4,
+        "staging_bytes": 67108864,
+        "descriptors": 32,
+        "control_fd_headroom": 8,
+        "agent_request_bytes": 4194304,
+        "agent_reply_overhead_bytes": 65536,
+        "metadata_bytes": 33554432
+      },
+      "buffered": {
+        "payload_bytes": 720896,
+        "chunks": 11,
+        "metadata_bytes": 8388608,
+        "stdin_bytes": 65536
+      },
+      "logs": {
+        "lines": 10000,
+        "line_bytes": 131064,
+        "raw_line_bytes": 1048576,
+        "output_bytes": 8388608,
+        "memory_bytes": 6291456,
+        "poll_ms": 100
+      },
+      "terminals": {
+        "session_ms": 86400000,
+        "buffer_bytes": 1048576,
+        "input_bytes": 65536,
+        "total_input_bytes": 16777216,
+        "attach_ms": 30000,
+        "close_ms": 5000,
+        "input_slots": 2,
+        "output_events": 1024,
+        "descriptors": 20
+      },
+      "volumes": {
+        "work_ms": 86400000,
+        "observation_ms": 30000,
+        "record_bytes": 16384,
+        "delete_entries": 1000000,
+        "ancestor_bytes": 4096,
+        "control_metadata_bytes": 262144,
+        "observation_metadata_bytes": 131072
+      }
+    },
+    "preflight": {
+      "status": "ready"
+    },
+    "sdk": {
+      "sdk_version": "1.22.0",
+      "source_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "feature_versions": {
+        "lifecycle": 1,
+        "foreground_exec": 1,
+        "extended_exec": 1,
+        "files": 1,
+        "extended_files": 1,
+        "material_proofs": 2,
+        "observability": 1,
+        "networking": 1,
+        "ports": 1,
+        "workloads": 1,
+        "compact_creation": 1,
+        "job_resources": 1,
+        "buffered_exec": 1,
+        "background_exec": 1,
+        "logs": 1,
+        "streaming_exec": 1,
+        "terminals": 1,
+        "volumes": 1
+      }
+    }
+  }
+}

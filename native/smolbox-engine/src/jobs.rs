@@ -10,7 +10,10 @@ pub const JOB_CHILDREN: usize = 4;
 pub const JOB_STAGING_BYTES: u64 = 64 * 1024 * 1024;
 /// Separate finite host artifact-download allowance; not guest disk authority.
 pub const JOB_REGISTRY_STAGING_BYTES: u64 = 32 * 1024 * 1024 * 1024;
+/// Work metadata allowance. Reserved control memory is independent.
 pub const JOB_METADATA_BYTES: u64 = 32 * 1024 * 1024;
+/// Two bounded volume observers remain admissible with full work metadata.
+pub const JOB_CONTROL_METADATA_BYTES: u64 = 256 * 1024;
 pub const JOB_DESCRIPTORS: usize = 32;
 pub const JOB_CONTROL_HEADROOM: usize = 8;
 
@@ -29,6 +32,57 @@ pub(crate) struct Demand {
     metadata: u64,
 }
 impl Demand {
+    pub(crate) fn volume_mounts(count: usize) -> Result<Self> {
+        if count == 0 || count > crate::VOLUME_MOUNTS {
+            return Err(Error::before(ErrorCode::Validation));
+        }
+        Ok(Self {
+            lane: Lane::Work,
+            children: 0,
+            descriptors: 12 + count,
+            staging: 0,
+            registry_staging: 0,
+            metadata: crate::VOLUME_OBSERVATION_METADATA_BYTES * (count as u64 + 1),
+        })
+    }
+
+    pub(crate) fn volume_delete() -> Self {
+        Self {
+            lane: Lane::Work,
+            children: 0,
+            descriptors: 8,
+            staging: 0,
+            registry_staging: 0,
+            metadata: JOB_METADATA_BYTES,
+        }
+    }
+
+    pub(crate) fn volume_observation() -> Self {
+        Self {
+            lane: Lane::Control,
+            children: 0,
+            descriptors: 4,
+            staging: 0,
+            registry_staging: 0,
+            // Two bounded records, decoded identities, read buffers and root
+            // policy copies coexist; observation still consumes no work slot.
+            metadata: crate::VOLUME_OBSERVATION_METADATA_BYTES,
+        }
+    }
+
+    pub(crate) fn volume_root() -> Self {
+        Self {
+            lane: Lane::Work,
+            children: 0,
+            descriptors: 4,
+            staging: 0,
+            registry_staging: 0,
+            // Root qualification also enters staging/provisioning: reserve
+            // bounded private-record and identity copies for that whole job.
+            metadata: crate::VOLUME_OBSERVATION_METADATA_BYTES,
+        }
+    }
+
     pub(crate) fn registry_download(bytes: u64) -> Result<Self> {
         if bytes == 0 || bytes > JOB_REGISTRY_STAGING_BYTES {
             return Err(Error::before(ErrorCode::Validation));
@@ -218,6 +272,7 @@ pub(crate) struct Counts {
     pub staging: u64,
     pub registry_staging: u64,
     pub metadata: u64,
+    pub work_metadata: u64,
 }
 #[derive(Default)]
 struct Shared {
@@ -252,7 +307,11 @@ impl JobPool {
             || demand.descriptors > JOB_DESCRIPTORS
             || demand.registry_staging > JOB_REGISTRY_STAGING_BYTES
             || demand.staging > JOB_STAGING_BYTES
-            || demand.metadata > JOB_METADATA_BYTES
+            || demand.metadata
+                > match demand.lane {
+                    Lane::Work => JOB_METADATA_BYTES,
+                    Lane::Control => JOB_CONTROL_METADATA_BYTES,
+                }
         {
             return Err(Error::before(ErrorCode::Admission));
         }
@@ -273,6 +332,11 @@ impl JobPool {
             registry_staging: counts.registry_staging + demand.registry_staging,
             staging: counts.staging + demand.staging,
             metadata: counts.metadata + demand.metadata,
+            work_metadata: counts.work_metadata
+                + match demand.lane {
+                    Lane::Work => demand.metadata,
+                    Lane::Control => 0,
+                },
         };
         if next.work > JOB_WORK_SLOTS
             || next.control > JOB_CONTROL_SLOTS
@@ -281,7 +345,8 @@ impl JobPool {
             || next.work_descriptors > JOB_DESCRIPTORS - JOB_CONTROL_HEADROOM
             || next.registry_staging > JOB_REGISTRY_STAGING_BYTES
             || next.staging > JOB_STAGING_BYTES
-            || next.metadata > JOB_METADATA_BYTES
+            || next.work_metadata > JOB_METADATA_BYTES
+            || next.metadata - next.work_metadata > JOB_CONTROL_METADATA_BYTES
         {
             return Err(Error::before(ErrorCode::Admission));
         }
@@ -309,6 +374,7 @@ impl Drop for JobLease {
             Lane::Work => {
                 counts.work -= 1;
                 counts.work_descriptors -= self.demand.descriptors;
+                counts.work_metadata -= self.demand.metadata;
             }
             Lane::Control => counts.control -= 1,
         }
@@ -317,6 +383,80 @@ impl Drop for JobLease {
         counts.registry_staging -= self.demand.registry_staging;
         counts.staging -= self.demand.staging;
         counts.metadata -= self.demand.metadata;
+    }
+}
+
+impl JobLease {
+    /// Promote retained mount qualification to one complete creation job without
+    /// dropping authority or transiently freeing admission for another worker.
+    pub(crate) fn promote_mount_creation(&mut self) -> Result<()> {
+        self.promote_mount_work(0, 0)
+    }
+
+    pub(crate) fn promote_mount_start(&mut self) -> Result<()> {
+        self.promote_mount_work(1, 0)
+    }
+
+    pub(crate) fn promote_mount_oci_start(&mut self) -> Result<()> {
+        self.promote_mount_work(2, 1)
+    }
+
+    pub(crate) fn promote_mount_worker(&mut self, demand: Demand) -> Result<()> {
+        if !matches!(demand.lane, Lane::Work)
+            || demand.children != 1
+            || demand.descriptors > JOB_DESCRIPTORS - JOB_CONTROL_HEADROOM
+            || demand.metadata > JOB_METADATA_BYTES
+            || demand.staging > JOB_STAGING_BYTES
+            || demand.registry_staging != 0
+        {
+            return Err(Error::before(ErrorCode::Admission));
+        }
+        self.promote_mount_work(demand.children, demand.staging)
+    }
+
+    fn promote_mount_work(&mut self, children: usize, staging: u64) -> Result<()> {
+        let mut counts = self
+            .pool
+            .0
+            .counts
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        if !self.pool.available()
+            || !matches!(self.demand.lane, Lane::Work)
+            || self.demand.children > children
+            || self.demand.staging > staging
+            || self.demand.registry_staging != 0
+        {
+            return Err(Error::before(ErrorCode::State));
+        }
+        let descriptors = JOB_DESCRIPTORS - JOB_CONTROL_HEADROOM;
+        if self.demand.descriptors > descriptors || self.demand.metadata > JOB_METADATA_BYTES {
+            return Err(Error::before(ErrorCode::Admission));
+        }
+        let fd_delta = descriptors - self.demand.descriptors;
+        let metadata_delta = JOB_METADATA_BYTES - self.demand.metadata;
+        let child_delta = children - self.demand.children;
+        let staging_delta = staging - self.demand.staging;
+        if counts.work_descriptors + fd_delta > descriptors
+            || counts.descriptors + fd_delta > JOB_DESCRIPTORS
+            || counts.work_metadata + metadata_delta > JOB_METADATA_BYTES
+            || counts.children + child_delta > JOB_CHILDREN
+            || counts.staging + staging_delta > JOB_STAGING_BYTES
+        {
+            return Err(Error::before(ErrorCode::Admission));
+        }
+        fd_admission(counts.descriptors + fd_delta)?;
+        counts.work_descriptors += fd_delta;
+        counts.descriptors += fd_delta;
+        counts.work_metadata += metadata_delta;
+        counts.metadata += metadata_delta;
+        counts.children += child_delta;
+        counts.staging += staging_delta;
+        self.demand.descriptors = descriptors;
+        self.demand.metadata = JOB_METADATA_BYTES;
+        self.demand.children = children;
+        self.demand.staging = staging;
+        Ok(())
     }
 }
 fn fd_admission(reserved: usize) -> Result<()> {
@@ -346,6 +486,264 @@ fn fd_admission(reserved: usize) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn mounted_terminal_accounts_maximum_input_and_preserves_reserved_control() {
+        let pool = JobPool::default();
+        let mut mounts = pool.acquire(Demand::volume_mounts(8).unwrap()).unwrap();
+        let first = pool.acquire(Demand::volume_observation()).unwrap();
+        let second = pool.acquire(Demand::volume_observation()).unwrap();
+        let options = crate::TerminalOptions {
+            program: "/bin/sh".into(),
+            cols: 80,
+            rows: 24,
+            session: std::time::Duration::from_secs(1),
+            idle: std::time::Duration::from_secs(1),
+            attach: std::time::Duration::from_millis(100),
+            close: std::time::Duration::from_millis(1),
+            max_buffer_bytes: 1048576,
+            max_input_bytes: 65536,
+            total_input_bytes: crate::TERMINAL_INPUT_BYTES,
+        };
+        let demand = Demand::terminal(&options, crate::COMMAND_METADATA_BYTES).unwrap();
+        mounts.promote_mount_worker(demand).unwrap();
+        let counts = pool.counts();
+        assert_eq!(counts.children, 1);
+        assert_eq!(counts.staging, crate::TERMINAL_INPUT_BYTES * 3);
+        assert_eq!(counts.work, 1);
+        assert_eq!(counts.control, 2);
+        assert_eq!(counts.descriptors, JOB_DESCRIPTORS);
+        mounts.promote_mount_worker(demand).unwrap();
+        assert_eq!(pool.counts(), counts);
+        let mut excessive = demand;
+        excessive.metadata = JOB_METADATA_BYTES + 1;
+        assert!(mounts.promote_mount_worker(excessive).is_err());
+        assert_eq!(pool.counts(), counts);
+        drop(mounts);
+        drop((first, second));
+        assert_eq!(pool.counts(), Counts::default());
+    }
+
+    #[test]
+    fn mounted_command_admission_accounts_output_staging_without_releasing_qualification() {
+        let pool = JobPool::default();
+        let mut mount = pool.acquire(Demand::volume_mounts(8).unwrap()).unwrap();
+        let first = pool.acquire(Demand::volume_observation()).unwrap();
+        let second = pool.acquire(Demand::volume_observation()).unwrap();
+        let demand = Demand::command(16 * 1024 * 1024, 8 * 1024 * 1024).unwrap();
+        mount.promote_mount_worker(demand).unwrap();
+        let before = pool.counts();
+        assert_eq!(before.work, 1);
+        assert_eq!(before.children, 1);
+        assert_eq!(before.staging, 16 * 1024 * 1024);
+        assert_eq!(before.descriptors, JOB_DESCRIPTORS);
+        assert_eq!(before.work_metadata, JOB_METADATA_BYTES);
+        mount.promote_mount_worker(demand).unwrap();
+        assert_eq!(pool.counts(), before);
+        assert!(mount
+            .promote_mount_worker(Demand::volume_observation())
+            .is_err());
+        assert_eq!(pool.counts(), before);
+        drop(mount);
+        drop((first, second));
+        assert_eq!(pool.counts(), Counts::default());
+    }
+
+    #[test]
+    fn mount_oci_promotion_keeps_one_job_two_children_and_both_control_observers() {
+        let pool = JobPool::default();
+        let mut mount = pool.acquire(Demand::volume_mounts(8).unwrap()).unwrap();
+        let first = pool.acquire(Demand::volume_observation()).unwrap();
+        let second = pool.acquire(Demand::volume_observation()).unwrap();
+        mount.promote_mount_oci_start().unwrap();
+        let counts = pool.counts();
+        assert_eq!(counts.work, 1);
+        assert_eq!(counts.children, 2);
+        assert_eq!(counts.staging, 1);
+        assert_eq!(counts.descriptors, JOB_DESCRIPTORS);
+        assert_eq!(counts.work_metadata, JOB_METADATA_BYTES);
+        mount.promote_mount_oci_start().unwrap();
+        assert_eq!(pool.counts(), counts);
+        assert!(mount.promote_mount_start().is_err());
+        assert_eq!(pool.counts(), counts);
+        drop(mount);
+        assert_eq!(pool.counts().children, 0);
+        assert_eq!(pool.counts().staging, 0);
+        drop((first, second));
+        assert_eq!(pool.counts(), Counts::default());
+    }
+
+    #[test]
+    fn exhausted_staging_cannot_partially_promote_oci_mounts() {
+        let pool = JobPool::default();
+        let mut mounts = pool.acquire(Demand::volume_mounts(1).unwrap()).unwrap();
+        let staging = pool
+            .acquire(Demand {
+                lane: Lane::Work,
+                children: 0,
+                descriptors: 0,
+                staging: JOB_STAGING_BYTES,
+                registry_staging: 0,
+                metadata: 0,
+            })
+            .unwrap();
+        let before = pool.counts();
+        assert!(mounts.promote_mount_oci_start().is_err());
+        assert_eq!(pool.counts(), before);
+        drop(staging);
+        mounts.promote_mount_oci_start().unwrap();
+        drop(mounts);
+        assert_eq!(pool.counts(), Counts::default());
+    }
+
+    #[test]
+    fn mount_start_promotes_child_admission_atomically_and_retains_control() {
+        let pool = JobPool::default();
+        let mut mounts = pool.acquire(Demand::volume_mounts(8).unwrap()).unwrap();
+        let first = pool.acquire(Demand::volume_observation()).unwrap();
+        let second = pool.acquire(Demand::volume_observation()).unwrap();
+        mounts.promote_mount_start().unwrap();
+        assert_eq!(pool.counts().children, 1);
+        assert_eq!(pool.counts().work, 1);
+        assert_eq!(pool.counts().descriptors, JOB_DESCRIPTORS);
+        mounts.promote_mount_start().unwrap();
+        let before = pool.counts();
+        assert!(mounts.promote_mount_creation().is_err());
+        assert_eq!(pool.counts(), before);
+        drop(mounts);
+        assert_eq!(pool.counts().children, 0);
+        assert_eq!(pool.counts().work, 0);
+        drop((first, second));
+        assert_eq!(pool.counts(), Counts::default());
+    }
+
+    #[test]
+    fn exhausted_children_cannot_partially_promote_or_release_mount_admission() {
+        let pool = JobPool::default();
+        let mut mounts = pool.acquire(Demand::volume_mounts(1).unwrap()).unwrap();
+        let children = pool
+            .acquire(Demand {
+                lane: Lane::Work,
+                children: JOB_CHILDREN,
+                descriptors: 0,
+                staging: 0,
+                registry_staging: 0,
+                metadata: 0,
+            })
+            .unwrap();
+        let before = pool.counts();
+        assert!(mounts.promote_mount_start().is_err());
+        assert_eq!(pool.counts(), before);
+        drop(children);
+        mounts.promote_mount_start().unwrap();
+        drop(mounts);
+        assert_eq!(pool.counts(), Counts::default());
+    }
+
+    #[test]
+    fn mount_creation_promotion_is_atomic_and_preserves_both_control_jobs() {
+        let pool = JobPool::default();
+        let mut mount = pool.acquire(Demand::volume_mounts(8).unwrap()).unwrap();
+        let first = pool.acquire(Demand::volume_observation()).unwrap();
+        let second = pool.acquire(Demand::volume_observation()).unwrap();
+        mount.promote_mount_creation().unwrap();
+        assert_eq!(pool.counts().work, 1);
+        assert_eq!(pool.counts().control, 2);
+        assert_eq!(pool.counts().descriptors, JOB_DESCRIPTORS);
+        assert_eq!(pool.counts().work_metadata, JOB_METADATA_BYTES);
+        mount.promote_mount_creation().unwrap();
+        pool.quarantine();
+        let before = pool.counts();
+        assert!(mount.promote_mount_creation().is_err());
+        assert_eq!(pool.counts(), before);
+        drop(mount);
+        assert_eq!(pool.counts().work, 0);
+        assert_eq!(pool.counts().work_metadata, 0);
+        drop((first, second));
+        assert_eq!(pool.counts(), Counts::default());
+    }
+
+    #[test]
+    fn failed_mount_promotion_cannot_free_or_partially_change_existing_admission() {
+        let pool = JobPool::default();
+        let mut mount = pool.acquire(Demand::volume_mounts(1).unwrap()).unwrap();
+        let other = pool.acquire(Demand::volume_root()).unwrap();
+        let before = pool.counts();
+        assert!(mount.promote_mount_creation().is_err());
+        assert_eq!(pool.counts(), before);
+        drop(other);
+        mount.promote_mount_creation().unwrap();
+        drop(mount);
+        assert_eq!(pool.counts(), Counts::default());
+    }
+
+    #[test]
+    fn mount_descriptors_and_metadata_are_retained_without_consuming_control_admission() {
+        let pool = JobPool::default();
+        assert!(Demand::volume_mounts(0).is_err());
+        assert!(Demand::volume_mounts(9).is_err());
+        let mount = pool.acquire(Demand::volume_mounts(8).unwrap()).unwrap();
+        let first = pool.acquire(Demand::volume_observation()).unwrap();
+        let second = pool.acquire(Demand::volume_observation()).unwrap();
+        assert_eq!(pool.counts().work, 1);
+        assert_eq!(pool.counts().work_descriptors, 20);
+        assert_eq!(pool.counts().descriptors, 28);
+        assert!(pool.acquire(Demand::volume_mounts(1).unwrap()).is_err());
+        // Creation must integrate the existing grant into its own whole-job
+        // budget; silently stacking the full SDK allowance is not authorized.
+        assert!(pool.acquire(Demand::oci_create()).is_err());
+        pool.quarantine();
+        assert!(pool.acquire(Demand::volume_mounts(1).unwrap()).is_err());
+        drop(mount);
+        assert_eq!(pool.counts().work_descriptors, 0);
+        assert_eq!(pool.counts().work_metadata, 0);
+        drop((first, second));
+        assert_eq!(pool.counts(), Counts::default());
+    }
+
+    #[test]
+    fn full_work_metadata_cannot_starve_bounded_volume_control_observers() {
+        let pool = JobPool::default();
+        let work = pool.acquire(Demand::registry_download(1).unwrap()).unwrap();
+        let first = pool.acquire(Demand::volume_observation()).unwrap();
+        let second = pool.acquire(Demand::volume_observation()).unwrap();
+        assert_eq!(pool.counts().work_metadata, JOB_METADATA_BYTES);
+        assert_eq!(
+            pool.counts().metadata,
+            JOB_METADATA_BYTES + JOB_CONTROL_METADATA_BYTES
+        );
+        assert!(pool.acquire(Demand::volume_root()).is_err());
+        assert!(pool.acquire(Demand::volume_observation()).is_err());
+        pool.quarantine();
+        drop(first);
+        let replacement = pool.acquire(Demand::volume_observation()).unwrap();
+        drop(work);
+        assert_eq!(pool.counts().work_metadata, 0);
+        assert_eq!(pool.counts().metadata, JOB_CONTROL_METADATA_BYTES);
+        drop((second, replacement));
+        assert_eq!(pool.counts(), Counts::default());
+    }
+
+    #[test]
+    fn control_memory_is_finite_and_cannot_consume_the_work_allowance() {
+        let pool = JobPool::default();
+        let mut demand = Demand::volume_observation();
+        demand.metadata = JOB_CONTROL_METADATA_BYTES;
+        let control = pool.acquire(demand).unwrap();
+        let before = pool.counts();
+        assert!(pool.acquire(Demand::volume_observation()).is_err());
+        assert_eq!(pool.counts(), before);
+        let work = pool.acquire(Demand::growth_repair()).unwrap();
+        let empty_observer = pool.acquire(Demand::observation()).unwrap();
+        demand.metadata += 1;
+        assert!(pool.acquire(demand).is_err());
+        assert_eq!(
+            pool.counts().metadata,
+            JOB_METADATA_BYTES + JOB_CONTROL_METADATA_BYTES
+        );
+        drop((control, work, empty_observer));
+        assert_eq!(pool.counts(), Counts::default());
+    }
 
     #[test]
     fn registry_staging_is_separate_finite_and_retained_until_job_returns() {
@@ -519,6 +917,7 @@ mod tests {
                 registry_staging: 0,
                 staging: 48 * 1024 * 1024,
                 metadata: 0,
+                work_metadata: 0,
             }
         );
         drop(leases);

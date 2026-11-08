@@ -1,7 +1,7 @@
 defmodule SmolBox.Backend.EmbeddedOperation do
   @moduledoc false
   alias SmolBox.Backend.{Budget, EmbeddedContext, EmbeddedPreparation, Features}
-  alias SmolBox.Embedded.{Config, ImageContract, Request}
+  alias SmolBox.Embedded.{Config, ImageContract, MountContract, Request}
 
   alias SmolBox.{
     ArtifactPreparation,
@@ -80,7 +80,8 @@ defmodule SmolBox.Backend.EmbeddedOperation do
       overlay_gb: resources["overlay_gib"],
       network: context.spec.profile.network,
       ports: Map.get(context.spec, :ports, []),
-      workload: Map.get(context.spec, :workload)
+      workload: Map.get(context.spec, :workload),
+      mounts: MountContract.paths(create)
     }
 
     if spec == expected and MachineSpec.validate(spec) == :ok and context.identity == nil,

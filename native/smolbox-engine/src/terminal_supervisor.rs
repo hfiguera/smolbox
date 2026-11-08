@@ -46,8 +46,30 @@ impl crate::Engine {
         &self,
         receipt: &crate::CreationReceipt,
         request: TerminalRequest,
+        controls: impl FnMut() -> std::result::Result<Option<TerminalMessage>, ()>,
+        output: impl FnMut(TerminalEvent) -> std::result::Result<(), ()>,
+    ) -> Result<TerminalRunResult> {
+        self.terminal_owned_mode(receipt, request, controls, output, None)
+    }
+
+    pub fn terminal_owned_with_volume_policy(
+        &self,
+        receipt: &crate::CreationReceipt,
+        request: TerminalRequest,
+        controls: impl FnMut() -> std::result::Result<Option<TerminalMessage>, ()>,
+        output: impl FnMut(TerminalEvent) -> std::result::Result<(), ()>,
+        policy: &crate::LocalVolumePolicy,
+    ) -> Result<TerminalRunResult> {
+        self.terminal_owned_mode(receipt, request, controls, output, Some(policy))
+    }
+
+    fn terminal_owned_mode(
+        &self,
+        receipt: &crate::CreationReceipt,
+        request: TerminalRequest,
         mut controls: impl FnMut() -> std::result::Result<Option<TerminalMessage>, ()>,
         mut output: impl FnMut(TerminalEvent) -> std::result::Result<(), ()>,
+        policy: Option<&crate::LocalVolumePolicy>,
     ) -> Result<TerminalRunResult> {
         request.options.validate()?;
         let deadline = request
@@ -68,6 +90,14 @@ impl crate::Engine {
         };
         let metadata = crate::buffered::Metadata::new(&record, command, deadline)?;
         metadata.terminal(&request.options)?;
+        let mount_budget = crate::ReadBudget::new(
+            deadline
+                .saturating_duration_since(Instant::now())
+                .min(Duration::from_secs(30))
+                .max(Duration::from_nanos(1)),
+            request.cancel.clone(),
+        )?;
+        let mounts = self.worker_mounts(receipt, &record, policy, &mount_budget)?;
         let gate = self.gate(&receipt.name)?;
         let machine = gate
             .try_lock()
@@ -79,7 +109,14 @@ impl crate::Engine {
             .ok_or(Error::before(ErrorCode::Unsupported))?;
         let bytes =
             serde_json::to_vec(&metadata).map_err(|_| Error::before(ErrorCode::Validation))?;
-        let prepared = supervisor.prepare_terminal(
+        let (permit, mount_authority) = self.reserve_mounted_worker(
+            receipt,
+            mounts,
+            crate::jobs::Demand::terminal(&request.options, bytes.len() as u64)?,
+            &mount_budget,
+        )?;
+        let prepared = supervisor.prepare_terminal_reserved(
+            permit,
             &self.transfer_directory()?,
             self.vm_directory(&receipt.name).join("agent.sock"),
             &bytes,
@@ -90,7 +127,7 @@ impl crate::Engine {
         }
         supervisor.run_terminal(
             prepared,
-            Box::new((machine, source, self.domain.clone())),
+            Box::new((machine, source, self.domain.clone(), mount_authority)),
             deadline,
             &request.cancel,
             &mut || {
@@ -140,6 +177,7 @@ fn nonce() -> Result<String> {
     Ok(hex::encode(bytes))
 }
 impl TransferSupervisor {
+    #[cfg(test)]
     pub(crate) fn prepare_terminal(
         &self,
         directory: &Path,
@@ -150,6 +188,18 @@ impl TransferSupervisor {
         let permit = self
             .pool
             .acquire(crate::jobs::Demand::terminal(&options, bytes.len() as u64)?)?;
+        self.prepare_terminal_reserved(permit, directory, socket, bytes, options)
+    }
+
+    pub(crate) fn prepare_terminal_reserved(
+        &self,
+        permit: crate::jobs::JobLease,
+        directory: &Path,
+        socket: PathBuf,
+        bytes: &[u8],
+        options: TerminalOptions,
+    ) -> Result<Prepared> {
+        crate::jobs::Demand::terminal(&options, bytes.len() as u64)?;
         let mut metadata = Spool::new(directory)?;
         metadata
             .file

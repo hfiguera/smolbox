@@ -3,21 +3,43 @@ defmodule SmolBox.Embedded.Request do
   alias SmolBox.Embedded.{
     CreationFeatures,
     ImageContract,
+    MountContract,
     NativeSource,
     RegistryContract,
     Shape,
-    TerminalContract
+    TerminalContract,
+    VolumeContract
   }
 
   alias SmolBox.Validation
 
   @lifecycle ~w(inspect start stop delete)
 
+  def observation?(%{"operation" => "volume", "request" => request}),
+    do: VolumeContract.observation?(request)
+
   def observation?(%{"operation" => name}),
     do:
       name in ~w(health capacity metrics readiness list measurements inspect_growth inspect_oci_creation inspect_registry_creation)
 
   def observation?(_request), do: false
+
+  def reconciliation?(
+        %{
+          "operation" => "volume",
+          "request" => %{"action" => %{"action" => action, "quiesced" => true}}
+        } = request
+      )
+      when action in ~w(resolve_deletion abort_staging),
+      do: valid?(request, 1, 2)
+
+  def reconciliation?(%{"operation" => "volume"} = request), do: observation?(request)
+
+  def reconciliation?(%{"operation" => name}),
+    do:
+      name in ~w(inspect inspect_creation inspect_oci_creation inspect_registry_creation inspect_growth qualify_growth)
+
+  def reconciliation?(_request), do: false
 
   def valid?(operation, budget_ms, major \\ 1) do
     major in [1, 2] and Validation.integer?(budget_ms, 1, 86_400_000) and
@@ -52,6 +74,11 @@ defmodule SmolBox.Embedded.Request do
         request[key] != nil and request[key] > previous[key]
       end)
   end
+
+  defp operation?(%{"operation" => "volume"} = operation, budget, 2),
+    do:
+      Shape.keys?(operation, ~w(operation request)) and
+        VolumeContract.request?(operation["request"], budget)
 
   defp operation?(%{"operation" => "terminal_open"} = operation, budget, 2),
     do:
@@ -224,7 +251,11 @@ defmodule SmolBox.Embedded.Request do
   defp operation?(_operation, _budget, _major), do: false
 
   defp create?(create, major) do
-    feature_keys?(create, ~w(name owner_token incarnation artifact resources labels), major) and
+    MountContract.creation_keys?(
+      create,
+      ~w(name owner_token incarnation artifact resources labels),
+      major
+    ) and
       Shape.id?(create["name"]) and Shape.hex?(create["owner_token"], 64) and
       Shape.hex?(create["incarnation"], 32) and artifact?(create["artifact"]) and
       Shape.resources?(create["resources"]) and labels?(create["labels"])

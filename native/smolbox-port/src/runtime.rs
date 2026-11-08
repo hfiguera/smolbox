@@ -230,6 +230,37 @@ impl Shared {
 }
 
 pub trait Native: Send + Sync + 'static {
+    fn run_with_volume_policy(
+        &self,
+        _operation: wire::Operation,
+        _policy: smolbox_engine::LocalVolumePolicy,
+        _remaining: Duration,
+        _cancel: Cancellation,
+        _upload: Option<File>,
+        _emit: &mut dyn FnMut(wire::Stream, &[u8]) -> BridgeResult<()>,
+    ) -> wire::Outcome {
+        before(wire::SafeCode::Unsupported)
+    }
+    fn create_registry_mounted_prepared(
+        &self,
+        _create: wire::RegistryCreate,
+        _size: u64,
+        _approval: crate::package::RegistryApproval,
+        _policy: smolbox_engine::LocalVolumePolicy,
+        _remaining: Duration,
+        _cancel: Cancellation,
+    ) -> wire::Outcome {
+        before(wire::SafeCode::Unsupported)
+    }
+    fn volume(
+        &self,
+        _policy: smolbox_engine::LocalVolumePolicy,
+        _request: wire::VolumeRequest,
+        _remaining: Duration,
+        _cancel: Cancellation,
+    ) -> wire::Outcome {
+        before(wire::SafeCode::Unsupported)
+    }
     fn create_registry_prepared(
         &self,
         _create: wire::RegistryCreate,
@@ -253,6 +284,7 @@ pub trait Native: Send + Sync + 'static {
         &self,
         _receipt: wire::Receipt,
         _spec: wire::TerminalSpec,
+        _policy: Option<smolbox_engine::LocalVolumePolicy>,
         _remaining: Duration,
         _cancel: Cancellation,
         _bridge: &mut dyn TerminalBridge,
@@ -273,6 +305,53 @@ pub trait Native: Send + Sync + 'static {
     fn shutdown(&self) -> BridgeResult<()>;
 }
 impl Native for Engine {
+    fn run_with_volume_policy(
+        &self,
+        operation: wire::Operation,
+        policy: smolbox_engine::LocalVolumePolicy,
+        remaining: Duration,
+        cancel: Cancellation,
+        upload: Option<File>,
+        emit: &mut dyn FnMut(wire::Stream, &[u8]) -> BridgeResult<()>,
+    ) -> wire::Outcome {
+        adapter::run_with_policy(
+            self,
+            operation,
+            Some(policy),
+            remaining,
+            cancel,
+            upload,
+            emit,
+        )
+    }
+    fn create_registry_mounted_prepared(
+        &self,
+        create: wire::RegistryCreate,
+        size: u64,
+        approval: crate::package::RegistryApproval,
+        policy: smolbox_engine::LocalVolumePolicy,
+        remaining: Duration,
+        cancel: Cancellation,
+    ) -> wire::Outcome {
+        adapter::create_registry_with_policy(
+            self,
+            create,
+            size,
+            approval,
+            Some(policy),
+            remaining,
+            cancel,
+        )
+    }
+    fn volume(
+        &self,
+        policy: smolbox_engine::LocalVolumePolicy,
+        request: wire::VolumeRequest,
+        remaining: Duration,
+        cancel: Cancellation,
+    ) -> wire::Outcome {
+        adapter::volume(self, policy, request, remaining, cancel)
+    }
     fn create_registry_prepared(
         &self,
         create: wire::RegistryCreate,
@@ -296,11 +375,12 @@ impl Native for Engine {
         &self,
         receipt: wire::Receipt,
         spec: wire::TerminalSpec,
+        policy: Option<smolbox_engine::LocalVolumePolicy>,
         remaining: Duration,
         cancel: Cancellation,
         bridge: &mut dyn TerminalBridge,
     ) -> wire::Outcome {
-        adapter::terminal(self, receipt, spec, remaining, cancel, bridge)
+        adapter::terminal(self, receipt, spec, policy, remaining, cancel, bridge)
     }
     fn available(&self) -> bool {
         Engine::available(self)
@@ -584,6 +664,9 @@ fn before(code: wire::SafeCode) -> wire::Outcome {
     }
 }
 fn is_observation(operation: &wire::Operation) -> bool {
+    if let wire::Operation::Volume { request } = operation {
+        return request.is_observation();
+    }
     matches!(
         operation,
         wire::Operation::Health
@@ -677,6 +760,24 @@ fn admit_request(
     } else {
         None
     };
+    let rejection = if let Some(mounts) = operation.creation_mounts() {
+        if config
+            .approved_volume_policy
+            .as_ref()
+            .is_some_and(|policy| {
+                mounts.iter().all(|mount| {
+                    mount.proof.backing.policy.id == policy.id
+                        && mount.proof.backing.policy.root == policy.root.to_string_lossy()
+                })
+            })
+        {
+            rejection
+        } else {
+            Some(wire::SafeCode::Unsupported)
+        }
+    } else {
+        rejection
+    };
     let rejection = if let Some(source) = operation.oci_source() {
         if config
             .approved_oci_sources
@@ -722,6 +823,19 @@ fn admit_request(
                     .any(|approval| approval.matches(&source, identity.credential_ref.as_deref()) &&
                         !matches!(&operation,wire::Operation::CreateRegistryPrepared {size_bytes,..} if *size_bytes>approval.max_bytes))
             })
+        {
+            rejection
+        } else {
+            Some(wire::SafeCode::Unsupported)
+        }
+    } else {
+        rejection
+    };
+    let rejection = if let wire::Operation::Volume { request } = &operation {
+        if config
+            .approved_volume_policy
+            .as_ref()
+            .is_some_and(|policy| policy.id == request.policy_id)
         {
             rejection
         } else {
@@ -1000,6 +1114,7 @@ fn spawn_worker(
                     wire::Operation::TerminalOpen { receipt, terminal } => native.terminal(
                         receipt,
                         terminal,
+                        config.approved_volume_policy.clone(),
                         remaining,
                         work.cancel.clone(),
                         &mut TerminalChannel {
@@ -1007,6 +1122,15 @@ fn spawn_worker(
                             id: work.id,
                         },
                     ),
+                    wire::Operation::Volume { request } => match config
+                        .approved_volume_policy
+                        .as_ref()
+                    {
+                        Some(policy) if policy.id == request.policy_id => {
+                            native.volume(policy.clone(), request, remaining, work.cancel.clone())
+                        }
+                        _ => before(wire::SafeCode::Unsupported),
+                    },
                     wire::Operation::PrepareArtifact {
                         source,
                         credential_ref,
@@ -1042,15 +1166,54 @@ fn spawn_worker(
                                         .matches(&source, create.source.credential_ref.as_deref())
                                 })
                             }) {
-                            Some(approval) if size_bytes <= approval.max_bytes => native
-                                .create_registry_prepared(
-                                    create,
-                                    size_bytes,
-                                    approval.clone(),
-                                    remaining,
-                                    work.cancel.clone(),
-                                ),
+                            Some(approval) if size_bytes <= approval.max_bytes => {
+                                if create.volume_mounts.is_some() {
+                                    match &config.approved_volume_policy {
+                                        Some(policy) => native.create_registry_mounted_prepared(
+                                            create,
+                                            size_bytes,
+                                            approval.clone(),
+                                            policy.clone(),
+                                            remaining,
+                                            work.cancel.clone(),
+                                        ),
+                                        None => before(wire::SafeCode::Unsupported),
+                                    }
+                                } else {
+                                    native.create_registry_prepared(
+                                        create,
+                                        size_bytes,
+                                        approval.clone(),
+                                        remaining,
+                                        work.cancel.clone(),
+                                    )
+                                }
+                            }
                             _ => before(wire::SafeCode::Unsupported),
+                        }
+                    }
+                    operation
+                        if operation.creation_mounts().is_some()
+                            || matches!(
+                                &operation,
+                                wire::Operation::Start { .. }
+                                    | wire::Operation::StartOci { .. }
+                                    | wire::Operation::Exec { .. }
+                                    | wire::Operation::ExecBuffered { .. }
+                                    | wire::Operation::ExecStream { .. }
+                                    | wire::Operation::ExecBackground { .. }
+                            ) && config.approved_volume_policy.is_some() =>
+                    {
+                        match &config.approved_volume_policy {
+                            Some(policy) => native.run_with_volume_policy(
+                                operation,
+                                policy.clone(),
+                                remaining,
+                                work.cancel.clone(),
+                                upload,
+                                &mut |stream, bytes| shared.event(work.id, stream, bytes),
+                            ),
+                            None => before(wire::SafeCode::Unsupported),
                         }
                     }
                     operation => native.run(
@@ -1309,6 +1472,86 @@ mod tests {
         uploaded: Mutex<Vec<u8>>,
     }
     impl Native for Fake {
+        fn run_with_volume_policy(
+            &self,
+            operation: wire::Operation,
+            policy: smolbox_engine::LocalVolumePolicy,
+            _remaining: Duration,
+            _cancel: Cancellation,
+            _upload: Option<File>,
+            _emit: &mut dyn FnMut(wire::Stream, &[u8]) -> BridgeResult<()>,
+        ) -> wire::Outcome {
+            if let Some(mounts) = operation.creation_mounts() {
+                assert!(!mounts.is_empty());
+                for mount in mounts {
+                    assert_eq!(mount.proof.backing.policy.id, policy.id);
+                    assert_eq!(
+                        mount.proof.backing.policy.root,
+                        policy.root.to_str().unwrap()
+                    );
+                }
+            } else {
+                assert!(matches!(
+                    operation,
+                    wire::Operation::Start { .. }
+                        | wire::Operation::StartOci { .. }
+                        | wire::Operation::Exec { .. }
+                        | wire::Operation::ExecBuffered { .. }
+                        | wire::Operation::ExecStream { .. }
+                        | wire::Operation::ExecBackground { .. }
+                ));
+            }
+            self.calls.fetch_add(1, Ordering::AcqRel);
+            if matches!(
+                &operation,
+                wire::Operation::Exec { .. }
+                    | wire::Operation::ExecBuffered { .. }
+                    | wire::Operation::ExecStream { .. }
+            ) {
+                assert_eq!(policy.id, "local");
+                assert_eq!(policy.root, std::path::Path::new("/srv/smolvm/volumes"));
+                _emit(wire::Stream::Stdout, &[0, 255, 128]).unwrap();
+                return wire::Outcome::Command {
+                    completion: wire::Completion::Exited,
+                    dispatch: wire::Dispatch::MayHaveDispatched,
+                    observed_exit: Some(0),
+                    running_observed: true,
+                    output_bytes: 3,
+                };
+            }
+            before(wire::SafeCode::Native)
+        }
+        fn create_registry_mounted_prepared(
+            &self,
+            create: wire::RegistryCreate,
+            _size: u64,
+            _approval: crate::package::RegistryApproval,
+            policy: smolbox_engine::LocalVolumePolicy,
+            _remaining: Duration,
+            _cancel: Cancellation,
+        ) -> wire::Outcome {
+            self.run_with_volume_policy(
+                wire::Operation::InspectRegistryCreation { create },
+                policy,
+                _remaining,
+                _cancel,
+                None,
+                &mut |_, _| Err(()),
+            )
+        }
+        fn volume(
+            &self,
+            policy: smolbox_engine::LocalVolumePolicy,
+            request: wire::VolumeRequest,
+            _remaining: Duration,
+            _cancel: Cancellation,
+        ) -> wire::Outcome {
+            self.calls.fetch_add(1, Ordering::AcqRel);
+            assert_eq!(policy.id, request.policy_id);
+            wire::Outcome::Volume {
+                volume: wire::VolumeResult::Unverified,
+            }
+        }
         fn create_registry_prepared(
             &self,
             _create: wire::RegistryCreate,
@@ -1342,10 +1585,15 @@ mod tests {
             &self,
             _receipt: wire::Receipt,
             spec: wire::TerminalSpec,
+            policy: Option<smolbox_engine::LocalVolumePolicy>,
             remaining: Duration,
             cancel: Cancellation,
             bridge: &mut dyn TerminalBridge,
         ) -> wire::Outcome {
+            if let Some(policy) = policy {
+                assert_eq!(policy.id, "local");
+                assert_eq!(policy.root, std::path::Path::new("/srv/smolvm/volumes"));
+            }
             self.calls.fetch_add(1, Ordering::AcqRel);
             bridge.opened().unwrap();
             if spec.program == "credit_wait" || spec.program == "controls_wait" {
@@ -1401,7 +1649,12 @@ mod tests {
             let mut resized = false;
             while Instant::now() < end && !cancel.is_cancelled() {
                 match bridge.control() {
-                    Ok(Some(smolbox_engine::TerminalMessage::Attach)) => attached = true,
+                    Ok(Some(smolbox_engine::TerminalMessage::Attach)) => {
+                        attached = true;
+                        if spec.program == "paced_controls" {
+                            self.started.send(()).unwrap();
+                        }
+                    }
                     Ok(Some(smolbox_engine::TerminalMessage::Consumed { sequence, bytes })) => {
                         assert_eq!((sequence, bytes), (1, 3));
                         credited = true;
@@ -1411,12 +1664,18 @@ mod tests {
                     ))) => {
                         assert_eq!(bytes, [255, 0]);
                         input = true;
+                        if spec.program == "paced_controls" {
+                            self.started.send(()).unwrap();
+                        }
                     }
                     Ok(Some(smolbox_engine::TerminalMessage::Command(
                         smolbox_engine::TerminalControl::Resize { cols, rows },
                     ))) => {
                         assert_eq!((cols, rows), (120, 43));
                         resized = true;
+                        if spec.program == "paced_controls" {
+                            self.started.send(()).unwrap();
+                        }
                     }
                     Ok(Some(smolbox_engine::TerminalMessage::Command(
                         smolbox_engine::TerminalControl::Close,
@@ -1767,6 +2026,110 @@ mod tests {
         assert!(fake.shutdown_called.load(Ordering::Acquire));
     }
     #[test]
+    fn terminal_with_volume_policy_preserves_credit_resize_normal_close_and_control() {
+        let mut h = terminal_hello();
+        let sdk = h.sdk.as_mut().unwrap();
+        sdk.feature_versions
+            .extend([("volumes".into(), 1), ("compact_creation".into(), 1)]);
+        h.capabilities = sdk.capabilities();
+        h.limits = wire::Limits::for_sdk(sdk);
+        h.package.platform = "linux".into();
+        h.package.architecture = "x86_64".into();
+        let policy = smolbox_engine::LocalVolumePolicy {
+            id: "local".into(),
+            root: "/srv/smolvm/volumes".into(),
+        };
+        let (mut client, fake, started, thread) =
+            start_with_all_catalogs(h.clone(), None, None, Some(policy));
+        send(&mut client, terminal_request(&h, Some("paced_controls")));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Accepted { id: 1, .. }
+        ));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::TerminalOpened { id: 1, .. }
+        ));
+        assert!(
+            matches!(receive(&mut client), wire::ServerMessage::Event { event, .. }
+            if event.stream == wire::Stream::Terminal && wire::decode_chunk(&event.data_base64).unwrap() == [0, 255, 128])
+        );
+        send(&mut client, request(2, wire::Operation::Readiness));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Accepted { id: 2, .. }
+        ));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Terminal {
+                id: 2,
+                outcome: wire::Outcome::Ready,
+                ..
+            }
+        ));
+        send(
+            &mut client,
+            wire::ClientMessage::Credit {
+                epoch: h.epoch.clone(),
+                id: 1,
+                decoded_bytes: 3,
+                events: 1,
+            },
+        );
+        for (sequence, control) in [
+            (1, wire::TerminalAction::Attach),
+            (
+                2,
+                wire::TerminalAction::Input {
+                    data_base64: wire::encode_chunk(&[255, 0]).unwrap(),
+                },
+            ),
+            (
+                3,
+                wire::TerminalAction::Resize {
+                    cols: 120,
+                    rows: 43,
+                },
+            ),
+            (4, wire::TerminalAction::Close),
+        ] {
+            send(
+                &mut client,
+                wire::ClientMessage::TerminalControl {
+                    epoch: h.epoch.clone(),
+                    id: 1,
+                    sequence,
+                    control,
+                },
+            );
+            if sequence < 4 {
+                started.recv_timeout(Duration::from_secs(1)).unwrap();
+            }
+        }
+        let closed = receive(&mut client);
+        assert!(
+            matches!(
+                closed,
+                wire::ServerMessage::Terminal {
+                    id: 1,
+                    outcome: wire::Outcome::Terminal {
+                        completion: wire::Completion::Exited,
+                        observed_exit: Some(7),
+                        worker_collected: true,
+                        output_bytes: 3,
+                        ..
+                    },
+                    ..
+                }
+            ),
+            "{}",
+            serde_json::to_string(&closed).unwrap()
+        );
+        assert_eq!(fake.calls.load(Ordering::Acquire), 2);
+        shutdown(client, thread);
+    }
+
+    #[test]
     fn terminal_credit_wait_and_input_exhaustion_preserve_control_isolation() {
         for program in ["credit_wait", "controls_wait"] {
             let h = terminal_hello();
@@ -1920,6 +2283,44 @@ mod tests {
         Receiver<()>,
         std::thread::JoinHandle<BridgeResult<()>>,
     ) {
+        start_with_all_catalogs(
+            approved,
+            approved_oci_sources,
+            approved_registry_sources,
+            None,
+        )
+    }
+    fn start_with_all_catalogs(
+        approved: wire::Hello,
+        approved_oci_sources: Option<Vec<wire::OciSource>>,
+        approved_registry_sources: Option<Vec<crate::package::RegistryApproval>>,
+        approved_volume_policy: Option<smolbox_engine::LocalVolumePolicy>,
+    ) -> (
+        UnixStream,
+        Arc<Fake>,
+        Receiver<()>,
+        std::thread::JoinHandle<BridgeResult<()>>,
+    ) {
+        start_with_catalogs_and_artifacts(
+            approved,
+            approved_oci_sources,
+            approved_registry_sources,
+            approved_volume_policy,
+            vec![],
+        )
+    }
+    fn start_with_catalogs_and_artifacts(
+        approved: wire::Hello,
+        approved_oci_sources: Option<Vec<wire::OciSource>>,
+        approved_registry_sources: Option<Vec<crate::package::RegistryApproval>>,
+        approved_volume_policy: Option<smolbox_engine::LocalVolumePolicy>,
+        approved_artifacts: Vec<wire::Artifact>,
+    ) -> (
+        UnixStream,
+        Arc<Fake>,
+        Receiver<()>,
+        std::thread::JoinHandle<BridgeResult<()>>,
+    ) {
         let (mut client, server) = UnixStream::pair().unwrap();
         client
             .set_read_timeout(Some(Duration::from_secs(3)))
@@ -1943,9 +2344,10 @@ mod tests {
             generation: "cd".repeat(16),
             allow_initialize: false,
             package_manifest_sha256: "01".repeat(32),
-            approved_artifacts: vec![],
+            approved_artifacts,
             approved_oci_sources,
             approved_registry_sources,
+            approved_volume_policy,
         };
         let declared = approved.clone();
         let thread = std::thread::spawn(move || {
@@ -1967,6 +2369,339 @@ mod tests {
             wire::ClientMessage::Approve { hello: approved },
         );
         (client, fake, started, thread)
+    }
+
+    #[test]
+    fn policy_command_dispatch_preserves_credited_bytes_and_sibling_control() {
+        let mut h = terminal_hello();
+        let sdk = h.sdk.as_mut().unwrap();
+        sdk.feature_versions.extend([
+            ("volumes".into(), 1),
+            ("compact_creation".into(), 1),
+            ("streaming_exec".into(), 1),
+        ]);
+        h.capabilities = sdk.capabilities();
+        h.limits = wire::Limits::for_sdk(sdk);
+        h.package.platform = "linux".into();
+        h.package.architecture = "x86_64".into();
+        let mut receipt = serde_json::from_slice::<Vec<wire::GrowthTransition>>(include_bytes!(
+            "../../smolbox-protocol/fixtures/growth-transitions-v1.json"
+        ))
+        .unwrap()
+        .remove(0)
+        .previous;
+        receipt.target_id = h.domain.target_id.clone();
+        receipt.domain_generation = h.domain.generation.clone();
+        let policy = smolbox_engine::LocalVolumePolicy {
+            id: "local".into(),
+            root: "/srv/smolvm/volumes".into(),
+        };
+        let (mut client, fake, _started, thread) =
+            start_with_all_catalogs(h.clone(), None, None, Some(policy));
+        let command = wire::BufferedCommand {
+            argv: vec!["true".into()],
+            env: Default::default(),
+            workdir: None,
+            user: None,
+            stdin: None,
+            max_output_bytes: 1024,
+        };
+        for (index, operation) in [
+            wire::Operation::ExecBuffered {
+                receipt: receipt.clone(),
+                command: command.clone(),
+            },
+            wire::Operation::ExecStream {
+                receipt: receipt.clone(),
+                command,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            send(&mut client, request(index as u64 + 1, operation));
+            assert!(matches!(
+                receive(&mut client),
+                wire::ServerMessage::Accepted { .. }
+            ));
+            assert!(
+                matches!(receive(&mut client), wire::ServerMessage::Event { event, .. }
+                if event.stream == wire::Stream::Stdout && wire::decode_chunk(&event.data_base64).unwrap() == [0, 255, 128])
+            );
+            assert!(matches!(
+                receive(&mut client),
+                wire::ServerMessage::Terminal {
+                    outcome: wire::Outcome::Command {
+                        observed_exit: Some(0),
+                        output_bytes: 3,
+                        ..
+                    },
+                    ..
+                }
+            ));
+        }
+        assert_eq!(fake.calls.load(Ordering::Acquire), 2);
+        send(&mut client, request(3, wire::Operation::Readiness));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Accepted { .. }
+        ));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Terminal {
+                outcome: wire::Outcome::Ready,
+                ..
+            }
+        ));
+        shutdown(client, thread);
+    }
+
+    #[test]
+    fn mounted_source_creation_and_pack_start_forward_exact_operator_policy() {
+        let mut h = terminal_hello();
+        let sdk = h.sdk.as_mut().unwrap();
+        sdk.feature_versions.extend([
+            ("volumes".into(), 1),
+            ("compact_creation".into(), 1),
+            ("remote_sources".into(), 1),
+        ]);
+        h.capabilities = sdk.capabilities();
+        h.limits = wire::Limits::for_sdk(sdk);
+        h.package.platform = "linux".into();
+        h.package.architecture = "x86_64".into();
+        let mut fixture: serde_json::Value = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/mounted-creation-request.json"
+        ))
+        .unwrap();
+        let create = &mut fixture["operation"]["create"];
+        create["volume_mounts"][0]["proof"]["backing"]["target_id"] =
+            serde_json::json!(h.domain.target_id);
+        create["volume_mounts"][0]["proof"]["backing"]["domain_generation"] =
+            serde_json::json!(h.domain.generation);
+        let local: wire::Create = serde_json::from_value(create.clone()).unwrap();
+        let source = wire::OciSource {
+            reference: format!("registry.example/app@sha256:{}", "d".repeat(64)),
+            platform: "linux/amd64".into(),
+        };
+        create.as_object_mut().unwrap().remove("artifact");
+        create["source"] = serde_json::json!({"kind":"oci","id":"approved","sha256":"d".repeat(64),"architecture":"x86_64","reference":source.reference});
+        let oci: wire::OciCreate = serde_json::from_value(create.clone()).unwrap();
+        let mut registry = create.clone();
+        registry["source"]["kind"] = serde_json::json!("registry");
+        registry["source"]["content_sha256"] = serde_json::json!("e".repeat(64));
+        let registry: wire::RegistryCreate = serde_json::from_value(registry).unwrap();
+        let approval = crate::package::RegistryApproval {
+            source: smolbox_engine::RegistryArtifactSource {
+                reference: source.reference.clone(),
+                platform: source.platform.clone(),
+                content_sha256: "e".repeat(64),
+            },
+            max_bytes: 1024,
+            cache_policy: smolbox_engine::RegistryCachePolicy {
+                max_bytes: 1024,
+                max_files: 1,
+            },
+            credential_ref: None,
+            token_realm: None,
+        };
+        for root in ["/foreign", "/srv/smolvm/volumes"] {
+            let policy = smolbox_engine::LocalVolumePolicy {
+                id: "local".into(),
+                root: root.into(),
+            };
+            let (mut client, fake, _started, thread) = start_with_catalogs_and_artifacts(
+                h.clone(),
+                Some(vec![source.clone()]),
+                Some(vec![approval.clone()]),
+                Some(policy),
+                vec![local.artifact.clone()],
+            );
+            for (index, operation) in [
+                wire::Operation::Create {
+                    create: local.clone(),
+                },
+                wire::Operation::CreateOci {
+                    create: oci.clone(),
+                },
+                wire::Operation::CreateRegistryPrepared {
+                    create: registry.clone(),
+                    size_bytes: 123,
+                },
+            ]
+            .into_iter()
+            .enumerate()
+            {
+                send(&mut client, request(index as u64 + 1, operation));
+                if root == "/srv/smolvm/volumes" {
+                    assert!(matches!(
+                        receive(&mut client),
+                        wire::ServerMessage::Accepted { .. }
+                    ));
+                    assert!(matches!(
+                        receive(&mut client),
+                        wire::ServerMessage::Terminal {
+                            outcome: wire::Outcome::Error {
+                                code: wire::SafeCode::Native,
+                                dispatch: wire::Dispatch::NotDispatched
+                            },
+                            ..
+                        }
+                    ));
+                    assert_eq!(fake.calls.load(Ordering::Acquire), index + 1);
+                } else {
+                    assert!(matches!(
+                        receive(&mut client),
+                        wire::ServerMessage::Terminal {
+                            outcome: wire::Outcome::Error {
+                                code: wire::SafeCode::Unsupported,
+                                dispatch: wire::Dispatch::NotDispatched
+                            },
+                            ..
+                        }
+                    ));
+                    assert_eq!(fake.calls.load(Ordering::Acquire), 0);
+                }
+            }
+            let mut start_receipt = serde_json::from_slice::<Vec<wire::GrowthTransition>>(
+                include_bytes!("../../smolbox-protocol/fixtures/growth-transitions-v1.json"),
+            )
+            .unwrap()
+            .remove(0)
+            .previous;
+            start_receipt.target_id = h.domain.target_id.clone();
+            start_receipt.domain_generation = h.domain.generation.clone();
+            send(
+                &mut client,
+                request(
+                    4,
+                    wire::Operation::Start {
+                        receipt: start_receipt.clone(),
+                    },
+                ),
+            );
+            assert!(matches!(
+                receive(&mut client),
+                wire::ServerMessage::Accepted { .. }
+            ));
+            assert!(matches!(
+                receive(&mut client),
+                wire::ServerMessage::Terminal {
+                    outcome: wire::Outcome::Error {
+                        code: wire::SafeCode::Native,
+                        ..
+                    },
+                    ..
+                }
+            ));
+            assert_eq!(
+                fake.calls.load(Ordering::Acquire),
+                if root == "/foreign" { 1 } else { 4 }
+            );
+            send(
+                &mut client,
+                request(
+                    5,
+                    wire::Operation::StartOci {
+                        receipt: start_receipt,
+                        source: oci.source.clone(),
+                    },
+                ),
+            );
+            assert!(matches!(
+                receive(&mut client),
+                wire::ServerMessage::Accepted { .. }
+            ));
+            assert!(matches!(
+                receive(&mut client),
+                wire::ServerMessage::Terminal {
+                    outcome: wire::Outcome::Error {
+                        code: wire::SafeCode::Native,
+                        ..
+                    },
+                    ..
+                }
+            ));
+            assert_eq!(
+                fake.calls.load(Ordering::Acquire),
+                if root == "/foreign" { 2 } else { 5 }
+            );
+            shutdown(client, thread);
+        }
+    }
+
+    #[test]
+    fn volume_requests_require_exact_operator_catalog_before_native_entry() {
+        let mut approved = terminal_hello();
+        let sdk = approved.sdk.as_mut().unwrap();
+        sdk.feature_versions.insert("volumes".into(), 1);
+        sdk.feature_versions.insert("compact_creation".into(), 1);
+        approved.capabilities = sdk.capabilities();
+        approved.limits = wire::Limits::for_sdk(sdk);
+        approved.package.platform = "linux".into();
+        approved.package.architecture = "x86_64".into();
+        let operation = |policy_id: &str| wire::Operation::Volume {
+            request: wire::VolumeRequest {
+                policy_id: policy_id.into(),
+                intent: wire::VolumeIntent {
+                    worker_volume_id: format!("sbv-{}", "a".repeat(32)),
+                    size_gb: 4,
+                },
+                action: wire::VolumeAction::InspectProvision,
+            },
+        };
+        for catalog in [
+            None,
+            Some(smolbox_engine::LocalVolumePolicy {
+                id: "local".into(),
+                root: "/srv/smolvm/volumes".into(),
+            }),
+        ] {
+            let present = catalog.is_some();
+            let (mut client, fake, _started, thread) =
+                start_with_all_catalogs(approved.clone(), None, None, catalog);
+            send(&mut client, request(1, operation("other")));
+            assert!(matches!(
+                receive(&mut client),
+                wire::ServerMessage::Terminal {
+                    outcome: wire::Outcome::Error {
+                        code: wire::SafeCode::Unsupported,
+                        dispatch: wire::Dispatch::NotDispatched
+                    },
+                    ..
+                }
+            ));
+            assert_eq!(fake.calls.load(Ordering::Acquire), 0);
+            send(&mut client, request(2, operation("local")));
+            if present {
+                assert!(matches!(
+                    receive(&mut client),
+                    wire::ServerMessage::Accepted { id: 2, .. }
+                ));
+                assert!(matches!(
+                    receive(&mut client),
+                    wire::ServerMessage::Terminal {
+                        outcome: wire::Outcome::Volume {
+                            volume: wire::VolumeResult::Unverified
+                        },
+                        ..
+                    }
+                ));
+                assert_eq!(fake.calls.load(Ordering::Acquire), 1);
+            } else {
+                assert!(matches!(
+                    receive(&mut client),
+                    wire::ServerMessage::Terminal {
+                        outcome: wire::Outcome::Error {
+                            code: wire::SafeCode::Unsupported,
+                            ..
+                        },
+                        ..
+                    }
+                ));
+                assert_eq!(fake.calls.load(Ordering::Acquire), 0);
+            }
+            shutdown(client, thread);
+        }
     }
     #[test]
     fn registry_catalog_rejects_missing_crossed_and_credentials_before_native_preparation() {
@@ -2255,6 +2990,7 @@ mod tests {
                 overlay_gib: 1,
             },
             labels: BTreeMap::new(),
+            volume_mounts: None,
             features: None,
         };
         let mut wrong = approval.clone();
@@ -3073,6 +3809,7 @@ mod tests {
             approved_artifacts: vec![],
             approved_oci_sources: None,
             approved_registry_sources: None,
+            approved_volume_policy: None,
         };
         spawn_reader(shared.clone(), queued, server, controls, config);
         send(&mut client, wire::ClientMessage::Approve { hello: hello() });

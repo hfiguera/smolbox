@@ -79,6 +79,20 @@ impl Session {
             if rejection.is_some() {
                 rejection
             } else if !self.hello.capabilities.contains(&operation.capability())
+                || (matches!(&operation, Operation::Volume { .. })
+                    && (self.hello.major != 2
+                        || self
+                            .hello
+                            .sdk
+                            .as_ref()
+                            .is_none_or(|sdk| sdk.feature_versions.get("volumes") != Some(&1))))
+                || (operation.creation_mounts().is_some()
+                    && (self.hello.major != 2
+                        || self
+                            .hello
+                            .sdk
+                            .as_ref()
+                            .is_none_or(|sdk| sdk.feature_versions.get("volumes") != Some(&1))))
                 || (operation.requires_remote_source()
                     && (self.hello.major != 2
                         || self.hello.sdk.as_ref().is_none_or(|sdk| {
@@ -91,6 +105,8 @@ impl Session {
                 Some(SafeCode::Unsupported)
             } else if operation.receipt().is_some_and(|r| {
                 !r.matches_domain(&self.hello.domain) || r.validate_for(self.hello.major).is_err()
+            }) || operation.creation_mounts().is_some_and(|mounts| {
+                crate::VolumeMount::bound(mounts, &self.hello.domain).is_err()
             }) {
                 Some(SafeCode::Ownership)
             } else if self.pending.len() >= MAX_IN_FLIGHT {
@@ -441,6 +457,10 @@ impl Session {
                 },
             ) => {
                 check(pending.output_bytes == 0 && source == observed)?;
+            }
+            (Operation::Volume { request }, Outcome::Volume { volume }) => {
+                check(pending.output_bytes == 0)?;
+                volume.matches(request, &self.hello.domain)?;
             }
             (Operation::PullImage { source, .. }, Outcome::Pulled { image }) => {
                 check(pending.output_bytes == 0)?;

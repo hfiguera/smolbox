@@ -4,6 +4,7 @@ defmodule SmolBox.Volume do
   Creating, deleting and unknown records retain their full reservation. No
   operation is replayed automatically. Deleted identities remain tombstones.
   """
+  alias SmolBox.Embedded.VolumeAuthority
   alias SmolBox.{Error, Validation, VolumePolicy}
 
   @enforce_keys [
@@ -24,7 +25,8 @@ defmodule SmolBox.Volume do
                 version: 1,
                 attached_to: nil,
                 last_error: nil,
-                request_version: nil
+                request_version: nil,
+                native_authority: nil
               ]
 
   @type key :: {String.t(), String.t()}
@@ -42,7 +44,8 @@ defmodule SmolBox.Volume do
           version: pos_integer(),
           attached_to: key() | nil,
           last_error: Error.t() | nil,
-          request_version: pos_integer() | nil
+          request_version: pos_integer() | nil,
+          native_authority: SmolBox.Embedded.VolumeAuthority.t() | nil
         }
   @doc false
   def path(v), do: v.policy.root <> "/" <> v.worker_volume_id
@@ -60,10 +63,13 @@ defmodule SmolBox.Volume do
   @doc false
   def validate(%__MODULE__{} = v) do
     if Validation.struct_shape?(v, __MODULE__) and identity?(v) and lifecycle?(v) and
-         attachment_valid?(v), do: :ok, else: error(:validation)
+         attachment_valid?(v) and native?(v), do: :ok, else: error(:validation)
   end
 
   def validate(_), do: error(:validation)
+
+  defp native?(%{native_authority: nil}), do: true
+  defp native?(v), do: VolumeAuthority.valid?(v.native_authority, v)
 
   defp identity?(v) do
     Enum.all?([v.scope, v.id, v.worker_id], &Validation.identifier?/1) and
@@ -98,7 +104,14 @@ defmodule SmolBox.Volume do
         Map.merge(changes, %{version: v.version + 1, updated_at_ms: max(now, v.updated_at_ms)})
       )
 
-    with :ok <- validate(next), do: {:ok, next}
+    with true <-
+           Map.take(v, @enforce_keys -- [:updated_at_ms]) ==
+             Map.take(next, @enforce_keys -- [:updated_at_ms]),
+         true <-
+           VolumeAuthority.transition?(v.native_authority, next.native_authority),
+         :ok <- validate(next),
+         do: {:ok, next},
+         else: (_ -> error(:validation))
   end
 
   defp error(category), do: {:error, %Error{category: category, operation: :volume}}

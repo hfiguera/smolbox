@@ -57,16 +57,28 @@ mod oci_start;
 mod registry_artifact;
 mod registry_credentials;
 pub use registry_credentials::RegistryIdentityCredential;
+mod mount_material;
 mod registry_io;
+mod volumes;
+pub use mount_material::MountMaterial;
 pub use oci::{OciConfigDescriptor, VerifiedOci, OCI_METADATA_BYTES};
 pub use registry_artifact::{
     QualifiedRegistryArtifact, RegistryArtifactSource, RegistryBlobDescriptor, RegistryCachePolicy,
     RegistryCachedBlob, REGISTRY_CACHE_BYTES, REGISTRY_CACHE_FILES,
 };
+pub use volumes::{
+    LocalVolumeIntent, LocalVolumePolicy, QualifiedVolumeMounts, QualifiedVolumeRoot,
+    VolumeAccount, VolumeDeletionPermit, VolumeDeletionPresence, VolumeDeletionReceipt,
+    VolumeMountRequest, VolumeMountSelection, VolumeProvisionPresence, VolumeProvisionReceipt,
+    VolumeStagingAbortPresence, VolumeStagingAbortReceipt, VolumeStagingPresence,
+    VolumeStagingReceipt, VOLUME_ANCESTOR_BYTES, VOLUME_DELETE_ENTRIES, VOLUME_MOUNTS,
+    VOLUME_OBSERVATION_METADATA_BYTES, VOLUME_OBSERVATION_MS, VOLUME_RECORD_BYTES, VOLUME_WORK_MS,
+};
 mod sdk_compat;
 pub use jobs::{
-    JOB_CHILDREN, JOB_CONTROL_HEADROOM, JOB_CONTROL_SLOTS, JOB_DESCRIPTORS, JOB_METADATA_BYTES,
-    JOB_REGISTRY_STAGING_BYTES, JOB_STAGING_BYTES, JOB_WORK_SLOTS,
+    JOB_CHILDREN, JOB_CONTROL_HEADROOM, JOB_CONTROL_METADATA_BYTES, JOB_CONTROL_SLOTS,
+    JOB_DESCRIPTORS, JOB_METADATA_BYTES, JOB_REGISTRY_STAGING_BYTES, JOB_STAGING_BYTES,
+    JOB_WORK_SLOTS,
 };
 mod transfer_supervisor;
 mod transfer_worker;
@@ -74,7 +86,8 @@ mod transfer_worker;
 pub use artifact::ApprovedArtifact;
 pub use assets::{ApprovedTemplate, ApprovedTemplates, TemplateFile};
 pub use creation_features::{
-    CreationFeatures, MachineConfiguration, NetworkPolicy, PortMapping, StartupWorkload,
+    CreationFeatures, MachineConfiguration, NetworkPolicy, ObservedMount, PortMapping,
+    StartupWorkload,
 };
 pub use domain::DomainBinding;
 pub use exec::{Cancellation, Command, CommandOutcome, Completion, Output, Stream};

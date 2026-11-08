@@ -3,7 +3,9 @@
 The embedded Port backend supports explicitly approved development packages.
 The workspace builds against an unmodified SDK. Exact engine 0.1.0 packages have
 completed ordinary development qualification on Linux x86_64 and macOS arm64;
-the new 0.2.0/protocol-2 packages still need their own platform evidence. Follow the
+an exact rebuilt Linux 0.2.0/protocol-2 package now has
+[ordinary raw Port lifecycle evidence](../docs/evidence/embedded-port-http-parity-linux-lifecycle.json).
+Public consumers, stores and expanded feature qualification remain pending. Follow the
 [migration design](../docs/design/embedded-port-unmodified-sdk.md),
 [implementation plan](../docs/design/embedded-port-unmodified-sdk-implementation-plan.md),
 and [progress evidence](../docs/design/embedded-port-progress.md).
@@ -13,6 +15,11 @@ compatible helper replacement and bare-VM snapshot imports on both platforms.
 The [completion audit](../docs/design/embedded-port-unmodified-sdk-completion-audit.md)
 maps every plan item to implementation and evidence. Historical patched-package
 and live fault evidence is separate.
+
+The owned Port process sets umask 077 before SDK work and threads, so fresh
+SDK directories and files are private even with a shared-group caller default.
+The shared engine leaves process-wide umask control to the bridge; a future
+Rustler bridge must preserve BEAM process settings.
 
 The protocol crate builds independently of hypervisor assets and implements
 bounded framing, [versioned DTOs and admission/credit state](smolbox-protocol/README.md).

@@ -55,6 +55,7 @@ defmodule SmolBox.ManagedMachine do
                 active_export: nil,
                 reserved_ports: [],
                 mounts: [],
+                native_mounts: [],
                 volume_worker_id: nil,
                 schema: 1,
                 version: 1,
@@ -163,6 +164,7 @@ defmodule SmolBox.ManagedMachine do
          now = max(now, record.updated_at_ms),
          next =
            struct!(record, Map.merge(changes, %{version: record.version + 1, updated_at_ms: now})),
+         true <- next.native_mounts == record.native_mounts,
          :ok <- validate(next) do
       {:ok, next}
     else

@@ -1,6 +1,6 @@
 defmodule SmolBox.Embedded.NativeSource do
   @moduledoc false
-  alias SmolBox.Embedded.{CreationFeatures, Shape}
+  alias SmolBox.Embedded.{MountContract, Shape}
   alias SmolBox.Source
 
   # Durable source intent is separate from prepared metadata and a wire request.
@@ -19,9 +19,7 @@ defmodule SmolBox.Embedded.NativeSource do
   defp creation_shape?(creation, source?) do
     keys = ~w(name owner_token incarnation source resources labels)
 
-    (Shape.keys?(creation, keys) or
-       (Shape.keys?(creation, keys ++ ["features"]) and
-          CreationFeatures.valid?(creation["features"]))) and
+    MountContract.creation_keys?(creation, keys, 2) and
       Shape.id?(creation["name"]) and Shape.hex?(creation["owner_token"], 64) and
       Shape.hex?(creation["incarnation"], 32) and source?.(creation["source"]) and
       Shape.resources?(creation["resources"]) and creation["labels"] == %{}

@@ -5308,3 +5308,1078 @@ This is admission/regression evidence, not live authenticated/platform/package
 feature qualification. Full P0–P9 scope remains pending; crash validation deferred,
 remote_sources disabled and distribution approval separate. No source patches,
 historical evidence transfer, push or publication.
+
+## October 13, 2026 — Linux volume root qualification foundation
+
+The unmodified SDK 1.22.0 volume handler performs direct filesystem creation,
+sets the backing directory to 0777 and supplies no volume ownership receipt.
+The embedded engine therefore starts with explicit operator policy and generated
+`sbv-<32 lowercase hex>` intent, preserving the public 1–1024-GiB advisory
+reservation bounds. It does not treat an existing directory as a managed volume.
+
+The Linux-only engine qualifier reads the canonical SDK node-local root without
+creating it, rejects the relative SDK fallback, requires exact operator-approved
+root identity and opens a non-following directory descriptor. Account UID, owner
+access, special bits, group/other write permissions, unredirected components and
+path/descriptor device/inode are checked on open and revalidation. Replacement,
+unsafe permissions, files, symlinks and missing roots fail without repair,
+chmod, adoption or deletion. Debug output excludes paths and volume IDs.
+
+The opaque handle retains a work-slot/descriptor lease until drop; it cannot
+consume the reserved control slots. It is neither child ownership nor guest-write
+readiness. Durable authenticated provisioning/deletion evidence, helper config
+and wire/public integration, root setup, mount authority and actual Linux isolated
+guest UID/replacement writes remain pending. No volumes capability activates.
+
+Eight ordinary non-VM contracts pass. Rust workspace units pass 294 cases
+(255 engine, 30 bridge, nine protocol), with 13 helper fixture cases left ignored.
+Strict workspace all-target Clippy and Rust documentation checks pass, and
+bootstrap verifies unmodified SDK bytes. Private logs remain ignored. No live interruption/crash validation,
+source patch, historical package evidence transfer, push or publication occurs.
+
+## October 13, 2026 — fresh volume backing and protected staging evidence
+
+Shared Engine.stage_volume now prepares fresh private backing after Linux root
+qualification and a volume-specific gate. Before any child mutation it publishes
+an immutable 0600 intent in a descriptor-bound 0700 native ledger. The record
+binds target/domain generation, exact policy, generated ID/size, root identity
+and a fresh random ownership token. Descriptor-relative mkdir refuses existing
+directories, files and links. Only the newly created backing descriptor receives
+0700 access; root and child synchronization precede a distinct completion record.
+
+Completion binds the original root and resulting child device/inode, matching
+intent/token and private mode. Publication reopens the recorded name to verify
+identity, ownership, mode, link count and length within the four-descriptor
+allowance. Root, child, ledger and engine domain are rechecked before returning.
+Existing, incomplete or duplicate attempts cannot replay or infer completion
+from directory inventory. Errors after intent publication are uncertain and
+retain evidence/backing; no automatic cleanup or adoption is introduced. Debug
+output omits paths, generated volume IDs and ownership tokens.
+
+This is internal staging evidence, not Backend.provision_volume readiness. It
+does not claim isolated guest write access. Protected proof observation/deletion,
+the qualified guest-access transition, root setup, native wire/config/public
+integration, store history and mounts remain pending. Ordinary Linux guest UID
+and replacement-write qualification is still required; volumes stay disabled.
+
+Eight new ordinary non-VM staging contracts pass, including incomplete-intent and
+ledger-substitution models. Rust workspace units pass 302 cases (263 engine,
+30 bridge, nine protocol); 13 helper fixtures remain ignored. Strict workspace
+Clippy/docs, formatting and unmodified SDK verification pass. Raw evidence stays
+ignored/private. Crash validation remains deferred; no upstream changes,
+historical qualification transfer, push or publication occurs.
+
+## October 13, 2026 — bounded read-only volume staging observation
+
+Engine.inspect_volume_staging now observes exact protected intent/completion
+records and the current backing descriptor. It never calls the ledger initializer,
+mkdir, chmod, fsync, repair or replay. Matching completed staging is bound to the
+original target/domain generation, policy, ID/size, token, root and child identity.
+An absent ledger or absent records can report absence only when the child is also
+absent. Foreign inventory and partial/missing proof remain unverified; crossed
+authority or substituted material fails. Absence does not prove quiescence or
+authorize capacity release. No public ready volume is inferred from staging.
+
+Each record is bounded to 16 KiB and checked for regular-file type, account UID,
+0600 mode, one link, bounded nonzero length, strict JSON and descriptor/name/version
+stability before/after reading. Non-following nonblocking opens reject symlinks,
+directories and FIFOs without hanging. The private ledger/root/domain are
+revalidated. The existing per-volume gate serializes staging and observation.
+Reserved control admission charges four descriptors and 128 KiB for concurrent
+record/identity buffers while remaining available under work quarantine.
+
+Nine new ordinary non-VM contracts pass, including static missing-proof models,
+foreign inventory, crossed authority, changed/substituted backing, malformed,
+oversized, linked and FIFO records, cancellation and quarantine admission.
+Rust workspace units pass 311 cases (272 engine, 30 bridge, nine protocol), with
+13 helper fixtures left ignored. Strict Clippy/docs, format and unmodified SDK
+verification pass. Private raw logs remain ignored.
+
+Protected deletion, guest-access qualification, root setup, helper/public/store
+integration and mounts remain pending. No capability activates or parity gate
+closes. Crash validation stays deferred; no upstream changes, transferred
+historical evidence, push or publication occurs.
+
+## October 13, 2026 — account-bound native volume provisioning
+
+The verified SDK retains the launcher account when unprivileged and can allocate
+distinct dropped VM UIDs when root. The existing HTTP volume guide qualifies
+replacement writes only for an unprivileged worker. Native host provision now
+uses that same account boundary: nonzero effective UID equal to real UID, stable
+real/effective GID and no SDK UID-drop mode. It does not disable UID isolation or
+turn a root opt-out into qualification. Future privileged support still needs
+separate ordinary mode/UID and replacement-write evidence.
+
+Engine.provision_volume now performs fresh staging under the existing volume
+gate and publishes a third protected completion binding inherited UID/GID to
+the full original backing proof. Private 0700 backing remains unchanged; no
+existing directory is widened, adopted or replayed. Exact native records and
+current descriptors/account are checked before returning an owned node path.
+Errors after staging remain uncertain. Read-only provisioning observation uses
+reserved control admission; staging alone or orphan completion remains
+unverified and cannot be promoted. Work jobs now also charge 128-KiB metadata
+headroom for bounded record/identity copies throughout provisioning.
+
+Seven new account/provision contracts pass on this unprivileged host: SDK mode
+matrix, same-account host reads/writes, unchanged observation records, duplicate
+refusal, crossed account/backing identity, orphan-completion model and foreign
+account rejection before mutation. These are ordinary non-VM filesystem checks,
+not Linux guest/replacement qualification. Rust workspace units pass 318 cases
+(279 engine, 30 bridge, nine protocol); 13 helper fixtures remain ignored.
+Strict Clippy/docs, formatting and unmodified SDK verification pass.
+
+The public volume guide now distinguishes qualified HTTP behavior from disabled
+embedded support. Protected deletion, wire/config/public/store integration,
+mounts, root setup and actual guest/replacement-write and guest-visible mode/
+ownership evolution acceptance remain pending. No parity row closes. Private
+evidence stays ignored; crash validation remains deferred. No upstream changes,
+historical evidence transfer, push or publication occurs.
+
+## October 13, 2026 — retained-mount deletion preflight and control memory
+
+Charged volume observers exposed a resource gap: a full-metadata registry/OCI/
+growth job could exhaust their memory admission despite reserved control slots
+and descriptors. Work keeps its existing 32-MiB metadata allowance; control now
+has a separate finite 256-KiB reservation. Accounting tracks work memory and
+aggregate memory independently and releases exactly the retained lane demand.
+Two contracts prove admission with either lane first, full work memory,
+quarantine, bounded control exhaustion and exact release. Maximum charged
+metadata is 32 MiB plus 256 KiB; command/file and work limits remain unchanged.
+
+Engine.qualify_volume_deletion now selects protected completed provisioning,
+then excludes retained SDK mounts through the existing read-only schema/inode/
+deadline database connection. Per-row projection ignores unrelated VM payload
+fields and bounds row bytes, aggregate bytes, row count, path shape and live/
+staged mount counts. Every matching source blocks qualification, including
+created/stopped/running/failed records and read-only/staged mounts. This neither
+adopts inventory nor reconciles/reaps records. The opaque permit retains root
+identity, the volume gate, eight-descriptor admission and work metadata; future
+deletion must consume it and recheck proof/attachments before mutation.
+
+Four new ordinary non-VM SDK-record contracts pass: exclusion across states/
+modes, exact source matching with preserved rows, malformed/ambiguous/oversized
+inventory rejection and pre-dispatch cancellation. Rust workspace units pass
+324 cases (285 engine, 30 bridge, nine protocol), with 13 helper fixtures ignored.
+Strict Clippy/docs, formatting and unmodified SDK verification pass. An internal
+count fixture was updated for the new lane counter before final checks.
+
+Recursive descriptor-relative removal, protected delete intent/completion and
+uncertainty resolution remain pending. Public/store/wire integration, mount
+creation/attachment, root setup and Linux guest/replacement/mode qualification
+also remain pending; volume support is disabled and no parity row closes.
+Crash validation remains deferred. Raw evidence stays private/ignored; no
+upstream change, historical qualification transfer, push or publication occurs.
+
+## October 13, 2026 — owned volume removal and durable deletion evidence
+
+Native Engine.delete_volume/delete_prepared_volume now consume retained deletion
+authority, recheck protected provision ownership/domain and SDK mount exclusion,
+then publish a private immutable entered record before removing any contents.
+The existing volume gate and work/descriptor lease stay held through filesystem
+work. A fresh operation ID correlates entered and completed records to the exact
+original account/root/backing provision. Root synchronization and verified absence
+precede distinct completed evidence; read-only deletion observation requires both
+matching records and original protected provisioning, never absence alone.
+
+Traversal uses openat/fstatat/unlinkat with no-follow directory lookup and a
+bounded explicit ancestor stack. It reopens and verifies ancestor identities,
+keeps FD usage independent of depth, rejects different devices, unlinks guest
+symlinks without following them and removes only the volume's hardlink entries.
+Independent directory descriptions prevent libc buffering/shared-offset skips.
+Cancellation is checked between traversal stages and ancestor opens. One attempt
+is bounded to one million visited entries and 4096 retained relative ancestor-path
+bytes. Budget exhaustion or error after entered intent is uncertain, preserves
+remaining contents/evidence and cannot automatically replay. Explicit quiesced
+resolution and acceptance for long/large trees remain pending.
+
+Ten new ordinary non-VM contracts pass: nested/many-file removal, outside symlink/
+hardlink preservation and FIFO handling, bounded partial progress, cancellation,
+exact intent/completion/absence, attachment refusal before mutation, static entered/
+missing-proof models, substituted backing and crossed completion/replacement
+inventory. macOS rejected an attempted raw non-UTF-8 filename creation; that
+fixture is now Linux-only and remains unexecuted here. No Linux guest qualification
+is inferred. An unused import was removed before strict final checks.
+
+Rust workspace units pass 334 cases (295 engine, 30 bridge, nine protocol), with
+13 helper fixtures left ignored. Strict Clippy/docs, format and unmodified SDK
+verification pass. Raw logs stay private/ignored. Public/store/wire integration,
+mounts, root setup, explicit resolution and actual guest/replacement/mode
+qualification remain pending; volumes stay disabled and no parity gate closes.
+Crash validation remains deferred. No upstream change, historical evidence
+transfer, push or publication occurs.
+
+## October 13, 2026 — shared volume limit negotiation
+
+A future volumes descriptor now carries exact limits for 24-hour work and
+30-second observations, 16-KiB private records, one-million-entry deletion
+attempts, 4096 retained ancestor bytes, 256-KiB reserved control metadata and
+128-KiB per-observation metadata. The separate control allowance is explicit;
+jobs.metadata_bytes remains the work allowance. Engine constants now drive the
+executing volume paths and a bridge contract compares every negotiated value
+against those constants. No existing command/file/work allowance changes.
+
+Rust and Elixir require identical limits/capability order and reject missing,
+changed or unexpected limit fields. Volume declaration requires Linux and the
+job_resources, buffered_exec and compact_creation feature dependencies. The
+shared synthetic hello-v2-volumes fixture is an interoperability witness, not a
+qualified package identity. Protocol 1 and current protocol-2 fixtures omit the
+volume block and keep existing bytes/behavior. Current SDK/package approval
+still rejects volume activation; the implemented descriptor is unchanged.
+
+Checks pass: 358 Rust units (313 engine, 33 bridge, 12 protocol), 53 protocol
+contracts and 18 Elixir parity/config cases. Strict Clippy/docs/Credo, formatting,
+test Dialyzer with zero errors/skips and unmodified SDK verification pass. Thirteen
+helper fixtures remain ignored. The future-volume bridge fixture was updated for
+its required dependency, Linux package tuple and limits; two small protocol
+helpers keep constructor/hello complexity within repository checks.
+
+Elixir volume request/reply and durable authority, mounts, unproved temporary
+cleanup, long/large-tree acceptance and ordinary Linux guest/replacement/mode
+qualification remain pending. No capability or parity gate activates. Raw logs
+stay private/ignored; crash validation stays deferred. No upstream change,
+historical qualification transfer, push or publication occurs.
+
+## October 13, 2026 — typed volume Port requests and helper routing
+
+Protocol-2 Volume requests now select an operator policy ID, generated worker
+volume ID/size and a typed action. Host root paths and arbitrary mounts cannot
+arrive in requests. Actions cover provision/delete, explicit fenced resolution/
+staging abort, three read-only proof observations and deletion qualification.
+Results carry distinct typed provision/deletion/abort/qualification authority or
+bounded absence/unknown status, with strict nested shapes and full unsigned
+filesystem identities. Session completion binds result kind, intent, policy and
+target/domain generation, with no output events. Legacy protocol and a descriptor
+without volumes reject the request before native entry.
+
+Helper config now optionally carries a validated approved_volume_policy. Elixir
+launch includes it only under a future approved volumes descriptor; dormant
+catalogs remain absent and current Config validation still rejects activation.
+Reader and worker repeat exact policy-ID selection; dedicated native dispatch
+passes only that immutable operator policy to shared Engine methods. Generic
+dispatch cannot select caller roots. Reserved observation workers handle proof
+reads under quarantine; mutating actions retain normal work admission.
+
+Volume work now has a separate constructor preserving one caller deadline up to
+24 hours, rather than truncating deletion to an observation timeout. Read-only
+budgets retain their 30-second ceiling and shared cancellation remains effective.
+Neither core authority nor engine code depends on Port framing or Erlang types.
+
+Checks pass: 357 ordinary Rust units (313 engine, 32 bridge, 12 protocol), 52
+protocol contracts, 11 Elixir config cases, strict Clippy/docs/Credo and test
+Dialyzer with zero errors/skips. Thirteen helper fixtures remain ignored. Initial
+field-tag/validation-arm and test-helper/Debug fixture issues were fixed before
+final checks. Bootstrap verifies unmodified SDK bytes; private raw logs stay
+ignored. No current package advertises volumes and public volume admission stays
+disabled. Elixir request/reply/store authority, negotiated volume limits, mounts,
+unproved temporary cleanup and ordinary Linux qualification remain pending.
+Crash validation remains deferred; no upstream changes, historical evidence
+transfer, push or publication occurs.
+
+## October 13, 2026 — explicit fenced volume deletion resolution
+
+Engine.resolve_volume_deletion now requires positive caller-declared quiescence
+before filesystem entry. The caller must fence all prior writers/requests; this
+declaration never overrides native work quarantine, retained volume gates or SDK
+attachments. Protected original deletion intent and completed provisioning are
+revalidated against target/domain, policy, exact ID/size, token/account and root.
+Existing backing must match original device/inode, UID and private mode before
+resolution entry; substituted or missing authority remains an error.
+
+An immutable resolution record audits explicit entry. The shared remover can
+continue known partial contents or synchronize and complete an already removed
+backing under that original entered proof. Repeated resolutions each require
+fresh caller fencing and preserve the original operation ID/provision identity;
+normal deletion, inspection and startup still never replay. A completed matching
+attempt returns its protected proof without rewriting it. If provisioning was
+completed but its acknowledgment was lost, explicit fenced cleanup can start
+its first normal deletion. Cleanup without completed provisioning proof remains
+pending; early publication gaps need a separate design/implementation step.
+
+Seven new ordinary non-VM contracts pass: false-quiescence refusal, repeated
+bounded partial completion, missing-completion model, first cleanup of completed
+provisioning, crossed/substituted authority, retained attachment/cancellation,
+missing provision and crossed resolution record. Missing-proof fixtures are
+static models; no live writer or persistence interruption occurs. A duplicate
+return introduced while extracting the common remover was fixed before tests.
+
+Rust workspace units pass 341 cases (302 engine, 30 bridge, nine protocol), with
+13 helper fixtures ignored. Strict Clippy/docs, format and unmodified SDK
+verification pass. Early provisioning cleanup/publication gaps, long/large-tree
+acceptance, public/store/wire integration, mounts and Linux guest/replacement/
+mode qualification remain pending. Volumes stay disabled; no parity gate closes.
+Raw evidence remains private/ignored. Crash validation stays deferred; no
+upstream changes, transferred historical evidence, push or publication occurs.
+
+## October 13, 2026 — backing evidence before public volume publication
+
+Fresh staging now writes a schema-2 intent, creates a private temporary sibling
+and synchronizes its descriptor-bound identity before recording protected
+backing evidence. Only then does an atomic no-replacement rename publish the
+generated SDK-visible volume name. Linux uses renameat2 via syscall; macOS
+fixture execution uses renameatx_np with exclusive rename. Unsupported filesystem/
+kernel behavior rejects without a replacement fallback. Public root synchronization
+and inode/UID/mode checks precede distinct final staging evidence.
+
+This closes the former successful-public-mkdir-before-inode-evidence window:
+successful public publication now always has prior protected backing identity.
+The observer requires exact prepared/final equality for schema-2 intent, while
+schema-1 private evidence remains readable without conversion or adoption.
+Temporary/prepared or post-rename states without final evidence remain unverified,
+and retry still refuses existing intent/temporary material. No observation
+initializes, repairs, resumes or promotes partial staging.
+
+Four new ordinary non-VM contracts pass: exclusive rename preserves even an
+empty foreign target; static pre/post-rename models remain unverified without
+replay; prepared-proof mismatch/missing proof rejects; legacy schema-1 reading
+remains compatible. Existing lifecycle fixtures now include the additional
+protected backing record. A fixture-name mismatch was corrected before final
+checks. Linux no-replacement publication still needs actual Linux execution.
+
+Rust workspace units pass 345 cases (306 engine, 30 bridge, nine protocol), with
+13 helper fixtures ignored. Strict Clippy/docs, formatting and unmodified SDK
+verification pass. Incomplete prepared/private staging cleanup, long/large-tree
+acceptance, public/store/wire integration, mounts and Linux guest/replacement/
+mode qualification remain pending. No volume capability or parity gate activates.
+Raw evidence stays private/ignored; crash validation remains deferred. No upstream
+changes, transferred historical evidence, push or publication occurs.
+
+## October 13, 2026 — protected incomplete staging abort
+
+Engine.abort_volume_staging now cleans protected prepared/staged backing only
+after positive caller fencing and retained native work/gate admission. It checks
+original intent, target/domain, exact policy/ID/size, token, root and backing inode,
+account UID and private mode. SDK attachment exclusion covers both possible
+temporary and generated public paths. Two present candidate paths, substituted
+material, completed provisioning or deletion history prevent abort before entry.
+
+An immutable abort intent precedes descriptor-relative removal. Synchronized
+absence of both possible paths precedes distinct abort completion. Repeated
+explicitly fenced cleanup preserves original operation identity; normal startup/
+inspection cannot resume it. Separate VolumeStagingAbortReceipt/Presence types
+never claim provisioning readiness. Read-only abort evidence requires matching
+intent/completion, original protected backing and current absence, preserving
+unknown outcomes when any proof is missing. Legacy schema-1 staged evidence
+remains supported; schema-2 uses its pre-publication backing record.
+
+Six new ordinary non-VM contracts pass: prepared temporary and published unready
+cleanup, refusal without quiescence/attachment/cancellation, missing/substituted
+proof, both candidates/completed provisioning, missing-completion model and
+crossed/reappearing inventory. Models are static temporary fixtures; no live
+writer, persistence interruption or crash/CLI campaign runs. The native callback
+uses validated CString construction without a panic path.
+
+Rust workspace units pass 351 cases (312 engine, 30 bridge, nine protocol), with
+13 helper fixtures ignored. Strict Clippy/docs, format and unmodified SDK
+verification pass. A temporary directory created before protected prepared
+identity still cannot be adopted or deleted: that unproved-material cleanup
+remains pending, alongside long/large-tree acceptance, public/store/wire
+integration, mounts and Linux guest/replacement/mode qualification. Volume support
+stays disabled and no parity gate closes. Raw evidence remains private/ignored;
+crash validation stays deferred. No upstream changes, historical evidence
+transfer, push or publication occurs.
+
+## October 13, 2026 — Elixir volume authority and Port correlation
+
+VolumeContract now validates the eight protocol-2 volume actions and six typed
+statuses independently of machine receipts. Requests carry only the approved
+policy ID and generated volume ID/size; explicit resolution/abort require positive
+caller fencing. Mutations have a finite 24-hour ceiling and the three read-only
+inspections have a 30-second ceiling. Unknown fields, caller roots, invalid
+accounts/modes and out-of-range physical identities reject before acceptance.
+
+Channel binds completion to action, intent, policy and authenticated owner domain
+and accepts no volume output events. Port additionally checks returned proof roots
+against the operator catalog. Call and Port share reconciliation selection; only
+volume inspections gain reconciliation/quarantine observation admission. Current
+approved packages still reject volume dispatch before native requests. No public
+volume feature or phase exit gate activates.
+
+A synthetic shared Rust/Elixir authority fixture preserves full u64 inode values
+without rounding or signed truncation. Six Elixir contracts cover all action/status
+combinations, crossed authority, strict nested types, output rejection, catalog
+roots and quarantine. A normal message-driven dummy helper additionally proves
+current-package rejection without dispatch, then shuts down normally. No crash,
+persistence interruption or independent CLI race is executed.
+
+Durable volume proof/history/codec integration, mount authority, unproved temporary
+cleanup and ordinary Linux guest/replacement/large-tree qualification remain
+pending. Full parity acceptance remains pending across P0–P9. SDK inputs remain
+unmodified; private logs remain ignored, with no push or publication.
+
+Validation: full Elixir CI passes 891 cases (four doctests, six properties,
+881 tests), with 42 runtime/deferred-crash exclusions; format, compilation,
+xref, strict Credo, zero-clone checking, Credence and Dialyzer pass. Final
+volume/Port checks pass 20 cases with four deferred exclusions after the
+strict-integer proof refinement. Rust protocol contracts pass 54 cases; strict
+protocol Clippy/docs, Rust formatting and verified unmodified SDK check pass.
+Raw logs remain in ignored .local/http-parity/volume-* locations.
+
+## October 13, 2026 — durable native volume authority and selective v20
+
+Volume now has optional transport-neutral VolumeAuthority containing its enrolled
+owner binding and exact provision/deletion/abort proof. Validation binds generated
+ID, size, root/policy, account and physical identity to the durable volume. Native
+ready records require provisioning proof; deleted records require matching
+delete/abort completion. Creating/deleting/unknown records retain the full disk
+reservation, with no absence-based completion or readiness adoption.
+
+VolumeOps accepts a distinct complete_native result and rejects bare HTTP ready/
+deleted acknowledgments for native records. Explicit cleanup after uncertain
+provisioning can retain completed provisioning/deletion or protected abort proof
+without promoting readiness. Existing provision proof cannot be exchanged for a
+different inode during deletion. Volume updates preserve immutable identity,
+owner binding and previously committed proof, including deleted tombstones.
+
+Selective codec v20 carries native volume intent and evidence. HTTP v15 records
+retain identical bytes, omitting the new nil default and adding it only on read.
+Older envelopes reject native authority and explicit new defaults; compressed,
+trailing and relabeled payloads reject. Fixed-vocabulary fresh-BEAM decoding
+preserves full unsigned inode values. No native volume reader marker is
+advertised before complete recovery/attachment transactions and qualification.
+
+Memory and the PostgreSQL example check matching backend enrollment before volume
+acceptance, including deduplication, and share proof-only lifecycle transitions.
+Binding evidence now includes native volume tombstones rather than classifying
+them as HTTP. Memory tests cover absent/crossed enrollment, unchanged accounting
+on rejection, paged recovery records and exact capacity release. The PostgreSQL
+example compiles with these predicates and preserves its older HTTP fallback;
+live PostgreSQL native-volume contracts remain pending.
+
+Public provisioning/deletion coordinator plumbing, startup/recovery qualification,
+mount authority and Linux guest/replacement/large-tree checks remain pending.
+Unproved temporary cleanup remains fenced. Full P0–P9 parity and public volumes
+remain incomplete/disabled. Crash validation remains deferred; no SDK changes,
+push, publication or transferred historical evidence occurs.
+
+Validation: final full Elixir CI passes 899 cases (four doctests, six properties,
+889 tests), with 42 runtime/deferred-crash exclusions. Compilation, format, xref,
+strict Credo, zero-clone checking, Credence and Dialyzer pass; Dialyzer reports
+zero errors/skips. Seven new native-volume contracts cover proof lifecycle,
+crossed authority, explicit unready resolution, immutable evidence, envelope
+compatibility, fresh-BEAM decoding and atomic Memory accounting/binding. Focused
+volume/store/HTTP regression checks pass 29 cases. The PostgreSQL example's test
+compilation passes warnings-as-errors; no live PostgreSQL or Linux guest
+qualification is claimed. Raw logs remain ignored under .local/http-parity/.
+
+## October 13, 2026 — scoped volume operations and read-only startup recovery
+
+EmbeddedContext can bind a validated durable volume separately from machine
+assignment/receipt fields. Target/policy/domain, Linux platform and approved volume
+capability must all match; a machine scope cannot supply volume authority. Scoped
+request construction binds generated ID/size and exact action with finite work/
+observation/response budgets. Typed decoding checks domain/catalog/intent, existing
+proof linkage and empty output, retaining error dispatch evidence. The internal
+proof result supports durable orchestration, while Backend provision/delete retain
+the established path/:ok result shapes. The coverage inventory records both
+implemented dispatch entries with full parity acceptance still pending.
+
+Native startup now classifies volume rows separately. Ready records require exact
+committed provision evidence; deleted tombstones require exact deletion/abort
+operation evidence. Interrupted creating/deleting records become unknown under
+matching snapshot/version CAS, retaining full authority/accounting. Observed
+provision completion never promotes an unknown record or starts a mutation.
+Unknown records remain unchanged; missing/current inventory cannot release storage
+or replace ownership. Foreign domain/root and crossed physical identities reject.
+
+Future volumes descriptors require Linux, native_volumes: 1, local_volumes: 1 and
+every volume store callback before backend enrollment. No native volume reader
+marker or SDK/helper capability is activated. Current packages still reject volume
+scoping and public dispatch before native entry. Deterministic recovery/request/
+reply tests use synthetic proofs and Memory snapshots; existing ordinary dummy
+recovery checks select no deferred crash campaign.
+
+Public provision/delete coordinator plumbing, explicitly fenced resolution/abort
+selection, mount integration and reader activation remain pending. Linux ordinary
+guest/replacement/large-tree qualification and live PostgreSQL volume contracts
+remain pending. Full P0–P9 parity remains incomplete; crash validation stays
+deferred. No unmodified SDK input changes, historical evidence transfer, push or
+publication occurs. Raw logs remain private and ignored.
+
+Validation: final full Elixir CI passes 906 cases (four doctests, six properties,
+896 tests), with 42 runtime/deferred-crash exclusions. Format, warnings-as-errors
+compilation, xref, strict Credo, zero-clone checking, Credence and Dialyzer pass;
+Dialyzer reports zero errors/skips. Seven new deterministic contracts cover scoped
+request budgets, typed proof/error decoding, exact ready/tombstone observation,
+unknown persistence without adoption/release, current-package rejection and future
+reader/callback admission. Focused volume/store/HTTP regression passes 40 cases.
+No live native platform or PostgreSQL qualification is claimed. Private logs
+remain ignored under .local/http-parity/volume-*.
+
+## October 13, 2026 — managed native volume attempts and explicit cleanup
+
+Volumes now initializes native VolumeAuthority and domain-bound fingerprint input
+without changing HTTP fingerprint bytes. New native attempts pin the operational
+owner before durable intent, serialize against recovery through NativeAuthority,
+retain the durable worker lease and use one absolute deadline through every
+stage. Provision/deletion consume correlated typed proof, never a path-only
+native acknowledgment; compare-and-set completion keeps interrupted attempts
+reserved. HTTP provision/delete result handling and public API shapes remain.
+
+Explicit resolve_delete still requires host quiesced: true, then checks the
+pinned bridge has no pending requests before durable deletion intent. Resolution
+uses protected completed provisioning/entered deletion first. Only a confirmed
+pre-dispatch ownership rejection with no saved provision proof may select
+protected staging abort. Engine attachment/root/gate/proof checks apply to both
+requests; uncertain, expired or unsupported outcomes cannot trigger another
+mutation. Both requests share the original absolute budget. No ordinary startup
+or inspector invokes this cleanup sequence.
+
+Strict positively fenced resolution/abort requests may use the reconciling
+channel after quiescence; normal mutations still cannot. Quarantine continues to
+admit only observations and cannot authorize fenced work. Per-call native reader/
+callback admission complements startup reader gates. Reader/helper volumes
+capabilities remain disabled pending mounts and qualification.
+
+Native deduplication reads existing records before operational owner acquisition,
+so a retained identity or previously requested deletion needs no live helper and
+cannot replay. New acceptance remains atomic with drain/capacity checks. Saved
+root/domain must match current approval. Deterministic tests cover domain
+fingerprints, deduplication without an owner, explicit cleanup selection, refusal
+after uncertainty, exact completion/accounting and strict fenced admission.
+
+Mount integration, reader activation, unproved temporary cleanup, Linux guest/
+replacement/large-tree acceptance and live native PostgreSQL contracts remain
+pending. Full P0–P9 parity stays incomplete and public volumes stay disabled.
+No crash/persistence interruption/CLI race campaign runs; unmodified SDK source,
+historical qualification, private evidence and distribution boundaries remain.
+
+Validation: full Elixir CI passes 913 cases (four doctests, six properties,
+903 tests), with 42 runtime/deferred-crash exclusions. Format, compilation, xref,
+strict Credo, zero-clone checking, Credence and Dialyzer pass, with zero errors/
+skips. Final seven native-attempt tests plus shared HTTP volume and wire checks
+pass 25 cases after preserving early lease/deadline error categories. Final strict
+Credo/Dialyzer checks cover that refinement. The new tests use deterministic
+callback results and Memory authority; they do not qualify native guest behavior
+or inject live owner/store failure. Raw logs remain ignored under
+.local/http-parity/volume-api-*.
+
+## October 14, 2026 — opaque proof-bound native mount qualification
+
+Shared-engine VolumeMountRequest binds completed private provisioning proof to
+a canonical /mnt/volumes target and read-only flag. Mount sets are finite (eight),
+sorted, nonoverlapping and exclusive by generated volume ID, including read-only
+mounts. Operator policy, target/domain, current account and physical backing
+identity must match; supplied proof or path alone cannot select a directory.
+
+QualifiedVolumeMounts retains one backing descriptor per volume, the approved
+root, actor-domain ownership and volume gates acquired by generated ID order.
+Only its owning Engine may project SDK record mounts. Projection reopens exact
+protected provisioning evidence and rechecks descriptor/current path, UID/GID,
+mode, root and cleanup-journal absence. Any deletion/resolution/abort evidence
+blocks selection even when original backing remains. The public SDK tuple shape
+contains exact owned source, guest target and read-only mode; staged mounts and
+caller host paths cannot enter it. Debug output omits paths and proof tokens.
+
+Qualification has bounded work/FD/metadata admission, retained through handle
+lifetime with both control slots available. A full existing OCI creation job
+cannot be silently stacked on top: composite creation/start admission still needs
+integration without widening existing budgets. No job timeout releases retained
+mount authority, and quarantine cannot authorize selection. These handles are
+internal foundation; creation/start/material/wire/durable attachment integration
+and guest qualification remain pending before feature activation.
+
+Seven new ordinary non-VM fixture contracts cover exact/read-only SDK projection,
+unknown/caller fields, targets/set bounds, crossed/missing proof, static descriptor
+substitution, cleanup snapshots, cancellation and gate retention. A separate job
+contract covers finite descriptor/memory/control accounting and exact release.
+Private fixture bindings are synthetic; production additionally checks the exact
+SDK default domain. Static fixture snapshots do not interrupt any live writer or
+run a crash/CLI race. Public native volume/mount admission and all full-parity
+acceptance rows remain pending. SDK source remains unmodified and private logs
+remain ignored; no historical qualification transfer, push or publication occurs.
+
+Validation: ordinary Rust workspace units pass 366 cases (321 engine, 33 bridge,
+12 protocol), with 13 deferred helper fixtures ignored. Protocol contracts pass
+54 cases. Strict workspace Clippy/docs, Rust formatting, diff checks and verified
+unmodified SDK-source checks pass. Fixture domain validation was corrected before
+final tests: isolated private fixture paths are synthetic, while the production
+Engine entry independently enforces the exact SDK default binding. The unmodified
+dependency's existing atomic deprecation warning remains unchanged. No Linux guest,
+current-package, durable-store or new public-consumer qualification is claimed.
+Private logs remain ignored under .local/http-parity/volume-mounts-*.
+
+## October 14, 2026 — durable native attachment authority and selective v21
+
+VolumeAttachment captures the volume key, enrolled binding, exact provisioning
+proof, guest target and read-only mode at atomic machine acceptance. It derives
+the managed host source from proof rather than adopting a path. Machine validation
+correlates every attachment with scoped references and public mounts, enforces
+one worker/domain/policy/account and rejects duplicate generated backing IDs.
+HTTP/native or different-domain sets cannot mix. Native mount authority remains
+immutable through machine updates and retirement tombstones; debug output omits
+private proof.
+
+Memory and the PostgreSQL example check backend enrollment before publishing
+attachments, alongside drain checks. Exclusive attachment applies to read-only
+volumes too. Release requires exact saved proof/key/binding; crossed proof cannot
+release another backing. Normal stop/uncertainty retain attachments, and verified
+retirement or cancellation before allocation releases the hold while preserving
+volume proof and independent disk reservation. No native reader marker is enabled.
+
+Selective v21 preserves native attached machines before allocation and after
+retirement. Older HTTP/native envelopes omit the empty native_mounts default and
+add it on read; explicit new fields, native descriptors, compressed/trailing or
+relabeled payloads reject in old envelopes. The historical v16 byte witness now
+explicitly omits the new default. Fixed-vocabulary fresh-BEAM decoding retains full
+unsigned physical identity. No historical package evidence is transferred.
+
+Seven new deterministic contracts cover exact descriptor/public mount linkage,
+malformed/crossed fields, mixed authority, proof-bound release, selective codec
+compatibility, fresh-BEAM reading and atomic Memory exclusivity/accounting. The
+PostgreSQL example compiles these shared predicates, but live native attachment
+transactions remain pending. Composite native create/start budgets, wire/material/
+assignment and retained-command authority, reader activation and ordinary Linux
+guest/replacement qualification remain pending. All full P0–P9 acceptance stays
+pending; public volume/mount admission remains disabled, crash validation remains
+deferred and SDK source remains unmodified. Raw logs remain private/ignored.
+
+Validation: full Elixir CI passes 920 cases (four doctests, six properties,
+910 tests), with 42 runtime/deferred-crash exclusions. Format, warnings-as-errors
+compilation, xref, strict Credo, zero-clone checking, Credence and Dialyzer pass;
+Dialyzer reports zero errors/skips. Focused attachment/native/HTTP codec tests
+pass 23 cases, and the PostgreSQL example test compilation passes warnings-as-
+errors. No live PostgreSQL, native guest or changed-package qualification is
+claimed. Raw logs remain ignored under .local/http-parity/volume-attachment-*.
+
+## October 14, 2026 — mount creation intent and retained command authority
+
+Local/OCI/registry creation and creation inspection now accept optional exact
+volume_mounts tuples with completed proof, canonical guest target and read-only
+mode. Shared Rust/Elixir validation bounds count, target overlap/order, exclusive
+generated IDs, policy/account and full unsigned physical identity. Empty/null
+fields, caller source paths and unknown fields reject. Legacy creation omits the
+field exactly; protocol-1/current descriptors cannot admit it. A synthetic shared
+fixture binds the future Linux Hello domain without qualifying a real package.
+
+Protocol Session requires future volumes support and exact enrolled proof domain;
+helper reader and Elixir Port additionally select the approved operator policy.
+Assignment generation copies the accepted machine's immutable attachments, checks
+scoped volume references and domain, and atomically reserves that intent. Assigned
+record validation binds attachment proof to creation and actual machine mounts.
+Retained commands inherit the mounted assignment and observation, with selective
+v21 encoding and old native-envelope rejection. No host path alone becomes mount
+identity or ownership.
+
+Mounted machine observations additionally require exact observed mount data, so
+missing configuration cannot be replaced by expected values. Both ordinary and
+registry helper creation execution explicitly reject supplied mount proof before
+SDK dispatch while SDK material/composite creation/start support is unfinished.
+No success placeholder or discarded-proof fallback is introduced. Current helper/
+reader feature admission remains disabled, and all full parity acceptance stays
+pending.
+
+Four new deterministic Elixir contracts cover shared schema/domain/path identity,
+local/OCI/registry source preservation, assigned proof/observation consistency and
+retained command inheritance/v21. A new Rust contract checks unsigned fixture
+identity, future admission, crossed-domain/current-feature rejection and malformed
+mount sets. Composite jobs, SDK material/observation/start integration, incomplete
+temporary cleanup and ordinary Linux/PostgreSQL qualification remain pending.
+No live crash/CLI race/persistence interruption or SDK-source change occurs;
+private evidence remains ignored and historical qualification is not transferred.
+
+Validation: full Elixir CI passes 924 cases (four doctests, six properties,
+914 tests), with 42 runtime/deferred-crash exclusions. Compilation, format, xref,
+strict Credo, zero-clone checking, Credence and Dialyzer pass; Dialyzer reports
+zero errors/skips. Ordinary Rust workspace units pass 366 cases (321 engine,
+33 bridge, 12 protocol), with 13 deferred fixtures ignored; protocol contracts
+pass 55. Strict workspace Clippy/docs, Rust formatting and unmodified SDK checks
+pass. Focused Elixir checks pass 33 cases and PostgreSQL example compilation
+passes warnings-as-errors. Xref/capture style issues and synthetic PID fixture
+shape were corrected before final checks. No current-package/native guest/live
+PostgreSQL qualification is claimed; logs stay ignored under
+.local/http-parity/mount-intent-*.
+
+## October 14, 2026 — authenticated mount material and local creation budget
+
+The private material journal now retains the complete volume mount proof set.
+A digest of that set is included in the SDK record's authenticated material,
+alongside its exact source/target/read-only tuples. Verification rejects changed
+physical proof, substituted paths or flags, staged mounts and missing digest;
+a copied path or label alone cannot supply authority. Growth retains the original
+mount material. Unmounted legacy journals omit the optional field exactly.
+
+Local mounted creation now consumes the opaque qualified handle, preserving its
+root/backing descriptors and volume gates through record/journal publication.
+Its existing work lease is atomically promoted to the whole-job descriptor and
+metadata budget; no release/reacquire gap is introduced. Both reserved control
+observers remain available. Promotion failure changes no counters, and drop
+releases the final demand. The creation deadline is bounded and checked before
+entry and after publication; post-reservation failures remain uncertain.
+
+Six new non-VM contracts cover full-proof/SDK-record authentication, proof and
+configuration substitution, journal rewriting, legacy encoding, mount-preserving
+growth and admission/drop behavior. Ordinary Rust workspace units pass 372 cases
+(327 engine, 33 bridge, 12 protocol), with 13 deferred fixtures ignored. Protocol
+contracts pass 55. Strict workspace Clippy/docs, Rust format and unmodified SDK
+verification pass. Elixir source is unchanged; prior Elixir evidence is not a new
+run. Private logs remain ignored under .local/http-parity/mount-material-*.
+
+Port mounted dispatch, OCI/registry composite creation, start/current-backing
+verification and mount observations remain pending, as do Linux guest/replacement,
+PostgreSQL, package and full parity acceptance. No volume capability or reader
+marker activates. Crash validation stays deferred, SDK source is unchanged, and
+historical platform qualification is not transferred to these changed bytes.
+
+## October 14, 2026 — mounted OCI and prepared registry creation
+
+The shared engine now accepts opaque qualified mounts for direct OCI and prepared
+registry creation. Each path promotes the existing mount lease instead of stacking
+a second work job, retains root/backing descriptors and ordered volume gates
+through publication, and authenticates the full proof set with exact SDK tuples
+in the same private material journal. Prepared registry creation preserves its
+verified cache/source identity; direct OCI creation preserves its source metadata
+and does not boot a guest. Unmounted calls retain their existing entry points.
+OCI creation also enforces the finite one-day budget and owner availability.
+Post-entry cancellation remains uncertain and cannot authorize replay or release.
+
+Existing non-VM creation contracts now exercise mounted cancellation and foreign
+handles for both source kinds. They prove rejection before SDK/storage/reservation
+mutation and no leaked work admission. Test-only private filesystem fixtures
+supply foreign handles; no native VM or live fault campaign is used. An initial
+test module-path error was corrected before the final checks.
+
+Ordinary Rust workspace units pass 372 cases (327 engine, 33 bridge, 12 protocol),
+with 13 deferred fixtures ignored. Strict workspace Clippy/docs and formatting
+pass, and verified SDK source remains unmodified. Protocol schemas and Elixir are
+unchanged in this step; previous contract/Elixir runs are not relabeled as new
+runs. Private logs remain ignored under .local/http-parity/mount-source-*.
+
+Port mounted dispatch, start/current-backing verification, mount observations,
+reader activation and ordinary Linux/PostgreSQL/package acceptance remain
+pending. Public volume admission remains disabled and the full P0–P9 objective
+remains incomplete. Crash validation remains deferred.
+
+## October 14, 2026 — actual mounted configuration observations
+
+Machine configuration now projects the SDK record's actual source/target/read-only
+mount tuples, including offline machines. Staged SDK mounts are exposed as staged
+rather than discarded; the managed protocol rejects them. Protocol 2 carries a
+strict optional mounts field, with exact keys, canonical absolute paths, at most
+eight entries, sorted nonoverlapping targets, unique sources and staged=false.
+Empty/null fields reject. Unmounted configuration omits the field exactly and
+legacy protocol 1 continues to reject expanded configuration.
+
+Elixir validates the same shape. Managed replies compare actual mounts against
+saved creation/attachment authority, rejecting missing or altered mounts and
+unexpected mounts on unmounted assignments. Expected values cannot replace a
+missing observation. The shared synthetic mounted-observation fixture, an engine
+projection/legacy test, a Rust wire contract and an Elixir managed-reply contract
+cover these boundaries without booting a VM or changing SDK source.
+
+Full Elixir CI passes 925 cases (four doctests, six properties, 915 tests), with
+42 runtime/deferred-crash exclusions. Format, warnings-as-errors compilation,
+xref, strict Credo, zero-clone checking, Credence and Dialyzer pass; Dialyzer reports
+zero errors/skips. Ordinary Rust workspace units pass 373 cases (328 engine,
+33 bridge, 12 protocol), with 13 deferred fixtures ignored; protocol contracts
+pass 56. Strict workspace Clippy/docs, formatting and unmodified SDK verification
+pass. A Rust partial-move issue in the adapter was corrected before final checks.
+Private logs remain ignored under .local/http-parity/mount-observation-*.
+
+Port mounted dispatch, lifecycle current-backing verification, reader activation
+and ordinary Linux guest/PostgreSQL/package acceptance remain pending. No volume
+capability activates and all full-parity acceptance remains pending. Crash
+validation stays deferred; historical package evidence is not transferred.
+
+## October 14, 2026 — proof-bound mounted pack startup
+
+Local/prepared-pack startup now consumes a freshly qualified mount handle and
+matches its full saved provisioning proof against authenticated machine material,
+as well as its exact SDK tuples. It retains root/backing descriptors and sorted
+volume gates through SDK launch and final observation, rechecking current private
+proof and backing before entry. Ordinary start without that handle rejects mounted
+records; paths and labels cannot substitute for retained proof. Direct OCI startup
+continues through its separate gated path.
+
+Mount startup atomically promotes its existing work lease to the whole descriptor/
+metadata budget plus one launch child. Both reserved control observers remain
+available. Exhausted child admission changes no counters; promotion is idempotent
+and cannot demote/free an already reserved child. Cancellation/deadline rejection
+before SDK entry remains not-dispatched; expiry after launch remains uncertain.
+No SDK path, result or durable reservation is replayed to obtain a success.
+
+Four new non-VM tests cover complete saved-proof mismatch despite identical mount
+paths, foreign handles, cancellation, pre-entry template rejection, atomic child
+promotion/drop and exhausted child admission. Private host-directory fixtures and
+synthetic SDK records exercise these contracts without booting a VM. Ordinary Rust
+workspace units pass 377 cases (332 engine, 33 bridge, 12 protocol), with 13 deferred
+fixtures ignored. Strict workspace Clippy/docs, format and unmodified SDK checks
+pass. Elixir and protocol schemas are unchanged; earlier CI/contract evidence is
+not relabeled as a new run. Logs remain ignored under .local/http-parity/mount-start-*.
+
+Port mounted dispatch and OCI mounted bootstrap resource integration remain
+pending, alongside retained command/current-backing use, reader activation and
+ordinary Linux guest/PostgreSQL/package qualification. OCI bootstrap currently
+reserves its own 24 work descriptors; retained mounts must be integrated without
+stacking leases or silently exceeding that declaration. Public volume admission
+remains disabled and full P0–P9 acceptance remains incomplete. Crash validation
+stays deferred; no SDK-source change or historical evidence transfer occurs.
+
+## October 14, 2026 — mounted Port dispatch and sequential source preparation
+
+The helper now forwards exact operator-approved volume policy and complete mount
+proof into local/OCI/prepared-registry creation and pack startup. Reader catalog
+checks remain in place, and the executing adapter independently checks exact
+policy and strict mount shape while preserving full unsigned physical identity.
+No proof is discarded to run an unmounted create. Plain legacy adapter calls
+without policy reject mounted requests. Current package feature admission is
+unchanged and public volume support remains disabled.
+
+Shared-engine mounted source preparation validates domain/policy/account intent
+before preparation. OCI metadata and registry pack qualification finish under
+the original absolute deadline before mount qualification acquires its retained
+work lease. Creation then promotes that lease and publishes authenticated material
+through the previously implemented paths. This avoids stacking source-preparation
+and mount jobs. Pack startup loads saved full proof only after receipt/record
+verification, qualifies it against the current operator policy, then enters the
+retained-handle startup path. No source refetch, CLI or server fallback is added.
+
+Three new non-VM contracts cover source cancellation/crossed authority without
+cache/storage/jobs, strict adapter conversion and unsigned proof preservation,
+and framed helper forwarding for local/OCI/registry creation and pack startup.
+Wrong catalog roots reject before native entry. An initially legacy startup
+receipt fixture was corrected to protocol-2 material authority before final checks.
+The framed peer supplies deterministic errors, never synthetic creation success
+or live SDK/VM evidence.
+
+Ordinary Rust workspace units pass 380 cases (333 engine, 35 bridge, 12 protocol),
+with 13 deferred fixtures ignored. Strict workspace Clippy/docs, formatting and
+unmodified SDK checks pass. Elixir and wire schemas are unchanged; previous CI and
+protocol contract evidence is not relabeled as a new run. Raw logs remain ignored
+under .local/http-parity/mount-dispatch-*.
+
+OCI mounted bootstrap resource integration and retained-command/current-backing
+verification remain pending, along with reader activation, guest/replacement/mode
+qualification, long/large-tree acceptance and public Linux/PostgreSQL/package
+checks. Full P0–P9 acceptance remains incomplete. Crash validation remains
+deferred; SDK source and historical qualification evidence remain unchanged.
+
+## October 14, 2026 — mounted OCI launch/bootstrap handoff
+
+OCI startup now accepts the current operator volume policy, qualifies journal-
+bound full mount proof and rechecks current backing before owned SDK launch.
+The ordinary unqualified entry still rejects mounted records. Port forwards
+approved policy for StartOci as well as pack startup; source catalog checks stay
+separate. The unmodified SDK returns launch success only after agent readiness.
+
+Mount qualification's existing lease is atomically promoted to the OCI job's two
+children, bounded staging, full metadata and existing 24 work-descriptor allowance.
+No second work job or wider descriptor limit is added. Mounted bootstrap holds
+its validated bounded plan in memory; it opens no bootstrap spools and spawns no
+worker while parent root/backing descriptors are held for launch. After SDK
+readiness, those descriptors close and the volume gates, domain guard and full
+proof move into the supervisor's collection leases. Successful collection retains
+leases through final SDK record/material/mount verification; unresolved collection
+keeps them retained. Unmounted OCI preserves pre-launch spool preparation.
+Post-entry failures and expired observations remain uncertain, with no replay.
+
+Five new non-VM contracts cover atomic OCI promotion/control headroom, exhausted
+staging with no partial counter change, mount authority/job handoff/drop, deferred
+spool creation and exact read-only guest bindings. Framed bridge tests additionally
+route policy-bound OCI start. Guest bootstrap receives SDK mount tags, never host
+source paths. An initial fixture replayed a completed generated intent; the fixture
+was corrected to a fresh private ledger. Test field/binding assertions were also
+corrected before final verification.
+
+Ordinary Rust workspace units pass 385 cases (338 engine, 35 bridge, 12 protocol),
+with 13 deferred fixtures ignored. Strict workspace Clippy/docs, format and
+unmodified SDK verification pass. Elixir and protocol schemas are unchanged;
+previous CI/contract runs are not relabeled as current runs. Raw logs remain
+ignored under .local/http-parity/mount-oci-*.
+
+Retained-command/current-backing integration, ordinary Linux guest/resource-peak/
+replacement/mode qualification, long/large-tree acceptance, reader activation and
+public PostgreSQL/package checks remain pending. This code/model evidence does
+not qualify a package or live descriptor peak. Public volumes and source admission
+remain disabled and full P0–P9 acceptance remains incomplete. Crash validation
+stays deferred; no SDK patch or historical qualification transfer occurs.
+
+## October 14, 2026 — current mount authority for retained commands
+
+Buffered, owned streaming and background commands now select current operator
+volume policy, qualify complete saved/backing proof before the machine gate, and
+recheck exact proof plus confirmed running state before worker dispatch. This
+preserves volume/machine gate order and rejects missing policy or stopped backing
+before preparation. Unqualified mounted command entry points fail before SDK
+entry; the policy-aware legacy direct exec adapter uses the owned streaming worker
+for mounted machines. Unmounted entry points retain their public signatures and
+existing result/output behavior.
+
+A common handoff atomically promotes the existing mount lease into one worker
+child, exact output staging and whole work metadata/FD allowance. Parent root/
+backing descriptors close before worker spools and pipes are prepared. Volume
+gates, full proof and domain guard remain in collection leases through forwarding
+or uncertain retained work. SDK guest tags/read-only mode supply image mount
+context; guest arguments never select a host mount. Port's policy-aware native
+interface now preserves its credited output callback.
+
+Three new non-VM contracts cover atomic command/output admission with reserved
+control, missing policy/stopped backing and no worker/storage/SDK mutation, and
+framed policy-aware commands with binary output plus sibling control. Existing
+worker peer contracts continue to check bounded execution/collection. A test env
+shape and the framed peer's command completion discriminator were corrected
+before final checks; obsolete production preparation wrappers are now test-only.
+
+Ordinary Rust workspace units pass 388 cases (340 engine, 36 bridge, 12 protocol),
+with 13 deferred fixtures ignored. Strict workspace Clippy/docs, formatting and
+unmodified SDK checks pass. Elixir and protocol schemas are unchanged; previous
+CI/contract evidence is not relabeled as a new run. Logs remain ignored under
+.local/http-parity/mount-command-*.
+
+Terminal mount integration and ordinary Linux guest/current-backing/resource-peak/
+replacement/mode qualification remain pending, along with long/large-tree,
+reader activation and public PostgreSQL/package acceptance. Public volume
+admission remains disabled and full P0–P9 acceptance remains incomplete. Crash
+validation stays deferred; no SDK patch or historical qualification transfer occurs.
+
+## October 14, 2026 — current backing authority for managed terminals
+
+Managed terminals now use the same exact operator-policy selection and current
+mount proof qualification as retained commands. Qualification occurs before the
+machine gate; full saved/backing proof and running authority are rechecked before
+worker preparation. Atomic promotion reserves the terminal worker and exact
+bounded input staging without dropping mount admission. Parent backing/root
+descriptors close before metadata/worker preparation, while volume gates, full
+proof and domain remain in session collection leases, including unresolved work.
+Unqualified mounted terminal calls reject before dispatch.
+
+Port forwards the current immutable operator policy to terminal execution while
+preserving the existing control and output-credit callbacks. SDK guest mount tags
+and read-only flags continue to supply image context. Public TerminalSpec/Handle/
+Result, queue bounds and source restrictions are unchanged; no reattach, replay,
+implicit boot or host terminal handling is added.
+
+A new maximum-input admission contract retains both control observers and tests
+atomic rejection. The core mounted-command fixture now also checks terminal
+missing-policy rejection without controls, output, worker preparation or storage
+mutation. A new framed peer contract verifies policy forwarding, binary output,
+consumed credit, input, resize, normal close and sibling readiness. An initial
+control burst correctly exhausted the existing two-message inbox; the test now
+uses bounded consumed-control acknowledgments rather than scheduler timing. The
+wire credit shape was corrected before final verification. These are non-VM
+contracts, not live terminal/volume package qualification.
+
+Ordinary Rust workspace units pass 390 cases (341 engine, 37 bridge, 12 protocol),
+with 13 deferred fixtures ignored. Strict workspace Clippy/docs, formatting and
+unmodified SDK checks pass. Elixir and wire schemas are unchanged; prior CI and
+protocol evidence is not relabeled as a new run. Private logs remain ignored
+under .local/http-parity/mount-terminal-*.
+
+Ordinary Linux guest/current-backing/resource-peak/replacement/mode qualification,
+long/large-tree acceptance, reader activation and public PostgreSQL/package checks
+remain pending, alongside the rest of P0–P9. Public volume admission remains
+disabled. Crash validation stays deferred and no SDK patch or historical platform
+evidence transfer occurs.
+
+## October 14, 2026 — ordinary qualification handshake and Linux preflight
+
+The ordinary Python Port peer now recognizes future volume and remote-source
+capability declarations in the same canonical order as Rust, and verifies exact
+volume limits. It previously rejected those future handshakes despite typed
+protocol support. A shared Linux volume Hello fixture checks full capabilities/
+limits and keeps current packages unchanged; synthetic source declaration checks
+prepare_artifact ordering without activating package support.
+
+Read-only Linux preflight confirmed the authorized physical host is reachable.
+The disposable test and provision units are inactive with MainPID zero; the probe
+unit is failed with MainPID zero. No recovery-required marker exists. Prior clean
+SDK build inputs remain in owned physical-host staging. The old preparation
+script was inspected but not executed. Current native/check.sh was reviewed and
+explicitly selects ordinary units plus named non-VM fixtures, rather than all
+ignored tests. A fresh build-only entry was prepared under ignored private staging
+and passes shell syntax validation; no guest was started or runtime qualified.
+
+Ordinary-runner tests pass seven cases and deferred-selection tests pass two.
+The full native Python suite passes with its explicitly reported resolver skips;
+these are model/source/package-contract checks, not guest qualification. SDK source
+verification passes. No current Linux package, guest, public consumer or store
+qualification is claimed, and historical package evidence is not transferred.
+Public volume/source admission remains disabled, crash validation remains deferred,
+and full P0–P9 acceptance stays pending. Private preflight/build/test files remain
+ignored under .local/http-parity/linux-qualification-* and linux-ordinary-build.sh.
+
+## October 14, 2026 — current Linux source checks and optimized build
+
+Committed source 8bf113f was archived with SHA-256
+0afa6c034955fc942e8b02e7cbdd21eda4bf34b6660332a272be61c9a0c1a512
+and staged privately on the authorized Linux host. Prior clean vendored crates,
+Rust 1.98.1, runtime asset and build-cache archives matched their recorded input
+hashes before use. SDK trees from the cache were excluded and freshly materialized
+from verified unmodified source. Native lockfile differences add no new registry
+package versions. No research checkout, upstream source or sealed baseline changed.
+
+The disposable test guest was started through the reviewed lab controller with
+its ordinary 45-minute deadline. Input checks passed, and current native/check.sh
+explicitly selected ordinary checks plus individually named non-VM fixtures.
+Linux workspace units passed 390 cases (341 engine, 37 bridge, 12 protocol), with
+13 deferred fixtures ignored. Normal child reaping passed one case; ordinary
+worker fixtures passed two and invalid-config boot guard passed one. Clean SDK
+configuration witnesses passed three. The full Python suite passed 21 cases with
+three resolver skips; the subsequently compiled resolver passed those three
+selected cases. Formatting, strict Clippy, Rustdoc and both SDK source inventory
+checks completed successfully. The deletion-tree contract exercised its Linux-
+only raw non-UTF-8 filename branch. These are current Linux non-VM checks, not
+public guest or volume qualification.
+
+The optimized release/package build is still running in the same verified session.
+Current SDK inventory was observed absent before enrollment preparation. Fresh
+ordinary enrollment and lifecycle scripts are prepared, but have not run; no new
+package or guest result is claimed. The live session must be monitored before its
+08:58:15 UTC deadline and end through normal guest shutdown. Raw inputs, logs,
+receipts and scripts remain ignored/private, including physical-host staging
+http-parity-8bf113f-20261014 and guest work /home/lab/http-parity-8bf113f.
+
+Public volume/source admission remains disabled, full P0–P9 acceptance remains
+incomplete, and crash validation remains deferred. Historical package evidence is
+not transferred to this source/build session. Distribution approval stays separate.
+
+## October 14, 2026 — Linux lifecycle qualification and Port process umask
+
+The optimized Linux package completed, but fresh-account enrollment exposed an
+ordinary runner assumption that the SDK database already exists. Snapshot now
+accepts only an entirely absent SDK directory as fresh; partial state and symlinks
+still reject and no database is initialized by observation. A model contract
+covers those boundaries. The initial failure happened before launching a helper.
+
+The first lifecycle creation then failed and receipt-free inspection returned
+unverified with no SDK row. Its intent and unknown storage were preserved; no
+mutation was replayed or cleanup/adoption inferred from empty inventory. SDK
+paths were group-writable under the account's inherited umask. The Port now sets
+077 in main before threads and SDK filesystem work. This changes only the owned
+helper process; the transport-neutral engine does not change a BEAM/NIF umask,
+and existing directories are not repaired. An ordinary Linux IPC-worker test
+starts with caller umask 002, observes helper 077, then closes stdin and collects
+its normal invalid-request exit without a signal or VM dispatch. The ordinary
+runner now preserves creation results before assertions for future diagnostics.
+
+A rebuilt exact package passed the existing ordinary lifecycle through a fresh
+intent. The sanitized report at docs/evidence/embedded-port-http-parity-linux-lifecycle.json
+binds manifest 512c976d1d40c56d29b5ee7981527a2384294a12526780cefd5f52ce46776bee
+and executable 4b468377ad2fc5815de685c0df7d7cb899e93795778a4fdd1dea4b69e564f4d0.
+It used base 8bf113f plus main.rs SHA-256
+1ef62e5c295b08b0a6fd860b27dae9c8467155d3b7611a80783dccd14566fff7.
+SDK source and assets remained unchanged. Execution returned exit 7, one CPU,
+525000 KiB reported memory, two 1-GiB disks, exact env/cwd and numeric user 65534.
+The 1,048,593-byte file survived stop/start and stopped-helper replacement with
+full original receipt and fresh epoch. Three normal stops left zero helper
+children; authenticated deletion removed only the successful fixture.
+
+Private evidence, package and unknown SDK state were copied to owned physical-
+host staging and verified by archive hashes. All helpers closed; the guest then
+powered off through normal OS shutdown before its deadline. The lab unit reports
+inactive, MainPID zero, success and exit status zero. No forced owner loss or live
+persistence interruption was used. Raw receipts, SDK state, keys and packages
+remain ignored/private; the failed creation is still unverified.
+
+Linux source checks from the preceding entry passed before the one-line helper
+change. The rebuilt release and actual process-umask/lifecycle witnesses pass;
+local ordinary Rust workspace units pass 390 cases with 13 deferred fixtures
+ignored, and strict Clippy, format, shell syntax and unmodified source verification
+pass. The updated Python suite passes 22 cases with four environment/platform skips;
+the Linux helper-umask case passed separately. Broad source-check evidence is not
+relabelled as a full rerun after the helper correction.
+
+Raw Port lifecycle is qualified only for these bytes. Public Runtime/Memory/
+PostgreSQL, current/minimum consumers, HTTP-only consumers and remaining feature
+campaigns still need this package's own evidence. Public volume/source admission
+remains disabled; all full P0–P9 acceptance remains incomplete. Crash validation
+and distribution approval stay deferred/separate.

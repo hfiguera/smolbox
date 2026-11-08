@@ -144,6 +144,43 @@ defmodule SmolBox.Embedded.ConfigTest do
     assert Target.sdk_version(%{runtime_version: "1.19.0"}) == "1.19.0"
   end
 
+  test "volume root enters helper config only under future volume capability" do
+    {:ok, policy} = SmolBox.VolumePolicy.new("local", "/srv/smolvm/volumes")
+    options = options()
+
+    package =
+      options[:package_identity]
+      |> Map.merge(%{"platform" => "linux", "architecture" => "x86_64"})
+
+    artifacts = Enum.map(options[:artifacts], &Map.put(&1, "architecture", "x86_64"))
+
+    {:ok, dormant} =
+      Config.new(
+        Keyword.merge(options,
+          platform: :linux,
+          architecture: "x86_64",
+          package_identity: package,
+          artifacts: artifacts,
+          volume_policy: policy
+        )
+      )
+
+    refute Map.has_key?(Launch.helper_config(dormant), "approved_volume_policy")
+    package = Map.put(dormant.package_identity, "engine_version", "0.2.0")
+    sdk = SDKIdentity.implemented("1.22.0", package["smolvm_revision"])
+    sdk = put_in(sdk, ["feature_versions", "volumes"], 1)
+    future = %{dormant | package_identity: package, sdk_identity: sdk}
+    assert {:error, _} = Config.validate(future)
+
+    assert Launch.helper_config(future)["approved_volume_policy"] ==
+             %{"id" => "local", "root" => "/srv/smolvm/volumes"}
+
+    refute Map.has_key?(
+             Launch.helper_config(%{future | volume_policy: nil}),
+             "approved_volume_policy"
+           )
+  end
+
   test "identity must match the configured platform and pinned engine" do
     package = options()[:package_identity]
 

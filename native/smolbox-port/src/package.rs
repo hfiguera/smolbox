@@ -25,6 +25,8 @@ pub struct Config {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub approved_registry_sources: Option<Vec<RegistryApproval>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approved_volume_policy: Option<smolbox_engine::LocalVolumePolicy>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub publish_address: Option<String>,
 }
 
@@ -171,6 +173,9 @@ pub fn read_config(path: &Path) -> Result<Config, SafeCode> {
         || config.approved_artifacts.len() > 64
     {
         return Err(SafeCode::Validation);
+    }
+    if let Some(policy) = &config.approved_volume_policy {
+        policy.validate().map_err(|_| SafeCode::Validation)?;
     }
     if config.publish_address.as_ref().is_some_and(|value| {
         value
@@ -892,6 +897,72 @@ mod tests {
         value["approved_registry_sources"] = serde_json::json!([approval]);
         std::fs::write(&path, serde_json::to_vec(&value).unwrap()).unwrap();
         assert!(read_config(&path).is_err());
+    }
+
+    #[test]
+    fn volume_catalog_accepts_only_operator_policy_shape_and_normalized_root() {
+        let root = tempfile::tempdir().unwrap();
+        let path = root.path().join("config.json");
+        let base = serde_json::json!({"schema":2,"target_id":"test","generation":"ab".repeat(16),"allow_initialize":false,"package_manifest_sha256":"cd".repeat(32),"approved_artifacts":[]});
+        let mut value = base.clone();
+        value["approved_volume_policy"] =
+            serde_json::json!({"id":"local","root":"/srv/smolvm/volumes"});
+        std::fs::write(&path, serde_json::to_vec(&value).unwrap()).unwrap();
+        let config = read_config(&path).ok().unwrap();
+        assert_eq!(config.approved_volume_policy.unwrap().id, "local");
+        for policy in [
+            serde_json::json!({"id":"local","root":"relative"}),
+            serde_json::json!({"id":"local","root":"/srv/../outside"}),
+            serde_json::json!({"id":"local","root":"/srv//volumes"}),
+            serde_json::json!({"id":"local","root":"/srv/volumes","adopt_existing":true}),
+            serde_json::json!([]),
+            serde_json::Value::Null,
+        ] {
+            value["approved_volume_policy"] = policy;
+            std::fs::write(&path, serde_json::to_vec(&value).unwrap()).unwrap();
+            if value["approved_volume_policy"].is_null() {
+                // Optional catalog omission/null cannot authorize a request.
+                assert!(read_config(&path)
+                    .ok()
+                    .unwrap()
+                    .approved_volume_policy
+                    .is_none());
+            } else {
+                assert!(read_config(&path).is_err());
+            }
+        }
+    }
+
+    #[test]
+    fn negotiated_volume_bounds_match_engine_constants_and_remain_unadvertised() {
+        let limits = smolbox_protocol::VolumeLimits::default();
+        assert_eq!(limits.work_ms, smolbox_engine::VOLUME_WORK_MS);
+        assert_eq!(limits.observation_ms, smolbox_engine::VOLUME_OBSERVATION_MS);
+        assert_eq!(
+            limits.record_bytes,
+            smolbox_engine::VOLUME_RECORD_BYTES as u64
+        );
+        assert_eq!(
+            limits.delete_entries,
+            smolbox_engine::VOLUME_DELETE_ENTRIES as u64
+        );
+        assert_eq!(
+            limits.ancestor_bytes,
+            smolbox_engine::VOLUME_ANCESTOR_BYTES as u64
+        );
+        assert_eq!(
+            limits.control_metadata_bytes,
+            smolbox_engine::JOB_CONTROL_METADATA_BYTES
+        );
+        assert_eq!(
+            limits.observation_metadata_bytes,
+            smolbox_engine::VOLUME_OBSERVATION_METADATA_BYTES
+        );
+        assert!(
+            smolbox_protocol::Limits::for_sdk(&sdk_identity().ok().unwrap())
+                .volumes
+                .is_none()
+        );
     }
 
     #[test]

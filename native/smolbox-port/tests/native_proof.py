@@ -51,7 +51,8 @@ def capabilities(manifest):
     features = manifest['policy']['sdk']['feature_versions']
     if features.get('observability') == 1:
         values = ['health', 'capacity', 'metrics', 'readiness', 'list', 'measurements'] + values
-    for feature, operation in [('logs', 'logs'), ('background_exec', 'exec_background'),
+    for feature, operation in [('volumes', 'volumes'), ('remote_sources', 'prepare_artifact'),
+                               ('logs', 'logs'), ('background_exec', 'exec_background'),
                                ('buffered_exec', 'exec_buffered'), ('streaming_exec', 'exec_stream'),
                                ('terminals', 'terminal_open'), ('disk_growth', 'qualify_growth'), ('disk_growth', 'inspect_growth'),
                                ('disk_growth', 'expand_disks'), ('images', 'pull_image'), ('images', 'list_images')]:
@@ -86,6 +87,10 @@ def limits(manifest):
             values['terminals'] = dict(session_ms=86400000, buffer_bytes=1048576, input_bytes=65536,
                 total_input_bytes=16777216, attach_ms=30000, close_ms=5000, input_slots=2,
                 output_events=1024, descriptors=20)
+        if features.get('volumes') == 1:
+            values['volumes'] = dict(work_ms=86400000, observation_ms=30000,
+                record_bytes=16384, delete_entries=1000000, ancestor_bytes=4096,
+                control_metadata_bytes=262144, observation_metadata_bytes=131072)
     return values
 
 
@@ -111,6 +116,12 @@ def save(path, value):
 
 def snapshot():
     database = Path.home() / 'Library/Application Support/smolvm/server/smolvm.db' if os.uname().sysname == 'Darwin' else Path(os.environ.get('XDG_DATA_HOME', Path.home() / '.local/share')) / 'smolvm/server/smolvm.db'
+    sdk_root = database.parent.parent
+    try:
+        sdk_root.lstat()
+    except FileNotFoundError:
+        return []  # Fresh account only: no SDK directory or partial material.
+    assert sdk_root.is_dir() and not sdk_root.is_symlink(), 'redirected SDK inventory'
     with sqlite3.connect(f'file:{database}?mode=ro', uri=True) as connection:
         rows = connection.execute('SELECT * FROM vms ORDER BY name').fetchall()
     return [hashlib.sha256(repr(row).encode()).hexdigest() for row in rows]

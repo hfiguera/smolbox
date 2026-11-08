@@ -3,7 +3,16 @@ defmodule SmolBox.Runtime.NativeRecovery do
   alias SmolBox.{Backend, DiskExpansion, Error, Execution, Machine, ManagedMachine}
   alias SmolBox.Backend.EmbeddedContext
   alias SmolBox.Embedded.{Call, Health}
-  alias SmolBox.Runtime.{MachineSession, NativeAuthority, Session, Target, WorkerHealth}
+
+  alias SmolBox.Runtime.{
+    MachineSession,
+    NativeAuthority,
+    NativeVolumeRecovery,
+    Session,
+    Target,
+    WorkerHealth
+  }
+
   alias SmolBox.Store.BackendAssignments
 
   def observe(config, target, previous, coordinator) do
@@ -111,6 +120,9 @@ defmodule SmolBox.Runtime.NativeRecovery do
       end
     end)
   end
+
+  defp classify(config, target, %SmolBox.Volume{} = volume),
+    do: NativeVolumeRecovery.classify(config, target, volume)
 
   defp classify(config, target, record) do
     with true <-

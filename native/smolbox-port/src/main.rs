@@ -6,6 +6,11 @@ use smolbox_protocol as wire;
 use std::path::Path;
 
 fn main() {
+    // The Port owns this process. Set before threads/SDK filesystem work; a
+    // future NIF must never change the BEAM process's global umask.
+    unsafe {
+        libc::umask(0o077);
+    }
     std::panic::set_hook(Box::new(|_| eprintln!("smolbox-port: native panic")));
     if run().is_err() {
         // Native/protocol source text, argv, file content and paths never log.

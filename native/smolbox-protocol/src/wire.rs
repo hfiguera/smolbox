@@ -51,6 +51,7 @@ pub struct DomainIdentity {
 #[derive(Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Capability {
+    Volumes,
     PrepareArtifact,
     ListImages,
     PullImage,
@@ -111,6 +112,8 @@ pub enum Preflight {
 #[serde(deny_unknown_fields)]
 pub struct Limits {
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub volumes: Option<Box<crate::VolumeLimits>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub terminals: Option<Box<crate::TerminalLimits>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub logs: Option<Box<LogLimits>>,
@@ -150,6 +153,7 @@ pub struct Limits {
 impl Default for Limits {
     fn default() -> Self {
         Self {
+            volumes: None,
             terminals: None,
             logs: None,
             creation: None,
@@ -237,6 +241,9 @@ pub struct LogLimits {
 impl Limits {
     pub fn for_sdk(sdk: &SdkIdentity) -> Self {
         let mut limits = Self::default();
+        if sdk.feature_versions.get("volumes") == Some(&1) {
+            limits.volumes = Some(Box::default());
+        }
         if sdk.feature_versions.get("terminals") == Some(&1) {
             limits.terminals = Some(Box::default());
         }
@@ -356,6 +363,7 @@ impl SdkIdentity {
             capabilities = observations;
         }
         for (feature, capability) in [
+            ("volumes", Capability::Volumes),
             ("remote_sources", Capability::PrepareArtifact),
             ("logs", Capability::Logs),
             ("background_exec", Capability::ExecBackground),
@@ -441,6 +449,12 @@ impl SdkIdentity {
                 || self.feature_versions.get("job_resources") == Some(&1),
         )?;
         require(
+            self.feature_versions.get("volumes") != Some(&1)
+                || ["job_resources", "buffered_exec", "compact_creation"]
+                    .iter()
+                    .all(|name| self.feature_versions.get(*name) == Some(&1)),
+        )?;
+        require(
             self.feature_versions.get("terminals") != Some(&1)
                 || self.feature_versions.get("buffered_exec") == Some(&1),
         )?;
@@ -472,6 +486,13 @@ impl Hello {
             hex(hash, 64)?;
         }
         require(matches!(self.package.platform.as_str(), "linux" | "macos"))?;
+        if self
+            .sdk
+            .as_ref()
+            .is_some_and(|sdk| sdk.feature_versions.get("volumes") == Some(&1))
+        {
+            require(self.package.platform == "linux")?;
+        }
         require(matches!(
             self.package.architecture.as_str(),
             "x86_64" | "aarch64"
@@ -703,6 +724,12 @@ pub struct Create {
         deserialize_with = "present_optional"
     )]
     pub features: Option<Box<CreationFeatures>>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "present_optional"
+    )]
+    pub volume_mounts: Option<Vec<crate::VolumeMount>>,
 }
 
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -755,6 +782,12 @@ pub struct OciCreate {
         deserialize_with = "present_optional"
     )]
     pub features: Option<Box<CreationFeatures>>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "present_optional"
+    )]
+    pub volume_mounts: Option<Vec<crate::VolumeMount>>,
 }
 
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -816,6 +849,12 @@ pub struct RegistryCreate {
         deserialize_with = "present_optional"
     )]
     pub features: Option<Box<CreationFeatures>>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "present_optional"
+    )]
+    pub volume_mounts: Option<Vec<crate::VolumeMount>>,
 }
 impl RegistryCreate {
     pub fn validate(&self) -> Result<()> {
@@ -827,6 +866,9 @@ impl RegistryCreate {
         require(self.labels.is_empty())?;
         if let Some(features) = &self.features {
             features.validate()?;
+        }
+        if let Some(mounts) = &self.volume_mounts {
+            crate::VolumeMount::validate_set(mounts)?;
         }
         Ok(())
     }
@@ -841,6 +883,9 @@ impl OciCreate {
         require(self.labels.is_empty())?;
         if let Some(features) = &self.features {
             features.validate()?;
+        }
+        if let Some(mounts) = &self.volume_mounts {
+            crate::VolumeMount::validate_set(mounts)?;
         }
         Ok(())
     }
@@ -962,9 +1007,55 @@ pub struct MachineConfiguration {
     pub network: NetworkPolicy,
     pub ports: Vec<PortMapping>,
     pub backend: Option<String>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "present_optional"
+    )]
+    pub mounts: Option<Vec<ObservedMount>>,
+}
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ObservedMount {
+    pub source: String,
+    pub target: String,
+    pub readonly: bool,
+    pub staged: bool,
+}
+impl ObservedMount {
+    fn path(value: &str) -> bool {
+        (2..=4096).contains(&value.len())
+            && value.starts_with('/')
+            && !value.ends_with('/')
+            && !value.contains(['\0', '\\'])
+            && !value.contains("//")
+            && !value.split('/').any(|part| matches!(part, "." | ".."))
+    }
+    fn validate_set(mounts: &[Self]) -> Result<()> {
+        require(!mounts.is_empty() && mounts.len() <= 8)?;
+        for (index, mount) in mounts.iter().enumerate() {
+            require(
+                Self::path(&mount.source)
+                    && Self::path(&mount.target)
+                    && mount.target.starts_with("/mnt/volumes/")
+                    && !mount.staged,
+            )?;
+            for previous in &mounts[..index] {
+                require(
+                    previous.source != mount.source
+                        && previous.target < mount.target
+                        && !mount.target.starts_with(&format!("{}/", previous.target)),
+                )?;
+            }
+        }
+        Ok(())
+    }
 }
 impl MachineConfiguration {
     fn validate(&self) -> Result<()> {
+        if let Some(mounts) = &self.mounts {
+            ObservedMount::validate_set(mounts)?;
+        }
         CreationFeatures {
             compact: false,
             network: self.network.clone(),
@@ -1213,6 +1304,9 @@ impl ImageObservation {
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "operation", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Operation {
+    Volume {
+        request: crate::VolumeRequest,
+    },
     QualifyRegistryCreation {
         source: RegistryIdentity,
         resources: Resources,
@@ -1427,6 +1521,19 @@ impl Operation {
             _ => None,
         }
     }
+    pub fn creation_mounts(&self) -> Option<&[crate::VolumeMount]> {
+        match self {
+            Self::Create { create } | Self::InspectCreation { create } => {
+                create.volume_mounts.as_deref()
+            }
+            Self::CreateOci { create } | Self::InspectOciCreation { create } => {
+                create.volume_mounts.as_deref()
+            }
+            Self::CreateRegistryPrepared { create, .. }
+            | Self::InspectRegistryCreation { create } => create.volume_mounts.as_deref(),
+            _ => None,
+        }
+    }
     pub fn creation_features(&self) -> Option<&CreationFeatures> {
         match self {
             Self::QualifyRegistryCreation { features, .. } => features.as_deref(),
@@ -1445,6 +1552,7 @@ impl Operation {
     }
     pub fn capability(&self) -> Capability {
         match self {
+            Self::Volume { .. } => Capability::Volumes,
             Self::QualifyRegistryCreation { .. } => Capability::QualifyCreation,
             Self::CreateRegistryPrepared { .. } => Capability::Create,
             Self::InspectRegistryCreation { .. } => Capability::InspectCreation,
@@ -1483,6 +1591,7 @@ impl Operation {
     }
     pub fn receipt(&self) -> Option<&Receipt> {
         match self {
+            Self::Volume { .. } => None,
             Self::QualifyRegistryCreation { .. } => None,
             Self::CreateRegistryPrepared { .. } | Self::InspectRegistryCreation { .. } => None,
             Self::PrepareArtifact { .. } => None,
@@ -1519,10 +1628,14 @@ impl Operation {
         if let Some(receipt) = self.receipt() {
             receipt.validate()?;
         }
+        if let Some(mounts) = self.creation_mounts() {
+            crate::VolumeMount::validate_set(mounts)?;
+        }
         if let Some(features) = self.creation_features() {
             features.validate()?;
         }
         match self {
+            Self::Volume { request } => request.validate(budget_ms)?,
             Self::QualifyRegistryCreation {
                 source,
                 resources,
@@ -1948,6 +2061,9 @@ pub struct MachineCounters {
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "result", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Outcome {
+    Volume {
+        volume: crate::VolumeResult,
+    },
     PreparedArtifact {
         source: RegistrySource,
         size_bytes: u64,
@@ -2037,6 +2153,7 @@ pub enum Outcome {
 impl Outcome {
     pub fn validate(&self) -> Result<()> {
         match self {
+            Self::Volume { volume } => volume.validate(),
             Self::PreparedArtifact {
                 source, size_bytes, ..
             } => {
@@ -2203,7 +2320,8 @@ impl Outcome {
         }
         if matches!(
             self,
-            Self::PreparedArtifact { .. }
+            Self::Volume { .. }
+                | Self::PreparedArtifact { .. }
                 | Self::Pulled { .. }
                 | Self::Images { .. }
                 | Self::Grown { .. }

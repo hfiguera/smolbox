@@ -22,23 +22,9 @@ defmodule SmolBox.Store.MemoryVolumes do
   end
 
   def run({:accept, v, capacity, usage}, state) do
-    case fetch(state, Volume.key(v)) do
-      {:ok, %{fingerprint: fp} = existing} when fp == v.fingerprint ->
-        {{:ok, existing, :existing}, state}
-
-      {:ok, _} ->
-        {error(:identity_conflict), state}
-
-      {:error, %{category: :not_found}} ->
-        with :ok <- BackendBindings.http(state.backend_bindings[v.worker_id]),
-             :ok <-
-               WorkerControl.admit(
-                 Map.get(state.worker_controls, v.worker_id, WorkerControl.initial(v.worker_id))
-               ),
-             {:ok, v} <- VolumeOps.accept(v, capacity, usage),
-             {:ok, next} <- persist(state, Map.put(state.volumes, Volume.key(v), v)),
-             do: {{:ok, v, :inserted}, next},
-             else: (e -> {e, state})
+    case BackendBindings.volume(state.backend_bindings[v.worker_id], v) do
+      :ok -> accept(v, capacity, usage, state)
+      e -> {e, state}
     end
   end
 
@@ -48,6 +34,26 @@ defmodule SmolBox.Store.MemoryVolumes do
          {:ok, state} <- persist(state, Map.put(state.volumes, key, next)),
          do: {{:ok, next, result}, state},
          else: (e -> {e, state})
+  end
+
+  defp accept(v, capacity, usage, state) do
+    case fetch(state, Volume.key(v)) do
+      {:ok, %{fingerprint: fp} = existing} when fp == v.fingerprint ->
+        {{:ok, existing, :existing}, state}
+
+      {:ok, _} ->
+        {error(:identity_conflict), state}
+
+      {:error, %{category: :not_found}} ->
+        with :ok <-
+               WorkerControl.admit(
+                 Map.get(state.worker_controls, v.worker_id, WorkerControl.initial(v.worker_id))
+               ),
+             {:ok, v} <- VolumeOps.accept(v, capacity, usage),
+             {:ok, next} <- persist(state, Map.put(state.volumes, Volume.key(v), v)),
+             do: {{:ok, v, :inserted}, next},
+             else: (e -> {e, state})
+    end
   end
 
   defp fetch(state, key) do
