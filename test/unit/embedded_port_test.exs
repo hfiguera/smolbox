@@ -36,6 +36,30 @@ defmodule SmolBox.Embedded.PortTest do
     end
   end
 
+  test "current approved package rejects volume dispatch before any native request" do
+    config = package(protocol_major: 2, backend: true)
+    pid = owner(config)
+
+    request = %{
+      "operation" => "volume",
+      "request" => %{
+        "policy_id" => "local",
+        "intent" => %{
+          "worker_volume_id" => "sbv-" <> String.duplicate("a", 32),
+          "size_gb" => 4
+        },
+        "action" => %{"action" => "provision"}
+      }
+    }
+
+    assert {:error, %Error{evidence: :not_dispatched}} =
+             Port.submit(pid, request, budget(), self())
+
+    refute Enum.any?(Package.received(config), &(&1["type"] == "request"))
+    assert :ok = Port.shutdown(pid)
+    wait_until(fn -> match?({:ok, %{status: :stopped}}, Port.health(pid)) end)
+  end
+
   test "unavailable notice quarantines admission without losing the current owner or terminal" do
     config = package(protocol_minor: 4)
     pid = owner(config)

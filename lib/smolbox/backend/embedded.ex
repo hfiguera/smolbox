@@ -10,6 +10,7 @@ defmodule SmolBox.Backend.Embedded do
     EmbeddedOperation,
     EmbeddedPreparation,
     EmbeddedReply,
+    EmbeddedVolume,
     Features,
     Reference
   }
@@ -72,6 +73,13 @@ defmodule SmolBox.Backend.Embedded do
   def supports_operation?(nil, :expand_disks), do: true
   def supports_operation?(nil, :qualify_growth), do: true
 
+  def supports_operation?(nil, operation) when operation in [:provision_volume, :delete_volume],
+    do: true
+
+  def supports_operation?(%{__struct__: EmbeddedContext, config: config}, operation)
+      when operation in [:provision_volume, :delete_volume],
+      do: config.platform == :linux and Features.supports?(config, :volumes)
+
   def supports_operation?(%{__struct__: EmbeddedContext, config: config}, operation)
       when operation in [:expand_disks, :qualify_growth],
       do: Features.supports?(config, :disk_growth)
@@ -128,6 +136,28 @@ defmodule SmolBox.Backend.Embedded do
   def invoke(context, :prepare_artifact, arguments, budget),
     do: EmbeddedPreparation.run(context, arguments, budget)
 
+  def invoke(%{volume: volume} = context, :provision_volume, [id, size], budget) do
+    with true <- volume != nil and volume.worker_volume_id == id and volume.size_gb == size,
+         {:ok, %{"volume" => %{"status" => "provisioned"}}} <-
+           EmbeddedVolume.run(context, %{"action" => "provision"}, budget),
+         do: {:ok, SmolBox.Volume.path(volume)},
+         else: (
+           {:error, _} = error -> error
+           _ -> volume_error()
+         )
+  end
+
+  def invoke(%{volume: volume} = context, :delete_volume, [id], budget) do
+    with true <- volume != nil and volume.worker_volume_id == id,
+         {:ok, %{"volume" => %{"status" => "deleted"}}} <-
+           EmbeddedVolume.run(context, %{"action" => "delete"}, budget),
+         do: :ok,
+         else: (
+           {:error, _} = error -> error
+           _ -> volume_error()
+         )
+  end
+
   def invoke(context, :open_managed_terminal, [name, spec, consumer, observer], budget) do
     with {:ok, source} <- TerminalConnection.source(context, name, spec, budget),
          do: Server.start_connection(source, name, spec, consumer, observer)
@@ -173,4 +203,9 @@ defmodule SmolBox.Backend.Embedded do
 
   defp qualification_error(_),
     do: {:error, %SmolBox.Error{category: :unknown, operation: :qualify_creation}}
+
+  defp volume_error,
+    do:
+      {:error,
+       %SmolBox.Error{category: :identity_conflict, operation: :volume, evidence: :not_dispatched}}
 end

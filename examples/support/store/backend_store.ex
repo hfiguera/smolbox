@@ -153,6 +153,40 @@ defmodule SmolBox.DurableHost.BackendStore do
            do: BackendBindings.http(binding)
     end
 
+    def volume(context, v) do
+      if function_exported?(BackendBindings, :volume, 2) do
+        with {:ok, binding} <- read(context, v.worker_id),
+             :ok <- unbound(context, v.worker_id, binding),
+             do: BackendBindings.volume(binding, v)
+      else
+        legacy_volume(context, v)
+      end
+    end
+
+    defp legacy_volume(context, v),
+      do:
+        if(Map.get(v, :native_authority) == nil,
+          do: http(context, v.worker_id),
+          else: error(:unsupported_capability)
+        )
+
+    def mounts(context, machine) do
+      if function_exported?(BackendBindings, :mounts, 2) do
+        with {:ok, binding} <- read(context, machine.volume_worker_id),
+             :ok <- unbound(context, machine.volume_worker_id, binding),
+             do: BackendBindings.mounts(binding, machine)
+      else
+        legacy_mounts(context, machine)
+      end
+    end
+
+    defp legacy_mounts(context, machine),
+      do:
+        if(Map.get(machine, :native_mounts, []) == [],
+          do: http(context, machine.volume_worker_id),
+          else: error(:unsupported_capability)
+        )
+
     defp unbound(context, worker, nil) do
       with {:ok, evidence} <- Database.assignment_backend(context, worker),
            do: BackendBindings.unbound(evidence)
@@ -203,6 +237,20 @@ defmodule SmolBox.DurableHost.BackendStore do
     def capabilities(_context), do: %{}
     def allocation(_context, {worker, name, capacity}), do: {:ok, worker, name, capacity, nil}
     def http(_context, _worker), do: :ok
+
+    def mounts(context, machine),
+      do:
+        if(Map.get(machine, :native_mounts, []) == [],
+          do: http(context, machine.volume_worker_id),
+          else: {:error, %SmolBox.Error{category: :unsupported_capability, operation: :volume}}
+        )
+
+    def volume(context, v),
+      do:
+        if(Map.get(v, :native_authority) == nil,
+          do: http(context, v.worker_id),
+          else: {:error, %SmolBox.Error{category: :unsupported_capability, operation: :volume}}
+        )
 
     def reserve_execution(record, worker, name, lease, capacity, used, now, nil),
       do: RecordOps.reservation(record, worker, name, lease, capacity, used, now)

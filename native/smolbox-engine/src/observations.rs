@@ -22,6 +22,18 @@ pub struct ReadBudget {
     pub(crate) cancel: Cancellation,
 }
 impl ReadBudget {
+    /// Volume mutation shares one caller deadline through filesystem stages.
+    /// Read-only constructors retain their separate thirty-second ceiling.
+    pub fn for_volume_work(remaining: Duration, cancel: Cancellation) -> Result<Self> {
+        if remaining.is_zero() || remaining > Duration::from_millis(crate::VOLUME_WORK_MS) {
+            return Err(Error::before(ErrorCode::Validation));
+        }
+        Ok(Self {
+            deadline: Instant::now() + remaining,
+            cancel,
+        })
+    }
+
     pub fn new(remaining: Duration, cancel: Cancellation) -> Result<Self> {
         if remaining.is_zero() || remaining > Duration::from_secs(30) {
             return Err(Error::before(ErrorCode::Validation));
@@ -37,6 +49,26 @@ impl ReadBudget {
         } else {
             Ok(())
         }
+    }
+}
+
+#[cfg(test)]
+mod volume_budget_tests {
+    use super::*;
+    #[test]
+    fn volume_work_preserves_long_caller_budget_and_shared_cancellation_without_widening_observers()
+    {
+        let cancel = Cancellation::default();
+        assert!(ReadBudget::new(Duration::from_secs(3600), cancel.clone()).is_err());
+        let work = ReadBudget::for_volume_work(Duration::from_secs(3600), cancel.clone()).unwrap();
+        work.check().unwrap();
+        cancel.cancel();
+        assert_eq!(work.check().unwrap_err().code, ErrorCode::State);
+        assert!(ReadBudget::for_volume_work(Duration::ZERO, Cancellation::default()).is_err());
+        assert!(
+            ReadBudget::for_volume_work(Duration::from_secs(86_401), Cancellation::default())
+                .is_err()
+        );
     }
 }
 #[derive(Clone, Copy)]

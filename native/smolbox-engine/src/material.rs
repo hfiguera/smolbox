@@ -196,6 +196,8 @@ struct Journal {
     head: MaterialProof,
     history: Vec<Completed>,
     pending: Option<Pending>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    mounts: Option<crate::MountMaterial>,
 }
 
 pub(crate) struct MaterialJournal {
@@ -217,6 +219,31 @@ impl MaterialJournal {
     /// Called only after Engine's successful fresh create and original marker.
     /// There is deliberately no promote-existing-receipt entry point.
     pub(crate) fn initialize(&self, origin: &CreationReceipt) -> Result<CreationReceipt> {
+        self.initialize_material(origin, None)
+    }
+
+    pub(crate) fn initialize_mounted(
+        &self,
+        origin: &CreationReceipt,
+        record: &VmRecord,
+        mounts: crate::MountMaterial,
+    ) -> Result<CreationReceipt> {
+        mounts.verify_record(origin, record)?;
+        if origin.material_sha256 != material_hash(record)?
+            || record.name != origin.name
+            || record.labels.get("smolbox.owner") != Some(&origin.owner_token)
+            || record.labels.get("smolbox.incarnation") != Some(&origin.incarnation)
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        self.initialize_material(origin, Some(mounts))
+    }
+
+    fn initialize_material(
+        &self,
+        origin: &CreationReceipt,
+        mounts: Option<crate::MountMaterial>,
+    ) -> Result<CreationReceipt> {
         if origin.material.is_some() {
             return Err(Error::before(ErrorCode::Ownership));
         }
@@ -227,6 +254,7 @@ impl MaterialJournal {
             head: head.clone(),
             history: Vec::new(),
             pending: None,
+            mounts,
         };
         self.write(&journal, None)?;
         Ok(with_proof(origin, head))
@@ -249,6 +277,44 @@ impl MaterialJournal {
                 Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
                 _ => Err(Error::before(ErrorCode::Ownership)),
             },
+        }
+    }
+
+    pub(crate) fn verify_mount_record(
+        &self,
+        receipt: &CreationReceipt,
+        record: &VmRecord,
+    ) -> Result<()> {
+        let mounts = if receipt.material.is_some() {
+            self.load()?.0.mounts
+        } else {
+            None
+        };
+        match mounts {
+            Some(material) => material.verify_record(receipt, record),
+            None if record.mounts.is_empty()
+                && record.staged_mounts.is_empty()
+                && !record
+                    .labels
+                    .contains_key(crate::mount_material::MOUNT_LABEL) =>
+            {
+                Ok(())
+            }
+            None => Err(Error::before(ErrorCode::Ownership)),
+        }
+    }
+
+    pub(crate) fn mount_material(
+        &self,
+        receipt: &CreationReceipt,
+        record: &VmRecord,
+    ) -> Result<Option<crate::MountMaterial>> {
+        self.verify(receipt)?;
+        self.verify_mount_record(receipt, record)?;
+        if receipt.material.is_some() {
+            Ok(self.load()?.0.mounts)
+        } else {
+            Ok(None)
         }
     }
 
@@ -289,6 +355,7 @@ impl MaterialJournal {
         geometry: Option<crate::growth::Metadata>,
     ) -> Result<Permit> {
         self.verify(receipt)?;
+        self.verify_mount_record(receipt, record)?;
         let (mut journal, inode) = self.load()?;
         if !valid_id(operation_id)
             || journal.history.len() >= MAX_HISTORY
@@ -379,6 +446,8 @@ impl MaterialJournal {
         record: &VmRecord,
         qualified: bool,
     ) -> Result<CreationReceipt> {
+        self.verify_mount_record(receipt, record)
+            .map_err(after_entry)?;
         let (mut journal, inode) = self.load().map_err(after_entry)?;
         check_origin(&journal.origin, receipt).map_err(after_entry)?;
         let pending = journal
@@ -690,6 +759,9 @@ fn validate_journal(journal: &Journal) -> Result<()> {
     {
         return Err(Error::before(ErrorCode::Ownership));
     }
+    if let Some(mounts) = &journal.mounts {
+        mounts.validate(&journal.origin)?;
+    }
     let mut previous = root_proof(&journal.origin)?;
     previous.validate()?;
     let mut ids = std::collections::BTreeSet::new();
@@ -759,6 +831,144 @@ fn after_entry(error: Error) -> Error {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn mounted_fixture() -> (
+        tempfile::TempDir,
+        MaterialJournal,
+        CreationReceipt,
+        VmRecord,
+        crate::MountMaterial,
+    ) {
+        let value: serde_json::Value = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/mounted-creation-request.json"
+        ))
+        .unwrap();
+        let mounts =
+            serde_json::from_value(value["operation"]["create"]["volume_mounts"].clone()).unwrap();
+        let material = crate::MountMaterial { schema: 1, mounts };
+        let backing = &material.mounts[0].proof.backing;
+        let mut record = VmRecord::new(
+            "owned".into(),
+            1,
+            512,
+            material.records().unwrap(),
+            vec![],
+            false,
+        );
+        record.storage_gb = Some(1);
+        record.overlay_gb = Some(1);
+        record.labels.insert("smolbox.owner".into(), "a".repeat(64));
+        record
+            .labels
+            .insert("smolbox.incarnation".into(), "b".repeat(32));
+        record.labels.insert(
+            crate::mount_material::MOUNT_LABEL.into(),
+            material.digest().unwrap(),
+        );
+        let origin = CreationReceipt {
+            target_id: backing.target_id.clone(),
+            domain_generation: backing.domain_generation.clone(),
+            name: record.name.clone(),
+            owner_token: "a".repeat(64),
+            incarnation: "b".repeat(32),
+            material_sha256: material_hash(&record).unwrap(),
+            material: None,
+        };
+        let directory = tempfile::tempdir().unwrap();
+        let journal = MaterialJournal::at(&directory.path().canonicalize().unwrap());
+        (directory, journal, origin, record, material)
+    }
+
+    #[test]
+    fn mounted_material_authenticates_full_volume_proof_and_exact_sdk_record() {
+        let (_directory, journal, origin, record, material) = mounted_fixture();
+        let receipt = journal
+            .initialize_mounted(&origin, &record, material.clone())
+            .unwrap();
+        journal.verify(&receipt).unwrap();
+        journal.verify_mount_record(&receipt, &record).unwrap();
+        assert!(receipt.matches(&record).unwrap());
+        let (loaded, _) = journal.load().unwrap();
+        assert!(loaded.mounts == Some(material.clone()));
+        let bytes = std::fs::read(journal.directory.join(FILE_NAME)).unwrap();
+        assert!(journal
+            .initialize_mounted(&origin, &record, material.clone())
+            .is_err());
+        assert_eq!(
+            std::fs::read(journal.directory.join(FILE_NAME)).unwrap(),
+            bytes
+        );
+        let mut changed = material;
+        changed.mounts[0].proof.backing.inode -= 1;
+        assert!(changed.verify_record(&origin, &record).is_err());
+        assert!(!format!("{changed:?}").contains(&origin.owner_token));
+    }
+
+    #[test]
+    fn copied_paths_changed_targets_flags_or_staged_mounts_cannot_supply_material_authority() {
+        let (_directory, journal, origin, record, material) = mounted_fixture();
+        let receipt = journal
+            .initialize_mounted(&origin, &record, material)
+            .unwrap();
+        for field in 0..5 {
+            let mut changed = record.clone();
+            match field {
+                0 => changed.mounts[0].0 = "/foreign".into(),
+                1 => changed.mounts[0].1 = "/mnt/volumes/other".into(),
+                2 => changed.mounts[0].2 = true,
+                3 => changed
+                    .staged_mounts
+                    .push((0, "/foreign".into(), "/mnt/volumes/data".into())),
+                _ => {
+                    changed.labels.remove(crate::mount_material::MOUNT_LABEL);
+                }
+            }
+            assert!(journal.verify_mount_record(&receipt, &changed).is_err());
+            assert!(!receipt.matches(&changed).unwrap());
+        }
+        let mut legacy = receipt;
+        legacy.material = None;
+        assert!(journal.verify_mount_record(&legacy, &record).is_err());
+    }
+
+    #[test]
+    fn private_mount_proof_cannot_be_rewritten_without_the_sdk_digest_and_receipt() {
+        let (_directory, journal, origin, record, material) = mounted_fixture();
+        let receipt = journal
+            .initialize_mounted(&origin, &record, material)
+            .unwrap();
+        let path = journal.directory.join(FILE_NAME);
+        let mut value: serde_json::Value =
+            serde_json::from_slice(&std::fs::read(&path).unwrap()).unwrap();
+        value["mounts"]["mounts"][0]["proof"]["backing"]["inode"] = serde_json::json!(7);
+        std::fs::write(&path, serde_json::to_vec(&value).unwrap()).unwrap();
+        assert!(journal.verify_mount_record(&receipt, &record).is_err());
+        value.as_object_mut().unwrap().remove("mounts");
+        std::fs::write(&path, serde_json::to_vec(&value).unwrap()).unwrap();
+        assert!(journal.verify_mount_record(&receipt, &record).is_err());
+    }
+
+    #[test]
+    fn growth_preserves_original_mount_proof_and_unmounted_journal_encoding() {
+        let (_directory, journal, origin, mut record, material) = mounted_fixture();
+        let receipt = journal
+            .initialize_mounted(&origin, &record, material.clone())
+            .unwrap();
+        let permit = journal
+            .prepare(&receipt, "mounted-grow", grow(), &record)
+            .unwrap();
+        journal.enter(&permit).unwrap();
+        record.storage_gb = Some(2);
+        let updated = journal.complete(&receipt, &permit, &record).unwrap();
+        journal.verify_mount_record(&updated, &record).unwrap();
+        assert!(journal.load().unwrap().0.mounts == Some(material));
+        let (_directory, legacy, receipt, record) = fixture();
+        legacy.verify_mount_record(&receipt, &record).unwrap();
+        let value: serde_json::Value =
+            serde_json::from_slice(&std::fs::read(legacy.directory.join(FILE_NAME)).unwrap())
+                .unwrap();
+        assert!(value.get("mounts").is_none());
+    }
 
     fn transitions() -> Vec<GrowthTransition> {
         serde_json::from_slice(include_bytes!(

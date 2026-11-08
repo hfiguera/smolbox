@@ -24,6 +24,7 @@ defmodule SmolBox.Backend.Assignment do
     CreationFeatures,
     Identity,
     Launch,
+    MountContract,
     NativeGrowth,
     NativeSource,
     Request
@@ -38,15 +39,16 @@ defmodule SmolBox.Backend.Assignment do
 
   # Generate once before the atomic reservation write, never inside dispatch.
   @doc false
-  def new(config, spec, name) do
+  def new(config, spec, name, attachments \\ []) do
     with :ok <- Config.validate(config),
          :ok <- validate_spec(spec),
+         true <- MountContract.attachments_match?(attachments, spec),
          true <-
            admission_spec?(spec, Config.protocol_major(config)) and
              spec.profile in config.profiles,
          true <-
            CreationFeatures.approved?(CreationFeatures.from_spec(spec), config) and
-             command_approved?(config, spec),
+             command_approved?(config, spec) and volume_spec_approved?(config, spec),
          artifact when not is_nil(artifact) <- approved_artifact(config, spec.artifact) do
       assignment = %__MODULE__{
         version: Config.protocol_major(config),
@@ -63,9 +65,13 @@ defmodule SmolBox.Backend.Assignment do
             },
             CreationFeatures.from_spec(spec)
           )
+          |> MountContract.attach(attachments)
       }
 
-      if valid?(assignment), do: {:ok, assignment}, else: failure(:validation)
+      if valid?(assignment) and MountContract.matches_spec?(assignment.creation, spec, nil) and
+           MountContract.approved?(assignment.creation, config),
+         do: {:ok, assignment},
+         else: failure(:validation)
     else
       _unsupported -> failure(:unsupported_capability)
     end
@@ -77,7 +83,7 @@ defmodule SmolBox.Backend.Assignment do
       Config.validate(config) == :ok and validate_spec(spec) == :ok and
         admission_spec?(spec, Config.protocol_major(config)) and spec.profile in config.profiles and
         CreationFeatures.approved?(CreationFeatures.from_spec(spec), config) and
-        command_approved?(config, spec) and
+        command_approved?(config, spec) and volume_spec_approved?(config, spec) and
         approved_artifact(config, spec.artifact) != nil
 
   @doc false
@@ -85,17 +91,26 @@ defmodule SmolBox.Backend.Assignment do
     do:
       Validation.struct_shape?(assignment, __MODULE__) and Binding.valid?(assignment.binding) and
         assignment.version in [1, 2] and
-        (Request.valid?(
-           %{"operation" => "create", "create" => assignment.creation},
-           1,
-           assignment.version
-         ) or
-           (assignment.version == 2 and
-              (NativeSource.creation?(assignment.creation) or
-                 NativeSource.registry_creation?(assignment.creation)))) and
-        assignment.creation["labels"] == %{}
+        creation_valid?(assignment) and mount_binding?(assignment)
 
   def valid?(_assignment), do: false
+
+  defp creation_valid?(assignment),
+    do:
+      (Request.valid?(
+         %{"operation" => "create", "create" => assignment.creation},
+         1,
+         assignment.version
+       ) or
+         (assignment.version == 2 and
+            (NativeSource.creation?(assignment.creation) or
+               NativeSource.registry_creation?(assignment.creation)))) and
+        assignment.creation["labels"] == %{}
+
+  defp mount_binding?(assignment),
+    do:
+      not Map.has_key?(assignment.creation, "volume_mounts") or
+        MountContract.bound?(assignment.creation["volume_mounts"], assignment.binding)
 
   @doc false
   def approved?(assignment, config, spec, retained \\ nil) do
@@ -103,16 +118,21 @@ defmodule SmolBox.Backend.Assignment do
       assignment.version == Config.protocol_major(config) and
       supported_spec?(spec, assignment.version) and
       features_approved?(assignment, config, spec) and
-      CreationFeatures.matches?(assignment.creation, spec, retained) and
+      specification_matches?(assignment.creation, spec, retained) and
       spec.profile in config.profiles and
       Map.from_struct(assignment.binding) == Config.domain_binding(config) and
       approved_creation?(assignment.creation, approved_artifact(config, spec.artifact))
   end
 
+  defp specification_matches?(create, spec, retained),
+    do:
+      CreationFeatures.matches?(create, spec, retained) and
+        MountContract.matches_spec?(create, spec, retained)
+
   defp features_approved?(assignment, config, spec),
     do:
       CreationFeatures.approved?(Map.get(assignment.creation, "features"), config) and
-        command_approved?(config, spec)
+        command_approved?(config, spec) and MountContract.approved?(assignment.creation, config)
 
   defp approved_creation?(_creation, nil), do: false
 
@@ -132,14 +152,9 @@ defmodule SmolBox.Backend.Assignment do
 
   def record_valid?(%{backend_assignment: %__MODULE__{} = assignment} = record) do
     valid?(assignment) and supported_record?(record, assignment.version) and
-      CreationFeatures.matches?(
-        assignment.creation,
-        record.spec,
-        Map.get(record, :managed_machine)
-      ) and
-      assignment.binding.target_id == record.worker_id and
-      assignment.creation["name"] == record.machine_name and
-      assignment.creation["resources"] == resources(record.spec.profile) and
+      specification_matches?(assignment.creation, record.spec, Map.get(record, :managed_machine)) and
+      MountContract.record_matches?(record) and
+      record_identity_matches?(record, assignment) and
       creation_artifact_matches?(assignment.creation, record.spec.artifact) and
       optional_histories?(record, assignment.version) and
       Enum.all?(
@@ -149,6 +164,12 @@ defmodule SmolBox.Backend.Assignment do
   end
 
   def record_valid?(_record), do: false
+
+  defp record_identity_matches?(record, assignment),
+    do:
+      assignment.binding.target_id == record.worker_id and
+        assignment.creation["name"] == record.machine_name and
+        assignment.creation["resources"] == resources(record.spec.profile)
 
   @doc false
   def qualification(config, spec) do
@@ -179,6 +200,11 @@ defmodule SmolBox.Backend.Assignment do
       supported_spec?(spec, version) and qualified_user?(Map.get(spec, :command)) and
         (spec.artifact["kind"] != "oci" or spec.profile.network != :offline)
 
+  defp volume_spec_approved?(config, spec),
+    do:
+      Map.get(spec, :volumes, []) == [] or
+        (config.platform == :linux and Features.supports?(config, :volumes))
+
   defp qualified_user?(nil), do: true
   defp qualified_user?(%ImagePull{}), do: true
   defp qualified_user?(%TerminalSpec{}), do: true
@@ -208,7 +234,8 @@ defmodule SmolBox.Backend.Assignment do
   defp observation_matches?(%{backend_identity: identity} = machine, assignment),
     do:
       Identity.matches?(identity, assignment) and
-        CreationFeatures.observation_matches?(assignment.creation, machine)
+        CreationFeatures.observation_matches?(assignment.creation, machine) and
+        machine.mounts == MountContract.paths(assignment.creation)
 
   defp observation_matches?(_machine, _assignment), do: false
 
@@ -269,7 +296,8 @@ defmodule SmolBox.Backend.Assignment do
 
   defp bare_guest?(spec, version),
     do:
-      Map.get(spec, :volumes, []) == [] and not Map.get(spec, :checkpointable, false) and
+      (version == 2 or Map.get(spec, :volumes, []) == []) and
+        not Map.get(spec, :checkpointable, false) and
         (version == 2 or (Map.get(spec, :ports, []) == [] and Map.get(spec, :workload) == nil))
 
   defp command_supported?(nil, _profile, _version), do: true
@@ -377,11 +405,11 @@ defmodule SmolBox.Backend.Assignment do
           active_export: nil,
           branch: nil,
           active_branch: nil,
-          preparation: nil,
-          mounts: []
+          preparation: nil
         ],
         fn {key, empty} -> Map.get(record, key, empty) == empty end
-      ) and growth_histories?(record, version) and
+      ) and (Map.get(record, :mounts, []) == [] or version == 2) and
+        growth_histories?(record, version) and
         (version == 2 or Map.get(record, :reserved_ports, []) == [])
 
   defp growth_histories?(record, 2), do: NativeGrowth.record_valid?(record)

@@ -8,6 +8,7 @@ defmodule SmolBox.Backend.EmbeddedReply do
     Identity,
     ImageContract,
     LogStream,
+    MountContract,
     Protocol
   }
 
@@ -19,6 +20,7 @@ defmodule SmolBox.Backend.EmbeddedReply do
     LogResult,
     Machine,
     MachineMeasurements,
+    Mount,
     Result
   }
 
@@ -297,6 +299,7 @@ defmodule SmolBox.Backend.EmbeddedReply do
       overlay_gb: resources["overlay_gib"],
       network: context.spec.profile.network,
       ports: CreationFeatures.ports(context.assignment.creation),
+      mounts: MountContract.paths(context.assignment.creation),
       backend_identity: identity
     }
 
@@ -326,7 +329,23 @@ defmodule SmolBox.Backend.EmbeddedReply do
       end
 
     actual ==
-      {:ok, context.spec.profile.network, CreationFeatures.ports(context.assignment.creation)}
+      {:ok, context.spec.profile.network, CreationFeatures.ports(context.assignment.creation)} and
+      mounts_observed?(context, observed)
+  end
+
+  defp mounts_observed?(context, observed) do
+    expected = MountContract.paths(context.assignment.creation)
+
+    case get_in(observed, ["configuration", "mounts"]) do
+      nil ->
+        expected == []
+
+      value ->
+        case Mount.from_wire(value) do
+          {:ok, mounts} -> mounts == expected
+          _invalid -> false
+        end
+    end
   end
 
   defp operation_error(operation, outcome, overlay) do

@@ -42,10 +42,24 @@ pub struct MachineConfiguration {
     pub network: NetworkPolicy,
     pub ports: Vec<PortMapping>,
     pub backend: Option<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub mounts: Vec<ObservedMount>,
+}
+#[derive(Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ObservedMount {
+    pub source: String,
+    pub target: String,
+    pub readonly: bool,
+    pub staged: bool,
 }
 impl MachineConfiguration {
     pub(crate) fn observe(record: &VmRecord) -> Option<Box<Self>> {
-        (record.network || !record.ports.is_empty()).then(|| {
+        (record.network
+            || !record.ports.is_empty()
+            || !record.mounts.is_empty()
+            || !record.staged_mounts.is_empty())
+        .then(|| {
             Box::new(Self {
                 network: NetworkPolicy {
                     enabled: record.network,
@@ -58,6 +72,27 @@ impl MachineConfiguration {
                     .map(|&(host, guest)| PortMapping { host, guest })
                     .collect(),
                 backend: record.network_backend.map(|value| value.as_str().into()),
+                mounts: record
+                    .mounts
+                    .iter()
+                    .map(|(source, target, readonly)| ObservedMount {
+                        source: source.clone(),
+                        target: target.clone(),
+                        readonly: *readonly,
+                        staged: false,
+                    })
+                    .chain(
+                        record
+                            .staged_mounts
+                            .iter()
+                            .map(|(_, source, target)| ObservedMount {
+                                source: source.clone(),
+                                target: target.clone(),
+                                readonly: false,
+                                staged: true,
+                            }),
+                    )
+                    .collect(),
             })
         })
     }
@@ -359,6 +394,27 @@ mod tests {
             env: BTreeMap::new(),
             workdir: None,
         }
+    }
+
+    #[test]
+    fn offline_mount_observation_projects_actual_record_and_preserves_legacy_shape() {
+        let mut record = neutral();
+        assert!(MachineConfiguration::observe(&record).is_none());
+        record.mounts = vec![("/approved/data".into(), "/mnt/volumes/data".into(), true)];
+        let observed = MachineConfiguration::observe(&record).unwrap();
+        assert!(!observed.network.enabled && observed.ports.is_empty());
+        assert_eq!(observed.mounts[0].source, record.mounts[0].0);
+        assert_eq!(observed.mounts[0].target, record.mounts[0].1);
+        assert!(observed.mounts[0].readonly && !observed.mounts[0].staged);
+        record.mounts.clear();
+        record
+            .staged_mounts
+            .push((0, "/staged".into(), "/mnt/volumes/staged".into()));
+        assert!(MachineConfiguration::observe(&record).unwrap().mounts[0].staged);
+        record.staged_mounts.clear();
+        record.ports.push((8080, 80));
+        let legacy = serde_json::to_value(MachineConfiguration::observe(&record).unwrap()).unwrap();
+        assert!(legacy.get("mounts").is_none());
     }
 
     #[test]

@@ -147,6 +147,7 @@ defmodule SmolBox.Embedded.Launch do
       end
 
     values = registry_config(values, config, features)
+    values = volume_config(values, config, features)
 
     case Config.sdk_identity(config) do
       %{"feature_versions" => %{"ports" => 1}} ->
@@ -165,6 +166,11 @@ defmodule SmolBox.Embedded.Launch do
   end
 
   defp registry_config(values, _config, _features), do: values
+
+  defp volume_config(values, %{volume_policy: %{id: id, root: root}}, %{"volumes" => 1}),
+    do: Map.put(values, "approved_volume_policy", %{"id" => id, "root" => root})
+
+  defp volume_config(values, _config, _features), do: values
 
   defp protocol(path, config) do
     with {:ok, file} <- File.open(path, [:read, :binary, :raw]) do

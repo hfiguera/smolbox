@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "date": "2026-10-14",
+  "scope": "ordinary-native-lifecycle",
+  "status": "passed",
+  "source": {
+    "base_commit": "8bf113f",
+    "main_rs_sha256": "1ef62e5c295b08b0a6fd860b27dae9c8467155d3b7611a80783dccd14566fff7",
+    "note": "Base source plus Port process umask correction; no SDK edits."
+  },
+  "package_manifest_sha256": "512c976d1d40c56d29b5ee7981527a2384294a12526780cefd5f52ce46776bee",
+  "identity": {
+    "engine_version": "0.2.0",
+    "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+    "build_sha256": "4b468377ad2fc5815de685c0df7d7cb899e93795778a4fdd1dea4b69e564f4d0",
+    "assets_sha256": "b9f2db4c07283dcfae5fc9d4207c2c35e8c39771872ead843e7a4e65c9b7724c",
+    "platform": "linux",
+    "architecture": "x86_64"
+  },
+  "fixture_sha256": "8ac12958bc166344f1ffeb4c518c883c750fece358bf177f13f6ded7953cfe5b",
+  "runner_sha256": "43fdb6e7f20bc6a05acfefde2f23bb708e5db3c92cd4509744bc1dbe0a32548d",
+  "witnesses": {
+    "observed_exit": 7,
+    "resource_witness": "cpu=1 mem_kib=525000 storage_sectors=2097152 overlay_sectors=2097152 env=set cwd=/workspace user=65534",
+    "file_bytes": 1048593,
+    "file_sha256": "b863256dee74effc15743dff63a34ea93bb1f6778b22f6c971469c259638dd41",
+    "retained_after_stop_start": true,
+    "retained_after_stopped_helper_shutdown": true,
+    "fresh_epoch": true,
+    "owned_deleted": true,
+    "normal_stop_child_reaping": [
+      {
+        "stopped_helper_children": 0
+      },
+      {
+        "stopped_helper_children": 0
+      },
+      {
+        "stopped_helper_children": 0
+      }
+    ]
+  },
+  "normal_guest_shutdown": {
+    "active_state": "inactive",
+    "main_pid": 0,
+    "result": "success",
+    "exit_status": 0
+  },
+  "restrictions": [
+    "Raw Port lifecycle scope; public Runtime/store consumers remain pending.",
+    "Volumes, OCI/images, growth, networking and saved-state behavior are not qualified by this run.",
+    "Earlier failed creation remains unverified; no replay, adoption or deletion of its unknown material."
+  ],
+  "deliberate_process_interruption": false,
+  "crash_handling_qualified": false,
+  "distribution_approved": false
+}

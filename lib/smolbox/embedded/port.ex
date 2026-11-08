@@ -14,13 +14,15 @@ defmodule SmolBox.Embedded.Port do
     ImageContract,
     JSON,
     Launch,
+    MountContract,
     NativeSource,
     Outbox,
     Protocol,
     RegistryContract,
     Request,
     Shape,
-    TerminalContract
+    TerminalContract,
+    VolumeContract
   }
 
   alias SmolBox.{Error, Source, Validation}
@@ -428,7 +430,7 @@ defmodule SmolBox.Embedded.Port do
         failure(:transport)
 
       state.status == :reconciling and
-          operation["operation"] not in ~w(inspect inspect_creation inspect_oci_creation inspect_registry_creation inspect_growth qualify_growth) ->
+          not Request.reconciliation?(operation) ->
         failure(:transport)
 
       remaining <= 0 ->
@@ -536,6 +538,7 @@ defmodule SmolBox.Embedded.Port do
        when operation in ~w(create inspect_creation) do
     create["artifact"] in Enum.map(config.artifacts, &Launch.artifact/1) and
       CreationFeatures.approved?(create["features"], config) and
+      MountContract.approved?(create, config) and
       profile_approved?(config, create)
   end
 
@@ -549,6 +552,7 @@ defmodule SmolBox.Embedded.Port do
          Features.supports?(config, :remote_sources) and NativeSource.registry_creation?(create) and
            create["source"] in Enum.map(config.sources, &Source.artifact/1) and
            CreationFeatures.approved?(create["features"], config) and
+           MountContract.approved?(create, config) and
            profile_approved?(config, create)
 
   defp approved?(config, %{"operation" => "qualify_oci_creation"} = request),
@@ -560,6 +564,7 @@ defmodule SmolBox.Embedded.Port do
         NativeSource.registry_artifact?(request["source"]) and
         request["source"] in Enum.map(config.sources, &Source.artifact/1) and
         CreationFeatures.approved?(request["features"], config) and
+        MountContract.approved?(request, config) and
         profile_approved?(config, request)
 
   defp approved?(config, %{"operation" => "start_oci", "source" => source}),
@@ -586,6 +591,11 @@ defmodule SmolBox.Embedded.Port do
 
   defp approved?(config, %{"operation" => "exec_stream"}),
     do: Features.supports?(config, :streaming_exec)
+
+  defp approved?(config, %{"operation" => "volume", "request" => request}),
+    do:
+      config.platform == :linux and Features.supports?(config, :volumes) and
+        VolumeContract.approved?(request, config.volume_policy)
 
   defp approved?(config, %{"operation" => "terminal_open"}),
     do: Features.supports?(config, :terminals)
@@ -616,6 +626,7 @@ defmodule SmolBox.Embedded.Port do
       Features.supports?(config, :remote_sources) and NativeSource.artifact?(request["source"]) and
         request["source"] in Enum.map(config.sources, &Source.artifact/1) and
         CreationFeatures.approved?(request["features"], config) and
+        MountContract.approved?(request, config) and
         profile_approved?(config, request)
 
   defp profile_approved?(config, create) do
@@ -675,7 +686,8 @@ defmodule SmolBox.Embedded.Port do
 
   defp receive_correlated(state, {id, event}, bytes) do
     with {:ok, record} <- Map.fetch(state.records, id),
-         true <- record.sent do
+         true <- record.sent,
+         true <- catalog_result?(state.config, event) do
       # Terminal transcripts have a bounded unread window, not a lifetime
       # response cap. Channel enforces byte/event credit and exact total proof.
       charged =
@@ -696,6 +708,11 @@ defmodule SmolBox.Embedded.Port do
       _invalid -> :error
     end
   end
+
+  defp catalog_result?(config, {:terminal, %{"result" => "volume"} = outcome}),
+    do: VolumeContract.approved_result?(outcome, config.volume_policy)
+
+  defp catalog_result?(_config, _event), do: true
 
   defp receive_next(body, state) do
     case receive_body(state, body) do

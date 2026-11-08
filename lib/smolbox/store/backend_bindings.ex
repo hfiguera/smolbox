@@ -25,6 +25,11 @@ defmodule SmolBox.Store.BackendBindings do
   def merge(_first, _second), do: :conflict
 
   def record_binding(%{backend_assignment: %Assignment{binding: binding}}), do: binding
+  def record_binding(%SmolBox.Volume{native_authority: %{binding: binding}}), do: binding
+
+  def record_binding(%SmolBox.ManagedMachine{native_mounts: [%{binding: binding} | _]}),
+    do: binding
+
   def record_binding(_record), do: :http
 
   def valid?(worker, :http), do: Validation.identifier?(worker)
@@ -48,6 +53,28 @@ defmodule SmolBox.Store.BackendBindings do
 
   def http(binding) when binding in [nil, :http], do: :ok
   def http(_binding), do: error(:unsupported_capability)
+
+  def volume(binding, %SmolBox.Volume{native_authority: nil}), do: http(binding)
+
+  def volume(binding, %SmolBox.Volume{worker_id: worker, native_authority: %{binding: requested}}),
+      do:
+        if(valid?(worker, requested) and binding == requested,
+          do: :ok,
+          else: error(:identity_conflict)
+        )
+
+  def volume(_, _), do: error(:validation)
+
+  def mounts(binding, %{native_mounts: []}), do: http(binding)
+
+  def mounts(binding, %{volume_worker_id: worker, native_mounts: [%{binding: expected} | _]}),
+    do:
+      if(valid?(worker, expected) and binding == expected,
+        do: :ok,
+        else: error(:identity_conflict)
+      )
+
+  def mounts(_, _), do: error(:validation)
 
   def unbound(evidence) when evidence in [:empty, :http], do: :ok
   def unbound(_evidence), do: error(:identity_conflict)

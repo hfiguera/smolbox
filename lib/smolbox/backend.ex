@@ -141,9 +141,14 @@ defmodule SmolBox.Backend do
   defp record_valid?(%SmolBox.ManagedMachine{} = record),
     do: SmolBox.ManagedMachine.validate(record) == :ok
 
+  defp record_valid?(%SmolBox.Volume{} = record), do: SmolBox.Volume.validate(record) == :ok
+
   defp record_valid?(_record), do: false
 
   defp assign_context(%{kind: :http, context: context}, %{backend_assignment: nil}),
+    do: {:ok, context}
+
+  defp assign_context(%{kind: :http, context: context}, %SmolBox.Volume{native_authority: nil}),
     do: {:ok, context}
 
   defp assign_context(%{kind: :http}, _record), do: :error

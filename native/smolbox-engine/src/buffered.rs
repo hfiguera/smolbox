@@ -362,13 +362,43 @@ impl Engine {
         receipt: &CreationReceipt,
         command: BufferedCommand,
         cancel: Cancellation,
+        consumer: impl FnMut(Output) -> std::result::Result<(), ()>,
+    ) -> Result<CommandOutcome> {
+        self.exec_buffered_mode(receipt, command, cancel, consumer, None)
+    }
+
+    pub fn exec_buffered_with_volume_policy(
+        &self,
+        receipt: &CreationReceipt,
+        command: BufferedCommand,
+        cancel: Cancellation,
+        consumer: impl FnMut(Output) -> std::result::Result<(), ()>,
+        policy: &crate::LocalVolumePolicy,
+    ) -> Result<CommandOutcome> {
+        self.exec_buffered_mode(receipt, command, cancel, consumer, Some(policy))
+    }
+
+    fn exec_buffered_mode(
+        &self,
+        receipt: &CreationReceipt,
+        command: BufferedCommand,
+        cancel: Cancellation,
         mut consumer: impl FnMut(Output) -> std::result::Result<(), ()>,
+        policy: Option<&crate::LocalVolumePolicy>,
     ) -> Result<CommandOutcome> {
         let expires = Instant::now()
             .checked_add(command.timeout)
             .ok_or(Error::before(ErrorCode::Validation))?;
         let record = self.record(receipt)?;
         command.validate(record.image.is_some())?;
+        let mount_budget = crate::ReadBudget::new(
+            expires
+                .saturating_duration_since(Instant::now())
+                .min(std::time::Duration::from_secs(30))
+                .max(std::time::Duration::from_nanos(1)),
+            cancel.clone(),
+        )?;
+        let mounts = self.worker_mounts(receipt, &record, policy, &mount_budget)?;
         let gate = self.gate(&receipt.name)?;
         let machine = gate
             .try_lock()
@@ -398,15 +428,23 @@ impl Engine {
         metadata.validate()?;
         let bytes =
             serde_json::to_vec(&metadata).map_err(|_| Error::before(ErrorCode::Validation))?;
-        let prepared = supervisor.prepare_command(
+        let (permit, mount_authority) = self.reserve_mounted_worker(
+            receipt,
+            mounts,
+            crate::jobs::Demand::command(metadata.command.max_output_bytes, bytes.len() as u64)?,
+            &mount_budget,
+        )?;
+        let prepared = supervisor.prepare_job_reserved(
+            permit,
             &self.transfer_directory()?,
             self.vm_directory(&receipt.name).join("agent.sock"),
             &bytes,
             metadata.command.max_output_bytes,
+            false,
         )?;
         let result = supervisor.run(
             prepared,
-            Box::new((machine, source, self.domain.clone())),
+            Box::new((machine, source, self.domain.clone(), mount_authority)),
             expires,
             &cancel,
         )?;
@@ -560,12 +598,40 @@ impl Engine {
         command: BufferedCommand,
         cancel: Cancellation,
     ) -> Result<LaunchOutcome> {
+        self.exec_background_mode(receipt, command, cancel, None)
+    }
+
+    pub fn exec_background_with_volume_policy(
+        &self,
+        receipt: &CreationReceipt,
+        command: BufferedCommand,
+        cancel: Cancellation,
+        policy: &crate::LocalVolumePolicy,
+    ) -> Result<LaunchOutcome> {
+        self.exec_background_mode(receipt, command, cancel, Some(policy))
+    }
+
+    fn exec_background_mode(
+        &self,
+        receipt: &CreationReceipt,
+        command: BufferedCommand,
+        cancel: Cancellation,
+        policy: Option<&crate::LocalVolumePolicy>,
+    ) -> Result<LaunchOutcome> {
         let expires = Instant::now()
             .checked_add(command.timeout)
             .ok_or(Error::before(ErrorCode::Validation))?;
         let record = self.record(receipt)?;
         command.validate(record.image.is_some())?;
         let metadata = Metadata::background(&record, command, expires)?;
+        let mount_budget = crate::ReadBudget::new(
+            expires
+                .saturating_duration_since(Instant::now())
+                .min(std::time::Duration::from_secs(30))
+                .max(std::time::Duration::from_nanos(1)),
+            cancel.clone(),
+        )?;
+        let mounts = self.worker_mounts(receipt, &record, policy, &mount_budget)?;
         let gate = self.gate(&receipt.name)?;
         let machine = gate
             .try_lock()
@@ -579,11 +645,22 @@ impl Engine {
             serde_json::to_vec(&metadata).map_err(|_| Error::before(ErrorCode::Validation))?;
         // Reserve the worker before connecting to an agent. No guest command,
         // container or auxiliary VM is created by preparation or observation.
-        let prepared = supervisor.prepare_background(
+        let (permit, mount_authority) = self.reserve_mounted_worker(
+            receipt,
+            mounts,
+            crate::jobs::Demand::command(
+                metadata.command.max_output_bytes.min(64),
+                bytes.len() as u64,
+            )?,
+            &mount_budget,
+        )?;
+        let prepared = supervisor.prepare_job_reserved(
+            permit,
             &self.transfer_directory()?,
             self.vm_directory(&receipt.name).join("agent.sock"),
             &bytes,
             metadata.command.max_output_bytes.min(64),
+            true,
         )?;
         if self.inspect(receipt)?.state != crate::ObservedState::Running {
             return Err(Error::before(ErrorCode::State));
@@ -605,7 +682,7 @@ impl Engine {
         }
         match supervisor.run(
             prepared,
-            Box::new((machine, source, self.domain.clone())),
+            Box::new((machine, source, self.domain.clone(), mount_authority)),
             expires,
             &cancel,
         )? {

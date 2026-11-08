@@ -1,0 +1,30 @@
+{
+  "result": "observed",
+  "observation": {
+    "state": "stopped",
+    "resources": {
+      "cpus": 1,
+      "memory_mib": 256,
+      "storage_gib": 1,
+      "overlay_gib": 1
+    },
+    "pid_identity": null,
+    "configuration": {
+      "network": {
+        "enabled": false,
+        "hosts": [],
+        "cidrs": []
+      },
+      "ports": [],
+      "backend": null,
+      "mounts": [
+        {
+          "source": "/srv/smolvm/volumes/sbv-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "target": "/mnt/volumes/data",
+          "readonly": false,
+          "staged": false
+        }
+      ]
+    }
+  }
+}

@@ -105,6 +105,16 @@ pub(crate) struct Prepared {
     _metadata: Option<Spool>,
 }
 impl Prepared {
+    pub(crate) fn into_streaming(mut self) -> Result<Self> {
+        let Kind::Buffered { metadata } = &self.request.kind else {
+            return Err(Error::before(ErrorCode::Validation));
+        };
+        self.request.kind = Kind::Streaming {
+            metadata: metadata.clone(),
+        };
+        self.request.validate()?;
+        Ok(self)
+    }
     /// Caller adapters supply a bounded local source. Never feed an arbitrary
     /// blocking user reader on a BEAM scheduler. This step precedes guest dispatch.
     pub(crate) fn upload(
@@ -429,6 +439,7 @@ impl TransferSupervisor {
         })
     }
 
+    #[cfg(test)]
     pub(crate) fn prepare_command(
         &self,
         directory: &Path,
@@ -439,6 +450,7 @@ impl TransferSupervisor {
         self.prepare_job(directory, socket, bytes, output, false)
     }
 
+    #[cfg(test)]
     pub(crate) fn prepare_background(
         &self,
         directory: &Path,
@@ -449,6 +461,7 @@ impl TransferSupervisor {
         self.prepare_job(directory, socket, bytes, output, true)
     }
 
+    #[cfg(test)]
     pub(crate) fn prepare_streaming(
         &self,
         directory: &Path,
@@ -456,15 +469,8 @@ impl TransferSupervisor {
         bytes: &[u8],
         output: u64,
     ) -> Result<Prepared> {
-        let mut prepared = self.prepare_command(directory, socket, bytes, output)?;
-        let Kind::Buffered { metadata } = &prepared.request.kind else {
-            unreachable!()
-        };
-        prepared.request.kind = Kind::Streaming {
-            metadata: metadata.clone(),
-        };
-        prepared.request.validate()?;
-        Ok(prepared)
+        self.prepare_command(directory, socket, bytes, output)?
+            .into_streaming()
     }
 
     #[cfg(test)]
@@ -537,6 +543,7 @@ impl TransferSupervisor {
         })
     }
 
+    #[cfg(test)]
     fn prepare_job(
         &self,
         directory: &Path,
@@ -548,6 +555,19 @@ impl TransferSupervisor {
         let permit = self
             .pool
             .acquire(crate::jobs::Demand::command(output, bytes.len() as u64)?)?;
+        self.prepare_job_reserved(permit, directory, socket, bytes, output, background)
+    }
+
+    pub(crate) fn prepare_job_reserved(
+        &self,
+        permit: crate::jobs::JobLease,
+        directory: &Path,
+        socket: PathBuf,
+        bytes: &[u8],
+        output: u64,
+        background: bool,
+    ) -> Result<Prepared> {
+        crate::jobs::Demand::command(output, bytes.len() as u64)?;
         let mut metadata = Spool::new(directory)?;
         metadata
             .file

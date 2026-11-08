@@ -41,6 +41,7 @@ defmodule SmolBox.Runtime.NativeSupport do
          true <- terminal_support?(config, supported),
          true <- growth_support?(config, supported),
          true <- source_support?(config, supported),
+         true <- volume_support?(config, supported, adapter),
          true <-
            Enum.all?(required, fn {name, arity} -> function_exported?(adapter, name, arity) end),
          do: :ok,
@@ -118,5 +119,25 @@ defmodule SmolBox.Runtime.NativeSupport do
           (supported[:native_sources] == 1 and supported[:registry_sources] == 1 and
              (not match?(%{"feature_versions" => %{"images" => 1}}, features) or
                 supported[:managed_images] == 1))
+      end)
+
+  defp volume_support?(config, supported, adapter),
+    do:
+      Enum.all?(targets(config), fn target ->
+        case Config.sdk_identity(target.native_config) do
+          %{"feature_versions" => %{"volumes" => 1}} ->
+            target.native_config.platform == :linux and supported[:native_volumes] == 1 and
+              supported[:local_volumes] == 1 and volume_callbacks?(adapter)
+
+          _ ->
+            true
+        end
+      end)
+
+  defp volume_callbacks?(adapter),
+    do:
+      Enum.all?([volume_accept: 3, volume_fetch: 2, volume_list: 4, volume_change: 5], fn {name,
+                                                                                           arity} ->
+        function_exported?(adapter, name, arity)
       end)
 end

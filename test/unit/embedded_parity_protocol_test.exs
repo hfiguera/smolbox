@@ -35,6 +35,42 @@ defmodule SmolBox.Embedded.ParityProtocolTest do
     refute Request.valid?(stripped["operation"], 1000, 2)
   end
 
+  test "volume negotiation binds exact limits Linux and dependencies without activation" do
+    message = fixture("hello-v2-volumes.json")
+    hello = message["hello"]
+    assert {:ok, _} = Protocol.decode(Jason.encode!(message), 2)
+    assert hello["limits"] == Protocol.limits(2, 0, hello["sdk"])
+    assert hello["capabilities"] == Protocol.capabilities(hello["sdk"])
+    assert hello["limits"]["volumes"]["control_metadata_bytes"] == 262_144
+    assert hello["limits"]["jobs"]["metadata_bytes"] == 33_554_432
+    refute SDKIdentity.approved?(hello["sdk"], "1.22.0", hello["package"]["smolvm_revision"])
+
+    for key <- Map.keys(hello["limits"]["volumes"]) do
+      altered = put_in(message, ["hello", "limits", "volumes", key], 0)
+      assert :error = Protocol.decode(Jason.encode!(altered), 2)
+    end
+
+    assert :error =
+             Protocol.decode(
+               Jason.encode!(update_in(message, ["hello", "limits"], &Map.delete(&1, "volumes"))),
+               2
+             )
+
+    assert :error =
+             Protocol.decode(
+               Jason.encode!(put_in(message, ["hello", "package", "platform"], "macos")),
+               2
+             )
+
+    for dependency <- ~w(job_resources buffered_exec compact_creation) do
+      sdk = update_in(hello["sdk"], ["feature_versions"], &Map.delete(&1, dependency))
+      refute SDKIdentity.valid?(sdk)
+    end
+
+    refute Map.has_key?(Protocol.limits(1, 4), "volumes")
+    refute Map.has_key?(fixture("hello-v2-current.json")["hello"]["limits"], "volumes")
+  end
+
   test "SDK approval is explicit and binds the complete feature and source identity" do
     hello = fixture("hello-v2.json")["hello"]
 

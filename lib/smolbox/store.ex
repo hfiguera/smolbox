@@ -586,7 +586,11 @@ defmodule SmolBox.Store do
   @callback volume_list(context(), String.t(), String.t() | nil, pos_integer()) ::
               {:ok, [SmolBox.Volume.t()], String.t() | nil} | {:error, Error.t()}
   @type volume_action ::
-          :delete | :resolve_delete | {:complete, :ready | :deleted} | {:unknown, Error.t()}
+          :delete
+          | :resolve_delete
+          | {:complete, :ready | :deleted}
+          | {:complete_native, map()}
+          | {:unknown, Error.t()}
   @doc "Compare-and-set a volume lifecycle transition. Never delete an attached volume; attachment is atomic with machine acceptance and released only on verified deletion."
   @callback volume_change(
               context(),

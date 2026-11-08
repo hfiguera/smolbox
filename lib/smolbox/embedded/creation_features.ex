@@ -1,7 +1,7 @@
 defmodule SmolBox.Embedded.CreationFeatures do
   @moduledoc false
   alias SmolBox.Embedded.{Config, Shape}
-  alias SmolBox.{ExecutionSpec, NetworkPolicy, PortMapping, Validation, Workload}
+  alias SmolBox.{ExecutionSpec, Mount, NetworkPolicy, PortMapping, Validation, Workload}
 
   def from_spec(spec) do
     ports = Map.get(spec, :ports, [])
@@ -75,10 +75,23 @@ defmodule SmolBox.Embedded.CreationFeatures do
   def observation_matches?(_create, _machine), do: false
 
   def configuration?(value) do
-    Shape.keys?(value, ~w(network ports backend)) and
+    (Shape.keys?(value, ~w(network ports backend)) or
+       (Shape.keys?(value, ~w(network ports backend mounts)) and
+          observed_mounts?(value["mounts"]))) and
       valid?(%{"network" => value["network"], "ports" => value["ports"], "workload" => nil}) and
       (value["backend"] == "virtio-net" or
          (value["backend"] == nil and not value["network"]["enabled"] and value["ports"] == []))
+  end
+
+  defp observed_mounts?(value) do
+    with true <- Validation.list?(value, 8) and value != [],
+         true <- Enum.all?(value, &Shape.keys?(&1, ~w(source target readonly staged))),
+         {:ok, mounts} <- Mount.from_wire(value) do
+      Mount.to_wire(mounts) == value and
+        length(Enum.uniq_by(mounts, & &1.source)) == length(mounts)
+    else
+      _invalid -> false
+    end
   end
 
   def observed(value) do

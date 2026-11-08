@@ -12,7 +12,8 @@ defmodule SmolBox.Embedded.Protocol do
     RegistryContract,
     SDKIdentity,
     Shape,
-    TerminalContract
+    TerminalContract,
+    VolumeContract
   }
 
   alias SmolBox.Validation
@@ -41,6 +42,15 @@ defmodule SmolBox.Embedded.Protocol do
   @dispatch ~w(not_dispatched may_have_dispatched)
   @completions ~w(exited cancelled deadline output_limit consumer_lost native_error unknown)
   @states ~w(missing stopped running paused pausing frozen failed unreachable identity_unknown)
+  @volume_limits %{
+    "work_ms" => 86_400_000,
+    "observation_ms" => 30_000,
+    "record_bytes" => 16_384,
+    "delete_entries" => 1_000_000,
+    "ancestor_bytes" => 4096,
+    "control_metadata_bytes" => 262_144,
+    "observation_metadata_bytes" => 131_072
+  }
   @limits %{
     "frame_bytes" => 1_048_576,
     "chunk_bytes" => 65_536,
@@ -117,6 +127,8 @@ defmodule SmolBox.Embedded.Protocol do
         do: Map.put(values, "terminals", TerminalContract.limits()),
         else: values
 
+    values = volume_limits(values, sdk)
+
     if match?(%{"feature_versions" => %{"job_resources" => 1}}, sdk),
       do: Map.put(values, "jobs", jobs),
       else: values
@@ -148,8 +160,8 @@ defmodule SmolBox.Embedded.Protocol do
 
     values =
       if observers?(sdk),
-        do: preparation(sdk) ++ @observations ++ @capabilities,
-        else: preparation(sdk) ++ @capabilities
+        do: preparation(sdk) ++ volume_capabilities(sdk) ++ @observations ++ @capabilities,
+        else: preparation(sdk) ++ volume_capabilities(sdk) ++ @capabilities
 
     values =
       if match?(%{"feature_versions" => %{"logs" => 1}}, sdk), do: ["logs" | values], else: values
@@ -166,6 +178,17 @@ defmodule SmolBox.Embedded.Protocol do
 
   defp preparation(%{"feature_versions" => %{"remote_sources" => 1}}), do: ["prepare_artifact"]
   defp preparation(_sdk), do: []
+
+  defp volume_feature?(sdk), do: match?(%{"feature_versions" => %{"volumes" => 1}}, sdk)
+  defp volume_capabilities(sdk), do: if(volume_feature?(sdk), do: ["volumes"], else: [])
+
+  defp volume_limits(values, %{"feature_versions" => %{"volumes" => 1}}),
+    do: Map.put(values, "volumes", @volume_limits)
+
+  defp volume_limits(values, _sdk), do: values
+
+  defp volume_platform?(hello),
+    do: not volume_feature?(hello["sdk"]) or hello["package"]["platform"] == "linux"
 
   defp observers?(%{"feature_versions" => %{"observability" => 1}}), do: true
   defp observers?(_sdk), do: false
@@ -254,6 +277,7 @@ defmodule SmolBox.Embedded.Protocol do
     do:
       hello_version?(hello, major) and Shape.hex?(hello["epoch"], 32) and
         domain?(hello["domain"]) and package?(hello["package"]) and sdk_matches?(hello, major) and
+        volume_platform?(hello) and
         capabilities?(hello["capabilities"], major, hello["sdk"]) and
         hello["limits"] == limits(major, hello["minor"], hello["sdk"]) and
         preflight?(hello["preflight"])
@@ -352,6 +376,8 @@ defmodule SmolBox.Embedded.Protocol do
     do: Shape.keys?(outcome, ~w(result text)) and Shape.text?(text, 65_536, true)
 
   defp outcome?(%{"result" => "ready"} = outcome, 2), do: map_size(outcome) == 1
+
+  defp outcome?(%{"result" => "volume"} = outcome, 2), do: VolumeContract.result?(outcome)
 
   defp outcome?(%{"result" => "prepared_artifact"} = outcome, 2),
     do: RegistryContract.result?(outcome)

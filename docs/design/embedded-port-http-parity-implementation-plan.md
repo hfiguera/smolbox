@@ -222,6 +222,81 @@ same public budgets, ownership and recovery rules. HTTP terminal behavior passes
 Primary areas: volume policy/store attachments, native host-filesystem control,
 SDK mount/storage APIs, disk-expansion coordinator and material transition proofs.
 
+Implementation note: the shared engine has read-only root qualification and fresh
+0700 backing staging with protected intent/completion records and bounded,
+nonmutating proof observation through reserved control admission. These are
+internal foundations. Native host provision additionally binds inherited
+unprivileged UID/GID to a protected completion without widening backing mode.
+Public readiness still needs guest/replacement-write and permitted mode/ownership
+evolution qualification. Deletion preflight now excludes all retained SDK mounts
+and holds root/resource/volume-gate authority in an opaque permit. Native removal
+now consumes it with protected intent/completion and descriptor-relative iterative
+traversal. Explicit caller-fenced resolution continues only protected entered
+deletion or completed provisioning, with native gate/work/attachment checks.
+Fresh schema-2 staging records synchronized temporary backing identity before
+no-replacement public rename, then records distinct final staging; schema-1
+reading remains compatible. Explicit fenced abort now cleans only protected
+prepared/staged backing, with distinct abort proof and no ready promotion.
+Unproved temporary cleanup, long/large-tree acceptance and bridge/durable/mount
+integration remain pending; no volume capability or P7 exit gate activates yet.
+Typed protocol-2 actions, result authority and helper adapter/catalog routing
+now exist behind that disabled gate. Exact volume limits, Linux-only declaration
+and job/buffered/compact feature dependencies now agree across Rust/Elixir and
+executing engine constants. Elixir now validates exact requests/results, correlates action/intent/domain proof,
+checks operator-root result authority and routes read-only inspection during
+reconciliation/quarantine. Durable VolumeAuthority and selective v20 now retain native binding and exact
+provision/delete/abort proof, with immutable linkage and proof-only completion.
+Memory and the PostgreSQL example check matching enrollment at acceptance;
+HTTP v15 bytes remain unchanged. Scoped backend volume construction/reply decoding and read-only startup volume
+classification now preserve saved identity, immutable proofs and reservations.
+Future enrollment requires native volume reader and callback support; this marker
+is not advertised yet. Managed provisioning/deletion now pins the owner before durable intent, serializes
+against native recovery, retains worker lease/domain binding and uses typed proof
+completion with one absolute budget. Explicit fenced cleanup selects protected
+staging only after confirmed pre-dispatch ownership rejection, never after
+uncertainty. Deduplication stays read-only without requiring a live helper.
+The shared engine now qualifies proof-bound mount sets into opaque retained root/
+backing/domain/gate handles and rechecks them before projecting SDK mount tuples.
+Any protected cleanup journal blocks projection. Durable attachments now preserve volume key/binding/proof/target/read-only mode
+in immutable machine records with selective v21 and atomic enrolled-store checks.
+Creation wire/assignment now carries exact saved mounts for local/OCI/registry
+sources; retained commands inherit that authority in selective v21. Protocol and
+operator-catalog gates reject mismatched feature/domain/policy. Helper dispatch
+now forwards the exact approved policy and full proof into engine qualification
+and material publication; current public package capability admission is disabled. The shared engine now authenticates the full mount proof set in its private
+material journal and binds its digest plus exact SDK mount tuples into creation
+authority. Local mounted creation consumes the qualified handle and atomically
+promotes its retained lease to the whole-job budget without releasing gates or
+descriptors; failures after reservation remain uncertain. Legacy unmounted
+journals omit the new field. Prepared registry and direct OCI creation now also retain/promote that handle
+and publish authenticated mount material without reacquiring work capacity.
+Cancellation and foreign-handle contracts reject before reservation/SDK mutation.
+SDK mount observations now project actual source/target/read-only/staged values
+through protocol 2, including offline mounted machines. Strict wire contracts
+and managed reply correlation reject missing, changed or unexpected mounts; old
+unmounted observations omit the field exactly. Local/prepared-pack startup now
+requires a freshly qualified handle matched to the full saved material, retains
+its gates/descriptors through SDK entry and observation, and atomically reserves
+one launch child under the existing whole-work budget. Ordinary start without
+a qualified handle rejects mounted records. Port now routes mounted local/OCI/
+prepared-registry creation to these paths. Source preparation finishes before
+mount qualification to avoid stacking work leases, with one original deadline.
+Pack startup selects journal-bound mounts only against the current operator
+policy. OCI startup now qualifies full saved mount proof and atomically promotes
+the existing lease to its launch/bootstrap job. Mounted bootstrap spools and
+worker dispatch wait until SDK agent readiness and parent backing/root FD closure;
+volume gates, domain and proof follow worker collection. The declared descriptor
+limit is unchanged. Buffered, owned streaming and background commands now
+qualify saved/current mounts before machine gating, recheck running authority,
+and atomically promote the retained lease to worker/output admission. Parent
+backing descriptors close before worker preparation; full proof and volume gates
+follow collection. Policy-aware Port dispatch retains credited output, and the
+unqualified command paths reject mounted records. Managed terminals now use
+the same current-backing qualification and retained worker authority, including
+exact terminal input staging and unchanged control/output credit. Port forwards
+the current operator policy. Live phase/resource qualification, reader activation
+and ordinary acceptance remain pending.
+
 1. Implement Linux local volume provision/delete using the canonical approved SDK
    root and generated durable IDs. Add authenticated native operation evidence;
    do not adopt directories, follow substituted paths or remove unrelated content.

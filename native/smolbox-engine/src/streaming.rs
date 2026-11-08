@@ -14,7 +14,29 @@ impl Engine {
         receipt: &CreationReceipt,
         command: BufferedCommand,
         cancel: Cancellation,
+        consumer: impl FnMut(Output) -> std::result::Result<(), ()>,
+    ) -> Result<CommandOutcome> {
+        self.exec_stream_owned_mode(receipt, command, cancel, consumer, None)
+    }
+
+    pub fn exec_stream_owned_with_volume_policy(
+        &self,
+        receipt: &CreationReceipt,
+        command: BufferedCommand,
+        cancel: Cancellation,
+        consumer: impl FnMut(Output) -> std::result::Result<(), ()>,
+        policy: &crate::LocalVolumePolicy,
+    ) -> Result<CommandOutcome> {
+        self.exec_stream_owned_mode(receipt, command, cancel, consumer, Some(policy))
+    }
+
+    fn exec_stream_owned_mode(
+        &self,
+        receipt: &CreationReceipt,
+        command: BufferedCommand,
+        cancel: Cancellation,
         mut consumer: impl FnMut(Output) -> std::result::Result<(), ()>,
+        policy: Option<&crate::LocalVolumePolicy>,
     ) -> Result<CommandOutcome> {
         let expires = Instant::now()
             .checked_add(command.timeout)
@@ -26,6 +48,14 @@ impl Engine {
         }
         let metadata = crate::buffered::Metadata::new(&record, command, expires)?;
         metadata.validate()?;
+        let mount_budget = crate::ReadBudget::new(
+            expires
+                .saturating_duration_since(Instant::now())
+                .min(std::time::Duration::from_secs(30))
+                .max(std::time::Duration::from_nanos(1)),
+            cancel.clone(),
+        )?;
+        let mounts = self.worker_mounts(receipt, &record, policy, &mount_budget)?;
         let gate = self.gate(&receipt.name)?;
         let machine = gate
             .try_lock()
@@ -37,12 +67,22 @@ impl Engine {
             .ok_or(Error::before(ErrorCode::Unsupported))?;
         let bytes =
             serde_json::to_vec(&metadata).map_err(|_| Error::before(ErrorCode::Validation))?;
-        let prepared = supervisor.prepare_streaming(
-            &self.transfer_directory()?,
-            self.vm_directory(&receipt.name).join("agent.sock"),
-            &bytes,
-            metadata.command.max_output_bytes,
+        let (permit, mount_authority) = self.reserve_mounted_worker(
+            receipt,
+            mounts,
+            crate::jobs::Demand::command(metadata.command.max_output_bytes, bytes.len() as u64)?,
+            &mount_budget,
         )?;
+        let prepared = supervisor
+            .prepare_job_reserved(
+                permit,
+                &self.transfer_directory()?,
+                self.vm_directory(&receipt.name).join("agent.sock"),
+                &bytes,
+                metadata.command.max_output_bytes,
+                false,
+            )?
+            .into_streaming()?;
         if self.inspect(receipt)?.state != crate::ObservedState::Running {
             return Err(Error::before(ErrorCode::State));
         }
@@ -62,7 +102,7 @@ impl Engine {
         let mut observed = 0;
         let result = supervisor.run_streaming(
             prepared,
-            Box::new((machine, source, self.domain.clone())),
+            Box::new((machine, source, self.domain.clone(), mount_authority)),
             expires,
             &cancel,
             &mut |output| {

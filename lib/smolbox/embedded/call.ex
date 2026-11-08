@@ -139,7 +139,7 @@ defmodule SmolBox.Embedded.Call do
   defp submit(state, health) do
     if health.status == :ready or
          (health.status == :reconciling and
-            state.request["operation"] in ~w(inspect inspect_creation inspect_oci_creation inspect_registry_creation inspect_growth qualify_growth)) or
+            Request.reconciliation?(state.request)) or
          (health.status == :quarantined and Map.get(health, :protocol_major) == 2 and
             Request.observation?(state.request)) do
       :atomics.put(state.flags, 1, 1)

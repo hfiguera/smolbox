@@ -20,6 +20,39 @@ with patch.dict(sys.modules, {'native_proof': proof}):
 
 
 class OrdinaryRunnerTests(unittest.TestCase):
+    def test_snapshot_allows_only_absent_sdk_root_and_never_initializes_partial_state(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            with patch.dict(proof.os.environ, {'XDG_DATA_HOME': str(root)}), \
+                    patch.object(proof.os, 'uname', return_value=Mock(sysname='Linux')):
+                self.assertEqual(proof.snapshot(), [])
+                self.assertFalse((root / 'smolvm').exists())
+                (root / 'smolvm').mkdir()
+                with self.assertRaises(proof.sqlite3.OperationalError):
+                    proof.snapshot()
+                self.assertFalse((root / 'smolvm/server').exists())
+                (root / 'smolvm').rmdir()
+                (root / 'smolvm').symlink_to(root / 'missing')
+                with self.assertRaisesRegex(AssertionError, 'redirected'):
+                    proof.snapshot()
+
+    def test_future_volume_handshake_matches_shared_fixture_without_enabling_current_package(self):
+        root = Path(__file__).resolve().parents[1]
+        hello = json.loads((root / 'smolbox-protocol/fixtures/hello-v2-volumes.json').read_bytes())['hello']
+        policy = json.loads((root / 'policy.json').read_bytes())
+        current = {'schema': 3, 'identity': hello['package'], 'policy': policy}
+        self.assertNotIn('volumes', proof.capabilities(current))
+        self.assertNotIn('volumes', proof.limits(current))
+        future = json.loads(json.dumps(current))
+        future['policy']['sdk'] = hello['sdk']
+        self.assertEqual(proof.capabilities(future), hello['capabilities'])
+        self.assertEqual(proof.limits(future), hello['limits'])
+        future['policy']['sdk']['feature_versions']['remote_sources'] = 1
+        capabilities = proof.capabilities(future)
+        self.assertIn('prepare_artifact', capabilities)
+        self.assertLess(capabilities.index('prepare_artifact'), capabilities.index('volumes'))
+        self.assertNotIn('prepare_artifact', proof.capabilities(current))
+
     def test_current_handshake_matches_shared_fixture_and_older_descriptors_stay_smaller(self):
         root = Path(__file__).resolve().parents[1]
         hello = json.loads((root / 'smolbox-protocol/fixtures/hello-v2-current.json').read_bytes())['hello']

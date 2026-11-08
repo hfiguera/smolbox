@@ -82,7 +82,7 @@ defmodule SmolBox.Runtime.Machines do
              :ok <- Target.qualify(worker, record.spec),
              {:ok, current} <- claim(config, ManagedMachine.key(record)),
              {:ok, name} <- Identity.machine_name(config.namespace),
-             {:ok, allocation} <- Target.allocation(worker, current.spec, name),
+             {:ok, allocation} <- Target.allocation_record(worker, current, name),
              {:ok, reserved} <-
                store(config, :reserve, [
                  ManagedMachine.key(record),
