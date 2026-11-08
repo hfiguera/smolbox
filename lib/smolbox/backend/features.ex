@@ -49,7 +49,7 @@ defmodule SmolBox.Backend.Features do
                   &{Atom.to_string(&1), &1}
                 )
 
-  def supports?(%Target{kind: :embedded, native_config: config}, feature),
+  def supports?(%{__struct__: Target, kind: :embedded, native_config: config}, feature),
     do: supports?(config, feature)
 
   def supports?(%Config{} = config, feature),

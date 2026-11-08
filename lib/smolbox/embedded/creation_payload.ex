@@ -1,6 +1,7 @@
 defmodule SmolBox.Embedded.CreationPayload do
   @moduledoc false
   alias SmolBox.Embedded.{Config, CreationFeatures, JSON}
+  import SmolBox.Embedded.PayloadFields, only: [strings: 1, string: 1, optional: 1]
   @maximum 655_360
   @chunk 65_536
 
@@ -64,12 +65,8 @@ defmodule SmolBox.Embedded.CreationPayload do
 
   defp pack_fields(fields), do: {:ok, fields}
 
-  defp strings(values), do: [<<length(values)::unsigned-big-16>>, Enum.map(values, &string/1)]
-  defp string(value), do: [<<byte_size(value)::unsigned-big-32>>, value]
   defp flag(true), do: <<1>>
   defp flag(false), do: <<0>>
-  defp optional(nil), do: <<0>>
-  defp optional(value), do: [<<1>>, string(value)]
   defp workload(nil), do: <<0>>
 
   defp workload(value) do

@@ -91,6 +91,29 @@ defmodule SmolBox.Machine do
 
   def from_wire(_body), do: invalid()
 
+  @doc false
+  def list_from_wire(values) do
+    if Validation.list?(values, 1024) do
+      Enum.reduce_while(values, {:ok, []}, &list_entry/2)
+      |> case do
+        {:ok, machines} -> {:ok, Enum.reverse(machines)}
+        error -> error
+      end
+    else
+      {:error, %Error{category: :output_limit, operation: :list, evidence: :dispatch_uncertain}}
+    end
+  end
+
+  defp list_entry(value, {:ok, machines}) do
+    case from_wire(value) do
+      {:ok, machine} ->
+        {:cont, {:ok, [machine | machines]}}
+
+      {:error, error} ->
+        {:halt, {:error, %{error | operation: :list, evidence: :dispatch_uncertain}}}
+    end
+  end
+
   defp decode_network(ports, wire) do
     with true <- port_network?(ports, wire),
          {:ok, network} <- SmolBox.NetworkPolicy.from_wire(wire) do

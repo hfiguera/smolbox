@@ -173,8 +173,7 @@ defmodule SmolBox.Embedded.Call do
     end
   end
 
-  defp output(state, stream, bytes)
-       when stream == :log and is_binary(bytes) do
+  defp output(state, :log, bytes) when is_binary(bytes) do
     case LogStream.feed(state.log_parser, bytes) do
       {:ok, parser, lines} ->
         next = Enum.reduce(lines, %{state | log_parser: parser}, &log_callback/2)

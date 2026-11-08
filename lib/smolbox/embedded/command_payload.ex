@@ -1,6 +1,7 @@
 defmodule SmolBox.Embedded.CommandPayload do
   @moduledoc false
   alias SmolBox.Embedded.Request
+  import SmolBox.Embedded.PayloadFields, only: [strings: 1, string: 1, optional: 1]
 
   def limits,
     do: %{
@@ -42,10 +43,6 @@ defmodule SmolBox.Embedded.CommandPayload do
   end
 
   def pack(operation), do: {:ok, operation}
-  defp strings(values), do: [<<length(values)::unsigned-big-16>>, Enum.map(values, &string/1)]
-  defp string(value), do: [<<byte_size(value)::unsigned-big-32>>, value]
-  defp optional(nil), do: <<0>>
-  defp optional(value), do: [<<1>>, string(value)]
   defp chunks(<<>>), do: []
   defp chunks(bytes) when byte_size(bytes) <= 65_536, do: [Base.encode64(bytes)]
 

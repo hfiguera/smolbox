@@ -92,7 +92,7 @@ defmodule SmolBox.Embedded.ConfigTest do
 
   test "optional approvals fail closed and do not change the helper capability surface" do
     for field <- ~w(sources checkpoints export_destinations checkpoint_policies branch_policies)a,
-        invalid <- [nil, [nil], Enum.map(1..33, & &1)] do
+        invalid <- [nil, [nil], Enum.to_list(1..33)] do
       assert_invalid(Keyword.put(options(), field, invalid))
     end
 
