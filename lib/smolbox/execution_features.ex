@@ -12,4 +12,9 @@ defmodule SmolBox.ExecutionFeatures do
   def extended?(%{command: %{background: true}}), do: true
   def extended?(%{profile: %{execution_ms: ms}}), do: is_integer(ms) and ms > 300_000
   def extended?(_invalid), do: false
+
+  def worker_supported?(worker, spec),
+    do:
+      not extended?(spec) or
+        worker.runtime_version in ["1.17.0", "1.19.0", "1.20.2", "1.22.0"]
 end

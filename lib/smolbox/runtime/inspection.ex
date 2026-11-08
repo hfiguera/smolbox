@@ -1,13 +1,14 @@
 defmodule SmolBox.Runtime.Inspection do
+  alias SmolBox.Runtime.Target
   @moduledoc false
-  alias SmolBox.{Client, Error, Execution, Identity, Machine, MachineSpec, Validation}
+  alias SmolBox.{Backend, Error, Execution, Identity, Machine, MachineSpec, Validation}
   alias SmolBox.Runtime.Session
 
   def page(config, worker_id, options) do
     with true <- Validation.identifier?(worker_id) and options?(options),
          worker when worker != nil <-
-           Enum.find(config.workers, &(&1.client.worker.id == worker_id)),
-         {:ok, machines} <- Client.list(bounded_client(worker.client)) do
+           Enum.find(config.workers, &(Target.id(&1) == worker_id)),
+         {:ok, machines} <- Backend.list(bounded_client(Target.connection(worker))) do
       report(config, worker_id, machines, options)
     else
       false -> Session.error(:validation, :inspect)
@@ -102,14 +103,7 @@ defmodule SmolBox.Runtime.Inspection do
     do: %{machine_name: machine.name, observed_state: machine.state, status: status}
 
   defp bounded_client(client),
-    do: %{
-      client
-      | worker: %{
-          client.worker
-          | operation_timeout_ms: min(client.worker.operation_timeout_ms, 1000),
-            max_response_bytes: min(client.worker.max_response_bytes, 2_097_152)
-        }
-    }
+    do: Backend.bounded(client, timeout_ms: 1000, max_response_bytes: 2_097_152)
 
   defp options?(options) do
     Validation.keys?(options, [:cursor, :limit]) and

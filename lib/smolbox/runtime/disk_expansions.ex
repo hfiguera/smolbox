@@ -1,6 +1,7 @@
 defmodule SmolBox.Runtime.DiskExpansions do
+  alias SmolBox.Runtime.Target
   @moduledoc false
-  alias SmolBox.{Client, DiskExpansion, Error, ManagedMachine}
+  alias SmolBox.{Backend, DiskExpansion, Error, ManagedMachine}
   alias SmolBox.Runtime.MachineSession, as: Machines
   alias SmolBox.Runtime.{Session, WorkerHealth}
 
@@ -43,7 +44,7 @@ defmodule SmolBox.Runtime.DiskExpansions do
          %{status: :ready} <- WorkerHealth.observe(worker, config.clock),
          {:ok, observed} <-
            Machines.io(config, m, fn ->
-             Client.inspect_machine(worker.client, m.machine_name)
+             Backend.inspect_machine(Target.connection(worker), m.machine_name)
            end),
          true <- observed.state in [:created, :stopped] and DiskExpansion.matches?(m, observed),
          {:ok, intent} <- advance(config, m, :dispatch) do
@@ -60,11 +61,11 @@ defmodule SmolBox.Runtime.DiskExpansions do
     r = intent.disk_expansions[intent.active_expansion]
 
     with {:ok, _} <-
-           Client.expand_disks(worker.client, DiskExpansion.expected(intent),
+           Backend.expand_disks(Target.connection(worker), DiskExpansion.expected(intent),
              storage_gb: r.storage_gb,
              overlay_gb: r.overlay_gb
            ),
-         do: Client.inspect_machine(worker.client, intent.machine_name)
+         do: Backend.inspect_machine(Target.connection(worker), intent.machine_name)
   end
 
   defp received(config, m, {:ok, observed}) do

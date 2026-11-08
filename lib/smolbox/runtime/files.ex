@@ -1,7 +1,8 @@
 defmodule SmolBox.Runtime.Files do
+  alias SmolBox.Runtime.Target
   @moduledoc false
-  alias SmolBox.{Client, Files, Machine, Telemetry}
-  alias SmolBox.Runtime.{Session, WorkerConfig}
+  alias SmolBox.{Backend, Files, Machine, Telemetry}
+  alias SmolBox.Runtime.Session
 
   def stage(session, record) do
     Enum.reduce_while(record.spec.inputs, :ok, fn input, :ok ->
@@ -56,8 +57,8 @@ defmodule SmolBox.Runtime.Files do
              Files.sha256(bytes) == input["sha256"],
          :ok <-
            Session.io(session, record, :preparation, fn ->
-             Client.upload(
-               session.worker.client,
+             Backend.upload(
+               Target.connection(session.worker),
                record.machine_name,
                input["path"],
                bytes,
@@ -66,8 +67,8 @@ defmodule SmolBox.Runtime.Files do
            end),
          {:ok, staged} <-
            Session.io(session, record, :preparation, fn ->
-             Client.download(
-               session.worker.client,
+             Backend.download(
+               Target.connection(session.worker),
                record.machine_name,
                input["path"],
                record.spec.profile.max_file_bytes
@@ -88,8 +89,8 @@ defmodule SmolBox.Runtime.Files do
          :ok <- running(session, record),
          {:ok, bytes} <-
            Session.io(session, record, :collection, fn ->
-             Client.download(
-               session.worker.client,
+             Backend.download(
+               Target.connection(session.worker),
                record.machine_name,
                output["path"],
                output["max_bytes"]
@@ -113,14 +114,14 @@ defmodule SmolBox.Runtime.Files do
   defp approved(%{worker: nil}, _record), do: Session.error(:unsupported_capability, :worker)
 
   defp approved(session, record) do
-    if WorkerConfig.supports?(session.worker, record.spec),
+    if Target.supports?(session.worker, record.spec),
       do: :ok,
       else: Session.error(:unsupported_capability, :worker)
   end
 
   defp running(session, record) do
     case Session.io(session, record, :collection, fn ->
-           Client.inspect_machine(session.worker.client, record.machine_name)
+           Backend.inspect_machine(Target.connection(session.worker), record.machine_name)
          end) do
       {:ok, %{state: :running} = observed} ->
         if Machine.same_incarnation?(record.created_machine, observed),

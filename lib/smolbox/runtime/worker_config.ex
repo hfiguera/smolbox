@@ -59,7 +59,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   hostile multi-tenant host quotas. Requested unsupported hard controls are
   rejected by `SmolBox.Profile`. Reachability alone does not qualify a worker.
   """
-  alias SmolBox.Runtime.ExecutionSupport
+  alias SmolBox.ExecutionFeatures
 
   alias SmolBox.{
     Checkpoint,
@@ -194,7 +194,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
       do: false
 
   def supports?(worker, %{artifact: %{"kind" => "checkpoint"}} = spec) do
-    ExecutionSupport.worker?(worker, spec) and
+    ExecutionFeatures.worker_supported?(worker, spec) and
       not SmolBox.FileAccess.extended?(spec.profile) and
       Map.get(spec, :ports, []) == [] and
       Map.get(spec, :workload) == nil and
@@ -205,7 +205,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   end
 
   def supports?(worker, spec) do
-    ExecutionSupport.worker?(worker, spec) and
+    ExecutionFeatures.worker_supported?(worker, spec) and
       extensions_supported?(worker, spec) and
       file_support?(worker, spec) and
       workload_supported?(worker, spec) and

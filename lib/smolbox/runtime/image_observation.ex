@@ -1,12 +1,17 @@
 defmodule SmolBox.Runtime.ImageObservation do
+  alias SmolBox.Runtime.Target
   @moduledoc false
-  alias SmolBox.{Client, Error, Image}
+  alias SmolBox.{Backend, Error, Image}
   alias SmolBox.Runtime.Session
 
   def run(session, record) do
     result =
       Session.io(session, record, :execution, fn ->
-        Client.pull_image(session.worker.client, record.machine_name, record.spec.command.source)
+        Backend.pull_image(
+          Target.connection(session.worker),
+          record.machine_name,
+          record.spec.command.source
+        )
       end)
 
     case result do

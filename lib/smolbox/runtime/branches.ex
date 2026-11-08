@@ -1,12 +1,13 @@
 defmodule SmolBox.Runtime.Branches do
+  alias SmolBox.Runtime.Target
   @moduledoc false
-  alias SmolBox.{BranchClient, ManagedMachine}
-  alias SmolBox.Runtime.{MachineSession, Session, WorkerConfig, WorkerHealth}
+  alias SmolBox.{Backend, ManagedMachine}
+  alias SmolBox.Runtime.{MachineSession, Session, WorkerHealth}
 
   def approved?(worker, parent, spec),
     do:
       worker.runtime_version in ["1.19.0", "1.20.2", "1.22.0"] and
-        spec.policy in worker.branch_policies and WorkerConfig.supports?(worker, parent.spec)
+        spec.policy in worker.branch_policies and Target.supports?(worker, parent.spec)
 
   def supported(_config, %{branch: nil, branch_children: children}) when map_size(children) == 0,
     do: :ok
@@ -61,7 +62,7 @@ defmodule SmolBox.Runtime.Branches do
     with {:ok, pending} <- advance(config, parent, child, :dispatching) do
       response =
         MachineSession.io(config, parent, fn ->
-          {:branch_result, BranchClient.create(worker.client, parent, pending)}
+          {:branch_result, Backend.branch_create(Target.connection(worker), parent, pending)}
         end)
 
       received(config, parent, pending, response)
@@ -77,8 +78,8 @@ defmodule SmolBox.Runtime.Branches do
 
   defp preflight(worker, parent, child, clock) do
     with :ok <- WorkerHealth.check(worker, clock),
-         {:ok, _} <- BranchClient.source(worker.client, parent),
-         {:ok, :absent} <- BranchClient.absent(worker.client, child.machine_name),
+         {:ok, _} <- Backend.branch_source(Target.connection(worker), parent),
+         {:ok, :absent} <- Backend.branch_absent(Target.connection(worker), child.machine_name),
          do: :ok
   end
 
@@ -96,8 +97,9 @@ defmodule SmolBox.Runtime.Branches do
 
   defp completed_evidence(worker, parent, child, clock) do
     with :ok <- WorkerHealth.check(worker, clock),
-         {:ok, source} <- BranchClient.source(worker.client, parent),
-         {:ok, _} <- BranchClient.inspect_child(worker.client, child, child.branch.spec.hold),
+         {:ok, source} <- Backend.branch_source(Target.connection(worker), parent),
+         {:ok, _} <-
+           Backend.branch_inspect_child(Target.connection(worker), child, child.branch.spec.hold),
          do: {:ok, source}
   end
 
@@ -119,7 +121,7 @@ defmodule SmolBox.Runtime.Branches do
          {:ok, pending} <- release_advance(config, child, :dispatching) do
       result =
         MachineSession.io(config, pending, fn ->
-          {:branch_result, BranchClient.release(worker.client, pending)}
+          {:branch_result, Backend.branch_release(Target.connection(worker), pending)}
         end)
 
       case result do
@@ -136,7 +138,7 @@ defmodule SmolBox.Runtime.Branches do
 
   defp release_evidence(worker, child, clock) do
     with :ok <- WorkerHealth.check(worker, clock),
-         do: BranchClient.inspect_child(worker.client, child, true)
+         do: Backend.branch_inspect_child(Target.connection(worker), child, true)
   end
 
   def release_advance(config, child, change) do

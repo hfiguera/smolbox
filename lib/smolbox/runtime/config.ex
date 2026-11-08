@@ -1,7 +1,7 @@
 defmodule SmolBox.Runtime.Config do
+  alias SmolBox.Runtime.Target
   @moduledoc false
   alias SmolBox.{Error, Identity, Validation}
-  alias SmolBox.Runtime.WorkerConfig
 
   @schema [
     name: [type: :atom, required: true],
@@ -39,7 +39,7 @@ defmodule SmolBox.Runtime.Config do
           mode: :durable | :ephemeral,
           fingerprint_key: binary(),
           artifact_store: {module(), term()},
-          workers: [WorkerConfig.t()],
+          workers: [Target.t()],
           max_pending: pos_integer(),
           max_active: pos_integer(),
           poll_ms: pos_integer(),
@@ -68,7 +68,8 @@ defmodule SmolBox.Runtime.Config do
        %{
          config
          | managed_machines: machine_support?(config),
-           worker_control: worker_control
+           worker_control: worker_control,
+           workers: Enum.map(config.workers, &Target.normalize/1)
        }}
     else
       {:error, %Error{} = error} -> {:error, error}
@@ -145,9 +146,9 @@ defmodule SmolBox.Runtime.Config do
   end
 
   defp workers?(workers) do
-    Validation.list?(workers, 64) and Enum.all?(workers, &(WorkerConfig.validate(&1) == :ok)) and
-      MapSet.size(MapSet.new(workers, & &1.client.worker.id)) == length(workers) and
-      MapSet.size(MapSet.new(workers, &{&1.client.worker.base_url, &1.client.worker.unix_socket})) ==
+    Validation.list?(workers, 64) and Enum.all?(workers, &(Target.validate(&1) == :ok)) and
+      MapSet.size(MapSet.new(workers, &Target.id(&1))) == length(workers) and
+      MapSet.size(MapSet.new(workers, &Target.endpoint/1)) ==
         length(workers)
   end
 

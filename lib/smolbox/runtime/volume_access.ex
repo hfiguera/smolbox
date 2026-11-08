@@ -1,7 +1,8 @@
 defmodule SmolBox.Runtime.VolumeAccess do
+  alias SmolBox.Runtime.Target
   @moduledoc false
   alias SmolBox.Error
-  alias SmolBox.Runtime.{Session, WorkerConfig}
+  alias SmolBox.Runtime.Session
 
   @doc false
   def approved(config, spec, mode \\ :existing)
@@ -16,7 +17,7 @@ defmodule SmolBox.Runtime.VolumeAccess do
   defp approve_reference(config, spec, mode, ref, :ok) do
     with {:ok, v} <- Session.store(config, :volume_fetch, [{spec.scope, ref.volume_id}]),
          {:ok, w} <- worker(config, v.worker_id),
-         true <- w.volume_policy == v.policy and WorkerConfig.supports?(w, spec),
+         true <- w.volume_policy == v.policy and Target.supports?(w, spec),
          :ok <- admission(w, mode) do
       {:cont, :ok}
     else
@@ -37,7 +38,7 @@ defmodule SmolBox.Runtime.VolumeAccess do
   end
 
   def worker(config, id) do
-    case Enum.find(config.workers, &(&1.client.worker.id == id)) do
+    case Enum.find(config.workers, &(Target.id(&1) == id)) do
       %{runtime_version: version, platform: :linux} = w when version in ["1.20.2", "1.22.0"] ->
         {:ok, w}
 

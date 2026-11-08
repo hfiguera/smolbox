@@ -1,7 +1,8 @@
 defmodule SmolBox.Runtime.Exports do
+  alias SmolBox.Runtime.Target
   @moduledoc false
   alias SmolBox.{
-    Client,
+    Backend,
     Error,
     ExportReceipt,
     ManagedMachine,
@@ -70,7 +71,8 @@ defmodule SmolBox.Runtime.Exports do
     with {:ok, worker} <- Machines.worker(config, machine),
          true <- approved?(worker, export.spec),
          %{status: :ready} <- WorkerHealth.observe(worker, config.clock),
-         {:ok, observed} <- Client.inspect_machine(worker.client, machine.machine_name),
+         {:ok, observed} <-
+           Backend.inspect_machine(Target.connection(worker), machine.machine_name),
          true <-
            observed.state == :stopped and
              SmolBox.DiskExpansion.matches?(machine, observed),
@@ -112,7 +114,13 @@ defmodule SmolBox.Runtime.Exports do
              worker.registry_credentials,
              export.spec.destination.credential_ref
            ),
-         do: Client.export_machine(worker.client, machine.machine_name, export.spec, token)
+         do:
+           Backend.export_machine(
+             Target.connection(worker),
+             machine.machine_name,
+             export.spec,
+             token
+           )
   end
 
   defp received(config, machine, export, worker, {:ok, %ExportReceipt{} = receipt}) do

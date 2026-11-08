@@ -1,6 +1,7 @@
 defmodule SmolBox.Runtime.Executor do
+  alias SmolBox.Runtime.Target
   @moduledoc false
-  alias SmolBox.{Client, Error, Execution, Identity, Machine, Telemetry}
+  alias SmolBox.{Backend, Error, Execution, Identity, Machine, Telemetry}
   alias SmolBox.Runtime.ExecutionSupport
 
   alias SmolBox.Runtime.{
@@ -9,7 +10,6 @@ defmodule SmolBox.Runtime.Executor do
     Machines,
     Observation,
     Session,
-    WorkerConfig,
     WorkerHealth
   }
 
@@ -91,7 +91,7 @@ defmodule SmolBox.Runtime.Executor do
     with {:ok, preparing} <- Session.write(session, record, state: :preparing),
          {:ok, observed} <-
            Session.io(session, preparing, :preparation, fn ->
-             Client.inspect_machine(session.worker.client, record.machine_name)
+             Backend.inspect_machine(Target.connection(session.worker), record.machine_name)
            end),
          true <-
            observed.state == :running and
@@ -111,7 +111,7 @@ defmodule SmolBox.Runtime.Executor do
   defp reserve(session, record, eligible) do
     workers =
       Enum.filter(session.config.workers, fn worker ->
-        worker.client.worker.id in eligible and WorkerConfig.supports?(worker, record.spec)
+        Target.id(worker) in eligible and Target.supports?(worker, record.spec)
       end)
 
     result =
@@ -146,7 +146,7 @@ defmodule SmolBox.Runtime.Executor do
       Session.store(session.config, :reserve, [
         session.key,
         Session.guard(current),
-        {worker.client.worker.id, name, worker.capacity},
+        {Target.id(worker), name, worker.capacity},
         Session.now(session)
       ])
     else
@@ -173,16 +173,16 @@ defmodule SmolBox.Runtime.Executor do
 
   defp prepare_machine(session, record) do
     {:ok, spec} =
-      WorkerConfig.machine_spec(session.worker, record.spec, record.machine_name)
+      Target.machine_spec(session.worker, record.spec, record.machine_name)
 
     with {:ok, created} <-
            Session.io(session, record, :preparation, fn ->
-             Client.create(session.worker.client, spec)
+             Backend.create(Target.connection(session.worker), spec)
            end),
          {:ok, saved} <- Session.patch(session, created_machine: created),
          {:ok, started} <-
            Session.io(session, saved, :preparation, fn ->
-             Client.start(session.worker.client, saved.machine_name)
+             Backend.start(Target.connection(session.worker), saved.machine_name)
            end),
          true <- Machine.same_incarnation?(created, started) and started.state == :running,
          :ok <- Files.stage(session, saved) do
@@ -203,7 +203,7 @@ defmodule SmolBox.Runtime.Executor do
     with :ok <- dispatch_health(session, current),
          {:ok, observed} <-
            Session.io(session, current, :preparation, fn ->
-             Client.inspect_machine(session.worker.client, current.machine_name)
+             Backend.inspect_machine(Target.connection(session.worker), current.machine_name)
            end),
          true <-
            Machine.same_incarnation?(current.created_machine, observed) and
@@ -223,7 +223,7 @@ defmodule SmolBox.Runtime.Executor do
     do: Session.error(:unsupported_capability, :worker)
 
   defp dispatch_health(session, record) do
-    if WorkerConfig.supports?(session.worker, record.spec),
+    if Target.supports?(session.worker, record.spec),
       do: observe_dispatch_health(session, record),
       else: Session.error(:unsupported_capability, :worker)
   end

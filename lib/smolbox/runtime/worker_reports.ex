@@ -1,22 +1,16 @@
 defmodule SmolBox.Runtime.WorkerReports do
+  alias SmolBox.Runtime.Target
   @moduledoc false
-  alias SmolBox.{AdmissionReport, Client, Error, Profile, Validation, WorkerReport}
-  alias SmolBox.Runtime.{Session, WorkerConfig}
+  alias SmolBox.{AdmissionReport, Backend, Error, Profile, Validation, WorkerReport}
+  alias SmolBox.Runtime.Session
 
   def observe(config, worker, snapshot) do
     {used, remaining, usage_error} = accounting(config, worker)
 
-    client = %{
-      worker.client
-      | worker: %{
-          worker.client.worker
-          | operation_timeout_ms: min(500, worker.client.worker.operation_timeout_ms),
-            max_response_bytes: min(8192, worker.client.worker.max_response_bytes)
-        }
-    }
+    client = Backend.bounded(Target.connection(worker), timeout_ms: 500, max_response_bytes: 8192)
 
     {capacity, capacity_error} =
-      case Client.capacity(client) do
+      case Backend.capacity(client) do
         {:ok, capacity} -> {capacity, nil}
         {:error, error} -> {nil, error}
       end
@@ -40,7 +34,7 @@ defmodule SmolBox.Runtime.WorkerReports do
       blockers = if snapshot.status == :ready, do: [], else: [snapshot.status]
 
       blockers =
-        if WorkerConfig.supports?(worker, spec),
+        if Target.supports?(worker, spec),
           do: blockers,
           else: blockers ++ [:unsupported_spec]
 
@@ -67,7 +61,7 @@ defmodule SmolBox.Runtime.WorkerReports do
       )
 
   defp accounting(config, worker) do
-    case Session.store(config, :usage, [worker.client.worker.id]) do
+    case Session.store(config, :usage, [Target.id(worker)]) do
       {:ok, used} when is_map(used) ->
         project(used, worker.capacity)
 

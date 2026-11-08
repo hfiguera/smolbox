@@ -1,4 +1,6 @@
 defmodule SmolBox.Telemetry do
+  alias SmolBox.Runtime.Target
+
   @moduledoc """
   Redacted, optional managed-runtime observations through `:telemetry`.
 
@@ -242,15 +244,16 @@ defmodule SmolBox.Telemetry do
   end
 
   @doc false
-  @spec worker(Dispatcher.table() | nil, SmolBox.Runtime.WorkerConfig.t(), atom()) :: :ok
+  @spec worker(Dispatcher.table() | nil, Target.t() | SmolBox.Runtime.WorkerConfig.t(), atom()) ::
+          :ok
   def worker(table, worker, status) do
     safe(fn ->
       if status in [:ready, :degraded, :incompatible, :unavailable, :draining] and
-           worker.platform in [:linux, :macos] and Validation.identifier?(worker.client.worker.id) do
+           worker.platform in [:linux, :macos] and Validation.identifier?(Target.id(worker)) do
         offer(
           table,
           {[:smolbox, :worker, :status], %{count: 1},
-           %{worker_id: worker.client.worker.id, platform: worker.platform, status: status}}
+           %{worker_id: Target.id(worker), platform: worker.platform, status: status}}
         )
       end
     end)

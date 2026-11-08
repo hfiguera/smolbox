@@ -1,6 +1,7 @@
 defmodule SmolBox.Runtime.TerminalObservation do
+  alias SmolBox.Runtime.Target
   @moduledoc false
-  alias SmolBox.{Client, Error}
+  alias SmolBox.{Backend, Error}
   alias SmolBox.Runtime.Session
   alias SmolBox.Terminal.{Result, Server}
 
@@ -10,13 +11,13 @@ defmodule SmolBox.Runtime.TerminalObservation do
 
     task =
       Task.async(fn ->
-        with {:ok, client} <-
-               Client.terminal_preflight(
-                 session.worker.client,
-                 record.machine_name,
-                 record.spec.command
-               ),
-             do: Server.start(client, record.machine_name, record.spec.command, nil, observer)
+        Backend.open_managed_terminal(
+          Target.connection(session.worker),
+          record.machine_name,
+          record.spec.command,
+          nil,
+          observer
+        )
       end)
 
     try do

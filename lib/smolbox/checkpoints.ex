@@ -1,4 +1,6 @@
 defmodule SmolBox.Checkpoints do
+  alias SmolBox.Runtime.Target
+
   @moduledoc """
   Managed capture of idle offline memory and disks, and explicit independent restore.
 
@@ -9,11 +11,11 @@ defmodule SmolBox.Checkpoints do
   checkpoint expiry, artifact deletion, live branching or in-place rollback.
   """
   alias SmolBox.{
+    Backend,
     Checkpoint,
     CheckpointCapture,
     CheckpointCaptureSpec,
     CheckpointIO,
-    Client,
     Error,
     Machine,
     Machines,
@@ -144,7 +146,7 @@ defmodule SmolBox.Checkpoints do
          {:ok, worker} <- MachineSession.worker(config, m),
          {:ok, observed} <-
            MachineSession.io(config, %{m | operation_deadline_ms: nil}, fn ->
-             observe(worker.client, m.machine_name, disposition)
+             observe(Target.connection(worker), m.machine_name, disposition)
            end),
          true <- observed == :absent or Machine.same_incarnation?(m.created_machine, observed),
          {:ok, current} <- MachineSession.claim(config, {scope, machine}),
@@ -223,10 +225,10 @@ defmodule SmolBox.Checkpoints do
          )
   end
 
-  defp observe(client, name, :present), do: Client.inspect_machine(client, name)
+  defp observe(client, name, :present), do: Backend.inspect_machine(client, name)
 
   defp observe(client, name, :deleted) do
-    case Client.inspect_machine(client, name) do
+    case Backend.inspect_machine(client, name) do
       {:error, %{category: :not_found}} -> {:ok, :absent}
       {:error, _} = error -> error
       _ -> Session.error(:identity_conflict, :checkpoint)

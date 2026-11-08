@@ -1,4 +1,6 @@
 defmodule SmolBox.Branches do
+  alias SmolBox.Runtime.Target
+
   @moduledoc """
   Create managed leaf machines from idle offline bare sources on smolvm 1.19.0, 1.20.2 or 1.22.0.
 
@@ -10,7 +12,7 @@ defmodule SmolBox.Branches do
   uncertain worker response.
   """
   alias SmolBox.{
-    BranchClient,
+    Backend,
     BranchSpec,
     Error,
     Identity,
@@ -167,7 +169,7 @@ defmodule SmolBox.Branches do
          {:ok, worker} <- MachineSession.worker(config, parent),
          {:ok, {source, observed}} <-
            MachineSession.io(config, %{parent | operation_deadline_ms: nil}, fn ->
-             resolution_evidence(worker.client, parent, child, disposition)
+             resolution_evidence(Target.connection(worker), parent, child, disposition)
            end),
          {:ok, current} <- MachineSession.claim(config, child.branch.source),
          do:
@@ -200,7 +202,7 @@ defmodule SmolBox.Branches do
          {:ok, worker} <- MachineSession.worker(config, parent),
          {:ok, :absent} <-
            MachineSession.io(config, %{parent | operation_deadline_ms: nil}, fn ->
-             BranchClient.absent(worker.client, child.machine_name)
+             Backend.branch_absent(Target.connection(worker), child.machine_name)
            end),
          {:ok, current} <- MachineSession.claim(config, child.branch.source),
          do:
@@ -227,7 +229,7 @@ defmodule SmolBox.Branches do
          {:ok, worker} <- MachineSession.worker(config, parent),
          :ok <-
            MachineSession.io(config, %{parent | operation_deadline_ms: nil}, fn ->
-             backing_absent(worker.client, parent, child)
+             backing_absent(Target.connection(worker), parent, child)
            end),
          {:ok, current} <- MachineSession.claim(config, child.branch.source),
          do:
@@ -244,8 +246,8 @@ defmodule SmolBox.Branches do
   end
 
   defp backing_absent(client, parent, child) do
-    with {:ok, :absent} <- BranchClient.absent(client, parent.machine_name),
-         {:ok, :absent} <- BranchClient.absent(client, child.machine_name),
+    with {:ok, :absent} <- Backend.branch_absent(client, parent.machine_name),
+         {:ok, :absent} <- Backend.branch_absent(client, child.machine_name),
          do: :ok
   end
 
@@ -256,17 +258,17 @@ defmodule SmolBox.Branches do
   end
 
   defp source_observation(client, name, disposition) do
-    case SmolBox.Client.inspect_machine(client, name) do
+    case SmolBox.Backend.inspect_machine(client, name) do
       {:error, %{category: :not_found}} when disposition == :deleted -> {:ok, :absent}
       result -> result
     end
   end
 
   defp resolution_observation(client, child, :keep),
-    do: BranchClient.inspect_child(client, child, child.branch.spec.hold)
+    do: Backend.branch_inspect_child(client, child, child.branch.spec.hold)
 
   defp resolution_observation(client, child, :deleted),
-    do: BranchClient.absent(client, child.machine_name)
+    do: Backend.branch_absent(client, child.machine_name)
 
   defp config(runtime) do
     with {:ok, config} <- GenServer.call(Runtime.coordinator(runtime), :config),
