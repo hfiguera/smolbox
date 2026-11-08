@@ -11,7 +11,7 @@ defmodule SmolBox.Embedded.NativeBranchBacking do
     UnbootedBranchDisposal
   }
 
-  alias SmolBox.{ManagedMachine, Validation}
+  alias SmolBox.Validation
   @enforce_keys [:version, :request]
   @derive {Inspect, only: [:version]}
   defstruct @enforce_keys ++ [proof: nil]
@@ -153,18 +153,6 @@ defmodule SmolBox.Embedded.NativeBranchBacking do
   end
 
   def record?(_), do: false
-
-  def pair?(parent, child) do
-    with true <- NativeBranchRetirement.pair?(parent, child),
-         true <- child.branch.state in [:retired, :backing_pending, :closed],
-         %NativeBranchRetirement{} <- child.branch.native_authority.retirement do
-      parent.state == :deleted and ManagedMachine.idle?(parent) and parent.reservation == nil and
-        parent.active_branch == nil and parent.branch_children[child.id] == true and
-        Enum.all?(parent.branch_children, fn {_, retired} -> retired == true end)
-    else
-      _ -> false
-    end
-  end
 
   def preserved?(nil, nil, _), do: true
   def preserved?(nil, %__MODULE__{version: version, proof: nil}, version), do: true

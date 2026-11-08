@@ -45,16 +45,7 @@ defmodule SmolBox.Embedded.UnbootedBranchDisposal do
         request["quiesced"]
       ])
 
-  def from_wire(value) do
-    if valid?(value) and not is_struct(value),
-      do:
-        {:ok,
-         struct!(
-           __MODULE__,
-           Map.new(value, fn {key, field} -> {String.to_existing_atom(key), field} end)
-         )},
-      else: :error
-  end
+  def from_wire(value), do: BranchCanonical.from_wire(value, __MODULE__)
 
   def to_wire(%__MODULE__{} = proof),
     do: Map.new(Map.from_struct(proof), fn {key, value} -> {Atom.to_string(key), value} end)

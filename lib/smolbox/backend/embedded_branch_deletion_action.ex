@@ -1,6 +1,6 @@
 defmodule SmolBox.Backend.EmbeddedBranchDeletionAction do
   @moduledoc false
-  alias SmolBox.Backend.{Budget, EmbeddedContext, EmbeddedReply, Features}
+  alias SmolBox.Backend.{Budget, EmbeddedBranchOperation, EmbeddedContext, Features}
 
   alias SmolBox.Embedded.{
     BranchDeletionCollection,
@@ -107,11 +107,8 @@ defmodule SmolBox.Backend.EmbeddedBranchDeletionAction do
          else: (_ -> failure(:identity_conflict, :dispatch_uncertain))
   end
 
-  defp decode({:ok, %{"result" => "error"} = outcome, @empty, nil} = response, _, _, _) do
-    if Protocol.valid_outcome?(outcome, 2),
-      do: EmbeddedReply.decode(nil, :reconcile, nil, response),
-      else: failure(:identity_conflict, :dispatch_uncertain)
-  end
+  defp decode({:ok, %{"result" => "error"}, @empty, nil} = response, _, _, _),
+    do: EmbeddedBranchOperation.error_reply(response, :reconcile)
 
   defp decode({:error, %Error{} = error}, _, _, _), do: {:error, %{error | operation: :reconcile}}
   defp decode(_, _, _, _), do: failure(:identity_conflict, :dispatch_uncertain)

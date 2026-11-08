@@ -6,7 +6,6 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
     BranchCanonical,
     BranchCompletion,
     BranchCreation,
-    BranchReleaseTransition,
     BranchRequest,
     Identity
   }
@@ -15,6 +14,7 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
     NativeBranchBacking,
     NativeBranchDeletion,
     NativeBranchDeletionAction,
+    NativeBranchHistory,
     NativeBranchRelease,
     NativeBranchRetirement,
     NativePreparedBranchRetirement,
@@ -129,6 +129,29 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
       creation: BranchCreation.from_request(authority.request, artifact, profile)
     }
 
+  def history_valid?(%{backend_assignment: nil} = record),
+    do:
+      Map.get(record, :native_branch_history, %{}) == %{} and
+        (Map.get(record, :branch) == nil or
+           match?(%{__struct__: Branch, native_authority: nil}, Map.get(record, :branch)))
+
+  def history_valid?(%{backend_assignment: %{version: 2}, branch: %{}} = record),
+    do: record.native_branch_history == %{} and child?(record)
+
+  def history_valid?(%{backend_assignment: %{version: 2}, branch: nil} = record),
+    do: NativeBranchHistory.source?(record)
+
+  def history_valid?(%{backend_assignment: %{version: 2}} = record),
+    do:
+      not BranchCreation.valid?(record.backend_assignment.creation) or
+        (Map.get(record, :managed_machine) != nil and BranchCreation.command?(record))
+
+  def history_valid?(record),
+    do:
+      Map.get(record, :native_branch_history, %{}) == %{} and
+        Map.get(record, :branch_children, %{}) == %{} and Map.get(record, :branch) == nil and
+        Map.get(record, :active_branch) == nil
+
   def child?(
         %{
           backend_assignment: %{__struct__: Assignment} = assignment,
@@ -177,7 +200,8 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
       completion_record?(child, completion) and NativePreparedBranchRetirement.record?(child) and
         NativeUnbootedBranchDisposal.record?(child) and
         NativeBranchRetirement.record?(child) and
-        NativeBranchBacking.record?(child) and NativeBranchDeletion.record?(child) and
+        NativeBranchBacking.record?(child) and
+        NativeBranchDeletion.record?(child, &NativeBranchDeletionAction.historical?/2) and
         NativeBranchDeletionAction.record?(child)
 
   defp proofs_preserved?(original, saved, record, next),
@@ -216,19 +240,7 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
   def root(%__MODULE__{completion: %BranchCompletion{} = completion}),
     do: %Identity{receipt: completion.publication["change"]["child"]}
 
-  def transitions(%{
-        branch: %{native_authority: %__MODULE__{release: %NativeBranchRelease{transition: proof}}}
-      })
-      when not is_nil(proof), do: {:ok, [proof]}
-
-  def transitions(%{
-        branch: %{native_authority: %__MODULE__{completion: %BranchCompletion{release: release}}}
-      })
-      when not is_nil(release) do
-    with {:ok, proof} <- BranchReleaseTransition.from_wire(release), do: {:ok, [proof]}
-  end
-
-  def transitions(_), do: {:ok, []}
+  defdelegate transitions(record), to: NativeBranchHistory, as: :release_transitions
 
   defp completion_record?(child, nil),
     do:

@@ -14,11 +14,11 @@ defmodule SmolBox.NativeReleasedBranchCleanupTest do
     CodecNativePreparedBranchRetirements,
     Contract,
     Memory,
+    NativeBranchDeletionActionContract,
     NativeBranchDeletionActionOps,
     NativeBranchDeletionContract,
     NativeBranchRetirementContract,
     NativeReleasedBranchCleanupContract,
-    NativeReleasedBranchContinuationContract,
     NativeReleasedBranchDeletionContract
   }
 
@@ -126,7 +126,7 @@ defmodule SmolBox.NativeReleasedBranchCleanupTest do
       assert {:ok, <<"smolbox-record-v40\0", _::binary>>} = Codec.encode(observed)
 
       assert {:ok, observed} =
-               NativeReleasedBranchContinuationContract.accept(
+               NativeBranchDeletionActionContract.accept(
                  Memory,
                  store,
                  observed,
@@ -138,7 +138,7 @@ defmodule SmolBox.NativeReleasedBranchCleanupTest do
       assert {:ok, <<"smolbox-record-v41\0", _::binary>>} = Codec.encode(observed)
 
       assert {:ok, pending} =
-               NativeReleasedBranchCleanupContract.accept(
+               NativeBranchDeletionActionContract.accept(
                  Memory,
                  store,
                  observed,
@@ -167,7 +167,7 @@ defmodule SmolBox.NativeReleasedBranchCleanupTest do
       {_, child, _} = NativeBranchDeletionContract.prepare(Memory, store, unquote(mode))
 
       assert {:ok, pending} =
-               NativeReleasedBranchCleanupContract.accept(
+               NativeBranchDeletionActionContract.accept(
                  Memory,
                  store,
                  child,
@@ -181,7 +181,7 @@ defmodule SmolBox.NativeReleasedBranchCleanupTest do
         )
 
       assert {:ok, gone} =
-               NativeReleasedBranchCleanupContract.finish(
+               NativeBranchDeletionActionContract.finish(
                  Memory,
                  store,
                  pending,

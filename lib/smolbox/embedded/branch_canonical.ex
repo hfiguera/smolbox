@@ -6,14 +6,26 @@ defmodule SmolBox.Embedded.BranchCanonical do
 
   def transition_from_wire(value, module) do
     if Shape.keys?(value, @transition_fields) and module.valid?(value) do
-      fields = Map.new(value, fn {key, field} -> {String.to_existing_atom(key), field} end)
-      {:ok, struct!(module, fields)}
+      {:ok, wire_struct(value, module)}
     else
       :error
     end
   end
 
-  def transition_wire(value),
+  def from_wire(value, module) do
+    if not is_struct(value) and module.valid?(value),
+      do: {:ok, wire_struct(value, module)},
+      else: :error
+  end
+
+  def wire_struct(value, module),
+    do:
+      struct!(
+        module,
+        Map.new(value, fn {key, field} -> {String.to_existing_atom(key), field} end)
+      )
+
+  def wire_fields(value),
     do: Map.new(Map.from_struct(value), fn {key, field} -> {Atom.to_string(key), field} end)
 
   def transition_shape?(value),
@@ -114,6 +126,15 @@ defmodule SmolBox.Embedded.BranchCanonical do
       value |> Jason.encode!() |> then(&:crypto.hash(:sha256, &1)) |> Base.encode16(case: :lower)
 
   def origin(receipt), do: Map.delete(receipt, "material")
+
+  def current_head?(current, expected),
+    do:
+      Shape.receipt?(current, 2) and current["material"] != nil and
+        origin(current) == origin(expected) and
+        current["material"]["revision"] >= expected["material"]["revision"] and
+        (current["material"]["revision"] != expected["material"]["revision"] or
+           current["material"] == expected["material"]) and
+        (current["material"]["revision"] != 0 or root?(current))
 
   def root?(receipt),
     do:

@@ -55,6 +55,9 @@ defmodule SmolBox.DurableHost.BranchStore do
       def run(_context, :branch_retire, [_, _, _, _, _]), do: unsupported()
       def run(_context, :branch_backing_accept, [_, _, _, _, _, _]), do: unsupported()
       def run(_context, :branch_release_storage, [_, _, _, _, _]), do: unsupported()
+
+      defp unsupported,
+        do: {:error, %SmolBox.Error{category: :unsupported_capability, operation: :store}}
     end
 
     def run(context, :branch_retire, [key, guard, id, now]) do
@@ -104,11 +107,8 @@ defmodule SmolBox.DurableHost.BranchStore do
       end
     else
       defp native_release(_context, _child, _operation, _arguments),
-        do: unsupported()
+        do: {:error, %SmolBox.Error{category: :unsupported_capability, operation: :store}}
     end
-
-    defp unsupported,
-      do: {:error, %SmolBox.Error{category: :unsupported_capability, operation: :store}}
 
     defp pair(context, key, guard, id, now) do
       with {:ok, p} <- Database.guarded_machine(context, key, guard, now),

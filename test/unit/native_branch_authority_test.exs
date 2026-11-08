@@ -19,7 +19,6 @@ defmodule SmolBox.NativeBranchAuthorityTest do
     BranchPublication,
     Identity,
     NativeBranchAuthority,
-    NativeBranchHistory,
     NativeGrowth,
     Request
   }
@@ -212,7 +211,7 @@ defmodule SmolBox.NativeBranchAuthorityTest do
       assert {:error, _} = Codec.encode(%{saved | native_branch_history: %{}})
       assert {:error, _} = Codec.encode(%{saved | observed_machine: original.observed_machine})
       assert {:error, _} = Codec.encode(%{saved | native_branch_history: %{"different" => proof}})
-      refute NativeBranchHistory.record?(%{saved | backend_assignment: nil})
+      refute NativeBranchAuthority.history_valid?(%{saved | backend_assignment: nil})
 
       assert {:ok, command} = Command.new(["true"])
 

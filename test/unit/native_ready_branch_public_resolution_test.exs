@@ -492,7 +492,8 @@ defmodule SmolBox.NativeReadyBranchPublicResolutionTest do
     leaf = %{"operation" => "inspect", "receipt" => result.completion.child}
 
     input =
-      Enum.sum(Enum.map([operation, source, leaf], &byte_size(Jason.encode!(&1)))) + 3 * 1024 - 1
+      Enum.reduce([operation, source, leaf], 0, &(byte_size(Jason.encode!(&1)) + &2)) + 3 * 1024 -
+        1
 
     assert {:error, %Error{category: :output_limit, evidence: :dispatch_uncertain}} =
              Adapter.invoke(context, :resolve_ready_branch, [parent, child], %{

@@ -57,23 +57,7 @@ defmodule SmolBox.Store.NativePreparedBranchRetirementContract do
     {parent, child, result, usage}
   end
 
-  def rehash_intent(intent) do
-    Map.put(
-      intent,
-      "request_sha256",
-      BranchCanonical.digest([
-        "smolbox-initial-branch-admission-v1",
-        "9f446ae00219148ca4a703914f44a8e2fab11655",
-        "shared-materialized-ram",
-        BranchCanonical.ordered(intent["source"], :receipt),
-        BranchCanonical.ordered(intent["child"], :child),
-        BranchCanonical.ordered(intent["approval"], :approval),
-        BranchCanonical.ordered(intent["plan"], :plan),
-        intent["source_pid"],
-        intent["epoch"]
-      ])
-    )
-  end
+  defdelegate rehash_intent(intent), to: NativeBranchContract
 
   def proof(intent, request) do
     retirement = %{

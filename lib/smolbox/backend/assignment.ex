@@ -33,7 +33,7 @@ defmodule SmolBox.Backend.Assignment do
     Launch,
     MaterialHistory,
     MountContract,
-    NativeBranchHistory,
+    NativeBranchAuthority,
     NativeGrowth,
     NativeSource,
     Request
@@ -495,7 +495,7 @@ defmodule SmolBox.Backend.Assignment do
           preparation: nil
         ],
         fn {key, empty} -> Map.get(record, key, empty) == empty end
-      ) and NativeBranchHistory.record?(record) and export_histories?(record, version) and
+      ) and NativeBranchAuthority.history_valid?(record) and export_histories?(record, version) and
         (Map.get(record, :mounts, []) == [] or version == 2) and
         growth_histories?(record, version) and
         checkpointable_origin?(record) and capture_histories?(record, version)

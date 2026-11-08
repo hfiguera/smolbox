@@ -56,8 +56,8 @@ defmodule SmolBox.Backend.EmbeddedBranch do
     if source_context?(context, parent), do: records, else: :error
   end
 
-  defp records(context, :resolve_ready_branch, [parent, child]) do
-    if source_context?(context, parent), do: [parent, child], else: :error
+  defp records(context, :resolve_ready_branch, [parent, _] = records) do
+    if source_context?(context, parent), do: records, else: :error
   end
 
   defp records(context, :branch_release, [child]), do: [context, child]

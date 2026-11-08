@@ -1,5 +1,7 @@
 defmodule SmolBox.Store.NativeUnbootedBranchDisposalOps do
   @moduledoc false
+  alias SmolBox.Embedded.NativeBranchAdmission
+
   alias SmolBox.Embedded.{
     BranchPublication,
     NativeUnbootedBranchDisposal,
@@ -42,7 +44,7 @@ defmodule SmolBox.Store.NativeUnbootedBranchDisposalOps do
          do: {:ok, parent, child}
   end
 
-  def pending?(parent, child), do: NativeUnbootedBranchDisposal.pending?(parent, child)
+  def pending?(parent, child), do: NativeBranchAdmission.disposal_pending?(parent, child)
 
   def resolve(parent, child, %NativeUnbootedBranchDisposalResult{} = result, now) do
     with true <- Validation.timestamp?(now),

@@ -140,4 +140,10 @@ defmodule SmolBox.Error do
   def message(%__MODULE__{category: category, operation: operation, evidence: evidence}) do
     "SmolBox #{operation} failed: #{category} (#{evidence})"
   end
+
+  @doc false
+  def uncertain({:error, %__MODULE__{} = error}, operation),
+    do: {:error, %{error | operation: operation, evidence: :dispatch_uncertain}}
+
+  def uncertain(result, _operation), do: result
 end

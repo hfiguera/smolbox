@@ -44,15 +44,22 @@ defmodule SmolBox.Embedded.ReleasedBranchDeletionResolution do
         }
   @request_maximum 132 * 1024
   @proof_maximum 4096
+  @request_domain "smolbox-released-child-delete-request-v1"
+  @proof_domain "smolbox-released-child-delete-resolution-v1"
+  @proof_fields ~w(schema child operation_id request_sha256 completion_sha256 release_sha256 deletion_sha256 proof_sha256)
 
-  def request?(request),
+  def request?(request), do: request?(request, @request_domain)
+
+  @doc false
+  def request?(request, domain),
     do:
       Shape.keys?(request, ~w(completion release child operation_id request_sha256 quiesced)) and
         BranchCompletion.wire?(request["completion"]) and
         BranchReleaseTransition.valid?(request["release"]) and
         Shape.receipt?(request["child"], 2) and request["quiesced"] == true and
         release_bound?(request) and
-        request_identity?(request) and byte_size(Jason.encode!(request)) <= @request_maximum
+        request_identity?(request, domain) and
+        byte_size(Jason.encode!(request)) <= @request_maximum
 
   defp release_bound?(request),
     do:
@@ -65,7 +72,7 @@ defmodule SmolBox.Embedded.ReleasedBranchDeletionResolution do
         (request["completion"]["held"] == true or
            request["completion"]["release"] == request["release"])
 
-  defp request_identity?(request),
+  defp request_identity?(request, domain),
     do:
       BranchRequest.release?(Map.take(request, ~w(operation_id request_sha256))) and
         request["operation_id"] != get_in(request, ~w(release change request operation_id)) and
@@ -74,12 +81,15 @@ defmodule SmolBox.Embedded.ReleasedBranchDeletionResolution do
             request,
             ~w(completion publication change child_origin intent child operation_id)
           ) and
-        request["request_sha256"] == request_digest(request)
+        request["request_sha256"] == request_digest(request, domain)
 
-  def request_digest(request),
+  def request_digest(request), do: request_digest(request, @request_domain)
+
+  @doc false
+  def request_digest(request, domain),
     do:
       BranchCanonical.digest([
-        "smolbox-released-child-delete-request-v1",
+        domain,
         BranchCanonical.ordered(request["completion"], :completion),
         BranchCanonical.ordered(request["release"], :child_release),
         BranchCanonical.ordered(request["child"], :receipt),
@@ -87,32 +97,26 @@ defmodule SmolBox.Embedded.ReleasedBranchDeletionResolution do
         request["quiesced"]
       ])
 
-  def from_wire(value) do
-    if Shape.keys?(
-         value,
-         ~w(schema child operation_id request_sha256 completion_sha256 release_sha256 deletion_sha256 proof_sha256)
-       ) and valid?(value),
-       do:
-         {:ok,
-          struct!(
-            __MODULE__,
-            Map.new(value, fn {key, field} -> {String.to_existing_atom(key), field} end)
-          )},
-       else: :error
+  def from_wire(value), do: proof_from_wire(value, __MODULE__, @proof_domain)
+
+  @doc false
+  def proof_from_wire(value, module, domain) do
+    if valid_wire?(value, domain),
+      do: {:ok, BranchCanonical.wire_struct(value, module)},
+      else: :error
   end
 
-  def to_wire(%__MODULE__{} = value),
-    do: Map.new(Map.from_struct(value), fn {key, field} -> {Atom.to_string(key), field} end)
+  def to_wire(%__MODULE__{} = value), do: BranchCanonical.wire_fields(value)
 
   def valid?(%__MODULE__{} = value),
     do: Validation.struct_shape?(value, __MODULE__) and valid?(to_wire(value))
 
-  def valid?(value),
+  def valid?(value), do: valid_wire?(value, @proof_domain)
+
+  @doc false
+  def valid_wire?(value, domain),
     do:
-      Shape.keys?(
-        value,
-        ~w(schema child operation_id request_sha256 completion_sha256 release_sha256 deletion_sha256 proof_sha256)
-      ) and
+      Shape.keys?(value, @proof_fields) and
         value["schema"] === 1 and Shape.receipt?(value["child"], 2) and
         value["child"]["material"]["revision"] == 1 and
         BranchRequest.release?(Map.take(value, ~w(operation_id request_sha256))) and
@@ -122,7 +126,7 @@ defmodule SmolBox.Embedded.ReleasedBranchDeletionResolution do
         ) and
         value["proof_sha256"] ==
           BranchCanonical.digest([
-            "smolbox-released-child-delete-resolution-v1",
+            domain,
             1,
             BranchCanonical.ordered(value["child"], :receipt),
             value["operation_id"],
@@ -135,8 +139,12 @@ defmodule SmolBox.Embedded.ReleasedBranchDeletionResolution do
   def matches?(%__MODULE__{} = proof, request), do: matches?(to_wire(proof), request)
 
   def matches?(proof, request),
+    do: valid?(proof) and request?(request) and proof_matches?(proof, request)
+
+  @doc false
+  def proof_matches?(proof, request),
     do:
-      valid?(proof) and request?(request) and proof["child"] == request["child"] and
+      proof["child"] == request["child"] and
         proof["operation_id"] == request["operation_id"] and
         proof["request_sha256"] == request["request_sha256"] and
         proof["completion_sha256"] ==

@@ -29,3 +29,7 @@ strip = true
 # Line tables retain useful backtraces without the SDK's full dependency DWARF.
 [profile.dev]
 debug = 1
+
+# Keep SDK test harnesses below the executable verification limit.
+[profile.test]
+debug = 0

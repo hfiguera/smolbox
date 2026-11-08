@@ -1,6 +1,6 @@
 defmodule SmolBox.Backend.EmbeddedBranchRetirement do
   @moduledoc false
-  alias SmolBox.Backend.{Budget, EmbeddedContext, EmbeddedReply, Features}
+  alias SmolBox.Backend.{Budget, EmbeddedBranchOperation, EmbeddedContext}
 
   alias SmolBox.Embedded.{
     BranchChildAbsence,
@@ -16,15 +16,9 @@ defmodule SmolBox.Backend.EmbeddedBranchRetirement do
     {:ok, budget} = Budget.constrain(budget, timeout_ms: 30_000, max_response_bytes: 72 * 1024)
     deadline = now() + budget.timeout_ms
 
-    with true <-
-           EmbeddedContext.scoped?(context) and Features.supports?(context.config, :branches),
-         true <- context.quiesced,
-         {:ok, pin_budget} <- remaining(budget, deadline),
-         do: coordinate(Call.pin(context, pin_budget), name, budget, &Call.run/3, deadline),
-         else: (
-           {:error, _} = error -> error
-           _ -> failure(:unsupported_capability, :not_dispatched)
-         )
+    with {:ok, pinned} <-
+           EmbeddedBranchOperation.pin(context, budget, deadline, {:branch, :dispatch_uncertain}),
+         do: coordinate(pinned, name, budget, &Call.run/3, deadline)
   end
 
   # Shared semantic sequence after production policy and owner-fence admission.
@@ -62,22 +56,17 @@ defmodule SmolBox.Backend.EmbeddedBranchRetirement do
          else: (_ -> failure(:identity_conflict, :dispatch_uncertain))
   end
 
-  defp decode({:ok, %{"result" => "error"} = outcome, @empty, nil} = response, _, _) do
-    if Protocol.valid_outcome?(outcome, 2),
-      do: EmbeddedReply.decode(nil, :branch, nil, response),
-      else: failure(:identity_conflict, :dispatch_uncertain)
-  end
+  defp decode({:ok, %{"result" => "error"}, @empty, nil} = response, _, _),
+    do: EmbeddedBranchOperation.error_reply(response, :branch)
 
   defp decode({:error, %Error{} = error}, _, _), do: {:error, error}
   defp decode(_, _, _), do: failure(:identity_conflict, :dispatch_uncertain)
 
-  defp remaining(budget, deadline) do
-    timeout = deadline - now()
-
-    if timeout > 0,
-      do: Budget.constrain(budget, timeout_ms: timeout, max_response_bytes: 72 * 1024),
-      else: failure(:expired, :dispatch_uncertain)
-  end
+  defp remaining(budget, deadline),
+    do:
+      EmbeddedBranchOperation.remaining(budget, deadline, {:branch, :dispatch_uncertain},
+        max_response_bytes: 72 * 1024
+      )
 
   defp failure(category, evidence),
     do: {:error, %Error{category: category, operation: :branch, evidence: evidence}}

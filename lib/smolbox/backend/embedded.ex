@@ -20,9 +20,9 @@ defmodule SmolBox.Backend.Embedded do
     EmbeddedOperation,
     EmbeddedPreparation,
     EmbeddedPreparedBranchRetirement,
+    EmbeddedReply,
     EmbeddedUnbootedBranchDisposal,
     EmbeddedUnbootedBranchRetirement,
-    EmbeddedReply,
     EmbeddedVolume,
     Features,
     Reference

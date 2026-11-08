@@ -1,6 +1,6 @@
 defmodule SmolBox.Backend.EmbeddedBranchDeletion do
   @moduledoc false
-  alias SmolBox.Backend.{Budget, EmbeddedContext, EmbeddedReply, Features}
+  alias SmolBox.Backend.{Budget, EmbeddedBranchOperation, EmbeddedContext}
 
   alias SmolBox.Embedded.{
     BranchDeletionResolution,
@@ -21,15 +21,14 @@ defmodule SmolBox.Backend.EmbeddedBranchDeletion do
 
     deadline = now() + budget.timeout_ms
 
-    with true <-
-           EmbeddedContext.scoped?(context) and Features.supports?(context.config, :branches),
-         true <- context.quiesced,
-         {:ok, pin_budget} <- remaining(budget, deadline),
-         do: coordinate(Call.pin(context, pin_budget), child, budget, &Call.run/3, deadline),
-         else: (
-           {:error, _} = error -> error
-           _ -> failure(:unsupported_capability, :not_dispatched)
-         )
+    with {:ok, pinned} <-
+           EmbeddedBranchOperation.pin(
+             context,
+             budget,
+             deadline,
+             {:reconcile, :dispatch_uncertain}
+           ),
+         do: coordinate(pinned, child, budget, &Call.run/3, deadline)
   end
 
   def run(_, _, _), do: failure(:validation, :not_dispatched)
@@ -80,22 +79,17 @@ defmodule SmolBox.Backend.EmbeddedBranchDeletion do
          else: (_ -> failure(:identity_conflict, :dispatch_uncertain))
   end
 
-  defp decode({:ok, %{"result" => "error"} = outcome, @empty, nil} = response, _, _, _) do
-    if Protocol.valid_outcome?(outcome, 2),
-      do: EmbeddedReply.decode(nil, :reconcile, nil, response),
-      else: failure(:identity_conflict, :dispatch_uncertain)
-  end
+  defp decode({:ok, %{"result" => "error"}, @empty, nil} = response, _, _, _),
+    do: EmbeddedBranchOperation.error_reply(response, :reconcile)
 
   defp decode({:error, %Error{} = error}, _, _, _), do: {:error, error}
   defp decode(_, _, _, _), do: failure(:identity_conflict, :dispatch_uncertain)
 
-  defp remaining(budget, deadline) do
-    timeout = deadline - now()
-
-    if timeout > 0,
-      do: Budget.constrain(budget, timeout_ms: timeout, max_response_bytes: @response_bytes),
-      else: failure(:expired, :dispatch_uncertain)
-  end
+  defp remaining(budget, deadline),
+    do:
+      EmbeddedBranchOperation.remaining(budget, deadline, {:reconcile, :dispatch_uncertain},
+        max_response_bytes: @response_bytes
+      )
 
   defp failure(category, evidence),
     do: {:error, %Error{category: category, operation: :reconcile, evidence: evidence}}

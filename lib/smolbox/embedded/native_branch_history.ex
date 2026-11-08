@@ -2,36 +2,16 @@ defmodule SmolBox.Embedded.NativeBranchHistory do
   @moduledoc false
   alias SmolBox.Embedded.{
     BranchCanonical,
-    BranchCreation,
+    BranchCompletion,
     BranchPublication,
+    BranchReleaseTransition,
     NativeBranchAuthority,
-    NativePreparedBranchRetirement
+    NativeBranchRelease,
+    NativePreparedBranchRetirement,
+    PreparedBranchRetirement
   }
 
-  alias SmolBox.{Branch, Validation}
-
-  def record?(%{backend_assignment: nil} = record),
-    do:
-      Map.get(record, :native_branch_history, %{}) == %{} and
-        (Map.get(record, :branch) == nil or
-           match?(%{__struct__: Branch, native_authority: nil}, Map.get(record, :branch)))
-
-  def record?(%{backend_assignment: %{version: 2}, branch: %{}} = record),
-    do: record.native_branch_history == %{} and NativeBranchAuthority.child?(record)
-
-  def record?(%{backend_assignment: %{version: 2}, branch: nil} = record),
-    do: source?(record)
-
-  def record?(%{backend_assignment: %{version: 2}} = record),
-    do:
-      not BranchCreation.valid?(record.backend_assignment.creation) or
-        (Map.get(record, :managed_machine) != nil and BranchCreation.command?(record))
-
-  def record?(record),
-    do:
-      Map.get(record, :native_branch_history, %{}) == %{} and
-        Map.get(record, :branch_children, %{}) == %{} and Map.get(record, :branch) == nil and
-        Map.get(record, :active_branch) == nil
+  alias SmolBox.Validation
 
   def transitions(record) do
     history = Map.get(record, :native_branch_history, %{})
@@ -44,7 +24,31 @@ defmodule SmolBox.Embedded.NativeBranchHistory do
     _ -> :error
   end
 
-  defp source?(record) do
+  def release_transitions(%{
+        branch: %{
+          native_authority: %{
+            __struct__: NativeBranchAuthority,
+            release: %NativeBranchRelease{transition: proof}
+          }
+        }
+      })
+      when not is_nil(proof), do: {:ok, [proof]}
+
+  def release_transitions(%{
+        branch: %{
+          native_authority: %{
+            __struct__: NativeBranchAuthority,
+            completion: %BranchCompletion{release: release}
+          }
+        }
+      })
+      when not is_nil(release) do
+    with {:ok, proof} <- BranchReleaseTransition.from_wire(release), do: {:ok, [proof]}
+  end
+
+  def release_transitions(_), do: {:ok, []}
+
+  def source?(record) do
     with true <- is_map(record.branch_children) and map_size(record.branch_children) <= 256,
          {:ok, history} <- transitions(record),
          true <- history == [] or record.spec.checkpointable do
@@ -64,8 +68,8 @@ defmodule SmolBox.Embedded.NativeBranchHistory do
       spec.checkpointable and spec.profile.network == :offline and
         spec.ports == [] and spec.volumes == [] and spec.workload == nil
 
-  defp entry?(record, id, %NativePreparedBranchRetirement{} = saved),
-    do: NativePreparedBranchRetirement.source?(record, id, saved)
+  defp entry?(record, id, %{__struct__: NativePreparedBranchRetirement} = saved),
+    do: PreparedBranchRetirement.saved_source?(record, id, saved)
 
   defp entry?(record, id, %BranchPublication{} = proof) do
     profile = record.spec.profile
