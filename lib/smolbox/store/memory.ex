@@ -169,6 +169,8 @@ defmodule SmolBox.Store.Memory do
           native_background_launches: 1,
           native_streaming_commands: 1,
           native_terminal_sessions: 1,
+          native_disk_growth: 1,
+          native_sources: 1,
           local_volumes: 1,
           worker_control: 1,
           schema: 1,

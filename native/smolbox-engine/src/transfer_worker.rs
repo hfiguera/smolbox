@@ -20,10 +20,34 @@ const STREAM_EVENTS: u32 = 65538;
 #[serde(tag = "type", deny_unknown_fields)]
 pub(crate) enum Kind {
     Read,
-    Write { total: u64, mode: Option<u32> },
-    Buffered { metadata: Blob },
-    Background { metadata: Blob },
-    Streaming { metadata: Blob },
+    Bootstrap {
+        metadata: Blob,
+        expected: crate::bootstrap::Expected,
+    },
+    Pull {
+        metadata: Blob,
+        expected: crate::ImagePullRequest,
+    },
+    Images {
+        deadline_ns: u64,
+    },
+    Write {
+        total: u64,
+        mode: Option<u32>,
+    },
+    Buffered {
+        metadata: Blob,
+    },
+    Background {
+        metadata: Blob,
+    },
+    Streaming {
+        metadata: Blob,
+    },
+    Grow {
+        metadata: Blob,
+        expected: crate::growth::GrowthProof,
+    },
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -94,20 +118,64 @@ impl Request {
     pub(crate) fn validate(&self) -> Result<()> {
         if let Kind::Buffered { metadata }
         | Kind::Background { metadata }
-        | Kind::Streaming { metadata } = &self.kind
+        | Kind::Streaming { metadata }
+        | Kind::Grow { metadata, .. }
+        | Kind::Pull { metadata, .. }
+        | Kind::Bootstrap { metadata, .. } = &self.kind
         {
             if metadata.path.parent() != self.staging.parent()
                 || metadata.bytes == 0
-                || metadata.bytes > crate::buffered::COMMAND_METADATA_BYTES
+                || metadata.bytes
+                    > if matches!(self.kind, Kind::Bootstrap { .. }) {
+                        crate::bootstrap::METADATA_BYTES
+                    } else if matches!(self.kind, Kind::Pull { .. }) {
+                        crate::image_pull::METADATA_BYTES
+                    } else if matches!(self.kind, Kind::Grow { .. }) {
+                        crate::growth::METADATA_BYTES
+                    } else {
+                        crate::buffered::COMMAND_METADATA_BYTES
+                    }
             {
+                return Err(Error::before(ErrorCode::Validation));
+            }
+        }
+        if let Kind::Bootstrap { expected, .. } = &self.kind {
+            expected.source.validate()?;
+            if self.max_bytes != 1
+                || !crate::domain::valid_id(&expected.machine)
+                || !valid_hex(&expected.metadata_sha256, 64)
+            {
+                return Err(Error::before(ErrorCode::Validation));
+            }
+        }
+        if let Kind::Pull { expected, .. } = &self.kind {
+            expected.validate()?;
+            if self.max_bytes != 1 {
+                return Err(Error::before(ErrorCode::Validation));
+            }
+        }
+        if let Kind::Grow { expected, .. } = self.kind {
+            if !(1..=64).contains(&expected.storage_gib)
+                || !(1..=64).contains(&expected.overlay_gib)
+                || self.max_bytes != 1
+            {
+                return Err(Error::before(ErrorCode::Validation));
+            }
+        }
+        if let Kind::Images { deadline_ns } = self.kind {
+            if deadline_ns == 0 || self.max_bytes != crate::images::IMAGE_OUTPUT_BYTES {
                 return Err(Error::before(ErrorCode::Validation));
             }
         }
         let mode = match self.kind {
             Kind::Read
+            | Kind::Bootstrap { .. }
+            | Kind::Pull { .. }
+            | Kind::Images { .. }
             | Kind::Buffered { .. }
             | Kind::Background { .. }
-            | Kind::Streaming { .. } => None,
+            | Kind::Streaming { .. }
+            | Kind::Grow { .. } => None,
             Kind::Write { mode, .. } => mode,
         };
         FileOptions {
@@ -151,7 +219,14 @@ impl Request {
         let metadata = file.metadata().map_err(|_| Error::before(ErrorCode::Io))?;
         let required_mode = if matches!(
             self.kind,
-            Kind::Read | Kind::Buffered { .. } | Kind::Background { .. } | Kind::Streaming { .. }
+            Kind::Read
+                | Kind::Bootstrap { .. }
+                | Kind::Pull { .. }
+                | Kind::Images { .. }
+                | Kind::Buffered { .. }
+                | Kind::Background { .. }
+                | Kind::Streaming { .. }
+                | Kind::Grow { .. }
         ) {
             0o600
         } else {
@@ -163,9 +238,13 @@ impl Request {
             || (metadata.dev(), metadata.ino()) != (self.staging_device, self.staging_inode)
             || match self.kind {
                 Kind::Read
+                | Kind::Bootstrap { .. }
+                | Kind::Pull { .. }
+                | Kind::Images { .. }
                 | Kind::Buffered { .. }
                 | Kind::Background { .. }
-                | Kind::Streaming { .. } => metadata.len() != 0,
+                | Kind::Streaming { .. }
+                | Kind::Grow { .. } => metadata.len() != 0,
                 Kind::Write { total, .. } => metadata.len() != total,
             }
         {
@@ -189,6 +268,15 @@ pub(crate) enum Event {
         bytes: u64,
         running: bool,
     },
+    Bootstrapped {
+        proof: crate::bootstrap::Proof,
+    },
+    ImagePulled {
+        image: crate::ImageObservation,
+    },
+    ImagesListed {
+        bytes: u64,
+    },
     Ready,
     Progress {
         bytes: u64,
@@ -210,6 +298,9 @@ pub(crate) enum Event {
     },
     Launched {
         pid: u32,
+    },
+    Grown {
+        proof: crate::growth::GrowthProof,
     },
 }
 
@@ -325,10 +416,17 @@ pub(crate) struct Evidence {
     pub stream: Option<crate::CommandOutcome>,
     pub command: Option<CommandProof>,
     pub launched: Option<u32>,
+    pub bootstrapped: Option<crate::bootstrap::Proof>,
+    bootstrap: Option<crate::bootstrap::Expected>,
+    pub pulled: Option<crate::ImageObservation>,
+    pull: Option<crate::ImagePullRequest>,
+    pub grown: Option<crate::growth::GrowthProof>,
+    growth: Option<crate::growth::GrowthProof>,
     pub limited: bool,
     buffered: bool,
     background: bool,
     streaming: bool,
+    images: bool,
     operation: String,
     sequence: u32,
     max_bytes: u64,
@@ -343,10 +441,26 @@ pub(crate) struct Evidence {
 impl Evidence {
     pub(crate) fn new(request: &Request) -> Self {
         Self {
+            bootstrapped: None,
+            bootstrap: match &request.kind {
+                Kind::Bootstrap { expected, .. } => Some(expected.clone()),
+                _ => None,
+            },
+            pulled: None,
+            pull: match &request.kind {
+                Kind::Pull { expected, .. } => Some(expected.clone()),
+                _ => None,
+            },
+            images: matches!(request.kind, Kind::Images { .. }),
             operation: request.operation.clone(),
             stream: None,
             command: None,
             launched: None,
+            grown: None,
+            growth: match request.kind {
+                Kind::Grow { expected, .. } => Some(expected),
+                _ => None,
+            },
             limited: false,
             buffered: matches!(request.kind, Kind::Buffered { .. }),
             background: matches!(request.kind, Kind::Background { .. }),
@@ -355,9 +469,13 @@ impl Evidence {
             max_bytes: request.max_bytes,
             exact_write: match request.kind {
                 Kind::Read
+                | Kind::Bootstrap { .. }
+                | Kind::Pull { .. }
+                | Kind::Images { .. }
                 | Kind::Buffered { .. }
                 | Kind::Background { .. }
-                | Kind::Streaming { .. } => None,
+                | Kind::Streaming { .. }
+                | Kind::Grow { .. } => None,
                 Kind::Write { total, .. } => Some(total),
             },
             ready: false,
@@ -427,9 +545,42 @@ impl Evidence {
                     output_bytes: bytes,
                 });
             }
+            Event::Bootstrapped { proof }
+                if self.ready
+                    && self
+                        .bootstrap
+                        .as_ref()
+                        .is_some_and(|expected| proof.matches(expected)) =>
+            {
+                self.bootstrapped = Some(proof);
+                self.acknowledged = true;
+                self.terminal = true;
+            }
+            Event::ImagePulled { image }
+                if self.ready
+                    && self
+                        .pull
+                        .as_ref()
+                        .is_some_and(|expected| expected.matches(&image)) =>
+            {
+                self.pulled = Some(image);
+                self.acknowledged = true;
+                self.terminal = true;
+            }
+            Event::ImagesListed { bytes }
+                if self.images && self.ready && bytes > 0 && bytes <= self.max_bytes =>
+            {
+                self.observed_bytes = bytes;
+                self.acknowledged = true;
+                self.terminal = true;
+            }
             Event::Ready if !self.ready && self.sequence == 0 => self.ready = true,
             Event::Progress { bytes }
-                if !self.background
+                if self.growth.is_none()
+                    && self.bootstrap.is_none()
+                    && self.pull.is_none()
+                    && !self.images
+                    && !self.background
                     && !self.streaming
                     && self.ready
                     && bytes > self.observed_bytes
@@ -438,7 +589,11 @@ impl Evidence {
                 self.observed_bytes = bytes;
             }
             Event::Acknowledged { bytes }
-                if !self.buffered
+                if self.growth.is_none()
+                    && self.bootstrap.is_none()
+                    && self.pull.is_none()
+                    && !self.images
+                    && !self.buffered
                     && !self.streaming
                     && !self.background
                     && self.ready
@@ -451,13 +606,24 @@ impl Evidence {
                 self.terminal = true;
             }
             Event::Failed { bytes }
-                if self.ready && bytes >= self.observed_bytes && bytes <= self.max_bytes =>
+                if self.ready
+                    && bytes >= self.observed_bytes
+                    && bytes <= self.max_bytes
+                    && ((self.growth.is_none()
+                        && self.pull.is_none()
+                        && self.bootstrap.is_none())
+                        || bytes == 0) =>
             {
                 self.observed_bytes = bytes;
                 self.terminal = true;
             }
             Event::Limited { bytes }
-                if self.ready && bytes >= self.observed_bytes && bytes <= self.max_bytes =>
+                if self.growth.is_none()
+                    && self.bootstrap.is_none()
+                    && self.pull.is_none()
+                    && self.ready
+                    && bytes >= self.observed_bytes
+                    && bytes <= self.max_bytes =>
             {
                 self.observed_bytes = bytes;
                 self.limited = true;
@@ -483,6 +649,11 @@ impl Evidence {
                     stderr,
                 });
                 self.limited = limited;
+            }
+            Event::Grown { proof } if self.ready && self.growth == Some(proof) => {
+                self.grown = Some(proof);
+                self.acknowledged = true;
+                self.terminal = true;
             }
             Event::Launched { pid }
                 if self.background && self.ready && pid > 0 && self.observed_bytes == 0 =>
@@ -556,6 +727,30 @@ pub fn run_file_worker() -> Result<()> {
         streaming: matches!(request.kind, Kind::Streaming { .. }),
     };
     writer.event(Event::Ready)?;
+    if let Kind::Bootstrap { metadata, expected } = &request.kind {
+        return writer.event(match crate::bootstrap::run(&request, metadata, expected) {
+            Ok(proof) => Event::Bootstrapped { proof },
+            Err(_) => Event::Failed { bytes: 0 },
+        });
+    }
+    if let Kind::Pull { metadata, expected } = &request.kind {
+        return writer.event(match crate::image_pull::run(&request, metadata, expected) {
+            Ok(image) => Event::ImagePulled { image },
+            Err(_) => Event::Failed { bytes: 0 },
+        });
+    }
+    if matches!(request.kind, Kind::Images { .. }) {
+        return writer.event(match crate::images::run(&request) {
+            Ok(bytes) => Event::ImagesListed { bytes },
+            Err(_) => Event::Failed { bytes: 0 },
+        });
+    }
+    if let Kind::Grow { metadata, expected } = &request.kind {
+        return writer.event(match crate::growth::run(&request, metadata, *expected) {
+            Ok(proof) => Event::Grown { proof },
+            Err(_) => Event::Failed { bytes: 0 },
+        });
+    }
     if let Kind::Buffered { metadata }
     | Kind::Background { metadata }
     | Kind::Streaming { metadata } = &request.kind
@@ -605,7 +800,13 @@ pub fn run_file_worker() -> Result<()> {
                             writer.progress(bytes);
                         },
                     ),
-                    Kind::Buffered { .. } | Kind::Background { .. } | Kind::Streaming { .. } => {
+                    Kind::Bootstrap { .. }
+                    | Kind::Pull { .. }
+                    | Kind::Images { .. }
+                    | Kind::Buffered { .. }
+                    | Kind::Background { .. }
+                    | Kind::Streaming { .. }
+                    | Kind::Grow { .. } => {
                         unreachable!()
                     }
                 }
@@ -625,6 +826,71 @@ pub fn run_file_worker() -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn growth_requires_distinct_exact_correlated_proof_and_rejects_late_success() {
+        let expected = crate::growth::GrowthProof {
+            storage_gib: 2,
+            overlay_gib: 3,
+        };
+        let query = request(Kind::Grow {
+            metadata: Blob {
+                path: "/tmp/metadata".into(),
+                device: 1,
+                inode: 2,
+                bytes: 1,
+            },
+            expected,
+        });
+        for invalid in [
+            Event::Acknowledged { bytes: 0 },
+            Event::Progress { bytes: 1 },
+            Event::Launched { pid: 1 },
+            Event::Limited { bytes: 0 },
+            Event::CommandCompleted {
+                exit_code: 0,
+                stdout: 0,
+                stderr: 0,
+                limited: false,
+            },
+            Event::Grown {
+                proof: crate::growth::GrowthProof {
+                    storage_gib: 3,
+                    overlay_gib: 3,
+                },
+            },
+        ] {
+            let mut evidence = Evidence::new(&query);
+            evidence.event(frame(0, Event::Ready)).unwrap();
+            assert!(evidence.event(frame(1, invalid)).is_err());
+            assert!(!evidence.acknowledged);
+        }
+        let mut evidence = Evidence::new(&query);
+        assert!(evidence
+            .event(frame(0, Event::Grown { proof: expected }))
+            .is_err());
+        evidence.event(frame(0, Event::Ready)).unwrap();
+        evidence
+            .event(frame(1, Event::Grown { proof: expected }))
+            .unwrap();
+        assert!(evidence.acknowledged);
+        assert_eq!(evidence.grown, Some(expected));
+        assert!(evidence
+            .event(frame(2, Event::Grown { proof: expected }))
+            .is_err());
+        let mut retired = Evidence::new(&query);
+        retired.event(frame(0, Event::Ready)).unwrap();
+        retired.retire();
+        assert!(retired
+            .event(frame(1, Event::Grown { proof: expected }))
+            .is_err());
+        assert!(!retired.acknowledged);
+        let mut ordinary = Evidence::new(&request(Kind::Read));
+        ordinary.event(frame(0, Event::Ready)).unwrap();
+        assert!(ordinary
+            .event(frame(1, Event::Grown { proof: expected }))
+            .is_err());
+    }
     #[test]
     fn streaming_spool_ranges_and_terminal_exit_are_correlated_without_file_ack() {
         let query = request(Kind::Streaming {
@@ -859,6 +1125,169 @@ mod tests {
             sequence,
             event,
         }
+    }
+
+    #[test]
+    fn bootstrap_ack_is_distinct_and_requires_matching_full_launch_proof() {
+        let plan = crate::bootstrap::tests::plan(false);
+        let expected = plan.expected().unwrap();
+        let image = crate::ImageObservation {
+            reference: expected.source.reference.clone(),
+            digest: format!("sha256:{}", "b".repeat(64)),
+            size: 1,
+            architecture: expected.source.platform.trim_start_matches("linux/").into(),
+            os: "linux".into(),
+            layer_count: 0,
+        };
+        let proof = crate::bootstrap::Proof {
+            image,
+            metadata_sha256: expected.metadata_sha256.clone(),
+            container_id: Some("smolvm-fixture".into()),
+        };
+        let mut query = request(Kind::Bootstrap {
+            metadata: Blob {
+                path: "/private/metadata".into(),
+                device: 1,
+                inode: 1,
+                bytes: 100,
+            },
+            expected,
+        });
+        query.max_bytes = 1;
+        query.validate().unwrap();
+        for event in [
+            Event::Acknowledged { bytes: 0 },
+            Event::ImagePulled {
+                image: proof.image.clone(),
+            },
+            Event::Bootstrapped {
+                proof: crate::bootstrap::Proof {
+                    container_id: None,
+                    ..proof.clone()
+                },
+            },
+        ] {
+            let mut evidence = Evidence::new(&query);
+            evidence.event(frame(0, Event::Ready)).unwrap();
+            assert!(evidence.event(frame(1, event)).is_err());
+            assert!(evidence.bootstrapped.is_none());
+        }
+        let mut evidence = Evidence::new(&query);
+        evidence.event(frame(0, Event::Ready)).unwrap();
+        evidence
+            .event(frame(
+                1,
+                Event::Bootstrapped {
+                    proof: proof.clone(),
+                },
+            ))
+            .unwrap();
+        assert!(evidence.acknowledged);
+        assert_eq!(evidence.bootstrapped, Some(proof));
+    }
+
+    #[test]
+    fn pull_evidence_requires_exact_reference_platform_configuration_digest_and_distinct_completion(
+    ) {
+        let expected = crate::ImagePullRequest {
+            reference: format!("registry.example/app@sha256:{}", "a".repeat(64)),
+            platform: "linux/arm64".into(),
+        };
+        let image = crate::ImageObservation {
+            reference: expected.reference.clone(),
+            digest: format!("sha256:{}", "b".repeat(64)),
+            size: 1,
+            architecture: "arm64".into(),
+            os: "linux".into(),
+            layer_count: 2,
+        };
+        let mut query = request(Kind::Pull {
+            metadata: Blob {
+                path: "/private/meta".into(),
+                device: 1,
+                inode: 1,
+                bytes: 100,
+            },
+            expected,
+        });
+        query.max_bytes = 1;
+        query.validate().unwrap();
+        for event in [
+            Event::Acknowledged { bytes: 0 },
+            Event::ImagesListed { bytes: 1 },
+            Event::ImagePulled {
+                image: crate::ImageObservation {
+                    digest: "packed".into(),
+                    ..image.clone()
+                },
+            },
+            Event::ImagePulled {
+                image: crate::ImageObservation {
+                    reference: "different".into(),
+                    ..image.clone()
+                },
+            },
+            Event::ImagePulled {
+                image: crate::ImageObservation {
+                    architecture: "amd64".into(),
+                    ..image.clone()
+                },
+            },
+        ] {
+            let mut evidence = Evidence::new(&query);
+            evidence.event(frame(0, Event::Ready)).unwrap();
+            assert!(evidence.event(frame(1, event)).is_err());
+            assert!(evidence.pulled.is_none());
+        }
+        let mut evidence = Evidence::new(&query);
+        evidence.event(frame(0, Event::Ready)).unwrap();
+        evidence
+            .event(frame(
+                1,
+                Event::ImagePulled {
+                    image: image.clone(),
+                },
+            ))
+            .unwrap();
+        assert!(evidence.acknowledged);
+        assert_eq!(evidence.pulled, Some(image.clone()));
+        assert!(evidence
+            .event(frame(2, Event::ImagePulled { image }))
+            .is_err());
+    }
+
+    #[test]
+    fn image_inventory_requires_distinct_correlated_collected_evidence() {
+        let mut query = request(Kind::Images { deadline_ns: 1 });
+        query.max_bytes = crate::images::IMAGE_OUTPUT_BYTES;
+        query.validate().unwrap();
+        for event in [
+            Event::Acknowledged { bytes: 2 },
+            Event::Progress { bytes: 2 },
+            Event::Launched { pid: 42 },
+            Event::ImagesListed { bytes: 0 },
+        ] {
+            let mut evidence = Evidence::new(&query);
+            evidence.event(frame(0, Event::Ready)).unwrap();
+            assert!(evidence.event(frame(1, event)).is_err());
+        }
+        let mut evidence = Evidence::new(&query);
+        evidence.event(frame(0, Event::Ready)).unwrap();
+        evidence
+            .event(frame(1, Event::ImagesListed { bytes: 2 }))
+            .unwrap();
+        assert!(evidence.acknowledged);
+        assert_eq!(evidence.observed_bytes, 2);
+        assert!(evidence
+            .event(frame(2, Event::ImagesListed { bytes: 2 }))
+            .is_err());
+        let mut crossed = Evidence::new(&request(Kind::Read));
+        crossed.event(frame(0, Event::Ready)).unwrap();
+        assert!(crossed
+            .event(frame(1, Event::ImagesListed { bytes: 2 }))
+            .is_err());
+        query.max_bytes = 1;
+        assert!(query.validate().is_err());
     }
 
     #[test]

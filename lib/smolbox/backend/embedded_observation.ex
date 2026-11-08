@@ -77,22 +77,7 @@ defmodule SmolBox.Backend.EmbeddedObservation do
 
   defp decode(_context, operation, _result, _output), do: invalid(operation)
 
-  defp decode_machines(values) do
-    case Enum.reduce_while(values, {:ok, []}, &decode_machine/2) do
-      {:ok, machines} -> {:ok, Enum.reverse(machines)}
-      error -> error
-    end
-  end
-
-  defp decode_machine(value, {:ok, machines}) do
-    case Machine.from_wire(value) do
-      {:ok, machine} ->
-        {:cont, {:ok, [machine | machines]}}
-
-      {:error, error} ->
-        {:halt, {:error, %{error | operation: :list, evidence: :dispatch_uncertain}}}
-    end
-  end
+  defp decode_machines(values), do: Machine.list_from_wire(values)
 
   defp invalid(operation),
     do: {:error, %Error{category: :protocol, operation: operation, evidence: :dispatch_uncertain}}

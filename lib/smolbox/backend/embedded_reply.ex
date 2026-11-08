@@ -1,7 +1,26 @@
 defmodule SmolBox.Backend.EmbeddedReply do
   @moduledoc false
-  alias SmolBox.Embedded.{CreationFeatures, Identity, LogStream}
-  alias SmolBox.{Error, LaunchResult, LogResult, Machine, MachineMeasurements, Result}
+  alias SmolBox.Backend.EmbeddedContext
+
+  alias SmolBox.Embedded.{
+    CreationFeatures,
+    GrowthTransition,
+    Identity,
+    ImageContract,
+    LogStream,
+    Protocol
+  }
+
+  alias SmolBox.{
+    Error,
+    Image,
+    ImageInventory,
+    LaunchResult,
+    LogResult,
+    Machine,
+    MachineMeasurements,
+    Result
+  }
 
   def decode(context, operation, request, {:ok, outcome, output, overlay}),
     do: response(context, operation, request, outcome, output, overlay)
@@ -12,11 +31,12 @@ defmodule SmolBox.Backend.EmbeddedReply do
   defp response(
          %{identity: nil},
          :inspect_creation,
-         %{"operation" => "inspect_creation"},
+         %{"operation" => name},
          %{"result" => "creation_presence", "presence" => presence},
          %{stdout: <<>>, stderr: <<>>, file: <<>>},
          nil
-       ) do
+       )
+       when name in ~w(inspect_creation inspect_oci_creation inspect_registry_creation) do
     case presence do
       "absent" -> {:ok, :absent}
       "unverified" -> error(:identity_conflict, :inspect, :dispatch_uncertain)
@@ -25,12 +45,13 @@ defmodule SmolBox.Backend.EmbeddedReply do
 
   defp response(
          context,
-         :create,
+         operation,
          _request,
          %{"result" => "created", "receipt" => receipt},
          _output,
          nil
-       ) do
+       )
+       when operation in [:create, :create_prepared] do
     identity = %Identity{receipt: receipt}
 
     if Identity.matches?(identity, context.assignment),
@@ -41,11 +62,44 @@ defmodule SmolBox.Backend.EmbeddedReply do
   defp response(
          context,
          operation,
+         request,
+         %{"result" => kind, "transition" => wire, "observation" => observed},
+         %{stdout: <<>>, stderr: <<>>, file: <<>>},
+         nil
+       )
+       when operation in [:expand_disks, :qualify_growth] and kind in ~w(grown growth_qualified) do
+    with true <- growth_kind?(operation, kind, request, context.growth),
+         {:ok, proof} <- GrowthTransition.from_wire(wire),
+         true <-
+           GrowthTransition.bound?(
+             proof,
+             context.growth.receipt,
+             context.growth.id,
+             context.growth.request,
+             context.growth.previous,
+             context.growth.targets
+           ),
+         true <-
+           request["receipt"] == context.growth.receipt and
+             request["operation_id"] == context.growth.id and
+             request["request"] == context.growth.request and
+             request["previous"] == context.growth.previous do
+      updated = %{context | identity: %Identity{receipt: proof.receipt, transition: proof}}
+      observation(updated, :inspect_machine, observed)
+    else
+      _ -> error(:identity_conflict, operation, :dispatch_uncertain)
+    end
+  end
+
+  defp response(
+         context,
+         operation,
          _request,
          %{"result" => "observed", "observation" => observation},
          _output,
          nil
-       ),
+       )
+       when operation in [:inspect_machine, :start, :stop, :delete],
        do: observation(context, operation, observation)
 
   defp response(
@@ -69,6 +123,38 @@ defmodule SmolBox.Backend.EmbeddedReply do
       {:error, error} ->
         {:error, %{error | operation: :machine_measurements}}
     end
+  end
+
+  defp response(
+         context,
+         :pull_image,
+         %{"operation" => "pull_image", "receipt" => receipt, "source" => source},
+         %{"result" => "pulled", "image" => image} = outcome,
+         %{stdout: <<>>, stderr: <<>>, file: <<>>},
+         nil
+       ) do
+    with {:ok, ^receipt} <- EmbeddedContext.receipt(context),
+         %{command: %SmolBox.ImagePull{source: expected}} <- context.spec,
+         true <- source == ImageContract.source(expected),
+         true <- Protocol.valid_outcome?(outcome, 2) and ImageContract.matches?(image, source),
+         do: Image.from_wire(image),
+         else: (_ -> error(:protocol, :pull_image, :dispatch_uncertain))
+  end
+
+  defp response(
+         context,
+         :list_images,
+         %{"operation" => "list_images", "receipt" => receipt},
+         %{"result" => "images", "count" => count, "bytes" => length} = outcome,
+         %{stdout: <<>>, stderr: <<>>, file: bytes},
+         nil
+       ) do
+    with {:ok, ^receipt} <- EmbeddedContext.receipt(context),
+         true <- Protocol.valid_outcome?(outcome, 2) and byte_size(bytes) == length,
+         {:ok, images} when is_list(images) <- Jason.decode(bytes),
+         true <- length(images) == count,
+         do: ImageInventory.from_wire(%{"images" => images}),
+         else: (_ -> error(:protocol, :images, :dispatch_uncertain))
   end
 
   defp response(
@@ -141,6 +227,21 @@ defmodule SmolBox.Backend.EmbeddedReply do
   defp response(_context, operation, _request, outcome, _output, overlay),
     do: {:error, operation_error(operation, outcome, overlay)}
 
+  defp growth_kind?(:expand_disks, "grown", %{"operation" => "expand_disks"}, %{
+         state: :dispatching
+       }),
+       do: true
+
+  defp growth_kind?(
+         :qualify_growth,
+         "growth_qualified",
+         %{"operation" => "qualify_growth", "quiesced" => true},
+         %{state: :unknown}
+       ),
+       do: true
+
+  defp growth_kind?(_operation, _kind, _request, _growth), do: false
+
   defp observation(_context, :delete, %{"state" => "missing"}), do: :ok
 
   defp observation(_context, operation, %{"state" => "missing"}),
@@ -156,7 +257,7 @@ defmodule SmolBox.Backend.EmbeddedReply do
          } = observed
        )
        when state in ["running", "stopped"] do
-    expected = context.assignment.creation["resources"]
+    expected = EmbeddedContext.resources(context)
     identity = %{context.identity | pid_identity: pid}
 
     if resources == expected and valid_state?(state, pid) and lifecycle_state?(operation, state) and
@@ -274,7 +375,10 @@ defmodule SmolBox.Backend.EmbeddedReply do
 
   # Persist the established public error vocabulary, shared with the HTTP adapter.
   defp error_operation(:inspect_machine), do: :inspect
+  defp error_operation(:create_prepared), do: :create
   defp error_operation(:inspect_creation), do: :inspect
+  defp error_operation(:list_images), do: :images
+  defp error_operation(:qualify_growth), do: :expand_disks
   defp error_operation(operation), do: operation
 
   @counter_fields ~w(cpu_seconds cpu_millis rss_mb pss_mb private_memory_mb shared_memory_mapped_mb disk_used_mb egress_bytes)a

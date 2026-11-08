@@ -189,6 +189,18 @@ mod tests {
         r.network = false;
         r.source_smolmachine = Some("foreign".into());
         assert_ne!(hash, material_hash(&r).unwrap());
+        let packed_hash = material_hash(&r).unwrap();
+        r.source_registry_ref = Some(format!(
+            "registry.example/team/app@sha256:{}",
+            "a".repeat(64)
+        ));
+        assert_ne!(packed_hash, material_hash(&r).unwrap());
+        let registry_hash = material_hash(&r).unwrap();
+        r.source_registry_ref = Some(format!(
+            "registry.example/team/app@sha256:{}",
+            "b".repeat(64)
+        ));
+        assert_ne!(registry_hash, material_hash(&r).unwrap());
     }
 
     #[test]

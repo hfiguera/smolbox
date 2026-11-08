@@ -1,12 +1,12 @@
 defmodule SmolBox.Embedded.Call do
   @moduledoc false
   alias SmolBox.Backend.EmbeddedContext
-  alias SmolBox.Embedded.{Config, LogStream, Protocol}
+  alias SmolBox.Embedded.{Config, LogStream, Protocol, RegistryContract, Request}
   alias SmolBox.Error
 
   # Capture once before durable intent writes. A failed capture remains fenced
   # unavailable, rather than resolving a replacement owner later in a Task.
-  def pin(%EmbeddedContext{pinned: true} = context, _budget), do: context
+  def pin(%{__struct__: EmbeddedContext, pinned: true} = context, _budget), do: context
 
   def pin(context, budget) do
     owner = GenServer.whereis(context.server)
@@ -139,12 +139,20 @@ defmodule SmolBox.Embedded.Call do
   defp submit(state, health) do
     if health.status == :ready or
          (health.status == :reconciling and
-            state.request["operation"] in ~w(inspect inspect_creation)) do
+            state.request["operation"] in ~w(inspect inspect_creation inspect_oci_creation inspect_registry_creation inspect_growth qualify_growth)) or
+         (health.status == :quarantined and Map.get(health, :protocol_major) == 2 and
+            Request.observation?(state.request)) do
       :atomics.put(state.flags, 1, 1)
 
       case state.bridge.submit(state.owner, state.request, state.budget, self(), health.epoch) do
-        {:ok, handle} -> consume(Map.put(state, :handle, handle))
-        {:error, %Error{} = error} -> {:error, error}
+        {:ok, handle} ->
+          consume(
+            %{state | request: RegistryContract.sanitize(state.request)}
+            |> Map.put(:handle, handle)
+          )
+
+        {:error, %Error{} = error} ->
+          {:error, error}
       end
     else
       {:error, %Error{category: :unknown, operation: :embedded}}
@@ -173,8 +181,7 @@ defmodule SmolBox.Embedded.Call do
     end
   end
 
-  defp output(state, stream, bytes)
-       when stream == :log and is_binary(bytes) do
+  defp output(state, :log, bytes) when is_binary(bytes) do
     case LogStream.feed(state.log_parser, bytes) do
       {:ok, parser, lines} ->
         next = Enum.reduce(lines, %{state | log_parser: parser}, &log_callback/2)

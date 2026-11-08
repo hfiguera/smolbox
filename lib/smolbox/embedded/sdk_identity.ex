@@ -72,7 +72,12 @@ defmodule SmolBox.Embedded.SDKIdentity do
           {"background_exec", "buffered_exec"},
           {"logs", "buffered_exec"},
           {"streaming_exec", "buffered_exec"},
-          {"terminals", "buffered_exec"}
+          {"terminals", "buffered_exec"},
+          {"disk_growth", "job_resources"},
+          {"images", "job_resources"},
+          {"remote_sources", "job_resources"},
+          {"remote_sources", "buffered_exec"},
+          {"remote_sources", "compact_creation"}
         ],
         fn {feature, required} -> features[feature] != 1 or features[required] == 1 end
       )

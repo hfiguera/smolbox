@@ -5,8 +5,10 @@ defmodule SmolBox.Backend.Embedded do
     Assignment,
     Budget,
     EmbeddedContext,
+    EmbeddedGrowthObservation,
     EmbeddedObservation,
     EmbeddedOperation,
+    EmbeddedPreparation,
     EmbeddedReply,
     Features,
     Reference
@@ -40,7 +42,7 @@ defmodule SmolBox.Backend.Embedded do
   @impl true
   def supports_operation?(nil, operation) when operation in @observations, do: true
 
-  def supports_operation?(%EmbeddedContext{config: config}, operation)
+  def supports_operation?(%{__struct__: EmbeddedContext, config: config}, operation)
       when operation in @observations,
       do: Features.supports?(config, :observability)
 
@@ -48,12 +50,33 @@ defmodule SmolBox.Backend.Embedded do
 
   def supports_operation?(nil, :open_managed_terminal), do: true
 
-  def supports_operation?(%EmbeddedContext{config: config}, :open_managed_terminal),
+  def supports_operation?(%{__struct__: EmbeddedContext, config: config}, :open_managed_terminal),
     do: Features.supports?(config, :terminals)
 
-  def supports_operation?(nil, :logs), do: true
+  def supports_operation?(nil, operation) when operation in [:list_images, :pull_image], do: true
 
-  def supports_operation?(%EmbeddedContext{config: config}, :logs),
+  def supports_operation?(%{__struct__: EmbeddedContext, config: config}, operation)
+      when operation in [:list_images, :pull_image],
+      do: Features.supports?(config, :images)
+
+  def supports_operation?(nil, :logs), do: true
+  def supports_operation?(nil, :prepare_artifact), do: true
+  def supports_operation?(nil, :create_prepared), do: true
+
+  def supports_operation?(%{__struct__: EmbeddedContext, config: config}, :create_prepared),
+    do: Features.supports?(config, :remote_sources)
+
+  def supports_operation?(%{__struct__: EmbeddedContext, config: config}, :prepare_artifact),
+    do: Features.supports?(config, :remote_sources)
+
+  def supports_operation?(nil, :expand_disks), do: true
+  def supports_operation?(nil, :qualify_growth), do: true
+
+  def supports_operation?(%{__struct__: EmbeddedContext, config: config}, operation)
+      when operation in [:expand_disks, :qualify_growth],
+      do: Features.supports?(config, :disk_growth)
+
+  def supports_operation?(%{__struct__: EmbeddedContext, config: config}, :logs),
     do: Features.supports?(config, :logs)
 
   def supports_operation?(_context, operation),
@@ -102,10 +125,17 @@ defmodule SmolBox.Backend.Embedded do
     end
   end
 
+  def invoke(context, :prepare_artifact, arguments, budget),
+    do: EmbeddedPreparation.run(context, arguments, budget)
+
   def invoke(context, :open_managed_terminal, [name, spec, consumer, observer], budget) do
     with {:ok, source} <- TerminalConnection.source(context, name, spec, budget),
          do: Server.start_connection(source, name, spec, consumer, observer)
   end
+
+  def invoke(%{growth: %{state: state}} = context, :inspect_machine, [name], budget)
+      when state in [:dispatching, :unknown],
+      do: EmbeddedGrowthObservation.run(context, name, budget)
 
   def invoke(context, operation, arguments, budget) do
     with {:ok, request, budget, input, callback} <-

@@ -151,7 +151,7 @@ defmodule SmolBox.Store.ExpansionOps do
     if observed.state in [:created, :stopped] and DiskExpansion.target_matches?(m, r, observed) do
       save(
         m,
-        r,
+        transition(r, observed),
         state,
         %{
           state: observed.state,
@@ -171,6 +171,11 @@ defmodule SmolBox.Store.ExpansionOps do
       error(:identity_conflict)
     end
   end
+
+  defp transition(expansion, %{backend_identity: nil}), do: expansion
+
+  defp transition(expansion, %{backend_identity: identity}),
+    do: %{expansion | native_transition: identity.transition}
 
   defp save(m, r, state, changes, now),
     do:

@@ -1,6 +1,6 @@
 defmodule SmolBox.Embedded.ConfigTest do
   use ExUnit.Case, async: true
-  alias SmolBox.Embedded.{Config, Health, Limits, Protocol}
+  alias SmolBox.Embedded.{Config, Health, Launch, Limits, Protocol, RegistryPolicy, SDKIdentity}
   alias SmolBox.{Error, Profile, Source}
   alias SmolBox.Runtime.Target
 
@@ -90,9 +90,37 @@ defmodule SmolBox.Embedded.ConfigTest do
     assert_invalid(Keyword.put(options(), :sources, [%{source | architecture: "x86_64"}]))
   end
 
+  test "registry policy maps only future approved source capability into helper config" do
+    {:ok, source} =
+      Source.registry(
+        id: "registry",
+        reference: "registry.example/team/app@sha256:" <> String.duplicate("a", 64),
+        architecture: "aarch64",
+        content_sha256: String.duplicate("b", 64)
+      )
+
+    {:ok, policy} =
+      RegistryPolicy.new(max_download_bytes: 1024, max_cache_bytes: 4096, max_cache_files: 2)
+
+    {:ok, dormant} =
+      Config.new(Keyword.merge(options(), sources: [source], registry_policy: policy))
+
+    refute Map.has_key?(Launch.helper_config(dormant), "approved_registry_sources")
+    package = Map.put(dormant.package_identity, "engine_version", "0.2.0")
+    sdk = SDKIdentity.implemented("1.22.0", package["smolvm_revision"])
+    sdk = put_in(sdk, ["feature_versions", "remote_sources"], 1)
+    future = %{dormant | package_identity: package, sdk_identity: sdk}
+    assert {:error, _} = Config.validate(future)
+    assert {:error, _} = Config.validate(%{future | artifacts: []})
+    assert [approval] = Launch.helper_config(future)["approved_registry_sources"]
+    assert approval["source"]["content_sha256"] == source.content_sha256
+    assert approval["cache_policy"] == %{"max_bytes" => 4096, "max_files" => 2}
+    refute Map.has_key?(approval, "identity_token")
+  end
+
   test "optional approvals fail closed and do not change the helper capability surface" do
     for field <- ~w(sources checkpoints export_destinations checkpoint_policies branch_policies)a,
-        invalid <- [nil, [nil], Enum.map(1..33, & &1)] do
+        invalid <- [nil, [nil], Enum.to_list(1..33)] do
       assert_invalid(Keyword.put(options(), field, invalid))
     end
 

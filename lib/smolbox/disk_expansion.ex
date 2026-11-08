@@ -7,10 +7,11 @@ defmodule SmolBox.DiskExpansion do
   an operator established quiescence and verified the requested sizes, not that
   the original request's outcome became known.
   """
+  alias SmolBox.Embedded.{GrowthTransition, NativeGrowth}
   alias SmolBox.{Error, Machine, Validation}
 
   @enforce_keys [:id, :storage_gb, :overlay_gb, :requested_version, :accepted_at_ms, :request]
-  defstruct @enforce_keys ++ [state: :pending]
+  defstruct @enforce_keys ++ [state: :pending, native_transition: nil]
 
   @type state :: :pending | :dispatching | :unknown | :completed | :resolved | :deleted
   @type targets :: %{
@@ -30,6 +31,7 @@ defmodule SmolBox.DiskExpansion do
           request: targets(),
           requested_version: pos_integer(),
           accepted_at_ms: non_neg_integer(),
+          native_transition: map() | nil,
           state: state()
         }
 
@@ -50,8 +52,21 @@ defmodule SmolBox.DiskExpansion do
   @doc false
   def expected(%{created_machine: nil}), do: nil
 
-  def expected(%{disk_sizes: _} = m),
+  def expected(%{backend_assignment: nil, disk_sizes: _} = m),
     do: struct!(m.created_machine, Map.take(profile(m), [:storage_gb, :overlay_gb]))
+
+  def expected(%{disk_sizes: _} = m) do
+    case NativeGrowth.current_identity(m) do
+      {:ok, identity} ->
+        struct!(
+          m.created_machine,
+          Map.put(Map.take(profile(m), [:storage_gb, :overlay_gb]), :backend_identity, identity)
+        )
+
+      _ ->
+        nil
+    end
+  end
 
   @doc false
   def matches?(m, observed),
@@ -60,7 +75,15 @@ defmodule SmolBox.DiskExpansion do
   @doc false
   def target_matches?(m, r, observed) do
     wanted = struct!(expected(m), Map.take(r, [:storage_gb, :overlay_gb]))
-    Machine.same_incarnation?(wanted, observed)
+
+    if m.backend_assignment == nil,
+      do: Machine.same_incarnation?(wanted, observed),
+      else:
+        NativeGrowth.transition?(m, r, observed) and
+          Machine.same_incarnation?(
+            %{wanted | backend_identity: observed.backend_identity},
+            observed
+          )
   end
 
   @doc false
@@ -83,8 +106,16 @@ defmodule SmolBox.DiskExpansion do
   def valid_machine?(m) do
     is_map(m.disk_expansions) and map_size(m.disk_expansions) <= 32 and
       Enum.all?(m.disk_expansions, fn {id, r} -> valid?(r) and id == r.id end) and
+      native_histories?(m) and
       sizes?(m) and active?(m) and (m.disk_expansions == %{} or supported?(m))
   end
+
+  defp native_histories?(%{backend_assignment: nil} = m),
+    do: Enum.all?(m.disk_expansions, fn {_, expansion} -> expansion.native_transition == nil end)
+
+  defp native_histories?(_machine), do: true
+  defp native_transition?(nil), do: true
+  defp native_transition?(transition), do: GrowthTransition.valid?(transition)
 
   defp sizes?(%{disk_sizes: nil, disk_expansions: history}), do: history == %{}
 
@@ -145,7 +176,8 @@ defmodule SmolBox.DiskExpansion do
         Validation.integer?(r.storage_gb, 1, 64) and Validation.integer?(r.overlay_gb, 1, 64) and
         Validation.integer?(r.requested_version, 1, 9_007_199_254_740_991) and
         Validation.timestamp?(r.accepted_at_ms) and request_valid?(r) and
-        r.state in [:pending, :dispatching, :unknown, :completed, :resolved, :deleted]
+        r.state in [:pending, :dispatching, :unknown, :completed, :resolved, :deleted] and
+        native_transition?(r.native_transition)
 
   defp valid?(_), do: false
   defp error(category), do: {:error, %Error{category: category, operation: :expand_disks}}

@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "previous": {
+    "target_id": "fixture-local",
+    "domain_generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "name": "fixture-owned",
+    "owner_token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "incarnation": "cccccccccccccccccccccccccccccccc",
+    "material_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "material": {
+      "schema": 2,
+      "revision": 1,
+      "record_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "chain_sha256": "d9b14f3989f62bb5e8b75a08dda42b84520bb47119f2b9f9dfb7e808d771af7e",
+      "operation_id": "grow.1",
+      "request_sha256": "c5a54cb1ac82a52cd55392a6b9c2374d86455aa2a135227f2a3775e0acef4875"
+    }
+  },
+  "receipt": {
+    "target_id": "fixture-local",
+    "domain_generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "name": "fixture-owned",
+    "owner_token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "incarnation": "cccccccccccccccccccccccccccccccc",
+    "material_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "material": {
+      "schema": 2,
+      "revision": 2,
+      "record_sha256": "9999999999999999999999999999999999999999999999999999999999999999",
+      "chain_sha256": "917b41fd696d7e4e5b8ab71a2aab95b8973af8c75167440965de7b2b5d93511f",
+      "operation_id": "grow.2",
+      "request_sha256": "4a03b2fc82c9a7a6bf6dce7b7acfa3d2e2adcc1168a70cab064aa1f2c6ea060a"
+    }
+  },
+  "change": {
+    "operation_id": "grow.2",
+    "request": {
+      "storage_gib": null,
+      "overlay_gib": 3
+    },
+    "previous": {
+      "schema": 2,
+      "revision": 1,
+      "record_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "chain_sha256": "d9b14f3989f62bb5e8b75a08dda42b84520bb47119f2b9f9dfb7e808d771af7e",
+      "operation_id": "grow.1",
+      "request_sha256": "c5a54cb1ac82a52cd55392a6b9c2374d86455aa2a135227f2a3775e0acef4875"
+    },
+    "immutable_sha256": "8888888888888888888888888888888888888888888888888888888888888888",
+    "previous_storage_gib": 2,
+    "previous_overlay_gib": 1,
+    "storage_gib": 2,
+    "overlay_gib": 3
+  }
+}

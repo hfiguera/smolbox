@@ -32,6 +32,14 @@ class OrdinaryRunnerTests(unittest.TestCase):
         self.assertNotIn('terminal_open', proof.capabilities(older))
         self.assertNotIn('terminals', proof.limits(older))
         self.assertNotIn('jobs', proof.limits(older))
+        future = json.loads(json.dumps(manifest))
+        future['policy']['sdk']['feature_versions']['disk_growth'] = 1
+        self.assertEqual(proof.capabilities(future)[:3], ['expand_disks', 'inspect_growth', 'qualify_growth'])
+        self.assertNotIn('expand_disks', proof.capabilities(manifest))
+        future['policy']['sdk']['feature_versions']['images'] = 1
+        self.assertEqual(proof.capabilities(future)[0], 'list_images')
+        self.assertEqual(len(proof.capabilities(future)), 26)
+        self.assertNotIn('list_images', proof.capabilities(manifest))
 
     def test_manifest_selection_binds_protocol_config_sdk_and_engine(self):
         revision = '9f446ae00219148ca4a703914f44a8e2fab11655'

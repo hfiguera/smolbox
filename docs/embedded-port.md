@@ -293,11 +293,30 @@ versions with the mandatory core contract; approval cannot enable a planned
 feature. Package/Hello/limit agreement remains exact. Legacy 1.3/1.4 packages
 keep their original observations and capability surface.
 
+Store readers also recognize selective v18 native growth histories and grown
+retained-command authority. Install every reader/resource writer before a future
+growth descriptor is approved; stores must advertise `native_disk_growth: 1`
+alongside `managed_disk_expansion: 1`. Existing HTTP/v16/v17 records retain their
+encodings and nil proof defaults. This is a reader foundation: public embedded
+growth remains disabled pending remaining disk-format/source and exact-package
+platform qualification. Wire dispatch, completed-proof lookup and explicit
+operator qualification now exist. A read can use a completed link to inspect the new receipt, but only explicit
+quiesced resolution commits an unknown expansion's history. Missing proof and
+current target-size inventory cannot authorize growth or release its reservation.
+Explicit native stopped resolution pins/quiesces the owner and verifies the
+original saved geometry after operator repair; it may publish an engine proof,
+but never resizes disks, changes SDK metadata or overrides retained work fences.
+Older entered journal entries without an original witness remain blocked.
+
 Previously approved engine 0.1.0 manifest schema 2 binds protocol 1.4 and SmolBox's ownership, observation,
 worker, asset and boot-guard policies. The bridge requires at least 4000 ms of
 cancellation grace for protocol 1.4 and 2.0 (the default). An epoch-bound unavailable
-notice closes admission while retaining the current helper, pending results and
-reserved capacity. It does not initiate replacement or prove cleanup. Approved
+notice closes work admission while retaining the current helper, pending results
+and reserved capacity. Protocol 2.0 keeps approved bounded health, capacity,
+metrics, inventory and measurement observations available on that same live
+channel; retained machine locks still conflict and readiness stays unavailable.
+Observation does not restore work admission, initiate replacement or prove
+cleanup. Protocol 1.4 retains its original rejection of new requests. Approved
 legacy schema 1 / protocol 1.3 packages retain their original handshake limits;
 legacy assignments keep codec v16. Receipt and protocol versions cannot be mixed.
 A protocol-major migration requires draining, deleting verified owned assignments
@@ -373,6 +392,12 @@ packages. Live crash and independent CLI-race campaigns remain deferred at the
 user's request. See the latest
 repository progress record (`docs/design/embedded-port-progress.md`) for exact scope and failures.
 
+Default `mix test` and `mix ci` exclude both `runtime` and `deferred_crash`. The
+second tag separately fences native owner/helper-loss and persistence-interruption
+fixture tests. Selecting ordinary runtime qualification does not select deferred
+crash cases. These cases remain deferred; use deterministic models and normal
+shutdown/replacement for current validation.
+
 ## Upgrade and drain procedure
 
 Quiesce the target, finish subscriptions and reconcile pending outcomes. Unknown
@@ -418,3 +443,30 @@ deferred live fault gates, independent CLI races, exact binary/source and licens
 delivery review, and publisher signing/provenance. No package is published by
 this implementation. The repository release gap assessment is
 `native/release-review.md`.
+
+Store readers also recognize selective v19 typed native OCI and registry creation intent and
+retained image-pull records. Upgrade every reader and reservation writer before
+advertising `native_sources: 1`, alongside `registry_sources: 1` and
+`managed_images: 1` for image operations. Memory and the updated PostgreSQL example
+include this reader marker. Existing HTTP and v16-v18 native records keep their
+encodings. A source manifest identity cannot replace local pack content authority.
+OCI catalog/assignment translation and protocol-2 creation, qualification,
+absence and source-bound startup routing now exist behind explicit source approval.
+Reader support does not activate them. Public image/source capabilities remain
+disabled while remaining credential/source combinations and ordinary exact-package
+qualification are pending.
+
+
+Registry preparation now has a gated embedded adapter and typed
+`ArtifactPreparation` translation. It selects an exact approved registry source
+and explicit `RegistryPolicy`, bounds its reply and preserves distinct manifest
+and content digests. The engine verifies downloads and rehashes warm entries;
+a preparation observation still grants no machine ownership or readiness.
+Current package policy keeps remote_sources disabled. The gated create_prepared adapter now validates exact preparation/source identity
+and routes cached creation without refetching. Registry intent preflight checks
+policy/template feasibility before reservation; pack bytes are checked during
+creation. Scoped credential options now travel through bounded private Port IPC only for
+preparation; exact configured token realms govern exchange and bookkeeping strips
+tokens. Cached creation validates options but does not refetch or transmit tokens.
+Live authenticated exchange and ordinary exact-package Runtime/materialization
+qualification remain pending before this becomes an admitted public workflow.

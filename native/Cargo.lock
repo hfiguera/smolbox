@@ -2331,6 +2331,7 @@ dependencies = [
  "getrandom 0.3.4",
  "hex",
  "libc",
+ "reqwest",
  "rusqlite",
  "serde",
  "serde_json",
@@ -2340,6 +2341,7 @@ dependencies = [
  "smolvm-protocol",
  "tar",
  "tempfile",
+ "tokio",
  "zstd",
 ]
 
@@ -2368,6 +2370,7 @@ dependencies = [
  "base64 0.22.1",
  "serde",
  "serde_json",
+ "sha2 0.10.9",
 ]
 
 [[package]]

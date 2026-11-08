@@ -3,12 +3,13 @@ defmodule SmolBox.ArtifactPreparation do
   Observation of a registry artifact prepared in the worker host's blob cache.
 
   The manifest and content SHA-256 digests are distinct. This result verifies
-  that the warm response names the expected blob, not that an existing cache
-  entry was rehashed. Upstream verifies downloaded bytes but trusts cache hits.
-  Operators must protect the cache from modification.
+  that the preparation response names the expected blob. The HTTP backend's
+  upstream warm path verifies downloads but trusts cache hits. Embedded Port
+  preparation verifies downloaded bytes and rehashes protected cache hits.
+  Operators must protect either backend's cache from modification.
 
-  `already_cached` describes the blob lookup, not offline availability: upstream
-  still fetches the registry manifest on a warm cache. `size_bytes` describes
+  `already_cached` describes the blob lookup, not offline availability: both
+  backends still fetch the registry manifest on a warm cache. `size_bytes` describes
   shared host cache storage, outside per-machine disk reservations.
   This observation neither creates a machine nor proves application readiness.
   """

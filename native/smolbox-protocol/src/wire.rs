@@ -51,6 +51,12 @@ pub struct DomainIdentity {
 #[derive(Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Capability {
+    PrepareArtifact,
+    ListImages,
+    PullImage,
+    ExpandDisks,
+    InspectGrowth,
+    QualifyGrowth,
     TerminalOpen,
     ExecStream,
     Logs,
@@ -350,11 +356,17 @@ impl SdkIdentity {
             capabilities = observations;
         }
         for (feature, capability) in [
+            ("remote_sources", Capability::PrepareArtifact),
             ("logs", Capability::Logs),
             ("background_exec", Capability::ExecBackground),
             ("buffered_exec", Capability::ExecBuffered),
             ("streaming_exec", Capability::ExecStream),
             ("terminals", Capability::TerminalOpen),
+            ("disk_growth", Capability::QualifyGrowth),
+            ("disk_growth", Capability::InspectGrowth),
+            ("disk_growth", Capability::ExpandDisks),
+            ("images", Capability::PullImage),
+            ("images", Capability::ListImages),
         ] {
             if self.feature_versions.get(feature) == Some(&1) {
                 capabilities.insert(0, capability);
@@ -415,6 +427,20 @@ impl SdkIdentity {
                 || self.feature_versions.get("buffered_exec") == Some(&1),
         )?;
         require(
+            self.feature_versions.get("images") != Some(&1)
+                || self.feature_versions.get("job_resources") == Some(&1),
+        )?;
+        require(
+            self.feature_versions.get("remote_sources") != Some(&1)
+                || ["job_resources", "buffered_exec", "compact_creation"]
+                    .iter()
+                    .all(|name| self.feature_versions.get(*name) == Some(&1)),
+        )?;
+        require(
+            self.feature_versions.get("disk_growth") != Some(&1)
+                || self.feature_versions.get("job_resources") == Some(&1),
+        )?;
+        require(
             self.feature_versions.get("terminals") != Some(&1)
                 || self.feature_versions.get("buffered_exec") == Some(&1),
         )?;
@@ -456,9 +482,29 @@ impl Hello {
             .map_or_else(Limits::default, |sdk| Limits::for_sdk(sdk));
         require(
             self.limits == expected_limits
-                && self.capabilities.len() <= if self.major == 1 { 10 } else { 21 },
+                && self.capabilities.len() <= if self.major == 1 { 10 } else { 32 },
         )?;
         for (index, capability) in self.capabilities.iter().enumerate() {
+            if *capability == Capability::PrepareArtifact {
+                require(
+                    self.major == 2
+                        && self.sdk.as_ref().is_some_and(|sdk| {
+                            sdk.feature_versions.get("remote_sources") == Some(&1)
+                        }),
+                )?;
+            }
+            if matches!(
+                capability,
+                Capability::ExpandDisks | Capability::InspectGrowth | Capability::QualifyGrowth
+            ) {
+                require(
+                    self.major == 2
+                        && self
+                            .sdk
+                            .as_ref()
+                            .is_some_and(|sdk| sdk.feature_versions.get("disk_growth") == Some(&1)),
+                )?;
+            }
             if *capability == Capability::TerminalOpen {
                 require(
                     self.major == 2
@@ -474,6 +520,15 @@ impl Hello {
                         && self.sdk.as_ref().is_some_and(|sdk| {
                             sdk.feature_versions.get("streaming_exec") == Some(&1)
                         }),
+                )?;
+            }
+            if matches!(capability, Capability::ListImages | Capability::PullImage) {
+                require(
+                    self.major == 2
+                        && self
+                            .sdk
+                            .as_ref()
+                            .is_some_and(|sdk| sdk.feature_versions.get("images") == Some(&1)),
                 )?;
             }
             if *capability == Capability::Logs {
@@ -550,7 +605,9 @@ pub struct MaterialProof {
     pub revision: u32,
     pub record_sha256: String,
     pub chain_sha256: String,
+    #[serde(deserialize_with = "required_nullable")]
     pub operation_id: Option<String>,
+    #[serde(deserialize_with = "required_nullable")]
     pub request_sha256: Option<String>,
 }
 
@@ -646,6 +703,147 @@ pub struct Create {
         deserialize_with = "present_optional"
     )]
     pub features: Option<Box<CreationFeatures>>,
+}
+
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct OciIdentity {
+    pub kind: String,
+    pub id: String,
+    pub sha256: String,
+    pub architecture: String,
+    pub reference: String,
+}
+impl OciIdentity {
+    pub fn request(&self) -> OciSource {
+        OciSource {
+            reference: self.reference.clone(),
+            platform: match self.architecture.as_str() {
+                "x86_64" => "linux/amd64",
+                "aarch64" => "linux/arm64",
+                _ => "",
+            }
+            .into(),
+        }
+    }
+    pub fn validate(&self) -> Result<()> {
+        require(self.kind == "oci")?;
+        id(&self.id)?;
+        hex(&self.sha256, 64)?;
+        self.request().validate()?;
+        require(
+            self.reference
+                .rsplit_once("@sha256:")
+                .map(|(_, digest)| digest)
+                == Some(self.sha256.as_str()),
+        )
+    }
+}
+
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct OciCreate {
+    pub name: String,
+    pub owner_token: String,
+    pub incarnation: String,
+    pub source: OciIdentity,
+    pub resources: Resources,
+    pub labels: BTreeMap<String, String>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "present_optional"
+    )]
+    pub features: Option<Box<CreationFeatures>>,
+}
+
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RegistryIdentity {
+    pub kind: String,
+    pub id: String,
+    pub sha256: String,
+    pub architecture: String,
+    pub reference: String,
+    pub content_sha256: String,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "present_optional"
+    )]
+    pub credential_ref: Option<String>,
+}
+impl RegistryIdentity {
+    pub fn request(&self) -> RegistrySource {
+        RegistrySource {
+            reference: self.reference.clone(),
+            platform: match self.architecture.as_str() {
+                "x86_64" => "linux/amd64",
+                "aarch64" => "linux/arm64",
+                _ => "",
+            }
+            .into(),
+            content_sha256: self.content_sha256.clone(),
+        }
+    }
+    pub fn validate(&self) -> Result<()> {
+        require(self.kind == "registry")?;
+        id(&self.id)?;
+        hex(&self.sha256, 64)?;
+        self.request().validate()?;
+        require(
+            self.reference.rsplit_once("@sha256:").map(|(_, hash)| hash)
+                == Some(self.sha256.as_str()),
+        )?;
+        if let Some(reference) = &self.credential_ref {
+            id(reference)?;
+        }
+        Ok(())
+    }
+}
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RegistryCreate {
+    pub name: String,
+    pub owner_token: String,
+    pub incarnation: String,
+    pub source: RegistryIdentity,
+    pub resources: Resources,
+    pub labels: BTreeMap<String, String>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "present_optional"
+    )]
+    pub features: Option<Box<CreationFeatures>>,
+}
+impl RegistryCreate {
+    pub fn validate(&self) -> Result<()> {
+        id(&self.name)?;
+        hex(&self.owner_token, 64)?;
+        hex(&self.incarnation, 32)?;
+        self.source.validate()?;
+        self.resources.validate()?;
+        require(self.labels.is_empty())?;
+        if let Some(features) = &self.features {
+            features.validate()?;
+        }
+        Ok(())
+    }
+}
+impl OciCreate {
+    pub fn validate(&self) -> Result<()> {
+        id(&self.name)?;
+        hex(&self.owner_token, 64)?;
+        hex(&self.incarnation, 32)?;
+        self.source.validate()?;
+        self.resources.validate()?;
+        require(self.labels.is_empty())?;
+        if let Some(features) = &self.features {
+            features.validate()?;
+        }
+        Ok(())
+    }
 }
 
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -839,9 +1037,262 @@ pub struct FileOptions {
     pub mode: Option<u32>,
 }
 
+/// Exact credential-free sidecar source. Operator byte/cache policy is selected
+/// from helper config; request callers cannot alter it or select host paths.
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RegistrySource {
+    pub reference: String,
+    pub platform: String,
+    pub content_sha256: String,
+}
+
+/// Bounded ephemeral identity token. No Debug or source identity field exposes
+/// its bytes; bridges discard it from session/handle state after admission.
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct RegistryToken(String);
+impl std::fmt::Debug for RegistryToken {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("RegistryToken(<redacted>)")
+    }
+}
+impl RegistryToken {
+    pub fn validate(&self) -> Result<()> {
+        let body = self.0.trim_end_matches('=');
+        require(
+            !body.is_empty()
+                && self.0.len() <= 16384
+                && body
+                    .bytes()
+                    .all(|b| b.is_ascii_alphanumeric() || b"._~+/-".contains(&b)),
+        )
+    }
+    pub fn into_secret(self) -> String {
+        self.0
+    }
+}
+impl RegistrySource {
+    pub fn validate(&self) -> Result<()> {
+        OciSource {
+            reference: self.reference.clone(),
+            platform: self.platform.clone(),
+        }
+        .validate()?;
+        hex(&self.content_sha256, 64)
+    }
+}
+
+/// Credential-free exact OCI target; full registry/repository eligibility is
+/// checked by helper catalog loading and the shared engine before guest entry.
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct OciSource {
+    pub reference: String,
+    pub platform: String,
+}
+impl OciSource {
+    pub fn validate(&self) -> Result<()> {
+        text(&self.reference, 1024, false)?;
+        require(matches!(
+            self.platform.as_str(),
+            "linux/amd64" | "linux/arm64"
+        ))?;
+        require(valid_oci_reference(&self.reference))
+    }
+}
+fn valid_oci_reference(value: &str) -> bool {
+    if value.len() > 1024 {
+        return false;
+    }
+    let Some((location, digest)) = value.split_once("@sha256:") else {
+        return false;
+    };
+    if hex(digest, 64).is_err() {
+        return false;
+    }
+    let Some((registry, repo)) = location.split_once('/') else {
+        return false;
+    };
+    let host = if let Some((host, port)) = registry.split_once(':') {
+        let Ok(number) = port.parse::<u16>() else {
+            return false;
+        };
+        if number == 0 || number.to_string() != port {
+            return false;
+        }
+        host
+    } else {
+        registry
+    };
+    let alnum = |b: u8| b.is_ascii_lowercase() || b.is_ascii_digit();
+    if host.len() > 253
+        || !(host == "localhost" || host.contains('.'))
+        || !host.split('.').all(|label| {
+            !label.is_empty()
+                && label.len() <= 63
+                && label.bytes().next().is_some_and(alnum)
+                && label.bytes().last().is_some_and(alnum)
+                && label.bytes().all(|b| alnum(b) || b == b'-')
+        })
+    {
+        return false;
+    }
+    repo.split('/').all(|part| {
+        let bytes = part.as_bytes();
+        let mut offset = 0;
+        while offset < bytes.len() && alnum(bytes[offset]) {
+            offset += 1;
+        }
+        if offset == 0 {
+            return false;
+        }
+        while offset < bytes.len() {
+            match bytes[offset] {
+                b'.' => offset += 1,
+                b'_' => {
+                    offset += 1;
+                    if bytes.get(offset) == Some(&b'_') {
+                        offset += 1;
+                    }
+                }
+                b'-' => {
+                    while bytes.get(offset) == Some(&b'-') {
+                        offset += 1;
+                    }
+                }
+                _ => return false,
+            }
+            let start = offset;
+            while offset < bytes.len() && alnum(bytes[offset]) {
+                offset += 1;
+            }
+            if offset == start {
+                return false;
+            }
+        }
+        true
+    })
+}
+
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ImageObservation {
+    pub reference: String,
+    pub digest: String,
+    pub size: u64,
+    pub architecture: String,
+    pub os: String,
+    pub layer_count: u64,
+}
+impl ImageObservation {
+    pub fn validate(&self) -> Result<()> {
+        text(&self.reference, 1024, false)?;
+        text(&self.architecture, 64, false)?;
+        text(&self.os, 64, false)?;
+        if self.digest != "packed" {
+            hex(
+                self.digest.strip_prefix("sha256:").ok_or(InvalidMessage)?,
+                64,
+            )?;
+        }
+        require(self.size <= i64::MAX as u64 && self.layer_count <= 65536)
+    }
+    pub fn matches(&self, source: &OciSource) -> Result<()> {
+        self.validate()?;
+        source.validate()?;
+        require(
+            self.reference == source.reference
+                && self.digest != "packed"
+                && self.os == "linux"
+                && Some(self.architecture.as_str()) == source.platform.strip_prefix("linux/"),
+        )
+    }
+}
+
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "operation", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Operation {
+    QualifyRegistryCreation {
+        source: RegistryIdentity,
+        resources: Resources,
+        user: Option<String>,
+        #[serde(
+            default,
+            skip_serializing_if = "Option::is_none",
+            deserialize_with = "present_optional"
+        )]
+        features: Option<Box<CreationFeatures>>,
+    },
+    CreateRegistryPrepared {
+        create: RegistryCreate,
+        size_bytes: u64,
+    },
+    InspectRegistryCreation {
+        create: RegistryCreate,
+    },
+    PrepareArtifact {
+        source: RegistrySource,
+        #[serde(
+            default,
+            skip_serializing_if = "Option::is_none",
+            deserialize_with = "present_optional"
+        )]
+        credential_ref: Option<String>,
+        #[serde(
+            default,
+            skip_serializing_if = "Option::is_none",
+            deserialize_with = "present_optional"
+        )]
+        identity_token: Option<RegistryToken>,
+    },
+    StartOci {
+        receipt: Receipt,
+        source: OciIdentity,
+    },
+    CreateOci {
+        create: OciCreate,
+    },
+    InspectOciCreation {
+        create: OciCreate,
+    },
+    QualifyOciCreation {
+        source: OciIdentity,
+        resources: Resources,
+        user: Option<String>,
+        #[serde(
+            default,
+            skip_serializing_if = "Option::is_none",
+            deserialize_with = "present_optional"
+        )]
+        features: Option<Box<CreationFeatures>>,
+    },
+    PullImage {
+        receipt: Receipt,
+        source: OciSource,
+    },
+    ListImages {
+        receipt: Receipt,
+    },
+    ExpandDisks {
+        receipt: Receipt,
+        operation_id: String,
+        request: crate::GrowDisks,
+        previous: crate::DiskSizes,
+    },
+    InspectGrowth {
+        receipt: Receipt,
+        operation_id: String,
+        request: crate::GrowDisks,
+        previous: crate::DiskSizes,
+    },
+    QualifyGrowth {
+        receipt: Receipt,
+        operation_id: String,
+        request: crate::GrowDisks,
+        previous: crate::DiskSizes,
+        quiesced: bool,
+    },
     TerminalOpen {
         receipt: Receipt,
         terminal: crate::TerminalSpec,
@@ -916,6 +1367,58 @@ pub enum Operation {
     },
 }
 impl Operation {
+    pub fn sanitized(&self) -> Self {
+        match self {
+            Self::PrepareArtifact {
+                source,
+                credential_ref,
+                ..
+            } => Self::PrepareArtifact {
+                source: source.clone(),
+                credential_ref: credential_ref.clone(),
+                identity_token: None,
+            },
+            _ => self.clone(),
+        }
+    }
+    pub fn registry_source(&self) -> Option<&RegistrySource> {
+        match self {
+            Self::PrepareArtifact { source, .. } => Some(source),
+            _ => None,
+        }
+    }
+    pub fn registry_identity(&self) -> Option<&RegistryIdentity> {
+        match self {
+            Self::QualifyRegistryCreation { source, .. } => Some(source),
+            Self::CreateRegistryPrepared { create, .. }
+            | Self::InspectRegistryCreation { create } => Some(&create.source),
+            _ => None,
+        }
+    }
+    pub fn oci_source(&self) -> Option<OciSource> {
+        match self {
+            Self::StartOci { source, .. } => Some(source.request()),
+            Self::CreateOci { create } | Self::InspectOciCreation { create } => {
+                Some(create.source.request())
+            }
+            Self::QualifyOciCreation { source, .. } => Some(source.request()),
+            Self::PullImage { source, .. } => Some(source.clone()),
+            _ => None,
+        }
+    }
+    pub fn requires_remote_source(&self) -> bool {
+        matches!(
+            self,
+            Self::StartOci { .. }
+                | Self::PrepareArtifact { .. }
+                | Self::CreateRegistryPrepared { .. }
+                | Self::InspectRegistryCreation { .. }
+                | Self::QualifyRegistryCreation { .. }
+                | Self::CreateOci { .. }
+                | Self::InspectOciCreation { .. }
+                | Self::QualifyOciCreation { .. }
+        )
+    }
     pub fn command_limit(&self) -> Option<u64> {
         match self {
             Self::Exec { command, .. } => Some(command.max_output_bytes),
@@ -926,6 +1429,13 @@ impl Operation {
     }
     pub fn creation_features(&self) -> Option<&CreationFeatures> {
         match self {
+            Self::QualifyRegistryCreation { features, .. } => features.as_deref(),
+            Self::CreateRegistryPrepared { create, .. }
+            | Self::InspectRegistryCreation { create } => create.features.as_deref(),
+            Self::CreateOci { create } | Self::InspectOciCreation { create } => {
+                create.features.as_deref()
+            }
+            Self::QualifyOciCreation { features, .. } => features.as_deref(),
             Self::Create { create } | Self::InspectCreation { create } => {
                 create.features.as_deref()
             }
@@ -935,6 +1445,19 @@ impl Operation {
     }
     pub fn capability(&self) -> Capability {
         match self {
+            Self::QualifyRegistryCreation { .. } => Capability::QualifyCreation,
+            Self::CreateRegistryPrepared { .. } => Capability::Create,
+            Self::InspectRegistryCreation { .. } => Capability::InspectCreation,
+            Self::PrepareArtifact { .. } => Capability::PrepareArtifact,
+            Self::StartOci { .. } => Capability::Start,
+            Self::CreateOci { .. } => Capability::Create,
+            Self::InspectOciCreation { .. } => Capability::InspectCreation,
+            Self::QualifyOciCreation { .. } => Capability::QualifyCreation,
+            Self::PullImage { .. } => Capability::PullImage,
+            Self::ListImages { .. } => Capability::ListImages,
+            Self::ExpandDisks { .. } => Capability::ExpandDisks,
+            Self::InspectGrowth { .. } => Capability::InspectGrowth,
+            Self::QualifyGrowth { .. } => Capability::QualifyGrowth,
             Self::TerminalOpen { .. } => Capability::TerminalOpen,
             Self::Logs { .. } => Capability::Logs,
             Self::Health => Capability::Health,
@@ -960,11 +1483,23 @@ impl Operation {
     }
     pub fn receipt(&self) -> Option<&Receipt> {
         match self {
+            Self::QualifyRegistryCreation { .. } => None,
+            Self::CreateRegistryPrepared { .. } | Self::InspectRegistryCreation { .. } => None,
+            Self::PrepareArtifact { .. } => None,
+            Self::CreateOci { .. }
+            | Self::InspectOciCreation { .. }
+            | Self::QualifyOciCreation { .. } => None,
             Self::Health | Self::Capacity | Self::Metrics | Self::Readiness | Self::List => None,
             Self::Create { .. } | Self::InspectCreation { .. } | Self::QualifyCreation { .. } => {
                 None
             }
-            Self::Inspect { receipt }
+            Self::StartOci { receipt, .. }
+            | Self::PullImage { receipt, .. }
+            | Self::ListImages { receipt }
+            | Self::ExpandDisks { receipt, .. }
+            | Self::InspectGrowth { receipt, .. }
+            | Self::QualifyGrowth { receipt, .. }
+            | Self::Inspect { receipt }
             | Self::Logs { receipt, .. }
             | Self::Measurements { receipt }
             | Self::Start { receipt }
@@ -988,6 +1523,110 @@ impl Operation {
             features.validate()?;
         }
         match self {
+            Self::QualifyRegistryCreation {
+                source,
+                resources,
+                user,
+                ..
+            } => {
+                source.validate()?;
+                resources.validate()?;
+                require(budget_ms <= 30000)?;
+                if let Some(user) = user {
+                    text(user, 16384, false)?;
+                }
+            }
+            Self::CreateRegistryPrepared { create, size_bytes } => {
+                create.validate()?;
+                require(*size_bytes > 0 && *size_bytes <= 32 * 1024 * 1024 * 1024)?;
+            }
+            Self::InspectRegistryCreation { create } => {
+                create.validate()?;
+                require(budget_ms <= 30000)?;
+            }
+            Self::PrepareArtifact {
+                source,
+                credential_ref,
+                identity_token,
+            } => {
+                source.validate()?;
+                require(credential_ref.is_some() == identity_token.is_some())?;
+                if let Some(reference) = credential_ref {
+                    id(reference)?;
+                }
+                if let Some(token) = identity_token {
+                    token.validate()?;
+                }
+            }
+            Self::StartOci { receipt, source } => {
+                receipt.validate_for(2)?;
+                source.validate()?;
+            }
+            Self::CreateOci { create } | Self::InspectOciCreation { create } => {
+                create.validate()?;
+                if matches!(self, Self::InspectOciCreation { .. }) {
+                    require(budget_ms <= 30_000)?;
+                }
+            }
+            Self::QualifyOciCreation {
+                source,
+                resources,
+                user,
+                ..
+            } => {
+                require(budget_ms <= 30_000)?;
+                source.validate()?;
+                resources.validate()?;
+                if let Some(user) = user {
+                    text(user, 16384, false)?;
+                }
+            }
+            Self::ExpandDisks {
+                receipt,
+                operation_id,
+                request,
+                previous,
+            }
+            | Self::InspectGrowth {
+                receipt,
+                operation_id,
+                request,
+                previous,
+            }
+            | Self::QualifyGrowth {
+                receipt,
+                operation_id,
+                request,
+                previous,
+                ..
+            } => {
+                receipt.validate_for(2)?;
+                id(operation_id)?;
+                request.targets(*previous)?;
+                require(
+                    budget_ms
+                        <= if matches!(
+                            self,
+                            Self::InspectGrowth { .. } | Self::QualifyGrowth { .. }
+                        ) {
+                            30000
+                        } else {
+                            600000
+                        },
+                )?;
+                if let Self::QualifyGrowth { quiesced, .. } = self {
+                    require(*quiesced)?;
+                }
+            }
+            Self::PullImage { receipt, source } => {
+                receipt.validate_for(2)?;
+                source.validate()?;
+                require(budget_ms <= 86400000)?;
+            }
+            Self::ListImages { receipt } => {
+                receipt.validate_for(2)?;
+                require(budget_ms <= 30000)?;
+            }
             Self::TerminalOpen { terminal, .. } => {
                 terminal.validate()?;
                 require(budget_ms <= terminal.session_ms)?;
@@ -1143,6 +1782,19 @@ impl ClientMessage {
                 return Err(InvalidMessage);
             };
             match operation {
+                Operation::CreateOci { create } | Operation::InspectOciCreation { create } => {
+                    create.features.as_mut().ok_or(InvalidMessage)?.compact = true
+                }
+                Operation::CreateRegistryPrepared { create, .. }
+                | Operation::InspectRegistryCreation { create } => {
+                    create.features.as_mut().ok_or(InvalidMessage)?.compact = true
+                }
+                Operation::QualifyOciCreation { features, .. } => {
+                    features.as_mut().ok_or(InvalidMessage)?.compact = true
+                }
+                Operation::QualifyRegistryCreation { features, .. } => {
+                    features.as_mut().ok_or(InvalidMessage)?.compact = true
+                }
                 Operation::Create { create } | Operation::InspectCreation { create } => {
                     create.features.as_mut().ok_or(InvalidMessage)?.compact = true
                 }
@@ -1296,6 +1948,30 @@ pub struct MachineCounters {
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "result", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Outcome {
+    PreparedArtifact {
+        source: RegistrySource,
+        size_bytes: u64,
+        already_cached: bool,
+    },
+    Pulled {
+        image: ImageObservation,
+    },
+    Images {
+        count: u64,
+        bytes: u64,
+    },
+    Grown {
+        transition: Box<crate::GrowthTransition>,
+        observation: Observation,
+    },
+    GrowthQualified {
+        transition: Box<crate::GrowthTransition>,
+        observation: Observation,
+    },
+    GrowthPresence {
+        #[serde(deserialize_with = "required_nullable")]
+        transition: Option<Box<crate::GrowthTransition>>,
+    },
     Terminal {
         completion: Completion,
         dispatch: Dispatch,
@@ -1361,6 +2037,48 @@ pub enum Outcome {
 impl Outcome {
     pub fn validate(&self) -> Result<()> {
         match self {
+            Self::PreparedArtifact {
+                source, size_bytes, ..
+            } => {
+                source.validate()?;
+                require(*size_bytes > 0 && *size_bytes <= 32 * 1024 * 1024 * 1024)
+            }
+            Self::Pulled { image } => {
+                image.validate()?;
+                require(image.digest != "packed")
+            }
+            Self::Images { count, bytes } => {
+                require(*count <= 1024 && (2..=8388608).contains(bytes))
+            }
+            Self::Grown {
+                transition,
+                observation,
+            }
+            | Self::GrowthQualified {
+                transition,
+                observation,
+            } => {
+                transition.validate()?;
+                Self::Observed {
+                    observation: observation.clone(),
+                }
+                .validate()?;
+                require(
+                    observation.state == ObservedState::Stopped
+                        && observation.pid_identity.is_none(),
+                )?;
+                let resources = observation.resources.as_ref().ok_or(InvalidMessage)?;
+                require(
+                    resources.storage_gib == transition.change.storage_gib
+                        && resources.overlay_gib == transition.change.overlay_gib,
+                )
+            }
+            Self::GrowthPresence { transition } => {
+                if let Some(transition) = transition {
+                    transition.validate()?;
+                }
+                Ok(())
+            }
             Self::Terminal {
                 completion,
                 dispatch,
@@ -1485,7 +2203,13 @@ impl Outcome {
         }
         if matches!(
             self,
-            Self::Health { .. }
+            Self::PreparedArtifact { .. }
+                | Self::Pulled { .. }
+                | Self::Images { .. }
+                | Self::Grown { .. }
+                | Self::GrowthQualified { .. }
+                | Self::GrowthPresence { .. }
+                | Self::Health { .. }
                 | Self::Terminal { .. }
                 | Self::Logs { .. }
                 | Self::Launched { .. }
@@ -1656,7 +2380,7 @@ fn require(condition: bool) -> Result<()> {
 fn text(value: &str, max: usize, empty: bool) -> Result<()> {
     require((empty || !value.is_empty()) && value.len() <= max && !value.contains('\0'))
 }
-fn hex(value: &str, length: usize) -> Result<()> {
+pub(crate) fn hex(value: &str, length: usize) -> Result<()> {
     require(
         value.len() == length
             && value
@@ -1664,7 +2388,7 @@ fn hex(value: &str, length: usize) -> Result<()> {
                 .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b)),
     )
 }
-fn id(value: &str) -> Result<()> {
+pub(crate) fn id(value: &str) -> Result<()> {
     require(
         !value.is_empty()
             && value != "."
@@ -1690,4 +2414,14 @@ fn present_optional<'de, T: Deserialize<'de>, D: serde::Deserializer<'de>>(
     deserializer: D,
 ) -> std::result::Result<Option<T>, D::Error> {
     T::deserialize(deserializer).map(Some)
+}
+
+pub(crate) fn required_nullable<'de, D, T>(
+    deserializer: D,
+) -> std::result::Result<Option<T>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+    T: serde::Deserialize<'de>,
+{
+    Option::deserialize(deserializer)
 }

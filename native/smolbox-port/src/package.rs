@@ -21,8 +21,69 @@ pub struct Config {
     pub package_manifest_sha256: String,
     pub approved_artifacts: Vec<Artifact>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approved_oci_sources: Option<Vec<smolbox_protocol::OciSource>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approved_registry_sources: Option<Vec<RegistryApproval>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub publish_address: Option<String>,
 }
+
+/// Non-secret source/policy catalog. Tokens arrive separately per operation.
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RegistryApproval {
+    pub source: smolbox_engine::RegistryArtifactSource,
+    pub max_bytes: u64,
+    pub cache_policy: smolbox_engine::RegistryCachePolicy,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub credential_ref: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub token_realm: Option<String>,
+}
+impl RegistryApproval {
+    pub fn matches(
+        &self,
+        source: &smolbox_protocol::RegistrySource,
+        credential_ref: Option<&str>,
+    ) -> bool {
+        self.source.reference == source.reference
+            && self.source.platform == source.platform
+            && self.source.content_sha256 == source.content_sha256
+            && self.credential_ref.as_deref() == credential_ref
+    }
+    fn validate(&self) -> Result<(), SafeCode> {
+        self.source.validate().map_err(|_| SafeCode::Validation)?;
+        self.cache_policy
+            .validate()
+            .map_err(|_| SafeCode::Validation)?;
+        if self.max_bytes == 0 || self.max_bytes > smolbox_engine::JOB_REGISTRY_STAGING_BYTES {
+            return Err(SafeCode::Validation);
+        }
+        match (&self.credential_ref, &self.token_realm) {
+            (None, None) => {}
+            (Some(reference), Some(realm)) => {
+                if matches!(reference.as_str(), "." | "..")
+                    || reference.is_empty()
+                    || reference.len() > 128
+                    || !reference
+                        .bytes()
+                        .all(|b| b.is_ascii_alphanumeric() || b"._-".contains(&b))
+                {
+                    return Err(SafeCode::Validation);
+                }
+                smolbox_engine::RegistryIdentityCredential::validate_realm(realm)
+                    .map_err(|_| SafeCode::Validation)?;
+                smolbox_engine::RegistryIdentityCredential::validate_destination(
+                    &self.source.reference,
+                )
+                .map_err(|_| SafeCode::Validation)?;
+            }
+            _ => return Err(SafeCode::Validation),
+        }
+        Ok(())
+    }
+}
+
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Manifest {
@@ -117,6 +178,44 @@ pub fn read_config(path: &Path) -> Result<Config, SafeCode> {
             .map_or(true, |ip| ip.to_string() != *value)
     }) {
         return Err(SafeCode::Validation);
+    }
+    if let Some(sources) = &config.approved_oci_sources {
+        if sources.len() > 32 {
+            return Err(SafeCode::Validation);
+        }
+        let mut seen = BTreeSet::new();
+        for source in sources {
+            source.validate().map_err(|_| SafeCode::Validation)?;
+            smolbox_engine::ImagePullRequest {
+                reference: source.reference.clone(),
+                platform: source.platform.clone(),
+            }
+            .validate()
+            .map_err(|_| SafeCode::Validation)?;
+            if !seen.insert((&source.reference, &source.platform)) {
+                return Err(SafeCode::Validation);
+            }
+        }
+    }
+    if let Some(sources) = &config.approved_registry_sources {
+        if config.schema != 2 || sources.is_empty() || sources.len() > 32 {
+            return Err(SafeCode::Validation);
+        }
+        let mut seen = BTreeSet::new();
+        let mut policy = None;
+        for approval in sources {
+            approval.validate()?;
+            if !seen.insert((
+                &approval.source.reference,
+                &approval.source.platform,
+                &approval.source.content_sha256,
+                &approval.credential_ref,
+            )) || policy.is_some_and(|policy| policy != approval.cache_policy)
+            {
+                return Err(SafeCode::Validation);
+            }
+            policy = Some(approval.cache_policy);
+        }
     }
     for artifact in &config.approved_artifacts {
         if !Path::new(&artifact.path).is_absolute()
@@ -691,6 +790,152 @@ mod tests {
         assert!(open_file(&link).is_err());
         assert!(verify(&root.path().join("smolbox-port"), &"0".repeat(64)).is_err());
     }
+    #[test]
+    fn registry_catalog_keeps_tokens_out_and_has_exact_coherent_bounded_policy() {
+        let root = tempfile::tempdir().unwrap();
+        let path = root.path().join("config.json");
+        let base = serde_json::json!({"schema":2,"target_id":"test","generation":"ab".repeat(16),"allow_initialize":false,"package_manifest_sha256":"cd".repeat(32),"approved_artifacts":[]});
+        let approval = serde_json::json!({"source":{"reference":format!("registry.example/team/app@sha256:{}","a".repeat(64)),"platform":"linux/arm64","content_sha256":"b".repeat(64)},"max_bytes":1024,"cache_policy":{"max_bytes":4096,"max_files":2}});
+        let mut authenticated = approval.clone();
+        authenticated["credential_ref"] = serde_json::json!("tenant-read");
+        authenticated["token_realm"] = serde_json::json!("https://auth.example/exchange");
+        for entry in [&approval, &authenticated] {
+            let mut value = base.clone();
+            value["approved_registry_sources"] = serde_json::json!([entry]);
+            std::fs::write(&path, serde_json::to_vec(&value).unwrap()).unwrap();
+            let config = read_config(&path).ok().unwrap();
+            let selected = &config.approved_registry_sources.as_ref().unwrap()[0];
+            let source = smolbox_protocol::RegistrySource {
+                reference: selected.source.reference.clone(),
+                platform: selected.source.platform.clone(),
+                content_sha256: selected.source.content_sha256.clone(),
+            };
+            assert!(selected.matches(&source, selected.credential_ref.as_deref()));
+            assert!(!selected.matches(&source, Some("wrong-ref")));
+            let mut crossed = source;
+            crossed.content_sha256 = "c".repeat(64);
+            assert!(!selected.matches(&crossed, selected.credential_ref.as_deref()));
+            assert_eq!(serde_json::to_value(config).unwrap(), value);
+        }
+        let mut combined = base.clone();
+        combined["approved_registry_sources"] =
+            serde_json::json!([approval.clone(), authenticated.clone()]);
+        std::fs::write(&path, serde_json::to_vec(&combined).unwrap()).unwrap();
+        assert!(read_config(&path).is_ok());
+        let mut another = authenticated.clone();
+        another["credential_ref"] = serde_json::json!("tenant-other");
+        combined["approved_registry_sources"] = serde_json::json!([authenticated.clone(), another]);
+        std::fs::write(&path, serde_json::to_vec(&combined).unwrap()).unwrap();
+        assert!(read_config(&path).is_ok());
+        for (field, invalid) in [
+            ("identity_token", serde_json::json!("private")),
+            ("credential_ref", serde_json::json!("missing-realm")),
+            (
+                "token_realm",
+                serde_json::json!("https://auth.example/exchange"),
+            ),
+            ("max_bytes", serde_json::json!(0)),
+            (
+                "cache_policy",
+                serde_json::json!({"max_bytes":0,"max_files":2}),
+            ),
+        ] {
+            let mut entry = approval.clone();
+            entry[field] = invalid;
+            let mut value = base.clone();
+            value["approved_registry_sources"] = serde_json::json!([entry]);
+            std::fs::write(&path, serde_json::to_vec(&value).unwrap()).unwrap();
+            assert!(read_config(&path).is_err(), "{field}");
+        }
+        let mut different = approval.clone();
+        different["source"]["content_sha256"] = serde_json::json!("c".repeat(64));
+        different["cache_policy"]["max_files"] = serde_json::json!(3);
+        for entries in [
+            vec![],
+            vec![approval.clone(); 33],
+            vec![approval.clone(); 2],
+            vec![approval.clone(), different],
+        ] {
+            let mut value = base.clone();
+            value["approved_registry_sources"] = serde_json::json!(entries);
+            std::fs::write(&path, serde_json::to_vec(&value).unwrap()).unwrap();
+            assert!(read_config(&path).is_err());
+        }
+        let mut source = approval.clone();
+        source["source"]["identity_token"] = serde_json::json!("private");
+        let mut value = base.clone();
+        value["approved_registry_sources"] = serde_json::json!([source]);
+        std::fs::write(&path, serde_json::to_vec(&value).unwrap()).unwrap();
+        assert!(read_config(&path).is_err());
+        let mut private = authenticated.clone();
+        private["source"]["reference"] =
+            serde_json::json!(format!("127.0.0.1/team/app@sha256:{}", "a".repeat(64)));
+        let mut value = base.clone();
+        value["approved_registry_sources"] = serde_json::json!([private]);
+        std::fs::write(&path, serde_json::to_vec(&value).unwrap()).unwrap();
+        assert!(read_config(&path).is_err());
+        for (reference, realm) in [
+            ("..", "https://auth.example/exchange"),
+            ("safe", "http://auth.example/exchange"),
+            ("safe", "https://127.0.0.1/exchange"),
+        ] {
+            let mut entry = approval.clone();
+            entry["credential_ref"] = serde_json::json!(reference);
+            entry["token_realm"] = serde_json::json!(realm);
+            let mut value = base.clone();
+            value["approved_registry_sources"] = serde_json::json!([entry]);
+            std::fs::write(&path, serde_json::to_vec(&value).unwrap()).unwrap();
+            assert!(read_config(&path).is_err());
+        }
+        let mut value = base.clone();
+        value["schema"] = serde_json::json!(1);
+        value["approved_registry_sources"] = serde_json::json!([approval]);
+        std::fs::write(&path, serde_json::to_vec(&value).unwrap()).unwrap();
+        assert!(read_config(&path).is_err());
+    }
+
+    #[test]
+    fn oci_catalog_is_optional_exact_bounded_and_cannot_add_auth_or_tag_intent() {
+        let root = tempfile::tempdir().unwrap();
+        let path = root.path().join("config.json");
+        let base = serde_json::json!({"schema":2,"target_id":"test","generation":"ab".repeat(16),"allow_initialize":false,
+            "package_manifest_sha256":"cd".repeat(32),"approved_artifacts":[]});
+        let source = serde_json::json!({"reference":format!("registry.example/app@sha256:{}","a".repeat(64)),"platform":"linux/arm64"});
+        for catalog in [
+            None,
+            Some(serde_json::json!([])),
+            Some(serde_json::json!([source.clone()])),
+        ] {
+            let mut value = base.clone();
+            if let Some(catalog) = catalog {
+                value["approved_oci_sources"] = catalog;
+            }
+            std::fs::write(&path, serde_json::to_vec(&value).unwrap()).unwrap();
+            let config = read_config(&path).ok().unwrap();
+            if config.approved_oci_sources.is_none() {
+                assert_eq!(serde_json::to_value(config).unwrap(), base);
+            }
+        }
+        let mut auth = source.clone();
+        auth["auth"] = serde_json::json!("PRIVATE=discard");
+        let mut tag = source.clone();
+        tag["reference"] = serde_json::json!("registry.example/app:tag");
+        let mut bad_host = source.clone();
+        bad_host["reference"] = serde_json::json!(format!("reg/app@sha256:{}", "a".repeat(64)));
+        for entries in [
+            vec![source.clone(); 33],
+            vec![source.clone(); 2],
+            vec![auth],
+            vec![tag],
+            vec![bad_host],
+        ] {
+            let mut value = base.clone();
+            value["approved_oci_sources"] = serde_json::json!(entries);
+            std::fs::write(&path, serde_json::to_vec(&value).unwrap()).unwrap();
+            assert!(read_config(&path).is_err());
+        }
+    }
+
     #[test]
     fn unknown_config_fields_and_invalid_bindings_fail_without_engine_open() {
         let root = tempfile::tempdir().unwrap();

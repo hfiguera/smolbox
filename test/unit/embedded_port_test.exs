@@ -1,8 +1,9 @@
 defmodule SmolBox.Embedded.PortTest do
   use ExUnit.Case, async: false
+  alias SmolBox.{Backend, Error}
   alias SmolBox.Backend.Budget
+  alias SmolBox.Backend.Embedded, as: EmbeddedBackend
   alias SmolBox.Embedded.{Config, Health, Port, Protocol, Supervisor}
-  alias SmolBox.Error
   alias SmolBox.Test.EmbeddedPackage, as: Package
 
   defp package(options \\ []) do
@@ -59,6 +60,32 @@ defmodule SmolBox.Embedded.PortTest do
     assert :ok = Port.shutdown(pid)
     wait_until(fn -> match?({:ok, %{status: :stopped}}, Port.health(pid)) end)
     assert Enum.any?(Package.received(config), &(&1["type"] == "shutdown"))
+  end
+
+  test "parity quarantine preserves observations through Call without restoring work or readiness" do
+    config = package(protocol_major: 2, backend: true)
+    pid = owner(config)
+    {:ok, %{epoch: epoch}} = Port.health(pid)
+    {:ok, reference} = EmbeddedBackend.reference(config, pid)
+
+    assert {:ok, handle} =
+             Port.submit(pid, Package.command(config, "unavailable"), budget(), self())
+
+    assert_receive {:smolbox_embedded, ^handle, :accepted}, 1000
+    assert_receive {:smolbox_embedded, ^handle, {:terminal, outcome, nil}}, 1000
+    assert outcome["completion"] == "unknown"
+    wait_until(fn -> match?({:ok, %{status: :quarantined}}, Port.health(pid)) end)
+    assert {:ok, %SmolBox.Health{}} = Backend.invoke(reference, :health, [])
+
+    assert {:error, %Error{evidence: :not_dispatched}} =
+             Backend.invoke(reference, :readiness, [])
+
+    assert {:error, %Error{evidence: :not_dispatched}} =
+             Port.submit(pid, Package.command(config, "echo"), budget(), self())
+
+    assert {:ok, %{status: :quarantined, epoch: ^epoch}} = Port.health(pid)
+    assert Enum.count(Package.received(config), &Map.has_key?(&1, "launch")) == 1
+    assert :ok = Port.shutdown(pid)
   end
 
   test "supervision is explicit and mutations wait for exact domain reconciliation" do
@@ -241,6 +268,7 @@ defmodule SmolBox.Embedded.PortTest do
     refute_receive {:smolbox_embedded, ^handle, {:output, _, _}}, 50
   end
 
+  @tag :deferred_crash
   test "caller death cancels only its request and an independent observer retains terminal" do
     config = package()
     pid = owner(config)
@@ -267,6 +295,7 @@ defmodule SmolBox.Embedded.PortTest do
     assert :ok = Port.acknowledge(pid, other, 10)
   end
 
+  @tag :deferred_crash
   test "observer death drains unread output and releases only the finished subscription" do
     config = package(limits: [in_flight: 1])
     pid = owner(config)
@@ -289,6 +318,7 @@ defmodule SmolBox.Embedded.PortTest do
     assert {:ok, _next} = Port.submit(pid, Package.command(config, "hold"), budget(), self())
   end
 
+  @tag :deferred_crash
   test "helper loss retains unread output and restarts with a fresh epoch and no replay" do
     config = package()
     pid = owner(config)
@@ -384,6 +414,7 @@ defmodule SmolBox.Embedded.PortTest do
              Port.submit(pid, Package.command(config, "echo"), budget(), self())
   end
 
+  @tag :deferred_crash
   test "supervised owner death is observed once and its replacement must reconcile" do
     config = package()
     supervisor = start_supervised!({Supervisor, config})

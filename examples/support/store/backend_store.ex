@@ -1,7 +1,7 @@
 defmodule SmolBox.DurableHost.BackendStore do
   @moduledoc false
   alias SmolBox.DurableHost.Database
-  alias SmolBox.Store.{CodecMaterial, MachineOps, RecordOps}
+  alias SmolBox.Store.{CodecGrowth, CodecMaterial, CodecNativeSources, MachineOps, RecordOps}
 
   if Code.ensure_loaded?(SmolBox.Store.BackendAssignments) do
     alias SmolBox.Store.BackendAssignments
@@ -38,6 +38,8 @@ defmodule SmolBox.DurableHost.BackendStore do
       |> background_capabilities()
       |> streaming_capabilities()
       |> terminal_capabilities()
+      |> growth_capabilities()
+      |> source_capabilities()
     end
 
     if Code.ensure_loaded?(CodecMaterial) and
@@ -67,6 +69,21 @@ defmodule SmolBox.DurableHost.BackendStore do
         do: Map.put(capabilities, :native_terminal_sessions, CodecMaterial.terminal_sessions())
     else
       defp terminal_capabilities(capabilities), do: capabilities
+    end
+
+    if Code.ensure_loaded?(CodecGrowth) and function_exported?(CodecGrowth, :reader, 0) do
+      defp growth_capabilities(capabilities),
+        do: Map.put(capabilities, :native_disk_growth, CodecGrowth.reader())
+    else
+      defp growth_capabilities(capabilities), do: capabilities
+    end
+
+    if Code.ensure_loaded?(CodecNativeSources) and
+         function_exported?(CodecNativeSources, :reader, 0) do
+      defp source_capabilities(capabilities),
+        do: Map.put(capabilities, :native_sources, CodecNativeSources.reader())
+    else
+      defp source_capabilities(capabilities), do: capabilities
     end
 
     def reserve_execution(record, worker, name, lease, capacity, used, now, assignment),

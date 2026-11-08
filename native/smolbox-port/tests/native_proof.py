@@ -53,7 +53,8 @@ def capabilities(manifest):
         values = ['health', 'capacity', 'metrics', 'readiness', 'list', 'measurements'] + values
     for feature, operation in [('logs', 'logs'), ('background_exec', 'exec_background'),
                                ('buffered_exec', 'exec_buffered'), ('streaming_exec', 'exec_stream'),
-                               ('terminals', 'terminal_open')]:
+                               ('terminals', 'terminal_open'), ('disk_growth', 'qualify_growth'), ('disk_growth', 'inspect_growth'),
+                               ('disk_growth', 'expand_disks'), ('images', 'pull_image'), ('images', 'list_images')]:
         if features.get(feature) == 1:
             values.insert(0, operation)
     return values

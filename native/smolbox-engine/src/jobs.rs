@@ -8,6 +8,8 @@ pub const JOB_WORK_SLOTS: usize = 4;
 pub const JOB_CONTROL_SLOTS: usize = 2;
 pub const JOB_CHILDREN: usize = 4;
 pub const JOB_STAGING_BYTES: u64 = 64 * 1024 * 1024;
+/// Separate finite host artifact-download allowance; not guest disk authority.
+pub const JOB_REGISTRY_STAGING_BYTES: u64 = 32 * 1024 * 1024 * 1024;
 pub const JOB_METADATA_BYTES: u64 = 32 * 1024 * 1024;
 pub const JOB_DESCRIPTORS: usize = 32;
 pub const JOB_CONTROL_HEADROOM: usize = 8;
@@ -23,9 +25,114 @@ pub(crate) struct Demand {
     children: usize,
     descriptors: usize,
     staging: u64,
+    registry_staging: u64,
     metadata: u64,
 }
 impl Demand {
+    pub(crate) fn registry_download(bytes: u64) -> Result<Self> {
+        if bytes == 0 || bytes > JOB_REGISTRY_STAGING_BYTES {
+            return Err(Error::before(ErrorCode::Validation));
+        }
+        Ok(Self {
+            lane: Lane::Work,
+            children: 0,
+            descriptors: 16,
+            staging: 0,
+            registry_staging: bytes,
+            metadata: JOB_METADATA_BYTES,
+        })
+    }
+
+    pub(crate) fn oci_metadata() -> Self {
+        Self {
+            lane: Lane::Work,
+            children: 0,
+            descriptors: 12,
+            registry_staging: 0,
+            staging: 0,
+            metadata: JOB_METADATA_BYTES,
+        }
+    }
+
+    pub(crate) fn oci_start() -> Self {
+        Self {
+            lane: Lane::Work,
+            children: 2, // the enrolled VMM and the agent bootstrap worker
+            // Launch and bootstrap are sequential. Retained manager handles
+            // coexist with the bootstrap's 21-descriptor demand.
+            descriptors: 24,
+            registry_staging: 0,
+            staging: 1,
+            metadata: JOB_METADATA_BYTES,
+        }
+    }
+
+    pub(crate) fn oci_create() -> Self {
+        Self {
+            lane: Lane::Work,
+            children: 0,
+            descriptors: 12,
+            registry_staging: 0,
+            staging: 0,
+            metadata: JOB_METADATA_BYTES,
+        }
+    }
+
+    pub(crate) fn image_pull() -> Self {
+        Self {
+            lane: Lane::Work,
+            children: 1,
+            descriptors: 21,
+            registry_staging: 0,
+            staging: 1,
+            metadata: JOB_METADATA_BYTES,
+        }
+    }
+
+    pub(crate) fn images() -> Self {
+        Self {
+            lane: Lane::Work,
+            children: 1,
+            descriptors: 20,
+            registry_staging: 0,
+            staging: crate::images::IMAGE_OUTPUT_BYTES,
+            // Header payload, bounded projection, normalized SDK response and
+            // typed result coexist with relay/watch/collector stack headroom.
+            metadata: JOB_METADATA_BYTES,
+        }
+    }
+
+    pub(crate) fn growth_repair() -> Self {
+        Self {
+            lane: Lane::Work,
+            children: 0,
+            descriptors: 10,
+            registry_staging: 0,
+            staging: 0,
+            // Qualification loads/stages the bounded journal as well as disk
+            // scans. Reserve the whole metadata pool; control stays independent.
+            metadata: JOB_METADATA_BYTES,
+        }
+    }
+
+    pub(crate) fn growth(metadata: u64) -> Result<Self> {
+        if metadata == 0 || metadata > crate::growth::METADATA_BYTES {
+            return Err(Error::before(ErrorCode::Validation));
+        }
+        Ok(Self {
+            lane: Lane::Work,
+            children: 1,
+            // Parent/worker disk + directory descriptors, source flock, two
+            // spools, pipes, one backing-chain reader and worker stdio/scratch
+            // opens. Keep the separate
+            // control headroom available.
+            descriptors: 21,
+            registry_staging: 0,
+            staging: 1,
+            // Parser buffers plus owner-watch/retained-collector stack headroom.
+            metadata: metadata + 8 * 1024 * 1024 + crate::qcow_geometry::MEMORY_BYTES,
+        })
+    }
     pub(crate) fn terminal(options: &crate::TerminalOptions, metadata: u64) -> Result<Self> {
         options.validate()?;
         if metadata == 0 || metadata > crate::COMMAND_METADATA_BYTES {
@@ -35,6 +142,7 @@ impl Demand {
             lane: Lane::Work,
             children: 1,
             descriptors: 20,
+            registry_staging: 0,
             staging: options.total_input_bytes * 3,
             metadata: metadata + options.max_buffer_bytes * 4 + 8 * 1024 * 1024,
         })
@@ -47,6 +155,7 @@ impl Demand {
             lane: Lane::Work,
             children: 1,
             descriptors: 4,
+            registry_staging: 0,
             staging: bytes,
             metadata: 0,
         })
@@ -63,6 +172,7 @@ impl Demand {
             lane: Lane::Work,
             children: 1,
             descriptors: 6,
+            registry_staging: 0,
             staging: output,
             metadata,
         })
@@ -72,6 +182,7 @@ impl Demand {
             lane: Lane::Work,
             children: 0,
             descriptors: 4,
+            registry_staging: 0,
             staging: 0,
             metadata: 0,
         }
@@ -81,6 +192,7 @@ impl Demand {
             lane: Lane::Work,
             children: 0,
             descriptors: 2,
+            registry_staging: 0,
             staging: 0,
             metadata: crate::logs::LOG_MEMORY_BYTES,
         }
@@ -90,6 +202,7 @@ impl Demand {
             lane: Lane::Control,
             children: 0,
             descriptors: 4,
+            registry_staging: 0,
             staging: 0,
             metadata: 0,
         }
@@ -103,6 +216,7 @@ pub(crate) struct Counts {
     pub descriptors: usize,
     pub work_descriptors: usize,
     pub staging: u64,
+    pub registry_staging: u64,
     pub metadata: u64,
 }
 #[derive(Default)]
@@ -129,11 +243,14 @@ impl JobPool {
             .counts
             .lock()
             .map_err(|_| Error::before(ErrorCode::Native))?;
-        if !self.available() {
+        // Quarantine fences work, not truthful read-only observations. Control
+        // remains subject to its own slots, aggregate FDs and OS admission.
+        if !self.available() && matches!(demand.lane, Lane::Work) {
             return Err(Error::before(ErrorCode::State));
         }
         if demand.children > JOB_CHILDREN
             || demand.descriptors > JOB_DESCRIPTORS
+            || demand.registry_staging > JOB_REGISTRY_STAGING_BYTES
             || demand.staging > JOB_STAGING_BYTES
             || demand.metadata > JOB_METADATA_BYTES
         {
@@ -153,6 +270,7 @@ impl JobPool {
                     Lane::Work => demand.descriptors,
                     Lane::Control => 0,
                 },
+            registry_staging: counts.registry_staging + demand.registry_staging,
             staging: counts.staging + demand.staging,
             metadata: counts.metadata + demand.metadata,
         };
@@ -161,6 +279,7 @@ impl JobPool {
             || next.children > JOB_CHILDREN
             || next.descriptors > JOB_DESCRIPTORS
             || next.work_descriptors > JOB_DESCRIPTORS - JOB_CONTROL_HEADROOM
+            || next.registry_staging > JOB_REGISTRY_STAGING_BYTES
             || next.staging > JOB_STAGING_BYTES
             || next.metadata > JOB_METADATA_BYTES
         {
@@ -195,6 +314,7 @@ impl Drop for JobLease {
         }
         counts.children -= self.demand.children;
         counts.descriptors -= self.demand.descriptors;
+        counts.registry_staging -= self.demand.registry_staging;
         counts.staging -= self.demand.staging;
         counts.metadata -= self.demand.metadata;
     }
@@ -226,6 +346,64 @@ fn fd_admission(reserved: usize) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn registry_staging_is_separate_finite_and_retained_until_job_returns() {
+        let pool = JobPool::default();
+        assert!(Demand::registry_download(0).is_err());
+        assert!(Demand::registry_download(JOB_REGISTRY_STAGING_BYTES + 1).is_err());
+        let lease = pool
+            .acquire(Demand::registry_download(JOB_REGISTRY_STAGING_BYTES).unwrap())
+            .unwrap();
+        assert_eq!(pool.counts().registry_staging, JOB_REGISTRY_STAGING_BYTES);
+        assert_eq!(pool.counts().staging, 0);
+        assert!(pool.acquire(Demand::registry_download(1).unwrap()).is_err());
+        let control = pool.acquire(Demand::observation()).unwrap();
+        let second = pool.acquire(Demand::observation()).unwrap();
+        pool.quarantine();
+        assert_eq!(pool.counts().registry_staging, JOB_REGISTRY_STAGING_BYTES);
+        drop(lease);
+        assert_eq!(pool.counts().registry_staging, 0);
+        assert_eq!(pool.counts().control, 2);
+        drop((control, second));
+        assert_eq!(pool.counts(), Counts::default());
+    }
+
+    #[test]
+    fn growth_qualification_reserves_journal_memory_without_a_child_or_control_starvation() {
+        let pool = JobPool::default();
+        let repair = pool.acquire(Demand::growth_repair()).unwrap();
+        assert_eq!(pool.counts().metadata, JOB_METADATA_BYTES);
+        assert_eq!(pool.counts().children, 0);
+        assert_eq!(pool.counts().staging, 0);
+        assert!(pool.acquire(Demand::command(1, 1).unwrap()).is_err());
+        let first = pool.acquire(Demand::observation()).unwrap();
+        let second = pool.acquire(Demand::observation()).unwrap();
+        assert_eq!(pool.counts().control, 2);
+        drop((repair, first, second));
+        assert_eq!(pool.counts(), Counts::default());
+    }
+    #[test]
+    fn growth_reserves_geometry_child_and_memory_while_control_stays_available() {
+        let pool = JobPool::default();
+        assert!(Demand::growth(0).is_err());
+        assert!(Demand::growth(crate::growth::METADATA_BYTES + 1).is_err());
+        let growth = pool
+            .acquire(Demand::growth(crate::growth::METADATA_BYTES).unwrap())
+            .unwrap();
+        assert_eq!(pool.counts().children, 1);
+        assert_eq!(pool.counts().work_descriptors, 21);
+        assert_eq!(
+            pool.counts().metadata,
+            crate::growth::METADATA_BYTES + 8 * 1024 * 1024 + crate::qcow_geometry::MEMORY_BYTES
+        );
+        assert!(pool.acquire(Demand::growth(1).unwrap()).is_err());
+        let observation = pool.acquire(Demand::observation()).unwrap();
+        let second = pool.acquire(Demand::observation()).unwrap();
+        assert_eq!(pool.counts().control, 2);
+        drop((growth, observation, second));
+        assert_eq!(pool.counts(), Counts::default());
+    }
     #[test]
     fn terminal_reserves_peak_memory_child_and_descriptors_without_starving_observations() {
         let options = crate::TerminalOptions {
@@ -338,12 +516,53 @@ mod tests {
                 children: 3,
                 descriptors: 24,
                 work_descriptors: 16,
+                registry_staging: 0,
                 staging: 48 * 1024 * 1024,
                 metadata: 0,
             }
         );
         drop(leases);
         drop(control);
+        assert_eq!(pool.counts(), Counts::default());
+    }
+    #[test]
+    fn pull_reserves_worker_projection_resources_without_consuming_control_capacity() {
+        let pool = JobPool::default();
+        let pull = pool.acquire(Demand::image_pull()).unwrap();
+        assert_eq!(pool.counts().metadata, JOB_METADATA_BYTES);
+        assert_eq!(pool.counts().children, 1);
+        assert_eq!(pool.counts().staging, 1);
+        assert_eq!(
+            pool.acquire(Demand::image_pull()).err().unwrap().code,
+            ErrorCode::Admission
+        );
+        let controls = [
+            pool.acquire(Demand::observation()).unwrap(),
+            pool.acquire(Demand::observation()).unwrap(),
+        ];
+        assert_eq!(pool.counts().control, 2);
+        drop(pull);
+        drop(controls);
+        assert_eq!(pool.counts(), Counts::default());
+    }
+    #[test]
+    fn oci_creation_reserves_metadata_and_descriptors_before_sdk_entry() {
+        let pool = JobPool::default();
+        let creation = pool.acquire(Demand::oci_create()).unwrap();
+        assert_eq!(pool.counts().metadata, JOB_METADATA_BYTES);
+        assert_eq!(pool.counts().children, 0);
+        assert_eq!(pool.counts().staging, 0);
+        assert_eq!(
+            pool.acquire(Demand::oci_create()).err().unwrap().code,
+            ErrorCode::Admission
+        );
+        let controls = [
+            pool.acquire(Demand::observation()).unwrap(),
+            pool.acquire(Demand::observation()).unwrap(),
+        ];
+        assert_eq!(pool.counts().control, 2);
+        drop(creation);
+        drop(controls);
         assert_eq!(pool.counts(), Counts::default());
     }
     #[test]
@@ -358,10 +577,21 @@ mod tests {
         assert_eq!(pool.counts().children, 1);
         assert_eq!(pool.counts().staging, 16 * 1024 * 1024);
         assert_eq!(
-            pool.acquire(Demand::observation()).err().unwrap().code,
+            pool.acquire(Demand::streaming()).err().unwrap().code,
             ErrorCode::State
         );
+        let controls = [
+            pool.acquire(Demand::observation()).unwrap(),
+            pool.acquire(Demand::observation()).unwrap(),
+        ];
+        assert_eq!(
+            pool.acquire(Demand::observation()).err().unwrap().code,
+            ErrorCode::Admission
+        );
         drop(lease);
+        assert_eq!(pool.counts().work, 0);
+        assert_eq!(pool.counts().control, 2);
+        drop(controls);
         assert_eq!(pool.counts(), Counts::default());
         assert!(!pool.available());
     }
@@ -373,6 +603,7 @@ mod tests {
             lane: Lane::Work,
             children: JOB_CHILDREN + 1,
             descriptors: 1,
+            registry_staging: 0,
             staging: 0,
             metadata: 0,
         };

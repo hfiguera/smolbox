@@ -77,7 +77,8 @@ defmodule SmolBox.Backend do
     branch_release: 2,
     observe_health: 2,
     qualify_creation: 2,
-    inspect_creation: 1
+    inspect_creation: 1,
+    qualify_growth: 2
   ]
 
   @doc false

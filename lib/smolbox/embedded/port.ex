@@ -11,16 +11,19 @@ defmodule SmolBox.Embedded.Port do
     CreationFeatures,
     CreationPayload,
     Frame,
+    ImageContract,
     JSON,
     Launch,
+    NativeSource,
     Outbox,
     Protocol,
+    RegistryContract,
     Request,
     Shape,
     TerminalContract
   }
 
-  alias SmolBox.{Error, Validation}
+  alias SmolBox.{Error, Source, Validation}
 
   @impl true
   def start_link(config, options \\ []) do
@@ -421,10 +424,11 @@ defmodule SmolBox.Embedded.Port do
     remaining = min(deadline - now(), min(budget.timeout_ms, state.config.budget.timeout_ms))
 
     cond do
-      state.status not in [:ready, :reconciling] ->
+      not admission_status?(state, operation) ->
         failure(:transport)
 
-      state.status == :reconciling and operation["operation"] not in ~w(inspect inspect_creation) ->
+      state.status == :reconciling and
+          operation["operation"] not in ~w(inspect inspect_creation inspect_oci_creation inspect_registry_creation inspect_growth qualify_growth) ->
         failure(:transport)
 
       remaining <= 0 ->
@@ -444,6 +448,15 @@ defmodule SmolBox.Embedded.Port do
         register(state, operation, budget, observer, caller, remaining)
     end
   end
+
+  defp admission_status?(state, operation),
+    do: state.status in [:ready, :reconciling] or quarantined_observation?(state, operation)
+
+  defp quarantined_observation?(state, operation),
+    do:
+      state.status == :quarantined and is_port(state.port) and not state.closing and
+        not state.shutting_down and state.channel != nil and state.channel.major == 2 and
+        state.channel.unavailable and Request.observation?(operation)
 
   defp register(state, operation, budget, observer, caller, remaining) do
     limits = state.config.limits
@@ -490,7 +503,7 @@ defmodule SmolBox.Embedded.Port do
         caller: caller,
         observer: observer,
         refs: refs,
-        operation: operation,
+        operation: RegistryContract.sanitize(operation),
         deadline: now() + remaining,
         sent: false,
         notified: false,
@@ -523,22 +536,44 @@ defmodule SmolBox.Embedded.Port do
        when operation in ~w(create inspect_creation) do
     create["artifact"] in Enum.map(config.artifacts, &Launch.artifact/1) and
       CreationFeatures.approved?(create["features"], config) and
-      Enum.any?(config.profiles, fn profile ->
-        Map.get(create, "features", %{})
-        |> Map.get("network", %{"enabled" => false, "hosts" => [], "cidrs" => []}) ==
-          CreationFeatures.network(profile.network) and
-          create["resources"] == %{
-            "cpus" => profile.cpus,
-            "memory_mib" => profile.memory_mb,
-            "storage_gib" => profile.storage_gb,
-            "overlay_gib" => profile.overlay_gb
-          }
-      end)
+      profile_approved?(config, create)
   end
+
+  defp approved?(config, %{"operation" => name, "create" => create})
+       when name in ~w(create_oci inspect_oci_creation),
+       do: source_approved?(config, create)
+
+  defp approved?(config, %{"operation" => name, "create" => create})
+       when name in ~w(create_registry_prepared inspect_registry_creation),
+       do:
+         Features.supports?(config, :remote_sources) and NativeSource.registry_creation?(create) and
+           create["source"] in Enum.map(config.sources, &Source.artifact/1) and
+           CreationFeatures.approved?(create["features"], config) and
+           profile_approved?(config, create)
+
+  defp approved?(config, %{"operation" => "qualify_oci_creation"} = request),
+    do: source_approved?(config, request)
+
+  defp approved?(config, %{"operation" => "qualify_registry_creation"} = request),
+    do:
+      Features.supports?(config, :remote_sources) and
+        NativeSource.registry_artifact?(request["source"]) and
+        request["source"] in Enum.map(config.sources, &Source.artifact/1) and
+        CreationFeatures.approved?(request["features"], config) and
+        profile_approved?(config, request)
+
+  defp approved?(config, %{"operation" => "start_oci", "source" => source}),
+    do:
+      Features.supports?(config, :remote_sources) and NativeSource.artifact?(source) and
+        source in Enum.map(config.sources, &Source.artifact/1)
 
   defp approved?(config, %{"operation" => name})
        when name in ~w(health capacity metrics readiness list measurements),
        do: Features.supports?(config, :observability)
+
+  defp approved?(config, %{"operation" => name})
+       when name in ~w(expand_disks inspect_growth qualify_growth),
+       do: Features.supports?(config, :disk_growth)
 
   defp approved?(config, %{"operation" => "qualify_creation"} = request),
     do: approved?(config, %{"operation" => "create", "create" => request})
@@ -555,9 +590,47 @@ defmodule SmolBox.Embedded.Port do
   defp approved?(config, %{"operation" => "terminal_open"}),
     do: Features.supports?(config, :terminals)
 
+  defp approved?(config, %{"operation" => "prepare_artifact", "source" => source} = request),
+    do:
+      Features.supports?(config, :remote_sources) and
+        Enum.any?(config.sources, fn approved ->
+          approved.kind == :registry and approved.credential_ref == request["credential_ref"] and
+            RegistryContract.source(approved) == source
+        end)
+
+  defp approved?(config, %{"operation" => "pull_image", "source" => source}),
+    do:
+      Features.supports?(config, :images) and
+        Enum.any?(config.sources, fn approved ->
+          approved.kind == :oci and ImageContract.source(approved) == source
+        end)
+
+  defp approved?(config, %{"operation" => "list_images"}), do: Features.supports?(config, :images)
+
   defp approved?(config, %{"operation" => "logs"}), do: Features.supports?(config, :logs)
 
   defp approved?(_config, _operation), do: true
+
+  defp source_approved?(config, request),
+    do:
+      Features.supports?(config, :remote_sources) and NativeSource.artifact?(request["source"]) and
+        request["source"] in Enum.map(config.sources, &Source.artifact/1) and
+        CreationFeatures.approved?(request["features"], config) and
+        profile_approved?(config, request)
+
+  defp profile_approved?(config, create) do
+    Enum.any?(config.profiles, fn profile ->
+      Map.get(create, "features", %{})
+      |> Map.get("network", %{"enabled" => false, "hosts" => [], "cidrs" => []}) ==
+        CreationFeatures.network(profile.network) and
+        create["resources"] == %{
+          "cpus" => profile.cpus,
+          "memory_mib" => profile.memory_mb,
+          "storage_gib" => profile.storage_gb,
+          "overlay_gib" => profile.overlay_gb
+        }
+    end)
+  end
 
   defp receive_body(%{status: :handshaking} = state, body) do
     with {:ok, %{"type" => "hello", "hello" => hello}} <-

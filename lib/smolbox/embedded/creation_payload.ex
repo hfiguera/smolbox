@@ -1,6 +1,7 @@
 defmodule SmolBox.Embedded.CreationPayload do
   @moduledoc false
   alias SmolBox.Embedded.{Config, CreationFeatures, JSON}
+  import SmolBox.Embedded.PayloadFields, only: [strings: 1, string: 1, optional: 1]
   @maximum 655_360
   @chunk 65_536
 
@@ -41,12 +42,13 @@ defmodule SmolBox.Embedded.CreationPayload do
   end
 
   defp pack_operation(%{"operation" => name, "create" => create} = operation)
-       when name in ~w(create inspect_creation) do
+       when name in ~w(create inspect_creation create_oci inspect_oci_creation create_registry_prepared inspect_registry_creation) do
     with {:ok, value} <- pack_fields(create), do: {:ok, %{operation | "create" => value}}
   end
 
-  defp pack_operation(%{"operation" => "qualify_creation"} = operation),
-    do: pack_fields(operation)
+  defp pack_operation(%{"operation" => name} = operation)
+       when name in ~w(qualify_creation qualify_oci_creation qualify_registry_creation),
+       do: pack_fields(operation)
 
   defp pack_operation(operation), do: {:ok, operation}
 
@@ -64,12 +66,8 @@ defmodule SmolBox.Embedded.CreationPayload do
 
   defp pack_fields(fields), do: {:ok, fields}
 
-  defp strings(values), do: [<<length(values)::unsigned-big-16>>, Enum.map(values, &string/1)]
-  defp string(value), do: [<<byte_size(value)::unsigned-big-32>>, value]
   defp flag(true), do: <<1>>
   defp flag(false), do: <<0>>
-  defp optional(nil), do: <<0>>
-  defp optional(value), do: [<<1>>, string(value)]
   defp workload(nil), do: <<0>>
 
   defp workload(value) do

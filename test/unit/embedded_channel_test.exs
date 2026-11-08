@@ -75,6 +75,19 @@ defmodule SmolBox.Embedded.ChannelTest do
     assert c.unavailable and c.pending == %{}
   end
 
+  test "parity unavailability permits only bounded observation shapes on the same epoch" do
+    c = %{channel() | major: 2, minor: 0}
+
+    assert {:ok, c, :unavailable} =
+             Channel.receive_message(c, %{"type" => "unavailable", "epoch" => c.epoch})
+
+    assert {:ok, 1, observed} = Channel.register(c, %{"operation" => "health"}, 0, 0)
+    assert observed.unavailable and observed.epoch == c.epoch
+    assert :error = Channel.register(c, operation(), 10, 2)
+    assert :error = Channel.register(c, %{"operation" => "health", "extra" => 1}, 0, 0)
+    assert :error = Channel.register(%{c | major: 1, minor: 4}, %{"operation" => "health"}, 0, 0)
+  end
+
   test "intent presence cannot stream, mint a receipt or satisfy a command" do
     receipt = operation()["receipt"]
 

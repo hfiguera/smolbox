@@ -337,3 +337,19 @@ have no guest Exit. Background/file/command results cannot satisfy terminal
 completion. Uncertainty may preserve observed Exit without qualifying success.
 Live bridge routing, native reader/store admission and platform qualification
 remain pending; crash validation stays deferred.
+
+### Optional growth and explicit qualification
+
+A future disk_growth:1 descriptor binds ExpandDisks/Grown, read-only
+InspectGrowth/GrowthPresence and explicit QualifyGrowth/GrowthQualified together.
+The current shipping descriptor excludes them. Growth messages require protocol 2,
+the exact receipt/operation ID/nullable request/prior sizes and canonical transition
+proof; success requires stopped target resources and no PID. ExpandDisks permits
+at most 600 seconds; lookup and qualification permit at most 30 seconds.
+QualifyGrowth additionally requires quiesced:true. Its result cannot complete an
+ExpandDisks request or imply a known original SDK outcome. Inspection never writes
+qualification evidence. No stream/upload is valid for these messages, and legacy
+majors, wrong/crossed results, geometry/proof mismatches and duplicates reject.
+Qualification remains subject to work admission/fences even after an explicit
+owner quiesce; it is not a quarantined observation. Public setup/qualification
+acceptance and crash qualification remain separate gates.
