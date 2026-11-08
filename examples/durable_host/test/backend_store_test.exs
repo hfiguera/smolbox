@@ -224,12 +224,10 @@ defmodule SmolBox.DurableHost.BackendStoreTest do
     """
     [path] = System.argv()
     {partition, key, bytes} = :erlang.binary_to_term(File.read!(path), [:safe])
-    Application.put_env(:smolbox_durable_host, SmolBox.DurableHost.Repo,
-      socket_dir: System.fetch_env!("SMOLBOX_DATABASE_SOCKET_DIR"),
-      port: String.to_integer(System.fetch_env!("SMOLBOX_DATABASE_PORT")),
-      username: System.get_env("SMOLBOX_DATABASE_USER", "smolbox"),
-      database: System.get_env("SMOLBOX_DATABASE_NAME", "smolbox_contract"),
-      pool_size: 1, log: false)
+    app = :smolbox_durable_host
+    repo = SmolBox.DurableHost.Repo
+    config = Config.Reader.read!("config/runtime.exs", env: :test)
+    Application.put_env(app, repo, Keyword.merge(config[app][repo], pool_size: 1, log: false))
     {:ok, _} = Application.ensure_all_started(:smolbox_durable_host)
     {:ok, expected} = SmolBox.Store.Codec.decode(bytes)
     {:ok, store} = SmolBox.DurableHost.Store.new(SmolBox.DurableHost.Repo, partition, key)
