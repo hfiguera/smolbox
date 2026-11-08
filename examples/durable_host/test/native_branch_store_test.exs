@@ -118,7 +118,7 @@ defmodule SmolBox.DurableHost.NativeBranchStoreTest do
       assert {:error, :injected} =
                Repo.transact(fn ->
                  assert {:ok, _} =
-                          NativeReleasedBranchCleanupContract.accept(
+                          NativeBranchDeletionActionContract.accept(
                             Store,
                             store,
                             child,
@@ -133,7 +133,7 @@ defmodule SmolBox.DurableHost.NativeBranchStoreTest do
       assert {:ok, ^usage} = Store.usage(store, parent.worker_id)
 
       assert {:ok, pending} =
-               NativeReleasedBranchCleanupContract.accept(
+               NativeBranchDeletionActionContract.accept(
                  Store,
                  store,
                  child,
@@ -149,7 +149,7 @@ defmodule SmolBox.DurableHost.NativeBranchStoreTest do
       assert {:error, :injected} =
                Repo.transact(fn ->
                  assert {:ok, _} =
-                          NativeReleasedBranchCleanupContract.finish(
+                          NativeBranchDeletionActionContract.finish(
                             Store,
                             store,
                             pending,
@@ -189,7 +189,7 @@ defmodule SmolBox.DurableHost.NativeBranchStoreTest do
       assert {:error, :injected} =
                Repo.transact(fn ->
                  assert {:ok, _} =
-                          NativeReleasedBranchContinuationContract.accept(
+                          NativeBranchDeletionActionContract.accept(
                             Store,
                             store,
                             child,
@@ -204,7 +204,7 @@ defmodule SmolBox.DurableHost.NativeBranchStoreTest do
       assert {:ok, ^usage} = Store.usage(store, parent.worker_id)
 
       assert {:ok, pending} =
-               NativeReleasedBranchContinuationContract.accept(
+               NativeBranchDeletionActionContract.accept(
                  Store,
                  store,
                  child,
@@ -220,7 +220,7 @@ defmodule SmolBox.DurableHost.NativeBranchStoreTest do
       assert {:error, :injected} =
                Repo.transact(fn ->
                  assert {:ok, _} =
-                          NativeReleasedBranchContinuationContract.finish(
+                          NativeBranchDeletionActionContract.finish(
                             Store,
                             store,
                             pending,

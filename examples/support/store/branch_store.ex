@@ -52,11 +52,11 @@ defmodule SmolBox.DurableHost.BranchStore do
              do: BranchOps.release_storage(p, c, proof, now)
       end
     else
-      def run(_context, :branch_retire, [_, _, _, _, _]), do: unsupported()
-      def run(_context, :branch_backing_accept, [_, _, _, _, _, _]), do: unsupported()
-      def run(_context, :branch_release_storage, [_, _, _, _, _]), do: unsupported()
+      def run(_context, operation, [_, _, _, _, _])
+          when operation in [:branch_retire, :branch_release_storage],
+          do: {:error, %SmolBox.Error{category: :unsupported_capability, operation: :store}}
 
-      defp unsupported,
+      def run(_context, :branch_backing_accept, [_, _, _, _, _, _]),
         do: {:error, %SmolBox.Error{category: :unsupported_capability, operation: :store}}
     end
 
