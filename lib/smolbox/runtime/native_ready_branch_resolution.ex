@@ -42,7 +42,12 @@ defmodule SmolBox.Runtime.NativeReadyBranchResolution do
          %{
            branch: %{
              state: :unknown,
-             native_authority: %{completion: nil, release: nil, disposal: nil}
+             native_authority: %{
+               completion: nil,
+               release: nil,
+               disposal: nil,
+               partial_collection: nil
+             }
            }
          } = child
        ),

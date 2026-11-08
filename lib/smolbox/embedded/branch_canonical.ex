@@ -21,6 +21,8 @@ defmodule SmolBox.Embedded.BranchCanonical do
          "initial_release" => :release_request
        }},
     initial_retirement: {~w(schema intent proof_sha256), %{"intent" => :intent}},
+    partial_absence_request:
+      {~w(disposal operation_id request_sha256 quiesced), %{"disposal" => :partial_disposal}},
     unbooted_absence_request:
       {~w(disposal operation_id request_sha256 quiesced), %{"disposal" => :unbooted_disposal}},
     unbooted_disposal_candidate:
@@ -33,6 +35,24 @@ defmodule SmolBox.Embedded.BranchCanonical do
          "creation" => :creation_request,
          "request" => :unbooted_disposal_intent,
          "publication" => :publication
+       }},
+    partial_collection_request:
+      {~w(creation operation_id request_sha256 quiesced), %{"creation" => :creation_request}},
+    partial_collection:
+      {~w(schema creation_sha256 publication_sha256 operation_id request_sha256 boot_sha256 collection_sha256 proof_sha256),
+       %{}},
+    partial_cleanup_request:
+      {~w(disposal_request operation_id request_sha256 quiesced),
+       %{"disposal_request" => :partial_disposal_request}},
+    partial_disposal_request:
+      {~w(collection_request collection operation_id request_sha256 quiesced),
+       %{"collection_request" => :partial_collection_request, "collection" => :partial_collection}},
+    partial_disposal:
+      {~w(schema completion request publication release disposal_sha256 proof_sha256),
+       %{
+         "request" => :partial_disposal_request,
+         "publication" => :publication,
+         "release" => :child_release
        }},
     release_request: {~w(operation_id request_sha256), %{}},
     plan:

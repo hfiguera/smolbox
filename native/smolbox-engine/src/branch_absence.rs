@@ -1,6 +1,10 @@
 //! Positive child absence under original completed branch authority. This is a
 //! fresh fenced observation, never SDK deletion or backing/dependency retirement.
+mod partial;
 mod unbooted;
+pub use partial::{
+    PartialBranchChildAbsence, PartialBranchChildAbsenceRequest, PARTIAL_BRANCH_ABSENCE_BYTES,
+};
 pub use unbooted::{
     UnbootedBranchChildAbsence, UnbootedBranchChildAbsenceRequest, UNBOOTED_BRANCH_ABSENCE_BYTES,
 };

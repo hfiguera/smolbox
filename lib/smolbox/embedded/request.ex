@@ -15,6 +15,11 @@ defmodule SmolBox.Embedded.Request do
     ImageContract,
     MountContract,
     NativeSource,
+    PartialBranchChildAbsence,
+    PartialBranchBackingRelease,
+    PartialBranchCollection,
+    PartialBranchDisposal,
+    PartialBranchDisposalCleanup,
     PreparedBranchRetirement,
     RegistryContract,
     ReleasedBranchDeletionCleanup,
@@ -33,6 +38,9 @@ defmodule SmolBox.Embedded.Request do
 
   @lifecycle ~w(inspect start stop delete)
 
+  def observation?(%{"operation" => "qualify_partial_branch_child_absence"} = request),
+    do: valid?(request, 1, 2)
+
   def observation?(%{"operation" => "qualify_unbooted_branch_child_absence"} = request),
     do: valid?(request, 1, 2)
 
@@ -46,7 +54,7 @@ defmodule SmolBox.Embedded.Request do
   def observation?(_request), do: false
 
   def control?(%{"operation" => name} = request)
-      when name in ~w(resolve_ready_branch_completion inspect_unbooted_branch_disposal dispose_unbooted_branch resolve_unbooted_branch_disposal release_unbooted_branch_backing),
+      when name in ~w(resolve_ready_branch_completion inspect_unbooted_branch_disposal dispose_unbooted_branch resolve_unbooted_branch_disposal release_unbooted_branch_backing release_partial_branch_backing),
       do: valid?(request, 1, 2)
 
   def control?(%{"operation" => "retire_prepared_branch"} = request),
@@ -60,6 +68,13 @@ defmodule SmolBox.Embedded.Request do
     do: valid?(request, 1, 2)
 
   def control?(%{"operation" => "cleanup_released_branch_deletion"} = request),
+    do: valid?(request, 1, 2)
+
+  def control?(%{"operation" => name} = request)
+      when name in ~w(dispose_partial_branch resolve_partial_branch_disposal qualify_partial_branch_cleanup cleanup_partial_branch_disposal resolve_partial_branch_cleanup),
+      do: valid?(request, 1, 2)
+
+  def control?(%{"operation" => "collect_partial_branch"} = request),
     do: valid?(request, 1, 2)
 
   def control?(%{"operation" => "collect_branch_deletion"} = request),
@@ -80,11 +95,14 @@ defmodule SmolBox.Embedded.Request do
 
   def control?(request), do: observation?(request)
 
+  def reconciliation?(%{"operation" => "qualify_partial_branch_child_absence"} = request),
+    do: valid?(request, 1, 2)
+
   def reconciliation?(%{"operation" => "qualify_unbooted_branch_child_absence"} = request),
     do: valid?(request, 1, 2)
 
   def reconciliation?(%{"operation" => name} = request)
-      when name in ~w(resolve_ready_branch_completion inspect_unbooted_branch_disposal dispose_unbooted_branch resolve_unbooted_branch_disposal release_unbooted_branch_backing),
+      when name in ~w(resolve_ready_branch_completion inspect_unbooted_branch_disposal dispose_unbooted_branch resolve_unbooted_branch_disposal release_unbooted_branch_backing release_partial_branch_backing),
       do: valid?(request, 1, 2)
 
   def reconciliation?(%{"operation" => "retire_prepared_branch"} = request),
@@ -107,6 +125,13 @@ defmodule SmolBox.Embedded.Request do
     do: valid?(request, 1, 2)
 
   def reconciliation?(%{"operation" => "cleanup_released_branch_deletion"} = request),
+    do: valid?(request, 1, 2)
+
+  def reconciliation?(%{"operation" => name} = request)
+      when name in ~w(dispose_partial_branch resolve_partial_branch_disposal qualify_partial_branch_cleanup cleanup_partial_branch_disposal resolve_partial_branch_cleanup),
+      do: valid?(request, 1, 2)
+
+  def reconciliation?(%{"operation" => "collect_partial_branch"} = request),
     do: valid?(request, 1, 2)
 
   def reconciliation?(%{"operation" => "collect_branch_deletion"} = request),
@@ -140,6 +165,9 @@ defmodule SmolBox.Embedded.Request do
 
   def command_valid?(command), do: command?(command)
 
+  def receipt(%{"operation" => "qualify_partial_branch_child_absence", "request" => request}),
+    do: get_in(request, ~w(disposal request collection_request creation source))
+
   def receipt(%{"operation" => "qualify_unbooted_branch_child_absence", "request" => request}),
     do: get_in(request, ~w(disposal creation source))
 
@@ -148,6 +176,9 @@ defmodule SmolBox.Embedded.Request do
       do: get_in(request, ~w(creation source))
 
   def receipt(%{"operation" => "release_unbooted_branch_backing", "request" => request}),
+    do: request["child"]
+
+  def receipt(%{"operation" => "release_partial_branch_backing", "request" => request}),
     do: request["child"]
 
   def receipt(%{"operation" => "retire_prepared_branch", "request" => request}),
@@ -160,6 +191,17 @@ defmodule SmolBox.Embedded.Request do
   def receipt(%{"operation" => name, "request" => request})
       when name in ~w(qualify_branch_child_absence release_branch_backing collect_branch_deletion cleanup_released_branch_deletion continue_released_branch_deletion resolve_released_branch_deletion resolve_held_branch_deletion continue_held_branch_deletion cleanup_held_branch_deletion),
       do: request["child"]
+
+  def receipt(%{"operation" => name, "request" => request})
+      when name in ~w(dispose_partial_branch resolve_partial_branch_disposal qualify_partial_branch_cleanup),
+      do: get_in(request, ~w(collection_request creation source))
+
+  def receipt(%{"operation" => name, "request" => request})
+      when name in ~w(cleanup_partial_branch_disposal resolve_partial_branch_cleanup),
+      do: get_in(request, ~w(disposal_request collection_request creation source))
+
+  def receipt(%{"operation" => "collect_partial_branch", "request" => request}),
+    do: get_in(request, ~w(creation source))
 
   def receipt(operation), do: operation["receipt"]
 
@@ -189,6 +231,16 @@ defmodule SmolBox.Embedded.Request do
         request[key] != nil and request[key] > previous[key]
       end)
   end
+
+  defp operation?(
+         %{"operation" => "qualify_partial_branch_child_absence", "request" => request} =
+           operation,
+         budget,
+         2
+       ),
+       do:
+         Shape.keys?(operation, ~w(operation request)) and
+           PartialBranchChildAbsence.request?(request) and budget <= 30_000
 
   defp operation?(
          %{"operation" => "qualify_unbooted_branch_child_absence", "request" => request} =
@@ -229,6 +281,15 @@ defmodule SmolBox.Embedded.Request do
            UnbootedBranchBackingRelease.request?(request) and budget <= 30_000
 
   defp operation?(
+         %{"operation" => "release_partial_branch_backing", "request" => request} = operation,
+         budget,
+         2
+       ),
+       do:
+         Shape.keys?(operation, ~w(operation request)) and
+           PartialBranchBackingRelease.request?(request) and budget <= 30_000
+
+  defp operation?(
          %{"operation" => "retire_prepared_branch", "request" => request} = operation,
          budget,
          2
@@ -263,6 +324,32 @@ defmodule SmolBox.Embedded.Request do
        do:
          Shape.keys?(operation, ~w(operation request)) and
            ReleasedBranchDeletionCleanup.request?(request) and budget <= 30_000
+
+  defp operation?(%{"operation" => name, "request" => request} = operation, budget, 2)
+       when name in ~w(dispose_partial_branch resolve_partial_branch_disposal qualify_partial_branch_cleanup),
+       do:
+         Shape.keys?(operation, ~w(operation request)) and
+           PartialBranchDisposal.request?(request) and budget <= 30_000
+
+  defp operation?(
+         %{"operation" => name, "request" => request} = operation,
+         budget,
+         2
+       )
+       when name in ~w(cleanup_partial_branch_disposal resolve_partial_branch_cleanup),
+       do:
+         Shape.keys?(operation, ~w(operation request)) and
+           PartialBranchDisposalCleanup.request?(request) and
+           budget <= 30_000
+
+  defp operation?(
+         %{"operation" => "collect_partial_branch", "request" => request} = operation,
+         budget,
+         2
+       ),
+       do:
+         Shape.keys?(operation, ~w(operation request)) and
+           PartialBranchCollection.request?(request) and budget <= 30_000
 
   defp operation?(
          %{"operation" => "collect_branch_deletion", "request" => request} = operation,

@@ -227,3 +227,36 @@ watcher-failure or sandbox runtime qualification. Source review confirms the
 clean SDK closes inherited descriptors and allows getppid, nanosleep/
 clock_nanosleep and exit/exit_group. Linux, ordinary VM loading and final clean
 package evidence remain pending.
+
+
+## Partial cleanup acknowledgement boundary
+
+`resolve_partial_branch_cleanup` is a protocol-two Inspect/control operation over
+`Engine::resolve_unneeded_partial_cleanup`. It uses original retained terminal
+history and positive unused-cache provenance: never enrolled, or the same original
+exclusive enrolled cache with neither publication attempted nor acknowledged.
+Only its request digest survives handoff; missing files cannot manufacture this
+fact or downgrade attempted cleanup. An original terminal owner can finish its
+handoff after revalidating its cached intent, original collected manager/actor,
+protected terminal proof and unused provenance. Selection and archival use one
+material-control reservation at a time under the same absolute budget. No SDK
+lifecycle dispatch, namespace adoption, manager reconstruction or removal fallback
+is introduced. With an exact original exclusive enrolled-but-unattempted cleanup,
+a separate completion may resolve an existing Entered disposal after two fresh
+original-context absence/source observations under the retained work lock. It
+rechecks cache, collected actor and retained roots immediately before the existing
+protected ResolvedAbsent publication; no terminal proof is inferred from empty
+inventory alone. The four-descriptor material control preserves one ordinary
+observer. Terminal archival follows in a separate control phase. Other absent,
+used, shared or crossed contexts retain work and backing.
+
+The independent Rust/Elixir DTO preserves original disposal provenance and cannot
+satisfy the existing removal command. Optional `partial_cleanup_resolution: 1`
+requires `branches: 1`; it remains structurally known and unadvertised/unapproved
+by default. Reserved control/output and exact catalog/context bound this path.
+Reader-first stores and public consumption are implemented through selective
+v49/v48 histories, fresh source observation and guarded paired commit; backend
+inventory remains 60 operations / 66 signatures. Synthetic fixtures, private
+actor/cache/file models and in-process peers establish these boundaries, not
+ordinary SDK/VM or changed-package qualification. Other partial SDK phases and
+ordinary package acceptance remain required. Crash validation stays deferred.

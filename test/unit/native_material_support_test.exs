@@ -75,7 +75,80 @@ defmodule SmolBox.Runtime.NativeMaterialSupportTest do
           %{},
           %{managed_branches: 1},
           %{native_branches: 1},
-          %{managed_branches: 1, native_branches: 2}
+          %{managed_branches: 1, native_branches: 2},
+          %{managed_branches: 1, native_branches: 1},
+          %{managed_branches: 1, native_branches: 1, native_partial_branch_collections: 2},
+          %{managed_branches: 1, native_branches: 1, native_partial_branch_collections: 1},
+          %{
+            managed_branches: 1,
+            native_branches: 1,
+            native_partial_branch_collections: 1,
+            native_partial_branch_disposals: 2
+          },
+          %{
+            managed_branches: 1,
+            native_branches: 1,
+            native_partial_branch_collections: 1,
+            native_partial_branch_disposals: 1
+          },
+          %{
+            managed_branches: 1,
+            native_branches: 1,
+            native_partial_branch_collections: 1,
+            native_partial_branch_disposals: 1,
+            native_partial_branch_retirements: 2
+          },
+          %{
+            managed_branches: 1,
+            native_branches: 1,
+            native_partial_branch_collections: 1,
+            native_partial_branch_disposals: 1,
+            native_partial_branch_retirements: 1
+          },
+          %{
+            managed_branches: 1,
+            native_branches: 1,
+            native_partial_branch_collections: 1,
+            native_partial_branch_disposals: 1,
+            native_partial_branch_retirements: 1,
+            native_partial_branch_backings: 2
+          },
+          %{
+            managed_branches: 1,
+            native_branches: 1,
+            native_partial_branch_collections: 1,
+            native_partial_branch_disposals: 1,
+            native_partial_branch_retirements: 1,
+            native_partial_branch_backings: 1
+          },
+          %{
+            managed_branches: 1,
+            native_branches: 1,
+            native_partial_branch_collections: 1,
+            native_partial_branch_disposals: 1,
+            native_partial_branch_retirements: 1,
+            native_partial_branch_backings: 1,
+            native_partial_branch_cleanups: 2
+          },
+          %{
+            managed_branches: 1,
+            native_branches: 1,
+            native_partial_branch_collections: 1,
+            native_partial_branch_disposals: 1,
+            native_partial_branch_retirements: 1,
+            native_partial_branch_backings: 1,
+            native_partial_branch_cleanups: 1
+          },
+          %{
+            managed_branches: 1,
+            native_branches: 1,
+            native_partial_branch_collections: 1,
+            native_partial_branch_disposals: 1,
+            native_partial_branch_retirements: 1,
+            native_partial_branch_backings: 1,
+            native_partial_branch_cleanups: 1,
+            native_partial_branch_cleanup_resolutions: 2
+          }
         ] do
       assert {:error, %Error{category: :unsupported_capability}} =
                NativeSupport.verify(%{workers: [future], store: {BranchStore, caps}})
@@ -84,7 +157,18 @@ defmodule SmolBox.Runtime.NativeMaterialSupportTest do
     assert :ok =
              NativeSupport.verify(%{
                workers: [future],
-               store: {BranchStore, %{managed_branches: 1, native_branches: 1}}
+               store:
+                 {BranchStore,
+                  %{
+                    managed_branches: 1,
+                    native_branches: 1,
+                    native_partial_branch_collections: 1,
+                    native_partial_branch_disposals: 1,
+                    native_partial_branch_retirements: 1,
+                    native_partial_branch_backings: 1,
+                    native_partial_branch_cleanups: 1,
+                    native_partial_branch_cleanup_resolutions: 1
+                  }}
              })
 
     assert :ok = NativeSupport.verify(%{workers: [target], store: {TerminalStore, nil}})

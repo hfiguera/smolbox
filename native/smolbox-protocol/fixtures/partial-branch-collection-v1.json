@@ -1,0 +1,175 @@
+[
+  {
+    "scope": "synthetic-canonical-reader-model-no-sdk-authority",
+    "platform": "macos",
+    "request": {
+      "creation": {
+        "source": {
+          "target_id": "embedded-local",
+          "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "name": "owned",
+          "owner_token": "6767676767676767676767676767676767676767676767676767676767676767",
+          "incarnation": "89898989898989898989898989898989",
+          "material_sha256": "abababababababababababababababababababababababababababababababab",
+          "material": {
+            "schema": 2,
+            "revision": 0,
+            "record_sha256": "abababababababababababababababababababababababababababababababab",
+            "chain_sha256": "fca9cdcb16003ca409f473f30a896cdc35ea38b5f21451557e840d23e133319c",
+            "operation_id": null,
+            "request_sha256": null
+          }
+        },
+        "child": {
+          "operation_id": "create-leaf",
+          "name": "leaf",
+          "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "incarnation": "dddddddddddddddddddddddddddddddd",
+          "idle": true,
+          "hold": true
+        },
+        "approval": {
+          "id": "branches",
+          "host_overhead_mb": 128,
+          "resources": {
+            "slots": 1,
+            "cpus": 1,
+            "memory_mb": 384,
+            "disk_gb": 5
+          }
+        }
+      },
+      "operation_id": "collect-partial-model",
+      "request_sha256": "3595298571f69006051da82ec8ed4c18746143428fee11fc2f0c0f2e731d8384",
+      "quiesced": true
+    },
+    "proof": {
+      "schema": 1,
+      "creation_sha256": "516dad6197d4044edf8498ec5cc3fee742c9cedcb5b531946664ca040c2762af",
+      "publication_sha256": "2e2fca1f9c118d4e70f184e6b917bdad4a68d32abd0da01e18aba2b79d6fad16",
+      "operation_id": "collect-partial-model",
+      "request_sha256": "3595298571f69006051da82ec8ed4c18746143428fee11fc2f0c0f2e731d8384",
+      "boot_sha256": "ffd97c3aa245f8066b21e5a0c46724a8b8f169137b4ba6e0d2fe631db95237c1",
+      "collection_sha256": "5ab7b30feb75837315625eca1743c1c170c68a0e9983910d1821bcde4ed38f0f",
+      "proof_sha256": "5553e531e79c2cdc2d21861731f8381d3fdf0eb0a47ab0f72a8765b37504c154"
+    }
+  },
+  {
+    "scope": "synthetic-canonical-reader-model-no-sdk-authority",
+    "platform": "macos",
+    "request": {
+      "creation": {
+        "source": {
+          "target_id": "embedded-local",
+          "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "name": "owned",
+          "owner_token": "6767676767676767676767676767676767676767676767676767676767676767",
+          "incarnation": "89898989898989898989898989898989",
+          "material_sha256": "abababababababababababababababababababababababababababababababab",
+          "material": {
+            "schema": 2,
+            "revision": 0,
+            "record_sha256": "abababababababababababababababababababababababababababababababab",
+            "chain_sha256": "fca9cdcb16003ca409f473f30a896cdc35ea38b5f21451557e840d23e133319c",
+            "operation_id": null,
+            "request_sha256": null
+          }
+        },
+        "child": {
+          "operation_id": "create-leaf",
+          "name": "leaf",
+          "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "incarnation": "dddddddddddddddddddddddddddddddd",
+          "idle": true,
+          "hold": false
+        },
+        "approval": {
+          "id": "branches",
+          "host_overhead_mb": 128,
+          "resources": {
+            "slots": 1,
+            "cpus": 1,
+            "memory_mb": 384,
+            "disk_gb": 5
+          }
+        },
+        "initial_release": {
+          "operation_id": "initial-activation",
+          "request_sha256": "9999999999999999999999999999999999999999999999999999999999999999"
+        }
+      },
+      "operation_id": "collect-partial-model",
+      "request_sha256": "094d31ba008c560eb8152d17fd36476c9a527c80fe9f42d95f402cda4b3a89d1",
+      "quiesced": true
+    },
+    "proof": {
+      "schema": 1,
+      "creation_sha256": "a8ed74f77f6d59a0a22c3d310897359b83c3daa77902425b083709480d2ca0ad",
+      "publication_sha256": "a11f9bdaa56b5ac7d76e94d66003b4d2ddfe1074d0f97d896e12435ef5de1e5b",
+      "operation_id": "collect-partial-model",
+      "request_sha256": "094d31ba008c560eb8152d17fd36476c9a527c80fe9f42d95f402cda4b3a89d1",
+      "boot_sha256": "4f48aa2ef87387ce6f760c65fd2ee0e62acbd957e220bc0ba14bce3661fa2a1a",
+      "collection_sha256": "505ca1a35dd747a36ce509aeab599eae1e91948dfb1150a169c0b1514a1aec27",
+      "proof_sha256": "5db4cf0ad4f2c11817ec65a97a1c805c36759fb5a80c581a811ca650f77c2d0b"
+    }
+  },
+  {
+    "scope": "synthetic-canonical-reader-model-no-sdk-authority",
+    "platform": "macos",
+    "request": {
+      "creation": {
+        "source": {
+          "target_id": "embedded-local",
+          "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "name": "owned",
+          "owner_token": "6767676767676767676767676767676767676767676767676767676767676767",
+          "incarnation": "89898989898989898989898989898989",
+          "material_sha256": "abababababababababababababababababababababababababababababababab",
+          "material": {
+            "schema": 2,
+            "revision": 0,
+            "record_sha256": "abababababababababababababababababababababababababababababababab",
+            "chain_sha256": "fca9cdcb16003ca409f473f30a896cdc35ea38b5f21451557e840d23e133319c",
+            "operation_id": null,
+            "request_sha256": null
+          }
+        },
+        "child": {
+          "operation_id": "create-leaf",
+          "name": "leaf",
+          "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "incarnation": "dddddddddddddddddddddddddddddddd",
+          "idle": true,
+          "hold": false
+        },
+        "approval": {
+          "id": "branches",
+          "host_overhead_mb": 128,
+          "resources": {
+            "slots": 1,
+            "cpus": 1,
+            "memory_mb": 384,
+            "disk_gb": 5
+          }
+        },
+        "initial_release": {
+          "operation_id": "initial-activation",
+          "request_sha256": "9999999999999999999999999999999999999999999999999999999999999999"
+        }
+      },
+      "operation_id": "collect-partial-model",
+      "request_sha256": "094d31ba008c560eb8152d17fd36476c9a527c80fe9f42d95f402cda4b3a89d1",
+      "quiesced": true
+    },
+    "proof": {
+      "schema": 1,
+      "creation_sha256": "a8ed74f77f6d59a0a22c3d310897359b83c3daa77902425b083709480d2ca0ad",
+      "publication_sha256": "a11f9bdaa56b5ac7d76e94d66003b4d2ddfe1074d0f97d896e12435ef5de1e5b",
+      "operation_id": "collect-partial-model",
+      "request_sha256": "094d31ba008c560eb8152d17fd36476c9a527c80fe9f42d95f402cda4b3a89d1",
+      "boot_sha256": "4f48aa2ef87387ce6f760c65fd2ee0e62acbd957e220bc0ba14bce3661fa2a1a",
+      "collection_sha256": "505ca1a35dd747a36ce509aeab599eae1e91948dfb1150a169c0b1514a1aec27",
+      "proof_sha256": "5db4cf0ad4f2c11817ec65a97a1c805c36759fb5a80c581a811ca650f77c2d0b"
+    }
+  }
+]

@@ -3243,3 +3243,178 @@ budget before opening through the existing terminal connection. Its read-only
 errors have terminal `not_dispatched` evidence, matching HTTP preflight.
 Legacy descriptors receive no new capability implicitly, persisted records/codecs
 are unchanged, and physical qualification of changed helper bytes remains open.
+
+
+## Original collected partial-child absence
+
+`Engine::qualify_partial_branch_child_absence` observes only a positively collected
+and disposed original pre-handoff child. Its distinct request freezes the full
+partial-disposal proof, separate action/digest and explicit quiescence; the prior
+creation, collection, optional release and disposal identities cannot be reused
+as the absence action. Request/proof caps are 56 KiB, with a 30-second control
+ceiling. It never fabricates a BranchCompletion or never-booted disposition.
+
+The original terminal archive keeps its opaque enrollment and same SDK runtime/
+domain. The observer re-synchronizes the exact protected completed disposal ledger,
+then verifies original epoch/enrollment collection and bounded read-only SDK row,
+creation-reservation and original-directory absence twice while holding the paired
+source/child gates. The archive intent and exact retained enrollment are checked
+again before return. No manager is constructed, source state inferred, SDK mutation
+entered, namespace removed, dependency retired or backing released. The source
+may remain running. Current ownership-map and ordinary-boot registry checks use
+nonblocking locks; SDK `runtime.pid` inventory fallback supplies no ownership or
+extra unbudgeted database observation. A busy gate/registry or uncertainty rejects.
+
+Protocol two routes the distinct Inspect observation through branch feature and
+exact immutable catalog approval, source/domain/original epoch/platform fences,
+reserved control/output capacity and zero streams. One captured adapter deadline
+includes conversion, native observation and final acknowledgement. Shared native/
+wire/Elixir synthetic readers and inert actor/file/SQLite/accounting models confer
+no SDK or ordinary package/platform provenance. Durable/public dependency
+retirement and backing closure remain separate integrations. Public native branch
+admission stays disabled; crash validation and distribution remain separate gates.
+
+
+### Original partial-disposal residual cleanup Port boundary
+
+Protocol-two `CleanupPartialBranchDisposal` now converts the independent strict
+wire request to the unchanged shared engine request. Exact archived cleanup is
+observed first; otherwise only the retained original job may run cleanup, followed
+by terminal archival before `PartialBranchDisposalCleaned`. One absolute 30-second
+budget spans conversion, original selection, action and handoff. Post-action
+failures preserve uncertainty. There is no SDK manager reconstruction or SDK
+delete continuation in this route.
+
+The 28/80-KiB request/proof bounds and canonical tuples match the engine. Separate
+Rust/Elixir readers and channel correlation require exact original request,
+resolved-absent disposal, publication/optional release, platform/domain/original
+epoch and zero output. Feature version/exact approval catalog and Delete capability
+are required. Reserved control/output works during ordinary quarantine; the finite
+terminal allowance covers the largest advertised proof plus envelope. Five
+synthetic cross-language fixtures, framed policy sessions and output saturation
+models establish only this boundary. Paired durable/public cleanup and original
+SDK-entry fencing/continuation remain required; no backend inventory, store shape,
+codec marker or public branch admission changes here. Ordinary exact-package
+qualification remains open and crash validation remains deferred.
+
+
+### Original partial-cleanup qualification and terminal-disposal recovery
+
+`Engine::qualify_partial_branch_cleanup` and protocol-two
+`QualifyPartialBranchCleanup` now observe only the exact saved original disposal
+request under its original runtime/domain. This is reserved control with Inspect,
+explicit prior quiescence, immutable branch approval and one captured 30-second
+adapter deadline. It may finish the prior disposal's positive-absence journal and
+terminal handoff, but never invokes SDK lifecycle or creates a cleanup grant.
+A separate `PartialBranchCleanupCandidate` binds the full old disposal request,
+publication/optional release and original intent digest; it grants no removal,
+readiness, SDK entry or capacity release. Strict 24-KiB request and 48-KiB candidate
+bounds preserve the existing limits and reserved branch output allowance.
+
+Original published cached intent, original manager/enrollment and positive actor
+collection, unchanged live source, SDK row/reservation absence, original directory
+and retained descriptor/inode facts precede residual qualification. Actual
+ownership maps and repeated row/source/collection/root/history checks reject
+current handles, replacement, missing/crossed history, active work and exhausted
+control. Qualification creates no sidecar and leaves original work/source/snapshot/
+backing charged. Existing cached or protected cleanup prevents fresh eligibility.
+When the original directory is positively absent, the existing disposal resolves
+as ResolvedAbsent without a new cleanup grant. Existing terminal proof retains its
+Deleted/ResolvedAbsent provenance. Original archive lookup leaves recreated names
+and deleted source paths untouched; it never reconstructs or adopts ownership.
+
+Port and Rust/Elixir readers correlate the exact request, platform/domain/original
+epoch and zero-output outcome, allowing only a candidate or the existing terminal
+disposal. These are synthetic/inert boundary models; ordinary SDK/VM or package
+qualification is not supplied. The source-scoped backend now exposes
+`qualify_partial_branch_cleanup/3`, returning a transient candidate bound to the
+saved child version/source head or the existing typed disposal result after fresh
+source observation. Public cleanup invokes it before fresh acceptance. Only a
+positive candidate and a fully reserved cleanup/observation stage permit a new
+cleanup action; generic errors never dispatch SDK disposal. Original terminal
+proof commits through the existing guarded paired store transaction without a
+cleanup grant. Already accepted cleanup keeps its original control and budget
+semantics, skipping fresh qualification. One 30-second deadline and 64/192-KiB
+input/output workflow cap include all stages; qualifier and cleanup/observation
+stages cap at 26/64 and 32/96 KiB respectively. Remaining partial-state and
+previously accepted unsupported-grant recovery still require work. Backend
+inventory is 60, codec stays v48, branch admission stays disabled and crash
+qualification stays deferred.
+
+
+### Original partial-disposal first SDK entry
+
+The unchanged primary Entered record publishes disposal intent, not SDK-entry
+state. A private bounded 4-KiB `sdk-entry.json` sidecar and the original cached
+grant separately bind full intent/creation digests and Prepared/Entered state.
+The cache is created only alongside the original first disposal acceptance. Old
+retained intent, missing cache or private files cannot reconstruct it.
+
+A published primary selection remains only structural context. Exact original
+Prepared and repeated enrollment/collection, lifecycle/release, child before/stopped
+row, root/snapshot, source and live-authority checks permit only the first SDK
+call. The observer can synchronize that original Prepared state and return a
+not-dispatched state without SDK deletion or row mutation. The caller may then
+re-offer the same saved action; the application independently rechecks entry.
+Cache is spent before the protected Entered write/sync and SDK callback. Any later
+uncertainty, error, cancellation or rollback prevents another SDK call. Original
+positive absence still uses the existing disposal proof; residual cleanup cannot
+be bypassed by SDK continuation.
+
+Private actor/file/SQLite tests supply only model evidence. No upstream source,
+wire/codec/public result or backend inventory changes. Material control remains
+32 MiB/four descriptors; existing work/backing charges remain intact. Initial
+primary publication recovery and other partial SDK phases, previously accepted
+unsupported cleanup recovery and ordinary exact-package qualification remain
+required. Public branch admission stays disabled and crash validation deferred.
+
+
+### Original partial-disposal primary publication acknowledgement
+
+A matching visible primary Entered intent with original cached publication still
+unacknowledged can now select synchronization, never SDK authority. The engine
+rebuilds and compares the entire original intent using the original manager,
+opaque collection, lifecycle/release, exact before-row, source/child/snapshot roots
+and fresh unchanged live source. The original retained collection requires that
+same cached intent plus its unused original SDK-entry cache and no SDK-entry or
+residual-cleanup sidecar. Only synchronization of the existing protected primary
+and directory may advance the original publication flag; the intent/row/cache Arc
+and all charges remain unchanged. Subsequent first entry remains independently
+fenced. Missing/crossed/corrupt/terminal history, missing legacy cache, prior entry
+attempt/publication, busy cache or spent budget cannot mint replacement authority.
+
+This uses the existing native engine/control path and schemas, with no wire,
+backend operation, codec or store-marker changes. Private actor/file/SQLite models
+supply no live persistence-interruption, SDK/VM or exact-package qualification.
+Changed/absent original contexts, other partial SDK states and remaining P0–P9
+qualification gates stay required. Branch admission and crash qualification remain
+disabled/false.
+
+
+### Unnecessary accepted cleanup after original terminal disposal
+
+Terminal handoff now retains the original owner's positive no-cleanup enrollment
+fact. `Engine::resolve_unneeded_partial_cleanup` uses only that original archive,
+runtime/domain, matching protected disposal and exact saved cleanup request. A
+distinct 80-KiB `PartialBranchDisposalCleanupUnneeded` preserves the entire original
+Deleted or ResolvedAbsent proof and uses a different canonical prefix from actual
+removal. It grants no SDK entry, removal or dependency/backing release. Neither
+first issuance nor historical retry inspects/adopts current source/child names.
+
+The bounded private receipt is keyed to original creation. Immutable cached
+request/proof digests and publication flags prevent crossed/missing-history
+adoption; matching visible original attempts can resynchronize. Existing cleanup
+state, missing/crossed original history, foreign receipts, unsafe file metadata,
+spent budget or occupied control/archive refuse acknowledgement. The cache adds
+only two digests and flags; existing 32-MiB/four-descriptor control covers transient
+28-KiB requests and 80-KiB proofs plus 256-byte receipt envelope. All charges stay.
+
+Fresh qualification, SDK first-entry and residual removal reject unneeded
+receipt/history, including a missing published receipt whose original cache
+remains. Terminal-but-unarchived disposal and enrolled-but-unused cleanup need
+additional recovery; they cannot borrow the archived no-enrollment fact.
+
+This component is not yet connected to Port/readers or public/store alternate
+outcomes. Existing removal proof and wire/codec/backend catalogs stay unchanged.
+Its deterministic actor/file/SQLite and synthetic DTO models confer no SDK/VM or
+new-package qualification. Public branches and crash qualification remain disabled.

@@ -110,14 +110,20 @@ defmodule SmolBox.Runtime.NativeSupport do
       end)
 
   # This marker covers all native branch readers and paired resource writers,
-  # including v31 explicit release. Existing HTTP branch support is insufficient.
+  # including explicit release and v49 cleanup resolution. HTTP branch support alone is insufficient.
   # Stores must not advertise it until the complete native lifecycle is supported.
   defp branch_support?(config, supported),
     do:
       Enum.all?(targets(config), fn target ->
         case Config.sdk_identity(target.native_config) do
           %{"feature_versions" => %{"branches" => 1}} ->
-            supported[:native_branches] == 1 and supported[:managed_branches] == 1
+            Enum.all?(
+              ~w(native_branches managed_branches native_partial_branch_collections
+                 native_partial_branch_disposals native_partial_branch_retirements
+                 native_partial_branch_backings native_partial_branch_cleanups
+                 native_partial_branch_cleanup_resolutions)a,
+              &(supported[&1] == 1)
+            )
 
           _ ->
             true

@@ -2,8 +2,36 @@ defmodule SmolBox.DurableHost.BranchStore do
   @moduledoc false
   if Code.ensure_loaded?(SmolBox.Store.BranchOps) do
     alias SmolBox.DurableHost.{Database, WorkerStore}
-    alias SmolBox.Store.{BranchOps, NativeBranchReleaseOps}
-    def capabilities, do: %{managed_branches: 1}
+
+    alias SmolBox.Store.{
+      BranchOps,
+      CodecNativePartialBranchBackings,
+      CodecNativePartialBranchCleanupResolutions,
+      CodecNativePartialBranchCleanups,
+      CodecNativePartialBranchCollections,
+      CodecNativePartialBranchDisposals,
+      CodecNativePartialBranchRetirements,
+      NativeBranchReleaseOps
+    }
+
+    def capabilities do
+      supported = %{managed_branches: 1}
+
+      Enum.reduce(
+        [
+          {:native_partial_branch_collections, CodecNativePartialBranchCollections},
+          {:native_partial_branch_disposals, CodecNativePartialBranchDisposals},
+          {:native_partial_branch_retirements, CodecNativePartialBranchRetirements},
+          {:native_partial_branch_backings, CodecNativePartialBranchBackings},
+          {:native_partial_branch_cleanups, CodecNativePartialBranchCleanups},
+          {:native_partial_branch_cleanup_resolutions, CodecNativePartialBranchCleanupResolutions}
+        ],
+        supported,
+        fn {marker, reader}, acc ->
+          if Code.ensure_loaded?(reader), do: Map.put(acc, marker, reader.reader()), else: acc
+        end
+      )
+    end
 
     def run(context, :branch_accept, [key, spec, fingerprint, name, capacity, now]) do
       case Database.read(context, {elem(key, 0), spec.id}, :machine) do

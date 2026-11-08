@@ -24,6 +24,7 @@ defmodule SmolBox.Branch do
           | :released
           | :unknown
           | :disposal_pending
+          | :disposal_cleanup_pending
           | :disposed
           | :backing_pending
           | :resolved
@@ -52,6 +53,7 @@ defmodule SmolBox.Branch do
     :released,
     :unknown,
     :disposal_pending,
+    :disposal_cleanup_pending,
     :disposed,
     :backing_pending,
     :resolved,
@@ -84,6 +86,20 @@ defmodule SmolBox.Branch do
   def validate(_), do: invalid()
 
   defp disposal_state?(%{
+         state: :disposal_cleanup_pending,
+         native_authority: %{
+           partial_disposal: %{cleanup: %SmolBox.Embedded.NativePartialBranchCleanup{}}
+         }
+       }),
+       do: true
+
+  defp disposal_state?(%{
+         state: state,
+         native_authority: %{partial_disposal: %SmolBox.Embedded.NativePartialBranchDisposal{}}
+       })
+       when state in [:disposal_pending, :disposed], do: true
+
+  defp disposal_state?(%{
          state: state,
          native_authority: %{disposal: %SmolBox.Embedded.NativeUnbootedBranchDisposal{}}
        })
@@ -98,8 +114,17 @@ defmodule SmolBox.Branch do
        }),
        do: true
 
+  defp disposal_state?(%{
+         state: :backing_pending,
+         native_authority: %{
+           partial_disposal: %SmolBox.Embedded.NativePartialBranchDisposal{},
+           backing: %SmolBox.Embedded.NativeBranchBacking{}
+         }
+       }),
+       do: true
+
   defp disposal_state?(%{state: state}),
-    do: state not in [:disposal_pending, :disposed, :backing_pending]
+    do: state not in [:disposal_pending, :disposal_cleanup_pending, :disposed, :backing_pending]
 
   @doc false
   def valid_machine?(m) do
@@ -147,10 +172,11 @@ defmodule SmolBox.Branch do
   defp phase?(%{branch: %{state: state}} = m) when state in [:accepted, :dispatching, :observed],
     do: m.operation == :branch_child and m.state == :creating and m.active_execution == nil
 
-  defp phase?(%{branch: %{state: state}} = m) when state in [:unknown, :disposal_pending],
-    do:
-      m.operation in [:branch_child, :branch_release] and m.state == :unknown and
-        m.active_execution == nil
+  defp phase?(%{branch: %{state: state}} = m)
+       when state in [:unknown, :disposal_pending, :disposal_cleanup_pending],
+       do:
+         m.operation in [:branch_child, :branch_release] and m.state == :unknown and
+           m.active_execution == nil
 
   defp phase?(%{branch: %{state: state}} = m)
        when state in [:release_pending, :release_dispatching],

@@ -18,6 +18,10 @@ defmodule SmolBox.Backend.Embedded do
     EmbeddedGrowthObservation,
     EmbeddedObservation,
     EmbeddedOperation,
+    EmbeddedPartialBranchCleanup,
+    EmbeddedPartialBranchCollection,
+    EmbeddedPartialBranchDisposal,
+    EmbeddedPartialBranchRetirement,
     EmbeddedPreparation,
     EmbeddedPreparedBranchRetirement,
     EmbeddedUnbootedBranchDisposal,
@@ -84,11 +88,17 @@ defmodule SmolBox.Backend.Embedded do
       when operation in [
              :retire_prepared_branch,
              :retire_unbooted_branch,
+             :retire_partial_branch,
              :inspect_unbooted_branch_disposal,
              :dispose_unbooted_branch,
              :resolve_unbooted_branch_disposal,
              :release_branch_backing,
              :resolve_branch_deletion,
+             :collect_partial_branch,
+             :dispose_partial_branch,
+             :resolve_partial_branch_disposal,
+             :cleanup_partial_branch_disposal,
+             :qualify_partial_branch_cleanup,
              :collect_branch_deletion,
              :continue_branch_deletion,
              :cleanup_branch_deletion,
@@ -105,11 +115,17 @@ defmodule SmolBox.Backend.Embedded do
       when operation in [
              :retire_prepared_branch,
              :retire_unbooted_branch,
+             :retire_partial_branch,
              :inspect_unbooted_branch_disposal,
              :dispose_unbooted_branch,
              :resolve_unbooted_branch_disposal,
              :release_branch_backing,
              :resolve_branch_deletion,
+             :collect_partial_branch,
+             :dispose_partial_branch,
+             :resolve_partial_branch_disposal,
+             :cleanup_partial_branch_disposal,
+             :qualify_partial_branch_cleanup,
              :collect_branch_deletion,
              :continue_branch_deletion,
              :cleanup_branch_deletion,
@@ -225,6 +241,27 @@ defmodule SmolBox.Backend.Embedded do
   def invoke(context, :prepare_artifact, arguments, budget),
     do: EmbeddedPreparation.run(context, arguments, budget)
 
+  def invoke(context, operation, [parent, child], budget)
+      when operation in [
+             :dispose_partial_branch,
+             :resolve_partial_branch_disposal,
+             :qualify_partial_branch_cleanup
+           ],
+      do: EmbeddedPartialBranchDisposal.run(context, operation, parent, child, budget)
+
+  def invoke(context, :cleanup_partial_branch_disposal, [parent, child], budget),
+    do:
+      EmbeddedPartialBranchCleanup.run(
+        context,
+        :cleanup_partial_branch_disposal,
+        parent,
+        child,
+        budget
+      )
+
+  def invoke(context, :collect_partial_branch, [parent, child], budget),
+    do: EmbeddedPartialBranchCollection.run(context, parent, child, budget)
+
   def invoke(context, :collect_branch_deletion, [child], budget),
     do: EmbeddedBranchDeletionAction.run(context, child, :collect, budget)
 
@@ -244,6 +281,9 @@ defmodule SmolBox.Backend.Embedded do
              :resolve_unbooted_branch_disposal
            ],
       do: EmbeddedUnbootedBranchDisposal.run(context, operation, parent, child, budget)
+
+  def invoke(context, :retire_partial_branch, [parent, child], budget),
+    do: EmbeddedPartialBranchRetirement.run(context, parent, child, budget)
 
   def invoke(context, :retire_unbooted_branch, [parent, child], budget),
     do: EmbeddedUnbootedBranchRetirement.run(context, parent, child, budget)

@@ -9,15 +9,20 @@ const MAX_DECODED: usize = 8 * 1024 * 1024;
 const MAX_EVENT_FRAMES: usize = 4096;
 const CONTROL_FRAMES: usize = 65;
 const SMALL_CONTROL_BYTES: usize = 4096;
-// Branch absence and backing proofs are capped at 68 KiB, plus its terminal envelope. Keep
-// the existing event allowance and enough space for every outstanding control
-// frame, even when all terminal replies contain the largest branch proof.
-const BRANCH_CONTROL_BYTES: usize =
-    if smolbox_protocol::BRANCH_ABSENCE_BYTES > smolbox_protocol::BRANCH_BACKING_PROOF_BYTES {
-        smolbox_protocol::BRANCH_ABSENCE_BYTES
-    } else {
-        smolbox_protocol::BRANCH_BACKING_PROOF_BYTES
-    } + SMALL_CONTROL_BYTES;
+// Reserve the largest advertised branch proof plus its terminal envelope, while
+// preserving event capacity and both observer control slots under saturation.
+const BRANCH_CONTROL_BYTES: usize = if smolbox_protocol::BRANCH_ABSENCE_BYTES
+    > smolbox_protocol::BRANCH_BACKING_PROOF_BYTES
+    && smolbox_protocol::BRANCH_ABSENCE_BYTES > smolbox_protocol::PARTIAL_BRANCH_CLEANUP_PROOF_BYTES
+{
+    smolbox_protocol::BRANCH_ABSENCE_BYTES
+} else if smolbox_protocol::BRANCH_BACKING_PROOF_BYTES
+    > smolbox_protocol::PARTIAL_BRANCH_CLEANUP_PROOF_BYTES
+{
+    smolbox_protocol::BRANCH_BACKING_PROOF_BYTES
+} else {
+    smolbox_protocol::PARTIAL_BRANCH_CLEANUP_PROOF_BYTES
+} + SMALL_CONTROL_BYTES;
 const CONTROL_BYTES: usize = CONTROL_FRAMES * BRANCH_CONTROL_BYTES;
 const MAX_EVENT_ENCODED: usize = 12 * 1024 * 1024 - CONTROL_FRAMES * SMALL_CONTROL_BYTES;
 const MAX_ENCODED: usize = MAX_EVENT_ENCODED + CONTROL_BYTES;
@@ -148,12 +153,18 @@ fn branch_terminal(message: &ServerMessage) -> bool {
                 | smolbox_protocol::Outcome::HeldBranchReleased { .. }
                 | smolbox_protocol::Outcome::HeldBranchReleasePresence { .. }
                 | smolbox_protocol::Outcome::UnbootedBranchChildAbsent { .. }
+                | smolbox_protocol::Outcome::PartialBranchChildAbsent { .. }
                 | smolbox_protocol::Outcome::BranchChildAbsent { .. }
                 | smolbox_protocol::Outcome::BranchBackingReleased { .. }
                 | smolbox_protocol::Outcome::PreparedBranchRetired { .. }
                 | smolbox_protocol::Outcome::UnbootedBranchDisposalCandidate { .. }
                 | smolbox_protocol::Outcome::UnbootedBranchDisposed { .. }
                 | smolbox_protocol::Outcome::ReleasedBranchDeletionContinued { .. }
+                | smolbox_protocol::Outcome::PartialBranchDisposed { .. }
+                | smolbox_protocol::Outcome::PartialBranchCleanupCandidate { .. }
+                | smolbox_protocol::Outcome::PartialBranchDisposalCleaned { .. }
+                | smolbox_protocol::Outcome::PartialBranchCleanupUnneeded { .. }
+                | smolbox_protocol::Outcome::PartialBranchCollected { .. }
                 | smolbox_protocol::Outcome::BranchDeletionCollected { .. }
                 | smolbox_protocol::Outcome::ReleasedBranchDeletionCleaned { .. }
                 | smolbox_protocol::Outcome::ReleasedBranchDeletionResolved { .. }
@@ -408,6 +419,162 @@ mod tests {
                 sequence: 1,
                 outcome: smolbox_protocol::Outcome::UnbootedBranchDisposed {
                     proof: Box::new(proof.clone()),
+                },
+            };
+            let (output, receiver) = Output::new();
+            assert!(output.send(0, || Ok(message())).is_err());
+            for _ in 0..CONTROL_FRAMES - 2 {
+                output.send_branch_terminal(|| Ok(message())).unwrap();
+            }
+            output.send(0, || Ok(accepted())).unwrap();
+            output.send(0, || Ok(accepted())).unwrap();
+            assert!(output.send_branch_terminal(|| Ok(message())).is_err());
+            while let Ok(frame) = receiver.try_recv() {
+                output.complete(&frame);
+            }
+            output.send_branch_terminal(|| Ok(message())).unwrap();
+        }
+    }
+    #[test]
+    fn partial_absence_requires_reserved_branch_output_and_preserves_both_observers() {
+        let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/partial-branch-child-absence-v1.json"
+        ))
+        .unwrap();
+        for row in rows {
+            let proof: smolbox_protocol::PartialBranchChildAbsence =
+                serde_json::from_value(row["proof"].clone()).unwrap();
+            let message = || ServerMessage::Terminal {
+                epoch: "ab".repeat(16),
+                id: 1,
+                sequence: 1,
+                outcome: smolbox_protocol::Outcome::PartialBranchChildAbsent {
+                    proof: Box::new(proof.clone()),
+                },
+            };
+            let (output, receiver) = Output::new();
+            assert!(output.send(0, || Ok(message())).is_err());
+            for _ in 0..CONTROL_FRAMES - 2 {
+                output.send_branch_terminal(|| Ok(message())).unwrap();
+            }
+            output.send(0, || Ok(accepted())).unwrap();
+            output.send(0, || Ok(accepted())).unwrap();
+            assert!(output.send_branch_terminal(|| Ok(message())).is_err());
+            while let Ok(frame) = receiver.try_recv() {
+                output.complete(&frame);
+            }
+            output.send_branch_terminal(|| Ok(message())).unwrap();
+        }
+    }
+    #[test]
+    fn partial_disposal_requires_reserved_branch_output_and_preserves_both_observers() {
+        let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/partial-branch-disposal-v1.json"
+        ))
+        .unwrap();
+        for row in rows {
+            let proof: smolbox_protocol::PartialBranchDisposal =
+                serde_json::from_value(row["proof"].clone()).unwrap();
+            let message = || ServerMessage::Terminal {
+                epoch: "ab".repeat(16),
+                id: 1,
+                sequence: 1,
+                outcome: smolbox_protocol::Outcome::PartialBranchDisposed {
+                    proof: Box::new(proof.clone()),
+                },
+            };
+            let (output, receiver) = Output::new();
+            assert!(output.send(0, || Ok(message())).is_err());
+            for _ in 0..CONTROL_FRAMES - 2 {
+                output.send_branch_terminal(|| Ok(message())).unwrap();
+            }
+            output.send(0, || Ok(accepted())).unwrap();
+            output.send(0, || Ok(accepted())).unwrap();
+            assert!(output.send_branch_terminal(|| Ok(message())).is_err());
+            while let Ok(frame) = receiver.try_recv() {
+                output.complete(&frame);
+            }
+            output.send_branch_terminal(|| Ok(message())).unwrap();
+        }
+    }
+    #[test]
+    fn partial_disposal_cleanup_requires_reserved_branch_output_and_preserves_both_observers() {
+        let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/partial-branch-disposal-cleanup-v1.json"
+        ))
+        .unwrap();
+        for row in rows {
+            let proof: smolbox_protocol::PartialBranchDisposalCleanup =
+                serde_json::from_value(row["proof"].clone()).unwrap();
+            let message = || ServerMessage::Terminal {
+                epoch: "ab".repeat(16),
+                id: 1,
+                sequence: 1,
+                outcome: smolbox_protocol::Outcome::PartialBranchDisposalCleaned {
+                    proof: Box::new(proof.clone()),
+                },
+            };
+            let (output, receiver) = Output::new();
+            assert!(output.send(0, || Ok(message())).is_err());
+            for _ in 0..CONTROL_FRAMES - 2 {
+                output.send_branch_terminal(|| Ok(message())).unwrap();
+            }
+            output.send(0, || Ok(accepted())).unwrap();
+            output.send(0, || Ok(accepted())).unwrap();
+            assert!(output.send_branch_terminal(|| Ok(message())).is_err());
+            while let Ok(frame) = receiver.try_recv() {
+                output.complete(&frame);
+            }
+            output.send_branch_terminal(|| Ok(message())).unwrap();
+        }
+    }
+    #[test]
+    fn unneeded_cleanup_requires_reserved_branch_output_without_changing_removal() {
+        let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/partial-branch-cleanup-unneeded-v1.json"
+        ))
+        .unwrap();
+        for row in rows {
+            let proof: smolbox_protocol::PartialBranchDisposalCleanupUnneeded =
+                serde_json::from_value(row["proof"].clone()).unwrap();
+            let message = || ServerMessage::Terminal {
+                epoch: "ab".repeat(16),
+                id: 1,
+                sequence: 1,
+                outcome: smolbox_protocol::Outcome::PartialBranchCleanupUnneeded {
+                    proof: Box::new(proof.clone()),
+                },
+            };
+            let (output, receiver) = Output::new();
+            assert!(output.send(0, || Ok(message())).is_err());
+            for _ in 0..CONTROL_FRAMES - 2 {
+                output.send_branch_terminal(|| Ok(message())).unwrap();
+            }
+            output.send(0, || Ok(accepted())).unwrap();
+            output.send(0, || Ok(accepted())).unwrap();
+            assert!(output.send_branch_terminal(|| Ok(message())).is_err());
+            while let Ok(frame) = receiver.try_recv() {
+                output.complete(&frame);
+            }
+            output.send_branch_terminal(|| Ok(message())).unwrap();
+        }
+    }
+    #[test]
+    fn partial_cleanup_qualification_requires_reserved_branch_output_and_preserves_both_observers()
+    {
+        let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/partial-branch-cleanup-candidate-v1.json"
+        ))
+        .unwrap();
+        for row in rows {
+            let proof: smolbox_protocol::PartialBranchCleanupCandidate =
+                serde_json::from_value(row["candidate"].clone()).unwrap();
+            let message = || ServerMessage::Terminal {
+                epoch: "ab".repeat(16),
+                id: 1,
+                sequence: 1,
+                outcome: smolbox_protocol::Outcome::PartialBranchCleanupCandidate {
+                    candidate: Box::new(proof.clone()),
                 },
             };
             let (output, receiver) = Output::new();

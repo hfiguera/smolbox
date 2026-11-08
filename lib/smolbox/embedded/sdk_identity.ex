@@ -5,7 +5,7 @@ defmodule SmolBox.Embedded.SDKIdentity do
 
   @features ~w(lifecycle foreground_exec extended_exec files extended_files material_proofs
                observability networking ports workloads compact_creation job_resources buffered_exec remote_sources images background_exec
-               logs streaming_exec terminals terminal_preflight volumes disk_growth checkpoints exports branches)
+               logs streaming_exec terminals terminal_preflight volumes disk_growth checkpoints exports branches partial_cleanup_resolution)
 
   # This is the implemented package contract, not all APIs present in the SDK.
   # Launch and Hello must both bind it to the exact locally approved package.
@@ -99,7 +99,8 @@ defmodule SmolBox.Embedded.SDKIdentity do
           {"images", "job_resources"},
           {"remote_sources", "job_resources"},
           {"remote_sources", "buffered_exec"},
-          {"remote_sources", "compact_creation"}
+          {"remote_sources", "compact_creation"},
+          {"partial_cleanup_resolution", "branches"}
         ],
         fn {feature, required} -> features[feature] != 1 or features[required] == 1 end
       )

@@ -1,0 +1,215 @@
+{
+  "schema": 1,
+  "status": "original-partial-disposal-residual-cleanup-engine-models-passed",
+  "source_base_commit": "9708051d6247ce42a91a1240a707d5a695f1c955",
+  "source_files_sha256": {
+    "native/smolbox-engine/src/branch/retention/boot/collection.rs": "8ff2e7fb3c22b80a9f8318922c6880f8ad9ec1feadeb1bcb3eb81b7dc14c2434",
+    "native/smolbox-engine/src/branch/retention/resolution/partial_disposal.rs": "ee150694bd29f3e13a9cc505e49d9ffd8786aa15b63ce3b3954cb90450d75b4e",
+    "native/smolbox-engine/src/branch/retention/resolution/partial_disposal/ledger.rs": "0887fc8676a4310783f2569e0e895ec93d76654e911f85d0e55009aac7071639",
+    "native/smolbox-engine/src/branch/retention/resolution/partial_disposal/residual.rs": "08d9facb97d75d746db333c7cafb5bc386fb2a01923600cb7c5fd7dcd648204a",
+    "native/smolbox-engine/src/branch/retention/resolution/partial_disposal/tests.rs": "db0dce228eabd482e1c2ea29f8b7a88551b45142d6ba0cdcf142525f660c4ffd",
+    "native/smolbox-engine/src/branch/retention/resolution/partial_disposal/tests/residual.rs": "2a7c44112ccd5ad61244c94d2170b7f43ca9536d88b1caa6bc7b97555c1abdf5",
+    "native/smolbox-engine/src/branch_partial_cleanup.rs": "6abcc9ed48fae21236ed4dfb134847a97b8912d46368413e346cbcb103b96c37",
+    "native/smolbox-engine/src/lib.rs": "370abd95234446aee2f1ed7f8fe3ab5694168fb2e9f4022e03f523cf15107654"
+  },
+  "native_api": {
+    "request": "PartialBranchDisposalCleanupRequest",
+    "result": "PartialBranchDisposalCleanup",
+    "entrypoint": "RetainedBranchResolution::cleanup_partial_disposal",
+    "historical_entrypoint": "Engine::inspect_partial_disposal_cleanup",
+    "transport_independent": true,
+    "no_erlang_nif_or_http_server_dependency": true
+  },
+  "authority": {
+    "full_prior_collection_disposal_request_and_distinct_action_quiescence_bound": true,
+    "same_original_entry_runtime_domain_published_primary_grant_and_opaque_enrollment_required": true,
+    "positive_original_collection_required": true,
+    "sdk_row_and_reservation_absence_before_removal_grant": true,
+    "unchanged_original_source_and_fresh_source_authority_required": true,
+    "actual_nonblocking_ownership_map_exclusion": true,
+    "partial_disposal_final_absence_inventory_pid_fallback_removed": true,
+    "source_snapshot_and_original_work_gates_retained": true
+  },
+  "removal": {
+    "independent_original_cached_request_and_protected_cleanup_grant_required": true,
+    "original_child_descriptor_inode_and_parent_identity_bound_before_removal": true,
+    "bounded_descriptor_relative_walk_and_unlinkat": true,
+    "symlink_targets_not_followed": true,
+    "sdk_deletion_never_retried": true,
+    "source_snapshot_and_unrelated_files_not_removed": true,
+    "missing_root_cannot_mint_a_new_grant": true,
+    "partial_removal_resumes_only_same_request_and_original_inode": true,
+    "missing_crossed_replaced_or_redirected_cached_published_history_rejects": true,
+    "owned_worker_retains_original_context_gates_and_reserved_control_through_return": true
+  },
+  "completion": {
+    "final_positive_absence_and_fresh_source_authority_precede_original_resolved_absent_disposal": true,
+    "separate_cleanup_acknowledgement_binds_request_and_original_disposal": true,
+    "primary_completion_with_pending_receipt_resynchronizes_same_ack_without_replay": true,
+    "historical_ack_after_original_archive_and_source_deletion_preserves_recreated_names_and_handles": true,
+    "dependency_backing_and_public_capacity_not_retired_by_this_engine_action": true
+  },
+  "bounds_and_compatibility": {
+    "request_bytes": 28672,
+    "proof_bytes": 81920,
+    "control_deadline_ms": 30000,
+    "cleanup_record_max_bytes": 262144,
+    "primary_record_max_bytes_unchanged": 131072,
+    "removal_entry_ceiling": 1000000,
+    "primary_journal_schema_fields_and_serialization_unchanged": true,
+    "independently_typed_path_bound_protected_io": true,
+    "sdk_source_unmodified": true,
+    "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655"
+  },
+  "validation": {
+    "new_cleanup_models": 9,
+    "branch_models": 312,
+    "existing_ignored_branch_tests": 1,
+    "runtime_boot_models": 18,
+    "results": [
+      {
+        "name": "branch-models-final",
+        "command": [
+          "cargo",
+          "test",
+          "--manifest-path",
+          "native/Cargo.toml",
+          "-p",
+          "smolbox-engine",
+          "--lib",
+          "branch"
+        ],
+        "exit_code": 0,
+        "summary": [
+          "test result: ok. 312 passed; 0 failed; 1 ignored; 0 measured; 682 filtered out; finished in 69.41s"
+        ]
+      },
+      {
+        "name": "runtime-boot-models",
+        "command": [
+          "cargo",
+          "test",
+          "--manifest-path",
+          "native/Cargo.toml",
+          "-p",
+          "smolbox-engine",
+          "--lib",
+          "runtime_boot"
+        ],
+        "exit_code": 0,
+        "summary": [
+          "test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 977 filtered out; finished in 0.82s"
+        ]
+      },
+      {
+        "name": "cleanup-final",
+        "command": [
+          "cargo",
+          "test",
+          "--manifest-path",
+          "native/Cargo.toml",
+          "-p",
+          "smolbox-engine",
+          "--lib",
+          "partial_disposal::tests::residual"
+        ],
+        "exit_code": 0,
+        "summary": [
+          "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 986 filtered out; finished in 5.12s"
+        ]
+      },
+      {
+        "name": "clippy-complete",
+        "command": [
+          "cargo",
+          "clippy",
+          "--manifest-path",
+          "native/Cargo.toml",
+          "--workspace",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exit_code": 0,
+        "summary": [
+          "",
+          "warning: `smolvm` (lib) generated 1 warning (run `cargo clippy --fix --lib -p smolvm -- -D warnings` to apply 1 suggestion)",
+          "    Checking smolbox-engine v0.2.0 (/Users/humberto/Projects/smolbox/native/smolbox-engine)",
+          "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.28s"
+        ]
+      },
+      {
+        "name": "fmt-complete",
+        "command": [
+          "cargo",
+          "fmt",
+          "--manifest-path",
+          "native/Cargo.toml",
+          "-p",
+          "smolbox-engine",
+          "-p",
+          "smolbox-protocol",
+          "-p",
+          "smolbox-port",
+          "--check"
+        ],
+        "exit_code": 0,
+        "summary": []
+      },
+      {
+        "name": "sdk-complete",
+        "command": [
+          "python3",
+          "native/bootstrap.py",
+          "--check"
+        ],
+        "exit_code": 0,
+        "summary": [
+          "Verified unmodified native source."
+        ]
+      }
+    ],
+    "strict_rustdoc_warnings_as_errors_exit_code": 0,
+    "private_log_sha256": {
+      "cleanup-final.log": "24e5dba359dd9fba730f1c64ac1492cba0a85bc9fb2c545fb849cece779d17d6",
+      "branch-models-final.log": "48999e24a10a857778e7f418313760ad89593d89c3d5875e99af5433ac218e14",
+      "runtime-boot-models.log": "25b3a61342faa0561af502aef2961ba2cae0f07bc96face13aac46e19af1bbcc",
+      "clippy-complete.log": "6a9cc7e98d2c5622cb7cedc7d58021303606f7b344aa1865f0f66d5ba9e7e1d1",
+      "fmt-complete.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sdk-complete.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "rustdoc.log": "5341540d92968e2c706b40beabef3f7a542a3f78b39fe8207af006370d0172c9",
+      "docs.log": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+      "doc-links.log": "cdd7741a182a14a635d88951872ff8af98bcaa848eb77347b24b1b91f27e5129"
+    },
+    "new_elixir_store_codec_http_runs_claimed": false,
+    "ordinary_sdk_vm_platform_or_new_package_qualification_supplied": false,
+    "documentation": {
+      "warnings_as_errors_build_exit_code": 0,
+      "local_links_fragments_exit_code": 0,
+      "pages_checked": 171
+    }
+  },
+  "scope": {
+    "port_routing_implemented": false,
+    "typed_elixir_reader_and_paired_public_cleanup_actions_implemented": false,
+    "unentered_sdk_continuation_implemented": false,
+    "unentered_sdk_continuation_requires_new_cached_protected_entry_fence": true,
+    "legacy_entered_primary_state_does_not_prove_sdk_call_never_began": true,
+    "backend_operations_unchanged": 58,
+    "all_full_parity_acceptance_rows_pending": true,
+    "native_branch_admission_enabled": false,
+    "historical_package_qualification_not_transferred": true,
+    "crash_validation_deferred": true,
+    "crash_handling_qualified": false,
+    "distribution_approved": false,
+    "parity_complete": false
+  },
+  "remaining": [
+    "Port routing and strict typed readers for cleanup",
+    "paired reader-first durable/public cleanup acceptance and completion",
+    "separate original cached/protected SDK-entry fence and demonstrably unentered continuation",
+    "remaining partial states and completed-child ownership-filter audit",
+    "ordinary exact-package platform/source/store/resource/consumer qualification and remaining P0-P9 gates"
+  ]
+}

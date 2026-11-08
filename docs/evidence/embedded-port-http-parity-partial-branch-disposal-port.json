@@ -1,0 +1,212 @@
+{
+  "schema": 1,
+  "status": "partial-disposal-port-and-typed-reader-models-passed",
+  "source_base_commit": "0868b2f9e240db90a5cce6a2f0ec724c174b6379",
+  "source_files_sha256": {
+    "lib/smolbox/embedded/branch_canonical.ex": "502c191933fd9759530deeb5ce41ea128792ce0c8448977b316ff4418fb72203",
+    "lib/smolbox/embedded/channel.ex": "567f226df72d7f583e224917eb76542e345dba7e1a20da3bae47e2bc2bc4d1ea",
+    "lib/smolbox/embedded/partial_branch_disposal.ex": "de7f43317e70f22100fad48becfaaab6395cf3741f0f6b77d1888fa2298a33b7",
+    "lib/smolbox/embedded/port.ex": "52658780c4c73be777d319018b6cf89282d144c92f447f260abc4c59a6a0dfbd",
+    "lib/smolbox/embedded/protocol.ex": "9a20ebd7b0e877709e73d0ddc509e879faa1f506595555a1a860598395b892d6",
+    "lib/smolbox/embedded/request.ex": "0ffc111e4a416e112174e253d2eb79ce7de2a35c86497fb5e6e20e939dcd71b9",
+    "native/smolbox-engine/src/branch_partial_disposal.rs": "cf287349d4e6740ea619a832cb2ad89e807f5c5e8a6403dc5d1a05d79bd7b2ed",
+    "native/smolbox-port/src/adapter.rs": "63559d7620abba48346ab1b83e933360871b5efa09bc64f2b0cfc0d83fb8de12",
+    "native/smolbox-port/src/output.rs": "00115ede8d6514a63feb30913c58860d1c23aa06592eb33519f14e405897fbef",
+    "native/smolbox-port/src/runtime.rs": "9df01d4a71496dc6f6b1b3cdfb7a6b4ca61f659fbbbf4a408dc541c64a56df11",
+    "native/smolbox-protocol/fixtures/partial-branch-disposal-v1.json": "6ca3e209165900d1cc3d75a8f8d53a1a7f97fbf886e7d0ddc231fd50919f6782",
+    "native/smolbox-protocol/src/lib.rs": "a75e9a3875ba7ee44c444b037646c12e26732cc4d184cf2d2e5952de901fcbf2",
+    "native/smolbox-protocol/src/partial_branch_disposal.rs": "3d96bdb88c2cc49e73f9c7e6364ad24d59d32d943bb4eb8718535aea4d8438ce",
+    "native/smolbox-protocol/src/session.rs": "8352c7473c8356c56f48ad1b8ee0ad8f07fbef7da8a27e471ebb6e6f42b8ccb8",
+    "native/smolbox-protocol/src/wire.rs": "176a8d55aecfab67fe05550968c07300b1545daf72322f9d26ccd028ad522c33",
+    "test/unit/embedded_partial_branch_disposal_test.exs": "a09e438bf51fa59b5d7f553446525b15d2b1c16bfe4cd2eb2a4ee409c563a592"
+  },
+  "wire": {
+    "major": 2,
+    "operations": {
+      "dispose_partial_branch": "delete",
+      "resolve_partial_branch_disposal": "inspect"
+    },
+    "outcome": "partial_branch_disposed",
+    "full_prior_collection_request_proof_and_creation_bound": true,
+    "explicit_quiescence_and_exact_immutable_branch_approval": true,
+    "required_branch_feature": 1,
+    "source_receipt_binds_domain": true,
+    "terminal_binds_current_platform_and_original_epoch": true,
+    "no_output_or_upload_streams": true,
+    "request_bytes": 24576,
+    "proof_bytes": 49152,
+    "control_budget_ms": 30000,
+    "captured_adapter_deadline_includes_conversion_and_original_selection": true,
+    "required_original_retention_no_sdk_inventory_fallback": true,
+    "sdk_success_and_resolved_absence_remain_distinct": true,
+    "engine_proof_shape_unchanged": true,
+    "reserved_control_and_branch_terminal_capacity": true
+  },
+  "fixtures": {
+    "kind": "synthetic canonical hash alternatives; no SDK source or ownership provenance",
+    "rows": 10,
+    "platforms": [
+      "linux",
+      "macos"
+    ],
+    "completion_variants": [
+      "deleted",
+      "resolved_absent"
+    ],
+    "held_and_explicit_release_platforms": [
+      "linux",
+      "macos"
+    ],
+    "initial_release_platforms": [
+      "macos"
+    ],
+    "derived_from": "native/smolbox-protocol/fixtures/branch-deletion-collection-v1.json"
+  },
+  "validation": {
+    "rust": [
+      {
+        "name": "protocol",
+        "exit_code": 0,
+        "summary": [
+          "test result: ok. 81 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s",
+          "test result: ok. 59 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s",
+          "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        ]
+      },
+      {
+        "name": "port-peer",
+        "exit_code": 0,
+        "summary": [
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 82 filtered out; finished in 3.46s"
+        ]
+      },
+      {
+        "name": "port-output",
+        "exit_code": 0,
+        "summary": [
+          "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 74 filtered out; finished in 0.92s"
+        ]
+      }
+    ],
+    "shared_engine_reader": {
+      "exit_code": 0,
+      "passed": 1,
+      "command": "cargo test --manifest-path native/Cargo.toml -p smolbox-engine --lib synthetic_partial_disposal_wire_bytes"
+    },
+    "static": [
+      {
+        "name": "clippy-final",
+        "exit_code": 0
+      },
+      {
+        "name": "sdk-check",
+        "exit_code": 0
+      },
+      {
+        "name": "cargo-fmt",
+        "exit_code": 0
+      },
+      {
+        "name": "credo-final",
+        "exit_code": 14
+      },
+      {
+        "name": "compile",
+        "exit_code": 0
+      }
+    ],
+    "elixir": {
+      "files": [
+        "test/unit/embedded_partial_branch_disposal_test.exs",
+        "test/unit/embedded_partial_branch_collection_test.exs",
+        "test/unit/native_partial_branch_collection_test.exs",
+        "test/unit/native_partial_branch_public_collection_test.exs",
+        "test/unit/backend_test.exs",
+        "test/unit/backend_parity_coverage_test.exs"
+      ],
+      "results": [
+        {
+          "lane": "current",
+          "exit_code": 0,
+          "summary": [
+            "......................................",
+            "Finished in 0.7 seconds (0.7s async, 0.00s sync)",
+            "",
+            "Result: 38 passed"
+          ]
+        },
+        {
+          "lane": "minimum",
+          "exit_code": 0,
+          "summary": [
+            "",
+            "......................................",
+            "Finished in 0.7 seconds (0.7s async, 0.00s sync)",
+            "38 tests, 0 failures"
+          ]
+        }
+      ]
+    },
+    "tests_per_current_minimum_toolchain": 38,
+    "credo": {
+      "repository_issues": 67,
+      "new_issues": [],
+      "changed_or_new_file_issues": []
+    },
+    "peer_is_in_process_not_an_sdk_helper_process": true,
+    "peer_catalog_control_sessions": 80,
+    "peer_normal_shutdown": true,
+    "documentation": {
+      "results": [
+        {
+          "name": "docs",
+          "exit_code": 0,
+          "summary": [
+            "Generating docs...",
+            "View html docs at \"doc/index.html\"",
+            "View markdown docs at \"doc/llms.txt\"",
+            "View epub docs at \"doc/SmolBox.epub\""
+          ]
+        },
+        {
+          "name": "doc-links",
+          "exit_code": 0,
+          "summary": [
+            "Checked local links and fragments in 169 documentation pages"
+          ]
+        }
+      ],
+      "local_pages_checked": 169
+    }
+  },
+  "sdk": {
+    "revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "patches": [],
+    "unmodified_snapshot_verified": true
+  },
+  "scope": {
+    "port_routing_and_typed_readers_implemented": true,
+    "backend_runtime_durable_public_disposal_consumption_complete": false,
+    "terminal_registry_handoff_complete": false,
+    "fresh_public_source_observation_requires_terminal_handoff": true,
+    "store_codec_changed": false,
+    "public_native_branch_admission_enabled": false,
+    "sdk_or_vm_launched": false,
+    "ordinary_changed_package_qualification_complete": false,
+    "historical_qualification_transferred": false,
+    "full_parity_complete": false,
+    "all_full_parity_rows_still_pending": true,
+    "crash_validation_deferred": true,
+    "live_loss_forced_termination_or_persistence_interruption_run": false,
+    "crash_handling_qualified": false,
+    "distribution_approved": false,
+    "pushed_or_published": false
+  },
+  "remaining": [
+    "terminal native job/registry handoff before fresh public source observation",
+    "Backend/Runtime/durable public partial disposal action acceptance/completion",
+    "explicit continuation/residual cleanup and dependency/backing closure",
+    "completed-child inventory-PID ownership audit",
+    "ordinary exact-package platform/source/store/resource qualification and remaining P0-P9 gates"
+  ]
+}

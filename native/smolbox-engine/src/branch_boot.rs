@@ -6,6 +6,9 @@ use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
 use std::os::unix::fs::{MetadataExt, OpenOptionsExt};
 use std::path::{Path, PathBuf};
+mod collection;
+mod partial_disposal;
+use collection::CollectionRecord;
 
 const FILE_NAME: &str = "smolbox.branch-start-v1.json";
 const MAX_BYTES: u64 = 64 * 1024;
@@ -159,10 +162,15 @@ enum Phase {
 struct Journal {
     plan: Plan,
     phase: Phase,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    collection: Option<CollectionRecord>,
 }
 impl Journal {
     fn validate(&self) -> Result<()> {
         self.plan.validate()?;
+        if let Some(record) = &self.collection {
+            record.validate(&self.plan, &self.phase)?;
+        }
         match &self.phase {
             Phase::Prepared => {}
             Phase::Releasing { intent } | Phase::Released { intent } => {
@@ -253,7 +261,7 @@ impl Lifecycle {
         if child.path() != self.directory {
             return Err(Error::before(ErrorCode::Ownership));
         }
-        match self.read() {
+        match self.read_active() {
             Err(error) if error.code == ErrorCode::NotFound => Ok(()),
             Ok((journal, _))
                 if journal.plan.publication == *publication
@@ -270,7 +278,7 @@ impl Lifecycle {
         if plan.child.path != self.directory {
             return Err(Error::before(ErrorCode::Ownership));
         }
-        match self.read() {
+        match self.read_active() {
             Ok((previous, _))
                 if previous.plan == *plan && matches!(previous.phase, Phase::Prepared) =>
             {
@@ -281,6 +289,7 @@ impl Lifecycle {
                 &Journal {
                     plan: plan.clone(),
                     phase: Phase::Prepared,
+                    collection: None,
                 },
                 None,
             ),
@@ -294,7 +303,7 @@ impl Lifecycle {
         epoch: &crate::epoch::ActorEpoch,
     ) -> Result<()> {
         plan.verify()?;
-        let (mut journal, version) = self.read()?;
+        let (mut journal, version) = self.read_active()?;
         if journal.plan != *plan
             || !matches!(journal.phase, Phase::Prepared)
             || !dispatch.matches_epoch(&plan.publication.child().name, epoch)
@@ -314,7 +323,7 @@ impl Lifecycle {
         enrollment: Option<&crate::epoch::BootEnrollment>,
         succeeded: bool,
     ) -> Result<()> {
-        let (mut journal, version) = self.read()?;
+        let (mut journal, version) = self.read_active()?;
         let Phase::Entered { boot: previous } = &journal.phase else {
             return Err(Error::uncertain(ErrorCode::State));
         };
@@ -339,7 +348,7 @@ impl Lifecycle {
         enrollment: &crate::epoch::BootEnrollment,
     ) -> Result<()> {
         plan.verify()?;
-        let (mut journal, version) = self.read()?;
+        let (mut journal, version) = self.read_active()?;
         let Phase::Returned {
             boot,
             child: Some(child),
@@ -367,7 +376,7 @@ impl Lifecycle {
         enrollment: &crate::epoch::BootEnrollment,
         proof: &crate::branch_identity::Verified,
     ) -> Result<()> {
-        let (mut journal, version) = self.read()?;
+        let (mut journal, version) = self.read_active()?;
         let Phase::Initializing { intent } = &journal.phase else {
             return Err(Error::uncertain(ErrorCode::State));
         };
@@ -391,7 +400,7 @@ impl Lifecycle {
         enrollment: &crate::epoch::BootEnrollment,
     ) -> Result<()> {
         intent.validate()?;
-        let (mut journal, version) = self.read()?;
+        let (mut journal, version) = self.read_active()?;
         let (Phase::IdentityReady {
             intent: identity,
             identity_sha256,
@@ -422,7 +431,7 @@ impl Lifecycle {
         intent: &crate::branch_release::Intent,
         enrollment: &crate::epoch::BootEnrollment,
     ) -> Result<()> {
-        let (journal, _) = self.read()?;
+        let (journal, _) = self.read_active()?;
         if journal.plan != *plan
             || !intent.matches(enrollment)
             || !matches!(&journal.phase, Phase::Releasing { intent: actual } if actual.as_ref() == intent)
@@ -446,7 +455,7 @@ impl Lifecycle {
         if recorded.as_ref() != Some(&intent.transition) {
             return Err(Error::uncertain(ErrorCode::Ownership));
         }
-        let (mut journal, version) = self.read()?;
+        let (mut journal, version) = self.read_active()?;
         journal.phase = Phase::Released {
             intent: Box::new(intent.clone()),
         };
@@ -460,7 +469,7 @@ impl Lifecycle {
         enrollment: &crate::epoch::BootEnrollment,
     ) -> Result<Option<crate::BranchReleaseTransition>> {
         request.validate()?;
-        let (journal, _) = self.read()?;
+        let (journal, _) = self.read_active()?;
         if journal.plan != *plan {
             return Err(Error::before(ErrorCode::Ownership));
         }
@@ -487,7 +496,7 @@ impl Lifecycle {
         bool,
         Option<crate::BranchReleaseTransition>,
     )> {
-        let (mut journal, version) = self.read()?;
+        let (mut journal, version) = self.read_active()?;
         if journal.plan != *plan {
             return Err(Error::before(ErrorCode::Ownership));
         }
@@ -533,7 +542,7 @@ impl Lifecycle {
     /// IdentityReady alone cannot permit cold restart. Explicit release and
     /// final initialized publication must precede ordinary lifecycle ownership.
     pub(crate) fn require_regular_restart(&self, receipt: &crate::CreationReceipt) -> Result<()> {
-        let (journal, _) = self.read()?;
+        let (journal, _) = self.read_active()?;
         let mut origin = journal.plan.publication.child().clone();
         origin.material = None;
         crate::material::check_origin(&origin, receipt)?;
@@ -548,14 +557,22 @@ impl Lifecycle {
                 let mut origin = journal.plan.publication.child().clone();
                 origin.material = None;
                 crate::material::check_origin(&origin, receipt)?;
-                Ok(!matches!(
-                    journal.phase,
-                    Phase::Released { .. } | Phase::HeldReady { .. }
-                ))
+                Ok(journal.collection.is_some()
+                    || !matches!(
+                        journal.phase,
+                        Phase::Released { .. } | Phase::HeldReady { .. }
+                    ))
             }
             Err(error) if error.code == ErrorCode::NotFound => Ok(true),
             Err(error) => Err(error),
         }
+    }
+    fn read_active(&self) -> Result<(Journal, crate::checkpoint_materialize::FileVersion)> {
+        let record = self.read()?;
+        if record.0.collection.is_some() {
+            return Err(Error::before(ErrorCode::State));
+        }
+        Ok(record)
     }
     fn read(&self) -> Result<(Journal, crate::checkpoint_materialize::FileVersion)> {
         let path = self.directory.join(FILE_NAME);

@@ -1,10 +1,17 @@
 defmodule SmolBox.Store.NativeBranchRetirementOps do
   @moduledoc false
-  alias SmolBox.Embedded.{BranchChildAbsence, NativeBranchRetirement, UnbootedBranchChildAbsence}
+  alias SmolBox.Embedded.{
+    BranchChildAbsence,
+    NativeBranchRetirement,
+    PartialBranchChildAbsence,
+    UnbootedBranchChildAbsence
+  }
+
   alias SmolBox.{Error, ManagedMachine, Validation}
 
   def retire(parent, child, proof, now)
-      when is_struct(proof, BranchChildAbsence) or is_struct(proof, UnbootedBranchChildAbsence) do
+      when is_struct(proof, BranchChildAbsence) or is_struct(proof, UnbootedBranchChildAbsence) or
+             is_struct(proof, PartialBranchChildAbsence) do
     with true <- Validation.timestamp?(now) and NativeBranchRetirement.pair?(parent, child),
          {:ok, request} <- NativeBranchRetirement.request(child),
          true <- NativeBranchRetirement.matches?(proof, request) do

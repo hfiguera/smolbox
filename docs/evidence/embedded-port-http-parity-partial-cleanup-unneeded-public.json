@@ -1,0 +1,162 @@
+{
+  "schema": 1,
+  "status": "public-unused-cleanup-resolution-fenced-models-and-store-pipelines-passed",
+  "source_base_commit": "b38fce34d28940832113a7b0705259cda1ec4c71",
+  "source_files_sha256": {
+    "examples/durable_host/test/native_partial_branch_cleanup_resolution_store_test.exs": "d68d135ef4998f7ac1d6ebf8ebb252285b61c90a908fd4a474f79b90eb204e86",
+    "lib/smolbox/backend/embedded_partial_branch_cleanup.ex": "6acb850c8e63ad79d1d08e1c00da95a4b3a000aa5fc4848b2a7e208dd668a6c9",
+    "lib/smolbox/branches.ex": "70dd7d881f660202fd2fe8fa96c14960a93daabc7d6bd16b2aa5d7ffd5944c71",
+    "lib/smolbox/runtime/native_partial_branch_cleanup.ex": "3fc07144432d235bbd932dd496e020384d9119b07945f91f3d45ef5be9e7d05f",
+    "lib/smolbox/store.ex": "9c58ed2d7dfb697ad90ae846b6b28d8f1e0d26cb44f15272ec5e5f204ea66aab",
+    "test/unit/native_partial_branch_public_cleanup_test.exs": "db41b6d3a04f23de35ab1543c01d2f954139038654444901147bb41bb04d6c31"
+  },
+  "public_boundary": {
+    "existing_backend_operation": "cleanup_partial_branch_disposal",
+    "optional_wire_lookup": "resolve_partial_branch_cleanup",
+    "initial_offer_is_only_the_exact_saved_cleanup_action": true,
+    "only_valid_zero_output_cursor_free_not_dispatched_wire_terminal_permits_lookup": true,
+    "optional_feature": {
+      "partial_cleanup_resolution": 1,
+      "requires": {
+        "branches": 1
+      }
+    },
+    "production_run_requires_approved_full_config_and_same_pinned_helper": true,
+    "older_helpers_uncertain_direct_errors_or_malformed_replies_do_not_trigger_lookup": true,
+    "no_removal_or_sdk_fallback_after_resolution_lookup": true,
+    "existing_actual_removal_outcome_cannot_be_replaced_by_alternate_acknowledgement": true,
+    "lookup_result_is_only_NativePartialBranchCleanupResolutionResult": true,
+    "same_controller_helper_fence_through_acceptance_rpc_observation_and_guarded_paired_commit": true,
+    "original_full_request_platform_epoch_and_fresh_source_observation_required": true,
+    "actual_refusal_request_and_response_bytes_deducted_with_envelope_headroom": true,
+    "per_control_input_bytes": 32768,
+    "per_control_output_bytes": 98304,
+    "accepted_retry_aggregate_input_bytes": 65536,
+    "accepted_retry_aggregate_output_bytes": 196608,
+    "smaller_configured_budgets_never_increased": true,
+    "one_absolute_deadline_max_ms": 30000,
+    "fresh_qualification_reserved_stages_unchanged": true,
+    "lost_ack_source_or_commit_preserve_request_and_pending_accounting": true,
+    "saved_acceptance_completion_and_current_versions_return_ack_without_helper_io": true,
+    "saved_history_readable_after_retirement_backing_and_late_commit": true,
+    "frozen_future_peer_descriptors_explicitly_fail_package_config_approval": true
+  },
+  "validation": {
+    "public_peer_tests_passed": 89,
+    "new_public_peer_cases": 34,
+    "material_provenance_combinations": 8,
+    "new_postgresql_backend_pipeline_provenance_cases": 2,
+    "current": {
+      "elixir": "1.20.4",
+      "otp": "29.0.6",
+      "shared_tests_passed": 617,
+      "deferred_crash_excluded": 4,
+      "postgresql_tests_passed": 151,
+      "http_contracts_passed": 410,
+      "earlier_legacy_envelopes": 12,
+      "original_v48_cleanup_envelopes": 8,
+      "original_source_envelopes_preserved_with_v48_reader": 4
+    },
+    "minimum": {
+      "elixir": "1.18.4-otp-27",
+      "otp": "27.3.4.15",
+      "shared_tests_passed": 617,
+      "deferred_crash_excluded": 4,
+      "postgresql_tests_passed": 151,
+      "http_contracts_passed": 410,
+      "earlier_legacy_envelopes": 12,
+      "original_v48_cleanup_envelopes": 8,
+      "original_source_envelopes_preserved_with_v48_reader": 4
+    },
+    "legacy_compatibility": "Original prefixes and exact ETF terms retained; cross-BEAM map byte order is not canonical.",
+    "private_original_envelope_sha256": {
+      "old-v48-explicit_release-completed.bin": "99eae20aa6b02e3cd1ee1b4bfe433c12f075214cc47bea3ca4a90628d58f1d93",
+      "old-v48-explicit_release-pending.bin": "42d0edc252966fe206b41982e3f8abc3039e107e0e57834f5a8928b3aea4a728",
+      "old-v48-explicit_release-source.bin": "f980205f834424709a0f643935cfb1e0347e339a917d507fe0a9732a15918d24",
+      "old-v48-held-completed.bin": "55d513c31180632d817d817bcb9d85fb2b22508984cf26587da35e06edaa0106",
+      "old-v48-held-pending.bin": "7d1bef9f32408ab998ec3bdc340ae40d923fc17794186bb441b9b45656aeffe3",
+      "old-v48-held-source.bin": "79400fc91882940a191a7a5a98508d32d7280321224688c6d74d0bab295d0ed3",
+      "old-v48-initial_release-completed.bin": "84acd614907009d002d69fa7f467b227f15838264e82aa9a38650ed2ae3bcf4c",
+      "old-v48-initial_release-pending.bin": "4c59928113214c40e1d1d35f8a9172f3aa7414337ddedf9e497bed22ba03dd77",
+      "old-v48-initial_release-source.bin": "7c617081e072f7991f47583dd811fd47f01ca49dedc5ee0558533cb7f3388df1",
+      "old-v48-pre_release-completed.bin": "3f93f7e85cad03fc032fde889d8e0fa5b9d785360bbab36f3236e03e33421358",
+      "old-v48-pre_release-pending.bin": "f697eea073cf141327c2ff9614dd8b6ba5814029f697fee68ff9ba73c7c2096c",
+      "old-v48-pre_release-source.bin": "5257a1da3a25553dad604674631ad01afd2d0143d2b0367139198975beeddcbf"
+    },
+    "postgresql_final_state": {
+      "partition_rows": 0,
+      "other_database_clients": 0,
+      "normal_smart_shutdown": true,
+      "pg_ctl_status": 3,
+      "socket_removed": true
+    },
+    "initial_postgresql_fixture_compile_failure": {
+      "test_fixture_constructor_repaired": true,
+      "failed_cluster_normally_stopped": true,
+      "failed_attempt_supplies_no_pipeline_qualification": true
+    },
+    "strict_credo": {
+      "exit_code": 14,
+      "repository_issues": 67,
+      "new_issues": [],
+      "changed_or_new_line_issues": []
+    },
+    "compile_warnings_as_errors_exit_code": 0,
+    "elixir_format_exit_code": 0,
+    "unmodified_sdk_verification_exit_code": 0,
+    "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "documentation": {
+      "warnings_as_errors_exit_code": 0,
+      "local_links_fragments_exit_code": 0,
+      "pages_checked": 176
+    },
+    "native_sources_unchanged_no_new_native_package_qualification_claimed": true,
+    "private_log_sha256": {
+      "focused-final.log": "acc6a2bdb9c544ef7d30b73de4e67b212208b818e00e14db1db1f19b519c39cd",
+      "current-tests.log": "ec53a46b7a40b021908544db20c6b5d339e72febf898b963f5d292b193d467ac",
+      "minimum-tests.log": "4ef953f69b44d102f328cc793663c22b3ae1a92154bd4659d6a692a27a8626c1",
+      "current-http.log": "59796db7e009360c343e795b6d768b8d85e83400584c4e8f0d9f1437d8d30d29",
+      "minimum-http.log": "203ef6833ca5fd1a257b4756d8ac1d267974746f8fb49294f1587647877473da",
+      "current-legacy.log": "5de7a3b347697a445f4b01c5b65551f07fcbed5f5256cd8b100431027a6e1ba5",
+      "minimum-legacy.log": "37e41f360674ac393cb9a13922f64ec0d251967b39c2fcd9f5e361b9398b8775",
+      "current-old-v48.log": "0d8f3499524cad9cd2b1b89878af536b2d3e0d4417138b0d0a6c335dd9bfd6ba",
+      "minimum-old-v48.log": "0d8f3499524cad9cd2b1b89878af536b2d3e0d4417138b0d0a6c335dd9bfd6ba",
+      "current-postgres.log": "c1ca80b7e902193aad3c5101374fe96737eb8b19c156b8cd574a18d06ad9a294",
+      "minimum-postgres.log": "711760e62088c9ff341a942733bc25c6b330215a3bbd2af09f7e630ad8367bbd",
+      "postgres-custody.log": "52f96c26a39ed25108a6db43d6e11c6051eba8a498a5baab1891adfa7ac7c262",
+      "postgres-stop.log": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "postgres-status.log": "e138ccb54fdb08283c6eb21159c53207bbbbf07077246e2804e18d22efe6e250",
+      "sdk-check.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "format.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "compile-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "credo-final.log": "d2edda9fceb0a16a6308160e9299a5af056ede99c88f180e58c87e38643e17e5",
+      "docs.log": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+      "doc-links.log": "2977ff71930dc7c0c0758e26d2a31102384e27693707da347f9b51505f31e155"
+    }
+  },
+  "scope": {
+    "native_engine_port_protocol_sdk_or_durable_shapes_changed": false,
+    "bounded_backend_and_public_original_archived_unused_cleanup_recovery_implemented": true,
+    "ordinary_sdk_vm_or_changed_package_platform_public_consumer_qualification_supplied": false,
+    "terminal_but_unarchived_or_enrolled_unused_cleanup_recovery_complete": false,
+    "backend_operation_inventory_unchanged": 60,
+    "arity_signatures_unchanged": 66,
+    "wire_unchanged": "2.0",
+    "selective_codecs_unchanged": [
+      49,
+      48
+    ],
+    "new_store_marker": false,
+    "native_branch_or_optional_resolution_admission_enabled": false,
+    "historical_package_qualification_transferred": false,
+    "all_full_parity_rows_pending": true,
+    "crash_validation_deferred": true,
+    "crash_handling_qualified": false,
+    "distribution_approved": false,
+    "parity_complete": false
+  },
+  "remaining": [
+    "terminal-but-unarchived disposal, original enrolled-but-unused cleanup, other partial SDK phases and previously accepted unsupported cleanup recovery outside original archived no-enrollment provenance",
+    "remaining completed-child ownership audit and all P0-P9 ordinary exact-package platform/source/store/resource/current-minimum-consumer acceptance gates"
+  ]
+}

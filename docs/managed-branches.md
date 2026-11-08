@@ -221,7 +221,15 @@ make an old reader accept it. Custom stores must implement the full normative
 `SmolBox.Store` contract before advertising the capability.
 
 Embedded Port branch support is still under implementation and public admission
-remains disabled. Its frozen child assignments and source dependency/history
+remains disabled. Each child's dependency and backing allowance has an independent
+lifetime: cleaning up one sibling does not unblock source lifecycle while another
+dependency remains, or release another child's backing. The paired-store sibling
+contracts cover these accounting boundaries; ordinary VM independence and exact
+package qualification remain required. The
+[sibling accounting evidence](evidence/embedded-port-http-parity-branch-siblings.json)
+records the validated scope.
+
+Its frozen child assignments and source dependency/history
 records use **codec v30**, including original completion, immutable child root and
 current held/released material. Source commands carrying branch material links
 use v29; commands retaining a native child assignment use v30. Completion and
@@ -445,3 +453,256 @@ metadata reservation is retained before original deletion entry so collection
 control remains available during quarantine. Ordinary SDK/platform qualification
 remains pending; native branch admission stays disabled and crash validation is
 deferred.
+
+The separate pre-handoff collection control is exposed as
+`SmolBox.Branches.collect_partial(runtime, child_handle, version, quiesced: true)`.
+It applies only to an uncertain original embedded creation whose source still
+retains the exact creation head and active dependency. It needs the original
+helper's retained manager/enrollment; an SDK row or matching name supplies no
+substitute. The current controller/helper epoch is fenced before an immutable
+full-creation/action request and pinned platform are saved. Its control budget is
+at most 30 seconds, 21 KiB encoded input allowance and six KiB reply allowance,
+including framing headroom. Collection never boots or initializes the child.
+
+A matching acknowledgement records only original-child collection. The child
+remains unknown, and every ordinary reservation, source dependency, disk and extra
+backing allowance stays charged. Exact saved acknowledgement reads return without
+helper IO. A missing reply retains the same accepted request for explicit retry;
+only the original manager's cached acknowledgement can deduplicate completed
+collection. A stale child version, crossed platform or failed commit cannot
+publish completion. This action cannot turn collection into readiness, absence,
+deletion, never-booted disposal or prepared-only retirement. The shared engine and
+Port protocol have distinct pre-handoff disposal controls and typed readers. Their
+terminal handoff retains the exact synchronized proof, original runtime/domain,
+opaque child enrollment and native backing while releasing only transient work
+and source/child locks. Exact historical lookup cannot replay SDK deletion or
+adopt newly recreated child material. Memory and encrypted PostgreSQL now provide
+paired disposal acceptance/completion writers and selective codec v45 readers.
+The separate action retains the completed collection and pinned platform, and
+only a matching current-version disposal result plus fresh source observation
+can release ordinary child capacity. Source dependency and extra backing stay
+charged. Upgrade every reader/projector before advertising
+`native_partial_branch_disposals: 1`; this marker enables no branch feature.
+`SmolBox.Branches.dispose_partial(runtime, child_key, version, quiesced: true)`
+now saves and dispatches this separate action under the same controller/helper
+fence as its paired commit. `resolve/3` with `disposition: :deleted` selects the
+same path when a collection record exists; its acknowledgement is required before
+any disposal. An accepted retry first observes its original disposal. An uncertain
+observation never falls through to another deletion offer. Only a definitive
+not-dispatched state reply may offer the same request to the engine's one-shot
+grant, which independently prevents repeated SDK entry. Lost proof/source replies
+and failed commits retain the accepted request and every public reservation.
+Saved disposal and collection acknowledgements return the current record without
+helper IO. A separate engine/Port `cleanup_partial_branch_disposal` control and
+strict typed reader now cover original SDK-absent residual cleanup. Its distinct
+request and resolved-absent acknowledgement preserve collection/disposal history;
+only the original cached/protected removal grant may remove the original child
+subtree. The bounded control requires explicit quiescence, exact branch approval,
+Delete capability and matching platform/domain/original epoch. It never retries
+SDK deletion or retires dependencies/backing. Memory and encrypted PostgreSQL now
+freeze a separate nested cleanup request before IO and commit only its matching
+typed acknowledgement plus fresh source observation. The distinct
+`disposal_cleanup_pending` phase and selective codec v48 retain every reservation
+while pending; ordinary disposal cannot consume this action. Completion records
+both cleanup and resolved-absent disposal together, releasing only ordinary child
+capacity. Dependency/backing closeout remains separate and preserves cleanup
+history. Upgrade every reader/projector before advertising
+`native_partial_branch_cleanups: 1`; this marker enables no native branches.
+`SmolBox.Branches.cleanup_partial(runtime, child_key, version, quiesced: true)`
+now holds one controller/helper fence through durable acceptance, bounded cleanup
+IO, fresh source observation and paired completion. It applies to the original
+SDK-absent residual state; the engine independently requires original retained
+ownership and the exact protected removal grant. Its cleanup/observation stage
+uses at most 32 KiB encoded input and 96 KiB reply data, including envelope
+headroom. The fresh qualification and total workflow bounds are described below. An accepted retry uses the same cleanup request, with no SDK disposal
+fallback. Deleted resolution resumes an already accepted cleanup; it does not
+create one from bare absence. Saved acknowledgements, including later retirement
+and backing closure, return without helper IO. A late store acknowledgement stays
+uncertain; an actually committed matching proof can then be read normally.
+
+Native eligibility/recovery now has a separate
+`qualify_partial_branch_cleanup` engine/Port control and strict reader. It can
+return a positive original residual candidate, or the exact original terminal
+disposal with its existing provenance. Positive original SDK row/reservation and
+directory absence can resolve the prior disposal without creating cleanup.
+A candidate is no cleanup/disposal proof or capacity-release grant. A current row,
+reservation, changed original directory, other owner or missing/crossed history
+refuses qualification. The public coordinator now runs this check before
+accepting fresh cleanup. Only a positive candidate permits the new action, after
+reserving its complete cleanup/observation budget. If the original disposal is
+already terminal, fresh source observation and guarded paired completion record
+that exact result without accepting cleanup. Deleted and ResolvedAbsent remain
+distinct. Refused, unknown, malformed or expired qualification cannot create a
+grant. Already accepted cleanup skips fresh qualification and keeps its saved
+request. The workflow shares one 30-second deadline and aggregate 64-KiB input /
+192-KiB output cap; its qualification stage uses 26/64 KiB and cleanup plus source
+observation uses 32/96 KiB. Saved ordinary disposition remains readable through
+retirement/backing closure, using the original pending completion version or
+current version, without another helper call. Other partial phases, recovery of
+previously accepted unsupported grants and ordinary rebuilt-package qualification
+remain unfinished; public native branch admission remains disabled.
+
+Original partial disposal now has a separate protected SDK-entry fence. A saved
+primary Entered intent alone never proves deletion unentered. Only the original
+cached grant and matching protected Prepared sidecar, together with fresh exact
+row/source/root/collection checks, permit the first SDK deletion call after an
+accepted intent whose worker never entered it. A retry offers only that same
+saved action. The cache is consumed before the Entered write and SDK call; an
+uncertain write or SDK error cannot authorize another call. Missing caches,
+missing/rolled-back published sidecars, changed ownership and existing residual
+cleanup refuse SDK continuation. No manager or grant is reconstructed from files
+or empty inventory. Positive original absence can still resolve the old disposal.
+A matching visible primary intent whose original publication was not acknowledged
+can now recover after fresh exact row/source/root/lifecycle/collection validation.
+Its original unused SDK-entry cache and absence of any entry/cleanup sidecar are
+required. Recovery synchronizes existing intent bytes before acknowledging the
+original cache; it never replaces intent or creates an SDK grant from files.
+Missing legacy caches, entered/attempted SDK state and absent/changed context
+refuse recovery. Other partial phases remain required; this does not qualify an
+SDK/VM or changed package or enable public branches.
+
+The shared engine additionally has a distinct acknowledgement for cleanup that
+was accepted after original disposal already completed. It requires the original
+terminal owner's positive unused-cleanup cache provenance and protected history:
+cleanup was never enrolled, or its exact original exclusive cache proves that
+publication was never attempted. An attempted/published cleanup cannot become
+unused because its receipt is missing. Both Deleted/ResolvedAbsent provenance
+remain intact without claiming residual removal. Before acknowledgement, an
+unarchived terminal disposal can now finish its original handoff using the
+retained manager/actor, exact published intent and protected terminal proof.
+Selection and handoff revalidate unused provenance separately under the same
+captured budget, without stacking material controls. Missing original owner or
+terminal proof, competing actors, wrong cache requests and foreign cleanup history
+refuse recovery. No manager is reconstructed or SDK lifecycle work dispatched;
+new SDK occupants/files are left untouched. If the original primary is still
+Entered, its exact exclusive enrolled-but-unattempted cleanup can now use a
+separate positive-absence completion. Under the original work lock, it verifies
+both SDK row/reservation and directory absence twice, source authority and
+unchanged source/material/retained roots, and exact original cache/actor history
+before publication. Recreated rows, handles, paths or changed source refuse
+completion. It publishes only ResolvedAbsent, then reuses the terminal handoff
+and distinct acknowledgement. A missing/used cache or bare empty namespace cannot
+complete disposal. This path never grants removal or repeats SDK deletion. The explicit protocol-two
+`resolve_partial_branch_cleanup` Port operation and strict Rust/Elixir readers
+now carry that distinct acknowledgement. It requires Inspect, the exact branch
+catalog and optional `partial_cleanup_resolution: 1` together with `branches: 1`;
+older helpers without that feature reject before dispatch. The feature remains
+unadvertised/unapproved in default packages. Reserved control/output and one
+30-second deadline preserve 28-KiB request/80-KiB proof limits. The removal
+command cannot return or consume this alternate proof. Reader-first paired
+Memory/PostgreSQL history now consumes a distinct typed resolution result beside
+fresh source observation. It records `cleanup.unneeded` separately while
+`cleanup.proof` remains nil, preserving the accepted request and original disposal
+provenance. Only ordinary child capacity retires; dependency/backing closeout
+remains explicit. Selective codec v49 carries this history through later cleanup;
+older pending/removal records retain v48 and omit exactly the new nil default.
+Upgrade every reader/projector before advertising
+`native_partial_branch_cleanup_resolutions: 1`; this marker enables no branches.
+The existing public cleanup/deleted-resolution flow now consumes this distinct
+acknowledgement under the same controller/helper fence. It offers the saved cleanup
+control first. Only a strictly valid zero-output native `not_dispatched` terminal,
+plus the negotiated optional capability, allows original-history lookup. Direct
+transport errors, uncertain replies, malformed results or legacy helpers cannot
+trigger it. A negative lookup retains the pending action and every charge; it
+never falls through to removal or SDK deletion. Each control stays within 32-KiB
+input / 96-KiB output, and actual encoded first-refusal bytes are deducted before
+lookup. Accepted retries share at most 64/192 KiB and one 30-second deadline
+through lookup, fresh observation and paired store acknowledgement. Smaller
+configured budgets remain smaller and can refuse another request before IO.
+Fresh qualification/cleanup keeps its existing reserved stage allowances. Saved
+acknowledgements remain readable using the saved acceptance/completion or current
+version, including after retirement/backing closure, without helper IO. Ordinary
+package qualification and the other partial SDK phases remain open; public native
+branch admission stays disabled.
+
+A separate engine/Port `qualify_partial_branch_child_absence` observation is now
+implemented for the positively disposed original child. It requires the exact
+terminal archive/runtime/domain/ledger, retained opaque enrollment and current
+original epoch. It checks actor collection and the child row, creation reservation
+and original directory before and after issuing its distinct typed proof. The
+source may remain running. Recreated names, current ownership handles, busy gates
+or ownership registries, missing history and expired/cancelled requests reject.
+Nothing is adopted, stopped or deleted; dependency and backing charges remain.
+Its strict Rust/Elixir readers and synthetic fixtures do not establish ordinary
+SDK/platform qualification. `SmolBox.Branches.retire(runtime, child_key, quiesced: true)`
+now consumes this fresh proof under the same controller/helper fence as the paired
+Memory/PostgreSQL commit. The request binds the current child version and exact
+saved disposal; source identity, platform and original helper epoch must match.
+Only the source dependency retires. Extra backing remains charged, and a proof
+from completed-child or never-booted disposal cannot close this origin's backing.
+Stale/lost replies and failed commits retain the dependency; explicit retries
+require fresh observation. Saved retirement, disposal and collection acknowledgements
+remain readable without helper IO. Selective **codec v46** persists retirement
+without relabeling disposal-only v45 records; older tags reject the new proof.
+Upgrade every reader/projector before advertising
+`native_partial_branch_retirements: 1`. This marker enables no native branch
+admission. Ordinary exact-package qualification of backing closure
+remains required.
+
+Pending and acknowledged pre-handoff collection records use **codec v44** and
+require the `native_partial_branch_collections: 1` reader marker. Earlier records
+omit the new nil field exactly and retain their existing envelope bytes. Upgrade
+all readers and resource projection writers before any native branch activation;
+the marker alone enables no helper feature or public branch admission. Memory
+and the encrypted PostgreSQL example implement the paired source/child contract.
+The HTTP backend rejects this native-only control before transport IO.
+
+
+The shared engine now has a separate
+`Engine::release_partial_branch_backing_checked` boundary for this original
+collected/disposed origin. Its exact request includes disposal and expected
+source/child material heads, explicit quiescence and host backing-removal
+confirmation. The original terminal archive/runtime/domain/ledger and opaque
+child enrollment remain mandatory. Source and child must be positively collected;
+source/child SDK rows, creation reservations and original directories must be
+absent twice under paired gates. Only the original native backing charge retires,
+after the protected acknowledgement is synchronized; sibling charges and result
+metadata remain. Expected source heads correlate with durable tombstones and are
+never reconstructed from namespace absence. An exact saved acknowledgement does
+not re-observe or clean up new namespace occupants.
+
+The protocol-two Port now routes `release_partial_branch_backing` to this exact
+engine boundary. It requires Inspect capability, the branch feature, exact
+approval catalog, platform/domain/original epoch and zero output. Strict Rust and
+Elixir readers bind the full request and matching accounting acknowledgement;
+they retain the existing `BranchBackingRelease` result shape.
+
+`SmolBox.Branches.release_storage(runtime, child_key, backing_removed: true)` now
+coordinates partial-child backing closure after source deletion and retirement of
+all child dependencies. The same controller/helper fence spans durable acceptance,
+bounded native control and paired completion. The exact disposal, retirement,
+source/child heads and action version remain immutable across claims/retries.
+Pending `backing_pending` records retain the full extra charge. Only the matching
+typed acknowledgement closes the child and releases its extra allowance in the
+same transaction. Missing/late replies and failed commits retain the accepted
+request; explicit retries use that same intent. Saved closed, collection, disposal
+and retirement acknowledgements remain readable without helper IO.
+
+Pending and acknowledged partial backing use **codec v47**; retirement-only v46
+and earlier encodings retain their envelope/default shape. Older tags reject the
+new action. Upgrade every reader/projector before advertising
+`native_partial_branch_backings: 1`. Memory and encrypted PostgreSQL implement
+this paired contract, including deterministic rollback checks. These models and
+framed in-process peers supply no ordinary SDK/package qualification. Public
+native branch admission remains disabled until the remaining lifecycle and
+qualification gates pass; no helper feature activates from a reader marker.
+
+
+The shared engine now also exposes
+`RetainedBranchResolution::cleanup_partial_disposal` for a failed disposal whose
+SDK row and creation reservation are absent while its original child directory
+remains. The exact retained job, published disposal, opaque collection and source
+publication are required. A separate cached, protected cleanup grant binds the
+original directory and its parent before bounded descriptor-relative removal.
+Partial removal resumes only that same request and original inode. It never calls
+SDK deletion, removes the source/snapshot or retires dependency/backing charges.
+The acknowledgement contains the original resolved-absent disposal plus the
+separate cleanup request. Exact history can be re-synchronized after terminal
+handoff without traversing recreated names or requiring the source to remain.
+
+This cleanup boundary is covered by inert actor/file/SQLite models. Port routing,
+typed Elixir readers and paired public cleanup actions remain required. It does
+not qualify a rebuilt package or activate public native branches. An SDK retry
+for a demonstrably unentered deletion still needs its own entry fence: the older
+`entered` record binds intent publication and cannot establish whether the SDK
+call began. Existing entered grants remain one-shot.

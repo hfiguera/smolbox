@@ -5,6 +5,9 @@ defmodule SmolBox.Store.BranchOps do
   alias SmolBox.Embedded.{
     NativeBranchReleaseResult,
     NativeBranchResult,
+    NativePartialBranchCleanupResolutionResult,
+    NativePartialBranchCleanupResult,
+    NativePartialBranchDisposalResult,
     NativePreparedBranchRetirementResult,
     NativeUnbootedBranchDisposalResult
   }
@@ -14,6 +17,9 @@ defmodule SmolBox.Store.BranchOps do
     NativeBranchOps,
     NativeBranchReleaseOps,
     NativeBranchRetirementOps,
+    NativePartialBranchCleanupOps,
+    NativePartialBranchCollectionOps,
+    NativePartialBranchDisposalOps,
     NativePreparedBranchRetirementOps,
     NativeUnbootedBranchDisposalOps,
     RecordOps
@@ -116,6 +122,18 @@ defmodule SmolBox.Store.BranchOps do
          else: (_ -> error(:stale_version))
   end
 
+  defp create_step(p, c, {:accept_partial_collection, version, platform}, now),
+    do: NativePartialBranchCollectionOps.accept(p, c, version, platform, now)
+
+  defp create_step(p, c, {:accept_partial_disposal_cleanup, version, platform}, now),
+    do: NativePartialBranchCleanupOps.accept(p, c, version, platform, now)
+
+  defp create_step(p, c, {:accept_partial_disposal, version, platform}, now),
+    do: NativePartialBranchDisposalOps.accept(p, c, version, platform, now)
+
+  defp create_step(p, c, {:complete_partial_collection, result}, now),
+    do: NativePartialBranchCollectionOps.complete(p, c, result, now)
+
   defp create_step(p, c, {:accept_unbooted_disposal, version}, now),
     do: NativeUnbootedBranchDisposalOps.accept(p, c, version, now)
 
@@ -207,6 +225,21 @@ defmodule SmolBox.Store.BranchOps do
 
   def resolve(p, c, source, %NativeUnbootedBranchDisposalResult{source: source} = result, now),
     do: NativeUnbootedBranchDisposalOps.resolve(p, c, result, now)
+
+  def resolve(
+        p,
+        c,
+        source,
+        %NativePartialBranchCleanupResolutionResult{source: source} = result,
+        now
+      ),
+      do: NativePartialBranchDisposalOps.resolve(p, c, result, now)
+
+  def resolve(p, c, source, %NativePartialBranchCleanupResult{source: source} = result, now),
+    do: NativePartialBranchDisposalOps.resolve(p, c, result, now)
+
+  def resolve(p, c, source, %NativePartialBranchDisposalResult{source: source} = result, now),
+    do: NativePartialBranchDisposalOps.resolve(p, c, result, now)
 
   def resolve(_p, %{branch: %{native_authority: authority}}, _source, _child_observation, _now)
       when not is_nil(authority), do: error(:unsupported_capability)

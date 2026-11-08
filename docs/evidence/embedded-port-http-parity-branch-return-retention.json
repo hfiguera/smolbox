@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "status": "deterministic-branch-return-retention-passed",
+  "source_base_commit": "e3743191b9916f6021acde6b3a2609c189e63df1",
+  "source_file": "native/smolbox-engine/src/branch/retention/boot.rs",
+  "source_file_sha256": "7caefc8d8205ff3e561657aeb295c4ce7664e15cc2f99fdb7831c8d14bec3a5c",
+  "change": {
+    "original_return_enrollment_retained_before_protected_publication": true,
+    "return_facts_single_assignment": true,
+    "successful_and_failed_sdk_return_facts_preserved": true,
+    "publication_error_stays_uncertain": true,
+    "missing_enrollment_grants_no_child_authority": true,
+    "readiness_checks_preserved": true
+  },
+  "regression_cases": [
+    "original_return_enrollment_survives_rejected_lifecycle_publication",
+    "original_return_cannot_be_overwritten_or_republished",
+    "failed_return_without_enrollment_keeps_uncertainty_without_child_authority"
+  ],
+  "validation": {
+    "branch_creation_retention_tests": {
+      "command": "cargo test -p smolbox-engine branch:: --lib --locked --offline",
+      "passed": 95,
+      "failed": 0,
+      "ignored": 0
+    },
+    "other_branch_models": {
+      "command": "cargo test -p smolbox-engine branch_ --lib --locked --offline",
+      "passed": 161,
+      "failed": 0,
+      "ignored": 1,
+      "ignored_cases": [
+        "test transfer_supervisor::tests::ordinary_branch_worker_rejects_unentered_fixture_and_collects_original_leases ... ignored, requires a built helper; explicit ordinary non-VM branch namespace rejection"
+      ]
+    },
+    "verified_unmodified_upstream": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "touched_source_rustfmt_passed": true,
+    "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)",
+    "engine_all_targets_clippy_warnings_denied_passed": true,
+    "upstream_deprecation_warnings_retained": [
+      "smolvm-checkpoint: Atomic::fetch_update renamed to try_update",
+      "smolvm: Atomic::fetch_update renamed to try_update"
+    ],
+    "selected_suite_counts_may_overlap": true
+  },
+  "compatibility": {
+    "sdk_changed": false,
+    "wire_shape_changed": false,
+    "codec_shape_changed": false,
+    "elixir_changed": false,
+    "public_native_branch_admission_enabled": false,
+    "historical_package_qualification_transferred": false
+  },
+  "scope": {
+    "sdk_boot_or_vm_started": false,
+    "live_fault_or_persistence_interruption": false,
+    "pre_handoff_child_collection_or_disposal_complete": false,
+    "ordinary_rebuilt_package_qualification_complete": false,
+    "all_full_parity_rows_still_pending": true,
+    "full_parity_complete": false,
+    "crash_validation_deferred": true,
+    "crash_handling_qualified": false,
+    "distribution_approved": false,
+    "pushed_or_published": false
+  }
+}

@@ -112,6 +112,10 @@ impl Session {
                             .sdk
                             .as_ref()
                             .is_none_or(|sdk| sdk.feature_versions.get("checkpoints") != Some(&1))))
+                || (matches!(&operation, Operation::ResolvePartialBranchCleanup { .. })
+                    && self.hello.sdk.as_ref().is_none_or(|sdk| {
+                        sdk.feature_versions.get("partial_cleanup_resolution") != Some(&1)
+                    }))
                 || (operation.requires_branches()
                     && (self.hello.major != 2
                         || self
@@ -741,6 +745,14 @@ impl Session {
                 check(proof.publication.change.platform == self.hello.package.platform)?;
             }
             (
+                Operation::ReleasePartialBranchBacking { request },
+                Outcome::BranchBackingReleased { proof },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                request.matches(proof)?;
+                check(proof.publication.change.platform == self.hello.package.platform)?;
+            }
+            (
                 Operation::RetirePreparedBranch { request },
                 Outcome::PreparedBranchRetired { proof },
             ) => {
@@ -788,6 +800,62 @@ impl Session {
                 )?;
             }
             (
+                Operation::DisposePartialBranch { request }
+                | Operation::ResolvePartialBranchDisposal { request }
+                | Operation::QualifyPartialBranchCleanup { request },
+                Outcome::PartialBranchDisposed { proof },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                proof.matches_request(request)?;
+                check(
+                    proof.publication.change.platform == self.hello.package.platform
+                        && proof.publication.change.child_origin.intent.epoch == self.hello.epoch,
+                )?;
+            }
+            (
+                Operation::QualifyPartialBranchCleanup { request },
+                Outcome::PartialBranchCleanupCandidate { candidate },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                candidate.matches_request(request)?;
+                check(
+                    candidate.publication.change.platform == self.hello.package.platform
+                        && candidate.publication.change.child_origin.intent.epoch
+                            == self.hello.epoch,
+                )?;
+            }
+            (
+                Operation::ResolvePartialBranchCleanup { request },
+                Outcome::PartialBranchCleanupUnneeded { proof },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                proof.matches_request(request)?;
+                check(
+                    proof.disposal.publication.change.platform == self.hello.package.platform
+                        && proof.disposal.publication.change.child_origin.intent.epoch
+                            == self.hello.epoch,
+                )?;
+            }
+            (
+                Operation::CleanupPartialBranchDisposal { request },
+                Outcome::PartialBranchDisposalCleaned { proof },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                request.matches(proof)?;
+                check(
+                    proof.disposal.publication.change.platform == self.hello.package.platform
+                        && proof.disposal.publication.change.child_origin.intent.epoch
+                            == self.hello.epoch,
+                )?;
+            }
+            (
+                Operation::CollectPartialBranch { request },
+                Outcome::PartialBranchCollected { proof, platform },
+            ) => {
+                check(pending.output_bytes == 0 && platform == &self.hello.package.platform)?;
+                request.matches(proof)?;
+            }
+            (
                 Operation::CollectBranchDeletion { request },
                 Outcome::BranchDeletionCollected { proof },
             ) => {
@@ -825,6 +893,24 @@ impl Session {
                 request.matches(proof)?;
                 check(
                     request.completion.publication.change.platform == self.hello.package.platform,
+                )?;
+            }
+            (
+                Operation::QualifyPartialBranchChildAbsence { request },
+                Outcome::PartialBranchChildAbsent { proof },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                request.matches(proof)?;
+                check(
+                    request.disposal.publication.change.platform == self.hello.package.platform
+                        && request
+                            .disposal
+                            .publication
+                            .change
+                            .child_origin
+                            .intent
+                            .epoch
+                            == self.hello.epoch,
                 )?;
             }
             (

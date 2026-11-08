@@ -94,6 +94,8 @@ defmodule SmolBox.NativeBranchRetirementTest do
                        |> Map.delete(:delete_continuation)
                        |> Map.delete(:delete_cleanup)
                        |> Map.delete(:delete_collection)
+                       |> Map.delete(:partial_collection)
+                       |> Map.delete(:partial_disposal)
                        |> Map.delete(:prepared_retirement)
                        |> Map.delete(:disposal))
                    )

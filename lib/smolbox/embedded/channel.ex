@@ -16,6 +16,13 @@ defmodule SmolBox.Embedded.Channel do
     HeldBranchDeletionAction,
     HeldBranchReleaseRequest,
     ImageContract,
+    PartialBranchBackingRelease,
+    PartialBranchChildAbsence,
+    PartialBranchCleanupCandidate,
+    PartialBranchCollection,
+    PartialBranchDisposal,
+    PartialBranchDisposalCleanup,
+    PartialBranchDisposalCleanupUnneeded,
     PreparedBranchRetirement,
     Protocol,
     RegistryContract,
@@ -43,6 +50,7 @@ defmodule SmolBox.Embedded.Channel do
     :platform,
     major: 1,
     unavailable: false,
+    partial_cleanup_resolution: false,
     last_id: 0,
     pending: %{},
     queued_bytes: 0,
@@ -55,6 +63,11 @@ defmodule SmolBox.Embedded.Channel do
       domain: hello["domain"],
       minor: hello["minor"],
       major: Map.get(hello, "major", 1),
+      partial_cleanup_resolution:
+        match?(
+          %{"branches" => 1, "partial_cleanup_resolution" => 1},
+          get_in(hello, ~w(sdk feature_versions))
+        ),
       platform: get_in(hello, ["package", "platform"]),
       export_platform:
         case get_in(hello, ["package", "architecture"]) do
@@ -70,6 +83,9 @@ defmodule SmolBox.Embedded.Channel do
          true <- map_size(channel.pending) < 32,
          true <- channel.last_id < 9_007_199_254_740_991,
          true <- Request.valid?(operation, 1, channel.major),
+         true <-
+           operation["operation"] != "resolve_partial_branch_cleanup" or
+             channel.partial_cleanup_resolution,
          true <- Validation.integer?(bytes, 0, 262_144),
          true <- Validation.integer?(events, 0, 64),
          true <-
@@ -306,12 +322,27 @@ defmodule SmolBox.Embedded.Channel do
   defp terminal_sequence?(_previous, _next), do: false
 
   defp branch_request_epoch?(epoch, %{
+         "operation" => "release_partial_branch_backing",
+         "request" => request
+       }),
+       do: PartialBranchBackingRelease.epoch(request) == epoch
+
+  defp branch_request_epoch?(epoch, %{
+         "operation" => "qualify_partial_branch_child_absence",
+         "request" => request
+       }),
+       do: PartialBranchChildAbsence.epoch(request) == epoch
+
+  defp branch_request_epoch?(epoch, %{
          "operation" => "qualify_unbooted_branch_child_absence",
          "request" => request
        }),
        do: UnbootedBranchChildAbsence.epoch(request) == epoch
 
   defp branch_request_epoch?(_, _), do: true
+
+  defp branch_epoch?(epoch, %{"result" => "partial_branch_child_absent", "proof" => proof}),
+    do: PartialBranchChildAbsence.epoch(proof["request"]) == epoch
 
   defp branch_epoch?(epoch, %{"result" => "unbooted_branch_child_absent", "proof" => proof}),
     do: UnbootedBranchChildAbsence.epoch(proof["request"]) == epoch
@@ -322,7 +353,23 @@ defmodule SmolBox.Embedded.Channel do
        }),
        do: get_in(candidate, ~w(publication change child_origin intent epoch)) == epoch
 
+  defp branch_epoch?(epoch, %{"result" => name, "proof" => proof})
+       when name in ~w(partial_branch_disposal_cleaned partial_branch_cleanup_unneeded),
+       do: get_in(proof, ~w(disposal publication change child_origin intent epoch)) == epoch
+
+  defp branch_epoch?(epoch, %{
+         "result" => "partial_branch_cleanup_candidate",
+         "candidate" => candidate
+       }),
+       do: get_in(candidate, ~w(publication change child_origin intent epoch)) == epoch
+
+  defp branch_epoch?(epoch, %{"result" => "partial_branch_disposed", "proof" => proof}),
+    do: get_in(proof, ~w(publication change child_origin intent epoch)) == epoch
+
   defp branch_epoch?(_, _), do: true
+
+  defp branch_platform?(platform, %{"result" => "partial_branch_child_absent", "proof" => proof}),
+    do: PartialBranchChildAbsence.platform(proof["request"]) == platform
 
   defp branch_platform?(platform, %{"result" => "unbooted_branch_child_absent", "proof" => proof}),
        do: UnbootedBranchChildAbsence.platform(proof["request"]) == platform
@@ -337,10 +384,35 @@ defmodule SmolBox.Embedded.Channel do
        when kind in ~w(branch_created branch_completion_presence) and proof != nil,
        do: proof["publication"]["change"]["platform"] == platform
 
+  defp branch_platform?(platform, %{
+         "result" => name,
+         "proof" => proof
+       })
+       when name in ~w(partial_branch_disposal_cleaned partial_branch_cleanup_unneeded),
+       do: get_in(proof, ~w(disposal publication change platform)) == platform
+
+  defp branch_platform?(platform, %{
+         "result" => "partial_branch_cleanup_candidate",
+         "candidate" => candidate
+       }),
+       do: get_in(candidate, ~w(publication change platform)) == platform
+
+  defp branch_platform?(platform, %{"result" => "partial_branch_disposed", "proof" => proof}),
+    do: get_in(proof, ~w(publication change platform)) == platform
+
   defp branch_platform?(platform, %{"result" => "unbooted_branch_disposed", "proof" => proof}),
     do: get_in(proof, ~w(publication change platform)) == platform
 
+  defp branch_platform?(platform, %{"result" => "partial_branch_collected", "platform" => actual}),
+       do: actual == platform
+
   defp branch_platform?(_platform, _outcome), do: true
+
+  defp held_platform?(platform, %{
+         "operation" => "qualify_partial_branch_child_absence",
+         "request" => request
+       }),
+       do: PartialBranchChildAbsence.platform(request) == platform
 
   defp held_platform?(platform, %{
          "operation" => "qualify_unbooted_branch_child_absence",
@@ -401,6 +473,12 @@ defmodule SmolBox.Embedded.Channel do
        }),
        do: UnbootedBranchBackingRelease.platform(request) == platform
 
+  defp held_platform?(platform, %{
+         "operation" => "release_partial_branch_backing",
+         "request" => request
+       }),
+       do: PartialBranchBackingRelease.platform(request) == platform
+
   defp held_platform?(_, _), do: true
 
   defp stream(%{"operation" => name, "command" => command}, "stdout")
@@ -441,6 +519,19 @@ defmodule SmolBox.Embedded.Channel do
        do: get_in(proof, ~w(publication change child_origin intent epoch)) == epoch
 
   defp ready_epoch?(_, _, _), do: true
+
+  defp terminal_matches?(
+         _domain,
+         %{
+           operation: %{
+             "operation" => "qualify_partial_branch_child_absence",
+             "request" => request
+           },
+           output_bytes: 0
+         },
+         %{"result" => "partial_branch_child_absent", "proof" => proof}
+       ),
+       do: PartialBranchChildAbsence.matches?(proof, request)
 
   defp terminal_matches?(
          _domain,
@@ -825,6 +916,16 @@ defmodule SmolBox.Embedded.Channel do
   defp terminal_matches?(
          _domain,
          %{
+           operation: %{"operation" => "release_partial_branch_backing", "request" => request},
+           output_bytes: 0
+         },
+         %{"result" => "branch_backing_released", "proof" => proof}
+       ),
+       do: PartialBranchBackingRelease.matches?(proof, request)
+
+  defp terminal_matches?(
+         _domain,
+         %{
            operation: %{"operation" => "retire_prepared_branch", "request" => request},
            output_bytes: 0
          },
@@ -871,6 +972,54 @@ defmodule SmolBox.Embedded.Channel do
          %{"result" => "released_branch_deletion_cleaned", "proof" => proof}
        ),
        do: ReleasedBranchDeletionCleanup.matches?(proof, request)
+
+  defp terminal_matches?(
+         _domain,
+         %{operation: %{"operation" => name, "request" => request}, output_bytes: 0},
+         %{"result" => "partial_branch_disposed", "proof" => proof}
+       )
+       when name in ~w(dispose_partial_branch resolve_partial_branch_disposal qualify_partial_branch_cleanup),
+       do: PartialBranchDisposal.matches?(proof, request)
+
+  defp terminal_matches?(
+         _domain,
+         %{
+           operation: %{"operation" => "qualify_partial_branch_cleanup", "request" => request},
+           output_bytes: 0
+         },
+         %{"result" => "partial_branch_cleanup_candidate", "candidate" => candidate}
+       ),
+       do: PartialBranchCleanupCandidate.matches?(candidate, request)
+
+  defp terminal_matches?(
+         _domain,
+         %{
+           operation: %{"operation" => "resolve_partial_branch_cleanup", "request" => request},
+           output_bytes: 0
+         },
+         %{"result" => "partial_branch_cleanup_unneeded", "proof" => proof}
+       ),
+       do: PartialBranchDisposalCleanupUnneeded.matches?(proof, request)
+
+  defp terminal_matches?(
+         _domain,
+         %{
+           operation: %{"operation" => "cleanup_partial_branch_disposal", "request" => request},
+           output_bytes: 0
+         },
+         %{"result" => "partial_branch_disposal_cleaned", "proof" => proof}
+       ),
+       do: PartialBranchDisposalCleanup.matches?(proof, request)
+
+  defp terminal_matches?(
+         _domain,
+         %{
+           operation: %{"operation" => "collect_partial_branch", "request" => request},
+           output_bytes: 0
+         },
+         %{"result" => "partial_branch_collected", "proof" => proof}
+       ),
+       do: PartialBranchCollection.matches?(proof, request)
 
   defp terminal_matches?(
          _domain,

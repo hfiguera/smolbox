@@ -1,0 +1,196 @@
+{
+  "schema": 1,
+  "status": "original-partial-disposal-cleanup-port-and-typed-reader-models-passed",
+  "source_base_commit": "b1c7c676e8a346f4d5f27475ae6f13f6952fe8ae",
+  "source_files_sha256": {
+    "lib/smolbox/embedded/branch_canonical.ex": "4401dc1d7b393c3363088f16dfb19a3cda4fe2653dfaae5e184278b08d21af49",
+    "lib/smolbox/embedded/channel.ex": "a5073295e32b33f9b76dcc9a763663fb56e0dfa445b3576650595a1950d55838",
+    "lib/smolbox/embedded/partial_branch_disposal_cleanup.ex": "398ea3d3bbfaf5ea2e4b47c3497a54eb45623ea9c0f04ed1a2fa345b73cc0828",
+    "lib/smolbox/embedded/port.ex": "ae943c0b87afb94dd07fa40fbe6058000a9ac5977a6a63c73d3966f5300a7b6d",
+    "lib/smolbox/embedded/protocol.ex": "cc2da57dec393132787211443085611a26de4074a959086dbf27e64e3189fcda",
+    "lib/smolbox/embedded/request.ex": "e9063f7426816f79e5d552d843f7197cbefa902d4fb9339b3562b1414e6bc440",
+    "native/smolbox-engine/src/branch/retention/boot/collection.rs": "8ff2e7fb3c22b80a9f8318922c6880f8ad9ec1feadeb1bcb3eb81b7dc14c2434",
+    "native/smolbox-engine/src/branch/retention/resolution/partial_disposal.rs": "ee150694bd29f3e13a9cc505e49d9ffd8786aa15b63ce3b3954cb90450d75b4e",
+    "native/smolbox-engine/src/branch/retention/resolution/partial_disposal/ledger.rs": "0887fc8676a4310783f2569e0e895ec93d76654e911f85d0e55009aac7071639",
+    "native/smolbox-engine/src/branch/retention/resolution/partial_disposal/residual.rs": "08d9facb97d75d746db333c7cafb5bc386fb2a01923600cb7c5fd7dcd648204a",
+    "native/smolbox-engine/src/branch/retention/resolution/partial_disposal/tests.rs": "db0dce228eabd482e1c2ea29f8b7a88551b45142d6ba0cdcf142525f660c4ffd",
+    "native/smolbox-engine/src/branch/retention/resolution/partial_disposal/tests/residual.rs": "2a7c44112ccd5ad61244c94d2170b7f43ca9536d88b1caa6bc7b97555c1abdf5",
+    "native/smolbox-engine/src/branch_partial_cleanup.rs": "6abcc9ed48fae21236ed4dfb134847a97b8912d46368413e346cbcb103b96c37",
+    "native/smolbox-engine/src/lib.rs": "370abd95234446aee2f1ed7f8fe3ab5694168fb2e9f4022e03f523cf15107654",
+    "native/smolbox-port/src/adapter.rs": "02b451a894f324ebd38447ca8f8a730b4a806dd747d2ff6c532f0fc9b2e805af",
+    "native/smolbox-port/src/output.rs": "8d266ec5166836444cb325a7c7e7653754dc09ca4830637cfe6eb1bcc6e767e4",
+    "native/smolbox-port/src/runtime.rs": "2c44d03c318c0858bf23680740fc4dcb528fbf1a8130aebfd85e73118493027a",
+    "native/smolbox-protocol/fixtures/partial-branch-disposal-cleanup-v1.json": "8dfa407a7b75fe0b4e6e63017b98f7aba971e89645ed9bc92d0e5fbac213375a",
+    "native/smolbox-protocol/src/lib.rs": "a6aece58a310aeff116883e55e3fcca168e32416fc7016448bcd9d2426e91f7b",
+    "native/smolbox-protocol/src/partial_branch_cleanup.rs": "f7b1d19e1feeb28a3b2e65cc85d62a23e8d9aadd3f2e4e769e065c130be235e8",
+    "native/smolbox-protocol/src/session.rs": "e2a95322e3e717c2c7703b7257f2c737f212ae599a5c2efcf0551b6618276309",
+    "native/smolbox-protocol/src/wire.rs": "6a4489f9f9224efbbeda8c881339e55240e9675269530a97063357f3c5f2f132",
+    "test/unit/embedded_partial_branch_disposal_cleanup_test.exs": "9bd107d4e2cde81ee2af33dbd124900afab51b635c1b8738e9a8bff7818c41b4",
+    "test/unit/embedded_port_test.exs": "c055936e5299043d1a8558bc1fa0d19cd9557aa236dc2d553003dff35e89a1b0"
+  },
+  "wire": {
+    "major": 2,
+    "operation": "cleanup_partial_branch_disposal",
+    "outcome": "partial_branch_disposal_cleaned",
+    "capability": "delete",
+    "request_bytes": 28672,
+    "proof_bytes": 81920,
+    "budget_ms": 30000,
+    "branch_terminal_encoded_allowance_bytes": 86016,
+    "control_frames": 65,
+    "feature_and_exact_immutable_approval_catalog_required": true,
+    "explicit_quiescence_required": true,
+    "source_receipt_binds_domain": true,
+    "terminal_original_epoch_and_platform_match_required": true,
+    "distinct_cleanup_request_and_resolved_absent_disposal_required": true,
+    "zero_stream_and_upload": true,
+    "one_absolute_adapter_deadline": true,
+    "original_archive_observation_before_retained_selection": true,
+    "terminal_handoff_before_acknowledgement": true,
+    "post_action_conversion_archive_cancellation_and_expiry_uncertainty_preserved": true,
+    "no_sdk_lifecycle_fallback": true,
+    "no_original_manager_reconstruction": true,
+    "engine_request_proof_and_protected_journal_schemas_unchanged": true,
+    "engine_sources_match_parent_model_evidence": true
+  },
+  "fixtures": {
+    "kind": "explicitly synthetic canonical boundary fixtures; no SDK ownership or lifecycle evidence",
+    "rows": 5,
+    "cases": [
+      {
+        "platform": "macos",
+        "held_creation": true,
+        "release_mode": null
+      },
+      {
+        "platform": "linux",
+        "held_creation": true,
+        "release_mode": null
+      },
+      {
+        "platform": "macos",
+        "held_creation": true,
+        "release_mode": "explicit"
+      },
+      {
+        "platform": "linux",
+        "held_creation": true,
+        "release_mode": "explicit"
+      },
+      {
+        "platform": "macos",
+        "held_creation": false,
+        "release_mode": "initial"
+      }
+    ]
+  },
+  "validation": {
+    "protocol": {
+      "unit_tests": 92,
+      "contracts": 59,
+      "exit_code": 0
+    },
+    "framed_peer": {
+      "tests": 1,
+      "sessions": 30,
+      "policies_per_row": 6,
+      "cases": [
+        "feature disabled",
+        "missing approval catalog",
+        "mismatched approval catalog",
+        "approved while ordinary work unavailable",
+        "Delete capability absent",
+        "foreign source domain"
+      ],
+      "sdk_engine_dto_validation_for_each_approved_synthetic_case": true,
+      "normal_shutdown_only": true,
+      "exit_code": 0
+    },
+    "reserved_output_models": {
+      "tests": 11,
+      "exit_code": 0
+    },
+    "elixir_current": {
+      "elixir": "1.20.4",
+      "otp": "29.0.6",
+      "shared_tests_passed": 486,
+      "deferred_crash_excluded": 4,
+      "http_contracts_passed": 410,
+      "legacy_envelopes": 6
+    },
+    "elixir_minimum": {
+      "elixir": "1.18.4-otp-27",
+      "otp": "27.3.4.15",
+      "shared_tests_passed": 486,
+      "deferred_crash_excluded": 4,
+      "http_contracts_passed": 410,
+      "legacy_envelopes": 6
+    },
+    "legacy_compatibility": "Original envelopes retain prefix and exact decoded ETF term; map byte order is not canonical across BEAMs.",
+    "strict_credo": {
+      "exit_code": 14,
+      "repository_issues": 67,
+      "new_issues": [],
+      "changed_or_new_line_issues": []
+    },
+    "strict_workspace_all_target_clippy_exit_code": 0,
+    "scoped_rust_format_exit_code": 0,
+    "elixir_format_exit_code": 0,
+    "unmodified_sdk_check_exit_code": 0,
+    "documentation": {
+      "warnings_as_errors_exit_code": 0,
+      "local_links_fragments_exit_code": 0,
+      "pages_checked": 172
+    },
+    "private_log_sha256": {
+      "protocol.log": "c5921e515a61e110064cb79a41b26e2782edee3a5c9e21d23ed44369a7c13ed4",
+      "output.log": "beecebb2d3b3cb9bc213aa908efbc8573f3ef14ab460aa9ece8c70b3c7a5b3ed",
+      "port-peer.log": "6493c59047a7a740e85aae9c51c939bde24f8aae9fb045efae44fbc56426b124",
+      "clippy.log": "eee10268ec421de161a41bcc978e22c4fe6543d359c914a66a2b16d239dc119b",
+      "rust-fmt.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sdk-check.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "current-tests.log": "9aa1d342331c7989fdc525be52e6442ac4b6fad72018b8a11d80517116905805",
+      "minimum-tests.log": "4e6995ef36bd6fce9b2f684bdd6d96c96c4a3d8ad25b32cc2261b0e684655b48",
+      "current-http.log": "25cf89c4c508b3d4a5bb7f607ea05f1a3191d87920b54812fe53e16adf316d26",
+      "minimum-http.log": "b5cb8830bbdcde721dccfd946da4088a8cc9e939d3d1c7e32804162dc18f7a38",
+      "current-legacy.log": "2a26d527e5fb984d90ff3b23230af25d8ef28db41a2052148af81bb27e2ef500",
+      "minimum-legacy.log": "01fe0be4175124604c6697421dfa04d3366a51242364c31e8fcfe19820e3d01d",
+      "compile-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "credo-final.log": "7de5f7f9bed36c169e78c0e532a77b8c577318014b31c68b407e598882567b6d",
+      "docs.log": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+      "doc-links.log": "7edbb8784b6215da582ff89fdebc01bc1f2d048a1a98cf31cfa0d1723a2066c9",
+      "admission-final.log": "c6dfd09b37f530914e806a1e3656c31ebde1154dc851cf2097ee5205dfe4dbd6",
+      "minimum-admission-final.log": "08ffce857b583d982286e31ac9fad2524d3cba5a528ef8c5218d81e02815358b"
+    },
+    "final_port_owner_contracts": {
+      "current_passed": 16,
+      "minimum_passed": 16,
+      "deferred_crash_excluded_per_lane": 4,
+      "subset_of_shared_suite": true,
+      "rerun_after_final_test_alias_format_cleanup": true
+    }
+  },
+  "scope": {
+    "engine_models_rerun": false,
+    "new_store_shape_codec_tag_or_reader_marker": false,
+    "paired_durable_public_cleanup_actions_implemented": false,
+    "public_cleanup_api_implemented": false,
+    "backend_operations_unchanged": 58,
+    "unentered_sdk_continuation_implemented": false,
+    "unentered_sdk_continuation_requires_new_cached_protected_entry_fence": true,
+    "all_full_parity_acceptance_rows_pending": true,
+    "native_branch_admission_enabled": false,
+    "ordinary_sdk_vm_or_new_package_platform_qualification_supplied": false,
+    "historical_package_qualification_transferred": false,
+    "crash_validation_deferred": true,
+    "crash_handling_qualified": false,
+    "distribution_approved": false,
+    "parity_complete": false
+  },
+  "remaining": [
+    "paired reader-first durable/public cleanup acceptance and completion with exact saved request and reservation retention",
+    "separate original cached/protected SDK-entry fence and demonstrably unentered continuation",
+    "remaining partial states and completed-child ownership-filter audit",
+    "ordinary exact-package platform/source/store/resource/consumer qualification and every remaining P0-P9 gate"
+  ]
+}

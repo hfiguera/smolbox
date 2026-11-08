@@ -1421,6 +1421,46 @@ impl Engine {
         }
         self.source_authority(receipt, pid, record)
     }
+    /// The cleanup caller separately owns and qualifies this exact target child.
+    /// Other retained siblings still require the ordinary published-head checks.
+    /// This dependency filter alone grants no source or child ownership.
+    pub(crate) fn branch_disposal_dependencies(
+        &self,
+        source: &CreationReceipt,
+        child: &str,
+        budget: &crate::ReadBudget,
+    ) -> Result<bool> {
+        let others = crate::sdk_compat::source_dependents(
+            &self.binding.database,
+            self.database_identity,
+            &source.name,
+            budget,
+        )?
+        .into_iter()
+        .filter(|name| name != child)
+        .collect::<Vec<_>>();
+        crate::material::MaterialJournal::at(&self.vm_directory(&source.name)).branch_dependencies(
+            source,
+            None,
+            &others,
+            &self.binding.database,
+            self.database_identity,
+            budget,
+        )
+    }
+    pub(crate) fn branch_disposal_source_authority(
+        &self,
+        source: &CreationReceipt,
+        child: &str,
+        pid: (i32, u64),
+        record: &VmRecord,
+        budget: &crate::ReadBudget,
+    ) -> Result<crate::capture_resolution::SourceAuthority> {
+        if !self.branch_disposal_dependencies(source, child, budget)? {
+            return Err(Error::before(ErrorCode::State));
+        }
+        self.source_authority(source, pid, record)
+    }
     fn source_authority(
         &self,
         receipt: &CreationReceipt,
@@ -1541,6 +1581,31 @@ impl Engine {
         }
         managers.insert(receipt.name.clone(), context.manager.clone());
         owners.insert(receipt.name.clone(), context);
+        Ok(())
+    }
+    /// Map/cache exclusion only, never original boot or collection authority.
+    /// SDK runtime.pid falls back to the persisted row, so its PID cannot
+    /// distinguish an original pre-handoff manager from a runtime-owned handle.
+    pub(crate) fn require_unhanded_branch_child(&self, name: &str) -> Result<()> {
+        let handles = self
+            .owned_handles
+            .try_lock()
+            .map_err(|_| Error::before(ErrorCode::Conflict))?;
+        let owners = self
+            .branch_owners
+            .try_lock()
+            .map_err(|_| Error::before(ErrorCode::Conflict))?;
+        let managers = self
+            .owned_managers
+            .try_lock()
+            .map_err(|_| Error::before(ErrorCode::Conflict))?;
+        if handles.contains_key(name)
+            || owners.contains_key(name)
+            || managers.contains_key(name)
+            || self.runtime_boots.try_contains(name)?
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
         Ok(())
     }
     pub(crate) fn branch_child_unstarted(&self, name: &str) -> Result<()> {
@@ -3751,6 +3816,40 @@ pub(crate) fn marker_matches(receipt: &CreationReceipt, directory: &Path) -> Res
 
 #[cfg(test)]
 pub(crate) mod tests {
+    #[test]
+    fn unhanded_branch_guards_refuse_busy_ownership_maps_without_waiting_or_minting_authority() {
+        let root = tempfile::tempdir().unwrap();
+        let engine = test_engine(root.path());
+        let held = engine.owned_handles.lock().unwrap();
+        assert_eq!(
+            engine
+                .require_unhanded_branch_child("inert-child")
+                .unwrap_err()
+                .code,
+            ErrorCode::Conflict
+        );
+        drop(held);
+        let held = engine.branch_owners.lock().unwrap();
+        assert_eq!(
+            engine
+                .require_unhanded_branch_child("inert-child")
+                .unwrap_err()
+                .code,
+            ErrorCode::Conflict
+        );
+        drop(held);
+        let held = engine.owned_managers.lock().unwrap();
+        assert_eq!(
+            engine
+                .require_unhanded_branch_child("inert-child")
+                .unwrap_err()
+                .code,
+            ErrorCode::Conflict
+        );
+        drop(held);
+        engine.require_unhanded_branch_child("inert-child").unwrap();
+    }
+
     use super::*;
     #[test]
     fn release_cache_recovery_never_reenrolls_a_missing_or_different_handle() {

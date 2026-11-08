@@ -1,1 +1,1 @@
-ExUnit.start(exclude: [:runtime])
+ExUnit.start(exclude: [:runtime, :deferred_crash])

@@ -736,8 +736,9 @@ impl JobLease {
     pub(crate) fn handoff_branch(&mut self) -> Result<BranchBackingLease> {
         self.handoff_branch_accounting(false)
     }
-    /// Only after synchronized disposal of the original never-booted child.
-    /// No manager or boot completion is manufactured; backing remains charged.
+    /// Only after synchronized disposal of the original never-booted child or
+    /// the positively collected original pre-handoff child. No manager or boot
+    /// completion is manufactured; backing remains charged.
     pub(crate) fn handoff_disposed_branch(&mut self) -> Result<BranchBackingLease> {
         self.handoff_branch_accounting(true)
     }

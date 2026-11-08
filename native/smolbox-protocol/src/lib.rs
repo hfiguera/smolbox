@@ -8,7 +8,13 @@ use std::io::{self, Read, Write};
 #[cfg(test)]
 mod branch;
 mod branch_backing;
+mod partial_branch_backing;
+pub use partial_branch_backing::PartialBranchBackingReleaseRequest;
+mod partial_branch_absence;
 mod unbooted_branch_absence;
+pub use partial_branch_absence::{
+    PartialBranchChildAbsence, PartialBranchChildAbsenceRequest, PARTIAL_BRANCH_ABSENCE_BYTES,
+};
 pub use unbooted_branch_absence::{
     UnbootedBranchChildAbsence, UnbootedBranchChildAbsenceRequest, UNBOOTED_BRANCH_ABSENCE_BYTES,
 };
@@ -577,4 +583,28 @@ mod branch_deletion_collection;
 pub use branch_deletion_collection::{
     BranchDeletionCollection, BranchDeletionCollectionRequest,
     BRANCH_DELETION_COLLECTION_PROOF_BYTES, BRANCH_DELETION_COLLECTION_REQUEST_BYTES,
+};
+
+mod partial_branch_collection;
+pub use partial_branch_collection::{PartialBranchCollection, PartialBranchCollectionRequest};
+
+mod partial_branch_cleanup_candidate;
+pub use partial_branch_cleanup_candidate::{
+    PartialBranchCleanupCandidate, PARTIAL_BRANCH_CLEANUP_CANDIDATE_BYTES,
+};
+
+mod partial_branch_cleanup_unneeded;
+pub use partial_branch_cleanup_unneeded::{
+    PartialBranchDisposalCleanupUnneeded, PARTIAL_BRANCH_UNNEEDED_CLEANUP_PROOF_BYTES,
+};
+mod partial_branch_cleanup;
+pub use partial_branch_cleanup::{
+    PartialBranchDisposalCleanup, PartialBranchDisposalCleanupRequest,
+    PARTIAL_BRANCH_CLEANUP_PROOF_BYTES, PARTIAL_BRANCH_CLEANUP_REQUEST_BYTES,
+};
+
+mod partial_branch_disposal;
+pub use partial_branch_disposal::{
+    PartialBranchDisposal, PartialBranchDisposalCompletion, PartialBranchDisposalRequest,
+    PARTIAL_BRANCH_DISPOSAL_PROOF_BYTES, PARTIAL_BRANCH_DISPOSAL_REQUEST_BYTES,
 };

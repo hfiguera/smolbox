@@ -81,7 +81,15 @@ defmodule SmolBox.Embedded.NativeUnbootedBranchDisposal do
   defp completion?(_), do: false
 
   def eligible?(
-        %ManagedMachine{branch: %{native_authority: %{completion: nil, prepared_retirement: nil}}} =
+        %ManagedMachine{
+          branch: %{
+            native_authority: %{
+              completion: nil,
+              prepared_retirement: nil,
+              partial_collection: nil
+            }
+          }
+        } =
           child
       ),
       do:

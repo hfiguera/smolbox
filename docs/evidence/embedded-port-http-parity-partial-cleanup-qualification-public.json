@@ -1,0 +1,159 @@
+{
+  "schema": 1,
+  "status": "public-original-partial-cleanup-qualification-and-terminal-disposal-recovery-models-passed",
+  "source_base_commit": "bc455c554252f8bc876008cef292816ea25f2c0a",
+  "source_files_sha256": {
+    "lib/smolbox/backend.ex": "04f5dc08888d0839174d2b20cf4bdc79034a0ed06b944907f40f413c11c8f3b7",
+    "lib/smolbox/backend/embedded.ex": "4ad5b88c672994287812ae4d448e9a9283e9a0d7f4b90894ba6cc93e58b3457c",
+    "lib/smolbox/backend/embedded_partial_branch_disposal.ex": "2d7741bfb94c99e232921f59f2c39ce754a4bc69f900016289701ff7dcc6a176",
+    "lib/smolbox/backend/http.ex": "3ad1491fb4c7c3154644c60f9ccefc5e321cdc43acc833a935475557c7f3b1ad",
+    "lib/smolbox/branches.ex": "4efc7e54a6bc4dd590f319ae98a2c8069b900c01c0d6beae9906d13c6882f687",
+    "lib/smolbox/embedded/native_partial_branch_cleanup_candidate.ex": "89531e8462a4c9198d6384b4b3b7d513c65b7655b456d52100fe2166133380b8",
+    "lib/smolbox/runtime/native_partial_branch_cleanup.ex": "770d0ecfddf9017fbd6a3df6fc0881810e2cebd3d6ae80cc9484b8f0ab4cd8ac",
+    "test/unit/backend_test.exs": "ca906d589240f823e86bf0235a68bb2b9bbab653cd0fe650ff87ef418c77ab6c",
+    "test/unit/native_partial_branch_public_cleanup_test.exs": "e4df1505da2c504320669463ff1b6cde500477f44875722fb57582bd7b68c906"
+  },
+  "workflow": {
+    "fresh_qualification_precedes_durable_cleanup_acceptance": true,
+    "positive_typed_candidate_only": true,
+    "candidate_binding": [
+      "saved full disposal request",
+      "child version",
+      "current source material head",
+      "source PID and child resource plan",
+      "platform",
+      "original helper epoch",
+      "pinned controller/helper and explicit quiescence"
+    ],
+    "candidate_is_transient_not_durable_or_completion": true,
+    "generic_unknown_not_dispatched_error_cannot_create_cleanup_or_sdk_entry": true,
+    "original_terminal_disposal_uses_existing_typed_result_fresh_source_and_guarded_paired_commit": true,
+    "terminal_deleted_and_resolved_absent_preserved_without_cleanup_grant": true,
+    "accepted_cleanup_skips_new_qualification_and_preserves_exact_request": true,
+    "accepted_retry_does_not_require_new_qualifier_capability": true,
+    "accepted_retry_preserves_smaller_configured_budgets_that_fit_existing_request_and_proof": true,
+    "cached_original_disposition_survives_retirement_source_delete_and_backing_closeout": true,
+    "cached_original_lookup_versions": [
+      "current child",
+      "original disposal",
+      "original pending completion"
+    ],
+    "uncertain_source_or_commit_retains_original_action_and_reservations": true,
+    "late_successful_commit_acknowledgement_is_uncertain_then_cached_readable": true,
+    "draining_allows_controls": true,
+    "timeout_ms": 30000,
+    "aggregate_request_bytes": 65536,
+    "aggregate_response_bytes": 196608,
+    "qualification_stage_request_bytes": 26624,
+    "qualification_stage_response_bytes": 65536,
+    "cleanup_and_source_stage_request_bytes": 32768,
+    "cleanup_and_source_stage_response_bytes": 98304,
+    "full_second_stage_reserved_before_fresh_acceptance": true,
+    "stage_source_inspection_consumes_actual_remaining_encoded_bytes_with_1024_headroom": true
+  },
+  "backend": {
+    "operation": "qualify_partial_branch_cleanup",
+    "arity": 3,
+    "http_supported": false,
+    "http_rejects_before_transport": true,
+    "operation_inventory": 60,
+    "arity_signatures": 66
+  },
+  "validation": {
+    "public_in_process_cleanup_tests": 55,
+    "new_public_cases": 24,
+    "terminal_variants": {
+      "original_heads": [
+        "held",
+        "pre_release",
+        "initial_release",
+        "explicit_release"
+      ],
+      "provenance": [
+        "deleted",
+        "resolved_absent"
+      ]
+    },
+    "current": {
+      "elixir": "1.20.4",
+      "otp": "29.0.6",
+      "shared_tests_passed": 560,
+      "deferred_crash_excluded": 4,
+      "postgresql_tests_passed": 134,
+      "http_contracts_passed": 410,
+      "legacy_envelopes": 12
+    },
+    "minimum": {
+      "elixir": "1.18.4-otp-27",
+      "otp": "27.3.4.15",
+      "shared_tests_passed": 560,
+      "deferred_crash_excluded": 4,
+      "postgresql_tests_passed": 134,
+      "http_contracts_passed": 410,
+      "legacy_envelopes": 12
+    },
+    "legacy_compatibility": "Original prefixes and exact ETF terms retained; cross-BEAM map byte order is not canonical.",
+    "postgresql_final_state": {
+      "partition_rows": 0,
+      "other_database_clients": 0,
+      "normal_smart_shutdown": true,
+      "pg_ctl_status": 3,
+      "socket_removed": true
+    },
+    "strict_credo": {
+      "exit_code": 14,
+      "repository_issues": 67,
+      "new_issues": [],
+      "changed_or_new_line_issues": []
+    },
+    "compile_warnings_as_errors_exit_code": 0,
+    "format_exit_code": 0,
+    "unmodified_sdk_verification_exit_code": 0,
+    "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "documentation": {
+      "warnings_as_errors_exit_code": 0,
+      "local_links_fragments_exit_code": 0,
+      "pages_checked": 174
+    },
+    "private_log_sha256": {
+      "current-tests.log": "7147640fb10fd3963019e475c2b7ab889dd96c7d47864bc4f24f312182252b1f",
+      "minimum-tests.log": "9983e84cb7cb15bcab633e846fdb59a1d8f7e602fdd717054ef1f175a3176680",
+      "current-http.log": "4aca9eaeb5c28d9d53b4b9f6b87d6bd3f6447a1b98517d4b619ef97156d9a5cd",
+      "minimum-http.log": "faf3395c84075c24f838c12a2c6a0cd195879e708526be50488cbcf39bd06684",
+      "current-legacy.log": "53288aa8f365c39e04ec9be4e82dc45207e4709a96aa4c77728842bd910a9562",
+      "minimum-legacy.log": "053492e16dac75a26b5e5d32c7e42355b5f0d686ee645ed7cf7495178b2a0dc4",
+      "current-postgres.log": "f5ead47a664509f1d03443e4c9a8a5ae0b9aabbc10bfe3f478ad6f5747d84331",
+      "minimum-postgres.log": "395cb047b9ad31b110da6b5a75d62738c67c1c3f988c8f43aa7a891f076cabbe",
+      "postgres-custody.log": "52f96c26a39ed25108a6db43d6e11c6051eba8a498a5baab1891adfa7ac7c262",
+      "postgres-stop.log": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "postgres-status.log": "e138ccb54fdb08283c6eb21159c53207bbbbf07077246e2804e18d22efe6e250",
+      "format.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "compile-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "credo-final.log": "e5e998f0f4b685492617202a150741c8acc8ce67bf782e17de68ebb87318face",
+      "docs.log": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+      "doc-links.log": "ccb3d7386bd85931f116ec6dc154a0398e27c84049d65217a7fbdfd38f352dd5",
+      "sdk-check.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+    }
+  },
+  "scope": {
+    "engine_port_protocol_and_sdk_sources_changed": false,
+    "native_tests_rerun_for_this_public_only_step": false,
+    "codec_unchanged": 48,
+    "new_durable_marker": false,
+    "other_partial_and_already_accepted_unsupported_grants_recovery_complete": false,
+    "actual_sdk_entry_fence_and_unentered_continuation_complete": false,
+    "native_branch_admission_enabled": false,
+    "ordinary_sdk_vm_or_changed_package_platform_public_consumer_qualification_supplied": false,
+    "historical_package_qualification_transferred": false,
+    "all_full_parity_rows_pending": true,
+    "crash_validation_deferred": true,
+    "crash_handling_qualified": false,
+    "distribution_approved": false,
+    "parity_complete": false
+  },
+  "remaining": [
+    "authorized recovery for other partial phases and already accepted unsupported cleanup actions",
+    "separate original cached/protected actual SDK-entry fence and demonstrably unentered continuation; legacy entered intent is insufficient",
+    "remaining completed-child ownership audit and all P0-P9 ordinary exact-package platform/source/store/resource/current-minimum-consumer acceptance gates"
+  ]
+}

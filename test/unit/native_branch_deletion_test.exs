@@ -94,6 +94,8 @@ defmodule SmolBox.NativeBranchDeletionTest do
       update_in(
         child.branch.native_authority,
         &Map.drop(&1, [
+          :partial_collection,
+          :partial_disposal,
           :prepared_retirement,
           :disposal,
           :release,

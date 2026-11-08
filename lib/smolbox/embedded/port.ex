@@ -26,6 +26,11 @@ defmodule SmolBox.Embedded.Port do
     MountContract,
     NativeSource,
     Outbox,
+    PartialBranchBackingRelease,
+    PartialBranchChildAbsence,
+    PartialBranchCollection,
+    PartialBranchDisposal,
+    PartialBranchDisposalCleanup,
     PreparedBranchRetirement,
     Protocol,
     RegistryContract,
@@ -584,6 +589,14 @@ defmodule SmolBox.Embedded.Port do
         operation_approved?(config, request)
 
   defp operation_approved?(config, %{
+         "operation" => "qualify_partial_branch_child_absence",
+         "request" => request
+       }),
+       do:
+         Features.supports?(config, :branches) and
+           PartialBranchChildAbsence.approval(request) in BranchRequest.approvals(config)
+
+  defp operation_approved?(config, %{
          "operation" => "qualify_unbooted_branch_child_absence",
          "request" => request
        }),
@@ -721,6 +734,14 @@ defmodule SmolBox.Embedded.Port do
            UnbootedBranchBackingRelease.approval(request) in BranchRequest.approvals(config)
 
   defp operation_approved?(config, %{
+         "operation" => "release_partial_branch_backing",
+         "request" => request
+       }),
+       do:
+         Features.supports?(config, :branches) and
+           PartialBranchBackingRelease.approval(request) in BranchRequest.approvals(config)
+
+  defp operation_approved?(config, %{
          "operation" => "retire_prepared_branch",
          "request" => request
        }),
@@ -749,6 +770,31 @@ defmodule SmolBox.Embedded.Port do
        do:
          Features.supports?(config, :branches) and
            ReleasedBranchDeletionCleanup.approval(request) in BranchRequest.approvals(config)
+
+  defp operation_approved?(config, %{"operation" => name, "request" => request})
+       when name in ~w(dispose_partial_branch resolve_partial_branch_disposal qualify_partial_branch_cleanup),
+       do:
+         Features.supports?(config, :branches) and
+           PartialBranchDisposal.approval(request) in BranchRequest.approvals(config)
+
+  defp operation_approved?(config, %{
+         "operation" => name,
+         "request" => request
+       })
+       when name in ~w(cleanup_partial_branch_disposal resolve_partial_branch_cleanup),
+       do:
+         Features.supports?(config, :branches) and
+           (name != "resolve_partial_branch_cleanup" or
+              Features.supports?(config, :partial_cleanup_resolution)) and
+           PartialBranchDisposalCleanup.approval(request) in BranchRequest.approvals(config)
+
+  defp operation_approved?(config, %{
+         "operation" => "collect_partial_branch",
+         "request" => request
+       }),
+       do:
+         Features.supports?(config, :branches) and
+           PartialBranchCollection.approval(request) in BranchRequest.approvals(config)
 
   defp operation_approved?(config, %{
          "operation" => "collect_branch_deletion",

@@ -11,6 +11,7 @@ defmodule SmolBox.DurableHost.NativeBranchStoreTest do
     NativeBranchDeletionContract,
     NativeBranchReleaseContract,
     NativeBranchRetirementContract,
+    NativeBranchSiblingContract,
     NativePreparedBranchRetirementContract,
     NativeReleasedBranchCleanupContract,
     NativeReleasedBranchContinuationContract,
@@ -31,6 +32,23 @@ defmodule SmolBox.DurableHost.NativeBranchStoreTest do
     end)
 
     %{store: store}
+  end
+
+  for first <- [:held, :ready, :released],
+      second <- [:held, :ready, :released],
+      reverse <- [false, true] do
+    test "#{first}/#{second} encrypted siblings retire independently in reverse=#{reverse} order",
+         %{
+           store: store
+         } do
+      NativeBranchSiblingContract.complete(
+        Store,
+        store,
+        unquote(first),
+        unquote(second),
+        unquote(reverse)
+      )
+    end
   end
 
   for mode <- [:held, :ready, :released] do

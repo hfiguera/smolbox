@@ -24,6 +24,12 @@ defmodule SmolBox.Embedded.Protocol do
     JSON,
     LogStream,
     ObservationShape,
+    PartialBranchChildAbsence,
+    PartialBranchCleanupCandidate,
+    PartialBranchCollection,
+    PartialBranchDisposal,
+    PartialBranchDisposalCleanup,
+    PartialBranchDisposalCleanupUnneeded,
     PreparedBranchRetirement,
     RegistryContract,
     ReleasedBranchDeletionContinuation,
@@ -380,6 +386,9 @@ defmodule SmolBox.Embedded.Protocol do
            (major == 2 and event["stream"] in ~w(log terminal checkpoint))) and
         match?({:ok, _bytes}, Shape.chunk(event["data_base64"]))
 
+  defp outcome?(%{"result" => "partial_branch_child_absent", "proof" => proof} = outcome, 2),
+    do: Shape.keys?(outcome, ~w(result proof)) and PartialBranchChildAbsence.valid?(proof)
+
   defp outcome?(%{"result" => "unbooted_branch_child_absent", "proof" => proof} = outcome, 2),
     do: Shape.keys?(outcome, ~w(result proof)) and UnbootedBranchChildAbsence.valid?(proof)
 
@@ -422,6 +431,34 @@ defmodule SmolBox.Embedded.Protocol do
        ),
        do:
          Shape.keys?(outcome, ~w(result proof)) and ReleasedBranchDeletionResolution.valid?(proof)
+
+  defp outcome?(%{"result" => "partial_branch_cleanup_unneeded", "proof" => proof} = outcome, 2),
+    do:
+      Shape.keys?(outcome, ~w(result proof)) and
+        PartialBranchDisposalCleanupUnneeded.valid?(proof)
+
+  defp outcome?(%{"result" => "partial_branch_disposal_cleaned", "proof" => proof} = outcome, 2),
+    do: Shape.keys?(outcome, ~w(result proof)) and PartialBranchDisposalCleanup.valid?(proof)
+
+  defp outcome?(
+         %{"result" => "partial_branch_cleanup_candidate", "candidate" => candidate} = outcome,
+         2
+       ),
+       do:
+         Shape.keys?(outcome, ~w(result candidate)) and
+           PartialBranchCleanupCandidate.valid?(candidate)
+
+  defp outcome?(%{"result" => "partial_branch_disposed", "proof" => proof} = outcome, 2),
+    do: Shape.keys?(outcome, ~w(result proof)) and PartialBranchDisposal.valid?(proof)
+
+  defp outcome?(
+         %{"result" => "partial_branch_collected", "proof" => proof, "platform" => platform} =
+           outcome,
+         2
+       ),
+       do:
+         Shape.keys?(outcome, ~w(result proof platform)) and platform in ~w(linux macos) and
+           PartialBranchCollection.valid?(proof)
 
   defp outcome?(
          %{"result" => "branch_deletion_collected", "proof" => proof} = outcome,

@@ -178,12 +178,18 @@ impl Shared {
             &outcome,
             wire::Outcome::BranchCreated { .. }
                 | wire::Outcome::UnbootedBranchChildAbsent { .. }
+                | wire::Outcome::PartialBranchChildAbsent { .. }
                 | wire::Outcome::BranchChildAbsent { .. }
                 | wire::Outcome::BranchBackingReleased { .. }
                 | wire::Outcome::PreparedBranchRetired { .. }
                 | wire::Outcome::UnbootedBranchDisposalCandidate { .. }
                 | wire::Outcome::UnbootedBranchDisposed { .. }
                 | wire::Outcome::ReleasedBranchDeletionContinued { .. }
+                | wire::Outcome::PartialBranchDisposed { .. }
+                | wire::Outcome::PartialBranchCleanupCandidate { .. }
+                | wire::Outcome::PartialBranchDisposalCleaned { .. }
+                | wire::Outcome::PartialBranchCleanupUnneeded { .. }
+                | wire::Outcome::PartialBranchCollected { .. }
                 | wire::Outcome::BranchDeletionCollected { .. }
                 | wire::Outcome::ReleasedBranchDeletionCleaned { .. }
                 | wire::Outcome::ReleasedBranchDeletionResolved { .. }
@@ -766,6 +772,7 @@ fn is_observation(operation: &wire::Operation) -> bool {
             | wire::Operation::InspectBranchCompletion { .. }
             | wire::Operation::QualifyHeldBranchRelease { .. }
             | wire::Operation::QualifyUnbootedBranchChildAbsence { .. }
+            | wire::Operation::QualifyPartialBranchChildAbsence { .. }
             | wire::Operation::QualifyBranchChildAbsence { .. }
     )
 }
@@ -779,11 +786,19 @@ fn is_control(operation: &wire::Operation) -> bool {
             .unbooted_disposal_request()
             .is_some_and(|r| r.request.quiesced)
         || matches!(operation, wire::Operation::ReleaseUnbootedBranchBacking { request } if request.quiesced && request.backing_removed)
+        || matches!(operation, wire::Operation::ReleasePartialBranchBacking { request } if request.quiesced && request.backing_removed)
         || matches!(operation, wire::Operation::RetirePreparedBranch { request } if request.quiesced)
         || operation
             .held_deletion_action_request()
             .is_some_and(|request| request.quiesced)
         || matches!(operation, wire::Operation::ContinueReleasedBranchDeletion { request } if request.quiesced)
+        || operation
+            .partial_disposal_request()
+            .is_some_and(|r| r.quiesced)
+        || matches!(operation, wire::Operation::QualifyPartialBranchCleanup { request } if request.quiesced)
+        || matches!(operation, wire::Operation::CleanupPartialBranchDisposal { request } if request.quiesced)
+        || matches!(operation, wire::Operation::ResolvePartialBranchCleanup { request } if request.quiesced)
+        || matches!(operation, wire::Operation::CollectPartialBranch { request } if request.quiesced)
         || matches!(operation, wire::Operation::CollectBranchDeletion { request } if request.quiesced)
         || matches!(operation, wire::Operation::CleanupReleasedBranchDeletion { request } if request.quiesced)
         || matches!(operation, wire::Operation::ResolveReleasedBranchDeletion { request } if request.quiesced)
@@ -1286,9 +1301,17 @@ fn spawn_worker(
                     | wire::Operation::ReleaseHeldBranch { .. }
                     | wire::Operation::QualifyHeldBranchRelease { .. }
                     | wire::Operation::QualifyUnbootedBranchChildAbsence { .. }
+                    | wire::Operation::QualifyPartialBranchChildAbsence { .. }
+                    | wire::Operation::ReleasePartialBranchBacking { .. }
                     | wire::Operation::QualifyBranchChildAbsence { .. }
                     | wire::Operation::ReleaseBranchBacking { .. }
                     | wire::Operation::ContinueReleasedBranchDeletion { .. }
+                    | wire::Operation::DisposePartialBranch { .. }
+                    | wire::Operation::ResolvePartialBranchDisposal { .. }
+                    | wire::Operation::CleanupPartialBranchDisposal { .. }
+                    | wire::Operation::ResolvePartialBranchCleanup { .. }
+                    | wire::Operation::QualifyPartialBranchCleanup { .. }
+                    | wire::Operation::CollectPartialBranch { .. }
                     | wire::Operation::CollectBranchDeletion { .. }
                     | wire::Operation::CleanupReleasedBranchDeletion { .. }
                     | wire::Operation::ResolveReleasedBranchDeletion { .. }
@@ -1893,6 +1916,140 @@ mod tests {
                     proof: Box::new(proof),
                 };
             }
+            if let wire::Operation::QualifyPartialBranchCleanup { request } = &operation {
+                assert!(request.collection_request.creation.approval == approval);
+                let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+                    "../../smolbox-protocol/fixtures/partial-branch-cleanup-candidate-v1.json"
+                ))
+                .unwrap();
+                let row = rows
+                    .into_iter()
+                    .find(|row| {
+                        serde_json::from_value::<wire::PartialBranchDisposalRequest>(
+                            row["request"].clone(),
+                        )
+                        .unwrap()
+                            == **request
+                    })
+                    .expect("exact original qualification request");
+                return wire::Outcome::PartialBranchCleanupCandidate {
+                    candidate: Box::new(serde_json::from_value(row["candidate"].clone()).unwrap()),
+                };
+            }
+            if let wire::Operation::ResolvePartialBranchCleanup { request } = &operation {
+                assert!(
+                    request
+                        .disposal_request
+                        .collection_request
+                        .creation
+                        .approval
+                        == approval
+                );
+                let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+                    "../../smolbox-protocol/fixtures/partial-branch-cleanup-unneeded-v1.json"
+                ))
+                .unwrap();
+                let row = rows
+                    .into_iter()
+                    .find(|row| {
+                        serde_json::from_value::<wire::PartialBranchDisposalCleanupRequest>(
+                            row["request"].clone(),
+                        )
+                        .unwrap()
+                            == **request
+                    })
+                    .expect("exact synthetic unnecessary cleanup request");
+                let native: smolbox_engine::PartialBranchDisposalCleanupUnneeded =
+                    serde_json::from_value(row["proof"].clone()).unwrap();
+                native
+                    .matches_request(&serde_json::from_value(row["request"].clone()).unwrap())
+                    .unwrap();
+                return wire::Outcome::PartialBranchCleanupUnneeded {
+                    proof: Box::new(serde_json::from_value(row["proof"].clone()).unwrap()),
+                };
+            }
+            if let wire::Operation::CleanupPartialBranchDisposal { request } = &operation {
+                assert!(
+                    request
+                        .disposal_request
+                        .collection_request
+                        .creation
+                        .approval
+                        == approval
+                );
+                let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+                    "../../smolbox-protocol/fixtures/partial-branch-disposal-cleanup-v1.json"
+                ))
+                .unwrap();
+                let row = rows
+                    .into_iter()
+                    .find(|row| {
+                        serde_json::from_value::<wire::PartialBranchDisposalCleanupRequest>(
+                            row["request"].clone(),
+                        )
+                        .unwrap()
+                            == **request
+                    })
+                    .expect("exact synthetic cleanup request");
+                // Check unchanged engine DTOs as well as the independent wire readers.
+                let native: smolbox_engine::PartialBranchDisposalCleanup =
+                    serde_json::from_value(row["proof"].clone()).unwrap();
+                native.validate().unwrap();
+                let native_request: smolbox_engine::PartialBranchDisposalCleanupRequest =
+                    serde_json::from_value(row["request"].clone()).unwrap();
+                native_request.matches(&native).unwrap();
+                return wire::Outcome::PartialBranchDisposalCleaned {
+                    proof: Box::new(serde_json::from_value(row["proof"].clone()).unwrap()),
+                };
+            }
+            if let Some(request) = operation.partial_disposal_request() {
+                assert!(request.collection_request.creation.approval == approval);
+                let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+                    "../../smolbox-protocol/fixtures/partial-branch-disposal-v1.json"
+                ))
+                .unwrap();
+                let completion =
+                    if matches!(operation, wire::Operation::DisposePartialBranch { .. }) {
+                        "deleted"
+                    } else {
+                        "resolved_absent"
+                    };
+                let row = rows
+                    .into_iter()
+                    .find(|row| {
+                        serde_json::from_value::<wire::PartialBranchDisposalRequest>(
+                            row["request"].clone(),
+                        )
+                        .unwrap()
+                            == *request
+                            && row["proof"]["completion"] == completion
+                    })
+                    .expect("exact synthetic partial disposal request");
+                return wire::Outcome::PartialBranchDisposed {
+                    proof: Box::new(serde_json::from_value(row["proof"].clone()).unwrap()),
+                };
+            }
+            if let wire::Operation::CollectPartialBranch { request } = &operation {
+                assert!(request.creation.approval == approval);
+                let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+                    "../../smolbox-protocol/fixtures/partial-branch-collection-v1.json"
+                ))
+                .unwrap();
+                let row = rows
+                    .into_iter()
+                    .find(|row| {
+                        serde_json::from_value::<wire::PartialBranchCollectionRequest>(
+                            row["request"].clone(),
+                        )
+                        .unwrap()
+                            == **request
+                    })
+                    .expect("exact synthetic partial collection request");
+                return wire::Outcome::PartialBranchCollected {
+                    proof: Box::new(serde_json::from_value(row["proof"].clone()).unwrap()),
+                    platform: self.platform.clone(),
+                };
+            }
             if let wire::Operation::CollectBranchDeletion { request } = &operation {
                 assert!(*request.approval() == approval);
                 let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
@@ -1983,6 +2140,46 @@ mod tests {
                     .expect("exact synthetic backing request");
                 return wire::Outcome::BranchBackingReleased {
                     proof: Box::new(proof),
+                };
+            }
+            if let wire::Operation::ReleasePartialBranchBacking { request } = &operation {
+                assert!(request.approval() == &approval);
+                let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+                    "../../smolbox-protocol/fixtures/partial-branch-backing-release-v1.json"
+                ))
+                .unwrap();
+                let row = rows
+                    .into_iter()
+                    .find(|row| {
+                        serde_json::from_value::<wire::PartialBranchBackingReleaseRequest>(
+                            row["request"].clone(),
+                        )
+                        .unwrap()
+                            == **request
+                    })
+                    .unwrap();
+                return wire::Outcome::BranchBackingReleased {
+                    proof: Box::new(serde_json::from_value(row["proof"].clone()).unwrap()),
+                };
+            }
+            if let wire::Operation::QualifyPartialBranchChildAbsence { request } = &operation {
+                assert!(request.approval() == &approval);
+                let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+                    "../../smolbox-protocol/fixtures/partial-branch-child-absence-v1.json"
+                ))
+                .unwrap();
+                let row = rows
+                    .into_iter()
+                    .find(|row| {
+                        serde_json::from_value::<wire::PartialBranchChildAbsenceRequest>(
+                            row["proof"]["request"].clone(),
+                        )
+                        .unwrap()
+                            == **request
+                    })
+                    .unwrap();
+                return wire::Outcome::PartialBranchChildAbsent {
+                    proof: Box::new(serde_json::from_value(row["proof"].clone()).unwrap()),
                 };
             }
             if let wire::Operation::QualifyUnbootedBranchChildAbsence { request } = &operation {
@@ -4930,6 +5127,635 @@ mod tests {
         }
     }
     #[test]
+    fn partial_branch_collection_uses_fenced_control_with_exact_catalog_and_no_sdk_fallback() {
+        let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/partial-branch-collection-v1.json"
+        ))
+        .unwrap();
+        for row in rows {
+            let wanted: wire::PartialBranchCollectionRequest =
+                serde_json::from_value(row["request"].clone()).unwrap();
+            for policy in 0..4 {
+                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                if policy != 0 {
+                    sdk.feature_versions.insert("branches".into(), 1);
+                }
+                let mut h = hello();
+                h.major = 2;
+                h.minor = 0;
+                h.package.engine_version = env!("CARGO_PKG_VERSION").into();
+                h.package.smolvm_revision = sdk.source_revision.clone();
+                h.package.platform = row["platform"].as_str().unwrap().to_owned();
+                h.package.architecture = if h.package.platform == "macos" {
+                    "aarch64"
+                } else {
+                    "x86_64"
+                }
+                .into();
+                h.domain.target_id = wanted.creation.source.target_id.clone();
+                h.domain.generation = wanted.creation.source.domain_generation.clone();
+                h.limits = wire::Limits::for_sdk(&sdk);
+                h.capabilities = sdk.capabilities();
+                h.sdk = Some(Box::new(sdk));
+                let catalog = match policy {
+                    1 => None,
+                    2 => {
+                        let mut wrong = wanted.creation.approval.clone();
+                        wrong.resources.disk_gb += 1;
+                        Some(vec![wrong])
+                    }
+                    _ => Some(vec![wanted.creation.approval.clone()]),
+                };
+                let operation = wire::Operation::CollectPartialBranch {
+                    request: Box::new(wanted.clone()),
+                };
+                assert!(!is_observation(&operation) && is_control(&operation));
+                let (mut client, fake, _, thread) =
+                    start_with_policy_catalogs(h, None, None, None, vec![], None, (None, catalog));
+                fake.available.store(false, Ordering::Release);
+                assert!(matches!(
+                    receive(&mut client),
+                    wire::ServerMessage::Unavailable { .. }
+                ));
+                send(&mut client, request(1, operation));
+                if policy == 3 {
+                    assert!(matches!(
+                        receive(&mut client),
+                        wire::ServerMessage::Accepted { .. }
+                    ));
+                    let terminal = receive(&mut client);
+                    assert!(
+                        matches!(
+                            terminal,
+                            wire::ServerMessage::Terminal {
+                                outcome: wire::Outcome::PartialBranchCollected { .. },
+                                ..
+                            }
+                        ),
+                        "{}",
+                        serde_json::to_string(&terminal).unwrap()
+                    );
+                    assert_eq!(fake.calls.load(Ordering::Acquire), 1);
+                } else {
+                    assert!(matches!(
+                        receive(&mut client),
+                        wire::ServerMessage::Terminal {
+                            outcome: wire::Outcome::Error {
+                                code: wire::SafeCode::Unsupported,
+                                dispatch: wire::Dispatch::NotDispatched
+                            },
+                            ..
+                        }
+                    ));
+                    assert_eq!(fake.calls.load(Ordering::Acquire), 0);
+                }
+                shutdown(client, thread);
+            }
+        }
+    }
+    #[test]
+    fn partial_branch_disposal_uses_exact_fenced_control_without_sdk_fallback() {
+        let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/partial-branch-disposal-v1.json"
+        ))
+        .unwrap();
+        for row in rows {
+            let wanted: wire::PartialBranchDisposalRequest =
+                serde_json::from_value(row["request"].clone()).unwrap();
+            for resolve in [false, true] {
+                for policy in 0..4 {
+                    let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                    if policy != 0 {
+                        sdk.feature_versions.insert("branches".into(), 1);
+                    }
+                    let mut h = hello();
+                    h.epoch = row["proof"]["publication"]["change"]["child_origin"]["intent"]
+                        ["epoch"]
+                        .as_str()
+                        .unwrap()
+                        .into();
+                    h.major = 2;
+                    h.minor = 0;
+                    h.package.engine_version = env!("CARGO_PKG_VERSION").into();
+                    h.package.smolvm_revision = sdk.source_revision.clone();
+                    h.package.platform = row["platform"].as_str().unwrap().to_owned();
+                    h.package.architecture = if h.package.platform == "macos" {
+                        "aarch64"
+                    } else {
+                        "x86_64"
+                    }
+                    .into();
+                    h.domain.target_id =
+                        wanted.collection_request.creation.source.target_id.clone();
+                    h.domain.generation = wanted
+                        .collection_request
+                        .creation
+                        .source
+                        .domain_generation
+                        .clone();
+                    h.limits = wire::Limits::for_sdk(&sdk);
+                    h.capabilities = sdk.capabilities();
+                    h.sdk = Some(Box::new(sdk));
+                    let catalog = match policy {
+                        1 => None,
+                        2 => {
+                            let mut wrong = wanted.collection_request.creation.approval.clone();
+                            wrong.resources.disk_gb += 1;
+                            Some(vec![wrong])
+                        }
+                        _ => Some(vec![wanted.collection_request.creation.approval.clone()]),
+                    };
+                    let operation = if resolve {
+                        wire::Operation::ResolvePartialBranchDisposal {
+                            request: Box::new(wanted.clone()),
+                        }
+                    } else {
+                        wire::Operation::DisposePartialBranch {
+                            request: Box::new(wanted.clone()),
+                        }
+                    };
+                    assert!(!is_observation(&operation) && is_control(&operation));
+                    let (mut client, fake, _, thread) = start_with_policy_catalogs(
+                        h,
+                        None,
+                        None,
+                        None,
+                        vec![],
+                        None,
+                        (None, catalog),
+                    );
+                    fake.available.store(false, Ordering::Release);
+                    assert!(matches!(
+                        receive(&mut client),
+                        wire::ServerMessage::Unavailable { .. }
+                    ));
+                    send(
+                        &mut client,
+                        wire::ClientMessage::Request {
+                            epoch: fake.epoch.clone(),
+                            id: 1,
+                            budget_ms: 1000,
+                            initial_credit: wire::INITIAL_CREDIT_BYTES,
+                            initial_event_credit: wire::INITIAL_CREDIT_EVENTS,
+                            operation,
+                        },
+                    );
+                    if policy == 3 {
+                        assert!(matches!(
+                            receive(&mut client),
+                            wire::ServerMessage::Accepted { .. }
+                        ));
+                        let terminal = receive(&mut client);
+                        assert!(
+                            matches!(
+                                terminal,
+                                wire::ServerMessage::Terminal {
+                                    outcome: wire::Outcome::PartialBranchDisposed { .. },
+                                    ..
+                                }
+                            ),
+                            "{}",
+                            serde_json::to_string(&terminal).unwrap()
+                        );
+                        assert_eq!(fake.calls.load(Ordering::Acquire), 1);
+                    } else {
+                        assert!(matches!(
+                            receive(&mut client),
+                            wire::ServerMessage::Terminal {
+                                outcome: wire::Outcome::Error {
+                                    code: wire::SafeCode::Unsupported,
+                                    dispatch: wire::Dispatch::NotDispatched
+                                },
+                                ..
+                            }
+                        ));
+                        assert_eq!(fake.calls.load(Ordering::Acquire), 0);
+                    }
+                    send(
+                        &mut client,
+                        wire::ClientMessage::Shutdown {
+                            epoch: fake.epoch.clone(),
+                        },
+                    );
+                    assert!(thread.join().unwrap().is_ok());
+                }
+            }
+        }
+    }
+    #[test]
+    fn partial_disposal_cleanup_uses_exact_fenced_control_without_sdk_fallback() {
+        let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/partial-branch-disposal-cleanup-v1.json"
+        ))
+        .unwrap();
+        for row in rows {
+            let wanted: wire::PartialBranchDisposalCleanupRequest =
+                serde_json::from_value(row["request"].clone()).unwrap();
+            for policy in 0..6 {
+                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                if policy != 0 {
+                    sdk.feature_versions.insert("branches".into(), 1);
+                }
+                let mut h = hello();
+                h.epoch = row["proof"]["disposal"]["publication"]["change"]["child_origin"]
+                    ["intent"]["epoch"]
+                    .as_str()
+                    .unwrap()
+                    .into();
+                h.major = 2;
+                h.minor = 0;
+                h.package.engine_version = env!("CARGO_PKG_VERSION").into();
+                h.package.smolvm_revision = sdk.source_revision.clone();
+                h.package.platform = row["platform"].as_str().unwrap().to_owned();
+                h.package.architecture = if h.package.platform == "macos" {
+                    "aarch64"
+                } else {
+                    "x86_64"
+                }
+                .into();
+                h.domain.target_id = wanted
+                    .disposal_request
+                    .collection_request
+                    .creation
+                    .source
+                    .target_id
+                    .clone();
+                h.domain.generation = wanted
+                    .disposal_request
+                    .collection_request
+                    .creation
+                    .source
+                    .domain_generation
+                    .clone();
+                h.limits = wire::Limits::for_sdk(&sdk);
+                h.capabilities = sdk.capabilities();
+                h.sdk = Some(Box::new(sdk));
+                let catalog = match policy {
+                    1 => None,
+                    2 => {
+                        let mut wrong = wanted
+                            .disposal_request
+                            .collection_request
+                            .creation
+                            .approval
+                            .clone();
+                        wrong.resources.disk_gb += 1;
+                        Some(vec![wrong])
+                    }
+                    _ => Some(vec![wanted
+                        .disposal_request
+                        .collection_request
+                        .creation
+                        .approval
+                        .clone()]),
+                };
+                if policy == 4 {
+                    h.capabilities
+                        .retain(|cap| *cap != wire::Capability::Delete);
+                }
+                if policy == 5 {
+                    h.domain.generation = "0".repeat(32);
+                }
+                let operation = wire::Operation::CleanupPartialBranchDisposal {
+                    request: Box::new(wanted.clone()),
+                };
+                assert!(!is_observation(&operation) && is_control(&operation));
+                let (mut client, fake, _, thread) =
+                    start_with_policy_catalogs(h, None, None, None, vec![], None, (None, catalog));
+                fake.available.store(false, Ordering::Release);
+                assert!(matches!(
+                    receive(&mut client),
+                    wire::ServerMessage::Unavailable { .. }
+                ));
+                send(
+                    &mut client,
+                    wire::ClientMessage::Request {
+                        epoch: fake.epoch.clone(),
+                        id: 1,
+                        budget_ms: 1000,
+                        initial_credit: wire::INITIAL_CREDIT_BYTES,
+                        initial_event_credit: wire::INITIAL_CREDIT_EVENTS,
+                        operation,
+                    },
+                );
+                if policy == 3 {
+                    assert!(matches!(
+                        receive(&mut client),
+                        wire::ServerMessage::Accepted { .. }
+                    ));
+                    let terminal = receive(&mut client);
+                    assert!(
+                        matches!(
+                            terminal,
+                            wire::ServerMessage::Terminal {
+                                outcome: wire::Outcome::PartialBranchDisposalCleaned { .. },
+                                ..
+                            }
+                        ),
+                        "{}",
+                        serde_json::to_string(&terminal).unwrap()
+                    );
+                    assert_eq!(fake.calls.load(Ordering::Acquire), 1);
+                } else {
+                    let expected = if policy == 5 {
+                        wire::SafeCode::Ownership
+                    } else {
+                        wire::SafeCode::Unsupported
+                    };
+                    assert!(matches!(
+                        receive(&mut client),
+                        wire::ServerMessage::Terminal {
+                            outcome: wire::Outcome::Error {
+                                code,
+                                dispatch: wire::Dispatch::NotDispatched
+                            },
+                            ..
+                        } if code == expected
+                    ));
+                    assert_eq!(fake.calls.load(Ordering::Acquire), 0);
+                }
+                send(
+                    &mut client,
+                    wire::ClientMessage::Shutdown {
+                        epoch: fake.epoch.clone(),
+                    },
+                );
+                assert!(thread.join().unwrap().is_ok());
+            }
+        }
+    }
+    #[test]
+    fn partial_cleanup_qualification_uses_original_fenced_inspection_without_sdk_fallback() {
+        let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/partial-branch-cleanup-candidate-v1.json"
+        ))
+        .unwrap();
+        for row in rows {
+            let wanted: wire::PartialBranchDisposalRequest =
+                serde_json::from_value(row["request"].clone()).unwrap();
+            for policy in 0..6 {
+                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                if policy != 0 {
+                    sdk.feature_versions.insert("branches".into(), 1);
+                }
+                let mut h = hello();
+                h.epoch = row["candidate"]["publication"]["change"]["child_origin"]["intent"]
+                    ["epoch"]
+                    .as_str()
+                    .unwrap()
+                    .into();
+                h.major = 2;
+                h.minor = 0;
+                h.package.engine_version = env!("CARGO_PKG_VERSION").into();
+                h.package.smolvm_revision = sdk.source_revision.clone();
+                h.package.platform = row["platform"].as_str().unwrap().to_owned();
+                h.package.architecture = if h.package.platform == "macos" {
+                    "aarch64"
+                } else {
+                    "x86_64"
+                }
+                .into();
+                h.domain.target_id = wanted.collection_request.creation.source.target_id.clone();
+                h.domain.generation = wanted
+                    .collection_request
+                    .creation
+                    .source
+                    .domain_generation
+                    .clone();
+                h.limits = wire::Limits::for_sdk(&sdk);
+                h.capabilities = sdk.capabilities();
+                h.sdk = Some(Box::new(sdk));
+                let catalog = match policy {
+                    1 => None,
+                    2 => {
+                        let mut wrong = wanted.collection_request.creation.approval.clone();
+                        wrong.resources.disk_gb += 1;
+                        Some(vec![wrong])
+                    }
+                    _ => Some(vec![wanted.collection_request.creation.approval.clone()]),
+                };
+                if policy == 4 {
+                    h.capabilities
+                        .retain(|cap| *cap != wire::Capability::Inspect);
+                }
+                if policy == 5 {
+                    h.domain.generation = "0".repeat(32);
+                }
+                let operation = wire::Operation::QualifyPartialBranchCleanup {
+                    request: Box::new(wanted.clone()),
+                };
+                assert!(!is_observation(&operation) && is_control(&operation));
+                let (mut client, fake, _, thread) =
+                    start_with_policy_catalogs(h, None, None, None, vec![], None, (None, catalog));
+                fake.available.store(false, Ordering::Release);
+                assert!(matches!(
+                    receive(&mut client),
+                    wire::ServerMessage::Unavailable { .. }
+                ));
+                send(
+                    &mut client,
+                    wire::ClientMessage::Request {
+                        epoch: fake.epoch.clone(),
+                        id: 1,
+                        budget_ms: 1000,
+                        initial_credit: wire::INITIAL_CREDIT_BYTES,
+                        initial_event_credit: wire::INITIAL_CREDIT_EVENTS,
+                        operation,
+                    },
+                );
+                if policy == 3 {
+                    assert!(matches!(
+                        receive(&mut client),
+                        wire::ServerMessage::Accepted { .. }
+                    ));
+                    let terminal = receive(&mut client);
+                    assert!(
+                        matches!(
+                            terminal,
+                            wire::ServerMessage::Terminal {
+                                outcome: wire::Outcome::PartialBranchCleanupCandidate { .. },
+                                ..
+                            }
+                        ),
+                        "{}",
+                        serde_json::to_string(&terminal).unwrap()
+                    );
+                    assert_eq!(fake.calls.load(Ordering::Acquire), 1);
+                } else {
+                    let expected = if policy == 5 {
+                        wire::SafeCode::Ownership
+                    } else {
+                        wire::SafeCode::Unsupported
+                    };
+                    assert!(matches!(
+                        receive(&mut client),
+                        wire::ServerMessage::Terminal {
+                            outcome: wire::Outcome::Error {
+                                code,
+                                dispatch: wire::Dispatch::NotDispatched
+                            },
+                            ..
+                        } if code == expected
+                    ));
+                    assert_eq!(fake.calls.load(Ordering::Acquire), 0);
+                }
+                send(
+                    &mut client,
+                    wire::ClientMessage::Shutdown {
+                        epoch: fake.epoch.clone(),
+                    },
+                );
+                assert!(thread.join().unwrap().is_ok());
+            }
+        }
+    }
+    #[test]
+    fn unneeded_cleanup_resolution_uses_original_inspect_control_without_removal_fallback() {
+        let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/partial-branch-cleanup-unneeded-v1.json"
+        ))
+        .unwrap();
+        for row in rows {
+            let wanted: wire::PartialBranchDisposalCleanupRequest =
+                serde_json::from_value(row["request"].clone()).unwrap();
+            for policy in 0..7 {
+                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                if policy != 0 {
+                    sdk.feature_versions.insert("branches".into(), 1);
+                    if policy != 6 {
+                        sdk.feature_versions
+                            .insert("partial_cleanup_resolution".into(), 1);
+                    }
+                }
+                let mut h = hello();
+                h.epoch = row["proof"]["disposal"]["publication"]["change"]["child_origin"]
+                    ["intent"]["epoch"]
+                    .as_str()
+                    .unwrap()
+                    .into();
+                h.major = 2;
+                h.minor = 0;
+                h.package.engine_version = env!("CARGO_PKG_VERSION").into();
+                h.package.smolvm_revision = sdk.source_revision.clone();
+                h.package.platform = row["platform"].as_str().unwrap().to_owned();
+                h.package.architecture = if h.package.platform == "macos" {
+                    "aarch64"
+                } else {
+                    "x86_64"
+                }
+                .into();
+                h.domain.target_id = wanted
+                    .disposal_request
+                    .collection_request
+                    .creation
+                    .source
+                    .target_id
+                    .clone();
+                h.domain.generation = wanted
+                    .disposal_request
+                    .collection_request
+                    .creation
+                    .source
+                    .domain_generation
+                    .clone();
+                h.limits = wire::Limits::for_sdk(&sdk);
+                h.capabilities = sdk.capabilities();
+                h.sdk = Some(Box::new(sdk));
+                let catalog = match policy {
+                    1 => None,
+                    2 => {
+                        let mut wrong = wanted
+                            .disposal_request
+                            .collection_request
+                            .creation
+                            .approval
+                            .clone();
+                        wrong.resources.disk_gb += 1;
+                        Some(vec![wrong])
+                    }
+                    _ => Some(vec![wanted
+                        .disposal_request
+                        .collection_request
+                        .creation
+                        .approval
+                        .clone()]),
+                };
+                if policy == 4 {
+                    h.capabilities
+                        .retain(|cap| *cap != wire::Capability::Inspect);
+                }
+                if policy == 5 {
+                    h.domain.generation = "0".repeat(32);
+                }
+                let operation = wire::Operation::ResolvePartialBranchCleanup {
+                    request: Box::new(wanted.clone()),
+                };
+                assert!(!is_observation(&operation) && is_control(&operation));
+                let (mut client, fake, _, thread) =
+                    start_with_policy_catalogs(h, None, None, None, vec![], None, (None, catalog));
+                fake.available.store(false, Ordering::Release);
+                assert!(matches!(
+                    receive(&mut client),
+                    wire::ServerMessage::Unavailable { .. }
+                ));
+                send(
+                    &mut client,
+                    wire::ClientMessage::Request {
+                        epoch: fake.epoch.clone(),
+                        id: 1,
+                        budget_ms: 1000,
+                        initial_credit: wire::INITIAL_CREDIT_BYTES,
+                        initial_event_credit: wire::INITIAL_CREDIT_EVENTS,
+                        operation,
+                    },
+                );
+                if policy == 3 {
+                    assert!(matches!(
+                        receive(&mut client),
+                        wire::ServerMessage::Accepted { .. }
+                    ));
+                    let terminal = receive(&mut client);
+                    assert!(
+                        matches!(
+                            terminal,
+                            wire::ServerMessage::Terminal {
+                                outcome: wire::Outcome::PartialBranchCleanupUnneeded { .. },
+                                ..
+                            }
+                        ),
+                        "{}",
+                        serde_json::to_string(&terminal).unwrap()
+                    );
+                    assert_eq!(fake.calls.load(Ordering::Acquire), 1);
+                } else {
+                    let expected = if policy == 5 {
+                        wire::SafeCode::Ownership
+                    } else {
+                        wire::SafeCode::Unsupported
+                    };
+                    assert!(matches!(
+                        receive(&mut client),
+                        wire::ServerMessage::Terminal {
+                            outcome: wire::Outcome::Error {
+                                code,
+                                dispatch: wire::Dispatch::NotDispatched
+                            },
+                            ..
+                        } if code == expected
+                    ));
+                    assert_eq!(fake.calls.load(Ordering::Acquire), 0);
+                }
+                send(
+                    &mut client,
+                    wire::ClientMessage::Shutdown {
+                        epoch: fake.epoch.clone(),
+                    },
+                );
+                assert!(thread.join().unwrap().is_ok());
+            }
+        }
+    }
+    #[test]
     fn released_delete_resolution_uses_fenced_control_with_exact_catalog_and_no_sdk_fallback() {
         let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
             "../../smolbox-protocol/fixtures/released-branch-deletion-v1.json"
@@ -5100,6 +5926,258 @@ mod tests {
                     assert_eq!(fake.calls.load(Ordering::Acquire), 0);
                 }
                 shutdown(client, thread);
+            }
+        }
+    }
+    #[test]
+    fn partial_child_absence_uses_exact_original_catalog_epoch_and_control_output() {
+        let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/partial-branch-child-absence-v1.json"
+        ))
+        .unwrap();
+        for row in rows {
+            let wanted: wire::PartialBranchChildAbsenceRequest =
+                serde_json::from_value(row["proof"]["request"].clone()).unwrap();
+            for policy in 0..5 {
+                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                if policy != 0 {
+                    sdk.feature_versions.insert("branches".into(), 1);
+                }
+                let mut h = hello();
+                h.major = 2;
+                h.minor = 0;
+                h.package.engine_version = env!("CARGO_PKG_VERSION").into();
+                h.package.smolvm_revision = sdk.source_revision.clone();
+                h.package.platform = row["proof"]["request"]["disposal"]["publication"]["change"]
+                    ["platform"]
+                    .as_str()
+                    .unwrap()
+                    .into();
+                h.epoch = row["proof"]["request"]["disposal"]["publication"]["change"]
+                    ["child_origin"]["intent"]["epoch"]
+                    .as_str()
+                    .unwrap()
+                    .into();
+                let epoch = h.epoch.clone();
+                h.package.architecture = if h.package.platform == "macos" {
+                    "aarch64"
+                } else {
+                    "x86_64"
+                }
+                .into();
+                h.domain.target_id = wanted
+                    .disposal
+                    .request
+                    .collection_request
+                    .creation
+                    .source
+                    .target_id
+                    .clone();
+                h.domain.generation = wanted
+                    .disposal
+                    .request
+                    .collection_request
+                    .creation
+                    .source
+                    .domain_generation
+                    .clone();
+                h.limits = wire::Limits::for_sdk(&sdk);
+                h.capabilities = sdk.capabilities();
+                if policy == 4 {
+                    h.capabilities
+                        .retain(|value| *value != wire::Capability::Inspect);
+                }
+
+                h.sdk = Some(Box::new(sdk));
+                let catalog = match policy {
+                    1 => None,
+                    2 => {
+                        let mut wrong = wanted.approval().clone();
+                        wrong.resources.disk_gb += 1;
+                        Some(vec![wrong])
+                    }
+                    _ => Some(vec![wanted.approval().clone()]),
+                };
+                let operation = wire::Operation::QualifyPartialBranchChildAbsence {
+                    request: Box::new(wanted.clone()),
+                };
+                assert!(is_observation(&operation) && is_control(&operation));
+                let (mut client, fake, _, thread) =
+                    start_with_policy_catalogs(h, None, None, None, vec![], None, (None, catalog));
+                fake.available.store(false, Ordering::Release);
+                assert!(matches!(
+                    receive(&mut client),
+                    wire::ServerMessage::Unavailable { .. }
+                ));
+                let mut message = request(1, operation);
+                if let wire::ClientMessage::Request { epoch: value, .. } = &mut message {
+                    *value = epoch.clone();
+                }
+                send(&mut client, message);
+                if policy == 3 {
+                    assert!(matches!(
+                        receive(&mut client),
+                        wire::ServerMessage::Accepted { .. }
+                    ));
+                    let terminal = receive(&mut client);
+                    assert!(
+                        matches!(
+                            terminal,
+                            wire::ServerMessage::Terminal {
+                                outcome: wire::Outcome::PartialBranchChildAbsent { .. },
+                                ..
+                            }
+                        ),
+                        "{}",
+                        serde_json::to_string(&terminal).unwrap()
+                    );
+                    assert_eq!(fake.calls.load(Ordering::Acquire), 1);
+                } else {
+                    assert!(matches!(
+                        receive(&mut client),
+                        wire::ServerMessage::Terminal {
+                            outcome: wire::Outcome::Error {
+                                code: wire::SafeCode::Unsupported,
+                                dispatch: wire::Dispatch::NotDispatched
+                            },
+                            ..
+                        }
+                    ));
+                    assert_eq!(fake.calls.load(Ordering::Acquire), 0);
+                }
+                send(
+                    &mut client,
+                    wire::ClientMessage::Shutdown {
+                        epoch: epoch.clone(),
+                    },
+                );
+                assert!(thread.join().unwrap().is_ok());
+            }
+        }
+    }
+    #[test]
+    fn partial_backing_uses_exact_original_catalog_epoch_and_control_output() {
+        let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/partial-branch-backing-release-v1.json"
+        ))
+        .unwrap();
+        for row in rows {
+            let wanted: wire::PartialBranchBackingReleaseRequest =
+                serde_json::from_value(row["request"].clone()).unwrap();
+            for policy in 0..5 {
+                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                if policy != 0 {
+                    sdk.feature_versions.insert("branches".into(), 1);
+                }
+                let mut h = hello();
+                h.major = 2;
+                h.minor = 0;
+                h.package.engine_version = env!("CARGO_PKG_VERSION").into();
+                h.package.smolvm_revision = sdk.source_revision.clone();
+                h.package.platform = row["request"]["disposal"]["publication"]["change"]
+                    ["platform"]
+                    .as_str()
+                    .unwrap()
+                    .into();
+                h.epoch = row["request"]["disposal"]["publication"]["change"]["child_origin"]
+                    ["intent"]["epoch"]
+                    .as_str()
+                    .unwrap()
+                    .into();
+                let epoch = h.epoch.clone();
+                h.package.architecture = if h.package.platform == "macos" {
+                    "aarch64"
+                } else {
+                    "x86_64"
+                }
+                .into();
+                h.domain.target_id = wanted
+                    .disposal
+                    .request
+                    .collection_request
+                    .creation
+                    .source
+                    .target_id
+                    .clone();
+                h.domain.generation = wanted
+                    .disposal
+                    .request
+                    .collection_request
+                    .creation
+                    .source
+                    .domain_generation
+                    .clone();
+                h.limits = wire::Limits::for_sdk(&sdk);
+                h.capabilities = sdk.capabilities();
+                if policy == 4 {
+                    h.capabilities
+                        .retain(|value| *value != wire::Capability::Inspect);
+                }
+
+                h.sdk = Some(Box::new(sdk));
+                let catalog = match policy {
+                    1 => None,
+                    2 => {
+                        let mut wrong = wanted.approval().clone();
+                        wrong.resources.disk_gb += 1;
+                        Some(vec![wrong])
+                    }
+                    _ => Some(vec![wanted.approval().clone()]),
+                };
+                let operation = wire::Operation::ReleasePartialBranchBacking {
+                    request: Box::new(wanted.clone()),
+                };
+                assert!(!is_observation(&operation) && is_control(&operation));
+                let (mut client, fake, _, thread) =
+                    start_with_policy_catalogs(h, None, None, None, vec![], None, (None, catalog));
+                fake.available.store(false, Ordering::Release);
+                assert!(matches!(
+                    receive(&mut client),
+                    wire::ServerMessage::Unavailable { .. }
+                ));
+                let mut message = request(1, operation);
+                if let wire::ClientMessage::Request { epoch: value, .. } = &mut message {
+                    *value = epoch.clone();
+                }
+                send(&mut client, message);
+                if policy == 3 {
+                    assert!(matches!(
+                        receive(&mut client),
+                        wire::ServerMessage::Accepted { .. }
+                    ));
+                    let terminal = receive(&mut client);
+                    assert!(
+                        matches!(
+                            terminal,
+                            wire::ServerMessage::Terminal {
+                                outcome: wire::Outcome::BranchBackingReleased { .. },
+                                ..
+                            }
+                        ),
+                        "{}",
+                        serde_json::to_string(&terminal).unwrap()
+                    );
+                    assert_eq!(fake.calls.load(Ordering::Acquire), 1);
+                } else {
+                    assert!(matches!(
+                        receive(&mut client),
+                        wire::ServerMessage::Terminal {
+                            outcome: wire::Outcome::Error {
+                                code: wire::SafeCode::Unsupported,
+                                dispatch: wire::Dispatch::NotDispatched
+                            },
+                            ..
+                        }
+                    ));
+                    assert_eq!(fake.calls.load(Ordering::Acquire), 0);
+                }
+                send(
+                    &mut client,
+                    wire::ClientMessage::Shutdown {
+                        epoch: epoch.clone(),
+                    },
+                );
+                assert!(thread.join().unwrap().is_ok());
             }
         }
     }

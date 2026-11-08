@@ -1,6 +1,6 @@
 defmodule SmolBox.Runtime.NativeBranchBacking do
   @moduledoc false
-  alias SmolBox.{Backend, ManagedMachine}
+  alias SmolBox.{Backend, Error, ManagedMachine}
   alias SmolBox.Embedded.BranchBackingRelease
   alias SmolBox.Runtime.{BranchObservation, MachineSession, NativeResolution, Session, Target}
 
@@ -54,7 +54,11 @@ defmodule SmolBox.Runtime.NativeBranchBacking do
          {:ok, _} <- remaining(deadline),
          {:ok, parent} <- MachineSession.claim(config, child.branch.source),
          {:ok, [proof]} <- observe(config, parent, child, worker, deadline),
-         {:ok, _} <- remaining(deadline),
+         do: uncertain(commit(config, child, proof, deadline))
+  end
+
+  defp commit(config, child, proof, deadline) do
+    with {:ok, _} <- remaining(deadline),
          {:ok, current} <- MachineSession.claim(config, child.branch.source),
          {:ok, _} <- remaining(deadline),
          do:
@@ -90,5 +94,9 @@ defmodule SmolBox.Runtime.NativeBranchBacking do
     if timeout > 0, do: {:ok, timeout}, else: Session.error(:expired, :branch)
   end
 
+  defp uncertain({:error, %Error{} = error}),
+    do: {:error, %{error | evidence: :dispatch_uncertain, operation: :branch}}
+
+  defp uncertain(result), do: result
   defp now, do: System.monotonic_time(:millisecond)
 end

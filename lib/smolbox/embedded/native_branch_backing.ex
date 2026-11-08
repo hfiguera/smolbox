@@ -6,6 +6,9 @@ defmodule SmolBox.Embedded.NativeBranchBacking do
     BranchCompletion,
     NativeBranchRetirement,
     NativeGrowth,
+    PartialBranchBackingRelease,
+    PartialBranchChildAbsence,
+    PartialBranchDisposal,
     UnbootedBranchBackingRelease,
     UnbootedBranchChildAbsence,
     UnbootedBranchDisposal
@@ -25,7 +28,20 @@ defmodule SmolBox.Embedded.NativeBranchBacking do
 
   def unbooted?(_), do: false
 
-  def pending_state(child), do: if(unbooted?(child), do: :backing_pending, else: :retired)
+  def partial?(%{
+        branch: %{
+          native_authority: %{
+            completion: nil,
+            partial_disposal: %{proof: %PartialBranchDisposal{}}
+          }
+        }
+      }),
+      do: true
+
+  def partial?(_), do: false
+  def source_scoped?(child), do: unbooted?(child) or partial?(child)
+
+  def pending_state(child), do: if(source_scoped?(child), do: :backing_pending, else: :retired)
 
   def child_receipt(%{
         branch: %{
@@ -36,6 +52,18 @@ defmodule SmolBox.Embedded.NativeBranchBacking do
         }
       }),
       do: {:ok, get_in(disposal.publication, ~w(change child))}
+
+  def child_receipt(%{
+        branch: %{
+          native_authority: %{
+            completion: nil,
+            partial_disposal: %{proof: %PartialBranchDisposal{} = disposal}
+          }
+        }
+      }),
+      do:
+        {:ok,
+         get_in(disposal.release, ["receipt"]) || get_in(disposal.publication, ~w(change child))}
 
   def child_receipt(child) do
     case NativeGrowth.head(child) do
@@ -70,6 +98,35 @@ defmodule SmolBox.Embedded.NativeBranchBacking do
     }
 
     Map.put(request, "request_sha256", UnbootedBranchBackingRelease.request_digest(request))
+  end
+
+  def intent(
+        %{completion: nil, partial_disposal: %{proof: %PartialBranchDisposal{} = disposal}} =
+          authority,
+        version,
+        source,
+        child
+      ) do
+    id =
+      BranchCanonical.digest([
+        "smolbox-native-partial-backing-v1",
+        authority.fingerprint,
+        version,
+        authority.retirement.proof.proof_sha256,
+        BranchCanonical.ordered(source, :receipt),
+        BranchCanonical.ordered(child, :receipt)
+      ])
+
+    request = %{
+      "disposal" => PartialBranchDisposal.to_wire(disposal),
+      "source" => source,
+      "child" => child,
+      "operation_id" => "backing-" <> binary_part(id, 0, 32),
+      "quiesced" => true,
+      "backing_removed" => true
+    }
+
+    Map.put(request, "request_sha256", PartialBranchBackingRelease.request_digest(request))
   end
 
   def intent(authority, version, source, child) do
@@ -126,15 +183,32 @@ defmodule SmolBox.Embedded.NativeBranchBacking do
        }),
        do: true
 
+  defp origin?(%{
+         completion: nil,
+         partial_disposal: %{proof: %PartialBranchDisposal{}},
+         retirement: %{proof: %PartialBranchChildAbsence{}}
+       }),
+       do: true
+
   defp origin?(_), do: false
+
+  def request?(%{"disposal" => %{"request" => %{"collection_request" => _}}} = request),
+    do: PartialBranchBackingRelease.request?(request)
 
   def request?(%{"disposal" => _} = request), do: UnbootedBranchBackingRelease.request?(request)
   def request?(request), do: BranchBackingRelease.request?(request)
+
+  def matches?(proof, %{"disposal" => %{"request" => %{"collection_request" => _}}} = request),
+    do: PartialBranchBackingRelease.matches?(proof, request)
 
   def matches?(proof, %{"disposal" => _} = request),
     do: UnbootedBranchBackingRelease.matches?(proof, request)
 
   def matches?(proof, request), do: BranchBackingRelease.matches?(proof, request)
+
+  def platform(%{"disposal" => %{"request" => %{"collection_request" => _}}} = request),
+    do: PartialBranchBackingRelease.platform(request)
+
   def platform(%{"disposal" => _} = request), do: UnbootedBranchBackingRelease.platform(request)
   def platform(request), do: BranchBackingRelease.platform(request)
 
@@ -155,7 +229,8 @@ defmodule SmolBox.Embedded.NativeBranchBacking do
   def record?(_), do: false
 
   def pair?(parent, child) do
-    with true <- NativeBranchRetirement.pair?(parent, child),
+    with true <- origin?(child.branch.native_authority),
+         true <- NativeBranchRetirement.pair?(parent, child),
          true <- child.branch.state in [:retired, :backing_pending, :closed],
          %NativeBranchRetirement{} <- child.branch.native_authority.retirement do
       parent.state == :deleted and ManagedMachine.idle?(parent) and parent.reservation == nil and

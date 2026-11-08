@@ -17,7 +17,11 @@ defmodule SmolBox.Embedded.NativePreparedBranchRetirement do
         %ManagedMachine{
           branch: %{
             state: :unknown,
-            native_authority: %{completion: nil, prepared_retirement: nil}
+            native_authority: %{
+              completion: nil,
+              prepared_retirement: nil,
+              partial_collection: nil
+            }
           },
           operation: :branch_child
         } = child

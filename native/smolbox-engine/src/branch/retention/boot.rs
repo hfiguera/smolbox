@@ -6,14 +6,42 @@ use crate::branch_release::unchanged_records;
 use crate::disk_geometry::ExportDisk;
 use smolvm::agent::AgentManager;
 use std::fs::File;
+mod collection;
 
 pub(super) struct OwnedBoot {
     manager: Arc<Mutex<AgentManager>>,
     plan: Plan,
-    enrollment: Option<Arc<crate::epoch::BootEnrollment>>,
-    returned: bool,
-    succeeded: bool,
+    returned: Option<ReturnedBoot>,
     identity_sha256: Option<String>,
+    collection: Option<collection::RetainedCollection>,
+}
+// Original opaque return facts survive failed protected publication. They grant
+// neither readiness nor collection, and are never reconstructed from SDK rows.
+struct ReturnedBoot {
+    enrollment: Option<Arc<crate::epoch::BootEnrollment>>,
+    succeeded: bool,
+}
+impl ReturnedBoot {
+    fn retain(
+        slot: &mut Option<Self>,
+        enrollment: Option<Arc<crate::epoch::BootEnrollment>>,
+        succeeded: bool,
+        publish: impl FnOnce(Option<&crate::epoch::BootEnrollment>) -> Result<()>,
+    ) -> Result<()> {
+        if slot.is_some() {
+            return Err(Error::uncertain(ErrorCode::State));
+        }
+        *slot = Some(Self {
+            enrollment,
+            succeeded,
+        });
+        // No fallible post-SDK IO may discard the only original enrollment.
+        // Publication failure leaves this slot owned by the retained worker job.
+        publish(
+            slot.as_ref()
+                .and_then(|returned| returned.enrollment.as_deref()),
+        )
+    }
 }
 /// Confirmed bare-guest initialization on the original boot. Held release,
 /// public readiness and current process liveness remain separate.
@@ -51,6 +79,9 @@ impl std::fmt::Debug for BranchBootIdentity {
     }
 }
 impl OwnedBoot {
+    pub(super) fn enrollment(&self) -> Option<&Arc<crate::epoch::BootEnrollment>> {
+        self.returned.as_ref()?.enrollment.as_ref()
+    }
     fn guest_identity(&self) -> Result<BranchGuestIdentity> {
         Ok(BranchGuestIdentity {
             schema: 1,
@@ -62,9 +93,11 @@ impl OwnedBoot {
         })
     }
     fn verify_live(&self, epoch: &crate::epoch::ActorEpoch) -> Result<()> {
+        if self.collection.is_some() {
+            return Err(Error::before(ErrorCode::State));
+        }
         let enrolled = self
-            .enrollment
-            .as_ref()
+            .enrollment()
             .ok_or(Error::uncertain(ErrorCode::Ownership))?;
         let child = enrolled.child();
         self.plan.verify()?;
@@ -85,11 +118,17 @@ impl OwnedBoot {
         Ok(())
     }
     fn identity(&self) -> Result<BranchBootIdentity> {
+        if self.collection.is_some() {
+            return Err(Error::before(ErrorCode::State));
+        }
         let enrollment = self
-            .enrollment
-            .as_ref()
+            .enrollment()
             .ok_or(Error::uncertain(ErrorCode::Ownership))?;
-        if !self.returned || !self.succeeded {
+        if !self
+            .returned
+            .as_ref()
+            .is_some_and(|returned| returned.succeeded)
+        {
             return Err(Error::uncertain(ErrorCode::State));
         }
         Ok(BranchBootIdentity {
@@ -292,8 +331,7 @@ impl RetainedBranchPreparation {
             .as_ref()
             .ok_or(Error::before(ErrorCode::State))?;
         let enrollment = boot
-            .enrollment
-            .as_ref()
+            .enrollment()
             .ok_or(Error::before(ErrorCode::Ownership))?;
         let result = qualify_ready_result(
             &boot.plan,
@@ -515,10 +553,9 @@ impl RetainedBranchPreparation {
         work.boot = Some(OwnedBoot {
             manager: manager.clone(),
             plan: plan.clone(),
-            enrollment: None,
-            returned: false,
-            succeeded: false,
+            returned: None,
             identity_sha256: None,
+            collection: None,
         });
         work.phase = Phase::BootEntered;
         let active = Arc::new(());
@@ -570,12 +607,6 @@ impl RetainedBranchPreparation {
                     .map_err(|_| Error::uncertain(ErrorCode::Native))?
                     .child_pid();
                 let enrollment = dispatch.finish_enrollment(pid);
-                lifecycle.returned(
-                    &plan,
-                    &boot_intent,
-                    enrollment.as_ref().ok(),
-                    started.is_ok(),
-                )?;
                 let mut work = retained
                     .work
                     .lock()
@@ -584,12 +615,14 @@ impl RetainedBranchPreparation {
                     .boot
                     .as_mut()
                     .ok_or(Error::uncertain(ErrorCode::Ownership))?;
-                boot.returned = true;
-                boot.succeeded = started.is_ok();
-                boot.enrollment = enrollment.ok().map(Arc::new);
+                ReturnedBoot::retain(
+                    &mut boot.returned,
+                    enrollment.ok().map(Arc::new),
+                    started.is_ok(),
+                    |enrolled| lifecycle.returned(&plan, &boot_intent, enrolled, started.is_ok()),
+                )?;
                 let enrolled = boot
-                    .enrollment
-                    .as_ref()
+                    .enrollment()
                     .ok_or(Error::uncertain(ErrorCode::Ownership))?;
                 let child = enrolled.child();
                 if pid != Some(child.pid)
@@ -685,8 +718,7 @@ impl RetainedBranchPreparation {
             return Err(Error::before(ErrorCode::Ownership));
         }
         let enrolled = boot
-            .enrollment
-            .as_ref()
+            .enrollment()
             .ok_or(Error::before(ErrorCode::Ownership))?;
         if record.pid != Some(enrolled.child().pid)
             || record.pid_start_time != Some(enrolled.child().birth)
@@ -703,8 +735,7 @@ impl RetainedBranchPreparation {
         Lifecycle::at(&plan.child.path).enter_identity(
             &plan,
             &intent,
-            boot.enrollment
-                .as_ref()
+            boot.enrollment()
                 .ok_or(Error::before(ErrorCode::Ownership))?,
         )?;
         let retained = entry.clone();
@@ -767,8 +798,7 @@ impl RetainedBranchPreparation {
                 check_budget.check().map_err(|e| Error::uncertain(e.code))?;
                 Lifecycle::at(&plan.child.path).identity_ready(
                     &plan,
-                    boot.enrollment
-                        .as_ref()
+                    boot.enrollment()
                         .ok_or(Error::uncertain(ErrorCode::Ownership))?,
                     &proof,
                 )?;
@@ -811,8 +841,7 @@ impl RetainedBranchPreparation {
                 let completed = Lifecycle::at(&boot.plan.child.path).completed_release(
                     &boot.plan,
                     request,
-                    boot.enrollment
-                        .as_ref()
+                    boot.enrollment()
                         .ok_or(Error::uncertain(ErrorCode::Ownership))?,
                 )?;
                 if let Some(release) = completed {
@@ -856,8 +885,7 @@ impl RetainedBranchPreparation {
             return Err(Error::before(ErrorCode::Ownership));
         }
         let enrolled = boot
-            .enrollment
-            .as_ref()
+            .enrollment()
             .ok_or(Error::before(ErrorCode::Ownership))?;
         let intent = crate::branch_release::Intent::issue(
             &plan.publication,
@@ -875,8 +903,7 @@ impl RetainedBranchPreparation {
         Lifecycle::at(&plan.child.path).enter_release(
             &plan,
             &intent,
-            boot.enrollment
-                .as_ref()
+            boot.enrollment()
                 .ok_or(Error::before(ErrorCode::Ownership))?,
         )?;
         crate::material::MaterialJournal::at(&plan.child.path)
@@ -888,8 +915,7 @@ impl RetainedBranchPreparation {
             before: record,
             source,
             enrollment: boot
-                .enrollment
-                .as_ref()
+                .enrollment()
                 .ok_or(Error::before(ErrorCode::Ownership))?
                 .clone(),
             database: engine.binding().database.clone(),
@@ -940,6 +966,84 @@ mod tests {
     use super::*;
     use sha2::{Digest, Sha256};
     use std::os::unix::fs::PermissionsExt;
+
+    #[test]
+    fn original_return_enrollment_survives_rejected_lifecycle_publication() {
+        // Inert file/actor model only. No SDK boot, process loss or interrupted IO.
+        let model = crate::branch_boot::tests::identity_model(true);
+        let path = model.plan.child.path.join("smolbox.branch-start-v1.json");
+        let before = std::fs::read(&path).unwrap();
+        let enrollment = Arc::new(model.enrollment);
+        for succeeded in [true, false] {
+            let mut returned = None;
+            let error = ReturnedBoot::retain(
+                &mut returned,
+                Some(enrollment.clone()),
+                succeeded,
+                |original| {
+                    // This model already has a later lifecycle. The actual
+                    // protected writer rejects the stale returned publication.
+                    Lifecycle::at(&model.plan.child.path).returned(
+                        &model.plan,
+                        enrollment.intent(),
+                        original,
+                        succeeded,
+                    )
+                },
+            )
+            .unwrap_err();
+            assert_eq!(error.code, ErrorCode::State);
+            let retained = returned.as_ref().unwrap();
+            assert_eq!(retained.succeeded, succeeded);
+            assert!(Arc::ptr_eq(
+                retained.enrollment.as_ref().unwrap(),
+                &enrollment
+            ));
+            assert_eq!(std::fs::read(&path).unwrap(), before);
+        }
+        assert!(model.engine.owned_managers.lock().unwrap().is_empty());
+    }
+
+    #[test]
+    fn original_return_cannot_be_overwritten_or_republished() {
+        let model = crate::branch_boot::tests::identity_model(true);
+        let enrollment = Arc::new(model.enrollment);
+        let mut returned = None;
+        let mut publications = 0;
+        ReturnedBoot::retain(&mut returned, Some(enrollment.clone()), true, |original| {
+            assert!(original.is_some_and(|proof| proof.child() == enrollment.child()));
+            publications += 1;
+            Ok(())
+        })
+        .unwrap();
+        assert!(ReturnedBoot::retain(&mut returned, None, false, |_| {
+            publications += 1;
+            Ok(())
+        })
+        .is_err());
+        assert_eq!(publications, 1);
+        let retained = returned.as_ref().unwrap();
+        assert!(retained.succeeded);
+        assert!(Arc::ptr_eq(
+            retained.enrollment.as_ref().unwrap(),
+            &enrollment
+        ));
+    }
+
+    #[test]
+    fn failed_return_without_enrollment_keeps_uncertainty_without_child_authority() {
+        let mut returned = None;
+        let error = ReturnedBoot::retain(&mut returned, None, false, |original| {
+            assert!(original.is_none());
+            Err(Error::uncertain(ErrorCode::Io))
+        })
+        .unwrap_err();
+        assert_eq!(error.code, ErrorCode::Io);
+        let retained = returned.as_ref().unwrap();
+        assert!(!retained.succeeded && retained.enrollment.is_none());
+        assert!(ReturnedBoot::retain(&mut returned, None, true, |_| Ok(())).is_err());
+        assert!(!returned.as_ref().unwrap().succeeded);
+    }
 
     fn pack_model(
         change: impl FnOnce(&mut smolvm_pack::format::PackManifest),
