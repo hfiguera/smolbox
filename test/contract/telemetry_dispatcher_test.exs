@@ -4,9 +4,13 @@ defmodule SmolBox.TelemetryDispatcherTest do
 
   @event [:smolbox, :test, :notification]
 
-  setup do
+  setup context do
     table = Dispatcher.table()
-    dispatcher = start_supervised!({Dispatcher, table: table, max_pending: 2, timeout_ms: 100})
+    timeout = Map.get(context, :delivery_timeout_ms, 100)
+
+    dispatcher =
+      start_supervised!({Dispatcher, table: table, max_pending: 2, timeout_ms: timeout})
+
     %{table: table, dispatcher: dispatcher}
   end
 
@@ -57,6 +61,7 @@ defmodule SmolBox.TelemetryDispatcherTest do
     assert Process.alive?(context.dispatcher)
   end
 
+  @tag delivery_timeout_ms: 30_000
   test "dispatcher death terminates its active handler and restart uses fresh credits", context do
     attach(:block)
     before = Dispatcher.stats(context.table)

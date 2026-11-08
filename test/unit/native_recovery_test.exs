@@ -371,7 +371,11 @@ defmodule SmolBox.NativeRecoveryTest do
                :ok
              end)
 
-    await(fn -> ready?(runtime) end)
+    await(fn -> ready?(runtime) and native_idle?(runtime) end)
+    owner = :global.whereis_name({Port, node()})
+    assert :ok = Port.shutdown(owner)
+    await(fn -> match?({:ok, %{status: :stopped}}, Port.health(owner)) end)
+    assert :ok = stop_supervised(Runtime)
   end
 
   test "receipt-less resolution refuses present material without adopting labels", context do

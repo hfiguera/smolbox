@@ -1,7 +1,7 @@
 defmodule SmolBox.NativeExportHistoryTest do
   use ExUnit.Case, async: true
-  alias SmolBox.Embedded.ExportAuthority
-  alias SmolBox.Store.{Codec, ExportOps}
+  alias SmolBox.Embedded.{ExportAuthority, ExportStageCleanup}
+  alias SmolBox.Store.{Codec, ExportContract, ExportOps, Memory, NativeExportContract}
 
   alias SmolBox.{
     Error,
@@ -12,12 +12,12 @@ defmodule SmolBox.NativeExportHistoryTest do
     ManagedMachine
   }
 
-  defp fixture, do: SmolBox.Store.NativeExportContract.fixture()
+  defp fixture, do: NativeExportContract.fixture()
 
   test "Memory atomically retains unknown reservations and releases only matching cleanup" do
-    SmolBox.Store.NativeExportContract.lifecycle(
-      SmolBox.Store.Memory,
-      start_supervised!(SmolBox.Store.Memory)
+    NativeExportContract.lifecycle(
+      Memory,
+      start_supervised!(Memory)
     )
   end
 
@@ -165,7 +165,7 @@ defmodule SmolBox.NativeExportHistoryTest do
       |> Jason.decode!()
       |> hd()
 
-    {:ok, cleanup} = SmolBox.Embedded.ExportStageCleanup.from_wire(cleanup_wire)
+    {:ok, cleanup} = ExportStageCleanup.from_wire(cleanup_wire)
 
     assert {:ok, completed} =
              ExportOps.resolve(published, spec.id, published.observed_machine, cleanup, 1104)
@@ -224,11 +224,11 @@ defmodule SmolBox.NativeExportHistoryTest do
   end
 
   test "legacy HTTP export bytes omit native defaults and reject their presence" do
-    store = start_supervised!(SmolBox.Store.Memory)
-    machine = SmolBox.Store.ExportContract.stopped(SmolBox.Store.Memory, store)
+    store = start_supervised!(Memory)
+    machine = ExportContract.stopped(Memory, store)
 
     assert {:ok, accepted} =
-             SmolBox.Store.ExportContract.accept(SmolBox.Store.Memory, store, machine)
+             ExportContract.accept(Memory, store, machine)
 
     id = accepted.active_export
     assert {:ok, sent} = ExportOps.advance(accepted, id, :accepted, [state: :dispatching], 1101)
@@ -266,9 +266,9 @@ defmodule SmolBox.NativeExportHistoryTest do
 
   test "fresh BEAM loads v28 proof vocabulary before safe decoding" do
     record =
-      SmolBox.Store.NativeExportContract.lifecycle(
-        SmolBox.Store.Memory,
-        start_supervised!(SmolBox.Store.Memory)
+      NativeExportContract.lifecycle(
+        Memory,
+        start_supervised!(Memory)
       )
 
     assert {:ok, bytes} = Codec.encode(record)

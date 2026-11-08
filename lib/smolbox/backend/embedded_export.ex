@@ -12,15 +12,18 @@ defmodule SmolBox.Backend.EmbeddedExport do
     Shape
   }
 
-  alias SmolBox.{Error, Export, ExportReceipt, ManagedMachine}
+  alias SmolBox.{Error, Export, ExportReceipt}
 
-  def intent(%ManagedMachine{active_export: id, exports: exports}) when not is_nil(id),
-    do: exports[id]
+  def invoke(context, operation, arguments, budget) do
+    if scoped?(context),
+      do: execute_authorized(context, operation, arguments, budget),
+      else: failure(:unsupported_capability, :not_dispatched)
+  end
 
-  def intent(_), do: nil
-
-  def run(context, [name, spec, token], budget) do
-    with true <- scoped?(context) and context.export.state == :dispatching,
+  # The caller has already checked the machine, receipt and package feature.
+  # The Port separately checks the pinned owner and approval for each request.
+  def execute_authorized(context, :export_machine, [name, spec, token], budget) do
+    with true <- context.export.state == :dispatching,
          true <- name == context.name and spec == context.export.spec,
          true <-
            spec.destination in context.config.export_destinations and ExportContract.token?(token),
@@ -40,12 +43,10 @@ defmodule SmolBox.Backend.EmbeddedExport do
     end
   end
 
-  def run(_, _, _), do: failure(:validation, :not_dispatched)
-
-  def qualify(context, budget) do
+  def execute_authorized(context, :qualify_export, [], budget) do
     deadline = now() + min(budget.timeout_ms, 30_000)
 
-    with true <- scoped?(context) and context.export.state == :accepted,
+    with true <- context.export.state == :accepted,
          true <- context.export.spec.destination in context.config.export_destinations,
          {:ok, budget} <- remaining(budget, deadline),
          context = Call.pin(context, budget),
@@ -80,6 +81,28 @@ defmodule SmolBox.Backend.EmbeddedExport do
            {:error, %Error{} = error} -> {:error, %{error | operation: :export}}
            _ -> failure(:unsupported_capability, :not_dispatched)
          )
+  end
+
+  def execute_authorized(context, :inspect_export, [], budget) do
+    with true <- context.export.native_authority.request != nil,
+         {:ok, budget} <- Budget.constrain(budget, timeout_ms: 30_000, max_response_bytes: 16_384),
+         do:
+           transfer(context, :inspect_export, control(context.export, "inspect_export"), budget),
+         else: (_ -> failure(:unsupported_capability, :not_dispatched))
+  end
+
+  def execute_authorized(context, :cleanup_export, [export, true], budget) do
+    with true <- context.export == export,
+         true <- export.state in [:unknown, :published] and export.native_authority.request != nil,
+         {:ok, budget} <- Budget.constrain(budget, timeout_ms: 30_000, max_response_bytes: 16_384),
+         do:
+           transfer(
+             context,
+             :cleanup_export,
+             Map.put(control(export, "cleanup_export_staging"), "quiesced", true),
+             budget
+           ),
+         else: (_ -> failure(:unsupported_capability, :not_dispatched))
   end
 
   # Requests carry upper bounds, not promised allocation or source-mode claims.
@@ -129,28 +152,6 @@ defmodule SmolBox.Backend.EmbeddedExport do
            Map.new(export.spec.destination.resources, fn {key, value} ->
              {Atom.to_string(key), value}
            end))
-  end
-
-  def lookup(context, budget) do
-    with true <- scoped?(context) and context.export.native_authority.request != nil,
-         {:ok, budget} <- Budget.constrain(budget, timeout_ms: 30_000, max_response_bytes: 16_384),
-         do:
-           transfer(context, :inspect_export, control(context.export, "inspect_export"), budget),
-         else: (_ -> failure(:unsupported_capability, :not_dispatched))
-  end
-
-  def cleanup(context, export, budget) do
-    with true <- scoped?(context) and context.export == export,
-         true <- export.state in [:unknown, :published] and export.native_authority.request != nil,
-         {:ok, budget} <- Budget.constrain(budget, timeout_ms: 30_000, max_response_bytes: 16_384),
-         do:
-           transfer(
-             context,
-             :cleanup_export,
-             Map.put(control(export, "cleanup_export_staging"), "quiesced", true),
-             budget
-           ),
-         else: (_ -> failure(:unsupported_capability, :not_dispatched))
   end
 
   def control(export, name),
@@ -220,18 +221,9 @@ defmodule SmolBox.Backend.EmbeddedExport do
         {:ok, %{"result" => "export_presence", "publication" => wire} = outcome, empty, nil}
       )
       when map_size(outcome) == 2 and empty == %{stdout: <<>>, stderr: <<>>, file: <<>>} do
-    with true <- request == control(context.export, "inspect_export") do
-      if wire == nil do
-        {:ok, nil}
-      else
-        with {:ok, proof} <- ExportPublication.from_wire(wire),
-             true <- publication_matches?(context, proof),
-             do: {:ok, proof},
-             else: (_ -> failure(:identity_conflict, :dispatch_uncertain))
-      end
-    else
-      _ -> failure(:identity_conflict, :dispatch_uncertain)
-    end
+    if request == control(context.export, "inspect_export"),
+      do: decode_presence(context, wire),
+      else: failure(:identity_conflict, :dispatch_uncertain)
   end
 
   def decode(
@@ -260,6 +252,15 @@ defmodule SmolBox.Backend.EmbeddedExport do
 
   def decode(_, _, _, {:error, %Error{} = error}), do: {:error, %{error | operation: :export}}
   def decode(_, _, _, _), do: failure(:protocol, :dispatch_uncertain)
+
+  defp decode_presence(_context, nil), do: {:ok, nil}
+
+  defp decode_presence(context, wire) do
+    with {:ok, proof} <- ExportPublication.from_wire(wire),
+         true <- publication_matches?(context, proof),
+         do: {:ok, proof},
+         else: (_ -> failure(:identity_conflict, :dispatch_uncertain))
+  end
 
   defp publication_matches?(context, proof) do
     export = context.export

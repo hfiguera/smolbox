@@ -3,6 +3,7 @@ defmodule SmolBox.Store.ExportOps do
   Pure export transactions. Adapters lock all machine histories, resource totals
   and the source together. Tag claims survive every outcome and machine deletion.
   """
+  alias SmolBox.Embedded.ExportAuthority
   alias SmolBox.{Error, Export, ExportSpec, ManagedMachine, Validation}
 
   def accept(machine, spec, fingerprint, capacity, usage, machines, now) do
@@ -28,7 +29,7 @@ defmodule SmolBox.Store.ExportOps do
            resource_floor?(spec.destination.resources, SmolBox.DiskExpansion.profile(machine)),
          true <- fits?(spec.destination.resources, capacity, usage),
          true <- vacant?(spec, machine.spec.artifact["architecture"], machines),
-         {:ok, authority} <- SmolBox.Embedded.ExportAuthority.enroll(machine),
+         {:ok, authority} <- ExportAuthority.enroll(machine),
          {:ok, export} <- Export.new(ManagedMachine.key(machine), spec, fingerprint, now) do
       export = %{export | native_authority: authority}
 
@@ -72,7 +73,7 @@ defmodule SmolBox.Store.ExportOps do
            record.receipt == nil or
              Keyword.get(changes, :receipt, record.receipt) == record.receipt,
          {:ok, authority} <-
-           SmolBox.Embedded.ExportAuthority.freeze_request(
+           ExportAuthority.freeze_request(
              record,
              Keyword.get(
                changes,
@@ -81,7 +82,7 @@ defmodule SmolBox.Store.ExportOps do
              )
            ),
          {:ok, authority} <-
-           SmolBox.Embedded.ExportAuthority.freeze_cleanup(
+           ExportAuthority.freeze_cleanup(
              %{record | native_authority: authority},
              Keyword.get(changes, :native_cleanup, authority && authority.cleanup)
            ),

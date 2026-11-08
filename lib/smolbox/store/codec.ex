@@ -209,8 +209,8 @@ defmodule SmolBox.Store.Codec do
     CodecNativeCaptureCleanup,
     CodecNativeCaptureResolutions,
     CodecNativeCaptures,
-    CodecNativeExports,
     CodecNativeCheckpoints,
+    CodecNativeExports,
     CodecNativeMounts,
     CodecNativeSources,
     CodecNativeVolumes,
@@ -671,21 +671,15 @@ defmodule SmolBox.Store.Codec do
     ArgumentError -> invalid()
   end
 
-  defp encode_native_captures(record) do
+  defp encode_native_captures(record),
+    do: encode_capture_history(record, @native_captures_prefix)
+
+  defp encode_native_capture_resolutions(record),
+    do: encode_capture_history(record, @native_capture_resolutions_prefix)
+
+  defp encode_capture_history(record, prefix) do
     with :ok <- validate_extended(record) do
-      bytes =
-        @native_captures_prefix <> :erlang.term_to_binary(CodecNativeCaptureCleanup.strip(record))
-
-      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
-    end
-  end
-
-  defp encode_native_capture_resolutions(record) do
-    with :ok <- validate_extended(record) do
-      bytes =
-        @native_capture_resolutions_prefix <>
-          :erlang.term_to_binary(CodecNativeCaptureCleanup.strip(record))
-
+      bytes = prefix <> :erlang.term_to_binary(CodecNativeCaptureCleanup.strip(record))
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
   end
