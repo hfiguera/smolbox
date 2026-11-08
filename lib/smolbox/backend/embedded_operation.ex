@@ -43,12 +43,20 @@ defmodule SmolBox.Backend.EmbeddedOperation do
 
   def prepared_request(_request, _prepared), do: error(:identity_conflict, :create)
 
+  defp creation_source(%{"source" => %{"kind" => "checkpoint"}}), do: :checkpoint
+
   defp creation_source(%{"source" => source}) do
     {:ok, source} = Source.from_artifact(source)
     source
   end
 
   defp creation_source(_local), do: :image
+
+  defp creation_operation(%{"source" => %{"kind" => "checkpoint"}}, "create"),
+    do: "create_checkpoint"
+
+  defp creation_operation(%{"source" => %{"kind" => "checkpoint"}}, "inspect_creation"),
+    do: "inspect_checkpoint_creation"
 
   defp creation_operation(%{"source" => %{"kind" => "registry"}}, "create"),
     do: "create_registry_prepared"
@@ -66,13 +74,19 @@ defmodule SmolBox.Backend.EmbeddedOperation do
   defp lifecycle_request(_creation, operation, receipt),
     do: %{"operation" => operation, "receipt" => receipt}
 
+  defp creation_path(config, %{"source" => %{"kind" => "checkpoint"} = source}),
+    do: Enum.find(config.checkpoints, &(SmolBox.Checkpoint.artifact(&1) == source)).path
+
+  defp creation_path(_config, %{"source" => _source}), do: nil
+  defp creation_path(_config, create), do: create["artifact"]["path"]
+
   defp operation(context, :create, [%MachineSpec{} = spec], budget) do
     create = context.assignment.creation
     resources = create["resources"]
 
     expected = %MachineSpec{
       name: context.name,
-      artifact_path: if(create["source"], do: nil, else: create["artifact"]["path"]),
+      artifact_path: creation_path(context.config, create),
       source: creation_source(create),
       cpus: resources["cpus"],
       memory_mb: resources["memory_mib"],
@@ -135,6 +149,21 @@ defmodule SmolBox.Backend.EmbeddedOperation do
          {:ok, receipt} <- EmbeddedContext.receipt(context),
          do: ready(lifecycle_request(context.assignment.creation, native, receipt), budget),
          else: (_mismatch -> error(:identity_conflict, operation))
+  end
+
+  defp operation(context, operation, [name], budget)
+       when operation in [:start_checkpointable, :checkpoint_preflight] do
+    with true <- name == context.name and Map.get(context.spec, :checkpointable, false),
+         true <- Features.supports?(context.config, :checkpoints),
+         {:ok, receipt} <- EmbeddedContext.receipt(context),
+         {:ok, budget} <- Budget.constrain(budget, max_response_bytes: 16_384),
+         {:ok, budget} <-
+           if(operation == :checkpoint_preflight,
+             do: Budget.constrain(budget, timeout_ms: 30_000),
+             else: {:ok, budget}
+           ),
+         do: ready(%{"operation" => Atom.to_string(operation), "receipt" => receipt}, budget),
+         else: (_ -> error(:unsupported_capability, operation))
   end
 
   defp operation(context, :pull_image, [name, %Source{kind: :oci} = source], budget) do

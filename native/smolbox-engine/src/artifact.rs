@@ -135,7 +135,7 @@ fn validate_sidecar_layout(footer: &smolvm_pack::format::PackFooter, length: u64
     Ok(())
 }
 
-fn open_regular(path: &Path) -> Result<File> {
+pub(crate) fn open_regular(path: &Path) -> Result<File> {
     let file = OpenOptions::new()
         .read(true)
         .custom_flags(libc::O_NOFOLLOW | libc::O_CLOEXEC | libc::O_NONBLOCK)
@@ -151,7 +151,11 @@ fn open_regular(path: &Path) -> Result<File> {
     Ok(file)
 }
 
-fn copy_hash(source: &mut impl Read, destination: &mut impl Write, cap: u64) -> Result<String> {
+pub(crate) fn copy_hash(
+    source: &mut impl Read,
+    destination: &mut impl Write,
+    cap: u64,
+) -> Result<String> {
     let mut hash = Sha256::new();
     let mut count = 0u64;
     let mut buffer = [0u8; 64 * 1024];

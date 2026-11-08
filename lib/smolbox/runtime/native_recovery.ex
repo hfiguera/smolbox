@@ -2,7 +2,7 @@ defmodule SmolBox.Runtime.NativeRecovery do
   @moduledoc false
   alias SmolBox.{Backend, DiskExpansion, Error, Execution, Machine, ManagedMachine}
   alias SmolBox.Backend.EmbeddedContext
-  alias SmolBox.Embedded.{Call, Health}
+  alias SmolBox.Embedded.{Call, Health, NativeCapture}
 
   alias SmolBox.Runtime.{
     MachineSession,
@@ -162,7 +162,7 @@ defmodule SmolBox.Runtime.NativeRecovery do
 
   def observation_valid?(%ManagedMachine{} = record, %Machine{} = observed) do
     record.reservation != nil and
-      (DiskExpansion.matches?(record, observed) or
+      (NativeCapture.observation_valid?(record, observed) or
          case record.disk_expansions[record.active_expansion] do
            %DiskExpansion{state: state} = expansion when state in [:dispatching, :unknown] ->
              DiskExpansion.target_matches?(record, expansion, observed)
@@ -233,6 +233,26 @@ defmodule SmolBox.Runtime.NativeRecovery do
       {:unknown, unknown()},
       config.clock.now()
     ])
+  end
+
+  defp persist_machine(config, %{active_capture: id} = record, observed) when not is_nil(id) do
+    case record.captures[id].state do
+      :dispatching ->
+        MachineSession.store(config, :capture_advance, [
+          ManagedMachine.key(record),
+          Session.guard(record),
+          id,
+          :dispatching,
+          [state: :unknown, error: %{unknown() | operation: :checkpoint}],
+          config.clock.now()
+        ])
+
+      :unknown ->
+        MachineSession.write(config, record, next_due_at_ms: record.next_due_at_ms)
+
+      _ ->
+        MachineSession.write(config, record, machine_changes(record, observed))
+    end
   end
 
   defp persist_machine(config, record, observed),

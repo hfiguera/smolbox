@@ -1,7 +1,7 @@
 defmodule SmolBox.Embedded.Launch do
   @moduledoc false
   import Bitwise
-  alias SmolBox.Embedded.{Config, ImageContract, Protocol, RegistryContract}
+  alias SmolBox.Embedded.{CheckpointContract, Config, ImageContract, Protocol, RegistryContract}
 
   @cleared ~w(DYLD_LIBRARY_PATH DYLD_INSERT_LIBRARIES DYLD_FALLBACK_LIBRARY_PATH DYLD_FRAMEWORK_PATH DYLD_FALLBACK_FRAMEWORK_PATH LD_LIBRARY_PATH LD_PRELOAD)
 
@@ -148,6 +148,7 @@ defmodule SmolBox.Embedded.Launch do
 
     values = registry_config(values, config, features)
     values = volume_config(values, config, features)
+    values = checkpoint_config(values, config, features)
 
     case Config.sdk_identity(config) do
       %{"feature_versions" => %{"ports" => 1}} ->
@@ -171,6 +172,15 @@ defmodule SmolBox.Embedded.Launch do
     do: Map.put(values, "approved_volume_policy", %{"id" => id, "root" => root})
 
   defp volume_config(values, _config, _features), do: values
+
+  defp checkpoint_config(values, config, %{"checkpoints" => 1}) do
+    case CheckpointContract.approvals(config) do
+      [] -> values
+      checkpoints -> Map.put(values, "approved_checkpoints", checkpoints)
+    end
+  end
+
+  defp checkpoint_config(values, _config, _features), do: values
 
   defp protocol(path, config) do
     with {:ok, file} <- File.open(path, [:read, :binary, :raw]) do

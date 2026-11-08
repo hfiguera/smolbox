@@ -189,6 +189,20 @@ defmodule SmolBox.Runtime.Target do
 
   def qualify(_target, _spec), do: :ok
 
+  def machine_spec(
+        %__MODULE__{kind: :embedded, native_config: config},
+        %{artifact: %{"kind" => "checkpoint"}} = spec,
+        name
+      ) do
+    if Assignment.supports?(config, spec),
+      do:
+        SmolBox.Checkpoint.machine(
+          Enum.find(config.checkpoints, &(SmolBox.Checkpoint.artifact(&1) == spec.artifact)),
+          name
+        ),
+      else: {:error, %Error{category: :unsupported_capability, operation: :create}}
+  end
+
   def machine_spec(%__MODULE__{kind: :embedded, native_config: config}, spec, name) do
     if Assignment.supports?(config, spec) do
       artifact =

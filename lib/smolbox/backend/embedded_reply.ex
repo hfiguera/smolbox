@@ -101,7 +101,14 @@ defmodule SmolBox.Backend.EmbeddedReply do
          _output,
          nil
        )
-       when operation in [:inspect_machine, :start, :stop, :delete],
+       when operation in [
+              :inspect_machine,
+              :start,
+              :stop,
+              :delete,
+              :start_checkpointable,
+              :checkpoint_preflight
+            ],
        do: observation(context, operation, observation)
 
   defp response(
@@ -284,6 +291,10 @@ defmodule SmolBox.Backend.EmbeddedReply do
   defp valid_state?("running", pid), do: pid != nil
   defp valid_state?("stopped", pid), do: pid == nil
   defp lifecycle_state?(:start, state), do: state == "running"
+
+  defp lifecycle_state?(operation, state)
+       when operation in [:start_checkpointable, :checkpoint_preflight], do: state == "running"
+
   defp lifecycle_state?(:stop, state), do: state == "stopped"
   defp lifecycle_state?(:delete, _state), do: false
   defp lifecycle_state?(:inspect_machine, _state), do: true
@@ -398,6 +409,7 @@ defmodule SmolBox.Backend.EmbeddedReply do
   defp error_operation(:inspect_creation), do: :inspect
   defp error_operation(:list_images), do: :images
   defp error_operation(:qualify_growth), do: :expand_disks
+  defp error_operation(:cleanup_capture), do: :checkpoint
   defp error_operation(operation), do: operation
 
   @counter_fields ~w(cpu_seconds cpu_millis rss_mb pss_mb private_memory_mb shared_memory_mapped_mb disk_used_mb egress_bytes)a

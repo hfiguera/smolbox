@@ -77,7 +77,7 @@ the adapter does not currently implement the HTTP operation. Arity overloads in
 | `start_checkpointable`, `checkpoint_preflight`, `capture_checkpoint` | Add | Approved idle offline bare guests, bounded portable capture, source resumes, no external/container/network dependencies | P8 |
 | `export_machine` | Add | Stopped-machine supported disk export and approved registry destination; no implicit stop, checkpoint semantics or container workspace export | P8 |
 | `branch_source`, `branch_absent`, `branch_create`, `branch_inspect_child`, `branch_release` | Add | Same-worker offline bare source, one leaf, explicit hold/release, source dependencies and extra backing reservations | P8 |
-| `qualify_creation`, `inspect_creation`, `qualify_growth` | Native-only implementation | Keep pre-dispatch qualification, non-mutating verified absence and explicit quiesced growth-proof qualification; HTTP intentionally does not implement these operations | P1, P7, P9 |
+| `qualify_creation`, `inspect_creation`, `qualify_growth`, `qualify_capture`, `cleanup_capture` | Native-only implementation | Keep pre-dispatch qualification, non-mutating verified absence, explicit quiesced growth/capture proof qualification and exact capture staging release. Capture qualification/cleanup never replay capture or adopt an artifact. HTTP intentionally does not implement these operations | P1, P7, P8, P9 |
 
 The following specification features also require coverage even though they are
 not individual backend operations:
@@ -324,6 +324,21 @@ and public checkpoint APIs. Validate runtime/CPU/platform/topology and forbidden
 dependencies before publication/activation. Bare idle capture leaves its source
 running on success; a normal restore acquires a fresh machine identity. Do not
 infer guest idleness or absence of secrets from an empty command slot.
+
+An entered capture without a completed journal proof needs a distinct explicit
+resolution, even if the source checkpoint head is unchanged. After verified
+worker collection, require a stopped source or the same engine-enrolled live
+source with original receipt, SDK PID and OS PID/birth. Bind the original intent,
+previous receipt, actual checkpoint head and otherwise unchanged material into
+a `CaptureResolutionTransition` using the separate
+`smolbox-quiesced-capture-resolution-v1` proof domain. Quiescence applies to the
+capture operation; a verified live source keeps running. Advance the ordered material
+revision and retire the operation ID, but keep artifact result unknown. Never
+decode this transition as capture success or import a staged artifact. Exact
+recorded resolution lookup may recover a lost reply without repeating dispatch.
+Staging cleanup and reservation release require their own authenticated authority;
+source resolution alone does neither. Durable readers and public routing must
+support this distinct history before exposing the resulting receipt.
 
 Exports remain stopped-source disk artifacts and registry publication through an
 approved destination. Container export excludes `/workspace` as the HTTP endpoint

@@ -28,6 +28,437 @@ pub(crate) fn validate_assets(
     validate(input, manifest, resources).map_err(|_| Error::before(ErrorCode::Validation))
 }
 
+/// Pre-extraction bounds for both checkpoint transports. History index semantics
+/// remain the public SDK store reader's responsibility after bounded extraction.
+pub(crate) fn validate_checkpoint_assets(
+    input: impl Read,
+    manifest: &PackManifest,
+    resources: Resources,
+    budget: &crate::ReadBudget,
+) -> Result<()> {
+    budget.check()?;
+    let result = (|| {
+        let limit = checkpoint_expanded_limit(manifest, resources)?;
+        let mut decoder = zstd::stream::read::Decoder::new(input)?;
+        decoder.window_log_max(23)?;
+        let mut decoded = Budgeted {
+            input: Capped {
+                input: decoder,
+                remaining: limit,
+            },
+            budget,
+        };
+        match manifest.checkpoint.as_ref().ok_or_else(bad)?.payload {
+            smolvm_pack::format::CheckpointLayout::Assets => {
+                checkpoint_classic(&mut decoded, manifest, resources)
+            }
+            smolvm_pack::format::CheckpointLayout::Chunked => {
+                checkpoint_history(&mut decoded, manifest)
+            }
+        }
+    })();
+    // Preserve caller cancellation/deadline classification through IO adapters.
+    budget.check()?;
+    result.map_err(|_| Error::before(ErrorCode::Validation))
+}
+
+struct Budgeted<'a, R> {
+    input: R,
+    budget: &'a crate::ReadBudget,
+}
+impl<R: Read> Read for Budgeted<'_, R> {
+    fn read(&mut self, buffer: &mut [u8]) -> io::Result<usize> {
+        self.budget
+            .check()
+            .map_err(|_| io::Error::other("checkpoint read budget"))?;
+        self.input.read(buffer)
+    }
+}
+
+type CheckpointInventory = BTreeMap<Vec<u8>, (u64, AssetKind, Option<String>)>;
+
+fn checkpoint_inventory(
+    manifest: &PackManifest,
+    resources: Resources,
+) -> io::Result<CheckpointInventory> {
+    let checkpoint = manifest.checkpoint.as_ref().ok_or_else(bad)?;
+    let max_asset = MAX_BYTES.max(
+        resources
+            .storage_gib
+            .max(resources.overlay_gib)
+            .checked_mul(2 << 30)
+            .and_then(|value| value.checked_add(64 * 1024 * 1024))
+            .ok_or_else(bad)?,
+    );
+    let mut expected = BTreeMap::new();
+    let mut add = |path: &str, size: u64, kind: AssetKind, digest: Option<&str>| {
+        let path = normalized(path.as_bytes(), false)?;
+        if path.is_empty()
+            || size == 0
+            || size > max_asset
+            || expected.len() >= MAX_ASSETS
+            || digest.is_some_and(|value| !crate::domain::valid_hex(value, 64))
+            || expected
+                .insert(path, (size, kind, digest.map(str::to_owned)))
+                .is_some()
+        {
+            return invalid();
+        }
+        Ok(())
+    };
+    if manifest.assets.agent_rootfs.path != "agent-rootfs.tar"
+        || !manifest.assets.layers.is_empty()
+        || manifest.assets.workspace_seed.is_some()
+    {
+        return invalid();
+    }
+    add(
+        &manifest.assets.agent_rootfs.path,
+        manifest.assets.agent_rootfs.size,
+        AssetKind::Tar,
+        None,
+    )?;
+    for library in &manifest.assets.libraries {
+        add(&library.path, library.size, AssetKind::Bytes, None)?;
+    }
+    for (asset, cap) in [
+        (
+            manifest.assets.storage_template.as_ref(),
+            resources.storage_gib << 30,
+        ),
+        (
+            manifest.assets.overlay_template.as_ref(),
+            resources.overlay_gib << 30,
+        ),
+    ] {
+        if let Some(asset) = asset {
+            add(&asset.path, asset.size, AssetKind::Disk(cap), None)?;
+        }
+    }
+    for (asset, path, limit, sparse) in [
+        (
+            &checkpoint.state,
+            "checkpoint/checkpoint.bin",
+            64 * 1024 * 1024,
+            false,
+        ),
+        (
+            &checkpoint.memory,
+            "checkpoint/memory.bin",
+            (resources.memory_mib as u64 + 2048) << 20,
+            true,
+        ),
+        (
+            &checkpoint.layout,
+            "checkpoint/manifest.bin",
+            1024 * 1024,
+            false,
+        ),
+    ] {
+        if asset.path != path || asset.size > limit {
+            return invalid();
+        }
+        let digest = if sparse && asset.sha256.is_empty() {
+            None
+        } else {
+            Some(asset.sha256.as_str())
+        };
+        add(&asset.path, asset.size, AssetKind::Bytes, digest)?;
+    }
+    if checkpoint.disks.len() != 2 {
+        return invalid();
+    }
+    for (role, disk, cap) in [
+        ("storage", &checkpoint.disks[0], resources.storage_gib << 30),
+        ("overlay", &checkpoint.disks[1], resources.overlay_gib << 30),
+    ] {
+        if disk.role != role
+            || disk.files.is_empty()
+            || disk.files.len() > crate::CHECKPOINT_DISK_FILES
+        {
+            return invalid();
+        }
+        for (index, file) in disk.files.iter().enumerate() {
+            if !matches!(file.format.as_str(), "raw" | "qcow2")
+                || (file.format == "raw" && index + 1 != disk.files.len())
+                || file.asset.path != format!("checkpoint/disks/{role}/{index}")
+                || file.target
+                    != if index == 0 {
+                        format!("{role}.{}", file.format)
+                    } else {
+                        format!(".smolcheckpoint-{role}-{index}.{}", file.format)
+                    }
+                || (file.format == "raw" && file.asset.size > cap)
+                || file.asset.size
+                    > cap
+                        .checked_mul(2)
+                        .and_then(|value| value.checked_add(64 * 1024 * 1024))
+                        .ok_or_else(bad)?
+            {
+                return invalid();
+            }
+            let digest = if file.asset.sha256.is_empty() {
+                None
+            } else {
+                Some(file.asset.sha256.as_str())
+            };
+            // SDK installation validates disk format/chain semantics separately.
+            add(&file.asset.path, file.asset.size, AssetKind::Bytes, digest)?;
+        }
+    }
+    let paths: Vec<_> = expected.keys().cloned().collect();
+    for (index, path) in paths.iter().enumerate() {
+        if paths[index + 1..]
+            .iter()
+            .any(|child| child.starts_with(&[path.as_slice(), b"/"].concat()))
+        {
+            return invalid();
+        }
+    }
+    Ok(expected)
+}
+
+pub(crate) fn checkpoint_expected_files(
+    manifest: &PackManifest,
+    resources: Resources,
+) -> Result<BTreeMap<String, (u64, Option<String>)>> {
+    checkpoint_inventory(manifest, resources)
+        .and_then(|inventory| {
+            inventory
+                .into_iter()
+                .map(|(path, (size, _, digest))| {
+                    String::from_utf8(path)
+                        .map(|path| (path, (size, digest)))
+                        .map_err(|_| bad())
+                })
+                .collect()
+        })
+        .map_err(|_| Error::before(ErrorCode::Validation))
+}
+
+fn checkpoint_classic(
+    input: &mut dyn Read,
+    manifest: &PackManifest,
+    resources: Resources,
+) -> io::Result<()> {
+    use sha2::{Digest, Sha256};
+    let mut expected = checkpoint_inventory(manifest, resources)?;
+    let paths: Vec<_> = expected.keys().cloned().collect();
+    let mut stats = Stats {
+        limit: checkpoint_expanded_limit(manifest, resources)?,
+        ..Stats::default()
+    };
+    walk(input, &mut stats, &mut |entry, payload, stats| {
+        if entry.kind == tar::EntryType::Directory {
+            if !entry.path.is_empty()
+                && entry.path != b"lib"
+                && entry.path != b"layers"
+                && !paths
+                    .iter()
+                    .any(|path| path.starts_with(&[entry.path.as_slice(), b"/"].concat()))
+            {
+                return invalid();
+            }
+            if paths.contains(&entry.path) {
+                return invalid();
+            }
+            return Ok(());
+        }
+        if !matches!(
+            entry.kind,
+            tar::EntryType::Regular | tar::EntryType::GNUSparse
+        ) {
+            return invalid();
+        }
+        let (size, kind, digest) = expected.remove(&entry.path).ok_or_else(bad)?;
+        if size != entry.size {
+            return invalid();
+        }
+        match kind {
+            AssetKind::Tar => walk(payload, stats, &mut validate_guest_entry)?,
+            AssetKind::Disk(cap) => validate_disk(payload, size, cap)?,
+            AssetKind::Bytes => {}
+        }
+        if let Some(expected_digest) = digest {
+            let mut hash = Sha256::new();
+            let mut buffer = [0; 64 * 1024];
+            loop {
+                let count = payload.read(&mut buffer)?;
+                if count == 0 {
+                    break;
+                }
+                hash.update(&buffer[..count]);
+            }
+            if hex::encode(hash.finalize()) != expected_digest {
+                return invalid();
+            }
+        }
+        Ok(())
+    })?;
+    if !expected.is_empty() {
+        return invalid();
+    }
+    Ok(())
+}
+
+fn checkpoint_expanded_limit(manifest: &PackManifest, resources: Resources) -> io::Result<u64> {
+    let checkpoint = manifest.checkpoint.as_ref().ok_or_else(bad)?;
+    if checkpoint.payload == smolvm_pack::format::CheckpointLayout::Chunked {
+        return Ok(MAX_BYTES);
+    }
+    let max_asset = MAX_BYTES.max(
+        resources
+            .storage_gib
+            .max(resources.overlay_gib)
+            .checked_mul(2 << 30)
+            .and_then(|value| value.checked_add(64 * 1024 * 1024))
+            .ok_or_else(bad)?,
+    );
+    let sizes = std::iter::once(manifest.assets.agent_rootfs.size)
+        .chain(manifest.assets.libraries.iter().map(|asset| asset.size))
+        .chain(
+            manifest
+                .assets
+                .storage_template
+                .iter()
+                .map(|asset| asset.size),
+        )
+        .chain(
+            manifest
+                .assets
+                .overlay_template
+                .iter()
+                .map(|asset| asset.size),
+        )
+        .chain([
+            checkpoint.state.size,
+            checkpoint.memory.size,
+            checkpoint.layout.size,
+        ])
+        .chain(
+            checkpoint
+                .disks
+                .iter()
+                .flat_map(|disk| disk.files.iter().map(|file| file.asset.size)),
+        );
+    let mut total = 0u64;
+    for (index, size) in sizes.enumerate() {
+        if index >= MAX_ASSETS || size == 0 || size > max_asset {
+            return invalid();
+        }
+        total = total.checked_add(size).ok_or_else(bad)?;
+    }
+    // Exact declared logical assets plus the existing guest-rootfs traversal
+    // allowance. This admits sparse disks larger than the ordinary pack cap;
+    // the disk profile and chain bounds are checked before walking payloads.
+    total.checked_add(MAX_BYTES).ok_or_else(bad)
+}
+
+fn checkpoint_history(input: &mut dyn Read, manifest: &PackManifest) -> io::Result<()> {
+    use sha2::{Digest, Sha256};
+    let checkpoint = manifest.checkpoint.as_ref().ok_or_else(bad)?;
+    if checkpoint.history.is_empty()
+        || checkpoint.history.len() > smolvm::checkpoint_store::MAX_RETAINED_GENERATIONS + 1
+    {
+        return invalid();
+    }
+    let mut indexes = std::collections::BTreeSet::new();
+    indexes.insert(b"checkpoint.json".to_vec());
+    let mut ids = std::collections::BTreeSet::new();
+    for (index, generation) in checkpoint.history.iter().enumerate() {
+        if !crate::domain::valid_hex(&generation.lineage.id, 32)
+            || !ids.insert(generation.lineage.id.clone())
+            || generation.data_bytes > MAX_BYTES
+        {
+            return invalid();
+        }
+        if index > 0 {
+            indexes.insert(
+                format!("generations/{}/checkpoint.json", generation.lineage.id).into_bytes(),
+            );
+        }
+    }
+    if checkpoint.lineage.as_ref() != Some(&checkpoint.history[0].lineage) {
+        return invalid();
+    }
+    for pair in checkpoint.history.windows(2) {
+        if pair[0].lineage.parent.as_deref() != Some(pair[1].lineage.id.as_str()) {
+            return invalid();
+        }
+    }
+    let index_paths = indexes.clone();
+    let mut seen = std::collections::BTreeSet::new();
+    let mut index_bytes = 0u64;
+    walk(input, &mut Stats::default(), &mut |entry, payload, _| {
+        if seen.len() >= crate::checkpoint::HISTORY_ENTRIES || !seen.insert(entry.path.clone()) {
+            return invalid();
+        }
+        if entry.kind == tar::EntryType::Directory {
+            if entry.path.is_empty()
+                || entry.path == b"objects"
+                || entry.path == b"generations"
+                // The public AssetCollector creates these empty structural
+                // directories even for an object-store history transport.
+                || entry.path == b"layers"
+                || entry.path == b"lib"
+                || index_paths
+                    .iter()
+                    .any(|path| path.starts_with(&[entry.path.as_slice(), b"/"].concat()))
+            {
+                return Ok(());
+            }
+            return invalid();
+        }
+        if entry.kind != tar::EntryType::Regular {
+            return invalid();
+        }
+        if indexes.remove(&entry.path) {
+            index_bytes = index_bytes.checked_add(entry.size).ok_or_else(bad)?;
+            // Bound SDK JSON allocation across every retained generation.
+            if entry.size == 0
+                || entry.size > crate::checkpoint::HISTORY_INDEX_BYTES
+                || index_bytes > crate::checkpoint::HISTORY_INDEX_TOTAL_BYTES
+            {
+                return invalid();
+            }
+            return Ok(());
+        }
+        let hash = entry.path.strip_prefix(b"objects/").ok_or_else(bad)?;
+        let hash = std::str::from_utf8(hash).map_err(|_| bad())?;
+        if !crate::domain::valid_hex(hash, 64)
+            || entry.size == 0
+            || entry.size > crate::checkpoint::HISTORY_OBJECT_PACKED_BYTES
+        {
+            return invalid();
+        }
+        let mut decoder = zstd::stream::read::Decoder::new(payload)?;
+        decoder.window_log_max(23)?;
+        let mut object = Capped {
+            input: decoder,
+            remaining: crate::checkpoint::HISTORY_OBJECT_BYTES,
+        };
+        let mut digest = Sha256::new();
+        let mut buffer = [0; 64 * 1024];
+        let mut size = 0;
+        loop {
+            let count = object.read(&mut buffer)?;
+            if count == 0 {
+                break;
+            }
+            size += count;
+            digest.update(&buffer[..count]);
+        }
+        if size == 0 || hex::encode(digest.finalize()) != hash {
+            return invalid();
+        }
+        Ok(())
+    })?;
+    if !indexes.is_empty() {
+        return invalid();
+    }
+    Ok(())
+}
+
 fn validate(input: impl Read, manifest: &PackManifest, resources: Resources) -> io::Result<()> {
     if manifest.assets.agent_rootfs.path != "agent-rootfs.tar" {
         return invalid();
@@ -209,6 +640,8 @@ struct Entry {
 struct Stats {
     entries: u64,
     bytes: u64,
+    // Zero preserves the ordinary pack policy for all existing walkers.
+    limit: u64,
 }
 
 #[derive(Default)]
@@ -343,7 +776,13 @@ fn walk(
             }
         }
         stats.bytes = stats.bytes.checked_add(size).ok_or_else(bad)?;
-        if stats.bytes > MAX_BYTES {
+        if stats.bytes
+            > if stats.limit == 0 {
+                MAX_BYTES
+            } else {
+                stats.limit
+            }
+        {
             return invalid();
         }
         let entry = Entry {
@@ -548,7 +987,7 @@ fn invalid<T>() -> io::Result<T> {
 }
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
     use super::*;
     use smolvm_pack::format::{AssetEntry, LayerEntry};
 
@@ -598,6 +1037,34 @@ mod tests {
     fn qualified(manifest: &PackManifest, assets: &[u8]) -> Result<()> {
         let compressed = zstd::encode_all(assets, 1).unwrap();
         validate_assets(compressed.as_slice(), manifest, resources())
+    }
+
+    #[test]
+    fn checkpoint_expansion_allowance_tracks_large_captured_disks_without_widening_pack_walks() {
+        let (mut manifest, _, _) = fixture();
+        let asset = |path: &str, size| serde_json::json!({"path":path,"size":size,"sha256":""});
+        manifest.checkpoint = Some(serde_json::from_value(serde_json::json!({
+            "version":4,"runtime_abi":"fixture","host_platform":"linux/amd64",
+            "cpu_contract":{"kind":"exact-v1","fingerprint":"a".repeat(64)},
+            "cpus":1,"memory_mib":512,"device_profile":"smolvm-basic-v1",
+            "state":asset("checkpoint/checkpoint.bin",5),"memory":asset("checkpoint/memory.bin",6),
+            "layout":asset("checkpoint/manifest.bin",6),
+            "disks":[{"role":"storage","files":[{
+                "asset":asset("checkpoint/disks/storage/0",512u64 << 30),
+                "target":"storage.raw","format":"raw"
+            }]}]
+        })).unwrap());
+        let mut profile = resources();
+        profile.storage_gib = 512;
+        assert!(checkpoint_expanded_limit(&manifest, profile).unwrap() > 512u64 << 30);
+        assert!(checkpoint_expanded_limit(&manifest, resources()).is_err());
+        assert_eq!(Stats::default().limit, 0); // Existing pack walkers still use MAX_BYTES.
+        manifest.checkpoint.as_mut().unwrap().payload =
+            smolvm_pack::format::CheckpointLayout::Chunked;
+        assert_eq!(
+            checkpoint_expanded_limit(&manifest, profile).unwrap(),
+            MAX_BYTES
+        );
     }
 
     #[test]
@@ -738,7 +1205,7 @@ mod tests {
         }
     }
 
-    fn superblock(blocks: u64) -> Vec<u8> {
+    pub(crate) fn superblock(blocks: u64) -> Vec<u8> {
         let mut disk = vec![0; 4096];
         let sb = &mut disk[1024..];
         sb[4..8].copy_from_slice(&(blocks as u32).to_le_bytes());

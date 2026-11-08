@@ -6383,3 +6383,1377 @@ PostgreSQL, current/minimum consumers, HTTP-only consumers and remaining feature
 campaigns still need this package's own evidence. Public volume/source admission
 remains disabled; all full P0–P9 acceptance remains incomplete. Crash validation
 and distribution approval stay deferred/separate.
+## October 14, 2026: checkpoint restore approval boundary
+
+Added shared-engine checkpoint approval and header eligibility checks for the
+current unmodified SDK. Approval binds exact CPU/memory/disk allocations and
+host/guest platform; classic and chunked versions use SDK constants. Workload,
+network, packed-layer and credential dependencies reject before dispatch. A
+separate 64-GiB checkpoint artifact cap preserves the public capture allowance.
+CPU/hypervisor compatibility delegates to the public SDK validator. Header
+eligibility does not attest idle RAM, verify artifact bytes or authorize an
+existing machine.
+
+SDK convenience restore owns its reservation, record and failure cleanup. The
+public materialize/install boundary is selected instead for a fresh SmolBox
+reservation; bounded artifact preparation, owned restore/start, durable/wire
+integration and ordinary qualification remain pending. No checkpoint capability
+is enabled by this change.
+
+Ordinary Rust workspace tests pass 392 cases (343 engine, 37 bridge, 12 protocol),
+with 13 deferred fixtures ignored. The two focused checkpoint contracts, strict
+Clippy and documentation checks pass. Changed bytes do not inherit historical
+package qualification. Crash validation remains deferred and full parity remains
+incomplete.
+
+## October 14, 2026: bounded checkpoint artifact inspection
+
+Added admitted read-only checkpoint artifact inspection to the shared engine.
+It checks the whole-file operator SHA-256, bounded footer/manifest and public
+SDK descriptor-based checksum and CPU compatibility before payload traversal.
+Descriptor/named-path inode, length, permissions, owner and timestamp versions
+must match; substituted, symlinked or altered inputs cannot return success.
+Inspection neither extracts bytes nor creates SDK rows, receipts or reusable
+restore authority.
+
+Streaming classic validation requires the exact asset inventory, state/layout
+digests, optional sparse memory/disk hashes and disk role/path/target mappings.
+Each chain is limited to eight files. Expanded-byte bounds include the captured
+disk profile, so sparse disks larger than the pack limit are represented without
+widening ordinary pack parsing. History envelopes bind head/ancestry and declared
+index paths, cap indexes and entries, and verify bounded decoded object hashes.
+SDK index/reference and disk format/chain validation remain restore requirements;
+large-history scaling is still pending.
+
+Read-only observers retain their native lease until executing collection after
+caller cancellation, reject late success and preserve sibling control admission.
+Mutation observation/quarantine behavior remains unchanged. Seven checkpoint
+contracts cover inventories, crossed bytes/checksums, object/index limits,
+cancellation, descriptor/path substitution and an ordinary synthetic sidecar.
+Separate contracts cover large-profile sizing and retired-reader resource/control
+isolation. No VM, captured RAM, live fault injection or destructive CLI race is
+used by these tests.
+
+Ordinary Rust workspace tests pass 399 cases (350 engine, 37 bridge, 12 protocol),
+with 13 deferred fixtures ignored. Strict Clippy, warning-free workspace API
+documentation, format, diff and verified unmodified SDK source checks pass.
+These are source/contract checks, not new native package qualification.
+
+Fresh owned artifact staging, history semantics, restore/install/start, durable
+proofs, wire/store integration, capture/export/branch operations and ordinary
+platform qualification remain pending. No checkpoint capability is enabled, and
+changed packages do not inherit historical evidence. Crash validation remains
+deferred.
+
+## October 14, 2026: private checkpoint preparation and SDK history policy
+
+Added opaque PreparedCheckpoint and Engine::prepare_checkpoint_artifact. Approved
+source bytes are copied, synced, made read-only and independently inspected under
+fresh private owner-domain staging. The token retains native admission and domain
+authority; original operator-path changes do not alter prepared bytes, while
+cross-domain reuse or changed private files reject. No SDK machine/reservation,
+material receipt, global restore cache or reusable existing-machine authority is
+created.
+
+After bounded history extraction, public SDK index readers validate typed indexes.
+An independent policy reader uses public StoredFile serialization and the SDK’s
+published FORMAT.md to bind exact manifest files, referenced object lengths/hashes,
+reconstructed declared file digests, lineage and nonzero data summaries. Retained
+ancestors keep their own captured resource profiles, including earlier disk sizes.
+Index/object versions are retained and rechecked before further use.
+
+SDK-written fixtures found two interoperability errors in the earlier synthetic
+validator: top-level disk targets used backing names, and history envelopes
+rejected the AssetCollector’s empty layers directory. Both are fixed. Chains now
+follow the published 64-file limit; raw sizes bind captured capacity and QCOW
+inputs have a finite overhead allowance. No disk-format/geometry qualification is
+claimed by header/index policy.
+
+Separate checkpoint staging (128 GiB aggregate) and SDK-parser metadata (128 MiB)
+are charged without widening registry/command budgets or consuming control
+headroom. The prepared token holds allowances through normal private-root cleanup.
+A deterministic substituted-root model preserves unknown files and retains/fences
+the allowance; it does not run a live VM/CLI race. Five new source contracts cover
+private bytes/domain/cleanup, SDK-written multi-generation history across growth,
+malformed index/reference/digest cases, cancellation and unknown-root retention.
+Additional contracts cover chain depth/top targets and resource/control limits.
+
+Ordinary Rust workspace checks pass 406 tests (357 engine, 37 bridge, 12 protocol),
+with 13 deferred fixtures ignored. Strict Clippy, API documentation and verified
+unmodified SDK checks pass. SDK materialization/install/start, creation/material
+proofs, wire/store integration, scaled histories and ordinary platform qualification
+remain pending. Public checkpoint admission remains disabled. No new package
+qualification is inherited; crash validation remains deferred.
+
+## October 14, 2026: owned SDK checkpoint materialization
+
+Added MaterializedCheckpoint and a private checkpoint-materialization job kind.
+The engine consumes opaque prepared input through its owned supervisor; public
+SDK extraction handles classic files and uncached checkpoint_store::materialize
+handles history. No SDK row/reservation, VM dispatch or global restore cache is
+created. Protected metadata binds source/root/input versions, exact resource
+profile, selected manifest and the original deadline. Distinct correlated output
+evidence plus exact worker collection precedes parent output re-observation.
+
+Atomic promotion preserves the source’s single work slot and retains its lease
+in the collection box through worker retirement. Separate decoded staging is
+charged from declared input, bounded at the SDK store’s 2-TiB ceiling. Witness
+spools are bounded at 16 MiB. Only collected child exit and spool cleanup allow
+worker-resource demotion; source/material allowances survive until private
+cleanup. New work uses close/retain without signals or replay.
+
+Ordinary qualification found that SDK CPU matching invokes sysctl on macOS and
+SDK extraction applies mode 0755 to its fresh output root. The worker now has a
+fixed system tool path and four chunk threads; metadata-query child capacity is
+reserved, and its owned fresh output root is tightened through a no-follow
+descriptor under private staging before proof generation. Source/API checks do
+not change a BEAM/NIF process environment or umask. Temporary diagnostics were
+removed after these fixes.
+
+The explicitly selected ordinary non-VM fixture passes classic and SDK-written
+history materialization, verifies actual synthetic file bytes and matching
+private proofs, collects the helper normally, removes owned staging and leaves
+SDK VM inventory empty. The tested macOS debug helper SHA-256 is
+9d70f8c9d2621d7ca6b69ee7337be7602fb47fc27ef7f2c142f334994ec39c5b.
+This is a development worker witness, not VM/platform/package qualification.
+
+Three new deterministic contracts cover exact material inventory/digests/versions,
+extra or redirected data, correlated proof versus generic/crossed/retired events,
+and atomic promotion/collection with retained decoded capacity/control headroom.
+Ordinary Rust workspace tests pass 409 cases (360 engine, 37 bridge, 12 protocol).
+Fourteen fixtures are ignored by the unit selection: thirteen deferred/historical
+fixtures plus this explicitly selected ordinary materialization check. The final
+focused checkpoint selection passes 18 contracts; strict Clippy, API documentation,
+format/diff and verified unmodified SDK checks pass. Crash validation stays deferred.
+
+SDK installation, fresh creation/material authority, first-start consumption,
+wire/store integration, scaled histories and ordinary restored-VM/platform/consumer
+qualification remain pending. Public checkpoint admission remains disabled, and
+changed bytes inherit no historical qualification. Full P0–P9 parity is incomplete.
+
+## October 14, 2026: fresh checkpoint installation and creation authority
+
+Added CreateCheckpointRequest and Engine::create_checkpoint. Admission binds the
+opaque materialized source, exact resources, generated identity, current domain
+and approved templates. Existing SDK rows/directories reject. Fresh SDK-name
+reservation, exclusive private directory creation and no-clobber source/material
+ticket precede the owned installer. Public SDK install/discard APIs populate only
+that exact ticketed directory; source/target identity, top disk capacities, pending
+inputs and installed file evidence are checked before any success is promoted.
+
+Distinct CheckpointInstalled evidence binds metadata and ticket. Exact child
+collection plus parent output rechecks precede neutral public MachineSpec record
+construction, creation receipt and material-journal initialization. Explicit
+forkable/own host-UID/history routing is set without copying private SDK record
+construction or adopting SDK inventory. Source/gate/SDK reservation and native
+allowances stay in the collection box through unresolved work. Partial storage is
+retained on error; no signals, automatic deletion or replay authorize recovery.
+
+Install promotion separately charges prospective output (finite 2-TiB cap) while
+retaining decoded input and source budgets. The child environment selects private
+disk restoration and disk-backed inputs; no BEAM/NIF environment or research SDK
+source is modified. A missing-parent path-ordering bug found by the ordinary
+fixture was corrected without repairing existing VM material.
+
+Four deterministic contracts cover no-clobber tickets, read-only top capacity
+checks/crossed or invalid disk profiles, distinct versus generic/crossed/duplicate
+proof and atomic installation accounting/control headroom. An explicitly selected
+ordinary macOS worker fixture materializes and installs synthetic checkpoint
+state plus sparse 1-GiB storage/overlay disks, commits a receipt-bound stopped SDK
+row, confirms neutral routing/no VMM PID/pending inputs, collects normally and
+releases private work. The tested debug helper SHA-256 is
+95a4899e28de9eb15f9c1d70bcde28175c9e33175bfbec88ebbbce2828cbe47a.
+This is ownership/filesystem evidence, not captured-RAM boot or package qualification.
+
+Ordinary Rust workspace tests pass 413 cases (364 engine, 37 bridge, 12 protocol).
+The fifteen ignored fixtures comprise thirteen deferred/historical fixtures and
+the two explicitly selected ordinary checkpoint worker checks. Strict Clippy,
+API documentation, formatting/diff and unmodified SDK source checks pass.
+
+First-start validation/consumption and uncertainty, saved-state wire/store
+histories, scaled histories and ordinary restored-VM/platform/consumer
+qualification remain pending. Public checkpoint admission remains disabled; full
+P0–P9 parity remains incomplete and crash validation stays deferred.
+
+## October 14, 2026: checkpoint first-start authority and consumed-state journal
+
+Added receipt/record-bound pending, entered and consumed lifecycle evidence. Its
+immutable header binds creation identity, source, captured resources and initial
+installation snapshot through a material record label. Private bounded/no-follow
+reads and synced compare-version writes reject missing, crossed, redirected,
+replaced or changed journals. No observer can mint, complete or replay this
+authority from SDK inventory. Legacy non-checkpoint records retain their path.
+
+First start checks exact pending input versions and captured sizes, then persists
+a fresh correlated entered intent before SDK entry. The unmodified SDK already
+finalizes and consumes a live restore on successful embedded start. Only that
+success plus this engine’s matched live SDK handle PID/birth and consumed input
+postconditions completes the controller journal. SDK failure, cancellation or
+late completion leaves entered state unknown; inspection reports IdentityUnknown
+and another start cannot cold-boot/replay. Same-engine normal stop/shutdown remains
+possible only with original tracked-handle and live PID/birth proof; it does not
+resolve restoration or release storage authority.
+
+The ordinary installed-row fixture caught a legitimate macOS ctime change from
+SDK readonly links when source staging was removed. Lifecycle input evidence now
+anchors after authorized cleanup while native allowance, gate and SDK reservation
+remain held. Checks were not weakened. SDK installation fingerprints exclude
+independently validated controller control files added during creation.
+
+Five deterministic contracts cover pending input/receipt rejection, entered
+uncertainty despite SDK file consumption, explicit correlated completion/later
+cold start, cancellation/replaced journal, in-place version changes and legacy
+records. They use synthetic files/PIDs and ordinary SDK consume, not a VM, owner
+loss or live interruption. The explicitly selected ordinary SDK-installed-row
+fixture now confirms pending inspection, durable entered classification and start
+rejection without booting captured state.
+
+Ordinary Rust workspace checks pass 418 tests (369 engine, 37 bridge, 12 protocol),
+with fifteen ignored fixtures (thirteen historical/deferred and two explicitly
+selected ordinary checkpoint worker checks). Strict Clippy, API documentation,
+format/diff and verified unmodified SDK source checks pass. Captured-RAM/device
+boot qualification, explicit resolution and expanded saved-state wire/store
+histories remain pending. Public checkpoint admission stays disabled; full parity
+remains active and crash validation remains deferred.
+
+## HTTP parity: operator checkpoint catalog
+
+Added a separate optional native checkpoint approval catalog and an immutable
+request identity containing only kind, ID, digest and architecture. Operator
+configuration supplies the path, current SDK/native platform, captured allocations
+and separate 64-GiB input ceiling. Parsing checks up to 32 unique IDs without
+opening files or acquiring machine authority. Unknown fields (including paths in
+request identity), crossed platform/version, duplicate IDs and excessive bounds
+fail before engine open. Elixir publishes approvals only when the package explicitly
+advertises checkpoint support; absent optional catalogs preserve legacy bytes.
+
+Ordinary Rust workspace checks pass 419 tests (369 engine, 38 bridge, 12 protocol),
+with the same fifteen ignored fixtures. The focused Elixir checkpoint/config/source
+codec checks pass 22 tests. Operation dispatch and durable checkpoint histories,
+restored-RAM platform/consumer qualification and P8 acceptance remain pending.
+No checkpoint capability is enabled; crash validation remains deferred.
+
+## HTTP parity: checkpoint creation wire integration
+
+Added path-free checkpoint qualification, creation and absence protocol requests,
+exact catalog identity/allocation selection before helper admission, and an
+engine approved-source entry point. It checks creation identity and templates
+before staging and carries one absolute deadline/cancellation budget through
+private preparation, collected materialization and fresh installation. Read-only
+absence requires the existing domain/database/gate evidence, stays usable during
+work quarantine and never opens an operator artifact or adopts existing/partial
+material. Rust session and Elixir request/channel contracts reject crossed
+receipt identities, unknown dependency fields, caller paths and authority returned
+to an absence request. Public feature negotiation remains unchanged.
+
+Deterministic models cover omitted feature/catalog, crossed allocations, source
+digest/owner rejection before staging, existing-row/partial-storage absence and
+correlated terminal results. The explicitly selected ordinary non-VM installation
+fixture now uses the approved-source engine entry point. It passes without a VMM
+boot, owner loss or interruption. Its debug helper SHA-256 is
+`69d73b5cf7fe94256408f2279a881a1a879b3172f2aeb38998abb3fb75af303e`;
+this scope is not captured-RAM or public package qualification.
+
+Ordinary workspace checks pass 423 tests (371 engine, 39 bridge, 13 protocol),
+with fifteen ignored fixtures unchanged. Protocol codec contracts pass 56 tests.
+The Elixir suite passes 928 checks (4 doctests, 6 properties, 918 tests), with 42
+runtime/deferred-crash exclusions. Strict Clippy, API documentation, formatting
+and verified unmodified SDK source checks pass. Raw logs remain ignored under
+`.local/http-parity/checkpoint-wire-*`. Public managed creation routing, durable
+checkpoint histories, explicit resolution and restored-VM/platform/consumer
+qualification remain pending. Full parity remains active; no checkpoint admission
+is enabled and crash validation remains deferred.
+
+## HTTP parity: durable checkpoint restore-source assignments
+
+Managed assignment, qualification, machine-spec creation and absence routing now
+recognize approved checkpoint sources separately from local packs and registry/OCI
+sources. Approval requires the exact original captured profile; restore sources
+retain offline/no-port/no-workload/no-volume restrictions. Paths remain operator
+configuration, while durable intent retains source identity, allocations and
+generated ownership/incarnation. Retained commands inherit that assignment rather
+than creating or replaying restore. Public helper descriptors remain unchanged.
+
+Selective codec v22 preserves restore-source assignments and retained commands;
+earlier native/HTTP envelopes reject their expanded shape. Existing HTTP/native
+encodings stay unchanged. An independent same-process comparison against the
+pre-change encoder at b80929b confirmed identical HTTP checkpoint bytes. The
+ordinary legacy regression also verifies the old v5 envelope and omission of
+native fields. Fresh BEAM decoding, crossed source/allocation/path rejection,
+Memory atomic reservation/capacity/recovery and missing-reader-before-enrollment
+contracts pass. Runtime requires native_checkpoint_sources: 1 before admitting a
+future checkpoint-capable helper. Memory and the PostgreSQL example implement
+that reader and retain original intent through their atomic reservation paths.
+
+The Elixir suite passes 935 checks (4 doctests, 6 properties, 925 tests), with 42
+runtime/deferred-crash exclusions. Focused final checkpoint/source/config checks
+pass 31 tests. A fresh private PostgreSQL 17.11 database passes 72 ordinary
+checkpoint/backend/store/machine checks, including crossed-identity rejection,
+transaction rollback without projection/capacity changes, v22 decode and recovery
+reads. It was shut down normally; no VM or database interruption campaign ran.
+Root/example warning-free compilation, strict Credo and formatting pass. Raw
+logs/database data remain ignored under .local/http-parity/checkpoint-assignment-*.
+
+This is a reader and routing foundation, not ordinary restored-RAM qualification.
+Expanded capture/export/branch histories, explicit entered-state resolution,
+large-history acceptance and exact-package platform/public consumer checks remain
+pending. No public checkpoint capability is enabled. Full parity stays active,
+with crash validation and publisher distribution approval separate.
+
+## HTTP parity: checkpointable startup and source preflight
+
+Fresh local and qualified-registry bare pack creation can now bind forkable
+into original material before receipt publication. A private typed record policy
+preserves ordinary creation behavior and rejects container/layered/dependency
+packs and network/port/workload combinations for this opt-in. Shared bare capture
+eligibility retains public SDK profile validation and rejects automatic workload,
+environment/user, credential, device and disk dependencies. It is not a guest idle
+assertion. Both forkable and checkpoint_head remain part of material hashing.
+
+Engine start_checkpointable requires originally authenticated forkable material
+and uses ordinary SDK start, which already honors that flag. It cannot rewrite
+an ordinary record using the SDK convenience start. Read-only checkpoint_preflight
+requires running state, exact enrolled cached PID/birth, verified templates and
+unchanged lifecycle preconditions. Source-operation Port requests and Elixir
+backend/request/channel routing now exist under the still-disabled checkpoint
+feature. Protocol/channel tests reject stopped preflight success, legacy receipts
+and excessive observation budgets. The two operation inventory rows now register
+their routing while retaining pending acceptance.
+
+Four non-VM engine contracts cover profile rejection, original material opt-in,
+container/network rejection and unchanged/crossed ordinary records. Validated
+bare sidecar fixtures carry independently checked ext4 geometry; they create no
+VM row or VMM and do not qualify a guest filesystem or running checkpoint source.
+The clean SDK capture path changes checkpoint_head and only warns on persistence
+failure. Product capture therefore still needs its own entered intent, bounded
+staging/collection and correlated artifact/source-resume material transition.
+Neither dropping this field nor reusing growth evidence is acceptable.
+
+Ordinary Rust workspace checks pass 428 tests (375 engine, 39 bridge, 14 protocol),
+with fifteen ignored fixtures unchanged. Protocol codec contracts pass 56 tests.
+The full Elixir suite passes 936 checks (4 doctests, 6 properties, 926 tests), with
+42 runtime/deferred-crash exclusions. Strict Clippy, Credo, API documentation,
+formatting and verified unmodified SDK source checks pass. Raw logs remain ignored
+under .local/http-parity/checkpointable-*. No live VM or deferred fault campaign
+was run. Fresh creation opt-in intent/codec integration, capture/history work,
+explicit resolution and exact-package running-source/platform/consumer
+qualification remain pending. Full parity stays active; public checkpoint
+admission, crash qualification and publisher approval are not claimed.
+
+## HTTP parity: persisted checkpointable creation opt-in
+
+Qualification and creation now retain an optional explicit true checkpointable
+marker for local, registry and checkpoint sources. False/null values, legacy
+protocol use and mount/network/workload combinations reject before dispatch.
+Ordinary requests omit the field. Local qualification checks bare pack eligibility;
+local/registry creation selects the original-material checkpointable constructors
+under the existing deadline. Checkpoint restores retain their required forkable
+material while the marker binds the controller's capture opt-in independently.
+
+Managed assignments persist that opt-in and reject its removal or disagreement
+with the immutable specification. Retained commands inherit it without restore
+replay. Selective codec v23 rejects downgrade into earlier native/HTTP envelopes;
+v22 restore-source records and HTTP checkpoint/checkpointable envelopes retain
+their encoding. Runtime requires native_checkpointable: 1 alongside the existing
+checkpoint source reader before enrolling a future capable package. Memory and
+the PostgreSQL example implement the reader and atomic reservation foundation.
+
+Models cover explicit marker validation, feature gating, omitted old defaults,
+reservation rejection/retention, v22/v23 fresh-BEAM decoding and attached commands.
+A private PostgreSQL database passes 73 ordinary checkpoint/backend/store/machine
+checks for both opt-in states, including transaction rollback without capacity or
+projection changes and recovery reads. It shut down normally. No VM, live
+persistence interruption or deferred crash/CLI-race campaign was run. An
+independent same-process comparison with the pre-change encoder again preserves
+HTTP checkpoint bytes. Raw logs remain ignored under
+.local/http-parity/checkpointable-intent-* and the private PostgreSQL directory.
+
+Creation opt-in wiring is implemented as a foundation; public checkpoint feature
+admission stays disabled. Capture still requires an authenticated source material
+transition, bounded staging/streaming/collection and saved histories. Explicit
+resolution and exact-package running-source/platform/public consumer qualification
+remain pending. The full P0–P9 objective stays active without narrowing scope.
+
+Final checks pass 429 ordinary Rust unit tests (375 engine, 39 bridge, 15 protocol)
+with fifteen ignored fixtures unchanged, plus 56 protocol codec contracts. The
+Elixir suite passes 941 checks (4 doctests, 6 properties, 931 tests), excluding
+42 runtime/deferred-crash cases. Strict Clippy/Credo, API documentation,
+warning-free compilation, formatting and unmodified SDK verification pass.
+
+## HTTP parity: authenticated capture material transitions
+
+Added distinct capture request/artifact/change/transition types and journal
+prepared/entered/completed state. The intent binds the original material proof,
+explicit idle assertion and byte limit, original checkpoint parent, immutable
+source fields and exact source PID/birth. Completion requires entered authority,
+the correlated artifact digest/size/new head/parent, unchanged source material
+except checkpoint_head, and the same resumed running PID/birth. This is not guest
+idle attestation or proof of actual artifact bytes/process liveness by itself;
+the capture coordinator must independently verify those before completion.
+
+Capture and growth links share one ordered revision chain with distinct proof
+domains and globally unique operation IDs. Capture's new lineage updates the
+growth immutable witness instead of excluding lineage from material hashing.
+Pending capture fences material verification and further mutation. Completed
+lookup returns only an exact recorded result; it cannot synthesize success from
+SDK inventory, artifact existence or an unchanged head after a persistence warning.
+Old journals omit all optional capture fields and preserve their encoding.
+
+Permits bind the original private directory. Journal reads/compare-and-replace
+writes now check the full file version (identity, ownership/mode, size and change
+times), detecting in-place changes as well as replaced inodes. Five deterministic
+non-VM contracts exercise entry/completion boundaries, wrong PID/state/material,
+parent/digest/byte bounds, growth/capture ordering, duplicate/reordered/corrupted
+links, crossed directories, in-place changes and exact completed lookup. They use
+synthetic SDK-result records and never launch, interrupt or lose an owner process.
+
+The journal interfaces are not yet called by a production capture coordinator;
+their explicit temporary dead-code annotations reflect that integration work.
+SDK dispatch, bounded staging/worker collection, artifact verification/streaming,
+normal shutdown for entered capture, saved store histories and ordinary source/
+package/platform/public consumer qualification remain pending. No public capture
+feature is enabled. Full parity remains active with crash validation deferred.
+
+Final checks pass 434 ordinary Rust unit tests (380 engine, 39 bridge, 15 protocol),
+with fifteen ignored fixtures unchanged, and 56 protocol contracts. Strict Clippy,
+API documentation, format/diff and unmodified SDK verification pass. Raw logs
+remain ignored under .local/http-parity/capture-material-*.
+
+## HTTP parity: owned capture worker and shared-engine collection
+
+Connected capture material entry/completion to `Engine::capture_checkpoint` and a
+distinct collected native worker calling unmodified public SDK capture. Source
+preflight, machine gate, entered operation metadata, SDK default-domain identity,
+private staging and live PID/birth are checked before dispatch. The worker uses
+no prepared cache, independently inspects artifact bytes/profile/lineage, and
+requires the same resumed source and persisted new checkpoint head. Parent
+collection independently checks source material/liveness, output hash/version and
+private staging identity before completing the material journal and updating the
+enrolled receipt. It does not infer success from artifact existence or inventory.
+
+An opaque captured result retains private output and native allowances during
+one-time bounded chunk streaming. Generic/retired/crossed acknowledgments cannot
+complete capture. A pre-entry cancelled preparation can abort; entered uncertainty
+preserves staging and allowance. Normal stop is restricted to the exact original
+enrolled source PID/birth and leaves capture material fenced. Replaced private
+staging is preserved with admission quarantine. No forced termination is added.
+
+Five new non-VM staging/stream models cover collection cleanup, resource retention,
+replaced directories, changed file versions, failed consumers, cancellation and
+replay rejection. Additional proof/source-intent models cover crossed/retired
+capture evidence and pre-entry abort versus entered normal-stop authority. These
+are deterministic contracts, not ordinary live SDK capture qualification.
+
+Public capture Port/backend routing, durable capture histories/publication,
+explicit resolution, and ordinary source/package/platform/public consumer
+qualification remain pending. No public checkpoint feature is enabled. The
+full P0–P9 objective remains active and crash validation remains deferred.
+
+Final checks pass 441 ordinary Rust unit tests (387 engine, 39 bridge, 15 protocol)
+and 56 protocol contracts; fifteen ignored fixtures remain excluded. Strict
+Clippy, API documentation, formatting/diff checks and unmodified SDK source
+verification pass. Raw logs remain ignored under
+.local/http-parity/capture-worker-* and capture-stream-models.log. No live capture
+qualification or public descriptor approval is inferred from these checks.
+
+## HTTP parity: exact capture transition and completed-result wire observation
+
+Added strict transport evidence for capture transitions in Rust and Elixir,
+preserving the engine's canonical request/chain hashes, immutable origin, source
+PID/birth, artifact digest/size/head/parent and consecutive revision. Both shared
+synthetic fixtures are accepted by the actual engine validator and the two wire
+validators. Models reject altered PID/material/artifact bounds, missing nullable
+fields and crossed source intent.
+
+Protocol-2 `inspect_capture` and `capture_presence` provide a read-only exact
+completed-operation lookup through the engine and Port adapter. The engine binds
+the target/domain/database and original incarnation marker, keeps observation
+allowance and source gate held, and checks the caller deadline/cancellation.
+Helper/BEAM terminal correlation requires the exact original receipt/operation/
+request and no output bytes. Null means no recorded completion; it is not source
+quiescence, artifact absence, adoption or capture replay authority. Checkpoint
+feature gating is retained and the public descriptor remains unchanged.
+
+The non-VM lookup model uses only synthetic completed journal evidence and checks
+missing creation markers, foreign target, cancellation, held source gate, unchanged
+journal bytes and released observation allowance. No SDK VM record is inserted or
+adopted. Public capture byte transfer, durable source identity/capture histories,
+explicit resolution and ordinary running-source/platform/public consumer
+qualification remain pending. Full P0–P9 scope remains active; crash validation
+stays deferred.
+
+Final checks pass 445 ordinary Rust unit tests (388 engine, 40 bridge, 17 protocol)
+and 56 protocol contracts, with fifteen ignored fixtures excluded. The full Elixir
+suite passes 943 checks (4 doctests, 6 properties, 933 tests) with 42 runtime/
+deferred cases excluded. Strict Clippy/Credo, API documentation, formatting/diff
+and unmodified SDK verification pass. Raw logs remain ignored under
+.local/http-parity/capture-wire-*; no changed package or live capture qualification
+is claimed.
+
+## HTTP parity: bounded checkpoint Port stream and consumer
+
+Connected path-free protocol-2 `capture_checkpoint` requests to the shared engine
+through the Port adapter. Requests bind the original source receipt, operation ID,
+explicit idle assertion and artifact byte cap. Successful `captured` terminals
+carry the exact authenticated capture transition and require all artifact bytes
+to have been delivered. Worker/engine collection and artifact leases remain held
+through the adapter's one-time stream. Post-capture transfer/cancellation errors
+are uncertain even when streaming did not begin, so they cannot authorize replay.
+
+Checkpoint bytes use their own `checkpoint` stream and a finite 1,048,577-event
+allowance for the 64-GiB artifact cap. Frame/chunk size, byte/event credits and
+queued-memory limits remain unchanged; ordinary command/file byte and event caps
+are unchanged. Helpers and BEAM channels reject wrong streams, exhausted credit,
+crossed capture proofs and incomplete delivered sizes.
+
+Elixir `CaptureStream` hashes chunks incrementally without accumulating artifact
+bytes. `Call` requires an explicit consumer before submitting capture, returns
+credit only after the consumer returns `:ok`, and checks final digest/size and
+request binding. Failed/throwing consumers, oversized chunks and unexpected
+streams retire the operation without credit or success. Returned buffered output
+stays empty. A deterministic GenServer peer exercises actual Call/Port-interface
+messages, proves credit follows acceptance and transfers more total bytes than
+the response-buffer budget. It never launches a helper or VM.
+
+The shared synthetic capture fixtures now declare digests of their known modeled
+512-byte streams; canonical proof hashes remain accepted by engine/Rust/Elixir.
+Wire models cover feature gating, larger checkpoint sequence limits and preserved
+ordinary file limits. Public Backend capture policy/destination selection,
+no-clobber local publication, durable source/capture histories, unknown-result
+resolution and exact-package ordinary live capture qualification remain pending.
+No public checkpoint descriptor is enabled. Full parity remains active with
+crash validation deferred.
+
+Verification passes 446 ordinary Rust unit tests (388 engine, 40 bridge,
+18 protocol), plus 56 protocol contracts; fifteen ignored fixtures remain
+excluded. The full Elixir suite passes 947 checks (4 doctests, 6 properties,
+937 tests), excluding 42 runtime/deferred cases. Strict Clippy/Credo, API docs,
+format/diff and unmodified SDK checks pass. Raw evidence remains ignored under
+.local/http-parity/capture-stream-*; no native package/live capture qualification
+is inferred from these deterministic checks.
+
+## HTTP parity: durable native capture and material history
+
+Added a bounded ordered material-history validator combining existing growth and
+capture proof domains. It checks canonical root, exact previous receipt/revision,
+unique operation IDs, disk geometry, capture lineage and immutable witnesses
+across transitions. Source records retain their original creation receipt;
+capture history and current observed receipt advance together under a store guard.
+Attached commands inherit the complete history and current material receipt.
+Shared synthetic mixed growth/capture fixtures pass the actual engine and both
+wire validators. They do not widen public growth support: checkpointable machines
+remain excluded from growth by the existing HTTP-compatible predicate.
+
+`CheckpointCapture.native_transition` binds capture ID/request, result bytes and
+source identity; native captured/completed results require the correlated proof.
+HTTP histories retain nil and reject native evidence. Store advancement matches
+the exact prior receipt and source PID/birth, keeps original creation immutable,
+and atomically records the captured result/current identity. Failed or crossed
+proofs retain the previous source receipt, intent and resource usage. Captured
+resource profiles are derived at their position in material history.
+
+Selective codec v24 stores native capture intents/histories and attached material
+histories. New defaults are omitted from prior encodings; old envelopes reject
+their presence. Memory and the PostgreSQL example advertise the separate
+`native_capture_histories: 1` reader, required before future checkpoint-capable
+helper enrollment. A fresh-BEAM contract exposed a safe-decoding checkpoint
+platform vocabulary gap and verified the fix. No public SDK feature is enabled.
+
+Four deterministic contracts exercise source advancement, ordering/geometry,
+attached commands, v24 round trips, crossed/missing proofs, old-envelope smuggling,
+fresh BEAM and atomic store retention. The same ordinary capture contract passes
+Memory and a private PostgreSQL database, including a rejected transaction with
+unchanged projections and usage. The selected PostgreSQL campaign passes 59
+checks and the database shuts down normally. An independent comparison against
+the pre-change encoder in the same BEAM preserves tested HTTP v12 and native v23
+bytes. Raw evidence remains ignored under .local/http-parity/capture-history-*.
+
+Public backend capture routing/policy/destination selection, no-clobber
+publication, explicit unknown-result resolution and ordinary live
+source/package/platform/public consumer qualification remain pending. The full
+P0–P9 objective remains active and crash validation remains deferred.
+
+Final verification passes 447 ordinary Rust unit tests (388 engine, 41 bridge,
+18 protocol) and 56 protocol contracts, with fifteen ignored fixtures excluded.
+The full Elixir suite passes 951 checks (4 doctests, 6 properties, 941 tests),
+excluding 42 runtime/deferred cases. The PostgreSQL campaign passes 59 checks;
+three checkpoint/capture checks pass again after the final original-opt-in guard.
+Strict Clippy/Credo, warning-free application compilation, API docs,
+format/diff and unmodified SDK verification pass. The private database is normally
+stopped. These checks establish no live capture, package or platform qualification.
+
+## HTTP parity: scoped capture routing and controller publication
+
+Added `EmbeddedCapture` and an active capture snapshot in `EmbeddedContext`.
+Backend capture validates scoped original authority, checkpointable creation,
+approved policy, capture state/ID and exact fingerprint output/max bytes before
+any file or SDK dispatch. Owner pinning and publication/transfer share a reducing
+deadline. Runtime checkpoint preflight/capture now use assigned connections and
+the persisted dispatched intent. Native subsequent preflight compares current
+material authority rather than original creation; original creation stays intact.
+Native transition metadata survives result projection into the atomic store.
+Checkpoint artifact metadata uses SDK identity independently of engine health.
+
+`CapturePublication` opens a private read/write exclusive partial file. It binds
+root/directory/file identity and modes, bounds accepted bytes and independently
+hashes the opened descriptor before publication. File and directory metadata are
+synced, and a no-clobber hard link publishes final output before retiring the
+partial name. Existing destinations, replaced directories, wrong/incomplete bytes
+and publication failures remain preserved/uncertain. An existing fingerprint
+directory is not treated as undispatched evidence or permission to retry.
+
+Transport-only optional chunk_bytes fits the caller's response window without
+changing canonical capture request/proof hashes. The adapter slices the existing
+opaque stream, and both channels enforce the selected chunk size and original
+byte/event credit. Nonempty output bounds artifact event count by the 64-GiB byte
+cap, replacing the provisional full-chunk event count; ordinary command/file caps
+and queue bounds stay unchanged. Seven publication/source models cover success,
+private partial retention, collision/replacement, byte admission and current
+material preflight. Existing channel models now exercise small chunk windows.
+These tests use synthetic local bytes/peers, not a live captured guest.
+
+Public backend method advertisement is recorded in the checked matrix, while
+every full-parity acceptance row remains pending. The actual public checkpoint
+descriptor remains disabled. Explicit unknown-result resolution and ordinary
+source/package/platform/public consumer qualification remain pending. Full
+P0–P9 scope remains active; crash validation remains deferred.
+
+Verification passes 447 ordinary Rust unit tests (388 engine, 41 bridge,
+18 protocol) and 56 protocol contracts, with fifteen ignored fixtures excluded.
+The full Elixir suite passes 959 checks (4 doctests, 6 properties, 949 tests),
+excluding 42 runtime/deferred cases. One earlier full run hit the existing
+worker-health observation timeout; the affected contract passed in isolation and
+the complete suite passed with eight concurrent cases. Eighteen focused capture,
+metadata and coverage checks pass. Strict Clippy/Credo, warning-free compilation,
+API documentation, formatting/diff and unmodified SDK verification pass. Raw
+evidence remains ignored under .local/http-parity/capture-publication-*; no live
+capture/package/platform qualification is claimed.
+
+## HTTP parity: completed capture observation and explicit unknown resolution
+
+Added exact completed-capture lookup to backend inspection for dispatched/unknown
+capture intents. An ephemeral context advances only after prior receipt, ID,
+request, canonical proof and complete ordered history match. Null remains no
+completion evidence. Inspection then uses the recovered receipt to observe source
+state; it does not mutate durable capture history, adopt local output or dispatch
+capture. Embedded operational contexts now retain source history for this purpose.
+
+Public checkpoint resolution now enters the existing native authority/quiescence
+boundary before claiming the expected version and making assigned source
+observations. Source proof, history, resources and incarnation must match the exact
+unknown intent. The guarded store transaction records its source transition and
+current observation but keeps artifact result nil and state resolved_unknown.
+The retained artifact allowance remains charged until explicit release. Original
+creation stays immutable and duplicate IDs never replay. Known captured/native
+source resolution uses current material authority; HTTP behavior stays unchanged.
+
+Recovery/inspection recognize correlated source evidence without synthesizing
+artifact success. Interrupted dispatch becomes unknown; existing unknown capture
+state/receipt/reservations remain unchanged during automatic recovery. Proof import
+and unlocking occur only through explicit resolution. Three new non-VM contracts
+cover exact/no/crossed evidence, state/request/PID tampering, running/stopped source
+resolution, rollback, retained allowance, codec round-trip and deduplication.
+Memory and the private PostgreSQL example share the same contracts. PostgreSQL
+passes 46 ordinary checks and shuts down normally.
+
+Entered captures without a completed journal link remain fenced. Their explicit
+material/staging/budget resolution, ordinary running-source/package/platform/public
+consumer qualification and other P0–P9 acceptance remain pending. Public checkpoint
+admission stays disabled. Crash validation remains deferred.
+
+Final verification passes 962 Elixir checks (4 doctests, 6 properties, 952 tests)
+with eight concurrent cases and 42 runtime/deferred cases excluded. Twenty-four
+targeted capture/recovery checks pass, with three older tagged cases excluded;
+the ordinary PostgreSQL campaign passes 46 checks. Strict Credo, warning-free
+compilation, formatting/diff and unmodified SDK checks pass. Native implementation
+bytes are unchanged from the preceding 447-unit/56-protocol-contract verification.
+Raw logs remain ignored under .local/http-parity/capture-resolution-*; the private
+database is stopped and no crash or live capture qualification is claimed.
+
+## HTTP parity: entered capture source-material resolution
+
+The shared engine now has an explicit resolution boundary for an entered capture
+without completed artifact proof. It requires the exact original receipt, intent
+ID/request and creation marker, the retained source gate, stopped SDK state with
+no PID, absence of the original live PID/birth and cached/enrolled handles, and
+quiescent boot actors with no dependent clones. Current inventory cannot create
+the intent or substitute for those authorities. Budget/ownership/state rejection
+leaves the private journal unchanged.
+
+`CaptureResolutionTransition` has a separate canonical proof domain and carries
+the actual checkpoint head, never artifact digest/size or capture success. Other
+source material must remain unchanged. Resolution appends an ordered material
+revision, retires the ID across capture/growth operations and clears the entered
+source fence. Unchanged and advanced heads use the same explicit transition;
+erasing an existing head is rejected. Exact recorded lookup and repeated explicit
+resolution recover evidence without repeating SDK dispatch or importing output.
+Old journals omit the new optional history field. Seven non-VM contracts exercise
+these boundaries, mixed subsequent capture history and malformed/crossed proofs.
+
+Resolution has one finite independent 32-MiB material-control metadata allowance,
+sharing existing control-slot/descriptor limits. A fully promoted unresolved
+capture can retain its work, process, staging, parser and material reservations
+while resolution and one bounded volume observer remain admissible. No native
+capture allowance or staging is released by this source-only boundary.
+
+Ordinary verification passes 454 Rust units (395 engine, 41 bridge, 18 protocol)
+and 56 protocol contracts, excluding all fifteen ignored fixtures. Nineteen
+focused Elixir backend/protocol/capture-history/resolution checks pass. Strict
+workspace Clippy, warning-free API documentation, formatting/diff and exact
+unmodified SDK verification pass. A further focused journal test covers retained
+as well as previously absent heads. Raw logs remain ignored under
+`.local/http-parity/capture-entered-resolution-*`.
+
+The new transition is internal shared-engine authority. Port routing, distinct
+durable histories/reader negotiation, public unknown resolution integration,
+authenticated retained staging cleanup and native allowance release remain
+pending. Public checkpoint admission stays disabled. Ordinary live source,
+package/platform/consumer qualification and other P0–P9 acceptance remain pending;
+the full objective stays active and crash validation remains deferred.
+
+## HTTP parity: entered capture resolution over Port
+
+Protocol 2 now separates explicit `resolve_capture` from read-only
+`inspect_capture_resolution`, with distinct `capture_resolved` and nullable
+`capture_resolution_presence` replies. Resolution requires positive quiescence;
+both requests retain a 30-second ceiling, checkpoint capability gating and exact
+original receipt/operation/request correlation. The helper invokes the existing
+shared-engine resolution boundary or exact recorded lookup. Neither operation
+has an artifact stream or accepts capture-completion substitution.
+
+Rust engine, Rust wire and Elixir validators independently validate the same
+synthetic fixture using the resolution proof domain. Missing nullable fields,
+missing prior material, crossed intent/PID, modified hashes, extra artifact fields
+and wrong reply kinds reject. Protocol 1 rejects the new operations/results. The
+protocol metadata constant matches the engine's finite independent 32-MiB
+material-control allowance; existing volume control and command/file caps remain
+unchanged.
+
+The helper schedules positive resolution through reserved control workers and
+request identities. Elixir admission/correlation permits it in modeled quarantine
+while keeping ordinary work fenced. An in-process peer holds all command workers,
+completes source resolution, uses explicit API cancellation, models unavailable
+native work, resolves/looks up without restoring availability and shuts down
+normally. No SDK VM or live fault campaign runs in this peer. Four new Elixir
+contracts cover canonical proof, request/quiescence/deadline validation, strict
+zero-output terminal correlation and nullable recorded lookup.
+
+Verification passes 459 ordinary Rust units (396 engine, 43 bridge, 20 protocol)
+and 56 protocol contracts, with all fifteen ignored fixtures excluded. The full
+Elixir suite passes 966 checks (4 doctests, 6 properties, 956 tests), excluding 42
+runtime/deferred cases. Strict Clippy/Credo, warning-free Elixir compilation/API
+documentation, formatting/diff and exact unmodified SDK verification pass. Raw
+evidence stays ignored under `.local/http-parity/capture-resolution-wire-*`.
+
+Distinct durable resolution histories/readers and public coordinator integration
+remain pending, as do authenticated retained staging cleanup and native allowance
+release. The internal RPCs do not expand `Backend.operations/0` or activate public
+checkpoint admission. Ordinary source/platform/package/public consumer
+qualification and the remaining P0–P9 scope stay pending. Crash validation remains
+deferred and distribution approval is unchanged.
+
+## HTTP parity: durable entered-capture resolution history
+
+`CaptureResolutionTransition` now participates in the ordered native material
+chain without becoming a capture artifact. An explicit guarded store resolution
+requires the exact prior receipt, ID/request and complete history, stopped source
+state and nil PID evidence. It atomically records source authority and
+`resolved_unknown` history while preserving immutable creation and retaining the
+artifact allowance. Ordinary capture advancement cannot import the resolution;
+captured/completed states reject its proof. Duplicate IDs return the existing
+record without replay. Attached commands inherit the distinct history and can
+retain verified PID evidence after a later normal start.
+
+Selective codec v25 and the separate `native_capture_resolutions: 1` reader cover
+resolution records and inherited command history. V24 captured histories and
+earlier HTTP/native records keep their encodings. Older envelopes reject a v25
+payload, trailing bytes and missing history; fresh BEAM decoding loads the new
+type before safe term parsing. Future checkpoint targets require this reader
+alongside existing checkpoint-source/checkpointable/capture readers before
+enrollment. Memory and the PostgreSQL example advertise it after implementation.
+
+Rust/Elixir history validation now distinguishes a recorded absent checkpoint
+head from an unobserved head. Shared synthetic fixtures contain a valid
+resolution/capture chain plus an individually canonical wrong-parent resolution;
+whole-history readers reject the inconsistent link. The native journal also
+retains head and immutable capture witnesses across transitions and pending
+intents, resetting the geometry-dependent witness only after growth. Existing
+ordinary journals and strict history/corruption contracts continue passing.
+
+Verification passes 460 ordinary Rust units (397 engine, 43 bridge, 20 protocol)
+and 56 protocol contracts, excluding all fifteen ignored fixtures. The full
+Elixir suite passes 972 checks (4 doctests, 6 properties, 962 tests), with 42
+runtime/deferred cases excluded. Twenty-four focused history/reader/resolution
+checks and 48 ordinary PostgreSQL contracts pass; the private database shuts down
+normally. Same-BEAM comparison against 87fa629 proves unchanged representative
+HTTP v12, native v23 and captured v24 bytes. Strict Clippy/Credo, warning-free
+Elixir compilation, formatting/diff and unmodified SDK verification pass. Raw
+logs and the temporary comparison module remain ignored under
+`.local/http-parity/capture-resolution-durable-*`.
+
+Public coordinator integration and authenticated retained native staging cleanup/
+allowance release remain pending. No checkpoint feature is activated and no live
+VM/package/platform/public consumer qualification is claimed. The full P0–P9
+objective remains active; crash validation is deferred and distribution approval
+remains separate.
+
+## HTTP parity: public explicit entered-capture source resolution
+
+`Checkpoints.resolve` now routes present unknown native captures through the
+native-only `qualify_capture` backend operation after native authority
+serialization, pinned owner/epoch quiescence and expected-version claim. HTTP
+continues its existing source inspection; deleted resolution verifies absence
+without qualifying present material. The checked matrix now includes this
+native-only operation: 39 operation names, 45 signatures and eight specification
+features, with all full-parity acceptance still pending.
+
+The native adapter first observes exact completed capture evidence, then exact
+recorded source-resolution evidence. Only when both are absent does explicit
+qualification enter the shared-engine source resolution. A single original
+30-second deadline spans pinning, lookups, resolution and final owned source
+inspection. Reply kind, receipt, ID/request, full material history and zero output
+must match. Native error evidence is preserved. Final source observation reaches
+the existing guarded atomic store transaction; result remains nil and artifact
+allowance stays retained. No SDK capture is replayed and no local artifact is
+adopted.
+
+Automatic inspection can recover already recorded resolution evidence into an
+ephemeral context, without dispatching resolution or importing a durable proof.
+Protocol-2 quarantine admits the explicit control request through Call and Port
+while ordinary work remains fenced. Quiescence preserves quarantine instead of
+reactivating the helper; legacy quarantine remains unsupported for this boundary.
+Pinning now verifies target/domain/package health before retaining an epoch,
+rejecting foreign owner health before any resolution request.
+
+Public coordinator models cover entered stopped sources, completed-proof running
+sources, busy/stale epoch and version guards, crossed resources, verified deleted
+disposition and retained accounting. Call/Port models cover quarantine control,
+foreign health, absence of normal work reactivation and legacy compatibility.
+Strict promotion models reject wrong reply kinds and preserve native error
+dispatch evidence. Current approved packages still reject capture qualification
+before submission. These are synthetic/in-process peers, not live VM or crash
+qualification.
+
+Verification passes 981 Elixir checks (4 doctests, 6 properties, 971 tests), with
+four concurrent cases and 42 runtime/deferred cases excluded. An earlier
+eight-case run encountered an HTTP audit transport failure; that contract passed
+in isolation and the complete lower-concurrency suite passed. Forty-three focused
+backend/Port/Call/public resolution/matrix checks pass, excluding six older tagged
+cases. Strict Credo, warning-free compilation, formatting/diff and unmodified SDK
+verification pass. Native Rust implementation bytes are unchanged from the prior
+460-unit/56-protocol-contract verification. Raw logs remain ignored under
+`.local/http-parity/capture-resolution-public-*`.
+
+Entered running-source resolution, authenticated retained native staging cleanup
+and native allowance release remain pending. Public checkpoint admission stays
+disabled. Ordinary source/package/platform/public consumer qualification and the
+remaining P0–P9 objective remain active; crash validation is deferred and
+distribution approval remains separate.
+
+## HTTP parity: entered resolution preserves an enrolled running source
+
+Entered capture resolution now accepts either a fully stopped source with original
+process absence or the same engine-enrolled live source after worker collection.
+An opaque source permit binds original receipt, start enrollment, SDK PID, record
+PID/birth and OS liveness/birth. Boot activity, dependent clones, OCI ownership,
+foreign/missing handle ownership and changed/unknown birth reject. The material
+journal consumes the permit rather than accepting a running inventory row as
+authority. Current material except checkpoint head must remain unchanged; capture
+is never dispatched again and artifact result stays unknown.
+
+The public SDK's `pid()` falls back to the DB row. The engine therefore records
+an independent in-memory PID/birth witness only after successful controlled
+forkable start and verified live postconditions. Ordinary confirmed stop/delete
+retire it; helper replacement cannot adopt a live source from persisted inventory.
+Capture preflight and entered-source normal stop require the same enrollment.
+Running resolution advances retained handle authority only through a comparison
+against its exact prior receipt and immutable origin. Exact recorded resolution
+can recover an interrupted bookkeeping update only with original live enrollment;
+copied/stale handles cannot supply it. No guest stop or cache reconnection occurs.
+
+Elixir/backend/store source validation accepts a running resolution only with the
+original intent's PID/birth; stopped observations require nil PID evidence.
+Existing schema-1 resolution proofs and selective codec v25 remain unchanged.
+Memory/PostgreSQL models cover old/advanced heads in both running and stopped
+states, reject PID/resource/history/operation mismatches, preserve original
+creation, prevent replay and retain artifact allowance. The public coordinator
+model confirms a running entered source remains running with unknown artifact.
+
+Verification passes 464 ordinary Rust units (401 engine, 43 bridge, 20 protocol)
+and 56 protocol contracts, excluding all fifteen ignored fixtures. Four new
+native source-authority/journal/cache models include a live test-process identity
+without any SDK VM or termination. A focused final owner/origin check passes.
+The complete Elixir suite passes 984 checks (4 doctests, 6 properties, 974 tests),
+with four concurrent cases and 42 runtime/deferred cases excluded; eighteen
+focused resolution checks pass. PostgreSQL passes 50 ordinary contracts and
+shuts down normally. Strict Clippy/Credo, warning-free compilation/API docs,
+formatting/diff and unmodified SDK verification pass. Raw logs remain ignored
+under `.local/http-parity/capture-resolution-running-*`.
+
+These models do not qualify a live running-source capture or native package.
+Authenticated retained native staging cleanup/allowance release and ordinary
+source/package/platform/public consumer qualification remain pending. Public
+checkpoint admission stays disabled; the full P0–P9 objective remains active,
+crash validation is deferred and distribution approval stays separate.
+
+## HTTP parity: recoverable capture staging and native reservations
+
+The shared engine now writes a protected schema-1 capture-stage ledger before
+source intent/SDK dispatch. Each bounded record binds original receipt,
+operation/request, private generated directory dev/inode and exact worker
+metadata digest. Parent and record data are synced; updates compare full file
+versions and exact previous records. Ownership, mode, hard-link, redirected path,
+domain, filename/key and byte/count checks reject foreign or corrupt registrations.
+
+Collected entered uncertainty transfers its actual promoted native lease into a
+retention registry, retaining work, child, descriptor, staging, parser, material and
+metadata allowances. Existing supervisor guards prevent this transfer while a
+child is uncollected; failed collector setup preserves the guards indefinitely.
+The registry does not hold a source gate after collection, so ordinary source
+stop/explicit material resolution remains available. An engine replacement
+reacquires the declared allowances from protected records; dropping an old
+registry is never filesystem cleanup. No directory name alone supplies a lease.
+
+An indexed missing or redirected stage retains restored admission and quarantines
+work while observation capacity remains available. Unindexed legacy `.capture-`
+directories quarantine without adoption/deletion. Normal pre-entry/completed
+cleanup removes only its exact unretained registration after verified own stage
+removal and synchronized directory absence. Unknown retained registrations cannot
+be forgotten through that path. Seven non-VM models exercise actual lease transfer,
+restored finite admission, record/domain/duplicate/substitution rejection,
+uncertain missing stage, copied ledger parent, corruption, legacy quarantine and
+normal own cleanup.
+
+Verification passes 471 ordinary Rust units (408 engine, 43 bridge, 20 protocol)
+and 56 protocol contracts, excluding all fifteen ignored fixtures. Strict Clippy,
+warning-free API documentation, formatting/diff and unmodified SDK checks pass.
+Elixir implementation bytes are unchanged from the preceding 984-check
+verification; no live capture or helper-loss qualification is transferred.
+Raw logs remain ignored under `.local/http-parity/capture-staging-retention-*`.
+
+Explicit descriptor-based cleanup of retained stages, durable cleanup authority,
+native allowance release and Port/public integration remain pending. Ordinary
+source/package/platform/public consumer qualification and other P0–P9 acceptance
+remain pending. Checkpoint admission stays disabled, the full objective remains
+active, crash validation stays deferred and distribution approval is unchanged.
+
+## HTTP parity: explicit retained native capture-stage cleanup
+
+The shared engine now has explicit `cleanup_capture_staging`, requiring positive
+caller quiescence, exact original receipt/operation/request, the source gate and
+creation marker, and correlated completed/resolved source journal evidence. The
+protected registry must hold the exact collected stage and its retained job lease;
+neither artifact absence, inventory nor an uncollected entry can release capacity.
+The returned schema-1 `CaptureStagingCleanupReceipt` binds original authority and
+a stage identity digest while exposing no filesystem path or artifact result.
+
+Protected Cleaning intent is synchronized before removing content. Cleanup
+reuses the existing bounded descriptor-relative volume tree walker, with original
+root dev/inode, no symlink following, cross-device/ancestor/entry limits and the
+original absolute budget. Original-root removal and parent sync precede durable
+Cleaned completion and actual retained lease release. Outside symlink/hard-link
+targets survive. Registry replacement restores partial attempts and their
+allowances; cleaned tombstones restore none. Only a protected prior Cleaning
+entry can finish an already removed root. Exact published completion can finish
+its bookkeeping/sync after a modeled lost reply, without inventing success from
+absence. Repeated calls return the same recorded receipt. Quarantine stays set.
+
+Six new non-VM models cover the engine's source/gate/quiescence boundary,
+descriptor cleanup and outside links, unchanged capacity on cancellation or
+uncollected/foreign/replaced/absent stages, partial-tree/known-removed recovery,
+completion bookkeeping recovery and immutable-record mismatch. Verification
+passes 477 ordinary Rust units (414 engine, 43 bridge, 20 protocol) and 56 protocol
+contracts, excluding all fifteen ignored fixtures. Strict Clippy, warning-free API
+documentation, formatting/diff and unmodified SDK checks pass. Elixir/store bytes
+are unchanged from the preceding 984-check verification. Logs remain ignored
+under `.local/http-parity/capture-staging-cleanup-*`; no live VM/helper-loss or
+persistence-interruption campaign was run.
+
+Port/public cleanup integration, explicit prepared-stage abort and cleanup after
+verified source deletion remain pending, as do ordinary source/package/platform/
+public consumer qualification and other P0–P9 acceptance. Public checkpoint
+admission remains disabled. The full objective stays active, crash validation is
+deferred and distribution approval remains separate.
+
+
+## HTTP parity: typed Port capture-stage cleanup
+
+Protocol two now carries `cleanup_capture_staging` with positive quiescence,
+original receipt/operation/request and a finite 30-second budget. The native
+adapter invokes explicit engine cleanup and revalidates the path-free schema-1
+receipt before returning `capture_staging_cleaned`. Both Rust and Elixir require
+checkpoint feature approval, exact intent correlation and zero output. Cleanup
+cannot substitute a material transition, source qualification or artifact result.
+
+Reserved control scheduling permits cleanup through busy workers and modeled
+quarantine. Elixir request/channel and pinned Call checks keep ordinary work
+fenced. New pure contracts reject missing/extra fields, foreign authority,
+negative quiescence, excessive deadlines, protocol-one replies and streamed or
+substituted results. The native peer model covers both busy and quarantined
+cleanup dispatch without an SDK VM or process-loss campaign.
+
+Verification: ordinary workspace Rust passes 479 units (414 engine, 43 bridge,
+22 protocol) and 56 protocol contracts with fifteen ignored fixtures excluded.
+After expanding busy-worker coverage, the final 43-test bridge run also passes.
+The full Elixir regression run passes 987 checks (4 doctests, 6 properties,
+977 tests), excluding 42 runtime/deferred cases; a final eight-test focused run
+includes the additional quarantined cleanup Call test. Strict workspace Clippy,
+API documentation, SDK integrity, formatting and diff checks pass. Store codecs
+and atomic store writers are unchanged. Private logs are ignored under
+`.local/http-parity/capture-cleanup-port-*`.
+
+Public/store release integration, prepared-stage abort and cleanup after verified
+source deletion remain pending, together with ordinary exact-package/platform/
+consumer qualification and other P0–P9 acceptance. Guides and completion audit
+reflect this distinction. Public checkpoint admission remains disabled, the full
+goal remains active, crash validation remains deferred and distribution approval
+is separate. Nothing was pushed or published.
+
+
+## HTTP parity: capture-stage cleanup after authorized source deletion
+
+Stopped-source deletion now validates all protected stages for the same immutable
+creation authority before SDK deletion. Each collected/cleaning/cleaned stage must
+have exact completed/resolved capture evidence in the current source journal.
+The protected record retains the exact current deletion receipt, synchronized
+before SDK entry. Uncollected or mismatched stages block deletion before dispatch.
+Enrollment alone releases neither native admission nor durable artifact capacity.
+
+Cleanup with an absent source now requires that recorded enrollment and existing
+native missing-source checks, in addition to the original capture authority,
+positive quiescence and protected stage identity. Missing database rows or removed
+source journals alone cannot authorize cleanup. Recreated/partial sources fail
+closed. Normal registry replacement restores enrolled authority and retained
+allowances without source adoption. Cleanup identity excludes deletion enrollment,
+so already completed cleanup receipts remain stable. Protected records without
+this optional field keep their existing serialized shape.
+
+The engine adds `delete_with_budget`; the Port adapter forwards the bounded
+caller budget. Cancellation/deadline checks precede selection, each enrollment,
+lifecycle recheck and SDK entry. This does not imply interruption of a dispatched
+SDK deletion or convert uncertainty into rollback.
+
+Five deterministic non-VM contracts cover enrollment versus unproved absence,
+cancelled/crossed/recreated sources, ordinary registry replacement, uncollected
+stage rejection before SDK deletion and stable cleaned proofs/partial-source
+rejection. The ordinary Rust workspace passes 484 units (419 engine, 43 bridge,
+22 protocol) and 56 protocol contracts, excluding fifteen ignored fixtures.
+Strict Clippy, API documentation, SDK integrity and formatting/diff checks pass.
+Elixir/store bytes are unchanged; their preceding regression evidence is retained
+with its original scope, not reported as rerun. Raw logs stay ignored under
+`.local/http-parity/capture-deleted-source-*`.
+
+Public/store release integration, prepared-stage abort, ordinary live deleted-
+source and exact package/platform/consumer qualification, and other P0–P9
+acceptance remain pending. Checkpoint admission stays disabled. The full goal is
+active, crash validation is deferred, and distribution approval is separate.
+
+
+## HTTP parity: explicit prepared capture-stage abort
+
+The engine now exposes `abort_capture_staging` for exact registered pre-entry
+stage authority, positive quiescence and a held source gate. Only a matching
+unentered source intent may be cleared; entered or already completed/resolved
+capture evidence cannot become abort success. Retiring an old stage leaves later
+pending/completed operations, SDK records and material history untouched.
+
+Protected Aborting/Aborted phases use a distinct abort proof digest. Descriptor
+removal, parent synchronization and durable completion precede actual reservation
+release. Recorded partial/known-removed attempts resume; arbitrary absent roots,
+foreign authority or uncollected live entries do not release allowances. Aborted
+tombstones restore no lease, preserve no-replay stage identity, and do not block
+subsequent authorized source deletion. Terminal abort observation does not adopt
+source ownership or produce capture/material success.
+
+Ordinary pre-entry retirement now moves its actual lease into protected staging
+before bounded automatic intent retirement/cleanup. Failures keep that lease
+recoverable and quarantine work rather than losing it behind an anonymous hold.
+The source gate remains held through this closeout. Automatic closeout has its
+own finite 30-second budget; explicit Port abort preserves the caller's absolute
+budget. Protocol two requires checkpoint approval and an exact zero-output
+`capture_staging_aborted` terminal. Reserved native control and pinned Elixir Call
+models permit abort through busy workers/quarantine without reopening ordinary
+admission. Cleanup and abort result substitution is rejected by both bridges.
+
+Six new native non-VM models cover preserved original material, unsafe authority,
+automatic retirement and normal replacement, partial/removed-root continuation,
+completed-bookkeeping recovery, and later source-operation isolation. Final
+ordinary workspace verification passes 490 Rust units (425 engine, 43 bridge,
+22 protocol) and 56 protocol contracts; all fifteen ignored fixtures remain
+excluded. Full Elixir regression passes 989 checks (4 doctests, 6 properties,
+979 tests), with 42 runtime/deferred cases excluded. Strict Clippy, API docs,
+formatting/diff and SDK integrity checks pass. Store codecs/writers are unchanged.
+Raw evidence remains ignored under `.local/http-parity/capture-prepared-abort-*`.
+
+Public/store abort and release integration, completed-stage closeout evidence,
+ordinary source/package/platform/public consumer qualification and remaining
+P0–P9 acceptance remain pending. Public checkpoint admission stays disabled. The
+full goal remains active, crash validation remains deferred and distribution
+approval remains separate. No live process-loss or persistence interruption
+campaign was run, and nothing was pushed or published.
+
+
+## HTTP parity: durable completed capture-stage closeout
+
+Registered capture guards now move the actual native allowance into the protected
+stage registry on collection, including completed captures. Completed closeout
+requires exact correlated source completion and keeps the source gate through a
+finite 30-second control/parser and descriptor-cleanup budget. Sync/removal and
+durable Cleaned completion precede allowance release. The ledger tombstone remains
+available for exact repeated cleanup and normal helper/registry replacement.
+Legacy record-forgetting is no longer a production capture closeout path.
+The earlier production gate release before artifact streaming has been removed;
+the gate now survives the stream and closeout, matching the collection models.
+
+Missing source completion, failed markers and substituted roots preserve native
+capacity in the registry and quarantine work. Explicit engine cleanup can qualify
+an earlier Prepared/Entered collection marker only after completed/resolved source
+authority, positive caller quiescence, source-gate exclusion, retained allowance
+and exact original root dev/inode. Foreign roots or absent unrecorded removals
+never supply collection/cleanup authority. Returning the original root permits
+bounded cleanup of owned bytes while outside/foreign data survives. Quarantine
+is not cleared by release.
+
+Three new deterministic non-VM contracts cover completed closeout with unchanged
+source journal/SDK record and outside links; durable receipt observation after
+normal replacement; a false completion flag holding admission until source
+qualification; and substituted-root preservation with recoverable reservations
+through replacement and eventual exact-root cleanup. Source-gate exclusion is
+also asserted. No VM or live process-loss campaign is involved.
+
+Ordinary workspace Rust verification passes 493 units (428 engine, 43 bridge,
+22 protocol) and 56 protocol contracts, excluding fifteen ignored fixtures.
+Strict Clippy, API documentation, SDK integrity and formatting/diff checks pass.
+Elixir/store/codec bytes are unchanged from the preceding 989-check regression;
+that evidence is not reported as rerun. Private logs remain ignored under
+`.local/http-parity/capture-completed-closeout-*`.
+
+Public/store abort and release receipt integration, ordinary capture/cleanup
+source/package/platform/current-minimum consumer qualification and other P0–P9
+acceptance remain pending. Public checkpoint admission remains disabled. The full
+goal stays active, crash validation stays deferred and distribution approval is
+separate. Nothing was pushed or published.
+
+
+## HTTP parity: durable native cleanup authority and release accounting
+
+Native capture acceptance now freezes the exact source receipt, including its
+material head. It remains immutable through generic capture advancement and is
+validated against the record's creation/material lineage. Cleanup proof binds
+that original receipt, capture ID/request and a distinct cleaned/aborted result.
+An aborted proof cannot substitute for an entered/completed source transition.
+No cleanup evidence supplies an artifact or changes source material history.
+
+Memory and the PostgreSQL example now support guarded `capture_release` with
+explicit native cleanup authority. They validate exact source/operation/request,
+terminal state and immutable proof, then atomically save proof, release timestamp
+and usage. Native first release without proof fails closed. Identical repeated
+consumption is idempotent; stale guards, crossed authority, malformed evidence
+and replacement stage digests retain existing records/accounting. HTTP retains
+its existing release argument form. Native legacy records already released remain
+readable and their ordinary idempotent release does not invent new authority.
+
+Selective codec v26 stores frozen source and cleanup fields; all preceding
+envelopes omit nil defaults and reject smuggling them back. Existing HTTP/v24/v25
+records without new authority preserve their formats. `native_capture_cleanup: 1`
+requires reader and atomic writer deployment before future checkpoint target
+enrollment; Memory and the conditional PostgreSQL reader advertise it. Fresh
+BEAM decoding loads the typed cleanup/stage receipt vocabulary first. A private
+same-BEAM comparison against the previous committed codec preserves representative
+HTTP, v24 and v25 bytes; it is not a changed-package platform qualification.
+
+Shared store contracts cover completed, source-resolved, deleted-source and
+prepared-aborted histories, exact proof rejection, retained usage and duplicate
+consumption. PostgreSQL verifies proof/accounting rollback in an ordinary
+transaction without interrupting persistence. The private PostgreSQL suite passes
+55 tests and was smart-stopped afterward. Full Elixir regression passes 996 checks
+(4 doctests, 6 properties, 986 tests), excluding 42 runtime/deferred cases; the final
+19-test focused run additionally verifies source enrollment, reader gating and
+fresh cleanup decoding after final edits. Rust/SDK/helper bytes are unchanged from
+the preceding verification; Rust checks are not reported as rerun. Formatting/
+diff checks pass. Private evidence stays ignored under
+`.local/http-parity/capture-cleanup-*`.
+
+Public release/abort routing must still obtain and consume the scoped helper
+receipt before these store transactions. Ordinary exact-package/source/platform/
+current-minimum consumers and remaining P0–P9 acceptance are also pending.
+Checkpoint admission stays disabled. The full goal remains active, crash
+validation remains deferred, and distribution approval stays separate. No changes
+were pushed or published.
+
+
+## HTTP parity: public native capture release routing
+
+`Checkpoints.release` now routes native records through the target's serialized
+native authority and pinned epoch. Quiescence and worker claim precede a fresh
+machine claim, source/policy-scoped `cleanup_capture` request and guarded atomic
+receipt/accounting consumption. The native-only backend operation returns typed
+cleanup evidence; HTTP keeps its original release form and intentionally does
+not implement this helper operation. The coverage inventory now contains forty
+operations, forty-six signatures and the same eight specification features.
+Every ordinary acceptance row remains pending.
+
+Requests select the capture's immutable original source receipt, ID and bounds,
+not current source material or an operator path. The real adapter verifies scoped
+assignment, checkpoint feature approval, matching machine/policy and explicit
+quiescence, with a finite original 30-second deadline and zero-output proof.
+An exact pre-dispatch state reply may select prepared abort only for an already
+resolved transition-free capture. Ambiguous dispatch, malformed/crossed replies,
+wrong kinds, output and overlays never select abort or capture replay. Fallback
+consumes the same deadline. Store guards validate final immutable evidence.
+
+Host artifact and partial absence are checked before native IO and again before
+receipt consumption. Native cleanup never removes host artifacts or independent
+restores. A partial host file appearing during IO keeps durable accounting until
+removed and explicitly retried. Already consumed capture evidence returns without
+another helper/quiescence request; source history and result remain unchanged.
+
+Ten ordinary public peer models cover completed/resolved/deleted/prepared-aborted
+release, idempotence, busy/stale/crossed/uncertain boundaries, host partial-file
+preservation and rejection of active unknown capture release. Five pure adapter/
+transport models cover exact response shape/correlation, distinct abort selection,
+no fallback on uncertainty, original deadlines and disabled descriptor rejection.
+The full Elixir regression passes 1012 checks (4 doctests, 6 properties, 1002 tests),
+excluding 42 runtime/deferred cases. A final focused run also checks approved-
+package gating. Existing Rust/SDK/store codec/writer bytes are unchanged and their
+previous verification is not reported as rerun. Formatting/diff checks pass;
+private logs remain ignored under `.local/http-parity/capture-public-release-*`.
+
+Release routing retires staging for terminal captures; it does not substitute
+stage evidence for source ownership. Live-source pre-entry abort qualification
+for an active unknown capture remains pending, together with ordinary exact
+package/source/platform/current-minimum consumer qualification and other P0–P9
+acceptance. Public checkpoint admission stays disabled. The full goal stays
+active, crash validation stays deferred and distribution approval remains
+separate. No changes were pushed or published.
+
+
+## HTTP parity: native pre-entry aborted-source qualification
+
+Production native capture registration now persists original source intent,
+PID/birth, prior checkpoint head and immutable material evidence with the protected
+stage record before SDK dispatch. The intent constructor is shared with journal
+preparation, so both use identical source/request authority. Older records omit
+this optional field, retain their existing bytes and cannot recover missing
+process evidence from inventory. New cleanup digests bind the retained intent.
+
+The engine exposes `qualify_aborted_capture_source` with positive quiescence,
+exact capture identity, reserved control budget, source gate and domain/database/
+creation/material checks. It requires an exact completed Aborted stage and
+unchanged source material/head. Running qualification requires the independently
+enrolled original engine/cache PID/birth; stopped qualification requires absent
+ownership/cache handles and verified original-process absence or verified PID
+reuse. OCI/boot activity and source dependencies remain excluded. Original source
+and process checks are repeated before returning evidence. No SDK lifecycle call,
+material revision, handle adoption or artifact success is produced.
+
+Schema-1 `CaptureAbortSourceQualification` uses the distinct
+`smolbox-preentry-aborted-source-v1` proof domain, original cleanup/intent and
+source state/record digest. Six non-VM models cover owned running proof issuance,
+proof-domain separation and tampering, stopped-source qualification/normal
+replacement with unchanged source records, rejecting an actual live test process
+presented as stopped without signalling it, unsafe/gated/cancelled/changed
+requests, and rejection of legacy stages lacking original process authority.
+
+Ordinary workspace Rust passes 499 units (434 engine, 43 bridge, 22 protocol) and
+56 protocol contracts, excluding fifteen ignored fixtures. Strict Clippy, API
+docs, SDK integrity and formatting/diff checks pass after correcting test-module
+placement and a must-use result. Elixir/store/codec bytes are unchanged from the
+preceding 1012-check regression, not reported as rerun. Raw logs remain ignored
+under `.local/http-parity/capture-abort-source-*`.
+
+Port/public/store routing and durable consumption of aborted-source qualification
+remain pending, together with ordinary exact-package/source/platform/current-
+minimum consumer qualification and other P0–P9 acceptance. Public checkpoint
+admission stays disabled. The full objective is active, crash validation remains
+deferred and distribution approval is separate. No live helper/BEAM loss,
+persistence interruption or destructive independent CLI campaign was run.
+
+## HTTP parity: typed Port aborted-source qualification
+
+Protocol 2 now exposes `qualify_aborted_capture_source` with explicit positive
+quiescence, checkpoint feature approval, Inspect capability and a 30-second
+control budget. The native adapter calls the existing shared-engine authority
+check and converts only a validated, exactly correlated
+`CaptureAbortSourceQualification`. Its distinct `aborted_capture_source_qualified`
+outcome requires zero stream output; neither staging cleanup nor successful/
+resolved material transitions can substitute. Control scheduling remains available
+under busy work slots and quarantine without restoring ordinary admission.
+
+Rust and Elixir independently validate original intent/PID/birth, unchanged
+source material, cleanup/request binding, source state and the canonical
+`smolbox-preentry-aborted-source-v1` hash. Shared synthetic running/stopped fixtures
+also validate in the actual engine. Deterministic contracts cover strict required
+and unknown fields, changed proofs, crossed operations/requests, unsupported
+protocol/features, missing quiescence, finite budgets, stream rejection and
+modeled quarantine. No VM or loss campaign is used for these contracts.
+
+Validation: ordinary Rust workspace passes 502 units (435 engine, 43 bridge,
+24 protocol) and 56 protocol contracts with fifteen ignored fixtures. Full root
+Elixir passes 1014 checks (4 doctests, 6 properties, 1004 tests), 42 excluded;
+the final five focused checks include added request-correlation assertions.
+Strict workspace Clippy, Rust API docs, unmodified SDK integrity and Rust/Elixir
+formatting/diff checks pass. One unchanged upstream Clippy warning is reported
+under dependency lint capping; verified source remains unmodified. Initial test
+failures were corrected synthetic mutation inputs and a test peer sequence ID,
+not relaxed production validators. Raw logs remain ignored under
+`.local/http-parity/capture-abort-wire-*`.
+
+Public controller/store routing and durable consumption of this proof still need
+implementation. This adds transport authority without enabling public checkpoint
+admission, completing P8 or qualifying changed package bytes. All full-parity
+acceptance rows and remaining P0–P9 work stay in scope. Crash validation remains
+deferred and distribution approval separate. No push or publication occurs.
+
+## HTTP parity: durable public pre-entry aborted-source resolution
+
+Public native unknown-capture resolution now distinguishes an unchanged pre-entry
+source from completed capture and entered material resolution. After exact
+completed/resolution lookups, the pinned quiesced helper first attempts owned
+pre-entry stage abort. Only an exact empty pre-dispatch state/ownership refusal
+selects entered-source resolution; uncertain or malformed replies do not select
+another operation. Exact aborted cleanup is followed by distinct source
+qualification, with identical cleanup and original request/receipt binding under
+one absolute deadline. Final inspection must match qualified state and original
+running PID/birth, or stopped state with no PID. No SDK capture is replayed and no
+artifact is adopted.
+
+A transport-independent NativeCaptureResolution carries observed machine plus
+qualification without inserting a material transition. Memory and PostgreSQL
+atomically consume the proof with guarded source projection and resolved_unknown
+capture history. Source receipt, material history, immutable creation, result nil
+and artifact disk allowance remain; operation resources retire only after this
+proof. Ordinary running/stopped inventory cannot resolve unknown native captures.
+Verified deletion remains a distinct existing path. Explicit release still needs
+matching native cleanup and host artifact/partial absence; stored aborted-source
+proof and cleanup must agree exactly.
+
+CheckpointCapture.native_abort_source selectively uses codec v27. Runtime gates
+future checkpoint admission on native_capture_abort_sources: 1 alongside earlier
+readers; Memory and the PostgreSQL example provide the reader/atomic writer.
+Older envelopes omit the nil field and reject any smuggled presence, even nil.
+Independent pre-change v24/v25/v26/HTTP encoders produce identical representative
+bytes in the same BEAM; a fresh BEAM safely decodes a private v27 record. These
+comparisons are not cross-VM map-byte ordering claims.
+
+Validation: the full root suite passes 1023 checks (4 doctests, 6 properties,
+1013 tests), 42 runtime/deferred exclusions. Final focused resolution/release/
+store checks pass 37 after tightening plain-observation rejection and equivalent
+validator refactoring. PostgreSQL capture/machine contracts pass 57 with both
+pre-entry source dispositions and exact accounting; the private lab is normally
+smart-stopped. Compilation with warnings-as-errors and formatting/diff checks
+pass. The broader strict Credo audit remains non-green on earlier cleanup/proof/
+release style findings; new resolution and consumption findings were corrected.
+One intermediate catch-all clause accidentally preceded its native-specific
+clause; compiler warning and focused failures caught it, and clause order was
+corrected without weakening validation. Native/SDK bytes are unchanged from
+37c73db and the previous Rust evidence is not reported as rerun. Raw logs, baseline
+encoder copies and encoded records stay ignored under
+.local/http-parity/capture-abort-consumption-* and capture-abort-codec-baseline/.
+
+This closes the controller/store consumption foundation for recorded pre-entry
+aborts, not the P8 or P9 acceptance gates. Exact-package ordinary captured-source,
+platform and current/minimum consumer qualification, exports/branches and the
+remaining full parity requirements stay pending. Public checkpoint admission
+remains disabled. The full P0–P9 objective remains active, crash validation stays
+deferred, distribution approval is separate, and nothing is pushed or published.

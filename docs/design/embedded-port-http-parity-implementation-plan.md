@@ -1,6 +1,6 @@
 # Implementation plan for embedded Port HTTP parity
 
-Status: implementation in progress, October 13, 2026. Implements the
+Status: implementation in progress, October 14, 2026. Implements the
 [HTTP-parity design](embedded-port-http-parity.md) on
 `embedded-port-design-non-upstream-patches`. This document does not enable new
 features. P0 coverage/API witnesses and part of P1's shared approvals/version
@@ -323,12 +323,191 @@ after legitimate geometry changes and retain capacity on uncertain outcomes.
 Primary areas: checkpoint/capture/export/branch coordinators and artifact IO,
 native public SDK saved-state/packer/fork APIs, epoch actors and store proofs.
 
+Entered-capture resolution note: the shared engine now records a distinct
+`CaptureResolutionTransition` only for an exact entered intent and verified
+quiescent stopped source. The ordered journal retires the ID without publishing
+artifact success, including when the checkpoint head is unchanged. Independent
+bounded material-control admission permits this while capture reservations stay
+retained. Public integration
+and authenticated staging/native allowance release remain required before this
+boundary can resolve public unknown captures. Non-VM models are not ordinary
+source/package/platform qualification. Protocol-2 resolution and exact recorded
+lookup are now routed through the helper with positive quiescence, 30-second
+budgets, distinct zero-output replies and reserved control admission. Strict
+Rust/Elixir validators and an in-process native peer cover the wire/control
+boundary. Typed source-only histories, selective codec v25, the separate
+`native_capture_resolutions: 1` reader and guarded Memory/PostgreSQL transactions
+now preserve stopped source authority with unknown artifact results. Whole-chain
+validators enforce known absent heads and exact ordered lineage. Public explicit
+resolution now routes native-only `qualify_capture` after authority/quiescence and
+version claim; completed/recorded lookup precedes any entered-source qualification.
+Read-only recovery imports no durable proof and never dispatches resolution.
+Entered running-source resolution now requires the original enrolled engine start,
+current SDK PID and OS PID/birth under the collected-worker gate, with stopped
+resolution preserving process-absence checks. Native/durable models keep the
+source running without artifact adoption. Authenticated staging/allowance release
+and ordinary live qualification remain required; checkpoint capabilities stay
+disabled.
+
+Capture staging note: schema-1 protected stage registration now precedes source
+intent/SDK dispatch and binds original authority, directory identity and worker
+metadata digest. Unknown collected stages retain real native leases in a registry;
+replacement restores declared admission from verified private records. Unindexed
+or substituted stages cannot be adopted, cleaned or used to release capacity.
+Explicit retained-stage cleanup, native allowance release and public qualification
+remain required. These filesystem/lease models run no live fault campaign.
+
+Retained cleanup note: the shared engine now explicitly removes only a protected
+collected stage with correlated completed/resolved source evidence. Durable
+Cleaning/Cleaned phases bracket descriptor-relative removal and actual allowance
+release; known partial/removed-root attempts resume without capture replay.
+Typed protocol-two `cleanup_capture_staging` now routes through the Port adapter,
+with positive quiescence, checkpoint feature approval, a 30-second absolute
+budget and an exact zero-output `capture_staging_cleaned` receipt. Rust/Elixir
+validators bind original receipt/ID/request and keep cleanup distinct from
+material resolution and successful artifacts. Reserved control scheduling and
+quarantined pinned calls permit cleanup without reactivating work. Public/store
+release integration and ordinary qualification remain required. Before
+stopped-source SDK deletion, protected stage records now retain
+the exact current deletion receipt after complete/resolved source verification.
+Later cleanup requires that enrollment plus verified source absence; a missing
+row/directory alone grants no cleanup authority. Deletion checks the caller's
+budget before enrollment and SDK entry. Non-VM models cover replacement,
+recreated/uncollected sources, cancellation and stable cleanup receipts. Ordinary
+live deleted-source qualification remains required.
+
+Prepared-stage abort note: `abort_capture_staging` now requires exact registered
+pre-entry authority, positive quiescence and the source gate. It clears only its
+own unentered source intent and preserves subsequent source operations/material
+history. Durable Aborting/Aborted phases use a distinct proof digest, descriptor
+cleanup and synchronized allowance release. Recorded partial removal resumes;
+unproved absence and entered/collected capture stages cannot supply abort success.
+Ordinary pre-entry retirement keeps its actual lease recoverable on failure.
+Protocol-two reserved control routing returns an exact zero-output
+`capture_staging_aborted` reply without reactivating work. Public/store integration
+and ordinary source/package/platform qualification remain required.
+
+Completed-stage closeout note: registered completed capture guards now retain
+their actual lease, verify exact source completion, and use bounded descriptor
+cleanup with a durable Cleaned receipt rather than removing the ledger record.
+The source gate survives closeout. Missing completion evidence or substituted
+roots preserve recoverable reservations and quarantine work. Explicit qualified
+cleanup can record collection for an earlier Prepared/Entered stage only after
+correlated source completion/resolution, retained capacity and original root
+identity checks. Non-VM models cover normal replacement, source preservation,
+false completion flags and substituted-root recovery. Public/store receipt
+consumption and ordinary exact-package qualification remain required.
+
+Durable cleanup note: native capture acceptance now freezes the source receipt;
+Memory/PostgreSQL guarded release takes exact cleanup evidence and atomically
+persists it with reservation release. First native release without evidence is
+rejected, while HTTP uses the unchanged request form. Already consumed identical
+evidence is idempotent; crossed/stale or replacement evidence cannot mutate
+accounting. Source enrollment and cleanup fields selectively require codec v26 and
+`native_capture_cleanup: 1`, with older nil-default stripping and legacy rejection.
+Reader/writer enrollment is required before a future checkpoint helper. Public
+release now pins/quiesces its owner under native authority serialization, obtains
+scoped `cleanup_capture` evidence, rechecks host output absence and commits it with
+fresh store authority. An exact pre-dispatch state reply can select prepared abort
+only for an already resolved transition-free capture; uncertain results cannot
+select another operation. Live-source pre-entry abort qualification remains
+required independently of stage cleanup, along with ordinary qualification.
+
+Pre-entry source authority note: native registration now preserves original
+source intent/PID/birth before SDK entry. `qualify_aborted_capture_source` requires
+exact Aborted evidence, positive quiescence, domain/source gate and unchanged
+source material. Running sources require actual engine/cache/start ownership;
+stopped sources require verified original-process absence. Its distinct proof
+neither advances material nor supplies capture/artifact success. Legacy stage
+records without this evidence cannot borrow it from inventory. Port/public/store
+routing and ordinary qualification remain required.
+
+Implementation note: checkpoint approval/header eligibility now has a shared-engine
+type with exact SDK/platform/allocation and idle bare dependency checks. Its
+64-GiB artifact allowance is separate from ordinary pack/command/file limits.
+Both SDK header layouts are represented; CPU compatibility stays with the public
+SDK validator. The convenience restore API owns a separate reservation and may
+clean storage on failure, so fresh SmolBox authority will use public checkpoint
+materialization/installation under its own reservation. Bounded byte/assets
+preparation remains distinct from read-only inspection. Engine inspection now
+checks the operator SHA-256, bounded sidecar layout and public descriptor-based
+SDK checksum/CPU compatibility. Streaming validation requires the classic asset
+inventory and digests, profile-derived expansion bounds and the SDK format’s
+64-file disk-chain limit with correct top-level/backing targets. History validation bounds indexes/objects and authenticates object
+content. Request-private preparation now copies authenticated bytes into the
+owner domain, holds separate finite staging/parser allowances and validates
+SDK-written history indexes through public readers/StoredFile serialization.
+Index policy binds exact files, referenced object lengths and hashes, whole-file
+digests and head/ancestor lineage/data summaries. Retained ancestors preserve
+their captured allocations, including earlier disk sizes.
+Read-only cancellation retains executing admission without quarantining siblings.
+Owned worker materialization now uses public SDK classic extraction or uncached
+store materialization, with four chunk threads, finite decoded staging and exact
+collected evidence. MaterializedCheckpoint retains source/domain/admission and
+rechecks the private output inventory, versions and declared digests. An ordinary
+non-VM helper fixture exercises both layouts; this is not restored-VM qualification.
+Fresh installation now reserves the SDK name, creates a ticketed private VM
+directory and uses the public SDK installer in an owned no-signal worker. Exact
+collected installation evidence and parent rechecks precede neutral bare record
+and creation/material proof publication. Partial storage is retained on error;
+name/gate/source/native leases survive unresolved collection. A non-VM fixture
+installs sparse disks and commits an owned stopped SDK row. First-start now has a receipt/record-bound private journal with pending, entered
+and consumed phases. Dispatch intent is persisted before SDK entry; only successful
+SDK start with matched live PID/birth and consumed inputs completes it. Observers
+keep entered state unknown and cannot replay or cold-boot missing pending inputs.
+A normally stoppable VMM still requires this engine’s enrolled handle/PID proof.
+Five deterministic models and a non-VM installed-row fixture exercise these
+boundaries. The helper now accepts a separate optional checkpoint approval
+catalog (at most 32 unique IDs), binding immutable source identity, operator-only
+path, current SDK/native platform, captured resources and the independent 64-GiB
+input ceiling. Elixir publishes this catalog only for an explicitly advertised
+checkpoint feature; omission preserves old configuration bytes. Catalog parsing
+does not open inputs, prepare material or grant existing-machine authority.
+Path-free qualification, creation and absence operations now select an exact
+catalog identity/resource pair before native admission. Shared-engine approved
+creation retains one absolute budget across preparation, materialization and
+installation, with identity/template checks before staging. Absence is admitted
+read-only and never opens the checkpoint, repairs a row or recovers a receipt.
+Rust session and Elixir request/channel contracts bind replies to request kind
+and exact receipt identity. Managed qualification/creation/absence routing and
+selective v22 restore-source assignments now preserve exact capture profiles,
+immutable creation resources and retained-command authority. Runtime requires
+the separate native_checkpoint_sources reader before enrolling a future
+checkpoint-capable package. Memory and the PostgreSQL example support the
+reader/atomic reservation foundation; HTTP and earlier native encodings remain
+unchanged. Expanded capture/export/branch histories, explicit resolution,
+large-history scalability and ordinary restored-VM/
+platform/consumer qualification remain pending; no checkpoint capability
+is activated by inspection.
+
 1. Implement approved checkpoint restore into a fresh authenticated creation
    intent. Preserve CPU/runtime/platform/topology compatibility and forbidden
    dependency checks. Starting after a later stop does not reapply captured RAM.
 2. Add checkpointable startup, preflight and bounded capture using SDK APIs.
    Preserve idle offline bare-source limits, controller-private streamed artifacts,
    extra resource floors, immutable source authority and source resume on success.
+   Startup foundation now binds forkable in fresh local/registry material before
+   receipt publication; ordinary SDK start honors it without an untracked update.
+   Core/Port start and read-only preflight require authenticated source material
+   and reject promotion of an ordinary record. Preflight verifies enrolled live
+   PID/birth and does not assert guest idleness. Capture updates checkpoint_head
+   in the SDK, which may warn rather than fail on persistence error: implement a
+   distinct correlated material transition before treating its result as complete.
+   Fresh creation now retains explicit true opt-in in qualification and creation
+   requests, selects the checkpointable local/registry constructors, and uses
+   selective codec v23. Attached commands retain the original marker. Runtime
+   requires native_checkpointable: 1; older native readers reject the field and
+   ordinary/HTTP requests keep their encodings. Source SDK dispatch, capture
+   budgets/streaming/collection and saved histories remain pending. A distinct capture
+   material journal foundation now binds request bounds/idle assertion, source
+   PID/birth, previous receipt/head and exact artifact digest/size/lineage. Prepared
+   and entered intents fence other mutations. Completion permits only a resumed
+   source and checkpoint-head material change; SDK persistence warnings cannot
+   complete it from artifact existence. Capture/growth history shares ordered
+   revisions without reinterpreting proof types. Full journal file versions fence
+   in-place changes. These interfaces are exercised by non-VM models and are not
+   yet invoked by a production capture coordinator. Ordinary running-source
+   qualification also remains pending.
 3. Implement stopped-source export with exact container/bare preservation rules
    and approved registry destination/token/receipt. Select the bounded approved
    host-conversion or fully enrolled auxiliary-VM approach established in P0;

@@ -588,6 +588,14 @@ pub(crate) mod tests {
     use std::os::unix::fs::PermissionsExt;
 
     pub(crate) fn sidecar_fixture(domain: &Path, platform: &str) -> RegistryCachedBlob {
+        sidecar_fixture_mode(domain, platform, smolvm_pack::format::PackMode::Container)
+    }
+
+    pub(crate) fn sidecar_fixture_mode(
+        domain: &Path,
+        platform: &str,
+        mode: smolvm_pack::format::PackMode,
+    ) -> RegistryCachedBlob {
         fn tar(files: &[(&str, &[u8])]) -> Vec<u8> {
             let mut builder = tar::Builder::new(Vec::new());
             for (path, bytes) in files {
@@ -608,20 +616,37 @@ pub(crate) mod tests {
             platform.into(),
             "proof".into(),
         );
+        manifest.mode = mode.clone();
         manifest.assets.agent_rootfs = smolvm_pack::format::AssetEntry {
             path: "agent-rootfs.tar".into(),
             size: guest.len() as u64,
         };
-        manifest.assets.layers = vec![smolvm_pack::format::LayerEntry {
-            digest: format!("sha256:{digest}"),
-            path: layer.clone(),
-            size: guest.len() as u64,
-        }];
-        let assets = zstd::stream::encode_all(
-            tar(&[("agent-rootfs.tar", &guest), (&layer, &guest)]).as_slice(),
-            1,
-        )
-        .unwrap();
+        let disk = crate::archive::tests::superblock((1 << 30) / 4096);
+        let mut files = vec![("agent-rootfs.tar", guest.as_slice())];
+        if mode == smolvm_pack::format::PackMode::Container {
+            manifest.assets.layers = vec![smolvm_pack::format::LayerEntry {
+                digest: format!("sha256:{digest}"),
+                path: layer.clone(),
+                size: guest.len() as u64,
+            }];
+            files.push((&layer, guest.as_slice()));
+        } else {
+            manifest.assets.storage_template = Some(smolvm_pack::format::AssetEntry {
+                path: "storage.ext4".into(),
+                size: disk.len() as u64,
+            });
+            manifest.assets.overlay_template = Some(smolvm_pack::format::AssetEntry {
+                path: "overlay.ext4".into(),
+                size: disk.len() as u64,
+            });
+            manifest.assets.storage_logical_size = Some(1 << 30);
+            manifest.assets.overlay_logical_size = Some(1 << 30);
+            files.extend([
+                ("storage.ext4", disk.as_slice()),
+                ("overlay.ext4", disk.as_slice()),
+            ]);
+        }
+        let assets = zstd::stream::encode_all(tar(&files).as_slice(), 1).unwrap();
         let mut bytes = assets.clone();
         let json = manifest.to_json().unwrap();
         bytes.extend_from_slice(&json);

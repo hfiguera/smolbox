@@ -16,6 +16,7 @@ const MAX_RECORD_BYTES: usize = super::VOLUME_RECORD_BYTES;
 
 #[path = "volume_access.rs"]
 mod access;
+pub(crate) use access::remove_tree;
 #[cfg(test)]
 pub(crate) use access::{foreign_handle, owned_handle};
 pub use access::{

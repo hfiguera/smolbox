@@ -222,6 +222,7 @@ defmodule SmolBox.Store do
   | `:capture_cancel` | `[key, capture_id, now]` | `{:ok, machine}` |
   | `:capture_resolve` | `[key, guard, capture_id, running_or_stopped_observation_or_absent, now]` | `{:ok, machine}` |
   | `:capture_release` | `[key, guard, capture_id, now]` | `{:ok, machine}` |
+  | `:capture_release` | `[key, guard, capture_id, native_cleanup, now]` (native captures) | `{:ok, machine}` |
   | `:export_accept` | `[key, spec, fingerprint, capacity, now]` | `{:ok, machine}` |
   | `:export_advance` | `[key, guard, export_id, expected_state, changes, now]` | `{:ok, machine}` |
   | `:export_cancel` | `[key, export_id, now]` | `{:ok, machine}` |
@@ -461,7 +462,11 @@ defmodule SmolBox.Store do
               | non_neg_integer()
             ]) :: machine_result()
   @callback machine(context(), :capture_release, [
-              ManagedMachine.key() | guard() | String.t() | non_neg_integer()
+              ManagedMachine.key()
+              | guard()
+              | String.t()
+              | non_neg_integer()
+              | SmolBox.Embedded.NativeCaptureCleanup.t()
             ]) :: machine_result()
   @type branch_change ::
           :dispatching
@@ -641,6 +646,14 @@ defmodule SmolBox.Store do
   reservations and managed_images: 1 image transactions as appropriate. Existing
   HTTP v10 and native v16-v18 records keep their encodings. This reader marker
   does not enable an unimplemented helper feature or grant source approval.
+  A future native checkpoints descriptor additionally requires
+  native_checkpoint_sources: 1 after every reader accepts selective v22
+  checkpoint restore-source assignments and every atomic reservation writer
+  preserves their original capture profile and creation identity. This marker
+  does not enable capture histories, restore replay or public checkpoint admission.
+  Checkpoint-capable native packages also require native_checkpointable: 1 after
+  every reader accepts selective v23 creation opt-in and every reservation writer
+  retains that marker for the original machine and its attached commands.
   """
   @callback bind_backend(context(), String.t(), :http | SmolBox.Backend.Binding.t()) ::
               {:ok, :http | SmolBox.Backend.Binding.t()} | {:error, Error.t()}

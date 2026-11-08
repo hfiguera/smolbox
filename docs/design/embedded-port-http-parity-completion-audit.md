@@ -1,6 +1,6 @@
 # Embedded Port HTTP parity completion audit
 
-Status: **incomplete**, October 13, 2026. The full P0–P9 objective remains active.
+Status: **incomplete**, October 14, 2026. The full P0–P9 objective remains active.
 This audit follows each numbered requirement in the
 [implementation plan](embedded-port-http-parity-implementation-plan.md).
 The [coverage manifest](embedded-port-http-parity-coverage.json) remains the
@@ -13,9 +13,285 @@ The exact engine 0.1.0 offline evidence remains historical. Changed engine 0.2.0
 manifest 3, protocol 2.0 packages need their own ordinary platform/consumer evidence.
 Crash qualification and distribution approval remain false and separate.
 
+Pre-entry aborted-source transport foundation: protocol 2 carries the exact
+quiesced `qualify_aborted_capture_source` control and distinct
+`aborted_capture_source_qualified` outcome. Native adapter conversion and Rust/
+Elixir validators bind the protected original intent, cleanup, unchanged material,
+source state and canonical proof digest. Replies require exact receipt/operation/
+request correlation and zero output; stage cleanup and material transitions cannot
+substitute. Shared synthetic fixtures validate in the actual engine and both
+wire implementations. A pure Port peer exercises reserved control capacity under
+busy workers and modeled quarantine without restoring ordinary work. Public/store
+consumption now persists distinct source qualification and the observation under
+pinned/quiesced authority and current store guards. Memory/PostgreSQL retain source
+material/history and unknown artifact accounting. Ordinary running/stopped
+inventory cannot resolve an unknown native capture without the distinct proof.
+Selective v27 and
+`native_capture_abort_sources: 1` require reader/writer upgrades; tested HTTP and
+v24–v26 envelopes remain compatible. Ordinary package/source/platform qualification
+remains pending; checkpoint admission is still disabled.
+
+Checkpoint catalog foundation: `CheckpointIdentity`, helper `CheckpointApproval`
+and Elixir `CheckpointContract` bind immutable source identity, operator-only
+path, native host/guest platform, current SDK and exact captured allocations.
+Catalog validation caps 32 unique IDs and 64-GiB input without opening files.
+Deterministic Rust/Elixir contracts reject crossed/oversized approvals and caller
+paths; optional omission and feature-gated launch serialization preserve older
+configuration. Native operation dispatch and Elixir wire contracts now cover
+qualification, creation and absence with exact catalog/resource selection and
+correlated receipt results. The ordinary non-VM installed-row fixture uses the
+shared engine's approved-source creation entry point under one absolute budget.
+Managed routing and selective v22 restore-source assignments now have a structural
+reader/atomic reservation foundation with exact captured-profile approval.
+Retained commands inherit the same assignment. Runtime requires the separate
+native_checkpoint_sources reader before enrolling a future capable helper;
+Memory and the PostgreSQL example implement it. Old native envelopes reject
+restore-source assignments and HTTP bytes remain compatible. Capture/export/branch
+histories, explicit resolution and ordinary restored-VM qualification remain
+pending; this does not enable public admission.
+
+Checkpointable startup foundation: fresh local/registry pack creation can bind
+forkable into original material; start/preflight core and Port operations reject
+untracked ordinary-record promotion. Non-VM contracts keep forkable and lineage
+in the material hash, reject container/network/dependency profiles and require a
+running preflight result. Source inspection additionally checks enrolled runtime
+PID/birth and grants no idle assertion. Creation opt-in now has explicit true
+wire/assignment routing, selective v23 persistence and a separate Runtime reader
+gate. Ordinary/HTTP defaults remain omitted; capture's
+separate material transition and ordinary running-source qualification are still
+pending. No public checkpoint descriptor is added.
+
+Capture material foundation: `capture_material.rs` and `MaterialJournal` define
+distinct prepared/entered/completed capture evidence, request and original-source
+binding, exact artifact/lineage and source-resume postconditions. Five non-VM
+contracts exercise lost/unpersisted head, foreign PID/material/parent, growth
+interleaving, duplicate/order/proof corruption, copied permits and in-place journal
+changes. Capture pending state fences generic material verification. Old journals
+omit capture fields. SDK dispatch and owned worker collection now connect to the
+shared engine's capture coordinator. Distinct correlated proofs bind metadata,
+artifact bytes, lineage and the same resumed source PID/birth. Parent checks
+independently verify retained output before publishing a material transition.
+One-time streaming retains staging/job allowances. Entered uncertainty preserves
+staging and its allowance; only the enrolled exact source can stop normally
+without resolving capture. Deterministic models cover these boundaries. Public
+capture routing, saved store history and ordinary captured-source qualification
+remain pending; this foundation does not admit public capture or claim guest
+idleness.
+
+Capture observation foundation: protocol-2 `inspect_capture`/`capture_presence`
+look up only an exact journal-completed operation under an observation allowance,
+machine gate, original creation marker and matching engine domain/database.
+No recorded completion returns null, not absence/quiescence or replay permission.
+Strict Rust/Elixir capture transition validators preserve the engine's canonical
+capture proof domain, original receipt, request, source PID/birth and lineage.
+Both channels require exact request correlation and zero streamed bytes. The
+operation remains checkpoint-feature gated; no current public descriptor is
+activated. Shared synthetic fixtures are verified by the actual engine, Rust wire
+and Elixir validators. Durable saved histories and public backend publication
+remain pending. Path-free protocol-2 capture now connects through the Port adapter
+and a dedicated checkpoint stream to an incremental Elixir consumer. Exact
+delivered size, digest and request correlation are required before transfer
+success. Credits follow explicit consumer acceptance and artifacts are never
+buffered as ordinary response output. Public checkpoint admission stays disabled.
+
+Capture durable-history foundation: selective codec v24, immutable creation plus
+current identity and complete ordered material history, typed capture history,
+atomic result/source identity updates and `native_capture_histories: 1` reader
+negotiation are implemented. Rust/Elixir validators agree on mixed synthetic
+growth/capture proofs; public checkpointable-growth restrictions remain unchanged.
+Memory and the PostgreSQL example pass the same captured-result contract,
+including rejected-proof rollback and resource retention. A fresh BEAM safely
+loads v24 vocabulary; old envelopes reject even nil new fields. Independent
+pre-change encoders preserve tested HTTP/native bytes in the same BEAM process.
+Public backend capture/result routing and no-clobber publication now have
+implemented foundations. Embedded contexts bind the active capture snapshot,
+operator policy, source receipt and exact fingerprint destination. Runtime passes
+assigned pinned connections and preserves native transition metadata in the
+atomic store result. Publication uses a private exclusive partial file, bounded
+consumer, independent descriptor hash and directory/file identity checks, synced
+file/directory metadata and a no-clobber final link. Smaller response windows bind
+an optional transport chunk limit; nonempty artifact bytes bound lifetime event
+count separately from unchanged ordinary limits. Models cover publication,
+collisions, replaced directories, byte bounds and current-receipt preflight.
+Unknown capture resolution and ordinary live/platform/package/consumer
+qualification remain pending. Public checkpoint admission stays disabled.
+
+Completed-proof resolution foundation: exact `inspect_capture` evidence now
+promotes only an ephemeral source-observation context. The proof binds prior
+receipt, operation/request and complete material history. Public capture resolution
+uses native dispatch quiescence and coordinator serialization before version claim,
+assigned inspection and guarded store resolution. Unknown results remain
+`resolved_unknown` with nil artifact result and retained artifact allowance; only
+source material advances. Automatic recovery keeps interrupted capture uncertainty
+and does not import a recovered proof. Memory and PostgreSQL pass the same running/
+stopped resolution/rollback contracts. Entered captures without completed evidence,
+including retained native staging/budget resolution, and ordinary live/package/
+platform/consumer qualification remain pending; checkpoint admission is disabled.
+
+Entered-capture material resolution foundation: the shared engine now explicitly
+resolves only an exact entered intent after original-source/worker quiescence,
+under the same machine gate and original creation marker. A separate typed proof
+records the stopped source's actual checkpoint head and unchanged remaining
+material, advances the ordered journal revision and permanently retires the ID.
+It has no artifact result and cannot decode as capture completion. Exact recorded
+resolution lookup is read-only; repeated resolution returns existing evidence.
+Seven non-VM contracts cover old/advanced heads, request/material tampering,
+nonquiescent sources, live original PID, retained engine ownership, gate/marker/
+budget rejection, proof/history corruption, no replay and finite independent
+control admission. Resolution retains all capture staging and reservations.
+Public protocol routing, distinct durable resolution histories, authenticated
+staging cleanup/native allowance release and ordinary qualification remain
+pending. No public checkpoint capability is enabled.
+
+Entered-capture protocol foundation: protocol 2 now carries distinct
+`resolve_capture`/`capture_resolved` and
+`inspect_capture_resolution`/`capture_resolution_presence` pairs. Explicit
+resolution requires `quiesced: true`; both requests have a 30-second ceiling and
+checkpoint-feature gating. The helper routes the shared-engine boundary and
+exact recorded lookup. Rust/Elixir validators agree on shared synthetic proofs,
+reject artifact/completion substitution and bind original receipt/ID/request with
+zero output. Positive resolution uses reserved control scheduling, including
+modeled quarantine, without re-enabling ordinary work. The finite independent
+material metadata constant agrees across engine/protocol. An in-process native
+peer exercises busy workers, explicit cancellation, modeled unavailable state,
+resolution/lookup and normal shutdown. This is not live crash or VM qualification.
+Public coordinator integration,
+authenticated staging cleanup/native allowance release and ordinary qualification
+remain pending. Public checkpoint admission stays disabled.
+
+Entered-capture durable foundation: source-only resolution is a distinct typed
+material-history link, restricted to `resolved_unknown` with no artifact result.
+Memory/PostgreSQL transactions bind the exact current receipt, capture intent,
+full ordered history and stopped source with nil PID evidence; creation remains
+immutable and retained artifact capacity stays charged. Generic capture advance
+cannot import this authority. Selective codec v25 covers these histories and
+attached commands, rejects older-envelope substitution and safely decodes in a
+fresh BEAM. Native targets with a future checkpoint descriptor require the
+`native_capture_resolutions: 1` reader before enrollment. Same-BEAM comparison
+against 87fa629 preserves representative HTTP v12, native v23 and captured v24
+bytes. Rust/Elixir full-history validators distinguish a recorded absent head
+from unknown lineage, reject individually canonical inconsistent links and retain
+capture/growth operation-ID retirement. Six new Elixir models, one Rust journal
+model and 48 ordinary PostgreSQL contracts pass.
+Authenticated native staging cleanup/allowance release and ordinary live/package/
+platform/consumer qualification remain pending; checkpoint admission is disabled.
+
+Public entered-resolution foundation: `Checkpoints.resolve` now invokes
+native-only `qualify_capture` for present unknown native capture intents, after
+authority serialization, exact owner/epoch quiescence and version claim. HTTP
+continues inspecting its source, and deleted resolution never qualifies present
+material. The backend observes exact completed/recorded evidence before dispatching
+explicit entered-source resolution; its original absolute deadline spans all
+stages. Final owned source observation precedes the atomic store write. Automatic
+inspection can recover recorded resolution authority ephemerally but does not
+persist it or replay capture. Protocol-2 quarantine permits only bounded control;
+pinning rejects foreign health and quiescence preserves quarantine. Models cover
+unknown stopped and completed-proof running sources, busy/stale/crossed guards,
+absence, wrong reply kinds, native errors, retained capacity and disabled package
+admission. Entered running-source resolution, authenticated staging/native
+allowance release and ordinary source/package/platform/consumer qualification
+remain pending. Every full-parity acceptance row remains pending.
+
+Running entered-resolution foundation: the native engine now mints an opaque
+source authority only for a fully stopped source with original-process absence or
+the same enrolled live source. Successful engine-controlled forkable start
+records an independent PID/birth witness, because public SDK `pid()` may fall
+back to inventory. Original receipt, enrollment, SDK PID, row PID/birth and OS
+liveness/birth must all match. Capture preflight and entered-source normal stop
+reuse this boundary. Boot activity, dependent clones, OCI ownership, missing/
+foreign cache ownership and stale PID reject. Exact live source resolution
+advances only source material and conditionally updates retained handle authority;
+recorded-proof recovery cannot invent enrollment. Source remains running and
+artifact stays unknown. Memory/PostgreSQL/public coordinator models verify both
+head outcomes and running/stopped source projections, mismatch rejection,
+immutable creation, no replay and retained artifact allowance. Native staging
+cleanup/allowance release and ordinary live source/package/platform/public
+consumer qualification remain pending; checkpoints stay disabled.
+
+Capture staging retention foundation: capture now publishes a protected schema-1
+stage record before source intent/SDK dispatch, binding original receipt,
+operation/request, private directory dev/inode and exact worker metadata digest.
+Entered uncertainty transfers its actual promoted job lease to a recoverable
+registry after collection, keeping every declared allowance charged. A replacement
+engine restores reservations only from bounded, owner-protected, domain-bound
+records. Indexed missing/redirected stages keep reservations and quarantine work;
+unindexed legacy directories quarantine without adoption or deletion. Existing
+pre-entry/completed cleanup removes a matching unretained registration only after
+synced own-directory absence. Seven non-VM retention/identity/restore/corruption
+models and ordinary native contracts pass. Explicit retained-stage cleanup/native
+allowance release, its Port/public integration and ordinary live/package/platform/
+consumer qualification remain pending; no checkpoint feature is activated.
+
+Retained-stage cleanup foundation: the shared engine now exposes explicit
+`cleanup_capture_staging` with positive caller quiescence, exact original
+receipt/ID/request, source gate/creation marker and completed/resolved source
+journal evidence. A retained collected lease and exact protected stage record
+are required. Cleaning intent is persisted before descriptor-relative traversal
+and root unlink; synchronized absence and private Cleaned completion precede
+actual native allowance release. Repeated calls return the same path-free cleanup
+receipt. Protected Cleaning records may resume partial removal or finish known
+absence; completed records do not restore native reservations on replacement.
+Quarantine is never cleared by cleanup. Six new non-VM models cover engine
+authorization, outside links, cancellation, partial/removed-root recovery,
+completion bookkeeping recovery and mismatched/uncollected stages. Typed Port
+cleanup now has exact protocol-two request/reply authority, positive quiescence,
+checkpoint approval and a finite zero-output control path. Validators reject
+foreign intent, artifact/material-result substitution and streaming. Native peer
+models exercise busy-worker and quarantined control dispatch; pinned Elixir calls
+preserve quarantine. Stopped-source deletion now enrolls exact current authority
+in protected collected-stage records before SDK deletion removes source journals.
+Deleted-source cleanup requires that enrollment and verified absence, rejecting
+unenrolled, recreated and partial sources. Registry replacement preserves the
+authority/reservation; already cleaned receipts keep the same identity. Five new
+non-VM models cover these boundaries and budget cancellation before SDK entry.
+Prepared-stage abort now validates exact pre-entry stage and source authority,
+clears only its own unentered intent, and preserves later source operations.
+Distinct Aborting/Aborted records bracket descriptor cleanup and synchronized
+native release; automatic pre-entry retirement retains the real lease on failure.
+Both bridges validate the separate zero-output abort reply and quarantine/control
+boundaries. Six native non-VM models cover exact material preservation, entered/
+foreign/cancelled/gated rejection, automatic retirement, partial/known-removed
+continuation, completed bookkeeping recovery and later-operation isolation.
+Registered completed guards now retain their real lease through bounded source-
+proof checks and descriptor closeout. Synced Cleaned receipts survive normal
+registry replacement; the source journal/SDK record is untouched. A completion
+flag alone cannot release native admission. Failed collection-marker updates
+may qualify only through exact completed/resolved source evidence, retained
+capacity and original stage identity. Three new non-VM models cover ordinary
+closeout/replacement, missing source proof and substituted-root preservation/
+recovery, including source-gate exclusion and continued quarantine.
+Native capture acceptance now freezes the exact source receipt. Guarded Memory
+and PostgreSQL release transactions require a typed, correlated cleanup receipt
+and atomically persist it with released accounting; the proof is immutable and
+repeated consumption is idempotent. Shared contracts cover completed/resolved,
+deleted-source and aborted capture records, crossed/stale rejection and retained
+usage. PostgreSQL rollback preserves both accounting and proof absence. Selective
+codec v26 and `native_capture_cleanup: 1` reader/writer negotiation retain old
+HTTP/v24/v25 encodings without new authority. Fresh-BEAM and same-BEAM previous-
+codec comparisons cover this boundary. Public release now serializes with native
+recovery, pins/quiesces the helper and claims worker/machine authority before
+native-only `cleanup_capture`. Scoped requests bind original capture receipt,
+approved policy and exact intent. Only a transition-free resolved capture with an
+exact pre-dispatch state reply can select abort; uncertainty cannot trigger
+fallback or replay. Receipt consumption follows repeated host-output absence
+checks and a fresh store guard. Ten public peer models and five transport/policy
+models cover success, idempotence, busy/stale/crossed/uncertain rejection, host
+partial-output preservation, distinct abort replies and original deadlines.
+The shared engine now separately qualifies a source after recorded pre-entry
+abort. Registration retains original source intent/PID/birth before dispatch;
+legacy records retain their encoding and cannot invent missing process evidence.
+The distinct qualification proof preserves original material and requires actual
+cache/start enrollment for running sources or verified original-process absence
+for stopped sources, with source gate/domain/material/marker and before/after
+checks. Six non-VM models cover proof separation, original process authority,
+replacement, live-process disguise, unsafe/cancelled/gated/changed requests and
+legacy rejection. Port/public/store source-qualification routing remains pending;
+stage cleanup alone cannot resolve an active unknown capture. Ordinary
+live/package/platform/consumer qualification remains pending; admission is disabled.
+
 | Requirement | Current evidence and remaining work |
 | --- | --- |
-| P0.1 Operations, arities, specifications | Checked manifest and `backend_parity_coverage_test.exs` cover 38 operations, 44 arity signatures and eight specification features. Acceptance references are inventoried; implementation/qualification closure remains pending. |
+| P0.1 Operations, arities, specifications | Checked manifest and `backend_parity_coverage_test.exs` cover 40 operations, 46 arity signatures and eight specification features, including native-only explicit capture qualification and cleanup. Acceptance references are inventoried; implementation/qualification closure remains pending. |
 | P0.2 Public HTTP restrictions | Design matrix and 15 manifest contracts record existing source/platform/input limits. Shared backend acceptance is pending. |
 | P0.3 Clean SDK witnesses | `native/tests/clean-sdk-api` compile witnesses and three pure configuration/lineage tests exist. Bounded integrated feature behavior remains pending. |
 | P0.4 Existing-agent commands | `native/http-parity-api-boundaries.md` and compile witnesses identify public RunConfig, mount/overlay and AgentClient APIs. Expanded command/terminal integration remains pending. |
@@ -54,8 +330,8 @@ Crash qualification and distribution approval remain false and separate.
 | P7.2 Mounts | Shared engine VolumeMountRequest now carries exact provision proof, canonical guest target and read-only mode; opaque QualifiedVolumeMounts retains approved root/backing descriptors, actor-domain ownership and sorted volume gates. Selection reopens completed private proof, excludes all cleanup journals and projects the public SDK VmRecord mount tuple without staged/arbitrary sources. Seven ordinary non-VM fixture contracts cover strict target/set bounds, exact SDK tuple/read-only projection, crossed authority, missing proof, substitution, cleanup evidence, cancellation and gate retention. A job contract preserves both control observers under eight retained mounts, bounds descriptors/memory and refuses to stack a full creation job over mount admission. Durable VolumeAttachment now preserves key/binding/proof/target/read-only authority in immutable ManagedMachine.native_mounts; selective v21 retains pre-allocation records and tombstones while earlier envelopes omit empty defaults. Memory and the PostgreSQL example check enrollment before atomic attachment, reject mixed domains/HTTP authority, preserve exclusivity and release only matching proof. Seven deterministic contracts cover shape/correlation, mixed authority, immutable/release proof, envelope rejection, fresh-BEAM reading and Memory transactions; live PostgreSQL/native VM checks remain pending. Local/OCI/registry creation wire now carries exact volume_mounts proof/target/read-only tuples; protocol Session requires future volume capability and enrolled proof domain, and both bridges select the operator policy. Assignment/allocation now copies durable attachments and retained commands inherit that authority in selective v21. Structural record checks bind saved proof to assignment and actual observed mounts. A shared Rust/Elixir fixture covers unsigned identity, strict shape, unknown/empty/null rejection, feature/domain gates and command inheritance. Helper dispatch now forwards exact approved mount policy and proof into shared-engine qualification/material publication, with no discarded-proof fallback; current public capability admission remains disabled. Private material now stores the full mount proof set, binds its digest and exact SDK tuples to creation authority, rejects proof/path/flag substitutions and preserves mounts across growth. Local mounted creation retains its opaque handle and atomically promotes the existing lease to one full creation job while preserving two control observers. Six new non-VM tests cover material authentication, legacy encoding, growth preservation and atomic admission/drop behavior. Prepared registry and direct OCI creation now share retained-handle promotion and mounted journal publication; their deterministic pre-entry cases reject cancellation and foreign handles without reservation/storage mutation or leaked jobs. SDK configuration now projects actual mount tuples, including offline mounts and staged indicators, through strict optional protocol-2 observation fields. A shared Rust/Elixir fixture and deterministic engine/reply tests cover legacy omission, malformed/bounded/staged rejection and exact saved-authority correlation; unmounted assignments reject unexpected mounts too. Local/prepared-pack mounted startup now consumes a freshly qualified handle, matches complete saved mount proof and exact SDK tuples, rechecks current backing before entry and retains gates/descriptors through observation. Atomic promotion includes one launch child without freeing work admission; the unqualified start path rejects mounts. Deterministic pre-entry tests cover full-proof mismatch, cancellation, foreign handles, control preservation and exhausted child admission. Port now routes mounted local/OCI/prepared-registry creation and pack startup through these engine paths, selecting exact operator policy and retaining full proof. Source preparation completes before mount qualification under the original deadline, avoiding stacked admission. New non-VM source rejection, adapter conversion and framed bridge contracts cover crossed/cancelled intent, full unsigned proof preservation, exact catalog forwarding and wrong-root pre-entry rejection. OCI mounted startup now validates full saved/current mount authority, promotes one retained lease to two children and existing staging/metadata/FD demand, and defers mounted bootstrap spool/worker preparation until SDK agent readiness and parent mount FD closure. Volume gates/domain/full proof follow the supervisor through successful or unresolved collection; post-bootstrap journal/SDK mounts are verified. Five deterministic contracts cover atomic admission, exhausted staging, handoff/drop retention, deferred spool creation and exact read-only guest bindings, and the framed bridge also routes approved-policy OCI start. Buffered, owned streaming and background commands now qualify saved/current backing under exact operator policy before machine gating, recheck full proof/running authority and promote the retained lease into bounded worker/output admission. Parent mount FDs close before preparation, while proof/domain/volume gates remain with collection. Unqualified command APIs reject mounts; policy-aware Port dispatch preserves credited binary output and sibling control. Three additional deterministic contracts cover worker/output admission, missing-policy/stopped-backing pre-entry rejection and framed command forwarding. Managed terminals now share current-backing qualification, ordered volume/machine gates and retained proof/domain collection ownership, with atomic terminal/input resource admission and exact Port policy forwarding. Maximum-input/control-headroom and framed credit/input/resize/normal-close contracts pass; the core pre-entry fixture also rejects missing policy without controls/output/worker preparation. Ordinary guest/resource qualification remains pending; no mount or volume capability activates. |
 | P7.3 Growth | Engine/journal growth now executes through the existing owned worker supervisor. A protected 16-KiB metadata witness binds original storage/overlay descriptors, parent identity, layout and exact targets. Only distinct correlated Grown evidence plus successful exact-child collection and parent post-geometry permits database/material-proof updates. Machine/source/domain/geometry/job leases survive unresolved collection; growth retirement closes input then retains without signals or replay. Four new pure contracts cover witness identity, typed proof, signal-free collection policy and shared admission/control headroom. Selected ordinary sparse raw/QCOW worker checks cover normal success and companion substitution before any mutation; an engine fixture covers database/material completion, immutable creation identity, pre-dispatch cancellation and duplicate rejection. An engine-owned transition API now returns correlated journal evidence only after collected SDK growth; a read-only proof observer cannot replay or adopt pending/current inventory. Shared proof contracts bind original identity, preceding receipt, exact request (including null targets), size transition and preserved immutable SDK configuration. Raw ext4 remains unchanged until normal boot. Growth admission now precedes geometry reads and the same job lease enters the worker. Bounded QCOW scans fingerprint header/L1/L2/refcount metadata and stable host length, with pointer-range/alias/flag checks, cancellation and IO/memory limits. Flat backing-chain witnesses now bind up to eight path/parent/file-version/capacity/layout entries with one reader and a shared table-IO budget. Standard L1/L2/zero/backing reads bind actual ext4 superblock bytes and capacity; pure and ordinary read-only-base worker fixtures cover preservation. Standard 16-bit refcounts now match derived metadata/data counts, sparse table indexes and copied exclusivity, using a capped charged count map and shared IO budget. Pending entries now preserve original geometry; explicit quiesced engine qualification checks entered intent, stopped SDK metadata and complete preserved targets, writes only a separately audited material proof, and cannot override retained fences or adopt legacy inventory. Distinct QualifyGrowth/GrowthQualified wire/adapter and explicit Runtime resolution now bind quiescence and prior sizes before proof publication, serialize/pin/quiesce the owner and use a local resolved preview with one remaining budget; read-only/absence paths cannot repair. Backing-source provenance/content qualification, compressed/format coverage and platform qualification remain pending; no growth capability is enabled. Protocol-2 ExpandDisks/Grown and InspectGrowth/GrowthPresence contracts now bind prior receipt, exact nullable request, operation ID, previous/target sizes and canonical transition proof. The adapter uses owned SDK growth with one deadline; bounded proof lookup is nonmutating. Runtime uses scoped pre-inspection and a validated local receipt preview for follow-up observation while durable intent remains dispatching. Matching completed-proof lookup now restores a local inspection receipt with one deadline and pinned owner/epoch. Startup validates committed current geometry or exact unresolved growth proof, then keeps active expansion history unknown and fully reserved; only explicit quiesced resolution commits it. Missing proof cannot become absence/quiescence authority. Public descriptor activation and ordinary new-package acceptance remain pending. Native expansion/current-identity integration now persists correlated transitions, validates ordered committed history, selects the current receipt for retained lifecycle/command context and rejects bare geometry resolution. Increased reservations survive uncertainty; missing history cannot become current ownership. |
 | P7.4 Storage acceptance | Protected native staging/provision/delete journals bind original authority and correlated completion; non-VM models preserve uncertainty and reject automatic replay/absence adoption. Explicit caller-fenced resolution now continues matching entered deletion or starts cleanup of completed provisioning; repeated explicit attempts preserve identity and normal observers remain nonmutating. Missing completed provisioning still rejects and retains accounting. Schema-2 staging now protects backing identity before public publication and keeps schema-1 readers compatible. Protected incomplete staging now has explicit abort intent/completion and read-only proof with no ready promotion; missing prepared identity remains fenced. Elixir exact request/result contracts now bind action, generated ID/size, policy and owner domain; Port checks returned root against the operator catalog and rejects current-package volume dispatch. Shared Rust/Elixir authority fixtures preserve full unsigned inode identities. Read-only volume inspections use reconciliation/quarantine observation routing; mutation never gains this admission. Durable VolumeAuthority now preserves native binding and exact provision/delete/abort proof; VolumeOps accepts correlated native completion only, keeps uncertain reservations and preserves immutable proof linkage. Selective v20 reads/writes native volumes while HTTP v15 bytes remain identical; fresh-BEAM decoding and old-envelope rejection pass. Memory atomically checks enrollment, retains binding through tombstones and releases capacity only on proof-based completion; PostgreSQL example shares the same predicates but live native-volume PostgreSQL contracts remain pending. Scoped embedded volume context/request/reply now preserves exact saved intent, public backend path/ack shapes and known proof linkage. Startup classifies volume records separately, checks ready/tombstone proof and turns interrupted intents unknown without adoption or release; matching snapshot/CAS prevents stale recovery writes. Future enrollment additionally requires native volume reader and all callbacks. Managed provision/delete orchestration now pins the owner before intent writes, serializes with recovery, retains worker lease and consumes correlated proof under one absolute deadline. Explicit fenced cleanup alone may select staging abort after confirmed pre-dispatch ownership rejection; uncertainty cannot trigger another mutation. Native deduplication stays read-only without requiring a live helper; domain-bound fingerprints preserve HTTP inputs. Mount integration and reader activation, unproved temporary cleanup, long/large-tree acceptance, ordinary Linux guest volume/growth witnesses and macOS public rejection checks remain pending. |
-| P8.1 Restore | Public portable API witnesses exist; compatibility, fresh intent and owned restore integration remain pending. |
-| P8.2 Capture | Checkpointable boot, preflight, bounded capture/publication and source resume integration remain pending. |
+| P8.1 Restore | Public portable API witnesses exist. Shared-engine ApprovedCheckpoint/ApprovedCheckpointArtifact now bind current SDK, host/guest platform, exact captured allocations, idle bare topology and forbidden workload/layer/credential/network dependencies. Classic and chunked header versions follow public SDK constants; SDK CPU compatibility remains delegated. A distinct 64-GiB checkpoint allowance preserves the public capture bound without widening pack/command/file caps. Two pure contracts cover layouts, crossed allocation/SDK/platform/device metadata and bounds. SDK convenience restore owns its own reservation/record and error cleanup, so the clean public materialize/install APIs are selected for fresh SmolBox reservation/material integration. Read-only admitted inspection now checks whole-file SHA-256, exact input descriptor/path versions, bounded footer/manifest and public descriptor-based SDK checksum/CPU compatibility. Classic streaming validation binds exact assets/digests, captured-profile expansion and the public 64-file chain bound. History envelopes bind head/ancestry/index paths and bounded content-hashed objects, but do not attest SDK index/reference semantics. Eight checkpoint contracts plus archive sizing and read-only retirement/control-isolation contracts pass. Request-private staging now retains input bytes, domain binding, separate 128-GiB aggregate staging and 128-MiB SDK-parser allowances through cleanup. Public SDK index readers and StoredFile serialization enforce exact declared files, referenced object lengths/hashes, reconstructed file digests, head/ancestor lineage and data summaries; ancestors retain their captured resource profiles. SDK-written fixtures exposed and corrected empty structural directories, top-level disk targets and the published 64-file chain limit. Unknown stage replacement is preserved with retained allowance/work fencing in a non-VM model. Public SDK extraction/uncached store materialization now runs in the owned job worker with four chunk threads, a fixed system tool path and a reserved SDK CPU-query child. Its distinct acknowledgement binds exact metadata/source hashes and output identity/inventory/version evidence; no generic or retired acknowledgement promotes a materialized input. Atomic promotion retains one work slot and separate decoded staging through collection; the source lease remains charged until cleanup. A rebuilt macOS debug helper ordinarily materializes both SDK-written layouts, verifies bytes/proof, collects normally and leaves no SDK VM row. No VM is started by this evidence. Fresh creation/installation now binds generated owner/incarnation, selected material and no-clobber ticket to a private SDK VM directory after SDK-name reservation. The owned install worker uses public install/discard APIs, checks input/output top disk capacities and pending inputs, and emits distinct correlated installation evidence. Parent rechecks precede public neutral bare record construction, creation receipt and material-journal publication. Source, machine gate, SDK reservation and separately charged installation work survive unresolved collection; errors keep partial storage without replay. An ordinary macOS non-VM fixture installs sparse disks, commits a receipt-bound stopped row, leaves no VMM PID and releases native leases after collection. First-start now uses an immutable-root-hash/receipt-bound private pending/entered/consumed journal. Pending installed versions are anchored after authorized macOS staging-link cleanup while source capacity, SDK reservation and gate remain held. Entry is persisted before SDK start; completion requires SDK success, actual enrolled live PID/birth and SDK-consumed inputs. Entered observation stays IdentityUnknown and cannot supply replay or cold-boot authority. Same-engine normal stop is allowed only with enrolled handle and matching live PID/birth; it does not resolve the entered operation. Five deterministic contracts cover missing/crossed/consumed/entered/cancelled/replaced state plus legacy behavior. The ordinary SDK-created non-VM fixture verifies pending and entered classification/start rejection. Explicit quiesced resolution, expanded saved-state durable/wire histories, large-history scalability and ordinary restored-VM/platform/consumer qualification remain pending. No restored VM or existing-machine ownership is produced. |
+| P8.2 Capture | Checkpointable creation/start/preflight, shared engine capture/owned SDK worker, Port streaming, scoped backend routing and native publication/history are implemented foundations. Exact request/proof/current receipt, byte/identity checks, bounded transport/consumer, synced no-clobber publication and atomic durable history have deterministic contracts. Explicit unknown-result resolution and exact-package ordinary running-source/platform/consumer qualification remain pending; public checkpoint admission is disabled. |
 | P8.3 Export | Bounded approved converter or enrolled auxiliary VM, disk semantics and registry publication remain pending. Private fixture conversion is not product evidence. |
 | P8.4 Branches | Public held-fork APIs are identified. Source/child gates, independent proofs, epoch enrollment, dual reservation and hold/release integration remain pending. |
 | P8.5 Saved-state histories | Typed native histories, correlated proofs and deterministic partial/lost-result contracts remain pending. |

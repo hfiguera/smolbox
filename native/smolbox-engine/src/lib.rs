@@ -8,7 +8,29 @@ mod agent_io;
 mod bootstrap;
 pub use bootstrap::Metadata as OciBootstrapPlan;
 mod buffered;
+mod capture;
+mod capture_abort_source;
+mod capture_material;
+mod capture_resolution;
+mod capture_staging;
+pub use capture_abort_source::{CaptureAbortSourceQualification, CaptureAbortSourceState};
+pub use capture_staging::CaptureStagingCleanupReceipt;
+mod capture_worker;
+pub use capture::CapturedCheckpoint;
+mod checkpoint;
+mod checkpoint_capture;
+pub use capture_material::{CaptureArtifact, CaptureChange, CaptureRequest, CaptureTransition};
+pub use capture_resolution::{CaptureResolutionChange, CaptureResolutionTransition};
+mod checkpoint_install;
+mod checkpoint_lifecycle;
+mod checkpoint_materialize;
+mod checkpoint_source;
 pub use buffered::{BufferedCommand, LaunchOutcome, COMMAND_METADATA_BYTES};
+pub use checkpoint::{
+    ApprovedCheckpoint, ApprovedCheckpointArtifact, CHECKPOINT_ARTIFACT_BYTES,
+    CHECKPOINT_DISK_FILES,
+};
+pub use checkpoint_source::{CreateCheckpointRequest, MaterializedCheckpoint, PreparedCheckpoint};
 mod archive;
 mod artifact;
 mod assets;
@@ -76,9 +98,10 @@ pub use volumes::{
 };
 mod sdk_compat;
 pub use jobs::{
+    JOB_CHECKPOINT_MATERIAL_BYTES, JOB_CHECKPOINT_METADATA_BYTES, JOB_CHECKPOINT_STAGING_BYTES,
     JOB_CHILDREN, JOB_CONTROL_HEADROOM, JOB_CONTROL_METADATA_BYTES, JOB_CONTROL_SLOTS,
-    JOB_DESCRIPTORS, JOB_METADATA_BYTES, JOB_REGISTRY_STAGING_BYTES, JOB_STAGING_BYTES,
-    JOB_WORK_SLOTS,
+    JOB_DESCRIPTORS, JOB_MATERIAL_CONTROL_METADATA_BYTES, JOB_METADATA_BYTES,
+    JOB_REGISTRY_STAGING_BYTES, JOB_STAGING_BYTES, JOB_WORK_SLOTS,
 };
 mod transfer_supervisor;
 mod transfer_worker;
@@ -95,8 +118,8 @@ pub use files::{FileCompletion, FileOptions, FileOutcome};
 pub use host::{BootLauncher, Executable, ExecutableLocator, HostContext, OwnerIdentity};
 pub use identity::{CreationReceipt, Observation, ObservedState, Resources};
 pub use machine::{
-    CreateOciRequest, CreateRegistryRequest, CreateRequest, CreationPresence, Engine,
-    OciCreationIntent, RegistryCreationIntent,
+    CheckpointCreationIntent, CreateOciRequest, CreateRegistryRequest, CreateRequest,
+    CreationPresence, Engine, OciCreationIntent, RegistryCreationIntent,
 };
 pub use material::{GrowDisks, GrowthChange, GrowthTransition, MaterialProof};
 pub use observations::{

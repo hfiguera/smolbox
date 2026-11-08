@@ -101,7 +101,7 @@ impl Drop for Spool {
 pub(crate) struct Prepared {
     pub request: Request,
     pub spool: Spool,
-    _permit: crate::jobs::JobLease,
+    _permit: Option<crate::jobs::JobLease>,
     _metadata: Option<Spool>,
 }
 impl Prepared {
@@ -159,8 +159,11 @@ impl Prepared {
 }
 
 pub(crate) struct Collected {
+    pub captured: Option<crate::capture_worker::Proof>,
     pub bootstrapped: Option<crate::bootstrap::Proof>,
     pub pulled: Option<crate::ImageObservation>,
+    pub installed: Option<crate::checkpoint_install::Proof>,
+    pub materialized: Option<crate::checkpoint_materialize::Proof>,
     pub grown: Option<crate::growth::GrowthProof>,
     pub stream: Option<crate::CommandOutcome>,
     pub command: Option<ipc::CommandProof>,
@@ -288,7 +291,7 @@ impl TransferSupervisor {
         Ok(Prepared {
             request,
             spool,
-            _permit: permit,
+            _permit: Some(permit),
             _metadata: None,
         })
     }
@@ -353,7 +356,7 @@ impl TransferSupervisor {
         Ok(Prepared {
             request,
             spool,
-            _permit: permit,
+            _permit: Some(permit),
             _metadata: Some(plan),
         })
     }
@@ -434,7 +437,7 @@ impl TransferSupervisor {
         Ok(Prepared {
             request,
             spool,
-            _permit: permit,
+            _permit: Some(permit),
             _metadata: Some(metadata),
         })
     }
@@ -538,7 +541,170 @@ impl TransferSupervisor {
         Ok(Prepared {
             request,
             spool,
-            _permit: permit,
+            _permit: Some(permit),
+            _metadata: Some(metadata),
+        })
+    }
+
+    /// Admission lives in the checkpoint source held by the collection lease
+    /// box. No second work slot or prematurely dropped temporary-file lease.
+    pub(crate) fn prepare_checkpoint_owned(
+        &self,
+        directory: &Path,
+        bytes: &[u8],
+        expected: crate::checkpoint_materialize::Expected,
+    ) -> Result<Prepared> {
+        expected.validate()?;
+        if bytes.is_empty() || bytes.len() as u64 > crate::checkpoint_materialize::METADATA_BYTES {
+            return Err(Error::before(ErrorCode::Validation));
+        }
+        let mut metadata = Spool::new(directory)?;
+        metadata
+            .file
+            .write_all(bytes)
+            .map_err(|_| Error::before(ErrorCode::Io))?;
+        metadata
+            .file
+            .set_permissions(std::fs::Permissions::from_mode(0o400))
+            .and_then(|()| metadata.file.sync_all())
+            .map_err(|_| Error::before(ErrorCode::Io))?;
+        let blob = ipc::Blob {
+            path: metadata.path.clone(),
+            device: metadata.identity.0,
+            inode: metadata.identity.1,
+            bytes: bytes.len() as u64,
+        };
+        let spool = Spool::new(directory)?;
+        let mut nonce = [0; 16];
+        getrandom::fill(&mut nonce).map_err(|_| Error::before(ErrorCode::Native))?;
+        let request = Request {
+            schema: 1,
+            operation: hex::encode(nonce),
+            owner: self.owner,
+            socket: directory.join("agent.sock"),
+            staging: spool.path.clone(),
+            staging_device: spool.identity.0,
+            staging_inode: spool.identity.1,
+            guest_path: "/workspace/.smolbox-checkpoint-material".into(),
+            max_bytes: 1,
+            kind: Kind::CheckpointMaterialize {
+                metadata: blob,
+                expected,
+            },
+        };
+        request.validate()?;
+        Ok(Prepared {
+            request,
+            spool,
+            _permit: None,
+            _metadata: Some(metadata),
+        })
+    }
+
+    pub(crate) fn prepare_capture_owned(
+        &self,
+        directory: &Path,
+        source: &Path,
+        bytes: &[u8],
+        expected: crate::capture_worker::Expected,
+    ) -> Result<Prepared> {
+        expected.validate()?;
+        if bytes.is_empty() || bytes.len() as u64 > crate::capture_worker::METADATA_BYTES {
+            return Err(Error::before(ErrorCode::Validation));
+        }
+        let mut metadata = Spool::new(directory)?;
+        metadata
+            .file
+            .write_all(bytes)
+            .map_err(|_| Error::before(ErrorCode::Io))?;
+        metadata
+            .file
+            .set_permissions(std::fs::Permissions::from_mode(0o400))
+            .and_then(|()| metadata.file.sync_all())
+            .map_err(|_| Error::before(ErrorCode::Io))?;
+        let blob = ipc::Blob {
+            path: metadata.path.clone(),
+            device: metadata.identity.0,
+            inode: metadata.identity.1,
+            bytes: bytes.len() as u64,
+        };
+        let spool = Spool::new(directory)?;
+        let mut nonce = [0; 16];
+        getrandom::fill(&mut nonce).map_err(|_| Error::before(ErrorCode::Native))?;
+        let request = Request {
+            schema: 1,
+            operation: hex::encode(nonce),
+            owner: self.owner,
+            socket: source.join("agent.sock"),
+            staging: spool.path.clone(),
+            staging_device: spool.identity.0,
+            staging_inode: spool.identity.1,
+            guest_path: "/workspace/.smolbox-capture".into(),
+            max_bytes: 1,
+            kind: Kind::Capture {
+                metadata: blob,
+                expected,
+            },
+        };
+        request.validate()?;
+        Ok(Prepared {
+            request,
+            spool,
+            _permit: None,
+            _metadata: Some(metadata),
+        })
+    }
+
+    pub(crate) fn prepare_checkpoint_install_owned(
+        &self,
+        directory: &Path,
+        target: &Path,
+        bytes: &[u8],
+        expected: crate::checkpoint_install::Expected,
+    ) -> Result<Prepared> {
+        expected.validate()?;
+        if bytes.is_empty() || bytes.len() as u64 > crate::checkpoint_install::METADATA_BYTES {
+            return Err(Error::before(ErrorCode::Validation));
+        }
+        let mut metadata = Spool::new(directory)?;
+        metadata
+            .file
+            .write_all(bytes)
+            .map_err(|_| Error::before(ErrorCode::Io))?;
+        metadata
+            .file
+            .set_permissions(std::fs::Permissions::from_mode(0o400))
+            .and_then(|()| metadata.file.sync_all())
+            .map_err(|_| Error::before(ErrorCode::Io))?;
+        let blob = ipc::Blob {
+            path: metadata.path.clone(),
+            device: metadata.identity.0,
+            inode: metadata.identity.1,
+            bytes: bytes.len() as u64,
+        };
+        let spool = Spool::new(directory)?;
+        let mut nonce = [0; 16];
+        getrandom::fill(&mut nonce).map_err(|_| Error::before(ErrorCode::Native))?;
+        let request = Request {
+            schema: 1,
+            operation: hex::encode(nonce),
+            owner: self.owner,
+            socket: target.join("agent.sock"),
+            staging: spool.path.clone(),
+            staging_device: spool.identity.0,
+            staging_inode: spool.identity.1,
+            guest_path: "/workspace/.smolbox-checkpoint-install".into(),
+            max_bytes: 1,
+            kind: Kind::CheckpointInstall {
+                metadata: blob,
+                expected,
+            },
+        };
+        request.validate()?;
+        Ok(Prepared {
+            request,
+            spool,
+            _permit: None,
             _metadata: Some(metadata),
         })
     }
@@ -606,7 +772,7 @@ impl TransferSupervisor {
         Ok(Prepared {
             request,
             spool,
-            _permit: permit,
+            _permit: Some(permit),
             _metadata: Some(metadata),
         })
     }
@@ -646,7 +812,8 @@ impl TransferSupervisor {
         verified_executable(&self.executable)?;
         check_budget(deadline, cancel)?;
         let request_bytes = ipc::encode(&prepared.request)?;
-        let mut child = Command::new(&self.executable.path)
+        let mut command = Command::new(&self.executable.path);
+        command
             .arg(
                 if matches!(
                     prepared.request.kind,
@@ -656,6 +823,9 @@ impl TransferSupervisor {
                         | Kind::Buffered { .. }
                         | Kind::Background { .. }
                         | Kind::Streaming { .. }
+                        | Kind::Capture { .. }
+                        | Kind::CheckpointInstall { .. }
+                        | Kind::CheckpointMaterialize { .. }
                         | Kind::Grow { .. }
                 ) {
                     "--job-worker"
@@ -664,6 +834,13 @@ impl TransferSupervisor {
                 },
             )
             .env_clear()
+            .env("PATH", "/usr/bin:/bin:/usr/sbin:/sbin")
+            .env("SMOLVM_RESTORE_COW_DISK", "0")
+            .env("SMOLVM_RESTORE_TMPFS", "0")
+            .env(
+                "SMOLVM_CHECKPOINT_THREADS",
+                crate::checkpoint_materialize::THREADS,
+            )
             .env(
                 if cfg!(target_os = "macos") {
                     "DYLD_LIBRARY_PATH"
@@ -682,7 +859,27 @@ impl TransferSupervisor {
             )
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
-            .stderr(Stdio::null())
+            .stderr(Stdio::null());
+        if let Kind::Capture { metadata, .. } = &prepared.request.kind {
+            let selected: crate::capture_worker::Metadata =
+                metadata.read(self.owner, crate::capture_worker::METADATA_BYTES)?;
+            let data = selected
+                .database
+                .parent()
+                .and_then(Path::parent)
+                .and_then(Path::parent)
+                .ok_or(Error::before(ErrorCode::Ownership))?;
+            let cache = selected
+                .source_directory
+                .parent()
+                .and_then(Path::parent)
+                .and_then(Path::parent)
+                .ok_or(Error::before(ErrorCode::Ownership))?;
+            command
+                .env("XDG_DATA_HOME", data)
+                .env("XDG_CACHE_HOME", cache);
+        }
+        let mut child = command
             .spawn()
             .map_err(|_| Error::before(ErrorCode::Native))?;
         let birth = smolvm::process::process_start_time(child.id() as i32);
@@ -702,7 +899,13 @@ impl TransferSupervisor {
         let mut pipe_eof = false;
         let mut reason = None;
         let mut policy = CollectionPolicy {
-            no_signals: matches!(owned.prepared.request.kind, Kind::Grow { .. }),
+            no_signals: matches!(
+                owned.prepared.request.kind,
+                Kind::Grow { .. }
+                    | Kind::Capture { .. }
+                    | Kind::CheckpointInstall { .. }
+                    | Kind::CheckpointMaterialize { .. }
+            ),
             ..CollectionPolicy::default()
         };
         let origin = Instant::now();
@@ -868,6 +1071,21 @@ impl TransferSupervisor {
                     },
                     pulled: if status.success() && decoder.complete() && reason.is_none() {
                         evidence.pulled.clone()
+                    } else {
+                        None
+                    },
+                    captured: if status.success() && decoder.complete() && reason.is_none() {
+                        evidence.captured.clone()
+                    } else {
+                        None
+                    },
+                    installed: if status.success() && decoder.complete() && reason.is_none() {
+                        evidence.installed.clone()
+                    } else {
+                        None
+                    },
+                    materialized: if status.success() && decoder.complete() && reason.is_none() {
+                        evidence.materialized.clone()
                     } else {
                         None
                     },

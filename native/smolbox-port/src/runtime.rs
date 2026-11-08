@@ -230,6 +230,15 @@ impl Shared {
 }
 
 pub trait Native: Send + Sync + 'static {
+    fn checkpoint(
+        &self,
+        _operation: wire::Operation,
+        _approval: crate::package::CheckpointApproval,
+        _remaining: Duration,
+        _cancel: Cancellation,
+    ) -> wire::Outcome {
+        before(wire::SafeCode::Unsupported)
+    }
     fn run_with_volume_policy(
         &self,
         _operation: wire::Operation,
@@ -370,6 +379,15 @@ impl Native for Engine {
         cancel: Cancellation,
     ) -> wire::Outcome {
         adapter::prepare_artifact(self, approval, token, remaining, cancel)
+    }
+    fn checkpoint(
+        &self,
+        operation: wire::Operation,
+        approval: crate::package::CheckpointApproval,
+        remaining: Duration,
+        cancel: Cancellation,
+    ) -> wire::Outcome {
+        adapter::checkpoint(self, operation, approval, remaining, cancel)
     }
     fn terminal(
         &self,
@@ -676,9 +694,23 @@ fn is_observation(operation: &wire::Operation) -> bool {
             | wire::Operation::List
             | wire::Operation::Measurements { .. }
             | wire::Operation::InspectGrowth { .. }
+            | wire::Operation::InspectCapture { .. }
+            | wire::Operation::InspectCaptureResolution { .. }
             | wire::Operation::InspectOciCreation { .. }
             | wire::Operation::InspectRegistryCreation { .. }
+            | wire::Operation::InspectCheckpointCreation { .. }
+            | wire::Operation::CheckpointPreflight { .. }
     )
+}
+fn is_control(operation: &wire::Operation) -> bool {
+    is_observation(operation)
+        || matches!(
+            operation,
+            wire::Operation::ResolveCapture { quiesced: true, .. }
+                | wire::Operation::CleanupCaptureStaging { quiesced: true, .. }
+                | wire::Operation::QualifyAbortedCaptureSource { quiesced: true, .. }
+                | wire::Operation::AbortCaptureStaging { quiesced: true, .. }
+        )
 }
 fn tick(shared: &Shared, controls: &Sender<Cancellation>) -> BridgeResult<()> {
     let now = Instant::now();
@@ -812,6 +844,19 @@ fn admit_request(
     } else {
         rejection
     };
+    let rejection = if let Some((source, resources)) = operation.checkpoint_source() {
+        if config.approved_checkpoints.as_ref().is_some_and(|catalog| {
+            catalog
+                .iter()
+                .any(|approval| approval.matches(source, resources))
+        }) {
+            rejection
+        } else {
+            Some(wire::SafeCode::Unsupported)
+        }
+    } else {
+        rejection
+    };
     let rejection = if let Some(identity) = operation.registry_identity() {
         let source = identity.request();
         if config
@@ -846,7 +891,7 @@ fn admit_request(
     };
     let rejection = if state.unavailable
         && !(state.session.protocol_major() == wire::PARITY_PROTOCOL_MAJOR
-            && is_observation(&operation))
+            && is_control(&operation))
     {
         Some(wire::SafeCode::State)
     } else {
@@ -861,14 +906,14 @@ fn admit_request(
     )
     .or_else(|| {
         // A full work queue cannot consume the two request identities needed
-        // to reach the independently scheduled observation lane. Cancellation
+        // to reach the independently scheduled observation/resolution lane. Cancellation
         // and credit bypass both queues in the reader, as before.
         let work_requests = state
             .handles
             .values()
-            .filter(|h| !is_observation(&h.operation))
+            .filter(|h| !is_control(&h.operation))
             .count();
-        (!is_observation(&operation)
+        (!is_control(&operation)
             && work_requests >= wire::MAX_IN_FLIGHT - state.reserved_observations)
             .then_some(wire::SafeCode::Overload)
     });
@@ -956,7 +1001,7 @@ fn handle_input(
                 }
                 queue_upload(shared, jobs, id)?;
             } else {
-                let queue = if is_observation(&operation) {
+                let queue = if is_control(&operation) {
                     observations
                 } else {
                     jobs
@@ -1068,7 +1113,7 @@ fn spawn_worker(
                 };
                 let unavailable = (state.unavailable || !native.available())
                     && !(state.session.protocol_major() == wire::PARITY_PROTOCOL_MAJOR
-                        && is_observation(&work.operation));
+                        && is_control(&work.operation));
                 let should_run = if state.closing || unavailable {
                     false
                 } else {
@@ -1111,6 +1156,29 @@ fn spawn_worker(
             };
             let result =
                 std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| match work.operation {
+                    operation @ (wire::Operation::QualifyCheckpointCreation { .. }
+                    | wire::Operation::CreateCheckpoint { .. }
+                    | wire::Operation::InspectCheckpointCreation { .. }) => {
+                        let approval =
+                            operation
+                                .checkpoint_source()
+                                .and_then(|(source, resources)| {
+                                    config.approved_checkpoints.as_ref().and_then(|catalog| {
+                                        catalog
+                                            .iter()
+                                            .find(|approval| approval.matches(source, resources))
+                                    })
+                                });
+                        match approval {
+                            Some(approval) => native.checkpoint(
+                                operation,
+                                approval.clone(),
+                                remaining,
+                                work.cancel.clone(),
+                            ),
+                            None => before(wire::SafeCode::Unsupported),
+                        }
+                    }
                     wire::Operation::TerminalOpen { receipt, terminal } => native.terminal(
                         receipt,
                         terminal,
@@ -1563,6 +1631,26 @@ mod tests {
             self.calls.fetch_add(1, Ordering::AcqRel);
             before(wire::SafeCode::Native)
         }
+        fn checkpoint(
+            &self,
+            operation: wire::Operation,
+            approval: crate::package::CheckpointApproval,
+            _remaining: Duration,
+            _cancel: Cancellation,
+        ) -> wire::Outcome {
+            let (source, resources) = operation.checkpoint_source().unwrap();
+            assert!(approval.matches(source, resources));
+            self.calls.fetch_add(1, Ordering::AcqRel);
+            match operation {
+                wire::Operation::QualifyCheckpointCreation { .. } => wire::Outcome::Qualified,
+                wire::Operation::InspectCheckpointCreation { .. } => {
+                    wire::Outcome::CreationPresence {
+                        presence: wire::CreationPresence::Unverified,
+                    }
+                }
+                _ => before(wire::SafeCode::Native),
+            }
+        }
         fn prepare_artifact(
             &self,
             approval: crate::package::RegistryApproval,
@@ -1715,6 +1803,94 @@ mod tests {
         ) -> wire::Outcome {
             self.calls.fetch_add(1, Ordering::AcqRel);
             match operation {
+                wire::Operation::QualifyAbortedCaptureSource {
+                    receipt,
+                    operation_id,
+                    request,
+                    quiesced: true,
+                } => {
+                    let proofs: Vec<wire::CaptureAbortSourceQualification> =
+                        serde_json::from_str(include_str!(
+                            "../../smolbox-protocol/fixtures/capture-abort-sources-v1.json"
+                        ))
+                        .unwrap();
+                    let Some(proof) = proofs
+                        .into_iter()
+                        .find(|proof| proof.matches(&receipt, &operation_id, &request).is_ok())
+                    else {
+                        return wire::Outcome::Error {
+                            code: wire::SafeCode::Ownership,
+                            dispatch: wire::Dispatch::NotDispatched,
+                        };
+                    };
+                    wire::Outcome::AbortedCaptureSourceQualified {
+                        qualification: Box::new(proof),
+                    }
+                }
+                wire::Operation::AbortCaptureStaging {
+                    receipt,
+                    operation_id,
+                    request,
+                    quiesced: true,
+                } => wire::Outcome::CaptureStagingAborted {
+                    cleanup: Box::new(wire::CaptureStagingCleanupReceipt {
+                        schema: 1,
+                        previous: receipt,
+                        operation_id,
+                        request,
+                        stage_sha256: "d".repeat(64),
+                    }),
+                },
+                wire::Operation::CleanupCaptureStaging {
+                    receipt,
+                    operation_id,
+                    request,
+                    quiesced: true,
+                } => wire::Outcome::CaptureStagingCleaned {
+                    cleanup: Box::new(wire::CaptureStagingCleanupReceipt {
+                        schema: 1,
+                        previous: receipt,
+                        operation_id,
+                        request,
+                        stage_sha256: "d".repeat(64),
+                    }),
+                },
+                wire::Operation::ResolveCapture {
+                    receipt,
+                    operation_id,
+                    request,
+                    quiesced: true,
+                } => {
+                    let proofs: Vec<wire::CaptureResolutionTransition> = serde_json::from_str(
+                        include_str!("../../smolbox-protocol/fixtures/capture-resolutions-v1.json"),
+                    )
+                    .unwrap();
+                    match proofs
+                        .into_iter()
+                        .find(|proof| proof.matches(&receipt, &operation_id, &request).is_ok())
+                    {
+                        Some(proof) => wire::Outcome::CaptureResolved {
+                            transition: Box::new(proof),
+                        },
+                        None => before(wire::SafeCode::Ownership),
+                    }
+                }
+                wire::Operation::InspectCaptureResolution {
+                    receipt,
+                    operation_id,
+                    request,
+                } => {
+                    let proofs: Vec<wire::CaptureResolutionTransition> = serde_json::from_str(
+                        include_str!("../../smolbox-protocol/fixtures/capture-resolutions-v1.json"),
+                    )
+                    .unwrap();
+                    let proof = proofs
+                        .into_iter()
+                        .find(|proof| proof.matches(&receipt, &operation_id, &request).is_ok());
+                    wire::Outcome::CaptureResolutionPresence {
+                        transition: proof.map(Box::new),
+                    }
+                }
                 wire::Operation::QualifyOciCreation { .. } => wire::Outcome::Qualified,
                 wire::Operation::PullImage { source, .. } => wire::Outcome::Pulled {
                     image: wire::ImageObservation {
@@ -2321,6 +2497,28 @@ mod tests {
         Receiver<()>,
         std::thread::JoinHandle<BridgeResult<()>>,
     ) {
+        start_with_complete_catalogs(
+            approved,
+            approved_oci_sources,
+            approved_registry_sources,
+            approved_volume_policy,
+            approved_artifacts,
+            None,
+        )
+    }
+    fn start_with_complete_catalogs(
+        approved: wire::Hello,
+        approved_oci_sources: Option<Vec<wire::OciSource>>,
+        approved_registry_sources: Option<Vec<crate::package::RegistryApproval>>,
+        approved_volume_policy: Option<smolbox_engine::LocalVolumePolicy>,
+        approved_artifacts: Vec<wire::Artifact>,
+        approved_checkpoints: Option<Vec<crate::package::CheckpointApproval>>,
+    ) -> (
+        UnixStream,
+        Arc<Fake>,
+        Receiver<()>,
+        std::thread::JoinHandle<BridgeResult<()>>,
+    ) {
         let (mut client, server) = UnixStream::pair().unwrap();
         client
             .set_read_timeout(Some(Duration::from_secs(3)))
@@ -2348,6 +2546,7 @@ mod tests {
             approved_oci_sources,
             approved_registry_sources,
             approved_volume_policy,
+            approved_checkpoints,
         };
         let declared = approved.clone();
         let thread = std::thread::spawn(move || {
@@ -2624,6 +2823,127 @@ mod tests {
             assert_eq!(
                 fake.calls.load(Ordering::Acquire),
                 if root == "/foreign" { 2 } else { 5 }
+            );
+            shutdown(client, thread);
+        }
+    }
+
+    #[test]
+    fn checkpoint_catalog_and_feature_reject_before_native_dispatch() {
+        let source = wire::CheckpointIdentity {
+            kind: "checkpoint".into(),
+            id: "idle-v1".into(),
+            sha256: "a".repeat(64),
+            architecture: "aarch64".into(),
+        };
+        let resources = wire::Resources {
+            cpus: 1,
+            memory_mib: 256,
+            storage_gib: 1,
+            overlay_gib: 1,
+        };
+        let approval = crate::package::CheckpointApproval {
+            source: source.clone(),
+            path: "/operator/idle.smolcheckpoint".into(),
+            max_bytes: 1024,
+            sdk_version: "1.22.0".into(),
+            host_platform: "darwin/arm64".into(),
+            resources: resources.clone(),
+        };
+        for (enabled, catalog, exact) in [
+            (false, Some(vec![approval.clone()]), true),
+            (true, None, true),
+            (true, Some(vec![approval.clone()]), false),
+            (true, Some(vec![approval]), true),
+        ] {
+            let dispatch = enabled && catalog.is_some() && exact;
+            let mut h = terminal_hello();
+            if enabled {
+                h.sdk
+                    .as_mut()
+                    .unwrap()
+                    .feature_versions
+                    .insert("checkpoints".into(), 1);
+            }
+            let (mut client, fake, _, thread) =
+                start_with_complete_catalogs(h, None, None, None, vec![], catalog);
+            let mut requested = resources.clone();
+            if !exact {
+                requested.memory_mib = 512;
+            }
+            let create = wire::CheckpointCreate {
+                checkpointable: None,
+                name: "new-checkpoint".into(),
+                owner_token: "b".repeat(64),
+                incarnation: "c".repeat(32),
+                source: source.clone(),
+                resources: requested.clone(),
+                labels: Default::default(),
+            };
+            for (i, operation) in [
+                wire::Operation::QualifyCheckpointCreation {
+                    checkpointable: None,
+                    source: source.clone(),
+                    resources: requested,
+                },
+                wire::Operation::CreateCheckpoint {
+                    create: create.clone(),
+                },
+                wire::Operation::InspectCheckpointCreation { create },
+            ]
+            .into_iter()
+            .enumerate()
+            {
+                send(&mut client, request(i as u64 + 1, operation));
+                if dispatch {
+                    assert!(matches!(
+                        receive(&mut client),
+                        wire::ServerMessage::Accepted { .. }
+                    ));
+                    let outcome = receive(&mut client);
+                    assert!(matches!(
+                        (i, outcome),
+                        (
+                            0,
+                            wire::ServerMessage::Terminal {
+                                outcome: wire::Outcome::Qualified,
+                                ..
+                            },
+                        ) | (
+                            1,
+                            wire::ServerMessage::Terminal {
+                                outcome: wire::Outcome::Error {
+                                    code: wire::SafeCode::Native,
+                                    dispatch: wire::Dispatch::NotDispatched,
+                                },
+                                ..
+                            },
+                        ) | (
+                            2,
+                            wire::ServerMessage::Terminal {
+                                outcome: wire::Outcome::CreationPresence {
+                                    presence: wire::CreationPresence::Unverified,
+                                },
+                                ..
+                            },
+                        )
+                    ));
+                } else {
+                    assert!(matches!(
+                        receive(&mut client),
+                        wire::ServerMessage::Terminal {
+                            outcome: wire::Outcome::Error {
+                                code: wire::SafeCode::Unsupported,
+                                dispatch: wire::Dispatch::NotDispatched
+                            },
+                            ..
+                        }
+                    ));
+                }
+            }
+            assert_eq!(
+                fake.calls.load(Ordering::Acquire),
+                if dispatch { 3 } else { 0 }
             );
             shutdown(client, thread);
         }
@@ -2979,6 +3299,7 @@ mod tests {
             token_realm: Some("https://auth.example/token".into()),
         };
         let create = wire::RegistryCreate {
+            checkpointable: None,
             name: "fresh".into(),
             owner_token: "c".repeat(64),
             incarnation: "d".repeat(32),
@@ -3123,6 +3444,259 @@ mod tests {
             );
             assert!(thread.join().unwrap().is_ok());
         }
+    }
+
+    #[test]
+    fn capture_resolution_control_dispatch_survives_busy_workers_and_modeled_quarantine() {
+        // Pure native peer model: no SDK, VM, process loss or forced termination.
+        let proofs: Vec<wire::CaptureResolutionTransition> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/capture-resolutions-v1.json"
+        ))
+        .unwrap();
+        let proof = &proofs[0];
+        let mut sdk = crate::package::sdk_identity()
+            .unwrap_or_else(|_| panic!("invalid compiled SDK policy"));
+        sdk.feature_versions.insert("checkpoints".into(), 1);
+        let mut approved = hello();
+        approved.major = wire::PARITY_PROTOCOL_MAJOR;
+        approved.minor = wire::PARITY_PROTOCOL_MINOR;
+        approved.package.engine_version = env!("CARGO_PKG_VERSION").into();
+        approved.package.smolvm_revision = sdk.source_revision.clone();
+        approved.domain.target_id = proof.previous.target_id.clone();
+        approved.domain.generation = proof.previous.domain_generation.clone();
+        approved.limits = wire::Limits::for_sdk(&sdk);
+        approved.sdk = Some(Box::new(sdk));
+        approved.capabilities.extend([
+            wire::Capability::Health,
+            wire::Capability::Readiness,
+            wire::Capability::Inspect,
+        ]);
+        let (mut client, fake, started, thread) = start_with(approved);
+        let command = |name: &str| {
+            let mut operation = exec(name);
+            if let wire::Operation::Exec { receipt, .. } = &mut operation {
+                *receipt = proof.previous.clone();
+            }
+            operation
+        };
+        for id in 1..=WORKERS as u64 {
+            let mut message = request(id, command("hold"));
+            if let wire::ClientMessage::Request { budget_ms, .. } = &mut message {
+                *budget_ms = 5000;
+            }
+            send(&mut client, message);
+            assert!(matches!(
+                receive(&mut client),
+                wire::ServerMessage::Accepted { .. }
+            ));
+            started.recv_timeout(Duration::from_secs(1)).unwrap();
+        }
+        let resolution = wire::Operation::ResolveCapture {
+            receipt: proof.previous.clone(),
+            operation_id: proof.change.intent.operation_id.clone(),
+            request: proof.change.intent.request.clone(),
+            quiesced: true,
+        };
+        assert!(!is_observation(&resolution));
+        assert!(is_control(&resolution));
+        send(&mut client, request(5, resolution.clone()));
+        let response = receive(&mut client);
+        assert!(
+            matches!(response, wire::ServerMessage::Accepted { id: 5, .. }),
+            "{}",
+            serde_json::to_string(&response).unwrap()
+        );
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Terminal {
+                id: 5,
+                outcome: wire::Outcome::CaptureResolved { .. },
+                ..
+            }
+        ));
+        let cleanup = wire::Operation::CleanupCaptureStaging {
+            receipt: proof.previous.clone(),
+            operation_id: proof.change.intent.operation_id.clone(),
+            request: proof.change.intent.request.clone(),
+            quiesced: true,
+        };
+        send(&mut client, request(6, cleanup));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Accepted { id: 6, .. }
+        ));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Terminal {
+                id: 6,
+                outcome: wire::Outcome::CaptureStagingCleaned { .. },
+                ..
+            }
+        ));
+        let abort = wire::Operation::AbortCaptureStaging {
+            receipt: proof.previous.clone(),
+            operation_id: proof.change.intent.operation_id.clone(),
+            request: proof.change.intent.request.clone(),
+            quiesced: true,
+        };
+        assert!(!is_observation(&abort));
+        assert!(is_control(&abort));
+        send(&mut client, request(7, abort.clone()));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Accepted { id: 7, .. }
+        ));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Terminal {
+                id: 7,
+                outcome: wire::Outcome::CaptureStagingAborted { .. },
+                ..
+            }
+        ));
+        let qualification = wire::Operation::QualifyAbortedCaptureSource {
+            receipt: proof.previous.clone(),
+            operation_id: proof.change.intent.operation_id.clone(),
+            request: proof.change.intent.request.clone(),
+            quiesced: true,
+        };
+        assert!(!is_observation(&qualification));
+        assert!(is_control(&qualification));
+        send(&mut client, request(8, qualification.clone()));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Accepted { id: 8, .. }
+        ));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Terminal {
+                id: 8,
+                outcome: wire::Outcome::AbortedCaptureSourceQualified { .. },
+                ..
+            }
+        ));
+        for id in 1..=WORKERS as u64 {
+            send(
+                &mut client,
+                wire::ClientMessage::Cancel {
+                    epoch: hello().epoch,
+                    id,
+                },
+            );
+        }
+        for _ in 0..WORKERS {
+            assert!(matches!(
+                receive(&mut client),
+                wire::ServerMessage::Terminal {
+                    outcome: wire::Outcome::Command {
+                        completion: wire::Completion::Cancelled,
+                        ..
+                    },
+                    ..
+                }
+            ));
+        }
+        send(&mut client, request(9, command("unavailable")));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Accepted { id: 9, .. }
+        ));
+        unavailable_and_terminal_id(&mut client, 9);
+        send(&mut client, request(10, resolution));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Accepted { id: 10, .. }
+        ));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Terminal {
+                id: 10,
+                outcome: wire::Outcome::CaptureResolved { .. },
+                ..
+            }
+        ));
+        let lookup = wire::Operation::InspectCaptureResolution {
+            receipt: proof.previous.clone(),
+            operation_id: proof.change.intent.operation_id.clone(),
+            request: proof.change.intent.request.clone(),
+        };
+        send(&mut client, request(11, lookup));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Accepted { id: 11, .. }
+        ));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Terminal {
+                id: 11,
+                outcome: wire::Outcome::CaptureResolutionPresence {
+                    transition: Some(_)
+                },
+                ..
+            }
+        ));
+        let cleanup = wire::Operation::CleanupCaptureStaging {
+            receipt: proof.previous.clone(),
+            operation_id: proof.change.intent.operation_id.clone(),
+            request: proof.change.intent.request.clone(),
+            quiesced: true,
+        };
+        assert!(!is_observation(&cleanup));
+        assert!(is_control(&cleanup));
+        send(&mut client, request(12, cleanup));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Accepted { id: 12, .. }
+        ));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Terminal {
+                id: 12,
+                outcome: wire::Outcome::CaptureStagingCleaned { .. },
+                ..
+            }
+        ));
+        send(&mut client, request(13, abort));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Accepted { id: 13, .. }
+        ));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Terminal {
+                id: 13,
+                outcome: wire::Outcome::CaptureStagingAborted { .. },
+                ..
+            }
+        ));
+        send(&mut client, request(14, qualification));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Accepted { id: 14, .. }
+        ));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Terminal {
+                id: 14,
+                outcome: wire::Outcome::AbortedCaptureSourceQualified { .. },
+                ..
+            }
+        ));
+        send(&mut client, request(15, command("hold")));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Terminal {
+                id: 15,
+                sequence: 0,
+                outcome: wire::Outcome::Error {
+                    code: wire::SafeCode::State,
+                    dispatch: wire::Dispatch::NotDispatched
+                },
+                ..
+            }
+        ));
+        assert!(!fake.available());
+        shutdown(client, thread);
     }
 
     #[test]
@@ -3435,6 +4009,9 @@ mod tests {
         shutdown(client, thread);
     }
     fn unavailable_and_terminal(client: &mut UnixStream) {
+        unavailable_and_terminal_id(client, 1);
+    }
+    fn unavailable_and_terminal_id(client: &mut UnixStream, expected_id: u64) {
         let frames = [receive(client), receive(client)];
         assert_eq!(
             frames
@@ -3450,14 +4027,14 @@ mod tests {
                 .filter(|frame| matches!(
                     frame,
                     wire::ServerMessage::Terminal {
-                        id: 1,
+                        id,
                         outcome: wire::Outcome::Command {
                             dispatch: wire::Dispatch::MayHaveDispatched,
                             observed_exit: None,
                             ..
                         },
                         ..
-                    }
+                    } if *id == expected_id
                 ))
                 .count(),
             1
@@ -3810,6 +4387,7 @@ mod tests {
             approved_oci_sources: None,
             approved_registry_sources: None,
             approved_volume_policy: None,
+            approved_checkpoints: None,
         };
         spawn_reader(shared.clone(), queued, server, controls, config);
         send(&mut client, wire::ClientMessage::Approve { hello: hello() });

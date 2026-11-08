@@ -467,7 +467,7 @@ fn record_references(owned: &Path, references: &References) -> Result<()> {
 }
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
     use super::*;
     #[test]
     fn created_backing_is_private_writable_without_changing_immutable_template() {
@@ -507,7 +507,7 @@ mod tests {
         std::fs::write(&empty, b"").unwrap();
         assert!(prepare_created_disk(&empty).is_err());
     }
-    struct Fixture {
+    pub(crate) struct Fixture {
         _temporary: tempfile::TempDir,
         approved: ApprovedTemplates,
         account: PathBuf,
@@ -516,7 +516,7 @@ mod tests {
         domain: DomainBinding,
     }
     impl Fixture {
-        fn new() -> Self {
+        pub(crate) fn new() -> Self {
             let temporary = tempfile::tempdir().unwrap();
             let root = temporary.path().canonicalize().unwrap();
             let package = root.join("package");
@@ -565,7 +565,7 @@ mod tests {
                 _temporary: temporary,
             }
         }
-        fn prepare(&self) -> Result<PreparedTemplates> {
+        pub(crate) fn prepare(&self) -> Result<PreparedTemplates> {
             self.approved.prepare_at(
                 &self.domain,
                 &self.owned,

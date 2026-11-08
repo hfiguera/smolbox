@@ -2,6 +2,37 @@ defmodule SmolBox.CheckpointArtifactTest do
   use ExUnit.Case, async: true
   alias SmolBox.{CheckpointArtifact, CheckpointFixture, Profile}
 
+  test "native metadata binds the SDK version independently of engine health version" do
+    path =
+      Path.join(System.tmp_dir!(), "capture-native-version-#{System.unique_integer([:positive])}")
+
+    on_exit(fn -> File.rm(path) end)
+    {:ok, profile} = Profile.new("native")
+
+    bytes =
+      CheckpointFixture.bytes(Map.put(CheckpointFixture.manifest(), "smolvm_version", "1.22.0"))
+
+    File.write!(path, bytes)
+
+    config =
+      struct(SmolBox.Embedded.Config,
+        package_identity: %{
+          "engine_version" => "0.2.0",
+          "smolvm_revision" => "9f446ae00219148ca4a703914f44a8e2fab11655"
+        }
+      )
+
+    worker = %SmolBox.Runtime.Target{
+      kind: :embedded,
+      native_config: config,
+      platform: :linux,
+      architecture: "x86_64",
+      runtime_version: "0.2.0"
+    }
+
+    assert :ok = CheckpointArtifact.verify(path, %{size_bytes: byte_size(bytes)}, profile, worker)
+  end
+
   test "a newer worker cannot silently relabel an older captured checkpoint" do
     path = Path.join(System.tmp_dir!(), "capture-version-#{System.unique_integer([:positive])}")
     on_exit(fn -> File.rm(path) end)

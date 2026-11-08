@@ -42,6 +42,38 @@ pub struct CreateRequest {
     pub labels: BTreeMap<String, String>,
 }
 
+#[derive(Clone, Copy, Default)]
+struct PackRecordPolicy<'a> {
+    features: Option<&'a crate::CreationFeatures>,
+    checkpointable: bool,
+}
+impl<'a> From<Option<&'a crate::CreationFeatures>> for PackRecordPolicy<'a> {
+    fn from(features: Option<&'a crate::CreationFeatures>) -> Self {
+        Self {
+            features,
+            checkpointable: false,
+        }
+    }
+}
+impl PackRecordPolicy<'_> {
+    fn qualify(&self, manifest: &smolvm_pack::format::PackManifest) -> Result<()> {
+        if let Some(features) = self.features {
+            features.qualify(manifest)?;
+        }
+        if self.checkpointable {
+            crate::checkpoint_capture::validate_pack(manifest)?;
+            if self.features.is_some_and(|features| {
+                features.network.enabled
+                    || !features.ports.is_empty()
+                    || features.workload.is_some()
+            }) {
+                return Err(Error::before(ErrorCode::Unsupported));
+            }
+        }
+        Ok(())
+    }
+}
+
 /// Fresh registry creation consumes a qualified pack; it cannot select a host
 /// path or promote cache/inventory into existing-machine ownership.
 pub struct CreateRegistryRequest {
@@ -92,6 +124,17 @@ pub struct RegistryCreationIntent {
 }
 
 /// An intent can prove absence, never recover a lost creation receipt.
+#[derive(Clone)]
+pub struct CheckpointCreationIntent {
+    pub name: String,
+    pub owner_token: String,
+    pub incarnation: String,
+    pub source_sha256: String,
+    pub resources: Resources,
+    pub labels: BTreeMap<String, String>,
+}
+
+/// An intent can prove absence, never recover a lost creation receipt.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CreationPresence {
     Absent,
@@ -106,17 +149,32 @@ pub struct Engine {
     binding: DomainBinding,
     gates: Mutex<HashMap<String, Weak<MachineGate>>>,
     owned_handles: Mutex<BTreeMap<String, CreationReceipt>>,
+    // Public SDK pid() can fall back to inventory. Only a successful owned
+    // forkable start may enroll this independent original-live-source witness.
+    capture_sources: Mutex<BTreeMap<String, (i32, u64)>>,
     // Keep the actual SDK manager alive; dropping it would stop its VMM.
     pub(crate) owned_oci: Mutex<BTreeMap<String, Arc<Mutex<AgentManager>>>>,
     pub(crate) domain: Arc<DomainGuard>,
     pub(crate) transfers: Option<TransferSupervisor>,
     pub(crate) jobs: crate::jobs::JobPool,
+    pub(crate) capture_staging: Arc<crate::capture_staging::Staging>,
     templates: Option<crate::assets::PreparedTemplates>,
     host: Option<crate::HostContext>,
     boot: Option<(crate::BootLauncher, crate::epoch::ActorEpoch)>,
 }
 
 impl Engine {
+    pub(crate) fn capture_assets(&self) -> Result<(PathBuf, PathBuf)> {
+        let host = self
+            .host
+            .as_ref()
+            .ok_or(Error::before(ErrorCode::Unsupported))?;
+        Ok((
+            host.executables.library_directory.clone(),
+            smolvm::agent::AgentManager::resolve_rootfs_path(None, "capture source assets")
+                .map_err(|_| Error::before(ErrorCode::Unsupported))?,
+        ))
+    }
     /// Cache-independent pre-reservation feasibility. Downloaded pack contents
     /// are qualified separately during create_prepared, never inferred here.
     pub fn qualify_registry_intent(
@@ -150,7 +208,7 @@ impl Engine {
         deadline: std::time::Instant,
         cancel: &Cancellation,
     ) -> Result<CreationReceipt> {
-        self.create_registry_cached_mode(intent, (size, policy), None, deadline, cancel)
+        self.create_registry_cached_mode(intent, (size, policy, false), None, deadline, cancel)
     }
 
     pub fn create_registry_cached_with_mount_selection(
@@ -161,13 +219,30 @@ impl Engine {
         deadline: std::time::Instant,
         cancel: &Cancellation,
     ) -> Result<CreationReceipt> {
-        self.create_registry_cached_mode(intent, cache, Some(mounts), deadline, cancel)
+        self.create_registry_cached_mode(
+            intent,
+            (cache.0, cache.1, false),
+            Some(mounts),
+            deadline,
+            cancel,
+        )
+    }
+
+    pub fn create_registry_checkpointable_cached(
+        &self,
+        intent: RegistryCreationIntent,
+        size: u64,
+        policy: crate::RegistryCachePolicy,
+        deadline: std::time::Instant,
+        cancel: &Cancellation,
+    ) -> Result<CreationReceipt> {
+        self.create_registry_cached_mode(intent, (size, policy, true), None, deadline, cancel)
     }
 
     fn create_registry_cached_mode(
         &self,
         intent: RegistryCreationIntent,
-        cache: (u64, crate::RegistryCachePolicy),
+        cache: (u64, crate::RegistryCachePolicy, bool),
         mounts: Option<crate::VolumeMountSelection>,
         deadline: std::time::Instant,
         cancel: &Cancellation,
@@ -175,7 +250,7 @@ impl Engine {
         if cancel.is_cancelled() || std::time::Instant::now() >= deadline {
             return Err(Error::before(ErrorCode::State));
         }
-        let (size, policy) = cache;
+        let (size, policy, checkpointable) = cache;
         if let Some(mounts) = &mounts {
             mounts.validate(self.binding())?;
         }
@@ -214,6 +289,9 @@ impl Engine {
                 )?;
                 self.create_registry_with_volume_mounts(request, mounts, deadline, cancel)
             }
+            None if checkpointable => {
+                self.create_registry_checkpointable_prepared(request, deadline, cancel)
+            }
             None => self.create_registry_prepared(request, deadline, cancel),
         }
     }
@@ -237,6 +315,44 @@ impl Engine {
         intent.features.validate()?;
         if intent.source.platform != crate::oci::native_oci_platform() {
             return Err(Error::before(ErrorCode::Unsupported));
+        }
+        let _lease = self.jobs.acquire(crate::jobs::Demand::observation())?;
+        let gate = self.observation_gate(&intent.name)?;
+        let _guard = gate
+            .try_lock()
+            .map_err(|_| Error::before(ErrorCode::Conflict))?;
+        self.verify_database_identity()?;
+        let absent = crate::sdk_compat::observe_absence(
+            &self.binding.database,
+            self.database_identity,
+            &intent.name,
+            || self.creation_material_absent(&intent.name),
+        )?;
+        self.verify_database_identity()?;
+        budget.check()?;
+        Ok(if absent {
+            CreationPresence::Absent
+        } else {
+            CreationPresence::Unverified
+        })
+    }
+    /// Read-only checkpoint absence. No source read, installation, receipt
+    /// recovery or adoption; release still requires caller-proven quiescence.
+    pub fn inspect_checkpoint_creation(
+        &self,
+        intent: &CheckpointCreationIntent,
+        budget: &crate::ReadBudget,
+    ) -> Result<CreationPresence> {
+        budget.check()?;
+        validate_creation_identity(
+            &intent.name,
+            &intent.owner_token,
+            &intent.incarnation,
+            intent.resources,
+            &intent.labels,
+        )?;
+        if !valid_hex(&intent.source_sha256, 64) {
+            return Err(Error::before(ErrorCode::Validation));
         }
         let _lease = self.jobs.acquire(crate::jobs::Demand::observation())?;
         let gate = self.observation_gate(&intent.name)?;
@@ -403,6 +519,10 @@ impl Engine {
         let domain = DomainGuard::acquire(&binding, allow_initialize)?;
         crate::epoch::fence_previous(&domain.directory, &binding)?;
         let (db, database_identity) = open_database(&binding.database, allow_initialize)?;
+        let domain = Arc::new(domain);
+        let jobs = crate::jobs::JobPool::default();
+        let capture_staging =
+            crate::capture_staging::Staging::open(&binding, domain.clone(), jobs.clone())?;
         Ok(Self {
             opened_at: std::time::Instant::now(),
             runtime: EmbeddedRuntime::with_db(db.clone()),
@@ -411,10 +531,12 @@ impl Engine {
             binding,
             gates: Mutex::new(HashMap::new()),
             owned_handles: Mutex::new(BTreeMap::new()),
+            capture_sources: Mutex::new(BTreeMap::new()),
             owned_oci: Mutex::new(BTreeMap::new()),
-            domain: Arc::new(domain),
+            domain,
             transfers: None,
-            jobs: crate::jobs::JobPool::default(),
+            jobs,
+            capture_staging,
             templates: None,
             host: None,
             boot: None,
@@ -580,25 +702,70 @@ impl Engine {
         user: Option<&str>,
         features: Option<&crate::CreationFeatures>,
     ) -> Result<()> {
-        if let Some(features) = features {
+        self.qualify_creation_policy(artifact, resources, user, features.into())
+    }
+
+    pub fn qualify_checkpointable_creation(
+        &self,
+        artifact: &ApprovedArtifact,
+        resources: Resources,
+        user: Option<&str>,
+    ) -> Result<()> {
+        self.qualify_creation_policy(
+            artifact,
+            resources,
+            user,
+            PackRecordPolicy {
+                features: None,
+                checkpointable: true,
+            },
+        )
+    }
+
+    fn qualify_creation_policy(
+        &self,
+        artifact: &ApprovedArtifact,
+        resources: Resources,
+        user: Option<&str>,
+        policy: PackRecordPolicy<'_>,
+    ) -> Result<()> {
+        if let Some(features) = policy.features {
             features.validate()?;
         }
         self.verify_templates()?;
         let prepared = artifact.prepare(&self.domain.directory.join("artifacts"), resources)?;
         validate_guest_user(user, prepared.manifest.mode == PackMode::Container)?;
-        if let Some(features) = features {
-            features.qualify(&prepared.manifest)?;
-        }
+        policy.qualify(&prepared.manifest)?;
         Ok(())
     }
 
     pub fn create(&self, request: CreateRequest) -> Result<CreationReceipt> {
-        self.create_mode(request, false, None, None, None)
+        self.create_mode(request, false, PackRecordPolicy::default(), None, None)
     }
 
     /// Fresh protocol-2 authority. An existing v1 receipt is never promoted.
     pub fn create_versioned(&self, request: CreateRequest) -> Result<CreationReceipt> {
-        self.create_mode(request, true, None, None, None)
+        self.create_mode(request, true, PackRecordPolicy::default(), None, None)
+    }
+
+    /// Opt-in is part of fresh material before receipt publication. Never
+    /// promote an existing non-forkable record from inventory or start output.
+    pub fn create_checkpointable(
+        &self,
+        request: CreateRequest,
+        deadline: std::time::Instant,
+        cancel: &Cancellation,
+    ) -> Result<CreationReceipt> {
+        self.create_mode(
+            request,
+            true,
+            PackRecordPolicy {
+                features: None,
+                checkpointable: true,
+            },
+            None,
+            Some((deadline, cancel)),
+        )
     }
 
     pub fn create_with_features(
@@ -606,7 +773,7 @@ impl Engine {
         request: CreateRequest,
         features: crate::CreationFeatures,
     ) -> Result<CreationReceipt> {
-        self.create_mode(request, true, Some(&features), None, None)
+        self.create_mode(request, true, Some(&features).into(), None, None)
     }
 
     /// Mounted fresh local-pack creation. Retains qualified volume gates and
@@ -622,7 +789,7 @@ impl Engine {
         self.create_mode(
             request,
             true,
-            Some(&features),
+            Some(&features).into(),
             Some(mounts),
             Some((deadline, cancel)),
         )
@@ -632,7 +799,7 @@ impl Engine {
         &self,
         request: CreateRequest,
         versioned: bool,
-        features: Option<&crate::CreationFeatures>,
+        policy: PackRecordPolicy<'_>,
         mut mounts: Option<crate::QualifiedVolumeMounts>,
         budget: Option<(std::time::Instant, &Cancellation)>,
     ) -> Result<CreationReceipt> {
@@ -657,7 +824,7 @@ impl Engine {
             let (deadline, cancel) = budget.ok_or(Error::before(ErrorCode::Ownership))?;
             self.promote_creation_mounts(mounts, deadline, cancel)?;
         }
-        if let Some(features) = features {
+        if let Some(features) = policy.features {
             features.validate()?;
         }
         let gate = self.gate(&request.name)?;
@@ -668,9 +835,7 @@ impl Engine {
         let prepared = request
             .artifact
             .prepare(&self.domain.directory.join("artifacts"), request.resources)?;
-        if let Some(features) = features {
-            features.qualify(&prepared.manifest)?;
-        }
+        policy.qualify(&prepared.manifest)?;
         check()?;
         if self
             .db
@@ -695,7 +860,7 @@ impl Engine {
         // From here on partial storage may exist. Errors are uncertain and
         // cannot authorize reservation release or a replayed create.
         let result = self
-            .create_reserved(&request, prepared, features, None, budget, mounts.as_ref())
+            .create_reserved(&request, prepared, policy, None, budget, mounts.as_ref())
             .and_then(|receipt| {
                 if versioned && receipt.material.is_none() {
                     crate::material::MaterialJournal::at(&self.vm_directory(&receipt.name))
@@ -737,7 +902,16 @@ impl Engine {
         deadline: std::time::Instant,
         cancel: &Cancellation,
     ) -> Result<CreationReceipt> {
-        self.create_registry_mode(request, None, deadline, cancel)
+        self.create_registry_mode(request, None, deadline, cancel, false)
+    }
+
+    pub fn create_registry_checkpointable_prepared(
+        &self,
+        request: CreateRegistryRequest,
+        deadline: std::time::Instant,
+        cancel: &Cancellation,
+    ) -> Result<CreationReceipt> {
+        self.create_registry_mode(request, None, deadline, cancel, true)
     }
 
     /// Prepared registry creation retains the same qualified mount authority and
@@ -749,7 +923,7 @@ impl Engine {
         deadline: std::time::Instant,
         cancel: &Cancellation,
     ) -> Result<CreationReceipt> {
-        self.create_registry_mode(request, Some(mounts), deadline, cancel)
+        self.create_registry_mode(request, Some(mounts), deadline, cancel, false)
     }
 
     fn create_registry_mode(
@@ -758,6 +932,7 @@ impl Engine {
         mut mounts: Option<crate::QualifiedVolumeMounts>,
         deadline: std::time::Instant,
         cancel: &Cancellation,
+        checkpointable: bool,
     ) -> Result<CreationReceipt> {
         let check = || {
             if cancel.is_cancelled() || std::time::Instant::now() >= deadline || !self.available() {
@@ -789,7 +964,11 @@ impl Engine {
         )?;
         artifact.source.validate()?;
         features.validate()?;
-        features.qualify(&artifact.prepared.manifest)?;
+        let policy = PackRecordPolicy {
+            features: Some(&features),
+            checkpointable,
+        };
+        policy.qualify(&artifact.prepared.manifest)?;
         if artifact.prepared.manifest.platform != artifact.source.platform {
             return Err(Error::before(ErrorCode::Validation));
         }
@@ -857,7 +1036,7 @@ impl Engine {
             let receipt = self.create_reserved(
                 &local,
                 artifact.prepared,
-                Some(&features),
+                policy,
                 Some(&artifact.source.reference),
                 Some((deadline, cancel)),
                 mounts.as_ref(),
@@ -1041,10 +1220,112 @@ impl Engine {
         })
     }
 
-    fn verify_database_identity(&self) -> Result<()> {
+    pub(crate) fn verify_database_identity(&self) -> Result<()> {
         self.domain.verify()?;
         if database_identity(&self.binding.database)? != self.database_identity {
             return Err(Error::before(ErrorCode::Ownership));
+        }
+        Ok(())
+    }
+
+    pub(crate) fn capture_source_authority(
+        &self,
+        receipt: &CreationReceipt,
+        pid: (i32, u64),
+        record: &VmRecord,
+    ) -> Result<crate::capture_resolution::SourceAuthority> {
+        let name = &receipt.name;
+        let owner = self
+            .owned_handles
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?
+            .get(name)
+            .map(|owned| owned == receipt);
+        let enrolled = self
+            .capture_sources
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?
+            .get(name)
+            .copied();
+        let owner = if record.state == smolvm::config::RecordState::Running {
+            owner.map(|owned| owned && enrolled == Some(pid))
+        } else if enrolled.is_some() {
+            Some(false)
+        } else {
+            owner
+        };
+        let excluded = self
+            .owned_oci
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?
+            .contains_key(name);
+        if let Some((_, actors)) = &self.boot {
+            if !actors.quiescent_for(name)? {
+                return Err(Error::before(ErrorCode::State));
+            }
+        }
+        if !self
+            .db
+            .dependent_clones(name)
+            .map_err(|_| Error::before(ErrorCode::Database))?
+            .is_empty()
+        {
+            return Err(Error::before(ErrorCode::State));
+        }
+        crate::capture_resolution::SourceAuthority::verify(
+            record,
+            pid,
+            crate::capture_resolution::SourceFacts {
+                owner,
+                runtime_pid: self.runtime.pid(name),
+                original_alive: smolvm::process::is_alive(pid.0),
+                observed_birth: smolvm::process::process_start_time(pid.0),
+                excluded,
+            },
+        )
+    }
+
+    pub(crate) fn promote_capture_handle(
+        &self,
+        previous: &CreationReceipt,
+        receipt: &CreationReceipt,
+    ) -> Result<()> {
+        let mut origin = previous.clone();
+        origin.material = None;
+        crate::material::check_origin(&origin, receipt)?;
+        receipt.validate(self.binding())?;
+        let mut handles = self
+            .owned_handles
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        if handles.get(&previous.name) != Some(previous) {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        handles.insert(receipt.name.clone(), receipt.clone());
+        Ok(())
+    }
+
+    pub(crate) fn recover_capture_handle(
+        &self,
+        transition: &crate::CaptureResolutionTransition,
+    ) -> Result<()> {
+        let original = self
+            .owned_handles
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?
+            .get(&transition.previous.name)
+            .is_some_and(|owned| owned == &transition.previous);
+        if original {
+            let record = self.record(&transition.receipt)?;
+            let authority = self.capture_source_authority(
+                &transition.previous,
+                transition.change.intent.source_pid,
+                &record,
+            )?;
+            if !authority.running() {
+                return Err(Error::before(ErrorCode::Ownership));
+            }
+            self.promote_capture_handle(&transition.previous, &transition.receipt)?;
         }
         Ok(())
     }
@@ -1092,7 +1373,7 @@ impl Engine {
         &self,
         request: &CreateRequest,
         prepared: crate::artifact::PreparedArtifact,
-        features: Option<&crate::CreationFeatures>,
+        policy: PackRecordPolicy<'_>,
         registry_reference: Option<&str>,
         budget: Option<(std::time::Instant, &Cancellation)>,
         mounts: Option<&crate::QualifiedVolumeMounts>,
@@ -1151,7 +1432,7 @@ impl Engine {
         if !prepared.verified.covers(&prepared.path) {
             return Err(Error::uncertain(ErrorCode::Validation));
         }
-        let mut record = prepared_pack_record(request, &prepared, features, registry_reference)?;
+        let mut record = prepared_pack_record(request, &prepared, policy, registry_reference)?;
         let material = if let Some(mounts) = mounts {
             let (deadline, cancel) = budget.ok_or(Error::uncertain(ErrorCode::Ownership))?;
             let read_budget = crate::ReadBudget::new(
@@ -1184,7 +1465,7 @@ impl Engine {
         }
     }
 
-    fn commit_created_record(
+    pub(crate) fn commit_created_record(
         &self,
         name: &str,
         owner_token: &str,
@@ -1322,6 +1603,15 @@ impl Engine {
             .dependent_clones(&receipt.name)
             .map_err(|_| Error::before(ErrorCode::Database))?;
         let mut state = record_state(&record, !dependents.is_empty());
+        let checkpoint_budget =
+            crate::ReadBudget::new(std::time::Duration::from_secs(30), Cancellation::default())?;
+        if crate::checkpoint_lifecycle::Lifecycle::at(&self.vm_directory(&receipt.name)).uncertain(
+            receipt,
+            &record,
+            &checkpoint_budget,
+        )? {
+            state = ObservedState::IdentityUnknown;
+        }
         if self.oci_manager_busy(&receipt.name)?
             || self.runtime_pid(&receipt.name).is_some_and(|pid| {
                 smolvm::process::is_alive(pid)
@@ -1742,6 +2032,65 @@ impl Engine {
         self.start_mode(receipt, None, None)
     }
 
+    /// Only originally authenticated forkable material is eligible. The SDK's
+    /// ordinary start already honors it without rewriting the record's policy.
+    pub fn start_checkpointable(
+        &self,
+        receipt: &CreationReceipt,
+        deadline: std::time::Instant,
+        cancel: &Cancellation,
+    ) -> Result<Observation> {
+        let budget = crate::ReadBudget::for_checkpoint_work(
+            deadline.saturating_duration_since(std::time::Instant::now()),
+            cancel.clone(),
+        )?;
+        budget.check()?;
+        let record = self.record(receipt)?;
+        crate::checkpoint_capture::validate_record(&record)?;
+        if !record.forkable {
+            return Err(Error::before(ErrorCode::Unsupported));
+        }
+        self.start_mode(receipt, None, Some((deadline, cancel)))
+    }
+
+    /// Read-only source qualification, not an assertion that guest work is idle.
+    /// No caller can obtain capture authority from an inventory row or agent ping.
+    pub fn checkpoint_preflight(
+        &self,
+        receipt: &CreationReceipt,
+        budget: &crate::ReadBudget,
+    ) -> Result<Observation> {
+        budget.check()?;
+        let _permit = self.jobs.acquire(crate::jobs::Demand::observation())?;
+        let gate = self.observation_gate(&receipt.name)?;
+        let _guard = gate
+            .try_lock()
+            .map_err(|_| Error::before(ErrorCode::Conflict))?;
+        let observed = self.inspect(receipt)?;
+        if observed.state != ObservedState::Running {
+            return Err(Error::before(ErrorCode::State));
+        }
+        let record = self.record(receipt)?;
+        crate::checkpoint_capture::validate_record(&record)?;
+        if !record.forkable {
+            return Err(Error::before(ErrorCode::Unsupported));
+        }
+        self.verify_templates()?;
+        self.verify_lifecycle_preconditions(receipt, &observed)?;
+        let (pid, birth) = observed
+            .pid_identity
+            .ok_or(Error::before(ErrorCode::Ownership))?;
+        self.capture_source_authority(receipt, (pid, birth), &record)?;
+        if self.runtime.pid(&receipt.name) != Some(pid)
+            || !smolvm::process::is_alive(pid)
+            || smolvm::process::process_start_time(pid) != Some(birth)
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        budget.check()?;
+        Ok(observed)
+    }
+
     /// Select saved mount proof only after receipt verification and against the
     /// bridge's current operator policy; a record path cannot grant admission.
     pub fn start_with_volume_policy(
@@ -1839,15 +2188,72 @@ impl Engine {
                 &creation_read_budget(deadline, cancel)?,
             )?;
         }
+        let lifecycle =
+            crate::checkpoint_lifecycle::Lifecycle::at(&self.vm_directory(&receipt.name));
+        let checkpoint_budget = match budget {
+            Some((deadline, cancel)) => crate::ReadBudget::for_checkpoint_work(
+                deadline.saturating_duration_since(std::time::Instant::now()),
+                cancel.clone(),
+            )?,
+            None => crate::ReadBudget::for_checkpoint_work(
+                std::time::Duration::from_secs(86_400),
+                Cancellation::default(),
+            )?,
+        };
+        let checkpoint_start = lifecycle.prepare(receipt, &record, &checkpoint_budget)?;
         self.track_handle(receipt)?;
         check()?;
         let dispatch = boot.begin_boot(&receipt.name)?;
+        let checkpoint_start = match checkpoint_start {
+            Some(permit) => {
+                let mut nonce = [0; 16];
+                getrandom::fill(&mut nonce).map_err(|_| Error::before(ErrorCode::Native))?;
+                Some(lifecycle.enter(permit, &hex::encode(nonce), &checkpoint_budget)?)
+            }
+            None => None,
+        };
         let result = self.runtime.start_machine(&receipt.name);
         dispatch
             .finish(self.runtime.pid(&receipt.name))
             .map_err(|error| Error::uncertain(error.code))?;
         result.map_err(|error| Error::uncertain(crate::sdk_compat::launch_error(&error)))?;
+        if record.forkable {
+            let running = self
+                .record(receipt)
+                .map_err(|error| Error::uncertain(error.code))?;
+            let pid = running
+                .pid
+                .zip(running.pid_start_time)
+                .ok_or(Error::uncertain(ErrorCode::Ownership))?;
+            if running.state != smolvm::config::RecordState::Running
+                || self.runtime.pid(&receipt.name) != Some(pid.0)
+                || !smolvm::process::is_alive(pid.0)
+                || smolvm::process::process_start_time(pid.0) != Some(pid.1)
+            {
+                return Err(Error::uncertain(ErrorCode::Ownership));
+            }
+            self.capture_sources
+                .lock()
+                .map_err(|_| Error::uncertain(ErrorCode::Native))?
+                .insert(receipt.name.clone(), pid);
+        }
         check().map_err(|error| Error::uncertain(error.code))?;
+        if let Some(permit) = checkpoint_start {
+            let record = self
+                .record(receipt)
+                .map_err(|error| Error::uncertain(error.code))?;
+            let pid = record
+                .pid
+                .zip(record.pid_start_time)
+                .ok_or(Error::uncertain(ErrorCode::Ownership))?;
+            if self.runtime.pid(&receipt.name) != Some(pid.0)
+                || smolvm::process::process_start_time(pid.0) != Some(pid.1)
+                || !smolvm::process::is_alive(pid.0)
+            {
+                return Err(Error::uncertain(ErrorCode::Ownership));
+            }
+            lifecycle.complete(permit, receipt, &record, pid, &checkpoint_budget)?;
+        }
         self.inspect(receipt)
             .map_err(|error| Error::uncertain(error.code))
             .and_then(|observation| {
@@ -1861,7 +2267,41 @@ impl Engine {
         let _guard = gate
             .try_lock()
             .map_err(|_| Error::before(ErrorCode::Conflict))?;
-        let expected = self.inspect(receipt)?;
+        let mut expected = self.inspect(receipt)?;
+        if expected.state == ObservedState::IdentityUnknown {
+            if self.stop_entered_capture(receipt)? {
+                return self.inspect(receipt);
+            }
+            let record = self.record(receipt)?;
+            let budget = crate::ReadBudget::new(
+                std::time::Duration::from_secs(30),
+                Cancellation::default(),
+            )?;
+            let entered = record.labels.contains_key("smolbox.checkpoint-sha256")
+                && crate::checkpoint_lifecycle::Lifecycle::at(&self.vm_directory(&receipt.name))
+                    .uncertain(receipt, &record, &budget)?;
+            let tracked = self
+                .owned_handles
+                .lock()
+                .map_err(|_| Error::before(ErrorCode::Native))?
+                .get(&receipt.name)
+                .is_some_and(|owned| owned == receipt);
+            let pid = record.pid.zip(record.pid_start_time);
+            if entered
+                && tracked
+                && record_state(&record, false) == ObservedState::Running
+                && pid.is_some_and(|(pid, birth)| {
+                    self.runtime.pid(&receipt.name) == Some(pid)
+                        && smolvm::process::process_start_time(pid) == Some(birth)
+                        && smolvm::process::is_alive(pid)
+                })
+            {
+                // Normal stop of this engine's already enrolled VMM is allowed.
+                // It does not resolve/replay the entered restore or free storage.
+                expected.state = ObservedState::Running;
+                expected.pid_identity = pid;
+            }
+        }
         match expected.state {
             ObservedState::Stopped => {
                 // An owned SDK manager may retain an ordinarily exited child
@@ -1920,11 +2360,27 @@ impl Engine {
                 .lock()
                 .map_err(|_| Error::uncertain(ErrorCode::Native))?
                 .remove(&receipt.name);
+            self.capture_sources
+                .lock()
+                .map_err(|_| Error::uncertain(ErrorCode::Native))?
+                .remove(&receipt.name);
         }
         Ok(observation)
     }
 
     pub fn delete(&self, receipt: &CreationReceipt) -> Result<Observation> {
+        self.delete_with_budget(
+            receipt,
+            &crate::ReadBudget::new(std::time::Duration::from_secs(30), Cancellation::default())?,
+        )
+    }
+
+    pub fn delete_with_budget(
+        &self,
+        receipt: &CreationReceipt,
+        budget: &crate::ReadBudget,
+    ) -> Result<Observation> {
+        budget.check()?;
         let gate = self.gate(&receipt.name)?;
         let _guard = gate
             .try_lock()
@@ -1937,9 +2393,12 @@ impl Engine {
             ObservedState::Stopped => {}
             _ => return Err(Error::before(ErrorCode::State)),
         }
-        self.coordinated_lifecycle(receipt, &expected, || {
-            self.runtime.delete_machine(&receipt.name)
-        })?;
+        self.authorize_capture_staging_deletion(receipt, budget)?;
+        self.verify_lifecycle_preconditions(receipt, &expected)?;
+        budget.check()?;
+        self.runtime
+            .delete_machine(&receipt.name)
+            .map_err(|_| Error::uncertain(ErrorCode::Native))?;
         let observation = self
             .inspect(receipt)
             .map_err(|error| Error::uncertain(error.code))?;
@@ -1952,8 +2411,80 @@ impl Engine {
                 .lock()
                 .map_err(|_| Error::uncertain(ErrorCode::Native))?
                 .remove(&receipt.name);
+            self.capture_sources
+                .lock()
+                .map_err(|_| Error::uncertain(ErrorCode::Native))?
+                .remove(&receipt.name);
         }
         Ok(observation)
+    }
+
+    fn stop_entered_capture(&self, receipt: &CreationReceipt) -> Result<bool> {
+        if receipt.material.is_none() {
+            return Ok(false);
+        }
+        let journal = crate::material::MaterialJournal::at(&self.vm_directory(&receipt.name));
+        let record = self
+            .db
+            .get_vm(&receipt.name)
+            .map_err(|_| Error::before(ErrorCode::Database))?
+            .ok_or(Error::before(ErrorCode::NotFound))?;
+        if !journal.entered_capture_source(receipt, &record)? {
+            return Ok(false);
+        }
+        let tracked = self
+            .owned_handles
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?
+            .get(&receipt.name)
+            .is_some_and(|owned| owned == receipt);
+        let pid = record
+            .pid
+            .zip(record.pid_start_time)
+            .ok_or(Error::before(ErrorCode::Ownership))?;
+        self.capture_source_authority(receipt, pid, &record)?;
+        if !tracked
+            || self.runtime.pid(&receipt.name) != Some(pid.0)
+            || !smolvm::process::is_alive(pid.0)
+            || smolvm::process::process_start_time(pid.0) != Some(pid.1)
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        self.verify_database_identity()?;
+        let current = self
+            .db
+            .get_vm(&receipt.name)
+            .map_err(|_| Error::before(ErrorCode::Database))?
+            .ok_or(Error::before(ErrorCode::NotFound))?;
+        if !journal.entered_capture_source(receipt, &current)?
+            || current.pid.zip(current.pid_start_time) != Some(pid)
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        self.runtime
+            .stop_machine(&receipt.name)
+            .map_err(|_| Error::uncertain(ErrorCode::Native))?;
+        let after = self
+            .db
+            .get_vm(&receipt.name)
+            .map_err(|_| Error::uncertain(ErrorCode::Database))?
+            .ok_or(Error::uncertain(ErrorCode::NotFound))?;
+        if after.state != smolvm::config::RecordState::Stopped
+            || after.pid.is_some()
+            || self.runtime.pid(&receipt.name).is_some()
+        {
+            return Err(Error::uncertain(ErrorCode::Ownership));
+        }
+        self.owned_handles
+            .lock()
+            .map_err(|_| Error::uncertain(ErrorCode::Native))?
+            .remove(&receipt.name);
+        self.capture_sources
+            .lock()
+            .map_err(|_| Error::uncertain(ErrorCode::Native))?
+            .remove(&receipt.name);
+        // The entered capture and unknown material remain fenced after collection.
+        Ok(true)
     }
 
     fn coordinated_lifecycle(
@@ -2229,7 +2760,7 @@ impl Engine {
 fn prepared_pack_record(
     request: &CreateRequest,
     prepared: &crate::artifact::PreparedArtifact,
-    features: Option<&crate::CreationFeatures>,
+    policy: PackRecordPolicy<'_>,
     registry_reference: Option<&str>,
 ) -> Result<VmRecord> {
     let mut labels = request.labels.clone();
@@ -2268,10 +2799,15 @@ fn prepared_pack_record(
     // environment values enter this durable neutral-start record.
     record.workdir = Some("/".into());
     record.user = (prepared.manifest.mode == PackMode::Container).then(|| "0".into());
-    if let Some(features) = features {
+    if let Some(features) = policy.features {
         features
             .apply(&mut record, &prepared.manifest)
             .map_err(|error| Error::uncertain(error.code))?;
+    }
+    if policy.checkpointable {
+        policy.qualify(&prepared.manifest)?;
+        crate::checkpoint_capture::validate_record(&record)?;
+        record.forkable = true;
     }
     Ok(record)
 }
@@ -2291,7 +2827,7 @@ fn reject_unqualified_oci_boot(record: &VmRecord) -> Result<()> {
     }
     Ok(())
 }
-fn validate_creation_identity(
+pub(crate) fn validate_creation_identity(
     name: &str,
     owner_token: &str,
     incarnation: &str,
@@ -2415,7 +2951,7 @@ pub(crate) fn marker_matches(receipt: &CreationReceipt, directory: &Path) -> Res
 }
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
     use super::*;
 
     #[test]
@@ -2752,7 +3288,14 @@ mod tests {
         assert!(engine.vm_directory(&receipt.name).exists());
     }
 
-    fn test_engine(root: &Path) -> Engine {
+    pub(crate) fn test_install_templates(
+        engine: &mut Engine,
+        templates: crate::assets::PreparedTemplates,
+    ) {
+        engine.templates = Some(templates);
+    }
+
+    pub(crate) fn test_engine(root: &Path) -> Engine {
         let root = root.canonicalize().unwrap();
         let binding = DomainBinding {
             target_id: "local".into(),
@@ -2762,6 +3305,10 @@ mod tests {
         };
         let db = SmolvmDb::open_at(&binding.database).unwrap();
         let domain = DomainGuard::acquire_at(&binding, root.join("private"), true).unwrap();
+        let domain = Arc::new(domain);
+        let jobs = crate::jobs::JobPool::default();
+        let capture_staging =
+            crate::capture_staging::Staging::open(&binding, domain.clone(), jobs.clone()).unwrap();
         Engine {
             opened_at: std::time::Instant::now(),
             runtime: EmbeddedRuntime::with_db(db.clone()),
@@ -2770,10 +3317,12 @@ mod tests {
             binding,
             gates: Mutex::new(HashMap::new()),
             owned_handles: Mutex::new(BTreeMap::new()),
+            capture_sources: Mutex::new(BTreeMap::new()),
             owned_oci: Mutex::new(BTreeMap::new()),
-            domain: Arc::new(domain),
+            domain,
             transfers: None,
-            jobs: crate::jobs::JobPool::default(),
+            jobs,
+            capture_staging,
             templates: None,
             host: None,
             boot: None,
@@ -3280,6 +3829,170 @@ mod tests {
     }
 
     #[test]
+    fn checkpointable_pack_opt_in_is_original_material_and_rejects_container_or_networked_sources()
+    {
+        use std::time::{Duration, Instant};
+        let temp = tempfile::tempdir().unwrap();
+        let engine = test_engine(temp.path());
+        let resources = Resources {
+            cpus: 1,
+            memory_mib: 512,
+            storage_gib: 1,
+            overlay_gib: 1,
+        };
+        for mode in [PackMode::Vm, PackMode::Container] {
+            let blob = crate::registry_artifact::tests::sidecar_fixture_mode(
+                &engine.domain.directory,
+                crate::oci::native_oci_platform(),
+                mode.clone(),
+            );
+            let artifact = engine
+                .qualify_registry_blob(
+                    blob,
+                    resources,
+                    Instant::now() + Duration::from_secs(3),
+                    Cancellation::new(),
+                )
+                .unwrap();
+            let request = CreateRequest {
+                name: "checkpointable-source".into(),
+                owner_token: "a".repeat(64),
+                incarnation: "b".repeat(32),
+                resources,
+                labels: BTreeMap::new(),
+                artifact: ApprovedArtifact {
+                    path: artifact.prepared.path.clone(),
+                    sha256: artifact.source.content_sha256.clone(),
+                    max_bytes: 1024 * 1024,
+                    guest_platform: artifact.source.platform.clone(),
+                },
+            };
+            let ordinary = prepared_pack_record(
+                &request,
+                &artifact.prepared,
+                PackRecordPolicy::default(),
+                None,
+            )
+            .unwrap();
+            assert!(!ordinary.forkable);
+            let policy = PackRecordPolicy {
+                features: None,
+                checkpointable: true,
+            };
+            let opted = prepared_pack_record(&request, &artifact.prepared, policy, None);
+            if mode == PackMode::Vm {
+                let mut opted = opted.unwrap();
+                assert!(opted.forkable);
+                assert_eq!(
+                    crate::checkpoint_capture::validate_record(&opted).unwrap(),
+                    resources
+                );
+                opted.created_at = ordinary.created_at;
+                assert_ne!(
+                    material_hash(&opted).unwrap(),
+                    material_hash(&ordinary).unwrap()
+                );
+                opted.forkable = false;
+                assert_eq!(
+                    material_hash(&opted).unwrap(),
+                    material_hash(&ordinary).unwrap()
+                );
+                let networked = crate::CreationFeatures {
+                    network: crate::NetworkPolicy {
+                        enabled: true,
+                        hosts: vec!["example.com".into()],
+                        cidrs: vec![],
+                    },
+                    ports: vec![],
+                    workload: None,
+                };
+                assert_eq!(
+                    PackRecordPolicy {
+                        features: Some(&networked),
+                        checkpointable: true
+                    }
+                    .qualify(&artifact.prepared.manifest)
+                    .unwrap_err()
+                    .code,
+                    ErrorCode::Unsupported
+                );
+            } else {
+                assert_eq!(opted.unwrap_err().code, ErrorCode::Unsupported);
+            }
+            assert!(engine.db.get_vm(&request.name).unwrap().is_none());
+            assert!(!engine.vm_directory(&request.name).exists());
+            assert_eq!(engine.jobs.counts(), crate::jobs::Counts::default());
+        }
+    }
+
+    #[test]
+    fn checkpointable_start_and_preflight_cannot_promote_a_stopped_record_or_cross_ownership() {
+        use std::time::{Duration, Instant};
+        let temp = tempfile::tempdir().unwrap();
+        let engine = test_engine(temp.path());
+        let name = "ordinary-source";
+        let owner = "a".repeat(64);
+        let incarnation = "b".repeat(32);
+        let mut record = VmRecord::new(name.into(), 1, 512, vec![], vec![], false);
+        record.storage_gb = Some(1);
+        record.overlay_gb = Some(1);
+        record.entrypoint = vec!["/bin/true".into()];
+        record.cmd.clear();
+        record.env.clear();
+        record.workdir = Some("/".into());
+        record.user = None;
+        record.labels.insert("smolbox.owner".into(), owner.clone());
+        record
+            .labels
+            .insert("smolbox.incarnation".into(), incarnation.clone());
+        crate::checkpoint_capture::validate_record(&record).unwrap();
+        std::fs::create_dir_all(engine.vm_directory(name)).unwrap();
+        assert!(engine.db.reserve_vm_create(name, &owner).unwrap());
+        let receipt = engine
+            .commit_created_record(name, &owner, &incarnation, &record)
+            .unwrap();
+        let receipt = crate::material::MaterialJournal::at(&engine.vm_directory(name))
+            .initialize(&receipt)
+            .unwrap();
+        let before = serde_json::to_vec(&engine.db.get_vm(name).unwrap()).unwrap();
+        let failure = engine
+            .start_checkpointable(
+                &receipt,
+                Instant::now() + Duration::from_secs(3),
+                &Cancellation::new(),
+            )
+            .unwrap_err();
+        assert_eq!(failure.code, ErrorCode::Unsupported);
+        assert_eq!(failure.dispatch, crate::Dispatch::NotDispatched);
+        assert_eq!(
+            engine
+                .checkpoint_preflight(&receipt, &read_budget())
+                .unwrap_err()
+                .code,
+            ErrorCode::State
+        );
+        let mut crossed = receipt.clone();
+        crossed.owner_token = "f".repeat(64);
+        assert_eq!(
+            engine
+                .start_checkpointable(
+                    &crossed,
+                    Instant::now() + Duration::from_secs(3),
+                    &Cancellation::new()
+                )
+                .unwrap_err()
+                .code,
+            ErrorCode::Ownership
+        );
+        assert_eq!(
+            serde_json::to_vec(&engine.db.get_vm(name).unwrap()).unwrap(),
+            before
+        );
+        assert_eq!(engine.jobs.counts(), crate::jobs::Counts::default());
+        assert!(engine.owned_handles.lock().unwrap().is_empty());
+    }
+
+    #[test]
     fn registry_pack_record_binds_origin_without_inheriting_baked_workload() {
         use std::time::{Duration, Instant};
         let temp = tempfile::tempdir().unwrap();
@@ -3321,7 +4034,7 @@ mod tests {
         let record = prepared_pack_record(
             &request,
             &artifact.prepared,
-            None,
+            PackRecordPolicy::default(),
             Some(&artifact.source.reference),
         )
         .unwrap();
@@ -3339,7 +4052,13 @@ mod tests {
         assert_eq!(record.user.as_deref(), Some("0"));
         assert_eq!(record.workdir.as_deref(), Some("/"));
         assert!(!record.network);
-        let local = prepared_pack_record(&request, &artifact.prepared, None, None).unwrap();
+        let local = prepared_pack_record(
+            &request,
+            &artifact.prepared,
+            PackRecordPolicy::default(),
+            None,
+        )
+        .unwrap();
         assert_ne!(
             material_hash(&record).unwrap(),
             material_hash(&local).unwrap()
@@ -3416,6 +4135,80 @@ mod tests {
             1
         );
         assert!(!engine.domain.directory.join("artifacts").exists());
+    }
+
+    #[test]
+    fn checkpoint_intent_absence_never_restores_or_recovers_authority() {
+        let temp = tempfile::tempdir().unwrap();
+        let engine = test_engine(temp.path());
+        let receipt = install_record(&engine);
+        let before = serde_json::to_vec(&engine.db.get_vm(&receipt.name).unwrap()).unwrap();
+        let mut intent = CheckpointCreationIntent {
+            name: "missing-checkpoint".into(),
+            owner_token: "a".repeat(64),
+            incarnation: "b".repeat(32),
+            source_sha256: "c".repeat(64),
+            resources: Resources {
+                cpus: 1,
+                memory_mib: 256,
+                storage_gib: 1,
+                overlay_gib: 1,
+            },
+            labels: BTreeMap::new(),
+        };
+        assert_eq!(
+            engine
+                .inspect_checkpoint_creation(&intent, &read_budget())
+                .unwrap(),
+            CreationPresence::Absent
+        );
+        assert!(engine.db.get_vm(&intent.name).unwrap().is_none());
+        intent.name = receipt.name.clone();
+        assert_eq!(
+            engine
+                .inspect_checkpoint_creation(&intent, &read_budget())
+                .unwrap(),
+            CreationPresence::Unverified
+        );
+        intent.name = "partial-checkpoint".into();
+        std::fs::create_dir_all(engine.vm_directory(&intent.name)).unwrap();
+        assert_eq!(
+            engine
+                .inspect_checkpoint_creation(&intent, &read_budget())
+                .unwrap(),
+            CreationPresence::Unverified
+        );
+        engine.jobs.quarantine();
+        intent.name = "missing-checkpoint".into();
+        assert_eq!(
+            engine
+                .inspect_checkpoint_creation(&intent, &read_budget())
+                .unwrap(),
+            CreationPresence::Absent
+        );
+        intent.source_sha256 = "invalid".into();
+        assert_eq!(
+            engine
+                .inspect_checkpoint_creation(&intent, &read_budget())
+                .unwrap_err()
+                .code,
+            ErrorCode::Validation
+        );
+        assert_eq!(
+            serde_json::to_vec(&engine.db.get_vm(&receipt.name).unwrap()).unwrap(),
+            before
+        );
+        assert_eq!(engine.jobs.counts(), crate::jobs::Counts::default());
+        assert!(engine.owned_handles.lock().unwrap().is_empty());
+        assert!(!std::fs::read_dir(&engine.domain.directory)
+            .unwrap()
+            .any(|entry| {
+                entry
+                    .unwrap()
+                    .file_name()
+                    .to_string_lossy()
+                    .starts_with(".checkpoint-source-")
+            }));
     }
 
     #[test]

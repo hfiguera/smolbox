@@ -9,6 +9,7 @@ defmodule SmolBox.Backend.Assignment do
   alias SmolBox.Backend.{Binding, Features}
 
   alias SmolBox.{
+    Checkpoint,
     Command,
     Error,
     ExecutionSpec,
@@ -20,6 +21,7 @@ defmodule SmolBox.Backend.Assignment do
   }
 
   alias SmolBox.Embedded.{
+    CheckpointContract,
     Config,
     CreationFeatures,
     Identity,
@@ -45,7 +47,7 @@ defmodule SmolBox.Backend.Assignment do
          true <- MountContract.attachments_match?(attachments, spec),
          true <-
            admission_spec?(spec, Config.protocol_major(config)) and
-             spec.profile in config.profiles,
+             profile_approved?(config, spec),
          true <-
            CreationFeatures.approved?(CreationFeatures.from_spec(spec), config) and
              command_approved?(config, spec) and volume_spec_approved?(config, spec),
@@ -66,6 +68,7 @@ defmodule SmolBox.Backend.Assignment do
             CreationFeatures.from_spec(spec)
           )
           |> MountContract.attach(attachments)
+          |> CheckpointContract.attach(spec)
       }
 
       if valid?(assignment) and MountContract.matches_spec?(assignment.creation, spec, nil) and
@@ -81,7 +84,7 @@ defmodule SmolBox.Backend.Assignment do
   def supports?(config, spec),
     do:
       Config.validate(config) == :ok and validate_spec(spec) == :ok and
-        admission_spec?(spec, Config.protocol_major(config)) and spec.profile in config.profiles and
+        admission_spec?(spec, Config.protocol_major(config)) and profile_approved?(config, spec) and
         CreationFeatures.approved?(CreationFeatures.from_spec(spec), config) and
         command_approved?(config, spec) and volume_spec_approved?(config, spec) and
         approved_artifact(config, spec.artifact) != nil
@@ -104,7 +107,8 @@ defmodule SmolBox.Backend.Assignment do
        ) or
          (assignment.version == 2 and
             (NativeSource.creation?(assignment.creation) or
-               NativeSource.registry_creation?(assignment.creation)))) and
+               NativeSource.registry_creation?(assignment.creation) or
+               CheckpointContract.creation?(assignment.creation)))) and
         assignment.creation["labels"] == %{}
 
   defp mount_binding?(assignment),
@@ -119,7 +123,7 @@ defmodule SmolBox.Backend.Assignment do
       supported_spec?(spec, assignment.version) and
       features_approved?(assignment, config, spec) and
       specification_matches?(assignment.creation, spec, retained) and
-      spec.profile in config.profiles and
+      profile_approved?(config, spec) and
       Map.from_struct(assignment.binding) == Config.domain_binding(config) and
       approved_creation?(assignment.creation, approved_artifact(config, spec.artifact))
   end
@@ -127,14 +131,21 @@ defmodule SmolBox.Backend.Assignment do
   defp specification_matches?(create, spec, retained),
     do:
       CreationFeatures.matches?(create, spec, retained) and
+        CheckpointContract.matches?(create, spec, retained) and
         MountContract.matches_spec?(create, spec, retained)
 
   defp features_approved?(assignment, config, spec),
     do:
-      CreationFeatures.approved?(Map.get(assignment.creation, "features"), config) and
+      CheckpointContract.opt_in_approved?(config, assignment.creation) and
+        CreationFeatures.approved?(Map.get(assignment.creation, "features"), config) and
         command_approved?(config, spec) and MountContract.approved?(assignment.creation, config)
 
   defp approved_creation?(_creation, nil), do: false
+
+  defp approved_creation?(creation, %Checkpoint{} = checkpoint),
+    do:
+      CheckpointContract.creation?(creation) and
+        creation["source"] == Checkpoint.artifact(checkpoint)
 
   defp approved_creation?(creation, %Source{kind: kind} = source) when kind in [:oci, :registry],
     do: NativeSource.matches?(creation, Source.artifact(source))
@@ -172,6 +183,20 @@ defmodule SmolBox.Backend.Assignment do
         assignment.creation["resources"] == resources(record.spec.profile)
 
   @doc false
+  def qualification(config, %{artifact: %{"kind" => "checkpoint"}} = spec) do
+    if supports?(config, spec),
+      do:
+        {:ok,
+         %{
+           "operation" => "qualify_checkpoint_creation",
+           "source" => spec.artifact,
+           "resources" => resources(spec.profile)
+         }
+         |> CheckpointContract.attach(spec)},
+      else: failure(:unsupported_capability)
+  end
+
+  @doc false
   def qualification(config, spec) do
     if supports?(config, spec),
       do:
@@ -189,7 +214,8 @@ defmodule SmolBox.Backend.Assignment do
                end
            },
            CreationFeatures.from_spec(spec)
-         )},
+         )
+         |> CheckpointContract.attach(spec)},
       else: failure(:unsupported_capability)
   end
 
@@ -204,6 +230,19 @@ defmodule SmolBox.Backend.Assignment do
     do:
       Map.get(spec, :volumes, []) == [] or
         (config.platform == :linux and Features.supports?(config, :volumes))
+
+  defp profile_approved?(config, spec),
+    do:
+      spec.profile in config.profiles and checkpoint_profile_approved?(config, spec) and
+        (not Map.get(spec, :checkpointable, false) or Features.supports?(config, :checkpoints))
+
+  defp checkpoint_profile_approved?(config, %{artifact: %{"kind" => "checkpoint"}} = spec),
+    do:
+      Enum.any?(config.checkpoints, fn checkpoint ->
+        Checkpoint.artifact(checkpoint) == spec.artifact and checkpoint.profile == spec.profile
+      end)
+
+  defp checkpoint_profile_approved?(_config, _spec), do: true
 
   defp qualified_user?(nil), do: true
   defp qualified_user?(%ImagePull{}), do: true
@@ -240,8 +279,10 @@ defmodule SmolBox.Backend.Assignment do
   defp observation_matches?(_machine, _assignment), do: false
 
   defp provision_key(%Source{kind: kind}) when kind in [:oci, :registry], do: "source"
+  defp provision_key(%Checkpoint{}), do: "source"
   defp provision_key(_local), do: "artifact"
   defp provision_value(%Source{} = source), do: Source.artifact(source)
+  defp provision_value(%Checkpoint{} = checkpoint), do: Checkpoint.artifact(checkpoint)
   defp provision_value(local), do: Launch.artifact(local)
   defp qualification_operation(%{"kind" => "oci"}), do: "qualify_oci_creation"
   defp qualification_operation(%{"kind" => "registry"}), do: "qualify_registry_creation"
@@ -253,6 +294,12 @@ defmodule SmolBox.Backend.Assignment do
       else: nil
   end
 
+  defp approved_artifact(config, %{"kind" => "checkpoint"} = expected) do
+    if Features.supports?(config, :checkpoints),
+      do: Enum.find(config.checkpoints, &(Checkpoint.artifact(&1) == expected)),
+      else: nil
+  end
+
   defp approved_artifact(config, expected),
     do: Enum.find(config.artifacts, &(Map.take(&1, ~w(id sha256 architecture)) == expected))
 
@@ -261,6 +308,9 @@ defmodule SmolBox.Backend.Assignment do
       artifact["sha256"] == expected["sha256"] and
         artifact["guest_platform"] ==
           if(expected["architecture"] == "aarch64", do: "linux/arm64", else: "linux/amd64")
+
+  defp creation_artifact_matches?(%{"source" => %{"kind" => "checkpoint"}} = creation, expected),
+    do: CheckpointContract.creation?(creation) and creation["source"] == expected
 
   defp creation_artifact_matches?(%{"source" => _source} = creation, expected),
     do: NativeSource.matches?(creation, expected)
@@ -283,7 +333,8 @@ defmodule SmolBox.Backend.Assignment do
     do:
       (is_map(artifact) and map_size(artifact) == 3) or
         (version == 2 and
-           (NativeSource.artifact?(artifact) or NativeSource.registry_artifact?(artifact)))
+           (NativeSource.artifact?(artifact) or NativeSource.registry_artifact?(artifact) or
+              CheckpointContract.source?(artifact)))
 
   defp bounded_files?(entries, field, minimum),
     do: Enum.all?(entries, &Validation.integer?(&1[field], minimum, 16_777_216))
@@ -293,6 +344,18 @@ defmodule SmolBox.Backend.Assignment do
       Profile.validate(profile) == :ok and (profile.network == :offline or version == 2) and
         profile.max_output_bytes <= 16_777_216 and profile.max_file_bytes <= 16_777_216 and
         profile.cpus <= 16 and profile.execution_ms <= 86_400_000
+
+  defp bare_guest?(%{artifact: %{"kind" => "checkpoint"}} = spec, version),
+    do:
+      version == 2 and spec.profile.network == :offline and
+        not SmolBox.FileAccess.extended?(spec.profile) and Map.get(spec, :volumes, []) == [] and
+        Map.get(spec, :ports, []) == [] and Map.get(spec, :workload) == nil
+
+  defp bare_guest?(%{checkpointable: true} = spec, version),
+    do:
+      version == 2 and spec.artifact["kind"] != "oci" and spec.profile.network == :offline and
+        not SmolBox.FileAccess.extended?(spec.profile) and Map.get(spec, :volumes, []) == [] and
+        Map.get(spec, :ports, []) == [] and Map.get(spec, :workload) == nil
 
   defp bare_guest?(spec, version),
     do:
@@ -398,10 +461,8 @@ defmodule SmolBox.Backend.Assignment do
     do:
       Enum.all?(
         [
-          captures: %{},
           exports: %{},
           branch_children: %{},
-          active_capture: nil,
           active_export: nil,
           branch: nil,
           active_branch: nil,
@@ -410,7 +471,10 @@ defmodule SmolBox.Backend.Assignment do
         fn {key, empty} -> Map.get(record, key, empty) == empty end
       ) and (Map.get(record, :mounts, []) == [] or version == 2) and
         growth_histories?(record, version) and
-        (version == 2 or Map.get(record, :reserved_ports, []) == [])
+        capture_origin?(record) and
+        (version == 2 or
+           (Map.get(record, :reserved_ports, []) == [] and
+              Map.get(record, :captures, %{}) == %{} and Map.get(record, :active_capture) == nil))
 
   defp growth_histories?(record, 2), do: NativeGrowth.record_valid?(record)
 
@@ -419,6 +483,18 @@ defmodule SmolBox.Backend.Assignment do
       Enum.all?([disk_expansions: %{}, disk_sizes: nil, active_expansion: nil], fn {key, empty} ->
         Map.get(record, key, empty) == empty
       end) and NativeGrowth.record_valid?(record)
+
+  defp capture_origin?(record) do
+    required =
+      Map.get(record, :captures, %{}) != %{} or
+        match?(
+          %{created_machine: %{backend_identity: %{material_history: history}}}
+          when is_list(history),
+          record
+        )
+
+    not required or record.backend_assignment.creation["checkpointable"] == true
+  end
 
   defp validate_spec(%ManagedMachineSpec{} = spec), do: ManagedMachineSpec.validate(spec)
   defp validate_spec(spec), do: ExecutionSpec.validate(spec)

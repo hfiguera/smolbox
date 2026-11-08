@@ -29,6 +29,11 @@ defmodule SmolBox.DurableHost.CaptureStore do
       with {:ok, m} <- Database.guarded_machine(context, key, guard, now),
            do: CaptureOps.release(m, id, now)
     end
+
+    def run(context, :capture_release, [key, guard, id, proof, now]) do
+      with {:ok, m} <- Database.guarded_machine(context, key, guard, now),
+           do: CaptureOps.release(m, id, proof, now)
+    end
   else
     def capabilities, do: %{}
 

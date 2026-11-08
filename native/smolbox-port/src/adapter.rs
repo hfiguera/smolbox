@@ -214,8 +214,14 @@ pub fn run_with_policy(
     let observation_budget =
         || engine::ReadBudget::new(remaining.min(Duration::from_secs(30)), cancel.clone());
     let result = match operation {
+        wire::Operation::QualifyCheckpointCreation { .. }
+        | wire::Operation::CreateCheckpoint { .. }
+        | wire::Operation::InspectCheckpointCreation { .. } => return wire::Outcome::Error {
+            code: wire::SafeCode::Unsupported,
+            dispatch: wire::Dispatch::NotDispatched,
+        },
         wire::Operation::Volume { .. } => return wire::Outcome::Error {code:wire::SafeCode::Unsupported,dispatch:wire::Dispatch::NotDispatched},
-        wire::Operation::QualifyRegistryCreation {source,resources:requested,user,features}=>observation_budget().and_then(|budget| {
+        wire::Operation::QualifyRegistryCreation {source,resources:requested,user,features,..}=>observation_budget().and_then(|budget| {
             let source=source.request();engine.qualify_registry_intent(&engine::RegistryArtifactSource {reference:source.reference,platform:source.platform,content_sha256:source.content_sha256},resources(&requested),user.as_deref(),&effective_features(features),&budget)
         }).map(|()|wire::Outcome::Qualified),
         wire::Operation::CreateRegistryPrepared {..}=>return wire::Outcome::Error {code:wire::SafeCode::Unsupported,dispatch:wire::Dispatch::NotDispatched},
@@ -292,6 +298,108 @@ pub fn run_with_policy(
                 }
                 let wire::Outcome::Observed { observation } = observation(observed) else { unreachable!() };
                 Ok(wire::Outcome::GrowthQualified { transition: Box::new(transition), observation })
+            })
+        },
+        wire::Operation::CaptureCheckpoint { receipt: supplied, operation_id, request, chunk_bytes } => {
+            engine::ReadBudget::for_checkpoint_work(remaining, cancel.clone()).and_then(|budget| {
+                let mut captured = engine.capture_checkpoint(&receipt(&supplied), &operation_id,
+                    engine::CaptureRequest {max_bytes: request.max_bytes, idle: request.idle}, budget.clone())?;
+                let transition: wire::CaptureTransition = serde_json::to_value(captured.transition()).ok()
+                    .and_then(|value| serde_json::from_value(value).ok())
+                    .ok_or(engine::Error {code: engine::ErrorCode::Ownership, dispatch: engine::Dispatch::MayHaveDispatched})?;
+                transition.matches(&supplied, &operation_id, &request).map_err(|_| engine::Error {code: engine::ErrorCode::Ownership, dispatch: engine::Dispatch::MayHaveDispatched})?;
+                captured.stream(&budget, |chunk| {
+                    for part in chunk.chunks(chunk_bytes.unwrap_or(wire::MAX_CHUNK_BYTES as u64) as usize) {
+                        emit(wire::Stream::Checkpoint, part).map_err(|_| engine::Error {code: engine::ErrorCode::Io, dispatch: engine::Dispatch::MayHaveDispatched})?;
+                    }
+                    Ok(())
+                })
+                    .map_err(|error| engine::Error {code: error.code, dispatch: engine::Dispatch::MayHaveDispatched})?;
+                if cancel.is_cancelled() || operation_deadline.is_none_or(|deadline| Instant::now() >= deadline) {
+                    return Err(engine::Error {code: engine::ErrorCode::State, dispatch: engine::Dispatch::MayHaveDispatched});
+                }
+                Ok(wire::Outcome::Captured {transition: Box::new(transition)})
+            })
+        },
+        wire::Operation::QualifyAbortedCaptureSource { receipt: supplied, operation_id, request, quiesced } => {
+            observation_budget().and_then(|budget| {
+                let qualification = engine.qualify_aborted_capture_source(&receipt(&supplied), &operation_id,
+                    &engine::CaptureRequest {max_bytes: request.max_bytes, idle: request.idle}, quiesced, &budget)?;
+                let converted: wire::CaptureAbortSourceQualification = serde_json::to_value(qualification).ok()
+                    .and_then(|value| serde_json::from_value(value).ok())
+                    .ok_or(engine::Error {code: engine::ErrorCode::Ownership, dispatch: engine::Dispatch::MayHaveDispatched})?;
+                converted.matches(&supplied, &operation_id, &request)
+                    .map_err(|_| engine::Error {code: engine::ErrorCode::Ownership, dispatch: engine::Dispatch::MayHaveDispatched})?;
+                Ok(wire::Outcome::AbortedCaptureSourceQualified {qualification: Box::new(converted)})
+            })
+        },
+        wire::Operation::AbortCaptureStaging { receipt: supplied, operation_id, request, quiesced } => {
+            observation_budget().and_then(|budget| {
+                let cleanup = engine.abort_capture_staging(&receipt(&supplied), &operation_id,
+                    &engine::CaptureRequest {max_bytes: request.max_bytes, idle: request.idle}, quiesced, &budget)?;
+                let converted: wire::CaptureStagingCleanupReceipt = serde_json::to_value(cleanup).ok()
+                    .and_then(|value| serde_json::from_value(value).ok())
+                    .ok_or(engine::Error {code: engine::ErrorCode::Ownership, dispatch: engine::Dispatch::MayHaveDispatched})?;
+                converted.matches(&supplied, &operation_id, &request)
+                    .map_err(|_| engine::Error {code: engine::ErrorCode::Ownership, dispatch: engine::Dispatch::MayHaveDispatched})?;
+                Ok(wire::Outcome::CaptureStagingAborted {cleanup: Box::new(converted)})
+            })
+        },
+        wire::Operation::CleanupCaptureStaging { receipt: supplied, operation_id, request, quiesced } => {
+            observation_budget().and_then(|budget| {
+                let cleanup = engine.cleanup_capture_staging(&receipt(&supplied), &operation_id,
+                    &engine::CaptureRequest {max_bytes: request.max_bytes, idle: request.idle}, quiesced, &budget)?;
+                let converted: wire::CaptureStagingCleanupReceipt = serde_json::to_value(cleanup).ok()
+                    .and_then(|value| serde_json::from_value(value).ok())
+                    .ok_or(engine::Error {code: engine::ErrorCode::Ownership, dispatch: engine::Dispatch::MayHaveDispatched})?;
+                converted.matches(&supplied, &operation_id, &request)
+                    .map_err(|_| engine::Error {code: engine::ErrorCode::Ownership, dispatch: engine::Dispatch::MayHaveDispatched})?;
+                Ok(wire::Outcome::CaptureStagingCleaned {cleanup: Box::new(converted)})
+            })
+        },
+        wire::Operation::ResolveCapture { receipt: supplied, operation_id, request, quiesced: true } => {
+            observation_budget().and_then(|budget| {
+                let transition = engine.resolve_entered_capture(&receipt(&supplied), &operation_id,
+                    &engine::CaptureRequest {max_bytes: request.max_bytes, idle: request.idle}, &budget)?;
+                let converted: wire::CaptureResolutionTransition = serde_json::to_value(transition).ok()
+                    .and_then(|value| serde_json::from_value(value).ok())
+                    .ok_or(engine::Error {code: engine::ErrorCode::Ownership, dispatch: engine::Dispatch::MayHaveDispatched})?;
+                converted.matches(&supplied, &operation_id, &request)
+                    .map_err(|_| engine::Error {code: engine::ErrorCode::Ownership, dispatch: engine::Dispatch::MayHaveDispatched})?;
+                Ok(wire::Outcome::CaptureResolved {transition: Box::new(converted)})
+            })
+        },
+        wire::Operation::ResolveCapture { quiesced: false, .. } => {
+            Err(engine::Error {code: engine::ErrorCode::Validation, dispatch: engine::Dispatch::NotDispatched})
+        },
+        wire::Operation::InspectCaptureResolution { receipt: supplied, operation_id, request } => {
+            observation_budget().and_then(|budget| {
+                let transition = engine.resolved_capture_with_budget(&receipt(&supplied), &operation_id,
+                    &engine::CaptureRequest {max_bytes: request.max_bytes, idle: request.idle}, &budget)?;
+                let converted = transition.map(|transition| {
+                    let converted: wire::CaptureResolutionTransition = serde_json::to_value(transition).ok()
+                        .and_then(|value| serde_json::from_value(value).ok())
+                        .ok_or(engine::Error {code: engine::ErrorCode::Native, dispatch: engine::Dispatch::NotDispatched})?;
+                    converted.matches(&supplied, &operation_id, &request)
+                        .map_err(|_| engine::Error {code: engine::ErrorCode::Ownership, dispatch: engine::Dispatch::NotDispatched})?;
+                    Ok(converted)
+                }).transpose()?;
+                Ok(wire::Outcome::CaptureResolutionPresence {transition: converted.map(Box::new)})
+            })
+        },
+        wire::Operation::InspectCapture { receipt: supplied, operation_id, request } => {
+            observation_budget().and_then(|budget| {
+                let transition = engine.completed_capture_with_budget(&receipt(&supplied), &operation_id,
+                    &engine::CaptureRequest {max_bytes: request.max_bytes, idle: request.idle}, &budget)?;
+                let converted = transition.map(|transition| {
+                    let converted: wire::CaptureTransition = serde_json::to_value(transition).ok()
+                        .and_then(|value| serde_json::from_value(value).ok())
+                        .ok_or(engine::Error {code: engine::ErrorCode::Native, dispatch: engine::Dispatch::NotDispatched})?;
+                    converted.matches(&supplied, &operation_id, &request)
+                        .map_err(|_| engine::Error {code: engine::ErrorCode::Ownership, dispatch: engine::Dispatch::NotDispatched})?;
+                    Ok(converted)
+                }).transpose()?;
+                Ok(wire::Outcome::CapturePresence {transition: converted.map(Box::new)})
             })
         },
         wire::Operation::InspectGrowth { receipt: supplied, operation_id, request, previous } => {
@@ -388,19 +496,21 @@ pub fn run_with_policy(
             resources: admitted,
             user,
             features: requested,
-        } => engine
-            .qualify_creation_with_features(
-                &engine::ApprovedArtifact {
+            checkpointable,
+        } => {
+            let approved = engine::ApprovedArtifact {
                     path: artifact.path.into(),
                     sha256: artifact.sha256,
                     max_bytes: artifact.max_bytes,
                     guest_platform: artifact.guest_platform,
-                },
-                resources(&admitted),
-                user.as_deref(),
-                requested.map(|value| features(*value)).as_ref(),
-            )
-            .map(|()| wire::Outcome::Qualified),
+                };
+            let result = if checkpointable == Some(true) {
+                engine.qualify_checkpointable_creation(&approved, resources(&admitted), user.as_deref())
+            } else {
+                engine.qualify_creation_with_features(&approved, resources(&admitted), user.as_deref(), requested.map(|value| features(*value)).as_ref())
+            };
+            result.map(|()| wire::Outcome::Qualified)
+        },
         wire::Operation::Create { create } => {
             let requested = create.features.map(|value| features(*value));
             let request = engine::CreateRequest {
@@ -423,6 +533,9 @@ pub fn run_with_policy(
                         let qualified = engine.qualify_volume_mounts(&mounts.policy, &mounts.requests, &budget)?;
                         engine.create_with_volume_mounts(request, requested.unwrap_or_else(|| effective_features(None)), qualified, deadline, &cancel)
                     }),
+                None if create.checkpointable == Some(true) => operation_deadline
+                    .ok_or(engine::Error { code: engine::ErrorCode::Validation, dispatch: engine::Dispatch::NotDispatched })
+                    .and_then(|deadline| engine.create_checkpointable(request, deadline, &cancel)),
                 None => match requested {
                     Some(features) => engine.create_with_features(request, features),
                     None => engine.create_versioned(request),
@@ -434,13 +547,19 @@ pub fn run_with_policy(
             })
         },
         wire::Operation::Inspect { receipt: r } => engine.inspect(&receipt(&r)).map(observation),
+        wire::Operation::StartCheckpointable { receipt: r } => operation_deadline
+            .ok_or(engine::Error { code: engine::ErrorCode::Validation, dispatch: engine::Dispatch::NotDispatched })
+            .and_then(|deadline| engine.start_checkpointable(&receipt(&r), deadline, &cancel)).map(observation),
+        wire::Operation::CheckpointPreflight { receipt: r } => observation_budget()
+            .and_then(|budget| engine.checkpoint_preflight(&receipt(&r), &budget)).map(observation),
         wire::Operation::Start { receipt: r } => match policy {
             Some(policy) => operation_deadline.ok_or(engine::Error { code: engine::ErrorCode::Validation, dispatch: engine::Dispatch::NotDispatched })
                 .and_then(|deadline| engine.start_with_volume_policy(&receipt(&r), &policy, deadline, &cancel)),
             None => engine.start(&receipt(&r)),
         }.map(observation),
         wire::Operation::Stop { receipt: r } => engine.stop(&receipt(&r)).map(observation),
-        wire::Operation::Delete { receipt: r } => engine.delete(&receipt(&r)).map(observation),
+        wire::Operation::Delete { receipt: r } => observation_budget()
+            .and_then(|budget| engine.delete_with_budget(&receipt(&r), &budget)).map(observation),
         wire::Operation::ExecBackground {receipt:r,command} => match &policy { Some(policy) => engine.exec_background_with_volume_policy(&receipt(&r),
             engine::BufferedCommand {argv:command.argv,env:command.env.into_iter().collect(),workdir:command.workdir,
                 user:command.user,stdin:command.stdin,timeout:remaining,max_output_bytes:command.max_output_bytes},cancel
@@ -718,6 +837,91 @@ fn registry_intent(create: wire::RegistryCreate) -> engine::RegistryCreationInte
         features: effective_features(create.features),
     }
 }
+pub fn checkpoint(
+    engine: &engine::Engine,
+    operation: wire::Operation,
+    approval: crate::package::CheckpointApproval,
+    remaining: Duration,
+    cancel: engine::Cancellation,
+) -> wire::Outcome {
+    let Some((source, requested)) = operation.checkpoint_source() else {
+        return wire::Outcome::Error {
+            code: wire::SafeCode::Unsupported,
+            dispatch: wire::Dispatch::NotDispatched,
+        };
+    };
+    if !approval.matches(source, requested)
+        || operation.validate(remaining.as_millis() as u64).is_err()
+    {
+        return wire::Outcome::Error {
+            code: wire::SafeCode::Validation,
+            dispatch: wire::Dispatch::NotDispatched,
+        };
+    }
+    let approved = match approval.engine() {
+        Ok(approved) => approved,
+        Err(code) => {
+            return wire::Outcome::Error {
+                code,
+                dispatch: wire::Dispatch::NotDispatched,
+            }
+        }
+    };
+    let result = (|| {
+        let budget = engine::ReadBudget::for_checkpoint_work(remaining, cancel)?;
+        match operation {
+            wire::Operation::QualifyCheckpointCreation { .. } => {
+                engine.inspect_checkpoint_artifact(approved, budget)?;
+                Ok(wire::Outcome::Qualified)
+            }
+            wire::Operation::CreateCheckpoint { create } => {
+                let receipt = engine.create_checkpoint_approved(
+                    approved,
+                    engine::CheckpointCreationIntent {
+                        name: create.name,
+                        owner_token: create.owner_token,
+                        incarnation: create.incarnation,
+                        source_sha256: create.source.sha256,
+                        resources: resources(&create.resources),
+                        labels: create.labels,
+                    },
+                    budget,
+                )?;
+                Ok(wire::Outcome::Created {
+                    receipt: receipt_wire(receipt),
+                })
+            }
+            wire::Operation::InspectCheckpointCreation { create } => {
+                let presence = engine.inspect_checkpoint_creation(
+                    &engine::CheckpointCreationIntent {
+                        name: create.name,
+                        owner_token: create.owner_token,
+                        incarnation: create.incarnation,
+                        source_sha256: create.source.sha256,
+                        resources: resources(&create.resources),
+                        labels: create.labels,
+                    },
+                    &budget,
+                )?;
+                Ok(wire::Outcome::CreationPresence {
+                    presence: match presence {
+                        engine::CreationPresence::Absent => wire::CreationPresence::Absent,
+                        engine::CreationPresence::Unverified => wire::CreationPresence::Unverified,
+                    },
+                })
+            }
+            _ => Err(engine::Error {
+                code: engine::ErrorCode::Unsupported,
+                dispatch: engine::Dispatch::NotDispatched,
+            }),
+        }
+    })();
+    match result {
+        Ok(outcome) => outcome,
+        Err(failure) => error(failure),
+    }
+}
+
 pub fn create_registry_prepared(
     engine: &engine::Engine,
     create: wire::RegistryCreate,
@@ -754,11 +958,19 @@ pub fn create_registry_with_policy(
             dispatch: wire::Dispatch::NotDispatched,
         };
     }
+    let checkpointable = create.checkpointable == Some(true);
     let result = match mounts {
         Some(mounts) => engine.create_registry_cached_with_mount_selection(
             registry_intent(create),
             (size, approval.cache_policy),
             mounts,
+            deadline,
+            &cancel,
+        ),
+        None if checkpointable => engine.create_registry_checkpointable_cached(
+            registry_intent(create),
+            size,
+            approval.cache_policy,
             deadline,
             &cancel,
         ),
@@ -943,6 +1155,42 @@ pub fn terminal(
 #[cfg(test)]
 mod growth_tests {
     use super::*;
+
+    #[test]
+    fn engine_capture_evidence_matches_wire_without_rewriting_proofs() {
+        let bytes = include_bytes!("../../smolbox-protocol/fixtures/capture-transitions-v1.json");
+        let engine: Vec<engine::CaptureTransition> = serde_json::from_slice(bytes).unwrap();
+        for transition in engine {
+            transition.validate().unwrap();
+            let serialized = serde_json::to_value(&transition).unwrap();
+            let wire: wire::CaptureTransition = serde_json::from_value(serialized.clone()).unwrap();
+            wire.validate().unwrap();
+            assert_eq!(serde_json::to_value(wire).unwrap(), serialized);
+        }
+    }
+
+    #[test]
+    fn mixed_material_fixture_preserves_individually_valid_engine_and_wire_proofs() {
+        let values: Vec<serde_json::Value> = serde_json::from_slice(include_bytes!(
+            "../../smolbox-protocol/fixtures/material-history-v1.json"
+        ))
+        .unwrap();
+        for value in values {
+            if value["change"].get("intent").is_some() {
+                let proof: engine::CaptureTransition =
+                    serde_json::from_value(value.clone()).unwrap();
+                proof.validate().unwrap();
+                let wire: wire::CaptureTransition = serde_json::from_value(value).unwrap();
+                wire.validate().unwrap();
+            } else {
+                let proof: engine::GrowthTransition =
+                    serde_json::from_value(value.clone()).unwrap();
+                proof.validate().unwrap();
+                let wire: wire::GrowthTransition = serde_json::from_value(value).unwrap();
+                wire.validate().unwrap();
+            }
+        }
+    }
 
     #[test]
     fn completed_engine_transition_converts_without_changing_canonical_evidence() {

@@ -6,6 +6,7 @@ defmodule SmolBox.Embedded.Port do
 
   alias SmolBox.Embedded.{
     Channel,
+    CheckpointContract,
     CommandPayload,
     Config,
     CreationFeatures,
@@ -210,8 +211,10 @@ defmodule SmolBox.Embedded.Port do
   end
 
   def handle_call({:quiesce, epoch}, _from, state) do
-    if (state.channel && state.channel.epoch == epoch) and state.status in [:ready, :reconciling] do
-      state = %{state | status: :reconciling}
+    if (state.channel && state.channel.epoch == epoch) and
+         (state.status in [:ready, :reconciling] or
+            (state.status == :quarantined and state.channel.major == 2)) do
+      state = if state.status == :quarantined, do: state, else: %{state | status: :reconciling}
       result = if map_size(state.records) == 0, do: :ok, else: failure(:admission_exhausted)
       {:reply, result, state}
     else
@@ -452,13 +455,13 @@ defmodule SmolBox.Embedded.Port do
   end
 
   defp admission_status?(state, operation),
-    do: state.status in [:ready, :reconciling] or quarantined_observation?(state, operation)
+    do: state.status in [:ready, :reconciling] or quarantined_control?(state, operation)
 
-  defp quarantined_observation?(state, operation),
+  defp quarantined_control?(state, operation),
     do:
       state.status == :quarantined and is_port(state.port) and not state.closing and
         not state.shutting_down and state.channel != nil and state.channel.major == 2 and
-        state.channel.unavailable and Request.observation?(operation)
+        state.channel.unavailable and Request.control?(operation)
 
   defp register(state, operation, budget, observer, caller, remaining) do
     limits = state.config.limits
@@ -534,7 +537,12 @@ defmodule SmolBox.Embedded.Port do
     end
   end
 
-  defp approved?(config, %{"operation" => operation, "create" => create})
+  defp approved?(config, request),
+    do:
+      CheckpointContract.opt_in_approved?(config, Map.get(request, "create", request)) and
+        operation_approved?(config, request)
+
+  defp operation_approved?(config, %{"operation" => operation, "create" => create})
        when operation in ~w(create inspect_creation) do
     create["artifact"] in Enum.map(config.artifacts, &Launch.artifact/1) and
       CreationFeatures.approved?(create["features"], config) and
@@ -542,11 +550,11 @@ defmodule SmolBox.Embedded.Port do
       profile_approved?(config, create)
   end
 
-  defp approved?(config, %{"operation" => name, "create" => create})
+  defp operation_approved?(config, %{"operation" => name, "create" => create})
        when name in ~w(create_oci inspect_oci_creation),
        do: source_approved?(config, create)
 
-  defp approved?(config, %{"operation" => name, "create" => create})
+  defp operation_approved?(config, %{"operation" => name, "create" => create})
        when name in ~w(create_registry_prepared inspect_registry_creation),
        do:
          Features.supports?(config, :remote_sources) and NativeSource.registry_creation?(create) and
@@ -555,10 +563,19 @@ defmodule SmolBox.Embedded.Port do
            MountContract.approved?(create, config) and
            profile_approved?(config, create)
 
-  defp approved?(config, %{"operation" => "qualify_oci_creation"} = request),
+  defp operation_approved?(config, %{"operation" => name, "create" => create})
+       when name in ~w(create_checkpoint inspect_checkpoint_creation),
+       do:
+         Features.supports?(config, :checkpoints) and CheckpointContract.creation?(create) and
+           CheckpointContract.approved?(config, create)
+
+  defp operation_approved?(config, %{"operation" => "qualify_checkpoint_creation"} = request),
+    do: Features.supports?(config, :checkpoints) and CheckpointContract.approved?(config, request)
+
+  defp operation_approved?(config, %{"operation" => "qualify_oci_creation"} = request),
     do: source_approved?(config, request)
 
-  defp approved?(config, %{"operation" => "qualify_registry_creation"} = request),
+  defp operation_approved?(config, %{"operation" => "qualify_registry_creation"} = request),
     do:
       Features.supports?(config, :remote_sources) and
         NativeSource.registry_artifact?(request["source"]) and
@@ -567,59 +584,68 @@ defmodule SmolBox.Embedded.Port do
         MountContract.approved?(request, config) and
         profile_approved?(config, request)
 
-  defp approved?(config, %{"operation" => "start_oci", "source" => source}),
+  defp operation_approved?(config, %{"operation" => "start_oci", "source" => source}),
     do:
       Features.supports?(config, :remote_sources) and NativeSource.artifact?(source) and
         source in Enum.map(config.sources, &Source.artifact/1)
 
-  defp approved?(config, %{"operation" => name})
+  defp operation_approved?(config, %{"operation" => name})
        when name in ~w(health capacity metrics readiness list measurements),
        do: Features.supports?(config, :observability)
 
-  defp approved?(config, %{"operation" => name})
+  defp operation_approved?(config, %{"operation" => name})
        when name in ~w(expand_disks inspect_growth qualify_growth),
        do: Features.supports?(config, :disk_growth)
 
-  defp approved?(config, %{"operation" => "qualify_creation"} = request),
+  defp operation_approved?(config, %{"operation" => "qualify_creation"} = request),
     do: approved?(config, %{"operation" => "create", "create" => request})
 
-  defp approved?(config, %{"operation" => "exec_buffered"}),
+  defp operation_approved?(config, %{"operation" => "exec_buffered"}),
     do: Features.supports?(config, :buffered_exec)
 
-  defp approved?(config, %{"operation" => "exec_background"}),
+  defp operation_approved?(config, %{"operation" => "exec_background"}),
     do: Features.supports?(config, :background_exec)
 
-  defp approved?(config, %{"operation" => "exec_stream"}),
+  defp operation_approved?(config, %{"operation" => "exec_stream"}),
     do: Features.supports?(config, :streaming_exec)
 
-  defp approved?(config, %{"operation" => "volume", "request" => request}),
+  defp operation_approved?(config, %{"operation" => "volume", "request" => request}),
     do:
       config.platform == :linux and Features.supports?(config, :volumes) and
         VolumeContract.approved?(request, config.volume_policy)
 
-  defp approved?(config, %{"operation" => "terminal_open"}),
+  defp operation_approved?(config, %{"operation" => "terminal_open"}),
     do: Features.supports?(config, :terminals)
 
-  defp approved?(config, %{"operation" => "prepare_artifact", "source" => source} = request),
-    do:
-      Features.supports?(config, :remote_sources) and
-        Enum.any?(config.sources, fn approved ->
-          approved.kind == :registry and approved.credential_ref == request["credential_ref"] and
-            RegistryContract.source(approved) == source
-        end)
+  defp operation_approved?(
+         config,
+         %{"operation" => "prepare_artifact", "source" => source} = request
+       ),
+       do:
+         Features.supports?(config, :remote_sources) and
+           Enum.any?(config.sources, fn approved ->
+             approved.kind == :registry and approved.credential_ref == request["credential_ref"] and
+               RegistryContract.source(approved) == source
+           end)
 
-  defp approved?(config, %{"operation" => "pull_image", "source" => source}),
+  defp operation_approved?(config, %{"operation" => "pull_image", "source" => source}),
     do:
       Features.supports?(config, :images) and
         Enum.any?(config.sources, fn approved ->
           approved.kind == :oci and ImageContract.source(approved) == source
         end)
 
-  defp approved?(config, %{"operation" => "list_images"}), do: Features.supports?(config, :images)
+  defp operation_approved?(config, %{"operation" => "list_images"}),
+    do: Features.supports?(config, :images)
 
-  defp approved?(config, %{"operation" => "logs"}), do: Features.supports?(config, :logs)
+  defp operation_approved?(config, %{"operation" => name})
+       when name in ~w(start_checkpointable checkpoint_preflight inspect_capture inspect_capture_resolution resolve_capture cleanup_capture_staging abort_capture_staging qualify_aborted_capture_source capture_checkpoint),
+       do: Features.supports?(config, :checkpoints)
 
-  defp approved?(_config, _operation), do: true
+  defp operation_approved?(config, %{"operation" => "logs"}),
+    do: Features.supports?(config, :logs)
+
+  defp operation_approved?(_config, _operation), do: true
 
   defp source_approved?(config, request),
     do:

@@ -19,6 +19,10 @@ const STREAM_EVENTS: u32 = 65538;
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(tag = "type", deny_unknown_fields)]
 pub(crate) enum Kind {
+    Capture {
+        metadata: Blob,
+        expected: crate::capture_worker::Expected,
+    },
     Read,
     Bootstrap {
         metadata: Blob,
@@ -43,6 +47,14 @@ pub(crate) enum Kind {
     },
     Streaming {
         metadata: Blob,
+    },
+    CheckpointInstall {
+        metadata: Blob,
+        expected: crate::checkpoint_install::Expected,
+    },
+    CheckpointMaterialize {
+        metadata: Blob,
+        expected: crate::checkpoint_materialize::Expected,
     },
     Grow {
         metadata: Blob,
@@ -119,6 +131,9 @@ impl Request {
         if let Kind::Buffered { metadata }
         | Kind::Background { metadata }
         | Kind::Streaming { metadata }
+        | Kind::Capture { metadata, .. }
+        | Kind::CheckpointInstall { metadata, .. }
+        | Kind::CheckpointMaterialize { metadata, .. }
         | Kind::Grow { metadata, .. }
         | Kind::Pull { metadata, .. }
         | Kind::Bootstrap { metadata, .. } = &self.kind
@@ -130,6 +145,12 @@ impl Request {
                         crate::bootstrap::METADATA_BYTES
                     } else if matches!(self.kind, Kind::Pull { .. }) {
                         crate::image_pull::METADATA_BYTES
+                    } else if matches!(self.kind, Kind::Capture { .. }) {
+                        crate::capture_worker::METADATA_BYTES
+                    } else if matches!(self.kind, Kind::CheckpointInstall { .. }) {
+                        crate::checkpoint_install::METADATA_BYTES
+                    } else if matches!(self.kind, Kind::CheckpointMaterialize { .. }) {
+                        crate::checkpoint_materialize::METADATA_BYTES
                     } else if matches!(self.kind, Kind::Grow { .. }) {
                         crate::growth::METADATA_BYTES
                     } else {
@@ -149,6 +170,24 @@ impl Request {
             }
         }
         if let Kind::Pull { expected, .. } = &self.kind {
+            expected.validate()?;
+            if self.max_bytes != 1 {
+                return Err(Error::before(ErrorCode::Validation));
+            }
+        }
+        if let Kind::Capture { expected, .. } = &self.kind {
+            expected.validate()?;
+            if self.max_bytes != 1 {
+                return Err(Error::before(ErrorCode::Validation));
+            }
+        }
+        if let Kind::CheckpointInstall { expected, .. } = &self.kind {
+            expected.validate()?;
+            if self.max_bytes != 1 {
+                return Err(Error::before(ErrorCode::Validation));
+            }
+        }
+        if let Kind::CheckpointMaterialize { expected, .. } = &self.kind {
             expected.validate()?;
             if self.max_bytes != 1 {
                 return Err(Error::before(ErrorCode::Validation));
@@ -175,6 +214,9 @@ impl Request {
             | Kind::Buffered { .. }
             | Kind::Background { .. }
             | Kind::Streaming { .. }
+            | Kind::Capture { .. }
+            | Kind::CheckpointInstall { .. }
+            | Kind::CheckpointMaterialize { .. }
             | Kind::Grow { .. } => None,
             Kind::Write { mode, .. } => mode,
         };
@@ -226,6 +268,9 @@ impl Request {
                 | Kind::Buffered { .. }
                 | Kind::Background { .. }
                 | Kind::Streaming { .. }
+                | Kind::Capture { .. }
+                | Kind::CheckpointInstall { .. }
+                | Kind::CheckpointMaterialize { .. }
                 | Kind::Grow { .. }
         ) {
             0o600
@@ -244,6 +289,9 @@ impl Request {
                 | Kind::Buffered { .. }
                 | Kind::Background { .. }
                 | Kind::Streaming { .. }
+                | Kind::Capture { .. }
+                | Kind::CheckpointInstall { .. }
+                | Kind::CheckpointMaterialize { .. }
                 | Kind::Grow { .. } => metadata.len() != 0,
                 Kind::Write { total, .. } => metadata.len() != total,
             }
@@ -257,6 +305,9 @@ impl Request {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "type", deny_unknown_fields)]
 pub(crate) enum Event {
+    Captured {
+        proof: crate::capture_worker::Proof,
+    },
     StreamOutput {
         stderr: bool,
         offset: u64,
@@ -298,6 +349,12 @@ pub(crate) enum Event {
     },
     Launched {
         pid: u32,
+    },
+    CheckpointInstalled {
+        proof: crate::checkpoint_install::Proof,
+    },
+    CheckpointMaterialized {
+        proof: crate::checkpoint_materialize::Proof,
     },
     Grown {
         proof: crate::growth::GrowthProof,
@@ -413,6 +470,8 @@ impl Decoder {
 }
 
 pub(crate) struct Evidence {
+    pub captured: Option<crate::capture_worker::Proof>,
+    capture: Option<crate::capture_worker::Expected>,
     pub stream: Option<crate::CommandOutcome>,
     pub command: Option<CommandProof>,
     pub launched: Option<u32>,
@@ -420,6 +479,10 @@ pub(crate) struct Evidence {
     bootstrap: Option<crate::bootstrap::Expected>,
     pub pulled: Option<crate::ImageObservation>,
     pull: Option<crate::ImagePullRequest>,
+    pub installed: Option<crate::checkpoint_install::Proof>,
+    install: Option<crate::checkpoint_install::Expected>,
+    pub materialized: Option<crate::checkpoint_materialize::Proof>,
+    materialize: Option<crate::checkpoint_materialize::Expected>,
     pub grown: Option<crate::growth::GrowthProof>,
     growth: Option<crate::growth::GrowthProof>,
     pub limited: bool,
@@ -441,6 +504,11 @@ pub(crate) struct Evidence {
 impl Evidence {
     pub(crate) fn new(request: &Request) -> Self {
         Self {
+            captured: None,
+            capture: match &request.kind {
+                Kind::Capture { expected, .. } => Some(expected.clone()),
+                _ => None,
+            },
             bootstrapped: None,
             bootstrap: match &request.kind {
                 Kind::Bootstrap { expected, .. } => Some(expected.clone()),
@@ -456,6 +524,16 @@ impl Evidence {
             stream: None,
             command: None,
             launched: None,
+            installed: None,
+            install: match &request.kind {
+                Kind::CheckpointInstall { expected, .. } => Some(expected.clone()),
+                _ => None,
+            },
+            materialized: None,
+            materialize: match &request.kind {
+                Kind::CheckpointMaterialize { expected, .. } => Some(expected.clone()),
+                _ => None,
+            },
             grown: None,
             growth: match request.kind {
                 Kind::Grow { expected, .. } => Some(expected),
@@ -475,6 +553,9 @@ impl Evidence {
                 | Kind::Buffered { .. }
                 | Kind::Background { .. }
                 | Kind::Streaming { .. }
+                | Kind::Capture { .. }
+                | Kind::CheckpointInstall { .. }
+                | Kind::CheckpointMaterialize { .. }
                 | Kind::Grow { .. } => None,
                 Kind::Write { total, .. } => Some(total),
             },
@@ -577,6 +658,9 @@ impl Evidence {
             Event::Ready if !self.ready && self.sequence == 0 => self.ready = true,
             Event::Progress { bytes }
                 if self.growth.is_none()
+                    && self.materialize.is_none()
+                    && self.install.is_none()
+                    && self.capture.is_none()
                     && self.bootstrap.is_none()
                     && self.pull.is_none()
                     && !self.images
@@ -590,6 +674,9 @@ impl Evidence {
             }
             Event::Acknowledged { bytes }
                 if self.growth.is_none()
+                    && self.materialize.is_none()
+                    && self.install.is_none()
+                    && self.capture.is_none()
                     && self.bootstrap.is_none()
                     && self.pull.is_none()
                     && !self.images
@@ -610,6 +697,9 @@ impl Evidence {
                     && bytes >= self.observed_bytes
                     && bytes <= self.max_bytes
                     && ((self.growth.is_none()
+                        && self.materialize.is_none()
+                        && self.install.is_none()
+                        && self.capture.is_none()
                         && self.pull.is_none()
                         && self.bootstrap.is_none())
                         || bytes == 0) =>
@@ -619,6 +709,9 @@ impl Evidence {
             }
             Event::Limited { bytes }
                 if self.growth.is_none()
+                    && self.materialize.is_none()
+                    && self.install.is_none()
+                    && self.capture.is_none()
                     && self.bootstrap.is_none()
                     && self.pull.is_none()
                     && self.ready
@@ -649,6 +742,39 @@ impl Evidence {
                     stderr,
                 });
                 self.limited = limited;
+            }
+            Event::Captured { proof }
+                if self.ready
+                    && self
+                        .capture
+                        .as_ref()
+                        .is_some_and(|expected| proof.matches(expected)) =>
+            {
+                self.captured = Some(proof);
+                self.acknowledged = true;
+                self.terminal = true;
+            }
+            Event::CheckpointInstalled { proof }
+                if self.ready
+                    && self
+                        .install
+                        .as_ref()
+                        .is_some_and(|expected| proof.matches(expected)) =>
+            {
+                self.installed = Some(proof);
+                self.acknowledged = true;
+                self.terminal = true;
+            }
+            Event::CheckpointMaterialized { proof }
+                if self.ready
+                    && self
+                        .materialize
+                        .as_ref()
+                        .is_some_and(|expected| proof.matches(expected)) =>
+            {
+                self.materialized = Some(proof);
+                self.acknowledged = true;
+                self.terminal = true;
             }
             Event::Grown { proof } if self.ready && self.growth == Some(proof) => {
                 self.grown = Some(proof);
@@ -745,6 +871,30 @@ pub fn run_file_worker() -> Result<()> {
             Err(_) => Event::Failed { bytes: 0 },
         });
     }
+    if let Kind::Capture { metadata, expected } = &request.kind {
+        return writer.event(
+            match crate::capture_worker::run(&request, metadata, expected) {
+                Ok(proof) => Event::Captured { proof },
+                Err(_) => Event::Failed { bytes: 0 },
+            },
+        );
+    }
+    if let Kind::CheckpointInstall { metadata, expected } = &request.kind {
+        return writer.event(
+            match crate::checkpoint_install::run(&request, metadata, expected) {
+                Ok(proof) => Event::CheckpointInstalled { proof },
+                Err(_) => Event::Failed { bytes: 0 },
+            },
+        );
+    }
+    if let Kind::CheckpointMaterialize { metadata, expected } = &request.kind {
+        return writer.event(
+            match crate::checkpoint_materialize::run(&request, metadata, expected) {
+                Ok(proof) => Event::CheckpointMaterialized { proof },
+                Err(_) => Event::Failed { bytes: 0 },
+            },
+        );
+    }
     if let Kind::Grow { metadata, expected } = &request.kind {
         return writer.event(match crate::growth::run(&request, metadata, *expected) {
             Ok(proof) => Event::Grown { proof },
@@ -806,6 +956,9 @@ pub fn run_file_worker() -> Result<()> {
                     | Kind::Buffered { .. }
                     | Kind::Background { .. }
                     | Kind::Streaming { .. }
+                    | Kind::Capture { .. }
+                    | Kind::CheckpointInstall { .. }
+                    | Kind::CheckpointMaterialize { .. }
                     | Kind::Grow { .. } => {
                         unreachable!()
                     }
@@ -826,6 +979,196 @@ pub fn run_file_worker() -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn capture_requires_distinct_exact_proof_and_ignores_retired_or_generic_ack() {
+        let expected = crate::capture_worker::Expected {
+            metadata_sha256: "a".repeat(64),
+            operation_id: "capture-1".into(),
+        };
+        let query = request(Kind::Capture {
+            metadata: Blob {
+                path: "/tmp/metadata".into(),
+                device: 1,
+                inode: 2,
+                bytes: 1,
+            },
+            expected: expected.clone(),
+        });
+        let proof = crate::capture_worker::Proof {
+            expected,
+            artifact: crate::CaptureArtifact {
+                sha256: "b".repeat(64),
+                size_bytes: 512,
+                head: "c".repeat(32),
+                parent: None,
+            },
+            device: 1,
+            inode: 2,
+            source_pid: (123, 456),
+            source_material_sha256: "d".repeat(64),
+        };
+        for event in [
+            Event::Acknowledged { bytes: 0 },
+            Event::Progress { bytes: 1 },
+        ] {
+            let mut evidence = Evidence::new(&query);
+            evidence.event(frame(0, Event::Ready)).unwrap();
+            assert!(evidence.event(frame(1, event)).is_err());
+            assert!(evidence.captured.is_none());
+        }
+        let mut evidence = Evidence::new(&query);
+        evidence.event(frame(0, Event::Ready)).unwrap();
+        let mut crossed = proof.clone();
+        crossed.expected.operation_id = "another".into();
+        assert!(evidence
+            .event(frame(1, Event::Captured { proof: crossed }))
+            .is_err());
+        let mut evidence = Evidence::new(&query);
+        evidence.event(frame(0, Event::Ready)).unwrap();
+        evidence.retire();
+        assert!(evidence
+            .event(frame(
+                1,
+                Event::Captured {
+                    proof: proof.clone(),
+                },
+            ))
+            .is_err());
+        assert!(evidence.captured.is_none());
+        let mut evidence = Evidence::new(&query);
+        evidence.event(frame(0, Event::Ready)).unwrap();
+        evidence
+            .event(frame(
+                1,
+                Event::Captured {
+                    proof: proof.clone(),
+                },
+            ))
+            .unwrap();
+        assert!(evidence.captured.is_some());
+        assert!(evidence.acknowledged);
+        assert!(evidence.event(frame(2, Event::Captured { proof })).is_err());
+    }
+
+    #[test]
+    fn checkpoint_install_requires_its_own_exact_proof_and_rejects_generic_ack() {
+        let expected = crate::checkpoint_install::Expected {
+            metadata_sha256: "a".repeat(64),
+            ticket_sha256: "b".repeat(64),
+        };
+        let query = request(Kind::CheckpointInstall {
+            metadata: Blob {
+                path: "/tmp/install-metadata".into(),
+                device: 1,
+                inode: 2,
+                bytes: 1,
+            },
+            expected: expected.clone(),
+        });
+        let proof = crate::checkpoint_install::Proof {
+            expected,
+            device: 1,
+            inode: 2,
+            storage_gib: 1,
+            overlay_gib: 1,
+            inventory_sha256: "c".repeat(64),
+        };
+        let mut evidence = Evidence::new(&query);
+        evidence.event(frame(0, Event::Ready)).unwrap();
+        assert!(evidence
+            .event(frame(1, Event::Acknowledged { bytes: 0 }))
+            .is_err());
+        let mut crossed = proof.clone();
+        crossed.expected.ticket_sha256 = "d".repeat(64);
+        assert!(evidence
+            .event(frame(1, Event::CheckpointInstalled { proof: crossed }))
+            .is_err());
+        evidence
+            .event(frame(
+                1,
+                Event::CheckpointInstalled {
+                    proof: proof.clone(),
+                },
+            ))
+            .unwrap();
+        assert_eq!(evidence.installed, Some(proof.clone()));
+        assert!(evidence
+            .event(frame(2, Event::CheckpointInstalled { proof }))
+            .is_err());
+    }
+
+    #[test]
+    fn checkpoint_material_requires_distinct_correlated_proof_and_rejects_retired_or_crossed_events(
+    ) {
+        let expected = crate::checkpoint_materialize::Expected {
+            metadata_sha256: "a".repeat(64),
+            source_sha256: "b".repeat(64),
+        };
+        let query = request(Kind::CheckpointMaterialize {
+            metadata: Blob {
+                path: "/tmp/metadata".into(),
+                device: 1,
+                inode: 2,
+                bytes: 1,
+            },
+            expected: expected.clone(),
+        });
+        let proof = crate::checkpoint_materialize::Proof {
+            expected: expected.clone(),
+            device: 1,
+            inode: 2,
+            logical_bytes: 1024,
+            files: 6,
+            material_sha256: "c".repeat(64),
+        };
+        for invalid in [
+            Event::Acknowledged { bytes: 0 },
+            Event::Progress { bytes: 1 },
+            Event::Limited { bytes: 0 },
+            Event::Grown {
+                proof: crate::growth::GrowthProof {
+                    storage_gib: 1,
+                    overlay_gib: 1,
+                },
+            },
+        ] {
+            let mut evidence = Evidence::new(&query);
+            evidence.event(frame(0, Event::Ready)).unwrap();
+            assert!(evidence.event(frame(1, invalid)).is_err());
+            assert!(evidence.materialized.is_none());
+        }
+        let mut crossed = proof.clone();
+        crossed.expected.source_sha256 = "d".repeat(64);
+        let mut evidence = Evidence::new(&query);
+        evidence.event(frame(0, Event::Ready)).unwrap();
+        assert!(evidence
+            .event(frame(1, Event::CheckpointMaterialized { proof: crossed }))
+            .is_err());
+        evidence
+            .event(frame(
+                1,
+                Event::CheckpointMaterialized {
+                    proof: proof.clone(),
+                },
+            ))
+            .unwrap();
+        assert_eq!(evidence.materialized, Some(proof.clone()));
+        assert!(evidence
+            .event(frame(
+                2,
+                Event::CheckpointMaterialized {
+                    proof: proof.clone()
+                }
+            ))
+            .is_err());
+        let mut retired = Evidence::new(&query);
+        retired.event(frame(0, Event::Ready)).unwrap();
+        retired.retire();
+        assert!(retired
+            .event(frame(1, Event::CheckpointMaterialized { proof }))
+            .is_err());
+    }
 
     #[test]
     fn growth_requires_distinct_exact_correlated_proof_and_rejects_late_success() {

@@ -22,6 +22,18 @@ pub struct ReadBudget {
     pub(crate) cancel: Cancellation,
 }
 impl ReadBudget {
+    /// Checkpoint transport validation shares a single finite caller deadline.
+    /// Its long artifact reads do not widen ordinary observation budgets.
+    pub fn for_checkpoint_work(remaining: Duration, cancel: Cancellation) -> Result<Self> {
+        if remaining.is_zero() || remaining > Duration::from_secs(86_400) {
+            return Err(Error::before(ErrorCode::Validation));
+        }
+        Ok(Self {
+            deadline: Instant::now() + remaining,
+            cancel,
+        })
+    }
+
     /// Volume mutation shares one caller deadline through filesystem stages.
     /// Read-only constructors retain their separate thirty-second ceiling.
     pub fn for_volume_work(remaining: Duration, cancel: Cancellation) -> Result<Self> {

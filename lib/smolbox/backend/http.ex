@@ -22,7 +22,13 @@ defmodule SmolBox.Backend.HTTP do
   @impl true
   def supports_operation?(_context, operation),
     do:
-      operation not in [:qualify_creation, :inspect_creation, :qualify_growth] and
+      operation not in [
+        :qualify_creation,
+        :inspect_creation,
+        :qualify_growth,
+        :qualify_capture,
+        :cleanup_capture
+      ] and
         Keyword.has_key?(Backend.operations(), operation)
 
   @impl true

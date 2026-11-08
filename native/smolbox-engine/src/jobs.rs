@@ -10,10 +10,22 @@ pub const JOB_CHILDREN: usize = 4;
 pub const JOB_STAGING_BYTES: u64 = 64 * 1024 * 1024;
 /// Separate finite host artifact-download allowance; not guest disk authority.
 pub const JOB_REGISTRY_STAGING_BYTES: u64 = 32 * 1024 * 1024 * 1024;
+/// Request-private checkpoint input plus bounded history objects; separate from
+/// registry downloads, command spools and admitted guest disks.
+pub const JOB_CHECKPOINT_STAGING_BYTES: u64 = 128 * 1024 * 1024 * 1024;
+/// Request-private decoded checkpoint material, not persistent guest capacity.
+pub const JOB_CHECKPOINT_MATERIAL_BYTES: u64 = crate::checkpoint_materialize::MATERIAL_BYTES;
+/// Extra room for one bounded SDK history-index parser, separate from ordinary
+/// work metadata and permanently reserved control headroom.
+pub const JOB_CHECKPOINT_METADATA_BYTES: u64 = 128 * 1024 * 1024;
 /// Work metadata allowance. Reserved control memory is independent.
 pub const JOB_METADATA_BYTES: u64 = 32 * 1024 * 1024;
 /// Two bounded volume observers remain admissible with full work metadata.
 pub const JOB_CONTROL_METADATA_BYTES: u64 = 256 * 1024;
+/// One bounded material-journal resolver remains admissible while unresolved
+/// capture work retains its whole work metadata allowance. Volume/control
+/// observation headroom stays independent; no checkpoint staging is released.
+pub const JOB_MATERIAL_CONTROL_METADATA_BYTES: u64 = 32 * 1024 * 1024;
 pub const JOB_DESCRIPTORS: usize = 32;
 pub const JOB_CONTROL_HEADROOM: usize = 8;
 
@@ -21,6 +33,7 @@ pub const JOB_CONTROL_HEADROOM: usize = 8;
 enum Lane {
     Work,
     Control,
+    MaterialControl,
 }
 #[derive(Clone, Copy)]
 pub(crate) struct Demand {
@@ -29,6 +42,10 @@ pub(crate) struct Demand {
     descriptors: usize,
     staging: u64,
     registry_staging: u64,
+    checkpoint_staging: u64,
+    checkpoint_metadata: u64,
+    checkpoint_material: u64,
+    checkpoint_install: u64,
     metadata: u64,
 }
 impl Demand {
@@ -42,6 +59,10 @@ impl Demand {
             descriptors: 12 + count,
             staging: 0,
             registry_staging: 0,
+            checkpoint_staging: 0,
+            checkpoint_metadata: 0,
+            checkpoint_material: 0,
+            checkpoint_install: 0,
             metadata: crate::VOLUME_OBSERVATION_METADATA_BYTES * (count as u64 + 1),
         })
     }
@@ -53,6 +74,10 @@ impl Demand {
             descriptors: 8,
             staging: 0,
             registry_staging: 0,
+            checkpoint_staging: 0,
+            checkpoint_metadata: 0,
+            checkpoint_material: 0,
+            checkpoint_install: 0,
             metadata: JOB_METADATA_BYTES,
         }
     }
@@ -64,6 +89,10 @@ impl Demand {
             descriptors: 4,
             staging: 0,
             registry_staging: 0,
+            checkpoint_staging: 0,
+            checkpoint_metadata: 0,
+            checkpoint_material: 0,
+            checkpoint_install: 0,
             // Two bounded records, decoded identities, read buffers and root
             // policy copies coexist; observation still consumes no work slot.
             metadata: crate::VOLUME_OBSERVATION_METADATA_BYTES,
@@ -77,6 +106,10 @@ impl Demand {
             descriptors: 4,
             staging: 0,
             registry_staging: 0,
+            checkpoint_staging: 0,
+            checkpoint_metadata: 0,
+            checkpoint_material: 0,
+            checkpoint_install: 0,
             // Root qualification also enters staging/provisioning: reserve
             // bounded private-record and identity copies for that whole job.
             metadata: crate::VOLUME_OBSERVATION_METADATA_BYTES,
@@ -93,6 +126,31 @@ impl Demand {
             descriptors: 16,
             staging: 0,
             registry_staging: bytes,
+            checkpoint_staging: 0,
+            checkpoint_metadata: 0,
+            checkpoint_material: 0,
+            checkpoint_install: 0,
+            metadata: JOB_METADATA_BYTES,
+        })
+    }
+
+    pub(crate) fn checkpoint_prepare(bytes: u64) -> Result<Self> {
+        if bytes == 0 || bytes > crate::CHECKPOINT_ARTIFACT_BYTES {
+            return Err(Error::before(ErrorCode::Validation));
+        }
+        let staging = bytes
+            .checked_add(crate::checkpoint::HISTORY_STAGING_BYTES)
+            .ok_or(Error::before(ErrorCode::Admission))?;
+        Ok(Self {
+            lane: Lane::Work,
+            children: 1,
+            descriptors: 16,
+            staging: 0,
+            registry_staging: 0,
+            checkpoint_staging: staging,
+            checkpoint_metadata: JOB_CHECKPOINT_METADATA_BYTES,
+            checkpoint_material: 0,
+            checkpoint_install: 0,
             metadata: JOB_METADATA_BYTES,
         })
     }
@@ -103,8 +161,21 @@ impl Demand {
             children: 0,
             descriptors: 12,
             registry_staging: 0,
+            checkpoint_staging: 0,
+            checkpoint_metadata: 0,
+            checkpoint_material: 0,
+            checkpoint_install: 0,
             staging: 0,
             metadata: JOB_METADATA_BYTES,
+        }
+    }
+
+    pub(crate) fn checkpoint_inspection() -> Self {
+        // Public SDK CPU compatibility uses a normally collected sysctl child
+        // on macOS. Keep one conservative slot on both qualified platforms.
+        Self {
+            children: 1,
+            ..Self::oci_metadata()
         }
     }
 
@@ -116,6 +187,10 @@ impl Demand {
             // coexist with the bootstrap's 21-descriptor demand.
             descriptors: 24,
             registry_staging: 0,
+            checkpoint_staging: 0,
+            checkpoint_metadata: 0,
+            checkpoint_material: 0,
+            checkpoint_install: 0,
             staging: 1,
             metadata: JOB_METADATA_BYTES,
         }
@@ -127,6 +202,10 @@ impl Demand {
             children: 0,
             descriptors: 12,
             registry_staging: 0,
+            checkpoint_staging: 0,
+            checkpoint_metadata: 0,
+            checkpoint_material: 0,
+            checkpoint_install: 0,
             staging: 0,
             metadata: JOB_METADATA_BYTES,
         }
@@ -138,6 +217,10 @@ impl Demand {
             children: 1,
             descriptors: 21,
             registry_staging: 0,
+            checkpoint_staging: 0,
+            checkpoint_metadata: 0,
+            checkpoint_material: 0,
+            checkpoint_install: 0,
             staging: 1,
             metadata: JOB_METADATA_BYTES,
         }
@@ -149,6 +232,10 @@ impl Demand {
             children: 1,
             descriptors: 20,
             registry_staging: 0,
+            checkpoint_staging: 0,
+            checkpoint_metadata: 0,
+            checkpoint_material: 0,
+            checkpoint_install: 0,
             staging: crate::images::IMAGE_OUTPUT_BYTES,
             // Header payload, bounded projection, normalized SDK response and
             // typed result coexist with relay/watch/collector stack headroom.
@@ -162,6 +249,10 @@ impl Demand {
             children: 0,
             descriptors: 10,
             registry_staging: 0,
+            checkpoint_staging: 0,
+            checkpoint_metadata: 0,
+            checkpoint_material: 0,
+            checkpoint_install: 0,
             staging: 0,
             // Qualification loads/stages the bounded journal as well as disk
             // scans. Reserve the whole metadata pool; control stays independent.
@@ -182,6 +273,10 @@ impl Demand {
             // control headroom available.
             descriptors: 21,
             registry_staging: 0,
+            checkpoint_staging: 0,
+            checkpoint_metadata: 0,
+            checkpoint_material: 0,
+            checkpoint_install: 0,
             staging: 1,
             // Parser buffers plus owner-watch/retained-collector stack headroom.
             metadata: metadata + 8 * 1024 * 1024 + crate::qcow_geometry::MEMORY_BYTES,
@@ -197,6 +292,10 @@ impl Demand {
             children: 1,
             descriptors: 20,
             registry_staging: 0,
+            checkpoint_staging: 0,
+            checkpoint_metadata: 0,
+            checkpoint_material: 0,
+            checkpoint_install: 0,
             staging: options.total_input_bytes * 3,
             metadata: metadata + options.max_buffer_bytes * 4 + 8 * 1024 * 1024,
         })
@@ -210,6 +309,10 @@ impl Demand {
             children: 1,
             descriptors: 4,
             registry_staging: 0,
+            checkpoint_staging: 0,
+            checkpoint_metadata: 0,
+            checkpoint_material: 0,
+            checkpoint_install: 0,
             staging: bytes,
             metadata: 0,
         })
@@ -227,6 +330,10 @@ impl Demand {
             children: 1,
             descriptors: 6,
             registry_staging: 0,
+            checkpoint_staging: 0,
+            checkpoint_metadata: 0,
+            checkpoint_material: 0,
+            checkpoint_install: 0,
             staging: output,
             metadata,
         })
@@ -237,6 +344,10 @@ impl Demand {
             children: 0,
             descriptors: 4,
             registry_staging: 0,
+            checkpoint_staging: 0,
+            checkpoint_metadata: 0,
+            checkpoint_material: 0,
+            checkpoint_install: 0,
             staging: 0,
             metadata: 0,
         }
@@ -247,6 +358,10 @@ impl Demand {
             children: 0,
             descriptors: 2,
             registry_staging: 0,
+            checkpoint_staging: 0,
+            checkpoint_metadata: 0,
+            checkpoint_material: 0,
+            checkpoint_install: 0,
             staging: 0,
             metadata: crate::logs::LOG_MEMORY_BYTES,
         }
@@ -257,8 +372,21 @@ impl Demand {
             children: 0,
             descriptors: 4,
             registry_staging: 0,
+            checkpoint_staging: 0,
+            checkpoint_metadata: 0,
+            checkpoint_material: 0,
+            checkpoint_install: 0,
             staging: 0,
             metadata: 0,
+        }
+    }
+
+    pub(crate) fn material_resolution() -> Self {
+        Self {
+            lane: Lane::MaterialControl,
+            descriptors: 4,
+            metadata: JOB_MATERIAL_CONTROL_METADATA_BYTES,
+            ..Self::observation()
         }
     }
 }
@@ -271,8 +399,13 @@ pub(crate) struct Counts {
     pub work_descriptors: usize,
     pub staging: u64,
     pub registry_staging: u64,
+    pub checkpoint_staging: u64,
+    pub checkpoint_metadata: u64,
+    pub checkpoint_material: u64,
+    pub checkpoint_install: u64,
     pub metadata: u64,
     pub work_metadata: u64,
+    pub material_control_metadata: u64,
 }
 #[derive(Default)]
 struct Shared {
@@ -306,18 +439,23 @@ impl JobPool {
         if demand.children > JOB_CHILDREN
             || demand.descriptors > JOB_DESCRIPTORS
             || demand.registry_staging > JOB_REGISTRY_STAGING_BYTES
+            || demand.checkpoint_staging > JOB_CHECKPOINT_STAGING_BYTES
+            || demand.checkpoint_metadata > JOB_CHECKPOINT_METADATA_BYTES
+            || demand.checkpoint_material > JOB_CHECKPOINT_MATERIAL_BYTES
+            || demand.checkpoint_install > JOB_CHECKPOINT_MATERIAL_BYTES
             || demand.staging > JOB_STAGING_BYTES
             || demand.metadata
                 > match demand.lane {
                     Lane::Work => JOB_METADATA_BYTES,
                     Lane::Control => JOB_CONTROL_METADATA_BYTES,
+                    Lane::MaterialControl => JOB_MATERIAL_CONTROL_METADATA_BYTES,
                 }
         {
             return Err(Error::before(ErrorCode::Admission));
         }
         let (work, control) = match demand.lane {
             Lane::Work => (counts.work + 1, counts.control),
-            Lane::Control => (counts.work, counts.control + 1),
+            Lane::Control | Lane::MaterialControl => (counts.work, counts.control + 1),
         };
         let next = Counts {
             work,
@@ -327,15 +465,24 @@ impl JobPool {
             work_descriptors: counts.work_descriptors
                 + match demand.lane {
                     Lane::Work => demand.descriptors,
-                    Lane::Control => 0,
+                    Lane::Control | Lane::MaterialControl => 0,
                 },
             registry_staging: counts.registry_staging + demand.registry_staging,
+            checkpoint_staging: counts.checkpoint_staging + demand.checkpoint_staging,
+            checkpoint_metadata: counts.checkpoint_metadata + demand.checkpoint_metadata,
+            checkpoint_material: counts.checkpoint_material + demand.checkpoint_material,
+            checkpoint_install: counts.checkpoint_install + demand.checkpoint_install,
             staging: counts.staging + demand.staging,
             metadata: counts.metadata + demand.metadata,
             work_metadata: counts.work_metadata
                 + match demand.lane {
                     Lane::Work => demand.metadata,
-                    Lane::Control => 0,
+                    Lane::Control | Lane::MaterialControl => 0,
+                },
+            material_control_metadata: counts.material_control_metadata
+                + match demand.lane {
+                    Lane::MaterialControl => demand.metadata,
+                    Lane::Work | Lane::Control => 0,
                 },
         };
         if next.work > JOB_WORK_SLOTS
@@ -344,9 +491,15 @@ impl JobPool {
             || next.descriptors > JOB_DESCRIPTORS
             || next.work_descriptors > JOB_DESCRIPTORS - JOB_CONTROL_HEADROOM
             || next.registry_staging > JOB_REGISTRY_STAGING_BYTES
+            || next.checkpoint_staging > JOB_CHECKPOINT_STAGING_BYTES
+            || next.checkpoint_metadata > JOB_CHECKPOINT_METADATA_BYTES
+            || next.checkpoint_material > JOB_CHECKPOINT_MATERIAL_BYTES
+            || next.checkpoint_install > JOB_CHECKPOINT_MATERIAL_BYTES
             || next.staging > JOB_STAGING_BYTES
             || next.work_metadata > JOB_METADATA_BYTES
-            || next.metadata - next.work_metadata > JOB_CONTROL_METADATA_BYTES
+            || next.material_control_metadata > JOB_MATERIAL_CONTROL_METADATA_BYTES
+            || next.metadata - next.work_metadata - next.material_control_metadata
+                > JOB_CONTROL_METADATA_BYTES
         {
             return Err(Error::before(ErrorCode::Admission));
         }
@@ -377,16 +530,136 @@ impl Drop for JobLease {
                 counts.work_metadata -= self.demand.metadata;
             }
             Lane::Control => counts.control -= 1,
+            Lane::MaterialControl => {
+                counts.control -= 1;
+                counts.material_control_metadata -= self.demand.metadata;
+            }
         }
         counts.children -= self.demand.children;
         counts.descriptors -= self.demand.descriptors;
         counts.registry_staging -= self.demand.registry_staging;
+        counts.checkpoint_staging -= self.demand.checkpoint_staging;
+        counts.checkpoint_metadata -= self.demand.checkpoint_metadata;
+        counts.checkpoint_material -= self.demand.checkpoint_material;
+        counts.checkpoint_install -= self.demand.checkpoint_install;
         counts.staging -= self.demand.staging;
         counts.metadata -= self.demand.metadata;
     }
 }
 
 impl JobLease {
+    pub(crate) fn promote_checkpoint_install(&mut self, bytes: u64) -> Result<()> {
+        let mut counts = self
+            .pool
+            .0
+            .counts
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        let descriptors = JOB_DESCRIPTORS - JOB_CONTROL_HEADROOM;
+        if !self.pool.available()
+            || bytes == 0
+            || bytes > JOB_CHECKPOINT_MATERIAL_BYTES
+            || self.demand.checkpoint_material == 0
+            || self.demand.checkpoint_install != 0
+            || self.demand.children != 1
+            || self.demand.descriptors > descriptors
+            || self.demand.staging != 0
+        {
+            return Err(Error::before(ErrorCode::Admission));
+        }
+        let extra = descriptors - self.demand.descriptors;
+        if counts.children + 1 > JOB_CHILDREN
+            || counts.descriptors + extra > JOB_DESCRIPTORS
+            || counts.work_descriptors + extra > descriptors
+            || counts.staging + crate::checkpoint_install::METADATA_BYTES > JOB_STAGING_BYTES
+            || counts.checkpoint_install + bytes > JOB_CHECKPOINT_MATERIAL_BYTES
+        {
+            return Err(Error::before(ErrorCode::Admission));
+        }
+        fd_admission(counts.descriptors + extra)?;
+        counts.children += 1;
+        counts.descriptors += extra;
+        counts.work_descriptors += extra;
+        counts.staging += crate::checkpoint_install::METADATA_BYTES;
+        counts.checkpoint_install += bytes;
+        self.demand.children = 2;
+        self.demand.descriptors = descriptors;
+        self.demand.staging = crate::checkpoint_install::METADATA_BYTES;
+        self.demand.checkpoint_install = bytes;
+        Ok(())
+    }
+    pub(crate) fn promote_checkpoint_material(&mut self, bytes: u64) -> Result<()> {
+        let mut counts = self
+            .pool
+            .0
+            .counts
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        let staging = crate::checkpoint_materialize::METADATA_BYTES;
+        let descriptors = JOB_DESCRIPTORS - JOB_CONTROL_HEADROOM;
+        if !self.pool.available()
+            || !matches!(self.demand.lane, Lane::Work)
+            || bytes == 0
+            || bytes > JOB_CHECKPOINT_MATERIAL_BYTES
+            || self.demand.checkpoint_metadata != JOB_CHECKPOINT_METADATA_BYTES
+            || self.demand.checkpoint_staging == 0
+            || self.demand.checkpoint_material != 0
+            || self.demand.checkpoint_install != 0
+            || self.demand.children != 1
+            || self.demand.descriptors > descriptors
+            || self.demand.staging != 0
+            || self.demand.registry_staging != 0
+        {
+            return Err(Error::before(ErrorCode::Admission));
+        }
+        let extra_fd = descriptors - self.demand.descriptors;
+        if counts.children + 1 > JOB_CHILDREN
+            || counts.descriptors + extra_fd > JOB_DESCRIPTORS
+            || counts.work_descriptors + extra_fd > descriptors
+            || counts.staging + staging > JOB_STAGING_BYTES
+            || counts.checkpoint_material + bytes > JOB_CHECKPOINT_MATERIAL_BYTES
+        {
+            return Err(Error::before(ErrorCode::Admission));
+        }
+        fd_admission(counts.descriptors + extra_fd)?;
+        counts.children += 1;
+        counts.descriptors += extra_fd;
+        counts.work_descriptors += extra_fd;
+        counts.staging += staging;
+        counts.checkpoint_material += bytes;
+        self.demand.children = 2;
+        self.demand.descriptors = descriptors;
+        self.demand.staging = staging;
+        self.demand.checkpoint_material = bytes;
+        Ok(())
+    }
+
+    /// Only after exact worker collection and metadata/spool cleanup. The
+    /// decoded-material allowance follows the returned input until destruction.
+    pub(crate) fn collected_checkpoint_material(&mut self) -> Result<()> {
+        let mut counts = self
+            .pool
+            .0
+            .counts
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        if self.demand.children != 2
+            || self.demand.descriptors != JOB_DESCRIPTORS - JOB_CONTROL_HEADROOM
+            || self.demand.checkpoint_material == 0
+            || self.demand.staging != crate::checkpoint_materialize::METADATA_BYTES
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        counts.children -= 1;
+        counts.descriptors -= self.demand.descriptors - 16;
+        counts.work_descriptors -= self.demand.descriptors - 16;
+        counts.staging -= self.demand.staging;
+        self.demand.children = 1;
+        self.demand.descriptors = 16;
+        self.demand.staging = 0;
+        Ok(())
+    }
+
     /// Promote retained mount qualification to one complete creation job without
     /// dropping authority or transiently freeing admission for another worker.
     pub(crate) fn promote_mount_creation(&mut self) -> Result<()> {
@@ -408,6 +681,10 @@ impl JobLease {
             || demand.metadata > JOB_METADATA_BYTES
             || demand.staging > JOB_STAGING_BYTES
             || demand.registry_staging != 0
+            || demand.checkpoint_staging != 0
+            || demand.checkpoint_metadata != 0
+            || demand.checkpoint_material != 0
+            || demand.checkpoint_install != 0
         {
             return Err(Error::before(ErrorCode::Admission));
         }
@@ -426,6 +703,10 @@ impl JobLease {
             || self.demand.children > children
             || self.demand.staging > staging
             || self.demand.registry_staging != 0
+            || self.demand.checkpoint_staging != 0
+            || self.demand.checkpoint_metadata != 0
+            || self.demand.checkpoint_material != 0
+            || self.demand.checkpoint_install != 0
         {
             return Err(Error::before(ErrorCode::State));
         }
@@ -486,6 +767,42 @@ fn fd_admission(reserved: usize) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn material_resolution_has_finite_independent_room_while_capture_work_is_retained() {
+        let pool = JobPool::default();
+        let mut capture = pool
+            .acquire(Demand::checkpoint_prepare(1024).unwrap())
+            .unwrap();
+        capture
+            .promote_checkpoint_material(JOB_CHECKPOINT_MATERIAL_BYTES)
+            .unwrap();
+        let retained = pool.counts();
+        let resolution = pool.acquire(Demand::material_resolution()).unwrap();
+        assert_eq!(pool.counts().work_metadata, retained.work_metadata);
+        assert_eq!(
+            pool.counts().checkpoint_staging,
+            retained.checkpoint_staging
+        );
+        assert_eq!(
+            pool.counts().material_control_metadata,
+            JOB_MATERIAL_CONTROL_METADATA_BYTES
+        );
+        assert!(pool.acquire(Demand::material_resolution()).is_err());
+        let observer = pool.acquire(Demand::volume_observation()).unwrap();
+        assert_eq!(pool.counts().control, 2);
+        drop(observer);
+        drop(resolution);
+        assert_eq!(pool.counts(), retained);
+        pool.quarantine();
+        assert!(pool.acquire(Demand::growth_repair()).is_err());
+        let resolution = pool.acquire(Demand::material_resolution()).unwrap();
+        let observer = pool.acquire(Demand::volume_observation()).unwrap();
+        drop((observer, resolution));
+        assert_eq!(pool.counts(), retained);
+        drop(capture);
+        assert_eq!(pool.counts(), Counts::default());
+    }
 
     #[test]
     fn mounted_terminal_accounts_maximum_input_and_preserves_reserved_control() {
@@ -584,6 +901,10 @@ mod tests {
                 descriptors: 0,
                 staging: JOB_STAGING_BYTES,
                 registry_staging: 0,
+                checkpoint_staging: 0,
+                checkpoint_metadata: 0,
+                checkpoint_material: 0,
+                checkpoint_install: 0,
                 metadata: 0,
             })
             .unwrap();
@@ -628,6 +949,10 @@ mod tests {
                 descriptors: 0,
                 staging: 0,
                 registry_staging: 0,
+                checkpoint_staging: 0,
+                checkpoint_metadata: 0,
+                checkpoint_material: 0,
+                checkpoint_install: 0,
                 metadata: 0,
             })
             .unwrap();
@@ -742,6 +1067,93 @@ mod tests {
             JOB_METADATA_BYTES + JOB_CONTROL_METADATA_BYTES
         );
         drop((control, work, empty_observer));
+        assert_eq!(pool.counts(), Counts::default());
+    }
+
+    #[test]
+    fn install_promotion_retains_source_material_and_charges_distinct_output_work() {
+        let pool = JobPool::default();
+        let mut lease = pool
+            .acquire(Demand::checkpoint_prepare(1024).unwrap())
+            .unwrap();
+        lease.promote_checkpoint_material(4096).unwrap();
+        lease.collected_checkpoint_material().unwrap();
+        let before = pool.counts();
+        assert!(lease
+            .promote_checkpoint_install(JOB_CHECKPOINT_MATERIAL_BYTES + 1)
+            .is_err());
+        assert_eq!(pool.counts(), before);
+        lease.promote_checkpoint_install(4096).unwrap();
+        assert_eq!(pool.counts().checkpoint_material, 4096);
+        assert_eq!(pool.counts().checkpoint_install, 4096);
+        assert_eq!(pool.counts().work, 1);
+        assert_eq!(pool.counts().children, 2);
+        let control = pool.acquire(Demand::observation()).unwrap();
+        let sibling = pool.acquire(Demand::observation()).unwrap();
+        assert!(lease.promote_checkpoint_install(4096).is_err());
+        assert!(lease.collected_checkpoint_material().is_err());
+        drop((lease, control, sibling));
+        assert_eq!(pool.counts(), Counts::default());
+    }
+
+    #[test]
+    fn checkpoint_material_promotion_is_atomic_and_collection_keeps_private_bytes_charged() {
+        let pool = JobPool::default();
+        let mut lease = pool
+            .acquire(Demand::checkpoint_prepare(1024).unwrap())
+            .unwrap();
+        let before = pool.counts();
+        assert!(lease
+            .promote_checkpoint_material(JOB_CHECKPOINT_MATERIAL_BYTES + 1)
+            .is_err());
+        assert_eq!(pool.counts(), before);
+        lease.promote_checkpoint_material(4096).unwrap();
+        assert_eq!(pool.counts().work, 1);
+        assert_eq!(pool.counts().children, 2);
+        assert_eq!(pool.counts().checkpoint_material, 4096);
+        assert_eq!(pool.counts().checkpoint_staging, before.checkpoint_staging);
+        let control = pool.acquire(Demand::observation()).unwrap();
+        let sibling = pool.acquire(Demand::observation()).unwrap();
+        assert!(lease.promote_checkpoint_material(4096).is_err());
+        lease.collected_checkpoint_material().unwrap();
+        assert_eq!(pool.counts().children, 1);
+        assert_eq!(pool.counts().staging, 0);
+        assert_eq!(pool.counts().checkpoint_material, 4096);
+        assert_eq!(pool.counts().control, 2);
+        assert!(lease.collected_checkpoint_material().is_err());
+        drop((lease, control, sibling));
+        assert_eq!(pool.counts(), Counts::default());
+    }
+
+    #[test]
+    fn checkpoint_prepare_has_separate_finite_staging_parser_room_and_control_headroom() {
+        assert!(Demand::checkpoint_prepare(0).is_err());
+        assert!(Demand::checkpoint_prepare(crate::CHECKPOINT_ARTIFACT_BYTES + 1).is_err());
+        let pool = JobPool::default();
+        let demand = Demand::checkpoint_prepare(crate::CHECKPOINT_ARTIFACT_BYTES).unwrap();
+        let lease = pool.acquire(demand).unwrap();
+        assert_eq!(
+            pool.counts().checkpoint_staging,
+            crate::CHECKPOINT_ARTIFACT_BYTES + crate::checkpoint::HISTORY_STAGING_BYTES
+        );
+        assert!(pool.counts().checkpoint_staging <= JOB_CHECKPOINT_STAGING_BYTES);
+        assert_eq!(pool.counts().registry_staging, 0);
+        assert_eq!(pool.counts().staging, 0);
+        assert_eq!(
+            pool.counts().checkpoint_metadata,
+            JOB_CHECKPOINT_METADATA_BYTES
+        );
+        assert_eq!(pool.counts().work_metadata, JOB_METADATA_BYTES);
+        assert!(pool.acquire(demand).is_err());
+        let control = pool.acquire(Demand::observation()).unwrap();
+        let sibling = pool.acquire(Demand::observation()).unwrap();
+        drop(lease);
+        assert_eq!(pool.counts().checkpoint_staging, 0);
+        assert_eq!(pool.counts().checkpoint_metadata, 0);
+        assert!(pool
+            .acquire(Demand::registry_download(JOB_REGISTRY_STAGING_BYTES).unwrap())
+            .is_ok());
+        drop((control, sibling));
         assert_eq!(pool.counts(), Counts::default());
     }
 
@@ -915,9 +1327,14 @@ mod tests {
                 descriptors: 24,
                 work_descriptors: 16,
                 registry_staging: 0,
+                checkpoint_staging: 0,
+                checkpoint_metadata: 0,
+                checkpoint_material: 0,
+                checkpoint_install: 0,
                 staging: 48 * 1024 * 1024,
                 metadata: 0,
                 work_metadata: 0,
+                material_control_metadata: 0,
             }
         );
         drop(leases);
@@ -1003,6 +1420,10 @@ mod tests {
             children: JOB_CHILDREN + 1,
             descriptors: 1,
             registry_staging: 0,
+            checkpoint_staging: 0,
+            checkpoint_metadata: 0,
+            checkpoint_material: 0,
+            checkpoint_install: 0,
             staging: 0,
             metadata: 0,
         };

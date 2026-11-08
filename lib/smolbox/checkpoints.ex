@@ -24,8 +24,10 @@ defmodule SmolBox.Checkpoints do
     Runtime
   }
 
+  alias SmolBox.Embedded.{NativeCapture, NativeCaptureResolution}
+
   alias SmolBox.Runtime.Checkpoints, as: CaptureRuntime
-  alias SmolBox.Runtime.{MachineSession, Session}
+  alias SmolBox.Runtime.{MachineSession, NativeResolution, Session}
 
   @spec capture(SmolBox.runtime(), ManagedMachine.key(), CheckpointCaptureSpec.t()) ::
           {:ok, CheckpointCapture.handle()} | {:error, Error.t()}
@@ -124,6 +126,13 @@ defmodule SmolBox.Checkpoints do
   `quiesced: true` and the current source version. Running/stopped observation or
   an expired lease alone cannot establish quiescence. Unknown results stay unknown;
   no output file is adopted. Source ownership is verified before unlocking it.
+  Embedded resolution freezes target dispatch and serializes against recovery.
+  Exact completed or previously resolved native evidence is observed first;
+  without it, exact pre-entry abort requires distinct unchanged-source qualification,
+  while an entered capture requires explicit material qualification.
+  A live source must remain this engine's originally enrolled PID/birth; a stopped
+  source requires verified original-process absence. No capture is replayed,
+  guest stopped for resolution or local artifact adopted.
   """
   @spec resolve(SmolBox.runtime(), CheckpointCapture.handle(), pos_integer(), keyword()) ::
           {:ok, CheckpointCapture.t()} | {:error, Error.t()}
@@ -135,34 +144,22 @@ defmodule SmolBox.Checkpoints do
          true <- disposition in [:present, :deleted],
          {:ok, _} <- fetch(runtime, handle),
          {:ok, config} <- configuration(runtime),
-         {:ok, m} <-
-           MachineSession.store(config, :claim_version, [
-             {scope, machine},
-             version,
-             config.owner,
-             config.clock.now(),
-             config.lease_ms
-           ]),
-         {:ok, worker} <- MachineSession.worker(config, m),
-         {:ok, observed} <-
-           MachineSession.io(config, %{m | operation_deadline_ms: nil}, fn ->
-             observe(Target.connection(worker), m.machine_name, disposition)
-           end),
-         true <- observed == :absent or Machine.same_incarnation?(m.created_machine, observed),
-         {:ok, current} <- MachineSession.claim(config, {scope, machine}),
-         {:ok, saved} <-
-           MachineSession.store(config, :capture_resolve, [
-             {scope, machine},
-             Session.guard(current),
-             id,
-             observed,
-             config.clock.now()
-           ]),
-         do: {:ok, saved.captures[id]},
-         else: (
-           false -> Session.error(:validation, :checkpoint)
-           error -> error
-         )
+         {:ok, m} <- MachineSession.store(config, :fetch, [{scope, machine}]),
+         {:ok, worker} <- MachineSession.worker(config, m) do
+      NativeResolution.run(
+        config,
+        Runtime.coordinator(runtime),
+        m,
+        worker,
+        disposition,
+        fn pinned ->
+          resolve_record(config, {scope, machine}, id, version, pinned, disposition)
+        end
+      )
+    else
+      false -> Session.error(:validation, :checkpoint)
+      error -> error
+    end
   end
 
   def resolve(_, _, _, _), do: Session.error(:validation, :checkpoint)
@@ -170,8 +167,10 @@ defmodule SmolBox.Checkpoints do
   @doc """
   Release retained capture accounting after the host removes all retained copies
   and partial output. Requires `artifacts_removed: true`; local complete and partial
-  paths must be absent. Never deletes artifacts or invalidates independent restores.
+  paths must be absent. Never deletes host artifacts or invalidates independent restores.
   History and request identity remain. Only completed/resolved captures qualify.
+  Embedded release fences the pinned helper, cleans only its owned private stage,
+  and atomically consumes the exact cleanup receipt with released accounting.
   """
   @spec release(SmolBox.runtime(), CheckpointCapture.handle(), keyword()) ::
           {:ok, CheckpointCapture.t()} | {:error, Error.t()}
@@ -181,13 +180,7 @@ defmodule SmolBox.Checkpoints do
          true <- CheckpointIO.absent?(r),
          {:ok, config} <- configuration(runtime),
          {:ok, current} <- MachineSession.claim(config, {scope, machine}),
-         {:ok, saved} <-
-           MachineSession.store(config, :capture_release, [
-             {scope, machine},
-             Session.guard(current),
-             id,
-             config.clock.now()
-           ]),
+         {:ok, saved} <- release_record(runtime, config, current, id),
          do: {:ok, saved.captures[id]},
          else: (
            false -> Session.error(:validation, :checkpoint)
@@ -196,6 +189,60 @@ defmodule SmolBox.Checkpoints do
   end
 
   def release(_, _, _), do: Session.error(:validation, :checkpoint)
+
+  defp release_record(runtime, config, %{backend_assignment: %{version: 2}} = current, id) do
+    capture = current.captures[id]
+
+    if capture.released_at_ms != nil do
+      save_release(config, current, id, nil)
+    else
+      with true <- capture.state in [:completed, :resolved_unknown],
+           {:ok, worker} <- MachineSession.worker(config, current) do
+        NativeResolution.run(
+          config,
+          Runtime.coordinator(runtime),
+          current,
+          worker,
+          :release,
+          fn pinned ->
+            release_native(config, current, id, pinned)
+          end
+        )
+      else
+        false -> Session.error(:identity_conflict, :checkpoint)
+        error -> error
+      end
+    end
+  end
+
+  defp release_record(_runtime, config, current, id), do: save_release(config, current, id, nil)
+
+  defp release_native(config, record, id, worker) do
+    key = ManagedMachine.key(record)
+
+    with {:ok, current} <- MachineSession.claim(config, key),
+         capture = current.captures[id],
+         true <- CheckpointIO.absent?(capture),
+         {:ok, proof} <-
+           MachineSession.io(config, %{current | operation_deadline_ms: nil}, fn ->
+             Backend.cleanup_capture(Target.connection(worker, current), capture, true)
+           end),
+         {:ok, current} <- MachineSession.claim(config, key),
+         true <- CheckpointIO.absent?(current.captures[id]),
+         do: save_release(config, current, id, proof),
+         else: (
+           false -> Session.error(:validation, :checkpoint)
+           error -> error
+         )
+  end
+
+  defp save_release(config, current, id, proof) do
+    args =
+      [ManagedMachine.key(current), Session.guard(current), id] ++
+        if(proof == nil, do: [], else: [proof]) ++ [config.clock.now()]
+
+    MachineSession.store(config, :capture_release, args)
+  end
 
   @doc "Restore a completed capture as a new machine using an explicitly registered worker checkpoint approval."
   @spec restore(SmolBox.runtime(), CheckpointCapture.handle(), Checkpoint.t(), keyword()) ::
@@ -225,6 +272,58 @@ defmodule SmolBox.Checkpoints do
          )
   end
 
+  defp resolve_record(config, key, id, version, worker, disposition) do
+    with {:ok, m} <-
+           MachineSession.store(config, :claim_version, [
+             key,
+             version,
+             config.owner,
+             config.clock.now(),
+             config.lease_ms
+           ]),
+         true <- resolution_intent?(m, id),
+         {:ok, observed} <-
+           MachineSession.io(config, %{m | operation_deadline_ms: nil}, fn ->
+             resolution_observe(worker, m, disposition)
+           end),
+         true <- observed == :absent or source_valid?(m, observed),
+         {:ok, current} <- MachineSession.claim(config, key),
+         {:ok, saved} <-
+           MachineSession.store(config, :capture_resolve, [
+             key,
+             Session.guard(current),
+             id,
+             observed,
+             config.clock.now()
+           ]) do
+      {:ok, saved.captures[id]}
+    else
+      false -> Session.error(:validation, :checkpoint)
+      error -> error
+    end
+  end
+
+  defp source_valid?(
+         %{backend_assignment: %{version: 2}} = m,
+         %NativeCaptureResolution{} = resolution
+       ),
+       do: NativeCapture.resolution_valid?(m, m.captures[m.active_capture], resolution)
+
+  defp source_valid?(%{backend_assignment: %{version: 2}} = m, observed) do
+    capture = m.captures[m.active_capture]
+
+    if capture.state == :unknown,
+      do: NativeCapture.resolution_valid?(m, capture, observed),
+      else: NativeCapture.observation_valid?(m, observed)
+  end
+
+  defp source_valid?(m, observed), do: Machine.same_incarnation?(m.created_machine, observed)
+
+  defp resolution_intent?(%{backend_assignment: %{version: 2}} = m, id),
+    do: m.active_capture == id and m.captures[id].state in [:captured, :unknown]
+
+  defp resolution_intent?(_m, _id), do: true
+
   defp observe(client, name, :present), do: Backend.inspect_machine(client, name)
 
   defp observe(client, name, :deleted) do
@@ -234,6 +333,17 @@ defmodule SmolBox.Checkpoints do
       _ -> Session.error(:identity_conflict, :checkpoint)
     end
   end
+
+  defp resolution_observe(%{kind: :embedded} = worker, m, :present) do
+    client = Target.connection(worker, m)
+
+    if m.captures[m.active_capture].state == :unknown,
+      do: Backend.qualify_capture(client, true),
+      else: observe(client, m.machine_name, :present)
+  end
+
+  defp resolution_observe(worker, m, disposition),
+    do: observe(Target.connection(worker, m), m.machine_name, disposition)
 
   defp elem_machine({scope, machine, _}), do: {scope, machine}
   defp handle(m, id), do: {m.scope, m.id, id}

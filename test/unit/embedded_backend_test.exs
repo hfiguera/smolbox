@@ -21,6 +21,21 @@ defmodule SmolBox.EmbeddedBackendTest do
 
   alias SmolBox.Test.EmbeddedPackage, as: Package
 
+  test "capture qualification remains unavailable on currently approved native packages",
+       context do
+    assert {:error, %{category: :unsupported_capability, evidence: :not_dispatched}} =
+             Backend.qualify_capture(context.reference, true)
+
+    refute Embedded.supports_operation?(context.reference.context, :qualify_capture)
+    refute HTTP.supports_operation?(nil, :qualify_capture)
+
+    assert {:error, %{category: :unsupported_capability, evidence: :not_dispatched}} =
+             Backend.cleanup_capture(context.reference, nil, true)
+
+    refute Embedded.supports_operation?(context.reference.context, :cleanup_capture)
+    refute HTTP.supports_operation?(nil, :cleanup_capture)
+  end
+
   setup do
     config = Package.create(backend: true)
     on_exit(fn -> File.rm_rf!(config.package_path) end)

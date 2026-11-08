@@ -1,6 +1,7 @@
 defmodule SmolBox.Runtime.NativeInspection do
   @moduledoc false
   alias SmolBox.{Backend, Error, Execution, Machine, ManagedMachine}
+  alias SmolBox.Embedded.NativeCapture
   alias SmolBox.Runtime.{Session, Target}
   alias SmolBox.Store.BackendAssignments
 
@@ -64,7 +65,7 @@ defmodule SmolBox.Runtime.NativeInspection do
 
   defp ownership(record, observed) do
     cond do
-      not Machine.same_incarnation?(record.created_machine, observed) -> :conflict
+      not NativeCapture.observation_valid?(record, observed) -> :conflict
       released?(record) -> :cleanup_conflict
       true -> :owned
     end

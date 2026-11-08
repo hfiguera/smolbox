@@ -1,7 +1,7 @@
 defmodule SmolBox.Embedded.Call do
   @moduledoc false
   alias SmolBox.Backend.EmbeddedContext
-  alias SmolBox.Embedded.{Config, LogStream, Protocol, RegistryContract, Request}
+  alias SmolBox.Embedded.{CaptureStream, Config, LogStream, Protocol, RegistryContract, Request}
   alias SmolBox.Error
 
   # Capture once before durable intent writes. A failed capture remains fenced
@@ -14,12 +14,21 @@ defmodule SmolBox.Embedded.Call do
     budget = %{budget | timeout_ms: min(budget.timeout_ms, 1000)}
 
     case health(context, budget) do
-      {:ok, %{status: status, epoch: epoch}} when status in [:ready, :reconciling] ->
-        %{context | pinned: true, epoch: epoch}
+      {:ok, %{status: status} = health} when status in [:ready, :reconciling] ->
+        pin_health(context, health)
+
+      {:ok, %{status: :quarantined, protocol_major: 2} = health} ->
+        pin_health(context, health)
 
       _unavailable ->
         %{context | pinned: true, server: nil, epoch: nil}
     end
+  end
+
+  defp pin_health(context, health) do
+    if identity?(health, context.config),
+      do: %{context | pinned: true, epoch: health.epoch},
+      else: %{context | pinned: true, server: nil, epoch: nil}
   end
 
   def run(context, request, budget, input \\ <<>>, callback \\ nil) do
@@ -29,6 +38,10 @@ defmodule SmolBox.Embedded.Call do
       budget: budget,
       input: input,
       callback: callback,
+      capture_stream:
+        if(is_map(request) and request["operation"] == "capture_checkpoint",
+          do: CaptureStream.new(request["request"]["max_bytes"])
+        ),
       log_parser:
         if(is_map(request) and request["operation"] == "logs",
           do: LogStream.new(request["max_bytes"])
@@ -136,12 +149,18 @@ defmodule SmolBox.Embedded.Call do
 
   defp submit(%{request: :health}, health), do: {:ok, health}
 
+  defp submit(
+         %{request: %{"operation" => "capture_checkpoint"}, callback: callback} = state,
+         _health
+       )
+       when not is_function(callback, 1), do: failure(state.flags, :unsupported_capability)
+
   defp submit(state, health) do
     if health.status == :ready or
          (health.status == :reconciling and
             Request.reconciliation?(state.request)) or
          (health.status == :quarantined and Map.get(health, :protocol_major) == 2 and
-            Request.observation?(state.request)) do
+            Request.control?(state.request)) do
       :atomics.put(state.flags, 1, 1)
 
       case state.bridge.submit(state.owner, state.request, state.budget, self(), health.epoch) do
@@ -180,6 +199,44 @@ defmodule SmolBox.Embedded.Call do
       0 -> advance(state)
     end
   end
+
+  defp output(%{capture_stream: %CaptureStream{}} = state, :checkpoint, bytes)
+       when is_binary(bytes) do
+    received =
+      if byte_size(bytes) <= state.budget.max_response_bytes,
+        do: CaptureStream.feed(state.capture_stream, bytes, state.callback),
+        else: :error
+
+    case received do
+      {:ok, stream} ->
+        case state.bridge.acknowledge(state.owner, state.handle, byte_size(bytes)) do
+          :ok ->
+            consume(%{state | capture_stream: stream})
+
+          {:error, %Error{} = error} ->
+            {:error, %{error | operation: :checkpoint, evidence: :dispatch_uncertain}}
+        end
+
+      :error ->
+        consume(
+          cancel(state, %Error{
+            category: :unknown,
+            operation: :checkpoint,
+            evidence: :dispatch_uncertain
+          })
+        )
+    end
+  end
+
+  defp output(%{capture_stream: %CaptureStream{}} = state, _stream, _bytes),
+    do:
+      consume(
+        cancel(state, %Error{
+          category: :protocol,
+          operation: :checkpoint,
+          evidence: :dispatch_uncertain
+        })
+      )
 
   defp output(state, :log, bytes) when is_binary(bytes) do
     case LogStream.feed(state.log_parser, bytes) do
@@ -308,7 +365,7 @@ defmodule SmolBox.Embedded.Call do
 
   defp terminal(state, outcome, overlay) do
     if Protocol.valid_outcome?(outcome, Config.protocol_major(state.context.config)) and
-         log_terminal?(state, outcome) do
+         log_terminal?(state, outcome) and capture_terminal?(state, outcome) do
       if is_integer(outcome["observed_exit"]),
         do: :atomics.put(state.flags, 2, outcome["observed_exit"] + 2_147_483_649)
 
@@ -330,6 +387,11 @@ defmodule SmolBox.Embedded.Call do
       failure(state.flags, :protocol)
     end
   end
+
+  defp capture_terminal?(%{capture_stream: nil}, _outcome), do: true
+
+  defp capture_terminal?(state, outcome),
+    do: CaptureStream.complete?(state.capture_stream, outcome, state.request)
 
   defp log_terminal?(%{log_parser: nil}, _outcome), do: true
 

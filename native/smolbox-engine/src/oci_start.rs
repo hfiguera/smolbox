@@ -50,6 +50,29 @@ pub(crate) fn observe_owned<T: Send + 'static>(
     cancel: Cancellation,
     action: impl FnOnce() -> Result<T> + Send + 'static,
 ) -> Result<T> {
+    observe_job(pool, deadline, cancel, action, false)
+}
+
+/// Only for jobs that cannot mutate SDK/material state, spawn children or return
+/// reusable existing-machine ownership. Request-private temporary files may
+/// belong to the result/closure. Their executing closure retains admission after caller
+/// retirement; losing an observation cannot quarantine unrelated authority.
+pub(crate) fn observe_readonly<T: Send + 'static>(
+    pool: crate::jobs::JobPool,
+    deadline: Instant,
+    cancel: Cancellation,
+    action: impl FnOnce() -> Result<T> + Send + 'static,
+) -> Result<T> {
+    observe_job(pool, deadline, cancel, action, true)
+}
+
+fn observe_job<T: Send + 'static>(
+    pool: crate::jobs::JobPool,
+    deadline: Instant,
+    cancel: Cancellation,
+    action: impl FnOnce() -> Result<T> + Send + 'static,
+    readonly: bool,
+) -> Result<T> {
     check(deadline, &cancel)?;
     let (send, receive) = mpsc::sync_channel(1);
     let thread = std::thread::Builder::new()
@@ -60,23 +83,45 @@ pub(crate) fn observe_owned<T: Send + 'static>(
         .map_err(|_| Error::before(ErrorCode::Native))?;
     loop {
         if cancel.is_cancelled() || Instant::now() >= deadline {
-            pool.quarantine();
+            if !readonly {
+                pool.quarantine();
+            }
             // Dropping JoinHandle detaches observation, not the owned work.
             // No signals, lease release, result promotion or automatic replay.
-            return Err(Error::uncertain(ErrorCode::State));
+            return Err(if readonly {
+                Error::before(ErrorCode::State)
+            } else {
+                Error::uncertain(ErrorCode::State)
+            });
         }
         if thread.is_finished() {
             if thread.join().is_err() {
-                pool.quarantine();
-                return Err(Error::uncertain(ErrorCode::Native));
+                if !readonly {
+                    pool.quarantine();
+                }
+                return Err(if readonly {
+                    Error::before(ErrorCode::Native)
+                } else {
+                    Error::uncertain(ErrorCode::Native)
+                });
             }
             if let Err(error) = check(deadline, &cancel) {
-                pool.quarantine();
-                return Err(Error::uncertain(error.code));
+                if !readonly {
+                    pool.quarantine();
+                }
+                return Err(if readonly {
+                    error
+                } else {
+                    Error::uncertain(error.code)
+                });
             }
-            return receive
-                .try_recv()
-                .map_err(|_| Error::uncertain(ErrorCode::Native))?;
+            return receive.try_recv().map_err(|_| {
+                if readonly {
+                    Error::before(ErrorCode::Native)
+                } else {
+                    Error::uncertain(ErrorCode::Native)
+                }
+            })?;
         }
         std::thread::sleep(POLL.min(deadline.saturating_duration_since(Instant::now())));
     }
@@ -597,6 +642,47 @@ mod tests {
         assert_eq!(pool.counts().control, 2);
         drop(control);
         drop(second_control);
+    }
+
+    #[test]
+    fn readonly_cancellation_retains_executing_lease_without_quarantining_sibling_controls() {
+        let pool = crate::jobs::JobPool::default();
+        let permit = pool.acquire(crate::jobs::Demand::oci_metadata()).unwrap();
+        let cancel = Cancellation::new();
+        let work_cancel = cancel.clone();
+        let work_pool = pool.clone();
+        let (entered_send, entered) = mpsc::sync_channel(1);
+        let (finish, finishing) = mpsc::sync_channel(1);
+        let (collected_send, collected) = mpsc::sync_channel(1);
+        let observer = std::thread::spawn(move || {
+            observe_readonly(
+                work_pool,
+                Instant::now() + Duration::from_secs(5),
+                work_cancel,
+                move || {
+                    entered_send.send(()).unwrap();
+                    finishing.recv_timeout(Duration::from_secs(5)).unwrap();
+                    drop(permit);
+                    collected_send.send(()).unwrap();
+                    Ok(7)
+                },
+            )
+        });
+        entered.recv_timeout(Duration::from_secs(2)).unwrap();
+        cancel.cancel();
+        let error = observer.join().unwrap().unwrap_err();
+        assert_eq!(error.dispatch, crate::Dispatch::NotDispatched);
+        assert!(pool.available());
+        assert_eq!(pool.counts().work, 1);
+        assert!(pool.acquire(crate::jobs::Demand::oci_metadata()).is_err());
+        let control = pool.acquire(crate::jobs::Demand::observation()).unwrap();
+        let sibling_control = pool.acquire(crate::jobs::Demand::observation()).unwrap();
+        finish.send(()).unwrap();
+        collected.recv_timeout(Duration::from_secs(2)).unwrap();
+        assert_eq!(pool.counts().work, 0);
+        assert!(pool.acquire(crate::jobs::Demand::oci_metadata()).is_ok());
+        assert_eq!(pool.counts().control, 2);
+        drop((control, sibling_control));
     }
 
     #[test]

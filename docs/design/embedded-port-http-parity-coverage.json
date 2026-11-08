@@ -410,8 +410,14 @@
       ],
       "contract": "checkpoints",
       "http_supported": true,
-      "port_operation_supported": false,
+      "port_operation_supported": true,
       "parity_status": "pending",
+      "implementation_refs": [
+        "native/smolbox-engine/src/machine.rs",
+        "native/smolbox-protocol/src/wire.rs",
+        "lib/smolbox/backend/embedded_operation.ex",
+        "test/unit/embedded_checkpoint_contract_test.exs"
+      ],
       "acceptance": [
         "checkpoints:validation-and-dispatch",
         "checkpoints:ordinary-public-behavior",
@@ -425,8 +431,14 @@
       ],
       "contract": "checkpoints",
       "http_supported": true,
-      "port_operation_supported": false,
+      "port_operation_supported": true,
       "parity_status": "pending",
+      "implementation_refs": [
+        "native/smolbox-engine/src/checkpoint_capture.rs",
+        "native/smolbox-engine/src/machine.rs",
+        "native/smolbox-protocol/src/session.rs",
+        "test/unit/embedded_checkpoint_contract_test.exs"
+      ],
       "acceptance": [
         "checkpoints:validation-and-dispatch",
         "checkpoints:ordinary-public-behavior",
@@ -440,7 +452,7 @@
       ],
       "contract": "checkpoints",
       "http_supported": true,
-      "port_operation_supported": false,
+      "port_operation_supported": true,
       "parity_status": "pending",
       "acceptance": [
         "checkpoints:validation-and-dispatch",
@@ -581,6 +593,36 @@
         "native-recovery:validation-and-dispatch",
         "native-recovery:ordinary-public-behavior",
         "native-recovery:durable-accounting-and-no-replay"
+      ]
+    },
+    {
+      "name": "qualify_capture",
+      "arities": [
+        2
+      ],
+      "contract": "checkpoints",
+      "http_supported": false,
+      "port_operation_supported": true,
+      "parity_status": "pending",
+      "acceptance": [
+        "checkpoints:validation-and-dispatch",
+        "checkpoints:ordinary-public-behavior",
+        "checkpoints:durable-accounting-and-no-replay"
+      ]
+    },
+    {
+      "name": "cleanup_capture",
+      "arities": [
+        3
+      ],
+      "contract": "checkpoints",
+      "http_supported": false,
+      "port_operation_supported": true,
+      "parity_status": "pending",
+      "acceptance": [
+        "checkpoints:validation-and-dispatch",
+        "checkpoints:ordinary-public-behavior",
+        "checkpoints:durable-accounting-and-no-replay"
       ]
     }
   ],

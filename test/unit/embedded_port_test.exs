@@ -76,6 +76,7 @@ defmodule SmolBox.Embedded.PortTest do
     wait_until(fn -> match?({:ok, %{status: :quarantined}}, Port.health(pid)) end)
     assert {:ok, %{epoch: ^epoch, status: :quarantined}} = Port.health(pid)
     assert is_port(:sys.get_state(pid).port)
+    assert {:error, %Error{category: :identity_conflict}} = Port.quiesce(pid, epoch)
 
     assert {:error, %Error{evidence: :not_dispatched}} =
              Port.submit(pid, Package.command(config, "echo"), budget(), self())
@@ -99,6 +100,8 @@ defmodule SmolBox.Embedded.PortTest do
     assert_receive {:smolbox_embedded, ^handle, {:terminal, outcome, nil}}, 1000
     assert outcome["completion"] == "unknown"
     wait_until(fn -> match?({:ok, %{status: :quarantined}}, Port.health(pid)) end)
+    assert :ok = Port.quiesce(pid, epoch)
+    assert {:ok, %{status: :quarantined, epoch: ^epoch}} = Port.health(pid)
     assert {:ok, %SmolBox.Health{}} = Backend.invoke(reference, :health, [])
 
     assert {:error, %Error{evidence: :not_dispatched}} =
