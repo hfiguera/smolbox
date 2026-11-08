@@ -1,5 +1,8 @@
 defmodule SmolBox.Embedded.NativeBranchReleaseResult do
-  @moduledoc false
+  @moduledoc """
+  Release proof and current source and child observations supplied to a store
+  when recording the release of a held native branch.
+  """
   alias SmolBox.Embedded.{Identity, NativeBranchRelease}
   alias SmolBox.{Machine, Validation}
   @enforce_keys [:transition, :source, :child]
@@ -7,6 +10,7 @@ defmodule SmolBox.Embedded.NativeBranchReleaseResult do
   defstruct @enforce_keys
   @type t :: %__MODULE__{}
 
+  @doc false
   def bound?(%__MODULE__{} = result, authority) do
     release = authority.release
 

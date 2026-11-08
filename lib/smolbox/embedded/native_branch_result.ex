@@ -1,10 +1,14 @@
 defmodule SmolBox.Embedded.NativeBranchResult do
-  @moduledoc false
+  @moduledoc """
+  Completion proof and current source and child observations supplied to a store
+  when recording a native branch.
+
+  This value is transaction input. The store persists the verified evidence in
+  the corresponding machine records.
+  """
   alias SmolBox.Embedded.{BranchCompletion, Identity, NativeBranchAuthority}
   alias SmolBox.{Machine, ManagedMachine, Validation}
 
-  # Historical completion is separate from the two positive current observations.
-  # This ephemeral transaction input is never persisted or used as SDK authority.
   @enforce_keys [:completion, :source, :child]
   @derive {Inspect, only: []}
   defstruct @enforce_keys
@@ -15,6 +19,7 @@ defmodule SmolBox.Embedded.NativeBranchResult do
           child: Machine.t()
         }
 
+  @doc false
   def valid?(%__MODULE__{} = result),
     do:
       Validation.struct_shape?(result, __MODULE__) and
@@ -23,6 +28,7 @@ defmodule SmolBox.Embedded.NativeBranchResult do
 
   def valid?(_), do: false
 
+  @doc false
   def bound?(
         %__MODULE__{} = result,
         parent,

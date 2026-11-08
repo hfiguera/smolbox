@@ -533,31 +533,23 @@ defmodule SmolBox.Store.Codec do
     {CodecNativeCaptures.upgrade(record), used}
   end
 
-  defp encode_native_exports(record) do
+  defp encode_native_exports(record),
+    do: encode_native_record(record, @native_exports_prefix, &CodecNativeBranchAuthority.strip/1)
+
+  defp encode_native_branches(record),
+    do: encode_native_record(record, @native_branches_prefix, &CodecNativeBranchAuthority.strip/1)
+
+  defp encode_native_branch_authority(record),
+    do:
+      encode_native_record(
+        record,
+        @native_branch_authority_prefix,
+        &CodecNativeBranchReleases.strip/1
+      )
+
+  defp encode_native_record(record, prefix, strip) do
     with :ok <- validate_extended(record) do
-      bytes =
-        @native_exports_prefix <> :erlang.term_to_binary(CodecNativeBranchAuthority.strip(record))
-
-      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
-    end
-  end
-
-  defp encode_native_branches(record) do
-    with :ok <- validate_extended(record) do
-      bytes =
-        @native_branches_prefix <>
-          :erlang.term_to_binary(CodecNativeBranchAuthority.strip(record))
-
-      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
-    end
-  end
-
-  defp encode_native_branch_authority(record) do
-    with :ok <- validate_extended(record) do
-      bytes =
-        @native_branch_authority_prefix <>
-          :erlang.term_to_binary(CodecNativeBranchReleases.strip(record))
-
+      bytes = prefix <> :erlang.term_to_binary(strip.(record))
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
   end
@@ -575,12 +567,8 @@ defmodule SmolBox.Store.Codec do
     ArgumentError -> invalid()
   end
 
-  defp encode_native_branch_releases(record) do
-    with :ok <- validate_extended(record) do
-      bytes = @native_branch_releases_prefix <> :erlang.term_to_binary(record)
-      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
-    end
-  end
+  defp encode_native_branch_releases(record),
+    do: encode_native_record(record, @native_branch_releases_prefix, &Function.identity/1)
 
   defp decode_native_branch_releases(<<@native_branch_releases_prefix, payload::binary>>) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)

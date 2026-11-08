@@ -45,8 +45,8 @@ defmodule SmolBox.Backend.EmbeddedBranch do
   # The source is the assigned authority for this two-machine operation. Release
   # receives only the child argument; the source context already carries its head
   # and complete material history, including any sibling publications.
-  defp records(context, :branch_create, [parent, child]) do
-    if source_context?(context, parent), do: [parent, child], else: :error
+  defp records(context, :branch_create, [parent, _] = records) do
+    if source_context?(context, parent), do: records, else: :error
   end
 
   defp records(context, :branch_release, [child]), do: [context, child]
