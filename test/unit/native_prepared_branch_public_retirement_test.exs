@@ -459,7 +459,7 @@ defmodule SmolBox.NativePreparedBranchPublicRetirementTest do
 
     call = fn _, request, _ ->
       send(self(), {:deadline_call, request["operation"]})
-      Process.sleep(80)
+      Process.sleep(750)
 
       {:ok,
        %{
@@ -473,7 +473,7 @@ defmodule SmolBox.NativePreparedBranchPublicRetirementTest do
                context,
                parent,
                child,
-               %Budget{timeout_ms: 50, max_request_bytes: 131_072, max_response_bytes: 131_072},
+               %Budget{timeout_ms: 500, max_request_bytes: 131_072, max_response_bytes: 131_072},
                call
              )
 

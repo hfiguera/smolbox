@@ -439,7 +439,8 @@ defmodule SmolBox.NativeUnbootedBranchPublicBackingTest do
              )
 
     late = fn _, _, _ ->
-      Process.sleep(80)
+      send(self(), :late_backing_reply)
+      Process.sleep(750)
       response
     end
 
@@ -451,9 +452,10 @@ defmodule SmolBox.NativeUnbootedBranchPublicBackingTest do
                true,
                budget,
                late,
-               System.monotonic_time(:millisecond) + 50
+               System.monotonic_time(:millisecond) + 500
              )
 
+    assert_receive :late_backing_reply
     assert {:ok, ^usage} = Memory.usage(store, parent.worker_id)
   end
 end
