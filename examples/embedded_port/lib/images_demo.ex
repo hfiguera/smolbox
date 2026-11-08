@@ -30,7 +30,8 @@ defmodule SmolBox.Example.EmbeddedImages do
   @scope "public-images-proof"
   @startup "set -eu; test \"$SMOLBOX_STARTUP_WITNESS\" = configured-v1; test \"$PWD\" = /tmp; test \"$(id -u)\" = 0; mkdir -p /workspace; printf 'configured-v1:/tmp:0\\n' >> /workspace/ordinary-images-startups"
 
-  def configure(%Config{platform: :linux} = target, settings) do
+  def configure(%Config{platform: platform} = target, settings)
+      when platform in [:linux, :macos] do
     true =
       is_map(settings) and
         Map.keys(settings) -- ~w(source pull_source network cache_policy startup_workload) == []
@@ -131,7 +132,8 @@ defmodule SmolBox.Example.EmbeddedImages do
     source
   end
 
-  def run(%Config{platform: :linux} = target, output, settings) do
+  def run(%Config{platform: platform} = target, output, settings)
+      when platform in [:linux, :macos] do
     target = configure(target, settings)
     Process.flag(:trap_exit, true)
     Process.put({__MODULE__, :closed}, false)

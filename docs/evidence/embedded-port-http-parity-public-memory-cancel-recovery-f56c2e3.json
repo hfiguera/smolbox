@@ -1,0 +1,153 @@
+{
+  "schema": 1,
+  "status": "qualified-scoped-linux-memory-public-cancellation-and-original-completed-result-recovery",
+  "source_commit": "f56c2e303881dff9327105f4d75624a6cbf410d3",
+  "hex_archive_sha256": "cc39175e90a613d1d23ab730859ed900ad3b297a1c3863bdb0e4b358075c756d",
+  "source_archive_sha256": "3f9744028c01ef10406872d91d72401c457168302088b544dc92befde6857a94",
+  "native_source_commit": "41cc8a6c2d54ddcfbb130768dda0690cb1be0333",
+  "native_manifest_sha256": "7b6cfae8a0140babab03f821c56406b018be97e52994bc4cb74d3d9791ebfc39",
+  "native_helper_sha256": "e3fbda886c3129f798dc2668781014204b7c6a1090129ae82ac265def2176ce1",
+  "sdk_source_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "sdk_unmodified": true,
+  "workflow_sha256": "12a05c3842c360d627e6a52d27906022c80f409ace678c888a89dee8b86abaa0",
+  "scope": {
+    "platform": "linux",
+    "architecture": "x86_64",
+    "source": "approved-local-bare",
+    "store": "memory",
+    "public_cancel_from_managed_dispatching": true,
+    "explicit_keep_resolution_under_worker_draining": true,
+    "same_original_request_helper_epoch_and_completed_scan_preserved": true,
+    "cancelled_and_recovered_reservations": {
+      "slots": 3,
+      "cpus": 3,
+      "memory_mb": 1920,
+      "disk_gb": 9
+    },
+    "native_internal_phase_at_cancellation_not_instrumented": true,
+    "no_claim_that_all_partial_phases_or_both_native_handoff_paths_were_exercised": true
+  },
+  "cases": {
+    "current": {
+      "toolchain": {
+        "elixir": "1.20.4",
+        "otp_release": "29",
+        "otp_version": "29.0.6"
+      },
+      "installed_consumer_without_rust": true,
+      "postgresql_started_for_campaign": false,
+      "completed_original_result_recovery_and_following_lifecycle": {
+        "mode": "memory",
+        "normal_shutdown": true,
+        "campaign": "ordinary-public-branch-cancel-and-original-ready-recovery",
+        "cancellation_after_dispatch_retained_uncertainty_and_all_charges": true,
+        "original_request_and_epoch_preserved": true,
+        "original_completion_explicitly_recovered": true,
+        "held_child_released_once": true,
+        "completed_scan_preserved": true,
+        "persisted_draining_preserved": true,
+        "sibling_and_source_independent": true,
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gb": 0,
+        "owned_deletions": 3,
+        "paired_retirements": 2,
+        "backing_acknowledgements": 2,
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false
+      },
+      "source_files_verified": 1801,
+      "assets_verified": 806,
+      "source_library_host_tools_domain_keys_verified": true,
+      "all_five_sdk_inventories_empty": true,
+      "native_beam_sql_and_zombie_kvm_inventories_empty": true,
+      "account_lock_available": true,
+      "archive_sha256": "8f589533911048b71b7ca423505b5f437895580973efc2ff6323a6504aeb4a6a",
+      "archive_bytes": 379941175,
+      "archive_members": 11194,
+      "sdk_backup_sha256": "5ff31cc64b54b8059d9aed4e5ab959ea28488a956131bee0964721d31bbc6fc7",
+      "full_archive_verified_on_guest_outer_and_mac_stream": true,
+      "all_compact_metadata_files_verified": 75,
+      "codec_readers": {
+        "current": {
+          "checkpoints": 5,
+          "decoded_records": 45,
+          "record_validation_and_roundtrip_passed": true
+        },
+        "minimum": {
+          "checkpoints": 5,
+          "decoded_records": 45,
+          "record_validation_and_roundtrip_passed": true
+        }
+      }
+    },
+    "minimum": {
+      "toolchain": {
+        "elixir": "1.18.4",
+        "otp_release": "27",
+        "otp_version": "27.3.4.15"
+      },
+      "installed_consumer_without_rust": true,
+      "postgresql_started_for_campaign": false,
+      "completed_original_result_recovery_and_following_lifecycle": {
+        "mode": "memory",
+        "normal_shutdown": true,
+        "campaign": "ordinary-public-branch-cancel-and-original-ready-recovery",
+        "cancellation_after_dispatch_retained_uncertainty_and_all_charges": true,
+        "original_request_and_epoch_preserved": true,
+        "original_completion_explicitly_recovered": true,
+        "held_child_released_once": true,
+        "completed_scan_preserved": true,
+        "persisted_draining_preserved": true,
+        "sibling_and_source_independent": true,
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gb": 0,
+        "owned_deletions": 3,
+        "paired_retirements": 2,
+        "backing_acknowledgements": 2,
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false
+      },
+      "source_files_verified": 1801,
+      "assets_verified": 806,
+      "source_library_host_tools_domain_keys_verified": true,
+      "all_five_sdk_inventories_empty": true,
+      "native_beam_sql_and_zombie_kvm_inventories_empty": true,
+      "account_lock_available": true,
+      "archive_sha256": "fa2cfede22b6ae45125245cdc4a198153f0cc128461b9249288f8b4f97cdd09c",
+      "archive_bytes": 379806737,
+      "archive_members": 11200,
+      "sdk_backup_sha256": "0c383fcf3f31d57919cdc7d16c4e887837bb31c67bde822cf6a561103eb7aa20",
+      "full_archive_verified_on_guest_outer_and_mac_stream": true,
+      "all_compact_metadata_files_verified": 66,
+      "codec_readers": {
+        "current": {
+          "checkpoints": 5,
+          "decoded_records": 45,
+          "record_validation_and_roundtrip_passed": true
+        },
+        "minimum": {
+          "checkpoints": 5,
+          "decoded_records": 45,
+          "record_validation_and_roundtrip_passed": true
+        }
+      }
+    }
+  },
+  "historical_failed_case": {
+    "source_commit": "ebc6e775080db5a1195086b1c46767b237005b79",
+    "archive_preserved": true,
+    "authority_not_reopened_or_replayed": true,
+    "previous_rejection_cause_not_established": true
+  },
+  "remaining": {
+    "postgresql_cancellation_recovery_acceptance": true,
+    "other_partial_ready_unbooted_and_disposal_histories": true,
+    "different_library_native_package_upgrades": true,
+    "other_source_platform_resource_combinations": true,
+    "all_full_parity_rows_pending": true
+  },
+  "full_http_parity_complete": false,
+  "crash_validation_deferred": true,
+  "crash_handling_qualified": false,
+  "distribution_approved": false
+}

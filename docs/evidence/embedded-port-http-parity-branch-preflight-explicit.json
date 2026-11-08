@@ -1,0 +1,229 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "scope": "Explicit verified default configuration for native branch preflight after a failed ordinary Port run",
+  "source_base_commit": "9c00605a928efc53229caf645807e4a32b0e469c",
+  "source_files_sha256": {
+    "native/smolbox-engine/src/branch.rs": "cea14696c2c34197cc4310a0081f970c85e8f041fb81393faa4e69f553aa06b2",
+    "native/smolbox-engine/src/creation_features.rs": "60b1f4f5f4f7cf5fcb4af4e0e9bf8ca5fe45ee1cafed710d03a2f622682c3ae7"
+  },
+  "ordinary_linux_attempt": {
+    "source_commit": "9c00605a928efc53229caf645807e4a32b0e469c",
+    "manifest_sha256": "a44d58714545d244b325283572393cd34b37a7c8528e381b8055be2e73c42d56",
+    "helper_sha256": "e81c9b60cf51cdf8bf8d9b6882d0ba2d3d34caf8d3274b0d3476f8bcbf1b452e",
+    "source_files_verified": 1779,
+    "assets_verified": 806,
+    "source_created_started_and_marker_command_completed": true,
+    "failed_operation": "branch_preflight",
+    "controller_exit_status": 1,
+    "observed_error": "helper EOF before frame completion",
+    "helper_stderr": "smolbox-port: startup or channel failure",
+    "failure_metadata": {
+      "error_type": "AssertionError",
+      "last_operation": "branch_preflight",
+      "last_result": "command",
+      "states": [
+        "unknown",
+        "missing",
+        "missing"
+      ],
+      "original_request_unresolved": true,
+      "original_helper_retained": false,
+      "forced_termination": false,
+      "crash_validation_performed": false
+    },
+    "branch_requests_entered": 0,
+    "sdk_rows_remaining": 1,
+    "sdk_source_state": "running",
+    "original_source_pid_absent": true,
+    "native_processes_and_zombies_after_failure": [],
+    "kvm_processes_after_failure": [],
+    "record_configuration": {
+      "network": false,
+      "ports": 0,
+      "mounts": 0,
+      "staged_mounts": 0,
+      "network_backend": null,
+      "legacy_configuration_presence_predicate": false
+    },
+    "identified_contract_mismatch": "Generic all-default offline observation omits configuration; strict branch-preflight terminal requires explicit verified configuration.",
+    "original_collection_absence_normal_shutdown_or_cleanup_qualified": false,
+    "private_archive": {
+      "archive_sha256": "535a52ac8be6ffee125eca76f349a5b6729e7409e2ad56e482115d756f641e69",
+      "bytes": 160352844,
+      "members": 3849,
+      "tar_exit_status": 0,
+      "after_unexpected_helper_exit": true,
+      "source_sdk_row_running_pid_absent": true,
+      "sdk_source_disks_and_records_preserved": true,
+      "native_processes_and_zombies": [],
+      "kvm_processes": [],
+      "sdk_backup_sha256": "b713a2052b851635f4e48b3e7baba5a9584379f680a9ebeb3bfe1f2d081358fa",
+      "original_collection_or_absence_qualified": false,
+      "cold_sdk_consistency_qualified": false,
+      "no_signals_sent": true,
+      "crash_validation_performed": false,
+      "finished_utc": "2026-10-17T10:22:06.570523+00:00",
+      "verified_on_guest_outer_host_and_mac": true,
+      "no_archive_restored_as_authority": true
+    }
+  },
+  "implementation": {
+    "preflight_explicit_configuration_from_already_verified_sdk_record": true,
+    "same_source_eligibility_original_enrollment_pid_resources_agent_and_epoch_checks": true,
+    "ordinary_generic_default_configuration_omission_preserved": true,
+    "no_weaker_protocol_acceptance_of_missing_networked_or_mounted_observations": true,
+    "transport_independent_engine_producer": true,
+    "no_sdk_source_or_record_rewrite": true,
+    "no_wire_codec_version_or_public_admission_change": true
+  },
+  "validation": {
+    "host": "Darwin/arm64",
+    "branch_models_passed": 389,
+    "existing_ignored_branch_fixture_not_selected": 1,
+    "configuration_models_passed": 9,
+    "strict_preflight_protocol_models_passed": 9,
+    "branch_framing_models_passed": 17,
+    "strict_all_target_clippy": true,
+    "scoped_format_check": true,
+    "sdk_full_and_clean_verification": true,
+    "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "failed_package_prior_linux_build_stages": [
+      {
+        "name": "toolchain",
+        "exit_status": 0,
+        "log_sha256": "2073de5abf149185c2f4d7473dc833bc921b99135560d24ae7b2293f33a9c376"
+      },
+      {
+        "name": "sdk-before",
+        "exit_status": 0,
+        "log_sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+      },
+      {
+        "name": "sdk-clean-before",
+        "exit_status": 0,
+        "log_sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+      },
+      {
+        "name": "clippy-toolchain",
+        "exit_status": 0,
+        "log_sha256": "301d7b95e4b79bba0c58aeac9c313e46fc7bc1373970c5599f003a75dc41c5a7"
+      },
+      {
+        "name": "clippy",
+        "exit_status": 0,
+        "log_sha256": "549a3224273c5363909c9492f584e01f59e41bb03de93d51a9ff676507375baa"
+      },
+      {
+        "name": "build-helper",
+        "exit_status": 0,
+        "log_sha256": "d74c70baed559e4e6f4c216af90379d1fd96a7bd79a6ab8135a7f2e763acf053"
+      },
+      {
+        "name": "build-witness",
+        "exit_status": 0,
+        "log_sha256": "e65cc0af4465f8b44d46117097826732003400840c3a490f66f2f99d5351ec81"
+      },
+      {
+        "name": "witness-models",
+        "exit_status": 0,
+        "log_sha256": "196b82944ceaa378ab9f042a1688157e6d81d408b627e308ce960b971bdfa555"
+      },
+      {
+        "name": "native-tooling",
+        "exit_status": 0,
+        "log_sha256": "99d3519f046d350f90b7e4762faac833bd9cac97bfa26e46d0cda430d728bb56"
+      },
+      {
+        "name": "epoch-models",
+        "exit_status": 0,
+        "log_sha256": "77082cb9e97d4a8d3667dce367e2ca459016641f0b93f606236248c5ef2a2f07"
+      },
+      {
+        "name": "runtime-models",
+        "exit_status": 0,
+        "log_sha256": "2a60c038fa60c1254035f606a0228107526e1cece0ab4524bd21e3840f39304f"
+      },
+      {
+        "name": "branch-models",
+        "exit_status": 0,
+        "log_sha256": "ff3e570f476325fcfa134083a3eb19e4b71db1f83e356b246ada87b824b41f22"
+      },
+      {
+        "name": "capture-models",
+        "exit_status": 0,
+        "log_sha256": "f2167ee0a324444c756e54342253c6e06eea09dee57f584e1e43a49d91813151"
+      },
+      {
+        "name": "sdk-compat-models",
+        "exit_status": 0,
+        "log_sha256": "a21983781da6827a86f8549eca9a24b90735dcd8ed38209520bb30563c3417c5"
+      },
+      {
+        "name": "protocol-models",
+        "exit_status": 0,
+        "log_sha256": "a9d4422eedf67dd0aded6f30b66951fb460d1930be765ef7fc3bce2310143270"
+      },
+      {
+        "name": "package",
+        "exit_status": 0,
+        "log_sha256": "ba0e446e50f7c65a1c1439a3b19eaa17a5cda6d835a5b02f307a5977a04e774e"
+      },
+      {
+        "name": "sdk-after",
+        "exit_status": 0,
+        "log_sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+      },
+      {
+        "name": "sdk-clean-after",
+        "exit_status": 0,
+        "log_sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+      }
+    ],
+    "failed_package_linux_extra_model_checks": [
+      {
+        "name": "package-policy-model",
+        "exit_status": 0,
+        "log_sha256": "f56cf5f3278ad11782f2a9f5fedaea0e3818ebf6814ad623dbf3a47e89cae096",
+        "summary": [
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 91 filtered out; finished in 0.00s"
+        ]
+      },
+      {
+        "name": "branch-framing-models",
+        "exit_status": 0,
+        "log_sha256": "ac6f7172bb92d0ca4c7a0e4997a66e915fec847045d04466b2808904d9d440f1",
+        "summary": [
+          "test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 75 filtered out; finished in 3.73s"
+        ]
+      }
+    ],
+    "logs_sha256": {
+      "branch-models": "7df613b89c312337bb2f225e4f9af6252d0694d2270ea4a4c3f28d3a6916ee84",
+      "configuration-models": "9c6e6f558a8f0b51122bd332d976119fa81909d55734ebfe827f2645b993af17",
+      "strict-preflight-protocol": "b9215699edd3b448cf6702114794b1683806b3c259814a7b6e5956a9295ef0c8",
+      "branch-framing": "c0f17f4793a093e78a3470f7e19a1e90720ad94223207b148b6645b46e600c89",
+      "clippy": "5179eefb91a61cc812d1c71f670fc43e77cb57664ed2b46cdf3279143a0243d7",
+      "format": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sdk": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "sdk-clean": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "docs": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+      "doc-links": "fe7e86509e4e55bfacafbae259d53fb8b130721b7e8d9250576f81d31fb0aa5a"
+    },
+    "documentation_build_and_links": true
+  },
+  "qualification": {
+    "changed_engine_package_built_or_run": false,
+    "ordinary_port_branch_lifecycle": false,
+    "public_runtime_branch_admission": false,
+    "full_parity_complete": false,
+    "all_full_parity_rows_pending": true,
+    "crash_validation_performed": false,
+    "distribution_approved": false
+  },
+  "remaining": [
+    "Freeze/rebuild the corrected producer and rerun ordinary framed Port source/two-child lifecycle.",
+    "Public SDK/store activation, original-owner controls and installed current/minimum branch consumers.",
+    "All remaining P0-P9 source/platform/resource/upgrade gates; crash validation remains deferred and distribution approval separate."
+  ]
+}

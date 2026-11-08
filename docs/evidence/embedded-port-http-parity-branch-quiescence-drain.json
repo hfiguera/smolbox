@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "status": "ordinary-branch-quiescence-drain-race-source-and-model-correction",
+  "source_base_commit": "8e72ad08bb814c4335317387f58ab76da94c2e2d",
+  "source_files_sha256": {
+    "lib/smolbox/embedded/bridge.ex": "b2b5e14bc5ba9a7fffd110867fe8cfb99f4d2cf61e2bd6655f7fc7426b0cc036",
+    "lib/smolbox/runtime/native_resolution.ex": "7e48df6fc2cc6917d28d2962dcec9f80ef443300082400b73856119751df5977",
+    "test/unit/native_branch_control_readiness_test.exs": "0d652c9f02defabd74ee12aec698e652d669b4d4cce6c9be856815f2425a5419"
+  },
+  "actual_trigger": {
+    "source_commit": "c5f9fdeb633af0c70fdcba7482ed6aa7b37cb197",
+    "native_manifest_sha256": "7b6cfae8a0140babab03f821c56406b018be97e52994bc4cb74d3d9791ebfc39",
+    "native_helper_sha256": "e3fbda886c3129f798dc2668781014204b7c6a1090129ae82ac265def2176ce1",
+    "store": "real Memory retained outside Runtime",
+    "failed_before_first_retirement_dispatch": true,
+    "error": {
+      "category": "admission_exhausted",
+      "operation": "embedded",
+      "evidence": "not_dispatched"
+    },
+    "source_and_held_became_unknown_during_conservative_recovery": true,
+    "normal_original_epoch_shutdown_completed": true,
+    "sdk_vm_rows_retained": 2,
+    "capacity_released": false,
+    "authority_restored_or_replayed": false,
+    "archive": {
+      "archive_sha256": "832a26834b976f43c0f59bdee90d107742ea5d208b025a6f73437c11dce7796b",
+      "bytes": 379714562,
+      "members": 11163,
+      "sdk_backup_sha256": "78c8c6839776bdd3bb74734d5f6351c4756fa8b4952151e9e40b0dcd6e08134d",
+      "stale_socket_metadata_preserved": 4
+    },
+    "archive_and_sdk_backup_verified_on_guest_outer_and_mac_stream": true
+  },
+  "correction": {
+    "wait_for_final_port_record_drain_before_control_work": true,
+    "only_retry_admission_exhausted_and_not_dispatched_quiescence": true,
+    "same_authority_barrier_pinned_owner_epoch_and_deadline": true,
+    "control_operation_callback_not_replayed": true,
+    "uncertain_reply_epoch_change_expiry_stay_fenced": true,
+    "incomplete_recovery_never_promoted": true,
+    "generic_startup_and_partial_recovery_unchanged": true,
+    "rustler_bridge_contract_documents_drain_semantics": true,
+    "native_engine_sdk_package_bytes_changed": false,
+    "public_api_or_codec_changed": false
+  },
+  "validation": {
+    "new_drain_models": 4,
+    "readiness_models_total": 26,
+    "focused_readiness_public_retirement_backing_checks": 42,
+    "selected_models_per_current_minimum_toolchain": 1003,
+    "runtime_or_deferred_cases_excluded": 7,
+    "http_contracts_per_toolchain": 411,
+    "encrypted_postgresql_contracts_per_toolchain": 180,
+    "postgresql_partition_rows": 0,
+    "postgresql_other_clients": 0,
+    "postgresql_normal_smart_shutdown": true,
+    "credo_existing_findings": 67,
+    "new_credo_findings": 0,
+    "format_and_warnings_as_errors_compile_passed": true
+  },
+  "qualification": {
+    "changed_elixir_installed_consumers_qualified": false,
+    "memory_normal_replacement_qualified": false,
+    "all_full_parity_rows_pending": true,
+    "full_http_parity_complete": false,
+    "crash_validation_deferred": true,
+    "distribution_approved": false
+  },
+  "remaining": [
+    "Freeze the corrected Elixir source/Hex archive and repeat ordinary current/minimum installed Memory branch/replacement workflows in fresh or unused SDK accounts",
+    "Retain the failed account and all disks without importing its Memory authority or replaying creation",
+    "Continue original P0\u2013P9 partial/source/platform/resource/consumer/upgrade acceptance"
+  ]
+}

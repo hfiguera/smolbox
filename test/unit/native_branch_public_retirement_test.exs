@@ -18,6 +18,15 @@ defmodule SmolBox.NativeBranchPublicRetirementTest do
     def init(state), do: {:ok, state}
     def handle_call(:config, _, state), do: {:reply, {:ok, state.config}, state}
 
+    # This semantic host has never completed a startup scan. Ordinary proof
+    # routing must not manufacture readiness or activate a bridge for it.
+    def handle_call({:native_acquire_operation, id}, from, state) do
+      case handle_call({:native_acquire, id}, from, state) do
+        {:reply, :ok, next} -> {:reply, {:ok, false}, next}
+        result -> result
+      end
+    end
+
     def handle_call({:native_acquire, id}, {caller, _}, state) do
       result =
         Agent.get_and_update(state.authority, fn

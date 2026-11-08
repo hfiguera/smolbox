@@ -323,9 +323,10 @@ defmodule SmolBox.NativeBranchPublicDeletionTest do
 
   test "acceptance consuming the deadline cannot dispatch native resolution" do
     {runtime, store, parent, child, usage, authority, peer} =
-      fixture(budget: 50, accept_delay: 100)
+      fixture(budget: 2000, accept_delay: 2100)
 
     assert {:error, _} = resolve(runtime, child)
+    assert_received {:store_operation, :branch_delete_accept, true}
     saved = NativeBranchDeletionContract.fetch(Memory, store, child)
     assert saved.branch.native_authority.deletion.proof == nil
     assert {:ok, ^usage} = Memory.usage(store, parent.worker_id)

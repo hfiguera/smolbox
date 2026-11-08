@@ -1,0 +1,184 @@
+{
+  "schema": 1,
+  "status": "fresh-linux-helper-build-and-release-models-passed-current-minimum-partial-collection-refusals-preserved-positive-partial-qualification-incomplete",
+  "source_commit": "06ba0d0e2ef4579b9a6e685fa664ee649e8919fb",
+  "source_archive_sha256": "c90f874558a591dc888482b8a5f06d7beac5c26a41d86316818d2f56933fb34e",
+  "hex_archive_sha256": "8ecb4596d11373a5416760dca44f32d2d5d3161e08b32769474bf42a9e68e6bc",
+  "native_manifest_sha256": "83137f8c802adfaf5d8852de206b3c2a334b770dddd6a1ff17b3846113217d7c",
+  "helper_sha256": "0ed15dd052ffe193fb8b5d929cf1c0de339a1187507fe0f7297d456c38884c63",
+  "sdk_source_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "sdk_unmodified": true,
+  "native_inputs_bound_to_frozen_source": 336,
+  "build_stages_all_eight_exit_zero": true,
+  "release_publication_models_passed": 9,
+  "release_port_branch_models_passed": 17,
+  "input_asset_bytes_unchanged": true,
+  "cases": {
+    "current": {
+      "elixir": "1.20.4",
+      "otp": "29.0.6",
+      "installed_consumer_without_rust": true,
+      "dependency_resolution_strict_compilation_and_cold_caller_exit_zero": true,
+      "ordinary_source_creation_checkpointable_start_and_setup_ran": true,
+      "ordinary_branch_api_deadline_ms": 1000,
+      "harness_exit_status": 1,
+      "failure_stage": "collect_partial",
+      "failed_control": {
+        "category": "unknown",
+        "operation": "branch",
+        "evidence": "not_dispatched"
+      },
+      "collection_request_durably_stored": true,
+      "collection_proof_present": false,
+      "publication_attempted": false,
+      "exclusive_native_phase_or_rejection_cause_established": false,
+      "all_original_resource_charges_preserved": {
+        "slots": 3,
+        "cpus": 3,
+        "memory_mb": 1920,
+        "disk_gb": 9
+      },
+      "normal_original_protocol_shutdown_and_sql_smart_shutdown": true,
+      "source_files_verified": 1813,
+      "installed_package_files_verified": 627,
+      "assets_verified": 806,
+      "host_tools_domain_keys_and_workflow_verified": true,
+      "sdk_counts": {
+        "vms": 2,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0
+      },
+      "account_processes_absent_and_lock_free": true,
+      "sdk_rows_disks_and_all_records_preserved": true,
+      "codecs": {
+        "current": {
+          "checkpoints": 3,
+          "decoded_records": 9,
+          "typed_request_and_uncertainty_preserved": true,
+          "collection_or_disposal_proof_invented": false,
+          "resources_retained_at_every_checkpoint": true,
+          "sdk_or_native_vm_started": false,
+          "log_sha256": "96d242e39b0b959f9c35c659a220b661b972cc36f001128e282b664ef24462c1"
+        },
+        "minimum": {
+          "checkpoints": 3,
+          "decoded_records": 9,
+          "typed_request_and_uncertainty_preserved": true,
+          "collection_or_disposal_proof_invented": false,
+          "resources_retained_at_every_checkpoint": true,
+          "sdk_or_native_vm_started": false,
+          "log_sha256": "08b42ee235e8e6709acd536fc9f49c43d3855ee72f5bbfb1107e005529e8f311"
+        }
+      },
+      "archive_sha256": "044202a8755e6c49abdd01c3a485e64e4b516d79dc1c5de35b4c61e36ff71871",
+      "archive_bytes": 387465632,
+      "archive_members": 12612,
+      "sdk_backup_sha256": "a7806623832016e0d023168ceb0598f55b8584a3a8340cacb915577f5c49b605",
+      "logical_sql_backup_sha256": "452843e99e10a575df4521f569492b9215f590698b49245dfb15960b315a519f",
+      "cold_postgresql_files_verified": 1320,
+      "compact_metadata_files_verified": 26,
+      "full_archive_sdk_sql_metadata_and_cold_files_verified_guest_outer_mac_stream": true,
+      "full_archive_retained_on_mac": false,
+      "authority_restored_or_replayed": false,
+      "manual_process_signals_or_sdk_creation_deletion_replay": false
+    },
+    "minimum": {
+      "elixir": "1.18.4",
+      "otp": "27.3.4.15",
+      "installed_consumer_without_rust": true,
+      "dependency_resolution_strict_compilation_and_cold_caller_exit_zero": true,
+      "ordinary_source_creation_checkpointable_start_and_setup_ran": true,
+      "ordinary_branch_api_deadline_ms": 1000,
+      "harness_exit_status": 1,
+      "failure_stage": "collect_partial",
+      "failed_control": {
+        "category": "unknown",
+        "operation": "branch",
+        "evidence": "not_dispatched"
+      },
+      "collection_request_durably_stored": true,
+      "collection_proof_present": false,
+      "publication_attempted": false,
+      "exclusive_native_phase_or_rejection_cause_established": false,
+      "all_original_resource_charges_preserved": {
+        "slots": 3,
+        "cpus": 3,
+        "memory_mb": 1920,
+        "disk_gb": 9
+      },
+      "normal_original_protocol_shutdown_and_sql_smart_shutdown": true,
+      "source_files_verified": 1813,
+      "installed_package_files_verified": 627,
+      "assets_verified": 806,
+      "host_tools_domain_keys_and_workflow_verified": true,
+      "sdk_counts": {
+        "vms": 2,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0
+      },
+      "account_processes_absent_and_lock_free": true,
+      "sdk_rows_disks_and_all_records_preserved": true,
+      "codecs": {
+        "current": {
+          "checkpoints": 3,
+          "decoded_records": 9,
+          "typed_request_and_uncertainty_preserved": true,
+          "collection_or_disposal_proof_invented": false,
+          "resources_retained_at_every_checkpoint": true,
+          "sdk_or_native_vm_started": false,
+          "log_sha256": "96d242e39b0b959f9c35c659a220b661b972cc36f001128e282b664ef24462c1"
+        },
+        "minimum": {
+          "checkpoints": 3,
+          "decoded_records": 9,
+          "typed_request_and_uncertainty_preserved": true,
+          "collection_or_disposal_proof_invented": false,
+          "resources_retained_at_every_checkpoint": true,
+          "sdk_or_native_vm_started": false,
+          "log_sha256": "96d242e39b0b959f9c35c659a220b661b972cc36f001128e282b664ef24462c1"
+        }
+      },
+      "archive_sha256": "1bd2f8882672ef6f54a6b0e3e550e8f6ef4e660fd469a031dd65aa2deba6f13f",
+      "archive_bytes": 387576482,
+      "archive_members": 12627,
+      "sdk_backup_sha256": "3772ce2270ef0ef47a0bce050e0026935830c964c412cb7efa0739a771e56e9d",
+      "logical_sql_backup_sha256": "7b4037d574de829b32c7927ba1ac7d2d30a9c54c9730855c0a196de19dbe5853",
+      "cold_postgresql_files_verified": 1320,
+      "compact_metadata_files_verified": 26,
+      "full_archive_sdk_sql_metadata_and_cold_files_verified_guest_outer_mac_stream": true,
+      "full_archive_retained_on_mac": false,
+      "authority_restored_or_replayed": false,
+      "manual_process_signals_or_sdk_creation_deletion_replay": false
+    }
+  },
+  "source_review_gap": {
+    "established": "Runtime.NativePartialBranchCollection.accept persists a fresh collection action before the helper checks original-context eligibility. An unacknowledged collection prevents prepared/unbooted/ready alternatives.",
+    "exact_old_native_rejection_cause_established": false,
+    "required_correction": "Read-only original-context collection candidate before saving a new action, within the same finite deadline and original helper/controller fence. Rejection leaves the child unselected and all resources charged. Existing saved requests retain immutable resume semantics.",
+    "new_serialized_authority_or_sdk_patch_permitted": false,
+    "implementation_pending": true
+  },
+  "positive_live_partial_collection_disposal_or_cached_publication_qualified": false,
+  "remaining": [
+    "Implement and model the read-only candidate before fresh partial-collection admission",
+    "Fresh corrected-package current/minimum ordinary positive partial and unbooted proof paths",
+    "Remaining P0\u2013P9 source/platform/resource/upgrade requirements"
+  ],
+  "full_parity_rows_closed": 0,
+  "full_http_parity_complete": false,
+  "crash_validation_deferred": true,
+  "crash_handling_qualified": false,
+  "distribution_approved": false,
+  "documentation_checks": {
+    "documentation_and_coverage_tests_passed": 7,
+    "exdoc_warnings_as_errors_and_local_links_pages": 177,
+    "log_sha256": {
+      "partial-evidence-doc-tests.log": "b3866419028f9179cfa8bf2ea8ffe48fba3cc61dbfdf409ea5944123037f2e4c",
+      "partial-evidence-docs.log": "2685e6b37d98831478f9f025c988041fc9239895ce883eeb37e8d019683bdf33"
+    }
+  }
+}

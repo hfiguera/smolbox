@@ -28,6 +28,18 @@ defmodule SmolBox.Embedded.Bridge do
   admits inspections only until the controller has fenced its durable domain
   binding, reconciled retained records, and explicitly activated mutations.
 
+  Quiescence fences new mutations before waiting for accepted requests to finish
+  draining. A known busy reply proves neither quiescence nor permission to
+  dispatch more work. Callers may wait only within their captured deadline on
+  the same pinned owner and epoch; uncertain replies and changed identity stay
+  fenced. Waiting for quiescence never replays the native operation.
+
+  A completed scan may be retained across an explicit original ready-result
+  recovery only after its validated completion and fresh source/child observations
+  commit atomically. Reactivation still requires the same healthy owner, epoch
+  and worker lease generation within the original deadline. Material publication,
+  partial/uncertain results and incomplete scans cannot establish readiness.
+
   A terminal event carries the actual native outcome plus an optional bridge
   error that disqualifies completion, such as an exceeded response budget. This
   error never replaces a real observed exit. Known unsent failures use
@@ -85,6 +97,10 @@ defmodule SmolBox.Embedded.Bridge do
   @callback activate(server(), binding :: map()) :: :ok | {:error, Error.t()}
   @callback activate(server(), binding :: map(), epoch :: String.t()) :: :ok | {:error, Error.t()}
   @callback quiesce(server(), epoch :: String.t()) :: :ok | {:error, Error.t()}
+  # Same-owner branch controls share one captured operation deadline. Bridges
+  # supporting them must bound quiescence and activation by the remaining time.
+  @callback activate(server(), map(), String.t(), pos_integer()) :: :ok | {:error, Error.t()}
+  @callback quiesce(server(), String.t(), pos_integer()) :: :ok | {:error, Error.t()}
   @callback shutdown(server()) :: :ok | {:error, Error.t()}
   @callback health(server()) :: {:ok, map()} | {:error, Error.t()}
   # Interactive adapters use finite call budgets from one absolute deadline.
@@ -103,7 +119,9 @@ defmodule SmolBox.Embedded.Bridge do
   @callback acknowledge(server(), handle(), pos_integer(), pos_integer()) ::
               :ok | {:error, Error.t()}
   @callback cancel(server(), handle(), pos_integer()) :: :ok | {:error, Error.t()}
-  @optional_callbacks health: 2,
+  @optional_callbacks activate: 4,
+                      quiesce: 3,
+                      health: 2,
                       submit: 6,
                       terminal_control: 4,
                       acknowledge: 4,

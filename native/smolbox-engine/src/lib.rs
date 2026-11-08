@@ -40,7 +40,9 @@ mod branch_material;
 mod branch_owned;
 pub use branch_owned::BranchCompletion;
 mod branch_partial_collection;
-pub use branch_partial_collection::{PartialBranchCollection, PartialBranchCollectionRequest};
+pub use branch_partial_collection::{
+    PartialBranchCollection, PartialBranchCollectionCandidate, PartialBranchCollectionRequest,
+};
 mod branch_partial_cleanup_candidate;
 pub use branch_partial_cleanup_candidate::{
     PartialBranchCleanupCandidate, PartialBranchCleanupState,

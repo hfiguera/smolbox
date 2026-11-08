@@ -23,7 +23,12 @@
       "logs": 1,
       "streaming_exec": 1,
       "terminals": 1,
-      "terminal_preflight": 1
+      "terminal_preflight": 1,
+      "remote_sources": 1,
+      "images": 1,
+      "checkpoints": 1,
+      "branches": 1,
+      "partial_collection_preflight": 1
     }
   },
   "observation_limits": {

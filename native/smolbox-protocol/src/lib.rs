@@ -197,6 +197,58 @@ mod tests {
     use std::io::Cursor;
 
     #[test]
+    fn optional_linux_collection_preflight_keeps_the_older_branch_handshake_valid() {
+        let decode = |bytes: &str| {
+            let message = ServerMessage::decode(serde_json::from_str(bytes).unwrap()).unwrap();
+            let ServerMessage::Hello { hello } = message else {
+                unreachable!()
+            };
+            hello
+        };
+        let older = decode(include_str!("../fixtures/hello-v2-linux-branches.json"));
+        let current = decode(include_str!(
+            "../fixtures/hello-v2-linux-branches-preflight.json"
+        ));
+        assert!(older.validate().is_ok() && current.validate().is_ok());
+        let mut expected = older.sdk.as_deref().unwrap().clone();
+        assert!(!expected
+            .feature_versions
+            .contains_key("partial_collection_preflight"));
+        expected
+            .feature_versions
+            .insert("partial_collection_preflight".into(), 1);
+        assert!(current.sdk.as_deref() == Some(&expected));
+        assert!(older.capabilities == current.capabilities);
+        assert!(older.limits == current.limits);
+    }
+
+    #[test]
+    fn linux_saved_state_descriptor_preserves_the_existing_wire_and_older_packages() {
+        let newer = ServerMessage::decode(
+            serde_json::from_str(include_str!("../fixtures/hello-v2-linux-branches.json")).unwrap(),
+        )
+        .unwrap();
+        let older = ServerMessage::decode(
+            serde_json::from_str(include_str!("../fixtures/hello-v2-linux-images.json")).unwrap(),
+        )
+        .unwrap();
+        let (ServerMessage::Hello { hello: newer }, ServerMessage::Hello { hello: older }) =
+            (newer, older)
+        else {
+            panic!("hello fixtures")
+        };
+        assert_eq!((newer.major, newer.minor), (2, 0));
+        assert!(newer.capabilities == older.capabilities && newer.limits == older.limits);
+        let mut sdk = newer.sdk.unwrap();
+        assert_eq!(sdk.feature_versions.remove("checkpoints"), Some(1));
+        assert_eq!(sdk.feature_versions.remove("branches"), Some(1));
+        assert!(sdk == older.sdk.unwrap());
+        assert!(!sdk
+            .feature_versions
+            .contains_key("partial_cleanup_resolution"));
+    }
+
+    #[test]
     fn checkpointable_creation_marker_omits_legacy_default_rejects_false_and_requires_feature() {
         let mut operation = Operation::QualifyCreation {
             artifact: Artifact {
@@ -586,7 +638,9 @@ pub use branch_deletion_collection::{
 };
 
 mod partial_branch_collection;
-pub use partial_branch_collection::{PartialBranchCollection, PartialBranchCollectionRequest};
+pub use partial_branch_collection::{
+    PartialBranchCollection, PartialBranchCollectionCandidate, PartialBranchCollectionRequest,
+};
 
 mod partial_branch_cleanup_candidate;
 pub use partial_branch_cleanup_candidate::{

@@ -106,6 +106,6 @@ defmodule SmolBox.DurableHost.NativePartialBranchDisposalStoreTest do
     assert Contract.fetch(Store, store, child) == child
     assert {:ok, ^usage} = Store.usage(store, parent.worker_id)
     assert {:ok, %{native_partial_branch_disposals: 1} = capabilities} = Store.capabilities(store)
-    refute Map.has_key?(capabilities, :native_branches)
+    assert capabilities.native_branches == 1
   end
 end

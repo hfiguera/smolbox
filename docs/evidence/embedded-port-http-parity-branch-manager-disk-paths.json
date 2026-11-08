@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "status": "ordinary-sibling-independence-passed-first-stop-rejected-correction-models-passed",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "ordinary_linux": {
+    "source_commit": "aa21103210df5f08525925e46cb1959c53c1e7c9",
+    "manifest_sha256": "ebda1e1e70c25db5afb403f126fd7d019554e0b91df8b3c5db7062a26626bb10",
+    "helper_sha256": "4f82868f5885d688458dc7fb35263bd318ebd88480c9a87de10409c9493ca768",
+    "witness_sha256": "ed33a13c97724a9dd7a8e9b717098b7a9415dfdf359859ebe1bf93a26d7067d8",
+    "source_files_verified": 1753,
+    "assets_verified": 806,
+    "unmodified_sdk_checks_before_after": true,
+    "strict_all_target_clippy": true,
+    "branch_models_passed": 380,
+    "existing_ignored_branch_case_not_selected": 1,
+    "capture_models_passed": 66,
+    "sdk_compatibility_models_passed": 16,
+    "witness_models_passed": 13,
+    "native_python_cases": 51,
+    "native_python_skipped": 4,
+    "fresh_account_empty_inventory_and_normal_enrollment_close": true,
+    "source_preflight_passed": true,
+    "initially_released_child_creation_passed": true,
+    "held_sibling_creation_and_explicit_release_passed": true,
+    "source_and_two_children_disk_and_ram_independent": true,
+    "failure": "first child normal stop: Ownership (NotDispatched)",
+    "original_owner_states_after_failure": [
+      "running",
+      "running",
+      "running"
+    ],
+    "child_disk_formats_observed": [
+      "qcow2",
+      "qcow2"
+    ],
+    "protected_plan_directory_identities_match": true,
+    "normal_restart_deletion_and_backing_not_reached": true
+  },
+  "correction": {
+    "base_commit": "aa21103210df5f08525925e46cb1959c53c1e7c9",
+    "source_files_sha256": {
+      "native/smolbox-engine/src/branch_owned/collection.rs": "fc945b1b4ccf65fbb488046371cd94c881a0a3f591b5edcf53ae7e3fb6f01cfd",
+      "native/smolbox-engine/src/branch_owned/collection/tests.rs": "c151adcdb417202b4f46ef05fd72a50e8f1cd45144f57fa884f0fefedc0056ca",
+      "native/smolbox-engine/examples/branch-guest-proof.rs": "14daadf907f448cca3328edb12bf7fd06afb0ea302ff4d819ed878e496266a94"
+    },
+    "boot_and_collection_use_same_public_sdk_disk_resolver": true,
+    "requires_original_manager_paths_and_opaque_enrollment": true,
+    "protected_source_child_snapshot_rootfs_directory_identities_required": true,
+    "requires_owned_regular_files_without_symlink_redirection": true,
+    "crossed_missing_writable_or_newly_shadowed_paths_reject": true,
+    "ordinary_guest_payload_changes_allowed": true,
+    "no_new_manager_or_receipt_adoption": true,
+    "no_source_dependency_or_backing_release": true,
+    "witness_separates_successful_stop_and_restart": true
+  },
+  "private_preservation": {
+    "archive_sha256": "ce7b21ec7995c0e3aef70b49c134bec54a4c59e2c3f9114d3a9191204b6ec24d",
+    "bytes": 160249192,
+    "members": 3888,
+    "tar_exit_status": 0,
+    "verified_locally_and_outer": true,
+    "cold_consistency_qualified": false,
+    "owners_retained_pending_scoped_cleanup_approval": true
+  },
+  "validation": {
+    "new_private_disk_path_models_passed": 2,
+    "host": "Darwin/arm64",
+    "branch_models_passed": 382,
+    "existing_ignored_branch_case_not_selected": 1,
+    "witness_models_passed": 13,
+    "strict_all_target_clippy": true,
+    "scoped_format_check": true,
+    "sdk_unmodified": true,
+    "documentation_build_and_links": true,
+    "logs_sha256": {
+      "branch": "2541f8087ac52d04379d1d39488a901c74e6c6cc0a1fc70b4ee9c21e0e894c90",
+      "clippy": "6170c338b3e1bf3075e26971df7c23933f3a8765c71bc8b17eee2838342cc381",
+      "sdk": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "sdk-clean": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "format": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "docs": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+      "docs-links": "2977ff71930dc7c0c0758e26d2a31102384e27693707da347f9b51505f31e155"
+    }
+  },
+  "qualification": {
+    "corrected_package_normal_lifecycle": false,
+    "ordinary_recovery_of_collected_publication_control": false,
+    "framed_port_publication_control": false,
+    "durable_dependency_retirement": false,
+    "installed_branch_consumers": false,
+    "public_native_branch_admission": false,
+    "full_parity_complete": false,
+    "crash_validation_performed": false,
+    "distribution_approved": false
+  }
+}

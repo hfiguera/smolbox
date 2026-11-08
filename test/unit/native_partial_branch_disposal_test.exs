@@ -149,7 +149,7 @@ defmodule SmolBox.NativePartialBranchDisposalTest do
     assert {:ok, %{native_partial_branch_disposals: 1} = capabilities} =
              Store.Memory.capabilities(start_supervised!({Memory, []}, id: :other))
 
-    refute Map.has_key?(capabilities, :native_branches)
+    assert capabilities.native_branches == 1
   end
 
   test "fresh normal readers retain pending and completed disposal and old v44 omits the new nil field" do

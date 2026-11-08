@@ -10,6 +10,51 @@ fn hash(value: &impl Serialize) -> Result<String, InvalidMessage> {
     ))
 }
 
+/// Ephemeral eligibility only; never collection or serialized ownership.
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct PartialBranchCollectionCandidate {
+    pub schema: u8,
+    pub creation_sha256: String,
+    pub operation_id: String,
+    pub request_sha256: String,
+    pub epoch: String,
+    pub platform: String,
+}
+impl std::fmt::Debug for PartialBranchCollectionCandidate {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("PartialBranchCollectionCandidate")
+            .field("schema", &self.schema)
+            .finish_non_exhaustive()
+    }
+}
+impl PartialBranchCollectionCandidate {
+    pub fn validate(&self) -> Result<(), InvalidMessage> {
+        if self.schema != 1
+            || crate::wire::hex(&self.creation_sha256, 64).is_err()
+            || crate::wire::id(&self.operation_id).is_err()
+            || crate::wire::hex(&self.request_sha256, 64).is_err()
+            || crate::wire::hex(&self.epoch, 32).is_err()
+            || !matches!(self.platform.as_str(), "linux" | "macos")
+            || serde_json::to_vec(self).map_err(|_| InvalidMessage)?.len() > 4096
+        {
+            return Err(InvalidMessage);
+        }
+        Ok(())
+    }
+    pub fn matches(&self, request: &PartialBranchCollectionRequest) -> Result<(), InvalidMessage> {
+        self.validate()?;
+        request.validate()?;
+        if self.creation_sha256 != hash(&request.creation)?
+            || self.operation_id != request.operation_id
+            || self.request_sha256 != request.request_sha256
+        {
+            return Err(InvalidMessage);
+        }
+        Ok(())
+    }
+}
+
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct PartialBranchCollectionRequest {
@@ -43,7 +88,7 @@ impl PartialBranchCollectionRequest {
             return Err(InvalidMessage);
         }
         if !self.quiesced
-            || !crate::wire::id(&self.operation_id).is_ok()
+            || crate::wire::id(&self.operation_id).is_err()
             || self.operation_id == self.creation.child.operation_id
             || self
                 .creation
@@ -104,7 +149,7 @@ impl PartialBranchCollection {
     }
     pub fn validate(&self) -> Result<(), InvalidMessage> {
         if self.schema != 1
-            || !crate::wire::id(&self.operation_id).is_ok()
+            || crate::wire::id(&self.operation_id).is_err()
             || [
                 &self.creation_sha256,
                 &self.publication_sha256,
@@ -113,7 +158,7 @@ impl PartialBranchCollection {
                 &self.collection_sha256,
             ]
             .into_iter()
-            .any(|s| !crate::wire::hex(s, 64).is_ok())
+            .any(|s| crate::wire::hex(s, 64).is_err())
             || self.proof_sha256 != self.digest()?
             || serde_json::to_vec(self).map_err(|_| InvalidMessage)?.len() > 4096
         {
@@ -176,6 +221,88 @@ mod tests {
             })
             .unwrap()
     }
+    #[test]
+    fn candidate_requires_negotiated_feature_and_exact_request_epoch_platform_without_output() {
+        let candidates: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../fixtures/partial-branch-collection-candidate-v1.json"
+        ))
+        .unwrap();
+        for row in candidates {
+            let request: PartialBranchCollectionRequest =
+                serde_json::from_value(row["request"].clone()).unwrap();
+            let candidate: PartialBranchCollectionCandidate =
+                serde_json::from_value(row["candidate"].clone()).unwrap();
+            candidate.matches(&request).unwrap();
+            let operation = Operation::InspectPartialBranchCollection {
+                request: Box::new(request.clone()),
+            };
+            operation.validate(30000).unwrap();
+            assert!(operation.validate(30001).is_err());
+            assert!(operation.requires_branches() && operation.capability() == Capability::Inspect);
+            assert!(operation.receipt() == Some(&request.creation.source));
+            assert!(operation.branch_approval() == Some(&request.creation.approval));
+            for variant in 0..5 {
+                let mut hello = hello(&row, &request);
+                if variant != 0 {
+                    hello
+                        .sdk
+                        .as_mut()
+                        .unwrap()
+                        .feature_versions
+                        .insert("partial_collection_preflight".into(), 1);
+                }
+                let mut session = Session::new(hello.clone()).unwrap();
+                session.approve(&hello).unwrap();
+                let admitted = session
+                    .admit(ClientMessage::Request {
+                        epoch: hello.epoch.clone(),
+                        id: 1,
+                        budget_ms: 30000,
+                        initial_credit: 1024,
+                        initial_event_credit: 1,
+                        operation: operation.clone(),
+                    })
+                    .unwrap();
+                if variant == 0 {
+                    assert!(matches!(
+                        admitted,
+                        ServerMessage::Terminal {
+                            outcome: Outcome::Error {
+                                code: crate::SafeCode::Unsupported,
+                                ..
+                            },
+                            ..
+                        }
+                    ));
+                    continue;
+                }
+                assert!(matches!(admitted, ServerMessage::Accepted { .. }));
+                assert!(session.event(1, Stream::Stdout, b"unexpected").is_err());
+                let mut value = candidate.clone();
+                if variant == 2 {
+                    value.epoch = "f".repeat(32);
+                }
+                if variant == 3 {
+                    value.platform = if value.platform == "linux" {
+                        "macos"
+                    } else {
+                        "linux"
+                    }
+                    .into();
+                }
+                if variant == 4 {
+                    value.request_sha256 = "0".repeat(64);
+                }
+                let outcome = Outcome::PartialBranchCollectionCandidate {
+                    candidate: Box::new(value),
+                };
+                outcome.validate_for(2).unwrap();
+                assert!(outcome.validate_for(1).is_err());
+                assert_eq!(session.terminal(1, outcome).is_ok(), variant == 1);
+            }
+        }
+    }
+
     #[test]
     fn canonical_partial_collection_has_distinct_full_request_and_required_zero_output_result() {
         for row in rows() {

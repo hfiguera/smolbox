@@ -79,7 +79,7 @@ defmodule SmolBox.DurableHost.NativePartialBranchBackingStoreTest do
     assert {:ok, ^usage} = Store.usage(store, source.worker_id)
     assert {:ok, _} = Contract.complete_proof(Store, store, current, pending, proof, 1315)
     assert {:ok, %{native_partial_branch_backings: 1} = caps} = Store.capabilities(store)
-    refute Map.has_key?(caps, :native_branches)
+    assert caps.native_branches == 1
   end
 
   test "claims preserve accepted intent until only its exact typed acknowledgement closes backing",

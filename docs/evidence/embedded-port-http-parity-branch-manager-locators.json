@@ -1,0 +1,168 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "scope": "immutable original-manager disk locators for historical branch deletion collection and continuation",
+  "source_base_commit": "ef2be77372fef3447d183fdc60a373ec3e992821",
+  "source_files_sha256": {
+    "native/smolbox-engine/src/branch_owned/paths.rs": "02f656f2d62db6ce80b0aab807a62175066a8ecaafe9f282f1532eb857a90eaa",
+    "native/smolbox-engine/src/branch_owned.rs": "74989388162790033ab3ccd653ba07ce732494f5fd91e99ce9164a5141221418",
+    "native/smolbox-engine/src/branch_owned/collection.rs": "32c2d94fc6c830eb3c869e353ae423f00d0ad2f181346b6e9e5de5cb638d392e",
+    "native/smolbox-engine/src/branch/retention/boot.rs": "05d4936f10ef4e2de922945448baaedd81a5856fa8aca8ea256e0714f28a6c94",
+    "native/smolbox-engine/src/branch_delete/continuation.rs": "046f54430db5d7bac1b962dc397a219bfdd930de61e7e29811dc28b4059e952c"
+  },
+  "implementation": {
+    "private_paths_captured_from_original_manager_at_verified_handoff": true,
+    "capture_checks_actual_sdk_raw_or_qcow_selection": true,
+    "capture_requires_original_directory_identities_and_owned_regular_files": true,
+    "captured_paths_bound_to_original_child_directory_identity": true,
+    "no_serialization_or_manager_reconstruction_from_paths": true,
+    "context_install_and_live_collection_verify_captured_manager_paths": true,
+    "historical_locator_check_does_not_require_a_removed_namespace": true,
+    "historical_paths_are_not_collection_or_deletion_proof": true,
+    "actual_collection_still_requires_live_directory_and_disk_checks": true,
+    "mutating_continuation_still_requires_positive_original_collection_current_plan_and_row": true,
+    "continuation_rejects_pending_runtime_boot_using_shared_registry": true,
+    "no_database_pid_inference_of_cached_runtime_owner": true,
+    "no_new_wire_codec_or_public_feature_descriptor": true
+  },
+  "validation": {
+    "new_private_filesystem_locator_models_passed": 3,
+    "models_create_no_sdk_manager_vm_or_loss_campaign": true,
+    "host": "Darwin/arm64",
+    "branch_models_passed": 386,
+    "existing_ignored_branch_fixture_not_selected": 1,
+    "runtime_boot_models_passed": 19,
+    "witness_models_passed": 13,
+    "strict_all_target_clippy": true,
+    "scoped_format_check": true,
+    "sdk_unmodified": true,
+    "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "logs_sha256": {
+      "branch": "b1a090cb3425237b535aa962b2667ab327999b37f8eea856dbeb9f9efcaa0f36",
+      "runtime": "babc6b1be159b5b7333ccd1802a6c78fa6a81e72f6f7c83fe3869b162ef5f769",
+      "witness": "d5bced4ee854ea8ec2cc52da9ff6cc7ba1786478d9a609b81c962e01ddeb63c6",
+      "clippy": "08e0df69514bfca7c441943052d8ea824beb7daf571bdd59c9c9b6947a608c89",
+      "sdk": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "sdk-clean": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "format": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "docs-final": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+      "docs-links-final": "2977ff71930dc7c0c0758e26d2a31102384e27693707da347f9b51505f31e155"
+    },
+    "documentation_build_and_links": true
+  },
+  "qualification": {
+    "changed_package_ordinary_vm_acceptance": false,
+    "live_deletion_continuation_qualified": false,
+    "public_native_branch_admission": false,
+    "full_parity_complete": false,
+    "crash_validation_performed": false,
+    "distribution_approved": false
+  },
+  "linux_build": {
+    "source_commit": "fa48c445f7cc856fd7109fcfc611e8b71856a741",
+    "source_archive_sha256": "1ec1e87fe5acaea627d5db6d19e73750d545e01c44822d81375c32e30ab3c360",
+    "source_files_verified": 1759,
+    "manifest_sha256": "ae6e81dad2d464419076a71f5aba4372f28e137d7b33672d76a0a9662490cb1c",
+    "helper_sha256": "e5f5f30d9ba480a9baaeae22fcd8ac09e818b58e78ff9de842c77cb02d78f38c",
+    "witness_sha256": "16d31a63804a44c0c85cf621b6a9ff20fcc61a4f2c5c1008f866647cf95f2288",
+    "assets": 806,
+    "rust_toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+    "clippy_toolchain": "clippy 0.1.92 (ded5c06cf2 2025-12-08)",
+    "sdk_unmodified_before_after": true,
+    "stages": [
+      {
+        "name": "toolchain",
+        "exit_status": 0,
+        "log_sha256": "2073de5abf149185c2f4d7473dc833bc921b99135560d24ae7b2293f33a9c376"
+      },
+      {
+        "name": "sdk-before",
+        "exit_status": 0,
+        "log_sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+      },
+      {
+        "name": "sdk-clean-before",
+        "exit_status": 0,
+        "log_sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+      },
+      {
+        "name": "clippy-toolchain",
+        "exit_status": 0,
+        "log_sha256": "301d7b95e4b79bba0c58aeac9c313e46fc7bc1373970c5599f003a75dc41c5a7"
+      },
+      {
+        "name": "clippy",
+        "exit_status": 0,
+        "log_sha256": "e0792f834a4968efe989a07c2607229f70115c60644e4bcb6032daeca156b85b"
+      },
+      {
+        "name": "build-helper",
+        "exit_status": 0,
+        "log_sha256": "7913dbba2a762d4546af960bdf88d88158b6ea428e30187876f60407223cca49"
+      },
+      {
+        "name": "build-witness",
+        "exit_status": 0,
+        "log_sha256": "d62d6a2aa23a49689fd072d2fd2600b422c2b34ea2057d92c8593156258daab3"
+      },
+      {
+        "name": "witness-models",
+        "exit_status": 0,
+        "log_sha256": "5e3acf7734cfada416377418b0a8f4a7f15e7be5a44850127eed52476d3d709c"
+      },
+      {
+        "name": "native-tooling",
+        "exit_status": 0,
+        "log_sha256": "751e6a54a73cac7f68423db4d49fbfad75258ad4d0eedeae134f9a4b92aa62bb"
+      },
+      {
+        "name": "epoch-models",
+        "exit_status": 0,
+        "log_sha256": "d2e0e53a621e257e3a92a6be9b882c9be639b492d5e0f7b37b7c5db3addab148"
+      },
+      {
+        "name": "runtime-models",
+        "exit_status": 0,
+        "log_sha256": "e6b38555b4c308bb40c9987973955795c913f5699c5ab3348f12e8171d514019"
+      },
+      {
+        "name": "branch-models",
+        "exit_status": 0,
+        "log_sha256": "f3c779a39ce594e0729f9155c3fe75195bd18b2f13f5c87a574c2353a61057b1"
+      },
+      {
+        "name": "capture-models",
+        "exit_status": 0,
+        "log_sha256": "b006fbd7309a33f209bad1bca1b11d5bd800a1a613c59c430cde50885762dbd9"
+      },
+      {
+        "name": "sdk-compat-models",
+        "exit_status": 0,
+        "log_sha256": "e463017dcfb670cfc94a969f3e49388ced414d0a385535e8106ef9d0a7b24e4a"
+      },
+      {
+        "name": "protocol-models",
+        "exit_status": 0,
+        "log_sha256": "c37414eb65930868145a7fabdc094e2ed878d382c799c732166ac4a1d30d8d77"
+      },
+      {
+        "name": "package",
+        "exit_status": 0,
+        "log_sha256": "b2d50b4d4396bc3de58796bbed336285f9c15447262ce6cff83c5d510025023d"
+      },
+      {
+        "name": "sdk-after",
+        "exit_status": 0,
+        "log_sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+      },
+      {
+        "name": "sdk-clean-after",
+        "exit_status": 0,
+        "log_sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+      }
+    ],
+    "ordinary_vm_acceptance": false,
+    "later_elixir_framing_changes_not_in_frozen_source": true,
+    "public_native_branch_admission": false
+  }
+}

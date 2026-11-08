@@ -591,16 +591,18 @@ defmodule SmolBox.Store.NativeSourceCodecTest do
     def machine(_store, _operation, _arguments), do: raise("reader check must not mutate")
   end
 
-  test "future source descriptors require reader and atomic source/image markers before enrollment" do
+  test "approved macOS source descriptors require reader and atomic source/image markers before enrollment" do
     store = start_supervised!(Memory)
-    config = Package.create(protocol_major: 2)
+
+    sdk =
+      "native/smolbox-protocol/fixtures/hello-v2-macos-images.json"
+      |> File.read!()
+      |> Jason.decode!()
+      |> get_in(~w(hello sdk))
+
+    config = Package.create(protocol_major: 2, sdk_identity: sdk)
     on_exit(fn -> File.rm_rf!(config.package_path) end)
-    # Exercise the reader gate independently. This descriptor remains rejected
-    # by Config/package approval and cannot actually start a helper.
-    sdk = put_in(Config.sdk_identity(config)["feature_versions"]["remote_sources"], 1)
-    sdk = put_in(sdk["feature_versions"]["images"], 1)
-    config = %{config | sdk_identity: sdk}
-    assert {:error, _} = Config.validate(config)
+    assert :ok = Config.validate(config)
     target = %Target{kind: :embedded, native_config: config}
 
     for missing <- [[:native_sources], [:registry_sources], [:managed_images]] do
@@ -610,5 +612,6 @@ defmodule SmolBox.Store.NativeSourceCodecTest do
 
     assert :ok = NativeSupport.verify(%{workers: [target], store: {Memory, store}})
     assert :ok = NativeSupport.verify(%{workers: [target], store: {ReaderStore, {store, []}}})
+    assert Package.received(config) == []
   end
 end

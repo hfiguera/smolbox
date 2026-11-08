@@ -1,6 +1,13 @@
 defmodule SmolBox.Backend.EmbeddedBranch do
   @moduledoc false
-  alias SmolBox.Backend.{Assignment, Budget, EmbeddedContext, EmbeddedReply, Features}
+  alias SmolBox.Backend.{
+    Assignment,
+    Budget,
+    EmbeddedBranchSourceObservation,
+    EmbeddedContext,
+    EmbeddedReply,
+    Features
+  }
 
   alias SmolBox.Embedded.{
     BranchCompletion,
@@ -12,6 +19,7 @@ defmodule SmolBox.Backend.EmbeddedBranch do
     NativeBranchAuthority,
     NativeBranchReleaseResult,
     NativeBranchResult,
+    NativeCollectedBranchPublication,
     NativeGrowth,
     Protocol
   }
@@ -86,12 +94,32 @@ defmodule SmolBox.Backend.EmbeddedBranch do
          {:ok, request} <- request(operation, child),
          {:ok, response, budget} <- exchange(context, request, budget, call, deadline),
          {:ok, evidence} <- proof(operation, child, response),
-         {:ok, source_context, child_context} <- promote(context, operation, child, evidence),
-         source_request = %{
-           "operation" => "branch_preflight",
-           "receipt" => source_context.identity.receipt
-         },
-         {:ok, source_response, budget} <-
+         {:ok, source_context, child_context} <- promote(context, operation, child, evidence) do
+      observations(
+        {operation, parent, child, evidence},
+        {source_context, child_context},
+        {budget, call, deadline}
+      )
+    else
+      {:error, %Error{} = error} -> {:error, %{error | operation: :branch}}
+      _ -> failure(:identity_conflict, :dispatch_uncertain)
+    end
+  end
+
+  # A valid completion precedes these fresh observations. A later undispatched
+  # inspection cannot prove that the whole branch operation was undispatched,
+  # nor authorize replay, activation or release of its retained resources.
+  defp observations(
+         {operation, parent, child, evidence},
+         {source_context, child_context},
+         {budget, call, deadline}
+       ) do
+    source_request = %{
+      "operation" => "branch_preflight",
+      "receipt" => source_context.identity.receipt
+    }
+
+    with {:ok, source_response, budget} <-
            exchange(source_context, source_request, budget, call, deadline, 16_384),
          {:ok, source} <- observe(source_context, :branch_source, source_request, source_response),
          child_request = %{"operation" => "inspect", "receipt" => child_context.identity.receipt},
@@ -102,8 +130,11 @@ defmodule SmolBox.Backend.EmbeddedBranch do
          {:ok, _} <- remaining(budget, deadline) do
       result(operation, parent, child, evidence, source, observed)
     else
-      {:error, %Error{} = error} -> {:error, %{error | operation: :branch}}
-      _ -> failure(:identity_conflict, :dispatch_uncertain)
+      {:error, %Error{} = error} ->
+        {:error, %{error | operation: :branch, evidence: :dispatch_uncertain}}
+
+      _ ->
+        failure(:identity_conflict, :dispatch_uncertain)
     end
   end
 
@@ -196,7 +227,7 @@ defmodule SmolBox.Backend.EmbeddedBranch do
          :branch_lookup_creation,
          %{completion: nil, release: nil} = authority
        ),
-       do: authority.request["source"] == context.identity.receipt
+       do: lookup_creation_source?(context, authority)
 
   defp lookup_source?(context, :branch_lookup_release, %{
          release: %{source: source, transition: nil}
@@ -204,6 +235,20 @@ defmodule SmolBox.Backend.EmbeddedBranch do
        do: source == context.identity.receipt
 
   defp lookup_source?(_, _, _), do: false
+
+  defp lookup_creation_source?(context, %{collected_publication: nil} = authority),
+    do: authority.request["source"] == context.identity.receipt
+
+  defp lookup_creation_source?(context, %{
+         collected_publication: %NativeCollectedBranchPublication{
+           proof: %BranchPublication{} = proof
+         }
+       }),
+       do:
+         context.identity.receipt == proof.receipt and context.identity.transition == proof and
+           List.last(context.history || []) == proof
+
+  defp lookup_creation_source?(_, _), do: false
 
   defp proof(
          operation,
@@ -257,12 +302,8 @@ defmodule SmolBox.Backend.EmbeddedBranch do
            operation != :branch_resolve_creation or
              get_in(proof.publication, ~w(change child_origin intent epoch)) == context.epoch,
          {:ok, publication} <- BranchPublication.from_wire(proof.publication),
-         history = (context.history || []) ++ [publication],
-         source_identity = %Identity{
-           receipt: publication.receipt,
-           transition: publication,
-           material_history: history
-         },
+         {:ok, source_context} <-
+           EmbeddedBranchSourceObservation.promote_publication(context, publication),
          authority = %{child.branch.native_authority | completion: proof},
          {:ok, child_history} <-
            NativeBranchAuthority.transitions(%{
@@ -274,9 +315,8 @@ defmodule SmolBox.Backend.EmbeddedBranch do
            transition: List.last(child_history),
            material_history: history_or_nil(child_history)
          },
-         true <- Identity.valid?(source_identity) and Identity.valid?(child_identity) do
-      {:ok, %{context | identity: source_identity, history: history},
-       child_context(context, child, child_identity, child_history)}
+         true <- Identity.valid?(child_identity) do
+      {:ok, source_context, child_context(context, child, child_identity, child_history)}
     else
       _ -> failure(:identity_conflict, :dispatch_uncertain)
     end

@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "status": "source-and-inert-model-correction-live-package-qualification-pending",
+  "base_commit": "b859b7b4",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "sdk_unmodified": true,
+  "shared_engine_change": true,
+  "behavior": {
+    "exact_original_boot_publication_tracking_allowed": true,
+    "candidate_inspection_retires_tracking": false,
+    "runtime_boot_owned_manager_or_branch_owner_still_rejected": true,
+    "mismatched_receipts_or_busy_maps_preserve_tracking": true,
+    "tracking_retired_only_after_validated_original_collection": true,
+    "strict_disposal_and_backing_guards_unchanged": true,
+    "sdk_rows_disks_or_resource_charges_changed_by_tracking_retirement": false,
+    "wire_or_persistent_codec_format_changed": false
+  },
+  "checks": {
+    "narrow_original_tracking_model_passed": true,
+    "all_target_clippy_passed": true,
+    "regular_and_clean_sdk_verification_passed": true,
+    "documentation_current": {
+      "tests": 7,
+      "doctests": 4
+    },
+    "documentation_minimum": {
+      "tests": 7,
+      "doctests": 4
+    },
+    "generated_documentation_link_pages": 177,
+    "current_and_minimum_archived_cases_each": 4,
+    "current_and_minimum_decoded_roundtrip_records_each": 156,
+    "owned_engine_protocol_format": true,
+    "ordinary_rust_workspace_sweep": {
+      "passed": 1319,
+      "ignored": 24,
+      "failed": 0,
+      "scope": "workspace --lib --bins --test contract --locked; deferred integration campaigns excluded"
+    }
+  },
+  "source_sha256": {
+    "native/smolbox-engine/src/machine.rs": "9317c22bde179561980a3c826e5b930666e0b4d3579504a4a9f38370ae3ff4ce",
+    "native/smolbox-engine/src/branch/retention/boot/collection.rs": "fa5fe732865027ce8f229bab849a8beae22a2e4312c5bb69bf28304e8d8f9799",
+    "native/smolbox-engine/src/branch/retention/resolution/collection.rs": "bfe26bc3932d7ec882e1d8a49276d41e225a100f8c3aeda1363eda57b0c3044a",
+    "native/smolbox-engine/src/branch/retention/resolution/partial_disposal/tests.rs": "c5700d167df9caed2a69f6d3539b1e32c663a3281a3d3218b7e2b2b632dc61d4"
+  },
+  "log_sha256": {
+    "original-handle-test.log": "1114afbb5b41b3da13085b1694f6af9c6153281731bae08d059e0d380af72b7a",
+    "original-handle-clippy.log": "51b78a49ea8dcb9ad01abc0cc9bc4c7509150ed1b51ba255cf999158b4e9975f",
+    "original-handle-sdk-check.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+    "original-handle-clean-sdk-check.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+    "original-handle-doc-tests.log": "db5a57a448f17b9a0babad853390194f09d93be7798cd661f814f7de5a161027",
+    "original-handle-minimum-doc-tests.log": "9053d8bff3fbd8594c326fe8882eec9d7add712a37e3abebb3cb3f5266fa581d",
+    "original-handle-doc-links.log": "fe7e86509e4e55bfacafbae259d53fb8b130721b7e8d9250576f81d31fb0aa5a",
+    "original-handle-final-docs.log": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+    "original-handle-final-doc-links.log": "fe7e86509e4e55bfacafbae259d53fb8b130721b7e8d9250576f81d31fb0aa5a",
+    "original-handle-workspace-tests.log": "0597a5944fb6a67454524abb12f80a0131f1084322cefa8e20a392a2e1438c3d"
+  },
+  "fresh_exact_package_positive_ordinary_recovery": "pending",
+  "full_parity_gates_closed": 0,
+  "crash_validation": "deferred",
+  "distribution_approved": false,
+  "source_commit": "8686e179ceb4232774d97552fa09602fa9d7eaa8"
+}

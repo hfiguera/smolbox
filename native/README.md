@@ -684,3 +684,166 @@ cached creation, normal exec/restart/data, owned deletion and retained pack-cach
 requalification. Bare execution omits the image-only user option. The fixture
 observes two manifest GETs and one blob GET and closes normally. Credentials,
 other source/platform cases and public source admission remain unqualified.
+
+## Explicit ordinary branch engine witness
+
+`smolbox-engine/examples/branch-guest-proof.rs` prepares the ordinary Linux x86_64
+local-bare branch campaign. Its live path has not yet been qualified. It uses the
+shared engine with a verified package's boot/file helpers; it is a maintainer
+witness, not a public Port consumer or a capability activation.
+
+Build the witness and helper from the same frozen, verified unmodified-SDK source:
+
+```sh
+cargo build --manifest-path native/Cargo.toml -p smolbox-engine --example branch-guest-proof --release --locked
+```
+
+Live entries require an explicit mode:
+`branch-guest-proof ordinary SETTINGS_JSON OUTPUT` or
+`branch-guest-proof ordinary-partial-cancellation SETTINGS_JSON OUTPUT`.
+The latter is an opt-in shared-engine cancellation witness. It prepares the source,
+calls the original retained boot API to completion, then cancels that operation's
+token. It verifies that initialization rejects before dispatch and no completed
+branch exists, then uses the original retained collection, disposal, absence and
+backing controls. It injects no process loss or launch pause. This is engine-only
+evidence; it cannot qualify public Port or durable Runtime coordination. Neither
+mode is invoked by default tests, and neither selects deferred fault validation.
+Use an enrolled dedicated account/domain with an initially empty SDK inventory.
+The output must be a new private normalized absolute directory, at most 88 bytes
+for its control socket. The bounded private settings file contains:
+
+```json
+{
+  "package": "/approved/package",
+  "manifest_sha256": "<exact package.json SHA-256>",
+  "domain_json": "/approved/domain.json",
+  "artifact": {
+    "path": "/approved/bare.smolmachine",
+    "sha256": "<exact artifact SHA-256>",
+    "max_bytes": 2147483648,
+    "guest_platform": "linux/amd64"
+  },
+  "branch_approval": {
+    "id": "ordinary-branches",
+    "host_overhead_mb": 128,
+    "resources": {"slots": 1, "cpus": 1, "memory_mb": 640, "disk_gb": 5}
+  }
+}
+```
+
+The source is fixed at one CPU, 512 MiB RAM and 1-GiB storage/overlay disks, with
+checkpointable startup and offline networking. The existing engine validates the
+bare artifact and rejects incompatible sources. The guest must provide the public
+SDK's `smolvm-branch-ready` helper. This runner supplies no registry, networking,
+host mount, checkpoint-source import or arbitrary workload settings.
+
+The live sequence prepares disk and RAM markers, parks the source's branch-ready
+helper, creates an initially released child and a held sibling, verifies held and
+source lifecycle restrictions, explicitly releases the held child, and checks
+independent source/child RAM and disk changes. Normal first-child stop/start must
+preserve disk and discard its captured RAM. Deleting that child must leave the
+source blocked by the remaining sibling and leave that sibling usable. Both child
+absence proofs, source deletion and separate backing acknowledgements precede
+normal owner shutdown. Output records both the package manifest and the witness
+executable digests; they identify a pair, not interchangeable qualifications.
+
+Original branch-manager collection uses the same public SDK disk resolver as
+boot: fork children can have `storage.qcow2` / `overlay.qcow2` rather than raw
+files. Collection requires the original manager's exact resolved paths, protected
+directory identities and owned regular files without symlink redirection. It
+does not freeze a running guest's disk contents or construct a manager from files.
+Runtime ownership exclusion uses the same engine's shared runtime-boot registry,
+including pending starts. The SDK's PID accessor also reads database rows, so a
+PID row cannot distinguish the original manager from an ordinary runtime owner.
+Context installation/selection binds the original registry pointer; manager maps,
+enrollment, PID/birth and epoch checks remain mandatory before collection.
+At verified handoff the original context also retains its actual manager's
+selected raw/QCOW locators, bound to the original child-directory identity.
+Historical collection/continuation checks compare those immutable locators even
+after a namespace was removed. They never reconstruct a manager or attest
+collection. Live collection still checks current directories/disks; mutating
+continuation still requires positive original collection, the current protected
+plan and exact row. No file inventory can replace this original context.
+The witness records successful first-child stop and restart separately, so a
+later failure cannot qualify the remaining lifecycle sequence.
+
+On failure, returned facts remain in the original in-memory owner before any
+fallible evidence write. `branch-guest-proof control OUTPUT status` reports only
+the original tracked states. Explicit `stop-source`, `stop-first`, `stop-held`,
+`delete-source`, `delete-first`, `delete-held` and `release-held` invoke only their
+normal original APIs. An entered uncertain lifecycle cannot replay. After proved
+child deletion, `qualify-first-absence` / `qualify-held-absence` collect typed
+absence evidence; after source deletion, `release-first-backing` /
+`release-held-backing` use the exact retained requests. `close-cleaned` requires
+all entered members deleted, all entered children's absence/backing acknowledgements,
+an available engine and empty inventory. A child never entered by this owner needs
+no invented deletion. `close-unstarted` requires no source creation entry.
+`close-retained` requests normal engine shutdown while preserving uncertain
+records and disks. It grants no deletion, absence, retirement or backing proof.
+If normal shutdown fails, the witness retains its original owner and controls;
+there is no forced termination fallback.
+
+Partial creations without returned original completion retain their requests and
+engine authority. Their explicit controls now use that same retained engine:
+
+| Controls (replace `CHILD` with `first` or `held`) | Original authority required |
+| --- | --- |
+| `inspect-retained-CHILD`, `qualify-ready-CHILD` | Original retained phase, or protected completion plus fresh running source/child observations. Phase names alone grant nothing. |
+| `publish-collected-CHILD` | Exact original verified worker output and frozen creation, source/child gates and protected publication. Uses one fresh control deadline; no fork or boot is repeated, and the child remains unknown. |
+| `retire-prepared-CHILD` | Positive original unused declaration; empty inventory cannot supply it. No child deletion or backing proof is invented. |
+| `dispose-unbooted-CHILD`, `resolve-unbooted-CHILD` | Original published/unbooted context. The second control observes the exact accepted request and never repeats SDK entry. |
+| `collect-partial-CHILD`, `dispose-partial-CHILD`, `resolve-partial-CHILD` | Original opaque pre-handoff enrollment and typed collection, followed by one disposal entry or separate observation. |
+| `cleanup-partial-CHILD`, `qualify-cleanup-CHILD`, `resolve-cleanup-CHILD` | One explicit residual cleanup request, then distinct actual-removal or unnecessary-cleanup lookups. Neither lookup falls through to mutation or to the other lookup. |
+| `finish-disposal-CHILD` | Protected original disposal proof and terminal archival; dependency/backing lifetimes remain separate. |
+| `qualify-held-release` | Exact original held completion and saved release request, followed by fresh running observations. It never repeats activation. |
+
+A collected publication can be explicitly completed before selecting unbooted
+disposal. The control preserves the returned proof and receipts before evidence
+IO, and never creates a ready completion. Pending raw/owned child rows, marker and
+material-journal writes continue only under the original protected publication.
+Already completed publication is historical lookup, including an inactive later
+boot, identity or release phase under the same retained original owner. It reads
+only the synchronized original proof without regressing phase or repeating the
+publisher; missing history or active work rejects. A new control cannot extend
+the captured deadline of an existing control. The full original creation keeps
+the initial activation choice, which a publication alone cannot attest.
+
+The native protocol-two side also accepts `publish_collected_branch_material`
+with that full original creation and `quiesced: true`. It requires the exact
+branch approval and Create capability, uses the existing control lane and caps
+the entire request at 30 seconds with a 16-KiB creation. Its distinct
+`collected_branch_material_published` result contains only the bounded material
+publication, correlated with the source, child, approval, platform and original
+epoch, with no stream output. The shared engine selects its original retained
+context; serialized requests cannot create one. Existing branch output limits
+leave room for both observers under a stalled writer. Elixir validates the same
+request/reply, quiescence, bounds, source/child/approval and original epoch/platform
+correlation, with zero stream output. Its current package still refuses dispatch
+before native IO even with the operator catalog. Backend/Runtime/store public
+continuation, installed consumers and ordinary package recovery remain required;
+these framing boundaries do not enable public branch admission.
+
+The existing absence/backing controls select completed, unbooted or collected
+partial proofs according to the original result. Accepted cleanup must have its
+own typed acknowledgement before backing closure. Phase routing rejects the
+wrong kind before accepting a new request; the engine still independently checks
+all actual authority. Source cleanup waits for entered children to be proved
+absent or positively retired as unentered, preserving their original context.
+`status` labels retained phase observations as historical, not current authority.
+
+Missing enrollment, active work, substituted roots or missing original context
+remain uncertain. These controls do not reconstruct an SDK manager from inventory,
+and a failed witness must not be terminated as an automatic cleanup step. There
+are no process-signal, crash, pause, forced-exit or arbitrary-command controls.
+Default checks select only pure Rust models, never the live entry point. See the
+[control evidence](../docs/evidence/embedded-port-http-parity-branch-witness-controls.json)
+for the scoped checks; it supplies no live SDK outcome.
+
+This witness does not exercise durable paired dependency retirement, framed Port
+branch routing or public current/minimum no-Rust consumers. Those campaigns and
+other required platforms/sources remain P8/P9 acceptance gates. Public native
+branch admission stays disabled; crash and distribution approvals stay separate.
+
+The [preparation evidence](../docs/evidence/embedded-port-http-parity-branch-witness-preparation.json)
+records only pure models, source/tooling checks and documentation validation.
+It supplies no live branch result.

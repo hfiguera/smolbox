@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "status": "isolated-macos-package-build-passed-native-qualification-pending",
+  "source_commit": "766b3a111eb07bf885641a20b6bb826b6cf39668",
+  "source_archive_sha256": "433c13cbc1a59d532500e7834099e5cb6f3909998112aa5b3e6be7e826cc0a58",
+  "source_files_verified": 1834,
+  "native_inputs_verified": 339,
+  "manifest_sha256": "947ad46c11c0f0768712b77a8f126a142747ce22cad9cbc2c2430353e2cef61e",
+  "helper_sha256": "407bcee7bb54123083690fe52dcd917047f2c038894db882b70f069b7a40cfb5",
+  "assets_verified": 809,
+  "build_stages": 8,
+  "all_stage_logs_and_results_verified": true,
+  "sdk_unmodified_before_after": true,
+  "input_library_copy_isolated": true,
+  "original_input_assets_verify_after_build": true,
+  "development_signature_verified": true,
+  "original_build_target_and_approved_executable_paths_not_replaced": true,
+  "native_owner_or_vm_started": false,
+  "ordinary_native_acceptance_pending": true,
+  "needs_fresh_actual_macos_account": true,
+  "existing_failed_sdk_authority_not_opened": true,
+  "crash_validation_deferred": true,
+  "distribution_approved": false,
+  "full_http_parity_complete": false,
+  "private_evidence_sha256": {
+    "source-inputs.json": "101f96e7b27da086d5ec533a4926bd43d967aaa3716b19b98dc962756c482b43",
+    "mac-retry1-build-record.json": "cf52aa08f1111256bc2ca1e85269bc4b1804442fd64b0e1c176c4c250db28a95",
+    "mac-retry1-build-results.json": "ae453b39b627168ff7930b2d434cf129d79026ce6dcffe0aeb5cd853c330e463",
+    "mac-retry1-build-exit.json": "d6ef96897ab31cf7e867a53a0bb9e053430897b2b0e488c6c2a37c09c5e17744",
+    "build-macos-retry1.py": "545b66f23e65bb51eff0a6163401ac23eeef64fcd550a3e05d4cbf3de75eb1f8",
+    "mac-fresh-account-plan.json": "f3602604770038034e64b814f248f9b9d9b5043a9eec9ad2215e865614486d20"
+  }
+}

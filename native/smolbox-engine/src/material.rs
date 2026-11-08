@@ -1806,7 +1806,7 @@ pub(crate) fn capture_source_intent(
     record: &VmRecord,
 ) -> Result<crate::capture_material::Intent> {
     request.validate()?;
-    crate::checkpoint_capture::validate_record(record)?;
+    crate::checkpoint_capture::validate_portable_record(record)?;
     let intent = crate::capture_material::Intent {
         operation_id: operation_id.into(),
         request,

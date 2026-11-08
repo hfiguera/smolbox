@@ -116,6 +116,10 @@ impl Session {
                     && self.hello.sdk.as_ref().is_none_or(|sdk| {
                         sdk.feature_versions.get("partial_cleanup_resolution") != Some(&1)
                     }))
+                || (matches!(&operation, Operation::InspectPartialBranchCollection { .. })
+                    && self.hello.sdk.as_ref().is_none_or(|sdk| {
+                        sdk.feature_versions.get("partial_collection_preflight") != Some(&1)
+                    }))
                 || (operation.requires_branches()
                     && (self.hello.major != 2
                         || self
@@ -849,6 +853,17 @@ impl Session {
                 )?;
             }
             (
+                Operation::InspectPartialBranchCollection { request },
+                Outcome::PartialBranchCollectionCandidate { candidate },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                candidate.matches(request)?;
+                check(
+                    candidate.epoch == self.hello.epoch
+                        && candidate.platform == self.hello.package.platform,
+                )?;
+            }
+            (
                 Operation::CollectPartialBranch { request },
                 Outcome::PartialBranchCollected { proof, platform },
             ) => {
@@ -962,6 +977,18 @@ impl Session {
                 if let Some(proof) = transition {
                     request.matches(proof)?;
                 }
+            }
+            (
+                Operation::PublishCollectedBranchMaterial {
+                    request,
+                    quiesced: true,
+                },
+                Outcome::CollectedBranchMaterialPublished { publication },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                request.matches_publication(publication)?;
+                check(publication.change.platform == self.hello.package.platform)?;
+                check(publication.change.child_origin.intent.epoch == self.hello.epoch)?;
             }
             (Operation::CreateBranch { request }, Outcome::BranchCreated { completion }) => {
                 check(pending.output_bytes == 0)?;

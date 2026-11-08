@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "status": "ordinary-completed-branch-readiness-source-and-model-correction",
+  "source_base_commit": "d5a4de00382acd04169232f5fd37904570591793",
+  "source_files_sha256": {
+    "lib/smolbox/branches.ex": "73b5a20e54cfe8a712f4986cc20284e4e27f3309b162ba5c6a682fd60b1990a5",
+    "lib/smolbox/embedded/bridge.ex": "be9a50032dd14ae99324fc58c68d62afe23f4a4816895e72365e964698fc9c02",
+    "lib/smolbox/embedded/port.ex": "ec279277719b9f01a969b8f8fedc5d89745df8360e92e1ea9b84f978d91df86a",
+    "lib/smolbox/runtime/native_authority.ex": "7582cae07700a6a085a6289d1e3e305d5d6a83e7af682fa40f6682b4b20acaa4",
+    "lib/smolbox/runtime/native_branch_backing.ex": "7a4dccd4b153dfe54ced8347bc21e8fd3351137a3b2bf900623f03e3ecd353a5",
+    "lib/smolbox/runtime/native_resolution.ex": "11fe4f42bf2e066124364ba63fd8da6c141f40b4c6623de66127d1de02eba605",
+    "test/unit/native_branch_public_backing_test.exs": "9cf1fe961f557cb798ddf621bddf19bc5ae36d6f9ef48ccde5a1708c4b64348d",
+    "test/unit/native_branch_public_retirement_test.exs": "b35c9e9de547ccf6105b44e401173bcc117abde428e09aea10240664643c3452",
+    "test/unit/native_branch_control_readiness_test.exs": "77b71ce67a28dc354c5bdf69ada0852ccbf64cb2b98d9a25317102fc330e3a97"
+  },
+  "scope": {
+    "public_api_or_record_codec_changed": false,
+    "native_engine_or_package_bytes_changed": false,
+    "ordinary_completed_retirement_and_backing_only": true,
+    "completed_scan_captured_atomically": true,
+    "original_owner_pid_epoch_package_domain_required": true,
+    "source_and_renewed_worker_lease_generation_required": true,
+    "single_captured_control_deadline": true,
+    "bridge_quiesce_and_activate_calls_bounded": true,
+    "known_commit_result_preserved_if_reactivation_fails": true,
+    "partial_unbooted_disposal_keeps_conservative_recovery": true,
+    "startup_recovery_running_observations_unchanged": true,
+    "persisted_draining_unchanged": true
+  },
+  "validation": {
+    "current": {
+      "elixir": "1.20.4",
+      "otp": "29.0.6",
+      "selected_models_passed": 997,
+      "selected_excluded_runtime_or_deferred_cases": 7,
+      "final_readiness_models_passed": 22,
+      "http_contracts_passed": 411,
+      "encrypted_postgresql_contracts_passed": 180
+    },
+    "minimum": {
+      "elixir": "1.18.4-otp-27",
+      "otp": "27.3.4.15",
+      "selected_models_passed": 999,
+      "selected_excluded_runtime_or_deferred_cases": 7,
+      "included_final_readiness_models": 22,
+      "http_contracts_passed": 411,
+      "encrypted_postgresql_contracts_passed": 180
+    },
+    "postgresql_final_partition_rows": 0,
+    "postgresql_final_other_clients": 0,
+    "postgresql_normal_smart_shutdown": true,
+    "credo_existing_findings": 67,
+    "credo_new_findings": 0,
+    "format_and_warnings_as_errors_compile_passed": true,
+    "unmodified_sdk_full_and_clean_checks_passed": true,
+    "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655"
+  },
+  "private_log_sha256": {
+    "compile.log": "0b98d3259f9495a110b8bae47079ec4bb0f5fb9562cffd24034660bc3a78a144",
+    "credo-final.log": "9224cb2d6d610dcf9a04329e0ee0a0bbe86d3901f9743b37093bb5032196eeb1",
+    "current-deadlines.log": "da16912cde3897d15adffa3212fba99dae9e93b62aa532689c849676f2e7c6d2",
+    "current-http-final.log": "31619cb78f1aa3cfc6617a3beaddbd5d86da694e21944f3c440c5e540203e427",
+    "current-models-final.log": "d8a4a6b8bbb71be0d85e583cdde8782efff74c7e8990eb152fd72864076ec2a6",
+    "current-models-scoped.log": "af3538b39f3248a9e9133138684de3397134f3fa298c1dd829cd12c9170c270c",
+    "current-models.log": "1d770980b4120e3f6c2766e5b92d66fff856e9531d904b59829d97c4acddf493",
+    "current-postgres.log": "0731e321fe3393d09c27a48ee518caf4d1ba78fc55959c8ef44b0b06bde9635f",
+    "format.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "minimum-http-final.log": "890acf8e70e2a2e45c269d6534fd7fb5bd79a7e82c32e5567bb8638a06d32ed0",
+    "minimum-models-final.log": "45e6dbbf5a8dcf256a8c90cad797c6d5cf42235f2f1450ee46e1a84715626fde",
+    "minimum-models-scoped.log": "61e3991b3dd6453227ffb58e0768f9102ca8203570b80f2ef0fd2aa4191da1db",
+    "minimum-postgres.log": "2e0a500c14e7419171cab2556ad314732a82565aefef7620868ee86289ca1704",
+    "postgres-createdb.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "postgres-custody.log": "52f96c26a39ed25108a6db43d6e11c6051eba8a498a5baab1891adfa7ac7c262",
+    "postgres-init.log": "447d46d064cb725d527ac9c8cfdbf13eb34d7c68ec5925897eee450c0c6c96a5",
+    "postgres-migrate.log": "72956feebeac798f6d63a1b67dcdb14bdf416c6be40ed9d50c77e3f902894cfe",
+    "postgres-server.log": "99e9baa6dbe7d8c08ee365b3aff9e56ee408e357765b3660726d764061e0e705",
+    "postgres-start.log": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+    "postgres-stop.log": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "public-boundaries.log": "09b2c85ec93142cccefe44346e78aa41bda65f2277b9ad963fd1a7b966afa6c2",
+    "readiness-models.log": "85e9c816cd8c0390ac4a2fdd59af59017296134a5c1a07834b249b4721691efb"
+  },
+  "qualification": {
+    "live_sdk_or_vm_run": false,
+    "failed_public_source_adopted_or_replayed": false,
+    "public_branch_acceptance_complete": false,
+    "full_parity_complete": false,
+    "crash_validation_deferred": true,
+    "distribution_approved": false
+  },
+  "remaining": [
+    "Repeat complete installed public branch workflows on current/minimum toolchains in fresh accounts with exact native package 7b6cfae8/e3fbda88",
+    "Complete durable public branch and required original-owner partial continuation acceptance without crash campaigns",
+    "Complete all other required P0\u2013P9 source/platform/resource/store/consumer/upgrade acceptance gates"
+  ]
+}

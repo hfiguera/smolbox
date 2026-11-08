@@ -1,0 +1,141 @@
+{
+  "schema": 1,
+  "status": "frozen-linux-build-and-release-models-passed-positive-ordinary-acceptance-pending",
+  "source_commit": "8686e179ceb4232774d97552fa09602fa9d7eaa8",
+  "source_archive_sha256": "b5b44b649d3f60d3d17faaa6e64ba6caca8c17e0d2581718d008eb85c3b14308",
+  "source_files_verified": 1823,
+  "native_inputs_verified": 337,
+  "manifest_sha256": "acf8cbdaa1d1c0897735b633b9848fea62427b6731cfd1631e03e873c21eb2ed",
+  "helper_sha256": "8ca58cf6dcc5dc075dcc4daa39052734a65b56ca81d98bab0e1fb09f88d7c76c",
+  "assets": 806,
+  "input_asset_bytes_unchanged": true,
+  "sdk_unmodified_before_after": true,
+  "vm_or_sdk_owner_started": false,
+  "ordinary_native_acceptance_pending": true,
+  "crash_validation_run": false,
+  "distribution_approved": false,
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "hex_archive_sha256": "b8d349cdbea0d4f007ed0426c50ff03024524be0c618e9d1bbd47f6c8152b2b5",
+  "stages": [
+    {
+      "stage": "toolchain",
+      "exit_status": 0,
+      "sha256": "2073de5abf149185c2f4d7473dc833bc921b99135560d24ae7b2293f33a9c376",
+      "summaries": []
+    },
+    {
+      "stage": "bootstrap",
+      "exit_status": 0,
+      "sha256": "f5635a5ea6e5c7bd5a4dcf2697ad74b564d970d2e741b9227a827a1a3d851f88",
+      "summaries": []
+    },
+    {
+      "stage": "sdk-before",
+      "exit_status": 0,
+      "sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "summaries": []
+    },
+    {
+      "stage": "clean-bootstrap",
+      "exit_status": 0,
+      "sha256": "f5635a5ea6e5c7bd5a4dcf2697ad74b564d970d2e741b9227a827a1a3d851f88",
+      "summaries": []
+    },
+    {
+      "stage": "clean-sdk-before",
+      "exit_status": 0,
+      "sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "summaries": []
+    },
+    {
+      "stage": "build-helper",
+      "exit_status": 0,
+      "sha256": "2772970f5c29d696af36b4b9e5e4afd4649ba609858130cbe9670d561b63560a",
+      "summaries": []
+    },
+    {
+      "stage": "original-handle-model",
+      "exit_status": 0,
+      "sha256": "037f2643d2483756a80eb7ff5ca75c0dd69078d46b150b9af1142efe8eeeb1a0",
+      "summaries": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1088 filtered out; finished in 0.08s"
+      ]
+    },
+    {
+      "stage": "original-lifecycle-model",
+      "exit_status": 0,
+      "sha256": "b83fb683236076184362e40429fa12958416978e2f9b496c4c987bdab65d9732",
+      "summaries": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1088 filtered out; finished in 1.57s"
+      ]
+    },
+    {
+      "stage": "collection-models",
+      "exit_status": 0,
+      "sha256": "153763455be12ccb9de35c80451cc410387ba116c440a9a6197f622566bcf233",
+      "summaries": [
+        "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1087 filtered out; finished in 0.00s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "stage": "lifecycle-preflight-models",
+      "exit_status": 0,
+      "sha256": "b627d0f818e84707c865d59a726dfbb9fb6a8872241b562424a1d31f60378960",
+      "summaries": [
+        "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1084 filtered out; finished in 1.09s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "stage": "protocol-preflight",
+      "exit_status": 0,
+      "sha256": "b4bf5c30cd83103138c9634a42ea88ae8ae169ba882774af5a080b9127121d30",
+      "summaries": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 102 filtered out; finished in 0.00s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 59 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "stage": "port-preflight",
+      "exit_status": 0,
+      "sha256": "b073c1f015444936b1e393bf93dbe044740741a1022e2cf658c6619896e6246c",
+      "summaries": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 92 filtered out; finished in 0.32s"
+      ]
+    },
+    {
+      "stage": "port-branch",
+      "exit_status": 0,
+      "sha256": "27122609e14d177d053c421e173fba323bb7a98cf00983493499e00fac90995d",
+      "summaries": [
+        "test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 76 filtered out; finished in 2.07s"
+      ]
+    },
+    {
+      "stage": "package",
+      "exit_status": 0,
+      "sha256": "8a9acdafba9977458b958dc9d76d09e67073650eeaec7133fb3a6089e819dd6b",
+      "summaries": []
+    },
+    {
+      "stage": "sdk-after",
+      "exit_status": 0,
+      "sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "summaries": []
+    },
+    {
+      "stage": "clean-sdk-after",
+      "exit_status": 0,
+      "sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "summaries": []
+    }
+  ],
+  "compact_archive_sha256": "bce1bd425dd682df23572ed0a4fffd8cb5232bde42a589de34cf5369b668a0b8",
+  "all_compact_logs_and_manifest_hashes_verified_on_mac": true,
+  "shared_engine_change": "Original boot shutdown tracking is admitted only for the retained publication receipt; tracking retires after verified original collection.",
+  "positive_native_recovery_qualified": false,
+  "full_parity_gates_closed": 0,
+  "crash_validation": "deferred",
+  "macos_custody_touched": false
+}

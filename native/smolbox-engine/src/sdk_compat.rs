@@ -88,16 +88,87 @@ pub(crate) fn validate_database_budget(
     with_observation_budget(database, identity, budget, |_| Ok(()))
 }
 
-/// Pinned fork preparation creates `pack` as a link to its source or leaves it
-/// absent. SDK deletion skips volume detach for either shape. A private directory
-/// could enter macOS hdiutil cleanup outside this branch job's no-launch grant.
+/// Pinned fork preparation can copy a shared-pack lease into an empty private
+/// `pack` directory, link the source cache or leave this path absent. The SDK's
+/// detach path skips links and cannot find a layers mount or lease in an empty
+/// directory. Reject nonempty/unsafe private caches before SDK deletion. This
+/// predicate supplies no ownership, collection or child-absence authority.
 pub(crate) fn branch_deletion_cache(directory: &Path) -> Result<()> {
     unredirected(directory)?;
-    match std::fs::symlink_metadata(directory.join("pack")) {
+    let pack = directory.join("pack");
+    match std::fs::symlink_metadata(&pack) {
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
         Ok(metadata) if metadata.file_type().is_symlink() => Ok(()),
+        Ok(metadata) if metadata.is_dir() => {
+            let root = crate::export_source::Root::open(&pack)?;
+            let empty = std::fs::read_dir(root.path())
+                .map_err(|_| Error::before(ErrorCode::Io))?
+                .next()
+                .is_none();
+            root.verify()?;
+            if empty {
+                Ok(())
+            } else {
+                Err(Error::before(ErrorCode::Ownership))
+            }
+        }
         _ => Err(Error::before(ErrorCode::Ownership)),
     }
+}
+
+/// A completed bare child can cold-start by extracting its approved pack into
+/// a private cache. Only the pinned bare layout is allowed here. In particular,
+/// SDK force_detach_layers_volume must find neither a mount nor lease state.
+/// Callers still require original collection and a canonical stopped row;
+/// unbooted/partial callers retain the stricter absent/link/empty predicate.
+pub(crate) fn stopped_branch_deletion_cache(directory: &Path) -> Result<()> {
+    unredirected(directory)?;
+    let pack = directory.join("pack");
+    let metadata = match std::fs::symlink_metadata(&pack) {
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(()),
+        Err(_) => return Err(Error::before(ErrorCode::Io)),
+        Ok(metadata) if metadata.file_type().is_symlink() => return Ok(()),
+        Ok(metadata) => metadata,
+    };
+    if !metadata.is_dir() {
+        return Err(Error::before(ErrorCode::Ownership));
+    }
+    let root = crate::export_source::Root::open(&pack)?;
+    for (count, entry) in std::fs::read_dir(root.path())
+        .map_err(|_| Error::before(ErrorCode::Io))?
+        .enumerate()
+    {
+        let entry = entry.map_err(|_| Error::before(ErrorCode::Io))?;
+        if count >= 6 {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        let path = entry.path();
+        let metadata =
+            std::fs::symlink_metadata(&path).map_err(|_| Error::before(ErrorCode::Io))?;
+        if metadata.uid() != unsafe { libc::geteuid() } || metadata.mode() & 0o022 != 0 {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        match entry.file_name().to_str() {
+            Some("agent-rootfs") if metadata.is_dir() => {
+                crate::export_source::Root::open(&path)?.verify()?;
+            }
+            Some("layers") if metadata.is_dir() => {
+                let layers = crate::export_source::Root::open(&path)?;
+                if std::fs::read_dir(layers.path())
+                    .map_err(|_| Error::before(ErrorCode::Io))?
+                    .next()
+                    .is_some()
+                {
+                    return Err(Error::before(ErrorCode::Ownership));
+                }
+                layers.verify()?;
+            }
+            Some("agent-rootfs.tar" | "overlay.raw" | "storage.ext4") if metadata.is_file() => {}
+            Some(".smolvm-extracted") if metadata.is_file() && metadata.len() == 0 => {}
+            _ => return Err(Error::before(ErrorCode::Ownership)),
+        }
+    }
+    root.verify()
 }
 
 /// Exclude every retained SDK mount, including stopped and read-only records.
@@ -429,8 +500,7 @@ fn with_observation_budget<T>(
     action: impl FnOnce(&rusqlite::Connection) -> Result<T>,
 ) -> Result<T> {
     budget.check()?;
-    // Hold the enrolled inode open, preventing inode reuse during path checks.
-    let pinned = open_database_inode(database, identity)?;
+    verify_database_path(database, identity)?;
     check_sidecars(database)?;
     let mut connection = rusqlite::Connection::open_with_flags(
         database,
@@ -439,6 +509,9 @@ fn with_observation_budget<T>(
             | rusqlite::OpenFlags::SQLITE_OPEN_NOFOLLOW,
     )
     .map_err(|_| Error::before(ErrorCode::Database))?;
+    // SQLite owns the inode pin. Closing an independently opened descriptor
+    // would cancel this process's POSIX locks, including the SDK's cached ones.
+    verify_database_connection(&connection, database, identity)?;
     let interrupted = budget.clone();
     connection.progress_handler(1000, Some(move || interrupted.check().is_err()));
     connection
@@ -458,14 +531,13 @@ fn with_observation_budget<T>(
         return Err(Error::before(ErrorCode::Database));
     }
     let observation = action(&transaction)?;
-    open_database_inode(database, identity)?;
+    verify_database_connection(&transaction, database, identity)?;
     check_sidecars(database)?;
     transaction
         .rollback()
         .map_err(|_| Error::before(ErrorCode::Database))?;
+    verify_database_connection(&connection, database, identity)?;
     drop(connection);
-    open_database_inode(database, identity)?;
-    drop(pinned);
     budget.check()?;
     Ok(observation)
 }
@@ -507,7 +579,7 @@ fn verify_schema(connection: &rusqlite::Connection) -> Result<()> {
     Ok(())
 }
 
-fn open_database_inode(database: &Path, identity: (u64, u64)) -> Result<File> {
+fn verify_database_path(database: &Path, identity: (u64, u64)) -> Result<()> {
     // A missing DB is an error, never an empty SQLite database.
     let metadata =
         std::fs::symlink_metadata(database).map_err(|_| Error::before(ErrorCode::Database))?;
@@ -519,18 +591,37 @@ fn open_database_inode(database: &Path, identity: (u64, u64)) -> Result<File> {
         return Err(Error::before(ErrorCode::Ownership));
     }
     unredirected(database)?;
-    let file = OpenOptions::new()
-        .read(true)
-        .custom_flags(libc::O_NOFOLLOW | libc::O_CLOEXEC | libc::O_NONBLOCK)
-        .open(database)
-        .map_err(|_| Error::before(ErrorCode::Database))?;
-    let metadata = file
-        .metadata()
-        .map_err(|_| Error::before(ErrorCode::Database))?;
-    if !metadata.is_file() || (metadata.dev(), metadata.ino()) != identity {
+    Ok(())
+}
+
+fn verify_database_connection(
+    connection: &rusqlite::Connection,
+    database: &Path,
+    identity: (u64, u64),
+) -> Result<()> {
+    verify_database_path(database, identity)?;
+    if connection
+        .path()
+        .is_none_or(|path| Path::new(path) != database)
+    {
         return Err(Error::before(ErrorCode::Ownership));
     }
-    Ok(file)
+    let mut moved: libc::c_int = 1;
+    // SAFETY: this thread exclusively borrows the live connection. The public
+    // SQLite opcode only observes its main-file identity and writes one c_int.
+    // No SQLite/VFS private structs or borrowed file descriptors are inspected.
+    let result = unsafe {
+        rusqlite::ffi::sqlite3_file_control(
+            connection.handle(),
+            c"main".as_ptr(),
+            rusqlite::ffi::SQLITE_FCNTL_HAS_MOVED,
+            (&mut moved as *mut libc::c_int).cast(),
+        )
+    };
+    if result != rusqlite::ffi::SQLITE_OK || moved != 0 {
+        return Err(Error::before(ErrorCode::Ownership));
+    }
+    verify_database_path(database, identity)
 }
 fn check_sidecars(database: &Path) -> Result<()> {
     for suffix in ["-wal", "-shm", "-journal"] {
@@ -605,6 +696,92 @@ mod tests {
     use super::*;
 
     #[test]
+    fn branch_deletion_accepts_only_absent_shared_or_owned_empty_cache() {
+        use std::os::unix::fs::{symlink, PermissionsExt};
+        let directory = tempfile::tempdir().unwrap();
+        let root = directory.path().canonicalize().unwrap();
+        let pack = root.join("pack");
+        assert!(branch_deletion_cache(&root).is_ok());
+        assert!(stopped_branch_deletion_cache(&root).is_ok());
+        std::fs::create_dir(&pack).unwrap();
+        std::fs::set_permissions(&pack, std::fs::Permissions::from_mode(0o700)).unwrap();
+        assert!(branch_deletion_cache(&root).is_ok());
+        assert!(stopped_branch_deletion_cache(&root).is_ok());
+        let marker = pack.join("private-volume-or-lease");
+        std::fs::write(&marker, b"retain").unwrap();
+        assert!(branch_deletion_cache(&root).is_err());
+        assert!(stopped_branch_deletion_cache(&root).is_err());
+        assert_eq!(std::fs::read(&marker).unwrap(), b"retain");
+        std::fs::remove_file(&marker).unwrap();
+        std::fs::set_permissions(&pack, std::fs::Permissions::from_mode(0o777)).unwrap();
+        assert!(branch_deletion_cache(&root).is_err());
+        assert!(stopped_branch_deletion_cache(&root).is_err());
+        std::fs::set_permissions(&pack, std::fs::Permissions::from_mode(0o700)).unwrap();
+        std::fs::remove_dir(&pack).unwrap();
+        std::fs::write(&pack, b"not a directory").unwrap();
+        assert!(branch_deletion_cache(&root).is_err());
+        assert!(stopped_branch_deletion_cache(&root).is_err());
+        std::fs::remove_file(&pack).unwrap();
+        let source = tempfile::tempdir().unwrap();
+        let marker = source.path().join("source-marker");
+        std::fs::write(&marker, b"source remains").unwrap();
+        symlink(source.path(), &pack).unwrap();
+        assert!(branch_deletion_cache(&root).is_ok());
+        assert!(stopped_branch_deletion_cache(&root).is_ok());
+        assert_eq!(std::fs::read(&marker).unwrap(), b"source remains");
+    }
+
+    #[test]
+    fn stopped_bare_cache_accepts_only_the_pinned_layout_without_mounts_or_leases() {
+        use std::os::unix::fs::{symlink, PermissionsExt};
+        let temporary = tempfile::tempdir().unwrap();
+        let root = temporary.path().canonicalize().unwrap();
+        let pack = root.join("pack");
+        std::fs::create_dir(&pack).unwrap();
+        std::fs::set_permissions(&pack, std::fs::Permissions::from_mode(0o755)).unwrap();
+        for name in ["agent-rootfs", "layers"] {
+            std::fs::create_dir(pack.join(name)).unwrap();
+        }
+        for name in [
+            "agent-rootfs.tar",
+            "overlay.raw",
+            "storage.ext4",
+            ".smolvm-extracted",
+        ] {
+            std::fs::write(pack.join(name), b"").unwrap();
+        }
+        std::fs::write(pack.join("agent-rootfs/owned"), b"derived cache").unwrap();
+        assert!(stopped_branch_deletion_cache(&root).is_ok());
+        assert!(branch_deletion_cache(&root).is_err());
+        for name in ["leases", "layers-cs", "layers-cs.sparseimage", "unknown"] {
+            std::fs::write(pack.join(name), b"retain").unwrap();
+            assert!(stopped_branch_deletion_cache(&root).is_err(), "{name}");
+            assert_eq!(std::fs::read(pack.join(name)).unwrap(), b"retain");
+            std::fs::remove_file(pack.join(name)).unwrap();
+        }
+        std::fs::write(pack.join("layers/private-layer"), b"retain").unwrap();
+        assert!(stopped_branch_deletion_cache(&root).is_err());
+        std::fs::remove_file(pack.join("layers/private-layer")).unwrap();
+        let overlay = pack.join("overlay.raw");
+        std::fs::remove_file(&overlay).unwrap();
+        symlink(root.join("unowned"), &overlay).unwrap();
+        assert!(stopped_branch_deletion_cache(&root).is_err());
+        std::fs::remove_file(&overlay).unwrap();
+        std::fs::write(&overlay, b"retain").unwrap();
+        std::fs::set_permissions(&overlay, std::fs::Permissions::from_mode(0o666)).unwrap();
+        assert!(stopped_branch_deletion_cache(&root).is_err());
+        std::fs::set_permissions(&overlay, std::fs::Permissions::from_mode(0o600)).unwrap();
+        std::fs::write(pack.join(".smolvm-extracted"), b"not an empty marker").unwrap();
+        assert!(stopped_branch_deletion_cache(&root).is_err());
+        std::fs::write(pack.join(".smolvm-extracted"), b"").unwrap();
+        assert!(stopped_branch_deletion_cache(&root).is_ok());
+        assert_eq!(
+            std::fs::read(pack.join("agent-rootfs/owned")).unwrap(),
+            b"derived cache"
+        );
+    }
+
+    #[test]
     fn owned_source_release_is_not_prolonged_by_a_duplicate_descriptor() {
         let directory = tempfile::tempdir().unwrap();
         let root = directory.path().canonicalize().unwrap();
@@ -656,6 +833,120 @@ mod tests {
             crate::Cancellation::default(),
         )
         .unwrap()
+    }
+
+    #[test]
+    fn sqlite_observation_preserves_cached_sdk_writer_across_an_external_writer() {
+        const CHILD: &str = "SMOLBOX_SQLITE_MODEL_CHILD";
+        const MODEL: &str = "private sqlite observation model; no SDK runtime or VM";
+        if let Some(path) = std::env::var_os(CHILD) {
+            let path = std::path::PathBuf::from(path);
+            let root = path.parent().unwrap();
+            assert_eq!(path.file_name().unwrap(), "model.db");
+            assert!(root
+                .file_name()
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .starts_with("sbx-sqlite-fd-"));
+            assert_eq!(
+                std::fs::read_to_string(root.join("model-kind")).unwrap(),
+                MODEL
+            );
+            let metadata = std::fs::symlink_metadata(root).unwrap();
+            assert!(metadata.is_dir() && metadata.uid() == unsafe { libc::geteuid() });
+            let db = smolvm::db::SmolvmDb::open_at(&path).unwrap();
+            let record =
+                smolvm::config::VmRecord::new("worker".into(), 1, 128, vec![], vec![], false);
+            db.insert_vm("worker", &record).unwrap();
+            return;
+        }
+        let root = tempfile::Builder::new()
+            .prefix("sbx-sqlite-fd-")
+            .tempdir()
+            .unwrap();
+        std::fs::write(root.path().join("model-kind"), MODEL).unwrap();
+        let path = root.path().canonicalize().unwrap().join("model.db");
+        let db = smolvm::db::SmolvmDb::open_at(&path).unwrap();
+        let parent = smolvm::config::VmRecord::new("parent".into(), 1, 128, vec![], vec![], false);
+        db.insert_vm("parent", &parent).unwrap();
+        assert!(db.get_vm("parent").unwrap().is_some());
+        let metadata = std::fs::metadata(&path).unwrap();
+        let identity = (metadata.dev(), metadata.ino());
+        validate_database(&path, identity).unwrap();
+        // A normal child writes only this private model DB, then exits. No
+        // production SDK namespace, lifecycle, process loss or fault campaign.
+        let child = std::process::Command::new(std::env::current_exe().unwrap())
+            .args([
+                "--exact",
+                "sdk_compat::tests::sqlite_observation_preserves_cached_sdk_writer_across_an_external_writer",
+                "--test-threads=1",
+            ])
+            .env(CHILD, &path)
+            .output()
+            .unwrap();
+        assert!(child.status.success(), "private writer child failed");
+        assert!(observe_record(&path, identity, "worker", &volume_budget())
+            .unwrap()
+            .is_some());
+        let updated = db
+            .update_vm("worker", |row| {
+                row.labels.insert("model".into(), "original-writer".into());
+            })
+            .unwrap()
+            .unwrap();
+        assert_eq!(
+            updated.labels.get("model").map(String::as_str),
+            Some("original-writer")
+        );
+        assert_eq!(
+            observe_record(&path, identity, "worker", &volume_budget())
+                .unwrap()
+                .unwrap()
+                .labels,
+            updated.labels
+        );
+    }
+
+    #[test]
+    fn sqlite_identity_uses_the_opened_file_and_rejects_a_substituted_or_unrelated_connection() {
+        let root = tempfile::tempdir().unwrap();
+        let root = root.path().canonicalize().unwrap();
+        let first = root.join("first.db");
+        let second = root.join("second.db");
+        for path in [&first, &second] {
+            drop(smolvm::db::SmolvmDb::open_at(path).unwrap());
+        }
+        let metadata = std::fs::metadata(&first).unwrap();
+        let identity = (metadata.dev(), metadata.ino());
+        let connection = rusqlite::Connection::open_with_flags(
+            &first,
+            rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
+        )
+        .unwrap();
+        verify_database_connection(&connection, &first, identity).unwrap();
+        let unrelated = rusqlite::Connection::open_with_flags(
+            &second,
+            rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
+        )
+        .unwrap();
+        assert!(verify_database_connection(&unrelated, &first, identity).is_err());
+        let original = root.join("original.db");
+        std::fs::rename(&first, &original).unwrap();
+        std::fs::rename(&second, &first).unwrap();
+        let substituted = rusqlite::Connection::open_with_flags(
+            &first,
+            rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
+        )
+        .unwrap();
+        std::fs::rename(&first, &second).unwrap();
+        std::fs::rename(&original, &first).unwrap();
+        // The pathname once again has the expected identity, but this SQLite
+        // connection still pins the replacement file opened during the swap.
+        verify_database_path(&first, identity).unwrap();
+        assert!(verify_database_connection(&substituted, &first, identity).is_err());
+        let memory = rusqlite::Connection::open_in_memory().unwrap();
+        assert!(verify_database_connection(&memory, &first, identity).is_err());
     }
 
     #[test]

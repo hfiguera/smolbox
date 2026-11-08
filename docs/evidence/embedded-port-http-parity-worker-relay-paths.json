@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "status": "long-path-relay-regression-reproduced-and-models-pass-live-acceptance-pending",
+  "base_source_commit": "2bcc0713",
+  "changed_source": "native/smolbox-engine/src/agent_io.rs",
+  "changed_source_sha256": "5a41d328e628755f9cbba976045782f4915d30fdfe910cdacde8d61360cee0a6",
+  "defect": {
+    "tempfile_converts_relative_staging_to_absolute_path": true,
+    "failed_account_relay_path_bytes": 112,
+    "macos_socket_path_field_bytes": 104,
+    "old_worker_fails_binding_before_fake_agent_request": true,
+    "regression_before_exit_code": 101
+  },
+  "correction": {
+    "worker_uses_relative_socket_name": true,
+    "absolute_private_directory_retained_for_cleanup": true,
+    "relative_path_must_be_direct_child_of_checked_worker_cwd": true,
+    "owner_process_keeps_its_existing_short_absolute_staging": true,
+    "global_cwd_changed_by_engine": false,
+    "upstream_source_changed": false,
+    "sdk_namespace_or_vm_opened_by_models": false
+  },
+  "validation": {
+    "agent_io_models_passed": 10,
+    "owner_exchange_models_passed": 6,
+    "regular_and_clean_sdk_sources_verified_before_and_after": true,
+    "helper_rebuild_and_current_minimum_consumers_pending": true
+  },
+  "original_failed_domain_reset_or_reopened": false,
+  "ordinary_live_acceptance_claimed": false,
+  "full_feature_parity_claimed": false,
+  "crash_validation_deferred": true,
+  "distribution_approved": false,
+  "private_log_sha256": {
+    "long-path-before.log": "5c75efd4492308a3619dc1b675b0d0f8dbb9f6811c366b94723ceef3310087e9",
+    "agent-io-after.log": "74617eb6392e8555fa18489b3f8f6d7c4dd6639dfcb6a2ec40ee4884f8f98135",
+    "owner-relay-after.log": "645759a1395ef9126494091d0fa1e747353603274bc09075a9e79d3d0483ef3c",
+    "sdk-before.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+    "clean-sdk-before.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+    "sdk-after.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+    "clean-sdk-after.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+  }
+}

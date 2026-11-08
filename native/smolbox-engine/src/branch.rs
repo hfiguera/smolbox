@@ -865,12 +865,7 @@ impl Engine {
             |agent, _| agent.ping().map_err(|_| Error::before(ErrorCode::State)),
         )?;
         source_resources(self, source, pid, budget, None)?;
-        Ok(crate::Observation {
-            state: crate::ObservedState::Running,
-            resources: Some(resources),
-            pid_identity: Some(pid),
-            configuration: crate::MachineConfiguration::observe(&record),
-        })
+        Ok(branch_observation(&record, resources, pid))
     }
     /// Source admission requires an enrolled parent and a fresh child.
     /// Persistent intent/resource reservation and
@@ -936,6 +931,19 @@ impl Engine {
     }
 }
 
+fn branch_observation(
+    record: &smolvm::config::VmRecord,
+    resources: Resources,
+    pid: (i32, u64),
+) -> crate::Observation {
+    crate::Observation {
+        state: crate::ObservedState::Running,
+        resources: Some(resources),
+        pid_identity: Some(pid),
+        configuration: Some(crate::MachineConfiguration::observe_explicit(record)),
+    }
+}
+
 fn validate_lookup(
     engine: &Engine,
     source: &CreationReceipt,
@@ -963,6 +971,34 @@ fn require_marker(engine: &Engine, source: &CreationReceipt) -> Result<()> {
 #[cfg(test)]
 pub(crate) mod tests {
     use super::*;
+
+    #[test]
+    fn default_offline_branch_preflight_reports_configuration_instead_of_legacy_omission() {
+        let record = smolvm::config::VmRecord::new(
+            "bare-source-model".into(),
+            1,
+            512,
+            vec![],
+            vec![],
+            false,
+        );
+        let resources = Resources {
+            cpus: 1,
+            memory_mib: 512,
+            storage_gib: 1,
+            overlay_gib: 1,
+        };
+        assert!(crate::MachineConfiguration::observe(&record).is_none());
+        let observation = branch_observation(&record, resources, (123, 456));
+        assert!(observation.state == crate::ObservedState::Running);
+        assert_eq!(observation.resources, Some(resources));
+        assert_eq!(observation.pid_identity, Some((123, 456)));
+        let config = observation.configuration.unwrap();
+        assert!(!config.network.enabled && config.ports.is_empty() && config.mounts.is_empty());
+        let encoded = serde_json::to_value(config).unwrap();
+        assert_eq!(encoded["network"]["enabled"], false);
+        assert!(encoded.get("mounts").is_none());
+    }
     use crate::Cancellation;
     use std::time::Duration;
     fn budget() -> ReadBudget {

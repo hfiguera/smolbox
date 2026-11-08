@@ -1,7 +1,7 @@
 defmodule SmolBox.Runtime.NativeBranchBacking do
   @moduledoc false
   alias SmolBox.{Backend, Error, ManagedMachine}
-  alias SmolBox.Embedded.BranchBackingRelease
+  alias SmolBox.Embedded.{BranchBackingRelease, BranchCompletion}
   alias SmolBox.Runtime.{BranchObservation, MachineSession, NativeResolution, Session, Target}
 
   # A saved acknowledgement is historical and idempotent. Returning the closed
@@ -32,13 +32,23 @@ defmodule SmolBox.Runtime.NativeBranchBacking do
         coordinator,
         parent,
         worker,
-        :branch_release_storage,
+        disposition(child),
         fn pinned ->
           release(config, parent, child, pinned, deadline)
-        end
+        end,
+        deadline
       )
     end
   end
+
+  # Partial and unbooted disposal share this backing coordinator, but their
+  # uncertain original history must still pass through conservative recovery.
+  defp disposition(%{
+         branch: %{native_authority: %{completion: %BranchCompletion{}}}
+       }),
+       do: {:ordinary_branch, :branch_release_storage}
+
+  defp disposition(_), do: :branch_release_storage
 
   defp release(config, parent, child, worker, deadline) do
     with {:ok, _} <- remaining(deadline),

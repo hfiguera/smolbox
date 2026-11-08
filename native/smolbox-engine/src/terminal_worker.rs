@@ -87,6 +87,9 @@ pub fn run_terminal_worker() -> Result<()> {
     let startup = Startup::read(&mut std::io::stdin().lock())?;
     startup.owner.arm_subprocess_watch()?;
     crate::host::private_directory(&startup.staging)?;
+    if std::env::current_dir().map_err(|_| Error::before(ErrorCode::Io))? != startup.staging {
+        return Err(Error::before(ErrorCode::Ownership));
+    }
     let metadata: crate::buffered::Metadata = startup
         .metadata
         .read(startup.owner, crate::COMMAND_METADATA_BYTES)?;
@@ -239,7 +242,9 @@ pub fn run_terminal_worker() -> Result<()> {
     let proof = crate::run_terminal_agent(
         TerminalIoRequest {
             socket: startup.socket,
-            staging: startup.staging,
+            // The supervisor fixes this isolated worker's private CWD. Keep
+            // relay socket names relative even for a long admitted domain.
+            staging: ".".into(),
             config,
             options: options.clone(),
             deadline,
@@ -365,6 +370,12 @@ mod tests {
         let socket = root.join("agent.sock");
         let listener = UnixListener::bind(&socket).unwrap();
         listener.set_nonblocking(true).unwrap();
+        // The guest endpoint stays short; the actual private worker spool
+        // exceeds sockaddr_un on both supported platforms.
+        let root = root.join("private-terminal-spool-".repeat(6));
+        std::fs::create_dir(&root).unwrap();
+        std::fs::set_permissions(&root, std::fs::Permissions::from_mode(0o700)).unwrap();
+        assert!(root.as_os_str().len() > 108);
         let (seen, delivered) = mpsc::channel();
         let deadline = Instant::now() + Duration::from_secs(15);
         let peer = std::thread::spawn(move || {

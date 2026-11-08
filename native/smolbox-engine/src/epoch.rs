@@ -15,8 +15,19 @@ const MAX_BYTES: u64 = 4096;
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 enum Role {
-    Boot { machine: String, operation: String },
-    Transfer { machine: String, operation: String },
+    Boot {
+        machine: String,
+        operation: String,
+    },
+    Transfer {
+        machine: String,
+        operation: String,
+    },
+    CheckpointMaterialize {
+        operation: String,
+        device: u64,
+        inode: u64,
+    },
 }
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -374,6 +385,58 @@ impl ActorEpoch {
         };
         publish(&actor_path(&self.0.directory, child), &actor)
     }
+    /// Request-private decoding has no VM identity or authority. Keep its child
+    /// in the epoch's shutdown fence without inventing a machine hash.
+    pub(crate) fn register_checkpoint_materialize(
+        &self,
+        child: OwnerIdentity,
+        operation: &str,
+        stage: &Path,
+    ) -> Result<()> {
+        if !self.available()
+            || !valid_hex(operation, 32)
+            || child.pid <= 0
+            || child.birth == 0
+            || child.uid != self.0.owner.uid
+            || stage.parent() != self.0.directory.parent().and_then(Path::parent)
+            || !stage.file_name().and_then(|s| s.to_str()).is_some_and(|s| {
+                s.strip_prefix(".checkpoint-source-").is_some_and(|suffix| {
+                    !suffix.is_empty()
+                        && suffix.len() <= 32
+                        && suffix.bytes().all(|b| b.is_ascii_alphanumeric())
+                })
+            })
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        private_directory(stage)?;
+        let metadata =
+            std::fs::symlink_metadata(stage).map_err(|_| Error::before(ErrorCode::Ownership))?;
+        if metadata.dev() == 0 || metadata.ino() == 0 {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        let _guard = self
+            .0
+            .mutation
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        self.collect_locked()?;
+        admission(&self.0.directory)?;
+        publish(
+            &actor_path(&self.0.directory, child),
+            &Actor {
+                schema: 1,
+                owner: self.0.owner,
+                epoch: self.0.epoch.clone(),
+                child,
+                role: Role::CheckpointMaterialize {
+                    operation: operation.into(),
+                    device: metadata.dev(),
+                    inode: metadata.ino(),
+                },
+            },
+        )
+    }
     pub(crate) fn quiescent_for(&self, name: &str) -> Result<bool> {
         let _guard = self
             .0
@@ -401,7 +464,58 @@ impl ActorEpoch {
                     machine: actor_machine,
                     ..
                 } => actor_machine == &machine,
+                Role::CheckpointMaterialize { .. } => false,
             }))
+    }
+    /// A running capture/branch source retains its exact original boot actor.
+    /// This does not collect it or admit any other work for the source.
+    pub(crate) fn quiescent_with_boot(
+        &self,
+        name: &str,
+        enrolled: &BootEnrollment,
+    ) -> Result<bool> {
+        if !enrolled.intent.matches_epoch(name, self) {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        let _guard = self
+            .0
+            .mutation
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        self.collect_locked()?;
+        if self
+            .0
+            .directory
+            .join(format!("pending-{}.json", enrolled.intent.machine))
+            .exists()
+        {
+            return Ok(false);
+        }
+        let mut original = false;
+        for (_, actor) in actors(&self.0.directory, self.0.owner, &self.0.epoch)? {
+            let machine = match &actor.role {
+                Role::Boot { machine, .. } | Role::Transfer { machine, .. } => machine,
+                Role::CheckpointMaterialize { .. } => continue,
+            };
+            if machine != &enrolled.intent.machine {
+                continue;
+            }
+            if actor.child != enrolled.child
+                || actor.role
+                    != (Role::Boot {
+                        machine: enrolled.intent.machine.clone(),
+                        operation: enrolled.intent.operation.clone(),
+                    })
+                || original
+            {
+                return Ok(false);
+            }
+            original = true;
+        }
+        if !enrolled.intent.matches_epoch(name, self) {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        Ok(original)
     }
     fn collect_locked(&self) -> Result<bool> {
         let mut quiescent = true;
@@ -572,6 +686,11 @@ fn actors(directory: &Path, owner: OwnerIdentity, epoch: &str) -> Result<Vec<(Pa
                 Role::Transfer { machine, operation } => {
                     valid_hex(machine, 16) && valid_hex(operation, 32)
                 }
+                Role::CheckpointMaterialize {
+                    operation,
+                    device,
+                    inode,
+                } => valid_hex(operation, 32) && *device > 0 && *inode > 0,
             };
             if actor.schema != 1
                 || actor.owner != owner
@@ -617,7 +736,11 @@ fn collect_exact(actor: &Actor) -> Result<bool> {
         return Ok(true);
     }
     // TransferSupervisor owns its Child; never consume that exit status here.
-    if matches!(actor.role, Role::Transfer { .. }) || actor.owner != OwnerIdentity::capture()? {
+    if matches!(
+        actor.role,
+        Role::Transfer { .. } | Role::CheckpointMaterialize { .. }
+    ) || actor.owner != OwnerIdentity::capture()?
+    {
         return Ok(false);
     }
     if smolvm::process::process_start_time(actor.child.pid) != Some(actor.child.birth) {
@@ -809,6 +932,128 @@ pub(crate) mod tests {
                 uid: unsafe { libc::geteuid() },
             },
         )
+    }
+
+    #[test]
+    fn private_checkpoint_decoder_is_enrolled_without_vm_authority_and_collects_normally() {
+        let temporary = tempfile::tempdir().unwrap();
+        let root = temporary.path().canonicalize().unwrap();
+        let (_, _, epoch) = fixture(&root, None);
+        let stage = root.join(".checkpoint-source-AbC123");
+        std::fs::create_dir(&stage).unwrap();
+        std::fs::set_permissions(&stage, std::fs::Permissions::from_mode(0o700)).unwrap();
+        let (mut child, identity) = waiting_child();
+        let operation = "d".repeat(32);
+        // The old VM-only route rejects the real staging directory name.
+        assert!(epoch
+            .register_transfer(identity, &operation, ".checkpoint-source-AbC123")
+            .is_err());
+        assert!(epoch
+            .register_checkpoint_materialize(identity, &operation, &root)
+            .is_err());
+        assert!(epoch
+            .register_checkpoint_materialize(identity, "invalid", &stage)
+            .is_err());
+        epoch
+            .register_checkpoint_materialize(identity, &operation, &stage)
+            .unwrap();
+        let enrolled = actors(&epoch.0.directory, epoch.0.owner, &epoch.0.epoch).unwrap();
+        assert_eq!(enrolled.len(), 1);
+        assert!(matches!(
+            enrolled[0].1.role,
+            Role::CheckpointMaterialize { .. }
+        ));
+        assert!(epoch.quiescent_for("unrelated-machine").unwrap());
+        // It still fences global shutdown, and the epoch cannot consume the
+        // transfer supervisor's Child status or stop this ordinary child.
+        assert!(epoch.close().is_err());
+        assert!(child.try_wait().unwrap().is_none());
+        drop(child.stdin.take());
+        child.wait().unwrap();
+        epoch.close().unwrap();
+        assert!(actors(&epoch.0.directory, epoch.0.owner, &epoch.0.epoch)
+            .unwrap()
+            .is_empty());
+    }
+
+    #[test]
+    fn running_source_exempts_only_original_boot_and_keeps_collection_fences() {
+        struct NormalChild(Child);
+        impl Drop for NormalChild {
+            fn drop(&mut self) {
+                drop(self.0.stdin.take());
+                self.0.wait().unwrap();
+            }
+        }
+        let temporary = tempfile::tempdir().unwrap();
+        let root = temporary.path().canonicalize().unwrap();
+        let (host, _, epoch) = fixture(&root, None);
+        let dispatch = epoch.begin_boot("owned").unwrap();
+        let (child, identity) = waiting_child();
+        let child = NormalChild(child);
+        let enrolled = complete_model_with_child(dispatch, identity);
+        assert!(!epoch.quiescent_for("owned").unwrap());
+        assert!(epoch.quiescent_with_boot("owned", &enrolled).unwrap());
+        assert!(epoch.quiescent_with_boot("foreign", &enrolled).is_err());
+
+        let pending = epoch.begin_collection("owned", &enrolled).unwrap();
+        assert!(!epoch.quiescent_with_boot("owned", &enrolled).unwrap());
+        pending.sdk_returned().unwrap(); // Private fence model; no SDK call.
+        assert!(epoch.quiescent_with_boot("owned", &enrolled).unwrap());
+
+        let (other, other_identity) = waiting_child();
+        let other = NormalChild(other);
+        epoch
+            .register_transfer(
+                other_identity,
+                &"e".repeat(32),
+                &smolvm::agent::vm_dir_hash("sibling"),
+            )
+            .unwrap();
+        assert!(epoch.quiescent_with_boot("owned", &enrolled).unwrap());
+        let path = actor_path(&epoch.0.directory, other_identity);
+        let mut actor: Actor = read(&path).unwrap();
+        remove_record(&path).unwrap();
+        actor.role = Role::Transfer {
+            machine: smolvm::agent::vm_dir_hash("owned"),
+            operation: "e".repeat(32),
+        };
+        publish(&path, &actor).unwrap();
+        assert!(!epoch.quiescent_with_boot("owned", &enrolled).unwrap());
+        remove_record(&path).unwrap();
+        actor.role = Role::Boot {
+            machine: smolvm::agent::vm_dir_hash("owned"),
+            operation: "e".repeat(32),
+        };
+        publish(&path, &actor).unwrap();
+        assert!(!epoch.quiescent_with_boot("owned", &enrolled).unwrap());
+        remove_record(&path).unwrap();
+        assert!(epoch.quiescent_with_boot("owned", &enrolled).unwrap());
+
+        let original_path = actor_path(&epoch.0.directory, identity);
+        let original: Actor = read(&original_path).unwrap();
+        remove_record(&original_path).unwrap();
+        assert!(!epoch.quiescent_with_boot("owned", &enrolled).unwrap());
+        let mut crossed = original.clone();
+        crossed.role = Role::Boot {
+            machine: enrolled.intent.machine.clone(),
+            operation: "f".repeat(32),
+        };
+        publish(&original_path, &crossed).unwrap();
+        assert!(!epoch.quiescent_with_boot("owned", &enrolled).unwrap());
+        remove_record(&original_path).unwrap();
+        publish(&original_path, &original).unwrap();
+
+        let foreign_root = root.join("foreign");
+        std::fs::create_dir(&foreign_root).unwrap();
+        let (_, _, foreign) = fixture_for_binding(&foreign_root, None, host.domain.clone());
+        assert!(foreign.quiescent_with_boot("owned", &enrolled).is_err());
+        drop(other);
+        drop(child);
+        assert!(epoch.quiescent_for("owned").unwrap());
+        assert!(!epoch.quiescent_with_boot("owned", &enrolled).unwrap());
+        epoch.close().unwrap();
+        foreign.close().unwrap();
     }
 
     #[test]

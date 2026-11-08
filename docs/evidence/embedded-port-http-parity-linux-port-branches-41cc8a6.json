@@ -1,0 +1,295 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "scope": "Ordinary framed Port Linux x86_64 local-bare source and two-child branch lifecycle",
+  "source_commit": "41cc8a6c2d54ddcfbb130768dda0690cb1be0333",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "package": {
+    "source_archive_sha256": "79da41257e878393cb2c2dc5a03851074ed96395d5c9b61e567802f99f8f3b3c",
+    "source_files_verified": 1780,
+    "manifest_sha256": "7b6cfae8a0140babab03f821c56406b018be97e52994bc4cb74d3d9791ebfc39",
+    "helper_sha256": "e3fbda886c3129f798dc2668781014204b7c6a1090129ae82ac265def2176ce1",
+    "witness_sha256": "a20a9e6a08eb3ce096aae706ca8dfc5f1e41f1b3cad397158a418499c9bd78c8",
+    "assets": 806,
+    "rust_toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+    "clippy_toolchain": "clippy 0.1.92 (ded5c06cf2 2025-12-08)",
+    "sdk_unmodified_before_after": true
+  },
+  "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+  "ordinary_evidence": {
+    "status": "passed",
+    "scope": "ordinary-port-branches-linux-local-bare",
+    "package_manifest_sha256": "7b6cfae8a0140babab03f821c56406b018be97e52994bc4cb74d3d9791ebfc39",
+    "helper_build_sha256": "e3fbda886c3129f798dc2668781014204b7c6a1090129ae82ac265def2176ce1",
+    "source_and_two_children_independent": true,
+    "held_release": true,
+    "normal_child_restart": true,
+    "cold_restart_does_not_restore_ram": true,
+    "owned_deleted": true,
+    "owned_child_absence_proofs": 2,
+    "native_backing_acknowledgements": 2,
+    "original_ready_lookups": 2,
+    "normal_owner_shutdown": true,
+    "port_branch_routing_qualified": true,
+    "public_consumer_qualified": false,
+    "durable_dependency_retirement_qualified": false,
+    "crash_validation_performed": false,
+    "distribution_approved": false
+  },
+  "final_custody": {
+    "sdk_counts": {
+      "vms": 0,
+      "vm_create_reservations": 0,
+      "vm_pause_operations": 0,
+      "vm_resize_intents": 0,
+      "vm_resize_receipts": 0
+    },
+    "native_processes_and_zombies": [],
+    "kvm_processes": [],
+    "account_lock_free": true,
+    "vm_directories_empty": true,
+    "source_files_verified": 1780,
+    "assets_verified": 806,
+    "host_tools_unchanged": true,
+    "domain_unchanged": true,
+    "fixture_unchanged": true,
+    "proof_exit_status": 0
+  },
+  "validation": {
+    "linux_branch_models_passed": 389,
+    "linux_existing_ignored_branch_fixture_not_selected": 1,
+    "linux_epoch_models_passed": 7,
+    "linux_existing_ignored_epoch_fixture_not_selected": 1,
+    "linux_runtime_boot_models_passed": 20,
+    "linux_capture_models_passed": 67,
+    "linux_sdk_compat_models_passed": 17,
+    "linux_protocol_models_passed": [
+      102,
+      59
+    ],
+    "linux_witness_models_passed": 13,
+    "native_python_tooling_cases": 63,
+    "native_python_tooling_skipped": 4,
+    "strict_linux_all_target_clippy": true,
+    "sdk_full_and_clean_checks_before_after": true,
+    "build_stages": [
+      {
+        "name": "toolchain",
+        "exit_status": 0,
+        "log_sha256": "2073de5abf149185c2f4d7473dc833bc921b99135560d24ae7b2293f33a9c376"
+      },
+      {
+        "name": "sdk-before",
+        "exit_status": 0,
+        "log_sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+      },
+      {
+        "name": "sdk-clean-before",
+        "exit_status": 0,
+        "log_sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+      },
+      {
+        "name": "clippy-toolchain",
+        "exit_status": 0,
+        "log_sha256": "301d7b95e4b79bba0c58aeac9c313e46fc7bc1373970c5599f003a75dc41c5a7"
+      },
+      {
+        "name": "clippy",
+        "exit_status": 0,
+        "log_sha256": "93e7d6528ca3f7c95afc988c03279829f8f0059ab9cb4adca77a4a80e145f265"
+      },
+      {
+        "name": "build-helper",
+        "exit_status": 0,
+        "log_sha256": "ca31017207089b9c0db329ee5eed65fa0fcc8ee3f6137b2a0d671fc6cad9922e"
+      },
+      {
+        "name": "build-witness",
+        "exit_status": 0,
+        "log_sha256": "3b881fd09c3f798305c64746976f1ed8daa496fe39c55e8863c9d199a2554e70"
+      },
+      {
+        "name": "witness-models",
+        "exit_status": 0,
+        "log_sha256": "1b6abd52421beedb828a0c9ec7be9446da22a857a0f963fae1fc46af5935d0f8"
+      },
+      {
+        "name": "native-tooling",
+        "exit_status": 0,
+        "log_sha256": "2f8b88bbfb98c750af1f65fc80acc880b69357532b4e77162d21a891d7b74358"
+      },
+      {
+        "name": "epoch-models",
+        "exit_status": 0,
+        "log_sha256": "5eb53cfc9754b26c7112ed6376f0bdc03aa12323a9ad8f78a1035736f4d859cb"
+      },
+      {
+        "name": "runtime-models",
+        "exit_status": 0,
+        "log_sha256": "c5e0b0696f0e15003c86326f53be2514a8a86c96d8e0f8b1634aadaa5b125616"
+      },
+      {
+        "name": "branch-models",
+        "exit_status": 0,
+        "log_sha256": "ea45a0399ab9e9ec76ca63a6c8e36a842c58da40b9e35017f67b464e64461b78"
+      },
+      {
+        "name": "capture-models",
+        "exit_status": 0,
+        "log_sha256": "c4e1cc26f46e646e63fea8e50342deb907cd9ea2a913c05418d4dfabad9aa768"
+      },
+      {
+        "name": "sdk-compat-models",
+        "exit_status": 0,
+        "log_sha256": "ffb5172562f04b08f1937d902a102c5d9ca8fd5e610a1e2594acaca10f60aac4"
+      },
+      {
+        "name": "protocol-models",
+        "exit_status": 0,
+        "log_sha256": "c3e1ba1569c8090c872255f5b73126a77d8b432fc142162f458eea2fb5b2ec0b"
+      },
+      {
+        "name": "package",
+        "exit_status": 0,
+        "log_sha256": "ecf8071d5ed3a48db380e38b09d2549407384524018cb3e3c0d5eb9e323b7d8c"
+      },
+      {
+        "name": "sdk-after",
+        "exit_status": 0,
+        "log_sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+      },
+      {
+        "name": "sdk-clean-after",
+        "exit_status": 0,
+        "log_sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+      }
+    ],
+    "linux_package_policy_and_branch_framing": [
+      {
+        "name": "package-policy-model",
+        "exit_status": 0,
+        "log_sha256": "61c633e5847a2afa48ecca5f97e09fce2f7943cc94f430a4668ef21c33d2da00",
+        "summary": [
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 91 filtered out; finished in 0.00s"
+        ]
+      },
+      {
+        "name": "branch-framing-models",
+        "exit_status": 0,
+        "log_sha256": "cdc0fb13a8c1b95a9e1ce86b6da5ff91d46b3e751b98f8eb535631867653b794",
+        "summary": [
+          "test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 75 filtered out; finished in 4.01s"
+        ]
+      }
+    ],
+    "actual_native_proofs_accepted_by_current_and_minimum_elixir": {
+      "per_toolchain": 7,
+      "groups": {
+        "completion": 2,
+        "absence": 2,
+        "backing": 2,
+        "release": 1
+      },
+      "checks": [
+        "strict from_wire",
+        "typed validity",
+        "exact to_wire and JSON roundtrip",
+        "original request match and canonical proof digests"
+      ],
+      "read_only_no_sdk_or_vm_start": true,
+      "not_public_or_store_lifecycle_acceptance": true,
+      "private_input_sha256": "e6d10d19a922f6fc968f3f88cef7d6e9ce8b27d5b55186974758b6cd1404f9fc",
+      "logs_sha256": {
+        "current-actual-proofs": "1628c2d63bd137b97d5f0a0cf2a5787d1e7d969e1654732ae3e76f9fcbec4ae3",
+        "minimum-actual-proofs": "174def0d329b6b8e5175655f70b748e0f6579b37606b5600d4996b8adadc4f98"
+      }
+    },
+    "http_contracts": [
+      {
+        "toolchain": "current Elixir 1.20.4 / OTP 29.0.6",
+        "checks_passed": 410,
+        "runtime_and_deferred_crash_excluded": true,
+        "exit_status": 0,
+        "log_sha256": "ae8c157f27e45256db4b1382962609d206cbb02354f67b0e3e7a4354d1351c86"
+      },
+      {
+        "toolchain": "minimum Elixir 1.18.4 / OTP 27.3.4.15",
+        "checks_run": 410,
+        "failures": 2,
+        "concurrency": 32,
+        "seed": 661511,
+        "exit_status": 2,
+        "log_sha256": "fa8d3c2897c7d316d8f00583f61cf973c8278deb968eb26bd6b9b78c69c2ce65",
+        "failed_cases": [
+          "InspectionTest public operator API pages draining workers and rejects unbounded options: transport/list dispatch_uncertain",
+          "ClientTest network preflight and create share one operation budget: transport/create not_dispatched instead of dispatch_uncertain"
+        ],
+        "same_seed_lower_concurrency_rerun_pending": false,
+        "same_seed_lower_concurrency_rerun": {
+          "max_cases": 4,
+          "seed": 661511,
+          "checks_run": 410,
+          "failures": 0,
+          "exit_status": 0,
+          "no_source_or_test_changes_between_runs": true,
+          "log_sha256": "1a33481ebcbca68b6374ca3fa0f2e28a9a520d349550dfba0af6ad827b11a5b4"
+        },
+        "root_cause_of_first_timing_failures": "Not assigned; the same-seed reduced-concurrency rerun passed without code changes."
+      }
+    ],
+    "documentation_build_and_links": true,
+    "documentation_logs_sha256": {
+      "docs-final": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+      "doc-links-final": "fe7e86509e4e55bfacafbae259d53fb8b130721b7e8d9250576f81d31fb0aa5a"
+    },
+    "reproduction_commands": [
+      "mix run --no-start PRIVATE/validate-actual-proofs.exs PRIVATE/actual-proofs.json",
+      "mix test test/contract",
+      "ASDF_ELIXIR_VERSION=1.18.4-otp-27 ASDF_ERLANG_VERSION=27.3.4.15 MIX_BUILD_PATH=PRIVATE_MINIMUM_BUILD mix test test/contract --max-cases 4 --seed 661511",
+      "MIX_ENV=dev mix docs --warnings-as-errors",
+      "MIX_ENV=dev mix smolbox.ci.docs"
+    ]
+  },
+  "private_archive": {
+    "archive_sha256": "ce5a31429347697a12de0a5889105fead1495b6e985c9f64395671b7ca2b4e18",
+    "bytes": 160356938,
+    "members": 3858,
+    "tar_exit_status": 0,
+    "after_normal_shutdown_and_verified_empty_inventories": true,
+    "sdk_database_source_unchanged_during_readonly_backup": true,
+    "sdk_backup_sha256": "64fa6189b05983e923a4de7c18b0967a544b3f054b5cbf70d6ed88eff387f9f1",
+    "authority_restored_or_replayed": false,
+    "finished_utc": "2026-10-17T10:39:36.548630+00:00",
+    "verified_on_guest_outer_host_and_mac": true,
+    "restore_or_mutation_replay_performed": false
+  },
+  "proof_and_custody_sha256": {
+    "preflight": "8eccc9cd3964e5b9a0f7cd7124c1fcf530d2c5cdbe8e6fc29ccb32991e4567c1",
+    "proof": "9fdd9c544b67390831de87f91d62fcd6c0a50fa8677150f4e3f80efb9bf12d5f",
+    "exit": "7962974b0ad37a3886f5a67c3584f2656a4c2ec4f6831174f686b331bb2c755f",
+    "custody": "cc514989e013284d702aeaa7c5d34b1cb2b74ba15783d8fc9a11cca5cd02e305"
+  },
+  "qualification": {
+    "ordinary_exact_package_port_linux_local_bare_two_child_lifecycle": true,
+    "original_ready_completed_result_lookups": true,
+    "original_owner_partial_or_uncertain_recovery_qualified": false,
+    "durable_branch_lifecycle_qualified": false,
+    "installed_current_minimum_branch_consumers": false,
+    "public_native_branch_admission": false,
+    "all_full_parity_rows_pending": true,
+    "full_parity_complete": false,
+    "crash_validation_performed": false,
+    "distribution_approved": false
+  },
+  "remaining": [
+    "Actual public Runtime and Memory/PostgreSQL branch workflows, source dependency retirement and retained backing release.",
+    "Installed current/minimum no-Rust branch consumers and original-owner partial/uncertain recovery controls.",
+    "All remaining P0-P9 platform/source/resource/upgrade gates; crash validation deferred and distribution approval separate."
+  ],
+  "notes": [
+    "The 9c00605 unsuccessful preflight run remains preserved as separate evidence; no old SDK account is adopted or repaired.",
+    "Only the opt-in Python Port runner used this package. The unused separately built Rust witness is inventoried but supplies no live evidence in this run.",
+    "Completion lookups were ordinary lookups of already returned results, not injected lost-reply or crash recovery campaigns.",
+    "Epochs, receipts, enrollment, keys, raw logs, SDK disks and native packages remain private."
+  ]
+}

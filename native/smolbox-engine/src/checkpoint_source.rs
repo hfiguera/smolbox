@@ -239,17 +239,7 @@ impl Engine {
             let parent = target
                 .parent()
                 .ok_or(Error::uncertain(ErrorCode::Ownership))?;
-            crate::host::unredirected(
-                parent
-                    .parent()
-                    .ok_or(Error::uncertain(ErrorCode::Ownership))?,
-            )
-            .map_err(|error| Error::uncertain(error.code))?;
-            match std::fs::DirBuilder::new().mode(0o700).create(parent) {
-                Ok(()) => {}
-                Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => {}
-                Err(_) => return Err(Error::uncertain(ErrorCode::Io)),
-            }
+            prepare_cache_parents(parent).map_err(|error| Error::uncertain(error.code))?;
             let parent_metadata = std::fs::symlink_metadata(parent)
                 .map_err(|_| Error::uncertain(ErrorCode::Ownership))?;
             crate::host::unredirected(parent).map_err(|error| Error::uncertain(error.code))?;
@@ -512,6 +502,65 @@ impl Engine {
             move || prepare(approval, budget, domain, pool, permit),
         )
     }
+}
+
+/// A checkpoint can be the account's first machine. Create only missing cache
+/// parents below an existing owned, non-writable-by-others directory. Never
+/// follow a redirect, repair existing permissions or create the VM target here.
+fn prepare_cache_parents(path: &Path) -> Result<()> {
+    if !path.is_absolute()
+        || path.components().any(|part| {
+            matches!(
+                part,
+                std::path::Component::ParentDir | std::path::Component::CurDir
+            )
+        })
+    {
+        return Err(Error::before(ErrorCode::Ownership));
+    }
+    fn verify(path: &Path) -> Result<std::fs::Metadata> {
+        crate::host::unredirected(path)?;
+        let metadata = std::fs::symlink_metadata(path).map_err(|_| Error::before(ErrorCode::Io))?;
+        if !metadata.is_dir()
+            || metadata.uid() != unsafe { libc::geteuid() }
+            || metadata.mode() & 0o022 != 0
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        Ok(metadata)
+    }
+    let mut missing = Vec::new();
+    for ancestor in path.ancestors() {
+        match std::fs::symlink_metadata(ancestor) {
+            Ok(_) => {
+                verify(ancestor)?;
+                break;
+            }
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => missing.push(ancestor),
+            Err(_) => return Err(Error::before(ErrorCode::Io)),
+        }
+    }
+    for directory in missing.into_iter().rev() {
+        let parent = directory
+            .parent()
+            .ok_or(Error::before(ErrorCode::Ownership))?;
+        let before = verify(parent)?;
+        match std::fs::DirBuilder::new().mode(0o700).create(directory) {
+            Ok(()) => {}
+            Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => {}
+            Err(_) => return Err(Error::before(ErrorCode::Io)),
+        }
+        let after = verify(parent)?;
+        if (before.dev(), before.ino()) != (after.dev(), after.ino()) {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        verify(directory)?;
+        File::open(parent)
+            .and_then(|file| file.sync_all())
+            .map_err(|_| Error::before(ErrorCode::Io))?;
+    }
+    verify(path)?;
+    Ok(())
 }
 
 fn checkpoint_record(request: &CreateCheckpointRequest) -> Result<smolvm::config::VmRecord> {
@@ -998,6 +1047,49 @@ pub(crate) mod tests {
         )
         .unwrap()
     }
+    #[test]
+    fn first_checkpoint_cache_parents_are_private_and_existing_modes_are_preserved() {
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path().canonicalize().unwrap();
+        std::fs::set_permissions(&root, std::fs::Permissions::from_mode(0o755)).unwrap();
+        let target = root.join("Library/Caches/smolvm/vms");
+        prepare_cache_parents(&target).unwrap();
+        for relative in [
+            "Library",
+            "Library/Caches",
+            "Library/Caches/smolvm",
+            "Library/Caches/smolvm/vms",
+        ] {
+            assert_eq!(
+                std::fs::metadata(root.join(relative)).unwrap().mode() & 0o777,
+                0o700
+            );
+        }
+        let inode = std::fs::metadata(&target).unwrap().ino();
+        prepare_cache_parents(&target).unwrap();
+        assert_eq!(std::fs::metadata(&target).unwrap().ino(), inode);
+        assert_eq!(std::fs::metadata(root).unwrap().mode() & 0o777, 0o755);
+    }
+
+    #[test]
+    fn first_checkpoint_cache_parents_reject_redirects_files_and_shared_write_without_repair() {
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path().canonicalize().unwrap();
+        let outside = tempfile::tempdir().unwrap();
+        std::os::unix::fs::symlink(outside.path(), root.join("redirect")).unwrap();
+        assert!(prepare_cache_parents(&root.join("redirect/new")).is_err());
+        assert!(!outside.path().join("new").exists());
+        std::fs::write(root.join("file"), b"preserved").unwrap();
+        assert!(prepare_cache_parents(&root.join("file/new")).is_err());
+        assert_eq!(std::fs::read(root.join("file")).unwrap(), b"preserved");
+        let shared = root.join("shared");
+        std::fs::create_dir(&shared).unwrap();
+        std::fs::set_permissions(&shared, std::fs::Permissions::from_mode(0o777)).unwrap();
+        assert!(prepare_cache_parents(&shared.join("new")).is_err());
+        assert!(!shared.join("new").exists());
+        assert_eq!(std::fs::metadata(shared).unwrap().mode() & 0o777, 0o777);
+        assert!(prepare_cache_parents(&root.join("../escape")).is_err());
+    }
     fn domain(root: &Path) -> Arc<DomainGuard> {
         std::fs::create_dir_all(root).unwrap();
         let root = root.canonicalize().unwrap();
@@ -1311,6 +1403,90 @@ pub(crate) mod tests {
             assert!(!path.exists());
             assert_eq!(engine.jobs.counts(), crate::jobs::Counts::default());
         }
+    }
+
+    #[test]
+    #[ignore = "requires an explicit checkpoint and built helper; no VM or default SDK domain"]
+    fn ordinary_operator_checkpoint_worker_is_epoch_enrolled_without_vm_dispatch() {
+        let input = PathBuf::from(std::env::var_os("SMOLBOX_CHECKPOINT_FIXTURE").unwrap());
+        let digest = std::env::var("SMOLBOX_CHECKPOINT_FIXTURE_SHA256").unwrap();
+        assert_eq!(
+            hex::encode(Sha256::digest(std::fs::read(&input).unwrap())),
+            digest
+        );
+        let manifest = smolvm_pack::packer::read_manifest_from_sidecar(&input).unwrap();
+        let header = manifest.checkpoint.as_ref().unwrap();
+        let approval = ApprovedCheckpoint {
+            artifact: crate::ApprovedCheckpointArtifact {
+                path: input.clone(),
+                sha256: digest,
+                // Match the public operator catalog ceiling, not the fixture's
+                // small physical length.
+                max_bytes: crate::CHECKPOINT_ARTIFACT_BYTES,
+                guest_platform: manifest.platform.clone(),
+            },
+            sdk_version: smolvm::VERSION.into(),
+            host_platform: manifest.host_platform.clone(),
+            resources: Resources {
+                cpus: header.cpus,
+                memory_mib: header.memory_mib,
+                storage_gib: header.storage_gib.unwrap(),
+                overlay_gib: header.overlay_gib.unwrap(),
+            },
+        };
+        let executable = PathBuf::from(std::env::var_os("SMOLBOX_TEST_FILE_WORKER").unwrap())
+            .canonicalize()
+            .unwrap();
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path().canonicalize().unwrap();
+        // This test-only engine opens only root/db and root/private. It never
+        // opens the account SDK defaults or calls create/start/restore APIs.
+        let mut engine = crate::machine::tests::test_engine_with_vm_root(
+            &root,
+            root.join("missing-cache/smolvm/vms"),
+        );
+        let templates = crate::assets::tests::Fixture::new();
+        crate::machine::tests::test_install_templates(&mut engine, templates.prepare().unwrap());
+        let (host, _, epoch) = crate::epoch::tests::fixture_for_binding(
+            &engine.domain.directory,
+            Some(executable),
+            engine.binding().clone(),
+        );
+        let mut supervisor =
+            crate::transfer_supervisor::TransferSupervisor::new(&host, engine.jobs.clone())
+                .unwrap();
+        supervisor.set_epoch(epoch.clone());
+        engine.transfers = Some(supervisor);
+        let selected = engine
+            .prepare_checkpoint_artifact(approval.clone(), budget())
+            .unwrap();
+        let material = engine
+            .materialize_checkpoint_artifact(selected, budget())
+            .expect("enrolled request-private worker");
+        material.verify(&engine, &budget()).unwrap();
+        crate::checkpoint_install::verify_input_capacities(
+            &material.source.stage.path().join("materialized"),
+            &material.manifest,
+            material.resources(),
+        )
+        .expect("pre-install disk capacities");
+        let receipt = engine
+            .create_checkpoint(
+                CreateCheckpointRequest {
+                    name: "ordinary-operator-checkpoint".into(),
+                    owner_token: "d".repeat(64),
+                    incarnation: "e".repeat(32),
+                    checkpoint: material,
+                    labels: BTreeMap::new(),
+                },
+                budget(),
+            )
+            .expect("fresh cache tree and checkpoint-only installation");
+        let record = engine.db.get_vm(&receipt.name).unwrap().unwrap();
+        assert!(receipt.matches(&record).unwrap());
+        assert!(record.pid.is_none());
+        assert_eq!(engine.jobs.counts(), crate::jobs::Counts::default());
+        epoch.close().unwrap();
     }
 
     #[test]

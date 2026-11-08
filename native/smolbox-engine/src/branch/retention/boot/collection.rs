@@ -98,6 +98,35 @@ impl RetainedCollection {
     }
 }
 impl OwnedBoot {
+    pub(in crate::branch::retention) fn collection_handle(&self) -> &CreationReceipt {
+        self.plan.publication.child()
+    }
+    pub(in crate::branch::retention) fn inspect_partial_collection(
+        &self,
+        request: &PartialBranchCollectionRequest,
+    ) -> Result<&str> {
+        let enrollment = self
+            .enrollment()
+            .ok_or(Error::before(ErrorCode::Ownership))?;
+        if self
+            .collection
+            .as_ref()
+            .is_some_and(|prior| prior.request != *request)
+        {
+            return Err(Error::before(ErrorCode::Conflict));
+        }
+        let published = Lifecycle::at(&self.plan.child.path)
+            .inspect_partial_collection(&self.plan, request, enrollment)?;
+        if self
+            .collection
+            .as_ref()
+            .is_some_and(|prior| prior.published)
+            && !published
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        Ok(&self.plan.publication.change.platform)
+    }
     pub(in crate::branch::retention) fn collection_started(&self) -> bool {
         self.collection.is_some()
     }
@@ -264,23 +293,7 @@ impl OwnedBoot {
             .manager
             .try_lock()
             .map_err(|_| Error::before(ErrorCode::Conflict))?;
-        if manager.name() != Some(self.plan.publication.child().name.as_str())
-            || manager.child_pid().is_some()
-            || manager.storage_path()
-                != self
-                    .plan
-                    .child
-                    .path
-                    .join(smolvm::storage::STORAGE_DISK_FILENAME)
-            || manager.overlay_path()
-                != self
-                    .plan
-                    .child
-                    .path
-                    .join(smolvm::storage::OVERLAY_DISK_FILENAME)
-        {
-            return Err(Error::before(ErrorCode::Ownership));
-        }
+        self.manager_paths.verify_collected(&self.plan, &manager)?;
         let collected = epoch.collect_enrolled(&self.plan.publication.child().name, enrollment)?;
         if PartialBranchCollection::issue(&state.request, &self.plan.publication, &collected)?
             != request.collection

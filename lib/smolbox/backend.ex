@@ -84,6 +84,8 @@ defmodule SmolBox.Backend do
     resolve_unbooted_branch_disposal: 3,
     release_branch_backing: 4,
     resolve_branch_deletion: 2,
+    publish_collected_branch_material: 3,
+    inspect_partial_branch_collection: 3,
     collect_partial_branch: 3,
     dispose_partial_branch: 3,
     resolve_partial_branch_disposal: 3,

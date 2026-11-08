@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "status": "model-confirmed-composite-branch-uncertainty-correction",
+  "source_base_commit": "c62d79a17f739d611e3449ca7dce5ffdc99d0f8e",
+  "files_sha256": {
+    "lib/smolbox/backend/embedded_branch.ex": "68e055f76593fdc054ad1ca9aa39ae9a37933749148ff1344a52c47790e1e3a4",
+    "test/unit/embedded_branch_backend_test.exs": "03169ac86ff2c4ed672ab4aff3ac4d16e44019558fc8766e61ce30ed99f0996b",
+    "test/unit/native_ready_branch_public_resolution_test.exs": "fd67ae33b675fa2428e52af343f2291960699554124a67371380fa6d42cf45a9",
+    "test/unit/native_branch_public_deletion_action_test.exs": "7acc98c0e3ec460b3ca5035cc8363b1362decb1f4ec5698c6643a23c1b6ef921"
+  },
+  "problem": {
+    "follow_up_not_dispatched_was_returned_for_whole_branch_after_valid_completion": true,
+    "new_regression_models_failed_before_correction": 6,
+    "live_fault_reproduction": false
+  },
+  "correction": {
+    "creation_release_both_completion_lookups_and_original_ready_recovery_covered": true,
+    "source_and_child_bridge_rejections_and_native_error_terminals_covered": true,
+    "whole_operation_dispatch_uncertain_after_valid_completion": true,
+    "error_category_preserved": true,
+    "initial_definitive_rejection_evidence_preserved": true,
+    "one_original_owner_epoch_deadline_and_cumulative_budgets_preserved": true,
+    "public_recovery_retains_unknown_content_reservations_and_fence": true,
+    "prior_ready_coordinator_cannot_reactivate_after_failed_follow_up": true,
+    "only_normal_claim_metadata_may_advance": true,
+    "no_paired_completion_commit_or_native_operation_replay_on_failure": true,
+    "native_sdk_helper_assets_and_codecs_unchanged": true
+  },
+  "validation": {
+    "current_toolchain": {
+      "elixir": "1.20.4",
+      "otp": "29.0.6"
+    },
+    "minimum_toolchain": {
+      "elixir": "1.18.4-otp-27",
+      "otp": "27.3.4.15"
+    },
+    "selected_models_per_toolchain": 946,
+    "model_max_cases": 4,
+    "http_contracts_per_toolchain": 411,
+    "new_models": 6,
+    "preliminary_focused_current_checks": 97,
+    "strict_credo_findings_per_toolchain": 67,
+    "new_credo_findings": 0,
+    "full_and_clean_sdk_inventory_verified": true,
+    "existing_deletion_deadline_fixture_setup_budget_ms": 2000,
+    "existing_deletion_deadline_fixture_entry_asserted": true,
+    "high_concurrency_timing_failures_retained_privately": true,
+    "checked_logs": {
+      "unit-current-final-source.log": {
+        "tests": 946,
+        "passed": true,
+        "sha256": "b890e4646cd0c6ffe5fd930139ad606c9a046b24699b8820f101468639e899bd"
+      },
+      "unit-minimum-final-source.log": {
+        "tests": 946,
+        "passed": true,
+        "sha256": "a90ece681c38e1068ff0d39ae7169514d8d57171c3ce63544541e7c0818a5d71"
+      },
+      "http-current.log": {
+        "tests": 411,
+        "passed": true,
+        "sha256": "7eae0f7d49f73f8874886836c9993ad3d3de25c222577b0d2d4db0581c1ee818"
+      },
+      "http-minimum.log": {
+        "tests": 411,
+        "passed": true,
+        "sha256": "f133a499056e3d2c6272275a6958346bc118672db6d5739313243118063428e9"
+      }
+    }
+  },
+  "offline_original_request_diagnostic": {
+    "control": true,
+    "valid": true,
+    "sdk_or_vm_started": false,
+    "authority_restored_or_replayed": false,
+    "request_bytes": 1036,
+    "source_bytes": 601,
+    "reconciliation": true,
+    "pure_channel_registration": true,
+    "synthetic_matching_domain_channel_only": true,
+    "live_owner_identity_or_native_admission_qualified": false
+  },
+  "ordinary_gap": {
+    "previous_installed_case_source_commit": "ebc6e775080db5a1195086b1c46767b237005b79",
+    "previous_admission_rejection_cause_unresolved": true,
+    "failed_authority_not_reopened": true,
+    "this_correction_not_attributed_as_native_rejection_cause": true
+  },
+  "qualification": {
+    "changed_library_ordinary_cancellation_recovery_acceptance_pending": true,
+    "all_full_parity_rows_pending": true,
+    "full_http_parity_complete": false,
+    "crash_validation_deferred": true,
+    "crash_handling_qualified": false,
+    "distribution_approved": false
+  }
+}

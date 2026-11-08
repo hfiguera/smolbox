@@ -13,6 +13,7 @@ defmodule SmolBox.Backend.Embedded do
     EmbeddedCaptureObservation,
     EmbeddedCaptureResolution,
     EmbeddedCaptureCleanup,
+    EmbeddedCollectedBranchPublication,
     EmbeddedContext,
     EmbeddedExport,
     EmbeddedGrowthObservation,
@@ -82,6 +83,14 @@ defmodule SmolBox.Backend.Embedded do
       when operation in [:list_images, :pull_image],
       do: Features.supports?(config, :images)
 
+  def supports_operation?(nil, :inspect_partial_branch_collection), do: true
+
+  def supports_operation?(
+        %{__struct__: EmbeddedContext, config: config},
+        :inspect_partial_branch_collection
+      ),
+      do: Features.supports?(config, :partial_collection_preflight)
+
   def supports_operation?(nil, :logs), do: true
 
   def supports_operation?(nil, operation)
@@ -94,6 +103,7 @@ defmodule SmolBox.Backend.Embedded do
              :resolve_unbooted_branch_disposal,
              :release_branch_backing,
              :resolve_branch_deletion,
+             :publish_collected_branch_material,
              :collect_partial_branch,
              :dispose_partial_branch,
              :resolve_partial_branch_disposal,
@@ -121,6 +131,7 @@ defmodule SmolBox.Backend.Embedded do
              :resolve_unbooted_branch_disposal,
              :release_branch_backing,
              :resolve_branch_deletion,
+             :publish_collected_branch_material,
              :collect_partial_branch,
              :dispose_partial_branch,
              :resolve_partial_branch_disposal,
@@ -258,6 +269,12 @@ defmodule SmolBox.Backend.Embedded do
         child,
         budget
       )
+
+  def invoke(context, :publish_collected_branch_material, [parent, child], budget),
+    do: EmbeddedCollectedBranchPublication.run(context, parent, child, budget)
+
+  def invoke(context, :inspect_partial_branch_collection, [parent, child], budget),
+    do: EmbeddedPartialBranchCollection.inspect_candidate(context, parent, child, budget)
 
   def invoke(context, :collect_partial_branch, [parent, child], budget),
     do: EmbeddedPartialBranchCollection.run(context, parent, child, budget)

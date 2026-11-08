@@ -10,7 +10,7 @@ defmodule SmolBox.Embedded.UnbootedBranchDisposalCandidate do
     BranchCanonical,
     BranchPublication,
     BranchRequest,
-    NativeGrowth,
+    NativeCollectedBranchPublication,
     NativeUnbootedBranchDisposal,
     Shape
   }
@@ -60,11 +60,10 @@ defmodule SmolBox.Embedded.UnbootedBranchDisposalCandidate do
   def bound?(%__MODULE__{} = candidate, parent, child, epoch, platform) do
     with true <- NativeUnbootedBranchDisposal.pending?(parent, child),
          true <- child.branch.native_authority.disposal == nil,
-         true <- matches?(candidate, child.branch.native_authority.request),
-         {:ok, receipt, _, _} <- NativeGrowth.head(parent) do
+         true <- matches?(candidate, child.branch.native_authority.request) do
       intent = get_in(candidate.publication, ~w(change child_origin intent))
 
-      candidate.publication["previous"] == receipt and
+      NativeCollectedBranchPublication.publication_pending?(parent, child, candidate.publication) and
         intent["epoch"] == epoch and candidate.publication["change"]["platform"] == platform and
         intent["source_pid"] == child.branch.source_machine.backend_identity.pid_identity and
         NativeUnbootedBranchDisposal.plan?(candidate, child.spec.profile)

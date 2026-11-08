@@ -234,6 +234,10 @@ def terminal(identifier, completion="exited", code=7):
             result="terminal", completion=completion, dispatch="may_have_dispatched",
             observed_exit=code, worker_collected=True, output_bytes=entry["bytes"])))
         return
+    if entry["mode"] == "capture":
+        send(correlated("terminal", identifier, entry["sequence"] + 1, outcome=dict(
+            result="error", code="cancelled", dispatch="may_have_dispatched")))
+        return
     send(correlated("terminal", identifier, entry["sequence"] + 1, outcome=dict(
         result="command", completion=completion, dispatch="may_have_dispatched",
         observed_exit=code, running_observed=True, output_bytes=entry["bytes"])))
@@ -265,6 +269,10 @@ def pump(identifier):
         send(correlated("terminal", identifier, entry["sequence"] + 1, outcome=dict(
             result="file", completion="completed", dispatch="may_have_dispatched",
             observed_bytes=entry["bytes"], native_acknowledged=True)))
+    elif entry["mode"] == "capture":
+        PENDING.pop(identifier)
+        send(correlated("terminal", identifier, entry["sequence"] + 1,
+            outcome=dict(result="captured", transition=META["capture_transition"])))
     elif entry["mode"] == "echo":
         terminal(identifier)
     elif entry["mode"] == "exit_error":
@@ -309,6 +317,15 @@ try:
                 elif operation["operation"] == "readiness":
                     outcome = dict(result="error", code="state", dispatch="not_dispatched") if QUARANTINED else dict(result="ready")
                     send(correlated("terminal", identifier, 1, outcome=outcome))
+                elif operation["operation"] == "capture_checkpoint" and META.get("capture_transition"):
+                    proof = META["capture_transition"]
+                    assert operation["receipt"] == proof["previous"]
+                    payload = b"c" * proof["change"]["artifact"]["size_bytes"]
+                    size = operation["chunk_bytes"]
+                    PENDING[identifier] = dict(sequence=0, bytes=0, mode="capture",
+                        chunks=[("checkpoint", payload[i:i+size]) for i in range(0, len(payload), size)],
+                        credit=message["initial_credit"], events=message["initial_event_credit"])
+                    pump(identifier)
                 elif operation["operation"] == "capacity":
                     running = bool(VM and VM["state"] == "running")
                     send(correlated("terminal", identifier, 1, outcome=dict(result="capacity", snapshot=dict(

@@ -33,6 +33,45 @@ defmodule SmolBox.CheckpointArtifactTest do
     assert :ok = CheckpointArtifact.verify(path, %{size_bytes: byte_size(bytes)}, profile, worker)
   end
 
+  test "Mac captures distinguish Linux guest from Darwin host and accept neutral SDK metadata" do
+    path = Path.join(System.tmp_dir!(), "capture-macos-#{System.unique_integer([:positive])}")
+    on_exit(fn -> File.rm(path) end)
+    {:ok, profile} = Profile.new("macos")
+    worker = %{platform: :macos, architecture: "aarch64", runtime_version: "1.22.0"}
+
+    manifest =
+      CheckpointFixture.manifest()
+      |> Map.merge(%{
+        "platform" => "linux/arm64",
+        "host_platform" => "darwin/arm64",
+        "entrypoint" => ["/bin/true"],
+        "workdir" => "/"
+      })
+      |> put_in(["checkpoint", "host_platform"], "darwin/arm64")
+      |> put_in(["checkpoint", "network"], %{"enabled" => false, "allowed_cidrs" => []})
+
+    verify = fn manifest ->
+      bytes = CheckpointFixture.bytes(manifest)
+      File.write!(path, bytes)
+      CheckpointArtifact.verify(path, %{size_bytes: byte_size(bytes)}, profile, worker)
+    end
+
+    assert :ok = verify.(manifest)
+
+    for invalid <- [
+          Map.put(manifest, "platform", "darwin/arm64"),
+          Map.put(manifest, "host_platform", "linux/arm64"),
+          Map.put(manifest, "entrypoint", ["/application"]),
+          Map.put(manifest, "workdir", "/application"),
+          put_in(manifest, ["checkpoint", "network", "allowed_cidrs"], ["0.0.0.0/0"]),
+          put_in(manifest, ["checkpoint", "network", "ports"], [%{"host" => 8080}]),
+          put_in(manifest, ["checkpoint", "network", "credential_policy"], %{}),
+          put_in(manifest, ["checkpoint", "network", "unknown"], [])
+        ] do
+      assert {:error, %{category: :unsupported_capability}} = verify.(invalid)
+    end
+  end
+
   test "a newer worker cannot silently relabel an older captured checkpoint" do
     path = Path.join(System.tmp_dir!(), "capture-version-#{System.unique_integer([:positive])}")
     on_exit(fn -> File.rm(path) end)

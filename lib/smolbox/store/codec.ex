@@ -328,6 +328,15 @@ defmodule SmolBox.Store.Codec do
   exactly unneeded: nil and refuses nonnil acknowledgement history. Upgrade every
   reader/projector before advertising `native_partial_branch_cleanup_resolutions: 1`.
   This reader marker alone enables no native branch or public resolution path.
+
+  Collected material publication selectively uses v50. The full frozen creation,
+  quiescence, platform and acceptance/completion versions survive separately from
+  child readiness. Paired source history advances exactly once beside a fresh
+  source observation; child state and all reservations remain unknown/retained.
+  Earlier envelopes omit/restore collected_publication: nil exactly and reject
+  even an explicitly nil new field. Upgrade every reader/projector before
+  advertising `native_collected_branch_publications: 1`. This marker enables
+  neither native publication dispatch nor public branch admission.
   """
 
   alias SmolBox.{Error, Execution, ExecutionFeatures}
@@ -356,6 +365,7 @@ defmodule SmolBox.Store.Codec do
     CodecNativeCaptureResolutions,
     CodecNativeCaptures,
     CodecNativeCheckpoints,
+    CodecNativeCollectedBranchPublications,
     CodecNativeExports,
     CodecNativeMounts,
     CodecNativePartialBranchBackings,
@@ -380,6 +390,7 @@ defmodule SmolBox.Store.Codec do
   }
 
   @max_bytes 16_777_216
+  @native_collected_branch_publications_prefix "smolbox-record-v50\0"
   @native_partial_branch_cleanup_resolutions_prefix "smolbox-record-v49\0"
   @native_partial_branch_cleanups_prefix "smolbox-record-v48\0"
   @native_partial_branch_backings_prefix "smolbox-record-v47\0"
@@ -453,6 +464,7 @@ defmodule SmolBox.Store.Codec do
     SmolBox.Embedded.NativeReleasedBranchDeletionCleanup,
     SmolBox.Embedded.ReleasedBranchDeletionContinuation,
     SmolBox.Embedded.ReleasedBranchDeletionResolution,
+    SmolBox.Embedded.NativeCollectedBranchPublication,
     SmolBox.Embedded.NativePartialBranchCollection,
     SmolBox.Embedded.NativePartialBranchDisposal,
     SmolBox.Embedded.NativePartialBranchCleanup,
@@ -526,6 +538,14 @@ defmodule SmolBox.Store.Codec do
         do: encode_native_volume(record),
         else: encode_volumes(record)
       )
+
+  def encode(
+        %{
+          spec: %{profile: %SmolBox.Profile{}},
+          branch: %{native_authority: %{collected_publication: saved}}
+        } = record
+      )
+      when not is_nil(saved), do: encode_native_collected_branch_publications(record)
 
   def encode(
         %{
@@ -707,6 +727,10 @@ defmodule SmolBox.Store.Codec do
   @spec decode(binary()) ::
           {:ok, Execution.t() | SmolBox.ManagedMachine.t() | SmolBox.Volume.t()}
           | {:error, Error.t()}
+  def decode(<<@native_collected_branch_publications_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_native_collected_branch_publications(bytes)
+
   def decode(
         <<@native_partial_branch_cleanup_resolutions_prefix, 131, tag, _rest::binary>> = bytes
       )
@@ -1223,9 +1247,34 @@ defmodule SmolBox.Store.Codec do
     ArgumentError -> invalid()
   end
 
+  defp encode_native_collected_branch_publications(record) do
+    with :ok <- validate_extended(record) do
+      bytes = @native_collected_branch_publications_prefix <> :erlang.term_to_binary(record)
+      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
+    end
+  end
+
+  defp decode_native_collected_branch_publications(
+         <<@native_collected_branch_publications_prefix, payload::binary>>
+       ) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <-
+           used == byte_size(payload) and CodecNativeCollectedBranchPublications.required?(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
   defp encode_native_partial_branch_cleanup_resolutions(record) do
     with :ok <- validate_extended(record) do
-      bytes = @native_partial_branch_cleanup_resolutions_prefix <> :erlang.term_to_binary(record)
+      bytes =
+        @native_partial_branch_cleanup_resolutions_prefix <>
+          :erlang.term_to_binary(CodecNativeCollectedBranchPublications.strip(record))
+
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
   end
@@ -1239,6 +1288,7 @@ defmodule SmolBox.Store.Codec do
          true <-
            used == byte_size(payload) and
              CodecNativePartialBranchCleanupResolutions.required?(record),
+         record = CodecNativeCollectedBranchPublications.upgrade(record),
          :ok <- validate_extended(record),
          do: {:ok, record},
          else: (_ -> invalid())

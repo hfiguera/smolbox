@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "scope": "Completed-child deletion after ordinary cold restart; empty SDK cache correction",
+  "source_base_commit": "0be5a032180b08df30bfd412b3b3b7d0f7d0e16e",
+  "source_files_sha256": {
+    "native/smolbox-engine/src/sdk_compat.rs": "f4d9979d75c9dbb06c0efae236e228cd16c8a7a81edf4a5659316d6ab72eab0a",
+    "native/smolbox-engine/src/branch_delete.rs": "065b16388939750e63218710abb572a17a0807b6d889efb582194b9e4b61308d",
+    "native/smolbox-engine/src/branch_delete/residual.rs": "5045d3535b4a8cd571b518ce0a3357d3538f13ee8f536f7cb0502a021cd2ac4f",
+    "native/smolbox-engine/src/branch_delete/continuation.rs": "5384f1ec342261f9a9fa9393542e8947b87b182b4966ce6bb89b1798fc8638e8",
+    "native/smolbox-engine/examples/branch-guest-proof.rs": "fdfa643f1d896d535e5f515d826b94726bf0c447e1b4f6bd2f4e6f318bbfdbb0"
+  },
+  "ordinary_linux_attempt": {
+    "date": "2026-10-17",
+    "source_commit": "fa48c445f7cc856fd7109fcfc611e8b71856a741",
+    "manifest_sha256": "ae6e81dad2d464419076a71f5aba4372f28e137d7b33672d76a0a9662490cb1c",
+    "helper_sha256": "e5f5f30d9ba480a9baaeae22fcd8ac09e818b58e78ff9de842c77cb02d78f38c",
+    "witness_sha256": "16d31a63804a44c0c85cf621b6a9ff20fcc61a4f2c5c1008f866647cf95f2288",
+    "source_and_two_children_independent": true,
+    "held_release": true,
+    "normal_first_child_stop": true,
+    "normal_first_child_cold_restart": true,
+    "cold_restart_disk_retained_ram_not_restored_siblings_unchanged": true,
+    "second_stop_completed_before_delete_guard": true,
+    "first_child_delete": {
+      "result": "Ownership / MayHaveDispatched",
+      "retained_phase": "collected",
+      "sdk_delete_entered": false,
+      "journal_sha256": "817227ed4a200ab573f7d5819b36f4b77ac01b3f3f1ebf0edf6453545ffcfbb7",
+      "cache": "owned 0700 real empty pack directory"
+    },
+    "absence_or_backing_retirement_qualified": false,
+    "original_owner_retained": true,
+    "crash_validation": false,
+    "archive_sha256": "715669139b0f50490ee4c6cc7a7d520518ea83b60127a98f9302177619f30ec7",
+    "archive_bytes": 160306611,
+    "archive_members": 3901,
+    "archive_verified_linux_and_mac": true,
+    "cold_sdk_consistency_qualified": false,
+    "no_signals_sent_at_observation": true
+  },
+  "implementation": {
+    "completed_child_deletion_and_residual_cleanup_only": true,
+    "requires_original_collection_stopped_row_receipt_plan_and_dependency_checks": true,
+    "owned_no_follow_directory_descriptor_and_path_inode_binding": true,
+    "reject_group_or_world_writable_directory": true,
+    "positively_empty_cache_only": true,
+    "bounded_first_directory_entry_observation": true,
+    "missing_or_source_symlink_behavior_preserved": true,
+    "populated_cache_and_source_data_preserved": true,
+    "partial_and_unbooted_preparation_cache_guard_unchanged": true,
+    "no_sdk_source_or_database_rewrite": true,
+    "no_wire_codec_or_capability_change": true,
+    "witness_distinguishes_post_restart_checks_from_deletion_failure": true
+  },
+  "validation": {
+    "host": "Darwin/arm64",
+    "branch_models_passed": 388,
+    "existing_ignored_branch_fixture_not_selected": 1,
+    "sdk_compat_models_passed": 17,
+    "runtime_boot_models_passed": 19,
+    "witness_models_passed": 13,
+    "python_tooling_cases": 51,
+    "python_tooling_skipped": 4,
+    "strict_all_target_clippy": true,
+    "scoped_format_check": true,
+    "sdk_full_and_clean_verification": true,
+    "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "documentation_build_and_links": true,
+    "logs_sha256": {
+      "branch-models": "aa4278e1a7808f4301ed084221975a8f2c35128c1cddbe18b16a83c6707f6fe3",
+      "sdk-compat-models": "adbdf330b42289963b7d84045529dc23a9ea1ccf44f50d37eaa3935fb661918e",
+      "runtime-models": "a2875332a31b1a724122d1cef0e6e2f419f305e7ce5f2e257c0039c2339fa31e",
+      "witness-models": "f6c3b80ea9d1e2b18437f5b3061380f04e30dd46257dc14d38a8aa74dab204eb",
+      "clippy": "fc3e44fdd5435f1f2c6695bce310be837a3ac758745b86701f7c05fb0377de71",
+      "format": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sdk": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "sdk-clean": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "native-tooling": "194daa686316aa418f7021c9df7060c5835ae15bba6904e11ddb3d035b9c047a",
+      "docs": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+      "doc-links": "fe7e86509e4e55bfacafbae259d53fb8b130721b7e8d9250576f81d31fb0aa5a"
+    }
+  },
+  "lab_preservation": {
+    "cold_lab_images_byte_copied_before_restarting_provision_vm": true,
+    "exclusive_lab_lock_and_all_three_units_stopped_during_copy": true,
+    "provision_sha256": "5c1ee7a5dc95b65350cee8e24768c45d03d1de54387b28b785a04fe144bc47bd",
+    "baseline_sha256": "4ff59594af008ff0efb517e9c70cb90d5cf7c240dc0f71d53a162c7b4a0eea2d",
+    "original_run_image_unchanged_before_after_copy": true,
+    "sdk_consistency_or_authority_restoration_claimed": false,
+    "existing_network_provision_launcher_and_two_hour_guard_unchanged": true
+  },
+  "qualification": {
+    "changed_package_built_or_run": true,
+    "ordinary_full_branch_lifecycle": false,
+    "installed_public_branch_consumers": false,
+    "public_native_branch_admission": false,
+    "all_full_parity_rows_pending": true,
+    "crash_validation_performed": false,
+    "distribution_approved": false,
+    "ordinary_linux_local_bare_shared_engine_lifecycle": true
+  },
+  "remaining": [
+    "Broader branch/Port/public/durable consumer acceptance; the exact 845a37b ordinary Linux local-bare shared-engine lifecycle now passes.",
+    "Ordinary original-owner recovery, Port/public/store and installed consumer acceptance.",
+    "All remaining P0-P9 platform/source/resource/upgrade gates; crash validation remains deferred."
+  ],
+  "ordinary_followup_evidence": "embedded-port-http-parity-linux-branches-845a37b.json"
+}

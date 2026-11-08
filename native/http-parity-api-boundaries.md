@@ -3418,3 +3418,31 @@ This component is not yet connected to Port/readers or public/store alternate
 outcomes. Existing removal proof and wire/codec/backend catalogs stay unchanged.
 Its deterministic actor/file/SQLite and synthetic DTO models confer no SDK/VM or
 new-package qualification. Public branches and crash qualification remain disabled.
+
+### Completed bare-child cache after cold start
+
+Pinned macOS cold start can populate a child's private `pack` directory with
+`agent-rootfs`, `agent-rootfs.tar`, empty `layers`, `overlay.raw`, `storage.ext4`
+and the empty `.smolvm-extracted` marker. The completed/stopped-child deletion
+preflight admits only this owned, non-writable layout. It excludes the SDK's
+`layers-cs` mount, `layers-cs.sparseimage`, `leases` and every unknown entry, so
+`force_detach_layers_volume` has no mount or lease target in an admitted private
+cache. This changes no SDK source and supplies no original-child collection or
+stopped ownership proof. Unbooted and partial-child disposal retain the stricter
+absent/link/empty cache check. The first live Mac case remains a preserved negative;
+a rebuilt helper must qualify final ordinary deletion separately.
+
+### Portable capture source qualification on SDK 1.22
+
+`checkpoint_packed_layers` records a reference for every `source_smolmachine`,
+including bare packs with no OCI layers. Removing its marker would misdescribe
+the captured device state. Portable capture therefore rejects those sources
+before SDK entry; the independent branch eligibility predicate stays unchanged.
+Dependency-free checkpoint sources retain the existing self-contained contract.
+
+Mac manifests identify a `linux/arm64` guest and `darwin/arm64` host. Neutral
+`/bin/true` plus `/` metadata and empty disabled-network lists are valid SDK output.
+The public metadata reader checks those values separately and continues rejecting
+packed-device/workload/credential dependencies. The opt-in seed preparer uses
+public unmodified SDK APIs in a fresh account and normally stops/deletes its
+source. It supplies input bytes only, never public backend acceptance or recovery.

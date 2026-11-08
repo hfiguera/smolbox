@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "status": "current-minimum-installed-http-smoke-and-separate-custody-audit-passed-original-wrapper-assertion-failure-preserved",
+  "source_commit": "06ba0d0e2ef4579b9a6e685fa664ee649e8919fb",
+  "source_archive_sha256": "c90f874558a591dc888482b8a5f06d7beac5c26a41d86316818d2f56933fb34e",
+  "hex_archive_sha256": "8ecb4596d11373a5416760dca44f32d2d5d3161e08b32769474bf42a9e68e6bc",
+  "source_files": 1813,
+  "sdk_source_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "cases": {
+    "current": {
+      "elixir": "1.20.4",
+      "otp": "29.0.6",
+      "dependency_resolution_strict_compilation_and_smoke_exit_zero": true,
+      "without_rust_on_path": true,
+      "installed_package_files_verified": 627,
+      "smoke": {
+        "interactive": true,
+        "supervisor": true,
+        "client": true,
+        "versions": {
+          "mint": "1.11.0",
+          "nimble_options": "1.1.1",
+          "telemetry": "1.4.2",
+          "jason": "1.4.5",
+          "mint_web_socket": "1.0.6",
+          "req": "0.7.5"
+        },
+        "without_rust": true,
+        "checkpoint": true,
+        "workload": true,
+        "managed_exports": true,
+        "managed_checkpoints": true,
+        "managed_branches": true,
+        "guest_files": true,
+        "network_policy": true,
+        "offline_default": true,
+        "runtime_1_16_0_explicit": "1.16.0",
+        "unqualified_runtime_rejected": "1.16.2",
+        "runtime_default": "1.22.0",
+        "legacy_runtime_explicit": "1.14.1",
+        "legacy_1_14_6_explicit": "1.14.6"
+      },
+      "original_final_wrapper_check_failed": true,
+      "wrapper_failure_reason": "Its broad shared-library filename assertion incorrectly counted nine ordinary OTP runtime libraries as SmolBox native assets. All three actual consumer commands exited zero.",
+      "corrected_separate_read_only_custody_audit_passed": true,
+      "all_nine_flagged_libraries_match_trusted_minimum_runtime_archive": true,
+      "smolbox_helper_vm_assets_sdk_domain_and_account_processes_absent": true,
+      "archive_sha256": "50c287f1c23c95ffa17f0d88673a2a0651b956089f1f231d9b54800a6c642ed4",
+      "archive_bytes": 1401618,
+      "archive_members": 17,
+      "archive_every_member_verified_guest_outer_mac": true,
+      "archive_scope": "Hex archive, frozen source inventory, actual runner and provisioner, consumer Mix/lock/smoke files, complete phase/driver logs and custody audit. Runtime/dependency caches remain at original accounts and are not duplicated in this compact archive.",
+      "normal_http_runtime_supervision_shutdown": true,
+      "native_engine_or_sdk_vm_started": false
+    },
+    "minimum": {
+      "elixir": "1.18.4",
+      "otp": "27.3.4.15",
+      "dependency_resolution_strict_compilation_and_smoke_exit_zero": true,
+      "without_rust_on_path": true,
+      "installed_package_files_verified": 627,
+      "smoke": {
+        "interactive": true,
+        "supervisor": true,
+        "client": true,
+        "versions": {
+          "req": "0.7.4",
+          "mint": "1.11.0",
+          "mint_web_socket": "1.0.6",
+          "jason": "1.4.0",
+          "telemetry": "1.3.0",
+          "nimble_options": "1.1.0"
+        },
+        "without_rust": true,
+        "checkpoint": true,
+        "workload": true,
+        "managed_exports": true,
+        "managed_checkpoints": true,
+        "managed_branches": true,
+        "guest_files": true,
+        "network_policy": true,
+        "offline_default": true,
+        "runtime_1_16_0_explicit": "1.16.0",
+        "unqualified_runtime_rejected": "1.16.2",
+        "runtime_default": "1.22.0",
+        "legacy_runtime_explicit": "1.14.1",
+        "legacy_1_14_6_explicit": "1.14.6"
+      },
+      "original_final_wrapper_check_failed": true,
+      "wrapper_failure_reason": "Its broad shared-library filename assertion incorrectly counted nine ordinary OTP runtime libraries as SmolBox native assets. All three actual consumer commands exited zero.",
+      "corrected_separate_read_only_custody_audit_passed": true,
+      "all_nine_flagged_libraries_match_trusted_minimum_runtime_archive": true,
+      "smolbox_helper_vm_assets_sdk_domain_and_account_processes_absent": true,
+      "archive_sha256": "f1023d0fbcf04bfbbd4214333e48082970a2bf2eaa0458704cd014dffa1336e3",
+      "archive_bytes": 1403699,
+      "archive_members": 17,
+      "archive_every_member_verified_guest_outer_mac": true,
+      "archive_scope": "Hex archive, frozen source inventory, actual runner and provisioner, consumer Mix/lock/smoke files, complete phase/driver logs and custody audit. Runtime/dependency caches remain at original accounts and are not duplicated in this compact archive.",
+      "normal_http_runtime_supervision_shutdown": true,
+      "native_engine_or_sdk_vm_started": false
+    }
+  },
+  "sdk_native_acceptance_claimed": false,
+  "new_helper_ordinary_acceptance_pending": true,
+  "remaining": [
+    "Fresh changed native package and current/minimum ordinary original-context partial acceptance",
+    "Remaining full P0\u2013P9 source/platform/resource/upgrade requirements"
+  ],
+  "full_parity_rows_closed": 0,
+  "full_http_parity_complete": false,
+  "crash_validation_deferred": true,
+  "crash_handling_qualified": false,
+  "distribution_approved": false,
+  "documentation_checks": {
+    "documentation_and_coverage_tests_passed": 7,
+    "exdoc_warnings_as_errors_and_local_links_pages": 177,
+    "coverage_inventory_verified": {
+      "operations": 61,
+      "arity_signatures": 67,
+      "specification_features": 8,
+      "acceptance_contracts": 15
+    },
+    "log_sha256": {
+      "http-doc-tests.log": "9b4bacb215d78571c050198fc67a5c7803b4f7638afbc5a47ff8ef84734b615b",
+      "http-docs.log": "2685e6b37d98831478f9f025c988041fc9239895ce883eeb37e8d019683bdf33"
+    }
+  }
+}

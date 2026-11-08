@@ -1,0 +1,174 @@
+{
+  "schema": 1,
+  "status": "model-corrected-collected-spool-handoff-ordinary-package-acceptance-pending",
+  "base_source_commit": "6bc154f6f3a562689d53feaa1de944aec0fbe614",
+  "changed_native_files": {
+    "native/smolbox-engine/src/branch/retention/resolution/disposal/archive.rs": "6e77d4103597784316f90d89119599d85e77e0acfb43e15244ede4aa96a6a0ed",
+    "native/smolbox-engine/src/branch/retention/resolution/disposal/tests.rs": "b082a010927901cfa94e0bf035eebb14a53c4b984eb3217507c4cba3c01feb13",
+    "native/smolbox-engine/src/branch/retention/resolution/disposal/tests/archive.rs": "eb35459a02f01ecd61c1952d77c33d05ec316404e2dc8b276569a0f9a0532a37",
+    "native/smolbox-engine/src/branch/retention/resolution/partial_disposal/tests.rs": "81cc453319e640e695711e6f4dcd8a797df235217f959554f7a2d7b9338b8cb1",
+    "native/smolbox-engine/src/transfer_supervisor.rs": "70eddd9fd3423e6fe2a2bb7205ae078b67ecc9fcd7fa5b1a0c80393a6d0fefb0"
+  },
+  "sdk_source_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "sdk_unmodified": true,
+  "observed_manifest_sha256": "c63ee793b86fb68facb7e4be5582d0cf70570b4170c4f7dd19e902ad4de735d6",
+  "observed_helper_sha256": "8d1c31817367aa288b600bdeb11d0ef5bc8a95aaec3a3b8bcea0396eebbd9a59",
+  "ordinary_case": {
+    "platform": "linux",
+    "architecture": "x86_64",
+    "source": "approved-local-bare",
+    "store": "memory",
+    "toolchain": "Elixir 1.20.4 / OTP 29.0.6",
+    "without_rust": true,
+    "hex_archive_sha256": "52e6b3ab36d8770ca281959a620494c2495d41b9b8f2c0cca54562463926fa4e",
+    "workflow_sha256": "ea7e9d628e6809062ae242694d2248261967b9d26b05cae86cc7b9e77a12cfd4",
+    "request_timeout_ms": 1000,
+    "native_phase_pause_or_fault_injection": false,
+    "collected_publication_acknowledged": true,
+    "native_disposal_ledger_stage": "deleted",
+    "native_ledger_proof_valid_and_matches_public_retained_request": true,
+    "public_result": "identity_conflict / branch / dispatch_uncertain",
+    "public_disposal_state": "disposal_pending",
+    "public_disposal_retirement_backing_unacknowledged": true,
+    "reserved_resources_retained": {
+      "slots": 3,
+      "cpus": 3,
+      "memory_mb": 1920,
+      "disk_gb": 9
+    },
+    "failed_case_qualified": false,
+    "minimum_workflow_not_started": true,
+    "normal_original_owner_shutdown": true,
+    "source_files_verified": 1804,
+    "assets_verified": 806,
+    "source_library_assets_tools_domain_keys_verified": true,
+    "native_beam_sql_kvm_process_inventories_empty": true,
+    "account_lock_available": true,
+    "sdk_counts_retained": {
+      "vms": 1,
+      "vm_create_reservations": 0,
+      "vm_pause_operations": 0,
+      "vm_resize_intents": 0,
+      "vm_resize_receipts": 0
+    },
+    "stale_running_source_projection_preserved_after_positive_collection": true,
+    "disks_preserved": true,
+    "archive_sha256": "a3f1eb6764ca72f4b23588dc8f94fc5c802d2e14bbfcc47113a8433b0dbfb5d8",
+    "archive_bytes": 379761430,
+    "archive_members": 11233,
+    "sdk_backup_sha256": "a4121b8538e89a00424be14e875d5f4340632d331e24b65fcf846868a8fa4509",
+    "full_archive_verified_guest_outer_mac_stream": true,
+    "compact_metadata_verified": 34,
+    "socket_metadata_preserved": 3,
+    "codec_readers": {
+      "current": {
+        "checkpoints": 4,
+        "decoded_records": 12,
+        "valid_roundtrips_and_all_resources_retained": true
+      },
+      "minimum": {
+        "checkpoints": 4,
+        "decoded_records": 12,
+        "valid_roundtrips_and_all_resources_retained": true
+      }
+    },
+    "failed_authority_not_reopened": true
+  },
+  "correction": {
+    "real_collected_spool_retains_original_worker_ownership_reference": true,
+    "old_model_omitted_that_reference": true,
+    "matching_inert_model_fails_original_handoff_with_conflict": true,
+    "exact_synced_disposal_ledger_precedes_collected_spool_retirement": true,
+    "unique_ownership_gate_preserved_before_job_to_backing_transfer": true,
+    "foreign_owner_retains_entry_gates_snapshot_and_full_charge": true,
+    "booted_model_retires_collected_spools_at_existing_boot_boundary": true,
+    "ordinary_failure_has_no_detailed_native_stage_diagnostic": true,
+    "model_confirmed_gap_not_exclusive_attribution_of_live_error": true
+  },
+  "validation": {
+    "before_fix": {
+      "exact_disposal_handoff": {
+        "passed": 0,
+        "failed": 1,
+        "error": "Conflict / NotDispatched",
+        "log_sha256": "939010044c0aae5c5181e1b1b9e6120c28e179e472b0d1ab214ce251e0a6b48e"
+      }
+    },
+    "local_green_attempt": "did not execute: rust-objcopy output failed for temporary disk exhaustion; unusable executable retained as failure evidence",
+    "first_linux_cache_attempt": "47 pass / 2 fail: booted model reused newly realistic unbooted spool; corrected model now follows existing production boot spool retirement",
+    "current_and_minimum_readers": true,
+    "corrected_linux_checks": [
+      {
+        "name": "cache",
+        "exit_status": 0,
+        "sha256": "67d9ed85f998e4ae1a0731eb9a776f117f53e1f7ba14c7fa427512f0319b31cb",
+        "summaries": [
+          "test result: ok. 49 passed; 0 failed; 0 ignored; 0 measured; 1032 filtered out; finished in 8.27s"
+        ]
+      },
+      {
+        "name": "branch",
+        "exit_status": 0,
+        "sha256": "0cdf2807bda0634d66cae925550a87a6557362c0f7653d75a3f4183c53f2f2c5",
+        "summaries": [
+          "test result: ok. 392 passed; 0 failed; 1 ignored; 0 measured; 688 filtered out; finished in 73.76s"
+        ]
+      },
+      {
+        "name": "sdk-compat",
+        "exit_status": 0,
+        "sha256": "f09e99d2008fc2522473e158c70f842a0c02a2c78e5428be70efeeb69f8d9edd",
+        "summaries": [
+          "test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 1064 filtered out; finished in 0.75s"
+        ]
+      },
+      {
+        "name": "protocol",
+        "exit_status": 0,
+        "sha256": "c2e2008ccbc89869174bdc261801455628489f4b726b350c0275af487ab4f7c6",
+        "summaries": [
+          "test result: ok. 102 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.77s",
+          "test result: ok. 59 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s",
+          "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        ]
+      },
+      {
+        "name": "clippy",
+        "exit_status": 0,
+        "sha256": "42b819f14211b054e1c4d939f38bc0ecd31de1d1a7064ca61a18d53ff74d8bd3",
+        "summaries": []
+      },
+      {
+        "name": "sdk-after",
+        "exit_status": 0,
+        "sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+        "summaries": []
+      },
+      {
+        "name": "sdk-clean-after",
+        "exit_status": 0,
+        "sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+        "summaries": []
+      }
+    ],
+    "formatting_and_whitespace": true,
+    "docs_links_pages": 177,
+    "documentation_and_coverage_tests": 11,
+    "http_contracts_per_toolchain": 411,
+    "http_current_log_sha256": "f757a1e02f37b7c7b6016daaa7874d83020437cc13baf0f62d26ee329f27431c",
+    "http_minimum_log_sha256": "228c0278090a56a582b72bcf3e7a96a676131f2843e9cb2ef31c6ba9326bc638",
+    "first_linux_cache_attempt_log_sha256": "9cbd6feb1b94d29ab2db6682098d76f82380ce909919567184ec344a17b77d64",
+    "helper_rebuild": "running; ordinary acceptance not yet qualified"
+  },
+  "remaining": [
+    "Fresh rebuilt-helper package checks and current/minimum ordinary acceptance",
+    "Fresh current/minimum ordinary disposal, retirement and backing release",
+    "Other partial/source/platform/resource/durable-history and upgrade acceptance",
+    "Full parity matrix audit"
+  ],
+  "full_parity_rows_closed": 0,
+  "crash_validation_run": false,
+  "crash_handling_qualified": false,
+  "distribution_approved": false,
+  "pushed_or_published": false
+}

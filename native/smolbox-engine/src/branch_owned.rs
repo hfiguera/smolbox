@@ -3,15 +3,19 @@ use crate::{BranchPublication, CreationReceipt, Error, ErrorCode, Result};
 use std::sync::{Arc, Mutex};
 mod collection;
 pub(crate) use collection::collect_manager;
+mod paths;
+pub(crate) use paths::ManagerPaths;
 
 pub(crate) struct Context {
     // Drop the child's actual manager before its original source/runtime/domain.
     pub manager: Arc<Mutex<smolvm::agent::AgentManager>>,
     pub plan: crate::branch_boot::Plan,
+    pub manager_paths: ManagerPaths,
     pub enrollment: Arc<crate::epoch::BootEnrollment>,
     pub identity_sha256: String,
     pub release: Mutex<Option<Box<crate::branch_held_release::Retained>>>,
     pub deletion: Mutex<Option<Box<crate::branch_delete::Retained>>>,
+    pub runtime_boots: Arc<crate::runtime_boot::Registry>,
     pub _runtime: Arc<smolvm::embedded::EmbeddedRuntime>,
     pub _domain: Arc<crate::domain::DomainGuard>,
 }
@@ -78,8 +82,16 @@ impl crate::Engine {
             || context.identity_sha256 != completion.identity_sha256
             || !Arc::ptr_eq(&context._domain, &self.domain)
             || !Arc::ptr_eq(&context._runtime, &self.runtime)
+            || !Arc::ptr_eq(&context.runtime_boots, &self.runtime_boots)
         {
             return Err(Error::before(ErrorCode::Ownership));
+        }
+        {
+            let manager = context
+                .manager
+                .try_lock()
+                .map_err(|_| Error::before(ErrorCode::Conflict))?;
+            context.manager_paths.verify(&context.plan, &manager)?;
         }
         self.install_original_branch_manager(&completion.child, context)
     }

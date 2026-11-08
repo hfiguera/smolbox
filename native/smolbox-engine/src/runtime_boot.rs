@@ -96,6 +96,19 @@ impl Owned {
             .map(Arc::as_ref)
             .ok_or(Error::before(ErrorCode::Ownership))
     }
+    pub(crate) fn source_quiescent(
+        &self,
+        receipt: &CreationReceipt,
+        pid: (i32, u64),
+        epoch: &ActorEpoch,
+    ) -> Result<bool> {
+        self.matches(receipt)?;
+        let enrolled = self.enrolled()?;
+        if (enrolled.child().pid, enrolled.child().birth) != pid {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        epoch.quiescent_with_boot(&receipt.name, enrolled)
+    }
     /// A database snapshot is only a candidate. The start-only readiness wait
     /// remains bound to this returned enrollment, never a discovered live PID.
     pub(crate) fn verify_running(

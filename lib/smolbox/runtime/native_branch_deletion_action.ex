@@ -51,9 +51,17 @@ defmodule SmolBox.Runtime.NativeBranchDeletionAction do
          :ok <- Target.require_operation(worker, operation(action)) do
       deadline = now() + min(Target.connection(worker).budget.timeout_ms, 30_000)
 
-      NativeResolution.run(config, coordinator, child, worker, :deleted, fn pinned ->
-        claimed(config, child, version, pinned, action, deadline)
-      end)
+      NativeResolution.run(
+        config,
+        coordinator,
+        child,
+        worker,
+        :deleted,
+        fn pinned ->
+          claimed(config, child, version, pinned, action, deadline)
+        end,
+        deadline
+      )
     else
       false -> Session.error(:unsupported_capability, :reconcile)
       error -> error

@@ -136,7 +136,26 @@ impl BoundedAgent {
             .prefix("agent-")
             .tempdir_in(staging)
             .map_err(|_| Error::before(ErrorCode::Io))?;
-        let endpoint = directory.path().join("rpc.sock");
+        let endpoint = if staging == Path::new(".") {
+            // tempfile stores an absolute path even for tempdir_in(".").
+            // Workers keep their private CWD fixed: use its direct child name
+            // for socket syscalls, while retaining the absolute cleanup path.
+            let relative = directory
+                .path()
+                .strip_prefix(&checked)
+                .map_err(|_| Error::before(ErrorCode::Ownership))?;
+            if relative.components().count() != 1
+                || !matches!(
+                    relative.components().next(),
+                    Some(std::path::Component::Normal(_))
+                )
+            {
+                return Err(Error::before(ErrorCode::Ownership));
+            }
+            relative.join("rpc.sock")
+        } else {
+            directory.path().join("rpc.sock")
+        };
         let listener = UnixListener::bind(&endpoint).map_err(|_| Error::before(ErrorCode::Io))?;
         listener
             .set_nonblocking(true)
@@ -457,6 +476,88 @@ fn pump_bootstrap_launch(mut input: UnixStream, mut output: UnixStream, limited:
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn worker_relay_handles_long_spool_paths() {
+        const CHILD_SOCKET: &str = "SMOLBOX_TEST_LONG_RELAY_CHILD_SOCKET";
+        if let Some(socket) = std::env::var_os(CHILD_SOCKET) {
+            // Only this isolated test process has the long worker CWD. It
+            // connects to a fake agent and never opens an SDK domain or VM.
+            assert!(std::env::current_dir().unwrap().as_os_str().len() > 108);
+            let mut agent = BoundedAgent::connect(Path::new(&socket), 1).unwrap();
+            assert_eq!(agent.client.ping().unwrap(), 1);
+            assert!(!agent.limited());
+            return;
+        }
+        use std::os::unix::fs::PermissionsExt;
+        use std::time::{Duration, Instant};
+        let directory = tempfile::Builder::new()
+            .permissions(std::fs::Permissions::from_mode(0o700))
+            .tempdir_in("/tmp")
+            .unwrap();
+        let spool = directory.path().join("private-spool-".repeat(10));
+        std::fs::create_dir(&spool).unwrap();
+        std::fs::set_permissions(&spool, std::fs::Permissions::from_mode(0o700)).unwrap();
+        let socket = directory.path().join("agent.sock");
+        let listener = UnixListener::bind(&socket).unwrap();
+        listener.set_nonblocking(true).unwrap();
+        let peer = std::thread::spawn(move || {
+            let deadline = Instant::now() + Duration::from_secs(5);
+            let mut stream = loop {
+                match listener.accept() {
+                    Ok((stream, _)) => break stream,
+                    Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                        if Instant::now() >= deadline {
+                            return false;
+                        }
+                        std::thread::sleep(Duration::from_millis(5));
+                    }
+                    Err(error) => panic!("fake agent accept: {error}"),
+                }
+            };
+            stream
+                .set_read_timeout(Some(Duration::from_secs(2)))
+                .unwrap();
+            let mut header = [0; 4];
+            stream.read_exact(&mut header).unwrap();
+            let size = u32::from_be_bytes(header) as usize;
+            assert!(size <= 1024);
+            let mut request = vec![0; size];
+            stream.read_exact(&mut request).unwrap();
+            let request: smolvm_protocol::Envelope<smolvm_protocol::AgentRequest> =
+                serde_json::from_slice(&request).unwrap();
+            assert!(matches!(request.body, smolvm_protocol::AgentRequest::Ping));
+            let reply = serde_json::to_vec(&smolvm_protocol::AgentResponse::Pong {
+                version: 1,
+                capabilities: vec![],
+            })
+            .unwrap();
+            stream
+                .write_all(&(reply.len() as u32).to_be_bytes())
+                .unwrap();
+            stream.write_all(&reply).unwrap();
+            true
+        });
+        let output = std::process::Command::new(std::env::current_exe().unwrap())
+            .args([
+                "--exact",
+                "agent_io::tests::worker_relay_handles_long_spool_paths",
+                "--test-threads=1",
+            ])
+            .env(CHILD_SOCKET, &socket)
+            .current_dir(&spool)
+            .output()
+            .unwrap();
+        let exchanged = peer.join().unwrap();
+        assert!(
+            output.status.success(),
+            "isolated worker relay failed: {}{}",
+            String::from_utf8_lossy(&output.stdout),
+            String::from_utf8_lossy(&output.stderr)
+        );
+        assert!(exchanged);
+    }
+
     #[test]
     fn known_launch_rejection_is_redacted_and_malformed_reply_is_not_rejection() {
         for (valid_rejection, body) in [

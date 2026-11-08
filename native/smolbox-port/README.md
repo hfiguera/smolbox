@@ -251,3 +251,38 @@ The proof refuses output reuse and saves private intents and full receipts befor
 later actions. Failure cleanup uses only returned receipts. A create without a
 returned receipt remains uncertain. This is ordinary live macOS qualification;
 remaining fault/platform and package-consumer gates still apply.
+
+## Ordinary Linux Port branch qualification
+
+The Linux development policy now advertises checkpoint and branch wire operations.
+Existing package pins and the macOS descriptor retain their previous scopes.
+Public Runtime admission still needs the Elixir SDK approval and complete native
+store capability; this descriptor alone supplies neither qualification nor store
+ownership. Partial-cleanup resolution remains unadvertised.
+
+The explicit runner consumes the same bounded private settings shape as the
+shared-engine `branch-guest-proof` example: `package`, `manifest_sha256`,
+`domain_json`, `artifact` and `branch_approval`. It requires a fresh enrolled Linux
+x86_64 account, an approved local bare guest and the `ordinary-branches` policy
+(one slot/CPU, 640 MiB and 5 GiB additional capacity, 128 MiB host overhead).
+All receipts, requests, stderr and result files remain private.
+
+```sh
+python3 native/smolbox-port/tests/branch_proof.py ordinary \
+  /private/branch-settings.json /private/new-port-branch-proof
+python3 native/smolbox-port/tests/branch_proof.py control \
+  /private/new-port-branch-proof status
+```
+
+The campaign checks both original completion lookups, held release, sibling disk
+and RAM independence, child cold restart, owned deletion, absence and backing
+acknowledgements, then normal protocol shutdown. It starts no CLI or local HTTP
+server. Failure retains the same Python controller, helper and frozen in-memory
+requests; bounded explicit controls can qualify original ready/release results
+or continue an entered released-child deletion. An unresolved wire cursor blocks
+fresh requests. `shutdown-retained` requests normal protocol shutdown and preserves
+all SDK disks; it supplies no absence or capacity-release proof. There are no
+signals, forced escalation, saved-authority reconstruction or automatic retries.
+Pure models are part of native tooling tests; the live campaign runs only through
+the explicit `ordinary` command. Exact-package live acceptance and current/minimum
+public/durable consumers remain separate gates.

@@ -6,6 +6,7 @@ defmodule SmolBox.Embedded.Channel do
     BranchCompletion,
     BranchDeletionCollection,
     BranchDeletionResolution,
+    BranchPublication,
     CaptureAbortSourceQualification,
     CaptureResolutionTransition,
     CaptureStagingCleanupReceipt,
@@ -20,6 +21,7 @@ defmodule SmolBox.Embedded.Channel do
     PartialBranchChildAbsence,
     PartialBranchCleanupCandidate,
     PartialBranchCollection,
+    PartialBranchCollectionCandidate,
     PartialBranchDisposal,
     PartialBranchDisposalCleanup,
     PartialBranchDisposalCleanupUnneeded,
@@ -51,6 +53,7 @@ defmodule SmolBox.Embedded.Channel do
     major: 1,
     unavailable: false,
     partial_cleanup_resolution: false,
+    partial_collection_preflight: false,
     last_id: 0,
     pending: %{},
     queued_bytes: 0,
@@ -66,6 +69,11 @@ defmodule SmolBox.Embedded.Channel do
       partial_cleanup_resolution:
         match?(
           %{"branches" => 1, "partial_cleanup_resolution" => 1},
+          get_in(hello, ~w(sdk feature_versions))
+        ),
+      partial_collection_preflight:
+        match?(
+          %{"branches" => 1, "partial_collection_preflight" => 1},
           get_in(hello, ~w(sdk feature_versions))
         ),
       platform: get_in(hello, ["package", "platform"]),
@@ -86,6 +94,9 @@ defmodule SmolBox.Embedded.Channel do
          true <-
            operation["operation"] != "resolve_partial_branch_cleanup" or
              channel.partial_cleanup_resolution,
+         true <-
+           operation["operation"] != "inspect_partial_branch_collection" or
+             channel.partial_collection_preflight,
          true <- Validation.integer?(bytes, 0, 262_144),
          true <- Validation.integer?(events, 0, 64),
          true <-
@@ -341,6 +352,12 @@ defmodule SmolBox.Embedded.Channel do
 
   defp branch_request_epoch?(_, _), do: true
 
+  defp branch_epoch?(epoch, %{
+         "result" => "partial_branch_collection_candidate",
+         "candidate" => candidate
+       }),
+       do: candidate["epoch"] == epoch
+
   defp branch_epoch?(epoch, %{"result" => "partial_branch_child_absent", "proof" => proof}),
     do: PartialBranchChildAbsence.epoch(proof["request"]) == epoch
 
@@ -366,7 +383,19 @@ defmodule SmolBox.Embedded.Channel do
   defp branch_epoch?(epoch, %{"result" => "partial_branch_disposed", "proof" => proof}),
     do: get_in(proof, ~w(publication change child_origin intent epoch)) == epoch
 
+  defp branch_epoch?(epoch, %{
+         "result" => "collected_branch_material_published",
+         "publication" => publication
+       }),
+       do: get_in(publication, ~w(change child_origin intent epoch)) == epoch
+
   defp branch_epoch?(_, _), do: true
+
+  defp branch_platform?(platform, %{
+         "result" => "partial_branch_collection_candidate",
+         "candidate" => candidate
+       }),
+       do: candidate["platform"] == platform
 
   defp branch_platform?(platform, %{"result" => "partial_branch_child_absent", "proof" => proof}),
     do: PartialBranchChildAbsence.platform(proof["request"]) == platform
@@ -405,6 +434,12 @@ defmodule SmolBox.Embedded.Channel do
 
   defp branch_platform?(platform, %{"result" => "partial_branch_collected", "platform" => actual}),
        do: actual == platform
+
+  defp branch_platform?(platform, %{
+         "result" => "collected_branch_material_published",
+         "publication" => publication
+       }),
+       do: get_in(publication, ~w(change platform)) == platform
 
   defp branch_platform?(_platform, _outcome), do: true
 
@@ -519,6 +554,16 @@ defmodule SmolBox.Embedded.Channel do
        do: get_in(proof, ~w(publication change child_origin intent epoch)) == epoch
 
   defp ready_epoch?(_, _, _), do: true
+
+  defp terminal_matches?(
+         _domain,
+         %{
+           operation: %{"operation" => "publish_collected_branch_material", "request" => request},
+           output_bytes: 0
+         },
+         %{"result" => "collected_branch_material_published", "publication" => publication}
+       ),
+       do: BranchPublication.matches?(publication, request)
 
   defp terminal_matches?(
          _domain,
@@ -1010,6 +1055,16 @@ defmodule SmolBox.Embedded.Channel do
          %{"result" => "partial_branch_disposal_cleaned", "proof" => proof}
        ),
        do: PartialBranchDisposalCleanup.matches?(proof, request)
+
+  defp terminal_matches?(
+         _domain,
+         %{
+           operation: %{"operation" => "inspect_partial_branch_collection", "request" => request},
+           output_bytes: 0
+         },
+         %{"result" => "partial_branch_collection_candidate", "candidate" => candidate}
+       ),
+       do: PartialBranchCollectionCandidate.matches?(candidate, request)
 
   defp terminal_matches?(
          _domain,

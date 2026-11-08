@@ -1,7 +1,7 @@
 defmodule SmolBox.Embedded.BranchPreflightTest do
   use ExUnit.Case, async: true
-  alias SmolBox.Backend.{Assignment, Binding, EmbeddedContext, EmbeddedReply}
-  alias SmolBox.Embedded.{Channel, Config, Identity, Request}
+  alias SmolBox.Backend.{Assignment, Binding, Budget, EmbeddedContext, EmbeddedReply}
+  alias SmolBox.Embedded.{Call, Channel, Config, Identity, Limits, Request}
   alias SmolBox.{ManagedMachineSpec, Profile}
 
   @fixtures Path.expand("../../native/smolbox-protocol/fixtures", __DIR__)
@@ -10,6 +10,52 @@ defmodule SmolBox.Embedded.BranchPreflightTest do
   @source Jason.decode!(File.read!(@fixture))
   defp empty, do: %{stdout: <<>>, stderr: <<>>, file: <<>>}
 
+  # Bridge-contract peer only: no native helper, SDK or VM. The real Call/Port
+  # submission path must still admit the bounded request in the intended state.
+  defmodule Peer do
+    use GenServer
+    def start_link(state), do: GenServer.start_link(__MODULE__, state)
+    def init(state), do: {:ok, state}
+    def handle_call(:health, _, state), do: {:reply, {:ok, state.health}, state}
+
+    def handle_call({:submit, request, _, observer, _, epoch}, _, state) do
+      true = epoch == state.health.epoch
+      handle = make_ref()
+      send(state.observer, {:source_probe_admitted, request})
+      send(observer, {:smolbox_embedded, handle, :accepted})
+      send(observer, {:smolbox_embedded, handle, {:terminal, state.outcome, nil}})
+      {:reply, {:ok, handle}, state}
+    end
+  end
+
+  defp context(status) do
+    receipt = @source["operation"]["receipt"]
+
+    native =
+      struct(Config,
+        id: receipt["target_id"],
+        domain_generation: receipt["domain_generation"],
+        package_identity: %{"engine_version" => "0.2.0"},
+        package_manifest_sha256: String.duplicate("1", 64),
+        limits: %Limits{}
+      )
+
+    health = %{
+      status: status,
+      epoch: String.duplicate("a", 32),
+      target_id: native.id,
+      generation: native.domain_generation,
+      package_identity: native.package_identity,
+      package_manifest_sha256: native.package_manifest_sha256,
+      protocol_major: 2
+    }
+
+    peer =
+      start_supervised!({Peer, %{observer: self(), health: health, outcome: @source["outcome"]}})
+
+    %EmbeddedContext{config: native, server: peer, pinned: true, epoch: health.epoch}
+  end
+
   test "shared source preflight requires exact bounded major-two material authority" do
     request = @source["operation"]
     assert Request.valid?(request, 30_000, 2)
@@ -17,11 +63,51 @@ defmodule SmolBox.Embedded.BranchPreflightTest do
     refute Request.valid?(request, 1000, 1)
     refute Request.observation?(request)
     refute Request.control?(request)
-    refute Request.reconciliation?(request)
+    assert Request.reconciliation?(request)
     refute Request.valid?(put_in(request, ["receipt", "material"], nil), 1000, 2)
 
     for field <- ~w(path pid idle policy create quiesced),
         do: refute(Request.valid?(Map.put(request, field, true), 1000, 2))
+  end
+
+  test "quiesced original-result recovery can obtain fresh source evidence through the real call gate" do
+    context = context(:reconciling)
+    request = @source["operation"]
+
+    assert {:ok, outcome, output, nil} =
+             Call.run(context, request, %Budget{
+               timeout_ms: 1000,
+               max_request_bytes: 16_384,
+               max_response_bytes: 16_384
+             })
+
+    assert outcome == @source["outcome"] and output == empty()
+    assert_received {:source_probe_admitted, ^request}
+  end
+
+  test "source preflight does not gain quarantined control admission" do
+    assert {:error, _} =
+             Call.run(context(:quarantined), @source["operation"], %Budget{
+               timeout_ms: 1000,
+               max_request_bytes: 16_384,
+               max_response_bytes: 16_384
+             })
+
+    refute_received {:source_probe_admitted, _}
+  end
+
+  test "malformed source authority cannot use reconciliation admission" do
+    request = Map.put(@source["operation"], "receipt", nil)
+    refute Request.reconciliation?(request)
+
+    assert {:error, _} =
+             Call.run(context(:reconciling), request, %Budget{
+               timeout_ms: 1000,
+               max_request_bytes: 16_384,
+               max_response_bytes: 16_384
+             })
+
+    refute_received {:source_probe_admitted, _}
   end
 
   test "channel requires running offline unmounted evidence and rejects all streams" do

@@ -1,5 +1,6 @@
 Code.require_file("examples/embedded_port/lib/images_control.ex")
 Code.require_file("examples/embedded_port/lib/images_demo.ex")
+Code.require_file("examples/embedded_port/lib/growth_control.ex")
 Code.require_file("examples/embedded_port/lib/growth_demo.ex")
 
 defmodule SmolBox.EmbeddedImagesRuntimeTest do
@@ -8,6 +9,49 @@ defmodule SmolBox.EmbeddedImagesRuntimeTest do
   alias SmolBox.Store.Memory
   alias SmolBox.Test.EmbeddedPackage, as: Package
   alias SmolBox.Example.EmbeddedImages, as: Workflow
+
+  for kind <- [:oci, :registry] do
+    test "macOS #{kind} source uses public creation, durable identity and owned cleanup" do
+      f = fixture(platform: :macos, kind: unquote(kind))
+      kind = f.source.kind
+      assert f.native.architecture == "aarch64"
+      assert {:ok, machine} = Machines.inspect(f.runtime, f.key)
+      assert {:ok, bytes} = SmolBox.Store.Codec.encode(machine)
+      assert {:ok, ^machine} = SmolBox.Store.Codec.decode(bytes)
+      assert machine.backend_assignment.creation["source"] == Source.artifact(f.source)
+
+      if kind == :oci do
+        assert {:ok, execution} = Machines.pull_image(f.runtime, f.key, "pull", f.pull)
+
+        assert {:ok, %{state: :completed, result: image}} =
+                 SmolBox.await(f.runtime, execution, 5000)
+
+        assert SmolBox.Image.matches?(image, f.pull)
+        assert {:ok, ^execution} = Machines.pull_image(f.runtime, f.key, "pull", f.pull)
+        assert Enum.count(requests(f.native), &(&1["operation"] == "pull_image")) == 1
+      else
+        assert %{already_cached: false} = machine.preparation
+      end
+
+      assert {:ok, latest} = Machines.inspect(f.runtime, f.key)
+      assert {:ok, _} = Machines.stop(f.runtime, f.key, latest.version)
+      assert {:ok, stopped} = Machines.await(f.runtime, f.key, 5000)
+      assert {:ok, _} = Machines.delete(f.runtime, f.key, stopped.version)
+      assert {:ok, %{state: :deleted}} = Machines.await(f.runtime, f.key, 5000)
+
+      if kind == :registry do
+        assert {:ok, warm} = Machines.create(f.runtime, %{machine.spec | id: "warm"})
+
+        assert {:ok, %{state: :stopped, preparation: %{already_cached: true}} = cached} =
+                 Machines.await(f.runtime, warm, 5000)
+
+        assert {:ok, _} = Machines.delete(f.runtime, warm, cached.version)
+        assert {:ok, %{state: :deleted}} = Machines.await(f.runtime, warm, 5000)
+      end
+
+      assert {:ok, %{slots: 0}} = Memory.usage(f.store, f.native.id)
+    end
+  end
 
   test "native registry creation persists cold/warm preparation and releases owned capacity" do
     f = fixture(kind: :registry)
@@ -259,8 +303,12 @@ defmodule SmolBox.EmbeddedImagesRuntimeTest do
   end
 
   defp fixture(options \\ []) do
+    platform = Keyword.get(options, :platform, :linux)
+    architecture = if platform == :macos, do: "aarch64", else: "x86_64"
+    descriptor = if platform == :macos, do: "macos-images", else: "linux-images"
+
     sdk =
-      "native/smolbox-protocol/fixtures/hello-v2-linux-images.json"
+      "native/smolbox-protocol/fixtures/hello-v2-#{descriptor}.json"
       |> File.read!()
       |> Jason.decode!()
       |> get_in(["hello", "sdk"])
@@ -268,7 +316,7 @@ defmodule SmolBox.EmbeddedImagesRuntimeTest do
     native =
       Package.create(
         protocol_major: 2,
-        platform: :linux,
+        platform: platform,
         sdk_identity: sdk,
         backend: true,
         persistent_backend: true,
@@ -281,7 +329,7 @@ defmodule SmolBox.EmbeddedImagesRuntimeTest do
 
     source_options = [
       id: "original",
-      architecture: "x86_64",
+      architecture: architecture,
       reference: "registry.example/team/app@sha256:" <> String.duplicate("a", 64)
     ]
 
@@ -293,7 +341,7 @@ defmodule SmolBox.EmbeddedImagesRuntimeTest do
     {:ok, pull} =
       Source.oci(
         id: "pull",
-        architecture: "x86_64",
+        architecture: architecture,
         reference: "registry.example/team/other@sha256:" <> String.duplicate("b", 64)
       )
 

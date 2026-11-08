@@ -93,15 +93,23 @@ defmodule SmolBox.Embedded.Port do
   @impl true
   def activate(server, binding), do: call(server, {:activate, binding})
   @impl true
-  def activate(server, binding, epoch) do
+  def activate(server, binding, epoch), do: activate(server, binding, epoch, 15_000)
+
+  @impl true
+  def activate(server, binding, epoch, timeout) do
     if Shape.hex?(epoch, 32),
-      do: call(server, {:activate, binding, epoch}),
+      do: call(server, {:activate, binding, epoch}, timeout),
       else: failure(:validation)
   end
 
   @impl true
-  def quiesce(server, epoch) do
-    if Shape.hex?(epoch, 32), do: call(server, {:quiesce, epoch}), else: failure(:validation)
+  def quiesce(server, epoch), do: quiesce(server, epoch, 15_000)
+
+  @impl true
+  def quiesce(server, epoch, timeout) do
+    if Shape.hex?(epoch, 32),
+      do: call(server, {:quiesce, epoch}, timeout),
+      else: failure(:validation)
   end
 
   @impl true
@@ -789,11 +797,14 @@ defmodule SmolBox.Embedded.Port do
            PartialBranchDisposalCleanup.approval(request) in BranchRequest.approvals(config)
 
   defp operation_approved?(config, %{
-         "operation" => "collect_partial_branch",
+         "operation" => name,
          "request" => request
-       }),
+       })
+       when name in ~w(collect_partial_branch inspect_partial_branch_collection),
        do:
          Features.supports?(config, :branches) and
+           (name != "inspect_partial_branch_collection" or
+              Features.supports?(config, :partial_collection_preflight)) and
            PartialBranchCollection.approval(request) in BranchRequest.approvals(config)
 
   defp operation_approved?(config, %{
@@ -846,7 +857,7 @@ defmodule SmolBox.Embedded.Port do
            HeldBranchReleaseRequest.approval(request) in BranchRequest.approvals(config)
 
   defp operation_approved?(config, %{"operation" => name, "request" => request})
-       when name in ~w(create_branch inspect_branch_completion resolve_ready_branch_completion),
+       when name in ~w(create_branch inspect_branch_completion resolve_ready_branch_completion publish_collected_branch_material),
        do:
          Features.supports?(config, :branches) and
            request["approval"] in BranchRequest.approvals(config)
@@ -923,10 +934,10 @@ defmodule SmolBox.Embedded.Port do
     with {:ok, record} <- Map.fetch(state.records, id),
          true <- record.sent,
          true <- catalog_result?(state.config, event) do
-      # Terminal transcripts have a bounded unread window, not a lifetime
-      # response cap. Channel enforces byte/event credit and exact total proof.
+      # Terminals and captures are consumed streams. Bound each encoded frame;
+      # Channel enforces unread byte/event credit and the operation's total proof.
       charged =
-        if record.operation["operation"] == "terminal_open",
+        if record.operation["operation"] in ~w(terminal_open capture_checkpoint),
           do: max(record.response_bytes, bytes),
           else: record.response_bytes + bytes
 

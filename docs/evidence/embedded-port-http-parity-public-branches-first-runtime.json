@@ -1,0 +1,204 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "scope": "First installed public Linux Memory branch workflow and ordinary original-owner controls",
+  "elixir_source_commit": "5e1db7946f08aeb33bf59e0ed2b4b41d1fc94799",
+  "source_files_verified": 1788,
+  "hex_archive_sha256": "d59f60355ef1339e32894f6162bceab59b21ac16514d3b57dac533471a4f7a36",
+  "source_archive_sha256": "e9431fdaf3e918c76109460194e07b330705c49ab116354807949d159238764b",
+  "native_source_commit": "41cc8a6c2d54ddcfbb130768dda0690cb1be0333",
+  "native_manifest_sha256": "7b6cfae8a0140babab03f821c56406b018be97e52994bc4cb74d3d9791ebfc39",
+  "native_helper_sha256": "e3fbda886c3129f798dc2668781014204b7c6a1090129ae82ac265def2176ce1",
+  "assets_verified_per_account": 806,
+  "ordinary_current_attempt": {
+    "installed_without_rust": true,
+    "real_memory_store_used": true,
+    "checkpointable_source_create_start_setup": true,
+    "first_ready_child_with_original_completion_and_deduplicated_create": true,
+    "source_lifecycle_exclusion": true,
+    "drain_rejected_new_child_before_dispatch": true,
+    "failed_assertion": "runner expected unsupported_capability, actual persisted worker drain returns admission_exhausted / worker_control / not_dispatched",
+    "original_runtime_and_helper_retained_on_failure": true,
+    "held_or_second_child_created": false,
+    "two_child_independence_or_full_lifecycle_qualified": false,
+    "exit_status_after_explicit_normal_shutdown": 1
+  },
+  "ordinary_original_owner_controls": {
+    "first_child_stop_and_delete": true,
+    "typed_child_absence_and_paired_dependency_retirement": true,
+    "source_became_unknown_after_retirement_reconciliation": true,
+    "source_public_stop_not_accepted": true,
+    "source_delete_or_backing_release": false,
+    "normal_protocol_shutdown_at_original_pinned_owner_epoch": true,
+    "retained_shutdown_saved_real_store_records_first": true,
+    "all_disks_and_records_retained": true,
+    "no_signals_adoption_or_mutation_replay": true
+  },
+  "retained_store_summary": [
+    {
+      "id": "first",
+      "state": "deleted",
+      "phase": null,
+      "operation": null,
+      "active_execution": false,
+      "observed_state": "stopped",
+      "branch_state": "retired",
+      "extra_resources_retained": {
+        "slots": 1,
+        "cpus": 1,
+        "memory_mb": 640,
+        "disk_gb": 5
+      },
+      "reservation": null,
+      "last_error": null
+    },
+    {
+      "id": "source",
+      "state": "unknown",
+      "phase": null,
+      "operation": null,
+      "active_execution": false,
+      "observed_state": "running",
+      "branch_state": null,
+      "extra_resources_retained": null,
+      "reservation": {
+        "slots": 1,
+        "cpus": 1,
+        "memory_mb": 640,
+        "disk_gb": 2
+      },
+      "last_error": {
+        "category": "unknown",
+        "operation": "reconcile",
+        "evidence": "unknown"
+      }
+    }
+  ],
+  "identified_readiness_gap": {
+    "source_files_sha256": {
+      "lib/smolbox/runtime/native_authority.ex": "5a3204975e46a90dd3bb6c58442bbeed335d4ebb0ac6b978fa3cae75a9c3a0e9",
+      "lib/smolbox/runtime/native_resolution.ex": "c7de530a6a6aff53c6f5cacd8884b565fe27bc09fb0c8fda259b2dacd54047bc",
+      "lib/smolbox/runtime/native_recovery.ex": "861c26088b5a6c5403181ffaa324cad8ad17b684c605f010aa13e845cf23417a"
+    },
+    "local_path": "Normal retirement uses NativeResolution / NativeAuthority.run, invalidating the completed same-owner scan; generic startup recovery maps running observations to unknown.",
+    "next_fix": "Preserve completed readiness around bounded ordinary branch controls only after confirming the same healthy original owner/epoch and the worker lease. Keep startup and uncertain-owner recovery conservative; do not globally accept running observations."
+  },
+  "runner_drain_correction": {
+    "preserves_http_behavior": true,
+    "exact_expected_error": "admission_exhausted / worker_control / not_dispatched",
+    "http_managed_branch_contracts_per_toolchain": 28,
+    "final_example_control_and_cold_compile_checks_per_toolchain": 7,
+    "logs_sha256": {
+      "current-dynamic-drain": "a1aece1405e08d17baaf5a077fded5d628f8b6bf18fb23f867dec1ce163bae77",
+      "minimum-dynamic-drain": "064dbfa630d1025cf167d0781f627167712ef6776e0b2771eb531786830379d2",
+      "current-example-drain-final": "a66e66d544570433af64ec752d419a745d81e4a2faee3cd93b85b5805633640f",
+      "minimum-example-drain-final": "35cf5fe40e16180bb2d4274e2f961313913a190a42886e48348ab8da376d9777"
+    },
+    "source_files_sha256": {
+      "examples/embedded_port/lib/branch_demo.ex": "3d452906ec9d87d7df71a670ea5ba018eab13d9ea7230489104015ed7d8e37ee",
+      "test/contract/managed_branch_test.exs": "a72ce05d5285eb68abed4ff01b62b79fd70484ee48e3849e53c15c01d756bebe"
+    }
+  },
+  "actual_record_readers": {
+    "current_and_minimum_records_decode_to_identical_states_and_charges": true,
+    "read_only_no_sdk_or_vm_start": true,
+    "input_sha256": "e2c80a7adef7285199494faed9f029dcc2cf75aaa9afbd2418bfd843b10f81af",
+    "logs_sha256": {
+      "retained-record-proofs-current": "d5843a2c7231018d648649f6565935e2ee60a315245381c27c9ce5e93357f7dd",
+      "retained-record-proofs-minimum": "9de22941eb5c1cc72fac134eacea6ffff08a1e8b6497cb8a9d57e762c2250ea7"
+    }
+  },
+  "private_archive": {
+    "archive_sha256": "438a6f474ee407af01919fef5312df775b4b322bb14d3fb4d33bcd703f7e4cae",
+    "bytes": 727001521,
+    "members": 20676,
+    "tar_exit_status": 0,
+    "accounts": [
+      {
+        "account": "smolbox-branch-v10",
+        "sdk_counts": {
+          "vms": 1,
+          "vm_create_reservations": 0,
+          "vm_pause_operations": 0,
+          "vm_resize_intents": 0,
+          "vm_resize_receipts": 0
+        },
+        "source_files_verified": 1788,
+        "assets_verified": 806,
+        "domain_unchanged": true,
+        "host_tools_unchanged": true,
+        "native_and_beam_processes": [],
+        "kvm_processes": [],
+        "account_lock_free": true,
+        "sql_backup_sha256": "e7d3ce492e7d3278c1cd91c307a1a870e06e113056377b5c926f21f39b455fd6",
+        "source_sql_unchanged_during_readonly_backup": true
+      },
+      {
+        "account": "smolbox-branch-v11",
+        "sdk_counts": {
+          "vms": 0,
+          "vm_create_reservations": 0,
+          "vm_pause_operations": 0,
+          "vm_resize_intents": 0,
+          "vm_resize_receipts": 0
+        },
+        "source_files_verified": 1788,
+        "assets_verified": 806,
+        "domain_unchanged": true,
+        "host_tools_unchanged": true,
+        "native_and_beam_processes": [],
+        "kvm_processes": [],
+        "account_lock_free": true,
+        "sql_backup_sha256": "c542fa573256544f1bbd5df4a3889751ff51072556b1f4dcdc1a384320065df3",
+        "source_sql_unchanged_during_readonly_backup": true
+      }
+    ],
+    "current_normal_protocol_shutdown_retained_disks": true,
+    "current_source_sdk_row_retained": true,
+    "all_sdk_and_store_evidence_preserved": true,
+    "cold_sdk_consistency_or_source_absence_qualified": false,
+    "restore_or_mutation_replay": false,
+    "crash_validation_performed": false,
+    "finished_utc": "2026-10-17T11:12:10.965325+00:00",
+    "verified_guest_outer_host_and_mac": true
+  },
+  "lab_runtime_limit": {
+    "occurred_after_both_new_accounts_had_no_native_beam_or_kvm_processes_and_free_locks": true,
+    "current_owner_normal_shutdown_before_guard": true,
+    "archive_verified_before_guard": true,
+    "provision_result": "timeout",
+    "provision_main_pid": 0,
+    "provision_restarts": 0,
+    "guard_or_isolation_changed": false,
+    "agent_sent_termination_signals": false,
+    "original_run_image_stats_unchanged": true,
+    "older_v6_cleanup_pid_request_now_obsolete": true,
+    "no_normal_shutdown_or_crash_qualification_for_older_v6_owner": true
+  },
+  "qualification": {
+    "ordinary_installed_public_two_child_branch_workflow": false,
+    "minimum_live_campaign_started": false,
+    "actual_public_postgresql_vm_campaign": false,
+    "source_absence_or_cold_sdk_consistency": false,
+    "source_reservations_or_extra_backing_released": false,
+    "new_public_source_full_parity": false,
+    "all_full_parity_rows_pending": true,
+    "crash_validation_performed": false,
+    "distribution_approved": false
+  },
+  "remaining": [
+    "Fix same-owner completed-readiness preservation for ordinary branch retirement/backing controls, with deterministic stale-epoch, incomplete-scan, uncertainty and lease tests.",
+    "Repeat the complete current/minimum installed no-Rust branch workflows in fresh accounts; never adopt or replay the retained SDK source.",
+    "Qualify actual PostgreSQL branch workflows and all remaining P0-P9 platform/source/resource/upgrade/consumer requirements."
+  ],
+  "validation": {
+    "documentation_build_and_local_links": true,
+    "documentation_logs_sha256": {
+      "docs-first-runtime-final": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+      "doc-links-first-runtime-final": "fe7e86509e4e55bfacafbae259d53fb8b130721b7e8d9250576f81d31fb0aa5a"
+    },
+    "credo_total": 67,
+    "credo_new_findings_against_baseline": 0,
+    "credo_log_sha256": "6f5a5eeec66bd90a55fc87fde1f23a74f97ee7d83183801a8b6c03247ec3496c"
+  }
+}

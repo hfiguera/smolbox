@@ -13,6 +13,227 @@ not establish native qualification. Protocol-2 observations and network/port/
 workload creation intent and managed terminals are implemented; other expanded
 operations remain pending. Feature-specific ordinary qualification is still required.
 
+Newly rebuilt macOS candidates advertise OCI/registry sources and image operations
+through the shared engine. The public ordinary image runner accepts Linux x86_64
+and macOS ARM64 with matching digest-pinned source approvals. The
+[admission/model evidence](evidence/embedded-port-http-parity-macos-source-image-admission.json)
+now has [exact-package ordinary acceptance](evidence/embedded-port-http-parity-macos-public-sources-f1f250d3.json):
+current/minimum no-Rust OCI/image and offline bare registry consumers pass
+startup, cold/warm preparation, binary files, normal Runtime replacement and
+owned cleanup. Wider credential/store/resource cases remain pending. Existing
+approved packages keep their original capabilities.
+
+macOS packages now also explicitly advertise checkpoints, branches and branch
+collection preflight. The [current/minimum public branch consumers](evidence/embedded-port-http-parity-macos-public-branches-f1af384d.json)
+pass sibling RAM/disk independence, held release, cold restart, resource/draining
+rejection, owned deletion and paired backing release. These are scoped Memory
+store results on manifest 8bb60295/helper 09ea5c46. Portable captures require a
+dependency-free source; SDK 1.22 attaches a packed-device dependency even to bare
+`.smolmachine` sources, which native preflight now rejects before SDK capture.
+Such bare sources remain eligible for branches. The separate public checkpoint
+consumer takes an explicitly approved basic `.smolcheckpoint` seed; the
+[current/minimum public checkpoint consumers](evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json)
+now pass capture, source continuation, normal stopped Runtime replacement, two
+independent RAM/disk restores, cold restart and final artifact/staging cleanup.
+The same Hex package also passes both ordinary branch consumers. These remain
+scoped Memory-store results; wider parity gates stay pending. Crash validation
+stays deferred.
+
+The [83137f8c helper checkpoint](evidence/embedded-port-http-parity-partial-collection-83137f8c.json)
+passes its build and release models. Both fresh current/minimum ordinary partial
+attempts reject collection without a proof; normal shutdown preserves all disks
+and charges. Fresh collection admission still needs a positive original-context
+preflight before intent storage. Positive native partial acceptance remains open.
+
+The [06ba0d0e HTTP-only package consumers](evidence/embedded-port-http-parity-http-consumers-06ba0d0e.json)
+also pass strict compile and public smoke checks on current/minimum Linux
+without Rust or SmolBox native assets. A separate custody audit corrects the
+private runner's overbroad runtime-library check and preserves its original failure.
+This evidence does not qualify the newly changed native helper.
+
+The [Linux unbooted Memory lifecycle](evidence/embedded-port-http-parity-unbooted-memory-d1bba15.json)
+passes automatically on current/minimum installed consumers without Rust, using
+exact d1bba15/Hex 3b256131 and native manifest e82508e5. Both exercise original
+collected publication, typed unbooted disposal, retirement, source cleanup and
+backing release after an ordinary one-second API deadline. Both end with zero
+resources, empty SDK/process inventories and normal shutdown. Both toolchains
+read each history's five checkpoints (15 records). Encrypted unbooted histories
+and remaining platform/source/resource/upgrade combinations still need acceptance.
+Crash validation remains deferred; full parity and distribution approval stay open.
+
+The shared engine also supports original-owner historical publication lookup
+after an inactive later branch phase. Its deterministic models preserve phase,
+proof and charges. This native source correction still requires a fresh package
+and ordinary qualification; the exact package results above do not transfer.
+
+The [normal PostgreSQL branch lifecycle](evidence/embedded-port-http-parity-public-postgresql-branches-d1bba15.json)
+also passes both current/minimum installed consumers on this exact package. It
+covers two independent children, held release, cold restart, draining/budgets,
+owned deletion and paired retirement/backing release with zero final resources.
+Both toolchains read all 15 encrypted records and both saved backing replies in
+separate normal BEAMs without native workers; cleanup and full archives verify.
+
+[Encrypted PostgreSQL deadline cases](evidence/embedded-port-http-parity-unbooted-postgresql-uncertainty-d1bba15.json)
+retain uncertainty and all capacity after publication refuses or the diagnostic
+phase gate fails. Their original owners close normally with disks preserved.
+Both current/minimum encrypted datasets pass exact worker-free readback on both
+toolchains, including encrypted SQL payloads and retained accounting. These checks
+do not qualify live PostgreSQL unbooted disposal, retirement or backing release.
+
+The corrected lifecycle includes the
+[generic quiescence deadline](evidence/embedded-port-http-parity-generic-quiescence-deadline.json),
+[ordinary cleanup admission](evidence/embedded-port-http-parity-ordinary-cleanup-admission.json),
+[collected-spool handoff](evidence/embedded-port-http-parity-unbooted-collected-spool-handoff.json)
+and [shared-cache guard](evidence/embedded-port-http-parity-unbooted-empty-cache-guard.json)
+corrections. Historical failed runs retain their original outcomes and archives.
+
+Current source also corrects
+[explicit original ready-result recovery after cancellation](evidence/embedded-port-http-parity-ready-recovery-readiness.json).
+After validated original completion, fresh source/child observations and paired
+store commit, it can retain the completed scan of the same healthy owner/epoch.
+It preserves worker draining and does not replay creation. Uncertain/partial
+results, incomplete scans and changed identity remain fenced. The first ordinary
+[installed cancellation case](evidence/embedded-port-http-parity-ordinary-cancel-recovery-gap.json)
+retains source/child uncertainty and all charges, but ready recovery rejects with
+admission_exhausted/not_dispatched. Normal original-owner shutdown preserves disks;
+the private archive and both record readers verify. A separate source-preflight
+gate correction permits validated bounded probes while quiesced, without adding
+quarantined control admission. This gate is not proven to explain that native
+rejection. The newer exact-source Memory case below now supplies ordinary
+completed-result recovery acceptance; other partial states remain unqualified.
+
+After a validated branch completion or held-release transition, failed fresh
+source/child observations now retain whole-operation `dispatch_uncertain`
+evidence, even when the individual inspection reports `not_dispatched`.
+The paired result has not committed, so this failure grants no replay,
+reactivation or resource release. A definitive first-stage rejection retains
+its original evidence. This [source/model correction](evidence/embedded-port-http-parity-branch-observation-uncertainty.json)
+does not identify the cause of the earlier installed cancellation rejection.
+
+The [f56c2e3 Memory cancellation/recovery campaign](evidence/embedded-port-http-parity-public-memory-cancel-recovery-f56c2e3.json)
+passes installed Linux current/minimum consumers without Rust on exact Hex
+`cc39175e` and native manifest `7b6cfae8`. Both cancel from managed dispatching,
+retain source/child uncertainty and all resources, then explicitly recover the
+original held result while draining. The original epoch and completed scan survive.
+Held release, independent sibling/source disk and RAM, three owned deletions, two
+retirements/backing acknowledgements and normal shutdown pass. Final reservations
+and account-scoped SDK/process inventories are empty. Both readers accept each
+case's five checkpoints (45 records); complete archives and SDK backups verify
+on guest/outer and by Mac streaming. This qualifies public completed-result
+recovery in this Memory case. It does not identify every native internal phase or
+qualify PostgreSQL cancellation, other partial/disposal histories, other platforms
+or upgrades.
+
+The separate [f56c2e3 PostgreSQL cancellation/recovery campaign](evidence/embedded-port-http-parity-public-postgresql-cancel-recovery-f56c2e3.json)
+now passes the same completed-result case on both installed no-Rust toolchains,
+using fresh encrypted databases and keys. Cancellation succeeds on the first
+call in both cases. Recovery, draining, sibling independence and owned cleanup
+pass; separate normal BEAMs on both toolchains read all 13 final encrypted records
+and both backing acknowledgements without native workers. Both codec readers
+also validate each dataset's five checkpoints (45 records). Normal helper and
+smart SQL shutdown, empty inventories, free locks and cold archive verification
+pass. The first failed SQL attempt is separately archived and was closed through
+public cleanup APIs; its uncaptured cancellation error remains unexplained.
+This qualifies the recorded PostgreSQL completed-result case, while other native
+partial phases, source/platform combinations and upgrades remain pending.
+
+The latest [548fb97 Memory lifecycle and replacement campaign](evidence/embedded-port-http-parity-public-memory-branch-replacement-548fb97.json)
+passes current/minimum installed Linux consumers without Rust on the corrected
+drain-wait source. Both complete the local-bare two-child lifecycle and then
+normally replace the helper with the same external Memory store. The new epoch
+completes recovery while preserving all 15 records' immutable contents, persisted
+draining and both saved backing acknowledgements. Final reservations and SDK/
+process inventories are empty, locks are free, and source/assets/private archives
+verify. Both toolchains read each case's four saved checkpoints (57 records).
+This qualifies the recorded completed-history Memory case. Partial, upgrade and
+other platform/source/resource gates remain.
+
+The same corrected library now passes the
+[548fb97 PostgreSQL lifecycle/readback/replacement campaign](evidence/embedded-port-http-parity-public-postgresql-branch-replacement-548fb97.json)
+on both installed no-Rust toolchains. Real encrypted stores retain all 15 records
+through separate normal-BEAM readback, readback by the other toolchain, and normal
+same-package helper replacement. The new epoch preserves immutable histories,
+draining and both historical backing acknowledgements. Normal native/smart SQL
+shutdown, zero reservations, empty inventories, free locks and final cold
+database/archive checks pass. This tests the same library/package across
+toolchains; reader-first library upgrades and partial histories remain separate.
+
+The earlier [9470074 public branch campaign](evidence/embedded-port-http-parity-public-branches-9470074.json)
+passes the installed Linux local-bare Memory workflow on current/minimum
+toolchains without Rust: two independent children, held release, cold restart,
+retirement, backing release and normal shutdown. Both runs leave empty SDK and
+native/BEAM inventories, free account locks and zero reservations. Source/assets,
+private archives and cross-toolchain saved-record readers verify. The subsequent
+[c5f9fde PostgreSQL campaign](evidence/embedded-port-http-parity-public-postgresql-branches-c5f9fde.json)
+passes both installed no-Rust durable consumers, separate normal-BEAM readback
+and encrypted readback by the other toolchain. Each workerless reader preserves
+all 15 final records and both saved backing acknowledgements. Normal SQL shutdown,
+empty native/process inventories and final cold database/archive verification
+pass. Partial recovery and remaining source/platform/resource/upgrade gates stay
+open. Earlier implementation checkpoints below retain their historical scope.
+
+The [normal PostgreSQL helper replacement case](evidence/embedded-port-http-parity-postgresql-branch-replacement-c5f9fde.json)
+also passes on both toolchains for that exact c5f9fde library and native package.
+A new helper epoch completes recovery while preserving all 15 records' immutable
+contents, persisted draining and both saved backing acknowledgements. Normal
+native/SQL shutdown, zero reservations, empty inventories and cold archive checks
+pass. This is same-package replacement after normal shutdown; it does not qualify
+a library/package upgrade or transfer acceptance to the later drain correction.
+
+The [845a37b Linux branch checkpoint](evidence/embedded-port-http-parity-linux-branches-845a37b.json)
+passes the shared engine's ordinary local-bare two-child workflow: independent
+disk/RAM state, held release, child stop/cold restart, owned deletion, child
+absence proofs and backing acknowledgements. Normal shutdown leaves empty SDK,
+VM and native-process inventories. This exact package has no installed public
+branch-consumer qualification yet. Public/store workflows and
+original-owner recovery remain required. That checkpoint did not qualify public
+native branching.
+Crash validation remains deferred and distribution approval remains separate.
+
+The Linux development helper advertises checkpoint/branch wire operations
+for explicit Port qualification. Its [ordinary Port runner](evidence/embedded-port-http-parity-branch-port-runner.json)
+retains failed owners and offers bounded original-context controls, with no
+signals or replay. Existing approved packages keep their recorded descriptors.
+Current source accepts these descriptors only with explicit Linux platform and
+exact package approval. Memory and the PostgreSQL example advertise the complete
+native branch store marker alongside all required readers and paired writers.
+The public branch workflow (`examples/embedded_port/lib/branch_demo.ex`) and
+separate `--native-public --native-branches` installed-consumer campaign exercise
+the real APIs and stores. The recorded Memory and PostgreSQL cases above pass;
+remaining consumer combinations still require acceptance. No crash campaign is
+selected. Other platforms and the optional
+cleanup-resolution descriptor remain gated; exports retain their separate gate.
+
+The [first installed public branch case](evidence/embedded-port-http-parity-public-branches-first-runtime.json)
+creates a checkpointable source and ready child, then stops/deletes the child and
+retires its dependency through real Memory. That revision forced
+startup reconciliation of the same healthy owner, marking the running source
+unknown. Its reservation and extra backing remain charged. The readiness correction
+and successful fresh-account public reruns above resolve this ordinary-path gap.
+The failed run ends by explicit original-owner protocol shutdown with disks and
+records preserved; it supplies no source absence or backing-release proof.
+
+The [41cc8a6 framed Port checkpoint](evidence/embedded-port-http-parity-linux-port-branches-41cc8a6.json)
+now passes that ordinary local-bare two-child workflow through the real Port:
+source preflight, completion lookups, independent disk/RAM state, held release,
+cold restart, deletion, child absence and backing acknowledgements. Normal
+shutdown leaves empty SDK/VM/process inventories and a free domain lock. The
+exact source, package and clean private archive verify on both hosts. Current
+and minimum Elixir readers accept all seven real proofs. This qualifies Port
+routing for that case. The later public Memory runs above cover its installed
+Runtime workflow, followed by the scoped PostgreSQL case. Partial recovery and
+other required combinations remain open.
+
+The [first framed branch attempt](evidence/embedded-port-http-parity-branch-preflight-explicit.json)
+reached ordinary source startup and marker setup, then lost the helper channel
+during branch preflight before any child request. The SDK row and disks are
+preserved; process absence supplies no collection or cleanup proof. Default
+offline configuration was omitted by the ordinary observation producer, while
+branch qualification requires it explicitly. The shared engine now reports
+verified defaults for branch preflight; generic observations retain their
+existing omission behavior. The successful 41cc8a6 rerun above qualifies that
+correction for the recorded ordinary Port case.
+
 The qualification lab's [external runtime guard](evidence/embedded-port-http-parity-lab-runtime-limit-oct16.json)
 expired at 22:54:41 UTC. Completed ordinary runs and their verified archives precede
 that event. Older registry owners' graceful collection remains unverified; their
@@ -57,8 +278,8 @@ mounted local-container workflows pass, including proof-bound provisioning,
 attachment retention/deletion rejection, sibling isolation, binary data, draining, normal stopped
 Runtime replacement, read-only reattachment and owned cleanup. The mounted store
 is ephemeral Memory. PostgreSQL mounted acceptance, other source/resource cases,
-the reviewed volume CI runner and remaining P7-P9 gates stay pending. Native
-branches remain disabled. Earlier packages retain their own distinct scopes;
+the reviewed volume CI runner and remaining P7-P9 gates stay pending. That older
+package has no native branch descriptor. Earlier packages retain their own distinct scopes;
 network/workload evidence is not transferred to these changed bytes.
 
 The [source-controlled volume runner and PostgreSQL evidence](evidence/embedded-port-http-parity-postgresql-volumes-1fd1262.json)
@@ -141,6 +362,10 @@ and volume approvals using shared validation. Registering a catalog does not
 enable an unsupported helper operation. Health reports distinguish SDK version,
 SmolBox engine version and supported feature versions; legacy helpers continue
 to advertise their existing offline feature set.
+
+The following branch proof/store notes record earlier implementation milestones
+and their gate status at that time. Current Linux admission and qualification
+scopes are described at the beginning of this guide.
 
 Branch creation and completed-result proof readers now validate source changes,
 independent child identity and initial release across Rust and Elixir. Public
@@ -346,7 +571,11 @@ During the unmodified-SDK migration, newly built helpers prepare approved sparse
 plain templates in the dedicated account's `~/.smolvm` before readiness. Conflicting
 plain or compressed templates in home, helper or boot directories prevent
 activation; they are never overwritten. Keep account templates and their
-package/domain references when removing a package. Maintainer package authoring
+package/domain references when removing a package. Keep an enrolled package at
+its original absolute install path: template references bind that path, so moving
+identical package bytes to another directory does not provide a compatible
+replacement. Never edit those references to make a relocated copy start.
+Maintainer package authoring
 requires `zstd` to regenerate compressed assets from the resized plain templates;
 prebuilt-package consumers do not need it. Existing approved packages retain their
 historical behavior and identities until replaced through the migration workflow.
@@ -628,6 +857,10 @@ original saved geometry after operator repair; it may publish an engine proof,
 but never resizes disks, changes SDK metadata or overrides retained work fences.
 Older entered journal entries without an original witness remain blocked.
 
+The following checkpoint reader notes record staged implementation milestones.
+The current Linux checkpoint descriptor permits development admission with exact
+operator approvals; portable capture and restore still need ordinary qualification.
+
 Store readers recognize selective v22 native checkpoint restore-source assignments.
 Upgrade every reader and atomic reservation writer before advertising
 `native_checkpoint_sources: 1`; Memory and the PostgreSQL example include that
@@ -656,7 +889,7 @@ Native capture histories and attached material histories selectively use codec
 v24. Upgrade every reader and atomic source-identity/history writer before
 advertising `native_capture_histories: 1`; Memory and the PostgreSQL example now
 provide this reader. Runtime requires it alongside the checkpoint-source and
-checkpointable readers before enrolling a future checkpoint-capable helper.
+checkpointable readers before enrolling a checkpoint-capable helper.
 
 Original creation receipts stay immutable. A correlated capture proof and
 current source receipt are stored atomically, and attached commands retain the
@@ -676,7 +909,7 @@ histories and earlier HTTP/native records keep their encodings. Resolution keeps
 artifact result unknown, original creation immutable and artifact capacity charged
 until explicit release. Public retained staging release consumes native cleanup
 authority; ordinary qualification remains pending. This reader does not
-activate the currently disabled checkpoint capability or qualify a native package.
+qualify native capture or restore on a package.
 
 New native captures freeze their source receipt at acceptance. These records and
 native cleanup receipts selectively use codec v26. Upgrade every reader and the
@@ -686,8 +919,7 @@ checkpoint targets. Native reservation release requires the exact cleanup receip
 and persists proof/accounting together; repeated consumption is idempotent.
 HTTP, v24 capture histories and v25 resolution histories without these fields keep
 their previous encodings. Embedded public release now obtains and atomically
-consumes scoped helper cleanup evidence. These store capabilities do not enable
-the public checkpoint descriptor without ordinary qualification.
+consumes scoped helper cleanup evidence. These store capabilities do not establish ordinary checkpoint qualification.
 
 Scoped capture routing now binds an active dispatched capture, its approved
 policy and exact fingerprint destination. The controller opens an exclusive
@@ -696,9 +928,9 @@ syncs file/directory metadata and creates the final artifact without overwriting
 an existing destination. Partial or ambiguous publication remains uncertain;
 no capture is replayed. Transport-only chunk limits fit response windows without
 changing capture material hashes, ordinary transfer limits or queue credits.
-These implemented foundations remain gated by the checkpoint descriptor; public
-retained staging release integration and ordinary live package/platform/consumer
-qualification still precede public activation.
+These foundations require an explicit checkpoint descriptor and operator policy.
+Ordinary live capture/restore package, platform and consumer qualification remain
+pending; Linux branch admission does not supply that evidence.
 
 Unknown captures with exact completed native journal evidence can now recover
 source observation and resolve under the explicit native quiescence boundary.
@@ -716,7 +948,7 @@ work. Running resolution requires original engine-start enrollment, receipt,
 SDK PID and OS PID/birth; inventory or a copied receipt cannot substitute them.
 The source keeps running, while stopped resolution requires original-process
 absence. Public retained staging release integration and ordinary live qualification
-remain pending. The public checkpoint descriptor stays disabled.
+remain pending. Ordinary checkpoint qualification remains pending.
 
 The native engine and Port protocol now support explicit cleanup of a protected,
 collected capture stage with exact original capture authority and correlated
@@ -738,7 +970,7 @@ retires only that stage and its unentered source intent, and leaves later source
 operations unchanged. Entered captures require source resolution. Automatic
 pre-entry cleanup keeps reservations recoverable on failure. Public resolution/
 release integration and ordinary qualification remain pending; these foundations
-do not enable public checkpoint admission.
+do not establish ordinary public checkpoint acceptance.
 
 Completed capture cleanup now leaves a durable native cleanup receipt after
 removing the private stage and releasing its reservation. Normal helper/registry
@@ -918,10 +1150,9 @@ and keep a compatible reader for rollback. A source manifest identity cannot
 replace local pack content authority.
 OCI catalog/assignment translation and protocol-2 creation, qualification,
 absence and source-bound startup routing now exist behind explicit source approval.
-Reader support does not activate them. The Linux source policy now advertises
+Reader support does not activate them. Both platform source policies now advertise
 version-1 image/source capabilities for newly rebuilt and exactly approved
-packages. The default/macOS policy and older Linux descriptors retain their
-original surface. The scoped Linux public image/registry consumers now pass as recorded above;
+packages. Older descriptors retain their original surface. The scoped Linux public image/registry consumers now pass as recorded above;
 remaining credential/source/platform combinations and full parity stay pending.
 
 
@@ -930,8 +1161,10 @@ Registry preparation now has a gated embedded adapter and typed
 and explicit `RegistryPolicy`, bounds its reply and preserves distinct manifest
 and content digests. The engine verifies downloads and rehashes warm entries;
 a preparation observation still grants no machine ownership or readiness.
-The Linux source policy enables remote_sources for a changed package candidate;
-the default/macOS policy and previously qualified Linux packages keep it disabled.
+Both source policies enable remote_sources for changed package candidates;
+previously approved packages retain their exact descriptors. Scoped macOS
+current/minimum OCI and bare registry acceptance now passes as recorded above;
+the wider source/credential/store/resource matrix remains pending.
 The create_prepared adapter validates exact preparation/source identity
 and routes cached creation without refetching. Registry intent preflight checks
 policy/template feasibility before reservation; pack bytes are checked during
@@ -1209,3 +1442,19 @@ processes or zombies. Direct OCI, configured workloads, durable-store and other
 required combinations remain pending on this package. Keep the qualified package
 location available; its byte-identical initial build at another path does not
 replace protected template references. Crash validation remains deferred.
+
+
+[Public branch admission evidence](evidence/embedded-port-http-parity-public-branches-admission.json) records 939 branch/backend/codec checks
+and 180 encrypted PostgreSQL checks per toolchain, bounded-control/CI models and
+the unchanged Credo baseline. These checks prepare the ordinary public campaign;
+they do not qualify native consumer or durable VM behavior.
+
+Fresh partial-branch collection now requires a read-only eligibility response from
+the original helper before its action is saved. The helper must advertise
+`partial_collection_preflight: 1` with `branches: 1` and match the approved branch
+catalog. Rejection leaves the child unselected and its resources reserved, so an
+ineligible attempt does not block another valid recovery path. Existing saved
+collection requests and proofs keep their previous resume behavior. The candidate
+is ephemeral, grants no cleanup authority and changes no persistent record format.
+[Source/model checks](evidence/embedded-port-http-parity-partial-collection-preflight.json)
+cover this boundary; changed-package ordinary acceptance remains pending.

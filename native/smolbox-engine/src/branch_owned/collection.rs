@@ -5,6 +5,9 @@ use crate::epoch::{ActorEpoch, BootCollection, BootEnrollment};
 use crate::{CreationReceipt, Engine, Error, ErrorCode, Observation, ReadBudget, Result};
 
 impl Context {
+    pub(crate) fn require_no_runtime_boot(&self) -> Result<()> {
+        require_no_runtime_boot(&self.runtime_boots, &self.plan.publication.child().name)
+    }
     pub(crate) fn collect_original(
         &self,
         epoch: &ActorEpoch,
@@ -12,12 +15,26 @@ impl Context {
     ) -> Result<BootCollection> {
         budget.check()?;
         self.plan.verify()?;
-        let name = &self.plan.publication.child().name;
-        if self._runtime.pid(name).is_some() {
-            return Err(Error::before(ErrorCode::Ownership));
+        self.require_no_runtime_boot()?;
+        {
+            let manager = self
+                .manager
+                .try_lock()
+                .map_err(|_| Error::before(ErrorCode::Conflict))?;
+            self.manager_paths.verify(&self.plan, &manager)?;
         }
         collect_manager(&self.plan, &self.manager, epoch, &self.enrollment, budget)
     }
+}
+fn require_no_runtime_boot(registry: &crate::runtime_boot::Registry, name: &str) -> Result<()> {
+    // EmbeddedRuntime::pid also reads persisted rows. A running original
+    // manager necessarily has such a PID; it does not imply a cached runtime
+    // owner. Every ordinary runtime start reserves this shared registry before
+    // SDK entry, and the caller retains the child gate through collection.
+    if registry.try_contains(name)? {
+        return Err(Error::before(ErrorCode::Ownership));
+    }
+    Ok(())
 }
 // Both completed and pre-handoff jobs retain the original manager/enrollment.
 // This helper constructs neither from an SDK row or caller-supplied PID.
@@ -29,17 +46,16 @@ pub(crate) fn collect_manager(
     budget: &ReadBudget,
 ) -> Result<BootCollection> {
     budget.check()?;
-    plan.verify()?;
     let name = &plan.publication.child().name;
     let manager = manager
         .try_lock()
         .map_err(|_| Error::before(ErrorCode::Conflict))?;
-    if manager.name() != Some(name.as_str())
-        || manager.storage_path() != plan.child.path.join(smolvm::storage::STORAGE_DISK_FILENAME)
-        || manager.overlay_path() != plan.child.path.join(smolvm::storage::OVERLAY_DISK_FILENAME)
-    {
-        return Err(Error::before(ErrorCode::Ownership));
-    }
+    verify_manager_disks(
+        plan,
+        manager.name(),
+        manager.storage_path(),
+        manager.overlay_path(),
+    )?;
     let proof = collect_with(budget, epoch, enrollment, name, manager.child_pid(), || {
         manager
             .stop()
@@ -53,6 +69,45 @@ pub(crate) fn collect_manager(
     manager.mark_stopped();
     budget.check().map_err(|e| Error::uncertain(e.code))?;
     Ok(proof)
+}
+// Fork children use QCOW overlays even when the original source used raw
+// disks. Bind collection to the original manager's exact resolved paths,
+// rather than requiring raw filenames that the boot path never selected.
+pub(super) fn verify_manager_disks(
+    plan: &crate::branch_boot::Plan,
+    name: Option<&str>,
+    storage: &std::path::Path,
+    overlay: &std::path::Path,
+) -> Result<()> {
+    use std::os::unix::fs::MetadataExt;
+    plan.verify()?;
+    if name != Some(plan.publication.child().name.as_str()) {
+        return Err(Error::before(ErrorCode::Ownership));
+    }
+    for (raw, actual) in [
+        (smolvm::storage::STORAGE_DISK_FILENAME, storage),
+        (smolvm::storage::OVERLAY_DISK_FILENAME, overlay),
+    ] {
+        let (resolved, _) = smolvm::agent::resolve_disk_image(&plan.child.path, raw);
+        if actual != resolved {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        let file = crate::artifact::open_regular(actual)
+            .map_err(|_| Error::before(ErrorCode::Ownership))?;
+        let held = file
+            .metadata()
+            .map_err(|_| Error::before(ErrorCode::Ownership))?;
+        let path =
+            std::fs::symlink_metadata(actual).map_err(|_| Error::before(ErrorCode::Ownership))?;
+        if !path.is_file()
+            || (held.dev(), held.ino()) != (path.dev(), path.ino())
+            || held.uid() != unsafe { libc::geteuid() }
+            || held.mode() & 0o022 != 0
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+    }
+    plan.verify()
 }
 fn collect_with(
     budget: &ReadBudget,

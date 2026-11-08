@@ -70,20 +70,26 @@ defmodule SmolBox.Embedded.PortTest do
 
     pid = owner(config)
 
-    for row <- rows, name <- ~w(create_branch inspect_branch_completion) do
+    for row <- rows,
+        name <- ~w(create_branch inspect_branch_completion publish_collected_branch_material) do
       request =
         row["request"]
         |> put_in(["source", "target_id"], config.id)
         |> put_in(["source", "domain_generation"], config.domain_generation)
 
       assert {:error, %Error{evidence: :not_dispatched}} =
-               Port.submit(pid, %{"operation" => name, "request" => request}, budget(), self())
+               Port.submit(pid, branch_control(name, request), budget(), self())
     end
 
     refute Enum.any?(Package.received(config), &(&1["type"] == "request"))
     assert :ok = Port.shutdown(pid)
     wait_until(fn -> match?({:ok, %{status: :stopped}}, Port.health(pid)) end)
   end
+
+  defp branch_control("publish_collected_branch_material" = name, request),
+    do: %{"operation" => name, "request" => request, "quiesced" => true}
+
+  defp branch_control(name, request), do: %{"operation" => name, "request" => request}
 
   test "current package rejects partial disposal cleanup despite an exact operator catalog" do
     fixture =
@@ -396,6 +402,53 @@ defmodule SmolBox.Embedded.PortTest do
     assert outcome["observed_exit"] == 7
     assert outcome["completion"] == "exited"
     refute_receive {:smolbox_embedded, ^handle, {:output, _, _}}, 50
+  end
+
+  test "capture encoded frames use a response window while Channel proves the total artifact" do
+    fixtures = Path.expand("../../native/smolbox-protocol/fixtures", __DIR__)
+
+    [proof, _] =
+      fixtures |> Path.join("capture-transitions-v1.json") |> File.read!() |> Jason.decode!()
+
+    sdk =
+      fixtures
+      |> Path.join("hello-v2-macos-branches.json")
+      |> File.read!()
+      |> Jason.decode!()
+      |> get_in(["hello", "sdk"])
+
+    config = package(protocol_major: 2, sdk_identity: sdk, capture_transition: proof)
+
+    config = %{
+      config
+      | id: proof["previous"]["target_id"],
+        domain_generation: proof["previous"]["domain_generation"]
+    }
+
+    pid = owner(config)
+
+    request = %{
+      "operation" => "capture_checkpoint",
+      "receipt" => proof["previous"],
+      "operation_id" => proof["change"]["intent"]["operation_id"],
+      "request" => proof["change"]["intent"]["request"],
+      "chunk_bytes" => 1
+    }
+
+    limited = %{budget() | max_response_bytes: 8192}
+    assert {:ok, handle} = Port.submit(pid, request, limited, self())
+    assert_receive {:smolbox_embedded, ^handle, :accepted}, 1000
+
+    bytes =
+      for _ <- 1..proof["change"]["artifact"]["size_bytes"] do
+        assert_receive {:smolbox_embedded, ^handle, {:output, :checkpoint, byte}}, 1000
+        assert :ok = Port.acknowledge(pid, handle, byte_size(byte))
+        byte
+      end
+
+    assert IO.iodata_to_binary(bytes) == String.duplicate("c", 512)
+    assert_receive {:smolbox_embedded, ^handle, {:terminal, %{"result" => "captured"}, nil}}, 1000
+    assert :ok = Port.shutdown(pid)
   end
 
   @tag :deferred_crash

@@ -17,6 +17,7 @@ defmodule SmolBox.Store.BranchOps do
     NativeBranchOps,
     NativeBranchReleaseOps,
     NativeBranchRetirementOps,
+    NativeCollectedBranchPublicationOps,
     NativePartialBranchCleanupOps,
     NativePartialBranchCollectionOps,
     NativePartialBranchDisposalOps,
@@ -121,6 +122,12 @@ defmodule SmolBox.Store.BranchOps do
          do: {:ok, parent, child},
          else: (_ -> error(:stale_version))
   end
+
+  defp create_step(p, c, {:accept_collected_publication, version, platform}, now),
+    do: NativeCollectedBranchPublicationOps.accept(p, c, version, platform, now)
+
+  defp create_step(p, c, {:complete_collected_publication, result}, now),
+    do: NativeCollectedBranchPublicationOps.complete(p, c, result, now)
 
   defp create_step(p, c, {:accept_partial_collection, version, platform}, now),
     do: NativePartialBranchCollectionOps.accept(p, c, version, platform, now)

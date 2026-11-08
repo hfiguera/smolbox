@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "status": "original-collection-observed-disposal-refused-locator-correction-needs-native-qualification",
+  "witness_source_commit": "c1006d0976104adbd7d2d21e370afbd40da11b77",
+  "production_native_inputs_unchanged_from_8686e179": 324,
+  "witness_sha256": "e9d7bd185a6abbfaade32a2f53db792f9b268504f51f0daa62c5b440a70a5a67",
+  "manifest_sha256": "acf8cbdaa1d1c0897735b633b9848fea62427b6731cfd1631e03e873c21eb2ed",
+  "helper_sha256": "8ca58cf6dcc5dc075dcc4daa39052734a65b56ca81d98bab0e1fb09f88d7c76c",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "sdk_unmodified": true,
+  "ordinary_case": {
+    "scope": "shared-engine-sequential-explicit-cancellation-linux-local-bare",
+    "original_boot_api_returned": true,
+    "original_token_explicitly_cancelled": true,
+    "initialization_rejected_before_dispatch": true,
+    "completed_branch_absent": true,
+    "original_material_publication_observed": true,
+    "positive_original_partial_collection_observed": true,
+    "disposal_result": {
+      "code": "Ownership",
+      "dispatch": "NotDispatched"
+    },
+    "actual_child_disk_formats": [
+      "qcow2",
+      "qcow2"
+    ],
+    "exclusive_earliest_native_rejection_instrumented": false,
+    "accepted_disposal_replayed": false,
+    "normal_owner_shutdown": "failed; retained original owner",
+    "sdk_rows_retained": 2,
+    "source_vm_still_live_at_checkpoint": true,
+    "metadata_archive_sha256": "9407878491bbabc79e7021c3266693bf52bf7a56e7f61701ff51a9de47c2b081",
+    "metadata_archive_bytes": 358400,
+    "metadata_archive_members": 31,
+    "metadata_and_readonly_sdk_backup_verified_outer_and_mac": true,
+    "inner_metadata_files_verified": 30,
+    "full_cold_disk_archive_claimed": false,
+    "original_disks_and_records_retained_in_place": true,
+    "scoped_cleanup_approval_pending": true,
+    "public_port_or_durable_consumer_qualification_claimed": false
+  },
+  "correction": {
+    "scope": "shared-engine-original-manager-disk-locators",
+    "selected_paths_captured_before_launch": true,
+    "original_child_directory_and_manager_name_required": true,
+    "live_manager_pid_rejected": true,
+    "original_enrollment_collection_lifecycle_row_and_source_fences_retained": true,
+    "manager_reconstruction_from_inventory": false,
+    "wire_or_codec_format_changed": false,
+    "source_files_sha256": {
+      "native/smolbox-engine/src/branch/retention/boot.rs": "148546bded3751d0e5cb5223f81a17bc309d97309ce8d1f6f04daae538265f2f",
+      "native/smolbox-engine/src/branch/retention/boot/collection.rs": "eae60971e300885dae3c1ebc3c0b0a5f4b2ce274d44ec39d866c689bdc0c948f",
+      "native/smolbox-engine/src/branch_owned/paths.rs": "76a1b9fda443475b9c80416e179c829b7511b86b42261a1d4f3a9d4a3078821e"
+    },
+    "native_package_rebuild_and_ordinary_acceptance_required": true
+  },
+  "checks": {
+    "witness_model_tests_mac": 13,
+    "witness_model_tests_linux_release": 13,
+    "witness_linux_build_stages": 5,
+    "locator_regression_model_passed": true,
+    "ordinary_workspace_passed": 1320,
+    "ordinary_workspace_ignored": 24,
+    "workspace_all_target_clippy_passed": true,
+    "engine_format_passed": true,
+    "regular_and_clean_sdk_checks_passed": true,
+    "current_documentation_and_coverage": {
+      "doctests": 4,
+      "tests": 4,
+      "failures": 0
+    },
+    "minimum_documentation_and_coverage": {
+      "doctests": 4,
+      "tests": 4,
+      "failures": 0
+    }
+  },
+  "full_partial_disposal_qualified": false,
+  "full_http_parity_complete": false,
+  "crash_validation_deferred": true,
+  "distribution_approved": false,
+  "private_evidence_sha256": {
+    "model-tests.log": "caef00d6e5e5a3a49cc21d33a9d53c3d31721d31073f591f0e3cdb1c0b880926",
+    "clippy.log": "aa535e9cd0f8db2a9b5eb8bb124fb58878d8f278c2e64fcd9415234b0896ef79",
+    "linux-build-record.json": "7d7010bdbaa7bfa1da36f24b3b9a8fcc2ed173d57f9ec768bfbdab09c7618ed9",
+    "linux-results.json": "28ccd00052143ac37874c2630841b281e3f1a63178cc7954f7eb42aefd3110ed",
+    "locator-regression-tests.log": "5afba15ad3a914d96c2475ca1475b6698d780f563ad200441e49f36d411c033d",
+    "locator-clippy.log": "946daa8953b8894ef58d0817b909f4c1a55f3098342ae81993676b3ff00f67bc",
+    "metadata-record.json": "d34cff72cf6e35699090cd6a702cfb331afc28555b1651a5e6f93050b665bd26",
+    "cleanup-plan.json": "b7af4c85fd368c82e9464af1c3331271722bbd753a4eeb88562e8eaa954529bd"
+  }
+}

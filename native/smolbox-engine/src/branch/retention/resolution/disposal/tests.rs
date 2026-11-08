@@ -100,7 +100,11 @@ impl Model {
             .unwrap();
         {
             let mut work = entry.work.lock().unwrap();
-            work.prepared.take();
+            let prepared = work.prepared.take().unwrap();
+            work.collected = Some(Box::new(Collected::model_branch_projection_with_leases(
+                prepared,
+                Box::new(entry.ownership.clone()),
+            )));
             work.phase = Phase::Published;
             work.snapshot = Some(VerifiedSnapshot {
                 before,
@@ -355,8 +359,11 @@ fn boot_entry_changed_child_cache_or_source_cannot_enter_unbooted_disposal() {
                     })
                     .unwrap();
             }
-            2 => std::fs::create_dir(model.engine.vm_directory(&model.child.name).join("pack"))
-                .unwrap(),
+            2 => {
+                let pack = model.engine.vm_directory(&model.child.name).join("pack");
+                std::fs::create_dir(&pack).unwrap();
+                std::fs::write(pack.join("volume-or-lease"), b"retain").unwrap();
+            }
             3 => {
                 model
                     .engine

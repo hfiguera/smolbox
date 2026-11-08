@@ -1,11 +1,17 @@
 defmodule SmolBox.Backend.EmbeddedUnbootedBranchDisposal do
   @moduledoc false
-  alias SmolBox.Backend.{Assignment, Budget, EmbeddedContext, EmbeddedReply, Features}
+  alias SmolBox.Backend.{
+    Assignment,
+    Budget,
+    EmbeddedBranchSourceObservation,
+    EmbeddedContext,
+    EmbeddedReply,
+    Features
+  }
 
   alias SmolBox.Embedded.{
     BranchPublication,
     Call,
-    Identity,
     NativeGrowth,
     NativeUnbootedBranchDisposal,
     NativeUnbootedBranchDisposalResult,
@@ -198,17 +204,13 @@ defmodule SmolBox.Backend.EmbeddedUnbootedBranchDisposal do
         proof.publication["change"]["platform"] == platform(context)
 
   defp promote(context, proof) do
-    with true <- proof.publication["previous"] == context.identity.receipt,
-         {:ok, publication} <- BranchPublication.from_wire(proof.publication),
-         history = (context.history || []) ++ [publication],
-         identity = %Identity{
-           receipt: publication.receipt,
-           transition: publication,
-           material_history: history
-         },
-         true <- Identity.valid?(identity),
-         do: {:ok, %{context | identity: identity, history: history}},
-         else: (_ -> failure(:identity_conflict, :dispatch_uncertain))
+    case BranchPublication.from_wire(proof.publication) do
+      {:ok, publication} ->
+        EmbeddedBranchSourceObservation.promote_publication(context, publication)
+
+      _ ->
+        failure(:identity_conflict, :dispatch_uncertain)
+    end
   end
 
   defp observation(context, request, {:ok, outcome, @empty, nil} = response, maximum) do

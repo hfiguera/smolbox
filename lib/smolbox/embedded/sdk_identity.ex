@@ -5,7 +5,7 @@ defmodule SmolBox.Embedded.SDKIdentity do
 
   @features ~w(lifecycle foreground_exec extended_exec files extended_files material_proofs
                observability networking ports workloads compact_creation job_resources buffered_exec remote_sources images background_exec
-               logs streaming_exec terminals terminal_preflight volumes disk_growth checkpoints exports branches partial_cleanup_resolution)
+               logs streaming_exec terminals terminal_preflight volumes disk_growth checkpoints exports branches partial_cleanup_resolution partial_collection_preflight)
 
   # This is the implemented package contract, not all APIs present in the SDK.
   # Launch and Hello must both bind it to the exact locally approved package.
@@ -46,15 +46,25 @@ defmodule SmolBox.Embedded.SDKIdentity do
   # The default descriptor stays compatible with existing approved packages.
   def approved?(sdk, version, revision, platform \\ nil) do
     implemented =
-      if platform == :linux,
+      if platform in [:linux, :macos],
         do:
           Map.merge(@implemented, %{
-            "volumes" => 1,
-            "disk_growth" => 1,
             "remote_sources" => 1,
-            "images" => 1
+            "images" => 1,
+            "checkpoints" => 1,
+            "branches" => 1,
+            "partial_collection_preflight" => 1
           }),
         else: @implemented
+
+    implemented =
+      if platform == :linux,
+        do:
+          Map.merge(implemented, %{
+            "volumes" => 1,
+            "disk_growth" => 1
+          }),
+        else: implemented
 
     implemented = Map.put(implemented, "terminal_preflight", 1)
 
@@ -100,7 +110,8 @@ defmodule SmolBox.Embedded.SDKIdentity do
           {"remote_sources", "job_resources"},
           {"remote_sources", "buffered_exec"},
           {"remote_sources", "compact_creation"},
-          {"partial_cleanup_resolution", "branches"}
+          {"partial_cleanup_resolution", "branches"},
+          {"partial_collection_preflight", "branches"}
         ],
         fn {feature, required} -> features[feature] != 1 or features[required] == 1 end
       )

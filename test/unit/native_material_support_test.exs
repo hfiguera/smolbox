@@ -167,14 +167,34 @@ defmodule SmolBox.Runtime.NativeMaterialSupportTest do
                     native_partial_branch_retirements: 1,
                     native_partial_branch_backings: 1,
                     native_partial_branch_cleanups: 1,
-                    native_partial_branch_cleanup_resolutions: 1
+                    native_partial_branch_cleanup_resolutions: 1,
+                    native_collected_branch_publications: 1
                   }}
              })
 
+    for marker <- [nil, 2] do
+      caps = %{
+        managed_branches: 1,
+        native_branches: 1,
+        native_partial_branch_collections: 1,
+        native_partial_branch_disposals: 1,
+        native_partial_branch_retirements: 1,
+        native_partial_branch_backings: 1,
+        native_partial_branch_cleanups: 1,
+        native_partial_branch_cleanup_resolutions: 1
+      }
+
+      caps =
+        if marker, do: Map.put(caps, :native_collected_branch_publications, marker), else: caps
+
+      assert {:error, %Error{category: :unsupported_capability}} =
+               NativeSupport.verify(%{workers: [future], store: {BranchStore, caps}})
+    end
+
     assert :ok = NativeSupport.verify(%{workers: [target], store: {TerminalStore, nil}})
     assert Package.received(native) == []
-    # The semantic future descriptor above is never a valid public configuration.
-    assert {:error, _} = Config.validate(future.native_config)
+    # Package approval remains explicit; complete store admission is checked above.
+    assert :ok = Config.validate(future.native_config)
   end
 
   test "future growth descriptor requires both the native history reader and atomic expansion store" do

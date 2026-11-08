@@ -17,6 +17,7 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
     NativeBranchDeletionAction,
     NativeBranchRelease,
     NativeBranchRetirement,
+    NativeCollectedBranchPublication,
     NativePartialBranchCollection,
     NativePartialBranchDisposal,
     NativePreparedBranchRetirement,
@@ -29,6 +30,7 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
   @derive {Inspect, only: []}
   defstruct @enforce_keys ++
               [
+                collected_publication: nil,
                 partial_collection: nil,
                 partial_disposal: nil,
                 prepared_retirement: nil,
@@ -112,6 +114,7 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
     do:
       Enum.all?(
         [
+          {authority.collected_publication, NativeCollectedBranchPublication},
           {authority.partial_collection, NativePartialBranchCollection},
           {authority.partial_disposal, NativePartialBranchDisposal},
           {authority.prepared_retirement, NativePreparedBranchRetirement},
@@ -178,13 +181,18 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
 
   defp proof_records?(child, completion),
     do:
-      completion_record?(child, completion) and NativePartialBranchCollection.record?(child) and
-        NativePartialBranchDisposal.record?(child) and
-        NativePreparedBranchRetirement.record?(child) and
-        NativeUnbootedBranchDisposal.record?(child) and
+      completion_record?(child, completion) and creation_records?(child) and
         NativeBranchRetirement.record?(child) and
         NativeBranchBacking.record?(child) and NativeBranchDeletion.record?(child) and
         NativeBranchDeletionAction.record?(child)
+
+  defp creation_records?(child),
+    do:
+      NativeCollectedBranchPublication.record?(child) and
+        NativePartialBranchCollection.record?(child) and
+        NativePartialBranchDisposal.record?(child) and
+        NativePreparedBranchRetirement.record?(child) and
+        NativeUnbootedBranchDisposal.record?(child)
 
   defp proofs_preserved?(original, saved, record, next),
     do:
@@ -198,11 +206,16 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
 
   defp creation_proofs_preserved?(original, saved, version),
     do:
-      NativePartialBranchCollection.preserved?(
-        original.partial_collection,
-        saved.partial_collection,
+      NativeCollectedBranchPublication.preserved?(
+        original.collected_publication,
+        saved.collected_publication,
         version
       ) and
+        NativePartialBranchCollection.preserved?(
+          original.partial_collection,
+          saved.partial_collection,
+          version
+        ) and
         NativePartialBranchDisposal.preserved?(
           original.partial_disposal,
           saved.partial_disposal,

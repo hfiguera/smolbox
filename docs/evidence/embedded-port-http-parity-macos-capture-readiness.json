@@ -1,0 +1,152 @@
+{
+  "schema": 1,
+  "status": "preserved-macos-completed-capture-readiness-failure",
+  "source_commit": "0b62119c33c6c56b56e49c9735d57b31de487577",
+  "native_source_commit": "164c3c9a9a58cee820d787bfee167157889c9667",
+  "manifest_sha256": "b7851d7e7f7b71c4c6067daa17a1ecc30fb418925e13e3139df9165edeebe700",
+  "helper_sha256": "4d9f8af23768c27d5c9f4a7d2f0309650f1a4c74747a6626b45d57fe2d029d0d",
+  "hex_sha256": "abb0dd1c82bf0bf0c40d2db8acb29068b745ee2982ce14019883f5ee8f063edc",
+  "sdk": {
+    "version": "1.22.0",
+    "revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "source_unmodified": true
+  },
+  "account": {
+    "uid": 509,
+    "standard_account": true,
+    "fresh_sdk_defaults": true
+  },
+  "completed_scope": {
+    "basic_seed_creation_and_start": true,
+    "guest_marker_command": true,
+    "full_capture_verified_bytes": 37219611,
+    "artifact_sha256": "255b3f36cff5c9aaa4ffd3ac959c5b05aee6d5f45c25e48477817b38e913da3b",
+    "capture_resolved_completed": true,
+    "artifact_never_used_as_retry_input": true
+  },
+  "failure": {
+    "stage": "first retained source command after completed capture",
+    "rejection": {
+      "category": "unknown",
+      "operation": "qualify_creation",
+      "evidence": "not_dispatched"
+    },
+    "command_not_accepted_or_replayed": true,
+    "later_management_state": "unknown",
+    "capture_remains_completed": true,
+    "other_consumers_not_started": true,
+    "cause": "Generic explicit capture resolution restarts recovery; recovery conservatively marks the running source unknown instead of preserving the same ready owner scan."
+  },
+  "ordinary_cleanup": {
+    "original_keeper_shutdown_acknowledged": true,
+    "native_processes": [],
+    "account_lock_available": true,
+    "sdk_table_counts": {
+      "vms": 1,
+      "vm_create_reservations": 0,
+      "vm_pause_operations": 0,
+      "config": 0,
+      "vm_resize_intents": 0,
+      "vm_resize_receipts": 0,
+      "fork_pools": 0,
+      "fork_pool_snapshots": 0,
+      "fork_pool_slots": 0,
+      "fork_leases": 0
+    },
+    "retained_sdk_state": "stopped",
+    "disks_and_completed_artifact_preserved": true,
+    "charges_retained": true,
+    "namespace_quarantined": true,
+    "authority_restored": false,
+    "forced_termination": false
+  },
+  "stopped_custody": {
+    "entries": 67,
+    "inventory_sha256": "bcb87d80fa1d354dd942dea70ad618ccfa35af823ae9fcac20dfc8ac83ba42f2",
+    "all_regular_copies_verified": true,
+    "nonregular_objects_skipped": 1
+  },
+  "codec_readers": {
+    "current": {
+      "files": [
+        {
+          "file": "current-checkpoints-evidence/private-records-captured.json",
+          "records": 2,
+          "versions": {
+            "smolbox-record-v23": 1,
+            "smolbox-record-v26": 1
+          }
+        },
+        {
+          "file": "current-checkpoints-evidence/private-records-failure.json",
+          "records": 2,
+          "versions": {
+            "smolbox-record-v23": 1,
+            "smolbox-record-v26": 1
+          }
+        },
+        {
+          "file": "current-checkpoints-evidence/private-records-shutdown-capturedshutdown1.json",
+          "records": 2,
+          "versions": {
+            "smolbox-record-v23": 1,
+            "smolbox-record-v26": 1
+          }
+        }
+      ],
+      "total_records": 6,
+      "semantic_roundtrip": true,
+      "envelope_versions_preserved": true,
+      "restored_as_authority": false
+    },
+    "minimum": {
+      "files": [
+        {
+          "file": "current-checkpoints-evidence/private-records-captured.json",
+          "versions": {
+            "smolbox-record-v23": 1,
+            "smolbox-record-v26": 1
+          },
+          "records": 2
+        },
+        {
+          "file": "current-checkpoints-evidence/private-records-failure.json",
+          "versions": {
+            "smolbox-record-v23": 1,
+            "smolbox-record-v26": 1
+          },
+          "records": 2
+        },
+        {
+          "file": "current-checkpoints-evidence/private-records-shutdown-capturedshutdown1.json",
+          "versions": {
+            "smolbox-record-v23": 1,
+            "smolbox-record-v26": 1
+          },
+          "records": 2
+        }
+      ],
+      "total_records": 6,
+      "semantic_roundtrip": true,
+      "envelope_versions_preserved": true,
+      "restored_as_authority": false
+    }
+  },
+  "correction": {
+    "source_commit": "f8f8156ea77ef925904f4fb158729270812c05b7",
+    "normal_captured_completion_preserves_prior_ready_scan_only": true,
+    "exact_committed_capture_binding_checked": true,
+    "same_helper_epoch_identity_and_lease_rechecked": true,
+    "unknown_capture_and_incomplete_startup_remain_frozen": true,
+    "control_callback_not_replayed": true,
+    "native_bundle_unchanged": true,
+    "expanded_current_tests_passed": 104,
+    "expanded_minimum_tests_passed": 104,
+    "deferred_excluded_each": 4,
+    "new_public_acceptance": "pending"
+  },
+  "parity_complete": false,
+  "crash_validation_deferred": true,
+  "crash_handling_qualified": false,
+  "distribution_approved": false
+}

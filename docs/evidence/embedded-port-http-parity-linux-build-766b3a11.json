@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "status": "linux-release-helper-witness-and-models-passed-native-qualification-pending",
+  "source_commit": "766b3a111eb07bf885641a20b6bb826b6cf39668",
+  "source_archive_sha256": "433c13cbc1a59d532500e7834099e5cb6f3909998112aa5b3e6be7e826cc0a58",
+  "source_files_verified": 1834,
+  "native_inputs_verified": 339,
+  "manifest_sha256": "0faf74dc85f82063f73441ef07612ec0230b2f1fe97aefafe11b65423149eb35",
+  "helper_sha256": "2655ed9b95ad43b354580d47e05acd113095908b0939754c4dbbf79545aecbc5",
+  "witness_sha256": "004c160686556894c4b6d0e3f044eb6df88953b6c7916f235ec232bb6c86101f",
+  "assets_verified": 806,
+  "build_stages": 12,
+  "all_stage_logs_results_and_manifest_verified": true,
+  "workspace_tests_passed": 1322,
+  "workspace_tests_ignored": 24,
+  "witness_tests_passed": 13,
+  "sdk_unmodified_before_after": true,
+  "source_asset_bytes_unchanged": true,
+  "native_owner_or_vm_started": false,
+  "ordinary_native_acceptance_pending": true,
+  "crash_validation_deferred": true,
+  "distribution_approved": false,
+  "full_http_parity_complete": false,
+  "private_evidence_sha256": {
+    "source-inputs.json": "101f96e7b27da086d5ec533a4926bd43d967aaa3716b19b98dc962756c482b43",
+    "build-compact.tar": "775efe698749b4841614dd5e285af8d6abfdd001c56a4fe237ebefb845c82ad4",
+    "build-compact-verification.json": "ab6401e19526028d756fb8d1d00df0cd42f66f4f5958881a6c3c162b9bd3d7be",
+    "freeze-build.py": "5d9593f75d9f305467a48d61c0aafe65a5f52fa3d1fba433b5d25d5341fba809"
+  }
+}

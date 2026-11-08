@@ -1,0 +1,141 @@
+{
+  "schema": 1,
+  "status": "frozen-linux-release-helper-models-package-and-unmodified-source-checks-passed-live-recovery-pending",
+  "source_commit": "02f692f3e97bcf9f9837c599c57c5534340130ce",
+  "source_archive_sha256": "a4c7c59d5f958b1006f3f0de5870c51ac6a31ca21fc3da65bb4aa21fdcac86d5",
+  "hex_archive_sha256": "5f25fdb675d4bb549e9e49d6f4a24fa246378be59c50cda6a0e13e72f4a7211c",
+  "source_files_verified": 1819,
+  "native_inputs_verified": 337,
+  "native_manifest_sha256": "587e2ae5795d616fed940438c7ca24506349d7317e1d039289f6b6f8739b1001",
+  "helper_sha256": "736f6522be5d842eeece964f93d6f0d1f71fb8d9fd78765bcbeedf830c632565",
+  "assets_verified_unchanged": 806,
+  "sdk_source_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "sdk_unmodified_regular_and_clean_before_after": true,
+  "input_assets_bytes_unchanged": true,
+  "stages": [
+    {
+      "stage": "toolchain",
+      "exit_status": 0,
+      "sha256": "2073de5abf149185c2f4d7473dc833bc921b99135560d24ae7b2293f33a9c376",
+      "summaries": []
+    },
+    {
+      "stage": "bootstrap",
+      "exit_status": 0,
+      "sha256": "f5635a5ea6e5c7bd5a4dcf2697ad74b564d970d2e741b9227a827a1a3d851f88",
+      "summaries": []
+    },
+    {
+      "stage": "sdk-before",
+      "exit_status": 0,
+      "sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "summaries": []
+    },
+    {
+      "stage": "clean-bootstrap",
+      "exit_status": 0,
+      "sha256": "f5635a5ea6e5c7bd5a4dcf2697ad74b564d970d2e741b9227a827a1a3d851f88",
+      "summaries": []
+    },
+    {
+      "stage": "clean-sdk-before",
+      "exit_status": 0,
+      "sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "summaries": []
+    },
+    {
+      "stage": "build-helper",
+      "exit_status": 0,
+      "sha256": "c2578b52ce65e7d6dbcf159d2c89a4be32f6095ab9ec9cb7b7aac4fcb78d88bc",
+      "summaries": []
+    },
+    {
+      "stage": "collection-models",
+      "exit_status": 0,
+      "sha256": "38c3a4afe39f6bd4d7e7170aef4154cb517fe6678ddaf0de81334e0c5d4bb401",
+      "summaries": [
+        "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1085 filtered out; finished in 0.00s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "stage": "lifecycle-preflight-models",
+      "exit_status": 0,
+      "sha256": "868947f7adff6a075acfa6ee5ee512bda7b20eea5128451aaaaf9d5b56c80c4f",
+      "summaries": [
+        "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1082 filtered out; finished in 1.19s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "stage": "protocol-preflight",
+      "exit_status": 0,
+      "sha256": "cba43cb7715d632877dc24a56b845e964ebd923f3fc290fc560c6f1716fd4d33",
+      "summaries": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 102 filtered out; finished in 0.00s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 59 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "stage": "port-preflight",
+      "exit_status": 0,
+      "sha256": "446783d1fa4814e12e9c61cf8fbe24f34b0a965d1897affd54173c59813a58b8",
+      "summaries": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 92 filtered out; finished in 0.32s"
+      ]
+    },
+    {
+      "stage": "port-branch",
+      "exit_status": 0,
+      "sha256": "2803fdb131a5b3dbfe2153a43a8ce5453af5e3596c7ec48129c0f09d46e025f7",
+      "summaries": [
+        "test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 76 filtered out; finished in 2.13s"
+      ]
+    },
+    {
+      "stage": "package",
+      "exit_status": 0,
+      "sha256": "726563ab0eed1f77a90dc983b144b29dbb9dbbe4a33816b99d063e91a4e83c3f",
+      "summaries": []
+    },
+    {
+      "stage": "sdk-after",
+      "exit_status": 0,
+      "sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "summaries": []
+    },
+    {
+      "stage": "clean-sdk-after",
+      "exit_status": 0,
+      "sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "summaries": []
+    }
+  ],
+  "compact_build_archive_sha256": "949522ab206bef6e0a00fc74be494060001b87122bd349af78d6a8835d7d4d41",
+  "all_stage_log_hashes_and_manifest_verified_on_mac": true,
+  "ordinary_sdk_vm_or_runtime_owner_started_for_build": false,
+  "helper_feature": {
+    "branches": 1,
+    "partial_collection_preflight": 1
+  },
+  "macos_policy_changed": false,
+  "positive_live_partial_collection_or_unbooted_postgresql_qualified": false,
+  "remaining": [
+    "Fresh current/minimum ordinary original-context recovery with exact package",
+    "Remaining P0\u2013P9 source/platform/resource/upgrade acceptance; existing macOS custody remains untouched"
+  ],
+  "full_parity_rows_closed": 0,
+  "full_http_parity_complete": false,
+  "crash_validation_deferred": true,
+  "crash_handling_qualified": false,
+  "distribution_approved": false,
+  "documentation_checks": {
+    "tests_passed": 7,
+    "exdoc_warnings_as_errors_local_link_pages": 177,
+    "log_sha256": {
+      "build-doc-tests.log": "88a17a10fd10a4575224afc3e881b0a2148ec77900296dfcfca5da1c0c9542fe",
+      "build-docs.log": "2685e6b37d98831478f9f025c988041fc9239895ce883eeb37e8d019683bdf33"
+    }
+  }
+}

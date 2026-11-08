@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "status": "first-macos-candidate-failed-input-mode-check-private-copy-rebuild-running",
+  "source_commit": "766b3a111eb07bf885641a20b6bb826b6cf39668",
+  "all_eight_build_package_signature_sdk_stages_exit_zero": true,
+  "overall_first_candidate_accepted": false,
+  "failed_postcondition": "Input libkrun.dylib mode changed from 0755 to 0700 under a private umask.",
+  "input_library_bytes_unchanged": true,
+  "source_mode_restored_from_verified_manifest": true,
+  "source_assets_verified_after_restoration": 809,
+  "no_active_source_package_file_references_observed": true,
+  "upstream_behavior": "Unmodified SDK build.rs runs install_name_tool and ad-hoc codesign on the supplied LIBKRUN_BUNDLE library.",
+  "upstream_source_modified": false,
+  "existing_build_guidance": "native/README.md:171 requires a private library copy",
+  "workflow_error_acknowledged": true,
+  "retry_uses_private_link_library_copy": true,
+  "failed_candidate_manifest_sha256": "a70088a57ff7880017da012f762afa89a97ae5fd36d48c914e29dbbe6216ad0c",
+  "failed_candidate_helper_sha256": "407bcee7bb54123083690fe52dcd917047f2c038894db882b70f069b7a40cfb5",
+  "failed_candidate_retained": true,
+  "native_owner_or_vm_started": false,
+  "sdk_namespace_or_records_repaired": false,
+  "ordinary_native_acceptance_claimed": false,
+  "crash_validation_deferred": true,
+  "distribution_approved": false,
+  "private_evidence_sha256": {
+    "mac-build-results.json": "d43571561a9f6846b1a5be5a963ea1ba7e8aa08a450353b77a2451fe0f1e54ba",
+    "mac-input-asset-change.json": "5669c398b8bf32f7d6161b66c5c0c989f807afe37e47ed71f1d55a55cfa2a985",
+    "mac-input-mode-restored.json": "e58aa74261f3b7e69975e4419379fca2167586b24b11f44ca882f46b7d1a1ebf",
+    "build-macos-retry1.py": "545b66f23e65bb51eff0a6163401ac23eeef64fcd550a3e05d4cbf3de75eb1f8"
+  }
+}

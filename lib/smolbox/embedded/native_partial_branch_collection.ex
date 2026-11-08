@@ -4,7 +4,7 @@ defmodule SmolBox.Embedded.NativePartialBranchCollection do
     BranchCanonical,
     NativeBranchBacking,
     NativeBranchRetirement,
-    NativeGrowth,
+    NativeCollectedBranchPublication,
     PartialBranchChildAbsence,
     PartialBranchCollection
   }
@@ -103,17 +103,9 @@ defmodule SmolBox.Embedded.NativePartialBranchCollection do
   end
 
   def source_pending?(parent, child) do
-    case NativeGrowth.head(parent) do
-      {:ok, receipt, _, _} ->
-        parent.active_branch == child.id and parent.operation == :branch and
-          parent.branch_children[child.id] == false and
-          not Map.has_key?(parent.native_branch_history, child.id) and
-          same_worker_source?(parent, child) and
-          receipt == child.branch.native_authority.request["source"]
-
-      _ ->
-        false
-    end
+    parent.active_branch == child.id and parent.operation == :branch and
+      parent.branch_children[child.id] == false and same_worker_source?(parent, child) and
+      NativeCollectedBranchPublication.source_pending?(parent, child)
   end
 
   defp same_worker_source?(parent, child),

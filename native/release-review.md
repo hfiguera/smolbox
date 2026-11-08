@@ -10,20 +10,44 @@ The helper uses SDK 1.22.0 revision
 `9f446ae00219148ca4a703914f44a8e2fab11655`. Bootstrap verifies the source archive,
 complete unmodified content/mode inventory and lock inputs recorded in
 `vendor/source.json`. It rejects patch lists and native Cargo source overrides.
-The clean development packages have been rebuilt with exact source/policy bytes
-and complete asset inventories verified. Linux/macOS ordinary platform/consumer
-qualification passed, and the macOS signature/entitlement were verified. Old patched
-package identities and proof results remain historical. A digest establishes
+The earlier clean engine-0.1.0 development packages have their own ordinary
+Linux/macOS platform/consumer evidence. Those results remain attached to their
+exact identities. Expanded engine-0.2.0 packages need their own source, policy,
+asset and ordinary feature acceptance. At source 766b3a11, the isolated macOS
+build passes eight compile/package/signature/source-integrity stages on manifest
+947ad46c/helper 407bcee7; this is build evidence, with native qualification still
+pending. See the [current completion audit](../docs/design/embedded-port-http-parity-completion-audit.md)
+and [scoped build record](../docs/evidence/embedded-port-http-parity-macos-build-766b3a11.json).
+The matching [Linux build](../docs/evidence/embedded-port-http-parity-linux-build-766b3a11.json)
+passes 12 stages, 1,322 workspace tests (24 ignored) and 13 witness models on
+manifest 0faf74dc/helper 2655ed9b. Neither build starts a native owner or VM.
+Old patched package identities and proof results remain historical. A digest establishes
 integrity of approved bytes; it is not publisher authentication or a reproducible
 build attestation.
+
+The [corrected macOS ordinary package](../docs/evidence/embedded-port-http-parity-macos-relay-ordinary-7b05cf60.json) at source 7b05cf60 uses manifest 0735ee82/helper d1f8a583. Exact current/minimum no-Rust public consumers now pass offline local-container lifecycle/files/managed terminals, draining, normal stopped-machine Runtime replacement with Memory alive and owned cleanup. All 809 assets verify after use; original build inputs retain their bytes and modes. This scoped development acceptance does not supply full HTTP parity, changed-helper upgrade, crash qualification, publisher authentication or distribution approval. Earlier failed attempts keep their own preserved evidence.
+
+The [f1f250d3 source/image package](../docs/evidence/embedded-port-http-parity-macos-public-sources-f1f250d3.json)
+adds four scoped macOS current/minimum no-Rust public consumers on manifest
+1a8e644f/helper fe85a410. Configured OCI/images and offline bare registry
+cold/warm workflows pass binary files, normal Runtime replacement and owned
+cleanup. All 656 installed files and seven proof inputs per consumer verify;
+both private archives and semantic v19 readers verify. SDK tables and native
+process inventories end empty, the account lock is free and all 809 package
+assets unchanged. This is development feature acceptance. Publisher signing,
+notarization, firmware/source correspondence and license delivery remain open;
+no broader parity, helper-upgrade or crash qualification is inferred.
 
 The updated builder includes `SMOLBOX-LICENSE`, `SMOLVM-LICENSE`,
 `SMOLVM-LICENSES.md` and `NATIVE-SOURCE.json` in the hashed asset inventory. Earlier
 packages carried two SDK license files outside that inventory. These packages have
 distinct manifest and asset digests; evidence does not transfer between them.
-`NATIVE-SOURCE.json` describes helper/SDK inputs, not complete firmware provenance.
+`NATIVE-SOURCE.json` identifies the pinned SDK archive/inventory. It is not a
+complete SmolBox source-commit, dependency or firmware attestation. Separate
+source inventories and build records must bind the helper's actual engine and
+bridge source to its executable digest.
 
-Clean packages use manifest schema 2. They require the exact compiled policy in
+Earlier clean engine-0.1.0 packages use manifest schema 2. They require the exact compiled policy in
 both the manifest and hashed `SMOLBOX-POLICY.json`, plus exact compiled source
 metadata in hashed `NATIVE-SOURCE.json`. Policy version 1 records exclusive
 cooperating domain ownership, observation schema 1, and versions of SmolBox's
@@ -35,6 +59,23 @@ admission. Approved legacy schema 1 / Hello 1.3 packages retain their original
 limits and cannot satisfy a clean manifest. Old manifest approvals cannot be
 substituted for changed source/build/asset/policy identities. This integrity check
 does not authenticate a publisher or establish firmware correspondence.
+
+Expanded engine-0.2.0 packages use manifest schema 3, policy schema 2,
+configuration schema 2 and Port protocol 2.0. SDK version/revision remain
+independent of those SmolBox versions. The compiled platform policy, SDK feature
+versions, limits, hashed policy/source metadata and approved package identity
+must agree. Optional descriptor presence is not ordinary qualification, and
+the [current admission audit](../docs/evidence/embedded-port-http-parity-current-admission-audit.json)
+records required features still absent from the Linux/macOS approval policies.
+Legacy 1.3/1.4 readers and older receipts keep their own versions; a changed
+package cannot adopt their operational authority by relabelling it.
+
+macOS builds must give the unmodified SDK a private working library copy through
+`LIBKRUN_BUNDLE`: upstream build logic rewrites/re-signs that directory. The
+[recorded input-mode incident](../docs/evidence/embedded-port-http-parity-macos-build-input-mode.json)
+and subsequent isolated rebuild distinguish successful package signing from input
+preservation. Neither action opens the quarantined SDK domain or grants native
+feature acceptance.
 
 macOS development builds are ad-hoc signed with hypervisor entitlements. Linux
 packages are digest pinned. `--signing-identity` supports an explicit macOS identity
@@ -80,6 +121,9 @@ complete crash qualification is not claimed. The latest
 an unresolved Linux verification failure and the stop request.
 
 Distribution approval remains separate: complete independent SDK interference
-races, exact native source/license delivery, publisher provenance and distribution
-signing, then rerun consumers against the resulting bytes. No native package is
+races when separately authorized, exact native source/license delivery, publisher
+provenance and distribution signing, then rerun consumers against the resulting
+bytes. Ordinary HTTP-parity completion also requires all current operation,
+source, platform, durable-store and upgrade gates in the completion audit;
+historical offline qualification cannot close them. No native package is
 published by this change. Local manifest approval is not publisher authentication.

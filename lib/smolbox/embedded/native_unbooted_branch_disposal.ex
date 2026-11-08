@@ -5,7 +5,7 @@ defmodule SmolBox.Embedded.NativeUnbootedBranchDisposal do
     BranchCanonical,
     NativeBranchBacking,
     NativeBranchRetirement,
-    NativeGrowth,
+    NativeCollectedBranchPublication,
     UnbootedBranchChildAbsence,
     UnbootedBranchDisposal
   }
@@ -105,15 +105,13 @@ defmodule SmolBox.Embedded.NativeUnbootedBranchDisposal do
   def pending?(parent, child) do
     with :ok <- ManagedMachine.validate(parent),
          :ok <- ManagedMachine.validate(child),
-         true <- eligible?(child),
-         {:ok, receipt, _, _} <- NativeGrowth.head(parent) do
+         true <- eligible?(child) do
       parent.active_branch == child.id and parent.operation == :branch and
         parent.branch_children[child.id] == false and
-        not Map.has_key?(parent.native_branch_history, child.id) and
         parent.worker_id == child.worker_id and
         parent.worker_generation == child.worker_generation and
         child.branch.source == ManagedMachine.key(parent) and
-        receipt == child.branch.native_authority.request["source"]
+        NativeCollectedBranchPublication.source_pending?(parent, child)
     else
       _ -> false
     end

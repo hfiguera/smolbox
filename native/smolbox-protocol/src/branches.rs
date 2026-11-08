@@ -122,6 +122,21 @@ pub struct BranchCreateRequest {
     pub initial_release: Option<BranchReleaseRequest>,
 }
 impl BranchCreateRequest {
+    /// Publication binds material only. The engine must separately retain this
+    /// full creation, including initial activation, in its original registry.
+    pub fn matches_publication(
+        &self,
+        publication: &BranchPublication,
+    ) -> Result<(), InvalidMessage> {
+        self.validate()?;
+        publication.validate()?;
+        let intent = &publication.change.child_origin.intent;
+        check(
+            publication.previous == self.source
+                && intent.child == self.child
+                && intent.approval == self.approval,
+        )
+    }
     pub fn validate(&self) -> Result<(), InvalidMessage> {
         self.source.validate_for(2)?;
         self.child.validate(&self.source)?;
@@ -489,6 +504,18 @@ mod tests {
         epoch: Option<String>,
         platform: Option<String>,
     ) -> Session {
+        let operation = Operation::ResolveReadyBranchCompletion {
+            request: Box::new(serde_json::from_value(row["request"].clone()).unwrap()),
+            quiesced: true,
+        };
+        control_session(row, operation, epoch, platform)
+    }
+    fn control_session(
+        row: &serde_json::Value,
+        operation: Operation,
+        epoch: Option<String>,
+        platform: Option<String>,
+    ) -> Session {
         let value: serde_json::Value =
             serde_json::from_str(include_str!("../fixtures/hello-v2.json")).unwrap();
         let ServerMessage::Hello { hello } = ServerMessage::decode(value).unwrap() else {
@@ -509,10 +536,6 @@ mod tests {
         h.limits = Limits::for_sdk(sdk);
         let mut session = Session::new(h.clone()).unwrap();
         session.approve(&h).unwrap();
-        let operation = Operation::ResolveReadyBranchCompletion {
-            request: Box::new(serde_json::from_value(row["request"].clone()).unwrap()),
-            quiesced: true,
-        };
         let response = session
             .admit(ClientMessage::Request {
                 epoch: h.epoch,
@@ -525,6 +548,93 @@ mod tests {
             .unwrap();
         assert!(matches!(response, ServerMessage::Accepted { .. }));
         session
+    }
+    #[test]
+    fn collected_publication_is_a_bounded_material_control_without_activation_evidence() {
+        for row in rows() {
+            let request: BranchCreateRequest =
+                serde_json::from_value(row["request"].clone()).unwrap();
+            let completion: BranchCompletion =
+                serde_json::from_value(row["completion"].clone()).unwrap();
+            request
+                .matches_publication(&completion.publication)
+                .unwrap();
+            let operation = Operation::PublishCollectedBranchMaterial {
+                request: Box::new(request.clone()),
+                quiesced: true,
+            };
+            operation.validate(30_000).unwrap();
+            assert!(operation.validate(30_001).is_err());
+            assert!(operation.capability() == Capability::Create && operation.requires_branches());
+            assert!(operation.receipt() == Some(&request.source));
+            assert!(operation.branch_approval() == Some(&request.approval));
+            let mut wire = serde_json::to_value(&operation).unwrap();
+            assert!(serde_json::from_value::<Operation>(wire.clone())
+                .unwrap()
+                .validate(30_000)
+                .is_ok());
+            wire["quiesced"] = false.into();
+            assert!(serde_json::from_value::<Operation>(wire.clone())
+                .unwrap()
+                .validate(30_000)
+                .is_err());
+            wire["quiesced"] = serde_json::Value::Null;
+            assert!(serde_json::from_value::<Operation>(wire).is_err());
+            let outcome = Outcome::CollectedBranchMaterialPublished {
+                publication: Box::new(completion.publication.clone()),
+            };
+            outcome.validate_for(2).unwrap();
+            assert!(outcome.validate_for(1).is_err());
+            if let Some(release) = &request.initial_release {
+                let mut changed_activation = request.clone();
+                changed_activation
+                    .initial_release
+                    .as_mut()
+                    .unwrap()
+                    .operation_id = format!("changed-{}", release.operation_id);
+                changed_activation
+                    .matches_publication(&completion.publication)
+                    .unwrap();
+                assert!(completion.matches(&changed_activation).is_err());
+            }
+        }
+    }
+    #[test]
+    fn collected_publication_session_rejects_crossed_child_epoch_platform_or_ready_outcomes() {
+        for row in rows() {
+            let original: BranchCreateRequest =
+                serde_json::from_value(row["request"].clone()).unwrap();
+            let completion: BranchCompletion =
+                serde_json::from_value(row["completion"].clone()).unwrap();
+            for crossed in 0..6 {
+                let mut request = original.clone();
+                if crossed == 1 {
+                    request.child.name.push_str("-crossed");
+                }
+                let operation = Operation::PublishCollectedBranchMaterial {
+                    request: Box::new(request),
+                    quiesced: true,
+                };
+                let epoch = (crossed == 2).then(|| "f".repeat(32));
+                let platform = (crossed == 3).then(|| "linux".into());
+                let mut session = control_session(&row, operation, epoch, platform);
+                assert!(session
+                    .event(1, Stream::Stdout, b"unexpected output")
+                    .is_err());
+                let outcome = match crossed {
+                    4 => Outcome::BranchCompletionPresence {
+                        completion: Some(Box::new(completion.clone())),
+                    },
+                    5 => Outcome::BranchCreated {
+                        completion: Box::new(completion.clone()),
+                    },
+                    _ => Outcome::CollectedBranchMaterialPublished {
+                        publication: Box::new(completion.publication.clone()),
+                    },
+                };
+                assert_eq!(session.terminal(1, outcome).is_ok(), crossed == 0);
+            }
+        }
     }
     #[test]
     fn explicit_ready_handoff_has_exact_finite_fenced_protocol_two_authority() {

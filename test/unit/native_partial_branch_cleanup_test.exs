@@ -245,7 +245,7 @@ defmodule SmolBox.NativePartialBranchCleanupTest do
              )
 
     assert {:ok, %{native_partial_branch_cleanups: 1} = caps} = Memory.capabilities(store)
-    refute Map.has_key?(caps, :native_branches)
+    assert caps.native_branches == 1
     assert {:error, _} = Branch.validate(%{pending.branch | native_authority: nil})
   end
 

@@ -1,0 +1,185 @@
+{
+  "schema": 1,
+  "status": "both-ordinary-completions-passed-partial-collection-target-unqualified",
+  "request_timeout_ms": 3000,
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "sdk_unmodified": true,
+  "cases": {
+    "current": {
+      "toolchain": {
+        "elixir": "1.20.4",
+        "otp": "29.0.6"
+      },
+      "installed_consumer_without_rust": true,
+      "public_pipeline_exit_status": 0,
+      "source_files_verified": 1823,
+      "installed_package_files_verified": 635,
+      "assets_verified": 806,
+      "actual_recovery_family": "completed_before_deadline",
+      "partial_target_exercised": false,
+      "owned_cleanup": true,
+      "normal_native_and_sql_shutdown": true,
+      "remaining_account_processes": 0,
+      "native_account_lock_available": true,
+      "sdk_counts": {
+        "vms": 0,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0
+      },
+      "vm_caches_empty": true,
+      "sql_projection_zero_and_payloads_encrypted": true,
+      "normal_beam_durable_readback_records": 3,
+      "saved_backing_acknowledgements_without_worker": 1,
+      "final_resources": {
+        "slots": 0,
+        "cpus": 0,
+        "memory_mb": 0,
+        "disk_gb": 0
+      },
+      "archive_sha256": "69d103184dbea3471c0ca1eb96091be84fed01c9bf567d84c3b013732a83d3d2",
+      "archive_bytes": 390217048,
+      "archive_members": 12613,
+      "sdk_backup_sha256": "43673b6ba4f9e27bdea3673af6d19a5d0c96a82e4baffe0c6d8a9c34ef3bf684",
+      "logical_sql_backup_sha256": "e44958c32d620f46b6a4d2910d3bda62a874b18ef0c711118a1dbdab2078671f",
+      "compact_files_verified_against_full_archive": 79,
+      "cold_postgresql_files_verified": 1317,
+      "full_archive_and_backups_verified_guest_outer_mac": true,
+      "full_archive_retained_on_mac": false,
+      "authority_restored_or_replayed": false
+    },
+    "minimum": {
+      "toolchain": {
+        "elixir": "1.18.4",
+        "otp": "27.3.4.15"
+      },
+      "installed_consumer_without_rust": true,
+      "public_pipeline_exit_status": 0,
+      "source_files_verified": 1823,
+      "installed_package_files_verified": 635,
+      "assets_verified": 806,
+      "actual_recovery_family": "completed_before_deadline",
+      "partial_target_exercised": false,
+      "owned_cleanup": true,
+      "normal_native_and_sql_shutdown": true,
+      "remaining_account_processes": 0,
+      "native_account_lock_available": true,
+      "sdk_counts": {
+        "vms": 0,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0
+      },
+      "vm_caches_empty": true,
+      "sql_projection_zero_and_payloads_encrypted": true,
+      "normal_beam_durable_readback_records": 3,
+      "saved_backing_acknowledgements_without_worker": 1,
+      "final_resources": {
+        "slots": 0,
+        "cpus": 0,
+        "memory_mb": 0,
+        "disk_gb": 0
+      },
+      "archive_sha256": "7da3693fb856be33a210b58293258050a4676cd07ba2433da95dad8cbc23ca37",
+      "archive_bytes": 390235715,
+      "archive_members": 12629,
+      "sdk_backup_sha256": "8478f632364d2d95f0996c3007a0e3f9a83c6b17bd9894fb226d18ff959754e9",
+      "logical_sql_backup_sha256": "54d250eedf377816bf96c2baeb698e898df50c30da1dc8f22654060fdff9b6f8",
+      "compact_files_verified_against_full_archive": 79,
+      "cold_postgresql_files_verified": 1318,
+      "full_archive_and_backups_verified_guest_outer_mac": true,
+      "full_archive_retained_on_mac": false,
+      "authority_restored_or_replayed": false
+    }
+  },
+  "codec_readers": [
+    {
+      "lane": "current",
+      "reader_minimum": false,
+      "checkpoints": 4,
+      "checkpoint_records_decoded_and_roundtripped": 12,
+      "original_creation_unchanged": true,
+      "partial_collection_saved": false,
+      "completed_branch_proof_valid": true,
+      "final_usage": {
+        "slots": 0,
+        "cpus": 0,
+        "memory_mb": 0,
+        "disk_gb": 0
+      },
+      "runtime_sdk_or_vm_owner_started": false
+    },
+    {
+      "lane": "minimum",
+      "reader_minimum": false,
+      "checkpoints": 4,
+      "checkpoint_records_decoded_and_roundtripped": 12,
+      "original_creation_unchanged": true,
+      "partial_collection_saved": false,
+      "completed_branch_proof_valid": true,
+      "final_usage": {
+        "slots": 0,
+        "cpus": 0,
+        "memory_mb": 0,
+        "disk_gb": 0
+      },
+      "runtime_sdk_or_vm_owner_started": false
+    },
+    {
+      "lane": "current",
+      "reader_minimum": true,
+      "checkpoints": 4,
+      "checkpoint_records_decoded_and_roundtripped": 12,
+      "original_creation_unchanged": true,
+      "partial_collection_saved": false,
+      "completed_branch_proof_valid": true,
+      "final_usage": {
+        "slots": 0,
+        "cpus": 0,
+        "memory_mb": 0,
+        "disk_gb": 0
+      },
+      "runtime_sdk_or_vm_owner_started": false
+    },
+    {
+      "lane": "minimum",
+      "reader_minimum": true,
+      "checkpoints": 4,
+      "checkpoint_records_decoded_and_roundtripped": 12,
+      "original_creation_unchanged": true,
+      "partial_collection_saved": false,
+      "completed_branch_proof_valid": true,
+      "final_usage": {
+        "slots": 0,
+        "cpus": 0,
+        "memory_mb": 0,
+        "disk_gb": 0
+      },
+      "runtime_sdk_or_vm_owner_started": false
+    }
+  ],
+  "source_commit": "8686e179ceb4232774d97552fa09602fa9d7eaa8",
+  "manifest_sha256": "acf8cbdaa1d1c0897735b633b9848fea62427b6731cfd1631e03e873c21eb2ed",
+  "helper_sha256": "8ca58cf6dcc5dc075dcc4daa39052734a65b56ca81d98bab0e1fb09f88d7c76c",
+  "hex_sha256": "b8d349cdbea0d4f007ed0426c50ff03024524be0c618e9d1bbd47f6c8152b2b5",
+  "native_partial_collection_qualified": false,
+  "full_http_parity_complete": false,
+  "crash_validation_deferred": true,
+  "distribution_approved": false,
+  "remaining": [
+    "Positive ordinary partial collection/publication/disposal on current and minimum toolchains",
+    "Remaining P0\u2013P9 source/platform/resource/upgrade requirements"
+  ],
+  "private_evidence_sha256": {
+    "partial-pg-proof.exs": "e3e600f0709f1a4bac080427e03ad6e3e6ff88f28eaab213c66c2681d8f5848e",
+    "partial-pg-workflow.json": "36337b44195e83b38a579288eee970d6c511a11a65a579f9eb2ad188a6f3ad88",
+    "custody-success.py": "77d7b1d493709cce8b958ba61629ee48f33b05058b0a862dbd6e52cb0a58e35c",
+    "preserve-success.py": "b4e7129601f994d668377714a2680a73ed3ddf444a8663c9da37a9e6f15adb6b",
+    "collect-native-cases.py": "b39676b538df15bedfe8bff2584ccf423ac7cf6a8d4d7c309eb4d1e05c335ff3",
+    "verify-native-stream.py": "fa455a0a2cb3e32b7498297d9d13226332c54ecf648adb6e28b6c7d677afbc6e",
+    "read-native-cases.exs": "4c01f28dd2ebe5a897a45164c385079cc00e94ac25ffece401dd20c74478ca8a",
+    "native-codec-results.json": "0f33ada68e59d5ac5eaf8a63484aef3bdb6cea413bc2fc67a6414490ce7c9818"
+  }
+}

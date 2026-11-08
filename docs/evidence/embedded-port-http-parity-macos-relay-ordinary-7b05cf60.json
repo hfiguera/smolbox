@@ -1,0 +1,187 @@
+{
+  "schema": 1,
+  "status": "scoped-macos-current-minimum-public-lifecycle-terminal-passed",
+  "source_commit": "7b05cf6020907d876336b6864d19fe219b199e66",
+  "source_archive_sha256": "c177067b27c9f07e57489020056f0f3fcf225f9f4987522006efd7383051947c",
+  "hex_archive_sha256": "e0896e058cbde8f97dc0d02307dae3df44b80c69b0340b998aa1dfd78588f7d2",
+  "manifest_sha256": "0735ee827497dd4e133b28ca4a763a1c5387dd4ae435a64788099371402775e9",
+  "helper_sha256": "d1f8a5838336e0e37e5ade26c9063aaddbb56bb8d3d743e0aeec0171bf739c19",
+  "sdk": {
+    "version": "1.22.0",
+    "revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "source": "unmodified"
+  },
+  "package_versions": {
+    "manifest_schema": 3,
+    "engine": "0.2.0",
+    "policy_schema": 2,
+    "config_schema": 2,
+    "port_protocol": "2.0"
+  },
+  "fixture_sha256": "0f4a26a548738c6ba359701ea23c5d2bbb93f0c1d95f6444df897bfa99e27aa2",
+  "setup": {
+    "fresh_standard_account": true,
+    "actual_uid": 504,
+    "passwd_home_matches": true,
+    "administrator": false,
+    "sdk_defaults_absent_before_enrollment": true,
+    "source_files_verified_unchanged": 1844,
+    "native_inputs": 339,
+    "package_assets_verified_before_after": 809,
+    "original_build_input_assets_bytes_and_modes_unchanged": 809,
+    "development_signature_verified": true
+  },
+  "scope": {
+    "platform": "macOS arm64",
+    "source": "approved offline local-container fixture",
+    "store": "Memory survives normal stopped-machine Runtime replacement",
+    "public_no_rust_consumers": [
+      "current",
+      "minimum"
+    ],
+    "changed_helper_upgrade_or_beam_loss_qualified": false,
+    "network_remote_sources_volumes_growth_exports_checkpoints_branches_accepted_by_this_run": false
+  },
+  "consumers": {
+    "current": {
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "package_files_verified": 654,
+      "proof_tools_verified": 4,
+      "minimum_dependencies": null,
+      "checks": {
+        "without_rust": true,
+        "disposable_exit": 7,
+        "retained_write_exit": 7,
+        "file_bytes": 1048593,
+        "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+        "drain_blocks_new_assignments": true,
+        "existing_command_while_draining": true,
+        "retained_after_normal_runtime_restart": true,
+        "drain_survives_runtime_restart": true,
+        "resume_version_checked": true,
+        "owned_deleted": true,
+        "final_reserved_slots": 0,
+        "inventory_before": [],
+        "inventory_after": [],
+        "terminal": {
+          "binary_input_bytes": 3,
+          "binary_output_verified": true,
+          "codec": 17,
+          "deliberate_process_interruption": false,
+          "duplicate_open_reuses_execution": true,
+          "exercised": true,
+          "observed_exit": 7,
+          "resize": {
+            "cols": 120,
+            "rows": 43
+          },
+          "scope": "ordinary-public-retained-image-pty",
+          "slot_released": true,
+          "transcript_persisted": false
+        }
+      }
+    },
+    "minimum": {
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "package_files_verified": 654,
+      "proof_tools_verified": 4,
+      "minimum_dependencies": {
+        "jason": "1.4.0",
+        "mint": "1.11.0",
+        "mint_web_socket": "1.0.6",
+        "nimble_options": "1.1.0",
+        "req": "0.7.4",
+        "telemetry": "1.3.0"
+      },
+      "checks": {
+        "without_rust": true,
+        "disposable_exit": 7,
+        "retained_write_exit": 7,
+        "file_bytes": 1048593,
+        "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+        "drain_blocks_new_assignments": true,
+        "existing_command_while_draining": true,
+        "retained_after_normal_runtime_restart": true,
+        "drain_survives_runtime_restart": true,
+        "resume_version_checked": true,
+        "owned_deleted": true,
+        "final_reserved_slots": 0,
+        "inventory_before": [],
+        "inventory_after": [],
+        "terminal": {
+          "binary_input_bytes": 3,
+          "binary_output_verified": true,
+          "codec": 17,
+          "deliberate_process_interruption": false,
+          "duplicate_open_reuses_execution": true,
+          "exercised": true,
+          "observed_exit": 7,
+          "resize": {
+            "cols": 120,
+            "rows": 43
+          },
+          "scope": "ordinary-public-retained-image-pty",
+          "slot_released": true,
+          "transcript_persisted": false
+        }
+      }
+    }
+  },
+  "final_state": {
+    "sdk_table_counts": {
+      "vms": 0,
+      "vm_create_reservations": 0,
+      "vm_pause_operations": 0,
+      "config": 0,
+      "vm_resize_intents": 0,
+      "vm_resize_receipts": 0,
+      "fork_pools": 0,
+      "fork_pool_snapshots": 0,
+      "fork_pool_slots": 0,
+      "fork_leases": 0
+    },
+    "native_helper_vm_or_beam_process_remaining": false,
+    "native_account_lock_available": true,
+    "uncertain_work_replayed": false,
+    "previous_failed_domains_reopened_reset_or_deleted": false
+  },
+  "regressions": {
+    "worker_relay_failed_before_passed_after": true,
+    "terminal_long_spool_worker_failed_old_helper_passed_new_helper": true,
+    "mac_agent_io_models": 10,
+    "mac_owner_exchange_models": 6,
+    "mac_terminal_io_models": 4,
+    "mac_bootstrap_worker_peer": 1,
+    "mac_terminal_long_worker_peer": 1,
+    "linux_agent_io_models": 10,
+    "linux_owner_exchange_models": 6,
+    "linux_terminal_io_models": 4,
+    "linux_terminal_long_worker_peer": 1,
+    "linux_terminal_helper_sha256": "495555e64e8cb6fec10f5bf29009cd7b88a9438034b8ad9f97d64396801a9277",
+    "mac_engine_all_targets_clippy": "passed",
+    "format": "passed",
+    "regular_clean_sdk_checks": "passed"
+  },
+  "custody": {
+    "private_public_evidence_archive_sha256": "5d950640f58e1c3a527df6e06e551845256f8b9a1dbe2e77dbefe4928e9afeb7",
+    "private_public_evidence_members": 25,
+    "all_public_evidence_archive_members_verified": true,
+    "linux_terminal_compact_sha256": "220722e2c5b9eaeb2f93a9608e96258b03518bb00db65506b8581d5bffbfe1ed",
+    "linux_terminal_compact_members": 11,
+    "all_linux_compact_logs_verified": true
+  },
+  "ordinary_scope_accepted": true,
+  "full_feature_parity_claimed": false,
+  "crash_validation_deferred": true,
+  "distribution_approved": false,
+  "private_evidence_sha256": {
+    "public-consumer-verification.json": "62f56eb09ecadfcd16bb5c93e50ea060d6ea50523d4aa664dafb74393ec4ddf5",
+    "public-evidence-inventory.json": "88b1cda79cb04e30338e26f4c3d9e11e8b4fe12231a65b5f0920acd853182b6e",
+    "public-evidence-archive.json": "9415b06acd11ba12086183a26cd4ffaba612b68e64c37432cfc57b3ea505059f",
+    "build-record.json": "b02a731d6d02046f7d96e69294781f24884ab1a148e5c5979b1edc76ceea0aa8",
+    "results.json": "cef465af7f1d5cc21a6ce7709839ac5aa12cf4079cd81ff023fcbbd99efae9c6",
+    "source-inputs.json": "3074d2de61b84114119f542d28f842788ddf939c4f715b6dae883c0704c050ee",
+    "linux-compact-metadata.json": "544620e200e000c6665f94d383ab6786f29729387e57ac8cb5889a4e5916a75c",
+    "original-assets-after.json": "6eb1f2825526dcccef822217680575d0c8dbc9355a0f59ba9ab39cf613e93170"
+  }
+}

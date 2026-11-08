@@ -137,7 +137,9 @@ defmodule SmolBox.Embedded.BranchCreationTest do
     approval = row["request"]["approval"]
 
     resources =
-      Map.new(approval["resources"], fn {key, value} -> {String.to_existing_atom(key), value} end)
+      Map.new([:slots, :cpus, :memory_mb, :disk_gb], fn key ->
+        {key, Map.fetch!(approval["resources"], Atom.to_string(key))}
+      end)
 
     {:ok, policy} = SmolBox.BranchPolicy.new(id: approval["id"], resources: resources)
     config = Package.create(protocol_major: 2)
@@ -161,7 +163,7 @@ defmodule SmolBox.Embedded.BranchCreationTest do
     sdk = SDKIdentity.implemented("1.22.0", package["smolvm_revision"])
     sdk = put_in(sdk, ["feature_versions", "branches"], 1)
     future = %{config | package_identity: package, sdk_identity: sdk}
-    assert {:error, _} = Config.validate(future)
+    assert :ok = Config.validate(future)
     assert Launch.helper_config(future)["approved_branches"] == [approval]
 
     refute Map.has_key?(

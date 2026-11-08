@@ -701,6 +701,36 @@
       ]
     },
     {
+      "name": "publish_collected_branch_material",
+      "arities": [
+        3
+      ],
+      "contract": "branches",
+      "http_supported": false,
+      "port_operation_supported": true,
+      "parity_status": "pending",
+      "acceptance": [
+        "branches:validation-and-dispatch",
+        "branches:ordinary-public-behavior",
+        "branches:durable-accounting-and-no-replay"
+      ]
+    },
+    {
+      "name": "inspect_partial_branch_collection",
+      "arities": [
+        3
+      ],
+      "contract": "branches",
+      "http_supported": false,
+      "port_operation_supported": true,
+      "parity_status": "pending",
+      "acceptance": [
+        "branches:validation-and-dispatch",
+        "branches:ordinary-public-behavior",
+        "branches:durable-accounting-and-no-replay"
+      ]
+    },
+    {
       "name": "collect_partial_branch",
       "arities": [
         3
@@ -993,7 +1023,8 @@
         "docs/evidence/embedded-port-http-parity-public-images-linux-e7387c9c.json",
         "docs/evidence/embedded-port-http-parity-linux-public-images-4efcf6c.json",
         "docs/evidence/embedded-port-http-parity-linux-recovery-consumers-32698dc.json",
-        "docs/evidence/embedded-port-http-parity-remote-source-growth-models.json"
+        "docs/evidence/embedded-port-http-parity-remote-source-growth-models.json",
+        "docs/evidence/embedded-port-http-parity-macos-public-sources-f1f250d3.json"
       ]
     },
     {
@@ -1021,7 +1052,8 @@
         "docs/evidence/embedded-port-http-parity-linux-public-consumers-5788a29.json",
         "docs/evidence/embedded-port-http-parity-public-images-linux-e7387c9c.json",
         "docs/evidence/embedded-port-http-parity-linux-public-images-4efcf6c.json",
-        "docs/evidence/embedded-port-http-parity-linux-recovery-consumers-32698dc.json"
+        "docs/evidence/embedded-port-http-parity-linux-recovery-consumers-32698dc.json",
+        "docs/evidence/embedded-port-http-parity-macos-public-branches-f1af384d.json"
       ]
     },
     {
@@ -1101,7 +1133,8 @@
         "docs/evidence/embedded-port-http-parity-public-images-admission.json",
         "docs/evidence/embedded-port-http-parity-public-images-linux-e7387c9c.json",
         "docs/evidence/embedded-port-http-parity-linux-public-images-4efcf6c.json",
-        "docs/evidence/embedded-port-http-parity-linux-recovery-consumers-32698dc.json"
+        "docs/evidence/embedded-port-http-parity-linux-recovery-consumers-32698dc.json",
+        "docs/evidence/embedded-port-http-parity-macos-public-sources-f1f250d3.json"
       ]
     },
     {
@@ -1232,7 +1265,10 @@
         "Capture preserves running source; restore acquires independent owned identity."
       ],
       "acceptance_status": "pending",
-      "evidence": []
+      "evidence": [
+        "docs/evidence/embedded-port-http-parity-macos-public-branches-f1af384d.json",
+        "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json"
+      ]
     },
     {
       "id": "exports",
@@ -1448,7 +1484,18 @@
         "lib/smolbox/store/native_unbooted_branch_disposal_ops.ex",
         "lib/smolbox/store/codec_native_unbooted_branch_disposals.ex",
         "test/support/store/native_unbooted_branch_disposal_contract.ex",
-        "test/unit/native_unbooted_branch_disposal_test.exs"
+        "test/unit/native_unbooted_branch_disposal_test.exs",
+        "docs/evidence/embedded-port-http-parity-public-branches-9470074.json",
+        "docs/evidence/embedded-port-http-parity-public-postgresql-branches-c5f9fde.json",
+        "docs/evidence/embedded-port-http-parity-postgresql-branch-replacement-c5f9fde.json",
+        "docs/evidence/embedded-port-http-parity-public-memory-branch-replacement-548fb97.json",
+        "docs/evidence/embedded-port-http-parity-public-postgresql-branch-replacement-548fb97.json",
+        "docs/evidence/embedded-port-http-parity-ready-recovery-readiness.json",
+        "docs/evidence/embedded-port-http-parity-ordinary-cancel-recovery-gap.json",
+        "docs/evidence/embedded-port-http-parity-branch-observation-uncertainty.json",
+        "docs/evidence/embedded-port-http-parity-public-memory-cancel-recovery-f56c2e3.json",
+        "docs/evidence/embedded-port-http-parity-macos-public-branches-f1af384d.json",
+        "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json"
       ]
     },
     {
@@ -1474,7 +1521,11 @@
       "evidence": [
         "docs/evidence/embedded-port-http-parity-public-images-linux-e7387c9c.json",
         "docs/evidence/embedded-port-http-parity-linux-public-images-4efcf6c.json",
-        "docs/evidence/embedded-port-http-parity-linux-recovery-consumers-32698dc.json"
+        "docs/evidence/embedded-port-http-parity-linux-recovery-consumers-32698dc.json",
+        "docs/evidence/embedded-port-http-parity-public-memory-branch-replacement-548fb97.json",
+        "docs/evidence/embedded-port-http-parity-public-postgresql-branch-replacement-548fb97.json",
+        "docs/evidence/embedded-port-http-parity-ready-recovery-readiness.json",
+        "docs/evidence/embedded-port-http-parity-ordinary-cancel-recovery-gap.json"
       ]
     }
   ],
@@ -1568,7 +1619,9 @@
         "checkpoint-restore:ordinary-public-behavior",
         "checkpoint-restore:durable-accounting-and-no-replay"
       ],
-      "evidence": []
+      "evidence": [
+        "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json"
+      ]
     },
     {
       "id": "mounts",
@@ -1596,7 +1649,10 @@
       ],
       "evidence": [
         "docs/evidence/embedded-port-http-parity-linux-package.json",
-        "docs/evidence/embedded-port-http-parity-linux-public-consumers-5788a29.json"
+        "docs/evidence/embedded-port-http-parity-linux-public-consumers-5788a29.json",
+        "docs/evidence/embedded-port-http-parity-public-memory-branch-replacement-548fb97.json",
+        "docs/evidence/embedded-port-http-parity-public-postgresql-branch-replacement-548fb97.json",
+        "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json"
       ]
     }
   ]

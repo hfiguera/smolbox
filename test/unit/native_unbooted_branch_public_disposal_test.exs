@@ -226,9 +226,30 @@ defmodule SmolBox.NativeUnbootedBranchPublicDisposalTest do
       do: GenServer.call(context.server, {:call, context, request, budget, child})
   end
 
+  defp publish_fixture(store, parent, child, completion, :published) do
+    alias SmolBox.Store.NativeCollectedBranchPublicationContract, as: Publication
+    assert {:ok, pending} = Publication.accept(Memory, store, parent, child, child.version, 1103)
+    parent = Publication.fetch(Memory, store, parent)
+
+    assert {:ok, published} =
+             Publication.finish(
+               Memory,
+               store,
+               parent,
+               pending,
+               Publication.result(pending, completion),
+               1104
+             )
+
+    {Publication.fetch(Memory, store, parent), published}
+  end
+
+  defp publish_fixture(_, parent, child, _, _), do: {parent, child}
+
   defp fixture(mode \\ :normal, hold \\ true, timeout \\ 1000, transfer \\ 262_144) do
     store = start_supervised!(Memory)
     {parent, child, completion, usage} = Contract.prepare(Memory, store, hold)
+    {parent, child} = publish_fixture(store, parent, child, completion, mode)
 
     candidate = %{
       "schema" => 1,
@@ -324,6 +345,33 @@ defmodule SmolBox.NativeUnbootedBranchPublicDisposalTest do
       {:native_call, _, _, _, _, _, _} = call -> calls([call | acc])
     after
       0 -> Enum.reverse(acc)
+    end
+  end
+
+  for hold <- [true, false] do
+    test "held=#{hold} disposal selects the original candidate after stored material publication" do
+      {runtime, store, parent, child, _, _, _} = fixture(:published, unquote(hold))
+      assert {:ok, disposed} = resolve(runtime, child)
+      assert disposed.branch.state == :disposed and disposed.reservation == nil
+
+      assert Contract.fetch(Memory, store, parent).native_branch_history ==
+               parent.native_branch_history
+
+      assert disposed.branch.native_authority.collected_publication ==
+               child.branch.native_authority.collected_publication
+
+      saved = disposed.branch.native_authority.collected_publication
+
+      for version <- [saved.version, saved.completion_version, disposed.version] do
+        assert {:ok, ^disposed} =
+                 Branches.publish_collected(runtime, ManagedMachine.key(disposed), version,
+                   quiesced: true
+                 )
+      end
+
+      refute Enum.any?(calls(), fn {:native_call, name, _, _, _, _, _} ->
+               name == "retire_prepared_branch"
+             end)
     end
   end
 

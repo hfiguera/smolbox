@@ -1,0 +1,360 @@
+{
+  "schema": 1,
+  "status": "scoped-macos-branches-pass-checkpoint-creation-preserved",
+  "source_commit": "80fd3037feb495584d0f9940361ecb1a11d2a5d1",
+  "source_archive_sha256": "a94080efe08399d57d83b58e55d9a8a29eb651388d731603cca958318dc6b8b1",
+  "source_files_verified": 1850,
+  "evidence_archive_sha256": "a36d7c5a17be09dfb3ee95390ffc5468e3602d80dff334bfbaffdd02d127bda8",
+  "members_verified": 39,
+  "native_inputs_verified": 342,
+  "hex_sha256": "7aa74216c231000853012154158607d262b25825c5dfa13f79620c4ee9e5c371",
+  "manifest_sha256": "2366c87b56dd67254e86dfa8074a6a2c72a6e8d0e9ac625f94d524a6e092a870",
+  "helper_sha256": "35b5e352c791d4ef1e8a588c50534cd38decc7580352ad20b62d9f10431cc018",
+  "sdk": {
+    "version": "1.22.0",
+    "revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "source_unmodified": true
+  },
+  "account": {
+    "uid": 506,
+    "standard_account": true,
+    "genuine_default_home": true
+  },
+  "branch_cases": [
+    {
+      "campaign": "branches",
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "minimum": false,
+      "package_files_verified": 657,
+      "proof_tools_verified": 5,
+      "consumer_report_sha256": "619b9d81eb883120db93180f6319089b3be818857d471eed63bafad8b3ba8bab",
+      "evidence": {
+        "branch_budget_rejected_before_dispatch": true,
+        "campaign": "ordinary-public-native-branches",
+        "codec_roundtrips": true,
+        "cold_restart_does_not_restore_ram": true,
+        "crash_handling_qualified": false,
+        "deliberate_process_interruption": false,
+        "drain_rejected_new_branch": true,
+        "duplicate_release_retained": true,
+        "final_reserved_disk_gb": 0,
+        "final_reserved_slots": 0,
+        "held_release": true,
+        "inventory_after": [],
+        "inventory_before": [],
+        "native_backing_acknowledgements": 2,
+        "owned_deleted": true,
+        "package_manifest_sha256": "2366c87b56dd67254e86dfa8074a6a2c72a6e8d0e9ac625f94d524a6e092a870",
+        "public_native_admission_enabled": true,
+        "scope": "public-port-package-consumer",
+        "source_and_two_children_independent": true,
+        "source_dependencies_retired": 2,
+        "store_mode": "ephemeral",
+        "without_rust": true
+      }
+    },
+    {
+      "campaign": "branches",
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "minimum": true,
+      "package_files_verified": 657,
+      "proof_tools_verified": 5,
+      "consumer_report_sha256": "13630cabadf41d2a339b6d6db3d343628132d86ee7e05278e0d416abe4b09650",
+      "evidence": {
+        "branch_budget_rejected_before_dispatch": true,
+        "campaign": "ordinary-public-native-branches",
+        "codec_roundtrips": true,
+        "cold_restart_does_not_restore_ram": true,
+        "crash_handling_qualified": false,
+        "deliberate_process_interruption": false,
+        "drain_rejected_new_branch": true,
+        "duplicate_release_retained": true,
+        "final_reserved_disk_gb": 0,
+        "final_reserved_slots": 0,
+        "held_release": true,
+        "inventory_after": [],
+        "inventory_before": [],
+        "native_backing_acknowledgements": 2,
+        "owned_deleted": true,
+        "package_manifest_sha256": "2366c87b56dd67254e86dfa8074a6a2c72a6e8d0e9ac625f94d524a6e092a870",
+        "public_native_admission_enabled": true,
+        "scope": "public-port-package-consumer",
+        "source_and_two_children_independent": true,
+        "source_dependencies_retired": 2,
+        "store_mode": "ephemeral",
+        "without_rust": true
+      }
+    }
+  ],
+  "seed_preparation": {
+    "tool": {
+      "source_commit": "a76f2a0502ef848cbf2c68ba77465e326a32f692",
+      "source_file_sha256": "7d6c5f0308fd2248e7b81e914575e7381e9fcb31499483e10c6c2720d8639bbb",
+      "production_helper_source_commit": "80fd3037",
+      "production_native_code_unchanged": true,
+      "sdk_source_unmodified": true,
+      "sha256": "a84e546755f9794812b75679a71f0c7e12436b73f5ed394dc18c13d7fab8c883",
+      "normal_raw_disk_seeding": true,
+      "new_private_disks_owner_writable": true
+    },
+    "current": {
+      "bytes": 36908269,
+      "crash_validation_deferred": true,
+      "device_profile": "smolvm-basic-v1",
+      "ordinary_stop_delete": true,
+      "packed_dependency": false,
+      "sdk_inventory_empty": true,
+      "sdk_version": "1.22.0",
+      "sha256": "946056ab728393e2934bc499e14f88cfb02affab621c148043f3c10d08b16816",
+      "source_record_rewritten": false,
+      "status": "prepared"
+    },
+    "minimum": {
+      "bytes": 36927849,
+      "crash_validation_deferred": true,
+      "device_profile": "smolvm-basic-v1",
+      "ordinary_stop_delete": true,
+      "packed_dependency": false,
+      "sdk_inventory_empty": true,
+      "sdk_version": "1.22.0",
+      "sha256": "371cc45609e785456fee6f242964155b60429cd433a28e61e2b701e90856aa48",
+      "source_record_rewritten": false,
+      "status": "prepared"
+    },
+    "original_sdk_stop_delete_before_retry": true,
+    "no_port_authority_enrolled_during_preparation": true
+  },
+  "checkpoint_failure": {
+    "stage": "first source creation",
+    "management_state": "unknown",
+    "phase": "uncertain",
+    "created_receipt": null,
+    "sdk_table_counts": {
+      "vms": 0,
+      "vm_create_reservations": 0,
+      "vm_pause_operations": 0,
+      "config": 0,
+      "vm_resize_intents": 0,
+      "vm_resize_receipts": 0,
+      "fork_pools": 0,
+      "fork_pool_snapshots": 0,
+      "fork_pool_slots": 0,
+      "fork_leases": 0
+    },
+    "no_vm_booted": true,
+    "capture_not_reached": true,
+    "minimum_case_not_started": true,
+    "root_cause": "Epoch transfer enrollment requires a 16-hex VM directory; request-private .checkpoint-source-* decoding cannot enroll. Confirmed by source and epoch/ordinary worker models.",
+    "store_reservation_retained": true,
+    "mutation_replay": false,
+    "artifact_adoption": false
+  },
+  "ordinary_cleanup": {
+    "original_keeper_shutdown_acknowledged": true,
+    "native_processes": [],
+    "account_lock_available": true,
+    "namespace_quarantined": true,
+    "authority_restored": false,
+    "forced_termination": false
+  },
+  "stopped_custody": {
+    "entries": 92,
+    "inventory_sha256": "529ad01f408c35877d7e0e521462e5b9d666a9747f0d12d8d0a2ab1a93ef49b8",
+    "all_regular_copies_verified": true,
+    "nonregular_objects_skipped": 0
+  },
+  "codec_readers": {
+    "current": {
+      "files": [
+        {
+          "file": "current-branches-evidence/private-records-both-children.json",
+          "records": 12,
+          "versions": {
+            "smolbox-record-v23": 1,
+            "smolbox-record-v29": 2,
+            "smolbox-record-v30": 5,
+            "smolbox-record-v31": 4
+          }
+        },
+        {
+          "file": "current-branches-evidence/private-records-completed.json",
+          "records": 15,
+          "versions": {
+            "smolbox-record-v23": 1,
+            "smolbox-record-v29": 3,
+            "smolbox-record-v30": 5,
+            "smolbox-record-v31": 4,
+            "smolbox-record-v33": 2
+          }
+        },
+        {
+          "file": "current-branches-evidence/private-records-retired.json",
+          "records": 15,
+          "versions": {
+            "smolbox-record-v23": 1,
+            "smolbox-record-v29": 3,
+            "smolbox-record-v30": 5,
+            "smolbox-record-v31": 4,
+            "smolbox-record-v32": 2
+          }
+        },
+        {
+          "file": "current-checkpoints-evidence/private-records-failure.json",
+          "records": 1,
+          "versions": {
+            "smolbox-record-v23": 1
+          }
+        },
+        {
+          "file": "current-checkpoints-evidence/private-records-shutdown-seedcreateshutdown1.json",
+          "records": 1,
+          "versions": {
+            "smolbox-record-v23": 1
+          }
+        },
+        {
+          "file": "minimum-branches-evidence/private-records-both-children.json",
+          "records": 12,
+          "versions": {
+            "smolbox-record-v23": 1,
+            "smolbox-record-v29": 2,
+            "smolbox-record-v30": 5,
+            "smolbox-record-v31": 4
+          }
+        },
+        {
+          "file": "minimum-branches-evidence/private-records-completed.json",
+          "records": 15,
+          "versions": {
+            "smolbox-record-v23": 1,
+            "smolbox-record-v29": 3,
+            "smolbox-record-v30": 5,
+            "smolbox-record-v31": 4,
+            "smolbox-record-v33": 2
+          }
+        },
+        {
+          "file": "minimum-branches-evidence/private-records-retired.json",
+          "records": 15,
+          "versions": {
+            "smolbox-record-v23": 1,
+            "smolbox-record-v29": 3,
+            "smolbox-record-v30": 5,
+            "smolbox-record-v31": 4,
+            "smolbox-record-v32": 2
+          }
+        }
+      ],
+      "total_records": 86,
+      "semantic_roundtrip": true,
+      "envelope_versions_preserved": true,
+      "restored_as_authority": false
+    },
+    "minimum": {
+      "files": [
+        {
+          "file": "current-branches-evidence/private-records-both-children.json",
+          "versions": {
+            "smolbox-record-v23": 1,
+            "smolbox-record-v29": 2,
+            "smolbox-record-v30": 5,
+            "smolbox-record-v31": 4
+          },
+          "records": 12
+        },
+        {
+          "file": "current-branches-evidence/private-records-completed.json",
+          "versions": {
+            "smolbox-record-v23": 1,
+            "smolbox-record-v29": 3,
+            "smolbox-record-v30": 5,
+            "smolbox-record-v31": 4,
+            "smolbox-record-v33": 2
+          },
+          "records": 15
+        },
+        {
+          "file": "current-branches-evidence/private-records-retired.json",
+          "versions": {
+            "smolbox-record-v23": 1,
+            "smolbox-record-v29": 3,
+            "smolbox-record-v30": 5,
+            "smolbox-record-v31": 4,
+            "smolbox-record-v32": 2
+          },
+          "records": 15
+        },
+        {
+          "file": "current-checkpoints-evidence/private-records-failure.json",
+          "versions": {
+            "smolbox-record-v23": 1
+          },
+          "records": 1
+        },
+        {
+          "file": "current-checkpoints-evidence/private-records-shutdown-seedcreateshutdown1.json",
+          "versions": {
+            "smolbox-record-v23": 1
+          },
+          "records": 1
+        },
+        {
+          "file": "minimum-branches-evidence/private-records-both-children.json",
+          "versions": {
+            "smolbox-record-v23": 1,
+            "smolbox-record-v29": 2,
+            "smolbox-record-v30": 5,
+            "smolbox-record-v31": 4
+          },
+          "records": 12
+        },
+        {
+          "file": "minimum-branches-evidence/private-records-completed.json",
+          "versions": {
+            "smolbox-record-v23": 1,
+            "smolbox-record-v29": 3,
+            "smolbox-record-v30": 5,
+            "smolbox-record-v31": 4,
+            "smolbox-record-v33": 2
+          },
+          "records": 15
+        },
+        {
+          "file": "minimum-branches-evidence/private-records-retired.json",
+          "versions": {
+            "smolbox-record-v23": 1,
+            "smolbox-record-v29": 3,
+            "smolbox-record-v30": 5,
+            "smolbox-record-v31": 4,
+            "smolbox-record-v32": 2
+          },
+          "records": 15
+        }
+      ],
+      "total_records": 86,
+      "semantic_roundtrip": true,
+      "envelope_versions_preserved": true,
+      "restored_as_authority": false
+    }
+  },
+  "correction_source": "2f58f619",
+  "correction": {
+    "request_private_role_has_no_machine_authority": true,
+    "role_binds_operation_and_stage_device_inode": true,
+    "global_shutdown_fence_retained": true,
+    "transfer_child_status_stays_with_supervisor": true,
+    "vm_scoped_transfer_checks_unchanged": true,
+    "real_seed_header_and_payload_read_pass": true,
+    "sdk_private_extraction_and_material_proof_pass": true,
+    "real_seed_epoch_enrolled_worker_collected_without_vm_dispatch": true,
+    "rebuilt_public_acceptance": "pending",
+    "ordinary_engine_tests_passed": 1071,
+    "ordinary_engine_tests_ignored": 25,
+    "engine_port_all_target_clippy_passed": true,
+    "regular_and_clean_sdk_integrity_passed": true
+  },
+  "parity_complete": false,
+  "crash_validation_deferred": true,
+  "crash_handling_qualified": false,
+  "distribution_approved": false
+}

@@ -1,0 +1,169 @@
+[
+  {
+    "scope": "synthetic candidate only; no SDK or collection authority",
+    "platform": "macos",
+    "request": {
+      "creation": {
+        "source": {
+          "target_id": "embedded-local",
+          "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "name": "owned",
+          "owner_token": "6767676767676767676767676767676767676767676767676767676767676767",
+          "incarnation": "89898989898989898989898989898989",
+          "material_sha256": "abababababababababababababababababababababababababababababababab",
+          "material": {
+            "schema": 2,
+            "revision": 0,
+            "record_sha256": "abababababababababababababababababababababababababababababababab",
+            "chain_sha256": "fca9cdcb16003ca409f473f30a896cdc35ea38b5f21451557e840d23e133319c",
+            "operation_id": null,
+            "request_sha256": null
+          }
+        },
+        "child": {
+          "operation_id": "create-leaf",
+          "name": "leaf",
+          "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "incarnation": "dddddddddddddddddddddddddddddddd",
+          "idle": true,
+          "hold": true
+        },
+        "approval": {
+          "id": "branches",
+          "host_overhead_mb": 128,
+          "resources": {
+            "slots": 1,
+            "cpus": 1,
+            "memory_mb": 384,
+            "disk_gb": 5
+          }
+        }
+      },
+      "operation_id": "collect-partial-model",
+      "request_sha256": "3595298571f69006051da82ec8ed4c18746143428fee11fc2f0c0f2e731d8384",
+      "quiesced": true
+    },
+    "candidate": {
+      "schema": 1,
+      "creation_sha256": "516dad6197d4044edf8498ec5cc3fee742c9cedcb5b531946664ca040c2762af",
+      "operation_id": "collect-partial-model",
+      "request_sha256": "3595298571f69006051da82ec8ed4c18746143428fee11fc2f0c0f2e731d8384",
+      "epoch": "abababababababababababababababab",
+      "platform": "macos"
+    }
+  },
+  {
+    "scope": "synthetic candidate only; no SDK or collection authority",
+    "platform": "macos",
+    "request": {
+      "creation": {
+        "source": {
+          "target_id": "embedded-local",
+          "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "name": "owned",
+          "owner_token": "6767676767676767676767676767676767676767676767676767676767676767",
+          "incarnation": "89898989898989898989898989898989",
+          "material_sha256": "abababababababababababababababababababababababababababababababab",
+          "material": {
+            "schema": 2,
+            "revision": 0,
+            "record_sha256": "abababababababababababababababababababababababababababababababab",
+            "chain_sha256": "fca9cdcb16003ca409f473f30a896cdc35ea38b5f21451557e840d23e133319c",
+            "operation_id": null,
+            "request_sha256": null
+          }
+        },
+        "child": {
+          "operation_id": "create-leaf",
+          "name": "leaf",
+          "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "incarnation": "dddddddddddddddddddddddddddddddd",
+          "idle": true,
+          "hold": false
+        },
+        "approval": {
+          "id": "branches",
+          "host_overhead_mb": 128,
+          "resources": {
+            "slots": 1,
+            "cpus": 1,
+            "memory_mb": 384,
+            "disk_gb": 5
+          }
+        },
+        "initial_release": {
+          "operation_id": "initial-activation",
+          "request_sha256": "9999999999999999999999999999999999999999999999999999999999999999"
+        }
+      },
+      "operation_id": "collect-partial-model",
+      "request_sha256": "094d31ba008c560eb8152d17fd36476c9a527c80fe9f42d95f402cda4b3a89d1",
+      "quiesced": true
+    },
+    "candidate": {
+      "schema": 1,
+      "creation_sha256": "a8ed74f77f6d59a0a22c3d310897359b83c3daa77902425b083709480d2ca0ad",
+      "operation_id": "collect-partial-model",
+      "request_sha256": "094d31ba008c560eb8152d17fd36476c9a527c80fe9f42d95f402cda4b3a89d1",
+      "epoch": "abababababababababababababababab",
+      "platform": "macos"
+    }
+  },
+  {
+    "scope": "synthetic candidate only; no SDK or collection authority",
+    "platform": "macos",
+    "request": {
+      "creation": {
+        "source": {
+          "target_id": "embedded-local",
+          "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "name": "owned",
+          "owner_token": "6767676767676767676767676767676767676767676767676767676767676767",
+          "incarnation": "89898989898989898989898989898989",
+          "material_sha256": "abababababababababababababababababababababababababababababababab",
+          "material": {
+            "schema": 2,
+            "revision": 0,
+            "record_sha256": "abababababababababababababababababababababababababababababababab",
+            "chain_sha256": "fca9cdcb16003ca409f473f30a896cdc35ea38b5f21451557e840d23e133319c",
+            "operation_id": null,
+            "request_sha256": null
+          }
+        },
+        "child": {
+          "operation_id": "create-leaf",
+          "name": "leaf",
+          "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "incarnation": "dddddddddddddddddddddddddddddddd",
+          "idle": true,
+          "hold": false
+        },
+        "approval": {
+          "id": "branches",
+          "host_overhead_mb": 128,
+          "resources": {
+            "slots": 1,
+            "cpus": 1,
+            "memory_mb": 384,
+            "disk_gb": 5
+          }
+        },
+        "initial_release": {
+          "operation_id": "initial-activation",
+          "request_sha256": "9999999999999999999999999999999999999999999999999999999999999999"
+        }
+      },
+      "operation_id": "collect-partial-model",
+      "request_sha256": "094d31ba008c560eb8152d17fd36476c9a527c80fe9f42d95f402cda4b3a89d1",
+      "quiesced": true
+    },
+    "candidate": {
+      "schema": 1,
+      "creation_sha256": "a8ed74f77f6d59a0a22c3d310897359b83c3daa77902425b083709480d2ca0ad",
+      "operation_id": "collect-partial-model",
+      "request_sha256": "094d31ba008c560eb8152d17fd36476c9a527c80fe9f42d95f402cda4b3a89d1",
+      "epoch": "abababababababababababababababab",
+      "platform": "macos"
+    }
+  }
+]

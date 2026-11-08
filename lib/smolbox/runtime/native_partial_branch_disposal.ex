@@ -39,9 +39,17 @@ defmodule SmolBox.Runtime.NativePartialBranchDisposal do
     with {:ok, _} <- remaining(deadline),
          {:ok, parent} <- MachineSession.claim(config, child.branch.source),
          true <- Disposal.pending?(parent, child) do
-      NativeResolution.run(config, coordinator, parent, worker, :deleted, fn pinned ->
-        accept(config, child, version, pinned, budget, deadline)
-      end)
+      NativeResolution.run(
+        config,
+        coordinator,
+        parent,
+        worker,
+        :deleted,
+        fn pinned ->
+          accept(config, child, version, pinned, budget, deadline)
+        end,
+        deadline
+      )
     else
       false -> Session.error(:identity_conflict, :branch)
       error -> error

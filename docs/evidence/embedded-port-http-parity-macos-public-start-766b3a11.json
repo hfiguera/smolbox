@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "status": "current-public-consumer-failed-start-uncertain-minimum-not-started",
+  "source_commit": "766b3a111eb07bf885641a20b6bb826b6cf39668",
+  "hex_archive_sha256": "26acbc8474a930764ebff649124ac3e0da74524b65043d2b6db16436a38ae261",
+  "package_manifest_sha256": "947ad46c11c0f0768712b77a8f126a142747ce22cad9cbc2c2430353e2cef61e",
+  "helper_sha256": "407bcee7bb54123083690fe52dcd917047f2c038894db882b70f069b7a40cfb5",
+  "account_isolated_from_uid_501": true,
+  "toolchain": "Elixir 1.20.4 / OTP 29.0.6",
+  "consumer": {
+    "dependency_resolution_strict_compilation_and_smoke_reached_native_stage": true,
+    "public_broker_startup_reached_ready": true,
+    "first_disposable_execution_failed": true,
+    "execution_summary": [
+      {
+        "state": "failed",
+        "cleanup": "in_progress",
+        "errors": [
+          {
+            "category": "unknown",
+            "operation": "start",
+            "evidence": "dispatch_uncertain"
+          }
+        ],
+        "evidence": "not_dispatched",
+        "collection": "pending",
+        "reservation_held": true
+      }
+    ],
+    "guest_boot_agent_ready_observed": true,
+    "terminal_checks_reached": false,
+    "normal_runtime_replacement_reached": false,
+    "minimum_consumer_started": false,
+    "owned_cleanup_passed": false
+  },
+  "preservation": {
+    "sdk_vm_rows": 1,
+    "sdk_record_state": "stopped",
+    "sdk_record_pid_present": false,
+    "other_nine_sdk_tables_empty": true,
+    "native_account_lock_available": true,
+    "original_domain_binding_matches": true,
+    "snapshot_files_hashed": 842,
+    "failed_command_replayed": false,
+    "sdk_authority_reopened_after_public_failure": false,
+    "generation_rotated": false,
+    "force_signal_sent": false,
+    "private_records_and_sdk_disks_retained": true
+  },
+  "diagnosis": {
+    "exact_start_failure_cause_proven": false,
+    "local_production_elixir_recompiled_for_offline_codec_inspection": true,
+    "codec_decoded_original_record_without_restoring_it": true,
+    "uncertain_work_accepted_as_success": false
+  },
+  "ordinary_native_acceptance_claimed": false,
+  "full_feature_parity_claimed": false,
+  "crash_validation_deferred": true,
+  "distribution_approved": false,
+  "private_evidence_sha256": {
+    "mac-public-qualification-status.json": "89cb58bea53db4513514ac6b9ecb402374c643455433f67cbcc0886a65625415",
+    "mac-current-exit.json": "b89a5978f3280a5c378ae43e92d4c722733652f89c38ebd1a825f2b542fa6312",
+    "mac-public-failure/current-consumer.log": "556c8451bbd4abb4fc3320b9ed997e1883d708a45eafe158175f40df2931e0bb",
+    "mac-public-failure/current-native.log": "62c014d609588729a56f723da688667540681e27f627d10bdf451af22455ad52",
+    "mac-public-failure/decoded-summary.json": "b89a21410f96bab269cd11498a59afc5509bb9039f641516264c4c235c89594b",
+    "mac-public-failure/public-custody.json": "a05e3fd511b50d47a636fd66d5d11ec832108b536d6b46d66405fa9acce95abd"
+  }
+}

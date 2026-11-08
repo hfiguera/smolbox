@@ -136,6 +136,6 @@ defmodule SmolBox.DurableHost.NativePartialBranchCleanupStoreTest do
 
   test "reader marker is present without enabling native branch admission", %{store: store} do
     assert {:ok, %{native_partial_branch_cleanups: 1} = caps} = Store.capabilities(store)
-    refute Map.has_key?(caps, :native_branches)
+    assert caps.native_branches == 1
   end
 end

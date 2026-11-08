@@ -6,6 +6,7 @@ use super::*;
 mod collection;
 pub(super) mod disposal;
 pub(super) mod partial_disposal;
+mod publication;
 mod ready;
 pub use disposal::{
     UnbootedBranchDisposal, UnbootedBranchDisposalCandidate, UnbootedBranchDisposalCompletion,

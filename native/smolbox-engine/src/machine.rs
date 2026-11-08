@@ -166,7 +166,7 @@ pub struct Engine {
     // Keep the actual SDK manager alive; dropping it would stop its VMM.
     pub(crate) owned_managers: Mutex<BTreeMap<String, Arc<Mutex<AgentManager>>>>,
     branch_owners: Mutex<BTreeMap<String, Arc<crate::branch_owned::Context>>>,
-    pub(crate) runtime_boots: crate::runtime_boot::Registry,
+    pub(crate) runtime_boots: Arc<crate::runtime_boot::Registry>,
     pub(crate) domain: Arc<DomainGuard>,
     pub(crate) transfers: Option<TransferSupervisor>,
     pub(crate) jobs: crate::jobs::JobPool,
@@ -611,7 +611,7 @@ impl Engine {
             capture_sources: Mutex::new(BTreeMap::new()),
             owned_managers: Mutex::new(BTreeMap::new()),
             branch_owners: Mutex::new(BTreeMap::new()),
-            runtime_boots: crate::runtime_boot::Registry::default(),
+            runtime_boots: Arc::default(),
             domain,
             transfers: None,
             jobs,
@@ -1493,7 +1493,15 @@ impl Engine {
             .map_err(|_| Error::before(ErrorCode::Native))?
             .contains_key(name);
         if let Some((_, actors)) = &self.boot {
-            if !actors.quiescent_for(name)? {
+            let quiescent = if record.state == smolvm::config::RecordState::Running {
+                self.runtime_boots
+                    .get(receipt)?
+                    .ok_or(Error::before(ErrorCode::Ownership))?
+                    .source_quiescent(receipt, pid, actors)?
+            } else {
+                actors.quiescent_for(name)?
+            };
+            if !quiescent {
                 return Err(Error::before(ErrorCode::State));
             }
         }
@@ -1587,6 +1595,27 @@ impl Engine {
     /// SDK runtime.pid falls back to the persisted row, so its PID cannot
     /// distinguish an original pre-handoff manager from a runtime-owned handle.
     pub(crate) fn require_unhanded_branch_child(&self, name: &str) -> Result<()> {
+        self.unhanded_branch_handles(name, None).map(drop)
+    }
+    /// Original boot registers its receipt for graceful shutdown before SDK
+    /// entry. That tracking is not lifecycle handoff. Only the retained boot's
+    /// exact publication may tolerate it; all runtime handoff maps still refuse.
+    pub(crate) fn require_original_branch_handle(&self, receipt: &CreationReceipt) -> Result<()> {
+        self.unhanded_branch_handles(&receipt.name, Some(receipt))
+            .map(drop)
+    }
+    /// Called only after original enrolled collection and its protected proof.
+    /// Forget shutdown tracking, never a manager, actor, SDK row or disk.
+    pub(crate) fn retire_collected_branch_handle(&self, receipt: &CreationReceipt) -> Result<()> {
+        self.unhanded_branch_handles(&receipt.name, Some(receipt))?
+            .remove(&receipt.name);
+        Ok(())
+    }
+    fn unhanded_branch_handles(
+        &self,
+        name: &str,
+        original: Option<&CreationReceipt>,
+    ) -> Result<std::sync::MutexGuard<'_, BTreeMap<String, CreationReceipt>>> {
         let handles = self
             .owned_handles
             .try_lock()
@@ -1599,14 +1628,16 @@ impl Engine {
             .owned_managers
             .try_lock()
             .map_err(|_| Error::before(ErrorCode::Conflict))?;
-        if handles.contains_key(name)
+        if handles
+            .get(name)
+            .is_some_and(|actual| Some(actual) != original)
             || owners.contains_key(name)
             || managers.contains_key(name)
             || self.runtime_boots.try_contains(name)?
         {
             return Err(Error::before(ErrorCode::Ownership));
         }
-        Ok(())
+        Ok(handles)
     }
     pub(crate) fn branch_child_unstarted(&self, name: &str) -> Result<()> {
         if self.runtime.pid(name).is_some()
@@ -2456,7 +2487,7 @@ impl Engine {
             return Err(Error::before(ErrorCode::State));
         }
         let record = self.record(receipt)?;
-        crate::checkpoint_capture::validate_record(&record)?;
+        crate::checkpoint_capture::validate_portable_record(&record)?;
         if !record.forkable {
             return Err(Error::before(ErrorCode::Unsupported));
         }
@@ -3437,6 +3468,7 @@ impl Engine {
         crate::material::check_origin(&origin, receipt)?;
         if !Arc::ptr_eq(&context._domain, &self.domain)
             || !Arc::ptr_eq(&context._runtime, &self.runtime)
+            || !Arc::ptr_eq(&context.runtime_boots, &self.runtime_boots)
         {
             return Err(Error::before(ErrorCode::Ownership));
         }
@@ -3447,6 +3479,7 @@ impl Engine {
         receipt: &CreationReceipt,
         context: &Arc<crate::branch_owned::Context>,
     ) -> Result<()> {
+        context.require_no_runtime_boot()?;
         if self
             .owned_handles
             .lock()
@@ -3851,6 +3884,77 @@ pub(crate) mod tests {
     }
 
     use super::*;
+    #[test]
+    fn original_branch_shutdown_tracking_is_not_handoff_and_retires_only_the_exact_handle() {
+        let root = tempfile::tempdir().unwrap();
+        let engine = test_engine(root.path());
+        let receipt = install_record(&engine);
+        let mut sibling = receipt.clone();
+        sibling.name = "untouched-sibling".into();
+        engine.track_handle(&sibling).unwrap();
+        // Production boot records this exact receipt before entering the SDK.
+        engine.track_handle(&receipt).unwrap();
+        assert_eq!(
+            engine
+                .require_unhanded_branch_child(&receipt.name)
+                .unwrap_err()
+                .code,
+            ErrorCode::Ownership
+        );
+        engine.require_original_branch_handle(&receipt).unwrap();
+        assert_eq!(engine.owned_handles.lock().unwrap().len(), 2);
+        for case in 0..4 {
+            let mut crossed = receipt.clone();
+            match case {
+                0 => crossed.owner_token = "f".repeat(64),
+                1 => crossed.incarnation = "f".repeat(32),
+                2 => crossed.domain_generation = "f".repeat(32),
+                _ => crossed.material = None,
+            }
+            if crossed == receipt {
+                crossed.material_sha256 = "f".repeat(64);
+            }
+            assert_eq!(
+                engine
+                    .require_original_branch_handle(&crossed)
+                    .unwrap_err()
+                    .code,
+                ErrorCode::Ownership
+            );
+            assert!(engine.retire_collected_branch_handle(&crossed).is_err());
+            assert_eq!(engine.owned_handles.lock().unwrap().len(), 2);
+        }
+        // Neither an exact receipt nor an empty tracking map overrides runtime
+        // boot ownership. No manager is constructed in this model.
+        let runtime = engine
+            .runtime_boots
+            .reserve(&receipt, &engine.jobs)
+            .unwrap();
+        assert!(engine.require_original_branch_handle(&receipt).is_err());
+        assert!(engine.retire_collected_branch_handle(&receipt).is_err());
+        engine.runtime_boots.retire(&runtime).unwrap();
+        let held = engine.owned_handles.lock().unwrap();
+        assert_eq!(
+            engine
+                .require_original_branch_handle(&receipt)
+                .unwrap_err()
+                .code,
+            ErrorCode::Conflict
+        );
+        assert!(engine.retire_collected_branch_handle(&receipt).is_err());
+        drop(held);
+        engine.retire_collected_branch_handle(&receipt).unwrap();
+        // A retry after positive collection may observe already-retired
+        // tracking. This supplies no actor or collection authority by itself.
+        engine.retire_collected_branch_handle(&receipt).unwrap();
+        engine.require_unhanded_branch_child(&receipt.name).unwrap();
+        assert_eq!(
+            engine.owned_handles.lock().unwrap().get(&sibling.name),
+            Some(&sibling)
+        );
+        assert!(engine.db.get_vm(&receipt.name).unwrap().is_some());
+    }
+
     #[test]
     fn release_cache_recovery_never_reenrolls_a_missing_or_different_handle() {
         let model = crate::branch_boot::tests::identity_model(true);
@@ -4484,11 +4588,16 @@ pub(crate) mod tests {
 
     pub(crate) fn test_engine(root: &Path) -> Engine {
         let root = root.canonicalize().unwrap();
+        test_engine_with_vm_root(&root, root.join("vms"))
+    }
+
+    pub(crate) fn test_engine_with_vm_root(root: &Path, vm_root: PathBuf) -> Engine {
+        let root = root.canonicalize().unwrap();
         let binding = DomainBinding {
             target_id: "local".into(),
             generation: "a".repeat(32),
             database: root.join("db"),
-            vm_root: root.join("vms"),
+            vm_root,
         };
         let db = SmolvmDb::open_at(&binding.database).unwrap();
         let domain = DomainGuard::acquire_at(&binding, root.join("private"), true).unwrap();
@@ -4511,7 +4620,7 @@ pub(crate) mod tests {
             capture_sources: Mutex::new(BTreeMap::new()),
             owned_managers: Mutex::new(BTreeMap::new()),
             branch_owners: Mutex::new(BTreeMap::new()),
-            runtime_boots: crate::runtime_boot::Registry::default(),
+            runtime_boots: Arc::default(),
             domain,
             transfers: None,
             jobs,
@@ -4552,6 +4661,12 @@ pub(crate) mod tests {
             )
             .unwrap(),
         );
+    }
+    pub(crate) fn test_model_host_epoch(engine: &mut Engine, root: &Path, epoch: &str) {
+        if engine.host.is_none() {
+            test_export_host(engine, root);
+        }
+        engine.host.as_mut().unwrap().epoch = epoch.into();
     }
     #[test]
     fn metadata_preparation_observes_exact_source_without_changing_machine_storage_or_records() {

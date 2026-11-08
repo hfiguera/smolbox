@@ -35,6 +35,9 @@ cargo test --manifest-path "$native_manifest" -p smolbox-engine --example volume
 # Only pure source approval models run here. The explicit source/control CLI is
 # never invoked by the default check; live OCI/registry qualification is opt-in.
 cargo test --manifest-path "$native_manifest" -p smolbox-engine --example oci-guest-proof --locked
+# The branch example's harness checks only approval/state/request models. The
+# explicit Linux `ordinary` entry point is never selected by default checks.
+cargo test --manifest-path "$native_manifest" -p smolbox-engine --example branch-guest-proof --locked
 cargo test --manifest-path "$native_manifest" -p smolbox-engine --test child_reaping --locked
 cargo build --manifest-path "$native_manifest" -p smolbox-port --locked
 SMOLBOX_UMASK_HELPER="${CARGO_TARGET_DIR:-$native_root/target}/debug/smolbox-port" \

@@ -2,6 +2,116 @@
 use super::*;
 use crate::branch_boot::tests::identity_model;
 use std::cell::Cell;
+use std::os::unix::fs::{OpenOptionsExt, PermissionsExt};
+
+#[test]
+fn persisted_original_pid_is_not_a_runtime_owner_but_pending_runtime_boot_is() {
+    let model = identity_model(true);
+    let receipt = model.plan.publication.child();
+    // This private fixture has a persisted synthetic PID and original opaque
+    // model enrollment, with no live child or SDK runtime cached handle.
+    assert_eq!(
+        model.engine.runtime.pid(&receipt.name),
+        Some(model.enrollment.child().pid)
+    );
+    let original_registry = model.engine.runtime_boots.clone();
+    require_no_runtime_boot(&original_registry, &receipt.name).unwrap();
+    let before = model.engine.jobs.counts();
+    let reserved = model
+        .engine
+        .runtime_boots
+        .reserve(receipt, &model.engine.jobs)
+        .unwrap();
+    // Sharing the original registry keeps even a pre-SDK reservation visible
+    // to an asynchronous original-manager collector. No DB row can clear it.
+    assert!(require_no_runtime_boot(&original_registry, &receipt.name).is_err());
+    require_no_runtime_boot(&original_registry, "another-machine").unwrap();
+    model.engine.runtime_boots.retire(&reserved).unwrap();
+    require_no_runtime_boot(&original_registry, &receipt.name).unwrap();
+    drop(reserved);
+    assert_eq!(model.engine.jobs.counts(), before);
+    assert_eq!(
+        model.engine.runtime.pid(&receipt.name),
+        Some(model.enrollment.child().pid)
+    );
+}
+
+fn model_disk(path: &std::path::Path) {
+    use std::io::Write;
+    // Only pathname/ownership facts are modeled here; no valid disk image,
+    // SDK manager, VM boot or process collection is constructed.
+    std::fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .mode(0o600)
+        .open(path)
+        .unwrap()
+        .write_all(b"private manager disk-path model")
+        .unwrap();
+}
+
+#[test]
+fn original_manager_disk_binding_accepts_raw_and_fork_qcow_paths_without_payload_freezing() {
+    for storage_ext in ["raw", "qcow2"] {
+        for overlay_ext in ["raw", "qcow2"] {
+            let model = identity_model(true);
+            let storage = model.plan.child.path.join(format!("storage.{storage_ext}"));
+            let overlay = model.plan.child.path.join(format!("overlay.{overlay_ext}"));
+            model_disk(&storage);
+            model_disk(&overlay);
+            let verify =
+                || verify_manager_disks(&model.plan, Some(&model.record.name), &storage, &overlay);
+            verify().unwrap();
+            // A running guest may change its disk payload. Collection is tied
+            // to original manager paths and the protected directory identities.
+            std::fs::write(&storage, b"ordinary guest writes").unwrap();
+            verify().unwrap();
+        }
+    }
+}
+
+#[test]
+fn original_manager_disk_binding_rejects_crossed_missing_redirected_and_shadowed_paths() {
+    let model = identity_model(true);
+    let storage = model.plan.child.path.join("storage.raw");
+    let overlay = model.plan.child.path.join("overlay.raw");
+    model_disk(&storage);
+    model_disk(&overlay);
+    let verify = |name, storage: &std::path::Path, overlay: &std::path::Path| {
+        verify_manager_disks(&model.plan, name, storage, overlay)
+    };
+    assert!(verify(None, &storage, &overlay).is_err());
+    assert!(verify(Some("another-child"), &storage, &overlay).is_err());
+    assert!(verify(Some(&model.record.name), &overlay, &storage).is_err());
+    let foreign = model.plan.source.path.join("storage.raw");
+    model_disk(&foreign);
+    assert!(verify(Some(&model.record.name), &foreign, &overlay).is_err());
+    std::fs::remove_file(&storage).unwrap();
+    assert!(verify(Some(&model.record.name), &storage, &overlay).is_err());
+    std::os::unix::fs::symlink(&foreign, &storage).unwrap();
+    assert!(verify(Some(&model.record.name), &storage, &overlay).is_err());
+    std::fs::remove_file(&storage).unwrap();
+    model_disk(&storage);
+    std::fs::set_permissions(&storage, std::fs::Permissions::from_mode(0o620)).unwrap();
+    assert!(verify(Some(&model.record.name), &storage, &overlay).is_err());
+    std::fs::set_permissions(&storage, std::fs::Permissions::from_mode(0o600)).unwrap();
+    let qcow = model.plan.child.path.join("storage.qcow2");
+    model_disk(&qcow);
+    // A newly preferred QCOW file cannot authorize collection of a manager
+    // whose original disk path was raw (or vice versa after removal).
+    assert!(verify(Some(&model.record.name), &storage, &overlay).is_err());
+    verify(Some(&model.record.name), &qcow, &overlay).unwrap();
+    std::fs::remove_file(&qcow).unwrap();
+    assert!(verify(Some(&model.record.name), &qcow, &overlay).is_err());
+    verify(Some(&model.record.name), &storage, &overlay).unwrap();
+    std::fs::rename(
+        &model.plan.child.path,
+        model.plan.child.path.with_extension("moved"),
+    )
+    .unwrap();
+    std::fs::create_dir(&model.plan.child.path).unwrap();
+    assert!(verify(Some(&model.record.name), &storage, &overlay).is_err());
+}
 
 #[test]
 fn original_gone_child_collects_without_sdk_entry_and_rejects_another_manager() {

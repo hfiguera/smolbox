@@ -4,6 +4,7 @@ defmodule SmolBox.Runtime.NativeDeletedBranchResolution do
   alias SmolBox.Backend.Budget
 
   alias SmolBox.Embedded.{
+    BranchPublication,
     NativeUnbootedBranchDisposal,
     NativeUnbootedBranchDisposalResult,
     UnbootedBranchDisposal,
@@ -28,6 +29,20 @@ defmodule SmolBox.Runtime.NativeDeletedBranchResolution do
       else: Session.error(:identity_conflict, :branch)
   end
 
+  def run(
+        config,
+        coordinator,
+        %{
+          branch: %{
+            native_authority: %{
+              disposal: nil,
+              collected_publication: %{proof: %BranchPublication{}}
+            }
+          }
+        } = child
+      ),
+      do: published(config, coordinator, child)
+
   def run(config, coordinator, %{branch: %{native_authority: %{disposal: nil}}} = child),
     do:
       NativePreparedBranchRetirement.run(config, coordinator, child, fn parent,
@@ -47,9 +62,51 @@ defmodule SmolBox.Runtime.NativeDeletedBranchResolution do
       budget = Target.connection(worker).budget
       deadline = now() + min(budget.timeout_ms, 30_000)
 
-      NativeResolution.run(config, coordinator, parent, worker, :deleted, fn pinned ->
-        uncertain(resume(config, parent, child, pinned, budget, deadline))
-      end)
+      NativeResolution.run(
+        config,
+        coordinator,
+        parent,
+        worker,
+        :deleted,
+        fn pinned ->
+          uncertain(resume(config, parent, child, pinned, budget, deadline))
+        end,
+        deadline
+      )
+    else
+      false -> Session.error(:unsupported_capability, :branch)
+      error -> error
+    end
+  end
+
+  defp published(config, coordinator, child) do
+    with :ok <- ManagedMachine.validate(child),
+         true <- NativeUnbootedBranchDisposal.eligible?(child),
+         {:ok, parent} <- MachineSession.claim(config, child.branch.source),
+         {:ok, worker} <- MachineSession.worker(config, parent),
+         :ok <- require_operations(worker) do
+      budget = Target.connection(worker).budget
+      deadline = now() + min(budget.timeout_ms, 30_000)
+
+      NativeResolution.run(
+        config,
+        coordinator,
+        parent,
+        worker,
+        :deleted,
+        fn pinned ->
+          select(
+            config,
+            parent,
+            child,
+            pinned,
+            deadline,
+            Session.error(:unsupported_capability, :branch),
+            {:ok, budget}
+          )
+        end,
+        deadline
+      )
     else
       false -> Session.error(:unsupported_capability, :branch)
       error -> error
@@ -58,10 +115,22 @@ defmodule SmolBox.Runtime.NativeDeletedBranchResolution do
 
   # A retirement error is never evidence of SDK entry. Obtain a positive candidate
   # under the SAME controller/helper fence before saving any disposal intent.
-  defp select(config, parent, child, worker, deadline, original_error) do
+  defp select(config, parent, child, worker, deadline, original_error),
+    do:
+      select(
+        config,
+        parent,
+        child,
+        worker,
+        deadline,
+        original_error,
+        after_prepared(Target.connection(worker).budget)
+      )
+
+  defp select(config, parent, child, worker, deadline, original_error, initial_budget) do
     with :ok <- require_operations(worker),
          :ok <- Target.require_operation(worker, :inspect_unbooted_branch_disposal) do
-      with {:ok, budget} <- after_prepared(Target.connection(worker).budget),
+      with {:ok, budget} <- initial_budget,
            {:ok, stage, budget} <- reserve(budget, 20 * 1024, 34 * 1024, deadline),
            {:ok, %UnbootedBranchDisposalCandidate{} = candidate} <-
              perform(config, parent, child, worker, :inspect_unbooted_branch_disposal, stage),

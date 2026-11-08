@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "status": "required-admission-gaps-open",
+  "source_commit": "766b3a111eb07bf885641a20b6bb826b6cf39668",
+  "policy_sha256": {
+    "native/policy.json": "a9b95768e2baba7d6515585e6fa8791782ddd4988e8cefde6a58f4d7d0e780f7",
+    "native/policy-linux.json": "75f5ed91ea91ee1665675c428141f56866cbd84ea9fb636bd98b9bb313e33067"
+  },
+  "sdk_approval_source": "lib/smolbox/embedded/sdk_identity.ex",
+  "sdk_approval_source_sha256": "18d7cc06a6b12bab1f084a968f63a0fd03746a51b1174242bb6f049b8753224c",
+  "current_features": {
+    "linux-x86_64": {
+      "lifecycle": 1,
+      "foreground_exec": 1,
+      "extended_exec": 1,
+      "files": 1,
+      "extended_files": 1,
+      "material_proofs": 2,
+      "observability": 1,
+      "networking": 1,
+      "ports": 1,
+      "workloads": 1,
+      "compact_creation": 1,
+      "job_resources": 1,
+      "buffered_exec": 1,
+      "background_exec": 1,
+      "logs": 1,
+      "streaming_exec": 1,
+      "terminals": 1,
+      "volumes": 1,
+      "disk_growth": 1,
+      "terminal_preflight": 1,
+      "remote_sources": 1,
+      "images": 1,
+      "checkpoints": 1,
+      "branches": 1,
+      "partial_collection_preflight": 1
+    },
+    "macos-aarch64": {
+      "lifecycle": 1,
+      "foreground_exec": 1,
+      "extended_exec": 1,
+      "files": 1,
+      "extended_files": 1,
+      "material_proofs": 2,
+      "observability": 1,
+      "networking": 1,
+      "ports": 1,
+      "workloads": 1,
+      "compact_creation": 1,
+      "job_resources": 1,
+      "buffered_exec": 1,
+      "background_exec": 1,
+      "logs": 1,
+      "streaming_exec": 1,
+      "terminals": 1,
+      "terminal_preflight": 1
+    }
+  },
+  "required_unadvertised_public_features": {
+    "linux-x86_64": [
+      "exports"
+    ],
+    "macos-aarch64": [
+      "remote_sources",
+      "images",
+      "checkpoints",
+      "branches",
+      "exports"
+    ]
+  },
+  "supporting_native_control_gap": {
+    "macos-aarch64": [
+      "partial_collection_preflight"
+    ]
+  },
+  "documented_http_platform_restrictions_not_reclassified_as_gaps": {
+    "volumes": "Linux only",
+    "disk_growth": "Linux qualified; macOS HTTP growth unqualified"
+  },
+  "operation_rows": 62,
+  "operation_arities": 68,
+  "specification_features": 8,
+  "contracts": 15,
+  "full_parity_operation_rows_pending": 62,
+  "full_parity_contracts_pending": 15,
+  "descriptor_presence_does_not_prove_ordinary_qualification": true,
+  "gaps_must_be_implemented_and_qualified_before_parity": true,
+  "no_scope_exception_or_feature_removal": true,
+  "crash_validation_deferred": true,
+  "distribution_approved": false,
+  "parity_complete": false
+}

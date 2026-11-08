@@ -54,6 +54,51 @@ fn running(child: crate::OwnerIdentity) -> Observation {
 }
 
 #[test]
+fn source_gate_requires_original_enrollment_and_exact_receipt_and_birth() {
+    let (_root, engine, receipt, _actors, epoch) = fixture();
+    let owned = engine
+        .runtime_boots
+        .reserve(&receipt, &engine.jobs)
+        .unwrap();
+    assert_eq!(
+        owned
+            .source_quiescent(&receipt, (1, 1), &epoch)
+            .unwrap_err()
+            .code,
+        ErrorCode::Ownership
+    );
+    owned
+        .enroll(
+            crate::epoch::tests::complete_model(epoch.begin_boot(&receipt.name).unwrap()),
+            &epoch,
+        )
+        .unwrap();
+    let child = owned.enrolled().unwrap().child();
+    let counts = engine.jobs.counts();
+    for pid in [(child.pid + 1, child.birth), (child.pid, child.birth + 1)] {
+        assert_eq!(
+            owned
+                .source_quiescent(&receipt, pid, &epoch)
+                .unwrap_err()
+                .code,
+            ErrorCode::Ownership
+        );
+    }
+    let mut foreign = receipt.clone();
+    foreign.incarnation = "f".repeat(32);
+    assert!(owned
+        .source_quiescent(&foreign, (child.pid, child.birth), &epoch)
+        .is_err());
+    // The synthetic PID has no live original actor. Its row/enrollment cannot
+    // grant a running source, retire the registry or release metadata.
+    assert!(!owned
+        .source_quiescent(&receipt, (child.pid, child.birth), &epoch)
+        .unwrap());
+    assert!(engine.runtime_boots.contains(&receipt.name).unwrap());
+    assert_eq!(engine.jobs.counts().branch_metadata, counts.branch_metadata);
+}
+
+#[test]
 fn readiness_retries_only_probes_and_rechecks_the_original_enrollment_after_success() {
     let (_root, engine, receipt, _actors, epoch) = fixture();
     let owned = enrolled(&engine, &receipt, &epoch);

@@ -1,7 +1,7 @@
 defmodule SmolBox.Embedded.NativePartialBranchCleanupCandidate do
   @moduledoc false
   alias SmolBox.Embedded.{
-    NativeGrowth,
+    NativeCollectedBranchPublication,
     NativePartialBranchDisposal,
     NativeUnbootedBranchDisposal,
     PartialBranchCleanupCandidate
@@ -17,9 +17,8 @@ defmodule SmolBox.Embedded.NativePartialBranchCleanupCandidate do
     with true <- Validation.struct_shape?(result, __MODULE__) and result.version == child.version,
          true <- NativePartialBranchDisposal.pending?(parent, child),
          %{proof: nil, cleanup: nil} = saved <- child.branch.native_authority.partial_disposal,
-         true <- PartialBranchCleanupCandidate.matches?(proof, saved.request),
-         {:ok, receipt, _, _} <- NativeGrowth.head(parent) do
-      proof.publication["previous"] == receipt and
+         true <- PartialBranchCleanupCandidate.matches?(proof, saved.request) do
+      NativeCollectedBranchPublication.publication_pending?(parent, child, proof.publication) and
         proof.publication["change"]["platform"] == saved.platform and
         child.branch.source == ManagedMachine.key(parent) and
         get_in(proof.publication, ~w(change child_origin intent source_pid)) ==

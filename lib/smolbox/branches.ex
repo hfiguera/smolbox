@@ -25,6 +25,7 @@ defmodule SmolBox.Branches do
     BranchObservation,
     MachineSession,
     NativeBranchBacking,
+    NativeCollectedBranchPublication,
     NativeDeletedBranchResolution,
     NativePartialBranchCleanup,
     NativePartialBranchCollection,
@@ -33,7 +34,8 @@ defmodule SmolBox.Branches do
     NativeReadyBranchResolution,
     NativeResolution,
     NativeUnbootedBranchRetirement,
-    Session
+    Session,
+    Target
   }
 
   @spec create(SmolBox.runtime(), ManagedMachine.key(), BranchSpec.t()) ::
@@ -279,6 +281,37 @@ defmodule SmolBox.Branches do
   end
 
   @doc """
+  Publish material retained by the original embedded owner after collection.
+  Requires an expected child version and `quiesced: true`. Saves the full creation
+  request before IO, then atomically records the material proof beside a separate
+  fresh source observation. Both managed states remain unknown and all capacity,
+  dependencies and backing stay reserved. This does not boot, initialize, release,
+  dispose or adopt a child. Saved acknowledgements return without helper IO,
+  including after a separately completed creation or disposal.
+  """
+  @spec publish_collected(SmolBox.runtime(), ManagedMachine.key(), pos_integer(), keyword()) ::
+          {:ok, ManagedMachine.t()} | {:error, Error.t()}
+  def publish_collected(runtime, handle, version, options) do
+    with true <-
+           options == [quiesced: true] and
+             Validation.integer?(version, 1, 9_007_199_254_740_991),
+         {:ok, config} <- config(runtime),
+         {:ok, child} <- fetch(runtime, handle),
+         :ok <- require_partial_native(child),
+         do:
+           NativeCollectedBranchPublication.run(
+             config,
+             Runtime.coordinator(runtime),
+             child,
+             version
+           ),
+         else: (
+           false -> Session.error(:validation, :branch)
+           error -> error
+         )
+  end
+
+  @doc """
   Dispose an uncertain original embedded child after acknowledged collection.
   Requires its expected version and `quiesced: true`. The distinct request is
   saved before native IO. Completion requires the original disposal proof and
@@ -423,22 +456,32 @@ defmodule SmolBox.Branches do
   end
 
   defp explicit(config, runtime, parent, child, worker, operation, observe) do
+    deadline =
+      if worker.kind == :embedded,
+        do:
+          System.monotonic_time(:millisecond) +
+            min(Target.connection(worker).budget.timeout_ms, 30_000)
+
     NativeResolution.run(
       config,
       Runtime.coordinator(runtime),
       parent,
       worker,
-      operation,
+      if(worker.kind == :embedded, do: {:ordinary_branch, operation}, else: operation),
       fn pinned ->
-        finish_explicit(config, parent, child, operation, fn -> observe.(pinned) end)
-      end
+        finish_explicit(config, parent, child, operation, fn -> observe.(pinned) end, deadline)
+      end,
+      deadline
     )
   end
 
-  defp finish_explicit(config, parent, child, operation, observe) do
-    with {:ok, evidence} <-
+  defp finish_explicit(config, parent, child, operation, observe, deadline) do
+    with :ok <- within_deadline(deadline),
+         {:ok, evidence} <-
            MachineSession.io(config, %{parent | operation_deadline_ms: nil}, observe),
+         :ok <- within_deadline(deadline),
          {:ok, current} <- MachineSession.claim(config, child.branch.source),
+         :ok <- within_deadline(deadline),
          do:
            MachineSession.store(
              config,
@@ -446,6 +489,14 @@ defmodule SmolBox.Branches do
              [child.branch.source, Session.guard(current), child.id] ++
                evidence ++ [config.clock.now()]
            )
+  end
+
+  defp within_deadline(nil), do: :ok
+
+  defp within_deadline(deadline) do
+    if System.monotonic_time(:millisecond) < deadline,
+      do: :ok,
+      else: Session.error(:expired, :branch)
   end
 
   defp config(runtime) do

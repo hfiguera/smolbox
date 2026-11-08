@@ -272,6 +272,48 @@ pub(crate) mod tests {
     use serde_json::json;
     use sha2::{Digest, Sha256};
 
+    /// Pure artifact inspection: never opens an SDK database, domain or VM.
+    #[test]
+    #[ignore = "requires an explicitly supplied ordinary SDK checkpoint fixture"]
+    fn inspect_operator_checkpoint_fixture_without_native_state() {
+        let path = std::path::PathBuf::from(
+            std::env::var_os("SMOLBOX_CHECKPOINT_FIXTURE").expect("explicit checkpoint fixture"),
+        );
+        let expected =
+            std::env::var("SMOLBOX_CHECKPOINT_FIXTURE_SHA256").expect("explicit checkpoint digest");
+        let bytes = std::fs::read(&path).unwrap();
+        assert_eq!(hex::encode(Sha256::digest(&bytes)), expected);
+        let manifest = smolvm_pack::packer::read_manifest_from_sidecar(&path).unwrap();
+        let header = manifest.checkpoint.as_ref().unwrap();
+        let approval = ApprovedCheckpoint {
+            artifact: ApprovedCheckpointArtifact {
+                path: path.clone(),
+                sha256: expected,
+                max_bytes: bytes.len() as u64,
+                guest_platform: manifest.platform.clone(),
+            },
+            sdk_version: smolvm::VERSION.into(),
+            host_platform: manifest.host_platform.clone(),
+            resources: Resources {
+                cpus: header.cpus,
+                memory_mib: header.memory_mib,
+                storage_gib: header.storage_gib.unwrap(),
+                overlay_gib: header.overlay_gib.unwrap(),
+            },
+        };
+        approval
+            .validate_compatibility(&manifest)
+            .expect("compatible header");
+        eprintln!("header compatibility passed");
+        let budget = crate::ReadBudget::for_checkpoint_work(
+            std::time::Duration::from_secs(120),
+            crate::Cancellation::default(),
+        )
+        .unwrap();
+        super::inspect_artifact(&approval, &budget).expect("bounded complete checkpoint input");
+        eprintln!("bounded complete checkpoint input passed; native state unopened");
+    }
+
     fn archive(files: &[(String, Vec<u8>)]) -> Vec<u8> {
         let mut builder = tar::Builder::new(Vec::new());
         for (path, bytes) in files {

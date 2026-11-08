@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "status": "long-terminal-worker-peer-regression-fixed-live-acceptance-pending",
+  "base_source_commit": "fdd6e698476e3fd36e515434bff822a0a8810f5f",
+  "changed_source": "native/smolbox-engine/src/terminal_worker.rs",
+  "changed_source_sha256": "8fdfacbb9ed0812a57044fde0ff1db8aa2efcc8d0fb5955336038862ca19d749",
+  "correction": {
+    "verify_worker_cwd_matches_admitted_staging": true,
+    "worker_passes_relative_staging_to_sdk_terminal_relay": true,
+    "parent_or_global_cwd_changed": false,
+    "startup_owner_and_metadata_authentication_preserved": true,
+    "sdk_source_changed": false
+  },
+  "regression": {
+    "short_fake_agent_socket_and_long_private_worker_spool": true,
+    "old_helper_exit_code": 101,
+    "old_helper_sha256": "d97851523298c5e1602939031c5d5de0a268aaef5245b63ae54ece30faaa80fe",
+    "new_helper_test_passed": true,
+    "checks": [
+      "binary input/output",
+      "resize",
+      "consumption credit",
+      "observed Exit 7",
+      "changed metadata rejected before SDK entry"
+    ],
+    "sdk_domain_or_vm_opened": false
+  },
+  "candidate": {
+    "manifest_sha256": "0735ee827497dd4e133b28ca4a763a1c5387dd4ae435a64788099371402775e9",
+    "helper_sha256": "d1f8a5838336e0e37e5ade26c9063aaddbb56bb8d3d743e0aeec0171bf739c19",
+    "development_signature_verified": true
+  },
+  "validation": {
+    "terminal_worker_long_path_peer": 1,
+    "terminal_io_models": 4,
+    "all_target_engine_clippy": "passed",
+    "format": "passed",
+    "regular_and_clean_sdk_sources": "unchanged"
+  },
+  "ordinary_live_acceptance_claimed": false,
+  "full_feature_parity_claimed": false,
+  "crash_validation_deferred": true,
+  "distribution_approved": false,
+  "private_logs_sha256": {
+    "build-helper.log": "9efdaddd237fd2b56e1fbce12c634b2bf5effacf46facb1955df1dadcf1aeb67",
+    "package.log": "ea0ef3179642efdb74e6883faf87e775e2f7fab1dbd75f666db217bcfe90550b",
+    "signature.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "terminal-long-after.log": "7e22cb058fc11f53f984c871fa65e3646e5b65819dc5901bcede2f1c9b14dbd1",
+    "terminal-io-models.log": "48dda5222cc6dae5eb79854894fbfc0c24193178c57fed77e641aaba96dc122e",
+    "clippy.log": "eca990fee6e60924dc1f1e92ec25c5304daaba9d0257e2734878d7d74ce02cae",
+    "format.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sdk-final.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+    "clean-sdk-final.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+  }
+}

@@ -432,6 +432,76 @@ mod tests {
     use std::os::unix::fs::PermissionsExt;
 
     #[test]
+    #[ignore = "requires an explicitly supplied ordinary SDK checkpoint fixture"]
+    fn materialize_operator_checkpoint_fixture_without_native_state() {
+        let input = PathBuf::from(
+            std::env::var_os("SMOLBOX_CHECKPOINT_FIXTURE").expect("explicit checkpoint fixture"),
+        );
+        let expected =
+            std::env::var("SMOLBOX_CHECKPOINT_FIXTURE_SHA256").expect("explicit checkpoint digest");
+        assert_eq!(
+            hex::encode(Sha256::digest(std::fs::read(&input).unwrap())),
+            expected
+        );
+        let manifest = smolvm_pack::packer::read_manifest_from_sidecar(&input).unwrap();
+        let header = manifest.checkpoint.as_ref().unwrap();
+        let resources = Resources {
+            cpus: header.cpus,
+            memory_mib: header.memory_mib,
+            storage_gib: header.storage_gib.unwrap(),
+            overlay_gib: header.overlay_gib.unwrap(),
+        };
+        let temporary = tempfile::tempdir().unwrap();
+        let root = temporary
+            .path()
+            .canonicalize()
+            .unwrap()
+            .join("materialized");
+        let footer =
+            smolvm_pack::packer::read_footer_from_file(&mut std::fs::File::open(&input).unwrap())
+                .unwrap();
+        smolvm_pack::extract::extract_checkpoint_sidecar(&input, &root, &footer, &[], &[])
+            .expect("SDK request-private extraction");
+        std::fs::set_permissions(&root, std::fs::Permissions::from_mode(0o700)).unwrap();
+        eprintln!("SDK request-private extraction passed");
+        for (path, (size, _)) in
+            crate::archive::checkpoint_expected_files(&manifest, resources).unwrap()
+        {
+            let metadata = std::fs::symlink_metadata(root.join(&path)).unwrap();
+            if metadata.len() != size
+                || metadata.uid() != unsafe { libc::geteuid() }
+                || metadata.mode() & 0o022 != 0
+                || metadata.nlink() != 1
+            {
+                eprintln!(
+                    "material mismatch {path}: size={} expected={size} mode={:o} uid={} links={}",
+                    metadata.len(),
+                    metadata.mode(),
+                    metadata.uid(),
+                    metadata.nlink()
+                );
+            }
+        }
+        let budget = ReadBudget::for_checkpoint_work(
+            Duration::from_secs(120),
+            crate::Cancellation::default(),
+        )
+        .unwrap();
+        material_proof(
+            &root,
+            &manifest,
+            resources,
+            Expected {
+                metadata_sha256: "a".repeat(64),
+                source_sha256: expected,
+            },
+            &budget,
+        )
+        .expect("complete material proof");
+        eprintln!("complete material proof passed; native state unopened");
+    }
+
+    #[test]
     fn material_evidence_binds_exact_files_versions_digests_and_rejects_extra_or_redirected_data() {
         let temp = tempfile::tempdir().unwrap();
         let root = temp.path().canonicalize().unwrap();

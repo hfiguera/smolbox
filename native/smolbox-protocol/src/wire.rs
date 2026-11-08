@@ -427,9 +427,14 @@ impl SdkIdentity {
                     | "exports"
                     | "branches"
                     | "partial_cleanup_resolution"
+                    | "partial_collection_preflight"
             ))?;
             require(*version == if feature == "material_proofs" { 2 } else { 1 })?;
         }
+        require(
+            self.feature_versions.get("partial_collection_preflight") != Some(&1)
+                || self.feature_versions.get("branches") == Some(&1),
+        )?;
         require(
             self.feature_versions.get("partial_cleanup_resolution") != Some(&1)
                 || self.feature_versions.get("branches") == Some(&1),
@@ -1407,6 +1412,10 @@ impl ImageObservation {
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "operation", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Operation {
+    PublishCollectedBranchMaterial {
+        request: Box<crate::BranchCreateRequest>,
+        quiesced: bool,
+    },
     InspectUnbootedBranchDisposal {
         request: Box<crate::BranchCreateRequest>,
         quiesced: bool,
@@ -1449,6 +1458,9 @@ pub enum Operation {
     },
     ResolvePartialBranchCleanup {
         request: Box<crate::PartialBranchDisposalCleanupRequest>,
+    },
+    InspectPartialBranchCollection {
+        request: Box<crate::PartialBranchCollectionRequest>,
     },
     CollectPartialBranch {
         request: Box<crate::PartialBranchCollectionRequest>,
@@ -1889,7 +1901,9 @@ impl Operation {
         if let Some(request) = self.partial_disposal_request() {
             return Some(&request.collection_request.creation.approval);
         }
-        if let Self::CollectPartialBranch { request } = self {
+        if let Self::CollectPartialBranch { request }
+        | Self::InspectPartialBranchCollection { request } = self
+        {
             return Some(&request.creation.approval);
         }
         if let Self::CollectBranchDeletion { request } = self {
@@ -1937,6 +1951,7 @@ impl Operation {
         match self {
             Self::CreateBranch { request }
             | Self::InspectBranchCompletion { request }
+            | Self::PublishCollectedBranchMaterial { request, .. }
             | Self::ResolveReadyBranchCompletion { request, .. } => Some(request),
             _ => None,
         }
@@ -2059,6 +2074,7 @@ impl Operation {
         matches!(
             self,
             Self::InspectUnbootedBranchDisposal { .. }
+                | Self::PublishCollectedBranchMaterial { .. }
                 | Self::BranchPreflight { .. }
                 | Self::DisposeUnbootedBranch { .. }
                 | Self::ResolveUnbootedBranchDisposal { .. }
@@ -2078,6 +2094,7 @@ impl Operation {
                 | Self::ResolvePartialBranchCleanup { .. }
                 | Self::QualifyPartialBranchCleanup { .. }
                 | Self::CollectPartialBranch { .. }
+                | Self::InspectPartialBranchCollection { .. }
                 | Self::CollectBranchDeletion { .. }
                 | Self::CleanupReleasedBranchDeletion { .. }
                 | Self::ResolveReleasedBranchDeletion { .. }
@@ -2130,7 +2147,8 @@ impl Operation {
         match self {
             Self::QualifyUnbootedBranchChildAbsence { .. }
             | Self::QualifyPartialBranchChildAbsence { .. } => Capability::Inspect,
-            Self::InspectUnbootedBranchDisposal { .. } => Capability::Inspect,
+            Self::InspectUnbootedBranchDisposal { .. }
+            | Self::InspectPartialBranchCollection { .. } => Capability::Inspect,
             Self::DisposeUnbootedBranch { .. } => Capability::Delete,
             Self::ResolveUnbootedBranchDisposal { .. }
             | Self::ReleaseUnbootedBranchBacking { .. }
@@ -2154,7 +2172,9 @@ impl Operation {
             | Self::CleanupHeldBranchDeletion { .. } => Capability::Delete,
             Self::ReleaseHeldBranch { .. } => Capability::Exec,
             Self::QualifyHeldBranchRelease { .. } => Capability::Inspect,
-            Self::CreateBranch { .. } => Capability::Create,
+            Self::CreateBranch { .. } | Self::PublishCollectedBranchMaterial { .. } => {
+                Capability::Create
+            }
             Self::InspectBranchCompletion { .. } | Self::ResolveReadyBranchCompletion { .. } => {
                 Capability::Inspect
             }
@@ -2242,7 +2262,8 @@ impl Operation {
             | Self::ResolvePartialBranchCleanup { request } => {
                 Some(&request.disposal_request.collection_request.creation.source)
             }
-            Self::CollectPartialBranch { request } => Some(&request.creation.source),
+            Self::CollectPartialBranch { request }
+            | Self::InspectPartialBranchCollection { request } => Some(&request.creation.source),
             Self::CollectBranchDeletion { request } => Some(&request.child),
             Self::CleanupReleasedBranchDeletion { request } => Some(&request.child),
             Self::ResolveReleasedBranchDeletion { request } => Some(&request.child),
@@ -2254,6 +2275,7 @@ impl Operation {
             }
             Self::CreateBranch { request }
             | Self::InspectBranchCompletion { request }
+            | Self::PublishCollectedBranchMaterial { request, .. }
             | Self::ResolveReadyBranchCompletion { request, .. } => Some(&request.source),
             Self::QualifyCheckpointCreation { .. }
             | Self::CreateCheckpoint { .. }
@@ -2385,7 +2407,8 @@ impl Operation {
                 request.validate()?;
                 require(budget_ms <= 30000)?;
             }
-            Self::CollectPartialBranch { request } => {
+            Self::CollectPartialBranch { request }
+            | Self::InspectPartialBranchCollection { request } => {
                 request.validate()?;
                 require(budget_ms <= 30000)?;
             }
@@ -2428,7 +2451,8 @@ impl Operation {
                         },
                 )?;
             }
-            Self::ResolveReadyBranchCompletion { request, quiesced } => {
+            Self::ResolveReadyBranchCompletion { request, quiesced }
+            | Self::PublishCollectedBranchMaterial { request, quiesced } => {
                 request.validate()?;
                 require(*quiesced && budget_ms <= 30000)?;
                 require(
@@ -3002,6 +3026,9 @@ pub struct MachineCounters {
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "result", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Outcome {
+    CollectedBranchMaterialPublished {
+        publication: Box<crate::BranchPublication>,
+    },
     UnbootedBranchDisposalCandidate {
         candidate: Box<crate::UnbootedBranchDisposalCandidate>,
     },
@@ -3031,6 +3058,9 @@ pub enum Outcome {
     },
     PartialBranchCleanupUnneeded {
         proof: Box<crate::PartialBranchDisposalCleanupUnneeded>,
+    },
+    PartialBranchCollectionCandidate {
+        candidate: Box<crate::PartialBranchCollectionCandidate>,
     },
     PartialBranchCollected {
         proof: Box<crate::PartialBranchCollection>,
@@ -3199,6 +3229,15 @@ pub enum Outcome {
 impl Outcome {
     pub fn validate(&self) -> Result<()> {
         match self {
+            Self::CollectedBranchMaterialPublished { publication } => {
+                publication.validate()?;
+                require(
+                    serde_json::to_vec(publication)
+                        .map_err(|_| InvalidMessage)?
+                        .len()
+                        <= 64 * 1024,
+                )
+            }
             Self::UnbootedBranchDisposalCandidate { candidate } => candidate.validate(),
             Self::UnbootedBranchDisposed { proof } => proof.validate(),
             Self::PreparedBranchRetired { proof } => proof.validate(),
@@ -3211,6 +3250,7 @@ impl Outcome {
             Self::PartialBranchCleanupCandidate { candidate } => candidate.validate(),
             Self::PartialBranchDisposalCleaned { proof } => proof.validate(),
             Self::PartialBranchCleanupUnneeded { proof } => proof.validate(),
+            Self::PartialBranchCollectionCandidate { candidate } => candidate.validate(),
             Self::PartialBranchCollected { proof, platform } => {
                 require(matches!(platform.as_str(), "linux" | "macos"))?;
                 proof.validate()
@@ -3433,6 +3473,7 @@ impl Outcome {
         if matches!(
             self,
             Self::BranchCreated { .. }
+                | Self::CollectedBranchMaterialPublished { .. }
                 | Self::UnbootedBranchChildAbsent { .. }
                 | Self::PartialBranchChildAbsent { .. }
                 | Self::BranchChildAbsent { .. }
@@ -3446,6 +3487,7 @@ impl Outcome {
                 | Self::PartialBranchDisposalCleaned { .. }
                 | Self::PartialBranchCleanupUnneeded { .. }
                 | Self::PartialBranchCollected { .. }
+                | Self::PartialBranchCollectionCandidate { .. }
                 | Self::BranchDeletionCollected { .. }
                 | Self::ReleasedBranchDeletionCleaned { .. }
                 | Self::ReleasedBranchDeletionResolved { .. }

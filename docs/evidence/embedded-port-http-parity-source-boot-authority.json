@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "scope": "running capture/branch source original boot actor qualification",
+  "diagnostic_source_commit": "cbfb83d1d7e06b698bbbac2f5bac42446db94e2a",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "native_manifest_sha256": "8c7030d6977226a6fe816aacdf1acfe9be0cd8896f4e626fd6693c7b9456cdbe",
+  "helper_sha256": "17b7fccd57b8187fa439c579112b47cdd438675ef5be0201086e6352c700f7b4",
+  "witness_sha256": "0bcec90dcc3eca7f9b4d613c0f218026c1dcf980442982d2158115e5678895fd",
+  "ordinary_diagnosis": {
+    "source_start_and_fresh_observation": "Running",
+    "guest_marker_setup_completed": true,
+    "ready_marker_observed": true,
+    "branch_preflight_error": "State (NotDispatched)",
+    "child_request_entered": false,
+    "protected_boot_actor_matches_original_source_pid_and_birth": true,
+    "direct_sdk_read_only_ping": "pong version=1",
+    "diagnostic_sdk_relay_read_only_ping": "pong version=1",
+    "diagnostic_probes_created_no_runtime_or_lifecycle_authority": true,
+    "cause": "complete actor quiescence rejects the original live source boot before the agent exchange"
+  },
+  "fix": {
+    "requires_retained_runtime_boot_enrollment": true,
+    "receipt_pid_birth_and_epoch_bound": true,
+    "requires_exact_protected_original_boot_actor": true,
+    "rejects_pending_dispatch_or_collection": true,
+    "rejects_other_same_source_actors": true,
+    "does_not_reconstruct_enrollment_from_inventory": true,
+    "stopped_source_and_collection_rules_unchanged": true,
+    "metadata_and_runtime_ownership_retained": true
+  },
+  "validation": {
+    "new_epoch_gate_model": 1,
+    "runtime_boot_models": 19,
+    "branch_models_passed": 374,
+    "existing_ignored_branch_case_not_run": 1,
+    "capture_models": 66,
+    "strict_all_target_clippy": true,
+    "sdk_unmodified": true,
+    "epoch_models_passed": 7,
+    "existing_ignored_epoch_case_not_run": 1,
+    "witness_models": 12,
+    "python_native_tooling_cases": 51,
+    "python_native_tooling_skipped": 4,
+    "documentation_build_and_links": true,
+    "logs_sha256": {
+      "epoch-all": "b1b7069c8d7b336daa7ddebd2e44416f09cb9802cdbb9f84aaac080d2c1fa66d",
+      "runtime": "d010fe2735712b24e39200944ee46a118a55700435de06f1588eec2b23c3d08f",
+      "branch": "3ee56fee11d969b3b7e34659113de1982d0eda60d7007a448a068be5c2832f20",
+      "capture": "94cc1d5cc5c215b95763fb1bda27f891ebda8d3cdd05ad4d2f42d9eeb9288ea9",
+      "clippy": "a60cae1fe4aff3fa35b7eda03457054428365d9b0c62f61d484e462896bbbb88",
+      "sdk": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "witness": "89ec0b4702f6efb476b1f16deddd2bf0e65d0aa66bc4792d730d637de950b702",
+      "tooling": "57b05da635b67c48bd443e666a56c9aaa52e7525425d91205c3b6a5fd7cc62c0",
+      "docs": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+      "docs-links": "2977ff71930dc7c0c0758e26d2a31102384e27693707da347f9b51505f31e155"
+    }
+  },
+  "failed_run_cleanup": {
+    "source_files_verified": 1748,
+    "assets_verified": 806,
+    "host_tools_unchanged": true,
+    "domain_unchanged": true,
+    "fixture_unchanged": true,
+    "sdk_counts": {
+      "vms": 0,
+      "vm_create_reservations": 0,
+      "vm_pause_operations": 0,
+      "vm_resize_intents": 0,
+      "vm_resize_receipts": 0
+    },
+    "native_processes_and_zombies": [],
+    "kvm_processes": [],
+    "account_lock_free": true,
+    "vm_directories_empty": true,
+    "proof_exit_status": 1
+  },
+  "private_archive": {
+    "sha256": "fc752c62e8ac56876f53ab8050a52f6d69df1b577deb7559f2c4fca2911d48e8",
+    "bytes": 133008134,
+    "verified_locally_and_outer": true
+  },
+  "changed_engine_ordinary_vm_qualification": false,
+  "public_native_branch_admission": false,
+  "full_parity_complete": false,
+  "crash_validation_performed": false,
+  "distribution_approved": false
+}

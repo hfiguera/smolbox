@@ -217,6 +217,7 @@ defmodule SmolBox.NativeBranchDeletionActionTest do
       update_in(
         child.branch.native_authority,
         &Map.drop(&1, [
+          :collected_publication,
           :delete_collection,
           :partial_collection,
           :partial_disposal,

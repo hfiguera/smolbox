@@ -63,6 +63,53 @@ defmodule SmolBox.EmbeddedImagesExampleTest do
     assert EmbeddedPackage.received(target) == []
   end
 
+  test "macOS runner requires ARM64 source approvals and preserves the registry cache boundary" do
+    sdk =
+      "native/smolbox-protocol/fixtures/hello-v2-macos-images.json"
+      |> File.read!()
+      |> Jason.decode!()
+      |> get_in(~w(hello sdk))
+
+    target = EmbeddedPackage.create(protocol_major: 2, platform: :macos, sdk_identity: sdk)
+    on_exit(fn -> File.rm_rf!(target.package_path) end)
+
+    options =
+      settings()
+      |> put_in(["source", "architecture"], "aarch64")
+      |> put_in(["pull_source", "architecture"], "aarch64")
+
+    configured = EmbeddedImages.configure(target, options)
+    assert :ok = Config.validate(configured)
+    assert configured.platform == :macos and configured.architecture == "aarch64"
+
+    assert Enum.all?(Launch.helper_config(configured)["approved_oci_sources"], fn approval ->
+             approval["platform"] == "linux/arm64"
+           end)
+
+    assert_raise MatchError, fn -> EmbeddedImages.configure(target, settings()) end
+
+    registry = %{
+      "source" =>
+        Map.merge(options["source"], %{
+          "kind" => "registry",
+          "content_sha256" => String.duplicate("c", 64)
+        }),
+      "cache_policy" => %{
+        "max_download_bytes" => 1000,
+        "max_cache_bytes" => 2000,
+        "max_cache_files" => 2
+      }
+    }
+
+    configured = EmbeddedImages.configure(target, registry)
+    assert hd(configured.profiles).network == :offline
+
+    assert [%{"source" => %{"platform" => "linux/arm64"}}] =
+             Launch.helper_config(configured)["approved_registry_sources"]
+
+    assert EmbeddedPackage.received(target) == []
+  end
+
   test "registry fixture keeps host cache approval separate from offline guest capacity", %{
     target: target
   } do

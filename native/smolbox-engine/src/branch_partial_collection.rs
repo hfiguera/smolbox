@@ -3,6 +3,71 @@
 use crate::{BranchCreateRequest, Error, ErrorCode, Result};
 use serde::{Deserialize, Serialize};
 
+/// Ephemeral original-context eligibility, never a collection acknowledgement
+/// or serialized authority. Actual collection rechecks its accepted request.
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct PartialBranchCollectionCandidate {
+    pub schema: u8,
+    pub creation_sha256: String,
+    pub operation_id: String,
+    pub request_sha256: String,
+    pub epoch: String,
+    pub platform: String,
+}
+impl std::fmt::Debug for PartialBranchCollectionCandidate {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("PartialBranchCollectionCandidate")
+            .field("schema", &self.schema)
+            .finish_non_exhaustive()
+    }
+}
+impl PartialBranchCollectionCandidate {
+    pub(crate) fn issue(
+        request: &PartialBranchCollectionRequest,
+        epoch: &str,
+        platform: &str,
+    ) -> Result<Self> {
+        let candidate = Self {
+            schema: 1,
+            creation_sha256: crate::material::hash(&request.creation)?,
+            operation_id: request.operation_id.clone(),
+            request_sha256: request.request_sha256.clone(),
+            epoch: epoch.into(),
+            platform: platform.into(),
+        };
+        candidate.matches(request)?;
+        Ok(candidate)
+    }
+    pub fn validate(&self) -> Result<()> {
+        if self.schema != 1
+            || !crate::domain::valid_hex(&self.creation_sha256, 64)
+            || !crate::domain::valid_id(&self.operation_id)
+            || !crate::domain::valid_hex(&self.request_sha256, 64)
+            || !crate::domain::valid_hex(&self.epoch, 32)
+            || !matches!(self.platform.as_str(), "linux" | "macos")
+            || serde_json::to_vec(self)
+                .map_err(|_| Error::before(ErrorCode::Io))?
+                .len()
+                > 4096
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        Ok(())
+    }
+    pub fn matches(&self, request: &PartialBranchCollectionRequest) -> Result<()> {
+        self.validate()?;
+        request.validate()?;
+        if self.creation_sha256 != crate::material::hash(&request.creation)?
+            || self.operation_id != request.operation_id
+            || self.request_sha256 != request.request_sha256
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        Ok(())
+    }
+}
+
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct PartialBranchCollectionRequest {
@@ -15,6 +80,37 @@ pub struct PartialBranchCollectionRequest {
 #[cfg(test)]
 mod reader_tests {
     use super::*;
+    #[test]
+    fn ephemeral_candidates_share_canonical_request_hashes_without_becoming_collection_proofs() {
+        let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/partial-branch-collection-candidate-v1.json"
+        ))
+        .unwrap();
+        for row in rows {
+            let request: PartialBranchCollectionRequest =
+                serde_json::from_value(row["request"].clone()).unwrap();
+            let candidate: PartialBranchCollectionCandidate =
+                serde_json::from_value(row["candidate"].clone()).unwrap();
+            candidate.matches(&request).unwrap();
+            assert!(
+                PartialBranchCollectionCandidate::issue(
+                    &request,
+                    &candidate.epoch,
+                    &candidate.platform
+                )
+                .unwrap()
+                    == candidate
+            );
+            assert!(
+                serde_json::from_value::<PartialBranchCollection>(row["candidate"].clone())
+                    .is_err()
+            );
+            let mut crossed = request.clone();
+            crossed.operation_id = "another-prospective-action".into();
+            crossed.request_sha256 = crossed.digest().unwrap();
+            assert!(candidate.matches(&crossed).is_err());
+        }
+    }
     #[test]
     fn shared_synthetic_partial_collection_bytes_match_both_readers_without_sdk_authority() {
         let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(

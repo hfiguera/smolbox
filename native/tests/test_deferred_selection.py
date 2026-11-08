@@ -61,6 +61,7 @@ class DeferredSelectionTests(unittest.TestCase):
             'cargo test --manifest-path "$native_manifest" --workspace --lib --bins --test contract --locked',
             'cargo test --manifest-path "$native_manifest" -p smolbox-engine --example volume-guest-proof --locked',
             'cargo test --manifest-path "$native_manifest" -p smolbox-engine --example oci-guest-proof --locked',
+            'cargo test --manifest-path "$native_manifest" -p smolbox-engine --example branch-guest-proof --locked',
             'cargo test --manifest-path "$native_manifest" -p smolbox-engine --test child_reaping --locked',
             'cargo test --manifest-path "$native_manifest" -p smolbox-engine --lib "$native_ordinary_fixture" --locked -- --exact --ignored',
             'cargo test --manifest-path "$native_clean_fixture/Cargo.toml" --lib parity::tests --offline',

@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "status": "normal-linux-window-shutdown-storage-preservation-and-cold-copy-verified",
+  "source_commit": "8686e179ceb4232774d97552fa09602fa9d7eaa8",
+  "native_and_beam_owners_absent_before_poweroff": true,
+  "six_private_postgresql_servers_stopped_before_poweroff": true,
+  "normal_guest_poweroff": true,
+  "lab_unit_result": "success",
+  "lab_mainpid_after_shutdown": 0,
+  "runtime_guard_and_network_boundary_unchanged": true,
+  "sealed_archive_preservation": {
+    "initial_archives": 25,
+    "initial_logical_bytes": 7386647438,
+    "additional_archives": 48,
+    "additional_logical_bytes": 5803554659,
+    "all_destination_bytes_mode_owner_group_and_mtime_verified": true,
+    "initial_hardlink_count_assertion_stopped_deletion": true,
+    "remaining_aliases_completed_after_verifying_exact_link_count_decrements": true,
+    "original_hardlink_relationship_metadata_preserved": true
+  },
+  "inactive_compile_cache": {
+    "entries": 35842,
+    "regular_files_verified": 29869,
+    "bytes_mode_owner_group_and_mtime_preserved": true,
+    "active_reference_to_original_files": false,
+    "current_package_assets_or_tools_reference_cache": false,
+    "runtime_database_pid_or_named_journals_found": false,
+    "static_source_contents_relocated_without_patching": true
+  },
+  "cold_copies": [
+    {
+      "name": "baseline.qcow2",
+      "sha256": "4ff59594af008ff0efb517e9c70cb90d5cf7c240dc0f71d53a162c7b4a0eea2d",
+      "source_metadata": {
+        "device": 1792,
+        "inode": 8126469,
+        "bytes": 5599789056,
+        "mtime_ns": 1788841267568891754,
+        "mode": 288,
+        "uid": 1000,
+        "gid": 995
+      },
+      "copy_verified": true
+    },
+    {
+      "name": "provision.qcow2",
+      "sha256": "3679c3d2ff4d1da191e18b3ae4721806985830a3f2e21d88cdee39b06386d70e",
+      "source_metadata": {
+        "device": 1792,
+        "inode": 8126468,
+        "bytes": 87805460480,
+        "mtime_ns": 1792267264094925256,
+        "mode": 432,
+        "uid": 1000,
+        "gid": 995
+      },
+      "copy_verified": true
+    }
+  ],
+  "original_run_metadata": {
+    "device": 1792,
+    "inode": 8126467,
+    "bytes": 24766644224,
+    "mtime_ns": 1792169349745541145,
+    "mode": 432,
+    "uid": 1000,
+    "gid": 995
+  },
+  "original_run_metadata_unchanged": true,
+  "exclusive_controller_and_vm_locks_held_during_cold_copy": true,
+  "SDK_namespace_or_authority_reopened_for_preservation": false,
+  "SDK_namespaces_or_VM_images_opened_for_write_by_archive_relocation": false,
+  "lab_free_bytes_after_staging_preservation": 13122859008,
+  "new_native_acceptance_claimed": false,
+  "full_parity_gates_closed": 0,
+  "crash_validation_deferred": true,
+  "distribution_approved": false,
+  "private_evidence_sha256": {
+    "preserve-inactive-staging.py": "d5d74326e53991ec92e1eb03c349fdbd9906a23949cbe9a77230b77c40a39d96",
+    "preserve-compile-cache.py": "3c22615b3381ad25ceac13307fab1206128f1424105f3f597153fdfc0e1ea9aa",
+    "preserve-cold.py": "74907714234857b2f047cd79c5472f8b3ca9c470f48fb24bcabbca193c2536e3",
+    "host-archives-complete.json": "b252f7adedf5a0bf6895b723e501919ff410f3d91d8a44701825acf86defa69f",
+    "host-cache-complete.json": "4d3d19aba7046fa5b7618fd02384794f42a3820e1fe0fc8f8d6cf8a1a939fbc4",
+    "cold-preservation-verified.json": "e66924fc0a03f49414a239d361011c12a8062dcf19a9001e9696dff04040fb4f",
+    "normal-window-stopped.txt": "e5f44b28129c7b803a14829d34894530e19a434389f1a8c65e95d62ea41196eb",
+    "guest-archive-placement-complete.json": "0679131c0725c34f7464e93ba75def3bb59ba31b832f93ff09e4f3de8586f6f6",
+    "static-package-placement-complete.json": "25e081cc164af807ab87d83f3c4eab9d53dd4ab6d1dff22250ab672906f5803b"
+  },
+  "duplicate_guest_archive_placement": {
+    "containers_removed_after_reverification": 6,
+    "logical_bytes": 2330176274,
+    "full_archives_retained_outer_host_and_verified_cold_provision_copy": true,
+    "original_SDK_disks_and_store_records_remain_in_place": true,
+    "failed_authority_reopened": false,
+    "guest_free_bytes_after_removing_duplicates": 12879134720
+  },
+  "unused_static_staging_package_placement": {
+    "all_806_assets_manifest_and_helper_reverified": true,
+    "only_unused_global_staging_copy_removed": true,
+    "configured_account_package_copies_preserved": true,
+    "original_static_package_retained_on_outer_host_and_in_cold_provision_copy": true,
+    "SDK_namespace_or_store_records_changed": false,
+    "active_reference_found": false,
+    "guest_free_bytes_after_removal": 11594764288
+  }
+}

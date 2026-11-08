@@ -10590,6 +10590,8 @@ end-to-end platform acceptance remain required. Public branch admission stays
 disabled; Rustler and Kubernetes implementation remain future work, and crash
 validation stays deferred.
 
+
+
 Verification passes 776 Rust units (689 engine, 53 bridge, 34 protocol) and 56
 contracts. Twenty-two opt-in fixtures remain ignored; the unchanged two-GiB
 sparse-materialization case is filtered from this repeat. Strict Clippy/API docs,
@@ -17397,3 +17399,1713 @@ Native, protocol and production library bytes are unchanged. Ordinary independen
 branch workloads, held release, child restart, dependency/backing cleanup and
 the remaining P0–P9 combinations remain required. Public native branch admission
 stays disabled; crash validation is deferred and distribution approval separate.
+
+## Ordinary branch witness preparation — October 17, 2026
+
+The explicit Linux x86_64 `branch-guest-proof ordinary` runner now connects the
+existing shared-engine branch APIs into a local-bare two-child workflow: source
+preparation, initially released and held children, explicit held activation,
+RAM/disk independence, ordinary first-child restart, child deletion/absence,
+source deletion and independent backing acknowledgements. Fixed source resources,
+explicit finite approvals and package/artifact verification precede dispatch.
+The report records separate helper-package and witness-executable identities.
+
+Original returned facts survive evidence-write errors. A failed run retains its
+engine behind a bounded private control socket. Normal known-state cleanup,
+typed absence and frozen backing requests are separate actions; uncertain
+lifecycle entry cannot replay. Normal close requires positive cleanup/backing
+acknowledgements and empty SDK inventory. Partial creations retain original
+requests and authority for separate resolution; inventory cannot supply it.
+
+The default native check adds only pure approval/state/request models, with the
+explicit reviewed selector updated. No live SDK/VM campaign is performed here.
+The Linux test lab was observed inactive with MainPID 0; no old job is restarted
+and no process signal is sent. Exact-package ordinary execution and remaining
+partial-owner controls still precede live acceptance. Port/public-consumer and
+durable dependency-retirement qualification, other source/platform combinations
+and all full-parity gates remain open. Crash validation stays deferred, public
+branch admission stays disabled and distribution approval remains separate.
+
+[Witness preparation evidence](../evidence/embedded-port-http-parity-branch-witness-preparation.json)
+records six pure Rust models, 51 Python native-tooling cases (four skipped),
+strict all-target Clippy, scoped formatting, shell syntax, unmodified-SDK
+verification, four parity-inventory contracts per current/minimum toolchain and
+documentation checks. Production Rust/Elixir library and bridge source stays
+unchanged; these results qualify no new native package or VM workflow.
+
+## Original-owner branch witness controls — October 17, 2026
+
+The ordinary witness now exposes explicit original-context ready/release lookup,
+prepared-only retirement, published/unbooted disposal, pre-handoff collection,
+collected-partial disposal, residual cleanup and terminal handoff. Wrong phase
+selection rejects before accepting a new collection/unbooted request. The engine
+still validates original grants, opaque actor enrollment, current roots, source
+authority and one-shot entry; an observed phase or an empty namespace supplies
+none of those facts.
+
+Every accepted request remains frozen in the original process. SDK disposal
+retry uses a distinct observer. Actual cleanup and unnecessary-cleanup lookup
+are separate actions with no fallback to each other or to mutation. Positive
+disposal is handed to the original terminal archive before local deletion state;
+fresh absence and backing choose the real unbooted/partial/completed proof kind.
+Accepted cleanup requires its own acknowledgement before closure. Source cleanup
+cannot remove context while an entered child is unresolved. A positive original
+prepared retirement can close an unused declaration without inventing an SDK
+child, deletion or backing allowance.
+
+[Control evidence](../evidence/embedded-port-http-parity-branch-witness-controls.json)
+records request builders against frozen cross-reader fixtures, phase/state guards,
+underlying branch models and source/tooling checks. No live fault campaign or VM
+outcome is attributed to these models. Exact Linux witness/helper build and
+ordinary SDK execution, public consumers and the remaining P0–P9 gates stay open;
+public native branch admission remains disabled, crash validation is deferred
+and distribution approval stays separate.
+
+## Linux protocol lint follow-up — October 17, 2026
+
+The frozen 633f067 Linux candidate compiled its helper and branch witness and
+passed all 12 witness models, but its strict Clippy step rejected three negated
+`Result::is_ok()` checks in partial-collection validators. The installed compiler
+is Rust 1.98.1 and the separately installed lint driver is Clippy 0.1.92; both
+identities are retained in private build evidence. The validators now use the
+equivalent `Result::is_err()` forms. Request/proof shapes, limits, hash domains,
+versions and feature admission are unchanged. The 99 protocol units and 59
+contracts cover the existing valid/invalid vectors; the corrected Linux candidate
+still needs its own frozen build and ordinary VM evidence. No SDK owner or
+workload VM was started by the failed build.
+
+## Initial ordinary branch run — October 17, 2026
+
+The exact c99db18 Linux helper/witness pair built with strict all-target Clippy,
+12 witness models, 51 Python tooling cases (four skipped) and verified unmodified
+SDK inputs. A fresh dedicated account verified all 1,747 source files, 806 assets,
+host tools and the pinned local-bare fixture before normal domain enrollment.
+
+The ordinary run created and started the source, then returned State /
+NotDispatched before the first child request. Existing diagnostics do not identify
+which source setup/readiness/preflight step rejected; no branch VM behavior is
+qualified. Explicit original-owner controls normally deleted the source and closed
+the engine. The witness exited, all five SDK table inventories are empty and the
+account lock is free. No process termination signal or deferred campaign ran.
+The private archive verifies locally; bounded
+[initial Linux evidence](../evidence/embedded-port-http-parity-branch-linux-initial.json)
+records exact identities and this negative outcome.
+
+The witness now records returned source startup and a fresh observation separately,
+then marks successful guest setup, ready-marker observation and branch preflight.
+Step-specific errors distinguish these boundaries without replaying a command or
+changing engine authority, feature admission or SDK bytes. These diagnostic changes
+need their own frozen witness execution. Ordinary sibling independence, public Port
+routing, durable retirement, consumers and all remaining P0–P9 gates remain open.
+Public branching stays disabled, crash validation deferred and distribution separate.
+
+## Running-source original boot authority — October 17, 2026
+
+The diagnostic cbfb83d Linux run positively observed original source startup,
+guest disk/RAM marker setup and the branch-ready marker, then rejected branch
+preflight before entering any child request. Inspection found the original live
+source boot actor still in its protected epoch. Both a direct public-SDK ping and
+a diagnostic guarded relay returned a valid pong; neither created a runtime or
+lifecycle authority. The earlier State error did not prove that the preflight
+ping had been reached.
+
+The source-authority gate had required complete actor quiescence, which also
+counts its own original live boot actor as busy. Running-source qualification
+now selects the retained original runtime-boot enrollment, binds its receipt and
+PID/birth and permits only that exact protected boot actor. Pending dispatch or
+collection, another same-source boot/transfer actor, missing original records,
+wrong operation/name/epoch/root or changed identity still refuses. Stopped-source
+quiescence and ordinary collection retain their existing semantics. The source
+runtime handle, capture enrollment and live process checks still independently
+precede capture/branch authority; no receipt or inventory can reconstruct it.
+
+The failed run used normal original-owner source deletion and close. Postchecks
+verify all 1,748 source files and 806 assets, unchanged domain/fixture/host tools,
+empty SDK tables and VM directories, no native processes/zombies or KVM owners,
+and a free account lock. Private evidence is archived and verified locally.
+The new engine bytes still need frozen package and ordinary VM execution; this
+correction grants no public feature admission or full-parity acceptance. Crash
+validation remains deferred and distribution separate.
+
+[Source boot authority evidence](../evidence/embedded-port-http-parity-source-boot-authority.json)
+records the negative ordinary attempt and the corrected original-owner gate.
+The focused epoch regression, 19 runtime-boot models, 374 branch models (one
+existing ignored case not run), 66 capture models, strict all-target Clippy and
+unmodified-SDK verification pass. No changed-package VM acceptance transfers from
+the earlier helper; public feature admission remains disabled.
+
+## SQLite observation inode custody — October 17, 2026
+
+The b16c806 ordinary Linux run passed original source startup, marker setup and
+branch preflight, then collected and verified its first SDK preparation. Child
+material publication returned Database / MayHaveDispatched before any child VM
+boot. Its original context remains retained in Collected. The current witness
+cannot continue that exact publication or discard an unpublished raw child; the
+original SDK disks/records are privately preserved, with both archive copies
+verified. Copies taken with the source running are not cold consistency evidence.
+Cleanup authorization is pending because ending this original test owner crosses
+the goal's explicit helper-loss validation deferral; no signal is sent here.
+
+A separate private SQLite fixture reproduced a cached-SDK-writer/native-observer
+failure across a normally exiting writer child, without creating an SDK runtime
+or VM. The observer previously opened/closed raw main-database descriptors to pin
+the inode. [SQLite documents](https://www.sqlite.org/howtocorrupt.html#_posix_advisory_locks_canceled_by_a_separate_thread_doing_close_)
+that such closes can cancel the process's database locks. A read-only SQLite
+connection now retains the inode. Path identity/ownership and no-redirect checks,
+the actual connection filename and the public HAS_MOVED file control bind that
+connection to the enrolled database before/after observation and rollback. A
+moved or unsupported connection rejects; there is no weaker fallback or repair.
+Read-only schema/integrity, deadline and bounded projection checks remain.
+
+The private regression now passes, including a pathname restored around a
+connection that had opened a replacement file. Sixteen SDK compatibility models,
+374 branch models (one existing ignored case not run), 66 capture models, strict
+all-target Clippy and unmodified-SDK verification pass. [Scoped evidence](../evidence/embedded-port-http-parity-sqlite-observation-locks.json)
+keeps these source/model results separate from ordinary VM qualification of changed
+helper bytes. The missing original publication continuation, remaining P0–P9 gates
+and public consumer/platform acceptance stay required. Public branching remains
+disabled; crash validation remains deferred and distribution separate.
+
+## Original collected publication continuation — October 17, 2026
+
+An explicit original-owner control now finishes only the same verified collected
+row/material publication under one fresh captured deadline, at most 30 seconds.
+It reuses the protected declaration, verified output, source/snapshot/child roots,
+original source authority and exact pending publication. Raw-to-owned conditional
+row replacement, marker and child-journal continuation preserve the original
+operation; fork, child boot, activation and deletion never replay. Completed
+publication is historical lookup, with no child readiness or capacity release.
+Active work, crossed creation/epoch/rows, missing original evidence and exhausted
+control admission refuse while all original gates, work and backing stay retained.
+A late acknowledgement keeps its protected result and uncertainty.
+
+The witness exposes publish-collected-first/held, preserves returned publication
+and receipts before evidence IO and keeps the child unknown. Separate unbooted
+disposal, typed absence and backing actions remain necessary. The pure publication
+matcher validates source/child/approval material; the live retained context still
+binds the full creation and activation choice. Publication alone never attests an
+activation result. No new frame, codec, capability or public admission is enabled.
+
+[Collected publication evidence](../evidence/embedded-port-http-parity-collected-publication.json)
+records six new private publication/lease models, 380 branch models (one existing
+ignored case not run), 19 runtime-boot and 16 SDK compatibility checks, 13 witness
+models, 51 Python tooling cases (four skipped), strict all-target Clippy and clean
+SDK verification. These inject explicit private host/process facts and construct
+no VM or SDK lifecycle. Ordinary exact-package recovery, framed Port/public store
+routing, installed consumers and all remaining P0–P9 acceptance remain open.
+Public native branching stays disabled; crash validation stays deferred and
+distribution approval separate. The older parked witness cannot gain these new
+controls in place; its separately requested teardown approval remains pending.
+
+## Original branch-manager disk paths — October 17, 2026
+
+The exact aa211032 Linux package passes its frozen build, strict all-target
+Clippy, 380 branch models (one existing ignored case not selected), 66 capture
+models, 16 SDK compatibility models and 13 witness models. Source and asset checks
+verify 1,753 files, 806 assets, unchanged host tools and unmodified smolvm inputs.
+A fresh dedicated account enrolls normally with empty SDK inventories.
+
+Its ordinary shared-engine run creates both children, releases the held child
+and positively checks independent source/two-child disk and RAM changes. The
+first child's normal stop then rejects with Ownership / NotDispatched. The
+original witness reports all members still Running. Inspection confirms both
+children use QCOW files while original-manager collection requires raw paths;
+source, child, snapshot and rootfs directory identities still match.
+
+Collection now checks the same public SDK resolver used at boot against the
+original manager's storage/overlay paths, with protected directory identities,
+owned regular files and no symlink redirection. Missing, crossed, redirected,
+writable or newly shadowed paths refuse. Ordinary guest payload writes do not
+invalidate a pathname check. These checks create no manager or enrollment and
+grant no disk deletion, source-dependency or backing release. The witness now
+records successful first-child stop and restart separately.
+
+The two focused private models and all 382 branch models pass (one existing
+ignored case not selected), together with 13 witness models, strict all-target
+Clippy, scoped formatting, unmodified-SDK checks and documentation/link checks.
+The private disk fixtures cover raw/QCOW combinations and rejection cases.
+[Scoped evidence](../evidence/embedded-port-http-parity-branch-manager-disk-paths.json)
+keeps the failed ordinary package separate from the correction's validation.
+All original SDK disks/records are preserved in archives verified locally and
+on the outer Linux host. They were captured with VMs running and are not cold
+consistency evidence. Both failed original owners remain retained pending their
+scoped cleanup approval; no signal or deferred campaign ran. New-package normal
+lifecycle, durable/public routing, installed consumers and all remaining P0–P9
+gates stay open. Public branching stays disabled and distribution separate.
+
+## Native collected-publication framing — October 17, 2026
+
+Protocol two now routes `publish_collected_branch_material` to the existing
+shared-engine original-owner control. The complete frozen creation and explicit
+quiescence are required, together with the immutable operator approval and Create
+capability. A single deadline capped at 30 seconds includes original selection,
+conversion and publication. Missing original context has no inventory/file-based
+fallback. The operation never repeats a fork, child boot, initialization,
+activation or deletion and never releases any allowance.
+
+The distinct material publication reply binds source, child, approval, platform
+and the original epoch. It attests no activation or ready child. Request creation
+and publication remain bounded at 16/64 KiB, with zero stream output. Both the
+runtime and output classifier use the existing branch control reserve; a stalled
+writer cannot consume the two ordinary observer replies or advance sequence when
+capacity is exhausted. Quarantined new work still permits this fenced control.
+
+[Native framing evidence](../evidence/embedded-port-http-parity-collected-publication-port.json)
+records 101 protocol units, 59 contracts, 90 helper units (two existing ignored
+cases not selected), strict all-target Clippy, scoped formatting and clean SDK
+checks. Eight added framed scenarios use an in-process synthetic peer, not an SDK
+owner or VM. The full creation/activation remains bound separately by the engine's
+original registry. This changes no Elixir codec, Backend operation inventory or
+public feature descriptor. Elixir routing, durable/public continuation, ordinary
+package recovery and installed consumers remain required. Public native branches
+stay disabled; crash validation and distribution remain separate.
+
+## Original manager versus runtime PID rows — October 17, 2026
+
+Exact 050b351 Linux source/helper/witness builds pass every selected stage, with
+1,754 source files and normalized executable/file modes, 806 assets, host tools
+and unmodified SDK inputs verified. A fresh account enrolls and closes its empty
+helper normally. Source preflight, both branch creations, explicit held release
+and actual source/sibling disk and RAM independence pass again. The new diagnostic
+identifies first-child normal stop as the Ownership / NotDispatched failure;
+all three original members remain Running.
+
+The stop path's `EmbeddedRuntime::pid` exclusion runs before disk collection and
+also reads the persisted child row. It therefore rejects the original running
+manager as if an ordinary runtime cached handle owned it. Original contexts now
+share the actual engine runtime-boot registry. Pointer identity is checked at
+installation and selection, while a bounded registry lookup excludes pending or
+active same-name runtime starts. The original-manager maps, child gate, opaque
+enrollment, PID/birth, epoch, directories and current row still independently
+qualify collection. The asynchronous deletion worker rechecks that same registry.
+No SDK source or public data/wire/codec shape changes.
+
+[Scoped evidence](../evidence/embedded-port-http-parity-branch-runtime-exclusion.json)
+records a private synthetic PID/real registry regression: a persisted PID alone
+does not exclude the original manager, but a pre-SDK reservation observed through
+the shared registry does, with metadata retained until retirement. The full
+engine unit suite passes 1,048 cases (22 existing ignored ordinary fixture cases
+not selected), followed by strict all-target Clippy, scoped formatting, clean SDK
+and documentation/link checks. No VM, cached runtime handle or loss campaign is
+started by this validation. Ordinary corrected-package stop,
+restart, deletion and backing acceptance remain required. Existing deletion
+continuation locator checks still need their QCOW-aware review; public routing,
+durable continuation, consumers and all P0–P9 gates remain open.
+
+All three failed original owners remain parked pending scoped cleanup approval.
+Their SDK disks/records have archives verified locally and on the outer host;
+running-VM archives are preservation, not cold consistency evidence. No signal or
+deferred campaign ran. The original run image's size, mtime, device and inode are
+unchanged. Public branching stays disabled and distribution approval separate.
+
+## Original manager locators for deletion continuation — October 17, 2026
+
+Deletion collection, residual cleanup and continuation shared another raw-only
+manager identity check. It also used the SDK database-backed PID accessor to
+infer a runtime cached owner. The original context now captures its actual
+selected storage/overlay paths at verified handoff, after checking the SDK
+resolver, original directories and owned regular files. This private record is
+bound to the original child-directory identity and cannot be deserialized or
+used to reconstruct a manager. Context installation and original live collection
+check it against the actual retained manager.
+
+Historical continuation matching uses those exact immutable raw/QCOW locators,
+so a removed namespace does not invalidate an already returned opaque collection.
+It still binds the original manager name/PID and rejects competing starts through
+the same shared runtime-boot registry. No historical path match attests collection
+or absence. Live collection retains current directory/disk checks, while every
+mutating continuation retains positive original collection and current protected
+plan, material and exact-row checks before SDK entry. No wire, codec, Backend
+inventory, public descriptor or upstream SDK source changes.
+
+[Locator evidence](../evidence/embedded-port-http-parity-branch-manager-locators.json)
+records three private filesystem models for raw/QCOW combinations, crossed names
+and paths, changed directory identities, newly preferred disks and namespace
+removal. All 386 branch models pass (one existing ignored fixture not selected),
+alongside 19 runtime-boot and 13 witness models, strict all-target Clippy, scoped
+formatting and unmodified-SDK checks. These construct no SDK manager, runtime
+handle, VM or loss campaign.
+Ordinary rebuilt-package stop/restart/deletion/continuation and backing acceptance,
+Elixir/public/store routing, installed consumers and all remaining P0–P9 gates
+stay required. Public native branches remain disabled and crash validation stays
+deferred.
+
+## Provisioning window runtime limit — October 17, 2026
+
+The existing two-hour provisioning service limit fired at 08:33 UTC. Systemd
+reports failed/timeout with MainPID 0 and no restart. The agent sent no termination
+signals and made no guard change. The pending three-owner cleanup scope is now
+obsolete; its old PIDs cannot be signalled in a restarted guest. No original-owner
+collection/reaping or crash qualification is inferred from the external VM loss.
+
+[Preservation evidence](../evidence/embedded-port-http-parity-lab-runtime-limit-oct17.json)
+reverifies all three private archives locally and on the outer host, retains the
+provision disk and confirms unchanged size/mtime/device/inode for the original
+run image. These archives were captured with VMs running and do not establish
+cold SDK consistency. No old SDK workflow is replayed, adopted or restored from
+saved authority. The frozen outer ef2be773 build and local source/model work
+continue independently; all ordinary acceptance and deferred gates remain open.
+
+## Elixir collected-publication framing — October 17, 2026
+
+Elixir now accepts the native protocol-two collected-publication control only
+with the full valid creation, explicit quiescence, a 30-second cap and 16-KiB
+creation bound. It is a fenced reconciliation/control action rather than a
+read-only observation, so a quarantined channel can carry it. The 64-KiB
+material-only reply binds original source, child, approval, epoch and platform;
+stream output, crossed identity, substituted completion and extra/null fields
+reject. Publication alone never attests activation or readiness. The current
+package's feature/catalog gate still refuses the action before any native IO.
+
+[Elixir evidence](../evidence/embedded-port-http-parity-collected-publication-elixir.json)
+records 22 wire/channel, nine legacy protocol and one cold dispatch-rejection
+check per current/minimum toolchain. Four new tests consume the same canonical
+Rust fixtures; the existing catalog fixture now uses a fixed atom-key set to
+remove fresh-process atom-load-order dependence. Scoped formatting passes. Credo
+retains its existing 67 findings/exit 14, with no new changed-line findings.
+No SDK owner, VM, loss campaign, Backend inventory, codec/store marker or public
+feature admission is added. Explicit Backend/Runtime/store publication
+continuation, installed consumers, ordinary SDK recovery and every remaining
+P0–P9 gate remain required. Crash validation stays deferred.
+
+## Frozen Linux locator package — October 17, 2026
+
+Exact fa48c44 completes its Linux helper/witness build, selected epoch/runtime/
+branch/capture/SDK-compatibility/protocol and witness models, native tooling,
+strict all-target Clippy and clean SDK checks before/after. All 1,759 source files
+and normalized modes verify, alongside the same 806 approved assets. The
+[locator evidence](../evidence/embedded-port-http-parity-branch-manager-locators.json)
+records exact source, manifest, helper and witness identities. The completed build
+runs on the outer host after the provisioning window's external timeout and starts
+no guest VM qualification. It does not include later Elixir framing source or
+qualify ordinary stop/restart/deletion, SDK recovery, public consumers or admission.
+
+## Paired collected-publication persistence — October 17, 2026
+
+The [durable-publication evidence](../evidence/embedded-port-http-parity-collected-publication-durable.json)
+records a separate accepted action containing full frozen creation (including
+initial release), explicit quiescence, platform and child version. Typed material
+publication plus a separate fresh original-source observation commits source
+history and child acknowledgement together. Both managed states stay unknown;
+active source/child dependency, ordinary capacity and all backing remain charged.
+Retries retain the action, stale/crossed results fail atomically, and later ready,
+unbooted-disposal or partial-disposal proofs must consume the exact saved
+publication without a duplicate material-history link. Partial collection also
+binds its publication digest and platform, in either acceptance order.
+
+Selective v50 persists this history. Earlier envelopes omit/restore exactly the
+new nil default, and fresh readers reject older-tag substitution, compression,
+trailing/oversized payloads and stripped histories. Reader/projector marker
+`native_collected_branch_publications: 1` is required by future branch admission;
+it enables no helper feature. Memory and encrypted PostgreSQL exercise the paired
+contract, ordinary claims and modeled transaction rollback. Backend/Runtime/public
+publication dispatch, installed consumers, ordinary SDK recovery and remaining
+P0–P9 gates stay required. Native source/package bytes and backend inventory stay
+unchanged; public native branching remains disabled and crash validation deferred.
+
+## Fenced public collected-publication control — October 17, 2026
+
+`SmolBox.Branches.publish_collected/4` now connects saved v50 publication intent
+through Backend/Runtime to the original native owner. An expected child version
+and exactly `quiesced: true` precede acceptance. The same controller/helper fence
+covers the accepted request, material-only publication, fresh source observation
+and paired acknowledgement. One deadline of at most 30 seconds and aggregate
+24-KiB input / 84-KiB output never reset between exchanges. Lost/late/malformed
+replies, crossed epoch/platform/PID and store rejection preserve unknown states
+and every reservation. Explicit retries retain the same full creation; saved
+acknowledgements, including after later ready/disposal, need no helper IO.
+
+Ready, unbooted-disposal and partial-disposal paths now accept the exact already
+saved source publication without appending it again. Known publication bypasses
+prepared-only retirement, but disposal still requires its positive original
+candidate and actual typed proof; material history supplies neither absence nor
+SDK ownership. [Public-control evidence](../evidence/embedded-port-http-parity-collected-publication-public.json)
+separates inert model/peer/SQL checks from live SDK qualification. HTTP rejects
+the added native-only operation, and the current approved package rejects before
+native IO. Backend inventory is now 61 operations / 67 signatures; every full-
+parity row remains pending. Native Rust/SDK/helper/assets and wire/codec schemas remain
+unchanged. Ordinary installed consumers, branch lifecycle/recovery and remaining
+P0–P9 platform/source/resource gates stay required. Public native branch admission
+and distribution remain disabled; crash validation stays deferred.
+
+## Completed-child cold-restart cache — October 17, 2026
+
+Exact fa48c44 Linux helper/witness bytes pass original source/two-child disk and
+RAM independence, held release, first-child normal stop and cold restart. The
+restarted child retains disk data without restoring RAM, and both siblings keep
+their data. The second stop reaches a protected Collected deletion intent with a
+canonical stopped row. Deletion then refuses the SDK-created empty real `pack`
+directory before entering SDK deletion. No absence, dependency or backing
+retirement is qualified. The original owner stays retained; its private warm
+archive verifies on Linux and Mac, without claiming cold SDK consistency.
+
+Completed-child deletion and its residual cleanup now accept a separately
+verified owned empty cache, using a no-follow directory descriptor, path/inode
+checks and a bounded emptiness observation. Missing caches and source symlinks
+retain their existing behavior. Populated/private mount caches and writable or
+redirected directories refuse. Never-booted/partial disposal keeps the original
+strict guard. Existing original collection, stopped-row, receipt, dependency,
+epoch and resource checks still precede mutation; no SDK source or record is
+rewritten. The witness adds a distinct post-restart checkpoint and deletion error
+context. [Scoped evidence](../evidence/embedded-port-http-parity-branch-empty-cache.json)
+separates this model correction from the failed ordinary attempt. Changed native
+bytes need a fresh frozen build and ordinary lifecycle acceptance. Public branch
+admission remains disabled, every full-parity row remains pending, and crash
+validation stays deferred. Distribution approval remains separate.
+
+## Ordinary Linux two-child branch lifecycle — October 17, 2026
+
+Exact source 845a37b, manifest e55695a6, helper 0d064031 and witness 3b96d144 now
+pass the shared engine's local-bare Linux x86_64 branch workflow. Source and two
+children preserve independent disk/RAM data, the held child releases, and the
+first child stops and cold-starts with disk data retained and RAM not restored.
+Both children and the original source delete normally. Two typed child absence
+proofs and both native backing acknowledgements complete before normal engine
+shutdown. The completed-child empty-cache correction therefore has ordinary
+acceptance on these exact bytes.
+
+Fresh-account postchecks find all five SDK inventories empty, no VM directories,
+native processes/zombies or KVM owners, and a free native-domain lock. All 1,774
+frozen source files and 806 assets verify; approved host tools, domain and fixture
+remain unchanged. The 160,304,493-byte private clean archive verifies on Linux
+and Mac, including 3,861 members and its read-only SQLite backup. No archived
+state is restored as authority. The earlier failed account remains separate;
+this case neither adopts its owner nor qualifies its cleanup.
+
+Linux selected checks pass: seven epoch, 20 runtime-boot, 388 branch, 67 capture,
+17 SDK-compatibility, 160 protocol and 13 witness models, plus 51 native Python
+cases with four skips. Existing ignored epoch/branch fixtures stay unselected.
+Strict all-target Clippy, source/SDK checks and asset verification pass. Both
+current/minimum HTTP contract suites pass 410 checks, with runtime and deferred
+crash tags excluded. [Scoped evidence](../evidence/embedded-port-http-parity-linux-branches-845a37b.json)
+binds all package/proof/archive identities. Original-owner partial/uncertain
+recovery, framed Port/public/durable branch workflows, installed current/minimum
+consumers and all remaining P0–P9 gates stay required. Every full-parity row
+remains pending, public native branching stays disabled, crash validation stays
+deferred and distribution approval remains separate.
+
+The seven actual ordinary Rust results also pass the current/minimum Elixir
+readers: two creation completions, held release, two child absence proofs and two
+backing acknowledgements. Strict typed parsing, canonical digests, original
+request matching and exact wire/JSON round trips pass without starting an SDK
+owner or VM. This checks the real returned evidence across languages; it does
+not qualify framed Port routing, installed consumers or store lifecycle.
+
+## Linux Port branch candidate and ordinary runner — October 17, 2026
+
+The Linux development policy now declares checkpoint and branch wire operations,
+with a new exact Hello fixture. Older descriptors and the macOS policy remain
+unchanged; optional partial-cleanup resolution stays unadvertised. Existing
+package pins are not relabelled. The Elixir SDK approval and withheld native-store
+capability still block public Runtime admission for this candidate.
+
+The opt-in Python Port runner exercises the same ordinary local-bare source and
+two-child lifecycle as the qualified shared-engine witness, including historical
+completion/ready lookups, held release qualification, independent disk/RAM state,
+cold restart, typed absence and backing acknowledgements, and normal protocol
+shutdown. It pins the approved package/settings and retains original receipts,
+requests and helper on failure. Bounded controls use the same in-memory owner;
+unknown lifecycle cannot replay, and an unresolved wire cursor blocks fresh
+quiesced controls. Explicit normal shutdown preserves disks and supplies no
+absence/resource-release proof. No forced signal or deferred campaign is added.
+The transport reader uses one captured observation deadline across acceptance,
+header/body and event frames, preserving the native request's own finite budget.
+
+[Preparation evidence](../evidence/embedded-port-http-parity-branch-port-runner.json)
+records 161 protocol, 17 branch-framing and one package-policy check, strict
+all-target Clippy, SDK verification and 63 Python models (four skipped). These
+construct no live SDK branch or VM. The changed exact Linux package, live framed
+Port workflow, Elixir/store activation, installed current/minimum consumers and
+remaining P0–P9 gates still require acceptance. Crash validation remains deferred,
+distribution approval separate and every full-parity matrix row pending.
+
+## Explicit default configuration for branch preflight — October 17, 2026
+
+The exact 9c00605 Linux candidate builds and passes the selected native checks,
+including the actual Linux package-policy and 17 branch-framing models. A fresh
+account then reaches real framed source creation, checkpointable startup and
+marker setup. Branch preflight loses the channel with helper EOF; the helper and
+controller exit before any child request. No deliberate signal, loss injection
+or mutation replay runs. The SDK source row remains Running with its original PID
+absent; its disks and records are preserved in a verified private archive on both
+hosts. This is neither original collection, positive absence, normal shutdown,
+cleanup nor crash qualification.
+
+The actual source has networking disabled and empty port/mount sets. The generic
+configuration observer intentionally omits that default, but the strict branch
+preflight protocol requires explicit verified offline configuration. That
+producer/contract mismatch can turn a valid shared-engine observation into a
+rejected terminal and channel failure. Branch preflight now constructs an explicit
+configuration from its already-verified SDK record, preserving the same source
+eligibility, original ownership, PID/resource and agent checks. Ordinary default
+observations continue omitting configuration; protocol qualification still rejects
+missing, networked or mounted results. No SDK source, wire version, store record
+or public admission gate changes. The original raw record is never repaired.
+
+[Scoped evidence](../evidence/embedded-port-http-parity-branch-preflight-explicit.json)
+separates the unsuccessful exact-package run from the producer/model correction.
+A new frozen package and ordinary Port rerun are required. Public SDK/store and
+installed current/minimum consumers, remaining original-owner controls and all
+other P0–P9 gates remain open. Every full-parity row stays pending, crash validation
+stays deferred and distribution approval remains separate.
+
+
+## Ordinary Linux framed Port branches — October 17, 2026
+
+Exact source 41cc8a6, manifest 7b6cfae8 and helper e3fbda88 now pass the ordinary
+local-bare source/two-child workflow through the actual Port. Source preflight
+reports verified offline defaults. Both creations, historical/original-ready
+completion lookups, held release, independent source/sibling disk and RAM state,
+normal first-child stop/cold restart, all three deletions, both child absence
+proofs and both native backing acknowledgements pass. The controller exits zero
+following normal protocol shutdown; SDK tables, VM directories, native processes,
+zombies and KVM owners are empty and the account lock is free.
+
+All 1,780 frozen source files, 806 package assets, host tools, domain and fixture
+verify unchanged. The clean private archive and read-only SQL backup verify on
+the guest, Linux host and Mac. Current/minimum strict Elixir readers accept seven
+actual returned proofs, including canonical request matching and JSON roundtrips.
+The unused Rust witness is inventoried but supplies no live evidence in this run.
+The earlier unsuccessful 9c00605 account remains preserved without adoption or
+repair. No signals, injected loss, persistence interruption or mutation replay run.
+
+[Scoped evidence](../evidence/embedded-port-http-parity-linux-port-branches-41cc8a6.json)
+closes the ordinary Port case, not public Runtime/store acceptance. Public native
+branch admission, Memory/PostgreSQL lifecycle and dependency/backing accounting,
+installed current/minimum branch consumers, partial recovery and remaining P0–P9
+gates stay open. Every full-parity row stays pending, crash validation remains
+deferred and distribution approval stays separate.
+
+The current HTTP contract suite passes 410 checks. The minimum suite initially
+reports two transport/timing failures at 32-way concurrency; its same-seed rerun
+at four-way concurrency passes all 410 without source/test changes. Both outcomes
+and log hashes remain in the scoped evidence, without assigning a root cause.
+Documentation build and generated local links pass.
+
+
+## Public Linux branch admission and ordinary consumer preparation — October 17, 2026
+
+Following the successful exact 41cc8a6 ordinary Port case, current Elixir source
+accepts checkpoint/branch descriptors only with explicit Linux platform context
+and exact operator package approval. Mac, exports and the optional cleanup-resolution
+descriptor keep their prior gates. Real Memory advertises native_branches: 1;
+the PostgreSQL example does so only with its complete publication/collection/
+disposal/retirement/backing/cleanup readers and release writer available. Runtime
+still requires every individual store marker. No proof-only store wrapper is used.
+
+The new public Runtime workflow creates a checkpointable local-bare source and
+ready/held children, checks independent disk/RAM state, explicit release and its
+original-version deduplication, cold restart, source exclusion, draining and
+capacity rejection. It deletes children, atomically retires source dependencies,
+retains all extra reservations until source deletion plus positive original
+backing-namespace absence, then consumes both native backing acknowledgements.
+Private codec checkpoints preserve actual store records. The installed no-Rust
+consumer has explicit separate --native-public --native-branches selection.
+
+Failure retains the same Runtime/store and private once-only versioned controls.
+Retirement/resolution require positive quiescence, and backing requires positive
+removal attestation. Normal shutdown verifies the original pinned owner epoch,
+requests protocol shutdown inside the native-authority barrier, waits for stopped
+status, and only then stops supervision. Retained shutdown saves records first;
+it supplies no deletion, absence or resource-release evidence. No signals, owner
+adoption, mutation replay or deferred crash campaign is available.
+
+These are implementation/model boundaries. Ordinary new-source public, durable
+store and installed current/minimum branch consumer acceptance remain required;
+all full-parity rows remain pending and distribution approval stays separate.
+
+
+[Public branch admission evidence](../evidence/embedded-port-http-parity-public-branches-admission.json) records 939 branch/backend/codec checks
+and 180 encrypted PostgreSQL checks per toolchain, bounded-control/CI models and
+the unchanged Credo baseline. These checks prepare the ordinary public campaign;
+they do not qualify native consumer or durable VM behavior.
+
+
+The [public branch shutdown follow-up](../evidence/embedded-port-http-parity-public-branches-shutdown-drain.json)
+waits through the Port's ordinary `unavailable` drain state before requiring
+`stopped` and ending supervision. Six pure example/control checks pass per
+toolchain, and the post-admission HTTP regressions pass 410 per toolchain. This
+correction preceded all public SDK/VM work; new public consumer acceptance is
+still required. Crash validation remains deferred.
+
+
+The first installed current consumer rejects a cold-compiler warning before
+creating Runtime output or starting SDK/VM work. Separated control clauses are
+now grouped, and a fresh-BEAM strict compiler regression runs on both toolchains.
+[Cold compilation evidence](../evidence/embedded-port-http-parity-public-branches-cold-compile.json)
+records seven passing example/control/compiler checks each and empty SDK/native
+inventories with free account locks. A corrected-source ordinary rerun is still
+required; the compile rejection supplies no native qualification.
+
+
+## First installed public branch Runtime and retained cleanup — October 17, 2026
+
+Exact Elixir source 5e1db79/archive d59f6035 on Linux native manifest 7b6cfae8
+starts a real checkpointable source and ready child through an installed no-Rust
+consumer with real Memory. Creation deduplication and source lifecycle exclusion
+pass. Persisted worker draining rejects the next branch before dispatch with
+admission_exhausted/worker_control; the runner incorrectly expected the static
+worker flag's unsupported_capability. Its assertion now matches the existing
+public behavior; 28 HTTP branch contracts and seven example/control/cold-compiler
+checks pass per toolchain.
+
+The frozen original Runtime then stops/deletes the child and commits a typed
+absence proof plus paired dependency retirement. Retirement forces a full native
+startup scan of the same healthy owner; a running source observation is
+conservatively persisted unknown. Saved actual records retain the source's
+ordinary reservation and the child's extra backing charge. Fix normal-control
+readiness preservation at the same owner/epoch with completed prior recovery;
+do not weaken generic startup recovery or clear uncertain records automatically.
+The full two-child, held-release, backing and installed/durable campaigns remain
+unqualified.
+
+Explicit original-epoch protocol shutdown saves real store records and collects
+the current native owner without signals, preserving all disks and the source SDK
+row. Both new accounts have no matching native/BEAM processes or KVM owners and
+free account locks. All 1,788 source files, 806 assets, host tools and domain verify.
+The complete private archive and both SQL backups verify on guest, outer host and
+Mac before the unchanged lab runtime guard expires. The minimum live campaign
+never starts. The guard later reports timeout/MainPID 0/no restart; the older v6
+PID-specific cleanup request is obsolete and supplies no graceful collection or
+crash qualification. The original run image's host metadata stays unchanged.
+
+[Scoped evidence](../evidence/embedded-port-http-parity-public-branches-first-runtime.json)
+separates these partial public boundaries from full parity. No old SDK record is
+adopted, repaired or replayed; source absence, cold SDK consistency, resource
+release, crash validation and distribution approval are not established.
+
+
+## Ordinary completed-branch readiness correction — October 17, 2026
+
+The [readiness correction](../evidence/embedded-port-http-parity-branch-control-readiness.json)
+captures the coordinator's completed scan atomically under its native authority
+barrier. Only ordinary completed-child retirement/backing controls can preserve
+it, after checking the original helper PID/epoch/package/domain, the source's
+worker lease generation and the operation's known result. Quiescence and
+activation consume the remaining captured deadline. A second same-generation
+lease and final ready health are required before releasing the barrier as ready;
+failed reactivation retains a committed result while leaving dispatch fenced.
+Persisted draining is unchanged. Partial/unbooted disposal and generic startup or
+uncertain resolution retain their previous conservative recovery path.
+
+Pure models cover stale epochs/identity, incomplete scans, lease rejection or
+generation changes, quarantine, uncertain results and delayed control replies.
+Existing public retirement/backing, partial cleanup, recovery, volume, codec,
+PostgreSQL and HTTP contracts are rerun on current/minimum toolchains. This is
+source/model evidence only: repeat the complete installed public workflows in
+fresh accounts with the exact native package. Do not reopen or replay the
+retained failed source. All required P0–P9 acceptance gates remain open; crash
+validation stays deferred.
+
+
+## Installed public Memory branches pass both toolchains — October 17, 2026
+
+Exact Elixir source 9470074 and Hex archive 319a9f36, using unchanged Linux native
+manifest 7b6cfae8/helper e3fbda88, pass both current/minimum no-Rust public branch
+consumers in fresh accounts. Real Memory coordinates source/two-child disk and
+RAM independence, persisted draining and capacity rejection, explicit held
+release/deduplication, ordinary child cold restart, both typed retirements, source
+deletion and both backing acknowledgements. Normal protocol shutdown leaves zero
+reservations, empty SDK/VM/native/BEAM/zombie/KVM inventories and free account locks.
+
+All 1,791 source files, 806 assets, host tools and enrolled domains verify after
+each run. Both complete private archives and SQL backups verify on guest, outer
+host and Mac. Each actual run's three saved checkpoints (42 records) decode and
+roundtrip on both toolchains; typed creation, held release, absence, backing and
+paired dependency proofs validate. The source remains running through retirement.
+The failed older source is preserved without adoption or replay. The provisioning
+VM remains active under its unchanged two-hour guard for ordinary follow-up; no
+native test owner remains. The original run image's host metadata is unchanged.
+
+[Scoped public evidence](../evidence/embedded-port-http-parity-public-branches-9470074.json)
+closes this Linux local-bare Memory consumer case only. Public encrypted
+PostgreSQL/durable branch workflows, required original-owner partial transitions,
+other source/platform/resource combinations and all remaining P0–P9 acceptance
+remain open. Crash validation stays deferred and distribution approval is separate.
+
+
+## Public PostgreSQL branch campaign preparation — October 17, 2026
+
+The durable example's `scripts/embedded-branches.exs` runs the same ordinary
+Linux local-bare public lifecycle with the real encrypted PostgreSQL adapter.
+It requires explicit ordinary/no-Rust selection and private partition/key settings.
+After successful ordinary shutdown and normal process exit, a separate workerless
+Runtime reads every saved final machine/command through public APIs and both
+historical backing acknowledgements. Readback admits no SDK work and checks zero
+reservations; failed exercise owners remain retained for explicit cleanup.
+
+Cold compilation passes on current/minimum toolchains without starting a database
+or native owner. Strict Credo retains its 67 existing findings with no additions.
+Actual durable VM, normal separate-BEAM readback, source/asset custody and cleanup
+qualification remain next. This adds no backend capability, codec change or native
+package bytes and does not close any P0–P9 gate. Crash validation stays deferred.
+
+
+## Installed public PostgreSQL branches and encrypted readback pass — October 17, 2026
+
+Exact source c5f9fde and Hex archive 333db07d, using unchanged Linux native
+manifest 7b6cfae8/helper e3fbda88, pass current/minimum installed no-Rust consumers
+with the actual encrypted PostgreSQL adapter. Both complete the Linux local-bare
+source/two-child lifecycle, independent disk/RAM state, held release, cold restart,
+retirement, source deletion and both backing acknowledgements. Resource/draining
+checks pass and all reservations end at zero. A separate normal BEAM reads all
+15 final records and both saved acknowledgements through a workerless Runtime.
+Each dataset then passes the other toolchain's encrypted readback after ordinary
+SQL restart; both SQL cycles end by smart shutdown. This tests the same library
+version across toolchains, not library rollback or a reader-first code upgrade.
+
+All 1,793 source files, installed library bytes, 806 assets, host tools, domains
+and store keys verify. Each final 1,318-file cold database inventory and both SQL
+backups are preserved. Full private archives stay on guest and outer host; a
+single streaming pass on the outer host and Mac verifies full hashes, SDK/SQL
+backups and every final cold database file without another full Mac disk copy.
+Compact local evidence includes the actual record checkpoints; both Elixir readers
+validate all three checkpoints, typed proofs and paired flags from each case.
+Empty SDK/native/BEAM/SQL/zombie/KVM inventories, free locks and unchanged original
+run-image host metadata verify. Only superseded read-only archive verifiers were
+interrupted to replace repeated gzip seeks; no native, BEAM or SQL process was
+signaled. The provisioning VM stays active under its unchanged 13:43:37 UTC guard
+for further ordinary work. Old failed SDK workflows remain untouched.
+
+[Scoped durable evidence](../evidence/embedded-port-http-parity-public-postgresql-branches-c5f9fde.json)
+closes this completed-branch PostgreSQL case only. Required original-owner partial
+continuations, other source/platform/resource/consumer/upgrade combinations and
+remaining P0–P9 acceptance stay open. Crash validation stays deferred and release
+signing/provenance/license approval remains separate.
+
+
+## Ordinary branch quiescence drain race — October 17, 2026
+
+A fresh external-Memory branch workflow on source c5f9fde reaches two independent
+children, held release and cold restart, then retirement rejects before dispatch
+because an earlier Port record is still draining. The bridge has already fenced
+new mutations; generic recovery then marks source/held observations unknown.
+The original epoch shuts down normally, preserving actual records, both remaining
+SDK rows/disks and all backing charges. Its complete private archive and SDK SQL
+backup verify on guest, outer and the Mac stream. Four stale socket endpoints are
+recorded as metadata; no disk or capacity cleanup is inferred from process exit.
+
+The [bounded drain correction](../evidence/embedded-port-http-parity-branch-quiescence-drain.json)
+waits only on admission_exhausted/not_dispatched quiescence while holding the same
+native barrier, pinned owner/epoch and captured deadline. It never retries SDK
+work or an uncertain bridge reply. Expiry and changed identity stay fenced;
+incomplete recovery, generic startup, partial cleanup and HTTP behavior remain
+unchanged. The bridge contract retains these semantics for future Rustler support.
+
+Both toolchains pass 1,003 selected checks (seven runtime/deferred cases excluded),
+411 HTTP contracts and 180 encrypted PostgreSQL contracts; 26 readiness models
+include four new drain cases. Both SQL lanes have empty final partition/client
+inventories and smart shutdown. Formatting/strict compilation pass; Credo retains
+67 existing findings with no additions. Native/SDK bytes and codecs are unchanged.
+Corrected-source installed consumers and the Memory replacement case must now run
+in fresh/unused accounts. Do not reopen the failed Memory workflow or import its
+archived authority. The original P0–P9 scope remains open and crash validation stays
+deferred.
+
+## Normal PostgreSQL helper replacement with completed branches — October 17, 2026
+
+Exact c5f9fde/Hex 333db07d and unchanged native manifest 7b6cfae8/helper e3fbda88
+pass both installed no-Rust toolchains after normal helper shutdown. A new helper
+epoch completes recovery against each successful live durable store/domain.
+Immutable contents of all 15 records, persisted draining and both historical
+backing acknowledgements survive; only normal claim/version metadata may advance.
+Reservations remain zero. Normal native and smart SQL shutdown leave empty
+process/SDK inventories and a free domain lock. All 1,793 source files, 806 assets
+and 1,318 cold database files verify per account. Baseline archives remain intact;
+new private deltas and SDK/SQL backups verify on guest, outer host and Mac.
+
+[Scoped replacement evidence](../evidence/embedded-port-http-parity-postgresql-branch-replacement-c5f9fde.json)
+qualifies this same-package completed-history case only. It does not qualify the
+later 548fb97 library, Memory replacement, partial histories or an upgrade. Failed
+owners are not adopted or replayed. All full-parity rows stay pending; crash
+validation remains deferred and distribution approval remains separate.
+
+## Corrected-source Memory branches and normal replacement pass — October 17, 2026
+
+Exact source 548fb97/Hex fbfd8b7c and unchanged native manifest 7b6cfae8/helper
+e3fbda88 pass both installed no-Rust toolchains in fresh Linux accounts. The public
+local-bare workflow completes two independent children, held release, cold restart,
+owned deletion, paired retirements and both backing releases. Normal same-package
+helper replacement reuses the surviving external Memory store. A new epoch
+completes recovery with all 15 records' immutable contents, persisted draining and
+both saved backing acknowledgements preserved. Only normal claim/version metadata
+may advance. Final reservations and all SDK/native/BEAM/zombie/KVM inventories are
+empty, VM caches are empty and domain locks are free.
+
+All 1,795 frozen source files, installed library bytes, 806 assets, host tools,
+domains and keys verify. Private clean archives and read-only SDK backups verify
+on guest/outer and by streaming on the Mac, which retains compact metadata only.
+Both toolchains accept each case's four checkpoints (57 actual records), including
+the replacement comparison. The original run disk's host metadata is unchanged;
+no signal, owner-loss or fault campaign runs. The failed older workflow is neither
+reopened nor imported.
+
+[Scoped Memory evidence](../evidence/embedded-port-http-parity-public-memory-branch-replacement-548fb97.json)
+closes this corrected-source lifecycle/replacement case only. Changed-library
+PostgreSQL native acceptance, partial continuations, other source/platform/resource
+cases and reader-first/different-package upgrades remain required. All full-parity
+rows stay pending; crash validation remains deferred and distribution approval is
+separate.
+
+## Corrected PostgreSQL lifecycle, encrypted readers and replacement pass — October 17, 2026
+
+Exact source 548fb97/Hex fbfd8b7c and unchanged native manifest 7b6cfae8/helper
+e3fbda88 pass both installed no-Rust toolchains with actual encrypted PostgreSQL
+stores. Fresh databases use the successful empty native domains after normal
+Memory shutdown; no archived records are restored as authority. Both complete
+the local-bare two-child lifecycle, separate normal-BEAM workerless readback and
+the other toolchain's encrypted readback. Normal same-package helper replacement
+then completes a new-epoch scan while retaining immutable contents of all 15
+records, persisted draining and both historical backing acknowledgements.
+Normal claim/version metadata may advance; all reservations remain zero.
+
+Native/smart SQL shutdown and empty SDK/native/BEAM/SQL/zombie/KVM inventories
+verify. Domain locks are free. All 1,795 source files, installed library bytes,
+806 assets, host tools, domain and keys verify per account. The final current
+database has 1,318 cold files and minimum has 1,317; every file and the SDK/latest
+SQL backups verify in clean private archives on guest/outer and by Mac streaming.
+Full archives stay on guest/outer and compact evidence stays on the Mac. Both
+Elixir readers accept each case's four checkpoints (57 actual records).
+
+[Corrected PostgreSQL evidence](../evidence/embedded-port-http-parity-public-postgresql-branch-replacement-548fb97.json)
+closes this scoped lifecycle/readback/replacement case. Remaining original-owner
+partial continuations, platform/source/resource cases and reader-first/different-
+package upgrades stay open. Full HTTP parity remains incomplete, crash validation
+stays deferred and distribution approval remains separate.
+
+## Explicit original ready-result recovery preserves a completed scan — October 17, 2026
+
+Two new models first reproduce held/ready completion being committed while its
+already healthy coordinator scan remains frozen. The resulting generic startup
+recovery can downgrade running source/sibling states. The explicit ready-result
+path now shares the bounded original-owner branch control, requiring prior
+completed recovery, the same healthy helper/epoch and worker lease generation.
+Only a validated held/ready child matching the source, worker and original epoch
+after paired store commit permits activation. Quiescence, original-result lookup,
+fresh source/child observations, commit and activation use one captured deadline.
+No creation, initialization, release or SDK mutation is replayed. Uncertain,
+untyped, material-only and partial results cannot activate; incomplete scans and
+changed identity keep their original fences. Persisted draining is unchanged.
+Generic startup and partial disposal recovery remain conservative.
+
+Both toolchains pass 937 selected models, 411 HTTP contracts and 180 encrypted
+PostgreSQL contracts. Focused public recovery/readiness coverage is 61 checks,
+including 14 new cases. A load-sensitive existing deadline fixture now gives
+setup enough time and asserts intent acceptance before checking expiry; native
+resolution must still receive zero calls. Both SQL lanes finish with empty
+partition/client inventories and normal smart shutdown. Full/clean SDK checks,
+formatting/strict compilation and the unchanged 67-finding Credo baseline pass.
+The private ordinary API-cancellation runner cold-compiles on both toolchains.
+[Source/model evidence](../evidence/embedded-port-http-parity-ready-recovery-readiness.json)
+qualifies no VM or changed installed package yet. Native SDK/helper/assets/codecs
+are unchanged; ordinary cancellation/recovery acceptance and remaining P0–P9 gates
+stay required. Crash validation remains deferred and distribution approval separate.
+
+## Ordinary cancellation retained; source-preflight reconciliation gate corrected — October 17, 2026
+
+Exact ebc6e77/Hex 7b9038cc with unchanged native manifest 7b6cfae8/helper e3fbda88
+reaches public cancellation from managed dispatching in a current-toolchain Linux
+local-bare Memory consumer without Rust. The source and requested held child
+remain unknown, with no managed completion recorded and all 3 slots, 3 CPUs,
+1,920 MiB and 9 GiB retained. Worker draining precedes explicit original-result
+recovery, which rejects with admission_exhausted/not_dispatched. The exact native
+rejection cause remains unresolved; no sibling, ready recovery, disposal or backing
+release qualifies. An earlier host-example configuration rejection occurred before
+Runtime/SDK VM work and is retained as a separate attempt.
+
+The original owner stays parked until explicit normal protocol shutdown succeeds
+on its third request, collecting both VMs through normal shutdown. No controller
+signal is sent. SDK rows/disks,
+source dependency and all charges remain. All 1,799 source files, installed library
+bytes, 806 assets, host tools, domain and keys verify. The complete private archive
+and read-only SDK backup verify on guest/outer and by Mac streaming; full copies
+stay on guest/outer. Five stale sockets are preserved as metadata only. Both Elixir
+readers accept five checkpoints (15 records) and the exact retained resource sum.
+No archived authority is restored, and the minimum ordinary campaign never starts.
+
+A separate actual Call/Port-contract peer reproduces refusal of branch_preflight
+while reconciling. The client now admits only its fully validated bounded
+protocol-two shape in that state. It remains outside quarantined control admission;
+malformed receipts/extra fields, native ownership and native work budgets retain
+their checks. Both toolchains pass 71 focused checks, 940 selected models and 32
+HTTP branch/coverage checks. Strict compilation/formatting pass and Credo retains
+67 existing findings without additions. The parent correction's full 411 HTTP and
+180 PostgreSQL contracts per toolchain remain separately scoped evidence.
+
+[Preserved ordinary gap and separate framing evidence](../evidence/embedded-port-http-parity-ordinary-cancel-recovery-gap.json)
+closes neither ordinary ready/partial recovery nor any full-parity row. The source
+gate correction is not proven to explain the native admission rejection. Fresh
+ordinary original-owner continuation and remaining platform/source/resource/upgrade
+gates stay required. Crash validation stays deferred and distribution approval is
+separate. Never reopen the failed Memory workflow or import its archived authority.
+
+## Branch follow-up rejection preserves whole-operation uncertainty — October 17, 2026
+
+The branch sequence could receive a valid native creation completion or held-release
+transition, then return not_dispatched from a rejected fresh source/child inspection.
+That evidence described only the inspection and incorrectly described the whole
+branch operation. The shared Elixir backend now preserves dispatch_uncertain for
+all failures after validated completion. Initial definitive rejection retains its
+category/evidence. The same owner, deadline, cumulative budgets and paired-store
+requirements remain in force; no native operation is replayed.
+
+Six new model tests fail before correction: creation, release, both completion
+lookups and public original ready recovery after source/child rejection. They cover
+bridge errors and native error terminals. Public recovery retains unknown records,
+original authority, reservations and its coordinator fence without store commit or
+activation. Only normal claim metadata may advance. An existing deletion deadline
+fixture now has a 2-second setup allowance and explicit acceptance/observation entry
+assertions, so it tests its intended boundary under load. Both toolchains pass 946
+selected models at four-case concurrency and 411 HTTP contracts. Strict compilation,
+formatting, full/clean SDK verification and the unchanged 67-finding Credo baseline
+pass. Parallel high-concurrency timing failures remain preserved in private logs.
+
+[Source/model evidence](../evidence/embedded-port-http-parity-branch-observation-uncertainty.json)
+records exact changed-file hashes and validation scopes. No Rust engine, SDK,
+helper, assets or codecs change. Offline inspection of the failed case's original
+request confirms its bounded structural shape only; no archived authority is
+restored or submitted. The native admission rejection remains unresolved. Ordinary
+ready/partial recovery, combined-package/platform/source/resource/upgrade acceptance
+and all full-parity gates remain pending. Crash validation stays deferred and
+distribution approval is separate.
+
+## Explicit partial-branch controls before ordinary qualification — October 17, 2026
+
+The branch example now routes collect_partial, publish_collected, dispose_partial
+and cleanup_partial through the existing public Runtime APIs. Requests require
+private once-only delivery, an original child ID, its exact current version and
+quiesced:true. Source IDs, foreign handles, supplied paths/PIDs, missing/false
+attestations and process-signalling verbs remain rejected. Native/store phase,
+proof and accounting checks remain authoritative. Rejections now retain the error
+operation beside category and dispatch evidence for subsequent diagnostics.
+
+Both toolchains pass seven example/control checks, including fresh-BEAM compilation.
+This changes the example control surface only; library/native engine/SDK/codec
+behavior is unchanged. It provides explicit original-context actions for an
+ordinary partial run without hot-loading code into an active owner. It qualifies
+no native partial recovery, releases no capacity and closes no full-parity row.
+Crash validation remains deferred. Before any new lab boot, the stopped baseline
+and provisioning disks were copied and checksum-verified under the exclusive VM
+lock; the original run disk metadata is unchanged. No old Memory authority is
+restored.
+
+## Public Memory cancellation and original completed-result recovery pass — October 17, 2026
+
+Exact f56c2e3/Hex cc39175e on unchanged native manifest 7b6cfae8 passes installed
+Linux current/minimum consumers without Rust. Both cancel an initial held branch
+from managed dispatching and retain unknown source/child records with all 3 slots,
+3 CPUs, 1,920 MiB and 9 GiB charged. Explicit keep recovery under persisted draining
+commits the original held completion and fresh observations, preserving the request,
+helper epoch and completed scan. Idempotent result readback, one explicit release,
+source/two-child disk and RAM independence, three owned deletions, paired dependency
+retirements/backing acknowledgements and normal shutdown pass. All final reservations
+and five SDK inventories are empty; native/BEAM/SQL/zombie/KVM inventories are empty
+within each account and locks are free.
+
+All 1,801 source files, installed library bytes, 806 assets, host tools, domain and
+keys verify. Both Elixir readers accept five actual checkpoints (45 records) per
+case, including cancelled uncertainty/resource retention, original completion,
+retirement and backing proofs. Full private archives and read-only SDK backups
+verify on guest/outer and by Mac streaming; the Mac retains compact metadata.
+The older failed ebc6e77 authority is never restored or replayed. Its rejection cause
+is not inferred from these successes.
+
+[Scoped ordinary evidence](../evidence/embedded-port-http-parity-public-memory-cancel-recovery-f56c2e3.json)
+closes this public Memory completed-result recovery case. The native internal
+phase at cancellation was not instrumented, so no claim covers every retained
+ready-handoff path or all partial states. PostgreSQL cancellation, unbooted/partial
+collection/disposal histories, other sources/platforms/resources and library/native
+package upgrades remain required. All full-parity rows remain pending. Crash
+validation stays deferred and distribution approval separate.
+
+## Public PostgreSQL cancellation and original completed-result recovery pass — October 17, 2026
+
+Exact f56c2e3/Hex cc39175e on unchanged native manifest 7b6cfae8 now passes the
+recorded completed-result cancellation case on both installed Linux no-Rust
+toolchains with fresh encrypted databases and keys. Each first cancellation call
+changes managed dispatching to unknown while preserving the original request and
+all 3 slots, 3 CPUs, 1,920 MiB and 9 GiB. Explicit original held-result recovery
+preserves the helper epoch, completed scan and persisted draining. Held release,
+source/two-child disk and RAM independence, three owned deletions, paired
+retirements/backing acknowledgements and normal shutdown pass. Final reservations
+and SQL resource projections are zero; payloads remain encrypted.
+
+Separate normal BEAMs on the same and opposite toolchains read all 13 final
+encrypted records and both saved backing acknowledgements without native workers.
+Both codec readers validate each dataset's five checkpoints (45 records), including
+the cancelled uncertainty/resources and the matching completion, release,
+retirement and backing proofs. All 1,801 source files, installed library bytes,
+806 assets, host tools, domain and keys verify. Native/BEAM/SQL/zombie/KVM and all
+five SDK inventories are empty, and account locks are free. Normal smart SQL
+shutdown, full private archives/SDK backups and every cold database file verify
+on guest/outer and by Mac streaming; only compact metadata remains on the Mac.
+
+The first PostgreSQL caller failed at its cancellation assertion without saving
+the returned error. Its child and source were deleted through public APIs, its
+dependency retired, and backing acknowledged only after positive file absence.
+The original owner shut down normally; the database was dumped and smart-stopped.
+Its distinct archive/SDK backup and all 1,322 cold database files verify. No
+cancellation acceptance or cause is inferred from that failed case, and no failed
+authority is restored. The revised private caller saves the API outcome before
+asserting, removes an unnecessary observation delay and allows only bounded,
+definitively undispatched store retries against the unchanged original branch.
+Neither successful run needed a retry. Library/native/SDK bytes are unchanged.
+
+[Scoped ordinary evidence](../evidence/embedded-port-http-parity-public-postgresql-cancel-recovery-f56c2e3.json)
+closes this PostgreSQL completed-result case. Native internal phases were not
+instrumented, so other retained-ready, partial/unbooted collection/disposal and
+cleanup histories remain required, alongside upgrades and remaining source/
+platform/resource combinations. All full-parity rows remain pending. Crash
+validation remains deferred and distribution approval stays separate.
+
+## Explicit deleted resolution in the branch example — October 17, 2026
+
+The private branch controller now forwards `resolve_deleted` to the existing
+`Branches.resolve` API with exactly quiesced:true and disposition:deleted.
+The request still requires an original child ID, the current inspected version,
+private once-only delivery and positive quiescence. Source IDs, foreign handles,
+supplied paths/PIDs and signalling verbs remain rejected. The public API retains
+its existing phase, original-owner, proof and paired-accounting requirements.
+This supplies the normal API path needed by a future ordinary unbooted-child
+case without adding code to an active owner. Seven example/control checks,
+including fresh-BEAM compilation, pass on both toolchains. Library, native engine,
+SDK and codec behavior are unchanged; no partial phase or full-parity row is
+qualified by this example-only extension. Crash validation stays deferred.
+
+## Unbooted SDK shared-cache guard correction — October 17, 2026
+
+Ordinary one-second branch deadlines on exact d164277/Hex 1c8c74bf and unchanged
+native manifest 7b6cfae8 retain source/child uncertainty and all 3 slots, 3 CPUs,
+1,920 MiB and 9 GiB. The first caller selects partial collection without first
+establishing the native phase; its accepted collection remains pending without
+proof. The separate minimum caller checks the created/no-PID SDK projection as a
+test prerequisite, then obtains the original collected-publication proof through
+the fenced public API. That proof updates source history while retaining unknown
+states and every charge. Unbooted deleted resolution then rejects with
+identity_conflict/not_dispatched before accepting disposal. A cold audit confirms
+library scope/current identity/request/reconciliation predicates and callback
+entry without starting another Runtime, helper or VM.
+
+The verified minimum archive contains an owned empty private child `pack`
+directory. Pinned SDK shared-pack lease copying creates that directory and a
+separate shared-pack pointer. The old deletion guard accepts only absent paths or
+links and therefore refuses this valid shape. SDK force-detach cannot find a
+layers mount or lease inside an empty directory. The shared-engine cache guard
+now applies its existing owned-root/emptiness checks to unbooted and partial
+disposal too. Completed stopped-child deletion uses the same check. Nonempty,
+unsafe and regular-file caches still reject; source/child ownership, original
+epoch, unentered/collected actor, dependency and positive-absence checks remain
+separate and unchanged. No upstream SDK, Elixir library, wire or codec change is made.
+
+Two regressions fail against the old guard (47 other cache checks pass), then all
+49 pass after correction. Broader checks pass 390 branch models, 17 SDK-compatibility cases,
+102/59 protocol checks, strict workspace/all-target Clippy and full/clean verified
+SDK checks. Both toolchains pass all 411 HTTP contracts. Scoped Rust formatting
+passes. These component checks do not qualify a corrected native package.
+
+The corrected Linux helper builds with manifest c63ee793 and helper 8d1c3181,
+preserving all 806 asset inputs and the unmodified SDK. All 17 Port branch checks
+pass. The helper-dependent ordinary non-VM worker rejection, excluded from the
+branch filter, then passes separately against that exact rebuilt executable.
+It uses an unentered private namespace that cannot open the SDK default database;
+normal child collection retains/releases the original leases without SDK fork,
+VM entry or forced child termination. The package still needs ordinary acceptance.
+
+Both failed owners close through normal original-epoch shutdown, without process
+signals. The first closes on its third request after two undetailed rejections;
+the second closes on its first. Native/BEAM/SQL/KVM inventories are empty and locks
+are free. Their two SDK rows, disks and charged records remain; the source SDK
+running projections are retained after positive original-process collection.
+All 1,803 source files, installed library bytes, 806 assets, host tools, domain and
+keys verify per case. Full private archives and read-only SDK backups verify on
+guest/outer and by Mac streaming. Unserializable socket nodes have private stat
+inventories preserved rather than being removed. Both codec readers validate
+five checkpoints/15 records from the first case and four/12 from the publication
+case, retaining the original request and every reservation. No archived authority
+is restored or SDK projection repaired.
+
+[Checked correction and failure evidence](../evidence/embedded-port-http-parity-unbooted-empty-cache-guard.json)
+leaves corrected-helper ordinary disposition, retirement/backing closure, other
+partial histories and remaining platform/source/resource/upgrade coverage open.
+All full-parity rows remain pending, crash validation stays deferred, and
+distribution approval is separate.
+
+## Original unbooted disposal collected-spool handoff — October 17, 2026
+
+The [collected-spool handoff correction](../evidence/embedded-port-http-parity-unbooted-collected-spool-handoff.json)
+follows the first ordinary rebuilt-helper case on exact 6bc154f/Hex 52e6b3ab,
+manifest c63ee793/helper 8d1c3181. Original collected publication succeeds and the
+native ledger records a valid deleted proof, but public disposal returns
+identity_conflict/dispatch_uncertain and retains disposal_pending plus all
+3 slots, 3 CPUs, 1,920 MiB and 9 GiB. The native reply has no detailed stage
+diagnostic, so its exclusive failure cause is not inferred. Source inspection
+finds that actual collected IPC output retains an original ownership reference;
+the previous disposal model omitted it. The matching inert model now reproduces
+a handoff Conflict. Corrected handoff retires only collected preparation spools
+after exact synchronized disposal evidence, then requires unique ownership before
+transferring the job to retained backing. Other owners still preserve the entry,
+gates, snapshot and full job charge. The booted partial fixture follows the
+existing production boot boundary that already retires those spools.
+
+Corrected Linux checks pass 49 cache models, 392 branch models (one ordinary
+helper-dependent case excluded), 17 SDK-compatibility checks, 102/59 protocol
+checks and strict workspace/all-target Clippy. Full/clean SDK source checks pass;
+no SDK source changes. Both toolchains pass all 411 HTTP contracts; documentation
+links and focused documentation/coverage checks pass. Fresh helper/package
+acceptance remains required.
+
+The failed ordinary owner closes normally on its first retained-shutdown request.
+All native/BEAM/SQL/KVM processes are gone and its lock is free. One stale running
+SDK source row, source/backing disks and all public charges remain; no projection
+is repaired and no failed authority is reopened. Both codec readers accept all
+four checkpoints (12 records), correlate the native deleted proof to the retained
+public request and preserve unacknowledged disposal/retirement/backing. Full
+archives and the read-only SDK backup verify on guest/outer and by Mac streaming.
+The minimum workflow never starts. Corrected native package qualification and
+remaining partial/source/platform/resource/upgrade gates are still required;
+no full-parity row closes. Crash validation remains deferred.
+
+## Ordinary unbooted disposal and retirement on both toolchains — October 17, 2026
+
+The [ac4bf45 ordinary unbooted cases](../evidence/embedded-port-http-parity-unbooted-linux-ac4bf45.json)
+use exact Hex 553c0001 and rebuilt manifest e82508e5/helper 3f72b406. Both installed
+Linux current/minimum consumers without Rust positively acknowledge the original
+collected publication, typed unbooted disposal and separate child retirement after
+an ordinary one-second deadline. The current case also deletes its source,
+acknowledges backing release and reaches zero resources; its first normal close
+rejects without a detailed reason, then the preinstalled explicit close succeeds.
+Its original harness exit remains 1. The minimum case stops at a source cleanup
+admission_exhausted/embedded/not_dispatched return. Exact native phase is not
+established; normal retained shutdown preserves a stopped/no-PID SDK source row,
+source/backing disks and 2 slots, 2 CPUs, 1,280 MiB and 7 GiB. It acknowledges no
+backing release. Neither automatic harness is relabeled as a pass.
+
+Both owners close normally with native/BEAM/SQL/KVM inventories empty and free
+account locks. Each verifies all 1,805 source files and 806 assets, installed
+library bytes, domain, keys and host tools. Both codec readers accept each case's
+six checkpoints (18 records), validating the actual typed proofs and resource
+transitions. Full archives and read-only SDK backups verify on guest/outer and by
+Mac streaming. The exact helper also passes the separate ordinary unentered
+non-VM worker check. Automatic source cleanup/normal-close handling, encrypted
+unbooted histories and other partial/source/platform/resource/upgrade combinations
+remain required. No full-parity row closes; crash validation stays deferred.
+
+## Bounded ordinary cleanup and close admission — October 17, 2026
+
+The [ordinary cleanup admission correction](../evidence/embedded-port-http-parity-ordinary-cleanup-admission.json)
+updates example controls after those retained cases. Normal close waits only for
+known undispatched authority-acquisition busy replies; a tagged callback result,
+even a matching-looking error, never replays shutdown. The original owner/epoch
+and one deadline persist through admission and channel drain. Same-owner source
+stop now waits for quiescence under its existing authority barrier and pinned
+epoch; the captured deadline bounds pin, activation, SDK stop, follow-up health
+and fencing. Expiry before dispatch cannot enter stop, while failure or expiry
+after positive stop remains uncertain. No SDK operation is retried. Fixed action
+clauses preserve the private controller's existing IDs, exact versions,
+attestations and once-only handling while removing its new complexity finding.
+
+Three normal-close models fail before correction. Both toolchains pass 30 focused
+checks afterward, including fresh-BEAM example compilation and documentation/
+coverage checks. The 67-finding Credo baseline has no new issue keys. Library,
+engine, SDK, protocol and codecs are unchanged. No active owner is hot-loaded;
+old evidence is not transferred. Fresh ordinary cleanup/close acceptance remains
+required, and the full P0–P9 objective stays open with crash validation deferred.
+
+## Current automatic unbooted lifecycle and generic drain correction — October 17, 2026
+
+The [a5f19f3 current ordinary unbooted lifecycle](../evidence/embedded-port-http-parity-generic-quiescence-deadline.json)
+passes automatically on Linux with installed no-Rust Hex f1beffbe and unchanged
+manifest e82508e5/helper 3f72b406. It positively records original collected
+publication, unbooted disposal, child retirement, source deletion and backing
+release after a normal one-second deadline, then closes normally with exit 0 and
+zero resources. No manual continuation is needed. Its minimum counterpart fails
+earlier at collected-publication admission_exhausted/embedded/not_dispatched;
+none of that publication or its follow-up proofs is accepted. Normal retained
+shutdown preserves two SDK rows/disks and all 3 slots, 3 CPUs, 1,920 MiB and 9 GiB.
+Both actual owners are collected before the unchanged lab runtime guard stops
+provisioning. Each verifies 1,808 source files and 806 assets, installed library,
+host tools, domain and keys, with empty native/BEAM/SQL/KVM inventories and free
+locks. Both readers validate the current five checkpoints (15 records) and the
+minimum three (9 records), including actual proofs or retained uncertainty. Full
+archives and SDK backups verify on guest/outer and by Mac streaming.
+
+Five models reproduce generic resolution's remaining one-shot quiescence and
+ignored deadline. Corrected generic resolution uses the existing bounded drain
+wait under the same barrier, owner and epoch, and bounds lease/callback stages
+without replay or readiness promotion. All 12 native resolution call sites now
+pass their original captured deadline; ten previously omitted it. The older
+coordination peer now supports operation acquisition without inventing a completed
+scan. Both toolchains pass 983 branch/unit/documentation/coverage checks (three
+runtime cases excluded), 411 HTTP contracts and strict compilation. Credo keeps
+67 existing findings with no new keys. SDK/engine/bridge/protocol/codecs are
+unchanged. The current ordinary pass belongs to exact a5f19f3, not these changed
+library bytes. Fresh current/minimum public consumers, encrypted unbooted
+histories and remaining partial/source/platform/resource/upgrade combinations
+stay required. No full-parity row closes; crash validation remains deferred.
+
+## Current and minimum automatic unbooted Memory lifecycle — October 17, 2026
+
+The [d1bba15 ordinary unbooted Memory cases](../evidence/embedded-port-http-parity-unbooted-memory-d1bba15.json)
+now pass automatically on both Linux current/minimum installed consumers without
+Rust, with exact Hex 3b256131 and unchanged manifest e82508e5/helper 3f72b406.
+After an ordinary one-second API deadline, each acknowledges the original
+collected publication, typed unbooted disposal, child retirement, source cleanup
+and backing release, then reaches zero resources and normal shutdown with exit 0.
+No manual continuation or SDK replay is needed. Both readers validate each case's
+five checkpoints (15 records), including the original request and all charge/proof
+transitions. Each verifies 1,809 source files, installed library, 806 assets, host
+tools, domain and keys. All five SDK tables and native/BEAM/SQL/KVM inventories
+are empty, caches are clear and account locks free. Full private archives and
+read-only SDK backups verify on guest/outer and by Mac streaming. This supplies
+ordinary acceptance for the corrected generic drain/deadline path on these exact
+bytes. Encrypted unbooted histories and remaining partial/source/platform/resource/
+upgrade combinations stay required; no full-parity row closes. Crash validation
+remains deferred and distribution approval separate.
+
+## Encrypted uncertain histories and normal worker-free readback — October 17, 2026
+
+The [d1bba15 encrypted uncertainty cases](../evidence/embedded-port-http-parity-unbooted-postgresql-uncertainty-d1bba15.json)
+preserve the ordinary one-second PostgreSQL deadline outcomes without qualifying
+native unbooted disposal. Current collected publication rejects with unknown /
+branch / not_dispatched after its intent is stored. Minimum and a separate fresh
+current attempt fail the diagnostic Created/no-PID observation gate; no exclusive
+native phase or rejection cause is inferred. A later original-context publication
+also refuses in the minimum case. The first two retain unacknowledged publication
+intents; the third has none. All three retain source/child SDK rows, disks and
+3 slots, 3 CPUs, 1,920 MiB and 9 GiB, then close their original native epochs and
+SQL servers normally without signals, repair, replay or authority restoration.
+Both codec readers validate each case's three checkpoints (9 records).
+
+The first current/minimum encrypted datasets also pass separate worker-free
+normal BEAM readbacks on both the original and opposite toolchains. Each reads
+all three records exactly and retains every charge without inventing disposal,
+retirement or backing acknowledgement. SQL confirms encrypted payloads and exact
+retained resource projections with no other database clients. All normal SQL
+restarts close smartly. Each dataset verifies 1,809 source files, installed
+library, 806 assets, host tools, domain and keys; native/BEAM/SQL/KVM inventories
+are empty and locks free. Immutable full failed archives remain unchanged, with
+separate readback deltas containing the new cold databases and reader evidence.
+Guest/outer checks and Mac streaming verify both layers, SDK backups and every
+cold database file. Native PostgreSQL unbooted disposal/retirement/backing release
+still needs a valid original proof path; these failures are not relabeled.
+Remaining P0–P9 gates stay open, crash validation deferred and distribution
+approval separate.
+
+## Corrected-package ordinary PostgreSQL branching passes both consumers — October 17, 2026
+
+The [d1bba15 public PostgreSQL two-child lifecycle](../evidence/embedded-port-http-parity-public-postgresql-branches-d1bba15.json)
+passes automatically on both Linux current/minimum installed consumers without
+Rust, using exact Hex 3b256131 and unchanged manifest e82508e5/helper 3f72b406.
+The source-controlled ordinary workflow proves independent source/sibling disk
+and RAM state, held and duplicate release, cold restart without RAM restoration,
+pre-dispatch resource/draining rejection, three owned deletions, two typed
+dependency retirements, two backing acknowledgements and zero final resources.
+Both original native owners close normally with no manual continuation.
+
+For each encrypted database, separate original/opposite-toolchain normal BEAMs
+read all 15 records exactly and both saved backing replies without native
+workers. SQL payloads remain encrypted and all resource projections are zero.
+Both codec readers validate each dataset's three checkpoints (42 records) and
+actual typed release, absence, retirement and backing evidence. Each verifies
+1,809 source files, installed library, 806 assets, host tools, domain and keys;
+all SDK tables and native/BEAM/SQL/zombie/KVM inventories are empty, caches clear
+and account locks free. Both normal SQL restarts shut down smartly. Full private
+archives, SDK/logical SQL backups, all compact metadata and every cold database
+file verify on guest/outer and by Mac streaming. This refreshes the normal
+PostgreSQL branch lifecycle on the corrected generic drain/deadline library and
+current native package; it does not relabel the failed one-second cases or qualify
+unbooted/partial PostgreSQL paths. Other source/platform/resource/upgrade and
+P0–P9 gates remain open, crash validation deferred and distribution approval
+separate.
+
+## Recorded material publication after inactive later phases — October 17, 2026
+
+The [recorded-publication continuation models](../evidence/embedded-port-http-parity-recorded-publication-continuation.json)
+reproduce an independent shared-engine gap: the exact original saved material
+publication was rejected after its retained job advanced to an inactive boot,
+identity or release phase. The continuation now reads only that synchronized
+historical proof under the original borrow, epoch, request and finite control
+budget. It does not invoke publication again, change phase, acquire a manager,
+create readiness or release resources. Missing history, active work, expired or
+cancelled controls and lost original ownership still reject.
+
+This correction is source/model evidence only. It does not diagnose the archived
+PostgreSQL deadline failures. The changed native inputs require a fresh package
+and ordinary current/minimum acceptance; d1bba15/e82508e5 results remain attached
+to their exact old bytes. Remaining P0–P9 gates stay open and crash validation
+remains deferred.
+
+The complete ordinary Rust lib/bin/contract sweep passes 1,312 tests with 24
+ignored fixtures. HTTP contracts pass 411 on each Elixir toolchain. This adds
+regression coverage to the source correction; it supplies no live acceptance
+for the new helper.
+
+## Fresh HTTP-only consumers and explicit custody audit — October 17, 2026
+
+The [06ba0d0e HTTP-only consumers](../evidence/embedded-port-http-parity-http-consumers-06ba0d0e.json)
+pass actual dependency resolution, strict compilation and the public smoke script
+on both Linux current/minimum toolchains, using exact Hex 8ecb4596 without Rust
+on PATH or SmolBox native assets. All 627 installed package files match the
+frozen source; the minimum consumer uses all six exact supported dependency
+versions. HTTP client/configuration, public codecs and normal Runtime supervision
+pass with no SDK domain or native/VM work.
+
+The private wrapper subsequently fails an overbroad asset assertion that counts
+nine ordinary Erlang runtime shared libraries as SmolBox assets. That failure is
+preserved. A separate read-only custody audit verifies each flagged library against
+the trusted runtime archive and positively checks that no SmolBox helper, VM asset,
+SDK domain or account process exists. Compact archives preserve the exact package,
+source inventory, runner, consumer inputs, all logs and corrected audit; every
+member verifies on guest, outer host and Mac. Runtime/dependency caches remain at
+the original accounts. This adds HTTP-only consumer evidence; it supplies no
+qualification for the changed native helper. All full-parity gates remain open,
+crash validation deferred and distribution approval separate.
+
+## Fresh partial-collection refusals and admission gap — October 17, 2026
+
+The [83137f8c partial-collection checkpoint](../evidence/embedded-port-http-parity-partial-collection-83137f8c.json)
+builds a fresh helper from exact 06ba0d0e/Hex 8ecb4596 with all 336 native inputs
+bound to the frozen source and unchanged SDK/assets. All eight build stages,
+nine release publication models and 17 release Port branch models pass. This
+build evidence does not qualify live partial collection.
+
+Fresh Linux current/minimum installed consumers pass strict compilation and cold
+caller checks, then create/start a checkpointable source through public Runtime.
+Both ordinary one-second branch deadlines leave creation unknown. Explicit partial
+collection rejects unknown / branch / not_dispatched after its request is stored;
+no collection proof or subsequent publication is accepted. No exclusive native
+phase or rejection cause is inferred. Both original owners close through their
+installed normal shutdown_retained control; PostgreSQL closes smartly. Two SDK
+rows, disks and all 3 slots, 3 CPUs, 1,920 MiB and 9 GiB remain retained.
+
+Both codec readers validate each case's three checkpoints (9 records), exact
+original creation/request and every charge without inventing collection, disposal,
+absence, retirement or backing proof. Each account verifies 1,813 source files,
+627 installed package files, 806 assets, host tools, domain, keys and workflow;
+account processes are absent and locks free. Full private archives, read-only SDK
+backups, logical SQL backups, all compact evidence and every cold database file
+verify on guest/outer and by Mac streaming. Nothing is restored as authority.
+
+Source review identifies a separate admission gap: a fresh collection request is
+saved before native original-context eligibility is checked, and that unacknowledged
+action blocks other recovery paths. Add a read-only positive candidate before
+saving a fresh request, under the same original owner/controller fence and finite
+deadline. A rejection must leave the child unselected with every charge retained;
+an existing saved request must preserve its immutable resume/no-replay rules.
+The candidate grants no lifecycle authority. This correction and positive live
+partial/unbooted acceptance remain required. Full P0–P9 gates stay open, crash
+validation deferred and distribution approval separate.
+
+## Read-only partial-collection admission — October 17, 2026
+
+Fresh `Branches.collect_partial` requests now inspect original-context eligibility
+before saving their immutable collection action. The transport-independent engine
+checks the original registry, epoch, complete creation/request, inactive collectible
+phase and boot enrollment against its protected lifecycle journal. This inspection
+registers no collection, runs no SDK action and releases no reservation. Actual
+collection still rechecks all ownership and lifecycle fences after durable acceptance.
+
+The Port bridge negotiates `partial_collection_preflight: 1` with `branches: 1`
+and the exact approved branch catalog. Its bounded, zero-output candidate binds
+the full prospective request, original epoch and platform under the same finite
+Runtime/controller deadline. A refusal, missing capability, crossed response or
+stale durable version leaves a fresh child unselected and fully charged. Existing
+saved requests resume through the previous opcode; saved proofs remain worker-free.
+The candidate is ephemeral and adds no persistent record format or SDK patch.
+
+The complete ordinary Rust library/binary/protocol-contract sweep passes 1,317
+cases with 24 ignored. Both Elixir toolchains pass 976 branch/backend/codec cases,
+117 boundary cases, 411 HTTP contracts and seven documentation/coverage checks.
+Both readers decode all 36 archived legacy records without restoring authority;
+the 67-finding Credo baseline has no changed issue keys. These regressions do not
+qualify changed-package native recovery.
+
+The [admission source/model evidence](../evidence/embedded-port-http-parity-partial-collection-preflight.json)
+records current/minimum contracts, original-journal checks, protocol/framed Port
+checks and regressions. The current inventory is **62 operations / 68 signatures /
+8 specification features**. This correction requires a newly frozen native package
+and ordinary current/minimum positive recovery acceptance. Historical 83137f8c
+failures remain preserved; their exact native rejection cause is unproven. All
+full-parity gates remain pending, crash validation deferred and distribution approval
+separate.
+
+## Corrected-package HTTP consumers — October 17, 2026
+
+Fresh Linux [current/minimum HTTP consumers](../evidence/embedded-port-http-parity-http-consumers-02f692f3.json)
+pass dependency resolution, strict compilation, the public smoke and the complete
+wrapper on frozen source 02f692f3 / Hex 5f25fdb6. All 631 installed package files
+match the frozen source. The minimum consumer uses all six exact supported
+dependencies. No Rust tools, SmolBox native assets, SDK domain or VM work are
+introduced. All nine runtime shared libraries match the trusted OTP archive;
+a separate read-only custody audit confirms no account process remains.
+
+Both 20-member compact evidence archives preserve successful wrapper exits,
+complete logs, source/package inventories and audit sources; all members verify
+on guest, outer host and Mac. This supersedes neither the preserved prior wrapper
+failure nor any historical native qualification. The changed helper's ordinary
+acceptance and remaining P0–P9 gates remain pending; crash validation stays deferred.
+
+## Read-only collection preflight release package — October 17, 2026
+
+The [frozen Linux release package](../evidence/embedded-port-http-parity-partial-preflight-linux-build-02f692f3.json)
+binds manifest 587e2ae5/helper 736f6522 to source 02f692f3/Hex 5f25fdb6,
+all 337 native inputs, 1,819 source files and 806 unchanged assets. All 14
+build/model/package/source-verification stages exit zero. Release checks pass two
+collection reader models, five lifecycle eligibility models, one protocol preflight,
+one framed Port preflight and the branch model sweep. Both regular and clean SDK
+sources verify unmodified before and after the build. No native VM or Runtime
+owner is started by this build; all private compact logs and manifest hashes verify
+on the Mac. This supplies build/model evidence, not positive live recovery acceptance.
+
+Fresh exact-package current/minimum ordinary recovery and remaining P0–P9
+source/platform/resource/upgrade gates stay required. macOS custody remains
+untouched; no earlier package qualification transfers to these changed bytes.
+Crash validation remains deferred and distribution approval separate.
+
+## Fresh macOS account and startup observation — October 17, 2026
+
+The user-authorized standard account passes [isolated setup checks](../evidence/embedded-port-http-parity-macos-fresh-account.json): actual UID/passwd home, no administrator membership, all 809 assets of manifest 947ad46c, all 1,834 frozen 766b3a11 source files, current/minimum toolchains and no Rust on consumer PATH. SDK defaults were absent before first launch.
+
+The initial maintenance enrollment runner did not complete startup observation; its ten-second normal collection timeout masked the original startup exception. The helper later exited without a signal. A cold private snapshot verifies the original binding, an available native lock, all ten SDK tables empty and no VM cache. No wire work request or public VM consumer ran in that attempt. Its failed diagnostics remain preserved; the exact startup cause is unproven.
+
+The maintenance harness now uses the public broker's existing 120-second handshake default instead of 60 seconds, and preserves the startup exception if normal collection is unresolved. Seventeen deterministic runner tests pass; no forced termination or live fault campaign is added. Ordinary public continuation uses the original binding with initialization disabled and records its own result. No qualification transfers from this setup/model evidence, and all full-parity gates remain pending. Crash validation remains deferred and distribution approval separate.
+
+## Fresh macOS public consumer: uncertain start — October 17, 2026
+
+The [ordinary current-toolchain public attempt](../evidence/embedded-port-http-parity-macos-public-start-766b3a11.json) uses frozen 766b3a11 / Hex 26acbc84 / manifest 947ad46c under the new standard account. Dependency resolution, strict compilation and public smoke reach native admission; the public broker becomes ready using the original binding with initialization disabled. The first disposable execution then fails with an `unknown/start/dispatch_uncertain` error. Guest console evidence shows boot and agent readiness, but it does not establish a successful owned start or command. Terminal and normal Runtime replacement checks are not reached; the minimum consumer is not started.
+
+Normal example shutdown leaves no native helper/VM process observed and the native account lock available. The SDK retains one stopped/no-PID VM row; the other nine SDK tables are empty. The original failed execution retains its reservation, pending collection and incomplete cleanup. Its authentic private records, SDK data, disks and logs are preserved in an 842-file hashed snapshot. Pure codec inspection after recompiling the local production Elixir code reads the original failure without restoring it. No uncertain work is replayed, no generation changes, no failed authority reopens and no forced signal is sent. The exact start failure cause remains unproven.
+
+This is failed ordinary acceptance, not a crash campaign or a parity pass. Diagnose the start/ownership outcome before another native attempt. All full-parity gates remain pending; crash validation and distribution approval remain separate.
+
+## Worker relay path correction — October 17, 2026
+
+A [non-VM regression](../evidence/embedded-port-http-parity-worker-relay-paths.json) reproduces a concrete defect on the packed-bootstrap path: `tempfile::tempdir_in(".")` returns an absolute path, so the relay bound its full spool path despite intending to use a relative endpoint. In the failed account that endpoint is 112 bytes, exceeding the macOS 104-byte socket field. The old code fails before reaching a fake local agent. This explains a feasible post-boot bootstrap failure; changed-package ordinary acceptance is still required to establish the live correction.
+
+Workers now derive a checked direct-child relative endpoint from their fixed private CWD. The absolute directory remains owned by `TempDir` for cleanup; parent-process exchanges retain their short absolute temporary staging. No process-global CWD change, namespace alias, SDK patch or authority relaxation is introduced. Ten relay models and six owner-exchange models pass, including the isolated long-path worker; regular and clean SDK sources verify unmodified before and after. The original failed domain remains preserved and unopened. Rebuild and fresh current/minimum public acceptance remain pending; crash validation stays deferred.
+
+## Repaired start and terminal relay follow-up — October 17, 2026
+
+The [fresh fdd6e698 macOS attempt](../evidence/embedded-port-http-parity-macos-start-fixed-terminal-pending.json) confirms the original start correction: the disposable workload completes Exit 7, physical collection/cleanup completes and its reservation releases. A retained machine then creates/starts successfully through the terminal step. Terminal open returns unknown, so the remaining lifecycle and minimum consumer do not run. The failed account's original records, one stopped/no-PID VM and 845 hashed snapshot files remain private; no replay, authority reopening or forced signal occurs.
+
+The terminal worker was the remaining production caller supplying a long absolute staging directory to the same relay. Its supervisor already fixes the isolated worker's CWD there. The [terminal correction](../evidence/embedded-port-http-parity-terminal-relay-paths.json) verifies that CWD before using relative relay staging. The full non-VM worker peer now uses a long spool with a short fake agent socket: it fails against the old helper and passes against the corrected helper, checking binary I/O, resize, consumption credit, Exit 7 and protected-metadata rejection. Four terminal I/O models, format and all-target engine Clippy pass; regular/clean SDK sources remain unmodified. Fresh full current/minimum ordinary acceptance is still pending. Crash validation and distribution approval stay separate.
+
+## Corrected macOS public lifecycle and terminals — October 17, 2026
+
+Both [current/minimum public consumers](../evidence/embedded-port-http-parity-macos-relay-ordinary-7b05cf60.json) pass on source 7b05cf60 / Hex e0896e05 / manifest 0735ee82 / helper d1f8a583. A fresh standard account uses its actual UID/passwd home with fresh SDK defaults. All 1,844 source files, 339 native inputs, 809 package assets and 654 installed Hex files match their recorded identities; all four proof tools match source. The SDK remains unmodified 1.22.0 at 9f446ae0. The package uses development ad-hoc signing.
+
+Current Elixir 1.20.4/OTP 29.0.6 and minimum Elixir 1.18.4/OTP 27.3.4.15 both run without Rust on PATH. Each proves disposable/retained Exit 7, 1,048,593 binary file bytes, managed PTY binary I/O and resize/Exit 7, duplicate terminal-open reuse, codec-17 roundtrip, slot release, drain rejection with retained work allowed, drain persistence through normal Runtime replacement, version-checked resume and owned deletion. All ten SDK tables end empty, the native account lock is available and no helper/VM/BEAM remains. This uses Memory surviving a normal stopped-machine Runtime replacement; it is not helper-version upgrade or full BEAM/store-loss qualification.
+
+The relay regression reproduces the old absolute socket-path failure; the terminal follow-up reproduces the remaining absolute-staging caller against its old helper. Both corrected paths pass their fake-agent regressions. Ten relay, six owner-exchange and four terminal I/O models pass on both platforms; the full long-spool terminal worker passes on both, and the macOS packed-bootstrap worker peer passes. Format, all-target engine Clippy and regular/clean SDK checks pass. Original input asset bytes/modes remain unchanged. All 25 members of the private public-run archive and all 11 Linux terminal compact members/logs verify. Failed-account records/disks remain preserved without replay or reopening.
+
+This accepts the exact package's scoped ordinary macOS offline lifecycle/file/terminal consumers. It does not close the required networking/source/resource/durable-store/upgrade or broader admission gaps, and all full-parity rows remain pending. Crash validation stays deferred; distribution approval stays separate and false.
+
+## macOS public source and image consumers — October 17, 2026
+
+Source f1f250d3 adds explicit macOS remote-source/image admission and a matching
+package policy/Hello fixture. The shared ordinary image runner now accepts both
+supported platforms and enforces matching source architecture. Older descriptors
+retain their capabilities. Current source/admission tests and HTTP contracts pass
+502 checks; minimum source/admission tests pass 91, protocol contracts 60 and
+package models 12. SDK sources remain unmodified.
+
+The [exact 1a8e644f/fe85a410 package](../evidence/embedded-port-http-parity-macos-public-sources-f1f250d3.json)
+then passes four actual no-Rust current/minimum consumers: configured OCI/image
+operations and offline bare registry artifacts. Both preserve binary files and
+immutable creation through normal stopped Runtime replacement and owned cleanup.
+OCI verifies pull/list and duplicate reuse; registry verifies cold/warm preparation
+and imported-pull rejection, serving exactly two manifests and one blob per run.
+All 1,847 source files, 340 native inputs, 656 installed files and seven proof
+inputs per consumer verify. Both readers preserve 24 records' semantic state and
+v19 envelopes. Both private archives verify, all ten SDK tables end empty, no
+native owner remains, the account lock is free and all 809 assets are unchanged.
+
+Two earlier fixture errors remain preserved with normal cleanup: an omitted
+Docker CDN hostname and moving identical package bytes away from their verified
+template paths. No template reference is edited or failed authority restored.
+Mac checkpoint/branch admission, exports on both platforms and broader source,
+credential, store, resource and upgrade gates remain open. Full-parity rows stay
+pending; crash validation remains deferred and distribution approval false.
+
+## macOS saved-state admission and ordinary consumers — October 17, 2026
+
+The Mac package now explicitly advertises checkpoints, branches and partial
+collection preflight, using the existing shared engine and unmodified SDK. Older
+Mac descriptors remain accepted with their original feature surface. Volumes,
+growth and exports retain their previous platform admission. Required native
+store readers and atomic transitions still gate Runtime enrollment.
+
+The ordinary branch example accepts Linux and macOS. A separate public
+`--native-checkpoints` consumer captures an idle local bare source, confirms
+quiescence, normally replaces a stopped Runtime while retaining Memory, registers
+the exact capture and checks two independent RAM/disk restores and cold restart.
+Explicit artifact removal/native staging release must return reservations to zero.
+Failure controls retain the original store and owner; no signalling or automatic
+replay is added. Source/model checks pass; exact-package live Mac qualification
+is the next gate. Crash validation remains deferred and distribution unapproved.
+
+### Mac cold-start cache qualification correction
+
+The first 9600f969 Mac public branch consumer confirms ordinary source/sibling
+RAM and disk independence, held release and a cold restart, then retains an
+uncertain first-child deletion. The native journal stops at `collected`, before
+final SDK deletion. Cold start extracted a six-entry private bare pack cache;
+the stopped-child guard incorrectly accepted only absent, linked or empty caches.
+The original control completes normal disk-preserving shutdown. All native,
+VM and BEAM owners are absent; the failed SDK namespace and records stay preserved,
+with no reopening, repair or mutation replay.
+
+The completed/stopped guard now accepts only that pinned bare-cache layout,
+including an empty `layers` directory, and rejects mount images, mount/lease
+state, unknown entries, symlinks within the private layout and writable entries.
+Unbooted/partial guards keep their previous stricter predicate. Original child
+collection, canonical stopped ownership and the exact release remain mandatory.
+The example's backing absence check now uses macOS `Library/Caches`, matching
+the SDK, and future keepers expose existing explicit deletion continuation APIs.
+No SDK or wire/codec schema changes. Rebuilt-package live acceptance remains
+required; crash validation stays deferred.
+
+### Dependency-free Mac capture qualification
+
+The [rebuilt f1af384d helper](../evidence/embedded-port-http-parity-macos-public-branches-f1af384d.json)
+completes both current/minimum public Mac branch
+consumers, including real cold restart, final deletion, paired retirement and
+backing release. All 658 installed Hex files and five proof tools are recorded
+per consumer. Each case returns all ten SDK tables and reservations to zero.
+
+Its first capture case produces a 36,984,542-byte SDK artifact, then refuses
+publication: SDK 1.22 marks every `source_smolmachine` capture as a packed-device
+checkpoint, even when the original pack is bare. The self-contained checkpoint
+contract excludes that dependency. The original keeper acknowledges normal
+shutdown; failed bytes and records remain evidence, never approved restore input.
+
+Native portable preflight now rejects these pack references before SDK capture;
+branch source eligibility remains separate. Elixir metadata inspection now
+separates Linux guest and Darwin host platforms, accepts the neutral `/bin/true`
+metadata and typed empty offline-network fields, and still rejects workloads,
+network policy and external dependencies. The public checkpoint runner accepts an
+explicit dependency-free seed and retains its approval during stopped Runtime
+replacement. A dedicated ordinary SDK fixture preparer produces that input
+without source-record edits or consumer CLI fallbacks. Fresh exact-package Mac
+capture/restore qualification remains required. Crash validation stays deferred.
+
+Both codec readers preserve 88 saved branch/capture records, including their
+envelope versions, without restoring authority. The private 37-member evidence
+archive, 1,849 source inputs and all 463 regular stopped-custody copies verify.
+The [earlier cold-cache failure](../evidence/embedded-port-http-parity-macos-cold-cache-correction.json)
+retains its separate 2,907-entry custody and negative result. Both original native
+owners close normally; their failed SDK namespaces remain quarantined. No forced
+termination or owner-loss campaign is performed.
+
+### Checkpoint staging-worker enrollment
+
+The [80fd3037 follow-up](../evidence/embedded-port-http-parity-macos-checkpoint-staging-enrollment.json)
+passes both public Mac branch consumers again on manifest 2366c87b/helper
+35b5e352 (657 installed files and five proof inputs each). Ordinary SDK-only
+preparation produces two basic, dependency-free seeds and deletes both sources.
+The public checkpoint workflow accepts its seed, then retains uncertain creation
+before any VM boot: epoch enrollment requires a VM hash, while the decoder uses
+a private `.checkpoint-source-*` directory. Original-owner shutdown succeeds;
+SDK tables are empty, reservations remain retained, and 92 custody entries verify.
+Both codec readers preserve all 86 saved records without restoring authority.
+
+Source 2f58f619 adds a distinct request-private actor role bound to its operation
+and staging device/inode. It fences epoch shutdown and leaves child status with
+the transfer supervisor, without granting VM authority or weakening VM-scoped
+enrollment. Eight epoch models and three explicit real-seed checks pass, including
+an enrolled ordinary worker with no VM dispatch or default SDK domain. The
+rebuilt manifest d19d76d5/helper e79a9ebb passes packaging, signature and unmodified
+SDK checks. The ordinary engine sweep passes 1,071 tests with 25 ignored;
+all-target engine/Port Clippy passes. Fresh public capture/restore qualification
+remains pending; crash validation stays deferred.
+
+### Checkpoint-first cache setup
+
+The [d19d76d5 checkpoint-first attempt](../evidence/embedded-port-http-parity-macos-checkpoint-cache-parents.json)
+enrolls the decoder successfully, then retains unknown creation before VM boot.
+The fresh account has no `Library/Caches`, and creation checked a missing cache
+parent before making it. The original keeper closes normally; all SDK tables are
+empty, no VM cache or native owner remains, 38 custody entries verify and both
+codec readers preserve its two records. Its reservation remains retained and its
+failed authority is quarantined.
+
+Source 164c3c9a creates only missing cache parents below an owned directory without
+shared write permission. New directories use 0700; existing modes stay unchanged,
+redirects/files/shared-write parents are rejected, and parent identity is checked
+and synchronized. The real seed now completes full installation into a disposable
+explicit database with absent cache parents, without VM boot or default SDK
+authority. Two guard models, all 38 checkpoint models and all-target engine/Port
+Clippy pass. Fresh public capture/restore qualification remains required; crash
+validation stays deferred.
+
+### Capture stream response window
+
+The [164c3c9a public checkpoint attempt](../evidence/embedded-port-http-parity-macos-capture-stream-window.json)
+creates and starts its basic-seed source, runs the guest marker command and
+completes native capture. Controller delivery then fails after 12,517,376 bytes:
+the Port broker adds every encoded frame to a lifetime response limit, although
+Channel already bounds unread credit and proves the complete artifact. The
+partial output is never approved or restored. Explicit resolution is rejected
+before dispatch; the original keeper subsequently completes normal shutdown.
+The SDK source is stopped, no native process remains, the lock is free and all
+74 custody entries verify. Source/capture accounting remains retained. Both
+codec readers preserve all four saved records without restoring authority.
+
+Source 0b62119c applies the existing terminal streaming rule to checkpoint
+capture: each encoded frame stays within the response budget while Channel
+retains byte/event credit, total-size and checksum validation. Ordinary response
+accumulation is unchanged. A real OS-Port regression with a valid capture proof
+reproduces the earlier output-limit rejection and passes with the correction.
+The focused suite passes 30 cases on both current and minimum toolchains, with
+four deferred cases excluded each. The signed 164c3c9a native bundle is unchanged;
+a new Hex package contains the Elixir-only correction. Fresh current/minimum
+checkpoint and branch acceptance is running separately. Crash validation remains
+deferred, and full parity and distribution approval stay open.
+
+### Normal capture completion preserves the ready owner
+
+The [0b62119c public run](../evidence/embedded-port-http-parity-macos-capture-readiness.json)
+verifies the full 37,219,611-byte capture and resolves it to completed. Its next
+source command is rejected before qualification dispatch. Generic resolution
+restarted the recovery scan, which conservatively marked the running source
+unknown. The original keeper closes normally; its stopped SDK source, disks,
+completed artifact and charges remain preserved. All 67 custody entries and both
+six-record codec readers verify, without restoring authority or replaying work.
+
+Source f8f8156e lets normal captured completion retain an already completed scan
+through the existing serialized control path. It requires the exact committed
+capture, immutable source binding, matching previous captured record, same ready
+helper/epoch and worker lease before reactivation. Changed evidence, leases or
+helper identity, incomplete startup and unknown capture recovery cannot promote
+readiness. The callback is never replayed. The expanded suite passes 104 tests on
+each current/minimum toolchain, with four deferred cases excluded each. The signed
+native bundle remains unchanged; fresh public checkpoint/branch acceptance is
+running on the corrected Elixir package. Full parity remains incomplete and crash
+validation stays deferred.
+
+### macOS public checkpoint and branch acceptance
+
+The [f8f8156e ordinary consumers](../evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json) pass all four installed no-Rust cases:
+checkpoints and branches on current Elixir 1.20.4/OTP 29 and minimum Elixir
+1.18.4/OTP 27. The Hex package includes the capture stream window and exact
+completed-capture readiness corrections. Native manifest b7851d7e/helper 4d9f8af2
+remain the signed 164c3c9a bundle, with unmodified smolvm 1.22.0.
+
+Both checkpoint consumers verify basic-seed creation, duplicate capture identity,
+complete checked transfer, continued source RAM/disk state, ordinary stop and
+Runtime replacement with Memory retained, two independent RAM/disk restores,
+changed-child isolation, cold restart without RAM restoration, all three owned
+deletions and explicit artifact/native-stage release. Both branch consumers
+verify source/two-child independence, held/duplicate release, resource/draining
+rejection, cold restart, owned deletion, paired retirement and backing release.
+Each case ends with all ten SDK tables empty and zero reserved resources.
+
+All 662 installed files and five proof tools per consumer match the frozen inputs.
+Final verification covers the source, 52-member private archive, both codec readers,
+free account lock and empty native inventory. All 809 package assets match, and
+the helper passes strict signature verification.
+Earlier failed runs remain separately preserved; no failed authority is reopened.
+These are scoped ordinary Memory-store results with basic checkpoint seeds and
+bare local branch sources. Wider source/store/resource combinations, changed-helper
+upgrade, partial recovery and all remaining P0–P9 gates stay pending. Full parity,
+crash handling and distribution approval remain false; crash validation is deferred.
