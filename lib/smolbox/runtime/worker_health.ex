@@ -1,6 +1,7 @@
 defmodule SmolBox.Runtime.WorkerHealth do
+  alias SmolBox.Runtime.Target
   @moduledoc false
-  alias SmolBox.{Client, Error}
+  alias SmolBox.{Backend, Error}
 
   def check(worker, clock) do
     case observe(worker, clock) do
@@ -14,22 +15,7 @@ defmodule SmolBox.Runtime.WorkerHealth do
   end
 
   def observe(worker, clock) do
-    client = %{
-      worker.client
-      | worker: %{
-          worker.client.worker
-          | operation_timeout_ms: 500,
-            max_response_bytes: min(4096, worker.client.worker.max_response_bytes)
-        }
-    }
-
-    result =
-      case Client.health(client) do
-        {:ok, health} -> {classify(client, health, worker.runtime_version), health}
-        _failed -> {:unavailable, nil}
-      end
-
-    {status, health} = result
+    {status, health} = Backend.observe_health(Target.connection(worker), worker.runtime_version)
 
     %{
       status: status,
@@ -44,16 +30,4 @@ defmodule SmolBox.Runtime.WorkerHealth do
       do: status
 
   def status(_missing_or_stale, _monotonic), do: :unavailable
-
-  defp classify(_client, %{version: actual}, expected) when actual != expected,
-    do: :incompatible
-
-  defp classify(_client, %{total: nil}, _expected), do: :degraded
-
-  defp classify(client, _health, _expected) do
-    case Client.readiness(client) do
-      :ok -> :ready
-      _failed -> :degraded
-    end
-  end
 end

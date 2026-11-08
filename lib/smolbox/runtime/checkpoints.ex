@@ -1,11 +1,12 @@
 defmodule SmolBox.Runtime.Checkpoints do
+  alias SmolBox.Runtime.Target
   @moduledoc false
   alias SmolBox.{
+    Backend,
     CheckpointArtifact,
     CheckpointCapture,
     CheckpointIO,
     CheckpointResult,
-    Client,
     Error,
     Machine,
     ManagedMachine
@@ -68,7 +69,8 @@ defmodule SmolBox.Runtime.Checkpoints do
     with {:ok, worker} <- MachineSession.worker(config, m),
          true <- approved?(worker, c.spec),
          :ok <- WorkerHealth.check(worker, config.clock),
-         {:ok, observed} <- Client.checkpoint_preflight(worker.client, m.machine_name),
+         {:ok, observed} <-
+           Backend.checkpoint_preflight(Target.connection(worker), m.machine_name),
          true <- Machine.same_incarnation?(m.created_machine, observed),
          :ok <- CheckpointIO.vacant?(c) do
       :ok
@@ -96,8 +98,8 @@ defmodule SmolBox.Runtime.Checkpoints do
     path = CheckpointCapture.path(capture)
 
     with {:ok, receipt} <-
-           Client.capture_checkpoint(
-             worker.client,
+           Backend.capture_checkpoint(
+             Target.connection(worker),
              machine.machine_name,
              path,
              capture.spec.policy.max_bytes

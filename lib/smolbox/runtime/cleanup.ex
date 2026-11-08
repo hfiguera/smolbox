@@ -1,6 +1,7 @@
 defmodule SmolBox.Runtime.Cleanup do
+  alias SmolBox.Runtime.Target
   @moduledoc false
-  alias SmolBox.{Client, Error, Execution, Machine, Telemetry}
+  alias SmolBox.{Backend, Error, Execution, Machine, Telemetry}
   alias SmolBox.Runtime.{Machines, Session}
 
   def run(session) do
@@ -61,7 +62,7 @@ defmodule SmolBox.Runtime.Cleanup do
   defp inspect_machine(session, record),
     do:
       Session.io(session, record, :cleanup, fn ->
-        Client.inspect_machine(session.worker.client, record.machine_name)
+        Backend.inspect_machine(Target.connection(session.worker), record.machine_name)
       end)
 
   defp finish_observation(session, record, observed) do
@@ -97,7 +98,7 @@ defmodule SmolBox.Runtime.Cleanup do
 
   defp stop(session, record, %{state: :running}) do
     case Session.io(session, record, :cleanup, fn ->
-           Client.stop(session.worker.client, record.machine_name)
+           Backend.stop(Target.connection(session.worker), record.machine_name)
          end) do
       {:ok, _stopped} -> :ok
       error -> error
@@ -134,7 +135,7 @@ defmodule SmolBox.Runtime.Cleanup do
 
   defp delete(session, record) do
     case Session.io(session, record, :cleanup, fn ->
-           Client.delete(session.worker.client, record.machine_name)
+           Backend.delete(Target.connection(session.worker), record.machine_name)
          end) do
       :ok -> verify_absence(session, record)
       {:error, %Error{category: :not_found}} -> verify_absence(session, record)
@@ -203,12 +204,9 @@ defmodule SmolBox.Runtime.Cleanup do
       )
 
   defp exhausted(session, record) do
-    client = %{
-      session.worker.client
-      | worker: %{session.worker.client.worker | operation_timeout_ms: 1000}
-    }
+    client = Backend.bounded(Target.connection(session.worker), timeout_ms: 1000)
 
-    case Client.inspect_machine(client, record.machine_name) do
+    case Backend.inspect_machine(client, record.machine_name) do
       {:error, %Error{category: :not_found}} ->
         complete(session)
 

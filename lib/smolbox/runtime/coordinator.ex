@@ -1,4 +1,5 @@
 defmodule SmolBox.Runtime.Coordinator do
+  alias SmolBox.Runtime.Target
   @moduledoc false
   use GenServer
 
@@ -55,7 +56,7 @@ defmodule SmolBox.Runtime.Coordinator do
   def handle_call(:workers, _from, state) do
     reports =
       Enum.map(state.config.workers, fn worker ->
-        id = worker.client.worker.id
+        id = Target.id(worker)
 
         %{
           id: id,
@@ -162,7 +163,7 @@ defmodule SmolBox.Runtime.Coordinator do
       eligible =
         for worker <- state.config.workers,
             status(state, worker) == :ready,
-            do: worker.client.worker.id
+            do: Target.id(worker)
 
       task =
         Task.Supervisor.async_nolink(state.tasks, fn ->
@@ -197,7 +198,7 @@ defmodule SmolBox.Runtime.Coordinator do
   defp run_work(config, key, eligible, lane), do: Executor.run(config, key, eligible, lane)
 
   defp status(state, worker) do
-    mode = get_in(state.health, [worker.client.worker.id, :admission_mode])
+    mode = get_in(state.health, [Target.id(worker), :admission_mode])
 
     cond do
       worker.draining or mode == :draining -> :draining
@@ -209,7 +210,7 @@ defmodule SmolBox.Runtime.Coordinator do
   defp health_status(state, worker),
     do:
       WorkerHealth.status(
-        Map.get(state.health, worker.client.worker.id),
+        Map.get(state.health, Target.id(worker)),
         state.config.clock.monotonic()
       )
 
@@ -223,8 +224,8 @@ defmodule SmolBox.Runtime.Coordinator do
       )
       |> Enum.zip(config.workers)
       |> Map.new(fn
-        {{:ok, status}, worker} -> {worker.client.worker.id, status}
-        {_failed, worker} -> {worker.client.worker.id, nil}
+        {{:ok, status}, worker} -> {Target.id(worker), status}
+        {_failed, worker} -> {Target.id(worker), nil}
       end)
 
     {machines, machine_next} =
@@ -250,7 +251,7 @@ defmodule SmolBox.Runtime.Coordinator do
       end)
 
   defp probe(config, worker, previous, refresh) do
-    id = worker.client.worker.id
+    id = Target.id(worker)
 
     observation =
       case Session.store(config, :claim_worker, [

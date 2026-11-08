@@ -1,6 +1,7 @@
 defmodule SmolBox.Runtime.Observation do
+  alias SmolBox.Runtime.Target
   @moduledoc false
-  alias SmolBox.{Client, Error, LaunchResult, Result, Telemetry}
+  alias SmolBox.{Backend, Error, LaunchResult, Result, Telemetry}
   alias SmolBox.Runtime.{ImageObservation, Session, TerminalObservation}
 
   def run(session, %{spec: %{command: %SmolBox.ImagePull{}}} = record),
@@ -44,30 +45,23 @@ defmodule SmolBox.Runtime.Observation do
   end
 
   defp execute(session, record, callback) do
-    worker = session.worker.client.worker
-
-    client = %{
-      session.worker.client
-      | worker: %{
-          worker
-          | operation_timeout_ms:
-              min(worker.operation_timeout_ms, record.spec.profile.execution_ms),
-            max_response_bytes:
-              min(worker.max_response_bytes, record.spec.profile.max_output_bytes * 2 + 4096)
-        }
-    }
+    client =
+      Backend.bounded(Target.connection(session.worker),
+        timeout_ms: record.spec.profile.execution_ms,
+        max_response_bytes: record.spec.profile.max_output_bytes * 2 + 4096
+      )
 
     options = [max_output_bytes: record.spec.profile.max_output_bytes]
 
     if record.spec.command.stdin == nil and not record.spec.command.background,
       do:
-        Client.exec_stream(
+        Backend.exec_stream(
           client,
           record.machine_name,
           record.spec.command,
           options ++ [on_event: callback]
         ),
-      else: Client.exec(client, record.machine_name, record.spec.command, options)
+      else: Backend.exec(client, record.machine_name, record.spec.command, options)
   end
 
   defp observe(session, record, task, token) do

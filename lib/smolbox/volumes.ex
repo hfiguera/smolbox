@@ -1,4 +1,6 @@
 defmodule SmolBox.Volumes do
+  alias SmolBox.Runtime.Target
+
   @moduledoc """
   Managed local volumes independent of machine lifetime. Hosts authorize scopes.
 
@@ -12,7 +14,7 @@ defmodule SmolBox.Volumes do
   exclusive even for read-only mounts and remain through stop and uncertainty.
   Verified machine deletion releases attachment, but retains volume and budget.
   """
-  alias SmolBox.{Client, Error, Runtime, Validation, Volume, VolumePolicy}
+  alias SmolBox.{Backend, Error, Runtime, Validation, Volume, VolumePolicy}
   alias SmolBox.Runtime.Session
 
   alias SmolBox.Runtime.VolumeAccess
@@ -73,7 +75,7 @@ defmodule SmolBox.Volumes do
 
   defp provision(config, worker, v) do
     result =
-      case Client.provision_volume(worker.client, v.worker_volume_id, v.size_gb) do
+      case Backend.provision_volume(Target.connection(worker), v.worker_volume_id, v.size_gb) do
         {:ok, path} ->
           if path == Volume.path(v),
             do: {:complete, :ready},
@@ -163,7 +165,7 @@ defmodule SmolBox.Volumes do
 
   defp delete_attempt(config, worker, intent, :changed) do
     result =
-      case Client.delete_volume(worker.client, intent.worker_volume_id) do
+      case Backend.delete_volume(Target.connection(worker), intent.worker_volume_id) do
         :ok -> {:complete, :deleted}
         {:error, e} -> {:unknown, e}
       end

@@ -1,11 +1,12 @@
 defmodule SmolBox.Runtime.Machines do
+  alias SmolBox.Runtime.Target
   @moduledoc false
-  alias SmolBox.{Client, Error, Identity, Machine, ManagedMachine}
+  alias SmolBox.{Backend, Error, Identity, Machine, ManagedMachine}
   alias SmolBox.Runtime.Branches
   alias SmolBox.Runtime.Checkpoints
   alias SmolBox.Runtime.DiskExpansions
   alias SmolBox.Runtime.{ExecutionSupport, Exports}
-  alias SmolBox.Runtime.{Session, VolumeAccess, WorkerConfig, WorkerHealth}
+  alias SmolBox.Runtime.{Session, VolumeAccess, WorkerHealth}
 
   defdelegate store(config, operation, arguments), to: SmolBox.Runtime.MachineSession
 
@@ -69,9 +70,9 @@ defmodule SmolBox.Runtime.Machines do
     workers =
       Enum.filter(
         config.workers,
-        &(&1.client.worker.id in eligible and
-            record.volume_worker_id in [nil, &1.client.worker.id] and
-            WorkerConfig.supports?(&1, record.spec))
+        &(Target.id(&1) in eligible and
+            record.volume_worker_id in [nil, Target.id(&1)] and
+            Target.supports?(&1, record.spec))
       )
 
     result =
@@ -83,7 +84,7 @@ defmodule SmolBox.Runtime.Machines do
                store(config, :reserve, [
                  ManagedMachine.key(record),
                  Session.guard(current),
-                 {worker.client.worker.id, name, worker.capacity},
+                 {Target.id(worker), name, worker.capacity},
                  config.clock.now()
                ]) do
           {:halt, dispatch(config, reserved)}
@@ -127,7 +128,7 @@ defmodule SmolBox.Runtime.Machines do
   defp dispatch(config, record) do
     with {:ok, worker} <- worker(config, record),
          true <-
-           record.operation in [:stop, :delete] or WorkerConfig.supports?(worker, record.spec),
+           record.operation in [:stop, :delete] or Target.supports?(worker, record.spec),
          :ok <- volume_policy(config, record),
          %{status: :ready} <- WorkerHealth.observe(worker, config.clock),
          :ok <- verify_before(config, record, worker),
@@ -159,7 +160,7 @@ defmodule SmolBox.Runtime.Machines do
 
   defp prepare(config, record) do
     with {:ok, worker} <- worker(config, record),
-         true <- WorkerConfig.supports?(worker, record.spec),
+         true <- Target.supports?(worker, record.spec),
          :ok <- volume_policy(config, record),
          %{status: :ready} <- WorkerHealth.observe(worker, config.clock),
          {:ok, current} <- claim(config, ManagedMachine.key(record)),
@@ -188,7 +189,7 @@ defmodule SmolBox.Runtime.Machines do
     with {:ok, source} <- SmolBox.Source.from_artifact(intent.spec.artifact),
          {:ok, credentials} <-
            SmolBox.RegistryCredentials.resolve(worker.registry_credentials, source),
-         do: Client.prepare_artifact(worker.client, source, credentials)
+         do: Backend.prepare_artifact(Target.connection(worker), source, credentials)
   end
 
   defp prepared(config, record, {:ok, %SmolBox.ArtifactPreparation{} = result}) do
@@ -220,7 +221,9 @@ defmodule SmolBox.Runtime.Machines do
 
   defp verify_before(config, record, worker) do
     with {:ok, observed} <-
-           io(config, record, fn -> Client.inspect_machine(worker.client, record.machine_name) end),
+           io(config, record, fn ->
+             Backend.inspect_machine(Target.connection(worker), record.machine_name)
+           end),
          true <-
            record.created_machine != nil and
              SmolBox.DiskExpansion.matches?(record, observed) do
@@ -232,23 +235,23 @@ defmodule SmolBox.Runtime.Machines do
   end
 
   defp mutate(worker, %{operation: :create} = record) do
-    with {:ok, spec} <- WorkerConfig.machine_spec(worker, record.spec, record.machine_name),
+    with {:ok, spec} <- Target.machine_spec(worker, record.spec, record.machine_name),
          do: create(worker, %{spec | mounts: record.mounts}, record.preparation)
   end
 
   defp mutate(worker, %{operation: :start, spec: %{checkpointable: true}} = record),
-    do: Client.start_checkpointable(worker.client, record.machine_name)
+    do: Backend.start_checkpointable(Target.connection(worker), record.machine_name)
 
   defp mutate(worker, record),
-    do: apply(Client, record.operation, [worker.client, record.machine_name])
+    do: apply(Backend, record.operation, [Target.connection(worker), record.machine_name])
 
   defp create(worker, %{source: %SmolBox.Source{kind: :registry} = source} = spec, preparation) do
     with {:ok, credentials} <-
            SmolBox.RegistryCredentials.resolve(worker.registry_credentials, source),
-         do: Client.create_prepared(worker.client, spec, preparation, credentials)
+         do: Backend.create_prepared(Target.connection(worker), spec, preparation, credentials)
   end
 
-  defp create(worker, spec, _preparation), do: Client.create(worker.client, spec)
+  defp create(worker, spec, _preparation), do: Backend.create(Target.connection(worker), spec)
 
   defp complete_response(config, record, {:ok, %Machine{} = observed}) do
     with {:ok, current} <- claim(config, ManagedMachine.key(record)),
@@ -285,9 +288,7 @@ defmodule SmolBox.Runtime.Machines do
   defp confirm(config, record) do
     with {:ok, current} <- claim(config, ManagedMachine.key(record)),
          {:ok, worker} <- worker(config, current) do
-      case io(config, current, fn ->
-             Client.inspect_machine(worker.client, current.machine_name)
-           end) do
+      case inspect(config, current, worker) do
         {:ok, observed} ->
           confirm_present(config, current, observed)
 
@@ -324,13 +325,19 @@ defmodule SmolBox.Runtime.Machines do
     record = %{record | operation_deadline_ms: nil}
 
     with {:ok, worker} <- worker(config, record) do
-      case io(config, record, fn -> Client.inspect_machine(worker.client, record.machine_name) end) do
+      case inspect(config, record, worker) do
         {:ok, observed} -> observe_present(config, record, observed)
         {:error, %Error{category: :not_found}} -> observe_absent(config, record)
         {:error, error} -> failed_observation(config, record, error)
       end
     end
   end
+
+  defp inspect(config, record, worker),
+    do:
+      io(config, record, fn ->
+        Backend.inspect_machine(Target.connection(worker), record.machine_name)
+      end)
 
   defp observe_present(config, record, observed) do
     cond do

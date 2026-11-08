@@ -1,4 +1,5 @@
 defmodule SmolBox.Runtime.WorkerControls do
+  alias SmolBox.Runtime.Target
   @moduledoc false
   alias SmolBox.Runtime.Session
   alias SmolBox.{Telemetry, Validation, WorkerControl, WorkerMaintenance}
@@ -61,7 +62,7 @@ defmodule SmolBox.Runtime.WorkerControls do
   end
 
   defp report(config, worker, snapshot) do
-    case read(config, worker.client.worker.id) do
+    case read(config, Target.id(worker)) do
       {:ok, control} ->
         status =
           if worker.draining or control.mode == :draining,
@@ -92,7 +93,7 @@ defmodule SmolBox.Runtime.WorkerControls do
   defp supported(_), do: Session.error(:unsupported_capability, :worker_control)
 
   defp configured(config, id) do
-    case Enum.find(config.workers, &(&1.client.worker.id == id)) do
+    case Enum.find(config.workers, &(Target.id(&1) == id)) do
       nil -> Session.error(:not_found, :worker)
       worker -> {:ok, worker}
     end

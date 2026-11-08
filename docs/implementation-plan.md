@@ -1,3 +1,13 @@
+# Embedded backend planning — October 10, 2026
+
+The proposed [embedded Port design](design/embedded-port.md) and
+[implementation plan](design/embedded-port-implementation-plan.md) extend the
+original HTTP-only scope with an optional local backend. Port comes first;
+Rustler remains an additive embedded bridge, and a native Kubernetes backend has
+a separate lifecycle boundary. These are planning documents, not implemented or
+qualified features. The completed implementation and publication records below
+remain historical evidence.
+
 # SmolBox 0.1.5 publication — September 18, 2026
 
 Published and verified. Tag `v0.1.5` points to

@@ -1,7 +1,8 @@
 defmodule SmolBox.Runtime.Session do
+  alias SmolBox.Runtime.Target
   @moduledoc false
   alias SmolBox.{Error, Execution, Telemetry}
-  alias SmolBox.Runtime.{Config, Deadline, WorkerConfig}
+  alias SmolBox.Runtime.{Config, Deadline}
 
   @enforce_keys [:config, :key, :worker, :wall, :monotonic]
   defstruct @enforce_keys
@@ -9,7 +10,7 @@ defmodule SmolBox.Runtime.Session do
   @type t :: %__MODULE__{
           config: Config.t(),
           key: Execution.key(),
-          worker: WorkerConfig.t() | nil,
+          worker: Target.t() | nil,
           wall: non_neg_integer(),
           monotonic: integer()
         }
@@ -19,7 +20,7 @@ defmodule SmolBox.Runtime.Session do
     %__MODULE__{
       config: config,
       key: Execution.key(record),
-      worker: Enum.find(config.workers, &(&1.client.worker.id == record.worker_id)),
+      worker: Enum.find(config.workers, &(Target.id(&1) == record.worker_id)),
       wall: config.clock.now(),
       monotonic: config.clock.monotonic()
     }

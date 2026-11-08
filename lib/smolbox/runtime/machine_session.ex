@@ -1,4 +1,5 @@
 defmodule SmolBox.Runtime.MachineSession do
+  alias SmolBox.Runtime.Target
   @moduledoc false
   alias SmolBox.ManagedMachine
   alias SmolBox.Runtime.{Deadline, Session}
@@ -19,7 +20,7 @@ defmodule SmolBox.Runtime.MachineSession do
       ])
 
   def worker(config, record) do
-    case Enum.find(config.workers, &(&1.client.worker.id == record.worker_id)) do
+    case Enum.find(config.workers, &(Target.id(&1) == record.worker_id)) do
       nil -> Session.error(:unsupported_capability, :worker)
       worker -> {:ok, worker}
     end

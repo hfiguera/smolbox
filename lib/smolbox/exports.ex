@@ -1,4 +1,6 @@
 defmodule SmolBox.Exports do
+  alias SmolBox.Runtime.Target
+
   @moduledoc """
   Managed stopped-machine exports with durable intent and explicit recovery.
 
@@ -7,7 +9,7 @@ defmodule SmolBox.Exports do
   Completed history survives machine deletion. Hosts authorize every scope and
   configure exact destinations on the owning worker. Handles are not credentials.
   """
-  alias SmolBox.{Client, Error, Export, ExportSpec, ManagedMachine, Runtime, Validation}
+  alias SmolBox.{Backend, Error, Export, ExportSpec, ManagedMachine, Runtime, Validation}
   alias SmolBox.Runtime.Exports, as: ExportRuntime
   alias SmolBox.Runtime.{Machines, Session}
 
@@ -141,7 +143,7 @@ defmodule SmolBox.Exports do
          {:ok, worker} <- Machines.worker(config, record),
          {:ok, observed} <-
            Machines.io(config, %{record | operation_deadline_ms: nil}, fn ->
-             observe_resolution(worker.client, record.machine_name, disposition)
+             observe_resolution(Target.connection(worker), record.machine_name, disposition)
            end),
          {:ok, current} <- Machines.claim(config, {scope, machine}),
          {:ok, saved} <-
@@ -162,7 +164,7 @@ defmodule SmolBox.Exports do
   def resolve(_runtime, _handle, _version, _options), do: Session.error(:validation, :export)
 
   defp observe_resolution(client, name, disposition) do
-    case {Client.inspect_machine(client, name), disposition} do
+    case {Backend.inspect_machine(client, name), disposition} do
       {{:ok, observed}, :stopped} -> {:ok, observed}
       {{:error, %Error{category: :not_found}}, :deleted} -> {:ok, :absent}
       {{:error, _error} = error, _disposition} -> error
