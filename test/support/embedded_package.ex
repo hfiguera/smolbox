@@ -84,10 +84,28 @@ defmodule SmolBox.Test.EmbeddedPackage do
     config
   end
 
-  def received(config) do
-    case File.read(Path.join(config.package_path, "received.jsonl")) do
-      {:ok, text} -> String.split(text, "\n", trim: true) |> Enum.map(&Jason.decode!/1)
+  def received(config), do: read_received(Path.join(config.package_path, "received.jsonl"), 20)
+
+  defp read_received(path, retries) do
+    case File.read(path) do
+      {:ok, ""} -> []
+      {:ok, text} -> decode_received(path, text, retries)
       {:error, :enoent} -> []
+    end
+  end
+
+  defp decode_received(path, text, retries) do
+    cond do
+      String.ends_with?(text, "\n") ->
+        text |> String.split("\n", trim: true) |> Enum.map(&Jason.decode!/1)
+
+      retries > 0 ->
+        # A concurrent append can leave a partial final line in this snapshot.
+        Process.sleep(5)
+        read_received(path, retries - 1)
+
+      true ->
+        raise "incomplete request record in Port fixture log"
     end
   end
 
