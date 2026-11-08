@@ -3,7 +3,6 @@ defmodule SmolBox.Backend.EmbeddedBranchBacking do
   alias SmolBox.Backend.{
     Assignment,
     Budget,
-    EmbeddedBranchRetirement,
     EmbeddedContext,
     EmbeddedReply,
     Features
@@ -124,7 +123,7 @@ defmodule SmolBox.Backend.EmbeddedBranchBacking do
         context.name == parent.machine_name and context.profile == parent.spec.profile and
         NativeGrowth.current_identity(parent) == {:ok, context.identity}
     else
-      context.branch_retirement == child and EmbeddedBranchRetirement.scope?(context)
+      context.branch_retirement == child and EmbeddedContext.branch_retirement_scope?(context)
     end
   end
 

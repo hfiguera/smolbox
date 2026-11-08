@@ -6,6 +6,7 @@ defmodule SmolBox.ExportReceipt do
   blob or the tag's index. The returned pack metadata may contain environment
   values; it is discarded rather than retained in this receipt.
   """
+  alias SmolBox.Embedded.ExportPublication
   alias SmolBox.{Error, Validation}
   @enforce_keys [:manifest_sha256, :size_bytes, :platform]
   defstruct @enforce_keys ++ [native_publication: nil]
@@ -42,7 +43,7 @@ defmodule SmolBox.ExportReceipt do
   defp native?(receipt) do
     proof = receipt.native_publication
 
-    SmolBox.Embedded.ExportPublication.valid?(proof) and
+    ExportPublication.valid?(proof) and
       proof.identity["manifest_sha256"] == receipt.manifest_sha256 and
       proof.identity["size_bytes"] == receipt.size_bytes and
       proof.identity["platform"] == receipt.platform

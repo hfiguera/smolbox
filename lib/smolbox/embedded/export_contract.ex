@@ -46,20 +46,30 @@ defmodule SmolBox.Embedded.ExportContract do
         &Validation.digest?(value[&1])
       ) and
       Validation.text?(value["registry"], 260) and Validation.text?(value["repository"], 256) and
-      tag?(value["tag"]) and value["platform"] in ~w(linux/amd64 linux/arm64) and
-      value["platform_tag"] == value["tag"] <> "-" <> String.replace(value["platform"], "/", "-") and
+      platform_tag?(value) and
       Validation.integer?(value["size_bytes"], 1, @limits["staging_bytes"]) and
-      match?(
-        {:ok, _},
-        Source.registry(
-          id: "native-export",
-          reference:
-            value["registry"] <>
-              "/" <> value["repository"] <> "@sha256:" <> value["manifest_sha256"],
-          content_sha256: value["content_sha256"],
-          architecture: if(value["platform"] == "linux/amd64", do: "x86_64", else: "aarch64")
-        )
+      registry_identity?(value)
+  end
+
+  defp platform_tag?(value),
+    do:
+      tag?(value["tag"]) and value["platform"] in ~w(linux/amd64 linux/arm64) and
+        value["platform_tag"] ==
+          value["tag"] <> "-" <> String.replace(value["platform"], "/", "-")
+
+  defp registry_identity?(value) do
+    reference =
+      value["registry"] <> "/" <> value["repository"] <> "@sha256:" <> value["manifest_sha256"]
+
+    match?(
+      {:ok, _},
+      Source.registry(
+        id: "native-export",
+        reference: reference,
+        content_sha256: value["content_sha256"],
+        architecture: if(value["platform"] == "linux/amd64", do: "x86_64", else: "aarch64")
       )
+    )
   end
 
   def proof_digest(source, id, request, identity) do

@@ -6,7 +6,6 @@ defmodule SmolBox.Backend.EmbeddedBranchDeletion do
     BranchDeletionResolution,
     Call,
     NativeBranchDeletion,
-    NativeGrowth,
     NativeReleasedBranchDeletion,
     Protocol,
     ReleasedBranchDeletionResolution
@@ -15,8 +14,6 @@ defmodule SmolBox.Backend.EmbeddedBranchDeletion do
   alias SmolBox.{Error, ManagedMachine}
   @empty %{stdout: <<>>, stderr: <<>>, file: <<>>}
   @response_bytes 8192
-
-  def intent(record), do: if(NativeBranchDeletion.resolvable?(record), do: record)
 
   def run(context, %ManagedMachine{} = child, budget) do
     {:ok, budget} =
@@ -37,22 +34,13 @@ defmodule SmolBox.Backend.EmbeddedBranchDeletion do
 
   def run(_, _, _), do: failure(:validation, :not_dispatched)
 
-  def scope?(%{branch_deletion: %ManagedMachine{} = child} = context),
-    do:
-      ManagedMachine.validate(child) == :ok and NativeBranchDeletion.resolvable?(child) and
-        child.spec == context.spec and child.backend_assignment == context.assignment and
-        child.machine_name == context.name and
-        child.spec.profile == context.profile and
-        NativeGrowth.current_identity(child) == {:ok, context.identity}
-
-  def scope?(_), do: false
-
   def coordinate(context, child, budget, call, deadline \\ nil) do
     deadline = deadline || now() + min(budget.timeout_ms, 30_000)
 
     with true <-
            context.pinned and context.quiesced and is_pid(context.server) and context.epoch != nil,
-         true <- scope?(context) and context.branch_deletion == child,
+         true <-
+           EmbeddedContext.branch_deletion_scope?(context) and context.branch_deletion == child,
          {:ok, name, reader, request} <- exchange(child.branch.native_authority.deletion),
          operation = %{"operation" => name, "request" => request},
          {:ok, budget} <- remaining(budget, deadline),

@@ -21,7 +21,7 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
     NativeUnbootedBranchDisposal
   }
 
-  alias SmolBox.{BranchSpec, Profile, Validation}
+  alias SmolBox.{Branch, BranchSpec, Profile, Validation}
 
   @enforce_keys [:source, :request, :fingerprint]
   @derive {Inspect, only: []}
@@ -118,8 +118,8 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
         fn {proof, module} -> proof == nil or module.valid?(proof, authority) end
       )
 
-  def assignment(%__MODULE__{} = authority, artifact, profile),
-    do: %Assignment{
+  def assignment_fields(%__MODULE__{} = authority, artifact, profile),
+    do: %{
       version: 2,
       binding: %Binding{
         kind: :embedded,
@@ -131,8 +131,10 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
 
   def child?(
         %{
+          backend_assignment: %{__struct__: Assignment} = assignment,
           branch:
-            %SmolBox.Branch{
+            %{
+              __struct__: Branch,
               source_machine: %SmolBox.Machine{},
               native_authority: %__MODULE__{} = authority
             } = branch
@@ -144,7 +146,7 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
     valid?(authority) and branch_spec?(branch.spec, request, profile) and
       authority.source == branch.source and authority.fingerprint == child.fingerprint and
       child.id == request["child"]["operation_id"] and
-      child.backend_assignment == assignment(authority, child.spec.artifact, profile) and
+      Map.from_struct(assignment) == assignment_fields(authority, child.spec.artifact, profile) and
       source?(branch.source_machine, request["source"], profile) and
       proof_records?(child, authority.completion)
   end

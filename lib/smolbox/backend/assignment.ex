@@ -13,7 +13,9 @@ defmodule SmolBox.Backend.Assignment do
     Command,
     Error,
     ExecutionSpec,
+    Export,
     ImagePull,
+    ManagedMachine,
     ManagedMachineSpec,
     Profile,
     Source,
@@ -496,18 +498,17 @@ defmodule SmolBox.Backend.Assignment do
       ) and NativeBranchHistory.record?(record) and export_histories?(record, version) and
         (Map.get(record, :mounts, []) == [] or version == 2) and
         growth_histories?(record, version) and
-        checkpointable_origin?(record) and
-        legacy_slots?(record, version)
+        checkpointable_origin?(record) and capture_histories?(record, version)
 
-  defp legacy_slots?(_record, 2), do: true
+  defp capture_histories?(_record, 2), do: true
 
-  defp legacy_slots?(record, 1),
+  defp capture_histories?(record, _version),
     do:
       Map.get(record, :reserved_ports, []) == [] and
         Map.get(record, :captures, %{}) == %{} and Map.get(record, :active_capture) == nil
 
-  defp export_histories?(%SmolBox.ManagedMachine{} = record, 2),
-    do: SmolBox.Export.history_valid?(record)
+  defp export_histories?(%{__struct__: ManagedMachine} = record, 2),
+    do: Export.history_valid?(record)
 
   defp export_histories?(record, _),
     do: Map.get(record, :exports, %{}) == %{} and Map.get(record, :active_export) == nil

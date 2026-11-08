@@ -1,6 +1,6 @@
 defmodule SmolBox.Backend.EmbeddedBranchDeletionAction do
   @moduledoc false
-  alias SmolBox.Backend.{Budget, EmbeddedBranchDeletion, EmbeddedContext, EmbeddedReply, Features}
+  alias SmolBox.Backend.{Budget, EmbeddedContext, EmbeddedReply, Features}
 
   alias SmolBox.Embedded.{
     BranchDeletionCollection,
@@ -43,7 +43,8 @@ defmodule SmolBox.Backend.EmbeddedBranchDeletionAction do
 
     with true <-
            context.pinned and context.quiesced and is_pid(context.server) and context.epoch != nil,
-         true <- EmbeddedBranchDeletion.scope?(context) and context.branch_deletion == child,
+         true <-
+           EmbeddedContext.branch_deletion_scope?(context) and context.branch_deletion == child,
          true <- NativeBranchDeletionAction.eligible?(child, action),
          saved =
            Map.fetch!(child.branch.native_authority, NativeBranchDeletionAction.field(action)),

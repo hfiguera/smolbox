@@ -168,7 +168,7 @@ defmodule SmolBox.NativeUnbootedBranchRetirementTest do
 
   test "completed-child observation cannot accept an unbooted retirement scope" do
     {_, child, proof, _} = Contract.complete(Memory, start_supervised!(Memory), true)
-    assert EmbeddedBranchRetirement.intent(child) == nil
+    assert EmbeddedContext.branch_retirement_intent(child) == nil
 
     context = %EmbeddedContext{
       config: nil,
@@ -184,7 +184,7 @@ defmodule SmolBox.NativeUnbootedBranchRetirementTest do
       identity: nil
     }
 
-    refute EmbeddedBranchRetirement.scope?(context)
+    refute EmbeddedContext.branch_retirement_scope?(context)
 
     assert {:error, _} =
              EmbeddedBranchRetirement.coordinate(

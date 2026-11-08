@@ -772,31 +772,23 @@ defmodule SmolBox.Store.Codec do
     {CodecNativeCaptures.upgrade(record), used}
   end
 
-  defp encode_native_exports(record) do
+  defp encode_native_exports(record),
+    do: encode_native_record(record, @native_exports_prefix, &CodecNativeBranchAuthority.strip/1)
+
+  defp encode_native_branches(record),
+    do: encode_native_record(record, @native_branches_prefix, &CodecNativeBranchAuthority.strip/1)
+
+  defp encode_native_branch_authority(record),
+    do:
+      encode_native_record(
+        record,
+        @native_branch_authority_prefix,
+        &CodecNativeBranchReleases.strip/1
+      )
+
+  defp encode_native_record(record, prefix, strip) do
     with :ok <- validate_extended(record) do
-      bytes =
-        @native_exports_prefix <> :erlang.term_to_binary(CodecNativeBranchAuthority.strip(record))
-
-      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
-    end
-  end
-
-  defp encode_native_branches(record) do
-    with :ok <- validate_extended(record) do
-      bytes =
-        @native_branches_prefix <>
-          :erlang.term_to_binary(CodecNativeBranchAuthority.strip(record))
-
-      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
-    end
-  end
-
-  defp encode_native_branch_authority(record) do
-    with :ok <- validate_extended(record) do
-      bytes =
-        @native_branch_authority_prefix <>
-          :erlang.term_to_binary(CodecNativeBranchReleases.strip(record))
-
+      bytes = prefix <> :erlang.term_to_binary(strip.(record))
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
   end
@@ -814,15 +806,13 @@ defmodule SmolBox.Store.Codec do
     ArgumentError -> invalid()
   end
 
-  defp encode_native_branch_releases(record) do
-    with :ok <- validate_extended(record) do
-      bytes =
-        @native_branch_releases_prefix <>
-          :erlang.term_to_binary(CodecNativeBranchRetirements.strip(record))
-
-      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
-    end
-  end
+  defp encode_native_branch_releases(record),
+    do:
+      encode_native_record(
+        record,
+        @native_branch_releases_prefix,
+        &CodecNativeBranchRetirements.strip/1
+      )
 
   defp decode_native_branch_releases(<<@native_branch_releases_prefix, payload::binary>>) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
@@ -1217,21 +1207,15 @@ defmodule SmolBox.Store.Codec do
     ArgumentError -> invalid()
   end
 
-  defp encode_native_captures(record) do
+  defp encode_native_captures(record),
+    do: encode_capture_history(record, @native_captures_prefix)
+
+  defp encode_native_capture_resolutions(record),
+    do: encode_capture_history(record, @native_capture_resolutions_prefix)
+
+  defp encode_capture_history(record, prefix) do
     with :ok <- validate_extended(record) do
-      bytes =
-        @native_captures_prefix <> :erlang.term_to_binary(CodecNativeCaptureCleanup.strip(record))
-
-      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
-    end
-  end
-
-  defp encode_native_capture_resolutions(record) do
-    with :ok <- validate_extended(record) do
-      bytes =
-        @native_capture_resolutions_prefix <>
-          :erlang.term_to_binary(CodecNativeCaptureCleanup.strip(record))
-
+      bytes = prefix <> :erlang.term_to_binary(CodecNativeCaptureCleanup.strip(record))
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
   end

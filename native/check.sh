@@ -33,6 +33,9 @@ cargo test --manifest-path "$native_manifest" -p smolbox-engine --test child_rea
 cargo build --manifest-path "$native_manifest" -p smolbox-port --locked
 SMOLBOX_UMASK_HELPER="${CARGO_TARGET_DIR:-$native_root/target}/debug/smolbox-port" \
   python3 "$native_root/tests/test_port_umask.py" -v
+# Use the packaged build profile so fixture startup verifies the same executable
+# geometry and avoids hashing an unoptimized SDK binary during a short deadline.
+cargo build --manifest-path "$native_manifest" --release -p smolbox-port --locked
 # Every ignored fixture is individually reviewed and exactly named. This list
 # uses ordinary protocol/filesystem peers and normal child exit only; it cannot
 # select a newly added similarly named test, a VM fixture or a fault campaign.
@@ -47,7 +50,7 @@ native_ordinary_fixtures=(
   "epoch::tests::ordinary_boot_guard_enrolls_before_sdk_and_collects_normal_exit"
 )
 for native_ordinary_fixture in "${native_ordinary_fixtures[@]}"; do
-  SMOLBOX_TEST_FILE_WORKER="${CARGO_TARGET_DIR:-$native_root/target}/debug/smolbox-port" \
+  SMOLBOX_TEST_FILE_WORKER="${CARGO_TARGET_DIR:-$native_root/target}/release/smolbox-port" \
     cargo test --manifest-path "$native_manifest" -p smolbox-engine --lib "$native_ordinary_fixture" --locked -- --exact --ignored
 done
 native_clean_fixture="$native_root/tests/clean-sdk-api"

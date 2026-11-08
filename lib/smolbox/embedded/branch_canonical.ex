@@ -2,6 +2,26 @@ defmodule SmolBox.Embedded.BranchCanonical do
   @moduledoc false
   alias SmolBox.Embedded.Shape
 
+  @transition_fields ~w(schema previous receipt change)
+
+  def transition_from_wire(value, module) do
+    if Shape.keys?(value, @transition_fields) and module.valid?(value) do
+      fields = Map.new(value, fn {key, field} -> {String.to_existing_atom(key), field} end)
+      {:ok, struct!(module, fields)}
+    else
+      :error
+    end
+  end
+
+  def transition_wire(value),
+    do: Map.new(Map.from_struct(value), fn {key, field} -> {Atom.to_string(key), field} end)
+
+  def transition_shape?(value),
+    do:
+      Shape.keys?(value, @transition_fields) and value["schema"] === 1 and
+        Shape.receipt?(value["previous"], 2) and Shape.receipt?(value["receipt"], 2) and
+        origin(value["previous"]) == origin(value["receipt"])
+
   # Explicit serde struct order, including required nulls. These hashes check
   # history/correlation; they never grant SDK ownership or manager enrollment.
   @schemas %{

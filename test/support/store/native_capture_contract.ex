@@ -369,22 +369,7 @@ defmodule SmolBox.Store.NativeCaptureContract do
     assert {:ok, %{native_capture_resolutions: 1}} = adapter.capabilities(store)
     key = ManagedMachine.key(original)
 
-    assert {:ok, unknown} =
-             adapter.machine(store, :capture_advance, [
-               key,
-               Contract.guard(sent),
-               spec.id,
-               :dispatching,
-               [
-                 state: :unknown,
-                 error: %SmolBox.Error{
-                   category: :unknown,
-                   operation: :checkpoint,
-                   evidence: :unknown
-                 }
-               ],
-               1102
-             ])
+    unknown = mark_unknown(adapter, store, key, sent, spec.id)
 
     observed = %{
       unknown.observed_machine
@@ -631,15 +616,12 @@ defmodule SmolBox.Store.NativeCaptureContract do
     released
   end
 
-  def unknown_resolution(adapter, store, state) do
-    {original, _running, sent, spec, proof, _crossed, usage} = prepare(adapter, store)
-    key = ManagedMachine.key(original)
-
-    assert {:ok, unknown} =
+  defp mark_unknown(adapter, store, key, sent, id) do
+    assert {:ok, record} =
              adapter.machine(store, :capture_advance, [
                key,
                Contract.guard(sent),
-               spec.id,
+               id,
                :dispatching,
                [
                  state: :unknown,
@@ -651,6 +633,15 @@ defmodule SmolBox.Store.NativeCaptureContract do
                ],
                1102
              ])
+
+    record
+  end
+
+  def unknown_resolution(adapter, store, state) do
+    {original, _running, sent, spec, proof, _crossed, usage} = prepare(adapter, store)
+    key = ManagedMachine.key(original)
+
+    unknown = mark_unknown(adapter, store, key, sent, spec.id)
 
     assert {:ok, identity} = NativeGrowth.current_identity(unknown)
 

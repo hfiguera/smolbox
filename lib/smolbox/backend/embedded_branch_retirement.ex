@@ -4,22 +4,13 @@ defmodule SmolBox.Backend.EmbeddedBranchRetirement do
 
   alias SmolBox.Embedded.{
     BranchChildAbsence,
-    BranchCompletion,
     Call,
     NativeBranchRetirement,
-    NativeGrowth,
     Protocol
   }
 
-  alias SmolBox.{Error, ManagedMachine}
+  alias SmolBox.Error
   @empty %{stdout: <<>>, stderr: <<>>, file: <<>>}
-
-  def intent(
-        %ManagedMachine{branch: %{native_authority: %{completion: %BranchCompletion{}}}} = record
-      ),
-      do: if(NativeBranchRetirement.eligible?(record), do: record)
-
-  def intent(_), do: nil
 
   def run(context, name, budget) do
     {:ok, budget} = Budget.constrain(budget, timeout_ms: 30_000, max_response_bytes: 72 * 1024)
@@ -43,7 +34,7 @@ defmodule SmolBox.Backend.EmbeddedBranchRetirement do
 
     with true <-
            context.pinned and context.quiesced and is_pid(context.server) and context.epoch != nil,
-         true <- name == context.name and scope?(context),
+         true <- name == context.name and EmbeddedContext.branch_retirement_scope?(context),
          {:ok, request} <- NativeBranchRetirement.request(context.branch_retirement),
          operation = %{"operation" => "qualify_branch_child_absence", "request" => request},
          {:ok, budget} <- remaining(budget, deadline),
@@ -57,15 +48,6 @@ defmodule SmolBox.Backend.EmbeddedBranchRetirement do
            _ -> failure(:identity_conflict, :dispatch_uncertain)
          )
   end
-
-  def scope?(%{branch_retirement: %ManagedMachine{} = child} = context),
-    do:
-      ManagedMachine.validate(child) == :ok and intent(child) == child and
-        child.spec == context.spec and child.backend_assignment == context.assignment and
-        child.machine_name == context.name and child.spec.profile == context.profile and
-        NativeGrowth.current_identity(child) == {:ok, context.identity}
-
-  def scope?(_), do: false
 
   defp decode(
          {:ok, %{"result" => "branch_child_absent", "proof" => wire} = outcome, @empty, nil},

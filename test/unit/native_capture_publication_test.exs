@@ -16,7 +16,7 @@ defmodule SmolBox.NativeCapturePublicationTest do
     root =
       Path.join(
         System.tmp_dir!(),
-        "smolbox-capture-publication-#{System.unique_integer([:positive])}"
+        "smolbox-capture-publication-#{Base.url_encode64(:crypto.strong_rand_bytes(12), padding: false)}"
       )
 
     File.mkdir!(root)
@@ -167,14 +167,12 @@ defmodule SmolBox.NativeCapturePublicationTest do
 
   test "receiver independently caps bytes before writing an over-budget producer" do
     {capture, request, budget, _proof} = fixture()
-    # Test the aggregate byte boundary with normal maximum-sized chunks, rather
-    # than racing thousands of filesystem calls against a wall-clock deadline.
     budget = %{budget | timeout_ms: 10_000, max_response_bytes: 65_536}
+    chunk = String.duplicate("x", 65_536)
 
     assert {:error, %{evidence: :dispatch_uncertain}} =
              CapturePublication.receive(capture, request, budget, fn consumer, _ ->
-               for _ <- 1..16,
-                   do: assert(:ok == consumer.({:checkpoint, String.duplicate("x", 65_536)}))
+               for _ <- 1..16, do: assert(:ok == consumer.({:checkpoint, chunk}))
 
                assert {:error, _} = consumer.({:checkpoint, "extra"})
 
@@ -188,5 +186,28 @@ defmodule SmolBox.NativeCapturePublicationTest do
 
     assert File.stat!(CheckpointCapture.path(capture) <> ".partial").size ==
              capture.spec.policy.max_bytes
+  end
+
+  test "a pre-dispatch refusal is preserved only before any checkpoint bytes arrive" do
+    for bytes <- ["", "partial"] do
+      {capture, request, budget, _proof} = fixture()
+
+      failure = %SmolBox.Error{
+        category: :expired,
+        operation: :embedded,
+        evidence: :not_dispatched
+      }
+
+      result =
+        CapturePublication.receive(capture, request, budget, fn consumer, _ ->
+          if bytes != "", do: assert(:ok == consumer.({:checkpoint, bytes}))
+          {:error, failure}
+        end)
+
+      expected = if bytes == "", do: :not_dispatched, else: :dispatch_uncertain
+      assert {:error, %{operation: :checkpoint, evidence: ^expected}} = result
+      assert File.read!(CheckpointCapture.path(capture) <> ".partial") == bytes
+      assert File.lstat(CheckpointCapture.path(capture)) == {:error, :enoent}
+    end
   end
 end

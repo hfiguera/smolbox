@@ -8,13 +8,13 @@ defmodule SmolBox.Embedded.NativeBranchHistory do
     NativePreparedBranchRetirement
   }
 
-  alias SmolBox.Validation
+  alias SmolBox.{Branch, Validation}
 
   def record?(%{backend_assignment: nil} = record),
     do:
       Map.get(record, :native_branch_history, %{}) == %{} and
         (Map.get(record, :branch) == nil or
-           match?(%SmolBox.Branch{native_authority: nil}, Map.get(record, :branch)))
+           match?(%{__struct__: Branch, native_authority: nil}, Map.get(record, :branch)))
 
   def record?(%{backend_assignment: %{version: 2}, branch: %{}} = record),
     do: record.native_branch_history == %{} and NativeBranchAuthority.child?(record)
