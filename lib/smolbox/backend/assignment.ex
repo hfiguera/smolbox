@@ -23,12 +23,17 @@ defmodule SmolBox.Backend.Assignment do
   }
 
   alias SmolBox.Embedded.{
+    BranchCreation,
+    BranchPublication,
+    BranchRequest,
     CheckpointContract,
     Config,
     CreationFeatures,
     Identity,
     Launch,
+    MaterialHistory,
     MountContract,
+    NativeBranchHistory,
     NativeGrowth,
     NativeSource,
     Request
@@ -110,7 +115,8 @@ defmodule SmolBox.Backend.Assignment do
          (assignment.version == 2 and
             (NativeSource.creation?(assignment.creation) or
                NativeSource.registry_creation?(assignment.creation) or
-               CheckpointContract.creation?(assignment.creation)))) and
+               CheckpointContract.creation?(assignment.creation) or
+               BranchCreation.valid?(assignment.creation)))) and
         assignment.creation["labels"] == %{}
 
   defp mount_binding?(assignment),
@@ -130,11 +136,19 @@ defmodule SmolBox.Backend.Assignment do
       approved_creation?(assignment.creation, approved_artifact(config, spec.artifact))
   end
 
+  defp specification_matches?(%{"branch" => _} = create, spec, _retained),
+    do: BranchCreation.matches?(create, spec)
+
   defp specification_matches?(create, spec, retained),
     do:
       CreationFeatures.matches?(create, spec, retained) and
         CheckpointContract.matches?(create, spec, retained) and
         MountContract.matches_spec?(create, spec, retained)
+
+  defp features_approved?(%{creation: %{"branch" => request}}, config, spec),
+    do:
+      Features.supports?(config, :branches) and
+        request["approval"] in BranchRequest.approvals(config) and command_approved?(config, spec)
 
   defp features_approved?(assignment, config, spec),
     do:
@@ -143,6 +157,18 @@ defmodule SmolBox.Backend.Assignment do
         command_approved?(config, spec) and MountContract.approved?(assignment.creation, config)
 
   defp approved_creation?(_creation, nil), do: false
+
+  defp approved_creation?(%{"branch" => _} = creation, %Checkpoint{} = checkpoint),
+    do:
+      BranchCreation.valid?(creation) and
+        creation["artifact_identity"] == Checkpoint.artifact(checkpoint)
+
+  defp approved_creation?(%{"branch" => _}, %Source{}), do: false
+
+  defp approved_creation?(%{"branch" => _} = creation, artifact),
+    do:
+      BranchCreation.valid?(creation) and
+        creation["artifact_identity"] == Map.take(artifact, ~w(id sha256 architecture))
 
   defp approved_creation?(creation, %Checkpoint{} = checkpoint),
     do:
@@ -311,6 +337,9 @@ defmodule SmolBox.Backend.Assignment do
         artifact["guest_platform"] ==
           if(expected["architecture"] == "aarch64", do: "linux/arm64", else: "linux/amd64")
 
+  defp creation_artifact_matches?(%{"branch" => _} = creation, expected),
+    do: BranchCreation.valid?(creation) and creation["artifact_identity"] == expected
+
   defp creation_artifact_matches?(%{"source" => %{"kind" => "checkpoint"}} = creation, expected),
     do: CheckpointContract.creation?(creation) and creation["source"] == expected
 
@@ -463,16 +492,13 @@ defmodule SmolBox.Backend.Assignment do
     do:
       Enum.all?(
         [
-          branch_children: %{},
-          branch: nil,
-          active_branch: nil,
           preparation: nil
         ],
         fn {key, empty} -> Map.get(record, key, empty) == empty end
-      ) and export_histories?(record, version) and
+      ) and NativeBranchHistory.record?(record) and export_histories?(record, version) and
         (Map.get(record, :mounts, []) == [] or version == 2) and
         growth_histories?(record, version) and
-        capture_origin?(record) and capture_histories?(record, version)
+        checkpointable_origin?(record) and capture_histories?(record, version)
 
   defp capture_histories?(_record, 2), do: true
 
@@ -495,17 +521,19 @@ defmodule SmolBox.Backend.Assignment do
         Map.get(record, key, empty) == empty
       end) and NativeGrowth.record_valid?(record)
 
-  defp capture_origin?(record) do
+  defp checkpointable_origin?(record) do
     required =
       Map.get(record, :captures, %{}) != %{} or
-        match?(
-          %{created_machine: %{backend_identity: %{material_history: history}}}
-          when is_list(history),
-          record
-        )
+        checkpointable_links?(Map.get(record, :created_machine))
 
     not required or record.backend_assignment.creation["checkpointable"] == true
   end
+
+  defp checkpointable_links?(%{backend_identity: %{material_history: history}})
+       when is_list(history),
+       do: Enum.any?(history, &(MaterialHistory.capture?(&1) or is_struct(&1, BranchPublication)))
+
+  defp checkpointable_links?(_), do: false
 
   defp validate_spec(%ManagedMachineSpec{} = spec), do: ManagedMachineSpec.validate(spec)
   defp validate_spec(spec), do: ExecutionSpec.validate(spec)

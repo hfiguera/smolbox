@@ -26,6 +26,37 @@ class DeferredSelectionTests(unittest.TestCase):
         # The owner/helper macro generates two cases from one tagged declaration.
         self.assertEqual(checked, 12)
 
+    def test_native_check_uses_only_reviewed_exact_ordinary_fixtures(self):
+        source = (ROOT / 'native/check.sh').read_text()
+        declaration = re.search(r'native_ordinary_fixtures=\((.*?)\)', source, re.S)
+        self.assertIsNotNone(declaration)
+        actual = re.findall(r'"([a-zA-Z0-9_:]+)"', declaration.group(1))
+        expected = {
+            'transfer_supervisor::tests::ordinary_worker_process_connects_without_initializing_runtime_ownership',
+            'transfer_supervisor::tests::ordinary_worker_binary_transfers_use_public_agent_api',
+            'checkpoint_source::tests::ordinary_worker_checkpoint_installation_commits_only_fresh_owned_material',
+            'checkpoint_source::tests::ordinary_worker_checkpoint_materializes_sdk_files_and_collects_without_vm_dispatch',
+            'transfer_supervisor::tests::ordinary_conversion_worker_collects_and_rehashes_both_spools_with_original_leases',
+            'transfer_supervisor::tests::ordinary_imported_conversion_worker_preserves_source_gate_and_spools',
+            'transfer_supervisor::tests::ordinary_branch_worker_rejects_unentered_fixture_and_collects_original_leases',
+            'epoch::tests::ordinary_boot_guard_enrolls_before_sdk_and_collects_normal_exit',
+        }
+        self.assertEqual(len(actual), len(expected))
+        self.assertEqual(set(actual), expected)
+        self.assertIn('--lib "$native_ordinary_fixture" --locked -- --exact --ignored', source)
+        ignored = [line for line in source.splitlines() if '--ignored' in line]
+        self.assertEqual(len(ignored), 1)
+        self.assertIn('--exact --ignored', ignored[0])
+        self.assertIn('--workspace --lib --bins --test contract --locked', source)
+        self.assertIn('--test child_reaping --locked', source)
+        commands = {line.strip() for line in source.splitlines() if line.strip().startswith('cargo test ')}
+        self.assertEqual(commands, {
+            'cargo test --manifest-path "$native_manifest" --workspace --lib --bins --test contract --locked',
+            'cargo test --manifest-path "$native_manifest" -p smolbox-engine --test child_reaping --locked',
+            'cargo test --manifest-path "$native_manifest" -p smolbox-engine --lib "$native_ordinary_fixture" --locked -- --exact --ignored',
+            'cargo test --manifest-path "$native_clean_fixture/Cargo.toml" --lib parity::tests --offline',
+        })
+
     def test_runtime_selection_does_not_implicitly_include_deferred_native_campaigns(self):
         helper = (ROOT / 'test/test_helper.exs').read_text()
         self.assertRegex(helper, r'ExUnit\.start\(exclude: \[:runtime, :deferred_crash\]\)')

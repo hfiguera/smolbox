@@ -482,7 +482,7 @@
       ],
       "contract": "branches",
       "http_supported": true,
-      "port_operation_supported": false,
+      "port_operation_supported": true,
       "parity_status": "pending",
       "acceptance": [
         "branches:validation-and-dispatch",
@@ -512,7 +512,7 @@
       ],
       "contract": "branches",
       "http_supported": true,
-      "port_operation_supported": false,
+      "port_operation_supported": true,
       "parity_status": "pending",
       "acceptance": [
         "branches:validation-and-dispatch",
@@ -527,7 +527,7 @@
       ],
       "contract": "branches",
       "http_supported": true,
-      "port_operation_supported": false,
+      "port_operation_supported": true,
       "parity_status": "pending",
       "acceptance": [
         "branches:validation-and-dispatch",
@@ -542,7 +542,7 @@
       ],
       "contract": "branches",
       "http_supported": true,
-      "port_operation_supported": false,
+      "port_operation_supported": true,
       "parity_status": "pending",
       "acceptance": [
         "branches:validation-and-dispatch",
@@ -731,7 +731,9 @@
         "Preparation content digest differs from registry platform-manifest digest."
       ],
       "acceptance_status": "pending",
-      "evidence": []
+      "evidence": [
+        "docs/evidence/embedded-port-http-parity-linux-package.json"
+      ]
     },
     {
       "id": "lifecycle",
@@ -753,7 +755,9 @@
         "Unknown outcomes retain reservations; deletion requires authority."
       ],
       "acceptance_status": "pending",
-      "evidence": []
+      "evidence": [
+        "docs/evidence/embedded-port-http-parity-linux-package.json"
+      ]
     },
     {
       "id": "commands",
@@ -776,7 +780,9 @@
         "Streaming rejects stdin and background; native bare guest rejects explicit user."
       ],
       "acceptance_status": "pending",
-      "evidence": []
+      "evidence": [
+        "docs/evidence/embedded-port-http-parity-linux-package.json"
+      ]
     },
     {
       "id": "files",
@@ -798,7 +804,9 @@
         "Cancellation is not rollback or proof of guest absence."
       ],
       "acceptance_status": "pending",
-      "evidence": []
+      "evidence": [
+        "docs/evidence/embedded-port-http-parity-linux-package.json"
+      ]
     },
     {
       "id": "images",
@@ -861,7 +869,8 @@
         "test/unit/embedded_terminal_runtime_test.exs",
         "test/unit/embedded_terminal_contract_test.exs",
         "test/unit/terminal_embedded_connection_test.exs",
-        "docs/evidence/embedded-port-http-parity-terminal-macos.json"
+        "docs/evidence/embedded-port-http-parity-terminal-macos.json",
+        "docs/evidence/embedded-port-http-parity-linux-package.json"
       ]
     },
     {
@@ -970,7 +979,82 @@
         "Explicit held release, source dependencies and additional backing allowance."
       ],
       "acceptance_status": "pending",
-      "evidence": []
+      "evidence": [
+        "native/smolbox-engine/src/branch.rs",
+        "native/smolbox-engine/src/branch/creation.rs",
+        "native/smolbox-port/src/adapter.rs",
+        "native/smolbox-port/src/runtime.rs",
+        "native/smolbox-protocol/src/branch.rs",
+        "native/smolbox-protocol/fixtures/branch-preflight-v1.json",
+        "native/smolbox-protocol/src/branches.rs",
+        "native/smolbox-protocol/fixtures/branch-creation-v1.json",
+        "native/smolbox-port/src/package.rs",
+        "native/smolbox-port/src/output.rs",
+        "test/unit/embedded_branch_preflight_test.exs",
+        "test/unit/embedded_branch_creation_test.exs",
+        "test/unit/native_branch_material_history_test.exs",
+        "native/smolbox-protocol/fixtures/branch-material-history-v1.json",
+        "native/smolbox-engine/src/material/shared_branch_history.rs",
+        "lib/smolbox/store/codec_native_branches.ex",
+        "lib/smolbox/store/codec_native_branch_authority.ex",
+        "lib/smolbox/store/native_branch_ops.ex",
+        "lib/smolbox/embedded/branch_creation.ex",
+        "lib/smolbox/embedded/native_branch_authority.ex",
+        "lib/smolbox/embedded/native_branch_history.ex",
+        "test/unit/native_branch_authority_test.exs",
+        "lib/smolbox/embedded/native_branch_result.ex",
+        "test/support/store/native_branch_contract.ex",
+        "test/unit/native_branch_completion_test.exs",
+        "examples/durable_host/test/native_branch_store_test.exs",
+        "lib/smolbox/embedded/native_branch_release.ex",
+        "lib/smolbox/embedded/native_branch_release_result.ex",
+        "lib/smolbox/store/native_branch_release_ops.ex",
+        "lib/smolbox/store/codec_native_branch_releases.ex",
+        "test/support/store/native_branch_release_contract.ex",
+        "test/unit/native_branch_release_test.exs",
+        "lib/smolbox/embedded/held_branch_release_request.ex",
+        "native/smolbox-protocol/fixtures/branch-held-release-v1.json",
+        "native/smolbox-protocol/src/held_release.rs",
+        "test/unit/embedded_held_branch_release_test.exs",
+        "lib/smolbox/embedded/branch_canonical.ex",
+        "lib/smolbox/embedded/branch_completion.ex",
+        "lib/smolbox/embedded/branch_origin.ex",
+        "lib/smolbox/embedded/branch_publication.ex",
+        "lib/smolbox/embedded/branch_release_transition.ex",
+        "lib/smolbox/embedded/branch_request.ex",
+        "native/smolbox-engine/src/branch/retention.rs",
+        "native/smolbox-engine/src/branch/retention/backing.rs",
+        "native/smolbox-engine/src/branch_worker.rs",
+        "native/smolbox-engine/src/branch_material.rs",
+        "native/smolbox-engine/src/branch_boot.rs",
+        "native/smolbox-engine/src/branch_identity.rs",
+        "native/smolbox-engine/src/branch_agent.rs",
+        "native/smolbox-engine/src/branch_release.rs",
+        "native/smolbox-engine/src/branch_held_release.rs",
+        "native/smolbox-engine/src/branch_delete.rs",
+        "native/smolbox-engine/src/branch_delete/continuation.rs",
+        "native/smolbox-engine/src/branch_delete/residual.rs",
+        "native/smolbox-engine/src/branch_owned.rs",
+        "native/smolbox-engine/src/branch_identity.sh",
+        "native/smolbox-engine/src/branch/retention/boot.rs",
+        "native/smolbox-engine/src/transfer_worker.rs",
+        "native/smolbox-engine/src/transfer_supervisor.rs",
+        "native/smolbox-engine/src/gate.rs",
+        "native/smolbox-protocol/fixtures/branch-admission-v1.json",
+        "test/unit/native_branch_admission_test.exs",
+        "lib/smolbox/runtime/branch_observation.ex",
+        "lib/smolbox/runtime/branches.ex",
+        "lib/smolbox/branches.ex",
+        "test/unit/branch_observation_test.exs",
+        "test/unit/branch_public_authority_test.exs",
+        "native/http-parity-api-boundaries.md",
+        "native/smolbox-engine/src/material.rs",
+        "native/smolbox-engine/src/jobs.rs",
+        "lib/smolbox/backend/embedded_branch.ex",
+        "test/unit/embedded_branch_backend_test.exs",
+        "lib/smolbox/runtime/native_support.ex",
+        "test/unit/native_material_support_test.exs"
+      ]
     },
     {
       "id": "native-recovery",
@@ -1111,7 +1195,9 @@
         "draining-and-upgrade:ordinary-public-behavior",
         "draining-and-upgrade:durable-accounting-and-no-replay"
       ],
-      "evidence": []
+      "evidence": [
+        "docs/evidence/embedded-port-http-parity-linux-package.json"
+      ]
     }
   ]
 }

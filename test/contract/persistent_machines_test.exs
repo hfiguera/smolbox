@@ -275,7 +275,7 @@ defmodule SmolBox.PersistentMachinesTest do
       handle = start_machine(fixture, @mappings)
       {:ok, idle} = Machines.inspect(fixture.runtime, handle)
       {:ok, _} = Machines.delete(fixture.runtime, handle, idle.version)
-      wait_machine(fixture, handle, &(&1.state == :unknown))
+      wait_machine(fixture, handle, &(&1.state in [:unknown, :deleted]))
       assert :ok = Machines.reconcile(fixture.runtime, handle)
       gone = wait_machine(fixture, handle, &(&1.state == :deleted))
       assert gone.reservation == nil and gone.absence_at_ms != nil

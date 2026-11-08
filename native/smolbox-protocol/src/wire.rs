@@ -1387,6 +1387,21 @@ impl ImageObservation {
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "operation", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Operation {
+    ReleaseHeldBranch {
+        request: Box<crate::BranchHeldReleaseRequest>,
+    },
+    QualifyHeldBranchRelease {
+        request: Box<crate::BranchHeldReleaseRequest>,
+    },
+    CreateBranch {
+        request: Box<crate::BranchCreateRequest>,
+    },
+    InspectBranchCompletion {
+        request: Box<crate::BranchCreateRequest>,
+    },
+    BranchPreflight {
+        receipt: Receipt,
+    },
     QualifyExport {
         receipt: Receipt,
         request: crate::ExportRequest,
@@ -1649,6 +1664,28 @@ pub enum Operation {
     },
 }
 impl Operation {
+    pub fn branch_approval(&self) -> Option<&crate::BranchApproval> {
+        if let Some(request) = self.held_branch_request() {
+            return Some(request.approval());
+        }
+        self.branch_request().map(|request| &request.approval)
+    }
+    pub fn held_branch_request(&self) -> Option<&crate::BranchHeldReleaseRequest> {
+        match self {
+            Self::ReleaseHeldBranch { request } | Self::QualifyHeldBranchRelease { request } => {
+                Some(request)
+            }
+            _ => None,
+        }
+    }
+    pub fn branch_request(&self) -> Option<&crate::BranchCreateRequest> {
+        match self {
+            Self::CreateBranch { request } | Self::InspectBranchCompletion { request } => {
+                Some(request)
+            }
+            _ => None,
+        }
+    }
     pub fn checkpointable(&self) -> Option<bool> {
         match self {
             Self::QualifyCreation { checkpointable, .. }
@@ -1763,6 +1800,16 @@ impl Operation {
                     | Self::CaptureCheckpoint { .. }
             )
     }
+    pub fn requires_branches(&self) -> bool {
+        matches!(
+            self,
+            Self::BranchPreflight { .. }
+                | Self::ReleaseHeldBranch { .. }
+                | Self::QualifyHeldBranchRelease { .. }
+                | Self::CreateBranch { .. }
+                | Self::InspectBranchCompletion { .. }
+        )
+    }
     pub fn command_limit(&self) -> Option<u64> {
         match self {
             Self::Exec { command, .. } => Some(command.max_output_bytes),
@@ -1802,6 +1849,11 @@ impl Operation {
     }
     pub fn capability(&self) -> Capability {
         match self {
+            Self::ReleaseHeldBranch { .. } => Capability::Exec,
+            Self::QualifyHeldBranchRelease { .. } => Capability::Inspect,
+            Self::CreateBranch { .. } => Capability::Create,
+            Self::InspectBranchCompletion { .. } => Capability::Inspect,
+            Self::BranchPreflight { .. } => Capability::Inspect,
             Self::QualifyExport { .. }
             | Self::AdmitExport { .. }
             | Self::InspectExport { .. }
@@ -1858,6 +1910,12 @@ impl Operation {
     }
     pub fn receipt(&self) -> Option<&Receipt> {
         match self {
+            Self::ReleaseHeldBranch { request } | Self::QualifyHeldBranchRelease { request } => {
+                Some(&request.source)
+            }
+            Self::CreateBranch { request } | Self::InspectBranchCompletion { request } => {
+                Some(&request.source)
+            }
             Self::QualifyCheckpointCreation { .. }
             | Self::CreateCheckpoint { .. }
             | Self::InspectCheckpointCreation { .. } => None,
@@ -1872,7 +1930,8 @@ impl Operation {
             Self::Create { .. } | Self::InspectCreation { .. } | Self::QualifyCreation { .. } => {
                 None
             }
-            Self::QualifyExport { receipt, .. }
+            Self::BranchPreflight { receipt }
+            | Self::QualifyExport { receipt, .. }
             | Self::AdmitExport { receipt, .. }
             | Self::ExportMachine { receipt, .. }
             | Self::InspectExport { receipt, .. }
@@ -1924,6 +1983,32 @@ impl Operation {
             features.validate()?;
         }
         match self {
+            Self::ReleaseHeldBranch { request } | Self::QualifyHeldBranchRelease { request } => {
+                request.validate()?;
+                require(
+                    budget_ms
+                        <= if matches!(self, Self::ReleaseHeldBranch { .. }) {
+                            900000
+                        } else {
+                            30000
+                        },
+                )?;
+            }
+            Self::CreateBranch { request } | Self::InspectBranchCompletion { request } => {
+                request.validate()?;
+                require(
+                    budget_ms
+                        <= if matches!(self, Self::CreateBranch { .. }) {
+                            900000
+                        } else {
+                            30000
+                        },
+                )?;
+            }
+            Self::BranchPreflight { receipt } => {
+                receipt.validate_for(2)?;
+                require(receipt.material.is_some() && budget_ms <= 30000)?;
+            }
             Self::QualifyExport { receipt, request } => {
                 receipt.validate_for(2)?;
                 require(receipt.material.is_some() && budget_ms <= 30000)?;
@@ -2469,6 +2554,20 @@ pub struct MachineCounters {
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "result", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Outcome {
+    HeldBranchReleased {
+        transition: Box<crate::BranchReleaseTransition>,
+    },
+    HeldBranchReleasePresence {
+        #[serde(deserialize_with = "required_nullable")]
+        transition: Option<Box<crate::BranchReleaseTransition>>,
+    },
+    BranchCreated {
+        completion: Box<crate::BranchCompletion>,
+    },
+    BranchCompletionPresence {
+        #[serde(deserialize_with = "required_nullable")]
+        completion: Option<Box<crate::BranchCompletion>>,
+    },
     Exported {
         publication: Box<crate::ExportPublication>,
     },
@@ -2594,6 +2693,24 @@ pub enum Outcome {
 impl Outcome {
     pub fn validate(&self) -> Result<()> {
         match self {
+            Self::HeldBranchReleased { transition } => {
+                transition.validate()?;
+                require(transition.change.mode == crate::BranchReleaseMode::Explicit)
+            }
+            Self::HeldBranchReleasePresence { transition } => {
+                if let Some(proof) = transition {
+                    proof.validate()?;
+                    require(proof.change.mode == crate::BranchReleaseMode::Explicit)?;
+                }
+                Ok(())
+            }
+            Self::BranchCreated { completion } => completion.validate(),
+            Self::BranchCompletionPresence { completion } => {
+                if let Some(completion) = completion {
+                    completion.validate()?;
+                }
+                Ok(())
+            }
             Self::Exported { publication } => publication.validate(),
             Self::ExportPresence { publication } => {
                 if let Some(publication) = publication {
@@ -2787,7 +2904,11 @@ impl Outcome {
         }
         if matches!(
             self,
-            Self::Exported { .. }
+            Self::BranchCreated { .. }
+                | Self::HeldBranchReleased { .. }
+                | Self::HeldBranchReleasePresence { .. }
+                | Self::BranchCompletionPresence { .. }
+                | Self::Exported { .. }
                 | Self::ExportPresence { .. }
                 | Self::ExportStagingCleaned { .. }
                 | Self::Volume { .. }
@@ -3034,7 +3155,7 @@ fn correlation(epoch: &str, request: u64) -> Result<()> {
 
 // Omitted extension fields preserve the old wire shape. An explicitly present
 // null is not a valid feature/configuration object and must not bypass gating.
-fn present_optional<'de, T: Deserialize<'de>, D: serde::Deserializer<'de>>(
+pub(crate) fn present_optional<'de, T: Deserialize<'de>, D: serde::Deserializer<'de>>(
     deserializer: D,
 ) -> std::result::Result<Option<T>, D::Error> {
     T::deserialize(deserializer).map(Some)

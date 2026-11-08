@@ -95,7 +95,7 @@ impl Engine {
         if let Some(outcome) = before_budget(expires, &cancel) {
             return Ok(outcome);
         }
-        self.record(receipt)?;
+        self.guest_work_record(receipt)?;
         let transfers = self
             .transfers
             .as_ref()
@@ -170,7 +170,7 @@ impl Engine {
         if let Some(outcome) = before_budget(expires, &cancel) {
             return Ok(outcome);
         }
-        self.record(receipt)?;
+        self.guest_work_record(receipt)?;
         let transfers = self
             .transfers
             .as_ref()

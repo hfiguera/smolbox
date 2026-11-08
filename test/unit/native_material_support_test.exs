@@ -1,5 +1,6 @@
 defmodule SmolBox.Runtime.NativeMaterialSupportTest do
   use ExUnit.Case, async: true
+  alias SmolBox.Embedded.Config
   alias SmolBox.Error
   alias SmolBox.Runtime.{NativeSupport, Target}
   alias SmolBox.Test.EmbeddedPackage, as: Package
@@ -50,6 +51,46 @@ defmodule SmolBox.Runtime.NativeMaterialSupportTest do
     defdelegate bind_backend(a, b, c), to: LegacyStore
     defdelegate backend_assignments(a, b, c, d), to: LegacyStore
     defdelegate machine(a, b, c), to: LegacyStore
+  end
+
+  defmodule BranchStore do
+    def capabilities(extra) do
+      {:ok, caps} = TerminalStore.capabilities(nil)
+      {:ok, Map.merge(caps, extra)}
+    end
+
+    defdelegate bind_backend(a, b, c), to: LegacyStore
+    defdelegate backend_assignments(a, b, c, d), to: LegacyStore
+    defdelegate machine(a, b, c), to: LegacyStore
+  end
+
+  test "future branch descriptor requires native readers and paired store transactions before enrollment" do
+    native = Package.create(protocol_major: 2)
+    on_exit(fn -> File.rm_rf!(native.package_path) end)
+    target = Target.normalize(native)
+    sdk = put_in(native.sdk_identity, ["feature_versions", "branches"], 1)
+    future = %{target | native_config: %{native | sdk_identity: sdk}}
+
+    for caps <- [
+          %{},
+          %{managed_branches: 1},
+          %{native_branches: 1},
+          %{managed_branches: 1, native_branches: 2}
+        ] do
+      assert {:error, %Error{category: :unsupported_capability}} =
+               NativeSupport.verify(%{workers: [future], store: {BranchStore, caps}})
+    end
+
+    assert :ok =
+             NativeSupport.verify(%{
+               workers: [future],
+               store: {BranchStore, %{managed_branches: 1, native_branches: 1}}
+             })
+
+    assert :ok = NativeSupport.verify(%{workers: [target], store: {TerminalStore, nil}})
+    assert Package.received(native) == []
+    # The semantic future descriptor above is never a valid public configuration.
+    assert {:error, _} = Config.validate(future.native_config)
   end
 
   test "future growth descriptor requires both the native history reader and atomic expansion store" do

@@ -389,7 +389,7 @@ impl Engine {
         let expires = Instant::now()
             .checked_add(command.timeout)
             .ok_or(Error::before(ErrorCode::Validation))?;
-        let record = self.record(receipt)?;
+        let record = self.guest_work_record(receipt)?;
         command.validate(record.image.is_some())?;
         let mount_budget = crate::ReadBudget::new(
             expires
@@ -621,7 +621,7 @@ impl Engine {
         let expires = Instant::now()
             .checked_add(command.timeout)
             .ok_or(Error::before(ErrorCode::Validation))?;
-        let record = self.record(receipt)?;
+        let record = self.guest_work_record(receipt)?;
         command.validate(record.image.is_some())?;
         let metadata = Metadata::background(&record, command, expires)?;
         let mount_budget = crate::ReadBudget::new(

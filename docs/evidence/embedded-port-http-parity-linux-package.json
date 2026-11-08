@@ -1,0 +1,301 @@
+{
+  "schema": 1,
+  "status": "passed",
+  "recorded_date": "2026-10-15",
+  "scope": "exact Linux package; ordinary offline public lifecycle/current-minimum consumers; current-toolchain managed PTY; non-VM worker and contract checks",
+  "platform": "linux",
+  "architecture": "x86_64",
+  "kernel": "6.8.0-139-generic",
+  "source_provenance": {
+    "base_commit": "a8e8cc982afe197f548da4e69089e14c49bd86b8",
+    "delta_commits": [
+      "b5450497435287076f9ca2c8cb2a4a31845b6061",
+      "19daffca2994db4c4a7ab3832be328c869139b22"
+    ],
+    "source_archive_sha256": "f1342899064c6eabc242313da8437c20dff4c02380220bb1ae59c56376eda429",
+    "overlaid_file_sha256": {
+      "native/check.sh": "29edb7c29aaf3e69a67cea296053768a0f31a297d2db50f836026b183d3a7594",
+      "native/smolbox-engine/src/export_bootstrap.rs": "77c5266d77f802a5f46cf9e00354975c89faf9e225855e4bab08aebe3bdd8c13",
+      "native/smolbox-engine/src/transfer_supervisor.rs": "cf99e3b1003361e2bca3bec769fa99eac0c63d1e2e26adbbc084cacf5a8824a2",
+      "native/tests/test_deferred_selection.py": "0ad1f600656b294ff0e86168c424b0e56fcc316ebe5c86338cfdb20e02dba327",
+      "native/package.py": "3f912493b78a54bc83c4cae207542fbfd74303fcdab96e43cee7f59945c40a21",
+      "native/tests/test_package_metadata.py": "b0f67e518f9586a3ceb1d5799e28232fdaef9a89470f85a02963f4903029286a"
+    },
+    "overlay_scope": "Four test-runner/test-only files and two package-builder/test files; production Rust/Elixir source from base archive."
+  },
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "native_package_identity": {
+    "architecture": "x86_64",
+    "assets_sha256": "9145807302068baa2df7fee25c7269dc3276a1808611ff3755b24220d1259784",
+    "build_sha256": "bbe8a332d604ad00d9661112aa4bc0bb5e12c840f3042db9ef089e5fc5e942ea",
+    "engine_version": "0.2.0",
+    "platform": "linux",
+    "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+  },
+  "native_package_manifest_sha256": "58a08bf8330c7a6b9e512318c73005093b8c0d6652e4444e13291d208f8d9bfa",
+  "native_helper_mode": "0755",
+  "native_package_root_mode": "0755",
+  "rust_build_toolchain": "1.98.1 (48a229ceaefd4985c50990b14116b6d856af0985)",
+  "public_archive_sha256": "9f76212eb49afd9d4fa0723bb5d163079bcfffb5417eed52a9494389e99b629c",
+  "public_archive_scope": "Saved base-commit archive; final native test/package-builder changes and subsequent documentation are separate source overlays, not replacement archive bytes.",
+  "consumers": {
+    "http-current": {
+      "without_rust": true,
+      "minimum": false,
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "report_sha256": "2c199fe9f44643e92221605122bcb895acfc1a2e45215878ffea265cba587945",
+      "native_assets_in_archive": false,
+      "native_exercised": false
+    },
+    "http-minimum": {
+      "without_rust": true,
+      "minimum": true,
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "report_sha256": "6ab445b61b751b105c25e8379334166d41955b5b3c214fd64b1714e10f7b9fe1",
+      "native_assets_in_archive": false,
+      "native_exercised": false
+    },
+    "public-current": {
+      "without_rust": true,
+      "minimum": false,
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "report_sha256": "1e70367c1f2c2f37ade36a6063d311d7d9ddc9dc07874b9de49cc82c18d26b4a",
+      "native_assets_in_archive": false,
+      "native": {
+        "scope": "public-port-package-consumer",
+        "evidence": {
+          "crash_handling_qualified": false,
+          "deliberate_process_interruption": false,
+          "disposable_exit": 7,
+          "drain_blocks_new_assignments": true,
+          "drain_survives_runtime_restart": true,
+          "existing_command_while_draining": true,
+          "file_bytes": 1048593,
+          "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+          "final_reserved_slots": 0,
+          "fixture_sha256": "8ac12958bc166344f1ffeb4c518c883c750fece358bf177f13f6ded7953cfe5b",
+          "http_workers_exercised_while_native_draining": 0,
+          "identity": {
+            "architecture": "x86_64",
+            "assets_sha256": "9145807302068baa2df7fee25c7269dc3276a1808611ff3755b24220d1259784",
+            "build_sha256": "bbe8a332d604ad00d9661112aa4bc0bb5e12c840f3042db9ef089e5fc5e942ea",
+            "engine_version": "0.2.0",
+            "platform": "linux",
+            "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+            "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+          },
+          "inventory_after": [],
+          "inventory_before": [],
+          "owned_deleted": true,
+          "package_manifest_sha256": "58a08bf8330c7a6b9e512318c73005093b8c0d6652e4444e13291d208f8d9bfa",
+          "proof": "passed",
+          "public_native_admission_enabled": true,
+          "resume_version_checked": true,
+          "retained_after_normal_runtime_restart": true,
+          "retained_write_exit": 7,
+          "scope": "public-port-package-consumer",
+          "store_mode": "ephemeral",
+          "terminal": {
+            "exercised": false
+          },
+          "without_rust": true
+        },
+        "exercised": true,
+        "proof_tool_sha256": {
+          "config.example.exs": "9a0178a7249aba9b4a7990a36162564bf77c39c355c7a5a9f57defae4b6330f3",
+          "demo.ex": "030504ee5e7c78f25267172e29989ad1ee7a606777dfb41e4e7b91b7c46c16f9",
+          "native-proof.exs": "8e68ef45f8fd3019bdf90de342174c6deb522207251ce7f7ffaf8a7df7a1bfef",
+          "native_proof.py": "43fdb6e7f20bc6a05acfefde2f23bb708e5db3c92cd4509744bc1dbe0a32548d"
+        }
+      }
+    },
+    "public-minimum": {
+      "without_rust": true,
+      "minimum": true,
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "report_sha256": "7489a9aa495e1376d176eded4ae17529fff5fe57a875d3a6d6146c1ca46ffb0a",
+      "native_assets_in_archive": false,
+      "native": {
+        "scope": "public-port-package-consumer",
+        "evidence": {
+          "crash_handling_qualified": false,
+          "deliberate_process_interruption": false,
+          "disposable_exit": 7,
+          "drain_blocks_new_assignments": true,
+          "drain_survives_runtime_restart": true,
+          "existing_command_while_draining": true,
+          "file_bytes": 1048593,
+          "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+          "final_reserved_slots": 0,
+          "fixture_sha256": "8ac12958bc166344f1ffeb4c518c883c750fece358bf177f13f6ded7953cfe5b",
+          "http_workers_exercised_while_native_draining": 0,
+          "identity": {
+            "architecture": "x86_64",
+            "assets_sha256": "9145807302068baa2df7fee25c7269dc3276a1808611ff3755b24220d1259784",
+            "build_sha256": "bbe8a332d604ad00d9661112aa4bc0bb5e12c840f3042db9ef089e5fc5e942ea",
+            "engine_version": "0.2.0",
+            "platform": "linux",
+            "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+            "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+          },
+          "inventory_after": [],
+          "inventory_before": [],
+          "owned_deleted": true,
+          "package_manifest_sha256": "58a08bf8330c7a6b9e512318c73005093b8c0d6652e4444e13291d208f8d9bfa",
+          "proof": "passed",
+          "public_native_admission_enabled": true,
+          "resume_version_checked": true,
+          "retained_after_normal_runtime_restart": true,
+          "retained_write_exit": 7,
+          "scope": "public-port-package-consumer",
+          "store_mode": "ephemeral",
+          "terminal": {
+            "exercised": false
+          },
+          "without_rust": true
+        },
+        "exercised": true,
+        "proof_tool_sha256": {
+          "config.example.exs": "9a0178a7249aba9b4a7990a36162564bf77c39c355c7a5a9f57defae4b6330f3",
+          "demo.ex": "030504ee5e7c78f25267172e29989ad1ee7a606777dfb41e4e7b91b7c46c16f9",
+          "native-proof.exs": "8e68ef45f8fd3019bdf90de342174c6deb522207251ce7f7ffaf8a7df7a1bfef",
+          "native_proof.py": "43fdb6e7f20bc6a05acfefde2f23bb708e5db3c92cd4509744bc1dbe0a32548d"
+        }
+      }
+    },
+    "public-current-terminal": {
+      "without_rust": true,
+      "minimum": false,
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "report_sha256": "631d62338aa8e22206b789e72be318fc2d39a142fe1013abb728646cecee45d1",
+      "native_assets_in_archive": false,
+      "native": {
+        "scope": "public-port-package-consumer",
+        "evidence": {
+          "crash_handling_qualified": false,
+          "deliberate_process_interruption": false,
+          "disposable_exit": 7,
+          "drain_blocks_new_assignments": true,
+          "drain_survives_runtime_restart": true,
+          "existing_command_while_draining": true,
+          "file_bytes": 1048593,
+          "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+          "final_reserved_slots": 0,
+          "fixture_sha256": "8ac12958bc166344f1ffeb4c518c883c750fece358bf177f13f6ded7953cfe5b",
+          "http_workers_exercised_while_native_draining": 0,
+          "identity": {
+            "architecture": "x86_64",
+            "assets_sha256": "9145807302068baa2df7fee25c7269dc3276a1808611ff3755b24220d1259784",
+            "build_sha256": "bbe8a332d604ad00d9661112aa4bc0bb5e12c840f3042db9ef089e5fc5e942ea",
+            "engine_version": "0.2.0",
+            "platform": "linux",
+            "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+            "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+          },
+          "inventory_after": [],
+          "inventory_before": [],
+          "owned_deleted": true,
+          "package_manifest_sha256": "58a08bf8330c7a6b9e512318c73005093b8c0d6652e4444e13291d208f8d9bfa",
+          "proof": "passed",
+          "public_native_admission_enabled": true,
+          "resume_version_checked": true,
+          "retained_after_normal_runtime_restart": true,
+          "retained_write_exit": 7,
+          "scope": "public-port-package-consumer",
+          "store_mode": "ephemeral",
+          "terminal": {
+            "binary_input_bytes": 3,
+            "binary_output_verified": true,
+            "codec": 17,
+            "deliberate_process_interruption": false,
+            "duplicate_open_reuses_execution": true,
+            "exercised": true,
+            "observed_exit": 7,
+            "resize": {
+              "cols": 120,
+              "rows": 43
+            },
+            "scope": "ordinary-public-retained-image-pty",
+            "slot_released": true,
+            "transcript_persisted": false
+          },
+          "without_rust": true
+        },
+        "exercised": true,
+        "proof_tool_sha256": {
+          "config.example.exs": "9a0178a7249aba9b4a7990a36162564bf77c39c355c7a5a9f57defae4b6330f3",
+          "demo.ex": "030504ee5e7c78f25267172e29989ad1ee7a606777dfb41e4e7b91b7c46c16f9",
+          "native-proof.exs": "8e68ef45f8fd3019bdf90de342174c6deb522207251ce7f7ffaf8a7df7a1bfef",
+          "native_proof.py": "43fdb6e7f20bc6a05acfefde2f23bb708e5db3c92cd4509744bc1dbe0a32548d"
+        }
+      }
+    }
+  },
+  "checks": {
+    "base_unit_sweep": {
+      "engine": 587,
+      "port": 48,
+      "protocol": 28,
+      "ignored": 21
+    },
+    "normal_child_reaping": 1,
+    "corrected_exact_ordinary_fixtures": 7,
+    "bootstrap_units_after_test_fix": 8,
+    "protocol_contracts": 56,
+    "clean_sdk_api_units": 3,
+    "clean_template_resolver": 3,
+    "final_python_tests": 34,
+    "clippy_strict": true,
+    "rustdoc": true,
+    "fmt": true,
+    "unmodified_sdk_source_verified": true
+  },
+  "private_log_sha256": {
+    "native-check.log": "c31516dc17b7f355cf9a52117b5202f7bfac98685582ecd5e642c4bcc9bacb66",
+    "resume-exact-fixtures.log": "6aa220c0969612b1cb634bb08e8e10827ee83dc11209e5d0ad25684e91cb34e7",
+    "resume-bootstrap.log": "7f4f04f77572483f62e8ab5800c20b3ce776f8bf1a563e3599d0522aacfce6f6",
+    "resume-contracts.log": "5db05a59a663a6486cad626fe8d4450ba5e948c84d1ff6ed5d37a35364e23aa0",
+    "resume-api-tests.log": "6cf1cb769180fe9dd5ffed13c1b7f44759a1a399b4ab3d9d320c29a77e590c68",
+    "resume-template-resolver.log": "03725688538a9a633d21b38992f174acdff065df03cdb93f841a8d6ac68c5f87",
+    "resume-clippy.log": "c7ca67db744fee87aaa953d7921eb255c9518c867db2c405a88e4f5e2ff8893b",
+    "resume-doc.log": "b45bd2775ca62e7145d1751e79cad5c340474e1e92ebd2932db05eda52a19e93",
+    "release-prefetch.log": "7172b2d0c16be07e95bdcebf7cca461027e5f24994ac20243309627fbb8c91b3",
+    "source-final.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+    "python-final.log": "442139527905b1f870da6b6b6a03f8b077a117664e419cd9622ef78117e41bf1",
+    "package-mode-tests-final.log": "b764d0e7b9cb9c015a34c7309a1a28e13a302e89451de81ceef7db3f07ef5ea6"
+  },
+  "initial_failures": [
+    "Original conversion peer accept timeout expired while the debug helper was rehashed; corrected exact fixtures passed with original operation deadlines.",
+    "Cached executable 0775 was rejected before domain creation; package copy now fixes executable mode.",
+    "Repackaging under umask 0002 exposed a writable package root after fresh enrollment; root creation now excludes group/other writes. Original domain identity was preserved."
+  ],
+  "full_http_parity_qualified": false,
+  "crash_handling_qualified": false,
+  "distribution_approved": false,
+  "historical_qualification_transferred": false,
+  "limitations": [
+    "Public witnesses use the Memory store and the approved offline imported fixture; PostgreSQL and other feature-specific campaigns remain separate.",
+    "Current/minimum PTY parity is not inferred: this Linux PTY witness uses only the current toolchain.",
+    "Networking, mapped ports, startup workloads, registry/OCI workflows, volumes, growth, checkpoints, exports and branches require their own remaining acceptance gates.",
+    "Retained macOS failed-qualifier owner and source were left untouched; this evidence grants no cleanup or ownership adoption authority."
+  ],
+  "lab_shutdown": {
+    "native_processes": [],
+    "sdk_inventory": [],
+    "ordinary_public_lanes_complete": true,
+    "normal_shutdown_requested": true,
+    "forced_termination": false,
+    "pre_shutdown_report_sha256": "400aa51f99967799708f1fa2bc6572b6e359ebb9ac7710f8b1ec71a92a17aa55",
+    "systemd_result": "success",
+    "exec_main_status": 0,
+    "final_state": "inactive/dead",
+    "runtime_limit_reached": false
+  },
+  "private_backup_verified": {
+    "root_mode": "0o755",
+    "helper_mode": "0o755",
+    "manifest_sha256": "58a08bf8330c7a6b9e512318c73005093b8c0d6652e4444e13291d208f8d9bfa",
+    "build_sha256": "bbe8a332d604ad00d9661112aa4bc0bb5e12c840f3042db9ef089e5fc5e942ea"
+  }
+}

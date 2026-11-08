@@ -6,10 +6,16 @@ use std::io::Write;
 use std::sync::{Arc, Mutex};
 
 const MAX_DECODED: usize = 8 * 1024 * 1024;
-const MAX_ENCODED: usize = 12 * 1024 * 1024;
 const MAX_EVENT_FRAMES: usize = 4096;
 const CONTROL_FRAMES: usize = 65;
-const CONTROL_BYTES: usize = CONTROL_FRAMES * 4096;
+const SMALL_CONTROL_BYTES: usize = 4096;
+// A branch completion is capped at 64 KiB, plus its terminal envelope. Keep
+// the existing event allowance and enough space for every outstanding control
+// frame, even when all terminal replies contain the largest branch proof.
+const BRANCH_CONTROL_BYTES: usize = 64 * 1024 + SMALL_CONTROL_BYTES;
+const CONTROL_BYTES: usize = CONTROL_FRAMES * BRANCH_CONTROL_BYTES;
+const MAX_EVENT_ENCODED: usize = 12 * 1024 * 1024 - CONTROL_FRAMES * SMALL_CONTROL_BYTES;
+const MAX_ENCODED: usize = MAX_EVENT_ENCODED + CONTROL_BYTES;
 const EVENT_ENCODED_RESERVE: usize = 96 * 1024;
 
 #[derive(Default)]
@@ -46,13 +52,43 @@ impl Output {
         decoded: usize,
         build: impl FnOnce() -> Result<ServerMessage, ()>,
     ) -> Result<(), ()> {
+        let reserve = if decoded == 0 {
+            SMALL_CONTROL_BYTES
+        } else {
+            EVENT_ENCODED_RESERVE
+        };
+        self.send_reserved(decoded, reserve, || {
+            let message = build()?;
+            if branch_terminal(&message) {
+                return Err(());
+            }
+            Ok(message)
+        })
+    }
+    pub fn send_branch_terminal(
+        &self,
+        build: impl FnOnce() -> Result<ServerMessage, ()>,
+    ) -> Result<(), ()> {
+        self.send_reserved(0, BRANCH_CONTROL_BYTES, || {
+            let message = build()?;
+            if !branch_terminal(&message) {
+                return Err(());
+            }
+            Ok(message)
+        })
+    }
+    fn send_reserved(
+        &self,
+        decoded: usize,
+        reserve: usize,
+        build: impl FnOnce() -> Result<ServerMessage, ()>,
+    ) -> Result<(), ()> {
         let control = decoded == 0;
         let mut usage = self.usage.lock().map_err(|_| ())?;
-        let reserve = if control { 4096 } else { EVENT_ENCODED_RESERVE };
         let encoded_max = if control {
             MAX_ENCODED
         } else {
-            MAX_ENCODED - CONTROL_BYTES
+            MAX_EVENT_ENCODED
         };
         if usage.decoded + decoded > MAX_DECODED
             || usage.encoded + reserve > encoded_max
@@ -96,6 +132,19 @@ impl Output {
             usage.events -= 1;
         }
     }
+}
+
+fn branch_terminal(message: &ServerMessage) -> bool {
+    matches!(
+        message,
+        ServerMessage::Terminal {
+            outcome: smolbox_protocol::Outcome::BranchCreated { .. }
+                | smolbox_protocol::Outcome::BranchCompletionPresence { .. }
+                | smolbox_protocol::Outcome::HeldBranchReleased { .. }
+                | smolbox_protocol::Outcome::HeldBranchReleasePresence { .. },
+            ..
+        }
+    )
 }
 pub fn write(writer: &mut impl Write, frame: &Frame) -> std::io::Result<()> {
     writer.write_all(&frame.bytes)?;
@@ -166,5 +215,94 @@ mod tests {
         let frame = receiver.recv().unwrap();
         output.complete(&frame);
         output.send(1, || Ok(event())).unwrap();
+    }
+    #[test]
+    fn explicit_release_proofs_use_only_bounded_branch_control_reservations() {
+        let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/branch-held-release-v1.json"
+        ))
+        .unwrap();
+        for row in rows {
+            for qualify in [false, true] {
+                let transition: smolbox_protocol::BranchReleaseTransition =
+                    serde_json::from_value(row["transition"].clone()).unwrap();
+                let message = || ServerMessage::Terminal {
+                    epoch: "ab".repeat(16),
+                    id: 1,
+                    sequence: 1,
+                    outcome: if qualify {
+                        smolbox_protocol::Outcome::HeldBranchReleasePresence {
+                            transition: Some(Box::new(transition.clone())),
+                        }
+                    } else {
+                        smolbox_protocol::Outcome::HeldBranchReleased {
+                            transition: Box::new(transition.clone()),
+                        }
+                    },
+                };
+                let (output, receiver) = Output::new();
+                assert!(output.send(0, || Ok(message())).is_err());
+                for _ in 0..CONTROL_FRAMES - 2 {
+                    output.send_branch_terminal(|| Ok(message())).unwrap();
+                }
+                output.send(0, || Ok(accepted())).unwrap();
+                output.send(0, || Ok(accepted())).unwrap();
+                assert!(output.send_branch_terminal(|| Ok(message())).is_err());
+                while let Ok(frame) = receiver.try_recv() {
+                    output.complete(&frame);
+                }
+                output.send_branch_terminal(|| Ok(message())).unwrap();
+            }
+        }
+    }
+    #[test]
+    fn branch_proofs_preserve_bounded_control_space_under_a_stalled_writer() {
+        let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/branch-creation-v1.json"
+        ))
+        .unwrap();
+        let branch = || ServerMessage::Terminal {
+            epoch: "ab".repeat(16),
+            id: 1,
+            sequence: 1,
+            outcome: smolbox_protocol::Outcome::BranchCreated {
+                completion: Box::new(
+                    serde_json::from_value(rows[1]["completion"].clone()).unwrap(),
+                ),
+            },
+        };
+        let (output, receiver) = Output::new();
+        // The ordinary control route must not gain an unbounded proof payload.
+        assert!(output.send(0, || Ok(branch())).is_err());
+        assert!(output.send_branch_terminal(|| Ok(accepted())).is_err());
+        // Fill the unchanged event byte allowance with maximum-size chunks.
+        while output
+            .send(65536, || {
+                Ok(ServerMessage::Event {
+                    epoch: "ab".repeat(16),
+                    id: 1,
+                    sequence: 1,
+                    event: Event {
+                        stream: Stream::Stdout,
+                        data_base64: encode_chunk(&vec![0; 65536]).unwrap(),
+                    },
+                })
+            })
+            .is_ok()
+        {}
+        for _ in 0..CONTROL_FRAMES - 2 {
+            output.send_branch_terminal(|| Ok(branch())).unwrap();
+        }
+        // Two ordinary observer replies still fit alongside the large proofs.
+        output.send(0, || Ok(accepted())).unwrap();
+        output.send(0, || Ok(accepted())).unwrap();
+        assert!(output
+            .send_branch_terminal(|| panic!("sequence advanced without capacity"))
+            .is_err());
+        while let Ok(frame) = receiver.try_recv() {
+            output.complete(&frame);
+        }
+        assert_eq!(output.usage.lock().unwrap().encoded, 0);
+        output.send_branch_terminal(|| Ok(branch())).unwrap();
     }
 }

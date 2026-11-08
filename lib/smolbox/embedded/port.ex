@@ -5,6 +5,7 @@ defmodule SmolBox.Embedded.Port do
   alias SmolBox.Backend.{Budget, Features}
 
   alias SmolBox.Embedded.{
+    BranchRequest,
     Channel,
     CheckpointContract,
     CommandPayload,
@@ -13,6 +14,7 @@ defmodule SmolBox.Embedded.Port do
     CreationPayload,
     ExportContract,
     Frame,
+    HeldBranchReleaseRequest,
     ImageContract,
     JSON,
     Launch,
@@ -676,6 +678,21 @@ defmodule SmolBox.Embedded.Port do
   defp operation_approved?(config, %{"operation" => name})
        when name in ~w(start_checkpointable checkpoint_preflight inspect_capture inspect_capture_resolution resolve_capture cleanup_capture_staging abort_capture_staging qualify_aborted_capture_source capture_checkpoint),
        do: Features.supports?(config, :checkpoints)
+
+  defp operation_approved?(config, %{"operation" => "branch_preflight"}),
+    do: Features.supports?(config, :branches)
+
+  defp operation_approved?(config, %{"operation" => name, "request" => request})
+       when name in ~w(release_held_branch qualify_held_branch_release),
+       do:
+         Features.supports?(config, :branches) and
+           HeldBranchReleaseRequest.approval(request) in BranchRequest.approvals(config)
+
+  defp operation_approved?(config, %{"operation" => name, "request" => request})
+       when name in ~w(create_branch inspect_branch_completion),
+       do:
+         Features.supports?(config, :branches) and
+           request["approval"] in BranchRequest.approvals(config)
 
   defp operation_approved?(config, %{"operation" => "logs"}),
     do: Features.supports?(config, :logs)

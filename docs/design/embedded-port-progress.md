@@ -9452,3 +9452,1581 @@ public exports stay disabled. The prior failed qualifier still retains its owner
 and stopped source, untouched pending teardown. Crash validation remains deferred,
 distribution approval separate, SDK/research source unmodified and no push or
 publication performed.
+
+
+## Initial branch admission boundary — October 15, 2026
+
+The transport-independent engine now has read-only `prepare_initial_branch` and
+an opaque retained guard for an originally enrolled, running unbranched source
+and a fresh child. It uses guarded checkpoint preflight, then acquires source/
+child machine gates in lexical order and rechecks source receipt/material, root,
+PID/birth, templates and child absence. Partial gate acquisition rolls back
+immediately. The guard retains domain/root/gates, sixteen descriptor declarations
+and the existing whole work metadata budget; both control observers remain usable.
+Its digest binds both identities, operation/hold/idleness, exact policy/resource
+plan, source PID/birth, original owner epoch, SDK revision and shared-RAM strategy.
+Legacy, foreign/stopped sources and invalid/nested/held/remote/network/container/
+injected requests do not gain dispatch or child authority.
+
+Resource planning preserves public child-plus-extra semantics and profile host
+overhead, including rounded-up RAM in the minimum backing disk declaration. Six
+shared cases run through Rust and actual public Elixir BranchOps admission; valid
+cases verify exact capacity and one-unit-short rejection in each dimension.
+Pure source/profile/hash checks, stopped/foreign/cancelled pre-dispatch rejection,
+control isolation and paired-gate rollback cover the initial boundary. No
+positive live-source guard qualification or branch SDK operation is claimed.
+
+Locked SDK inspection distinguishes shared/default RAM from the explicit paged
+mode's extra guardian path. Initial admission accepts only unset/auto/shared,
+without mutating process environment. Future SDK dispatch must freeze and qualify
+this strategy. SDK Linux source-lineage changes and copied child labels require
+authorized source material and independent child ownership publication.
+Persistent dual reservation/backing retention, sources with existing children,
+child enrollment, hold/release, bridge/store histories and ordinary independence/
+cleanup remain required. Full P8.4 and the original P0-P9 scope remain incomplete;
+public branch capability admission stays disabled.
+
+The final ordinary Rust sweep passes 662 units (586 engine, 48 bridge, 28 protocol)
+and 56 contracts. Twenty-one opt-in fixtures remain ignored and the unchanged
+two-GiB sparse bare case stays filtered from this repeated sweep. Branch/store/
+coverage/site Elixir checks pass 40 cases, with seven final docs/coverage checks
+also passing. Strict Clippy, API docs, Rust/Mix formatting, diff, clean-source and
+ten ordinary-selection/two deferred-selection Python guards pass. Private logs
+use .local/http-parity/branch-initial-*. Existing records/HTTP behavior and wire/
+package capabilities remain unchanged. The old failed qualifier remains live and
+untouched. Crash validation stays deferred; no push or publication is performed.
+
+
+## Exact ordinary native fixture selection — October 15, 2026
+
+The native check runner now includes the protocol contract integration suite and
+selects seven reviewed ordinary worker/checkpoint/boot-guard fixtures by full
+name with `--exact`. Broad ignored-test name filters are removed. A separate
+selection guard checks the complete Cargo test command inventory, exact fixture
+set and deferred crash exclusions, so similarly named additions cannot enter the
+ordinary runner implicitly.
+
+Linux qualification exposed a test-peer timeout while the supervisor verified
+the 238-MiB debug helper before launch. Conversion process peers now share the
+original finite operation deadline for accepting connections; ordinary in-process
+peers retain their shorter defaults. The registry fixture has a 60-second work
+budget. These changes are confined to test code and do not widen production
+operation or transport limits. Both conversion process peers pass on macOS and
+Linux, and all seven exact ordinary fixtures pass on Linux without a VMM.
+MacOS bootstrap units, strict Clippy/format checks and thirteen ordinary/deferred
+selection guards pass. The Linux full unit sweep passes 663 cases; its normal
+child-reaping integration and 56 protocol contracts also pass. Current/minimum
+Linux HTTP-only consumers pass against one saved archive with Rust and native
+assets absent. Exact current-package native public qualification is still in
+progress and is not inferred from those checks. Crash validation remains deferred.
+
+
+## Native package permissions independent of build umask — October 15, 2026
+
+A fresh Linux release package exposed cached Cargo executable mode `0775`;
+the shared engine rejected it before creating a domain. The packager now fixes
+its copied helper mode to `0755` without modifying the build input. Package root
+creation also excludes group/other write independently of the invoking umask;
+a second normal startup had reached fresh enrollment before rejecting that root.
+The original domain identity and empty database were preserved and reused. The
+final package passed Hello, template preparation and normal helper close.
+
+A packaging integration model runs with umask `0002` and a cached `0775` helper,
+verifies the resulting executable/root modes, unchanged input bytes/mode and
+actual manifest/build hashes. It uses disposable fixtures and mocks disk geometry
+preparation only. The focused model passes on macOS and Linux; the local full
+Python suite passes 34 tests with four unavailable-tool skips. Ordinary Linux
+public consumer qualification follows against the exact final package; neither
+startup rejection nor Hello alone proves public lifecycle parity. No crash
+campaign or retained macOS owner teardown was performed.
+
+
+## Exact Linux public package and terminal qualification — October 15, 2026
+
+A freshly linked Linux engine 0.2.0 helper using the verified unmodified SDK now
+passes current/minimum public no-Rust consumers against the same saved archive.
+The exact package manifest is
+`58a08bf8330c7a6b9e512318c73005093b8c0d6652e4444e13291d208f8d9bfa`.
+Both runs exercise disposable execution with observed exit 7, retained creation,
+1,048,593-byte binary file transfer/readback, draining/new-assignment exclusion,
+retained commands while draining, normal Runtime/helper replacement with a
+surviving Memory store, version-checked resume, normal restart and explicit owned
+deletion. Each finishes with empty SDK inventory and zero reserved slots.
+Current/minimum HTTP-only consumers pass the same archive with no native assets.
+
+A separate current-toolchain public managed PTY run passes exact binary input/
+output, 120-column/43-row resize, duplicate-open identity, observed exit 7,
+selective codec 17 and released command slot. It performs normal guest shell
+exit and normal lifecycle cleanup; no terminal transcript is persisted. This
+adds Linux ordinary PTY evidence without inferring minimum-toolchain PTY or
+other feature qualification.
+
+The [sanitized evidence](../evidence/embedded-port-http-parity-linux-package.json)
+binds source archive plus exact committed overlays, SDK/build/assets/package,
+consumer archive, fixture, proof tools and private log hashes. It retains the
+original conversion-peer failure and package-mode startup rejections alongside
+the successful corrected runs. The Linux sweep covers 663 base units, 56 protocol
+contracts, normal child reaping, seven exact ordinary worker fixtures, eight
+post-fix bootstrap units, three clean SDK API units, three template-resolver
+checks, strict Clippy, docs/format/source verification and 34 final Python checks.
+These are assembled scoped checks, not a claim that the originally failing
+whole runner passed unchanged. The full Python suite also passes locally with
+four unavailable-tool skips.
+
+Raw receipts, records, packages and logs remain private. After verifying no
+native helper, VM or BEAM and an empty SDK inventory, the lab guest powered off
+normally; systemd reports success/inactive before its 45-minute limit. The macOS
+failed-qualifier owner remains untouched. Full parity, PostgreSQL/native feature
+campaigns and P7/P8 capabilities remain pending. Crash validation and distribution
+approval stay separate and false; no push or publication was performed.
+
+
+## Protected initial branch intent — October 15, 2026
+
+The original admitted branch guard can now persist an exact prepared-only source/
+child declaration in the existing protected material journal and return an opaque
+`PreparedBranchIntent`. The declaration binds the whole current source receipt,
+fresh child intent, exact policy/resource plan, request digest, source PID/birth
+and original owner epoch. It consumes neither SDK fork preparation nor persistent
+backing capacity. Both ordered gates, source root/domain and original bounded job
+remain with the opaque guard.
+
+The optional journal field is omitted for existing unbranched records. Loading
+validates the preceding head, plan arithmetic, frozen digest, history capacity,
+operation-ID nonreuse and mutual exclusion with growth/capture. Generic source
+verification fences lifecycle, commands and receipt-bound inspection while prepared
+intent exists. Passive inventory and both reserved observers remain available.
+Normal reopen preserves the fence. No serialized declaration can become
+a retained owner handle, child receipt or successful fork result.
+
+Explicit abort requires the original opaque handle, unchanged material/root/PID/
+owner and verified child absence. It accepts a separate bounded cleanup budget
+so cancellation/expiry of admission cannot itself authorize entry or prevent an
+otherwise authorized pre-SDK retirement. Exact abort removes only that declaration
+and preserves the original material bytes/head/history. Drop does not erase it;
+explicit prepared recovery after original-handle retirement remains pending.
+There is no entered-fork phase or SDK-dispatch method in this schema.
+
+Four new deterministic models cover reopen/fencing and exact abort, twelve
+changed declaration cases, changed source/PID/lineage, cross-operation exclusion,
+historical operation reuse and actual engine lifecycle/command rejection before
+SDK entry. Synthetic PID fields supply no live ownership or enrollment evidence.
+The ordinary Rust sweep passes 666 units (590 engine, 48 bridge, 28 protocol) and
+56 contracts. Twenty-one opt-in fixtures remain ignored; the unchanged two-GiB
+sparse bare materialization case is filtered from this repeated sweep. The full
+34-case material suite and 68 selected public branch/store/native codec/history/
+coverage checks pass. Strict Clippy, API docs, Rust format, clean-source checks,
+diff and thirteen ordinary/deferred-selection guards pass. Private logs use
+.local/http-parity/branch-intent-*.
+
+P8.4 still needs dual backing reservation, SDK preparation/owned child enrollment,
+source/child material publication, existing-child sources, held release and public
+bridge/store histories plus ordinary qualification. Native branch capability
+admission stays disabled. The earlier exact Linux package evidence remains tied
+to its recorded source/build bytes and is not transferred to this changed engine.
+The retained macOS qualifier is untouched; no live crash campaign, push or
+publication was performed. Full P0–P9 scope remains active.
+
+
+## Durable initial branch retirement — October 15, 2026
+
+Original-guard abort now synchronizes a distinct `InitialBranchRetirement` with
+prepared-intent removal before returning. The separate record leaves the source
+receipt and ordered material chain unchanged, and preserves an exact result for
+lost acknowledgement. Its digest binds the whole source/child declaration,
+policy/resource plan, original PID/birth and epoch. Debug output omits those
+private fields. This grants no child creation/disposal, material transition,
+SDK entry or independent backing-release authority.
+
+Read-only `inspect_initial_branch_retirement` returns only a protected recorded
+result. Explicit caller-fenced `retire_prepared_initial_branch` can retire matching
+prepared-only intent after a normal stopped-owner replacement. It rechecks domain,
+root, marker, ordered source/child gates, unchanged source material, child absence
+and positive source authority. Running sources require current original enrollment;
+stopped sources require no native handle/PID and positive original-process
+absence. A stopped row alone rejects. Both methods use bounded material-control
+admission with eight descriptors; an original-guard abort retains its work lease.
+Busy control/gates or exhausted resources preserve intent. Reopening never runs
+retirement automatically.
+
+Recorded completion lookup precedes current-state/gate checks on explicit retry,
+returning the same receipt without another write. None grants no absence, disposal
+or capacity authority. Retirements anchor exact historical source heads, preserve
+nondecreasing revision order and consume the same finite 1024-operation history
+budget. Preparation reserves its completion slot. Retired IDs cannot be reused by
+branch, capture or growth, and old proofs cannot be relabelled onto newer receipts.
+Existing unbranched records omit the new optional collection.
+
+Four additional deterministic models cover normal value drop/reopen, ignored
+acknowledgement/result lookup, retained work/control admission, paired-gate rollback,
+changed source and child presence, original-process liveness rejection, historical
+proof lookup after capture, wrong proof domains/corruption/reordering and valid
+full-history bounds. Their synthetic SDK process fields supply no live enrollment;
+no VMM is created, paused, signalled or terminated. The full ordinary Rust sweep
+passes 670 units (594 engine, 48 bridge, 28 protocol) and 56 contracts. Twenty-one
+opt-in cases remain ignored; the unchanged two-GiB sparse bare case is filtered
+from this repeated sweep. Eight focused branch-intent/retirement cases, the material
+suite, 68 selected public branch/store/codec/history/coverage checks, strict Clippy,
+API docs, formatting, source verification and thirteen selection guards pass.
+Private logs use .local/http-parity/branch-retirement-*.
+
+This closes the prepared-only retirement boundary at the shared engine. Public
+Port retirement messages/controller histories and ordinary source/platform
+qualification remain pending, alongside persistent dual backing retention, SDK
+preparation, source/child publication, child enrollment, held release and the rest
+of P8.4. Branch capability admission stays disabled. Earlier exact-package evidence
+is not transferred to these source/build changes. The retained macOS qualifier
+remains untouched and the Linux lab remains stopped. Full P0–P9 scope stays active;
+crash validation is deferred and distribution approval stays separate. No push or
+publication was performed.
+
+## Bounded private branch-preparation worker — October 15, 2026
+
+The shared engine now prepares bounded fork-worker IPC from the original opaque
+initial-branch guard. It retains source/child gates, domain and whole-work
+admission. Atomic promotion reserves one worker child, 20 work descriptors,
+64-KiB metadata plus 16-KiB result staging and the existing saved-state metadata
+allowance. Both reserved observers remain available; this transient allowance
+does not fund persistent child/source backing. The worker deadline is derived
+without extending the original absolute budget. Unentered input supports explicit
+abort; substituted files quarantine and retain original authority.
+
+The private worker requires an exact protected entered grant before SDK access.
+It checks the real default namespace, pinned database/source/stage identities,
+original owner/PID/birth and bounded source/inventory records, then holds the
+public SDK source lock through clean `prepare_held_fork`. It constructs no
+runtime or child VMM. Result projection requires a continuing running source,
+the permitted platform lineage change and an exact Created, no-PID held child.
+Copied labels remain unowned SDK material. A small separately hashed result and
+distinct correlated terminal proof cannot substitute for parent verification,
+source publication, child ownership or enrollment. Collection uses the existing
+no-signal retirement policy and retains original leases through actual child exit.
+
+There is deliberately no production entered-marker writer or parent dispatcher
+yet. Preparing or dropping the opaque input cannot invoke the SDK. Entered
+retention, persistent dual backing reservation, independent parent verification,
+source/child publication, child boot/enrollment and held release remain required
+before branch dispatch can be connected. Public branch admission stays disabled.
+
+Five new deterministic contracts cover metadata/request binding, exact SDK result
+projection, entered-versus-prepared authorization, atomic resource promotion and
+distinct terminal proof/replay rejection. One exact opt-in ordinary non-VM test
+uses the rebuilt debug helper, rejects a private non-default namespace before SDK
+access, collects normally and preserves leases, spools and unchanged database
+bytes until collection. The runner selects it by exact name; deferred campaigns
+remain excluded. The ordinary Rust sweep passes 675 units (599 engine, 48 bridge,
+28 protocol) and 56 contracts, with 22 opt-in fixtures ignored and the unchanged
+two-GiB sparse materialization case filtered from this repeat. The exact ordinary
+worker fixture passes separately. Selected branch/store/native codec/history/
+coverage/doctest checks pass 53 cases. Strict Clippy, API docs, formatting,
+unmodified-source verification and thirteen ordinary/deferred-selection guards
+pass. Private logs use `.local/http-parity/branch-worker-*`.
+
+The full ordinary Elixir suite also passes 1,051 cases (4 doctests, 6 properties,
+1,041 tests), with 42 runtime/deferred-crash cases excluded by the default runner.
+This includes HTTP/shared regression contracts; it does not establish native
+platform/package, live branch or PostgreSQL-server qualification. One HTTP
+terminal peer logs a Bandit close-frame exception during the passing suite;
+the successful suite is not evidence that this diagnostic has been resolved.
+
+This is worker implementation and rejection/collection evidence, not live SDK
+fork qualification or completion of P8.4. Full P0–P9 scope remains active; current
+package/platform acceptance and other incomplete audit gates remain pending.
+Historical package evidence is unchanged. The retained macOS qualifier remains
+untouched, and no Linux lab or live crash campaign was started. Crash validation
+and distribution approval remain separate. No push or publication was performed.
+
+
+## Retained branch entry and parent collection — October 15, 2026
+
+The original engine now retains branch preparation independently of the caller.
+Its opaque token is bound to the exact registry, owner, source/child declaration,
+metadata digest and original gates. The shared SDK runtime is reference-counted
+and held by that original guard; keeping a domain lock alone cannot keep the
+source manager alive. Dropping an unentered caller preserves the registered work.
+Explicit quiesced retirement requires that caller to retire, rechecks original
+prepared input/source authority and releases only that entry after its protected
+retirement result. A previously recorded result supports lost acknowledgement
+without rechecking inventory as new authority or writing another journal entry.
+Read-only inspection never releases admission. Entered preparation rejects this
+cleanup path and cannot downgrade to prepared state or replay SDK work.
+
+Before input staging, native admission additionally charges the computed ordinary
+child disk allocation plus minimum extra snapshot/backing bytes against the
+existing finite saved-state material allowance. It competes atomically with
+other saved-state work and retains the exact charge through uncertainty. Metadata,
+worker and backing promotions use the original work lease and preserve both
+reserved observers. This declared preparation budget is neither a host quota nor
+the public store's persistent child-plus-extra reservation.
+
+The retained coordinator now synchronizes a distinct protected entered grant
+before exactly one private clean-SDK held-fork preparation call. Conservative
+entered state and original ownership precede the journal write, including its
+uncertain fsync boundary. The worker uses the existing no-signal retirement and
+normal owned collection policy. The parent reopens and rehashes original metadata
+and result spools with bounded reads, checks the exact source/child material and
+snapshot identity, and requires the original source runtime/PID/birth/epoch plus
+exactly its prepared child dependency. Capture authority still rejects all child
+dependencies. Actual collection does not itself release spools, gates, runtime or
+backing admission. Entered engine teardown retains them instead of dropping the
+original owner. None of this mints a child receipt, publishes source material,
+boots/releases a child or returns public branch-ready success.
+
+Five private non-VM ownership/output/retirement models cover caller/engine value
+retirement, original runtime/domain/gate retention, both observers, crossed owners,
+missing live enrollment, prepared result replay, entered fencing, no SDK replay,
+source-journal reopen and bounded original-inode output reads. Synthetic source
+facts supply no actual live enrollment or SDK qualification. A separate native
+backing model verifies exact/idempotent promotion, exhausted shared admission and
+complete release. The ordinary Rust sweep passes 681 units (605 engine, 48 bridge,
+28 protocol) and 56 contracts. Twenty-two opt-in fixtures remain ignored, and the
+unchanged two-GiB sparse materialization case is filtered from this repeat. The
+rebuilt debug helper's exact ordinary non-VM namespace-rejection/collection case
+also passes, now retaining the backing charge until collection drops. Nine
+Elixir admission/coverage/doctest cases, strict Clippy, API docs, formatting,
+unmodified SDK source verification and thirteen ordinary/deferred-selection
+guards pass. Private logs use `.local/http-parity/branch-retention-*`.
+
+This closes the original-owner entered preparation/parent verification boundary
+at the shared engine. Public activation still needs durable dual-reservation and
+bridge/store integration, source/child material publication, child ownership and
+boot/epoch enrollment, entered resolution, held release, existing-child source
+handling and ordinary platform qualification. Full P0–P9 completion remains
+unproven and active. The earlier exact Linux package evidence and ordinary Elixir
+regression record are not transferred to changed native packages. The retained
+macOS qualifier remains untouched and no Linux lab or live SDK fork was started.
+Crash validation remains deferred; distribution approval is separate. No push or
+publication was performed.
+
+
+## Source transition and independent child material — October 15, 2026
+
+The retained shared-engine branch path now exposes explicit material publication
+following verified worker collection. A protected publication plan precedes any
+child row/identity write. It binds the original source receipt, source/child intent,
+policy/resource plan, original PID/birth/epoch, raw SDK child digest and snapshot
+generation. Child ownership receives independent owner/incarnation labels plus a
+digest of that binding; copied SDK labels cannot supply ownership. Full raw/owned
+row comparison permits only the exact protected continuation. Atomic
+no-replacement marker publication and a branch-bound child root journal precede
+source completion. Foreign, linked or inconsistent identity files reject without
+being overwritten.
+
+A distinct `BranchPublication` preserves the source's immutable creation
+fingerprint and advances its ordered material head. On macOS this advances the
+chain even when SDK source material is unchanged; Linux records only the allowed
+source-lineage change. Completion requires original running-source authority and
+actual matching child marker/root journal. Native history validates branch events
+alongside growth, capture and resolution, preserving before/after immutable hashes,
+checkpoint-head linkage and global operation-ID uniqueness, including prepared
+retirements. Historical completed lookup is read-only and never repeats SDK work.
+Source cache promotion accepts the exact original or already promoted receipt.
+New branch fields stay omitted on ordinary unbranched journals; strict older
+readers reject new branch state.
+
+The coordinator retains both gates, snapshot, original SDK runtime, spools and
+backing after publication. Its distinct MaterialPublished state grants no child
+boot, epoch enrollment, readiness, release or dependency-retirement authority.
+Collected-publication failures report uncertainty while keeping original ownership. All
+fresh mutation remains under the original absolute budget and enrolled namespace;
+exact synchronized completion lookup can recover a lost acknowledgement later.
+A second cached publication object was removed; the protected journal supplies
+the result. A separate compatibility regression preserves reading and explicit
+retirement of older prepared-only declarations that reused the source owner token;
+new admission and child publication require independent ownership.
+
+Four private non-VM row/file models pass independent identity and exact SDK
+projection, staged child publication, source-journal reopen, partial identity
+rejection, no-replay result lookup, immutable creation fingerprints, macOS no-op
+revision advancement, marker substitution/link rejection, cross-operation reuse,
+corrupt/reordered history and a later capture-history link. Synthetic prior-source
+facts establish no actual native enrollment or VMM behavior. The ordinary Rust
+sweep passes 686 units (610 engine, 48 bridge, 28 protocol) and 56 contracts.
+Twenty-two opt-in fixtures remain ignored; the unchanged two-GiB sparse
+materialization case is filtered from this repeat. The rebuilt debug helper's
+exact ordinary non-VM namespace-rejection/normal-collection check also passes.
+Nine Elixir admission/coverage/doctest cases, strict Clippy, API docs, formatting,
+unmodified SDK verification and thirteen ordinary/deferred-selection guards pass.
+Private logs use `.local/http-parity/branch-publication-*`.
+
+This implements native source/child material publication, not public branch
+completion or ordinary SDK qualification. Public codecs/proof routing, durable
+store histories and dual reservation, entered resolution, child boot/enrollment,
+held release, existing-child sources and ordinary platform independence/cleanup
+remain pending, along with the rest of the full P0–P9 audit. Public branch
+capability admission stays disabled. Historical exact-package evidence is not
+transferred to changed native bytes. The retained macOS qualifier remains
+untouched; no Linux lab or live SDK fork was started. Crash validation stays
+deferred and distribution approval remains separate. Nothing was pushed or
+published.
+
+
+## October 15, 2026 — explicit held-child snapshot boot foundation
+
+The retained native branch coordinator now restores its published child through
+public unmodified SDK AgentManager APIs with the exact original snapshot and
+source UID-share directory. Existing storage/overlay handles avoid formatting or
+ordinary cold boot. The path does not use SDK convenience fork/retry, automatic
+release or a second runtime. It requires the original live source enrollment,
+actual approved namespace and package agent rootfs. Original bare sidecars are
+fully rehashed and pinned from creation caches, with bare/native manifest checks;
+subsequent approved disk growth does not invalidate their initial geometry.
+
+A private protected first-boot journal binds source/child/snapshot/rootfs directory
+identities, publication and original epoch. Entry synchronizes before launch;
+SDK return records the original opaque boot enrollment. The original manager,
+runtime, source/child gates and backing stay retained through cancellation or
+uncertain observation. A returned boot identity is historical enrollment only,
+not guest initialization, held release or current liveness. Branch-bound ordinary
+restart rejects incomplete initialization and avoids misinterpreting inherited
+checkpoint labels. The initialized journal reader has no production writer yet.
+
+Whole-branch admission now reserves 24 work descriptors and two child slots,
+within unchanged global caps and preserving both control observers. Seven new
+private non-VM models pass snapshot/UID-share selection, root replacement,
+epoch mismatch, entered/returned replay rejection, unresolved failed boot,
+initialized-reader origin validation, protected journal mode/link/content checks,
+bare input replacement, unsupported manifests and unowned paths. Synthetic
+process records establish no real VMM or guest qualification.
+
+The ordinary Rust sweep passes 693 units (617 engine, 48 bridge, 28 protocol) and
+56 protocol contracts. Twenty-two opt-in fixtures stay ignored; the unchanged
+two-GiB sparse-materialization case is filtered from this repeat. Strict Clippy,
+formatting, unmodified SDK verification, 13 ordinary/deferred-selection guards,
+API docs, five Elixir coverage/admission cases and four documentation doctests
+pass. The rebuilt debug helper also passes the exact ordinary namespace-rejection
+and normal-collection fixture with original leases. Private logs use
+`.local/http-parity/branch-boot-*`.
+
+Actual child boot qualification, guest identity reset, explicit held release,
+production initialization publication, manager handoff to ordinary lifecycle,
+entered resolution, public codecs/store histories/dual reservations and remaining
+P0–P9 acceptance are still required. Public branch admission remains disabled.
+The existing macOS qualifier remains untouched and no Linux lab or live SDK fork
+was started. Historical exact-package evidence is not transferred to changed
+bytes. Crash validation remains deferred; distribution approval remains separate.
+
+
+## October 15, 2026 — bounded original-child guest initialization
+
+The native retained coordinator now has an explicit initialize_child step after
+its original held snapshot boot. It requires the same manager, original opaque
+epoch enrollment, running child PID/birth and original continuing source. Bounded
+read-only source/child rows must remain unchanged before and after guest IO.
+Protected entry synchronizes the exact fixed bare-guest program digest, fresh
+challenge, original boot/process identity and host clock policy before dispatch.
+The public SDK AgentClient runs the engine program with separate validated
+positional arguments and no caller command or environment. This is shared-engine
+code and does not patch or vendor a modified SDK implementation.
+
+The fixed bare-guest program renews hostname, disk machine identity, existing SSH
+host keys and cloud-init instance state, stirs the guest random stream and marks
+the public restored forkpoint. Linux wall-time correction remains fail-soft and
+its specific warning is accepted explicitly. The helper remains held; this does
+not scrub arbitrary inherited RAM or replace the original approved idle assertion.
+Actual guest semantics have not been qualified by these non-VM models.
+
+Header-first agent reply limits bound SDK allocation. A dedicated absolute
+budget/cancellation guard shuts down only this exchange's socket, leaving the
+original VM manager and admitted backing retained. A short private temporary
+relay endpoint supports long domain paths without changing owner-process CWD or
+redirecting SDK state. Exact successful exit/challenge confirmation records a
+separate IdentityReady phase. Entered/failed/unknown work cannot retry. IdentityReady
+grants no explicit release, public readiness, ordinary cold restart or allowance
+retirement. Historical original boot lookup remains available after this step.
+
+Seven new models pass program/child/argument binding, exact confirmation, the
+actual public SDK exchange against a synthetic agent with a long domain path,
+oversized reply-header rejection, absolute deadline and API cancellation,
+unchanged source/child row checks and protected original-enrollment/no-replay
+journal transitions. They run no guest program or VMM. The ordinary Rust sweep
+passes 700 units (624 engine, 48 bridge, 28 protocol) and 56 contracts; the final
+relay refinement also passes all 44 branch-focused models. Its first run exposed
+a temporary-directory mode mismatch and unbounded synthetic accepts; explicit
+0700 creation and bounded test-peer accepts now pass. Twenty-two opt-in
+fixtures remain ignored and the unchanged two-GiB sparse-materialization test is
+filtered from this repeat. Nine Elixir admission/coverage/doctest cases, 13
+ordinary/deferred-selection guards, unmodified SDK verification, strict Clippy,
+API docs, formatting and shell syntax validation pass. The rebuilt debug helper
+also passes the exact ordinary branch namespace-rejection/normal-collection
+fixture with retained original leases. Private logs use
+`.local/http-parity/branch-identity-*`.
+
+Explicit held release, final initialized publication, manager handoff to ordinary
+lifecycle, entered resolution, public codecs/store histories/dual reservations
+and the remaining full P0–P9 acceptance are still required. Public branch
+admission stays disabled. The existing macOS qualifier remains untouched; no
+Linux lab, live fork or guest initialization qualifier was started. Historical
+exact-package evidence is not transferred to changed native bytes. Crash
+validation remains deferred, distribution approval remains separate, and nothing
+was pushed or published.
+
+
+## October 15, 2026 — protected original-job child release
+
+The native retained coordinator now releases its original initialized child under
+the existing creation job. A distinct request binds operation/request identity;
+the protected first-boot and material entries bind that request, original opaque
+boot enrollment, independent child origin, initialization digest and release mode
+before agent dispatch. The original manager/runtime, paired gates and backing
+remain retained on uncertainty. No second domain owner or SDK runtime is created.
+
+Initial non-held creation uses the public SDK typed BranchpointRelease request
+with empty environment, preserving inherited-helper acknowledgement and cleanup
+when no boundary exists. Explicit held release uses typed BranchpointActivate
+with standard bare paths, empty parameter files and one fresh activation token.
+Both require the typed capability and exact bounded responses. Missing data,
+duplicate activation, typed failures, oversized headers and cancellation never
+become release proof or automatic retry. A shared bounded owner-process agent
+primitive now serves initialization and release, preserving the short private
+relay endpoint, 0700 creation and absolute socket deadline/cancellation guard.
+Neither acknowledgement establishes application readiness.
+
+Unchanged source/child rows and original live process identities precede the
+full-row CAS changing only forkpoint_held. A distinct child release material
+transition keeps its immutable creation fingerprint, independent ownership and
+exact request identity. Branch-bound leaf history admits that single transition;
+old unbranched fields remain omitted and strict old readers reject the new state.
+Material completion alone grants no restart: the matching synchronized first-boot
+completion must also exist. The earlier reserved Initialized parser shape remains
+readable but carries no release/restart authority. Exact completed lookup uses
+original opaque enrollment, performs no guest IO or journal rewrite, and can
+recover a completed acknowledgement after the original deadline. A changed held
+flag cannot resolve an entered unknown result.
+
+Seven new private non-VM models pass exact held-only material evolution, both
+public SDK exchanges, malformed/duplicate/crossed acknowledgement, missing
+capability/oversized header/cancellation, entered no-replay and flag-only
+uncertainty, both-journal publication/read-only lookup, history corruption and
+legacy omission. Models use synthetic boot/guest facts and run no VM or guest
+program. The Rust sweep passes 707 units (631 engine, 48 bridge, 28 protocol) and
+56 contracts, including all 51 branch-focused cases. Twenty-two opt-in fixtures
+remain ignored; the unchanged two-GiB sparse-materialization case is filtered
+from this repeat. Nine Elixir admission/coverage/doctest cases, 13 ordinary/
+deferred-selection guards, unmodified SDK verification, strict Clippy, API docs
+and formatting pass. The rebuilt debug helper also passes the exact ordinary
+branch namespace-rejection/normal-collection fixture with original leases. Private
+logs use `.local/http-parity/branch-release-*`.
+
+This original-job API does not complete later public held release: fresh store/
+version admission after manager handoff is still required. Held-creation
+finalization, ordinary child manager ownership/start/stop, source continuation
+with existing children, entered resolution, public codecs/store histories/dual
+reservations and ordinary SDK/platform acceptance remain pending, along with the
+full P0–P9 objective. Public native branch admission stays disabled. The existing
+macOS qualifier remains untouched; no Linux lab or live SDK fork/release qualifier
+was started. Historical exact-package qualification is not transferred to changed
+bytes. Crash validation remains deferred and distribution approval stays separate.
+Nothing was pushed or published.
+
+
+## October 15, 2026 — original manager handoff and retained backing
+
+The native original-job finish_child path now verifies original source/child
+boot authority, synchronized first-boot/material completion, unique retained
+ownership, collected IPC and no live host worker before installing the same
+manager into the common direct-manager cache. Actual opaque boot enrollment,
+source SDK runtime and domain remain attached. No second manager or runtime is
+constructed from a receipt or inventory. HeldReady completes original held
+initialization for observation while rejecting commands and ordinary start/stop.
+Released children keep their exact material transition. Direct-manager foreground
+commands now use the bounded owned worker path instead of SDK reconnection.
+
+Only after installation are temporary root descriptors and paired machine gates
+closed. Atomic admission conversion retires executing work/parser/FD/launch/IPC
+allowances and retains the original backing charge in a distinct lease.
+Completed bookkeeping has a separate finite 128-MiB allowance, charged at
+128 KiB per child, covering the bounded result and original context. It does not
+consume the executing SDK-parser pool or control observers. Subsequent work can
+admit while completed backing remains charged. These private limits still need
+public capability/limit negotiation before activation. A completed original token
+returns its historical result without SDK work; registry teardown retains and
+quarantines backing/context instead of claiming disposal. Public backing
+retirement and stopped-helper replacement enrollment remain pending.
+
+Source observation can recognize a continuing original source with dependencies
+only against its original enrolled PID/birth/runtime and protected current child
+heads. Child rows are bounded and processed one at a time. Unpublished children,
+copied labels or an unrecorded held-flag change cannot override dependency state.
+This grants no child readiness or lifecycle retirement: existing source lifecycle
+dependency exclusion remains. Support for starting another branch while earlier
+children remain present is still pending.
+
+Seven additional non-VM models pass temporary/retained accounting and subsequent
+work/control capacity, rejected unfunded/quarantined handoff, held completion and
+command/restart restrictions, missing release, prepared-token rejection and
+continuing-source metadata candidacy against altered/unpublished children. They
+run no VM and prove no actual manager handoff, source command or cold restart.
+The Rust sweep passes 714 units (638 engine, 48 bridge, 28 protocol) and 56
+contracts, including 58 branch-focused cases. Twenty-two opt-in fixtures remain
+ignored; the unchanged two-GiB sparse-materialization case is filtered from this
+repeat. The full ordinary Elixir suite passes 1,051 cases (4 doctests, 6 properties,
+1,041 tests) with 42 runtime/deferred cases excluded. The earlier passing terminal
+peer's close-frame diagnostic does not reproduce in this run; no fix is claimed.
+Thirteen ordinary/deferred-selection guards, unmodified SDK verification, strict
+Clippy, API docs and formatting pass. The rebuilt debug helper also passes the
+exact ordinary branch namespace-rejection/normal-collection check with original
+leases. Private logs use `.local/http-parity/branch-handoff-*`.
+
+Actual SDK boot/initialization/release/handoff/start-stop qualification, later
+fresh-budget public held release/deletion, dependency/backing retirement and
+replacement, multiple-child sources and public proof/store/codec/dual-reservation
+integration remain pending, along with full P0–P9 acceptance. Public native branch
+admission stays disabled. The existing macOS qualifier remains untouched; no
+Linux lab or live SDK branch qualifier was started. Historical exact-package
+evidence does not qualify changed bytes. Crash validation remains deferred,
+distribution approval stays separate, and nothing was pushed or published.
+
+
+## October 15, 2026 — fresh-budget later held release
+
+The shared engine now admits delayed held activation after completed original
+manager handoff. It requires the retained original context, opaque enrollment,
+manager and current protected source/dependency authority. A fresh absolute
+budget funds one work slot, 20 descriptors and 32 MiB temporary metadata, plus
+128 KiB persistent result bookkeeping from the separate bounded pool. Existing
+disk backing is not reserved twice. Ordered source/child gates and the SDK child
+lease follow actual return. Original-job and delayed activation share one exact
+SDK exchange, unchanged-row checks, held-flag-only CAS and both protected journal
+completions. The tracked receipt is promoted before temporary leases retire.
+
+Unknown entry retains leases and cannot replay activation. Exact historical
+result recovery needs no SDK call or journal rewrite and never re-enrolls a
+stopped/deleted handle or overwrites a different incarnation. Persistent backing
+and result bookkeeping remain charged. Seven added private non-VM models exercise
+fresh admission, accounting exhaustion/quarantine, original-context rejection,
+unknown no-replay, dual completion, cache promotion and retained result recovery.
+These are file/row/protocol models; no guest program or SDK branch ran.
+
+The ordinary Rust sweep passes 721 units (645 engine, 48 bridge, 28 protocol) and
+56 contracts; 22 opt-in fixtures remain ignored and the unchanged two-GiB sparse
+materialization case is filtered from this repeat. Five targeted Elixir admission/
+coverage cases, 13 Python ordinary/deferred-selection guards, strict Clippy,
+strict API docs, formatting and unmodified SDK verification pass. The rebuilt
+debug helper passes the exact ordinary branch namespace-rejection/normal-child-
+collection fixture with original leases. Private logs use
+`.local/http-parity/branch-held-release-*`. The full Elixir baseline remains the
+1,051 cases recorded at the previous manager-handoff step; it was not rerun here.
+
+Public store/version/protocol routing, held-child deletion, dependency/backing
+retirement and replacement, existing-child source admission and actual SDK/platform
+qualification remain required. Full P0–P9 acceptance stays incomplete; public
+native branch admission remains disabled. The parked macOS qualifier is still
+live and untouched; no new live SDK qualifier or Linux lab was launched. Changed
+bytes receive no historical package qualification. Crash validation stays
+deferred, distribution approval remains separate, and nothing was pushed or
+published.
+
+
+## October 15, 2026 — original source admission with existing leaves
+
+Native branch source preflight now has its own bounded path instead of borrowing
+checkpoint preflight. Original enrolled source PID/birth/runtime, current protected
+head, exact approved bare/offline profile and checkpoint lifecycle are checked
+before a header-first bounded agent probe and again afterward under one absolute
+budget. It uses one work allowance with 20 descriptors, 32 MiB metadata and no
+child slot; both control observers retain separate capacity. It neither adopts
+SDK rows nor asserts guest idleness.
+
+Previously published leaves must match independent origins, markers and protected
+current material heads. Only the exact entered preparation can exempt its new
+unpublished child. Unentered declarations require that child to remain absent;
+unknown/duplicate siblings and mismatched pending work reject. These checks follow
+worker preflight under the SDK source lock, collection, publication, boot,
+initialization, release and manager handoff. Prepared-only retirement uses the
+same sibling checks without removing earlier leaves. Capture and ordinary source
+lifecycle dependency exclusion remain unchanged. Existing immutable creation
+proofs and journal/wire shapes are unchanged.
+
+Four private non-VM models cover a second publication on the current source head,
+unchanged earlier leaf, wrong/pending/exempt names, unknown siblings, cancellation
+without journal rewriting and missing original source enrollment. The Rust sweep
+passes 725 units (649 engine, 48 bridge, 28 protocol) and 56 contracts, including
+67 branch-focused cases. Twenty-two opt-in fixtures remain ignored; the unchanged
+two-GiB sparse-materialization case is filtered from the repeat. Five targeted
+Elixir admission/coverage cases, 13 Python ordinary/deferred-selection guards,
+strict Clippy/API docs, formatting and unmodified SDK verification pass. The
+rebuilt debug helper also passes the exact ordinary namespace-rejection/normal-
+child-collection fixture with original leases. Private logs use
+`.local/http-parity/branch-siblings-*`. The earlier full Elixir baseline is
+unchanged and was not rerun here.
+
+These models prove no real SDK fork, sibling isolation, disposal or platform
+qualification. Live multiple-child qualification, held-child deletion, backing/
+dependency retirement and replacement, public proof/store/protocol/codec/dual-
+reservation integration and full P0–P9 acceptance remain required. Public native
+branch admission stays disabled. The parked macOS qualifier remains live and
+untouched; no live SDK qualifier or Linux lab was started. Changed bytes receive
+no historical package qualification. Crash validation remains deferred,
+distribution approval stays separate, and nothing was pushed or published.
+
+
+## October 15, 2026 — original held-child collection and explicit deletion
+
+The native engine delete path now handles a completed original held child through
+its retained manager, opaque boot enrollment and original domain/runtime context.
+Ordinary held stop/start still reject. Before entry it retains ordered source/child
+gates, an SDK child lease, one work slot, 24 descriptors, 32 MiB work metadata,
+the existing 128-MiB SDK-parser allowance and another 128 KiB persistent result
+allowance. Existing backing remains charged separately.
+
+A bounded protected 0600 domain record binds the original child/plan/boot/process,
+initialization digest and nonce outside the SDK child directory. Collecting,
+Collected, Deleting and Deleted are distinct. Original opaque epoch collection
+precedes stopped-row CAS and one SDK deletion. The actor pending record remains
+through actual SDK stop return so a sibling collector cannot consume that child's
+status prematurely. A naturally exited original child can be collected without
+SDK stop. The outer SDK lease closes before Runtime deletion takes its own lock;
+SmolBox gates and work remain held. Bounded row/reservation/directory absence and
+fresh original collection precede Deleted. Only exact original cache entries can
+retire before transient admission closes. Persistent bookkeeping, original context
+and source backing remain charged for separate dependency/backing retirement.
+
+Unknown shutdown/deletion never replays or releases leases. Exact completed
+lookup reads the original result without another SDK call, journal rewrite or
+manager reconstruction. Five private file/row models cover phase ordering, opaque
+collection, required absence, missing original authority, unknown work/control
+accounting, historical results and record mode/link/version/identity protections.
+They run no guest shutdown or SDK deletion. An initial fixture reopen attempt
+failed on immutable executable/epoch setup; the fixture now retains its original
+opaque ActorEpoch rather than reconstructing it. The final models pass.
+
+The Rust sweep passes 730 units (654 engine, 48 bridge, 28 protocol) and 56
+contracts. Twenty-two opt-in fixtures remain ignored; the unchanged two-GiB sparse
+materialization case is filtered from this repeat. Five targeted Elixir admission/
+coverage cases, 13 Python ordinary/deferred-selection guards, strict Clippy/API
+docs, formatting and unmodified SDK verification pass. The rebuilt debug helper
+passes the exact ordinary branch namespace-rejection/normal-collection fixture.
+Private logs use `.local/http-parity/branch-delete-*`. The previous full ordinary
+Elixir baseline remains historical and was not rerun in this step.
+
+Pre-handoff child disposal, explicit unknown deletion resolution, dependency/
+backing retirement and replacement, public branch proof/store/protocol/codec/dual-
+reservation integration and actual SDK/platform qualification remain required.
+Full P0–P9 acceptance stays incomplete and public native branch admission remains
+disabled. The existing macOS qualifier is still live and untouched; no live SDK
+qualifier or Linux lab was started. Historical package evidence does not qualify
+changed bytes. Crash validation stays deferred, distribution approval remains
+separate, and nothing was pushed or published.
+
+
+## October 15, 2026 — explicit held-delete absence resolution
+
+Native resolve_held_branch_deletion now requires explicit caller quiescence,
+valid operation/request identity and the original retained context/gates. The
+bridge must fence its previous durable/controller requests. Native checks also
+require the actual host worker to have returned, the original opaque epoch child
+to be collected and the complete SDK row/reservation/directory to be absent.
+It never calls SDK stop/delete, reconstructs a manager or replays material work.
+Pending/unreturned actors and remaining material still fence resolution.
+
+ResolvedAbsent is distinct from SDK Deleted and binds the child, original delete
+intent digest, caller operation and request. It can confirm disappearance during
+Collecting, Collected or Deleting without claiming SDK success. Exact recorded
+lookup needs no SDK inventory or journal rewrite and rejects a different request.
+Known SDK completion cannot be converted into a resolution result. Existing
+schema-one records keep omitted-field bytes and their 64-KiB read/write bound.
+Only the new schema-two resolved result permits 80 KiB for bounded added proof/
+request data. Invalid schema/phase/proof combinations reject. These private
+reader/limit changes need public package/store/protocol negotiation before
+capability activation.
+
+The existing four-descriptor/32-MiB reserved material-control allowance works
+while deletion holds its work/parser leases and the pool is quarantined. One
+ordinary observer can coexist. Original cache retirement precedes transient gate/
+work release. Source backing and persistent result bookkeeping remain charged,
+and wider quarantine remains. SQLite absence observation now carries the same
+absolute caller budget through its query progress guard, instead of starting
+another observation budget. The legacy convenience path keeps its default.
+
+Five new private deletion file/row/accounting models and one read-only SQLite
+model pass quiescence/original-context rejection, all entered phases, active
+workers, remaining material, foreign collection, cancellation, typed histories,
+record/proof/version checks, bounded legacy compatibility and quarantined control
+accounting. They run no guest shutdown, SDK deletion or live persistence fault.
+The Rust sweep passes 736 units (660 engine, 48 bridge, 28 protocol) and 56
+contracts; all 10 deletion-focused cases pass. Five targeted Elixir admission/
+coverage cases, 13 Python ordinary/deferred-selection guards, strict Clippy/API
+docs, formatting and unmodified SDK verification pass. Private logs use
+`.local/http-parity/branch-delete-resolution-*`. The previous full ordinary
+Elixir baseline remains historical and was not rerun here.
+
+The final rebuilt debug helper also passes the exact ordinary branch namespace-
+rejection/normal-collection fixture. This is not a live SDK deletion witness.
+
+Public branch/store/version/protocol routing, collected residual-child cleanup,
+pre-handoff disposal, dependency/backing retirement and replacement, ordinary
+SDK/platform qualification and full P0–P9 acceptance remain required. Public
+native branch admission stays disabled. The parked macOS qualifier remains
+untouched; no live SDK qualifier or Linux lab was launched. Historical package
+evidence does not qualify changed bytes. Crash validation stays deferred,
+distribution approval remains separate, and nothing was pushed or published.
+
+
+## October 15, 2026 — explicit continuation after original child collection
+
+Native continue_held_branch_deletion can now finish a held child's as-yet-
+unentered deletion step after collection, including a stale Running row left
+before stopped-row publication. It requires explicit caller fencing, original
+retained context/gates/work, actual host-worker return, opaque original epoch
+collection and exact held material. It never repeats shutdown, adopts an SDK row
+or creates another manager. Cleanup uses the original collection epoch even
+when launch admission is fenced; pending actors still exclude collection.
+
+A schema-three Finishing grant freezes operation/request before stopped-row CAS
+and final SDK entry. Only the same unentered Finishing request can continue with
+a fresh budget. Deleting cannot move backward or repeat SDK deletion. Ordinary
+and continued deletion share final stopped-material/collection checks, source-
+lock closure, one-shot entry and positive absence completion. Any later absence
+resolution preserves and hashes the continuation binding; resolution cannot be
+converted into SDK success. Earlier record schemas omit the new field exactly
+and retain their limits. Schema three uses the existing expanded 80-KiB bound;
+public package/store/protocol negotiation remains required before activation.
+
+The original work slot, 24-descriptor/32-MiB work allowance, 128-MiB SDK-parser
+allowance and paired gates remain funded. One four-descriptor/32-MiB material-
+control allowance follows actual owner-thread return, leaving an ordinary
+observer available during quarantine. No new work/child slot or backing is
+reserved. Exact cache retirement precedes temporary lease retirement; source
+backing, result bookkeeping and any wider quarantine remain.
+
+Final entry freshly bounds SDK inventory and requires the pinned fork-child
+cache to be absent or a source link. SDK deletion skips volume detach for those
+shapes; a private pack directory rejects before SDK entry. This excludes an
+unadmitted mount-detach utility and protects source/sibling caches. The guard
+uses inspected unmodified SDK behavior, not a patched cleanup implementation.
+
+Eight additional private non-VM models pass original authority, canonical row
+changes, request freezing, monotonic grants, record compatibility, source-lock/
+gate retention, one-shot callback entry, uncertain no-replay, distinct resolution,
+fresh budgets, bounded inventory, source-link preservation and admission
+accounting. SDK results are private row/file callbacks; no actual SDK deletion,
+guest shutdown or live persistence fault ran. The Rust sweep passes 744 units
+(668 engine, 48 bridge, 28 protocol) and 56 contracts, including all 18 deletion
+cases. Twenty-two opt-in fixtures stay ignored; the unchanged two-GiB sparse
+materialization case is filtered from the repeat. Five targeted Elixir admission/
+coverage cases, 13 ordinary/deferred-selection Python guards, strict Clippy/API
+docs, formatting and unmodified SDK verification pass. Private logs use
+`.local/http-parity/branch-delete-continuation-*`. The previous full Elixir
+baseline remains historical and was not rerun here.
+
+The final rebuilt debug helper also passes the exact ordinary branch namespace-
+rejection/normal-collection fixture, with no live SDK deletion qualification.
+
+Public continuation/resolution/version/store/protocol integration, pre-handoff
+disposal, partial/unproved residual cleanup, dependency/backing retirement and
+replacement, ordinary SDK/platform qualification and full P0–P9 acceptance stay
+pending. Public native branch admission remains disabled. The parked macOS
+qualifier remains untouched; no live SDK qualifier or Linux lab was started.
+Historical package evidence does not qualify changed bytes. Crash validation
+stays deferred, distribution approval remains separate, and nothing was pushed
+or published.
+
+
+## October 15, 2026 — collected held-child residual directory cleanup
+
+Native cleanup_held_branch_deletion now explicitly removes residual original
+child files after opaque original epoch collection and SDK row/reservation
+absence. Caller fencing, original retained context, actual worker return and
+original manager identity precede mutation. An actual original directory
+descriptor remains pinned across SDK deletion until acknowledgement, preventing
+inode reuse from authorizing removal of replacement material. Exact original
+root and absent-or-linked SDK cache shape are required before first cleanup.
+
+A separate protected residual record freezes the cleanup request, original
+intent/optional continuation and parent directory identity. Cleaning precedes
+unlink; primary schema-one/two/three shapes and limits remain unchanged. The
+existing descriptor-relative remover bounds entries and ancestor paths, rejects
+device crossings and unlinks cache links without following source/sibling targets.
+Root/parent synchronization, fresh collection and full row/reservation/directory
+absence precede the distinct resolved-absence proof and Cleaned audit. SDK
+shutdown/deletion never repeats. Only the frozen request can continue partial
+Cleaning with a fresh budget. Recorded removed-root cleanup can finish forward;
+unrecorded absence cannot create removal authority. An already acknowledged
+matching primary proof permits audit-only closeout without touching new material.
+
+Traversal retains original work/gates/parser admission. One four-descriptor/
+32-MiB material-control job follows actual worker return, leaving a normal
+observer admissible during quarantine. Exact cache acknowledgement precedes
+transient retirement. Source backing, persistent metadata and wider quarantine
+remain. An initial six-descriptor control proposal failed the observer-admission
+model and was replaced by the existing four-descriptor control allowance, with
+traversal charged to the retained 24-descriptor work reservation.
+
+Eight new private non-VM models cover caller fencing, original collection,
+row/reservation exclusion, substituted roots, partial/missing-root continuation,
+frozen requests, cancellation, source/sibling links, accounting, record namespaces
+and audit-only completion. They run no SDK deletion, guest shutdown or live
+persistence fault. The Rust sweep passes 752 units (676 engine, 48 bridge,
+28 protocol) and 56 contracts, including all 26 deletion cases. Twenty-two opt-in
+fixtures stay ignored; the unchanged two-GiB sparse materialization case is
+filtered from the repeat. Five targeted Elixir admission/coverage cases, 13 Python
+ordinary/deferred-selection guards, strict Clippy/API docs, formatting and
+unmodified SDK verification pass. The rebuilt debug helper passes the exact
+ordinary branch namespace-rejection/normal-collection fixture. This is not live
+SDK deletion qualification. The previous full Elixir baseline remains historical
+and was not rerun here. Private logs use
+`.local/http-parity/branch-delete-residual-*`.
+
+Public cleanup/continuation/resolution/version/store/protocol integration,
+released/restarted-child deletion, pre-handoff disposal, dependency/backing
+retirement and replacement, ordinary SDK/platform qualification and full P0–P9
+acceptance remain required. Public native branch admission stays disabled.
+The parked macOS qualifier remains untouched; no live SDK qualifier or Linux lab
+was started. Historical package evidence does not qualify changed bytes.
+Crash validation stays deferred, distribution approval remains separate, and
+nothing was pushed or published.
+
+
+## October 15, 2026 — explicit native branch backing-accounting release
+
+Engine.release_branch_backing now requires positive caller quiescence and host
+backing-removal confirmation, matching public HTTP storage-release semantics.
+Only an original completed registry context can select the actual native backing
+lease. Ordered source/child gates and original epoch binding precede original
+source process absence/quiescence and opaque child collection. Runtime PID caches
+must be empty. SDK rows, creation reservations and both original directories must
+be absent. This operation performs no SDK cleanup/GC, filesystem deletion or
+source dependency retirement. The host assertion still covers moved/out-of-
+namespace backing; path absence alone does not attest forensic file removal.
+
+A separate protected 80-KiB-bounded record binds original completion, boot/child
+identity, plan and initialized identity to the publication, caller request and
+exact native material charge. Account ownership, 0600 mode, single-link/no-follow
+reads, inode/version checks, no-replacement publication and synchronization precede
+accounting release. Exact recorded proof can acknowledge an earlier result
+without observing or modifying recreated material. A cancelled acknowledgement
+retains the charge; the same request can complete with a fresh budget. Different
+requests, corrupted/crossed records and changed/unproved charges reject.
+
+Material bytes alone become free. Persistent history/result metadata, sibling
+backing and global quarantine remain. One four-descriptor/32-MiB material-control
+lease and both gates follow actual owner-thread return; an ordinary observer
+remains admissible during quarantine. Only explicitly released completed entries
+can drop normally at registry shutdown; unresolved completed entries still retain
+and quarantine their original owner and full material charge.
+
+Seven private non-VM models cover host confirmation/original-context admission,
+source/child row/reservation/directory exclusion, original/foreign/pending
+collection, cancelled and lost acknowledgements, request/proof/record integrity,
+control headroom, sibling capacity and retained history. They run no guest, SDK
+cleanup or live persistence interruption. The Rust sweep passes 759 units
+(683 engine, 48 bridge, 28 protocol) and 56 contracts. Twenty-two opt-in fixtures
+stay ignored; the unchanged two-GiB sparse materialization case is filtered from
+the repeat. Five targeted Elixir admission/coverage cases, 13 Python ordinary/
+deferred-selection guards, strict Clippy/API docs, formatting and unmodified SDK
+verification pass. The rebuilt debug helper also passes the exact ordinary branch
+namespace-rejection/normal-collection fixture. This is not live backing-release
+qualification. Private logs use `.local/http-parity/branch-backing-*`.
+The previous full Elixir baseline remains historical and was not rerun here.
+
+Public branch dependency-retirement/storage-release routing, durable dual
+reservation/history/codec integration, pre-handoff disposal, released/restarted
+child deletion, replacement and ordinary SDK/platform qualification remain
+required. Public branch admission stays disabled; full P0–P9 acceptance remains
+pending. The parked macOS qualifier remains untouched; no live SDK qualifier or
+Linux lab was launched. Historical package evidence does not qualify changed
+bytes. Crash validation stays deferred, distribution approval remains separate,
+and nothing was pushed or published.
+
+
+## October 15, 2026 — scoped public branch coordination
+
+Automatic branch preflight, creation, completion and held release now assign each
+backend reference to its exact saved source or child record. Explicit public
+resolve/retire/storage-release now use the shared native authority fence, pinned
+owner/epoch, positive helper quiescence and worker claim. The fence remains held
+through paired observations, fresh parent claim and final guarded store commit.
+One pin survives both source/child queries, including a stale or unavailable
+owner; registration changes cannot retarget the second call. HTTP retains its
+original client, result types and atomic source/child store operations.
+
+Seven semantic transport models cover independent record scope, preserved budgets,
+absence/presence/uncertainty and replacement/unavailable pins. Four public/store
+coordination models cover the authority fence through each final transaction,
+busy/stale/competing helper rejection and retained public backing accounting.
+They use validated public branch records and semantic channel/owner adapters;
+they do not enroll native assignments, qualify branch/material proof histories,
+invoke SDK operations or run live interruption campaigns. All 32 targeted HTTP
+branch/store cases and all 16 targeted scope/public/admission/coverage cases pass.
+Warnings-as-errors compilation, changed-file formatting, 13 ordinary/deferred-
+selection Python guards, strict Credo diff (no added findings) and unmodified SDK
+verification pass. Whole-repository strict Credo still reports 52 findings in
+unchanged files; that remains a required P9 cleanup gate. Private logs use
+`.local/http-parity/branch-scoped-*`.
+
+The final full Elixir suite passes 1,062 cases (four doctests, six properties and
+1,052 tests) at --max-cases 8, with the same 42 runtime/deferred exclusions. The
+initial default 32-way run failed three unchanged clock tests waiting 100 ms for
+observation startup; all four clock cases passed in isolation, and the full
+lower-concurrency run passed. No clock fixtures or operation budgets were changed.
+The new Rust baseline remains the previously recorded c5a7b7e scope: Rust source
+is unchanged and its suite/helper was not rebuilt for this Elixir-only increment.
+
+Native Port requests, durable branch authority/codec and dual reservations,
+engine backing-release acknowledgement, pre-handoff disposal, released/restarted
+child deletion, replacement and ordinary SDK/platform qualification remain
+required. Public native branch admission stays disabled; full P0–P9 acceptance
+is pending. The parked macOS qualifier remains untouched; no live SDK qualifier
+or Linux lab was launched. Crash validation stays deferred, changed bytes receive
+no historical package qualification, and nothing was pushed or published.
+
+
+## October 15, 2026 — Port source-only branch preflight
+
+A typed protocol-two branch_preflight request now routes from scoped branch_source
+through the Port helper to Engine.branch_preflight. Exact material receipt,
+matching target/domain, branches feature version and a maximum 30-second budget
+precede entry. The existing engine retains original source enrollment/material,
+gates, bounded dependency reads and bounded agent ping; this grants neither a
+fork nor guest-idleness/child readiness authority. No SDK source was changed.
+
+The probe uses work admission, preserving reserved observation/control capacity.
+Only a zero-output Running observation with PID/birth, resources and explicit
+offline/unmapped/unmounted configuration can complete it. Streams remain invalid
+even with available credit; qualification/creation responses cannot substitute.
+Scoped construction checks the caller's saved assignment/current identity and
+reply decoding preserves that receipt while checking resources/configuration.
+Both public adapter and Port gate reject currently approved packages before
+source dispatch. No public native branch admission is enabled.
+
+A shared synthetic transport fixture, three Rust protocol contracts, one helper
+peer and four Elixir contracts cover shape/material/domain/feature/deadline gates,
+work-lane classification, credited stream rejection, response correlation and
+current-package rejection. They run no SDK action, fork or live source qualifier.
+The Rust sweep passes 763 units (683 engine, 49 bridge, 31 protocol) and 56
+contracts. Twenty-two opt-in fixtures stay ignored; the unchanged two-GiB sparse
+materialization case is filtered from the repeat. The ordinary Elixir suite passes
+1,066 cases (four doctests, six properties and 1,056 tests) at --max-cases 8, with
+the same 42 runtime/deferred exclusions. Strict Clippy/API docs, Credo diff with no
+added findings, 13 ordinary/deferred-selection guards, formatting and unmodified
+SDK verification pass. Existing repository Credo findings remain a P9 gate.
+All eight targeted source/admission/coverage cases and warnings-as-errors
+compilation pass. The rebuilt debug helper passes the exact ordinary branch
+namespace-rejection/normal-collection fixture; this is not live source/SDK
+qualification. Private logs use `.local/http-parity/branch-preflight-*`.
+
+Original retained create orchestration and remaining branch requests, durable
+branch authority/history/codec and dual reservations, backing-release proof
+acknowledgement, pre-handoff disposal, released/restarted child deletion,
+replacement and ordinary SDK/platform qualification remain required. Public
+native branch admission stays disabled; full P0–P9 acceptance is pending. The
+parked macOS qualifier remains untouched; no live SDK qualifier or Linux lab was
+launched. Crash validation stays deferred, changed bytes receive no historical
+package qualification, and nothing was pushed or published.
+
+
+## October 15, 2026 — original shared-engine branch creation workflow
+
+Engine.create_branch now composes the existing protected stages under one caller
+budget: preparation/retention, material publication and first boot, guest
+initialization, optional initial release and original manager handoff. Typed
+BranchCreateRequest fixes source/child/operator approval and initial activation
+before admission. Held children reject activation; non-held children require a
+distinct activation operation/request. The caller still funds the public durable
+child-plus-extra reservation. Post-intent failures remain uncertain, with original
+pending journals/gates/work/backing retained; no SDK convenience fork, cold
+fallback, new owner or entered-step replay is added.
+
+Read-only inspect_branch_completion checks exact request fields against original
+completed registry results before new creation admission. Source material head,
+full child identity/mode, approval and initial activation must match; duplicates,
+corrupt or conflicting results reject. None proves no absence or retry permission.
+Results remain historical creation evidence through later child lifecycle changes.
+Lookup consumes one bounded four-descriptor/32-MiB material-control allowance,
+including during quarantine, without reading SDK inventory, reconstructing a
+manager or releasing backing/history.
+
+Six private non-VM models pass request mode/activation validation, held/initially
+released correlation, source/child/policy/activation substitution, duplicate/corrupt
+results, cancellation, original-owner rejection and quarantined accounting.
+They construct typed result models and do not dispatch a fork or prove the happy
+path. The Rust sweep passes 769 units (689 engine, 49 bridge, 31 protocol) and 56
+contracts. Twenty-two opt-in fixtures stay ignored; the unchanged two-GiB sparse
+materialization case is filtered from the repeat. Five targeted Elixir admission/
+coverage cases, 13 ordinary/deferred-selection Python guards, strict Clippy/API
+docs, formatting and unmodified SDK verification pass. Elixir source is unchanged;
+the prior 1,066-case full Elixir baseline is historical and was not rerun here.
+The rebuilt debug helper passes the exact ordinary branch namespace-rejection/
+normal-collection fixture. This is not live workflow/SDK qualification. Private
+logs use `.local/http-parity/branch-create-workflow-*`.
+
+Branch Port DTO/catalog routing, durable proof/history/codec and dual reservation
+integration, backing-release acknowledgement, pre-handoff disposal, released/
+restarted child deletion, replacement and ordinary end-to-end SDK/platform
+qualification remain required. Public native branch admission stays disabled;
+full P0–P9 acceptance is pending. The parked macOS qualifier remains untouched;
+no live SDK qualifier or Linux lab was launched. Crash validation stays deferred,
+changed bytes receive no historical package qualification, and nothing was pushed
+or published.
+
+
+## October 15, 2026 — branch creation and completion lookup Port routing
+
+Protocol two now carries create_branch and inspect_branch_completion through the
+helper's typed adapter to the original shared-engine workflow. Each request fixes
+the source receipt, independent child intent, full resource/backing approval and
+optional distinct initial activation. Feature negotiation and exact immutable
+operator catalog equality gate admission and dispatch; matching an approval ID
+alone is insufficient. Absent catalogs preserve legacy configuration bytes and
+reject branch work. Present catalogs are major-two-only, unique and bounded to
+32 entries. Creation uses work; historical lookup uses observation admission.
+
+Typed publication, child origin and initial-release proofs retain the engine's
+canonical hash algebra and require exact request/platform correlation. Lookup
+None is not child absence, replay permission or free capacity. All results reject
+streamed bytes. Completion proofs are capped at 64 KiB; branch terminal envelopes
+receive 68 KiB of bounded control storage. Ordinary controls keep their 4-KiB cap;
+the event allowance is unchanged. Combined queue storage is finite at the prior
+event allowance plus 65 branch control allowances. Stalled-event/control tests
+preserve two observer replies and reject overflow before sequence advancement.
+
+Synthetic held/released fixtures validate unchanged in engine and protocol. Three
+protocol contracts, an adapter fixture, catalog/helper peers and one stalled-output
+contract add no live SDK qualification. Elixir readers/catalog forwarding, durable
+branch authority/history/codec/dual reservations, backing acknowledgement,
+pre-handoff disposal, released/restarted deletion, replacement and ordinary
+end-to-end platform acceptance remain required. Public branch admission stays
+disabled; Rustler and Kubernetes implementation remain future work, and crash
+validation stays deferred.
+
+Verification passes 776 Rust units (689 engine, 53 bridge, 34 protocol) and 56
+contracts. Twenty-two opt-in fixtures remain ignored; the unchanged two-GiB
+sparse-materialization case is filtered from this repeat. Strict Clippy/API docs,
+formatting, both source-verification modes, five targeted Elixir coverage/admission
+cases and 13 ordinary/deferred-selection Python guards pass. The rebuilt debug
+helper passes the exact ordinary branch namespace-rejection/normal-collection
+fixture (one case); this neither enters SDK fork nor qualifies its successful
+workflow. No Elixir source changed, so the earlier 1,066-case full-suite baseline
+is historical. Private logs use .local/http-parity/branch-wire-*. The parked
+macOS qualifier is still live and untouched; no live SDK qualifier or Linux lab
+was launched. Full P0–P9 acceptance remains pending. Changed bytes inherit no
+historical package evidence; nothing was pushed or published.
+
+
+## October 15, 2026 — Elixir branch proof readers and profile-bound catalogs
+
+Elixir now validates the exact shared Rust creation/completion fixture without
+rewriting its source/root/intent/publication/initial-release hash algebra. Typed
+BranchCompletion inspection hides receipts, child owner and activation material.
+Strict request/proof shapes preserve omitted-versus-null semantics, independent
+child identity, held/initially-released mode, original source/material and bounded
+plans. Channel matching rejects crossed domain/platform/request/result kind and
+all stream output. Completed lookup alone may return None; that remains historical
+result lookup, never verified child absence, retry permission or free capacity.
+
+Port admission and helper configuration now forward only negotiated branch
+approvals. Full policy resources and an approved source profile's host-memory
+overhead must match. The worker allocation floor is not the source's overhead.
+Each of at most 32 policy IDs can have at most 32 unique profile-overhead variants;
+all variants retain identical backing resources. Duplicate variants, conflicting
+backing declarations and excess policies/overheads reject. Maximum 32-by-32
+catalogs are tested, including the actual helper config reader. Branch-bearing
+configs receive a finite 512-KiB allowance on both writer/reader; configs without
+them keep the old 64-KiB limit. Existing approved packages still reject both
+creation and lookup before native dispatch even with the exact operator catalog.
+No SDK descriptor or public Backend branch capability has been enabled.
+
+Five shared-fixture/request/hash/channel/catalog tests and the ordinary Port
+rejection case pass. The final ordinary Elixir suite passes 1,072 cases (four
+doctests, six properties, 1,062 tests) at --max-cases 8, with the same 42
+runtime/deferred exclusions. One intermediate repeat exposed the existing capture
+byte-boundary fixture's 4,096 small writes exceeding its deadline under parallel
+load. Commit 50b2446 exercises that same aggregate limit with 16 ordinary 64-KiB
+chunks and still rejects the next chunk before publication; all seven capture
+publication cases and the final full repeat pass. The synthetic Python peer still
+prints an existing close-frame BrokenPipe diagnostic in some full-suite runs;
+all final assertions pass. This is not VM/crash qualification.
+
+The Rust sweep passes 776 units (689 engine, 53 bridge, 34 protocol) and 56
+contracts. Twenty-two opt-in fixtures remain ignored and the unchanged two-GiB
+sparse materialization case stays filtered on the repeat. Strict Clippy/API docs,
+formatting, warnings-as-errors Elixir compilation, 13 ordinary/deferred-selection
+Python guards and both clean SDK source-verification modes pass. Credo reports
+the same 52 existing repository findings, with no added findings. The rebuilt
+debug helper passes the exact ordinary branch namespace-rejection/normal-collection
+fixture (one case); this proves no successful SDK fork or live workflow. Private
+logs use .local/http-parity/branch-reader-*.
+
+Durable native branch authority/history/codec/dual reservations, public backend
+creation/lookup and child lifecycle routing, backing acknowledgement, pre-handoff
+disposal, released/restarted deletion, replacement and ordinary end-to-end
+platform/package/consumer qualification remain required. Public native branch
+admission and every full-parity acceptance row remain pending. The parked original
+macOS qualifier was confirmed live and left untouched; no new live SDK qualifier
+or Linux lab was launched. Crash validation remains deferred. Changed bytes
+inherit no historical package qualification; nothing was pushed or published.
+
+
+## October 15, 2026 — typed branch material histories and selective v29 codec
+
+Typed source-publication and child-release records now compose with existing
+Elixir growth/capture/resolution material history. Exact prior receipts and global
+operation-ID uniqueness fence ordering; known growth/capture hashes, checkpoint
+heads, source platform/lineage and backing disk totals must agree. Known None is
+not an unobserved wildcard. Source material can advance by a branch no-op without
+rewriting creation authority. Child release is a distinct sealed root link,
+matching the actual engine journal: a later growth/capture/branch link cannot use
+it as mutation permission. Identities carrying either branch link require the
+complete chain. Branch histories have a 1,024-link ceiling while branchless
+histories retain the original 288-link bound.
+
+Two entirely synthetic macOS/Linux fixtures contain growth, capture, two source
+branches and an explicit capture resolution. Every prefix validates in the actual
+Rust journal and the Elixir reader, preserving canonical proof bytes. Two new
+Rust contracts and five Elixir models cover valid histories, individually valid
+crossed hashes/heads, missing/reordered/duplicate links, reused operation IDs,
+platform/lineage mismatch, child release and forbidden extra child mutation.
+These are typed journal models, not SDK or live source qualification.
+
+Attached command evidence with these links now selects v29. Older envelopes,
+compressed/trailing payloads, missing history and a v29 wrapper without a branch
+link reject. Existing branchless encodings are unchanged. The selective codec
+reader advertises no native branch store marker; source/child branch authority,
+atomic intent/completion/resource transactions, prepared-retirement history,
+public lifecycle routing and normal durable replacement remain pending.
+
+Verification passes 1,077 ordinary Elixir cases (four doctests, six properties,
+1,067 tests) at --max-cases 8, with the same 42 runtime/deferred exclusions.
+All 70 codec/native-history cases and 10 focused branch/history/admission/coverage
+cases pass after the codec dispatch refactor. The full Rust sweep passes 778
+units (691 engine, 53 bridge, 34 protocol) and 56 contracts. Twenty-two opt-in
+fixtures remain ignored; the unchanged two-GiB sparse materialization case is
+filtered from this repeat. Strict Clippy/API docs, formatting, warnings-as-errors
+Elixir compilation, 13 ordinary/deferred-selection Python guards and both clean
+source-verification modes pass. Credo reports the same 52 existing findings with
+no additions. The existing synthetic Python peer can still print its close-frame
+BrokenPipe diagnostic while all ordinary assertions pass. Private logs use
+.local/http-parity/branch-history-*.
+
+The user explicitly authorized ending the earlier parked qualifier test process.
+PID 30257 was reverified as the exact ordinary export unit-test binary and had no
+direct children. SIGTERM was sent only to that PID; a subsequent process check
+confirmed it had exited. Its disks and evidence were preserved. This was an
+explicit test teardown, not a crash qualification campaign or a successful SDK
+cleanup witness. Fresh ordinary cleanup/qualification must inspect retained
+state and use its authorized cleanup path; no fresh VM qualifier or Linux lab was
+launched here. Crash validation stays deferred. All full-parity acceptance rows
+remain pending; no helper feature or public branch admission was enabled.
+Nothing was pushed or published, and changed bytes inherit no historical package
+qualification.
+
+## October 15, 2026 — guarded native branch admission and selective v30 authority
+
+Initial native Store admission now freezes the source public key and current
+material receipt, child fingerprint, exact profile/policy and optional initial
+release request. Each child receives a separate owner token/incarnation and a
+branch-specific assignment. That assignment cannot dispatch as a fresh SDK
+pack/checkpoint/OCI create. The source's immutable creation receipt remains
+unchanged. Existing public restrictions remain in force, including the exclusion
+of disk growth on checkpointable branch sources.
+
+Memory's existing atomic source/child transaction now admits these native records
+and reserves both the ordinary child resources and the extra branch allowance.
+Idempotent admission preserves the original random authority; resource shortfalls
+and stale guards reject before changing records. Dispatch uncertainty retains the
+source lock, frozen request and both charges. Only accepted, undispatched requests
+can cancel through the initial path: the same source update clears its active
+operation and retires the child index, preserving observed source state/history.
+It releases no entered SDK work and claims no SDK absence witness. Legacy bare
+Machine observations, atom-only resolution, release, retirement and backing
+acknowledgments cannot complete native branch authority.
+
+Source native branch publications are validated as an append-only history and
+folded into the existing material head. Root identity, profile/overhead, child
+operation index and exact receipt chain must agree. New child admission binds that
+advanced head, and attached commands retain the full source proof chain. These
+are deterministic record models; the guarded successful source/child completion
+transaction that appends actual helper results remains pending.
+
+Selective v30 records retain native branch assignments, dependency indexes and
+source histories. Earlier HTTP/native records gain empty/nil defaults on read and
+keep their previous encoded bytes. V1-v29 envelopes reject native branch semantics
+even if new default fields are stripped. Compressed/trailing payloads and mismatched
+proofs reject; a fresh BEAM decodes the fixed v30 vocabulary without native tools.
+Attached commands with branch material links retain selective v29. No native
+branch store capability is advertised by this codec foundation.
+
+Eight new deterministic tests cover both hold modes, exact child-plus-extra
+accounting, independent ownership, substitutions, current material head,
+append-only history, attached commands, historical envelope rejection, fresh-BEAM
+reading, accepted-only cancellation and actual Memory guard/uncertainty behavior.
+The full ordinary Elixir sweep passes 1,085 cases (four doctests, six properties,
+1,075 tests), with the same 42 runtime/deferred exclusions. The focused
+codec/history/admission/port-migration/coverage sweep passes 88 cases; the final
+native-authority sweep passes eight. Two hand-built v4 fixtures now omit the new
+empty field, preserving their exact historical shape. Warnings-as-errors
+compilation, formatting, 13 ordinary/deferred runner guards and both unmodified
+SDK source checks pass. Credo has 51 existing findings, down from 52, with no new
+findings. The existing synthetic Python peer still prints a close-frame BrokenPipe
+diagnostic while ordinary assertions pass. Rust production code was unchanged;
+this increment does not claim a new native package or SDK qualification. Private
+logs use .local/http-parity/branch-authority-*.
+
+Proof-backed completion, recovery, explicit held release, deletion and backing
+transactions; prepared-retirement history; derived assignment approval and public
+routing; PostgreSQL qualification; normal replacement; and ordinary platform/source
+acceptance remain required. Public native branch admission remains disabled and
+all full-parity acceptance rows remain pending. The authorized parked qualifier
+process is confirmed gone; its disks/evidence remain preserved and successful SDK
+cleanup is not inferred. No new live SDK qualifier or Linux lab was launched.
+Crash validation stays deferred. Nothing was pushed or published, and changed
+bytes inherit no historical package qualification.
+
+## October 15, 2026 — atomic native branch completion and explicit kept resolution
+
+Native branch completion now has a distinct transaction input: original typed
+completion plus positive current source and child observations. Exact frozen
+source/child/request/policy authority, source PID/birth and current material head
+must agree, and source/child host PIDs must be distinct. Completion is accepted
+only from a dispatched initial branch within
+its original deadline. One guarded source/child transaction appends source
+publication, records the independent immutable child root and current held or
+initially released material, and unlocks the source. Ordinary child and extra
+backing reservations remain fully charged. A late, missing, crossed or bare
+observation result cannot partially update either record or free capacity.
+
+An unknown initial branch can use the same proof and current observations through
+explicit kept resolution, with a fresh operator budget. It cannot use ordinary
+late completion, missing historical lookup, an absence atom or a bare Machine to
+infer success. Resolution neither replays SDK mutation nor adopts an inventory
+owner. Partial/absent outcomes still need their separate protected retirement and
+disposal proofs and remain unsupported by this path.
+
+Child material now folds the exact initial-release link from original completion
+into the common history/head reader. Immutable creation evidence remains the
+independent root, while current observations carry the held root or sealed
+release history. Stopped observations preserve that authority; held children
+cannot become ready by changing a state atom, and lost/substituted release proof
+rejects. Ready-child command attachment retains the current child proof chain.
+Source commands with branch links retain v29; commands retaining the distinct
+native child assignment select v30. Checkpointable opt-in now follows source capture/publication links; a child
+release chain does not falsely demand the source startup flag.
+Existing HTTP/native records and their earlier encodings remain compatible.
+
+Managed updates now preserve the frozen branch/source snapshot, child spec,
+fingerprint, assignment and already recorded completion. This prevents changing
+creation metadata or replacing a self-consistent historical proof after commit.
+The shared synthetic fixture builder correlates proofs with actual random frozen
+admission tokens; it creates no SDK manager, native enrollment or VM authority.
+
+Six new Memory tests cover both hold modes, proof/current-observation binding,
+late completion, explicit unknown resolution, immutable root/request/completion,
+held-state substitution, release-history loss, stopped observations and command
+attachment. The same completion and resolution contracts pass the encrypted
+PostgreSQL adapter. A fifth PostgreSQL test explicitly rolls back a successful
+source/child completion and its resource projections, then commits normally.
+The new isolated PostgreSQL 17 test database uses a private local socket; no
+existing database or guest evidence was reset. Its normal shutdown is recorded
+separately from any deferred interruption campaign.
+
+Verification passes 1,091 ordinary Elixir cases (four doctests, six properties,
+1,081 tests), with the same 42 runtime/deferred exclusions. The codec/history/
+branch/coverage sweep passes 105 cases and the final native branch sweep passes
+14. The full encrypted PostgreSQL example sweep passes 115 cases, with 29 runtime
+cases excluded and deferred_crash explicitly excluded; the five new native
+branch tests pass separately. Warnings-as-errors compilation, formatting, 13
+ordinary/deferred runner guards and both unmodified SDK source checks pass.
+Credo reports the same 51 existing findings with no additions. Existing synthetic
+Python close-frame BrokenPipe and Postgrex client-exit diagnostics accompany
+passing assertions. Rust production code and native packages were unchanged;
+this supplies no new SDK/platform/package qualification. Private logs use
+.local/http-parity/branch-completion-*.
+
+Partial/absent resolution, explicit held release, deletion/backing transactions,
+prepared-retirement history, derived assignment approval/public routing, normal
+store/helper replacement and ordinary platform/source independence/cleanup
+qualification remain required. Public native branch admission and every full
+parity acceptance row remain pending. No VM or live crash/owner-loss/persistence
+interruption/independent CLI-race campaign was launched. Crash validation remains
+deferred. Nothing was pushed or published; changed bytes inherit no historical
+package qualification.
+
+## October 15, 2026 — paired held-release store transactions and selective v31
+
+Native held-release acceptance now freezes the public submitted version, a
+separate random request/digest, a fresh deadline, the current source material
+receipt and both original process identities. The source head can have advanced
+through sibling creation; the child keeps its immutable creation completion and
+root. Memory and encrypted PostgreSQL both lock and update source and child in
+the same transaction. A duplicate original release version returns the retained
+intent/result; another version cannot initiate another attempt.
+
+Child-guarded advancement records dispatch on both rows and rejects entry or
+ordinary completion after the release deadline. Unknown outcomes retain the
+source lock, child operation, frozen intent and all ordinary/extra reservations.
+Only exact explicit-mode release transition plus positive current source and
+child observations can commit release. The original source/child PID/birth,
+request, child origin/identity and source head must match. Missing/bare/foreign
+proofs, stale guards, crossed observations or lost history leave both rows and
+accounting unchanged. An uncertain release requires explicit kept resolution with
+the same proof/current observations; it cannot replay ordinary completion.
+Neither successful release nor kept resolution frees backing.
+
+The independent child root and original held completion remain immutable. Current
+material carries the distinct sealed explicit-release chain. Ready command
+attachment retains it and checks the release origin against the exact frozen
+branch request; a different source/policy/child cannot borrow that authority.
+Frozen release version/source/request/process data and already recorded transition
+cannot be rewritten or dropped through updates. New explicit-release intent,
+results and attached commands selectively use v31. Earlier native authority gains
+release: nil on read and preserves v30 bytes. Older envelopes reject explicit
+release data, compressed/trailing payloads reject and a fresh BEAM decodes the
+fixed vocabulary without native tools. HTTP release keeps its existing path and
+formats. The codec advertises no native release/store capability.
+
+Five new deterministic Memory tests cover completion, explicit unknown resolution,
+command/codec authority, fresh-BEAM reading and release after a sibling advances
+the source head. The sibling model checks independent process IDs, latest-head
+binding, source exclusion and unchanged sibling/accounting. Three PostgreSQL cases
+add both shared release paths and rollback of paired intent/result/projection
+writes. These construct synthetic canonical proofs from the shared fixture;
+no SDK manager, VMM, live owner loss or persistence interruption is created.
+
+Verification passes 1,096 ordinary Elixir cases (four doctests, six properties,
+1,086 tests), with the same 42 runtime/deferred exclusions. The final codec/history/
+branch/coverage sweep passes 110 cases; the held-release sweep passes five. The
+full PostgreSQL example sweep passes 118 cases, with 29 runtime cases and
+explicit deferred_crash exclusion; the eight native branch cases pass separately.
+The private database was started and shut down normally, preserving its data/logs
+without resetting existing guest or SDK evidence. Warnings-as-errors compilation,
+formatting, 13 ordinary/deferred runner guards and both unmodified SDK source
+checks pass. Credo retains the same 51 findings with no additions. Existing
+synthetic Python close-frame BrokenPipe and Postgrex client-exit diagnostics
+accompany passing assertions. Rust production and native packages were unchanged;
+no historical package or SDK qualification transfers. Private logs use
+.local/http-parity/branch-release-*.
+
+Held release still needs engine completed-result lookup, typed Port wire/backend/
+public routing and ordinary SDK/platform qualification. Partial/absent resolution,
+deletion/backing retirement, prepared-retirement history, derived assignment
+approval, normal replacement and full source/platform independence/cleanup
+acceptance remain required. Public native branch admission and all full-parity
+acceptance rows remain pending. Crash validation remains deferred. No VM or live
+crash/owner-loss/persistence-interruption/independent CLI-race campaign ran.
+Nothing was pushed or published.
+
+## October 15, 2026 — checked held release and original-result Port qualification
+
+The shared engine's new checked release entry validates the entire original held
+completion, initialized identity and source origin against retained context before
+work. A different valid-shaped proof or SDK row cannot manufacture that original
+manager/enrollment. The existing fresh-budget workflow still verifies live original
+source/child authority and ordered gates before SDK entry.
+
+Completed-result qualification now has reserved material-control admission. It
+uses only original context, exact request and protected completion evidence; it
+never calls the SDK, reconstructs ownership from inventory or replays release.
+An active original worker or incomplete result remains uncertain. Both protected
+completions plus collected original work may promote only an existing owned
+handle and retire transient work/gates. Missing stopped/deleted handles are not
+re-enrolled. Backing remains retained. Returned proof is historical result
+qualification, not a current running observation; None grants neither absence,
+readiness, retry permission nor capacity release.
+
+Protocol two now carries release_held_branch and qualify_held_branch_release with
+the original held completion, frozen current source receipt and distinct release
+request. Exact original approval must match the immutable helper catalog before
+native entry. Dispatch uses work; qualification uses reserved observation/control,
+including during unavailable admission. Both require branches:1, which current
+packages do not activate. Requests have a 68-KiB bound and separate finite work/
+qualification ceilings. Distinct zero-output released/presence results correlate
+original binding/identity, request, namespace and package platform. Presence must
+contain an explicit nullable transition field. Creation or initial activation,
+missing proof, foreign platform and streamed bytes cannot substitute.
+
+Every branch proof terminal now uses the existing finite branch-control allowance,
+even for a small explicit proof; ordinary control routing rejects these messages.
+The prior event/storage/count limits and room for both ordinary observers remain
+intact. Elixir reads the same envelope and derives it from frozen store release
+without issuing another request. Shared entirely synthetic macOS/Linux fixtures
+validate in the engine, Rust wire and Elixir readers. Two new engine models,
+three protocol models, helper catalog/lane and bounded-output models, and four
+Elixir models cover these boundaries without SDK ownership or a VM.
+
+Verification passes 785 Rust units (693 engine, 55 helper, 37 protocol) and 56
+protocol contracts. Twenty-two opt-in fixtures remain ignored; the unchanged
+large sparse bare-materialization case is filtered from this repeat. Strict
+Clippy, warnings-as-errors API docs and formatting pass. Existing upstream
+dependency deprecation warnings remain in unmodified SDK source. All 1,100
+ordinary Elixir cases pass (four doctests, six properties, 1,090 tests), with the
+same 42 runtime/deferred exclusions. Nine focused creation/held-release cases
+pass. Warnings-as-errors Elixir compilation, formatting, 13 ordinary/deferred
+runner guards and both clean source-verification modes pass. One pre-existing
+related codec formatting discrepancy was corrected. Credo retains the same 51
+findings with no additions. The existing synthetic Python close-frame BrokenPipe
+diagnostic accompanies passing assertions. Private logs use
+.local/http-parity/held-wire-*.
+
+Backend/public branch routing, pinned positive current observations, partial/
+absent resolution, deletion/backing retirement, prepared-retirement histories,
+normal replacement and ordinary SDK/platform/source/consumer qualification remain
+required. Public native branch admission and all full-parity acceptance rows
+remain pending. Changed native bytes inherit no previous package qualification.
+No VM, live owner/helper/BEAM loss, forced termination, persistence interruption
+or independent CLI race was launched. Crash validation stays deferred; no Rustler
+or Kubernetes backend was implemented. Nothing was pushed or published.
+
+
+## October 15, 2026 — source-scoped native branch backend and Runtime routing
+
+Native branch creation, fresh explicit held release and original-result lookup
+now share an Elixir backend coordinator. Production admission still requires the
+approved branches descriptor, independently approved child assignment and exact
+source scope. Child approval binds the original branch policy and inherited bare
+or checkpoint metadata; it does not substitute a fresh pack/checkpoint creation.
+Ordinary create/prepared-create/inspect-creation reject branch assignments before
+any artifact-path lookup.
+
+The coordinator keeps one pinned helper PID/epoch and absolute operation deadline
+through original proof collection and both positive observations. Creation promotes
+the source history with the exact publication and derives the independent child
+head. Release uses the source's full current history, including earlier sibling
+publications, while assigning the child's own identity, specification and history
+to its observation. Exact original process births, current running state, resources,
+material receipts, platform and empty outputs must all match. Helper error terminals
+retain their public category and dispatch evidence. No proof alone commits readiness.
+
+Runtime pins before native dispatch, bounds work by the remaining durable deadline
+and consumes creation/release bundles through the existing paired atomic store
+transactions. Native namespace exclusion happens inside the engine's two-owner
+gate; a bare-name absence lookup does not authorize creation. HTTP continues its
+existing absence/observation flow. Explicit kept resolution requests only retained
+creation/release completion, then requires fresh source/child observations under
+that same owner/deadline. Missing completion remains uncertain, with no replay,
+absence inference, re-enrollment or backing-capacity release.
+
+Future descriptor enrollment now additionally requires native_branches:1 and
+managed_branches:1 from every store. The native marker covers all native readers
+and paired resource writers, including v31 explicit release. Current Memory and
+PostgreSQL stores deliberately do not advertise it: cleanup/recovery/lifecycle
+work remains. Public branches:0 and full-parity acceptance rows remain pending.
+
+Fifteen new semantic backend models cover held/immediate/explicit release, paired
+completion, pinned identities and evolving observation scopes, exact budgets,
+proof/output/process/resource rejection, explicit kept lookup, missing-result
+uncertainty and helper errors. One future-descriptor startup model covers reader/
+writer gating without approving a future public configuration. These models use
+synthetic peers and the actual Memory store; no helper, VM or SDK branch ran.
+
+Verification passes all 1,116 ordinary Elixir cases (four doctests, six
+properties, 1,106 tests), with the same 42 runtime/deferred exclusions. The final
+25 focused backend/reader/coverage cases pass. Formatting, warnings-as-errors
+compilation, 13 ordinary/deferred-selection Python guards and both SDK clean-source
+verification modes pass. Credo retains exactly the prior 51 findings, with no
+additions or removals. The earlier sweep passed 1,113 cases before the final
+budget/error/startup models were added; its synthetic Python close-frame
+BrokenPipe diagnostic did not recur in the final sweep, with no fix claimed.
+Rust and PostgreSQL production were unchanged and those suites were not rerun.
+Strict ExDoc generation produced artifacts but failed on existing hidden native
+type references in unchanged Store/Volume API documentation (VolumeAuthority,
+NativeBranchResult, NativeBranchReleaseResult and NativeCaptureCleanup). This is
+an outstanding documentation check, not a successful warnings-as-errors build.
+
+Partial/absent resolution, public deletion/dependency/backing retirement,
+prepared-retirement histories, normal replacement and ordinary source/platform/
+consumer qualification remain required. Current source changes are Elixir only;
+no native package was rebuilt and no historical SDK/package qualification transfers.
+Crash validation remains deferred. The previously authorized parked qualifier was
+already absent at this continuation; no signal or new teardown campaign was needed.
+Nothing was pushed or published. Private logs use .local/http-parity/branch-backend-*.

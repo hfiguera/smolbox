@@ -47,10 +47,24 @@ pub(crate) fn observe_absence(
     name: &str,
     verify_material: impl FnOnce() -> Result<bool>,
 ) -> Result<bool> {
+    let budget = crate::ReadBudget::new(
+        std::time::Duration::from_secs(30),
+        crate::Cancellation::new(),
+    )?;
+    observe_absence_budget(database, identity, name, &budget, verify_material)
+}
+
+pub(crate) fn observe_absence_budget(
+    database: &Path,
+    identity: (u64, u64),
+    name: &str,
+    budget: &crate::ReadBudget,
+    verify_material: impl FnOnce() -> Result<bool>,
+) -> Result<bool> {
     if !crate::domain::valid_id(name) {
         return Err(Error::before(ErrorCode::Validation));
     }
-    with_observation(database, identity, |transaction| {
+    with_observation_budget(database, identity, budget, |transaction| {
         let present: bool = transaction
             .query_row(
                 "SELECT EXISTS(SELECT 1 FROM vms WHERE name = ?1)
@@ -65,6 +79,18 @@ pub(crate) fn observe_absence(
 
 pub(crate) fn validate_database(database: &Path, identity: (u64, u64)) -> Result<()> {
     with_observation(database, identity, |_| Ok(()))
+}
+
+/// Pinned fork preparation creates `pack` as a link to its source or leaves it
+/// absent. SDK deletion skips volume detach for either shape. A private directory
+/// could enter macOS hdiutil cleanup outside this branch job's no-launch grant.
+pub(crate) fn branch_deletion_cache(directory: &Path) -> Result<()> {
+    unredirected(directory)?;
+    match std::fs::symlink_metadata(directory.join("pack")) {
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
+        Ok(metadata) if metadata.file_type().is_symlink() => Ok(()),
+        _ => Err(Error::before(ErrorCode::Ownership)),
+    }
 }
 
 /// Exclude every retained SDK mount, including stopped and read-only records.
@@ -274,6 +300,15 @@ pub(crate) fn has_source_dependents(
     source: &str,
     budget: &crate::ReadBudget,
 ) -> Result<bool> {
+    Ok(!source_dependents(database, identity, source, budget)?.is_empty())
+}
+
+pub(crate) fn source_dependents(
+    database: &Path,
+    identity: (u64, u64),
+    source: &str,
+    budget: &crate::ReadBudget,
+) -> Result<Vec<String>> {
     #[derive(serde::Deserialize)]
     struct Dependency {
         name: String,
@@ -291,7 +326,7 @@ pub(crate) fn has_source_dependents(
             .map_err(|_| Error::before(ErrorCode::Database))?;
         let mut bytes = 0usize;
         let mut count = 0usize;
-        let mut found = false;
+        let mut found = Vec::new();
         while let Some(row) = rows
             .next()
             .map_err(|_| Error::before(ErrorCode::Database))?
@@ -326,7 +361,9 @@ pub(crate) fn has_source_dependents(
             {
                 return Err(Error::before(ErrorCode::Database));
             }
-            found |= dependency.golden.as_deref() == Some(source);
+            if dependency.golden.as_deref() == Some(source) {
+                found.push(name);
+            }
         }
         budget.check()?;
         Ok(found)
@@ -809,6 +846,35 @@ mod tests {
                 .unwrap(),
             [0]
         );
+    }
+    #[test]
+    fn absence_uses_the_callers_original_budget_before_and_after_the_host_probe() {
+        let (_temporary, db, path, identity) = database();
+        let budget = crate::ReadBudget::new(
+            std::time::Duration::from_secs(5),
+            crate::Cancellation::default(),
+        )
+        .unwrap();
+        budget.cancel.cancel();
+        let error = observe_absence_budget(&path, identity, "absent", &budget, || {
+            panic!("cancelled observation reached the material probe")
+        })
+        .unwrap_err();
+        assert_eq!(error.dispatch, crate::Dispatch::NotDispatched);
+        let budget = crate::ReadBudget::new(
+            std::time::Duration::from_secs(5),
+            crate::Cancellation::default(),
+        )
+        .unwrap();
+        assert!(
+            observe_absence_budget(&path, identity, "absent", &budget, || {
+                budget.cancel.cancel();
+                Ok(true)
+            })
+            .is_err()
+        );
+        assert!(db.list_vms().unwrap().is_empty());
+        assert!(observe_absence(&path, identity, "absent", || Ok(true)).unwrap());
     }
     #[test]
     fn unsupported_schema_version_table_or_trigger_is_rejected_without_repair() {

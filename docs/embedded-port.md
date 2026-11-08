@@ -32,6 +32,19 @@ enable an unsupported helper operation. Health reports distinguish SDK version,
 SmolBox engine version and supported feature versions; legacy helpers continue
 to advertise their existing offline feature set.
 
+Branch creation and completed-result proof readers now validate source changes,
+independent child identity and initial release across Rust and Elixir. Public
+native branch admission remains disabled while durable branch histories,
+reservations, lifecycle routing and ordinary platform qualification are completed.
+Branch approvals bind each approved profile's host-memory overhead; changing the
+worker allocation floor does not change that profile's branch reservation.
+
+Typed native branch material links carried by attached commands selectively use
+store schema v29. Readers must retain the complete source-publication or child-
+release chain; older envelopes reject those links. Existing branchless records
+keep their earlier bytes. This reader foundation does not enable branch admission
+or establish the source/child transaction and platform qualification gates.
+
 The migration to an unmodified SDK has removed the five active downstream patches
 while keeping this architecture. Repository design and implementation notes are
 `docs/design/embedded-port-unmodified-sdk.md` and

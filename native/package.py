@@ -124,8 +124,11 @@ def build(executable, assets, output, signing_identity=None):
         raise ValueError('an explicit distribution identity requires macOS')
     with tempfile.TemporaryDirectory(prefix='.smolbox-package-', dir=output.parent) as temporary:
         staging = Path(temporary) / 'package'
-        staging.mkdir()
+        staging.mkdir(mode=0o755)
         shutil.copy2(executable, staging / 'smolbox-port')
+        # Cached Cargo outputs can be group-writable. Package permissions must
+        # satisfy native executable ownership checks independently of that cache.
+        (staging / 'smolbox-port').chmod(0o755)
         # Libraries are dereferenced so no rewrite/load can escape to the source.
         shutil.copytree(assets / 'lib', staging / 'lib', symlinks=False)
         prepare_export_libraries(staging / 'lib')

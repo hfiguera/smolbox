@@ -13,6 +13,328 @@ The exact engine 0.1.0 offline evidence remains historical. Changed engine 0.2.0
 manifest 3, protocol 2.0 packages need their own ordinary platform/consumer evidence.
 Crash qualification and distribution approval remain false and separate.
 
+Ordinary regression at worker-stage commit `8314577`: the full Elixir suite passes
+1,051 cases (4 doctests, 6 properties, 1,041 tests), with 42 runtime/deferred-crash
+cases excluded. Rust passes 675 ordinary units and 56 protocol contracts; the
+exact non-VM branch rejection worker passes separately. These are regression and
+contract checks, not native branch, changed-package/platform or PostgreSQL-server
+qualification. A passing HTTP terminal-peer case logs a Bandit close-frame
+exception; that diagnostic remains unresolved.
+
+Held-child first-boot foundation: the native retained coordinator now explicitly
+selects its original snapshot and source UID-share directory through public SDK
+AgentManager APIs. It opens existing disks without formatting and avoids the
+SDK convenience fork's retry, cleanup and automatic release behavior. A protected
+first-boot journal binds the publication, pinned directory identities and original
+epoch before dispatch, then records SDK return and opaque boot enrollment.
+Original manager/runtime/gates/backing remain retained on cancellation or unknown
+outcomes. Bare-pack inputs are fully rehashed and pinned from creation caches;
+legitimate later disk growth does not change their original manifest geometry.
+The whole branch allowance now reserves 24 work descriptors and two child slots,
+leaving the existing eight control descriptors and two observers available.
+Seven new non-VM models cover explicit configuration, replacement rejection,
+epoch binding, no replay, unresolved returns and journal/input protections.
+These models establish no actual SDK boot or guest initialization qualification.
+A native-only initialization step now uses a fixed bare-guest program through
+public SDK AgentClient APIs and a header-first bounded relay. Protected entry
+binds original opaque boot enrollment, child, program digest and fresh challenge.
+A deadline/cancellation guard closes only that observation socket; unknown entry
+never retries or releases capacity. Exact successful confirmation records a
+separate IdentityReady phase, retaining the original manager/gates/backing.
+Seven more non-VM models cover program/child binding, confirmation, bounded SDK
+exchange, oversized headers, deadline/cancel, unchanged original source/child rows
+and protected no-replay transitions.
+These are protocol/file models; no guest program ran or guest initialization was
+qualified. Actual boot/initialization qualification, explicit held release, final
+initialized publication, manager handoff, public proof/store integration and
+ordinary platform acceptance remain pending. Public branch admission is disabled;
+crash validation is deferred.
+
+
+Original-job release foundation: the retained coordinator now distinguishes
+initial helper acknowledgement from explicit held activation through public SDK
+agent requests. Capability negotiation and exact bounded responses precede proof;
+missing/duplicate/malformed acknowledgements never become success. Protected
+first-boot/material entry records bind the independent child, original opaque
+boot enrollment, initialization digest, caller operation/request and release mode.
+Only the exact agent outcome permits the full-row CAS changing the held flag.
+A distinct release material proof preserves immutable creation identity and links
+both synchronized journal completions before cold restart becomes eligible.
+The earlier reserved Initialized shape remains readable but grants no restart
+without actual release material. Exact completed lookup recovers acknowledgement
+without replay or journal mutation. Seven private non-VM models cover these
+boundaries and both SDK request paths; no guest/VMM is qualified. The native
+coordinator still retains its original manager/runtime/gates/backing and creation
+budget. Public delayed held release needs fresh store/version admission after
+manager handoff. Public held-creation finalization, ordinary lifecycle qualification, entered
+resolution, public codecs/store histories/dual reservation and ordinary platform
+acceptance remain pending. Public native branches stay disabled.
+
+
+Original manager handoff foundation: finish_child now verifies original live
+source/child boot authority, completed IPC, unique retained ownership and exact
+synchronized completion before installing the same manager into the common
+direct-manager cache. Original opaque enrollment, source SDK runtime and domain
+remain attached. HeldReady grants observation only; held commands and ordinary
+start/stop reject. Released children retain their authorized material proof.
+Temporary roots/gates/work/parser/FD/launch allowances retire after transfer;
+backing remains charged. Completed bookkeeping uses 128 KiB per child under a
+separate 128-MiB limit, preserving the executing SDK-parser pool and both control
+observers. Unresolved backing/context survive registry teardown. This does not
+implement public backing retirement or replacement enrollment. Continuing-source
+observation requires protected current child heads plus original live-source
+witnesses; inventory alone cannot override dependency state. Ordinary direct-
+manager commands use the owned worker path, avoiding SDK-manager reconstruction.
+Seven additional non-VM models cover accounting, held restrictions, original-token
+rejection and metadata candidacy. The ordinary Rust sweep passes 714 units and
+56 contracts. The full ordinary Elixir suite passes 1,051 cases with 42 runtime/
+deferred cases excluded; the earlier terminal close-frame diagnostic does not
+reproduce in this run, with no fix claimed. They establish no actual SDK manager handoff,
+source command, stop/restart or platform qualification. Public/store/codec routing,
+fresh-budget held release/deletion, multiple-child sources, backing retirement/
+replacement and ordinary acceptance remain pending. Public branches stay disabled;
+new persistent limits need negotiation before activation.
+
+Fresh-budget held-release foundation: release_held_branch uses the completed
+original context, manager and opaque enrollment with a new absolute budget.
+Current protected source/dependency authority and ordered gates precede one-shot
+SDK activation. A separate 128-KiB result lease is funded before dispatch without
+duplicating retained disk charges. Both journal completions and exact tracked
+receipt promotion precede temporary lease retirement. Unknown entry retains its
+leases; historical results never reconstruct a manager or re-enroll a missing
+handle. Seven additional private non-VM models cover result recovery, no replay,
+gates, fresh admission and persistent accounting. The Rust sweep passes 721 units
+and 56 contracts; five targeted Elixir admission/coverage cases pass. These are
+regression/model evidence only. Public release/version/store routing, deletion,
+dependency/backing retirement, multiple-child sources and actual platform
+qualification remain pending. Public branch admission stays disabled.
+
+Existing-child source foundation: native branch_preflight now uses bounded
+dependency reads and the original live source witness independently of capture
+preflight. Every earlier leaf requires its published origin and protected current
+material. Only the exact entered preparation can exempt its new unpublished
+child. The checks follow worker preflight/collection, publication, boot,
+initialization, release and handoff; prepared-only retirement preserves siblings.
+Four additional private models cover successive source heads, unchanged earlier
+child, pending/exempt boundaries, unknown siblings and missing original owner.
+The Rust sweep passes 725 units and 56 contracts; 67 branch-focused cases pass.
+Strict Clippy/API docs, five targeted Elixir cases and the exact rebuilt-debug-
+helper ordinary namespace-rejection/normal-collection fixture pass.
+They run no SDK branch and do not qualify real child isolation, live multiple-child
+sources or package/platform behavior. Public branch routing, durable dual
+reservation, deletion/retirement/replacement and ordinary acceptance remain
+required. Capture and ordinary source lifecycle dependency exclusion are unchanged.
+Public branch admission stays disabled; crash validation stays deferred.
+
+Original held-child deletion foundation: native explicit deletion routes completed
+held children through original manager/opaque epoch collection, preserving ordinary
+held stop/start rejection. A protected domain record survives SDK child-directory
+deletion and distinguishes Collecting, Collected, Deleting and Deleted. Exact
+collection precedes stopped-row CAS and one SDK deletion; bounded row/reservation/
+directory absence precedes completion. Unknown attempts retain gates/work/SDK lease
+as applicable and never replay. Only exact original cache entries can retire after
+completion; persistent bookkeeping and source backing remain charged. Five private
+non-VM models cover ordering, absence, uncertainty/accounting and protected records.
+The Rust sweep passes 730 units and 56 contracts. Strict Clippy/API docs, five
+targeted Elixir cases, 13 ordinary/deferred-selection Python guards and the exact
+rebuilt-debug-helper ordinary rejection/collection fixture pass.
+They do not qualify actual guest shutdown or SDK deletion. Public branch routing/
+store histories, pre-handoff child disposal, explicit unknown deletion resolution,
+dependency/backing retirement, replacement and ordinary platform acceptance remain
+pending. Public branch admission remains disabled and crash validation is deferred.
+
+Unknown held-delete resolution foundation: explicit native resolution requires
+caller quiescence, original returned worker/gates, opaque epoch collection and
+complete row/reservation/directory absence. It never calls SDK shutdown/deletion.
+A distinct operation/request-bound ResolvedAbsent proof can resolve disappearance
+during any entered deletion phase without asserting SDK success. Exact recorded
+lookup rejects a different request and performs no SDK work or journal rewrite.
+Legacy schema one retains its 64-KiB limit and omitted-field bytes; resolved schema
+two has an 80-KiB bound. Reserved material-control admission works during quarantine
+alongside one ordinary observer. Cache retirement precedes temporary lease release;
+source backing, persistent bookkeeping and wider quarantine remain. Five additional
+private models pass these boundaries, including history, version and proof checks.
+An additional read-only SQLite model verifies that the absence query uses the
+caller's original cancellation/deadline rather than a fresh observation budget.
+The Rust sweep passes 736 units and 56 contracts; all 10 deletion-focused cases
+pass. Strict Clippy/API docs, targeted Elixir and ordinary/deferred guards pass.
+The final rebuilt debug helper's exact ordinary rejection/collection fixture passes.
+They do not qualify actual SDK deletion, absence resolution or platform behavior.
+Public store/protocol/version routing, private schema/limit negotiation, collected
+residual-child cleanup, pre-handoff disposal, dependency/backing retirement/
+replacement and ordinary qualification stay
+pending. Public branches remain disabled; crash validation remains deferred.
+
+Collected held-child continuation foundation: an explicit fenced request can now
+finish deletion after original collection when exact held material remains. The
+original leases and epoch proof precede a frozen schema-three Finishing grant and
+stopped-row CAS. Only the same as-yet-unentered step can continue with a fresh
+budget; entered Deleting cannot replay. Shared final deletion checks preserve
+ordinary deletion behavior, exact SDK lock closure and positive absence before
+completion. Resolution retains and hashes the continuation binding separately
+from SDK success. The old work/parser/gates and one reserved control allowance
+follow actual host-worker return; backing/bookkeeping and wider quarantine remain.
+Eight private models cover these gates, one-shot callbacks, histories, compatibility
+and accounting without SDK deletion or a VMM. They include bounded dependency
+inventory and pinned cache-shape checks before entry, preserving source links and
+excluding private volume-detach utilities. The Rust sweep passes 744 units and
+56 contracts, including all 18 deletion cases. Public continuation/version/store/
+protocol routing, private schema negotiation, pre-handoff disposal, unproved or
+partial residual cleanup, backing retirement/replacement and ordinary platform
+qualification remain pending. Public branches remain disabled; crash validation
+stays deferred.
+
+Collected held-child residual-cleanup foundation: explicit caller-fenced cleanup
+now handles partial original directories after original epoch collection and SDK
+row/reservation absence. The directory descriptor remains pinned across SDK
+entry, preventing inode reuse before acknowledgement. A separate protected
+Cleaning/Cleaned record binds the frozen request, original intent/continuation and
+parent identity without changing primary record schemas. Bounded descriptor-
+relative removal preserves source/sibling link targets; no SDK deletion repeats.
+Recorded partial or removed-root cleanup can finish forward with a fresh budget;
+unrecorded absence cannot create a cleanup grant. Matching acknowledged primary
+absence proof can finish only the residual audit without touching new material.
+Exact primary resolved proof precedes cache/transient retirement. Original
+work/gates/parser reservation and one four-descriptor/32-MiB material-control
+allowance keep an observer available under quarantine; backing/history and wider
+quarantine remain. Eight private non-VM models cover these boundaries. The Rust
+sweep passes 752 units and 56 contracts, including all 26 deletion cases; targeted
+Elixir/selection checks and the rebuilt ordinary worker fixture pass. This is not
+live SDK or platform acceptance. Public cleanup/version/store routing, released/restarted children, pre-handoff disposal,
+unproved residual cleanup, backing retirement/replacement and ordinary platform
+qualification remain pending. Public branches remain disabled; crash validation
+stays deferred.
+
+Native branch backing-release foundation: explicit release now requires caller
+quiescence, host backing-removal confirmation, original completed registry context
+and ordered source/child gates. Original source process/epoch quiescence and
+opaque child collection, empty runtime PID caches and absent source/child SDK
+rows, creation reservations and directories precede a fresh protected receipt.
+The synchronized request/publication/context-bound proof releases only the exact
+native material charge. Exact acknowledgement can finish a recorded result
+without requalifying or touching new material. Persistent history, sibling
+charges and wider quarantine remain; only already released completed entries can
+drop normally at registry shutdown. Seven private non-VM models cover these
+boundaries. The Rust sweep passes 759 units and 56 contracts; targeted Elixir/
+selection checks and the rebuilt ordinary worker fixture pass. The host assertion
+covers moved/out-of-namespace material;
+this is not native forensic proof of all file removal. Public retirement/storage-release
+routing, durable dual reservations, replacement and ordinary SDK/platform
+qualification remain required. Public branch admission stays disabled; crash
+validation remains deferred.
+
+Scoped public branch coordination: source/child backend calls now carry their
+own saved record authority across preflight/create/completion/release. Explicit
+resolve/retire/storage-release pin one native owner/epoch, require helper quiescence
+and worker claim under the shared authority fence, and retain that fence through
+the guarded final store transaction. Paired observations never retarget a stale
+or unavailable pin. HTTP client/result/store behavior stays unchanged. Seven
+semantic transport models and four public/store coordination models cover scope,
+replacement lookup, busy/stale/competing authority and retained public accounting.
+The final ordinary Elixir suite passes 1,062 cases at eight-way concurrency with
+the same 42 runtime/deferred exclusions; no added Credo findings are reported,
+while 52 existing repository findings remain a P9 gate. These models use validated
+public branch records; they do not qualify native assignment enrollment, branch/material proof histories or SDK behavior. Native
+Port routing, durable branch authority/codec integration, engine backing-release
+acknowledgement and ordinary qualification remain pending. Public native branch
+admission stays disabled; crash validation remains deferred.
+
+Port branch source preflight: a typed major-two branch_preflight request now
+reaches the existing shared-engine original-owner source probe. Material receipt,
+matching domain, branches feature version and a maximum 30-second budget precede
+entry. Only a zero-output running source observation with PID/resources and
+explicit offline/unmapped/unmounted configuration can complete it. The probe
+consumes work admission and grants no fork, creation or guest-idleness authority.
+Scoped branch_source construction/decoding checks saved source identity/resources;
+current packages remain gated before dispatch. Three Rust protocol contracts,
+one semantic helper peer and four Elixir contracts cover the shared synthetic
+fixture and disabled-package behavior. The Rust sweep passes 763 units and 56
+contracts; the ordinary Elixir suite passes 1,066 cases at eight-way concurrency
+with the same 42 runtime/deferred exclusions. These are not live source/SDK/
+platform qualification. Remaining branch operations, durable authority/codec integration,
+package activation and full ordinary qualification remain pending. Public native
+branch admission stays disabled; crash validation remains deferred.
+
+Shared-engine branch creation workflow: create_branch now composes original
+protected preparation, material publication/first boot/initialization, optional
+initial activation and manager handoff under one absolute budget. Typed input
+freezes source, child and operator approval; held versus non-held mode requires
+exact absence/presence of a distinct initial activation request before admission.
+Post-intent failures remain uncertain, with original pending state/gates/work/
+backing retained. Read-only completed lookup checks the exact request against
+original registry results before new admission, without SDK inventory or owner
+reconstruction. Conflicts, duplicates, corrupt results and changed activation
+reject. None proves no absence or retry permission. Bounded material control
+supports lookup during quarantine without releasing reservations. Six private
+non-VM request/result/accounting models cover these boundaries. The Rust sweep
+passes 769 units and 56 contracts; targeted Elixir/selection checks pass. They do
+not qualify a successful SDK fork or the full live workflow. Port/durable integration,
+replacement and ordinary platform qualification remain required. Public native
+branch admission stays disabled; crash validation remains deferred.
+
+Branch creation Port contracts: protocol two now routes typed creation and exact
+historical completed lookup through the shared engine. Feature negotiation and
+full immutable operator approval equality gate both requests. Creation uses work;
+lookup uses observation admission. Typed publication/child-origin/initial-release
+proofs preserve engine serialization and hashes, enforce source/child/activation
+correlation and reject crossed platforms, legacy protocol and streamed output.
+The helper catalog is optional for legacy configurations; present catalogs are
+major-two-only, finite and unique. Each branch completion is at most 64 KiB.
+Branch terminal frames have a distinct 68-KiB control allowance; ordinary frames
+keep 4 KiB and event storage is unchanged. The combined finite queue preserves
+space for control replies during stalled event output. Synthetic held/released
+fixtures, helper/catalog/session contracts and stalled-output tests pass. The Rust
+sweep passes 776 units and 56 contracts; five targeted Elixir cases, 13 selection
+guards, strict Clippy/API docs, formatting and clean source verification pass.
+These checks do not qualify a successful SDK fork or public branch lifecycle.
+Elixir now reads the same canonical intent/publication/release hashes and validates
+exact request/domain/platform, operation kind and zero output. Operator catalogs
+forward only under the branch feature and bind approved profile host overheads,
+preserving profile-based public child accounting. At most 32 policy IDs by 32
+distinct profile overheads are allowed; one ID cannot change backing resources
+and duplicate variants reject. Current packages reject both operations before
+native dispatch even with an exact catalog. Full catalogs fit a bounded 512-KiB
+helper config; configurations without branch catalogs retain their 64-KiB limit.
+Durable authority/history/codec/dual
+reservation integration, public backend routing and ordinary platform
+qualification remain pending.
+Public branch admission stays disabled; crash validation stays deferred.
+
+Branch material-history reader foundation: typed source-publication and child
+release links now compose with growth/capture/resolution evidence. Exact prior
+receipts and global operation IDs fence ordering; known growth/capture hashes,
+checkpoint head, platform/lineage and backing disk totals must agree. Source
+publication can advance a material revision without changing record bytes.
+Child release is a distinct sealed root link, not a source mutation or permission
+to extend that child's journal. Native identities carrying these links require
+the complete chain. Branch histories have a 1,024-link ceiling; existing
+branchless histories retain 288. Two entirely synthetic platform fixtures pass
+every prefix through the actual Rust journal validator and Elixir reader. Typed
+links in modeled attached-command evidence select v29 and reject older,
+compressed or trailing envelopes. Existing branchless encodings are unchanged.
+Five new Elixir models, 70 codec/history cases, the 1,077-case ordinary Elixir
+suite, 778 Rust units and 56 contracts pass. These checks are not source/child
+store transactions, normal durable replacement or live SDK qualification.
+Native branch authority, prepared-retirement history, guarded source/child
+projection/dual reservations, public lifecycle routing and ordinary platform
+acceptance remain pending. No branch-store capability or public native admission
+is advertised; crash validation remains deferred.
+
+Ordinary Linux package qualification: the [scoped package evidence](../evidence/embedded-port-http-parity-linux-package.json)
+records engine 0.2.0/manifest 3 public offline lifecycle consumers on current
+Elixir 1.20.4/OTP 29 and minimum Elixir 1.18.4/OTP 27, with Rust absent. Both
+consume the same saved archive and exact rebuilt package; HTTP-only lanes also
+pass with native assets absent. A separate current-toolchain public PTY run
+passes binary input/output, resize, duplicate-open identity, observed exit, codec
+17 and slot release. All public runs delete owned machines, leave empty SDK
+inventories and zero reserved slots, and exercise ordinary draining and Runtime
+replacement. Package modes now exclude group/other writes independently of cache
+or umask. The lab powered off normally with no helper, VM or BEAM remaining;
+systemd reports success before the runtime limit. This qualifies the recorded
+Memory-store offline/PTY scope only: feature-specific native acceptance, full
+P0–P9 completion, macOS changed-package qualification and distribution approval
+remain pending. Historical evidence is unchanged; crash validation stays deferred.
+
 Ordinary SDK export qualification: a freshly built macOS development package
 successfully created/started/stopped a real approved imported source through the
 normal Port path. The opt-in shared-engine fixture consumed its original receipt
@@ -362,6 +684,26 @@ legacy rejection. Port/public/store source-qualification routing remains pending
 stage cleanup alone cannot resolve an active unknown capture. Ordinary
 live/package/platform/consumer qualification remains pending; admission is disabled.
 
+Source-scoped backend and Runtime routing foundation: native creation, explicit
+held release and completed-result lookup now validate original proof plus both
+positive current observations under one helper PID/epoch and absolute deadline.
+The source reference preserves its complete material history; the independent
+child scope cannot borrow source assignment or creation identity. Runtime consumes
+paired completion and explicit kept resolution without SDK replay. Exact branch
+approval/inherited metadata and a fresh-create rejection guard prevent an image
+creation fallback. Future descriptor enrollment requires both native_branches:1
+and managed_branches:1; current stores deliberately do not advertise the native
+marker. Fifteen backend semantic models and one startup model run without a VM.
+All 1,116 ordinary Elixir cases and 25 final focused cases pass; 42 runtime/deferred
+cases remain excluded. Formatting, warnings-as-errors compilation, 13 runner guards
+and both source-verification modes pass. Credo has the same 51 existing findings.
+Rust and PostgreSQL production were unchanged; their suites were not rerun here.
+Strict ExDoc generation fails on existing hidden native type references in the
+unchanged Store/Volume API documentation; that check remains outstanding.
+Public admission, partial/absent resolution, deletion/backing retirement, prepared
+retirement history, normal replacement and ordinary SDK/platform/consumer
+qualification remain incomplete. No package or crash qualification is established.
+
 | Requirement | Current evidence and remaining work |
 | --- | --- |
 | P0.1 Operations, arities, specifications | Checked manifest and `backend_parity_coverage_test.exs` cover 40 operations, 46 arity signatures and eight specification features, including native-only explicit capture qualification and cleanup. Acceptance references are inventoried; implementation/qualification closure remains pending. |
@@ -406,8 +748,8 @@ live/package/platform/consumer qualification remains pending; admission is disab
 | P8.1 Restore | Public portable API witnesses exist. Shared-engine ApprovedCheckpoint/ApprovedCheckpointArtifact now bind current SDK, host/guest platform, exact captured allocations, idle bare topology and forbidden workload/layer/credential/network dependencies. Classic and chunked header versions follow public SDK constants; SDK CPU compatibility remains delegated. A distinct 64-GiB checkpoint allowance preserves the public capture bound without widening pack/command/file caps. Two pure contracts cover layouts, crossed allocation/SDK/platform/device metadata and bounds. SDK convenience restore owns its own reservation/record and error cleanup, so the clean public materialize/install APIs are selected for fresh SmolBox reservation/material integration. Read-only admitted inspection now checks whole-file SHA-256, exact input descriptor/path versions, bounded footer/manifest and public descriptor-based SDK checksum/CPU compatibility. Classic streaming validation binds exact assets/digests, captured-profile expansion and the public 64-file chain bound. History envelopes bind head/ancestry/index paths and bounded content-hashed objects, but do not attest SDK index/reference semantics. Eight checkpoint contracts plus archive sizing and read-only retirement/control-isolation contracts pass. Request-private staging now retains input bytes, domain binding, separate 128-GiB aggregate staging and 128-MiB SDK-parser allowances through cleanup. Public SDK index readers and StoredFile serialization enforce exact declared files, referenced object lengths/hashes, reconstructed file digests, head/ancestor lineage and data summaries; ancestors retain their captured resource profiles. SDK-written fixtures exposed and corrected empty structural directories, top-level disk targets and the published 64-file chain limit. Unknown stage replacement is preserved with retained allowance/work fencing in a non-VM model. Public SDK extraction/uncached store materialization now runs in the owned job worker with four chunk threads, a fixed system tool path and a reserved SDK CPU-query child. Its distinct acknowledgement binds exact metadata/source hashes and output identity/inventory/version evidence; no generic or retired acknowledgement promotes a materialized input. Atomic promotion retains one work slot and separate decoded staging through collection; the source lease remains charged until cleanup. A rebuilt macOS debug helper ordinarily materializes both SDK-written layouts, verifies bytes/proof, collects normally and leaves no SDK VM row. No VM is started by this evidence. Fresh creation/installation now binds generated owner/incarnation, selected material and no-clobber ticket to a private SDK VM directory after SDK-name reservation. The owned install worker uses public install/discard APIs, checks input/output top disk capacities and pending inputs, and emits distinct correlated installation evidence. Parent rechecks precede public neutral bare record construction, creation receipt and material-journal publication. Source, machine gate, SDK reservation and separately charged installation work survive unresolved collection; errors keep partial storage without replay. An ordinary macOS non-VM fixture installs sparse disks, commits a receipt-bound stopped row, leaves no VMM PID and releases native leases after collection. First-start now uses an immutable-root-hash/receipt-bound private pending/entered/consumed journal. Pending installed versions are anchored after authorized macOS staging-link cleanup while source capacity, SDK reservation and gate remain held. Entry is persisted before SDK start; completion requires SDK success, actual enrolled live PID/birth and SDK-consumed inputs. Entered observation stays IdentityUnknown and cannot supply replay or cold-boot authority. Same-engine normal stop is allowed only with enrolled handle and matching live PID/birth; it does not resolve the entered operation. Five deterministic contracts cover missing/crossed/consumed/entered/cancelled/replaced state plus legacy behavior. The ordinary SDK-created non-VM fixture verifies pending and entered classification/start rejection. Explicit quiesced resolution, expanded saved-state durable/wire histories, large-history scalability and ordinary restored-VM/platform/consumer qualification remain pending. No restored VM or existing-machine ownership is produced. |
 | P8.2 Capture | Checkpointable creation/start/preflight, shared engine capture/owned SDK worker, Port streaming, scoped backend routing and native publication/history are implemented foundations. Exact request/proof/current receipt, byte/identity checks, bounded transport/consumer, synced no-clobber publication and atomic durable history have deterministic contracts. Explicit unknown-result resolution and exact-package ordinary running-source/platform/consumer qualification remain pending; public checkpoint admission is disabled. |
 | P8.3 Export | Shared-engine stopped-source admission now retains exact receipt/material, source gate, root FD/domain identity, absolute cancellation/deadline and work allowance; bounded dependency projection supplies no ownership. Bare disk preparation now retains both raw/QCOW descriptor views, atomically promotes FD admission and streams exact logical data/digests without helper boot or CLI conversion. Protected raw materialization now owns sparse output, a separate aggregate byte allowance, source/request-bound registration, file versions and explicit cleanup; modeled reopening restores capacity without adopting output. Bare pack construction now consumes materialized disks and exact operator-approved runtime asset files, uses bounded single-thread tar/zstd with public SDK manifest/footer types, independently verifies whole-file identity and records Packed staging authority. Fresh staging schema 2 permits packing; schema-1 rows retain read/cleanup compatibility. Source gates and byte/work capacity survive through explicit disposal, and partial packs cannot replay or become publication evidence. SDK format-reader checks and synthetic assets do not qualify package bootability. Package setup now derives a rootfs tar and exact library grants from the verified manifest, installs an immutable package/domain/root-bound catalog under native admission and selects it through the public Rust packing method. Packages without a tar retain catalog omission. Ordinary rebuilt macOS package preflight and archive-to-manifest file/link checks pass without an engine or VM; this does not qualify guest boot or export/import. Native one-attempt publication now uses SDK OCI types, bounded local HTTP transport, distinct transient push bearer, source postcondition checks and protected schema-3 prepared/entered/completed evidence. Local peers cover vacancy, range/byte fidelity, no auth/redirect/retry, cancellation and uncertain results; exact recorded completion can be inspected without registry-result adoption. Source/work/scratch remain held through explicit disposal. Gated protocol-2 preflight/publication/lookup/cleanup now select exact cached operator destination/TLS approvals without reader I/O. Typed Rust/Elixir replies require zero output, canonical publication hash, original receipt/operation/request/destination/tag/size and package-platform correlation; scoped tokens are removed from retained bookkeeping. Reserved control lookup/cleanup works under occupied work lanes and needs no current destination catalog. Shared synthetic fixtures validate actual engine/wire/Elixir proof correspondence and exact executing limits. Native export history now freezes enrolled source authority at acceptance and the bounded request before dispatch. Selective v28 retains correlated acknowledgement and separate cleanup proof; source history/platform and independently verified config/content identity remain exact. Memory and PostgreSQL share guarded unknown-reservation/cleanup-release contracts; HTTP v11 defaults/bytes and earlier native envelopes remain compatible. Future enrollment requires native_export_histories: 1. A deterministic ordinary startup peer classifies interrupted export as unknown without publication/cleanup replay or proof import. Scoped managed qualification/publication now use the same pinned helper and freeze an exact source-sized staging/artifact request selected from cached destination identity/caps. Exact native acknowledgement lookup precedes the existing independent registry verifier. Explicit public resolution serializes/quiesces the pinned helper, consumes separate cleanup, observes disposition and rejects changed intent or an exhausted shared control deadline before release. Typed backend and public Memory models cover zero-output/correlation, result uncertainty, busy/stale epochs, invalid cleanup and accounting; HTTP export/registry contracts preserve retry behavior. Explicit live-source no-stage retirement now authenticates marker/current material under the source gate, rejects unindexed/crossed roots and writes protected schema-4 zero-byte authority in a separate proof domain. It prevents replay and grants no publication or VM absence; exact protected cache lag/reopen retain the same fence. The existing separate 32-MiB material-control allowance preserves cleanup under full work/FD/metadata admission and quarantine without clearing it. Registered stage authority is independent of VM-row lifetime; a private removed-source model verifies cleanup. Separate bounded admit_export now records protected schema-5 frozen source/request identity and ceiling before managed dispatch, while qualification stays read-only. Dormant admission uses no scratch allowance; exact materialization records Entering before creating a directory and consumes admission once. Explicit cleanup retires admitted authority after private modeled source removal without granting publication, absence or replay. An unproved Entering directory remains fenced with its allowance. Native session/bridge and Elixir wire/backend contracts cover feature/catalog/deadline/zero-output boundaries; the ordinary two-GiB format test exercises admitted packing. Registry-container source preparation now holds receipt-bound stopped source/storage descriptors and its original gate/deadline; bounded cached metadata produces an inert exact-digest/native-platform plan. FlattenLayers follows actual agent topmost-first precedence and streams without a guest output path. SDK manifest seeding preserves env/user/command/workdir/resource semantics, with source-record binding and bounded output. Four non-VM models cover semantics, malformed/crossed metadata, changed disk, cancellation and substituted owner. These inputs grant no helper, cached-image authenticity, layer-production or publication proof. Operator conversion resources now flow through an optional strict catalog grant, with legacy omission preserving bare behavior. Engine budget plans bound guest CPU/memory and count raw helper storage, root overlay/COW metadata allowance, source COW view, flattened tar and final artifact against the same staging/disk grant. Prepared container inputs freeze the selected plan and atomically promote their original job to two children/24 descriptors without double charging or consuming control headroom. Pure models cover underfunded/invalid/changed grants, exhausted children and quarantine; no helper is launched. Schema-6 pre-launch helper scratch now binds original export admission, deterministic namespace name, exact conversion resources/budget and private directory device/inode/UID/timestamps before any SDK entry. The held scratch handle retains source/job/directory authority and rejects SDK process-cache mismatch; private models invoke no lifecycle API. Explicit protected Removing/Removed transitions retire only empty matching helper roots, bind a distinct cleanup hash and support recorded removal/cache-lag reconciliation after source-row disposal. Foreign/substituted roots and unproved absence retain capacity. Schema 6 grants no SDK dispatch, Ready/Packed writer or publication authority; schemas 1-5 retain compatibility. Schema-7 owned storage-only SDK initialization now checks original source/disk, VM namespace, package templates/host context and exact SDK library selection, then records SdkPreparing before public sparse-disk/private-COW APIs. The executing closure retains the original leases after observation retirement; returned batches record bounded exact private file versions as SdkPrepared even after partial failure, without a late success or VMM claim. Explicit version-bound cleanup supports recorded removal prefixes and protected/cache completion recovery only. Private tests exercise SDK sparse disks at explicit fixture paths, partial/uncollected/substituted files and namespace mismatch; they do not qualify full SDK namespace/COW/library execution. Schemas 1-6 preserve previous hashes and semantics. Boot finalization now yields a nonconstructible original-operation/machine/epoch/child enrollment after SDK return, including after normal child exit; exact PID substitution remains fenced. OCI startup records its original enrolled birth instead of resampling PID inventory after return. This establishes a shared child-evidence primitive, not helper launch or current-liveness proof. Initialized SDK storage is now retained in a bounded engine-owned registry before caller deadline collection. Dropping its observation token releases no source/job/descriptor/disk authority; exact successful quiesced cleanup alone removes the entry. Live borrowing, changed request, contention, cancellation or filesystem uncertainty retain ownership and capacity. Domain/registry substitution rejects; normal replacement restores staging capacity/quarantine without adopting tokens or storage objects. Private storage models prove those boundaries without SDK manager construction or VMM launch. A retained token can now prepare and retain an unstarted SDK manager with an explicit package rootfs anchor and reopened exact collected disk handles. Namespace, source/files, manager name/own-child absence and disk paths recheck before/after; repeat preparation rechecks the retained manager and failure preserves storage leases/cleanup. Explicit rootfs selection avoids default/cache extraction and rejects host redirects, while SDK guest init links remain valid. Two private boundary tests prove those checks, not positive full manager or guest boot qualification. Schema 7 still grants no launch. Manager preparation now retains a descriptor-checked private source COW and exact protected resource/configuration inputs; immediate source path/version, logical size, complete helper files/name/raw lengths and frozen grant must match. Partial batches remain cleanable. Four private models plus an exact-selected ordinary SDK filesystem-only raw/QCOW overlay witness pass; no manager or VMM is started by that witness. The retained token now connects one root-process SDK launch with the original budget and source leases. Per-entry work locks preserve registry control access; schema 8 freezes entered boot intent and exact returned pre-exec child enrollment, including creator and epoch-directory identity. Returned dispatch grants no child collection or cleanup proof; reopening restores capacity/quarantine without adoption. Private record/control models pass; positive helper startup is unqualified. Original SDK enrollment is now retained separately from returned-record publication. Explicit retained/retired collection controls use an owned bounded thread, original manager PID/birth and actor ledger even under launch quarantine. Opaque child collection is recorded in schema-8 collecting/collected phases without granting fsync, files, export or cleanup proof; all four phases restore capacity/quarantine on normal reopen. Ordinary non-VM child exit and private collection/control models pass; SDK helper shutdown remains unqualified. Collection now enrolls schema-9 post-launch runtime custody only from original opaque collection. Exact bounded regular/socket snapshots and the held rootfs helper marker bind removal; unknown/changed inventory rejects, protected Removing permits only captured remaining files, and a distinct hash binds successful retirement before allowance/source release. Marker-present/absent, substitution/type/size and partial-removal normal-reopen models pass; actual SDK inventory/rootfs behavior remains unqualified. Isolated-worker layer I/O now streams the SDK canonical sixteen-MiB DataChunk envelopes through bounded buffers with original deadline/cancellation and terminal byte/hash evidence. SDK-encoded large/fragmented loopback, invalid/missing/error/cap/base64, cancellation and pre-entry spool/path cases pass; no source, worker collection, tar or publication authority is granted. Frozen source/resource/deadline worker input now connects fixed private-source mount and cache bind commands, bounded exact digest/platform cached query and the existing topmost-first plan directly into streamed layer I/O. Typed header-capped query decoding avoids an unbounded Value tree and duplicate image parse; no pull/rebase/credential or arbitrary command is added. Setup/missing/foreign/cap/empty/pre-entry loopback cases pass without a VM. The original retained entry now dispatches one isolated conversion worker without another work reservation. Exact input/terminal evidence and distinct bounded layer/plan spools stay retained through actual child collection; parent rehash and source/plan checks precede an opaque bounded-read handle. A worker/output lease fences helper collection and cleanup, including retired callers. Generic/forged/retired evidence and pre-entry spool substitutions reject in non-VM contracts. Protected schema 10 now binds entered/ready layer custody to input/plan hashes and original file identity/bytes/hash. The original-entry opaque output moves by descriptor-relative nonreplacement rename, without a second tar allocation; post-move rehash/read-only mode precede ready registration. Plan metadata stays retained for packing. Helper collection/runtime retirement preserves schema 10; changed/unknown inventory retains capacity and private incomplete-handoff/reopen models permit cleanup without writer or VM adoption. Packing requires original opaque collection, then explicit helper retirement. Schema 11 now binds readiness, bounded packing intent, writer entry and the original empty output inode before body writes; unsupported schema/state combinations reject before mutation. The shared bounded packer emits SDK container mode with one digest-named layer, approved assets and inherited metadata; SDK footer/checksum/archive tests pass. Generic packed forwarding/publication/cleanup retains the original container entry, with a strong lease across normal Engine value drop. Private registry peers prove one-attempt publication and cleanup without releasing staging early. Partial/replaced/unregistered output models preserve uncertainty and cleanup ownership; normal reopen grants cleanup only. These format/ledger/lease models do not qualify SDK helper production or guest import. A transport-independent engine coordinator now chooses actual source mode and sequences the owned container pipeline through existing publication; the Port adapter delegates it. Cached exact destination grants construct upper-bound requests without mode guesses, with legacy request bytes preserved. Bare logical geometry and actual container layer bytes determine effective caps. Explicit shared output budgets bound helper/tar/artifact aggregate usage without an arbitrary partition; old fixed budgets omit the marker unchanged and older readers reject it before acting. Quiesced cleanup can collect only an original retired manager, skips SDK replay after recorded collection/runtime custody and permits provably unentered storage cleanup; active callers/workers reject. Read-only/pre-entry, shared-cap/reopen, high-level storage cleanup and database-only namespace-rejection models pass without SDK lifecycle entry. Whole-pipeline output-credit validation, ordinary initializer/library/COW/rootfs/UID/mount/device qualification, ordinary local/imported guest/cache semantics and public registry export/import qualification remain pending. Controller/file models do not establish helper production of every witness. Export preserves opaque bytes while growth retains ext4 validation. Coordinator inspection/publication use assigned references and verification selects SDK version. Public native export admission, ordinary auxiliary/helper and source semantics, full managed publication/cleanup acceptance and platform/consumer qualification remain pending. Private fixture conversion is not product evidence. |
-| P8.4 Branches | Public held-fork APIs are identified. Source/child gates, independent proofs, epoch enrollment, dual reservation and hold/release integration remain pending. |
-| P8.5 Saved-state histories | Typed native histories, correlated proofs and deterministic partial/lost-result contracts remain pending. |
+| P8.4 Branches | Public held-fork APIs are identified. Initial read-only admission now retains an originally enrolled running unbranched source and fresh child under stable ordered gates, with post-lock material/root/PID/absence rechecks. Exact public child-plus-extra resource planning has six shared Rust/Elixir cases; source/child/hold/policy/PID/birth/epoch/SDK/shared-RAM inputs bind its digest. Finite work metadata/FD admission leaves both control observers available. The original opaque guard now persists a protected prepared-only source/child declaration in the existing material journal. Exact plan/identity/PID/epoch/request validation, mutual exclusion with growth/capture and operation-ID history checks fence mutation across normal reopen. Explicit original-guard abort now persists a distinct retirement receipt while keeping source material/head unchanged. Read-only lookup can recover a lost acknowledgement; explicit quiesced cleanup also supports a normal stopped-owner replacement, with positive original-process absence or current enrolled-running authority, ordered gates and child exclusion. Completed lookup precedes current-state checks without mutation. Protected retirements anchor exact historical heads, reject cross-operation ID reuse/reordering and share the finite history budget. Four additional non-VM models cover replacement/result replay, live-original rejection, control admission, identity/source/child fencing, historical receipt lookup and corruption/history bounds; they perform no VM or forced-loss campaign. Public retirement integration and ordinary source/platform qualification remain pending. Bounded private fork-preparation worker/IPC and an opaque unentered producer now retain original admission, owner/source/root/database identities and one absolute deadline. Resource promotion uses two child slots, 24 work descriptors, 80 KiB of IPC staging and existing saved-state metadata allowance while preserving both observers. The worker requires a distinct protected entered grant, checks exact clean-SDK continuing-source/held no-PID child projections and returns a separate correlated proof. The original engine registry now retains the actual shared SDK runtime, source/child gates, input/output spools and admitted backing independently of caller lifetime. The protected entered writer precedes exactly one private SDK preparation dispatch. Parent collection independently rehashes original metadata/result inodes, checks bounded source/child material and snapshot identity, and requires original live-source enrollment plus exactly its prepared child dependency. Prepared abort/replay reject entered or collected work; entered registry teardown retains original authority. Explicit quiesced prepared retirement can clean a retired caller, including known completed proof after lost acknowledgement without another journal write. Computed child-plus-minimum-extra disk backing shares the existing finite saved-state material allowance; this does not replace persistent public dual reservation or host quotas. The exact ordinary non-VM rejection fixture collects normally with original leases and unchanged private database; it proves no SDK fork or live enrollment. Five non-VM retention/output/retirement models and backing admission contracts cover these boundaries without live SDK dispatch. Explicit native material publication now synchronizes its exact plan before any child identity write, derives independent child owner/incarnation plus a source/intent/raw-child/generation binding, atomically publishes a no-replacement marker and initializes the bound child root journal. Source completion requires those actual child files and original running source authority. Its distinct branch transition preserves the immutable creation fingerprint and advances the ordered head even for a macOS material no-op. Mixed growth/capture/resolution/retirement history validates immutable/head linkage and globally unique operation IDs. Exact completed lookup never replays SDK or journal mutation. Four non-VM models cover independent identity, staged publication, retry/lookup, corruption, marker substitution and mixed history; no VMM or live persistence interruption is used. Both gates, snapshot, runtime and backing stay retained. Native explicit first boot and protected original enrollment now have a retained-manager foundation and seven non-VM models, as described above. Native bounded guest initialization now has a protected single-entry/IdentityReady foundation with seven non-VM contracts. Original-job automatic/explicit release now has a protected typed-agent/material foundation with seven non-VM models, as described above. Original manager handoff and held initialization now have a native foundation with retained backing and seven non-VM models, as described above. Actual SDK boot/initialization/release/handoff/restart qualification, later fresh-budget public release/deletion, backing retirement, public codec/history/dual-reservation integration and entered resolution remain pending. The material receipt is not a public ready result or positive live-source qualification. Older prepared-only same-owner declarations remain readable/retirable; new admission/publication requires distinct ownership. Shared mode must be frozen/qualified before fork; paged raw-fork guardians are excluded. The engine now publishes authorized source-lineage changes and independent child material through its retained original context. Initial guarded native admission now freezes independent child assignment/ownership and exact source/public request/policy authority, with ordinary-child plus extra reservations in the existing Memory two-record transaction. Unknown dispatch retains capacity and source lock; accepted-only cancellation retires the index atomically. Source publication history is append-only and reaches the material head/attached commands. Selective v30 and a fresh BEAM reader preserve authority while older records retain their bytes. Guarded completion and explicit kept resolution now atomically retain the original proof, positive current source/child observations, source publication, independent immutable child root and exact held/released material. Requests/completion stay immutable and backing remains charged. The shared synthetic contracts pass Memory and encrypted PostgreSQL, including source/child/projection rollback. Child commands retain v30 authority; source commands with branch links retain v29. Held-release store transactions now freeze a distinct version/request/deadline, current source head and both original PIDs; both adapters lock and update the pair with retained backing. Exact explicit proof/current observations complete or explicitly resolve uncertainty. Selective v31 and fresh-BEAM reading preserve prior v30 bytes; sibling-head/exclusion and paired rollback models pass. Checked engine release now binds the full original held completion before work. Reserved result qualification uses only original context, both protected completions and collected work, promoting an existing handle and retiring transient work without SDK replay, re-enrollment or backing release. Typed release/qualification requests and distinct zero-output proof replies now traverse Port with exact catalog/domain/platform correlation and bounded control storage; shared synthetic platform/hash and helper lane/output models pass. Source-scoped backend and Runtime routing now collect exact proof plus fresh source/child observations under one pinned owner and absolute budget, then consume paired creation/release completion or explicit kept-resolution transactions. Native child assignment approval checks exact inherited metadata and original policy separately; ordinary fresh-create/inspect-creation routes reject this assignment. Future native descriptor startup requires native_branches:1 plus managed_branches:1, which current stores do not advertise. Public activation, partial/absent resolution, deletion/backing transactions, child epoch enrollment and ordinary SDK/platform/source independence/cleanup acceptance remain pending. Public native branch capability admission stays disabled. |
+| P8.5 Saved-state histories | Typed branch source-publication/child-release links and mixed growth/capture/resolution chains now have cross-reader synthetic fixtures and selective v29 attached-command codec support. Frozen native branch authority, initial guarded dual-reservation admission and append-only source histories now use selective v30; attached commands with branch links retain v29. Accepted-only cancellation, stale guards, retained uncertainty, old-envelope rejection and fresh-BEAM reading have deterministic contracts. Guarded completion and explicit positive kept resolution now bind original completion, current source/child observations and immutable child root/current release history in Memory/PostgreSQL. Requests and recorded completion cannot change, and rollback preserves both records/accounting. Explicit release intent/proof and attached commands now use selective v31, preserving original completion/root and earlier bytes. Memory/PostgreSQL paired release and explicit unknown-resolution models retain source lock and all backing; fresh-BEAM decoding and intent/result rollback pass. Checked engine dispatch and bounded original-result qualification now have typed Port/Elixir contracts; missing proof confers neither readiness nor replay authority. The source-scoped backend now obtains original creation/release proof and both positive current observations with one owner/deadline; Runtime atomically consumes completion and explicit kept resolution. Missing completion never authorizes replay or absence. Partial/absent resolution, deletion/backing transactions, prepared-retirement history, complete partial/lost-result contracts and public activation remain pending. |
 | P8.6 Saved-state acceptance | Ordinary restore/export/import/branch independence and dependency cleanup remain pending for every supported combination. |
 | P9.1 Matrix closure | All full-parity rows remain pending; checked inventory prevents a premature completion claim. |
 | P9.2 Regressions | Appropriate ordinary Rust/Elixir/schema/codec/source checks run incrementally. Full expanded Memory/PostgreSQL/HTTP and resource acceptance remains pending. |

@@ -1,7 +1,15 @@
 defmodule SmolBox.Embedded.NativeGrowth do
   @moduledoc false
   alias SmolBox.{DiskExpansion, Execution, Machine, ManagedMachine}
-  alias SmolBox.Embedded.{CaptureTransition, GrowthTransition, Identity, MaterialHistory}
+
+  alias SmolBox.Embedded.{
+    CaptureTransition,
+    GrowthTransition,
+    Identity,
+    MaterialHistory,
+    NativeBranchAuthority,
+    NativeBranchHistory
+  }
 
   def request(expansion),
     do: %{
@@ -32,16 +40,30 @@ defmodule SmolBox.Embedded.NativeGrowth do
 
   def intent(_record), do: nil
 
+  def current_identity(
+        %{
+          __struct__: ManagedMachine,
+          branch: %{native_authority: %{completion: completion}}
+        } = record
+      )
+      when not is_nil(completion), do: history_identity(record)
+
   def current_identity(%{
         __struct__: ManagedMachine,
         disk_expansions: history,
         captures: captures,
+        native_branch_history: branches,
         created_machine: created
       })
-      when map_size(history) == 0 and map_size(captures) == 0,
+      when map_size(history) == 0 and map_size(captures) == 0 and map_size(branches) == 0,
       do: if(created, do: {:ok, created.backend_identity}, else: {:ok, nil})
 
-  def current_identity(%{__struct__: ManagedMachine} = record) do
+  def current_identity(%{__struct__: ManagedMachine} = record), do: history_identity(record)
+
+  def current_identity(%{__struct__: Execution, created_machine: created}),
+    do: {:ok, if(created, do: created.backend_identity)}
+
+  defp history_identity(record) do
     with {:ok, receipt, _sizes, last} <- head(record),
          do:
            {:ok,
@@ -52,25 +74,24 @@ defmodule SmolBox.Embedded.NativeGrowth do
             }}
   end
 
-  def current_identity(%{__struct__: Execution, created_machine: created}),
-    do: {:ok, if(created, do: created.backend_identity)}
+  def record_valid?(
+        %{__struct__: ManagedMachine, branch: %{native_authority: %{completion: completion}}} =
+          record
+      )
+      when not is_nil(completion), do: history_record?(record)
 
   def record_valid?(
-        %{__struct__: ManagedMachine, disk_expansions: history, captures: captures} = record
+        %{
+          __struct__: ManagedMachine,
+          disk_expansions: history,
+          captures: captures,
+          native_branch_history: branches
+        } = record
       )
-      when map_size(history) == 0 and map_size(captures) == 0,
+      when map_size(history) == 0 and map_size(captures) == 0 and map_size(branches) == 0,
       do: unchanged?(record.created_machine) and unchanged?(record.observed_machine)
 
-  def record_valid?(%{__struct__: ManagedMachine} = record) do
-    with true <- unchanged?(record.created_machine),
-         {:ok, receipt, sizes, last} <- head(record) do
-      (record.disk_sizes == %{storage_gb: sizes["storage_gib"], overlay_gb: sizes["overlay_gib"]} or
-         (record.disk_sizes == nil and sizes == sizes(record.created_machine))) and
-        observation?(record.observed_machine, receipt, last)
-    else
-      _ -> false
-    end
-  end
+  def record_valid?(%{__struct__: ManagedMachine} = record), do: history_record?(record)
 
   def record_valid?(%{__struct__: Execution, managed_machine: nil} = record),
     do: unchanged?(record.created_machine)
@@ -92,6 +113,17 @@ defmodule SmolBox.Embedded.NativeGrowth do
   end
 
   def record_valid?(_record), do: false
+
+  defp history_record?(record) do
+    with true <- unchanged?(record.created_machine),
+         {:ok, receipt, sizes, last} <- head(record) do
+      (record.disk_sizes == %{storage_gb: sizes["storage_gib"], overlay_gb: sizes["overlay_gib"]} or
+         (record.disk_sizes == nil and sizes == sizes(record.created_machine))) and
+        observation?(record.observed_machine, receipt, last)
+    else
+      _ -> false
+    end
+  end
 
   def transition?(
         record,
@@ -151,7 +183,7 @@ defmodule SmolBox.Embedded.NativeGrowth do
 
   defp capture_history(record) do
     with {:ok, transitions} <- committed_all(record),
-         true <- Enum.any?(transitions, &MaterialHistory.capture?/1),
+         true <- Enum.any?(transitions, &MaterialHistory.requires_history?/1),
          do: transitions,
          else: (_ -> nil)
   end
@@ -183,8 +215,14 @@ defmodule SmolBox.Embedded.NativeGrowth do
 
   defp committed_all(record) do
     with {:ok, growth} <- committed(record.disk_expansions),
-         {:ok, captures} <- committed_captures(record.captures) do
-      {:ok, Enum.sort_by(growth ++ captures, & &1.receipt["material"]["revision"])}
+         {:ok, captures} <- committed_captures(record.captures),
+         {:ok, branches} <- NativeBranchHistory.transitions(record),
+         {:ok, release} <- NativeBranchAuthority.transitions(record) do
+      {:ok,
+       Enum.sort_by(
+         growth ++ captures ++ branches ++ release,
+         & &1.receipt["material"]["revision"]
+       )}
     end
   end
 

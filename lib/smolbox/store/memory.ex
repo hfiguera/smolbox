@@ -25,6 +25,7 @@ defmodule SmolBox.Store.Memory do
     ExportOps,
     MachineOps,
     MemoryVolumes,
+    NativeBranchReleaseOps,
     PortOwnership,
     RecordOps,
     SourceOwnership,
@@ -764,18 +765,45 @@ defmodule SmolBox.Store.Memory do
   end
 
   defp machine_operation(state, :branch_release, [key, version, now]) do
-    with {:ok, c} <- machine_lookup(state, key),
-         {:ok, c} <- BranchOps.release(c, version, now),
-         do: machine_save(state, c)
+    with {:ok, c} <- machine_lookup(state, key), do: accept_branch_release(state, c, version, now)
   end
 
   defp machine_operation(state, :branch_release_advance, [key, guard, expected, change, now]) do
     with {:ok, c} <- machine_guard(state, key, guard, now),
-         {:ok, c} <- BranchOps.release_advance(c, expected, change, now),
-         do: machine_save(state, c)
+         do: advance_branch_release(state, c, expected, change, now)
   end
 
   defp machine_operation(_state, _operation, _arguments), do: error(:validation)
+
+  defp accept_branch_release(state, %{branch: %{native_authority: authority}} = c, version, now)
+       when not is_nil(authority) do
+    with {:ok, p} <- machine_lookup(state, c.branch.source),
+         {:ok, p, c} <- NativeBranchReleaseOps.accept(p, c, version, now),
+         do: branch_save(state, p, c)
+  end
+
+  defp accept_branch_release(state, c, version, now),
+    do: with({:ok, c} <- BranchOps.release(c, version, now), do: machine_save(state, c))
+
+  defp advance_branch_release(
+         state,
+         %{branch: %{native_authority: authority}} = c,
+         expected,
+         change,
+         now
+       )
+       when not is_nil(authority) do
+    with {:ok, p} <- machine_lookup(state, c.branch.source),
+         {:ok, p, c} <- NativeBranchReleaseOps.advance(p, c, expected, change, now),
+         do: branch_save(state, p, c)
+  end
+
+  defp advance_branch_release(state, c, expected, change, now),
+    do:
+      with(
+        {:ok, c} <- BranchOps.release_advance(c, expected, change, now),
+        do: machine_save(state, c)
+      )
 
   defp insert_machine(state, record, max_pending) do
     with {:ok, record, volumes} <-

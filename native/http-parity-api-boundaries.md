@@ -2103,3 +2103,780 @@ not start a VM, prove real source geometry, traverse guest/worker conversion,
 attest aggregate OS memory peaks or complete public export/import acceptance.
 The existing SDK wire, whole-pipeline credit and ordinary platform/public gates
 remain pending. No capability, protocol limit or command/file ceiling changes.
+
+
+## Initial branch source/child admission
+
+The shared engine now exposes `prepare_initial_branch` and an opaque
+`PreparedInitialBranch`. This is read-only initial admission for an unbranched,
+originally enrolled running source and a fresh child identity. It does not dispatch
+fork preparation, reserve persistent backing, write an SDK row, mint a child
+receipt or enable a backend operation. Existing guarded checkpoint preflight
+establishes agent readiness and original owner/PID evidence; the source and child
+then acquire the same engine machine gates in lexical name order. A partial
+acquisition immediately drops its first gate. Source material, PID/birth,
+root/templates and child absence are rechecked after both gates are held, so the
+temporary preflight guard is never treated as continuous exclusion. No SDK source
+flock is held around a future SDK operation.
+
+The guard retains original domain/root/gates, a finite 16-descriptor work lease
+and the whole existing work metadata allowance. Both reserved observers remain
+available. Exact operator branch policy and profile host overhead derive the
+ordinary child reservation plus the additional allowance, matching public
+`Store.BranchOps`: extra memory covers guest RAM plus profile overhead; extra disk
+covers twice the source disks plus rounded-up guest RAM. Extra CPU/slot declarations
+retain their existing positive public policy bounds. These calculations do not
+claim persistent capacity reservation or measured CoW savings. Six shared cases
+are consumed by both Rust and actual public Elixir admission, including exact
+capacity and one-unit-short rejection in each resource dimension.
+
+A separate request digest binds original source receipt, fresh child intent,
+operation/hold/idleness, exact policy/plan, SDK revision, original source PID/birth,
+owner epoch and the fixed shared-RAM strategy. Rechecks reject another domain
+owner, epoch, changed material or child presence. Legacy receipts, foreign/stopped
+sources, nested/held/remote/networked/container/injected profiles and insufficient
+policies do not become fork permission. `idle: true` remains a host assertion;
+these checks do not attest guest process idleness or absence of RAM secrets.
+
+The locked SDK selects shared materialized RAM for unset/auto/shared
+`SMOLVM_BRANCH_RAM_MODE`; explicit paged mode uses a guardian manifest and may
+create an extra raw-forked guardian. Initial admission reads this setting without
+mutating it and rejects paged/unknown values. Future owned SDK dispatch must freeze
+the shared selection and qualify the exact libkrun/shared-generation behavior;
+a post-fork PID manifest cannot establish enrollment. SDK fork preparation also
+copies source labels into the child and can update the Linux source's
+`fork_lineage_pid_start_time`. Child ownership replacement and a distinct source
+material transition are mandatory before either can be accepted. Held activation
+must remain tied to one durable release intent, never a new call after uncertainty.
+
+Six branch units and the paired-gate model cover policy/hash/eligibility,
+pre-dispatch rejection, control isolation, stable lock acquisition and rollback.
+They create no VM and establish no positive live-source qualification. Durable
+source/child intents and backing reservations, existing-child source handling,
+child enrollment/identity reset/held release, bridge/store histories and ordinary
+independence/cleanup qualification remain pending. Full P8 branch scope is intact;
+public native branch support remains disabled.
+
+
+### Protected initial branch intent
+
+`PreparedInitialBranch.persist_intent` consumes the original admitted guard and
+writes one prepared-only source/child declaration into the protected material
+journal. `PreparedBranchIntent` retains the original gates, source root, domain
+and bounded job. Its recheck matches the exact stored declaration and original
+owner epoch/source PID authority, checks current source material and verifies
+child absence. No serialized declaration can construct that opaque handle.
+
+Journal validation binds the whole source receipt, child ownership intent,
+operation/hold/idleness, exact policy/resource plan, PID/birth, owner epoch,
+SDK/shared-RAM request digest and preceding material head. It excludes concurrent
+growth/capture intent, completed operation-ID reuse and exhausted histories.
+Generic record verification then fences lifecycle, execution and receipt-bound
+inspection; passive inventory and both reserved observers remain available.
+Normal reopening does not erase or adopt the declaration. Optional omission
+preserves unbranched journal bytes and readers reject unknown entered phases.
+
+Explicit `abort` requires the retained original handle plus unchanged source,
+root, owner and child absence. A separate cleanup budget can outlive cancelled
+admission; it grants no fork entry. Abort now records a separate protected retirement
+before acknowledgement; the source receipt and ordered material chain remain
+unchanged. Dropping a handle does not abort. Explicit prepared-only retirement
+and read-only result lookup are described below.
+
+Four new deterministic models cover journal reopen/fencing, changed identities/
+plans/source configuration/PID/lineage, mutually exclusive operations, historical
+ID reuse, exact abort and actual engine lifecycle/command rejection before SDK
+entry. Their synthetic process facts never establish positive enrollment. This
+is a pre-dispatch declaration, not persistent resource acquisition, SDK fork
+preparation, child authority, hold/release or live/platform qualification. Those
+remaining P8.4 gates and public capability exclusion stay unchanged.
+
+
+### Durable prepared-branch retirement
+
+`InitialBranchRetirement` is a distinct correlated result from either original-
+guard abort or explicit `retire_prepared_initial_branch`. Its domain-separated
+digest binds the entire original declaration, including source/child authority,
+resource plan, PID/birth, owner epoch and request hash. It grants no child receipt,
+material transition, SDK entry, child-disposal or backing-release authority.
+Serialized hashes alone cannot establish ownership: callers must use the exact
+result returned from the protected source journal.
+
+Explicit retirement requires caller quiescence, current domain/root/marker,
+lexically ordered source/child gates, the unchanged prepared-only declaration and
+source material, verified child absence and opaque source authority. A running
+source must still be originally enrolled in this engine. A stopped source must
+have no current native handle/PID and positive absence of its original PID/birth.
+A stopped SDK row alone is insufficient. Normal opening never invokes retirement.
+The original declaration cannot represent entered SDK dispatch; future fork
+entry must add distinct protected state before any mutation.
+
+The completed receipt is synchronized with intent removal before acknowledgement.
+`inspect_initial_branch_retirement` only reads that protected result. An explicit
+retirement retry returns an existing exact receipt before gates/current source or
+child checks, without writing or replaying the operation. Wrong request/source
+correlation rejects. None is not absence, disposal, cleanup or capacity authority.
+Retirement records anchor their original material head in the actual ordered
+history and cannot be relabelled onto a newer receipt. Their revisions are
+nondecreasing; operation IDs are unique across growth/capture/retirement. Total
+operation records remain bounded at 1024, and preparation reserves room for its
+own retirement. Existing records omit the optional retirement collection.
+
+Explicit retirement and read-only lookup each reserve the full material-control
+metadata allowance and eight descriptors for retained root, SQLite/actor readers
+and journal publication. Original-guard abort uses its retained work admission.
+Explicit retirement consumes one control slot and leaves the other available when admitted;
+full control admission rejects without changing intent. The model holds the full
+branch work allowance and an observer while retiring, then checks unchanged
+remaining admission. Typed receipts, normal value drop/reopen and ignored-result
+models verify lookup without another write. They launch or terminate no VMM and
+provide no ordinary fork/platform qualification. The public Port branch capability,
+bridge/store retirement histories and remaining P8.4 implementation stay pending.
+
+
+### Retained material publication (October 15, 2026)
+
+The current private engine path retains the original SDK runtime, ordered gates,
+metadata/result spools and bounded preparation backing through entered work and
+normal worker collection. Its distinct protected entered grant permits one
+held-fork preparation. The parent verifies original spools, bounded SDK rows,
+snapshot identity and original source enrollment. Neither collection nor caller
+retirement releases ownership or backing.
+
+`RetainedBranchPreparation.publish_material` now records an exact publication
+plan before changing child identity. It derives independent owner/incarnation
+labels and a source/intent/raw-child/generation digest; copied labels confer no
+ownership. Atomic no-replacement marker publication and a bound child root journal
+precede the distinct source material transition. Completion checks those actual
+files plus original running source authority. The source creation fingerprint
+stays fixed, while the ordered branch proof advances even when macOS source
+material is unchanged. Source/child gates, snapshot, runtime and backing remain
+retained. A material receipt does not establish child boot, readiness or release.
+
+Exact protected result lookup handles lost acknowledgement without SDK replay or
+another journal write. Mixed histories reject operation reuse, reordering and
+broken immutable/head linkage. New private journal fields are omitted on ordinary
+unbranched records; strict older readers reject new branch state. Four private
+non-VM row/file models exercise these boundaries with synthetic prior-authority
+facts. They run no VMM or live persistence interruption and establish no ordinary
+SDK/platform qualification. Public codecs, bridge/store histories and persistent
+dual reservation, entered resolution, child boot/enrollment, existing-child
+sources, held release and ordinary acceptance remain required. Public branch
+capability admission stays disabled; crash validation stays deferred.
+
+
+### Explicit held-child first boot
+
+`RetainedBranchPreparation::boot_child` uses the original published child,
+retained source/snapshot roots, runtime, gates and backing under the original
+absolute budget. It requires the actual approved SDK namespace and live original
+source enrollment. Public existing-disk constructors and
+`AgentManager::start_with_full_config` select the exact snapshot, source UID share
+and parent watch. No SDK convenience fork, cold fallback, second runtime, implicit
+release or retry is used. The package-approved agent rootfs must match the already
+selected launcher environment. Receipt-bound bare sidecars are rehashed, manifest
+checked and pinned before public packed-layer configuration; actual disk geometry
+may legitimately exceed the original bare manifest after approved growth.
+
+A protected first-boot journal synchronizes entry before SDK launch and records
+original epoch enrollment after return. The retained manager survives cancellation
+and uncertain observation. A historical boot identity grants neither current
+liveness nor guest identity initialization. Ordinary restart rejects an unfinished
+branch origin instead of interpreting inherited checkpoint labels as a new restore
+or using the ordinary SDK cold-start path. The initialized reader is reserved;
+its production writer, guest identity reset and explicit held release are pending.
+
+Branch admission reserves 24 work descriptors and two child slots for the whole
+preparation/boot/identity sequence within unchanged global caps, preserving eight
+control descriptors and both observers. Seven private non-VM models cover explicit
+configuration, root/input substitution, epoch mismatch, no replay and protected
+journal phases. Actual SDK boot semantics, manager transfer to ordinary lifecycle
+ownership, initialization/release, public integration and platform qualification
+remain required. No branch capability or acceptance row is enabled by this work.
+
+
+### Bounded original-child guest initialization
+
+`RetainedBranchPreparation::initialize_child` consumes only the original booted
+manager and opaque epoch enrollment. The child must still be the exact running
+held record and the continuing source must retain its original enrollment.
+Before guest IO, a protected first-boot transition binds the fixed bare-guest
+program digest, original boot intent/PID/birth, fresh challenge and host clock
+policy. Public SDK `AgentClient::vm_exec` runs only that engine program, with
+separate validated positional arguments and no caller command or environment.
+The program renews bare-guest hostname, disk machine identity, existing SSH host
+keys and cloud-init instance state, stirs the guest random stream, marks the
+public SDK restored forkpoint and attempts Linux guest wall-time correction; only
+the specific fail-soft clock warning is accepted.
+It does not release the parked helper or scrub arbitrary inherited RAM; the
+original approved idle/bare-source assertion remains necessary.
+
+The ordinary bounded agent relay rejects reply headers before SDK allocation.
+A short private temporary relay endpoint supports long owner-domain paths without
+changing process CWD or redirecting SDK state. An absolute deadline/cancellation
+guard shuts down only this exchange's socket;
+SDK failure, mismatched confirmation and uncertain completion cannot replay
+initialization. Only exact exit-zero challenge confirmation advances IdentityReady.
+The original manager/runtime/gates/backing remain retained. IdentityReady is
+neither a held-release proof nor ordinary cold-restart authority. Seven private
+models exercise fixed program/argument/identity binding, confirmation, actual
+public SDK exchange against a synthetic agent, oversized response headers,
+deadline/cancel, unchanged source/child rows and journal no-replay/origin checks. They execute no guest program.
+Actual guest semantics, initialization/release qualification, public integration
+and manager handoff remain pending; no branch capability is advertised.
+
+
+### Original-job typed release and child material
+
+`RetainedBranchPreparation::release_child` retains the original branch admission,
+manager, source/child gates, runtime and backing. A `BranchReleaseRequest` binds
+its caller's operation/request identity. Protected first-boot and material entry
+records bind the original publication, opaque boot enrollment, initialization
+digest and one release mode before guest entry. The shared bounded owner-process
+agent exchange now serves initialization and release, including its short private
+relay endpoint and absolute deadline/cancellation guard.
+
+For initial non-held creation, a public SDK BranchpointRelease request with empty
+environment preserves inherited-helper acknowledgement and no-boundary cleanup.
+Explicit held release uses public BranchpointActivate with exact standard bare
+paths, empty parameter files and one fresh activation token. Both require the
+public typed-branchpoint capability. Explicit activation requires the exact
+`already_done: false` response, while initial release requires its distinct empty
+acknowledgement. Missing data, duplicate activation, typed failures, oversized
+headers or uncertain observation cannot supply a release proof or cause retry.
+This avoids the SDK convenience function's automatic reconnect/retry behavior.
+It does not infer workload readiness from the acknowledgement.
+
+After exact confirmation, unchanged source/child rows and original live process
+identities precede a full-row CAS changing only forkpoint_held. A distinct child
+release proof preserves the immutable creation fingerprint. A branch-bound leaf
+journal records only that one permitted release material transition, keeping old
+unbranched bytes unchanged; unsupported child capture/growth histories cannot be
+smuggled into this transition. Both synchronized material and first-boot
+completions precede restart authority. The earlier reserved Initialized parser
+shape grants no restart. Exact completed-result lookup is read-only, uses the
+original opaque enrollment and never repeats guest IO, even after the original
+budget expires. A changed held flag or one completed journal is insufficient.
+
+Seven private models cover exact before/after material, both public SDK requests,
+malformed/duplicate confirmations, capability/header/cancellation failure,
+entered no-replay, synchronized publication/result lookup and history corruption/
+legacy omission. They start no VM or guest program. This native path still uses
+the original creation job; later public held release needs separate fresh store/
+version admission after manager handoff. Held-creation finalization, ordinary
+manager lifecycle ownership, entered resolution, public proof/codecs/store
+integration and ordinary SDK/platform qualification remain pending. Public native
+branch admission stays disabled; crash validation remains deferred.
+
+
+### Original manager handoff and retained backing
+
+`RetainedBranchPreparation::finish_child` requires completed original work and
+actual original source/child enrollment. It verifies the exact final material,
+unique retained ownership, collected IPC and absence of a live host worker before
+installing the same Arc<AgentManager> into the shared direct-manager cache.
+Opaque boot enrollment, the original source SDK runtime and domain follow it;
+there is no inventory adoption or second manager/runtime. A distinct HeldReady
+journal phase completes original held initialization without releasing the helper
+or granting cold restart. Released children retain the exact release receipt.
+Normal held commands and start/stop reject. Direct-manager foreground commands
+route through the bounded owned worker path instead of SDK reconnection.
+
+After manager installation, preparation roots and paired gates close. Atomic
+accounting retirement frees only temporary work/parser/FD/launch/IPC allowances.
+The original backing charge follows a distinct retained lease. Completed result
+and owner context have 128-KiB per-child bookkeeping under a separate finite
+128-MiB pool, leaving the existing 128-MiB SDK-parser allowance and both observers
+available. Completed original-token lookup is read-only and never boots or repeats
+preparation. Registry teardown quarantines and retains completed backing/context
+rather than asserting source disposal. Public backing/dependency retirement and
+replacement enrollment are still required; lease teardown alone grants neither.
+These private persistent limits need explicit negotiation before public activation.
+
+A continuing-source observation additionally requires original enrolled source
+PID/birth/runtime and exact protected current material for every SDK dependency.
+Published labels alone or an unrecorded held-flag change cannot override frozen/
+unknown dependency state. Children are checked one at a time through bounded
+read-only rows. Ordinary lifecycle dependency exclusion remains unchanged.
+
+Seven private non-VM models cover temporary-versus-retained accounting, subsequent
+work/control capacity, rejected unfunded/quarantined handoff, held completion and
+restrictions, missing release, prepared-token rejection, and metadata-only source
+candidacy against altered/unpublished children. They prove no real manager handoff,
+source commands or cold restart. Ordinary SDK/platform qualification, later
+fresh-budget held release/deletion, multiple-child sources, backing retirement/
+replacement and public proof/store/codec integration remain pending. Public branch
+admission is disabled; crash validation remains deferred.
+
+### Fresh-budget held release after manager handoff
+
+`Engine::release_held_branch` uses the original completed context and opaque boot
+enrollment. Receipts/rows alone cannot construct them. A new absolute budget funds
+one work slot, 20 descriptors and 32 MiB temporary metadata. An additional 128-KiB
+result-history lease comes from the bounded persistent metadata pool before
+dispatch; existing disk backing is not charged twice. Ordered source/child gates
+and the child's SDK source lease remain retained through actual host-worker return.
+
+Admission checks the current protected source head, original source PID/birth and
+every bounded SDK dependency against protected current child material. It does
+not reuse the creation request's expired deadline or frozen old source head.
+The original-job and later paths share the same bounded typed SDK exchange,
+unchanged-row checks, held-flag-only CAS and synchronized material/first-boot
+completion. Original manager and epoch checks fence both paths.
+
+Entered uncertainty keeps work/gates/SDK lease and history metadata; another call
+cannot replay activation. Exact completed lookup can recover an acknowledged
+result without SDK dispatch, including after ordinary cache removal. Only an
+existing exact tracked child receipt is promoted before temporary leases retire;
+lookup never re-enrolls stopped/deleted children or overwrites another incarnation.
+Persistent backing and result metadata remain charged. Seven private non-VM
+models exercise these boundaries; no real SDK branch is qualified. Public
+store/version/protocol routing, deletion/retirement, replacement, multiple-child
+creation and ordinary platform acceptance remain pending. Public native branch
+admission stays disabled and crash validation remains deferred.
+
+### Branch source admission with existing leaves
+
+`Engine::branch_preflight` separates branch source qualification from portable
+capture. It checks bounded current source/dependency records, exact protected
+head, original enrolled source PID/birth/runtime and nonpending checkpoint
+lifecycle before probing the agent through the existing header-first relay.
+One original absolute budget covers the probe and post-probe authority recheck.
+Its work allowance reserves 20 descriptors, 32 MiB metadata and no child slot;
+control observers remain separate. This does not assert guest idleness.
+
+Previously published leaves are checked against their independent creation
+bindings, markers and current protected child material, one bounded row at a
+time. A protected prepared declaration permits no existing row for its new child;
+only its exact entered grant can exempt that unpublished child. It cannot exempt
+another name, an unknown sibling, duplicate names or an unrelated pending source
+operation. After publication the new leaf needs the same complete proof as its
+siblings. These checks follow SDK worker preflight under the source lock,
+collection, source/child publication, boot, initialization, release and handoff.
+Prepared-only retirement uses the same sibling checks without deleting leaves.
+Capture and ordinary source lifecycle operations still reject dependencies.
+
+Four private non-VM models cover successive source publications and unchanged
+earlier child material, wrong/pending/exempt children, unknown siblings,
+cancellation without journal rewriting and missing original source enrollment.
+They establish no live fork, isolation, cleanup or platform qualification. Public
+proof/store/protocol/dual-reservation integration and actual SDK multiple-child
+qualification remain required; public branch admission stays disabled. Backing
+retirement/replacement is still pending and crash validation remains deferred.
+
+
+### Explicit deletion of an original completed held child
+
+The native delete path routes a retained original held child to
+`Engine::delete_held_branch`. Ordinary held stop/start remain forbidden. Matching
+rows or saved receipts cannot reconstruct the original manager, opaque enrollment
+or domain/runtime context. Ordered source/child gates, an SDK child lease, one
+work slot, 24 descriptors, 32 MiB work metadata and the existing 128-MiB SDK-parser
+allowance precede entry. Another 128 KiB of persistent result bookkeeping is
+funded before dispatch; existing disk backing is not charged twice.
+
+A bounded 0600 domain record binds the original plan, child/process/boot identities,
+initialization digest and nonce. It lives outside the SDK child directory and
+records Collecting, Collected, Deleting and Deleted. Only the original opaque
+BootCollection proof permits collection publication and the stopped-row CAS. SDK
+stop return alone or a stopped inventory row supplies no collection authority.
+The actor pending record excludes sibling actor reaping during the actual normal
+SDK stop call. A previously normally exited original child can be collected
+without sending a shutdown request. No manager is reconstructed from PID files.
+
+After collection, the original SDK lease closes before Runtime deletion takes its
+own source lock. SmolBox gates and whole-job allowance remain held. Runtime deletion
+can see only the verified stopped held row; it does not select unreachable recovery
+or another boot. A fresh original collection check plus bounded SDK row/reservation
+and child-directory absence permits Deleted. Only then can exact original cache
+entries and transient gates/work retire. Original context, source backing and
+result bookkeeping remain charged for separate dependency/backing retirement.
+
+Unknown collection/deletion cannot replay or release its leases. A completed exact
+result is read without another SDK call or journal rewrite. Five private non-VM
+models cover phase ordering, required absence, no original-manager reconstruction,
+unknown admission retention/control headroom, exact historical lookup and record
+identity/mode/link/version protections. They run no guest shutdown or SDK delete.
+Public/store/protocol activation, pre-handoff child disposal, explicit unknown
+delete resolution, dependency/backing retirement, replacement and ordinary SDK/
+platform qualification remain required. Public branch admission stays disabled;
+crash validation and distribution approval remain separate.
+
+
+### Explicit original held-delete absence resolution
+
+`Engine::resolve_held_branch_deletion` requires a valid operation/request digest
+and explicit caller quiescence. The bridge must fence its previous durable and
+controller requests. The native path additionally requires the original retained
+context/gates, actual host-worker return and exact opaque child/epoch collection.
+It performs no SDK stop, delete, reconnect, boot or material mutation. A live or
+unreturned actor, missing original context, remaining SDK row/reservation or child
+directory cannot supply absence. Pending actor dispatches still fence collection.
+
+Complete original-child absence during Collecting, Collected or Deleting records
+a distinct ResolvedAbsent proof. It confirms disposition without claiming SDK
+deletion success. The proof binds the child, original deletion-intent digest,
+resolution operation and caller request. Exact retries read the same result; a
+different operation/request rejects. Known SDK Deleted cannot be converted into
+a resolution result. Recorded lookup needs no current SDK inventory and never
+rewrites the journal. Completion retains its kind in the original owner cache.
+
+Existing schema-one records keep their exact absent optional field and 64-KiB
+limit on both read and write. Only schema two with ResolvedAbsent and its exact
+proof is accepted at the 80-KiB limit, allowing bounded additional request/proof
+bytes even for an accepted legacy intent. Unsupported schema/phase/proof pairings
+reject. These internal reader/limit changes still need public package, protocol
+and store negotiation before capability activation.
+
+The resolver uses the existing reserved material-control allowance: four
+descriptors and 32 MiB independent metadata, no work or child slot. It admits
+while the old deletion retains its work/parser allowance and the pool is
+quarantined; one ordinary control observer can coexist. The original work/gates
+stay retained through proof publication and exact original cache retirement.
+Only transient admission closes afterward. Source backing and persistent
+bookkeeping stay charged, and resolving this child never clears wider quarantine.
+
+Five additional private non-VM models cover quiescence/original-context rejection,
+all entered deletion phases, active workers, remaining material, foreign
+collection, cancellation, typed histories, proof/schema corruption, bounded legacy
+compatibility and quarantined control accounting. They establish no actual SDK
+shutdown/deletion or live resolution qualification. Public/version/store routing,
+collected residual-child cleanup, pre-handoff disposal, dependency/backing
+retirement/replacement and ordinary platform acceptance remain pending. Public
+branch admission remains disabled; crash qualification stays deferred.
+
+
+### Continue a collected child's unentered deletion step
+
+`Engine::continue_held_branch_deletion` requires explicit caller fencing, a valid
+operation/request, the original returned host worker, retained gates/work and
+positive original epoch collection. It verifies the same manager identity and
+exact held material. A collected original child can have its stale Running row
+normalized to Stopped through a full-row CAS; different process identities,
+changed material and foreign collection reject. This never repeats shutdown.
+Cleanup uses the original collection epoch even when launch admission is fenced;
+pending actors still exclude collection and no boot authority is granted.
+
+Schema three records a frozen continuation request in Finishing before the row
+update and final deletion. Only that same unentered Finishing request can
+continue with a fresh cleanup budget. Deleting cannot move backward or invoke
+SDK deletion again. Earlier schema-one/two records omit the new field exactly
+and keep their existing limits. Schema three uses the existing 80-KiB expanded
+record bound and accepts only the declared continuation/phase/proof combinations.
+A later absence resolution preserves and hashes the continuation binding and
+cannot become a successful continuation result. Private schema changes still
+need public package/store/protocol negotiation before capability activation.
+
+Ordinary and continued deletion now share final stopped-material checks, original
+collection, SDK source-lock closure, protected one-shot entry and positive
+row/reservation/directory absence. The SDK callback is invoked only after Deleting
+publication and a budget recheck. SmolBox gates stay held; the outer SDK lock
+closes before Runtime acquires its own. An entered/failed SDK delete retains its
+allowances and requires positive absence resolution, not retry.
+
+The old work slot, 24-descriptor/32-MiB work allowance and 128-MiB SDK-parser
+allowance fund the final SDK step. A four-descriptor/32-MiB material-control
+request follows actual owner-thread return, leaving one ordinary observer
+admissible during quarantine. No new work/child slot or disk backing is reserved.
+Only exact cache retirement and acknowledged completion retire transient work.
+Backing, persistent metadata and any wider quarantine remain.
+
+Eight private non-VM models exercise original authority, row normalization, frozen
+requests, record compatibility, lock closure/gates, one-shot callback entry,
+uncertain no-replay, separate absence resolution, fresh budgets and retained
+accounting. Their SDK results are private row/file callbacks; no SDK deletion or
+guest shutdown ran. Public continuation/version/store/protocol integration,
+pre-handoff disposal, partial/unproved residual cleanup, backing retirement/
+replacement and ordinary platform qualification remain pending. Public branch
+admission stays disabled and crash validation remains deferred.
+
+Final entry additionally requires fresh bounded dependency inventory and the
+pinned fork child's absent-or-linked `pack` cache. The SDK skips volume detach
+for those shapes. A private directory rejects before SDK entry; it cannot launch
+an unadmitted detach utility or detach a source/sibling volume. Private callback
+models verify the guard and preserve a linked source marker.
+
+
+### Residual directory cleanup after collected held-child deletion
+
+`Engine::cleanup_held_branch_deletion` requires explicit caller fencing, the
+original retained context, returned host worker, exact manager identity and opaque
+original epoch collection. SDK row and creation-reservation absence precede any
+unlink. Original directory identity is pinned by an actual descriptor retained
+across SDK deletion until acknowledgement; missing/replaced roots cannot create
+cleanup authority. The cache must still have the pinned SDK's absent-or-linked
+shape. This operation never calls SDK deletion or shutdown and grants no boot.
+
+A separate protected 80-KiB-bounded residual record binds the original intent,
+optional deletion continuation, cleanup request and parent directory identity.
+Cleaning precedes the first unlink. Descriptor-relative removal uses the existing
+one-million-entry and 4096-byte ancestor-path bounds, rejects device crossings and
+does not follow source-cache links. Root/parent synchronization, fresh original
+collection and complete row/reservation/directory absence precede the primary
+resolved-absence proof and residual Cleaned record. This cannot claim SDK success.
+Primary schema-one/two/three shapes and limits remain unchanged.
+
+Only the frozen request can continue partial Cleaning with a fresh budget.
+Known removed roots can complete forward; unknown absence cannot establish an
+initial cleanup grant. If the primary proof was already acknowledged, the exact
+saved request can close out only the cleanup audit, without inspecting/removing
+new material. A different request cannot supersede partial cleanup via generic
+absence resolution. Protected-file validation and version checks cover both
+namespaces independently.
+
+Traversal uses the original retained 24-descriptor work reservation. One extra
+four-descriptor/32-MiB material-control job leaves an ordinary observer admissible
+while quarantined; it follows actual worker return. Original gates/work/parser
+allowance retire only after exact cache acknowledgement. Source backing,
+persistent history and wider quarantine remain. Eight private row/file/counter
+models cover partial cleanup, caller fencing, foreign collection, substituted
+roots, row/reservation exclusion, links/siblings, accounting, record namespaces
+and audit-only completion. They run no VMM, SDK deletion or live fault campaign.
+Public bridge/version/store integration, released/restarted children, pre-handoff
+disposal, backing retirement/replacement and ordinary platform qualification
+remain required. Public branch admission stays disabled; crash validation remains
+deferred.
+
+
+### Explicit native branch backing-accounting release
+
+`Engine::release_branch_backing` requires both caller quiescence and the same
+positive host backing-removal confirmation required by public HTTP storage
+release. Native path checks additionally require absent source and child SDK
+rows, creation reservations and original directories. It does not remove files,
+run generation GC, invoke SDK lifecycle APIs or retire source dependencies.
+The host assertion still covers material moved outside the expected namespace;
+path absence alone is not proof that every original backing file was removed.
+
+Only the original completed registry context can select the actual backing lease.
+Ordered source/child gates, original epoch binding, source quiescence and original
+source process absence plus opaque original child collection precede a fresh
+release. Runtime PID caches must be empty. The original child manager is marked
+stopped only after collection; no signal is sent. Prepared/entered/uncompleted
+branches cannot substitute inventory or caller-created proof for that context.
+
+A separate protected 80-KiB-bounded record binds original completion, boot/child
+identity, plan and initialized identity digest to a typed BranchBackingRelease.
+Its public digest binds publication, operation/request and exact native charge.
+The file is account-owned, single-link, 0600, no-follow, bounded and inode/version
+checked, atomically published without replacement and synchronized before native
+material accounting changes. Exact known result acknowledges only the same
+request, re-synchronizes the domain and never requalifies/removes new material.
+A failed publication or cancelled acknowledgement retains the charge; an exact
+known proof permits subsequent explicit acknowledgement without a second release.
+
+One four-descriptor/32-MiB material-control job and both gates follow actual owner
+thread return, including observer timeout. One ordinary observer remains
+admissible under quarantine. Material bytes alone become free: persistent result
+metadata/history, sibling backing and wider quarantine remain. Completed zero-
+material entries can drop normally on registry shutdown; unresolved entries still
+retain/quarantine their original owner and charge. Seven private row/file/counter
+models cover these boundaries without VMs, SDK cleanup or live interruption.
+Public branch retirement/storage-release protocol, durable dual accounting,
+reader/package negotiation, replacement and ordinary platform acceptance remain
+required. Public branch admission is disabled; crash validation stays deferred.
+
+
+### Scoped public branch coordination
+
+Automatic branch preflight/create/completion/release now assign source and child
+backend references independently to their saved records. They retain the worker
+pin already selected before durable dispatch intent. Source identity never stands
+in for the child's context. Explicit public resolve/retire/storage-release now
+use the existing NativeResolution/NativeAuthority path: one owner/epoch pin,
+helper quiescence and worker lease precede observations; the authority fence
+survives the fresh parent claim and final guarded store transaction.
+
+BranchObservation preserves one pin across source/child queries. A changed
+registration cannot retarget the second query; an unavailable pin stays
+unavailable. Deleted resolution alone permits source not-found. Retirement checks
+only the child; storage release requires both absent. The HTTP adapter continues
+to use its original client, result semantics and atomic branch store operations.
+
+Seven semantic transport models exercise record scopes, preserved budgets,
+missing/present/uncertain observations and replacement/unavailable pins. Four
+public/store models exercise quiescence, the held authority fence through final
+writes, busy/stale/competing authority rejection and conservative public backing
+accounting. These models use validated public branch records and semantic native
+channel adapters. They do not enroll native assignments, invoke SDK actions,
+qualify native branch material proofs or run a live fault campaign. Native branch
+Port requests, durable authority/codec histories, engine backing-release proof
+acknowledgement and ordinary SDK/platform acceptance remain required. Public
+branch admission remains disabled; crash validation stays deferred.
+
+
+### Port source-only branch preflight
+
+Protocol two now carries BranchPreflight with exactly a saved material receipt
+and a maximum 30-second absolute budget. Session admission requires the branches
+feature version and matching target/domain; the legacy path cannot dispatch it.
+The helper adapter calls only Engine.branch_preflight, which retains original
+source enrollment/material/gates, bounded dependency checks and a bounded agent
+ping. This is neither a fork nor guest-idleness/readiness proof for a future child.
+
+The helper routes this probe through work admission, preserving the reserved
+observation/control lane. Replies require zero output, Running state, PID/birth,
+resources and explicit offline/unmapped/unmounted configuration. Streams and
+qualification/creation outcomes reject. Scoped branch_source construction binds
+the caller's saved assignment/current identity; reply decoding preserves that
+receipt and checks source resources/configuration instead of adopting inventory.
+Both public adapter and Port feature gates reject currently approved packages.
+No capability declaration, SDK source or public native admission is enabled.
+
+A shared synthetic transport fixture, three Rust protocol contracts, one semantic
+helper peer and four Elixir contracts cover exact shapes, material/domain/feature
+fences, bounded budgets, credited stream rejection, source reply/resource
+correlation and current-package rejection. They run no SDK action or live source
+qualification. Remaining branch requests, creation Port workflow routing,
+durable branch authority/history/codec and dual reservations, package negotiation,
+replacement and ordinary platform acceptance remain required. Crash validation
+stays deferred.
+
+
+### Shared-engine original branch creation workflow
+
+Engine.create_branch consumes a BranchCreateRequest with exact source receipt,
+independent child intent, operator-selected approval and optional initial release.
+Held requests require no initial activation. Non-held requests require a valid
+activation operation/request distinct from the creation operation before any
+admission. The caller must retain the public durable child-plus-extra reservation;
+internal preparation backing does not replace public capacity accounting.
+
+The driver composes the existing guarded stages: protected initial intent,
+retained preparation worker, material publication/first boot/guest initialization,
+optional initial release and original manager handoff. One caller ReadBudget
+follows every stage. No convenience fork, cold fallback, new SDK owner or replay
+of an entered step is introduced. Post-intent errors remain uncertain; pending
+journals/original gates and retained workers/backing keep their existing fences.
+
+Engine.inspect_branch_completion reads only the original completed registry and
+returns historical creation evidence. It compares the exact prior source material
+head, complete child identity/mode, approval and initial activation. Duplicate or
+conflicting results reject. None means no original completed result, not verified
+child absence, replay permission or free capacity. Later child release/deletion
+cannot rewrite that original creation kind. No current SDK rows or PID labels
+reconstruct ownership. A four-descriptor/32-MiB material-control allowance bounds
+lookup while quarantine and old work/backing stay retained; history is unchanged.
+
+Six private non-VM models exercise mode/activation admission, held/initial-release
+result correlation, changed source/child/policy/activation, corrupt/duplicate
+results, cancellation, original-owner rejection and quarantined accounting. They
+construct typed result models without constructing an SDK manager or dispatching
+a fork. Happy-path SDK workflow/platform qualification, branch Port DTO/catalog
+routing, public durable proof/codec/dual reservations and replacement remain
+required. Public native branch admission stays disabled; crash validation remains
+deferred.
+
+
+### Branch creation and historical completion Port contracts
+
+Protocol two now carries create_branch and inspect_branch_completion through the
+helper's typed adapter to the original shared-engine workflow. Each request fixes
+the source receipt, independent child intent, full resource/backing approval and
+optional distinct initial activation. Feature negotiation and exact immutable
+operator catalog equality gate admission and dispatch; matching an approval ID
+alone is insufficient. Absent catalogs preserve legacy configuration bytes and
+reject branch work. Present catalogs are major-two-only and bounded to 32 policy
+IDs with at most 32 distinct approved profile overheads each. All variants of an
+ID must have identical backing resources; exact duplicates reject. Creation uses
+work; historical lookup uses observation admission. Branch-bearing configurations
+have a finite 512-KiB allowance for the full profile catalog; configurations
+without that catalog retain 64 KiB. Both the writer and helper reader enforce it.
+
+Typed publication, child origin and initial-release proofs retain the engine's
+canonical hash algebra and require exact request/platform correlation. Lookup
+None is not child absence, replay permission or free capacity. All results reject
+streamed bytes. Completion proofs are capped at 64 KiB; branch terminal envelopes
+receive 68 KiB of bounded control storage. Ordinary controls keep their 4-KiB cap;
+the event allowance is unchanged. Combined queue storage is finite at the prior
+event allowance plus 65 branch control allowances. Stalled-event/control tests
+preserve two observer replies and reject overflow before sequence advancement.
+
+Synthetic held/released fixtures validate unchanged in engine and protocol. Three
+protocol contracts, an adapter fixture, catalog/helper peers and one stalled-output
+contract add no live SDK qualification. Elixir readers and catalog forwarding now
+check the same canonical hashes, exact request/domain/platform and distinct
+creation/lookup results. Approved source profiles determine host overhead; the
+worker allocation floor cannot substitute. Current packages reject both operations
+before native dispatch even with an exact catalog. Durable branch authority/
+history/codec/dual reservations, public backend routing, backing acknowledgement,
+pre-handoff disposal, released/restarted deletion, replacement and ordinary
+end-to-end platform acceptance remain required. Public branch admission stays
+disabled; Rustler and Kubernetes implementation remain future work, and crash
+validation stays deferred.
+
+
+### Branch material-history and selective persistence readers
+
+BranchPublication and BranchReleaseTransition now have typed Elixir forms with
+redacted inspection, preserving the existing wire/hash algebra. MaterialHistory
+checks exact prior receipts, unique operation IDs and known growth/capture hashes,
+checkpoint heads, platform/lineage continuity and backing disk totals while mixing
+source branches with growth, capture and capture resolution. A known absent head
+or lineage is never an unobserved wildcard. Branch publication may advance a
+revision without changing record bytes. Child release is its own root-linked
+sealed history, consistent with the current engine journal's one-release-only
+rule. Neither typed link grants runtime enrollment or guest readiness.
+
+Identities with branch links require their complete chain. Branch histories share
+the native 1,024-link ceiling; existing branchless histories retain 288. Two
+synthetic macOS/Linux fixtures pass every prefix through the actual engine journal
+and Elixir reader without an SDK manager, disk mutation or VM. Individually valid
+crossed hashes/heads, missing/reordered links, duplicate operation IDs, platform/
+lineage mismatch and extra child-release mutation reject.
+
+Attached command evidence carrying these typed links selectively uses v29.
+Older-envelope substitution, compression, trailing bytes, missing history and a
+v29 envelope without branch links reject. Existing records keep their earlier
+encodings. This codec foundation advertises no native_branch_histories capability
+and enables no public branch operation. Durable branch intent/completion authority,
+prepared retirement, atomic source/child histories and dual reservations, store
+replacement and ordinary source/platform qualification remain required. Crash
+validation remains deferred.
+
+### Held-release checked dispatch and completed-result qualification
+
+The shared engine now exposes release_held_branch_checked with the original held
+BranchCompletion, frozen current source receipt and distinct BranchReleaseRequest.
+It validates the exact retained publication, initialized identity and immutable
+source origin before entering the existing fresh-budget release workflow. A
+receipt, SDK row or syntactically valid different completion cannot manufacture
+that original context. The lower release workflow still requires its original
+manager/enrollment and ordered source/child gates before SDK entry.
+
+qualify_held_branch_release uses reserved material-control admission and the same
+original context. It never invokes the SDK or reconstructs a manager from inventory.
+An active original worker or incomplete protected result remains uncertain. Both
+recorded completions plus collected original work may promote only an already
+owned handle and retire transient work/gates. A stopped/deleted missing handle is
+not re-enrolled. Backing stays retained. This qualification is historical result
+recovery, not a positive current source/child observation; None establishes neither
+absence nor permission to replay an uncertain attempt.
+
+Protocol two carries release_held_branch and qualify_held_branch_release with the
+full original held completion, current source receipt and exact release request.
+The nested original approval must equal an immutable helper catalog entry before
+native dispatch. The checked engine entry independently compares that completion
+with original retained authority. Creation/initial activation cannot substitute for
+explicit release. Requests have a finite 68-KiB bound and distinct 900-second work/
+30-second qualification ceilings. Both require branches:1; current packages do
+not activate that feature. Qualification uses reserved observation/control rather
+than work, including during quarantined admission.
+
+held_branch_released requires an explicit transition. held_branch_release_presence
+requires a present nullable transition field; missing proof cannot become success.
+Both reject streams and correlate original binding/identity, request, source/child
+namespace and package platform. All branch proof terminals use the existing finite
+68-KiB branch control allowance, even when the proof is small; ordinary control
+routing rejects them. Queue/event limits and the two ordinary observer slots stay
+unchanged. Elixir validates the same envelope and constructs it from the original
+frozen store release without issuing a replacement request.
+
+Two new engine models validate exact completion/context rejection and shared
+synthetic macOS/Linux hashes. Three protocol models, helper catalog/lane and bounded
+output models, and four Elixir models cover these contracts without a VM. Existing
+held-release models retain the two-completion/collection/cache-promotion boundary.
+Backend/public branch routing, current observations, cleanup and ordinary SDK/
+platform qualification remain pending. These changes grant no public native branch
+admission, historical package qualification, Rustler/Kubernetes implementation or
+live crash/persistence-interruption qualification.

@@ -618,7 +618,7 @@ fn collect_exact(actor: &Actor) -> Result<bool> {
     }
     gone(actor.child)
 }
-fn gone(identity: OwnerIdentity) -> Result<bool> {
+pub(crate) fn gone(identity: OwnerIdentity) -> Result<bool> {
     let result = unsafe { libc::kill(identity.pid, 0) };
     if result == -1 {
         return if std::io::Error::last_os_error().raw_os_error() == Some(libc::ESRCH) {
@@ -705,6 +705,14 @@ pub(crate) mod tests {
         executable: Option<PathBuf>,
         binding: DomainBinding,
     ) -> (HostContext, BootLauncher, ActorEpoch) {
+        fixture_for_binding_and_epoch(root, executable, binding, "b".repeat(32))
+    }
+    pub(crate) fn fixture_for_binding_and_epoch(
+        root: &Path,
+        executable: Option<PathBuf>,
+        binding: DomainBinding,
+        epoch: String,
+    ) -> (HostContext, BootLauncher, ActorEpoch) {
         std::fs::set_permissions(root, std::fs::Permissions::from_mode(0o700)).unwrap();
         let path = executable.unwrap_or_else(|| {
             let path = root.join("approved");
@@ -718,7 +726,7 @@ pub(crate) mod tests {
         };
         let host = HostContext::capture(
             binding,
-            "b".repeat(32),
+            epoch,
             "c".repeat(64),
             ExecutableLocator {
                 boot: executable.clone(),

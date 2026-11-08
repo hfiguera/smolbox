@@ -2,7 +2,7 @@ defmodule SmolBox.DurableHost.BranchStore do
   @moduledoc false
   if Code.ensure_loaded?(SmolBox.Store.BranchOps) do
     alias SmolBox.DurableHost.{Database, WorkerStore}
-    alias SmolBox.Store.BranchOps
+    alias SmolBox.Store.{BranchOps, NativeBranchReleaseOps}
     def capabilities, do: %{managed_branches: 1}
 
     def run(context, :branch_accept, [key, spec, fingerprint, name, capacity, now]) do
@@ -46,14 +46,42 @@ defmodule SmolBox.DurableHost.BranchStore do
 
     def run(context, :branch_release, [key, version, now]) do
       with {:ok, c} <- Database.read(context, key, :machine),
-           {:ok, c} <- BranchOps.release(c, version, now),
-           do: {:ok, nil, c}
+           do: accept_release(context, c, version, now)
     end
 
     def run(context, :branch_release_advance, [key, guard, expected, change, now]) do
       with {:ok, c} <- Database.guarded_machine(context, key, guard, now),
-           {:ok, c} <- BranchOps.release_advance(c, expected, change, now),
-           do: {:ok, nil, c}
+           do: advance_release(context, c, expected, change, now)
+    end
+
+    defp accept_release(context, %{branch: %{native_authority: authority}} = c, version, now)
+         when not is_nil(authority),
+         do: native_release(context, c, :accept, [version, now])
+
+    defp accept_release(_context, c, version, now),
+      do: with({:ok, c} <- BranchOps.release(c, version, now), do: {:ok, nil, c})
+
+    defp advance_release(
+           context,
+           %{branch: %{native_authority: authority}} = c,
+           expected,
+           change,
+           now
+         )
+         when not is_nil(authority),
+         do: native_release(context, c, :advance, [expected, change, now])
+
+    defp advance_release(_context, c, expected, change, now),
+      do: with({:ok, c} <- BranchOps.release_advance(c, expected, change, now), do: {:ok, nil, c})
+
+    if Code.ensure_loaded?(NativeBranchReleaseOps) do
+      defp native_release(context, child, operation, arguments) do
+        with {:ok, parent} <- Database.read(context, child.branch.source, :machine),
+             do: apply(NativeBranchReleaseOps, operation, [parent, child | arguments])
+      end
+    else
+      defp native_release(_context, _child, _operation, _arguments),
+        do: {:error, %SmolBox.Error{category: :unsupported_capability, operation: :store}}
     end
 
     defp pair(context, key, guard, id, now) do

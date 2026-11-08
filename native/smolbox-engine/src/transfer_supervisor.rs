@@ -106,6 +106,26 @@ pub(crate) struct Prepared {
     _conversion: Option<Spool>,
 }
 impl Prepared {
+    pub(crate) fn verify_unentered_branch(&self) -> Result<()> {
+        let Kind::BranchPrepare { metadata, expected } = &self.request.kind else {
+            return Err(Error::before(ErrorCode::Validation));
+        };
+        self.request.validate()?;
+        self.spool.verify()?;
+        if self
+            .spool
+            .file
+            .metadata()
+            .map_err(|_| Error::before(ErrorCode::Io))?
+            .len()
+            != 0
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        let selected: crate::branch_worker::Metadata =
+            metadata.read(self.request.owner, crate::branch_worker::METADATA_BYTES)?;
+        crate::branch_worker::verify_request(&selected, &self.request, expected)
+    }
     pub(crate) fn into_streaming(mut self) -> Result<Self> {
         let Kind::Buffered { metadata } = &self.request.kind else {
             return Err(Error::before(ErrorCode::Validation));
@@ -162,6 +182,7 @@ impl Prepared {
 pub(crate) struct Collected {
     pub converted: Option<crate::export_bootstrap::Proof>,
     pub captured: Option<crate::capture_worker::Proof>,
+    pub branch_prepared: Option<crate::branch_worker::Proof>,
     pub bootstrapped: Option<crate::bootstrap::Proof>,
     pub pulled: Option<crate::ImageObservation>,
     pub installed: Option<crate::checkpoint_install::Proof>,
@@ -343,6 +364,63 @@ pub(crate) struct TransferSupervisor {
     pub(crate) epoch: Option<crate::epoch::ActorEpoch>,
 }
 impl TransferSupervisor {
+    pub(crate) fn prepare_branch_owned(
+        &self,
+        directory: &Path,
+        bytes: &[u8],
+        expected: crate::branch_worker::Expected,
+    ) -> Result<Prepared> {
+        expected.validate()?;
+        if bytes.is_empty() || bytes.len() as u64 > crate::branch_worker::METADATA_BYTES {
+            return Err(Error::before(ErrorCode::Validation));
+        }
+        let selected: crate::branch_worker::Metadata =
+            serde_json::from_slice(bytes).map_err(|_| Error::before(ErrorCode::Validation))?;
+        if selected.grant.directory != directory || selected.grant.owner != self.owner {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        let mut metadata = Spool::new(directory)?;
+        metadata
+            .file
+            .write_all(bytes)
+            .map_err(|_| Error::before(ErrorCode::Io))?;
+        metadata
+            .file
+            .set_permissions(std::fs::Permissions::from_mode(0o400))
+            .and_then(|()| metadata.file.sync_all())
+            .map_err(|_| Error::before(ErrorCode::Io))?;
+        let blob = ipc::Blob {
+            path: metadata.path.clone(),
+            device: metadata.identity.0,
+            inode: metadata.identity.1,
+            bytes: bytes.len() as u64,
+        };
+        let spool = Spool::new(directory)?;
+        let request = Request {
+            schema: 1,
+            operation: selected.grant.worker_operation,
+            owner: self.owner,
+            socket: selected.source_directory.join("agent.sock"),
+            staging: spool.path.clone(),
+            staging_device: spool.identity.0,
+            staging_inode: spool.identity.1,
+            guest_path: "/workspace/.smolbox-branch-prepare".into(),
+            max_bytes: crate::branch_worker::OUTPUT_BYTES,
+            kind: Kind::BranchPrepare {
+                metadata: blob,
+                expected,
+            },
+        };
+        let prepared = Prepared {
+            request,
+            spool,
+            _permit: None,
+            _metadata: Some(metadata),
+            _conversion: None,
+        };
+        prepared.verify_unentered_branch()?;
+        Ok(prepared)
+    }
     pub(crate) fn new(host: &HostContext, pool: crate::jobs::JobPool) -> Result<Self> {
         host.validate()?;
         Ok(Self {
@@ -1003,6 +1081,7 @@ impl TransferSupervisor {
                         | Kind::Background { .. }
                         | Kind::Streaming { .. }
                         | Kind::Capture { .. }
+                        | Kind::BranchPrepare { .. }
                         | Kind::CheckpointInstall { .. }
                         | Kind::CheckpointMaterialize { .. }
                         | Kind::Grow { .. }
@@ -1039,17 +1118,29 @@ impl TransferSupervisor {
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::null());
-        if let Kind::Capture { metadata, .. } = &prepared.request.kind {
-            let selected: crate::capture_worker::Metadata =
-                metadata.read(self.owner, crate::capture_worker::METADATA_BYTES)?;
-            let data = selected
-                .database
+        if let Kind::BranchPrepare { .. } = &prepared.request.kind {
+            command.env("SMOLVM_BRANCH_RAM_MODE", "shared");
+        }
+        let namespace = match &prepared.request.kind {
+            Kind::BranchPrepare { metadata, .. } => {
+                let selected: crate::branch_worker::Metadata =
+                    metadata.read(self.owner, crate::branch_worker::METADATA_BYTES)?;
+                Some((selected.database, selected.source_directory))
+            }
+            Kind::Capture { metadata, .. } => {
+                let selected: crate::capture_worker::Metadata =
+                    metadata.read(self.owner, crate::capture_worker::METADATA_BYTES)?;
+                Some((selected.database, selected.source_directory))
+            }
+            _ => None,
+        };
+        if let Some((database, source_directory)) = namespace {
+            let data = database
                 .parent()
                 .and_then(Path::parent)
                 .and_then(Path::parent)
                 .ok_or(Error::before(ErrorCode::Ownership))?;
-            let cache = selected
-                .source_directory
+            let cache = source_directory
                 .parent()
                 .and_then(Path::parent)
                 .and_then(Path::parent)
@@ -1083,6 +1174,7 @@ impl TransferSupervisor {
                 Kind::Conversion { .. }
                     | Kind::Grow { .. }
                     | Kind::Capture { .. }
+                    | Kind::BranchPrepare { .. }
                     | Kind::CheckpointInstall { .. }
                     | Kind::CheckpointMaterialize { .. }
             ),
@@ -1256,6 +1348,11 @@ impl TransferSupervisor {
                     },
                     pulled: if status.success() && decoder.complete() && reason.is_none() {
                         evidence.pulled.clone()
+                    } else {
+                        None
+                    },
+                    branch_prepared: if status.success() && decoder.complete() && reason.is_none() {
+                        evidence.branch_prepared.clone()
                     } else {
                         None
                     },
@@ -1456,6 +1553,66 @@ fn check_budget(deadline: Instant, cancel: &Cancellation) -> Result<()> {
 mod tests {
     use super::*;
     use sha2::{Digest, Sha256};
+    #[test]
+    #[ignore = "requires a built helper; explicit ordinary non-VM branch namespace rejection"]
+    fn ordinary_branch_worker_rejects_unentered_fixture_and_collects_original_leases() {
+        let (temp, metadata, expected) = crate::branch_worker::tests::fixture();
+        let root = root(&temp);
+        // This private DB cannot resolve to the SDK's default smolvm/server DB,
+        // even under the worker's inherited namespace projection. No SDK open,
+        // snapshot, manager or VM is permitted in this ordinary negative test.
+        assert_eq!(metadata.database.file_name().unwrap(), "db");
+        let original_db = std::fs::read(&metadata.database).unwrap();
+        let executable = std::env::var_os("SMOLBOX_TEST_FILE_WORKER")
+            .expect("set the explicit rebuilt helper path");
+        let supervisor = supervisor(&root, executable.into());
+        let mut permit = supervisor
+            .pool
+            .acquire(crate::jobs::Demand::branch_source())
+            .unwrap();
+        permit.promote_branch_preparation().unwrap();
+        permit
+            .promote_branch_backing(metadata.grant.intent.plan.preparation_disk_bytes().unwrap())
+            .unwrap();
+        let admitted = supervisor.pool.counts();
+        let (bytes, _) = metadata.encode().unwrap();
+        let prepared = supervisor
+            .prepare_branch_owned(&metadata.grant.directory, &bytes, expected)
+            .unwrap();
+        prepared.verify_unentered_branch().unwrap();
+        let paths = (
+            prepared.spool.path.clone(),
+            prepared._metadata.as_ref().unwrap().path.clone(),
+        );
+        assert_eq!(supervisor.pool.counts(), admitted);
+        let marker = std::sync::Arc::new(());
+        let retained = std::sync::Arc::downgrade(&marker);
+        let result = supervisor
+            .run(
+                prepared,
+                Box::new((permit, marker)),
+                Instant::now() + Duration::from_secs(60),
+                &Cancellation::new(),
+            )
+            .unwrap();
+        let RunResult::Collected(collected) = result else {
+            panic!("ordinary branch rejection worker was not collected")
+        };
+        assert!(collected.worker_ready && !collected.termination_requested);
+        assert!(!collected.outcome.native_acknowledged);
+        assert_eq!(collected.outcome.observed_bytes, 0);
+        assert!(collected.branch_prepared.is_none());
+        collected.prepared.verify_unentered_branch().unwrap();
+        assert!(retained.upgrade().is_some());
+        assert_eq!(supervisor.pool.counts(), admitted);
+        assert_eq!(std::fs::read(&metadata.database).unwrap(), original_db);
+        assert!(!metadata.source_directory.join("agent.sock").exists());
+        drop(collected);
+        assert!(retained.upgrade().is_none());
+        assert_eq!(supervisor.pool.counts(), crate::jobs::Counts::default());
+        assert!(!paths.0.exists() && !paths.1.exists());
+    }
+
     #[test]
     #[ignore = "requires a built helper; explicit ordinary non-VM imported conversion peer"]
     fn ordinary_imported_conversion_worker_preserves_source_gate_and_spools() {

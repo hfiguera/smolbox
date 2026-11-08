@@ -174,8 +174,19 @@ impl Shared {
         if !state.handles.contains_key(&id) {
             return Ok(());
         }
-        self.output
-            .send(0, || state.session.terminal(id, outcome).map_err(|_| ()))?;
+        let branch = matches!(
+            &outcome,
+            wire::Outcome::BranchCreated { .. }
+                | wire::Outcome::BranchCompletionPresence { .. }
+                | wire::Outcome::HeldBranchReleased { .. }
+                | wire::Outcome::HeldBranchReleasePresence { .. }
+        );
+        let build = || state.session.terminal(id, outcome).map_err(|_| ());
+        if branch {
+            self.output.send_branch_terminal(build)?;
+        } else {
+            self.output.send(0, build)?;
+        }
         let handle = state.handles.remove(&id).ok_or(())?;
         state.upload_bytes -= handle.upload_reservation;
         Ok(())
@@ -270,6 +281,15 @@ pub trait Native: Send + Sync + 'static {
     ) -> wire::Outcome {
         before(wire::SafeCode::Unsupported)
     }
+    fn branch(
+        &self,
+        _operation: wire::Operation,
+        _approval: wire::BranchApproval,
+        _remaining: Duration,
+        _cancel: Cancellation,
+    ) -> wire::Outcome {
+        before(wire::SafeCode::Unsupported)
+    }
     fn volume(
         &self,
         _policy: smolbox_engine::LocalVolumePolicy,
@@ -323,6 +343,15 @@ pub trait Native: Send + Sync + 'static {
     fn shutdown(&self) -> BridgeResult<()>;
 }
 impl Native for Engine {
+    fn branch(
+        &self,
+        operation: wire::Operation,
+        approval: wire::BranchApproval,
+        remaining: Duration,
+        cancel: Cancellation,
+    ) -> wire::Outcome {
+        adapter::branch(self, operation, approval, remaining, cancel)
+    }
     fn run_with_volume_policy(
         &self,
         operation: wire::Operation,
@@ -719,6 +748,8 @@ fn is_observation(operation: &wire::Operation) -> bool {
             | wire::Operation::InspectRegistryCreation { .. }
             | wire::Operation::InspectCheckpointCreation { .. }
             | wire::Operation::CheckpointPreflight { .. }
+            | wire::Operation::InspectBranchCompletion { .. }
+            | wire::Operation::QualifyHeldBranchRelease { .. }
     )
 }
 fn is_control(operation: &wire::Operation) -> bool {
@@ -822,6 +853,19 @@ fn admit_request(
                         && mount.proof.backing.policy.root == policy.root.to_string_lossy()
                 })
             })
+        {
+            rejection
+        } else {
+            Some(wire::SafeCode::Unsupported)
+        }
+    } else {
+        rejection
+    };
+    let rejection = if let Some(approval) = operation.branch_approval() {
+        if config
+            .approved_branches
+            .as_ref()
+            .is_some_and(|catalog| catalog.contains(approval))
         {
             rejection
         } else {
@@ -1196,6 +1240,25 @@ fn spawn_worker(
             };
             let result =
                 std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| match work.operation {
+                    operation @ (wire::Operation::CreateBranch { .. }
+                    | wire::Operation::InspectBranchCompletion { .. }
+                    | wire::Operation::ReleaseHeldBranch { .. }
+                    | wire::Operation::QualifyHeldBranchRelease { .. }) => {
+                        let approval = operation
+                            .branch_approval()
+                            .and_then(|wanted| {
+                                config.approved_branches.as_ref().and_then(|catalog| {
+                                    catalog.iter().find(|approved| *approved == wanted)
+                                })
+                            })
+                            .cloned();
+                        match approval {
+                            Some(approval) => {
+                                native.branch(operation, approval, remaining, work.cancel.clone())
+                            }
+                            None => before(wire::SafeCode::Unsupported),
+                        }
+                    }
                     operation @ (wire::Operation::QualifyExport { .. }
                     | wire::Operation::AdmitExport { .. }
                     | wire::Operation::ExportMachine { .. }) => {
@@ -1604,6 +1667,69 @@ mod tests {
         uploaded: Mutex<Vec<u8>>,
     }
     impl Native for Fake {
+        fn branch(
+            &self,
+            operation: wire::Operation,
+            approval: wire::BranchApproval,
+            _remaining: Duration,
+            _cancel: Cancellation,
+        ) -> wire::Outcome {
+            self.calls.fetch_add(1, Ordering::AcqRel);
+            if let Some(wanted) = operation.held_branch_request() {
+                assert!(*wanted.approval() == approval);
+                let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+                    "../../smolbox-protocol/fixtures/branch-held-release-v1.json"
+                ))
+                .unwrap();
+                let transition = rows
+                    .into_iter()
+                    .find_map(|row| {
+                        let request: wire::BranchHeldReleaseRequest =
+                            serde_json::from_value(row["request"].clone()).unwrap();
+                        (request == *wanted).then(|| {
+                            Box::new(
+                                serde_json::from_value::<wire::BranchReleaseTransition>(
+                                    row["transition"].clone(),
+                                )
+                                .unwrap(),
+                            )
+                        })
+                    })
+                    .unwrap();
+                return if matches!(operation, wire::Operation::ReleaseHeldBranch { .. }) {
+                    wire::Outcome::HeldBranchReleased { transition }
+                } else {
+                    wire::Outcome::HeldBranchReleasePresence {
+                        transition: Some(transition),
+                    }
+                };
+            }
+            let wanted = operation.branch_request().unwrap();
+            assert!(wanted.approval == approval);
+            let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+                "../../smolbox-protocol/fixtures/branch-creation-v1.json"
+            ))
+            .unwrap();
+            let completion = rows
+                .into_iter()
+                .find_map(|row| {
+                    let request: wire::BranchCreateRequest =
+                        serde_json::from_value(row["request"].clone()).unwrap();
+                    (request == *wanted).then(|| {
+                        serde_json::from_value::<wire::BranchCompletion>(row["completion"].clone())
+                            .unwrap()
+                    })
+                })
+                .unwrap();
+            match operation {
+                wire::Operation::CreateBranch { .. } => wire::Outcome::BranchCreated {
+                    completion: Box::new(completion),
+                },
+                _ => wire::Outcome::BranchCompletionPresence {
+                    completion: Some(Box::new(completion)),
+                },
+            }
+        }
         fn export(
             &self,
             operation: wire::Operation,
@@ -1900,6 +2026,13 @@ mod tests {
         ) -> wire::Outcome {
             self.calls.fetch_add(1, Ordering::AcqRel);
             match operation {
+                wire::Operation::BranchPreflight { .. } => {
+                    let fixture: serde_json::Value = serde_json::from_str(include_str!(
+                        "../../smolbox-protocol/fixtures/branch-preflight-v1.json"
+                    ))
+                    .unwrap();
+                    serde_json::from_value(fixture["outcome"].clone()).unwrap()
+                }
                 wire::Operation::QualifyAbortedCaptureSource {
                     receipt,
                     operation_id,
@@ -2667,6 +2800,33 @@ mod tests {
         Receiver<()>,
         std::thread::JoinHandle<BridgeResult<()>>,
     ) {
+        start_with_policy_catalogs(
+            approved,
+            approved_oci_sources,
+            approved_registry_sources,
+            approved_volume_policy,
+            approved_artifacts,
+            approved_checkpoints,
+            (approved_export_destinations, None),
+        )
+    }
+    fn start_with_policy_catalogs(
+        approved: wire::Hello,
+        approved_oci_sources: Option<Vec<wire::OciSource>>,
+        approved_registry_sources: Option<Vec<crate::package::RegistryApproval>>,
+        approved_volume_policy: Option<smolbox_engine::LocalVolumePolicy>,
+        approved_artifacts: Vec<wire::Artifact>,
+        approved_checkpoints: Option<Vec<crate::package::CheckpointApproval>>,
+        catalogs: (
+            Option<Vec<crate::package::ExportApproval>>,
+            Option<Vec<wire::BranchApproval>>,
+        ),
+    ) -> (
+        UnixStream,
+        Arc<Fake>,
+        Receiver<()>,
+        std::thread::JoinHandle<BridgeResult<()>>,
+    ) {
         let (mut client, server) = UnixStream::pair().unwrap();
         client
             .set_read_timeout(Some(Duration::from_secs(3)))
@@ -2695,7 +2855,8 @@ mod tests {
             approved_registry_sources,
             approved_volume_policy,
             approved_checkpoints,
-            approved_export_destinations,
+            approved_export_destinations: catalogs.0,
+            approved_branches: catalogs.1,
         };
         let declared = approved.clone();
         let thread = std::thread::spawn(move || {
@@ -3595,6 +3756,266 @@ mod tests {
         }
     }
 
+    #[test]
+    fn branch_creation_and_lookup_require_feature_and_exact_immutable_operator_catalog() {
+        let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/branch-creation-v1.json"
+        ))
+        .unwrap();
+        for row in rows {
+            for lookup in [false, true] {
+                for policy in 0..4 {
+                    let wanted: wire::BranchCreateRequest =
+                        serde_json::from_value(row["request"].clone()).unwrap();
+                    let mut sdk =
+                        crate::package::sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                    if policy != 0 {
+                        sdk.feature_versions.insert("branches".into(), 1);
+                    }
+                    let mut h = hello();
+                    h.major = wire::PARITY_PROTOCOL_MAJOR;
+                    h.minor = wire::PARITY_PROTOCOL_MINOR;
+                    h.package.engine_version = env!("CARGO_PKG_VERSION").into();
+                    h.package.smolvm_revision = sdk.source_revision.clone();
+                    h.package.platform = "macos".into();
+                    h.package.architecture = "aarch64".into();
+                    h.domain.target_id = wanted.source.target_id.clone();
+                    h.domain.generation = wanted.source.domain_generation.clone();
+                    h.limits = wire::Limits::for_sdk(&sdk);
+                    h.capabilities = sdk.capabilities();
+                    h.sdk = Some(Box::new(sdk));
+                    let catalog = match policy {
+                        1 => None,
+                        2 => {
+                            let mut wrong = wanted.approval.clone();
+                            wrong.resources.disk_gb += 1;
+                            Some(vec![wrong])
+                        }
+                        _ => Some(vec![wanted.approval.clone()]),
+                    };
+                    let operation = if lookup {
+                        wire::Operation::InspectBranchCompletion {
+                            request: Box::new(wanted),
+                        }
+                    } else {
+                        wire::Operation::CreateBranch {
+                            request: Box::new(wanted),
+                        }
+                    };
+                    assert_eq!(is_observation(&operation), lookup);
+                    assert_eq!(is_control(&operation), lookup);
+                    let (mut client, fake, _, thread) = start_with_policy_catalogs(
+                        h,
+                        None,
+                        None,
+                        None,
+                        vec![],
+                        None,
+                        (None, catalog),
+                    );
+                    send(&mut client, request(1, operation));
+                    let response = receive(&mut client);
+                    if policy == 3 {
+                        assert!(matches!(response, wire::ServerMessage::Accepted { .. }));
+                        let result = receive(&mut client);
+                        assert!(
+                            matches!(
+                                result,
+                                wire::ServerMessage::Terminal {
+                                    outcome: wire::Outcome::BranchCreated { .. },
+                                    ..
+                                }
+                            ) && !lookup
+                                || matches!(
+                                    result,
+                                    wire::ServerMessage::Terminal {
+                                        outcome: wire::Outcome::BranchCompletionPresence { .. },
+                                        ..
+                                    }
+                                ) && lookup
+                        );
+                        assert_eq!(fake.calls.load(Ordering::Acquire), 1);
+                    } else {
+                        assert!(matches!(
+                            response,
+                            wire::ServerMessage::Terminal {
+                                outcome: wire::Outcome::Error {
+                                    code: wire::SafeCode::Unsupported,
+                                    dispatch: wire::Dispatch::NotDispatched
+                                },
+                                ..
+                            }
+                        ));
+                        assert_eq!(fake.calls.load(Ordering::Acquire), 0);
+                    }
+                    shutdown(client, thread);
+                }
+            }
+        }
+    }
+    #[test]
+    fn held_release_and_qualification_require_feature_catalog_and_separate_lanes() {
+        let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/branch-held-release-v1.json"
+        ))
+        .unwrap();
+        for row in rows {
+            for qualify in [false, true] {
+                for policy in 0..4 {
+                    let wanted: wire::BranchHeldReleaseRequest =
+                        serde_json::from_value(row["request"].clone()).unwrap();
+                    let mut sdk =
+                        crate::package::sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                    if policy != 0 {
+                        sdk.feature_versions.insert("branches".into(), 1);
+                    }
+                    let mut h = hello();
+                    h.major = wire::PARITY_PROTOCOL_MAJOR;
+                    h.minor = wire::PARITY_PROTOCOL_MINOR;
+                    h.package.engine_version = env!("CARGO_PKG_VERSION").into();
+                    h.package.smolvm_revision = sdk.source_revision.clone();
+                    h.package.platform = wanted.completion.publication.change.platform.clone();
+                    h.package.architecture = if h.package.platform == "linux" {
+                        "x86_64"
+                    } else {
+                        "aarch64"
+                    }
+                    .into();
+                    h.domain.target_id = wanted.source.target_id.clone();
+                    h.domain.generation = wanted.source.domain_generation.clone();
+                    h.limits = wire::Limits::for_sdk(&sdk);
+                    h.capabilities = sdk.capabilities();
+                    h.sdk = Some(Box::new(sdk));
+                    let catalog = match policy {
+                        1 => None,
+                        2 => {
+                            let mut wrong = wanted.approval().clone();
+                            wrong.resources.disk_gb += 1;
+                            Some(vec![wrong])
+                        }
+                        _ => Some(vec![wanted.approval().clone()]),
+                    };
+                    let operation = if qualify {
+                        wire::Operation::QualifyHeldBranchRelease {
+                            request: Box::new(wanted),
+                        }
+                    } else {
+                        wire::Operation::ReleaseHeldBranch {
+                            request: Box::new(wanted),
+                        }
+                    };
+                    assert_eq!(is_observation(&operation), qualify);
+                    assert_eq!(is_control(&operation), qualify);
+                    let (mut client, fake, _, thread) = start_with_policy_catalogs(
+                        h,
+                        None,
+                        None,
+                        None,
+                        vec![],
+                        None,
+                        (None, catalog),
+                    );
+                    send(&mut client, request(1, operation));
+                    let response = receive(&mut client);
+                    if policy == 3 {
+                        assert!(matches!(response, wire::ServerMessage::Accepted { .. }));
+                        let response = receive(&mut client);
+                        assert!(
+                            matches!(
+                                response,
+                                wire::ServerMessage::Terminal {
+                                    outcome: wire::Outcome::HeldBranchReleased { .. },
+                                    ..
+                                }
+                            ) && !qualify
+                                || matches!(
+                                    response,
+                                    wire::ServerMessage::Terminal {
+                                        outcome: wire::Outcome::HeldBranchReleasePresence { .. },
+                                        ..
+                                    }
+                                ) && qualify
+                        );
+                        assert_eq!(fake.calls.load(Ordering::Acquire), 1);
+                    } else {
+                        assert!(matches!(
+                            response,
+                            wire::ServerMessage::Terminal {
+                                outcome: wire::Outcome::Error {
+                                    code: wire::SafeCode::Unsupported,
+                                    dispatch: wire::Dispatch::NotDispatched
+                                },
+                                ..
+                            }
+                        ));
+                        assert_eq!(fake.calls.load(Ordering::Acquire), 0);
+                    }
+                    shutdown(client, thread);
+                }
+            }
+        }
+    }
+    #[test]
+    fn branch_source_requires_its_feature_and_uses_work_without_stream_or_boot_authority() {
+        // Semantic helper peer only: no SDK source, fork or VM.
+        let fixture: serde_json::Value = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/branch-preflight-v1.json"
+        ))
+        .unwrap();
+        let operation: wire::Operation =
+            serde_json::from_value(fixture["operation"].clone()).unwrap();
+        assert!(!is_observation(&operation) && !is_control(&operation));
+        for enabled in [false, true] {
+            let mut sdk = crate::package::sdk_identity()
+                .unwrap_or_else(|_| panic!("invalid compiled SDK policy"));
+            if enabled {
+                sdk.feature_versions.insert("branches".into(), 1);
+            }
+            let mut approved = hello();
+            approved.major = wire::PARITY_PROTOCOL_MAJOR;
+            approved.minor = wire::PARITY_PROTOCOL_MINOR;
+            approved.package.engine_version = env!("CARGO_PKG_VERSION").into();
+            approved.package.smolvm_revision = sdk.source_revision.clone();
+            let source = operation.receipt().unwrap();
+            approved.domain.target_id = source.target_id.clone();
+            approved.domain.generation = source.domain_generation.clone();
+            approved.limits = wire::Limits::for_sdk(&sdk);
+            approved.capabilities = sdk.capabilities();
+            approved.sdk = Some(Box::new(sdk));
+            let (mut client, fake, _, thread) = start_with(approved);
+            send(&mut client, request(1, operation.clone()));
+            let response = receive(&mut client);
+            if enabled {
+                assert!(matches!(response, wire::ServerMessage::Accepted { .. }));
+                assert!(matches!(
+                    receive(&mut client),
+                    wire::ServerMessage::Terminal {
+                        outcome: wire::Outcome::Observed {
+                            observation: wire::Observation {
+                                state: wire::ObservedState::Running,
+                                ..
+                            }
+                        },
+                        ..
+                    }
+                ));
+                assert_eq!(fake.calls.load(Ordering::Acquire), 1);
+            } else {
+                assert!(matches!(
+                    response,
+                    wire::ServerMessage::Terminal {
+                        outcome: wire::Outcome::Error {
+                            code: wire::SafeCode::Unsupported,
+                            dispatch: wire::Dispatch::NotDispatched
+                        },
+                        ..
+                    }
+                ));
+                assert_eq!(fake.calls.load(Ordering::Acquire), 0);
+            }
+            shutdown(client, thread);
+        }
+    }
     #[test]
     fn capture_resolution_control_dispatch_survives_busy_workers_and_modeled_quarantine() {
         // Pure native peer model: no SDK, VM, process loss or forced termination.
@@ -4526,6 +4947,7 @@ mod tests {
         let (queued, inputs) = bounded(32);
         let (controls, cancellations) = bounded(32);
         let config = Config {
+            approved_branches: None,
             publish_address: None,
             schema: 1,
             target_id: "test".into(),

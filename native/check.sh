@@ -28,7 +28,7 @@ native_manifest="$native_root/Cargo.toml"
 cargo fmt --manifest-path "$native_manifest" -p smolbox-engine -p smolbox-protocol -p smolbox-port --check
 # Ordinary migration checks exclude the historical parent-loss integration
 # campaign. Child reaping here uses only normal pipe release and process exit.
-cargo test --manifest-path "$native_manifest" --workspace --lib --bins --locked
+cargo test --manifest-path "$native_manifest" --workspace --lib --bins --test contract --locked
 cargo test --manifest-path "$native_manifest" -p smolbox-engine --test child_reaping --locked
 cargo build --manifest-path "$native_manifest" -p smolbox-port --locked
 SMOLBOX_UMASK_HELPER="${CARGO_TARGET_DIR:-$native_root/target}/debug/smolbox-port" \
@@ -36,6 +36,9 @@ SMOLBOX_UMASK_HELPER="${CARGO_TARGET_DIR:-$native_root/target}/debug/smolbox-por
 # Use the packaged build profile so fixture startup verifies the same executable
 # geometry and avoids hashing an unoptimized SDK binary during a short deadline.
 cargo build --manifest-path "$native_manifest" --release -p smolbox-port --locked
+# Every ignored fixture is individually reviewed and exactly named. This list
+# uses ordinary protocol/filesystem peers and normal child exit only; it cannot
+# select a newly added similarly named test, a VM fixture or a fault campaign.
 native_ordinary_fixtures=(
   "transfer_supervisor::tests::ordinary_worker_process_connects_without_initializing_runtime_ownership"
   "transfer_supervisor::tests::ordinary_worker_binary_transfers_use_public_agent_api"
@@ -43,6 +46,7 @@ native_ordinary_fixtures=(
   "checkpoint_source::tests::ordinary_worker_checkpoint_materializes_sdk_files_and_collects_without_vm_dispatch"
   "transfer_supervisor::tests::ordinary_conversion_worker_collects_and_rehashes_both_spools_with_original_leases"
   "transfer_supervisor::tests::ordinary_imported_conversion_worker_preserves_source_gate_and_spools"
+  "transfer_supervisor::tests::ordinary_branch_worker_rejects_unentered_fixture_and_collects_original_leases"
   "epoch::tests::ordinary_boot_guard_enrolls_before_sdk_and_collects_normal_exit"
 )
 for native_ordinary_fixture in "${native_ordinary_fixtures[@]}"; do

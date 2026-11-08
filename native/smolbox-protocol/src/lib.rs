@@ -5,7 +5,13 @@
 use serde_json::Value;
 use std::io::{self, Read, Write};
 
+#[cfg(test)]
+mod branch;
+mod branches;
 mod exports;
+#[cfg(test)]
+mod held_release;
+pub use branches::*;
 pub use exports::{
     ExportLimits, ExportPublication, ExportPublicationIdentity, ExportRequest, ExportStageCleanup,
 };

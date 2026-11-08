@@ -120,7 +120,7 @@ impl Engine {
             .ok_or(Error::before(ErrorCode::Ownership))?;
         self.verify_record(receipt, &record)?;
         mode(&record)?;
-        if self.runtime_pid(&receipt.name).is_some() || self.oci_manager_busy(&receipt.name)? {
+        if self.runtime_pid(&receipt.name).is_some() || self.owned_manager_busy(&receipt.name)? {
             return Err(Error::before(ErrorCode::State));
         }
         if crate::sdk_compat::has_source_dependents(

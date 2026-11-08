@@ -1,38 +1,24 @@
 defmodule SmolBox.Embedded.MaterialHistory do
   @moduledoc false
-  alias SmolBox.Embedded.{CaptureResolutionTransition, CaptureTransition, GrowthTransition}
+  alias SmolBox.Embedded.{
+    BranchPublication,
+    BranchReleaseTransition,
+    CaptureResolutionTransition,
+    CaptureTransition,
+    GrowthTransition
+  }
+
   alias SmolBox.Validation
 
   def chain(transitions, origin, sizes) do
-    if Validation.list?(transitions, 288) and GrowthTransition.root?(origin) and sizes?(sizes) do
-      Enum.reduce_while(
-        transitions,
-        {:ok, origin, sizes, MapSet.new(), nil, nil, :unknown},
-        &link/2
-      )
-      |> case do
-        {:ok, receipt, sizes, _ids, _growth, _capture, _head} -> {:ok, receipt, sizes}
-        :error -> :error
-      end
-    else
-      :error
-    end
+    if sizes?(sizes), do: reduce(transitions, origin, sizes), else: :error
   end
 
   def identity?(history, receipt, last) do
-    if Validation.list?(history, 288) and history != [] and
-         Enum.any?(history, &capture?/1) do
-      first = hd(history)
-
-      sizes =
-        case Enum.find(history, &match?(%GrowthTransition{}, &1)) do
-          nil -> %{"storage_gib" => 1, "overlay_gib" => 1}
-          growth -> Map.new(~w(storage_gib overlay_gib), &{&1, growth.change["previous_" <> &1]})
-        end
-
-      case chain(history, first.previous, sizes) do
+    if bounded?(history) and history != [] and Enum.any?(history, &requires_history?/1) do
+      case reduce(history, hd(history).previous, :unknown) do
         {:ok, ^receipt, _} -> List.last(history) == last
-        _ -> false
+        :error -> false
       end
     else
       false
@@ -41,63 +27,150 @@ defmodule SmolBox.Embedded.MaterialHistory do
     _ -> false
   end
 
-  defp link(%GrowthTransition{} = transition, {:ok, previous, sizes, ids, growth, _capture, head}) do
-    change = transition.change
+  defp reduce(transitions, origin, sizes) do
+    if bounded?(transitions) and GrowthTransition.root?(origin) do
+      initial = %{
+        receipt: origin,
+        sizes: sizes,
+        ids: MapSet.new(),
+        growth: nil,
+        capture: nil,
+        head: :unknown,
+        lineage: :unknown,
+        platform: :unknown,
+        sealed: false
+      }
 
-    if GrowthTransition.valid?(transition) and transition.previous == previous and
-         not MapSet.member?(ids, change["operation_id"]) and
-         (growth == nil or growth == change["immutable_sha256"]) and
-         Map.new(~w(storage_gib overlay_gib), &{&1, change["previous_" <> &1]}) == sizes do
-      {:cont,
-       {:ok, transition.receipt, Map.take(change, ~w(storage_gib overlay_gib)),
-        MapSet.put(ids, change["operation_id"]), change["immutable_sha256"], nil, head}}
+      case Enum.reduce_while(transitions, {:ok, initial}, &link/2) do
+        {:ok, state} -> {:ok, state.receipt, state.sizes}
+        :error -> :error
+      end
+    else
+      :error
+    end
+  rescue
+    _ -> :error
+  end
+
+  defp link(_, {:ok, %{sealed: true}}), do: {:halt, :error}
+
+  defp link(%GrowthTransition{} = transition, {:ok, state}) do
+    change = transition.change
+    previous_sizes = Map.new(~w(storage_gib overlay_gib), &{&1, change["previous_" <> &1]})
+
+    if GrowthTransition.valid?(transition) and current?(transition, state, change["operation_id"]) and
+         compatible?(state.growth, change["immutable_sha256"]) and
+         compatible?(state.sizes, previous_sizes) do
+      next = %{
+        state
+        | sizes: Map.take(change, ~w(storage_gib overlay_gib)),
+          growth: change["immutable_sha256"],
+          capture: nil
+      }
+
+      advance(next, transition, change["operation_id"])
     else
       {:halt, :error}
     end
   end
 
-  defp link(%CaptureTransition{} = transition, {:ok, previous, sizes, ids, growth, capture, head}) do
-    change = transition.change
-    intent = change["intent"]
+  defp link(%CaptureTransition{} = transition, {:ok, state}),
+    do: capture_link(transition, CaptureTransition.valid?(transition), state)
 
-    if CaptureTransition.valid?(transition) and transition.previous == previous and
-         not MapSet.member?(ids, intent["operation_id"]) and
-         compatible?(growth, intent["growth_immutable_sha256"]) and
-         compatible?(capture, intent["immutable_sha256"]) and
-         head_compatible?(head, intent["previous_head"]) do
-      {:cont,
-       {:ok, transition.receipt, sizes, MapSet.put(ids, intent["operation_id"]),
-        change["growth_immutable_sha256"], intent["immutable_sha256"], change["artifact"]["head"]}}
+  defp link(%CaptureResolutionTransition{} = transition, {:ok, state}),
+    do: capture_link(transition, CaptureResolutionTransition.valid?(transition), state)
+
+  defp link(%BranchPublication{} = transition, {:ok, state}) do
+    change = transition.change
+    intent = change["child_origin"]["intent"]
+    id = intent["child"]["operation_id"]
+
+    if BranchPublication.valid?(transition) and current?(transition, state, id) and
+         compatible?(state.growth, change["previous_growth_sha256"]) and
+         compatible?(state.capture, change["previous_capture_sha256"]) and
+         head_compatible?(state.head, change["checkpoint_head"]) and
+         head_compatible?(state.lineage, change["previous_lineage"]) and
+         head_compatible?(state.platform, change["platform"]) and
+         backing_sizes?(state.sizes, intent["plan"]["ordinary_child"]["disk_gb"]) do
+      next = %{
+        state
+        | growth: change["growth_sha256"],
+          capture: change["capture_sha256"],
+          head: change["checkpoint_head"],
+          lineage: change["lineage"],
+          platform: change["platform"]
+      }
+
+      advance(next, transition, id)
     else
       {:halt, :error}
     end
   end
 
-  defp link(
-         %CaptureResolutionTransition{} = transition,
-         {:ok, previous, sizes, ids, growth, capture, head}
-       ) do
+  defp link(%BranchReleaseTransition{} = transition, {:ok, state}) do
     change = transition.change
-    intent = change["intent"]
+    id = change["request"]["operation_id"]
 
-    if CaptureResolutionTransition.valid?(transition) and transition.previous == previous and
-         not MapSet.member?(ids, intent["operation_id"]) and
-         compatible?(growth, intent["growth_immutable_sha256"]) and
-         compatible?(capture, intent["immutable_sha256"]) and
-         head_compatible?(head, intent["previous_head"]) do
-      {:cont,
-       {:ok, transition.receipt, sizes, MapSet.put(ids, intent["operation_id"]),
-        change["growth_immutable_sha256"], intent["immutable_sha256"], change["checkpoint_head"]}}
-    else
-      {:halt, :error}
-    end
+    if BranchReleaseTransition.valid?(transition) and MapSet.size(state.ids) == 0 and
+         current?(transition, state, id) and
+         backing_sizes?(
+           state.sizes,
+           change["binding"]["intent"]["plan"]["ordinary_child"]["disk_gb"]
+         ),
+       do: advance(%{state | sealed: true}, transition, id),
+       else: {:halt, :error}
   end
 
   defp link(_, _), do: {:halt, :error}
 
+  defp capture_link(transition, valid, state) do
+    change = transition.change
+    intent = change["intent"]
+    id = intent["operation_id"]
+
+    if valid and current?(transition, state, id) and
+         compatible?(state.growth, intent["growth_immutable_sha256"]) and
+         compatible?(state.capture, intent["immutable_sha256"]) and
+         head_compatible?(state.head, intent["previous_head"]) do
+      next = %{
+        state
+        | growth: change["growth_immutable_sha256"],
+          capture: intent["immutable_sha256"],
+          head: checkpoint_head(transition)
+      }
+
+      advance(next, transition, id)
+    else
+      {:halt, :error}
+    end
+  end
+
+  defp checkpoint_head(%CaptureTransition{change: change}), do: change["artifact"]["head"]
+
+  defp checkpoint_head(%CaptureResolutionTransition{change: change}),
+    do: change["checkpoint_head"]
+
+  defp current?(transition, state, id),
+    do: transition.previous == state.receipt and not MapSet.member?(state.ids, id)
+
+  defp advance(state, transition, id),
+    do: {:cont, {:ok, %{state | receipt: transition.receipt, ids: MapSet.put(state.ids, id)}}}
+
   def capture?(%CaptureTransition{}), do: true
   def capture?(%CaptureResolutionTransition{}), do: true
   def capture?(_), do: false
+  def branch?(%BranchPublication{}), do: true
+  def branch?(%BranchReleaseTransition{}), do: true
+  def branch?(_), do: false
+  def requires_history?(transition), do: capture?(transition) or branch?(transition)
+
+  defp bounded?(history),
+    do:
+      Validation.list?(history, 1024) and
+        (Enum.any?(history, &branch?/1) or Validation.list?(history, 288))
+
+  defp backing_sizes?(:unknown, _total), do: true
+  defp backing_sizes?(sizes, total), do: sizes["storage_gib"] + sizes["overlay_gib"] == total
   defp compatible?(nil, _), do: true
   defp compatible?(:unknown, _), do: true
   defp compatible?(expected, actual), do: expected == actual

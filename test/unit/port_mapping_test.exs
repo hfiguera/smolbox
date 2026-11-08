@@ -92,6 +92,7 @@ defmodule SmolBox.PortMappingTest do
       |> Map.delete(:reserved_ports)
       |> Map.delete(:preparation)
       |> Map.drop([
+        :native_branch_history,
         :exports,
         :active_export,
         :captures,
@@ -121,6 +122,7 @@ defmodule SmolBox.PortMappingTest do
       |> Map.delete(:reserved_ports)
       |> Map.delete(:preparation)
       |> Map.drop([
+        :native_branch_history,
         :exports,
         :active_export,
         :captures,

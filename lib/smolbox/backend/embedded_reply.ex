@@ -31,6 +31,23 @@ defmodule SmolBox.Backend.EmbeddedReply do
     do: {:error, %{error | operation: error_operation(operation)}}
 
   defp response(
+         context,
+         :branch_source,
+         %{"operation" => "branch_preflight", "receipt" => receipt},
+         %{"result" => "observed", "observation" => observed} = outcome,
+         %{stdout: <<>>, stderr: <<>>, file: <<>>},
+         nil
+       ) do
+    with true <- Protocol.valid_outcome?(outcome, 2),
+         {:ok, ^receipt} <- EmbeddedContext.receipt(context),
+         %{"configuration" => %{"network" => %{"enabled" => false}, "ports" => []} = config} <-
+           observed,
+         true <- Map.get(config, "mounts") == nil,
+         do: observation(context, :branch_source, observed),
+         else: (_ -> error(:identity_conflict, :branch_source, :dispatch_uncertain))
+  end
+
+  defp response(
          %{identity: nil},
          :inspect_creation,
          %{"operation" => name},
@@ -293,7 +310,8 @@ defmodule SmolBox.Backend.EmbeddedReply do
   defp lifecycle_state?(:start, state), do: state == "running"
 
   defp lifecycle_state?(operation, state)
-       when operation in [:start_checkpointable, :checkpoint_preflight], do: state == "running"
+       when operation in [:start_checkpointable, :checkpoint_preflight, :branch_source],
+       do: state == "running"
 
   defp lifecycle_state?(:stop, state), do: state == "stopped"
   defp lifecycle_state?(:delete, _state), do: false

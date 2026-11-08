@@ -11,7 +11,7 @@ defmodule SmolBox.ManagedMachine do
   alias SmolBox.{Error, Machine, ManagedMachineSpec, Validation}
 
   alias SmolBox.Backend.Assignment
-  alias SmolBox.Embedded.NativeCapture
+  alias SmolBox.Embedded.{NativeBranchAuthority, NativeBranchHistory, NativeCapture}
   alias SmolBox.Store.RecordOps
 
   alias SmolBox.Store.VolumeAttachments
@@ -49,6 +49,7 @@ defmodule SmolBox.ManagedMachine do
                 preparation: nil,
                 branch: nil,
                 branch_children: %{},
+                native_branch_history: %{},
                 active_branch: nil,
                 captures: %{},
                 active_capture: nil,
@@ -126,6 +127,7 @@ defmodule SmolBox.ManagedMachine do
              Assignment.record_valid?(record) and
              SmolBox.Export.history_valid?(record) and
              NativeCapture.history_valid?(record) and
+             NativeBranchHistory.record?(record) and
              SmolBox.Branch.valid_machine?(record) do
       :ok
     else
@@ -166,6 +168,12 @@ defmodule SmolBox.ManagedMachine do
          next =
            struct!(record, Map.merge(changes, %{version: record.version + 1, updated_at_ms: now})),
          true <- next.native_mounts == record.native_mounts,
+         true <- NativeBranchAuthority.preserved?(record, next),
+         true <-
+           is_map(next.native_branch_history) and
+             Enum.all?(record.native_branch_history, fn {id, proof} ->
+               next.native_branch_history[id] == proof
+             end),
          :ok <- validate(next) do
       {:ok, next}
     else

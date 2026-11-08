@@ -1,7 +1,28 @@
 defmodule SmolBox.Store.BranchOps do
   @moduledoc "Atomic source/child transactions; adapters serialize both identities and worker capacity."
   alias SmolBox.{Branch, BranchSpec, Error, Machine, ManagedMachine, Validation}
-  alias SmolBox.Store.RecordOps
+  alias SmolBox.Embedded.{NativeBranchReleaseResult, NativeBranchResult}
+  alias SmolBox.Store.{NativeBranchOps, NativeBranchReleaseOps, RecordOps}
+
+  def accept(
+        %{backend_assignment: %{version: 2}} = parent,
+        spec,
+        fingerprint,
+        name,
+        capacity,
+        usage,
+        now
+      ),
+      do:
+        NativeBranchOps.accept(
+          parent,
+          spec,
+          fingerprint,
+          name,
+          capacity,
+          usage,
+          now
+        )
 
   def accept(parent, spec, fingerprint, name, capacity, usage, now) do
     with :ok <- BranchSpec.validate(spec),
@@ -83,6 +104,14 @@ defmodule SmolBox.Store.BranchOps do
   defp create_step(p, c, :dispatching, now) when c.branch.state == :accepted,
     do: save(p, c, :dispatching, %{phase: :dispatching}, now)
 
+  defp create_step(
+         p,
+         %{branch: %{native_authority: authority}} = c,
+         {:native_complete, result},
+         now
+       )
+       when not is_nil(authority), do: NativeBranchOps.complete(p, c, result, now)
+
   defp create_step(p, c, {:observed, %Machine{} = observed}, now)
        when c.branch.state == :dispatching do
     if observed.state == :running,
@@ -113,6 +142,15 @@ defmodule SmolBox.Store.BranchOps do
            )
   end
 
+  defp create_step(
+         p,
+         %{branch: %{state: :accepted, native_authority: authority}} = c,
+         action,
+         now
+       )
+       when not is_nil(authority) and action in [:failed, :cancelled],
+       do: NativeBranchOps.cancel(p, c, action, now)
+
   defp create_step(p, c, action, now)
        when c.branch.state == :accepted and action in [:failed, :cancelled] do
     with {:ok, c} <- deleted(c, action, now),
@@ -127,6 +165,27 @@ defmodule SmolBox.Store.BranchOps do
   end
 
   defp create_step(_, _, _, _), do: error(:stale_version)
+
+  def resolve(
+        p,
+        %{branch: %{native_authority: authority}} = c,
+        source,
+        %NativeBranchReleaseResult{source: source} = result,
+        now
+      )
+      when not is_nil(authority), do: NativeBranchReleaseOps.resolve(p, c, result, now)
+
+  def resolve(
+        p,
+        %{branch: %{native_authority: authority}} = c,
+        source,
+        %NativeBranchResult{source: source} = result,
+        now
+      )
+      when not is_nil(authority), do: NativeBranchOps.resolve(p, c, result, now)
+
+  def resolve(_p, %{branch: %{native_authority: authority}}, _source, _child_observation, _now)
+      when not is_nil(authority), do: error(:unsupported_capability)
 
   def resolve(p, c, source, child_observation, now) do
     with true <- related?(p, c),
@@ -166,6 +225,9 @@ defmodule SmolBox.Store.BranchOps do
 
   defp resolve_child(_, _, _), do: error(:identity_conflict)
 
+  def release(%{branch: %{native_authority: authority}}, _version, _now)
+      when not is_nil(authority), do: error(:unsupported_capability)
+
   def release(c, version, now) do
     cond do
       c.branch == nil ->
@@ -196,6 +258,9 @@ defmodule SmolBox.Store.BranchOps do
         )
     end
   end
+
+  def release_advance(%{branch: %{native_authority: authority}}, _expected, _action, _now)
+      when not is_nil(authority), do: error(:unsupported_capability)
 
   def release_advance(c, expected, action, now) do
     if c.branch != nil and c.branch.state == expected,
@@ -243,12 +308,18 @@ defmodule SmolBox.Store.BranchOps do
 
   defp release_step(_, _, _), do: error(:stale_version)
 
+  def release_storage(_p, %{branch: %{native_authority: authority}}, _now)
+      when not is_nil(authority), do: error(:unsupported_capability)
+
   def release_storage(p, c, now) do
     with true <- related?(p, c) and p.state == :deleted and c.state == :deleted,
          true <- c.branch.state in [:retired, :closed],
          do: update(c, :closed, %{}, now),
          else: (_ -> error(:identity_conflict))
   end
+
+  def retire(_p, %{branch: %{native_authority: authority}}, _now)
+      when not is_nil(authority), do: error(:unsupported_capability)
 
   def retire(p, %{branch: %{state: :closed}} = c, _now) do
     if related?(p, c), do: {:ok, p, c}, else: error(:identity_conflict)

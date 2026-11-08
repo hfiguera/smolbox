@@ -36,6 +36,44 @@ defmodule SmolBox.Embedded.PortTest do
     end
   end
 
+  test "current package rejects branch creation and completed lookup despite an exact operator catalog" do
+    fixture =
+      Path.expand("../../native/smolbox-protocol/fixtures/branch-creation-v1.json", __DIR__)
+
+    rows = fixture |> File.read!() |> Jason.decode!()
+
+    {:ok, policy} =
+      SmolBox.BranchPolicy.new(
+        id: "branches",
+        resources: %{slots: 1, cpus: 1, memory_mb: 384, disk_gb: 5}
+      )
+
+    config = package(protocol_major: 2, backend: true)
+
+    config = %{
+      config
+      | branch_policies: [policy],
+        profiles: Enum.map(config.profiles, &%{&1 | host_overhead_mb: 128}),
+        allocation_floor: %{config.allocation_floor | host_overhead_mb: 128}
+    }
+
+    pid = owner(config)
+
+    for row <- rows, name <- ~w(create_branch inspect_branch_completion) do
+      request =
+        row["request"]
+        |> put_in(["source", "target_id"], config.id)
+        |> put_in(["source", "domain_generation"], config.domain_generation)
+
+      assert {:error, %Error{evidence: :not_dispatched}} =
+               Port.submit(pid, %{"operation" => name, "request" => request}, budget(), self())
+    end
+
+    refute Enum.any?(Package.received(config), &(&1["type"] == "request"))
+    assert :ok = Port.shutdown(pid)
+    wait_until(fn -> match?({:ok, %{status: :stopped}}, Port.health(pid)) end)
+  end
+
   test "current approved package rejects volume dispatch before any native request" do
     config = package(protocol_major: 2, backend: true)
     pid = owner(config)

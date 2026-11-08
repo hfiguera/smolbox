@@ -31,7 +31,39 @@ pub struct Config {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub approved_volume_policy: Option<smolbox_engine::LocalVolumePolicy>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approved_branches: Option<Vec<smolbox_protocol::BranchApproval>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub publish_address: Option<String>,
+}
+
+fn validate_branch_catalog(
+    schema: u8,
+    branches: Option<&[smolbox_protocol::BranchApproval]>,
+) -> Result<(), SafeCode> {
+    if let Some(branches) = branches {
+        if schema != 2 || branches.is_empty() || branches.len() > 32 * 32 {
+            return Err(SafeCode::Validation);
+        }
+        let mut seen = std::collections::BTreeMap::new();
+        for branch in branches {
+            branch.validate().map_err(|_| SafeCode::Validation)?;
+            let (resources, overheads) = seen
+                .entry(&branch.id)
+                .or_insert((&branch.resources, BTreeSet::new()));
+            // One public policy may serve profiles with distinct host overhead.
+            // Its backing allowance cannot change between those variants.
+            if *resources != &branch.resources
+                || overheads.len() >= 32
+                || !overheads.insert(branch.host_overhead_mb)
+            {
+                return Err(SafeCode::Validation);
+            }
+        }
+        if seen.len() > 32 {
+            return Err(SafeCode::Validation);
+        }
+    }
+    Ok(())
 }
 
 /// Operator-only destination/TLS approval; requests carry IDs, hashes and caps.
@@ -292,8 +324,13 @@ pub fn hash_bytes(bytes: &[u8]) -> String {
     hex::encode(Sha256::digest(bytes))
 }
 pub fn read_config(path: &Path) -> Result<Config, SafeCode> {
-    let mut config: Config =
-        serde_json::from_slice(&bounded_file(path, 65536)?).map_err(|_| SafeCode::Validation)?;
+    // A full 32-policy by 32-profile branch catalog needs more than 64 KiB.
+    // Only configurations carrying that bounded catalog receive the allowance.
+    let bytes = bounded_file(path, 512 * 1024)?;
+    let mut config: Config = serde_json::from_slice(&bytes).map_err(|_| SafeCode::Validation)?;
+    if config.approved_branches.is_none() && bytes.len() > 65536 {
+        return Err(SafeCode::Validation);
+    }
     let domain = smolbox_protocol::DomainIdentity {
         target_id: config.target_id.clone(),
         generation: config.generation.clone(),
@@ -327,6 +364,7 @@ pub fn read_config(path: &Path) -> Result<Config, SafeCode> {
             }
         }
     }
+    validate_branch_catalog(config.schema, config.approved_branches.as_deref())?;
     if let Some(policy) = &config.approved_volume_policy {
         policy.validate().map_err(|_| SafeCode::Validation)?;
     }
@@ -1587,5 +1625,88 @@ mod tests {
             limits.observation_metadata_bytes,
             smolbox_engine::VOLUME_OBSERVATION_METADATA_BYTES
         );
+    }
+}
+
+#[cfg(test)]
+mod branch_catalog_tests {
+    use super::*;
+    use std::fs;
+    #[test]
+    fn branch_catalog_is_bounded_unique_major_two_and_preserves_absent_legacy_shape() {
+        let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/branch-creation-v1.json"
+        ))
+        .unwrap();
+        let approval: smolbox_protocol::BranchApproval =
+            serde_json::from_value(rows[0]["request"]["approval"].clone()).unwrap();
+        assert!(validate_branch_catalog(1, None).is_ok());
+        assert!(validate_branch_catalog(1, Some(std::slice::from_ref(&approval))).is_err());
+        assert!(validate_branch_catalog(2, Some(&[])).is_err());
+        assert!(validate_branch_catalog(2, Some(std::slice::from_ref(&approval))).is_ok());
+        let mut duplicate = approval.clone();
+        duplicate.resources.disk_gb += 1;
+        assert!(validate_branch_catalog(2, Some(&[approval.clone(), duplicate])).is_err());
+        assert!(validate_branch_catalog(2, Some(&[approval.clone(), approval.clone()])).is_err());
+        let mut variant = approval.clone();
+        variant.host_overhead_mb += 1;
+        assert!(validate_branch_catalog(2, Some(&[approval.clone(), variant])).is_ok());
+        let policies: Vec<_> = (0..33)
+            .map(|index| {
+                let mut value = approval.clone();
+                value.id = format!("policy-{index}");
+                value
+            })
+            .collect();
+        assert!(validate_branch_catalog(2, Some(&policies)).is_err());
+        let overheads: Vec<_> = (0..33)
+            .map(|index| {
+                let mut value = approval.clone();
+                value.host_overhead_mb += index;
+                value
+            })
+            .collect();
+        assert!(validate_branch_catalog(2, Some(&overheads)).is_err());
+        let complete: Vec<_> = (0..32)
+            .flat_map(|policy| {
+                let approval = &approval;
+                (0..32).map(move |overhead| {
+                    let mut value = approval.clone();
+                    value.id = format!("policy-{policy}");
+                    value.host_overhead_mb += overhead;
+                    value
+                })
+            })
+            .collect();
+        assert!(validate_branch_catalog(2, Some(&complete)).is_ok());
+        let root = tempfile::tempdir().unwrap();
+        let path = root.path().join("config.json");
+        let mut config = serde_json::json!({
+            "schema": 2,
+            "target_id": "branches",
+            "generation": "a".repeat(32),
+            "allow_initialize": false,
+            "package_manifest_sha256": "b".repeat(64),
+            "approved_artifacts": [],
+            "approved_branches": complete
+        });
+        let bytes = serde_json::to_vec(&config).unwrap();
+        assert!(bytes.len() > 65536);
+        assert!(bytes.len() < 512 * 1024);
+        fs::write(&path, bytes).unwrap();
+        fs::set_permissions(&path, fs::Permissions::from_mode(0o600)).unwrap();
+        assert!(read_config(&path).is_ok());
+        config.as_object_mut().unwrap().remove("approved_branches");
+        let mut bytes = serde_json::to_vec(&config).unwrap();
+        bytes.resize(65537, b' ');
+        fs::write(&path, &bytes).unwrap();
+        assert!(read_config(&path).is_err());
+        bytes.resize(512 * 1024 + 1, b' ');
+        fs::write(&path, bytes).unwrap();
+        assert!(read_config(&path).is_err());
+        assert!(validate_branch_catalog(2, Some(&vec![approval.clone(); 1025])).is_err());
+        let mut invalid = approval;
+        invalid.host_overhead_mb = 0;
+        assert!(validate_branch_catalog(2, Some(&[invalid])).is_err());
     }
 }

@@ -157,6 +157,36 @@ defmodule SmolBox.Store.Codec do
   fields even when nil. HTTP export histories preserve v11 bytes; native records
   without exports retain their earlier selected envelope. Registry verification
   and staging cleanup remain separate from native publication acknowledgement.
+
+  Typed native branch source-publication and child-release material histories
+  selectively use v29, including attached commands carrying those links. Every
+  link retains its prior receipt and canonical proof; the immutable creation
+  receipt stays separate. V24-v28 and earlier readers reject these typed histories.
+  Records without branch links preserve their earlier bytes. Coordinate every
+  reader and atomic source/child history/resource writer before advertising
+  native_branch_histories: 1. This codec foundation advertises no store capability
+  and enables neither branch admission nor child creation/release transactions.
+
+  Frozen native branch child assignments and source dependency/history records
+  selectively use v30. Each child retains a distinct owner/incarnation and exact
+  source/public request binding. Branch assignment data cannot become fresh SDK
+  creation authority. Earlier records gain empty native_branch_history and nil
+  Branch.native_authority defaults without changing their encoded bytes. Older
+  envelopes reject native branch semantics even with those defaults stripped.
+  Coordinate every reader and atomic source/child resource writer before native
+  branch admission. The reader alone advertises no store or helper capability;
+  public lifecycle/qualification remains a separate gate. Completed child records
+  retain the original completion, immutable root and exact optional initial-release
+  chain. Commands retaining a native child assignment also use v30; source
+  commands carrying only branch material links retain v29.
+
+  Explicit native held-release intent, results and attached commands selectively
+  use v31. Release authority binds its original public version, current source
+  material, child root, both process identities and exact request. Earlier native
+  branch authority gains release: nil on read and keeps its v30 bytes. Older
+  envelopes reject explicit release semantics, including attached material proof.
+  Upgrade every reader and paired source/child release writer before activation;
+  this codec advertises no native feature or store capability by itself.
   """
 
   alias SmolBox.{Error, Execution, ExecutionFeatures}
@@ -172,6 +202,9 @@ defmodule SmolBox.Store.Codec do
     CodecGrowth,
     CodecMaterial,
     CodecNative,
+    CodecNativeBranchAuthority,
+    CodecNativeBranches,
+    CodecNativeBranchReleases,
     CodecNativeCaptureAbortSources,
     CodecNativeCaptureCleanup,
     CodecNativeCaptureResolutions,
@@ -188,6 +221,9 @@ defmodule SmolBox.Store.Codec do
   }
 
   @max_bytes 16_777_216
+  @native_branch_releases_prefix "smolbox-record-v31\0"
+  @native_branch_authority_prefix "smolbox-record-v30\0"
+  @native_branches_prefix "smolbox-record-v29\0"
   @native_exports_prefix "smolbox-record-v28\0"
   @native_prefix "smolbox-record-v16\0"
   @material_prefix "smolbox-record-v17\0"
@@ -221,6 +257,11 @@ defmodule SmolBox.Store.Codec do
     SmolBox.Backend.Binding,
     SmolBox.Backend.Assignment,
     SmolBox.Embedded.Identity,
+    SmolBox.Embedded.BranchPublication,
+    SmolBox.Embedded.BranchReleaseTransition,
+    SmolBox.Embedded.NativeBranchAuthority,
+    SmolBox.Embedded.NativeBranchRelease,
+    SmolBox.Embedded.BranchCompletion,
     SmolBox.Embedded.GrowthTransition,
     SmolBox.Embedded.CaptureTransition,
     SmolBox.Embedded.CaptureResolutionTransition,
@@ -283,6 +324,17 @@ defmodule SmolBox.Store.Codec do
 
   def encode(%{spec: %{profile: %SmolBox.Profile{} = profile}} = record) do
     cond do
+      CodecNativeBranchReleases.required?(record) -> encode_native_branch_releases(record)
+      CodecNativeBranchAuthority.required?(record) -> encode_native_branch_authority(record)
+      CodecNativeBranches.required?(record) -> encode_native_branches(record)
+      true -> encode_profile(record, profile)
+    end
+  end
+
+  def encode(_record), do: invalid()
+
+  defp encode_profile(record, profile) do
+    cond do
       CodecNativeExports.required?(record) ->
         encode_native_exports(record)
 
@@ -308,8 +360,6 @@ defmodule SmolBox.Store.Codec do
         encode_compatible(record, profile)
     end
   end
-
-  def encode(_record), do: invalid()
 
   defp encode_compatible(record, profile) do
     cond do
@@ -364,6 +414,18 @@ defmodule SmolBox.Store.Codec do
   @spec decode(binary()) ::
           {:ok, Execution.t() | SmolBox.ManagedMachine.t() | SmolBox.Volume.t()}
           | {:error, Error.t()}
+  def decode(<<@native_branch_releases_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_native_branch_releases(bytes)
+
+  def decode(<<@native_branch_authority_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_native_branch_authority(bytes)
+
+  def decode(<<@native_branches_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_native_branches(bytes)
+
   def decode(<<@native_exports_prefix, 131, tag, _rest::binary>> = bytes)
       when tag != 80 and byte_size(bytes) <= @max_bytes,
       do: decode_native_exports(bytes)
@@ -471,11 +533,66 @@ defmodule SmolBox.Store.Codec do
     {CodecNativeCaptures.upgrade(record), used}
   end
 
-  defp encode_native_exports(record) do
+  defp encode_native_exports(record),
+    do: encode_native_record(record, @native_exports_prefix, &CodecNativeBranchAuthority.strip/1)
+
+  defp encode_native_branches(record),
+    do: encode_native_record(record, @native_branches_prefix, &CodecNativeBranchAuthority.strip/1)
+
+  defp encode_native_branch_authority(record),
+    do:
+      encode_native_record(
+        record,
+        @native_branch_authority_prefix,
+        &CodecNativeBranchReleases.strip/1
+      )
+
+  defp encode_native_record(record, prefix, strip) do
     with :ok <- validate_extended(record) do
-      bytes = @native_exports_prefix <> :erlang.term_to_binary(record)
+      bytes = prefix <> :erlang.term_to_binary(strip.(record))
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
+  end
+
+  defp decode_native_branch_authority(<<@native_branch_authority_prefix, payload::binary>>) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <- used == byte_size(payload) and CodecNativeBranchAuthority.required?(record),
+         record = CodecNativeBranchReleases.upgrade(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
+  defp encode_native_branch_releases(record),
+    do: encode_native_record(record, @native_branch_releases_prefix, &Function.identity/1)
+
+  defp decode_native_branch_releases(<<@native_branch_releases_prefix, payload::binary>>) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <- used == byte_size(payload) and CodecNativeBranchReleases.required?(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
+  defp decode_native_branches(<<@native_branches_prefix, payload::binary>>) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <- used == byte_size(payload) and CodecNativeBranches.required?(record),
+         record = CodecNativeBranchAuthority.upgrade(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
   end
 
   defp decode_native_exports(<<@native_exports_prefix, payload::binary>>) do
@@ -483,6 +600,8 @@ defmodule SmolBox.Store.Codec do
 
     with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
          true <- used == byte_size(payload) and CodecNativeExports.required?(record),
+         record = CodecNativeBranchAuthority.upgrade(record),
+         false <- CodecNativeBranches.required?(record),
          :ok <- validate_extended(record),
          do: {:ok, record},
          else: (_ -> invalid())
@@ -508,6 +627,7 @@ defmodule SmolBox.Store.Codec do
     with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
          record = CodecNativeExports.upgrade(record),
          true <- used == byte_size(payload) and CodecNativeCaptureAbortSources.required?(record),
+         false <- CodecNativeBranches.required?(record),
          :ok <- validate_extended(record),
          do: {:ok, record},
          else: (_ -> invalid())
@@ -531,6 +651,7 @@ defmodule SmolBox.Store.Codec do
     with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
          record = CodecNativeCaptureAbortSources.upgrade(record),
          true <- used == byte_size(payload) and CodecNativeCaptureCleanup.required?(record),
+         false <- CodecNativeBranches.required?(record),
          :ok <- validate_extended(record),
          do: {:ok, record},
          else: (_ -> invalid())
@@ -557,6 +678,7 @@ defmodule SmolBox.Store.Codec do
     with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
          record = CodecNativeCaptureCleanup.upgrade(record),
          true <- used == byte_size(payload) and CodecNativeCaptureResolutions.required?(record),
+         false <- CodecNativeBranches.required?(record),
          :ok <- validate_extended(record),
          do: {:ok, record},
          else: (_ -> invalid())
@@ -570,6 +692,7 @@ defmodule SmolBox.Store.Codec do
     with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
          record = CodecNativeCaptureCleanup.upgrade(record),
          true <- used == byte_size(payload) and CodecNativeCaptures.required?(record),
+         false <- CodecNativeBranches.required?(record),
          false <- CodecNativeCaptureResolutions.required?(record),
          :ok <- validate_extended(record),
          do: {:ok, record},

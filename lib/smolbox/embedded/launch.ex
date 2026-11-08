@@ -3,6 +3,7 @@ defmodule SmolBox.Embedded.Launch do
   import Bitwise
 
   alias SmolBox.Embedded.{
+    BranchRequest,
     CheckpointContract,
     Config,
     ExportContract,
@@ -35,7 +36,7 @@ defmodule SmolBox.Embedded.Launch do
          true <- (mode &&& 0o111) != 0,
          helper = helper_config(config),
          {:ok, body} <- Jason.encode(helper),
-         true <- byte_size(body) <= 65_536,
+         true <- byte_size(body) <= config_bytes(helper),
          path = Path.join(directory, "config.json"),
          :ok <- File.write(path, body, [:exclusive]),
          :ok <- File.chmod(path, 0o600) do
@@ -73,6 +74,9 @@ defmodule SmolBox.Embedded.Launch do
   rescue
     _redacted -> :error
   end
+
+  defp config_bytes(%{"approved_branches" => _catalog}), do: 524_288
+  defp config_bytes(_helper), do: 65_536
 
   def cleanup(nil), do: :ok
 
@@ -160,6 +164,7 @@ defmodule SmolBox.Embedded.Launch do
     values = volume_config(values, config, features)
     values = checkpoint_config(values, config, features)
     values = export_config(values, config, features)
+    values = branch_config(values, config, features)
 
     case Config.sdk_identity(config) do
       %{"feature_versions" => %{"ports" => 1}} ->
@@ -178,6 +183,15 @@ defmodule SmolBox.Embedded.Launch do
   end
 
   defp registry_config(values, _config, _features), do: values
+
+  defp branch_config(values, config, %{"branches" => 1}) do
+    case BranchRequest.approvals(config) do
+      [] -> values
+      approvals -> Map.put(values, "approved_branches", approvals)
+    end
+  end
+
+  defp branch_config(values, _config, _features), do: values
 
   defp volume_config(values, %{volume_policy: %{id: id, root: root}}, %{"volumes" => 1}),
     do: Map.put(values, "approved_volume_policy", %{"id" => id, "root" => root})
