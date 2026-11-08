@@ -26,6 +26,9 @@ pub struct Session {
     pending: BTreeMap<u64, Pending>,
 }
 impl Session {
+    pub fn protocol_major(&self) -> u16 {
+        self.hello.major
+    }
     pub fn new(hello: Hello) -> Result<Self, InvalidMessage> {
         hello.validate()?;
         Ok(Self {
@@ -72,23 +75,29 @@ impl Session {
         }
         check(id > self.last_request)?;
         self.last_request = id;
-        let code = if rejection.is_some() {
-            rejection
-        } else if !self.hello.capabilities.contains(&operation.capability())
-            || operation
-                .creation_features()
-                .is_some_and(|features| !features.approved(&self.hello))
-        {
-            Some(SafeCode::Unsupported)
-        } else if operation.receipt().is_some_and(|r| {
-            !r.matches_domain(&self.hello.domain) || r.validate_for(self.hello.major).is_err()
-        }) {
-            Some(SafeCode::Ownership)
-        } else if self.pending.len() >= MAX_IN_FLIGHT {
-            Some(SafeCode::Overload)
-        } else {
-            None
-        };
+        let code =
+            if rejection.is_some() {
+                rejection
+            } else if !self.hello.capabilities.contains(&operation.capability())
+                || (operation.requires_remote_source()
+                    && (self.hello.major != 2
+                        || self.hello.sdk.as_ref().is_none_or(|sdk| {
+                            sdk.feature_versions.get("remote_sources") != Some(&1)
+                        })))
+                || operation
+                    .creation_features()
+                    .is_some_and(|features| !features.approved(&self.hello))
+            {
+                Some(SafeCode::Unsupported)
+            } else if operation.receipt().is_some_and(|r| {
+                !r.matches_domain(&self.hello.domain) || r.validate_for(self.hello.major).is_err()
+            }) {
+                Some(SafeCode::Ownership)
+            } else if self.pending.len() >= MAX_IN_FLIGHT {
+                Some(SafeCode::Overload)
+            } else {
+                None
+            };
         if let Some(code) = code {
             return Ok(ServerMessage::Terminal {
                 epoch,
@@ -103,7 +112,7 @@ impl Session {
         self.pending.insert(
             id,
             Pending {
-                operation,
+                operation: operation.sanitized(),
                 sequence: 0,
                 credit: initial_credit,
                 event_credit: initial_event_credit,
@@ -308,6 +317,7 @@ impl Session {
             {
                 command.max_output_bytes
             }
+            Operation::ListImages { .. } if stream == Stream::File => 8 * 1024 * 1024,
             Operation::List if stream == Stream::File => 4 * 1024 * 1024,
             _ => return Err(InvalidMessage),
         };
@@ -342,6 +352,45 @@ impl Session {
         outcome.validate_for(self.hello.major)?;
         let pending = self.pending.get(&id).ok_or(InvalidMessage)?;
         match (&pending.operation, &outcome) {
+            (
+                Operation::ExpandDisks {
+                    receipt,
+                    operation_id,
+                    request,
+                    previous,
+                },
+                Outcome::Grown { transition, .. },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                transition.matches(receipt, operation_id, *request, *previous)?;
+            }
+            (
+                Operation::QualifyGrowth {
+                    receipt,
+                    operation_id,
+                    request,
+                    previous,
+                    quiesced: true,
+                },
+                Outcome::GrowthQualified { transition, .. },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                transition.matches(receipt, operation_id, *request, *previous)?;
+            }
+            (
+                Operation::InspectGrowth {
+                    receipt,
+                    operation_id,
+                    request,
+                    previous,
+                },
+                Outcome::GrowthPresence { transition },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                if let Some(transition) = transition {
+                    transition.matches(receipt, operation_id, *request, *previous)?;
+                }
+            }
             (
                 Operation::TerminalOpen { .. },
                 Outcome::Terminal {
@@ -385,11 +434,36 @@ impl Session {
             | (Operation::Measurements { .. }, Outcome::Measurements { .. }) => {
                 check(pending.output_bytes == 0)?;
             }
+            (
+                Operation::PrepareArtifact { source, .. },
+                Outcome::PreparedArtifact {
+                    source: observed, ..
+                },
+            ) => {
+                check(pending.output_bytes == 0 && source == observed)?;
+            }
+            (Operation::PullImage { source, .. }, Outcome::Pulled { image }) => {
+                check(pending.output_bytes == 0)?;
+                image.matches(source)?;
+            }
+            (Operation::ListImages { .. }, Outcome::Images { bytes, .. }) => {
+                check(*bytes == pending.output_bytes)?;
+            }
             (Operation::List, Outcome::Inventory { bytes, .. }) => {
                 check(*bytes == pending.output_bytes)?;
             }
-            (Operation::QualifyCreation { .. }, Outcome::Qualified) => {}
-            (Operation::InspectCreation { .. }, Outcome::CreationPresence { .. }) => {}
+            (
+                Operation::QualifyCreation { .. }
+                | Operation::QualifyOciCreation { .. }
+                | Operation::QualifyRegistryCreation { .. },
+                Outcome::Qualified,
+            ) => {}
+            (
+                Operation::InspectCreation { .. }
+                | Operation::InspectOciCreation { .. }
+                | Operation::InspectRegistryCreation { .. },
+                Outcome::CreationPresence { .. },
+            ) => {}
             (_, Outcome::Error { dispatch, .. }) => {
                 check(*dispatch != Dispatch::NotDispatched || pending.output_bytes == 0)?
             }
@@ -402,8 +476,29 @@ impl Session {
                         && receipt.incarnation == create.incarnation,
                 )?;
             }
+            (Operation::CreateRegistryPrepared { create, .. }, Outcome::Created { receipt }) => {
+                check(pending.output_bytes == 0)?;
+                receipt.validate_for(2)?;
+                check(
+                    receipt.matches_domain(&self.hello.domain)
+                        && receipt.name == create.name
+                        && receipt.owner_token == create.owner_token
+                        && receipt.incarnation == create.incarnation,
+                )?;
+            }
+            (Operation::CreateOci { create }, Outcome::Created { receipt }) => {
+                check(pending.output_bytes == 0)?;
+                receipt.validate_for(2)?;
+                check(
+                    receipt.matches_domain(&self.hello.domain)
+                        && receipt.name == create.name
+                        && receipt.owner_token == create.owner_token
+                        && receipt.incarnation == create.incarnation,
+                )?;
+            }
             (
-                Operation::Inspect { .. }
+                Operation::StartOci { .. }
+                | Operation::Inspect { .. }
                 | Operation::Start { .. }
                 | Operation::Stop { .. }
                 | Operation::Delete { .. },

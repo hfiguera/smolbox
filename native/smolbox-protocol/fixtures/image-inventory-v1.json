@@ -1,0 +1,18 @@
+[
+  {
+    "reference": "fixture/imported",
+    "digest": "packed",
+    "size": 123,
+    "architecture": "arm64",
+    "os": "linux",
+    "layerCount": 2
+  },
+  {
+    "reference": "fixture/repository@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "size": 456,
+    "architecture": "amd64",
+    "os": "linux",
+    "layerCount": 3
+  }
+]

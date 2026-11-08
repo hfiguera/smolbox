@@ -40,10 +40,14 @@ defmodule SmolBox.Embedded.Config do
   Profile and remaining operation budgets further constrain individual requests.
 
   Optional source/checkpoint/export/branch/volume catalogs and registry credential
-  resolution use the shared HTTP approval rules. Catalog approval does not enable
+  resolution use the shared HTTP approval rules. `:registry_policy` supplies explicit host
+  download/cache limits and approved token realms through
+  `SmolBox.Embedded.RegistryPolicy`; token values stay in the credential resolver.
+  A registry catalog selected by remote_sources requires this policy. Dormant
+  legacy catalogs remain valid without it. Catalog approval does not enable
   an operation absent from the approved helper. Legacy helpers still accept only
-  local offline assignments; at least one local artifact remains required until
-  remote preparation and expanded assignments are implemented. `sdk_version/1` describes the
+  local offline assignments. Source-only OCI catalogs require an approved
+  remote_sources descriptor; current packages do not enable this feature. `sdk_version/1` describes the
   pinned SDK independently of the SmolBox engine version.
 
   Engine `0.2.0` packages use protocol 2 and manifest schema 3. Package policy and
@@ -64,7 +68,7 @@ defmodule SmolBox.Embedded.Config do
   startup. The manifest and Hello must match that exact descriptor and its limits.
   """
   alias SmolBox.Backend.Budget
-  alias SmolBox.Embedded.{Limits, SDKIdentity}
+  alias SmolBox.Embedded.{Limits, RegistryPolicy, SDKIdentity}
   alias SmolBox.{Error, Profile, Validation}
   alias SmolBox.Runtime.Approvals
 
@@ -98,6 +102,7 @@ defmodule SmolBox.Embedded.Config do
     :branch_policies,
     :volume_policy,
     :registry_credentials,
+    :registry_policy,
     :sdk_identity,
     :publish_address
   ]
@@ -116,6 +121,7 @@ defmodule SmolBox.Embedded.Config do
                 branch_policies: [],
                 volume_policy: nil,
                 registry_credentials: nil,
+                registry_policy: nil,
                 sdk_identity: nil,
                 publish_address: "127.0.0.1",
                 limits: %Limits{},
@@ -145,6 +151,7 @@ defmodule SmolBox.Embedded.Config do
           branch_policies: [SmolBox.BranchPolicy.t()],
           volume_policy: SmolBox.VolumePolicy.t() | nil,
           registry_credentials: {module(), term()} | nil,
+          registry_policy: SmolBox.Embedded.RegistryPolicy.t() | nil,
           sdk_identity: map() | nil,
           publish_address: String.t(),
           capacity: SmolBox.Store.capacity(),
@@ -249,13 +256,24 @@ defmodule SmolBox.Embedded.Config do
   end
 
   defp catalogs?(config) do
-    Validation.list?(config.artifacts, 32) and config.artifacts != [] and
+    Validation.list?(config.artifacts, 32) and catalog_present?(config) and
       Enum.all?(config.artifacts, &artifact?(&1, config.architecture)) and
       unique?(config.artifacts, & &1["id"]) and unique?(config.artifacts, & &1["path"]) and
       Validation.list?(config.profiles, 32) and config.profiles != [] and
       Enum.all?(config.profiles, &profile?(&1, config)) and
       unique?(config.profiles, & &1.id)
   end
+
+  defp catalog_present?(config), do: config.artifacts != [] or source_only?(config)
+
+  defp source_only?(config),
+    do:
+      match?(%{"feature_versions" => %{"remote_sources" => 1}}, sdk_identity(config)) and
+        config.sources != [] and
+        Enum.all?(
+          config.sources,
+          &match?(%SmolBox.Source{kind: kind} when kind in [:oci, :registry], &1)
+        )
 
   defp artifact?(artifact, architecture) do
     exact_keys?(artifact, @artifact_keys) and Validation.identifier?(artifact["id"]) and
@@ -305,7 +323,18 @@ defmodule SmolBox.Embedded.Config do
       Approvals.checkpoint_policies?(config.checkpoint_policies, version) and
       Approvals.branch_policies?(config.branch_policies, version) and
       Approvals.volume_policy?(config.volume_policy, version, config.platform) and
-      SmolBox.RegistryCredentials.valid?(config.registry_credentials)
+      SmolBox.RegistryCredentials.valid?(config.registry_credentials) and
+      registry_policy?(config)
+  end
+
+  defp registry_policy?(config) do
+    valid = RegistryPolicy.catalog?(config.registry_policy, config.sources)
+
+    required =
+      match?(%{"feature_versions" => %{"remote_sources" => 1}}, sdk_identity(config)) and
+        Enum.any?(config.sources, &(&1.kind == :registry))
+
+    valid and (not required or config.registry_policy != nil)
   end
 
   defp capacity?(capacity), do: Approvals.capacity?(capacity)

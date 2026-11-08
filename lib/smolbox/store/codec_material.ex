@@ -1,7 +1,7 @@
 defmodule SmolBox.Store.CodecMaterial do
   @moduledoc false
   alias SmolBox.Backend.Assignment
-  alias SmolBox.Store.CodecFields
+  alias SmolBox.Store.{CodecFields, CodecGrowth}
 
   @defaults %{Assignment => [version: 1]}
 
@@ -11,6 +11,8 @@ defmodule SmolBox.Store.CodecMaterial do
 
   def required?(%{backend_assignment: %Assignment{version: 2}}), do: true
   def required?(_record), do: false
-  def strip(record), do: CodecFields.transform(record, @defaults, :strip)
-  def upgrade(record), do: CodecFields.transform(record, @defaults, :upgrade)
+  def strip(record), do: record |> CodecGrowth.strip() |> CodecFields.transform(@defaults, :strip)
+
+  def upgrade(record),
+    do: record |> CodecFields.transform(@defaults, :upgrade) |> CodecGrowth.upgrade()
 end

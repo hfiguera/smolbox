@@ -23,7 +23,15 @@ pub(crate) fn expand(value: &mut Value) -> Result<bool, InvalidMessage> {
         .and_then(Value::as_str)
         .ok_or(InvalidMessage)?
         .to_owned();
-    let fields = if matches!(name.as_str(), "create" | "inspect_creation") {
+    let fields = if matches!(
+        name.as_str(),
+        "create"
+            | "inspect_creation"
+            | "create_oci"
+            | "inspect_oci_creation"
+            | "create_registry_prepared"
+            | "inspect_registry_creation"
+    ) {
         operation
             .get_mut("create")
             .and_then(Value::as_object_mut)
@@ -36,7 +44,15 @@ pub(crate) fn expand(value: &mut Value) -> Result<bool, InvalidMessage> {
     };
     if !matches!(
         name.as_str(),
-        "create" | "inspect_creation" | "qualify_creation"
+        "create"
+            | "inspect_creation"
+            | "qualify_creation"
+            | "create_oci"
+            | "inspect_oci_creation"
+            | "qualify_oci_creation"
+            | "qualify_registry_creation"
+            | "create_registry_prepared"
+            | "inspect_registry_creation"
     ) || fields.contains_key("features")
     {
         return Err(InvalidMessage);

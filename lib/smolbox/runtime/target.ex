@@ -2,7 +2,7 @@ defmodule SmolBox.Runtime.Target do
   @moduledoc false
   alias SmolBox.Backend.{Assignment, Embedded, Features, HTTP}
   alias SmolBox.Embedded.{Config, Port}
-  alias SmolBox.{Error, MachineSpec}
+  alias SmolBox.{Error, MachineSpec, Source}
   alias SmolBox.Runtime.WorkerConfig
 
   @worker_fields [
@@ -181,11 +181,17 @@ defmodule SmolBox.Runtime.Target do
   def machine_spec(%__MODULE__{kind: :embedded, native_config: config}, spec, name) do
     if Assignment.supports?(config, spec) do
       artifact =
-        Enum.find(config.artifacts, &(Map.take(&1, ~w(id sha256 architecture)) == spec.artifact))
+        if spec.artifact["kind"] in ["oci", "registry"],
+          do: Enum.find(config.sources, &(Source.artifact(&1) == spec.artifact)),
+          else:
+            Enum.find(
+              config.artifacts,
+              &(Map.take(&1, ~w(id sha256 architecture)) == spec.artifact)
+            )
 
       profile = spec.profile
 
-      MachineSpec.new(name, artifact["path"],
+      MachineSpec.new(name, if(is_struct(artifact, Source), do: artifact, else: artifact["path"]),
         cpus: profile.cpus,
         memory_mb: profile.memory_mb,
         storage_gb: profile.storage_gb,

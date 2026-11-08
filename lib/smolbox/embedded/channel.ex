@@ -1,6 +1,15 @@
 defmodule SmolBox.Embedded.Channel do
   @moduledoc false
-  alias SmolBox.Embedded.{Protocol, Request, Shape, TerminalContract}
+  alias SmolBox.Embedded.{
+    GrowthTransition,
+    ImageContract,
+    Protocol,
+    RegistryContract,
+    Request,
+    Shape,
+    TerminalContract
+  }
+
   alias SmolBox.Validation
 
   @derive {Inspect, only: [:last_id, :queued_bytes, :queued_events]}
@@ -25,7 +34,8 @@ defmodule SmolBox.Embedded.Channel do
     }
 
   def register(channel, operation, bytes, events) do
-    with false <- channel.unavailable,
+    with true <-
+           not channel.unavailable or (channel.major == 2 and Request.observation?(operation)),
          true <- map_size(channel.pending) < 32,
          true <- channel.last_id < 9_007_199_254_740_991,
          true <- Request.valid?(operation, 1, channel.major),
@@ -38,7 +48,7 @@ defmodule SmolBox.Embedded.Channel do
       id = channel.last_id + 1
 
       pending = %{
-        operation: operation,
+        operation: RegistryContract.sanitize(operation),
         sequence: nil,
         done: false,
         credit: bytes,
@@ -269,6 +279,8 @@ defmodule SmolBox.Embedded.Channel do
   defp stream(%{"operation" => "read_file", "options" => options}, "file"),
     do: {:ok, :file, options["max_bytes"]}
 
+  defp stream(%{"operation" => "list_images"}, "file"), do: {:ok, :file, 8_388_608}
+
   defp stream(%{"operation" => "list"}, "file"), do: {:ok, :file, 4_194_304}
   defp stream(%{"operation" => "logs", "max_bytes" => max}, "log"), do: {:ok, :log, max + 30_000}
 
@@ -276,6 +288,13 @@ defmodule SmolBox.Embedded.Channel do
 
   defp terminal_matches?(_domain, pending, %{"result" => "error", "dispatch" => dispatch}),
     do: dispatch != "not_dispatched" or pending.output_bytes == 0
+
+  defp terminal_matches?(
+         _domain,
+         %{operation: %{"operation" => "prepare_artifact", "source" => source}, output_bytes: 0},
+         %{"result" => "prepared_artifact", "source" => source}
+       ),
+       do: true
 
   defp terminal_matches?(
          _domain,
@@ -293,6 +312,23 @@ defmodule SmolBox.Embedded.Channel do
        })
        when name in ~w(health capacity metrics readiness measurements),
        do: result == if(name == "readiness", do: "ready", else: name)
+
+  defp terminal_matches?(
+         _domain,
+         %{operation: %{"operation" => "pull_image", "source" => source}, output_bytes: 0},
+         %{"result" => "pulled", "image" => image}
+       ),
+       do: ImageContract.matches?(image, source)
+
+  defp terminal_matches?(
+         _domain,
+         %{operation: %{"operation" => "list_images"}, output_bytes: bytes},
+         %{
+           "result" => "images",
+           "bytes" => bytes
+         }
+       ),
+       do: true
 
   defp terminal_matches?(_domain, %{operation: %{"operation" => "list"}, output_bytes: bytes}, %{
          "result" => "inventory",
@@ -312,26 +348,57 @@ defmodule SmolBox.Embedded.Channel do
        ),
        do: bytes <= request["max_bytes"] and (completion != "completed" or not request["follow"])
 
-  defp terminal_matches?(_domain, %{operation: %{"operation" => "qualify_creation"}}, %{
+  defp terminal_matches?(_domain, %{operation: %{"operation" => name}}, %{
          "result" => "qualified"
-       }),
+       })
+       when name in ~w(qualify_creation qualify_oci_creation qualify_registry_creation),
        do: true
 
-  defp terminal_matches?(domain, %{operation: %{"operation" => "create", "create" => create}}, %{
-         "result" => "created",
-         "receipt" => receipt
-       }),
+  defp terminal_matches?(
+         _domain,
+         %{operation: %{"operation" => "expand_disks"} = request, output_bytes: 0},
+         %{"result" => "grown", "transition" => transition}
+       ),
+       do: growth_matches?(request, transition)
+
+  defp terminal_matches?(
+         _domain,
+         %{
+           operation: %{"operation" => "qualify_growth", "quiesced" => true} = request,
+           output_bytes: 0
+         },
+         %{"result" => "growth_qualified", "transition" => transition}
+       ),
+       do: growth_matches?(request, transition)
+
+  defp terminal_matches?(
+         _domain,
+         %{operation: %{"operation" => "inspect_growth"} = request, output_bytes: 0},
+         %{"result" => "growth_presence", "transition" => transition}
+       ),
+       do: transition == nil or growth_matches?(request, transition)
+
+  defp terminal_matches?(
+         domain,
+         %{operation: %{"operation" => name, "create" => create}, output_bytes: bytes},
+         %{
+           "result" => "created",
+           "receipt" => receipt
+         }
+       )
+       when name in ~w(create create_oci create_registry_prepared),
        do:
-         domain_matches?(domain, receipt) and
+         (name == "create" or bytes == 0) and domain_matches?(domain, receipt) and
            Enum.all?(~w(name owner_token incarnation), &(receipt[&1] == create[&1]))
 
-  defp terminal_matches?(_domain, %{operation: %{"operation" => "inspect_creation"}}, %{
+  defp terminal_matches?(_domain, %{operation: %{"operation" => name}}, %{
          "result" => "creation_presence"
-       }),
+       })
+       when name in ~w(inspect_creation inspect_oci_creation inspect_registry_creation),
        do: true
 
   defp terminal_matches?(_domain, %{operation: %{"operation" => name}}, %{"result" => "observed"})
-       when name in ~w(inspect start stop delete), do: true
+       when name in ~w(inspect start start_oci stop delete), do: true
 
   defp terminal_matches?(
          _domain,
@@ -382,6 +449,23 @@ defmodule SmolBox.Embedded.Channel do
       {{:value, size}, rest} when bytes >= size -> consume(rest, bytes - size, events + 1)
       {{:value, size}, rest} -> {:ok, :queue.in_r(size - bytes, rest), events}
       {:empty, _queue} -> :error
+    end
+  end
+
+  defp growth_matches?(request, transition) do
+    case GrowthTransition.from_wire(transition) do
+      {:ok, proof} ->
+        GrowthTransition.bound?(
+          proof,
+          request["receipt"],
+          request["operation_id"],
+          request["request"],
+          request["previous"],
+          Map.take(proof.change, ~w(storage_gib overlay_gib))
+        )
+
+      _ ->
+        false
     end
   end
 end

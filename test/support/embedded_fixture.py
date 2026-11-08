@@ -12,6 +12,7 @@ META = json.loads((ROOT / "fixture.json").read_text())
 CONFIG = json.loads(Path(sys.argv[2]).read_text())
 EPOCH = secrets.token_hex(16)
 PENDING = {}
+QUARANTINED = False
 VM_PATH = ROOT / "vm.json"
 VM = json.loads(VM_PATH.read_text()) if META.get("persistent_backend") and VM_PATH.exists() else None
 FILES = {}
@@ -243,7 +244,8 @@ try:
                     send(correlated("terminal", identifier, 1, outcome=dict(result="health", snapshot=dict(
                         total=int(VM is not None), running=int(bool(VM and VM["state"] == "running")), uptime_seconds=1))))
                 elif operation["operation"] == "readiness":
-                    send(correlated("terminal", identifier, 1, outcome=dict(result="ready")))
+                    outcome = dict(result="error", code="state", dispatch="not_dispatched") if QUARANTINED else dict(result="ready")
+                    send(correlated("terminal", identifier, 1, outcome=outcome))
                 elif operation["operation"] == "capacity":
                     running = bool(VM and VM["state"] == "running")
                     send(correlated("terminal", identifier, 1, outcome=dict(result="capacity", snapshot=dict(
@@ -392,6 +394,7 @@ try:
                                                credit=message["initial_credit"],
                                                events=message["initial_event_credit"])
                     if mode == "unavailable":
+                        QUARANTINED = True
                         send(dict(type="unavailable", epoch=EPOCH))
                         terminal(identifier, "unknown", None)
                         continue

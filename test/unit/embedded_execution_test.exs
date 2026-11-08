@@ -118,13 +118,16 @@ defmodule SmolBox.EmbeddedExecutionTest do
     owner =
       spawn(fn ->
         receive do
+          :stop ->
+            :ok
+
           _message ->
             send(observer, :native_contact)
             receive do: (:stop -> :ok)
         end
       end)
 
-    on_exit(fn -> Process.exit(owner, :kill) end)
+    on_exit(fn -> send(owner, :stop) end)
     {:ok, reference} = Embedded.reference(context.native, owner)
     native = %{context.target | connection: reference}
     http = %Target{kind: :http, id: "http"}
@@ -171,6 +174,7 @@ defmodule SmolBox.EmbeddedExecutionTest do
     end
   end
 
+  @tag :deferred_crash
   test "owner loss keeps unknown evidence and reservation without replay", context do
     config = activate(context)
     {:ok, command} = Command.new(["hold"], timeout_secs: 10)
@@ -274,6 +278,7 @@ defmodule SmolBox.EmbeddedExecutionTest do
 
   for replacement <- [:owner, :helper] do
     @replacement replacement
+    @tag :deferred_crash
     test "delayed dispatch intent cannot cross a restarted #{@replacement}", context do
       config = activate(context)
       observer = self()
@@ -341,6 +346,7 @@ defmodule SmolBox.EmbeddedExecutionTest do
     end
   end
 
+  @tag :deferred_crash
   test "retained lifecycle intent stays uncertain when its owner is replaced before dispatch",
        context do
     config = activate(context)

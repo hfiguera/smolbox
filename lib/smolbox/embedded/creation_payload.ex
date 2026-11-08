@@ -42,12 +42,13 @@ defmodule SmolBox.Embedded.CreationPayload do
   end
 
   defp pack_operation(%{"operation" => name, "create" => create} = operation)
-       when name in ~w(create inspect_creation) do
+       when name in ~w(create inspect_creation create_oci inspect_oci_creation create_registry_prepared inspect_registry_creation) do
     with {:ok, value} <- pack_fields(create), do: {:ok, %{operation | "create" => value}}
   end
 
-  defp pack_operation(%{"operation" => "qualify_creation"} = operation),
-    do: pack_fields(operation)
+  defp pack_operation(%{"operation" => name} = operation)
+       when name in ~w(qualify_creation qualify_oci_creation qualify_registry_creation),
+       do: pack_fields(operation)
 
   defp pack_operation(operation), do: {:ok, operation}
 

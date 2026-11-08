@@ -1,9 +1,23 @@
 defmodule SmolBox.Embedded.Request do
   @moduledoc false
-  alias SmolBox.Embedded.{CreationFeatures, Shape, TerminalContract}
+  alias SmolBox.Embedded.{
+    CreationFeatures,
+    ImageContract,
+    NativeSource,
+    RegistryContract,
+    Shape,
+    TerminalContract
+  }
+
   alias SmolBox.Validation
 
   @lifecycle ~w(inspect start stop delete)
+
+  def observation?(%{"operation" => name}),
+    do:
+      name in ~w(health capacity metrics readiness list measurements inspect_growth inspect_oci_creation inspect_registry_creation)
+
+  def observation?(_request), do: false
 
   def valid?(operation, budget_ms, major \\ 1) do
     major in [1, 2] and Validation.integer?(budget_ms, 1, 86_400_000) and
@@ -27,6 +41,18 @@ defmodule SmolBox.Embedded.Request do
       )
   end
 
+  def growth_request?(request, previous) do
+    Shape.keys?(request, ~w(storage_gib overlay_gib)) and
+      Shape.keys?(previous, ~w(storage_gib overlay_gib)) and
+      Enum.all?(~w(storage_gib overlay_gib), fn key ->
+        Validation.integer?(previous[key], 1, 64) and
+          (request[key] == nil or Validation.integer?(request[key], previous[key], 64))
+      end) and
+      Enum.any?(~w(storage_gib overlay_gib), fn key ->
+        request[key] != nil and request[key] > previous[key]
+      end)
+  end
+
   defp operation?(%{"operation" => "terminal_open"} = operation, budget, 2),
     do:
       Shape.keys?(operation, ~w(operation receipt terminal)) and
@@ -35,10 +61,76 @@ defmodule SmolBox.Embedded.Request do
         budget <= operation["terminal"]["session_ms"]
 
   defp operation?(%{"operation" => name} = operation, budget, 2)
+       when name in ~w(expand_disks inspect_growth),
+       do:
+         Shape.keys?(operation, ~w(operation receipt operation_id request previous)) and
+           Shape.receipt?(operation["receipt"], 2) and Shape.id?(operation["operation_id"]) and
+           growth_request?(operation["request"], operation["previous"]) and
+           budget <= if(name == "inspect_growth", do: 30_000, else: 600_000)
+
+  defp operation?(%{"operation" => "qualify_growth", "quiesced" => true} = operation, budget, 2),
+    do:
+      Shape.keys?(operation, ~w(operation receipt operation_id request previous quiesced)) and
+        Shape.receipt?(operation["receipt"], 2) and Shape.id?(operation["operation_id"]) and
+        growth_request?(operation["request"], operation["previous"]) and budget <= 30_000
+
+  defp operation?(%{"operation" => name} = operation, budget, 2)
        when name in ~w(health capacity metrics readiness list),
        do:
          Shape.keys?(operation, ~w(operation)) and
            budget <= if(name == "readiness", do: 2000, else: 30_000)
+
+  defp operation?(%{"operation" => name, "create" => create} = operation, budget, 2)
+       when name in ~w(create_oci inspect_oci_creation),
+       do:
+         Shape.keys?(operation, ~w(operation create)) and NativeSource.creation?(create) and
+           (name == "create_oci" or budget <= 30_000)
+
+  defp operation?(%{"operation" => "qualify_oci_creation"} = operation, budget, 2),
+    do:
+      feature_keys?(operation, ~w(operation source resources user), 2) and budget <= 30_000 and
+        NativeSource.artifact?(operation["source"]) and Shape.resources?(operation["resources"]) and
+        Shape.optional?(operation["user"], &Shape.text?(&1, 16_384, false))
+
+  defp operation?(%{"operation" => "start_oci"} = operation, _budget, 2),
+    do:
+      Shape.keys?(operation, ~w(operation receipt source)) and
+        Shape.receipt?(operation["receipt"], 2) and
+        NativeSource.artifact?(operation["source"])
+
+  defp operation?(%{"operation" => "create_registry_prepared"} = operation, _budget, 2),
+    do:
+      Shape.keys?(operation, ~w(operation create size_bytes)) and
+        NativeSource.registry_creation?(operation["create"]) and
+        Validation.integer?(operation["size_bytes"], 1, 34_359_738_368)
+
+  defp operation?(%{"operation" => "inspect_registry_creation"} = operation, budget, 2),
+    do:
+      Shape.keys?(operation, ~w(operation create)) and budget <= 30_000 and
+        NativeSource.registry_creation?(operation["create"])
+
+  defp operation?(%{"operation" => "qualify_registry_creation"} = operation, budget, 2),
+    do:
+      feature_keys?(operation, ~w(operation source resources user), 2) and budget <= 30_000 and
+        NativeSource.registry_artifact?(operation["source"]) and
+        Shape.resources?(operation["resources"]) and
+        Shape.optional?(operation["user"], &Shape.text?(&1, 16_384, false))
+
+  defp operation?(%{"operation" => "prepare_artifact"} = operation, _budget, 2),
+    do:
+      (Shape.keys?(operation, ~w(operation source)) or
+         Shape.keys?(operation, ~w(operation source credential_ref identity_token))) and
+        RegistryContract.source?(operation["source"]) and RegistryContract.credentials?(operation)
+
+  defp operation?(%{"operation" => "pull_image"} = operation, _budget, 2),
+    do:
+      Shape.keys?(operation, ~w(operation receipt source)) and
+        Shape.receipt?(operation["receipt"], 2) and ImageContract.source?(operation["source"])
+
+  defp operation?(%{"operation" => "list_images", "receipt" => receipt} = operation, budget, 2),
+    do:
+      Shape.keys?(operation, ~w(operation receipt)) and budget <= 30_000 and
+        Shape.receipt?(receipt, 2)
 
   defp operation?(%{"operation" => "measurements", "receipt" => receipt} = operation, budget, 2),
     do:

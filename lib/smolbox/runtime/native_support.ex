@@ -39,6 +39,8 @@ defmodule SmolBox.Runtime.NativeSupport do
          true <- background_support?(config, supported),
          true <- streaming_support?(config, supported),
          true <- terminal_support?(config, supported),
+         true <- growth_support?(config, supported),
+         true <- source_support?(config, supported),
          true <-
            Enum.all?(required, fn {name, arity} -> function_exported?(adapter, name, arity) end),
          do: :ok,
@@ -89,5 +91,32 @@ defmodule SmolBox.Runtime.NativeSupport do
           _ ->
             true
         end
+      end)
+
+  defp growth_support?(config, supported),
+    do:
+      Enum.all?(targets(config), fn target ->
+        case Config.sdk_identity(target.native_config) do
+          %{"feature_versions" => %{"disk_growth" => 1}} ->
+            supported[:native_disk_growth] == 1 and supported[:managed_disk_expansion] == 1
+
+          _ ->
+            true
+        end
+      end)
+
+  defp source_support?(config, supported),
+    do:
+      Enum.all?(targets(config), fn target ->
+        features = Config.sdk_identity(target.native_config)
+
+        required =
+          match?(%{"feature_versions" => %{"remote_sources" => 1}}, features) or
+            match?(%{"feature_versions" => %{"images" => 1}}, features)
+
+        not required or
+          (supported[:native_sources] == 1 and supported[:registry_sources] == 1 and
+             (not match?(%{"feature_versions" => %{"images" => 1}}, features) or
+                supported[:managed_images] == 1))
       end)
 end

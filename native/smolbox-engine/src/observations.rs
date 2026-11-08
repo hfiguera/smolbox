@@ -18,8 +18,8 @@ const MIB: u64 = 1024 * 1024;
 
 #[derive(Clone)]
 pub struct ReadBudget {
-    deadline: Instant,
-    cancel: Cancellation,
+    pub(crate) deadline: Instant,
+    pub(crate) cancel: Cancellation,
 }
 impl ReadBudget {
     pub fn new(remaining: Duration, cancel: Cancellation) -> Result<Self> {
@@ -244,7 +244,7 @@ impl Engine {
         let _job = self.jobs.acquire(crate::jobs::Demand::observation())?;
         budget.check()?;
         receipt.validate(self.binding())?;
-        let gate = self.gate(&receipt.name)?;
+        let gate = self.observation_gate(&receipt.name)?;
         let _guard = gate
             .try_lock()
             .map_err(|_| Error::before(ErrorCode::Conflict))?;

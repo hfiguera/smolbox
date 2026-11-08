@@ -222,7 +222,9 @@ defmodule SmolBox.Machines do
   files and worker metadata reached the complete target; partial growth or an old
   size observation is insufficient. This API verifies owned stopped target sizes.
   With `disposition: :deleted`, remove the resource after quiescence; verified
-  absence releases accounting. Neither disposition sends a worker mutation.
+  absence releases accounting. Neither disposition resizes disks or updates SDK
+  metadata. Embedded stopped resolution may qualify its saved geometry and publish
+  an engine material proof after operator repair; it never replays the resize.
   """
   def resolve_disk_expansion(runtime, handle, id, version, options) do
     with true <-
@@ -234,8 +236,25 @@ defmodule SmolBox.Machines do
          :ok <- DiskExpansions.supported(config),
          {:ok, record} <- Machines.store(config, :fetch, [handle]),
          {:ok, worker} <- Machines.worker(config, record),
-         :ok <- Target.require_operation(worker, :expand_disks),
-         {:ok, current} <-
+         :ok <- Target.require_operation(worker, :expand_disks) do
+      NativeResolution.run(
+        config,
+        Runtime.coordinator(runtime),
+        record,
+        worker,
+        disposition,
+        fn pinned ->
+          resolve_expansion(config, handle, id, version, pinned, disposition)
+        end
+      )
+    else
+      false -> Session.error(:validation, :expand_disks)
+      error -> error
+    end
+  end
+
+  defp resolve_expansion(config, handle, id, version, worker, disposition) do
+    with {:ok, current} <-
            Machines.store(config, :claim_version, [
              handle,
              version,
@@ -246,7 +265,7 @@ defmodule SmolBox.Machines do
          true <- current.active_expansion == id and current.phase == :uncertain,
          result =
            Machines.io(config, %{current | operation_deadline_ms: nil}, fn ->
-             Backend.inspect_machine(Target.connection(worker, current), current.machine_name)
+             DiskExpansions.resolution_observation(worker, current, disposition)
            end),
          {:ok, observed} <- resolution_observation(result, disposition) do
       DiskExpansions.advance(config, current, {:resolve, observed})

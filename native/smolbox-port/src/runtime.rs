@@ -230,6 +230,25 @@ impl Shared {
 }
 
 pub trait Native: Send + Sync + 'static {
+    fn create_registry_prepared(
+        &self,
+        _create: wire::RegistryCreate,
+        _size: u64,
+        _approval: crate::package::RegistryApproval,
+        _remaining: Duration,
+        _cancel: Cancellation,
+    ) -> wire::Outcome {
+        before(wire::SafeCode::Unsupported)
+    }
+    fn prepare_artifact(
+        &self,
+        _approval: crate::package::RegistryApproval,
+        _token: Option<wire::RegistryToken>,
+        _remaining: Duration,
+        _cancel: Cancellation,
+    ) -> wire::Outcome {
+        before(wire::SafeCode::Unsupported)
+    }
     fn terminal(
         &self,
         _receipt: wire::Receipt,
@@ -254,6 +273,25 @@ pub trait Native: Send + Sync + 'static {
     fn shutdown(&self) -> BridgeResult<()>;
 }
 impl Native for Engine {
+    fn create_registry_prepared(
+        &self,
+        create: wire::RegistryCreate,
+        size: u64,
+        approval: crate::package::RegistryApproval,
+        remaining: Duration,
+        cancel: Cancellation,
+    ) -> wire::Outcome {
+        adapter::create_registry_prepared(self, create, size, approval, remaining, cancel)
+    }
+    fn prepare_artifact(
+        &self,
+        approval: crate::package::RegistryApproval,
+        token: Option<wire::RegistryToken>,
+        remaining: Duration,
+        cancel: Cancellation,
+    ) -> wire::Outcome {
+        adapter::prepare_artifact(self, approval, token, remaining, cancel)
+    }
     fn terminal(
         &self,
         receipt: wire::Receipt,
@@ -376,11 +414,16 @@ fn serve_io(
     let (input_sender, inputs) = bounded(wire::MAX_IN_FLIGHT);
     let (jobs, work) = bounded::<Work>(wire::MAX_IN_FLIGHT);
     for _ in 0..WORKERS {
-        spawn_worker(shared.clone(), native.clone(), work.clone());
+        spawn_worker(shared.clone(), native.clone(), work.clone(), config.clone());
     }
     let (observations, observation_work) = bounded::<Work>(wire::MAX_IN_FLIGHT);
     for _ in 0..OBSERVATION_WORKERS {
-        spawn_worker(shared.clone(), native.clone(), observation_work.clone());
+        spawn_worker(
+            shared.clone(),
+            native.clone(),
+            observation_work.clone(),
+            config.clone(),
+        );
     }
     drop(observation_work);
     let (controls, cancellations) = bounded::<Cancellation>(wire::MAX_IN_FLIGHT);
@@ -549,6 +592,9 @@ fn is_observation(operation: &wire::Operation) -> bool {
             | wire::Operation::Readiness
             | wire::Operation::List
             | wire::Operation::Measurements { .. }
+            | wire::Operation::InspectGrowth { .. }
+            | wire::Operation::InspectOciCreation { .. }
+            | wire::Operation::InspectRegistryCreation { .. }
     )
 }
 fn tick(shared: &Shared, controls: &Sender<Cancellation>) -> BridgeResult<()> {
@@ -631,7 +677,63 @@ fn admit_request(
     } else {
         None
     };
-    let rejection = if state.unavailable {
+    let rejection = if let Some(source) = operation.oci_source() {
+        if config
+            .approved_oci_sources
+            .as_ref()
+            .is_some_and(|approved| approved.contains(&source))
+        {
+            rejection
+        } else {
+            Some(wire::SafeCode::Unsupported)
+        }
+    } else {
+        rejection
+    };
+    let rejection = if let Some(source) = operation.registry_source() {
+        if config
+            .approved_registry_sources
+            .as_ref()
+            .is_some_and(|catalog| {
+                catalog.iter().any(|approval| {
+                    approval.source.reference == source.reference
+                        && approval.source.platform == source.platform
+                        && approval.source.content_sha256 == source.content_sha256
+                        && matches!(&operation,wire::Operation::PrepareArtifact {credential_ref,identity_token,..}
+                            if approval.credential_ref.as_deref()==credential_ref.as_deref() && approval.credential_ref.is_some()==identity_token.is_some())
+                })
+            })
+        {
+            rejection
+        } else {
+            Some(wire::SafeCode::Unsupported)
+        }
+    } else {
+        rejection
+    };
+    let rejection = if let Some(identity) = operation.registry_identity() {
+        let source = identity.request();
+        if config
+            .approved_registry_sources
+            .as_ref()
+            .is_some_and(|catalog| {
+                catalog
+                    .iter()
+                    .any(|approval| approval.matches(&source, identity.credential_ref.as_deref()) &&
+                        !matches!(&operation,wire::Operation::CreateRegistryPrepared {size_bytes,..} if *size_bytes>approval.max_bytes))
+            })
+        {
+            rejection
+        } else {
+            Some(wire::SafeCode::Unsupported)
+        }
+    } else {
+        rejection
+    };
+    let rejection = if state.unavailable
+        && !(state.session.protocol_major() == wire::PARITY_PROTOCOL_MAJOR
+            && is_observation(&operation))
+    {
         Some(wire::SafeCode::State)
     } else {
         rejection
@@ -686,7 +788,7 @@ fn admit_request(
             started: false,
             deadline,
             cancellation_requested: None,
-            operation: operation.clone(),
+            operation: operation.sanitized(),
             upload: None,
             upload_reservation,
         },
@@ -836,7 +938,12 @@ fn queue_upload(shared: &Shared, jobs: &Sender<Work>, id: u64) -> BridgeResult<(
     })
     .map_err(|_| ())
 }
-fn spawn_worker(shared: Arc<Shared>, native: Arc<dyn Native>, work: Receiver<Work>) {
+fn spawn_worker(
+    shared: Arc<Shared>,
+    native: Arc<dyn Native>,
+    work: Receiver<Work>,
+    config: Config,
+) {
     std::thread::spawn(move || {
         while let Ok(work) = work.recv() {
             let remaining = work.deadline.saturating_duration_since(Instant::now());
@@ -845,7 +952,9 @@ fn spawn_worker(shared: Arc<Shared>, native: Arc<dyn Native>, work: Receiver<Wor
                     shared.fatal.store(true, Ordering::Release);
                     return;
                 };
-                let unavailable = state.unavailable || !native.available();
+                let unavailable = (state.unavailable || !native.available())
+                    && !(state.session.protocol_major() == wire::PARITY_PROTOCOL_MAJOR
+                        && is_observation(&work.operation));
                 let should_run = if state.closing || unavailable {
                     false
                 } else {
@@ -898,6 +1007,52 @@ fn spawn_worker(shared: Arc<Shared>, native: Arc<dyn Native>, work: Receiver<Wor
                             id: work.id,
                         },
                     ),
+                    wire::Operation::PrepareArtifact {
+                        source,
+                        credential_ref,
+                        identity_token,
+                    } => match config
+                        .approved_registry_sources
+                        .as_ref()
+                        .and_then(|catalog| {
+                            catalog.iter().find(|approval| {
+                                approval.source.reference == source.reference
+                                    && approval.source.platform == source.platform
+                                    && approval.source.content_sha256 == source.content_sha256
+                                    && approval.credential_ref.as_deref()
+                                        == credential_ref.as_deref()
+                            })
+                        }) {
+                        Some(approval) => native.prepare_artifact(
+                            approval.clone(),
+                            identity_token,
+                            remaining,
+                            work.cancel.clone(),
+                        ),
+                        None => before(wire::SafeCode::Unsupported),
+                    },
+                    wire::Operation::CreateRegistryPrepared { create, size_bytes } => {
+                        let source = create.source.request();
+                        match config
+                            .approved_registry_sources
+                            .as_ref()
+                            .and_then(|catalog| {
+                                catalog.iter().find(|approval| {
+                                    approval
+                                        .matches(&source, create.source.credential_ref.as_deref())
+                                })
+                            }) {
+                            Some(approval) if size_bytes <= approval.max_bytes => native
+                                .create_registry_prepared(
+                                    create,
+                                    size_bytes,
+                                    approval.clone(),
+                                    remaining,
+                                    work.cancel.clone(),
+                                ),
+                            _ => before(wire::SafeCode::Unsupported),
+                        }
+                    }
                     operation => native.run(
                         operation,
                         remaining,
@@ -1154,6 +1309,35 @@ mod tests {
         uploaded: Mutex<Vec<u8>>,
     }
     impl Native for Fake {
+        fn create_registry_prepared(
+            &self,
+            _create: wire::RegistryCreate,
+            _size: u64,
+            _approval: crate::package::RegistryApproval,
+            _remaining: Duration,
+            _cancel: Cancellation,
+        ) -> wire::Outcome {
+            self.calls.fetch_add(1, Ordering::AcqRel);
+            before(wire::SafeCode::Native)
+        }
+        fn prepare_artifact(
+            &self,
+            approval: crate::package::RegistryApproval,
+            _token: Option<wire::RegistryToken>,
+            _remaining: Duration,
+            _cancel: Cancellation,
+        ) -> wire::Outcome {
+            self.calls.fetch_add(1, Ordering::AcqRel);
+            wire::Outcome::PreparedArtifact {
+                source: wire::RegistrySource {
+                    reference: approval.source.reference,
+                    platform: approval.source.platform,
+                    content_sha256: approval.source.content_sha256,
+                },
+                size_bytes: 12,
+                already_cached: false,
+            }
+        }
         fn terminal(
             &self,
             _receipt: wire::Receipt,
@@ -1272,6 +1456,17 @@ mod tests {
         ) -> wire::Outcome {
             self.calls.fetch_add(1, Ordering::AcqRel);
             match operation {
+                wire::Operation::QualifyOciCreation { .. } => wire::Outcome::Qualified,
+                wire::Operation::PullImage { source, .. } => wire::Outcome::Pulled {
+                    image: wire::ImageObservation {
+                        reference: source.reference,
+                        digest: format!("sha256:{}", "b".repeat(64)),
+                        size: 123,
+                        architecture: source.platform.trim_start_matches("linux/").into(),
+                        os: "linux".into(),
+                        layer_count: 2,
+                    },
+                },
                 wire::Operation::Health if self.hold_health.load(Ordering::Acquire) => {
                     self.started.send(()).unwrap();
                     let at = Instant::now();
@@ -1287,6 +1482,7 @@ mod tests {
                         uptime_seconds: 1,
                     },
                 },
+                wire::Operation::Readiness if !self.available() => before(wire::SafeCode::State),
                 wire::Operation::Readiness => wire::Outcome::Ready,
                 wire::Operation::Exec { command, .. } if command.argv[0] == "unavailable" => {
                     self.available.store(false, Ordering::Release);
@@ -1701,6 +1897,29 @@ mod tests {
         Receiver<()>,
         std::thread::JoinHandle<BridgeResult<()>>,
     ) {
+        start_with_sources(approved, None)
+    }
+    fn start_with_sources(
+        approved: wire::Hello,
+        approved_oci_sources: Option<Vec<wire::OciSource>>,
+    ) -> (
+        UnixStream,
+        Arc<Fake>,
+        Receiver<()>,
+        std::thread::JoinHandle<BridgeResult<()>>,
+    ) {
+        start_with_catalogs(approved, approved_oci_sources, None)
+    }
+    fn start_with_catalogs(
+        approved: wire::Hello,
+        approved_oci_sources: Option<Vec<wire::OciSource>>,
+        approved_registry_sources: Option<Vec<crate::package::RegistryApproval>>,
+    ) -> (
+        UnixStream,
+        Arc<Fake>,
+        Receiver<()>,
+        std::thread::JoinHandle<BridgeResult<()>>,
+    ) {
         let (mut client, server) = UnixStream::pair().unwrap();
         client
             .set_read_timeout(Some(Duration::from_secs(3)))
@@ -1725,6 +1944,8 @@ mod tests {
             allow_initialize: false,
             package_manifest_sha256: "01".repeat(32),
             approved_artifacts: vec![],
+            approved_oci_sources,
+            approved_registry_sources,
         };
         let declared = approved.clone();
         let thread = std::thread::spawn(move || {
@@ -1747,6 +1968,427 @@ mod tests {
         );
         (client, fake, started, thread)
     }
+    #[test]
+    fn registry_catalog_rejects_missing_crossed_and_credentials_before_native_preparation() {
+        let mut h = terminal_hello();
+        h.sdk
+            .as_mut()
+            .unwrap()
+            .feature_versions
+            .insert("remote_sources".into(), 1);
+        h.sdk
+            .as_mut()
+            .unwrap()
+            .feature_versions
+            .insert("compact_creation".into(), 1);
+        h.capabilities = h.sdk.as_ref().unwrap().capabilities();
+        h.limits = wire::Limits::for_sdk(h.sdk.as_ref().unwrap());
+        let source = wire::RegistrySource {
+            reference: format!("registry.example/team/app@sha256:{}", "a".repeat(64)),
+            platform: "linux/arm64".into(),
+            content_sha256: "b".repeat(64),
+        };
+        let approval = crate::package::RegistryApproval {
+            source: smolbox_engine::RegistryArtifactSource {
+                reference: source.reference.clone(),
+                platform: source.platform.clone(),
+                content_sha256: source.content_sha256.clone(),
+            },
+            max_bytes: 1024,
+            cache_policy: smolbox_engine::RegistryCachePolicy {
+                max_bytes: 4096,
+                max_files: 2,
+            },
+            credential_ref: None,
+            token_realm: None,
+        };
+        let mut crossed = approval.clone();
+        crossed.source.content_sha256 = "c".repeat(64);
+        let mut authenticated = approval.clone();
+        authenticated.credential_ref = Some("tenant".into());
+        authenticated.token_realm = Some("https://auth.example/token".into());
+        for (catalog, allowed) in [
+            (None, false),
+            (Some(vec![crossed]), false),
+            (Some(vec![authenticated]), false),
+            (Some(vec![approval]), true),
+        ] {
+            let (mut client, fake, _started, thread) =
+                start_with_catalogs(h.clone(), None, catalog);
+            send(
+                &mut client,
+                request(
+                    1,
+                    wire::Operation::PrepareArtifact {
+                        source: source.clone(),
+                        credential_ref: None,
+                        identity_token: None,
+                    },
+                ),
+            );
+            if allowed {
+                assert!(matches!(
+                    receive(&mut client),
+                    wire::ServerMessage::Accepted { id: 1, .. }
+                ));
+                assert!(
+                    matches!(receive(&mut client),wire::ServerMessage::Terminal {outcome:wire::Outcome::PreparedArtifact {source:actual,..},..} if actual==source)
+                );
+                assert_eq!(fake.calls.load(Ordering::Acquire), 1);
+            } else {
+                assert!(matches!(
+                    receive(&mut client),
+                    wire::ServerMessage::Terminal {
+                        outcome: wire::Outcome::Error {
+                            code: wire::SafeCode::Unsupported,
+                            dispatch: wire::Dispatch::NotDispatched
+                        },
+                        ..
+                    }
+                ));
+                assert_eq!(fake.calls.load(Ordering::Acquire), 0);
+            }
+            send(
+                &mut client,
+                wire::ClientMessage::Shutdown {
+                    epoch: h.epoch.clone(),
+                },
+            );
+            assert!(thread.join().unwrap().is_ok());
+        }
+    }
+
+    #[test]
+    fn pull_catalog_rejects_before_native_entry_and_exact_approval_returns_typed_evidence() {
+        let mut h = terminal_hello();
+        h.sdk
+            .as_mut()
+            .unwrap()
+            .feature_versions
+            .insert("images".into(), 1);
+        h.capabilities = h.sdk.as_ref().unwrap().capabilities();
+        let source = wire::OciSource {
+            reference: format!("registry.example/app@sha256:{}", "a".repeat(64)),
+            platform: "linux/arm64".into(),
+        };
+        let mut receipt = serde_json::from_slice::<Vec<wire::GrowthTransition>>(include_bytes!(
+            "../../smolbox-protocol/fixtures/growth-transitions-v1.json"
+        ))
+        .unwrap()
+        .remove(0)
+        .previous;
+        receipt.target_id = h.domain.target_id.clone();
+        receipt.domain_generation = h.domain.generation.clone();
+        let other = wire::OciSource {
+            reference: format!("registry.example/other@sha256:{}", "a".repeat(64)),
+            ..source.clone()
+        };
+        for (catalog, approved) in [
+            (None, false),
+            (Some(vec![other]), false),
+            (Some(vec![source.clone()]), true),
+        ] {
+            let (mut client, fake, _started, thread) = start_with_sources(h.clone(), catalog);
+            send(
+                &mut client,
+                request(
+                    1,
+                    wire::Operation::PullImage {
+                        receipt: receipt.clone(),
+                        source: source.clone(),
+                    },
+                ),
+            );
+            if approved {
+                assert!(matches!(
+                    receive(&mut client),
+                    wire::ServerMessage::Accepted { id: 1, .. }
+                ));
+                assert!(
+                    matches!(receive(&mut client),wire::ServerMessage::Terminal {outcome:wire::Outcome::Pulled {image},..} if image.matches(&source).is_ok())
+                );
+                assert_eq!(fake.calls.load(Ordering::Acquire), 1);
+            } else {
+                assert!(matches!(
+                    receive(&mut client),
+                    wire::ServerMessage::Terminal {
+                        outcome: wire::Outcome::Error {
+                            code: wire::SafeCode::Unsupported,
+                            dispatch: wire::Dispatch::NotDispatched
+                        },
+                        ..
+                    }
+                ));
+                assert_eq!(fake.calls.load(Ordering::Acquire), 0);
+            }
+            send(
+                &mut client,
+                wire::ClientMessage::Shutdown {
+                    epoch: h.epoch.clone(),
+                },
+            );
+            assert!(thread.join().unwrap().is_ok());
+        }
+    }
+
+    #[test]
+    fn registry_credential_admission_matches_ref_and_never_echoes_token() {
+        let mut h = terminal_hello();
+        h.sdk
+            .as_mut()
+            .unwrap()
+            .feature_versions
+            .insert("remote_sources".into(), 1);
+        h.sdk
+            .as_mut()
+            .unwrap()
+            .feature_versions
+            .insert("compact_creation".into(), 1);
+        h.capabilities = h.sdk.as_ref().unwrap().capabilities();
+        h.limits = wire::Limits::for_sdk(h.sdk.as_ref().unwrap());
+        let source = wire::RegistrySource {
+            reference: format!("registry.example/team/app@sha256:{}", "a".repeat(64)),
+            platform: "linux/arm64".into(),
+            content_sha256: "b".repeat(64),
+        };
+        let approval = crate::package::RegistryApproval {
+            source: smolbox_engine::RegistryArtifactSource {
+                reference: source.reference.clone(),
+                platform: source.platform.clone(),
+                content_sha256: source.content_sha256.clone(),
+            },
+            max_bytes: 123,
+            cache_policy: smolbox_engine::RegistryCachePolicy {
+                max_bytes: 123,
+                max_files: 1,
+            },
+            credential_ref: Some("tenant".into()),
+            token_realm: Some("https://auth.example/token".into()),
+        };
+        for reference in ["wrong", "tenant"] {
+            let (mut client, fake, _started, thread) =
+                start_with_catalogs(h.clone(), None, Some(vec![approval.clone()]));
+            send(
+                &mut client,
+                request(
+                    1,
+                    wire::Operation::PrepareArtifact {
+                        source: source.clone(),
+                        credential_ref: Some(reference.into()),
+                        identity_token: Some(
+                            serde_json::from_value(serde_json::json!("private-token")).unwrap(),
+                        ),
+                    },
+                ),
+            );
+            if reference == "tenant" {
+                assert!(matches!(
+                    receive(&mut client),
+                    wire::ServerMessage::Accepted { id: 1, .. }
+                ));
+            }
+            let outcome = receive(&mut client);
+            assert!(!serde_json::to_string(&outcome)
+                .unwrap()
+                .contains("private-token"));
+            assert_eq!(
+                fake.calls.load(Ordering::Acquire),
+                usize::from(reference == "tenant")
+            );
+            send(
+                &mut client,
+                wire::ClientMessage::Shutdown {
+                    epoch: h.epoch.clone(),
+                },
+            );
+            assert!(thread.join().unwrap().is_ok());
+        }
+    }
+
+    #[test]
+    fn registry_creation_catalog_and_prepared_size_gate_before_native_entry() {
+        let mut h = terminal_hello();
+        h.sdk
+            .as_mut()
+            .unwrap()
+            .feature_versions
+            .insert("remote_sources".into(), 1);
+        h.sdk
+            .as_mut()
+            .unwrap()
+            .feature_versions
+            .insert("compact_creation".into(), 1);
+        h.limits = wire::Limits::for_sdk(h.sdk.as_ref().unwrap());
+        h.capabilities = h.sdk.as_ref().unwrap().capabilities();
+        let source = wire::RegistryIdentity {
+            kind: "registry".into(),
+            id: "pack".into(),
+            sha256: "a".repeat(64),
+            architecture: "aarch64".into(),
+            reference: format!("registry.example/team/app@sha256:{}", "a".repeat(64)),
+            content_sha256: "b".repeat(64),
+            credential_ref: Some("tenant".into()),
+        };
+        let approval = crate::package::RegistryApproval {
+            source: smolbox_engine::RegistryArtifactSource {
+                reference: source.reference.clone(),
+                platform: "linux/arm64".into(),
+                content_sha256: source.content_sha256.clone(),
+            },
+            max_bytes: 123,
+            cache_policy: smolbox_engine::RegistryCachePolicy {
+                max_bytes: 123,
+                max_files: 1,
+            },
+            credential_ref: Some("tenant".into()),
+            token_realm: Some("https://auth.example/token".into()),
+        };
+        let create = wire::RegistryCreate {
+            name: "fresh".into(),
+            owner_token: "c".repeat(64),
+            incarnation: "d".repeat(32),
+            source,
+            resources: wire::Resources {
+                cpus: 1,
+                memory_mib: 512,
+                storage_gib: 1,
+                overlay_gib: 1,
+            },
+            labels: BTreeMap::new(),
+            features: None,
+        };
+        let mut wrong = approval.clone();
+        wrong.credential_ref = Some("other".into());
+        for (catalog, size, allowed) in [
+            (None, 123, false),
+            (Some(vec![wrong]), 123, false),
+            (Some(vec![approval.clone()]), 124, false),
+            (Some(vec![approval]), 123, true),
+        ] {
+            let (mut client, fake, _started, thread) =
+                start_with_catalogs(h.clone(), None, catalog);
+            send(
+                &mut client,
+                request(
+                    1,
+                    wire::Operation::CreateRegistryPrepared {
+                        create: create.clone(),
+                        size_bytes: size,
+                    },
+                ),
+            );
+            if allowed {
+                assert!(matches!(
+                    receive(&mut client),
+                    wire::ServerMessage::Accepted { id: 1, .. }
+                ));
+            }
+            assert!(matches!(
+                receive(&mut client),
+                wire::ServerMessage::Terminal {
+                    outcome: wire::Outcome::Error {
+                        dispatch: wire::Dispatch::NotDispatched,
+                        ..
+                    },
+                    ..
+                }
+            ));
+            assert_eq!(fake.calls.load(Ordering::Acquire), usize::from(allowed));
+            send(
+                &mut client,
+                wire::ClientMessage::Shutdown {
+                    epoch: h.epoch.clone(),
+                },
+            );
+            assert!(thread.join().unwrap().is_ok());
+        }
+    }
+
+    #[test]
+    fn source_catalog_and_feature_gate_qualification_before_any_native_entry() {
+        let mut h = terminal_hello();
+        h.sdk
+            .as_mut()
+            .unwrap()
+            .feature_versions
+            .insert("remote_sources".into(), 1);
+        h.sdk
+            .as_mut()
+            .unwrap()
+            .feature_versions
+            .insert("compact_creation".into(), 1);
+        h.limits = wire::Limits::for_sdk(h.sdk.as_ref().unwrap());
+        h.capabilities = h.sdk.as_ref().unwrap().capabilities();
+        let source = wire::OciIdentity {
+            kind: "oci".into(),
+            id: "approved-source".into(),
+            sha256: "a".repeat(64),
+            architecture: "aarch64".into(),
+            reference: format!("registry.example/app@sha256:{}", "a".repeat(64)),
+        };
+        let other = wire::OciSource {
+            reference: format!("registry.example/other@sha256:{}", "a".repeat(64)),
+            platform: "linux/arm64".into(),
+        };
+        for (catalog, approved) in [
+            (None, false),
+            (Some(vec![other]), false),
+            (Some(vec![source.request()]), true),
+        ] {
+            let (mut client, fake, _started, thread) = start_with_sources(h.clone(), catalog);
+            send(
+                &mut client,
+                request(
+                    1,
+                    wire::Operation::QualifyOciCreation {
+                        source: source.clone(),
+                        resources: wire::Resources {
+                            cpus: 1,
+                            memory_mib: 256,
+                            storage_gib: 1,
+                            overlay_gib: 1,
+                        },
+                        user: None,
+                        features: None,
+                    },
+                ),
+            );
+            if approved {
+                assert!(matches!(
+                    receive(&mut client),
+                    wire::ServerMessage::Accepted { .. }
+                ));
+                assert!(matches!(
+                    receive(&mut client),
+                    wire::ServerMessage::Terminal {
+                        outcome: wire::Outcome::Qualified,
+                        ..
+                    }
+                ));
+                assert_eq!(fake.calls.load(Ordering::Acquire), 1);
+            } else {
+                assert!(matches!(
+                    receive(&mut client),
+                    wire::ServerMessage::Terminal {
+                        outcome: wire::Outcome::Error {
+                            code: wire::SafeCode::Unsupported,
+                            dispatch: wire::Dispatch::NotDispatched
+                        },
+                        ..
+                    }
+                ));
+                assert_eq!(fake.calls.load(Ordering::Acquire), 0);
+            }
+            send(
+                &mut client,
+                wire::ClientMessage::Shutdown {
+                    epoch: h.epoch.clone(),
+                },
+            );
+            assert!(thread.join().unwrap().is_ok());
+        }
+    }
+
     #[test]
     fn full_work_queue_preserves_observation_dispatch_and_graceful_control() {
         let sdk = crate::package::sdk_identity()
@@ -1955,6 +2597,86 @@ mod tests {
         assert_eq!(fake.calls.load(Ordering::Acquire), 1);
         shutdown(client, thread);
         assert!(fake.shutdown_called.load(Ordering::Acquire));
+    }
+
+    #[test]
+    fn parity_quarantine_preserves_bounded_observations_without_restoring_work_or_readiness() {
+        let sdk = crate::package::sdk_identity()
+            .unwrap_or_else(|_| panic!("invalid compiled SDK policy"));
+        let mut approved = hello();
+        approved.major = wire::PARITY_PROTOCOL_MAJOR;
+        approved.minor = wire::PARITY_PROTOCOL_MINOR;
+        approved.package.engine_version = env!("CARGO_PKG_VERSION").into();
+        approved.package.smolvm_revision = sdk.source_revision.clone();
+        approved.limits = wire::Limits::for_sdk(&sdk);
+        approved.sdk = Some(Box::new(sdk));
+        approved
+            .capabilities
+            .extend([wire::Capability::Health, wire::Capability::Readiness]);
+        let (mut client, fake, _, thread) = start_with(approved);
+        let mut operation = exec("unavailable");
+        if let wire::Operation::Exec { receipt, .. } = &mut operation {
+            receipt.material = Some(Box::new(wire::MaterialProof {
+                schema: 2,
+                revision: 0,
+                record_sha256: receipt.material_sha256.clone(),
+                chain_sha256: "cd".repeat(32),
+                operation_id: None,
+                request_sha256: None,
+            }));
+        }
+        send(&mut client, request(1, operation.clone()));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Accepted { id: 1, .. }
+        ));
+        unavailable_and_terminal(&mut client);
+        send(&mut client, request(2, wire::Operation::Health));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Accepted { id: 2, .. }
+        ));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Terminal {
+                id: 2,
+                outcome: wire::Outcome::Health { .. },
+                ..
+            }
+        ));
+        send(&mut client, request(3, wire::Operation::Readiness));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Accepted { id: 3, .. }
+        ));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Terminal {
+                id: 3,
+                outcome: wire::Outcome::Error {
+                    code: wire::SafeCode::State,
+                    dispatch: wire::Dispatch::NotDispatched
+                },
+                ..
+            }
+        ));
+        send(&mut client, request(4, operation));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Terminal {
+                id: 4,
+                sequence: 0,
+                outcome: wire::Outcome::Error {
+                    code: wire::SafeCode::State,
+                    dispatch: wire::Dispatch::NotDispatched
+                },
+                ..
+            }
+        ));
+        assert_eq!(fake.calls.load(Ordering::Acquire), 3);
+        assert!(!fake.available());
+        assert!(!fake.shutdown_called.load(Ordering::Acquire));
+        shutdown(client, thread);
     }
     #[test]
     fn cancellation_grace_covers_modeled_worker_collection_before_quarantine() {
@@ -2349,6 +3071,8 @@ mod tests {
             allow_initialize: false,
             package_manifest_sha256: "01".repeat(32),
             approved_artifacts: vec![],
+            approved_oci_sources: None,
+            approved_registry_sources: None,
         };
         spawn_reader(shared.clone(), queued, server, controls, config);
         send(&mut client, wire::ClientMessage::Approve { hello: hello() });

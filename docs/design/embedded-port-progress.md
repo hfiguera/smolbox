@@ -3724,3 +3724,1587 @@ upgrade checks and other P0–P9 requirements remain pending. Crash qualificatio
 and distribution approval stay false and separate. No matrix row is relabeled
 fully qualified by partial platform evidence. Nothing is pushed or published;
 the full goal remains active.
+
+
+## October 13, 2026: descriptor-bound stopped-growth geometry
+
+Engine.expand_disks now captures both storage and overlay geometry before preparing
+or entering the material journal. The read-only descriptors bind selected SDK raw/
+QCOW paths, file device/inode/UID/mode/link count and parent directory identity.
+Raw ext4 block counts must fit actual backing and match the stored GiB capacity.
+QCOW2 versions 2/3 use their declared virtual capacity; physical padding cannot
+substitute. Header/backing-reference reads have fixed bounds, and unsupported or
+malformed metadata rejects before SDK entry. Redirected, replaced or shared
+inodes do not confer authority.
+
+After the unmodified SDK resize, both disks must retain identity and exact expected
+capacities before database updates or material-journal completion. Requested and
+unrequested disks remain bound. Raw superblock evidence and QCOW header/backing
+reference evidence must remain unchanged apart from the virtual-size field.
+Failures after entry remain may-have-dispatched uncertainty with an unresolved
+journal, never a new receipt. The pinned SDK grows backing/header capacity while
+stopped; it leaves ext4 expansion to normal boot. No filesystem-grown claim is
+inferred from a stopped SDK resize return.
+
+Six pure sparse-file tests exercise the public pinned SDK API for raw and QCOW2
+versions 2/3, unchanged/wrong capacity, padded QCOW, filesystem/header changes,
+record mismatch, symlink/hard-link/file/parent replacement, malformed ext4 and
+unsupported QCOW metadata. These deterministic fixtures do not use VMs, crash
+interruption, external CLI races or unfiltered ignored campaigns.
+
+Validation passes 216 standard Rust cases (150 engine, 21 helper, nine protocol
+library, 36 contracts; seven ignored helper fixtures unselected), six final focused
+geometry checks, seven selected ordinary non-VM helper checks against the rebuilt
+binary, strict Clippy, Rust documentation and formatting. Both unmodified SDK
+inventories match. Elixir/public protocol/package feature descriptors are unchanged
+and their prior evidence stays scoped to those paths. Changed native bytes inherit
+no previous macOS package qualification. Private builds/logs remain ignored.
+
+Full QCOW backing-chain/filesystem checks, bounded owned execution, durable
+reservation/history/reader integration, wire/public growth operations and ordinary
+platform witnesses remain pending. Linux volume ownership, mounts and permission/
+replacement checks also remain pending. No growth capability is advertised, the
+full P0–P9 scope stays active, crash validation stays deferred and nothing is pushed
+or published.
+
+## October 13, 2026: bounded owned stopped-growth execution
+
+Engine.expand_disks_owned carries one absolute deadline and explicit cancellation
+through the existing authenticated job supervisor. Its compatibility entry uses
+a finite 30-second budget. Growth is still not a public advertised capability.
+Before journal entry, admission reserves one work slot/child, 20 descriptors,
+bounded metadata plus 8 MiB for parser/thread-stack headroom and a tiny
+zero-content output spool. Observation
+control headroom remains separate. The worker receives protected 400-mode,
+inode-bound metadata of at most 16 KiB, including both original disk/parent/layout
+witnesses and exact absolute target sizes. It validates both original descriptors
+before any clean SDK mutation and creates no manager, database, agent or VM.
+
+A distinct correlated Grown proof cannot be substituted by file acknowledgment,
+command Exit, background PID, output limit or bare process success. Only exact
+normal child collection plus parent geometry checks allows the sole parent writer
+to update the SDK record and complete the material journal. Creation fingerprints,
+owner/incarnation and untouched companion capacity remain unchanged. Duplicate
+operation IDs reject before SDK dispatch; correlated completed journal evidence
+can be observed without replay. Failures after entry stay unresolved uncertainty.
+
+Growth cancellation/deadline retirement closes input and then retains the exact
+child without signals. A collector retains machine/source/domain/geometry/job
+leases until actual collection and quarantines admission while unresolved.
+Deterministic tests cover this policy, metadata witness identity/role, typed exact
+proof, retirement and shared resource/control budgets. No live mutation was
+interrupted to test uncertainty.
+
+Validation passes 220 standard Rust cases (154 engine, 21 helper, nine protocol
+library, 36 contracts; ten ignored ordinary helper fixtures excluded), ten
+explicitly selected ordinary non-VM checks against the rebuilt helper, strict
+Clippy, Rust docs and formatting. New ordinary checks grow sparse raw and QCOW2
+versions 2/3, reject a substituted companion before dispatch and hold source/job/
+machine leases through exact collection. A private synthetic-database engine
+fixture verifies completed record/material authority, untouched overlay, no
+implicit boot, pre-dispatch cancellation and duplicate rejection. Both clean SDK
+inventories remain verified. Private binaries and raw logs are ignored.
+
+Full QCOW backing-chain/filesystem checks, durable increased reservations,
+optional histories/reader integration, wire/public operations, Linux/macOS guest
+qualification and Linux volumes/mounts remain pending. Changed native binaries
+inherit no historical package qualification. HTTP/Elixir paths and public feature
+descriptors are unchanged. Full P0–P9 remains incomplete, crash validation stays
+deferred, distribution approval stays separate and nothing is pushed/published.
+
+## October 13, 2026: preserve observations while work is quarantined
+
+Job quarantine now fences work admission while leaving the separate bounded
+read-only control lane available. Control slots, aggregate descriptor limits and
+OS descriptor admission still apply. Machine measurements share the exact
+machine gate held by a retained mutation; they conflict while that machine is
+busy, rather than bypassing its lock or adopting inventory. Normal collection
+releases physical job leases but does not restore quarantined work admission.
+
+Protocol 2.0 dispatch and Elixir Channel/Port/Call permit only approved, strictly
+validated observation requests after an authenticated unavailable notice on the
+same live owner/epoch. Closing, unconfirmed shutdown and lost channels cannot
+use the exception. Health/capacity/metrics/inventory/measurements remain separate
+from readiness and mutation admission; readiness still returns unavailable.
+Legacy 1.3/1.4 admission behavior, pending result consumption and graceful
+shutdown remain unchanged. The target stays quarantined and no helper is
+replaced or authority re-enrolled.
+
+A deterministic engine model keeps a growth lease and machine lock held while
+observing node counts/capacity, preserves measurement conflict and verifies that
+collection cannot restore admission. A Rust bridge peer verifies correlated
+health after the unavailable notice, unavailable readiness, fenced new work,
+same owner and normal shutdown. Elixir Channel and public Backend/Call-through-
+Port peers verify the same selective behavior, malformed observation rejection,
+legacy fencing and unchanged epoch. These models do not interrupt a live VM,
+helper owner or durable operation.
+
+Validation passes 222 standard Rust cases (155 engine, 22 helper, nine protocol
+library and 36 contracts; ten ignored ordinary fixtures excluded), ten explicitly
+selected ordinary non-VM rebuilt-helper checks, strict Clippy and Rust docs.
+Elixir passes 838 cases (four doctests, six properties, 828 tests), with 29 live
+runtime cases excluded; the final focused observation/Channel/Port suite passes
+32 cases. Strict Credo, Elixir docs and both language format checks pass. Existing
+HTTP, legacy channel and durable contracts remain in the deterministic suite.
+This is not live Linux/PostgreSQL or new-package consumer qualification. Private
+raw logs remain ignored, changed native bytes inherit no historical package
+qualification, full P0–P9 remains incomplete, and crash/distribution gates remain
+separate and deferred. No push or publication occurs.
+
+## October 13, 2026: correlated completed growth transition proofs
+
+The shared Rust engine now returns GrowthTransition/GrowthChange containing the
+complete prior and resulting receipt, operation ID, exact requested sizes,
+previous/target capacities and immutable SDK configuration evidence. The
+transition API performs owned bounded SDK growth, then verifies that the
+correlated completed journal result equals the received receipt. Its read-only
+observer uses the same machine gate, domain/database/marker authority and
+original prior receipt/request; missing, pending or foreign evidence cannot
+supply proof, authorize replay or adopt current inventory.
+
+Elixir GrowthTransition validates the same canonical request and chain hashes,
+including the distinction between null omitted targets and explicit unchanged
+values. It binds a result to persisted intent and validates a maximum of 32
+ordered receipt/geometry links with unique operation IDs and one preserved
+immutable SDK configuration. Rust journal validation enforces the same immutable
+configuration continuity. Both languages redact transition inspection/debug
+output. Shared fixtures are explicitly synthetic, not real enrolled receipts.
+
+Three new Rust models cover cross-language hash identity/tampering, correlated
+completed-versus-pending evidence and individually valid links with inconsistent
+immutable configuration. Five Elixir contracts cover exact intent/root/link
+binding, changed/unknown/out-of-range shapes, reorder/gaps/duplicates/bounds,
+immutable configuration continuity and redaction. The selected ordinary engine
+fixture performs actual sparse-file SDK growth through the rebuilt owned helper,
+then verifies the typed transition and read-only correlated observation. No VM,
+crash interruption or live persistence race is used.
+
+Validation passes 225 standard Rust cases (158 engine, 22 helper, nine protocol
+library, 36 contracts; ten ordinary ignored fixtures excluded), ten explicitly
+selected ordinary non-VM checks against the rebuilt helper, strict Clippy and
+Rust docs. Elixir passes 843 cases (four doctests, six properties, 833 tests),
+with 29 live runtime cases excluded; all five final focused transition contracts
+pass. Strict Credo, Elixir docs and format checks pass. Both unmodified SDK source
+inventories verify; their bytes and upstream research checkouts remain unchanged.
+No real receipts, keys, packages or raw private evidence are committed.
+
+Persisted expansion/current-identity integration, reader-first codec evolution,
+public wire operations, explicit operator resolution, full QCOW backing-chain/
+filesystem validation and ordinary platform/package qualification remain pending.
+No disk_growth descriptor is advertised. Existing public HTTP and legacy record
+paths are unchanged. Full P0–P9 stays incomplete; crash validation remains deferred
+and distribution approval remains separate. Nothing is pushed or published.
+
+## October 13, 2026: native growth history and selective v18 readers
+
+DiskExpansion now has an optional native_transition and Identity has an optional
+transition; legacy HTTP/v16/v17 envelopes omit their nil defaults exactly and
+restore them on decode. Native histories and retained commands carrying grown
+authority selectively use v18. Fixed-schema fresh-BEAM decoding, compressed/
+trailing/downgraded envelope rejection and exact legacy default stripping are
+covered. Historical v17 structural receipt acceptance remains separate from
+qualification; an old opaque receipt is not promoted into new growth history.
+
+NativeGrowth validates ordered committed expansion proofs from the canonical
+creation root, complete preceding receipts, original requests, exact sizes,
+unique IDs and immutable SDK configuration. Pending/unknown/deleted entries
+cannot supply completed proof. Atomic expansion completion persists the received
+transition with history and the current observation while preserving the original
+creation evidence/spec/fingerprint. Current receipts are derived from validated
+history for scoped lifecycle/observations and borrowed commands. Grown borrowed
+commands require their proof; removing it cannot downgrade them into a v17 write.
+
+Unknown expansion outcomes retain the full target reservation and original
+uncertainty. Bare target-size inventory cannot resolve them. A correlated already
+completed transition can be retained through explicit resolution as resolved,
+not completed. Repair of an entered-only partial native mutation still needs an
+explicit owned operator-resolution implementation before public growth activation.
+
+Memory and the PostgreSQL example now advertise native_disk_growth reader 1.
+Future growth descriptor enrollment requires this marker together with atomic
+managed_disk_expansion 1. Missing readers reject before enrollment; older helper
+descriptors retain their original requirements. This reader marker enables no SDK
+feature: disk_growth remains absent from implemented helper descriptors, and wire/
+public dispatch, full format verification and ordinary platform qualification
+remain pending. No legacy receipt adoption or silent HTTP routing is introduced.
+
+Five new deterministic history/codec models cover successive growth, original
+identity/reservation preservation, malformed or premature proof, retained commands,
+unknown/resolved accounting and fresh v18 decoding. Reader admission has a new
+pre-enrollment capability contract. Existing HTTP growth and legacy native codec
+contracts remain passing. No live crash, owner loss or persistence race is used.
+
+The complete regression suite passes 849 Elixir cases (four doctests, six
+properties, 839 tests), with 29 live runtime cases excluded; all 24 focused
+history/codec/admission checks pass. The durable PostgreSQL example compiles
+with warnings as errors; this is not database conformance or platform evidence.
+Docs, strict Credo and Dialyzer pass. Dependency-cycle review compared an isolated
+tracked-source baseline with current source: unnecessary struct compilation
+edges and duplicate proof-shape validation were removed, leaving zero cycles.
+Compact payload fields and bounded machine-list decoding are now shared without
+changing bytes, result types or limits, and the zero-clone check passes.
+
+Public growth wire/Runtime dispatch, entered-only operator repair, full QCOW
+backing-chain/filesystem validation, ordinary Linux/macOS/PostgreSQL qualification
+and exact current/minimum no-Rust package consumers remain pending. The full
+P0–P9 objective stays active. SDK source/package descriptors are unchanged;
+no public growth capability or historical package qualification is claimed.
+Private build/CI/baseline logs remain ignored, crash validation stays deferred,
+distribution approval stays separate and no push/publication occurs.
+
+Final project-check components pass: formatting, unused-dependency check,
+warning-free compilation, zero cycles, the full 849-case deterministic regression
+suite, strict Credo, zero clones, Credence strict assumptions and Dialyzer with
+zero errors/skips. The composite CI command stopped at pre-existing style checks;
+those two equivalent simplifications were applied, then the remaining checks
+passed independently. Final changed-path validation passes 35 configuration/
+Port/observation/history cases and three selected log/parser cases; 12 unrelated
+cases remain excluded by that narrow log selector. Final docs and durable-example
+compilation pass. This does not claim PostgreSQL conformance or new-package
+platform/public-consumer qualification. All raw CI output stays ignored.
+
+## October 13, 2026: growth wire, adapter and scoped Runtime dispatch
+
+Protocol 2 now has distinct ExpandDisks/Grown and InspectGrowth/GrowthPresence
+shapes with finite budgets, exact prior receipt/ID/nullable request/previous-size
+binding, canonical transition validation and stopped post-capacity. Shared fixture
+checks reject mutated hashes, missing/extra fields, shrink/no-op/oversized targets,
+foreign intent, wrong output/result kinds, geometry mismatch, duplicates and
+legacy-major use. Optional capability order matches Rust, Elixir and the ordinary
+Python proof runner; the current package still advertises neither operation.
+
+The adapter dispatches through Engine.expand_disks_transition_owned using the
+absolute operation deadline captured before initial inspection. Typed engine
+results preserve exact canonical evidence. Follow-up stopped observation failures
+retain may-have-dispatched uncertainty. InspectGrowth uses a bounded read-only
+engine proof observer with cancellation checks before IO/control reservation and
+after journal reading. Missing proof is not absence, quiescence or replay authority.
+
+EmbeddedContext captures the validated active expansion and its current receipt.
+Operation/reply validation binds the full persisted intent and existing resource/
+configuration policy. Runtime pre-inspection and expansion use scoped references.
+A pure validated local completion preview supplies the next receipt for matching
+follow-up inspection; it makes no store write and durable intent remains
+dispatching until actual completion. HTTP keeps its original result types and
+response/observation workflow. New peer models cover wire crypto/correlation and
+this local-preview boundary without interrupting a live owner or mutation.
+
+The ordinary rebuilt-helper run exposed a transient inherited-descriptor source
+flock conflict after exact collection. SourceLease now explicitly unlocks its owned
+flock on Drop instead of relying solely on final descriptor close; retained jobs
+keep the guard alive. A pure duplicate-descriptor model proves that releasing this
+guard does not wait for an unrelated descriptor copy or unlock the next owner's
+lease. The ordinary checks are rerun against the rebuilt binary; no forced live
+termination, CLI race or crash campaign is used.
+
+Backend expansion implementation is reflected in coverage, but full parity
+acceptance stays pending. Shipping SDK/package descriptors and public feature
+approval remain unchanged: disk_growth cannot be enabled yet. Entered-only
+operator repair, full QCOW backing-chain/filesystem verification, live ordinary
+Linux/macOS/PostgreSQL acceptance and exact current/minimum public consumers
+remain pending, alongside the rest of P0–P9. Crash validation stays deferred and
+publisher/distribution approval stays separate.
+
+Final validation passes 855 Elixir cases (29 live cases remain excluded), full
+`mix ci` including zero cycles/clones and Dialyzer errors/skips, 231 Rust unit/
+binary/protocol-contract cases and the ten selected ordinary non-VM helper
+checks. The initial source-flock failure remains in private evidence; the rebuilt
+helper passes after explicit owned-lease release. Twenty-one Python runner/source
+checks, Rust/Elixir documentation, formatting and both immutable SDK inventories
+also pass. Clippy passes for the owned crates; the unmodified SDK emits its existing
+deprecated-API warning. These checks do not qualify new native package bytes for
+Linux/macOS guest, PostgreSQL or public-consumer feature acceptance.
+
+## October 13, 2026: isolate deferred native test selection
+
+Runner inspection found older fixture tests that forcibly retire native owner/
+coordinator processes, force fixture-helper loss or pause persistence boundaries
+while replacing the owner. Their thirteen generated cases now use a separate
+`deferred_crash` tag. Default ExUnit excludes both `runtime` and `deferred_crash`;
+including ordinary runtime qualification alone does not include these campaigns.
+Dummy unresponsive health peers now close normally by a stop message. Two static
+Python runner contracts check campaign declarations and the independent default
+exclusion without launching a helper or VM.
+
+The first broad recovery CI attempt was interrupted during runner review and is
+not counted as a pass. Historical full-suite counts included those older fixture
+cases and must not be interpreted as a crash-free selection guarantee. The selected
+new recovery/regression run passes 59 cases with all thirteen deferred cases
+excluded. Raw fixture logs remain private; no real SDK guest crash campaign was
+used, and distribution/crash qualification remain separate.
+
+## October 13, 2026: completed-proof growth observation and recovery
+
+The existing scoped inspect_machine operation now handles dispatching/unknown
+native growth by reading its correlated completed journal proof, then inspecting
+the resulting receipt. Exact prior receipt, operation ID, nullable request and
+previous/target sizes are mandatory. The two reads share one absolute deadline
+and captured owner/epoch. Unexpected streams, overlays, foreign/partial proofs,
+bare observations and pending intent cannot promote authority. A missing proof
+keeps the old reference; it cannot prove quiescence or satisfy target-size/proof
+resolution. Separate receipt-bound absence remains necessary for deleted resolution.
+
+Native startup now validates current committed growth geometry, or a matching
+unresolved target proof, instead of comparing every retained machine with its
+original creation sizes. Active expansion is atomically marked unknown under its
+store claim; startup never commits the proof, replays resize or reduces capacity.
+Explicit quiesced resolve remains necessary to commit the typed history. Pure
+models verify current/foreign geometry, local proof promotion, immutable original
+creation, unknown reservation and explicit resolution. HTTP dispatch and public
+result types remain unchanged. Public native growth is still disabled pending
+entered-only operator repair, full QCOW verification and ordinary platform/
+package/consumer qualification.
+
+Validation passes the 843-case ordinary Elixir suite (42 excluded), then all
+remaining CI components after the alias-ordering fix: warning-free test compilation,
+zero cycles/clones, strict Credo/Credence and test-environment Dialyzer with zero
+errors/skips. The final pin/deadline change additionally passes 38 selected cases
+with five deferred cases excluded. Docs and the durable-host example compile;
+two static selection guards pass. The composite CI stopped at the corrected style
+check, so the successful components are recorded separately. An incidental dev-
+environment Dialyzer invocation reported its existing missing EEx dependency;
+the intended CI test environment passes. No PostgreSQL service conformance or
+new native package/guest/consumer qualification is claimed.
+
+## October 13, 2026: bounded QCOW table evidence before owned growth
+
+Stopped growth now acquires its work/child/FD/metadata lease before geometry
+inspection and carries that same lease into the prepared worker. The full private
+metadata cap is reserved up front; no second job admission occurs after reads.
+Two independent control observations remain admissible. Invalid preparation drops
+only the unentered job; unresolved collected-worker rules remain unchanged. A
+separate 1-MiB scan allowance supplements the existing 8-MiB stack/relay allowance.
+
+The QCOW witness now binds unchanged physical length and fingerprints the complete
+first cluster (excluding only the virtual-size field), allocated L1 span, L2 tables,
+refcount table and referenced refcount blocks. Reads use a fixed 4-KiB buffer,
+4,096 metadata extents and a 64-MiB table-IO ceiling per disk scan. Initial parent
+inspection and collected postconditions check cancellation/deadline during scanning.
+Selected files remain descriptor-bound; ranges reject overflow, misalignment,
+truncation, overlapping metadata and guest-data references into metadata. Invalid
+reserved/copied flags and unsupported compressed entries reject before SDK entry.
+The backing-name cap now matches QCOW's 1,023-byte format limit. The sparse QCOW
+fixtures have explicit tables/refcounts instead of an empty header-only placeholder.
+
+Pure models cover table substitution, physical extent change, malformed references,
+metadata/data aliases, cancellation and scan-budget exhaustion. One reservation
+model verifies geometry/preparation share a lease and preserve two control slots.
+These are structural/preservation checks, not proof of backing content, semantic
+reference-count correctness or mapped ext4 geometry. Those gates, entered-only
+operator repair and ordinary guest/package/platform qualification remain pending.
+Public disk_growth admission and the shipping descriptor remain disabled.
+
+Final validation passes 236 Rust unit/binary/protocol-contract cases, all ten
+selected ordinary non-VM helper checks with the rebuilt scanner, and three focused
+growth-helper checks after the final reservation-memory adjustment. Clippy and
+Rust docs pass for the owned crates; the unmodified SDK retains its existing
+API-deprecation warning. Both immutable SDK inventories, formatting, diff checks
+and the two deferred-selection guards pass. This change has no Elixir/public wire
+activation. Exact changed-package guest/platform/PostgreSQL/public-consumer and
+full backing-chain/filesystem qualification are not claimed; crash validation
+remains deferred and private logs stay ignored.
+
+## October 13, 2026: backing-chain identity and virtual ext4 growth evidence
+
+Stopped QCOW geometry now walks a flat chain of at most eight backing files,
+with one additional reader descriptor at a time. Each backing witness binds its
+normalized path, protected parent directory device/inode/UID/mode, file identity,
+length, mode, modification/change times, virtual capacity and parsed layout.
+Every descriptor/path is rechecked after its reads and the complete chain is
+rechecked before returning. The root is stable within each inspection; only its
+legitimate SDK resize may change its times between inspections. The growth lease
+now charges 21 descriptors and preserves both independent control slots.
+
+Backing format declarations are parsed from bounded header extensions and must
+agree with the selected raw/QCOW format. Missing files, cycles, substituted files,
+unsafe parents, redirected ancestors, malformed names and hidden symlinks in
+relative a/../base paths reject before SDK entry. Header/data reads share the
+existing cancellation/deadline, and every QCOW layer consumes the same 64-MiB
+allocation-table budget. A failed scan cannot restore already spent credit.
+Chain witnesses remain inside the existing protected 16-KiB metadata envelope;
+long paths/large histories must fit that envelope before any journal entry.
+
+The filesystem witness reads the actual virtual ext4 superblock through standard
+L1/L2 mappings and backing fallback. It supports superblocks split across guest
+clusters and distinguishes explicit zero clusters from unallocated ones. Exact
+superblock bytes and bounded filesystem capacity remain unchanged during stopped
+SDK growth; normal guest boot still performs actual filesystem expansion. Raw and
+QCOW paths share the same ext4 capacity validator. Sparse QCOW fixtures now carry
+mapped ext4 geometry; the ordinary worker fixture uses read-only raw backings.
+
+Pure models cover relative nested chains and declared formats, read-only backing
+fallback and SDK growth, data changes outside the superblock, inode substitution,
+missing/redirected files, cycles, unsafe parent modes, depth limits, explicit-zero
+semantics, over-capacity ext4 and shared IO credit. The mapping-only split-cluster
+fixture proves reader semantics without claiming a complete image or guest.
+These are identity/geometry witnesses, not whole backing-file content hashes or
+filesystem fsck. Semantic refcounts, source-content/provenance qualification,
+remaining format coverage, entered-only operator repair and ordinary exact-package
+Linux/macOS/PostgreSQL/public-consumer acceptance remain pending. Public growth
+admission stays disabled, and crash validation remains deferred.
+
+Validation passes 243 Rust unit/binary/protocol-contract cases, all ten selected
+ordinary non-VM helper checks with the rebuilt backing-aware worker, and the three
+focused growth checks after the final single-metadata-snapshot refinement. Clippy,
+Rust docs, both immutable SDK inventories, formatting/diff checks and the two
+independent deferred-selection guards pass. Dependency deprecation warnings are
+left in the unmodified SDK. No Elixir wire/capability or durable reader change is
+introduced; no changed-package guest, Linux/macOS, PostgreSQL or public-consumer
+qualification is transferred from historical evidence. Raw logs remain ignored.
+
+## October 13, 2026: semantic QCOW reference counts
+
+The allocation witness now derives expected 16-bit host-cluster counts from every
+selected metadata extent and standard data/preallocation reference. It verifies
+actual refcount blocks at their original table indexes, including sparse high host
+offsets, and rejects uncovered references, undercounts, overcounts and nonzero
+counts for unused/out-of-file clusters. Shared data is valid only with exact counts;
+a copied flag cannot claim exclusivity for a shared cluster. Metadata remains
+nonoverlapping, compressed/extended/snapshot formats remain explicit coverage gates,
+and no count or dirty-bit repair is performed automatically.
+
+A second bounded L2 pass verifies copied flags after counts are complete. Both
+passes and refcount blocks consume the same chain-wide 64-MiB table-IO budget.
+The dense u16 expected-count map is capped at 8 MiB and fallible allocation rejects
+before SDK entry; the growth job reserves that full allowance in addition to its
+existing 1-MiB scanner and 8-MiB stack/relay allowances. Highly fragmented images
+must fit native resource admission rather than triggering unbounded allocation.
+This physical-footprint limit is separate from the public 1–64-GiB virtual targets.
+
+Pure models cover missing metadata/data counts, lost refcount coverage, leaks,
+overcounts, shared-data exclusivity, sparse high table indexes and bounded map
+admission. Sparse read-only-backed ordinary workers still complete clean SDK growth
+without changing allocation references. Semantic standard-format refcount checks
+are implemented; remaining format/source-content/guest/package qualification,
+entered-only operator repair and the rest of P0–P9 remain pending. Public growth
+admission is still disabled and crash validation remains deferred.
+
+Validation passes 247 Rust unit/binary/protocol-contract cases, all ten selected
+ordinary non-VM helper checks with the rebuilt refcount-aware worker, Clippy,
+Rust docs, both immutable SDK inventories, formatting/diff checks and the two
+independent deferred-selection guards. Source/dependency deprecation warnings
+remain in the unmodified SDK. No public descriptor, Elixir wire or durable codec
+change is introduced. Exact-package guest, Linux/macOS, PostgreSQL and public-
+consumer qualification remain pending; private raw logs are not committed.
+
+## October 13, 2026: entered growth witness and explicit engine qualification
+
+New growth preparation persists the original bounded disk/parent/layout/backing
+witness with pending intent before SDK entry. The permit carries the same witness;
+entry and completion reject changes to it. Completed history drops the full
+pending witness. Geometry remains inside the existing 16-KiB envelope and journal
+reads/writes retain their 2-MiB cap. Optional fields default to absent and are
+omitted when absent, preserving legacy journal bytes and canonical transition
+hashes. Older entered entries without original geometry cannot be qualified from
+current inventory. Exact replacement helpers must support the extended private
+journal reader; old readers must not be used to resume these new pending histories.
+
+Engine.qualify_growth is an explicit operator operation with quiesced=true. It
+requires the owned receipt/marker, original entered request and saved geometry,
+retained machine/source/domain fences, strict stopped metadata and complete target
+sizes. It reopens exact original identities/layouts at the targets, verifies immutable
+SDK configuration, rechecks the unchanged SDK row and then commits only the engine
+material proof. No disk resize, SDK database update, boot, stop, signal or mutation
+replay occurs. Source/gate conflicts and quarantined work remain fenced; explicit
+quiescence cannot override retained leases. Qualification charges the entire metadata
+pool for bounded journal/scanner processing, no child or staging, and retains both
+independent control slots. One absolute read budget is checked before and after
+publication; a late write remains uncertain.
+
+Operator qualification records a geometry digest separately from ordinary SDK
+completion. The original SDK result stays unknown, and eventual public resolution
+must use the resolved disposition. Matching completed retries return the same
+proof after stopped ownership observation. Missing/legacy/prepared/partial/foreign/
+substituted evidence cannot mint authority. Pure private-DB/file models cover
+quiescence, complete vs partial repair, unchanged SDK rows, idempotence, legacy byte
+fidelity, no witness adoption, retained gates/quarantine and control headroom.
+No helper/VM is interrupted or raced for these models.
+
+The engine foundation is implemented; Port wire/adapter and explicit Runtime
+resolution integration are still pending. Public disk_growth admission remains
+disabled, alongside remaining format/source/guest/package/platform/store/consumer
+qualification and the rest of P0–P9. Crash validation remains deferred.
+
+Validation passes 252 Rust unit/binary/protocol-contract cases, all ten selected
+ordinary non-VM helper checks with the rebuilt pending-witness implementation,
+Clippy, Rust docs, both immutable SDK inventories, formatting/diff checks and the
+two independent deferred-selection guards. Existing dependency deprecation warnings
+remain in the unmodified SDK. Private journal compatibility and original-transition
+fixtures pass; no Elixir record codec or public feature activation changes here.
+No interrupted helper/BEAM/store or CLI-race campaign runs. Exact-package guest,
+Linux/macOS, PostgreSQL and public-consumer qualification remain pending.
+
+## October 13, 2026: explicit growth qualification through Port and Runtime
+
+Protocol 2 now has distinct QualifyGrowth/GrowthQualified messages, a mandatory
+true quiescence assertion, finite 30-second budget and exact original receipt,
+operation ID, nullable request and prior-size binding. These messages cannot
+substitute for ExpandDisks/Grown or InspectGrowth/GrowthPresence. No stream/upload
+payload is accepted. Qualification is a work operation; it does not join the
+quarantined observation lane. Explicit reconciling-owner resolution can request it,
+but retained engine gates, source leases and quarantine remain authoritative.
+Capability order agrees across Rust, Elixir and the ordinary Python runner; the
+shipping descriptor still advertises none of the three growth operations.
+
+The adapter calls the transport-independent engine qualifier and inspects the
+qualified receipt within its captured deadline. Prior sizes now bind inside the
+engine before any journal publication, including idempotent completed lookup.
+A mismatch cannot commit a proof then fail correlation. Deadline/cancellation
+checks after qualification and final observation retain uncertainty when late.
+
+Machines.resolve_disk_expansion validates quiesced=true and preserves its public
+options/result types. Native resolution now serializes with reconciliation, pins
+and quiesces the exact owner/epoch and obtains its worker claim before the machine
+claim. Stopped native resolution invokes the native-only Backend.qualify_growth,
+validates a local resolved preview and observes the new receipt with the remaining
+shared budget. Durable unknown intent/reservation stays unchanged until successful
+explicit store resolution. Deleted resolution remains separate receipt-bound
+absence; HTTP keeps its existing one-inspection workflow. Qualification never
+repairs disk bytes or SDK metadata or replays resize.
+
+Checked inventory now includes this native-only internal operation: 38 operations,
+44 signatures and the original eight specification features. Coverage/acceptance
+still stays pending. Wire/session/public-reply and Runtime peer models cover false/
+missing quiescence, wrong majors/budgets, crossed result kinds, duplicates, bare
+observations, full proof correlation, local preview and remaining deadlines.
+The engine model also proves wrong prior sizes leave pending journal bytes unchanged.
+Public growth remains disabled pending remaining format/source/package/guest/
+platform/store/consumer qualification, alongside the rest of P0–P9. Crash validation
+stays deferred and distribution approval stays separate.
+
+Validation passes full mix ci: 844 Elixir cases with 42 runtime/deferred cases
+excluded, warning-free compilation, zero cycles/clones, strict Credo/Credence and
+Dialyzer with zero errors/skips. Rust unit/binary/protocol contracts pass 253 cases;
+the added prior-size-before-write engine assertion passes separately. All ten
+selected ordinary non-VM helper checks pass with the rebuilt helper. Rust/Elixir
+docs, Clippy, both immutable SDK inventories, formatting/diff checks and six
+ordinary-runner/two deferred-selection Python models pass. Unmodified dependency
+deprecation warnings remain. No new guest/Linux/macOS/PostgreSQL/public-consumer
+qualification is claimed or inherited; private logs remain ignored.
+
+
+## October 13, 2026: passive machine image inventory foundation
+
+Added shared engine `list_images` with receipt, machine/source/domain leases and
+one read budget. Bounded read-only SDK metadata supplies existing process identity;
+a stopped record returns an empty observation without opening an agent connection,
+creating a worker or booting a machine. This mirrors the HTTP endpoint's empty
+inventory semantics and supplies no cache-absence, source or deletion authority.
+Running observations retain exact identity through result collection/revalidation.
+
+An owned image job uses the existing supervisor with protected spool identity,
+distinct ImagesListed evidence, work/child/descriptor/staging admission and the
+full 32-MiB metadata reservation. The relay rejects guest frames above 2 MiB
+before reading their body. Direct sequence deserialization retains at most 1024
+validated images and ignores layers/env/command metadata without constructing
+those vectors. It avoids serde internally tagged content buffering. The relay
+then presents only the bounded projection to SDK decoding; one public
+send_raw/recv_raw exchange keeps the request/response boundary explicit.
+SDK runtime list_images is deliberately unused because started_handle can boot.
+
+The six public fields preserve packed versus configuration-digest observations,
+size/layer limits and untrusted reference text. No observed image approves a pull.
+The protected result spool is capped at 8 MiB, requires exact successful child
+collection and stays leased through parent decoding. Unknown collection remains
+reserved under the existing supervisor. No package descriptor/capability is
+activated: Port/Elixir integration, pull/source workflows and ordinary feature/
+platform/store/consumer acceptance remain required under the full P0–P9 goal.
+
+Validation: 258 Rust unit/binary/protocol cases pass (186 engine, 23 bridge,
+9 protocol unit and 40 protocol contract). All eleven inspected ordinary non-VM
+helper checks pass with a rebuilt helper. The added peer observes exactly one
+ListImages request, packed identity, discarded private metadata, invalid-result
+rejection, successful normal collection and no SDK database initialization.
+The stopped-engine model proves unchanged SDK record bytes, no socket/worker,
+foreign-receipt rejection and pre-dispatch cancellation. Clippy, Rust docs,
+formatting/diff checks and both complete unmodified SDK inventories pass.
+Unmodified dependency deprecation warnings remain. No new guest/platform/
+PostgreSQL/public-consumer evidence is claimed. Crash validation stays deferred;
+distribution approval remains separate. Private logs stay under ignored .local.
+
+
+## October 13, 2026: image inventory through Port and typed Elixir results
+
+Connected the passive image inventory engine through protocol-2 ListImages/Images,
+the native adapter and Elixir operation/channel/reply adapters. The operation uses
+a saved scoped receipt, a 30-second budget and an 8-MiB response cap. The image
+array travels in existing credited file events of at most 64 KiB, with distinct
+count/byte terminal evidence; it never becomes a multi-MiB result frame. The engine
+now holds collected worker/spool/job/domain/source/machine leases until forwarding
+finishes, including consumer failure. Stopped empty inventory sends exactly []
+without creating an agent or worker. Neither path supplies absence or ownership.
+
+Typed Elixir decoding binds the exact request receipt, delivered byte count,
+entry count and existing ImageInventory/Image validators. It preserves packed
+and configuration-digest identity, empty_or_unavailable and HTTP :images error
+names. Channel/session contracts reject crossed result kinds, wrong streams,
+missing bytes, duplicate completion and invalid version/count/size. A 1024-entry
+result crosses the initial credit window through bounded acknowledged chunks;
+1025 entries reject. Rust also exercises a credited 1-MiB stream. A shared
+synthetic projection fixture contains no real receipts or source credentials.
+
+The images descriptor requires job_resources and conditionally selects
+list_images in matching Rust/Elixir/Python order. The bounded protocol capability
+list allows 32 entries, covering the planned 25-entry combination with growth.
+Current/legacy descriptors keep their original lists. images remains absent from
+implemented SDK approval and native package policy: capability activation, pulls,
+source preparation and exact-package/platform acceptance are still pending.
+The checked static adapter inventory now marks list_images supported while every
+full-parity acceptance row stays pending. The public guide makes current embedded
+image/registry admission explicit. The entire P0–P9 goal remains incomplete.
+
+Validation: full mix ci passes 850 cases (4 doctests, 6 properties, 840 tests), with
+42 runtime/deferred cases excluded; compilation, format/dependency/cycle checks,
+Credo/Credence, clone analysis and Dialyzer pass without errors/skips. Rust
+unit/binary/protocol contracts pass 259 cases (186 engine, 23 bridge, 9 protocol
+unit and 41 contract). The stopped-stream/callback-error model passes. Clippy,
+Rust/Elixir docs, both complete unmodified SDK inventories, diff/format checks,
+six ordinary-runner and two deferred-selection Python checks pass. The first CI
+attempt exposed a 100-ms observer timing failure in an existing machine-session
+contract; its focused rerun and final full CI pass. The ordinary image peer also
+exposed inherited nonblocking mode on its accepted test socket; the peer now
+explicitly restores blocking reads before using its finite timeout. Ordinary
+rebuilt-helper validation uses only that inspected non-VM peer, with normal
+collection and no database initialization. Unmodified dependency deprecation
+warnings remain. No new guest/platform/PostgreSQL/public-consumer qualification
+is claimed or transferred. Crash qualification stays deferred and distribution
+approval remains separate; private logs/packages stay ignored.
+
+
+## October 13, 2026: bounded private existing-agent pull worker
+
+Added a transport-neutral ImagePullRequest with the same digest-pinned reference
+and platform grammar as Source. Validation does not confer source approval or OCI
+creation authority. A protected 4-KiB metadata witness binds the expected intent
+and one absolute deadline; unknown authentication/proxy fields reject. The private
+worker sends one public AgentRequest::Pull through AgentClient send_raw/recv_raw.
+It never constructs a runtime, boots a machine, resolves host settings, invokes
+credential helpers or rewrites a registry mirror. Auth/proxy fields are nil in
+this foundation; approved credential integration remains pending.
+
+A header-first pull relay caps each frame at 2 MiB, total reply IO at 64 MiB and
+progress at 4096 frames. Direct decoding discards unrelated fields without tagged
+content buffering. Progress/guest-error strings are never public output. Only one
+projected final image reaches SDK allocation. Success requires an exact requested
+reference, Linux platform and configuration digest; packed metadata, a changed
+reference or wrong architecture reject. The observed digest remains distinct from
+the source manifest digest. Distinct ImagePulled IPC cannot substitute a file,
+list or command acknowledgment. Final evidence is retained only after successful
+exact child collection, with existing uncertain-collection lease behavior intact.
+
+Shared admission reserves one worker/work slot, 21 descriptors, bounded spool and
+the full metadata pool, with both control slots independent. The parent factory
+and result extraction are deliberately test-only feasibility witnesses: product
+engine dispatch still needs immutable OCI creation-origin/source approval and
+managed durable command-slot integration. Source preparation/OCI creation,
+credentials, Port/Elixir pull activation and ordinary guest/platform acceptance
+remain required. images stays absent from package/implemented descriptors. The
+entire P0–P9 parity goal remains incomplete, with no acceptance row qualified.
+
+Validation passes 268 Rust unit/binary/protocol cases (195 engine, 23 bridge,
+9 protocol unit and 41 contract), plus all twelve inspected ordinary non-VM
+helper checks with a rebuilt helper. New peers cover exact typed requests,
+valid/progress/packed/changed/error replies, metadata redaction and normal child
+collection without SDK database initialization or termination requests. Pure
+checks cover source grammar, finite metadata budget/unknown fields, separate
+completion identity, resource/control accounting, per-frame headers, progress
+count and the complete 64-MiB aggregate limit before another body allocation.
+Ten image-wire/coverage and nineteen HTTP image/managed-image/credential cases
+pass. Clippy, Rust docs, formatting/diff and both full unmodified SDK inventories
+pass. Existing SDK deprecation warnings remain. No new guest/platform/durable
+store/public-consumer qualification is claimed; private logs remain ignored.
+Crash validation stays deferred and distribution approval remains separate.
+
+
+## October 13, 2026: verified direct OCI metadata and fresh creation authority
+
+Added bounded VerifiedOci construction from the exact approved platform-manifest
+and config bytes. Raw manifest SHA-256, descriptor digest/size, manifest media
+kind, Linux architecture and selected platform are checked before any SDK entry.
+Each document is capped at 1 MiB; layer descriptors are counted/validated without
+retained vectors. The opaque verified value does no network/credential lookup and
+does not grant source approval. Native create additionally matches guest platform.
+
+CreateOciRequest now reaches the shared engine's fresh reservation/storage/record
+path. Work/metadata/descriptor admission precedes SDK disk entry; name/owner/
+incarnation/resources/labels and creation features validate first. One deadline
+and cancellation checks surround the stages. Public SDK disk APIs prepare storage
+and overlay, and SDK MachineSpec.to_record builds the immutable record. Default
+boot intent is neutral; explicit workloads use existing shared inheritance and
+user/env/workdir rules. No seed, guest, second runtime, smolvm CLI or HTTP server fallback is
+launched. Partial mutation remains uncertain and durable reservations stay owned.
+
+Pack and OCI creation share marker/record commitment without changing legacy
+receipt/root proof bytes. The record's exact image and source_smolmachine fields
+already participate in the immutable hash, so imported packs cannot become direct
+OCI by displaying an OCI image reference. Fresh versioned OCI receipts can pass
+origin preflight for another separately approved pull reference; legacy/unversioned,
+imported-pack and changed-origin records reject. Current inventory cannot mint
+this authority. Template checks preserve their position before SDK formatting.
+
+Direct OCI startup is explicitly fenced before SDK convenience bootstrap, pending
+owned bounded pull/launch integration; host credential/mirror lookup or timeout
+extension is not admitted. Source catalogs, host preparation/credentials, wire/
+assignment/store integration, first-start and ordinary guest/platform acceptance
+remain pending. remote_sources/images remain absent from approved descriptors.
+The full P0–P9 objective and every full-parity acceptance row remain pending.
+
+Validation passes 273 Rust unit/binary/protocol cases (200 engine, 23 bridge,
+9 protocol unit, 41 contract), including verified hash/size/platform/index rejection,
+neutral/inherited/explicit workload rules, fresh reservation/marker/root source
+binding, imported-pack rejection, startup fencing and cancellation before SDK/
+disk mutation. OCI creation resource admission preserves both control slots.
+All twelve inspected ordinary non-VM helper checks pass with a rebuilt helper;
+these do not create or qualify an OCI guest. Thirty-eight shared HTTP image/
+registry and native image-wire/coverage checks pass. Clippy, Rust docs, formatting/
+diff and both complete unmodified SDK inventories pass. Existing SDK deprecation
+warnings remain. No new platform/store/public-consumer qualification is claimed
+or inherited. Private logs/packages remain ignored, crash validation deferred,
+and distribution approval separate.
+
+
+## October 13, 2026: receipt-bound existing-machine engine pull
+
+Connected the private pull worker and distinct extracted ImagePulled proof to
+production Engine.pull_image_owned. The enclosing bridge still supplies exact
+operator source selection and the durable command slot. The engine requires
+saved versioned receipt/marker/journal, direct OCI origin, explicit network policy,
+native platform and strict running-process identity before guest dispatch. It
+never starts a VM, creates a runtime, consults host registry settings or replays.
+
+Pull resource admission now precedes SDK metadata reads and protected staging.
+The same job lease enters the owned worker, avoiding a second acquisition; metadata
+is capped at 4 KiB. One absolute deadline covers preflight, staging, request,
+collection and final validation. Exact successful collection plus matching typed
+image proof is necessary. Receipt/origin/network/process identity is revalidated
+before returning the image while all ownership/resource/spool leases remain held.
+Unconfirmed or retained collection remains uncertain and cannot authorize guest
+quiescence, operation replay or durable slot reuse. SDK creation fields/receipts
+remain unchanged.
+
+Added a targeted bounded SDK row reader under existing read-only schema/inode/
+transaction/cancellation checks. Pull preflight and image inventory no longer
+scan or decode all SDK records for one saved receipt. The selected blob is capped
+before Rust decoding and its embedded name must match. No current row or unrelated
+inventory confers source/creation ownership. Models cover missing/oversized/
+mismatched/cancelled rows and malformed unrelated JSON. Cancelled or stopped OCI
+pulls reject before any staging/worker/guest entry, leave SDK record bytes unchanged
+and release pre-dispatch resource reservations. An inert test executable ensures
+these models cannot accidentally execute a helper. The reservation model proves
+one shared job survives preparation with both control slots independent.
+
+Validation passes 275 workspace/protocol cases (202 engine, 23 bridge, 9 protocol
+unit, 41 contract), plus the added reservation model separately, totaling 276.
+All twelve inspected ordinary non-VM helper checks pass with a rebuilt helper;
+matching/mismatched/error pull peers still exit and collect normally. Twenty-seven
+HTTP image/managed-image and native wire/coverage cases pass. Clippy, Rust docs,
+diff/format and both complete unmodified SDK inventories pass; dependency
+warnings remain. No live OCI guest/platform/store/public-consumer qualification
+is claimed. Source catalogs/credentials, Port/Elixir pull dispatch, durable
+assignment/operation integration and bounded OCI bootstrap remain pending.
+remote_sources/images stay unapproved and all P0–P9 acceptance rows remain pending.
+Private evidence stays ignored, crash validation deferred, distribution approval
+separate.
+
+
+## October 13, 2026: pull wire, exact catalog gate and typed Elixir results
+
+Connected shared-engine pull dispatch through protocol-2 PullImage/Pulled and the
+native adapter. The request carries a saved receipt and exact credential-free
+reference/platform. Distinct completion carries the existing six image fields,
+with configuration-digest identity rather than process Exit or manifest digest.
+Session/channel validation binds intent and refuses all streams, packed metadata,
+crossed image/list/file evidence, wrong reference/platform and duplicate results.
+
+Helper configuration now has optional approved_oci_sources, capped at 32 unique
+exact pairs and validated with the engine's full Source-compatible grammar. An
+absent/empty/changed catalog rejects before native entry. Old omitted config bytes
+remain unchanged. Elixir owner admission checks membership independently; the
+launcher emits only deduplicated OCI pairs for an images descriptor. Scoped
+operation construction additionally requires the exact Source/ImagePull intent,
+retained OCI creation kind, explicit network and one constrained execution budget.
+Typed reply decoding binds the receipt and request source and returns the existing
+Image result with the HTTP pull_image error vocabulary. Catalogs cannot enable a
+capability absent from package/Hello approval.
+
+Rust, Elixir and Python capability selection now agree on list_images/pull_image;
+the planned full current-plus-growth/image combination has 26 capabilities under
+the 32-entry bound. Current and legacy descriptors keep their existing lists.
+The checked adapter inventory marks pull_image wired but full acceptance remains
+pending. images remains absent from implemented SDK/package approval. OCI source
+assignment/store/reader integration, host credentials/preparation, bounded first
+boot and ordinary guest/platform/consumer acceptance remain required. No feature,
+phase or P0–P9 completion is claimed.
+
+Validation passes full mix ci: 854 cases (4 doctests, 6 properties, 844 tests),
+42 runtime/deferred cases excluded, zero cycles/clones and strict Credo/Credence/
+Dialyzer with no errors/skips. Rust passes 279 unit/binary/protocol cases (203 engine,
+25 bridge, 9 protocol unit and 42 contract). New deterministic bridge cases prove
+zero native invocations for absent/changed approval and exact typed completion
+only for the approved pair, with normal shutdown and no SDK/VM initialization.
+Schema tests cover optional config compatibility, duplicates/limits/tag/auth
+rejection; Elixir peers cover receipt/source/stream/result correlation. All twelve
+inspected ordinary non-VM helper checks pass with a rebuilt helper. Clippy, Rust/
+Elixir docs, formatting/diff, both immutable SDK inventories and six ordinary-runner/
+two deferred-selection Python checks pass. Existing dependency warnings remain.
+
+The first full test pass stopped at alias lint findings. An alias repair briefly
+overwrote port.ex with reply-module text; compilation detected it, the original
+owner implementation was restored and the complete final CI passed. A prior guide
+link to an unpublished/non-ExDoc design page caused doc warnings; the guide now
+states pending admission without that broken link, and strict docs pass. No live
+OCI/platform/store/public-consumer qualification is claimed or transferred.
+Private evidence stays ignored, crash validation deferred, distribution approval
+separate.
+
+
+## October 13, 2026: bounded agent-side OCI bootstrap worker
+
+Added an opaque shared-engine launch plan and private owned worker. It validates
+record-derived argv/env/user/workdir/mount/overlay intent before entry, hashes the
+complete protected plan/deadline, pulls one exact source and sends one detached
+workload request when argv is nonempty. Empty argv pulls without Run. The worker
+never boots a VM, loads account registry settings, retries or installs another
+runtime owner. One absolute deadline spans both agent requests.
+
+Detached launch now has a dedicated header-first relay: 64-KiB frames, 8-MiB
+aggregate, 4096 progress frames and 16-KiB combined output. Progress and stderr
+are removed before exposing the SDK response. Distinct Bootstrapped evidence
+binds source, full plan hash and required container acknowledgment; it cannot be
+replaced by pull/file completion, guest Exit or readiness. Existing work/child/FD/
+staging/metadata leases stay held until exact normal worker collection.
+
+Validation passes 284 workspace/protocol cases (208 engine, 25 bridge, nine
+protocol unit and 42 contracts), plus all thirteen inspected ordinary non-VM
+helper checks with the rebuilt helper. The new peer checks pull-then-launch
+fields, empty argv, launch error and normal collection without SDK database/VM
+entry. Clippy, strict Rust docs, formatting/diff and both complete immutable SDK
+inventories pass; upstream deprecation warnings remain. No Elixir behavior was
+changed. This evidence does not qualify public OCI startup or changed packages.
+
+Owned VMM launch/enrollment, retained manager lifetime, startup controller,
+source/credential/store integration and ordinary guest/platform/consumer checks
+remain pending. Engine.start still fences direct OCI. No optional capability or
+full parity acceptance row is enabled/completed. Raw evidence stays ignored;
+crash validation remains deferred and distribution approval stays separate.
+
+
+## October 13, 2026: owned direct-OCI engine launch and bootstrap integration
+
+Added Engine.start_oci_owned with receipt/source/stopped-state/template/owner
+preflight, exact persisted DNS/CIDR/port configuration, low-level public SDK
+launch and the existing bounded bootstrap worker. Auxiliary/restore/credential
+features reject until their approved paths exist. Launch never calls the SDK's
+registry-egress expansion or convenience image bootstrap. The original SDK
+manager remains in engine ownership through normal stop/delete; an observer
+reconnect cannot drop or substitute it. Busy launch managers cannot supply stopped
+or missing observations. Public SDK database mutation records actual PID/birth.
+
+The SDK launch stays in the helper process so boot enrollment can verify its
+exact parent. An owned thread bounds caller observation while retaining operation
+leases through actual SDK return. One startup reservation covers work, two child
+processes, 24 FDs, 32-MiB metadata and result staging; both control slots fit the
+remaining eight FDs. Explicit cancellation/deadline quarantines work and cannot
+promote late completion or automatically retry. After a late successful SDK boot,
+only actual lifecycle identity is recorded; bootstrap does not proceed. No
+forced termination or crash campaign is introduced.
+
+Validation passes 288 Rust unit/binary/protocol cases (212 engine, 25 bridge, nine
+protocol unit and 42 contracts), including four deterministic startup/controller
+checks. An existing engine fixture now also proves cancelled/unconfigured startup
+does not stage, retain handles, alter rows or enter SDK launch. All thirteen
+inspected ordinary non-VM helper checks pass with a rebuilt helper. Clippy, strict
+Rust docs, format/diff, both complete clean SDK inventories and six ordinary-runner/
+two deferred-selection Python checks pass. Upstream deprecation warnings remain.
+
+These models are not live OCI VMM/package qualification. Public Port source
+assignment/start routing, credential preparation, ordinary actual launch/stop/
+restart and full platform/resource/store/consumer acceptance remain pending. The
+existing Port start route still rejects direct OCI; no image/source capability is
+activated and no full parity acceptance row closes. Evidence stays ignored, crash
+validation deferred and distribution approval separate.
+
+
+## October 13, 2026: typed OCI source intent and selective native v19 readers
+
+Added strict native OCI creation-intent validation separate from a wire request
+and prepared metadata. The saved public Source identity includes its alias, exact
+manifest reference/digest and architecture; it cannot be substituted for local
+pack content authority. Source/token/resource/feature fields stay immutable, mixed
+local/source envelopes and invented credentials reject, and source aliases must
+match the managed specification exactly. Retained native image-pull records now
+require an OCI association, preserve original creation authority and reserve no
+second machine slot even when pulling another approved image.
+
+These source/pull shapes selectively encode as v19; existing HTTP and v16-v18
+native records preserve their prior encodings. Every earlier envelope rejects
+relabelled source bytes. Fresh-BEAM decoding loads the existing fixed schema
+vocabulary before safe decode. Native remote-source/image descriptors require
+new native_sources: 1 reader admission plus existing atomic registry/image store
+markers before enrollment. Memory and the PostgreSQL example expose the reader.
+Catalog approval/reader support cannot enable an unimplemented helper feature.
+
+Seven new tests cover selective encoding/downgrade rejection, identity/credential/
+local-authority substitution, retained pull inheritance, atomic Memory rollback/
+capacity/recovery, current package admission rejection, fresh-BEAM decoding and
+isolated reader gates without enrollment or native mutation. Full mix ci passes
+861 cases (four doctests, six properties, 851 tests), with 42 runtime/deferred
+cases excluded, zero cycles/clones and strict Credo/Credence/Dialyzer passing
+with zero errors/skips. Strict docs and PostgreSQL example compilation pass;
+no live PostgreSQL conformance is claimed. Both complete clean SDK inventories
+and six ordinary-runner/two deferred-selection Python checks pass. Rust/helper
+bytes were not changed and no native platform/package qualification is transferred.
+
+The first source fixture omitted Machine.created_at and the first catalog test
+used a different architecture from its package; both were corrected. A fresh-BEAM
+code sigil conflicted with its pipe operators and was replaced by a heredoc.
+Initial full CI then stopped at alias/number/complexity lint and two boolean-style
+findings; the final full CI and docs pass after those repairs.
+
+Public source assignment construction, source-only catalogs, wire/preparation
+requests, Port startup routing, registry sources/credentials and actual OCI
+platform/store/consumer qualification remain pending. Current Request still
+rejects the source creation intent as a dispatch request, and approved packages
+still exclude images/remote_sources. No full parity acceptance row closes.
+Evidence stays ignored; crash validation remains deferred and distribution
+approval remains separate.
+
+
+## October 13, 2026: bounded host OCI manifest/config preparation
+
+Added Engine.prepare_oci_metadata as an owned read-only source job. It validates
+exact SDK-parsed repository/digest identity, domain and available admission before
+entry, reserves work/FD/metadata capacity, and returns verified opaque metadata
+without VM, cache, staging or SDK machine mutation. One absolute deadline and
+explicit cancellation cover manifest, anonymous token and config requests. Domain
+verification repeats before result delivery. A current-thread runtime limits its
+blocking resolver pool to one; unresolved resolver completion retains the job
+leases after caller observation expires.
+
+The clean SDK registry convenience client has larger manifest/blob ceilings and
+uncapped error-body reads, with no public replacement policy for these bounds.
+This path uses engine-owned OCI Distribution I/O with already locked reqwest and
+Tokio versions, plus the unmodified SDK Reference parser and verifier. Cargo.lock
+changes only the engine's two direct dependency references; resolved dependency
+versions and every SDK source byte remain unchanged. No HTTP smolvm server or
+CLI fallback is introduced. Ordinary loopback fixtures serve registry endpoints
+only and never enter a VM.
+
+Host routing preserves exact repositories/pins and known exact infrastructure
+aliases. TLS is required except explicit localhost/IPv4 loopback origins. Proxies,
+redirects and decompression are disabled. Declared lengths and streamed chunks
+bound each document to 1 MiB; config also respects its verified descriptor size.
+Manifest digest/schema/media/config identity is checked before selecting a blob,
+then config digest/size/architecture is verified. Error bodies are discarded.
+Anonymous challenges/token replies/bearers have finite caps, exact pull-only
+repository scope and same-origin or exact Docker-auth destination rules. One
+identical authenticated GET retry has no global token/account credential cache.
+
+Eight new Rust tests cover locations/challenges, bounded registry/token flows,
+redirect/error/length/manifest rejection, cancellation/deadline, descriptor
+verification and actual engine record/handle/staging isolation, including
+pre-entry cancellation/expired/unavailable admission. Validation passes 296 Rust
+workspace/protocol cases (220 engine, 25 bridge, nine protocol unit, 42 contracts)
+and all thirteen inspected ordinary non-VM helper checks with a rebuilt helper.
+Thirty-nine native source/pull and shared HTTP image/registry Elixir cases pass.
+Clippy, strict Rust docs, format/diff, both complete unmodified SDK inventories and
+six ordinary-runner/two deferred-selection Python checks pass. Upstream
+deprecation warnings remain. Two initial scoped-test capture lifetime errors were
+fixed before the final successful checks.
+
+Other approved auth-service/redirect combinations, private credential resolution,
+registry pack preparation/cache, public source wire/catalog/assignment/start
+routing, and ordinary exact-package/platform/store/consumer qualification remain
+pending. The new metadata API grants neither operator approval nor creation or
+readiness authority. All image/remote-source activation and full parity acceptance
+rows remain pending. Private evidence stays ignored; crash validation remains
+deferred and distribution approval separate.
+
+
+## October 13, 2026: OCI source wire, adapter and managed startup routing
+
+Added strict protocol-2 OciIdentity/OciCreate and CreateOci, QualifyOciCreation,
+InspectOciCreation and StartOci. These variants reuse existing capabilities and
+public outcomes, preserving legacy local creation bytes and capability counts.
+Exact source identity/reference grammar, empty labels, optional feature presence,
+compact workload payloads and versioned startup receipts are validated on both
+bridges. Source operations require remote_sources plus the existing bounded job/
+buffer/compact descriptor dependencies. Current implemented package descriptors
+continue to exclude remote_sources/images, so no public feature activates.
+
+Native owner admission checks exact reference/platform approval before engine
+entry. The adapter connects one-deadline metadata preparation/fresh creation,
+read-only source qualification/absence and receipt-bound original-source startup.
+Absence never contacts a registry, acquires a handle or adopts inventory. Startup
+checks the catalog-selected origin inside its reserved/gated preflight before
+VM dispatch; a later image pull cannot substitute creation origin. Existing
+material authority and retained SDK manager/worker ownership remain unchanged.
+
+Elixir source-only catalog conditions, approved source assignment construction,
+qualification, managed Source MachineSpec resolution and source lifecycle request
+translation are now connected behind capability approval. Port owner/catalog and
+channel/result validation agree with Rust. Source absence remains available during
+read-only reconciliation; creation/start are still mutation-gated.
+
+Validation passes 302 Rust workspace/protocol cases (221 engine, 26 bridge, nine
+protocol unit and 46 contracts), including native catalog no-entry/approved-entry,
+source identity/correlation/version/dependency/compact tests and engine absence
+and crossed-origin startup rejection. Four new Elixir wire tests cover source
+shapes, old/mixed/credential rejection, no stream/crossed completion and compact
+workloads. Full mix ci passes 865 cases (four doctests, six properties, 855 tests),
+42 runtime/deferred cases excluded, zero cycles/clones and strict Credo/Credence/
+Dialyzer with zero errors/skips. Strict Rust/Elixir docs, Clippy, format/diff and
+both complete SDK inventories pass, as do six ordinary-runner/two deferred-
+selection Python checks. All thirteen inspected ordinary non-VM helper checks
+pass with a rebuilt helper; existing dependency deprecation warnings remain.
+
+Initial checks found a missing Elixir Source alias, grouped-clause warning, an
+incorrect test shutdown acknowledgment, a test descriptor missing compact support
+and a compact fixture originally shaped for qualification. Those were corrected
+before final checks; no deferred/live crash validation was run.
+
+Ordinary actual OCI launch/stop/restart, full source/auth/credential/resource/store
+acceptance and exact package/platform/current/minimum consumer qualification
+remain pending before capability approval. Registry pack/cache, volumes and
+saved-state/export/branch phases retain their full requirements. No full parity
+acceptance row closes and no historical evidence transfers. Raw evidence stays
+ignored; crash validation remains deferred and distribution approval separate.
+
+
+## October 13, 2026 — bounded registry sidecar descriptor foundation
+
+The shared engine now exposes a strict credential-free RegistryArtifactSource
+and an opaque RegistryBlobDescriptor from exact pinned manifest verification.
+The manifest reader caps input at one MiB, projects a single sidecar descriptor
+without retaining arbitrary annotations/layer vectors, distinguishes manifest
+from content SHA-256, and validates schema/media types, config identity/size and
+the operator content/byte cap. Indexes, extra layers, changed content, malformed
+sizes and duplicate required fields reject. Architecture still requires checking
+the downloaded pack; a platform string/descriptor does not prove its contents.
+
+Engine.prepare_registry_descriptor runs through the existing owned metadata job,
+exact registry locations, bounded anonymous authentication, no redirects/proxy,
+one deadline and explicit cancellation. The generic runtime/client helpers are
+shared with OCI metadata. An actual engine loopback fixture verifies a single
+exact manifest GET, no blob GET, unchanged selected SDK record, no VM handles or
+staging, lease release after return and pre-budget/quarantine rejection. The
+resolver job remains owned through timeout exactly as in OCI metadata.
+
+Workspace ordinary units pass 260 cases (engine 225, bridge 26, protocol 9),
+with 13 helper fixture cases ignored. Four manifest/identity tests include the
+additional descriptor/duplicate cases; all twelve final scoped registry checks,
+strict Rust docs and Clippy pass, with logs kept private and ignored. No Elixir code changed. An initial
+compile check found registry constants are not re-exported by the SDK wrapper;
+audited SDK-compatible media-type literals are used without dependency changes.
+
+This completes no parity acceptance row. Blob streaming/adoption, warm-cache
+integrity, credentials/protected IPC, pack architecture/materialization,
+create_prepared and public/package/platform qualification remain pending.
+remote_sources admission remains disabled. No deferred crash campaign was run;
+no old package evidence is transferred and nothing is pushed or published.
+
+
+## October 13, 2026 — owned registry blob/cache foundation
+
+Engine.prepare_registry_blob now fetches a pinned manifest, validates its
+separate approved content descriptor, streams exact bounded blob bytes into a
+private domain cache, verifies SHA-256/length and publishes without overwriting
+existing content. Warm preparation still fetches the manifest and rehashes the
+cache. The result is an opaque RegistryCachedBlob, not pack/creation authority.
+No SDK source, dependency versions, HTTP adapter or public capability changes.
+
+The private cache opens directories/files without following symlinks, requires
+account ownership and exact 0700/0400 modes, rejects hard links and checks named/
+opened inode identities and metadata across hashing. File and directory syncs
+cover normal publication. Cache misses create unique temporary files; malformed
+responses and explicit cancellation remove private partials on job return.
+Errors never buffer registry error bodies. Redirects/proxies remain disabled.
+The owned job retains domain/resources through blocking I/O and observation
+timeout. No retries, auxiliary VM or CLI is introduced.
+
+A separate finite JOB_REGISTRY_STAGING_BYTES (32 GiB) accounts the selected
+operator byte cap before dispatch. Existing command staging stays 64 MiB.
+One registry job reserves 16 descriptors and the metadata pool; both control
+slots remain available. Persisted cache capacity/eviction/admission policy is
+still pending and this allowance is not a guest disk reservation.
+
+Ordinary workspace tests pass 265 cases (230 engine, 26 bridge, nine protocol),
+13 helper fixture cases ignored. Subsequent scoped checks cover 17 registry
+cases, including cold/warm preparation, corrupt cache rejection, absent/linked/
+wrong-mode entries, failed/oversized/short/wrong/chunked bodies, explicit
+cancellation cleanup and finite staging/control isolation. Strict Rust docs and
+Clippy pass; final formatting/diff checks pass. Private raw logs stay ignored.
+
+Pack format/architecture qualification, aggregate retained cache capacity,
+credential resolution/protected IPC, source/store/wire integration and
+create_prepared remain pending. Public remote_sources admission remains disabled
+and no parity acceptance row closes. No deferred crash campaign ran, no
+historical package evidence transfers and nothing is pushed or published.
+
+
+## October 13, 2026 — explicit retained registry cache admission
+
+RegistryCachePolicy now carries an explicit operator max_bytes/max_files allowance
+to Engine.prepare_registry_blob, with hard ceilings 64 GiB/1024 files. This is
+independent of per-download staging and guest disk reservation. Before a blob
+request the engine scans retained entries under the owned metadata lease, caps
+entry count/checked byte accumulation, checks private regular content names/
+UID/mode/link count and rejects unknown/partial entries. Cancel/deadline checks
+bound scans, including empty caches. No eviction or automatic deletion is added.
+
+Warm cache preparation validates aggregate allowance without requiring a spare
+file/extra bytes; a full cache can serve an existing verified entry. A cold miss
+requires space for the complete descriptor before any blob request. The metadata
+lease serializes this scan/publication with other registry jobs. Restart scans
+retained files afresh rather than trusting an in-memory capacity counter. Helper
+configuration binding/operator approval for this policy remains pending.
+
+Workspace ordinary tests pass 268 cases (233 engine, 26 bridge, nine protocol),
+13 helper fixture cases ignored. Nineteen scoped registry cases cover strict
+policy bounds, retained byte/file limits, unknown-entry rejection, exact-limit
+warm reuse and actual engine pre-invalid policy/no blob request on exhausted
+allowance. Strict Rust docs, Clippy and format/diff checks pass. Logs remain
+private and ignored. No HTTP/Elixir code or SDK source/version changed.
+
+No parity acceptance row closes. Pack/architecture/materialization, cache policy
+configuration approval, credential/protected IPC and public create_prepared
+integration/qualification remain pending. Crash validation remains deferred,
+remote_sources admission disabled, distribution approval separate and no push.
+
+
+## October 13, 2026 — pinned registry pack qualification
+
+Engine.qualify_registry_blob now converts exact rehashed private cached content
+into opaque QualifiedRegistryArtifact retaining registry origin, resource shape
+and SDK pinned sidecar evidence. It checks the engine-selected cache path/domain,
+bounds footer layout/manifest before allocation, verifies source/host architecture
+and applies the same mode/geometry/deferred-feature constraints as local packs.
+The existing local reader was extracted without changing its validation rules.
+Registry qualification does not copy the blob into the local artifact cache.
+
+The unmodified public SDK verify_sidecar_pinned supplies checksum/inode evidence.
+Its footer bytes must equal the pre-read footer and its covers check must hold
+through bounded shared archive validation. A deadline/cancel reader wraps asset
+input; zstd window/tar metadata/asset counts retain existing bounds. SDK checksum
+I/O is not cooperatively cancellable: the enclosing owned thread can outlive
+caller observation, retaining domain/job resources until actual return and
+checking cancellation before any success. No VM, extraction or creation dispatch.
+
+Genuine sidecar fixtures prove successful qualification and rejection of wrong
+architecture, changed checksum/layout and invalid compressed assets. Pure checks
+reject cross-domain blobs and expired/cancelled asset reads. Actual engine
+qualification leaves SDK rows, handles and local artifact cache unchanged.
+Workspace ordinary tests pass 271 cases (236 engine, 26 bridge, nine protocol),
+13 helper fixture cases ignored. Final scoped registry checks include the added
+reader-budget case. Strict Rust docs, Clippy and formatting/diff checks pass;
+private logs remain ignored. An initial fixture compile error was corrected by
+converting footer bytes to the SDK's fixed-size array input.
+
+Materialization/typed create_prepared integration, credential/protected IPC,
+helper-approved cache policy and public exact-package/platform/source/store
+qualification remain pending. No full parity acceptance row closes, no SDK
+source/version changes and no historical qualification transfers. remote_sources
+remains disabled; crash validation and distribution approval remain separate.
+
+
+## October 13, 2026 — qualified registry fresh-creation engine path
+
+Typed CreateRegistryRequest consumes QualifiedRegistryArtifact and the selected
+creation features. Engine.create_registry_prepared validates fresh identity,
+resource/platform/cache origin and pinned evidence, acquires the native work lease
+and machine gate, verifies templates/current absence, then reserves SDK creation
+serialization before materializing. It reuses the existing public SDK extraction/
+disk seeding path without creating another artifact-cache copy. Partial errors
+remain uncertain and release only SDK serialization; durable capacity cannot be
+released or creation replayed from them. Normal success initializes the versioned
+material journal. Domain/cache/evidence are checked before reservation and domain
+identity after materialization. One absolute deadline is checked between steps.
+
+The SDK record retains its pack cache path in source_smolmachine and the exact
+pinned registry origin in source_registry_ref. Existing material hashes already
+cover both fields, preserving legacy schema/receipt behavior. The shared pack
+record projection keeps neutral /bin/true, empty arguments/environment, root user
+and root workdir unless an approved explicit workload applies. Registry provenance
+cannot make imported packs eligible for direct OCI pulls. Existing local paths
+retain their same projection and reserved-creation semantics.
+
+Predispatch engine fixtures reject explicit cancellation, unapproved templates and
+crossed content/cache identity with no SDK row/storage/reservation changes. Pure
+record tests show origin changes the material hash and baked workload/env does not
+enter neutral records. Workspace ordinary tests pass 274 cases (239 engine, 26
+bridge, nine protocol), 13 helper fixture cases ignored. Strict Rust docs/Clippy
+pass; final scoped registry checks and format/diff checks pass. Initial test/API
+compile errors were corrected before final checks. Logs stay private/ignored.
+
+This is engine integration, not public create_prepared acceptance. Actual ordinary
+SDK materialization/extraction resource/platform qualification, protected
+credentials, helper source/cache policy, wire/store/public preparation/creation
+integration and exact packages remain pending. SDK blocking extraction/disk calls
+may outlive observation while the executor/job must remain owned; no hard deadline
+termination guarantee is claimed. remote_sources remains disabled, crash tests
+deferred, distribution approval separate and no source patches/push/publication.
+
+
+## October 13, 2026 — per-operation engine registry identity credentials
+
+RegistryIdentityCredential is an opaque noncloneable/nonserializable token plus
+an exact host-approved HTTPS token realm. Tokens are bounded by shared resolver
+grammar/16-KiB limits and Debug is redacted. Engine preparation accepts optional
+credentials separately from source/cache policy; source/results never acquire
+token fields. Explicit credentials reject private/loopback/link-local/unspecified
+IP literals and localhost at registry and realm boundaries, matching the existing
+HTTP restriction. Hostname DNS rebinding is not qualified by literal validation.
+
+The bounded registry reader accepts an exact approved cross-origin token realm
+without widening anonymous destinations. Identity is sent only to that endpoint
+with repository pull-only scope; registry reads receive the exchanged bearer.
+An otherwise anonymous same-origin/Docker challenge cannot authorize identity
+transmission to a different realm. One authentication read retry remains bounded
+and no global credential/bearer cache, account configuration, environment or argv
+secret is introduced. Identity Authorization headers are sensitive in diagnostics.
+
+Tests cover token grammar/limits, strict HTTPS endpoint shape, literal address
+restrictions (including IPv4-mapped IPv6), exact realm/scope, redacted credential
+and request headers, token reply mismatch/error redaction and independent rotated
+request construction. A loopback wrong-realm exchange makes zero requests; actual
+engine preparation rejects explicit credentials for a loopback source before GET.
+Workspace ordinary tests pass 278 cases (243 engine, 26 bridge, nine protocol),
+13 helper fixture cases ignored. Subsequent final scoped checks include 30 registry
+cases. Strict Rust docs/Clippy and format/diff checks pass; private logs stay ignored.
+
+Protected Port IPC, worker resolver/realm policy approval and live authenticated
+exchange qualification remain pending. This is engine behavior, not public
+credential/source activation. Remaining full parity rows stay pending, crash
+validation deferred, distribution approval separate and no SDK patches or push.
+
+
+## October 13, 2026 — native non-secret registry approval catalog
+
+The schema-2 helper config now optionally accepts approved_registry_sources. Each
+strict RegistryApproval binds exact source reference/platform/content identity,
+per-download cap, explicit cache byte/file policy and optional paired safe
+credential_ref/token_realm. Realm validation reuses the engine's non-secret
+approved-HTTPS validator; config contains no token field. All entries share one
+retained-cache allowance, preventing different request policies from becoming
+independent capacity authorities for the same cache.
+
+The catalog is limited to 32 entries, rejects duplicate source identities, empty
+registry catalogs, legacy schema use, token/unknown fields, invalid byte/policy
+bounds, missing reference/realm partners and private/plaintext token realms.
+Existing config serialization omits the field when absent and fixture peers stay
+unchanged. Tests exercise valid anonymous/authenticated policies and malformed
+configs before any engine open. Request-side selector/dispatch, Elixir operator
+policy/launch translation and protected credential IPC remain unimplemented.
+
+Workspace ordinary tests pass 280 cases (244 engine, 27 bridge, nine protocol),
+13 helper fixture cases ignored. Six targeted package tests include final realm/
+legacy cases. Strict Rust docs/Clippy and formatting/diff checks pass. An initially
+unused future selector was removed after Clippy detection instead of suppressing
+dead-code checks; it will be implemented with the actual wire operation. Private
+logs stay ignored. No public capability/source activation, SDK changes, deferred
+crash campaign, evidence transfer, push or publication.
+
+
+## October 13, 2026 — anonymous registry preparation wire integration
+
+Protocol-2 PrepareArtifact takes exact credential-free RegistrySource and returns
+PreparedArtifact binding that same source to positive bounded size/already_cached.
+remote_sources adds prepare_artifact in the negotiated capability order without
+activating the current package policy. Session admission rejects legacy/missing
+features, completion rejects crossed identities/other result kinds and no event
+stream is allowed. Strict shapes reject token/path/cache-policy request extensions.
+
+Helper admission and queued workers select exact anonymous registry approval
+before native entry. Dedicated Native.prepare_artifact keeps operator policy out
+of caller-supplied operations; the adapter invokes bounded engine preparation
+with the selected byte/cache limits and one remaining deadline. Authenticated
+entries reject until protected credential IPC is integrated. Existing execution/
+terminal/observation queues retain their budgets and controls.
+
+Elixir RegistryContract supplies strict request/result source shapes, planned
+capability order, channel source correlation and no-event acceptance. Port owner
+approval requires remote_sources and exact anonymous worker source. Elixir launch
+catalog/cache configuration and public Backend/Runtime result translation remain
+pending; this does not advertise public prepare_artifact support.
+
+Rust ordinary workspace units pass 281 cases (244 engine, 28 bridge, nine
+protocol) with 13 helper fixture cases ignored, and 47 protocol contracts pass.
+Bridge fixtures reject missing/crossed/authenticated catalogs with zero native
+calls and return correlated evidence only for exact anonymous approval. Three
+new Elixir wire/channel tests and 11 source/package activation tests pass. Strict
+Rust docs and Clippy pass. Full mix ci passes all 868 cases (four doctests, six
+properties, 858 tests), 42 runtime/deferred excluded, before reporting style
+issues. Those were corrected; seven final source/registry tests pass, strict Credo/
+Credence, zero clones and test-environment Dialyzer (zero errors/skips) pass as
+separate checks. A dev-environment Dialyzer invocation reported an unrelated EEx
+unknown-function warning; the CI test environment passes. Private logs stay ignored.
+An initial contract incorrectly expected an error return for unsupported session
+admission; corrected to the actual not-dispatched terminal rejection contract.
+
+Protected credentials, launch policy, registry source/store/create_prepared
+plumbing and ordinary exact-package/platform acceptance remain pending. No full
+parity row closes, remote_sources stays disabled, crash validation deferred and
+distribution approval separate. No SDK/source patches, evidence transfer or push.
+
+
+## October 13, 2026 — Elixir operator registry policy and helper translation
+
+SmolBox.Embedded.RegistryPolicy provides explicit bounded host download, retained
+cache byte/file limits and exact credential-reference HTTPS token endpoints. Its
+Inspect omits endpoints; it has no token field. Private/link-local/loopback/
+unspecified literals, IPv4-mapped IPv6, credentials/query/fragment, malformed
+UTF-8 and invalid ports reject. Credential source references require an approved
+realm when policy is supplied. No I/O or DNS lookup occurs during configuration.
+
+Embedded Config retains dormant legacy catalogs without mandatory policy, while
+a registry catalog selected by remote_sources requires a valid registry_policy.
+Launch.helper_config derives exact non-secret registry approvals and shared
+cache/download limits only for that descriptor. The helper catalog deduplicates
+equivalent transport identities; native strict policy validation remains final.
+Current package approval still rejects remote_sources, so translation tests
+inspect a future descriptor without activating public support. No token enters
+helper config, argv or inherited environment.
+
+Sixteen targeted policy/config/wire cases pass, including bounds/unknown token
+fields, missing realm references, dormant versus future translation and current
+activation rejection. Final policy/config checks include malformed realm cases.
+Strict Credo/Credence, zero clones and test-environment Dialyzer (zero errors/skips)
+pass. Earlier Elixir keyword-spacing/complexity issues were corrected. Logs stay
+ignored. No native SDK/code changes in this increment.
+
+Protected credential IPC, public Backend/Runtime preparation/result translation,
+registry source/store/create_prepared integration and ordinary exact-package
+qualification remain pending. No parity acceptance row closes, remote_sources
+stays disabled, crash validation deferred and distribution approval separate.
+Nothing is pushed/published and no historical evidence transfers.
+
+
+## October 13, 2026 — gated public embedded preparation adapter
+
+Embedded now implements prepare_artifact arities through EmbeddedPreparation.
+The builder requires remote_sources, exact full approved Source identity, an
+explicit valid registry policy and anonymous credentials. It constrains encoded
+request/reply budgets without extending the caller deadline. Current package
+approval keeps the feature unavailable; credential options reject before dispatch
+until protected IPC is integrated. Preparation can use the already pinned/scoped
+Runtime context without inventing machine receipt authority.
+
+The result decoder requires exact source correspondence and empty outputs/no
+overlay, then produces the existing ArtifactPreparation shape with separate
+manifest/content digests, size and warm-cache flag. Safe native errors preserve
+category and dispatch evidence through the existing reply adapter. The shared
+result documentation now distinguishes HTTP warm-cache trust from embedded
+rehashing. The checked parity inventory records implementation support but keeps
+all acceptance status pending; broad public qualification is not inferred.
+
+Ten targeted translation/wire/inventory cases pass, covering mismatched source,
+unexpected output, typed identity, native errors, unsupported current admission
+and invalid token options. Strict Credo/Credence, zero clones and test-environment
+Dialyzer (zero errors/skips) pass. Initial inventory/style findings were corrected
+without altering acceptance scope. No native/SDK source changed and logs remain
+private/ignored. Public source/store/create_prepared and credential IPC plus
+ordinary exact-package/platform acceptance remain pending. No crash campaigns,
+capability activation, evidence transfer, push or publication.
+
+
+## October 13, 2026 — durable registry creation source identity
+
+NativeSource now has separate registry artifact/creation structural predicates.
+Assignment version 2 can retain exact registry intent with manifest, content,
+alias, architecture and safe credential_ref; no token or local artifact authority
+can be mixed in. Catalog matching/provision/qualification selection now recognizes
+registry sources behind remote_sources. Actual registry create/qualification wire
+routing remains pending; current descriptor admission stays disabled. OCI wire
+validation and retained ImagePull eligibility remain strictly OCI-only.
+
+Selective v19 already encodes native source terms, so no envelope or reader-marker
+change is required. The same exact source correspondence/resource/profile/receipt
+validation applies to registry records. Older v16-v18 source envelopes reject;
+existing local/HTTP records retain their previous codecs. Credential reference
+rotation changes identity; token rotation remains absent from durable terms.
+
+Seventeen source/store tests pass with warnings as errors. They cover registry
+v19 roundtrip, source mismatch/token rejection, old-reader rejection, Memory
+atomic rollback/reservation accounting/paged recovery for both source kinds and
+fresh-BEAM safe decoding for both. Strict Credo/Credence, zero clones and
+test-environment Dialyzer (zero errors/skips) pass. A fixture's unused default was
+removed before final checks. Private logs stay ignored. No SDK/native source change.
+
+No parity row closes. Registry wire/create_prepared, protected credentials and
+ordinary exact-package platform/store/upgrade qualification remain pending.
+remote_sources stays disabled, crash validation deferred, distribution approval
+separate and no evidence transfer, push or publication.
+
+
+## October 13, 2026 — cache-only registry qualification and intent controller
+
+Engine.qualify_registry_cached consumes exact source, observed prepared size,
+operator cache policy and resources, rechecking retained allowance/content/pack
+under an owned metadata job. It opens only an existing private cache; missing
+cache fails without directory creation or registry traffic. Existing blob
+qualification also opens existing cache rather than manufacturing one. Opaque
+prepared evidence remains origin/resource-bound and no receipt is minted.
+
+RegistryCreationIntent supplies receipt-free original source/resources/features.
+create_registry_cached validates identity/templates then carries one absolute
+deadline through cache qualification and fresh versioned materialization, with
+no host fetch. inspect_registry_creation uses the observation lane, machine
+observation gate and bounded SQL/material absence check, remains read-only in
+quarantine and reports rows/partial storage unverified. It cannot adopt current
+records or authorize release without caller quiescence.
+
+Workspace ordinary Rust tests pass 284 cases (247 engine, 28 bridge, nine
+protocol), 13 helper fixture cases ignored. Final scoped registry cases prove
+exact prepared size/policy/source, wrong size/exhausted allowance/missing cache,
+real pinned sidecar qualification and no handles/copies. Absence fixtures cover
+missing/current-row/partial storage/quarantine without cache creation or record
+mutation; unapproved templates reject the cache-creation controller before work.
+Strict Rust docs/Clippy and format/diff checks pass; logs remain ignored.
+
+Registry wire create/qualify/absence, public create_prepared, protected credentials
+and ordinary materialization/resource/platform/store acceptance remain pending.
+No parity gate closes, remote_sources stays disabled, crash validation deferred,
+distribution approval separate and no SDK changes/evidence transfer/push.
+
+
+## October 13, 2026 — registry prepared creation and absence wire routing
+
+Protocol-2 RegistryIdentity/RegistryCreate retain exact kind/alias/manifest/content/
+architecture/credential_ref fields with strict no-token/no-mixed-local shapes.
+CreateRegistryPrepared carries separate positive bounded prepared size and reuses
+the existing Create capability; InspectRegistryCreation reuses InspectCreation
+and has a 30-second observation budget. Both require remote_sources. Existing
+compact feature payload decoding now supports these creation kinds.
+
+Helper reader/worker match exact reference/platform/content and credential
+reference against the non-secret catalog; create also enforces approved byte cap
+before native entry. Dedicated Native creation dispatch calls the cache-only
+engine controller with selected cache policy and one remaining deadline. Absence
+uses the observation lane/adapter and remains available in quarantine. Creation
+success requires exact versioned receipt/domain/name/token/incarnation and no
+streams; prepared data/absence cannot substitute for ownership.
+
+Elixir request/owner/channel/compact rules now accept typed registry creation/
+absence with exact source/profile approval, forbid OCI substitution/token fields
+and preserve no-output completion. Public create_prepared builder and registry
+preflight qualification remain pending; current package admission still disabled.
+
+Workspace ordinary Rust units pass 284 cases (247 engine, 28 bridge, nine protocol),
+13 helper fixture cases ignored. All 49 protocol contracts pass, covering source/size/crossed
+receipts/absence and compact registry workload. A later bridge case checks absent
+policy/wrong ref/oversized size with zero native calls and exact approval dispatch
+without fabricating success. Fourteen Elixir registry wire/native source cases
+pass, strict Rust docs/Clippy, Credo/Credence, zero clones and test Dialyzer pass.
+An initial crossed-receipt fixture used its unchanged incarnation and was corrected
+to a guaranteed distinct value; compact tests found the missing registry
+provenance-marking decoder arm, which was added before final checks. The compact
+fixture path/API was also corrected.
+Private logs stay ignored. No live materialization/crash campaign or SDK changes.
+
+Protected credentials, public create_prepared/qualification and ordinary exact
+package/resource/platform/store acceptance remain pending. No parity gate closes,
+remote_sources stays disabled, distribution approval separate and no push.
+
+
+## October 13, 2026 — public create_prepared and registry feasibility preflight
+
+Embedded create_prepared arities now use the original scoped assignment/spec and
+exact ArtifactPreparation identity, rejecting nonpositive size or crossed
+manifest/content before constructing CreateRegistryPrepared. Prepared size stays
+a wire observation, not durable creation authority. Results decode through the
+existing Machine/Identity path; error operation remains create. Registry source
+MachineSpec resolves through approved catalog, registry start uses ordinary pack
+lifecycle and creation absence decodes its distinct read-only operation.
+
+Runtime qualifies before reservation and warms after reservation. To preserve
+that order, QualifyRegistryCreation checks exact registry intent, resource/user/
+feature structure, native platform and approved templates without registry/cache
+work. Native helper source/ref catalog approval remains mandatory. This is
+pre-reservation feasibility only: pack/geometry/features are verified against
+cached content by create_prepared before materialization. Its 30-second/no-output
+qualified result has no receipt/absence authority; compact features reuse the
+existing codec. All work retains the caller's remaining deadline.
+
+Coverage now records create_prepared adapter support while leaving parity status
+pending. Current remote_sources package approval remains disabled and credential
+options are not yet accepted. Twenty-two targeted preparation/source/wire/coverage
+cases pass; Rust ordinary units pass 285 cases (247 engine, 29 bridge, nine
+protocol), 13 helper fixture cases ignored, and all 50 protocol contracts pass.
+Strict Rust docs/Clippy, Credo/Credence, zero clones and test Dialyzer (zero errors/
+skips) pass. Later qualification assertions preserve no-cache preflight behavior.
+Private logs stay ignored. No live VM materialization or crash campaign ran.
+
+Protected credential IPC, full ordinary public Runtime source preparation/create/
+restart and exact-package platform/resource/store/upgrades remain pending. No
+parity row closes, distribution approval separate, no SDK patches/evidence
+transfer/push/publication.
+
+
+## October 13, 2026 — bounded registry credential Port IPC
+
+PrepareArtifact now accepts a strict paired safe credential_ref and bounded
+16-KiB RegistryToken separate from source identity. The private Port pipe carries
+the token only in a preparation request; helper source/ref catalog policy selects
+the preapproved realm and adapter constructs the engine credential. No token
+field enters helper config, source/receipt/durable term, argv/environment or reply.
+Malformed/missing pairs reject before preparation. Credential changes never alter
+manifest/blob identity and each operation has independent token exchange state.
+
+Native Session/Handle bookkeeping uses a sanitized operation after validation;
+only queued/executing preparation holds the needed token. Elixir Channel/Port
+records and Call consumption strip token bytes after submission; bounded Outbox
+retains the frame only until send/cancel. Port format_status remains fully redacted.
+These are lifetime/boundedness rules, not physical allocator-memory zeroization
+guarantees. Cached create_prepared validates scoped credential options but performs
+no host exchange and sends no token; preparation owns authentication.
+
+Public preparation accepts resolver token options only with the source credential
+reference, requiring exact source/catalog/policy approval. Encoded request budget
+is capped at 24 KiB to accommodate maximum token/source framing; caller limits
+still constrain it. Ordinary reconciliation Call admission now includes original
+OCI/registry creation absence operations, matching Port's existing whitelist.
+
+Rust ordinary units pass 285 cases (247 engine, 29 bridge, nine protocol), 13
+helper fixture cases ignored. All 51 protocol contracts pass; a later fourth
+registry bridge case proves exact authenticated ref admission/wrong-ref rejection
+and no token echo. Twenty targeted Elixir preparation/wire/codec cases pass,
+including pair validation, Channel term sanitization and transient rotation.
+Strict docs/Clippy, Credo/Credence, zero clones and test Dialyzer pass. Initial
+fixture field/alias/Elixir spacing issues were corrected. Raw logs stay ignored.
+
+Live authenticated exchange, public Runtime source/token rotation/no-leak ordinary
+qualification, actual materialization and exact package/platform/resource/store
+acceptance remain pending. Public remote_sources still disabled; no parity row
+closes. Crash validation deferred, distribution approval separate, no SDK source
+change/evidence transfer/push/publication.
+
+
+## October 13, 2026 — registry admission consistency and integrated regression
+
+Source-only Embedded config now accepts approved registry packs alongside OCI
+under the same future remote_sources gate and explicit registry policy. No current
+package activation changes. Native registry catalog uniqueness includes the exact
+credential reference as well as transport source identity. Anonymous/authenticated
+references or two separately scoped references can approve the same content;
+identical aliases with identical credential policy deduplicate during launch.
+
+Authenticated registry destinations now receive non-secret private-address checks
+at Elixir policy/native helper-config admission, before any token-bearing work.
+The validator reuses engine URL/literal policy without inventing credentials.
+Anonymous loopback source remains permitted for ordinary registry fixtures.
+Tests cover coherent multi-reference catalogs, alias deduplication and private
+source rejection, preserving current source-only activation rejection.
+
+Integrated mix ci on the snapshot before latest destination edits passes 883
+cases (four doctests, six properties, 873 tests), 42 runtime/deferred excluded,
+zero cycles/clones and strict Credo/Credence/Dialyzer (zero errors/skips). One
+ordinary Python peer emitted broken-pipe stderr while tests continued; the run
+exited zero. Latest admission edits separately pass 14 Elixir cases, six native
+package cases, strict Credo/Credence/type checks, zero clones, Rust Clippy/docs
+and verified unmodified source inventory. A grouped-clause warning was corrected
+before final targeted checks. Logs remain ignored/private.
+
+This is admission/regression evidence, not live authenticated/platform/package
+feature qualification. Full P0–P9 scope remains pending; crash validation deferred,
+remote_sources disabled and distribution approval separate. No source patches,
+historical evidence transfer, push or publication.

@@ -6,10 +6,29 @@ defmodule SmolBox.Backend.Assignment do
   write and retained across helper restarts. Public runtime startup separately
   validates the target and store capabilities. Inspect output omits creation evidence.
   """
-  alias SmolBox.Backend.Binding
+  alias SmolBox.Backend.{Binding, Features}
 
-  alias SmolBox.{Command, Error, ExecutionSpec, ManagedMachineSpec, Profile, Validation}
-  alias SmolBox.Embedded.{Config, CreationFeatures, Identity, Launch, Request}
+  alias SmolBox.{
+    Command,
+    Error,
+    ExecutionSpec,
+    ImagePull,
+    ManagedMachineSpec,
+    Profile,
+    Source,
+    Validation
+  }
+
+  alias SmolBox.Embedded.{
+    Config,
+    CreationFeatures,
+    Identity,
+    Launch,
+    NativeGrowth,
+    NativeSource,
+    Request
+  }
+
   alias SmolBox.Terminal.Spec, as: TerminalSpec
 
   @enforce_keys [:binding, :creation]
@@ -38,7 +57,7 @@ defmodule SmolBox.Backend.Assignment do
               "name" => name,
               "owner_token" => random(32),
               "incarnation" => random(16),
-              "artifact" => Launch.artifact(artifact),
+              provision_key(artifact) => provision_value(artifact),
               "resources" => resources(spec.profile),
               "labels" => %{}
             },
@@ -66,11 +85,14 @@ defmodule SmolBox.Backend.Assignment do
     do:
       Validation.struct_shape?(assignment, __MODULE__) and Binding.valid?(assignment.binding) and
         assignment.version in [1, 2] and
-        Request.valid?(
-          %{"operation" => "create", "create" => assignment.creation},
-          1,
-          assignment.version
-        ) and
+        (Request.valid?(
+           %{"operation" => "create", "create" => assignment.creation},
+           1,
+           assignment.version
+         ) or
+           (assignment.version == 2 and
+              (NativeSource.creation?(assignment.creation) or
+                 NativeSource.registry_creation?(assignment.creation)))) and
         assignment.creation["labels"] == %{}
 
   def valid?(_assignment), do: false
@@ -94,6 +116,9 @@ defmodule SmolBox.Backend.Assignment do
 
   defp approved_creation?(_creation, nil), do: false
 
+  defp approved_creation?(creation, %Source{kind: kind} = source) when kind in [:oci, :registry],
+    do: NativeSource.matches?(creation, Source.artifact(source))
+
   defp approved_creation?(creation, artifact),
     do: creation["artifact"] == Launch.artifact(artifact)
 
@@ -115,7 +140,7 @@ defmodule SmolBox.Backend.Assignment do
       assignment.binding.target_id == record.worker_id and
       assignment.creation["name"] == record.machine_name and
       assignment.creation["resources"] == resources(record.spec.profile) and
-      artifact_matches?(assignment.creation["artifact"], record.spec.artifact) and
+      creation_artifact_matches?(assignment.creation, record.spec.artifact) and
       optional_histories?(record, assignment.version) and
       Enum.all?(
         [Map.get(record, :created_machine), Map.get(record, :observed_machine)],
@@ -132,8 +157,9 @@ defmodule SmolBox.Backend.Assignment do
         {:ok,
          CreationFeatures.attach(
            %{
-             "operation" => "qualify_creation",
-             "artifact" => Launch.artifact(approved_artifact(config, spec.artifact)),
+             "operation" => qualification_operation(spec.artifact),
+             provision_key(approved_artifact(config, spec.artifact)) =>
+               provision_value(approved_artifact(config, spec.artifact)),
              "resources" => resources(spec.profile),
              "user" =>
                case Map.get(spec, :command) do
@@ -149,9 +175,12 @@ defmodule SmolBox.Backend.Assignment do
   # Admission policy is separate from structural historical validation. A new
   # qualification rule must not make existing v16 native records unreadable.
   defp admission_spec?(spec, version),
-    do: supported_spec?(spec, version) and qualified_user?(Map.get(spec, :command))
+    do:
+      supported_spec?(spec, version) and qualified_user?(Map.get(spec, :command)) and
+        (spec.artifact["kind"] != "oci" or spec.profile.network != :offline)
 
   defp qualified_user?(nil), do: true
+  defp qualified_user?(%ImagePull{}), do: true
   defp qualified_user?(%TerminalSpec{}), do: true
   defp qualified_user?(%{user: nil}), do: true
 
@@ -183,6 +212,20 @@ defmodule SmolBox.Backend.Assignment do
 
   defp observation_matches?(_machine, _assignment), do: false
 
+  defp provision_key(%Source{kind: kind}) when kind in [:oci, :registry], do: "source"
+  defp provision_key(_local), do: "artifact"
+  defp provision_value(%Source{} = source), do: Source.artifact(source)
+  defp provision_value(local), do: Launch.artifact(local)
+  defp qualification_operation(%{"kind" => "oci"}), do: "qualify_oci_creation"
+  defp qualification_operation(%{"kind" => "registry"}), do: "qualify_registry_creation"
+  defp qualification_operation(_local), do: "qualify_creation"
+
+  defp approved_artifact(config, %{"kind" => kind} = expected) when kind in ["oci", "registry"] do
+    if Features.supports?(config, :remote_sources),
+      do: Enum.find(config.sources, &(Source.artifact(&1) == expected)),
+      else: nil
+  end
+
   defp approved_artifact(config, expected),
     do: Enum.find(config.artifacts, &(Map.take(&1, ~w(id sha256 architecture)) == expected))
 
@@ -192,14 +235,28 @@ defmodule SmolBox.Backend.Assignment do
         artifact["guest_platform"] ==
           if(expected["architecture"] == "aarch64", do: "linux/arm64", else: "linux/amd64")
 
+  defp creation_artifact_matches?(%{"source" => _source} = creation, expected),
+    do: NativeSource.matches?(creation, expected)
+
+  defp creation_artifact_matches?(creation, expected),
+    do:
+      is_map(expected) and map_size(expected) == 3 and
+        artifact_matches?(creation["artifact"], expected)
+
   defp supported_spec?(spec, version) do
     is_map(spec) and native_profile?(spec.profile, version) and
-      is_map(spec.artifact) and map_size(spec.artifact) == 3 and
+      supported_artifact?(spec.artifact, version) and
       bare_guest?(spec, version) and
       command_supported?(Map.get(spec, :command), spec.profile, version) and
       bounded_files?(Map.get(spec, :inputs, []), "size", 0) and
       bounded_files?(Map.get(spec, :outputs, []), "max_bytes", 1)
   end
+
+  defp supported_artifact?(artifact, version),
+    do:
+      (is_map(artifact) and map_size(artifact) == 3) or
+        (version == 2 and
+           (NativeSource.artifact?(artifact) or NativeSource.registry_artifact?(artifact)))
 
   defp bounded_files?(entries, field, minimum),
     do: Enum.all?(entries, &Validation.integer?(&1[field], minimum, 16_777_216))
@@ -216,6 +273,9 @@ defmodule SmolBox.Backend.Assignment do
         (version == 2 or (Map.get(spec, :ports, []) == [] and Map.get(spec, :workload) == nil))
 
   defp command_supported?(nil, _profile, _version), do: true
+
+  defp command_supported?(%ImagePull{} = pull, profile, 2),
+    do: ImagePull.validate(pull) == :ok and profile.network != :offline
 
   defp command_supported?(%TerminalSpec{} = terminal, profile, 2),
     do: TerminalSpec.validate(terminal) == :ok and terminal.session_ms <= profile.execution_ms
@@ -254,6 +314,14 @@ defmodule SmolBox.Backend.Assignment do
 
   defp command_supported?(_command, _profile, _version), do: false
 
+  defp command_approved?(config, %{command: %ImagePull{source: source}}),
+    do:
+      source in config.sources and
+        match?(
+          %{"feature_versions" => %{"images" => 1, "remote_sources" => 1}},
+          Config.sdk_identity(config)
+        )
+
   defp command_approved?(config, spec) do
     sdk = Config.sdk_identity(config)
 
@@ -289,18 +357,22 @@ defmodule SmolBox.Backend.Assignment do
   defp retained_terminal?(_record, _version), do: true
 
   defp supported_record?(record, version),
-    do: supported_spec?(record.spec, version) and retained_terminal?(record, version)
+    do:
+      supported_spec?(record.spec, version) and retained_terminal?(record, version) and
+        retained_pull?(record)
+
+  defp retained_pull?(%{spec: %{command: %ImagePull{}, artifact: artifact}} = record),
+    do: Map.get(record, :managed_machine) != nil and NativeSource.artifact?(artifact)
+
+  defp retained_pull?(_record), do: true
 
   defp optional_histories?(record, version),
     do:
       Enum.all?(
         [
-          disk_expansions: %{},
           captures: %{},
           exports: %{},
           branch_children: %{},
-          disk_sizes: nil,
-          active_expansion: nil,
           active_capture: nil,
           active_export: nil,
           branch: nil,
@@ -309,7 +381,16 @@ defmodule SmolBox.Backend.Assignment do
           mounts: []
         ],
         fn {key, empty} -> Map.get(record, key, empty) == empty end
-      ) and (version == 2 or Map.get(record, :reserved_ports, []) == [])
+      ) and growth_histories?(record, version) and
+        (version == 2 or Map.get(record, :reserved_ports, []) == [])
+
+  defp growth_histories?(record, 2), do: NativeGrowth.record_valid?(record)
+
+  defp growth_histories?(record, 1),
+    do:
+      Enum.all?([disk_expansions: %{}, disk_sizes: nil, active_expansion: nil], fn {key, empty} ->
+        Map.get(record, key, empty) == empty
+      end) and NativeGrowth.record_valid?(record)
 
   defp validate_spec(%ManagedMachineSpec{} = spec), do: ManagedMachineSpec.validate(spec)
   defp validate_spec(spec), do: ExecutionSpec.validate(spec)

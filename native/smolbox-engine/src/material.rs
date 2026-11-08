@@ -89,22 +89,87 @@ impl GrowDisks {
 
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct Change {
-    operation_id: String,
-    request: GrowDisks,
-    previous: MaterialProof,
-    immutable_sha256: String,
-    previous_storage_gib: u64,
-    previous_overlay_gib: u64,
-    storage_gib: u64,
-    overlay_gib: u64,
+pub struct GrowthChange {
+    pub operation_id: String,
+    pub request: GrowDisks,
+    pub previous: MaterialProof,
+    pub immutable_sha256: String,
+    pub previous_storage_gib: u64,
+    pub previous_overlay_gib: u64,
+    pub storage_gib: u64,
+    pub overlay_gib: u64,
+}
+impl std::fmt::Debug for GrowthChange {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("GrowthChange")
+            .field("storage_gib", &self.storage_gib)
+            .field("overlay_gib", &self.overlay_gib)
+            .finish_non_exhaustive()
+    }
+}
+
+/// Correlated completed growth evidence; hashes bind semantic history, not a
+/// signature or authority obtained from current inventory.
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct GrowthTransition {
+    pub schema: u8,
+    pub previous: CreationReceipt,
+    pub receipt: CreationReceipt,
+    pub change: GrowthChange,
+}
+impl std::fmt::Debug for GrowthTransition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("GrowthTransition")
+            .field("schema", &self.schema)
+            .field(
+                "revision",
+                &self.receipt.material.as_ref().map(|proof| proof.revision),
+            )
+            .finish_non_exhaustive()
+    }
+}
+impl GrowthTransition {
+    pub fn validate(&self) -> Result<()> {
+        let previous = self
+            .previous
+            .material
+            .as_ref()
+            .ok_or(Error::before(ErrorCode::Ownership))?;
+        let proof = self
+            .receipt
+            .material
+            .as_ref()
+            .ok_or(Error::before(ErrorCode::Ownership))?;
+        proof.validate()?;
+        let mut origin = self.previous.clone();
+        origin.material = None;
+        check_origin(&origin, &self.receipt)?;
+        if self.schema != 1
+            || !valid_id(&origin.target_id)
+            || !valid_hex(&origin.domain_generation, 32)
+            || !valid_id(&origin.name)
+            || !valid_hex(&origin.owner_token, 64)
+            || !valid_hex(&origin.incarnation, 32)
+            || !valid_hex(&origin.material_sha256, 64)
+            || !valid_change(&self.change)
+            || *previous != self.change.previous
+            || (previous.revision == 0 && *previous != root_proof(&origin)?)
+            || *proof != next_proof(&self.change, proof.record_sha256.clone())?
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        Ok(())
+    }
 }
 
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Completed {
-    change: Change,
+    change: GrowthChange,
     proof: MaterialProof,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    qualified_geometry_sha256: Option<String>,
 }
 
 #[derive(Clone, Copy, Serialize, Deserialize)]
@@ -117,8 +182,10 @@ enum Stage {
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Pending {
-    change: Change,
+    change: GrowthChange,
     stage: Stage,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    geometry: Option<crate::growth::Metadata>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -136,7 +203,8 @@ pub(crate) struct MaterialJournal {
 }
 
 pub(crate) struct Permit {
-    change: Change,
+    change: GrowthChange,
+    geometry: Option<crate::growth::Metadata>,
 }
 
 impl MaterialJournal {
@@ -184,12 +252,41 @@ impl MaterialJournal {
         }
     }
 
+    #[cfg(test)]
     pub(crate) fn prepare(
         &self,
         receipt: &CreationReceipt,
         operation_id: &str,
         request: GrowDisks,
         record: &VmRecord,
+    ) -> Result<Permit> {
+        self.prepare_inner(receipt, operation_id, request, record, None)
+    }
+
+    pub(crate) fn prepare_geometry(
+        &self,
+        receipt: &CreationReceipt,
+        operation_id: &str,
+        request: GrowDisks,
+        record: &VmRecord,
+        geometry: &crate::growth::Metadata,
+    ) -> Result<Permit> {
+        self.prepare_inner(
+            receipt,
+            operation_id,
+            request,
+            record,
+            Some(geometry.clone()),
+        )
+    }
+
+    fn prepare_inner(
+        &self,
+        receipt: &CreationReceipt,
+        operation_id: &str,
+        request: GrowDisks,
+        record: &VmRecord,
+        geometry: Option<crate::growth::Metadata>,
     ) -> Result<Permit> {
         self.verify(receipt)?;
         let (mut journal, inode) = self.load()?;
@@ -206,7 +303,7 @@ impl MaterialJournal {
             return Err(Error::before(ErrorCode::Ownership));
         }
         let (storage_gib, overlay_gib) = request.targets(record)?;
-        let change = Change {
+        let change = GrowthChange {
             operation_id: operation_id.to_owned(),
             request,
             previous: journal.head.clone(),
@@ -220,12 +317,19 @@ impl MaterialJournal {
             storage_gib,
             overlay_gib,
         };
+        if geometry
+            .as_ref()
+            .is_some_and(|value| !value.bound(&change) || value.directory() != self.directory)
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
         journal.pending = Some(Pending {
             change: change.clone(),
             stage: Stage::Prepared,
+            geometry: geometry.clone(),
         });
         self.write(&journal, Some(inode))?;
-        Ok(Permit { change })
+        Ok(Permit { change, geometry })
     }
 
     /// Persist SDK-entry intent before mutation, not after an SDK result.
@@ -235,7 +339,10 @@ impl MaterialJournal {
             .pending
             .as_mut()
             .ok_or(Error::before(ErrorCode::State))?;
-        if pending.change != permit.change || !matches!(pending.stage, Stage::Prepared) {
+        if pending.change != permit.change
+            || pending.geometry != permit.geometry
+            || !matches!(pending.stage, Stage::Prepared)
+        {
             return Err(Error::before(ErrorCode::State));
         }
         pending.stage = Stage::Entered;
@@ -250,6 +357,28 @@ impl MaterialJournal {
         permit: &Permit,
         record: &VmRecord,
     ) -> Result<CreationReceipt> {
+        self.complete_inner(receipt, permit, record, false)
+    }
+
+    /// Record explicit quiesced qualification separately from SDK completion.
+    /// Engine has verified the saved geometry; the original SDK outcome stays
+    /// unknown and the public store must still use its resolved disposition.
+    pub(crate) fn complete_repaired(
+        &self,
+        receipt: &CreationReceipt,
+        permit: &Permit,
+        record: &VmRecord,
+    ) -> Result<CreationReceipt> {
+        self.complete_inner(receipt, permit, record, true)
+    }
+
+    fn complete_inner(
+        &self,
+        receipt: &CreationReceipt,
+        permit: &Permit,
+        record: &VmRecord,
+        qualified: bool,
+    ) -> Result<CreationReceipt> {
         let (mut journal, inode) = self.load().map_err(after_entry)?;
         check_origin(&journal.origin, receipt).map_err(after_entry)?;
         let pending = journal
@@ -258,6 +387,7 @@ impl MaterialJournal {
             .ok_or(Error::uncertain(ErrorCode::State))?;
         let change = &permit.change;
         if pending.change != *change
+            || pending.geometry != permit.geometry
             || !matches!(pending.stage, Stage::Entered)
             || journal.head != change.previous
             || immutable_hash(record).map_err(after_entry)? != change.immutable_sha256
@@ -267,9 +397,21 @@ impl MaterialJournal {
             return Err(Error::uncertain(ErrorCode::Ownership));
         }
         let proof = next_proof(change, material_hash(record).map_err(after_entry)?)?;
+        let qualified_geometry_sha256 = if qualified {
+            let geometry = permit
+                .geometry
+                .as_ref()
+                .ok_or(Error::uncertain(ErrorCode::Ownership))?;
+            let bytes = serde_json::to_vec(&("smolbox-growth-qualification-v1", geometry))
+                .map_err(|_| Error::uncertain(ErrorCode::Native))?;
+            Some(hex::encode(Sha256::digest(bytes)))
+        } else {
+            None
+        };
         journal.history.push(Completed {
             change: change.clone(),
             proof: proof.clone(),
+            qualified_geometry_sha256,
         });
         journal.head = proof.clone();
         journal.pending = None;
@@ -301,6 +443,95 @@ impl MaterialJournal {
             Some(_) => Err(Error::before(ErrorCode::Conflict)),
             None => Ok(None),
         }
+    }
+
+    pub(crate) fn completed_transition(
+        &self,
+        receipt: &CreationReceipt,
+        operation_id: &str,
+        request: GrowDisks,
+    ) -> Result<Option<GrowthTransition>> {
+        let (journal, _) = self.load()?;
+        check_origin(&journal.origin, receipt)?;
+        let Some(entry) = journal
+            .history
+            .iter()
+            .find(|entry| entry.change.operation_id == operation_id)
+        else {
+            return Ok(None);
+        };
+        if entry.change.request != request
+            || receipt.material.as_ref() != Some(&entry.change.previous)
+        {
+            return Err(Error::before(ErrorCode::Conflict));
+        }
+        let transition = GrowthTransition {
+            schema: 1,
+            previous: receipt.clone(),
+            receipt: with_proof(&journal.origin, entry.proof.clone()),
+            change: entry.change.clone(),
+        };
+        transition.validate()?;
+        Ok(Some(transition))
+    }
+
+    pub(crate) fn recovery_permit(
+        &self,
+        receipt: &CreationReceipt,
+        operation_id: &str,
+        request: GrowDisks,
+    ) -> Result<Permit> {
+        let (journal, _) = self.load()?;
+        check_origin(&journal.origin, receipt)?;
+        let pending = journal.pending.ok_or(Error::before(ErrorCode::State))?;
+        if !matches!(pending.stage, Stage::Entered)
+            || pending.change.operation_id != operation_id
+            || pending.change.request != request
+            || receipt.material.as_ref() != Some(&pending.change.previous)
+            || journal.head != pending.change.previous
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        let geometry = pending
+            .geometry
+            .ok_or(Error::before(ErrorCode::Unsupported))?;
+        if !geometry.bound(&pending.change) || geometry.directory() != self.directory {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        Ok(Permit {
+            change: pending.change,
+            geometry: Some(geometry),
+        })
+    }
+
+    pub(crate) fn verify_recovery(
+        &self,
+        permit: &Permit,
+        record: &VmRecord,
+        budget: &crate::ReadBudget,
+    ) -> Result<(
+        crate::disk_geometry::DiskGeometry,
+        crate::disk_geometry::DiskGeometry,
+    )> {
+        let change = &permit.change;
+        if immutable_hash(record)? != change.immutable_sha256
+            || record.storage_gb != Some(change.storage_gib)
+            || record.overlay_gb != Some(change.overlay_gib)
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        permit
+            .geometry
+            .as_ref()
+            .ok_or(Error::before(ErrorCode::Unsupported))?
+            .verify_repaired(change, budget)
+    }
+
+    pub(crate) fn previous_sizes(permit: &Permit) -> (u64, u64) {
+        (
+            permit.change.previous_storage_gib,
+            permit.change.previous_overlay_gib,
+        )
     }
 
     fn load(&self) -> Result<(Journal, (u64, u64))> {
@@ -424,7 +655,7 @@ fn root_proof(origin: &CreationReceipt) -> Result<MaterialProof> {
     })
 }
 
-fn next_proof(change: &Change, record_sha256: String) -> Result<MaterialProof> {
+fn next_proof(change: &GrowthChange, record_sha256: String) -> Result<MaterialProof> {
     let request_sha256 = hash(&change.request)?;
     let revision = change.previous.revision + 1;
     Ok(MaterialProof {
@@ -462,15 +693,22 @@ fn validate_journal(journal: &Journal) -> Result<()> {
     let mut previous = root_proof(&journal.origin)?;
     previous.validate()?;
     let mut ids = std::collections::BTreeSet::new();
+    let mut immutable = None;
     for entry in &journal.history {
         if !valid_change(&entry.change)
             || entry.change.previous != previous
             || !ids.insert(&entry.change.operation_id)
+            || immutable.is_some_and(|hash| hash != &entry.change.immutable_sha256)
             || entry.proof != next_proof(&entry.change, entry.proof.record_sha256.clone())?
+            || entry
+                .qualified_geometry_sha256
+                .as_ref()
+                .is_some_and(|value| !valid_hex(value, 64))
         {
             return Err(Error::before(ErrorCode::Ownership));
         }
         entry.proof.validate()?;
+        immutable = Some(&entry.change.immutable_sha256);
         previous = entry.proof.clone();
     }
     if journal.head != previous
@@ -478,6 +716,11 @@ fn validate_journal(journal: &Journal) -> Result<()> {
             !valid_change(&pending.change)
                 || pending.change.previous != previous
                 || ids.contains(&pending.change.operation_id)
+                || immutable.is_some_and(|hash| hash != &pending.change.immutable_sha256)
+                || pending
+                    .geometry
+                    .as_ref()
+                    .is_some_and(|value| !value.bound(&pending.change))
         })
     {
         return Err(Error::before(ErrorCode::Ownership));
@@ -485,7 +728,7 @@ fn validate_journal(journal: &Journal) -> Result<()> {
     Ok(())
 }
 
-fn valid_change(change: &Change) -> bool {
+fn valid_change(change: &GrowthChange) -> bool {
     valid_id(&change.operation_id)
         && valid_hex(&change.immutable_sha256, 64)
         && (1..=64).contains(&change.storage_gib)
@@ -516,6 +759,132 @@ fn after_entry(error: Error) -> Error {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn transitions() -> Vec<GrowthTransition> {
+        serde_json::from_slice(include_bytes!(
+            "../../smolbox-protocol/fixtures/growth-transitions-v1.json"
+        ))
+        .unwrap()
+    }
+
+    #[test]
+    fn cross_language_transition_fixture_binds_exact_request_previous_proof_and_chain() {
+        let transitions = transitions();
+        for transition in &transitions {
+            transition.validate().unwrap();
+        }
+        assert_eq!(transitions[0].receipt, transitions[1].previous);
+        let original = &transitions[0];
+        let debug = format!("{original:?} {:?}", original.change);
+        for private in [
+            &original.previous.owner_token,
+            &original.change.operation_id,
+            &original.receipt.material.as_ref().unwrap().chain_sha256,
+        ] {
+            assert!(!debug.contains(private));
+        }
+        let mut changed = original.clone();
+        changed.change.request.overlay_gib = Some(1); // null and explicit unchanged target are distinct requests.
+        assert!(changed.validate().is_err());
+        changed = original.clone();
+        changed.change.operation_id = "foreign".into();
+        assert!(changed.validate().is_err());
+        changed = original.clone();
+        changed.previous.material.as_mut().unwrap().chain_sha256 = "9".repeat(64);
+        changed.change.previous = changed.previous.material.clone().unwrap();
+        assert!(changed.validate().is_err());
+        changed = original.clone();
+        changed.receipt.incarnation = "9".repeat(32);
+        assert!(changed.validate().is_err());
+        changed = original.clone();
+        changed.receipt.material.as_mut().unwrap().record_sha256 = "8".repeat(64);
+        assert!(changed.validate().is_err());
+        changed = original.clone();
+        changed.change.previous_storage_gib = 3;
+        assert!(changed.validate().is_err());
+        changed = original.clone();
+        changed.receipt.material.as_mut().unwrap().revision = 1025;
+        assert!(changed.validate().is_err());
+        let mut wire = serde_json::to_value(original).unwrap();
+        wire["change"]["unknown"] = serde_json::json!(true);
+        assert!(serde_json::from_value::<GrowthTransition>(wire).is_err());
+    }
+
+    #[test]
+    fn completed_transition_is_correlated_journal_evidence_not_pending_inventory_or_replay() {
+        let (_directory, journal, receipt, mut record) = fixture();
+        let request = grow();
+        let permit = journal.prepare(&receipt, "grow", request, &record).unwrap();
+        journal.enter(&permit).unwrap();
+        assert!(journal
+            .completed_transition(&receipt, "grow", request)
+            .unwrap()
+            .is_none());
+        record.storage_gb = Some(2); // deterministic SDK-result boundary model.
+        let updated = journal.complete(&receipt, &permit, &record).unwrap();
+        let transition = journal
+            .completed_transition(&receipt, "grow", request)
+            .unwrap()
+            .unwrap();
+        transition.validate().unwrap();
+        assert_eq!(transition.previous, receipt);
+        assert_eq!(transition.receipt, updated);
+        assert!(journal
+            .completed_transition(&updated, "grow", request)
+            .is_err());
+        assert!(journal
+            .completed_transition(
+                &receipt,
+                "grow",
+                GrowDisks {
+                    storage_gib: Some(3),
+                    overlay_gib: None
+                }
+            )
+            .is_err());
+        assert!(journal
+            .completed_transition(&receipt, "foreign", request)
+            .unwrap()
+            .is_none());
+        assert!(journal
+            .prepare(
+                &updated,
+                "grow",
+                GrowDisks {
+                    storage_gib: Some(3),
+                    overlay_gib: None
+                },
+                &record
+            )
+            .is_err());
+    }
+
+    #[test]
+    fn individually_valid_growth_links_cannot_change_the_history_immutable_configuration() {
+        let (_directory, journal, receipt, mut record) = fixture();
+        let permit = journal.prepare(&receipt, "first", grow(), &record).unwrap();
+        journal.enter(&permit).unwrap();
+        record.storage_gb = Some(2);
+        let updated = journal.complete(&receipt, &permit, &record).unwrap();
+        let request = GrowDisks {
+            storage_gib: Some(3),
+            overlay_gib: None,
+        };
+        let permit = journal
+            .prepare(&updated, "second", request, &record)
+            .unwrap();
+        journal.enter(&permit).unwrap();
+        record.storage_gb = Some(3);
+        journal.complete(&updated, &permit, &record).unwrap();
+        let (mut history, _) = journal.load().unwrap();
+        let last = history.history.last_mut().unwrap();
+        last.change.immutable_sha256 = "9".repeat(64);
+        last.proof = next_proof(&last.change, last.proof.record_sha256.clone()).unwrap();
+        history.head = last.proof.clone();
+        assert!(valid_change(&last.change));
+        assert!(last.proof.validate().is_ok());
+        assert!(validate_journal(&history).is_err());
+    }
     use std::os::unix::fs::PermissionsExt;
 
     fn fixture() -> (
@@ -584,6 +953,32 @@ mod tests {
             journal.initialize(&receipt).err().unwrap().code,
             ErrorCode::Ownership
         );
+    }
+
+    #[test]
+    fn legacy_pending_geometry_is_absent_and_cannot_be_qualified_from_inventory() {
+        let (_directory, journal, receipt, record) = fixture();
+        let permit = journal
+            .prepare(&receipt, "legacy", grow(), &record)
+            .unwrap();
+        journal.enter(&permit).unwrap();
+        let bytes = std::fs::read(journal.directory.join(FILE_NAME)).unwrap();
+        let value: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+        assert!(value["pending"].get("geometry").is_none());
+        assert_eq!(
+            journal
+                .recovery_permit(&receipt, "legacy", grow())
+                .err()
+                .unwrap()
+                .code,
+            ErrorCode::Unsupported
+        );
+        assert_eq!(
+            std::fs::read(journal.directory.join(FILE_NAME)).unwrap(),
+            bytes
+        );
+        let (loaded, _) = journal.load().unwrap();
+        assert_eq!(serde_json::to_vec(&loaded).unwrap(), bytes);
     }
 
     #[test]

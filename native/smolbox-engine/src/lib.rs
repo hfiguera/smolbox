@@ -5,21 +5,30 @@
 //! is never a substitute for a creation receipt returned to the durable caller.
 
 mod agent_io;
+mod bootstrap;
+pub use bootstrap::Metadata as OciBootstrapPlan;
 mod buffered;
 pub use buffered::{BufferedCommand, LaunchOutcome, COMMAND_METADATA_BYTES};
 mod archive;
 mod artifact;
 mod assets;
 mod creation_features;
+mod disk_geometry;
 mod domain;
 mod epoch;
 mod exec;
 mod files;
 mod gate;
+mod growth;
 mod host;
 mod identity;
+mod image_pull;
+pub use image_pull::ImagePullRequest;
+mod images;
+pub use images::{ImageObservation, IMAGE_COUNT, IMAGE_OUTPUT_BYTES, IMAGE_REPLY_BYTES};
 mod jobs;
 mod logs;
+mod qcow_geometry;
 mod streaming;
 mod terminal;
 mod terminal_io;
@@ -43,10 +52,21 @@ pub use terminal_worker::run_terminal_worker;
 mod machine;
 mod material;
 mod observations;
+mod oci;
+mod oci_start;
+mod registry_artifact;
+mod registry_credentials;
+pub use registry_credentials::RegistryIdentityCredential;
+mod registry_io;
+pub use oci::{OciConfigDescriptor, VerifiedOci, OCI_METADATA_BYTES};
+pub use registry_artifact::{
+    QualifiedRegistryArtifact, RegistryArtifactSource, RegistryBlobDescriptor, RegistryCachePolicy,
+    RegistryCachedBlob, REGISTRY_CACHE_BYTES, REGISTRY_CACHE_FILES,
+};
 mod sdk_compat;
 pub use jobs::{
     JOB_CHILDREN, JOB_CONTROL_HEADROOM, JOB_CONTROL_SLOTS, JOB_DESCRIPTORS, JOB_METADATA_BYTES,
-    JOB_STAGING_BYTES, JOB_WORK_SLOTS,
+    JOB_REGISTRY_STAGING_BYTES, JOB_STAGING_BYTES, JOB_WORK_SLOTS,
 };
 mod transfer_supervisor;
 mod transfer_worker;
@@ -61,8 +81,11 @@ pub use exec::{Cancellation, Command, CommandOutcome, Completion, Output, Stream
 pub use files::{FileCompletion, FileOptions, FileOutcome};
 pub use host::{BootLauncher, Executable, ExecutableLocator, HostContext, OwnerIdentity};
 pub use identity::{CreationReceipt, Observation, ObservedState, Resources};
-pub use machine::{CreateRequest, CreationPresence, Engine};
-pub use material::{GrowDisks, MaterialProof};
+pub use machine::{
+    CreateOciRequest, CreateRegistryRequest, CreateRequest, CreationPresence, Engine,
+    OciCreationIntent, RegistryCreationIntent,
+};
+pub use material::{GrowDisks, GrowthChange, GrowthTransition, MaterialProof};
 pub use observations::{
     CapacitySnapshot, HealthSnapshot, InventorySnapshot, MachineCounters, ReadBudget,
 };

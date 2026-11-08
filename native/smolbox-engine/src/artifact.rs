@@ -79,26 +79,9 @@ impl ApprovedArtifact {
         if actual != self.sha256 || !verified.covers(&path) {
             return Err(Error::before(ErrorCode::Validation));
         }
-        // The upstream convenience manifest reader allocates footer.manifest_size
-        // directly. Bound it before allocation and use its public typed parser.
-        let footer = verified.footer();
-        validate_sidecar_layout(
-            footer,
-            file.metadata()
-                .map_err(|_| Error::before(ErrorCode::Io))?
-                .len(),
-        )?;
-        if footer.manifest_size == 0 || footer.manifest_size > 1024 * 1024 {
-            return Err(Error::before(ErrorCode::Validation));
-        }
-        file.seek(SeekFrom::Start(footer.manifest_offset))
-            .map_err(|_| Error::before(ErrorCode::Io))?;
-        let mut bytes = vec![0; footer.manifest_size as usize];
-        file.read_exact(&mut bytes)
-            .map_err(|_| Error::before(ErrorCode::Io))?;
-        let manifest =
-            PackManifest::from_json(&bytes).map_err(|_| Error::before(ErrorCode::Validation))?;
+        let manifest = read_manifest(&mut file, verified.footer())?;
         validate_manifest(&manifest, self, resources)?;
+        let footer = verified.footer();
         file.seek(SeekFrom::Start(footer.assets_offset))
             .map_err(|_| Error::before(ErrorCode::Io))?;
         crate::archive::validate_assets(file.take(footer.assets_size), &manifest, resources)?;
@@ -111,6 +94,28 @@ impl ApprovedArtifact {
             verified,
         })
     }
+}
+
+/// Bound the SDK footer before invoking its public typed manifest parser.
+pub(crate) fn read_manifest(
+    file: &mut File,
+    footer: &smolvm_pack::format::PackFooter,
+) -> Result<PackManifest> {
+    validate_sidecar_layout(
+        footer,
+        file.metadata()
+            .map_err(|_| Error::before(ErrorCode::Io))?
+            .len(),
+    )?;
+    if footer.manifest_size == 0 || footer.manifest_size > 1024 * 1024 {
+        return Err(Error::before(ErrorCode::Validation));
+    }
+    file.seek(SeekFrom::Start(footer.manifest_offset))
+        .map_err(|_| Error::before(ErrorCode::Io))?;
+    let mut bytes = vec![0; footer.manifest_size as usize];
+    file.read_exact(&mut bytes)
+        .map_err(|_| Error::before(ErrorCode::Io))?;
+    PackManifest::from_json(&bytes).map_err(|_| Error::before(ErrorCode::Validation))
 }
 
 fn validate_sidecar_layout(footer: &smolvm_pack::format::PackFooter, length: u64) -> Result<()> {
@@ -171,7 +176,7 @@ fn copy_hash(source: &mut impl Read, destination: &mut impl Write, cap: u64) -> 
     Ok(hex::encode(hash.finalize()))
 }
 
-fn validate_manifest(
+pub(crate) fn validate_manifest(
     manifest: &PackManifest,
     approved: &ApprovedArtifact,
     resources: Resources,

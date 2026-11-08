@@ -149,6 +149,9 @@ impl Prepared {
 }
 
 pub(crate) struct Collected {
+    pub bootstrapped: Option<crate::bootstrap::Proof>,
+    pub pulled: Option<crate::ImageObservation>,
+    pub grown: Option<crate::growth::GrowthProof>,
     pub stream: Option<crate::CommandOutcome>,
     pub command: Option<ipc::CommandProof>,
     pub launched: Option<u32>,
@@ -212,6 +215,7 @@ pub(crate) enum RunResult {
     Retained(FileOutcome),
 }
 
+#[derive(Clone)]
 pub(crate) struct TransferSupervisor {
     pub(crate) pool: crate::jobs::JobPool,
     pub(crate) executable: Executable,
@@ -246,9 +250,15 @@ impl TransferSupervisor {
         kind: Kind,
     ) -> Result<Prepared> {
         options.validate(matches!(kind, Kind::Write { .. }))?;
-        let permit = self
-            .pool
-            .acquire(crate::jobs::Demand::transfer(options.max_bytes)?)?;
+        let permit = self.pool.acquire(
+            if matches!(kind, Kind::Pull { .. } | Kind::Bootstrap { .. }) {
+                crate::jobs::Demand::image_pull()
+            } else if matches!(kind, Kind::Images { .. }) {
+                crate::jobs::Demand::images()
+            } else {
+                crate::jobs::Demand::transfer(options.max_bytes)?
+            },
+        )?;
         let spool = Spool::new(directory)?;
         let mut nonce = [0; 16];
         getrandom::fill(&mut nonce).map_err(|_| Error::before(ErrorCode::Native))?;
@@ -270,6 +280,152 @@ impl TransferSupervisor {
             spool,
             _permit: permit,
             _metadata: None,
+        })
+    }
+
+    #[cfg(test)]
+    fn prepare_bootstrap(
+        &self,
+        directory: &Path,
+        socket: PathBuf,
+        metadata: &crate::bootstrap::Metadata,
+    ) -> Result<Prepared> {
+        self.prepare_bootstrap_reserved(
+            self.pool.acquire(crate::jobs::Demand::image_pull())?,
+            directory,
+            socket,
+            metadata,
+        )
+    }
+
+    pub(crate) fn prepare_bootstrap_reserved(
+        &self,
+        permit: crate::jobs::JobLease,
+        directory: &Path,
+        socket: PathBuf,
+        metadata: &crate::bootstrap::Metadata,
+    ) -> Result<Prepared> {
+        let expected = metadata.expected()?;
+        let bytes =
+            serde_json::to_vec(metadata).map_err(|_| Error::before(ErrorCode::Validation))?;
+        let mut plan = Spool::new(directory)?;
+        plan.file
+            .write_all(&bytes)
+            .map_err(|_| Error::before(ErrorCode::Io))?;
+        plan.file
+            .set_permissions(std::fs::Permissions::from_mode(0o400))
+            .map_err(|_| Error::before(ErrorCode::Io))?;
+        let blob = ipc::Blob {
+            path: plan.path.clone(),
+            device: plan.identity.0,
+            inode: plan.identity.1,
+            bytes: bytes.len() as u64,
+        };
+        let spool = Spool::new(directory)?;
+        let mut nonce = [0; 16];
+        getrandom::fill(&mut nonce).map_err(|_| Error::before(ErrorCode::Native))?;
+        let request = Request {
+            schema: 1,
+            operation: hex::encode(nonce),
+            owner: self.owner,
+            socket,
+            staging: spool.path.clone(),
+            staging_device: spool.identity.0,
+            staging_inode: spool.identity.1,
+            guest_path: "/bootstrap".into(),
+            max_bytes: 1,
+            kind: Kind::Bootstrap {
+                metadata: blob,
+                expected,
+            },
+        };
+        request.validate()?;
+        Ok(Prepared {
+            request,
+            spool,
+            _permit: permit,
+            _metadata: Some(plan),
+        })
+    }
+
+    pub(crate) fn reserve_pull(&self) -> Result<crate::jobs::JobLease> {
+        self.pool.acquire(crate::jobs::Demand::image_pull())
+    }
+
+    #[cfg(test)]
+    fn prepare_pull(
+        &self,
+        directory: &Path,
+        socket: PathBuf,
+        request: crate::ImagePullRequest,
+        deadline_ns: u64,
+    ) -> Result<Prepared> {
+        self.prepare_pull_reserved(
+            self.reserve_pull()?,
+            directory,
+            socket,
+            request,
+            deadline_ns,
+        )
+    }
+
+    pub(crate) fn prepare_pull_reserved(
+        &self,
+        permit: crate::jobs::JobLease,
+        directory: &Path,
+        socket: PathBuf,
+        request: crate::ImagePullRequest,
+        deadline_ns: u64,
+    ) -> Result<Prepared> {
+        request.validate()?;
+        let bytes = serde_json::to_vec(&crate::image_pull::Metadata {
+            schema: 1,
+            request: request.clone(),
+            deadline_ns,
+        })
+        .map_err(|_| Error::before(ErrorCode::Validation))?;
+        if bytes.len() as u64 > crate::image_pull::METADATA_BYTES {
+            return Err(Error::before(ErrorCode::Validation));
+        }
+        let mut metadata = Spool::new(directory)?;
+        metadata
+            .file
+            .write_all(&bytes)
+            .map_err(|_| Error::before(ErrorCode::Io))?;
+        metadata
+            .file
+            .set_permissions(std::fs::Permissions::from_mode(0o400))
+            .map_err(|_| Error::before(ErrorCode::Io))?;
+        let blob = ipc::Blob {
+            path: metadata.path.clone(),
+            device: metadata.identity.0,
+            inode: metadata.identity.1,
+            bytes: bytes.len() as u64,
+        };
+        let spool = Spool::new(directory)?;
+        let mut nonce = [0; 16];
+        getrandom::fill(&mut nonce).map_err(|_| Error::before(ErrorCode::Native))?;
+        let request = Request {
+            schema: 1,
+            operation: hex::encode(nonce),
+            owner: self.owner,
+            socket,
+            staging: spool.path.clone(),
+            staging_device: spool.identity.0,
+            staging_inode: spool.identity.1,
+            guest_path: "/images".into(),
+            max_bytes: 1,
+            kind: Kind::Pull {
+                metadata: blob,
+                expected: request,
+            },
+        };
+        request.validate()?;
+        Ok(Prepared {
+            request,
+            spool,
+            _permit: permit,
+            _metadata: Some(metadata),
         })
     }
 
@@ -309,6 +465,76 @@ impl TransferSupervisor {
         };
         prepared.request.validate()?;
         Ok(prepared)
+    }
+
+    #[cfg(test)]
+    pub(crate) fn prepare_growth(
+        &self,
+        directory: &Path,
+        socket: PathBuf,
+        bytes: &[u8],
+        expected: crate::growth::GrowthProof,
+    ) -> Result<Prepared> {
+        self.prepare_growth_reserved(self.reserve_growth()?, directory, socket, bytes, expected)
+    }
+
+    pub(crate) fn reserve_growth(&self) -> Result<crate::jobs::JobLease> {
+        self.pool
+            .acquire(crate::jobs::Demand::growth(crate::growth::METADATA_BYTES)?)
+    }
+
+    pub(crate) fn prepare_growth_reserved(
+        &self,
+        permit: crate::jobs::JobLease,
+        directory: &Path,
+        socket: PathBuf,
+        bytes: &[u8],
+        expected: crate::growth::GrowthProof,
+    ) -> Result<Prepared> {
+        if bytes.is_empty() || bytes.len() as u64 > crate::growth::METADATA_BYTES {
+            return Err(Error::before(ErrorCode::Validation));
+        }
+        let mut metadata = Spool::new(directory)?;
+        metadata
+            .file
+            .write_all(bytes)
+            .map_err(|_| Error::before(ErrorCode::Io))?;
+        metadata
+            .file
+            .set_permissions(std::fs::Permissions::from_mode(0o400))
+            .and_then(|()| metadata.file.sync_all())
+            .map_err(|_| Error::before(ErrorCode::Io))?;
+        let blob = ipc::Blob {
+            path: metadata.path.clone(),
+            device: metadata.identity.0,
+            inode: metadata.identity.1,
+            bytes: bytes.len() as u64,
+        };
+        let spool = Spool::new(directory)?;
+        let mut nonce = [0; 16];
+        getrandom::fill(&mut nonce).map_err(|_| Error::before(ErrorCode::Native))?;
+        let request = Request {
+            schema: 1,
+            operation: hex::encode(nonce),
+            owner: self.owner,
+            socket,
+            staging: spool.path.clone(),
+            staging_device: spool.identity.0,
+            staging_inode: spool.identity.1,
+            guest_path: "/workspace/.smolbox-growth".into(),
+            max_bytes: 1,
+            kind: Kind::Grow {
+                metadata: blob,
+                expected,
+            },
+        };
+        request.validate()?;
+        Ok(Prepared {
+            request,
+            spool,
+            _permit: permit,
+            _metadata: Some(metadata),
+        })
     }
 
     fn prepare_job(
@@ -404,7 +630,13 @@ impl TransferSupervisor {
             .arg(
                 if matches!(
                     prepared.request.kind,
-                    Kind::Buffered { .. } | Kind::Background { .. } | Kind::Streaming { .. }
+                    Kind::Bootstrap { .. }
+                        | Kind::Pull { .. }
+                        | Kind::Images { .. }
+                        | Kind::Buffered { .. }
+                        | Kind::Background { .. }
+                        | Kind::Streaming { .. }
+                        | Kind::Grow { .. }
                 ) {
                     "--job-worker"
                 } else {
@@ -449,7 +681,10 @@ impl TransferSupervisor {
         let mut sent = 0;
         let mut pipe_eof = false;
         let mut reason = None;
-        let mut policy = CollectionPolicy::default();
+        let mut policy = CollectionPolicy {
+            no_signals: matches!(owned.prepared.request.kind, Kind::Grow { .. }),
+            ..CollectionPolicy::default()
+        };
         let origin = Instant::now();
         let nonblocking = owned
             .input
@@ -606,6 +841,21 @@ impl TransferSupervisor {
                     native_acknowledged: evidence.acknowledged,
                 };
                 return Ok(RunResult::Collected(Box::new(Collected {
+                    bootstrapped: if status.success() && decoder.complete() && reason.is_none() {
+                        evidence.bootstrapped.clone()
+                    } else {
+                        None
+                    },
+                    pulled: if status.success() && decoder.complete() && reason.is_none() {
+                        evidence.pulled.clone()
+                    } else {
+                        None
+                    },
+                    grown: if status.success() && decoder.complete() && reason.is_none() {
+                        evidence.grown
+                    } else {
+                        None
+                    },
                     stream: if status.success() && decoder.complete() {
                         evidence.stream.clone()
                     } else {
@@ -627,7 +877,7 @@ impl TransferSupervisor {
                     #[cfg(test)]
                     worker_ready: evidence.ready(),
                     #[cfg(test)]
-                    termination_requested: policy.next > 1,
+                    termination_requested: !policy.no_signals && policy.next > 1,
                 })));
             }
             if pipe_eof && reason.is_none() && !evidence.acknowledged {
@@ -735,6 +985,7 @@ enum Action {
 struct CollectionPolicy {
     retired: Option<Duration>,
     next: u8,
+    no_signals: bool,
 }
 impl CollectionPolicy {
     fn retire(&mut self, now: Duration) {
@@ -744,11 +995,17 @@ impl CollectionPolicy {
     }
     fn step(&mut self, now: Duration) -> Option<Action> {
         let elapsed = now.checked_sub(self.retired?)?;
-        let (after, action) = match self.next {
-            0 => (Duration::ZERO, Action::Close),
-            1 => (Duration::from_millis(100), Action::Terminate),
-            2 => (Duration::from_millis(200), Action::Kill),
-            3 => (Duration::from_millis(2200), Action::Retain),
+        // Filesystem growth/fsync may have crossed the mutation boundary.
+        // Cancellation closes input and retains the exact child; signals cannot
+        // establish rollback, quiescence or safe admission release.
+        let (after, action) = match (self.no_signals, self.next) {
+            (true, 0) => (Duration::ZERO, Action::Close),
+            (true, 1) => (Duration::from_millis(2200), Action::Retain),
+            (true, _) => return None,
+            (false, 0) => (Duration::ZERO, Action::Close),
+            (false, 1) => (Duration::from_millis(100), Action::Terminate),
+            (false, 2) => (Duration::from_millis(200), Action::Kill),
+            (false, 3) => (Duration::from_millis(2200), Action::Retain),
             _ => return None,
         };
         if elapsed < after {
@@ -976,6 +1233,236 @@ mod tests {
             Some(Action::Retain)
         );
         assert_eq!(policy.step(Duration::from_secs(100)), None);
+    }
+
+    #[test]
+    fn modeled_growth_retirement_closes_then_retains_without_signals() {
+        let mut policy = CollectionPolicy {
+            no_signals: true,
+            ..CollectionPolicy::default()
+        };
+        policy.retire(Duration::from_secs(20));
+        assert_eq!(policy.step(Duration::from_secs(20)), Some(Action::Close));
+        assert_eq!(policy.step(Duration::from_millis(20100)), None);
+        assert_eq!(policy.step(Duration::from_millis(20200)), None);
+        policy.retire(Duration::from_secs(99));
+        assert_eq!(
+            policy.step(Duration::from_millis(22200)),
+            Some(Action::Retain)
+        );
+        assert_eq!(policy.step(Duration::from_secs(100)), None);
+    }
+
+    #[test]
+    fn growth_geometry_and_prepared_worker_share_one_reserved_job_with_control_headroom() {
+        let temporary = tempfile::tempdir().unwrap();
+        let root = root(&temporary);
+        let supervisor = supervisor(&root, std::env::current_exe().unwrap());
+        let permit = supervisor.reserve_growth().unwrap();
+        assert_eq!(supervisor.pool.counts().work, 1);
+        assert_eq!(supervisor.pool.counts().children, 1);
+        assert!(supervisor.reserve_growth().is_err());
+        let control = supervisor
+            .pool
+            .acquire(crate::jobs::Demand::observation())
+            .unwrap();
+        let other_control = supervisor
+            .pool
+            .acquire(crate::jobs::Demand::observation())
+            .unwrap();
+        assert_eq!(supervisor.pool.counts().control, 2);
+        drop((control, other_control));
+
+        let storage_path = crate::disk_geometry::tests::raw(&root);
+        std::fs::rename(storage_path, root.join("overlay.raw")).unwrap();
+        crate::disk_geometry::tests::raw(&root);
+        let storage = crate::disk_geometry::DiskGeometry::capture(&root, "storage.raw", 1).unwrap();
+        let overlay = crate::disk_geometry::DiskGeometry::capture(&root, "overlay.raw", 1).unwrap();
+        let metadata = serde_json::to_vec(&crate::growth::Metadata::new(
+            &storage,
+            &overlay,
+            crate::GrowDisks {
+                storage_gib: Some(2),
+                overlay_gib: None,
+            },
+        ))
+        .unwrap();
+        let prepared = supervisor
+            .prepare_growth_reserved(
+                permit,
+                &root,
+                root.join("agent.sock"),
+                &metadata,
+                crate::growth::GrowthProof {
+                    storage_gib: 2,
+                    overlay_gib: 1,
+                },
+            )
+            .unwrap();
+        assert_eq!(supervisor.pool.counts().work, 1);
+        assert_eq!(supervisor.pool.counts().children, 1);
+        drop(prepared);
+        assert_eq!(supervisor.pool.counts(), crate::jobs::Counts::default());
+
+        let permit = supervisor.reserve_growth().unwrap();
+        assert!(supervisor
+            .prepare_growth_reserved(
+                permit,
+                &root,
+                root.join("agent.sock"),
+                &[],
+                crate::growth::GrowthProof {
+                    storage_gib: 2,
+                    overlay_gib: 1
+                },
+            )
+            .is_err());
+        assert_eq!(supervisor.pool.counts(), crate::jobs::Counts::default());
+    }
+    #[test]
+    fn pull_preflight_and_protected_worker_share_one_reservation_with_control_headroom() {
+        let temporary = tempfile::tempdir().unwrap();
+        let root = root(&temporary);
+        let supervisor = supervisor(&root, std::env::current_exe().unwrap());
+        let permit = supervisor.reserve_pull().unwrap();
+        assert_eq!(supervisor.pool.counts().work, 1);
+        assert!(supervisor.reserve_pull().is_err());
+        let controls = [
+            supervisor
+                .pool
+                .acquire(crate::jobs::Demand::observation())
+                .unwrap(),
+            supervisor
+                .pool
+                .acquire(crate::jobs::Demand::observation())
+                .unwrap(),
+        ];
+        let expected = crate::ImagePullRequest {
+            reference: format!("registry.example/app@sha256:{}", "a".repeat(64)),
+            platform: crate::oci::native_oci_platform().into(),
+        };
+        let prepared = supervisor
+            .prepare_pull_reserved(
+                permit,
+                &root,
+                root.join("agent.sock"),
+                expected,
+                crate::buffered::monotonic_ns().unwrap() + 1_000_000_000,
+            )
+            .unwrap();
+        assert_eq!(supervisor.pool.counts().work, 1);
+        assert_eq!(supervisor.pool.counts().children, 1);
+        assert_eq!(supervisor.pool.counts().control, 2);
+        drop(prepared);
+        drop(controls);
+        assert_eq!(supervisor.pool.counts(), crate::jobs::Counts::default());
+        assert!(!root.join("agent.sock").exists());
+    }
+
+    fn ordinary_growth_worker(qcow: bool, replace_companion: bool) {
+        let executable = std::env::var_os("SMOLBOX_TEST_FILE_WORKER")
+            .expect("set the explicit rebuilt helper path")
+            .into();
+        let temporary = tempfile::tempdir().unwrap();
+        let root = root(&temporary);
+        let supervisor = supervisor(&root, executable);
+        let storage_path = if qcow {
+            crate::disk_geometry::tests::backed_qcow(&root, 3)
+        } else {
+            crate::disk_geometry::tests::raw(&root)
+        };
+        let saved = root.join("saved-storage");
+        std::fs::rename(&storage_path, &saved).unwrap();
+        let companion = if qcow {
+            crate::disk_geometry::tests::backed_qcow(&root, 2)
+        } else {
+            crate::disk_geometry::tests::raw(&root)
+        };
+        let overlay_path = root.join(if qcow { "overlay.qcow2" } else { "overlay.raw" });
+        std::fs::rename(companion, &overlay_path).unwrap();
+        std::fs::rename(saved, &storage_path).unwrap();
+        let storage = std::sync::Arc::new(
+            crate::disk_geometry::DiskGeometry::capture(&root, "storage.raw", 1).unwrap(),
+        );
+        let overlay = std::sync::Arc::new(
+            crate::disk_geometry::DiskGeometry::capture(&root, "overlay.raw", 1).unwrap(),
+        );
+        let growth = crate::GrowDisks {
+            storage_gib: Some(2),
+            overlay_gib: Some(3),
+        };
+        let expected = crate::growth::GrowthProof {
+            storage_gib: 2,
+            overlay_gib: 3,
+        };
+        let metadata =
+            serde_json::to_vec(&crate::growth::Metadata::new(&storage, &overlay, growth)).unwrap();
+        let prepared = supervisor
+            .prepare_growth(&root, root.join("agent.sock"), &metadata, expected)
+            .unwrap();
+        if replace_companion {
+            // Deterministic pre-dispatch substitution; no live persistence race.
+            std::fs::rename(&overlay_path, root.join("original-overlay")).unwrap();
+            let replacement_directory = root.join("replacement");
+            std::fs::DirBuilder::new()
+                .mode(0o700)
+                .create(&replacement_directory)
+                .unwrap();
+            let replacement = crate::disk_geometry::tests::raw(&replacement_directory);
+            std::fs::rename(replacement, &overlay_path).unwrap();
+        }
+        let source = crate::sdk_compat::source_lease(&root, "owned").unwrap();
+        let gate = std::sync::Arc::new(crate::gate::MachineGate::default());
+        let machine = gate.try_lock().unwrap();
+        let result = supervisor
+            .run(
+                prepared,
+                Box::new((source, machine, storage.clone(), overlay.clone())),
+                Instant::now() + Duration::from_secs(10),
+                &Cancellation::new(),
+            )
+            .unwrap();
+        let RunResult::Collected(collected) = result else {
+            panic!("ordinary growth worker was not collected")
+        };
+        assert!(collected.worker_ready);
+        assert!(!collected.termination_requested);
+        assert!(gate.try_lock().is_err());
+        assert!(crate::sdk_compat::source_lease(&root, "owned").is_err());
+        assert_eq!(supervisor.pool.counts().work, 1);
+        assert_eq!(supervisor.pool.counts().children, 1);
+        assert_eq!(collected.prepared.spool.file.metadata().unwrap().len(), 0);
+        if replace_companion {
+            assert_eq!(collected.outcome.completion, FileCompletion::NativeError);
+            assert!(!collected.outcome.native_acknowledged);
+            assert_eq!(collected.grown, None);
+            storage.verify_after(1).unwrap();
+        } else {
+            assert_eq!(collected.outcome.completion, FileCompletion::Completed);
+            assert!(collected.outcome.native_acknowledged);
+            assert_eq!(collected.grown, Some(expected));
+            storage.verify_after(2).unwrap();
+            overlay.verify_after(3).unwrap();
+        }
+        drop(collected);
+        assert_eq!(supervisor.pool.counts().work, 0);
+        assert!(gate.try_lock().is_ok());
+        assert!(crate::sdk_compat::source_lease(&root, "owned").is_ok());
+        assert!(!root.join("db").exists());
+        assert!(!root.join("agent.sock").exists());
+    }
+
+    #[test]
+    #[ignore = "requires built helper; explicit ordinary sparse-file growth, no VM or fault campaign"]
+    fn ordinary_growth_worker_collects_raw_and_qcow_sdk_geometry_with_owned_leases() {
+        ordinary_growth_worker(false, false);
+        ordinary_growth_worker(true, false);
+    }
+
+    #[test]
+    #[ignore = "requires built helper; deterministic companion substitution before worker dispatch"]
+    fn ordinary_growth_worker_rejects_changed_companion_before_any_sdk_mutation() {
+        ordinary_growth_worker(false, true);
     }
 
     fn normal_child(executable: PathBuf, ready: bool) {
@@ -1214,6 +1701,280 @@ mod tests {
         }
         assert_eq!(supervisor.pool.counts().work, 0);
         assert_eq!(supervisor.pool.counts().metadata, 0);
+    }
+
+    #[test]
+    #[ignore = "requires a built helper; ordinary non-VM SDK peer only"]
+    fn ordinary_bootstrap_worker_pulls_once_then_launches_exact_workload_without_vm_entry() {
+        use smolvm_protocol::{AgentRequest, AgentResponse, Envelope};
+        use std::os::unix::net::UnixListener;
+        let directory = tempfile::tempdir_in("/tmp").unwrap();
+        let root = root(&directory);
+        let executable = std::env::var_os("SMOLBOX_TEST_FILE_WORKER").expect("built helper path");
+        let supervisor = supervisor(&root, executable.into());
+        for (empty, failed) in [(false, false), (false, true), (true, false)] {
+            let socket = root.join("agent.sock");
+            let listener = UnixListener::bind(&socket).unwrap();
+            listener.set_nonblocking(true).unwrap();
+            let plan = crate::bootstrap::tests::plan(empty);
+            let expected = plan.expected().unwrap();
+            let prepared = supervisor
+                .prepare_bootstrap(&root, socket.clone(), &plan)
+                .unwrap();
+            let deadline = Instant::now() + Duration::from_secs(30);
+            std::thread::scope(|scope| {
+                let peer = scope.spawn(|| {
+                    for stage in 0..if empty { 1 } else { 2 } {
+                        let mut stream = loop {
+                            match listener.accept() {
+                                Ok((stream, _)) => break stream,
+                                Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                                    assert!(Instant::now() < deadline);
+                                    std::thread::sleep(POLL);
+                                }
+                                Err(e) => panic!("{e}"),
+                            }
+                        };
+                        stream.set_nonblocking(false).unwrap();
+                        stream.set_read_timeout(Some(Duration::from_secs(5))).unwrap();
+                        let mut header = [0; 4];
+                        stream.read_exact(&mut header).unwrap();
+                        let size = u32::from_be_bytes(header) as usize;
+                        assert!(size <= crate::AGENT_REQUEST_BYTES);
+                        let mut body = vec![0; size];
+                        stream.read_exact(&mut body).unwrap();
+                        let request: Envelope<AgentRequest> = serde_json::from_slice(&body).unwrap();
+                        let response = if stage == 0 {
+                            let AgentRequest::Pull { image, oci_platform, auth, proxy, no_proxy } = request.body else { panic!() };
+                            assert_eq!(image, expected.source.reference);
+                            assert_eq!(oci_platform.as_deref(), Some(expected.source.platform.as_str()));
+                            assert!(auth.is_none() && proxy.is_none() && no_proxy.is_none());
+                            let info = serde_json::json!({
+                                "reference": expected.source.reference,
+                                "digest": format!("sha256:{}", "b".repeat(64)), "size": 123,
+                                "architecture": expected.source.platform.trim_start_matches("linux/"),
+                                "os": "linux", "layer_count": 2
+                            });
+                            AgentResponse::Ok { data: Some(info) }
+                        } else {
+                            let AgentRequest::Run {
+                                image, command, env, user, workdir, persistent_overlay_id,
+                                detached, background, interactive, tty, stdin_data, timeout_ms,
+                                stop_vm_on_exit, s3_volumes, mounts, unprivileged,
+                            } = request.body else { panic!() };
+                            assert_eq!(image, expected.source.reference);
+                            assert_eq!(command, vec!["/app", "serve"]);
+                            assert_eq!(env, vec![("A".into(), "override".into()), ("B".into(), "base".into())]);
+                            assert_eq!(user.as_deref(), Some("1234:2345"));
+                            assert_eq!(workdir.as_deref(), Some("/workspace"));
+                            assert_eq!(persistent_overlay_id.as_deref(), Some("owned"));
+                            assert!(detached && !background && !interactive && !tty && !stop_vm_on_exit && !unprivileged);
+                            assert!(stdin_data.is_none() && timeout_ms.is_none() && s3_volumes.is_empty() && mounts.is_empty());
+                            if failed {
+                                AgentResponse::Error { message: "PRIVATE=discard".into(), code: None }
+                            } else {
+                                AgentResponse::Completed { exit_code: 0, stdout: b"smolvm-fixture".to_vec(), stderr: b"PRIVATE=discard".to_vec() }
+                            }
+                        };
+                        let progress = serde_json::json!({ "status": "progress", "message": "PRIVATE=discard" });
+                        for body in [serde_json::to_vec(&progress).unwrap(), serde_json::to_vec(&response).unwrap()] {
+                            stream.write_all(&(body.len() as u32).to_be_bytes()).unwrap();
+                            stream.write_all(&body).unwrap();
+                        }
+                    }
+                });
+                let RunResult::Collected(collected) = supervisor
+                    .run(prepared, Box::new(()), deadline, &Cancellation::default())
+                    .unwrap()
+                else {
+                    panic!("ordinary worker must be collected")
+                };
+                assert!(!collected.termination_requested);
+                assert_eq!(collected.outcome.success(), !failed);
+                if failed {
+                    assert!(collected.bootstrapped.is_none());
+                } else {
+                    let proof = collected.bootstrapped.as_ref().unwrap();
+                    assert!(proof.matches(&expected));
+                    assert_eq!(proof.container_id.is_none(), empty);
+                }
+                peer.join().unwrap();
+            });
+            std::fs::remove_file(socket).unwrap();
+            assert!(supervisor.pool.available());
+            assert!(!root.join("db").exists());
+        }
+    }
+
+    #[test]
+    #[ignore = "requires a built helper; ordinary non-VM SDK peer only"]
+    fn ordinary_pull_worker_uses_exact_request_and_collects_only_matching_image_evidence() {
+        use smolvm_protocol::{AgentRequest, Envelope};
+        use std::os::unix::net::UnixListener;
+        let directory = tempfile::tempdir_in("/tmp").unwrap();
+        let root = root(&directory);
+        let executable = std::env::var_os("SMOLBOX_TEST_FILE_WORKER").expect("built helper path");
+        let supervisor = supervisor(&root, executable.into());
+        let expected = crate::ImagePullRequest {
+            reference: format!("registry.example/app@sha256:{}", "a".repeat(64)),
+            platform: "linux/arm64".into(),
+        };
+        for reply in ["valid", "packed", "different", "error"] {
+            let socket = root.join("agent.sock");
+            let listener = UnixListener::bind(&socket).unwrap();
+            listener.set_nonblocking(true).unwrap();
+            let deadline = Instant::now() + Duration::from_secs(30);
+            let deadline_ns = crate::buffered::monotonic_ns().unwrap() + 30_000_000_000;
+            let prepared = supervisor
+                .prepare_pull(&root, socket.clone(), expected.clone(), deadline_ns)
+                .unwrap();
+            std::thread::scope(|scope| {
+                let peer = scope.spawn(|| {
+                    let mut stream = loop {
+                        match listener.accept() {
+                            Ok((s, _)) => break s,
+                            Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                                assert!(Instant::now() < deadline);
+                                std::thread::sleep(POLL);
+                            }
+                            Err(e) => panic!("{e}"),
+                        }
+                    };
+                    stream.set_nonblocking(false).unwrap();
+                    stream.set_read_timeout(Some(Duration::from_secs(5))).unwrap();
+                    let mut header = [0; 4];
+                    stream.read_exact(&mut header).unwrap();
+                    let mut body = vec![0; u32::from_be_bytes(header) as usize];
+                    stream.read_exact(&mut body).unwrap();
+                    let request: Envelope<AgentRequest> = serde_json::from_slice(&body).unwrap();
+                    let AgentRequest::Pull { image, oci_platform, auth, proxy, no_proxy } = request.body else { panic!() };
+                    assert_eq!(image, expected.reference);
+                    assert_eq!(oci_platform.as_deref(), Some("linux/arm64"));
+                    assert!(auth.is_none() && proxy.is_none() && no_proxy.is_none());
+                    let progress = serde_json::json!({"status":"progress","message":"PRIVATE=discard"});
+                    let result = if reply == "error" {
+                        serde_json::json!({"status":"error","message":"PRIVATE=discard"})
+                    } else {
+                        serde_json::json!({"status":"ok","data":{
+                            "reference":if reply == "different" {"registry.example/other"} else {&expected.reference},
+                            "digest":if reply == "packed" {"packed".to_string()} else {format!("sha256:{}", "b".repeat(64))},
+                            "size":123,"architecture":"arm64","os":"linux","layer_count":2,
+                            "env":["PRIVATE=discard"],"layers":["discard"]}})
+                    };
+                    for value in [progress, result] {
+                        let bytes = serde_json::to_vec(&value).unwrap();
+                        stream.write_all(&(bytes.len() as u32).to_be_bytes()).unwrap();
+                        stream.write_all(&bytes).unwrap();
+                    }
+                });
+                let RunResult::Collected(collected) = supervisor
+                    .run(prepared, Box::new(()), deadline, &Cancellation::default())
+                    .unwrap()
+                else {
+                    panic!("ordinary worker must be collected")
+                };
+                assert_eq!(collected.outcome.success(), reply == "valid");
+                assert_eq!(collected.outcome.native_acknowledged, reply == "valid");
+                assert!(!collected.termination_requested);
+                if reply == "valid" {
+                    let image = collected.pulled.as_ref().unwrap();
+                    assert!(expected.matches(image));
+                    assert_ne!(image.digest, format!("sha256:{}", "a".repeat(64)));
+                } else {
+                    assert!(collected.pulled.is_none());
+                }
+                assert_eq!(collected.outcome.observed_bytes, 0);
+                peer.join().unwrap();
+            });
+            std::fs::remove_file(socket).unwrap();
+            assert!(supervisor.pool.available());
+            assert!(!root.join("db").exists());
+        }
+    }
+
+    #[test]
+    #[ignore = "requires a built helper; ordinary non-VM SDK peer only"]
+    fn ordinary_image_worker_lists_without_boot_and_collects_invalid_replies() {
+        use smolvm_protocol::{AgentRequest, Envelope};
+        use std::os::unix::net::UnixListener;
+        let directory = tempfile::tempdir_in("/tmp").unwrap();
+        let root = root(&directory);
+        let executable = std::env::var_os("SMOLBOX_TEST_FILE_WORKER").expect("built helper path");
+        let supervisor = supervisor(&root, executable.into());
+        for valid in [true, false] {
+            let socket = root.join("agent.sock");
+            let listener = UnixListener::bind(&socket).unwrap();
+            listener.set_nonblocking(true).unwrap();
+            let deadline = Instant::now() + Duration::from_secs(10);
+            let deadline_ns = crate::buffered::monotonic_ns().unwrap() + 10_000_000_000;
+            let prepared = supervisor
+                .prepare(
+                    &root,
+                    socket.clone(),
+                    &FileOptions {
+                        guest_path: "/images".into(),
+                        max_bytes: crate::images::IMAGE_OUTPUT_BYTES,
+                        timeout: Duration::from_secs(10),
+                        mode: None,
+                    },
+                    Kind::Images { deadline_ns },
+                )
+                .unwrap();
+            std::thread::scope(|scope| {
+                let peer = scope.spawn(|| {
+                    let mut stream = loop {
+                        match listener.accept() {
+                            Ok((s, _)) => break s,
+                            Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                                assert!(Instant::now() < deadline);
+                                std::thread::sleep(POLL);
+                            }
+                            Err(e) => panic!("{e}"),
+                        }
+                    };
+                    stream.set_nonblocking(false).unwrap();
+                    stream.set_read_timeout(Some(Duration::from_secs(5))).unwrap();
+                    let mut header = [0; 4];
+                    stream.read_exact(&mut header).unwrap();
+                    let mut body = vec![0; u32::from_be_bytes(header) as usize];
+                    stream.read_exact(&mut body).unwrap();
+                    let request: Envelope<AgentRequest> = serde_json::from_slice(&body).unwrap();
+                    assert!(matches!(request.body, AgentRequest::ListImages));
+                    let image = serde_json::json!({"reference":"fixture", "digest":if valid {"packed"} else {"invalid"},
+                        "size":123,"architecture":"arm64","os":"linux","layer_count":2,
+                        "env":["TOKEN=discard"],"layers":["discard"]});
+                    let bytes = serde_json::to_vec(&serde_json::json!({"status":"ok","data":[image]})).unwrap();
+                    stream.write_all(&(bytes.len() as u32).to_be_bytes()).unwrap();
+                    stream.write_all(&bytes).unwrap();
+                });
+                let RunResult::Collected(mut collected) = supervisor
+                    .run(prepared, Box::new(()), deadline, &Cancellation::default())
+                    .unwrap()
+                else {
+                    panic!("ordinary worker must be collected")
+                };
+                assert_eq!(collected.outcome.success(), valid);
+                assert_eq!(collected.outcome.native_acknowledged, valid);
+                assert!(!collected.termination_requested);
+                if valid {
+                    collected
+                        .prepared
+                        .spool
+                        .file
+                        .seek(SeekFrom::Start(0))
+                        .unwrap();
+                    let images: Vec<crate::ImageObservation> =
+                        serde_json::from_reader(&collected.prepared.spool.file).unwrap();
+                    assert_eq!(images.len(), 1);
+                    assert_eq!(images[0].digest, "packed");
+                    assert_eq!(images[0].layer_count, 2);
+                }
+                peer.join().unwrap();
+            });
+            std::fs::remove_file(socket).unwrap();
+            assert!(supervisor.pool.available());
+            assert!(!root.join("db").exists());
+        }
     }
 
     #[test]

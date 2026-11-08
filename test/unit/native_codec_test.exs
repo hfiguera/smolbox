@@ -151,6 +151,44 @@ defmodule SmolBox.Store.NativeCodecTest do
     assert {:error, _} = Codec.encode(%{created | backend_assignment: record.backend_assignment})
     stripped = put_in(created.created_machine.backend_identity.receipt, old_receipt)
     assert {:error, _} = Codec.encode(stripped)
+
+    # Preserve the previous v17 structural vocabulary; decoding an old opaque
+    # advanced receipt does not promote it into a qualified growth history.
+    advanced =
+      created
+      |> put_in(
+        [
+          Access.key(:created_machine),
+          Access.key(:backend_identity),
+          Access.key(:receipt),
+          "material",
+          "revision"
+        ],
+        1
+      )
+      |> put_in(
+        [
+          Access.key(:created_machine),
+          Access.key(:backend_identity),
+          Access.key(:receipt),
+          "material",
+          "operation_id"
+        ],
+        "legacy-material"
+      )
+      |> put_in(
+        [
+          Access.key(:created_machine),
+          Access.key(:backend_identity),
+          Access.key(:receipt),
+          "material",
+          "request_sha256"
+        ],
+        String.duplicate("c", 64)
+      )
+
+    assert {:ok, <<"smolbox-record-v17\0", _::binary>> = advanced_bytes} = Codec.encode(advanced)
+    assert {:ok, ^advanced} = Codec.decode(advanced_bytes)
   end
 
   test "v16 omits the new default exactly and v17 rejects legacy records" do

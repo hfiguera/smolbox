@@ -4,9 +4,12 @@ defmodule SmolBox.Embedded.Protocol do
     CommandPayload,
     CreationFeatures,
     CreationPayload,
+    GrowthTransition,
+    ImageContract,
     JSON,
     LogStream,
     ObservationShape,
+    RegistryContract,
     SDKIdentity,
     Shape,
     TerminalContract
@@ -123,6 +126,16 @@ defmodule SmolBox.Embedded.Protocol do
   def capabilities, do: @capabilities
 
   def capabilities(sdk) do
+    images =
+      if match?(%{"feature_versions" => %{"images" => 1}}, sdk),
+        do: ~w(list_images pull_image),
+        else: []
+
+    growth =
+      if match?(%{"feature_versions" => %{"disk_growth" => 1}}, sdk),
+        do: ~w(expand_disks inspect_growth qualify_growth),
+        else: []
+
     terminals =
       if match?(%{"feature_versions" => %{"terminals" => 1}}, sdk),
         do: ["terminal_open"],
@@ -135,8 +148,8 @@ defmodule SmolBox.Embedded.Protocol do
 
     values =
       if observers?(sdk),
-        do: @observations ++ @capabilities,
-        else: @capabilities
+        do: preparation(sdk) ++ @observations ++ @capabilities,
+        else: preparation(sdk) ++ @capabilities
 
     values =
       if match?(%{"feature_versions" => %{"logs" => 1}}, sdk), do: ["logs" | values], else: values
@@ -147,9 +160,12 @@ defmodule SmolBox.Embedded.Protocol do
         else: values
 
     if match?(%{"feature_versions" => %{"buffered_exec" => 1}}, sdk),
-      do: terminals ++ stream ++ ["exec_buffered" | values],
-      else: terminals ++ stream ++ values
+      do: images ++ growth ++ terminals ++ stream ++ ["exec_buffered" | values],
+      else: images ++ growth ++ terminals ++ stream ++ values
   end
+
+  defp preparation(%{"feature_versions" => %{"remote_sources" => 1}}), do: ["prepare_artifact"]
+  defp preparation(_sdk), do: []
 
   defp observers?(%{"feature_versions" => %{"observability" => 1}}), do: true
   defp observers?(_sdk), do: false
@@ -280,7 +296,7 @@ defmodule SmolBox.Embedded.Protocol do
 
   defp capabilities?(capabilities, major, sdk),
     do:
-      Validation.list?(capabilities, if(major == 1, do: 10, else: 21)) and
+      Validation.list?(capabilities, if(major == 1, do: 10, else: 32)) and
         Enum.all?(capabilities, &(&1 in capabilities(sdk))) and
         MapSet.size(MapSet.new(capabilities)) == length(capabilities)
 
@@ -300,6 +316,29 @@ defmodule SmolBox.Embedded.Protocol do
 
   defp outcome?(%{"result" => "terminal"} = outcome, 2), do: TerminalContract.outcome?(outcome)
 
+  defp outcome?(
+         %{"result" => kind, "transition" => transition, "observation" => observation} =
+           outcome,
+         2
+       )
+       when kind in ~w(grown growth_qualified) do
+    with true <- Shape.keys?(outcome, ~w(result transition observation)),
+         {:ok, proof} <- GrowthTransition.from_wire(transition),
+         true <-
+           observation?(observation, 2) and observation["state"] == "stopped" and
+             observation["pid_identity"] == nil do
+      observation["resources"]["storage_gib"] == proof.change["storage_gib"] and
+        observation["resources"]["overlay_gib"] == proof.change["overlay_gib"]
+    else
+      _ -> false
+    end
+  end
+
+  defp outcome?(%{"result" => "growth_presence", "transition" => transition} = outcome, 2),
+    do:
+      Shape.keys?(outcome, ~w(result transition)) and
+        (transition == nil or match?({:ok, _}, GrowthTransition.from_wire(transition)))
+
   defp outcome?(%{"result" => "created", "receipt" => receipt} = outcome, major),
     do: Shape.keys?(outcome, ~w(result receipt)) and Shape.receipt?(receipt, major)
 
@@ -313,6 +352,17 @@ defmodule SmolBox.Embedded.Protocol do
     do: Shape.keys?(outcome, ~w(result text)) and Shape.text?(text, 65_536, true)
 
   defp outcome?(%{"result" => "ready"} = outcome, 2), do: map_size(outcome) == 1
+
+  defp outcome?(%{"result" => "prepared_artifact"} = outcome, 2),
+    do: RegistryContract.result?(outcome)
+
+  defp outcome?(%{"result" => "pulled", "image" => image} = outcome, 2),
+    do: Shape.keys?(outcome, ~w(result image)) and ImageContract.image?(image)
+
+  defp outcome?(%{"result" => "images", "count" => count, "bytes" => bytes} = outcome, 2),
+    do:
+      Shape.keys?(outcome, ~w(result count bytes)) and Validation.integer?(count, 0, 1024) and
+        Validation.integer?(bytes, 2, 8_388_608)
 
   defp outcome?(%{"result" => "inventory", "count" => count, "bytes" => bytes} = outcome, 2),
     do:

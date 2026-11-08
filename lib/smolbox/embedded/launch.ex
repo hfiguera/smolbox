@@ -1,7 +1,7 @@
 defmodule SmolBox.Embedded.Launch do
   @moduledoc false
   import Bitwise
-  alias SmolBox.Embedded.{Config, Protocol}
+  alias SmolBox.Embedded.{Config, ImageContract, Protocol, RegistryContract}
 
   @cleared ~w(DYLD_LIBRARY_PATH DYLD_INSERT_LIBRARIES DYLD_FALLBACK_LIBRARY_PATH DYLD_FRAMEWORK_PATH DYLD_FALLBACK_FRAMEWORK_PATH LD_LIBRARY_PATH LD_PRELOAD)
 
@@ -115,7 +115,8 @@ defmodule SmolBox.Embedded.Launch do
     }
   end
 
-  defp helper_config(config) do
+  @doc false
+  def helper_config(config) do
     values = %{
       "schema" => Config.protocol_major(config),
       "target_id" => config.id,
@@ -125,6 +126,28 @@ defmodule SmolBox.Embedded.Launch do
       "approved_artifacts" => Enum.map(config.artifacts, &artifact/1)
     }
 
+    features =
+      case Config.sdk_identity(config) do
+        %{"feature_versions" => features} -> features
+        _ -> %{}
+      end
+
+    values =
+      if features["images"] == 1 or features["remote_sources"] == 1 do
+        Map.put(
+          values,
+          "approved_oci_sources",
+          config.sources
+          |> Enum.filter(&(&1.kind == :oci))
+          |> Enum.map(&ImageContract.source/1)
+          |> Enum.uniq()
+        )
+      else
+        values
+      end
+
+    values = registry_config(values, config, features)
+
     case Config.sdk_identity(config) do
       %{"feature_versions" => %{"ports" => 1}} ->
         Map.put(values, "publish_address", config.publish_address)
@@ -133,6 +156,15 @@ defmodule SmolBox.Embedded.Launch do
         values
     end
   end
+
+  defp registry_config(values, config, %{"remote_sources" => 1}) do
+    case RegistryContract.approvals(config) do
+      [] -> values
+      registry -> Map.put(values, "approved_registry_sources", registry)
+    end
+  end
+
+  defp registry_config(values, _config, _features), do: values
 
   defp protocol(path, config) do
     with {:ok, file} <- File.open(path, [:read, :binary, :raw]) do

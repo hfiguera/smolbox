@@ -353,6 +353,7 @@ defmodule SmolBox.EmbeddedBackendTest do
     assert {:ok, %{slots: 1}} = Memory.usage(context.store, context.config.id)
   end
 
+  @tag :deferred_crash
   test "losing the owner resolves once conservatively through the monitored original PID",
        context do
     {record, reference} = running(context)
@@ -388,6 +389,7 @@ defmodule SmolBox.EmbeddedBackendTest do
     assert length(Package.received(context.config)) == count
   end
 
+  @tag :deferred_crash
   test "caller death cancels its accepted command while the owner remains usable", context do
     {record, reference} = running(context)
     {:ok, command} = Command.new(["hold"], timeout_secs: 1)
@@ -424,8 +426,15 @@ defmodule SmolBox.EmbeddedBackendTest do
   end
 
   test "an unresponsive health owner is bounded without marking a request dispatched", context do
-    owner = spawn(fn -> receive do: (_message -> receive do: (:stop -> :ok)) end)
-    on_exit(fn -> Process.exit(owner, :kill) end)
+    owner =
+      spawn(fn ->
+        receive do
+          :stop -> :ok
+          _message -> receive do: (:stop -> :ok)
+        end
+      end)
+
+    on_exit(fn -> send(owner, :stop) end)
     {:ok, reference} = Embedded.reference(context.config, owner)
     reference = reference |> Backend.assigned(context.record) |> Backend.bounded(timeout_ms: 20)
 

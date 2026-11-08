@@ -1,6 +1,6 @@
 defmodule SmolBox.Runtime.NativeRecovery do
   @moduledoc false
-  alias SmolBox.{Backend, Error, Execution, Machine, ManagedMachine}
+  alias SmolBox.{Backend, DiskExpansion, Error, Execution, Machine, ManagedMachine}
   alias SmolBox.Backend.EmbeddedContext
   alias SmolBox.Embedded.{Call, Health}
   alias SmolBox.Runtime.{MachineSession, NativeAuthority, Session, Target, WorkerHealth}
@@ -140,14 +140,27 @@ defmodule SmolBox.Runtime.NativeRecovery do
     end
   end
 
-  defp observation_valid?(record, :unverified),
+  @doc false
+  def observation_valid?(record, :unverified),
     do:
       record.reservation != nil or Map.get(record, :managed_machine) != nil or
         record.absence_at_ms != nil
 
-  defp observation_valid?(_record, :missing), do: true
+  def observation_valid?(_record, :missing), do: true
 
-  defp observation_valid?(record, %Machine{} = observed),
+  def observation_valid?(%ManagedMachine{} = record, %Machine{} = observed) do
+    record.reservation != nil and
+      (DiskExpansion.matches?(record, observed) or
+         case record.disk_expansions[record.active_expansion] do
+           %DiskExpansion{state: state} = expansion when state in [:dispatching, :unknown] ->
+             DiskExpansion.target_matches?(record, expansion, observed)
+
+           _ ->
+             false
+         end)
+  end
+
+  def observation_valid?(record, %Machine{} = observed),
     do:
       (record.reservation != nil or Map.get(record, :managed_machine) != nil) and
         Machine.same_incarnation?(record.created_machine, observed)
@@ -188,11 +201,30 @@ defmodule SmolBox.Runtime.NativeRecovery do
   defp persist(config, %ManagedMachine{} = record, observed) do
     with {:ok, current} <- MachineSession.claim(config, ManagedMachine.key(record)),
          true <- same_work?(record, current),
-         {:ok, _saved} <-
-           MachineSession.write(config, current, machine_changes(current, observed)),
+         {:ok, _saved} <- persist_machine(config, current, observed),
          do: :ok,
          else: (_ -> Session.error(:stale_version, :reconcile))
   end
+
+  defp persist_machine(config, %{active_expansion: id} = record, _observed)
+       when not is_nil(id) do
+    # Startup observation never resolves growth or imports the proof into its
+    # history. Keep the full reservation and make interrupted intent explicitly
+    # unknown, including when the journal already contains completed evidence.
+    expansion = record.disk_expansions[id]
+
+    MachineSession.store(config, :expansion_advance, [
+      ManagedMachine.key(record),
+      Session.guard(record),
+      id,
+      expansion.state,
+      {:unknown, unknown()},
+      config.clock.now()
+    ])
+  end
+
+  defp persist_machine(config, record, observed),
+    do: MachineSession.write(config, record, machine_changes(record, observed))
 
   defp execution_changes(%{state: :collecting} = record, _observed) do
     if length(record.artifacts) == length(record.spec.outputs),

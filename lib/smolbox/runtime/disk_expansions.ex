@@ -4,6 +4,7 @@ defmodule SmolBox.Runtime.DiskExpansions do
   alias SmolBox.{Backend, DiskExpansion, Error, ManagedMachine}
   alias SmolBox.Runtime.MachineSession, as: Machines
   alias SmolBox.Runtime.{Session, WorkerHealth}
+  alias SmolBox.Store.ExpansionOps
 
   def supported(config) do
     case Session.store(config, :capabilities, []) do
@@ -38,13 +39,39 @@ defmodule SmolBox.Runtime.DiskExpansions do
     end
   end
 
+  def resolution_observation(%{kind: :embedded} = worker, intent, :stopped) do
+    reference = Target.connection(worker, intent)
+    deadline = System.monotonic_time(:millisecond) + reference.budget.timeout_ms
+
+    with {:ok, grown} <- Backend.qualify_growth(reference, true),
+         {:ok, preview} <- resolution_preview(intent, grown),
+         remaining = deadline - System.monotonic_time(:millisecond),
+         true <- remaining > 0 do
+      worker
+      |> Target.connection(preview)
+      |> Backend.bounded(timeout_ms: remaining)
+      |> Backend.inspect_machine(intent.machine_name)
+    else
+      false -> Session.error(:expired, :expand_disks)
+      {:error, error} -> {:error, %{error | operation: :expand_disks}}
+    end
+  end
+
+  def resolution_observation(worker, intent, _disposition),
+    do: Backend.inspect_machine(Target.connection(worker, intent), intent.machine_name)
+
+  def resolution_preview(intent, grown) do
+    r = intent.disk_expansions[intent.active_expansion]
+    ExpansionOps.advance(intent, r.id, :unknown, {:resolve, grown}, intent.updated_at_ms)
+  end
+
   defp dispatch(config, m) do
     with {:ok, worker} <- Machines.worker(config, m),
          true <- Target.supports_feature?(worker, :disk_growth),
          %{status: :ready} <- WorkerHealth.observe(worker, config.clock),
          {:ok, observed} <-
            Machines.io(config, m, fn ->
-             Backend.inspect_machine(Target.connection(worker), m.machine_name)
+             Backend.inspect_machine(Target.connection(worker, m), m.machine_name)
            end),
          true <- observed.state in [:created, :stopped] and DiskExpansion.matches?(m, observed),
          {:ok, intent} <- advance(config, m, :dispatch) do
@@ -60,13 +87,31 @@ defmodule SmolBox.Runtime.DiskExpansions do
   defp grow_and_observe(worker, intent) do
     r = intent.disk_expansions[intent.active_expansion]
 
-    with {:ok, _} <-
-           Backend.expand_disks(Target.connection(worker), DiskExpansion.expected(intent),
+    with {:ok, grown} <-
+           Backend.expand_disks(Target.connection(worker, intent), DiskExpansion.expected(intent),
              storage_gb: r.storage_gb,
              overlay_gb: r.overlay_gb
            ),
-         do: Backend.inspect_machine(Target.connection(worker), intent.machine_name)
+         do: observe_grown(worker, intent, grown)
   end
+
+  defp observe_grown(%{kind: :embedded} = worker, intent, grown) do
+    r = intent.disk_expansions[intent.active_expansion]
+    # This is a local validated preview for the follow-up reference. Durable
+    # intent remains dispatching until the subsequent observation is committed.
+    with {:ok, preview} <-
+           ExpansionOps.advance(
+             intent,
+             r.id,
+             :dispatching,
+             {:complete, grown},
+             intent.updated_at_ms
+           ),
+         do: Backend.inspect_machine(Target.connection(worker, preview), intent.machine_name)
+  end
+
+  defp observe_grown(worker, intent, _grown),
+    do: Backend.inspect_machine(Target.connection(worker, intent), intent.machine_name)
 
   defp received(config, m, {:ok, observed}) do
     case advance(config, m, {:complete, observed}) do

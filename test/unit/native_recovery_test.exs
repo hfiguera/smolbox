@@ -176,6 +176,7 @@ defmodule SmolBox.NativeRecoveryTest do
     assert {:ok, %{slots: 1}} = Memory.usage(context.store, context.native.id)
   end
 
+  @tag :deferred_crash
   test "coordinator restart reconciles the existing owner without booting retained storage",
        context do
     seed = seed_machine(context, :receipt)
@@ -422,6 +423,7 @@ defmodule SmolBox.NativeRecoveryTest do
     assert {:ok, %{slots: 0}} = Memory.usage(context.store, context.native.id)
   end
 
+  @tag :deferred_crash
   test "dead authority holders stay frozen until successful reconciliation", context do
     fault = start_supervised!({Agent, fn -> {:normal, 0} end}, id: FaultStore)
     config = %{context.config | store: {FaultStore, {context.store, fault}}}
@@ -504,6 +506,7 @@ defmodule SmolBox.NativeRecoveryTest do
     refute "exec" in operations(context.native)
   end
 
+  @tag :deferred_crash
   test "helper loss recovers its target while HTTP continues serving", context do
     {_peer, port} = SmolBox.ManagedPeer.start()
     spec = Contract.record().spec

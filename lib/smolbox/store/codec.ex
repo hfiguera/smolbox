@@ -90,6 +90,18 @@ defmodule SmolBox.Store.Codec do
   native terminal authority. A reader marker does not enable a helper capability.
   Silently treating undecodable records as absent
   would permit replay and is forbidden.
+  Native expansion histories and commands carrying grown native authority use
+  v18. Earlier HTTP/v16/v17 envelopes omit the new nil proof defaults exactly.
+  Install every reader and resource writer before advertising native_disk_growth:
+  1 alongside managed_disk_expansion: 1. This marker enables neither an SDK feature
+  nor growth dispatch; public helper feature approval remains separate.
+  Typed native OCI creation intent and retained image-pull records selectively
+  use v19. Their source identity remains distinct from a local pack's content
+  digest. Earlier native and HTTP envelopes retain their exact encodings and
+  reject these new native shapes. Upgrade every reader and reservation writer
+  before advertising native_sources: 1 alongside registry_sources: 1 (and
+  managed_images: 1 for image operations). Reader support alone enables neither
+  a source catalog assignment nor preparation, creation or startup dispatch.
   """
 
   alias SmolBox.{Error, Execution, ExecutionFeatures}
@@ -101,8 +113,10 @@ defmodule SmolBox.Store.Codec do
     CodecExpansion,
     CodecExports,
     CodecFiles,
+    CodecGrowth,
     CodecMaterial,
     CodecNative,
+    CodecNativeSources,
     CodecPorts,
     CodecSources,
     CodecVolumes,
@@ -112,6 +126,8 @@ defmodule SmolBox.Store.Codec do
   @max_bytes 16_777_216
   @native_prefix "smolbox-record-v16\0"
   @material_prefix "smolbox-record-v17\0"
+  @growth_prefix "smolbox-record-v18\0"
+  @native_sources_prefix "smolbox-record-v19\0"
   @volumes_prefix "smolbox-record-v15\0"
   @expansion_prefix "smolbox-record-v14\0"
   @branches_prefix "smolbox-record-v13\0"
@@ -132,6 +148,7 @@ defmodule SmolBox.Store.Codec do
     SmolBox.Backend.Binding,
     SmolBox.Backend.Assignment,
     SmolBox.Embedded.Identity,
+    SmolBox.Embedded.GrowthTransition,
     SmolBox.ManagedMachine,
     SmolBox.ManagedMachineSpec,
     SmolBox.ExecutionSpec,
@@ -236,6 +253,12 @@ defmodule SmolBox.Store.Codec do
   @spec decode(binary()) ::
           {:ok, Execution.t() | SmolBox.ManagedMachine.t() | SmolBox.Volume.t()}
           | {:error, Error.t()}
+  def decode(<<@native_sources_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes, do: decode_native_sources(bytes)
+
+  def decode(<<@growth_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes, do: decode_growth(bytes)
+
   def decode(<<@material_prefix, 131, tag, _rest::binary>> = bytes)
       when tag != 80 and byte_size(bytes) <= @max_bytes, do: decode_material(bytes)
 
@@ -302,9 +325,19 @@ defmodule SmolBox.Store.Codec do
   defp encode_native(record) do
     with :ok <- validate_extended(record) do
       bytes =
-        if CodecMaterial.required?(record),
-          do: @material_prefix <> :erlang.term_to_binary(record),
-          else: @native_prefix <> :erlang.term_to_binary(CodecMaterial.strip(record))
+        cond do
+          CodecNativeSources.required?(record) ->
+            @native_sources_prefix <> :erlang.term_to_binary(record)
+
+          CodecGrowth.required?(record) ->
+            @growth_prefix <> :erlang.term_to_binary(record)
+
+          CodecMaterial.required?(record) ->
+            @material_prefix <> :erlang.term_to_binary(CodecGrowth.strip(record))
+
+          true ->
+            @native_prefix <> :erlang.term_to_binary(CodecMaterial.strip(record))
+        end
 
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
@@ -316,6 +349,7 @@ defmodule SmolBox.Store.Codec do
     with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
          record = CodecMaterial.upgrade(record),
          true <- used == byte_size(payload) and CodecNative.required?(record),
+         false <- CodecNativeSources.required?(record),
          :ok <- validate_extended(record),
          do: {:ok, record},
          else: (_invalid -> invalid())
@@ -334,11 +368,40 @@ defmodule SmolBox.Store.Codec do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
     with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         record = CodecGrowth.upgrade(record),
          true <- used == byte_size(payload) and CodecMaterial.required?(record),
          true <- CodecNative.required?(record),
+         false <- CodecNativeSources.required?(record),
          :ok <- validate_extended(record),
          do: {:ok, record},
          else: (_invalid -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
+  defp decode_growth(<<@growth_prefix, payload::binary>>) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <- used == byte_size(payload) and CodecGrowth.required?(record),
+         true <- CodecMaterial.required?(record) and CodecNative.required?(record),
+         false <- CodecNativeSources.required?(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
+  defp decode_native_sources(<<@native_sources_prefix, payload::binary>>) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <- used == byte_size(payload) and CodecNativeSources.required?(record),
+         true <- CodecMaterial.required?(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
   rescue
     ArgumentError -> invalid()
   end

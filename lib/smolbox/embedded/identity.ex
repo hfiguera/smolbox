@@ -7,20 +7,25 @@ defmodule SmolBox.Embedded.Identity do
   Inspect output omits both kinds of evidence.
   """
   alias SmolBox.Backend.Binding
-  alias SmolBox.Embedded.Shape
+  alias SmolBox.Embedded.{GrowthTransition, Shape}
   alias SmolBox.Validation
 
   @enforce_keys [:receipt]
   @derive {Inspect, only: []}
-  defstruct [:receipt, pid_identity: nil]
-  @type t :: %__MODULE__{receipt: map(), pid_identity: [pos_integer()] | nil}
+  defstruct [:receipt, pid_identity: nil, transition: nil]
+
+  @type t :: %__MODULE__{
+          receipt: map(),
+          pid_identity: [pos_integer()] | nil,
+          transition: map() | nil
+        }
 
   @doc false
   def valid?(%__MODULE__{} = identity),
     do:
       Validation.struct_shape?(identity, __MODULE__) and
         (Shape.receipt?(identity.receipt, 1) or Shape.receipt?(identity.receipt, 2)) and
-        pid?(identity.pid_identity)
+        pid?(identity.pid_identity) and transition?(identity)
 
   def valid?(_identity), do: false
 
@@ -40,6 +45,11 @@ defmodule SmolBox.Embedded.Identity do
           Enum.all?(~w(name owner_token incarnation), &(identity.receipt[&1] == create[&1]))
 
   def matches?(_identity, _assignment), do: false
+
+  defp transition?(%{transition: nil}), do: true
+
+  defp transition?(%{transition: transition, receipt: receipt}),
+    do: GrowthTransition.valid?(transition) and transition.receipt == receipt
 
   defp pid?(nil), do: true
 

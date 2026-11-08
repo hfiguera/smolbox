@@ -84,6 +84,401 @@ fn parity_hello() -> Hello {
     *hello
 }
 
+fn oci_create() -> OciCreate {
+    let r = parity_receipt();
+    OciCreate {
+        name: r.name,
+        owner_token: r.owner_token,
+        incarnation: r.incarnation,
+        source: OciIdentity {
+            kind: "oci".into(),
+            id: "approved-source".into(),
+            sha256: "a".repeat(64),
+            architecture: "aarch64".into(),
+            reference: format!("registry.example/app@sha256:{}", "a".repeat(64)),
+        },
+        resources: Resources {
+            cpus: 1,
+            memory_mib: 256,
+            storage_gib: 1,
+            overlay_gib: 1,
+        },
+        labels: Default::default(),
+        features: None,
+    }
+}
+
+#[test]
+fn source_wire_rejects_mixed_authority_bad_identity_and_unapproved_feature_without_new_capabilities(
+) {
+    let operation = Operation::CreateOci {
+        create: oci_create(),
+    };
+    assert!(operation.capability() == Capability::Create);
+    operation.validate(1000).unwrap();
+    for (field, value) in [
+        ("sha256", json!("b".repeat(64))),
+        ("kind", json!("registry")),
+        ("architecture", json!("unknown")),
+        ("reference", json!("registry.example/app:tag")),
+    ] {
+        let mut changed = serde_json::to_value(&operation).unwrap();
+        changed["create"]["source"][field] = value;
+        let decoded: Operation = serde_json::from_value(changed).unwrap();
+        assert!(decoded.validate(1000).is_err());
+    }
+    for (field, value) in [("artifact", json!({})), ("metadata", json!({}))] {
+        let mut changed = serde_json::to_value(&operation).unwrap();
+        changed["create"][field] = value;
+        assert!(serde_json::from_value::<Operation>(changed).is_err());
+    }
+    for h in [hello(), parity_hello()] {
+        let mut session = Session::new(h.clone()).unwrap();
+        session.approve(&h).unwrap();
+        let message = ClientMessage::Request {
+            epoch: h.epoch.clone(),
+            id: 1,
+            budget_ms: 1000,
+            initial_credit: INITIAL_CREDIT_BYTES,
+            initial_event_credit: INITIAL_CREDIT_EVENTS,
+            operation: operation.clone(),
+        };
+        assert!(matches!(
+            session.admit(message).unwrap(),
+            ServerMessage::Terminal {
+                outcome: Outcome::Error {
+                    code: SafeCode::Unsupported,
+                    dispatch: Dispatch::NotDispatched
+                },
+                ..
+            }
+        ));
+    }
+}
+
+#[test]
+fn approved_source_creation_requires_correlated_versioned_completion_and_never_adopts_inventory() {
+    let mut h = growth_hello();
+    h.sdk
+        .as_mut()
+        .unwrap()
+        .feature_versions
+        .insert("remote_sources".into(), 1);
+    h.capabilities = h.sdk.as_ref().unwrap().capabilities();
+    let mut create = oci_create();
+    let mut r = parity_receipt();
+    r.target_id = h.domain.target_id.clone();
+    r.domain_generation = h.domain.generation.clone();
+    create.name = r.name.clone();
+    create.owner_token = r.owner_token.clone();
+    create.incarnation = r.incarnation.clone();
+    let mut session = Session::new(h.clone()).unwrap();
+    session.approve(&h).unwrap();
+    session
+        .admit(ClientMessage::Request {
+            epoch: h.epoch.clone(),
+            id: 1,
+            budget_ms: 1000,
+            initial_credit: INITIAL_CREDIT_BYTES,
+            initial_event_credit: INITIAL_CREDIT_EVENTS,
+            operation: Operation::CreateOci { create },
+        })
+        .unwrap();
+    let mut crossed = r.clone();
+    crossed.incarnation = "0".repeat(32);
+    assert!(session.event(1, Stream::Stdout, b"unexpected").is_err());
+    assert!(session
+        .terminal(1, Outcome::Created { receipt: crossed })
+        .is_err());
+    assert!(session
+        .terminal(
+            1,
+            Outcome::CreationPresence {
+                presence: CreationPresence::Absent
+            }
+        )
+        .is_err());
+    session
+        .terminal(1, Outcome::Created { receipt: r })
+        .unwrap();
+}
+
+#[test]
+fn source_features_require_the_existing_bounded_job_buffer_and_compact_contracts() {
+    let mut sdk = growth_hello().sdk.unwrap();
+    sdk.feature_versions.insert("remote_sources".into(), 1);
+    sdk.validate().unwrap();
+    for required in ["job_resources", "buffered_exec", "compact_creation"] {
+        let mut missing = sdk.clone();
+        missing.feature_versions.remove(required);
+        assert!(missing.validate().is_err());
+    }
+}
+
+#[test]
+fn source_compact_payload_preserves_full_workload_and_start_rejects_legacy_receipts() {
+    let mut value: Value =
+        serde_json::from_slice(include_bytes!("../fixtures/compact-creation-request.json"))
+            .unwrap();
+    let payload = value["operation"]["features_payload"].clone();
+    let mut create = serde_json::to_value(oci_create()).unwrap();
+    create["features_payload"] = payload;
+    value["operation"] = json!({"operation": "create_oci", "create": create});
+    let decoded = ClientMessage::decode(value).unwrap();
+    let ClientMessage::Request {
+        operation: Operation::CreateOci { create },
+        ..
+    } = decoded
+    else {
+        panic!()
+    };
+    let features = create.features.unwrap();
+    assert!(features.compact);
+    assert_eq!(
+        features.workload.unwrap().cmd,
+        vec!["literal; $(text)", "é\u{1}"]
+    );
+    let valid = Operation::StartOci {
+        source: oci_create().source,
+        receipt: parity_receipt(),
+    };
+    valid.validate(1000).unwrap();
+    let mut old = parity_receipt();
+    old.material = None;
+    assert!(Operation::StartOci {
+        source: oci_create().source,
+        receipt: old
+    }
+    .validate(1000)
+    .is_err());
+}
+
+fn growth_fixture() -> GrowthTransition {
+    serde_json::from_slice::<Vec<GrowthTransition>>(include_bytes!(
+        "../fixtures/growth-transitions-v1.json"
+    ))
+    .unwrap()
+    .remove(0)
+}
+fn growth_hello() -> Hello {
+    let value: Value =
+        serde_json::from_slice(include_bytes!("../fixtures/hello-v2-current.json")).unwrap();
+    let ServerMessage::Hello { hello } = ServerMessage::decode(value).unwrap() else {
+        unreachable!()
+    };
+    let mut hello = *hello;
+    let proof = growth_fixture();
+    hello.domain = DomainIdentity {
+        target_id: proof.previous.target_id.clone(),
+        generation: proof.previous.domain_generation.clone(),
+    };
+    let sdk = hello.sdk.as_mut().unwrap();
+    sdk.feature_versions.insert("disk_growth".into(), 1);
+    hello.capabilities = sdk.capabilities();
+    hello
+}
+fn growth_operation(inspect: bool) -> Operation {
+    let proof = growth_fixture();
+    let receipt = proof.previous;
+    let operation_id = proof.change.operation_id;
+    let request = proof.change.request;
+    let previous = DiskSizes {
+        storage_gib: 1,
+        overlay_gib: 1,
+    };
+    if inspect {
+        Operation::InspectGrowth {
+            receipt,
+            operation_id,
+            request,
+            previous,
+        }
+    } else {
+        Operation::ExpandDisks {
+            receipt,
+            operation_id,
+            request,
+            previous,
+        }
+    }
+}
+fn grown() -> Outcome {
+    Outcome::Grown {
+        transition: Box::new(growth_fixture()),
+        observation: Observation {
+            state: ObservedState::Stopped,
+            resources: Some(Resources {
+                cpus: 1,
+                memory_mib: 256,
+                storage_gib: 2,
+                overlay_gib: 1,
+            }),
+            pid_identity: None,
+            configuration: None,
+        },
+    }
+}
+
+#[test]
+fn growth_wire_preserves_crypto_fixture_and_binds_completion_to_exact_durable_intent() {
+    let hello = growth_hello();
+    hello.validate().unwrap();
+    let mut session = Session::new(hello.clone()).unwrap();
+    session.approve(&hello).unwrap();
+    assert!(matches!(
+        session.admit(request(1, growth_operation(false))).unwrap(),
+        ServerMessage::Accepted { .. }
+    ));
+    assert!(session.event(1, Stream::Stdout, b"unexpected").is_err());
+    let mut foreign = grown();
+    if let Outcome::Grown { transition, .. } = &mut foreign {
+        transition.change.operation_id = "foreign".into();
+    }
+    assert!(session.terminal(1, foreign).is_err());
+    let mut mismatch = grown();
+    if let Outcome::Grown { observation, .. } = &mut mismatch {
+        observation.resources.as_mut().unwrap().storage_gib = 3;
+    }
+    assert!(session.terminal(1, mismatch).is_err());
+    assert!(session
+        .terminal(
+            1,
+            Outcome::Observed {
+                observation: Observation {
+                    state: ObservedState::Stopped,
+                    resources: None,
+                    pid_identity: None,
+                    configuration: None
+                }
+            }
+        )
+        .is_err());
+    session.terminal(1, grown()).unwrap();
+    assert!(session.terminal(1, grown()).is_err());
+    assert!(grown().validate_for(1).is_err());
+    assert!(grown().validate_for(2).is_ok());
+}
+
+#[test]
+fn growth_lookup_is_distinct_bounded_nonmutating_evidence_and_requires_feature_approval() {
+    let hello = growth_hello();
+    let mut session = Session::new(hello.clone()).unwrap();
+    session.approve(&hello).unwrap();
+    session.admit(request(1, growth_operation(true))).unwrap();
+    assert!(session.terminal(1, grown()).is_err());
+    session
+        .terminal(
+            1,
+            Outcome::GrowthPresence {
+                transition: Some(Box::new(growth_fixture())),
+            },
+        )
+        .unwrap();
+    session.admit(request(2, growth_operation(true))).unwrap();
+    session
+        .terminal(2, Outcome::GrowthPresence { transition: None })
+        .unwrap();
+    let mut denied = hello;
+    denied
+        .sdk
+        .as_mut()
+        .unwrap()
+        .feature_versions
+        .remove("disk_growth");
+    denied.capabilities = denied.sdk.as_ref().unwrap().capabilities();
+    let mut session = Session::new(denied.clone()).unwrap();
+    session.approve(&denied).unwrap();
+    assert!(matches!(
+        session.admit(request(1, growth_operation(false))).unwrap(),
+        ServerMessage::Terminal {
+            outcome: Outcome::Error {
+                code: SafeCode::Unsupported,
+                dispatch: Dispatch::NotDispatched
+            },
+            ..
+        }
+    ));
+    assert!(growth_operation(true).validate(30001).is_err());
+    assert!(growth_operation(false).validate(600001).is_err());
+}
+
+#[test]
+fn growth_nullable_targets_strict_shapes_and_bounds_do_not_normalize_missing_fields() {
+    let operation = growth_operation(false);
+    let encoded = serde_json::to_value(operation).unwrap();
+    for key in ["storage_gib", "overlay_gib"] {
+        let mut bad = encoded.clone();
+        bad["request"].as_object_mut().unwrap().remove(key);
+        assert!(serde_json::from_value::<Operation>(bad).is_err());
+    }
+    let mut unknown = encoded.clone();
+    unknown["request"]["extra"] = json!(1);
+    assert!(serde_json::from_value::<Operation>(unknown).is_err());
+    for size in [0, 1, 65, u64::MAX] {
+        let mut invalid = encoded.clone();
+        invalid["request"]["storage_gib"] = json!(size);
+        match serde_json::from_value::<Operation>(invalid) {
+            Err(_) => {}
+            Ok(operation) => assert!(operation.validate(1000).is_err()),
+        }
+    }
+    let mut proof = growth_fixture();
+    proof.receipt.material.as_mut().unwrap().chain_sha256 = "9".repeat(64);
+    assert!(proof.validate().is_err());
+}
+
+#[test]
+fn explicit_growth_qualification_has_distinct_capability_quiescence_budget_and_completion() {
+    let hello = growth_hello();
+    let Operation::ExpandDisks {
+        receipt,
+        operation_id,
+        request: targets,
+        previous,
+    } = growth_operation(false)
+    else {
+        unreachable!()
+    };
+    let operation = Operation::QualifyGrowth {
+        receipt,
+        operation_id,
+        request: targets,
+        previous,
+        quiesced: true,
+    };
+    operation.validate(30000).unwrap();
+    assert!(operation.validate(30001).is_err());
+    let mut unsafe_operation = operation.clone();
+    if let Operation::QualifyGrowth { quiesced, .. } = &mut unsafe_operation {
+        *quiesced = false;
+    }
+    assert!(unsafe_operation.validate(1000).is_err());
+    let mut value = serde_json::to_value(&operation).unwrap();
+    value.as_object_mut().unwrap().remove("quiesced");
+    assert!(serde_json::from_value::<Operation>(value).is_err());
+    assert!(operation.capability() == Capability::QualifyGrowth);
+    let mut session = Session::new(hello.clone()).unwrap();
+    session.approve(&hello).unwrap();
+    session.admit(request(1, operation)).unwrap();
+    assert!(session.terminal(1, grown()).is_err());
+    let Outcome::Grown {
+        transition,
+        observation,
+    } = grown()
+    else {
+        unreachable!()
+    };
+    let qualified = Outcome::GrowthQualified {
+        transition,
+        observation,
+    };
+    assert!(qualified.validate_for(1).is_err());
+    roundtrip_server(session.terminal(1, qualified.clone()).unwrap());
+    assert!(session.terminal(1, qualified.clone()).is_err());
+    session.admit(request(2, growth_operation(false))).unwrap();
+    assert!(session.terminal(2, qualified).is_err());
+}
+
 #[test]
 fn terminal_wire_binds_open_controls_whole_credit_and_collected_exit_without_lifetime_output_cap() {
     Outcome::Terminal {
@@ -1747,4 +2142,463 @@ fn terminal_zero_only_represents_a_pre_admission_rejection() {
     }
     .validate()
     .is_err());
+}
+
+#[test]
+fn image_listing_is_versioned_capability_bound_and_uses_only_credited_file_output() {
+    let mut h: Hello = match ServerMessage::decode(
+        serde_json::from_str(include_str!("../fixtures/hello-v2-current.json")).unwrap(),
+    )
+    .unwrap()
+    {
+        ServerMessage::Hello { hello } => *hello,
+        _ => unreachable!(),
+    };
+    let r = growth_fixture().previous;
+    h.domain = DomainIdentity {
+        target_id: r.target_id.clone(),
+        generation: r.domain_generation.clone(),
+    };
+    let operation = Operation::ListImages { receipt: r };
+    assert!(operation.validate(30000).is_ok());
+    assert!(operation.validate(30001).is_err());
+    let mut unsupported = Session::new(h.clone()).ok().unwrap();
+    unsupported.approve(&h).unwrap();
+    assert!(matches!(
+        unsupported.admit(request(1, operation.clone())).unwrap(),
+        ServerMessage::Terminal {
+            outcome: Outcome::Error {
+                code: SafeCode::Unsupported,
+                dispatch: Dispatch::NotDispatched
+            },
+            ..
+        }
+    ));
+    let sdk = h.sdk.as_mut().unwrap();
+    sdk.feature_versions.insert("images".into(), 1);
+    h.capabilities = sdk.capabilities();
+    h.validate().unwrap();
+    let mut s = Session::new(h.clone()).ok().unwrap();
+    s.approve(&h).unwrap();
+    s.admit(request(1, operation.clone())).unwrap();
+    assert!(s.event(1, Stream::Stdout, b"[]").is_err());
+    assert!(s
+        .terminal(1, Outcome::Images { count: 0, bytes: 2 })
+        .is_err());
+    s.event(1, Stream::File, b"[").unwrap();
+    s.event(1, Stream::File, b"]").unwrap();
+    assert!(s
+        .terminal(1, Outcome::Inventory { count: 0, bytes: 2 })
+        .is_err());
+    assert!(s
+        .terminal(1, Outcome::Images { count: 0, bytes: 3 })
+        .is_err());
+    s.terminal(1, Outcome::Images { count: 0, bytes: 2 })
+        .unwrap();
+    assert!(s
+        .terminal(1, Outcome::Images { count: 0, bytes: 2 })
+        .is_err());
+    s.admit(request(2, operation)).unwrap();
+    let chunk = vec![b' '; MAX_CHUNK_BYTES];
+    for _ in 0..16 {
+        s.event(2, Stream::File, &chunk).unwrap();
+        s.credit(&h.epoch, 2, chunk.len() as u64, 1).unwrap();
+    }
+    s.terminal(
+        2,
+        Outcome::Images {
+            count: 1024,
+            bytes: 16 * MAX_CHUNK_BYTES as u64,
+        },
+    )
+    .unwrap();
+    assert!(Outcome::Images { count: 0, bytes: 2 }
+        .validate_for(1)
+        .is_err());
+    for outcome in [
+        Outcome::Images {
+            count: 1025,
+            bytes: 2,
+        },
+        Outcome::Images { count: 0, bytes: 1 },
+        Outcome::Images {
+            count: 0,
+            bytes: 8388609,
+        },
+    ] {
+        assert!(outcome.validate_for(2).is_err());
+    }
+    let sdk = h.sdk.as_mut().unwrap();
+    sdk.feature_versions.insert("disk_growth".into(), 1);
+    h.capabilities = sdk.capabilities();
+    assert_eq!(h.capabilities.len(), 26);
+    h.validate().unwrap();
+    h.sdk
+        .as_mut()
+        .unwrap()
+        .feature_versions
+        .remove("job_resources");
+    assert!(h.validate().is_err());
+}
+
+#[test]
+fn pull_image_has_distinct_versioned_nonstreaming_evidence_bound_to_exact_oci_intent() {
+    let mut h = growth_hello();
+    h.sdk
+        .as_mut()
+        .unwrap()
+        .feature_versions
+        .insert("images".into(), 1);
+    h.capabilities = h.sdk.as_ref().unwrap().capabilities();
+    let source = OciSource {
+        reference: format!("registry.example/app@sha256:{}", "a".repeat(64)),
+        platform: "linux/arm64".into(),
+    };
+    let operation = Operation::PullImage {
+        receipt: growth_fixture().previous,
+        source: source.clone(),
+    };
+    operation.validate(86400000).unwrap();
+    assert!(operation.validate(86400001).is_err());
+    let image = ImageObservation {
+        reference: source.reference.clone(),
+        digest: format!("sha256:{}", "b".repeat(64)),
+        size: 123,
+        architecture: "arm64".into(),
+        os: "linux".into(),
+        layer_count: 2,
+    };
+    let mut s = Session::new(h.clone()).ok().unwrap();
+    s.approve(&h).unwrap();
+    s.admit(request(1, operation)).unwrap();
+    assert!(s.event(1, Stream::File, b"[]").is_err());
+    assert!(s
+        .terminal(1, Outcome::Images { count: 1, bytes: 2 })
+        .is_err());
+    for invalid in [
+        ImageObservation {
+            digest: "packed".into(),
+            ..image.clone()
+        },
+        ImageObservation {
+            architecture: "amd64".into(),
+            ..image.clone()
+        },
+        ImageObservation {
+            reference: "different".into(),
+            ..image.clone()
+        },
+    ] {
+        assert!(s.terminal(1, Outcome::Pulled { image: invalid }).is_err());
+    }
+    assert!(Outcome::Pulled {
+        image: image.clone()
+    }
+    .validate_for(1)
+    .is_err());
+    s.terminal(1, Outcome::Pulled { image }).unwrap();
+    assert_eq!(s.pending_count(), 0);
+    let value = serde_json::json!({"reference":source.reference,"platform":source.platform,"auth":{"password":"discard"}});
+    assert!(serde_json::from_value::<OciSource>(value).is_err());
+}
+
+#[test]
+fn registry_preparation_is_versioned_exact_and_has_no_events_or_credentials() {
+    let mut h = growth_hello();
+    h.sdk
+        .as_mut()
+        .unwrap()
+        .feature_versions
+        .insert("remote_sources".into(), 1);
+    h.sdk
+        .as_mut()
+        .unwrap()
+        .feature_versions
+        .insert("compact_creation".into(), 1);
+    h.capabilities = h.sdk.as_ref().unwrap().capabilities();
+    let source = RegistrySource {
+        reference: format!("registry.example/team/app@sha256:{}", "a".repeat(64)),
+        platform: "linux/arm64".into(),
+        content_sha256: "b".repeat(64),
+    };
+    let operation = Operation::PrepareArtifact {
+        source: source.clone(),
+        credential_ref: None,
+        identity_token: None,
+    };
+    operation.validate(86400000).unwrap();
+    let mut s = Session::new(h.clone()).ok().unwrap();
+    s.approve(&h).unwrap();
+    s.admit(request(1, operation)).unwrap();
+    assert!(s.event(1, Stream::File, b"private").is_err());
+    let mut crossed = source.clone();
+    crossed.content_sha256 = "c".repeat(64);
+    assert!(s
+        .terminal(
+            1,
+            Outcome::PreparedArtifact {
+                source: crossed,
+                size_bytes: 12,
+                already_cached: false
+            }
+        )
+        .is_err());
+    assert!(s.terminal(1, Outcome::Qualified).is_err());
+    let outcome = Outcome::PreparedArtifact {
+        source: source.clone(),
+        size_bytes: 12,
+        already_cached: false,
+    };
+    assert!(outcome.validate_for(1).is_err());
+    s.terminal(1, outcome).unwrap();
+    assert_eq!(s.pending_count(), 0);
+    let mut value = serde_json::to_value(&source).unwrap();
+    value["identity_token"] = serde_json::json!("private");
+    assert!(serde_json::from_value::<RegistrySource>(value).is_err());
+    let mut legacy = hello();
+    let mut session = Session::new(legacy.clone()).ok().unwrap();
+    session.approve(&legacy).unwrap();
+    assert!(matches!(
+        session
+            .admit(request(
+                1,
+                Operation::PrepareArtifact {
+                    source,
+                    credential_ref: None,
+                    identity_token: None
+                }
+            ))
+            .unwrap(),
+        ServerMessage::Terminal {
+            outcome: Outcome::Error {
+                code: SafeCode::Unsupported,
+                dispatch: Dispatch::NotDispatched
+            },
+            ..
+        }
+    ));
+    legacy.capabilities.push(Capability::PrepareArtifact);
+    assert!(legacy.validate().is_err());
+}
+
+#[test]
+fn registry_cached_creation_binds_fresh_receipt_and_absence_has_no_ownership_authority() {
+    let mut h = growth_hello();
+    h.sdk
+        .as_mut()
+        .unwrap()
+        .feature_versions
+        .insert("remote_sources".into(), 1);
+    h.sdk
+        .as_mut()
+        .unwrap()
+        .feature_versions
+        .insert("compact_creation".into(), 1);
+    h.capabilities = h.sdk.as_ref().unwrap().capabilities();
+    let mut receipt = growth_fixture().previous;
+    receipt.target_id = h.domain.target_id.clone();
+    receipt.domain_generation = h.domain.generation.clone();
+    let create = RegistryCreate {
+        name: receipt.name.clone(),
+        owner_token: receipt.owner_token.clone(),
+        incarnation: receipt.incarnation.clone(),
+        source: RegistryIdentity {
+            kind: "registry".into(),
+            id: "approved".into(),
+            sha256: "a".repeat(64),
+            architecture: "aarch64".into(),
+            reference: format!("registry.example/team/app@sha256:{}", "a".repeat(64)),
+            content_sha256: "b".repeat(64),
+            credential_ref: Some("tenant-read".into()),
+        },
+        resources: Resources {
+            cpus: 1,
+            memory_mib: 512,
+            storage_gib: 1,
+            overlay_gib: 1,
+        },
+        labels: Default::default(),
+        features: None,
+    };
+    let operation = Operation::CreateRegistryPrepared {
+        create: create.clone(),
+        size_bytes: 123,
+    };
+    operation.validate(1000).unwrap();
+    let mut session = Session::new(h.clone()).ok().unwrap();
+    session.approve(&h).unwrap();
+    session.admit(request(1, operation)).unwrap();
+    assert!(session.event(1, Stream::File, b"private").is_err());
+    let mut crossed = receipt.clone();
+    crossed.incarnation = if receipt.incarnation == "0".repeat(32) {
+        "1".repeat(32)
+    } else {
+        "0".repeat(32)
+    };
+    assert!(session
+        .terminal(1, Outcome::Created { receipt: crossed })
+        .is_err());
+    assert!(session
+        .terminal(
+            1,
+            Outcome::CreationPresence {
+                presence: CreationPresence::Absent
+            }
+        )
+        .is_err());
+    session.terminal(1, Outcome::Created { receipt }).unwrap();
+    let absence = Operation::InspectRegistryCreation {
+        create: create.clone(),
+    };
+    assert!(absence.validate(30001).is_err());
+    session.admit(request(2, absence)).unwrap();
+    session
+        .terminal(
+            2,
+            Outcome::CreationPresence {
+                presence: CreationPresence::Unverified,
+            },
+        )
+        .unwrap();
+    let mut value = serde_json::to_value(&create).unwrap();
+    value["source"]["identity_token"] = serde_json::json!("private");
+    assert!(serde_json::from_value::<RegistryCreate>(value).is_err());
+    let mut value = serde_json::to_value(&create).unwrap();
+    value["source"]["sha256"] = serde_json::json!("c".repeat(64));
+    assert!(serde_json::from_value::<RegistryCreate>(value)
+        .unwrap()
+        .validate()
+        .is_err());
+    assert!(Operation::CreateRegistryPrepared {
+        create,
+        size_bytes: 0
+    }
+    .validate(1000)
+    .is_err());
+}
+
+#[test]
+fn registry_creation_compact_features_use_existing_bounded_payload() {
+    let mut value: serde_json::Value =
+        serde_json::from_str(include_str!("../fixtures/compact-creation-request.json")).unwrap();
+    let features = value["operation"]["features_payload"].take();
+    let create = serde_json::json!({"name":"fresh","owner_token":"a".repeat(64),"incarnation":"b".repeat(32),"source":{"kind":"registry","id":"pack","sha256":"c".repeat(64),"architecture":"aarch64","reference":format!("registry.example/team/pack@sha256:{}","c".repeat(64)),"content_sha256":"d".repeat(64)},"resources":{"cpus":1,"memory_mib":512,"storage_gib":1,"overlay_gib":1},"labels":{},"features_payload":features});
+    value["operation"] = serde_json::json!({"operation":"create_registry_prepared","create":create,"size_bytes":123});
+    let request = ClientMessage::decode(value).unwrap();
+    let ClientMessage::Request {
+        operation: Operation::CreateRegistryPrepared { create, .. },
+        ..
+    } = request
+    else {
+        panic!()
+    };
+    assert!(create.features.unwrap().compact);
+}
+
+#[test]
+fn registry_qualification_is_bounded_and_does_not_accept_creation_authority() {
+    let mut h = growth_hello();
+    h.sdk
+        .as_mut()
+        .unwrap()
+        .feature_versions
+        .insert("remote_sources".into(), 1);
+    h.sdk
+        .as_mut()
+        .unwrap()
+        .feature_versions
+        .insert("compact_creation".into(), 1);
+    h.capabilities = h.sdk.as_ref().unwrap().capabilities();
+    let operation = Operation::QualifyRegistryCreation {
+        source: RegistryIdentity {
+            kind: "registry".into(),
+            id: "pack".into(),
+            sha256: "a".repeat(64),
+            architecture: "aarch64".into(),
+            reference: format!("registry.example/team/app@sha256:{}", "a".repeat(64)),
+            content_sha256: "b".repeat(64),
+            credential_ref: None,
+        },
+        resources: Resources {
+            cpus: 1,
+            memory_mib: 512,
+            storage_gib: 1,
+            overlay_gib: 1,
+        },
+        user: None,
+        features: None,
+    };
+    assert!(operation.validate(30001).is_err());
+    let mut session = Session::new(h.clone()).ok().unwrap();
+    session.approve(&h).unwrap();
+    session.admit(request(1, operation)).unwrap();
+    assert!(session.event(1, Stream::File, b"metadata").is_err());
+    assert!(session
+        .terminal(
+            1,
+            Outcome::CreationPresence {
+                presence: CreationPresence::Absent
+            }
+        )
+        .is_err());
+    session.terminal(1, Outcome::Qualified).unwrap();
+}
+
+#[test]
+fn registry_token_is_bounded_paired_redacted_and_removed_from_bookkeeping() {
+    let source = RegistrySource {
+        reference: format!("registry.example/team/app@sha256:{}", "a".repeat(64)),
+        platform: "linux/arm64".into(),
+        content_sha256: "b".repeat(64),
+    };
+    let secret: RegistryToken = serde_json::from_value(json!("private-token")).unwrap();
+    assert!(!format!("{secret:?}").contains("private-token"));
+    let operation = Operation::PrepareArtifact {
+        source: source.clone(),
+        credential_ref: Some("tenant".into()),
+        identity_token: Some(secret),
+    };
+    operation.validate(1000).unwrap();
+    assert!(!serde_json::to_string(&operation.sanitized())
+        .unwrap()
+        .contains("private-token"));
+    for token in ["", "=", "a=b", "with space"] {
+        let operation = Operation::PrepareArtifact {
+            source: source.clone(),
+            credential_ref: Some("tenant".into()),
+            identity_token: Some(serde_json::from_value(json!(token)).unwrap()),
+        };
+        assert!(operation.validate(1000).is_err());
+    }
+    let missing = Operation::PrepareArtifact {
+        source: source.clone(),
+        credential_ref: Some("tenant".into()),
+        identity_token: None,
+    };
+    assert!(missing.validate(1000).is_err());
+    let mut h = growth_hello();
+    h.sdk
+        .as_mut()
+        .unwrap()
+        .feature_versions
+        .insert("remote_sources".into(), 1);
+    h.sdk
+        .as_mut()
+        .unwrap()
+        .feature_versions
+        .insert("compact_creation".into(), 1);
+    h.capabilities = h.sdk.as_ref().unwrap().capabilities();
+    let mut session = Session::new(h.clone()).ok().unwrap();
+    session.approve(&h).unwrap();
+    session.admit(request(1, operation)).unwrap();
+    session
+        .terminal(
+            1,
+            Outcome::PreparedArtifact {
+                source,
+                size_bytes: 123,
+                already_cached: true,
+            },
+        )
+        .unwrap();
 }

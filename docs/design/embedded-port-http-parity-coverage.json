@@ -151,7 +151,7 @@
       ],
       "contract": "creation",
       "http_supported": true,
-      "port_operation_supported": false,
+      "port_operation_supported": true,
       "parity_status": "pending",
       "acceptance": [
         "creation:validation-and-dispatch",
@@ -167,7 +167,7 @@
       ],
       "contract": "creation",
       "http_supported": true,
-      "port_operation_supported": false,
+      "port_operation_supported": true,
       "parity_status": "pending",
       "acceptance": [
         "creation:validation-and-dispatch",
@@ -289,7 +289,7 @@
       ],
       "contract": "images",
       "http_supported": true,
-      "port_operation_supported": false,
+      "port_operation_supported": true,
       "parity_status": "pending",
       "acceptance": [
         "images:validation-and-dispatch",
@@ -304,7 +304,7 @@
       ],
       "contract": "images",
       "http_supported": true,
-      "port_operation_supported": false,
+      "port_operation_supported": true,
       "parity_status": "pending",
       "acceptance": [
         "images:validation-and-dispatch",
@@ -395,7 +395,7 @@
       ],
       "contract": "disk-growth",
       "http_supported": true,
-      "port_operation_supported": false,
+      "port_operation_supported": true,
       "parity_status": "pending",
       "acceptance": [
         "disk-growth:validation-and-dispatch",
@@ -557,6 +557,21 @@
       "name": "inspect_creation",
       "arities": [
         1
+      ],
+      "contract": "native-recovery",
+      "http_supported": false,
+      "port_operation_supported": true,
+      "parity_status": "pending",
+      "acceptance": [
+        "native-recovery:validation-and-dispatch",
+        "native-recovery:ordinary-public-behavior",
+        "native-recovery:durable-accounting-and-no-replay"
+      ]
+    },
+    {
+      "name": "qualify_growth",
+      "arities": [
+        2
       ],
       "contract": "native-recovery",
       "http_supported": false,

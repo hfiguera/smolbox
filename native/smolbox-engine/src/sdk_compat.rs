@@ -134,6 +134,54 @@ pub(crate) fn observe_records(
     })
 }
 
+/// A receipt-bound operation needs one row, not adoption of an inventory snapshot.
+/// Limit SQLite's returned blob before allocation and preserve read-only budget/
+/// schema/inode checks used by the node observers.
+pub(crate) fn observe_record(
+    database: &Path,
+    identity: (u64, u64),
+    name: &str,
+    budget: &crate::ReadBudget,
+) -> Result<Option<smolvm::config::VmRecord>> {
+    if !crate::domain::valid_id(name) {
+        return Err(Error::before(ErrorCode::Validation));
+    }
+    with_observation_budget(database, identity, budget, |connection| {
+        let mut query = connection.prepare(
+            "SELECT length(CAST(data AS BLOB)),substr(CAST(data AS BLOB),1,?2) FROM vms WHERE name=?1 LIMIT 1")
+            .map_err(|_| Error::before(ErrorCode::Database))?;
+        let mut rows = query
+            .query(rusqlite::params![
+                name,
+                crate::observations::MAX_RECORD_BYTES + 1
+            ])
+            .map_err(|_| Error::before(ErrorCode::Database))?;
+        let Some(row) = rows
+            .next()
+            .map_err(|_| Error::before(ErrorCode::Database))?
+        else {
+            return Ok(None);
+        };
+        budget.check()?;
+        let length: usize = row.get(0).map_err(|_| Error::before(ErrorCode::Database))?;
+        if length > crate::observations::MAX_RECORD_BYTES {
+            return Err(Error::before(ErrorCode::OutputLimit));
+        }
+        let blob = row
+            .get_ref(1)
+            .map_err(|_| Error::before(ErrorCode::Database))?;
+        let record: smolvm::config::VmRecord = serde_json::from_slice(
+            blob.as_blob()
+                .map_err(|_| Error::before(ErrorCode::Database))?,
+        )
+        .map_err(|_| Error::before(ErrorCode::Database))?;
+        if record.name != name {
+            return Err(Error::before(ErrorCode::Database));
+        }
+        Ok(Some(record))
+    })
+}
+
 fn with_observation_budget<T>(
     database: &Path,
     identity: (u64, u64),
@@ -272,6 +320,17 @@ fn check_sidecars(database: &Path) -> Result<()> {
 pub(crate) struct SourceLease {
     _file: File,
 }
+impl Drop for SourceLease {
+    fn drop(&mut self) {
+        // O_CLOEXEC closes an unrelated spawned child's inherited descriptor
+        // only at exec. Release this owned lease explicitly so that temporary
+        // copy cannot prolong the source flock after exact worker collection.
+        // Retained jobs keep this guard alive; timeout alone never reaches Drop.
+        unsafe {
+            libc::flock(self._file.as_raw_fd(), libc::LOCK_UN);
+        }
+    }
+}
 pub(crate) fn source_lease(vm_root: &Path, name: &str) -> Result<SourceLease> {
     if !crate::domain::valid_id(name) {
         return Err(Error::before(ErrorCode::Validation));
@@ -304,6 +363,21 @@ pub(crate) fn source_lease(vm_root: &Path, name: &str) -> Result<SourceLease> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn owned_source_release_is_not_prolonged_by_a_duplicate_descriptor() {
+        let directory = tempfile::tempdir().unwrap();
+        let root = directory.path().canonicalize().unwrap();
+        let lease = source_lease(&root, "owned").unwrap();
+        let copied = lease._file.try_clone().unwrap();
+        assert!(source_lease(&root, "owned").is_err());
+        drop(lease);
+        let next = source_lease(&root, "owned").unwrap();
+        drop(copied);
+        assert!(source_lease(&root, "owned").is_err());
+        drop(next);
+        assert!(source_lease(&root, "owned").is_ok());
+    }
     #[test]
     fn only_a_virtio_bind_conflict_has_the_public_port_conflict_category() {
         assert_eq!(

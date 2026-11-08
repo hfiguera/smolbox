@@ -39,6 +39,34 @@ defmodule SmolBox.Runtime.NativeMaterialSupportTest do
     defdelegate machine(a, b, c), to: LegacyStore
   end
 
+  defmodule GrowthStore do
+    alias SmolBox.Runtime.NativeMaterialSupportTest.TerminalStore
+
+    def capabilities(context) do
+      {:ok, caps} = TerminalStore.capabilities(context)
+      {:ok, Map.merge(caps, %{native_disk_growth: 1, managed_disk_expansion: 1})}
+    end
+
+    defdelegate bind_backend(a, b, c), to: LegacyStore
+    defdelegate backend_assignments(a, b, c, d), to: LegacyStore
+    defdelegate machine(a, b, c), to: LegacyStore
+  end
+
+  test "future growth descriptor requires both the native history reader and atomic expansion store" do
+    native = Package.create(protocol_major: 2)
+    on_exit(fn -> File.rm_rf!(native.package_path) end)
+    target = Target.normalize(native)
+    sdk = put_in(native.sdk_identity, ["feature_versions", "disk_growth"], 1)
+    future = %{target | native_config: %{native | sdk_identity: sdk}}
+
+    assert {:error, %Error{category: :unsupported_capability}} =
+             NativeSupport.verify(%{workers: [future], store: {TerminalStore, nil}})
+
+    assert :ok = NativeSupport.verify(%{workers: [future], store: {GrowthStore, nil}})
+    assert :ok = NativeSupport.verify(%{workers: [target], store: {TerminalStore, nil}})
+    assert Package.received(native) == []
+  end
+
   test "terminal descriptor requires its native reader marker before any enrollment" do
     native = Package.create(protocol_major: 2)
     on_exit(fn -> File.rm_rf!(native.package_path) end)

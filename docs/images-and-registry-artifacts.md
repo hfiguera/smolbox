@@ -4,8 +4,10 @@ Registry sources let a retained machine fetch an approved environment without an
 operator copying the prepared file to each worker first. Provisioning still has a
 durable identity, an approved worker and profile, and an explicit lifetime.
 
-These operations support smolvm 1.19.0, 1.20.2 and 1.22.0. The three operations
-have different storage and authentication boundaries:
+HTTP targets support these operations on smolvm 1.19.0, 1.20.2 and 1.22.0.
+Current embedded Port packages do not admit image/registry workflows; their
+parity acceptance remains pending. Approving a source catalog does not enable an absent package capability.
+The three operations have different storage and authentication boundaries:
 
 | Operation | Where the content is fetched | Identity |
 | --- | --- | --- |

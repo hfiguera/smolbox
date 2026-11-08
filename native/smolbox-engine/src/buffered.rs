@@ -340,7 +340,7 @@ impl Metadata {
             .map_err(|_| Error::uncertain(ErrorCode::Native))
     }
 }
-fn monotonic_ns() -> Result<u64> {
+pub(crate) fn monotonic_ns() -> Result<u64> {
     let mut value = libc::timespec {
         tv_sec: 0,
         tv_nsec: 0,

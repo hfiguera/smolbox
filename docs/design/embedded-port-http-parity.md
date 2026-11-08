@@ -71,13 +71,13 @@ the adapter does not currently implement the HTTP operation. Arity overloads in
 | `upload`, `download` | Existing | Preserve bounded atomic writes/reads and profile path authorization across added machine kinds | P3–P8 |
 | `logs` | Add | Bounded console diagnostics, tail/follow/callback options; no implicit boot or inference of application completion | P5 |
 | `terminal_preflight`, `open_managed_terminal` | Add | Existing managed terminal API, single consumer, input/resize/close, bounded output and unchanged no-reconnect/no-replay semantics | P6 |
-| `list_images`, `pull_image` | Add | Existing-machine image inventory and approved digest-pinned pulls; managed pull is restricted to OCI-created machines | P4 |
+| `list_images`, `pull_image` | Listing/pull wired; activation pending | Existing-machine image inventory and approved digest-pinned pulls; managed pull is restricted to OCI-created machines | P4 |
 | `provision_volume`, `delete_volume` | Add | Linux local volumes, exact approved root, exclusive attachment and independent retained disk accounting | P7 |
 | `expand_disks` | Add | Idle created/stopped machines; absolute 1–64-GiB targets, growth only, no implicit stop/start, immutable creation intent | P7 |
 | `start_checkpointable`, `checkpoint_preflight`, `capture_checkpoint` | Add | Approved idle offline bare guests, bounded portable capture, source resumes, no external/container/network dependencies | P8 |
 | `export_machine` | Add | Stopped-machine supported disk export and approved registry destination; no implicit stop, checkpoint semantics or container workspace export | P8 |
 | `branch_source`, `branch_absent`, `branch_create`, `branch_inspect_child`, `branch_release` | Add | Same-worker offline bare source, one leaf, explicit hold/release, source dependencies and extra backing reservations | P8 |
-| `qualify_creation`, `inspect_creation` | Existing; native-only | Keep pre-dispatch qualification and non-mutating verified absence; HTTP intentionally does not implement these operations | All |
+| `qualify_creation`, `inspect_creation`, `qualify_growth` | Native-only implementation | Keep pre-dispatch qualification, non-mutating verified absence and explicit quiesced growth-proof qualification; HTTP intentionally does not implement these operations | P1, P7, P9 |
 
 The following specification features also require coverage even though they are
 not individual backend operations:
