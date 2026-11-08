@@ -131,6 +131,40 @@ defmodule SmolBox.NativeRecoveryTest do
     assert {:ok, %{slots: 1}} = Memory.usage(context.store, context.native.id)
   end
 
+  for {action, state} <- [start: :running, delete: :deleted] do
+    @tag lifecycle_action: action, resulting_state: state
+    test "a queued #{action} runs after recovery verifies the stopped VM", context do
+      seed = seed_machine(context, :receipt)
+      runtime = start_runtime(context.config)
+      await(fn -> ready?(runtime) and native_idle?(runtime) end)
+      key = ManagedMachine.key(seed)
+      action = context.lifecycle_action
+      wire_operation = Atom.to_string(action)
+
+      assert :ok =
+               NativeAuthority.run(Runtime.coordinator(runtime), context.native.id, fn ->
+                 assert {:ok, stopped} = SmolBox.Machines.inspect(runtime, key)
+
+                 assert {:ok, %{phase: :pending, reservation: reservation}} =
+                          apply(SmolBox.Machines, action, [runtime, key, stopped.version])
+
+                 assert reservation == seed.reservation
+                 refute wire_operation in operations(context.native)
+                 :ok
+               end)
+
+      expected_state = context.resulting_state
+      expected_reservation = if action == :delete, do: nil, else: seed.reservation
+      expected_slots = if action == :delete, do: 0, else: 1
+
+      assert {:ok, %{state: ^expected_state, reservation: ^expected_reservation}} =
+               SmolBox.Machines.await(runtime, key, 5000)
+
+      assert Enum.count(operations(context.native), &(&1 == wire_operation)) == 1
+      assert {:ok, %{slots: ^expected_slots}} = Memory.usage(context.store, context.native.id)
+    end
+  end
+
   test "startup preserves a native export intent as unknown without publication or cleanup replay",
        context do
     native = Package.create(backend: true, persistent_backend: true, protocol_major: 2)

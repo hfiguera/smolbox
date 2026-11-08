@@ -274,7 +274,7 @@ defmodule SmolBox.Embedded.ExportWireTest do
     refute Jason.encode!(approval) =~ "private-fixture-token"
   end
 
-  test "export bounds negotiate only with future capability and current public admission remains closed" do
+  test "exports require an approved platform package descriptor and all wire dependencies" do
     plain = %{"feature_versions" => %{}}
     refute Map.has_key?(Protocol.limits(2, 0, plain), "exports")
 
@@ -296,5 +296,12 @@ defmodule SmolBox.Embedded.ExportWireTest do
     assert SDKIdentity.valid?(sdk)
     refute SDKIdentity.approved?(sdk, "1.22.0", sdk["source_revision"])
     assert Protocol.limits(2, 0, sdk)["exports"] == ExportContract.limits()
+
+    revision = sdk["source_revision"]
+    base = SDKIdentity.implemented("1.22.0", revision)
+    package = put_in(base, ["feature_versions", "exports"], 1)
+    assert SDKIdentity.approved?(package, "1.22.0", revision, :macos)
+    assert SDKIdentity.approved?(package, "1.22.0", revision, :linux)
+    refute SDKIdentity.approved?(package, "1.22.0", revision)
   end
 end

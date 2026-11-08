@@ -935,9 +935,18 @@ mod tests {
         };
         assert!(hello.validate().is_ok());
         let sdk = sdk_identity().ok().unwrap();
-        assert!(hello.sdk.as_deref() == Some(&sdk));
+        // These captured descriptors predate export admission. Keep them as
+        // compatibility fixtures and check the additional limits separately.
+        let mut fixture_sdk = sdk.clone();
+        let exports = fixture_sdk.feature_versions.remove("exports");
+        assert!(hello.sdk.as_deref() == Some(&fixture_sdk));
         assert!(hello.capabilities == sdk.capabilities());
-        assert!(hello.limits == smolbox_protocol::Limits::for_sdk(&sdk));
+        let mut negotiated = smolbox_protocol::Limits::for_sdk(&sdk);
+        assert_eq!(
+            negotiated.exports.take().map(|limits| limits.staging_bytes),
+            exports.map(|_| smolbox_engine::JOB_EXPORT_STAGING_BYTES)
+        );
+        assert!(hello.limits == negotiated);
         let buffered = smolbox_protocol::Limits::for_sdk(&sdk_identity().ok().unwrap())
             .buffered
             .unwrap();

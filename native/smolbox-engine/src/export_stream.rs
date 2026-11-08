@@ -114,7 +114,7 @@ impl Read for Timed<'_> {
     }
 }
 struct Sink<'a> {
-    file: &'a mut File,
+    output: &'a mut dyn Write,
     bytes: u64,
     maximum: u64,
     hash: Sha256,
@@ -128,7 +128,7 @@ impl Sink<'_> {
             .checked_add(data.len() as u64)
             .filter(|n| *n <= self.maximum)
             .ok_or(unknown(ErrorCode::OutputLimit))?;
-        self.file
+        self.output
             .write_all(data)
             .map_err(|_| unknown(ErrorCode::Io))?;
         self.hash.update(data);
@@ -288,9 +288,42 @@ pub fn stream_container_layer(
     budget.check()?;
     validate(request, maximum)?;
     validate_output(output)?;
+    let result = stream_data(socket, request, output, maximum, budget)?;
+    output.sync_all().map_err(|_| unknown(ErrorCode::Io))?;
+    budget.check().map_err(|e| unknown(e.code))?;
+    Ok(result)
+}
+
+pub(crate) fn read_oci_metadata(
+    socket: &Path,
+    path: String,
+    maximum: u64,
+    budget: &ReadBudget,
+) -> Result<Vec<u8>> {
+    if maximum == 0 || maximum > crate::OCI_METADATA_BYTES as u64 {
+        return Err(Error::before(ErrorCode::OutputLimit));
+    }
+    let mut output = Vec::new();
+    stream_data(
+        socket,
+        &AgentRequest::FileRead { path },
+        &mut output,
+        maximum,
+        budget,
+    )?;
+    Ok(output)
+}
+
+fn stream_data(
+    socket: &Path,
+    request: &AgentRequest,
+    output: &mut dyn Write,
+    maximum: u64,
+    budget: &ReadBudget,
+) -> Result<ContainerLayerIo> {
     let mut reader = connect_request(socket, request, budget)?;
     let mut sink = Sink {
-        file: output,
+        output,
         bytes: 0,
         maximum,
         hash: Sha256::new(),
@@ -311,7 +344,6 @@ pub fn stream_container_layer(
             if sink.bytes == 0 {
                 return Err(unknown(ErrorCode::Validation));
             }
-            sink.file.sync_all().map_err(|_| unknown(ErrorCode::Io))?;
             budget.check().map_err(|e| unknown(e.code))?;
             return Ok(ContainerLayerIo {
                 bytes: sink.bytes,
@@ -512,9 +544,9 @@ mod tests {
     #[test]
     fn fragmented_sdk_frames_preserve_quartets_and_empty_terminal_status() {
         let budget = budget();
-        let mut named = tempfile::NamedTempFile::new().unwrap();
+        let mut bytes = Vec::new();
         let mut sink = Sink {
-            file: named.as_file_mut(),
+            output: &mut bytes,
             bytes: 0,
             maximum: 128,
             hash: Sha256::new(),
@@ -537,9 +569,6 @@ mod tests {
             );
         }
         assert_eq!(sink.bytes, 8);
-        sink.file.rewind().unwrap();
-        let mut bytes = Vec::new();
-        sink.file.read_to_end(&mut bytes).unwrap();
         assert_eq!(bytes, b"binary\0\xff");
     }
     #[test]

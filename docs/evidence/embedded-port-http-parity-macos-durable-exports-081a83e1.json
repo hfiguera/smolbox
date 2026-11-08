@@ -1,0 +1,178 @@
+{
+  "schema": 1,
+  "recorded_date": "2026-11-06",
+  "status": "macos-default-managed-exports-qualified",
+  "proof_source_commit": "f0e87d93",
+  "sdk": {
+    "version": "1.22.0",
+    "revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "source_unmodified": true
+  },
+  "qualified_candidate_policy_matches_default": true,
+  "default_macos_policy_sha256": "97927a9ad0c94edc3d8ae28fd3b138aecdd4e40cf2c42b07af778b0bb6a71be6",
+  "package": {
+    "source_base": "7f0eecde",
+    "export_pack_source_sha256": "64130e7d30a269aacd42b75ad810460f7a49196b46cd08df2129dfcf552d755b",
+    "policy_sha256": "97927a9ad0c94edc3d8ae28fd3b138aecdd4e40cf2c42b07af778b0bb6a71be6",
+    "manifest_sha256": "447d4d7eb7a461e5ea7a0492a8e619740a2378d666c3435d5088a98cf89101bb",
+    "helper_sha256": "aff740d6431bb5349f1ce13b9cc91a8465acfc7e7397e7ef381682a1438dba2d",
+    "asset_count": 809,
+    "hex_archive_sha256": "6348090d042b39d94a16dabddab55c436d1fde029979f009544cd48712dce46a",
+    "proof_source_sha256": "24457ba5cf1c6eb8d25324212efe769653da3382d21a6c31d28cdcad30310d28",
+    "registry_fixture_sha256": "3fa4bf60265b9128acf915c737cc308a5341c80fdd5fffba8caa5c26a7224a94",
+    "proof_sha256": "e55a4708a8b7e522d7ee70032890d987bb3fa1b1cb214ff5fd9dce0f6d1da4ed"
+  },
+  "qualification": {
+    "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+    "postgresql": "17.11 (Homebrew)",
+    "jason": "1.4.5",
+    "without_rust": true,
+    "postgresql_normal_shutdown": true
+  },
+  "modes": {
+    "bare": {
+      "managed": {
+        "mode": "bare",
+        "store": "postgresql",
+        "final_reserved_slots": 0,
+        "crash_validation_deferred": true,
+        "content_sha256": "5fdcfab0a9363e16a2684c77a7ba7ae3175049188b9895b59fadc55eb5b1f1b2",
+        "package_manifest_sha256": "447d4d7eb7a461e5ea7a0492a8e619740a2378d666c3435d5088a98cf89101bb",
+        "runtime_replacement": true,
+        "native_cleanup_resolved": true,
+        "export_history_after_delete": true,
+        "pinned_registry_reimport": true,
+        "source_and_copy_independent": true,
+        "manifest_sha256": "dc24dc0a587ec9b553b42818f7f445f70bfd13b06bc46e7b92aeffcb2cafe9a7",
+        "size_bytes": 25667193
+      },
+      "durable_readback": {
+        "exact_machine_records": 2,
+        "exact_completed_export_receipt": true,
+        "native_workers": 0,
+        "final_reserved_slots": 0,
+        "crash_validation_deferred": true
+      },
+      "postflight": {
+        "tables": {
+          "vms": 0,
+          "vm_create_reservations": 0,
+          "vm_pause_operations": 0,
+          "config": 0,
+          "vm_resize_intents": 0,
+          "vm_resize_receipts": 0,
+          "fork_pools": 0,
+          "fork_pool_snapshots": 0,
+          "fork_pool_slots": 0,
+          "fork_leases": 0
+        },
+        "account_lock_available": true,
+        "package_assets_verified": 809,
+        "encrypted_machine_rows": 2
+      },
+      "independent_registry_readback": {
+        "request_counts": {
+          "heads": 5,
+          "uploads": 2,
+          "chunks": 26,
+          "blobs": 2,
+          "manifests": 3,
+          "reads": 11,
+          "rejected": 0
+        },
+        "sha256": "5fdcfab0a9363e16a2684c77a7ba7ae3175049188b9895b59fadc55eb5b1f1b2"
+      }
+    },
+    "container": {
+      "managed": {
+        "mode": "container",
+        "store": "postgresql",
+        "final_reserved_slots": 0,
+        "crash_validation_deferred": true,
+        "content_sha256": "ff35832b85ba74d85a5275e1d1d96274bee30752b5f2ba378725bb983a71877c",
+        "package_manifest_sha256": "447d4d7eb7a461e5ea7a0492a8e619740a2378d666c3435d5088a98cf89101bb",
+        "runtime_replacement": true,
+        "native_cleanup_resolved": true,
+        "export_history_after_delete": true,
+        "pinned_registry_reimport": true,
+        "source_and_copy_independent": true,
+        "manifest_sha256": "74ce4d3a7e60406897b3d26598ef5ae63a9763d0fe5c28b47571e4e1f2c232db",
+        "size_bytes": 41511584
+      },
+      "durable_readback": {
+        "exact_machine_records": 2,
+        "exact_completed_export_receipt": true,
+        "native_workers": 0,
+        "final_reserved_slots": 0,
+        "crash_validation_deferred": true
+      },
+      "postflight": {
+        "tables": {
+          "vms": 0,
+          "vm_create_reservations": 0,
+          "vm_pause_operations": 0,
+          "config": 0,
+          "vm_resize_intents": 0,
+          "vm_resize_receipts": 0,
+          "fork_pools": 0,
+          "fork_pool_snapshots": 0,
+          "fork_pool_slots": 0,
+          "fork_leases": 0
+        },
+        "account_lock_available": true,
+        "package_assets_verified": 809,
+        "encrypted_machine_rows": 2
+      },
+      "independent_registry_readback": {
+        "request_counts": {
+          "heads": 5,
+          "uploads": 2,
+          "chunks": 41,
+          "blobs": 2,
+          "manifests": 3,
+          "reads": 11,
+          "rejected": 0
+        },
+        "sha256": "ff35832b85ba74d85a5275e1d1d96274bee30752b5f2ba378725bb983a71877c"
+      }
+    }
+  },
+  "native_port_model_checks_passed": 91,
+  "prior_preflight": {
+    "dependency_lock_and_decimal_pins_corrected": true,
+    "postgresql_locale_corrected": true,
+    "native_vm_started": false
+  },
+  "crash_validation_deferred": true,
+  "crash_handling_qualified": false,
+  "distribution_approved": false,
+  "default_rebuild": {
+    "commit": "71c26f806407be6eba8bcf6acd221ec6bf599faa",
+    "policy_sha256": "97927a9ad0c94edc3d8ae28fd3b138aecdd4e40cf2c42b07af778b0bb6a71be6",
+    "manifest_sha256": "1fc30dba6d32965c89a02e38cfc34efdb6ddabf6edef786bd4f6344f4853c9ce",
+    "helper_sha256": "9ccc23423dbf5c584c8dc3e89c82b0c57b4450e38ab22a4fa8ea199d8ed97c38",
+    "asset_count": 809,
+    "policy_and_all_assets_match_candidate": true,
+    "helper_bytes_match_candidate": false,
+    "helper_signature_verified": true,
+    "differences_limited_to_uuid_and_signature": true,
+    "normalized_helper_sha256": "967b8091000af126d8a78d47f5cffd62a31361f94a82ee15923ea7ea3288f36f",
+    "candidate": {
+      "uuid": "8f795836ebbd34e49e53b523ab9500fd",
+      "signature_offset": 18546096,
+      "signature_size": 36864
+    },
+    "default": {
+      "uuid": "3c46605d14d7393fa99a0bc9509844fa",
+      "signature_offset": 18546096,
+      "signature_size": 36864
+    },
+    "hypervisor_entitlements_match_candidate": true
+  },
+  "final_checks": {
+    "ordinary_elixir_passed": 2123,
+    "ordinary_elixir_excluded": 42,
+    "focused_elixir_export_passed": 79,
+    "older_mac_descriptor_export_gate_checked": true
+  }
+}

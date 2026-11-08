@@ -18,10 +18,10 @@ defmodule SmolBox.NativeReleasedBranchPublicDeletionTest do
     def init(state), do: {:ok, state}
     def handle_call(:config, _, state), do: {:reply, {:ok, state.config}, state}
 
-    def handle_call({:native_acquire, id}, {caller, _}, state) do
+    def handle_call({:native_acquire_operation, id}, {caller, _}, state) do
       result =
         Agent.get_and_update(state.authority, fn
-          nil -> {:ok, {id, caller}}
+          nil -> {{:ok, false}, {id, caller}}
           held -> {{:error, %Error{category: :admission_exhausted, operation: :embedded}}, held}
         end)
 

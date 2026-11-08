@@ -18,7 +18,7 @@ defmodule SmolBox.Runtime.VolumeAccess do
     with {:ok, v} <- Session.store(config, :volume_fetch, [{spec.scope, ref.volume_id}]),
          {:ok, w} <- worker(config, v.worker_id),
          true <- w.volume_policy == v.policy and Target.supports?(w, spec),
-         :ok <- admission(w, mode) do
+         :ok <- admission(w, spec, mode) do
       {:cont, :ok}
     else
       false -> {:halt, error(:unsupported_capability)}
@@ -26,8 +26,28 @@ defmodule SmolBox.Runtime.VolumeAccess do
     end
   end
 
-  defp admission(%{draining: true}, :new), do: error(:admission_exhausted)
-  defp admission(_, _), do: :ok
+  defp admission(%{draining: true}, _spec, :new), do: error(:admission_exhausted)
+  defp admission(worker, spec, :new), do: mount_budget(worker, spec)
+  defp admission(_, _, _), do: :ok
+
+  # The 1.22.0 x86_64 bundle has a fixed virtio IRQ budget. Prepared packs
+  # include a pack share, and filtering or forwarding adds a virtio-net device.
+  def mount_budget(
+        %{platform: :linux, architecture: "x86_64"} = worker,
+        %{volumes: [_ | _] = mounts} = spec
+      ) do
+    if Target.sdk_version(worker) == "1.22.0" and length(mounts) > mount_limit(spec),
+      do:
+        {:error,
+         %Error{category: :unsupported_capability, operation: :create, evidence: :not_dispatched}},
+      else: :ok
+  end
+
+  def mount_budget(_worker, _spec), do: :ok
+
+  defp mount_limit(%{artifact: %{"kind" => "oci"}}), do: 2
+  defp mount_limit(%{profile: %{network: :offline}, ports: []}), do: 2
+  defp mount_limit(_prepared), do: 1
 
   def capable(config) do
     case Session.store(config, :capabilities, []) do

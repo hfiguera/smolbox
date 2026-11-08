@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "recorded_date": "2026-11-06",
+  "status": "public-durable-unbooted-branch-passed",
+  "source_commit": "0618e7cc",
+  "platform": "macos",
+  "architecture": "aarch64",
+  "elixir": "1.18.4",
+  "otp": "27.3.4.15",
+  "postgresql": "17.11 (Homebrew)",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+  "hex_archive_sha256": "8e309276833c6b663f6d6f7bca18e1a645ba2e63791c5ddbcce4825c57fb268a",
+  "qualification_helper": {
+    "manifest_sha256": "29563fc7748f937ef1074934c59a551d35792d8fe1b1d4bcbda264e1edd57648",
+    "helper_sha256": "4c4221f32e2185780223938ba6128222668a337fa4e941cdbeaf67a361795d4c",
+    "adapter_sha256": "14651b9c35f419f380955869c5240a8cbee71ed71ee8b46681b2f8712f9aa67a",
+    "boundary": "Publish the original child material, then cancel the original engine budget after the API returns and before child boot.",
+    "default_package_changed": false
+  },
+  "public_recovery": {
+    "mode": "postgresql",
+    "campaign": "ordinary-public-durable-branch-recovery",
+    "actual_recovery_family": "unbooted",
+    "original_proof_retained": true,
+    "paired_retirement_and_release": true,
+    "final_reserved_slots": 0,
+    "final_reserved_disk_gb": 0,
+    "owned_cleanup": true,
+    "normal_shutdown": true,
+    "deliberate_process_interruption": false,
+    "crash_handling_qualified": false
+  },
+  "fresh_workerless_readback": {
+    "workers": 0,
+    "exact_records": 3,
+    "exact_machine_records": 2,
+    "saved_backing_reply": true
+  },
+  "postflight": {
+    "tables": {
+      "vms": 0,
+      "vm_create_reservations": 0,
+      "vm_pause_operations": 0,
+      "config": 0,
+      "vm_resize_intents": 0,
+      "vm_resize_receipts": 0,
+      "fork_pools": 0,
+      "fork_pool_snapshots": 0,
+      "fork_pool_slots": 0,
+      "fork_leases": 0
+    },
+    "account_lock_available": true,
+    "package_assets_verified": 809,
+    "encrypted_machine_rows": 2
+  },
+  "report_sha256": "ba2ed1d62fa41c32448bfe45515c7bf469028579c0d04e5f1d5ab69ed6617612",
+  "readback_sha256": "390466e233e836c955bb5a8f25385c60d0e348d6f7170d9907fa6359052f320c",
+  "full_http_parity_claimed": false,
+  "crash_validation_deferred": true
+}

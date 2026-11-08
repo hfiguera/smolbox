@@ -107,6 +107,36 @@ defmodule SmolBox.EmbeddedObservabilityTest do
     assert {:ok, %{slots: 1}} = Memory.usage(context.store, context.native.id)
   end
 
+  test "embedded inventory can include a frozen source alongside a running branch" do
+    source = %{
+      "name" => "branch-source",
+      "state" => "frozen",
+      "createdAt" => 1,
+      "cpus" => 1,
+      "memoryMb" => 512,
+      "storageGb" => 1,
+      "overlayGb" => 1,
+      "mounts" => [],
+      "ports" => [],
+      "network" => false,
+      "gpu" => false,
+      "cuda" => false
+    }
+
+    child = %{source | "name" => "branch-child", "state" => "running"}
+
+    assert {:ok,
+            [
+              %Machine{name: "branch-source", state: :frozen, backend_identity: nil},
+              %Machine{name: "branch-child", state: :running, backend_identity: nil}
+            ]} = Machine.list_from_embedded_inventory([source, child])
+
+    assert {:error, %{category: :protocol}} = Machine.list_from_wire([source, child])
+
+    assert {:error, %{category: :protocol}} =
+             Machine.list_from_embedded_inventory([%{source | "state" => "identity_unknown"}])
+  end
+
   test "legacy protocol-2 SDK approval preserves its narrower capabilities", context do
     legacy_sdk =
       Config.sdk_identity(context.native)

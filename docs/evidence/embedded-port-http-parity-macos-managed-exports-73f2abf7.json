@@ -1,0 +1,141 @@
+{
+  "schema": 1,
+  "recorded_date": "2026-11-06",
+  "status": "macos-bare-and-container-managed-export-and-registry-reimport-passed",
+  "implementation_commit": "73f2abf7f097a87e0239e303905713a7103d597c",
+  "sdk": {
+    "version": "1.22.0",
+    "revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "source_unmodified": true
+  },
+  "package": {
+    "source_base": "7f0eecde",
+    "export_pack_source_sha256": "64130e7d30a269aacd42b75ad810460f7a49196b46cd08df2129dfcf552d755b",
+    "policy_sha256": "97927a9ad0c94edc3d8ae28fd3b138aecdd4e40cf2c42b07af778b0bb6a71be6",
+    "manifest_sha256": "447d4d7eb7a461e5ea7a0492a8e619740a2378d666c3435d5088a98cf89101bb",
+    "helper_sha256": "aff740d6431bb5349f1ce13b9cc91a8465acfc7e7397e7ef381682a1438dba2d",
+    "asset_count": 809,
+    "hex_archive_sha256": "9ec1826dc1ae333988a60aceee59e054db45585081e84ff988dbb016f7c058ab",
+    "proof_source_sha256": "24457ba5cf1c6eb8d25324212efe769653da3382d21a6c31d28cdcad30310d28",
+    "registry_fixture_sha256": "3fa4bf60265b9128acf915c737cc308a5341c80fdd5fffba8caa5c26a7224a94"
+  },
+  "qualification": {
+    "platform": "macos",
+    "architecture": "aarch64",
+    "elixir": "1.20.4",
+    "otp": "29.0.6",
+    "store": "memory",
+    "without_rust": true,
+    "export_candidate_policy": true,
+    "default_package_exports_enabled": false
+  },
+  "prior_observations": {
+    "sdk_boot_requires_empty_layers_directory_in_bare_archive": true,
+    "insufficient_fixture_reservation_rejected_before_dispatch": true,
+    "earlier_registry_fixture_omitted_config_blob_content_type": true,
+    "earlier_publication_and_both_blobs_independently_verified": true,
+    "earlier_authority_preserved": true
+  },
+  "checks": {
+    "ordinary_elixir_passed": 2123,
+    "focused_elixir_passed": 79,
+    "native_export_pack_passed": 5,
+    "registry_auth_and_elixir_verification_smoke_passed": true
+  },
+  "crash_validation_deferred": true,
+  "crash_handling_qualified": false,
+  "distribution_approved": false,
+  "bare": {
+    "consumer": {
+      "mode": "bare",
+      "store": "memory",
+      "content_sha256": "c3872216376459dbc71b80d8f6df83de02df1786f742e0a667805a23234c54ed",
+      "package_manifest_sha256": "447d4d7eb7a461e5ea7a0492a8e619740a2378d666c3435d5088a98cf89101bb",
+      "runtime_replacement": true,
+      "native_cleanup_resolved": true,
+      "export_history_after_delete": true,
+      "pinned_registry_reimport": true,
+      "source_and_copy_independent": true,
+      "final_reserved_slots": 0,
+      "manifest_sha256": "538e1211c9312b85bd922ecb8aa9ed1e9b755f31d949d73fb1f7994774c680b6",
+      "size_bytes": 25667163,
+      "crash_validation_deferred": true
+    },
+    "independent_registry_readback": {
+      "request_counts": {
+        "heads": 5,
+        "uploads": 2,
+        "chunks": 26,
+        "blobs": 2,
+        "manifests": 3,
+        "reads": 11,
+        "rejected": 0
+      },
+      "sha256": "c3872216376459dbc71b80d8f6df83de02df1786f742e0a667805a23234c54ed"
+    },
+    "postflight": {
+      "tables": {
+        "vms": 0,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "config": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0,
+        "fork_pools": 0,
+        "fork_pool_snapshots": 0,
+        "fork_pool_slots": 0,
+        "fork_leases": 0
+      },
+      "account_lock_available": true,
+      "package_assets_verified": 809
+    },
+    "normal_runtime_shutdown": true
+  },
+  "container": {
+    "consumer": {
+      "mode": "container",
+      "store": "memory",
+      "content_sha256": "e9865d8f70c15d19a778c07113f13a129b7d78944ab57fdde90b2a3c036b4c04",
+      "package_manifest_sha256": "447d4d7eb7a461e5ea7a0492a8e619740a2378d666c3435d5088a98cf89101bb",
+      "runtime_replacement": true,
+      "native_cleanup_resolved": true,
+      "export_history_after_delete": true,
+      "pinned_registry_reimport": true,
+      "source_and_copy_independent": true,
+      "final_reserved_slots": 0,
+      "manifest_sha256": "3322db0accb0618ca2a46cd9d1841830df80a25cdbc934bd8b18d7cfbfb47db7",
+      "size_bytes": 41511695,
+      "crash_validation_deferred": true
+    },
+    "independent_registry_readback": {
+      "request_counts": {
+        "heads": 5,
+        "uploads": 2,
+        "chunks": 41,
+        "blobs": 2,
+        "manifests": 3,
+        "reads": 11,
+        "rejected": 0
+      },
+      "sha256": "e9865d8f70c15d19a778c07113f13a129b7d78944ab57fdde90b2a3c036b4c04"
+    },
+    "postflight": {
+      "tables": {
+        "vms": 0,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "config": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0,
+        "fork_pools": 0,
+        "fork_pool_snapshots": 0,
+        "fork_pool_slots": 0,
+        "fork_leases": 0
+      },
+      "account_lock_available": true,
+      "package_assets_verified": 809
+    },
+    "normal_runtime_shutdown": true
+  },
+  "normal_driver_exit_status": 0
+}

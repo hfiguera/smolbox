@@ -1923,6 +1923,8 @@ mod tests {
             vec![
                 completed(),
                 completed(),
+                crate::export_bootstrap::tests::cached_blobs()[0].clone(),
+                crate::export_bootstrap::tests::cached_blobs()[1].clone(),
                 wire(AgentResponse::Ok {
                     data: Some(
                         serde_json::to_value(crate::export_bootstrap::tests::cached()).unwrap(),
@@ -1967,7 +1969,7 @@ mod tests {
                 collected.outcome
             )
         });
-        assert_eq!(requests.len(), 4);
+        assert_eq!(requests.len(), 6);
         assert!(collected.worker_ready && !collected.termination_requested);
         assert!(retained.upgrade().is_some());
         let (plan, layer, _) = collected.verify_conversion(&budget).unwrap();

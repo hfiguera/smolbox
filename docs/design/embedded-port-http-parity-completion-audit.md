@@ -1,17 +1,950 @@
 # Embedded Port HTTP parity completion audit
 
-Status: **incomplete**, October 17, 2026. The full P0–P9 objective remains active.
-This audit follows each numbered requirement in the
+## HTTP parity closeout — November 8, 2026
+
+**34 of 35 HTTP-supported operations are qualified.** Validation of the
+explicit `credential_ref` exchange under public TLS trust is deferred for
+`prepare_artifact` and the `credentials` specification. GHCR account Basic
+authentication passed with both toolchains on Linux and macOS. GHCR refused
+the reader PAT as an explicit bearer identity, and a publicly trusted host
+for a compatible token realm was unavailable for qualification.
+[Coverage matrix](embedded-port-http-parity-coverage.json) · [GHCR qualification](../evidence/embedded-port-http-parity-private-ghcr-redirect-e03a29b0.json)
+
+The stopped-helper upgrade campaign passed all 16 checks, and the HTTP-only
+package smoke checks passed on Linux x86_64 and macOS ARM64 with both supported
+toolchains. Qualification follows SmolBox's documented source and platform
+limits. [Stopped-helper evidence](../evidence/embedded-port-http-parity-optional-history-upgrades-74f58b5f.json) · [HTTP-only consumer evidence](../evidence/embedded-port-http-parity-http-only-consumers-0618e7cc.json)
+
+The matrix also tracks Port-only branch and native recovery checks separately
+from the HTTP operation count. Crash and CLI-race validation stay deferred, and
+distribution approval remains a separate release decision. The qualified
+packages use the unmodified SDK revision
+`9f446ae00219148ca4a703914f44a8e2fab11655`.
+
+The dated sections below preserve earlier results, including gaps that were
+open when each checkpoint was recorded. The closeout and coverage matrix
+reflect current acceptance under the
 [implementation plan](embedded-port-http-parity-implementation-plan.md).
-The [coverage manifest](embedded-port-http-parity-coverage.json) remains the
-operation/arity/specification acceptance inventory: all full-parity acceptance
-rows are pending. No required feature is removed from scope.
 
 `Implemented foundation` below means inspected source and deterministic contracts
 exist; it does not establish the phase exit gate or native platform qualification.
 The exact engine 0.1.0 offline evidence remains historical. Changed engine 0.2.0,
 manifest 3, protocol 2.0 packages need their own ordinary platform/consumer evidence.
 Crash qualification and distribution approval remain false and separate.
+
+## Optional histories across stopped helper replacement
+
+The stopped-helper checks use installed no-Rust consumers and PostgreSQL. The
+predecessor and replacement have distinct helper binaries and match on the
+manifest schema, SDK pin, native policy and platform asset digest. The
+replacement opens a new epoch and checks the retained drain and reservation
+state. Record comparisons allow scheduler claim fields and due timestamps to
+change while keeping the original identities, receipts and results exact.
+
+Linux x86_64 and macOS ARM64 both passed prepared-artifact, authenticated OCI
+image and background-command history on the current and minimum toolchains.
+The replacement preserved the stopped inventory and guest data. A fresh
+workerless PostgreSQL reader recovered the original completed executions,
+background launch and machine tombstones after normal cleanup.
+
+Both platforms passed checkpoint capture and restore on both toolchains. Each
+replacement retained the completed capture and its reservation. Two independent
+restores verified RAM and disk contents, and a later cold start cleared RAM.
+The runs removed the capture and released the reservation. Both Linux toolchains
+also retained a writable managed-volume attachment across replacement, verified
+its data from the guest, and recorded machine deletion, volume deletion and
+reservation release in PostgreSQL.
+
+The export witnesses completed and released publication staging with the
+predecessor. The replacement verified the completed publication and cleanup
+receipts together with managed terminal and streamed-command history. Both
+toolchains passed workerless readback on Linux and macOS. The minimum macOS
+reader matched six records with zero native workers and zero reservations
+after the helper exited normally. PostgreSQL then shut down normally.
+
+Both Linux replacement toolchains reopened independent copies of a stopped
+PostgreSQL store from a completed live branch run. The predecessor wrote that
+history with the current toolchain. Each replacement matched all 15 records and
+both native backing acknowledgements, with no remaining reservations. Fresh
+Linux branch attempts returned an unknown outcome during child creation, before
+the helper handoff. The completed branch history was preserved independently.
+
+The [optional history upgrade evidence](../evidence/embedded-port-http-parity-optional-history-upgrades-74f58b5f.json)
+records all 16 passing lanes. The earlier Linux growth and macOS
+branch history evidence still applies to its recorded package pairs. Private
+production TLS, crash and CLI-race validation stay deferred.
+
+## Registry credentials and authenticated OCI lifecycle
+
+The final Linux x86_64 and macOS ARM64 packages passed with both installed
+no-Rust toolchains and PostgreSQL. The prepared-artifact registry refused an
+incorrect bearer, served the approved cold artifact once, and verified the
+rotated bearer on the warm path. The OCI guest used configured Basic
+credentials to boot, Docker inline Basic credentials to pull a second image,
+and a Docker credential helper to obtain the identity token for a third image.
+The fixture verified the authenticated requests for each cold image.
+
+The managed runs verified pull deduplication, configuration digests in the
+image inventory, and passive listing while stopped. A normal Runtime
+replacement retained the source receipt, guest data, image inventory and
+reservation. After stop and deletion, a workerless reader recovered the
+exact three deleted machine records and four completed executions from
+PostgreSQL. Each run ended with zero reservations and an empty SDK inventory.
+
+The guest registry fixture used a private address bound to loopback, an exact
+guest CIDR and the pinned SDK's metadata-only egress floor for the isolated
+test processes. The default floor denied the private endpoint. Earlier local
+TLS evidence covers host Basic and identity-token exchanges. Private
+production TLS remains the only open `prepare_artifact` requirement.
+Crash and CLI-race validation stay deferred.
+[Registry and authenticated OCI evidence](../evidence/embedded-port-http-parity-registry-auth-ac6ac709.json)
+
+## Private GHCR qualification attempt — November 8, 2026
+
+The reader verified six digest-pinned private manifests through the normal
+GHCR TLS and Basic credential exchange. Anonymous reads were refused. GHCR
+redirected the prepared payload and OCI configuration blobs to
+`pkg-containers.githubusercontent.com`. The final packages refused that
+redirect during artifact preparation and OCI metadata qualification, before
+machine creation. All four diagnostic lanes ended with empty SDK inventory,
+zero reservations and normal PostgreSQL shutdown. Private production TLS
+qualification remains open.
+[GHCR evidence](../evidence/embedded-port-http-parity-private-ghcr-e03a29b0.json) · [Qualification plan](embedded-port-private-ghcr-qualification.md)
+
+## Private GHCR blob redirect rerun — November 8, 2026
+
+The rebuilt helper permits a single HTTPS blob redirect from `ghcr.io` to
+`pkg-containers.githubusercontent.com`. The fresh GET carries no registry
+credentials, and the helper verifies the downloaded bytes against the pinned
+descriptor. Both toolchains on Linux and macOS passed cold prepared artifact
+download and offline boot, authenticated OCI cold boot and managed pull, exact
+PostgreSQL readback, and normal shutdown. An initial macOS run verified the bare
+artifact download.
+Its 1 GiB storage and overlay did not match the test profile's 4 GiB storage and
+3 GiB overlay, and its failed managed creation scope was preserved. The
+lifecycle reruns use the previously qualified container packs and the original
+OCI fixtures.
+[Redirect rerun evidence](../evidence/embedded-port-http-parity-private-ghcr-redirect-e03a29b0.json)
+
+## Export resources and registry policies
+
+The exact Linux x86_64 and macOS ARM64 packages passed the public
+`SmolBox.Exports` workflow with current and minimum no-Rust consumers backed
+by PostgreSQL. The bare source used 22 GiB of storage and 2 GiB of overlay.
+Linux grew the source through SmolBox, and macOS imported a presized pack.
+The prepared container source used 4 GiB of storage and 3 GiB of overlay.
+Each run rejected below-floor and over-capacity requests without reserving
+export resources. Accepted exports held their reservation until explicit
+resolution released it.
+
+Bare publication used explicitly approved loopback HTTP. Container
+publication used loopback TLS with a dedicated fixture CA. Both required
+fixture-scoped write credentials and refused occupied index and platform
+tags before dispatch. Independent registry readback verified the published
+digests. A pinned reimport preserved guest data, and changing the copy left
+the source unchanged. After ordinary Runtime replacement and deletion, a
+fresh workerless BEAM read back both exact tombstones and the completed
+receipt. Each run ended with zero reservations and an empty SDK inventory.
+
+The scaled bare runs used an explicit one-hour export deadline after an
+earlier Linux run reached the default 15 minutes while packing.
+Private production TLS, crash and CLI-race validation stay deferred.
+[Export qualification](../evidence/embedded-port-http-parity-export-policies-77bbe82c.json)
+
+## Linux mount-count admission on smolvm 1.22.0
+
+The Linux x86_64 HTTP release and Embedded Port package used the same libkrun
+binary. They reproduced the same device limits with the same local bare and
+container packs, the registry-prepared container pack and the digest-pinned
+OCI image. Offline packs without published ports booted with two mounts.
+Filtered or forwarded packs booted with one. Filtered OCI booted with two.
+The next mount exceeded the virtio interrupt budget before guest boot.
+
+Both managed backends now refuse an oversized layout before storing the new
+machine, attaching volumes or reserving worker resources. An older queued
+request stays unassigned and can be cancelled through the normal lifecycle
+API. The current and minimum no-Rust clients each passed 11 boundary layouts
+on both backends, with zero reservations after cleanup. The limits apply to
+the qualified Linux x86_64 1.22.0 runtime.
+Private production TLS, crash and CLI-race validation stay deferred.
+[Mount-count qualification](../evidence/embedded-port-http-parity-linux-mount-count-8e3faaf8.json)
+
+## Linux volume provisioning, attachments and release
+
+The pinned Linux x86_64 package passed both toolchains with Memory and
+PostgreSQL. The volume runs verified private `0700` backing, exact provision
+and deletion proofs, identical retries, stale-version refusal and independent
+disk reservations. When one of two requested attachments was already owned,
+the failed create left the available volume and the original attachment
+unchanged. A stopped machine kept its attachments through draining and a
+normal Runtime replacement.
+
+The live cases exercised two writable mounts on an offline local bare pack,
+two mixed-mode mounts on offline local and prepared-registry container packs
+and filtered OCI, and separate one-mount read-only and writable runs on the
+filtered prepared-registry container pack. Owned machine deletion released
+the attachments. Volume deletion removed a 640-file tree 20 levels deep,
+preserved the running sibling and the target of a link into its backing, and
+freed capacity for a fresh volume. Each lane ended with zero reservations, no
+SDK rows or volume backing, and exact workerless readback of ten tombstones.
+
+Four and eight offline bare mounts and two filtered prepared-registry
+container mounts exhausted libkrun's x86_64 MMIO interrupts before boot.
+Start reported uncertainty and retained the original receipts and reservations.
+The eight-mount and filtered two-mount scopes completed explicit stopped
+resolution and ordinary cleanup. The separate four-mount scope was archived.
+These runs qualified volume provisioning and deletion and identified the
+mount-count gap addressed by the later admission check. Private production
+TLS, crash and CLI-race validation stayed deferred.
+[Linux volume qualification](../evidence/embedded-port-http-parity-linux-volumes-4e2f125a.json)
+
+## Managed terminal preflight, detach and draining
+
+The approved Linux and macOS packages passed managed terminal qualification on
+both toolchains with PostgreSQL and Memory. The runs covered offline direct
+container packs and filtered, prepared-registry packs with a custom guest path
+policy and a reserved port. Linux also exercised writable managed mounts on
+both packed sources. Earlier evidence covers managed OCI terminals.
+
+Receipt-bound preflight accepted stopped eligible image machines without starting
+them or reserving a slot. Bare and unassigned sources were refused by preflight.
+Saved-state terminal intent and requests exceeding the profile's buffer or
+session budget were refused at spec construction. Attached sessions verified
+single-consumer ownership, resize, actual guest output and confirmed Exit.
+Persisted records round-tripped through the codecs selected for the image
+source and mount policy and held no terminal transcript.
+
+Draining left an attached terminal usable and prevented an unrelated machine
+request from obtaining a reservation. A second session on the retained
+assignment opened while draining. Its bound consumer returned normally after
+observing guest output. The session kept an unknown result and blocked ordinary
+stop, delete, and reattachment. An identical request returned the original
+execution. The test waited for the original Port request to drain, stopped the
+owned machine and explicitly resolved the slot. A normal stopped Runtime
+replacement retained the drain and the unknown history. Versioned resume
+allowed work again. Explicit close preserved whichever evidence the guest
+returned, with a confirmed exit releasing the slot.
+
+Owned deletion and Linux volume deletion released reservations. Workerless
+readback matched the settled terminal and machine records, and all ten SDK
+tables were empty after each passing run. The matrix qualifies terminal
+preflight and managed terminal opening. Private production TLS, crash, and
+CLI-race validation stay deferred.
+[Managed terminal evidence](../evidence/embedded-port-http-parity-managed-terminals-7974cc9e.json)
+
+## Packed and prepared-registry creation, networking and saved-state reservations
+
+The prior Port client refused a checkpoint-only worker before dispatch. Port
+now accepts that catalog when the approved helper declares checkpoint support.
+The same Linux and macOS helper packages ran with the updated Hex client.
+
+Both toolchains used PostgreSQL and Memory on both platforms. Checkpoint-only
+workers created stopped offline machines with a single reservation for one slot,
+one vCPU, 768 MiB including host overhead, and 2 GiB across both disks. Duplicate
+creation returned the original handle. Stop and normal Runtime replacement
+retained the reservation, and a guest command completed after each start.
+Networked checkpoint approvals and checkpoint machine specs with ports, volumes
+or startup workloads were refused before dispatch. Owned deletion released the
+reservation and verified absence.
+
+Direct container packs exercised explicit and inherited startup and neutral
+boot. The explicit workload verified literal arguments, an environment override
+and inherited environment, and a working directory of `/tmp`. The inherited
+workload used the image defaults. The witness ran once per start even after its
+nonzero exit. The filtered packed and prepared-registry machines also ran an
+ordinary command in an approved custom guest workdir and refused a workdir
+outside that policy.
+
+The anonymous loopback registry served the same platform-specific container
+pack used for direct creation. Prepared creation bound the manifest and content
+digests to the machine. OCI and saved-state creation use their own Port
+operations. Two independently observed TCP mappings returned
+different guest responses before and after restart. Offline guests accepted
+inbound forwarding while outbound probes failed. Filtered guests reached the
+permitted local responder and failed to reach the other. Retained port
+reservations blocked competing requests before dispatch and survived a normal
+Runtime replacement for each source on both hosts. The Linux PostgreSQL
+mounted cases additionally preserved volume data through Runtime replacement
+and verified volume backing and reservation release.
+
+The matrix now qualifies direct and prepared creation, networking, port
+mappings, and startup workloads. Credential acquisition and authenticated OCI
+lifecycle retain their separate evidence requirements. Private production TLS,
+crash and CLI-race validation stay deferred.
+[Creation and networking evidence](../evidence/embedded-port-http-parity-creation-network-7737ace6.json)
+
+## Prepared-registry and mounted guest I/O on 9a5ba0bc
+
+Both toolchains on Linux and macOS passed the local and registry-prepared bare
+workflows with Memory and PostgreSQL. Both Linux toolchains also passed with
+managed volumes attached to local bare, registry-prepared bare and OCI
+machines. The prepared bare fixtures came from an anonymous loopback registry,
+and their saved receipts matched the pinned manifest and artifact digests.
+
+The runs checked receipt-free inventory, receipt-bound measurements, and
+console tail and bounded follow. They verified buffered stdin, streaming
+stdout and stderr, nonzero exit codes, and a binary upload and download under
+approved guest roots. Invalid roots and an oversized file budget were refused
+at admission. Observation preserved the creation receipt, mount bindings and
+reservation. After owned deletion, all runs had empty native inventories, zero
+reservations and matching workerless readback.
+
+The matrix now qualifies inventory, measurements, buffered and streaming
+commands, upload, download, logs and the guest-path specification. Broader
+volume and attachment variants have their own acceptance requirements.
+Private production TLS, crash and CLI-race validation stay deferred.
+[Prepared-registry and mounted I/O evidence](../evidence/embedded-port-http-parity-source-io-9a5ba0bc.json)
+
+## Final-package ready-child adoption and deletion on e8135e87
+
+The default Linux and macOS helpers completed held and initially released
+children while a test store left their acknowledgements uncertain. The public
+resolver adopted the exact original completions and returned the same results on
+repeat. The same handoff exposed a gap in held-child deletion. The helper
+completed the delete, but its resolver required leases that ordinary completion
+had already retired. Both hosts rejected the resolution and retained the child
+reservation.
+
+The held resolver now rechecks the original enrollment, database identity and
+absence under fresh source and child gates when ordinary deletion has completed.
+Recreated material still blocks the proof. The rebuilt helper resolved the
+completed deletion and accepted dependency retirement on both hosts with Memory.
+Runtime also preserves an already completed readiness scan when that same helper
+returns a matching recovery proof and the store commits it. This prevents a new
+scan from marking the still-running source uncertain. Collection still retains
+the child's reservation, and an unconfirmed or uncommitted result keeps dispatch
+frozen.
+
+Both PostgreSQL toolchains on Linux and macOS verified held and initially
+released children, recovered their deletions, stopped and deleted their sources
+through the public API, and released dependencies, backing and all reservations.
+Consumers without workers read back the exact records. Both hosts and
+toolchains also passed the same workflows with Memory. The matrix now
+qualifies ready-child adoption and completed-deletion resolution.
+
+Both toolchains on Linux and macOS passed prepared retirement with PostgreSQL
+and Memory.
+A bounded staging-capacity fault left an authentic prepared intent before the
+SDK fork began. Explicit retirement returned the same proof on retry. The
+source remained usable, cleanup released every reservation, and the exact
+records were read back without a worker. Before the readiness fix, held-child
+collection and continuation returned matching proofs on both hosts, but the
+subsequent source stop remained blocked. Both platforms and toolchains
+subsequently completed held and initially released collection, continuation
+and residual cleanup with both stores. Collection preserved the child
+reservation, and continuation or cleanup released it after the matching proof.
+The workflows also retired the dependency, released backing, and read the exact
+records back without a worker. The matrix qualifies all six operations covered
+by this run. Partial and unbooted creation recovery retain their separate
+final-package acceptance requirements.
+Private production TLS, crash and CLI-race validation stay deferred.
+[Final-package branch recovery evidence](../evidence/embedded-port-http-parity-final-branch-e8135e87.json)
+
+## Stopped upgrade, growth resolution and mounted startup on b622fd9d
+
+The preserved macOS minimum-toolchain attempt reached the child’s guest identity
+initialization after the fork and recorded no ready event or creation receipt.
+The same signed helper pair passed a clean PostgreSQL rerun. It preserved all
+15 branch history records, both historical backing acknowledgements and the
+drain state, and released all reservations. The original attempt is preserved.
+The exact cause of its initialization stall remains undetermined.
+
+Both Linux toolchains passed explicit growth resolution for a local packed
+source with adequate scratch space. A separate test helper retained the entered
+journal after a real bare resize completed. Explicit quiesced resolution published
+one transition while the SDK row remained unchanged. Both toolchains retained the
+same receipt through restart and deletion and verified it from PostgreSQL
+without a worker. The native growth qualification operation now qualifies.
+
+Mounted bare start reserved a second readiness budget after promoting the
+existing mount lease to the full work budget. Start now retains and uses the
+promoted lease through readiness. Both Linux no-Rust consumers passed the durable
+volume workflow with the rebuilt default package, including stopped Runtime
+replacement, read-only reattachment, sibling isolation, and backing and
+reservation release. Both toolchains repeated the workflow with a prepared
+bare artifact from a local digest-pinned registry. The saved preparation
+receipt retained the exact manifest and content digests.
+
+Partial and unbooted branch recovery passed with PostgreSQL and Memory on both
+toolchains on Linux and macOS. The qualification helpers used ordinary
+cancellation after the native work had reached the intended boundary. Both
+platforms verified publication, disposal, retirement and backing release. A
+separate read-only check verified the macOS backing paths after cleanup. The
+Memory readback used a snapshot taken after normal Runtime shutdown and
+verified that the history matched the pre-shutdown snapshot. Qualification
+of the remaining recovery controls and final packages stays open.
+
+The Elixir client now handles checkpoint creation inspection replies, preserving
+the distinction between confirmed absence and unverified presence. Both
+toolchains on Linux and macOS passed OCI and checkpoint observation with the
+corrected client, including receipt-free inventory, owned and unassigned
+inspection, bounded console follow and deleted-handle refusal. The same
+workflows exercised OCI buffered and streaming commands, directional file roots
+and terminal exit, alongside offline checkpoint commands and files.
+
+Both Linux toolchains passed direct packed creation with two offline TCP
+mappings to distinct guest ports. Both forwarded responses returned before and
+after stopped Runtime replacement. PostgreSQL retained the port reservations
+until owned deletion and a workerless readback matched the deleted record.
+
+The larger OCI export used 3 GiB of storage and 2 GiB of overlay. Both toolchains
+on Linux and macOS published to the local registry with authenticated writes,
+reimported by digest, and read back the completed receipt from PostgreSQL.
+The staging reservation released 69 GiB, four CPUs, 1,152 MiB of memory and
+one slot.
+
+Private production TLS, crash validation and CLI-race validation remain deferred.
+[Follow-up qualification evidence](../evidence/embedded-port-http-parity-followup-b622fd9d.json)
+
+## Queued start after explicit growth resolution on 8887970d
+
+In both Linux runs, a controlled store handoff kept an actual completed native
+resize uncertain. Explicit growth resolution recovered the original material
+receipt, then the next start became uncertain before dispatch. The recovery
+scan had verified the stopped incarnation but treated the queued start as if
+it might already have reached the helper. The original records and stopped
+disks were preserved.
+
+The scan now keeps a pending start when it verifies the same stopped
+incarnation. The existing rule for queued deletion applies under the same
+conditions. Both patched PostgreSQL consumers resolved the original receipt,
+started and deleted the machine, and released all reservations. A workerless
+readback verified the exact deleted record. The regression covers the
+failure and successful dispatch after the scan.
+
+The same controlled receipt handoff passed for the approved prepared-registry
+artifact and the digest-pinned OCI image on both Linux toolchains. A separate
+local packed run reached an uncertain stop while the lab's temporary
+filesystem was full. Its expansion was never dispatched. Its store and SDK
+metadata were archived, and the queued volume runs remain open.
+
+Both Linux toolchains also passed an ordinary stopped upgrade between two
+approved helpers with identical SDK, policy and assets. The second helper
+reopened the stopped machine, preserved the drain and the first growth
+receipt, and verified the retained guest file and historical output. The
+workflow finished the second growth, deleted the machine, and read both
+linked receipts back from PostgreSQL without a worker.
+
+The macOS current toolchain passed a distinct-helper upgrade with PostgreSQL
+branch history. It preserved the drain, verified 15 records and two historical
+backing acknowledgements, and shut down normally. The minimum run stopped at
+the first child's readiness check under the older helper. The replacement was
+never opened, and the original qualification state was retained.
+
+Both toolchains on Linux and macOS passed PostgreSQL checkpoint admission
+and the ordinary branch lifecycle. A live portable capture source passed
+native preflight. Stopped, unenrolled and pack-dependent sources were refused,
+and policy, capacity and drain refusals left the source history and accounting
+intact with no capture outputs. The ordinary branch workflow verified two
+independent children, held release, owned deletion and paired backing release.
+The same branch lifecycle passed with Memory on both platforms and toolchains.
+macOS also verified receipt-free inventory, owned measurements and console
+tails for running and stopped branches, bounded follow for running branches,
+and refusal on deleted handles. Both macOS checkpoint admission lanes passed
+again with the patched client archive.
+The evidence records the exact Hex and native packages for each host.
+
+HTTP-only package smoke checks passed on both toolchains and platforms.
+Focused contracts and reader-first checks passed for legacy HTTP records and
+the collected-publication envelope. Production TLS registry authentication,
+crash validation and CLI-race validation remain deferred.
+[Queued start and ordinary qualification evidence](../evidence/embedded-port-http-parity-queued-start-8887970d.json)
+
+## Cold bare-registry PostgreSQL restart on 55003eae
+
+Port v2 already checked the enrolled process, guest readiness and material
+authority before returning a running start response. Runtime then made a
+separate one-shot inspection and could replace that success with an uncertain
+start. A regression test reproduces the recorded lifecycle outcome by returning
+an unreachable observation to the extra inspection. The original inspection
+wire reply was unavailable. The preserved guest answered eight read-only pings,
+and fresh cold-cache baselines passed on both toolchains with the old code.
+
+Runtime now completes Port v2 start from the verified running response under the
+existing store guard. Both fixed Linux consumers passed with a cold bare registry
+cache and PostgreSQL 16.15 using the same native package. Each fetched and
+verified the artifact, restarted after normal Runtime replacement, grew from
+1/1 through 2/3 to 3/3 GiB, retained guest data, and deleted the machine with
+zero reservations. A consumer with no worker read back the exact deleted
+record and both linked receipts. The public disk-growth operation now qualifies
+in the matrix. The broader P7 gate and explicit growth-resolution control
+remain open. The SDK pin is unchanged. Crash and CLI-race validation remain
+deferred.
+[Cold bare-registry restart evidence](../evidence/embedded-port-http-parity-registry-restart-55003eae.json)
+
+## Linux growth and checkpoint refusals on 5dc54b60
+
+The Linux consumers on both toolchains repeated two stopped growth operations
+on the approved local bare, local packed, and OCI fixtures with PostgreSQL and
+Memory. They retained guest data and both material receipts through normal
+Runtime replacement, rejected running, draining, and over-budget growth
+requests, and finished with zero reservations and empty SDK inventories.
+The first minimum-toolchain bare Memory attempt retained an uncertain
+post-resize guest read. Its same-owner stop, explicit resolution and deletion
+finished before a fresh workflow passed.
+
+Registry-backed growth passed with Memory and with a warm PostgreSQL registry
+cache on both toolchains. A fresh download of a packed registry artifact also
+passed with PostgreSQL on the current toolchain. Both initial PostgreSQL runs
+with a fresh bare registry artifact completed their first growth, then received
+a running start response after Runtime replacement. The follow-up inspection
+did not confirm start. Those attempts retained the 5 GiB reservation and were
+archived. The current-toolchain witness was stopped, resolved and deleted
+through its original owner. The read-only diagnosis of the preserved
+minimum-toolchain witness is recorded above.
+
+The public checkpoint contract tests reject an unapproved capture policy,
+a draining worker, and insufficient capacity. Each check keeps the source
+running with its original reservation, creates no capture history or output,
+and sends no capture request.
+
+The latest Linux package also rejected growth on checkpoint-backed and
+checkpointable machines in all four toolchain and store lanes. Live checks
+refused stopped and unenrolled capture sources, an unapproved capture policy,
+networked or port-published checkpoint requests, and a non-idle declaration.
+The workflows retained the original geometry and accounting through each
+refusal, left no capture output, and released all resources at deletion.
+A running checkpointable guest created from a `.smolmachine` pack also received
+a pre-dispatch refusal. The SDK record retains that pack dependency, which is
+ineligible for portable capture.
+[Growth and refusal evidence](../evidence/embedded-port-http-parity-linux-growth-refusals-5dc54b60.json)
+
+## Linux OCI disk growth on 2b984eed
+
+Both no-Rust PostgreSQL consumers grew a stopped digest-pinned Alpine OCI
+machine from 1/1 GiB to 2/3 GiB and then 3/3 GiB of storage and overlay. They
+rejected running, over-budget and draining requests before dispatch. Separate
+normally exited BEAMs preserved the first growth receipt, its 5 GiB reservation,
+the drain state, and historical binary output. The resumed workflows retained
+both linked growth receipts and verified the larger guest filesystem and
+independent overlay geometry.
+
+After ordinary deletion, a fresh consumer with no native worker read back the
+exact deleted record and both linked receipts from PostgreSQL. Both accounts
+finished with zero reserved slots or disk, empty SDK inventories, a free
+account lock and normal PostgreSQL shutdown.
+[Linux OCI disk growth qualification](../evidence/embedded-port-http-parity-linux-oci-growth-2b984eed.json)
+
+## OCI export and reimport on 266510d6
+
+The conversion helper now checks the cached OCI manifest against the approved
+platform digest and verifies the exact config bytes against the manifest
+descriptor. It checks the SDK query against that config digest, the native
+platform, the ordered layers and the workload defaults before flattening.
+The focused tests reject changed cache bytes and inconsistent SDK replies
+before flattening.
+
+Linux passed the public OCI export and digest-pinned reimport with PostgreSQL
+on Elixir 1.20.4/OTP 29 and Elixir 1.18.4/OTP 27. The macOS minimum consumer
+passed after setting `LC_ALL=en_US.UTF-8` in the qualification launcher.
+PostgreSQL had aborted before SmolBox started because the initial launcher
+omitted the locale.
+
+All three runs resolved export cleanup, retained the receipt across Runtime
+replacement, and verified that modifying the copy left the source unchanged.
+All deleted the machines and confirmed zero reservations, exact workerless
+readback of both stored records and the receipt, empty SDK inventories, and
+normal PostgreSQL shutdown. Archived records on both platforms confirm cleanup
+released the full 66 GiB export reservation. Production TLS registry
+authentication and the remaining admitted resource and credential combinations
+stay open.
+[OCI export qualification](../evidence/embedded-port-http-parity-oci-export-verified-266510d6.json)
+
+## OCI guest I/O and terminal backpressure on dadef569
+
+The Linux current toolchain and the macOS minimum toolchain both completed
+checkpoint file round trips, streaming stdout and stderr, and measurement
+checks for running, stopped and deleted checkpoint handles. Both verified
+OCI startup arguments, environment and working directory, then transferred
+binary files through direction-specific roots and exercised buffered and
+streaming commands with their exit codes.
+
+Both hosts lost the original terminal session when input followed resize. The
+first Linux attempt reported an admission rejection before dispatch. The
+terminal server now returns that specific error while keeping the session open
+for a caller retry. The regression test verifies that the server sends no close
+or duplicate input and can receive a confirmed exit on the original session.
+
+The corrected consumers on both hosts completed terminal resize, output and
+exit, and released the command slot. Both verified that the startup workload
+ran once per start across stopped Runtime replacement. Both runs ended with
+zero reservations, empty SDK inventories and normal PostgreSQL shutdown.
+[Guest I/O qualification](../evidence/embedded-port-http-parity-guest-io-dadef569.json)
+
+The Linux OCI export started and stopped the source, then remained unresolved
+with its native stage in `preparing`. A read-only check of the stopped source
+confirmed that the cached manifest matched the pin and that its config had a
+different, valid digest. The pinned SDK's image query reports the config
+digest. The earlier export planner compared it to the manifest digest.
+[OCI export diagnosis](../evidence/embedded-port-http-parity-oci-export-digest-dadef569.json)
+
+## OCI networking and saved-state lifecycle on 006ae76e
+
+The Linux PostgreSQL consumers on both toolchains and the macOS PostgreSQL
+consumer on the minimum toolchain passed ordinary start, stop, stopped Runtime
+replacement, restart and deletion for two OCI profiles. The hostname-only
+profile published one port, resolved the approved registry hostname, and denied
+the unapproved hostname and both literal destination controls. The combined
+hostname and CIDR profile published two distinct host ports to the same guest
+service at a larger CPU and memory allocation. Both ports served the exact
+response before and after replacement, and the guest reached only the allowed
+literal control. Reservations remained through stop and replacement and were
+released after deletion.
+
+All three runs rejected offline OCI and checkpoint networking or port options
+before creating a machine. An approved offline checkpoint restored, stopped,
+survived Runtime replacement, and cold-started with its disk marker and without
+its volatile RAM marker. Its deletion released the reservation. The SDK
+inventories were empty and PostgreSQL shut down normally in all three runs.
+[OCI and saved-state qualification](../evidence/embedded-port-http-parity-oci-saved-lifecycle-006ae76e.json)
+
+## Deletion after a published-port conflict
+
+Explicit stopped resolution temporarily freezes dispatch on the embedded
+worker. The recovery scan previously marked a newly queued delete as uncertain
+before the helper received it. The scan now keeps the request pending when it
+verifies the same stopped incarnation. Requests that already reached the
+dispatch phase still follow the uncertainty path.
+
+Linux (Elixir 1.20.4/OTP 29, packed image) and macOS (Elixir 1.18.4/OTP 27,
+prepared bare image) passed the public PostgreSQL workflow. Both retained the
+reservation on `port_conflict`, explicitly resolved the VM to stopped, and
+deleted it with verified absence. The independent listener kept serving while
+a second managed VM reserved and released the same port. Both runs ended with
+zero reservations, empty SDK inventories and normal PostgreSQL shutdown.
+[Port conflict cleanup evidence](../evidence/embedded-port-http-parity-port-conflict-cleanup-34413ad1.json)
+
+## Hostname filtering and published-port conflict follow-up
+
+The Linux minimum-toolchain PostgreSQL consumer passes hostname-only egress
+on the default package. Host controls resolve and connect to both destinations.
+The guest resolves and connects to the approved hostname, and the SDK denies
+both the unapproved name and a direct connection to its address. Explicit stop
+and deletion release all reservations, and PostgreSQL stops normally.
+
+The macOS minimum-toolchain consumer passes offline forwarding from a
+prepared bare image. A bounded foreground guest service returns the expected
+inbound reply while both independently reachable outbound destinations are
+denied. Stop and Runtime replacement retain the mapping, and ordinary
+deletion releases all reservations before the separate collision case.
+
+An independently bound loopback listener on either host causes a typed
+`port_conflict` during start. The listener continues to serve, the SDK reports
+the VM stopped, and the store retains the port reservation. Explicit stopped
+resolution succeeded on both hosts. In these earlier runs, the subsequent
+deletion became uncertain in both cases, with no automatic replay.
+
+Production TLS authentication awaits approved private GHCR artifact and image
+digests and a configured local read credential.
+[Network follow-up evidence](../evidence/embedded-port-http-parity-network-followup-c4b19058.json)
+
+## OCI credentials, egress and published ports on 7e3b43c7
+
+The current-toolchain PostgreSQL consumers on Linux and macOS pass the
+public OCI network workflow using the default helpers. Each verifies one
+reachable CIDR endpoint, one denied endpoint, and an inbound response over a
+loopback published port. The store rejects a competing reservation before
+dispatch, retains the mapping through stop and Runtime replacement, and
+releases it after deletion. Offline OCI creation is rejected before dispatch.
+
+The minimum macOS consumer repeats the OCI flow and verifies approved and
+unapproved DNS names. The minimum Linux consumer runs the prepared Python
+image with offline and CIDR policies. Offline egress denies both controls
+while the published port still delivers replies. All four consumers release
+their reservations, leave the SDK tables empty and stop PostgreSQL normally.
+
+The loopback TLS fixtures exercise Basic exchange and password rotation on
+Linux and macOS, and identity-token exchange and rotation on macOS. Both
+credential forms pass cold preparation, cache reuse and workerless
+PostgreSQL readback. The Basic fixture rejects a mismatched repository scope,
+and the identity fixture rejects a different realm. These helpers add only
+test CA trust and fixture name resolution. [OCI network and credential evidence](../evidence/embedded-port-http-parity-oci-network-7e3b43c7.json)
+
+Production-trust authenticated source and pull combinations, Linux hostname
+filtering, macOS offline forwarding, and conflicts with independently bound
+host listeners remain open.
+
+## macOS checkpoints on 9a2feea6
+
+Both macOS PostgreSQL consumers pass the full public checkpoint workflow
+using the helper rebuilt from `9a2feea6`. Each consumer starts from the
+previously qualified seed in a fresh domain, captures a new checkpoint, and
+restores two independent guests across ordinary stopped Runtime replacement.
+Both verify RAM and disk state, receipt-free inventory, console tail and
+bounded follow. A cold restart discards restored RAM. Ordinary cleanup
+releases all reservations, leaves the SDK tables empty, and shuts down
+PostgreSQL normally. The package keeps the same SDK pin and 809 runtime
+assets. [macOS checkpoint qualification record](../evidence/embedded-port-http-parity-macos-checkpoints-9a2feea6.json)
+
+The checkpoint restore specification and the four capture and restore
+operations now qualify. The checkpoint contract still has open preflight
+refusal cases for source, policy, draining and budgets.
+
+## Durable workflows on the 3d15db7b packages
+
+The [exact-package qualification record](../evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json)
+covers signed macOS and rebuilt Linux helpers against the same unmodified SDK
+pin. The four current and minimum HTTP-only consumers pass using one Hex
+archive, with identical hashes for all 682 installed files. The local test
+suite passes 2,124 checks with the runtime and deferred crash tags excluded.
+
+- Both macOS PostgreSQL consumers capture and restore two independent
+  children, verify RAM and disk state, and confirm that a later cold boot
+  discards restored RAM. Receipt-free inventory, console tail and bounded
+  follow pass on both children. Ordinary cleanup releases all reservations.
+- Both Linux PostgreSQL consumers restore a fresh basic seed and complete the
+  guest preparation command. On the original helper, both captures leave a
+  checksum-valid archive in native staging and an empty public partial.
+  The SDK records the entered VMM's birth time in
+  `fork_lineage_pid_start_time` after rebasing its RAM. The SmolBox capture
+  check rejects that record change before publication. Omitting just that
+  field reconstructs the original immutable hash for both retained attempts.
+  The current Linux branch consumer separately passes sibling isolation,
+  receipt-free inventory of the frozen source alongside its child, bounded
+  console follow, drain and ordinary cleanup.
+- The rebuilt Linux helper accepts the SDK marker only for the entered VMM
+  and verifies the rest of the record against the original immutable hash.
+  Both Linux PostgreSQL consumers pass the complete public capture and restore
+  workflow on that helper. Each restores two independent guests, verifies RAM
+  and disk state, observes receipt-free inventory and bounded console follow,
+  and releases all reservations. Both SDK inventories are empty and PostgreSQL
+  shuts down normally.
+- The Linux current and both macOS PostgreSQL consumers pass anonymous OCI
+  startup workloads, image inventory and pull reuse, binary file transfer,
+  receipt-free inventory, console tail and bounded follow, and a stopped
+  Runtime replacement. This run uses public digest-pinned sources. Both macOS
+  accounts passed the final postflight with empty SDK tables, available account
+  locks, verified package assets and normal PostgreSQL shutdown.
+- Both Linux PostgreSQL consumers pass the public OCI mount workflow with
+  the canonical SDK volume root. They verify writable and read-only access
+  across stopped Runtime replacement, competing attachment and volume budget
+  rejection, and ordinary release with zero reservations and an empty volume
+  root. The earlier attempt with a separate qualification root was preserved.
+
+The matrix retains checkpoint preflight refusals, remaining Linux mount and
+growth combinations, OCI credential and network cases, eligible OCI exports,
+terminal and streaming coverage, and remaining source-specific diagnostics and
+stopped-helper upgrade cases.
+Crash and CLI race validation remain deferred.
+
+## Earlier exact packages and operation review
+
+The [frozen package and consumer record](../evidence/embedded-port-http-parity-exact-packages-a3482fed.json)
+binds both default helper builds to the unmodified SDK. The four HTTP-only
+consumers use one Hex archive and agree on all 679 packaged file hashes. Both
+Linux PostgreSQL consumers exercise a bare VM through creation, start, stop and
+deletion. They check receipt-free inventory, owned measurements, node
+observations, custom workdir and file roots, console tail and bounded follow,
+and ordinary shutdown with empty SDK tables and the account lock available.
+
+The current macOS consumer passes receipt-free inventory, owned measurements,
+node observations and console tail on the running branch source. After the first
+child is created, listing fails at the worker inventory boundary. The inventory
+fix reports a frozen source without probing its agent or attaching a receipt.
+The deterministic tests cover the frozen source with a running child, and keep
+the HTTP inventory decoder on its existing state vocabulary.
+
+The [corrected package record](../evidence/embedded-port-http-parity-exact-packages-b4a19260.json)
+confirms both Linux PostgreSQL diagnostic lanes and all four HTTP-only consumers
+again. The macOS branch runs on both toolchains list the frozen source alongside
+the running and released children. Console tail and owned measurements pass on
+both children, accounting stays unchanged during observation, and ordinary
+cleanup leaves all SDK tables empty. These four Linux and macOS lanes qualify
+the five worker observation operations and their domain contract. On both
+macOS toolchains the basic seed boots and passes its initial observations.
+Both runs stop at the guest command that prepares capture data. The minimum
+run records an unknown execution with collection pending before capture.
+The failed runs and their records remain under their existing owners where
+ordinary cleanup could not complete. Crash validation stays deferred.
+
+The [macOS checkpoint readiness record](../evidence/embedded-port-http-parity-macos-checkpoint-readiness.json)
+qualifies the full ordinary capture and restore round trip on both toolchains
+with a newly captured seed and the same SDK pin. The rebuilt helper requires
+the guest timer probe before completing the entered restore. Each consumer
+restores two independent machines, verifies RAM and disk state, and confirms a
+later cold start drops the restored RAM. Ordinary cleanup leaves zero
+reservations and all SDK tables empty. Linux and the remaining durable restore
+lanes stay open.
+
+At this checkpoint, the remaining cases included authenticated OCI sources,
+Linux mounted remote sources, saved-state diagnostics, durable checkpoint
+lanes, and final package coverage for ordinary upgrade and retained histories.
+
+## Registry credentials, mounts and diagnostics — November 6, 2026
+
+The [five-contract qualification record](../evidence/embedded-port-http-parity-five-contracts-b5d119c6.json)
+adds ordinary public checks for the previously unlinked evidence entries.
+
+- The Linux and macOS PostgreSQL consumers verify receipt-free worker inventory
+  through the lifecycle, scoped managed listings and retained deleted history.
+  Both use a custom guest workdir and transfer 65,537 bytes outside
+  `/workspace`. Invalid roots, directions and file budgets leave no execution
+  record. Console tail and bounded follow deliver lines, preserve reservations,
+  and reject a deleted handle.
+- The minimum-toolchain Linux PostgreSQL consumer verifies writable and
+  read-only mounts across two normal BEAMs. The replacement reads the original
+  mounted data, rejects competing attachment and excess reservation, and
+  releases the volumes and machines normally. The earlier attempt with a
+  noncanonical test root retains an unknown record and its owner. Its SDK VM
+  inventory and attempted volume directory are empty.
+- The Linux PostgreSQL registry consumer verifies cold and cached preparation
+  with two identity tokens under the same credential reference. The loopback
+  HTTPS fixture checks exact realm and repository scope. The registry receives
+  only the scoped bearer and the wrong realm receives no identity token. A
+  workerless fresh BEAM compares the two encrypted-store records. The helper
+  uses a fixture CA and two fixture DNS mappings. TLS hostname, chain and
+  realm verification remain active.
+
+The matrix links earlier evidence and these scoped results. Wider supported
+sources, authentication variants and resource combinations remain open. Crash
+validation stays deferred.
+
+## Linux durable partial and unbooted branch recovery — November 6, 2026
+
+The [Linux durable recovery record](../evidence/embedded-port-http-parity-linux-durable-branch-recovery-32d4b083.json)
+covers four isolated local-bare cases on PostgreSQL 16.15. Partial and unbooted
+recovery both pass through the public branch controls on Elixir 1.20.4/OTP 29
+and Elixir 1.18.4/OTP 27. The qualification helper cancels the original budget
+at the selected native API return boundary. The default package has no such hook.
+
+Each case verifies typed disposal, dependency retirement, backing release and
+zero reservations. A fresh BEAM with no workers reads two encrypted machine
+records, one command record and the original backing acknowledgement. All ten
+SDK tables are empty, the account locks are free and PostgreSQL stops normally
+in all four accounts. The lab powers off normally. Wider parity matrix cases
+remain open, and crash validation stays deferred.
+
+## Final HTTP-only package smoke checks — November 6, 2026
+
+The [0618e7cc installed consumer record](../evidence/embedded-port-http-parity-http-only-consumers-0618e7cc.json)
+uses one Hex archive on macOS ARM64 and Linux x86_64. Current and minimum
+toolchains on both hosts verify all 671 installed files, resolve dependencies
+offline, and pass the HTTP client and Runtime smoke checks without Rust or
+native assets.
+
+The [reader-first codec record](../evidence/embedded-port-http-parity-reader-first-codec-0618e7cc.json)
+compares the reader immediately before collected branch publications with the
+current reader on both toolchains. The upgraded readers preserve legacy HTTP
+v5 records and read the complete v50 publication. Both older readers reject
+v50. Same-OTP HTTP round trips preserve the bytes, and cross-OTP reads preserve
+the decoded terms. The v50 fixture uses synthetic branch history.
+
+The [macOS stopped-helper replacement](../evidence/embedded-port-http-parity-macos-stopped-helper-upgrade-0618e7cc.json)
+uses signed manifests 447d4d7e and 1fc30dba with the same native policy. The
+replacement opens a new epoch, verifies the retained receipt and file, then
+deletes the owned VM normally. Both packages verify all 809 assets, all ten
+SDK tables end empty, and the account lock is free. The preflight rejects a
+policy-mismatched package before opening a native owner. This raw Port run
+covers a retained VM.
+
+The [macOS durable history replacement](../evidence/embedded-port-http-parity-macos-durable-history-upgrade-0618e7cc.json)
+uses the same two packages through the installed minimum-toolchain consumer
+and PostgreSQL 17. The original workflow rejects a new branch while draining,
+then resumes and completes both children. After normal shutdown, the replacement
+opens a new epoch, completes its scan, preserves the drain and compares 15
+retained records including both original backing acknowledgements. Only mutable
+claim fields are excluded from comparison. SDK inventory and reservations end
+empty and PostgreSQL stops normally.
+
+The [macOS durable unbooted branch record](../evidence/embedded-port-http-parity-macos-durable-unbooted-0618e7cc.json)
+covers the public recovery path on minimum Elixir and PostgreSQL 17. A separate
+qualification helper cancels the original budget after material publication
+returns and before child boot. Public operations publish the retained proof,
+dispose the unbooted child, retire its dependency, delete the source and release
+backing. A fresh workerless BEAM reads all three saved records and the saved
+backing acknowledgement. All ten SDK tables and all reservations end empty.
+
+The [macOS durable partial branch record](../evidence/embedded-port-http-parity-macos-durable-partial-4c3dcf63.json)
+uses minimum Elixir and PostgreSQL 17 with the bare-cache correction. The
+qualification helper cancels only after the original boot call returns and
+before identity initialization. Public branch controls publish material,
+collect the child, dispose it, retire the dependency and release backing. The
+original owner stops the source before public stopped resolution and deletion.
+A fresh workerless BEAM verifies the two deleted machine records, the command
+record and the saved backing acknowledgement. All reservations and ten SDK
+tables end empty, the account lock is free and PostgreSQL stops normally.
+The earlier rejection preserved its original authority and disks. The Linux
+durable recovery cases now have the separate evidence above.
+
+## Default macOS managed exports — November 6, 2026
+
+The [macOS durable export record](../evidence/embedded-port-http-parity-macos-durable-exports-081a83e1.json)
+binds the export-enabled manifest 447d4d7e to Elixir 1.18.4/OTP 27 and
+PostgreSQL 17. Bare and container cases both publish, resolve staging cleanup,
+re-import by digest, boot, verify independent guest changes and delete normally.
+After each normal exit a new workerless BEAM reads the exact completed receipt
+and both encrypted-store machine records. Both runs leave zero reservations,
+empty SDK tables and a free account lock. PostgreSQL stops normally.
+
+The default macOS policy matches that qualified descriptor byte for byte.
+Rebuilding from the default commit preserves all 809 assets and the helper's
+executable bytes outside the Mach-O UUID and signature. Both signatures verify
+and carry the same hypervisor entitlement.
+Together with the current-toolchain Memory evidence, this closes the requested
+macOS export admission gate. Crash validation remains deferred.
+
+## Default Linux managed exports — November 6, 2026
+
+The [Linux export record](../evidence/embedded-port-http-parity-linux-managed-exports-081a83e1.json)
+binds manifest 0870a210 to bare and container exports on Elixir 1.20.4/OTP 29
+and Elixir 1.18.4/OTP 27 with PostgreSQL 16. Both no-Rust consumers publish and
+verify the artifact, resolve staging, boot the digest-pinned import, verify
+independent guest data and delete both machines normally. A fresh workerless
+BEAM reads the exact completed export receipt and two deleted machine records
+from PostgreSQL after each normal exit. Each run ends with empty SDK tables,
+a free account lock and zero reservations.
+
+The default Linux policy matches the qualified candidate byte for byte. The
+minimum durable lane uses Jason 1.4.5 for Ecto SQL's Decimal 3 dependency.
+The Linux provisioning VM shut down normally. Crash validation remains deferred.
+
+## Managed macOS bare and container exports — November 6, 2026
+
+The [managed export record](../evidence/embedded-port-http-parity-macos-managed-exports-73f2abf7.json)
+qualifies both source modes through the installed no-Rust consumer on macOS
+ARM64 with Elixir 1.20.4, OTP 29.0.6 and Memory. A bare export now includes the
+empty `layers/` directory expected by the pinned SDK for an imported sidecar,
+matching the SDK's own bare pack layout.
+
+Each case verifies submit and duplicate submission, publication and both
+immutable tags, resolution and staging cleanup, ordinary Runtime replacement,
+explicit approval and boot of the digest-pinned registry import, independent
+source and copy data, owned deletion and retained completed export history.
+Both cases return reservations to zero. All ten SDK tables are empty, the
+account lock is free, and all 809 package assets and the helper signature
+verify. The candidate uses the same export policy as the later macOS default.
+Crash validation stays deferred.
+
+## Latest ordinary native export and partial branch evidence — November 6, 2026
+
+The [macOS export record](../evidence/embedded-port-http-parity-macos-native-export-07778edc.json)
+binds the production engine and raw Port import to manifest 769e5912. The
+container artifact publishes to an immutable loopback registry. Independent
+readback verifies both tags and both blobs, and native lookup returns the exact
+publication receipt after staging cleanup. The same bytes import under a new
+incarnation, boot, stop and delete normally. The account lock is free, all ten
+SDK tables are empty, and all 809 package assets and the signature verify.
+
+The bare artifact with an empty image name also packs and imports. Its first
+boot still returns a native uncertain outcome. The original owner shuts down
+normally, and the stopped imported VM and disks are retained for diagnosis.
+Public managed exports remain gated. The ordinary Elixir suite passes 2,123
+checks with runtime and deferred crash tags excluded.
+
+The [Linux partial branch record](../evidence/embedded-port-http-parity-linux-partial-branch-07778edc.json)
+binds ordinary API cancellation to manifest 055a460c and the original live
+engine. The boot call returns, and collection, absence, backing disposal and
+source disk and memory preservation all verify before owned cleanup. Final
+inventory has ten empty SDK tables, no native processes and a free account lock.
+All 806 package assets and the 22-member private proof archive verify. The lab
+shuts down normally. Public Port routing and durable dependency retirement
+remain separate acceptance gates.
+
+The [HTTP-only consumer record](../evidence/embedded-port-http-parity-http-only-consumers-271b12a4.json)
+uses one Hex archive across macOS ARM64 and Linux x86_64 with Elixir 1.20.4/OTP
+29 and Elixir 1.18.4/OTP 27. All four installed consumers verify the same 667
+package files, resolve dependencies offline and pass the HTTP client and
+Runtime smoke checks with Rust and native assets outside the test environment.
 
 ## Latest scoped macOS acceptance — October 17, 2026
 
@@ -113,7 +1046,7 @@ The [0735ee82/d1f8a583 ordinary record](../evidence/embedded-port-http-parity-ma
 
 This resolves the reproduced macOS start and terminal relay path failures for that exact scope/package. Memory survives the normal Runtime replacement. Changed-helper upgrade, full BEAM/store loss and the wider feature/platform/resource/source acceptance gates are not qualified here. All full-parity coverage rows remain pending; crash validation stays deferred and distribution approval false.
 
-## Current product admission gaps
+## Earlier product admission gaps
 
 The [earlier source admission audit](../evidence/embedded-port-http-parity-current-admission-audit.json)
 compares both package policies and the SDK approval gate at source 766b3a11.
@@ -127,13 +1060,11 @@ the scoped ordinary acceptance recorded above; wider acceptance remains required
 | --- | --- | --- |
 | Remote OCI/registry sources and image operations | Advertised; full acceptance remains pending | Advertised; scoped current/minimum OCI and bare registry consumers pass; wider gates pending |
 | Checkpoints and branches | Advertised; full acceptance remains pending | Advertised; scoped current/minimum branches and basic-seed capture/restore pass; wider gates pending |
-| Exports | Not advertised | Not advertised |
+| Exports | Enabled by default after bare and container acceptance on current and minimum PostgreSQL consumers | Enabled by default after bare and container acceptance on current Memory and minimum PostgreSQL consumers |
 
-Mac branch collection preflight is now admitted by the explicit policy/SDK gate.
-These remaining acceptance gaps
-remain implementation/qualification work; they are not accepted platform
-exceptions. Volumes and growth keep the HTTP guide's existing Linux qualification
-restrictions. All 62 operation rows and 15 contracts remain pending full acceptance.
+At this checkpoint, the explicit policy and SDK gate admitted macOS branch
+collection preflight. Volumes and growth follow the Linux qualification
+restrictions in the HTTP guide. The coverage manifest records current acceptance.
 
 ## Fresh macOS setup — October 17, 2026
 
@@ -145,7 +1076,7 @@ The [worker-relay correction](../evidence/embedded-port-http-parity-worker-relay
 
 The [fdd6e698 public macOS attempt](../evidence/embedded-port-http-parity-macos-start-fixed-terminal-pending.json) confirms repaired start/Exit 7 and complete disposable cleanup, then fails at terminal open. The [terminal caller correction](../evidence/embedded-port-http-parity-terminal-relay-paths.json) preserves the authenticated fixed worker CWD and uses relative relay staging. Its full long-path worker peer fails with the old helper and passes with the new helper; four terminal I/O models and Clippy/format also pass. The failed domain remains preserved; fresh complete current/minimum acceptance is still required.
 
-## Current acceptance checkpoint — October 17, 2026
+## Acceptance checkpoint — October 17, 2026
 
 The original-boot tracking correction is source **8686e179**. Its original-boot
 tracking models and complete ordinary Rust sweep pass **1,319 tests, 24 ignored**;
@@ -3707,10 +4638,8 @@ Public native branch admission stays disabled; all full-parity rows remain pendi
 Crash validation and distribution approval remain separate and false. Nothing is
 pushed or published.
 
-The following table is a historical requirement checkpoint. Later dated source
-corrections and scoped results, the current acceptance checkpoint and the admission
-audit above govern the present state; historical pending integration descriptions
-must not be mistaken for current implementation inventory.
+The following table preserves a historical requirement checkpoint. The closeout
+and coverage matrix above record current acceptance.
 
 | Requirement | Historical evidence and remaining work at that checkpoint |
 | --- | --- |
@@ -3762,7 +4691,7 @@ must not be mistaken for current implementation inventory.
 | P9.1 Matrix closure | All full-parity rows remain pending; checked inventory prevents a premature completion claim. |
 | P9.2 Regressions | Appropriate ordinary Rust/Elixir/schema/codec/source checks run incrementally. Full expanded Memory/PostgreSQL/HTTP and resource acceptance remains pending. |
 | P9.3 Packages/consumers | Newest source 655b323 builds manifest 8df2877a/helper 2d5a215e from 265 verified inputs. Full ordinary Rust sweeps pass 1,015 macOS/1,016 Linux units plus 56 contracts each; strict Clippy and SDK checks pass. Its mounted-guest attempt fails and is normally cleaned; no public current/minimum consumer qualification is attributed to this package. See the explicitly incomplete 655b323 evidence. Latest source a2342aa builds Linux manifest 762ddd47/helper 22d60320; all 262 native inputs verify. Actual current/minimum public no-Rust PTY/files consumers pass against those exact bytes, with binary retention, terminal Exit/resize, graceful Runtime replacement, draining and final owned deletion/zero slots. These runs exercise zero HTTP workers. Final-source strict Clippy, thirteen ordinary file-worker cases and the separate host-volume witness pass. The full ordinary Linux sweep at 0177ba4 passes 1,013 units plus 56 contracts; only the witness/README change afterward. New-package networking/workloads and broader platform/features remain pending. See the a2342aa scoped evidence. Historical native source 2785e18 builds Linux manifest af4bc9ff, executable fbc1a792 and fixture 339995f3 from verified unmodified SDK 1.22.0. All 261 native inputs match the frozen inventory. Six actual public no-Rust consumers pass: current/minimum PTY/files, workloads and networking. They exercise normal lifecycle and draining/replacement, binary retained data, terminal interaction/Exit, missing executable with a usable VM, real offline/CIDR traffic and mapped replies; every run ends with owned deletion, empty inventory and zero reserved slots. Final-source focused contracts, eleven non-VM worker cases and strict Clippy pass on Linux/macOS; the full Linux source sweep at parent 52065c9 passes 1,007 units plus 56 contracts and is not attributed to later source. See the two final 2785e18 evidence files. Historical 47fb3864 additionally retains its own resource/non-root/observation and compatible-upgrade evidence; HTTP-only source archive b2cbd652 passes Linux/macOS without Rust/native assets. Those scopes do not transfer to changed native bytes. The lab is normally stopped with its disk/domain retained, and macOS export custody is untouched. Changed macOS packages, native durable expanded histories, other source/volume/saved-state/branch/upgrade campaigns and full feature/platform parity remain pending. |
-| P9.4 Replacement/upgrades | Deterministic Runtime tests preserve the full v17 receipt/reservation after graceful stopped replacement and lease expiry. Exact Linux current/minimum public consumers now preserve binary data and draining mode across graceful Runtime replacement using a surviving Memory store. A separate ordinary stopped-helper upgrade from manifest 58a08bf8 to 47fb3864 preserves the original full receipt/domain, retains old assets, verifies file contents after the new helper starts the VM, and completes owned deletion/reaping. Policies/protocol/SDK match exactly; this qualifies only that pair and no codec rollback. Native durable expanded histories, incompatible/optional-history upgrade combinations and changed macOS package campaigns remain pending. |
+| P9.4 Replacement/upgrades | Qualified. The [optional history upgrade evidence](../evidence/embedded-port-http-parity-optional-history-upgrades-74f58b5f.json) records distinct compatible helper pairs and completed durable histories on both toolchains. Earlier evidence covers graceful Runtime replacement, reader-first codec upgrade, and incompatible policy rejection. |
 | P9.5 Public documentation | Setup/protocol guides describe protocol-2 activation, optional descriptor approval, observations, reader-first upgrade and current restrictions. Expanded examples, feature guides and final evidence remain pending. |
 | P9.6 Deferred campaigns | Ordinary package selection preserves explicit versions and graceful-only collection. Thirteen older native fixture-owner/helper-loss and persistence-boundary tests now carry an independent deferred_crash tag, excluded alongside runtime by default. Dummy health peers close by message instead of forced termination. Static runner contracts enforce these tags and separate runtime selection. No deferred live crash/persistence/CLI race campaign is authorized; broader qualification-runner closure remains pending. |
 
@@ -5933,3 +6862,33 @@ support remains mandatory and the SDK stays unmodified. The separate checkpoint
 campaign includes explicit capture approval, stopped Runtime replacement with
 Memory retained, two restores and final capture cleanup. Exact rebuilt-package
 current/minimum native qualification remains required. Crash validation is deferred.
+
+
+## Ordinary macOS export conversion and bare pack boot — November 6, 2026
+
+The [scoped export evidence](../evidence/embedded-port-http-parity-macos-export-roundtrip-6952eb2e.json)
+records that the earlier-formatting correction permits real SDK launch,
+container conversion and original helper collection. The first run retains
+its stopped source and collected helper staging: SDK 1.22 leaves
+`control.sock` in the helper's directory and the existing custody allowlist
+rejected it. Source 6952eb2e accepts that exact name only as a socket under
+the original collected helper's existing custody checks. Wrong file types
+remain rejected. The prior owner is not modified or forcibly closed.
+
+On the rebuilt 6952eb2e package the production engine packs the imported
+container, cleans the helper/staging, and the resulting artifact imports,
+boots, stops and deletes under a new identity. The SDK inventory returns to
+zero and all 809 assets and the signature verify. The bare engine also packs
+and cleans successfully, but the resulting artifact's first boot fails:
+its synthetic image name makes the SDK look for nonexistent packed layers.
+The original owner closes normally and the stopped failed VM is preserved.
+Source 07778edc emits an empty image name for bare packs, matching the known
+working SDK input. The serialized pack model passes; new live boot and
+publication acceptance remain pending.
+
+The explicit production witness can now publish to a bounded loopback registry
+and validate its recorded receipt and independent readback. The fixture smoke
+checks upload, readback and immutable tags; it does not qualify public export
+admission. Linux model preparation also corrects inherited branch feature flags
+in negative fixtures. Full public export acceptance, broader HTTP parity and
+distribution approval remain open. Crash validation remains deferred.

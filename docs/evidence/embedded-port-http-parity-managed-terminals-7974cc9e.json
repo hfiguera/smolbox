@@ -1,0 +1,183 @@
+{
+  "schema": 1,
+  "source_commit": "7974cc9ece39dbb449387f80dbe6b45f9485e0e1",
+  "recorded_date": "2026-11-07",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "packages": {
+    "linux": {
+      "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+      "assets_sha256": "706c83d1a75e5ed5791da54bb4cfa6e80448302a3921b202a5d8c769868e3c15",
+      "platform": "linux",
+      "architecture": "x86_64"
+    },
+    "macos": {
+      "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+      "assets_sha256": "0c109ee5c9cc8f1681e5b8b83b06d6712041bd36f9eda9940a423b52c7be5b25",
+      "platform": "macos",
+      "architecture": "aarch64"
+    }
+  },
+  "client_archive_sha256": "95bc26da56ab91c2826668776760d8bd113bdc54e0ba06388bfb634c501533d7",
+  "client_runtime_files_verified_against_commit": 354,
+  "toolchains": {
+    "current": {
+      "elixir": "1.20.4",
+      "otp": "29.0.6"
+    },
+    "minimum": {
+      "elixir": "1.18.4",
+      "otp": "27.3.4.15"
+    }
+  },
+  "fixtures": {
+    "linux": {
+      "packed": "ac45bd5b794e57f9627369facd15a18649f6af3b600f866f223f5f91b5bfa954",
+      "bare": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+      "checkpoint": "88b7171fc87edf17368bab2ae80652a673361c299b1035f053eda3863d8caedd"
+    },
+    "macos": {
+      "packed": "ec6ccce9b31a97bf8157cef7b5b6a5739f3bc7905f46f54656e143fe780291b9",
+      "bare": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+      "checkpoint": "fe4eac20410328d13696ecb2d09478005b376a18d63cbb73888caf906e649350"
+    }
+  },
+  "source_profiles": {
+    "both_hosts": [
+      "offline direct packed image",
+      "prepared-registry image with approved filtered networking, a custom command path policy and one reserved port"
+    ],
+    "linux": [
+      "filtered direct packed image with writable managed mount",
+      "filtered prepared-registry image with writable managed mount and a reserved port"
+    ],
+    "registry": "Digest-pinned anonymous loopback registry serving the same verified packed image",
+    "existing_oci_evidence": "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json"
+  },
+  "verification_in_each_passing_lane": [
+    "ordinary_shutdown",
+    "zero_reservations",
+    "workerless_readback",
+    "direct_offline",
+    "registry_filtered_custom_profile",
+    "offline_checkpoint_refusal",
+    "bare_refused_before_terminal_dispatch",
+    "idle_preflight_preserved_state",
+    "unassigned_and_out_of_budget_refused",
+    "attached_owner_exclusive",
+    "confirmed_terminal_exit_released_slot",
+    "drain_preserved_running_terminal",
+    "drain_prevented_new_reservation",
+    "existing_assignment_admitted_while_draining",
+    "normal_consumer_exit_preserved_unknown",
+    "explicit_close_checked",
+    "no_live_reattach_or_replay",
+    "unknown_held_slot_until_quiesced_resolution",
+    "stopped_runtime_replacement_preserved_drain_and_history"
+  ],
+  "ordinary_detach": "The bound consumer returned normally after observed guest output. The test kept the original Runtime and helper, refused duplicate reattachment and ordinary stop/delete while the command slot was held, then drained the isolated worker, stopped the exact owned machine and explicitly resolved the record.",
+  "explicit_close": "The outcome is checked against durable evidence. A trustworthy exit releases the command slot. An uncertain outcome retains it until owned stopped resolution.",
+  "linux_mounted_terminal_io_and_release": true,
+  "linux_result_archive_sha256": "7f4ad2f7a1d5c6ecdc272b6f358b8967e597407f8252aca9c0107fd15b7e0531",
+  "interrupted_attempts": {
+    "drain_harness": "An early harness waited for an unassigned request to become idle while the worker was draining. The corrected harness cancels that request using its inspected version.",
+    "linux_mounted_harness": "An early marker reader capped the number of output chunks. The corrected harness verifies mounted I/O in the same terminal input that produces a confirmed exit.",
+    "macos_owned_stop": "An early stop lost its channel after detach. Read-only SDK state confirmed the machine was stopped with no VM process, and the original scope completed ordinary cleanup. Passing runs waited for the detached terminal request to drain on the original Port epoch before submitting an owned stop.",
+    "custody": "Earlier harness-timeout witnesses were preserved separately from the passing lanes."
+  },
+  "focused_contracts_passed": {
+    "current": 50,
+    "minimum": 50
+  },
+  "proof_sha256": "1e84fba4826982a9ad85a76508a027c9f2f277a74e7c6a4371bb82de7a27795b",
+  "runner_sha256": {
+    "linux": "0161cf57b479160b1ce8486363df96475c929124da25d184d70b9acaf46adaf8",
+    "macos": "03f727df7d9b864b28926f86776c6393772afe4b157c0fa816890b2c6acca5e7"
+  },
+  "live_results": {
+    "linux": [
+      {
+        "toolchain": "current",
+        "store": "memory",
+        "explicit_close": {
+          "state": "completed",
+          "exit_code": 0
+        }
+      },
+      {
+        "toolchain": "current",
+        "store": "postgresql",
+        "explicit_close": {
+          "state": "completed",
+          "exit_code": 0
+        },
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)"
+      },
+      {
+        "toolchain": "minimum",
+        "store": "memory",
+        "explicit_close": {
+          "state": "completed",
+          "exit_code": 0
+        }
+      },
+      {
+        "toolchain": "minimum",
+        "store": "postgresql",
+        "explicit_close": {
+          "state": "completed",
+          "exit_code": 0
+        },
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)"
+      }
+    ],
+    "macos": [
+      {
+        "toolchain": "current",
+        "store": "memory",
+        "explicit_close": {
+          "state": "completed",
+          "exit_code": 0
+        }
+      },
+      {
+        "toolchain": "current",
+        "store": "postgresql",
+        "explicit_close": {
+          "state": "completed",
+          "exit_code": 0
+        },
+        "postgresql": "17.11 (Homebrew)"
+      },
+      {
+        "toolchain": "minimum",
+        "store": "memory",
+        "explicit_close": {
+          "state": "completed",
+          "exit_code": 0
+        }
+      },
+      {
+        "toolchain": "minimum",
+        "store": "postgresql",
+        "explicit_close": {
+          "state": "completed",
+          "exit_code": 0
+        },
+        "postgresql": "17.11 (Homebrew)"
+      }
+    ]
+  },
+  "private_production_tls_deferred": true,
+  "crash_validation_deferred": true,
+  "cli_race_validation_deferred": true,
+  "full_http_parity_claimed": false,
+  "distribution_approved": false
+}

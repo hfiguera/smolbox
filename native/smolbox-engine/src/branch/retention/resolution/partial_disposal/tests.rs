@@ -284,6 +284,22 @@ fn collected_failed_boot_identity_and_both_entered_release_heads_dispose_once_wi
 ) {
     for mode in 0..4 {
         let model = Model::new(mode);
+        if mode == 0 {
+            let pack = model.plan.child.path.join("pack");
+            std::fs::create_dir(&pack).unwrap();
+            for name in ["agent-rootfs", "layers"] {
+                std::fs::create_dir(pack.join(name)).unwrap();
+            }
+            for name in [
+                ".smolvm-extracted",
+                "agent-rootfs.tar",
+                "overlay.raw",
+                "storage.ext4",
+            ] {
+                std::fs::write(pack.join(name), b"").unwrap();
+            }
+            assert!(crate::sdk_compat::branch_deletion_cache(&model.plan.child.path).is_err());
+        }
         let before = model.original.counts();
         let source =
             std::fs::read(model.plan.source.path.join("smolbox.material-v2.json")).unwrap();

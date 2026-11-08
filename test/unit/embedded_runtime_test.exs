@@ -27,7 +27,8 @@ defmodule SmolBox.EmbeddedRuntimeTest do
         backend: true,
         persistent_backend: true,
         protocol_major: context[:protocol_major] || 1,
-        protocol_minor: context[:protocol_minor] || if(context[:unmodified], do: 4, else: 3)
+        protocol_minor: context[:protocol_minor] || if(context[:unmodified], do: 4, else: 3),
+        unreachable_after_start: context[:unreachable_after_start]
       )
 
     on_exit(fn -> File.rm_rf!(native.package_path) end)
@@ -54,6 +55,33 @@ defmodule SmolBox.EmbeddedRuntimeTest do
       )
 
     %{native: native, store: store, options: options, spec: spec}
+  end
+
+  @tag protocol_major: 2, protocol_minor: 0, unreachable_after_start: true
+  test "a verified native start reply completes the lifecycle without a second agent probe",
+       context do
+    runtime = start_supervised!(SmolBox.child_spec(context.options))
+    await(fn -> match?({:ok, [%{status: :ready}]}, SmolBox.workers(runtime)) end)
+    assert {:ok, handle} = Machines.create(runtime, context.spec)
+    assert {:ok, %{state: :stopped} = created} = Machines.await(runtime, handle, 5000)
+    before = length(Package.received(context.native))
+
+    assert {:ok, _} = lifecycle(runtime, handle, :start, created.version)
+
+    assert {:ok, %{state: :running, operation: nil} = running} =
+             Machines.await(runtime, handle, 5000)
+
+    assert running.reservation == created.reservation
+    assert running.created_machine == created.created_machine
+    assert running.observed_machine.backend_identity.pid_identity == [4242, 123_456]
+
+    lifecycle_requests =
+      for %{"type" => "request", "operation" => %{"operation" => operation}} <-
+            context.native |> Package.received() |> Enum.drop(before),
+          operation in ["inspect", "start"],
+          do: operation
+
+    assert lifecycle_requests == ["inspect", "start"]
   end
 
   for {major, minor} <- [{1, 3}, {1, 4}, {2, 0}] do

@@ -936,10 +936,15 @@ impl PreparedContainerExport {
             image: registry_source(&record)?.into(),
         })
     }
-    pub fn conversion_plan(&self, engine: &Engine, bytes: &[u8]) -> Result<ContainerExportPlan> {
+    pub fn conversion_plan(
+        &self,
+        engine: &Engine,
+        bytes: &[u8],
+        verified: &crate::VerifiedOci,
+    ) -> Result<ContainerExportPlan> {
         self.recheck(engine)?;
         let record = self.source.checked_record(engine)?;
-        let plan = ContainerExportPlan::from_cached(&record, bytes)?;
+        let plan = ContainerExportPlan::from_cached(&record, bytes, verified)?;
         self.recheck(engine)?;
         Ok(plan)
     }
@@ -1082,36 +1087,41 @@ impl std::fmt::Debug for ContainerExportPlan {
     }
 }
 impl ContainerExportPlan {
-    fn from_cached(record: &smolvm::config::VmRecord, bytes: &[u8]) -> Result<Self> {
+    fn from_cached(
+        record: &smolvm::config::VmRecord,
+        bytes: &[u8],
+        verified: &crate::VerifiedOci,
+    ) -> Result<Self> {
         if bytes.is_empty() || bytes.len() > METADATA_BYTES {
             return Err(Error::before(ErrorCode::OutputLimit));
         }
         let cached: CachedImage =
             serde_json::from_slice(bytes).map_err(|_| Error::before(ErrorCode::Validation))?;
-        Self::from_image(record, cached)
+        Self::from_image(record, cached, verified)
     }
     pub(crate) fn from_image(
         record: &smolvm::config::VmRecord,
         cached: CachedImage,
+        verified: &crate::VerifiedOci,
     ) -> Result<Self> {
         let image = registry_source(record)?;
+        let metadata = verified.metadata();
         let text = |v: &str, max| v.len() <= max && !v.contains('\0');
-        if cached.reference != image
-            || cached.digest
-                != image
-                    .rsplit_once('@')
-                    .ok_or(Error::before(ErrorCode::Validation))?
-                    .1
+        if verified.source().reference != image
+            || verified.source().platform != crate::oci::native_oci_platform()
+            || cached.reference != smolvm_protocol::normalize_image_ref(image)
+            || cached.digest != metadata.digest
             || cached.os != "linux"
             || format!("{}/{}", cached.os, cached.architecture) != crate::oci::native_oci_platform()
             || cached.size > i64::MAX as u64
             || cached.layer_count == 0
             || cached.layer_count != cached.layers.len()
-            || cached.layers.iter().any(|layer| {
-                !layer
-                    .strip_prefix("sha256:")
-                    .is_some_and(|id| crate::domain::valid_hex(id, 64))
-            })
+            || cached.layers != verified.layers()
+            || cached.entrypoint != metadata.entrypoint
+            || cached.cmd != metadata.cmd
+            || cached.env != metadata.env
+            || cached.workdir != metadata.workdir
+            || cached.user != metadata.user
             || cached.created.as_ref().is_some_and(|v| !text(v, 128))
             || cached.env.iter().any(|v| {
                 !text(v, 1024 * 1024)
@@ -2009,24 +2019,66 @@ pub(crate) mod tests {
     pub(crate) fn record() -> smolvm::config::VmRecord {
         let mut record =
             smolvm::config::VmRecord::new("source".into(), 2, 512, vec![], vec![], false);
-        record.image = Some(format!(
-            "registry.example/team/app@sha256:{}",
-            "d".repeat(64)
-        ));
+        record.image = Some(oci_fixture().0.source().reference.clone());
         record.env = vec![("PATH".into(), "/custom".into())];
         record.workdir = Some("/work".into());
         record
     }
     fn cached(record: &smolvm::config::VmRecord) -> serde_json::Value {
-        serde_json::json!({
-            "reference": record.image, "digest": format!("sha256:{}", "d".repeat(64)),
-            "size": 10, "created": null, "architecture": crate::oci::native_oci_platform().trim_start_matches("linux/"),
-            "os": "linux", "layer_count": 2,
-            "layers": [format!("sha256:{}", "a".repeat(64)), format!("sha256:{}", "b".repeat(64))],
-            "entrypoint": ["/image-entry"], "cmd": ["image-command"],
-            "env": ["PATH=/image", "IMAGE_ONLY=private-env-value"],
-            "workdir": "/image-work", "user": "1000"
-        })
+        let mut cached = serde_json::to_value(oci_fixture().3).unwrap();
+        cached["reference"] = serde_json::json!(record.image);
+        cached
+    }
+    pub(crate) fn oci_fixture() -> (
+        crate::VerifiedOci,
+        Vec<u8>,
+        Vec<u8>,
+        smolvm_protocol::ImageInfo,
+    ) {
+        use sha2::{Digest, Sha256};
+        let platform = crate::oci::native_oci_platform();
+        let architecture = platform.trim_start_matches("linux/");
+        let config = serde_json::to_vec(&serde_json::json!({
+            "architecture": architecture, "os": "linux", "config": {
+                "Entrypoint": ["/image-entry"], "Cmd": ["image-command"],
+                "Env": ["PATH=/image", "IMAGE_ONLY=private-env-value"],
+                "WorkingDir": "/image-work", "User": "1000"
+            }
+        }))
+        .unwrap();
+        let digest = format!("sha256:{}", hex::encode(Sha256::digest(&config)));
+        let layers = ['a', 'b'].map(|c| format!("sha256:{}", c.to_string().repeat(64)));
+        let manifest = serde_json::to_vec(&serde_json::json!({
+            "schemaVersion": 2,
+            "config": {"mediaType": "application/vnd.oci.image.config.v1+json", "digest": digest, "size": config.len()},
+            "layers": layers.iter().map(|digest| serde_json::json!({
+                "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip", "digest": digest, "size": 1
+            })).collect::<Vec<_>>()
+        })).unwrap();
+        let source = crate::ImagePullRequest {
+            reference: format!(
+                "registry.example/team/app@sha256:{}",
+                hex::encode(Sha256::digest(&manifest))
+            ),
+            platform: platform.into(),
+        };
+        let cached = smolvm_protocol::ImageInfo {
+            reference: source.reference.clone(),
+            digest,
+            size: 10,
+            created: None,
+            architecture: architecture.into(),
+            os: "linux".into(),
+            layer_count: layers.len(),
+            layers: layers.to_vec(),
+            entrypoint: vec!["/image-entry".into()],
+            cmd: vec!["image-command".into()],
+            env: vec!["PATH=/image".into(), "IMAGE_ONLY=private-env-value".into()],
+            workdir: Some("/image-work".into()),
+            user: Some("1000".into()),
+        };
+        let verified = crate::VerifiedOci::verify(source, &manifest, &config).unwrap();
+        (verified, manifest, config, cached)
     }
     #[test]
     fn decoded_plan_rejects_other_requests_extra_fields_and_sequence_growth_before_sdk_decode() {
@@ -2052,8 +2104,12 @@ pub(crate) mod tests {
         assert!(serde_json::from_value::<ContainerExportPlan>(changed).is_err());
     }
     pub(crate) fn plan(record: &smolvm::config::VmRecord) -> ContainerExportPlan {
-        ContainerExportPlan::from_cached(record, &serde_json::to_vec(&cached(record)).unwrap())
-            .unwrap()
+        ContainerExportPlan::from_cached(
+            record,
+            &serde_json::to_vec(&cached(record)).unwrap(),
+            &oci_fixture().0,
+        )
+        .unwrap()
     }
 
     #[test]
@@ -2109,6 +2165,7 @@ pub(crate) mod tests {
     #[test]
     fn cached_metadata_cannot_substitute_image_platform_layers_paths_or_unbounded_arrays() {
         let record = record();
+        let verified = oci_fixture().0;
         for (key, value) in [
             ("reference", serde_json::json!("registry.example/foreign")),
             (
@@ -2126,19 +2183,29 @@ pub(crate) mod tests {
             let mut bad = cached(&record);
             bad[key] = value;
             assert!(
-                ContainerExportPlan::from_cached(&record, &serde_json::to_vec(&bad).unwrap())
-                    .is_err(),
+                ContainerExportPlan::from_cached(
+                    &record,
+                    &serde_json::to_vec(&bad).unwrap(),
+                    &verified
+                )
+                .is_err(),
                 "{key}"
             );
         }
         let mut bad = cached(&record);
         bad["cmd"] = serde_json::json!(vec![""; STRINGS + 1]);
-        assert!(
-            ContainerExportPlan::from_cached(&record, &serde_json::to_vec(&bad).unwrap()).is_err()
-        );
-        assert!(
-            ContainerExportPlan::from_cached(&record, &vec![b' '; METADATA_BYTES + 1]).is_err()
-        );
+        assert!(ContainerExportPlan::from_cached(
+            &record,
+            &serde_json::to_vec(&bad).unwrap(),
+            &verified
+        )
+        .is_err());
+        assert!(ContainerExportPlan::from_cached(
+            &record,
+            &vec![b' '; METADATA_BYTES + 1],
+            &verified
+        )
+        .is_err());
         let mut imported = record.clone();
         imported.source_smolmachine = Some("/unproved.smolmachine".into());
         assert!(registry_source(&imported).is_err());
@@ -2150,7 +2217,11 @@ pub(crate) mod tests {
     #[test]
     fn container_storage_is_receipt_bound_readonly_and_keeps_gate_budget_and_source_identity() {
         let temp = tempfile::tempdir().unwrap();
-        let (engine, receipt) = crate::export_source::tests::fixture(temp.path(), true);
+        let verified = oci_fixture().0;
+        let (engine, receipt) =
+            crate::export_source::tests::fixture_record(temp.path(), true, |row| {
+                row.image = Some(verified.source().reference.clone());
+            });
         let root = engine.vm_directory(&receipt.name);
         let disk = crate::disk_geometry::tests::raw(&root);
         std::fs::rename(disk, root.join(smolvm::storage::STORAGE_DISK_FILENAME)).unwrap();
@@ -2172,7 +2243,11 @@ pub(crate) mod tests {
             matches!(prepared.cached_query(&engine).unwrap(), AgentRequest::Query { image } if Some(image.as_str()) == record.image.as_deref())
         );
         let mut plan = prepared
-            .conversion_plan(&engine, &serde_json::to_vec(&cached(&record)).unwrap())
+            .conversion_plan(
+                &engine,
+                &serde_json::to_vec(&cached(&record)).unwrap(),
+                &verified,
+            )
             .unwrap();
         prepared.container_manifest(&engine, &plan, 4096).unwrap();
         plan.record_sha256 = "0".repeat(64);

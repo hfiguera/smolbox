@@ -19109,3 +19109,76 @@ These are scoped ordinary Memory-store results with basic checkpoint seeds and
 bare local branch sources. Wider source/store/resource combinations, changed-helper
 upgrade, partial recovery and all remaining P0–P9 gates stay pending. Full parity,
 crash handling and distribution approval remain false; crash validation is deferred.
+
+
+## Ordinary macOS export conversion and bare pack boot — November 6, 2026
+
+The [scoped export evidence](../evidence/embedded-port-http-parity-macos-export-roundtrip-6952eb2e.json)
+records that the earlier-formatting correction permits real SDK launch,
+container conversion and original helper collection. The first run retains
+its stopped source and collected helper staging: SDK 1.22 leaves
+`control.sock` in the helper's directory and the existing custody allowlist
+rejected it. Source 6952eb2e accepts that exact name only as a socket under
+the original collected helper's existing custody checks. Wrong file types
+remain rejected. The prior owner is not modified or forcibly closed.
+
+On the rebuilt 6952eb2e package the production engine packs the imported
+container, cleans the helper/staging, and the resulting artifact imports,
+boots, stops and deletes under a new identity. The SDK inventory returns to
+zero and all 809 assets and the signature verify. The bare engine also packs
+and cleans successfully, but the resulting artifact's first boot fails:
+its synthetic image name makes the SDK look for nonexistent packed layers.
+The original owner closes normally and the stopped failed VM is preserved.
+Source 07778edc emits an empty image name for bare packs, matching the known
+working SDK input. The serialized pack model passes; new live boot and
+publication acceptance remain pending.
+
+The explicit production witness can now publish to a bounded loopback registry
+and validate its recorded receipt and independent readback. The fixture smoke
+checks upload, readback and immutable tags; it does not qualify public export
+admission. Linux model preparation also corrects inherited branch feature flags
+in negative fixtures. Full public export acceptance, broader HTTP parity and
+distribution approval remain open. Crash validation remains deferred.
+
+The [exact 07778edc macOS rerun](../evidence/embedded-port-http-parity-macos-native-export-07778edc.json)
+verifies container publication, both tags, both blobs, exact native receipt
+lookup after staging cleanup, and a normal new-incarnation import, boot, stop
+and delete. The bare export packs and imports with the empty image name, but
+the imported VM's first boot remains unresolved. The owner closes normally
+and the stopped imported VM and disks are preserved. The scoped witness uses
+the production engine and raw Port import. Managed export admission remains
+gated.
+
+The [07778edc Linux rerun](../evidence/embedded-port-http-parity-linux-partial-branch-07778edc.json)
+passes all 13 build and verification stages, including 1,074 engine, 91 Port,
+104 protocol and 60 wire-contract cases. On the exact package, ordinary API
+cancellation after the original boot returns passes partial-child collection,
+absence and backing disposal while preserving source disk and memory. The
+engine closes normally. The SDK tables are empty, all 806 assets verify and
+the lab shuts down normally after archiving the 22 proof files. Public
+Port/store recovery and wider combinations remain open.
+
+The [managed macOS exports record](../evidence/embedded-port-http-parity-macos-managed-exports-73f2abf7.json)
+closes the bare boot gap for the explicit macOS export candidate. The packer
+now includes the SDK's empty `layers/` directory for bare VM sidecars. Both
+bare and container cases pass publication, independent registry readback,
+explicit cleanup, Runtime replacement, digest-pinned re-import and guest boot.
+The imported copy's edits leave the source unchanged. Both cases end with
+normal owned deletion, retained export history, zero reservations and all ten
+SDK tables empty. These are macOS current-toolchain Memory results. Default
+package export admission and wider platform/toolchain/store qualification
+remain open. Crash validation stays deferred.
+
+The [Linux managed exports record](../evidence/embedded-port-http-parity-linux-managed-exports-081a83e1.json)
+qualifies bare and container publication, cleanup and digest-pinned re-import
+on both toolchains with PostgreSQL. Each case verifies independent guest data,
+normal owned deletion and exact receipt and machine readback in a new workerless
+BEAM. The default Linux policy matches the qualified candidate bytes. The
+macOS default still gates exports pending the minimum-toolchain PostgreSQL run.
+Crash validation stays deferred.
+
+The [macOS minimum-toolchain PostgreSQL record](../evidence/embedded-port-http-parity-macos-durable-exports-081a83e1.json)
+qualifies bare and container export, cleanup, pinned re-import and normal owned
+deletion. A fresh BEAM reads the exact completed receipt and both machine records
+for each case without attaching a worker. The qualified macOS descriptor is now
+the default. Crash validation remains deferred.

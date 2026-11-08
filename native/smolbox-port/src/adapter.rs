@@ -153,6 +153,7 @@ pub fn error(error: engine::Error) -> wire::Outcome {
             engine::ErrorCode::Ownership => wire::SafeCode::Ownership,
             engine::ErrorCode::Database => wire::SafeCode::Database,
             engine::ErrorCode::State => wire::SafeCode::State,
+            engine::ErrorCode::Deadline => wire::SafeCode::Deadline,
             engine::ErrorCode::Native => wire::SafeCode::Native,
             engine::ErrorCode::Io => wire::SafeCode::Io,
             engine::ErrorCode::OutputLimit => wire::SafeCode::OutputLimit,

@@ -1,0 +1,280 @@
+{
+  "schema": 1,
+  "recorded_date": "2026-11-06",
+  "source_base_commit": "266510d67b6ae302b1b094b23b6bb2093576eb71",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "sdk_source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+  "sdk_source_verified_unmodified_for_both_builds": true,
+  "fix": "Verify the cached platform manifest against the approved image pin, verify its referenced config bytes and length, then compare the SDK query with the verified config digest, native platform, ordered layer list and workload defaults before dispatching flatten.",
+  "native_model": {
+    "command": "cargo test --manifest-path native/Cargo.toml -p smolbox-engine --lib --locked export_ -- --skip deferred_crash",
+    "passed": 139,
+    "failed": 0,
+    "ignored": 1,
+    "reject_before_flatten": [
+      "changed manifest bytes",
+      "changed config bytes",
+      "manifest digest substituted for config digest",
+      "reordered layer digests"
+    ]
+  },
+  "registry_scope": "Public digest-pinned platform image as source. Publication and digest-pinned reimport used the isolated loopback registry fixture with authenticated writes and anonymous reads.",
+  "lanes": [
+    {
+      "host": "linux-x86_64",
+      "lane": "current",
+      "fixture": "docker.io/library/busybox@sha256:66a6306db78bf2dbf3487f293aa8d6990d8e506fdffab9cc43fe422becf886e4",
+      "package_manifest_sha256": "51fef500f29463edc5924aa0413ae56ff55b10b474fba17e94406da2fff62242",
+      "helper_sha256": "bc39528ad7358acffd0db80070815319b817cb3c27e9ebe63eee2750ba35a053",
+      "package_assets": 806,
+      "hex_archive_sha256": "369e9ba583c49d0d8ebb3b9e83226530b954f976d3fe8d310f547764726fdd13",
+      "live_proof_script_sha256": "8dfd07ded842cce9330a572dd69a34ea9ae6c24517bb9cfb1c4ca85416bfccef",
+      "status": "passed",
+      "elixir": "Elixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "erlang": "Erlang/OTP 29 [erts-17.0.6]",
+      "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+      "workflow": {
+        "mode": "oci",
+        "store": "postgresql",
+        "final_reserved_slots": 0,
+        "crash_validation_deferred": true,
+        "content_sha256": "2c8b9dfce6556d0aba371b808c08c96ab853fce1e2ca02b21b8572dfe61b4f85",
+        "package_manifest_sha256": "51fef500f29463edc5924aa0413ae56ff55b10b474fba17e94406da2fff62242",
+        "runtime_replacement": true,
+        "native_cleanup_resolved": true,
+        "export_history_after_delete": true,
+        "pinned_registry_reimport": true,
+        "source_and_copy_independent": true,
+        "manifest_sha256": "a81e6ac2a2f5c6b68a06ef0a4b503a82219b11409724a4a869aef68e14378987",
+        "size_bytes": 29508631
+      },
+      "durable_readback": {
+        "exact_machine_records": 2,
+        "exact_completed_export_receipt": true,
+        "native_workers": 0,
+        "final_reserved_slots": 0,
+        "crash_validation_deferred": true
+      },
+      "independent_registry_readback": {
+        "request_counts": {
+          "heads": 5,
+          "uploads": 2,
+          "chunks": 30,
+          "blobs": 2,
+          "manifests": 3,
+          "reads": 11,
+          "rejected": 0
+        },
+        "sha256": "2c8b9dfce6556d0aba371b808c08c96ab853fce1e2ca02b21b8572dfe61b4f85"
+      },
+      "verified_empty_sdk_tables": [
+        "config",
+        "fork_leases",
+        "fork_pool_slots",
+        "fork_pool_snapshots",
+        "fork_pools",
+        "vm_create_reservations",
+        "vm_pause_operations",
+        "vm_resize_intents",
+        "vm_resize_receipts",
+        "vms"
+      ],
+      "account_lock_available": true,
+      "postgres_stopped_normally": true,
+      "cleanup_accounting_from_archived_records": {
+        "completed": {
+          "slots": 1,
+          "disk_gb": 2,
+          "cpus": 1,
+          "memory_mb": 768
+        },
+        "published": {
+          "slots": 2,
+          "disk_gb": 68,
+          "cpus": 5,
+          "memory_mb": 1920
+        },
+        "released": {
+          "slots": 1,
+          "disk_gb": 66,
+          "cpus": 4,
+          "memory_mb": 1152
+        }
+      }
+    },
+    {
+      "host": "linux-x86_64",
+      "lane": "minimum",
+      "fixture": "docker.io/library/busybox@sha256:66a6306db78bf2dbf3487f293aa8d6990d8e506fdffab9cc43fe422becf886e4",
+      "package_manifest_sha256": "51fef500f29463edc5924aa0413ae56ff55b10b474fba17e94406da2fff62242",
+      "helper_sha256": "bc39528ad7358acffd0db80070815319b817cb3c27e9ebe63eee2750ba35a053",
+      "package_assets": 806,
+      "hex_archive_sha256": "369e9ba583c49d0d8ebb3b9e83226530b954f976d3fe8d310f547764726fdd13",
+      "live_proof_script_sha256": "8dfd07ded842cce9330a572dd69a34ea9ae6c24517bb9cfb1c4ca85416bfccef",
+      "status": "passed",
+      "elixir": "Elixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "erlang": "Erlang/OTP 27 [erts-15.2.7.11]",
+      "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+      "workflow": {
+        "mode": "oci",
+        "store": "postgresql",
+        "final_reserved_slots": 0,
+        "crash_validation_deferred": true,
+        "content_sha256": "1fbd6b60f21e8160bf768354ca5630f9fbd8105429b4edb1e40f0494c67c8193",
+        "package_manifest_sha256": "51fef500f29463edc5924aa0413ae56ff55b10b474fba17e94406da2fff62242",
+        "runtime_replacement": true,
+        "native_cleanup_resolved": true,
+        "export_history_after_delete": true,
+        "pinned_registry_reimport": true,
+        "source_and_copy_independent": true,
+        "manifest_sha256": "6fb57735b28118cba1f0913ee3660a3bacb6e499502abb11860d0ac695f604c9",
+        "size_bytes": 29508643
+      },
+      "durable_readback": {
+        "exact_machine_records": 2,
+        "exact_completed_export_receipt": true,
+        "native_workers": 0,
+        "final_reserved_slots": 0,
+        "crash_validation_deferred": true
+      },
+      "independent_registry_readback": {
+        "request_counts": {
+          "heads": 5,
+          "uploads": 2,
+          "chunks": 30,
+          "blobs": 2,
+          "manifests": 3,
+          "reads": 11,
+          "rejected": 0
+        },
+        "sha256": "1fbd6b60f21e8160bf768354ca5630f9fbd8105429b4edb1e40f0494c67c8193"
+      },
+      "verified_empty_sdk_tables": [
+        "config",
+        "fork_leases",
+        "fork_pool_slots",
+        "fork_pool_snapshots",
+        "fork_pools",
+        "vm_create_reservations",
+        "vm_pause_operations",
+        "vm_resize_intents",
+        "vm_resize_receipts",
+        "vms"
+      ],
+      "account_lock_available": true,
+      "postgres_stopped_normally": true,
+      "cleanup_accounting_from_archived_records": {
+        "published": {
+          "disk_gb": 68,
+          "cpus": 5,
+          "memory_mb": 1920,
+          "slots": 2
+        },
+        "completed": {
+          "disk_gb": 2,
+          "cpus": 1,
+          "memory_mb": 768,
+          "slots": 1
+        },
+        "released": {
+          "disk_gb": 66,
+          "cpus": 4,
+          "memory_mb": 1152,
+          "slots": 1
+        }
+      }
+    },
+    {
+      "host": "macos-aarch64",
+      "lane": "minimum",
+      "fixture": "docker.io/library/busybox@sha256:d82c2ab94640ded77cf76514ce6a84870761105058a4a9e51b05a8a79be97a6c",
+      "package_manifest_sha256": "ee13e2a4afff3cbbfa7cb8349353558e74a679982ec25ff0f5867df7be5b6f73",
+      "helper_sha256": "a0eb34c1d49bfe633f83f0cccc15e7e552dfd460151193a2dfb1777e624f23e2",
+      "package_assets": 809,
+      "hex_archive_sha256": "369e9ba583c49d0d8ebb3b9e83226530b954f976d3fe8d310f547764726fdd13",
+      "live_proof_script_sha256": "8dfd07ded842cce9330a572dd69a34ea9ae6c24517bb9cfb1c4ca85416bfccef",
+      "status": "passed",
+      "elixir": "Elixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "erlang": "Erlang/OTP 27 [erts-15.2.7.11]",
+      "postgresql": "17.11 (Homebrew)",
+      "workflow": {
+        "mode": "oci",
+        "store": "postgresql",
+        "final_reserved_slots": 0,
+        "crash_validation_deferred": true,
+        "content_sha256": "c8f2ccf1997d6e0bc931379ece886c87be50d04c6ecf240e0d29acd1670bd088",
+        "package_manifest_sha256": "ee13e2a4afff3cbbfa7cb8349353558e74a679982ec25ff0f5867df7be5b6f73",
+        "runtime_replacement": true,
+        "native_cleanup_resolved": true,
+        "export_history_after_delete": true,
+        "pinned_registry_reimport": true,
+        "source_and_copy_independent": true,
+        "manifest_sha256": "492930d12137cb177641cb249f9573eb6ffb289f8e67532504d63d651823d744",
+        "size_bytes": 27733692
+      },
+      "durable_readback": {
+        "exact_machine_records": 2,
+        "exact_completed_export_receipt": true,
+        "native_workers": 0,
+        "final_reserved_slots": 0,
+        "crash_validation_deferred": true
+      },
+      "independent_registry_readback": {
+        "request_counts": {
+          "heads": 5,
+          "uploads": 2,
+          "chunks": 28,
+          "blobs": 2,
+          "manifests": 3,
+          "reads": 11,
+          "rejected": 0
+        },
+        "sha256": "c8f2ccf1997d6e0bc931379ece886c87be50d04c6ecf240e0d29acd1670bd088"
+      },
+      "verified_empty_sdk_tables": [
+        "config",
+        "fork_leases",
+        "fork_pool_slots",
+        "fork_pool_snapshots",
+        "fork_pools",
+        "vm_create_reservations",
+        "vm_pause_operations",
+        "vm_resize_intents",
+        "vm_resize_receipts",
+        "vms"
+      ],
+      "account_lock_available": true,
+      "postgres_stopped_normally": true,
+      "postgres_startup_recovery": {
+        "initial_error": "postmaster became multithreaded during startup",
+        "server_hint": "Set the LC_ALL environment variable to a valid locale.",
+        "corrected_launcher_environment": {
+          "LC_ALL": "en_US.UTF-8"
+        },
+        "initial_attempt_reached_smolbox": false
+      },
+      "cleanup_accounting_from_archived_records": {
+        "published": {
+          "disk_gb": 68,
+          "cpus": 5,
+          "memory_mb": 1920,
+          "slots": 2
+        },
+        "completed": {
+          "disk_gb": 2,
+          "cpus": 1,
+          "memory_mb": 768,
+          "slots": 1
+        },
+        "released": {
+          "disk_gb": 66,
+          "cpus": 4,
+          "memory_mb": 1152,
+          "slots": 1
+        }
+      }
+    }
+  ],
+  "crash_validation_deferred": true,
+  "cli_race_validation_deferred": true
+}

@@ -215,6 +215,9 @@ defmodule SmolBox.Terminal.Server do
              active_at: now()
          }}
 
+      {:error, %Error{category: :admission_exhausted, evidence: :not_dispatched}} = rejected ->
+        {:reply, rejected, state}
+
       {:error, error} ->
         {:reply, {:error, error}, finish(state, {:error, error})}
     end

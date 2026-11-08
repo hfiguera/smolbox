@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "recorded_date": "2026-11-06",
+  "status": "scoped-reader-first-compatibility-passed",
+  "older_reader_commit": "c92211e1523bc85075e6bad1800b0a79efc67dfd",
+  "new_reader_commit": "0618e7ccb78ca5430ba8e977efeafab79e1e0bab",
+  "toolchains": [
+    {
+      "elixir": "1.20.4",
+      "otp": "29.0.6",
+      "old_http_envelope_sha256": "a90a91bea112a15a764dda523331b9454631f6eaac032b71d2e5490ef366c8db"
+    },
+    {
+      "elixir": "1.18.4",
+      "otp": "27.3.4.15",
+      "old_http_envelope_sha256": "3119b9a7b47aa7e944ed8f01d65f59169d76ce1158731ba0d43e334503686f84"
+    }
+  ],
+  "legacy_http_envelope_version": 5,
+  "new_collected_branch_publication_envelope_version": 50,
+  "synthetic_publication_envelope_sha256": "09805aaebab55eb9442c257c274e85c084a844cf434d25de987281f8cad800d4",
+  "old_http_records_read_and_reencoded_byte_for_byte_with_same_otp": true,
+  "otp_27_reads_otp_29_http_payload_with_equal_decoded_terms": true,
+  "new_readers_decode_and_preserve_full_v50_publication_payload": true,
+  "old_readers_reject_v50_publication_envelope": true,
+  "fresh_beam_per_read": true,
+  "synthetic_branch_history": true,
+  "live_store_migration_qualified": false,
+  "full_http_parity_claimed": false,
+  "crash_validation_deferred": true
+}

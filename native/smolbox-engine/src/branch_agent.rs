@@ -87,6 +87,41 @@ pub(crate) fn boot_probe(socket: &Path, staging: &Path, budget: &ReadBudget) -> 
     })
 }
 
+/// One fixed, read-only command on the enrolled checkpoint guest. A ping can
+/// succeed even when the restored guest cannot deliver timer interrupts.
+pub(crate) fn checkpoint_timer_probe(
+    socket: &Path,
+    staging: &Path,
+    budget: &ReadBudget,
+) -> Result<()> {
+    let attempt = ReadBudget {
+        deadline: budget
+            .deadline
+            .min(std::time::Instant::now() + Duration::from_secs(4)),
+        cancel: budget.cancel.clone(),
+    };
+    let result = exchange(socket, staging, 4096, &attempt, |client, remaining| {
+        let (exit, stdout, stderr) = client
+            .vm_exec(
+                vec!["/bin/sh".into(), "-c".into(), "exec sleep 1".into()],
+                vec![],
+                Some("/".into()),
+                Some(remaining),
+                None,
+            )
+            .map_err(|_| Error::uncertain(ErrorCode::Native))?;
+        match exit {
+            0 if stdout.is_empty() && stderr.is_empty() => Ok(()),
+            124 => Err(Error::uncertain(ErrorCode::Deadline)),
+            _ => Err(Error::uncertain(ErrorCode::Native)),
+        }
+    });
+    if !attempt.cancel.is_cancelled() && std::time::Instant::now() >= attempt.deadline {
+        return Err(Error::uncertain(ErrorCode::Deadline));
+    }
+    result.map_err(|error| Error::uncertain(error.code))
+}
+
 struct Deadline {
     done: Arc<AtomicBool>,
     thread: Option<std::thread::JoinHandle<()>>,
@@ -257,7 +292,7 @@ mod tests {
         let listener = UnixListener::bind(&socket).unwrap();
         (directory, listener, socket)
     }
-    fn read_ping(stream: &mut UnixStream) {
+    fn read_request(stream: &mut UnixStream) -> smolvm_protocol::AgentRequest {
         stream
             .set_read_timeout(Some(Duration::from_secs(2)))
             .unwrap();
@@ -267,10 +302,59 @@ mod tests {
         assert!(count < 1024);
         let mut body = vec![0; count];
         stream.read_exact(&mut body).unwrap();
+        serde_json::from_slice(&body).unwrap()
+    }
+    fn read_ping(stream: &mut UnixStream) {
         assert!(matches!(
-            serde_json::from_slice::<smolvm_protocol::AgentRequest>(&body).unwrap(),
+            read_request(stream),
             smolvm_protocol::AgentRequest::Ping
         ));
+    }
+
+    #[test]
+    fn checkpoint_timer_probe_requires_a_completed_sleep_under_the_original_deadline() {
+        use smolvm_protocol::{encode_message, AgentRequest, AgentResponse};
+
+        for completes in [true, false] {
+            let (directory, listener, socket) = peer();
+            let peer = std::thread::spawn(move || {
+                let (mut stream, _) = listener.accept().unwrap();
+                let AgentRequest::VmExec {
+                    command,
+                    workdir,
+                    timeout_ms: Some(timeout),
+                    interactive: false,
+                    ..
+                } = read_request(&mut stream)
+                else {
+                    panic!("expected the fixed timer probe");
+                };
+                assert_eq!(command, ["/bin/sh", "-c", "exec sleep 1"]);
+                assert_eq!(workdir.as_deref(), Some("/"));
+                assert!((1..=500).contains(&timeout));
+                if completes {
+                    let response = AgentResponse::Completed {
+                        exit_code: 0,
+                        stdout: vec![],
+                        stderr: vec![],
+                    };
+                    stream
+                        .write_all(&encode_message(&response).unwrap())
+                        .unwrap();
+                }
+                assert_eq!(stream.read(&mut [0; 1]).unwrap(), 0);
+            });
+            let budget =
+                ReadBudget::new(Duration::from_millis(500), crate::Cancellation::default())
+                    .unwrap();
+            let result = checkpoint_timer_probe(&socket, directory.path(), &budget);
+            peer.join().unwrap();
+            if completes {
+                result.unwrap();
+            } else {
+                assert_eq!(result.unwrap_err(), Error::uncertain(ErrorCode::Deadline));
+            }
+        }
     }
     #[test]
     fn boot_probe_waits_for_delayed_sdk_reply_without_booting_or_mutating() {

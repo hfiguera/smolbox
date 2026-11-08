@@ -4,7 +4,15 @@ defmodule SmolBox.NativeBranchControlReadinessTest do
   alias SmolBox.Embedded.Config
   alias SmolBox.Error
   alias SmolBox.Runtime.{Coordinator, NativeAuthority, NativeResolution, Target}
-  alias SmolBox.Store.{CaptureOps, Memory, NativeCaptureContract}
+
+  alias SmolBox.Store.{
+    CaptureOps,
+    Memory,
+    NativeBranchDeletionActionContract,
+    NativeBranchDeletionContract,
+    NativeCaptureContract,
+    NativePreparedBranchRetirementContract
+  }
 
   defmodule Clock do
     def now, do: 1400
@@ -190,12 +198,113 @@ defmodule SmolBox.NativeBranchControlReadinessTest do
 
   defp run(f, function, operation \\ :branch_retire, deadline \\ nil) do
     disposition =
-      if operation in [:branch_retire, :branch_release_storage, :branch_resolve_ready],
-        do: {:ordinary_branch, operation},
-        else:
-          if(operation == :capture_complete, do: {:ordinary_capture, operation}, else: operation)
+      if operation in [
+           :branch_retire,
+           :branch_release_storage,
+           :branch_resolve_ready,
+           :resolve_branch_deletion,
+           :retire_prepared_branch
+         ],
+         do: {:ordinary_branch, operation},
+         else:
+           if(operation == :capture_complete, do: {:ordinary_capture, operation}, else: operation)
 
     NativeResolution.run(f.config, f.host, f.record, f.target, disposition, function, deadline)
+  end
+
+  test "a committed branch deletion keeps the same ready owner without rescanning the source" do
+    f = fixture(id: "embedded-local")
+    {_, child, _} = NativeBranchDeletionContract.prepare(Memory, f.memory)
+    {:ok, pending} = NativeBranchDeletionContract.accept(Memory, f.memory, child, 1303)
+    proof = NativeBranchDeletionContract.proof(pending.branch.native_authority.deletion.request)
+    {:ok, deleted} = NativeBranchDeletionContract.resolve(Memory, f.memory, pending, proof, 1304)
+
+    epoch =
+      get_in(
+        child.branch.native_authority.completion.publication,
+        ~w(change child_origin intent epoch)
+      )
+
+    :ok = GenServer.call(f.peer, {:update, %{epoch: epoch}})
+    f = put_in(f.target.connection.context.epoch, epoch)
+    f = %{f | record: child}
+
+    assert {:ok, ^deleted} = run(f, fn _ -> {:ok, deleted} end, :resolve_branch_deletion)
+    assert_received {:activate, _, ^epoch}
+    assert NativeAuthority.available?(f.host, f.target.id)
+
+    assert {:ok, ^child} = run(f, fn _ -> {:ok, child} end, :resolve_branch_deletion)
+    refute_received {:activate, _, _}
+    refute NativeAuthority.available?(f.host, f.target.id)
+  end
+
+  test "prepared retirement keeps the same ready owner only for its committed child" do
+    f = fixture(id: "embedded-local")
+
+    {parent, child, result, _usage} =
+      NativePreparedBranchRetirementContract.prepare(Memory, f.memory, true)
+
+    {:ok, retired} =
+      NativePreparedBranchRetirementContract.resolve(
+        Memory,
+        f.memory,
+        parent,
+        child,
+        result,
+        1103
+      )
+
+    epoch = result.proof.retirement["intent"]["epoch"]
+    :ok = GenServer.call(f.peer, {:update, %{epoch: epoch}})
+    f = put_in(f.target.connection.context.epoch, epoch)
+    f = %{f | record: parent}
+
+    assert {:ok, ^retired} = run(f, fn _ -> {:ok, retired} end, :retire_prepared_branch)
+    assert_received {:activate, _, ^epoch}
+    assert NativeAuthority.available?(f.host, f.target.id)
+
+    assert {:ok, ^child} = run(f, fn _ -> {:ok, child} end, :retire_prepared_branch)
+    refute_received {:activate, _, _}
+    refute NativeAuthority.available?(f.host, f.target.id)
+  end
+
+  test "collection retains the original child reservation and keeps the same ready owner" do
+    f = fixture(id: "embedded-local")
+    {_, child, _} = NativeBranchDeletionContract.prepare(Memory, f.memory)
+
+    {:ok, pending} =
+      NativeBranchDeletionActionContract.accept(Memory, f.memory, child, :collect, 1303)
+
+    proof =
+      NativeBranchDeletionActionContract.proof(
+        pending.branch.native_authority.delete_collection.request
+      )
+
+    {:ok, collected} =
+      NativeBranchDeletionActionContract.finish(Memory, f.memory, pending, :collect, proof, 1304)
+
+    epoch =
+      get_in(
+        child.branch.native_authority.completion.publication,
+        ~w(change child_origin intent epoch)
+      )
+
+    :ok = GenServer.call(f.peer, {:update, %{epoch: epoch}})
+    f = put_in(f.target.connection.context.epoch, epoch)
+    f = %{f | record: child}
+
+    assert {:ok, ^collected} =
+             run(f, fn _ -> {:ok, collected} end, {:branch_deletion_action, :collect})
+
+    assert collected.reservation == child.reservation and collected.state == :unknown
+    assert_received {:activate, _, ^epoch}
+    assert NativeAuthority.available?(f.host, f.target.id)
+
+    assert {:ok, ^pending} =
+             run(f, fn _ -> {:ok, pending} end, {:branch_deletion_action, :collect})
+
+    refute_received {:activate, _, _}
+    refute NativeAuthority.available?(f.host, f.target.id)
   end
 
   defp capture_fixture(options \\ []) do

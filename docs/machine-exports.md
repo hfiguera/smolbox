@@ -10,18 +10,19 @@ backup scheduling, disaster recovery, migration, or automatic registry cleanup.
 
 ## What an export preserves
 
-SmolBox uses `POST /api/v1/machines/:name/export` on an approved 1.19.0, 1.20.2 or 1.22.0 worker.
-It requires a stopped machine and never stops one implicitly.
+SmolBox exports a stopped machine through an approved HTTP worker on 1.19.0,
+1.20.2 or 1.22.0, or through an approved Linux or macOS Embedded Port package advertising
+`exports: 1` with the unmodified 1.22.0 SDK. Export never stops a machine implicitly.
 
 | Source | Supported exported state | Excluded state |
 | --- | --- | --- |
 | Container machine | Container root filesystem changes and pack configuration | `/workspace`, host mounts, temporary filesystems, memory and processes |
 | Bare VM | Storage and overlay disks used by the pack exporter | Host mounts, memory and processes |
 
-The HTTP endpoint does not expose the CLI's `--include-workspace` option. For a
-container example, put the recognizable file in a persistent root filesystem path
-such as `/app/export-proof.txt`, with an explicit guest path policy when staging
-files there. Do not use `/workspace` to demonstrate export preservation.
+For a container example, put the recognizable file in a persistent root
+filesystem path such as `/app/export-proof.txt`, with an explicit guest path policy
+when staging files there. The managed export preserves container root filesystem
+changes. A bare VM export preserves the storage and overlay disks.
 
 Pack metadata can carry environment, entrypoint, command, working directory,
 user, network settings, and secret references. Treat an artifact as potentially
@@ -154,7 +155,9 @@ Before resolution, fence pending requests from old controllers, confirm that the
 worker's export subprocess and helper VM have stopped, and account for or remove
 only this export's temporary storage. A stopped source, an expired store lease,
 or a controller restart is not sufficient evidence. The HTTP API does not expose
-a helper cleanup attestation; this step belongs to the operator or host integration.
+a helper cleanup attestation, so the operator or host integration verifies it.
+On Embedded Port, resolution fences the pinned helper and requires its correlated
+native cleanup evidence before releasing the reservation.
 
 Then fetch the current machine version and confirm:
 
@@ -229,26 +232,25 @@ v11. PostgreSQL uses the existing encrypted machine row and partition transactio
 **no new SQL migration is required**. Its history scan is intended for the example's
 bounded deployments, not a large registry scheduling service.
 
-The embedded parity implementation has a separate gated **codec v28** for native
+Embedded Port uses a separate **codec v28** for native
 export authority. It freezes the enrolled source receipt at acceptance and the
 bounded destination/request identity before dispatch. Native acknowledgement must
 match this authority; independent registry verification and explicit staging
 cleanup remain distinct. Guarded native reservation release requires correlated
 cleanup evidence. Deploy every reader and guarded writer before advertising
 `native_export_histories: 1`. Earlier envelopes reject the new fields, including
-nil defaults; HTTP exports retain v11. This storage support does not enable the
-public embedded export workflow or establish platform qualification.
+nil defaults. HTTP exports retain v11. Package admission also requires an
+approved descriptor advertising exports.
 
-The gated embedded controller uses one pinned helper for approved preflight and
+The embedded controller uses one pinned helper for approved preflight and
 publication and freezes the exact byte allowances before dispatch. Verification
 looks up the matching protected native acknowledgement before independently
 checking the registry. Explicit native resolution fences that pinned helper,
 requests distinct staging cleanup, verifies the source disposition and saves
 cleanup with resource release. A missing acknowledgement conveys no absence or
 permission to replay. Busy/stale helpers, invalid proof, changed intent or an
-expired control budget keep reservations and result uncertainty. Container
-conversion and remaining native cleanup cases still need implementation and
-ordinary qualification; public embedded export admission remains disabled.
+expired control budget keep reservations and result uncertainty. Linux and macOS
+have ordinary installed consumer qualification for bare and container exports.
 
 Native no-stage cleanup can retire an attempt only while its source's protected
 ownership/material journal remains available. Its zero-byte native retirement
@@ -299,9 +301,18 @@ exclusion, cancellation, deadlines, corrupt registry responses, and store failur
 around dispatch, receipt, and result writes. Those fault tests are not evidence of
 real power-loss durability or a production registry's failure behavior.
 
-Export remains development-qualified. Bare VM exports and macOS exports were not
-live-qualified in this campaign. Host quotas, crash-consistent application state,
-universal artifact portability, and automatic helper cleanup are not certified.
+The [Linux Embedded Port qualification](evidence/embedded-port-http-parity-linux-managed-exports-081a83e1.json)
+covers both source modes, the current and minimum toolchains, and durable
+PostgreSQL readback after a normal BEAM exit. The
+[macOS current-toolchain Memory qualification](evidence/embedded-port-http-parity-macos-managed-exports-73f2abf7.json)
+and [macOS minimum-toolchain PostgreSQL qualification](evidence/embedded-port-http-parity-macos-durable-exports-081a83e1.json)
+cover both source modes. The larger bare and prepared-container exports also
+passed on both toolchains and platforms with PostgreSQL. Those runs verified
+resource admission and release, immutable tags, authenticated loopback HTTP
+and TLS publication, and digest-pinned reimport. The 22 GiB bare storage runs
+used an explicit one-hour deadline. Private production TLS, crash and
+CLI-race validation are deferred.
+[Export resource and policy qualification](evidence/embedded-port-http-parity-export-policies-77bbe82c.json)
 
 See [Supported platforms](supported-platforms.md) for current worker selection
 and [Testing reports](testing.md) for recorded checks and their limits.

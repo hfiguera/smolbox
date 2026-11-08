@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "recorded_date": "2026-11-06",
+  "status": "macos-native-container-publication-and-roundtrip-passed-bare-boot-unresolved",
+  "sdk": {
+    "version": "1.22.0",
+    "revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "source_unmodified": true
+  },
+  "package": {
+    "manifest_sha256": "769e5912b33c15042062f33ac2fec0ef05d6b13746bfe219f7e3cd5653fa0dfd",
+    "helper_sha256": "bc6d24a8b187dc3e0ccebae109587bca761453b3f60f00623cbfd0733c4b1997",
+    "asset_count": 809
+  },
+  "native_source_commit": "07778edce83ebbc64c01504c79687629d1f0ebce",
+  "native_inputs_verified": 343,
+  "container": {
+    "publication": {
+      "independent_registry_readback": true,
+      "exact_native_receipt_lookup_after_cleanup": true,
+      "requests": {
+        "heads": 2,
+        "uploads": 2,
+        "chunks": 41,
+        "blobs": 2,
+        "manifests": 3,
+        "reads": 5,
+        "rejected": 0
+      },
+      "content_sha256": "6e370fca10a4290f88f4f88fa177b24d12e1fde13afafc6835bd9e717efbe8cb",
+      "artifact_bytes": 41511386,
+      "manifest_sha256": "bdd4b3e640f873c974577c694d4024bb285c50a372302b8aa76d9a2277ec743b",
+      "index_sha256": "a2ed3da8c642a3f88e9af8da933d55c19013075eac78d78e0c434da4d183635c"
+    },
+    "production_qualification_pack_and_publication": true,
+    "original_source_boot_stop_delete": true,
+    "stage_cleaned": true,
+    "new_incarnation_import_boot_stop_delete": true,
+    "final": {
+      "sdk_table_counts": {
+        "vms": 0,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "config": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0,
+        "fork_pools": 0,
+        "fork_pool_snapshots": 0,
+        "fork_pool_slots": 0,
+        "fork_leases": 0
+      },
+      "normal_owner_shutdown": true,
+      "account_lock_available": true,
+      "new_incarnation": true,
+      "artifact_verified_unchanged": true,
+      "package_assets_verified": 809,
+      "helper_signature_verified": true
+    },
+    "witness_elapsed_seconds": 74.4
+  },
+  "public_export_admission": false,
+  "managed_export_qualification": false,
+  "parity_complete": false,
+  "crash_validation_deferred": true,
+  "crash_handling_qualified": false,
+  "distribution_approved": false,
+  "bare": {
+    "artifact": {
+      "bytes": 25666834,
+      "sha256": "941f9ac83e634964a0491777d0b9bff584d0921b4d897926569efa3eeb0c4124"
+    },
+    "production_qualification_and_pack": true,
+    "stage_cleaned": true,
+    "original_source_boot_stop_delete": true,
+    "new_incarnation_imported": true,
+    "new_incarnation_boot_passed": false,
+    "roundtrip_start_result": {
+      "code": "native",
+      "dispatch": "may_have_dispatched",
+      "result": "error"
+    },
+    "original_owner_closed_normally": true,
+    "failed_stopped_vm_and_disks_preserved": true,
+    "witness_elapsed_seconds": 266.64
+  },
+  "ordinary_elixir_checks": {
+    "passed": 2123,
+    "excluded": 42,
+    "deferred_crash_and_runtime_tags_excluded": true
+  }
+}

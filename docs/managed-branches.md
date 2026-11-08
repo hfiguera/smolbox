@@ -204,7 +204,14 @@ covers models and store contracts. The subsequent
 passes both installed current/minimum consumers. The subsequent
 [c5f9fde PostgreSQL case](evidence/embedded-port-http-parity-public-postgresql-branches-c5f9fde.json)
 also passes the completed lifecycle and encrypted historical readback with both
-toolchains. Partial recovery and other required combinations remain unqualified.
+toolchains. On macOS ARM64 with minimum Elixir and PostgreSQL, the scoped
+[partial branch case](evidence/embedded-port-http-parity-macos-durable-partial-4c3dcf63.json)
+and [unbooted case](evidence/embedded-port-http-parity-macos-durable-unbooted-0618e7cc.json)
+verify public disposal, retirement, backing release and workerless history
+readback with explicit qualification helpers. The
+[Linux durable recovery cases](evidence/embedded-port-http-parity-linux-durable-branch-recovery-32d4b083.json)
+verify the same local-bare paths on current and minimum Elixir with PostgreSQL
+16.15. Wider source and resource combinations still require evidence.
 
 1. Delete each child with the existing versioned `Machines.delete/3` operation and
    wait for verified deletion.

@@ -56,7 +56,7 @@ defmodule SmolBox.Runtime.NativeBranchDeletionAction do
         coordinator,
         child,
         worker,
-        :deleted,
+        {:branch_deletion_action, action},
         fn pinned ->
           claimed(config, child, version, pinned, action, deadline)
         end,

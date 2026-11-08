@@ -69,7 +69,7 @@ defmodule SmolBox.Backend.EmbeddedReply do
          %{stdout: <<>>, stderr: <<>>, file: <<>>},
          nil
        )
-       when name in ~w(inspect_creation inspect_oci_creation inspect_registry_creation) do
+       when name in ~w(inspect_creation inspect_oci_creation inspect_registry_creation inspect_checkpoint_creation) do
     case presence do
       "absent" -> {:ok, :absent}
       "unverified" -> error(:identity_conflict, :inspect, :dispatch_uncertain)

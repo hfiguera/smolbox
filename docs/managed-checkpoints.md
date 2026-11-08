@@ -48,6 +48,11 @@ changes to one restore must not modify the capture or source. A later normal sto
 and start of a restored guest is not another memory restore. Create a new machine
 from the checkpoint when you need the captured memory again.
 
+Embedded Port requires the restored guest to complete a short timer probe within
+the startup budget before reporting the first restore ready. A probe timeout
+leaves the start unresolved and retains the machine's ownership and reservations
+for explicit recovery.
+
 ## Approve capture storage and resources
 
 ```elixir

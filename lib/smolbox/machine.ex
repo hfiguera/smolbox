@@ -11,11 +11,16 @@ defmodule SmolBox.Machine do
   nil `created_at`. Running observations also require PID and process birth
   evidence. Restarting the VMM may change that process evidence while preserving
   the full receipt and durable machine incarnation.
+
+  Embedded worker inventory can report a frozen branch source without a receipt.
   """
 
   alias SmolBox.{Error, MachineSpec, Validation}
 
   alias SmolBox.Embedded.Identity
+
+  @wire_states ~w(created running stopped)
+  @embedded_inventory_states ["frozen" | @wire_states]
 
   @enforce_keys [:name, :state, :created_at, :cpus, :memory_mb, :storage_gb, :overlay_gb]
   defstruct [
@@ -37,7 +42,7 @@ defmodule SmolBox.Machine do
           network: :offline | SmolBox.NetworkPolicy.t(),
           mounts: [SmolBox.Mount.t()],
           ports: [SmolBox.PortMapping.t()],
-          state: :created | :running | :stopped,
+          state: :created | :running | :stopped | :frozen,
           created_at: non_neg_integer() | nil,
           backend_identity: SmolBox.Embedded.Identity.t() | nil,
           cpus: pos_integer(),
@@ -47,26 +52,29 @@ defmodule SmolBox.Machine do
         }
 
   @spec from_wire(term()) :: {:ok, t()} | {:error, Error.t()}
-  def from_wire(
-        %{
-          "name" => name,
-          "state" => state,
-          "createdAt" => created,
-          "cpus" => cpus,
-          "memoryMb" => memory,
-          "storageGb" => storage,
-          "overlayGb" => overlay,
-          "mounts" => wire_mounts,
-          "ports" => wire_ports,
-          "gpu" => false,
-          "cuda" => false
-        } = wire
-      ) do
+  def from_wire(body), do: decode(body, @wire_states)
+
+  defp decode(
+         %{
+           "name" => name,
+           "state" => state,
+           "createdAt" => created,
+           "cpus" => cpus,
+           "memoryMb" => memory,
+           "storageGb" => storage,
+           "overlayGb" => overlay,
+           "mounts" => wire_mounts,
+           "ports" => wire_ports,
+           "gpu" => false,
+           "cuda" => false
+         } = wire,
+         states
+       ) do
     with {:ok, mounts} <- SmolBox.Mount.from_wire(wire_mounts),
          {:ok, ports} <- SmolBox.PortMapping.from_wire(wire_ports),
          {:ok, network} <- decode_network(ports, wire),
          true <-
-           MachineSpec.valid_name?(name) and state in ["created", "running", "stopped"] and
+           MachineSpec.valid_name?(name) and state in states and
              Validation.integer?(created, 0, 253_402_300_799) and
              Validation.integer?(cpus, 1, 64) and Validation.integer?(memory, 128, 16_384) and
              Validation.integer?(storage, 1, 64) and Validation.integer?(overlay, 1, 64) do
@@ -89,12 +97,19 @@ defmodule SmolBox.Machine do
     end
   end
 
-  def from_wire(_body), do: invalid()
+  defp decode(_body, _states), do: invalid()
 
   @doc false
-  def list_from_wire(values) do
+  def list_from_wire(values), do: decode_list(values, @wire_states)
+
+  @doc false
+  def list_from_embedded_inventory(values) do
+    decode_list(values, @embedded_inventory_states)
+  end
+
+  defp decode_list(values, states) do
     if Validation.list?(values, 1024) do
-      Enum.reduce_while(values, {:ok, []}, &list_entry/2)
+      Enum.reduce_while(values, {:ok, []}, &list_entry(&1, &2, states))
       |> case do
         {:ok, machines} -> {:ok, Enum.reverse(machines)}
         error -> error
@@ -104,8 +119,8 @@ defmodule SmolBox.Machine do
     end
   end
 
-  defp list_entry(value, {:ok, machines}) do
-    case from_wire(value) do
+  defp list_entry(value, {:ok, machines}, states) do
+    case decode(value, states) do
       {:ok, machine} ->
         {:cont, {:ok, [machine | machines]}}
 
@@ -158,6 +173,7 @@ defmodule SmolBox.Machine do
   defp state("created"), do: :created
   defp state("running"), do: :running
   defp state("stopped"), do: :stopped
+  defp state("frozen"), do: :frozen
 
   defp invalid(category \\ :protocol),
     do: {:error, %Error{category: category, operation: :machine}}

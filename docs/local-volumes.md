@@ -8,17 +8,12 @@ The HTTP backend supports **Linux workers running smolvm 1.20.2 or 1.22.0**, one
 exclusive machine attachment per volume, and guest targets below `/mnt/volumes/`.
 Read-only attachments are exclusive too. The default remains no mounts.
 
-Embedded Port volumes remain disabled while integration and qualification are
-in progress. Native host provisioning binds an unprivileged dedicated account
-to private `0700` backing. One [exact Linux package](evidence/embedded-port-http-parity-linux-mounted-guest-7993b53.json)
-passes ordinary local-container mounted IO, read-only enforcement, stopped-owner
-replacement with retained/new writes and original owned deletion. Managed native
-provisioning and explicit cleanup preserve pinned owner identity, durable intent
-and exact completion proof, with bounded read-only startup validation. Memory and
-the PostgreSQL example advertise `native_volumes: 1` after shared native proof,
-attachment, command-reader and accounting contracts. Public mounted Runtime
-acceptance and other source/platform combinations remain pending; existing HTTP
-qualification does not qualify the changed native helper.
+Approved Linux Embedded Port packages can use local volumes. Native provisioning
+binds an unprivileged dedicated account to private `0700` backing. The public
+Linux x86_64 qualification covers writable and read-only attachments, stop and
+normal owner replacement, retained data, exclusive attachment, and owned
+deletion. Memory and the PostgreSQL example advertise `native_volumes: 1` and
+retain native proofs and independent disk accounting.
 
 ## Approve the worker storage boundary
 
@@ -101,6 +96,23 @@ and nonoverlapping guest targets. The constructor sorts targets. Multiple volume
 on one machine must belong to the same worker. Set `readonly: true` in
 `VolumeMount.new/3` to deny guest writes. Ordinary command working-directory and
 file-transfer policies remain separate; approving a mount does not broaden them.
+
+The eight-entry constructor limit is a schema bound. On Linux x86_64 smolvm
+1.22.0, the HTTP and Embedded Port managed runtimes enforce a smaller limit
+because boot devices and volume mounts share libkrun's virtio interrupt
+budget. Local and registry-prepared packs have the same limit.
+
+| Machine source and profile | Maximum managed mounts |
+| --- | --- |
+| Offline prepared bare or container pack without published ports | 2 |
+| Prepared bare or container pack with filtered networking or published ports | 1 |
+| OCI image with approved networking | 2 |
+
+`Machines.create/2` returns `:unsupported_capability` with
+`:not_dispatched` evidence for an oversized layout. It creates no machine
+record, attaches no volumes and takes no machine or port reservation. An
+unassigned request queued by an older controller remains cancellable.
+[Mount-count qualification](evidence/embedded-port-http-parity-linux-mount-count-8e3faaf8.json)
 
 There is no hot attach/detach, concurrent sharing, migration, replication or automatic
 volume expiry. Mounted machines cannot currently be checkpoint sources, checkpoint

@@ -357,11 +357,39 @@ The helper selects export asset grants only from the verified manifest. Shared
 engine setup binds them to package, domain and library root under native admission;
 packing rechecks the files under the retained whole-job budget. Packages without
 the tar retain their previous setup path and cannot provide that pack catalog.
-Public export admission remains disabled while container flattening, publication,
-histories and ordinary export/import qualification are pending. The opt-in
+The default Linux and macOS packages advertise exports after ordinary bare
+and container qualification. Both platforms have minimum-toolchain PostgreSQL
+qualification. The opt-in
 `ordinary_manifest_rootfs_archive_matches_approved_guest_files` test checks an
 explicit local package's preflight and tar/manifest correspondence without opening
 an engine or VM. It does not qualify guest boot, distribution or crash boundaries.
+
+The ignored `ordinary_owned_container_conversion` witness requires a stopped,
+Port-owned source in an already enrolled dedicated account. Its explicit
+`pipeline` phase uses production qualification and packing for a bare or
+container source. The `publish` phase additionally requires one approved
+loopback registry destination and its transient bearer on stdin. The test peer
+in `smolbox-port/tests/export_registry.py` keeps bounded upload files, enforces
+immutable tags and supports independent digest readback. Neither mode changes
+public capability admission or runs deferred crash tests.
+
+For the managed export proof, use `scripts/embedded-exports-runtime-proof.exs`
+inside an installed production consumer with no Rust on PATH. Run it with
+`--without-rust --ordinary`, the configured target file, a fresh evidence
+directory, the loopback registry address, a private bearer file, and `bare`
+or `container`. The target must point to an exactly approved platform package
+advertising exports and to an ordinary fixture of the selected mode. The loopback
+fixture can allow anonymous reads while requiring the bearer for publication.
+The proof publishes and resolves the export, approves the digest-pinned registry
+source, then boots and changes the imported copy independently of the original.
+It checks final reservation release and leaves the original Runtime available on
+a failed run. The default proof store is Memory. Add `--postgres SETTINGS` in
+the durable example consumer with a migrated Repo and a JSON settings file
+containing the partition and the path to a private 32-byte encryption key in
+`partition` and `key_file`. After normal exit, run
+`--without-rust --ordinary --readback EVIDENCE SETTINGS` in a fresh BEAM to verify
+the exact completed records without attaching a worker. These campaigns keep
+crash validation deferred.
 
 For offline Linux builds, use the locked Cargo vendor tree with a private
 `CARGO_HOME`, a vendored-source configuration and `CARGO_NET_OFFLINE=true`.

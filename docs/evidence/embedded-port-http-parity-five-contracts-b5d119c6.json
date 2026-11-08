@@ -1,0 +1,296 @@
+{
+  "schema": 1,
+  "recorded_date": "2026-11-06",
+  "status": "scoped-live-public-evidence-recorded-for-five-contracts",
+  "source_commit": "b5d119c6367f1a4b0403ada84a77d8dbdfefe611",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "diagnostics_fixture_sha256": {
+    "linux": "339995f33fe84c2ed5a4e212a0acb9afab22df972bf2c2b4aa8e412ea0af5bc4",
+    "macos": "0f4a26a548738c6ba359701ea23c5d2bbb93f0c1d95f6444df897bfa99e27aa2"
+  },
+  "installed_no_rust_consumers": true,
+  "public_inventory_console_and_guest_paths": [
+    {
+      "platform": "linux",
+      "elixir": "1.20.4",
+      "otp": "29.0.6",
+      "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+      "package": {
+        "manifest_sha256": "0870a210d25fe5183800404df626205ac2da1d6ceb3e857fd618667bb058f986",
+        "helper_sha256": "40ac91f1704ab99c5be28651f78b5d2deeb89a92c9459198884ab01a55409f23",
+        "asset_count": 806,
+        "hex_archive_sha256": "1b718c7f7097e2568b7904f8569827d78e20bcbaa6c076b047c278d6e63e890b"
+      },
+      "proof": {
+        "inventory_empty_created_running_stopped_deleted": true,
+        "unassigned_inventory_has_no_receipt": true,
+        "managed_scope_filtered_and_deleted_history_retained": true,
+        "zero_reservations": true,
+        "ordinary_shutdown": true,
+        "crash_validation_deferred": true,
+        "custom_workdir_upload_download": true,
+        "denied_direction_boundary_and_budget_before_reservation": true,
+        "transferred_bytes": 65537,
+        "transferred_sha256": "f6b82df7d28d7ebac8601da4c154ce0d5389b929901075bbbeec3003e37e12b4",
+        "tail_lines": 2,
+        "bounded_follow_expiry_with_callback": true,
+        "invalid_follow_rejected": true,
+        "running_and_stopped_observation": true,
+        "deleted_handle_rejected": true
+      },
+      "postflight": {
+        "sdk_tables": {
+          "vms": 0,
+          "vm_create_reservations": 0,
+          "vm_pause_operations": 0,
+          "config": 0,
+          "vm_resize_intents": 0,
+          "vm_resize_receipts": 0,
+          "fork_pools": 0,
+          "fork_pool_snapshots": 0,
+          "fork_pool_slots": 0,
+          "fork_leases": 0
+        },
+        "account_lock_available": true,
+        "package_assets_verified": 806
+      },
+      "report_sha256": "fa8cb396296551b5f23c8462c9e5df5019b736e55dca792bce557779a1dfc9a6"
+    },
+    {
+      "platform": "macos",
+      "elixir": "1.18.4",
+      "otp": "27.3.4.15",
+      "postgresql": "17.11 (Homebrew)",
+      "package": {
+        "manifest_sha256": "b6b4a0a54295036d719ffdf2b241ce5c1a16b3c79811356b7995fa6cc4aa881c",
+        "helper_sha256": "5ed6cb9ebe3cbe50aecfccb0e9d7f21a71f8aa5a9e114ae0d3ad5ca40538f2f4",
+        "asset_count": 809,
+        "hex_archive_sha256": "1b718c7f7097e2568b7904f8569827d78e20bcbaa6c076b047c278d6e63e890b"
+      },
+      "proof": {
+        "inventory_empty_created_running_stopped_deleted": true,
+        "unassigned_inventory_has_no_receipt": true,
+        "managed_scope_filtered_and_deleted_history_retained": true,
+        "zero_reservations": true,
+        "ordinary_shutdown": true,
+        "crash_validation_deferred": true,
+        "custom_workdir_upload_download": true,
+        "denied_direction_boundary_and_budget_before_reservation": true,
+        "transferred_bytes": 65537,
+        "transferred_sha256": "f6b82df7d28d7ebac8601da4c154ce0d5389b929901075bbbeec3003e37e12b4",
+        "tail_lines": 2,
+        "bounded_follow_expiry_with_callback": true,
+        "invalid_follow_rejected": true,
+        "running_and_stopped_observation": true,
+        "deleted_handle_rejected": true
+      },
+      "postflight": {
+        "sdk_tables": {
+          "vms": 0,
+          "vm_create_reservations": 0,
+          "vm_pause_operations": 0,
+          "config": 0,
+          "vm_resize_intents": 0,
+          "vm_resize_receipts": 0,
+          "fork_pools": 0,
+          "fork_pool_snapshots": 0,
+          "fork_pool_slots": 0,
+          "fork_leases": 0
+        },
+        "account_lock_available": true,
+        "package_assets_verified": 809
+      },
+      "report_sha256": "8acbb180b1e9828f1f5235a8c710731f6b77bdb86a22a3798dd8ecc323faa41f"
+    }
+  ],
+  "linux_minimum_postgresql_managed_mounts": {
+    "elixir": "1.18.4",
+    "otp": "27.3.4.15",
+    "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+    "canonical_sdk_volume_root": true,
+    "package": {
+      "manifest_sha256": "0870a210d25fe5183800404df626205ac2da1d6ceb3e857fd618667bb058f986",
+      "helper_sha256": "40ac91f1704ab99c5be28651f78b5d2deeb89a92c9459198884ab01a55409f23",
+      "asset_count": 806,
+      "hex_archive_sha256": "1b718c7f7097e2568b7904f8569827d78e20bcbaa6c076b047c278d6e63e890b"
+    },
+    "prepare": {
+      "scope": "public-linux-mounted-runtime",
+      "identity": {
+        "architecture": "x86_64",
+        "assets_sha256": "e4bbd2fa0d53803ebf511e92c6ff46e0f24863e5f81b7602d1e27f4e8c5ae00c",
+        "build_sha256": "40ac91f1704ab99c5be28651f78b5d2deeb89a92c9459198884ab01a55409f23",
+        "engine_version": "0.2.0",
+        "platform": "linux",
+        "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+        "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+      },
+      "phase": "prepare",
+      "package_manifest_sha256": "0870a210d25fe5183800404df626205ac2da1d6ceb3e857fd618667bb058f986",
+      "prepared_stopped": true,
+      "owned_deleted": false,
+      "store_mode": "durable",
+      "fixture_sha256": "339995f33fe84c2ed5a4e212a0acb9afab22df972bf2c2b4aa8e412ea0af5bc4",
+      "worker_capacity": {
+        "cpus": 2,
+        "memory_mb": 1536,
+        "slots": 2,
+        "disk_gb": 10
+      },
+      "deliberate_process_interruption": false,
+      "crash_handling_qualified": false,
+      "reserved_slots": 1,
+      "reserved_disk_gb": 4
+    },
+    "resume": {
+      "scope": "public-linux-mounted-runtime",
+      "identity": {
+        "architecture": "x86_64",
+        "assets_sha256": "e4bbd2fa0d53803ebf511e92c6ff46e0f24863e5f81b7602d1e27f4e8c5ae00c",
+        "build_sha256": "40ac91f1704ab99c5be28651f78b5d2deeb89a92c9459198884ab01a55409f23",
+        "engine_version": "0.2.0",
+        "platform": "linux",
+        "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+        "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+      },
+      "phase": "resume",
+      "package_manifest_sha256": "0870a210d25fe5183800404df626205ac2da1d6ceb3e857fd618667bb058f986",
+      "owned_deleted": true,
+      "separate_normal_beam_restart": true,
+      "historical_output_after_normal_beam_restart": true,
+      "final_reserved_slots": 0,
+      "final_reserved_disk_gb": 0,
+      "store_mode": "durable",
+      "fixture_sha256": "339995f33fe84c2ed5a4e212a0acb9afab22df972bf2c2b4aa8e412ea0af5bc4",
+      "worker_capacity": {
+        "cpus": 2,
+        "memory_mb": 1536,
+        "slots": 2,
+        "disk_gb": 10
+      },
+      "deliberate_process_interruption": false,
+      "crash_handling_qualified": false,
+      "file_bytes": 65554,
+      "file_sha256": "25ac6018e1a86a5aa310d7cd70d12c517e89e42b33afb021d07ca3c0ce909638",
+      "readonly_reattachment": true,
+      "stopped_runtime_replacement": true,
+      "drain_retained": true,
+      "running_sibling_preserved": true,
+      "competing_attachment_rejected": true,
+      "volume_budget_rejected_before_dispatch": true,
+      "proof_retained": true
+    },
+    "postflight": {
+      "sdk_tables": {
+        "vms": 0,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "config": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0,
+        "fork_pools": 0,
+        "fork_pool_snapshots": 0,
+        "fork_pool_slots": 0,
+        "fork_leases": 0
+      },
+      "account_lock_available": true,
+      "package_assets_verified": 806
+    },
+    "report_sha256": "0c72ad598e8beaea6394c04a31fd99a79841cda756ea30d1e42f191ddbf98184"
+  },
+  "linux_current_postgresql_registry_identity_token": {
+    "elixir": "1.20.4",
+    "otp": "29.0.6",
+    "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+    "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+    "qualification_package": {
+      "manifest_sha256": "da5c1773d5756b6afe4900a6d5f569c9d8c0a9b53c9c8fbfd23dd7892e6e326e",
+      "helper_sha256": "72e220cfa0f6b4cede3e56bc7c20e5831ba4caeb28ed42858eda951c88dafaa1",
+      "asset_count": 806,
+      "hex_archive_sha256": "1b718c7f7097e2568b7904f8569827d78e20bcbaa6c076b047c278d6e63e890b"
+    },
+    "qualification_overlay_sha256": "924fc0ec4891af80ce56c176160a9465b5375196fd9b6317967b424932a07430",
+    "qualification_overlay_scope": "Add a fixture CA and resolve two dedicated test DNS names to loopback. Keep TLS chain and hostname verification, public dispatch, credential scope, and wrong-realm rejection.",
+    "proof": {
+      "public_cold_and_warm_prepared_creation": true,
+      "stable_credential_reference": true,
+      "rotated_identity_token": true,
+      "codec_records_exclude_both_identity_tokens": true,
+      "wrong_realm_rejected": true,
+      "owned_deleted": true,
+      "zero_reservations": true,
+      "ordinary_shutdown": true,
+      "crash_validation_deferred": true
+    },
+    "https_fixture": {
+      "requests": {
+        "anonymous_challenges": 2,
+        "wrong_realm_challenges": 1,
+        "identity_exchanges": 2,
+        "scoped_manifest_reads": 2,
+        "scoped_blob_reads": 1,
+        "unexpected_requests": 0,
+        "identity_on_registry": 0
+      },
+      "distinct_identity_generations": 2,
+      "loopback_only": true,
+      "tls_chain_and_hostname_verification_enabled": true,
+      "identity_and_scoped_tokens_absent_from_owned_argv_and_environment": true,
+      "test_ca_injected_only_in_qualification_helper": true
+    },
+    "fresh_workerless_store_readback": {
+      "workers": 0,
+      "exact_machine_records": 2,
+      "identity_tokens_excluded": true
+    },
+    "postflight": {
+      "sdk_tables": {
+        "vms": 0,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "config": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0,
+        "fork_pools": 0,
+        "fork_pool_snapshots": 0,
+        "fork_pool_slots": 0,
+        "fork_leases": 0
+      },
+      "account_lock_available": true,
+      "package_assets_verified": 806
+    },
+    "report_sha256": "034555b01874f771d09b6cd6635476d8de3632c1f643245f448b80eb92cfbbd1"
+  },
+  "focused_checks_passed": 53,
+  "runner_sha256": {
+    "diagnostics.exs": "9eaaa7c748ef4a0c1b9a682cd5f655c004b2856e58b3bf3ad3e4ddecc83c5776",
+    "mount-proof.exs": "1dfacecb55f44e9838eb5f423a21a232b5fbb098ed4ab1f730d8236e13980999",
+    "credentials.exs": "5458b916392758ad1c62b8ca7d9087997f8db3ed84441656cc4b5382414e24cd",
+    "credentials-readback.exs": "0bf3c841abba7314d036493de899b841821b078a7692dbb6c80f9f10a12a8a03",
+    "tls_fixture.py": "ad931f4d569a2b83e12a6194d20d52a6b4c516f7467baa5c0a6cd57c186d5876"
+  },
+  "earlier_attempts": {
+    "diagnostics_runner_corrected_for_upload_readback_policy_and_callback_process": true,
+    "earlier_diagnostics_owners_closed_normally": true,
+    "mount_runner_corrected_to_canonical_sdk_volume_root": true,
+    "noncanonical_volume_attempt_retained_unknown_record": true,
+    "credential_source_only_config_explicit_empty_artifact_list": true,
+    "initial_credential_config_rejected_before_owner_open": true
+  },
+  "lab_custody": {
+    "successful_lanes_closed": 3,
+    "earlier_noncanonical_volume_root_owner_retained": true,
+    "retained_run_has_no_sdk_vms_or_volume_files": true,
+    "forced_termination": false,
+    "lab_left_running_to_preserve_original_owner": true
+  },
+  "staged_guest_template_bytes_unchanged_on_four_reclaimed_files": true,
+  "remaining_scope": [
+    "Inventory and console cases across other supported sources.",
+    "Additional registry authentication variants, toolchains and platforms where required.",
+    "Additional supported mount, guest-path and resource combinations."
+  ],
+  "crash_validation_deferred": true,
+  "full_http_parity_claimed": false,
+  "distribution_approved": false
+}

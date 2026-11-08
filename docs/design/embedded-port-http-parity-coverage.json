@@ -3,9 +3,22 @@
   "scope": "SmolBox managed HTTP backend feature parity; HTTP transports remain HTTP-specific",
   "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
   "crash_validation_deferred": true,
+  "cli_race_validation_deferred": true,
   "crash_handling_qualified": false,
   "distribution_approved": false,
   "parity_complete": false,
+  "http_parity": {
+    "qualified_operations": 34,
+    "total_operations": 35,
+    "remaining_gaps": [
+      {
+        "id": "private-production-tls",
+        "status": "deferred",
+        "operations": ["prepare_artifact"],
+        "specifications": ["credentials"]
+      }
+    ]
+  },
   "operations": [
     {
       "name": "health",
@@ -15,12 +28,21 @@
       "contract": "observability",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "observability:validation-and-dispatch",
         "observability:ordinary-public-behavior",
         "observability:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "test/unit/embedded_observability_test.exs",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json",
+          "docs/evidence/embedded-port-http-parity-macos-stopped-helper-upgrade-0618e7cc.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "capacity",
@@ -30,12 +52,21 @@
       "contract": "observability",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "observability:validation-and-dispatch",
         "observability:ordinary-public-behavior",
         "observability:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "test/unit/embedded_observability_test.exs",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json",
+          "docs/evidence/embedded-port-http-parity-macos-stopped-helper-upgrade-0618e7cc.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "metrics",
@@ -45,12 +76,21 @@
       "contract": "observability",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "observability:validation-and-dispatch",
         "observability:ordinary-public-behavior",
         "observability:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "test/unit/embedded_observability_test.exs",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json",
+          "docs/evidence/embedded-port-http-parity-macos-stopped-helper-upgrade-0618e7cc.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "readiness",
@@ -60,12 +100,21 @@
       "contract": "observability",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "observability:validation-and-dispatch",
         "observability:ordinary-public-behavior",
         "observability:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "test/unit/embedded_observability_test.exs",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json",
+          "docs/evidence/embedded-port-http-parity-macos-stopped-helper-upgrade-0618e7cc.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "observe_health",
@@ -75,12 +124,21 @@
       "contract": "observability",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "observability:validation-and-dispatch",
         "observability:ordinary-public-behavior",
         "observability:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "test/unit/embedded_observability_test.exs",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json",
+          "docs/evidence/embedded-port-http-parity-macos-stopped-helper-upgrade-0618e7cc.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "list",
@@ -90,12 +148,26 @@
       "contract": "inventory",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "inventory:validation-and-dispatch",
         "inventory:ordinary-public-behavior",
         "inventory:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-source-io-9a5ba0bc.json",
+          "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+          "docs/evidence/embedded-port-http-parity-queued-start-8887970d.json",
+          "docs/evidence/embedded-port-http-parity-macos-checkpoints-9a2feea6.json",
+          "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
+          "test/unit/embedded_observability_test.exs",
+          "docs/evidence/embedded-port-http-parity-five-contracts-b5d119c6.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "inspect_machine",
@@ -105,12 +177,22 @@
       "contract": "inventory",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "inventory:validation-and-dispatch",
         "inventory:ordinary-public-behavior",
         "inventory:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+          "test/unit/embedded_observability_test.exs",
+          "docs/evidence/embedded-port-http-parity-five-contracts-b5d119c6.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "machine_measurements",
@@ -120,12 +202,25 @@
       "contract": "inventory",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "inventory:validation-and-dispatch",
         "inventory:ordinary-public-behavior",
         "inventory:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-source-io-9a5ba0bc.json",
+          "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+          "docs/evidence/embedded-port-http-parity-queued-start-8887970d.json",
+          "docs/evidence/embedded-port-http-parity-guest-io-dadef569.json",
+          "test/unit/embedded_observability_test.exs",
+          "docs/evidence/embedded-port-http-parity-five-contracts-b5d119c6.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "create",
@@ -136,12 +231,26 @@
       "contract": "creation",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "creation:validation-and-dispatch",
         "creation:ordinary-public-behavior",
         "creation:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-creation-network-7737ace6.json",
+          "test/unit/embedded_config_test.exs",
+          "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+          "docs/evidence/embedded-port-http-parity-oci-network-7e3b43c7.json",
+          "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
+          "test/unit/embedded_creation_payload_test.exs",
+          "test/unit/embedded_preparation_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-public-images-4efcf6c.json",
+          "docs/evidence/embedded-port-http-parity-macos-public-sources-f1f250d3.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "create_prepared",
@@ -152,12 +261,23 @@
       "contract": "creation",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "creation:validation-and-dispatch",
         "creation:ordinary-public-behavior",
         "creation:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-creation-network-7737ace6.json",
+          "docs/evidence/embedded-port-http-parity-oci-network-7e3b43c7.json",
+          "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
+          "test/unit/embedded_preparation_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-public-images-4efcf6c.json",
+          "docs/evidence/embedded-port-http-parity-macos-public-sources-f1f250d3.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "prepare_artifact",
@@ -173,7 +293,23 @@
         "creation:validation-and-dispatch",
         "creation:ordinary-public-behavior",
         "creation:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-private-ghcr-redirect-e03a29b0.json",
+          "docs/evidence/embedded-port-http-parity-private-ghcr-e03a29b0.json",
+          "docs/evidence/embedded-port-http-parity-registry-auth-ac6ac709.json",
+          "docs/evidence/embedded-port-http-parity-oci-network-7e3b43c7.json",
+          "docs/evidence/embedded-port-http-parity-registry-oci-linux-5788a29.json",
+          "docs/evidence/embedded-port-http-parity-five-contracts-b5d119c6.json",
+          "test/unit/embedded_preparation_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-public-images-4efcf6c.json",
+          "docs/evidence/embedded-port-http-parity-macos-public-sources-f1f250d3.json"
+        ],
+        "remaining": [
+          "Public TLS validation of the explicit credential_ref exchange is deferred. GHCR account Basic preparation passes on Linux and macOS with both toolchains."
+        ]
+      }
     },
     {
       "name": "start",
@@ -183,12 +319,27 @@
       "contract": "lifecycle",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "lifecycle:validation-and-dispatch",
         "lifecycle:ordinary-public-behavior",
         "lifecycle:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-registry-auth-ac6ac709.json",
+          "docs/evidence/embedded-port-http-parity-queued-start-8887970d.json",
+          "docs/evidence/embedded-port-http-parity-registry-restart-55003eae.json",
+          "docs/evidence/embedded-port-http-parity-oci-saved-lifecycle-006ae76e.json",
+          "docs/evidence/embedded-port-http-parity-oci-network-7e3b43c7.json",
+          "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
+          "docs/evidence/embedded-port-http-parity-linux-public-consumers-5788a29.json",
+          "docs/evidence/embedded-port-http-parity-macos-relay-ordinary-7b05cf60.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "stop",
@@ -198,12 +349,25 @@
       "contract": "lifecycle",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "lifecycle:validation-and-dispatch",
         "lifecycle:ordinary-public-behavior",
         "lifecycle:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-registry-auth-ac6ac709.json",
+          "docs/evidence/embedded-port-http-parity-oci-saved-lifecycle-006ae76e.json",
+          "docs/evidence/embedded-port-http-parity-oci-network-7e3b43c7.json",
+          "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
+          "docs/evidence/embedded-port-http-parity-linux-public-consumers-5788a29.json",
+          "docs/evidence/embedded-port-http-parity-macos-relay-ordinary-7b05cf60.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "delete",
@@ -213,12 +377,26 @@
       "contract": "lifecycle",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "lifecycle:validation-and-dispatch",
         "lifecycle:ordinary-public-behavior",
         "lifecycle:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-registry-auth-ac6ac709.json",
+          "docs/evidence/embedded-port-http-parity-oci-saved-lifecycle-006ae76e.json",
+          "docs/evidence/embedded-port-http-parity-port-conflict-cleanup-34413ad1.json",
+          "docs/evidence/embedded-port-http-parity-oci-network-7e3b43c7.json",
+          "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
+          "docs/evidence/embedded-port-http-parity-linux-public-consumers-5788a29.json",
+          "docs/evidence/embedded-port-http-parity-macos-relay-ordinary-7b05cf60.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "exec",
@@ -229,12 +407,24 @@
       "contract": "commands",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "commands:validation-and-dispatch",
         "commands:ordinary-public-behavior",
         "commands:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-source-io-9a5ba0bc.json",
+          "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+          "docs/evidence/embedded-port-http-parity-guest-io-dadef569.json",
+          "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
+          "test/unit/embedded_command_payload_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-public-consumers-5788a29.json",
+          "docs/evidence/embedded-port-http-parity-macos-relay-ordinary-7b05cf60.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "exec_stream",
@@ -245,12 +435,23 @@
       "contract": "commands",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "commands:validation-and-dispatch",
         "commands:ordinary-public-behavior",
         "commands:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-source-io-9a5ba0bc.json",
+          "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+          "docs/evidence/embedded-port-http-parity-guest-io-dadef569.json",
+          "test/unit/embedded_command_payload_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-public-consumers-5788a29.json",
+          "docs/evidence/embedded-port-http-parity-macos-relay-ordinary-7b05cf60.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "upload",
@@ -260,12 +461,25 @@
       "contract": "files",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "files:validation-and-dispatch",
         "files:ordinary-public-behavior",
         "files:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-source-io-9a5ba0bc.json",
+          "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+          "docs/evidence/embedded-port-http-parity-guest-io-dadef569.json",
+          "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
+          "test/contract/managed_guest_files_test.exs",
+          "docs/evidence/embedded-port-http-parity-five-contracts-b5d119c6.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "download",
@@ -275,12 +489,25 @@
       "contract": "files",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "files:validation-and-dispatch",
         "files:ordinary-public-behavior",
         "files:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-source-io-9a5ba0bc.json",
+          "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+          "docs/evidence/embedded-port-http-parity-guest-io-dadef569.json",
+          "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
+          "test/contract/managed_guest_files_test.exs",
+          "docs/evidence/embedded-port-http-parity-five-contracts-b5d119c6.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "list_images",
@@ -290,12 +517,22 @@
       "contract": "images",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "images:validation-and-dispatch",
         "images:ordinary-public-behavior",
         "images:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-registry-auth-ac6ac709.json",
+          "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
+          "docs/evidence/embedded-port-http-parity-linux-public-images-4efcf6c.json",
+          "docs/evidence/embedded-port-http-parity-macos-public-sources-f1f250d3.json",
+          "docs/evidence/embedded-port-http-parity-registry-oci-linux-5788a29.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "pull_image",
@@ -305,12 +542,22 @@
       "contract": "images",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "images:validation-and-dispatch",
         "images:ordinary-public-behavior",
         "images:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-registry-auth-ac6ac709.json",
+          "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
+          "docs/evidence/embedded-port-http-parity-linux-public-images-4efcf6c.json",
+          "docs/evidence/embedded-port-http-parity-macos-public-sources-f1f250d3.json",
+          "docs/evidence/embedded-port-http-parity-registry-oci-linux-5788a29.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "logs",
@@ -321,12 +568,27 @@
       "contract": "logs",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "logs:validation-and-dispatch",
         "logs:ordinary-public-behavior",
         "logs:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-source-io-9a5ba0bc.json",
+          "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+          "docs/evidence/embedded-port-http-parity-queued-start-8887970d.json",
+          "docs/evidence/embedded-port-http-parity-macos-checkpoints-9a2feea6.json",
+          "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
+          "test/unit/embedded_log_stream_test.exs",
+          "test/contract/logs_test.exs",
+          "docs/evidence/embedded-port-http-parity-five-contracts-b5d119c6.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "terminal_preflight",
@@ -336,12 +598,24 @@
       "contract": "terminals",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "terminals:validation-and-dispatch",
         "terminals:ordinary-public-behavior",
         "terminals:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-managed-terminals-7974cc9e.json",
+          "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+          "docs/evidence/embedded-port-http-parity-guest-io-dadef569.json",
+          "test/unit/embedded_terminal_contract_test.exs",
+          "test/unit/embedded_terminal_runtime_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-public-consumers-5788a29.json",
+          "docs/evidence/embedded-port-http-parity-macos-relay-ordinary-7b05cf60.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "open_managed_terminal",
@@ -351,12 +625,24 @@
       "contract": "terminals",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "terminals:validation-and-dispatch",
         "terminals:ordinary-public-behavior",
         "terminals:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-managed-terminals-7974cc9e.json",
+          "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+          "docs/evidence/embedded-port-http-parity-guest-io-dadef569.json",
+          "test/unit/embedded_terminal_contract_test.exs",
+          "test/unit/embedded_terminal_runtime_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-public-consumers-5788a29.json",
+          "docs/evidence/embedded-port-http-parity-macos-relay-ordinary-7b05cf60.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "provision_volume",
@@ -366,12 +652,24 @@
       "contract": "volumes",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "volumes:validation-and-dispatch",
         "volumes:ordinary-public-behavior",
         "volumes:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-linux-volumes-4e2f125a.json",
+          "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+          "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
+          "test/unit/embedded_volume_wire_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-public-volumes-d7a2354.json",
+          "docs/evidence/embedded-port-http-parity-postgresql-volumes-1fd1262.json",
+          "docs/evidence/embedded-port-http-parity-five-contracts-b5d119c6.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "delete_volume",
@@ -381,12 +679,24 @@
       "contract": "volumes",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "volumes:validation-and-dispatch",
         "volumes:ordinary-public-behavior",
         "volumes:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-linux-volumes-4e2f125a.json",
+          "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+          "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
+          "test/unit/embedded_volume_wire_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-public-volumes-d7a2354.json",
+          "docs/evidence/embedded-port-http-parity-postgresql-volumes-1fd1262.json",
+          "docs/evidence/embedded-port-http-parity-five-contracts-b5d119c6.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "expand_disks",
@@ -396,12 +706,24 @@
       "contract": "disk-growth",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "disk-growth:validation-and-dispatch",
         "disk-growth:ordinary-public-behavior",
         "disk-growth:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-registry-restart-55003eae.json",
+          "docs/evidence/embedded-port-http-parity-linux-growth-refusals-5dc54b60.json",
+          "docs/evidence/embedded-port-http-parity-linux-oci-growth-2b984eed.json",
+          "test/unit/embedded_growth_wire_test.exs",
+          "test/unit/native_growth_history_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-bare-growth-c728e31.json",
+          "docs/evidence/embedded-port-http-parity-linux-oci-growth-ff0ed3e.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "start_checkpointable",
@@ -411,7 +733,7 @@
       "contract": "checkpoints",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "implementation_refs": [
         "native/smolbox-engine/src/machine.rs",
         "native/smolbox-protocol/src/wire.rs",
@@ -422,7 +744,18 @@
         "checkpoints:validation-and-dispatch",
         "checkpoints:ordinary-public-behavior",
         "checkpoints:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-macos-checkpoints-9a2feea6.json",
+          "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
+          "docs/evidence/embedded-port-http-parity-macos-checkpoint-readiness.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+          "test/unit/embedded_capture_call_test.exs"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "checkpoint_preflight",
@@ -432,7 +765,7 @@
       "contract": "checkpoints",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "implementation_refs": [
         "native/smolbox-engine/src/checkpoint_capture.rs",
         "native/smolbox-engine/src/machine.rs",
@@ -443,7 +776,19 @@
         "checkpoints:validation-and-dispatch",
         "checkpoints:ordinary-public-behavior",
         "checkpoints:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-queued-start-8887970d.json",
+          "docs/evidence/embedded-port-http-parity-linux-growth-refusals-5dc54b60.json",
+          "test/contract/managed_checkpoint_test.exs",
+          "docs/evidence/embedded-port-http-parity-macos-checkpoint-readiness.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "test/unit/embedded_capture_call_test.exs",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "capture_checkpoint",
@@ -453,12 +798,23 @@
       "contract": "checkpoints",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "checkpoints:validation-and-dispatch",
         "checkpoints:ordinary-public-behavior",
         "checkpoints:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-macos-checkpoints-9a2feea6.json",
+          "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
+          "docs/evidence/embedded-port-http-parity-macos-checkpoint-readiness.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+          "test/unit/embedded_capture_call_test.exs"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "export_machine",
@@ -468,12 +824,24 @@
       "contract": "exports",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "exports:validation-and-dispatch",
         "exports:ordinary-public-behavior",
         "exports:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-export-policies-77bbe82c.json",
+          "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+          "docs/evidence/embedded-port-http-parity-oci-export-verified-266510d6.json",
+          "docs/evidence/embedded-port-http-parity-oci-export-digest-dadef569.json",
+          "test/unit/embedded_export_backend_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-managed-exports-081a83e1.json",
+          "docs/evidence/embedded-port-http-parity-macos-durable-exports-081a83e1.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "branch_source",
@@ -483,12 +851,23 @@
       "contract": "branches",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "branches:validation-and-dispatch",
         "branches:ordinary-public-behavior",
         "branches:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-queued-start-8887970d.json",
+          "test/unit/embedded_branch_preflight_test.exs",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+          "docs/evidence/embedded-port-http-parity-public-postgresql-branches-d1bba15.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "branch_absent",
@@ -498,12 +877,23 @@
       "contract": "branches",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "branches:validation-and-dispatch",
         "branches:ordinary-public-behavior",
         "branches:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-queued-start-8887970d.json",
+          "test/unit/embedded_branch_absence_test.exs",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+          "docs/evidence/embedded-port-http-parity-public-postgresql-branches-d1bba15.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "branch_create",
@@ -513,12 +903,24 @@
       "contract": "branches",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "branches:validation-and-dispatch",
         "branches:ordinary-public-behavior",
         "branches:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-queued-start-8887970d.json",
+          "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
+          "test/unit/embedded_branch_creation_test.exs",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+          "docs/evidence/embedded-port-http-parity-public-postgresql-branches-d1bba15.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "branch_inspect_child",
@@ -528,12 +930,23 @@
       "contract": "branches",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "branches:validation-and-dispatch",
         "branches:ordinary-public-behavior",
         "branches:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-queued-start-8887970d.json",
+          "test/unit/embedded_branch_backend_test.exs",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+          "docs/evidence/embedded-port-http-parity-public-postgresql-branches-d1bba15.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "resolve_ready_branch",
@@ -543,12 +956,23 @@
       "contract": "branches",
       "http_supported": false,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "branches:validation-and-dispatch",
         "branches:ordinary-public-behavior",
         "branches:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-final-branch-e8135e87.json",
+          "test/unit/embedded_ready_branch_completion_test.exs",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+          "docs/evidence/embedded-port-http-parity-public-postgresql-branches-d1bba15.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "branch_release",
@@ -558,12 +982,24 @@
       "contract": "branches",
       "http_supported": true,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "branches:validation-and-dispatch",
         "branches:ordinary-public-behavior",
         "branches:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-queued-start-8887970d.json",
+          "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
+          "test/unit/embedded_held_branch_release_test.exs",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+          "docs/evidence/embedded-port-http-parity-public-postgresql-branches-d1bba15.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "retire_prepared_branch",
@@ -573,12 +1009,23 @@
       "contract": "branches",
       "http_supported": false,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "branches:validation-and-dispatch",
         "branches:ordinary-public-behavior",
         "branches:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-final-branch-e8135e87.json",
+          "test/unit/embedded_prepared_branch_retirement_test.exs",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+          "docs/evidence/embedded-port-http-parity-public-postgresql-branches-d1bba15.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "retire_unbooted_branch",
@@ -593,7 +1040,22 @@
         "branches:validation-and-dispatch",
         "branches:ordinary-public-behavior",
         "branches:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+          "test/unit/embedded_unbooted_branch_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-durable-branch-recovery-32d4b083.json",
+          "docs/evidence/embedded-port-http-parity-macos-durable-unbooted-0618e7cc.json",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+          "docs/evidence/embedded-port-http-parity-public-postgresql-branches-d1bba15.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": [
+          "Complete remaining final-package qualification for unbooted retirement. The Linux and macOS PostgreSQL workflow passed on both toolchains with a qualification-only helper. Both toolchains on both hosts also passed the applicable Memory workflow."
+        ]
+      }
     },
     {
       "name": "retire_partial_branch",
@@ -608,7 +1070,22 @@
         "branches:validation-and-dispatch",
         "branches:ordinary-public-behavior",
         "branches:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+          "test/unit/embedded_branch_retirement_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-durable-branch-recovery-32d4b083.json",
+          "docs/evidence/embedded-port-http-parity-macos-durable-partial-4c3dcf63.json",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+          "docs/evidence/embedded-port-http-parity-public-postgresql-branches-d1bba15.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": [
+          "Complete remaining final-package qualification for partial retirement. The Linux and macOS PostgreSQL workflow passed on both toolchains with a qualification-only helper. Both toolchains on both hosts also passed the applicable Memory workflow."
+        ]
+      }
     },
     {
       "name": "inspect_unbooted_branch_disposal",
@@ -623,7 +1100,22 @@
         "branches:validation-and-dispatch",
         "branches:ordinary-public-behavior",
         "branches:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+          "test/unit/embedded_unbooted_branch_disposal_candidate_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-durable-branch-recovery-32d4b083.json",
+          "docs/evidence/embedded-port-http-parity-macos-durable-unbooted-0618e7cc.json",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+          "docs/evidence/embedded-port-http-parity-public-postgresql-branches-d1bba15.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": [
+          "Complete remaining final-package qualification for unbooted disposal inspection. The Linux and macOS PostgreSQL workflow passed on both toolchains with a qualification-only helper. Both toolchains on both hosts also passed the applicable Memory workflow."
+        ]
+      }
     },
     {
       "name": "dispose_unbooted_branch",
@@ -638,7 +1130,22 @@
         "branches:validation-and-dispatch",
         "branches:ordinary-public-behavior",
         "branches:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+          "test/unit/embedded_unbooted_branch_backend_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-durable-branch-recovery-32d4b083.json",
+          "docs/evidence/embedded-port-http-parity-macos-durable-unbooted-0618e7cc.json",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+          "docs/evidence/embedded-port-http-parity-public-postgresql-branches-d1bba15.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": [
+          "Complete remaining final-package qualification for unbooted disposal. The Linux and macOS PostgreSQL workflow passed on both toolchains with a qualification-only helper. Both toolchains on both hosts also passed the applicable Memory workflow."
+        ]
+      }
     },
     {
       "name": "resolve_unbooted_branch_disposal",
@@ -653,7 +1160,22 @@
         "branches:validation-and-dispatch",
         "branches:ordinary-public-behavior",
         "branches:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+          "test/unit/embedded_unbooted_branch_child_absence_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-durable-branch-recovery-32d4b083.json",
+          "docs/evidence/embedded-port-http-parity-macos-durable-unbooted-0618e7cc.json",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+          "docs/evidence/embedded-port-http-parity-public-postgresql-branches-d1bba15.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": [
+          "Complete remaining final-package qualification for unbooted disposal resolution. The Linux and macOS PostgreSQL workflow passed on both toolchains with a qualification-only helper. Both toolchains on both hosts also passed the applicable Memory workflow."
+        ]
+      }
     },
     {
       "name": "release_branch_backing",
@@ -663,12 +1185,23 @@
       "contract": "branches",
       "http_supported": false,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "branches:validation-and-dispatch",
         "branches:ordinary-public-behavior",
         "branches:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-queued-start-8887970d.json",
+          "test/unit/embedded_branch_backing_release_test.exs",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+          "docs/evidence/embedded-port-http-parity-public-postgresql-branches-d1bba15.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "resolve_branch_deletion",
@@ -678,12 +1211,23 @@
       "contract": "branches",
       "http_supported": false,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "branches:validation-and-dispatch",
         "branches:ordinary-public-behavior",
         "branches:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-final-branch-e8135e87.json",
+          "test/unit/embedded_released_branch_deletion_resolution_test.exs",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+          "docs/evidence/embedded-port-http-parity-public-postgresql-branches-d1bba15.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "continue_branch_deletion",
@@ -693,12 +1237,23 @@
       "contract": "branches",
       "http_supported": false,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "branches:validation-and-dispatch",
         "branches:ordinary-public-behavior",
         "branches:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-final-branch-e8135e87.json",
+          "test/unit/embedded_released_branch_deletion_continuation_test.exs",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+          "docs/evidence/embedded-port-http-parity-public-postgresql-branches-d1bba15.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "publish_collected_branch_material",
@@ -713,7 +1268,22 @@
         "branches:validation-and-dispatch",
         "branches:ordinary-public-behavior",
         "branches:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+          "test/unit/embedded_collected_branch_publication_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-durable-branch-recovery-32d4b083.json",
+          "docs/evidence/embedded-port-http-parity-macos-durable-partial-4c3dcf63.json",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+          "docs/evidence/embedded-port-http-parity-public-postgresql-branches-d1bba15.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": [
+          "Complete remaining final-package qualification for collected material publication. The Linux and macOS PostgreSQL workflow passed on both toolchains with a qualification-only helper. Both toolchains on both hosts also passed the applicable Memory workflow."
+        ]
+      }
     },
     {
       "name": "inspect_partial_branch_collection",
@@ -728,7 +1298,22 @@
         "branches:validation-and-dispatch",
         "branches:ordinary-public-behavior",
         "branches:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+          "test/unit/embedded_partial_branch_collection_candidate_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-durable-branch-recovery-32d4b083.json",
+          "docs/evidence/embedded-port-http-parity-macos-durable-partial-4c3dcf63.json",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+          "docs/evidence/embedded-port-http-parity-public-postgresql-branches-d1bba15.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": [
+          "Complete remaining final-package qualification for partial collection inspection. The Linux and macOS PostgreSQL workflow passed on both toolchains with a qualification-only helper. Both toolchains on both hosts also passed the applicable Memory workflow."
+        ]
+      }
     },
     {
       "name": "collect_partial_branch",
@@ -743,7 +1328,22 @@
         "branches:validation-and-dispatch",
         "branches:ordinary-public-behavior",
         "branches:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+          "test/unit/embedded_partial_branch_collection_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-durable-branch-recovery-32d4b083.json",
+          "docs/evidence/embedded-port-http-parity-macos-durable-partial-4c3dcf63.json",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+          "docs/evidence/embedded-port-http-parity-public-postgresql-branches-d1bba15.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": [
+          "Complete remaining final-package qualification for partial collection. The Linux and macOS PostgreSQL workflow passed on both toolchains with a qualification-only helper. Both toolchains on both hosts also passed the applicable Memory workflow."
+        ]
+      }
     },
     {
       "name": "dispose_partial_branch",
@@ -758,7 +1358,22 @@
         "branches:validation-and-dispatch",
         "branches:ordinary-public-behavior",
         "branches:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+          "test/unit/embedded_partial_branch_disposal_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-durable-branch-recovery-32d4b083.json",
+          "docs/evidence/embedded-port-http-parity-macos-durable-partial-4c3dcf63.json",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+          "docs/evidence/embedded-port-http-parity-public-postgresql-branches-d1bba15.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": [
+          "Complete remaining final-package qualification for partial child disposal. The Linux and macOS PostgreSQL workflow passed on both toolchains with a qualification-only helper. Both toolchains on both hosts also passed the applicable Memory workflow."
+        ]
+      }
     },
     {
       "name": "resolve_partial_branch_disposal",
@@ -773,7 +1388,22 @@
         "branches:validation-and-dispatch",
         "branches:ordinary-public-behavior",
         "branches:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+          "test/unit/embedded_partial_branch_disposal_cleanup_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-durable-branch-recovery-32d4b083.json",
+          "docs/evidence/embedded-port-http-parity-macos-durable-partial-4c3dcf63.json",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+          "docs/evidence/embedded-port-http-parity-public-postgresql-branches-d1bba15.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": [
+          "Complete remaining final-package qualification for partial disposal resolution. The Linux and macOS PostgreSQL workflow passed on both toolchains with a qualification-only helper. Both toolchains on both hosts also passed the applicable Memory workflow."
+        ]
+      }
     },
     {
       "name": "qualify_partial_branch_cleanup",
@@ -788,7 +1418,21 @@
         "branches:validation-and-dispatch",
         "branches:ordinary-public-behavior",
         "branches:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "test/unit/embedded_partial_branch_cleanup_candidate_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-durable-branch-recovery-32d4b083.json",
+          "docs/evidence/embedded-port-http-parity-macos-durable-partial-4c3dcf63.json",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+          "docs/evidence/embedded-port-http-parity-public-postgresql-branches-d1bba15.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": [
+          "Confirm ordinary partial cleanup candidate qualification in the remaining applicable host and store lanes on the final package."
+        ]
+      }
     },
     {
       "name": "cleanup_partial_branch_disposal",
@@ -803,7 +1447,21 @@
         "branches:validation-and-dispatch",
         "branches:ordinary-public-behavior",
         "branches:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "test/unit/embedded_partial_branch_cleanup_unneeded_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-durable-branch-recovery-32d4b083.json",
+          "docs/evidence/embedded-port-http-parity-macos-durable-partial-4c3dcf63.json",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+          "docs/evidence/embedded-port-http-parity-public-postgresql-branches-d1bba15.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": [
+          "Confirm ordinary partial disposal cleanup in the remaining applicable host and store lanes on the final package."
+        ]
+      }
     },
     {
       "name": "collect_branch_deletion",
@@ -813,12 +1471,23 @@
       "contract": "branches",
       "http_supported": false,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "branches:validation-and-dispatch",
         "branches:ordinary-public-behavior",
         "branches:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-final-branch-e8135e87.json",
+          "test/unit/embedded_branch_deletion_collection_test.exs",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+          "docs/evidence/embedded-port-http-parity-public-postgresql-branches-d1bba15.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "cleanup_branch_deletion",
@@ -828,12 +1497,23 @@
       "contract": "branches",
       "http_supported": false,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "branches:validation-and-dispatch",
         "branches:ordinary-public-behavior",
         "branches:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-final-branch-e8135e87.json",
+          "test/unit/embedded_released_branch_deletion_cleanup_test.exs",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+          "docs/evidence/embedded-port-http-parity-public-postgresql-branches-d1bba15.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "qualify_creation",
@@ -848,7 +1528,18 @@
         "native-recovery:validation-and-dispatch",
         "native-recovery:ordinary-public-behavior",
         "native-recovery:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "test/unit/embedded_preparation_test.exs",
+          "test/unit/embedded_creation_payload_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-bare-growth-c728e31.json",
+          "docs/evidence/embedded-port-http-parity-linux-oci-growth-ff0ed3e.json"
+        ],
+        "remaining": [
+          "Repeat ordinary matching and incompatible prepared-source receipt qualification across remaining final-package lanes."
+        ]
+      }
     },
     {
       "name": "inspect_creation",
@@ -858,12 +1549,21 @@
       "contract": "native-recovery",
       "http_supported": false,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "native-recovery:validation-and-dispatch",
         "native-recovery:ordinary-public-behavior",
         "native-recovery:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+          "test/unit/embedded_creation_payload_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-bare-growth-c728e31.json",
+          "docs/evidence/embedded-port-http-parity-linux-oci-growth-ff0ed3e.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "qualify_growth",
@@ -873,12 +1573,25 @@
       "contract": "native-recovery",
       "http_supported": false,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "native-recovery:validation-and-dispatch",
         "native-recovery:ordinary-public-behavior",
         "native-recovery:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+          "docs/evidence/embedded-port-http-parity-queued-start-8887970d.json",
+          "docs/evidence/embedded-port-http-parity-linux-growth-refusals-5dc54b60.json",
+          "docs/evidence/embedded-port-http-parity-linux-oci-growth-2b984eed.json",
+          "test/unit/native_growth_history_test.exs",
+          "test/unit/embedded_creation_payload_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-bare-growth-c728e31.json",
+          "docs/evidence/embedded-port-http-parity-linux-oci-growth-ff0ed3e.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "qualify_capture",
@@ -888,12 +1601,24 @@
       "contract": "checkpoints",
       "http_supported": false,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "checkpoints:validation-and-dispatch",
         "checkpoints:ordinary-public-behavior",
         "checkpoints:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-macos-checkpoints-9a2feea6.json",
+          "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
+          "docs/evidence/embedded-port-http-parity-macos-checkpoint-readiness.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "test/unit/native_capture_public_resolution_test.exs",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+          "test/unit/embedded_capture_call_test.exs"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "cleanup_capture",
@@ -903,12 +1628,25 @@
       "contract": "checkpoints",
       "http_supported": false,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "checkpoints:validation-and-dispatch",
         "checkpoints:ordinary-public-behavior",
         "checkpoints:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-macos-checkpoints-9a2feea6.json",
+          "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
+          "docs/evidence/embedded-port-http-parity-macos-checkpoint-readiness.json",
+          "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+          "test/unit/native_capture_cleanup_backend_test.exs",
+          "test/unit/native_capture_public_release_test.exs",
+          "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+          "test/unit/embedded_capture_call_test.exs"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "qualify_export",
@@ -918,12 +1656,21 @@
       "contract": "exports",
       "http_supported": false,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "exports:validation-and-dispatch",
         "exports:ordinary-public-behavior",
         "exports:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-oci-export-verified-266510d6.json",
+          "test/unit/embedded_export_wire_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-managed-exports-081a83e1.json",
+          "docs/evidence/embedded-port-http-parity-macos-durable-exports-081a83e1.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "inspect_export",
@@ -933,12 +1680,21 @@
       "contract": "exports",
       "http_supported": false,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "exports:validation-and-dispatch",
         "exports:ordinary-public-behavior",
         "exports:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-oci-export-verified-266510d6.json",
+          "test/unit/embedded_export_backend_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-managed-exports-081a83e1.json",
+          "docs/evidence/embedded-port-http-parity-macos-durable-exports-081a83e1.json"
+        ],
+        "remaining": []
+      }
     },
     {
       "name": "cleanup_export",
@@ -948,12 +1704,21 @@
       "contract": "exports",
       "http_supported": false,
       "port_operation_supported": true,
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "exports:validation-and-dispatch",
         "exports:ordinary-public-behavior",
         "exports:durable-accounting-and-no-replay"
-      ]
+      ],
+      "review": {
+        "evidence": [
+          "docs/evidence/embedded-port-http-parity-oci-export-verified-266510d6.json",
+          "test/unit/embedded_export_wire_test.exs",
+          "docs/evidence/embedded-port-http-parity-linux-managed-exports-081a83e1.json",
+          "docs/evidence/embedded-port-http-parity-macos-durable-exports-081a83e1.json"
+        ],
+        "remaining": []
+      }
     }
   ],
   "contracts": [
@@ -972,8 +1737,12 @@
         "Separate measured, configured and reserved resources.",
         "Observations do not initialize, reconcile, repair or reap SDK state."
       ],
-      "acceptance_status": "pending",
-      "evidence": []
+      "acceptance_status": "qualified",
+      "evidence": [
+        "docs/evidence/embedded-port-http-parity-macos-stopped-helper-upgrade-0618e7cc.json",
+        "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+        "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+      ]
     },
     {
       "id": "inventory",
@@ -993,8 +1762,19 @@
       "restrictions": [
         "Observation never grants machine ownership."
       ],
-      "acceptance_status": "pending",
-      "evidence": []
+      "acceptance_status": "qualified",
+      "evidence": [
+        "docs/evidence/embedded-port-http-parity-source-io-9a5ba0bc.json",
+        "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+        "docs/evidence/embedded-port-http-parity-macos-checkpoints-9a2feea6.json",
+        "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
+        "test/unit/embedded_observability_test.exs",
+        "docs/evidence/embedded-port-http-parity-linux-ordinary-0e35c3f.json",
+        "docs/evidence/embedded-port-http-parity-macos-stopped-helper-upgrade-0618e7cc.json",
+        "docs/evidence/embedded-port-http-parity-five-contracts-b5d119c6.json",
+        "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+        "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+      ]
     },
     {
       "id": "creation",
@@ -1017,6 +1797,10 @@
       ],
       "acceptance_status": "pending",
       "evidence": [
+        "docs/evidence/embedded-port-http-parity-private-ghcr-redirect-e03a29b0.json",
+        "docs/evidence/embedded-port-http-parity-registry-auth-ac6ac709.json",
+        "docs/evidence/embedded-port-http-parity-oci-network-7e3b43c7.json",
+        "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
         "docs/evidence/embedded-port-http-parity-linux-package.json",
         "docs/evidence/embedded-port-http-parity-linux-public-consumers-5788a29.json",
         "docs/evidence/embedded-port-http-parity-public-images-admission.json",
@@ -1046,14 +1830,20 @@
         "Full native receipt and authorized material evolution required.",
         "Unknown outcomes retain reservations; deletion requires authority."
       ],
-      "acceptance_status": "pending",
+      "acceptance_status": "qualified",
       "evidence": [
+        "docs/evidence/embedded-port-http-parity-registry-auth-ac6ac709.json",
+        "docs/evidence/embedded-port-http-parity-queued-start-8887970d.json",
+        "docs/evidence/embedded-port-http-parity-oci-network-7e3b43c7.json",
+        "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
         "docs/evidence/embedded-port-http-parity-linux-package.json",
         "docs/evidence/embedded-port-http-parity-linux-public-consumers-5788a29.json",
         "docs/evidence/embedded-port-http-parity-public-images-linux-e7387c9c.json",
         "docs/evidence/embedded-port-http-parity-linux-public-images-4efcf6c.json",
         "docs/evidence/embedded-port-http-parity-linux-recovery-consumers-32698dc.json",
-        "docs/evidence/embedded-port-http-parity-macos-public-branches-f1af384d.json"
+        "docs/evidence/embedded-port-http-parity-macos-public-branches-f1af384d.json",
+        "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+        "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
       ]
     },
     {
@@ -1076,8 +1866,12 @@
         "Background is retained-image launch evidence, not observed Exit.",
         "Streaming rejects stdin and background; native bare guest rejects explicit user."
       ],
-      "acceptance_status": "pending",
+      "acceptance_status": "qualified",
       "evidence": [
+        "docs/evidence/embedded-port-http-parity-optional-history-upgrades-74f58b5f.json",
+        "docs/evidence/embedded-port-http-parity-source-io-9a5ba0bc.json",
+        "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+        "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
         "docs/evidence/embedded-port-http-parity-linux-package.json",
         "docs/evidence/embedded-port-http-parity-linux-public-consumers-5788a29.json",
         "docs/evidence/embedded-port-http-parity-public-images-linux-e7387c9c.json",
@@ -1104,13 +1898,18 @@
         "Approved guest roots, bounded reads and atomic bounded writes.",
         "Cancellation is not rollback or proof of guest absence."
       ],
-      "acceptance_status": "pending",
+      "acceptance_status": "qualified",
       "evidence": [
+        "docs/evidence/embedded-port-http-parity-source-io-9a5ba0bc.json",
+        "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+        "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
         "docs/evidence/embedded-port-http-parity-linux-package.json",
         "docs/evidence/embedded-port-http-parity-linux-public-consumers-5788a29.json",
         "docs/evidence/embedded-port-http-parity-public-images-linux-e7387c9c.json",
         "docs/evidence/embedded-port-http-parity-linux-public-images-4efcf6c.json",
-        "docs/evidence/embedded-port-http-parity-linux-recovery-consumers-32698dc.json"
+        "docs/evidence/embedded-port-http-parity-linux-recovery-consumers-32698dc.json",
+        "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+        "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
       ]
     },
     {
@@ -1128,8 +1927,11 @@
         "Managed pull requires OCI-created machine and separately approved source.",
         "Imported packed metadata does not prove a download."
       ],
-      "acceptance_status": "pending",
+      "acceptance_status": "qualified",
       "evidence": [
+        "docs/evidence/embedded-port-http-parity-registry-auth-ac6ac709.json",
+        "docs/evidence/embedded-port-http-parity-oci-network-7e3b43c7.json",
+        "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
         "docs/evidence/embedded-port-http-parity-public-images-admission.json",
         "docs/evidence/embedded-port-http-parity-public-images-linux-e7387c9c.json",
         "docs/evidence/embedded-port-http-parity-linux-public-images-4efcf6c.json",
@@ -1156,8 +1958,18 @@
         "Boot/agent console diagnostics, not application stdout or readiness.",
         "Bounded tail/follow with no implicit start or reconnect."
       ],
-      "acceptance_status": "pending",
-      "evidence": []
+      "acceptance_status": "qualified",
+      "evidence": [
+        "docs/evidence/embedded-port-http-parity-source-io-9a5ba0bc.json",
+        "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+        "docs/evidence/embedded-port-http-parity-macos-checkpoints-9a2feea6.json",
+        "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
+        "test/unit/embedded_log_stream_test.exs",
+        "test/contract/logs_test.exs",
+        "docs/evidence/embedded-port-http-parity-five-contracts-b5d119c6.json",
+        "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+        "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+      ]
     },
     {
       "id": "terminals",
@@ -1175,8 +1987,11 @@
         "Managed retained image only; no disposable/checkpoint sessions.",
         "Single consumer, finite input/output/session budgets, no reattach or replay."
       ],
-      "acceptance_status": "pending",
+      "acceptance_status": "qualified",
       "evidence": [
+        "docs/evidence/embedded-port-http-parity-managed-terminals-7974cc9e.json",
+        "docs/evidence/embedded-port-http-parity-optional-history-upgrades-74f58b5f.json",
+        "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
         "test/unit/embedded_terminal_runtime_test.exs",
         "test/unit/embedded_terminal_contract_test.exs",
         "test/unit/terminal_embedded_connection_test.exs",
@@ -1209,8 +2024,11 @@
         "Canonical exclusive approved root, independent disk reservation.",
         "Exclusive attachments including read-only; unknown deletion retains capacity."
       ],
-      "acceptance_status": "pending",
+      "acceptance_status": "qualified",
       "evidence": [
+        "docs/evidence/embedded-port-http-parity-linux-volumes-4e2f125a.json",
+        "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+        "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
         "docs/evidence/embedded-port-http-parity-public-volumes-40c7d3d.json"
       ]
     },
@@ -1231,8 +2049,13 @@
         "No checkpoint/branch sources or children; no implicit stop/start.",
         "macOS HTTP growth has no qualification campaign."
       ],
-      "acceptance_status": "pending",
+      "acceptance_status": "qualified",
       "evidence": [
+        "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+        "docs/evidence/embedded-port-http-parity-queued-start-8887970d.json",
+        "docs/evidence/embedded-port-http-parity-registry-restart-55003eae.json",
+        "docs/evidence/embedded-port-http-parity-linux-growth-refusals-5dc54b60.json",
+        "docs/evidence/embedded-port-http-parity-linux-oci-growth-2b984eed.json",
         "test/unit/native_growth_history_test.exs",
         "test/unit/embedded_growth_example_test.exs",
         "docs/evidence/embedded-port-http-parity-public-growth-1d5e64c.json",
@@ -1264,8 +2087,13 @@
         "Idle offline bare guest, no ports/workload/external packed dependencies.",
         "Capture preserves running source; restore acquires independent owned identity."
       ],
-      "acceptance_status": "pending",
+      "acceptance_status": "qualified",
       "evidence": [
+        "docs/evidence/embedded-port-http-parity-queued-start-8887970d.json",
+        "docs/evidence/embedded-port-http-parity-macos-checkpoints-9a2feea6.json",
+        "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
+        "docs/evidence/embedded-port-http-parity-macos-checkpoint-readiness.json",
+        "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
         "docs/evidence/embedded-port-http-parity-macos-public-branches-f1af384d.json",
         "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json"
       ]
@@ -1288,8 +2116,9 @@
         "Container workspace, host mounts and RAM excluded.",
         "Implicit flattening VM must not bypass epoch guard or auxiliary accounting."
       ],
-      "acceptance_status": "pending",
+      "acceptance_status": "qualified",
       "evidence": [
+        "docs/evidence/embedded-port-http-parity-export-policies-77bbe82c.json",
         "native/smolbox-engine/src/export_import.rs",
         "native/smolbox-engine/src/export_bootstrap.rs",
         "native/smolbox-engine/src/export_container.rs",
@@ -1297,6 +2126,7 @@
         "native/smolbox-engine/src/transfer_supervisor.rs",
         "native/http-parity-api-boundaries.md",
         "native/smolbox-port/src/ordinary_export.rs",
+        "docs/evidence/embedded-port-http-parity-oci-export-verified-266510d6.json",
         "docs/evidence/embedded-port-http-parity-export-sdk-macos-incomplete.json",
         "docs/evidence/embedded-port-http-parity-template-growth-macos.json",
         "native/smolbox-engine/src/export_pack.rs",
@@ -1321,7 +2151,13 @@
       ],
       "acceptance_status": "pending",
       "evidence": [
+        "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+        "docs/evidence/embedded-port-http-parity-queued-start-8887970d.json",
+        "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
         "native/smolbox-engine/src/branch.rs",
+        "docs/evidence/embedded-port-http-parity-macos-durable-unbooted-0618e7cc.json",
+        "docs/evidence/embedded-port-http-parity-macos-durable-partial-4c3dcf63.json",
+        "docs/evidence/embedded-port-http-parity-linux-durable-branch-recovery-32d4b083.json",
         "native/smolbox-engine/src/branch/creation.rs",
         "native/smolbox-port/src/adapter.rs",
         "native/smolbox-port/src/runtime.rs",
@@ -1495,7 +2331,9 @@
         "docs/evidence/embedded-port-http-parity-branch-observation-uncertainty.json",
         "docs/evidence/embedded-port-http-parity-public-memory-cancel-recovery-f56c2e3.json",
         "docs/evidence/embedded-port-http-parity-macos-public-branches-f1af384d.json",
-        "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json"
+        "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+        "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+        "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
       ]
     },
     {
@@ -1519,6 +2357,8 @@
       ],
       "acceptance_status": "pending",
       "evidence": [
+        "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+        "docs/evidence/embedded-port-http-parity-queued-start-8887970d.json",
         "docs/evidence/embedded-port-http-parity-public-images-linux-e7387c9c.json",
         "docs/evidence/embedded-port-http-parity-linux-public-images-4efcf6c.json",
         "docs/evidence/embedded-port-http-parity-linux-recovery-consumers-32698dc.json",
@@ -1535,65 +2375,98 @@
       "phase": "P3",
       "guide": "docs/network-access.md",
       "contract": "Exact approved hostname/CIDR policy; offline default; existing infrastructure exceptions.",
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "networking:validation-and-dispatch",
         "networking:ordinary-public-behavior",
         "networking:durable-accounting-and-no-replay"
       ],
       "evidence": [
+        "docs/evidence/embedded-port-http-parity-creation-network-7737ace6.json",
+        "docs/evidence/embedded-port-http-parity-oci-saved-lifecycle-006ae76e.json",
+        "docs/evidence/embedded-port-http-parity-network-followup-c4b19058.json",
+        "docs/evidence/embedded-port-http-parity-oci-network-7e3b43c7.json",
+        "docs/evidence/embedded-port-http-parity-linux-network-0e35c3f.json",
+        "docs/evidence/embedded-port-http-parity-linux-network-2785e18.json",
         "native/smolbox-engine/src/creation_features.rs (pure record/qualification contracts; no VM)",
         "native/smolbox-protocol/tests/contract.rs (wire admission and version gates)",
         "test/unit/embedded_creation_features_test.exs (deterministic OS-Port peer; no SDK or VM)"
-      ]
+      ],
+      "remaining": []
     },
     {
       "id": "ports",
       "phase": "P3",
       "guide": "docs/port-mappings.md",
       "contract": "Retained TCP mappings; offline egress can coexist with inbound forwarding; durable port reservation.",
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "ports:validation-and-dispatch",
         "ports:ordinary-public-behavior",
         "ports:durable-accounting-and-no-replay"
       ],
       "evidence": [
+        "docs/evidence/embedded-port-http-parity-creation-network-7737ace6.json",
+        "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+        "docs/evidence/embedded-port-http-parity-oci-saved-lifecycle-006ae76e.json",
+        "docs/evidence/embedded-port-http-parity-port-conflict-cleanup-34413ad1.json",
+        "docs/evidence/embedded-port-http-parity-network-followup-c4b19058.json",
+        "docs/evidence/embedded-port-http-parity-oci-network-7e3b43c7.json",
+        "docs/evidence/embedded-port-http-parity-linux-network-0e35c3f.json",
+        "docs/evidence/embedded-port-http-parity-linux-network-2785e18.json",
         "native/smolbox-engine/src/creation_features.rs (pure record/qualification contracts; no VM)",
         "native/smolbox-protocol/tests/contract.rs (wire admission and version gates)",
         "test/unit/embedded_creation_features_test.exs (deterministic OS-Port peer; no SDK or VM)"
-      ]
+      ],
+      "remaining": []
     },
     {
       "id": "workloads",
       "phase": "P3",
       "guide": "docs/workloads.md",
       "contract": "Exact argv/env/workdir/user inheritance; restart never; VM running is not readiness.",
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "workloads:validation-and-dispatch",
         "workloads:ordinary-public-behavior",
         "workloads:durable-accounting-and-no-replay"
       ],
       "evidence": [
+        "docs/evidence/embedded-port-http-parity-creation-network-7737ace6.json",
+        "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+        "docs/evidence/embedded-port-http-parity-guest-io-dadef569.json",
+        "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
         "native/smolbox-engine/src/creation_features.rs (pure record/qualification contracts; no VM)",
         "native/smolbox-protocol/tests/contract.rs (wire admission and version gates)",
         "test/unit/embedded_creation_features_test.exs (deterministic OS-Port peer; no SDK or VM)",
         "test/unit/embedded_creation_payload_test.exs (maximum valid compact payload and shared byte fixture; no SDK or VM)"
-      ]
+      ],
+      "remaining": []
     },
     {
       "id": "guest-paths",
       "phase": "P3",
       "guide": "docs/guest-files.md",
       "contract": "Host-approved GuestPaths and bounded file budgets without depending on an HTTP Client.",
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "guest-paths:validation-and-dispatch",
         "guest-paths:ordinary-public-behavior",
         "guest-paths:durable-accounting-and-no-replay"
       ],
-      "evidence": []
+      "evidence": [
+        "docs/evidence/embedded-port-http-parity-source-io-9a5ba0bc.json",
+        "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+        "docs/evidence/embedded-port-http-parity-guest-io-dadef569.json",
+        "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
+        "test/unit/guest_paths_test.exs",
+        "test/contract/managed_guest_files_test.exs",
+        "docs/evidence/embedded-port-http-parity-macos-public-sources-f1f250d3.json",
+        "docs/evidence/embedded-port-http-parity-five-contracts-b5d119c6.json",
+        "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
+        "docs/evidence/embedded-port-http-parity-exact-packages-a3482fed.json"
+      ],
+      "remaining": []
     },
     {
       "id": "credentials",
@@ -1606,54 +2479,97 @@
         "credentials:ordinary-public-behavior",
         "credentials:durable-accounting-and-no-replay"
       ],
-      "evidence": []
+      "evidence": [
+        "docs/evidence/embedded-port-http-parity-private-ghcr-redirect-e03a29b0.json",
+        "docs/evidence/embedded-port-http-parity-private-ghcr-e03a29b0.json",
+        "docs/evidence/embedded-port-http-parity-registry-auth-ac6ac709.json",
+        "docs/evidence/embedded-port-http-parity-network-followup-c4b19058.json",
+        "docs/evidence/embedded-port-http-parity-oci-network-7e3b43c7.json",
+        "test/unit/embedded_registry_policy_test.exs",
+        "test/unit/embedded_registry_wire_test.exs",
+        "test/unit/registry_credentials_test.exs",
+        "test/unit/native_source_codec_test.exs",
+        "docs/evidence/embedded-port-http-parity-registry-oci-linux-5788a29.json",
+        "docs/evidence/embedded-port-http-parity-linux-managed-exports-081a83e1.json",
+        "docs/evidence/embedded-port-http-parity-five-contracts-b5d119c6.json"
+      ],
+      "remaining": [
+        "Public TLS validation of the explicit credential_ref exchange is deferred until a publicly trusted host is available for a compatible token realm. GHCR account Basic authentication passed all four lanes, and GHCR refused the reader PAT as an explicit bearer identity."
+      ]
     },
     {
       "id": "checkpoint-restore",
       "phase": "P8",
       "guide": "docs/checkpoints.md",
       "contract": "Exact runtime/CPU/platform/topology; new receipt; stop/start is not RAM restore.",
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "checkpoint-restore:validation-and-dispatch",
         "checkpoint-restore:ordinary-public-behavior",
         "checkpoint-restore:durable-accounting-and-no-replay"
       ],
       "evidence": [
+        "docs/evidence/embedded-port-http-parity-queued-start-8887970d.json",
+        "docs/evidence/embedded-port-http-parity-oci-saved-lifecycle-006ae76e.json",
+        "docs/evidence/embedded-port-http-parity-macos-checkpoints-9a2feea6.json",
+        "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
+        "docs/evidence/embedded-port-http-parity-macos-checkpoint-readiness.json",
+        "docs/evidence/embedded-port-http-parity-exact-packages-b4a19260.json",
         "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json"
-      ]
+      ],
+      "remaining": []
     },
     {
       "id": "mounts",
       "phase": "P7",
       "guide": "docs/local-volumes.md",
       "contract": "Linux managed volume sources/targets/modes; no arbitrary managed host directories.",
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "mounts:validation-and-dispatch",
         "mounts:ordinary-public-behavior",
         "mounts:durable-accounting-and-no-replay"
       ],
-      "evidence": []
+      "evidence": [
+        "docs/evidence/embedded-port-http-parity-linux-mount-count-8e3faaf8.json",
+        "docs/evidence/embedded-port-http-parity-linux-volumes-4e2f125a.json",
+        "docs/evidence/embedded-port-http-parity-source-io-9a5ba0bc.json",
+        "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+        "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
+        "test/unit/native_mount_intent_test.exs",
+        "docs/evidence/embedded-port-http-parity-linux-mounted-guest-7993b53.json",
+        "docs/evidence/embedded-port-http-parity-linux-public-volumes-d7a2354.json",
+        "docs/evidence/embedded-port-http-parity-postgresql-volumes-1fd1262.json",
+        "docs/evidence/embedded-port-http-parity-five-contracts-b5d119c6.json"
+      ],
+      "remaining": []
     },
     {
       "id": "draining-and-upgrade",
       "phase": "P9",
       "guide": "docs/embedded-port.md",
       "contract": "Block new allocations, preserve allowed retained work, quiesce before normal replacement.",
-      "parity_status": "pending",
+      "parity_status": "qualified",
       "acceptance": [
         "draining-and-upgrade:validation-and-dispatch",
         "draining-and-upgrade:ordinary-public-behavior",
         "draining-and-upgrade:durable-accounting-and-no-replay"
       ],
       "evidence": [
+        "docs/evidence/embedded-port-http-parity-followup-b622fd9d.json",
+        "docs/evidence/embedded-port-http-parity-queued-start-8887970d.json",
+        "docs/evidence/embedded-port-http-parity-durable-workflows-3d15db7b.json",
         "docs/evidence/embedded-port-http-parity-linux-package.json",
         "docs/evidence/embedded-port-http-parity-linux-public-consumers-5788a29.json",
         "docs/evidence/embedded-port-http-parity-public-memory-branch-replacement-548fb97.json",
         "docs/evidence/embedded-port-http-parity-public-postgresql-branch-replacement-548fb97.json",
-        "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json"
-      ]
+        "docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json",
+        "docs/evidence/embedded-port-http-parity-macos-stopped-helper-upgrade-0618e7cc.json",
+        "docs/evidence/embedded-port-http-parity-macos-durable-history-upgrade-0618e7cc.json",
+        "docs/evidence/embedded-port-http-parity-reader-first-codec-0618e7cc.json",
+        "docs/evidence/embedded-port-http-parity-optional-history-upgrades-74f58b5f.json"
+      ],
+      "remaining": []
     }
   ]
 }

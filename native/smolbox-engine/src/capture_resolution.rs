@@ -146,6 +146,8 @@ impl CaptureResolutionTransition {
 pub(crate) struct Resolved {
     pub change: CaptureResolutionChange,
     pub proof: MaterialProof,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resulting_immutable_sha256: Option<String>,
 }
 
 pub(crate) fn next_proof(

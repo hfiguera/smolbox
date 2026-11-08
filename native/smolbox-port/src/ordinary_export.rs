@@ -22,6 +22,37 @@ fn budget() -> engine::ReadBudget {
     engine::ReadBudget::for_export_work(Duration::from_secs(600), engine::Cancellation::default())
         .unwrap()
 }
+fn copy_artifact(
+    packed: &engine::PackedExport,
+    output: &Path,
+) -> engine::Result<serde_json::Value> {
+    fn io_error(_: std::io::Error) -> engine::Error {
+        engine::Error {
+            code: engine::ErrorCode::Io,
+            dispatch: engine::Dispatch::MayHaveDispatched,
+        }
+    }
+
+    let artifact = packed.artifact().clone();
+    let mut file = OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .mode(0o600)
+        .open(output.join("artifact.smolmachine"))
+        .map_err(io_error)?;
+    let mut buffer = [0; 65536];
+    let mut offset = 0;
+    while offset < artifact.size_bytes {
+        let count = (artifact.size_bytes - offset).min(buffer.len() as u64) as usize;
+        packed.read_at(offset, &mut buffer[..count])?;
+        file.write_all(&buffer[..count]).map_err(io_error)?;
+        offset += count as u64;
+    }
+    file.sync_all().map_err(io_error)?;
+    drop(file);
+    Ok(serde_json::json!({"bytes": artifact.size_bytes, "sha256": artifact.sha256}))
+}
+
 #[test]
 #[ignore = "explicit ordinary SDK/package/default-domain export fixture; may start one owned helper VM"]
 fn ordinary_owned_container_conversion() {
@@ -39,7 +70,7 @@ fn ordinary_owned_container_conversion() {
         std::env::var("SMOLBOX_EXPORT_ORDINARY_PHASE").expect("explicit qualification phase");
     assert!(matches!(
         phase.as_str(),
-        "storage" | "launch" | "convert" | "pack"
+        "storage" | "launch" | "convert" | "pack" | "pipeline" | "publish"
     ));
     std::fs::DirBuilder::new()
         .mode(0o700)
@@ -52,6 +83,34 @@ fn ordinary_owned_container_conversion() {
         !config.allow_initialize,
         "qualify only an already enrolled real domain"
     );
+    let publication = if phase == "publish" {
+        let [approval] = config
+            .approved_export_destinations
+            .as_deref()
+            .unwrap_or(&[])
+        else {
+            panic!("publication requires one explicit fixture destination");
+        };
+        assert!(
+            approval.allow_insecure_loopback,
+            "fixture registry must be loopback"
+        );
+        let destination = approval
+            .resolved
+            .as_ref()
+            .expect("resolved fixture destination");
+        let mut token = String::new();
+        // The fixture passes its short-lived credential through a private pipe.
+        // Neither config, arguments, environment nor witness reports contain it.
+        std::io::stdin()
+            .take(16_385)
+            .read_to_string(&mut token)
+            .unwrap();
+        let credential = engine::RegistryPublishCredential::new(token).expect("fixture credential");
+        Some((approval, destination, credential))
+    } else {
+        None
+    };
     let verified = crate::package::verify(
         &package.join("smolbox-port"),
         &config.package_manifest_sha256,
@@ -131,8 +190,12 @@ fn ordinary_owned_container_conversion() {
         request_identity_sha256: hex::encode(sha2::Sha256::digest(
             [nonce.as_slice(), b"identity"].concat(),
         )),
-        max_artifact_bytes: 2 << 30,
-        max_staging_bytes: 64 << 30,
+        max_artifact_bytes: publication
+            .as_ref()
+            .map_or(2 << 30, |p| p.0.max_artifact_bytes),
+        max_staging_bytes: publication
+            .as_ref()
+            .map_or(64 << 30, |p| p.0.max_staging_bytes),
     };
     save(
         &output,
@@ -144,13 +207,49 @@ fn ordinary_owned_container_conversion() {
             "package_manifest_sha256": config.package_manifest_sha256, "identity": verified.identity,
         }),
     );
-    let resources = engine::ExportConversionResources {
+    let default_resources = engine::ExportConversionResources {
         slots: 1,
         cpus: 4,
         memory_mb: 1152,
         disk_gb: 64,
     };
+    let resources = publication.as_ref().map_or(Some(&default_resources), |p| {
+        p.0.conversion_resources.as_ref()
+    });
     let work = budget();
+    let source_mode = native
+        .qualify_export_source(&receipt, &work)
+        .unwrap()
+        .mode();
+    let conversion = if source_mode == engine::ExportSourceMode::Container {
+        resources
+    } else {
+        None
+    };
+    let production_pipeline = matches!(phase.as_str(), "pipeline" | "publish");
+    if production_pipeline {
+        // Exercise the production funding and source selection before accepting
+        // intent. The diagnostic phases below deliberately isolate SDK steps.
+        native
+            .qualify_export(
+                &receipt,
+                intent.max_artifact_bytes,
+                intent.max_staging_bytes,
+                conversion,
+                &work,
+            )
+            .unwrap();
+        save(
+            &output,
+            "pipeline-qualified.json",
+            &serde_json::json!({"source_mode": format!("{source_mode:?}")}),
+        );
+    } else {
+        assert!(
+            conversion.is_some(),
+            "diagnostic phases require a container"
+        );
+    }
     native
         .admit_export_intent(
             &receipt,
@@ -162,10 +261,37 @@ fn ordinary_owned_container_conversion() {
         )
         .unwrap();
     let result = (|| -> engine::Result<serde_json::Value> {
+        if production_pipeline {
+            let packed = native.pack_export(&receipt, &intent, conversion, &work)?;
+            let artifact = copy_artifact(&packed, &output)?;
+            let proof = if let Some((_, destination, credential)) = publication {
+                let published =
+                    packed.publish(&native, destination, "ordinary-proof", credential)?;
+                let proof = published.publication().clone();
+                published.close(&budget())?;
+                let observed = native.inspect_export_publication(
+                    &receipt,
+                    &intent.operation_id,
+                    &intent.request_sha256,
+                    &budget(),
+                )?;
+                if observed.as_ref() != Some(&proof) {
+                    return Err(engine::Error {
+                        code: engine::ErrorCode::Ownership,
+                        dispatch: engine::Dispatch::MayHaveDispatched,
+                    });
+                }
+                Some(proof)
+            } else {
+                packed.close(&budget())?;
+                None
+            };
+            return Ok(serde_json::json!({"artifact": artifact, "publication": proof}));
+        }
         let source = native
             .qualify_export_source(&receipt, &work)?
             .prepare_container_export(&native)?;
-        let scratch = source.prepare_conversion_scratch(&native, &resources, &intent)?;
+        let scratch = source.prepare_conversion_scratch(&native, &default_resources, &intent)?;
         let retained = scratch.initialize_sdk_storage(&native)?;
         retained.recheck(&native, &work)?;
         retained.prepare_manager(&native, &work)?;
@@ -185,32 +311,9 @@ fn ordinary_owned_container_conversion() {
         }
         let artifact = if phase == "pack" {
             let packed = retained.pack(&native)?;
-            let artifact = packed.artifact().clone();
-            let mut file = OpenOptions::new()
-                .write(true)
-                .create_new(true)
-                .mode(0o600)
-                .open(output.join("artifact.smolmachine"))
-                .map_err(|_| engine::Error {
-                    code: engine::ErrorCode::Io,
-                    dispatch: engine::Dispatch::MayHaveDispatched,
-                })?;
-            let mut buffer = [0; 65536];
-            let mut offset = 0;
-            while offset < artifact.size_bytes {
-                let count = (artifact.size_bytes - offset).min(buffer.len() as u64) as usize;
-                packed.read_at(offset, &mut buffer[..count])?;
-                file.write_all(&buffer[..count])
-                    .map_err(|_| engine::Error {
-                        code: engine::ErrorCode::Io,
-                        dispatch: engine::Dispatch::MayHaveDispatched,
-                    })?;
-                offset += count as u64;
-            }
-            file.sync_all().unwrap();
-            drop(file);
+            let artifact = copy_artifact(&packed, &output)?;
             packed.close(&budget())?;
-            Some(serde_json::json!({"bytes":artifact.size_bytes,"sha256":artifact.sha256}))
+            Some(artifact)
         } else {
             drop(retained);
             None
@@ -283,7 +386,9 @@ fn ordinary_owned_container_conversion() {
         &serde_json::json!({
             "status":"passed","phase":phase,"result":result,"package_manifest_sha256":config.package_manifest_sha256,
             "identity":verified.identity,"original_source_receipt":true,"source_stopped":true,
-            "conversion_vm_started":phase != "storage","helper_collected":phase != "storage",
+            "source_mode":format!("{source_mode:?}"),"production_pipeline":production_pipeline,
+            "conversion_vm_started":conversion.is_some() && phase != "storage",
+            "helper_collected":conversion.is_some() && phase != "storage",
             "cleanup_verified":true,"public_export_capability_enabled":false,
             "crash_handling_qualified":false,"distribution_approved":false,
         }),

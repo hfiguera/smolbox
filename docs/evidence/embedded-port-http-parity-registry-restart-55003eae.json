@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "date": "2026-11-06",
+  "base_commit": "55003eaeba3197c2c5be0508a0653bf5950fdb5e",
+  "platform": "linux-x86_64",
+  "postgresql": "16.15",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "native_package_manifest_sha256": "51fef500f29463edc5924aa0413ae56ff55b10b474fba17e94406da2fff62242",
+  "native_package_unchanged": true,
+  "verified_package_assets_per_run": 806,
+  "baseline_hex_archive_sha256": "369e9ba583c49d0d8ebb3b9e83226530b954f976d3fe8d310f547764726fdd13",
+  "fixed_hex_archive_sha256": "036a8c70f19c2bc2eaea5ece312e2d13440658e084e8531a379e023395163c0a",
+  "fixed_runtime_machines_sha256": "10c17889177ab6d21181bace82dd9e54694583607593bd0d482bbf1a816ec525",
+  "fixture": {
+    "kind": "bare .smolmachine from the approved loopback registry",
+    "manifest_sha256": "7b45a3809c692738d72330c8d7703c398a2b2b4aa5d55efa6af36af222a35ec0",
+    "blob_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1"
+  },
+  "diagnosis": {
+    "prior_evidence": "docs/evidence/embedded-port-http-parity-linux-growth-refusals-5dc54b60.json",
+    "historical_sequence": "Both original runs persisted a running start observation at 2 GiB storage and 3 GiB overlay after normal Runtime replacement. The separate inspection failed to confirm it. The lifecycle remained unknown with the start pending and the 5 GiB reservation retained.",
+    "preserved_minimum_witness": {
+      "expected_process_identity_before_and_after": true,
+      "sdk_state": "running",
+      "storage_gib": 2,
+      "overlay_gib": 3,
+      "read_only_agent_pings": 8,
+      "successful_pongs": 8
+    },
+    "smolbox_failure_path": "The native Port v2 start already checked enrolled process identity, guest readiness and material authority. Runtime then issued a separate one-shot inspection and allowed that observation to override the successful start response.",
+    "original_followup_wire_reply_captured": false,
+    "original_agent_or_transport_trigger_confirmed": false,
+    "fresh_baselines": "Both original-code toolchains passed from cold caches. The traces show the running start reply followed by another successful inspection. The historical failure did not recur in either baseline.",
+    "regression": {
+      "test": "test/unit/embedded_runtime_test.exs",
+      "simulated_reply_after_successful_start": "unreachable",
+      "before": "unknown start with uncertain lifecycle outcome",
+      "after": "running with the original creation authority and reservation",
+      "requests_during_start_after_fix": ["inspect", "start"]
+    }
+  },
+  "correction": "Persist the verified Port v2 running start response directly under the managed machine store guard after matching the retained incarnation and growth history. Other lifecycle confirmations and subsequent inspection use their existing paths.",
+  "fixed_lanes": [
+    {
+      "toolchain": "current",
+      "elixir": "1.20.4",
+      "otp": "29.0.6",
+      "status": "passed"
+    },
+    {
+      "toolchain": "minimum",
+      "elixir": "1.18.4",
+      "otp": "27.3.4.15",
+      "status": "passed"
+    }
+  ],
+  "verified_in_each_fixed_lane": {
+    "consumer_built_without_rust": true,
+    "fixture_cache_absent_before_create": true,
+    "registry_manifest_downloads": 1,
+    "registry_blob_downloads": 1,
+    "registry_blob_digest_verified": true,
+    "normal_stopped_runtime_replacement": true,
+    "first_growth_gib": { "storage": 2, "overlay": 3 },
+    "second_growth_gib": { "storage": 3, "overlay": 3 },
+    "immutable_creation_and_binary_guest_data_retained": true,
+    "owned_delete_completed": true,
+    "workerless_postgresql_readback_matches_deleted_record": true,
+    "workerless_postgresql_readback_linked_growth_receipts": 2,
+    "final_reserved_slots": 0,
+    "final_reserved_disk_gib": 0,
+    "empty_sdk_tables": 10,
+    "postgresql_normal_shutdown": true
+  },
+  "crash_validation_deferred": true,
+  "cli_race_validation_deferred": true
+}

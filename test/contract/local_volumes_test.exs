@@ -3,6 +3,7 @@ defmodule SmolBox.LocalVolumesTest do
   alias SmolBox.Store.Contract
 
   alias SmolBox.{
+    ManagedMachine,
     Machines,
     ManagedMachineSpec,
     Runtime,
@@ -31,7 +32,15 @@ defmodule SmolBox.LocalVolumesTest do
   end
 
   defp machine(f, id, volume) do
-    {:ok, mount} = VolumeMount.new(volume, "/mnt/volumes/data")
+    Machines.create(f.runtime, machine_spec(f, id, [volume]))
+  end
+
+  defp machine_spec(f, id, volumes) do
+    mounts =
+      Enum.map(volumes, fn volume ->
+        {:ok, mount} = VolumeMount.new(volume, "/mnt/volumes/#{volume}")
+        mount
+      end)
 
     {:ok, spec} =
       ManagedMachineSpec.new(
@@ -39,16 +48,69 @@ defmodule SmolBox.LocalVolumesTest do
         id: id,
         artifact: f.spec.artifact,
         profile: f.spec.profile,
-        volumes: [mount]
+        volumes: mounts
       )
 
-    Machines.create(f.runtime, spec)
+    spec
   end
 
   defp delete_machine(f, handle) do
     m = RuntimeFixture.await_idle(f.runtime, handle)
     assert {:ok, _} = Machines.delete(f.runtime, handle, m.version)
     assert {:ok, %{state: :deleted}} = Machines.await(f.runtime, handle, 5000)
+  end
+
+  test "x86_64 HTTP mount budget rejects new specs before attachment or reservation" do
+    f = fixture()
+    ids = ~w(data logs cache)
+
+    volumes =
+      for id <- ids do
+        {key, _} = create(f, id)
+        assert {:ok, %{attached_to: nil} = volume} = Volumes.inspect(f.runtime, key)
+        {key, volume}
+      end
+
+    spec = machine_spec(f, "too-many-mounts", ids)
+
+    assert {:error, %{category: :unsupported_capability, evidence: :not_dispatched}} =
+             Machines.create(f.runtime, spec)
+
+    assert {:error, %{category: :not_found}} =
+             Machines.inspect(f.runtime, {spec.scope, spec.id})
+
+    for {key, volume} <- volumes, do: assert({:ok, ^volume} = Volumes.inspect(f.runtime, key))
+    assert {:ok, %{slots: 0, disk_gb: 6}} = Memory.usage(f.store, "peer")
+    refute {"POST", "/api/v1/machines"} in SmolBox.ManagedPeer.snapshot(f.peer).operations
+
+    assert {:ok, handle} = Machines.create(f.runtime, machine_spec(f, "fits", ~w(data logs)))
+    assert %{created_machine: %{mounts: [_, _]}} = RuntimeFixture.await_idle(f.runtime, handle)
+    delete_machine(f, handle)
+  end
+
+  test "an oversized request accepted by an older controller stays unassigned and cancellable" do
+    f = fixture()
+    ids = ~w(data logs cache)
+    keys = Enum.map(ids, fn id -> elem(create(f, id), 0) end)
+    spec = machine_spec(f, "accepted-before-upgrade", ids)
+    key = {spec.scope, spec.id}
+    {:ok, fingerprint} = ManagedMachineSpec.fingerprint(spec, f.options[:fingerprint_key])
+    {:ok, record} = ManagedMachine.new(spec, fingerprint, System.system_time(:millisecond))
+    assert {:ok, %{state: :accepted}} = Memory.machine(f.store, :accept, [record, 128])
+
+    assert %{
+             state: :conflict,
+             worker_id: nil,
+             reservation: nil,
+             last_error: %{category: :unsupported_capability, evidence: :not_dispatched}
+           } = RuntimeFixture.await_idle(f.runtime, key)
+
+    assert {:ok, %{slots: 0, disk_gb: 6}} = Memory.usage(f.store, "peer")
+    refute {"POST", "/api/v1/machines"} in SmolBox.ManagedPeer.snapshot(f.peer).operations
+    delete_machine(f, key)
+
+    for volume <- keys,
+        do: assert({:ok, %{attached_to: nil}} = Volumes.inspect(f.runtime, volume))
   end
 
   test "volume survives machine deletion and controller restart; attachments remain exclusive while stopped" do

@@ -5,10 +5,12 @@ network configuration when its protocol-2 package declares `networking: 1`.
 An exact Linux package now passes
 [ordinary offline/CIDR traffic checks](evidence/embedded-port-http-parity-linux-network-0e35c3f.json)
 through raw Port and current/minimum public no-Rust consumers, including mapped
-inbound replies and normal restart. The checks use two independently reachable
-local TCP responders. Hostname/DNS, other traffic combinations and changed macOS
-packages remain unqualified. See [Embedded Port setup](embedded-port.md) for its
-development status.
+inbound replies and normal restart. The default Linux and macOS packages also
+pass OCI CIDR allow/deny checks with PostgreSQL. The minimum macOS consumer
+resolves an approved hostname and blocks an unapproved one. The minimum
+Linux consumer also verifies a hostname-only policy, including denial of a
+direct connection to the unapproved host's address. Additional source
+and network combinations remain open. [OCI network qualification](evidence/embedded-port-http-parity-oci-network-7e3b43c7.json), [hostname-only qualification](evidence/embedded-port-http-parity-network-followup-c4b19058.json)
 
 Approve specific outbound destinations when a guest needs network access.
 Offline remains the default. These policies require a supported smolvm version

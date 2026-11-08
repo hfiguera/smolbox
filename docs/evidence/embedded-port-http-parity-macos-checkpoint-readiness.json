@@ -1,0 +1,114 @@
+{
+  "schema": 1,
+  "recorded_date": "2026-11-06",
+  "status": "macos-checkpoint-readiness-scoped-qualification",
+  "native_base_commit": "e38ec6b85c9030deb33ac3678f5693d6891d163f",
+  "native_source_patch_sha256": "d41d74f04c3050fe47158bafc8c89079e70ce43f6a51971a6cc30de2b036dc83",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "sdk_source_unmodified": true,
+  "package": {
+    "manifest_sha256": "9146ca3268990a52229455879ce17e1b141538cb083132d0ace88d6fca35d004",
+    "helper_sha256": "393fe2f12f2b31a8cd75685ca890a3923e292cb7b96acbef151d0478fe97df18",
+    "asset_count": 809,
+    "assets_and_policy_match_previous_package": true
+  },
+  "helper_signature_verified": true,
+  "installed_hex_archive_sha256": "65eb98f042cc9ef552d41dee16ed429daa924a5f31227b0fddc932161ebd40e6",
+  "seed_sha256": "fe4eac20410328d13696ecb2d09478005b376a18d63cbb73888caf906e649350",
+  "seed_preparation": "same-Mac fresh bare checkpoint captured with pinned SDK",
+  "store_mode": "ephemeral Memory",
+  "crash_validation_deferred": true,
+  "distribution_approved": false,
+  "lanes": {
+    "current": {
+      "elixir": "1.20.4",
+      "otp": "29.0.6",
+      "progress": {
+        "stage": "passed",
+        "crash_validation_deferred": true
+      },
+      "status": "passed",
+      "proof": {
+        "campaign": "ordinary-public-native-checkpoints",
+        "package_manifest_sha256": "9146ca3268990a52229455879ce17e1b141538cb083132d0ace88d6fca35d004",
+        "store_mode": "ephemeral",
+        "capture_source_continues": true,
+        "duplicate_capture_retained": true,
+        "stopped_runtime_replacement": true,
+        "ram_and_disk_restored": true,
+        "independent_restores": 2,
+        "cold_restart_does_not_restore_ram": true,
+        "captured_bytes_unchanged": true,
+        "capture_artifact_removed": true,
+        "native_capture_cleanup": true,
+        "codec_roundtrips": true,
+        "owned_deleted": true,
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gb": 0,
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false
+      },
+      "postflight": {
+        "sdk_table_counts": {
+          "vms": 0,
+          "vm_create_reservations": 0,
+          "vm_pause_operations": 0,
+          "config": 0,
+          "vm_resize_intents": 0,
+          "vm_resize_receipts": 0,
+          "fork_pools": 0,
+          "fork_pool_snapshots": 0,
+          "fork_pool_slots": 0,
+          "fork_leases": 0
+        },
+        "account_lock_available": true
+      },
+      "report_sha256": "72140ddcef686513dc767a932490e75f699ec48345b2ccc7d8083adbba0c258e"
+    },
+    "minimum": {
+      "elixir": "1.18.4",
+      "otp": "27.3.4.15",
+      "progress": {
+        "stage": "passed",
+        "crash_validation_deferred": true
+      },
+      "status": "passed",
+      "proof": {
+        "campaign": "ordinary-public-native-checkpoints",
+        "package_manifest_sha256": "9146ca3268990a52229455879ce17e1b141538cb083132d0ace88d6fca35d004",
+        "store_mode": "ephemeral",
+        "capture_source_continues": true,
+        "duplicate_capture_retained": true,
+        "stopped_runtime_replacement": true,
+        "ram_and_disk_restored": true,
+        "independent_restores": 2,
+        "cold_restart_does_not_restore_ram": true,
+        "captured_bytes_unchanged": true,
+        "capture_artifact_removed": true,
+        "native_capture_cleanup": true,
+        "codec_roundtrips": true,
+        "owned_deleted": true,
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gb": 0,
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false
+      },
+      "postflight": {
+        "sdk_table_counts": {
+          "vms": 0,
+          "vm_create_reservations": 0,
+          "vm_pause_operations": 0,
+          "config": 0,
+          "vm_resize_intents": 0,
+          "vm_resize_receipts": 0,
+          "fork_pools": 0,
+          "fork_pool_snapshots": 0,
+          "fork_pool_slots": 0,
+          "fork_leases": 0
+        },
+        "account_lock_available": true
+      },
+      "report_sha256": "72140ddcef686513dc767a932490e75f699ec48345b2ccc7d8083adbba0c258e"
+    }
+  }
+}

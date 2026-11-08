@@ -65,6 +65,7 @@ defmodule SmolBox.EmbeddedPackageActivationTest do
        } do
     policy = "native/policy.json" |> File.read!() |> Jason.decode!()
     refute Features.supports?(native, :terminal_preflight)
+    refute Features.supports?(native, :exports)
 
     assert SDKIdentity.approved?(
              Config.sdk_identity(native),
@@ -81,11 +82,11 @@ defmodule SmolBox.EmbeddedPackageActivationTest do
     assert Features.native_versions(current).material_proofs == 2
 
     for feature <-
-          ~w(networking ports workloads background_exec logs streaming_exec terminals terminal_preflight remote_sources images)a do
+          ~w(networking ports workloads background_exec logs streaming_exec terminals terminal_preflight remote_sources images exports)a do
       assert Features.supports?(current, feature)
     end
 
-    for feature <- ~w(volumes disk_growth exports)a do
+    for feature <- ~w(volumes disk_growth)a do
       refute Features.supports?(current, feature)
     end
   end
@@ -108,7 +109,7 @@ defmodule SmolBox.EmbeddedPackageActivationTest do
     assert Features.supports?(candidate, :images)
     assert Package.received(candidate) == []
 
-    for feature <- ~w(volumes disk_growth exports),
+    for feature <- ~w(volumes disk_growth),
         do:
           refute(
             SDKIdentity.approved?(
@@ -203,7 +204,7 @@ defmodule SmolBox.EmbeddedPackageActivationTest do
              :linux
            )
 
-    refute SDKIdentity.approved?(
+    assert SDKIdentity.approved?(
              put_in(sdk, ["feature_versions", "exports"], 1),
              "1.22.0",
              sdk["source_revision"],

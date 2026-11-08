@@ -1,0 +1,206 @@
+{
+  "schema": 1,
+  "source_commit": "77bbe82cc4873fb639f86f0445f734c672bf495f",
+  "recorded_date": "2026-11-07",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "packages": {
+    "linux": {
+      "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+      "assets_sha256": "706c83d1a75e5ed5791da54bb4cfa6e80448302a3921b202a5d8c769868e3c15",
+      "platform": "linux",
+      "architecture": "x86_64"
+    },
+    "macos": {
+      "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+      "assets_sha256": "0c109ee5c9cc8f1681e5b8b83b06d6712041bd36f9eda9940a423b52c7be5b25",
+      "platform": "macos",
+      "architecture": "aarch64"
+    }
+  },
+  "toolchains": {
+    "current": {
+      "elixir": "1.20.4",
+      "otp": "29.0.6"
+    },
+    "minimum": {
+      "elixir": "1.18.4",
+      "otp": "27.3.4.15"
+    }
+  },
+  "client_archive_sha256": "611a408b07907c8dbd756735704e010a2f17c622320707dfd94ed88af5dfa03f",
+  "client_lib_files_verified_against_source_commit": 354,
+  "resources_and_policies": {
+    "bare": {
+      "source": {
+        "linux": "Exact local 1 GiB storage and 1 GiB overlay bare pack, grown through SmolBox before export.",
+        "macos": "Exact presized local ARM64 bare pack. The macOS package does not offer managed disk growth."
+      },
+      "macos_presized_fixture_sha256": "4381f86a38a23947c8d1b418d6cef53ac0f47077b5f7b6876ec455041af1b781",
+      "export_deadline_ms": 3600000,
+      "source_storage_gib": 22,
+      "source_overlay_gib": 2,
+      "export_disk_floor_gib": 90,
+      "refused_disk_gib": 89,
+      "released_export_resources": {
+        "slots": 1,
+        "cpus": 5,
+        "memory_mb": 1280,
+        "disk_gb": 92
+      },
+      "publication_policy": "Explicit loopback HTTP with a fixture-scoped publisher bearer."
+    },
+    "container": {
+      "source": "Digest-pinned prepared container pack with a filtered profile.",
+      "source_storage_gib": 4,
+      "source_overlay_gib": 3,
+      "export_disk_floor_gib": 71,
+      "refused_disk_gib": 70,
+      "released_export_resources": {
+        "slots": 2,
+        "cpus": 6,
+        "memory_mb": 1344,
+        "disk_gb": 76
+      },
+      "publication_policy": "Loopback TLS with an explicitly approved test CA and a fixture-scoped publisher bearer.",
+      "reimport": "Read-only loopback mirror of the same verified manifest and artifact bytes."
+    },
+    "both": [
+      "Below-floor and over-capacity requests retained no new reservation.",
+      "Mutable and unapproved destinations were refused.",
+      "Existing index and platform tags each prevented publication before dispatch.",
+      "Verified immutable index and platform tags, manifest, config and content digests.",
+      "Publication retained the exact helper reservation. Explicit resolution released it and retained the source allocation.",
+      "Digest-pinned reimport booted and preserved the expected data. Editing the copy left the source unchanged.",
+      "Both deleted machine records and the completed receipt were read back from PostgreSQL in a fresh workerless BEAM.",
+      "Verified zero reservations, normal shutdown and an empty SDK inventory."
+    ]
+  },
+  "focused_contracts_passed": {
+    "current": 71,
+    "minimum": 71
+  },
+  "live_results": {
+    "linux": [
+      {
+        "toolchain": "current",
+        "source": "bare",
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "result_sha256": "2ae88b26ec2b0f3db494d40e0e6160e6645c070fd9080b0cce98b8d25e4a7ca8",
+        "publication_sha256": "41cc862e0c79960bc5a2f88ee0cb93458f4947f110ccd2caa37efccfc228c739",
+        "artifact_sha256": "f4157ec849b8121061a351e8508484546ef4159475bb782bdf0cf61d8b81311a",
+        "artifact_bytes": 27891917,
+        "empty_sdk_tables": 10,
+        "postgresql_normal_stop": true
+      },
+      {
+        "toolchain": "current",
+        "source": "container",
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "result_sha256": "f845c275264923eac24fd5cae20b9567d63ea531c399ddcd071714df385c46cb",
+        "publication_sha256": "0083e89df0914c1a53ebf44456694ff2b77360e9160ebf36a9212b68ed154de6",
+        "artifact_sha256": "a763bb3dd1c7bf596c388fb74e8a80df8ac465cebe671e667d81efd239ac4f7d",
+        "artifact_bytes": 29508476,
+        "empty_sdk_tables": 10,
+        "postgresql_normal_stop": true
+      },
+      {
+        "toolchain": "minimum",
+        "source": "bare",
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "result_sha256": "881dd947e0dd896e6b8aa96e0f068defa87a651f5ae8e0e2736079df3a1a8c65",
+        "publication_sha256": "ac4277918399854c7e94549a60383e4414ce1f1f8c0add3ba5cc5d3e34689551",
+        "artifact_sha256": "49c4c29bd1957cdd091c47be906eee6c973b7f28d012f11e0be3be588879cb94",
+        "artifact_bytes": 27892008,
+        "empty_sdk_tables": 10,
+        "postgresql_normal_stop": true
+      },
+      {
+        "toolchain": "minimum",
+        "source": "container",
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "result_sha256": "ac56b7b8cc72604abd22856ba9c6dbe83f8ec9df32971004506a41f15372de77",
+        "publication_sha256": "439b83c0082b1be93d6dab00d5b4152d09d7f5337801e8df652c18dc75a9234e",
+        "artifact_sha256": "b15352d8d35cf9edf88d0d132e0d7bb614456500e810b6b1c253f63b9fc87d6f",
+        "artifact_bytes": 29508462,
+        "empty_sdk_tables": 10,
+        "postgresql_normal_stop": true
+      }
+    ],
+    "macos": [
+      {
+        "toolchain": "current",
+        "source": "bare",
+        "postgresql": "17.11 (Homebrew)",
+        "result_sha256": "f65539a157d8e4f37b8af01c7660a5ab6bbb7096e19b12566b42c5f20d6388a2",
+        "publication_sha256": "a92a80c27f8866d0419f8e44564d494ddf63d3f41e01e6e90546edc20ffd46b5",
+        "artifact_sha256": "232748492d340a437a1d3c4a4239c5758243ad8d95cd23c871c368ed27e1c428",
+        "artifact_bytes": 26412667,
+        "empty_sdk_tables": 10,
+        "postgresql_normal_stop": true
+      },
+      {
+        "toolchain": "current",
+        "source": "container",
+        "postgresql": "17.11 (Homebrew)",
+        "result_sha256": "ceff0ae1d20a7ee51b0de0c3930f6772c0a4670b4003d14615bcf17e88ba84a3",
+        "publication_sha256": "30ec5d078124b027da751af5d982533cb5e0e21decd58025f30f3e2b35d8d5fb",
+        "artifact_sha256": "8776e80e4f2ea3726939bb18f39db6b8c83d12ddd51628575dd213635ac564b0",
+        "artifact_bytes": 27733503,
+        "empty_sdk_tables": 10,
+        "postgresql_normal_stop": true
+      },
+      {
+        "toolchain": "minimum",
+        "source": "bare",
+        "postgresql": "17.11 (Homebrew)",
+        "result_sha256": "33ebb17fdd78aa1c0526fbc4d44961a3b2b394a238fe66d288881503f78156d1",
+        "publication_sha256": "0c7d978f000aff873f16f5a0b806b69d013f05c1e90c37be3255b65dd7e969c9",
+        "artifact_sha256": "8c55a841b364c4a50d9406f0ddc396df6e6ecae01171b2a7c6489459155f3ce5",
+        "artifact_bytes": 26412588,
+        "empty_sdk_tables": 10,
+        "postgresql_normal_stop": true
+      },
+      {
+        "toolchain": "minimum",
+        "source": "container",
+        "postgresql": "17.11 (Homebrew)",
+        "result_sha256": "43a1d71a39cbe9410b7bf439cfc08ab87c10442e53a951d023a8b137b53c159e",
+        "publication_sha256": "0761ed6f4c5bb73a0d873419219902dc4742bf47c7ba5b0261e2112113152777",
+        "artifact_sha256": "4db160870a34dfce6f0405566a9784db8a03560cc09f80f2cacf14b3ad5dcc87",
+        "artifact_bytes": 27733488,
+        "empty_sdk_tables": 10,
+        "postgresql_normal_stop": true
+      }
+    ]
+  },
+  "preserved_attempts": {
+    "initial_bare_geometry": "A requested profile whose geometry differed from the approved bare pack was refused before dispatch.",
+    "linux_bare_deadline": "The first scaled bare export reached the default 15-minute deadline while packing and its scope was archived. The scaled bare qualification used an explicit one-hour deadline.",
+    "macos_bare_claim": "Both initial presized bare runs used a one-second test lease and failed with a stale store claim during source lifecycle, before export admission. The reruns used the default 30-second lease in separate standard accounts. The failed scopes remained in place because their native inventory did not confirm a stopped state.",
+    "fixture_tls": "A same-name issuer and leaf failed OTP preflight. The corrected fixture uses separate subjects and key identifiers and verifies OTP and Python trust before submission on macOS. Linux cleaned the stopped source through SmolBox. The earlier macOS stopped source remains archived because its replacement helper could not become ready for deletion.",
+    "linux_cache": "The first minimum-toolchain publication completed but its reimport hit the fixture cache limit. That scope and the prior Linux results were archived. A fresh lab used the increased bounded cache."
+  },
+  "linux_result_archives_sha256": {
+    "container": "dda4e3bdafa32b88fad2b400d399fad8439b006bafef1cf5bf270a89bdbc501d",
+    "current-bare": "f2b59546217021b3863b378de6176d2717db383b36996ced23ca59aa18b9551c",
+    "minimum-bare": "9ced4c15efb00f86d78f3e8f98f80a52a561764af9a6e7d42dd597bb8224816d"
+  },
+  "proof_sha256": {
+    "linux_container": "e3bc4d794a37e07786594fb08070579524c5ab1cf0ed78987fbcb0bc05ddd9ab",
+    "macos_container": "e3bc4d794a37e07786594fb08070579524c5ab1cf0ed78987fbcb0bc05ddd9ab",
+    "linux_bare": "bb2e1041d69f36cb7c46f4a36d957900afc7373905d5ef7a3056ab7839b8fc39",
+    "macos_bare": "54bb0ca5eccba0b3920c5df8c9995b2843e5744e54558bb25f5effb7d35c2bf0"
+  },
+  "private_production_tls_validation_deferred": true,
+  "crash_validation_deferred": true,
+  "cli_race_validation_deferred": true,
+  "parity_complete": false
+}

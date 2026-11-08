@@ -16,6 +16,12 @@ const FILE_NAME: &str = "smolbox.material-v2.json";
 const MAX_BYTES: u64 = 2 * 1024 * 1024;
 const MAX_HISTORY: usize = 1024;
 
+#[derive(Clone, Copy)]
+pub(crate) enum CaptureSourcePhase {
+    BeforeCapture,
+    AfterCapture,
+}
+
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct MaterialProof {
@@ -785,6 +791,7 @@ impl MaterialJournal {
         operation_id: &str,
         request: &crate::CaptureRequest,
         record: &VmRecord,
+        phase: CaptureSourcePhase,
     ) -> Result<(i32, u64)> {
         let (journal, _) = self.load()?;
         check_origin(&journal.origin, receipt)?;
@@ -796,7 +803,7 @@ impl MaterialJournal {
             || journal.head != pending.intent.previous
             || record.state != smolvm::config::RecordState::Running
             || record.pid.zip(record.pid_start_time) != Some(pending.intent.source_pid)
-            || capture_immutable_hash(record)? != pending.intent.immutable_sha256
+            || !pending.matches_record(record, phase)?
             || pending.intent.operation_id != operation_id
             || pending.intent.request != *request
         {
@@ -821,7 +828,7 @@ impl MaterialJournal {
             && journal.head == pending.intent.previous
             && record.state == smolvm::config::RecordState::Running
             && record.pid.zip(record.pid_start_time) == Some(pending.intent.source_pid)
-            && capture_immutable_hash(record)? == pending.intent.immutable_sha256)
+            && pending.matches_record(record, CaptureSourcePhase::AfterCapture)?)
     }
     // Capture entry is persisted before the owned SDK worker is dispatched.
     pub(crate) fn prepare_capture(
@@ -864,6 +871,7 @@ impl MaterialJournal {
         journal.capture_pending = Some(crate::capture_material::Pending {
             intent: intent.clone(),
             entered: false,
+            previous_lineage: record.fork_lineage_pid_start_time,
         });
         self.write(&journal, Some(inode))?;
         Ok(crate::capture_material::Permit {
@@ -973,8 +981,9 @@ impl MaterialJournal {
             || pending.intent != permit.intent
             || journal.head != permit.intent.previous
             || receipt.material.as_ref() != Some(&permit.intent.previous)
-            || capture_immutable_hash(record).map_err(after_entry)?
-                != permit.intent.immutable_sha256
+            || !pending
+                .matches_record(record, CaptureSourcePhase::AfterCapture)
+                .map_err(after_entry)?
             || record.state != smolvm::config::RecordState::Running
             || record.pid.zip(record.pid_start_time) != Some(permit.intent.source_pid)
             || record.checkpoint_head.as_ref() != Some(&artifact.head)
@@ -986,6 +995,9 @@ impl MaterialJournal {
             artifact,
             growth_immutable_sha256: immutable_hash(record).map_err(after_entry)?,
         };
+        let resulting_immutable_sha256 = pending
+            .resulting_immutable_sha256(record)
+            .map_err(after_entry)?;
         let proof = crate::capture_material::next_proof(
             &change,
             material_hash(record).map_err(after_entry)?,
@@ -1002,6 +1014,7 @@ impl MaterialJournal {
             crate::capture_material::Completed {
                 change,
                 proof: proof.clone(),
+                resulting_immutable_sha256,
             },
         );
         journal.head = proof;
@@ -1087,7 +1100,7 @@ impl MaterialJournal {
             || receipt.material.as_ref() != Some(&pending.intent.previous)
             || journal.head != pending.intent.previous
             || !authority.matches(record, pending.intent.source_pid)
-            || capture_immutable_hash(record)? != pending.intent.immutable_sha256
+            || !pending.matches_record(record, CaptureSourcePhase::AfterCapture)?
         {
             return Err(Error::before(ErrorCode::Ownership));
         }
@@ -1096,6 +1109,7 @@ impl MaterialJournal {
             checkpoint_head: record.checkpoint_head.clone(),
             growth_immutable_sha256: immutable_hash(record)?,
         };
+        let resulting_immutable_sha256 = pending.resulting_immutable_sha256(record)?;
         let proof = crate::capture_resolution::next_proof(&change, material_hash(record)?)?;
         let transition = crate::CaptureResolutionTransition {
             schema: 1,
@@ -1110,6 +1124,7 @@ impl MaterialJournal {
             .push(crate::capture_resolution::Resolved {
                 change,
                 proof: proof.clone(),
+                resulting_immutable_sha256,
             });
         journal.head = proof;
         journal.capture_pending = None;
@@ -1851,6 +1866,30 @@ pub(crate) fn capture_immutable_hash(record: &VmRecord) -> Result<String> {
     hash(&value)
 }
 
+impl crate::capture_material::Pending {
+    fn matches_record(&self, record: &VmRecord, phase: CaptureSourcePhase) -> Result<bool> {
+        if capture_immutable_hash(record)? == self.intent.immutable_sha256 {
+            return Ok(true);
+        }
+        // Linux deferred capture can record the RAM rebase for this exact VMM.
+        // Restore the previous marker in the comparison and bind every other field.
+        if cfg!(target_os = "linux")
+            && matches!(phase, CaptureSourcePhase::AfterCapture)
+            && record.fork_lineage_pid_start_time == Some(self.intent.source_pid.1)
+        {
+            let mut before_rebase = record.clone();
+            before_rebase.fork_lineage_pid_start_time = self.previous_lineage;
+            return Ok(capture_immutable_hash(&before_rebase)? == self.intent.immutable_sha256);
+        }
+        Ok(false)
+    }
+
+    fn resulting_immutable_sha256(&self, record: &VmRecord) -> Result<Option<String>> {
+        let digest = capture_immutable_hash(record)?;
+        Ok((digest != self.intent.immutable_sha256).then_some(digest))
+    }
+}
+
 pub(crate) fn hash(value: &impl Serialize) -> Result<String> {
     let bytes = serde_json::to_vec(value).map_err(|_| Error::before(ErrorCode::Io))?;
     Ok(hex::encode(Sha256::digest(bytes)))
@@ -2023,6 +2062,10 @@ fn validate_journal(journal: &Journal) -> Result<()> {
                 if !entry.change.valid()
                     || entry.change.intent.previous != previous
                     || !ids.insert(&entry.change.intent.operation_id)
+                    || entry
+                        .resulting_immutable_sha256
+                        .as_ref()
+                        .is_some_and(|hash| !valid_hex(hash, 64))
                     || immutable
                         .is_some_and(|hash| hash != &entry.change.intent.growth_immutable_sha256)
                     || capture_immutable
@@ -2039,7 +2082,12 @@ fn validate_journal(journal: &Journal) -> Result<()> {
                 }
                 entry.proof.validate()?;
                 immutable = Some(&entry.change.growth_immutable_sha256);
-                capture_immutable = Some(&entry.change.intent.immutable_sha256);
+                capture_immutable = Some(
+                    entry
+                        .resulting_immutable_sha256
+                        .as_ref()
+                        .unwrap_or(&entry.change.intent.immutable_sha256),
+                );
                 checkpoint_head = Some(Some(&entry.change.artifact.head));
                 previous = entry.proof.clone();
             }
@@ -2047,6 +2095,10 @@ fn validate_journal(journal: &Journal) -> Result<()> {
                 if !entry.change.valid()
                     || entry.change.intent.previous != previous
                     || !ids.insert(&entry.change.intent.operation_id)
+                    || entry
+                        .resulting_immutable_sha256
+                        .as_ref()
+                        .is_some_and(|hash| !valid_hex(hash, 64))
                     || immutable
                         .is_some_and(|hash| hash != &entry.change.intent.growth_immutable_sha256)
                     || capture_immutable
@@ -2063,7 +2115,12 @@ fn validate_journal(journal: &Journal) -> Result<()> {
                 }
                 entry.proof.validate()?;
                 immutable = Some(&entry.change.growth_immutable_sha256);
-                capture_immutable = Some(&entry.change.intent.immutable_sha256);
+                capture_immutable = Some(
+                    entry
+                        .resulting_immutable_sha256
+                        .as_ref()
+                        .unwrap_or(&entry.change.intent.immutable_sha256),
+                );
                 checkpoint_head = Some(entry.change.checkpoint_head.as_ref());
                 previous = entry.proof.clone();
             }
@@ -2459,6 +2516,7 @@ mod tests {
         stored.capture_pending = Some(crate::capture_material::Pending {
             intent: capture_source_intent(&receipt, "capture", capture_request(), &record).unwrap(),
             entered: false,
+            previous_lineage: None,
         });
         assert!(validate_journal(&stored).is_err());
         retire_branch_model(&journal, &intent, &record).unwrap();
@@ -2697,6 +2755,69 @@ mod tests {
             .is_err());
     }
 
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn capture_binds_linux_ram_rebase_to_the_entered_vmm_and_keeps_history() {
+        let (_dir, journal, receipt, mut record) = capture_fixture();
+        let request = capture_request();
+        let permit = journal
+            .prepare_capture(&receipt, "first", request.clone(), &record)
+            .unwrap();
+        journal.enter_capture(&permit).unwrap();
+        let artifact = capture_artifact(None);
+        record.checkpoint_head = Some(artifact.head.clone());
+        record.fork_lineage_pid_start_time = Some(999);
+        assert!(journal
+            .complete_capture(&receipt, &permit, artifact.clone(), &record)
+            .is_err());
+
+        record.fork_lineage_pid_start_time = record.pid_start_time;
+        assert!(journal
+            .capture_dispatch(
+                &receipt,
+                "first",
+                &request,
+                &record,
+                CaptureSourcePhase::BeforeCapture,
+            )
+            .is_err());
+        assert!(journal
+            .capture_dispatch(
+                &receipt,
+                "first",
+                &request,
+                &record,
+                CaptureSourcePhase::AfterCapture,
+            )
+            .is_ok());
+        let mut changed = record.clone();
+        changed.cpus = 2;
+        assert!(journal
+            .complete_capture(&receipt, &permit, artifact.clone(), &changed)
+            .is_err());
+        let transition = journal
+            .complete_capture(&receipt, &permit, artifact, &record)
+            .unwrap();
+        assert!(transition.receipt.matches(&record).unwrap());
+
+        // An ordinary restart changes the live PID but keeps the last marker.
+        record.pid = Some(124);
+        record.pid_start_time = Some(457);
+        let next = journal
+            .prepare_capture(&transition.receipt, "second", request, &record)
+            .unwrap();
+        journal.enter_capture(&next).unwrap();
+        let mut artifact = capture_artifact(record.checkpoint_head.clone());
+        artifact.head = "e".repeat(32);
+        record.checkpoint_head = Some(artifact.head.clone());
+        record.fork_lineage_pid_start_time = record.pid_start_time;
+        let next = journal
+            .complete_capture(&transition.receipt, &next, artifact, &record)
+            .unwrap();
+        journal.verify(&next.receipt).unwrap();
+        assert!(next.receipt.matches(&record).unwrap());
+    }
+
     #[test]
     fn capture_and_growth_are_one_ordered_chain_with_distinct_operation_proofs() {
         let (_dir, journal, receipt, mut record) = capture_fixture();
@@ -2809,7 +2930,13 @@ mod tests {
         record.checkpoint_head = Some("d".repeat(32));
         assert!(journal.entered_capture_source(&receipt, &record).unwrap());
         assert!(journal
-            .capture_dispatch(&receipt, "other", &capture_request(), &record)
+            .capture_dispatch(
+                &receipt,
+                "other",
+                &capture_request(),
+                &record,
+                CaptureSourcePhase::BeforeCapture,
+            )
             .is_err());
         assert!(journal.verify(&receipt).is_err());
         record.pid_start_time = Some(999);
@@ -3130,10 +3257,12 @@ mod tests {
             capture_history: Some(vec![crate::capture_material::Completed {
                 change: captured.change,
                 proof: captured.receipt.material.unwrap(),
+                resulting_immutable_sha256: None,
             }]),
             capture_resolutions: Some(vec![crate::capture_resolution::Resolved {
                 change: first.change,
                 proof: first.receipt.material.unwrap(),
+                resulting_immutable_sha256: None,
             }]),
         };
         validate_journal(&journal).unwrap();
@@ -3146,6 +3275,7 @@ mod tests {
             .push(crate::capture_resolution::Resolved {
                 change: wrong.change,
                 proof: wrong.receipt.material.unwrap(),
+                resulting_immutable_sha256: None,
             });
         assert!(validate_journal(&journal).is_err());
     }

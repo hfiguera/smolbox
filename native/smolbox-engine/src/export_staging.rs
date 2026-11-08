@@ -3173,6 +3173,13 @@ mod tests {
             std::fs::write(path.join("boot-config.json"), b"{}").unwrap();
             let socket = std::os::unix::net::UnixListener::bind(path.join("agent.sock")).unwrap();
             drop(socket); // Stale private socket model, no connection or SDK entry.
+            if marker {
+                // The current SDK can leave its separate libkrun control socket
+                // beside agent.ready after collection. Older boots may omit it.
+                let control =
+                    std::os::unix::net::UnixListener::bind(path.join("control.sock")).unwrap();
+                drop(control);
+            }
             let rootfs = crate::export_source::Root::open(&rootfs_path).unwrap();
             stage
                 .prepare_helper_runtime(&root, &epoch, &collected, &rootfs, &budget())
@@ -3294,7 +3301,7 @@ mod tests {
 
     #[test]
     fn changed_runtime_files_markers_and_foreign_inventory_keep_the_full_allowance() {
-        for variant in 0..8 {
+        for variant in 0..9 {
             let (temp, engine, _source, mut stage, root, epoch) = launch_fixture();
             let (name, path) = stage.prepared_helper_identity(&root).unwrap();
             let dispatch = epoch.begin_boot(&name).unwrap();
@@ -3331,11 +3338,12 @@ mod tests {
                         let file = std::fs::File::create(path.join("agent-console.log")).unwrap();
                         file.set_len((64 << 20) + 1).unwrap();
                     }
-                    _ => std::fs::hard_link(
+                    7 => std::fs::hard_link(
                         path.join("export-source.qcow2"),
                         path.join("agent.config.json"),
                     )
                     .unwrap(),
+                    _ => std::fs::write(path.join("control.sock"), b"not a socket").unwrap(),
                 }
                 assert!(stage
                     .prepare_helper_runtime(&root, &epoch, &collected, &rootfs, &budget())

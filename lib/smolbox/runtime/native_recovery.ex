@@ -402,6 +402,16 @@ defmodule SmolBox.Runtime.NativeRecovery do
        when observation in [:missing, :unverified],
        do: [next_due_at_ms: record.next_due_at_ms]
 
+  # Explicit stopped resolution freezes dispatch while the worker is scanned.
+  # A start or delete accepted during that window is still queued. Keep its
+  # intent only for a verified stopped incarnation before dispatch is recorded.
+  defp machine_changes(
+         %{state: state, operation: operation, phase: :pending} = record,
+         %Machine{state: :stopped} = observed
+       )
+       when {state, operation} in [{:starting, :start}, {:deleting, :delete}],
+       do: [observed_machine: observed, next_due_at_ms: record.next_due_at_ms]
+
   defp machine_changes(record, observed) do
     state = machine_state(record, observed)
 

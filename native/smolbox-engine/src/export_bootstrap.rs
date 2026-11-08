@@ -282,8 +282,35 @@ pub fn run_container_conversion(
         ContainerExportPlan::from_imported(&input.record, input.imported.as_ref().unwrap())?
     } else {
         command(socket, CACHE, &budget).map_err(|e| Error::uncertain(e.code))?;
+        let image = crate::export_container::registry_source(&input.record)?;
+        let source = crate::ImagePullRequest {
+            reference: image.into(),
+            platform: crate::oci::native_oci_platform().into(),
+        };
+        let manifest = crate::export_stream::read_oci_metadata(
+            socket,
+            crate::sdk_compat::oci_manifest_cache_path(image),
+            crate::OCI_METADATA_BYTES as u64,
+            &budget,
+        )?;
+        let descriptor = crate::VerifiedOci::configuration(&source, &manifest)
+            .map_err(|e| Error::uncertain(e.code))?;
+        let config_id = descriptor
+            .digest()
+            .strip_prefix("sha256:")
+            .ok_or(Error::uncertain(ErrorCode::Validation))?;
+        let config = crate::export_stream::read_oci_metadata(
+            socket,
+            format!("/storage/configs/{config_id}.json"),
+            descriptor.size(),
+            &budget,
+        )?;
+        let verified = crate::VerifiedOci::verify(source, &manifest, &config)
+            .map_err(|e| Error::uncertain(e.code))?;
+        // Query confirms the referenced layers are present. Its digest is the
+        // config digest, not the manifest digest in the approved reference.
         let query = AgentRequest::Query {
-            image: crate::export_container::registry_source(&input.record)?.into(),
+            image: image.into(),
         };
         let mut reader = crate::export_stream::connect_request(socket, &query, &budget)
             .map_err(|e| Error::uncertain(e.code))?;
@@ -292,7 +319,7 @@ pub fn run_container_conversion(
             _ => return Err(Error::uncertain(ErrorCode::Ownership)),
         };
         drop(reader);
-        ContainerExportPlan::from_image(&input.record, cached)
+        ContainerExportPlan::from_image(&input.record, cached, &verified)
             .map_err(|e| Error::uncertain(e.code))?
     };
     let layer =
@@ -761,37 +788,23 @@ pub(crate) mod tests {
     pub(crate) fn record() -> smolvm::config::VmRecord {
         let mut r = smolvm::config::VmRecord::new("source".into(), 1, 512, vec![], vec![], false);
         r.state = smolvm::config::RecordState::Stopped;
-        r.image = Some(format!(
-            "registry.example/team/app@sha256:{}",
-            "a".repeat(64)
-        ));
+        r.image = Some(
+            crate::export_container::tests::oci_fixture()
+                .0
+                .source()
+                .reference
+                .clone(),
+        );
         r.storage_gb = Some(1);
         r.overlay_gb = Some(1);
         r
     }
     pub(crate) fn cached() -> smolvm_protocol::ImageInfo {
-        smolvm_protocol::ImageInfo {
-            reference: record().image.unwrap(),
-            digest: format!("sha256:{}", "a".repeat(64)),
-            size: 1024,
-            created: None,
-            architecture: crate::oci::native_oci_platform()
-                .rsplit('/')
-                .next()
-                .unwrap()
-                .into(),
-            os: "linux".into(),
-            layer_count: 2,
-            layers: vec![
-                format!("sha256:{}", "b".repeat(64)),
-                format!("sha256:{}", "c".repeat(64)),
-            ],
-            entrypoint: vec![],
-            cmd: vec![],
-            env: vec!["IMAGE=preserved".into()],
-            workdir: None,
-            user: Some("123".into()),
-        }
+        crate::export_container::tests::oci_fixture().3
+    }
+    pub(crate) fn cached_blobs() -> [Vec<Vec<u8>>; 2] {
+        let (_, manifest, config, _) = crate::export_container::tests::oci_fixture();
+        [manifest, config].map(|data| vec![wire(AgentResponse::DataChunk { data, done: true })])
     }
     fn wire(r: AgentResponse) -> Vec<u8> {
         smolvm_protocol::encode_message(&r).unwrap()
@@ -953,6 +966,8 @@ pub(crate) mod tests {
             vec![
                 completed(0),
                 completed(0),
+                cached_blobs()[0].clone(),
+                cached_blobs()[1].clone(),
                 vec![wire(AgentResponse::Ok {
                     data: Some(serde_json::to_value(cached()).unwrap()),
                 })],
@@ -963,7 +978,7 @@ pub(crate) mod tests {
             ],
         );
         let proof = run_worker(&request, metadata, plan, expected).unwrap();
-        assert_eq!(server.join().unwrap().len(), 4);
+        assert_eq!(server.join().unwrap().len(), 6);
         assert!(proof.matches(expected));
         assert_eq!(proof.bytes, 11);
         assert_eq!(proof.sha256, hex::encode(Sha256::digest(b"owned layer")));
@@ -987,6 +1002,8 @@ pub(crate) mod tests {
             vec![
                 completed(0),
                 completed(0),
+                cached_blobs()[0].clone(),
+                cached_blobs()[1].clone(),
                 vec![wire(AgentResponse::Ok {
                     data: Some(serde_json::to_value(cached()).unwrap()),
                 })],
@@ -1009,7 +1026,7 @@ pub(crate) mod tests {
         let result =
             run_container_conversion(&input, &socket, output.as_file_mut(), &budget).unwrap();
         let requests = server.join().unwrap();
-        assert_eq!(requests.len(), 4);
+        assert_eq!(requests.len(), 6);
         for (request, script) in requests[..2].iter().zip([MOUNT, CACHE]) {
             match request {
                 AgentRequest::VmExec {
@@ -1032,11 +1049,20 @@ pub(crate) mod tests {
                 _ => panic!("unexpected setup request"),
             }
         }
+        let (verified, _, _, image) = crate::export_container::tests::oci_fixture();
+        let manifest_id = verified.source().reference.split_once('@').unwrap().1;
+        let manifest_path = format!(
+            "/storage/manifests/registry.example_team_app_{}.json",
+            manifest_id.replace(':', "_")
+        );
+        let config_path = format!("/storage/configs/{}.json", &image.digest[7..]);
+        assert!(matches!(&requests[2], AgentRequest::FileRead { path } if path == &manifest_path));
+        assert!(matches!(&requests[3], AgentRequest::FileRead { path } if path == &config_path));
         assert!(
-            matches!(&requests[2], AgentRequest::Query { image } if Some(image) == record.image.as_ref())
+            matches!(&requests[4], AgentRequest::Query { image } if Some(image) == record.image.as_ref())
         );
         assert_eq!(
-            serde_json::to_vec(&requests[3]).unwrap(),
+            serde_json::to_vec(&requests[5]).unwrap(),
             serde_json::to_vec(result.plan.request()).unwrap()
         );
         assert_eq!(result.layer.bytes, 21);
@@ -1045,37 +1071,50 @@ pub(crate) mod tests {
             .plan
             .seed_manifest(&record, result.layer.bytes)
             .unwrap();
-        assert!(manifest.env.iter().any(|v| v == "IMAGE=preserved"));
-        assert_eq!(manifest.user.as_deref(), Some("123"));
+        assert!(manifest
+            .env
+            .iter()
+            .any(|v| v == "IMAGE_ONLY=private-env-value"));
+        assert_eq!(manifest.user.as_deref(), Some("1000"));
     }
     #[test]
-    fn mount_failure_missing_cache_and_foreign_digest_never_dispatch_flatten() {
-        for variant in 0..4 {
+    fn mount_failure_and_unverified_cache_never_dispatch_flatten() {
+        for variant in 0..7 {
             let temp = tempfile::tempdir().unwrap();
             let socket = temp.path().join("agent.sock");
-            let responses = match variant {
-                0 => vec![completed(1)],
-                1 => vec![completed(0), completed(1)],
-                2 => vec![
-                    completed(0),
-                    completed(0),
-                    vec![wire(AgentResponse::Error {
-                        code: Some("NOT_FOUND".into()),
-                        message: "missing".into(),
-                    })],
-                ],
-                _ => {
-                    let mut image = cached();
-                    image.digest = format!("sha256:{}", "d".repeat(64));
-                    vec![
-                        completed(0),
-                        completed(0),
-                        vec![wire(AgentResponse::Ok {
-                            data: Some(serde_json::to_value(image).unwrap()),
-                        })],
-                    ]
+            let mut responses = vec![completed(0), completed(0)];
+            responses.extend(cached_blobs());
+            let mut image = cached();
+            match variant {
+                0 => responses = vec![completed(1)],
+                1 => responses = vec![completed(0), completed(1)],
+                2 => responses.push(vec![wire(AgentResponse::Error {
+                    code: Some("NOT_FOUND".into()),
+                    message: "missing".into(),
+                })]),
+                3 | 4 => {
+                    let (_, manifest, config, _) = crate::export_container::tests::oci_fixture();
+                    let mut bytes = if variant == 3 { manifest } else { config };
+                    bytes[0] ^= 1;
+                    let index = variant - 1;
+                    responses[index] = vec![wire(AgentResponse::DataChunk {
+                        data: bytes,
+                        done: true,
+                    })];
+                    responses.truncate(index + 1);
                 }
-            };
+                _ => {
+                    if variant == 5 {
+                        // This is the digest the old conversion gate expected.
+                        image.digest = image.reference.split_once('@').unwrap().1.into();
+                    } else {
+                        image.layers.swap(0, 1);
+                    }
+                    responses.push(vec![wire(AgentResponse::Ok {
+                        data: Some(serde_json::to_value(image).unwrap()),
+                    })]);
+                }
+            }
             let count = responses.len();
             let server = peer(UnixListener::bind(&socket).unwrap(), responses);
             let budget = budget();
@@ -1095,8 +1134,11 @@ pub(crate) mod tests {
             let socket = temp.path().join("agent.sock");
             let mut responses = vec![completed(0), completed(0)];
             if oversize {
-                responses.push(vec![((METADATA_BYTES + 1) as u32).to_be_bytes().to_vec()]);
+                responses.push(vec![((smolvm_protocol::LAYER_CHUNK_SIZE * 2) as u32)
+                    .to_be_bytes()
+                    .to_vec()]);
             } else {
+                responses.extend(cached_blobs());
                 responses.push(vec![wire(AgentResponse::Ok {
                     data: Some(serde_json::to_value(cached()).unwrap()),
                 })]);

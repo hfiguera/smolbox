@@ -2635,9 +2635,13 @@ impl Engine {
                 lifecycle.prepare(receipt, &record, &checkpoint_budget)?
             };
         check()?;
-        // Reserve the bounded SDK relay before boot dispatch. Its sockets and
-        // threads retire on collection; boot authority stays in runtime_boots.
-        let _readiness = self.jobs.acquire(crate::jobs::Demand::branch_probe())?;
+        // Mounted startup already holds the promoted work budget through
+        // readiness. Unmounted startup reserves its relay here.
+        let _readiness = if mounts.is_none() {
+            Some(self.jobs.acquire(crate::jobs::Demand::branch_probe())?)
+        } else {
+            None
+        };
         let owned_boot = self.runtime_boots.reserve(receipt, &self.jobs)?;
         self.track_handle(receipt)?;
         if let Err(error) = check() {
@@ -2686,27 +2690,44 @@ impl Engine {
                 .insert(receipt.name.clone(), pid);
         }
         check().map_err(|error| Error::uncertain(error.code))?;
+        let directory = self.vm_directory(&receipt.name);
         if let Some(permit) = checkpoint_start {
-            let record = self
-                .record(receipt)
-                .map_err(|error| Error::uncertain(error.code))?;
-            let pid = record
-                .pid
-                .zip(record.pid_start_time)
-                .ok_or(Error::uncertain(ErrorCode::Ownership))?;
-            if self.runtime.pid(&receipt.name) != Some(pid.0)
-                || smolvm::process::process_start_time(pid.0) != Some(pid.1)
-                || !smolvm::process::is_alive(pid.0)
-            {
-                return Err(Error::uncertain(ErrorCode::Ownership));
-            }
+            let restored_record = || {
+                check().map_err(|error| Error::uncertain(error.code))?;
+                let record = self
+                    .record(receipt)
+                    .map_err(|error| Error::uncertain(error.code))?;
+                owned_boot
+                    .verify_before(receipt, &record)
+                    .map_err(|error| Error::uncertain(error.code))?;
+                let pid = record
+                    .pid
+                    .zip(record.pid_start_time)
+                    .ok_or(Error::uncertain(ErrorCode::Ownership))?;
+                if record.state != smolvm::config::RecordState::Running
+                    || self.runtime.pid(&receipt.name) != Some(pid.0)
+                    || smolvm::process::process_start_time(pid.0) != Some(pid.1)
+                    || !smolvm::process::is_alive(pid.0)
+                {
+                    return Err(Error::uncertain(ErrorCode::Ownership));
+                }
+                Ok((record, pid))
+            };
+            restored_record()?;
+            // Keep the restore Entered until the enrolled guest proves timer
+            // progress. An expired probe cannot enable cold fallback or replay.
+            crate::branch_agent::checkpoint_timer_probe(
+                &directory.join("agent.sock"),
+                &directory,
+                &checkpoint_budget,
+            )?;
+            let (record, pid) = restored_record()?;
             lifecycle.complete(permit, receipt, &record, pid, &checkpoint_budget)?;
         }
         let readiness = crate::ReadBudget {
             deadline,
             cancel: cancel.clone(),
         };
-        let directory = self.vm_directory(&receipt.name);
         crate::runtime_boot::wait_until_ready(
             &readiness,
             || {

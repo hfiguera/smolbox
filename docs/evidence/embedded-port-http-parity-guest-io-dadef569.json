@@ -1,0 +1,150 @@
+{
+  "schema": 1,
+  "recorded_date": "2026-11-06",
+  "source_base_commit": "dadef569",
+  "terminal_server_source_sha256": "394d5b0cfe41414763afb60304ad6599cd594916837a2be6822363908fb7994c",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "hex_archive_sha256": "3d67055121d4f39e4df58457424a0be16549a8ba754f528a8bbab16202f118fb",
+  "workflow_sha256": "53ba53637e19e32a0f34b6e04b0466e381c807f2bdb8432930ada0e3862219a8",
+  "focused_terminal_and_matrix_tests_passed": 43,
+  "focused_guest_paths_and_terminal_tests_passed_before_fix": 21,
+  "crash_validation_deferred": true,
+  "cli_race_validation_deferred": true,
+  "linux_before_fix": {
+    "host": "linux-x86_64",
+    "status": "terminal-input-unresolved-after-resize",
+    "failure_report_sha256": "eace827fe537e86ea248f17a7f3c33f049e1b95f1f51ee29d830028c3a4b7707"
+  },
+  "macos_before_fix": {
+    "host": "macos-aarch64",
+    "status": "terminal-input-unresolved-after-resize",
+    "failure_report_sha256": "5f2ea732af16ae9d16074ac9dce0f270e1c1011331201298121d2b7f980e922d",
+    "saved_state": {
+      "default_path_binary_roundtrip": true,
+      "unsupported_pty_and_unapproved_cwd_refused": true,
+      "streaming_stdout_stderr_and_exit": true,
+      "measurements_running_stopped_deleted": true,
+      "deleted_and_released": true
+    },
+    "oci_startup": {
+      "witness": true
+    },
+    "oci_io": {
+      "stream": true,
+      "files": true,
+      "buffered": true
+    }
+  },
+  "linux_current": {
+    "host": "linux-x86_64",
+    "report_sha256": "00b923617d8af86bd5a77880e55808460e07ce3d06fc81c79bf72efa40b21464",
+    "status": "passed",
+    "evidence": {
+      "status": "passed",
+      "oci": {
+        "streaming_stdout_stderr_and_exit": true,
+        "deleted_and_released": true,
+        "startup_entrypoint_arguments_environment_workdir": true,
+        "startup_counts": [
+          1,
+          2
+        ],
+        "custom_workdir_and_directional_file_roots": true,
+        "path_and_budget_rejections": true,
+        "buffered_stdin_stdout_stderr_and_exit": true,
+        "terminal_resize_output_exit_and_slot_release": true
+      },
+      "package_manifest_sha256": "06328244c299a4fb237b105ce532c8fd64427a2e7b6390118fd8a195fff9607f",
+      "durable": true,
+      "saved_state": {
+        "default_path_binary_roundtrip": true,
+        "unsupported_pty_and_unapproved_cwd_refused": true,
+        "streaming_stdout_stderr_and_exit": true,
+        "measurements_running_stopped_deleted": true,
+        "deleted_and_released": true
+      },
+      "zero_reservations": true,
+      "fixture_source_kind": "oci",
+      "crash_validation_deferred": true,
+      "cli_race_validation_deferred": true
+    },
+    "postflight": {
+      "sdk_table_counts": {
+        "vms": 0,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "config": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0,
+        "fork_pools": 0,
+        "fork_pool_snapshots": 0,
+        "fork_pool_slots": 0,
+        "fork_leases": 0
+      },
+      "account_lock_available": true,
+      "postgresql_normal_stop": true
+    },
+    "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+    "toolchain": "current",
+    "hex_archive_sha256": "3d67055121d4f39e4df58457424a0be16549a8ba754f528a8bbab16202f118fb",
+    "assets_verified": 806,
+    "without_rust": true,
+    "crash_validation_deferred": true
+  },
+  "macos_minimum": {
+    "host": "macos-aarch64",
+    "report_sha256": "484735c3e963d89b62f927bf865e3dbd53575dd690f23fb08e02716084245713",
+    "status": "passed",
+    "evidence": {
+      "status": "passed",
+      "oci": {
+        "streaming_stdout_stderr_and_exit": true,
+        "deleted_and_released": true,
+        "startup_entrypoint_arguments_environment_workdir": true,
+        "startup_counts": [
+          1,
+          2
+        ],
+        "custom_workdir_and_directional_file_roots": true,
+        "path_and_budget_rejections": true,
+        "buffered_stdin_stdout_stderr_and_exit": true,
+        "terminal_resize_output_exit_and_slot_release": true
+      },
+      "package_manifest_sha256": "28d07b9a209c856c4c734939afa3404539975c881a7a7c0e8b03102c08d58a3a",
+      "durable": true,
+      "saved_state": {
+        "default_path_binary_roundtrip": true,
+        "unsupported_pty_and_unapproved_cwd_refused": true,
+        "streaming_stdout_stderr_and_exit": true,
+        "measurements_running_stopped_deleted": true,
+        "deleted_and_released": true
+      },
+      "zero_reservations": true,
+      "fixture_source_kind": "oci",
+      "crash_validation_deferred": true,
+      "cli_race_validation_deferred": true
+    },
+    "postflight": {
+      "sdk_table_counts": {
+        "vms": 0,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "config": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0,
+        "fork_pools": 0,
+        "fork_pool_snapshots": 0,
+        "fork_pool_slots": 0,
+        "fork_leases": 0
+      },
+      "account_lock_available": true,
+      "postgresql_normal_stop": true
+    },
+    "postgresql": "17.11 (Homebrew)",
+    "toolchain": "minimum",
+    "hex_archive_sha256": "3d67055121d4f39e4df58457424a0be16549a8ba754f528a8bbab16202f118fb",
+    "assets_verified": 809,
+    "without_rust": true,
+    "crash_validation_deferred": true
+  }
+}

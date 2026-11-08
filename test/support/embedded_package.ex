@@ -151,6 +151,7 @@ defmodule SmolBox.Test.EmbeddedPackage do
       "pull_error" => Keyword.get(options, :pull_error, false),
       "prepare_error" => Keyword.get(options, :prepare_error, false),
       "capture_transition" => options[:capture_transition],
+      "unreachable_after_start" => Keyword.get(options, :unreachable_after_start, false),
       "stop_no_change" => Keyword.get(options, :stop_no_change, false)
     }
     |> Map.merge(volume_metadata(options))

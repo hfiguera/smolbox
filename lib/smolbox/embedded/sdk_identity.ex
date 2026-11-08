@@ -66,6 +66,9 @@ defmodule SmolBox.Embedded.SDKIdentity do
           }),
         else: implemented
 
+    implemented =
+      if platform in [:linux, :macos], do: Map.put(implemented, "exports", 1), else: implemented
+
     implemented = Map.put(implemented, "terminal_preflight", 1)
 
     valid?(sdk) and sdk["sdk_version"] == version and sdk["source_revision"] == revision and

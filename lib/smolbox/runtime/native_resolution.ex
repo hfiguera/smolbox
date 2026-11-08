@@ -1,7 +1,17 @@
 defmodule SmolBox.Runtime.NativeResolution do
   @moduledoc false
   alias SmolBox.Backend.{Budget, EmbeddedContext}
-  alias SmolBox.Embedded.{BranchCompletion, Call, CaptureTransition, NativeCapture}
+
+  alias SmolBox.Embedded.{
+    BranchCompletion,
+    Call,
+    CaptureTransition,
+    NativeBranchDeletion,
+    NativeBranchDeletionAction,
+    NativeCapture,
+    NativePreparedBranchRetirement
+  }
+
   alias SmolBox.{CheckpointCapture, Error, ManagedMachine}
   alias SmolBox.Runtime.{NativeAuthority, Session, Target}
 
@@ -49,7 +59,24 @@ defmodule SmolBox.Runtime.NativeResolution do
          function,
          deadline
        )
-       when operation in [:branch_retire, :branch_release_storage, :branch_resolve_ready],
+       when operation in [
+              :branch_retire,
+              :branch_release_storage,
+              :branch_resolve_ready,
+              :resolve_branch_deletion,
+              :retire_prepared_branch
+            ],
+       do: ordinary_control(config, coordinator, record, target, operation, function, deadline)
+
+  defp control(
+         config,
+         coordinator,
+         record,
+         target,
+         {:branch_deletion_action, _} = operation,
+         function,
+         deadline
+       ),
        do: ordinary_control(config, coordinator, record, target, operation, function, deadline)
 
   defp control(
@@ -132,6 +159,25 @@ defmodule SmolBox.Runtime.NativeResolution do
   defp reusable_result?(
          {:ok,
           %ManagedMachine{
+            state: :deleted,
+            branch: %{
+              state: :closed,
+              native_authority: %{prepared_retirement: %NativePreparedBranchRetirement{} = saved}
+            }
+          } = child},
+         :retire_prepared_branch,
+         parent,
+         target
+       ) do
+    ManagedMachine.validate(child) == :ok and
+      child.id == parent.active_branch and child.branch.source == ManagedMachine.key(parent) and
+      child.worker_id == target.id and child.worker_generation == parent.worker_generation and
+      saved.proof.retirement["intent"]["epoch"] == target.connection.context.epoch
+  end
+
+  defp reusable_result?(
+         {:ok,
+          %ManagedMachine{
             branch: %{state: state, native_authority: %{completion: %BranchCompletion{} = proof}}
           } = child},
          :branch_resolve_ready,
@@ -143,6 +189,34 @@ defmodule SmolBox.Runtime.NativeResolution do
       child.branch.source == ManagedMachine.key(parent) and child.worker_id == target.id and
       get_in(proof.publication, ~w(change child_origin intent epoch)) ==
         target.connection.context.epoch
+  end
+
+  defp reusable_result?(
+         {:ok,
+          %ManagedMachine{
+            state: :deleted,
+            branch: %{native_authority: %{deletion: %{proof: proof} = deletion}}
+          } = child},
+         :resolve_branch_deletion,
+         original,
+         target
+       ) do
+    same_branch_child?(child, original, target) and
+      NativeBranchDeletion.matches?(deletion, proof)
+  end
+
+  defp reusable_result?(result, {:branch_deletion_action, action}, original, target) do
+    with {:ok, %ManagedMachine{branch: %{native_authority: %{} = authority}} = child} <- result,
+         %{proof: proof} = saved <- Map.get(authority, NativeBranchDeletionAction.field(action)),
+         true <- same_branch_child?(child, original, target),
+         true <- NativeBranchDeletionAction.matches?(saved, action, proof) do
+      case action do
+        :collect -> child.state == :unknown and child.reservation == original.reservation
+        _ -> child.state == :deleted and child.reservation == nil
+      end
+    else
+      _ -> false
+    end
   end
 
   # A normal completed capture already committed its material transition. Keep
@@ -182,9 +256,27 @@ defmodule SmolBox.Runtime.NativeResolution do
 
   defp reusable_result?(_, :capture_complete, _, _), do: false
   defp reusable_result?(_, :branch_resolve_ready, _, _), do: false
+  defp reusable_result?(_, :resolve_branch_deletion, _, _), do: false
+  defp reusable_result?(_, :retire_prepared_branch, _, _), do: false
   defp reusable_result?({:ok, _}, _, _, _), do: true
   defp reusable_result?({:error, %Error{evidence: :not_dispatched}}, _, _, _), do: true
   defp reusable_result?(_, _, _, _), do: false
+
+  defp same_branch_child?(
+         %{branch: %{native_authority: %{completion: %BranchCompletion{} = completion}}} = child,
+         original,
+         target
+       ) do
+    ManagedMachine.validate(child) == :ok and
+      ManagedMachine.key(child) == ManagedMachine.key(original) and
+      child.worker_id == target.id and child.worker_generation == original.worker_generation and
+      child.branch.source == original.branch.source and
+      completion == original.branch.native_authority.completion and
+      get_in(completion.publication, ~w(change child_origin intent epoch)) ==
+        target.connection.context.epoch
+  end
+
+  defp same_branch_child?(_, _, _), do: false
 
   defp restore(config, target, deadline, %{owner: owner, generation: generation}) do
     context = target.connection.context

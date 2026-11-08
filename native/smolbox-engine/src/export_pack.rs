@@ -100,7 +100,9 @@ pub(crate) fn manifest(
         return Err(Error::before(ErrorCode::Unsupported));
     }
     let mut manifest = PackManifest::new(
-        format!("vm://{}", record.name),
+        // A VM pack has no image to mount. A nonempty name makes the SDK
+        // look for bundled image layers when the exported VM boots.
+        String::new(),
         "none".into(),
         crate::oci::native_oci_platform().into(),
         smolvm::platform::Platform::current()
@@ -263,6 +265,16 @@ pub(crate) fn pack(
                     },
                 )?;
             } else {
+                // The SDK mounts this directory for any imported sidecar,
+                // even when a VM-mode artifact has no image layers.
+                let mut layers = tar::Header::new_gnu();
+                layers.set_entry_type(tar::EntryType::Directory);
+                layers.set_size(0);
+                layers.set_mode(0o755);
+                layers.set_uid(0);
+                layers.set_gid(0);
+                layers.set_mtime(0);
+                archive.append_data(&mut layers, "layers", std::io::empty())?;
                 for (name, path) in [
                     ("storage.raw", "storage.ext4"),
                     ("overlay.raw", "overlay.raw"),
@@ -557,7 +569,7 @@ pub(crate) mod tests {
         )
         .unwrap();
         assert!(matches!(decoded.mode, PackMode::Vm));
-        assert_eq!(decoded.image, "vm://export-source");
+        assert!(decoded.image.is_empty());
         assert_eq!(decoded.digest, "none");
         assert_eq!(decoded.env, manifest.env);
         assert_eq!(decoded.env, vec!["SECRET=private-env-value"]);
@@ -573,16 +585,25 @@ pub(crate) mod tests {
         let decoder = zstd::stream::Decoder::new(&bytes[..footer.assets_size as usize]).unwrap();
         let mut archive = tar::Archive::new(decoder);
         let mut extracted = BTreeMap::new();
+        let mut has_layers_directory = false;
         for entry in archive.entries().unwrap() {
             let mut entry = entry.unwrap();
-            assert!(entry.header().entry_type().is_file());
             assert_eq!(entry.header().uid().unwrap(), 0);
             assert_eq!(entry.header().mtime().unwrap(), 0);
             let path = entry.path().unwrap().to_str().unwrap().to_owned();
+            if path == "layers" {
+                assert!(!has_layers_directory);
+                assert!(entry.header().entry_type().is_dir());
+                assert_eq!(entry.size(), 0);
+                has_layers_directory = true;
+                continue;
+            }
+            assert!(entry.header().entry_type().is_file());
             let mut content = vec![];
             entry.read_to_end(&mut content).unwrap();
             extracted.insert(path, content);
         }
+        assert!(has_layers_directory);
         assert_eq!(extracted.len(), 5);
         assert_eq!(extracted["storage.ext4"], b"storage\0\x80");
         assert_eq!(extracted["overlay.raw"], b"root\xff\0");

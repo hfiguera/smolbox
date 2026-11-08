@@ -1,0 +1,126 @@
+{
+  "schema": 1,
+  "recorded_date": "2026-11-06",
+  "source_base_commit": "34413ad1aa73b1e8340a5d3af4c95ef10d457020",
+  "runtime_source_sha256": "6fc12b7c56b07ff5c0a386c1d9d304ec577e0c5a21d775f41d80d45b9f576795",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "linux_current": {
+    "status": "passed",
+    "evidence": {
+      "status": "passed",
+      "package_manifest_sha256": "06328244c299a4fb237b105ce532c8fd64427a2e7b6390118fd8a195fff9607f",
+      "durable": true,
+      "cases": [
+        {
+          "operation": "start",
+          "durable_state": "unknown",
+          "safe_error": {
+            "category": "port_conflict",
+            "operation": "start",
+            "evidence": "unknown"
+          },
+          "reservation_retained": true,
+          "independent_listener_unchanged": true,
+          "backend_states": [
+            "stopped"
+          ],
+          "explicit_stopped_resolution": true,
+          "owned_deletion_after_stopped_proof": true,
+          "independent_listener_served_after_delete": true,
+          "same_port_reserved_again_and_released": true
+        }
+      ],
+      "zero_reservations": true,
+      "fixture_source_kind": "packed_python",
+      "separately_bound_loopback_listener": true,
+      "crash_validation_deferred": true,
+      "cli_race_validation_deferred": true
+    },
+    "postflight": {
+      "sdk_table_counts": {
+        "vms": 0,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "config": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0,
+        "fork_pools": 0,
+        "fork_pool_snapshots": 0,
+        "fork_pool_slots": 0,
+        "fork_leases": 0
+      },
+      "account_lock_available": true,
+      "postgresql_normal_stop": true
+    },
+    "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+    "toolchain": "current",
+    "hex_archive_sha256": "0041e36922237242a1770d4cef98c63a863a76f18d3bfd36de322a622d337971",
+    "assets_verified": 806,
+    "without_rust": true,
+    "crash_validation_deferred": true,
+    "elixir_version": "1.20.4",
+    "otp_release": "29",
+    "host": "linux-x86_64"
+  },
+  "macos_minimum": {
+    "status": "passed",
+    "evidence": {
+      "status": "passed",
+      "package_manifest_sha256": "28d07b9a209c856c4c734939afa3404539975c881a7a7c0e8b03102c08d58a3a",
+      "durable": true,
+      "cases": [
+        {
+          "durable_state": "unknown",
+          "operation": "start",
+          "safe_error": {
+            "category": "port_conflict",
+            "operation": "start",
+            "evidence": "unknown"
+          },
+          "reservation_retained": true,
+          "independent_listener_unchanged": true,
+          "backend_states": [
+            "stopped"
+          ],
+          "explicit_stopped_resolution": true,
+          "owned_deletion_after_stopped_proof": true,
+          "independent_listener_served_after_delete": true,
+          "same_port_reserved_again_and_released": true
+        }
+      ],
+      "zero_reservations": true,
+      "fixture_source_kind": "prepared_bare",
+      "separately_bound_loopback_listener": true,
+      "crash_validation_deferred": true,
+      "cli_race_validation_deferred": true
+    },
+    "postflight": {
+      "sdk_table_counts": {
+        "vms": 0,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "config": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0,
+        "fork_pools": 0,
+        "fork_pool_snapshots": 0,
+        "fork_pool_slots": 0,
+        "fork_leases": 0
+      },
+      "account_lock_available": true,
+      "postgresql_normal_stop": true
+    },
+    "postgresql": "17.11 (Homebrew)",
+    "toolchain": "minimum",
+    "hex_archive_sha256": "0041e36922237242a1770d4cef98c63a863a76f18d3bfd36de322a622d337971",
+    "assets_verified": 809,
+    "without_rust": true,
+    "crash_validation_deferred": true,
+    "elixir_version": "1.18.4",
+    "otp_release": "27",
+    "host": "macos-aarch64"
+  },
+  "focused_elixir_checks_passed": 29,
+  "crash_validation_deferred": true,
+  "cli_race_validation_deferred": true
+}
