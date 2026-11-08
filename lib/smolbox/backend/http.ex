@@ -23,6 +23,17 @@ defmodule SmolBox.Backend.HTTP do
   def supports_operation?(_context, operation),
     do:
       operation not in [
+        :resolve_ready_branch,
+        :retire_prepared_branch,
+        :retire_unbooted_branch,
+        :inspect_unbooted_branch_disposal,
+        :dispose_unbooted_branch,
+        :resolve_unbooted_branch_disposal,
+        :release_branch_backing,
+        :resolve_branch_deletion,
+        :collect_branch_deletion,
+        :continue_branch_deletion,
+        :cleanup_branch_deletion,
         :qualify_creation,
         :inspect_creation,
         :qualify_growth,

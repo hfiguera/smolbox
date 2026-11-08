@@ -181,7 +181,9 @@ defmodule SmolBox.NativeRecoveryTest do
     assert saved.exports[spec.id].receipt == nil and saved.exports[spec.id].result == nil
     assert saved.created_machine == sent.created_machine and saved.reservation == sent.reservation
     assert {:ok, %{slots: 2, disk_gb: 130}} = Memory.usage(context.store, native.id)
-    assert Enum.all?(operations(native), &(&1 == "inspect"))
+    # Protocol-two worker health may poll after startup becomes ready. Preserve
+    # the no-publication/no-cleanup invariant without depending on that timing.
+    assert Enum.all?(operations(native), &(&1 in ~w(inspect health readiness)))
   end
 
   test "a lost creation receipt remains unverified and keeps its reservation", context do

@@ -1,7 +1,12 @@
 defmodule SmolBox.Embedded.Protocol do
   @moduledoc false
   alias SmolBox.Embedded.{
+    BranchBackingRelease,
+    BranchChildAbsence,
     BranchCompletion,
+    BranchDeletionCollection,
+    BranchDeletionContinuation,
+    BranchDeletionResolution,
     BranchReleaseTransition,
     CaptureAbortSourceQualification,
     CaptureResolutionTransition,
@@ -19,10 +24,16 @@ defmodule SmolBox.Embedded.Protocol do
     JSON,
     LogStream,
     ObservationShape,
+    PreparedBranchRetirement,
     RegistryContract,
+    ReleasedBranchDeletionContinuation,
+    ReleasedBranchDeletionResolution,
     SDKIdentity,
     Shape,
     TerminalContract,
+    UnbootedBranchChildAbsence,
+    UnbootedBranchDisposal,
+    UnbootedBranchDisposalCandidate,
     VolumeContract
   }
 
@@ -362,10 +373,70 @@ defmodule SmolBox.Embedded.Protocol do
            (major == 2 and event["stream"] in ~w(log terminal checkpoint))) and
         match?({:ok, _bytes}, Shape.chunk(event["data_base64"]))
 
+  defp outcome?(%{"result" => "unbooted_branch_child_absent", "proof" => proof} = outcome, 2),
+    do: Shape.keys?(outcome, ~w(result proof)) and UnbootedBranchChildAbsence.valid?(proof)
+
+  defp outcome?(
+         %{"result" => "unbooted_branch_disposal_candidate", "candidate" => candidate} = outcome,
+         2
+       ),
+       do:
+         Shape.keys?(outcome, ~w(result candidate)) and
+           UnbootedBranchDisposalCandidate.valid?(candidate)
+
+  defp outcome?(%{"result" => "unbooted_branch_disposed", "proof" => proof} = outcome, 2),
+    do: Shape.keys?(outcome, ~w(result proof)) and UnbootedBranchDisposal.valid?(proof)
+
+  defp outcome?(%{"result" => "prepared_branch_retired", "proof" => proof} = outcome, 2),
+    do: Shape.keys?(outcome, ~w(result proof)) and PreparedBranchRetirement.valid?(proof)
+
   defp outcome?(%{"result" => "terminal"} = outcome, 2), do: TerminalContract.outcome?(outcome)
 
   defp outcome?(%{"result" => "branch_created", "completion" => proof} = outcome, 2),
     do: Shape.keys?(outcome, ~w(result completion)) and BranchCompletion.wire?(proof)
+
+  defp outcome?(%{"result" => "held_branch_deletion_continued", "proof" => proof} = outcome, 2),
+    do: Shape.keys?(outcome, ~w(result proof)) and BranchDeletionContinuation.valid?(proof)
+
+  defp outcome?(%{"result" => "held_branch_deletion_cleaned", "proof" => proof} = outcome, 2),
+    do: Shape.keys?(outcome, ~w(result proof)) and BranchDeletionResolution.valid?(proof)
+
+  defp outcome?(
+         %{"result" => "released_branch_deletion_continued", "proof" => proof} = outcome,
+         2
+       ),
+       do:
+         Shape.keys?(outcome, ~w(result proof)) and
+           ReleasedBranchDeletionContinuation.valid?(proof)
+
+  defp outcome?(
+         %{"result" => "released_branch_deletion_cleaned", "proof" => proof} = outcome,
+         2
+       ),
+       do:
+         Shape.keys?(outcome, ~w(result proof)) and ReleasedBranchDeletionResolution.valid?(proof)
+
+  defp outcome?(
+         %{"result" => "branch_deletion_collected", "proof" => proof} = outcome,
+         2
+       ),
+       do: Shape.keys?(outcome, ~w(result proof)) and BranchDeletionCollection.valid?(proof)
+
+  defp outcome?(
+         %{"result" => "released_branch_deletion_resolved", "proof" => proof} = outcome,
+         2
+       ),
+       do:
+         Shape.keys?(outcome, ~w(result proof)) and ReleasedBranchDeletionResolution.valid?(proof)
+
+  defp outcome?(%{"result" => "held_branch_deletion_resolved", "proof" => proof} = outcome, 2),
+    do: Shape.keys?(outcome, ~w(result proof)) and BranchDeletionResolution.valid?(proof)
+
+  defp outcome?(%{"result" => "branch_backing_released", "proof" => proof} = outcome, 2),
+    do: Shape.keys?(outcome, ~w(result proof)) and BranchBackingRelease.valid?(proof)
+
+  defp outcome?(%{"result" => "branch_child_absent", "proof" => proof} = outcome, 2),
+    do: Shape.keys?(outcome, ~w(result proof)) and BranchChildAbsence.valid?(proof)
 
   defp outcome?(%{"result" => kind, "transition" => proof} = outcome, 2)
        when kind in ~w(held_branch_released held_branch_release_presence),

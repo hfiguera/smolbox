@@ -5,6 +5,10 @@ defmodule SmolBox.Backend.Embedded do
     Assignment,
     Budget,
     EmbeddedBranch,
+    EmbeddedBranchBacking,
+    EmbeddedBranchDeletion,
+    EmbeddedBranchDeletionAction,
+    EmbeddedBranchRetirement,
     EmbeddedCapture,
     EmbeddedCaptureObservation,
     EmbeddedCaptureResolution,
@@ -15,6 +19,9 @@ defmodule SmolBox.Backend.Embedded do
     EmbeddedObservation,
     EmbeddedOperation,
     EmbeddedPreparation,
+    EmbeddedPreparedBranchRetirement,
+    EmbeddedUnbootedBranchDisposal,
+    EmbeddedUnbootedBranchRetirement,
     EmbeddedReply,
     EmbeddedVolume,
     Features,
@@ -69,11 +76,45 @@ defmodule SmolBox.Backend.Embedded do
   def supports_operation?(nil, :logs), do: true
 
   def supports_operation?(nil, operation)
-      when operation in [:branch_source, :branch_create, :branch_release, :branch_inspect_child],
+      when operation in [
+             :retire_prepared_branch,
+             :retire_unbooted_branch,
+             :inspect_unbooted_branch_disposal,
+             :dispose_unbooted_branch,
+             :resolve_unbooted_branch_disposal,
+             :release_branch_backing,
+             :resolve_branch_deletion,
+             :collect_branch_deletion,
+             :continue_branch_deletion,
+             :cleanup_branch_deletion,
+             :branch_source,
+             :branch_absent,
+             :branch_create,
+             :branch_release,
+             :branch_inspect_child,
+             :resolve_ready_branch
+           ],
       do: true
 
   def supports_operation?(%{__struct__: EmbeddedContext, config: config}, operation)
-      when operation in [:branch_source, :branch_create, :branch_release, :branch_inspect_child],
+      when operation in [
+             :retire_prepared_branch,
+             :retire_unbooted_branch,
+             :inspect_unbooted_branch_disposal,
+             :dispose_unbooted_branch,
+             :resolve_unbooted_branch_disposal,
+             :release_branch_backing,
+             :resolve_branch_deletion,
+             :collect_branch_deletion,
+             :continue_branch_deletion,
+             :cleanup_branch_deletion,
+             :branch_source,
+             :branch_absent,
+             :branch_create,
+             :branch_release,
+             :branch_inspect_child,
+             :resolve_ready_branch
+           ],
       do: Features.supports?(config, :branches)
 
   def supports_operation?(nil, operation)
@@ -179,8 +220,45 @@ defmodule SmolBox.Backend.Embedded do
   def invoke(context, :prepare_artifact, arguments, budget),
     do: EmbeddedPreparation.run(context, arguments, budget)
 
+  def invoke(context, :collect_branch_deletion, [child], budget),
+    do: EmbeddedBranchDeletionAction.run(context, child, :collect, budget)
+
+  def invoke(context, :continue_branch_deletion, [child], budget),
+    do: EmbeddedBranchDeletionAction.run(context, child, :continue, budget)
+
+  def invoke(context, :cleanup_branch_deletion, [child], budget),
+    do: EmbeddedBranchDeletionAction.run(context, child, :cleanup, budget)
+
+  def invoke(context, :resolve_branch_deletion, [child], budget),
+    do: EmbeddedBranchDeletion.run(context, child, budget)
+
+  def invoke(context, operation, [parent, child], budget)
+      when operation in [
+             :inspect_unbooted_branch_disposal,
+             :dispose_unbooted_branch,
+             :resolve_unbooted_branch_disposal
+           ],
+      do: EmbeddedUnbootedBranchDisposal.run(context, operation, parent, child, budget)
+
+  def invoke(context, :retire_unbooted_branch, [parent, child], budget),
+    do: EmbeddedUnbootedBranchRetirement.run(context, parent, child, budget)
+
+  def invoke(context, :retire_prepared_branch, [parent, child], budget),
+    do: EmbeddedPreparedBranchRetirement.run(context, parent, child, budget)
+
+  def invoke(context, :release_branch_backing, [parent, child, removed], budget),
+    do: EmbeddedBranchBacking.run(context, parent, child, removed, budget)
+
+  def invoke(context, :branch_absent, [name], budget),
+    do: EmbeddedBranchRetirement.run(context, name, budget)
+
   def invoke(context, operation, arguments, budget)
-      when operation in [:branch_create, :branch_release, :branch_inspect_child],
+      when operation in [
+             :branch_create,
+             :branch_release,
+             :branch_inspect_child,
+             :resolve_ready_branch
+           ],
       do: EmbeddedBranch.run(context, operation, arguments, budget)
 
   def invoke(context, :capture_checkpoint, arguments, budget),

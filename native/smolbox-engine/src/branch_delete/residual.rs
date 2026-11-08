@@ -20,6 +20,93 @@ struct Cleanup {
     stage: Stage,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     resolution: Option<BranchDeletionResolution>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    released_resolution: Option<ReleasedBranchDeletionResolution>,
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(super) enum ResidualProof {
+    Held(Box<BranchDeletionResolution>),
+    Released(Box<ReleasedBranchDeletionResolution>),
+}
+impl ResidualProof {
+    pub(super) fn held(self) -> Result<BranchDeletionResolution> {
+        match self {
+            Self::Held(proof) => Ok(*proof),
+            _ => Err(Error::before(ErrorCode::Ownership)),
+        }
+    }
+    pub(super) fn released(self) -> Result<ReleasedBranchDeletionResolution> {
+        match self {
+            Self::Released(proof) => Ok(*proof),
+            _ => Err(Error::before(ErrorCode::Ownership)),
+        }
+    }
+    fn from_main(record: &Record) -> Option<Self> {
+        record
+            .released_resolution
+            .as_ref()
+            .map(|proof| Self::Released(Box::new(proof.clone())))
+            .or_else(|| {
+                record
+                    .resolution
+                    .as_ref()
+                    .map(|proof| Self::Held(Box::new(proof.clone())))
+            })
+    }
+    fn from_cleanup(record: &Cleanup) -> Result<Option<Self>> {
+        match (
+            &record.resolution,
+            &record.released_resolution,
+            record.intent.release.is_some(),
+        ) {
+            (None, None, _) => Ok(None),
+            (Some(proof), None, false) => Ok(Some(Self::Held(Box::new(proof.clone())))),
+            (None, Some(proof), true) => Ok(Some(Self::Released(Box::new(proof.clone())))),
+            _ => Err(Error::before(ErrorCode::Ownership)),
+        }
+    }
+    fn validate_for(
+        &self,
+        intent: &Intent,
+        continuation: Option<&ContinuationRequest>,
+    ) -> Result<()> {
+        match self {
+            Self::Held(proof) => {
+                intent.require_held()?;
+                proof.validate()?;
+                if proof.child != *intent.receipt()
+                    || proof.deletion_sha256 != deletion_digest(intent, continuation)?
+                {
+                    return Err(Error::before(ErrorCode::Ownership));
+                }
+                Ok(())
+            }
+            Self::Released(proof) => proof.validate_for_intent(intent, continuation),
+        }
+    }
+    fn matches_request(&self, request: &ContinuationRequest) -> bool {
+        match self {
+            Self::Held(proof) => {
+                proof.matches_request(&request.operation_id, &request.request_sha256)
+            }
+            Self::Released(proof) => {
+                proof.matches_request(&request.operation_id, &request.request_sha256)
+            }
+        }
+    }
+    fn complete_entry(&self, entry: &mut Cleanup) {
+        entry.stage = Stage::Cleaned;
+        match self {
+            Self::Held(proof) => entry.resolution = Some((**proof).clone()),
+            Self::Released(proof) => entry.released_resolution = Some((**proof).clone()),
+        }
+    }
+    fn complete_state(&self, state: &mut Retained) {
+        state.completion = Some(match self {
+            Self::Held(proof) => Completion::Resolved(proof.clone()),
+            Self::Released(proof) => Completion::ReleasedResolved(proof.clone()),
+        });
+    }
 }
 fn ledger(main: &Journal) -> Journal {
     Journal {
@@ -28,30 +115,29 @@ fn ledger(main: &Journal) -> Journal {
     }
 }
 impl ProtectedRecord for Cleanup {
-    fn validate_for(&self, journal: &Journal, _: u64) -> Result<()> {
+    fn validate_for(&self, journal: &Journal, bytes: u64) -> Result<()> {
         self.intent.validate()?;
+        if self.intent.release.is_none() && bytes > LEGACY_EXTENDED_BYTES {
+            return Err(Error::before(ErrorCode::Admission));
+        }
         self.request.validate()?;
         if let Some(request) = &self.continuation {
             request.validate()?;
         }
         let main = Journal::new(journal.domain.clone(), self.intent.receipt())?;
-        if self.schema != 1
+        if self.schema != if self.intent.release.is_some() { 2 } else { 1 }
             || self.parent.0 == 0
             || self.parent.1 == 0
             || ledger(&main).path != journal.path
         {
             return Err(Error::before(ErrorCode::Ownership));
         }
-        match (self.stage, &self.resolution) {
+        let proof = ResidualProof::from_cleanup(self)?;
+        match (self.stage, proof) {
             (Stage::Cleaning, None) => Ok(()),
             (Stage::Cleaned, Some(proof)) => {
-                proof.validate()?;
-                if proof.child != *self.intent.receipt()
-                    || proof.deletion_sha256
-                        != deletion_digest(&self.intent, self.continuation.as_ref())?
-                    || !proof
-                        .matches_request(&self.request.operation_id, &self.request.request_sha256)
-                {
+                proof.validate_for(&self.intent, self.continuation.as_ref())?;
+                if !proof.matches_request(&self.request) {
                     return Err(Error::before(ErrorCode::Ownership));
                 }
                 Ok(())
@@ -110,15 +196,38 @@ struct Removal<'a> {
     max_entries: usize,
 }
 impl Removal<'_> {
+    #[cfg(test)]
     fn run(
         &self,
         state: &mut Retained,
         request: &ContinuationRequest,
     ) -> Result<BranchDeletionResolution> {
+        self.run_original(state, request, None)?.held()
+    }
+    fn run_original(
+        &self,
+        state: &mut Retained,
+        request: &ContinuationRequest,
+        released: Option<&crate::ReleasedBranchDeletionCleanupRequest>,
+    ) -> Result<ResidualProof> {
         self.budget.check()?;
         request.validate()?;
+        match released {
+            Some(released) => {
+                released.matches_intent(&state.intent)?;
+                if released.operation_id != request.operation_id
+                    || released.request_sha256 != request.request_sha256
+                {
+                    return Err(Error::before(ErrorCode::Ownership));
+                }
+            }
+            None => state.intent.require_held()?,
+        }
         let intent = state.intent.clone();
-        let (main, _) = self.main.read()?;
+        let (mut main, main_version) = self.main.read()?;
+        if released.is_some() {
+            state.qualify_released_record(&mut main)?;
+        }
         if main.intent != intent
             || main.continuation != state.continuation
             || state.cleanup.as_ref().is_some_and(|old| old != request)
@@ -133,27 +242,36 @@ impl Removal<'_> {
             {
                 return Err(Error::before(ErrorCode::Conflict));
             }
-            if let Some(proof) = &main.resolution {
-                if !proof.matches_request(&request.operation_id, &request.request_sha256) {
+            if let Some(proof) = ResidualProof::from_main(&main) {
+                if !proof.matches_request(request) {
                     return Err(Error::before(ErrorCode::Conflict));
                 }
-                if saved
-                    .resolution
-                    .as_ref()
-                    .is_some_and(|prior| prior != proof)
-                {
+                if let Some(request) = released {
+                    match &proof {
+                        ResidualProof::Released(proof) => request.matches(proof)?,
+                        _ => return Err(Error::before(ErrorCode::Ownership)),
+                    }
+                }
+                if ResidualProof::from_cleanup(saved)?.is_some_and(|prior| prior != proof) {
                     return Err(Error::before(ErrorCode::Ownership));
                 }
                 let mut complete = saved.clone();
-                complete.stage = Stage::Cleaned;
-                complete.resolution = Some(proof.clone());
+                proof.complete_entry(&mut complete);
                 if saved.stage != Stage::Cleaned {
                     self.budget.check()?;
                     self.file.write_record(&complete, Some(version.clone()))?;
                 }
                 state.cleanup = Some(request.clone());
-                state.completion = Some(Completion::Resolved(Box::new(proof.clone())));
-                return Ok(proof.clone());
+                if released.is_some() {
+                    self.main
+                        .sync_released_resolution(&main_version, self.budget)?;
+                    self.file.sync_record::<Cleanup>(
+                        &self.file.read_record::<Cleanup>()?.1,
+                        self.budget,
+                    )?;
+                }
+                proof.complete_state(state);
+                return Ok(proof);
             }
             if saved.stage == Stage::Cleaned {
                 return Err(Error::before(ErrorCode::Ownership));
@@ -194,13 +312,14 @@ impl Removal<'_> {
         } else {
             child_root(&intent)?; // Missing/replaced roots cannot create removal authority.
             let entry = Cleanup {
-                schema: 1,
+                schema: if released.is_some() { 2 } else { 1 },
                 intent: intent.clone(),
-                continuation: main.continuation,
+                continuation: main.continuation.clone(),
                 request: request.clone(),
                 parent: identity(&parent)?,
                 stage: Stage::Cleaning,
                 resolution: None,
+                released_resolution: None,
             };
             state.cleanup = Some(request.clone());
             self.budget.check()?;
@@ -211,7 +330,7 @@ impl Removal<'_> {
             (entry, version)
         };
         state.cleanup = Some(request.clone());
-        let result = (|| -> Result<BranchDeletionResolution> {
+        let result = (|| -> Result<ResidualProof> {
             if !absent_path(&intent.plan.child.path) {
                 let root = child_root(&intent)?;
                 crate::volumes::remove_owned_tree(
@@ -259,18 +378,34 @@ impl Removal<'_> {
                 self.authority.identity,
                 self.budget,
             )?;
-            let proof = self.main.resolve_absent(
-                &intent,
-                &request.operation_id,
-                &request.request_sha256,
-                &absent,
-                self.budget,
-            )?;
+            let proof = match released {
+                Some(request) => {
+                    let proof = ReleasedBranchDeletionResolution::issue_cleanup(
+                        request,
+                        &intent,
+                        main.continuation.as_ref(),
+                    )?;
+                    self.main.publish_released_absence(
+                        main,
+                        main_version,
+                        &proof,
+                        &absent,
+                        self.budget,
+                    )?;
+                    ResidualProof::Released(Box::new(proof))
+                }
+                None => ResidualProof::Held(Box::new(self.main.resolve_absent(
+                    &intent,
+                    &request.operation_id,
+                    &request.request_sha256,
+                    &absent,
+                    self.budget,
+                )?)),
+            };
             let mut complete = entry;
-            complete.stage = Stage::Cleaned;
-            complete.resolution = Some(proof.clone());
+            proof.complete_entry(&mut complete);
             self.file.write_record(&complete, Some(version))?;
-            state.completion = Some(Completion::Resolved(Box::new(proof.clone())));
+            proof.complete_state(state);
             self.budget.check()?;
             Ok(proof)
         })();
@@ -288,6 +423,43 @@ impl Engine {
         quiesced: bool,
         budget: &ReadBudget,
     ) -> Result<BranchDeletionResolution> {
+        self.cleanup_held_branch_deletion_with_completion(
+            child,
+            (operation_id, request_sha256),
+            quiesced,
+            None,
+            budget,
+        )
+    }
+    pub(crate) fn cleanup_held_branch_deletion_with_completion(
+        &self,
+        child: &CreationReceipt,
+        ids: (&str, &str),
+        quiesced: bool,
+        expected: Option<&crate::BranchCompletion>,
+        budget: &ReadBudget,
+    ) -> Result<BranchDeletionResolution> {
+        self.cleanup_original_branch_deletion(
+            child,
+            ids,
+            quiesced,
+            expected.map(|completion| (completion, None)),
+            budget,
+        )?
+        .held()
+    }
+    pub(in crate::branch_delete) fn cleanup_original_branch_deletion(
+        &self,
+        child: &CreationReceipt,
+        ids: (&str, &str),
+        quiesced: bool,
+        expected: Option<(
+            &crate::BranchCompletion,
+            Option<&crate::ReleasedBranchDeletionCleanupRequest>,
+        )>,
+        budget: &ReadBudget,
+    ) -> Result<ResidualProof> {
+        let (operation_id, request_sha256) = ids;
         let request = ContinuationRequest {
             operation_id: operation_id.into(),
             request_sha256: request_sha256.into(),
@@ -304,6 +476,13 @@ impl Engine {
             .jobs
             .acquire(crate::jobs::Demand::material_resolution())?;
         let context = self.retained_branch_context(child)?;
+        if let Some((expected, _)) = expected {
+            let original = self.branch_retention.completed_context_exact(expected)?;
+            if !Arc::ptr_eq(&original, &context) {
+                return Err(Error::before(ErrorCode::Ownership));
+            }
+        }
+
         let main = Journal::new(self.domain.clone(), child)?;
         let file = ledger(&main);
         let mut guard = context
@@ -311,15 +490,20 @@ impl Engine {
             .try_lock()
             .map_err(|_| Error::before(ErrorCode::Conflict))?;
         let state = guard.as_mut().ok_or(Error::before(ErrorCode::State))?;
+        let released = expected.and_then(|(_, request)| request).cloned();
+        match &released {
+            Some(request) => request.matches_intent(&state.intent)?,
+            None => state.intent.require_held()?,
+        }
         state.check_returned(child)?;
         if state.cleanup.as_ref().is_some_and(|old| old != &request) {
             return Err(Error::before(ErrorCode::Conflict));
         }
         let saved = recorded(&file)?;
         let (primary, _) = main.read()?;
-        let known = saved
-            .as_ref()
-            .is_some_and(|(record, _)| record.request == request && primary.resolution.is_some());
+        let known = saved.as_ref().is_some_and(|(record, _)| {
+            record.request == request && ResidualProof::from_main(&primary).is_some()
+        });
         let epoch = self.collection_epoch()?.clone();
         if !known {
             self.verify_database_identity()?;
@@ -371,7 +555,7 @@ impl Engine {
                     budget: &work_budget,
                     max_entries: crate::VOLUME_DELETE_ENTRIES,
                 }
-                .run(state, &request)
+                .run_original(state, &request, released.as_ref())
             },
         )
         .map_err(|e| Error::uncertain(e.code))?;
@@ -519,7 +703,7 @@ mod tests {
         assert_eq!(pool.counts().checkpoint_material, 7 << 30);
         assert_eq!(
             pool.counts().branch_metadata,
-            2 * crate::jobs::BRANCH_BACKING_METADATA
+            3 * crate::jobs::BRANCH_BACKING_METADATA
         );
         assert!(!pool.available());
         let bytes = std::fs::read(&remove.file.path).unwrap();
@@ -688,3 +872,6 @@ mod tests {
         assert!(wrong.validate_for(&remove.file, 1).is_err());
     }
 }
+
+#[cfg(test)]
+mod released_tests;

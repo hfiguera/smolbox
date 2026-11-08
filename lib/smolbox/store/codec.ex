@@ -187,6 +187,98 @@ defmodule SmolBox.Store.Codec do
   envelopes reject explicit release semantics, including attached material proof.
   Upgrade every reader and paired source/child release writer before activation;
   this codec advertises no native feature or store capability by itself.
+
+  Native dependency retirement selectively uses v32, retaining request-correlated
+  child-absence proof and the original observed child version. The source/child
+  transaction preserves material and extra backing charges. Earlier envelopes
+  omit the new nil retirement default and keep their exact bytes. Historical
+  experimental retirement states stay readable but cannot supply new native
+  proof; ratification requires fresh fenced evidence. Deploy every reader and
+  paired resource writer before native activation. The codec alone enables no
+  branch feature and grants no backing-removal or SDK ownership authority.
+
+  Native backing acceptance and acknowledgement selectively use v33. The exact
+  request, original child version and optional typed acknowledgement remain
+  immutable through later claims. Missing replies retain the pending intent and
+  charge; only paired acknowledgement closes the branch. V30/v31/v32 keep their
+  exact earlier bytes and gain backing: nil on read; older envelopes reject even
+  an explicit new nil field. Upgrade every reader and paired resource writer
+  before enabling native backing release. No capability is advertised here.
+
+  Native held-delete resolution selectively uses v34. It freezes the original
+  management/delete versions and exact helper request before IO, then retains the
+  typed acknowledgement. Claims cannot replace the request, and later retirement
+  retains its proof. V30/v31/v32/v33 preserve their previous bytes and gain
+  deletion: nil on read; older envelopes reject even an explicit new nil field.
+  This reader alone grants no native capability, SDK replay or backing release.
+
+  Explicit held-delete continuation and residual-cleanup grants selectively use
+  v35. Each freezes its own claimed management/delete versions, exact action
+  request and optional typed acknowledgement. A terminal action preserves other
+  pending requests as history and releases only ordinary child capacity. V30–v34
+  retain exact bytes and gain nil action slots on read; earlier envelopes reject
+  even explicit new nil fields. All readers/resource writers must upgrade before
+  branch activation. This format grants no native feature or ownership authority.
+
+  Prepared-only native retirement selectively uses v36. The child retains the
+  original full creation request, claimed version and typed pre-SDK proof. The
+  source keeps the same tagged immutable entry in native_branch_history, outside
+  its material transition chain. Atomic resolution retires only the unentered
+  declaration and its host reservations; it grants no child receipt or entered
+  backing disposal. Earlier envelopes omit the new nil default exactly. Upgrade
+  every reader and resource projector before native branch admission.
+
+  Published never-booted disposal selectively uses v37. Its exact pre-dispatch
+  request survives claims and uncertainty. Typed completion carries the real
+  source publication, separate current source observation and child-version
+  fence, without creating a guest Machine or BranchCompletion. Dedicated
+  disposal_pending/disposed states reject stripped downgrades. Earlier envelopes
+  omit the new nil authority default exactly. Extra backing/dependency retirement
+  remains separate. Upgrade every reader/projector before native admission.
+
+  Dependency retirement after original unbooted disposal selectively uses v38.
+  A distinct typed fresh-absence proof remains bound to the original disposal,
+  fingerprint and child version. The paired source dependency flag changes while
+  all backing stays charged; no Machine or boot completion is synthesized.
+  Earlier v37 disposal-only and legacy encodings stay exact. Relabeled or stripped
+  new retirement is rejected. Upgrade every reader/resource writer before enabling
+  native branch admission; this schema alone enables no native capability.
+
+  Accepted backing closure after original unbooted disposal selectively uses v39.
+  The immutable request binds the full disposal, exact source head and original
+  child root. A distinct backing_pending state retains every extra charge until
+  a matching typed native acknowledgement closes it. No Machine or boot completion
+  is synthesized. Earlier v37/v38 and legacy encodings stay exact; old envelopes
+  and stripped pending requests are rejected. Upgrade every reader and resource
+  projector before enabling native branch admission.
+
+  Accepted original released-child delete resolution selectively uses v40.
+  Its distinct typed grant freezes claimed management/delete versions and the
+  exact original completion, release and current head before IO. The immutable
+  positive-absence proof releases only the ordinary child reservation; dependency
+  and backing retirement remain separate. Legacy held v34 and earlier encodings
+  remain exact, and older envelopes reject the released variant. Upgrade every
+  reader/projector before enabling native branch admission.
+
+  Accepted original released-child continuation selectively uses v41. A distinct
+  typed grant/proof occupies the existing continuation slot and freezes claimed
+  management/delete versions, original completion, release and current head before
+  IO. Only the ordinary child reservation retires. Independent pending histories
+  survive completion through the SDK-success or positive-absence route without
+  converting absence into SDK success. Older envelopes reject the new variant;
+  earlier encodings remain exact. Upgrade every reader/projector before native
+  branch admission.
+
+  Original-child deletion collection selectively uses v43 and preserves all
+  reservations and earlier envelope bytes. Accepted original released-child
+  residual cleanup selectively uses v42. Its
+  distinct saved grant occupies the existing cleanup slot and binds claimed
+  management/delete versions, full original completion, release and current head.
+  Matching typed absence retires only the ordinary child reservation. Independent
+  pending cleanup, observation and SDK-continuation histories survive each route;
+  none can authorize another route's completion. Earlier envelopes reject the new
+  grant and earlier encodings remain exact. Upgrade every reader/projector before
+  native activation; no native capability is enabled by this schema.
   """
 
   alias SmolBox.{Error, Execution, ExecutionFeatures}
@@ -203,16 +295,28 @@ defmodule SmolBox.Store.Codec do
     CodecMaterial,
     CodecNative,
     CodecNativeBranchAuthority,
+    CodecNativeBranchBackings,
+    CodecNativeBranchCollections,
+    CodecNativeBranchDeletionActions,
+    CodecNativeBranchDeletions,
     CodecNativeBranches,
     CodecNativeBranchReleases,
+    CodecNativeBranchRetirements,
     CodecNativeCaptureAbortSources,
     CodecNativeCaptureCleanup,
     CodecNativeCaptureResolutions,
     CodecNativeCaptures,
-    CodecNativeExports,
     CodecNativeCheckpoints,
+    CodecNativeExports,
     CodecNativeMounts,
+    CodecNativePreparedBranchRetirements,
+    CodecNativeReleasedBranchCleanups,
+    CodecNativeReleasedBranchContinuations,
+    CodecNativeReleasedBranchDeletions,
     CodecNativeSources,
+    CodecNativeUnbootedBranchBackings,
+    CodecNativeUnbootedBranchDisposals,
+    CodecNativeUnbootedBranchRetirements,
     CodecNativeVolumes,
     CodecPorts,
     CodecSources,
@@ -221,6 +325,18 @@ defmodule SmolBox.Store.Codec do
   }
 
   @max_bytes 16_777_216
+  @native_branch_collections_prefix "smolbox-record-v43\0"
+  @native_released_branch_cleanups_prefix "smolbox-record-v42\0"
+  @native_released_branch_continuations_prefix "smolbox-record-v41\0"
+  @native_released_branch_deletions_prefix "smolbox-record-v40\0"
+  @native_unbooted_branch_backings_prefix "smolbox-record-v39\0"
+  @native_unbooted_branch_retirements_prefix "smolbox-record-v38\0"
+  @native_unbooted_branch_disposals_prefix "smolbox-record-v37\0"
+  @native_prepared_branch_retirements_prefix "smolbox-record-v36\0"
+  @native_branch_deletion_actions_prefix "smolbox-record-v35\0"
+  @native_branch_deletions_prefix "smolbox-record-v34\0"
+  @native_branch_backings_prefix "smolbox-record-v33\0"
+  @native_branch_retirements_prefix "smolbox-record-v32\0"
   @native_branch_releases_prefix "smolbox-record-v31\0"
   @native_branch_authority_prefix "smolbox-record-v30\0"
   @native_branches_prefix "smolbox-record-v29\0"
@@ -260,8 +376,28 @@ defmodule SmolBox.Store.Codec do
     SmolBox.Embedded.BranchPublication,
     SmolBox.Embedded.BranchReleaseTransition,
     SmolBox.Embedded.NativeBranchAuthority,
+    SmolBox.Embedded.NativeUnbootedBranchDisposal,
+    SmolBox.Embedded.UnbootedBranchDisposal,
+    SmolBox.Embedded.UnbootedBranchChildAbsence,
+    SmolBox.Embedded.NativePreparedBranchRetirement,
+    SmolBox.Embedded.PreparedBranchRetirement,
     SmolBox.Embedded.NativeBranchRelease,
     SmolBox.Embedded.BranchCompletion,
+    SmolBox.Embedded.BranchChildAbsence,
+    SmolBox.Embedded.NativeBranchRetirement,
+    SmolBox.Embedded.NativeBranchBacking,
+    SmolBox.Embedded.NativeBranchDeletion,
+    SmolBox.Embedded.NativeReleasedBranchDeletion,
+    SmolBox.Embedded.NativeReleasedBranchDeletionContinuation,
+    SmolBox.Embedded.NativeReleasedBranchDeletionCleanup,
+    SmolBox.Embedded.ReleasedBranchDeletionContinuation,
+    SmolBox.Embedded.ReleasedBranchDeletionResolution,
+    SmolBox.Embedded.NativeBranchDeletionCollection,
+    SmolBox.Embedded.BranchDeletionCollection,
+    SmolBox.Embedded.NativeBranchDeletionAction,
+    SmolBox.Embedded.BranchDeletionContinuation,
+    SmolBox.Embedded.BranchDeletionResolution,
+    SmolBox.Embedded.BranchBackingRelease,
     SmolBox.Embedded.GrowthTransition,
     SmolBox.Embedded.CaptureTransition,
     SmolBox.Embedded.CaptureResolutionTransition,
@@ -322,16 +458,71 @@ defmodule SmolBox.Store.Codec do
         else: encode_volumes(record)
       )
 
+  def encode(
+        %{
+          spec: %{profile: %SmolBox.Profile{}},
+          branch: %{native_authority: %{delete_collection: saved}}
+        } = record
+      )
+      when not is_nil(saved), do: encode_native_branch_collections(record)
+
   def encode(%{spec: %{profile: %SmolBox.Profile{} = profile}} = record) do
     cond do
-      CodecNativeBranchReleases.required?(record) -> encode_native_branch_releases(record)
-      CodecNativeBranchAuthority.required?(record) -> encode_native_branch_authority(record)
-      CodecNativeBranches.required?(record) -> encode_native_branches(record)
-      true -> encode_profile(record, profile)
+      CodecNativeReleasedBranchCleanups.required?(record) ->
+        encode_native_released_branch_cleanups(record)
+
+      CodecNativeReleasedBranchContinuations.required?(record) ->
+        encode_native_released_branch_continuations(record)
+
+      CodecNativeReleasedBranchDeletions.required?(record) ->
+        encode_native_released_branch_deletions(record)
+
+      CodecNativeUnbootedBranchBackings.required?(record) ->
+        encode_native_unbooted_branch_backings(record)
+
+      CodecNativeUnbootedBranchRetirements.required?(record) ->
+        encode_native_unbooted_branch_retirements(record)
+
+      CodecNativeUnbootedBranchDisposals.required?(record) ->
+        encode_native_unbooted_branch_disposals(record)
+
+      CodecNativePreparedBranchRetirements.required?(record) ->
+        encode_native_prepared_branch_retirements(record)
+
+      true ->
+        encode_branch(record, profile)
     end
   end
 
   def encode(_record), do: invalid()
+
+  defp encode_branch(record, profile) do
+    cond do
+      CodecNativeBranchDeletionActions.required?(record) ->
+        encode_native_branch_deletion_actions(record)
+
+      CodecNativeBranchDeletions.required?(record) ->
+        encode_native_branch_deletions(record)
+
+      CodecNativeBranchBackings.required?(record) ->
+        encode_native_branch_backings(record)
+
+      CodecNativeBranchRetirements.required?(record) ->
+        encode_native_branch_retirements(record)
+
+      CodecNativeBranchReleases.required?(record) ->
+        encode_native_branch_releases(record)
+
+      CodecNativeBranchAuthority.required?(record) ->
+        encode_native_branch_authority(record)
+
+      CodecNativeBranches.required?(record) ->
+        encode_native_branches(record)
+
+      true ->
+        encode_profile(record, profile)
+    end
+  end
 
   defp encode_profile(record, profile) do
     cond do
@@ -414,6 +605,54 @@ defmodule SmolBox.Store.Codec do
   @spec decode(binary()) ::
           {:ok, Execution.t() | SmolBox.ManagedMachine.t() | SmolBox.Volume.t()}
           | {:error, Error.t()}
+  def decode(<<@native_branch_collections_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_native_branch_collections(bytes)
+
+  def decode(<<@native_released_branch_cleanups_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_native_released_branch_cleanups(bytes)
+
+  def decode(<<@native_released_branch_continuations_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_native_released_branch_continuations(bytes)
+
+  def decode(<<@native_released_branch_deletions_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_native_released_branch_deletions(bytes)
+
+  def decode(<<@native_unbooted_branch_backings_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_native_unbooted_branch_backings(bytes)
+
+  def decode(<<@native_unbooted_branch_retirements_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_native_unbooted_branch_retirements(bytes)
+
+  def decode(<<@native_unbooted_branch_disposals_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_native_unbooted_branch_disposals(bytes)
+
+  def decode(<<@native_prepared_branch_retirements_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_native_prepared_branch_retirements(bytes)
+
+  def decode(<<@native_branch_deletion_actions_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_native_branch_deletion_actions(bytes)
+
+  def decode(<<@native_branch_deletions_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_native_branch_deletions(bytes)
+
+  def decode(<<@native_branch_backings_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_native_branch_backings(bytes)
+
+  def decode(<<@native_branch_retirements_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_native_branch_retirements(bytes)
+
   def decode(<<@native_branch_releases_prefix, 131, tag, _rest::binary>> = bytes)
       when tag != 80 and byte_size(bytes) <= @max_bytes,
       do: decode_native_branch_releases(bytes)
@@ -577,7 +816,10 @@ defmodule SmolBox.Store.Codec do
 
   defp encode_native_branch_releases(record) do
     with :ok <- validate_extended(record) do
-      bytes = @native_branch_releases_prefix <> :erlang.term_to_binary(record)
+      bytes =
+        @native_branch_releases_prefix <>
+          :erlang.term_to_binary(CodecNativeBranchRetirements.strip(record))
+
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
   end
@@ -587,6 +829,310 @@ defmodule SmolBox.Store.Codec do
 
     with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
          true <- used == byte_size(payload) and CodecNativeBranchReleases.required?(record),
+         record = CodecNativeBranchRetirements.upgrade(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
+  defp encode_native_branch_retirements(record) do
+    with :ok <- validate_extended(record) do
+      bytes =
+        @native_branch_retirements_prefix <>
+          :erlang.term_to_binary(CodecNativeBranchBackings.strip(record))
+
+      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
+    end
+  end
+
+  defp decode_native_branch_retirements(<<@native_branch_retirements_prefix, payload::binary>>) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <- used == byte_size(payload) and CodecNativeBranchRetirements.required?(record),
+         record = CodecNativeBranchBackings.upgrade(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
+  defp encode_native_branch_backings(record) do
+    with :ok <- validate_extended(record) do
+      bytes =
+        @native_branch_backings_prefix <>
+          :erlang.term_to_binary(CodecNativeBranchDeletions.strip(record))
+
+      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
+    end
+  end
+
+  defp decode_native_branch_backings(<<@native_branch_backings_prefix, payload::binary>>) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <- used == byte_size(payload) and CodecNativeBranchBackings.required?(record),
+         record = CodecNativeBranchDeletions.upgrade(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
+  defp encode_native_unbooted_branch_backings(record) do
+    with :ok <- validate_extended(record) do
+      bytes =
+        @native_unbooted_branch_backings_prefix <>
+          :erlang.term_to_binary(CodecNativeBranchCollections.strip(record))
+
+      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
+    end
+  end
+
+  defp decode_native_unbooted_branch_backings(
+         <<@native_unbooted_branch_backings_prefix, payload::binary>>
+       ) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <-
+           used == byte_size(payload) and CodecNativeUnbootedBranchBackings.required?(record),
+         record = CodecNativeBranchCollections.upgrade(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
+  defp encode_native_unbooted_branch_retirements(record) do
+    with :ok <- validate_extended(record) do
+      bytes =
+        @native_unbooted_branch_retirements_prefix <>
+          :erlang.term_to_binary(CodecNativeBranchCollections.strip(record))
+
+      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
+    end
+  end
+
+  defp decode_native_unbooted_branch_retirements(
+         <<@native_unbooted_branch_retirements_prefix, payload::binary>>
+       ) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <-
+           used == byte_size(payload) and CodecNativeUnbootedBranchRetirements.required?(record) and
+             not CodecNativeUnbootedBranchBackings.required?(record),
+         record = CodecNativeBranchCollections.upgrade(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
+  defp encode_native_unbooted_branch_disposals(record) do
+    with :ok <- validate_extended(record) do
+      bytes =
+        @native_unbooted_branch_disposals_prefix <>
+          :erlang.term_to_binary(CodecNativeBranchCollections.strip(record))
+
+      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
+    end
+  end
+
+  defp decode_native_unbooted_branch_disposals(
+         <<@native_unbooted_branch_disposals_prefix, payload::binary>>
+       ) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <-
+           used == byte_size(payload) and CodecNativeUnbootedBranchDisposals.required?(record) and
+             not CodecNativeUnbootedBranchRetirements.required?(record),
+         record = CodecNativeBranchCollections.upgrade(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
+  defp encode_native_prepared_branch_retirements(record) do
+    with :ok <- validate_extended(record) do
+      bytes =
+        @native_prepared_branch_retirements_prefix <>
+          :erlang.term_to_binary(CodecNativeUnbootedBranchDisposals.strip(record))
+
+      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
+    end
+  end
+
+  defp decode_native_prepared_branch_retirements(
+         <<@native_prepared_branch_retirements_prefix, payload::binary>>
+       ) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <-
+           used == byte_size(payload) and CodecNativePreparedBranchRetirements.required?(record),
+         record = CodecNativeUnbootedBranchDisposals.upgrade(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
+  defp encode_native_branch_deletion_actions(record) do
+    with :ok <- validate_extended(record) do
+      bytes =
+        @native_branch_deletion_actions_prefix <>
+          :erlang.term_to_binary(CodecNativePreparedBranchRetirements.strip(record))
+
+      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
+    end
+  end
+
+  defp decode_native_branch_deletion_actions(
+         <<@native_branch_deletion_actions_prefix, payload::binary>>
+       ) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <- used == byte_size(payload) and CodecNativeBranchDeletionActions.required?(record),
+         false <- CodecNativeReleasedBranchContinuations.required?(record),
+         false <- CodecNativeReleasedBranchCleanups.required?(record),
+         record = CodecNativePreparedBranchRetirements.upgrade(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
+  defp encode_native_branch_deletions(record) do
+    with :ok <- validate_extended(record) do
+      bytes =
+        @native_branch_deletions_prefix <>
+          :erlang.term_to_binary(CodecNativeBranchDeletionActions.strip(record))
+
+      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
+    end
+  end
+
+  defp decode_native_branch_deletions(<<@native_branch_deletions_prefix, payload::binary>>) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <- used == byte_size(payload) and CodecNativeBranchDeletions.required?(record),
+         false <- CodecNativeReleasedBranchDeletions.required?(record),
+         record = CodecNativeBranchDeletionActions.upgrade(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
+  defp encode_native_released_branch_deletions(record) do
+    with :ok <- validate_extended(record) do
+      bytes =
+        @native_released_branch_deletions_prefix <>
+          :erlang.term_to_binary(CodecNativeBranchCollections.strip(record))
+
+      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
+    end
+  end
+
+  defp decode_native_released_branch_deletions(
+         <<@native_released_branch_deletions_prefix, payload::binary>>
+       ) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <-
+           used == byte_size(payload) and CodecNativeReleasedBranchDeletions.required?(record),
+         false <- CodecNativeReleasedBranchContinuations.required?(record),
+         false <- CodecNativeReleasedBranchCleanups.required?(record),
+         record = CodecNativeBranchCollections.upgrade(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
+  defp encode_native_released_branch_continuations(record) do
+    with :ok <- validate_extended(record) do
+      bytes =
+        @native_released_branch_continuations_prefix <>
+          :erlang.term_to_binary(CodecNativeBranchCollections.strip(record))
+
+      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
+    end
+  end
+
+  defp decode_native_released_branch_continuations(
+         <<@native_released_branch_continuations_prefix, payload::binary>>
+       ) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <-
+           used == byte_size(payload) and CodecNativeReleasedBranchContinuations.required?(record),
+         false <- CodecNativeReleasedBranchCleanups.required?(record),
+         record = CodecNativeBranchCollections.upgrade(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
+  defp encode_native_branch_collections(record) do
+    with :ok <- validate_extended(record) do
+      bytes = @native_branch_collections_prefix <> :erlang.term_to_binary(record)
+      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
+    end
+  end
+
+  defp decode_native_branch_collections(<<@native_branch_collections_prefix, payload::binary>>) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <- used == byte_size(payload) and CodecNativeBranchCollections.required?(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
+  defp encode_native_released_branch_cleanups(record) do
+    with :ok <- validate_extended(record) do
+      bytes =
+        @native_released_branch_cleanups_prefix <>
+          :erlang.term_to_binary(CodecNativeBranchCollections.strip(record))
+
+      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
+    end
+  end
+
+  defp decode_native_released_branch_cleanups(
+         <<@native_released_branch_cleanups_prefix, payload::binary>>
+       ) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <-
+           used == byte_size(payload) and CodecNativeReleasedBranchCleanups.required?(record),
+         record = CodecNativeBranchCollections.upgrade(record),
          :ok <- validate_extended(record),
          do: {:ok, record},
          else: (_ -> invalid())

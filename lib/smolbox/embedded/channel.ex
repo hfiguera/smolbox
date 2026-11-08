@@ -1,7 +1,11 @@
 defmodule SmolBox.Embedded.Channel do
   @moduledoc false
   alias SmolBox.Embedded.{
+    BranchBackingRelease,
+    BranchChildAbsence,
     BranchCompletion,
+    BranchDeletionCollection,
+    BranchDeletionResolution,
     CaptureAbortSourceQualification,
     CaptureResolutionTransition,
     CaptureStagingCleanupReceipt,
@@ -9,13 +13,22 @@ defmodule SmolBox.Embedded.Channel do
     ExportPublication,
     ExportStageCleanup,
     GrowthTransition,
+    HeldBranchDeletionAction,
     HeldBranchReleaseRequest,
     ImageContract,
+    PreparedBranchRetirement,
     Protocol,
     RegistryContract,
+    ReleasedBranchDeletionCleanup,
+    ReleasedBranchDeletionContinuation,
+    ReleasedBranchDeletionResolution,
     Request,
     Shape,
     TerminalContract,
+    UnbootedBranchBackingRelease,
+    UnbootedBranchChildAbsence,
+    UnbootedBranchDisposal,
+    UnbootedBranchDisposalCandidate,
     VolumeContract
   }
 
@@ -63,7 +76,8 @@ defmodule SmolBox.Embedded.Channel do
            operation["operation"] != "terminal_open" or
              bytes <= operation["terminal"]["max_buffer_bytes"],
          true <- domain_matches?(channel.domain, Request.receipt(operation)),
-         true <- held_platform?(channel.platform, operation) do
+         true <- held_platform?(channel.platform, operation),
+         true <- branch_request_epoch?(channel.epoch, operation) do
       id = channel.last_id + 1
 
       pending = %{
@@ -273,12 +287,16 @@ defmodule SmolBox.Embedded.Channel do
   end
 
   defp advance(channel, pending, %{"type" => "terminal", "sequence" => next, "outcome" => outcome}) do
-    if terminal_sequence?(pending.sequence, next) and
-         Protocol.valid_outcome?(outcome, channel.major) and
-         branch_platform?(channel.platform, outcome) and
-         terminal_matches?(channel.domain, pending, outcome),
-       do: {:ok, %{pending | sequence: next, done: true}, {:terminal, outcome}},
-       else: :error
+    if(
+      terminal_sequence?(pending.sequence, next) and
+        Protocol.valid_outcome?(outcome, channel.major) and
+        branch_platform?(channel.platform, outcome) and
+        branch_epoch?(channel.epoch, outcome) and
+        ready_epoch?(channel.epoch, pending, outcome) and
+        terminal_matches?(channel.domain, pending, outcome),
+      do: {:ok, %{pending | sequence: next, done: true}, {:terminal, outcome}},
+      else: :error
+    )
   end
 
   defp advance(_channel, _pending, _message), do: :error
@@ -287,15 +305,101 @@ defmodule SmolBox.Embedded.Channel do
   defp terminal_sequence?(previous, next) when is_integer(previous), do: next == previous + 1
   defp terminal_sequence?(_previous, _next), do: false
 
+  defp branch_request_epoch?(epoch, %{
+         "operation" => "qualify_unbooted_branch_child_absence",
+         "request" => request
+       }),
+       do: UnbootedBranchChildAbsence.epoch(request) == epoch
+
+  defp branch_request_epoch?(_, _), do: true
+
+  defp branch_epoch?(epoch, %{"result" => "unbooted_branch_child_absent", "proof" => proof}),
+    do: UnbootedBranchChildAbsence.epoch(proof["request"]) == epoch
+
+  defp branch_epoch?(epoch, %{
+         "result" => "unbooted_branch_disposal_candidate",
+         "candidate" => candidate
+       }),
+       do: get_in(candidate, ~w(publication change child_origin intent epoch)) == epoch
+
+  defp branch_epoch?(_, _), do: true
+
+  defp branch_platform?(platform, %{"result" => "unbooted_branch_child_absent", "proof" => proof}),
+       do: UnbootedBranchChildAbsence.platform(proof["request"]) == platform
+
+  defp branch_platform?(platform, %{
+         "result" => "unbooted_branch_disposal_candidate",
+         "candidate" => candidate
+       }),
+       do: get_in(candidate, ~w(publication change platform)) == platform
+
   defp branch_platform?(platform, %{"result" => kind, "completion" => proof})
        when kind in ~w(branch_created branch_completion_presence) and proof != nil,
        do: proof["publication"]["change"]["platform"] == platform
 
+  defp branch_platform?(platform, %{"result" => "unbooted_branch_disposed", "proof" => proof}),
+    do: get_in(proof, ~w(publication change platform)) == platform
+
   defp branch_platform?(_platform, _outcome), do: true
+
+  defp held_platform?(platform, %{
+         "operation" => "qualify_unbooted_branch_child_absence",
+         "request" => request
+       }),
+       do: UnbootedBranchChildAbsence.platform(request) == platform
 
   defp held_platform?(platform, %{"operation" => name, "request" => request})
        when name in ~w(release_held_branch qualify_held_branch_release),
        do: HeldBranchReleaseRequest.platform(request) == platform
+
+  defp held_platform?(platform, %{
+         "operation" => "qualify_branch_child_absence",
+         "request" => request
+       }),
+       do: BranchChildAbsence.platform(request) == platform
+
+  defp held_platform?(platform, %{"operation" => "release_branch_backing", "request" => request}),
+    do: BranchBackingRelease.platform(request) == platform
+
+  defp held_platform?(platform, %{
+         "operation" => "continue_released_branch_deletion",
+         "request" => request
+       }),
+       do: ReleasedBranchDeletionContinuation.platform(request) == platform
+
+  defp held_platform?(platform, %{
+         "operation" => "cleanup_released_branch_deletion",
+         "request" => request
+       }),
+       do: ReleasedBranchDeletionCleanup.platform(request) == platform
+
+  defp held_platform?(platform, %{
+         "operation" => "collect_branch_deletion",
+         "request" => request
+       }),
+       do: BranchDeletionCollection.platform(request) == platform
+
+  defp held_platform?(platform, %{
+         "operation" => "resolve_released_branch_deletion",
+         "request" => request
+       }),
+       do: ReleasedBranchDeletionResolution.platform(request) == platform
+
+  defp held_platform?(platform, %{
+         "operation" => "resolve_held_branch_deletion",
+         "request" => request
+       }),
+       do: BranchDeletionResolution.platform(request) == platform
+
+  defp held_platform?(platform, %{"operation" => name, "request" => request})
+       when name in ~w(continue_held_branch_deletion cleanup_held_branch_deletion),
+       do: HeldBranchDeletionAction.platform(request) == platform
+
+  defp held_platform?(platform, %{
+         "operation" => "release_unbooted_branch_backing",
+         "request" => request
+       }),
+       do: UnbootedBranchBackingRelease.platform(request) == platform
 
   defp held_platform?(_, _), do: true
 
@@ -327,6 +431,39 @@ defmodule SmolBox.Embedded.Channel do
     do: byte_size(bytes) <= limit
 
   defp chunk_matches?(_operation, _bytes), do: true
+
+  defp ready_epoch?(
+         epoch,
+         %{operation: %{"operation" => "resolve_ready_branch_completion"}},
+         %{"result" => "branch_completion_presence", "completion" => proof}
+       )
+       when not is_nil(proof),
+       do: get_in(proof, ~w(publication change child_origin intent epoch)) == epoch
+
+  defp ready_epoch?(_, _, _), do: true
+
+  defp terminal_matches?(
+         _domain,
+         %{
+           operation: %{
+             "operation" => "qualify_unbooted_branch_child_absence",
+             "request" => request
+           },
+           output_bytes: 0
+         },
+         %{"result" => "unbooted_branch_child_absent", "proof" => proof}
+       ),
+       do: UnbootedBranchChildAbsence.matches?(proof, request)
+
+  defp terminal_matches?(
+         _domain,
+         %{
+           operation: %{"operation" => "inspect_unbooted_branch_disposal", "request" => request},
+           output_bytes: 0
+         },
+         %{"result" => "unbooted_branch_disposal_candidate", "candidate" => candidate}
+       ),
+       do: UnbootedBranchDisposalCandidate.matches?(candidate, request)
 
   defp terminal_matches?(
          _domain,
@@ -662,6 +799,124 @@ defmodule SmolBox.Embedded.Channel do
 
   defp terminal_matches?(
          _domain,
+         %{operation: %{"operation" => name, "request" => request}, output_bytes: 0},
+         %{"result" => "unbooted_branch_disposed", "proof" => proof}
+       )
+       when name in ~w(dispose_unbooted_branch resolve_unbooted_branch_disposal),
+       do: UnbootedBranchDisposal.matches?(proof, request)
+
+  defp terminal_matches?(
+         _domain,
+         %{
+           operation: %{"operation" => "release_unbooted_branch_backing", "request" => request},
+           output_bytes: 0
+         },
+         %{"result" => "branch_backing_released", "proof" => proof}
+       ),
+       do: UnbootedBranchBackingRelease.matches?(proof, request)
+
+  defp terminal_matches?(
+         _domain,
+         %{
+           operation: %{"operation" => "retire_prepared_branch", "request" => request},
+           output_bytes: 0
+         },
+         %{"result" => "prepared_branch_retired", "proof" => proof}
+       ),
+       do: PreparedBranchRetirement.matches?(proof, request)
+
+  defp terminal_matches?(
+         _domain,
+         %{
+           operation: %{"operation" => "continue_held_branch_deletion", "request" => request},
+           output_bytes: 0
+         },
+         %{"result" => "held_branch_deletion_continued", "proof" => proof}
+       ),
+       do: HeldBranchDeletionAction.matches?(proof, request, "continue")
+
+  defp terminal_matches?(
+         _domain,
+         %{
+           operation: %{"operation" => "cleanup_held_branch_deletion", "request" => request},
+           output_bytes: 0
+         },
+         %{"result" => "held_branch_deletion_cleaned", "proof" => proof}
+       ),
+       do: HeldBranchDeletionAction.matches?(proof, request, "cleanup")
+
+  defp terminal_matches?(
+         _domain,
+         %{
+           operation: %{"operation" => "continue_released_branch_deletion", "request" => request},
+           output_bytes: 0
+         },
+         %{"result" => "released_branch_deletion_continued", "proof" => proof}
+       ),
+       do: ReleasedBranchDeletionContinuation.matches?(proof, request)
+
+  defp terminal_matches?(
+         _domain,
+         %{
+           operation: %{"operation" => "cleanup_released_branch_deletion", "request" => request},
+           output_bytes: 0
+         },
+         %{"result" => "released_branch_deletion_cleaned", "proof" => proof}
+       ),
+       do: ReleasedBranchDeletionCleanup.matches?(proof, request)
+
+  defp terminal_matches?(
+         _domain,
+         %{
+           operation: %{"operation" => "collect_branch_deletion", "request" => request},
+           output_bytes: 0
+         },
+         %{"result" => "branch_deletion_collected", "proof" => proof}
+       ),
+       do: BranchDeletionCollection.matches?(proof, request)
+
+  defp terminal_matches?(
+         _domain,
+         %{
+           operation: %{"operation" => "resolve_released_branch_deletion", "request" => request},
+           output_bytes: 0
+         },
+         %{"result" => "released_branch_deletion_resolved", "proof" => proof}
+       ),
+       do: ReleasedBranchDeletionResolution.matches?(proof, request)
+
+  defp terminal_matches?(
+         _domain,
+         %{
+           operation: %{"operation" => "resolve_held_branch_deletion", "request" => request},
+           output_bytes: 0
+         },
+         %{"result" => "held_branch_deletion_resolved", "proof" => proof}
+       ),
+       do: BranchDeletionResolution.matches?(proof, request)
+
+  defp terminal_matches?(
+         _domain,
+         %{
+           operation: %{"operation" => "release_branch_backing", "request" => request},
+           output_bytes: 0
+         },
+         %{"result" => "branch_backing_released", "proof" => proof}
+       ),
+       do: BranchBackingRelease.matches?(proof, request)
+
+  defp terminal_matches?(
+         _domain,
+         %{
+           operation: %{"operation" => "qualify_branch_child_absence", "request" => request},
+           output_bytes: 0
+         },
+         %{"result" => "branch_child_absent", "proof" => proof}
+       ),
+       do: BranchChildAbsence.matches?(proof, request)
+
+  defp terminal_matches?(
+         _domain,
          %{
            operation: %{"operation" => "release_held_branch", "request" => request},
            output_bytes: 0
@@ -690,11 +945,12 @@ defmodule SmolBox.Embedded.Channel do
   defp terminal_matches?(
          _domain,
          %{
-           operation: %{"operation" => "inspect_branch_completion", "request" => request},
+           operation: %{"operation" => name, "request" => request},
            output_bytes: 0
          },
          %{"result" => "branch_completion_presence", "completion" => proof}
-       ),
+       )
+       when name in ~w(inspect_branch_completion resolve_ready_branch_completion),
        do: proof == nil or BranchCompletion.matches?(proof, request)
 
   defp terminal_matches?(

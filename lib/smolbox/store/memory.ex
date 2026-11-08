@@ -25,6 +25,8 @@ defmodule SmolBox.Store.Memory do
     ExportOps,
     MachineOps,
     MemoryVolumes,
+    NativeBranchDeletionActionOps,
+    NativeBranchDeletionOps,
     NativeBranchReleaseOps,
     PortOwnership,
     RecordOps,
@@ -619,6 +621,24 @@ defmodule SmolBox.Store.Memory do
          do: {:ok, {:ok, execution}, state}
   end
 
+  defp machine_operation(state, :branch_delete_action_accept, [key, guard, action, now]) do
+    with {:ok, child} <- machine_guard(state, key, guard, now),
+         {:ok, child} <- NativeBranchDeletionActionOps.accept(child, action, now),
+         do: machine_save(state, child)
+  end
+
+  defp machine_operation(state, :branch_delete_action_complete, [key, guard, action, proof, now]) do
+    with {:ok, child} <- machine_guard(state, key, guard, now),
+         {:ok, child} <- NativeBranchDeletionActionOps.complete(child, action, proof, now),
+         do: machine_save(state, child)
+  end
+
+  defp machine_operation(state, :branch_delete_accept, [key, guard, now]) do
+    with {:ok, child} <- machine_guard(state, key, guard, now),
+         {:ok, child} <- NativeBranchDeletionOps.accept(child, now),
+         do: machine_save(state, child)
+  end
+
   defp machine_operation(state, :resolve, [key, guard, observed, now]) do
     with {:ok, machine} <- machine_guard(state, key, guard, now),
          {:ok, command} <- active_record(state, machine),
@@ -750,10 +770,31 @@ defmodule SmolBox.Store.Memory do
          do: branch_save(state, p, c)
   end
 
+  defp machine_operation(state, :branch_retire, [key, guard, id, proof, now]) do
+    with {:ok, p} <- machine_guard(state, key, guard, now),
+         {:ok, c} <- machine_lookup(state, {elem(key, 0), id}),
+         {:ok, p, c} <- BranchOps.retire(p, c, proof, now),
+         do: branch_save(state, p, c)
+  end
+
   defp machine_operation(state, :branch_retire, [key, guard, id, now]) do
     with {:ok, p} <- machine_guard(state, key, guard, now),
          {:ok, c} <- machine_lookup(state, {elem(key, 0), id}),
          {:ok, p, c} <- BranchOps.retire(p, c, now),
+         do: branch_save(state, p, c)
+  end
+
+  defp machine_operation(state, :branch_backing_accept, [key, guard, id, version, removed, now]) do
+    with {:ok, p} <- machine_guard(state, key, guard, now),
+         {:ok, c} <- machine_lookup(state, {elem(key, 0), id}),
+         {:ok, p, c} <- BranchOps.accept_backing(p, c, version, removed, now),
+         do: branch_save(state, p, c)
+  end
+
+  defp machine_operation(state, :branch_release_storage, [key, guard, id, proof, now]) do
+    with {:ok, p} <- machine_guard(state, key, guard, now),
+         {:ok, c} <- machine_lookup(state, {elem(key, 0), id}),
+         {:ok, p, c} <- BranchOps.release_storage(p, c, proof, now),
          do: branch_save(state, p, c)
   end
 

@@ -1,5 +1,13 @@
 defmodule SmolBox.Embedded.NativeBranchReleaseResult do
-  @moduledoc false
+  @moduledoc """
+  Explicit native held-release proof with current source and child observations.
+
+  A custom store must bind this transient result to the original versioned release
+  request, current source head and both original process identities before updating
+  the pair. Completion and explicit resolution preserve all backing charges and
+  the original creation completion. Inspect output omits native authority. This
+  type alone enables neither release dispatch nor SDK manager enrollment.
+  """
   alias SmolBox.Embedded.{Identity, NativeBranchRelease}
   alias SmolBox.{Machine, Validation}
   @enforce_keys [:transition, :source, :child]

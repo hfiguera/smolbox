@@ -1,5 +1,15 @@
 defmodule SmolBox.Embedded.BranchCompletion do
-  @moduledoc false
+  @moduledoc """
+  Original completed native branch creation evidence for durable store adapters.
+
+  The publication advances source material and binds an independently owned child;
+  optional initial-release evidence records its automatic activation. Retain this
+  value unchanged beside the immutable child root. Later held release, deletion,
+  retirement and backing removal have separate evidence and lifetimes.
+  This historical result alone proves neither current liveness nor SDK ownership.
+  Inspect output omits receipt, process and ownership fields. Feature admission
+  remains separately gated by the approved native descriptor and store support.
+  """
   alias SmolBox.Embedded.{BranchPublication, BranchReleaseTransition, BranchRequest, Shape}
   alias SmolBox.Validation
 

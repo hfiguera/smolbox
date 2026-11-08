@@ -1,0 +1,770 @@
+[
+  {
+    "platform": "macos",
+    "request": {
+      "action": "continue",
+      "completion": {
+        "schema": 1,
+        "publication": {
+          "schema": 1,
+          "previous": {
+            "target_id": "embedded-local",
+            "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+            "name": "owned",
+            "owner_token": "6767676767676767676767676767676767676767676767676767676767676767",
+            "incarnation": "89898989898989898989898989898989",
+            "material_sha256": "abababababababababababababababababababababababababababababababab",
+            "material": {
+              "schema": 2,
+              "revision": 0,
+              "record_sha256": "abababababababababababababababababababababababababababababababab",
+              "chain_sha256": "fca9cdcb16003ca409f473f30a896cdc35ea38b5f21451557e840d23e133319c",
+              "operation_id": null,
+              "request_sha256": null
+            }
+          },
+          "receipt": {
+            "target_id": "embedded-local",
+            "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+            "name": "owned",
+            "owner_token": "6767676767676767676767676767676767676767676767676767676767676767",
+            "incarnation": "89898989898989898989898989898989",
+            "material_sha256": "abababababababababababababababababababababababababababababababab",
+            "material": {
+              "schema": 2,
+              "revision": 1,
+              "record_sha256": "abababababababababababababababababababababababababababababababab",
+              "chain_sha256": "3f9b4c0004adf6a17b9b546853d1b73ba5d03455e05877ea322da55c55a46450",
+              "operation_id": "create-leaf",
+              "request_sha256": "98c77e048bcba83eb070993980e4cfdc50d31ebe20c85c1306be088789ff651e"
+            }
+          },
+          "change": {
+            "child_origin": {
+              "intent": {
+                "source": {
+                  "target_id": "embedded-local",
+                  "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+                  "name": "owned",
+                  "owner_token": "6767676767676767676767676767676767676767676767676767676767676767",
+                  "incarnation": "89898989898989898989898989898989",
+                  "material_sha256": "abababababababababababababababababababababababababababababababab",
+                  "material": {
+                    "schema": 2,
+                    "revision": 0,
+                    "record_sha256": "abababababababababababababababababababababababababababababababab",
+                    "chain_sha256": "fca9cdcb16003ca409f473f30a896cdc35ea38b5f21451557e840d23e133319c",
+                    "operation_id": null,
+                    "request_sha256": null
+                  }
+                },
+                "child": {
+                  "operation_id": "create-leaf",
+                  "name": "leaf",
+                  "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+                  "incarnation": "dddddddddddddddddddddddddddddddd",
+                  "idle": true,
+                  "hold": true
+                },
+                "approval": {
+                  "id": "branches",
+                  "host_overhead_mb": 128,
+                  "resources": {
+                    "slots": 1,
+                    "cpus": 1,
+                    "memory_mb": 384,
+                    "disk_gb": 5
+                  }
+                },
+                "plan": {
+                  "ordinary_child": {
+                    "slots": 1,
+                    "cpus": 1,
+                    "memory_mb": 384,
+                    "disk_gb": 2
+                  },
+                  "total_additional": {
+                    "slots": 2,
+                    "cpus": 2,
+                    "memory_mb": 768,
+                    "disk_gb": 7
+                  },
+                  "minimum_extra_memory_mb": 384,
+                  "minimum_extra_disk_gb": 5
+                },
+                "request_sha256": "98c77e048bcba83eb070993980e4cfdc50d31ebe20c85c1306be088789ff651e",
+                "source_pid": [
+                  123,
+                  456
+                ],
+                "epoch": "11111111111111111111111111111111"
+              },
+              "generation": "aabbccdd",
+              "raw_child_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+            },
+            "child": {
+              "target_id": "embedded-local",
+              "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+              "name": "leaf",
+              "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "incarnation": "dddddddddddddddddddddddddddddddd",
+              "material_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+              "material": {
+                "schema": 2,
+                "revision": 0,
+                "record_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                "chain_sha256": "28f1ba35e8d1ae0494f2d7050589297de8d9b1cdc6e424512985964e60966033",
+                "operation_id": null,
+                "request_sha256": null
+              }
+            },
+            "platform": "macos",
+            "previous_lineage": null,
+            "lineage": null,
+            "previous_growth_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "growth_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "previous_capture_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "capture_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "checkpoint_head": null
+          }
+        },
+        "child": {
+          "target_id": "embedded-local",
+          "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "name": "leaf",
+          "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "incarnation": "dddddddddddddddddddddddddddddddd",
+          "material_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "material": {
+            "schema": 2,
+            "revision": 0,
+            "record_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "chain_sha256": "28f1ba35e8d1ae0494f2d7050589297de8d9b1cdc6e424512985964e60966033",
+            "operation_id": null,
+            "request_sha256": null
+          }
+        },
+        "identity_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "held": true
+      },
+      "child": {
+        "target_id": "embedded-local",
+        "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+        "name": "leaf",
+        "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "incarnation": "dddddddddddddddddddddddddddddddd",
+        "material_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "material": {
+          "schema": 2,
+          "revision": 0,
+          "record_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "chain_sha256": "28f1ba35e8d1ae0494f2d7050589297de8d9b1cdc6e424512985964e60966033",
+          "operation_id": null,
+          "request_sha256": null
+        }
+      },
+      "operation_id": "held-delete-continue-0",
+      "request_sha256": "1e533010d6665e3f19526d28351065828dd80555fb75ca108937bc770890b11c",
+      "quiesced": true
+    },
+    "proof": {
+      "schema": 1,
+      "child": {
+        "target_id": "embedded-local",
+        "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+        "name": "leaf",
+        "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "incarnation": "dddddddddddddddddddddddddddddddd",
+        "material_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "material": {
+          "schema": 2,
+          "revision": 0,
+          "record_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "chain_sha256": "28f1ba35e8d1ae0494f2d7050589297de8d9b1cdc6e424512985964e60966033",
+          "operation_id": null,
+          "request_sha256": null
+        }
+      },
+      "operation_id": "held-delete-continue-0",
+      "request_sha256": "1e533010d6665e3f19526d28351065828dd80555fb75ca108937bc770890b11c",
+      "deletion_sha256": "be780b6bc48e49b1810981861f730d73aa930b399cd40c66a533aa9faaa9287d",
+      "proof_sha256": "c3580dbc1b5f92957d7120d3e5322f8859f2def136da9daf1863dba8406bb90e"
+    }
+  },
+  {
+    "platform": "macos",
+    "request": {
+      "action": "cleanup",
+      "completion": {
+        "schema": 1,
+        "publication": {
+          "schema": 1,
+          "previous": {
+            "target_id": "embedded-local",
+            "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+            "name": "owned",
+            "owner_token": "6767676767676767676767676767676767676767676767676767676767676767",
+            "incarnation": "89898989898989898989898989898989",
+            "material_sha256": "abababababababababababababababababababababababababababababababab",
+            "material": {
+              "schema": 2,
+              "revision": 0,
+              "record_sha256": "abababababababababababababababababababababababababababababababab",
+              "chain_sha256": "fca9cdcb16003ca409f473f30a896cdc35ea38b5f21451557e840d23e133319c",
+              "operation_id": null,
+              "request_sha256": null
+            }
+          },
+          "receipt": {
+            "target_id": "embedded-local",
+            "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+            "name": "owned",
+            "owner_token": "6767676767676767676767676767676767676767676767676767676767676767",
+            "incarnation": "89898989898989898989898989898989",
+            "material_sha256": "abababababababababababababababababababababababababababababababab",
+            "material": {
+              "schema": 2,
+              "revision": 1,
+              "record_sha256": "abababababababababababababababababababababababababababababababab",
+              "chain_sha256": "3f9b4c0004adf6a17b9b546853d1b73ba5d03455e05877ea322da55c55a46450",
+              "operation_id": "create-leaf",
+              "request_sha256": "98c77e048bcba83eb070993980e4cfdc50d31ebe20c85c1306be088789ff651e"
+            }
+          },
+          "change": {
+            "child_origin": {
+              "intent": {
+                "source": {
+                  "target_id": "embedded-local",
+                  "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+                  "name": "owned",
+                  "owner_token": "6767676767676767676767676767676767676767676767676767676767676767",
+                  "incarnation": "89898989898989898989898989898989",
+                  "material_sha256": "abababababababababababababababababababababababababababababababab",
+                  "material": {
+                    "schema": 2,
+                    "revision": 0,
+                    "record_sha256": "abababababababababababababababababababababababababababababababab",
+                    "chain_sha256": "fca9cdcb16003ca409f473f30a896cdc35ea38b5f21451557e840d23e133319c",
+                    "operation_id": null,
+                    "request_sha256": null
+                  }
+                },
+                "child": {
+                  "operation_id": "create-leaf",
+                  "name": "leaf",
+                  "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+                  "incarnation": "dddddddddddddddddddddddddddddddd",
+                  "idle": true,
+                  "hold": true
+                },
+                "approval": {
+                  "id": "branches",
+                  "host_overhead_mb": 128,
+                  "resources": {
+                    "slots": 1,
+                    "cpus": 1,
+                    "memory_mb": 384,
+                    "disk_gb": 5
+                  }
+                },
+                "plan": {
+                  "ordinary_child": {
+                    "slots": 1,
+                    "cpus": 1,
+                    "memory_mb": 384,
+                    "disk_gb": 2
+                  },
+                  "total_additional": {
+                    "slots": 2,
+                    "cpus": 2,
+                    "memory_mb": 768,
+                    "disk_gb": 7
+                  },
+                  "minimum_extra_memory_mb": 384,
+                  "minimum_extra_disk_gb": 5
+                },
+                "request_sha256": "98c77e048bcba83eb070993980e4cfdc50d31ebe20c85c1306be088789ff651e",
+                "source_pid": [
+                  123,
+                  456
+                ],
+                "epoch": "11111111111111111111111111111111"
+              },
+              "generation": "aabbccdd",
+              "raw_child_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+            },
+            "child": {
+              "target_id": "embedded-local",
+              "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+              "name": "leaf",
+              "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "incarnation": "dddddddddddddddddddddddddddddddd",
+              "material_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+              "material": {
+                "schema": 2,
+                "revision": 0,
+                "record_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                "chain_sha256": "28f1ba35e8d1ae0494f2d7050589297de8d9b1cdc6e424512985964e60966033",
+                "operation_id": null,
+                "request_sha256": null
+              }
+            },
+            "platform": "macos",
+            "previous_lineage": null,
+            "lineage": null,
+            "previous_growth_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "growth_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "previous_capture_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "capture_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "checkpoint_head": null
+          }
+        },
+        "child": {
+          "target_id": "embedded-local",
+          "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "name": "leaf",
+          "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "incarnation": "dddddddddddddddddddddddddddddddd",
+          "material_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "material": {
+            "schema": 2,
+            "revision": 0,
+            "record_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "chain_sha256": "28f1ba35e8d1ae0494f2d7050589297de8d9b1cdc6e424512985964e60966033",
+            "operation_id": null,
+            "request_sha256": null
+          }
+        },
+        "identity_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "held": true
+      },
+      "child": {
+        "target_id": "embedded-local",
+        "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+        "name": "leaf",
+        "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "incarnation": "dddddddddddddddddddddddddddddddd",
+        "material_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "material": {
+          "schema": 2,
+          "revision": 0,
+          "record_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "chain_sha256": "28f1ba35e8d1ae0494f2d7050589297de8d9b1cdc6e424512985964e60966033",
+          "operation_id": null,
+          "request_sha256": null
+        }
+      },
+      "operation_id": "held-delete-cleanup-0",
+      "request_sha256": "fb1d2d53216b812e2902da21354ed320a8d92bec8943c3c5d44dd897783b68c1",
+      "quiesced": true
+    },
+    "proof": {
+      "schema": 1,
+      "child": {
+        "target_id": "embedded-local",
+        "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+        "name": "leaf",
+        "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "incarnation": "dddddddddddddddddddddddddddddddd",
+        "material_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "material": {
+          "schema": 2,
+          "revision": 0,
+          "record_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "chain_sha256": "28f1ba35e8d1ae0494f2d7050589297de8d9b1cdc6e424512985964e60966033",
+          "operation_id": null,
+          "request_sha256": null
+        }
+      },
+      "operation_id": "held-delete-cleanup-0",
+      "request_sha256": "fb1d2d53216b812e2902da21354ed320a8d92bec8943c3c5d44dd897783b68c1",
+      "deletion_sha256": "27af867b3e9155bc29a129f636460a13db36c11b5a2a75f11e892908c4fd69ed",
+      "proof_sha256": "855d9a0c0db84a0c48e13a9a0fdd760dc25ec51b48ca7d715f4e5394a75c0b9e"
+    }
+  },
+  {
+    "platform": "linux",
+    "request": {
+      "action": "continue",
+      "completion": {
+        "schema": 1,
+        "publication": {
+          "schema": 1,
+          "previous": {
+            "target_id": "embedded-local",
+            "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+            "name": "owned",
+            "owner_token": "6767676767676767676767676767676767676767676767676767676767676767",
+            "incarnation": "89898989898989898989898989898989",
+            "material_sha256": "abababababababababababababababababababababababababababababababab",
+            "material": {
+              "schema": 2,
+              "revision": 0,
+              "record_sha256": "abababababababababababababababababababababababababababababababab",
+              "chain_sha256": "fca9cdcb16003ca409f473f30a896cdc35ea38b5f21451557e840d23e133319c",
+              "operation_id": null,
+              "request_sha256": null
+            }
+          },
+          "receipt": {
+            "target_id": "embedded-local",
+            "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+            "name": "owned",
+            "owner_token": "6767676767676767676767676767676767676767676767676767676767676767",
+            "incarnation": "89898989898989898989898989898989",
+            "material_sha256": "abababababababababababababababababababababababababababababababab",
+            "material": {
+              "schema": 2,
+              "revision": 1,
+              "record_sha256": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+              "chain_sha256": "de806d6aaec01b477eaf9fb1915a9310b6c2c8e34f84696042d90f8b24f3af01",
+              "operation_id": "create-leaf",
+              "request_sha256": "98c77e048bcba83eb070993980e4cfdc50d31ebe20c85c1306be088789ff651e"
+            }
+          },
+          "change": {
+            "child_origin": {
+              "intent": {
+                "source": {
+                  "target_id": "embedded-local",
+                  "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+                  "name": "owned",
+                  "owner_token": "6767676767676767676767676767676767676767676767676767676767676767",
+                  "incarnation": "89898989898989898989898989898989",
+                  "material_sha256": "abababababababababababababababababababababababababababababababab",
+                  "material": {
+                    "schema": 2,
+                    "revision": 0,
+                    "record_sha256": "abababababababababababababababababababababababababababababababab",
+                    "chain_sha256": "fca9cdcb16003ca409f473f30a896cdc35ea38b5f21451557e840d23e133319c",
+                    "operation_id": null,
+                    "request_sha256": null
+                  }
+                },
+                "child": {
+                  "operation_id": "create-leaf",
+                  "name": "leaf",
+                  "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+                  "incarnation": "dddddddddddddddddddddddddddddddd",
+                  "idle": true,
+                  "hold": true
+                },
+                "approval": {
+                  "id": "branches",
+                  "host_overhead_mb": 128,
+                  "resources": {
+                    "slots": 1,
+                    "cpus": 1,
+                    "memory_mb": 384,
+                    "disk_gb": 5
+                  }
+                },
+                "plan": {
+                  "ordinary_child": {
+                    "slots": 1,
+                    "cpus": 1,
+                    "memory_mb": 384,
+                    "disk_gb": 2
+                  },
+                  "total_additional": {
+                    "slots": 2,
+                    "cpus": 2,
+                    "memory_mb": 768,
+                    "disk_gb": 7
+                  },
+                  "minimum_extra_memory_mb": 384,
+                  "minimum_extra_disk_gb": 5
+                },
+                "request_sha256": "98c77e048bcba83eb070993980e4cfdc50d31ebe20c85c1306be088789ff651e",
+                "source_pid": [
+                  123,
+                  456
+                ],
+                "epoch": "11111111111111111111111111111111"
+              },
+              "generation": "aabbccdd",
+              "raw_child_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+            },
+            "child": {
+              "target_id": "embedded-local",
+              "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+              "name": "leaf",
+              "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "incarnation": "dddddddddddddddddddddddddddddddd",
+              "material_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+              "material": {
+                "schema": 2,
+                "revision": 0,
+                "record_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                "chain_sha256": "28f1ba35e8d1ae0494f2d7050589297de8d9b1cdc6e424512985964e60966033",
+                "operation_id": null,
+                "request_sha256": null
+              }
+            },
+            "platform": "linux",
+            "previous_lineage": null,
+            "lineage": 456,
+            "previous_growth_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "growth_sha256": "b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1",
+            "previous_capture_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "capture_sha256": "c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1",
+            "checkpoint_head": null
+          }
+        },
+        "child": {
+          "target_id": "embedded-local",
+          "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "name": "leaf",
+          "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "incarnation": "dddddddddddddddddddddddddddddddd",
+          "material_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "material": {
+            "schema": 2,
+            "revision": 0,
+            "record_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "chain_sha256": "28f1ba35e8d1ae0494f2d7050589297de8d9b1cdc6e424512985964e60966033",
+            "operation_id": null,
+            "request_sha256": null
+          }
+        },
+        "identity_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "held": true
+      },
+      "child": {
+        "target_id": "embedded-local",
+        "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+        "name": "leaf",
+        "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "incarnation": "dddddddddddddddddddddddddddddddd",
+        "material_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "material": {
+          "schema": 2,
+          "revision": 0,
+          "record_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "chain_sha256": "28f1ba35e8d1ae0494f2d7050589297de8d9b1cdc6e424512985964e60966033",
+          "operation_id": null,
+          "request_sha256": null
+        }
+      },
+      "operation_id": "held-delete-continue-1",
+      "request_sha256": "4a6d8d6322c5296dc674a02d811535156cb3ce53c5e71f642bde9be69f8639e9",
+      "quiesced": true
+    },
+    "proof": {
+      "schema": 1,
+      "child": {
+        "target_id": "embedded-local",
+        "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+        "name": "leaf",
+        "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "incarnation": "dddddddddddddddddddddddddddddddd",
+        "material_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "material": {
+          "schema": 2,
+          "revision": 0,
+          "record_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "chain_sha256": "28f1ba35e8d1ae0494f2d7050589297de8d9b1cdc6e424512985964e60966033",
+          "operation_id": null,
+          "request_sha256": null
+        }
+      },
+      "operation_id": "held-delete-continue-1",
+      "request_sha256": "4a6d8d6322c5296dc674a02d811535156cb3ce53c5e71f642bde9be69f8639e9",
+      "deletion_sha256": "f45c53d11ad058ece7538aab524f408d0d51f571d372e18758f844eae38ab3ee",
+      "proof_sha256": "1777457dfde427cb4256a681291cc2e62365bc920faedcd5c6b59f20551a04d9"
+    }
+  },
+  {
+    "platform": "linux",
+    "request": {
+      "action": "cleanup",
+      "completion": {
+        "schema": 1,
+        "publication": {
+          "schema": 1,
+          "previous": {
+            "target_id": "embedded-local",
+            "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+            "name": "owned",
+            "owner_token": "6767676767676767676767676767676767676767676767676767676767676767",
+            "incarnation": "89898989898989898989898989898989",
+            "material_sha256": "abababababababababababababababababababababababababababababababab",
+            "material": {
+              "schema": 2,
+              "revision": 0,
+              "record_sha256": "abababababababababababababababababababababababababababababababab",
+              "chain_sha256": "fca9cdcb16003ca409f473f30a896cdc35ea38b5f21451557e840d23e133319c",
+              "operation_id": null,
+              "request_sha256": null
+            }
+          },
+          "receipt": {
+            "target_id": "embedded-local",
+            "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+            "name": "owned",
+            "owner_token": "6767676767676767676767676767676767676767676767676767676767676767",
+            "incarnation": "89898989898989898989898989898989",
+            "material_sha256": "abababababababababababababababababababababababababababababababab",
+            "material": {
+              "schema": 2,
+              "revision": 1,
+              "record_sha256": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+              "chain_sha256": "de806d6aaec01b477eaf9fb1915a9310b6c2c8e34f84696042d90f8b24f3af01",
+              "operation_id": "create-leaf",
+              "request_sha256": "98c77e048bcba83eb070993980e4cfdc50d31ebe20c85c1306be088789ff651e"
+            }
+          },
+          "change": {
+            "child_origin": {
+              "intent": {
+                "source": {
+                  "target_id": "embedded-local",
+                  "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+                  "name": "owned",
+                  "owner_token": "6767676767676767676767676767676767676767676767676767676767676767",
+                  "incarnation": "89898989898989898989898989898989",
+                  "material_sha256": "abababababababababababababababababababababababababababababababab",
+                  "material": {
+                    "schema": 2,
+                    "revision": 0,
+                    "record_sha256": "abababababababababababababababababababababababababababababababab",
+                    "chain_sha256": "fca9cdcb16003ca409f473f30a896cdc35ea38b5f21451557e840d23e133319c",
+                    "operation_id": null,
+                    "request_sha256": null
+                  }
+                },
+                "child": {
+                  "operation_id": "create-leaf",
+                  "name": "leaf",
+                  "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+                  "incarnation": "dddddddddddddddddddddddddddddddd",
+                  "idle": true,
+                  "hold": true
+                },
+                "approval": {
+                  "id": "branches",
+                  "host_overhead_mb": 128,
+                  "resources": {
+                    "slots": 1,
+                    "cpus": 1,
+                    "memory_mb": 384,
+                    "disk_gb": 5
+                  }
+                },
+                "plan": {
+                  "ordinary_child": {
+                    "slots": 1,
+                    "cpus": 1,
+                    "memory_mb": 384,
+                    "disk_gb": 2
+                  },
+                  "total_additional": {
+                    "slots": 2,
+                    "cpus": 2,
+                    "memory_mb": 768,
+                    "disk_gb": 7
+                  },
+                  "minimum_extra_memory_mb": 384,
+                  "minimum_extra_disk_gb": 5
+                },
+                "request_sha256": "98c77e048bcba83eb070993980e4cfdc50d31ebe20c85c1306be088789ff651e",
+                "source_pid": [
+                  123,
+                  456
+                ],
+                "epoch": "11111111111111111111111111111111"
+              },
+              "generation": "aabbccdd",
+              "raw_child_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+            },
+            "child": {
+              "target_id": "embedded-local",
+              "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+              "name": "leaf",
+              "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "incarnation": "dddddddddddddddddddddddddddddddd",
+              "material_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+              "material": {
+                "schema": 2,
+                "revision": 0,
+                "record_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                "chain_sha256": "28f1ba35e8d1ae0494f2d7050589297de8d9b1cdc6e424512985964e60966033",
+                "operation_id": null,
+                "request_sha256": null
+              }
+            },
+            "platform": "linux",
+            "previous_lineage": null,
+            "lineage": 456,
+            "previous_growth_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "growth_sha256": "b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1",
+            "previous_capture_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "capture_sha256": "c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1",
+            "checkpoint_head": null
+          }
+        },
+        "child": {
+          "target_id": "embedded-local",
+          "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "name": "leaf",
+          "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "incarnation": "dddddddddddddddddddddddddddddddd",
+          "material_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "material": {
+            "schema": 2,
+            "revision": 0,
+            "record_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "chain_sha256": "28f1ba35e8d1ae0494f2d7050589297de8d9b1cdc6e424512985964e60966033",
+            "operation_id": null,
+            "request_sha256": null
+          }
+        },
+        "identity_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "held": true
+      },
+      "child": {
+        "target_id": "embedded-local",
+        "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+        "name": "leaf",
+        "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "incarnation": "dddddddddddddddddddddddddddddddd",
+        "material_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "material": {
+          "schema": 2,
+          "revision": 0,
+          "record_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "chain_sha256": "28f1ba35e8d1ae0494f2d7050589297de8d9b1cdc6e424512985964e60966033",
+          "operation_id": null,
+          "request_sha256": null
+        }
+      },
+      "operation_id": "held-delete-cleanup-1",
+      "request_sha256": "2f683d9aa44130e898de7395ca845192cb405155a020df39d8e7c9fa430cd559",
+      "quiesced": true
+    },
+    "proof": {
+      "schema": 1,
+      "child": {
+        "target_id": "embedded-local",
+        "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+        "name": "leaf",
+        "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "incarnation": "dddddddddddddddddddddddddddddddd",
+        "material_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "material": {
+          "schema": 2,
+          "revision": 0,
+          "record_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "chain_sha256": "28f1ba35e8d1ae0494f2d7050589297de8d9b1cdc6e424512985964e60966033",
+          "operation_id": null,
+          "request_sha256": null
+        }
+      },
+      "operation_id": "held-delete-cleanup-1",
+      "request_sha256": "2f683d9aa44130e898de7395ca845192cb405155a020df39d8e7c9fa430cd559",
+      "deletion_sha256": "719c17beb39684f77a856bcf09d29661033603ddaa3d9138bc5ade7a32c2696a",
+      "proof_sha256": "c5e060a38158e16b26d5b9bd1e5cf4ebbe972f784ba3d1dd86bf1feb17eddd88"
+    }
+  }
+]

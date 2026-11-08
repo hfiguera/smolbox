@@ -1,5 +1,13 @@
 defmodule SmolBox.Embedded.NativeCaptureCleanup do
-  @moduledoc false
+  @moduledoc """
+  Correlated native checkpoint staging cleanup or abort evidence for store adapters.
+
+  Bind the receipt to the saved source, capture ID and request before changing
+  staging accounting. Cleanup and pre-entry abort are distinct from a completed
+  capture or successful source resolution. Preserve material and artifact charges
+  according to the capture transaction contract. Inspect output omits the receipt;
+  this type cannot enroll a native manager or enable capture admission.
+  """
   alias SmolBox.Embedded.{CaptureStagingCleanupReceipt, NativeCapture, Shape}
   alias SmolBox.{CheckpointCapture, Validation}
 

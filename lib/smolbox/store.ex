@@ -134,6 +134,9 @@ defmodule SmolBox.Store do
           | :submit
           | :finish
           | :resolve
+          | :branch_delete_action_accept
+          | :branch_delete_action_complete
+          | :branch_delete_accept
           | :export_accept
           | :export_advance
           | :export_cancel
@@ -154,7 +157,8 @@ defmodule SmolBox.Store do
   Verified absence or a matching created/stopped incarnation, supplied only after
   operator quiescence. A store cannot establish quiescence from this value alone.
   """
-  @type machine_resolution :: :absent | Machine.t()
+  @type machine_resolution ::
+          :absent | Machine.t() | SmolBox.Embedded.BranchDeletionResolution.t()
 
   @typedoc """
   Mutable fields accepted by `:write`. Omitted fields retain their values.
@@ -217,6 +221,10 @@ defmodule SmolBox.Store do
   | `:submit` | `[key, initial_execution, max_pending, now]` | `{:ok, execution}` |
   | `:finish` | `[execution_key, execution_guard, now]` | `{:ok, execution}` |
   | `:resolve` | `[key, guard, observation_or_absent, now]` | `{:ok, machine}` |
+  | `:branch_delete_accept` (native) | `[key, guard, now]` | `{:ok, machine}` |
+  | `:branch_delete_action_accept` (native) | `[key, guard, action, now]` | `{:ok, machine}` |
+  | `:branch_delete_action_complete` (native) | `[key, guard, action, proof, now]` | `{:ok, machine}` |
+  | `:resolve` (native held delete) | `[key, guard, deletion_resolution_proof, now]` | `{:ok, machine}` |
   | `:capture_accept` | `[key, spec, fingerprint, capacity, now]` | `{:ok, machine}` |
   | `:capture_advance` | `[key, guard, capture_id, expected_state, changes, now]` | `{:ok, machine}` |
   | `:capture_cancel` | `[key, capture_id, now]` | `{:ok, machine}` |
@@ -231,9 +239,22 @@ defmodule SmolBox.Store do
   | `:branch_advance` | `[source_key, source_guard, child_id, expected_state, change, now]` | `{:ok, child}` |
   | `:branch_resolve` | `[source_key, source_guard, child_id, source_or_absent, child_or_absent, now]` | `{:ok, child}` |
   | `:branch_retire` | `[source_key, source_guard, child_id, now]` | `{:ok, child}` |
+  | `:branch_retire` (native) | `[source_key, source_guard, child_id, child_absence_proof, now]` | `{:ok, child}` |
+  | `:branch_backing_accept` (native) | `[source_key, source_guard, child_id, child_version, backing_removed, now]` | `{:ok, child}` |
+  | `:branch_release_storage` (native) | `[source_key, source_guard, child_id, backing_release_proof, now]` | `{:ok, child}` |
   | `:branch_release_storage` | `[source_key, source_guard, child_id, now]` | `{:ok, child}` |
   | `:branch_release` | `[child_key, expected_version, now]` | `{:ok, child}` |
   | `:branch_release_advance` | `[child_key, child_guard, expected_state, change, now]` | `{:ok, child}` |
+
+  Native backing release first uses `:branch_backing_accept` to save the exact
+  request under the source guard and child version. Both records must be deleted,
+  every source dependency retired, and the child's original completion and typed
+  retirement retained. Acceptance preserves all backing capacity. Claim/version
+  changes retain the accepted request. A typed matching acknowledgement is then
+  required by the native `:branch_release_storage` variant to close the branch and
+  release only its extra backing reservation. Both operations must lock and
+  persist source, child and resource projections atomically. Missing replies keep
+  the public charge; adapters must never reconstruct a request after dispatch.
 
   Native branch advancement accepts `{:native_complete, NativeBranchResult}` only
   after dispatch. The result combines the original typed completion with two
@@ -255,6 +276,17 @@ defmodule SmolBox.Store do
   Neither success nor resolution frees backing. Bare Machine acknowledgments
   cannot complete native release. Readers/writers of selective v31 must upgrade
   together before native held release can be enabled.
+
+  Native dependency retirement additionally requires a typed
+  `SmolBox.Embedded.BranchChildAbsence` from the fenced backend. Bind the proof to
+  the child's exact saved completion/head, fingerprint and observed version;
+  reject stale responses even if the source guard remains current. The child
+  must already be durably deleted. Atomically retain immutable retirement proof
+  and original child version while marking only that source dependency retired.
+  Preserve source material/history, child creation/current material and all extra
+  backing charges. Bare absence, a deleted state or host assertion cannot replace
+  this proof. Selective v32 readers and all paired writers must upgrade together;
+  current stores still do not advertise the complete `native_branches: 1` marker.
 
   Expansion acceptance atomically deduplicates operation identity, validates the
   machine version and exclusion, reserves disk growth, and enforces durable drain.
@@ -357,6 +389,81 @@ defmodule SmolBox.Store do
   releases capacity and ports. Resolve any active terminal/unknown command in the
   same transaction, preserving its outcome while completing cleanup. Never replay
   work, delete identity history, or infer quiescence from a stopped observation.
+
+  Original native held-delete uncertainty requires `:branch_delete_accept` before
+  helper IO. It freezes the claimed version, original delete request version and
+  exact completion/root-bound request; later claims retain it unchanged. Native
+  `:resolve` requires its typed matching deletion-resolution proof and atomically
+  retains that proof while releasing only the child's ordinary reservation.
+  Source dependencies and extra backing remain charged for their separate paired
+  retirement/release transactions. Bare absence or a generic uncertain-to-deleted
+  write cannot substitute. Pending/complete authority uses selective codec v34;
+  upgrade every reader and resource projection writer before native activation.
+
+  Explicit held-delete continuation and residual cleanup use separate
+  `:branch_delete_action_accept` / `:branch_delete_action_complete` commands with
+  action `:continue` or `:cleanup`. Accept freezes the current claimed management
+  version, original delete version and exact action request before IO. Claims and
+  retries preserve it. Complete requires the matching typed continuation or
+  cleanup acknowledgement and atomically releases only the ordinary child slot.
+  Distinct pending action and observational requests remain as immutable history
+  when another acknowledgement finishes deletion; they cannot authorize new IO
+  after deletion. Source dependency and persistent backing remain separate.
+  Pending/completed action slots use selective codec v35. Every reader and resource
+  projection writer must upgrade before native activation; no capability marker
+  is introduced here. Generic resolve does not consume action acknowledgements.
+
+  Original released-child observation, SDK continuation and residual cleanup use
+  distinct saved grants in the same slots, selectively encoded as v40, v41 and
+  v42 respectively. They bind the full original completion, release and current
+  head as well as claimed management/delete versions. Cleanup consumes its exact
+  typed positive-absence proof; it cannot substitute for an independently accepted
+  observation or SDK-success proof. Completing any route preserves other pending
+  grants as immutable history and retires only the ordinary child reservation.
+  Every shared reader/projector must upgrade before native activation.
+
+  Original deletion collection uses these same commands with action `:collect`,
+  a separate `delete_collection` history and selective codec v43. Acceptance freezes
+  the exact original completion/release/child and management/delete versions before
+  IO. Completion consumes only its matching typed historical collection proof,
+  changing no delete state, operation phase, ordinary child reservation, source
+  dependency or backing charge. It gives no readiness/deletion/absence authority
+  and cannot satisfy another accepted action. Source and other accepted histories
+  remain unchanged. Existing final deletion routes preserve this history.
+  Earlier envelopes omit the new nil default exactly and restore it on read;
+  older tags cannot carry collection state. Upgrade every reader/projector first.
+
+  Prepared-only creation resolution uses the distinct
+  `SmolBox.Embedded.NativePreparedBranchRetirementResult` in the child observation
+  position, paired with its exact fresh source observation. Bind the typed proof
+  to the immutable full creation request, original source PID, resource plan and
+  current child version. The source's current material head must remain the
+  original request head. In one transaction, retain the same immutable retirement
+  entry on both records, close the never-created child, retire its dependency and
+  release its ordinary plus pre-entry reservations. Neither created_machine nor
+  observed_machine is manufactured for that child. The tagged source history entry
+  is excluded from material transitions and permanently reserves its operation ID.
+  Entered work, missing proof, generic absence and stale versions retain all
+  reservations. Selective v36 requires reader/resource-writer upgrades; public
+  native admission remains disabled pending its separate gates. Public resolution
+  retains the original helper/controller fence through the final pair transaction.
+  Run NativePreparedBranchRetirementContract against each real adapter.
+
+  Entered, published never-booted disposal first saves
+  `{:accept_unbooted_disposal, child_version}` through `:branch_advance` while the
+  source and child are locked. Preserve its exact creation-bound request across
+  claims and uncertainty, with every reservation still charged. Completion uses
+  `SmolBox.Embedded.NativeUnbootedBranchDisposalResult` in the `:branch_resolve`
+  child observation position, paired with its fresh source observation. Require
+  the current child version, exact accepted request/proof, original source PID,
+  plan and publication heads. Atomically append the actual source publication,
+  retain the disposal proof and tombstone the unbooted child without fabricating
+  a Machine or BranchCompletion. Release only its ordinary reservation. Extra
+  backing and its source dependency stay charged until separate typed retirement.
+  The distinct disposal_pending/disposed states and selective v37 require all
+  readers/projectors to upgrade; older envelopes cannot carry these semantics.
+  Run NativeUnbootedBranchDisposalContract against each real adapter. Public
+  native admission stays disabled; Backend/Runtime routing remains pending.
 
   Every mutation must roll back machine, execution, assignment, port and capacity
   changes together on failure. `SmolBox.Store.MachineOps` and
@@ -520,11 +627,18 @@ defmodule SmolBox.Store do
               | SmolBox.Machine.t()
               | SmolBox.Embedded.NativeBranchResult.t()
               | SmolBox.Embedded.NativeBranchReleaseResult.t()
+              | SmolBox.Embedded.NativePreparedBranchRetirementResult.t()
+              | SmolBox.Embedded.NativeUnbootedBranchDisposalResult.t()
               | :absent
               | non_neg_integer()
             ]) :: machine_result()
   @callback machine(context(), :branch_retire, [
-              ManagedMachine.key() | guard() | String.t() | non_neg_integer()
+              ManagedMachine.key()
+              | guard()
+              | String.t()
+              | SmolBox.Embedded.BranchChildAbsence.t()
+              | SmolBox.Embedded.UnbootedBranchChildAbsence.t()
+              | non_neg_integer()
             ]) :: machine_result()
   @callback machine(context(), :branch_release, [
               ManagedMachine.key() | pos_integer() | non_neg_integer()
@@ -537,8 +651,37 @@ defmodule SmolBox.Store do
               | non_neg_integer()
             ]) :: machine_result()
 
+  @callback machine(context(), :branch_backing_accept, [
+              ManagedMachine.key()
+              | guard()
+              | String.t()
+              | pos_integer()
+              | boolean()
+              | non_neg_integer()
+            ]) :: machine_result()
+  @callback machine(context(), :branch_delete_action_accept, [
+              ManagedMachine.key() | guard() | :collect | :continue | :cleanup | non_neg_integer()
+            ]) :: machine_result()
+  @callback machine(context(), :branch_delete_action_complete, [
+              ManagedMachine.key()
+              | guard()
+              | :collect
+              | :continue
+              | :cleanup
+              | SmolBox.Embedded.BranchDeletionCollection.t()
+              | SmolBox.Embedded.BranchDeletionContinuation.t()
+              | SmolBox.Embedded.BranchDeletionResolution.t()
+              | non_neg_integer()
+            ]) :: machine_result()
+  @callback machine(context(), :branch_delete_accept, [
+              ManagedMachine.key() | guard() | non_neg_integer()
+            ]) :: machine_result()
   @callback machine(context(), :branch_release_storage, [
-              ManagedMachine.key() | guard() | String.t() | non_neg_integer()
+              ManagedMachine.key()
+              | guard()
+              | String.t()
+              | SmolBox.Embedded.BranchBackingRelease.t()
+              | non_neg_integer()
             ]) :: machine_result()
   @callback machine(context(), :expansion_accept, [
               SmolBox.ManagedMachine.key()

@@ -651,7 +651,40 @@ is activated by inspection.
    Recorded-result lookup precedes current-state checks and never replays mutation;
    None grants no absence or release authority. Retirements bind actual historical
    heads and share the finite operation-history budget. Dropping a guard never
-   retires intent automatically. Prepared retirement grants no persistent backing reservation,
+   retires intent automatically. A checked engine request now correlates the full
+   host creation request and explicit quiescence with a required bounded retirement
+   acknowledgement. Protected history selects the private native admission digest
+   only after exact source/child/approval matching; the caller cannot supply a
+   replacement native PID/epoch/digest. Initial-release fields correlate unused
+   host intent and attest no SDK activation. The existing native proof still
+   attests only its unentered declaration. Missing/entered declarations cannot
+   become absence even with empty SDK inventory. Known retirement lookup remains
+   historical and does not re-enroll ownership. The finite control allowance is
+   released between lookup and retirement, and child-absence SQLite reads now use
+   the same caller deadline/cancellation. Protocol two now carries
+   retire_prepared_branch with a required bounded typed acknowledgement. Rust and
+   Elixir independently validate the native intent, both proof hashes and exact
+   host source/child/approval correlation. Immutable branch approval and Inspect
+   capability precede control-lane dispatch; zero output and source-domain binding
+   are mandatory. The existing finite branch terminal storage preserves both
+   observer frame reservations. Conversion/correlation failure after native return
+   remains uncertain. The store now retains a distinct typed prepared-retirement
+   entry on source and child under selective v36. A child-version-bound proof plus
+   a fresh unchanged source observation atomically closes only the never-created
+   child and releases its ordinary/pre-entry reservations. The tagged source entry
+   remains outside material transitions and permanently excludes ID reuse by
+   branching or capture. Memory/PostgreSQL share this transaction and rollback
+   contract. Exact earlier envelopes and fresh-BEAM reading remain supported.
+   Public `Branches.resolve` now consumes this proof for explicit deleted
+   resolution through native-only retire_prepared_branch/3. It keeps the original
+   helper/controller fence through both bounded backend stages and final paired
+   store commit. The stages share one deadline and aggregate JSON payload budgets;
+   the Port independently bounds each framed message. Only a current child version
+   and fresh unchanged source observation can complete. Post-proof/host/store
+   failure stays uncertain, and a saved acknowledgement returns without helper IO.
+   Missing/entered proof retains reservations. This adds native recovery plumbing
+   for the same SmolBox feature scope; it enables no public native branch admission
+   or SDK qualification. Prepared retirement grants no persistent backing reservation,
    SDK fork dispatch or child proof. Bounded private fork-preparation workers
    now call the clean held-fork API only after an exact protected entered grant.
    The original admission promotes atomically to two child slots, 24 work descriptors,
@@ -664,7 +697,129 @@ is activated by inspection.
    The producer additionally charges computed child-plus-minimum-extra disk
    backing against the existing finite saved-state material allowance. An original
    engine registry now retains source/child gates, SDK runtime, spools and admission
-   independently of caller retirement. Its synchronized entered writer precedes
+   independently of caller retirement. Automatic creation now freezes the full
+   bounded host request before SDK entry, including the initial-release choice.
+   A fresh explicit resolution call can exclusively borrow only that exact
+   original entered registry entry after its creation borrower/worker retire.
+   Source/domain/runtime identity, live helper epoch, quiescence and a captured
+   thirty-second deadline/cancellation remain mandatory. Phase lookup supplies no
+   disposal proof or authority to replay creation. Old unbound/prepared-only work and
+   completed children use separate APIs. Dropping the borrow leaves every
+   original lease/gate/context intact. This original-context selection foundation
+   now supports separate explicit disposal of a fully published, never-booted
+   child. Bounded control admission, exact original directory/metadata identities,
+   protected source publication and unchanged live source authority precede a
+   synchronized disposal-entered grant and one original-runtime SDK deletion.
+   Missing or exact prepared-only boot plans qualify only with no manager,
+   enrollment, child process, dependent child or real layers-cache directory.
+   Row, creation-reservation and directory absence plus unchanged source/snapshot
+   are required before a durable typed acknowledgement. SDK success and later
+   observed absence have distinct completion provenance. An entered unknown
+   deletion cannot be retried; explicit resolution only observes its exact grant.
+   Historical completion never touches recreated material or asserts current
+   namespace absence. Missing evidence cannot be rebuilt from phase or labels.
+   Disposal itself retains every original gate, transient lease and backing
+   charge. A separate finish_unbooted_disposal step now verifies the exact durable
+   proof and unique original job before transferring the same runtime/domain and
+   full backing charge into bounded disposed bookkeeping. Only original temporary
+   spools, pinned roots, work allowances and machine gates retire. No manager,
+   boot readiness, BranchCompletion or released backing is fabricated. Historical
+   lookup requires the original archive and protected ledger; recreated material
+   is untouched. Proof recovery re-synchronizes the exact ledger file and directory
+   before acknowledging or retiring work. Failed unique conversion restores the
+   whole original registry entry. Live helper identity, quiescence, one captured
+   budget and bounded control admission still apply. Native disposed backing
+   retirement now uses a distinct full-disposal request and the exact original
+   archive/ledger, without manufacturing BranchCompletion or enrollment. It binds
+   the caller's source tombstone head, exact unbooted child root, distinct operation,
+   quiescence and host removal confirmation. Original actor/source collection and
+   bounded SDK row/reservation/directory absence precede a protected accounting
+   receipt and release of only that native charge. The owned worker retains
+   ordered gates/control admission through actual return, including observation
+   cancellation. Saved acknowledgements neither requalify recreated namespaces
+   nor release a charge twice; missing archive or evidence cannot reconstruct
+   authority. Source tombstone heads remain caller correlation, not an invented
+   native history proof. Backing metadata/history stay retained. Other partial/
+   boot-entered states, Backend/Runtime/store integration and ordinary SDK
+   qualification remain required. Protocol-two dispose_unbooted_branch and
+   resolve_unbooted_branch_disposal now bind the full creation and disposal
+   request. Both require explicit quiescence; resolution never dispatches SDK
+   deletion. Original archived completion returns without namespace adoption;
+   otherwise the same retained original job supplies disposal/observation and
+   terminal handoff. Distinct release_unbooted_branch_backing carries the full
+   disposal and caller tombstones to the checked accounting route. Requests and
+   required nonnullable results have independent Rust/Elixir validators, immutable
+   catalog/domain/platform binding, thirty-second budgets and zero event output.
+   Disposal input caps at 20 KiB with 16-KiB creation, its proof at 32 KiB; backing
+   preserves existing 80-KiB request/68-KiB proof bounds. Branch terminal
+   reservations apply even with a stalled writer. Proven disposed-job handoff
+   can retire transient work during quarantine without reopening admission or
+   releasing backing; ordinary ready-manager handoff still rejects quarantine.
+   Thirty-two inert disposal/handoff/backing models plus synthetic cross-reader,
+   helper policy/output and Elixir channel contracts exercise these boundaries
+   without SDK dispatch or a live crash campaign. No public admission or codec
+   marker is enabled by this transport step. NativeUnbootedBranchDisposal now
+   saves its exact version/request before dispatch through paired branch_advance
+   acceptance. Claims preserve that request; only a current child-version result,
+   matching typed proof and fresh source observation can complete through
+   branch_resolve. The real source publication advances its actual material head.
+   A deleted never-booted child retains proof without created/observed Machine or
+   BranchCompletion. Ordinary reservation alone retires; the source dependency
+   and extra backing stay charged. Dedicated disposal_pending/disposed states
+   require the new authority and prevent stripped schema downgrades. Selective
+   v37, exact earlier-envelope omission and fresh-BEAM readers preserve this state
+   in Memory/PostgreSQL, including paired request/result/projection rollback.
+   Native dependency retirement and host backing closure for this origin remain
+   required; no store capability marker is advertised.
+   Before accepting a new entered-disposal intent, obtain positive original-job
+   selection evidence. Read-only inspect_unbooted_branch_disposal now checks the
+   exact original published, never-booted job, no active worker/disposal grant,
+   live source and exact material. Its typed candidate binds the full frozen
+   creation, actual source publication and original preparation digest. Engine,
+   Port and Elixir readers preserve original helper epoch/platform, branch
+   approval, finite observation budget and zero-output correlation. It neither
+   dispatches SDK work nor releases any charge. Prepared-retirement errors are
+   never selection evidence; previously accepted disposal uses its saved request
+   and observation path. The source-scoped backend now exposes native-only
+   inspect_unbooted_branch_disposal/3, dispose_unbooted_branch/3 and
+   resolve_unbooted_branch_disposal/3; HTTP rejects all three. Public deleted
+   resolution preserves prepared retirement first, requires positive candidate
+   evidence before accepting entered disposal, and retains one original helper/
+   controller fence through the guarded final paired write. Saved intent skips
+   selection and observes its original ledger before offering the same request
+   to independently protected one-shot dispatch. Cached completion needs no IO.
+   A single deadline covers stages and commit admission; offered transfer bounds
+   are charged across stages even on failed replies. Missing/wrong/late evidence,
+   stale claims or either store failure preserve retained state and charges.
+   Fresh source observation evolves only the actual publication and uses complete
+   material history for disk geometry. Host backing closure, remaining partial/
+   boot-entered states and ordinary acceptance stay required.
+   No public native admission or store capability marker is enabled.
+   Fresh dependency-retirement evidence for this origin now has a distinct
+   UnbootedBranchChildAbsence request/proof. Engine qualification requires the
+   exact original disposal archive/runtime/domain/protected ledger and child
+   epoch quiescence, with SDK row, creation-reservation and original-directory
+   absence before and after issuance. Source collection is not required; the
+   source may remain running. No manager/boot enrollment, SDK mutation, dependency
+   retirement or accounting release occurs in this observation. Protocol-two
+   qualify_unbooted_branch_child_absence uses exact branch approval, Inspect,
+   original epoch/platform/domain, reserved control/terminal capacity, zero output,
+   30 seconds and bounded 68-KiB request/proof. Rust and Elixir share synthetic
+   fixtures and strict request/result correlation. Source-scoped native-only
+   retire_unbooted_branch/3 now obtains this fresh proof for public retirement.
+   Fingerprint/current child version/full disposal bind its canonical request.
+   One pinned helper/controller fence and deadline cover observation and final
+   guarded branch_retire admission. Paired success retains immutable disposal
+   plus version-bound retirement, sets only the source dependency flag and leaves
+   every backing charge retained. Cached retirement needs no helper IO. Missing/
+   wrong/late proof, stale child versions or failed commit cannot retire a flag.
+   Selective v38 preserves old disposal-only and legacy bytes, rejects downgraded
+   new semantics and decodes without native assets in a fresh BEAM. Memory and
+   PostgreSQL share the contract with paired rollback of records/crypto/projections.
+   The completed-child backing path remains guarded against this new origin.
+   Host backing closure and ordinary SDK/platform acceptance still need completion;
+   no readiness or boot-completion surrogate is permitted.
+   Fork preparation's synchronized entered writer precedes
    exactly one private SDK preparation dispatch; write/worker uncertainty cannot
    downgrade to prepared abort or replay. Normal collection keeps all original
    authority, rehashes original metadata/result inodes and checks bounded source/
@@ -786,6 +941,28 @@ is activated by inspection.
    any wider quarantine remain. Five additional private models cover these gates,
    resolution histories, compatibility and control accounting. These private
    schemas/limits still need public reader/package negotiation before activation.
+   The checked resolve_held_branch_deletion request now binds full original
+   completion, the exact held root receipt, a distinct operation/canonical request
+   digest and explicit quiescence. The engine matches the retained completed
+   context and excludes its active borrower before touching the deletion journal.
+   Protocol two/Port/Elixir carry a required nonnullable positive-absence proof
+   under exact policy/domain/platform correlation and zero output. Request and
+   proof caps are 68 KiB and four KiB; the 30-second control entry remains usable
+   while ordinary admission is unavailable. The existing finite branch terminal
+   allowance preserves both observers. Synthetic cross-reader/helper models and
+   the existing private deletion state models establish no SDK qualification.
+   This entry performs no SDK delete or filesystem cleanup and releases neither
+   dependency nor backing. Frozen managed intent/version and proof now use
+   selective v34, preserving prior envelope bytes. Both Memory and PostgreSQL
+   accept the request before IO and atomically retain proof while releasing only
+   the ordinary child reservation; dependency/backing state remains. Generic bare
+   absence and uncertain-to-deleted writes cannot bypass this boundary. Public
+   Machines.resolve deleted resolution preserves the native helper/controller
+   fence through acceptance, original-owner proof and guarded final commit. Its
+   finite deadline follows fencing, claims, IO and commit admission; explicit
+   retries preserve the accepted request. Parent/dependency history and immutable
+   child creation/material stay unchanged. Explicit continuation/residual-cleanup
+   routing and ordinary qualification remain required before native activation.
    Shared SQLite absence queries now accept the same caller deadline/cancellation
    through their query progress guard; the legacy convenience entry retains its
    existing default budget. A read-only cancellation model covers both boundaries.
@@ -822,6 +999,37 @@ is activated by inspection.
    persistent history and wider quarantine remain. Eight private non-VM models
    cover these boundaries. Released/restarted children and pre-handoff disposal
    are outside this original-held-context path and remain required.
+   Checked continuation and residual-cleanup requests now bind the full original
+   held completion/root, a distinct action, fresh operation/canonical request digest
+   and explicit quiescence. Exact retained completion and no active borrower are
+   required before entering the original deletion path. Continuation acknowledgement
+   comes only from the protected Deleted record with the same frozen continuation;
+   positive absence cannot assert SDK success. Cleanup returns its action-bound
+   absence proof. Protocol two, Port and Elixir distinguish both operations and
+   nonnullable outcomes, require Delete capability plus immutable branch approval,
+   correlate domain/platform/request and reject streams. The existing 68-KiB request,
+   four-KiB proof and 30-second control limits apply, preserving both observers under
+   finite terminal buffering. This transport foundation adds no public machine API,
+   durable action grant, codec version or activation marker. Managed acceptance,
+   version freezing, separate action/proof retention and explicit public routing
+   remain required; Machines.resolve must keep its no-delete/no-cleanup contract.
+   Managed action acceptance now freezes each continuation/cleanup request under
+   the claimed version before helper IO, independently of observational resolution.
+   Selective v35 retains both action slots and typed acknowledgements while older
+   envelopes omit the new nil defaults exactly. Memory and PostgreSQL guarded
+   completion release only the ordinary child reservation. A completed action can
+   preserve earlier pending requests as history without treating them as completed
+   or allowing a late different result to rewrite deletion. Generic resolve cannot
+   consume an action acknowledgement. Explicit Machines.continue_deletion/4 and
+   Machines.cleanup_deletion/4 now hold one captured helper/controller fence through
+   expected-version claim, request acceptance, bounded IO and guarded final commit.
+   Each checks the exact accepted scope, original platform/action/request, typed
+   acknowledgement and zero output. A single deadline begins before fencing.
+   Missing/late results, renewal failure during IO and post-effect guard conflict
+   retain uncertainty and the child slot; a definitive pre-entry rejection keeps
+   not-dispatched evidence. Historical saved acknowledgement returns without helper
+   IO. HTTP rejects both native-only entries before dispatch. Shared native
+   admission requirements and ordinary package qualification remain required.
    Explicit native release_branch_backing now requires positive caller
    quiescence and host backing-removal confirmation, original completed registry
    context, ordered source/child gates, original source absence/epoch quiescence
@@ -980,13 +1188,211 @@ is activated by inspection.
    and distinct zero-output results bind identity, request, domain and platform;
    proofs use bounded branch control storage and cannot use ordinary controls.
    Shared synthetic macOS/Linux engine/wire/Elixir and helper catalog/lane tests
-   grant no live SDK qualification. Backend/public routing, pinned current
-   observations and ordinary SDK qualification remain pending.
-   Partial/absent resolution, deletion/backing transactions, prepared-retirement
-   history, derived assignment
-   approval/public dispatch, normal store replacement and ordinary end-to-end
-   platform/source qualification remain pending.
+   grant no live SDK qualification. Source-scoped backend and Runtime routing now
+   obtain original proof and positive current source/child observations under one
+   owner/deadline, then consume paired completion or explicit kept resolution.
+   Native assignment approval binds inherited metadata and original policy;
+   ordinary image creation cannot substitute. Future descriptor enrollment needs
+   native_branches:1 plus managed_branches:1, which current stores do not advertise.
+   A separate qualify_branch_child_absence protocol entry now requires exact
+   retained completed context, original boot collection, current epoch quiescence,
+   both gates and bounded SDK row/reservation/directory absence. It dispatches no
+   SDK deletion and releases neither dependency nor backing capacity. Exact
+   request-bound zero-output proof uses reserved control admission and the same
+   caller budget; typed cross-reader synthetic fixtures cover held and released
+   children on Linux/macOS. No proof is issued from inventory or bare row absence.
+   Backend child-absence routing now requires successful helper quiescence under
+   the captured owner/epoch, an approved deleted-child assignment and the exact
+   original completion/head. Runtime carries the native authority fence through
+   final paired retirement. The Memory and PostgreSQL stores bind proof to saved
+   child head/completion/fingerprint/version and retain immutable proof/original
+   version while atomically retiring only its source dependency. Stale child
+   results reject even under a current source guard; all extra backing remains.
+   Selective v32 preserves v30/v31 bytes and fresh-BEAM reading. Older experimental
+   retired states remain readable without becoming new proof; explicit fresh
+   ratification is required. Complete partial/absent creation resolution,
+   released/restarted-child deletion, normal store replacement, public activation
+   and ordinary end-to-end SDK/platform/source qualification remain. Prepared-only
+   v36 history and public routing are implemented as described above.
    The codec reader advertises no branch-store capability or native admission.
+   The checked release_branch_backing protocol entry now binds the full original
+   completion, expected source/child tombstone heads, explicit quiescence and host
+   backing-removal confirmation to a canonical request digest. The engine checks
+   exact retained completion and absence of an active original borrower before
+   admission and again inside the accounting worker. Its existing protected
+   ledger acknowledges only that original charge; lost replies cannot authorize
+   another charge release. Requests are bounded to 80 KiB, proofs to 68 KiB and
+   work to 30 seconds. This accounting mutation uses reserved control admission,
+   exact approval/domain/platform correlation and a zero-output terminal, including
+   while ordinary admission is unavailable. Rust and Elixir share synthetic
+   held/initial/explicit-release fixtures. Native backing intent acceptance now
+   locks source/child under the source guard and exact child version. Both must
+   be durably deleted, all dependencies retired and original publication/typed
+   retirement retained. Selective v33 saves a stable request across later claims,
+   preserving earlier bytes. Both Memory and PostgreSQL retain all backing while
+   pending and close only the extra reservation with a matching typed proof in a
+   paired transaction. Public release_storage now accepts the native request
+   after successful helper/controller fencing and before IO, preserving that
+   fence through final guarded closure. A native-only release_branch_backing
+   backend entry binds independent source approval and the exact accepted child
+   scope, saved heads and request. One finite budget covers fencing, acceptance,
+   observation and commit admission. Missing/late/wrong results preserve the
+   request and every charge; explicit retry keeps its original ledger identity.
+   Saved completed acknowledgement reads are idempotent without helper IO. HTTP
+   retains its original two absence observations and store variant. Deterministic
+   public/backend peers cover both fence-held store writes, draining cleanup,
+   missing reply retry, final guard conflict, deadlines and unavailable/stale
+   owners. Ordinary qualification and remaining resolution/replacement gates stay
+   required; no store marker or native feature admission is enabled.
+   Original unbooted disposal now also uses that backend entry, assigned to the
+   source rather than a fabricated child Machine. Its full-disposal wire request
+   selects release_unbooted_branch_backing and requires the original epoch,
+   exact source head/child root, retired dependencies and host confirmation.
+   Selective v39 persists a stable request and distinct backing_pending state;
+   only its matching native acknowledgement closes the paired extra reservation.
+   Disposal/retirement history and earlier v37/v38/legacy bytes remain immutable.
+   One fence/deadline covers acceptance, dispatch and final guarded commit; retries
+   retain the original request and cached completion needs no helper IO. Memory,
+   encrypted PostgreSQL and public semantic models cover both hold/provenance
+   combinations, missing replies, failed commits and draining. Other partial/
+   boot-entered origins and ordinary SDK/platform qualification stay required.
+   The engine now also has explicit resolve_ready_branch_completion for an
+   original pre-handoff result whose producer budget expired. A fresh bounded
+   original resolution token can requalify completed initialization/release and
+   transfer its actual original manager, enrollment and backing. Protected
+   lifecycle/full creation/live source and child facts remain mandatory; entered
+   phase flags cannot invent completion. Exact released-head promotion requires
+   an already owned root/head. No SDK or guest action is replayed, and historical
+   lookup remains observational. Protocol-two resolve_ready_branch_completion
+   now carries exact creation plus positive quiescence through the branch catalog,
+   reserved control/terminal path and shared engine. Native-only
+   resolve_ready_branch/3 routes public kept resolution through one controller/
+   helper fence and finite deadline, requiring fresh source/child observations
+   before the paired existing v30 completion. Historical inspection remains
+   read-only. Missing/late/wrong proof or a failed commit retains source exclusion
+   and all reservations; retry keeps original creation identity and cached saved
+   completion needs no helper IO. Draining permits retained recovery. Cumulative
+   encoded payload/framing budgets and separate 30-second observation limits apply
+   across the three exchanges. Ordinary SDK/platform qualification, earlier
+   partial phases and remaining deletion paths stay pending.
+   Ordinary delete now also selects the original released-child context, sharing
+   the held collector's protected entry, original manager/enrollment, collected
+   stopped row and one-shot final SDK deletion. Its exact initial/explicit release
+   binds the current head and private native schema four; legacy schemas retain
+   their encodings and 64/80-KiB bounds. Released records have a 160-KiB bound and
+   a second retained metadata lease. Legacy held resolution/continuation/cleanup
+   explicitly reject this origin. Host/store guards now require distinct native
+   evidence for every completed-branch delete uncertainty; bare absence cannot
+   resolve either origin.
+   The distinct checked released absence request/proof now binds full original
+   completion, exact release/current head, separate operation and canonical hashes.
+   Retained original collection and bounded row/reservation/directory absence
+   precede native schema five. Completed ordinary deletion reacquires paired gates
+   if its transient leases already retired. Earlier encodings remain unchanged;
+   source/snapshot/backing is retained. Protocol-two/Port use an exact-policy,
+   30-second control entry with 132-KiB requests, four-KiB results and zero output.
+   Public/store consumption now selects distinct held/released grants and typed
+   proofs under the same captured helper/controller fence and absolute deadline.
+   Released grants freeze claimed management/delete versions, exact completion,
+   release and current head before IO; selective v40 preserves earlier encodings
+   and older envelopes reject this variant. Memory/PostgreSQL atomically retain
+   acknowledgement and retire only the ordinary child reservation. Source history,
+   dependency/backing charges and immutable child creation/release remain separate.
+   Missing/mismatched proof, stale guards and explicit retries preserve the saved
+   request. Shared-engine released continuation now uses a distinct checked
+   request/proof and reuses the held collector/final SDK worker. Schema six freezes
+   the exact continuation before stopped-row normalization and final entry; only
+   the same unentered grant resumes, while Deleting never replays. Positive
+   absence after unknown continuation preserves the grant in the intent digest.
+   SDK success and absence remain distinct, earlier encodings stay exact and all
+   backing remains retained. Protocol-two/Port use Delete capability, the original
+   approval catalog, finite reserved control/terminal capacity and zero output.
+   Durable/public released continuation now persists a distinct grant in the
+   existing continuation slot before IO and consumes only its exact SDK-success
+   proof under the same helper/controller fence and absolute deadline. Selective
+   v41 freezes claimed management/delete versions, original completion, release
+   and current head while preserving earlier encodings. Old v35/v40 envelopes reject
+   the new variant. Both stores retain an independent pending observational grant
+   after SDK success and a pending continuation after positive absence; absence
+   cannot become SDK success. Only the ordinary child slot retires and independent
+   dependency retirement preserves both histories. Released residual
+   cleanup now has a distinct checked native/Port request with the existing
+   positive-absence proof. Shared descriptor-relative removal requires original
+   collection, row/reservation absence and a pinned original root; it preserves
+   source/sibling links and never invokes SDK lifecycle. Released cleanup schema
+   two and main proof schemas retain exact request/continuation history; only the
+   same recorded grant resumes partial cleanup or finishes an already removed
+   directory. Matching primary completion finishes only its audit and never
+   traverses recreated material. A third retained 128-KiB metadata allowance is
+   reserved before uncertainty, funding cleanup during ordinary quarantine.
+   Earlier held ledger bytes/bounds stay exact. Durable/public cleanup now saves a
+   distinct released grant before IO and consumes only its matching typed absence
+   proof under one helper/controller fence and absolute deadline. Selective v42
+   preserves claimed management/delete versions, full completion/release/current
+   head and pending independent histories. Both stores retire only the ordinary
+   child reservation; mixed cleanup/observation/SDK completion routes preserve the
+   other original grants without authorizing a later cross-route completion.
+   Reader-first upgrade is required; v35/v40/v41 reject the new grant and earlier
+   bytes remain exact. Restarted/pre-handoff deletion and ordinary SDK/platform
+   qualification remain required. Normal original released-child stop now shares
+   deletion's retained-manager collection primitive. It binds the actual manager,
+   enrollment, paths and release, records pending collection before SDK stop, and
+   requires positive collection plus an exact stopped-row acknowledgement before
+   active manager retirement. It retains protected material/release history and
+   source/backing for regular restart. A later authorized current material head
+   must still verify against its original child. Deterministic actor/row checks
+   cover returned errors, incomplete collection and stale/crossed acknowledgements;
+   actual stop/restart/delete and replacement-owner qualification remain required.
+   A normally retired original manager can now enter the existing protected
+   deletion path for its exact original released head, including that unchanged
+   head after an ordinarily completed restart/stop. No active Engine/runtime
+   handles, canonical stopped state and positive original epoch collection precede
+   intent entry under the paired gates. Pending restart/collection actors block
+   admission. The existing final collector, one-entry SDK deletion and explicit
+   continuation/absence/cleanup journals retain all source/snapshot/backing state;
+   no new wire/codec/proof shape is needed. Selection preserves existing lifecycle
+   behavior for later heads, active handles and missing historical material,
+   without granting retired-original authority. Their complete recovery,
+   replacement-owner and pre-handoff deletion remain required. Ordinary SDK start
+   now retains a finite charged boot slot before dispatch and attaches only the
+   original returned enrollment. Pending slots grant no collection authority.
+   Ordinary stop, stale-start cleanup, deletion and entered-capture stop fence the
+   exact SDK entry until return, then require positive current-boot collection.
+   Exact stopped acknowledgement retires only that runtime metadata, while
+   uncertain results retain it. Stopped natural exits no longer skip cleanup of
+   the current returned SDK handle. Replacement start validates source/mount
+   restrictions before cleanup and cannot overwrite a previous unresolved slot.
+   Metadata exhaustion preserves reserved control/observer headroom. These
+   same-engine foundations still require ordinary package/platform qualification
+   and do not resolve broader partial/unknown material or helper replacement.
+   Port stop now captures/caps an absolute deadline before adapter selection and
+   passes it with the same cancellation through stop_with_budget, inspection,
+   original/current collectors, SDK entry and final observation/retirement.
+   Pre-entry expiry keeps NotDispatched; late return/observation stays uncertain.
+   Failed final observation retains the ordinary boot slot and active handle;
+   successful cleanup removes both so retries cannot strand an inactive handle.
+   Source/mount/ownership guards remain before SDK mutation. Existing deadline/
+   cancelled wire errors preserve dispatch evidence and public vocabulary without
+   protocol/codec evolution. Ordinary lifecycle qualification remains required.
+   Original-child collection after a returned Collecting deletion now has a
+   separate checked shared-engine control. It binds the exact original completed
+   context, held/initial/explicit-release head and quiesced request. A distinct
+   bounded protected ledger freezes request/worker before original-manager stop;
+   same-original opaque collection precedes its collection-only acknowledgement.
+   SDK return alone grants no proof. Both held and released deletion reserve an
+   extra 128-KiB metadata lease before original entry, retaining all gates, source
+   leases, work, backing and public capacity through collection uncertainty.
+   The new acknowledgement changes neither SDK rows nor primary journal schemas,
+   readiness, absence, dependency or backing authority. Existing continuation
+   still requires positive original collection and enters only an unentered final
+   SDK delete. Matching historical acknowledgement lookup avoids current child
+   namespace traversal; missing published ledgers cannot be re-enrolled.
+   The distinct request/proof now routes through Port control and a fenced
+   Machines.collect_deletion/4 public action. Separate v43 durable acceptance and
+   completion preserve delete uncertainty, ordinary capacity and all dependency/
+   backing charges. Exact saved proof returns without helper IO; old codecs retain
+   exact bytes and cannot carry collection history. Ordinary SDK, package/platform/
+   source and consumer qualification remain required before activation.
 6. Run ordinary independent checkpoint restores, supported registry export/import,
    sibling branch independence, explicit held release and dependency cleanup on
    every supported platform/source combination. Use normal APIs and owned cleanup;

@@ -11,6 +11,30 @@ impl Journal {
         budget: &ReadBudget,
     ) -> Result<()> {
         request.validate()?;
+        intent.require_held()?;
+        self.begin_original_finishing(intent, request, collection, budget)
+    }
+    pub(super) fn begin_released_finishing(
+        &self,
+        intent: &Intent,
+        request: &ContinuationRequest,
+        collection: &crate::epoch::BootCollection,
+        budget: &ReadBudget,
+    ) -> Result<()> {
+        intent.validate()?;
+        if intent.release.is_none() {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        self.begin_original_finishing(intent, request, collection, budget)
+    }
+    pub(super) fn begin_original_finishing(
+        &self,
+        intent: &Intent,
+        request: &ContinuationRequest,
+        collection: &crate::epoch::BootCollection,
+        budget: &ReadBudget,
+    ) -> Result<()> {
+        request.validate()?;
         intent.collected(collection)?;
         let (mut record, version) = self.read()?;
         if record.intent != *intent {
@@ -29,7 +53,7 @@ impl Journal {
         if !matches!(record.phase, Phase::Collecting | Phase::Collected) {
             return Err(Error::before(ErrorCode::State));
         }
-        record.schema = 3;
+        record.schema = if intent.release.is_some() { 6 } else { 3 };
         record.phase = Phase::Finishing;
         record.continuation = Some(request.clone());
         budget.check()?;
@@ -38,7 +62,7 @@ impl Journal {
     }
 }
 impl Retained {
-    fn continuation_status(
+    pub(super) fn continuation_status(
         &mut self,
         journal: &Journal,
         request: &ContinuationRequest,
@@ -126,6 +150,42 @@ impl Engine {
         quiesced: bool,
         budget: &ReadBudget,
     ) -> Result<Observation> {
+        self.continue_held_branch_deletion_with_completion(
+            child,
+            (operation_id, request_sha256),
+            quiesced,
+            None,
+            budget,
+        )
+    }
+    pub(crate) fn continue_held_branch_deletion_with_completion(
+        &self,
+        child: &CreationReceipt,
+        ids: (&str, &str),
+        quiesced: bool,
+        expected: Option<&crate::BranchCompletion>,
+        budget: &ReadBudget,
+    ) -> Result<Observation> {
+        self.continue_original_branch_deletion(
+            child,
+            ids,
+            quiesced,
+            expected.map(|completion| (completion, None)),
+            budget,
+        )
+    }
+    pub(in crate::branch_delete) fn continue_original_branch_deletion(
+        &self,
+        child: &CreationReceipt,
+        ids: (&str, &str),
+        quiesced: bool,
+        expected: Option<(
+            &crate::BranchCompletion,
+            Option<&crate::BranchReleaseTransition>,
+        )>,
+        budget: &ReadBudget,
+    ) -> Result<Observation> {
+        let (operation_id, request_sha256) = ids;
         let request = ContinuationRequest {
             operation_id: operation_id.into(),
             request_sha256: request_sha256.into(),
@@ -140,12 +200,25 @@ impl Engine {
             .jobs
             .acquire(crate::jobs::Demand::material_resolution())?;
         let context = self.retained_branch_context(child)?;
+        if let Some((expected, _)) = expected {
+            let original = self.branch_retention.completed_context_exact(expected)?;
+            if !Arc::ptr_eq(&original, &context) {
+                return Err(Error::before(ErrorCode::Ownership));
+            }
+        }
+
         let journal = Journal::new(self.domain.clone(), child)?;
         let mut retained = context
             .deletion
             .try_lock()
             .map_err(|_| Error::before(ErrorCode::Conflict))?;
         let state = retained.as_mut().ok_or(Error::before(ErrorCode::State))?;
+        let release = expected.and_then(|(_, release)| release);
+        match release {
+            Some(release) if state.intent.release.as_ref() == Some(release) => (),
+            None => state.intent.require_held()?,
+            _ => return Err(Error::before(ErrorCode::Ownership)),
+        }
         state.check_returned(child)?;
         if state.continuation_status(&journal, &request)? {
             budget.check()?;
@@ -177,7 +250,11 @@ impl Engine {
         // Freeze the request and retain the worker before even publishing entry.
         state.continuation = Some(request.clone());
         state.worker = Arc::downgrade(&active);
-        journal.begin_finishing(&state.intent, &request, &collection, budget)?;
+        if release.is_some() {
+            journal.begin_released_finishing(&state.intent, &request, &collection, budget)?;
+        } else {
+            journal.begin_finishing(&state.intent, &request, &collection, budget)?;
+        }
         drop(retained);
         let application = ContinuedDeletion {
             context: context.clone(),
@@ -207,6 +284,70 @@ impl Engine {
             return Err(Error::uncertain(ErrorCode::State));
         }
         Ok(missing())
+    }
+}
+fn continuation_result(
+    state: &Retained,
+    record: &Record,
+    request: &ContinuationRequest,
+) -> Result<BranchDeletionContinuation> {
+    check_continuation_result(state, record, request)?;
+    state.intent.require_held()?;
+    BranchDeletionContinuation::issue(
+        &state.intent,
+        &request.operation_id,
+        &request.request_sha256,
+        Some(request),
+    )
+}
+pub(super) fn check_continuation_result(
+    state: &Retained,
+    record: &Record,
+    request: &ContinuationRequest,
+) -> Result<()> {
+    record.validate()?;
+    state.check_returned(state.intent.receipt())?;
+    if record.intent != state.intent
+        || record.phase != Phase::Deleted
+        || record.continuation.as_ref() != Some(request)
+        || state.continuation.as_ref() != Some(request)
+        || !matches!(state.completion, Some(Completion::Deleted))
+    {
+        return Err(Error::before(ErrorCode::State));
+    }
+    Ok(())
+}
+impl Engine {
+    pub(crate) fn held_branch_deletion_continuation_result(
+        &self,
+        child: &CreationReceipt,
+        request: (&str, &str),
+        expected: &crate::BranchCompletion,
+        budget: &ReadBudget,
+    ) -> Result<BranchDeletionContinuation> {
+        budget.check()?;
+        let _control = self
+            .jobs
+            .acquire(crate::jobs::Demand::material_resolution())?;
+        let context = self.branch_retention.completed_context_exact(expected)?;
+        let retained = context
+            .deletion
+            .try_lock()
+            .map_err(|_| Error::before(ErrorCode::Conflict))?;
+        let state = retained.as_ref().ok_or(Error::before(ErrorCode::State))?;
+        state.intent.require_held()?;
+        if state.intent.receipt() != child {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        let (record, _) = Journal::new(self.domain.clone(), child)?.read()?;
+        let request = ContinuationRequest {
+            operation_id: request.0.into(),
+            request_sha256: request.1.into(),
+        };
+        request.validate()?;
+        let proof = continuation_result(state, &record, &request)?;
+        budget.check()?;
+        Ok(proof)
     }
 }
 struct ContinuedDeletion {
@@ -520,6 +661,30 @@ mod tests {
             .is_err());
         assert_eq!(called.get(), 1);
         assert!(state.continuation_status(&journal, &request).unwrap());
+        let record = journal.read().unwrap().0;
+        let proof = continuation_result(&state, &record, &request).unwrap();
+        proof.validate().unwrap();
+        assert_eq!(
+            proof.deletion_sha256,
+            deletion_digest(&intent, Some(&request)).unwrap()
+        );
+        let active = Arc::new(());
+        state.worker = Arc::downgrade(&active);
+        assert!(continuation_result(&state, &record, &request).is_err());
+        drop(active);
+        let mut wrong = request.clone();
+        wrong.operation_id = "different-continuation".into();
+        assert!(continuation_result(&state, &record, &wrong).is_err());
+        for phase in [
+            Phase::Collecting,
+            Phase::Collected,
+            Phase::Finishing,
+            Phase::Deleting,
+        ] {
+            let mut unfinished = record.clone();
+            unfinished.phase = phase;
+            assert!(continuation_result(&state, &unfinished, &request).is_err());
+        }
         let bytes = std::fs::read(&journal.path).unwrap();
         state.completion = None;
         assert!(state.continuation_status(&journal, &request).unwrap());
@@ -531,7 +696,7 @@ mod tests {
         assert_eq!(pool.counts().checkpoint_material, 7 << 30);
         assert_eq!(
             pool.counts().branch_metadata,
-            2 * crate::jobs::BRANCH_BACKING_METADATA
+            3 * crate::jobs::BRANCH_BACKING_METADATA
         );
         assert!(
             !pool.available()
@@ -606,6 +771,7 @@ mod tests {
             .unwrap();
         let (record, _) = journal.read().unwrap();
         assert!(record.schema == 3 && record.phase == Phase::ResolvedAbsent);
+        assert!(continuation_result(&state, &record, &request).is_err());
         assert_eq!(
             proof.deletion_sha256,
             deletion_digest(&intent, Some(&request)).unwrap()

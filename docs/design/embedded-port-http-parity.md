@@ -76,7 +76,7 @@ the adapter does not currently implement the HTTP operation. Arity overloads in
 | `expand_disks` | Add | Idle created/stopped machines; absolute 1–64-GiB targets, growth only, no implicit stop/start, immutable creation intent | P7 |
 | `start_checkpointable`, `checkpoint_preflight`, `capture_checkpoint` | Add | Approved idle offline bare guests, bounded portable capture, source resumes, no external/container/network dependencies | P8 |
 | `export_machine` | Add | Stopped-machine supported disk export and approved registry destination; no implicit stop, checkpoint semantics or container workspace export | P8 |
-| `branch_source`, `branch_absent`, `branch_create`, `branch_inspect_child`, `branch_release` | Source preflight wired; activation and remaining operations pending | Same-worker offline bare source, one leaf, explicit hold/release, source dependencies and extra backing reservations | P8 |
+| `branch_source`, `branch_absent`, `branch_create`, `branch_inspect_child`, `branch_release`, native-only `resolve_ready_branch`, `retire_prepared_branch`, `retire_unbooted_branch`, `inspect_unbooted_branch_disposal`, `dispose_unbooted_branch`, `resolve_unbooted_branch_disposal` and `release_branch_backing` | Creation, held release, original ready-result recovery, retirement and backing routing wired; other resolution and ordinary qualification pending | Same-worker offline bare source, explicit hold/release, source dependencies and extra backing reservations | P8 |
 | `qualify_creation`, `inspect_creation`, `qualify_growth`, `qualify_capture`, `cleanup_capture` | Native-only implementation | Keep pre-dispatch qualification, non-mutating verified absence, explicit quiesced growth/capture proof qualification and exact capture staging release. Capture qualification/cleanup never replay capture or adopt an artifact. HTTP intentionally does not implement these operations | P1, P7, P8, P9 |
 
 The following specification features also require coverage even though they are
@@ -369,6 +369,22 @@ bare-source limits, hold/release evidence, source dependency retention and expli
 child retirement. A child has its own incarnation/proof; source labels or an
 inventory row never supply child authority. Keep uncertain children and backing
 allowances until supported reconciliation establishes the required result.
+
+Never-booted disposal retains its own typed authority. It must not manufacture
+guest readiness or a boot-completion record to reuse lifecycle cleanup. Its
+separate terminal handoff retires transient work while preserving the original
+runtime/domain and full backing charge. Explicit backing retirement then requires
+that exact original disposal archive and protected ledger, both deleted
+namespaces and creation reservations absent, original actor quiescence, positive
+original-source process absence and durable host removal confirmation. Its
+request binds the caller's saved source tombstone head and exact unbooted child
+root; native absence does not prove a claimed historical head. A protected
+accounting receipt precedes releasing only that original native charge. Historical
+acknowledgement cannot requalify or remove recreated material. Protocol-two
+disposal, explicit absence resolution and unbooted backing requests now traverse
+Port with independent Rust/Elixir correlation and reserved terminal storage.
+Backend/Runtime/store consumption and ordinary qualification remain required
+before public native branch admission.
 
 ## Qualification and completion
 

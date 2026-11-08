@@ -65,7 +65,26 @@ pub(crate) struct CollectionDispatch(BootDispatch);
 impl CollectionDispatch {
     /// The owned SDK stop call actually returned, including an error. Only then
     /// may another actor sweep reap this boot child. This proves no collection.
-    pub(crate) fn sdk_returned(mut self) -> Result<()> {
+    pub(crate) fn sdk_returned(self) -> Result<()> {
+        self.clear()
+    }
+    /// Recheck the caller budget after publishing pending collection. A request
+    /// that expires before entry removes only its own unentered fence; it makes
+    /// no SDK-return or process-collection claim.
+    pub(crate) fn run(
+        self,
+        budget: &crate::ReadBudget,
+        call: impl FnOnce() -> Result<()>,
+    ) -> Result<()> {
+        if let Err(error) = budget.check() {
+            self.clear().map_err(|e| Error::uncertain(e.code))?;
+            return Err(error);
+        }
+        let result = call();
+        self.sdk_returned().map_err(|e| Error::uncertain(e.code))?;
+        result.map_err(|e| Error::uncertain(e.code))
+    }
+    fn clear(mut self) -> Result<()> {
         let _guard = self
             .0
             .epoch
@@ -166,16 +185,8 @@ impl BootDispatch {
             operation: self.pending.operation.clone(),
         }
     }
-    /// SDK entry returned. Missing/late enrollment remains an unknown attempt.
-    pub(crate) fn finish(self, sdk_pid: Option<i32>) -> Result<()> {
-        self.finish_child(sdk_pid).map(|_| ())
-    }
     /// Return the identity enrolled before SDK execution, including when the
     /// child has already exited. Current inventory cannot reconstruct birth.
-    pub(crate) fn finish_child(self, sdk_pid: Option<i32>) -> Result<OwnerIdentity> {
-        self.finish_enrollment(sdk_pid)
-            .map(|enrolled| enrolled.child)
-    }
     pub(crate) fn finish_enrollment(mut self, sdk_pid: Option<i32>) -> Result<BootEnrollment> {
         let _guard = self
             .epoch
@@ -746,6 +757,12 @@ pub(crate) mod tests {
             birth: 1,
             uid: dispatch.pending.owner.uid,
         };
+        complete_model_with_child(dispatch, identity)
+    }
+    pub(crate) fn complete_model_with_child(
+        dispatch: BootDispatch,
+        identity: OwnerIdentity,
+    ) -> BootEnrollment {
         let actor = Actor {
             schema: 1,
             owner: dispatch.pending.owner,
@@ -1003,7 +1020,7 @@ pub(crate) mod tests {
         };
         assert_eq!(status.code(), Some(2));
         // Guard rejection cannot pass: it would leave no enrolled actor.
-        dispatch.finish(Some(child.id() as i32)).unwrap();
+        dispatch.finish_enrollment(Some(child.id() as i32)).unwrap();
         assert!(actors.quiescent_for("owned").unwrap());
         actors.close().unwrap();
         fence_previous(&root, &host.domain).unwrap();

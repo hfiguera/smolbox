@@ -8,7 +8,8 @@ defmodule SmolBox.Embedded.NativeGrowth do
     Identity,
     MaterialHistory,
     NativeBranchAuthority,
-    NativeBranchHistory
+    NativeBranchHistory,
+    NativePreparedBranchRetirement
   }
 
   def request(expansion),
@@ -218,11 +219,15 @@ defmodule SmolBox.Embedded.NativeGrowth do
          {:ok, captures} <- committed_captures(record.captures),
          {:ok, branches} <- NativeBranchHistory.transitions(record),
          {:ok, release} <- NativeBranchAuthority.transitions(record) do
-      {:ok,
-       Enum.sort_by(
-         growth ++ captures ++ branches ++ release,
-         & &1.receipt["material"]["revision"]
-       )}
+      transitions =
+        Enum.sort_by(
+          growth ++ captures ++ branches ++ release,
+          & &1.receipt["material"]["revision"]
+        )
+
+      if NativePreparedBranchRetirement.history?(record, transitions),
+        do: {:ok, transitions},
+        else: :error
     end
   end
 

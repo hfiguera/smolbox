@@ -206,16 +206,28 @@ pub fn run_with_policy(
     upload: Option<File>,
     mut emit: impl FnMut(wire::Stream, &[u8]) -> Result<(), ()>,
 ) -> wire::Outcome {
+    let entered = Instant::now();
+    let operation_deadline = entered.checked_add(remaining);
+    let stop_deadline = capped_stop_deadline(entered, remaining);
     let mounts = match mount_selection(operation.creation_mounts(), policy.as_ref()) {
         Ok(mounts) => mounts,
         Err(failure) => return error(failure),
     };
-    let operation_deadline = Instant::now().checked_add(remaining);
     let observation_budget =
         || engine::ReadBudget::new(remaining.min(Duration::from_secs(30)), cancel.clone());
     let result = match operation {
-        wire::Operation::ReleaseHeldBranch { .. } | wire::Operation::QualifyHeldBranchRelease { .. }
-        | wire::Operation::CreateBranch { .. } | wire::Operation::InspectBranchCompletion { .. } =>
+        wire::Operation::InspectUnbootedBranchDisposal { .. } | wire::Operation::DisposeUnbootedBranch { .. } | wire::Operation::ResolveUnbootedBranchDisposal { .. } | wire::Operation::ReleaseUnbootedBranchBacking { .. } | wire::Operation::RetirePreparedBranch { .. } | wire::Operation::ContinueHeldBranchDeletion { .. } | wire::Operation::CleanupHeldBranchDeletion { .. }
+        | wire::Operation::ContinueReleasedBranchDeletion { .. }
+        | wire::Operation::CollectBranchDeletion { .. }
+        | wire::Operation::CleanupReleasedBranchDeletion { .. }
+        | wire::Operation::ResolveReleasedBranchDeletion { .. }
+        | wire::Operation::ResolveHeldBranchDeletion { .. }
+        | wire::Operation::ReleaseBranchBacking { .. }
+        | wire::Operation::QualifyUnbootedBranchChildAbsence { .. }
+        | wire::Operation::QualifyBranchChildAbsence { .. }
+        | wire::Operation::ReleaseHeldBranch { .. } | wire::Operation::QualifyHeldBranchRelease { .. }
+        | wire::Operation::CreateBranch { .. } | wire::Operation::InspectBranchCompletion { .. }
+        | wire::Operation::ResolveReadyBranchCompletion { .. } =>
             return error(engine::Error {code:engine::ErrorCode::Unsupported, dispatch:engine::Dispatch::NotDispatched}),
         wire::Operation::BranchPreflight { receipt: supplied } => observation_budget()
             .and_then(|budget| engine.branch_preflight(&receipt(&supplied), &budget))
@@ -583,7 +595,8 @@ pub fn run_with_policy(
                 .and_then(|deadline| engine.start_with_volume_policy(&receipt(&r), &policy, deadline, &cancel)),
             None => engine.start(&receipt(&r)),
         }.map(observation),
-        wire::Operation::Stop { receipt: r } => engine.stop(&receipt(&r)).map(observation),
+        wire::Operation::Stop { receipt: r } => stop_operation(stop_deadline, cancel.clone(),
+            |budget| engine.stop_with_budget(&receipt(&r), budget)),
         wire::Operation::Delete { receipt: r } => observation_budget()
             .and_then(|budget| engine.delete_with_budget(&receipt(&r), &budget)).map(observation),
         wire::Operation::ExecBackground {receipt:r,command} => match &policy { Some(policy) => engine.exec_background_with_volume_policy(&receipt(&r),
@@ -1185,6 +1198,339 @@ pub fn branch(
     remaining: Duration,
     cancel: engine::Cancellation,
 ) -> wire::Outcome {
+    let collection_deadline = Instant::now().checked_add(remaining.min(Duration::from_secs(30)));
+    if matches!(
+        operation,
+        wire::Operation::InspectUnbootedBranchDisposal { .. }
+    ) || operation.unbooted_disposal_request().is_some()
+        || matches!(
+            operation,
+            wire::Operation::ReleaseUnbootedBranchBacking { .. }
+        )
+    {
+        return unbooted_branch(engine, operation, approval, remaining, cancel);
+    }
+    if let wire::Operation::RetirePreparedBranch { request } = &operation {
+        let run = || -> engine::Result<wire::Outcome> {
+            let before = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::NotDispatched,
+            };
+            let uncertain = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::MayHaveDispatched,
+            };
+            operation
+                .validate(remaining.as_millis().min(u64::MAX as u128) as u64)
+                .map_err(|_| before())?;
+            if request.creation.approval != approval {
+                return Err(before());
+            }
+            let native: engine::PreparedBranchRetirementRequest =
+                serde_json::from_value(serde_json::to_value(request).map_err(|_| before())?)
+                    .map_err(|_| before())?;
+            let budget = engine::ReadBudget::new(remaining.min(Duration::from_secs(30)), cancel)?;
+            let proof = engine.retire_prepared_branch_checked(&native, &budget)?;
+            let proof: wire::PreparedBranchRetirement =
+                serde_json::from_value(serde_json::to_value(proof).map_err(|_| uncertain())?)
+                    .map_err(|_| uncertain())?;
+            request.matches(&proof).map_err(|_| uncertain())?;
+            Ok(wire::Outcome::PreparedBranchRetired {
+                proof: Box::new(proof),
+            })
+        };
+        return run().unwrap_or_else(error);
+    }
+    if let Some(request) = operation.held_deletion_action_request() {
+        let run = || -> engine::Result<wire::Outcome> {
+            let before = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::NotDispatched,
+            };
+            let uncertain = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::MayHaveDispatched,
+            };
+            operation
+                .validate(remaining.as_millis().min(u64::MAX as u128) as u64)
+                .map_err(|_| before())?;
+            if *request.approval() != approval {
+                return Err(before());
+            }
+            let native: engine::HeldBranchDeletionActionRequest =
+                serde_json::from_value(serde_json::to_value(request).map_err(|_| before())?)
+                    .map_err(|_| before())?;
+            let budget = engine::ReadBudget::new(remaining.min(Duration::from_secs(30)), cancel)?;
+            match request.action {
+                wire::HeldBranchDeletionAction::Continue => {
+                    let proof = engine.continue_held_branch_deletion_checked(&native, &budget)?;
+                    let proof: wire::BranchDeletionContinuation = serde_json::from_value(
+                        serde_json::to_value(proof).map_err(|_| uncertain())?,
+                    )
+                    .map_err(|_| uncertain())?;
+                    request
+                        .matches_continuation(&proof)
+                        .map_err(|_| uncertain())?;
+                    Ok(wire::Outcome::HeldBranchDeletionContinued {
+                        proof: Box::new(proof),
+                    })
+                }
+                wire::HeldBranchDeletionAction::Cleanup => {
+                    let proof = engine.cleanup_held_branch_deletion_checked(&native, &budget)?;
+                    let proof: wire::BranchDeletionResolution = serde_json::from_value(
+                        serde_json::to_value(proof).map_err(|_| uncertain())?,
+                    )
+                    .map_err(|_| uncertain())?;
+                    request.matches_cleanup(&proof).map_err(|_| uncertain())?;
+                    Ok(wire::Outcome::HeldBranchDeletionCleaned {
+                        proof: Box::new(proof),
+                    })
+                }
+            }
+        };
+        return run().unwrap_or_else(error);
+    }
+    if let wire::Operation::ContinueReleasedBranchDeletion { request } = &operation {
+        let run = || -> engine::Result<wire::Outcome> {
+            let failure = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::NotDispatched,
+            };
+            operation
+                .validate(remaining.as_millis().min(u64::MAX as u128) as u64)
+                .map_err(|_| failure())?;
+            if *request.approval() != approval {
+                return Err(failure());
+            }
+            let native: engine::ReleasedBranchDeletionContinuationRequest =
+                serde_json::from_value(serde_json::to_value(request).map_err(|_| failure())?)
+                    .map_err(|_| failure())?;
+            let budget = engine::ReadBudget::new(remaining.min(Duration::from_secs(30)), cancel)?;
+            let proof = engine.continue_released_branch_deletion_checked(&native, &budget)?;
+            let uncertain = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::MayHaveDispatched,
+            };
+            let proof: wire::ReleasedBranchDeletionContinuation =
+                serde_json::from_value(serde_json::to_value(proof).map_err(|_| uncertain())?)
+                    .map_err(|_| uncertain())?;
+            request.matches(&proof).map_err(|_| uncertain())?;
+            Ok(wire::Outcome::ReleasedBranchDeletionContinued {
+                proof: Box::new(proof),
+            })
+        };
+        return run().unwrap_or_else(error);
+    }
+    if let wire::Operation::CleanupReleasedBranchDeletion { request } = &operation {
+        let run = || -> engine::Result<wire::Outcome> {
+            let failure = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::NotDispatched,
+            };
+            operation
+                .validate(remaining.as_millis().min(u64::MAX as u128) as u64)
+                .map_err(|_| failure())?;
+            if *request.approval() != approval {
+                return Err(failure());
+            }
+            let native: engine::ReleasedBranchDeletionCleanupRequest =
+                serde_json::from_value(serde_json::to_value(request).map_err(|_| failure())?)
+                    .map_err(|_| failure())?;
+            let budget = engine::ReadBudget::new(remaining.min(Duration::from_secs(30)), cancel)?;
+            let proof = engine.cleanup_released_branch_deletion_checked(&native, &budget)?;
+            let uncertain = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::MayHaveDispatched,
+            };
+            let proof: wire::ReleasedBranchDeletionResolution =
+                serde_json::from_value(serde_json::to_value(proof).map_err(|_| uncertain())?)
+                    .map_err(|_| uncertain())?;
+            request.matches(&proof).map_err(|_| uncertain())?;
+            Ok(wire::Outcome::ReleasedBranchDeletionCleaned {
+                proof: Box::new(proof),
+            })
+        };
+        return run().unwrap_or_else(error);
+    }
+    if let wire::Operation::CollectBranchDeletion { request } = &operation {
+        let run = || -> engine::Result<wire::Outcome> {
+            let failure = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::NotDispatched,
+            };
+            operation
+                .validate(remaining.as_millis().min(u64::MAX as u128) as u64)
+                .map_err(|_| failure())?;
+            if *request.approval() != approval {
+                return Err(failure());
+            }
+            let native: engine::BranchDeletionCollectionRequest =
+                serde_json::from_value(serde_json::to_value(request).map_err(|_| failure())?)
+                    .map_err(|_| failure())?;
+            let budget =
+                engine::ReadBudget::until(collection_deadline.ok_or_else(failure)?, cancel)?;
+            let proof = engine.collect_branch_deletion_checked(&native, &budget)?;
+            let uncertain = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::MayHaveDispatched,
+            };
+            let proof: wire::BranchDeletionCollection =
+                serde_json::from_value(serde_json::to_value(proof).map_err(|_| uncertain())?)
+                    .map_err(|_| uncertain())?;
+            request.matches(&proof).map_err(|_| uncertain())?;
+            Ok(wire::Outcome::BranchDeletionCollected {
+                proof: Box::new(proof),
+            })
+        };
+        return run().unwrap_or_else(error);
+    }
+    if let wire::Operation::ResolveReleasedBranchDeletion { request } = &operation {
+        let run = || -> engine::Result<wire::Outcome> {
+            let failure = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::NotDispatched,
+            };
+            operation
+                .validate(remaining.as_millis().min(u64::MAX as u128) as u64)
+                .map_err(|_| failure())?;
+            if *request.approval() != approval {
+                return Err(failure());
+            }
+            let native: engine::ReleasedBranchDeletionRequest =
+                serde_json::from_value(serde_json::to_value(request).map_err(|_| failure())?)
+                    .map_err(|_| failure())?;
+            let budget = engine::ReadBudget::new(remaining.min(Duration::from_secs(30)), cancel)?;
+            let proof = engine.resolve_released_branch_deletion_checked(&native, &budget)?;
+            let uncertain = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::MayHaveDispatched,
+            };
+            let proof: wire::ReleasedBranchDeletionResolution =
+                serde_json::from_value(serde_json::to_value(proof).map_err(|_| uncertain())?)
+                    .map_err(|_| uncertain())?;
+            request.matches(&proof).map_err(|_| uncertain())?;
+            Ok(wire::Outcome::ReleasedBranchDeletionResolved {
+                proof: Box::new(proof),
+            })
+        };
+        return run().unwrap_or_else(error);
+    }
+    if let wire::Operation::ResolveHeldBranchDeletion { request } = &operation {
+        let run = || -> engine::Result<wire::Outcome> {
+            let failure = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::NotDispatched,
+            };
+            operation
+                .validate(remaining.as_millis().min(u64::MAX as u128) as u64)
+                .map_err(|_| failure())?;
+            if *request.approval() != approval {
+                return Err(failure());
+            }
+            let native: engine::HeldBranchDeletionRequest =
+                serde_json::from_value(serde_json::to_value(request).map_err(|_| failure())?)
+                    .map_err(|_| failure())?;
+            let budget = engine::ReadBudget::new(remaining.min(Duration::from_secs(30)), cancel)?;
+            let proof = engine.resolve_held_branch_deletion_checked(&native, &budget)?;
+            let uncertain = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::MayHaveDispatched,
+            };
+            let proof: wire::BranchDeletionResolution =
+                serde_json::from_value(serde_json::to_value(proof).map_err(|_| uncertain())?)
+                    .map_err(|_| uncertain())?;
+            request.matches(&proof).map_err(|_| uncertain())?;
+            Ok(wire::Outcome::HeldBranchDeletionResolved {
+                proof: Box::new(proof),
+            })
+        };
+        return run().unwrap_or_else(error);
+    }
+    if let wire::Operation::ReleaseBranchBacking { request } = &operation {
+        let run = || -> engine::Result<wire::Outcome> {
+            let failure = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::NotDispatched,
+            };
+            operation
+                .validate(remaining.as_millis().min(u64::MAX as u128) as u64)
+                .map_err(|_| failure())?;
+            if *request.approval() != approval {
+                return Err(failure());
+            }
+            let native: engine::BranchBackingReleaseRequest =
+                serde_json::from_value(serde_json::to_value(request).map_err(|_| failure())?)
+                    .map_err(|_| failure())?;
+            let budget = engine::ReadBudget::new(remaining.min(Duration::from_secs(30)), cancel)?;
+            let proof = engine.release_branch_backing_checked(&native, &budget)?;
+            let uncertain = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::MayHaveDispatched,
+            };
+            let proof: wire::BranchBackingRelease =
+                serde_json::from_value(serde_json::to_value(proof).map_err(|_| uncertain())?)
+                    .map_err(|_| uncertain())?;
+            request.matches(&proof).map_err(|_| uncertain())?;
+            Ok(wire::Outcome::BranchBackingReleased {
+                proof: Box::new(proof),
+            })
+        };
+        return run().unwrap_or_else(error);
+    }
+    if let wire::Operation::QualifyUnbootedBranchChildAbsence { request } = &operation {
+        let run = || -> engine::Result<wire::Outcome> {
+            let failure = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::NotDispatched,
+            };
+            operation
+                .validate(remaining.as_millis().min(u64::MAX as u128) as u64)
+                .map_err(|_| failure())?;
+            if *request.approval() != approval {
+                return Err(failure());
+            }
+            let native: engine::UnbootedBranchChildAbsenceRequest =
+                serde_json::from_value(serde_json::to_value(request).map_err(|_| failure())?)
+                    .map_err(|_| failure())?;
+            let budget = engine::ReadBudget::new(remaining.min(Duration::from_secs(30)), cancel)?;
+            let proof = engine.qualify_unbooted_branch_child_absence(&native, &budget)?;
+            let proof: wire::UnbootedBranchChildAbsence =
+                serde_json::from_value(serde_json::to_value(proof).map_err(|_| failure())?)
+                    .map_err(|_| failure())?;
+            request.matches(&proof).map_err(|_| failure())?;
+            Ok(wire::Outcome::UnbootedBranchChildAbsent {
+                proof: Box::new(proof),
+            })
+        };
+        return run().unwrap_or_else(error);
+    }
+    if let wire::Operation::QualifyBranchChildAbsence { request } = &operation {
+        let run = || -> engine::Result<wire::Outcome> {
+            let failure = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::NotDispatched,
+            };
+            operation
+                .validate(remaining.as_millis().min(u64::MAX as u128) as u64)
+                .map_err(|_| failure())?;
+            if *request.approval() != approval {
+                return Err(failure());
+            }
+            let native: engine::BranchChildAbsenceRequest =
+                serde_json::from_value(serde_json::to_value(request).map_err(|_| failure())?)
+                    .map_err(|_| failure())?;
+            let budget = engine::ReadBudget::new(remaining.min(Duration::from_secs(30)), cancel)?;
+            let proof = engine.qualify_branch_child_absence(&native, &budget)?;
+            let proof: wire::BranchChildAbsence =
+                serde_json::from_value(serde_json::to_value(proof).map_err(|_| failure())?)
+                    .map_err(|_| failure())?;
+            request.matches(&proof).map_err(|_| failure())?;
+            Ok(wire::Outcome::BranchChildAbsent {
+                proof: Box::new(proof),
+            })
+        };
+        return run().unwrap_or_else(error);
+    }
     if operation
         .validate(remaining.as_millis().min(u64::MAX as u128) as u64)
         .is_err()
@@ -1197,9 +1543,13 @@ pub fn branch(
     if operation.held_branch_request().is_some() {
         return held_branch_release(engine, operation, approval, remaining, cancel);
     }
-    let (request, lookup) = match operation {
-        wire::Operation::CreateBranch { request } => (request, false),
-        wire::Operation::InspectBranchCompletion { request } => (request, true),
+    let (request, lookup, resolving) = match operation {
+        wire::Operation::CreateBranch { request } => (request, false, false),
+        wire::Operation::InspectBranchCompletion { request } => (request, true, false),
+        wire::Operation::ResolveReadyBranchCompletion {
+            request,
+            quiesced: true,
+        } => (request, true, true),
         _ => {
             return error(engine::Error {
                 code: engine::ErrorCode::Unsupported,
@@ -1224,7 +1574,9 @@ pub fn branch(
         } else {
             engine::ReadBudget::for_checkpoint_work(remaining, cancel)
         }?;
-        let completion = if lookup {
+        let completion = if resolving {
+            engine.resolve_ready_branch_completion(&native, true, &budget)?
+        } else if lookup {
             engine.inspect_branch_completion(&native, &budget)?
         } else {
             Some(engine.create_branch(&native, &budget)?)
@@ -1596,3 +1948,163 @@ pub fn export(
     })();
     result.unwrap_or_else(error)
 }
+
+fn unbooted_branch(
+    engine: &engine::Engine,
+    operation: wire::Operation,
+    approval: wire::BranchApproval,
+    remaining: Duration,
+    cancel: engine::Cancellation,
+) -> wire::Outcome {
+    let run = || -> engine::Result<wire::Outcome> {
+        let before = || engine::Error {
+            code: engine::ErrorCode::Ownership,
+            dispatch: engine::Dispatch::NotDispatched,
+        };
+        let uncertain = || engine::Error {
+            code: engine::ErrorCode::Ownership,
+            dispatch: engine::Dispatch::MayHaveDispatched,
+        };
+        operation
+            .validate(remaining.as_millis().min(u64::MAX as u128) as u64)
+            .map_err(|_| before())?;
+        if operation.branch_approval() != Some(&approval) {
+            return Err(before());
+        }
+        let check_cancel = cancel.clone();
+        let deadline = std::time::Instant::now() + remaining.min(Duration::from_secs(30));
+        let budget = engine::ReadBudget::new(remaining.min(Duration::from_secs(30)), cancel)?;
+        if let wire::Operation::InspectUnbootedBranchDisposal { request, quiesced } = &operation {
+            let creation: engine::BranchCreateRequest =
+                serde_json::from_value(serde_json::to_value(request).map_err(|_| before())?)
+                    .map_err(|_| before())?;
+            let original = engine
+                .retain_branch_resolution(&creation, *quiesced, &budget)?
+                .ok_or_else(before)?;
+            let candidate = original.inspect_disposal_candidate(engine)?;
+            let candidate: wire::UnbootedBranchDisposalCandidate =
+                serde_json::from_value(serde_json::to_value(candidate).map_err(|_| before())?)
+                    .map_err(|_| before())?;
+            candidate.matches(request).map_err(|_| before())?;
+            if check_cancel.is_cancelled() || Instant::now() >= deadline {
+                return Err(before());
+            }
+            return Ok(wire::Outcome::UnbootedBranchDisposalCandidate {
+                candidate: Box::new(candidate),
+            });
+        }
+        if let wire::Operation::ReleaseUnbootedBranchBacking { request } = &operation {
+            let native: engine::UnbootedBranchBackingReleaseRequest =
+                serde_json::from_value(serde_json::to_value(request).map_err(|_| before())?)
+                    .map_err(|_| before())?;
+            let result = engine.release_unbooted_branch_backing_checked(&native, &budget)?;
+            let proof: wire::BranchBackingRelease =
+                serde_json::from_value(serde_json::to_value(result).map_err(|_| uncertain())?)
+                    .map_err(|_| uncertain())?;
+            request.matches(&proof).map_err(|_| uncertain())?;
+            if check_cancel.is_cancelled() || Instant::now() >= deadline {
+                return Err(engine::Error {
+                    code: engine::ErrorCode::State,
+                    dispatch: engine::Dispatch::MayHaveDispatched,
+                });
+            }
+            return Ok(wire::Outcome::BranchBackingReleased {
+                proof: Box::new(proof),
+            });
+        }
+        let request = operation.unbooted_disposal_request().ok_or_else(before)?;
+        let creation: engine::BranchCreateRequest =
+            serde_json::from_value(serde_json::to_value(&request.creation).map_err(|_| before())?)
+                .map_err(|_| before())?;
+        let native: engine::UnbootedBranchDisposalRequest =
+            serde_json::from_value(serde_json::to_value(&request.request).map_err(|_| before())?)
+                .map_err(|_| before())?;
+        let proof = if let Some(saved) =
+            engine.inspect_unbooted_branch_disposal(&creation, &native, &budget)?
+        {
+            saved
+        } else {
+            let original = engine
+                .retain_branch_resolution(&creation, native.quiesced, &budget)?
+                .ok_or_else(before)?;
+            let proof = if matches!(operation, wire::Operation::DisposeUnbootedBranch { .. }) {
+                original.dispose_unbooted_child(engine, &native)?
+            } else {
+                original.resolve_unbooted_disposal(engine, &native)?
+            };
+            original
+                .finish_unbooted_disposal(engine, &proof)
+                .map_err(|e| engine::Error {
+                    code: e.code,
+                    dispatch: engine::Dispatch::MayHaveDispatched,
+                })?
+        };
+        let proof: wire::UnbootedBranchDisposal =
+            serde_json::from_value(serde_json::to_value(proof).map_err(|_| uncertain())?)
+                .map_err(|_| uncertain())?;
+        request.matches(&proof).map_err(|_| uncertain())?;
+        if check_cancel.is_cancelled() || std::time::Instant::now() >= deadline {
+            return Err(engine::Error {
+                code: engine::ErrorCode::State,
+                dispatch: engine::Dispatch::MayHaveDispatched,
+            });
+        }
+        Ok(wire::Outcome::UnbootedBranchDisposed {
+            proof: Box::new(proof),
+        })
+    };
+    run().unwrap_or_else(error)
+}
+
+fn capped_stop_deadline(entered: Instant, remaining: Duration) -> Option<Instant> {
+    entered
+        .checked_add(remaining)
+        .map(|deadline| deadline.min(entered + Duration::from_secs(30)))
+}
+fn stop_budget_outcome(
+    deadline: Instant,
+    cancel: &engine::Cancellation,
+    dispatch: wire::Dispatch,
+) -> Option<wire::Outcome> {
+    let code = if cancel.is_cancelled() {
+        wire::SafeCode::Cancelled
+    } else if Instant::now() >= deadline {
+        wire::SafeCode::Deadline
+    } else {
+        return None;
+    };
+    Some(wire::Outcome::Error { code, dispatch })
+}
+fn stop_operation(
+    deadline: Option<Instant>,
+    cancel: engine::Cancellation,
+    invoke: impl FnOnce(&engine::ReadBudget) -> engine::Result<engine::Observation>,
+) -> engine::Result<wire::Outcome> {
+    let deadline = deadline.ok_or(engine::Error {
+        code: engine::ErrorCode::Validation,
+        dispatch: engine::Dispatch::NotDispatched,
+    })?;
+    if let Some(outcome) = stop_budget_outcome(deadline, &cancel, wire::Dispatch::NotDispatched) {
+        return Ok(outcome);
+    }
+    let budget = match engine::ReadBudget::until(deadline, cancel.clone()) {
+        Ok(budget) => budget,
+        Err(error) => {
+            return match stop_budget_outcome(deadline, &cancel, wire::Dispatch::NotDispatched) {
+                Some(outcome) => Ok(outcome),
+                None => Err(error),
+            }
+        }
+    };
+    let result = invoke(&budget);
+    let evidence = result.as_ref().map_or_else(
+        |error| dispatch(error.dispatch),
+        |_| wire::Dispatch::MayHaveDispatched,
+    );
+    if let Some(outcome) = stop_budget_outcome(deadline, &cancel, evidence) {
+        return Ok(outcome);
+    }
+    result.map(observation)
+}
+#[cfg(test)]
+mod stop_tests;

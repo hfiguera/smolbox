@@ -102,6 +102,37 @@ impl OwnedBoot {
         })
     }
 }
+// Completed worker facts are requalified from the original protected lifecycle
+// below. An in-memory phase alone never attests readiness or permits handoff.
+pub(super) fn handoff_ready(work: &Work, resolving: bool) -> bool {
+    let phase = matches!(work.phase, Phase::IdentityReady | Phase::Released)
+        || (resolving && matches!(work.phase, Phase::IdentityEntered | Phase::ReleaseEntered));
+    phase && work.worker.upgrade().is_none() && work.prepared.is_none() && work.collected.is_none()
+}
+// Protected lifecycle completion is required even when an expired producer
+// left its in-memory phase at the entered boundary. This calls no SDK/agent API.
+pub(super) fn qualify_ready_result(
+    plan: &Plan,
+    enrollment: &crate::epoch::BootEnrollment,
+    identity_sha256: &str,
+    creation: Option<&BranchCreateRequest>,
+) -> Result<crate::BranchCompletion> {
+    let (child, held, release) =
+        Lifecycle::at(&plan.child.path).finish_record(plan, enrollment, identity_sha256)?;
+    let result = crate::BranchCompletion {
+        schema: 1,
+        publication: plan.publication.clone(),
+        child,
+        identity_sha256: identity_sha256.into(),
+        held,
+        release,
+    };
+    result.validate()?;
+    if let Some(creation) = creation {
+        creation.matches(&result)?;
+    }
+    Ok(result)
+}
 struct BarePack {
     root: crate::export_source::Root,
     file: File,
@@ -199,6 +230,21 @@ impl RetainedBranchPreparation {
         if let Some(completed) = self.completed(engine)? {
             return Ok(completed);
         }
+        let budget = self.entry(engine)?.ownership.intent.guard.budget.clone();
+        self.finish_child_under(engine, &budget, false)
+    }
+    // Only the original explicit resolution token may supply a fresh deadline.
+    // It can qualify an already completed worker result, never resume that work.
+    pub(super) fn finish_child_under(
+        &self,
+        engine: &Engine,
+        budget: &ReadBudget,
+        resolving: bool,
+    ) -> Result<crate::BranchCompletion> {
+        budget.check()?;
+        if let Some(completed) = self.completed(engine)? {
+            return Ok(completed);
+        }
         let registry = self
             .registry
             .upgrade()
@@ -225,19 +271,20 @@ impl RetainedBranchPreparation {
             .work
             .try_lock()
             .map_err(|_| Error::before(ErrorCode::Conflict))?;
-        if !matches!(work.phase, Phase::IdentityReady | Phase::Released)
-            || work.worker.upgrade().is_some()
-            || work.prepared.is_some()
-            || work.collected.is_some()
-        {
+        if !handoff_ready(&work, resolving) {
             return Err(Error::before(ErrorCode::State));
         }
         let original = &entry.ownership.intent;
-        original.guard.budget.check()?;
-        original.guard._job.check_branch_handoff()?;
+        budget.check()?;
+        if resolving {
+            original.guard._job.check_resolved_branch_handoff()?;
+        } else {
+            original.guard._job.check_branch_handoff()?;
+        }
         let boot = work.boot.as_ref().ok_or(Error::before(ErrorCode::State))?;
         let epoch = engine.boot_epoch()?;
         boot.verify_live(epoch)?;
+        boot.guest_identity()?;
         let identity_sha256 = boot
             .identity_sha256
             .as_ref()
@@ -246,10 +293,13 @@ impl RetainedBranchPreparation {
             .enrollment
             .as_ref()
             .ok_or(Error::before(ErrorCode::Ownership))?;
-        let lifecycle = Lifecycle::at(&boot.plan.child.path);
-        let (receipt, held, release) =
-            lifecycle.finish_record(&boot.plan, enrollment, identity_sha256)?;
-        let record = engine.record(&receipt)?;
+        let result = qualify_ready_result(
+            &boot.plan,
+            enrollment,
+            identity_sha256,
+            entry.ownership.creation.as_ref(),
+        )?;
+        let record = engine.record(&result.child)?;
         let source = engine.record(&boot.plan.publication.receipt)?;
         if !engine
             .branch_source_authority(
@@ -257,24 +307,15 @@ impl RetainedBranchPreparation {
                 original.intent.source_pid,
                 &source,
                 &record,
-                &original.guard.budget,
+                budget,
             )?
             .running()
-            || record.forkpoint_held != held
+            || record.forkpoint_held != result.held
             || record.pid != Some(enrollment.child().pid)
             || record.pid_start_time != Some(enrollment.child().birth)
         {
             return Err(Error::uncertain(ErrorCode::Ownership));
         }
-        let result = crate::BranchCompletion {
-            schema: 1,
-            publication: boot.plan.publication.clone(),
-            child: receipt,
-            identity_sha256: identity_sha256.clone(),
-            held,
-            release,
-        };
-        result.validate()?;
         let context = Arc::new(crate::branch_owned::Context {
             manager: boot.manager.clone(),
             plan: boot.plan.clone(),
@@ -285,11 +326,15 @@ impl RetainedBranchPreparation {
             _runtime: original.guard._runtime.clone(),
             _domain: original.guard.domain.clone(),
         });
-        original
-            .guard
-            .budget
-            .check()
-            .map_err(|e| Error::uncertain(e.code))?;
+        budget.check().map_err(|e| Error::uncertain(e.code))?;
+        // A returned release may have synchronized both journals just before
+        // the original observer expired, leaving its in-memory handle at root.
+        // Promotion accepts only that already-owned root or this exact next head.
+        if let Some(release) = &result.release {
+            engine
+                .promote_branch_handle(&release.previous, &release.receipt)
+                .map_err(|error| Error::uncertain(error.code))?;
+        }
         engine
             .install_branch_manager(&result, context.clone())
             .map_err(|e| Error::uncertain(e.code))?;
@@ -300,7 +345,13 @@ impl RetainedBranchPreparation {
         let converted = Arc::get_mut(&mut entry)
             .and_then(|unique| Arc::get_mut(&mut unique.ownership))
             .ok_or(Error::uncertain(ErrorCode::Conflict))
-            .and_then(|ownership| ownership.intent.guard._job.handoff_branch());
+            .and_then(|ownership| {
+                if resolving {
+                    ownership.intent.guard._job.handoff_resolved_branch()
+                } else {
+                    ownership.intent.guard._job.handoff_branch()
+                }
+            });
         let backing = match converted {
             Ok(backing) => backing,
             Err(error) => {

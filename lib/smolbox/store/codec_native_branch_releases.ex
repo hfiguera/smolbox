@@ -1,13 +1,14 @@
 defmodule SmolBox.Store.CodecNativeBranchReleases do
   @moduledoc false
   alias SmolBox.Embedded.{BranchReleaseTransition, NativeBranchAuthority}
-  alias SmolBox.Store.CodecFields
+  alias SmolBox.Store.{CodecFields, CodecNativeBranchRetirements}
   @defaults %{NativeBranchAuthority => [release: nil]}
-  def strip(record), do: CodecFields.transform(record, @defaults, :strip)
+  def strip(record),
+    do: record |> CodecNativeBranchRetirements.strip() |> CodecFields.transform(@defaults, :strip)
 
   def upgrade(record) do
     if required?(record), do: raise(ArgumentError)
-    CodecFields.transform(record, @defaults, :upgrade)
+    record |> CodecFields.transform(@defaults, :upgrade) |> CodecNativeBranchRetirements.upgrade()
   end
 
   def required?(%{backend_assignment: %{version: 2}} = record),

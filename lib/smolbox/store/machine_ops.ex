@@ -4,7 +4,7 @@ defmodule SmolBox.Store.MachineOps do
   assignment index, and shared worker capacity together before using these checks.
   """
   alias SmolBox.{Error, Execution, ManagedMachine, Validation}
-  alias SmolBox.Store.RecordOps
+  alias SmolBox.Store.{NativeBranchDeletionOps, RecordOps}
 
   def initial(record) do
     with :ok <- ManagedMachine.validate(record),
@@ -159,6 +159,31 @@ defmodule SmolBox.Store.MachineOps do
          {:ok, machine} <- ManagedMachine.update(machine, machine_changes, now),
          do: {:ok, machine, command}
   end
+
+  def resolve(machine, nil, %SmolBox.Embedded.BranchDeletionResolution{} = proof, now),
+    do: NativeBranchDeletionOps.resolve(machine, proof, now)
+
+  def resolve(machine, nil, %SmolBox.Embedded.ReleasedBranchDeletionResolution{} = proof, now),
+    do: NativeBranchDeletionOps.resolve(machine, proof, now)
+
+  def resolve(
+        %{
+          branch: %{
+            native_authority: %{
+              completion: %SmolBox.Embedded.BranchCompletion{}
+            }
+          },
+          operation: :delete
+        } = child,
+        command,
+        proof,
+        now
+      ),
+      do:
+        if(command == nil,
+          do: NativeBranchDeletionOps.resolve(child, proof, now),
+          else: error(:identity_conflict)
+        )
 
   def resolve(machine, command, :absent, now) do
     with true <-

@@ -336,7 +336,11 @@ defmodule SmolBox.Store.CaptureOps do
 
   defp native?(%{backend_assignment: %{version: 2}}), do: true
   defp native?(_), do: false
-  defp id_available?(m, id), do: not native?(m) or not Map.has_key?(m.disk_expansions, id)
+
+  defp id_available?(m, id),
+    do:
+      not native?(m) or
+        (not Map.has_key?(m.disk_expansions, id) and not Map.has_key?(m.native_branch_history, id))
 
   defp fields(m),
     do:

@@ -1,5 +1,14 @@
 defmodule SmolBox.Embedded.NativeBranchResult do
-  @moduledoc false
+  @moduledoc """
+  Native branch completion paired with fresh source and child observations.
+
+  Custom stores consume this transient result in an atomic branch transaction.
+  The original completion alone cannot prove either machine is currently running.
+  Validate its binding against the frozen request and original process identities;
+  preserve the immutable child root and source material history separately.
+  Inspect output omits receipt and ownership fields. This type grants no SDK
+  manager enrollment and does not enable native branch admission.
+  """
   alias SmolBox.Embedded.{BranchCompletion, Identity, NativeBranchAuthority}
   alias SmolBox.{Machine, ManagedMachine, Validation}
 

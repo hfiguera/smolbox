@@ -173,7 +173,7 @@ defmodule SmolBox.EmbeddedBranchBackendTest do
                  :branch_create,
                  parent,
                  child,
-                 @budget,
+                 %{@budget | timeout_ms: 900_000},
                  peer(:branch_create, evidence)
                )
 
@@ -199,6 +199,8 @@ defmodule SmolBox.EmbeddedBranchBackendTest do
           do: assert({scoped.server, scoped.epoch} == {context.server, context.epoch})
 
       assert first.timeout_ms >= second.timeout_ms and second.timeout_ms >= third.timeout_ms
+      assert first.timeout_ms > 30_000
+      assert second.timeout_ms <= 30_000 and third.timeout_ms <= 30_000
       assert second.max_response_bytes <= 16_384 and third.max_response_bytes <= 16_384
 
       assert {:ok, saved} =

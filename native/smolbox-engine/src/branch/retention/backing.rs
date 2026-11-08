@@ -43,12 +43,16 @@ impl BranchBackingRelease {
                     .plan
                     .preparation_disk_bytes()?
             || self.proof_sha256 != self.digest()?
+            || serde_json::to_vec(self)
+                .map_err(|_| Error::before(ErrorCode::Io))?
+                .len()
+                > crate::BRANCH_BACKING_PROOF_BYTES
         {
             return Err(Error::before(ErrorCode::Ownership));
         }
         Ok(())
     }
-    fn digest(&self) -> Result<String> {
+    pub(super) fn digest(&self) -> Result<String> {
         crate::material::hash(&(
             "smolbox-branch-backing-release-v1",
             self.schema,
@@ -66,13 +70,13 @@ struct Record {
     context_sha256: String,
     proof: BranchBackingRelease,
 }
-struct Ledger {
+pub(super) struct Ledger {
     domain: Arc<crate::domain::DomainGuard>,
     path: std::path::PathBuf,
     context_sha256: String,
 }
 impl Ledger {
-    fn new(
+    pub(super) fn new(
         domain: Arc<crate::domain::DomainGuard>,
         publication: &crate::BranchPublication,
         context_sha256: String,
@@ -180,7 +184,7 @@ impl Ledger {
             .map_err(|_| Error::before(ErrorCode::Io))?;
         self.domain.verify()
     }
-    fn release(
+    pub(super) fn release(
         &self,
         expected: &BranchBackingRelease,
         backing: &mut crate::jobs::BranchBackingLease,
@@ -276,6 +280,25 @@ impl Engine {
         backing_removed: bool,
         budget: &ReadBudget,
     ) -> Result<BranchBackingRelease> {
+        self.release_branch_backing_with_completion(
+            child,
+            (operation_id, request_sha256),
+            (quiesced, backing_removed),
+            None,
+            budget,
+        )
+    }
+    pub(crate) fn release_branch_backing_with_completion(
+        &self,
+        child: &CreationReceipt,
+        request: (&str, &str),
+        confirmations: (bool, bool),
+        expected: Option<&crate::BranchCompletion>,
+        budget: &ReadBudget,
+    ) -> Result<BranchBackingRelease> {
+        let (operation_id, request_sha256) = request;
+        let (quiesced, backing_removed) = confirmations;
+        let expected = expected.cloned();
         if !quiesced
             || !backing_removed
             || !crate::domain::valid_id(operation_id)
@@ -327,6 +350,11 @@ impl Engine {
                         return Err(Error::before(ErrorCode::Ownership));
                     }
                     entry.result.validate()?;
+                    if expected.as_ref().is_some_and(|expected| {
+                        entry.result != *expected || entry.borrower.upgrade().is_some()
+                    }) {
+                        return Err(Error::before(ErrorCode::Conflict));
+                    }
                     let mut origin = entry.result.child.clone();
                     origin.material = None;
                     crate::material::check_origin(&origin, &child)?;

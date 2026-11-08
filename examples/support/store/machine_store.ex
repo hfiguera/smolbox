@@ -11,7 +11,13 @@ defmodule SmolBox.DurableHost.MachineStore do
   }
 
   alias SmolBox.{Error, Execution, ManagedMachine, Validation}
-  alias SmolBox.Store.{MachineOps, RecordOps}
+
+  alias SmolBox.Store.{
+    MachineOps,
+    NativeBranchDeletionActionOps,
+    NativeBranchDeletionOps,
+    RecordOps
+  }
 
   # Every entry runs under Store's partition transaction, including command
   # acceptance/completion and capacity accounting shared with disposable work.
@@ -157,6 +163,24 @@ defmodule SmolBox.DurableHost.MachineStore do
          do: Database.write(context, execution)
   end
 
+  def run(context, :branch_delete_action_accept, [key, guard, action, now]) do
+    with {:ok, child} <- Database.guarded_machine(context, key, guard, now),
+         {:ok, child} <- NativeBranchDeletionActionOps.accept(child, action, now),
+         do: persist(context, child)
+  end
+
+  def run(context, :branch_delete_action_complete, [key, guard, action, proof, now]) do
+    with {:ok, child} <- Database.guarded_machine(context, key, guard, now),
+         {:ok, child} <- NativeBranchDeletionActionOps.complete(child, action, proof, now),
+         do: persist(context, child)
+  end
+
+  def run(context, :branch_delete_accept, [key, guard, now]) do
+    with {:ok, child} <- Database.guarded_machine(context, key, guard, now),
+         {:ok, child} <- NativeBranchDeletionOps.accept(child, now),
+         do: persist(context, child)
+  end
+
   def run(context, :resolve, [key, guard, observed, now]) do
     with {:ok, machine} <- Database.guarded_machine(context, key, guard, now),
          {:ok, command} <- active_record(context, machine),
@@ -202,6 +226,7 @@ defmodule SmolBox.DurableHost.MachineStore do
                :branch_advance,
                :branch_resolve,
                :branch_retire,
+               :branch_backing_accept,
                :branch_release_storage,
                :branch_release,
                :branch_release_advance

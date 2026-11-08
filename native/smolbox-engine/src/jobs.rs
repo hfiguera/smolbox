@@ -679,11 +679,25 @@ impl JobLease {
             .counts
             .lock()
             .map_err(|_| Error::before(ErrorCode::Native))?;
-        self.check_branch_handoff_counts(&counts)
+        self.check_branch_handoff_counts(&counts, false)
     }
-    fn check_branch_handoff_counts(&self, counts: &Counts) -> Result<()> {
+    pub(crate) fn check_disposed_branch_handoff(&self) -> Result<()> {
+        let counts = self
+            .pool
+            .0
+            .counts
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        self.check_branch_handoff_counts(&counts, true)
+    }
+    // An explicitly fenced original ready result may retire transient work even
+    // while new work is quarantined. This grants no new admission or disk release.
+    pub(crate) fn check_resolved_branch_handoff(&self) -> Result<()> {
+        self.check_disposed_branch_handoff()
+    }
+    fn check_branch_handoff_counts(&self, counts: &Counts, retained_cleanup: bool) -> Result<()> {
         let demand = self.demand;
-        if !self.pool.available()
+        if (!retained_cleanup && !self.pool.available())
             || !matches!(demand.lane, Lane::Work)
             || demand.metadata != JOB_METADATA_BYTES
             || demand.descriptors != JOB_DESCRIPTORS - JOB_CONTROL_HEADROOM
@@ -704,13 +718,26 @@ impl JobLease {
     /// Only after actual dispatch return, collected spools, original-manager
     /// installation and synchronized completion. Backing never becomes free.
     pub(crate) fn handoff_branch(&mut self) -> Result<BranchBackingLease> {
+        self.handoff_branch_accounting(false)
+    }
+    /// Only after synchronized disposal of the original never-booted child.
+    /// No manager or boot completion is manufactured; backing remains charged.
+    pub(crate) fn handoff_disposed_branch(&mut self) -> Result<BranchBackingLease> {
+        self.handoff_branch_accounting(true)
+    }
+    /// Only after explicit original-context ready-result qualification and actual
+    /// manager installation. The exact original backing remains charged.
+    pub(crate) fn handoff_resolved_branch(&mut self) -> Result<BranchBackingLease> {
+        self.handoff_branch_accounting(true)
+    }
+    fn handoff_branch_accounting(&mut self, retained_cleanup: bool) -> Result<BranchBackingLease> {
         let mut counts = self
             .pool
             .0
             .counts
             .lock()
             .map_err(|_| Error::before(ErrorCode::Native))?;
-        self.check_branch_handoff_counts(&counts)?;
+        self.check_branch_handoff_counts(&counts, retained_cleanup)?;
         counts.work -= 1;
         counts.children -= self.demand.children;
         counts.descriptors -= self.demand.descriptors;
@@ -1288,6 +1315,37 @@ mod tests {
         let before = pool.counts();
         assert!(work.handoff_branch().is_err());
         assert_eq!(pool.counts(), before);
+    }
+    #[test]
+    fn resolved_original_handoff_preserves_backing_under_quarantine_and_never_grants_new_work() {
+        let pool = JobPool::default();
+        let mut original = pool.acquire(Demand::branch_source()).unwrap();
+        original.promote_branch_preparation().unwrap();
+        original.promote_branch_backing(7 << 30).unwrap();
+        pool.quarantine();
+        let before = pool.counts();
+        assert!(original.check_branch_handoff().is_err());
+        original.check_resolved_branch_handoff().unwrap();
+        assert_eq!(pool.counts(), before);
+        let backing = original.handoff_resolved_branch().unwrap();
+        assert_eq!(
+            pool.counts(),
+            Counts {
+                checkpoint_material: 7 << 30,
+                branch_metadata: BRANCH_BACKING_METADATA,
+                ..Counts::default()
+            }
+        );
+        assert!(original.handoff_resolved_branch().is_err());
+        assert!(pool.acquire(Demand::branch_source()).is_err());
+        let observers = [
+            pool.acquire(Demand::volume_observation()).unwrap(),
+            pool.acquire(Demand::volume_observation()).unwrap(),
+        ];
+        drop((observers, original));
+        assert_eq!(pool.counts().checkpoint_material, 7 << 30);
+        drop(backing); // Private accounting model, never proof of disk cleanup.
+        assert_eq!(pool.counts(), Counts::default());
     }
     #[test]
     fn branch_backing_promotion_is_exact_retained_and_competes_with_saved_state_material() {

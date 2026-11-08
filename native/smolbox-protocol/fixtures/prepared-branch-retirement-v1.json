@@ -1,0 +1,224 @@
+[
+  {
+    "request": {
+      "creation": {
+        "source": {
+          "target_id": "embedded-local",
+          "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "name": "owned",
+          "owner_token": "6767676767676767676767676767676767676767676767676767676767676767",
+          "incarnation": "89898989898989898989898989898989",
+          "material_sha256": "abababababababababababababababababababababababababababababababab",
+          "material": {
+            "schema": 2,
+            "revision": 0,
+            "record_sha256": "abababababababababababababababababababababababababababababababab",
+            "chain_sha256": "fca9cdcb16003ca409f473f30a896cdc35ea38b5f21451557e840d23e133319c",
+            "operation_id": null,
+            "request_sha256": null
+          }
+        },
+        "child": {
+          "operation_id": "create-leaf",
+          "name": "leaf",
+          "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "incarnation": "dddddddddddddddddddddddddddddddd",
+          "idle": true,
+          "hold": true
+        },
+        "approval": {
+          "id": "branches",
+          "host_overhead_mb": 128,
+          "resources": {
+            "slots": 1,
+            "cpus": 1,
+            "memory_mb": 384,
+            "disk_gb": 5
+          }
+        }
+      },
+      "request_sha256": "3f9934b4a3e4708474a86319e2a379ca93e1abd7b5daadf7b81126d6c6426bff",
+      "quiesced": true
+    },
+    "proof": {
+      "schema": 1,
+      "request_sha256": "3f9934b4a3e4708474a86319e2a379ca93e1abd7b5daadf7b81126d6c6426bff",
+      "retirement": {
+        "schema": 1,
+        "intent": {
+          "source": {
+            "target_id": "embedded-local",
+            "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+            "name": "owned",
+            "owner_token": "6767676767676767676767676767676767676767676767676767676767676767",
+            "incarnation": "89898989898989898989898989898989",
+            "material_sha256": "abababababababababababababababababababababababababababababababab",
+            "material": {
+              "schema": 2,
+              "revision": 0,
+              "record_sha256": "abababababababababababababababababababababababababababababababab",
+              "chain_sha256": "fca9cdcb16003ca409f473f30a896cdc35ea38b5f21451557e840d23e133319c",
+              "operation_id": null,
+              "request_sha256": null
+            }
+          },
+          "child": {
+            "operation_id": "create-leaf",
+            "name": "leaf",
+            "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "incarnation": "dddddddddddddddddddddddddddddddd",
+            "idle": true,
+            "hold": true
+          },
+          "approval": {
+            "id": "branches",
+            "host_overhead_mb": 128,
+            "resources": {
+              "slots": 1,
+              "cpus": 1,
+              "memory_mb": 384,
+              "disk_gb": 5
+            }
+          },
+          "plan": {
+            "ordinary_child": {
+              "slots": 1,
+              "cpus": 1,
+              "memory_mb": 384,
+              "disk_gb": 2
+            },
+            "total_additional": {
+              "slots": 2,
+              "cpus": 2,
+              "memory_mb": 768,
+              "disk_gb": 7
+            },
+            "minimum_extra_memory_mb": 384,
+            "minimum_extra_disk_gb": 5
+          },
+          "request_sha256": "98c77e048bcba83eb070993980e4cfdc50d31ebe20c85c1306be088789ff651e",
+          "source_pid": [
+            123,
+            456
+          ],
+          "epoch": "11111111111111111111111111111111"
+        },
+        "proof_sha256": "7dcf33c1322382732b80b2ae85791b869e5a02c448c4fba0c2d3c07f2ca02682"
+      },
+      "proof_sha256": "c063986cb115727cf6dfa0621bbe3823537d604c73adec1f4296a640030a35a6"
+    }
+  },
+  {
+    "request": {
+      "creation": {
+        "source": {
+          "target_id": "embedded-local",
+          "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "name": "owned",
+          "owner_token": "6767676767676767676767676767676767676767676767676767676767676767",
+          "incarnation": "89898989898989898989898989898989",
+          "material_sha256": "abababababababababababababababababababababababababababababababab",
+          "material": {
+            "schema": 2,
+            "revision": 0,
+            "record_sha256": "abababababababababababababababababababababababababababababababab",
+            "chain_sha256": "fca9cdcb16003ca409f473f30a896cdc35ea38b5f21451557e840d23e133319c",
+            "operation_id": null,
+            "request_sha256": null
+          }
+        },
+        "child": {
+          "operation_id": "create-leaf",
+          "name": "leaf",
+          "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "incarnation": "dddddddddddddddddddddddddddddddd",
+          "idle": true,
+          "hold": false
+        },
+        "approval": {
+          "id": "branches",
+          "host_overhead_mb": 128,
+          "resources": {
+            "slots": 1,
+            "cpus": 1,
+            "memory_mb": 384,
+            "disk_gb": 5
+          }
+        },
+        "initial_release": {
+          "operation_id": "initial-activation",
+          "request_sha256": "9999999999999999999999999999999999999999999999999999999999999999"
+        }
+      },
+      "request_sha256": "f638f4d2d9ebd350ccaf5d9f538a841704a08475aae8630a82651d57946e1fb4",
+      "quiesced": true
+    },
+    "proof": {
+      "schema": 1,
+      "request_sha256": "f638f4d2d9ebd350ccaf5d9f538a841704a08475aae8630a82651d57946e1fb4",
+      "retirement": {
+        "schema": 1,
+        "intent": {
+          "source": {
+            "target_id": "embedded-local",
+            "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+            "name": "owned",
+            "owner_token": "6767676767676767676767676767676767676767676767676767676767676767",
+            "incarnation": "89898989898989898989898989898989",
+            "material_sha256": "abababababababababababababababababababababababababababababababab",
+            "material": {
+              "schema": 2,
+              "revision": 0,
+              "record_sha256": "abababababababababababababababababababababababababababababababab",
+              "chain_sha256": "fca9cdcb16003ca409f473f30a896cdc35ea38b5f21451557e840d23e133319c",
+              "operation_id": null,
+              "request_sha256": null
+            }
+          },
+          "child": {
+            "operation_id": "create-leaf",
+            "name": "leaf",
+            "owner_token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "incarnation": "dddddddddddddddddddddddddddddddd",
+            "idle": true,
+            "hold": false
+          },
+          "approval": {
+            "id": "branches",
+            "host_overhead_mb": 128,
+            "resources": {
+              "slots": 1,
+              "cpus": 1,
+              "memory_mb": 384,
+              "disk_gb": 5
+            }
+          },
+          "plan": {
+            "ordinary_child": {
+              "slots": 1,
+              "cpus": 1,
+              "memory_mb": 384,
+              "disk_gb": 2
+            },
+            "total_additional": {
+              "slots": 2,
+              "cpus": 2,
+              "memory_mb": 768,
+              "disk_gb": 7
+            },
+            "minimum_extra_memory_mb": 384,
+            "minimum_extra_disk_gb": 5
+          },
+          "request_sha256": "cbb03560366a36e871b14cfd8a3d2f285f3adbeeb49e52c9b203b04e7c014d2b",
+          "source_pid": [
+            123,
+            456
+          ],
+          "epoch": "11111111111111111111111111111111"
+        },
+        "proof_sha256": "5ca6e693d72a474c7544977c3df6db1b1630180bd0fc29fe3270a351d663439b"
+      },
+      "proof_sha256": "cd7e7b0c03ec5c362386f23f0e4c65678ae9709b3a4d1c808ef3c9f1d46ecae2"
+    }
+  }
+]

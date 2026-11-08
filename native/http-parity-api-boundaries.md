@@ -2880,3 +2880,315 @@ Backend/public branch routing, current observations, cleanup and ordinary SDK/
 platform qualification remain pending. These changes grant no public native branch
 admission, historical package qualification, Rustler/Kubernetes implementation or
 live crash/persistence-interruption qualification.
+
+
+### Fenced completed-child absence
+
+`Engine::qualify_branch_child_absence` requires `BranchChildAbsenceRequest` with
+an exact retained `BranchCompletion`, expected current child receipt, distinct
+operation ID, request hash and explicit quiescence. A valid serialized proof or
+SDK row cannot manufacture the original completed registry context. The registry
+requires the exact completed result and no active original borrower. Both source
+and child observation gates exclude retained mutations, including during work
+quarantine. The original opaque boot enrollment must match the current domain
+and actor epoch; ordinary collection proves that exact child is gone and that no
+current boot/transfer for its namespace remains. Both runtime caches must report
+no child handle. Bounded read-only SDK row and creation-reservation absence plus
+unredirected directory absence are rechecked with the same caller deadline before
+and after proof construction. No SDK shutdown/delete, cache retirement or backing
+release is dispatched. A foreign row, partial directory, symlink, active worker,
+changed epoch or missing original result remains uncertain.
+
+`BranchChildAbsence` is historical request-correlated positive namespace absence,
+not an assertion that the caller's expected material head previously existed.
+The future guarded store consumer must bind it to its own saved head and frozen
+branch authority. Issuance repeats the current checks even for an identical
+request; it never acknowledges an old absence against recreated material. This
+boundary deliberately remains separate from original held-delete resolution and
+backing-removal confirmation.
+
+Protocol two routes `qualify_branch_child_absence` through exact immutable branch
+approval and the reserved observation/control lane with a thirty-second ceiling.
+Its required nonnullable `branch_child_absent` proof and request each have a
+68-KiB limit. All branch proof terminals use the finite branch output path, now
+72 KiB per frame including envelope, with the same 65-control-frame ceiling,
+unchanged event allowance and room for both ordinary observers. Generic small
+control output cannot carry branch proof. Domain, package platform, original
+completion and exact request correlation precede success; no streams are accepted.
+Public branch feature admission remains disabled. Synthetic wire/file/process-
+record models establish no live VM, deletion, isolation or platform qualification.
+
+
+### Guarded dependency retirement and v32
+
+The Elixir backend now routes an approved deleted native child's saved authority
+through the fenced qualifier. `NativeResolution` marks only its captured reference
+quiesced after successful bridge quiescence and worker claim. The same reference
+and absolute finite budget reach proof collection; no SDK row or plain absence
+can substitute for the typed response. Production feature/assignment policy remains
+closed while native branch admission is disabled. Semantic transport tests exercise
+the same post-policy sequence without approving a future descriptor.
+
+The exact retirement request is derived from the saved original completion,
+expected child head, fingerprint and observed child version. Memory and encrypted
+PostgreSQL reject a stale child proof even when the source guard is fresh. One
+paired transaction retains immutable proof/original version, marks only that
+source dependency retired and preserves original creation, source/child material,
+other dependencies and all extra backing charges. Public explicit retirement keeps
+the native authority fence through the final guarded store commit. This establishes
+neither deletion nor backing removal. Backing-release integration stays pending.
+
+Selective v32 carries retirement proof; v30/v31 retain exact earlier bytes and
+strictly reject a new field in an older envelope. Fresh BEAM reading needs no
+native tools. Historical experimental retired/closed states without this proof
+remain readable and do not become new evidence; ratification of an earlier retired
+state needs fresh fenced proof and retains its original retirement timestamp.
+Current stores still do not advertise the complete native branch capability.
+
+## Original backing accounting acknowledgement and public routing
+
+`Engine.release_branch_backing_checked` binds the full original completion,
+expected source/child tombstone heads, explicit quiescence and host backing-removal
+confirmation to a canonical request. Exact original completed context and no
+active original borrower are checked before admission and again in the accounting
+worker. Existing ordered gates, original collection and bounded namespace absence
+precede the protected acknowledgement ledger. Exact ledger retry releases no
+second charge and does not touch recreated material. No SDK deletion or filesystem
+cleanup is dispatched. The DTO is shared-engine authority suitable for a future
+Rustler bridge; the Port wire representation cannot manufacture enrollment.
+
+Protocol two/Elixir use the native-only `release_branch_backing/4` backend entry.
+The public API holds native helper/controller fencing through durable request
+acceptance, captured owner/epoch dispatch and final paired guarded store closure.
+Accepted source/child heads and independent source approval must match. One
+absolute finite budget limits this sequence; a missing, late or mismatched reply
+leaves the exact accepted request and all public backing charged. An explicit
+retry uses that same request. Selective v33 retains immutable request and optional
+typed acknowledgement, preserving all previous envelope bytes. Completed saved
+acknowledgements return idempotently without a replacement helper or another
+namespace observation. HTTP retains its existing absence path and rejects this
+native-only backend operation before transport dispatch.
+
+Deterministic file/row/protocol/public-store models establish this foundation;
+they grant no live SDK or rebuilt-package qualification. Public native branch
+admission and every full-parity acceptance row remain pending. Partial/absent
+resolution, prepared-retirement histories, normal replacement and ordinary
+platform/source/consumer acceptance remain required. Crash validation is deferred.
+
+## Checked original held-child deletion absence resolution
+
+`Engine.resolve_held_branch_deletion_checked` validates full original held
+completion, its exact root receipt, a distinct operation/canonical request digest
+and explicit caller fencing. It matches the retained completed context and checks
+active borrower exclusion before reading or changing deletion history. Existing
+original returned-worker, opaque collection, namespace absence and protected
+resolution/cache retirement checks remain authoritative. No SDK shutdown/delete,
+filesystem cleanup, dependency retirement or backing release is dispatched.
+
+Protocol two/Port/Elixir correlate the required nonnullable proof with the exact
+request, original branch approval, domain and package platform. The request caps
+at 68 KiB, proof at four KiB, and budget at 30 seconds. This control entry stays
+available during ordinary admission quarantine; the existing finite branch
+terminal buffer preserves both observers. Legacy protected resolution records
+retain their schema and serialized fields. Only the checked boundary accepts the
+new canonical request; raw receipt-only control cannot replace it on the wire.
+
+Shared synthetic macOS/Linux fixtures and private deletion/protocol models
+establish no SDK/platform qualification. Managed request/version retention,
+codec/store proof consumption, public absence resolution and explicit
+continuation/residual cleanup routing remain required before native activation.
+The shared Rust DTO and engine retain the future Rustler boundary; no bridge
+reimplements SDK lifecycle logic. Crash validation remains deferred.
+
+## Durable original held-delete request and public absence resolution
+
+The host now freezes the claimed management version, original delete version and
+full completion/root-bound helper request before resolution IO. Claims and
+explicit retries cannot replace it. Selective codec v34 retains pending intent
+and typed absence acknowledgement; earlier v30/v31/v32/v33 bytes and strict
+reader upgrades remain unchanged. An uncertain original held-child delete cannot
+be marked deleted through generic absence or a generic record write.
+
+Public Machines.resolve with deleted disposition retains the native original
+helper/controller fence through user-version claim, accepted request, scoped
+resolve_branch_deletion backend dispatch and final guarded proof commit. One
+finite deadline covers this sequence. Normal IO renewal changes no request.
+Only the child's ordinary reservation is released; source dependency, extra
+backing, creation/material and command history remain for their separate
+transactions. Memory/PostgreSQL retain proof and resource changes atomically.
+HTTP keeps the existing observation route and rejects the native-only entry.
+
+Synthetic store/backend/public peers establish the transaction/correlation
+boundary without SDK/VM dispatch. Explicit continuation/residual cleanup,
+partial/absent creation/release resolution, prepared-retirement history, normal
+replacement and ordinary platform/source/consumer qualification remain required.
+No complete native branch store marker or public capability is enabled by v34.
+Crash validation remains deferred and distribution approval separate.
+
+
+## Original entered-job resolution borrowing
+
+`PreparedBranchWorker::retain_creation` now freezes the complete bounded
+`BranchCreateRequest` before SDK entry, including an initial activation choice.
+The automatic `Engine::create_branch` path uses it. The existing `retain` API
+keeps its unbound behavior; a later resolution cannot adopt that legacy entry by
+matching names, copied labels or partial native intent.
+
+`Engine::retain_branch_resolution` uses a finite control allowance and explicit
+quiescence to select only that exact original entered entry. It checks original
+registry/domain/runtime identity, pinned source root/marker/database and live
+helper epoch. A synchronized exclusive borrower rejects an active creation
+borrower or worker. Prepared-only and completed work use separate APIs. No SDK
+inventory query, manager reconstruction, journal mutation or replay occurs.
+
+The opaque `RetainedBranchResolution` exposes only in-memory phase, under its
+captured deadline/cancellation and bounded control admission. It is neither
+liveness nor child readiness/absence/disposal evidence. Dropping it releases only
+the borrow; every original gate, spool, runtime/manager and backing allowance
+remains retained. Future entered disposal must use that context and independent
+durable proof before host/store reservations can change. No Port message,
+public backend operation, codec envelope or capability marker is added here.
+Six new inert metadata/PID/spool models cover exact identity, original ownership,
+exclusive borrowing, active workers, request/initial-activation substitution,
+foreign owner, changed root, missing registry, finite cancellation/deadline and
+phase-only semantics. They create no VMM or live owner-loss campaign.
+
+
+## Original disposed child fresh absence
+
+UnbootedBranchChildAbsence is distinct from BranchChildAbsence, which requires
+real boot/guest completion. Its complete original disposal is correlation only:
+Engine.qualify_unbooted_branch_child_absence requires the exact retained disposed
+archive, same runtime/domain and protected synchronized ledger. Original child
+epoch quiescence plus current SDK row/reservation and original-directory absence
+are checked before and after issuance under source/child gates and a reserved
+material-control allowance. The source may remain running; no source process
+collection, manager/boot enrollment, SDK mutation, filesystem cleanup, dependency
+retirement or native capacity release occurs. Every subsequent qualification
+rechecks current absence and preserves recreated material. Finite cancellation/
+deadline and protected context checks surround the observation.
+
+Bounded protocol-two requests/results and Elixir readers bind full disposal,
+provenance, immutable creation, distinct canonical request, exact approval/domain,
+original epoch/platform and zero output. Seven native private projection models,
+three wire contracts, one helper catalog/control model and shared synthetic Elixir
+readers establish these boundaries without SDK/VMM qualification or a live crash
+campaign. Public/store retirement now consumes this proof under one helper/
+controller fence, with source/child graph and child-version correlation. Selective
+v38 preserves immutable disposal plus retirement and retires only the dependency
+flag; all backing stays charged. Memory/PostgreSQL share paired commit/rollback
+and fresh-reader contracts. Host backing closure and remaining ordinary source/
+platform acceptance stay required. No public branch
+admission or store marker is enabled; upstream SDK/research sources stay untouched.
+
+
+## Original released-child deletion absence resolution
+
+`Engine::resolve_released_branch_deletion_checked` consumes a distinct request
+with the exact original completion, completed initial/explicit release, current
+release receipt, new operation identity, canonical digest and caller quiescence.
+It matches the retained completed context and original deletion intent; SDK rows
+cannot reconstruct either. Active original borrowers/workers, changed boot or
+identity, foreign epochs and an uncollected original manager reject.
+
+The reserved material-control allowance performs bounded positive original
+collection and SDK row/reservation/directory absence without SDK stop/delete or
+filesystem removal. Unresolved deletion keeps its original gates and work. A
+successfully deleted child whose ordinary transient leases already retired uses
+fresh paired source/child gates. The protected domain journal records schema five
+with a distinct released proof binding completion/release/deletion hashes and the
+exact request. Earlier held schemas and released schema four retain their bytes
+and bounds; schema five shares the existing 160-KiB released limit. The previously
+reserved second result-metadata lease remains retained.
+
+Exact recorded lookup is historical evidence for only its saved request; a new
+request cannot rewrite it. File and directory sync are repeated before returning
+a recorded proof, so a prior uncertain sync does not become an acknowledgement. Returned resolution retires transient deletion leases
+only after original handle retirement. Source/snapshot dependency and persistent
+backing charges require their existing separate retirement/closure workflows.
+The distinct protocol-two entry is bounded to 132-KiB requests, four-KiB proofs,
+30 seconds and zero output, with exact approval/domain/platform correlation and
+reserved control/terminal capacity while ordinary admission is unavailable.
+
+Public/store consumption now persists a distinct released intent before IO and
+consumes its exact proof under the original helper/controller fence and deadline.
+Selective v40 freezes claimed management/delete versions, completion, release and
+current head; older envelopes reject this variant. Only the ordinary child slot
+retires, with source dependency and backing requiring their separate proofs.
+Released continuation/residual cleanup and ordinary SDK/platform qualification
+remain required. This path neither enables public
+native branch admission nor performs deferred crash validation. Deterministic
+file/row/callback models and synthetic cross-reader fixtures establish only their
+stated boundaries; upstream SDK and research source remain unmodified.
+
+
+## Original released-child final deletion continuation
+
+`Engine::continue_released_branch_deletion_checked` is separate from observational
+resolution and held-only action grants. Its exact completion/release/current head,
+new canonical operation/request and quiescence bind the original retained context.
+The shared collector requires returned owner work, original positive collection,
+matching original manager, protected stopped material and bounded leaf inventory.
+Schema six freezes Finishing before normalization and one final SDK deletion.
+Only the same unentered grant may continue; entered Deleting never replays.
+Positive absence may also preserve an original in-memory frozen grant before its
+Finishing publication. Another grant or entered final step cannot be adopted.
+
+SDK success requires the protected Deleted phase, returned original worker and
+exact saved continuation before a distinct bounded acknowledgement is issued.
+Recorded completion is synchronized again before acknowledgement. Unknown final
+results retain the original gates/work and can resolve only by positive bounded
+namespace absence, preserving the continuation and its original intent digest.
+That historical absence proof cannot substitute for SDK success. Earlier record
+schemas and proof shapes remain exact; the existing 160-KiB released journal bound
+and retained metadata allowance fund the extension. Source dependencies and full
+snapshot/backing charges retain their independent retirement/closure workflows.
+
+Protocol two/Port use the original approval catalog, Delete capability, zero
+output, 30-second reserved control admission, 132-KiB request and four-KiB proof
+limits, exact receipt/domain/platform correlation and finite terminal capacity.
+Public/store continuation consumption now persists a distinct released grant
+before IO and consumes its exact SDK-success proof under the same captured
+helper/controller fence and absolute deadline. Selective v41 freezes claimed
+management/delete versions, original completion, release and current head. Earlier
+envelopes reject the new variant and earlier bytes stay exact. Independent pending
+observational/continuation histories survive completion through the other route;
+positive absence cannot become SDK success. Only the ordinary child reservation
+retires. Released filesystem residual cleanup and ordinary SDK/platform
+qualification remain pending. No public admission or package
+approval is enabled and crash validation stays deferred.
+
+
+## Original released-child residual cleanup
+
+`Engine::cleanup_released_branch_deletion_checked` consumes a distinct cleanup
+request bound to the full retained completion, exact initial/explicit release,
+current head, new operation/canonical digest and caller quiescence. The shared
+held/released removal worker requires original returned deletion context, positive
+original collection, SDK row/reservation absence and the exact pinned original
+directory identity. Missing/replaced roots cannot create cleanup authority.
+Descriptor-relative bounded removal preserves source/sibling link targets and
+never invokes SDK stop/delete, guest work, volume detach or backing retirement.
+
+A separate protected released cleanup ledger uses schema two and a 160-KiB cap;
+held schema one preserves its bytes and 80-KiB bound. The main released proof
+keeps its existing schema/shape. Frozen continuation history, including a retained
+unpublished grant, remains part of the original deletion digest. Cleaning precedes
+unlink; only the same recorded request may resume partial removal or acknowledge
+an already removed path. Matching primary completion may finish only its cleanup
+audit without traversing recreated material. Different observations cannot replace
+an entered cleanup grant. Both ledgers are synchronized before returning a
+recorded released acknowledgement.
+
+Released deletion reserves a third retained 128-KiB metadata allowance before any
+uncertain SDK work, funding the independent cleanup ledger without ordinary
+metadata admission during quarantine. It remains charged alongside release/result
+metadata and persistent backing after transient cleanup work retires. Control
+admission, original descriptor/work leases and one ordinary observer stay bounded.
+
+Protocol two/Port/Elixir carry the distinct cleanup request and required existing
+positive-absence proof under exact approval/domain/platform correlation, Delete
+capability, zero output, 30-second reserved control admission, 132-KiB requests and
+four-KiB proofs. Durable/public cleanup acceptance and ordinary SDK/platform
+qualification remain pending. No capability admission or package approval is
+enabled, and crash validation stays deferred.

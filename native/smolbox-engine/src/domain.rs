@@ -308,13 +308,18 @@ mod tests {
         ));
         drop(guard);
         binding.generation = "b".repeat(32);
-        assert!(matches!(
-            DomainGuard::acquire_at(&binding, directory.clone(), true),
-            Err(Error {
-                code: ErrorCode::Ownership,
-                ..
-            })
-        ));
+        let rebound = DomainGuard::acquire_at(&binding, directory.clone(), true);
+        assert!(
+            matches!(
+                &rebound,
+                Err(Error {
+                    code: ErrorCode::Ownership,
+                    ..
+                })
+            ),
+            "unexpected rebound result: {:?}",
+            rebound.err()
+        );
         binding.generation = "a".repeat(32);
         let _guard = DomainGuard::acquire_at(&binding, directory, false).unwrap();
     }

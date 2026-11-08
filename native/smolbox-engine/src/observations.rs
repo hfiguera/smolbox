@@ -67,6 +67,18 @@ impl ReadBudget {
             cancel,
         })
     }
+    /// Preserve an already captured deadline without granting fresh time while
+    /// crossing a bridge. Ordinary observation/lifecycle budgets remain <=30s.
+    pub fn until(deadline: Instant, cancel: Cancellation) -> Result<Self> {
+        let now = Instant::now();
+        if deadline <= now || deadline.duration_since(now) > Duration::from_secs(30) {
+            return Err(Error::before(ErrorCode::Validation));
+        }
+        Ok(Self { deadline, cancel })
+    }
+    pub fn deadline(&self) -> Instant {
+        self.deadline
+    }
     pub(crate) fn check(&self) -> Result<()> {
         if self.cancel.is_cancelled() || Instant::now() >= self.deadline {
             Err(Error::before(ErrorCode::State))

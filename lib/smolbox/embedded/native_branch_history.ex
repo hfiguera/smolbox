@@ -4,7 +4,8 @@ defmodule SmolBox.Embedded.NativeBranchHistory do
     BranchCanonical,
     BranchCreation,
     BranchPublication,
-    NativeBranchAuthority
+    NativeBranchAuthority,
+    NativePreparedBranchRetirement
   }
 
   alias SmolBox.Validation
@@ -36,8 +37,8 @@ defmodule SmolBox.Embedded.NativeBranchHistory do
     history = Map.get(record, :native_branch_history, %{})
 
     if is_map(history) and map_size(history) <= 256 and
-         Enum.all?(history, fn {id, proof} -> publication?(record, id, proof) end),
-       do: {:ok, Map.values(history)},
+         Enum.all?(history, fn {id, proof} -> entry?(record, id, proof) end),
+       do: {:ok, history |> Map.values() |> Enum.filter(&is_struct(&1, BranchPublication))},
        else: :error
   rescue
     _ -> :error
@@ -63,7 +64,10 @@ defmodule SmolBox.Embedded.NativeBranchHistory do
       spec.checkpointable and spec.profile.network == :offline and
         spec.ports == [] and spec.volumes == [] and spec.workload == nil
 
-  defp publication?(record, id, %BranchPublication{} = proof) do
+  defp entry?(record, id, %NativePreparedBranchRetirement{} = saved),
+    do: NativePreparedBranchRetirement.source?(record, id, saved)
+
+  defp entry?(record, id, %BranchPublication{} = proof) do
     profile = record.spec.profile
     intent = proof.change["child_origin"]["intent"]
     child = intent["plan"]["ordinary_child"]
@@ -77,5 +81,5 @@ defmodule SmolBox.Embedded.NativeBranchHistory do
       child["memory_mb"] == profile.memory_mb + profile.host_overhead_mb
   end
 
-  defp publication?(_, _, _), do: false
+  defp entry?(_, _, _), do: false
 end

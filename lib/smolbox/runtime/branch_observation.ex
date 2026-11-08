@@ -1,7 +1,16 @@
 defmodule SmolBox.Runtime.BranchObservation do
   @moduledoc false
   alias SmolBox.Backend
-  alias SmolBox.Embedded.{NativeBranchReleaseResult, NativeBranchResult}
+
+  alias SmolBox.Embedded.{
+    BranchBackingRelease,
+    BranchChildAbsence,
+    NativeBranchBacking,
+    NativeBranchReleaseResult,
+    NativeBranchResult,
+    NativeBranchRetirement
+  }
+
   alias SmolBox.Runtime.Target
 
   # One operational owner across both observations. Each reference carries only
@@ -41,9 +50,56 @@ defmodule SmolBox.Runtime.BranchObservation do
          do: {:ok, [source, observed]}
   end
 
+  def retirement(worker, %{branch: %{native_authority: authority}} = child)
+      when not is_nil(authority) do
+    worker = Target.pin(worker)
+
+    with {:ok, request} <- NativeBranchRetirement.request(child),
+         {:ok, %BranchChildAbsence{} = proof} <- absent(worker, child),
+         true <- BranchChildAbsence.matches?(proof, request),
+         do: {:ok, [proof]},
+         else: (
+           {:error, _} = error ->
+             error
+
+           _ ->
+             {:error,
+              %SmolBox.Error{
+                category: :identity_conflict,
+                operation: :branch,
+                evidence: :dispatch_uncertain
+              }}
+         )
+  end
+
   def retirement(worker, child) do
     worker = Target.pin(worker)
     with {:ok, :absent} <- absent(worker, child), do: {:ok, []}
+  end
+
+  def storage_release(worker, parent, %{branch: %{native_authority: authority}} = child)
+      when not is_nil(authority) do
+    worker = Target.pin(worker)
+
+    owner = if NativeBranchBacking.unbooted?(child), do: parent, else: child
+
+    with %NativeBranchBacking{request: request, proof: nil} <- authority.backing,
+         {:ok, %BranchBackingRelease{} = proof} <-
+           Backend.release_branch_backing(Target.connection(worker, owner), parent, child, true),
+         true <- NativeBranchBacking.matches?(proof, request),
+         do: {:ok, [proof]},
+         else: (
+           {:error, _} = error ->
+             error
+
+           _ ->
+             {:error,
+              %SmolBox.Error{
+                category: :identity_conflict,
+                operation: :branch,
+                evidence: :dispatch_uncertain
+              }}
+         )
   end
 
   def storage_release(worker, parent, child) do

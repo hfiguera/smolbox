@@ -1,6 +1,8 @@
 defmodule SmolBox.NativeBranchMaterialHistoryTest do
   use ExUnit.Case, async: true
 
+  alias SmolBox.Backend.EmbeddedContext
+
   alias SmolBox.Embedded.{
     BranchCanonical,
     BranchPublication,
@@ -60,6 +62,30 @@ defmodule SmolBox.NativeBranchMaterialHistoryTest do
       refute inspect(last) =~ row["origin"]["owner_token"]
       assert BranchPublication.to_wire(last) == List.last(row["events"])["transition"]
       assert :error = BranchPublication.from_wire(last)
+    end
+  end
+
+  test "backend source observation preserves grown disk geometry through later branch publications" do
+    for row <- @rows do
+      history = proofs(row)
+      last = List.last(history)
+      base = Map.merge(%{"cpus" => 1, "memory_mib" => 256}, row["initial_sizes"])
+      identity = %Identity{receipt: row["receipt"], transition: last, material_history: history}
+
+      context = %EmbeddedContext{
+        config: nil,
+        server: self(),
+        identity: identity,
+        assignment: %{creation: %{"resources" => base}}
+      }
+
+      assert EmbeddedContext.resources(context) == Map.merge(base, row["sizes"])
+
+      refute Map.take(EmbeddedContext.resources(context), ~w(storage_gib overlay_gib)) ==
+               row["initial_sizes"]
+
+      crossed = %{context | identity: %{identity | material_history: Enum.drop(history, 1)}}
+      assert_raise SmolBox.Error, fn -> EmbeddedContext.resources(crossed) end
     end
   end
 

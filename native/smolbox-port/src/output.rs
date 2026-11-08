@@ -9,10 +9,15 @@ const MAX_DECODED: usize = 8 * 1024 * 1024;
 const MAX_EVENT_FRAMES: usize = 4096;
 const CONTROL_FRAMES: usize = 65;
 const SMALL_CONTROL_BYTES: usize = 4096;
-// A branch completion is capped at 64 KiB, plus its terminal envelope. Keep
+// Branch absence and backing proofs are capped at 68 KiB, plus its terminal envelope. Keep
 // the existing event allowance and enough space for every outstanding control
 // frame, even when all terminal replies contain the largest branch proof.
-const BRANCH_CONTROL_BYTES: usize = 64 * 1024 + SMALL_CONTROL_BYTES;
+const BRANCH_CONTROL_BYTES: usize =
+    if smolbox_protocol::BRANCH_ABSENCE_BYTES > smolbox_protocol::BRANCH_BACKING_PROOF_BYTES {
+        smolbox_protocol::BRANCH_ABSENCE_BYTES
+    } else {
+        smolbox_protocol::BRANCH_BACKING_PROOF_BYTES
+    } + SMALL_CONTROL_BYTES;
 const CONTROL_BYTES: usize = CONTROL_FRAMES * BRANCH_CONTROL_BYTES;
 const MAX_EVENT_ENCODED: usize = 12 * 1024 * 1024 - CONTROL_FRAMES * SMALL_CONTROL_BYTES;
 const MAX_ENCODED: usize = MAX_EVENT_ENCODED + CONTROL_BYTES;
@@ -141,7 +146,20 @@ fn branch_terminal(message: &ServerMessage) -> bool {
             outcome: smolbox_protocol::Outcome::BranchCreated { .. }
                 | smolbox_protocol::Outcome::BranchCompletionPresence { .. }
                 | smolbox_protocol::Outcome::HeldBranchReleased { .. }
-                | smolbox_protocol::Outcome::HeldBranchReleasePresence { .. },
+                | smolbox_protocol::Outcome::HeldBranchReleasePresence { .. }
+                | smolbox_protocol::Outcome::UnbootedBranchChildAbsent { .. }
+                | smolbox_protocol::Outcome::BranchChildAbsent { .. }
+                | smolbox_protocol::Outcome::BranchBackingReleased { .. }
+                | smolbox_protocol::Outcome::PreparedBranchRetired { .. }
+                | smolbox_protocol::Outcome::UnbootedBranchDisposalCandidate { .. }
+                | smolbox_protocol::Outcome::UnbootedBranchDisposed { .. }
+                | smolbox_protocol::Outcome::ReleasedBranchDeletionContinued { .. }
+                | smolbox_protocol::Outcome::BranchDeletionCollected { .. }
+                | smolbox_protocol::Outcome::ReleasedBranchDeletionCleaned { .. }
+                | smolbox_protocol::Outcome::ReleasedBranchDeletionResolved { .. }
+                | smolbox_protocol::Outcome::HeldBranchDeletionResolved { .. }
+                | smolbox_protocol::Outcome::HeldBranchDeletionContinued { .. }
+                | smolbox_protocol::Outcome::HeldBranchDeletionCleaned { .. },
             ..
         }
     )
@@ -215,6 +233,196 @@ mod tests {
         let frame = receiver.recv().unwrap();
         output.complete(&frame);
         output.send(1, || Ok(event())).unwrap();
+    }
+    #[test]
+    fn absence_proofs_have_a_finite_terminal_allowance_and_leave_both_observers() {
+        let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/branch-child-absence-v1.json"
+        ))
+        .unwrap();
+        for row in rows {
+            let proof: smolbox_protocol::BranchChildAbsence =
+                serde_json::from_value(row["proof"].clone()).unwrap();
+            let message = || ServerMessage::Terminal {
+                epoch: "ab".repeat(16),
+                id: 1,
+                sequence: 1,
+                outcome: smolbox_protocol::Outcome::BranchChildAbsent {
+                    proof: Box::new(proof.clone()),
+                },
+            };
+            let (output, receiver) = Output::new();
+            assert!(output.send(0, || Ok(message())).is_err());
+            for _ in 0..CONTROL_FRAMES - 2 {
+                output.send_branch_terminal(|| Ok(message())).unwrap();
+            }
+            output.send(0, || Ok(accepted())).unwrap();
+            output.send(0, || Ok(accepted())).unwrap();
+            assert!(output.send_branch_terminal(|| Ok(message())).is_err());
+            while let Ok(frame) = receiver.try_recv() {
+                output.complete(&frame);
+            }
+            output.send_branch_terminal(|| Ok(message())).unwrap();
+        }
+    }
+
+    #[test]
+    fn backing_proofs_have_a_finite_terminal_allowance_and_leave_both_observers() {
+        let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/branch-backing-release-v1.json"
+        ))
+        .unwrap();
+        for row in rows {
+            let proof: smolbox_protocol::BranchBackingRelease =
+                serde_json::from_value(row["proof"].clone()).unwrap();
+            let message = || ServerMessage::Terminal {
+                epoch: "ab".repeat(16),
+                id: 1,
+                sequence: 1,
+                outcome: smolbox_protocol::Outcome::BranchBackingReleased {
+                    proof: Box::new(proof.clone()),
+                },
+            };
+            let (output, receiver) = Output::new();
+            assert!(output.send(0, || Ok(message())).is_err());
+            for _ in 0..CONTROL_FRAMES - 2 {
+                output.send_branch_terminal(|| Ok(message())).unwrap();
+            }
+            output.send(0, || Ok(accepted())).unwrap();
+            output.send(0, || Ok(accepted())).unwrap();
+            assert!(output.send_branch_terminal(|| Ok(message())).is_err());
+            while let Ok(frame) = receiver.try_recv() {
+                output.complete(&frame);
+            }
+            output.send_branch_terminal(|| Ok(message())).unwrap();
+        }
+    }
+
+    #[test]
+    fn prepared_and_held_deletion_proofs_have_finite_terminal_allowance_and_leave_both_observers() {
+        let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/held-branch-deletion-v1.json"
+        ))
+        .unwrap();
+        let actions: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/held-branch-deletion-action-v1.json"
+        ))
+        .unwrap();
+        let prepared: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/prepared-branch-retirement-v1.json"
+        ))
+        .unwrap();
+        let outcomes = rows
+            .into_iter()
+            .map(
+                |row| smolbox_protocol::Outcome::HeldBranchDeletionResolved {
+                    proof: Box::new(serde_json::from_value(row["proof"].clone()).unwrap()),
+                },
+            )
+            .chain(actions.into_iter().map(|row| {
+                if row["request"]["action"] == "continue" {
+                    smolbox_protocol::Outcome::HeldBranchDeletionContinued {
+                        proof: Box::new(serde_json::from_value(row["proof"].clone()).unwrap()),
+                    }
+                } else {
+                    smolbox_protocol::Outcome::HeldBranchDeletionCleaned {
+                        proof: Box::new(serde_json::from_value(row["proof"].clone()).unwrap()),
+                    }
+                }
+            }));
+        let outcomes = outcomes.chain(prepared.into_iter().map(|row| {
+            smolbox_protocol::Outcome::PreparedBranchRetired {
+                proof: Box::new(serde_json::from_value(row["proof"].clone()).unwrap()),
+            }
+        }));
+        let released: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/released-branch-deletion-v1.json"
+        ))
+        .unwrap();
+        let outcomes = outcomes.chain(released.into_iter().map(|row| {
+            smolbox_protocol::Outcome::ReleasedBranchDeletionResolved {
+                proof: Box::new(serde_json::from_value(row["proof"].clone()).unwrap()),
+            }
+        }));
+        let continued: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/released-branch-deletion-continuation-v1.json"
+        ))
+        .unwrap();
+        let outcomes = outcomes.chain(continued.into_iter().map(|row| {
+            smolbox_protocol::Outcome::ReleasedBranchDeletionContinued {
+                proof: Box::new(serde_json::from_value(row["proof"].clone()).unwrap()),
+            }
+        }));
+        let cleaned: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/released-branch-deletion-cleanup-v1.json"
+        ))
+        .unwrap();
+        let outcomes = outcomes.chain(cleaned.into_iter().map(|row| {
+            smolbox_protocol::Outcome::ReleasedBranchDeletionCleaned {
+                proof: Box::new(serde_json::from_value(row["proof"].clone()).unwrap()),
+            }
+        }));
+        let collected: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/branch-deletion-collection-v1.json"
+        ))
+        .unwrap();
+        let outcomes = outcomes.chain(collected.into_iter().map(|row| {
+            smolbox_protocol::Outcome::BranchDeletionCollected {
+                proof: Box::new(serde_json::from_value(row["proof"].clone()).unwrap()),
+            }
+        }));
+        for outcome in outcomes {
+            let message = || ServerMessage::Terminal {
+                epoch: "ab".repeat(16),
+                id: 1,
+                sequence: 1,
+                outcome: outcome.clone(),
+            };
+            let (output, receiver) = Output::new();
+            assert!(output.send(0, || Ok(message())).is_err());
+            for _ in 0..CONTROL_FRAMES - 2 {
+                output.send_branch_terminal(|| Ok(message())).unwrap();
+            }
+            output.send(0, || Ok(accepted())).unwrap();
+            output.send(0, || Ok(accepted())).unwrap();
+            assert!(output.send_branch_terminal(|| Ok(message())).is_err());
+            while let Ok(frame) = receiver.try_recv() {
+                output.complete(&frame);
+            }
+            output.send_branch_terminal(|| Ok(message())).unwrap();
+        }
+    }
+
+    #[test]
+    fn unbooted_disposal_requires_branch_reservations_and_preserves_stalled_control_capacity() {
+        let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/unbooted-branch-disposal-v1.json"
+        ))
+        .unwrap();
+        for row in rows {
+            let proof: smolbox_protocol::UnbootedBranchDisposal =
+                serde_json::from_value(row["proof"].clone()).unwrap();
+            let message = || ServerMessage::Terminal {
+                epoch: "ab".repeat(16),
+                id: 1,
+                sequence: 1,
+                outcome: smolbox_protocol::Outcome::UnbootedBranchDisposed {
+                    proof: Box::new(proof.clone()),
+                },
+            };
+            let (output, receiver) = Output::new();
+            assert!(output.send(0, || Ok(message())).is_err());
+            for _ in 0..CONTROL_FRAMES - 2 {
+                output.send_branch_terminal(|| Ok(message())).unwrap();
+            }
+            output.send(0, || Ok(accepted())).unwrap();
+            output.send(0, || Ok(accepted())).unwrap();
+            assert!(output.send_branch_terminal(|| Ok(message())).is_err());
+            while let Ok(frame) = receiver.try_recv() {
+                output.complete(&frame);
+            }
+            output.send_branch_terminal(|| Ok(message())).unwrap();
+        }
     }
     #[test]
     fn explicit_release_proofs_use_only_bounded_branch_control_reservations() {
