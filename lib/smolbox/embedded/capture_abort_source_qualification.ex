@@ -38,16 +38,20 @@ defmodule SmolBox.Embedded.CaptureAbortSourceQualification do
     Validation.struct_shape?(proof, __MODULE__) and proof.schema == 1 and
       proof.state in ~w(running stopped) and CaptureTransition.intent?(proof.intent) and
       match?({:ok, _}, CaptureStagingCleanupReceipt.from_wire(proof.cleanup)) and
-      proof.cleanup["operation_id"] == proof.intent["operation_id"] and
+      intent_matches?(proof) and Validation.digest?(proof.proof_sha256) and
+      proof.proof_sha256 == digest(proof)
+  end
+
+  def valid?(_), do: false
+
+  defp intent_matches?(proof) do
+    proof.cleanup["operation_id"] == proof.intent["operation_id"] and
       proof.cleanup["request"] == proof.intent["request"] and
       proof.cleanup["previous"]["material"] == proof.intent["previous"] and
       proof.record_sha256 == proof.intent["previous"]["record_sha256"] and
       (proof.intent["previous"]["revision"] != 0 or
-         GrowthTransition.root?(proof.cleanup["previous"])) and
-      Validation.digest?(proof.proof_sha256) and proof.proof_sha256 == digest(proof)
+         GrowthTransition.root?(proof.cleanup["previous"]))
   end
-
-  def valid?(_), do: false
 
   def bound?(proof, previous, id, request),
     do:

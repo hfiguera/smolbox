@@ -4,17 +4,17 @@ defmodule SmolBox.NativeCapturePublicReleaseTest do
 
   alias SmolBox.Embedded.{
     CaptureResolutionTransition,
-    CaptureTransition,
     CaptureStagingCleanupReceipt,
+    CaptureTransition,
     Config,
     Identity,
     NativeCapture,
     NativeCaptureCleanup
   }
 
+  alias SmolBox.{CheckpointCapture, CheckpointResult, Checkpoints, ManagedMachine}
   alias SmolBox.Runtime.{Coordinator, Target, WorkSupervisor}
   alias SmolBox.Store.{Contract, Memory, NativeCaptureContract}
-  alias SmolBox.{CheckpointCapture, CheckpointResult, Checkpoints, ManagedMachine}
 
   defmodule Clock do
     def now, do: 1104
@@ -136,96 +136,7 @@ defmodule SmolBox.NativeCapturePublicReleaseTest do
           end)
 
     {_, _, sent, spec, proof, _, _} = NativeCaptureContract.prepare(Memory, store, proofs, root)
-    key = ManagedMachine.key(sent)
-
-    record =
-      case disposition do
-        mode when mode in [:completed, :deleted] ->
-          result = %CheckpointResult{
-            path: CheckpointCapture.path(sent.captures[spec.id]),
-            sha256: proof.change["artifact"]["sha256"],
-            size_bytes: 512,
-            profile: sent.spec.profile,
-            platform: :macos,
-            architecture: "aarch64",
-            runtime_version: "1.22.0"
-          }
-
-          assert {:ok, captured} =
-                   Memory.machine(store, :capture_advance, [
-                     key,
-                     Contract.guard(sent),
-                     spec.id,
-                     :dispatching,
-                     [state: :captured, result: result, native_transition: proof],
-                     1102
-                   ])
-
-          observed = if mode == :deleted, do: :absent, else: captured.observed_machine
-
-          assert {:ok, record} =
-                   Memory.machine(store, :capture_resolve, [
-                     key,
-                     Contract.guard(captured),
-                     spec.id,
-                     observed,
-                     1103
-                   ])
-
-          record
-
-        mode ->
-          assert {:ok, unknown} =
-                   Memory.machine(store, :capture_advance, [
-                     key,
-                     Contract.guard(sent),
-                     spec.id,
-                     :dispatching,
-                     [state: :unknown],
-                     1102
-                   ])
-
-          case mode do
-            :unknown ->
-              unknown
-
-            :aborted ->
-              assert {:ok, record} =
-                       Memory.machine(store, :capture_resolve, [
-                         key,
-                         Contract.guard(unknown),
-                         spec.id,
-                         :absent,
-                         1103
-                       ])
-
-              record
-
-            :resolved ->
-              assert %CaptureResolutionTransition{} = proof
-
-              observed = %{
-                unknown.observed_machine
-                | state: :stopped,
-                  backend_identity: %Identity{
-                    receipt: proof.receipt,
-                    transition: proof,
-                    material_history: [proof]
-                  }
-              }
-
-              assert {:ok, record} =
-                       Memory.machine(store, :capture_resolve, [
-                         key,
-                         Contract.guard(unknown),
-                         spec.id,
-                         observed,
-                         1103
-                       ])
-
-              record
-          end
-      end
+    record = capture_record(store, sent, spec, proof, disposition)
 
     epoch = String.duplicate("a", 32)
 
@@ -287,6 +198,98 @@ defmodule SmolBox.NativeCapturePublicReleaseTest do
 
     assert {:ok, usage} = Memory.usage(store, record.worker_id)
     {runtime, store, record, spec, usage}
+  end
+
+  defp capture_record(store, sent, spec, proof, disposition) do
+    key = ManagedMachine.key(sent)
+
+    case disposition do
+      mode when mode in [:completed, :deleted] ->
+        result = %CheckpointResult{
+          path: CheckpointCapture.path(sent.captures[spec.id]),
+          sha256: proof.change["artifact"]["sha256"],
+          size_bytes: 512,
+          profile: sent.spec.profile,
+          platform: :macos,
+          architecture: "aarch64",
+          runtime_version: "1.22.0"
+        }
+
+        assert {:ok, captured} =
+                 Memory.machine(store, :capture_advance, [
+                   key,
+                   Contract.guard(sent),
+                   spec.id,
+                   :dispatching,
+                   [state: :captured, result: result, native_transition: proof],
+                   1102
+                 ])
+
+        observed = if mode == :deleted, do: :absent, else: captured.observed_machine
+
+        assert {:ok, record} =
+                 Memory.machine(store, :capture_resolve, [
+                   key,
+                   Contract.guard(captured),
+                   spec.id,
+                   observed,
+                   1103
+                 ])
+
+        record
+
+      mode ->
+        assert {:ok, unknown} =
+                 Memory.machine(store, :capture_advance, [
+                   key,
+                   Contract.guard(sent),
+                   spec.id,
+                   :dispatching,
+                   [state: :unknown],
+                   1102
+                 ])
+
+        case mode do
+          :unknown ->
+            unknown
+
+          :aborted ->
+            assert {:ok, record} =
+                     Memory.machine(store, :capture_resolve, [
+                       key,
+                       Contract.guard(unknown),
+                       spec.id,
+                       :absent,
+                       1103
+                     ])
+
+            record
+
+          :resolved ->
+            assert %CaptureResolutionTransition{} = proof
+
+            observed = %{
+              unknown.observed_machine
+              | state: :stopped,
+                backend_identity: %Identity{
+                  receipt: proof.receipt,
+                  transition: proof,
+                  material_history: [proof]
+                }
+            }
+
+            assert {:ok, record} =
+                     Memory.machine(store, :capture_resolve, [
+                       key,
+                       Contract.guard(unknown),
+                       spec.id,
+                       observed,
+                       1103
+                     ])
+
+            record
+        end
+    end
   end
 
   for disposition <- [:completed, :resolved, :deleted, :aborted] do

@@ -196,26 +196,28 @@ defmodule SmolBox.Checkpoints do
     if capture.released_at_ms != nil do
       save_release(config, current, id, nil)
     else
-      with true <- capture.state in [:completed, :resolved_unknown],
-           {:ok, worker} <- MachineSession.worker(config, current) do
-        NativeResolution.run(
-          config,
-          Runtime.coordinator(runtime),
-          current,
-          worker,
-          :release,
-          fn pinned ->
-            release_native(config, current, id, pinned)
-          end
-        )
-      else
-        false -> Session.error(:identity_conflict, :checkpoint)
-        error -> error
-      end
+      release_pending(runtime, config, current, id, capture.state)
     end
   end
 
   defp release_record(_runtime, config, current, id), do: save_release(config, current, id, nil)
+
+  defp release_pending(runtime, config, current, id, state)
+       when state in [:completed, :resolved_unknown] do
+    with {:ok, worker} <- MachineSession.worker(config, current) do
+      NativeResolution.run(
+        config,
+        Runtime.coordinator(runtime),
+        current,
+        worker,
+        :release,
+        &release_native(config, current, id, &1)
+      )
+    end
+  end
+
+  defp release_pending(_runtime, _config, _current, _id, _state),
+    do: Session.error(:identity_conflict, :checkpoint)
 
   defp release_native(config, record, id, worker) do
     key = ManagedMachine.key(record)

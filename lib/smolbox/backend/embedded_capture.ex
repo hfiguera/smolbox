@@ -4,20 +4,24 @@ defmodule SmolBox.Backend.EmbeddedCapture do
 
   alias SmolBox.Embedded.{Call, CapturePublication, Identity}
 
-  alias SmolBox.{CheckpointCapture, Error, ManagedMachine}
-
-  def intent(%ManagedMachine{active_capture: id, captures: captures}) when not is_nil(id),
-    do: captures[id]
-
-  def intent(_), do: nil
+  alias SmolBox.{CheckpointCapture, Error}
 
   def run(context, [name, output, maximum], budget) do
     started = System.monotonic_time(:millisecond)
 
-    with {:ok, request, budget} <- prepare(context, name, output, maximum, budget),
-         context = Call.pin(context, budget),
-         true <- context.server != nil and context.epoch != nil,
-         remaining = started + budget.timeout_ms - System.monotonic_time(:millisecond),
+    with {:ok, request, budget} <- prepare(context, name, output, maximum, budget) do
+      transfer(context, request, budget, started + budget.timeout_ms)
+    end
+  end
+
+  def run(_context, _arguments, _budget),
+    do: {:error, %Error{category: :validation, operation: :checkpoint}}
+
+  def transfer(context, request, budget, deadline) do
+    context = Call.pin(context, budget)
+
+    with true <- context.server != nil and context.epoch != nil,
+         remaining = deadline - System.monotonic_time(:millisecond),
          true <- remaining > 0,
          {:ok, budget} <- Budget.constrain(budget, timeout_ms: remaining) do
       CapturePublication.receive(context.capture, request, budget, fn consumer, transfer_budget ->
@@ -29,13 +33,14 @@ defmodule SmolBox.Backend.EmbeddedCapture do
     end
   end
 
-  def run(_context, _arguments, _budget),
-    do: {:error, %Error{category: :validation, operation: :checkpoint}}
-
   def prepare(context, name, output, maximum, budget) do
-    with true <- EmbeddedContext.scoped?(context),
-         true <- Features.supports?(context.config, :checkpoints),
-         %CheckpointCapture{state: :dispatching} = capture <- context.capture,
+    if EmbeddedContext.scoped?(context) and Features.supports?(context.config, :checkpoints),
+      do: prepare_capture(context, name, output, maximum, budget),
+      else: unsupported()
+  end
+
+  def prepare_capture(context, name, output, maximum, budget) do
+    with %CheckpointCapture{state: :dispatching} = capture <- context.capture,
          :ok <- CheckpointCapture.validate(capture),
          true <- Map.get(context.spec, :checkpointable, false),
          true <- capture.machine == {context.spec.scope, context.spec.id},
@@ -55,13 +60,16 @@ defmodule SmolBox.Backend.EmbeddedCapture do
          "request" => %{"max_bytes" => maximum, "idle" => capture.spec.idle}
        }, budget}
     else
-      _ ->
-        {:error,
-         %Error{
-           category: :unsupported_capability,
-           operation: :checkpoint,
-           evidence: :not_dispatched
-         }}
+      _ -> unsupported()
     end
   end
+
+  defp unsupported,
+    do:
+      {:error,
+       %Error{
+         category: :unsupported_capability,
+         operation: :checkpoint,
+         evidence: :not_dispatched
+       }}
 end

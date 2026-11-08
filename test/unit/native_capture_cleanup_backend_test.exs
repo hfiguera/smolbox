@@ -1,6 +1,6 @@
 defmodule SmolBox.NativeCaptureCleanupBackendTest do
   use ExUnit.Case, async: true
-  alias SmolBox.Backend.{Budget, EmbeddedCaptureCleanup, EmbeddedContext}
+  alias SmolBox.Backend.{Budget, Embedded, EmbeddedCaptureCleanup, EmbeddedContext, HTTP}
   alias SmolBox.Embedded.{Config, NativeCapture}
   alias SmolBox.Store.{Memory, NativeCaptureContract}
 
@@ -139,13 +139,13 @@ defmodule SmolBox.NativeCaptureCleanupBackendTest do
              EmbeddedCaptureCleanup.prepare(context, capture, budget())
 
     assert {:error, %{evidence: :not_dispatched}} =
-             SmolBox.Backend.Embedded.invoke(
+             Embedded.invoke(
                context,
                :cleanup_capture,
                [capture, false],
                budget()
              )
 
-    refute SmolBox.Backend.HTTP.supports_operation?(nil, :cleanup_capture)
+    refute HTTP.supports_operation?(nil, :cleanup_capture)
   end
 end

@@ -91,8 +91,11 @@ defmodule SmolBox.ManagedRegistryTest do
     {fixture, _credentials} = fixture(warm_lost: true, slots: 2)
     {:ok, first} = Machines.create(fixture.runtime, spec(fixture))
 
-    assert {:ok, %{state: :unknown, phase: :uncertain, preparation: nil}} =
+    assert {:ok, %{state: state, phase: :uncertain, preparation: nil}} =
              Machines.await(fixture.runtime, first, 5000)
+
+    # The reconciler can observe absence before this process reads the record.
+    assert state in [:unknown, :missing]
 
     stop_supervised!(SmolBox.Runtime)
     runtime = start_supervised!({SmolBox.Runtime, fixture.options})

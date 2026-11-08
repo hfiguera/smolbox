@@ -1,7 +1,13 @@
 defmodule SmolBox.Embedded.NativeCaptureCleanup do
-  @moduledoc false
-  alias SmolBox.Embedded.{CaptureStagingCleanupReceipt, NativeCapture, Shape}
+  @moduledoc """
+  Verified native staging cleanup evidence for a released checkpoint capture.
+
+  Store adapters bind the receipt to the capture and source identity before
+  releasing its reservation. The kind records whether staging was cleaned or
+  aborted before entry.
+  """
   alias SmolBox.{CheckpointCapture, Validation}
+  alias SmolBox.Embedded.{CaptureStagingCleanupReceipt, CaptureTransition, Shape}
 
   @enforce_keys [:kind, :receipt]
   @derive {Inspect, only: [:kind]}
@@ -15,14 +21,14 @@ defmodule SmolBox.Embedded.NativeCaptureCleanup do
 
   def valid?(_), do: false
 
-  def bound?(proof, %CheckpointCapture{} = capture, previous),
+  def bound?(proof, %{__struct__: CheckpointCapture} = capture, previous),
     do:
       valid?(proof) and Shape.receipt?(previous, 2) and
         CaptureStagingCleanupReceipt.bound?(
           proof.receipt,
           previous,
           capture.spec.id,
-          NativeCapture.request(capture)
+          CaptureTransition.request(capture)
         ) and
         (proof.kind == :cleaned or
            (capture.state == :resolved_unknown and capture.native_transition == nil))

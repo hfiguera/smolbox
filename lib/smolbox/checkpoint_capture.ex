@@ -12,7 +12,6 @@ defmodule SmolBox.CheckpointCapture do
     CaptureResolutionTransition,
     CaptureTransition,
     NativeCaptureCleanup,
-    NativeGrowth,
     Shape
   }
 
@@ -75,7 +74,7 @@ defmodule SmolBox.CheckpointCapture do
              r.deadline_ms == r.accepted_at_ms + r.spec.timeout_ms,
          true <- r.state in (@terminal ++ [:accepted, :dispatching, :captured, :unknown]),
          true <- result?(r) and native_evidence?(r),
-         true <- SmolBox.ExecutionValidation.error?(r.error),
+         true <- Error.valid?(r.error),
          true <-
            Enum.all?(
              [r.resolved_at_ms, r.released_at_ms],
@@ -95,56 +94,6 @@ defmodule SmolBox.CheckpointCapture do
   @doc false
   def path(r), do: Path.join([r.spec.policy.root, r.fingerprint, "capture.smolcheckpoint"])
   @doc false
-  def history_valid?(m) do
-    is_map(m.captures) and map_size(m.captures) <= 256 and
-      Enum.all?(m.captures, fn {id, r} ->
-        entry_valid?(r, id, m)
-      end) and active?(m)
-  end
-
-  defp entry_valid?(r, id, m),
-    do:
-      validate(r) == :ok and r.spec.id == id and
-        r.machine == {m.scope, m.id} and source_result?(r, m) and source_enrolled?(r, m) and
-        native_fields?(r, m) and
-        (terminal?(r) or m.active_capture == id)
-
-  defp native_fields?(_r, %{backend_assignment: %{version: 2}}), do: true
-
-  defp native_fields?(r, _m),
-    do:
-      r.native_transition == nil and r.native_source_receipt == nil and
-        r.native_cleanup == nil and r.native_abort_source == nil
-
-  defp source_enrolled?(%{native_source_receipt: nil}, _), do: true
-
-  defp source_enrolled?(r, %{created_machine: %{backend_identity: %{receipt: origin}}} = m) do
-    source = r.native_source_receipt
-
-    receipts =
-      [origin] ++
-        Enum.flat_map(Map.values(m.captures) ++ Map.values(m.disk_expansions), fn
-          %{native_transition: %{receipt: receipt}} -> [receipt]
-          _ -> []
-        end)
-
-    Shape.receipt?(origin, 2) and Map.delete(source, "material") == Map.delete(origin, "material") and
-      source in receipts
-  end
-
-  defp source_enrolled?(_, _), do: false
-
-  defp source_result?(%{result: nil}, _), do: true
-
-  defp source_result?(r, %{backend_assignment: %{version: 2}} = m),
-    do:
-      r.result.profile == NativeGrowth.capture_profile(m, r) and
-        r.result.architecture == m.spec.artifact["architecture"]
-
-  defp source_result?(%{result: result}, %{spec: spec}),
-    do: result.profile == spec.profile and result.architecture == spec.artifact["architecture"]
-
-  @doc false
   def resources(m),
     do:
       Enum.reduce(m.captures, zero(), fn {_id, r}, total ->
@@ -159,15 +108,6 @@ defmodule SmolBox.CheckpointCapture do
 
   defp resources_for(r), do: r.spec.policy.resources
   defp zero, do: %{slots: 0, cpus: 0, memory_mb: 0, disk_gb: 0}
-  defp active?(%{active_capture: nil, operation: op}), do: op != :capture
-
-  defp active?(m),
-    do:
-      match?(%__MODULE__{}, m.captures[m.active_capture]) and
-        not terminal?(m.captures[m.active_capture]) and m.operation == :capture and
-        m.active_execution == nil and
-        m.state in [:running, :unknown, :missing, :conflict]
-
   defp result?(%{state: state, result: nil}), do: state not in [:captured, :completed]
 
   defp result?(%{state: state, result: %CheckpointResult{} = result} = r),

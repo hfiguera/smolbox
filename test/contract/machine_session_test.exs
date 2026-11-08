@@ -43,7 +43,7 @@ defmodule SmolBox.Runtime.MachineSessionTest do
           end)
         end)
 
-      assert_receive {:observing, pid}
+      assert_receive {:observing, pid}, 1000
       monitor = Process.monitor(pid)
       Agent.update(Clock, fn _ -> unquote(time) end)
       assert {:error, %{category: :expired}} = Task.await(task, 1000)
@@ -65,7 +65,7 @@ defmodule SmolBox.Runtime.MachineSessionTest do
         end)
       end)
 
-    assert_receive :observing
+    assert_receive :observing, 1000
     Agent.update(Clock, fn _ -> {900, 210} end)
     assert {:error, %{category: :expired}} = Task.await(task, 1000)
   end
