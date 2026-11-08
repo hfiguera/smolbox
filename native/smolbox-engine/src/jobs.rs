@@ -26,6 +26,7 @@ pub const JOB_CONTROL_METADATA_BYTES: u64 = 256 * 1024;
 /// capture work retains its whole work metadata allowance. Volume/control
 /// observation headroom stays independent; no checkpoint staging is released.
 pub const JOB_MATERIAL_CONTROL_METADATA_BYTES: u64 = 32 * 1024 * 1024;
+pub const JOB_EXPORT_STAGING_BYTES: u64 = 512 * 1024 * 1024 * 1024;
 pub const JOB_DESCRIPTORS: usize = 32;
 pub const JOB_CONTROL_HEADROOM: usize = 8;
 
@@ -49,6 +50,29 @@ pub(crate) struct Demand {
     metadata: u64,
 }
 impl Demand {
+    pub(crate) fn export_observation() -> Self {
+        // Two bounded publication record/proof readers fit reserved control
+        // descriptors and metadata even while an export holds the work ceiling.
+        Self::volume_observation()
+    }
+    pub(crate) fn export_cleanup() -> Self {
+        let mut demand = Self::volume_observation();
+        demand.descriptors = 8;
+        demand
+    }
+    pub(crate) fn export_retirement() -> Self {
+        // Full authenticated material-journal parsing shares the existing
+        // independent resolver allowance; never consume observation headroom.
+        let mut demand = Self::material_resolution();
+        demand.descriptors = 8;
+        demand
+    }
+    pub(crate) fn export_source() -> Self {
+        let mut demand = Self::volume_root();
+        demand.metadata = JOB_METADATA_BYTES;
+        demand
+    }
+
     pub(crate) fn volume_mounts(count: usize) -> Result<Self> {
         if count == 0 || count > crate::VOLUME_MOUNTS {
             return Err(Error::before(ErrorCode::Validation));
@@ -398,6 +422,7 @@ pub(crate) struct Counts {
     pub descriptors: usize,
     pub work_descriptors: usize,
     pub staging: u64,
+    pub export_staging: u64,
     pub registry_staging: u64,
     pub checkpoint_staging: u64,
     pub checkpoint_metadata: u64,
@@ -473,6 +498,7 @@ impl JobPool {
             checkpoint_material: counts.checkpoint_material + demand.checkpoint_material,
             checkpoint_install: counts.checkpoint_install + demand.checkpoint_install,
             staging: counts.staging + demand.staging,
+            export_staging: counts.export_staging,
             metadata: counts.metadata + demand.metadata,
             work_metadata: counts.work_metadata
                 + match demand.lane {
@@ -510,9 +536,45 @@ impl JobPool {
             demand,
         })
     }
+    pub(crate) fn export_staging(&self, bytes: u64, restore: bool) -> Result<ExportStagingLease> {
+        let mut counts = self
+            .0
+            .counts
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        if (!restore && !self.available())
+            || bytes == 0
+            || bytes > JOB_EXPORT_STAGING_BYTES
+            || counts
+                .export_staging
+                .checked_add(bytes)
+                .is_none_or(|next| next > JOB_EXPORT_STAGING_BYTES)
+        {
+            return Err(Error::before(ErrorCode::Admission));
+        }
+        counts.export_staging += bytes;
+        Ok(ExportStagingLease {
+            pool: self.clone(),
+            bytes,
+        })
+    }
     #[cfg(test)]
     pub(crate) fn counts(&self) -> Counts {
         *self.0.counts.lock().unwrap()
+    }
+}
+pub(crate) struct ExportStagingLease {
+    pool: JobPool,
+    bytes: u64,
+}
+impl Drop for ExportStagingLease {
+    fn drop(&mut self) {
+        self.pool
+            .0
+            .counts
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .export_staging -= self.bytes;
     }
 }
 impl Drop for JobLease {
@@ -548,6 +610,114 @@ impl Drop for JobLease {
 }
 
 impl JobLease {
+    pub(crate) fn promote_export_stage(&mut self) -> Result<()> {
+        let mut counts = self
+            .pool
+            .0
+            .counts
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        let wanted = JOB_DESCRIPTORS - JOB_CONTROL_HEADROOM;
+        if self.pool.available()
+            && matches!(self.demand.lane, Lane::Work)
+            && self.demand.descriptors == wanted
+            && self.demand.children == 2
+            && self.demand.metadata == JOB_METADATA_BYTES
+        {
+            // An admitted conversion already holds the whole export pipeline.
+            return Ok(());
+        }
+        if !self.pool.available()
+            || !matches!(self.demand.lane, Lane::Work)
+            || self.demand.descriptors != 12
+            || self.demand.children != 0
+            || self.demand.metadata != JOB_METADATA_BYTES
+        {
+            return Err(Error::before(ErrorCode::Admission));
+        }
+        let extra = wanted - self.demand.descriptors;
+        if counts.descriptors + extra > JOB_DESCRIPTORS || counts.work_descriptors + extra > wanted
+        {
+            return Err(Error::before(ErrorCode::Admission));
+        }
+        fd_admission(counts.descriptors + extra)?;
+        counts.descriptors += extra;
+        counts.work_descriptors += extra;
+        self.demand.descriptors = wanted;
+        Ok(())
+    }
+
+    pub(crate) fn promote_export_conversion(&mut self) -> Result<()> {
+        let mut counts = self
+            .pool
+            .0
+            .counts
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        let wanted = JOB_DESCRIPTORS - JOB_CONTROL_HEADROOM;
+        if !self.pool.available()
+            || !matches!(self.demand.lane, Lane::Work)
+            || self.demand.metadata != JOB_METADATA_BYTES
+            || self.demand.registry_staging != 0
+            || self.demand.checkpoint_staging != 0
+        {
+            return Err(Error::before(ErrorCode::Admission));
+        }
+        if self.demand.descriptors == wanted && self.demand.children == 2 {
+            return Ok(());
+        }
+        if self.demand.descriptors != 12 || self.demand.children != 0 {
+            return Err(Error::before(ErrorCode::Admission));
+        }
+        let extra = wanted - self.demand.descriptors;
+        if counts.descriptors + extra > JOB_DESCRIPTORS
+            || counts.work_descriptors + extra > wanted
+            || counts.children + 2 > JOB_CHILDREN
+        {
+            return Err(Error::before(ErrorCode::Admission));
+        }
+        fd_admission(counts.descriptors + extra)?;
+        counts.descriptors += extra;
+        counts.work_descriptors += extra;
+        counts.children += 2;
+        self.demand.descriptors = wanted;
+        self.demand.children = 2;
+        Ok(())
+    }
+
+    pub(crate) fn promote_export_disks(&mut self) -> Result<()> {
+        let mut counts = self
+            .pool
+            .0
+            .counts
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        // Source/root and disk descriptors, bounded SQLite rechecks, backing
+        // reopen and one coordinator-owned output must coexist.
+        let wanted = 12;
+        if !self.pool.available()
+            || !matches!(self.demand.lane, Lane::Work)
+            || self.demand.children != 0
+            || self.demand.descriptors != 4
+            || self.demand.metadata != JOB_METADATA_BYTES
+            || self.demand.checkpoint_staging != 0
+            || self.demand.registry_staging != 0
+        {
+            return Err(Error::before(ErrorCode::Admission));
+        }
+        let extra = wanted - self.demand.descriptors;
+        if counts.descriptors + extra > JOB_DESCRIPTORS
+            || counts.work_descriptors + extra > JOB_DESCRIPTORS - JOB_CONTROL_HEADROOM
+        {
+            return Err(Error::before(ErrorCode::Admission));
+        }
+        fd_admission(counts.descriptors + extra)?;
+        counts.descriptors += extra;
+        counts.work_descriptors += extra;
+        self.demand.descriptors = wanted;
+        Ok(())
+    }
+
     pub(crate) fn promote_checkpoint_install(&mut self, bytes: u64) -> Result<()> {
         let mut counts = self
             .pool
@@ -767,6 +937,45 @@ fn fd_admission(reserved: usize) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn export_conversion_promotes_one_job_atomically_and_keeps_reserved_controls() {
+        let pool = JobPool::default();
+        let mut source = pool.acquire(Demand::export_source()).unwrap();
+        source.promote_export_disks().unwrap();
+        let occupied = pool
+            .acquire(Demand {
+                children: JOB_CHILDREN,
+                ..Demand::observation()
+            })
+            .unwrap();
+        let before = pool.counts();
+        assert!(source.promote_export_conversion().is_err());
+        assert_eq!(before, pool.counts());
+        drop(occupied);
+        source.promote_export_conversion().unwrap();
+        let reserved = pool.counts();
+        assert_eq!(
+            (reserved.work, reserved.work_descriptors, reserved.children),
+            (1, 24, 2)
+        );
+        source.promote_export_conversion().unwrap();
+        source.promote_export_stage().unwrap();
+        assert_eq!(reserved, pool.counts());
+        let first = pool.acquire(Demand::observation()).unwrap();
+        let second = pool.acquire(Demand::observation()).unwrap();
+        assert_eq!(pool.counts().descriptors, JOB_DESCRIPTORS);
+        assert_eq!(pool.counts().control, 2);
+        pool.quarantine();
+        let held = pool.counts();
+        assert!(source.promote_export_conversion().is_err());
+        assert_eq!(held, pool.counts());
+        drop(source);
+        assert_eq!((pool.counts().children, pool.counts().work), (0, 0));
+        drop((first, second));
+        assert_eq!(pool.counts(), Counts::default());
+        assert!(!pool.available());
+    }
 
     #[test]
     fn material_resolution_has_finite_independent_room_while_capture_work_is_retained() {
@@ -1332,6 +1541,7 @@ mod tests {
                 checkpoint_material: 0,
                 checkpoint_install: 0,
                 staging: 48 * 1024 * 1024,
+                export_staging: 0,
                 metadata: 0,
                 work_metadata: 0,
                 material_control_metadata: 0,
@@ -1432,5 +1642,25 @@ mod tests {
             ErrorCode::Admission
         );
         assert_eq!(pool.counts(), Counts::default());
+    }
+    #[test]
+    fn export_byte_allowance_is_aggregate_retained_and_independent_of_control_or_work_slots() {
+        let pool = JobPool::default();
+        let lease = pool
+            .export_staging(JOB_EXPORT_STAGING_BYTES, false)
+            .unwrap();
+        assert_eq!(pool.counts().work, 0);
+        assert_eq!(pool.counts().export_staging, JOB_EXPORT_STAGING_BYTES);
+        assert!(pool.export_staging(1, false).is_err());
+        let control = pool.acquire(Demand::observation()).unwrap();
+        assert_eq!(pool.counts().export_staging, JOB_EXPORT_STAGING_BYTES);
+        drop(control);
+        drop(lease);
+        assert_eq!(pool.counts(), Counts::default());
+        pool.quarantine();
+        assert!(pool.export_staging(1, false).is_err());
+        let restored = pool.export_staging(1, true).unwrap();
+        assert_eq!(pool.counts().export_staging, 1);
+        drop(restored);
     }
 }

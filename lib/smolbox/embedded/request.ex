@@ -4,6 +4,7 @@ defmodule SmolBox.Embedded.Request do
     CaptureTransition,
     CheckpointContract,
     CreationFeatures,
+    ExportContract,
     ImageContract,
     MountContract,
     NativeSource,
@@ -22,12 +23,12 @@ defmodule SmolBox.Embedded.Request do
 
   def observation?(%{"operation" => name}),
     do:
-      name in ~w(health capacity metrics readiness list measurements inspect_growth inspect_capture inspect_capture_resolution inspect_oci_creation inspect_registry_creation inspect_checkpoint_creation checkpoint_preflight)
+      name in ~w(health capacity metrics readiness list measurements inspect_export inspect_growth inspect_capture inspect_capture_resolution inspect_oci_creation inspect_registry_creation inspect_checkpoint_creation checkpoint_preflight)
 
   def observation?(_request), do: false
 
   def control?(%{"operation" => name, "quiesced" => true} = request)
-      when name in ~w(resolve_capture cleanup_capture_staging abort_capture_staging qualify_aborted_capture_source),
+      when name in ~w(cleanup_export_staging resolve_capture cleanup_capture_staging abort_capture_staging qualify_aborted_capture_source),
       do: valid?(request, 1, 2)
 
   def control?(request), do: observation?(request)
@@ -44,12 +45,12 @@ defmodule SmolBox.Embedded.Request do
   def reconciliation?(%{"operation" => "volume"} = request), do: observation?(request)
 
   def reconciliation?(%{"operation" => name, "quiesced" => true} = request)
-      when name in ~w(resolve_capture cleanup_capture_staging abort_capture_staging qualify_aborted_capture_source),
+      when name in ~w(cleanup_export_staging resolve_capture cleanup_capture_staging abort_capture_staging qualify_aborted_capture_source),
       do: valid?(request, 1, 2)
 
   def reconciliation?(%{"operation" => name}),
     do:
-      name in ~w(inspect inspect_creation inspect_oci_creation inspect_registry_creation inspect_checkpoint_creation inspect_growth inspect_capture inspect_capture_resolution qualify_growth)
+      name in ~w(inspect_export inspect inspect_creation inspect_oci_creation inspect_registry_creation inspect_checkpoint_creation inspect_growth inspect_capture inspect_capture_resolution qualify_growth)
 
   def reconciliation?(_request), do: false
 
@@ -87,6 +88,38 @@ defmodule SmolBox.Embedded.Request do
       end)
   end
 
+  defp operation?(%{"operation" => name} = operation, budget, 2)
+       when name in ~w(qualify_export admit_export export_machine) do
+    fields =
+      case name do
+        "export_machine" -> ~w(operation receipt operation_id request push_token)
+        "admit_export" -> ~w(operation receipt operation_id request)
+        "qualify_export" -> ~w(operation receipt request)
+      end
+
+    Shape.keys?(operation, fields) and Shape.receipt?(operation["receipt"], 2) and
+      operation["receipt"]["material"] != nil and
+      ExportContract.request?(operation["request"]) and export_admission?(operation, budget)
+  end
+
+  defp operation?(%{"operation" => "inspect_export"} = operation, budget, 2),
+    do:
+      Shape.keys?(operation, ~w(operation receipt operation_id request_sha256)) and
+        Shape.receipt?(operation["receipt"], 2) and operation["receipt"]["material"] != nil and
+        Shape.id?(operation["operation_id"]) and Validation.digest?(operation["request_sha256"]) and
+        budget <= 30_000
+
+  defp operation?(
+         %{"operation" => "cleanup_export_staging", "quiesced" => true} = operation,
+         budget,
+         2
+       ),
+       do:
+         Shape.keys?(operation, ~w(operation receipt operation_id request_sha256 quiesced)) and
+           Shape.receipt?(operation["receipt"], 2) and operation["receipt"]["material"] != nil and
+           Shape.id?(operation["operation_id"]) and
+           Validation.digest?(operation["request_sha256"]) and budget <= 30_000
+
   defp operation?(%{"operation" => "volume"} = operation, budget, 2),
     do:
       Shape.keys?(operation, ~w(operation request)) and
@@ -108,7 +141,7 @@ defmodule SmolBox.Embedded.Request do
            (name == "capture_checkpoint" or budget <= 30_000) and capture_chunk?(operation)
 
   defp operation?(%{"operation" => name, "quiesced" => true} = operation, budget, 2)
-       when name in ~w(resolve_capture cleanup_capture_staging abort_capture_staging qualify_aborted_capture_source),
+       when name in ~w(cleanup_export_staging resolve_capture cleanup_capture_staging abort_capture_staging qualify_aborted_capture_source),
        do:
          Shape.keys?(operation, ~w(operation receipt operation_id request quiesced)) and
            Shape.receipt?(operation["receipt"], 2) and Shape.id?(operation["operation_id"]) and
@@ -316,6 +349,14 @@ defmodule SmolBox.Embedded.Request do
            Validation.integer?(total, 0, options["max_bytes"])
 
   defp operation?(_operation, _budget, _major), do: false
+
+  defp export_admission?(%{"operation" => "export_machine"} = operation, _budget),
+    do: Shape.id?(operation["operation_id"]) and ExportContract.token?(operation["push_token"])
+
+  defp export_admission?(%{"operation" => "admit_export"} = operation, budget),
+    do: budget <= 30_000 and Shape.id?(operation["operation_id"])
+
+  defp export_admission?(%{"operation" => "qualify_export"}, budget), do: budget <= 30_000
 
   defp capture_chunk?(%{"chunk_bytes" => bytes}), do: Validation.integer?(bytes, 1, 65_536)
   defp capture_chunk?(_), do: true

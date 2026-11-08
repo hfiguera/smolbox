@@ -230,6 +230,15 @@ impl Shared {
 }
 
 pub trait Native: Send + Sync + 'static {
+    fn export(
+        &self,
+        _operation: wire::Operation,
+        _approval: crate::package::ExportApproval,
+        _remaining: Duration,
+        _cancel: Cancellation,
+    ) -> wire::Outcome {
+        before(wire::SafeCode::Unsupported)
+    }
     fn checkpoint(
         &self,
         _operation: wire::Operation,
@@ -379,6 +388,15 @@ impl Native for Engine {
         cancel: Cancellation,
     ) -> wire::Outcome {
         adapter::prepare_artifact(self, approval, token, remaining, cancel)
+    }
+    fn export(
+        &self,
+        operation: wire::Operation,
+        approval: crate::package::ExportApproval,
+        remaining: Duration,
+        cancel: Cancellation,
+    ) -> wire::Outcome {
+        adapter::export(self, operation, approval, remaining, cancel)
     }
     fn checkpoint(
         &self,
@@ -694,6 +712,7 @@ fn is_observation(operation: &wire::Operation) -> bool {
             | wire::Operation::List
             | wire::Operation::Measurements { .. }
             | wire::Operation::InspectGrowth { .. }
+            | wire::Operation::InspectExport { .. }
             | wire::Operation::InspectCapture { .. }
             | wire::Operation::InspectCaptureResolution { .. }
             | wire::Operation::InspectOciCreation { .. }
@@ -706,7 +725,8 @@ fn is_control(operation: &wire::Operation) -> bool {
     is_observation(operation)
         || matches!(
             operation,
-            wire::Operation::ResolveCapture { quiesced: true, .. }
+            wire::Operation::CleanupExportStaging { quiesced: true, .. }
+                | wire::Operation::ResolveCapture { quiesced: true, .. }
                 | wire::Operation::CleanupCaptureStaging { quiesced: true, .. }
                 | wire::Operation::QualifyAbortedCaptureSource { quiesced: true, .. }
                 | wire::Operation::AbortCaptureStaging { quiesced: true, .. }
@@ -843,6 +863,26 @@ fn admit_request(
         }
     } else {
         rejection
+    };
+    let rejection = match &operation {
+        wire::Operation::QualifyExport { request, .. }
+        | wire::Operation::AdmitExport { request, .. }
+        | wire::Operation::ExportMachine { request, .. } => {
+            if config
+                .approved_export_destinations
+                .as_ref()
+                .is_some_and(|destinations| {
+                    destinations
+                        .iter()
+                        .any(|approval| approval.matches(request))
+                })
+            {
+                rejection
+            } else {
+                Some(wire::SafeCode::Unsupported)
+            }
+        }
+        _ => rejection,
     };
     let rejection = if let Some((source, resources)) = operation.checkpoint_source() {
         if config.approved_checkpoints.as_ref().is_some_and(|catalog| {
@@ -1156,6 +1196,30 @@ fn spawn_worker(
             };
             let result =
                 std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| match work.operation {
+                    operation @ (wire::Operation::QualifyExport { .. }
+                    | wire::Operation::AdmitExport { .. }
+                    | wire::Operation::ExportMachine { .. }) => {
+                        let request = match &operation {
+                            wire::Operation::QualifyExport { request, .. }
+                            | wire::Operation::AdmitExport { request, .. }
+                            | wire::Operation::ExportMachine { request, .. } => request,
+                            _ => unreachable!(),
+                        };
+                        match config
+                            .approved_export_destinations
+                            .as_ref()
+                            .and_then(|catalog| {
+                                catalog.iter().find(|approval| approval.matches(request))
+                            }) {
+                            Some(approval) => native.export(
+                                operation,
+                                approval.clone(),
+                                remaining,
+                                work.cancel.clone(),
+                            ),
+                            None => before(wire::SafeCode::Unsupported),
+                        }
+                    }
                     operation @ (wire::Operation::QualifyCheckpointCreation { .. }
                     | wire::Operation::CreateCheckpoint { .. }
                     | wire::Operation::InspectCheckpointCreation { .. }) => {
@@ -1540,6 +1604,39 @@ mod tests {
         uploaded: Mutex<Vec<u8>>,
     }
     impl Native for Fake {
+        fn export(
+            &self,
+            operation: wire::Operation,
+            approval: crate::package::ExportApproval,
+            _remaining: Duration,
+            _cancel: Cancellation,
+        ) -> wire::Outcome {
+            self.calls.fetch_add(1, Ordering::AcqRel);
+            match operation {
+                wire::Operation::QualifyExport { request, .. }
+                | wire::Operation::AdmitExport { request, .. } => {
+                    assert!(approval.matches(&request));
+                    wire::Outcome::Qualified
+                }
+                wire::Operation::ExportMachine {
+                    receipt,
+                    operation_id,
+                    request,
+                    push_token,
+                } => {
+                    assert!(approval.matches(&request));
+                    assert_eq!(push_token.into_secret(), "fixture-export-token");
+                    let proof = export_fixture();
+                    proof
+                        .matches_request(&receipt, &operation_id, &request)
+                        .unwrap();
+                    wire::Outcome::Exported {
+                        publication: Box::new(proof),
+                    }
+                }
+                _ => before(wire::SafeCode::Validation),
+            }
+        }
         fn run_with_volume_policy(
             &self,
             operation: wire::Operation,
@@ -1827,6 +1924,33 @@ mod tests {
                         qualification: Box::new(proof),
                     }
                 }
+                wire::Operation::InspectExport {
+                    receipt,
+                    operation_id,
+                    request_sha256,
+                } => {
+                    let proof = export_fixture();
+                    proof
+                        .matches(&receipt, &operation_id, &request_sha256)
+                        .unwrap();
+                    wire::Outcome::ExportPresence {
+                        publication: Some(Box::new(proof)),
+                    }
+                }
+                wire::Operation::CleanupExportStaging {
+                    receipt,
+                    operation_id,
+                    request_sha256,
+                    quiesced: true,
+                } => wire::Outcome::ExportStagingCleaned {
+                    cleanup: Box::new(wire::ExportStageCleanup {
+                        schema: 1,
+                        source: receipt,
+                        operation_id,
+                        request_sha256,
+                        stage_sha256: "d".repeat(64),
+                    }),
+                },
                 wire::Operation::AbortCaptureStaging {
                     receipt,
                     operation_id,
@@ -2519,6 +2643,30 @@ mod tests {
         Receiver<()>,
         std::thread::JoinHandle<BridgeResult<()>>,
     ) {
+        start_with_export_catalogs(
+            approved,
+            approved_oci_sources,
+            approved_registry_sources,
+            approved_volume_policy,
+            approved_artifacts,
+            approved_checkpoints,
+            None,
+        )
+    }
+    fn start_with_export_catalogs(
+        approved: wire::Hello,
+        approved_oci_sources: Option<Vec<wire::OciSource>>,
+        approved_registry_sources: Option<Vec<crate::package::RegistryApproval>>,
+        approved_volume_policy: Option<smolbox_engine::LocalVolumePolicy>,
+        approved_artifacts: Vec<wire::Artifact>,
+        approved_checkpoints: Option<Vec<crate::package::CheckpointApproval>>,
+        approved_export_destinations: Option<Vec<crate::package::ExportApproval>>,
+    ) -> (
+        UnixStream,
+        Arc<Fake>,
+        Receiver<()>,
+        std::thread::JoinHandle<BridgeResult<()>>,
+    ) {
         let (mut client, server) = UnixStream::pair().unwrap();
         client
             .set_read_timeout(Some(Duration::from_secs(3)))
@@ -2538,8 +2686,8 @@ mod tests {
         let config = Config {
             publish_address: None,
             schema: approved.major as u8,
-            target_id: "test".into(),
-            generation: "cd".repeat(16),
+            target_id: approved.domain.target_id.clone(),
+            generation: approved.domain.generation.clone(),
             allow_initialize: false,
             package_manifest_sha256: "01".repeat(32),
             approved_artifacts,
@@ -2547,6 +2695,7 @@ mod tests {
             approved_registry_sources,
             approved_volume_policy,
             approved_checkpoints,
+            approved_export_destinations,
         };
         let declared = approved.clone();
         let thread = std::thread::spawn(move || {
@@ -4388,6 +4537,7 @@ mod tests {
             approved_registry_sources: None,
             approved_volume_policy: None,
             approved_checkpoints: None,
+            approved_export_destinations: None,
         };
         spawn_reader(shared.clone(), queued, server, controls, config);
         send(&mut client, wire::ClientMessage::Approve { hello: hello() });
@@ -4411,5 +4561,253 @@ mod tests {
         assert_eq!(inputs.len(), 1);
         drop(state);
         drop(client);
+    }
+    fn export_fixture() -> wire::ExportPublication {
+        serde_json::from_str::<Vec<wire::ExportPublication>>(include_str!(
+            "../../smolbox-protocol/fixtures/export-publications-v1.json"
+        ))
+        .unwrap()
+        .remove(0)
+    }
+    fn export_hello() -> wire::Hello {
+        let proof = export_fixture();
+        let mut hello = terminal_hello();
+        hello.domain.target_id = proof.source.target_id;
+        hello.domain.generation = proof.source.domain_generation;
+        hello.package.platform = "linux".into();
+        hello.package.architecture = "x86_64".into();
+        hello
+            .sdk
+            .as_mut()
+            .unwrap()
+            .feature_versions
+            .insert("exports".into(), 1);
+        hello
+            .sdk
+            .as_mut()
+            .unwrap()
+            .feature_versions
+            .insert("compact_creation".into(), 1);
+        hello.capabilities = hello.sdk.as_ref().unwrap().capabilities();
+        hello.limits = wire::Limits::for_sdk(hello.sdk.as_ref().unwrap());
+        hello
+    }
+    fn export_request() -> wire::ExportRequest {
+        let proof = export_fixture();
+        wire::ExportRequest {
+            request_sha256: proof.request_sha256,
+            destination_id: proof.identity.destination_id,
+            destination_sha256: proof.identity.destination_sha256,
+            tag: proof.identity.tag,
+            max_artifact_bytes: 1048576,
+            max_staging_bytes: 4194304,
+        }
+    }
+    fn export_approval() -> crate::package::ExportApproval {
+        let proof = export_fixture();
+        let identity = proof.identity;
+        let mut approval: crate::package::ExportApproval = serde_json::from_value(serde_json::json!({"id":identity.destination_id,"registry":identity.registry,"repository":identity.repository,"credential_ref":"publisher","immutable_tags":true,"allow_insecure_loopback":false,"ca_cert_file":null,"ca_certificate_sha256":null,"destination_sha256":identity.destination_sha256,"max_artifact_bytes":1048576,"max_staging_bytes":4194304})).unwrap();
+        approval
+            .resolve()
+            .unwrap_or_else(|_| panic!("invalid export fixture approval"));
+        approval
+    }
+    #[test]
+    fn export_conversion_resources_are_explicit_validated_and_legacy_catalogs_grant_none() {
+        let legacy = export_approval();
+        assert!(legacy.conversion_resources.is_none());
+        assert!(serde_json::to_value(&legacy)
+            .unwrap()
+            .get("conversion_resources")
+            .is_none());
+        let mut configured = serde_json::to_value(&legacy).unwrap();
+        configured["conversion_resources"] =
+            serde_json::json!({"slots":1,"cpus":4,"memory_mb":4608,"disk_gb":128});
+        let mut approval: crate::package::ExportApproval =
+            serde_json::from_value(configured.clone()).unwrap();
+        assert!(approval.resolve().is_ok());
+        assert!(approval
+            .conversion_resources
+            .unwrap()
+            .plan(1 << 30, 30 << 30, 128 << 30)
+            .is_ok());
+        configured["conversion_resources"]["cpus"] = serde_json::json!(3);
+        let mut invalid: crate::package::ExportApproval =
+            serde_json::from_value(configured).unwrap();
+        assert!(invalid.resolve().is_err());
+    }
+    #[test]
+    fn export_requires_feature_exact_catalog_and_caps_before_dispatch_then_returns_only_bound_proof(
+    ) {
+        for approved in [false, true] {
+            let hello = export_hello();
+            let (mut client, fake, _started, thread) = start_with_export_catalogs(
+                hello.clone(),
+                None,
+                None,
+                None,
+                vec![],
+                None,
+                approved.then(|| vec![export_approval()]),
+            );
+            let proof = export_fixture();
+            for (id, operation) in [
+                (
+                    1,
+                    wire::Operation::QualifyExport {
+                        receipt: proof.source.clone(),
+                        request: export_request(),
+                    },
+                ),
+                (
+                    2,
+                    wire::Operation::AdmitExport {
+                        receipt: proof.source.clone(),
+                        operation_id: proof.operation_id.clone(),
+                        request: export_request(),
+                    },
+                ),
+                (
+                    3,
+                    wire::Operation::ExportMachine {
+                        receipt: proof.source.clone(),
+                        operation_id: proof.operation_id.clone(),
+                        request: export_request(),
+                        push_token: serde_json::from_value(serde_json::json!(
+                            "fixture-export-token"
+                        ))
+                        .unwrap(),
+                    },
+                ),
+            ] {
+                send(&mut client, request(id, operation));
+                if approved {
+                    assert!(matches!(
+                        receive(&mut client),
+                        wire::ServerMessage::Accepted { .. }
+                    ));
+                    let response = receive(&mut client);
+                    assert!(matches!(
+                        response,
+                        wire::ServerMessage::Terminal {
+                            outcome: wire::Outcome::Qualified | wire::Outcome::Exported { .. },
+                            ..
+                        }
+                    ));
+                } else {
+                    assert!(matches!(
+                        receive(&mut client),
+                        wire::ServerMessage::Terminal {
+                            outcome: wire::Outcome::Error {
+                                code: wire::SafeCode::Unsupported,
+                                dispatch: wire::Dispatch::NotDispatched
+                            },
+                            ..
+                        }
+                    ));
+                }
+            }
+            let mut crossed = export_request();
+            crossed.destination_sha256 = "0".repeat(64);
+            send(
+                &mut client,
+                request(
+                    4,
+                    wire::Operation::QualifyExport {
+                        receipt: proof.source,
+                        request: crossed,
+                    },
+                ),
+            );
+            assert!(matches!(
+                receive(&mut client),
+                wire::ServerMessage::Terminal {
+                    outcome: wire::Outcome::Error {
+                        code: wire::SafeCode::Unsupported,
+                        ..
+                    },
+                    ..
+                }
+            ));
+            assert_eq!(
+                fake.calls.load(Ordering::Acquire),
+                if approved { 3 } else { 0 }
+            );
+            send(
+                &mut client,
+                wire::ClientMessage::Shutdown { epoch: hello.epoch },
+            );
+            assert!(thread.join().unwrap().is_ok());
+        }
+    }
+    #[test]
+    fn export_inspection_and_cleanup_use_reserved_controls_without_catalog_under_busy_workers() {
+        let hello = export_hello();
+        let proof = export_fixture();
+        let (mut client, _fake, started, thread) = start_with(hello.clone());
+        for id in 1..=WORKERS as u64 {
+            let mut operation = exec("hold");
+            if let wire::Operation::Exec { receipt, .. } = &mut operation {
+                *receipt = proof.source.clone();
+            }
+            let mut message = request(id, operation);
+            if let wire::ClientMessage::Request { budget_ms, .. } = &mut message {
+                *budget_ms = 5000;
+            }
+            send(&mut client, message);
+            assert!(matches!(
+                receive(&mut client),
+                wire::ServerMessage::Accepted { .. }
+            ));
+            started.recv_timeout(Duration::from_secs(1)).unwrap();
+        }
+        for (id, operation) in [
+            (
+                5,
+                wire::Operation::InspectExport {
+                    receipt: proof.source.clone(),
+                    operation_id: proof.operation_id.clone(),
+                    request_sha256: proof.request_sha256.clone(),
+                },
+            ),
+            (
+                6,
+                wire::Operation::CleanupExportStaging {
+                    receipt: proof.source.clone(),
+                    operation_id: proof.operation_id.clone(),
+                    request_sha256: proof.request_sha256.clone(),
+                    quiesced: true,
+                },
+            ),
+        ] {
+            assert!(is_control(&operation));
+            send(&mut client, request(id, operation));
+            assert!(matches!(
+                receive(&mut client),
+                wire::ServerMessage::Accepted { .. }
+            ));
+            assert!(matches!(
+                receive(&mut client),
+                wire::ServerMessage::Terminal {
+                    outcome: wire::Outcome::ExportPresence { .. }
+                        | wire::Outcome::ExportStagingCleaned { .. },
+                    ..
+                }
+            ));
+        }
+        for id in 1..=WORKERS as u64 {
+            send(
+                &mut client,
+                wire::ClientMessage::Cancel {
+                    epoch: hello.epoch.clone(),
+                    id,
+                },
+            );
+        }
+        send(
+            &mut client,
+            wire::ClientMessage::Shutdown { epoch: hello.epoch },
+        );
+        assert!(thread.join().unwrap().is_ok());
     }
 }

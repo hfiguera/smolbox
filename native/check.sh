@@ -33,15 +33,22 @@ cargo test --manifest-path "$native_manifest" -p smolbox-engine --test child_rea
 cargo build --manifest-path "$native_manifest" -p smolbox-port --locked
 SMOLBOX_UMASK_HELPER="${CARGO_TARGET_DIR:-$native_root/target}/debug/smolbox-port" \
   python3 "$native_root/tests/test_port_umask.py" -v
-# Only these two ignored fixtures are ordinary checks: private worker entry and
-# binary transfers to a local SDK-protocol peer. Neither launches a VM or forces
-# child termination. Never select all ignored tests.
-SMOLBOX_TEST_FILE_WORKER="${CARGO_TARGET_DIR:-$native_root/target}/debug/smolbox-port" \
-  cargo test --manifest-path "$native_manifest" -p smolbox-engine --lib ordinary_worker --locked -- --ignored
-# The guard fixture enters the SDK only with invalid JSON configuration and
-# observes its normal exit. It cannot boot a VM or exercise owner-loss behavior.
-SMOLBOX_TEST_FILE_WORKER="${CARGO_TARGET_DIR:-$native_root/target}/debug/smolbox-port" \
-  cargo test --manifest-path "$native_manifest" -p smolbox-engine --lib ordinary_boot_guard --locked -- --ignored
+# Use the packaged build profile so fixture startup verifies the same executable
+# geometry and avoids hashing an unoptimized SDK binary during a short deadline.
+cargo build --manifest-path "$native_manifest" --release -p smolbox-port --locked
+native_ordinary_fixtures=(
+  "transfer_supervisor::tests::ordinary_worker_process_connects_without_initializing_runtime_ownership"
+  "transfer_supervisor::tests::ordinary_worker_binary_transfers_use_public_agent_api"
+  "checkpoint_source::tests::ordinary_worker_checkpoint_installation_commits_only_fresh_owned_material"
+  "checkpoint_source::tests::ordinary_worker_checkpoint_materializes_sdk_files_and_collects_without_vm_dispatch"
+  "transfer_supervisor::tests::ordinary_conversion_worker_collects_and_rehashes_both_spools_with_original_leases"
+  "transfer_supervisor::tests::ordinary_imported_conversion_worker_preserves_source_gate_and_spools"
+  "epoch::tests::ordinary_boot_guard_enrolls_before_sdk_and_collects_normal_exit"
+)
+for native_ordinary_fixture in "${native_ordinary_fixtures[@]}"; do
+  SMOLBOX_TEST_FILE_WORKER="${CARGO_TARGET_DIR:-$native_root/target}/release/smolbox-port" \
+    cargo test --manifest-path "$native_manifest" -p smolbox-engine --lib "$native_ordinary_fixture" --locked -- --exact --ignored
+done
 native_clean_fixture="$native_root/tests/clean-sdk-api"
 if [[ ! -f "$native_clean_fixture/Cargo.lock" ]]; then
   cp "$native_root/Cargo.lock" "$native_clean_fixture/Cargo.lock"

@@ -103,6 +103,7 @@ pub(crate) struct Prepared {
     pub spool: Spool,
     _permit: Option<crate::jobs::JobLease>,
     _metadata: Option<Spool>,
+    _conversion: Option<Spool>,
 }
 impl Prepared {
     pub(crate) fn into_streaming(mut self) -> Result<Self> {
@@ -159,6 +160,7 @@ impl Prepared {
 }
 
 pub(crate) struct Collected {
+    pub converted: Option<crate::export_bootstrap::Proof>,
     pub captured: Option<crate::capture_worker::Proof>,
     pub bootstrapped: Option<crate::bootstrap::Proof>,
     pub pulled: Option<crate::ImageObservation>,
@@ -177,6 +179,110 @@ pub(crate) struct Collected {
     #[cfg(test)]
     termination_requested: bool,
 }
+impl Collected {
+    pub(crate) fn verify_conversion(
+        &mut self,
+        budget: &crate::ReadBudget,
+    ) -> Result<(
+        crate::ContainerExportPlan,
+        crate::ContainerLayerIo,
+        crate::checkpoint_materialize::FileVersion,
+    )> {
+        use sha2::{Digest, Sha256};
+        budget.check()?;
+        let Kind::Conversion { expected, .. } = &self.prepared.request.kind else {
+            return Err(Error::before(ErrorCode::Validation));
+        };
+        let proof = self
+            .converted
+            .as_ref()
+            .filter(|p| p.matches(expected))
+            .ok_or(Error::uncertain(ErrorCode::Native))?;
+        let plan = self
+            .prepared
+            ._conversion
+            .as_mut()
+            .ok_or(Error::uncertain(ErrorCode::Ownership))?;
+        fn verify(
+            spool: &mut Spool,
+            length: u64,
+            hash: &str,
+            budget: &crate::ReadBudget,
+        ) -> Result<crate::checkpoint_materialize::FileVersion> {
+            spool.verify()?;
+            let before = spool
+                .file
+                .metadata()
+                .map_err(|_| Error::uncertain(ErrorCode::Io))?;
+            let version = crate::checkpoint_materialize::FileVersion::of(&before);
+            if !before.is_file()
+                || before.uid() != unsafe { libc::geteuid() }
+                || before.mode() & 0o777 != 0o600
+                || before.nlink() != 1
+                || before.len() != length
+            {
+                return Err(Error::uncertain(ErrorCode::Ownership));
+            }
+            spool
+                .file
+                .seek(SeekFrom::Start(0))
+                .map_err(|_| Error::uncertain(ErrorCode::Io))?;
+            let mut remaining = length;
+            let mut hash_state = Sha256::new();
+            let mut buffer = [0; ipc::CHUNK as usize];
+            while remaining > 0 {
+                budget.check().map_err(|e| Error::uncertain(e.code))?;
+                let n = spool
+                    .file
+                    .read(&mut buffer[..remaining.min(ipc::CHUNK) as usize])
+                    .map_err(|_| Error::uncertain(ErrorCode::Io))?;
+                if n == 0 {
+                    return Err(Error::uncertain(ErrorCode::Ownership));
+                }
+                hash_state.update(&buffer[..n]);
+                remaining -= n as u64;
+            }
+            spool.verify()?;
+            let after = spool
+                .file
+                .metadata()
+                .map_err(|_| Error::uncertain(ErrorCode::Io))?;
+            if crate::checkpoint_materialize::FileVersion::of(&after) != version
+                || hex::encode(hash_state.finalize()) != hash
+            {
+                return Err(Error::uncertain(ErrorCode::Ownership));
+            }
+            budget.check().map_err(|e| Error::uncertain(e.code))?;
+            Ok(version)
+        }
+        let version = verify(&mut self.prepared.spool, proof.bytes, &proof.sha256, budget)?;
+        verify(plan, proof.plan_bytes, &proof.plan_sha256, budget)?;
+        plan.file
+            .seek(SeekFrom::Start(0))
+            .map_err(|_| Error::uncertain(ErrorCode::Io))?;
+        let mut bytes = Vec::with_capacity(proof.plan_bytes as usize);
+        (&mut plan.file)
+            .take(proof.plan_bytes + 1)
+            .read_to_end(&mut bytes)
+            .map_err(|_| Error::uncertain(ErrorCode::Io))?;
+        if bytes.len() as u64 != proof.plan_bytes
+            || hex::encode(Sha256::digest(&bytes)) != proof.plan_sha256
+        {
+            return Err(Error::uncertain(ErrorCode::Ownership));
+        }
+        let metadata =
+            serde_json::from_slice(&bytes).map_err(|_| Error::uncertain(ErrorCode::Validation))?;
+        Ok((
+            metadata,
+            crate::ContainerLayerIo {
+                bytes: proof.bytes,
+                sha256: proof.sha256.clone(),
+            },
+            version,
+        ))
+    }
+}
+
 fn forward_stream(
     prepared: &mut Prepared,
     stderr: bool,
@@ -293,6 +399,7 @@ impl TransferSupervisor {
             spool,
             _permit: Some(permit),
             _metadata: None,
+            _conversion: None,
         })
     }
 
@@ -358,6 +465,7 @@ impl TransferSupervisor {
             spool,
             _permit: Some(permit),
             _metadata: Some(plan),
+            _conversion: None,
         })
     }
 
@@ -439,6 +547,7 @@ impl TransferSupervisor {
             spool,
             _permit: Some(permit),
             _metadata: Some(metadata),
+            _conversion: None,
         })
     }
 
@@ -543,6 +652,7 @@ impl TransferSupervisor {
             spool,
             _permit: Some(permit),
             _metadata: Some(metadata),
+            _conversion: None,
         })
     }
 
@@ -598,6 +708,7 @@ impl TransferSupervisor {
             spool,
             _permit: None,
             _metadata: Some(metadata),
+            _conversion: None,
         })
     }
 
@@ -652,6 +763,71 @@ impl TransferSupervisor {
             spool,
             _permit: None,
             _metadata: Some(metadata),
+            _conversion: None,
+        })
+    }
+
+    /// Uses the source's existing conversion reservation, retained by run's leases.
+    pub(crate) fn prepare_conversion_owned(
+        &self,
+        directory: &Path,
+        socket: PathBuf,
+        bytes: &[u8],
+        expected: crate::export_bootstrap::Expected,
+    ) -> Result<Prepared> {
+        expected.validate()?;
+        if bytes.is_empty() || bytes.len() > crate::export_bootstrap::METADATA_BYTES {
+            return Err(Error::before(ErrorCode::Validation));
+        }
+        let mut metadata = Spool::new(directory)?;
+        metadata
+            .file
+            .write_all(bytes)
+            .map_err(|_| Error::before(ErrorCode::Io))?;
+        metadata
+            .file
+            .set_permissions(std::fs::Permissions::from_mode(0o400))
+            .and_then(|()| metadata.file.sync_all())
+            .map_err(|_| Error::before(ErrorCode::Io))?;
+        let blob = ipc::Blob {
+            path: metadata.path.clone(),
+            device: metadata.identity.0,
+            inode: metadata.identity.1,
+            bytes: bytes.len() as u64,
+        };
+        let spool = Spool::new(directory)?;
+        let plan = Spool::new(directory)?;
+        let plan_blob = ipc::Blob {
+            path: plan.path.clone(),
+            device: plan.identity.0,
+            inode: plan.identity.1,
+            bytes: crate::export_bootstrap::PLAN_BYTES,
+        };
+        let mut nonce = [0; 16];
+        getrandom::fill(&mut nonce).map_err(|_| Error::before(ErrorCode::Native))?;
+        let request = Request {
+            schema: 1,
+            operation: hex::encode(nonce),
+            owner: self.owner,
+            socket,
+            staging: spool.path.clone(),
+            staging_device: spool.identity.0,
+            staging_inode: spool.identity.1,
+            guest_path: "/workspace/.smolbox-conversion".into(),
+            max_bytes: expected.maximum,
+            kind: Kind::Conversion {
+                metadata: blob,
+                plan: plan_blob,
+                expected,
+            },
+        };
+        request.validate()?;
+        Ok(Prepared {
+            request,
+            spool,
+            _permit: None,
+            _metadata: Some(metadata),
+            _conversion: Some(plan),
         })
     }
 
@@ -706,6 +882,7 @@ impl TransferSupervisor {
             spool,
             _permit: None,
             _metadata: Some(metadata),
+            _conversion: None,
         })
     }
 
@@ -774,6 +951,7 @@ impl TransferSupervisor {
             spool,
             _permit: Some(permit),
             _metadata: Some(metadata),
+            _conversion: None,
         })
     }
 
@@ -817,7 +995,8 @@ impl TransferSupervisor {
             .arg(
                 if matches!(
                     prepared.request.kind,
-                    Kind::Bootstrap { .. }
+                    Kind::Conversion { .. }
+                        | Kind::Bootstrap { .. }
                         | Kind::Pull { .. }
                         | Kind::Images { .. }
                         | Kind::Buffered { .. }
@@ -901,7 +1080,8 @@ impl TransferSupervisor {
         let mut policy = CollectionPolicy {
             no_signals: matches!(
                 owned.prepared.request.kind,
-                Kind::Grow { .. }
+                Kind::Conversion { .. }
+                    | Kind::Grow { .. }
                     | Kind::Capture { .. }
                     | Kind::CheckpointInstall { .. }
                     | Kind::CheckpointMaterialize { .. }
@@ -1064,6 +1244,11 @@ impl TransferSupervisor {
                     native_acknowledged: evidence.acknowledged,
                 };
                 return Ok(RunResult::Collected(Box::new(Collected {
+                    converted: if status.success() && decoder.complete() && reason.is_none() {
+                        evidence.converted.clone()
+                    } else {
+                        None
+                    },
                     bootstrapped: if status.success() && decoder.complete() && reason.is_none() {
                         evidence.bootstrapped.clone()
                     } else {
@@ -1271,6 +1456,179 @@ fn check_budget(deadline: Instant, cancel: &Cancellation) -> Result<()> {
 mod tests {
     use super::*;
     use sha2::{Digest, Sha256};
+    #[test]
+    #[ignore = "requires a built helper; explicit ordinary non-VM imported conversion peer"]
+    fn ordinary_imported_conversion_worker_preserves_source_gate_and_spools() {
+        use std::os::unix::net::UnixListener;
+        let budget =
+            crate::ReadBudget::for_export_work(Duration::from_secs(60), Cancellation::default())
+                .unwrap();
+        let (temp, engine, source, input, files) =
+            crate::export_bootstrap::tests::imported_fixture(&budget);
+        let root = root(&temp);
+        let executable = std::env::var_os("SMOLBOX_TEST_FILE_WORKER").expect("built helper path");
+        let mut supervisor = supervisor(&root, executable.into());
+        supervisor.pool = engine.jobs.clone();
+        let before = engine.jobs.counts();
+        let snapshot: crate::export_import::Snapshot =
+            serde_json::from_value(serde_json::to_value(&input).unwrap()["imported"].clone())
+                .unwrap();
+        let record = engine.db.get_vm("export-source").unwrap().unwrap();
+        let expected_plan = crate::ContainerExportPlan::from_imported(&record, &snapshot).unwrap();
+        let socket = root.join("agent.sock");
+        let peer = crate::export_bootstrap::tests::imported_peer_until(
+            UnixListener::bind(&socket).unwrap(),
+            files,
+            false,
+            budget.deadline,
+        );
+        let prepared = supervisor
+            .prepare_conversion_owned(
+                &root,
+                socket,
+                &serde_json::to_vec(&input).unwrap(),
+                input.expected().unwrap(),
+            )
+            .unwrap();
+        assert_eq!(engine.jobs.counts(), before);
+        let marker = std::sync::Arc::new(());
+        let retained = std::sync::Arc::downgrade(&marker);
+        let result = supervisor
+            .run(
+                prepared,
+                Box::new((source, marker)),
+                budget.deadline,
+                &budget.cancel,
+            )
+            .unwrap();
+        let RunResult::Collected(mut collected) = result else {
+            panic!("imported worker not collected")
+        };
+        assert!(collected.worker_ready && !collected.termination_requested);
+        assert!(retained.upgrade().is_some());
+        assert!(engine.gate("export-source").unwrap().try_lock().is_err());
+        let (plan, layer, _) = collected.verify_conversion(&budget).unwrap();
+        assert_eq!(
+            crate::material::hash(&plan).unwrap(),
+            crate::material::hash(&expected_plan).unwrap()
+        );
+        assert!(layer.bytes > 256 * 1024);
+        assert_eq!(engine.jobs.counts(), before);
+        assert!(
+            peer.join()
+                .unwrap()
+                .iter()
+                .filter(|r| matches!(r, smolvm_protocol::AgentRequest::FileWriteChunk { .. }))
+                .count()
+                > 2
+        );
+        drop(collected);
+        assert!(retained.upgrade().is_none());
+        assert_eq!(engine.jobs.counts(), crate::jobs::Counts::default());
+        assert!(engine.gate("export-source").unwrap().try_lock().is_ok());
+    }
+    #[test]
+    #[ignore = "requires a built helper; explicit ordinary non-VM conversion peer"]
+    fn ordinary_conversion_worker_collects_and_rehashes_both_spools_with_original_leases() {
+        use smolvm_protocol::{encode_message, AgentResponse};
+        use std::os::unix::net::UnixListener;
+        let temp = tempfile::tempdir_in("/tmp").unwrap();
+        let root = root(&temp);
+        let executable = std::env::var_os("SMOLBOX_TEST_FILE_WORKER").expect("built helper path");
+        let supervisor = supervisor(&root, executable.into());
+        let budget =
+            crate::ReadBudget::for_export_work(Duration::from_secs(60), Cancellation::default())
+                .unwrap();
+        let original = crate::export_bootstrap::tests::record();
+        let input =
+            crate::ContainerConversionInput::from_record(original.clone(), 1024, &budget).unwrap();
+        let mut permit = supervisor
+            .pool
+            .acquire(crate::jobs::Demand::export_source())
+            .unwrap();
+        permit.promote_export_disks().unwrap();
+        permit.promote_export_conversion().unwrap();
+        let before = supervisor.pool.counts();
+        let socket = root.join("agent.sock");
+        let wire = |event| vec![encode_message(&event).unwrap()];
+        let completed = || {
+            wire(AgentResponse::Completed {
+                exit_code: 0,
+                stdout: vec![],
+                stderr: vec![],
+            })
+        };
+        let peer = crate::export_bootstrap::tests::peer_until(
+            UnixListener::bind(&socket).unwrap(),
+            vec![
+                completed(),
+                completed(),
+                wire(AgentResponse::Ok {
+                    data: Some(
+                        serde_json::to_value(crate::export_bootstrap::tests::cached()).unwrap(),
+                    ),
+                }),
+                wire(AgentResponse::DataChunk {
+                    data: b"owned layer".to_vec(),
+                    done: true,
+                }),
+            ],
+            budget.deadline,
+        );
+        let prepared = supervisor
+            .prepare_conversion_owned(
+                &root,
+                socket,
+                &serde_json::to_vec(&input).unwrap(),
+                input.expected().unwrap(),
+            )
+            .unwrap();
+        assert_eq!(supervisor.pool.counts(), before); // No double work admission.
+        let paths = (
+            prepared.spool.path.clone(),
+            prepared._conversion.as_ref().unwrap().path.clone(),
+        );
+        let marker = std::sync::Arc::new(());
+        let retained = std::sync::Arc::downgrade(&marker);
+        let result = supervisor
+            .run(
+                prepared,
+                Box::new((permit, marker)),
+                budget.deadline,
+                &budget.cancel,
+            )
+            .unwrap();
+        let RunResult::Collected(mut collected) = result else {
+            panic!("worker not collected")
+        };
+        let requests = peer.join().unwrap_or_else(|_| {
+            panic!(
+                "conversion peer failed after worker outcome {:?}",
+                collected.outcome
+            )
+        });
+        assert_eq!(requests.len(), 4);
+        assert!(collected.worker_ready && !collected.termination_requested);
+        assert!(retained.upgrade().is_some());
+        let (plan, layer, _) = collected.verify_conversion(&budget).unwrap();
+        plan.validate(&original).unwrap();
+        assert_eq!(layer.bytes, 11);
+        assert_eq!(supervisor.pool.counts(), before);
+        let proof = collected.converted.clone().unwrap();
+        collected.converted.as_mut().unwrap().input_sha256 = "e".repeat(64);
+        assert!(collected.verify_conversion(&budget).is_err());
+        collected.converted = Some(proof.clone());
+        std::fs::write(&paths.0, b"other layer").unwrap();
+        assert!(collected.verify_conversion(&budget).is_err());
+        std::fs::write(&paths.0, b"owned layer").unwrap();
+        std::fs::write(&paths.1, b"changed plan").unwrap();
+        assert!(collected.verify_conversion(&budget).is_err());
+        drop(collected);
+        assert!(retained.upgrade().is_none());
+        assert_eq!(supervisor.pool.counts().work, 0);
+        assert!(!paths.0.exists() && !paths.1.exists());
+    }
+
     #[test]
     fn spool_directory_is_private_and_old_owned_permissions_tighten_without_content_changes() {
         let root = tempfile::tempdir().unwrap();

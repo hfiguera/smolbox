@@ -93,6 +93,160 @@ refusal and private fixture conversion are documented historical evidence, not a
 product export proof. Product export must explicitly approve/bound host conversion
 or enroll/account the auxiliary VM. The compile witness is not executed.
 
+`Engine::qualify_export_source` now produces an opaque, movable stopped-source
+lease from existing creation/material authority. It holds the source gate, root
+FD/domain and work allowance; repeated bounded record/dependency checks reject
+changed, running, ambiguous or foreign sources. A replacement engine cannot
+consume it. This is source admission, not disk conversion, manifest/registry
+publication evidence or ordinary package qualification. Export workers must still
+consume this lease, qualify disk/layer/asset descriptors and retain owned helper/
+staging allowances through actual collection. Native assignment history and public
+SDK descriptor approval still fence exports until those paths are implemented.
+
+Bare source disks now have an engine-owned descriptor preparation and logical
+streaming converter. It consumes the stopped-source lease, atomically promotes
+the FD allowance, verifies both declared disk capacities and reads raw/QCOW v2/v3
+bytes through bounded buffers. Allocated clusters, backing inheritance, explicit
+zeros and backing EOF are distinct. Source/backing file versions and directory
+identities remain bound before/after reads and final digest issuance. Conversion
+streams to a coordinator-owned sink without booting a hidden SDK helper or
+invoking a host CLI. Export treats raw disk contents as opaque; growth retains
+its ext4 checks. Existing eight-backing, 64-GiB-per-disk and finite QCOW metadata
+limits remain explicit, pending qualification of every required source shape.
+
+This is disk preparation/conversion, not `.smolmachine` packing or registry
+publication. It does not materialize/own a staging artifact: the future export
+coordinator must reserve and retain whole-job staging before selecting its sink,
+qualify runtime libraries/templates and preserve container semantics separately.
+Public export capability and native history admission remain disabled.
+
+Bare disk materialization now has protected export staging. `MaterializedExportDisks`
+retains the source lease, writes sparse request-private raw files, independently
+rehashes their descriptors and records exact file versions before readiness.
+`export-stages-v1` indexes registered roots and immutable source/request/byte
+allowances; it is created only by explicit export work. A separate aggregate
+512-GiB logical scratch allowance survives handle retirement and is restored
+conservatively on registry reopen. Live handles fence external cleanup; explicit
+quiesced cleanup records intent, removes only the registered root and releases
+bytes only after a synced completion. Recovery does not reopen a writer or adopt
+existing output. Root mismatch/missing proof retains capacity, and uncertain
+cleanup cannot attest pre-dispatch failure. These are ordinary file/model checks,
+not live process-loss or persistence-interruption qualification.
+
+Bare pack construction now consumes `MaterializedExportDisks` and qualified
+operator asset grants. Qualification and its three retained asset descriptors run
+inside the existing whole-job FD allowance. The grants require the exact platform
+library/rootfs names, protected regular files, explicit size/digest approval and unchanged descriptor/
+path versions. Qualification is byte/file authority, not a runtime bootability or
+package approval claim. The package builder now creates a bounded reproducible
+rootfs tar and includes it in the approved asset inventory. Preflight selects only
+that declared tar and exact library entries, then the engine installs one catalog
+bound to host package/domain/library root. Asset setup uses native admission and
+opens no detached FD grant. Older packages without the tar omit the catalog.
+`MaterializedExportDisks.pack` selects the installed catalog; requests cannot
+supply host asset paths. Current artifact guest boot remains unqualified.
+
+A single-thread tar/zstd writer uses public SDK manifest seeding/footer types,
+fixed archive paths, a finite compression window and bounded reads/writes under
+the original deadline. It avoids the SDK Packer's implicit cache permit/staging.
+The manifest preserves source workload/env/user/secret references and allocations;
+VM storage/overlay entries retain full logical bytes. The output includes SDK CRC
+and whole-file SHA, independent descriptor rehash and a protected Packed record.
+Fresh staging schema 2 adds Packing/Packed; schema-1 rows remain readable/cleanable
+without writer resumption. Failed packing retains byte reservations for explicit
+cleanup. A PackedExport retains source gates/domain/work capacity; it is private
+scratch, not registry publication proof.
+
+`PackedExport.publish` now makes one bounded publication attempt with SDK OCI
+manifest/index types and a transient scoped push bearer. Unlike the convenience
+SDK push path, it neither retries uploads/auth nor merges an existing tag index.
+Both tags must be vacant. Fixed-size PATCHes validate exact progress, URL origins,
+response sizes and final transmitted SHA before blob commit. Manifest, platform
+tag and one-platform index acknowledgements precede a native completed receipt.
+Source postconditions are rechecked before recording completion. Controller-side
+registry verification still remains distinct from this acknowledgement.
+
+Fresh private staging schema 3 adds prepared/entered/completed publication state,
+with only digests and nonsecret destination identity in the ledger. Schema 1/2
+rows remain readable and cleanable; previous staged artifacts cannot resume
+publication. Bounded inspection returns only an exact protected completed receipt,
+including after normal registry replacement. None proves neither absence nor
+permission to replay. Failures retain host staging for explicit cleanup, and even
+successful publication holds source/work/scratch until disposal. No registry
+objects are deleted by native scratch cleanup. Container flattening, managed
+controller routing/cleanup integration and ordinary
+current platform/package/export-import/consumer qualification remain pending.
+Public export admission stays disabled.
+
+The gated protocol-2 export adapter now accepts path-free preflight, publication,
+exact completion lookup and explicit quiesced staging cleanup. Operator setup
+resolves at most 32 approved destinations, hashes bounded CA inputs and caches
+the immutable engine destination. Reader admission compares only cached IDs,
+destination hashes and finite byte allowances; it performs no trust-file or
+registry I/O. The executing adapter requalifies the source and installed assets
+under the original budget. Once materialization is attempted, failures retain
+uncertain dispatch classification because private scratch may already exist.
+
+Rust and Elixir validate the same synthetic publication/cleanup fixtures and
+executing engine limits. Zero-output terminal replies bind source, operation,
+original request fingerprint, destination, tag, artifact size and package
+architecture. Publication lookup grants no absence or replay authority; cleanup
+has a distinct proof shape. Scoped push tokens are removed from retained call/
+session bookkeeping. Lookup and cleanup retain reserved control admission with
+work lanes occupied, without needing a current destination catalog. These are
+wire/adapter contracts, not live package qualification.
+
+Native durable export history now freezes the current enrolled material receipt
+at acceptance and an exact bounded request before dispatch. Public receipt shape
+retains an optional internal typed acknowledgement; source/request/destination/
+platform and independent config/content verification must agree. Separate cleanup
+authority is required for completed/resolved-unknown release. Source observations,
+stopped state and registry acknowledgement cannot supply that proof. Permanent
+tag claims survive every outcome. Selective codec v28 and the separate
+native_export_histories reader preserve earlier HTTP/native envelope semantics,
+including rejection of smuggled nil defaults. Runtime startup keeps interrupted
+export unknown without importing native journal evidence or replaying work.
+Memory/PostgreSQL guarded store contracts and a deterministic normal startup peer
+exercise this foundation. Scoped managed preflight/publication now retain the
+pinned helper, use cached destination metadata without reader I/O and freeze
+source-sized staging plus artifact allowance before dispatch. Exact protected
+acknowledgement lookup precedes the existing independent registry verifier.
+Explicit controller resolution serializes with reconciliation, quiesces the
+pinned bridge and consumes cleanup before disposition observation and guarded
+release. Changed intent or expired shared control budget cannot commit release.
+Typed reply/control and Memory-backed public resolution models establish those
+controller boundaries. No-stage cleanup now requires an authenticated source
+marker/current material journal, positive caller quiescence and the shared source
+gate. It rejects unindexed roots and crossed recorded intent, then synchronizes a
+schema-4 zero-byte retirement in a distinct proof domain. Exact protected cache
+lag can recover that retirement; no writer or publication is recovered. Reopen
+retains the fence without staging allowance. Full work/FD/metadata admission and
+quarantine do not consume its existing separate 32-MiB material-control allowance.
+Rust/Elixir limits and the bridge's executing-constant checks negotiate this bound.
+
+Registered export scratch already supplies its own protected root/source/intent
+authority after VM-row removal. It neither adopts nor disposes a source VM and
+does not require a second source-deletion enrollment. A private removed-source
+model exercises exact cleanup and rejects minting an unrelated unstaged receipt.
+An already deleted source lacking stage/retirement authority still cannot enroll
+itself from absence. A separate bounded `admit_export` action now enrolls protected schema-5 frozen
+source/request identity before managed dispatch. Qualification remains read-only.
+Dormant admissions reserve no scratch bytes; materialization records Entering
+and retains the byte ceiling before directory creation. Cleanup after source
+removal retires only exact registered authority. Entering with an unproved
+directory preserves it and the allowance rather than adopting a writer.
+Container export and ordinary exact-package acceptance remain pending. Public exports remain
+disabled; these models do not qualify native production of every witness.
+
+SDK deletion independently derives storage from its process cache root. The
+engine now rejects a mismatch with its bound VM path before deletion enrollment
+or SDK entry. A DB-only fixture cannot exercise that lifecycle call safely;
+its source-removal contract uses only the fixture's own row and directory.
+Ordinary SDK deletion still requires a correctly scoped helper/process run.
+
+
+
+
 The runtime convenience fork APIs always release the inherited forkpoint and
 offer no held-slot option. Public launch-agnostic `prepare_held_fork` and manager
 `start_with_full_config` provide the preparation and guarded subprocess-boot
@@ -1124,3 +1278,828 @@ Entered source capture without completed journal evidence remains unresolved and
 fenced. Explicit retained-stage/native-budget and material resolution still need
 implementation and qualification; source stop alone cannot complete capture.
 Public checkpoint feature admission remains disabled.
+
+
+## Container export conversion inputs
+
+`QualifiedExportSource.prepare_container_export` now retains the stopped source
+receipt/gate/root/deadline and promotes its existing descriptor allowance before
+opening the exact logical storage disk. It supports the registry-container path;
+local/imported layer caches still require separate authenticated grants. Raw and
+QCOW descriptor handling uses the same bounded engine reader as bare exports.
+Reads create no scratch or VM and grant no conversion/publication success.
+
+The prepared handle produces an exact cached Query and consumes byte-bounded,
+sequence-bounded image metadata into an inert conversion plan. Reference,
+digest, native platform, layer count/digests and metadata bounds reject before
+building guest paths. FlattenLayers streams (`output: None`) with the persistent
+overlay first and cached layers reversed from manifest order. This matches the
+actual SDK collector and agent `lowerdir+` implementation; the protocol field's
+older bottom-up comment contradicts both. No network rebase or tag resolution is
+introduced. Manifest seeding uses the public SDK helper to preserve machine env
+over image env, user precedence, original entrypoint/cmd/workdir, network and
+resource values. A plan is bound to the exact source-record digest and is
+rechecked against that held source before metadata can be returned. It attests
+neither cached-image authenticity nor layer production on its own.
+
+Four private non-VM contracts cover these semantic/boundary checks, source gate
+and descriptor retention, changed source storage, cancellation and substituted
+owner. No convenience collector, implicit SDK helper, stale reaper or SDK
+lifecycle call is invoked. Enrolled auxiliary conversion VM creation/collection,
+account-approved disk/UID/mount policy, authenticated cached-query collection,
+bounded flattened tar staging, container packing and public ordinary acceptance
+remain pending. Local/imported source semantics remain pending. Public exports
+stay disabled and crash validation remains deferred.
+
+
+## Explicit export conversion resources and composite admission
+
+Future exports catalogs now carry the operator's exact slots/CPU/memory/disk
+resource grant as optional `conversion_resources`. Rust validates the same
+bounds as ExportDestination; staging cannot exceed the granted disk capacity.
+Omission remains omission on serialization and supplies no conversion grant.
+Existing destination/TLS identity, cached reader checks and bare publication
+are unchanged. No request can select an independent resource grant. Public SDK
+packages still omit exports, so this introduces no public helper activation.
+
+The shared engine plans four guest CPUs and 1024-4096 MiB of guest memory from
+that grant, leaving 128 MiB for host conversion work without consulting SDK
+export environment overrides. Registry conversion uses an explicit one-GiB raw
+metadata disk: cached source directories are bound into the helper and the flattened tar streams to the host,
+without extraction/re-pull on helper storage. The plan counts that disk together
+with conservative two-times source COW backing,
+two GiB for the one-GiB root overlay including QCOW metadata, flattened tar and
+final pack. Their sum fits both the granted disk capacity and native staging
+ceiling. Insufficient/overflowing plans reject before allocation. The approval
+has its own canonical resource hash; these values supply no inode/child proof.
+Raw disk format and actual UID/mount/resource behavior remain to be qualified.
+
+Prepared container inputs can now atomically promote the existing source job to
+24 descriptors and two children for the enrolled VMM plus agent conversion
+worker. It consumes no second work slot or metadata grant and preserves eight
+control descriptors. Changed grants/caps conflict within the same handle;
+repeat identical reservation does not double-charge. Quarantine/exhaustion
+cannot partially promote or release existing capacity. Staging reuses this
+whole-pipeline allowance. No child or scratch is actually created by reservation;
+future execution must retain that same handle/lease until actual collection.
+
+Controller container request sizing, protected auxiliary-root/child enrollment,
+UID/COW/device grants, SDK launch/collection, reserved-worker handoff, tar/pack
+staging and ordinary exact-package acceptance remain pending. No auxiliary VM
+or SDK lifecycle test was run; crash qualification stays deferred.
+
+
+## Protected pre-launch helper scratch
+
+Prepared container inputs can now enroll schema-6 helper scratch after checking
+the original full export admission and freezing the conversion resource plan.
+The existing export byte ceiling is retained before allocation. Reserved records
+bind a deterministic helper name, operator grant and exact budget to the source/
+operation/request. Owned records additionally bind the newly created empty
+private directory's device/inode/UID and modification/change timestamps. Helper
+paths derive only from the bound VM namespace; existing paths never enroll.
+The movable scratch handle retains source/job leases and both directory anchors.
+A mandatory SDK namespace check rejects a process-cache/bound-directory mismatch
+without entering any SDK lifecycle API. Database-only fixtures supply no such
+SDK authority, and tests operate only in their private directories.
+
+This schema expressly grants no SDK entry, launch or publication. Helper records
+cannot become Ready/Packed or open the existing bare disk/artifact writers. An
+empty pre-launch helper can be retired explicitly: protected Removing precedes
+descriptor-relative rmdir and parent sync, then Removed precedes stage cleanup.
+The cleanup hash binds the helper/resource/root authority in its own domain and
+grants no VM absence. Source-row removal does not invalidate protected scratch
+cleanup. Known Removing plus an absent directory can complete explicit cleanup;
+unproved Owned absence, foreign contents and substituted directories retain
+capacity. Exact forward protected/cache reconciliation recovers only cleanup,
+never a writer. Schemas 1-5 retain their existing read/cleanup contracts and hash
+bytes; current nonterminal records restore byte capacity and quarantine.
+
+Private filesystem models cover these boundaries. Child enrollment, SDK setup/
+launch/collection, actual UID/COW/mount/device behavior and retained-worker handoff
+remain pending, alongside container tar/pack construction, controller sizing,
+local/imported sources and ordinary exact-package acceptance. No VM/lifecycle or
+crash campaign ran. Public exports remain disabled and crash validation deferred.
+
+
+## Collected storage-only SDK initialization
+
+The shared engine now has an owned SDK storage initializer for conversion
+scratch. Before entry it rechecks the source/disk and SDK VM namespace, verifies
+prepared package templates/host context and requires the SDK library selector
+to match the approved canonical library directory. It retains the same source/
+job/directory leases on the owned executor through the original deadline. The
+SDK batch uses only public ensure_vm_dir, explicit sparse StorageDisk/OverlayDisk
+constructors and create_disk_overlays for a private source COW view. Namespace
+identity is checked again before the global SDK directory call; disk sizes are
+explicit. No AgentManager/default-rootfs resolver, cache extraction, formatter,
+manager start, CLI/server fallback or VMM launch is called by this batch.
+
+Protected schema 7 records SdkPreparing before SDK filesystem entry. A returned
+batch, including a partial failure or retired observation, records SdkPrepared
+with exact private regular-file versions and directory identity. This proves
+collection of this storage-only batch, not bootability, VM absence or guest
+startup. Four bounded names are permitted; the name binding is byte-bounded and
+must match the expected helper name (or a partial prefix after failed setup).
+Zero-length partial files can be retired. Unknown names, links, replaced files,
+uncollected entry and repeated initialization retain the fence and capacity.
+File snapshots are private and cleanup hashes bind them in a new domain;
+schemas 1-6 retain their prior bytes and cleanup semantics.
+
+Explicit cleanup removes only matching collected file versions under protected
+Removing before directory removal. Recorded file-removal prefixes and exact
+protected completion/cache lag permit cleanup only, never reopening a manager
+or writer. The actual SDK sparse disk APIs are exercised with explicit private
+fixture paths; modeled name/partial allocation and completion prefixes are not
+SDK namespace/COW/VM qualification. Database-only fixtures cannot enter the full
+initializer. Correctly scoped ordinary library/COW/package qualification and
+helper child enrollment, manager launch/collection, account/device/mount policy,
+reserved-worker handoff, container pack/controller sizing and other source modes
+remain pending. Public exports stay disabled and crash validation deferred.
+
+
+## Exact enrolled child identity after SDK return
+
+Boot dispatch finalization now returns an opaque enrollment containing the
+original pending operation, helper/machine hash, owner epoch and the child
+identity captured before SDK execution. Its fields cannot be constructed from
+inventory. Legacy finish callers keep their existing result shape. Exact SDK
+PID matching and protected pending-record checks still precede finalization;
+substituted PIDs retain the unresolved pending/actor evidence and replacement
+fence. Finalization can return the original identity after normal child exit.
+
+Owned OCI startup now persists that enrolled birth rather than sampling the PID
+again after SDK return, avoiding a lost/reused PID race. It checks original
+machine/epoch correlation and exact SDK PID before recording launch evidence.
+This is birth evidence, not current guest liveness or readiness inferred from
+inventory. Normal child-exit and substituted-PID contracts cover the boundaries.
+Conversion helpers still require an owned retention registry/manager lifecycle
+before VMM launch can be added; SDK setup and scratch qualification remain
+separate. No helper VM, forced termination or crash campaign is invoked here.
+
+
+## Engine-owned initialized storage retention
+
+Successful storage initialization now inserts its collected storage/source into
+an engine-owned bounded registry before checking the retiring caller's deadline.
+The returned token borrows/observes that entry; dropping it releases no source
+machine gate, native work/child/descriptor/metadata lease, directory anchor or
+SDK disk handle. Late observer retirement leaves the same collected storage
+owned by the registry. Identity includes original source/operation/request and
+insertion additionally requires the same owner-domain Arc. Tokens cannot be
+adopted by a different registry/engine instance. The registry contains only
+initialized storage, never an SDK manager or VMM in this revision.
+
+Explicit positively quiesced cleanup routes exact retained identity before
+trying the source gate already held by that entry. Live borrowing, changed
+request, cancelled budget, contention or file/root uncertainty reject without
+removing the entry or releasing its leases. Matching cleanup uses the original
+stage owner token; only successful protected filesystem retirement removes the
+registry entry. Mutex acquisition is nonblocking for bounded control budgets.
+Normal engine replacement restores only protected staging capacity/quarantine,
+never a retired token or initialized object. Schema-7 records and prior cleanup
+proof shapes are unchanged. No registry inventory supplies VM ownership.
+
+Private storage models cover caller drop, held source/resource capacity, live/
+changed/unquiesced/cancelled/failed cleanup, foreign files, registry/domain
+substitution and normal replacement. VMM manager retention/launch/collection,
+owned worker handoff, container pack construction and ordinary full-namespace/
+library/COW/platform qualification still remain pending. This change invokes no
+helper VM or SDK lifecycle operation and keeps crash validation deferred.
+
+## Retained unstarted SDK manager preparation
+
+A retained storage token can now prepare an unstarted SDK AgentManager inside
+its original engine-owned entry. Preparation first rechecks source/disk/collected
+helper files and requires the SDK name-derived directory to equal the bound
+helper namespace. The rootfs is selected only as the approved package library
+parent's agent-rootfs directory, after template/host/library and export asset
+catalog checks. The directory is anchored and the public SDK rootfs resolver is
+called with an explicit path, never its default/cache extraction branch. Guest
+sbin/init symlinks are tested by symlink_metadata as in the SDK; host rootfs
+redirects and invalid package layouts reject.
+
+SDK disk handles are reopened from the exact collected storage/overlay paths,
+then passed to public new_named. It starts no VMM, formatter or workload and
+creates no disks. Source and collected files are rechecked before/after; the
+manager's name, own child absence and storage/overlay paths are checked against
+the original helper. The registry retains the manager and rootfs anchor with
+storage/source leases. Repeat preparation rechecks the existing manager. Failed
+preparation preserves retained storage and explicit cleanup; current helpers
+remain schema 7 with no launch authority. The borrowing token supplies no SDK
+manager access or inventory-derived ownership.
+
+Private tests prove namespace rejection keeps capacity/cleanup and explicit
+package rootfs selection accepts guest init links while rejecting missing or
+redirected host roots. These boundaries do not qualify positive full SDK manager
+construction or guest boot; manifest/archive/tree integrity and exact-package
+ordinary qualification remain required. VMM retention through entered launch,
+child enrollment/start/collection, UID/device/mount policy, owned worker handoff
+and container pack/controller integration remain pending. Crash tests stay
+deferred and public exports disabled.
+
+
+## Source-bound conversion launch configuration
+
+Unstarted manager preparation now retains an ExportDisk descriptor view for
+export-source.qcow2 and a frozen launch configuration. Capture uses the existing
+bounded QCOW chain/table scanner with opaque export-byte semantics, verifies
+logical size and requires the immediate backing path and full captured file
+version to equal the already retained source. Source and view are rechecked;
+a matching-size foreign disk, raw/unbacked view or changed source cannot qualify.
+Protected schema-7 scratch must have all four expected files, exact helper name
+and raw disk lengths, plus the same resource plan retained by the source job.
+Partial collected batches keep cleanup authority without obtaining launch inputs.
+
+Configuration supplies the explicit offline CPU/memory/storage/overlay grant and
+one writable QCOW extra disk. Ext4 journal replay is confined to the private view,
+following the public SDK export convention; the original source is never attached
+writable. UID sharing selects only the held source directory. Defaults grant no
+network, GPU/CUDA, fork/snapshot, host mount, pack mount, credential interceptor or
+extra caller-supplied disk. The manager retains these inputs and rechecks them;
+no launch API is called and schema 7 still conveys no VMM authority. Privileged
+Linux UID/mount behavior is not qualified by selecting that directory.
+
+Four private model tests cover raw/QCOW backing identity and logical bytes,
+foreign/unbacked views, protected resource/configuration binding, and partial
+collected storage (including a short helper name) retaining cleanup. A separate
+explicitly selected ordinary filesystem-only SDK witness creates private overlays
+using public create_disk_overlays for both retained raw and QCOW sources, then
+checks them with the same descriptor scanner and logical reader. It loads
+libkrun but constructs no manager or VMM and accesses no SDK machine namespace.
+The tested macOS libkrun SHA-256 is
+03b62510617705307e7ca4fa60c8a499a42ea536bd6aa29a14e2a4ed258384b3.
+This is library filesystem evidence, not positive full initializer, manager,
+guest boot or export/import package qualification. The opt-in witness is selected
+by its exact test name; deferred campaigns stay unselected.
+
+
+## Entered conversion launch and exact returned child
+
+The retained conversion token now exposes one owned SDK manager start. It uses
+the source's original cancellation/deadline, without granting a fresh budget or
+work slot. Preparation/source/assets and the current engine boot epoch are
+rechecked before dispatch. A root-process owned thread holds the original entry,
+manager, source gate, domain and resource leases across blocking SDK entry and
+caller retirement. Registry metadata and per-entry work locks are separate, with
+nonblocking access; an executing entry does not hold the whole registry lock.
+Both observation slots remain available under the retained conversion demand.
+The SDK boot executable selection is checked again within the owned thread; no
+CLI/default-executable fallback is authorized.
+
+Protected staging schema 8 records LaunchEntering before SDK entry, binding the
+original helper/source/request/resource/file snapshots to the opaque boot intent.
+The intent now contains creator PID/birth/UID and epoch-directory device/inode in
+addition to epoch, machine hash and operation. The actor epoch is bound to the
+engine domain and original directory; matching a label in a different directory
+cannot substitute for it. LaunchReturned accepts only the exact opaque enrollment
+produced by the pre-exec actor ledger. It retains the original child PID/birth/UID
+even if the SDK result arrives after expiry or reports an error. No process sample,
+PID file or inventory supplies that enrollment. SDK success and unchanged stopped
+source are separately required before returning success to an active caller.
+
+Returned dispatch is not normal child collection. Both schema-8 states reject
+replay, storage-only cleanup and cleanup-proof generation. Normal reopening
+restores staging capacity and quarantine without adopting a manager/token or
+inventing child absence. Schemas 1-7 retain their original shapes/proof hashes;
+older engines reject schema 8 before mutation. This internal lifecycle adds no
+public protocol capability or helper-result proof. Public exports remain disabled.
+
+Four private record models cover entered/returned fences, foreign name/domain/
+epoch, crossed enrollment despite equal epoch labels, and normal reopening with
+capacity retained. Modeled actor records use synthetic identities and start no
+process or SDK lifecycle. A separate per-entry contention model proves metadata
+access and two credited observation slots while work is held, then checks retained
+source leases through explicit cleanup and worker release. The existing private
+namespace test also rejects the new start method before manager/VM entry.
+Positive full SDK helper startup, normal child collection, bounded runtime-file/
+rootfs retirement, privileged UID/device/mount policy, worker handoff and actual
+container flatten/pack/public acceptance still require implementation/ordinary
+qualification. No live helper or deferred crash campaign ran for these models.
+
+
+## Original conversion child collection
+
+The retained manager now keeps its opaque pre-exec enrollment independently of
+returned-record publication. Collection can reconcile that retained SDK return
+without relaunching. A retained token has explicit collection; quiesced control
+can also select the exact original entry after its borrower retires. Foreign
+source/request, active borrower, missing manager, cancellation or contention
+reject before SDK work. Persisted child fields cannot recreate the manager.
+
+Collection runs in an owned thread with retained source/job/domain/manager leases,
+using the caller's remaining control deadline capped at thirty seconds. It uses
+the original actor ledger even when new launch admission is fenced. SDK normal
+stop requires this manager's own child PID and the original enrolled birth to
+match; no observed manager or PID-file stop fallback is constructed. If the exact
+child has already been collected, the manager's handle is cleared with public
+mark_stopped, without an orphan shutdown. SDK stop is not initiated for an already observed reused
+PID. A failed/unknown entered stop is not implicitly replayed while its child
+remains uncollected; a later explicit control may observe original collection.
+While the SDK stop call runs, an opaque collection dispatch keeps the original
+boot actor pending. Sibling sweeps cannot reap it or consume its exit status.
+Only actual SDK return (including an error) clears that pending record; an
+unresolved dispatch retains the epoch fence. It grants no child collection.
+
+Opaque BootCollection is produced only from the original enrollment, matching
+creator/epoch-directory/domain authority, positive original-child absence and
+quiescent helper actor ledger. The ledger can reap the exact exited owned child;
+transfer status still belongs to its supervisor. Collection is not guest fsync,
+flattening or artifact/publication proof. Schema-8 LaunchCollecting is recorded
+before stop; LaunchCollected accepts only the matching opaque collection. Actual
+late collection is retained before refusing caller success. Both phases still
+reject restart, storage-only cleanup and cleanup-proof generation. Staging/files
+and source resources remain held until future separately bounded runtime-file/
+rootfs retirement. Older schema-8 readers reject the new phase names before
+mutation; package approval and reader-first deployment remain required.
+
+One ordinary non-VM child test covers live refusal, normal pipe-close/wait exit,
+exact collection and foreign epoch rejection without signals. Private models
+cover crossed/duplicate collection, all four launch phases surviving normal
+reopen with capacity/quarantine, exact retired control and cancelled/unquiesced/
+missing-manager rejection. A machine model keeps collection's original ledger
+accessible under launch quarantine without granting a boot. These checks qualify
+these boundaries, not SDK helper shutdown or positive guest startup. No live
+helper or deferred crash campaign ran; public export admission remains disabled.
+
+
+## Collected helper runtime and rootfs-marker retirement
+
+Original manager collection now enrolls bounded post-launch file custody after
+matching opaque child collection. Protected staging schema 9 snapshots the exact
+helper directory, mandatory name/storage/overlay/COW files, bounded optional SDK
+config/log/lock files and stale agent socket. Each entry captures type/mode,
+owner/single-link checks and device/inode/length/mtime/ctime. Unknown files,
+directories, links, malformed name binding and over-budget inventory reject
+without gaining retirement authority. The twelve-file inventory follows the
+unmodified SDK manager paths; config files cap at eight MiB, individual logs at
+sixty-four MiB, and aggregate metadata/file lengths fit the frozen private-disk
+grant. Disk snapshots supply custody, not filesystem/export correctness.
+
+The retained package rootfs anchor supplies only the exact SDK readiness marker
+for that helper hash. Present-marker version or positive absence is captured;
+other rootfs contents/markers are not selected. Repeated collection verifies the
+existing schema-9 custody without repeating SDK stop or enrolling new files.
+After borrower retirement and explicit quiescence, cleanup verifies all current
+versions before publishing Removing, then unlinks only captured names through
+held directory descriptors. Partial removing records permit only missing captured
+entries. Marker and helper directory absence are verified and synced before
+staging/source accounting releases. Failed/cancelled/uncertain cleanup keeps the
+entry and leases. The completed child record alone still cannot grant deletion.
+
+A distinct cleanup hash binds the schema-9 runtime/rootfs-marker snapshot and
+original boot/child/resource/source/request evidence. Public cleanup proof shape
+is unchanged. Schemas 1-8 retain their omitted-field shapes and existing proof
+rules; earlier readers reject schema 9 before mutation. Reopening restores
+staging capacity and quarantine and allows explicit version-bound removal, never
+manager/child adoption or export replay.
+
+Three private filesystem models cover marker-present/absent cleanup with stale
+socket and other rootfs files preserved; changed files/markers, unexpected marker,
+unknown inventory/directory, symlink, hard link and oversized log rejection; and
+recorded partial removal followed by normal engine reopen. No SDK manager or live
+VM is involved. These models do not establish actual helper startup/shutdown,
+all SDK-produced file inventories, privileged UID behavior, package rootfs
+integrity or export/import semantics. Public exports remain disabled and crash
+campaigns deferred; exact-package/platform qualification remains required.
+
+
+## Bounded streamed container layer I/O
+
+The shared engine now has isolated-worker I/O for a FlattenLayers request with
+no guest output path. It validates the retained-plan guest path grammar, rejects
+nonempty/nonprivate/linked spools before connection, and sends the public SDK
+protocol encoding. This function creates no manager/VM, claims no source ownership
+and grants no publication or worker-collection authority. It still requires the
+original parent/supervisor to authenticate the helper socket and retain admission.
+
+The verified SDK's guest producer fills sixteen-MiB data chunks, checks tar exit
+status and sends a terminal DataChunk. Receiving the whole base64 JSON frame plus
+its decoded payload would exceed the desired working-buffer bound. The new decoder
+consumes that pinned encoder's canonical envelope through a header-capped reader,
+strict base64 quartets and sixty-four-KiB buffers; it never allocates a whole large
+frame/payload. Per-frame raw size, aggregate output, frame count and original
+absolute deadline/cancellation are bounded. Invalid prefix/suffix/base64, missing
+termination, guest error, oversize or cancellation produces no layer evidence;
+partial private bytes are not a result. Accepted termination syncs the file and
+returns only byte count/SHA-256. It does not verify tar contents or export semantics.
+The canonical envelope is tied to the verified SDK encoding; an official SDK
+upgrade requires corresponding codec compatibility qualification.
+
+Five non-VM tests cover SDK-encoded sixteen-MiB payload plus terminal digest;
+fragmented reads, binary bytes/base64 quartets and empty terminator; missing
+termination/guest error/size/header/base64 faults; explicit mid-frame cancellation;
+and pre-entry path/output/spool rejection. Ordinary loopback peers use SDK types
+and bounded accept/socket deadlines. macOS requires setting socket receive timeout
+before transfer rather than resetting it after peer close. No SDK lifecycle,
+helper loss, watcher or destructive CLI campaign is involved. The engine now
+explicitly depends on the already-locked base64 0.22.1; upstream bytes/versions
+are unchanged.
+
+Mount/cache-query bootstrap, the owned supervisor request/proof/credit integration,
+parent FD/lease handoff, protected tar registration, container packing and public
+ordinary qualification remain required. The I/O result is not a completed worker,
+qualified guest-produced archive or product capability. Public export admission
+stays disabled and crash validation deferred.
+
+
+## Fixed conversion mount and cache-query bootstrap
+
+A qualified prepared source can now freeze worker input only after its original
+conversion resource grant is reserved. Input binds schema, exact stopped record
+hash, planned maximum flattened bytes and the original monotonic deadline. The
+metadata is capped at eight MiB, contains no ownership grant/receipt and has
+redacted Debug. Caller cancellation and remaining deadline cannot be widened.
+The parent still has to retain the actual source/job/helper/worker authority.
+
+Conversion-worker I/O now preflights the empty private output before any guest
+operation, mounts only the private third disk (/dev/vdc) read-only at the fixed
+source path, and bind-mounts only layers/configs/manifests into the helper store.
+Fixed guest shell argv uses public SDK VmExec wire types with remaining timeout;
+no image/workload/user strings are interpolated into commands. Each operation
+uses a bounded deadline-aware socket; nonzero setup status stops the sequence.
+No pull, registry credentials, rebase, source boot, arbitrary host command or
+local HTTP/CLI fallback is introduced.
+
+The helper then queries only the frozen digest-pinned registry reference.
+A header cap precedes streaming typed CachedImage decoding, bounded sequences,
+strict fields and exact reference/digest/platform/layer checks. This avoids a
+large serde Value tree and second full cached-image parse. The existing plan
+validator consumes the typed image directly, preserving actual topmost-first
+upper/layer precedence and image environment/user metadata. Only that validated
+plan reaches bounded FlattenLayers I/O. Results bind input hash, plan and terminal
+layer bytes/hash, but grant no source/child/worker custody, tar correctness or
+publication authority. Failures after the first mount preserve uncertainty.
+
+Four non-VM SDK-encoded loopback tests cover exact setup/query/flatten sequence
+and inherited metadata; failed mounts, missing cache and foreign digest stopping
+before flatten; cached reply header cap and empty archive rejection; and frozen
+hash/deadline/cancellation/spool rejection before guest mount. The source-grant
+model also checks worker input cannot precede resource reservation. These peers
+are not guest/filesystem qualification. Owned supervisor metadata/proof/credit
+integration, actual FD/lease handoff, protected tar registration, packing and
+ordinary exact-package/platform acceptance remain pending. Public exports stay
+disabled and crash validation deferred; SDK source/version remains unmodified.
+
+
+## Owned conversion worker and collected private outputs
+
+The retained entry now dispatches exactly one conversion worker using its existing
+source conversion reservation and original deadline. No second engine, work
+reservation or SDK lifecycle occurs in the worker. The parent authenticates the
+started original manager and derives its exact socket. Request metadata is bounded
+to eight MiB. Distinct 0600 regular single-link layer/plan spools are opened by
+recorded device/inode before guest entry; the input is read-only 0400. Plan bytes
+are capped at twelve MiB under the existing 32-MiB metadata reservation. Direct
+struct visitors bound cached-image and plan sequences during decode, avoiding
+serde internally tagged enum buffering of a complete body before validation. Flattened
+bytes use only the explicit conversion maximum; ordinary command/file limits
+remain unchanged.
+
+Ready and one small Converted terminal bind frozen input hash, layer length/hash
+and plan length/hash. No large payload enters worker control IPC. Generic progress,
+acknowledgment, limit, foreign/oversized proof, duplicate or retired terminal events
+do not complete conversion. Failed requests confer no output authority. The
+supervisor selects job-worker mode and the existing no-signal retirement path.
+A collector retains original source/job/worker guards and both spools through
+actual child collection; late terminal evidence cannot revive an observer.
+
+After successful normal collection the parent checks modes, links, original
+identities, exact sizes and incremental hashes before parsing the bounded plan.
+It rechecks source/overlay/environment/user constraints. The resulting opaque
+handle retains source/helper accounting and bounds each positional read to 64 KiB,
+checking the captured file version before/after reads. Its worker/output token
+fences helper collection and explicit retired cleanup until released. Attempted
+conversion cannot replay through the retained entry.
+
+Private loopback and protocol models exercise frozen input, writable identity,
+exact terminal correlation and invalid evidence. An explicitly selected ordinary
+helper-process fixture checks actual worker collection, parent rehash rejection
+and lease retention using a local SDK-protocol peer; no VM launches. This does not
+qualify actual helper mount/cache behavior, tar correctness, SDK lifecycle or
+platform export/import. Protected tar registration/packing and whole-pipeline
+output credit remain required. Public exports remain disabled, crash validation
+deferred and SDK source unmodified. Changed helper bytes carry no historical
+package/platform qualification.
+
+
+## Protected collected-layer custody (schema 10)
+
+`RetainedConversionStorage.register_conversion` consumes only the opaque output
+of that same original retained entry. It rechecks source, started manager, plan,
+original deadline/cancellation and both private worker outputs. A crossed entry
+cannot supply staging authority. There is no path, digest-only or detached FD
+constructor. The caller's existing conversion job/FD/staging reservations remain
+held; the original bounded plan is retained in the entry after registration.
+
+A new optional protected layer field is present only in schema 10. Entering/ready
+states bind frozen input hash, plan hash, fixed layer.tar name, bytes/hash and the
+original file version. Earlier schemas omit the field exactly; they reject a
+layer field or a schema downgrade. Existing cleanup proof shape stays schema 1,
+with a separate container-layer hash domain binding helper/runtime/layer/files
+while excluding only mutable retirement phases. Schema 1-9 hash inputs stay intact.
+
+Entered intent precedes a descriptor-relative exclusive rename of the collected
+worker's original inode into the held staging root. No second tar is copied or
+charged outside the grant. Source and destination are held directories, original
+FD/path versions match, devices must agree and destination replacement has no
+fallback. Post-move identity, read-only mode, file/directory sync and incremental
+rehash precede ready registration. Partial/late failure retains entered ownership;
+it does not retry the move, adopt the target or grant publication. The consumed
+worker/output lease is released only when the handoff call returns.
+
+Helper collection and runtime custody preserve schema 10. Full cleanup checks
+layer identity/mode and exact stage inventory before retiring helper files. Pending
+handoffs permit only the original inode with unchanged content dimensions and the
+expected rename/chmod metadata evolution; ready files require their exact captured
+version. A protected cleaning phase permits missing already-removed files. Changed
+or unknown payloads retain the entire allowance. Normal reopening restores capacity
+and quarantine for explicit cleanup only; it never reconstructs a worker, writer,
+manager or live ownership from tar bytes.
+
+Five private non-VM tests cover inode-preserving registration, helper collection
+and cleanup, modeled before/after move/chmod boundaries with normal reopen, invalid
+spools/destinations/cancellation, changed/unknown inventory and schema restrictions.
+These are filesystem/ledger models, not actual helper mount/tar/export qualification.
+Container packing, whole-pipeline output credit and ordinary platform/public
+consumer gates remain pending. Public exports stay disabled; crash validation
+remains deferred and no SDK/research source is modified.
+
+
+## Retired-helper container packing and publication (schema 11)
+
+The original retained token now consumes its registered conversion plan only after
+its original manager supplies opaque child collection and exact runtime custody.
+`pack` never launches/stops a helper or reacquires work admission. Explicit bounded
+helper retirement uses cleanup control admission, verifies exact layer/runtime
+inventory, removes only captured helper files/marker and preserves the tar and
+source/work/staging leases. New schema 11 records ready/packing/packed state with
+the helper removed. Unsupported older schemas reject the new state before mutation;
+schema 1-10 serialization/hash inputs stay unchanged.
+
+Packing intent binds the original artifact maximum. A separate entered writer
+record precedes create-new output, and its empty original inode is journaled before
+body writes. Failed/uncertain entry cannot reopen a writer. Cleanup accepts partial
+content only at the registered inode and within its cap; an unregistered replacement
+or linked/unknown output retains capacity. Normal reopen restores quarantine and
+cleanup authority, never a pack writer or publication replay. Schema-11 cleanup
+uses a distinct hash domain while keeping the public schema-1 proof shape.
+
+The existing single-thread bounded tar/zstd writer now supports the SDK container
+manifest and one `layers/<full-sha256>.tar` entry. Manifest digest/path/size must
+match registered layer custody. Approved rootfs/library descriptors stay checked;
+workspace, disk templates and extra layers are excluded. Public SDK metadata
+seeding preserves image environment/user and source overrides, resource/workload
+metadata and layer image_size. Original budgets, artifact caps, streamed hashing,
+SDK footer/checksum and final asset/source checks remain in force.
+
+PackedExport now retains either the existing bare materialization or an opaque
+container entry. The container variant keeps a strong original entry through reads,
+publication and cleanup even after normal Engine value drop; fresh engines cannot
+adopt it. Publication still requires the original engine, exact operator destination
+and transient credential, uses the same bounded single-attempt OCI uploader and
+records the same acknowledgement shape. Explicit disposal retains source accounting
+until stage/helper absence is verified. No new public Port capability is enabled.
+
+New non-VM models check retired readiness/schema boundaries; SDK sidecar/footer,
+whole-file digest and archived layer byte fidelity; manifest mismatch/partial output;
+original partial inode and normal reopen; replacement/link/unregistered preservation;
+container registry publication/cleanup; and entry/domain retention across normal
+Engine value drop. These are format, filesystem, transport and lease evidence, not
+SDK helper startup, actual tar production or guest import qualification. Controller
+container orchestration/sizing, whole-pipeline output credit, local/imported sources
+and ordinary exact-package/platform/public-consumer gates remain pending. Crash
+validation stays deferred, public exports disabled and SDK/research source unmodified.
+
+
+## Export coordinator, shared output budget and explicit retained cleanup
+
+The shared engine now provides read-only `qualify_export` and a single-attempt
+`pack_export` coordinator. Actual receipt-bound source records select bare versus
+container mode. Bare disks use their measured logical size to clamp the effective
+artifact maximum. Containers require an explicit cached operator conversion grant,
+then sequence owned SDK storage, retained launch, isolated conversion, registered
+layer, original collection and packing. The Port adapter delegates the sequence
+and preserves existing destination/credential/publication correlation. No new wire
+operation, public result type, downstream SDK patch, CLI or server is introduced.
+
+Fresh cached approvals return nonsecret conversion resources under the pinned
+epoch. Elixir checks exact equality to the saved approved destination. Such requests
+freeze upper bounds without guessing source mode; the engine allocates from actual
+data. Legacy catalogs omit the grant and preserve previous source-sized request
+bytes. The grant never enters caller wire requests or durable publication data.
+
+A distinct optional shared_output_bytes budget marker leaves old fixed-budget
+serialization/hash inputs unchanged. The approval hash uses a separate domain.
+After private helper disks, tar and artifact share the remaining grant; the stream
+has a finite cap and packing uses min(frozen artifact maximum, staging minus private
+disks minus actual layer). Registered packing intent/writer reservation enforces
+that cap again. Individual maxima are not simultaneous allocation promises. Older
+strict budget readers reject the marker before acting on a record. No command/file
+cap or implicit process-global SDK transfer override changes.
+
+Explicit quiesced cleanup now locates only an original retained entry. Live caller
+or worker leases reject before collection. It may skip SDK entry only for no
+manager, or an original unstarted manager plus protected never-entered launch state.
+Otherwise it collects the original manager through existing bounded controls. An
+original opaque collection plus recorded runtime custody skips repeated SDK stop;
+filesystem cleanup independently verifies captured retirement/absence. Lost managers
+are not reconstructed on reopening. Original collection without runtime custody can
+finish only its retained post-collection evidence, never replay launch or publication.
+
+Tests cover budget tradeoffs including large tar/small pack and the reverse;
+measured bare clamping; read-only missing approvals/assets/cancellation; mandatory
+namespace rejection before SDK calls in a DB-only coordinator model; shared staged
+output/reopen cleanup; active/foreign retained cleanup; and never-entered versus
+collected-runtime observations. The Elixir contract preserves legacy requests and
+rejects foreign grants/mode claims. These are models and pre-entry evidence, not
+successful real helper/export/import qualification. Public admission stays disabled;
+local/imported sources, ordinary platform/consumer and remaining P0-P9 gates remain
+pending. Crash validation stays deferred and SDK/research sources unmodified.
+
+## Receipt-bound imported-container input qualification
+
+The shared engine now exposes read-only `qualify_imported_container_export` on an
+already qualified stopped source. The opaque result retains that exact source
+gate/job/domain and a descriptor-held sidecar/cache root. Before opening input,
+the source's material receipt authenticates `source_smolmachine`; only the exact
+content-addressed `artifacts` or `registry-blobs` creation-cache path is accepted.
+The basename alone grants no authority. Cache/file identity, unredirected paths,
+current owner, single link and 0400 mode are checked before and after bounded I/O.
+
+One 64-KiB-buffered pass verifies both the full approved content SHA and SDK footer
+CRC. The public SDK footer/manifest parser is used only after its fixed footer and
+one-MiB sidecar-layout bounds. The existing bounded archive walker now optionally
+inspects layers without extraction: it checks each full tar hash, the exact asset
+inventory, nested tar metadata, expansion/entry ceilings and manifest order rather
+than physical archive order. Logical expansion includes sparse holes; it is input
+metadata, not a helper filesystem allocation proof. Cancellation/deadline checks
+also wrap decoded reads and synthesized sparse holes, so compressed buffering or
+hole drainage cannot hide further traversal.
+Ordinary pack creation keeps its previous validation behavior.
+
+Promotion of the original source job to its existing 12-descriptor allowance
+precedes holding extra input descriptors. No second work slot or child is created.
+The public metadata is inert; recheck requires the same engine and unchanged
+original source/cache/file versions. No SDK cache pointer, layer-order file,
+directory fallback, cache repair, host extraction or arbitrary host path is used.
+Managed `Source.local/1` still selects an approved `.smolmachine`, not the SDK's
+raw host-rootfs/archive source forms. Baked environment remains outside this
+metadata and cannot grant workload/secret inheritance.
+
+Private non-VM source models cover both creation caches, manifest order,
+retained gate/accounting, rejected inventory edits, foreign/redirected paths,
+replaced/modified/linked/mode-changed files, wrong domains and binding/lock files,
+independent content/CRC/layer/inventory checks, managed manifest restrictions, cancellation and sparse
+logical expansion. A decoded-reader cancellation model complements them. These
+checks qualify only input handling. The integration below adds owned worker
+transport/staging/budget foundations; ordinary local/registry export/import
+qualification remains required. No public wire/codec/package feature is enabled. Public export admission
+stays disabled, crash validation deferred and distribution approval separate.
+
+## Imported-container conversion through original worker custody
+
+`prepare_container_export` now retains the qualified original sidecar alongside
+the held source disk. The coordinator selects this route from actual saved
+`source_smolmachine`, without a caller mode flag. Original cache identity, file
+version, content key and bounded ordered layer metadata enter the frozen worker
+input. Before guest I/O the worker opens exactly those versions, independently
+rehashes/inspects the full sidecar and compares the resulting snapshot. Parent
+gate/domain/input descriptors follow actual worker collection. A second bounded
+sidecar pass streams each original tar directly into guest upload messages; no
+second host tar, mutable SDK cache or host layer share is allocated.
+
+Imports mount the private source COW, but do not bind/query registry caches. Fresh
+fixed `/storage/imported` paths hold extracted digest-named layers and temporary
+parts for one layer. Parts stay within the SDK's fixed four-GiB file-write cap;
+each request carries at most 64 KiB and each reply has a bounded control header.
+Larger tars use at most 32 parts under the existing 128-GiB input ceiling. Exact
+byte/hash completion and unchanged source versions precede extraction. Fixed
+guest shell operations require pipeline failure detection, then remove parts
+before the next layer. Any failed upload/extraction stops before flattening.
+Normal helper collection/retirement owns later disk cleanup; errors do not release
+or reconstruct manager authority.
+
+The returned plan binds the original snapshot digest and saved record. Parent
+verification reconstructs exact upper/lower paths, manifest precedence and empty
+baked image inheritance from its held input. Actual record overrides are preserved.
+Mixed source plans, changed input ordering/hash and unrelated record metadata
+reject. Manifest seeding now validates its exact plan/record, so a changed record
+cannot borrow earlier plan authority. The shared engine owns this behavior;
+neither Port nor a future Rustler bridge performs SDK calls for it.
+
+`ImportedConversionAllowance` binds original content SHA, total/max tar bytes,
+expanded logical bytes and nested entry counts. The helper storage plan funds all
+extracted layers plus one largest raw tar, 10% content headroom, 32 KiB per entry
+for block/inode/xattr overhead and one GiB reserve, rounded to GiB. The existing
+source COW/overlay/private allowances remain additional. A separate approval hash
+binds imported/fixed/shared mode. Protected helper records rebuild the complete
+plan, with exact staging ceiling, before acting. Tar and artifact still share the
+remaining staging. Optional imported budget/input/plan fields are omitted for
+legacy paths; strict older readers reject those fields before mutation. No new
+public operation, ordinary command/file cap or credential field is introduced.
+
+Non-VM models exercise original snapshot reopening and raw streaming, changed
+input rejection before connection, multichunk uploads, upload failure fencing,
+large-tar part layouts, exact plan/metadata inheritance and funded protected scratch
+with mandatory SDK namespace rejection. The explicitly selected rebuilt-helper
+process peer passes imported conversion with held source gates, original job
+accounting, independent output/plan hashes and normal child collection. It boots
+no VM. Ordinary SDK initialization/UID/mount/device behavior, actual shell/tar
+mode/whiteout/xattr semantics, OS resource peaks, local/registry export/import and
+full output-credit acceptance remain pending. These models do not enable public
+export admission or transfer historical package/platform evidence.
+
+
+## Ordinary export SDK disk initialization and failed-start custody
+
+An opt-in Port test now accepts an exact approved package, original stopped-source
+receipt and explicit storage/launch/conversion/packing phase. It opens the actual
+enrolled default SDK domain with initialization disabled. SDK environment is
+configured before process startup; database-only models cannot enter this path.
+The original source was created/started/stopped through normal Port operations.
+The pre-fix real macOS storage/COW and unstarted-manager cleanup passed. Helper
+startup then failed naturally: SDK formatting copied a read-only approved template
+before expanding the larger storage disk. Its original child was collected;
+unmodeled SDK files prevented runtime-custody capture and cleanup. The original
+owner remains retained, without forced loss, reconstructed manager or file removal.
+The redacted [incomplete evidence](../docs/evidence/embedded-port-http-parity-export-sdk-macos-incomplete.json)
+binds the actual package and limits these observations to those bytes.
+
+The initializer now uses public SDK formatting at the approved one-GiB baseline,
+makes only its owned disk copies writable, then grows storage through the public
+SDK. It neither modifies templates nor writes SDK formatting markers. Exact
+protected `storage.formatted` and `overlay.formatted` files containing `1` are
+required before conversion launch configuration. Legacy unformatted batches stay
+cleanable but cannot supply launch inputs.
+
+After original enrolled-child collection, runtime custody recognizes these bounded
+markers and the SDK's `agent.ready` socket. Raw disks may be shorter than their
+funded maxima after a failed formatter. This permits cleanup custody only: it does
+not prove launch, conversion, geometry or artifact success. Existing directory,
+file-version, owner, link, role and original collection checks remain required;
+unknown names still reject. Deterministic models cover these rules without SDK
+lifecycle entry. Changed initializer/custody bytes need ordinary qualification.
+Public export admission remains disabled and crash validation deferred.
+
+
+## Fresh container and OCI disk sizing
+
+Fresh OCI and imported/prepared container creation now allocate the one-GiB raw
+baseline, finish public SDK formatting, make only the owned copies writable, and
+grow storage/overlay through `VmDisk::open_or_create_at` before receipt minting.
+The full requested resources are already reserved. Resulting raw sizes must equal
+the saved request; missing formatting or a lower target rejects with uncertain
+dispatch rather than shrinking or synthesizing markers. Existing-machine growth
+still uses its separate material-transition authority. VM-mode pack seeding and
+its geometry remain on the existing public SDK path.
+
+An inert regression checks preservation of existing prefix/tail bytes and SDK
+marker contents through sparse growth, rejection before growth without formatting,
+idempotence and refusal to shrink. A separate explicitly ignored qualification
+uses only disposable explicit disk paths and preapproved immutable account
+templates. It opens no engine/domain, constructs no manager and starts no VM.
+It verifies the resolver selects the approved existing plain files before SDK
+formatting, then checks complete original-prefix hashes, exact sizes and unchanged
+template identities/modes/content. This is an ordinary disk API witness; it cannot
+qualify machine boot, guest resize, helper conversion, mounts or exports. The
+explicit macOS witness passed real SDK formatting, three-GiB storage/two-GiB
+overlay growth, complete original-prefix hashes, unchanged templates and removal
+of only its four created files. The [scoped evidence](../docs/evidence/embedded-port-http-parity-template-growth-macos.json)
+binds test binary, engine source file, input templates and private log hash.
+
+
+## Staged artifact upload credit and explicit registry retry policy
+
+Native registry clients now explicitly select `reqwest::retry::never()`. The locked
+reqwest 0.12.28 source enables protocol-NACK retries by default. Native request
+ceilings and single-attempt publication must count every dispatched request,
+including library-level behavior. Existing bounded registry authentication steps
+remain explicit; automatic transport retries grant no extra attempt. Redirect,
+proxy, compression, origin, credential and deadline policies are unchanged.
+Publication fixtures now use the same client constructor as production. A shared
+private `bounded_attempt` applies the existing absolute deadline/cancellation
+select to the production publication future and its artifact-credit witness.
+
+The new non-VM artifact witness packs 17 MiB of incompressible private model data
+through the real bounded stage/packer, then reads that greater-than-16-MiB artifact
+through the production blob uploader. A loopback registry sends a valid first
+PATCH response header but withholds its one-byte body. The uploader reads exactly
+one MiB in four bounded 256-KiB reads and returns no further read credit before the
+complete acknowledgement. Resuming it sends exact sequential ranges and verifies
+the complete blob hash. API cancellation and absolute deadline expiry instead
+return uncertain State without another PATCH, upload restart or blob commit.
+
+A receipt-qualified source gate, full work metadata and staging grant remain held
+through the blocked upload and its retirement. Two reserved export observers and
+node health stay available; a third control request, another full source job and
+concurrent same-source qualification reject. Neither cancellation nor a complete
+blob acknowledgement supplies a registry publication proof. Explicit cleanup
+releases only private staging, and the original source job remains held until its
+lease is dropped. All fixtures close their ordinary threads/sockets normally.
+
+This witnesses the staged-file/packer/upload/retirement boundary only. It does
+not start a VM, prove real source geometry, traverse guest/worker conversion,
+attest aggregate OS memory peaks or complete public export/import acceptance.
+The existing SDK wire, whole-pipeline credit and ordinary platform/public gates
+remain pending. No capability, protocol limit or command/file ceiling changes.

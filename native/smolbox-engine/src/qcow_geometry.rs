@@ -157,6 +157,24 @@ pub(crate) fn superblock(
     bytes: &mut [u8; 1024],
     resolved: &mut [bool; 1024],
 ) -> Result<()> {
+    logical_layer(file, budget, 1024, bytes, resolved)
+}
+
+/// Apply only mapped bytes from one already-qualified QCOW layer. Unmapped
+/// bytes remain unresolved for the authenticated backing chain.
+pub(crate) fn logical_layer(
+    file: &File,
+    budget: &ReadBudget,
+    start: u64,
+    bytes: &mut [u8],
+    resolved: &mut [bool],
+) -> Result<()> {
+    if bytes.len() != resolved.len()
+        || bytes.len() > 256 * 1024
+        || start.checked_add(bytes.len() as u64).is_none()
+    {
+        return Err(Error::before(ErrorCode::Validation));
+    }
     budget.check()?;
     let mut header = [0; 72];
     file.read_exact_at(&mut header, 0)
@@ -172,7 +190,7 @@ pub(crate) fn superblock(
     let mut done = 0usize;
     while done < bytes.len() {
         budget.check()?;
-        let virtual_offset = 1024 + done as u64;
+        let virtual_offset = start + done as u64;
         let within = virtual_offset % cluster;
         let take = (cluster - within).min((bytes.len() - done) as u64) as usize;
         let l1_index = virtual_offset / cluster / (cluster / 8);
@@ -209,7 +227,7 @@ pub(crate) fn superblock(
             }
         }
         if entry & 1 != 0 || entry & OFFSET != 0 {
-            let mut data = [0; 1024];
+            let mut data = vec![0; take];
             if entry & 1 == 0 {
                 file.read_exact_at(&mut data[..take], (entry & OFFSET) + within)
                     .map_err(|_| Error::before(ErrorCode::Validation))?;

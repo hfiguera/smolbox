@@ -9,6 +9,7 @@ defmodule SmolBox.Backend.Embedded do
     EmbeddedCaptureObservation,
     EmbeddedCaptureResolution,
     EmbeddedContext,
+    EmbeddedExport,
     EmbeddedGrowthObservation,
     EmbeddedObservation,
     EmbeddedOperation,
@@ -65,6 +66,15 @@ defmodule SmolBox.Backend.Embedded do
       do: Features.supports?(config, :images)
 
   def supports_operation?(nil, :logs), do: true
+
+  def supports_operation?(nil, operation)
+      when operation in [:export_machine, :qualify_export, :inspect_export, :cleanup_export],
+      do: true
+
+  def supports_operation?(%{__struct__: EmbeddedContext, config: config}, operation)
+      when operation in [:export_machine, :qualify_export, :inspect_export, :cleanup_export],
+      do: Features.supports?(config, :exports)
+
   def supports_operation?(nil, :prepare_artifact), do: true
   def supports_operation?(nil, :create_prepared), do: true
 
@@ -162,6 +172,21 @@ defmodule SmolBox.Backend.Embedded do
 
   def invoke(context, :capture_checkpoint, arguments, budget),
     do: EmbeddedCapture.run(context, arguments, budget)
+
+  def invoke(context, :export_machine, [_, _, _] = arguments, budget),
+    do: EmbeddedExport.invoke(context, :export_machine, arguments, budget)
+
+  def invoke(_context, :export_machine, _arguments, _budget),
+    do: EmbeddedExport.failure(:validation, :not_dispatched)
+
+  def invoke(context, operation, [], budget) when operation in [:qualify_export, :inspect_export],
+    do: EmbeddedExport.invoke(context, operation, [], budget)
+
+  def invoke(context, :cleanup_export, [_, true] = arguments, budget),
+    do: EmbeddedExport.invoke(context, :cleanup_export, arguments, budget)
+
+  def invoke(_context, :cleanup_export, _arguments, _budget),
+    do: EmbeddedExport.failure(:validation, :not_dispatched)
 
   def invoke(%{volume: volume} = context, :provision_volume, [id, size], budget) do
     with true <- volume != nil and volume.worker_volume_id == id and volume.size_gb == size,

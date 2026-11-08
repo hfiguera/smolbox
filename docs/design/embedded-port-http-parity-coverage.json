@@ -467,7 +467,7 @@
       ],
       "contract": "exports",
       "http_supported": true,
-      "port_operation_supported": false,
+      "port_operation_supported": true,
       "parity_status": "pending",
       "acceptance": [
         "exports:validation-and-dispatch",
@@ -623,6 +623,51 @@
         "checkpoints:validation-and-dispatch",
         "checkpoints:ordinary-public-behavior",
         "checkpoints:durable-accounting-and-no-replay"
+      ]
+    },
+    {
+      "name": "qualify_export",
+      "arities": [
+        1
+      ],
+      "contract": "exports",
+      "http_supported": false,
+      "port_operation_supported": true,
+      "parity_status": "pending",
+      "acceptance": [
+        "exports:validation-and-dispatch",
+        "exports:ordinary-public-behavior",
+        "exports:durable-accounting-and-no-replay"
+      ]
+    },
+    {
+      "name": "inspect_export",
+      "arities": [
+        1
+      ],
+      "contract": "exports",
+      "http_supported": false,
+      "port_operation_supported": true,
+      "parity_status": "pending",
+      "acceptance": [
+        "exports:validation-and-dispatch",
+        "exports:ordinary-public-behavior",
+        "exports:durable-accounting-and-no-replay"
+      ]
+    },
+    {
+      "name": "cleanup_export",
+      "arities": [
+        3
+      ],
+      "contract": "exports",
+      "http_supported": false,
+      "port_operation_supported": true,
+      "parity_status": "pending",
+      "acceptance": [
+        "exports:validation-and-dispatch",
+        "exports:ordinary-public-behavior",
+        "exports:durable-accounting-and-no-replay"
       ]
     }
   ],
@@ -894,7 +939,19 @@
         "Implicit flattening VM must not bypass epoch guard or auxiliary accounting."
       ],
       "acceptance_status": "pending",
-      "evidence": []
+      "evidence": [
+        "native/smolbox-engine/src/export_import.rs",
+        "native/smolbox-engine/src/export_bootstrap.rs",
+        "native/smolbox-engine/src/export_container.rs",
+        "native/smolbox-engine/src/export_conversion.rs",
+        "native/smolbox-engine/src/transfer_supervisor.rs",
+        "native/http-parity-api-boundaries.md",
+        "native/smolbox-port/src/ordinary_export.rs",
+        "docs/evidence/embedded-port-http-parity-export-sdk-macos-incomplete.json",
+        "docs/evidence/embedded-port-http-parity-template-growth-macos.json",
+        "native/smolbox-engine/src/export_pack.rs",
+        "native/smolbox-engine/src/export_publication.rs"
+      ]
     },
     {
       "id": "branches",

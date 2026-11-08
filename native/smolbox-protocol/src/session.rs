@@ -98,6 +98,13 @@ impl Session {
                         || self.hello.sdk.as_ref().is_none_or(|sdk| {
                             sdk.feature_versions.get("remote_sources") != Some(&1)
                         })))
+                || (operation.requires_exports()
+                    && (self.hello.major != 2
+                        || self
+                            .hello
+                            .sdk
+                            .as_ref()
+                            .is_none_or(|sdk| sdk.feature_versions.get("exports") != Some(&1))))
                 || (operation.requires_checkpoints()
                     && (self.hello.major != 2
                         || self
@@ -387,6 +394,65 @@ impl Session {
         outcome.validate_for(self.hello.major)?;
         let pending = self.pending.get(&id).ok_or(InvalidMessage)?;
         match (&pending.operation, &outcome) {
+            (
+                Operation::ExportMachine {
+                    receipt,
+                    operation_id,
+                    request,
+                    ..
+                },
+                Outcome::Exported { publication },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                publication.matches_request(receipt, operation_id, request)?;
+                check(
+                    publication.identity.platform
+                        == if self.hello.package.architecture == "x86_64" {
+                            "linux/amd64"
+                        } else {
+                            "linux/arm64"
+                        },
+                )?;
+            }
+            (
+                Operation::InspectExport {
+                    receipt,
+                    operation_id,
+                    request_sha256,
+                },
+                Outcome::ExportPresence { publication },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                if let Some(publication) = publication {
+                    publication.matches(receipt, operation_id, request_sha256)?;
+                    check(
+                        publication.identity.platform
+                            == if self.hello.package.architecture == "x86_64" {
+                                "linux/amd64"
+                            } else {
+                                "linux/arm64"
+                            },
+                    )?;
+                }
+            }
+            (
+                Operation::CleanupExportStaging {
+                    receipt,
+                    operation_id,
+                    request_sha256,
+                    ..
+                },
+                Outcome::ExportStagingCleaned { cleanup },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                cleanup.matches(receipt, operation_id, request_sha256)?;
+            }
+            (
+                Operation::QualifyExport { .. } | Operation::AdmitExport { .. },
+                Outcome::Qualified,
+            ) => {
+                check(pending.output_bytes == 0)?;
+            }
             (
                 Operation::ExpandDisks {
                     receipt,

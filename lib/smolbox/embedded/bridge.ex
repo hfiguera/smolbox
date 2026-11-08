@@ -91,6 +91,11 @@ defmodule SmolBox.Embedded.Bridge do
   # Legacy non-interactive bridges may omit these variants; a bridge advertising
   # terminals must implement them with the same caller/observer identity checks.
   @callback health(server(), pos_integer()) :: {:ok, map()} | {:error, Error.t()}
+  # Cached nonsecret destination identity/caps and optional conversion grant,
+  # selected under a pinned epoch. Missing grants preserve legacy bare behavior.
+  # Bridges advertising exports must implement this without filesystem/network I/O.
+  @callback export_approval(server(), String.t(), String.t(), pos_integer()) ::
+              {:ok, map()} | {:error, Error.t()}
   @callback submit(server(), request(), Budget.t(), pid(), String.t(), pos_integer()) ::
               {:ok, handle()} | {:error, Error.t()}
   @callback terminal_control(server(), handle(), map(), pos_integer()) ::
@@ -98,5 +103,10 @@ defmodule SmolBox.Embedded.Bridge do
   @callback acknowledge(server(), handle(), pos_integer(), pos_integer()) ::
               :ok | {:error, Error.t()}
   @callback cancel(server(), handle(), pos_integer()) :: :ok | {:error, Error.t()}
-  @optional_callbacks health: 2, submit: 6, terminal_control: 4, acknowledge: 4, cancel: 3
+  @optional_callbacks health: 2,
+                      submit: 6,
+                      terminal_control: 4,
+                      acknowledge: 4,
+                      cancel: 3,
+                      export_approval: 4
 end

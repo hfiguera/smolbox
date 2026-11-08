@@ -11,7 +11,7 @@ defmodule SmolBox.Exports do
   """
   alias SmolBox.{Backend, Error, Export, ExportSpec, ManagedMachine, Runtime, Validation}
   alias SmolBox.Runtime.Exports, as: ExportRuntime
-  alias SmolBox.Runtime.{Machines, Session}
+  alias SmolBox.Runtime.{Machines, NativeResolution, Session}
 
   @spec submit(SmolBox.runtime(), ManagedMachine.key(), ExportSpec.t()) ::
           {:ok, Export.handle()} | {:error, Error.t()}
@@ -132,28 +132,53 @@ defmodule SmolBox.Exports do
          {:ok, %{state: state}} <- fetch(runtime, handle),
          true <- state in [:unknown, :published],
          {:ok, config} <- configuration(runtime),
-         {:ok, record} <-
+         {:ok, record} <- Machines.store(config, :fetch, [{scope, machine}]),
+         {:ok, worker} <- Machines.worker(config, record) do
+      deadline =
+        if match?(%{kind: :embedded}, worker),
+          do:
+            System.monotonic_time(:millisecond) +
+              min(Target.connection(worker).budget.timeout_ms, 30_000)
+
+      NativeResolution.run(
+        config,
+        Runtime.coordinator(runtime),
+        record,
+        worker,
+        disposition,
+        fn pinned ->
+          resolve_record(config, {scope, machine}, id, version, pinned, disposition, deadline)
+        end
+      )
+    else
+      false -> Session.error(:validation, :export)
+      error -> error
+    end
+  end
+
+  def resolve(_runtime, _handle, _version, _options), do: Session.error(:validation, :export)
+
+  defp resolve_record(config, key, id, version, worker, disposition, deadline) do
+    with {:ok, record} <-
            Machines.store(config, :claim_version, [
-             {scope, machine},
+             key,
              version,
              config.owner,
              config.clock.now(),
              config.lease_ms
            ]),
-         {:ok, worker} <- Machines.worker(config, record),
-         {:ok, observed} <-
+         export = record.exports[id],
+         true <- export != nil and export.state in [:unknown, :published],
+         {:ok, observed, cleanup} <-
            Machines.io(config, %{record | operation_deadline_ms: nil}, fn ->
-             observe_resolution(Target.connection(worker), record.machine_name, disposition)
+             resolution_evidence(worker, record, export, disposition, deadline)
            end),
-         {:ok, current} <- Machines.claim(config, {scope, machine}),
+         {:ok, current} <- Machines.claim(config, key),
+         true <-
+           current.exports[id] == export and
+             current.backend_assignment == record.backend_assignment,
          {:ok, saved} <-
-           Machines.store(config, :export_resolve, [
-             {scope, machine},
-             Session.guard(current),
-             id,
-             observed,
-             config.clock.now()
-           ]),
+           save_resolution(config, current, id, observed, cleanup),
          do: {:ok, saved.exports[id]},
          else: (
            false -> Session.error(:validation, :export)
@@ -161,7 +186,40 @@ defmodule SmolBox.Exports do
          )
   end
 
-  def resolve(_runtime, _handle, _version, _options), do: Session.error(:validation, :export)
+  defp resolution_evidence(%{kind: :embedded} = worker, record, export, disposition, deadline) do
+    client = Target.connection(worker, record)
+
+    with {:ok, client} <- remaining(client, deadline),
+         {:ok, cleanup} <- Backend.cleanup_export(client, export, true),
+         {:ok, client} <- remaining(client, deadline),
+         {:ok, observed} <- observe_resolution(client, record.machine_name, disposition),
+         do: {:ok, observed, cleanup}
+  end
+
+  defp resolution_evidence(worker, record, _export, disposition, _deadline) do
+    with {:ok, observed} <-
+           observe_resolution(Target.connection(worker), record.machine_name, disposition),
+         do: {:ok, observed, nil}
+  end
+
+  defp remaining(client, deadline) do
+    timeout = deadline - System.monotonic_time(:millisecond)
+
+    if timeout > 0,
+      do: {:ok, Backend.bounded(client, timeout_ms: timeout)},
+      else: Session.error(:expired, :export)
+  end
+
+  defp save_resolution(config, current, id, observed, cleanup) do
+    arguments = [ManagedMachine.key(current), Session.guard(current), id, observed]
+
+    arguments =
+      if match?(%SmolBox.Embedded.ExportAuthority{}, current.exports[id].native_authority),
+        do: arguments ++ [cleanup],
+        else: arguments
+
+    Machines.store(config, :export_resolve, arguments ++ [config.clock.now()])
+  end
 
   defp observe_resolution(client, name, disposition) do
     case {Backend.inspect_machine(client, name), disposition} do

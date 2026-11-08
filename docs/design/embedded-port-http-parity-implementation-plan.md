@@ -1,6 +1,6 @@
 # Implementation plan for embedded Port HTTP parity
 
-Status: implementation in progress, October 14, 2026. Implements the
+Status: implementation in progress, October 15, 2026. Implements the
 [HTTP-parity design](embedded-port-http-parity.md) on
 `embedded-port-design-non-upstream-patches`. This document does not enable new
 features. P0 coverage/API witnesses and part of P1's shared approvals/version
@@ -136,6 +136,14 @@ Exit gate: network/workload specifications work through unchanged public managed
 APIs with equal approvals and accounting, including offline-with-ports behavior.
 
 ## P4 Registry sources, OCI creation and image operations
+
+Fresh-disk sizing note: OCI and imported container creation format the one-GiB
+baseline before making owned copies writable and growing through public SDK APIs.
+Exact requested sizes are verified before receipt minting. This avoids SDK
+format-time expansion after read-only template copying; it does not alter VM-pack
+seeding or qualify guest filesystem growth. An explicitly opt-in disposable-disk
+fixture uses preapproved account templates without opening a domain or VM.
+
 
 Primary areas: `Source`, `ArtifactPreparation`, credential resolver, target source
 catalogs, native preparation/cache/agent workers and source/store codecs.
@@ -322,6 +330,30 @@ after legitimate geometry changes and retain capacity on uncertain outcomes.
 
 Primary areas: checkpoint/capture/export/branch coordinators and artifact IO,
 native public SDK saved-state/packer/fork APIs, epoch actors and store proofs.
+
+Imported-container note: the coordinator now retains the receipt-bound original
+`.smolmachine` from either engine creation cache, verifies whole-file/CRC/per-layer
+hashes and derives ordered layers plus bounded logical expansion. Frozen original
+versions follow the owned worker through collection; the worker independently
+rehashes before guest I/O and streams verified layers as bounded guest parts,
+extracts into fixed helper paths and removes raw parts before the next layer.
+Protected resource plans fund all expanded layers, the largest temporary tar and
+filesystem overhead. This does not trust/repair SDK caches or copy host tars.
+Ordinary SDK storage/mount/tar semantics and local/prepared-registry export/import
+qualification remain required. Raw SDK host-directory/archive forms are not
+additions to the managed `Source.local/1` API.
+
+Ordinary SDK qualification note: the opt-in Port test fixture selects an explicit
+storage/launch/conversion/packing phase, approved package/config and original
+stopped-source receipt in the actual default SDK namespace. It performs no
+database-only fixture adoption or in-process environment redirection. Initial
+macOS storage/COW qualification passed; helper launch exposed immutable template
+permission inheritance during expansion and unmodeled format/readiness files.
+The initializer now formats at the one-GiB approved baseline, makes only owned
+copies writable and grows via public SDK APIs. Exact SDK format markers gate
+launch configuration; legacy unformatted records remain cleanup-only. Bounded
+post-collection custody includes failed shorter disks without granting launch or
+export success. Ordinary requalification of these changes remains required.
 
 Entered-capture resolution note: the shared engine now records a distinct
 `CaptureResolutionTransition` only for an exact entered intent and verified
@@ -512,6 +544,91 @@ is activated by inspection.
    and approved registry destination/token/receipt. Select the bounded approved
    host-conversion or fully enrolled auxiliary-VM approach established in P0;
    never reuse the private fixture exporter as qualified product behavior.
+   Gated typed Port preflight/publication/lookup/cleanup now connect the bare
+   shared-engine path. Setup snapshots exact operator destination/TLS approvals;
+   reader admission uses cached hashes/caps only. Rust/Elixir correlate canonical
+   publication and separate cleanup evidence to original source/request and
+   package architecture, with reserved control lookup/cleanup. Managed controller
+   routing now snapshots active export authority and uses the same pinned helper
+   for preflight and publication. Controller qualification selects only cached
+   destination hash/caps, accounts source logical bytes within staging, and
+   freezes the derived request before dispatch. Exact acknowledgement lookup
+   precedes existing independent registry verification. Native history freezes the enrolled source
+   at acceptance and the exact bounded request before dispatch. Selective v28
+   retains correlated native acknowledgement and distinct cleanup proof; guarded
+   completion releases allowance only with exact cleanup, preserving HTTP v11.
+   Future package enrollment requires native_export_histories: 1. Controller
+   pinning/quiescence and lookup/cleanup orchestration now consume correlated
+   proof with one control deadline and reject changed intent before release.
+   Explicit live-source no-stage cleanup now authenticates marker/current
+   material under the source gate and writes schema-4 zero-byte retirement.
+   Its separate proof domain gives no publication or VM-absence authority and
+   fences operation reuse. Existing registered stage cleanup is independent of
+   VM-row lifetime; a private removed-source model validates that boundary.
+   Pre-disposal intent authority when an unstaged source is already deleted,
+   container flattening and ordinary
+   qualification remain pending. The retained conversion token now connects one
+   owned SDK launch through the original budget and per-entry work retention.
+   Protected schema 8 records the opaque entered boot intent and exact returned
+   pre-exec child identity. Return grants no collection, replay or cleanup proof;
+   normal reopening retains capacity/quarantine without adoption. Original
+   enrollment is now retained separately from record publication. Bounded owned
+   collection controls select the original manager/child, including quiesced
+   retired callers; schema-8 collecting/collected phases record opaque collection
+   without guest fsync, filesystem cleanup or publication authority. Ordinary
+   non-VM child and private control/reopen models pass. Schema-9 runtime custody
+   now binds exact bounded SDK files/socket and the original rootfs helper marker
+   after opaque collection. Explicit removal records intent before unlinking,
+   rejects changed/unknown inventory, resumes only captured remaining files and
+   verifies/syncs absence before release. Private filesystem models pass; actual
+   SDK file inventory/rootfs behavior and ordinary SDK startup/shutdown
+   qualification must follow before public conversion admission. Frozen worker
+   input now derives from the qualified source and reserved conversion grant.
+   Fixed private-source mount/cache binds, a bounded typed exact cached query and
+   validated topmost-first flatten plan connect to streamed layer I/O. SDK-encoded
+   loopback checks pass without a guest. The original retained entry now dispatches
+   one isolated conversion worker through its existing job reservation. Distinct
+   private layer/plan spools stay retained through actual child collection;
+   parent verification binds both sizes/hashes to frozen input and rechecks the
+   source/plan. A live or retained-output worker lease fences helper collection
+   and cleanup. Bounded positional reads supply no tar/publication authority.
+   Protected schema 10 now consumes that exact original-entry output through a
+   no-replacement descriptor-relative move, avoiding a second tar allocation.
+   Entered/ready layer records bind input/plan hashes, file identity, bytes/hash
+   and original budgets. Rehash plus read-only mode precede ready registration;
+   the original plan remains retained for future packing. Collection/runtime
+   retirement preserves the layer schema. Deterministic private models cover
+   pending moves and normal cleanup/reopen without writer adoption. Packing
+   requires original opaque collection before explicit helper retirement. Fresh
+   schema 11 now records retired-helper readiness, packing intent, writer entry
+   and original empty output inode before body writes. The bounded shared packer
+   emits one SDK digest-named layer plus approved assets, SDK-seeded inherited
+   metadata and a verified sidecar/footer. Generic packed-export forwarding,
+   single-attempt publication and cleanup retain the original container entry,
+   including across normal Engine value drop. Private format/ledger/registry-peer
+   and retention models pass; they do not qualify SDK helper production or guest
+   import. A transport-independent engine coordinator now selects actual source
+   mode and sequences source qualification, explicit funding, owned SDK storage/
+   launch/worker/registration/collection, packing and existing publication. The
+   Port adapter delegates this path. New cached grants produce frozen upper
+   bounds without guessing mode; old catalogs retain exact request construction.
+   Bare geometry and actual container layer bytes determine effective pack caps.
+   Shared output budgets bound aggregate helper/tar/artifact bytes without a fixed
+   split; legacy fixed records keep their bytes. Quiesced cleanup collects only
+   an original retired manager, permits provably unentered storage retirement and
+   skips SDK replay after collection/runtime custody. Active callers/workers still
+   reject. A non-VM staged-artifact witness now packs more than 16 MiB and
+   exercises one-MiB upload credit, 256-KiB reads and incomplete acknowledgement
+   bodies against the production uploader. Resume, explicit cancellation and
+   deadline retirement preserve original source/staging allowances and both
+   control observers; blob completion cannot supply publication proof. Native
+   registry clients explicitly disable automatic library retries. This does not
+   traverse guest/worker conversion or qualify aggregate OS memory. Whole-pipeline
+   output-credit validation, local/imported source semantics
+   and ordinary public/platform qualification remain required. Private record/control models
+   are not positive SDK startup qualification; deterministic controller models do not prove
+   the helper can produce every required cleanup witness.
+   No public export capability is enabled by this wire foundation.
 4. Add branch source/absence/create/inspection/hold/release with authenticated
    source and independent child proof, atomic dual reservation, ordered gates and
    owner-epoch enrollment for forked VMMs. Keep one-leaf/offline/bare restrictions,

@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "status": "incomplete",
+  "recorded_date": "2026-10-15",
+  "scope": "ordinary-macos-imported-export-source-and-pre-fix-storage; helper launch failed",
+  "platform": "macos",
+  "architecture": "arm64",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "package_manifest_sha256": "903204ff19ac74140e1d0481d364be1d23dcc363eacd4150093819f1184ceef6",
+  "identity": {
+    "engine_version": "0.2.0",
+    "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+    "build_sha256": "ebb818bd2ebb68068401fc79237138cd54a52ec8d416fdfec1eb936d00b8bcd5",
+    "assets_sha256": "b5d1e0e2ec5799ed1490f1d134986416bcd66edb2272f5afc1feabe2249bfd7c",
+    "platform": "macos",
+    "architecture": "aarch64"
+  },
+  "engine_base_commit": "42321ce84c3cd2e4e3485c50e4b606faeb85ca68",
+  "fixture_sha256": "0f4a26a548738c6ba359701ea23c5d2bbb93f0c1d95f6444df897bfa99e27aa2",
+  "source_creation_interface": "native-port-protocol",
+  "source_normal_start_stop_passed": true,
+  "original_source_receipt_retained": true,
+  "actual_default_sdk_namespace": true,
+  "database_only_fixture": false,
+  "pre_fix_storage_cow_and_unstarted_manager_passed": true,
+  "helper_launch_passed": false,
+  "startup_failure": "immutable template permission inherited before raw disk expansion",
+  "original_helper_child_collection_recorded": true,
+  "helper_runtime_cleanup_completed": false,
+  "qualification_owner_retained": true,
+  "ordinary_formatting_fix_requalified": false,
+  "proof_log_sha256": {
+    "storage": "29a85aef50c4d8b46062372207da382577f2b57b0687d7b7a796059670290f44",
+    "launch": "0eda05e88ac023a89f67864505592751efeeecf8ab5d5ce61443eb3c0113cc58"
+  },
+  "private_collected_stage_sha256": "f0aa5c5f79d1b790d4a1801175b58b6c0698599ae681551f8d1055241e57109f",
+  "public_export_capability_advertised": false,
+  "qualifies_export_import": false,
+  "historical_qualification_transferred": false,
+  "deliberate_process_interruption": false,
+  "crash_handling_qualified": false,
+  "distribution_approved": false,
+  "limitations": [
+    "The initializer and custody fixes need a new ordinary run with changed bytes.",
+    "No successful helper launch/conversion/packing or public Runtime export is claimed.",
+    "Linux, native public consumers and distribution reviews remain separate gates."
+  ]
+}

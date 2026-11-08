@@ -3,6 +3,7 @@ defmodule SmolBox.Store.ExportOps do
   Pure export transactions. Adapters lock all machine histories, resource totals
   and the source together. Tag claims survive every outcome and machine deletion.
   """
+  alias SmolBox.Embedded.ExportAuthority
   alias SmolBox.{Error, Export, ExportSpec, ManagedMachine, Validation}
 
   def accept(machine, spec, fingerprint, capacity, usage, machines, now) do
@@ -28,7 +29,10 @@ defmodule SmolBox.Store.ExportOps do
            resource_floor?(spec.destination.resources, SmolBox.DiskExpansion.profile(machine)),
          true <- fits?(spec.destination.resources, capacity, usage),
          true <- vacant?(spec, machine.spec.artifact["architecture"], machines),
+         {:ok, authority} <- ExportAuthority.enroll(machine),
          {:ok, export} <- Export.new(ManagedMachine.key(machine), spec, fingerprint, now) do
+      export = %{export | native_authority: authority}
+
       ManagedMachine.update(
         machine,
         %{
@@ -43,6 +47,7 @@ defmodule SmolBox.Store.ExportOps do
       )
     else
       false -> error(:admission_exhausted)
+      :error -> error(:identity_conflict)
       error -> error
     end
   end
@@ -52,16 +57,40 @@ defmodule SmolBox.Store.ExportOps do
   def advance(machine, id, expected, changes, now) do
     with %Export{} = record <- machine.exports[id],
          true <- machine.active_export == id and record.state == expected,
-         true <- Validation.keys?(changes, [:state, :receipt, :result, :error, :resolved_at_ms]),
+         true <-
+           Validation.keys?(changes, [
+             :state,
+             :receipt,
+             :result,
+             :error,
+             :resolved_at_ms,
+             :native_request,
+             :native_cleanup
+           ]),
          true <- allowed?(record.state, changes[:state]),
          true <- safe_release?(record.state, changes),
          true <-
            record.receipt == nil or
              Keyword.get(changes, :receipt, record.receipt) == record.receipt,
+         {:ok, authority} <-
+           ExportAuthority.freeze_request(
+             record,
+             Keyword.get(
+               changes,
+               :native_request,
+               record.native_authority && record.native_authority.request
+             )
+           ),
+         {:ok, authority} <-
+           ExportAuthority.freeze_cleanup(
+             %{record | native_authority: authority},
+             Keyword.get(changes, :native_cleanup, authority && authority.cleanup)
+           ),
          next =
            struct!(
              record,
-             changes ++
+             Keyword.drop(changes, [:native_request, :native_cleanup]) ++
+               [native_authority: authority] ++
                [version: record.version + 1, updated_at_ms: max(now, record.updated_at_ms)]
            ),
          :ok <- Export.validate(next) do
@@ -96,7 +125,9 @@ defmodule SmolBox.Store.ExportOps do
     end
   end
 
-  def resolve(machine, id, :absent, now) do
+  def resolve(machine, id, observed, now), do: resolve(machine, id, observed, nil, now)
+
+  def resolve(machine, id, :absent, cleanup, now) do
     with %Export{state: state} <- machine.exports[id],
          true <- state in [:unknown, :published],
          {:ok, saved} <-
@@ -106,7 +137,8 @@ defmodule SmolBox.Store.ExportOps do
              state,
              [
                state: if(state == :published, do: :completed, else: :resolved_unknown),
-               resolved_at_ms: now
+               resolved_at_ms: now,
+               native_cleanup: cleanup
              ],
              now
            ) do
@@ -126,7 +158,7 @@ defmodule SmolBox.Store.ExportOps do
     end
   end
 
-  def resolve(machine, id, observed, now) do
+  def resolve(machine, id, observed, cleanup, now) do
     with %Export{state: state} <- machine.exports[id],
          true <- state in [:unknown, :published],
          true <- observed.state == :stopped,
@@ -138,7 +170,8 @@ defmodule SmolBox.Store.ExportOps do
              state,
              [
                state: if(state == :published, do: :completed, else: :resolved_unknown),
-               resolved_at_ms: now
+               resolved_at_ms: now,
+               native_cleanup: cleanup
              ],
              now
            ) do

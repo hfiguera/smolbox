@@ -56,6 +56,9 @@ defmodule SmolBox.Runtime.Exports do
       :ok ->
         dispatch(config, machine, export)
 
+      {:ok, request, worker} ->
+        dispatch(config, machine, export, request, worker)
+
       {:error, error} ->
         advance(config, machine, export, state: :failed, error: error)
 
@@ -69,10 +72,11 @@ defmodule SmolBox.Runtime.Exports do
 
   defp preflight(config, machine, export) do
     with {:ok, worker} <- Machines.worker(config, machine),
+         worker = Target.pin(worker),
          true <- approved?(worker, export.spec),
          %{status: :ready} <- WorkerHealth.observe(worker, config.clock),
          {:ok, observed} <-
-           Backend.inspect_machine(Target.connection(worker), machine.machine_name),
+           Backend.inspect_machine(Target.connection(worker, machine), machine.machine_name),
          true <-
            observed.state == :stopped and
              SmolBox.DiskExpansion.matches?(machine, observed),
@@ -82,23 +86,35 @@ defmodule SmolBox.Runtime.Exports do
              export.spec.destination.credential_ref
            ),
          :ok <- RegistryExport.vacant(export.spec, worker.architecture, token) do
-      :ok
+      qualify(worker, machine)
     else
       {:error, error} -> {:error, %{error | evidence: :not_dispatched}}
       _invalid -> Session.error(:identity_conflict, :export)
     end
   end
 
-  defp dispatch(config, machine, export) do
-    with {:ok, intent} <- advance(config, machine, export, state: :dispatching),
-         {:ok, worker} <- Machines.worker(config, intent) do
+  defp qualify(%{kind: :embedded} = worker, machine) do
+    with {:ok, request} <- Backend.qualify_export(Target.connection(worker, machine)),
+         do: {:ok, request, worker}
+  end
+
+  defp qualify(_worker, _machine), do: :ok
+
+  defp dispatch(config, machine, export, request \\ nil, pinned \\ nil) do
+    changes =
+      if request, do: [state: :dispatching, native_request: request], else: [state: :dispatching]
+
+    with {:ok, intent} <- advance(config, machine, export, changes),
+         {:ok, worker} <- if(pinned, do: {:ok, pinned}, else: Machines.worker(config, intent)) do
       pending = intent.exports[export.spec.id]
 
       # Only the operation itself can attest pre-dispatch rejection. A timeout,
       # lost task or store failure in the outer lease-renewal loop cannot tell
       # whether the HTTP request already reached the worker.
       response =
-        Machines.io(config, intent, fn -> {:operation_result, publish(worker, intent, export)} end)
+        Machines.io(config, intent, fn ->
+          {:operation_result, publish(worker, intent, pending)}
+        end)
 
       case response do
         {:operation_result, result} -> received(config, intent, pending, worker, result)
@@ -116,7 +132,7 @@ defmodule SmolBox.Runtime.Exports do
            ),
          do:
            Backend.export_machine(
-             Target.connection(worker),
+             Target.connection(worker, machine),
              machine.machine_name,
              export.spec,
              token
@@ -147,7 +163,9 @@ defmodule SmolBox.Runtime.Exports do
     result =
       Machines.io(config, machine, fn ->
         with {:ok, worker} <- Machines.worker(config, machine),
+             worker = Target.pin(worker),
              true <- approved?(worker, export.spec),
+             :ok <- acknowledgement(worker, machine, export),
              {:ok, token} <-
                RegistryCredentials.publication(
                  worker.registry_credentials,
@@ -159,7 +177,7 @@ defmodule SmolBox.Runtime.Exports do
                  export.receipt,
                  token,
                  config.clock.now(),
-                 worker.runtime_version
+                 Target.sdk_version(worker)
                ),
              else: (
                false -> Session.error(:unsupported_capability, :export)
@@ -169,7 +187,11 @@ defmodule SmolBox.Runtime.Exports do
 
     case result do
       {:ok, verified} ->
-        advance(config, machine, export, state: :published, result: verified)
+        if SmolBox.Export.validate(%{export | state: :published, result: verified}) == :ok do
+          advance(config, machine, export, state: :published, result: verified)
+        else
+          unknown(config, machine, export, %Error{category: :protocol, operation: :export})
+        end
 
       {:error, error} ->
         unknown(config, machine, export, error)
@@ -178,6 +200,18 @@ defmodule SmolBox.Runtime.Exports do
         unknown(config, machine, export, %Error{category: :protocol, operation: :export})
     end
   end
+
+  defp acknowledgement(%{kind: :embedded} = worker, machine, export) do
+    with {:ok, proof} <- Backend.inspect_export(Target.connection(worker, machine)),
+         true <- proof != nil and proof == export.receipt.native_publication,
+         do: :ok,
+         else: (
+           {:error, _} = error -> error
+           _ -> Session.error(:identity_conflict, :export)
+         )
+  end
+
+  defp acknowledgement(_, _, _), do: :ok
 
   defp unknown(config, machine, export, error),
     do: advance(config, machine, export, state: :unknown, error: %{error | evidence: :unknown})

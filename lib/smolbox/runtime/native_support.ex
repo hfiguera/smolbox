@@ -42,6 +42,7 @@ defmodule SmolBox.Runtime.NativeSupport do
          true <- growth_support?(config, supported),
          true <- source_support?(config, supported),
          true <- checkpoint_source_support?(config, supported),
+         true <- export_support?(config, supported),
          true <- volume_support?(config, supported, adapter),
          true <-
            Enum.all?(required, fn {name, arity} -> function_exported?(adapter, name, arity) end),
@@ -132,6 +133,18 @@ defmodule SmolBox.Runtime.NativeSupport do
               supported[:native_capture_resolutions] == 1 and
               supported[:native_capture_cleanup] == 1 and
               supported[:native_capture_abort_sources] == 1
+
+          _ ->
+            true
+        end
+      end)
+
+  defp export_support?(config, supported),
+    do:
+      Enum.all?(targets(config), fn target ->
+        case Config.sdk_identity(target.native_config) do
+          %{"feature_versions" => %{"exports" => 1}} ->
+            supported[:native_export_histories] == 1 and supported[:managed_exports] == 1
 
           _ ->
             true

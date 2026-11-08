@@ -114,6 +114,8 @@ pub enum Preflight {
 #[serde(deny_unknown_fields)]
 pub struct Limits {
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub exports: Option<Box<crate::ExportLimits>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub volumes: Option<Box<crate::VolumeLimits>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub terminals: Option<Box<crate::TerminalLimits>>,
@@ -155,6 +157,7 @@ pub struct Limits {
 impl Default for Limits {
     fn default() -> Self {
         Self {
+            exports: None,
             volumes: None,
             terminals: None,
             logs: None,
@@ -243,6 +246,9 @@ pub struct LogLimits {
 impl Limits {
     pub fn for_sdk(sdk: &SdkIdentity) -> Self {
         let mut limits = Self::default();
+        if sdk.feature_versions.get("exports") == Some(&1) {
+            limits.exports = Some(Box::default());
+        }
         if sdk.feature_versions.get("volumes") == Some(&1) {
             limits.volumes = Some(Box::default());
         }
@@ -459,6 +465,12 @@ impl SdkIdentity {
         require(
             self.feature_versions.get("terminals") != Some(&1)
                 || self.feature_versions.get("buffered_exec") == Some(&1),
+        )?;
+        require(
+            self.feature_versions.get("exports") != Some(&1)
+                || ["job_resources", "buffered_exec", "compact_creation"]
+                    .iter()
+                    .all(|name| self.feature_versions.get(*name) == Some(&1)),
         )?;
         Ok(())
     }
@@ -1375,6 +1387,32 @@ impl ImageObservation {
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "operation", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Operation {
+    QualifyExport {
+        receipt: Receipt,
+        request: crate::ExportRequest,
+    },
+    AdmitExport {
+        receipt: Receipt,
+        operation_id: String,
+        request: crate::ExportRequest,
+    },
+    ExportMachine {
+        receipt: Receipt,
+        operation_id: String,
+        request: crate::ExportRequest,
+        push_token: RegistryToken,
+    },
+    InspectExport {
+        receipt: Receipt,
+        operation_id: String,
+        request_sha256: String,
+    },
+    CleanupExportStaging {
+        receipt: Receipt,
+        operation_id: String,
+        request_sha256: String,
+        quiesced: bool,
+    },
     QualifyAbortedCaptureSource {
         receipt: Receipt,
         operation_id: String,
@@ -1627,6 +1665,17 @@ impl Operation {
     }
     pub fn sanitized(&self) -> Self {
         match self {
+            Self::ExportMachine {
+                receipt,
+                operation_id,
+                request,
+                ..
+            } => Self::ExportMachine {
+                receipt: receipt.clone(),
+                operation_id: operation_id.clone(),
+                request: request.clone(),
+                push_token: RegistryToken(String::new()),
+            },
             Self::PrepareArtifact {
                 source,
                 credential_ref,
@@ -1688,6 +1737,16 @@ impl Operation {
                 | Self::QualifyOciCreation { .. }
         )
     }
+    pub fn requires_exports(&self) -> bool {
+        matches!(
+            self,
+            Self::QualifyExport { .. }
+                | Self::AdmitExport { .. }
+                | Self::ExportMachine { .. }
+                | Self::InspectExport { .. }
+                | Self::CleanupExportStaging { .. }
+        )
+    }
     pub fn requires_checkpoints(&self) -> bool {
         self.checkpoint_source().is_some()
             || self.checkpointable() == Some(true)
@@ -1743,6 +1802,11 @@ impl Operation {
     }
     pub fn capability(&self) -> Capability {
         match self {
+            Self::QualifyExport { .. }
+            | Self::AdmitExport { .. }
+            | Self::InspectExport { .. }
+            | Self::CleanupExportStaging { .. } => Capability::Inspect,
+            Self::ExportMachine { .. } => Capability::ReadFile,
             Self::InspectCapture { .. }
             | Self::InspectCaptureResolution { .. }
             | Self::ResolveCapture { .. }
@@ -1808,7 +1872,12 @@ impl Operation {
             Self::Create { .. } | Self::InspectCreation { .. } | Self::QualifyCreation { .. } => {
                 None
             }
-            Self::StartOci { receipt, .. }
+            Self::QualifyExport { receipt, .. }
+            | Self::AdmitExport { receipt, .. }
+            | Self::ExportMachine { receipt, .. }
+            | Self::InspectExport { receipt, .. }
+            | Self::CleanupExportStaging { receipt, .. }
+            | Self::StartOci { receipt, .. }
             | Self::InspectCapture { receipt, .. }
             | Self::InspectCaptureResolution { receipt, .. }
             | Self::ResolveCapture { receipt, .. }
@@ -1855,6 +1924,52 @@ impl Operation {
             features.validate()?;
         }
         match self {
+            Self::QualifyExport { receipt, request } => {
+                receipt.validate_for(2)?;
+                require(receipt.material.is_some() && budget_ms <= 30000)?;
+                request.validate()?;
+            }
+            Self::AdmitExport {
+                receipt,
+                operation_id,
+                request,
+            } => {
+                receipt.validate_for(2)?;
+                require(receipt.material.is_some() && budget_ms <= 30000)?;
+                id(operation_id)?;
+                request.validate()?;
+            }
+            Self::ExportMachine {
+                receipt,
+                operation_id,
+                request,
+                push_token,
+            } => {
+                receipt.validate_for(2)?;
+                require(receipt.material.is_some())?;
+                id(operation_id)?;
+                request.validate()?;
+                push_token.validate()?;
+            }
+            Self::InspectExport {
+                receipt,
+                operation_id,
+                request_sha256,
+            }
+            | Self::CleanupExportStaging {
+                receipt,
+                operation_id,
+                request_sha256,
+                ..
+            } => {
+                receipt.validate_for(2)?;
+                require(receipt.material.is_some() && budget_ms <= 30000)?;
+                id(operation_id)?;
+                hex(request_sha256, 64)?;
+                if let Self::CleanupExportStaging { quiesced, .. } = self {
+                    require(*quiesced)?;
+                }
+            }
             Self::StartCheckpointable { receipt } => receipt.validate_for(2)?,
             Self::CheckpointPreflight { receipt } => {
                 receipt.validate_for(2)?;
@@ -2354,6 +2469,16 @@ pub struct MachineCounters {
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "result", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Outcome {
+    Exported {
+        publication: Box<crate::ExportPublication>,
+    },
+    ExportPresence {
+        #[serde(deserialize_with = "required_nullable")]
+        publication: Option<Box<crate::ExportPublication>>,
+    },
+    ExportStagingCleaned {
+        cleanup: Box<crate::ExportStageCleanup>,
+    },
     AbortedCaptureSourceQualified {
         qualification: Box<crate::CaptureAbortSourceQualification>,
     },
@@ -2469,6 +2594,14 @@ pub enum Outcome {
 impl Outcome {
     pub fn validate(&self) -> Result<()> {
         match self {
+            Self::Exported { publication } => publication.validate(),
+            Self::ExportPresence { publication } => {
+                if let Some(publication) = publication {
+                    publication.validate()?;
+                }
+                Ok(())
+            }
+            Self::ExportStagingCleaned { cleanup } => cleanup.validate(),
             Self::Volume { volume } => volume.validate(),
             Self::PreparedArtifact {
                 source, size_bytes, ..
@@ -2654,7 +2787,10 @@ impl Outcome {
         }
         if matches!(
             self,
-            Self::Volume { .. }
+            Self::Exported { .. }
+                | Self::ExportPresence { .. }
+                | Self::ExportStagingCleaned { .. }
+                | Self::Volume { .. }
                 | Self::PreparedArtifact { .. }
                 | Self::Pulled { .. }
                 | Self::Images { .. }

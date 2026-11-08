@@ -460,6 +460,77 @@ fn checkpoint_history(input: &mut dyn Read, manifest: &PackManifest) -> io::Resu
 }
 
 fn validate(input: impl Read, manifest: &PackManifest, resources: Resources) -> io::Result<()> {
+    inspect(input, manifest, resources, false, None, None).map(|_| ())
+}
+
+/// Inspect imported layers without extracting host files or trusting a mutable
+/// SDK cache. The manifest order is independent of the outer archive order.
+pub(crate) fn inspect_container_layers(
+    input: impl Read,
+    manifest: &PackManifest,
+    resources: Resources,
+    budget: &crate::ReadBudget,
+) -> Result<Vec<crate::ImportedContainerLayer>> {
+    budget.check()?;
+    let result = inspect(
+        Budgeted { input, budget },
+        manifest,
+        resources,
+        true,
+        Some(budget),
+        None,
+    );
+    budget.check()?;
+    result.map_err(|_| Error::before(ErrorCode::Validation))
+}
+
+pub(crate) type LayerConsumer<'a> = dyn FnMut(&str, u64, &mut dyn Read) -> io::Result<()> + 'a;
+/// A second pass over an already qualified immutable sidecar. Each raw layer
+/// streams directly to its consumer and is hashed again without a host copy.
+pub(crate) fn stream_container_layers(
+    input: impl Read,
+    manifest: &PackManifest,
+    resources: Resources,
+    budget: &crate::ReadBudget,
+    consume: &mut LayerConsumer<'_>,
+) -> Result<()> {
+    budget.check()?;
+    let result = inspect(
+        Budgeted { input, budget },
+        manifest,
+        resources,
+        true,
+        Some(budget),
+        Some(consume),
+    );
+    budget.check()?;
+    result
+        .map(|_| ())
+        .map_err(|_| Error::before(ErrorCode::Validation))
+}
+
+struct Hashed<R> {
+    input: R,
+    hash: sha2::Sha256,
+}
+impl<R: Read> Read for Hashed<R> {
+    fn read(&mut self, buffer: &mut [u8]) -> io::Result<usize> {
+        use sha2::Digest;
+        let count = self.input.read(buffer)?;
+        self.hash.update(&buffer[..count]);
+        Ok(count)
+    }
+}
+
+fn inspect(
+    input: impl Read,
+    manifest: &PackManifest,
+    resources: Resources,
+    inspect_layers: bool,
+    budget: Option<&crate::ReadBudget>,
+    mut consume: Option<&mut LayerConsumer<'_>>,
+) -> io::Result<Vec<crate::ImportedContainerLayer>> {
+    use sha2::Digest;
     if manifest.assets.agent_rootfs.path != "agent-rootfs.tar" {
         return invalid();
     }
@@ -518,11 +589,18 @@ fn validate(input: impl Read, manifest: &PackManifest, resources: Resources) -> 
     let mut decoder = zstd::stream::read::Decoder::new(input)?;
     // An approved pack cannot request an arbitrarily large decompressor window.
     decoder.window_log_max(23)?;
-    let mut decoded = Capped {
-        input: decoder,
-        remaining: MAX_BYTES,
+    let mut decoded = OptionalBudget {
+        input: Capped {
+            input: decoder,
+            remaining: MAX_BYTES,
+        },
+        budget,
     };
-    let mut stats = Stats::default();
+    let mut stats = Stats {
+        budget: budget.cloned(),
+        ..Stats::default()
+    };
+    let mut layers = BTreeMap::new();
     walk(&mut decoded, &mut stats, &mut |entry, payload, stats| {
         if entry.kind == tar::EntryType::Directory {
             // The SDK collector creates these structural directories even for
@@ -553,6 +631,42 @@ fn validate(input: impl Read, manifest: &PackManifest, resources: Resources) -> 
         }
         match kind {
             AssetKind::Bytes => Ok(()),
+            AssetKind::Tar if inspect_layers && entry.path.starts_with(b"layers/") => {
+                let path = String::from_utf8(entry.path).map_err(|_| bad())?;
+                let digest = path
+                    .strip_prefix("layers/")
+                    .and_then(|s| s.strip_suffix(".tar"))
+                    .ok_or_else(bad)?;
+                let bytes_before = stats.bytes;
+                let entries_before = stats.entries;
+                let mut hashed = Hashed {
+                    input: payload,
+                    hash: sha2::Sha256::new(),
+                };
+                if let Some(consume) = &mut consume {
+                    consume(&path, size, &mut hashed)?;
+                    // Every raw byte, including trailing tar zeros, must have
+                    // been accepted before a layer can become a guest input.
+                    let mut extra = [0; 1];
+                    if hashed.read(&mut extra)? != 0 {
+                        return invalid();
+                    }
+                } else {
+                    walk(&mut hashed, stats, &mut validate_guest_entry)?;
+                }
+                if hex::encode(hashed.hash.finalize()) != digest {
+                    return invalid();
+                }
+                let layer = crate::ImportedContainerLayer {
+                    digest: format!("sha256:{digest}"),
+                    path: path.clone(),
+                    tar_bytes: size,
+                    expanded_bytes: stats.bytes - bytes_before,
+                    entries: stats.entries - entries_before,
+                };
+                layers.insert(path, layer);
+                Ok(())
+            }
             AssetKind::Tar => walk(payload, stats, &mut validate_guest_entry),
             AssetKind::Disk(cap) => validate_disk(payload, size, cap),
         }
@@ -560,7 +674,31 @@ fn validate(input: impl Read, manifest: &PackManifest, resources: Resources) -> 
     if !expected.is_empty() {
         return invalid();
     }
-    Ok(())
+    if inspect_layers {
+        manifest
+            .assets
+            .layers
+            .iter()
+            .map(|layer| layers.remove(&layer.path).ok_or_else(bad))
+            .collect()
+    } else {
+        Ok(Vec::new())
+    }
+}
+
+struct OptionalBudget<'a, R> {
+    input: R,
+    budget: Option<&'a crate::ReadBudget>,
+}
+impl<R: Read> Read for OptionalBudget<'_, R> {
+    fn read(&mut self, buffer: &mut [u8]) -> io::Result<usize> {
+        if let Some(budget) = self.budget {
+            budget
+                .check()
+                .map_err(|_| io::Error::other("imported layer read budget"))?;
+        }
+        self.input.read(buffer)
+    }
 }
 
 fn validate_guest_entry(
@@ -642,6 +780,7 @@ struct Stats {
     bytes: u64,
     // Zero preserves the ordinary pack policy for all existing walkers.
     limit: u64,
+    budget: Option<crate::ReadBudget>,
 }
 
 #[derive(Default)]
@@ -798,6 +937,7 @@ fn walk(
                 index: 0,
                 position: 0,
                 size,
+                budget: stats.budget.clone(),
             };
             visit(entry, &mut sparse, stats)?;
             drain(&mut sparse)?;
@@ -902,9 +1042,17 @@ struct Sparse<'a> {
     index: usize,
     position: u64,
     size: u64,
+    budget: Option<crate::ReadBudget>,
 }
 impl Read for Sparse<'_> {
     fn read(&mut self, buffer: &mut [u8]) -> io::Result<usize> {
+        // A sparse hole produces logical bytes without reading the decoder.
+        // Preserve the budget even while draining such synthesized output.
+        if let Some(budget) = &self.budget {
+            budget
+                .check()
+                .map_err(|_| io::Error::other("imported sparse read budget"))?;
+        }
         if buffer.is_empty() || self.position == self.size {
             return Ok(0);
         }
@@ -989,6 +1137,45 @@ fn invalid<T>() -> io::Result<T> {
 #[cfg(test)]
 pub(crate) mod tests {
     use super::*;
+
+    #[test]
+    fn imported_decompressed_reads_check_budget_even_when_compressed_bytes_are_buffered() {
+        struct ForbiddenRead;
+        impl Read for ForbiddenRead {
+            fn read(&mut self, _: &mut [u8]) -> io::Result<usize> {
+                panic!("decoded read after cancellation")
+            }
+        }
+        let budget = crate::ReadBudget::for_export_work(
+            std::time::Duration::from_secs(30),
+            crate::Cancellation::default(),
+        )
+        .unwrap();
+        let mut decoded = OptionalBudget {
+            input: ForbiddenRead,
+            budget: Some(&budget),
+        };
+        budget.cancel.cancel();
+        assert!(decoded.read(&mut [0; 512]).is_err());
+        let mut sparse = Sparse {
+            input: &mut ForbiddenRead,
+            extents: vec![(4096, 0)],
+            index: 0,
+            position: 0,
+            size: 4096,
+            budget: Some(budget.clone()),
+        };
+        let mut output = [1; 512];
+        assert!(sparse.read(&mut output).is_err());
+        assert_eq!(output, [1; 512]);
+        let (manifest, _, _) = fixture();
+        assert_eq!(
+            inspect_container_layers(io::empty(), &manifest, resources(), &budget)
+                .unwrap_err()
+                .code,
+            ErrorCode::State
+        );
+    }
     use smolvm_pack::format::{AssetEntry, LayerEntry};
 
     fn tar(files: &[(&str, &[u8])]) -> Vec<u8> {

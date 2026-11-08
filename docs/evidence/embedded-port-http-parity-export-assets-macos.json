@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "status": "passed",
+  "scope": "ordinary-local-package-export-asset-layout",
+  "platform": "macos",
+  "architecture": "arm64",
+  "package_manifest_sha256": "0575d3e0941a870cbae5d6104a54882dd0afb529f055353569866c7231383614",
+  "identity": {
+    "engine_version": "0.2.0",
+    "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+    "build_sha256": "ab247ad48ef7a8ef87f666442d55ca5bbd987c2f6ecc90e68f0489926323f654",
+    "assets_sha256": "b5d1e0e2ec5799ed1490f1d134986416bcd66edb2272f5afc1feabe2249bfd7c",
+    "platform": "macos",
+    "architecture": "aarch64"
+  },
+  "sdk_version": "1.22.0",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "export_asset_entries": [
+    {
+      "kind": "file",
+      "path": "agent-rootfs.tar",
+      "sha256": "f797ffeb0288d5300b87004a70eb69575ffb31ebb91a3243e7023098e9de980e",
+      "bytes": 50145280,
+      "mode": 256
+    },
+    {
+      "kind": "file",
+      "path": "lib/libkrun.dylib",
+      "sha256": "03b62510617705307e7ca4fa60c8a499a42ea536bd6aa29a14e2a4ed258384b3",
+      "bytes": 6984032,
+      "mode": 493
+    },
+    {
+      "kind": "file",
+      "path": "lib/libkrunfw.5.dylib",
+      "sha256": "44335384f89f35daaa3bb72345925add9725a5b7fe122d4a9bbb92606294dfcc",
+      "bytes": 14366096,
+      "mode": 493
+    }
+  ],
+  "rootfs_archive": {
+    "files": 404,
+    "symlinks": 389,
+    "directories": 130,
+    "manifest_correspondence_verified": true,
+    "normalized_root_ownership_and_time": true,
+    "readiness_markers_excluded": true
+  },
+  "proof": "package::tests::ordinary_manifest_rootfs_archive_matches_approved_guest_files",
+  "proof_tools_sha256": {
+    "native/rootfs_archive.py": "c8799a24bb92c240abbc8e17d256a699f31d06d4738381e4f4f86afe73faf21e",
+    "native/package.py": "751381fd101df995a3992b5485b091e6b565076addda34513cdc243c77eae12c",
+    "native/smolbox-port/src/package.rs": "b55f4d3aaae7e5e49f1a4722c089cc21a3f9d8eefe6220f6ee610ee1c8d8e464",
+    "native/smolbox-engine/src/export_assets.rs": "8c0b1356983528cbb3e93eee228eaf46b0443d9cf99172ecc2bb56f9737a9f23"
+  },
+  "python_version": "3.14.8",
+  "engine_constructed": false,
+  "vm_started": false,
+  "qualifies_guest_boot": false,
+  "qualifies_export_import": false,
+  "public_export_capability_advertised": false,
+  "historical_qualification_transferred": false,
+  "deliberate_process_interruption": false,
+  "crash_handling_qualified": false,
+  "distribution_approved": false,
+  "limitations": [
+    "Private development package; no registry publication or guest/runtime acceptance.",
+    "Linux alias behavior has deterministic build tests; ordinary Linux package/layout qualification remains pending.",
+    "Kernel/firmware correspondence, distribution signing and source/license delivery remain separate reviews."
+  ]
+}

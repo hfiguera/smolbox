@@ -9,6 +9,7 @@ defmodule SmolBox.Export do
   `:resolved_unknown` records an operator's quiescence decision without claiming
   that publication failed. `:published` and `:completed` have a verified reusable result.
   """
+  alias SmolBox.Embedded.ExportAuthority
   alias SmolBox.{Error, ExportReceipt, ExportResult, ExportSpec, Validation}
   @enforce_keys [:machine, :spec, :fingerprint, :accepted_at_ms, :updated_at_ms, :deadline_ms]
   @derive {Inspect, only: [:machine, :state, :version]}
@@ -18,6 +19,7 @@ defmodule SmolBox.Export do
                 version: 1,
                 receipt: nil,
                 result: nil,
+                native_authority: nil,
                 error: nil,
                 resolved_at_ms: nil
               ]
@@ -42,6 +44,7 @@ defmodule SmolBox.Export do
           state: state(),
           version: pos_integer(),
           receipt: ExportReceipt.t() | nil,
+          native_authority: struct() | nil,
           result: ExportResult.t() | nil,
           error: Error.t() | nil,
           resolved_at_ms: non_neg_integer() | nil
@@ -71,7 +74,7 @@ defmodule SmolBox.Export do
                               [:accepted, :dispatching, :verifying, :published, :unknown]),
          true <- record.receipt == nil or ExportReceipt.validate(record.receipt) == :ok,
          true <- result?(record),
-         true <- SmolBox.ExecutionValidation.error?(record.error),
+         true <- Error.valid?(record.error),
          true <- record.resolved_at_ms == nil or Validation.timestamp?(record.resolved_at_ms),
          true <-
            record.state not in [:resolved_unknown, :completed] or record.resolved_at_ms != nil,
@@ -79,7 +82,7 @@ defmodule SmolBox.Export do
            record.state not in [:accepted, :dispatching, :failed, :cancelled] or
              record.receipt == nil,
          true <- record.state != :verifying or record.receipt != nil do
-      :ok
+      if ExportAuthority.valid?(record), do: :ok, else: invalid()
     else
       _invalid -> invalid()
     end
@@ -96,6 +99,7 @@ defmodule SmolBox.Export do
       Enum.all?(machine.exports, fn {id, record} ->
         validate(record) == :ok and record.spec.id == id and
           record.machine == {machine.scope, machine.id} and
+          ExportAuthority.entry_valid?(record, machine) and
           (terminal?(record) or machine.active_export == id)
       end) and active?(machine)
   end

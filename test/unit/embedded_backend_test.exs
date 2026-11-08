@@ -36,6 +36,22 @@ defmodule SmolBox.EmbeddedBackendTest do
     refute HTTP.supports_operation?(nil, :cleanup_capture)
   end
 
+  test "export controls and cached approval lookup remain gated on current packages", context do
+    for operation <- [:qualify_export, :inspect_export, :cleanup_export, :export_machine],
+        do: refute(Embedded.supports_operation?(context.reference.context, operation))
+
+    assert {:error, %{evidence: :not_dispatched}} = Backend.qualify_export(context.reference)
+    assert {:error, %{evidence: :not_dispatched}} = Backend.inspect_export(context.reference)
+
+    assert {:error, %{evidence: :not_dispatched}} =
+             Backend.cleanup_export(context.reference, nil, true)
+
+    {:ok, health} = Port.health(context.owner)
+    before = Package.received(context.config)
+    assert {:error, _} = Port.export_approval(context.owner, "unapproved", health.epoch, 1000)
+    assert Package.received(context.config) == before
+  end
+
   setup do
     config = Package.create(backend: true)
     on_exit(fn -> File.rm_rf!(config.package_path) end)

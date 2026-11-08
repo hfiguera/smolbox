@@ -17,6 +17,7 @@ defmodule SmolBox.Backend.EmbeddedContext do
     :epoch,
     growth: nil,
     capture: nil,
+    export: nil,
     history: nil,
     volume: nil,
     managed_machine: nil,
@@ -43,6 +44,7 @@ defmodule SmolBox.Backend.EmbeddedContext do
              spec: nil,
              growth: nil,
              capture: nil,
+             export: nil,
              history: nil,
              managed_machine: nil
          }},
@@ -67,6 +69,7 @@ defmodule SmolBox.Backend.EmbeddedContext do
            identity: current_identity(record),
            growth: NativeGrowth.intent(record),
            capture: capture_intent(record),
+           export: export_intent(record),
            history: material_history(record),
            profile: record.spec.profile,
            spec: record.spec,
@@ -83,6 +86,11 @@ defmodule SmolBox.Backend.EmbeddedContext do
        do: captures[id]
 
   defp capture_intent(_), do: nil
+
+  defp export_intent(%ManagedMachine{active_export: id, exports: exports}) when not is_nil(id),
+    do: exports[id]
+
+  defp export_intent(_), do: nil
 
   def scoped?(%__MODULE__{} = context),
     do:
@@ -105,7 +113,7 @@ defmodule SmolBox.Backend.EmbeddedContext do
     do:
       volume_approved?(volume, context.config) and
         Enum.all?(
-          ~w(assignment identity profile name spec growth capture history managed_machine)a,
+          ~w(assignment identity profile name spec growth capture export history managed_machine)a,
           &(Map.fetch!(context, &1) == nil)
         )
 

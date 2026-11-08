@@ -31,6 +31,7 @@ defmodule SmolBox.DurableHost.BackendStore do
       CodecNativeCaptureResolutions,
       CodecNativeCaptures,
       CodecNativeCheckpoints,
+      CodecNativeExports,
       CodecNativeSources
     }
 
@@ -54,6 +55,7 @@ defmodule SmolBox.DurableHost.BackendStore do
       |> growth_capabilities()
       |> source_capabilities()
       |> checkpoint_capabilities()
+      |> export_capabilities()
     end
 
     if Code.ensure_loaded?(CodecMaterial) and
@@ -170,6 +172,14 @@ defmodule SmolBox.DurableHost.BackendStore do
           )
     else
       defp capture_abort_source_capabilities(capabilities), do: capabilities
+    end
+
+    if Code.ensure_loaded?(CodecNativeExports) and
+         function_exported?(CodecNativeExports, :reader, 0) do
+      defp export_capabilities(capabilities),
+        do: Map.put(capabilities, :native_export_histories, CodecNativeExports.reader())
+    else
+      defp export_capabilities(capabilities), do: capabilities
     end
 
     def reserve_execution(record, worker, name, lease, capacity, used, now, assignment),

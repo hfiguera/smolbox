@@ -255,6 +255,24 @@ defmodule SmolBox.Runtime.NativeRecovery do
     end
   end
 
+  defp persist_machine(config, %{active_export: id} = record, _observed) when not is_nil(id) do
+    export = record.exports[id]
+
+    if export.state in [:dispatching, :verifying] do
+      MachineSession.store(config, :export_advance, [
+        ManagedMachine.key(record),
+        Session.guard(record),
+        id,
+        export.state,
+        [state: :unknown, error: %{unknown() | operation: :export}],
+        config.clock.now()
+      ])
+    else
+      # Observation supplies neither registry completion nor cleanup authority.
+      MachineSession.write(config, record, next_due_at_ms: record.next_due_at_ms)
+    end
+  end
+
   defp persist_machine(config, record, observed),
     do: MachineSession.write(config, record, machine_changes(record, observed))
 

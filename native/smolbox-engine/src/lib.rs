@@ -39,6 +39,49 @@ mod disk_geometry;
 mod domain;
 mod epoch;
 mod exec;
+mod export_assets;
+pub use export_assets::{
+    ApprovedExportAsset, ApprovedExportAssets, EXPORT_ASSET_FILE_BYTES, EXPORT_ASSET_TOTAL_BYTES,
+};
+mod export_publication;
+pub use export_publication::{
+    ApprovedExportDestination, ExportPublication, ExportPublicationIdentity, PublishedExport,
+    RegistryPublishCredential, EXPORT_METADATA_BYTES, EXPORT_REGISTRY_REQUESTS,
+    EXPORT_UPLOAD_CHUNK_BYTES,
+};
+mod export_pack;
+pub use export_pack::PackedExport;
+mod export_bootstrap;
+mod export_container;
+pub use export_bootstrap::{
+    run_container_conversion, ContainerConversionInput, ContainerConversionIo,
+};
+mod export_stream;
+pub use export_stream::{stream_container_layer, ContainerLayerIo};
+mod export_disks;
+pub use export_container::{
+    ContainerExportIntent, ContainerExportPlan, ContainerExportScratch,
+    InitializedContainerStorage, PreparedContainerExport,
+};
+mod export_conversion;
+mod export_import;
+pub use export_import::{ImportedContainerLayer, QualifiedImportedContainerExport};
+mod export_coordinator;
+pub use export_conversion::{
+    ExportConversionBudget, ExportConversionResources, ImportedConversionAllowance,
+};
+mod export_retention;
+mod export_runtime;
+pub use export_disks::{
+    ExportDiskDigest, ExportDiskKind, MaterializedExportDisks, PreparedExportDisks,
+};
+pub use export_retention::{CollectedContainerConversion, RetainedConversionStorage};
+mod export_source;
+mod export_staging;
+pub use export_source::{ExportSourceMode, QualifiedExportSource};
+pub use export_staging::{
+    ExportStageCleanup, ExportStagedFile, EXPORT_RECORDS, EXPORT_RECORD_BYTES,
+};
 mod files;
 mod gate;
 mod growth;
@@ -100,8 +143,8 @@ mod sdk_compat;
 pub use jobs::{
     JOB_CHECKPOINT_MATERIAL_BYTES, JOB_CHECKPOINT_METADATA_BYTES, JOB_CHECKPOINT_STAGING_BYTES,
     JOB_CHILDREN, JOB_CONTROL_HEADROOM, JOB_CONTROL_METADATA_BYTES, JOB_CONTROL_SLOTS,
-    JOB_DESCRIPTORS, JOB_MATERIAL_CONTROL_METADATA_BYTES, JOB_METADATA_BYTES,
-    JOB_REGISTRY_STAGING_BYTES, JOB_STAGING_BYTES, JOB_WORK_SLOTS,
+    JOB_DESCRIPTORS, JOB_EXPORT_STAGING_BYTES, JOB_MATERIAL_CONTROL_METADATA_BYTES,
+    JOB_METADATA_BYTES, JOB_REGISTRY_STAGING_BYTES, JOB_STAGING_BYTES, JOB_WORK_SLOTS,
 };
 mod transfer_supervisor;
 mod transfer_worker;

@@ -11,6 +11,7 @@ defmodule SmolBox.Embedded.Port do
     Config,
     CreationFeatures,
     CreationPayload,
+    ExportContract,
     Frame,
     ImageContract,
     JSON,
@@ -92,6 +93,13 @@ defmodule SmolBox.Embedded.Port do
   @impl true
   def health(server, timeout), do: call(server, :health, timeout)
   @impl true
+  def export_approval(server, id, epoch, timeout) do
+    if Shape.id?(id) and Shape.hex?(epoch, 32) and Validation.integer?(timeout, 1, 30_000),
+      do: call(server, {:export_approval, id, epoch}, timeout),
+      else: failure(:validation)
+  end
+
+  @impl true
   def submit(server, request, budget, observer, epoch, timeout) do
     if Budget.valid?(budget) and request_shape?(request, budget.timeout_ms) and is_pid(observer) and
          Shape.hex?(epoch, 32),
@@ -142,6 +150,7 @@ defmodule SmolBox.Embedded.Port do
         preparing: nil,
         directory: nil,
         cleanup_watcher: Launch.watch(self()),
+        export_approvals: [],
         frame: %Frame{},
         channel: nil,
         protocol_major: Config.protocol_major(config),
@@ -184,6 +193,22 @@ defmodule SmolBox.Embedded.Port do
           protocol_major: if(state.channel, do: state.channel.major),
           epoch: if(state.channel, do: state.channel.epoch)
         }}, state}
+
+  def handle_call({:export_approval, id, epoch}, _from, state) do
+    with true <- state.status == :ready and state.channel != nil and state.channel.epoch == epoch,
+         true <- Features.supports?(state.config, :exports),
+         approval when not is_nil(approval) <-
+           Enum.find(state.export_approvals, &(&1["id"] == id)) do
+      {:reply,
+       {:ok,
+        Map.take(
+          approval,
+          ~w(id destination_sha256 max_artifact_bytes max_staging_bytes conversion_resources)
+        )}, state}
+    else
+      _ -> {:reply, failure(:unsupported_capability), state}
+    end
+  end
 
   def handle_call({:activate, binding}, _from, %{status: :reconciling} = state) do
     if binding == Config.domain_binding(state.config),
@@ -337,6 +362,7 @@ defmodule SmolBox.Embedded.Port do
              %{
                state
                | port: port,
+                 export_approvals: prepared.export_approvals,
                  protocol_major: prepared.protocol_major,
                  protocol_minor: prepared.protocol_minor,
                  status: :handshaking
@@ -442,7 +468,7 @@ defmodule SmolBox.Embedded.Port do
       map_size(state.records) >= state.config.limits.in_flight ->
         failure(:admission_exhausted)
 
-      not approved?(state.config, operation) ->
+      not operation_available?(state, operation) ->
         failure(:unsupported_capability)
 
       state.upload_reserved + Map.get(operation, "total_bytes", 0) >
@@ -453,6 +479,11 @@ defmodule SmolBox.Embedded.Port do
         register(state, operation, budget, observer, caller, remaining)
     end
   end
+
+  defp operation_available?(state, operation),
+    do:
+      approved?(state.config, operation) and
+        ExportContract.approved_cached?(state.export_approvals, operation)
 
   defp admission_status?(state, operation),
     do: state.status in [:ready, :reconciling] or quarantined_control?(state, operation)
@@ -541,6 +572,10 @@ defmodule SmolBox.Embedded.Port do
     do:
       CheckpointContract.opt_in_approved?(config, Map.get(request, "create", request)) and
         operation_approved?(config, request)
+
+  defp operation_approved?(config, %{"operation" => name})
+       when name in ~w(qualify_export admit_export export_machine inspect_export cleanup_export_staging),
+       do: Features.supports?(config, :exports)
 
   defp operation_approved?(config, %{"operation" => operation, "create" => create})
        when operation in ~w(create inspect_creation) do

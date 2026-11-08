@@ -1,4 +1,6 @@
 mod adapter;
+#[cfg(test)]
+mod ordinary_export;
 mod output;
 mod package;
 mod runtime;
@@ -126,6 +128,16 @@ fn run() -> Result<(), ()> {
     engine
         .prepare_templates(verified.templates, &config.package_manifest_sha256)
         .map_err(|_| ())?;
+    if let Some(assets) = verified.export_assets {
+        let budget = smolbox_engine::ReadBudget::for_export_work(
+            std::time::Duration::from_secs(30),
+            smolbox_engine::Cancellation::default(),
+        )
+        .map_err(|_| ())?;
+        engine
+            .prepare_export_assets(assets, &config.package_manifest_sha256, &budget)
+            .map_err(|_| ())?;
+    }
     let hello = wire::Hello {
         major: wire::PARITY_PROTOCOL_MAJOR,
         minor: wire::PARITY_PROTOCOL_MINOR,

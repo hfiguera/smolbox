@@ -149,6 +149,14 @@ defmodule SmolBox.Store.Codec do
   writer before advertising native_capture_abort_sources: 1; older envelopes
   reject the new field even when nil. Records without qualification retain v26
   or their earlier compatible envelopes.
+
+  V28 stores native export histories with frozen source authority, immutable
+  bounded dispatch requests, correlated publication acknowledgements and distinct
+  explicit cleanup evidence. Deploy the reader and guarded export transactions
+  before advertising native_export_histories: 1. Older envelopes reject the new
+  fields even when nil. HTTP export histories preserve v11 bytes; native records
+  without exports retain their earlier selected envelope. Registry verification
+  and staging cleanup remain separate from native publication acknowledgement.
   """
 
   alias SmolBox.{Error, Execution, ExecutionFeatures}
@@ -169,6 +177,7 @@ defmodule SmolBox.Store.Codec do
     CodecNativeCaptureResolutions,
     CodecNativeCaptures,
     CodecNativeCheckpoints,
+    CodecNativeExports,
     CodecNativeMounts,
     CodecNativeSources,
     CodecNativeVolumes,
@@ -179,6 +188,7 @@ defmodule SmolBox.Store.Codec do
   }
 
   @max_bytes 16_777_216
+  @native_exports_prefix "smolbox-record-v28\0"
   @native_prefix "smolbox-record-v16\0"
   @material_prefix "smolbox-record-v17\0"
   @growth_prefix "smolbox-record-v18\0"
@@ -216,6 +226,9 @@ defmodule SmolBox.Store.Codec do
     SmolBox.Embedded.CaptureResolutionTransition,
     SmolBox.Embedded.CaptureStagingCleanupReceipt,
     SmolBox.Embedded.NativeCaptureCleanup,
+    SmolBox.Embedded.ExportAuthority,
+    SmolBox.Embedded.ExportPublication,
+    SmolBox.Embedded.ExportStageCleanup,
     SmolBox.Embedded.CaptureAbortSourceQualification,
     SmolBox.Embedded.VolumeAuthority,
     SmolBox.Embedded.VolumeAttachment,
@@ -270,6 +283,9 @@ defmodule SmolBox.Store.Codec do
 
   def encode(%{spec: %{profile: %SmolBox.Profile{} = profile}} = record) do
     cond do
+      CodecNativeExports.required?(record) ->
+        encode_native_exports(record)
+
       CodecNativeCaptureAbortSources.required?(record) ->
         encode_native_capture_abort_sources(record)
 
@@ -348,6 +364,10 @@ defmodule SmolBox.Store.Codec do
   @spec decode(binary()) ::
           {:ok, Execution.t() | SmolBox.ManagedMachine.t() | SmolBox.Volume.t()}
           | {:error, Error.t()}
+  def decode(<<@native_exports_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_native_exports(bytes)
+
   def decode(<<@native_capture_abort_sources_prefix, 131, tag, _rest::binary>> = bytes)
       when tag != 80 and byte_size(bytes) <= @max_bytes,
       do: decode_native_capture_abort_sources(bytes)
@@ -451,9 +471,31 @@ defmodule SmolBox.Store.Codec do
     {CodecNativeCaptures.upgrade(record), used}
   end
 
+  defp encode_native_exports(record) do
+    with :ok <- validate_extended(record) do
+      bytes = @native_exports_prefix <> :erlang.term_to_binary(record)
+      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
+    end
+  end
+
+  defp decode_native_exports(<<@native_exports_prefix, payload::binary>>) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <- used == byte_size(payload) and CodecNativeExports.required?(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
   defp encode_native_capture_abort_sources(record) do
     with :ok <- validate_extended(record) do
-      bytes = @native_capture_abort_sources_prefix <> :erlang.term_to_binary(record)
+      bytes =
+        @native_capture_abort_sources_prefix <>
+          :erlang.term_to_binary(CodecNativeExports.strip(record))
+
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
   end
@@ -464,6 +506,7 @@ defmodule SmolBox.Store.Codec do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
     with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         record = CodecNativeExports.upgrade(record),
          true <- used == byte_size(payload) and CodecNativeCaptureAbortSources.required?(record),
          :ok <- validate_extended(record),
          do: {:ok, record},
