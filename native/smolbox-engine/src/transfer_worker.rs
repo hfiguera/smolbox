@@ -28,6 +28,10 @@ pub(crate) enum Kind {
         metadata: Blob,
         expected: crate::capture_worker::Expected,
     },
+    BranchPrepare {
+        metadata: Blob,
+        expected: crate::branch_worker::Expected,
+    },
     Read,
     Bootstrap {
         metadata: Blob,
@@ -138,6 +142,7 @@ impl Request {
         | Kind::Background { metadata }
         | Kind::Streaming { metadata }
         | Kind::Capture { metadata, .. }
+        | Kind::BranchPrepare { metadata, .. }
         | Kind::CheckpointInstall { metadata, .. }
         | Kind::CheckpointMaterialize { metadata, .. }
         | Kind::Grow { metadata, .. }
@@ -154,6 +159,8 @@ impl Request {
                         crate::bootstrap::METADATA_BYTES
                     } else if matches!(self.kind, Kind::Pull { .. }) {
                         crate::image_pull::METADATA_BYTES
+                    } else if matches!(self.kind, Kind::BranchPrepare { .. }) {
+                        crate::branch_worker::METADATA_BYTES
                     } else if matches!(self.kind, Kind::Capture { .. }) {
                         crate::capture_worker::METADATA_BYTES
                     } else if matches!(self.kind, Kind::CheckpointInstall { .. }) {
@@ -204,6 +211,12 @@ impl Request {
                 return Err(Error::before(ErrorCode::Validation));
             }
         }
+        if let Kind::BranchPrepare { expected, .. } = &self.kind {
+            expected.validate()?;
+            if self.max_bytes != crate::branch_worker::OUTPUT_BYTES {
+                return Err(Error::before(ErrorCode::Validation));
+            }
+        }
         if let Kind::Capture { expected, .. } = &self.kind {
             expected.validate()?;
             if self.max_bytes != 1 {
@@ -245,6 +258,7 @@ impl Request {
             | Kind::Background { .. }
             | Kind::Streaming { .. }
             | Kind::Capture { .. }
+            | Kind::BranchPrepare { .. }
             | Kind::CheckpointInstall { .. }
             | Kind::CheckpointMaterialize { .. }
             | Kind::Grow { .. } => None,
@@ -304,6 +318,7 @@ impl Request {
                 | Kind::Background { .. }
                 | Kind::Streaming { .. }
                 | Kind::Capture { .. }
+                | Kind::BranchPrepare { .. }
                 | Kind::CheckpointInstall { .. }
                 | Kind::CheckpointMaterialize { .. }
                 | Kind::Grow { .. }
@@ -326,6 +341,7 @@ impl Request {
                 | Kind::Background { .. }
                 | Kind::Streaming { .. }
                 | Kind::Capture { .. }
+                | Kind::BranchPrepare { .. }
                 | Kind::CheckpointInstall { .. }
                 | Kind::CheckpointMaterialize { .. }
                 | Kind::Grow { .. } => metadata.len() != 0,
@@ -346,6 +362,9 @@ pub(crate) enum Event {
     },
     Captured {
         proof: crate::capture_worker::Proof,
+    },
+    BranchPrepared {
+        proof: crate::branch_worker::Proof,
     },
     StreamOutput {
         stderr: bool,
@@ -513,6 +532,8 @@ pub(crate) struct Evidence {
     conversion: Option<crate::export_bootstrap::Expected>,
     pub captured: Option<crate::capture_worker::Proof>,
     capture: Option<crate::capture_worker::Expected>,
+    pub branch_prepared: Option<crate::branch_worker::Proof>,
+    branch: Option<crate::branch_worker::Expected>,
     pub stream: Option<crate::CommandOutcome>,
     pub command: Option<CommandProof>,
     pub launched: Option<u32>,
@@ -548,6 +569,11 @@ impl Evidence {
             converted: None,
             conversion: match &request.kind {
                 Kind::Conversion { expected, .. } => Some(expected.clone()),
+                _ => None,
+            },
+            branch_prepared: None,
+            branch: match &request.kind {
+                Kind::BranchPrepare { expected, .. } => Some(expected.clone()),
                 _ => None,
             },
             captured: None,
@@ -601,6 +627,7 @@ impl Evidence {
                 | Kind::Background { .. }
                 | Kind::Streaming { .. }
                 | Kind::Capture { .. }
+                | Kind::BranchPrepare { .. }
                 | Kind::CheckpointInstall { .. }
                 | Kind::CheckpointMaterialize { .. }
                 | Kind::Grow { .. } => None,
@@ -721,6 +748,7 @@ impl Evidence {
                     && self.materialize.is_none()
                     && self.install.is_none()
                     && self.capture.is_none()
+                    && self.branch.is_none()
                     && self.bootstrap.is_none()
                     && self.pull.is_none()
                     && !self.images
@@ -738,6 +766,7 @@ impl Evidence {
                     && self.materialize.is_none()
                     && self.install.is_none()
                     && self.capture.is_none()
+                    && self.branch.is_none()
                     && self.bootstrap.is_none()
                     && self.pull.is_none()
                     && !self.images
@@ -762,6 +791,7 @@ impl Evidence {
                         && self.materialize.is_none()
                         && self.install.is_none()
                         && self.capture.is_none()
+                        && self.branch.is_none()
                         && self.pull.is_none()
                         && self.bootstrap.is_none())
                         || bytes == 0) =>
@@ -775,6 +805,7 @@ impl Evidence {
                     && self.materialize.is_none()
                     && self.install.is_none()
                     && self.capture.is_none()
+                    && self.branch.is_none()
                     && self.bootstrap.is_none()
                     && self.pull.is_none()
                     && self.ready
@@ -805,6 +836,18 @@ impl Evidence {
                     stderr,
                 });
                 self.limited = limited;
+            }
+            Event::BranchPrepared { proof }
+                if self.ready
+                    && self
+                        .branch
+                        .as_ref()
+                        .is_some_and(|expected| proof.matches(expected)) =>
+            {
+                self.observed_bytes = proof.bytes;
+                self.branch_prepared = Some(proof);
+                self.acknowledged = true;
+                self.terminal = true;
             }
             Event::Captured { proof }
                 if self.ready
@@ -947,6 +990,14 @@ pub fn run_file_worker() -> Result<()> {
             Err(_) => Event::Failed { bytes: 0 },
         });
     }
+    if let Kind::BranchPrepare { metadata, expected } = &request.kind {
+        return writer.event(
+            match crate::branch_worker::run(&request, metadata, expected) {
+                Ok(proof) => Event::BranchPrepared { proof },
+                Err(_) => Event::Failed { bytes: 0 },
+            },
+        );
+    }
     if let Kind::Capture { metadata, expected } = &request.kind {
         return writer.event(
             match crate::capture_worker::run(&request, metadata, expected) {
@@ -1034,6 +1085,7 @@ pub fn run_file_worker() -> Result<()> {
                     | Kind::Background { .. }
                     | Kind::Streaming { .. }
                     | Kind::Capture { .. }
+                    | Kind::BranchPrepare { .. }
                     | Kind::CheckpointInstall { .. }
                     | Kind::CheckpointMaterialize { .. }
                     | Kind::Grow { .. } => {
@@ -1056,6 +1108,84 @@ pub fn run_file_worker() -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn branch_preparation_requires_credited_distinct_proof_and_rejects_file_ack_or_replay() {
+        let expected = crate::branch_worker::Expected {
+            metadata_sha256: "a".repeat(64),
+            operation_id: "branch".into(),
+            request_sha256: "b".repeat(64),
+        };
+        let mut query = request(Kind::BranchPrepare {
+            metadata: Blob {
+                path: "/private/branch-meta".into(),
+                device: 1,
+                inode: 3,
+                bytes: 1,
+            },
+            expected: expected.clone(),
+        });
+        query.max_bytes = crate::branch_worker::OUTPUT_BYTES;
+        query.validate().unwrap();
+        let proof = crate::branch_worker::Proof {
+            expected: expected.clone(),
+            bytes: 100,
+            sha256: "c".repeat(64),
+        };
+        let mut evidence = Evidence::new(&query);
+        assert!(evidence
+            .event(frame(
+                0,
+                Event::BranchPrepared {
+                    proof: proof.clone()
+                }
+            ))
+            .is_err());
+        evidence.event(frame(0, Event::Ready)).unwrap();
+        for event in [
+            Event::Progress { bytes: 1 },
+            Event::Acknowledged { bytes: 1 },
+            Event::Limited { bytes: 1 },
+        ] {
+            assert!(evidence.event(frame(1, event)).is_err());
+        }
+        let mut crossed = proof.clone();
+        crossed.expected.request_sha256 = "d".repeat(64);
+        assert!(evidence
+            .event(frame(1, Event::BranchPrepared { proof: crossed }))
+            .is_err());
+        evidence
+            .event(frame(
+                1,
+                Event::BranchPrepared {
+                    proof: proof.clone(),
+                },
+            ))
+            .unwrap();
+        assert!(evidence.acknowledged && evidence.branch_prepared.is_some());
+        assert_eq!(evidence.observed_bytes, 100);
+        assert!(evidence
+            .event(frame(
+                2,
+                Event::BranchPrepared {
+                    proof: proof.clone()
+                }
+            ))
+            .is_err());
+        let mut retired = Evidence::new(&query);
+        retired.event(frame(0, Event::Ready)).unwrap();
+        retired.retire();
+        assert!(retired
+            .event(frame(
+                1,
+                Event::BranchPrepared {
+                    proof: proof.clone()
+                }
+            ))
+            .is_err());
+        let mut too_large = proof;
+        too_large.bytes = crate::branch_worker::OUTPUT_BYTES + 1;
+        assert!(!too_large.matches(&expected));
+    }
 
     #[test]
     fn conversion_requires_exact_small_terminal_proof_and_rejects_generic_or_retired_events() {

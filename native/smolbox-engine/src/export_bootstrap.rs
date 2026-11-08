@@ -548,6 +548,22 @@ pub(crate) mod tests {
         files: Vec<(String, Vec<u8>)>,
         fail_upload: bool,
     ) -> std::thread::JoinHandle<Vec<AgentRequest>> {
+        imported_peer_with_deadline(listener, files, fail_upload, None)
+    }
+    pub(crate) fn imported_peer_until(
+        listener: UnixListener,
+        files: Vec<(String, Vec<u8>)>,
+        fail_upload: bool,
+        deadline: Instant,
+    ) -> std::thread::JoinHandle<Vec<AgentRequest>> {
+        imported_peer_with_deadline(listener, files, fail_upload, Some(deadline))
+    }
+    fn imported_peer_with_deadline(
+        listener: UnixListener,
+        files: Vec<(String, Vec<u8>)>,
+        fail_upload: bool,
+        operation_deadline: Option<Instant>,
+    ) -> std::thread::JoinHandle<Vec<AgentRequest>> {
         std::thread::spawn(move || {
             listener.set_nonblocking(true).unwrap();
             let mut requests = Vec::new();
@@ -563,7 +579,8 @@ pub(crate) mod tests {
                 3 + 2 * expected.len()
             };
             for _ in 0..connection_count {
-                let deadline = Instant::now() + Duration::from_secs(5);
+                let deadline =
+                    operation_deadline.unwrap_or_else(|| Instant::now() + Duration::from_secs(5));
                 let (mut peer, _) = loop {
                     match listener.accept() {
                         Ok(peer) => break peer,
@@ -790,11 +807,26 @@ pub(crate) mod tests {
         listener: UnixListener,
         responses: Vec<Vec<Vec<u8>>>,
     ) -> std::thread::JoinHandle<Vec<AgentRequest>> {
+        peer_with_deadline(listener, responses, None)
+    }
+    pub(crate) fn peer_until(
+        listener: UnixListener,
+        responses: Vec<Vec<Vec<u8>>>,
+        deadline: Instant,
+    ) -> std::thread::JoinHandle<Vec<AgentRequest>> {
+        peer_with_deadline(listener, responses, Some(deadline))
+    }
+    fn peer_with_deadline(
+        listener: UnixListener,
+        responses: Vec<Vec<Vec<u8>>>,
+        operation_deadline: Option<Instant>,
+    ) -> std::thread::JoinHandle<Vec<AgentRequest>> {
         std::thread::spawn(move || {
             listener.set_nonblocking(true).unwrap();
             let mut requests = Vec::new();
             for frames in responses {
-                let until = Instant::now() + Duration::from_secs(3);
+                let until =
+                    operation_deadline.unwrap_or_else(|| Instant::now() + Duration::from_secs(3));
                 let mut socket = loop {
                     match listener.accept() {
                         Ok((socket, _)) => break socket,
@@ -802,7 +834,7 @@ pub(crate) mod tests {
                             if e.kind() == std::io::ErrorKind::WouldBlock
                                 && Instant::now() < until =>
                         {
-                            std::thread::yield_now()
+                            std::thread::sleep(Duration::from_millis(2))
                         }
                         Err(e) => panic!("loopback accept: {e}"),
                     }

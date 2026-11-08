@@ -1,6 +1,8 @@
 defmodule SmolBox.Embedded.Protocol do
   @moduledoc false
   alias SmolBox.Embedded.{
+    BranchCompletion,
+    BranchReleaseTransition,
     CaptureAbortSourceQualification,
     CaptureResolutionTransition,
     CaptureStagingCleanupReceipt,
@@ -361,6 +363,22 @@ defmodule SmolBox.Embedded.Protocol do
         match?({:ok, _bytes}, Shape.chunk(event["data_base64"]))
 
   defp outcome?(%{"result" => "terminal"} = outcome, 2), do: TerminalContract.outcome?(outcome)
+
+  defp outcome?(%{"result" => "branch_created", "completion" => proof} = outcome, 2),
+    do: Shape.keys?(outcome, ~w(result completion)) and BranchCompletion.wire?(proof)
+
+  defp outcome?(%{"result" => kind, "transition" => proof} = outcome, 2)
+       when kind in ~w(held_branch_released held_branch_release_presence),
+       do:
+         Shape.keys?(outcome, ~w(result transition)) and
+           ((kind == "held_branch_release_presence" and proof == nil) or
+              (BranchReleaseTransition.valid?(proof) and
+                 proof["change"]["mode"] == "explicit"))
+
+  defp outcome?(%{"result" => "branch_completion_presence", "completion" => proof} = outcome, 2),
+    do:
+      Shape.keys?(outcome, ~w(result completion)) and
+        (proof == nil or BranchCompletion.wire?(proof))
 
   defp outcome?(
          %{"result" => kind, "transition" => transition, "observation" => observation} =

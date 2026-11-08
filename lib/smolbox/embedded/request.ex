@@ -1,10 +1,12 @@
 defmodule SmolBox.Embedded.Request do
   @moduledoc false
   alias SmolBox.Embedded.{
+    BranchRequest,
     CaptureTransition,
     ExportContract,
     CheckpointContract,
     CreationFeatures,
+    HeldBranchReleaseRequest,
     ImageContract,
     MountContract,
     NativeSource,
@@ -23,7 +25,7 @@ defmodule SmolBox.Embedded.Request do
 
   def observation?(%{"operation" => name}),
     do:
-      name in ~w(health capacity metrics readiness list measurements inspect_export inspect_growth inspect_capture inspect_capture_resolution inspect_oci_creation inspect_registry_creation inspect_checkpoint_creation checkpoint_preflight)
+      name in ~w(health capacity metrics readiness list measurements inspect_export inspect_growth inspect_capture inspect_capture_resolution inspect_oci_creation inspect_registry_creation inspect_checkpoint_creation checkpoint_preflight inspect_branch_completion qualify_held_branch_release)
 
   def observation?(_request), do: false
 
@@ -50,7 +52,7 @@ defmodule SmolBox.Embedded.Request do
 
   def reconciliation?(%{"operation" => name}),
     do:
-      name in ~w(inspect_export inspect inspect_creation inspect_oci_creation inspect_registry_creation inspect_checkpoint_creation inspect_growth inspect_capture inspect_capture_resolution qualify_growth)
+      name in ~w(inspect_export inspect inspect_creation inspect_oci_creation inspect_registry_creation inspect_checkpoint_creation inspect_growth inspect_capture inspect_capture_resolution qualify_growth inspect_branch_completion qualify_held_branch_release)
 
   def reconciliation?(_request), do: false
 
@@ -60,6 +62,12 @@ defmodule SmolBox.Embedded.Request do
   end
 
   def command_valid?(command), do: command?(command)
+
+  def receipt(%{"operation" => name, "request" => request})
+      when name in ~w(create_branch inspect_branch_completion release_held_branch qualify_held_branch_release),
+      do: request["source"]
+
+  def receipt(operation), do: operation["receipt"]
 
   def buffered_command_valid?(command) do
     Shape.keys?(command, ~w(argv env workdir user stdin max_output_bytes)) and
@@ -87,6 +95,20 @@ defmodule SmolBox.Embedded.Request do
         request[key] != nil and request[key] > previous[key]
       end)
   end
+
+  defp operation?(%{"operation" => name} = operation, budget, 2)
+       when name in ~w(release_held_branch qualify_held_branch_release),
+       do:
+         Shape.keys?(operation, ~w(operation request)) and
+           HeldBranchReleaseRequest.valid?(operation["request"]) and
+           budget <= if(name == "release_held_branch", do: 900_000, else: 30_000)
+
+  defp operation?(%{"operation" => name} = operation, budget, 2)
+       when name in ~w(create_branch inspect_branch_completion),
+       do:
+         Shape.keys?(operation, ~w(operation request)) and
+           BranchRequest.valid?(operation["request"]) and
+           budget <= if(name == "create_branch", do: 900_000, else: 30_000)
 
   defp operation?(%{"operation" => name} = operation, budget, 2)
        when name in ~w(qualify_export admit_export export_machine) do
@@ -215,6 +237,15 @@ defmodule SmolBox.Embedded.Request do
        do:
          Shape.keys?(operation, ~w(operation receipt)) and budget <= 30_000 and
            Shape.receipt?(receipt, 2)
+
+  defp operation?(
+         %{"operation" => "branch_preflight", "receipt" => receipt} = operation,
+         budget,
+         2
+       ),
+       do:
+         Shape.keys?(operation, ~w(operation receipt)) and budget <= 30_000 and
+           Shape.receipt?(receipt, 2) and receipt["material"] != nil
 
   defp operation?(%{"operation" => "create_checkpoint"} = operation, _budget, 2),
     do:

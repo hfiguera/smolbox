@@ -8,8 +8,10 @@ defmodule SmolBox.Branch do
   without a recorded creation response is never adopted by name.
   """
   alias SmolBox.{BranchSpec, Error, ManagedMachine, Validation}
+  alias SmolBox.Embedded.NativeBranchAuthority
   @enforce_keys [:source, :source_machine, :spec, :accepted_at_ms, :deadline_ms]
-  defstruct @enforce_keys ++ [state: :accepted, release_version: nil, retired_at_ms: nil]
+  defstruct @enforce_keys ++
+              [state: :accepted, release_version: nil, retired_at_ms: nil, native_authority: nil]
 
   @type state ::
           :accepted
@@ -58,6 +60,9 @@ defmodule SmolBox.Branch do
          {scope, id} <- b.source,
          true <- Validation.identifier?(scope) and Validation.identifier?(id),
          :ok <- BranchSpec.validate(b.spec),
+         true <-
+           b.native_authority == nil or
+             NativeBranchAuthority.valid?(b.native_authority),
          true <- b.state in @states,
          true <- Validation.timestamp?(b.accepted_at_ms) and Validation.timestamp?(b.deadline_ms),
          true <- b.deadline_ms >= b.accepted_at_ms + b.spec.timeout_ms,
@@ -96,11 +101,17 @@ defmodule SmolBox.Branch do
     validate(b) == :ok and is_struct(b.source_machine, SmolBox.Machine) and b.spec.id == m.id and
       elem(b.source, 0) == m.scope and elem(b.source, 1) != m.id and
       child_spec?(m) and
-      SmolBox.ExecutionValidation.machine?(b.source_machine, %{
-        m
-        | machine_name: b.source_machine.name
-      })
+      source_identity?(m)
   end
+
+  defp source_identity?(%{branch: %{native_authority: nil}} = m),
+    do:
+      SmolBox.ExecutionValidation.machine?(m.branch.source_machine, %{
+        m
+        | machine_name: m.branch.source_machine.name
+      })
+
+  defp source_identity?(m), do: NativeBranchAuthority.child?(m)
 
   defp child_spec?(m),
     do:

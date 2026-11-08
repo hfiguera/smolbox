@@ -143,7 +143,7 @@ pub enum CreationPresence {
 
 pub struct Engine {
     opened_at: std::time::Instant,
-    runtime: EmbeddedRuntime,
+    pub(crate) runtime: Arc<EmbeddedRuntime>,
     pub(crate) db: SmolvmDb,
     pub(crate) database_identity: (u64, u64),
     binding: DomainBinding,
@@ -153,13 +153,15 @@ pub struct Engine {
     // forkable start may enroll this independent original-live-source witness.
     capture_sources: Mutex<BTreeMap<String, (i32, u64)>>,
     // Keep the actual SDK manager alive; dropping it would stop its VMM.
-    pub(crate) owned_oci: Mutex<BTreeMap<String, Arc<Mutex<AgentManager>>>>,
+    pub(crate) owned_managers: Mutex<BTreeMap<String, Arc<Mutex<AgentManager>>>>,
+    branch_owners: Mutex<BTreeMap<String, Arc<crate::branch_owned::Context>>>,
     pub(crate) domain: Arc<DomainGuard>,
     pub(crate) transfers: Option<TransferSupervisor>,
     pub(crate) jobs: crate::jobs::JobPool,
     pub(crate) capture_staging: Arc<crate::capture_staging::Staging>,
     pub(crate) export_staging: Arc<crate::export_staging::Staging>,
     pub(crate) export_retention: Arc<crate::export_retention::Registry>,
+    pub(crate) branch_retention: Arc<crate::branch::retention::Registry>,
     templates: Option<crate::assets::PreparedTemplates>,
     export_assets: Option<crate::ApprovedExportAssets>,
     host: Option<crate::HostContext>,
@@ -585,22 +587,25 @@ impl Engine {
         let export_staging =
             crate::export_staging::Staging::open(&binding, domain.clone(), jobs.clone())?;
         let export_retention = crate::export_retention::Registry::new(domain.clone());
+        let branch_retention = crate::branch::retention::Registry::new(domain.clone());
         Ok(Self {
             opened_at: std::time::Instant::now(),
-            runtime: EmbeddedRuntime::with_db(db.clone()),
+            runtime: Arc::new(EmbeddedRuntime::with_db(db.clone())),
             db,
             database_identity,
             binding,
             gates: Mutex::new(HashMap::new()),
             owned_handles: Mutex::new(BTreeMap::new()),
             capture_sources: Mutex::new(BTreeMap::new()),
-            owned_oci: Mutex::new(BTreeMap::new()),
+            owned_managers: Mutex::new(BTreeMap::new()),
+            branch_owners: Mutex::new(BTreeMap::new()),
             domain,
             transfers: None,
             jobs,
             capture_staging,
             export_staging,
             export_retention,
+            branch_retention,
             templates: None,
             export_assets: None,
             host: None,
@@ -1333,6 +1338,82 @@ impl Engine {
         pid: (i32, u64),
         record: &VmRecord,
     ) -> Result<crate::capture_resolution::SourceAuthority> {
+        if !self
+            .db
+            .dependent_clones(&receipt.name)
+            .map_err(|_| Error::before(ErrorCode::Database))?
+            .is_empty()
+        {
+            return Err(Error::before(ErrorCode::State));
+        }
+        self.source_authority(receipt, pid, record)
+    }
+    pub(crate) fn branch_source_authority(
+        &self,
+        receipt: &CreationReceipt,
+        pid: (i32, u64),
+        record: &VmRecord,
+        child: &VmRecord,
+        budget: &crate::ReadBudget,
+    ) -> Result<crate::capture_resolution::SourceAuthority> {
+        if child.golden.as_deref() != Some(receipt.name.as_str()) {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        let dependents = crate::sdk_compat::source_dependents(
+            &self.binding.database,
+            self.database_identity,
+            &receipt.name,
+            budget,
+        )?;
+        if !dependents.contains(&child.name)
+            || !crate::material::MaterialJournal::at(&self.vm_directory(&receipt.name))
+                .branch_dependencies(
+                    receipt,
+                    Some(&child.name),
+                    &dependents,
+                    &self.binding.database,
+                    self.database_identity,
+                    budget,
+                )?
+        {
+            return Err(Error::before(ErrorCode::State));
+        }
+        self.source_authority(receipt, pid, record)
+    }
+    pub(crate) fn branch_admission_source_authority(
+        &self,
+        receipt: &CreationReceipt,
+        pid: (i32, u64),
+        record: &VmRecord,
+        joining: Option<&str>,
+        budget: &crate::ReadBudget,
+    ) -> Result<crate::capture_resolution::SourceAuthority> {
+        let dependents = crate::sdk_compat::source_dependents(
+            &self.binding.database,
+            self.database_identity,
+            &receipt.name,
+            budget,
+        )?;
+        if !crate::material::MaterialJournal::at(&self.vm_directory(&receipt.name))
+            .branch_dependencies(
+                receipt,
+                joining,
+                &dependents,
+                &self.binding.database,
+                self.database_identity,
+                budget,
+            )?
+        {
+            return Err(Error::before(ErrorCode::State));
+        }
+        self.source_authority(receipt, pid, record)
+    }
+    fn source_authority(
+        &self,
+        receipt: &CreationReceipt,
+        pid: (i32, u64),
+        record: &VmRecord,
+    ) -> Result<crate::capture_resolution::SourceAuthority> {
         let name = &receipt.name;
         let owner = self
             .owned_handles
@@ -1354,7 +1435,7 @@ impl Engine {
             owner
         };
         let excluded = self
-            .owned_oci
+            .owned_managers
             .lock()
             .map_err(|_| Error::before(ErrorCode::Native))?
             .contains_key(name);
@@ -1362,14 +1443,6 @@ impl Engine {
             if !actors.quiescent_for(name)? {
                 return Err(Error::before(ErrorCode::State));
             }
-        }
-        if !self
-            .db
-            .dependent_clones(name)
-            .map_err(|_| Error::before(ErrorCode::Database))?
-            .is_empty()
-        {
-            return Err(Error::before(ErrorCode::State));
         }
         crate::capture_resolution::SourceAuthority::verify(
             record,
@@ -1403,6 +1476,82 @@ impl Engine {
         handles.insert(receipt.name.clone(), receipt.clone());
         Ok(())
     }
+    pub(crate) fn promote_branch_handle(
+        &self,
+        previous: &CreationReceipt,
+        receipt: &CreationReceipt,
+    ) -> Result<()> {
+        let mut origin = previous.clone();
+        origin.material = None;
+        crate::material::check_origin(&origin, receipt)?;
+        receipt.validate(self.binding())?;
+        let mut handles = self
+            .owned_handles
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        if handles.get(&previous.name) != Some(previous)
+            && handles.get(&previous.name) != Some(receipt)
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        handles.insert(receipt.name.clone(), receipt.clone());
+        Ok(())
+    }
+    pub(crate) fn install_original_branch_manager(
+        &self,
+        receipt: &CreationReceipt,
+        context: Arc<crate::branch_owned::Context>,
+    ) -> Result<()> {
+        let handles = self
+            .owned_handles
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        let mut owners = self
+            .branch_owners
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        let mut managers = self
+            .owned_managers
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        if handles.get(&receipt.name) != Some(receipt)
+            || managers
+                .get(&receipt.name)
+                .is_some_and(|manager| !Arc::ptr_eq(manager, &context.manager))
+            || owners.get(&receipt.name).is_some_and(|owner| {
+                !Arc::ptr_eq(&owner.enrollment, &context.enrollment)
+                    || owner.plan != context.plan
+                    || owner.identity_sha256 != context.identity_sha256
+            })
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        managers.insert(receipt.name.clone(), context.manager.clone());
+        owners.insert(receipt.name.clone(), context);
+        Ok(())
+    }
+    pub(crate) fn branch_child_unstarted(&self, name: &str) -> Result<()> {
+        if self.runtime.pid(name).is_some()
+            || self
+                .owned_handles
+                .lock()
+                .map_err(|_| Error::before(ErrorCode::Native))?
+                .contains_key(name)
+            || self
+                .owned_managers
+                .lock()
+                .map_err(|_| Error::before(ErrorCode::Native))?
+                .contains_key(name)
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        if let Some((_, actors)) = &self.boot {
+            if !actors.quiescent_for(name)? {
+                return Err(Error::before(ErrorCode::State));
+            }
+        }
+        Ok(())
+    }
 
     pub(crate) fn recover_capture_handle(
         &self,
@@ -1429,7 +1578,7 @@ impl Engine {
         Ok(())
     }
 
-    fn creation_material_absent(&self, name: &str) -> Result<bool> {
+    pub(crate) fn creation_material_absent(&self, name: &str) -> Result<bool> {
         if let Some((_, actors)) = &self.boot {
             if !actors.quiescent_for(name)? {
                 return Ok(false);
@@ -1698,7 +1847,7 @@ impl Engine {
             let child_present = self
                 .runtime_pid(&receipt.name)
                 .is_some_and(smolvm::process::is_alive)
-                || self.oci_manager_busy(&receipt.name)?;
+                || self.owned_manager_busy(&receipt.name)?;
             return Ok(Observation {
                 state: if storage_present || child_present {
                     ObservedState::IdentityUnknown
@@ -1715,17 +1864,33 @@ impl Engine {
             .db
             .dependent_clones(&receipt.name)
             .map_err(|_| Error::before(ErrorCode::Database))?;
-        let mut state = record_state(&record, !dependents.is_empty());
         let checkpoint_budget =
             crate::ReadBudget::new(std::time::Duration::from_secs(30), Cancellation::default())?;
-        if crate::checkpoint_lifecycle::Lifecycle::at(&self.vm_directory(&receipt.name)).uncertain(
-            receipt,
-            &record,
-            &checkpoint_budget,
-        )? {
+        let directory = self.vm_directory(&receipt.name);
+        let continuing = !dependents.is_empty()
+            && self.original_continuing_source(receipt, &record)?
+            && crate::material::MaterialJournal::at(&directory).continuing_branch_children(
+                receipt,
+                &dependents,
+                &self.binding.database,
+                self.database_identity,
+                &checkpoint_budget,
+            )?;
+        let mut state = record_state(&record, !dependents.is_empty() && !continuing);
+        let uncertain =
+            if crate::material::MaterialJournal::at(&directory).branch_child(receipt, &record)? {
+                crate::branch_boot::Lifecycle::at(&directory).uncertain(receipt)?
+            } else {
+                crate::checkpoint_lifecycle::Lifecycle::at(&directory).uncertain(
+                    receipt,
+                    &record,
+                    &checkpoint_budget,
+                )?
+            };
+        if uncertain {
             state = ObservedState::IdentityUnknown;
         }
-        if self.oci_manager_busy(&receipt.name)?
+        if self.owned_manager_busy(&receipt.name)?
             || self.runtime_pid(&receipt.name).is_some_and(|pid| {
                 smolvm::process::is_alive(pid)
                     && (record.pid != Some(pid) || state != ObservedState::Running)
@@ -1775,6 +1940,7 @@ impl Engine {
         let journal = crate::material::MaterialJournal::at(&self.vm_directory(&receipt.name));
         journal.verify(receipt)?;
         journal.verify_mount_record(receipt, record)?;
+        journal.verify_branch_child(receipt, record)?;
         Ok(())
     }
 
@@ -2313,7 +2479,16 @@ impl Engine {
                 Cancellation::default(),
             )?,
         };
-        let checkpoint_start = lifecycle.prepare(receipt, &record, &checkpoint_budget)?;
+        let checkpoint_start =
+            if crate::material::MaterialJournal::at(&self.vm_directory(&receipt.name))
+                .branch_child(receipt, &record)?
+            {
+                crate::branch_boot::Lifecycle::at(&self.vm_directory(&receipt.name))
+                    .require_regular_restart(receipt)?;
+                None
+            } else {
+                lifecycle.prepare(receipt, &record, &checkpoint_budget)?
+            };
         self.track_handle(receipt)?;
         check()?;
         let dispatch = boot.begin_boot(&receipt.name)?;
@@ -2380,6 +2555,9 @@ impl Engine {
         let _guard = gate
             .try_lock()
             .map_err(|_| Error::before(ErrorCode::Conflict))?;
+        if self.record(receipt)?.forkpoint_held {
+            return Err(Error::before(ErrorCode::State));
+        }
         let mut expected = self.inspect(receipt)?;
         if expected.state == ObservedState::IdentityUnknown {
             if self.stop_entered_capture(receipt)? {
@@ -2421,7 +2599,7 @@ impl Engine {
                 // and its launch flock. Explicit stop performs normal cleanup;
                 // an absent manager needs no SDK mutation.
                 if !self
-                    .owned_oci
+                    .owned_managers
                     .lock()
                     .map_err(|_| Error::before(ErrorCode::Native))?
                     .contains_key(&receipt.name)
@@ -2434,7 +2612,7 @@ impl Engine {
         }
         self.coordinated_lifecycle(receipt, &expected, || {
             let manager = self
-                .owned_oci
+                .owned_managers
                 .lock()
                 .map_err(|_| smolvm::Error::config("stop", "native manager unavailable"))?
                 .get(&receipt.name)
@@ -2465,7 +2643,11 @@ impl Engine {
             .inspect(receipt)
             .map_err(|error| Error::uncertain(error.code))?;
         if observation.state == ObservedState::Stopped {
-            self.owned_oci
+            self.owned_managers
+                .lock()
+                .map_err(|_| Error::uncertain(ErrorCode::Native))?
+                .remove(&receipt.name);
+            self.branch_owners
                 .lock()
                 .map_err(|_| Error::uncertain(ErrorCode::Native))?
                 .remove(&receipt.name);
@@ -2494,6 +2676,26 @@ impl Engine {
         budget: &crate::ReadBudget,
     ) -> Result<Observation> {
         budget.check()?;
+        receipt.validate(self.binding())?;
+        let original_held_child = self
+            .branch_owners
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?
+            .get(&receipt.name)
+            .is_some_and(|context| {
+                context.plan.publication.child() == receipt
+                    && context
+                        .plan
+                        .publication
+                        .change
+                        .child_origin
+                        .intent
+                        .child
+                        .hold
+            });
+        if original_held_child {
+            return self.delete_held_branch(receipt, budget);
+        }
         let gate = self.gate(&receipt.name)?;
         let _guard = gate
             .try_lock()
@@ -2522,7 +2724,7 @@ impl Engine {
             .inspect(receipt)
             .map_err(|error| Error::uncertain(error.code))?;
         if observation.state == ObservedState::Missing {
-            self.owned_oci
+            self.owned_managers
                 .lock()
                 .map_err(|_| Error::uncertain(ErrorCode::Native))?
                 .remove(&receipt.name);
@@ -2626,6 +2828,9 @@ impl Engine {
         // This contract covers cooperating callers, not independent SDK writers.
         self.verify_database_identity()?;
         let record = self.record(receipt)?;
+        if record.forkpoint_held {
+            return Err(Error::before(ErrorCode::State));
+        }
         let dependents = self
             .db
             .dependent_clones(&receipt.name)
@@ -2690,6 +2895,30 @@ impl Engine {
             return Err(Error::before(ErrorCode::Ownership));
         }
         command.validate(record.image.is_some())?;
+        if record.forkpoint_held {
+            return Err(Error::before(ErrorCode::State));
+        }
+        let direct_manager = self
+            .owned_managers
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?
+            .contains_key(&receipt.name);
+        if direct_manager {
+            return self.exec_stream_owned(
+                receipt,
+                crate::BufferedCommand {
+                    argv: command.argv,
+                    env: command.env.into_iter().collect(),
+                    workdir: command.workdir,
+                    user: command.user,
+                    stdin: None,
+                    timeout: command.timeout,
+                    max_output_bytes: command.max_output_bytes,
+                },
+                cancel,
+                consumer,
+            );
+        }
         let _job = self.jobs.acquire(crate::jobs::Demand::streaming())?;
         let gate = self.gate(&receipt.name)?;
         let _guard = gate
@@ -2804,9 +3033,9 @@ impl Engine {
         self.binding.vm_root.join(smolvm::agent::vm_dir_hash(name))
     }
 
-    pub(crate) fn oci_manager_busy(&self, name: &str) -> Result<bool> {
+    pub(crate) fn owned_manager_busy(&self, name: &str) -> Result<bool> {
         let handles = self
-            .owned_oci
+            .owned_managers
             .lock()
             .map_err(|_| Error::before(ErrorCode::Native))?;
         Ok(handles
@@ -2815,7 +3044,7 @@ impl Engine {
     }
 
     pub(crate) fn runtime_pid(&self, name: &str) -> Option<i32> {
-        self.owned_oci
+        self.owned_managers
             .lock()
             .ok()
             .and_then(|handles| handles.get(name)?.try_lock().ok()?.child_pid())
@@ -2832,6 +3061,146 @@ impl Engine {
             .ok_or(Error::before(ErrorCode::State))?;
         self.verify_record(receipt, &record)?;
         Ok(record)
+    }
+    pub(crate) fn guest_work_record(&self, receipt: &CreationReceipt) -> Result<VmRecord> {
+        let record = self.record(receipt)?;
+        if record.forkpoint_held {
+            return Err(Error::before(ErrorCode::State));
+        }
+        Ok(record)
+    }
+    pub(crate) fn original_continuing_source(
+        &self,
+        receipt: &CreationReceipt,
+        record: &VmRecord,
+    ) -> Result<bool> {
+        let owned = self
+            .owned_handles
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?
+            .get(&receipt.name)
+            == Some(receipt);
+        let pid = self
+            .capture_sources
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?
+            .get(&receipt.name)
+            .copied();
+        Ok(owned
+            && pid.is_some_and(|identity| {
+                record.pid.zip(record.pid_start_time) == Some(identity)
+                    && self.runtime.pid(&receipt.name) == Some(identity.0)
+                    && smolvm::process::process_start_time(identity.0) == Some(identity.1)
+                    && record_state(record, false) == ObservedState::Running
+            }))
+    }
+    pub(crate) fn retained_branch_context(
+        &self,
+        receipt: &CreationReceipt,
+    ) -> Result<Arc<crate::branch_owned::Context>> {
+        receipt.validate(self.binding())?;
+        self.domain.verify()?;
+        let cached = self
+            .branch_owners
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?
+            .get(&receipt.name)
+            .cloned();
+        let context = match cached {
+            Some(context) => Some(context),
+            None => self.branch_retention.completed_context(receipt)?,
+        }
+        .ok_or(Error::before(ErrorCode::Ownership))?;
+        let mut origin = context.plan.publication.child().clone();
+        origin.material = None;
+        crate::material::check_origin(&origin, receipt)?;
+        if !Arc::ptr_eq(&context._domain, &self.domain)
+            || !Arc::ptr_eq(&context._runtime, &self.runtime)
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        Ok(context)
+    }
+    pub(crate) fn original_branch_manager(
+        &self,
+        receipt: &CreationReceipt,
+        context: &Arc<crate::branch_owned::Context>,
+    ) -> Result<()> {
+        if self
+            .owned_handles
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?
+            .get(&receipt.name)
+            != Some(receipt)
+            || !self
+                .branch_owners
+                .lock()
+                .map_err(|_| Error::before(ErrorCode::Native))?
+                .get(&receipt.name)
+                .is_some_and(|owner| Arc::ptr_eq(owner, context))
+            || !self
+                .owned_managers
+                .lock()
+                .map_err(|_| Error::before(ErrorCode::Native))?
+                .get(&receipt.name)
+                .is_some_and(|manager| Arc::ptr_eq(manager, &context.manager))
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        Ok(())
+    }
+    pub(crate) fn retire_deleted_branch_handle(
+        &self,
+        receipt: &CreationReceipt,
+        context: &Arc<crate::branch_owned::Context>,
+    ) -> Result<()> {
+        let mut handles = self
+            .owned_handles
+            .lock()
+            .map_err(|_| Error::uncertain(ErrorCode::Native))?;
+        let mut owners = self
+            .branch_owners
+            .lock()
+            .map_err(|_| Error::uncertain(ErrorCode::Native))?;
+        let mut managers = self
+            .owned_managers
+            .lock()
+            .map_err(|_| Error::uncertain(ErrorCode::Native))?;
+        if handles
+            .get(&receipt.name)
+            .is_some_and(|actual| actual != receipt)
+            || owners
+                .get(&receipt.name)
+                .is_some_and(|actual| !Arc::ptr_eq(actual, context))
+            || managers
+                .get(&receipt.name)
+                .is_some_and(|actual| !Arc::ptr_eq(actual, &context.manager))
+        {
+            return Err(Error::uncertain(ErrorCode::Ownership));
+        }
+        handles.remove(&receipt.name);
+        owners.remove(&receipt.name);
+        managers.remove(&receipt.name);
+        Ok(())
+    }
+    pub(crate) fn recover_branch_release_handle(
+        &self,
+        release: &crate::BranchReleaseTransition,
+    ) -> Result<()> {
+        release.validate()?;
+        let mut handles = self
+            .owned_handles
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        match handles.get(&release.previous.name) {
+            Some(current) if current == &release.previous => {
+                handles.insert(release.receipt.name.clone(), release.receipt.clone());
+            }
+            Some(current) if current == &release.receipt => {}
+            None => {} // Historical result never re-enrolls a stopped/deleted handle.
+            Some(_) => return Err(Error::before(ErrorCode::Ownership)),
+        }
+        Ok(())
     }
 
     pub(crate) fn activate_files(
@@ -3070,6 +3439,44 @@ fn write_marker(receipt: &CreationReceipt, directory: &Path) -> Result<()> {
         .map_err(|_| Error::uncertain(ErrorCode::Io))
 }
 
+/// Only a protected branch publication may retry this exact independent marker.
+/// Atomic publication prevents a partial write becoming a reusable incarnation.
+pub(crate) fn publish_branch_marker(receipt: &CreationReceipt, directory: &Path) -> Result<()> {
+    let path = directory.join("smolbox.incarnation");
+    match std::fs::symlink_metadata(&path) {
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+            let mut file = tempfile::NamedTempFile::new_in(directory)
+                .map_err(|_| Error::uncertain(ErrorCode::Io))?;
+            file.write_all(marker_bytes(receipt).as_bytes())
+                .and_then(|()| file.as_file().sync_all())
+                .map_err(|_| Error::uncertain(ErrorCode::Io))?;
+            file.persist_noclobber(&path)
+                .map_err(|_| Error::uncertain(ErrorCode::Ownership))?;
+            std::fs::File::open(directory)
+                .and_then(|file| file.sync_all())
+                .map_err(|_| Error::uncertain(ErrorCode::Io))?;
+        }
+        Err(_) => return Err(Error::uncertain(ErrorCode::Ownership)),
+        Ok(_) => {}
+    }
+    verify_branch_marker(receipt, directory)
+}
+pub(crate) fn verify_branch_marker(receipt: &CreationReceipt, directory: &Path) -> Result<()> {
+    use std::os::unix::fs::MetadataExt;
+    let file = crate::artifact::open_regular(&directory.join("smolbox.incarnation"))?;
+    let info = file
+        .metadata()
+        .map_err(|_| Error::uncertain(ErrorCode::Io))?;
+    if info.uid() != unsafe { libc::geteuid() }
+        || info.mode() & 0o777 != 0o600
+        || info.nlink() != 1
+        || !marker_matches(receipt, directory)?
+    {
+        return Err(Error::uncertain(ErrorCode::Ownership));
+    }
+    Ok(())
+}
+
 pub(crate) fn marker_matches(receipt: &CreationReceipt, directory: &Path) -> Result<bool> {
     let path = directory.join("smolbox.incarnation");
     let mut file = match OpenOptions::new()
@@ -3099,6 +3506,69 @@ pub(crate) fn marker_matches(receipt: &CreationReceipt, directory: &Path) -> Res
 #[cfg(test)]
 pub(crate) mod tests {
     use super::*;
+    #[test]
+    fn release_cache_recovery_never_reenrolls_a_missing_or_different_handle() {
+        let model = crate::branch_boot::tests::identity_model(true);
+        let request = crate::BranchReleaseRequest {
+            operation_id: "recover-release-model".into(),
+            request_sha256: "e".repeat(64),
+        };
+        let release = crate::branch_release::Intent::issue(
+            &model.plan.publication,
+            &model.record,
+            &model.enrollment,
+            &model.identity_sha256,
+            &request,
+        )
+        .unwrap()
+        .transition;
+        model.engine.track_handle(&release.previous).unwrap();
+        model
+            .engine
+            .recover_branch_release_handle(&release)
+            .unwrap();
+        assert_eq!(
+            model
+                .engine
+                .owned_handles
+                .lock()
+                .unwrap()
+                .get(&release.receipt.name),
+            Some(&release.receipt)
+        );
+        model
+            .engine
+            .owned_handles
+            .lock()
+            .unwrap()
+            .remove(&release.receipt.name);
+        model
+            .engine
+            .recover_branch_release_handle(&release)
+            .unwrap();
+        assert!(model.engine.owned_handles.lock().unwrap().is_empty());
+        let mut foreign = release.previous.clone();
+        foreign.incarnation = "f".repeat(32);
+        model
+            .engine
+            .owned_handles
+            .lock()
+            .unwrap()
+            .insert(foreign.name.clone(), foreign.clone());
+        assert!(model
+            .engine
+            .recover_branch_release_handle(&release)
+            .is_err());
+        assert_eq!(
+            model
+                .engine
+                .owned_handles
+                .lock()
+                .unwrap()
+                .get(&foreign.name),
+            Some(&foreign)
+        );
+    }
 
     pub(crate) fn fixture_marker(receipt: &CreationReceipt, directory: &Path) {
         write_marker(receipt, directory).unwrap();
@@ -3684,22 +4154,25 @@ pub(crate) mod tests {
         let export_staging =
             crate::export_staging::Staging::open(&binding, domain.clone(), jobs.clone()).unwrap();
         let export_retention = crate::export_retention::Registry::new(domain.clone());
+        let branch_retention = crate::branch::retention::Registry::new(domain.clone());
         Engine {
             opened_at: std::time::Instant::now(),
-            runtime: EmbeddedRuntime::with_db(db.clone()),
+            runtime: Arc::new(EmbeddedRuntime::with_db(db.clone())),
             database_identity: database_identity(&binding.database).unwrap(),
             db,
             binding,
             gates: Mutex::new(HashMap::new()),
             owned_handles: Mutex::new(BTreeMap::new()),
             capture_sources: Mutex::new(BTreeMap::new()),
-            owned_oci: Mutex::new(BTreeMap::new()),
+            owned_managers: Mutex::new(BTreeMap::new()),
+            branch_owners: Mutex::new(BTreeMap::new()),
             domain,
             transfers: None,
             jobs,
             capture_staging,
             export_staging,
             export_retention,
+            branch_retention,
             templates: None,
             export_assets: None,
             host: None,
@@ -3809,7 +4282,7 @@ pub(crate) mod tests {
             before
         );
         assert!(engine.owned_handles.lock().unwrap().is_empty());
-        assert!(engine.owned_oci.lock().unwrap().is_empty());
+        assert!(engine.owned_managers.lock().unwrap().is_empty());
         assert_eq!(engine.jobs.counts(), crate::jobs::Counts::default());
         assert!(engine.jobs.available());
         assert!(!engine.domain.directory.join("transfers").exists());
@@ -3924,7 +4397,7 @@ pub(crate) mod tests {
             before
         );
         assert!(engine.owned_handles.lock().unwrap().is_empty());
-        assert!(engine.owned_oci.lock().unwrap().is_empty());
+        assert!(engine.owned_managers.lock().unwrap().is_empty());
         assert_eq!(engine.jobs.counts(), crate::jobs::Counts::default());
         assert!(!engine.domain.directory.join("transfers").exists());
         engine.jobs.quarantine();
@@ -4083,7 +4556,7 @@ pub(crate) mod tests {
             });
             assert_eq!(engine.jobs.counts(), crate::jobs::Counts::default());
             assert!(engine.owned_handles.lock().unwrap().is_empty());
-            assert!(engine.owned_oci.lock().unwrap().is_empty());
+            assert!(engine.owned_managers.lock().unwrap().is_empty());
             assert_eq!(
                 serde_json::to_vec(&engine.db.get_vm(&receipt.name).unwrap()).unwrap(),
                 before
@@ -4136,7 +4609,7 @@ pub(crate) mod tests {
         );
         assert_eq!(engine.jobs.counts(), crate::jobs::Counts::default());
         assert!(engine.owned_handles.lock().unwrap().is_empty());
-        assert!(engine.owned_oci.lock().unwrap().is_empty());
+        assert!(engine.owned_managers.lock().unwrap().is_empty());
         assert!(!engine.domain.directory.join("artifacts").exists());
     }
 
@@ -4531,7 +5004,7 @@ pub(crate) mod tests {
             }
             assert_eq!(engine.jobs.counts(), crate::jobs::Counts::default());
             assert!(engine.owned_handles.lock().unwrap().is_empty());
-            assert!(engine.owned_oci.lock().unwrap().is_empty());
+            assert!(engine.owned_managers.lock().unwrap().is_empty());
         }
         assert_eq!(
             std::fs::read_dir(engine.domain.directory.join("registry-blobs"))
@@ -5024,7 +5497,7 @@ pub(crate) mod tests {
             );
             assert_eq!(engine.jobs.counts(), crate::jobs::Counts::default());
             assert!(engine.owned_handles.lock().unwrap().is_empty());
-            assert!(engine.owned_oci.lock().unwrap().is_empty());
+            assert!(engine.owned_managers.lock().unwrap().is_empty());
         }
     }
 
@@ -5362,7 +5835,7 @@ pub(crate) mod tests {
             .unwrap();
         assert_eq!(error.code, ErrorCode::Ownership);
         assert_eq!(error.dispatch, crate::Dispatch::NotDispatched);
-        assert!(engine.owned_oci.lock().unwrap().is_empty());
+        assert!(engine.owned_managers.lock().unwrap().is_empty());
         let before = serde_json::to_value(engine.db.get_vm(name).unwrap().unwrap()).unwrap();
         let cancel = Cancellation::new();
         cancel.cancel();
@@ -5405,7 +5878,7 @@ pub(crate) mod tests {
             .unwrap_err();
         assert_eq!(error.dispatch, crate::Dispatch::NotDispatched);
         assert_eq!(error.code, ErrorCode::Unsupported);
-        assert!(engine.owned_oci.lock().unwrap().is_empty());
+        assert!(engine.owned_managers.lock().unwrap().is_empty());
         assert!(engine.owned_handles.lock().unwrap().is_empty());
         assert_eq!(engine.jobs.counts(), crate::jobs::Counts::default());
         assert!(!engine.domain.directory.join("transfers").exists());

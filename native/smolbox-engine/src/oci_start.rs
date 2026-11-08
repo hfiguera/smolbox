@@ -367,7 +367,7 @@ impl crate::Engine {
         ));
         {
             let mut handles = self
-                .owned_oci
+                .owned_managers
                 .lock()
                 .map_err(|_| Error::before(ErrorCode::Native))?;
             if handles.contains_key(&record.name) {

@@ -75,7 +75,7 @@ impl crate::Engine {
         let deadline = request
             .deadline
             .min(Instant::now() + request.options.session);
-        let record = self.record(receipt)?;
+        let record = self.guest_work_record(receipt)?;
         if record.image.is_none() || record.forkable_on_start() {
             return Err(Error::before(ErrorCode::Unsupported));
         }

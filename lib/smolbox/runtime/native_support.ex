@@ -43,6 +43,7 @@ defmodule SmolBox.Runtime.NativeSupport do
          true <- source_support?(config, supported),
          true <- checkpoint_source_support?(config, supported),
          true <- export_support?(config, supported),
+         true <- branch_support?(config, supported),
          true <- volume_support?(config, supported, adapter),
          true <-
            Enum.all?(required, fn {name, arity} -> function_exported?(adapter, name, arity) end),
@@ -102,6 +103,21 @@ defmodule SmolBox.Runtime.NativeSupport do
         case Config.sdk_identity(target.native_config) do
           %{"feature_versions" => %{"disk_growth" => 1}} ->
             supported[:native_disk_growth] == 1 and supported[:managed_disk_expansion] == 1
+
+          _ ->
+            true
+        end
+      end)
+
+  # This marker covers all native branch readers and paired resource writers,
+  # including v31 explicit release. Existing HTTP branch support is insufficient.
+  # Stores must not advertise it until the complete native lifecycle is supported.
+  defp branch_support?(config, supported),
+    do:
+      Enum.all?(targets(config), fn target ->
+        case Config.sdk_identity(target.native_config) do
+          %{"feature_versions" => %{"branches" => 1}} ->
+            supported[:native_branches] == 1 and supported[:managed_branches] == 1
 
           _ ->
             true

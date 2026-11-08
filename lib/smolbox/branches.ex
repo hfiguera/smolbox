@@ -1,6 +1,4 @@
 defmodule SmolBox.Branches do
-  alias SmolBox.Runtime.Target
-
   @moduledoc """
   Create managed leaf machines from idle offline bare sources on smolvm 1.19.0, 1.20.2 or 1.22.0.
 
@@ -12,7 +10,6 @@ defmodule SmolBox.Branches do
   uncertain worker response.
   """
   alias SmolBox.{
-    Backend,
     BranchSpec,
     Error,
     Identity,
@@ -23,7 +20,7 @@ defmodule SmolBox.Branches do
   }
 
   alias SmolBox.Runtime.Branches, as: BranchRuntime
-  alias SmolBox.Runtime.{MachineSession, Session}
+  alias SmolBox.Runtime.{BranchObservation, MachineSession, NativeResolution, Session}
 
   @spec create(SmolBox.runtime(), ManagedMachine.key(), BranchSpec.t()) ::
           {:ok, ManagedMachine.key()} | {:error, Error.t()}
@@ -167,20 +164,10 @@ defmodule SmolBox.Branches do
          {:ok, child} <- fetch(runtime, handle),
          {:ok, parent} <- MachineSession.claim(config, child.branch.source),
          {:ok, worker} <- MachineSession.worker(config, parent),
-         {:ok, {source, observed}} <-
-           MachineSession.io(config, %{parent | operation_deadline_ms: nil}, fn ->
-             resolution_evidence(Target.connection(worker), parent, child, disposition)
-           end),
-         {:ok, current} <- MachineSession.claim(config, child.branch.source),
          do:
-           MachineSession.store(config, :branch_resolve, [
-             child.branch.source,
-             Session.guard(current),
-             child.id,
-             source,
-             observed,
-             config.clock.now()
-           ]),
+           explicit(config, runtime, parent, child, worker, :branch_resolve, fn pinned ->
+             BranchObservation.resolution(pinned, parent, child, disposition)
+           end),
          else: (
            false -> Session.error(:validation, :branch)
            error -> error
@@ -200,18 +187,10 @@ defmodule SmolBox.Branches do
          {:ok, child} <- fetch(runtime, handle),
          {:ok, parent} <- MachineSession.claim(config, child.branch.source),
          {:ok, worker} <- MachineSession.worker(config, parent),
-         {:ok, :absent} <-
-           MachineSession.io(config, %{parent | operation_deadline_ms: nil}, fn ->
-             Backend.branch_absent(Target.connection(worker), child.machine_name)
-           end),
-         {:ok, current} <- MachineSession.claim(config, child.branch.source),
          do:
-           MachineSession.store(config, :branch_retire, [
-             child.branch.source,
-             Session.guard(current),
-             child.id,
-             config.clock.now()
-           ]),
+           explicit(config, runtime, parent, child, worker, :branch_retire, fn pinned ->
+             BranchObservation.retirement(pinned, child)
+           end),
          else: (
            false -> Session.error(:validation, :branch)
            error -> error
@@ -227,48 +206,41 @@ defmodule SmolBox.Branches do
          {:ok, child} <- fetch(runtime, handle),
          {:ok, parent} <- MachineSession.claim(config, child.branch.source),
          {:ok, worker} <- MachineSession.worker(config, parent),
-         :ok <-
-           MachineSession.io(config, %{parent | operation_deadline_ms: nil}, fn ->
-             backing_absent(Target.connection(worker), parent, child)
-           end),
-         {:ok, current} <- MachineSession.claim(config, child.branch.source),
          do:
-           MachineSession.store(config, :branch_release_storage, [
-             child.branch.source,
-             Session.guard(current),
-             child.id,
-             config.clock.now()
-           ]),
+           explicit(config, runtime, parent, child, worker, :branch_release_storage, fn pinned ->
+             BranchObservation.storage_release(pinned, parent, child)
+           end),
          else: (
            false -> Session.error(:validation, :branch)
            error -> error
          )
   end
 
-  defp backing_absent(client, parent, child) do
-    with {:ok, :absent} <- Backend.branch_absent(client, parent.machine_name),
-         {:ok, :absent} <- Backend.branch_absent(client, child.machine_name),
-         do: :ok
+  defp explicit(config, runtime, parent, child, worker, operation, observe) do
+    NativeResolution.run(
+      config,
+      Runtime.coordinator(runtime),
+      parent,
+      worker,
+      operation,
+      fn pinned ->
+        finish_explicit(config, parent, child, operation, fn -> observe.(pinned) end)
+      end
+    )
   end
 
-  defp resolution_evidence(client, parent, child, disposition) do
-    with {:ok, source} <- source_observation(client, parent.machine_name, disposition),
-         {:ok, observed} <- resolution_observation(client, child, disposition),
-         do: {:ok, {source, observed}}
+  defp finish_explicit(config, parent, child, operation, observe) do
+    with {:ok, evidence} <-
+           MachineSession.io(config, %{parent | operation_deadline_ms: nil}, observe),
+         {:ok, current} <- MachineSession.claim(config, child.branch.source),
+         do:
+           MachineSession.store(
+             config,
+             operation,
+             [child.branch.source, Session.guard(current), child.id] ++
+               evidence ++ [config.clock.now()]
+           )
   end
-
-  defp source_observation(client, name, disposition) do
-    case SmolBox.Backend.inspect_machine(client, name) do
-      {:error, %{category: :not_found}} when disposition == :deleted -> {:ok, :absent}
-      result -> result
-    end
-  end
-
-  defp resolution_observation(client, child, :keep),
-    do: Backend.branch_inspect_child(client, child, child.branch.spec.hold)
-
-  defp resolution_observation(client, child, :deleted),
-    do: Backend.branch_absent(client, child.machine_name)
 
   defp config(runtime) do
     with {:ok, config} <- GenServer.call(Runtime.coordinator(runtime), :config),

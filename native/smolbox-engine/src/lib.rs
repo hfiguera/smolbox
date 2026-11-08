@@ -5,6 +5,26 @@
 //! is never a substitute for a creation receipt returned to the durable caller.
 
 mod agent_io;
+mod branch;
+mod branch_agent;
+mod branch_boot;
+mod branch_delete;
+pub use branch_delete::BranchDeletionResolution;
+mod branch_held_release;
+mod branch_identity;
+mod branch_material;
+mod branch_owned;
+pub use branch_owned::BranchCompletion;
+mod branch_release;
+pub use branch_release::{BranchReleaseChange, BranchReleaseRequest, BranchReleaseTransition};
+mod branch_worker;
+pub use branch::{
+    BranchApproval, BranchBackingRelease, BranchBootIdentity, BranchChildIntent,
+    BranchCreateRequest, BranchGuestIdentity, BranchPreparationState, BranchResourcePlan,
+    BranchResources, InitialBranchRetirement, PreparedBranchIntent, PreparedBranchWorker,
+    PreparedInitialBranch, RetainedBranchPreparation,
+};
+pub use branch_material::{BranchPublication, BranchSourceChange};
 mod bootstrap;
 pub use bootstrap::Metadata as OciBootstrapPlan;
 mod buffered;

@@ -214,6 +214,12 @@ pub fn run_with_policy(
     let observation_budget =
         || engine::ReadBudget::new(remaining.min(Duration::from_secs(30)), cancel.clone());
     let result = match operation {
+        wire::Operation::ReleaseHeldBranch { .. } | wire::Operation::QualifyHeldBranchRelease { .. }
+        | wire::Operation::CreateBranch { .. } | wire::Operation::InspectBranchCompletion { .. } =>
+            return error(engine::Error {code:engine::ErrorCode::Unsupported, dispatch:engine::Dispatch::NotDispatched}),
+        wire::Operation::BranchPreflight { receipt: supplied } => observation_budget()
+            .and_then(|budget| engine.branch_preflight(&receipt(&supplied), &budget))
+            .map(observation),
         wire::Operation::QualifyCheckpointCreation { .. }
         | wire::Operation::CreateCheckpoint { .. }
         | wire::Operation::InspectCheckpointCreation { .. } => return wire::Outcome::Error {
@@ -1172,6 +1178,164 @@ pub fn terminal(
     }
 }
 
+pub fn branch(
+    engine: &engine::Engine,
+    operation: wire::Operation,
+    approval: wire::BranchApproval,
+    remaining: Duration,
+    cancel: engine::Cancellation,
+) -> wire::Outcome {
+    if operation
+        .validate(remaining.as_millis().min(u64::MAX as u128) as u64)
+        .is_err()
+    {
+        return error(engine::Error {
+            code: engine::ErrorCode::Validation,
+            dispatch: engine::Dispatch::NotDispatched,
+        });
+    }
+    if operation.held_branch_request().is_some() {
+        return held_branch_release(engine, operation, approval, remaining, cancel);
+    }
+    let (request, lookup) = match operation {
+        wire::Operation::CreateBranch { request } => (request, false),
+        wire::Operation::InspectBranchCompletion { request } => (request, true),
+        _ => {
+            return error(engine::Error {
+                code: engine::ErrorCode::Unsupported,
+                dispatch: engine::Dispatch::NotDispatched,
+            })
+        }
+    };
+    let convert_error = || engine::Error {
+        code: engine::ErrorCode::Ownership,
+        dispatch: engine::Dispatch::NotDispatched,
+    };
+    let run = || -> engine::Result<wire::Outcome> {
+        request.validate().map_err(|_| convert_error())?;
+        if request.approval != approval {
+            return Err(convert_error());
+        }
+        let native: engine::BranchCreateRequest =
+            serde_json::from_value(serde_json::to_value(&request).map_err(|_| convert_error())?)
+                .map_err(|_| convert_error())?;
+        let budget = if lookup {
+            engine::ReadBudget::new(remaining.min(Duration::from_secs(30)), cancel)
+        } else {
+            engine::ReadBudget::for_checkpoint_work(remaining, cancel)
+        }?;
+        let completion = if lookup {
+            engine.inspect_branch_completion(&native, &budget)?
+        } else {
+            Some(engine.create_branch(&native, &budget)?)
+        };
+        let completion = completion
+            .map(|value| {
+                let value: wire::BranchCompletion =
+                    serde_json::from_value(serde_json::to_value(value).map_err(|_| {
+                        engine::Error {
+                            code: engine::ErrorCode::Native,
+                            dispatch: engine::Dispatch::MayHaveDispatched,
+                        }
+                    })?)
+                    .map_err(|_| engine::Error {
+                        code: engine::ErrorCode::Native,
+                        dispatch: engine::Dispatch::MayHaveDispatched,
+                    })?;
+                value.matches(&request).map_err(|_| engine::Error {
+                    code: engine::ErrorCode::Native,
+                    dispatch: engine::Dispatch::MayHaveDispatched,
+                })?;
+                Ok(Box::new(value))
+            })
+            .transpose()?;
+        if lookup {
+            Ok(wire::Outcome::BranchCompletionPresence { completion })
+        } else {
+            Ok(wire::Outcome::BranchCreated {
+                completion: completion.ok_or(engine::Error {
+                    code: engine::ErrorCode::Native,
+                    dispatch: engine::Dispatch::MayHaveDispatched,
+                })?,
+            })
+        }
+    };
+    run().unwrap_or_else(error)
+}
+
+fn held_branch_release(
+    engine: &engine::Engine,
+    operation: wire::Operation,
+    approval: wire::BranchApproval,
+    remaining: Duration,
+    cancel: engine::Cancellation,
+) -> wire::Outcome {
+    let (request, qualify) = match operation {
+        wire::Operation::ReleaseHeldBranch { request } => (request, false),
+        wire::Operation::QualifyHeldBranchRelease { request } => (request, true),
+        _ => unreachable!(),
+    };
+    let convert_error = || engine::Error {
+        code: engine::ErrorCode::Ownership,
+        dispatch: engine::Dispatch::NotDispatched,
+    };
+    let run = || -> engine::Result<wire::Outcome> {
+        request.validate().map_err(|_| convert_error())?;
+        if *request.approval() != approval {
+            return Err(convert_error());
+        }
+        let completion: engine::BranchCompletion = serde_json::from_value(
+            serde_json::to_value(&request.completion).map_err(|_| convert_error())?,
+        )
+        .map_err(|_| convert_error())?;
+        let native_request: engine::BranchReleaseRequest = serde_json::from_value(
+            serde_json::to_value(&request.request).map_err(|_| convert_error())?,
+        )
+        .map_err(|_| convert_error())?;
+        let budget = if qualify {
+            engine::ReadBudget::new(remaining.min(Duration::from_secs(30)), cancel)
+        } else {
+            engine::ReadBudget::for_checkpoint_work(remaining, cancel)
+        }?;
+        let proof = if qualify {
+            engine.qualify_held_branch_release(
+                &completion,
+                &receipt(&request.source),
+                &native_request,
+                &budget,
+            )?
+        } else {
+            Some(engine.release_held_branch_checked(
+                &completion,
+                &receipt(&request.source),
+                &native_request,
+                &budget,
+            )?)
+        };
+        let transition = proof
+            .map(|proof| {
+                let failure = || engine::Error {
+                    code: engine::ErrorCode::Native,
+                    dispatch: engine::Dispatch::MayHaveDispatched,
+                };
+                let proof: wire::BranchReleaseTransition =
+                    serde_json::from_value(serde_json::to_value(proof).map_err(|_| failure())?)
+                        .map_err(|_| failure())?;
+                request.matches(&proof).map_err(|_| failure())?;
+                Ok(Box::new(proof))
+            })
+            .transpose()?;
+        if qualify {
+            Ok(wire::Outcome::HeldBranchReleasePresence { transition })
+        } else {
+            Ok(wire::Outcome::HeldBranchReleased {
+                transition: transition.ok_or_else(convert_error)?,
+            })
+        }
+    };
+    run().unwrap_or_else(error)
+}
+
 #[cfg(test)]
 mod growth_tests {
     use super::*;
@@ -1186,6 +1350,29 @@ mod growth_tests {
             let wire: wire::CaptureTransition = serde_json::from_value(serialized.clone()).unwrap();
             wire.validate().unwrap();
             assert_eq!(serde_json::to_value(wire).unwrap(), serialized);
+        }
+    }
+
+    #[test]
+    fn synthetic_branch_creation_evidence_matches_both_engine_and_wire_without_rewriting() {
+        let rows: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/branch-creation-v1.json"
+        ))
+        .unwrap();
+        for row in rows {
+            let request: wire::BranchCreateRequest =
+                serde_json::from_value(row["request"].clone()).unwrap();
+            request.validate().unwrap();
+            let native: engine::BranchCreateRequest =
+                serde_json::from_value(row["request"].clone()).unwrap();
+            assert!(serde_json::to_value(native).unwrap() == row["request"]);
+            let native: engine::BranchCompletion =
+                serde_json::from_value(row["completion"].clone()).unwrap();
+            native.validate().unwrap();
+            let wire: wire::BranchCompletion =
+                serde_json::from_value(row["completion"].clone()).unwrap();
+            wire.matches(&request).unwrap();
+            assert!(serde_json::to_value(native).unwrap() == serde_json::to_value(wire).unwrap());
         }
     }
 

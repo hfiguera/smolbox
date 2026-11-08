@@ -1,0 +1,32 @@
+defmodule SmolBox.Embedded.NativeBranchReleaseResult do
+  @moduledoc false
+  alias SmolBox.Embedded.{Identity, NativeBranchRelease}
+  alias SmolBox.{Machine, Validation}
+  @enforce_keys [:transition, :source, :child]
+  @derive {Inspect, only: []}
+  defstruct @enforce_keys
+  @type t :: %__MODULE__{}
+
+  def bound?(%__MODULE__{} = result, authority) do
+    release = authority.release
+
+    Validation.struct_shape?(result, __MODULE__) and
+      NativeBranchRelease.valid?(release, authority) and
+      NativeBranchRelease.bound?(result.transition, release, authority) and
+      observed?(result.source, release.source, release.source_pid) and
+      observed?(result.child, result.transition.receipt, release.child_pid)
+  end
+
+  def bound?(_, _), do: false
+
+  defp observed?(
+         %Machine{state: :running, backend_identity: %Identity{} = identity},
+         receipt,
+         pid
+       ),
+       do:
+         Identity.valid?(identity) and identity.receipt == receipt and
+           identity.pid_identity == pid
+
+  defp observed?(_, _, _), do: false
+end

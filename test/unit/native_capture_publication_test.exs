@@ -167,14 +167,14 @@ defmodule SmolBox.NativeCapturePublicationTest do
 
   test "receiver independently caps bytes before writing an over-budget producer" do
     {capture, request, budget, _proof} = fixture()
-    # Reach the byte boundary without racing 4096 filesystem writes against the
-    # fixture's unrelated one-second deadline under ordinary parallel test load.
-    budget = %{budget | timeout_ms: 10_000}
+    # Test the aggregate byte boundary with normal maximum-sized chunks, rather
+    # than racing thousands of filesystem calls against a wall-clock deadline.
+    budget = %{budget | timeout_ms: 10_000, max_response_bytes: 65_536}
 
     assert {:error, %{evidence: :dispatch_uncertain}} =
              CapturePublication.receive(capture, request, budget, fn consumer, _ ->
-               for _ <- 1..4096,
-                   do: assert(:ok == consumer.({:checkpoint, String.duplicate("x", 256)}))
+               for _ <- 1..16,
+                   do: assert(:ok == consumer.({:checkpoint, String.duplicate("x", 65_536)}))
 
                assert {:error, _} = consumer.({:checkpoint, "extra"})
 

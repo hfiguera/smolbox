@@ -4,6 +4,7 @@ defmodule SmolBox.Backend.Embedded do
   alias SmolBox.Backend.{
     Assignment,
     Budget,
+    EmbeddedBranch,
     EmbeddedCapture,
     EmbeddedCaptureObservation,
     EmbeddedCaptureResolution,
@@ -66,6 +67,14 @@ defmodule SmolBox.Backend.Embedded do
       do: Features.supports?(config, :images)
 
   def supports_operation?(nil, :logs), do: true
+
+  def supports_operation?(nil, operation)
+      when operation in [:branch_source, :branch_create, :branch_release, :branch_inspect_child],
+      do: true
+
+  def supports_operation?(%{__struct__: EmbeddedContext, config: config}, operation)
+      when operation in [:branch_source, :branch_create, :branch_release, :branch_inspect_child],
+      do: Features.supports?(config, :branches)
 
   def supports_operation?(nil, operation)
       when operation in [:export_machine, :qualify_export, :inspect_export, :cleanup_export],
@@ -169,6 +178,10 @@ defmodule SmolBox.Backend.Embedded do
 
   def invoke(context, :prepare_artifact, arguments, budget),
     do: EmbeddedPreparation.run(context, arguments, budget)
+
+  def invoke(context, operation, arguments, budget)
+      when operation in [:branch_create, :branch_release, :branch_inspect_child],
+      do: EmbeddedBranch.run(context, operation, arguments, budget)
 
   def invoke(context, :capture_checkpoint, arguments, budget),
     do: EmbeddedCapture.run(context, arguments, budget)

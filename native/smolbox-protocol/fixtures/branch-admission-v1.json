@@ -1,0 +1,131 @@
+[
+  {
+    "cpus": 1,
+    "memory_mb": 256,
+    "storage_gb": 1,
+    "overlay_gb": 1,
+    "host_overhead_mb": 256,
+    "extra": {
+      "slots": 1,
+      "cpus": 1,
+      "memory_mb": 512,
+      "disk_gb": 5
+    },
+    "expected": {
+      "ordinary_child": {
+        "slots": 1,
+        "cpus": 1,
+        "memory_mb": 512,
+        "disk_gb": 2
+      },
+      "total_additional": {
+        "slots": 2,
+        "cpus": 2,
+        "memory_mb": 1024,
+        "disk_gb": 7
+      },
+      "minimum_extra_memory_mb": 512,
+      "minimum_extra_disk_gb": 5
+    }
+  },
+  {
+    "cpus": 4,
+    "memory_mb": 2048,
+    "storage_gb": 8,
+    "overlay_gb": 4,
+    "host_overhead_mb": 768,
+    "extra": {
+      "slots": 1,
+      "cpus": 1,
+      "memory_mb": 2816,
+      "disk_gb": 26
+    },
+    "expected": {
+      "ordinary_child": {
+        "slots": 1,
+        "cpus": 4,
+        "memory_mb": 2816,
+        "disk_gb": 12
+      },
+      "total_additional": {
+        "slots": 2,
+        "cpus": 5,
+        "memory_mb": 5632,
+        "disk_gb": 38
+      },
+      "minimum_extra_memory_mb": 2816,
+      "minimum_extra_disk_gb": 26
+    }
+  },
+  {
+    "cpus": 1,
+    "memory_mb": 1025,
+    "storage_gb": 1,
+    "overlay_gb": 1,
+    "host_overhead_mb": 128,
+    "extra": {
+      "slots": 1,
+      "cpus": 1,
+      "memory_mb": 1153,
+      "disk_gb": 6
+    },
+    "expected": {
+      "ordinary_child": {
+        "slots": 1,
+        "cpus": 1,
+        "memory_mb": 1153,
+        "disk_gb": 2
+      },
+      "total_additional": {
+        "slots": 2,
+        "cpus": 2,
+        "memory_mb": 2306,
+        "disk_gb": 8
+      },
+      "minimum_extra_memory_mb": 1153,
+      "minimum_extra_disk_gb": 6
+    }
+  },
+  {
+    "cpus": 1,
+    "memory_mb": 1025,
+    "storage_gb": 1,
+    "overlay_gb": 1,
+    "host_overhead_mb": 128,
+    "extra": {
+      "slots": 1,
+      "cpus": 1,
+      "memory_mb": 1152,
+      "disk_gb": 6
+    },
+    "expected": null
+  },
+  {
+    "cpus": 1,
+    "memory_mb": 2048,
+    "storage_gb": 1,
+    "overlay_gb": 1,
+    "host_overhead_mb": 128,
+    "extra": {
+      "slots": 1,
+      "cpus": 1,
+      "memory_mb": 2176,
+      "disk_gb": 5
+    },
+    "expected": null
+  },
+  {
+    "cpus": 1,
+    "memory_mb": 256,
+    "storage_gb": 1,
+    "overlay_gb": 1,
+    "host_overhead_mb": 127,
+    "extra": {
+      "slots": 1,
+      "cpus": 1,
+      "memory_mb": 512,
+      "disk_gb": 8
+    },
+    "expected": null
+  }
+]

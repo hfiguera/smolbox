@@ -76,7 +76,7 @@ the adapter does not currently implement the HTTP operation. Arity overloads in
 | `expand_disks` | Add | Idle created/stopped machines; absolute 1–64-GiB targets, growth only, no implicit stop/start, immutable creation intent | P7 |
 | `start_checkpointable`, `checkpoint_preflight`, `capture_checkpoint` | Add | Approved idle offline bare guests, bounded portable capture, source resumes, no external/container/network dependencies | P8 |
 | `export_machine` | Add | Stopped-machine supported disk export and approved registry destination; no implicit stop, checkpoint semantics or container workspace export | P8 |
-| `branch_source`, `branch_absent`, `branch_create`, `branch_inspect_child`, `branch_release` | Add | Same-worker offline bare source, one leaf, explicit hold/release, source dependencies and extra backing reservations | P8 |
+| `branch_source`, `branch_absent`, `branch_create`, `branch_inspect_child`, `branch_release` | Source preflight wired; activation and remaining operations pending | Same-worker offline bare source, one leaf, explicit hold/release, source dependencies and extra backing reservations | P8 |
 | `qualify_creation`, `inspect_creation`, `qualify_growth`, `qualify_capture`, `cleanup_capture` | Native-only implementation | Keep pre-dispatch qualification, non-mutating verified absence, explicit quiesced growth/capture proof qualification and exact capture staging release. Capture qualification/cleanup never replay capture or adopt an artifact. HTTP intentionally does not implement these operations | P1, P7, P8, P9 |
 
 The following specification features also require coverage even though they are

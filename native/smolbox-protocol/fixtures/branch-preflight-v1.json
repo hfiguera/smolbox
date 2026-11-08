@@ -1,0 +1,47 @@
+{
+  "budget_ms": 30000,
+  "operation": {
+    "operation": "branch_preflight",
+    "receipt": {
+      "target_id": "embedded-local",
+      "domain_generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+      "name": "owned",
+      "owner_token": "6767676767676767676767676767676767676767676767676767676767676767",
+      "incarnation": "89898989898989898989898989898989",
+      "material_sha256": "abababababababababababababababababababababababababababababababab",
+      "material": {
+        "schema": 2,
+        "revision": 0,
+        "record_sha256": "abababababababababababababababababababababababababababababababab",
+        "chain_sha256": "bcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbc",
+        "operation_id": null,
+        "request_sha256": null
+      }
+    }
+  },
+  "outcome": {
+    "result": "observed",
+    "observation": {
+      "state": "running",
+      "resources": {
+        "cpus": 1,
+        "memory_mib": 256,
+        "storage_gib": 1,
+        "overlay_gib": 1
+      },
+      "pid_identity": [
+        123,
+        456
+      ],
+      "configuration": {
+        "network": {
+          "enabled": false,
+          "hosts": [],
+          "cidrs": []
+        },
+        "ports": [],
+        "backend": null
+      }
+    }
+  }
+}

@@ -9,6 +9,8 @@ defmodule SmolBox.Embedded.Identity do
   alias SmolBox.Backend.Binding
 
   alias SmolBox.Embedded.{
+    BranchPublication,
+    BranchReleaseTransition,
     CaptureResolutionTransition,
     CaptureTransition,
     GrowthTransition,
@@ -56,6 +58,12 @@ defmodule SmolBox.Embedded.Identity do
 
   defp transition?(%{transition: nil}), do: true
 
+  defp transition?(%{transition: %BranchPublication{} = transition, receipt: receipt}),
+    do: BranchPublication.valid?(transition) and transition.receipt == receipt
+
+  defp transition?(%{transition: %BranchReleaseTransition{} = transition, receipt: receipt}),
+    do: BranchReleaseTransition.valid?(transition) and transition.receipt == receipt
+
   defp transition?(%{transition: %CaptureTransition{} = transition, receipt: receipt}),
     do: CaptureTransition.valid?(transition) and transition.receipt == receipt
 
@@ -66,7 +74,7 @@ defmodule SmolBox.Embedded.Identity do
     do: GrowthTransition.valid?(transition) and transition.receipt == receipt
 
   defp history?(%{material_history: nil, transition: transition}),
-    do: not MaterialHistory.capture?(transition)
+    do: not MaterialHistory.requires_history?(transition)
 
   defp history?(identity),
     do:

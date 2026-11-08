@@ -1,6 +1,7 @@
 defmodule SmolBox.Embedded.Channel do
   @moduledoc false
   alias SmolBox.Embedded.{
+    BranchCompletion,
     CaptureAbortSourceQualification,
     CaptureResolutionTransition,
     CaptureStagingCleanupReceipt,
@@ -8,6 +9,7 @@ defmodule SmolBox.Embedded.Channel do
     ExportPublication,
     ExportStageCleanup,
     GrowthTransition,
+    HeldBranchReleaseRequest,
     ImageContract,
     Protocol,
     RegistryContract,
@@ -25,6 +27,7 @@ defmodule SmolBox.Embedded.Channel do
     :domain,
     :minor,
     :export_platform,
+    :platform,
     major: 1,
     unavailable: false,
     last_id: 0,
@@ -39,6 +42,7 @@ defmodule SmolBox.Embedded.Channel do
       domain: hello["domain"],
       minor: hello["minor"],
       major: Map.get(hello, "major", 1),
+      platform: get_in(hello, ["package", "platform"]),
       export_platform:
         case get_in(hello, ["package", "architecture"]) do
           "x86_64" -> "linux/amd64"
@@ -58,7 +62,8 @@ defmodule SmolBox.Embedded.Channel do
          true <-
            operation["operation"] != "terminal_open" or
              bytes <= operation["terminal"]["max_buffer_bytes"],
-         true <- domain_matches?(channel.domain, operation["receipt"]) do
+         true <- domain_matches?(channel.domain, Request.receipt(operation)),
+         true <- held_platform?(channel.platform, operation) do
       id = channel.last_id + 1
 
       pending = %{
@@ -270,6 +275,7 @@ defmodule SmolBox.Embedded.Channel do
   defp advance(channel, pending, %{"type" => "terminal", "sequence" => next, "outcome" => outcome}) do
     if terminal_sequence?(pending.sequence, next) and
          Protocol.valid_outcome?(outcome, channel.major) and
+         branch_platform?(channel.platform, outcome) and
          terminal_matches?(channel.domain, pending, outcome),
        do: {:ok, %{pending | sequence: next, done: true}, {:terminal, outcome}},
        else: :error
@@ -280,6 +286,18 @@ defmodule SmolBox.Embedded.Channel do
   defp terminal_sequence?(nil, 0), do: true
   defp terminal_sequence?(previous, next) when is_integer(previous), do: next == previous + 1
   defp terminal_sequence?(_previous, _next), do: false
+
+  defp branch_platform?(platform, %{"result" => kind, "completion" => proof})
+       when kind in ~w(branch_created branch_completion_presence) and proof != nil,
+       do: proof["publication"]["change"]["platform"] == platform
+
+  defp branch_platform?(_platform, _outcome), do: true
+
+  defp held_platform?(platform, %{"operation" => name, "request" => request})
+       when name in ~w(release_held_branch qualify_held_branch_release),
+       do: HeldBranchReleaseRequest.platform(request) == platform
+
+  defp held_platform?(_, _), do: true
 
   defp stream(%{"operation" => name, "command" => command}, "stdout")
        when name in ~w(exec exec_buffered exec_stream),
@@ -644,10 +662,62 @@ defmodule SmolBox.Embedded.Channel do
 
   defp terminal_matches?(
          _domain,
+         %{
+           operation: %{"operation" => "release_held_branch", "request" => request},
+           output_bytes: 0
+         },
+         %{"result" => "held_branch_released", "transition" => proof}
+       ),
+       do: HeldBranchReleaseRequest.matches?(proof, request)
+
+  defp terminal_matches?(
+         _domain,
+         %{
+           operation: %{"operation" => "qualify_held_branch_release", "request" => request},
+           output_bytes: 0
+         },
+         %{"result" => "held_branch_release_presence", "transition" => proof}
+       ),
+       do: proof == nil or HeldBranchReleaseRequest.matches?(proof, request)
+
+  defp terminal_matches?(
+         _domain,
+         %{operation: %{"operation" => "create_branch", "request" => request}, output_bytes: 0},
+         %{"result" => "branch_created", "completion" => proof}
+       ),
+       do: BranchCompletion.matches?(proof, request)
+
+  defp terminal_matches?(
+         _domain,
+         %{
+           operation: %{"operation" => "inspect_branch_completion", "request" => request},
+           output_bytes: 0
+         },
+         %{"result" => "branch_completion_presence", "completion" => proof}
+       ),
+       do: proof == nil or BranchCompletion.matches?(proof, request)
+
+  defp terminal_matches?(
+         _domain,
          %{operation: %{"operation" => "checkpoint_preflight"}, output_bytes: 0},
          %{"result" => "observed", "observation" => %{"state" => "running"}}
        ),
        do: true
+
+  defp terminal_matches?(
+         _domain,
+         %{operation: %{"operation" => "branch_preflight"}, output_bytes: 0},
+         %{
+           "result" => "observed",
+           "observation" => %{
+             "state" => "running",
+             "resources" => resources,
+             "pid_identity" => [_pid, _birth],
+             "configuration" => %{"network" => %{"enabled" => false}, "ports" => []} = config
+           }
+         }
+       ),
+       do: resources != nil and Map.get(config, "mounts") == nil
 
   defp terminal_matches?(_domain, %{operation: %{"operation" => name}}, %{"result" => "observed"})
        when name in ~w(inspect start start_oci start_checkpointable stop delete), do: true

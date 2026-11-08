@@ -203,6 +203,20 @@ struct Journal {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     capture_resolutions: Option<Vec<crate::capture_resolution::Resolved>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    initial_branch: Option<crate::branch::InitialBranchJournal>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    initial_branch_retirements: Option<Vec<crate::InitialBranchRetirement>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    branch_preparation: Option<crate::branch_worker::Entry>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    branch_history: Option<Vec<crate::branch_material::Completed>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    branch_child: Option<crate::branch_material::ChildOrigin>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    branch_release_pending: Option<crate::branch_release::Intent>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    branch_release: Option<crate::BranchReleaseTransition>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     mounts: Option<crate::MountMaterial>,
 }
 impl Journal {
@@ -210,6 +224,9 @@ impl Journal {
         self.history.len()
             + self.capture_history.as_ref().map_or(0, Vec::len)
             + self.capture_resolutions.as_ref().map_or(0, Vec::len)
+            + self.initial_branch_retirements.as_ref().map_or(0, Vec::len)
+            + self.branch_history.as_ref().map_or(0, Vec::len)
+            + usize::from(self.branch_release.is_some())
     }
 }
 
@@ -223,6 +240,520 @@ pub(crate) struct Permit {
 }
 
 impl MaterialJournal {
+    /// Observation only. Every current dependency must match one independently
+    /// published child and its current protected material head, never labels alone.
+    pub(crate) fn continuing_branch_children(
+        &self,
+        receipt: &CreationReceipt,
+        children: &[String],
+        database: &Path,
+        identity: (u64, u64),
+        budget: &crate::ReadBudget,
+    ) -> Result<bool> {
+        if children.is_empty() || children.len() > crate::observations::MAX_RECORDS {
+            return Ok(false);
+        }
+        self.verify(receipt)?;
+        let (journal, _) = self.load()?;
+        self.published_branch_children(&journal, children, database, identity, budget)
+    }
+    /// Branch admission may retain exactly its own prepared/entered declaration.
+    /// Only that entered declaration can exempt its not-yet-published child.
+    /// All earlier dependencies still require independently protected material.
+    pub(crate) fn branch_dependencies(
+        &self,
+        receipt: &CreationReceipt,
+        joining: Option<&str>,
+        children: &[String],
+        database: &Path,
+        identity: (u64, u64),
+        budget: &crate::ReadBudget,
+    ) -> Result<bool> {
+        budget.check()?;
+        let (journal, _) = self.load()?;
+        check_origin(&journal.origin, receipt)?;
+        if receipt.material.as_ref() != Some(&journal.head)
+            || journal.branch_child.is_some()
+            || journal.pending.is_some()
+            || journal.capture_pending.is_some()
+            || journal.branch_release_pending.is_some()
+        {
+            return Ok(false);
+        }
+        if let Some(intent) = &journal.initial_branch {
+            if joining != Some(intent.child.name.as_str())
+                || intent.source != *receipt
+                || children.contains(&intent.child.name)
+            {
+                return Ok(false);
+            }
+        }
+        let exempt = if let Some(entered) = &journal.branch_preparation {
+            if joining != Some(entered.grant.intent.child.name.as_str())
+                || entered.grant.intent.source != *receipt
+            {
+                return Ok(false);
+            }
+            joining
+        } else {
+            None
+        };
+        if children.len() > crate::observations::MAX_RECORDS
+            || children
+                .iter()
+                .collect::<std::collections::BTreeSet<_>>()
+                .len()
+                != children.len()
+        {
+            return Ok(false);
+        }
+        let siblings = children
+            .iter()
+            .filter(|name| Some(name.as_str()) != exempt)
+            .cloned()
+            .collect::<Vec<_>>();
+        if siblings.is_empty() {
+            budget.check()?;
+            return Ok(true);
+        }
+        self.published_branch_children(&journal, &siblings, database, identity, budget)
+    }
+    fn published_branch_children(
+        &self,
+        journal: &Journal,
+        children: &[String],
+        database: &Path,
+        identity: (u64, u64),
+        budget: &crate::ReadBudget,
+    ) -> Result<bool> {
+        let branches = journal.branch_history.as_deref().unwrap_or(&[]);
+        if branches.is_empty() || journal.branch_child.is_some() {
+            return Ok(false);
+        }
+        for name in children {
+            budget.check()?;
+            let Some(child) = crate::sdk_compat::observe_record(database, identity, name, budget)?
+            else {
+                return Ok(false);
+            };
+            let matches = branches
+                .iter()
+                .filter(|entry| entry.change.child_origin.verify_record(&child).is_ok())
+                .collect::<Vec<_>>();
+            if matches.len() != 1 {
+                return Ok(false);
+            }
+            let publication = &matches[0].change;
+            let directory = self
+                .directory
+                .parent()
+                .ok_or(Error::before(ErrorCode::Ownership))?
+                .join(smolvm::agent::vm_dir_hash(&child.name));
+            crate::machine::verify_branch_marker(&publication.child, &directory)?;
+            let (current, _) = Self::at(&directory).load()?;
+            check_origin(&current.origin, &publication.child)?;
+            if current.branch_child.as_ref() != Some(&publication.child_origin)
+                || current.head.record_sha256 != material_hash(&child)?
+                || current.branch_release_pending.is_some()
+            {
+                return Ok(false);
+            }
+        }
+        budget.check()?;
+        Ok(true)
+    }
+    pub(crate) fn begin_branch_release(
+        &self,
+        intent: &crate::branch_release::Intent,
+        before: &VmRecord,
+    ) -> Result<()> {
+        intent.validate()?;
+        intent.released_record(before)?;
+        self.verify(&intent.transition.previous)?;
+        self.verify_branch_child(&intent.transition.previous, before)?;
+        let (mut journal, inode) = self.load()?;
+        if journal.history_len() != 0
+            || journal.branch_child.as_ref() != Some(&intent.transition.change.binding)
+        {
+            return Err(Error::before(ErrorCode::State));
+        }
+        journal.branch_release_pending = Some(intent.clone());
+        self.write(&journal, Some(inode)).map_err(after_entry)
+    }
+    pub(crate) fn authorize_branch_release(
+        &self,
+        intent: &crate::branch_release::Intent,
+    ) -> Result<()> {
+        intent.validate()?;
+        let (journal, _) = self.load()?;
+        check_origin(&journal.origin, &intent.transition.previous)?;
+        if journal.branch_release_pending.as_ref() != Some(intent)
+            || intent.transition.previous.material.as_ref() != Some(&journal.head)
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        Ok(())
+    }
+    pub(crate) fn complete_branch_release(
+        &self,
+        intent: &crate::branch_release::Intent,
+        proof: &crate::branch_release::Verified,
+        record: &VmRecord,
+    ) -> Result<crate::BranchReleaseTransition> {
+        self.authorize_branch_release(intent)?;
+        intent.transition.verify_record(record)?;
+        if !proof.matches(intent)
+            || record.state != smolvm::config::RecordState::Running
+            || record.pid != Some(intent.child.pid)
+            || record.pid_start_time != Some(intent.child.birth)
+        {
+            return Err(Error::uncertain(ErrorCode::Ownership));
+        }
+        let (mut journal, inode) = self.load()?;
+        journal.head = intent
+            .transition
+            .receipt
+            .material
+            .clone()
+            .ok_or(Error::uncertain(ErrorCode::Ownership))?;
+        journal.branch_release_pending = None;
+        journal.branch_release = Some(intent.transition.clone());
+        self.write(&journal, Some(inode)).map_err(after_entry)?;
+        Ok(intent.transition.clone())
+    }
+    pub(crate) fn completed_branch_release(
+        &self,
+        previous: &CreationReceipt,
+        request: &crate::BranchReleaseRequest,
+    ) -> Result<Option<crate::BranchReleaseTransition>> {
+        request.validate()?;
+        let (journal, _) = self.load()?;
+        check_origin(&journal.origin, previous)?;
+        match journal.branch_release {
+            Some(release)
+                if release.previous == *previous && release.change.request == *request =>
+            {
+                Ok(Some(release))
+            }
+            Some(_) => Err(Error::before(ErrorCode::Ownership)),
+            None => Ok(None),
+        }
+    }
+    pub(crate) fn begin_branch_publication(
+        &self,
+        grant: &crate::branch_worker::Grant,
+        expected: &crate::branch_worker::Expected,
+        publication: &crate::BranchPublication,
+        before: &VmRecord,
+        source: &VmRecord,
+        raw_child: &VmRecord,
+    ) -> Result<()> {
+        let (computed, _) = crate::BranchPublication::issue(
+            &grant.intent,
+            before,
+            source,
+            raw_child,
+            &publication.change.child_origin.generation,
+        )?;
+        if computed != *publication {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        if let Some(previous) = self.pending_branch_publication(grant, expected)? {
+            return if previous == *publication {
+                Ok(())
+            } else {
+                Err(Error::before(ErrorCode::Ownership))
+            };
+        }
+        self.authorize_branch_preparation(grant, expected, before)?;
+        let (mut journal, inode) = self.load()?;
+        let entered = journal
+            .branch_preparation
+            .as_mut()
+            .ok_or(Error::before(ErrorCode::State))?;
+        if let Some(previous) = &entered.publication {
+            return if previous == publication {
+                Ok(())
+            } else {
+                Err(Error::before(ErrorCode::Ownership))
+            };
+        }
+        entered.publication = Some(publication.clone());
+        self.write(&journal, Some(inode)).map_err(after_entry)
+    }
+    pub(crate) fn authorize_branch_publication(
+        &self,
+        grant: &crate::branch_worker::Grant,
+        expected: &crate::branch_worker::Expected,
+        publication: &crate::BranchPublication,
+    ) -> Result<()> {
+        let (journal, _) = self.load()?;
+        let entered = journal
+            .branch_preparation
+            .ok_or(Error::before(ErrorCode::State))?;
+        if entered.grant != *grant
+            || entered.metadata_sha256 != expected.metadata_sha256
+            || expected.operation_id != grant.intent.child.operation_id
+            || expected.request_sha256 != grant.intent.request_sha256
+            || entered.publication.as_ref() != Some(publication)
+            || publication.previous.material.as_ref() != Some(&journal.head)
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        Ok(())
+    }
+    pub(crate) fn pending_branch_publication(
+        &self,
+        grant: &crate::branch_worker::Grant,
+        expected: &crate::branch_worker::Expected,
+    ) -> Result<Option<crate::BranchPublication>> {
+        let (journal, _) = self.load()?;
+        let entered = journal
+            .branch_preparation
+            .ok_or(Error::before(ErrorCode::State))?;
+        if entered.grant != *grant
+            || entered.metadata_sha256 != expected.metadata_sha256
+            || expected.operation_id != grant.intent.child.operation_id
+            || expected.request_sha256 != grant.intent.request_sha256
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        Ok(entered.publication)
+    }
+    pub(crate) fn complete_branch_publication(
+        &self,
+        grant: &crate::branch_worker::Grant,
+        expected: &crate::branch_worker::Expected,
+        publication: &crate::BranchPublication,
+        records: (&VmRecord, &VmRecord),
+        child_directory: &Path,
+        authority: &crate::capture_resolution::SourceAuthority,
+    ) -> Result<crate::BranchPublication> {
+        let (source, child) = records;
+        self.authorize_branch_publication(grant, expected, publication)?;
+        publication.validate()?;
+        publication.change.child_origin.verify_record(child)?;
+        if child_directory
+            != self
+                .directory
+                .parent()
+                .ok_or(Error::before(ErrorCode::Ownership))?
+                .join(smolvm::agent::vm_dir_hash(&child.name))
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        crate::machine::verify_branch_marker(publication.child(), child_directory)?;
+        let child_journal = Self::at(child_directory);
+        child_journal.verify(publication.child())?;
+        child_journal.verify_branch_child(publication.child(), child)?;
+        if !publication.receipt.matches(source)?
+            || !publication.child().matches(child)?
+            || !authority.running()
+            || !authority.matches(source, grant.intent.source_pid)
+            || child.state != smolvm::config::RecordState::Created
+            || child.pid.is_some()
+            || child.pid_start_time.is_some()
+            || !child.forkpoint_held
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        let (mut journal, inode) = self.load()?;
+        let proof = publication
+            .receipt
+            .material
+            .clone()
+            .ok_or(Error::before(ErrorCode::Ownership))?;
+        journal.branch_history.get_or_insert_with(Vec::new).push(
+            crate::branch_material::Completed {
+                change: publication.change.clone(),
+                proof: proof.clone(),
+            },
+        );
+        journal.head = proof;
+        journal.branch_preparation = None;
+        self.write(&journal, Some(inode)).map_err(after_entry)?;
+        Ok(publication.clone())
+    }
+    pub(crate) fn completed_branch_publication(
+        &self,
+        previous: &CreationReceipt,
+        operation: &str,
+        request: &str,
+    ) -> Result<Option<crate::BranchPublication>> {
+        let (journal, _) = self.load()?;
+        check_origin(&journal.origin, previous)?;
+        let Some(entry) = journal
+            .branch_history
+            .as_deref()
+            .unwrap_or(&[])
+            .iter()
+            .find(|entry| entry.change.operation_id() == operation)
+        else {
+            return Ok(None);
+        };
+        if entry.change.child_origin.intent.source != *previous
+            || entry.change.request_sha256() != request
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        let publication = crate::BranchPublication {
+            schema: 1,
+            previous: previous.clone(),
+            receipt: with_proof(&journal.origin, entry.proof.clone()),
+            change: entry.change.clone(),
+        };
+        publication.validate()?;
+        Ok(Some(publication))
+    }
+    /// A distinct synchronized boundary. Failure may have published entered
+    /// state; callers must already retain the original owner and allowance.
+    pub(crate) fn enter_branch_preparation(
+        &self,
+        grant: &crate::branch_worker::Grant,
+        expected: &crate::branch_worker::Expected,
+        record: &VmRecord,
+    ) -> Result<()> {
+        grant.validate()?;
+        expected.validate()?;
+        grant.intent.verify_record(record)?;
+        let (mut journal, inode) = self.load()?;
+        check_origin(&journal.origin, &grant.intent.source)?;
+        if journal.initial_branch.as_ref() != Some(&grant.intent)
+            || journal.branch_preparation.is_some()
+            || grant.intent.source.material.as_ref() != Some(&journal.head)
+            || expected.operation_id != grant.intent.child.operation_id
+            || expected.request_sha256 != grant.intent.request_sha256
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        journal.initial_branch = None;
+        journal.branch_preparation = Some(crate::branch_worker::Entry {
+            grant: grant.clone(),
+            metadata_sha256: expected.metadata_sha256.clone(),
+            publication: None,
+        });
+        self.write(&journal, Some(inode)).map_err(after_entry)
+    }
+    pub(crate) fn authorize_branch_preparation(
+        &self,
+        grant: &crate::branch_worker::Grant,
+        expected: &crate::branch_worker::Expected,
+        record: &VmRecord,
+    ) -> Result<()> {
+        let (journal, _) = self.load()?;
+        check_origin(&journal.origin, &grant.intent.source)?;
+        let entered = journal
+            .branch_preparation
+            .ok_or(Error::before(ErrorCode::State))?;
+        if entered.grant != *grant
+            || entered.metadata_sha256 != expected.metadata_sha256
+            || expected.operation_id != grant.intent.child.operation_id
+            || expected.request_sha256 != grant.intent.request_sha256
+            || grant.intent.source.material.as_ref() != Some(&journal.head)
+            || entered.publication.is_some()
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        grant.intent.verify_record(record)
+    }
+    pub(crate) fn prepare_initial_branch(
+        &self,
+        intent: &crate::branch::InitialBranchJournal,
+        record: &VmRecord,
+    ) -> Result<()> {
+        self.verify(&intent.source)?;
+        intent.verify_record(record)?;
+        let (mut journal, inode) = self.load()?;
+        if journal.history_len() >= MAX_HISTORY {
+            return Err(Error::before(ErrorCode::State));
+        }
+        // load/write validates operation reuse against every existing history.
+        journal.initial_branch = Some(intent.clone());
+        self.write(&journal, Some(inode))
+    }
+    pub(crate) fn verify_initial_branch(
+        &self,
+        intent: &crate::branch::InitialBranchJournal,
+        record: &VmRecord,
+    ) -> Result<()> {
+        let (journal, _) = self.load()?;
+        check_origin(&journal.origin, &intent.source)?;
+        if journal.initial_branch.as_ref() != Some(intent)
+            || intent.source.material.as_ref() != Some(&journal.head)
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        intent.verify_record(record)
+    }
+    pub(crate) fn pending_initial_branch(
+        &self,
+        source: &CreationReceipt,
+        operation_id: &str,
+        request_sha256: &str,
+    ) -> Result<crate::branch::InitialBranchJournal> {
+        let (journal, _) = self.load()?;
+        check_origin(&journal.origin, source)?;
+        let pending = journal
+            .initial_branch
+            .ok_or(Error::before(ErrorCode::State))?;
+        if pending.source != *source
+            || pending.child.operation_id != operation_id
+            || pending.request_sha256 != request_sha256
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        Ok(pending)
+    }
+    pub(crate) fn retired_initial_branch(
+        &self,
+        source: &CreationReceipt,
+        operation_id: &str,
+        request_sha256: &str,
+    ) -> Result<Option<crate::InitialBranchRetirement>> {
+        let (journal, _) = self.load()?;
+        check_origin(&journal.origin, source)?;
+        let proof = journal
+            .initial_branch_retirements
+            .as_deref()
+            .unwrap_or(&[])
+            .iter()
+            .find(|proof| proof.child().operation_id == operation_id);
+        if let Some(proof) = proof {
+            if proof.source() != source || proof.request_sha256() != request_sha256 {
+                return Err(Error::before(ErrorCode::Ownership));
+            }
+        }
+        Ok(proof.cloned())
+    }
+    /// This prepared-only schema cannot represent SDK entry. Retire the exact
+    /// declaration with positive source authority, retaining a correlated result
+    /// before acknowledging it. Lost acknowledgement can only read that result.
+    pub(crate) fn retire_initial_branch(
+        &self,
+        intent: &crate::branch::InitialBranchJournal,
+        record: &VmRecord,
+        authority: &crate::capture_resolution::SourceAuthority,
+    ) -> Result<crate::InitialBranchRetirement> {
+        intent.verify_material(record)?;
+        if !authority.matches(record, intent.source_pid) {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        let (mut journal, inode) = self.load()?;
+        check_origin(&journal.origin, &intent.source)?;
+        if journal.initial_branch.as_ref() != Some(intent)
+            || intent.source.material.as_ref() != Some(&journal.head)
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        let proof = crate::InitialBranchRetirement::issue(intent.clone())?;
+        journal.initial_branch = None;
+        journal
+            .initial_branch_retirements
+            .get_or_insert_with(Vec::new)
+            .push(proof.clone());
+        self.write(&journal, Some(inode)).map_err(after_entry)?;
+        Ok(proof)
+    }
     pub(crate) fn capture_dispatch(
         &self,
         receipt: &CreationReceipt,
@@ -620,7 +1151,7 @@ impl MaterialJournal {
     /// Called only after Engine's successful fresh create and original marker.
     /// There is deliberately no promote-existing-receipt entry point.
     pub(crate) fn initialize(&self, origin: &CreationReceipt) -> Result<CreationReceipt> {
-        self.initialize_material(origin, None)
+        self.initialize_material(origin, None, None)
     }
 
     pub(crate) fn initialize_mounted(
@@ -637,13 +1168,81 @@ impl MaterialJournal {
         {
             return Err(Error::before(ErrorCode::Ownership));
         }
-        self.initialize_material(origin, Some(mounts))
+        self.initialize_material(origin, Some(mounts), None)
+    }
+
+    pub(crate) fn initialize_branch_child(
+        &self,
+        publication: &crate::BranchPublication,
+        record: &VmRecord,
+    ) -> Result<CreationReceipt> {
+        publication.validate()?;
+        let binding = &publication.change.child_origin;
+        let receipt = publication.child();
+        binding.verify_record(record)?;
+        if !receipt.matches(record)? {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        let mut origin = receipt.clone();
+        origin.material = None;
+        match std::fs::symlink_metadata(self.directory.join(FILE_NAME)) {
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+                self.initialize_material(&origin, None, Some(binding.clone()))
+            }
+            Err(_) => Err(Error::before(ErrorCode::Ownership)),
+            Ok(_) => {
+                let (journal, _) = self.load()?;
+                if journal.origin != origin
+                    || journal.branch_child.as_ref() != Some(binding)
+                    || journal.history_len() != 0
+                    || journal.head != root_proof(&origin)?
+                {
+                    return Err(Error::before(ErrorCode::Ownership));
+                }
+                self.verify(receipt)?;
+                Ok(receipt.clone())
+            }
+        }
+    }
+    pub(crate) fn verify_branch_child(
+        &self,
+        receipt: &CreationReceipt,
+        record: &VmRecord,
+    ) -> Result<()> {
+        let binding = if receipt.material.is_some() {
+            self.load()?.0.branch_child
+        } else {
+            None
+        };
+        match binding {
+            Some(binding) => {
+                binding.verify_origin(receipt)?;
+                binding.verify_record(record)
+            }
+            None if !record
+                .labels
+                .contains_key(crate::branch_material::PARENT_LABEL) =>
+            {
+                Ok(())
+            }
+            None => Err(Error::before(ErrorCode::Ownership)),
+        }
+    }
+
+    pub(crate) fn branch_child(
+        &self,
+        receipt: &CreationReceipt,
+        record: &VmRecord,
+    ) -> Result<bool> {
+        self.verify_branch_child(receipt, record)?;
+        Ok(receipt.material.is_some() && self.load()?.0.branch_child.is_some())
     }
 
     fn initialize_material(
         &self,
         origin: &CreationReceipt,
         mounts: Option<crate::MountMaterial>,
+        branch_child: Option<crate::branch_material::ChildOrigin>,
     ) -> Result<CreationReceipt> {
         if origin.material.is_some() {
             return Err(Error::before(ErrorCode::Ownership));
@@ -658,6 +1257,13 @@ impl MaterialJournal {
             capture_history: None,
             capture_pending: None,
             capture_resolutions: None,
+            initial_branch: None,
+            initial_branch_retirements: None,
+            branch_preparation: None,
+            branch_history: None,
+            branch_child,
+            branch_release_pending: None,
+            branch_release: None,
             mounts,
         };
         self.write(&journal, None)?;
@@ -672,7 +1278,12 @@ impl MaterialJournal {
                 if journal.head != *proof {
                     return Err(Error::before(ErrorCode::Ownership));
                 }
-                if journal.pending.is_some() || journal.capture_pending.is_some() {
+                if journal.pending.is_some()
+                    || journal.capture_pending.is_some()
+                    || journal.initial_branch.is_some()
+                    || journal.branch_preparation.is_some()
+                    || journal.branch_release_pending.is_some()
+                {
                     return Err(Error::before(ErrorCode::State));
                 }
                 Ok(())
@@ -1223,15 +1834,32 @@ pub(crate) fn hash(value: &impl Serialize) -> Result<String> {
 fn validate_journal(journal: &Journal) -> Result<()> {
     let captures = journal.capture_history.as_deref().unwrap_or(&[]);
     let resolutions = journal.capture_resolutions.as_deref().unwrap_or(&[]);
+    let retirements = journal.initial_branch_retirements.as_deref().unwrap_or(&[]);
+    let branches = journal.branch_history.as_deref().unwrap_or(&[]);
     if journal.schema != 2
         || journal.origin.material.is_some()
         || journal.history_len() > MAX_HISTORY
         || journal.capture_history.as_ref().is_some_and(Vec::is_empty)
+        || journal.branch_history.as_ref().is_some_and(Vec::is_empty)
+        || journal
+            .initial_branch_retirements
+            .as_ref()
+            .is_some_and(Vec::is_empty)
         || journal
             .capture_resolutions
             .as_ref()
             .is_some_and(Vec::is_empty)
-        || (journal.pending.is_some() && journal.capture_pending.is_some())
+        || [
+            journal.pending.is_some(),
+            journal.capture_pending.is_some(),
+            journal.initial_branch.is_some(),
+            journal.branch_preparation.is_some(),
+            journal.branch_release_pending.is_some(),
+        ]
+        .into_iter()
+        .filter(|pending| *pending)
+        .count()
+            > 1
         || journal
             .history
             .windows(2)
@@ -1242,16 +1870,42 @@ fn validate_journal(journal: &Journal) -> Result<()> {
         || resolutions
             .windows(2)
             .any(|pair| pair[0].proof.revision >= pair[1].proof.revision)
+        || branches
+            .windows(2)
+            .any(|pair| pair[0].proof.revision >= pair[1].proof.revision)
     {
         return Err(Error::before(ErrorCode::Ownership));
     }
     if let Some(mounts) = &journal.mounts {
         mounts.validate(&journal.origin)?;
     }
+    if let Some(binding) = &journal.branch_child {
+        binding.verify_origin(&journal.origin)?;
+        if journal.mounts.is_some() {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+    }
+    if let Some(release) = &journal.branch_release {
+        release.validate()?;
+        check_origin(&journal.origin, &release.previous)?;
+        if journal.history_len() != 1
+            || journal.branch_child.as_ref() != Some(&release.change.binding)
+            || release.receipt.material.as_ref() != Some(&journal.head)
+            || journal.pending.is_some()
+            || journal.capture_pending.is_some()
+            || journal.initial_branch.is_some()
+            || journal.branch_preparation.is_some()
+            || journal.branch_release_pending.is_some()
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        return Ok(());
+    }
     enum Event<'a> {
         Grow(&'a Completed),
         Capture(&'a crate::capture_material::Completed),
         Resolve(&'a crate::capture_resolution::Resolved),
+        Branch(&'a crate::branch_material::Completed),
     }
     let mut events = std::collections::BTreeMap::new();
     for entry in &journal.history {
@@ -1278,8 +1932,17 @@ fn validate_journal(journal: &Journal) -> Result<()> {
             return Err(Error::before(ErrorCode::Ownership));
         }
     }
+    for entry in branches {
+        if events
+            .insert(entry.proof.revision, Event::Branch(entry))
+            .is_some()
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+    }
     let mut previous = root_proof(&journal.origin)?;
     previous.validate()?;
+    let mut heads = std::collections::BTreeMap::from([(previous.revision, previous.clone())]);
     let mut ids = std::collections::BTreeSet::new();
     let mut immutable = None;
     let mut capture_immutable = None;
@@ -1287,6 +1950,32 @@ fn validate_journal(journal: &Journal) -> Result<()> {
     let mut checkpoint_head: Option<Option<&String>> = None;
     for event in events.values() {
         match event {
+            Event::Branch(entry) => {
+                entry.change.validate()?;
+                let intent = &entry.change.child_origin.intent;
+                check_origin(&journal.origin, &intent.source)?;
+                if intent.source.material.as_ref() != Some(&previous)
+                    || !ids.insert(&intent.child.operation_id)
+                    || immutable.is_some_and(|hash| hash != &entry.change.previous_growth_sha256)
+                    || capture_immutable
+                        .is_some_and(|hash| hash != &entry.change.previous_capture_sha256)
+                    || checkpoint_head
+                        .is_some_and(|head| head != entry.change.checkpoint_head.as_ref())
+                    || entry.proof
+                        != crate::branch_material::next_proof(
+                            &entry.change,
+                            entry.proof.record_sha256.clone(),
+                        )?
+                    || (entry.change.lineage == entry.change.previous_lineage
+                        && entry.proof.record_sha256 != previous.record_sha256)
+                {
+                    return Err(Error::before(ErrorCode::Ownership));
+                }
+                immutable = Some(&entry.change.growth_sha256);
+                capture_immutable = Some(&entry.change.capture_sha256);
+                checkpoint_head = Some(entry.change.checkpoint_head.as_ref());
+                previous = entry.proof.clone();
+            }
             Event::Grow(entry) => {
                 if !valid_change(&entry.change)
                     || entry.change.previous != previous
@@ -1354,6 +2043,24 @@ fn validate_journal(journal: &Journal) -> Result<()> {
                 previous = entry.proof.clone();
             }
         }
+        heads.insert(previous.revision, previous.clone());
+    }
+    let mut retired_revision = 0;
+    for proof in retirements {
+        proof.validate()?;
+        check_origin(&journal.origin, proof.source())?;
+        let source_head = proof
+            .source()
+            .material
+            .as_ref()
+            .ok_or(Error::before(ErrorCode::Ownership))?;
+        if heads.get(&source_head.revision) != Some(source_head)
+            || source_head.revision < retired_revision
+            || !ids.insert(&proof.child().operation_id)
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        retired_revision = source_head.revision;
     }
     if journal.head != previous
         || journal.pending.as_ref().is_some_and(|pending| {
@@ -1376,6 +2083,38 @@ fn validate_journal(journal: &Journal) -> Result<()> {
         })
     {
         return Err(Error::before(ErrorCode::Ownership));
+    }
+    if let Some(branch) = &journal.initial_branch {
+        branch.validate()?;
+        check_origin(&journal.origin, &branch.source)?;
+        if branch.source.material.as_ref() != Some(&journal.head)
+            || ids.contains(&branch.child.operation_id)
+            || journal.mounts.is_some()
+            || journal.history_len() >= MAX_HISTORY
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+    }
+    if let Some(entered) = &journal.branch_preparation {
+        entered.validate()?;
+        check_origin(&journal.origin, &entered.grant.intent.source)?;
+        if entered.grant.intent.source.material.as_ref() != Some(&journal.head)
+            || ids.contains(&entered.grant.intent.child.operation_id)
+            || journal.mounts.is_some()
+            || journal.history_len() >= MAX_HISTORY
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+    }
+    if let Some(intent) = &journal.branch_release_pending {
+        intent.validate()?;
+        check_origin(&journal.origin, &intent.transition.previous)?;
+        if journal.history_len() != 0
+            || intent.transition.previous.material.as_ref() != Some(&journal.head)
+            || journal.branch_child.as_ref() != Some(&intent.transition.change.binding)
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
     }
     Ok(())
 }
@@ -1409,8 +2148,73 @@ fn after_entry(error: Error) -> Error {
 }
 
 #[cfg(test)]
+mod shared_branch_history;
+
+#[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn branch_preparation_requires_a_distinct_exact_entered_grant_and_rejects_prepared_retirement()
+    {
+        use std::os::unix::fs::MetadataExt;
+        let (directory, journal, source, record) = capture_fixture();
+        let intent = crate::branch::tests::initial_journal(&source, &record);
+        journal.prepare_initial_branch(&intent, &record).unwrap();
+        let info = std::fs::metadata(directory.path()).unwrap();
+        let grant = crate::branch_worker::Grant {
+            intent: intent.clone(),
+            owner: crate::OwnerIdentity::capture().unwrap(),
+            worker_operation: "a".repeat(32),
+            directory: directory.path().canonicalize().unwrap(),
+            device: info.dev(),
+            inode: info.ino(),
+        };
+        let expected = crate::branch_worker::Expected {
+            metadata_sha256: "a".repeat(64),
+            operation_id: intent.child.operation_id.clone(),
+            request_sha256: intent.request_sha256.clone(),
+        };
+        assert!(journal
+            .authorize_branch_preparation(&grant, &expected, &record)
+            .is_err());
+        let (mut stored, _) = journal.load().unwrap();
+        stored.branch_preparation = Some(crate::branch_worker::Entry {
+            grant: grant.clone(),
+            metadata_sha256: expected.metadata_sha256.clone(),
+            publication: None,
+        });
+        assert!(validate_journal(&stored).is_err());
+        // Pure protected-state transition through the production writer. This
+        // creates no live source enrollment and never invokes the SDK.
+        journal
+            .enter_branch_preparation(&grant, &expected, &record)
+            .unwrap();
+        journal
+            .authorize_branch_preparation(&grant, &expected, &record)
+            .unwrap();
+        assert_eq!(journal.verify(&source).unwrap_err().code, ErrorCode::State);
+        assert!(retire_branch_model(&journal, &intent, &record).is_err());
+        assert!(journal
+            .pending_initial_branch(&source, &intent.child.operation_id, &intent.request_sha256)
+            .is_err());
+        for case in 0..4 {
+            let mut changed = grant.clone();
+            match case {
+                0 => changed.owner.birth += 1,
+                1 => changed.worker_operation = "b".repeat(32),
+                2 => changed.inode += 1,
+                _ => changed.intent.child.hold = true,
+            }
+            assert!(journal
+                .authorize_branch_preparation(&changed, &expected, &record)
+                .is_err());
+        }
+        let mut changed = expected;
+        changed.metadata_sha256 = "c".repeat(64);
+        assert!(journal
+            .authorize_branch_preparation(&grant, &changed, &record)
+            .is_err());
+    }
 
     fn capture_fixture() -> (
         tempfile::TempDir,
@@ -1474,6 +2278,327 @@ mod tests {
             head: "d".repeat(32),
             parent,
         }
+    }
+
+    fn retire_branch_model(
+        journal: &MaterialJournal,
+        intent: &crate::branch::InitialBranchJournal,
+        record: &VmRecord,
+    ) -> Result<crate::InitialBranchRetirement> {
+        // Synthetic source facts only. No live process is created or adopted.
+        let running = record.state == smolvm::config::RecordState::Running;
+        let authority = crate::capture_resolution::SourceAuthority::verify(
+            record,
+            intent.source_pid,
+            crate::capture_resolution::SourceFacts {
+                owner: running.then_some(true),
+                runtime_pid: running.then_some(intent.source_pid.0),
+                original_alive: running,
+                observed_birth: running.then_some(intent.source_pid.1),
+                excluded: false,
+            },
+        )?;
+        journal.retire_initial_branch(intent, record, &authority)
+    }
+
+    #[test]
+    fn initial_branch_declaration_fences_mutation_across_reopen_until_exact_abort() {
+        let (directory, journal, receipt, record) = capture_fixture();
+        let before = std::fs::read(directory.path().join(FILE_NAME)).unwrap();
+        let intent = crate::branch::tests::initial_journal(&receipt, &record);
+        journal.prepare_initial_branch(&intent, &record).unwrap();
+        assert_eq!(journal.verify(&receipt).unwrap_err().code, ErrorCode::State);
+        assert!(journal
+            .prepare_capture(&receipt, "capture", capture_request(), &record)
+            .is_err());
+        assert!(journal
+            .prepare(
+                &receipt,
+                "grow",
+                GrowDisks {
+                    storage_gib: Some(2),
+                    overlay_gib: None
+                },
+                &record
+            )
+            .is_err());
+        assert!(journal.prepare_initial_branch(&intent, &record).is_err());
+        drop(journal);
+        let reopened = MaterialJournal::at(&directory.path().canonicalize().unwrap());
+        assert_eq!(
+            reopened.verify(&receipt).unwrap_err().code,
+            ErrorCode::State
+        );
+        reopened.verify_initial_branch(&intent, &record).unwrap();
+        let (stored, _) = reopened.load().unwrap();
+        assert!(stored.history.is_empty() && stored.capture_history.is_none());
+        assert_eq!(stored.head, receipt.material.clone().unwrap());
+        // Retirement keeps source material unchanged and separately records
+        // positive pre-entry completion, without a child or material revision.
+        let proof = retire_branch_model(&reopened, &intent, &record).unwrap();
+        reopened.verify(&receipt).unwrap();
+        let mut after: serde_json::Value =
+            serde_json::from_slice(&std::fs::read(directory.path().join(FILE_NAME)).unwrap())
+                .unwrap();
+        assert!(after
+            .as_object_mut()
+            .unwrap()
+            .remove("initial_branch_retirements")
+            .is_some());
+        assert_eq!(
+            after,
+            serde_json::from_slice::<serde_json::Value>(&before).unwrap()
+        );
+        assert_eq!(
+            reopened
+                .retired_initial_branch(
+                    &receipt,
+                    &intent.child.operation_id,
+                    &intent.request_sha256
+                )
+                .unwrap(),
+            Some(proof)
+        );
+        assert!(retire_branch_model(&reopened, &intent, &record).is_err());
+        assert!(!directory.path().join(&intent.child.name).exists());
+    }
+
+    #[test]
+    fn initial_branch_cannot_abort_changed_source_or_substitute_intent_and_budget_plan() {
+        let (directory, journal, receipt, record) = capture_fixture();
+        let intent = crate::branch::tests::initial_journal(&receipt, &record);
+        journal.prepare_initial_branch(&intent, &record).unwrap();
+        let original = std::fs::read(directory.path().join(FILE_NAME)).unwrap();
+        for case in 0..12 {
+            let mut changed = intent.clone();
+            match case {
+                0 => changed.child.hold = !changed.child.hold,
+                1 => changed.child.owner_token = "f".repeat(64),
+                2 => changed.child.name = "another-child".into(),
+                3 => changed.child.operation_id = "another-operation".into(),
+                4 => changed.source_pid.1 += 1,
+                5 => changed.epoch = "2".repeat(32),
+                6 => changed.plan.total_additional.memory_mb += 1,
+                7 => changed.plan.minimum_extra_disk_gb += 1,
+                8 => changed.approval.resources.disk_gb += 1,
+                9 => changed.source.incarnation = "e".repeat(32),
+                10 => changed.source.material.as_mut().unwrap().revision += 1,
+                _ => changed.child.idle = false,
+            }
+            assert!(changed.validate().is_err(), "changed declaration {case}");
+            assert!(retire_branch_model(&journal, &changed, &record).is_err());
+        }
+        for case in 0..7 {
+            let mut changed = record.clone();
+            match case {
+                0 => changed.pid_start_time = Some(999),
+                1 => changed.state = smolvm::config::RecordState::Stopped,
+                2 => changed.cpus = 2,
+                3 => changed.fork_lineage_pid_start_time = Some(999),
+                4 => {
+                    changed
+                        .labels
+                        .insert("smolbox.owner".into(), "e".repeat(64));
+                }
+                5 => changed.checkpoint_head = Some("f".repeat(32)),
+                _ => changed.golden = Some("foreign-parent".into()),
+            }
+            assert!(journal.verify_initial_branch(&intent, &changed).is_err());
+            assert!(retire_branch_model(&journal, &intent, &changed).is_err());
+        }
+        assert_eq!(
+            std::fs::read(directory.path().join(FILE_NAME)).unwrap(),
+            original
+        );
+        let mut entered = serde_json::to_value(&intent).unwrap();
+        entered["entered"] = true.into();
+        assert!(serde_json::from_value::<crate::branch::InitialBranchJournal>(entered).is_err());
+    }
+
+    #[test]
+    fn initial_branch_journal_rejects_cross_operation_pending_and_reused_capture_ids() {
+        let (_directory, journal, receipt, mut record) = capture_fixture();
+        let intent = crate::branch::tests::initial_journal(&receipt, &record);
+        journal.prepare_initial_branch(&intent, &record).unwrap();
+        let (mut stored, _) = journal.load().unwrap();
+        stored.capture_pending = Some(crate::capture_material::Pending {
+            intent: capture_source_intent(&receipt, "capture", capture_request(), &record).unwrap(),
+            entered: false,
+        });
+        assert!(validate_journal(&stored).is_err());
+        retire_branch_model(&journal, &intent, &record).unwrap();
+        let permit = journal
+            .prepare_capture(&receipt, "completed-capture", capture_request(), &record)
+            .unwrap();
+        journal.enter_capture(&permit).unwrap();
+        let artifact = capture_artifact(None);
+        record.checkpoint_head = Some(artifact.head.clone());
+        let completed = journal
+            .complete_capture(&receipt, &permit, artifact, &record)
+            .unwrap();
+        for operation_id in [&intent.child.operation_id[..], "completed-capture"] {
+            let next = crate::branch::tests::initial_journal_named(
+                &completed.receipt,
+                &record,
+                operation_id,
+            );
+            assert!(journal.prepare_initial_branch(&next, &record).is_err());
+        }
+        journal.verify(&completed.receipt).unwrap();
+        assert!(journal.load().unwrap().0.initial_branch.is_none());
+    }
+
+    #[test]
+    fn initial_branch_retirement_is_historical_proof_not_a_current_material_transition() {
+        let (directory, journal, source, mut record) = capture_fixture();
+        let intent = crate::branch::tests::initial_journal(&source, &record);
+        journal.prepare_initial_branch(&intent, &record).unwrap();
+        let proof = retire_branch_model(&journal, &intent, &record).unwrap();
+        let encoded = serde_json::to_vec(&proof).unwrap();
+        assert!(serde_json::from_slice::<GrowthTransition>(&encoded).is_err());
+        assert!(serde_json::from_slice::<crate::CaptureTransition>(&encoded).is_err());
+        assert!(!format!("{proof:?}").contains(&source.owner_token));
+        assert_eq!(proof.resource_plan(), &intent.plan);
+        assert!(proof.child() == &intent.child);
+        assert!(journal
+            .prepare_capture(
+                &source,
+                &intent.child.operation_id,
+                capture_request(),
+                &record
+            )
+            .is_err());
+        assert!(journal
+            .prepare(
+                &source,
+                &intent.child.operation_id,
+                GrowDisks {
+                    storage_gib: Some(2),
+                    overlay_gib: None
+                },
+                &record
+            )
+            .is_err());
+        let permit = journal
+            .prepare_capture(&source, "after-retirement", capture_request(), &record)
+            .unwrap();
+        journal.enter_capture(&permit).unwrap();
+        let artifact = capture_artifact(None);
+        record.checkpoint_head = Some(artifact.head.clone());
+        let completed = journal
+            .complete_capture(&source, &permit, artifact, &record)
+            .unwrap();
+        drop(journal);
+        let journal = MaterialJournal::at(&directory.path().canonicalize().unwrap());
+        assert_eq!(
+            journal
+                .retired_initial_branch(&source, &intent.child.operation_id, &intent.request_sha256)
+                .unwrap(),
+            Some(proof.clone())
+        );
+        assert!(journal
+            .retired_initial_branch(
+                &completed.receipt,
+                &intent.child.operation_id,
+                &intent.request_sha256
+            )
+            .is_err());
+        assert!(journal
+            .retired_initial_branch(&source, &intent.child.operation_id, &"0".repeat(64))
+            .is_err());
+        let after = crate::branch::tests::initial_journal_named(
+            &completed.receipt,
+            &record,
+            "after-capture-retirement",
+        );
+        journal.prepare_initial_branch(&after, &record).unwrap();
+        let after_proof = retire_branch_model(&journal, &after, &record).unwrap();
+        let (stored, _) = journal.load().unwrap();
+        assert_eq!(stored.history_len(), 3);
+        assert_eq!(stored.head, completed.receipt.material.unwrap());
+        assert_eq!(
+            stored.initial_branch_retirements.as_ref().unwrap(),
+            &vec![proof, after_proof]
+        );
+        let mut reordered = stored;
+        reordered
+            .initial_branch_retirements
+            .as_mut()
+            .unwrap()
+            .reverse();
+        assert!(validate_journal(&reordered).is_err());
+    }
+
+    #[test]
+    fn initial_branch_retirement_rejects_corruption_foreign_heads_duplicate_ids_and_exhaustion() {
+        let (_directory, journal, source, record) = capture_fixture();
+        let intent = crate::branch::tests::initial_journal(&source, &record);
+        journal.prepare_initial_branch(&intent, &record).unwrap();
+        let proof = retire_branch_model(&journal, &intent, &record).unwrap();
+        for case in 0..5 {
+            let mut changed = serde_json::to_value(&proof).unwrap();
+            match case {
+                0 => changed["schema"] = 2.into(),
+                1 => changed["proof_sha256"] = "f".repeat(64).into(),
+                2 => changed["intent"]["child"]["hold"] = true.into(),
+                3 => changed["intent"]["epoch"] = "e".repeat(32).into(),
+                _ => changed["intent"]["plan"]["total_additional"]["disk_gb"] = 999.into(),
+            }
+            let decoded: crate::InitialBranchRetirement = serde_json::from_value(changed).unwrap();
+            assert!(decoded.validate().is_err());
+        }
+        let mut unknown = serde_json::to_value(&proof).unwrap();
+        unknown["child_disposed"] = true.into();
+        assert!(serde_json::from_value::<crate::InitialBranchRetirement>(unknown).is_err());
+        let (stored, _) = journal.load().unwrap();
+        let mut duplicate = stored.clone();
+        duplicate
+            .initial_branch_retirements
+            .as_mut()
+            .unwrap()
+            .push(proof.clone());
+        assert!(validate_journal(&duplicate).is_err());
+        let mut empty = stored.clone();
+        empty.initial_branch_retirements = Some(vec![]);
+        assert!(validate_journal(&empty).is_err());
+        let mut full = stored.clone();
+        full.initial_branch_retirements = Some(
+            (0..MAX_HISTORY)
+                .map(|index| {
+                    crate::InitialBranchRetirement::issue(
+                        crate::branch::tests::initial_journal_named(
+                            &source,
+                            &record,
+                            &format!("retired-{index}"),
+                        ),
+                    )
+                    .unwrap()
+                })
+                .collect(),
+        );
+        validate_journal(&full).unwrap();
+        // Prepared intent must reserve room for its own retirement before entry.
+        full.initial_branch = Some(crate::branch::tests::initial_journal_named(
+            &source, &record, "one-more",
+        ));
+        assert!(validate_journal(&full).is_err());
+        full.initial_branch = None;
+        full.initial_branch_retirements
+            .as_mut()
+            .unwrap()
+            .push(proof);
+        assert!(validate_journal(&full).is_err());
+        // Even a syntactically self-consistent receipt must anchor its exact
+        // preceding source head in the protected journal's material history.
+        let mut altered_source = source;
+        altered_source.material.as_mut().unwrap().chain_sha256 = "f".repeat(64);
+        // Rebuild only the request correlation in this malformed model.
+        let foreign =
+            crate::branch::tests::initial_journal_named(&altered_source, &record, "foreign-head");
+        let forged = crate::InitialBranchRetirement::issue(foreign).unwrap();
+        let mut wrong_head = stored;
+        wrong_head.initial_branch_retirements = Some(vec![forged]);
+        assert!(validate_journal(&wrong_head).is_err());
     }
 
     #[test]
@@ -1959,6 +3084,13 @@ mod tests {
             history: vec![],
             pending: None,
             capture_pending: None,
+            initial_branch: None,
+            initial_branch_retirements: None,
+            branch_preparation: None,
+            branch_history: None,
+            branch_child: None,
+            branch_release_pending: None,
+            branch_release: None,
             mounts: None,
             capture_history: Some(vec![crate::capture_material::Completed {
                 change: captured.change,

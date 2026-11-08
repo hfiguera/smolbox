@@ -13,7 +13,8 @@ pub const JOB_REGISTRY_STAGING_BYTES: u64 = 32 * 1024 * 1024 * 1024;
 /// Request-private checkpoint input plus bounded history objects; separate from
 /// registry downloads, command spools and admitted guest disks.
 pub const JOB_CHECKPOINT_STAGING_BYTES: u64 = 128 * 1024 * 1024 * 1024;
-/// Request-private decoded checkpoint material, not persistent guest capacity.
+/// Request-private saved-state material (checkpoint decoding and retained branch
+/// preparation backing), not the store's persistent guest capacity reservation.
 pub const JOB_CHECKPOINT_MATERIAL_BYTES: u64 = crate::checkpoint_materialize::MATERIAL_BYTES;
 /// Extra room for one bounded SDK history-index parser, separate from ordinary
 /// work metadata and permanently reserved control headroom.
@@ -29,12 +30,16 @@ pub const JOB_MATERIAL_CONTROL_METADATA_BYTES: u64 = 32 * 1024 * 1024;
 pub const JOB_EXPORT_STAGING_BYTES: u64 = 512 * 1024 * 1024 * 1024;
 pub const JOB_DESCRIPTORS: usize = 32;
 pub const JOB_CONTROL_HEADROOM: usize = 8;
+/// Completed branch bookkeeping is independent of executing SDK-parser memory.
+pub(crate) const BRANCH_BACKING_METADATA: u64 = 128 * 1024;
+pub(crate) const BRANCH_BACKING_METADATA_BYTES: u64 = 128 * 1024 * 1024;
 
 #[derive(Clone, Copy)]
 enum Lane {
     Work,
     Control,
     MaterialControl,
+    Retired,
 }
 #[derive(Clone, Copy)]
 pub(crate) struct Demand {
@@ -50,6 +55,38 @@ pub(crate) struct Demand {
     metadata: u64,
 }
 impl Demand {
+    pub(crate) fn branch_delete() -> Self {
+        Self {
+            descriptors: 24,
+            checkpoint_metadata: JOB_CHECKPOINT_METADATA_BYTES,
+            ..Self::branch_release()
+        }
+    }
+    pub(crate) fn branch_probe() -> Self {
+        // Sequential bounded dependency reads and short header-first agent relay.
+        Self::branch_release()
+    }
+    pub(crate) fn branch_release() -> Self {
+        Self {
+            descriptors: 20,
+            metadata: JOB_METADATA_BYTES,
+            ..Self::streaming()
+        }
+    }
+    pub(crate) fn branch_retirement() -> Self {
+        let mut demand = Self::material_resolution();
+        // Retained source root plus the read-only SQLite snapshot, actor-ledger
+        // readers and protected journal replacement fit independently of work.
+        demand.descriptors = 8;
+        demand
+    }
+    pub(crate) fn branch_source() -> Self {
+        let mut demand = Self::export_source();
+        // Two stable gate/root identities plus bounded original-source checks.
+        // This is no child/VMM/backing reservation or fork dispatch permission.
+        demand.descriptors = 16;
+        demand
+    }
     pub(crate) fn export_observation() -> Self {
         // Two bounded publication record/proof readers fit reserved control
         // descriptors and metadata even while an export holds the work ceiling.
@@ -416,6 +453,7 @@ impl Demand {
 }
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub(crate) struct Counts {
+    pub branch_metadata: u64,
     pub work: usize,
     pub control: usize,
     pub children: usize,
@@ -444,6 +482,23 @@ pub(crate) struct JobLease {
     demand: Demand,
 }
 impl JobPool {
+    pub(crate) fn branch_result_metadata(&self) -> Result<BranchBackingLease> {
+        let mut counts = self
+            .0
+            .counts
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        if !self.available()
+            || counts.branch_metadata + BRANCH_BACKING_METADATA > BRANCH_BACKING_METADATA_BYTES
+        {
+            return Err(Error::before(ErrorCode::Admission));
+        }
+        counts.branch_metadata += BRANCH_BACKING_METADATA;
+        Ok(BranchBackingLease {
+            pool: self.clone(),
+            bytes: 0,
+        })
+    }
     pub(crate) fn available(&self) -> bool {
         !self.0.quarantined.load(Ordering::Acquire)
     }
@@ -451,6 +506,9 @@ impl JobPool {
         self.0.quarantined.store(true, Ordering::Release);
     }
     pub(crate) fn acquire(&self, demand: Demand) -> Result<JobLease> {
+        if matches!(demand.lane, Lane::Retired) {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
         let mut counts = self
             .0
             .counts
@@ -474,6 +532,7 @@ impl JobPool {
                     Lane::Work => JOB_METADATA_BYTES,
                     Lane::Control => JOB_CONTROL_METADATA_BYTES,
                     Lane::MaterialControl => JOB_MATERIAL_CONTROL_METADATA_BYTES,
+                    Lane::Retired => 0,
                 }
         {
             return Err(Error::before(ErrorCode::Admission));
@@ -481,8 +540,10 @@ impl JobPool {
         let (work, control) = match demand.lane {
             Lane::Work => (counts.work + 1, counts.control),
             Lane::Control | Lane::MaterialControl => (counts.work, counts.control + 1),
+            Lane::Retired => (counts.work, counts.control),
         };
         let next = Counts {
+            branch_metadata: counts.branch_metadata,
             work,
             control,
             children: counts.children + demand.children,
@@ -490,7 +551,7 @@ impl JobPool {
             work_descriptors: counts.work_descriptors
                 + match demand.lane {
                     Lane::Work => demand.descriptors,
-                    Lane::Control | Lane::MaterialControl => 0,
+                    Lane::Control | Lane::MaterialControl | Lane::Retired => 0,
                 },
             registry_staging: counts.registry_staging + demand.registry_staging,
             checkpoint_staging: counts.checkpoint_staging + demand.checkpoint_staging,
@@ -503,12 +564,12 @@ impl JobPool {
             work_metadata: counts.work_metadata
                 + match demand.lane {
                     Lane::Work => demand.metadata,
-                    Lane::Control | Lane::MaterialControl => 0,
+                    Lane::Control | Lane::MaterialControl | Lane::Retired => 0,
                 },
             material_control_metadata: counts.material_control_metadata
                 + match demand.lane {
                     Lane::MaterialControl => demand.metadata,
-                    Lane::Work | Lane::Control => 0,
+                    Lane::Work | Lane::Control | Lane::Retired => 0,
                 },
         };
         if next.work > JOB_WORK_SLOTS
@@ -596,6 +657,7 @@ impl Drop for JobLease {
                 counts.control -= 1;
                 counts.material_control_metadata -= self.demand.metadata;
             }
+            Lane::Retired => {}
         }
         counts.children -= self.demand.children;
         counts.descriptors -= self.demand.descriptors;
@@ -610,6 +672,150 @@ impl Drop for JobLease {
 }
 
 impl JobLease {
+    pub(crate) fn check_branch_handoff(&self) -> Result<()> {
+        let counts = self
+            .pool
+            .0
+            .counts
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        self.check_branch_handoff_counts(&counts)
+    }
+    fn check_branch_handoff_counts(&self, counts: &Counts) -> Result<()> {
+        let demand = self.demand;
+        if !self.pool.available()
+            || !matches!(demand.lane, Lane::Work)
+            || demand.metadata != JOB_METADATA_BYTES
+            || demand.descriptors != JOB_DESCRIPTORS - JOB_CONTROL_HEADROOM
+            || demand.children != 2
+            || demand.staging
+                != crate::branch_worker::METADATA_BYTES + crate::branch_worker::OUTPUT_BYTES
+            || demand.checkpoint_metadata != JOB_CHECKPOINT_METADATA_BYTES
+            || demand.checkpoint_material == 0
+            || demand.checkpoint_install != 0
+            || demand.registry_staging != 0
+            || demand.checkpoint_staging != 0
+            || counts.branch_metadata + BRANCH_BACKING_METADATA > BRANCH_BACKING_METADATA_BYTES
+        {
+            return Err(Error::before(ErrorCode::Admission));
+        }
+        Ok(())
+    }
+    /// Only after actual dispatch return, collected spools, original-manager
+    /// installation and synchronized completion. Backing never becomes free.
+    pub(crate) fn handoff_branch(&mut self) -> Result<BranchBackingLease> {
+        let mut counts = self
+            .pool
+            .0
+            .counts
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        self.check_branch_handoff_counts(&counts)?;
+        counts.work -= 1;
+        counts.children -= self.demand.children;
+        counts.descriptors -= self.demand.descriptors;
+        counts.work_descriptors -= self.demand.descriptors;
+        counts.staging -= self.demand.staging;
+        counts.checkpoint_metadata -= self.demand.checkpoint_metadata;
+        counts.metadata -= self.demand.metadata;
+        counts.work_metadata -= self.demand.metadata;
+        counts.branch_metadata += BRANCH_BACKING_METADATA;
+        let backing = BranchBackingLease {
+            pool: self.pool.clone(),
+            bytes: self.demand.checkpoint_material,
+        };
+        self.demand = Demand {
+            lane: Lane::Retired,
+            descriptors: 0,
+            ..Demand::streaming()
+        };
+        Ok(backing)
+    }
+    pub(crate) fn promote_branch_backing(&mut self, bytes: u64) -> Result<()> {
+        let mut counts = self
+            .pool
+            .0
+            .counts
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        if !self.pool.available()
+            || !matches!(self.demand.lane, Lane::Work)
+            || bytes == 0
+            || bytes > JOB_CHECKPOINT_MATERIAL_BYTES
+            || self.demand.metadata != JOB_METADATA_BYTES
+            || self.demand.descriptors != JOB_DESCRIPTORS - JOB_CONTROL_HEADROOM
+            || self.demand.children != 2
+            || self.demand.staging
+                != crate::branch_worker::METADATA_BYTES + crate::branch_worker::OUTPUT_BYTES
+            || self.demand.checkpoint_metadata != JOB_CHECKPOINT_METADATA_BYTES
+            || self.demand.registry_staging != 0
+            || self.demand.checkpoint_staging != 0
+            || self.demand.checkpoint_install != 0
+        {
+            return Err(Error::before(ErrorCode::Admission));
+        }
+        if self.demand.checkpoint_material == bytes {
+            return Ok(());
+        }
+        if self.demand.checkpoint_material != 0
+            || counts.checkpoint_material + bytes > JOB_CHECKPOINT_MATERIAL_BYTES
+        {
+            return Err(Error::before(ErrorCode::Admission));
+        }
+        counts.checkpoint_material += bytes;
+        self.demand.checkpoint_material = bytes;
+        Ok(())
+    }
+    pub(crate) fn promote_branch_preparation(&mut self) -> Result<()> {
+        let mut counts = self
+            .pool
+            .0
+            .counts
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        let staging = crate::branch_worker::METADATA_BYTES + crate::branch_worker::OUTPUT_BYTES;
+        if !self.pool.available()
+            || !matches!(self.demand.lane, Lane::Work)
+            || self.demand.metadata != JOB_METADATA_BYTES
+            || self.demand.registry_staging != 0
+            || self.demand.checkpoint_staging != 0
+            || self.demand.checkpoint_install != 0
+        {
+            return Err(Error::before(ErrorCode::Admission));
+        }
+        if self.demand.descriptors == JOB_DESCRIPTORS - JOB_CONTROL_HEADROOM
+            && self.demand.children == 2
+            && self.demand.staging == staging
+            && self.demand.checkpoint_metadata == JOB_CHECKPOINT_METADATA_BYTES
+        {
+            return Ok(());
+        }
+        if self.demand.descriptors != 16
+            || self.demand.checkpoint_material != 0
+            || self.demand.children != 0
+            || self.demand.staging != 0
+            || self.demand.checkpoint_metadata != 0
+            || counts.descriptors + 8 > JOB_DESCRIPTORS
+            || counts.work_descriptors + 8 > JOB_DESCRIPTORS - JOB_CONTROL_HEADROOM
+            || counts.children + 2 > JOB_CHILDREN
+            || counts.staging + staging > JOB_STAGING_BYTES
+            || counts.checkpoint_metadata + JOB_CHECKPOINT_METADATA_BYTES
+                > JOB_CHECKPOINT_METADATA_BYTES
+        {
+            return Err(Error::before(ErrorCode::Admission));
+        }
+        fd_admission(counts.descriptors + 8)?;
+        counts.descriptors += 8;
+        counts.work_descriptors += 8;
+        counts.children += 2;
+        counts.staging += staging;
+        counts.checkpoint_metadata += JOB_CHECKPOINT_METADATA_BYTES;
+        self.demand.descriptors = JOB_DESCRIPTORS - JOB_CONTROL_HEADROOM;
+        self.demand.children = 2;
+        self.demand.staging = staging;
+        self.demand.checkpoint_metadata = JOB_CHECKPOINT_METADATA_BYTES;
+        Ok(())
+    }
     pub(crate) fn promote_export_stage(&mut self) -> Result<()> {
         let mut counts = self
             .pool
@@ -910,6 +1116,42 @@ impl JobLease {
         Ok(())
     }
 }
+
+pub(crate) struct BranchBackingLease {
+    pool: JobPool,
+    bytes: u64,
+}
+impl BranchBackingLease {
+    /// Caller holds original branch authority and has synchronized its exact
+    /// backing-release receipt. Result metadata survives material retirement.
+    pub(crate) fn release_material(&mut self, expected: u64) -> Result<()> {
+        if expected == 0 || (self.bytes != 0 && self.bytes != expected) {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        let mut counts = self
+            .pool
+            .0
+            .counts
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        if counts.checkpoint_material < self.bytes {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        counts.checkpoint_material -= self.bytes;
+        self.bytes = 0;
+        Ok(())
+    }
+    pub(crate) fn material_bytes(&self) -> u64 {
+        self.bytes
+    }
+}
+impl Drop for BranchBackingLease {
+    fn drop(&mut self) {
+        let mut counts = self.pool.0.counts.lock().unwrap_or_else(|e| e.into_inner());
+        counts.checkpoint_material -= self.bytes;
+        counts.branch_metadata -= BRANCH_BACKING_METADATA;
+    }
+}
 fn fd_admission(reserved: usize) -> Result<()> {
     let mut limit = libc::rlimit {
         rlim_cur: 0,
@@ -937,6 +1179,184 @@ fn fd_admission(reserved: usize) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn later_branch_release_has_fresh_work_and_metadata_without_a_second_backing_charge() {
+        let pool = JobPool::default();
+        let mut creation = pool.acquire(Demand::branch_source()).unwrap();
+        creation.promote_branch_preparation().unwrap();
+        creation.promote_branch_backing(7 << 30).unwrap();
+        let backing = creation.handoff_branch().unwrap();
+        drop(creation);
+        let old = crate::ReadBudget::new(
+            std::time::Duration::from_secs(1),
+            crate::Cancellation::default(),
+        )
+        .unwrap();
+        old.cancel.cancel();
+        let fresh = crate::ReadBudget::new(
+            std::time::Duration::from_secs(1),
+            crate::Cancellation::default(),
+        )
+        .unwrap();
+        assert!(old.check().is_err());
+        fresh.check().unwrap();
+        let release = pool.acquire(Demand::branch_release()).unwrap();
+        let result = pool.branch_result_metadata().unwrap();
+        assert_eq!(pool.counts().checkpoint_material, 7 << 30);
+        assert_eq!(pool.counts().branch_metadata, 2 * BRANCH_BACKING_METADATA);
+        assert_eq!(
+            (
+                pool.counts().work,
+                pool.counts().children,
+                pool.counts().work_descriptors
+            ),
+            (1, 0, 20)
+        );
+        let observers = [
+            pool.acquire(Demand::volume_observation()).unwrap(),
+            pool.acquire(Demand::volume_observation()).unwrap(),
+        ];
+        drop((release, observers));
+        assert_eq!(
+            pool.counts(),
+            Counts {
+                checkpoint_material: 7 << 30,
+                branch_metadata: 2 * BRANCH_BACKING_METADATA,
+                ..Counts::default()
+            }
+        );
+        drop((backing, result)); // Pure accounting model, no backing disposal claim.
+        assert_eq!(pool.counts(), Counts::default());
+    }
+    #[test]
+    fn full_or_quarantined_result_metadata_rejects_before_changing_accounting() {
+        let pool = JobPool::default();
+        pool.0.counts.lock().unwrap().branch_metadata = BRANCH_BACKING_METADATA_BYTES;
+        let before = pool.counts();
+        assert!(pool.branch_result_metadata().is_err());
+        assert_eq!(pool.counts(), before);
+        pool.0.counts.lock().unwrap().branch_metadata = 0;
+        pool.quarantine();
+        assert!(pool.branch_result_metadata().is_err());
+        assert_eq!(pool.counts(), Counts::default());
+        assert!(pool.acquire(Demand::volume_observation()).is_ok());
+    }
+    #[test]
+    fn branch_handoff_frees_execution_and_parser_capacity_without_freeing_backing() {
+        let pool = JobPool::default();
+        let mut work = pool.acquire(Demand::branch_source()).unwrap();
+        work.promote_branch_preparation().unwrap();
+        work.promote_branch_backing(7 << 30).unwrap();
+        let backing = work.handoff_branch().unwrap();
+        let retained = Counts {
+            checkpoint_material: 7 << 30,
+            branch_metadata: BRANCH_BACKING_METADATA,
+            ..Counts::default()
+        };
+        assert_eq!(pool.counts(), retained);
+        assert!(work.handoff_branch().is_err());
+        drop(work);
+        assert_eq!(pool.counts(), retained);
+        let mut next = pool.acquire(Demand::branch_source()).unwrap();
+        next.promote_branch_preparation().unwrap();
+        next.promote_branch_backing(7 << 30).unwrap();
+        let controls = [
+            pool.acquire(Demand::volume_observation()).unwrap(),
+            pool.acquire(Demand::volume_observation()).unwrap(),
+        ];
+        assert_eq!(pool.counts().checkpoint_material, 14 << 30);
+        assert_eq!(pool.counts().branch_metadata, BRANCH_BACKING_METADATA);
+        drop((controls, next));
+        assert_eq!(pool.counts(), retained);
+        // Lease destruction here is a pure accounting model, never disposal proof.
+        drop(backing);
+        assert_eq!(pool.counts(), Counts::default());
+    }
+    #[test]
+    fn unfunded_or_quarantined_branch_cannot_retire_its_work_charge() {
+        let pool = JobPool::default();
+        let mut work = pool.acquire(Demand::branch_source()).unwrap();
+        let before = pool.counts();
+        assert!(work.handoff_branch().is_err());
+        assert_eq!(pool.counts(), before);
+        work.promote_branch_preparation().unwrap();
+        let before = pool.counts();
+        assert!(work.handoff_branch().is_err());
+        assert_eq!(pool.counts(), before);
+        work.promote_branch_backing(7 << 30).unwrap();
+        pool.quarantine();
+        let before = pool.counts();
+        assert!(work.handoff_branch().is_err());
+        assert_eq!(pool.counts(), before);
+    }
+    #[test]
+    fn branch_backing_promotion_is_exact_retained_and_competes_with_saved_state_material() {
+        let pool = JobPool::default();
+        let mut branch = pool.acquire(Demand::branch_source()).unwrap();
+        branch.promote_branch_preparation().unwrap();
+        let occupied = pool
+            .acquire(Demand {
+                checkpoint_material: JOB_CHECKPOINT_MATERIAL_BYTES,
+                ..Demand::observation()
+            })
+            .unwrap();
+        let before = pool.counts();
+        assert!(branch.promote_branch_backing(7 << 30).is_err());
+        assert_eq!(pool.counts(), before);
+        drop(occupied);
+        branch.promote_branch_backing(7 << 30).unwrap();
+        let funded = pool.counts();
+        assert_eq!(funded.checkpoint_material, 7 << 30);
+        branch.promote_branch_backing(7 << 30).unwrap();
+        branch.promote_branch_preparation().unwrap();
+        assert_eq!(pool.counts(), funded);
+        assert!(branch.promote_branch_backing(8 << 30).is_err());
+        assert_eq!(pool.counts(), funded);
+        let first = pool.acquire(Demand::volume_observation()).unwrap();
+        let second = pool.acquire(Demand::volume_observation()).unwrap();
+        drop((first, second, branch));
+        assert_eq!(pool.counts(), Counts::default());
+    }
+    #[test]
+    fn branch_preparation_promotes_original_admission_atomically_and_keeps_both_observers() {
+        for held in [
+            Demand {
+                children: JOB_CHILDREN,
+                ..Demand::observation()
+            },
+            Demand {
+                checkpoint_metadata: JOB_CHECKPOINT_METADATA_BYTES,
+                ..Demand::observation()
+            },
+        ] {
+            let pool = JobPool::default();
+            let mut source = pool.acquire(Demand::branch_source()).unwrap();
+            let occupied = pool.acquire(held).unwrap();
+            let before = pool.counts();
+            assert!(source.promote_branch_preparation().is_err());
+            assert_eq!(pool.counts(), before);
+            drop(occupied);
+            source.promote_branch_preparation().unwrap();
+            let ready = pool.counts();
+            assert_eq!(
+                (ready.work, ready.children, ready.work_descriptors),
+                (1, 2, 24)
+            );
+            assert_eq!(ready.work_metadata, JOB_METADATA_BYTES);
+            assert_eq!(ready.checkpoint_metadata, JOB_CHECKPOINT_METADATA_BYTES);
+            assert_eq!(
+                ready.staging,
+                crate::branch_worker::METADATA_BYTES + crate::branch_worker::OUTPUT_BYTES
+            );
+            source.promote_branch_preparation().unwrap();
+            assert_eq!(pool.counts(), ready);
+            let first = pool.acquire(Demand::volume_observation()).unwrap();
+            let second = pool.acquire(Demand::volume_observation()).unwrap();
+            assert!(pool.acquire(Demand::volume_observation()).is_err());
+            drop((first, second, source));
+            assert_eq!(pool.counts(), Counts::default());
+        }
+    }
 
     #[test]
     fn export_conversion_promotes_one_job_atomically_and_keeps_reserved_controls() {
@@ -1531,6 +1951,7 @@ mod tests {
             pool.counts(),
             Counts {
                 work: 4,
+                branch_metadata: 0,
                 control: 2,
                 children: 3,
                 descriptors: 24,

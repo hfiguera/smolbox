@@ -21,6 +21,17 @@ defmodule SmolBox.EmbeddedBackendTest do
 
   alias SmolBox.Test.EmbeddedPackage, as: Package
 
+  test "branch source preflight remains unavailable on current approved packages", context do
+    assert Embedded.supports_operation?(nil, :branch_source)
+    refute Embedded.supports_operation?(context.reference.context, :branch_source)
+    before = Package.received(context.config)
+
+    assert {:error, %{category: :unsupported_capability, evidence: :not_dispatched}} =
+             Backend.branch_source(context.reference, context.record)
+
+    assert Package.received(context.config) == before
+  end
+
   test "capture qualification remains unavailable on currently approved native packages",
        context do
     assert {:error, %{category: :unsupported_capability, evidence: :not_dispatched}} =

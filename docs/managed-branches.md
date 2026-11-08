@@ -164,7 +164,7 @@ child disappeared, resolution marks the source missing and retains its reservati
 retire child dependencies before explicitly resolving the source deletion through
 `Machines.resolve/4`.
 
-**An uncertain release cannot be resolved as kept.** Upstream can clear its held
+**For the HTTP backend, an uncertain release cannot be resolved as kept.** Upstream can clear its held
 flag before guest activation completes, so that flag does not prove successful
 release. Fence old requests, explicitly remove the child and resolve its absence.
 Never replay release or start a replacement under the same identity.
@@ -205,7 +205,7 @@ checkpoint artifacts have independent lifetimes.
 
 ## Durable adapters and compatibility
 
-Branch children and sources with branch history use **codec v13** and require
+HTTP branch children and sources with branch history use **codec v13** and require
 `managed_branches: 1`. Source opt-in also uses the existing
 `managed_checkpoints: 1` capability. Existing records read with nil/empty defaults and retain
 prior formats and fingerprints. Older envelopes cannot carry branch fields.
@@ -219,6 +219,35 @@ retained backing. Rollback requires a compatible reader or a coordinated backup
 from before feature use after worker effects are quiescent. Never strip history to
 make an old reader accept it. Custom stores must implement the full normative
 `SmolBox.Store` contract before advertising the capability.
+
+Embedded Port branch support is still under implementation and public admission
+remains disabled. Its frozen child assignments and source dependency/history
+records use **codec v30**, including original completion, immutable child root and
+current held/released material. Source commands carrying branch material links
+use v29; commands retaining a native child assignment use v30. Completion and
+explicit kept resolution require both the original proof and matching current
+source/child observations. These readers preserve earlier HTTP/native bytes and reject new branch
+semantics in older envelopes. Upgrade every shared reader and resource writer
+before future activation. Codec support alone does not enable native branching
+or establish ordinary platform qualification.
+
+Explicit native held-release intent, proof and attached commands use **codec v31**.
+The store freezes the original release version, a fresh request/deadline, current
+source head and both process identities, then updates source and child together.
+An uncertain attempt keeps both locks and charges until explicit resolution.
+Earlier v30 records retain their bytes and gain an empty release default on read.
+The native backend now routes creation, explicit held release and retained-result
+lookup through the Port protocol. It validates the original proof and then obtains
+fresh source and child observations under one pinned helper owner and absolute
+deadline. Runtime completion updates the source/child pair atomically. Explicit
+kept resolution can consume an original completed release proof; an absent proof
+or the held flag alone cannot authorize success, replay or capacity release.
+
+Public native admission remains disabled. Before future activation, every shared
+reader and paired resource writer must support the native lifecycle and advertise
+`native_branches: 1` together with `managed_branches: 1`. Current built-in stores
+intentionally do not advertise the native marker. Routing and codec contracts do
+not establish SDK release, cleanup or ordinary platform qualification.
 
 See the [durable example](https://github.com/hfiguera/smolbox/tree/main/examples/durable_host#managed-branches)
 for separate-process creation, restart, isolation, held release and cleanup. The

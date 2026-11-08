@@ -235,6 +235,27 @@ defmodule SmolBox.Store do
   | `:branch_release` | `[child_key, expected_version, now]` | `{:ok, child}` |
   | `:branch_release_advance` | `[child_key, child_guard, expected_state, change, now]` | `{:ok, child}` |
 
+  Native branch advancement accepts `{:native_complete, NativeBranchResult}` only
+  after dispatch. The result combines the original typed completion with two
+  positive current observations, including the original source PID/birth. Commit
+  the source publication/history and immutable child root/current material in the
+  same transaction; retain the child and extra backing reservations. Explicit
+  resolution of an unknown native branch uses that same result in the child
+  observation position and its exact source observation in the source position.
+  A historical completion alone, missing lookup, bare Machine or absence atom
+  cannot establish native completion or release capacity. Native branch admission
+  remains disabled until the complete native lifecycle/store contract is enabled.
+
+  Native held release also locks source and child atomically. Acceptance freezes
+  the public release version, a new request/deadline, the current source head and
+  both original process identities. Advance is fenced by the child guard and
+  preserves the source lock on uncertainty. `{:native_complete,
+  NativeBranchReleaseResult}` requires explicit release proof and current source/
+  child observations; explicit kept resolution uses the same source/result pair.
+  Neither success nor resolution frees backing. Bare Machine acknowledgments
+  cannot complete native release. Readers/writers of selective v31 must upgrade
+  together before native held release can be enabled.
+
   Expansion acceptance atomically deduplicates operation identity, validates the
   machine version and exclusion, reserves disk growth, and enforces durable drain.
   Advance requires the existing machine guard. Unknown outcomes retain requested
@@ -475,6 +496,8 @@ defmodule SmolBox.Store do
           | :cancelled
           | {:observed, SmolBox.Machine.t()}
           | {:complete, SmolBox.Machine.t()}
+          | {:native_complete, SmolBox.Embedded.NativeBranchResult.t()}
+          | {:native_complete, SmolBox.Embedded.NativeBranchReleaseResult.t()}
   @callback machine(context(), :branch_accept, [
               ManagedMachine.key()
               | SmolBox.BranchSpec.t()
@@ -495,6 +518,8 @@ defmodule SmolBox.Store do
               | guard()
               | String.t()
               | SmolBox.Machine.t()
+              | SmolBox.Embedded.NativeBranchResult.t()
+              | SmolBox.Embedded.NativeBranchReleaseResult.t()
               | :absent
               | non_neg_integer()
             ]) :: machine_result()

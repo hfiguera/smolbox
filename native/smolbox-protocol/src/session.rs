@@ -112,6 +112,13 @@ impl Session {
                             .sdk
                             .as_ref()
                             .is_none_or(|sdk| sdk.feature_versions.get("checkpoints") != Some(&1))))
+                || (operation.requires_branches()
+                    && (self.hello.major != 2
+                        || self
+                            .hello
+                            .sdk
+                            .as_ref()
+                            .is_none_or(|sdk| sdk.feature_versions.get("branches") != Some(&1))))
                 || operation
                     .creation_features()
                     .is_some_and(|features| !features.approved(&self.hello))
@@ -119,6 +126,8 @@ impl Session {
                 Some(SafeCode::Unsupported)
             } else if operation.receipt().is_some_and(|r| {
                 !r.matches_domain(&self.hello.domain) || r.validate_for(self.hello.major).is_err()
+            }) || operation.held_branch_request().is_some_and(|request| {
+                request.completion.publication.change.platform != self.hello.package.platform
             }) || operation.creation_mounts().is_some_and(|mounts| {
                 crate::VolumeMount::bound(mounts, &self.hello.domain).is_err()
             }) {
@@ -694,6 +703,59 @@ impl Session {
                         && receipt.name == create.name
                         && receipt.owner_token == create.owner_token
                         && receipt.incarnation == create.incarnation,
+                )?;
+            }
+            (
+                Operation::ReleaseHeldBranch { request },
+                Outcome::HeldBranchReleased { transition },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                request.matches(transition)?;
+                check(
+                    request.completion.publication.change.platform == self.hello.package.platform,
+                )?;
+            }
+            (
+                Operation::QualifyHeldBranchRelease { request },
+                Outcome::HeldBranchReleasePresence { transition },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                check(
+                    request.completion.publication.change.platform == self.hello.package.platform,
+                )?;
+                if let Some(proof) = transition {
+                    request.matches(proof)?;
+                }
+            }
+            (Operation::CreateBranch { request }, Outcome::BranchCreated { completion }) => {
+                check(pending.output_bytes == 0)?;
+                completion.matches(request)?;
+                check(completion.publication.change.platform == self.hello.package.platform)?;
+            }
+            (
+                Operation::InspectBranchCompletion { request },
+                Outcome::BranchCompletionPresence { completion },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                if let Some(completion) = completion {
+                    completion.matches(request)?;
+                    check(completion.publication.change.platform == self.hello.package.platform)?;
+                }
+            }
+            (Operation::BranchPreflight { .. }, Outcome::Observed { observation }) => {
+                check(
+                    pending.output_bytes == 0
+                        && observation.state == crate::ObservedState::Running
+                        && observation.pid_identity.is_some()
+                        && observation.resources.is_some()
+                        && observation
+                            .configuration
+                            .as_ref()
+                            .is_some_and(|configuration| {
+                                !configuration.network.enabled
+                                    && configuration.ports.is_empty()
+                                    && configuration.mounts.is_none()
+                            }),
                 )?;
             }
             (Operation::CheckpointPreflight { .. }, Outcome::Observed { observation }) => {

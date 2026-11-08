@@ -1,7 +1,7 @@
 defmodule SmolBox.Backend.EmbeddedOperation do
   @moduledoc false
   alias SmolBox.Backend.{Budget, EmbeddedContext, EmbeddedPreparation, Features}
-  alias SmolBox.Embedded.{Config, ImageContract, MountContract, Request}
+  alias SmolBox.Embedded.{Config, ImageContract, MountContract, NativeGrowth, Request}
 
   alias SmolBox.{
     ArtifactPreparation,
@@ -13,11 +13,16 @@ defmodule SmolBox.Backend.EmbeddedOperation do
     ImagePull,
     LogOptions,
     MachineSpec,
+    ManagedMachine,
     Source,
     Validation
   }
 
   alias SmolBox.Machine
+
+  def build(%{assignment: %{creation: %{"branch" => _}}}, operation, _arguments, _budget)
+      when operation in [:create, :create_prepared, :inspect_creation],
+      do: error(:identity_conflict, operation)
 
   def build(context, operation, arguments, budget) do
     with true <- EmbeddedContext.scoped?(context),
@@ -164,6 +169,18 @@ defmodule SmolBox.Backend.EmbeddedOperation do
            ),
          do: ready(%{"operation" => Atom.to_string(operation), "receipt" => receipt}, budget),
          else: (_ -> error(:unsupported_capability, operation))
+  end
+
+  defp operation(context, :branch_source, [%ManagedMachine{} = parent], budget) do
+    with true <- Features.supports?(context.config, :branches),
+         true <-
+           parent.machine_name == context.name and parent.backend_assignment == context.assignment,
+         {:ok, identity} <- NativeGrowth.current_identity(parent),
+         true <- identity == context.identity,
+         {:ok, receipt} <- EmbeddedContext.receipt(context),
+         {:ok, budget} <- Budget.constrain(budget, timeout_ms: 30_000, max_response_bytes: 16_384),
+         do: ready(%{"operation" => "branch_preflight", "receipt" => receipt}, budget),
+         else: (_ -> error(:unsupported_capability, :branch_source))
   end
 
   defp operation(context, :pull_image, [name, %Source{kind: :oci} = source], budget) do
