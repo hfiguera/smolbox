@@ -1,3 +1,5 @@
 # Preserve the captured SSE stream, including its empty data field and final frame.
 test/fixtures/wire/exec.sse binary
 test/fixtures/wire/*/exec.sse binary
+# Unified-diff blank context lines contain a required single space.
+native/upstream-patches/*.patch whitespace=-blank-at-eol

@@ -5,6 +5,7 @@ defmodule SmolBox.Store.CodecSources do
   alias SmolBox.Store.CodecCaptures
   alias SmolBox.Store.CodecExpansion
   alias SmolBox.Store.CodecExports
+  alias SmolBox.Store.CodecNative
 
   def required?(%{spec: %{command: %SmolBox.ImagePull{}}}), do: true
 
@@ -15,7 +16,7 @@ defmodule SmolBox.Store.CodecSources do
   def strip(record), do: record
 
   def legacy_term(payload) do
-    {record, used} = :erlang.binary_to_term(payload, [:safe, :used])
+    {record, used} = CodecNative.legacy_term(payload)
     if required?(record), do: raise(ArgumentError)
 
     {CodecExpansion.upgrade(

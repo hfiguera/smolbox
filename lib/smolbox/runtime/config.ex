@@ -1,5 +1,5 @@
 defmodule SmolBox.Runtime.Config do
-  alias SmolBox.Runtime.Target
+  alias SmolBox.Runtime.{NativeSupport, Target}
   @moduledoc false
   alias SmolBox.{Error, Identity, Validation}
 
@@ -63,13 +63,14 @@ defmodule SmolBox.Runtime.Config do
          config = struct!(__MODULE__, [{:owner, owner} | values]),
          true <- valid?(config),
          :ok <- persistence(config),
+         config = %{config | workers: Enum.map(config.workers, &Target.normalize/1)},
+         :ok <- NativeSupport.verify(config),
          {:ok, worker_control} <- worker_control_support(config) do
       {:ok,
        %{
          config
          | managed_machines: machine_support?(config),
-           worker_control: worker_control,
-           workers: Enum.map(config.workers, &Target.normalize/1)
+           worker_control: worker_control
        }}
     else
       {:error, %Error{} = error} -> {:error, error}

@@ -46,7 +46,7 @@ defmodule SmolBox.Runtime.Observation do
 
   defp execute(session, record, callback) do
     client =
-      Backend.bounded(Target.connection(session.worker),
+      Backend.bounded(Target.connection(session.worker, record),
         timeout_ms: record.spec.profile.execution_ms,
         max_response_bytes: record.spec.profile.max_output_bytes * 2 + 4096
       )
@@ -113,6 +113,19 @@ defmodule SmolBox.Runtime.Observation do
 
   defp outcome(session, {:ok, %Result{} = result}),
     do: Session.patch(session, state: :collecting, evidence: :exited, result: result)
+
+  defp outcome(
+         session,
+         {:error, %Error{exit_code: code} = error, %Result{exit_code: code} = result}
+       )
+       when is_integer(code),
+       do:
+         Session.patch(session,
+           state: :collecting,
+           evidence: :exited,
+           result: result,
+           last_error: error
+         )
 
   defp outcome(session, {:error, %Error{exit_code: code} = error}) when is_integer(code) do
     result = %Result{exit_code: code, stdout: "", stderr: "", truncated: true}

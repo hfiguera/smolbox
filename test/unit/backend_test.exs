@@ -82,6 +82,8 @@ defmodule SmolBox.BackendTest do
     {:ok, worker} = Worker.new("http", "https://worker.example", token: "private-token")
     {:ok, client} = Client.new(worker, transport: CaptureTransport)
     reference = Backend.bounded(HTTP.reference(client), timeout_ms: 75, max_response_bytes: 256)
+    assert Backend.pin(reference) == reference
+    refute_received {:http_request, _, _}
     {:ok, machine} = SmolBox.MachineSpec.new("owned", "/approved/image.smolmachine")
 
     assert {:error, %Error{evidence: :dispatch_uncertain}} = Backend.create(reference, machine)

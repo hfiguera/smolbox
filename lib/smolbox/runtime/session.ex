@@ -136,6 +136,7 @@ defmodule SmolBox.Runtime.Session do
   def safe(function) do
     function.()
   rescue
+    error in Error -> {:error, error}
     _redacted -> error(:unknown, :runtime)
   catch
     _kind, _redacted -> error(:unknown, :runtime)

@@ -18,6 +18,10 @@ defmodule SmolBox.Store.MachineOps do
   end
 
   def reserve(record, worker, name, lease, capacity, usage, now) do
+    reserve(record, worker, name, lease, capacity, usage, now, nil)
+  end
+
+  def reserve(record, worker, name, lease, capacity, usage, now, assignment) do
     needed = RecordOps.resources(record)
 
     with true <- record.state == :accepted and record.worker_id == nil,
@@ -33,6 +37,7 @@ defmodule SmolBox.Store.MachineOps do
       ManagedMachine.update(
         record,
         %{
+          backend_assignment: assignment,
           worker_id: worker,
           worker_generation: lease.generation,
           machine_name: name,
@@ -116,6 +121,7 @@ defmodule SmolBox.Store.MachineOps do
              worker_id: machine.worker_id,
              worker_generation: machine.worker_generation,
              machine_name: machine.machine_name,
+             backend_assignment: machine.backend_assignment,
              created_machine: SmolBox.DiskExpansion.expected(machine)
          },
          :ok <- Execution.validate(command),

@@ -12,7 +12,7 @@ defmodule SmolBox.Runtime do
   restart authority. Durable mode never falls back to memory.
   """
   use Supervisor
-  alias SmolBox.Runtime.{Config, Coordinator, WorkSupervisor}
+  alias SmolBox.Runtime.{Config, Coordinator, NativeSupervisor, NativeSupport, WorkSupervisor}
   alias SmolBox.Telemetry.Dispatcher
 
   @doc """
@@ -32,14 +32,18 @@ defmodule SmolBox.Runtime do
   def init(config) do
     config = %{config | telemetry_table: Dispatcher.table()}
 
-    children = [
-      {Dispatcher,
-       table: config.telemetry_table,
-       metadata: %{runtime: config.name, namespace: config.namespace},
-       max_pending: config.telemetry_max_pending,
-       timeout_ms: config.telemetry_timeout_ms},
-      {WorkSupervisor, config}
-    ]
+    native = if NativeSupport.targets(config) == [], do: [], else: [{NativeSupervisor, config}]
+
+    children =
+      native ++
+        [
+          {Dispatcher,
+           table: config.telemetry_table,
+           metadata: %{runtime: config.name, namespace: config.namespace},
+           max_pending: config.telemetry_max_pending,
+           timeout_ms: config.telemetry_timeout_ms},
+          {WorkSupervisor, config}
+        ]
 
     Supervisor.init(children, strategy: :one_for_one)
   end

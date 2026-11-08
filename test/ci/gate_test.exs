@@ -71,7 +71,7 @@ defmodule SmolBox.CI.GateTest do
           timeout: 20_000
         )
 
-      assert report.exit_code == expected
+      assert report.exit_code == expected, inspect(%{report: report, output: data})
       failed = JSON.decode!(data)["failed_dependencies"]
       assert failed == if(expected == 0, do: %{}, else: %{job => "skipped"})
     end

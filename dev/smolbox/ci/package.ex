@@ -1,6 +1,6 @@
 defmodule SmolBox.CI.Package do
   @moduledoc false
-  alias SmolBox.CI.Util
+  alias SmolBox.CI.{NativeConsumer, Util}
 
   @root Path.expand("../../..", __DIR__)
   @limit 64 * 1024 * 1024
@@ -14,15 +14,30 @@ defmodule SmolBox.CI.Package do
   }
   @forbidden ~w(credo ex_slop ex_dna credence dialyxir ex_doc mix_audit ecto ecto_sql postgrex stream_data plug bandit)
   @public ~w(mix.exs README.md CHANGELOG.md LICENSE docs/notebooks/getting-started.livemd)
-  @docs ~w(getting-started supported-platforms troubleshooting client host-integration recovery upgrading upgrading-within-0.1.x upgrading-to-0.2.0 upgrading-to-0.2.1 upgrading-to-0.3.0 upgrading-to-0.3.1 upgrading-to-0.4.0 upgrading-to-0.4.1 upgrading-to-0.4.2 upgrading-to-0.4.3 testing telemetry worker-measurements worker-measurements-validation worker-draining worker-draining-validation disk-expansion local-volumes security resource-qualification provisioning-performance compatibility network-access network-access-validation port-mappings port-mappings-validation long-running-exec long-running-exec-validation workloads workloads-validation guest-files guest-files-validation images-and-registry-artifacts images-and-registry-artifacts-validation machine-exports managed-checkpoints managed-branches interactive-terminals interactive-terminals-validation checkpoints persistent-machines persistent-machines-validation runtime-1.17.0-qualification runtime-1.19.0-qualification runtime-1.20.2-qualification runtime-1.22.0-qualification)
+  @docs ~w(getting-started supported-platforms troubleshooting client embedded-port host-integration recovery upgrading upgrading-within-0.1.x upgrading-to-0.2.0 upgrading-to-0.2.1 upgrading-to-0.3.0 upgrading-to-0.3.1 upgrading-to-0.4.0 upgrading-to-0.4.1 upgrading-to-0.4.2 upgrading-to-0.4.3 testing telemetry worker-measurements worker-measurements-validation worker-draining worker-draining-validation disk-expansion local-volumes security resource-qualification provisioning-performance compatibility network-access network-access-validation port-mappings port-mappings-validation long-running-exec long-running-exec-validation workloads workloads-validation guest-files guest-files-validation images-and-registry-artifacts images-and-registry-artifacts-validation machine-exports managed-checkpoints managed-branches interactive-terminals interactive-terminals-validation checkpoints persistent-machines persistent-machines-validation runtime-1.17.0-qualification runtime-1.19.0-qualification runtime-1.20.2-qualification runtime-1.22.0-qualification)
 
   def run(arguments) do
     {options, []} =
       Util.options!(
         arguments,
-        [minimum: :boolean, report: :string, package_output: :string, archive: :string],
+        [
+          minimum: :boolean,
+          report: :string,
+          package_output: :string,
+          archive: :string,
+          without_rust: :boolean,
+          native_package: :string,
+          native_fixture: :string,
+          native_sha256: :string,
+          native_domain_json: :string,
+          native_output: :string,
+          native_ordinary: :boolean,
+          native_public: :boolean
+        ],
         [:report]
       )
+
+    NativeConsumer.validate_options!(options)
 
     for key <- [:report, :package_output],
         file = options[key],
@@ -48,11 +63,7 @@ defmodule SmolBox.CI.Package do
       hashes = hashes(package, names)
       consumer = prepare_consumer(root, options[:minimum])
 
-      environment = [
-        {"MIX_ENV", "prod"},
-        {"MIX_DEPS_PATH", Path.join(consumer, "deps")},
-        {"MIX_BUILD_PATH", Path.join(consumer, "_build/prod")}
-      ]
+      environment = consumer_environment(consumer, options)
 
       for command <- [
             ["mix", "deps.get", "--only", "prod"],
@@ -69,6 +80,8 @@ defmodule SmolBox.CI.Package do
 
       Util.command!(["mix", "run", "--no-compile", "smoke.exs"], cd: consumer, env: environment)
       report = report!(consumer, package, archive, names, hashes, options[:minimum] || false)
+      report = native_report(report, consumer, environment, options)
+      Util.ensure!(hashes == hashes(package, names), "native consumer changed package source")
 
       if output = options[:package_output] do
         File.mkdir_p!(Path.dirname(output))
@@ -80,6 +93,24 @@ defmodule SmolBox.CI.Package do
     after
       File.rm_rf!(root)
     end
+  end
+
+  defp consumer_environment(consumer, options) do
+    [
+      {"MIX_ENV", "prod"},
+      {"SMOLBOX_CONSUMER_WITHOUT_RUST", if(options[:without_rust], do: "1", else: nil)},
+      {"MIX_DEPS_PATH", Path.join(consumer, "deps")},
+      {"MIX_BUILD_PATH", Path.join(consumer, "_build/prod")}
+    ]
+  end
+
+  defp native_report(report, consumer, environment, options) do
+    native = NativeConsumer.run(consumer, environment, options)
+
+    if options[:without_rust],
+      do: Util.ensure!(report.smoke["without_rust"] == true, "consumer did not verify no Rust")
+
+    Map.merge(report, %{without_rust: Keyword.get(options, :without_rust, false), native: native})
   end
 
   def unpack!(archive, destination) do

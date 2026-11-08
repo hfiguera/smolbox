@@ -1,7 +1,7 @@
 defmodule SmolBox.DurableHost.VolumeStore do
   @moduledoc false
   if Code.ensure_loaded?(SmolBox.Volume) do
-    alias SmolBox.DurableHost.{Database, WorkerStore}
+    alias SmolBox.DurableHost.{BackendStore, Database, WorkerStore}
     alias SmolBox.{Error, Validation, Volume}
     alias SmolBox.Store.VolumeOps
 
@@ -29,7 +29,8 @@ defmodule SmolBox.DurableHost.VolumeStore do
     end
 
     defp insert(context, v, capacity) do
-      with :ok <- WorkerStore.admit(context, v.worker_id),
+      with :ok <- BackendStore.http(context, v.worker_id),
+           :ok <- WorkerStore.admit(context, v.worker_id),
            {:ok, usage} <- Database.usage(context, v.worker_id),
            {:ok, v} <- VolumeOps.accept(v, capacity, usage),
            {:ok, saved} <- Database.write(context, v),

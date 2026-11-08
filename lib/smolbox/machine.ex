@@ -6,9 +6,16 @@ defmodule SmolBox.Machine do
   networking without explicit allowlists, unsupported mounts or port mappings, GPU or CUDA fail decoding and cannot be
   treated as an owned machine observation. `created_at` has only second precision upstream and
   is not a cryptographic or immutable ownership token.
+
+  Native observations carry typed receipt evidence in `backend_identity` and use
+  nil `created_at`. Running observations also require PID and process birth
+  evidence. Restarting the VMM may change that process evidence while preserving
+  the full receipt and durable machine incarnation.
   """
 
   alias SmolBox.{Error, MachineSpec, Validation}
+
+  alias SmolBox.Embedded.Identity
 
   @enforce_keys [:name, :state, :created_at, :cpus, :memory_mb, :storage_gb, :overlay_gb]
   defstruct [
@@ -19,6 +26,7 @@ defmodule SmolBox.Machine do
     :memory_mb,
     :storage_gb,
     :overlay_gb,
+    backend_identity: nil,
     network: :offline,
     mounts: [],
     ports: []
@@ -30,7 +38,8 @@ defmodule SmolBox.Machine do
           mounts: [SmolBox.Mount.t()],
           ports: [SmolBox.PortMapping.t()],
           state: :created | :running | :stopped,
-          created_at: non_neg_integer(),
+          created_at: non_neg_integer() | nil,
+          backend_identity: SmolBox.Embedded.Identity.t() | nil,
           cpus: pos_integer(),
           memory_mb: pos_integer(),
           storage_gb: pos_integer(),
@@ -108,6 +117,17 @@ defmodule SmolBox.Machine do
 
   @doc "Compare creation evidence and allocations; requires exclusive namespace control."
   @spec same_incarnation?(t(), t()) :: boolean()
+  def same_incarnation?(
+        %__MODULE__{backend_identity: %Identity{} = identity} = expected,
+        %__MODULE__{backend_identity: %Identity{} = observed_identity} = observed
+      ) do
+    Identity.valid?(identity) and
+      Identity.valid?(observed_identity) and
+      identity.receipt == observed_identity.receipt and
+      Map.from_struct(%{expected | state: observed.state, backend_identity: observed_identity}) ==
+        Map.from_struct(observed)
+  end
+
   def same_incarnation?(%__MODULE__{} = expected, %__MODULE__{} = observed) do
     Map.from_struct(%{expected | state: observed.state}) == Map.from_struct(observed)
   end

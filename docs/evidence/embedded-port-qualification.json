@@ -1,0 +1,833 @@
+{
+  "schema": 1,
+  "scope": "ordinary-and-finite-native-qualification",
+  "recorded_utc": "2026-10-12",
+  "library_source_commit": "f8887c5445c6004bd1d0b829ec67ac65e5ab480d",
+  "helper_build_source_commit": "d82a2db46b5470f4c7ee411d6251a420d67c8540",
+  "consumer_archive_sha256": "d0a902ae39bc0c01729164236943f38b601237b3b5b4042d7f15617271e35ac1",
+  "archive_scope": "Includes setup guide; library source unchanged from the library_source_commit. Later evidence/README edits are not part of this tested archive.",
+  "metadata_package_consumers": {
+    "macos": {
+      "current": {
+        "report_sha256": "5ba9f2a7af1693148bfd81d908dac54ea5c0e726e1bdcb74bc5362d52779ab48",
+        "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+        "minimum": false,
+        "without_rust": true,
+        "package_sha256": "d0a902ae39bc0c01729164236943f38b601237b3b5b4042d7f15617271e35ac1",
+        "smoke": {
+          "checkpoint": true,
+          "client": true,
+          "guest_files": true,
+          "interactive": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "managed_branches": true,
+          "managed_checkpoints": true,
+          "managed_exports": true,
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.22.0",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.5",
+            "mint": "1.11.0",
+            "mint_web_socket": "1.0.6",
+            "nimble_options": "1.1.1",
+            "req": "0.7.5",
+            "telemetry": "1.4.2"
+          },
+          "without_rust": true,
+          "workload": true
+        },
+        "native": {
+          "scope": "internal-port-ordinary-package-consumer",
+          "evidence": {
+            "bridge": "beam-os-port",
+            "crash_handling_qualified": false,
+            "deadline_without_exit": false,
+            "deliberate_process_interruption": false,
+            "domain_mismatch_rejected": true,
+            "elixir_version": "1.20.4",
+            "file_bytes": 1048593,
+            "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+            "fixture_sha256": "0f4a26a548738c6ba359701ea23c5d2bbb93f0c1d95f6444df897bfa99e27aa2",
+            "fresh_epoch": true,
+            "identity": {
+              "architecture": "aarch64",
+              "assets_sha256": "881b505275b72ac4f7acaa79fd538e944265b02e55dbefacf84beb4b2ffe0055",
+              "build_sha256": "64d5e4daeb5246ef13dd393135c0a2e272b7e9dee8ccc6c6d145a49a90dc5491",
+              "engine_version": "0.1.0",
+              "platform": "macos",
+              "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+              "source_sha256": "e303886b242f160006bf6da73735e52f2276fe48b2a5f68b686f4ebc3df1e70b"
+            },
+            "intent_absence_after_owned_delete": true,
+            "intent_absence_before_create": true,
+            "inventory_after": [],
+            "inventory_before": [],
+            "missing_package_rejected": true,
+            "observed_exit": 7,
+            "operation_checks": {},
+            "otp_version": "29",
+            "owned_deleted": true,
+            "package_manifest_sha256": "6f47e8db94475ab62d6a457ed47392692a2dbd7e30a4789ef21c36d772c0c89f",
+            "present_intent_unverified_across_epochs": true,
+            "retained_after_owner_kill": false,
+            "retained_after_shutdown": true,
+            "without_rust": true,
+            "witness": "cpu=1 env=set cwd=/workspace user=65534\n",
+            "wrong_package_digest_rejected": true
+          },
+          "exercised": true,
+          "proof_tool_sha256": {
+            "native-proof.exs": "319a39b394e5be7f97f5d52e7fc508a0e5f545d70c8ff3f8cae59203bcd8a83d",
+            "native_proof.py": "2853d7fb944597c3f939270042a597145743f73447bf42d38bceb6d4b6b4601e"
+          }
+        }
+      },
+      "minimum": {
+        "report_sha256": "e4175d23c3052304d3fff5b40d94816799dce161004b0cd59e8d3f71310882f2",
+        "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+        "minimum": true,
+        "without_rust": true,
+        "package_sha256": "d0a902ae39bc0c01729164236943f38b601237b3b5b4042d7f15617271e35ac1",
+        "smoke": {
+          "checkpoint": true,
+          "client": true,
+          "guest_files": true,
+          "interactive": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "managed_branches": true,
+          "managed_checkpoints": true,
+          "managed_exports": true,
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.22.0",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.0",
+            "mint": "1.11.0",
+            "mint_web_socket": "1.0.6",
+            "nimble_options": "1.1.0",
+            "req": "0.7.4",
+            "telemetry": "1.3.0"
+          },
+          "without_rust": true,
+          "workload": true
+        },
+        "native": {
+          "scope": "internal-port-ordinary-package-consumer",
+          "evidence": {
+            "bridge": "beam-os-port",
+            "crash_handling_qualified": false,
+            "deadline_without_exit": false,
+            "deliberate_process_interruption": false,
+            "domain_mismatch_rejected": true,
+            "elixir_version": "1.18.4",
+            "file_bytes": 1048593,
+            "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+            "fixture_sha256": "0f4a26a548738c6ba359701ea23c5d2bbb93f0c1d95f6444df897bfa99e27aa2",
+            "fresh_epoch": true,
+            "identity": {
+              "architecture": "aarch64",
+              "assets_sha256": "881b505275b72ac4f7acaa79fd538e944265b02e55dbefacf84beb4b2ffe0055",
+              "build_sha256": "64d5e4daeb5246ef13dd393135c0a2e272b7e9dee8ccc6c6d145a49a90dc5491",
+              "engine_version": "0.1.0",
+              "platform": "macos",
+              "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+              "source_sha256": "e303886b242f160006bf6da73735e52f2276fe48b2a5f68b686f4ebc3df1e70b"
+            },
+            "intent_absence_after_owned_delete": true,
+            "intent_absence_before_create": true,
+            "inventory_after": [],
+            "inventory_before": [],
+            "missing_package_rejected": true,
+            "observed_exit": 7,
+            "operation_checks": {},
+            "otp_version": "27",
+            "owned_deleted": true,
+            "package_manifest_sha256": "6f47e8db94475ab62d6a457ed47392692a2dbd7e30a4789ef21c36d772c0c89f",
+            "present_intent_unverified_across_epochs": true,
+            "retained_after_owner_kill": false,
+            "retained_after_shutdown": true,
+            "without_rust": true,
+            "witness": "cpu=1 env=set cwd=/workspace user=65534\n",
+            "wrong_package_digest_rejected": true
+          },
+          "exercised": true,
+          "proof_tool_sha256": {
+            "native-proof.exs": "319a39b394e5be7f97f5d52e7fc508a0e5f545d70c8ff3f8cae59203bcd8a83d",
+            "native_proof.py": "2853d7fb944597c3f939270042a597145743f73447bf42d38bceb6d4b6b4601e"
+          }
+        }
+      }
+    },
+    "linux": {
+      "current": {
+        "report_sha256": "b149f01d006df73cdaa390a86c1bf519bf216e386347fb8f23a436ac315bccb7",
+        "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+        "minimum": false,
+        "without_rust": true,
+        "package_sha256": "d0a902ae39bc0c01729164236943f38b601237b3b5b4042d7f15617271e35ac1",
+        "smoke": {
+          "checkpoint": true,
+          "client": true,
+          "guest_files": true,
+          "interactive": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "managed_branches": true,
+          "managed_checkpoints": true,
+          "managed_exports": true,
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.22.0",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.5",
+            "mint": "1.11.0",
+            "mint_web_socket": "1.0.6",
+            "nimble_options": "1.1.1",
+            "req": "0.7.5",
+            "telemetry": "1.4.2"
+          },
+          "without_rust": true,
+          "workload": true
+        },
+        "native": {
+          "scope": "internal-port-ordinary-package-consumer",
+          "evidence": {
+            "bridge": "beam-os-port",
+            "crash_handling_qualified": false,
+            "deadline_without_exit": false,
+            "deliberate_process_interruption": false,
+            "domain_mismatch_rejected": true,
+            "elixir_version": "1.20.4",
+            "file_bytes": 1048593,
+            "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+            "fixture_sha256": "8ac12958bc166344f1ffeb4c518c883c750fece358bf177f13f6ded7953cfe5b",
+            "fresh_epoch": true,
+            "identity": {
+              "architecture": "x86_64",
+              "assets_sha256": "a58df94b5a35f25fe647d56f9945d6cbdbab5d3ff77abc777200729b9d22274d",
+              "build_sha256": "f39c061cab3132ab2196925591cfa4a69290e2fd36979b061ba9b73491d33535",
+              "engine_version": "0.1.0",
+              "platform": "linux",
+              "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+              "source_sha256": "e303886b242f160006bf6da73735e52f2276fe48b2a5f68b686f4ebc3df1e70b"
+            },
+            "intent_absence_after_owned_delete": true,
+            "intent_absence_before_create": true,
+            "inventory_after": [],
+            "inventory_before": [],
+            "missing_package_rejected": true,
+            "observed_exit": 7,
+            "operation_checks": {},
+            "otp_version": "29",
+            "owned_deleted": true,
+            "package_manifest_sha256": "1af1bd1db8e73f81729162fb367c9fc2d9131bf05c0f327f46d27b74c46aa2ca",
+            "present_intent_unverified_across_epochs": true,
+            "retained_after_owner_kill": false,
+            "retained_after_shutdown": true,
+            "without_rust": true,
+            "witness": "cpu=1 env=set cwd=/workspace user=65534\n",
+            "wrong_package_digest_rejected": true
+          },
+          "exercised": true,
+          "proof_tool_sha256": {
+            "native-proof.exs": "319a39b394e5be7f97f5d52e7fc508a0e5f545d70c8ff3f8cae59203bcd8a83d",
+            "native_proof.py": "2853d7fb944597c3f939270042a597145743f73447bf42d38bceb6d4b6b4601e"
+          }
+        }
+      },
+      "minimum": {
+        "report_sha256": "3ee49a3b0e1fc79ece7487d15a8333cafe2a4634174d707a66abf9403ffe3887",
+        "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+        "minimum": true,
+        "without_rust": true,
+        "package_sha256": "d0a902ae39bc0c01729164236943f38b601237b3b5b4042d7f15617271e35ac1",
+        "smoke": {
+          "checkpoint": true,
+          "client": true,
+          "guest_files": true,
+          "interactive": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "managed_branches": true,
+          "managed_checkpoints": true,
+          "managed_exports": true,
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.22.0",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.0",
+            "mint": "1.11.0",
+            "mint_web_socket": "1.0.6",
+            "nimble_options": "1.1.0",
+            "req": "0.7.4",
+            "telemetry": "1.3.0"
+          },
+          "without_rust": true,
+          "workload": true
+        },
+        "native": {
+          "scope": "internal-port-ordinary-package-consumer",
+          "evidence": {
+            "bridge": "beam-os-port",
+            "crash_handling_qualified": false,
+            "deadline_without_exit": false,
+            "deliberate_process_interruption": false,
+            "domain_mismatch_rejected": true,
+            "elixir_version": "1.18.4",
+            "file_bytes": 1048593,
+            "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+            "fixture_sha256": "8ac12958bc166344f1ffeb4c518c883c750fece358bf177f13f6ded7953cfe5b",
+            "fresh_epoch": true,
+            "identity": {
+              "architecture": "x86_64",
+              "assets_sha256": "a58df94b5a35f25fe647d56f9945d6cbdbab5d3ff77abc777200729b9d22274d",
+              "build_sha256": "f39c061cab3132ab2196925591cfa4a69290e2fd36979b061ba9b73491d33535",
+              "engine_version": "0.1.0",
+              "platform": "linux",
+              "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+              "source_sha256": "e303886b242f160006bf6da73735e52f2276fe48b2a5f68b686f4ebc3df1e70b"
+            },
+            "intent_absence_after_owned_delete": true,
+            "intent_absence_before_create": true,
+            "inventory_after": [],
+            "inventory_before": [],
+            "missing_package_rejected": true,
+            "observed_exit": 7,
+            "operation_checks": {},
+            "otp_version": "27",
+            "owned_deleted": true,
+            "package_manifest_sha256": "1af1bd1db8e73f81729162fb367c9fc2d9131bf05c0f327f46d27b74c46aa2ca",
+            "present_intent_unverified_across_epochs": true,
+            "retained_after_owner_kill": false,
+            "retained_after_shutdown": true,
+            "without_rust": true,
+            "witness": "cpu=1 env=set cwd=/workspace user=65534\n",
+            "wrong_package_digest_rejected": true
+          },
+          "exercised": true,
+          "proof_tool_sha256": {
+            "native-proof.exs": "319a39b394e5be7f97f5d52e7fc508a0e5f545d70c8ff3f8cae59203bcd8a83d",
+            "native_proof.py": "2853d7fb944597c3f939270042a597145743f73447bf42d38bceb6d4b6b4601e"
+          }
+        }
+      }
+    }
+  },
+  "http_only_consumer": {
+    "report_sha256": "4f60d7cd597bb074353463d2cb3f62e779bb6abd9be69d788cd024e8a7fbee12",
+    "without_rust": true,
+    "native_scope": "not-requested"
+  },
+  "linux_finite_port_operations": {
+    "report_sha256": "586b0738958b2c9df70fda9599b57acf1bcba369a998abcae39fbbe708737b37",
+    "evidence": {
+      "bridge": "beam-os-port",
+      "crash_handling_qualified": false,
+      "deadline_without_exit": false,
+      "deliberate_process_interruption": false,
+      "domain_mismatch_rejected": true,
+      "elixir_version": "1.20.4",
+      "file_bytes": 1048593,
+      "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+      "fixture_sha256": "8ac12958bc166344f1ffeb4c518c883c750fece358bf177f13f6ded7953cfe5b",
+      "fresh_epoch": true,
+      "identity": {
+        "architecture": "x86_64",
+        "assets_sha256": "6c5ef685c1ca7863bf20f666063154029a846cbecc96349efd24bec900e8e83d",
+        "build_sha256": "f39c061cab3132ab2196925591cfa4a69290e2fd36979b061ba9b73491d33535",
+        "engine_version": "0.1.0",
+        "platform": "linux",
+        "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+        "source_sha256": "e303886b242f160006bf6da73735e52f2276fe48b2a5f68b686f4ebc3df1e70b"
+      },
+      "intent_absence_after_owned_delete": true,
+      "intent_absence_before_create": true,
+      "inventory_after": [],
+      "inventory_before": [],
+      "missing_package_rejected": true,
+      "observed_exit": 7,
+      "operation_checks": {
+        "caller_cancel_after_witness": true,
+        "cancel_without_exit": true,
+        "epoch_fenced_quiescence": true,
+        "guest_termination_on_cancel_claimed": false,
+        "output_byte_limit": true,
+        "partial_upload_cancel_preserves_file": true,
+        "read_file_byte_limit": true,
+        "sibling_execution_during_and_after_cancel": true,
+        "slow_consumer_completion": "consumer_lost",
+        "slow_consumer_credit_bytes": 261279,
+        "slow_consumer_sibling_survived": true
+      },
+      "otp_version": "29",
+      "owned_deleted": true,
+      "package_manifest_sha256": "0c4bab19131e04a2cace3438dfb78191705674465bfead2aa9f90f37975a76fa",
+      "present_intent_unverified_across_epochs": true,
+      "retained_after_owner_kill": false,
+      "retained_after_shutdown": true,
+      "without_rust": true,
+      "witness": "cpu=1 env=set cwd=/workspace user=65534\n",
+      "wrong_package_digest_rejected": true
+    }
+  },
+  "operations_executed_tool_sha256": "a2a6cca09f354dbad6db13aeb75418270136e3826a7b8c37206ddeecae0e922e",
+  "linux_record_interference": {
+    "report_sha256": "e21fb2494b21decae6eec4ead0a4d10698dc08c6f41109ef52f2c2708e8dfd67",
+    "evidence": {
+      "proof": "passed",
+      "scope": "linux-native-record-interference",
+      "package_manifest_sha256": "0c4bab19131e04a2cace3438dfb78191705674465bfead2aa9f90f37975a76fa",
+      "identity": {
+        "engine_version": "0.1.0",
+        "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+        "source_sha256": "e303886b242f160006bf6da73735e52f2276fe48b2a5f68b686f4ebc3df1e70b",
+        "build_sha256": "f39c061cab3132ab2196925591cfa4a69290e2fd36979b061ba9b73491d33535",
+        "assets_sha256": "6c5ef685c1ca7863bf20f666063154029a846cbecc96349efd24bec900e8e83d",
+        "platform": "linux",
+        "architecture": "x86_64"
+      },
+      "fixture_sha256": "8ac12958bc166344f1ffeb4c518c883c750fece358bf177f13f6ded7953cfe5b",
+      "changed_inspect": {
+        "code": "ownership",
+        "dispatch": "not_dispatched",
+        "result": "error"
+      },
+      "changed_delete": {
+        "code": "ownership",
+        "dispatch": "not_dispatched",
+        "result": "error"
+      },
+      "corrupt_inspect": {
+        "code": "database",
+        "dispatch": "not_dispatched",
+        "result": "error"
+      },
+      "corrupt_query": {
+        "presence": "unverified",
+        "result": "creation_presence"
+      },
+      "corrupt_delete": {
+        "code": "database",
+        "dispatch": "not_dispatched",
+        "result": "error"
+      },
+      "busy_query": {
+        "code": "database",
+        "dispatch": "not_dispatched",
+        "result": "error"
+      },
+      "copied_labels_did_not_authorize": true,
+      "same_name_recreation_rejects_original_receipt": true,
+      "owned_deleted": true,
+      "inventory_before": [],
+      "inventory_after": [],
+      "deliberate_process_interruption": false,
+      "independent_cli_races_qualified": false
+    }
+  },
+  "linux_independent_cli_interference": {
+    "report_sha256": "9a5bbc339c261ede8f0491d54acc66df816a5c3660479302f1c3c8f4df953a68",
+    "evidence": {
+      "proof": "passed",
+      "scope": "finite-independent-cli-interference",
+      "package_manifest_sha256": "1af1bd1db8e73f81729162fb367c9fc2d9131bf05c0f327f46d27b74c46aa2ca",
+      "identity": {
+        "engine_version": "0.1.0",
+        "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+        "source_sha256": "e303886b242f160006bf6da73735e52f2276fe48b2a5f68b686f4ebc3df1e70b",
+        "build_sha256": "f39c061cab3132ab2196925591cfa4a69290e2fd36979b061ba9b73491d33535",
+        "assets_sha256": "a58df94b5a35f25fe647d56f9945d6cbdbab5d3ff77abc777200729b9d22274d",
+        "platform": "linux",
+        "architecture": "x86_64"
+      },
+      "cli_sha256": "b67b25f363403e19deceb6897e5a4d94be30a079f8cb751372782f17fc99003a",
+      "cli_version": "1.22.0",
+      "copied_labels_did_not_authorize": true,
+      "native_delete_preserved_changed_record": true,
+      "owned_deleted": true,
+      "inventory_before": [],
+      "inventory_after": [],
+      "destructive_concurrent_cli_races_qualified": false,
+      "deliberate_process_interruption": false
+    }
+  },
+  "cli_interference_executed_tool_sha256": "428b229f68de9fed26ed9edb66687b8d0236a732e1f4f9e82ed0777e6893a8b0",
+  "proof_tool_hash_scope": "Source at report recording. The CLI probe additionally now retains unresolved CLI outcomes instead of restoring while that process is still running; this failure branch was not live qualified.",
+  "upgrades": {
+    "macos": {
+      "report_sha256": "22ef870ea497c8646edcc1fc10602903e247db82eb38086e531b48ec87eb829c",
+      "evidence": {
+        "proof": "passed",
+        "scope": "compatible-native-package-upgrade",
+        "package_manifest_sha256": "7066c758f9d4286bbf659c00a3bb23e822ee17848a06f9dd0de713f133a5b726",
+        "identity": {
+          "engine_version": "0.1.0",
+          "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+          "source_sha256": "7c4fa62665795f8477b4733972871ea4abf0d6635a3023eef6442c0d2dc0c53b",
+          "build_sha256": "374402cd4c996bd096f3ba6a0a27e53088f0000f91758ce66b120462a326f252",
+          "assets_sha256": "a0e91c6eb85048604b1ab96241deb54d4b6edf47b6b5efea3cd6fb2f75719dbb",
+          "platform": "macos",
+          "architecture": "aarch64"
+        },
+        "fixture_sha256": "0f4a26a548738c6ba359701ea23c5d2bbb93f0c1d95f6444df897bfa99e27aa2",
+        "observed_exit": 7,
+        "resource_witness": "cpu=1 mem_kib=495648 storage_sectors=2097152 overlay_sectors=2097152 env=set cwd=/workspace user=65534",
+        "file_bytes": 1048593,
+        "file_sha256": "b863256dee74effc15743dff63a34ea93bb1f6778b22f6c971469c259638dd41",
+        "retained_after_stop_start": true,
+        "retained_after_stopped_helper_shutdown": true,
+        "fresh_epoch": true,
+        "owned_deleted": true,
+        "inventory_before": [],
+        "inventory_after": [],
+        "upgrade": {
+          "from_manifest_sha256": "7066c758f9d4286bbf659c00a3bb23e822ee17848a06f9dd0de713f133a5b726",
+          "to_manifest_sha256": "687315ca3de50fdce4670fb40bedd361bbe9914ebe64b8437b2d048abc3f04bf",
+          "from_identity": {
+            "engine_version": "0.1.0",
+            "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+            "source_sha256": "7c4fa62665795f8477b4733972871ea4abf0d6635a3023eef6442c0d2dc0c53b",
+            "build_sha256": "374402cd4c996bd096f3ba6a0a27e53088f0000f91758ce66b120462a326f252",
+            "assets_sha256": "a0e91c6eb85048604b1ab96241deb54d4b6edf47b6b5efea3cd6fb2f75719dbb",
+            "platform": "macos",
+            "architecture": "aarch64"
+          },
+          "to_identity": {
+            "engine_version": "0.1.0",
+            "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+            "source_sha256": "e303886b242f160006bf6da73735e52f2276fe48b2a5f68b686f4ebc3df1e70b",
+            "build_sha256": "64d5e4daeb5246ef13dd393135c0a2e272b7e9dee8ccc6c6d145a49a90dc5491",
+            "assets_sha256": "6ab45446fc048f05c508c7654233ccd95f76e2767bc4ec503208b5ffbc40cfed",
+            "platform": "macos",
+            "architecture": "aarch64"
+          },
+          "retained_full_receipt": true,
+          "domain_generation_unchanged": true,
+          "old_assets_retained_during_upgrade": true,
+          "codec_rollback_qualified": false
+        },
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false
+      }
+    },
+    "linux": {
+      "report_sha256": "61188f81e84748e37b0e13005e37dd6dc27769337bbd1edc6883a065ee8583b6",
+      "evidence": {
+        "proof": "passed",
+        "scope": "compatible-native-package-upgrade",
+        "package_manifest_sha256": "a3839804811d911d495eb6db42d79d3e8bd705561c02408974d28205bf15205b",
+        "identity": {
+          "engine_version": "0.1.0",
+          "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+          "source_sha256": "7c4fa62665795f8477b4733972871ea4abf0d6635a3023eef6442c0d2dc0c53b",
+          "build_sha256": "a0d0996db1af009c434cc3e40980f6ab112f1835af387df80c96365c57a2af6a",
+          "assets_sha256": "13628c666d71d23346ef3685a25ac63535cfa77391dab6604fa66c1eef708ec8",
+          "platform": "linux",
+          "architecture": "x86_64"
+        },
+        "fixture_sha256": "8ac12958bc166344f1ffeb4c518c883c750fece358bf177f13f6ded7953cfe5b",
+        "observed_exit": 7,
+        "resource_witness": "cpu=1 mem_kib=525000 storage_sectors=2097152 overlay_sectors=2097152 env=set cwd=/workspace user=65534",
+        "file_bytes": 1048593,
+        "file_sha256": "b863256dee74effc15743dff63a34ea93bb1f6778b22f6c971469c259638dd41",
+        "retained_after_stop_start": true,
+        "retained_after_stopped_helper_shutdown": true,
+        "fresh_epoch": true,
+        "owned_deleted": true,
+        "inventory_before": [],
+        "inventory_after": [],
+        "upgrade": {
+          "from_manifest_sha256": "a3839804811d911d495eb6db42d79d3e8bd705561c02408974d28205bf15205b",
+          "to_manifest_sha256": "0c4bab19131e04a2cace3438dfb78191705674465bfead2aa9f90f37975a76fa",
+          "from_identity": {
+            "engine_version": "0.1.0",
+            "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+            "source_sha256": "7c4fa62665795f8477b4733972871ea4abf0d6635a3023eef6442c0d2dc0c53b",
+            "build_sha256": "a0d0996db1af009c434cc3e40980f6ab112f1835af387df80c96365c57a2af6a",
+            "assets_sha256": "13628c666d71d23346ef3685a25ac63535cfa77391dab6604fa66c1eef708ec8",
+            "platform": "linux",
+            "architecture": "x86_64"
+          },
+          "to_identity": {
+            "engine_version": "0.1.0",
+            "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+            "source_sha256": "e303886b242f160006bf6da73735e52f2276fe48b2a5f68b686f4ebc3df1e70b",
+            "build_sha256": "f39c061cab3132ab2196925591cfa4a69290e2fd36979b061ba9b73491d33535",
+            "assets_sha256": "6c5ef685c1ca7863bf20f666063154029a846cbecc96349efd24bec900e8e83d",
+            "platform": "linux",
+            "architecture": "x86_64"
+          },
+          "retained_full_receipt": true,
+          "domain_generation_unchanged": true,
+          "old_assets_retained_during_upgrade": true,
+          "codec_rollback_qualified": false
+        },
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false
+      }
+    },
+    "proof_script_digest_captured_at_execution": false,
+    "scope": "Only the recorded four-patch to five-patch package pairs; no firmware or codec rollback qualification."
+  },
+  "metadata_lifecycle": {
+    "macos": {
+      "report_sha256": "d5ea1ce4c45f96f47dd60aa51ff36bdf10790061cb7428458324220c54d0e202",
+      "evidence": {
+        "proof": "passed",
+        "scope": "ordinary-native-lifecycle",
+        "package_manifest_sha256": "6f47e8db94475ab62d6a457ed47392692a2dbd7e30a4789ef21c36d772c0c89f",
+        "identity": {
+          "engine_version": "0.1.0",
+          "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+          "source_sha256": "e303886b242f160006bf6da73735e52f2276fe48b2a5f68b686f4ebc3df1e70b",
+          "build_sha256": "64d5e4daeb5246ef13dd393135c0a2e272b7e9dee8ccc6c6d145a49a90dc5491",
+          "assets_sha256": "881b505275b72ac4f7acaa79fd538e944265b02e55dbefacf84beb4b2ffe0055",
+          "platform": "macos",
+          "architecture": "aarch64"
+        },
+        "fixture_sha256": "0f4a26a548738c6ba359701ea23c5d2bbb93f0c1d95f6444df897bfa99e27aa2",
+        "observed_exit": 7,
+        "resource_witness": "cpu=1 mem_kib=495648 storage_sectors=2097152 overlay_sectors=2097152 env=set cwd=/workspace user=65534",
+        "file_bytes": 1048593,
+        "file_sha256": "b863256dee74effc15743dff63a34ea93bb1f6778b22f6c971469c259638dd41",
+        "retained_after_stop_start": true,
+        "retained_after_stopped_helper_shutdown": true,
+        "fresh_epoch": true,
+        "owned_deleted": true,
+        "inventory_before": [],
+        "inventory_after": [],
+        "upgrade": null,
+        "normal_stop_child_reaping": [],
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false
+      }
+    },
+    "linux": {
+      "report_sha256": "c4728f6fd35b1d990f4f6e6593b80955a53d4923d08191fa23ea3a2a39ff3716",
+      "evidence": {
+        "proof": "passed",
+        "scope": "ordinary-native-lifecycle",
+        "package_manifest_sha256": "1af1bd1db8e73f81729162fb367c9fc2d9131bf05c0f327f46d27b74c46aa2ca",
+        "identity": {
+          "engine_version": "0.1.0",
+          "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+          "source_sha256": "e303886b242f160006bf6da73735e52f2276fe48b2a5f68b686f4ebc3df1e70b",
+          "build_sha256": "f39c061cab3132ab2196925591cfa4a69290e2fd36979b061ba9b73491d33535",
+          "assets_sha256": "a58df94b5a35f25fe647d56f9945d6cbdbab5d3ff77abc777200729b9d22274d",
+          "platform": "linux",
+          "architecture": "x86_64"
+        },
+        "fixture_sha256": "8ac12958bc166344f1ffeb4c518c883c750fece358bf177f13f6ded7953cfe5b",
+        "observed_exit": 7,
+        "resource_witness": "cpu=1 mem_kib=525000 storage_sectors=2097152 overlay_sectors=2097152 env=set cwd=/workspace user=65534",
+        "file_bytes": 1048593,
+        "file_sha256": "b863256dee74effc15743dff63a34ea93bb1f6778b22f6c971469c259638dd41",
+        "retained_after_stop_start": true,
+        "retained_after_stopped_helper_shutdown": true,
+        "fresh_epoch": true,
+        "owned_deleted": true,
+        "inventory_before": [],
+        "inventory_after": [],
+        "upgrade": null,
+        "normal_stop_child_reaping": [
+          {
+            "stopped_helper_children": 0
+          },
+          {
+            "stopped_helper_children": 0
+          },
+          {
+            "stopped_helper_children": 0
+          }
+        ],
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false
+      }
+    }
+  },
+  "metadata_integrity": {
+    "macos": {
+      "report_sha256": "a904d99461c6952aebd12ca7f034fc2a9f5c793e5ac9339a661b9788e66b1a8a",
+      "evidence": {
+        "proof": "passed",
+        "scope": "native-metadata-integrity",
+        "package_manifest_sha256": "6f47e8db94475ab62d6a457ed47392692a2dbd7e30a4789ef21c36d772c0c89f",
+        "identity": {
+          "engine_version": "0.1.0",
+          "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+          "source_sha256": "e303886b242f160006bf6da73735e52f2276fe48b2a5f68b686f4ebc3df1e70b",
+          "build_sha256": "64d5e4daeb5246ef13dd393135c0a2e272b7e9dee8ccc6c6d145a49a90dc5491",
+          "assets_sha256": "881b505275b72ac4f7acaa79fd538e944265b02e55dbefacf84beb4b2ffe0055",
+          "platform": "macos",
+          "architecture": "aarch64"
+        },
+        "metadata_rejections": {
+          "SMOLBOX-LICENSE": {
+            "code": "package",
+            "status": "rejected"
+          },
+          "SMOLVM-LICENSE": {
+            "code": "package",
+            "status": "rejected"
+          },
+          "SMOLVM-LICENSES.md": {
+            "code": "package",
+            "status": "rejected"
+          },
+          "NATIVE-SOURCE.json": {
+            "code": "package",
+            "status": "rejected"
+          }
+        },
+        "original_assets_unchanged": true,
+        "inventory_before": [],
+        "inventory_after": [],
+        "deliberate_process_interruption": false
+      }
+    },
+    "linux": {
+      "report_sha256": "6c2cdb2eabc216b8d6ab6c4f12aec290189e1f094ab0a006094eb964db786715",
+      "evidence": {
+        "proof": "passed",
+        "scope": "native-metadata-integrity",
+        "package_manifest_sha256": "1af1bd1db8e73f81729162fb367c9fc2d9131bf05c0f327f46d27b74c46aa2ca",
+        "identity": {
+          "engine_version": "0.1.0",
+          "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+          "source_sha256": "e303886b242f160006bf6da73735e52f2276fe48b2a5f68b686f4ebc3df1e70b",
+          "build_sha256": "f39c061cab3132ab2196925591cfa4a69290e2fd36979b061ba9b73491d33535",
+          "assets_sha256": "a58df94b5a35f25fe647d56f9945d6cbdbab5d3ff77abc777200729b9d22274d",
+          "platform": "linux",
+          "architecture": "x86_64"
+        },
+        "metadata_rejections": {
+          "SMOLBOX-LICENSE": {
+            "code": "package",
+            "status": "rejected"
+          },
+          "SMOLVM-LICENSE": {
+            "code": "package",
+            "status": "rejected"
+          },
+          "SMOLVM-LICENSES.md": {
+            "code": "package",
+            "status": "rejected"
+          },
+          "NATIVE-SOURCE.json": {
+            "code": "package",
+            "status": "rejected"
+          }
+        },
+        "original_assets_unchanged": true,
+        "inventory_before": [],
+        "inventory_after": [],
+        "deliberate_process_interruption": false
+      }
+    }
+  },
+  "contracts": {
+    "native_linux": {
+      "rust_tests_passed": 84,
+      "python_integrity_tests_passed": 4,
+      "fmt_clippy_rustdoc_bootstrap": "passed",
+      "log_sha256": "cb5d4a5fb0e0ed831df5d25b5de04a80a76c0ed78f5a05d86b03d4c0bbbf4379",
+      "child_reaping_test_sha256": "ba7b8c564dffe0d25a4f883de5a375d09ec89aaad89732bc3f07bd709cbe0671",
+      "hosted_workflow_executed": false
+    },
+    "linux_postgres": {
+      "tests_passed": 93,
+      "runtime_tests_excluded": 29,
+      "log_sha256": "b440b18d082110b38531b9039fe8b6a76bf00d9e6141b16d41fad4863a03b7f4",
+      "scope": "SQL/store fault contracts, not live BEAM process-loss recovery"
+    },
+    "codec_draining_port": {
+      "tests_passed": 44,
+      "log_sha256": "4dd3f214e653791801f468ff79ae3e05e388b15f28a17370cf100b649918dd31"
+    },
+    "elixir_ci": {
+      "passed": true,
+      "tests_passed": 742,
+      "runtime_tests_excluded": 29,
+      "log_sha256": "add5f341e16afee1ec71543ee9bff61b467c5e92273b29c85b97dcbe0aa7ed4f"
+    },
+    "ci_tools": {
+      "tests_passed": 31,
+      "log_sha256": "7a7b97dc518228b23d74da8401b6382002d12c2b79665d64c48c1be28dc225d0"
+    }
+  },
+  "http_live_regression": {
+    "report_sha256": "f8fec1ce91d02704b9e1d975a723721af9f4b1f9797c59d97ddc8a5505c02daa",
+    "evidence": {
+      "scope": "ordinary-http-regression",
+      "proof": "passed",
+      "runtime_version": "1.22.0",
+      "runtime_sha256": "b67b25f363403e19deceb6897e5a4d94be30a079f8cb751372782f17fc99003a",
+      "source_commit": "f8887c5445c6004bd1d0b829ec67ac65e5ab480d",
+      "artifacts": {
+        "python.smolmachine": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+        "node.smolmachine": "768b8d2158a75abd90ccc73a65a83717aebfe37e62ed91d0db0bb731584df776"
+      },
+      "selected_tests": 3,
+      "cold_setup_allowance": true,
+      "pristine_database_absent": true,
+      "inventory_before": [],
+      "inventory_after": [],
+      "normal_service_shutdown": true,
+      "deliberate_process_interruption": false
+    }
+  },
+  "excluded_http_trial": {
+    "tests_passed": 1,
+    "tests_selected": 3,
+    "failed": 2,
+    "cause": "Cold setup exceeded the ordinary 15-second receive window; a late fixture remained.",
+    "qualification": false,
+    "cleanup": "Evidence exported; owned disposable overlay shut down and replaced.",
+    "test_log_sha256": "8c4987bec9d4a315f39fa4982c3873de117e52c11e9d008044f3e6a7d32a7e8d"
+  },
+  "private_exports": {
+    "first_linux_sha256": "519c265fdaa5fe6dce5ffb049a49a19f123f071fbce80ea6a61809c01c71b4db",
+    "final_linux_sha256": "2ee0a4f0c65ef5d023273fb7cd79a34edfdc58e7b8fd795ccc645f67b32dc583",
+    "metadata_linux_package_sha256": "3cb4286854015a702c8f9f0d75497f591be5190b2388fcccda6845fcdb0c9c4a"
+  },
+  "proof_tools_sha256": {
+    "native/package.py": "a6a5401afa4093f66918c2816f4ee58de27c379e9c250e7e82f3e75fb1cbf6f6",
+    "native/smolbox-port/tests/ordinary_proof.py": "9227cfcd22ac1702caee2b663a5fd955e6903bf445870e768ae6ac000584a33c",
+    "native/smolbox-port/tests/interference_proof.py": "e81c8100460e4556ed57a8537db7768878e5152dbc54df32c12b1ceda2822e6b",
+    "native/smolbox-port/tests/cli_interference_proof.py": "c80e8b687b6650d056093722f9054104d2fc73aed3e934491c9ba8877107a9d2",
+    "native/smolbox-port/tests/package_metadata_proof.py": "6eef0fff9584f83e040dcd4aba98f0e66c0b8fdb532dea38612bcfa72fb71ae7",
+    "scripts/embedded-port-proof.exs": "319a39b394e5be7f97f5d52e7fc508a0e5f545d70c8ff3f8cae59203bcd8a83d"
+  },
+  "lab_final_status": {
+    "active_state": "inactive",
+    "main_pid": 0,
+    "status_log_sha256": "08e01db9ab10ca97c3d74e683b7cd1c6a75c31140d82bf133dcbce5dbe2e3481"
+  },
+  "remaining": [
+    "User-deferred live helper/BEAM interruption, pre-main boot/watch-failure and durable crash boundaries",
+    "Destructive concurrent CLI races and broader resource-exhaustion/host-budget qualification",
+    "Exact linked firmware/kernel/dependency provenance, corresponding-source and license delivery",
+    "Distribution identity signatures, notarization as applicable, publisher attestation and signed-package consumers",
+    "Public managed embedded startup/draining lifecycle and complete mixed HTTP/Port live admission campaign",
+    "Arbitrary firmware upgrade and codec rollback remain unqualified"
+  ],
+  "deliberate_live_process_interruption_run": false,
+  "crash_handling_qualified": false,
+  "public_native_admission_enabled": false,
+  "first_usable_release_complete": false
+}

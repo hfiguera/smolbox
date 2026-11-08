@@ -21,7 +21,9 @@ defmodule SmolBox.Backend.HTTP do
 
   @impl true
   def supports_operation?(_context, operation),
-    do: Keyword.has_key?(Backend.operations(), operation)
+    do:
+      operation not in [:qualify_creation, :inspect_creation] and
+        Keyword.has_key?(Backend.operations(), operation)
 
   @impl true
   def invoke(context, operation, arguments, budget) do

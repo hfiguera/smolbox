@@ -7,6 +7,7 @@
     "examples/support/store/*.ex",
     "examples/*/mix.exs",
     "examples/*/.*.exs",
+    "examples/embedded_port/*.exs",
     "examples/*/{lib,config,test,priv,scripts}/**/*.{ex,exs}"
   ],
   excludes: [

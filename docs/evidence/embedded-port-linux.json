@@ -1,0 +1,215 @@
+{
+  "schema": 1,
+  "date": "2026-10-11",
+  "scope": "embedded-port-linux-internal-qualification",
+  "first_usable_release_complete": false,
+  "public_native_admission_enabled": false,
+  "platform": {
+    "guest_kernel": "Linux 6.8.0-139-generic x86_64",
+    "glibc": "2.39",
+    "nested_kvm": true,
+    "rust": "1.98.1 (48a229cea 2026-09-01)",
+    "cargo": "1.98.1 (797e8a9bc 2026-08-05)",
+    "python": "3.12.3",
+    "cc": "Ubuntu 13.3.0-6ubuntu2~24.04.1",
+    "elixir": "1.20.4",
+    "otp": "29.0.6"
+  },
+  "build_source_commit": "0a8aee9d89f6fd1cfec43bb8d6f7cf94c049be99",
+  "source_archive_sha256": "04828a1c96039237229588934a1a9ea5976723e5ec25466b43bc93e71d12d288",
+  "cargo_vendor_archive_sha256": "7705399da5f5678752f8b3ab3df1da927029b17b736e4517128c4f7319509df2",
+  "rust_toolchain_archive_sha256": "af6ecb9b67e88793a1e847a436f2c6d07b8caaa92e35a8768d9c7ca512da3776",
+  "runtime_asset_source": "https://github.com/smol-machines/smolvm/releases/download/v1.22.0/smolvm-1.22.0-linux-x86_64.tar.gz",
+  "runtime_archive_sha256": "00d2f057c963ff950846d4059af87bdddb7edf707750cdab863cb0879d6b339e",
+  "package": {
+    "manifest_sha256": "a3839804811d911d495eb6db42d79d3e8bd705561c02408974d28205bf15205b",
+    "identity": {
+      "engine_version": "0.1.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "7c4fa62665795f8477b4733972871ea4abf0d6635a3023eef6442c0d2dc0c53b",
+      "build_sha256": "a0d0996db1af009c434cc3e40980f6ab112f1835af387df80c96365c57a2af6a",
+      "assets_sha256": "13628c666d71d23346ef3685a25ac63535cfa77391dab6604fa66c1eef708ec8",
+      "platform": "linux",
+      "architecture": "x86_64"
+    }
+  },
+  "fixture": {
+    "sha256": "8ac12958bc166344f1ffeb4c518c883c750fece358bf177f13f6ded7953cfe5b",
+    "bytes": 30008349,
+    "fixture_tool_sha256": "d469be46a18edd40c1e9190ded7dca473a0dea03f7b13c32515fbdf04c047d9b"
+  },
+  "native_tests": {
+    "rust": 80,
+    "python_integrity": 4,
+    "clippy": true,
+    "rustdoc": true
+  },
+  "native": {
+    "witness": "cpu=1 mem_kib=525000 storage_sectors=2097152 overlay_sectors=2097152 env=set cwd=/workspace user=0",
+    "memory_calibration": {
+      "initial_request_mib": 512,
+      "initial_kernel_kib": 525000,
+      "second_request_mib": 768,
+      "second_kernel_kib": 783048,
+      "kernel_delta_kib": 258048
+    },
+    "nonroot_uid": 65534,
+    "file_bytes": 1048593,
+    "retained_after_helper_eof": true,
+    "deadline_without_exit": true,
+    "owned_deleted": true,
+    "inventory_before": [],
+    "inventory_after": []
+  },
+  "helper_loss": [
+    {
+      "sent": false,
+      "accepted": false,
+      "running_event": false,
+      "boundary": "idle",
+      "proof": "passed",
+      "helper_exit_signal": 9,
+      "vmm_exit_observed": true,
+      "retained_record_preserved": true,
+      "counter": 0,
+      "owned_deleted": true,
+      "inventory_unchanged": true,
+      "durable_store_qualified": false
+    },
+    {
+      "sent": false,
+      "accepted": false,
+      "running_event": false,
+      "boundary": "before-send",
+      "proof": "passed",
+      "helper_exit_signal": 9,
+      "vmm_exit_observed": true,
+      "retained_record_preserved": true,
+      "counter": 0,
+      "owned_deleted": true,
+      "inventory_unchanged": true,
+      "durable_store_qualified": false
+    },
+    {
+      "sent": true,
+      "accepted": true,
+      "running_event": false,
+      "boundary": "accepted",
+      "proof": "passed",
+      "helper_exit_signal": 9,
+      "vmm_exit_observed": true,
+      "retained_record_preserved": true,
+      "counter": 0,
+      "owned_deleted": true,
+      "inventory_unchanged": true,
+      "durable_store_qualified": false
+    },
+    {
+      "sent": true,
+      "accepted": true,
+      "running_event": true,
+      "boundary": "running",
+      "proof": "passed",
+      "helper_exit_signal": 9,
+      "vmm_exit_observed": true,
+      "retained_record_preserved": true,
+      "counter": 1,
+      "owned_deleted": true,
+      "inventory_unchanged": true,
+      "durable_store_qualified": false
+    }
+  ],
+  "vm_pack": {
+    "proof": "passed",
+    "scope": "live-bare-vm-pack",
+    "package_manifest_sha256": "a3839804811d911d495eb6db42d79d3e8bd705561c02408974d28205bf15205b",
+    "seed_sha256": "37025cf4d9794be27023e24d596b7654d354b79d6a69810becd8998c8b077a66",
+    "exported_sha256": "c582dba5281132960661a22d3be2bd4840d01ed0db48ee4a2ef58de890c7c9bd",
+    "fixture_tool_sha256": "d469be46a18edd40c1e9190ded7dca473a0dea03f7b13c32515fbdf04c047d9b",
+    "witness": "cpu=1 mem_kib=525000 storage_sectors=2097152 overlay_sectors=2097152 uid=0",
+    "source_observed_exit": 7,
+    "root_and_storage_snapshots_preserved": true,
+    "implicit_workload_absent": true,
+    "explicit_vm_user_rejected": true,
+    "retained_after_helper_eof": true,
+    "file_bytes": 3341,
+    "owned_deleted": true,
+    "inventory_unchanged": true
+  },
+  "consumer": {
+    "hex_archive_sha256": "82f9442df53c20d3d4cf06dde974490b688486fb0fc73fb5b204420eae425d31",
+    "without_rust_in_path": true,
+    "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+    "runtime_dependencies": [
+      "finch",
+      "hpax",
+      "jason",
+      "mime",
+      "mint",
+      "mint_web_socket",
+      "nimble_options",
+      "nimble_pool",
+      "req",
+      "telemetry"
+    ],
+    "native": {
+      "bridge": "beam-os-port",
+      "deadline_without_exit": true,
+      "domain_mismatch_rejected": true,
+      "elixir_version": "1.20.4",
+      "file_bytes": 1048593,
+      "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+      "fixture_sha256": "8ac12958bc166344f1ffeb4c518c883c750fece358bf177f13f6ded7953cfe5b",
+      "fresh_epoch": true,
+      "identity": {
+        "architecture": "x86_64",
+        "assets_sha256": "13628c666d71d23346ef3685a25ac63535cfa77391dab6604fa66c1eef708ec8",
+        "build_sha256": "a0d0996db1af009c434cc3e40980f6ab112f1835af387df80c96365c57a2af6a",
+        "engine_version": "0.1.0",
+        "platform": "linux",
+        "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+        "source_sha256": "7c4fa62665795f8477b4733972871ea4abf0d6635a3023eef6442c0d2dc0c53b"
+      },
+      "intent_absence_after_owned_delete": true,
+      "intent_absence_before_create": true,
+      "inventory_after": [],
+      "inventory_before": [],
+      "missing_package_rejected": true,
+      "observed_exit": 7,
+      "otp_version": "29",
+      "owned_deleted": true,
+      "package_manifest_sha256": "a3839804811d911d495eb6db42d79d3e8bd705561c02408974d28205bf15205b",
+      "present_intent_unverified_across_epochs": true,
+      "retained_after_owner_kill": true,
+      "retained_after_shutdown": true,
+      "without_rust": true,
+      "witness": "cpu=1 env=set cwd=/workspace user=65534\n",
+      "wrong_package_digest_rejected": true
+    },
+    "proof_tool_sha256": {
+      "native-proof.exs": "74658e4a4d873eb95c25d3345778eb850dce59b3226c285a664b6e6665e31e90",
+      "native_proof.py": "2853d7fb944597c3f939270042a597145743f73447bf42d38bceb6d4b6b4601e"
+    }
+  },
+  "proof_tools": {
+    "native/smolbox-engine/examples/owned-proof.rs": "ceb9536fcddcbe7ba23ec4467e9637206f02864deaebacc16674c682e7129d22",
+    "native/smolbox-port/tests/native_proof.py": "2853d7fb944597c3f939270042a597145743f73447bf42d38bceb6d4b6b4601e",
+    "native/smolbox-port/tests/vm_pack_proof.py": "3ccf4bc91de39dc5b72c58073528617e28e8b52b419d49229655f04a575edb74",
+    "native/smolbox-port/tests/fault_proof.py": "68f61d3f5c22c3b312b4b93bf117ce88855aa7f40086828a3af83da8d9541a9f"
+  },
+  "lab": {
+    "stopped": true,
+    "main_pid": 0,
+    "owned_overlay_recovered": true
+  },
+  "private_evidence": ".local/embedded-linux-protocol13-qualification/",
+  "unqualified": [
+    "boot-time parent loss",
+    "live caller cancellation and sibling isolation",
+    "broader exhaustion and interference matrix",
+    "Linux durable-store fault campaign",
+    "minimum-toolchain Linux consumer",
+    "compatible upgrades and draining",
+    "public setup and distribution review"
+  ]
+}

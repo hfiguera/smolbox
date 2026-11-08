@@ -21,6 +21,7 @@ defmodule SmolBox.Runtime.Executor do
   def run(config, key, eligible, lane \\ :execution) do
     Session.safe(fn ->
       with {:ok, record} <- Session.store(config, :fetch, [key]),
+           config = Target.pin_config(config, record, eligible),
            true <- lane == :execution or maintenance?(record, config.clock.now()),
            :ok <- ExecutionSupport.check(config, record.spec),
            :ok <-
@@ -91,7 +92,10 @@ defmodule SmolBox.Runtime.Executor do
     with {:ok, preparing} <- Session.write(session, record, state: :preparing),
          {:ok, observed} <-
            Session.io(session, preparing, :preparation, fn ->
-             Backend.inspect_machine(Target.connection(session.worker), record.machine_name)
+             Backend.inspect_machine(
+               Target.connection(session.worker, record),
+               record.machine_name
+             )
            end),
          true <-
            observed.state == :running and
@@ -117,7 +121,7 @@ defmodule SmolBox.Runtime.Executor do
     result =
       Enum.reduce_while(workers, Session.error(:admission_exhausted, :reservation), fn worker,
                                                                                        _previous ->
-        case reserve_worker(session, worker) do
+        case reserve_worker(session, worker, record.spec) do
           {:ok, next} -> {:halt, {:ok, worker, next}}
           {:error, %Error{category: :admission_exhausted}} = error -> {:cont, error}
           error -> {:halt, error}
@@ -131,22 +135,33 @@ defmodule SmolBox.Runtime.Executor do
       {:error, %Error{category: :admission_exhausted}} ->
         Session.patch(session, next_due_at_ms: Session.now(session) + session.config.poll_ms)
 
+      {:error,
+       %Error{operation: :qualify_creation, evidence: :not_dispatched, category: category} = error}
+      when category in [:unsupported_capability, :validation] ->
+        Session.patch(session,
+          state: :failed,
+          cleanup: :complete,
+          last_error: %{error | operation: :prepare_artifact}
+        )
+
       error ->
         error
     end
   end
 
-  defp reserve_worker(session, worker) do
+  defp reserve_worker(session, worker, spec) do
     with %{status: :ready} <- WorkerHealth.observe(worker, session.config.clock),
+         :ok <- Target.qualify(worker, spec),
          {:ok, current} <- Session.claim(session),
          true <-
            current.cancel_requested_at_ms == nil and
              not Execution.expired?(current, Session.now(session)),
-         {:ok, name} <- Identity.machine_name(session.config.namespace) do
+         {:ok, name} <- Identity.machine_name(session.config.namespace),
+         {:ok, allocation} <- Target.allocation(worker, current.spec, name) do
       Session.store(session.config, :reserve, [
         session.key,
         Session.guard(current),
-        {Target.id(worker), name, worker.capacity},
+        allocation,
         Session.now(session)
       ])
     else
@@ -177,12 +192,12 @@ defmodule SmolBox.Runtime.Executor do
 
     with {:ok, created} <-
            Session.io(session, record, :preparation, fn ->
-             Backend.create(Target.connection(session.worker), spec)
+             Backend.create(Target.connection(session.worker, record), spec)
            end),
          {:ok, saved} <- Session.patch(session, created_machine: created),
          {:ok, started} <-
            Session.io(session, saved, :preparation, fn ->
-             Backend.start(Target.connection(session.worker), saved.machine_name)
+             Backend.start(Target.connection(session.worker, saved), saved.machine_name)
            end),
          true <- Machine.same_incarnation?(created, started) and started.state == :running,
          :ok <- Files.stage(session, saved) do
@@ -203,7 +218,10 @@ defmodule SmolBox.Runtime.Executor do
     with :ok <- dispatch_health(session, current),
          {:ok, observed} <-
            Session.io(session, current, :preparation, fn ->
-             Backend.inspect_machine(Target.connection(session.worker), current.machine_name)
+             Backend.inspect_machine(
+               Target.connection(session.worker, current),
+               current.machine_name
+             )
            end),
          true <-
            Machine.same_incarnation?(current.created_machine, observed) and

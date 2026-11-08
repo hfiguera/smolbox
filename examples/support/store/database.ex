@@ -278,6 +278,127 @@ defmodule SmolBox.DurableHost.Database do
     decode_rows(context, rows, kind)
   end
 
+  if Code.ensure_loaded?(SmolBox.Store.BackendBindings) do
+    alias SmolBox.Backend.Binding
+    alias SmolBox.Store.BackendBindings
+
+    # Include released/deleted tombstones, unlike operational maintenance pages.
+    # Read bounded authenticated pages while the partition lock excludes writes.
+    def assignment_backend(context, worker) do
+      Enum.reduce_while([:execution, :machine, :volume], {:ok, :empty}, fn kind,
+                                                                           {:ok, evidence} ->
+        case assignment_page(context, worker, kind, nil, evidence) do
+          {:ok, :conflict} = conflict -> {:halt, conflict}
+          {:ok, _evidence} = next -> {:cont, next}
+          error -> {:halt, error}
+        end
+      end)
+    end
+
+    # A lost ledger row must not let another target reserve the same native
+    # domain. Authenticate other assigned authorities in bounded keyset pages.
+    def assignment_domain_available(context, worker, generation),
+      do: domain_page(context, worker, generation, nil)
+
+    defp domain_page(context, worker, generation, cursor) do
+      rows =
+        query(
+          context,
+          """
+          SELECT worker_id FROM (
+            SELECT worker_id FROM smolbox_executions WHERE partition=$1
+            UNION SELECT worker_id FROM smolbox_managed_machines WHERE partition=$1
+            UNION SELECT worker_id FROM smolbox_volumes WHERE partition=$1
+          ) assigned WHERE worker_id IS NOT NULL AND worker_id<>$2
+            AND ($3::varchar IS NULL OR worker_id>$3) ORDER BY worker_id LIMIT 100
+          """,
+          [context.partition, worker, cursor]
+        ).rows
+
+      with :ok <- domain_workers(context, rows, generation) do
+        if Enum.count_until(rows, 100) == 100,
+          do: domain_page(context, worker, generation, rows |> List.last() |> hd()),
+          else: :ok
+      end
+    end
+
+    defp domain_workers(context, rows, generation) do
+      Enum.reduce_while(rows, :ok, fn [worker], :ok ->
+        case assignment_backend(context, worker) do
+          {:ok, %Binding{generation: ^generation}} -> {:halt, error(:identity_conflict)}
+          {:ok, :conflict} -> {:halt, error(:store)}
+          {:ok, _binding} -> {:cont, :ok}
+          error -> {:halt, error}
+        end
+      end)
+    end
+
+    defp assignment_page(context, worker, kind, cursor, evidence) do
+      {scope, id} = cursor || {nil, nil}
+
+      rows =
+        query(
+          context,
+          "SELECT scope,execution_id,#{columns(kind)} FROM #{table(kind)} WHERE partition=$1 AND worker_id=$2 " <>
+            "AND ($3::varchar IS NULL OR (scope,execution_id)>($3,$4)) ORDER BY scope,execution_id LIMIT 100",
+          [context.partition, worker, scope, id]
+        ).rows
+
+      with {:ok, records} <- decode_rows(context, rows, kind) do
+        next = BackendBindings.merge(evidence, BackendBindings.evidence(records, worker))
+        assignment_tail(context, worker, kind, records, next)
+      end
+    end
+
+    defp assignment_tail(_context, _worker, _kind, _records, :conflict), do: {:ok, :conflict}
+
+    defp assignment_tail(context, worker, kind, records, evidence) do
+      if Enum.count_until(records, 100) == 100 do
+        last = List.last(records)
+        assignment_page(context, worker, kind, {last.scope, last.id}, evidence)
+      else
+        {:ok, evidence}
+      end
+    end
+  end
+
+  if Code.ensure_loaded?(SmolBox.Store.BackendAssignments) do
+    # Authenticate the global corpus instead of trusting a possibly displaced
+    # worker projection. At most limit+1 candidates are loaded from each kind.
+    def assignment_records(context, cursor, limit) do
+      Enum.reduce_while([execution: 0, machine: 1, volume: 2], {:ok, []}, fn {kind, rank},
+                                                                             {:ok, records} ->
+        case assignment_candidates(context, cursor, limit, kind, rank) do
+          {:ok, next} -> {:cont, {:ok, records ++ next}}
+          error -> {:halt, error}
+        end
+      end)
+    end
+
+    defp assignment_candidates(_context, {kind, _, _}, _limit, _record_kind, rank)
+         when kind > rank,
+         do: {:ok, []}
+
+    defp assignment_candidates(context, cursor, limit, kind, rank) do
+      {scope, id} =
+        case cursor do
+          {^rank, scope, id} -> {scope, id}
+          _other -> {nil, nil}
+        end
+
+      rows =
+        query(
+          context,
+          "SELECT scope,execution_id,#{columns(kind)} FROM #{table(kind)} WHERE partition=$1 " <>
+            ~s|AND ($2::varchar IS NULL OR (scope COLLATE "C",execution_id COLLATE "C")>($2,$3)) | <>
+            ~s|ORDER BY scope COLLATE "C",execution_id COLLATE "C" LIMIT $4|,
+          [context.partition, scope, id, limit + 1]
+        ).rows
+
+      decode_rows(context, rows, kind)
+    end
+  end
+
   defp columns(:machine), do: @columns <> ",machine_name"
   defp columns(:volume), do: @columns
   defp columns(:execution), do: @columns

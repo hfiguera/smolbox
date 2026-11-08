@@ -1,6 +1,7 @@
 defmodule SmolBox.DurableHost.MachineStore do
   @moduledoc false
   alias SmolBox.DurableHost.{
+    BackendStore,
     Database,
     MachineIndex,
     PortIndex,
@@ -77,20 +78,23 @@ defmodule SmolBox.DurableHost.MachineStore do
          do: persist(context, next)
   end
 
-  def run(context, :reserve, [key, guard, {worker, name, capacity}, now]) do
-    with {:ok, record} <- Database.guarded_machine(context, key, guard, now),
+  def run(context, :reserve, [key, guard, allocation, now]) do
+    with {:ok, worker, name, capacity, assignment} <-
+           BackendStore.allocation(context, allocation),
+         {:ok, record} <- Database.guarded_machine(context, key, guard, now),
          :ok <- WorkerStore.admit(context, worker),
          :ok <- SourceStore.available(context, record, worker),
          {:ok, used} <- Database.usage(context, worker),
          {:ok, next} <-
-           MachineOps.reserve(
+           BackendStore.reserve_machine(
              record,
              worker,
              name,
              Database.worker_lease(context, worker),
              capacity,
              used,
-             now
+             now,
+             assignment
            ),
          do: persist(context, next)
   end

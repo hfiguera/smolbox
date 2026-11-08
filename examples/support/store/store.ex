@@ -13,6 +13,7 @@ defmodule SmolBox.DurableHost.Store do
   alias SmolBox.DurableHost.CaptureStore
 
   alias SmolBox.DurableHost.{
+    BackendStore,
     Database,
     ExportStore,
     MachineIndex,
@@ -96,6 +97,18 @@ defmodule SmolBox.DurableHost.Store do
         transaction(context, fn ->
           WorkerStore.maintenance(context, worker, cursor, limit, now)
         end)
+  end
+
+  if Code.ensure_loaded?(SmolBox.Store.BackendBindings) do
+    @impl SmolBox.Store
+    def bind_backend(context, worker, binding),
+      do: transaction(context, fn -> BackendStore.bind(context, worker, binding) end)
+  end
+
+  if Code.ensure_loaded?(SmolBox.Store.BackendAssignments) do
+    @impl SmolBox.Store
+    def backend_assignments(context, worker, cursor, limit),
+      do: transaction(context, fn -> BackendStore.assignments(context, worker, cursor, limit) end)
   end
 
   if Code.ensure_loaded?(SmolBox.Volume) do
@@ -186,20 +199,22 @@ defmodule SmolBox.DurableHost.Store do
   end
 
   @impl SmolBox.Store
-  def reserve(context, key, guard, {worker, machine, capacity}, now) do
+  def reserve(context, key, guard, allocation, now) do
     guarded(context, key, guard, now, fn record ->
-      {:ok, used} = Database.usage(context, worker)
-
-      with :ok <- WorkerStore.admit(context, worker),
+      with {:ok, worker, machine, capacity, assignment} <-
+             BackendStore.allocation(context, allocation),
+           {:ok, used} <- Database.usage(context, worker),
+           :ok <- WorkerStore.admit(context, worker),
            do:
-             RecordOps.reservation(
+             BackendStore.reserve_execution(
                record,
                worker,
                machine,
                Database.worker_lease(context, worker),
                capacity,
                used,
-               now
+               now,
+               assignment
              )
     end)
   end

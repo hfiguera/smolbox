@@ -17,6 +17,7 @@ defmodule SmolBox.Machines do
   alias SmolBox.Runtime.ExecutionSupport
 
   alias SmolBox.{
+    Backend,
     Error,
     Execution,
     ExecutionSpec,
@@ -26,7 +27,7 @@ defmodule SmolBox.Machines do
     Validation
   }
 
-  alias SmolBox.Runtime.{Machines, Session, VolumeAccess, WorkerConfig}
+  alias SmolBox.Runtime.{Machines, NativeResolution, Session, Target, VolumeAccess}
 
   @type handle :: ManagedMachine.key()
 
@@ -52,7 +53,7 @@ defmodule SmolBox.Machines do
   end
 
   defp accept_approved(config, spec, fingerprint) do
-    if Enum.any?(config.workers, &WorkerConfig.supports?(&1, spec)) do
+    if Enum.any?(config.workers, &Target.supports?(&1, spec)) do
       with {:ok, record} <- ManagedMachine.new(spec, fingerprint, config.clock.now()),
            {:ok, saved} <- Machines.store(config, :accept, [record, config.max_pending]),
            do: {:ok, ManagedMachine.key(saved)}
@@ -86,9 +87,11 @@ defmodule SmolBox.Machines do
          {:ok, record} <- Machines.store(config, :fetch, [handle]),
          true <- record.state != :deleted and record.created_machine != nil,
          {:ok, worker} <- Machines.worker(config, record),
-         {:ok, observed} <- SmolBox.Client.inspect_machine(worker.client, record.machine_name),
+         :ok <- Target.require_operation(worker, :logs),
+         {:ok, observed} <-
+           Backend.inspect_machine(Target.connection(worker, record), record.machine_name),
          true <- SmolBox.DiskExpansion.matches?(record, observed) do
-      SmolBox.Client.logs(worker.client, record.machine_name, options)
+      Backend.logs(Target.connection(worker, record), record.machine_name, options)
     else
       false -> Session.error(:identity_conflict, :logs)
       error -> error
@@ -111,8 +114,9 @@ defmodule SmolBox.Machines do
          {:ok, record} <- Machines.store(config, :fetch, [handle]),
          true <- record.state != :deleted and record.created_machine != nil,
          {:ok, worker} <- Machines.worker(config, record),
+         :ok <- Target.require_operation(worker, :machine_measurements),
          {:ok, measured} <-
-           SmolBox.Client.machine_measurements(worker.client, record.machine_name),
+           Backend.machine_measurements(Target.connection(worker, record), record.machine_name),
          true <- SmolBox.DiskExpansion.matches?(record, measured.machine) do
       {:ok, measured}
     else
@@ -194,6 +198,7 @@ defmodule SmolBox.Machines do
          :ok <- DiskExpansions.supported(config),
          {:ok, record} <- Machines.store(config, :fetch, [handle]),
          {:ok, worker} <- Machines.worker(config, record),
+         :ok <- Target.require_operation(worker, :expand_disks),
          true <- worker.runtime_version in ["1.20.2", "1.22.0"] do
       Machines.store(config, :expansion_accept, [
         handle,
@@ -227,6 +232,9 @@ defmodule SmolBox.Machines do
          :ok <- key(handle),
          {:ok, config} <- config(runtime),
          :ok <- DiskExpansions.supported(config),
+         {:ok, record} <- Machines.store(config, :fetch, [handle]),
+         {:ok, worker} <- Machines.worker(config, record),
+         :ok <- Target.require_operation(worker, :expand_disks),
          {:ok, current} <-
            Machines.store(config, :claim_version, [
              handle,
@@ -236,10 +244,9 @@ defmodule SmolBox.Machines do
              config.lease_ms
            ]),
          true <- current.active_expansion == id and current.phase == :uncertain,
-         {:ok, worker} <- Machines.worker(config, current),
          result =
            Machines.io(config, %{current | operation_deadline_ms: nil}, fn ->
-             SmolBox.Client.inspect_machine(worker.client, current.machine_name)
+             Backend.inspect_machine(Target.connection(worker, current), current.machine_name)
            end),
          {:ok, observed} <- resolution_observation(result, disposition) do
       DiskExpansions.advance(config, current, {:resolve, observed})
@@ -276,7 +283,7 @@ defmodule SmolBox.Machines do
          :ok <- ExecutionSpec.validate(spec),
          :ok <- ExecutionSupport.check(config, spec),
          :ok <- supported_machine(config, handle),
-         :ok <- approved_pull(config, handle, spec),
+         :ok <- approved_command(config, handle, spec),
          {:ok, fingerprint} <- ExecutionSpec.fingerprint(spec, config.fingerprint_key),
          digest =
            :crypto.mac(
@@ -355,27 +362,38 @@ defmodule SmolBox.Machines do
          {:ok, record} <- Machines.store(config, :fetch, [handle]),
          true <- record.state != :deleted and record.created_machine != nil,
          {:ok, worker} <- Machines.worker(config, record),
-         {:ok, observed} <- SmolBox.Client.inspect_machine(worker.client, record.machine_name),
+         :ok <- Target.require_operation(worker, :list_images),
+         {:ok, observed} <-
+           Backend.inspect_machine(Target.connection(worker, record), record.machine_name),
          true <- SmolBox.DiskExpansion.matches?(record, observed) do
-      SmolBox.Client.list_images(worker.client, record.machine_name)
+      Backend.list_images(Target.connection(worker, record), record.machine_name)
     else
       false -> Session.error(:identity_conflict, :images)
       error -> error
     end
   end
 
-  defp approved_pull(config, handle, %{command: %SmolBox.ImagePull{}} = spec) do
+  defp approved_command(config, handle, spec) do
     with {:ok, record} <- Machines.store(config, :fetch, [handle]),
          {:ok, worker} <- Machines.worker(config, record),
-         true <- WorkerConfig.supports?(worker, spec) do
+         true <- command_approved?(worker, spec),
+         :ok <- Target.qualify(Target.pin(worker), spec) do
       :ok
     else
-      false -> Session.error(:unsupported_capability, :pull_image)
+      false -> Session.error(:unsupported_capability, command_operation(spec))
       error -> error
     end
   end
 
-  defp approved_pull(_config, _handle, _spec), do: :ok
+  defp command_approved?(%{kind: :embedded} = worker, spec), do: Target.supports?(worker, spec)
+
+  defp command_approved?(worker, %{command: %SmolBox.ImagePull{}} = spec),
+    do: Target.supports?(worker, spec)
+
+  defp command_approved?(_worker, _spec), do: true
+
+  defp command_operation(%{command: %SmolBox.ImagePull{}}), do: :pull_image
+  defp command_operation(_spec), do: :submit
 
   defp pull_machine(%{spec: %{artifact: %{"kind" => "oci"}}}), do: :ok
   defp pull_machine(_machine), do: Session.error(:unsupported_capability, :pull_image)
@@ -391,6 +409,12 @@ defmodule SmolBox.Machines do
   With `disposition: :deleted`, the operator instead removes the resource after
   quiescence. This call verifies absence and releases capacity; it sends no delete.
   This also resolves a lost creation response without adopting an unverified VM.
+  Embedded resolution additionally freezes local target dispatch, drains pending
+  requests and serializes against automatic reconciliation. It currently requires
+  a saved full native receipt for stopped resolution. A lost receipt permits only
+  deleted resolution after the original creation intent is verified absent.
+  Present material remains unverified and reserved. Neither resolution nor
+  subsequent reconciliation invents Exit or reclaims completed command history.
   """
   def resolve(runtime, handle, version, options) do
     with true <-
@@ -399,7 +423,26 @@ defmodule SmolBox.Machines do
          true <- disposition in [:stopped, :deleted],
          :ok <- key(handle),
          {:ok, config} <- config(runtime),
-         {:ok, current} <-
+         {:ok, record} <- Machines.store(config, :fetch, [handle]),
+         {:ok, worker} <- Machines.worker(config, record) do
+      NativeResolution.run(
+        config,
+        Runtime.coordinator(runtime),
+        record,
+        worker,
+        disposition,
+        fn pinned ->
+          resolve_record(config, handle, version, pinned, disposition)
+        end
+      )
+    else
+      false -> Session.error(:validation, :reconcile)
+      error -> error
+    end
+  end
+
+  defp resolve_record(config, handle, version, worker, disposition) do
+    with {:ok, current} <-
            Machines.store(config, :claim_version, [
              handle,
              version,
@@ -408,10 +451,9 @@ defmodule SmolBox.Machines do
              config.lease_ms
            ]),
          :ok <- Machines.port_support(config, current.spec.ports),
-         {:ok, worker} <- Machines.worker(config, current),
          observation =
            Machines.io(config, %{current | operation_deadline_ms: nil}, fn ->
-             SmolBox.Client.inspect_machine(worker.client, current.machine_name)
+             resolution_inspect(worker, current)
            end),
          {:ok, observed} <- resolution_observation(observation, disposition),
          {:ok, fresh} <- Machines.claim(config, handle) do
@@ -421,11 +463,22 @@ defmodule SmolBox.Machines do
         observed,
         config.clock.now()
       ])
-    else
-      false -> Session.error(:validation, :reconcile)
-      error -> error
     end
   end
+
+  defp resolution_inspect(%{kind: :embedded} = worker, %{created_machine: nil} = record),
+    do: Backend.inspect_creation(resolution_reference(worker, record))
+
+  defp resolution_inspect(worker, record),
+    do: Backend.inspect_machine(resolution_reference(worker, record), record.machine_name)
+
+  defp resolution_reference(%{kind: :embedded} = worker, record),
+    do:
+      worker
+      |> Target.connection(record)
+      |> Backend.bounded(timeout_ms: 1000, max_response_bytes: 16_384)
+
+  defp resolution_reference(worker, record), do: Target.connection(worker, record)
 
   @doc "Schedule read-only recovery observation; this does not authorize replay of uncertain requests."
   def reconcile(runtime, handle) do
@@ -435,6 +488,8 @@ defmodule SmolBox.Machines do
   end
 
   defp resolution_observation({:ok, observed}, :stopped), do: {:ok, observed}
+
+  defp resolution_observation({:ok, :absent}, :deleted), do: {:ok, :absent}
 
   defp resolution_observation({:error, %Error{category: :not_found}}, :deleted),
     do: {:ok, :absent}

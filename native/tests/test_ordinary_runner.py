@@ -1,0 +1,82 @@
+"""Modeled ordinary-runner failures never force a VM owner to exit."""
+import importlib.util
+import json
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+import unittest
+from unittest.mock import Mock, patch
+
+spec = importlib.util.spec_from_file_location(
+    'native_proof', Path(__file__).resolve().parents[1] / 'smolbox-port/tests/native_proof.py')
+proof = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(proof)
+ordinary_spec = importlib.util.spec_from_file_location(
+    'ordinary_proof', Path(__file__).resolve().parents[1] / 'smolbox-port/tests/ordinary_proof.py')
+ordinary = importlib.util.module_from_spec(ordinary_spec)
+with patch.dict(sys.modules, {'native_proof': proof}):
+    ordinary_spec.loader.exec_module(ordinary)
+
+
+class OrdinaryRunnerTests(unittest.TestCase):
+    def test_clean_upgrade_cannot_adopt_legacy_receipts_or_change_policy(self):
+        identity = {name: 'fixture' for name in ['platform', 'architecture', 'engine_version', 'smolvm_revision']}
+        clean = {'schema': 2, 'policy': {'domain_ownership': 'exclusive'}, 'identity': identity}
+        legacy = {'schema': 1, 'identity': identity}
+        with self.assertRaisesRegex(AssertionError, 'fresh enrollment'):
+            ordinary.check_upgrade(legacy, clean)
+        with self.assertRaisesRegex(AssertionError, 'fresh enrollment'):
+            ordinary.check_upgrade(clean, legacy)
+        with self.assertRaisesRegex(AssertionError, 'native policy'):
+            ordinary.check_upgrade(clean, dict(clean, policy={'domain_ownership': 'different'}))
+        ordinary.check_upgrade(clean, dict(clean))
+
+    def test_unresolved_graceful_exit_records_diagnostics_without_forcing_or_deleting(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            port = proof.Port.__new__(proof.Port)
+            port.error_path = Path(temporary) / 'helper.stderr'
+            port.errors = Mock()
+            port.process = Mock(pid=123)
+            port.process.wait.side_effect = subprocess.TimeoutExpired('modeled-helper', 10)
+            with self.assertRaisesRegex(RuntimeError, 'preserve authority'):
+                port.graceful_exit()
+            port.process.stdin.close.assert_called_once()
+            port.process.kill.assert_not_called()
+            port.process.terminate.assert_not_called()
+            port.errors.close.assert_not_called()
+            evidence = json.loads(Path(str(port.error_path) + '.retained.json').read_text())
+            self.assertFalse(evidence['deletion_authority'])
+            self.assertFalse(evidence['forced_termination'])
+            self.assertFalse(evidence['crash_handling_qualified'])
+
+    def test_startup_rejection_uses_eof_and_normal_collection(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            process = Mock()
+            process.wait.return_value = 2  # Normal preflight rejection.
+            with patch.dict(proof.os.environ, {'LD_PRELOAD': '/fixture/injected', 'DYLD_INSERT_LIBRARIES': '/fixture/injected'}), \
+                    patch.object(proof.subprocess, 'Popen', return_value=process) as spawn, \
+                    patch.object(proof.Port, 'receive', return_value={'type': 'invalid'}):
+                with self.assertRaisesRegex(AssertionError, 'package not ready'):
+                    proof.Port(Path(temporary), Path(temporary) / 'config',
+                               Path(temporary) / 'helper.stderr')
+            self.assertNotIn('LD_PRELOAD', spawn.call_args.kwargs['env'])
+            self.assertNotIn('DYLD_INSERT_LIBRARIES', spawn.call_args.kwargs['env'])
+            process.stdin.close.assert_called_once()
+            process.wait.assert_called_once_with(timeout=10)
+            process.kill.assert_not_called()
+            process.terminate.assert_not_called()
+
+    def test_broken_pipe_does_not_prevent_normal_collection(self):
+        port = proof.Port.__new__(proof.Port)
+        port.errors = Mock()
+        port.process = Mock()
+        port.process.stdin.close.side_effect = BrokenPipeError()
+        port.process.wait.return_value = 0
+        self.assertEqual(port.graceful_exit(), 0)
+        port.errors.close.assert_called_once()
+        port.process.kill.assert_not_called()
+
+
+if __name__ == '__main__':
+    unittest.main()

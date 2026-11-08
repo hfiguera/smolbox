@@ -62,7 +62,7 @@ defmodule SmolBox.Runtime.Cleanup do
   defp inspect_machine(session, record),
     do:
       Session.io(session, record, :cleanup, fn ->
-        Backend.inspect_machine(Target.connection(session.worker), record.machine_name)
+        Backend.inspect_machine(Target.connection(session.worker, record), record.machine_name)
       end)
 
   defp finish_observation(session, record, observed) do
@@ -84,8 +84,23 @@ defmodule SmolBox.Runtime.Cleanup do
   defp dispose_or_preserve(session, record, observed) do
     if preserve?(session, record),
       do: stop_and_preserve(session, record, observed),
-      else: delete(session, record)
+      else: dispose(session, record, observed)
   end
+
+  defp dispose(%{worker: %{kind: :embedded}} = session, record, observed) do
+    with :ok <- stop(session, record, observed),
+         {:ok, stopped} <- inspect_machine(session, record),
+         true <- Machine.same_incarnation?(record.created_machine, stopped),
+         true <- stopped.state == :stopped do
+      delete(session, record)
+    else
+      false -> retry(session, %Error{category: :identity_conflict, operation: :cleanup})
+      {:error, %Error{category: :not_found}} -> complete(session)
+      {:error, error} -> retry(session, error)
+    end
+  end
+
+  defp dispose(session, record, _observed), do: delete(session, record)
 
   defp acknowledge_restart(session, %{evidence: :termination_confirmed}, %{state: :running}) do
     Session.patch(session,
@@ -98,7 +113,7 @@ defmodule SmolBox.Runtime.Cleanup do
 
   defp stop(session, record, %{state: :running}) do
     case Session.io(session, record, :cleanup, fn ->
-           Backend.stop(Target.connection(session.worker), record.machine_name)
+           Backend.stop(Target.connection(session.worker, record), record.machine_name)
          end) do
       {:ok, _stopped} -> :ok
       error -> error
@@ -135,7 +150,7 @@ defmodule SmolBox.Runtime.Cleanup do
 
   defp delete(session, record) do
     case Session.io(session, record, :cleanup, fn ->
-           Backend.delete(Target.connection(session.worker), record.machine_name)
+           Backend.delete(Target.connection(session.worker, record), record.machine_name)
          end) do
       :ok -> verify_absence(session, record)
       {:error, %Error{category: :not_found}} -> verify_absence(session, record)
@@ -204,7 +219,7 @@ defmodule SmolBox.Runtime.Cleanup do
       )
 
   defp exhausted(session, record) do
-    client = Backend.bounded(Target.connection(session.worker), timeout_ms: 1000)
+    client = Backend.bounded(Target.connection(session.worker, record), timeout_ms: 1000)
 
     case Backend.inspect_machine(client, record.machine_name) do
       {:error, %Error{category: :not_found}} ->

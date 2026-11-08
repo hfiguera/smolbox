@@ -4,6 +4,13 @@
 package checks on disposable hosted runners for every push and pull request.
 It can also be dispatched manually. It contains no real-worker jobs.
 
+The required `smolbox-native` Linux lane runs the verified SDK bootstrap,
+source-integrity checks, workspace formatting, Rust tests, Clippy and Rustdoc
+with Rust 1.98.1. Its tests launch no VM. The source/patch archive and Cargo lock
+remain pinned; this maintainer CI requirement does not add Rust, native assets or
+a hypervisor to HTTP-only or prebuilt Port package consumption. Live platform
+qualification and distributable signing remain separate gates.
+
 Main checks use Elixir 1.20.4 with OTP 29.0.6, matching `.tool-versions`.
 Compatibility jobs retain Elixir 1.18.4/OTP 27.3.4.15, Elixir 1.19.5/OTP 28.5
 and Elixir 1.20.4/OTP 28.5. Cache keys include the exact main toolchain so OTP 28
@@ -121,6 +128,23 @@ production consumer. The getting-started and troubleshooting guides must be in
 the archive. Examples, tests, maintainer tooling and external references must not
 be in it. For a release, validate both current and minimum consumers against the
 same saved archive as described in the implementation plan.
+
+For an approved, already enrolled native domain, add `--without-rust
+--native-public` plus `--native-package`, `--native-fixture`, `--native-sha256`,
+`--native-domain-json` and a fresh `--native-output` directory. Rust tools must be
+absent from PATH. This copies the public Runtime example into the fresh consumer,
+records its source hashes, checks the native inventory before/after, and verifies
+owned deletion. `--minimum` selects the minimum dependency/toolchain lane.
+`--native-public` and the internal `--native-ordinary` mode are mutually exclusive.
+Native consumer options require one of those explicit modes; omission is rejected
+before native work because crash validation remains deferred.
+Native consumer deadlines/output overflow retain the child collector and record
+private diagnostics without signalling its process group. The qualification
+fails; do not retry or delete unresolved authority. A diagnostic PID is not
+cleanup authority. The collector retires only after normal child collection.
+Public mode performs ordinary lifecycle operations and normal Runtime shutdown;
+it does not run deliberate process-interruption qualification. Private logs and
+codec records must not be uploaded as public evidence.
 
 ## Test concurrency
 

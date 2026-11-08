@@ -1,0 +1,30 @@
+[workspace]
+members = ["smolbox-protocol", "smolbox-engine", "smolbox-port"]
+exclude = ["target/upstream/smolvm"]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+license = "MIT"
+version = "0.1.0"
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+base64 = "0.22"
+# Verified offline snapshot of 9f446ae00219148ca4a703914f44a8e2fab11655,
+# with every byte and executable mode checked against upstream. Run bootstrap.py before Cargo.
+# The research checkout is never a build dependency or patch destination.
+smolvm = { path = "target/upstream/smolvm", version = "=1.22.0" }
+smolvm-pack = { path = "target/upstream/smolvm/crates/smolvm-pack", version = "=1.22.0" }
+smolvm-protocol = { path = "target/upstream/smolvm/crates/smolvm-protocol", version = "=1.22.0" }
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
+
+# Keep debug executables within the same 256-MiB admission bound as helpers.
+# Line tables retain useful backtraces without the SDK's full dependency DWARF.
+[profile.dev]
+debug = 1

@@ -6,7 +6,7 @@ defmodule SmolBox.LabCandidate do
   # Cold artifact creation under the one-CPU cap exceeded the fixture's former
   # 55-second receive budget. This remains within Profile's existing bounds.
   def preparation_ms do
-    if System.get_env("SMOLBOX_LINUX_CANDIDATE") == "true", do: 120_000, else: 60_000
+    if slow_setup?(), do: 120_000, else: 60_000
   end
 
   # The standard suites keep their existing behavior unless the dedicated Linux
@@ -41,7 +41,7 @@ defmodule SmolBox.LabCandidate do
     # fixture's 15-second receive budget. Match the 60-second preparation budget;
     # individual timeout/cancellation scenarios still apply their own overrides.
     options =
-      if System.get_env("SMOLBOX_LINUX_CANDIDATE") == "true" do
+      if slow_setup?() do
         Keyword.merge(options, operation_timeout_ms: 60_000, receive_timeout_ms: 55_000)
       else
         options
@@ -54,6 +54,13 @@ defmodule SmolBox.LabCandidate do
   end
 
   def observation_ms(default) do
-    if System.get_env("SMOLBOX_LINUX_CANDIDATE") == "true", do: 180_000, else: default
+    if slow_setup?(), do: 180_000, else: default
   end
+
+  # Standalone disposable-lab runs may need the same cold setup allowance without
+  # selecting the separate candidate deployment or invoking its control script.
+  defp slow_setup?,
+    do:
+      System.get_env("SMOLBOX_LINUX_CANDIDATE") == "true" or
+        System.get_env("SMOLBOX_SLOW_SETUP") == "true"
 end

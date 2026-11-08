@@ -2,7 +2,7 @@ defmodule SmolBox.DurableHost.WorkerStore do
   @moduledoc false
 
   if Code.ensure_loaded?(SmolBox.WorkerControl) do
-    alias SmolBox.DurableHost.Database
+    alias SmolBox.DurableHost.{BackendStore, Database}
     alias SmolBox.{Error, Validation, WorkerControl, WorkerMaintenance}
 
     def capabilities(context) do
@@ -13,7 +13,7 @@ defmodule SmolBox.DurableHost.WorkerStore do
       )
 
       Map.merge(
-        %{worker_control: 1},
+        Map.merge(%{worker_control: 1}, BackendStore.capabilities(context)),
         if(Code.ensure_loaded?(SmolBox.DiskExpansion),
           do: %{managed_disk_expansion: 1},
           else: %{}

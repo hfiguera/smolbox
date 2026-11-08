@@ -1,0 +1,14 @@
+{
+  "type": "terminal",
+  "epoch": "abababababababababababababababab",
+  "id": 1,
+  "sequence": 3,
+  "outcome": {
+    "result": "command",
+    "completion": "native_error",
+    "dispatch": "may_have_dispatched",
+    "observed_exit": 0,
+    "running_observed": true,
+    "output_bytes": 6
+  }
+}

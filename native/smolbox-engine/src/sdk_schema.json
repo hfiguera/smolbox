@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "user_version": 0,
+  "objects": [
+    {
+      "kind": "index",
+      "name": "fork_leases_pool_state",
+      "table": "fork_leases",
+      "sql": "CREATE INDEX fork_leases_pool_state ON fork_leases(pool_name, state)"
+    },
+    {
+      "kind": "index",
+      "name": "fork_pool_slots_pool_state",
+      "table": "fork_pool_slots",
+      "sql": "CREATE INDEX fork_pool_slots_pool_state ON fork_pool_slots(pool_name, state)"
+    },
+    {
+      "kind": "index",
+      "name": "vm_pause_active",
+      "table": "vm_pause_operations",
+      "sql": "CREATE UNIQUE INDEX vm_pause_active ON vm_pause_operations(name) WHERE consumed = 0"
+    },
+    {
+      "kind": "table",
+      "name": "config",
+      "table": "config",
+      "sql": "CREATE TABLE config ( key TEXT PRIMARY KEY NOT NULL, value TEXT NOT NULL )"
+    },
+    {
+      "kind": "table",
+      "name": "fork_leases",
+      "table": "fork_leases",
+      "sql": "CREATE TABLE fork_leases ( id TEXT PRIMARY KEY NOT NULL, pool_name TEXT NOT NULL, idempotency_key TEXT NOT NULL, state TEXT NOT NULL, data BLOB NOT NULL, UNIQUE(pool_name, idempotency_key) )"
+    },
+    {
+      "kind": "table",
+      "name": "fork_pool_slots",
+      "table": "fork_pool_slots",
+      "sql": "CREATE TABLE fork_pool_slots ( machine_name TEXT PRIMARY KEY NOT NULL, pool_name TEXT NOT NULL, state TEXT NOT NULL, data BLOB NOT NULL )"
+    },
+    {
+      "kind": "table",
+      "name": "fork_pool_snapshots",
+      "table": "fork_pool_snapshots",
+      "sql": "CREATE TABLE fork_pool_snapshots ( golden TEXT PRIMARY KEY NOT NULL, data BLOB NOT NULL )"
+    },
+    {
+      "kind": "table",
+      "name": "fork_pools",
+      "table": "fork_pools",
+      "sql": "CREATE TABLE fork_pools ( name TEXT PRIMARY KEY NOT NULL, data BLOB NOT NULL )"
+    },
+    {
+      "kind": "table",
+      "name": "vm_create_reservations",
+      "table": "vm_create_reservations",
+      "sql": "CREATE TABLE vm_create_reservations ( name TEXT PRIMARY KEY NOT NULL, owner_token TEXT NOT NULL, owner_pid INTEGER NOT NULL, created_at INTEGER NOT NULL )"
+    },
+    {
+      "kind": "table",
+      "name": "vm_pause_operations",
+      "table": "vm_pause_operations",
+      "sql": "CREATE TABLE vm_pause_operations ( name TEXT NOT NULL, operation TEXT NOT NULL, consumed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (name, operation) )"
+    },
+    {
+      "kind": "table",
+      "name": "vm_resize_intents",
+      "table": "vm_resize_intents",
+      "sql": "CREATE TABLE vm_resize_intents ( name TEXT PRIMARY KEY NOT NULL, data BLOB NOT NULL )"
+    },
+    {
+      "kind": "table",
+      "name": "vm_resize_receipts",
+      "table": "vm_resize_receipts",
+      "sql": "CREATE TABLE vm_resize_receipts ( name TEXT NOT NULL, operation_id TEXT NOT NULL, data BLOB NOT NULL, PRIMARY KEY (name, operation_id) )"
+    },
+    {
+      "kind": "table",
+      "name": "vms",
+      "table": "vms",
+      "sql": "CREATE TABLE vms ( name TEXT PRIMARY KEY NOT NULL, data BLOB NOT NULL )"
+    }
+  ]
+}

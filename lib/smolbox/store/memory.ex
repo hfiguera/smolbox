@@ -18,6 +18,8 @@ defmodule SmolBox.Store.Memory do
   alias SmolBox.Store.CaptureOps
 
   alias SmolBox.Store.{
+    BackendAssignments,
+    BackendBindings,
     Codec,
     ExpansionOps,
     ExportOps,
@@ -71,6 +73,7 @@ defmodule SmolBox.Store.Memory do
          bytes: 0,
          leases: %{},
          worker_controls: %{},
+         backend_bindings: %{},
          max_records: config[:max_records],
          max_bytes: config[:max_bytes]
        }}
@@ -102,6 +105,13 @@ defmodule SmolBox.Store.Memory do
 
   @impl Store
   def capabilities(store), do: call(store, :capabilities)
+  @impl Store
+  def bind_backend(store, worker, binding), do: call(store, {:bind_backend, worker, binding})
+
+  @impl Store
+  def backend_assignments(store, worker, cursor, limit),
+    do: call(store, {:backend_assignments, worker, cursor, limit})
+
   @impl Store
   def accept(store, record, max_pending), do: call(store, {:accept, record, max_pending})
   @impl Store
@@ -153,6 +163,8 @@ defmodule SmolBox.Store.Memory do
       {{:ok,
         %{
           managed_disk_expansion: 1,
+          backend_bindings: 1,
+          backend_recovery: 1,
           local_volumes: 1,
           worker_control: 1,
           schema: 1,
@@ -170,6 +182,30 @@ defmodule SmolBox.Store.Memory do
           interactive_terminal: 1,
           extended_execution: 1
         }}, state}
+
+  defp execute({:bind_backend, worker, binding}, state) do
+    records = Map.values(state.records) ++ Map.values(state.machines) ++ Map.values(state.volumes)
+    evidence = BackendBindings.evidence(records, worker)
+    current = state.backend_bindings[worker]
+
+    with {:ok, next} <- BackendBindings.bind(worker, current, binding, evidence),
+         :ok <- binding_admission(state, worker, current, next) do
+      {{:ok, next}, %{state | backend_bindings: Map.put(state.backend_bindings, worker, next)}}
+    else
+      {:error, _error} = error -> {error, state}
+    end
+  end
+
+  defp execute({:backend_assignments, worker, cursor, limit}, state) do
+    if BackendAssignments.valid_page?(worker, cursor, limit) do
+      records =
+        Map.values(state.records) ++ Map.values(state.machines) ++ Map.values(state.volumes)
+
+      {BackendAssignments.page(records, worker, cursor, limit), state}
+    else
+      {error(:validation), state}
+    end
+  end
 
   defp execute({:worker_control, worker}, state) do
     reply =
@@ -320,6 +356,19 @@ defmodule SmolBox.Store.Memory do
     end
   end
 
+  defp binding_admission(state, worker, current, next) do
+    cond do
+      not BackendBindings.available?(state.backend_bindings, worker, next) ->
+        error(:identity_conflict)
+
+      current != nil or map_size(state.backend_bindings) < state.max_records ->
+        :ok
+
+      true ->
+        error(:admission_exhausted)
+    end
+  end
+
   defp mutate(record, {:claim, owner, now, ttl}, state),
     do: RecordOps.claim(record, state.leases[record.worker_id], owner, now, ttl)
 
@@ -335,8 +384,12 @@ defmodule SmolBox.Store.Memory do
          do: RecordOps.release(record, now)
   end
 
-  defp mutate(record, {:reserve, guard, {worker, machine, capacity}, now}, state) do
-    with :ok <- RecordOps.guard(record, guard, state.leases[record.worker_id], now),
+  defp mutate(record, {:reserve, guard, allocation, now}, state) do
+    worker = BackendBindings.worker(allocation)
+
+    with {:ok, worker, machine, capacity, assignment} <-
+           BackendBindings.allocation(allocation, state.backend_bindings[worker]),
+         :ok <- RecordOps.guard(record, guard, state.leases[record.worker_id], now),
          :ok <- WorkerControl.admit(control(state, worker)) do
       RecordOps.reservation(
         record,
@@ -345,7 +398,8 @@ defmodule SmolBox.Store.Memory do
         state.leases[worker],
         capacity,
         used(state, worker),
-        now
+        now,
+        assignment
       )
     end
   end
@@ -481,8 +535,12 @@ defmodule SmolBox.Store.Memory do
          do: machine_save(state, next)
   end
 
-  defp machine_operation(state, :reserve, [key, guard, {worker, name, capacity}, now]) do
-    with {:ok, record} <- machine_guard(state, key, guard, now),
+  defp machine_operation(state, :reserve, [key, guard, allocation, now]) do
+    worker = BackendBindings.worker(allocation)
+
+    with {:ok, worker, name, capacity, assignment} <-
+           BackendBindings.allocation(allocation, state.backend_bindings[worker]),
+         {:ok, record} <- machine_guard(state, key, guard, now),
          :ok <- WorkerControl.admit(control(state, worker)),
          :ok <-
            SourceOwnership.available(record, worker, Map.values(state.machines)),
@@ -494,7 +552,8 @@ defmodule SmolBox.Store.Memory do
              state.leases[worker],
              capacity,
              used(state, worker),
-             now
+             now,
+             assignment
            ),
          do: machine_save(state, next)
   end

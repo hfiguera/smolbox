@@ -322,6 +322,18 @@ One physical worker must have one stable worker ID and one store partition acros
 controllers. Changing the partition is not controller takeover. Leases fence
 store writes; they cannot retract worker HTTP requests.
 
+The embedded development work adds migration
+`20261010000000_backend_bindings.exs` and `backend_bindings: 1` store support.
+Run the migration and upgrade every controller, codec reader and resource
+projection writer before enrolling native targets. Binding enrollment and native
+creation intent share the existing admission transaction authority. Existing
+assignments, including released/deleted tombstones, prevent changing a worker's
+backend or native domain. Rollback is rejected while native bindings remain;
+older readers also cannot read v16 native records or tombstones. Public embedded
+runtime admission is still disabled. See the
+[embedded implementation evidence](../../docs/design/embedded-port-progress.md)
+for the current boundary and outstanding recovery gates.
+
 SmolBox 0.1.3 writes record schema v2, including offline executions, and reads
 legacy v1 records as offline. All controllers sharing this database must upgrade
 together; old readers cannot read v2, and there is no built-in downgrade after
@@ -862,3 +874,16 @@ reservation within a 10 GiB worker budget. Verify your fixture supports these
 allocations and your host permission policy supports replacement writes. This is
 not a filesystem quota or a multi-tenant isolation test. See [local volumes](../../docs/local-volumes.md)
 for permission requirements, recovery and the native Linux evidence.
+
+### Embedded Port recovery qualification
+
+The [embedded durable proof](../../docs/design/embedded-port-durable-proof.md)
+exercises this encrypted store with a real native package, including retained
+receipt/unknown-slot recovery across fresh BEAM processes and a controlled
+SIGKILL at creation intent, creation reply, start reply, exec intent and exec
+result persistence boundaries. Select the checkpoint with the runner's `--fault`
+option as described in that document. It uses an internal normalized
+target for qualification; public embedded admission remains disabled. Use its
+explicit stages and authentic full receipts or verified intent-bound absence to
+dispose of interrupted fixtures. Out-of-band replies used for fixture maintenance
+are never adopted into the durable record; uncertain work is never replayed.

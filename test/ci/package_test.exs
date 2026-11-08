@@ -1,13 +1,39 @@
 defmodule SmolBox.CI.PackageTest do
   use ExUnit.Case, async: true
-  alias SmolBox.CI.{Package, Util}
+  alias SmolBox.CI.{NativeConsumer, Package, Util}
+
+  test "native lifecycle modes require a package and cannot be combined" do
+    for mode <- [:native_public, :native_ordinary] do
+      assert_raise ArgumentError, ~r/native lifecycle modes require/, fn ->
+        NativeConsumer.validate_options!([{mode, true}])
+      end
+    end
+
+    assert_raise ArgumentError, ~r/mutually exclusive/, fn ->
+      NativeConsumer.validate_options!(
+        native_public: true,
+        native_ordinary: true,
+        native_package: "/approved/package"
+      )
+    end
+  end
+
+  test "native consumers cannot implicitly select deferred interruption validation" do
+    for options <- [[native_package: "/approved/package"], [native_fixture: "/approved/fixture"]] do
+      assert_raise ArgumentError, ~r/requires explicit.*crash validation is deferred/, fn ->
+        NativeConsumer.validate_options!(options)
+      end
+    end
+
+    NativeConsumer.validate_options!([])
+  end
 
   test "public documentation and the onboarding notebook are accepted in the published package" do
     root = Util.temporary("smolbox-registry-package")
     on_exit(fn -> File.rm_rf!(root) end)
 
     names =
-      ~w(mix.exs README.md CHANGELOG.md LICENSE lib/smolbox.ex lib/smolbox/runtime.ex docs/notebooks/getting-started.livemd docs/images-and-registry-artifacts.md docs/images-and-registry-artifacts-validation.md docs/provisioning-performance.md docs/upgrading-to-0.3.0.md docs/upgrading-to-0.4.3.md docs/upgrading.md docs/upgrading-within-0.1.x.md docs/supported-platforms.md docs/testing.md docs/network-access-validation.md docs/worker-measurements-validation.md docs/worker-draining-validation.md)
+      ~w(mix.exs README.md CHANGELOG.md LICENSE lib/smolbox.ex lib/smolbox/runtime.ex docs/notebooks/getting-started.livemd docs/images-and-registry-artifacts.md docs/images-and-registry-artifacts-validation.md docs/provisioning-performance.md docs/upgrading-to-0.3.0.md docs/upgrading-to-0.4.3.md docs/upgrading.md docs/upgrading-within-0.1.x.md docs/supported-platforms.md docs/testing.md docs/embedded-port.md docs/network-access-validation.md docs/worker-measurements-validation.md docs/worker-draining-validation.md)
 
     inner = Path.join(root, "contents.tar")
     members = Enum.map(names, &{String.to_charlist(&1), "fixture"})

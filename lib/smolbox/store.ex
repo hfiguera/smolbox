@@ -212,7 +212,7 @@ defmodule SmolBox.Store do
   | `:claim` | `[key, owner, now, ttl]` | `{:ok, machine}` |
   | `:claim_version` | `[key, expected_version, owner, now, ttl]` | `{:ok, machine}` |
   | `:write` | `[key, guard, changes, now]` | `{:ok, machine}` |
-  | `:reserve` | `[key, guard, {worker_id, machine_name, capacity}, now]` | `{:ok, machine}` |
+  | `:reserve` | `[key, guard, allocation, now]` (`t:allocation/0`) | `{:ok, machine}` |
   | `:request` | `[key, action, expected_version, now]` | `{:ok, machine}` |
   | `:submit` | `[key, initial_execution, max_pending, now]` | `{:ok, execution}` |
   | `:finish` | `[execution_key, execution_guard, now]` | `{:ok, execution}` |
@@ -368,7 +368,7 @@ defmodule SmolBox.Store do
               [
                 ManagedMachine.key()
                 | guard()
-                | {String.t(), String.t(), capacity()}
+                | allocation()
                 | non_neg_integer()
               ]
             ) :: machine_result()
@@ -599,6 +599,58 @@ defmodule SmolBox.Store do
 
   @callback capabilities(context()) ::
               {:ok, %{schema: 1, durable: boolean(), atomic: true}} | {:error, Error.t()}
+
+  @doc """
+  Atomically enroll a stable worker ID as HTTP or an embedded data domain.
+
+  Advertise `backend_bindings: 1` only after implementing this callback and native
+  allocation transactions. Serialize enrollment with every assignment admission.
+  Legacy assignments imply HTTP. Reject kind/domain changes while any assignments,
+  reservations or tombstones remain, and reject another target using the same
+  embedded domain generation. Repeated enrollment of the same binding is harmless.
+  Changing an empty target additionally requires controller/native quiescence.
+
+  Native `reserve` allocations append a validated `Backend.Assignment` to the
+  existing three-element tuple. Save that immutable intent with capacity and name
+  assignment in one transaction, before any helper send. Reject native allocation
+  without an identical enrolled binding and HTTP allocation on a native target.
+  Retained command attachment inherits the assignment and takes no new reservation.
+  Upgrade every controller, codec reader and projection writer before enrollment.
+  """
+  @callback bind_backend(context(), String.t(), :http | SmolBox.Backend.Binding.t()) ::
+              {:ok, :http | SmolBox.Backend.Binding.t()} | {:error, Error.t()}
+  @optional_callbacks bind_backend: 3
+
+  @typedoc "Opaque keyset position in the authority's complete assignment scan."
+  @type backend_cursor :: {0 | 1 | 2, String.t(), String.t()} | nil
+
+  @doc """
+  Return a bounded page of authenticated assignments for a worker, including
+  released/deleted tombstones and retained command records.
+
+  Advertise `backend_recovery: 1` only after implementing this callback. Authenticate
+  payloads and all projections, including records with missing or displaced worker
+  projections. An indexed worker query alone can silently omit corrupt evidence.
+  A complete authority scan may return an empty page with a non-nil next cursor;
+  callers must follow it. Limit is 1–100, and returned records never exceed it.
+  Cursor order is `{kind, scope, id}`, where kind is execution=0, machine=1,
+  volume=2. Nil starts or ends the scan. Unassigned records and other workers may
+  advance the cursor but must not appear in the returned page.
+
+  Each page is consistent, but multiple pages are not a snapshot. The controller
+  must establish native dispatch quiescence and renew its worker lease before
+  using a complete scan to activate a fresh helper. Reads never claim, mutate,
+  release capacity or mint ownership. Corrupt/unavailable/unknown-schema data
+  fails closed with an error, not an empty page. Upgrade all shared readers first.
+  """
+  @callback backend_assignments(context(), String.t(), backend_cursor(), pos_integer()) ::
+              {:ok, [Execution.t() | ManagedMachine.t() | SmolBox.Volume.t()], backend_cursor()}
+              | {:error, Error.t()}
+  @optional_callbacks backend_assignments: 4
+
+  @type allocation ::
+          {String.t(), String.t(), capacity()}
+          | {String.t(), String.t(), capacity(), SmolBox.Backend.Assignment.t()}
   @callback accept(context(), Execution.t(), pos_integer()) ::
               {:ok, Execution.t(), :inserted | :existing} | {:error, Error.t()}
   @callback fetch(context(), Execution.key()) :: result()
@@ -613,7 +665,7 @@ defmodule SmolBox.Store do
               context(),
               Execution.key(),
               guard(),
-              {String.t(), String.t(), capacity()},
+              allocation(),
               non_neg_integer()
             ) :: result()
   @callback release(context(), Execution.key(), guard(), non_neg_integer()) :: result()

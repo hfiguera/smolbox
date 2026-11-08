@@ -1,5 +1,11 @@
 # Embedded Port backend design
 
+The October 12 [design for an unmodified SDK](embedded-port-unmodified-sdk.md)
+supersedes this document's upstream-patch integration strategy. Its
+[implementation plan](embedded-port-unmodified-sdk-implementation-plan.md) keeps
+Port, reserves Rustler support, and leaves live crash validation deferred. This
+document remains the original feature/contract baseline.
+
 Status: proposed, October 10, 2026. This document describes future work; it does
 not claim that an embedded backend is available or qualified. The accompanying
 [implementation plan](embedded-port-implementation-plan.md) defines the delivery
@@ -278,6 +284,7 @@ defaults, to verify before release, are:
 | Blocking work pool | 4 workers, bounded queue within the in-flight limit |
 | Reserved control pool | 2 workers; cancellation token lookup/abort does not wait on a VM lifecycle lock |
 | Initial output credit | 256 KiB decoded per streaming operation |
+| Initial event credit | 64 outstanding output chunks per operation; 2048 across 32 subscriptions |
 | Aggregate helper event queue | 8 MiB decoded maximum, also accounting for encoded storage |
 | Output/file/command time totals | Minimum of approved profile limits, bridge limits, and remaining operation budget |
 
@@ -286,7 +293,10 @@ input/output queues are bounded too. Large files are chunked rather than placed
 in a single frame. Inventory responses are paginated without exposing foreign
 records beyond the inspection policy.
 
-Replenish output credit only after the BEAM consumer processes the bytes. Bound
+Replenish byte and event credit only after the BEAM consumer processes the bytes.
+Partial byte consumption does not release an event slot. Retain completed
+subscriptions and their charged output until consumption; terminal receipt alone
+does not release unread observer data for admission of new subscriptions. Bound
 the BEAM mailbox/aggregation as well as the helper queue. When credit or output
 budget is exhausted, stop forwarding output and initiate cancellation according
 to a finite deadline; do not wait forever while holding a guest socket. Treat
@@ -380,6 +390,14 @@ label alone is insufficient. A create whose reply was lost remains unverified;
 do not adopt an inventory record automatically. Stronger automatic recovery
 would need a qualified durable native creation receipt/generation, which the
 current source does not provide.
+
+Explicit deleted resolution may use the original approved creation intent to
+verify absence without a receipt. It freezes the target, drains its pinned helper
+epoch and claims the durable worker lease before checking SDK records, create
+reservations and host VM material. Only a streamless absence result and a guarded
+store write release accounting. Any present material remains unverified; matching
+labels never authorize adoption. Stopped resolution still requires the saved full
+receipt. Automatic recovery, audits and cleanup preserve receipt-less reservations.
 
 Recovery is observational: distinguish DB read errors, verified absence, verified
 stopped, running with matching PID identity, and unsupported/unreachable states.

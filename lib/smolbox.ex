@@ -27,7 +27,7 @@ defmodule SmolBox do
     Inspection,
     Machines,
     Session,
-    WorkerConfig,
+    Target,
     WorkerControls,
     WorkerReports
   }
@@ -56,7 +56,7 @@ defmodule SmolBox do
 
   | Option | Default | Meaning |
   |---|---|---|
-  | `:workers` | `[]` | Up to 64 `SmolBox.Runtime.WorkerConfig` values with unique worker IDs/endpoints; an empty list permits inspection but cannot admit new work |
+  | `:workers` | `[]` | Up to 64 `SmolBox.Runtime.WorkerConfig` or `SmolBox.Embedded.Config` values with unique IDs/endpoints; at most one embedded domain per BEAM node; an empty list permits inspection but cannot admit new work |
   | `:mode` | `:durable` | `:ephemeral` explicitly permits a non-durable store such as `SmolBox.Store.Memory` |
   | `:max_pending` | `128` | Pending-queue bound, 1–10,000 |
   | `:max_active` | `4` | Concurrent execution tasks, 1–64; one additional maintenance task and one scan are independently bounded; worker reservations separately bound admitted guests |
@@ -70,6 +70,11 @@ defmodule SmolBox do
   Unknown options are rejected during startup. Stopping the runtime stops
   observers; it does not establish guest termination. Use durable storage when
   execution ownership must survive a controller restart.
+
+  Embedded Port targets are supported for development with an explicitly approved
+  native package, offline artifact and enrolled data domain. They require store
+  backend-binding, recovery and managed-machine capabilities. See
+  [Embedded Port](embedded-port.html) for setup, owner-bound lifetime and limits.
   """
   @spec child_spec(keyword()) :: Supervisor.child_spec()
   def child_spec(options),
@@ -123,7 +128,7 @@ defmodule SmolBox do
   defp disposable_command(_spec), do: :ok
 
   defp accept(config, spec, fingerprint) do
-    if Enum.any?(config.workers, &WorkerConfig.supports?(&1, spec)) do
+    if Enum.any?(config.workers, &Target.supports?(&1, spec)) do
       with {:ok, record} <- Execution.new(spec, fingerprint, config.clock.now()),
            {:ok, accepted, _status} <-
              Session.store(config, :accept, [record, config.max_pending]),
@@ -242,6 +247,8 @@ defmodule SmolBox do
   utilization and store accounting, or `admission_report/2` to explain a request.
   Store control failures make admission unavailable. Reads run outside the coordinator;
   adapters without worker control retain health/configuration reporting only.
+  Embedded health describes the approved package, bridge, protocol, engine/bridge
+  limits and owner-bound lifetime without exposing process or receipt identity.
   See [Telemetry](telemetry.html).
   """
   @spec workers(runtime()) :: {:ok, [map()]} | {:error, Error.t()}
@@ -257,6 +264,8 @@ defmodule SmolBox do
   Calls run on the caller, not the coordinator. The `/capacity` GET has a maximum
   500 ms operation budget and 8 KiB response cap, further limited by worker settings.
   Store errors and worker errors remain separate in `SmolBox.WorkerReport`.
+  Native targets report declared/store accounting; live capacity telemetry is
+  unsupported and remains a typed `capacity_error`, never a fabricated measurement.
   This performs no mutations, starts no polling and never changes admission.
   """
   @spec worker_report(runtime(), String.t()) ::
@@ -264,7 +273,7 @@ defmodule SmolBox do
   def worker_report(runtime, id) do
     with {:ok, config} <- config(runtime),
          {:ok, snapshots} <- workers(runtime) do
-      case Enum.find(config.workers, &(&1.client.worker.id == id)) do
+      case Enum.find(config.workers, &(Target.id(&1) == id)) do
         nil ->
           Session.error(:not_found, :worker_report)
 
@@ -334,6 +343,15 @@ defmodule SmolBox do
   periodic scans should restart at nil. The worker list has a one-second budget;
   store lookups have 500 ms each in groups of at most four. No stdout, code,
   command environment, or artifact content is returned.
+
+  For embedded targets, inventory is scoped to authoritative stored assignments,
+  including retained command history and deletion tombstones. It observes only
+  saved full receipts, never enumerates shared SDK inventory or adopts labels.
+  `foreign_count` is nil because foreign account resources are not enumerated.
+  Each native page examines at most one full store record (even with a larger
+  limit); an empty filtered page can advance its opaque tuple cursor. `:absent`
+  means that receipt-bound inspection observed missing storage; `:unverified`
+  means no full receipt is saved. Native observations send no lifecycle mutation.
   """
   @spec audit_worker(runtime(), String.t(), keyword()) :: {:ok, map()} | {:error, Error.t()}
   def audit_worker(runtime, worker_id, options \\ []) do

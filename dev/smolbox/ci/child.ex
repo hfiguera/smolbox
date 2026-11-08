@@ -13,12 +13,18 @@ defmodule SmolBox.CI.Child do
   def stop(child), do: GenServer.call(child, :stop, :infinity)
 
   def execute(arguments, options \\ []) do
-    {:ok, child} = start_link(arguments, options)
+    {:ok, child} =
+      if options[:termination] == :retain,
+        do:
+          GenServer.start(__MODULE__, {arguments, Keyword.put(options, :retire_after_exit, true)}),
+        else: start_link(arguments, options)
 
     try do
       await(child)
     after
-      GenServer.stop(child)
+      # Native qualification must retain an unresolved process and its collector;
+      # stopping this owner would close its port before child collection.
+      cleanup(child, options[:termination])
     end
   end
 
@@ -27,8 +33,9 @@ defmodule SmolBox.CI.Child do
     Process.flag(:trap_exit, true)
     timeout = Keyword.get(options, :timeout, 1_200_000)
     limit = Keyword.get(options, :output_limit, 4 * 1024 * 1024)
+    termination = Keyword.get(options, :termination, :signals)
 
-    unless arguments != [] and timeout > 0 and limit > 0,
+    unless arguments != [] and timeout > 0 and limit > 0 and termination in [:signals, :retain],
       do: raise(ArgumentError, "invalid child bounds")
 
     port = open_gated(arguments, options)
@@ -51,6 +58,9 @@ defmodule SmolBox.CI.Child do
        pid: pid,
        timer: timer,
        kill_timer: nil,
+       termination: termination,
+       retained: false,
+       retire_after_exit: Keyword.get(options, :retire_after_exit, false),
        started: System.monotonic_time(:millisecond),
        limit: limit,
        data: <<>>,
@@ -108,6 +118,7 @@ defmodule SmolBox.CI.Child do
   end
 
   def handle_call(:await, _from, %{done: true} = state), do: {:reply, result(state), state}
+  def handle_call(:await, _from, %{retained: true} = state), do: {:reply, result(state), state}
   def handle_call(:await, from, state), do: {:noreply, %{state | waiters: [from | state.waiters]}}
   def handle_call(:stop, _from, %{done: true} = state), do: {:reply, result(state), state}
 
@@ -125,12 +136,17 @@ defmodule SmolBox.CI.Child do
   end
 
   def handle_info({port, {:exit_status, code}}, %{port: port} = state) do
-    {:noreply, finish(%{state | exit_code: code})}
+    retire = state.retained and state.retire_after_exit
+    state = finish(%{state | exit_code: code})
+    if retire, do: {:stop, :normal, state}, else: {:noreply, state}
   end
 
   def handle_info(:deadline, state), do: {:noreply, cancel(state, "deadline")}
 
   def handle_info(:kill, %{done: true} = state), do: {:noreply, state}
+
+  def handle_info(:kill, %{termination: :retain} = state),
+    do: {:noreply, cancel(state, "deadline")}
 
   def handle_info(:kill, state) do
     signal(state.pid, "KILL")
@@ -147,6 +163,7 @@ defmodule SmolBox.CI.Child do
 
   @impl true
   def terminate(_reason, %{done: true}), do: :ok
+  def terminate(_reason, %{termination: :retain}), do: :ok
   def terminate(_reason, state), do: signal(state.pid, "KILL")
 
   defp close_port(port) do
@@ -158,7 +175,15 @@ defmodule SmolBox.CI.Child do
   end
 
   defp cancel(%{done: true} = state, _), do: state
+  defp cancel(%{retained: true} = state, _), do: state
   defp cancel(%{kill_timer: timer} = state, _) when not is_nil(timer), do: state
+
+  defp cancel(%{termination: :retain} = state, failure) do
+    Process.cancel_timer(state.timer)
+    state = %{state | failure: failure, retained: true}
+    Enum.each(state.waiters, &GenServer.reply(&1, result(state)))
+    %{state | waiters: []}
+  end
 
   defp cancel(state, failure) do
     signal(state.pid, "TERM")
@@ -170,10 +195,10 @@ defmodule SmolBox.CI.Child do
   defp finish(state) do
     # Leader exit does not establish descendant exit. Signal only the verified
     # group even when a child keeps its inherited output pipe open.
-    signal(state.pid, "KILL")
+    if state.termination == :signals, do: signal(state.pid, "KILL")
     Process.cancel_timer(state.timer)
     if state.kill_timer, do: Process.cancel_timer(state.kill_timer)
-    state = %{state | done: true}
+    state = %{state | done: true, retained: false}
     Enum.each(state.waiters, &GenServer.reply(&1, result(state)))
     %{state | waiters: []}
   end
@@ -208,18 +233,42 @@ defmodule SmolBox.CI.Child do
   defp phase(_, state), do: state
 
   defp result(state) do
+    retained =
+      if state.termination == :retain,
+        do: %{retained: state.retained, running: not state.done, diagnostic_os_pid: state.pid},
+        else: %{}
+
     {state.data,
-     %{
-       exit_code: state.exit_code,
-       failure: state.failure,
-       status:
-         if(state.done and state.exit_code == 0 and is_nil(state.failure),
-           do: "passed",
-           else: "failed"
-         ),
-       seconds: (System.monotonic_time(:millisecond) - state.started) / 1_000,
-       captured_bytes: byte_size(state.data),
-       output_sha256: Base.encode16(:crypto.hash(:sha256, state.data), case: :lower)
-     }}
+     Map.merge(
+       %{
+         exit_code: state.exit_code,
+         failure: state.failure,
+         status:
+           if(state.done and state.exit_code == 0 and is_nil(state.failure),
+             do: "passed",
+             else: "failed"
+           ),
+         seconds: (System.monotonic_time(:millisecond) - state.started) / 1_000,
+         captured_bytes: byte_size(state.data),
+         output_sha256: Base.encode16(:crypto.hash(:sha256, state.data), case: :lower)
+       },
+       retained
+     )}
   end
+
+  defp running?(child) do
+    {_bytes, report} = snapshot(child)
+    report[:running] == true
+  catch
+    :exit, _ -> false
+  end
+
+  defp cleanup(child, :retain) do
+    if not running?(child), do: GenServer.stop(child)
+  catch
+    # Detached collector may have already collected and retired.
+    :exit, _ -> :ok
+  end
+
+  defp cleanup(child, _termination), do: GenServer.stop(child)
 end

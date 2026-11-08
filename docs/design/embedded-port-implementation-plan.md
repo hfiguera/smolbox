@@ -1,7 +1,14 @@
 # Embedded Port implementation plan
 
-Status: proposed, October 10, 2026. No implementation or live qualification is
-claimed by this plan. Follow the decisions in
+For the next migration, follow the
+[unmodified SDK implementation plan](embedded-port-unmodified-sdk-implementation-plan.md).
+It replaces the downstream patch dependency while preserving the embedded Port
+backend and future Rustler boundary. This document remains the original delivery
+sequence; its live crash gates do not authorize resuming deferred validation.
+
+Status: implementation in progress, October 10, 2026. See
+[milestone evidence and outstanding gates](embedded-port-progress.md).
+No embedded release or full qualification is claimed. Follow the decisions in
 [the design](embedded-port.md); keep the existing HTTP backend usable throughout.
 The initial deliverable is the required Port feature matrix, not Rustler or a
 native Kubernetes backend.
