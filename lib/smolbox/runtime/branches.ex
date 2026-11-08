@@ -6,7 +6,7 @@ defmodule SmolBox.Runtime.Branches do
 
   def approved?(worker, parent, spec),
     do:
-      worker.runtime_version in ["1.19.0", "1.20.2", "1.22.0"] and
+      Target.supports_feature?(worker, :branches) and
         spec.policy in worker.branch_policies and Target.supports?(worker, parent.spec)
 
   def supported(_config, %{branch: nil, branch_children: children}) when map_size(children) == 0,

@@ -616,6 +616,21 @@ defmodule SmolBox.Store do
   without an identical enrolled binding and HTTP allocation on a native target.
   Retained command attachment inherits the assignment and takes no new reservation.
   Upgrade every controller, codec reader and projection writer before enrollment.
+  For protocol-2 targets, additionally advertise `native_material_proofs: 2`
+  only after supporting the selective v17 assignment/material-proof codec and
+  its authenticated reservation/recovery projections. A v16-only authority can
+  continue serving legacy targets; it cannot enroll a protocol-2 target merely
+  because it advertises backend binding/recovery version 1.
+  A package declaring `background_exec: 1` also requires
+  `native_background_launches: 1`, after every native v17 assignment/launch reader
+  and command-slot transaction supports that combination. HTTP launch records
+  keep their existing envelopes; this is an additional native admission gate.
+  A package declaring `terminals: 1` requires `native_terminal_sessions: 1`
+  after every reader and command-slot transaction accepts retained Terminal.Spec/
+  Terminal.Result under authenticated v17 material authority. The existing
+  `interactive_terminal: 1` and `extended_execution: 1` markers remain required
+  for terminal submission. No connection, input or transcript is persisted, and
+  a surviving record never permits reconnect or input replay.
   """
   @callback bind_backend(context(), String.t(), :http | SmolBox.Backend.Binding.t()) ::
               {:ok, :http | SmolBox.Backend.Binding.t()} | {:error, Error.t()}

@@ -4,6 +4,12 @@ Managed image machines on smolvm **1.17.0, 1.19.0, 1.20.2 or 1.22.0** can start 
 VM starts. Startup configuration belongs to the machine's immutable creation
 specification. Commands and terminal sessions remain separate executions.
 
+Embedded Port now translates this immutable intent for approved container packs
+when the protocol-2 package declares `workloads: 1`. Inheritance and durable
+identity have deterministic contracts; bounded startup and actual native workload
+qualification remain pending, and native console logs are not yet implemented.
+See [Embedded Port setup](embedded-port.md) for the current development status.
+
 This feature exposes **console diagnostics**, not application stdout/stderr.
 Upstream 1.17.0 and 1.19.0 sends the detached startup container's standard streams to
 `/dev/null`. Its restart supervisor observes VM liveness and does not relaunch the

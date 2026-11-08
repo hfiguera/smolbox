@@ -771,29 +771,8 @@ defmodule SmolBox.Client do
     end
   end
 
-  defp decode_list(%{"machines" => body}) when is_list(body) do
-    if Validation.list?(body, 1024) do
-      Enum.reduce_while(body, {:ok, []}, &decode_entry/2)
-      |> case do
-        {:ok, machines} -> {:ok, Enum.reverse(machines)}
-        error -> error
-      end
-    else
-      error(:output_limit, :list, :dispatch_uncertain)
-    end
-  end
-
+  defp decode_list(%{"machines" => body}) when is_list(body), do: Machine.list_from_wire(body)
   defp decode_list(_body), do: error(:protocol, :list, :dispatch_uncertain)
-
-  defp decode_entry(entry, {:ok, acc}) do
-    case Machine.from_wire(entry) do
-      {:ok, machine} ->
-        {:cont, {:ok, [machine | acc]}}
-
-      {:error, error} ->
-        {:halt, {:error, %{error | operation: :list, evidence: :dispatch_uncertain}}}
-    end
-  end
 
   @doc """
   Export a stopped machine to an explicitly approved registry destination.

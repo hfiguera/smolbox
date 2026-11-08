@@ -1,15 +1,56 @@
 defmodule SmolBox.Embedded.Request do
   @moduledoc false
-  alias SmolBox.Embedded.Shape
+  alias SmolBox.Embedded.{CreationFeatures, Shape, TerminalContract}
   alias SmolBox.Validation
 
   @lifecycle ~w(inspect start stop delete)
 
-  def valid?(operation, budget_ms) do
-    Validation.integer?(budget_ms, 1, 86_400_000) and operation?(operation, budget_ms)
+  def valid?(operation, budget_ms, major \\ 1) do
+    major in [1, 2] and Validation.integer?(budget_ms, 1, 86_400_000) and
+      operation?(operation, budget_ms, major)
   end
 
   def command_valid?(command), do: command?(command)
+
+  def buffered_command_valid?(command) do
+    Shape.keys?(command, ~w(argv env workdir user stdin max_output_bytes)) and
+      is_map(command["env"]) and
+      Validation.integer?(command["max_output_bytes"], 1, 16_777_216) and
+      match?(
+        {:ok, _},
+        SmolBox.Command.new(command["argv"],
+          env: Map.to_list(command["env"]),
+          workdir: command["workdir"],
+          user: command["user"],
+          stdin: command["stdin"]
+        )
+      )
+  end
+
+  defp operation?(%{"operation" => "terminal_open"} = operation, budget, 2),
+    do:
+      Shape.keys?(operation, ~w(operation receipt terminal)) and
+        Shape.receipt?(operation["receipt"], 2) and
+        TerminalContract.spec?(operation["terminal"]) and
+        budget <= operation["terminal"]["session_ms"]
+
+  defp operation?(%{"operation" => name} = operation, budget, 2)
+       when name in ~w(health capacity metrics readiness list),
+       do:
+         Shape.keys?(operation, ~w(operation)) and
+           budget <= if(name == "readiness", do: 2000, else: 30_000)
+
+  defp operation?(%{"operation" => "measurements", "receipt" => receipt} = operation, budget, 2),
+    do:
+      Shape.keys?(operation, ~w(operation receipt)) and budget <= 30_000 and
+        Shape.receipt?(receipt, 2)
+
+  defp operation?(%{"operation" => "logs"} = operation, budget, 2),
+    do:
+      Shape.keys?(operation, ~w(operation receipt tail follow max_bytes)) and
+        Shape.receipt?(operation["receipt"], 2) and budget <= 300_000 and
+        Validation.integer?(operation["tail"], 0, 10_000) and is_boolean(operation["follow"]) and
+        Validation.integer?(operation["max_bytes"], 1, 8_388_608)
 
   defp operation?(
          %{
@@ -18,37 +59,58 @@ defmodule SmolBox.Embedded.Request do
            "resources" => resources,
            "user" => user
          } = operation,
-         budget
+         budget,
+         major
        ),
        do:
-         Shape.keys?(operation, ~w(operation artifact resources user)) and budget <= 30_000 and
+         feature_keys?(operation, ~w(operation artifact resources user), major) and
+           budget <= 30_000 and
            artifact?(artifact) and Shape.resources?(resources) and
            Shape.optional?(user, &Shape.text?(&1, 16_384, false))
 
-  defp operation?(%{"operation" => "create", "create" => create} = operation, _budget),
-    do: Shape.keys?(operation, ~w(operation create)) and create?(create)
+  defp operation?(%{"operation" => "create", "create" => create} = operation, _budget, major),
+    do: Shape.keys?(operation, ~w(operation create)) and create?(create, major)
 
-  defp operation?(%{"operation" => "inspect_creation", "create" => create} = operation, budget),
-    do: Shape.keys?(operation, ~w(operation create)) and budget <= 30_000 and create?(create)
+  defp operation?(
+         %{"operation" => "inspect_creation", "create" => create} = operation,
+         budget,
+         major
+       ),
+       do:
+         Shape.keys?(operation, ~w(operation create)) and budget <= 30_000 and
+           create?(create, major)
 
   defp operation?(
          %{"operation" => "exec", "receipt" => receipt, "command" => command} = operation,
-         _budget
+         _budget,
+         major
        ),
        do:
-         Shape.keys?(operation, ~w(operation receipt command)) and Shape.receipt?(receipt) and
+         Shape.keys?(operation, ~w(operation receipt command)) and Shape.receipt?(receipt, major) and
            command?(command)
 
-  defp operation?(%{"operation" => name, "receipt" => receipt} = operation, _budget)
+  defp operation?(
+         %{"operation" => name, "receipt" => receipt, "command" => command} = operation,
+         _budget,
+         2
+       )
+       when name in ~w(exec_buffered exec_background exec_stream),
+       do:
+         Shape.keys?(operation, ~w(operation receipt command)) and Shape.receipt?(receipt, 2) and
+           buffered_command_valid?(command) and
+           (name == "exec_buffered" or command["stdin"] == nil)
+
+  defp operation?(%{"operation" => name, "receipt" => receipt} = operation, _budget, major)
        when name in @lifecycle,
-       do: Shape.keys?(operation, ~w(operation receipt)) and Shape.receipt?(receipt)
+       do: Shape.keys?(operation, ~w(operation receipt)) and Shape.receipt?(receipt, major)
 
   defp operation?(
          %{"operation" => "read_file", "receipt" => receipt, "options" => options} = operation,
-         budget
+         budget,
+         major
        ),
        do:
-         Shape.keys?(operation, ~w(operation receipt options)) and Shape.receipt?(receipt) and
+         Shape.keys?(operation, ~w(operation receipt options)) and Shape.receipt?(receipt, major) and
            budget <= 600_000 and file?(options) and options["mode"] == nil
 
   defp operation?(
@@ -58,21 +120,28 @@ defmodule SmolBox.Embedded.Request do
            "options" => options,
            "total_bytes" => total
          } = operation,
-         budget
+         budget,
+         major
        ),
        do:
          Shape.keys?(operation, ~w(operation receipt options total_bytes)) and
-           Shape.receipt?(receipt) and
+           Shape.receipt?(receipt, major) and
            budget <= 600_000 and file?(options) and
            Validation.integer?(total, 0, options["max_bytes"])
 
-  defp operation?(_operation, _budget), do: false
+  defp operation?(_operation, _budget, _major), do: false
 
-  defp create?(create) do
-    Shape.keys?(create, ~w(name owner_token incarnation artifact resources labels)) and
+  defp create?(create, major) do
+    feature_keys?(create, ~w(name owner_token incarnation artifact resources labels), major) and
       Shape.id?(create["name"]) and Shape.hex?(create["owner_token"], 64) and
       Shape.hex?(create["incarnation"], 32) and artifact?(create["artifact"]) and
       Shape.resources?(create["resources"]) and labels?(create["labels"])
+  end
+
+  defp feature_keys?(value, keys, major) do
+    Shape.keys?(value, keys) or
+      (major == 2 and Shape.keys?(value, keys ++ ["features"]) and
+         CreationFeatures.valid?(value["features"]))
   end
 
   defp artifact?(artifact),

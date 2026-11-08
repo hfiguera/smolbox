@@ -15,6 +15,7 @@ defmodule SmolBox.Backend.EmbeddedContext do
     :name,
     :spec,
     :epoch,
+    managed_machine: nil,
     pinned: false
   ]
 
@@ -26,7 +27,13 @@ defmodule SmolBox.Backend.EmbeddedContext do
 
   def assign(%__MODULE__{} = context, record) do
     with :ok <- validate(record),
-         true <- Assignment.approved?(record.backend_assignment, context.config, record.spec),
+         true <-
+           Assignment.approved?(
+             record.backend_assignment,
+             context.config,
+             record.spec,
+             Map.get(record, :managed_machine)
+           ),
          true <- record.worker_id == context.config.id do
       {:ok,
        %{
@@ -35,6 +42,7 @@ defmodule SmolBox.Backend.EmbeddedContext do
            identity: if(record.created_machine, do: record.created_machine.backend_identity),
            profile: record.spec.profile,
            spec: record.spec,
+           managed_machine: Map.get(record, :managed_machine),
            name: record.machine_name
        }}
     else
@@ -44,7 +52,13 @@ defmodule SmolBox.Backend.EmbeddedContext do
 
   def scoped?(%__MODULE__{} = context),
     do:
-      Assignment.approved?(context.assignment, context.config, context.spec) and
+      Assignment.approved?(
+        context.assignment,
+        context.config,
+        context.spec,
+        context.managed_machine
+      ) and
+        (context.managed_machine == nil or context.identity != nil) and
         context.profile == context.spec.profile and
         context.name == context.assignment.creation["name"] and
         (context.identity == nil or Identity.matches?(context.identity, context.assignment))

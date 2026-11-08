@@ -8,6 +8,12 @@ The [completion audit](embedded-port-unmodified-sdk-completion-audit.md) maps ev
 numbered item and gate to verified implementation/evidence; excluded release and
 fault gates remain open.
 
+The next proposed scope is the separate
+[HTTP-parity design](embedded-port-http-parity.md) and
+[implementation plan](embedded-port-http-parity-implementation-plan.md). Completion
+of this migration is not HTTP feature parity; the new feature work is not enabled
+or qualified by the existing evidence.
+
 Deliver small reviewable commits. Keep current HTTP behavior and the existing
 approved development packages usable until the replacement is ready. This plan
 does not publish packages or implement the Rustler or Kubernetes backends.

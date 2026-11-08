@@ -1,6 +1,6 @@
 defmodule SmolBox.Embedded.Channel do
   @moduledoc false
-  alias SmolBox.Embedded.{Request, Shape}
+  alias SmolBox.Embedded.{Protocol, Request, Shape, TerminalContract}
   alias SmolBox.Validation
 
   @derive {Inspect, only: [:last_id, :queued_bytes, :queued_events]}
@@ -8,6 +8,7 @@ defmodule SmolBox.Embedded.Channel do
     :epoch,
     :domain,
     :minor,
+    major: 1,
     unavailable: false,
     last_id: 0,
     pending: %{},
@@ -16,15 +17,23 @@ defmodule SmolBox.Embedded.Channel do
   ]
 
   def new(hello),
-    do: %__MODULE__{epoch: hello["epoch"], domain: hello["domain"], minor: hello["minor"]}
+    do: %__MODULE__{
+      epoch: hello["epoch"],
+      domain: hello["domain"],
+      minor: hello["minor"],
+      major: Map.get(hello, "major", 1)
+    }
 
   def register(channel, operation, bytes, events) do
     with false <- channel.unavailable,
          true <- map_size(channel.pending) < 32,
          true <- channel.last_id < 9_007_199_254_740_991,
-         true <- Request.valid?(operation, 1),
+         true <- Request.valid?(operation, 1, channel.major),
          true <- Validation.integer?(bytes, 0, 262_144),
          true <- Validation.integer?(events, 0, 64),
+         true <-
+           operation["operation"] != "terminal_open" or
+             bytes <= operation["terminal"]["max_buffer_bytes"],
          true <- domain_matches?(channel.domain, operation["receipt"]) do
       id = channel.last_id + 1
 
@@ -36,6 +45,11 @@ defmodule SmolBox.Embedded.Channel do
         event_credit: events,
         output_bytes: 0,
         upload_bytes: 0,
+        terminal_opened: false,
+        terminal_control: 0,
+        terminal_attached: false,
+        terminal_closed: false,
+        terminal_input: 0,
         outstanding: :queue.new(),
         unacknowledged: 0
       }
@@ -49,10 +63,10 @@ defmodule SmolBox.Embedded.Channel do
   # Only structurally validated Protocol messages reach this correlation layer.
   # IDs remain recorded until a terminal AND consumption retire the subscription.
   def receive_message(
-        %{minor: 4, unavailable: false} = channel,
+        %{major: major, minor: minor, unavailable: false} = channel,
         %{"type" => "unavailable", "epoch" => epoch}
       )
-      when epoch == channel.epoch,
+      when epoch == channel.epoch and ((major == 1 and minor == 4) or (major == 2 and minor == 0)),
       do: {:ok, %{channel | unavailable: true}, :unavailable}
 
   def receive_message(channel, %{"epoch" => epoch, "id" => id} = message)
@@ -80,6 +94,9 @@ defmodule SmolBox.Embedded.Channel do
   def acknowledge(channel, id, bytes) do
     with {:ok, pending} <- Map.fetch(channel.pending, id),
          true <- Validation.integer?(bytes, 1, pending.unacknowledged),
+         true <-
+           pending.operation["operation"] != "terminal_open" or
+             whole_credit?(pending.outstanding, bytes),
          {:ok, outstanding, events} <- consume(pending.outstanding, bytes, 0) do
       updated = %{
         pending
@@ -112,6 +129,33 @@ defmodule SmolBox.Embedded.Channel do
       _invalid -> :error
     end
   end
+
+  def terminal_control(channel, id, sequence, control) do
+    with true <- Validation.integer?(id, 1, channel.last_id),
+         true <- Validation.integer?(sequence, 1, TerminalContract.max_sequence()) do
+      terminal_control_pending(channel, id, sequence, control, channel.pending[id])
+    else
+      _ -> :error
+    end
+  end
+
+  defp terminal_control_pending(channel, _id, _sequence, _control, nil), do: {:ok, channel, false}
+
+  defp terminal_control_pending(channel, _id, _sequence, _control, %{done: true}),
+    do: {:ok, channel, false}
+
+  defp terminal_control_pending(
+         channel,
+         id,
+         sequence,
+         control,
+         %{operation: %{"operation" => "terminal_open"}} = pending
+       ) do
+    with {:ok, updated} <- TerminalContract.control(pending, sequence, control),
+         do: {:ok, %{channel | pending: Map.put(channel.pending, id, updated)}, true}
+  end
+
+  defp terminal_control_pending(_channel, _id, _sequence, _control, _pending), do: :error
 
   def retire(channel, id) do
     case Map.fetch(channel.pending, id) do
@@ -146,8 +190,29 @@ defmodule SmolBox.Embedded.Channel do
       receipt["target_id"] == domain["target_id"] and
         receipt["domain_generation"] == domain["generation"]
 
+  defp whole_credit?(_queue, 0), do: true
+
+  defp whole_credit?(queue, bytes) do
+    case :queue.out(queue) do
+      {{:value, size}, rest} when size <= bytes -> whole_credit?(rest, bytes - size)
+      _ -> false
+    end
+  end
+
   defp advance(_channel, %{sequence: nil} = pending, %{"type" => "accepted", "sequence" => 0}),
     do: {:ok, %{pending | sequence: 0}, :accepted}
+
+  defp advance(
+         _channel,
+         %{
+           operation: %{"operation" => "terminal_open"},
+           terminal_opened: false,
+           sequence: sequence
+         } = pending,
+         %{"type" => "terminal_opened", "sequence" => next}
+       )
+       when is_integer(sequence) and next == sequence + 1,
+       do: {:ok, %{pending | sequence: next, terminal_opened: true}, :terminal_opened}
 
   defp advance(_channel, %{sequence: sequence} = pending, %{
          "type" => "event",
@@ -156,6 +221,7 @@ defmodule SmolBox.Embedded.Channel do
        })
        when is_integer(sequence) and next == sequence + 1 do
     with {:ok, bytes} <- Shape.chunk(event["data_base64"]),
+         true <- pending.operation["operation"] != "terminal_open" or pending.terminal_opened,
          {:ok, stream, limit} <- stream(pending.operation, event["stream"]),
          true <- byte_size(bytes) <= pending.credit and pending.event_credit > 0,
          true <- pending.output_bytes + byte_size(bytes) <= limit do
@@ -177,6 +243,7 @@ defmodule SmolBox.Embedded.Channel do
 
   defp advance(channel, pending, %{"type" => "terminal", "sequence" => next, "outcome" => outcome}) do
     if terminal_sequence?(pending.sequence, next) and
+         Protocol.valid_outcome?(outcome, channel.major) and
          terminal_matches?(channel.domain, pending, outcome),
        do: {:ok, %{pending | sequence: next, done: true}, {:terminal, outcome}},
        else: :error
@@ -188,19 +255,62 @@ defmodule SmolBox.Embedded.Channel do
   defp terminal_sequence?(previous, next) when is_integer(previous), do: next == previous + 1
   defp terminal_sequence?(_previous, _next), do: false
 
-  defp stream(%{"operation" => "exec", "command" => command}, "stdout"),
-    do: {:ok, :stdout, command["max_output_bytes"]}
+  defp stream(%{"operation" => name, "command" => command}, "stdout")
+       when name in ~w(exec exec_buffered exec_stream),
+       do: {:ok, :stdout, command["max_output_bytes"]}
 
-  defp stream(%{"operation" => "exec", "command" => command}, "stderr"),
-    do: {:ok, :stderr, command["max_output_bytes"]}
+  defp stream(%{"operation" => "terminal_open"}, "terminal"),
+    do: {:ok, :terminal, TerminalContract.max_sequence()}
+
+  defp stream(%{"operation" => name, "command" => command}, "stderr")
+       when name in ~w(exec exec_buffered exec_stream),
+       do: {:ok, :stderr, command["max_output_bytes"]}
 
   defp stream(%{"operation" => "read_file", "options" => options}, "file"),
     do: {:ok, :file, options["max_bytes"]}
+
+  defp stream(%{"operation" => "list"}, "file"), do: {:ok, :file, 4_194_304}
+  defp stream(%{"operation" => "logs", "max_bytes" => max}, "log"), do: {:ok, :log, max + 30_000}
 
   defp stream(_operation, _stream), do: :error
 
   defp terminal_matches?(_domain, pending, %{"result" => "error", "dispatch" => dispatch}),
     do: dispatch != "not_dispatched" or pending.output_bytes == 0
+
+  defp terminal_matches?(
+         _domain,
+         %{operation: %{"operation" => "terminal_open"}} = pending,
+         %{"result" => "terminal"} = outcome
+       ),
+       do:
+         outcome["output_bytes"] >= pending.output_bytes and
+           (outcome["dispatch"] != "not_dispatched" or pending.output_bytes == 0) and
+           (outcome["completion"] != "exited" or
+              (pending.terminal_opened and outcome["output_bytes"] == pending.output_bytes))
+
+  defp terminal_matches?(_domain, %{operation: %{"operation" => name}, output_bytes: 0}, %{
+         "result" => result
+       })
+       when name in ~w(health capacity metrics readiness measurements),
+       do: result == if(name == "readiness", do: "ready", else: name)
+
+  defp terminal_matches?(_domain, %{operation: %{"operation" => "list"}, output_bytes: bytes}, %{
+         "result" => "inventory",
+         "bytes" => bytes
+       }),
+       do: true
+
+  defp terminal_matches?(
+         _domain,
+         %{operation: %{"operation" => "logs"} = request, output_bytes: delivered},
+         %{
+           "result" => "logs",
+           "bytes" => bytes,
+           "wire_bytes" => delivered,
+           "completion" => completion
+         }
+       ),
+       do: bytes <= request["max_bytes"] and (completion != "completed" or not request["follow"])
 
   defp terminal_matches?(_domain, %{operation: %{"operation" => "qualify_creation"}}, %{
          "result" => "qualified"
@@ -225,9 +335,17 @@ defmodule SmolBox.Embedded.Channel do
 
   defp terminal_matches?(
          _domain,
-         %{operation: %{"operation" => "exec", "command" => command}} = pending,
-         %{"result" => "command"} = outcome
+         %{operation: %{"operation" => "exec_background", "command" => command}, output_bytes: 0},
+         %{"result" => "launched", "pid" => pid}
        ),
+       do: byte_size("pid=#{pid}\n") <= command["max_output_bytes"]
+
+  defp terminal_matches?(
+         _domain,
+         %{operation: %{"operation" => name, "command" => command}} = pending,
+         %{"result" => "command"} = outcome
+       )
+       when name in ~w(exec exec_buffered exec_stream),
        do:
          outcome["output_bytes"] >= pending.output_bytes and
            outcome["output_bytes"] <= command["max_output_bytes"] and

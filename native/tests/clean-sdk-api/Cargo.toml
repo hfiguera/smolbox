@@ -10,4 +10,5 @@ publish = false
 [dependencies]
 smolvm = { path = "../../target/upstream/smolvm-clean", version = "=1.22.0" }
 smolvm-pack = { path = "../../target/upstream/smolvm-clean/crates/smolvm-pack", version = "=1.22.0" }
+smolvm-registry = { path = "../../target/upstream/smolvm-clean/crates/smolvm-registry", version = "=1.22.0" }
 

@@ -14,6 +14,7 @@ defmodule SmolBox.Store.NativeCodecTest do
     Profile
   }
 
+  alias SmolBox.Terminal.{Result, Spec}
   alias SmolBox.Test.EmbeddedPackage, as: Package
 
   defp fixture do
@@ -99,6 +100,109 @@ defmodule SmolBox.Store.NativeCodecTest do
 
     refute inspect(created.created_machine.backend_identity) =~
              record.backend_assignment.creation["owner_token"]
+  end
+
+  test "versioned material authority selectively uses v17 and cannot downgrade to legacy envelopes" do
+    {config, record} = fixture()
+    assignment = %{record.backend_assignment | version: 2}
+    versioned = %{record | backend_assignment: assignment}
+    assert :ok = ManagedMachine.validate(versioned)
+    assert {:ok, <<"smolbox-record-v17\0", _::binary>> = bytes} = Codec.encode(versioned)
+    assert {:ok, ^versioned} = Codec.decode(bytes)
+    refute Assignment.approved?(assignment, config, versioned.spec)
+    observed = observation(versioned)
+    old_receipt = observed.backend_identity.receipt
+
+    material = %{
+      "schema" => 2,
+      "revision" => 0,
+      "record_sha256" => old_receipt["material_sha256"],
+      "chain_sha256" => String.duplicate("b", 64),
+      "operation_id" => nil,
+      "request_sha256" => nil
+    }
+
+    observed =
+      put_in(observed.backend_identity.receipt, Map.put(old_receipt, "material", material))
+
+    created = %{
+      versioned
+      | created_machine: observed,
+        state: :created,
+        operation: nil,
+        phase: nil
+    }
+
+    assert :ok = ManagedMachine.validate(created)
+    assert {:ok, <<"smolbox-record-v17\0", payload::binary>> = bytes} = Codec.encode(created)
+    assert {:ok, ^created} = Codec.decode(bytes)
+
+    for prefix <- ["smolbox-record-v16\0", "smolbox-record-v15\0", "smolbox-record-v4\0"] do
+      assert {:error, _} = Codec.decode(prefix <> payload)
+    end
+
+    assert {:error, _} = Codec.decode(bytes <> "trailing")
+
+    assert {:error, _} =
+             Codec.decode(
+               "smolbox-record-v17\0" <> :erlang.term_to_binary(created, compressed: 9)
+             )
+
+    assert {:error, _} = Codec.encode(%{created | backend_assignment: record.backend_assignment})
+    stripped = put_in(created.created_machine.backend_identity.receipt, old_receipt)
+    assert {:error, _} = Codec.encode(stripped)
+  end
+
+  test "v16 omits the new default exactly and v17 rejects legacy records" do
+    {_config, record} = fixture()
+    assert record.backend_assignment.version == 1
+
+    historical =
+      put_in(record.backend_assignment, Map.delete(record.backend_assignment, :version))
+
+    expected = "smolbox-record-v16\0" <> :erlang.term_to_binary(historical)
+    assert {:ok, ^expected} = Codec.encode(record)
+    assert {:ok, ^record} = Codec.decode(expected)
+    assert {:error, _} = Codec.decode("smolbox-record-v17\0" <> :erlang.term_to_binary(record))
+    assert {:error, _} = Codec.decode("smolbox-record-v16\0" <> :erlang.term_to_binary(record))
+    assert {:error, _} = Codec.encode(put_in(record.backend_assignment.version, 3))
+  end
+
+  test "a fresh BEAM reads v17 material proofs using the fixed schema vocabulary" do
+    {config, record} = fixture()
+    record = put_in(record.backend_assignment.version, 2)
+    observed = observation(record)
+    receipt = observed.backend_identity.receipt
+
+    proof = %{
+      "schema" => 2,
+      "revision" => 0,
+      "record_sha256" => receipt["material_sha256"],
+      "chain_sha256" => String.duplicate("b", 64),
+      "operation_id" => nil,
+      "request_sha256" => nil
+    }
+
+    observed = put_in(observed.backend_identity.receipt, Map.put(receipt, "material", proof))
+    record = %{record | created_machine: observed, state: :created, operation: nil, phase: nil}
+    {:ok, bytes} = Codec.encode(record)
+    path = Path.join(config.package_path, "material-record.etf")
+    File.write!(path, bytes, [:exclusive])
+    File.chmod!(path, 0o600)
+    paths = Path.wildcard(Path.expand("_build/test/lib/*/ebin"))
+
+    code =
+      "[path] = System.argv(); case path |> File.read!() |> SmolBox.Store.Codec.decode() do " <>
+        "{:ok, %{backend_assignment: %{version: 2}, created_machine: %{backend_identity: " <>
+        ~S|%{receipt: %{"material" => %{"schema" => 2}}}}}} -> IO.puts("fresh-material"); | <>
+        "_ -> System.halt(1) end"
+
+    assert {"fresh-material\n", 0} =
+             System.cmd(
+               System.find_executable("elixir"),
+               Enum.flat_map(paths, &["-pa", &1]) ++ ["-e", code, path],
+               stderr_to_stdout: true
+             )
   end
 
   test "domain, intent, receipt and material identity cannot be mixed or downgraded" do
@@ -292,6 +396,129 @@ defmodule SmolBox.Store.NativeCodecTest do
     refute Identity.valid?(%Identity{receipt: identity(native).receipt, pid_identity: [1, 0]})
     refute Identity.valid?(%Identity{receipt: identity(native).receipt, pid_identity: self()})
     assert {:error, _} = Codec.encode(%{native | backend_assignment: self()})
+  end
+
+  test "native terminal records retain material authority and the exclusive command slot" do
+    {config, machine, record} = terminal_fixture()
+    assert :ok = Execution.validate(record)
+    assert record.reservation == nil
+    assert machine.active_execution == Execution.key(record)
+    assert {:ok, <<"smolbox-record-v17\0", payload::binary>> = bytes} = Codec.encode(record)
+    assert {:ok, ^record} = Codec.decode(bytes)
+
+    for version <- 1..16,
+        do: assert({:error, _} = Codec.decode("smolbox-record-v#{version}\0" <> payload))
+
+    assert {:error, _} = Codec.encode(%{record | managed_machine: nil})
+    assert {:error, _} = Codec.encode(put_in(record.backend_assignment.version, 1))
+    assert {:error, _} = Codec.encode(Map.put(record, :terminal_connection, make_ref()))
+
+    # An older approved descriptor remains unable to admit new terminal intent.
+    refute Assignment.supports?(config, record.spec)
+    assert {:error, _} = Assignment.qualification(config, record.spec)
+
+    completed = %{
+      record
+      | state: :completed,
+        evidence: :exited,
+        result: %Result{exit_code: 7},
+        collection: :complete
+    }
+
+    assert {:ok, released, finished} = MachineOps.finish(machine, completed, 1000)
+    assert released.active_execution == nil
+    assert released.reservation == machine.reservation
+    assert finished.cleanup == :complete
+    assert {:ok, bytes} = Codec.encode(finished)
+    assert {:ok, ^finished} = Codec.decode(bytes)
+
+    unknown = %{record | state: :unknown, evidence: :unknown}
+    assert {:ok, held, uncertain} = MachineOps.finish(machine, unknown, 1000)
+    assert held.state == :unknown and held.active_execution == Execution.key(record)
+    assert held.reservation == machine.reservation and uncertain.result == nil
+    assert {:error, _} = MachineOps.request(held, :stop, held.version, 1000)
+    assert {:ok, bytes} = Codec.encode(uncertain)
+    assert {:ok, ^uncertain} = Codec.decode(bytes)
+  end
+
+  test "fresh BEAM decodes native terminal intent and result with the fixed v17 vocabulary" do
+    {config, _machine, record} = terminal_fixture()
+
+    record = %{
+      record
+      | state: :completed,
+        evidence: :exited,
+        result: %Result{exit_code: 7},
+        collection: :complete,
+        cleanup: :complete
+    }
+
+    {:ok, bytes} = Codec.encode(record)
+    path = Path.join(config.package_path, "terminal-record.etf")
+    File.write!(path, bytes, [:exclusive])
+    File.chmod!(path, 0o600)
+    paths = Path.wildcard(Path.expand("_build/test/lib/*/ebin"))
+
+    code =
+      "[path] = System.argv(); case path |> File.read!() |> SmolBox.Store.Codec.decode() do " <>
+        "{:ok, %{backend_assignment: %{version: 2}, spec: %{command: %SmolBox.Terminal.Spec{}}, result: %SmolBox.Terminal.Result{exit_code: 7}}} -> IO.puts(\"fresh-native-terminal\"); _ -> System.halt(1) end"
+
+    assert {"fresh-native-terminal\n", 0} =
+             System.cmd(
+               System.find_executable("elixir"),
+               Enum.flat_map(paths, &["-pa", &1]) ++ ["-e", code, path],
+               stderr_to_stdout: true
+             )
+  end
+
+  defp terminal_fixture do
+    {config, native} = fixture()
+    assignment = %{native.backend_assignment | version: 2}
+    native = %{native | backend_assignment: assignment}
+    created = observation(native)
+    receipt = created.backend_identity.receipt
+
+    proof = %{
+      "schema" => 2,
+      "revision" => 0,
+      "record_sha256" => receipt["material_sha256"],
+      "chain_sha256" => String.duplicate("b", 64),
+      "operation_id" => nil,
+      "request_sha256" => nil
+    }
+
+    created = put_in(created.backend_identity.receipt, Map.put(receipt, "material", proof))
+
+    observed = %{
+      created
+      | state: :running,
+        backend_identity: %{created.backend_identity | pid_identity: [100, 12_345]}
+    }
+
+    native = %{
+      native
+      | state: :running,
+        operation: nil,
+        phase: nil,
+        created_machine: created,
+        observed_machine: observed
+    }
+
+    {:ok, command} = Spec.new(session_ms: 1000, idle_ms: 1000)
+
+    {:ok, spec} =
+      ExecutionSpec.new(
+        scope: native.scope,
+        id: "terminal",
+        artifact: native.spec.artifact,
+        profile: native.spec.profile,
+        command: command
+      )
+
+    {:ok, fingerprint} = ExecutionSpec.fingerprint(spec, String.duplicate("k", 32))
+    {:ok, record} = Execution.new(spec, fingerprint, 1000)
+    {:ok, machine, record} = MachineOps.attach(native, record, 1000)
+    {config, machine, record}
   end
 
   test "a fresh BEAM loads only the fixed native schema vocabulary before safe decode" do

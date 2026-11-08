@@ -47,6 +47,9 @@ fi
 # Reconcile only the independent fixture's package entry using seeded locked
 # versions; source inputs remain verified. Its generated lock stays untracked.
 cargo build --manifest-path "$native_clean_fixture/Cargo.toml" --bin template-resolver --offline
+# Pure public configuration/lineage witnesses only. These tests never invoke
+# the compile-only lifecycle/network/PTY/checkpoint/export functions or a VM.
+cargo test --manifest-path "$native_clean_fixture/Cargo.toml" --lib parity::tests --offline
 SMOLBOX_CLEAN_TEMPLATE_RESOLVER="${CARGO_TARGET_DIR:-$native_clean_fixture/target}/debug/template-resolver" \
   python3 "$native_root/tests/test_clean_template_resolver.py" -v
 cargo clippy --manifest-path "$native_manifest" --all-targets --locked -- -D warnings

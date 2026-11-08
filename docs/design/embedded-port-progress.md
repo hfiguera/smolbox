@@ -2472,3 +2472,1255 @@ interruption and destructive independent CLI races remain deferred. Historical
 Linux fault-verification failures remain unresolved. Developer ID/notarization,
 publisher provenance and complete firmware/kernel source/license delivery remain
 distribution gates, not ordinary migration completion claims.
+
+## October 13, 2026: HTTP-parity design and plan proposed
+
+The branch's next scope is feature parity with SmolBox's HTTP backend, preserving
+the embedded Port architecture and unmodified SDK dependency. The
+[design](embedded-port-http-parity.md) maps every backend operation and additional
+specification feature to its current status, public semantics and implementation
+phase. The [plan](embedded-port-http-parity-implementation-plan.md) covers shared
+approvals/version negotiation, native material transitions, bounded jobs and
+streams, networking/ports/workloads, images, commands/logs, terminals, Linux
+storage and saved-state workflows, followed by full ordinary qualification.
+
+This is documentation only. The completed offline migration, its exact package
+evidence and the current unsupported-feature checks remain unchanged. Additional
+features are not implemented or qualified. The plan preserves HTTP's existing
+source/platform restrictions and does not equate public SDK signatures with
+proven runtime behavior. Hidden OCI/export/fork resources and the current material
+receipt/version gates are explicit feasibility work, not assumed resolved.
+
+Rustler remains a future bridge to the shared engine; Kubernetes remains a future
+separate backend. Crash/CLI-race validation stays deferred, historical failures
+remain unresolved and native distribution approval is separate. No implementation,
+native campaign, package publication or push is performed by this planning change.
+
+## October 13, 2026: parity inventory and clean API witnesses
+
+Implementation began with a checked manifest covering 37 backend operations,
+43 arity signatures and eight additional specification features. Four new
+Elixir coverage contracts compare actual adapter advertisement and complete
+operation inventory, validate contracts/guides and forbid completion while
+required acceptance/evidence is pending. These and the five existing backend
+tests pass. No new capability is advertised by this commit.
+
+The independent verified-clean SDK fixture compiles witnesses for network/ports,
+workloads, existing-image configuration, buffered stdin/background launch, channel
+terminals/resize, image operations, registry pull/push, stopped SDK disk expansion,
+checkpoint capture/restore, export and held fork activation. Three pure SDK
+configuration tests pass for owned overlay identity, clone lineage/read-only
+guest mount conversion and offline port configuration. They launch no processes
+or VMs and make no network requests. Both complete source inventories pass.
+
+The [new API audit](../../native/http-parity-api-boundaries.md) records the
+private runtime command helper replacements and the finding that running SDK
+resize cannot implement stopped managed growth. Terminal queue/collection,
+registry staging/credentials, OCI builders/seeds, export flattening and child
+fork enrollment remain explicit implementation gates. Actual parity behavior,
+new package qualification and later phases remain pending. Crash/CLI-race
+validation stays deferred; source patches, push and publication remain absent.
+
+## October 13, 2026: shared approval and feature foundations
+
+`Runtime.Approvals` now supplies the same catalog, policy and allocation
+validation to HTTP and embedded configuration. Native targets retain registered
+source/checkpoint/export/branch/volume catalogs and credential resolver context
+through normalization. Approval does not activate an unavailable operation;
+legacy helper assignment still requires a local artifact and offline profile.
+Source-only configuration remains pending expanded protocol negotiation.
+
+`Backend.Features` centralizes the existing HTTP SDK/version/platform eligibility
+and the separately defined legacy native feature contract. Saved-state, growth
+and volume coordinators use those predicates instead of comparing a native
+engine version with an HTTP SDK version. Native SDK version is derived from its
+exact source revision and exposed separately from engine/protocol identity.
+Legacy native packages cannot acquire network, ports, workloads, sources, PTYs,
+background work, volumes or saved-state features just by registering approvals.
+HTTP version and platform eligibility remains unchanged.
+
+The audit additionally found that runtime convenience forks immediately release
+the child and cannot implement held branches. Public `prepare_held_fork` and
+`AgentManager::start_with_full_config` compile against clean source, providing
+the lower-level preparation/guarded-boot path for later authenticated held
+creation. These witnesses are never executed by the qualification fixture.
+
+The final ordinary Elixir run passes 763 cases (4 doctests, 6 properties,
+753 tests), with 29 live-runtime cases excluded. Full regression initially
+exposed a lazy-module-loading assumption in the coverage test's atom lookup;
+the test now derives its name lookup from actual backend signatures. The final
+fresh run passes. Strict Credo, formatting and documentation checks pass, as do
+the three pure SDK configuration tests and both complete source inventories.
+Private logs remain under `.local/http-parity/`; no native campaign ran.
+
+P1 remains incomplete: protocol 2 negotiation, authorized native material
+transitions, expanded assignment/history validation and selective codec evolution
+are still required. P2–P9 feature implementation/qualification remains pending.
+No additional runtime capability or changed native package is approved by these
+foundation checks. The full parity goal stays active; crash validation remains
+deferred and no patches, push or publication are introduced.
+
+## October 13, 2026: native material proof and journal foundation
+
+The shared engine now has versioned material proofs and a private bounded
+per-machine journal. Fresh versioned creation writes the original authority and
+root proof under the existing machine gate; there is no public receipt-promotion
+operation. Legacy receipt bytes and incarnation markers remain unchanged.
+Versioned verification requires the original authority, exact stored proof and
+SDK material hash, and rejects proof stripping, stale heads or pending work.
+
+Growth intent binds the operation ID, prior proof, exact targets and a hash of
+every other material field. Prepared/entered state is synced before SDK entry;
+correlated completion alone advances the chain. Incomplete work stays unavailable,
+duplicate IDs cannot dispatch again and lost replies can read recorded results
+without replay. Private metadata is bounded, mode 0600, path/inode checked and
+published atomically. No receipt or journal contents become diagnostics.
+
+The synchronous engine disk-growth entry point uses public SDK disk expansion
+and metadata APIs under the machine/source gates. It is not exposed by the
+legacy helper or qualified as product disk growth: bounded tool supervision,
+physical geometry witnesses and the public Runtime/codec integration remain P2/P7
+work. The protocol-2 receipt/handshake path is still pending at this checkpoint.
+
+Twelve new deterministic non-VM journal tests cover normal proof evolution,
+lost acknowledgments, pending/partial changes, owner/domain mismatch, unrelated
+material changes, growth bounds, corruption, redirection, permissions and privacy.
+All 89 engine library tests pass (three ignored live/ordinary integration fixtures
+remain unselected), together with 17 helper and seven protocol tests. All-target
+engine/helper Clippy and both complete SDK inventories pass. No SDK source was
+modified and no VM, owner-loss or destructive CLI-race campaign ran. The full
+parity goal remains active and distribution/crash qualification remains separate.
+
+## October 13, 2026: protocol-2 schemas and selective v17 readers
+
+Rust and Elixir now explicitly validate protocol 2.0 SDK identity and material
+proof schemas. Shared synthetic Hello/creation/inspection fixtures bind SDK
+version/source/features and original/current material identity. Legacy framing
+still omits all new fields exactly. Admission and creation-result correlation
+reject receipt/protocol mixing; malformed SDK/package fields fail closed. The
+Elixir channel keeps byte/event correlation and sticky unavailable behavior for
+version 2 without interpreting old receipts as new authority.
+
+Assignments have an explicit default version 1. The selective v16 encoder omits
+that new default, preserving the prior bytes; its reader upgrades historical
+assignment shapes. Version-2 assignments and their validated material receipts
+selectively encode as v17, reject older envelopes and decode in a fresh BEAM.
+No v1 assignment may use a v2 receipt or vice versa. Memory and the durable
+PostgreSQL example advertise material-reader capability only with the new codec;
+protocol-2 startup additionally requires `native_material_proofs: 2` before
+enrollment. No database migration is required for the existing opaque record
+column, but every reader/projection writer must be upgraded before activation.
+
+The final ordinary Elixir run passes 773 cases (4 doctests, 6 properties,
+763 tests), excluding 29 live-runtime cases. Rust passes 89 engine, 17 helper,
+seven protocol library and 21 protocol contract tests. Strict Credo, all-target
+native Clippy, formatting, documentation and both clean SDK inventory checks
+pass. These are model/schema/ordinary regression checks, not live feature or
+changed-package qualification. Private logs remain under `.local/http-parity/`.
+
+The active helper and package builder still use protocol 1.4/engine 0.1.0.
+Protocol-2 package policy, startup/handshake selection, source-only configuration,
+version-2 creation in the public Runtime and expanded operation/history support
+remain incomplete. P2–P9 features and platform/consumer qualification remain
+pending. No live helper/BEAM-loss or destructive CLI campaign, SDK patch, push or
+publication occurred; the full parity goal stays active.
+
+## October 13, 2026: protocol-2 package and public Runtime activation
+
+The native workspace is now engine 0.2.0. New packages bind manifest schema 3,
+compiled policy schema 2, protocol 2.0 and an explicit SDK/source/implemented-
+feature descriptor. The helper accepts private config schema 2 and emits that
+descriptor from compiled policy. Fresh creates call the shared engine's versioned
+creation path and return journal-bound root receipts. No advanced feature is
+advertised merely because its clean SDK API exists.
+
+Elixir validates the approved manifest identity and SDK descriptor before launch,
+selects the exact major/minor, approves the matching Hello, and keeps that major
+through request admission, terminal decoding and result consumption. New public
+Runtime assignments carry version 2 and selectively persist as v17. Startup needs
+the material-reader store capability before enrollment. Approved 0.1.0 packages
+retain explicit protocol 1.3/1.4 selection and exact v16 authority; no promotion,
+protocol mixing or old-inventory adoption is introduced.
+
+Deterministic public Runtime contracts now exercise the same retained lifecycle,
+command/file, drain and resume behavior on 1.3, 1.4 and 2.0. New tests reject
+policy/SDK/manifest mismatches and stripped receipts before dispatch. Graceful
+stopped Runtime replacement preserves the full v17 creation receipt and capacity
+reservation in a surviving Memory store, waits for the prior durable lease,
+observes without replaying create and performs normal deletion. A Rust socket
+peer separately proves protocol-2 bridge admission and normal shutdown without
+opening an SDK or VM. Ordinary native runners select config/protocol from exact
+package metadata and reject incompatible major/policy upgrades.
+
+The final Elixir suite passes 782 cases (4 doctests, 6 properties, 772 tests),
+excluding 29 live-runtime cases, with `--warnings-as-errors --max-cases 8`.
+Earlier full runs exposed an incomplete manifest fixture, a test's lifecycle CAS
+before durable command-slot retirement, and timeout-sensitive checks under higher
+concurrency. The fixtures now exercise their intended contract and the lifecycle
+test waits for retirement; all affected focused checks and the final full suite
+pass. No production timeout or optimistic version fence was relaxed.
+
+Rust passes 89 engine library, 18 helper, seven protocol library and 21 protocol
+contract tests (135 total); the three ignored engine integration fixtures remain
+unselected. All 20 Python checks pass, including the clean template resolver's
+ordinary file-only cases. Strict Credo, all-target native Clippy, formatting,
+Elixir/Rust documentation and both full SDK byte/mode inventories pass. Private
+logs remain under `.local/http-parity/`; occasional deliberately closing fake
+peer startup diagnostics are not native SDK qualification evidence.
+
+The new [requirement audit](embedded-port-http-parity-completion-audit.md) records
+all 51 numbered P0–P9 items and their remaining evidence. P1 still needs expanded
+assignment/history/source shapes. P2–P9 features, rebuilt package platform and
+current/minimum durable/public consumers remain pending. Existing 0.1.0 package
+qualification is not transferred to changed 0.2.0 bytes. No live native helper/
+BEAM-loss, persistence interruption or destructive CLI-race campaign, SDK patch,
+push or publication occurred. Crash validation and distribution approval remain
+separate; the full parity goal remains active.
+
+## October 13, 2026: bounded native observations
+
+Protocol-2 packages declaring `observability: 1` now implement the six previously
+missing observation operations: health, capacity, metrics, readiness, list and
+machine measurements. Public calls return the existing Health, WorkerCapacity,
+Machine and MachineMeasurements types, normal readiness result and Prometheus
+text. Worker health also performs actual health/readiness queries through the
+native work executor instead of treating the owner declaration as a dispatch
+probe. Observations never grant creation/cleanup authority or change reservations.
+
+The revision-specific read-only adapter validates the existing schema and enrolled
+inode/WAL paths, caps individual rows and the aggregate snapshot and installs a
+SQLite progress callback tied to cancellation and one absolute deadline. It opens
+no SDK writer, reaps no records and performs no reconciliation. Inventory omits
+labels, environment, source paths and all receipts; its bounded JSON is forwarded
+through credited chunks and complete count/byte validation. A size/error boundary
+cannot become successful truncated inventory.
+
+Capacity separates live record allocations and process utilization from the
+store's declarations/reservations. PID/birth checks surround fresh CPU/memory
+samples, CPU uses a minimum 25-ms interval and optional unavailable host/PSS fields
+remain nil. Capacity's disk gauge follows the SDK's apparent running disk lengths;
+receipt-bound Linux machine measurements separately count allocated blocks with
+capped entries/depth and no symlink traversal. Measurements retain the full saved
+authority and fail on conflicting material or process changes. No metric supplies
+absence, billing, quota or guest-readiness proof.
+
+Package policy, Hello, capabilities and observation limits agree exactly. Explicit
+`sdk_identity:` approval can retain an older protocol-2 descriptor with its base
+capabilities/limits; unsupported features or missing core versions reject before
+startup. Legacy 1.3/1.4 shapes and v16 readers remain unchanged. The coverage
+inventory advertises the six implemented operations but keeps their full-parity
+acceptance pending until ordinary package/platform evidence is available.
+
+The full ordinary Elixir suite passes 786 cases (4 doctests, 6 properties,
+776 tests), excluding 29 live-runtime cases, with warnings as errors and eight
+concurrent test cases. Native checks pass 94 engine, 18 helper, seven protocol
+library and 24 protocol contract tests (143 total), with the three ignored engine
+fixtures unselected. Five new engine models use temporary SDK databases and normal
+host-process sampling without a VM; public peer contracts verify distinct
+accounting, receipt-free inventory, stopped measurements and descriptor narrowing.
+All 20 Python checks, strict Credo/Clippy, formatting, Elixir/Rust docs and both
+complete SDK inventories pass. Logs remain private under `.local/http-parity/`.
+
+P2 still needs generalized long jobs, session/artifact sinks and whole-pipeline
+resource/control acceptance. Expanded assignment histories and P3–P9 features and
+new-package platform/current/minimum durable/public qualification remain pending.
+No SDK patch, live helper/BEAM-loss, interrupted persistence, destructive CLI-race
+campaign, push or publication occurred. Crash qualification and distribution
+approval remain separate; the full parity goal stays active.
+
+## October 13, 2026: native network, port and workload creation intent
+
+Protocol-2 creation and qualification now carry immutable network, port and
+startup workload specifications through public Runtime admission, durable
+assignments and the shared Rust engine. The compiled descriptor explicitly adds
+networking/ports/workloads version 1; older approved descriptors and legacy
+protocols cannot dispatch those extensions. Optional extension fields remain
+absent on the old wire shape, and explicit null cannot bypass native gating.
+
+The engine validates intent before artifact preparation, resolves opt-in container
+workload metadata before SDK reservation and writes the public SDK record fields
+through SmolBox's existing owned reservation/commit path. The SDK convenience
+creator inserts its own database row, so it is not called after SmolBox reserves
+creation. No SDK code is copied, patched or rewritten. Resulting network, port,
+argv, environment, working-directory and user fields participate in the material
+hash and journal-bound root authority.
+
+Exact canonical allowlists select virtio-net without adding destinations. CIDR
+validation matches Erlang's IPv4-compatible/mapped IPv6 spelling. Offline inbound
+ports retain explicitly empty outbound lists. Receipt-bound observations verify
+the actual recorded network and ports against intent; inventory contains those
+public fields without ownership receipts. Trusted canonical IPv4
+`publish_address:` defaults to loopback and overrides inherited publisher settings
+before helper threads start. A narrow revision-specific SDK error classifier
+preserves the HTTP port-conflict category without exposing native diagnostics.
+
+Workload is opt-in: no specification retains neutral startup. Empty argv arrays
+inherit both image arrays, explicit arrays replace both without a shell, environment
+overrides merge, nil working directory inherits and the image user is preserved,
+including names. Restart remains never and application readiness is not inferred.
+Malformed or bare-pack workloads reject before VM reservation.
+
+Six new deterministic public OS-Port peer tests cover typed feature observations,
+immutable workload identity, v17 round trips, store capability rejection, atomic
+port conflict without allocation, retained reservations through stop/drain/graceful
+stopped Runtime replacement, verified deletion release and conflicting observations.
+The peer never opens an SDK or VM. Six pure engine feature tests and a narrow
+launch-error test cover record construction, inheritance, exact policy spelling,
+bounds and material hashes; three new protocol contracts cover per-feature gates,
+strict extensions and legacy rejection.
+
+Validation passes 792 ordinary Elixir cases (4 doctests, 6 properties, 782 tests;
+29 live-runtime cases excluded), 153 Rust tests (101 engine, 18 helper, seven
+protocol library, 27 protocol contracts; three ignored engine fixtures unselected)
+and all 20 Python checks. Focused reruns cover the final publisher-policy,
+canonical-CIDR, restart and error-mapping checks. Strict Credo/Clippy, formatting,
+Elixir/Rust documentation and both complete SDK inventories pass. Private logs
+remain under `.local/http-parity/`.
+
+P3 ordinary traffic, listener rollback and guest workload acceptance remain pending
+on both native platforms. P2 still needs generalized long jobs, aggregate resource
+accounting and whole-pipeline acceptance, including large escaped Workload frames
+and merged metadata observation limits. P1 expanded histories and P4–P9 remain
+open; no phase exit or full parity is claimed. New-package public/minimum/durable
+consumer qualification has not been transferred from older bytes. No live crash,
+forced owner loss, interrupted persistence or destructive CLI-race campaign ran;
+there was no push or publication. The full goal remains active.
+
+## October 13, 2026: bounded large-workload creation and record observation
+
+The previous creation translation could reject valid Workload values whose JSON
+escaping exceeded the 1-MiB frame, and the original 256-KiB raw-record read cap
+could make a successfully created large workload unobservable. This milestone
+implements both boundaries without widening ordinary frames, command/file caps,
+inventory output, queue limits or control credit.
+
+Approved protocol-2 descriptors may declare `compact_creation: 1`, with exact
+package/Hello creation limits: schema 1, 640-KiB total payload, ten chunks and
+64-KiB decoded chunks. The Port serializes large workload features into bounded
+length-prefixed UTF-8 inside canonical base64 chunks. It does so only after the
+original typed request is approved; durable assignments and Channel correlation
+retain that original intent. Smaller and explicitly approved older descriptors
+keep their existing representation. No compression library, SDK patch, new
+backend, CLI or HTTP server is introduced.
+
+The native codec checks versions, flags, counts and string lengths before
+allocation, rejects duplicate environment keys, conflicting representations,
+truncation/trailing bytes and malformed UTF-8, then applies ordinary feature
+validation. Admission independently requires the compact-creation feature, so
+valid opaque bytes cannot bypass descriptor approval. A shared synthetic fixture
+checks Elixir/Rust byte agreement; decoder models cover every truncated prefix.
+The new public Runtime peer test creates a workload containing all 64 maximum
+environment values with escaped control bytes, verifies original durable intent
+and v17 decoding, and cleans up normally. The peer opens no SDK or VM.
+
+The new descriptor separately binds an 8-MiB individual record and a 32-MiB raw
+snapshot. Read-only SQL caps bytes explicitly; inventory projection remains capped
+at 4 MiB and contains neither environments nor receipts. Native models cover a
+large escaped record, the per-record rejection boundary and an aggregate exceeding
+the snapshot cap while every individual record is valid. Image inheritance is
+checked against the bounded verified manifest plus overrides instead of applying
+the request's argv/environment count restrictions to baked metadata. A 300-entry
+inheritance model passes, while request limits and validation remain unchanged.
+
+Validation passes 796 ordinary Elixir cases (4 doctests, six properties, 786 tests;
+29 live-runtime cases excluded), 159 Rust tests (104 engine, 18 helper, seven
+protocol library, 30 protocol contracts; three ignored engine fixtures unselected)
+and 20 Python checks. Focused reruns cover the final maximum-policy/argv encoder
+and aggregate-record bounds. Strict Credo/Clippy, formatting, Elixir/Rust docs and
+both complete SDK source inventories pass. Logs stay private in `.local/http-parity/`.
+
+P2 generalized long jobs, artifact/session sinks, FD/process/auxiliary accounting
+and remaining whole-pipeline acceptance remain pending. P3 ordinary network/port/
+workload qualification, expanded P1 histories and P4–P9 remain open. No changed
+package receives historical qualification, no live crash/owner-loss/persistence
+interruption/CLI-race campaign ran, and nothing was pushed or published. The full
+HTTP-parity goal stays active; crash and distribution gates remain separate.
+
+## October 13, 2026: shared engine job leases and bounded agent I/O
+
+File subprocesses and foreground execution now share the engine's four work
+slots instead of relying on unrelated file and Port admission counters. Read-only
+observations reserve a separate two-slot engine lane. RAII job leases charge
+worker children, parent descriptor reservations and private staging; the existing
+file collector retains these leases together with the machine/source/domain
+guards until its exact child is collected. Collection timeout cannot release
+capacity, and late collection cannot automatically reopen quarantined admission.
+
+The explicit `job_resources: 1` descriptor binds package/Hello limits: four work
+slots, two observation slots, four worker children, 64-MiB staging, 32 reserved
+parent descriptors and eight descriptors of control headroom. Admission checks
+the current OS descriptor usage plus reservations. Exhaustion returns the existing
+public admission-exhausted category before guest dispatch, distinct from identity
+conflict. The allocation layer is transport-independent; no Rustler/Kubernetes
+dependency or implementation is introduced.
+
+File workers now place a private Unix socket relay around the public SDK client.
+It bounds request frames at 4 MiB and reply frames at the requested decoded
+output's base64 size plus 64 KiB, checking headers before the SDK allocator sees
+them. Two fixed pumps copy opaque bodies in 64-KiB pieces; guest operations stay
+implemented by SDK APIs. Relative socket names within the private worker spool
+avoid Unix path-length regressions. Relay setup and teardown are bounded, and
+the worker still acquires no SDK runtime/account owner or VM.
+
+Native models cover mixed transfer/stream admission, independent observation
+slots, rejected admission without counter changes, retained/quarantined leases,
+engine overload before dispatch, fragmented byte-preserving relay traffic and
+oversized headers rejected without reading their bodies. The two explicitly
+selected ordinary non-VM worker tests also pass against the rebuilt debug helper:
+normal missing-agent collection and real SDK binary upload/download through a
+fake agent. They verify acknowledgment and normal collection without requesting
+termination, starting a VM or creating an SDK database.
+
+Validation passes 796 ordinary Elixir cases (4 doctests, six properties, 786 tests;
+29 live-runtime cases excluded), 166 standard Rust tests (110 engine, 18 helper,
+seven protocol library, 31 contracts; three ignored engine fixtures unselected)
+plus the two separately selected ordinary worker tests, and all 20 Python checks.
+Package/Hello tests bind pool constants to the compiled engine and reject changed
+limits before launch. Strict Credo/Clippy, formatting, Elixir/Rust documentation
+and both complete SDK inventories pass. Private logs and the helper stay ignored.
+
+This is not the P2 exit gate. Other long command/artifact/session workers,
+whole-pipeline deadlines/credit, VMM/auxiliary resource enrollment, memory budgets
+and full bridge-level control/interference acceptance remain pending. The Port
+work queue still shares its existing work threads; separate engine observation
+admission does not prove dispatch while all Port workers are blocked. P3 ordinary
+platform qualification, expanded P1 histories and P4–P9 remain open. No historical
+qualification is transferred, no live crash/owner-loss/persistence/CLI-race campaign
+ran, and nothing was pushed or published. The full goal remains active.
+
+## October 13, 2026: bounded foreground stdin jobs
+
+Approved protocol-2 packages may now declare `buffered_exec: 1`, which requires
+`job_resources: 1`. Public buffered execution accepts the existing Command UTF-8
+stdin limit, including NUL bytes, and preserves argv/environment/workdir/user
+validation, output caps and the original durable intent. Streaming stdin and
+background stdin remain unsupported, matching HTTP restrictions.
+
+Compact command encoding keeps escaped maximum-size inputs within the existing
+1-MiB Port frame. Package/Hello limits bind a 704-KiB payload, eleven chunks,
+8-MiB worker metadata and 32-MiB aggregate metadata. Owned command workers share
+the four work slots, child/descriptor limits and 64-MiB output staging pool.
+Metadata and output spools retain inode/owner/mode checks through collection.
+
+The worker connects only to the receipt-bound running agent, using public SDK
+VmExec or RunConfig with the existing image overlay, mount and numeric-user
+selection. It initializes no SDK runtime or VM. Header-first bounded SDK I/O
+prevents oversized reply allocation. An absolute monotonic deadline reaches the
+worker; collection and forwarding preserve conservative cancellation and credit.
+Only an SDK Completed reply supplies guest Exit. File acknowledgment, worker
+exit and EOF cannot substitute for it; uncertain jobs retain their leases.
+
+Validation passes 800 ordinary Elixir cases (four doctests, six properties, 790
+tests; 29 live-runtime cases excluded), 171 standard Rust tests (112 engine,
+18 helper, nine protocol library, 32 protocol contracts; four ignored fixtures
+unselected), and 20 Python checks. Four separately selected ordinary non-VM
+tests pass against the rebuilt helper: normal boot-config rejection/collection,
+missing-agent collection, SDK binary file transfers, and buffered stdin for bare
+and image contexts with binary output and observed Exit. The public peer tests
+preserve UTF-8/NUL stdin through Runtime and v17; codec tests reject all truncated
+prefixes, trailing data, hostile lengths/flags and invalid UTF-8. Strict lint,
+formatting, documentation and both complete SDK inventories pass. Logs and the
+helper remain private and ignored.
+
+Ordinary Linux/macOS guest qualification remains pending. Extended nil-stdin
+streaming bounds, background/logs, terminals, registry/image operations, storage,
+saved state and the remaining P1/P2/P9 gates remain open. Retained-machine
+execution must also carry creation features without comparing them to absent
+ports/workload fields in ExecutionSpec; this is the next integration check.
+No changed package inherits historical qualification. No deferred crash campaign
+ran, nothing was pushed or published, and the full parity goal remains active.
+
+## October 13, 2026: retained execution preserves creation features
+
+Retained commands copy the machine's immutable creation assignment, while their
+ExecutionSpec has no port/startup-workload fields. Validation previously compared
+that assignment against empty fields and rejected commands on mapped/workload
+machines. The comparison now uses the explicit same-scope managed-machine key,
+preserving the approved creation features and checking the command's profile,
+artifact, binding and receipt. Disposable execution still requires exact creation
+intent; this does not add creation fields to ExecutionSpec or change HTTP records.
+
+Receipt-bound observations must match the original network and port mappings.
+Inspection and measurements through a retained execution context reconstruct
+ports from that assignment. A context with a retained key requires an identity;
+missing authority, another scope and changed observations remain rejected.
+
+The public peer runs buffered stdin on a machine with both mapped ports and a
+startup workload, preserves its assignment and v17 round trip, checks inspection
+and measurements, then performs normal cleanup. Full Elixir regression passes
+800 cases with 29 live-runtime cases excluded. Final focused tests pass 31 cases;
+strict Credo, formatting and docs pass. No native source/package bytes changed.
+Ordinary guest/platform qualification and the remaining full-parity gates are
+still pending. Crash validation stays deferred; nothing was pushed or published.
+
+## October 13, 2026: independent bridge observation dispatch
+
+The Port now routes health, capacity, metrics, readiness, inventory and machine
+measurements through two dedicated observation threads. Commands, files and
+lifecycle work keep four threads. Thread counts use the shared engine constants.
+Cancellation and credit retain their independent reader/control path.
+
+Approved protocol-2 job descriptors reserve two request identities within the
+existing 32-request global limit. Thirty retained work requests cannot prevent
+observation admission; further work rejects before dispatch with admission
+exhausted. Both queues remain bounded under the existing shared session, input,
+output and byte limits. Legacy descriptors keep their prior request admission.
+
+The deterministic bridge model blocks all four work calls, fills the work queue,
+verifies overload without another native call, blocks one observation and still
+receives readiness from the second. Explicit observation cancellation and normal
+shutdown complete. It uses no helper, SDK owner, VM, signals or process loss.
+All 19 helper tests and strict Clippy pass. Other engine/protocol checks remain
+unchanged: 172 standard Rust cases in aggregate, plus four selected ordinary
+non-VM checks against the rebuilt debug helper. Rust docs and both complete SDK
+inventories pass; Elixir's preceding 800-case full regression and final 31-case
+retained-execution checks remain the evidence for unchanged Elixir source.
+
+This closes the known shared bridge work-thread obstruction, not the entire P2
+exit gate. Whole-pipeline command/artifact/session work, auxiliary enrollment,
+memory budgets, broader interference and ordinary package/platform acceptance
+remain pending. No historical package qualification is transferred, no deferred
+crash campaign runs, and nothing is pushed or published. The full goal stays active.
+
+## October 13, 2026: bounded retained-image background launch
+
+Approved protocol-2 packages may now declare `background_exec: 1`, requiring the
+existing buffered/job descriptors. Backend.exec and public retained-machine
+submission use compact command input and an owned job worker calling public SDK
+run_background. Image overlay, user and mount context comes from the authenticated
+record. Guest lifetime timeout/stdin stay nil; the host profile/request budget
+bounds observation. Streaming background commands and launch callbacks reject
+before dispatch. No SDK runtime, VM, CLI or local HTTP server is introduced.
+
+Launch has separate private/wire acknowledgment and public LaunchResult types.
+It cannot consume foreground output/Exit or file acknowledgment. Positive PID
+evidence must fit the original acknowledgment budget; zero/malformed PID,
+oversized response headers, worker exit, EOF and retired/duplicate proof cannot
+confirm launch. The worker retains shared child/descriptor/metadata leases through
+normal collection. Background output staging is bounded independently of a guest
+process's lifetime. PID is not readiness, durable process identity or termination
+authority.
+
+The public peer confirms durable :launched state, command-slot release and v17
+identity on a mapped retained machine. A separate uncertain-launch model retains
+the slot, ports and machine reservation and does not replay after normal Runtime
+replacement. Native SDK peers check image context, absent guest timeout/stdin,
+valid launch, zero/malformed PID, small acknowledgment limits and missing response
+without a VM or owner loss. Private/wire tests reject cross-kind and late proof.
+
+Older native v17 validators reject this launch combination. Runtime therefore
+requires `native_background_launches: 1` from the store before enrollment; material
+reader version 2 alone cannot activate it. Memory and the PostgreSQL example
+advertise the new reader capability together. Compile-time guards preserve older
+example consumers. Public startup rejects material-only adapters before opening
+a helper, while older package descriptors without background support remain
+eligible with their existing material reader. HTTP codecs and records keep their
+existing shapes; no schema bump or automatic receipt promotion is introduced.
+
+Ordinary guest/platform qualification, broader deadline/interference acceptance,
+streaming bounds, logs and P4/P6–P9 remain pending. No historical native package
+qualification is transferred; crash validation stays deferred, no upstream source
+changes, and nothing is pushed or published. The full parity goal remains active.
+
+Validation passes 804 ordinary Elixir cases (four doctests, six properties, 794
+tests; 29 live-runtime cases excluded), 175 standard Rust tests (114 engine,
+19 helper, nine protocol library, 33 protocol contracts; four ignored fixtures
+unselected), four separately selected ordinary non-VM helper checks, and all 20
+Python checks with the verified clean resolver fixture. Final reader/uncertainty
+contracts pass 29 focused Elixir cases. Strict Credo/Clippy, formatting,
+Elixir/Rust documentation and both complete unmodified SDK inventories pass.
+The rebuilt debug helper, private receipts/packages and raw evidence remain
+ignored under local build/test directories.
+
+## October 13, 2026: receipt-bound bounded console logs
+
+Approved protocol-2 descriptors may declare `logs: 1`. Both Backend.logs arities
+and Machines.logs support the existing tail/follow/timeout/output/callback options
+and LogResult. The engine reads the verified SDK's agent-console.log path under
+the receipt-bound hashed VM directory. It creates no SDK manager or VM, takes no
+managed command slot or machine mutation lock, and writes no lifecycle intent,
+reservation or transcript. Missing logs and EOF supply no absence/workload proof.
+
+The reader captures owner-controlled file/directory descriptors and rejects
+symlinks, foreign/writable aliases, hardlinks and replaced identities. SDK 0755
+directories remain readable without a chmod. Reverse tail selection reads bounded
+64-KiB blocks rather than loading old prefixes or retaining an unbounded ring.
+Tail zero begins at EOF; empty/CRLF/partial/lossy UTF-8 lines retain public newline
+accounting. Delivered line limits match the HTTP SSE frame boundary, with 10,000
+lines/8-MiB public output and a 1-MiB raw partial cap. One deadline and explicit
+cancellation bound polling and forwarding; a lost consumer cannot complete.
+
+The shared engine delivers text lines, independent of Port framing and ready for
+a future Rustler adapter. Port uses a separate log stream with length-prefixed
+UTF-8 and existing 64-KiB chunk/byte/event credit. Elixir validates fragmented
+prefixes/text, complete UTF-8 and terminal counts before returning LogResult.
+Callbacks receive complete log events synchronously; failures detach while
+capture continues. Followers use a shared work slot, two descriptors and 6 MiB
+from the existing 32-MiB metadata/buffer pool, preserving observation slots and
+command/file caps. Package/Hello policy binds every added limit and capability;
+legacy descriptors omit them and cannot enable logs.
+
+Validation passes 807 ordinary Elixir cases (four doctests, six properties, 797
+tests; 29 live-runtime cases excluded), 182 standard Rust tests (120 engine,
+19 helper, nine protocol library, 34 protocol contracts; four ignored fixtures
+unselected), four separately selected ordinary non-VM helper checks against the
+rebuilt debug binary, and all 20 Python checks. Final public/parser checks pass
+13 focused cases, including both arities, callbacks/detachment, follow timeout,
+missing logs, stopped snapshots and unchanged durable identity/accounting. Native
+file models cover bounded tails, UTF-8 splits, normal append/cancellation,
+replacement/missing paths, deadline/consumer failure and shared job admission.
+Strict Credo/Clippy, formatting, docs and both complete SDK inventories pass.
+
+This implements P5.3's foundation, not full parity or native package qualification.
+Ordinary Linux/macOS guest/package evidence, broader interference, expanded
+streaming bounds and the remaining P0–P9 requirements remain pending. Crash
+validation stays deferred. Upstream remains unmodified; private builds/evidence
+stay ignored and nothing is pushed or published. The full goal stays active.
+
+## October 13, 2026: owned streaming-command engine foundation
+
+The shared engine now has an unadvertised owned streaming-command path. It
+validates the full public argv/environment/workdir/user bounds with nil stdin,
+reserves the existing child/descriptor/metadata/output budgets, and retains its
+machine/source/domain leases through exact worker collection. The worker connects
+only to the existing receipt-bound agent and creates no SDK runtime or VM.
+
+Output is written to an inode-bound capped spool. Small private IPC messages
+identify contiguous stdout/stderr ranges; the supervisor validates identity,
+sequence, offsets, lengths and file size, then forwards them while the SDK call
+is still running. The command terminal separately preserves actual Exit and
+completion. File acknowledgment, worker exit, missing Exit or retired/duplicate
+ranges cannot replace it. Consumer loss, deadline and cancellation disqualify
+completion; unresolved collection retains every lease. The bounded relay can
+close its existing sockets without new descriptors or guest termination authority.
+
+The SDK convenience collector's fixed 11-MiB cap would conflict with SmolBox's
+existing command bound. Explicit collection uses verified public send_raw/
+recv_raw and official SDK request/response types, with finite response/event/
+deadline checks. SDK frame limits and SmolBox's 16-MiB aggregate remain unchanged;
+no source patch or CLI/server fallback is introduced. smolvm-protocol is promoted
+from a dev dependency to the same locked, verified production workspace source.
+
+The ordinary non-VM SDK peer holds Exit until the controller observes stdout,
+proving this is streaming. Bare/image contexts carry all 64 maximum-size escaped
+environment values; image user/overlay context and ordered binary stdout/stderr
+are checked. The image case then forwards 12 MiB, crossing the SDK convenience
+cap, before actual nonzero Exit and normal collection. Pure IPC models reject
+wrong/duplicate ranges, file ACK, missing/mismatched Exit totals and retired proof.
+
+Public operation/capability negotiation, compact streaming input, reader-first
+admission and Runtime acceptance remain pending. The current public descriptor
+and legacy streaming path are unchanged; this unit does not claim the larger
+public streaming surface is enabled. Ordinary guest/platform/package evidence
+and the full P0–P9 goal remain pending. Crash validation stays deferred, upstream
+remains unmodified, private builds/evidence remain ignored and nothing is pushed
+or published.
+
+Validation passes 183 standard Rust cases (121 engine, 19 helper, nine protocol
+library, 34 contracts; five ignored fixtures unselected), five separately selected
+ordinary non-VM helper checks against the rebuilt binary, strict Clippy,
+formatting, Rust/Elixir documentation and both complete SDK inventories. All 20
+Python checks pass with the clean resolver fixture. No Elixir production code or
+public protocol/policy changes; the preceding 807-case Elixir regression remains
+the evidence for those unchanged paths. The full goal remains active.
+
+
+## October 13, 2026: public owned streaming commands and reader admission
+
+Protocol-2 SDK descriptors may now declare `streaming_exec: 1`. The public
+backend routes nil-stdin foreground execution to `exec_stream`, using the shared
+owned engine worker instead of buffering through the SDK convenience collector.
+SBCM compact input preserves the original frame cap with the full public 64-KiB
+argv and all 64 maximum-size environment values. Elixir/Rust share a streaming
+fixture, strict nil-stdin validation, explicit capability approval and existing
+stdout/stderr byte/event credit. Actual Exit remains a separate correlated proof;
+background PID, file completion and missing Exit cannot supply it.
+
+Runtime submission on retained mapped/workload machines keeps the original
+creation assignment, ports and startup intent while storing the full command.
+Binary callbacks and result bytes survive public dispatch and v17 round trips.
+Callback failures detach the observer while capture continues. A delayed Exit
+callback yields an expired truncated result with the actual observed Exit; it
+cannot erase that evidence or extend the request deadline. Native pre-Exit and
+12-MiB output behavior remains proved by the real non-VM SDK peer.
+
+Record shape stays v17, but every native reader must understand expanded
+nil-stdin commands before advertising `native_streaming_commands: 1`. Runtime
+checks this capability before enrollment. Memory and the guarded PostgreSQL
+example advertise it alongside material/background support; older descriptors
+retain their original limits and reader requirements. Large intent rejects when
+the descriptor lacks streaming support. HTTP behavior and v16 remain unchanged.
+
+Validation passes 811 ordinary Elixir cases (four doctests, six properties,
+801 tests; 29 live-runtime cases excluded), 28 final focused public/reader/codec
+checks including the added Exit-callback deadline assertion, and 184 standard
+Rust tests (121 engine, 19 helper, nine protocol library, 35 protocol contracts;
+five ignored fixtures unselected). Five separately selected ordinary non-VM
+helper checks pass against the rebuilt debug binary. All 20 Python resolver/source
+checks pass; 17 focused legacy backend/observation regressions, strict
+Credo/Clippy, formatting and Rust/Elixir documentation pass. Both complete SDK
+source inventories still match after rebuilding the helper.
+
+Public activation implements a further P2/P5 foundation; it does not close the
+full phase gates. Ordinary guest/platform/package qualification, output
+representation compatibility, broader interference and remaining P0–P9 work
+remain pending. Crash validation stays deferred, upstream remains unmodified,
+private packages/evidence stay ignored, and nothing is pushed or published.
+The full goal remains active.
+
+
+## October 13, 2026: terminal controller transport boundary
+
+Terminal.Connection is now an opaque internal adapter connection, with a
+Connection.Transport contract for semantic input, resize, close, output and Exit.
+The original Mint/TLS/WebSocket implementation moves to Connection.HTTP. The
+controller no longer constructs resize JSON or decodes WebSocket events. The
+HTTP adapter retains authentication, TLS/hostname checks, Unix socket selection,
+finite passive I/O, handshake/frame limits and no retry/redirect behavior.
+Client.open_terminal and HTTP backend preflight remain unchanged; backend code
+can select an internal source after its own approvals.
+
+The adapter supplies a finite cumulative input budget and an exact input charge
+before dispatch. HTTP still charges the original binary/resize-JSON byte count;
+a non-HTTP model uses a different resize cost without changing the controller.
+Per-call limits, consumer/observer binding, bounded output queues, deadlines and
+closed-buffer retirement remain in the common controller. Consumption calls an
+adapter acknowledgment once when an output event leaves the queue, allowing a
+future Port adapter to return byte/event credit at that boundary. Queuing alone
+returns no credit. A credit failure retains the delivered validated bytes and
+closes observation conservatively.
+
+Semantic event order preserves valid output prefixes before later protocol
+errors. EOF alone, ambiguous Exit and excess output remain uncertain. A valid
+Exit followed by normal close keeps its evidence; output after Exit rejects.
+The native adapter must emit confirmed Exit only after owned worker collection.
+The deterministic non-HTTP model does not establish guest/worker qualification.
+
+Validation passes 817 ordinary Elixir cases (four doctests, six properties,
+807 tests; 29 live-runtime cases excluded), followed by 41 focused terminal
+contracts including two additional final HTTP prefix/resize-budget regressions.
+Six new non-HTTP model contracts cover binary output, consumption credit,
+adapter-specific admission, consumer binding, credit failure, prefix/EOF handling,
+ambiguous Exit, output bounds and opaque-context inspection. Strict Credo,
+formatting and Elixir documentation pass. No Rust, SDK, native policy or durable
+codec changes were made; native terminal capability stays disabled.
+
+This completes the controller/HTTP extraction foundation of P6.1. Native owned
+session workers, correlated Port controls, native durable eligibility and ordinary
+Linux/macOS PTY qualification remain pending, as do the remaining P0–P9 phase
+requirements. Crash validation stays deferred. Nothing is pushed or published,
+and the full goal remains active.
+
+
+## October 13, 2026: shared terminal admission and evidence state
+
+The Rust engine now exposes an unadvertised transport-independent TerminalSession
+state model and TerminalOptions. Options match the public program/dimension,
+session/idle/attach/close, per-call input and unread-buffer bounds. Total input
+has a finite approved ceiling of 16 MiB, matching the HTTP worker request cap.
+The state stores only counters and at most 1024 output tickets, not a transcript.
+
+Immutable epoch/operation identity and ordered controls reject stale, foreign,
+duplicate and retired input without replay. Input and resize charges are checked
+before forwarding; acceptance attests neither guest consumption nor applied
+resize. An output window has separate byte/event limits. Only whole matching
+FIFO consumer removal restores its credit; partial, duplicate, out-of-order and
+foreign credit cannot enlarge it. Consumed output may exceed 16 MiB over a session:
+a deterministic 32-MiB transcript passes through the bounded unread window.
+
+One outer deadline constrains session time. Attach, idle and close budgets cannot
+extend it. Cancel, consumer loss, limits, expired budgets or uncollected work
+remain uncertain even when a later actual Exit is recorded. EOF, local close,
+sentinel Exit and child failure cannot produce confirmed completion. Valid Exit
+only yields a confirmed outcome after the supervisor's exact successful owned
+child collection. Output after Exit invalidates completion while preserving the
+original exit code. Retired proof cannot reopen a session or mint completion.
+
+The model itself has no SDK ownership, receipt, SDK connection, job leases or
+physical child-collection authority. The future supervisor must provide those
+and separately bound SDK/control/output queues before invoking this state.
+No terminal wire operation, native capability, public admission or package policy
+is enabled by this unit. It implements P6.2/P6.3 state boundaries, not the session
+worker or the full phase gates.
+
+Validation passes 195 standard Rust cases (132 engine including 11 new terminal
+models, 19 helper, nine protocol library, 35 contracts; five ignored fixtures
+unselected), five separately selected ordinary non-VM helper checks against the
+rebuilt debug binary, all 20 Python checks, strict Clippy, Rust documentation and
+formatting. Both complete SDK source inventories still match after the build.
+Elixir production and wire/store contracts are unchanged; their preceding full
+817-case run plus final 41 focused terminal checks remain the evidence for those
+paths. No historical native package qualification transfers to changed bytes.
+
+Owned SDK PTY workers, protected session IPC, shared resource accounting, native
+Port controls/adapter, durable terminal admission and ordinary Linux/macOS PTY
+qualification remain pending along with the remaining P0–P9 requirements. Crash
+validation stays deferred. Private builds/evidence remain ignored, nothing is
+pushed or published, and the full goal remains active.
+
+
+## October 13, 2026: bounded clean-SDK terminal channel runner
+
+The shared engine now has an unadvertised terminal SDK I/O runner using public
+run_interactive_io and InteractiveInput/InteractiveOutput. It connects only to an
+existing agent through the bounded relay, validates finite options and bounded
+image context, enables TTY and supplies initial dimensions before caller input.
+It creates no manager or VM, captures no host stdin, changes no host tty and
+installs no signal handler. Guest timeout/stdin and stop_vm_on_exit reject; host
+observation budgets do not become guest lifetime authority.
+
+The runner charges input before enqueueing SDK controls, validates per-call input
+and resize, sends EOF on normal close and keeps the SDK sender alive while
+awaiting actual Exit. A scoped watchdog bounds SDK interactive reads even after
+the SDK clears its socket timeout. Deadline, explicit cancellation, close expiry,
+input exhaustion and consumer loss shut down existing relay sockets without
+allocating new descriptors or claiming guest termination. A scope guard also
+retires relay I/O when the runner returns. Error text is redacted and first
+failure remains authoritative. SDK Exit is separate from physical child
+collection: TerminalIoProof has no confirmed-completion method or lease authority.
+
+Output is incremental, binary and split to the approved unread-window chunk
+size. Existing header-first response guards reject oversized frames before SDK
+allocation. The relay now accepts an explicit private staging directory for this
+runner while retaining relative CWD endpoints for existing workers and long path
+compatibility. Ownership/path/mode checks are unchanged. Test staging explicitly
+uses mode 0700; accepted non-VM peer sockets switch to blocking I/O on macOS.
+
+Three real non-VM SDK peer cases verify image/user/overlay intent, initial and
+subsequent resize, binary stdin/stdout/stderr, output-driven input before Exit,
+EOF followed by actual Exit and a 12-MiB stream through a 1-KiB delivery window.
+They also cover deadline/cancel/close expiry, input exhaustion, callback loss and
+an oversized reply header without its body. Peers shut down normally; no VM or
+live crash/fault campaign is involved.
+
+Validation passes 198 standard Rust cases (135 engine, 19 helper, nine protocol
+library, 35 contracts; five ignored fixtures unselected), five separately
+selected ordinary non-VM helper checks against the rebuilt binary, all 20 Python
+checks, strict Clippy, Rust documentation and formatting. Both SDK inventories
+still match after rebuilding. Elixir production, wire/package policies and stores
+are unchanged; prior Elixir evidence remains scoped to those unchanged paths.
+
+This is the SDK channel layer for P6.2, not a complete isolated owned PTY worker.
+Protected startup/control IPC, isolated worker entry, exact owned supervision,
+shared process/descriptor/queue reservations, Port session controls/adapter,
+durable eligibility and ordinary Linux/macOS PTY qualification remain pending.
+No terminal capability is activated, no historical qualification transfers to
+changed bytes, crash validation stays deferred and the full P0–P9 goal remains
+active. Private builds/evidence remain ignored; nothing is pushed or published.
+
+
+## October 13, 2026: private terminal-worker framing and startup contract
+
+The shared engine now has a separate unadvertised terminal worker codec. Its
+16-KiB startup JSON carries strict epoch/operation, owner, finite options and an
+immutable metadata-file reference rather than command/environment contents.
+Shape validation rejects unknown nested fields, wrong schema, redirected path
+syntax, unrelated metadata parents and oversized references before private file
+reads. Actual file authentication and parent-watch enrollment belong to the
+worker entry, which remains pending; a decoded reference conveys no ownership.
+
+Steady-state frames carry fixed epoch/operation/sequence/direction with raw binary
+input/output. Resize, attach, exact credit, close and cancel have separate bounded
+payload shapes. Frames remain below 64 KiB plus fixed identity/stream overhead;
+public Port frame limits are unchanged. Header checks precede allocation. The
+incremental decoder yields one complete frame per call, so a coalesced read
+cannot allocate an arbitrary event vector or swallow a retired suffix.
+
+Worker streams require Ready before output and a distinct terminal proof matching
+the exact cumulative output-byte total. EOF, partial frames, stale/wrong-direction
+identity, duplicate sequences, unknown opcodes and extra control payload reject.
+Missing/ambiguous Exit cannot encode successful evidence; explicit uncertainty
+may preserve a real observed code. Retirement and trailing frames disqualify
+stream completion. Valid IPC evidence still needs exact physical owned-child
+collection; the codec grants no SDK ownership, receipt adoption or cleanup power.
+
+Seven deterministic codec cases cover every-byte fragmentation, binary fidelity,
+maximum input/credit/resize, coalesced input, retirement, identity/direction/order,
+header limits without bodies, truncation, wrong proof totals and strict startup
+including nested duration fields. Validation passes 205 standard Rust cases
+(142 engine, 19 helper, nine protocol library, 35 contracts; five ignored fixtures
+unselected), the additional focused nested-startup regression, five separately
+selected ordinary non-VM helper checks against the rebuilt binary, all 20 Python
+checks, strict Clippy, Rust documentation and formatting. SDK source inventories
+remain unchanged. No Elixir, public wire, package policy or store changes occur.
+
+This completes another P6.2 IPC foundation. Private worker entry, authenticated
+metadata loading, owned supervision and resource/queue reservations, live
+protected session transport, Port/runtime/durable admission and ordinary PTY
+qualification remain pending. Native terminal capability stays disabled; the
+full P0–P9 goal remains active. Crash validation stays deferred, no historical
+package evidence transfers to changed bytes, private builds/evidence stay ignored
+and nothing is pushed or published.
+
+
+## October 13, 2026: authenticated private terminal worker entry
+
+The packaged helper now has a private --terminal-worker entry, separate from the
+public Port protocol. It verifies the actual parent PID/birth/UID, arms the existing
+parent watch and authenticates metadata by unredirected private directory,
+owner/mode/size/device/inode before creating agent I/O. Image-only metadata binds
+the exact single program, user/mount/overlay context and original absolute host
+deadline. Bare context, argument/env/stdin overrides and expired metadata reject.
+No guest timeout or stop_vm_on_exit authority is introduced; no manager, VM,
+creation receipt, host tty or signal handler is created by the entry.
+
+Protected controls run through the correlated private decoder and bounded
+session state. The SDK input feeder has two pending control slots; the worker
+holds a bounded output ticket window and waits for matching whole consumption
+credit before emitting more output. Attach, session, idle and close budgets are
+polled independently even when the guest is quiet. Cancel/failed control/expired
+window closes observation conservatively. Input admission remains distinct from
+guest consumption. SDK first failure and actual Exit remain separate evidence.
+
+Output goes directly to nonblocking pipe/socket writes with finite host budgets,
+without stdout line buffering or terminal fd changes. Ready denotes worker
+initialization only. A separate End frame reports exact forwarded bytes and SDK
+Exit/failure; the worker never invokes TerminalSession.collected. Only the parent
+supervisor's exact physical child collection can qualify completion or release
+owned resource leases. The process's normal exit quiesces its private reader and
+budget threads; no waitpid sweep or PID label grants authority.
+
+An explicitly selected ordinary non-VM helper test authenticates real protected
+metadata, checks initial resize/TTY context, stalls the second 1-KiB output chunk
+until matching consumption credit, sends binary stdin and EOF, receives actual
+Exit 7 and collects the exact child normally. It also launches a second ordinary
+helper with a changed metadata inode and verifies exit 2 with no Ready/output or
+SDK connection. No parent loss, forced termination, persistence interruption or
+CLI race campaign runs.
+
+Validation passes 206 standard Rust cases (143 engine, 19 helper, nine protocol
+library, 35 contracts; six ignored helper fixtures unselected), six separately
+selected ordinary non-VM helper checks against the rebuilt binary, the focused
+absolute-deadline metadata check, all 20 Python checks, strict Clippy, Rust
+documentation and formatting. Both complete SDK inventories remain unchanged.
+Elixir, public wire/package policy and durable store contracts are unchanged.
+
+This implements the private entry/authentication/credit foundation for P6.2.
+Parent-side engine supervision, shared process/descriptor/queue reservations,
+public Port controls/adapter, durable terminal eligibility and ordinary Linux/macOS
+PTY qualification remain pending. Native terminal admission stays disabled and
+the full P0–P9 goal remains active. Crash validation stays deferred; changed helper
+bytes inherit no historical qualification. Private builds/evidence remain ignored
+and nothing is pushed or published.
+
+
+## October 13, 2026: owned terminal supervision and shared reservations
+
+Engine.terminal_owned now binds an image/non-forkable running record to the
+existing receipt, builds protected metadata and acquires machine/source/domain
+leases before launch. The shared transfer supervisor verifies executable bytes,
+reserves the terminal job, prepares immutable metadata and enrolls the exact
+child PID/birth in the actor epoch before sending startup authority. It uses a
+fresh correlated private operation and the existing private terminal entry;
+no runtime, VM, public receipt or automatic reconnect is created.
+
+Parent control and output use nonblocking pipes and bounded incremental reads.
+Output callback acceptance queues bytes without granting credit; only explicit
+whole consumer removal sends Credit. A successful child status, complete private
+stream and matching End are all required before confirmed Exit. Deadline,
+consumer/control/protocol failure and uncertain EOF close local input and remain
+conservative. Finite retirement never releases leases: unresolved work quarantines
+admission and transfers the exact child, metadata, job permit and supplied
+machine/source/domain guards to a bounded collector. Failed collector startup
+retains the guards rather than fabricating cleanup. No PID sweep or signal-based
+guest termination is used.
+
+SDK input now uses sync_channel(2), matching its public Receiver type, rather
+than an unbounded channel. Worker controls also have two slots. Terminal demand
+reserves one child and 20 descriptors, three times the approved total-input bytes
+from the shared staging budget, and metadata bytes plus four times the output
+window plus 8 MiB relay/config headroom from the metadata pool. Full 16-MiB input
+and 1-MiB windows remain representable. Work descriptors stop at 24 of 32, keeping
+both four-descriptor observation slots available. Reservations describe bounded
+buffers/queues rather than implying measured RSS; ordinary platform measurement
+and broader interference remain pending.
+
+A new ordinary non-VM supervisor check uses the verified helper and real SDK
+protocol peer. It checks binary output/input, explicit credit/EOF, actual Exit 7,
+normal exact child collection and a supplied RAII lease that remains held during
+output and releases only on collection. A deterministic pool test admits the
+maximum terminal input/window, rejects exhausted work, admits both observations
+and verifies complete reservation release. Prior normal worker/streaming/background/
+file/boot-guard checks remain selected without live fault campaigns.
+
+Validation passes 207 standard Rust cases (144 engine, 19 helper, nine protocol
+library, 35 contracts; seven ignored helper fixtures unselected), seven separately
+selected ordinary non-VM helper checks against the rebuilt binary, all 20 Python
+checks, strict Clippy, Rust documentation and formatting. Both full SDK source
+inventories still match. Elixir/public protocol/package/store contracts are
+unchanged, so their prior evidence remains scoped to those paths.
+
+Public Port session messages/adapter, native reader/durable terminal eligibility,
+expanded upgrade/recovery and ordinary Linux/macOS PTY/package qualification
+remain pending. No terminal capability or native public admission is activated.
+The full P0–P9 goal remains active, crash validation stays deferred and changed
+bytes inherit no historical qualification. Private builds/evidence remain ignored;
+nothing is pushed or published.
+
+
+## October 13, 2026: terminal public-wire contracts without activation
+
+Rust and Elixir now share strict protocol-2 terminal-open specifications,
+terminal-opened messages, ordered attach/input/resize/close controls, a distinct
+binary terminal stream and collected terminal completion. Negotiated terminal
+limits require the explicit terminals feature with buffered/job support. The
+current SDK implementation descriptor and package policy remain unchanged:
+terminal capability is unadvertised, Port approval rejects it and helper dispatch
+returns unsupported before native work. Planned schema support cannot activate
+a native session or bypass reader/durable admission.
+
+Session correlation separates server-event and caller-control sequence numbers,
+binds receipt/domain/epoch/request identity and permits no input before attach,
+repeated attach or input after close. Terminal outstanding byte/event credit is
+bounded by the existing windows and requested buffer. Only whole matching FIFO
+consumption restores terminal credit; partial credit rejects without mutation.
+Terminal event/byte counters use the existing safe integer bound instead of the
+ordinary command lifetime cap. Cross-language models pass 65,540 consumed events
+with zero retained queue bytes. Legacy command/file/log caps remain unchanged.
+
+Terminal completion requires valid non-sentinel Exit, worker collection and exact
+output-byte correlation. Background PID, file acknowledgment and command outcome
+cannot substitute. Uncertain outcomes may retain actual Exit. Host child
+collection remains orthogonal to SDK dispatch: a pre-dispatch collected failure
+has no guest Exit and cannot report successful terminal completion.
+
+Validation passes 822 ordinary Elixir cases (four doctests, six properties,
+812 tests; 29 live-runtime cases excluded), 10 final focused contract/activation
+checks, 208 standard Rust cases (144 engine, 19 helper, nine protocol library,
+36 contracts; seven ignored helper fixtures unselected), seven separately
+selected ordinary non-VM helper checks against the rebuilt binary and all 20
+Python checks. Strict Credo/Clippy, formatting and Rust/Elixir documentation pass.
+SDK inventories remain unchanged. No native terminal policy, durable codec or
+store capability is enabled, and changed bytes inherit no historical package
+qualification.
+
+Port live control/credit routing, native terminal connection, reader admission,
+durable command-slot/recovery and ordinary Linux/macOS PTY qualification remain
+pending alongside the full P0–P9 requirements. The goal remains active, crash
+validation stays deferred, private builds/evidence stay ignored and nothing is
+pushed or published.
+
+
+## October 13, 2026: helper terminal control and consumption routing
+
+The helper dispatches terminal jobs through a dedicated transport boundary into
+Engine.terminal_owned. Private worker initialization produces terminal_opened
+before output, including zero-output sessions; this is initialization evidence,
+not guest readiness. Ordered public controls map to attach, binary input, resize
+and close. Whole public consumption maps back to exact private output sequence/
+byte tickets. Queue admission grants no worker credit. Public credit waits release
+the registry lock and retain the original absolute request deadline.
+
+Input controls have two pending slots; consumption tickets and outstanding output
+mappings each have at most 64 entries. Credit is processed independently of the
+input queue. Input queue exhaustion requests scoped cancellation of that session.
+Deterministic helper tests cover binary output/input, resize, observed Exit 7,
+credit correspondence, readiness during an active session, an exhausted output
+window and a full input queue. Readiness remains available after scoped retirement;
+no guest Exit is invented for cancellation. These are non-VM bridge models.
+
+Validation passes 210 standard Rust cases (144 engine, 21 helper, nine protocol
+library, 36 contracts; seven ignored helper fixtures unselected), seven separately
+selected ordinary non-VM helper checks against the rebuilt binary, all 20 Python
+checks, strict Clippy, Rust documentation and formatting. Both unmodified SDK
+inventories match. Private evidence is under ignored .local/http-parity.
+
+The current SDK implementation descriptor and package policy still do not
+advertise terminals. Elixir connection/control routing, reader-first durable
+command-slot eligibility, recovery and ordinary Linux/macOS PTY qualification
+remain pending. The full P0–P9 goal remains active, crash validation stays deferred
+and changed bytes inherit no historical package qualification. Nothing is pushed
+or published.
+
+
+## October 13, 2026: bounded Elixir terminal connection without public activation
+
+Port now delivers terminal initialization and admits ordered observer-bound
+attach/input/resize/close controls. The encoded outbox allows two pending controls
+per handle and preserves their order without coalescing them. Cancellation and
+consumption credit retain their separate reserve. Rejected queue admission leaves
+control sequence and input accounting unchanged. Expired, closed or foreign
+subscriptions cannot admit controls. Initial byte credit fits the requested
+terminal buffer; terminal responses charge bounded individual frames rather than
+a cumulative transcript. Command/file/log response limits remain unchanged.
+
+Connection.Embedded constructs an operational source from assigned context,
+pinned owner/epoch, package/domain binding and receipt. Its current feature gate
+still rejects terminals. The adapter monitors the pinned owner, verifies health,
+submits with the epoch fence and waits for initialized evidence. Finite health,
+submit, control and acknowledgment calls use one captured deadline; cancellation
+and closed-subscription disposal have bounded close calls. No operational source,
+connection handle or transcript enters a durable record.
+
+An optional transport mailbox hook delivers asynchronous native events directly
+to the terminal controller rather than losing them between passive polls. HTTP
+retains passive Mint/TLS/WebSocket handling. Consumer binding sends one semantic
+attach; a prebound consumer attaches during initialization. HTTP attach is a
+local no-op. Binary output returns whole credit only when removed by the consumer.
+Confirmed terminal results require valid collected Exit and exact delivered bytes;
+uncertain completion preserves observed Exit without treating it as success.
+Closed-subscription disposal follows cancellation or collected completion, while
+the controller can retain its validated prefix within its existing closed buffer.
+
+Validation passes 828 ordinary Elixir cases (four doctests, six properties,
+818 tests; 29 live-runtime cases excluded), 33 final focused Port/outbox/terminal
+checks, strict Credo, documentation and formatting. Deterministic peers cover
+mailbox delivery, prebound/single attach, input/resize/close, binary whole-credit
+consumption, exhausted input queues, long consumed transcripts, stale admission,
+malformed/uncollected completion and synthetic owner loss. No live owner loss or
+forced termination campaign ran. The earlier 210 Rust cases and seven selected
+ordinary helper checks remain scoped to the unchanged native sources.
+
+Assigned-backend invocation, reader-first durable eligibility/command-slot
+integration, recovery and ordinary Linux/macOS PTY qualification remain pending.
+The SDK implementation descriptor, package policy and native store capabilities
+do not advertise terminals. The full P0–P9 goal remains active; crash validation
+and distribution approval remain separate, private evidence stays ignored and
+nothing is pushed or published.
+
+
+## October 13, 2026: retained terminal authority and reader-first admission
+
+Version-2 native assignments now structurally accept retained Terminal.Spec
+intent and Terminal.Result while preserving their original immutable creation and
+material proofs. Native terminal records require a managed-machine attachment;
+legacy v16 and disposable native authority reject them. The existing v17 envelope
+and fixed safe-decode vocabulary suffice, and HTTP terminals retain their v7
+encoding. The qualifying user projection handles terminal intent without inventing
+a user override. New admission remains gated by an explicit SDK terminals feature.
+
+NativeSupport now requires native_terminal_sessions: 1 before enrolling a
+terminal-capable descriptor. Memory and the PostgreSQL example implement the
+reader/command-slot marker; the example emits it only when the corresponding
+CodecMaterial reader marker exists. Existing interactive_terminal and
+extended_execution submission requirements remain. Older descriptors without
+terminals retain their original reader requirements. No SQL shape or projection
+change is needed for this existing terminal intent/result vocabulary.
+
+The embedded backend routes managed terminal calls through the scoped connection
+adapter. TerminalObservation now assigns the execution record and constrains the
+open attempt by the remaining durable execution deadline. Connection sources
+require that retained record and its exact terminal specification; an unassigned
+or mismatched source cannot acquire a session through this route. The coverage
+manifest records the implemented conditional operation route while preserving its
+pending parity status. No package or SDK terminal capability is advertised yet.
+
+Deterministic codec/slot checks preserve the inherited machine reservation,
+release only the exclusive command slot after confirmed completion and keep the
+slot/reservation on uncertainty. Unknown commands block lifecycle requests.
+Native terminal intent and results round-trip in a fresh BEAM using the fixed
+v17 vocabulary; legacy envelopes, downgraded authority, missing attachment and
+operational connection fields reject. Reader verification performs no enrollment
+or helper launch. These checks model recovery boundaries without live interruption.
+
+Validation passes 831 ordinary Elixir cases (four doctests, six properties,
+821 tests; 29 live-runtime cases excluded), 20 final focused coverage/codec/reader
+checks, strict Credo, documentation and formatting. Native sources, policy and
+SDK inventories are unchanged in this milestone; earlier native qualification
+remains scoped to those exact bytes. Private logs remain ignored.
+
+Package activation, full native public Runtime terminal/recovery contracts and
+ordinary Linux/macOS PTY/package qualification remain pending alongside the full
+P0–P9 scope. Crash validation remains deferred and distribution approval remains
+separate. The goal stays active; nothing is pushed or published.
+
+
+## October 13, 2026: explicit terminal activation and public Runtime peer contracts
+
+The implemented SDK descriptor, native manifest policy and helper capability list
+now declare terminals: 1 together. Negotiated terminal limits bind the public
+chunk/input/event constants to the engine; protocol defaults include the terminal
+limits while explicit older descriptors omit the feature. Native Runtime startup
+still requires native_terminal_sessions before enrollment, and existing terminal
+submission markers remain required. Legacy 1.3/1.4 and older approved protocol-2
+descriptors retain their prior feature and reader requirements.
+
+The deterministic OS-Port peer now implements initialized terminal sessions,
+ordered attach/input/resize/close, binary output, consumption credit and collected
+terminal outcomes. Public Terminal.open/attach/next/input/resize calls exercise
+the assigned backend and existing durable command slot. Identical opens do not
+reopen a session; another consumer cannot send input. A 25-KiB consumed transcript
+passes a 4-KiB per-frame response budget, confirming the absence of a lifetime
+terminal response cap. Confirmed Exit 7 releases only the command slot, preserves
+the machine reservation and round-trips through authenticated v17 without a
+transcript.
+
+Unknown completion and explicit public API cancellation retain the command slot
+and reservation without a fabricated result. Normal drained/stopped Runtime
+replacement with the store alive preserves uncertainty and cannot reconnect or
+replay terminal input/open. Missing native reader support rejects startup before
+enrollment or helper launch. These are deterministic non-VM Runtime/Port models,
+not ordinary guest or physical platform qualification. The real SDK/private
+worker/supervisor non-VM checks retain their distinct exact-collection scope.
+
+Validation passes 835 ordinary Elixir cases (four doctests, six properties,
+825 tests; 29 live-runtime cases excluded), 24 final focused activation/Runtime/
+codec/reader checks, 210 standard Rust cases (144 engine, 21 helper, nine protocol
+library, 36 contracts; seven ignored helper fixtures unselected), seven separately
+selected ordinary non-VM checks against the final rebuilt helper and all 20 Python
+checks. Strict Credo/Clippy, Rust/Elixir documentation and formatting pass. Both
+verified unmodified SDK inventories match. Exact builds and private raw evidence
+remain under ignored .local/http-parity.
+
+Managed terminal implementation is now available to explicitly approved packages
+with the terminal descriptor. Ordinary Linux/macOS PTY and new-package current/
+minimum consumer qualification, PostgreSQL terminal qualification and broader
+resource/interference/upgrade checks remain pending. Other P0–P9 requirements
+remain pending in the completion audit; no matrix row is relabeled qualified by
+these peer tests. Changed package bytes inherit no historical qualification.
+Crash validation remains deferred, distribution approval remains separate and
+nothing is pushed or published. The full goal remains active.
+
+
+## October 13, 2026: real macOS PTY and public no-Rust consumer qualification
+
+The ordinary runner exposed a production handshake mismatch: the actual helper
+ordered optional capabilities differently from Elixir's exact approved Hello
+contract. SdkIdentity.capabilities now supplies the shared ordered list to the
+helper. A synthetic hello-v2-current fixture cross-checks Rust, Elixir and the
+Python ordinary verifier. The verifier now accounts for compact creation, jobs,
+buffered/background/streaming/log/terminal features and their exact limits; it no
+longer rejects all expanded packages using the old lifecycle-only expectation.
+
+The public lifecycle example has an explicit optional terminal proof. Only
+SMOLBOX_EMBEDDED_TERMINAL=true, terminal: true or the consumer's
+--native-public --native-terminal selects it. Admission rejects unsupported
+packages before native work. The proof uses one owned retained-image shell,
+constructs non-echoable markers, verifies binary output and three binary input
+bytes, checks guest stty dimensions after resize and observes actual Exit 7.
+Only the owned guest PTY changes mode. Finite input/observation budgets and a
+64-KiB private accumulator bound the proof; no transcript or connection enters
+the store. Confirmed completion releases its command slot before normal cleanup.
+
+An optimized release macOS aarch64 0.2.0 package passed that ordinary PTY proof
+and the public lifecycle: disposable/retained Exit 7, binary file transfers,
+drain fencing, retained commands while draining, normal stopped Runtime
+replacement with its store alive, version-checked resume and owned deletion.
+Its exact manifest, executable/assets/source tuple and fixture digest are in
+docs/evidence/embedded-port-http-parity-terminal-macos.json. A prior debug build
+exceeded the finite readiness budget during template verification, created no
+VM or assigned record, and exited after normal channel closure; its failure is
+retained separately and confers no qualification. No forced termination ran.
+
+Fresh public native consumers also passed the PTY/lifecycle proof with Rust tools
+absent from PATH on current Elixir 1.20.4/OTP 29 and minimum Elixir 1.18.4/OTP 27.
+Both used the same saved Hex archive and exact optimized native package. HTTP-only
+current/minimum consumers passed the same archive without native assets. All
+consumer evidence binds proof-tool digests and checks inventory empty before and
+after owned deletion. Raw logs, packages, authority records and domain inputs
+remain private under ignored .local/http-parity; only sanitized evidence is saved.
+
+Validation passes 836 ordinary Elixir cases (four doctests, six properties,
+826 tests; 29 live-runtime cases excluded), 210 standard Rust cases (144 engine,
+21 helper, nine protocol library, 36 contracts), seven separately selected
+ordinary non-VM helper checks and all 21 Python checks. Strict Credo/Clippy,
+Rust/Elixir documentation and formatting pass. Both unmodified SDK inventories
+match. The shared engine stays bridge-independent; Rustler/Kubernetes are future
+work and the upstream reference checkout remains read-only.
+
+The exact macOS proof does not close the full parity matrix: Linux PTY/package
+consumers, PostgreSQL terminal qualification, broader resource/interference/
+upgrade checks and other P0–P9 requirements remain pending. Crash qualification
+and distribution approval stay false and separate. No matrix row is relabeled
+fully qualified by partial platform evidence. Nothing is pushed or published;
+the full goal remains active.

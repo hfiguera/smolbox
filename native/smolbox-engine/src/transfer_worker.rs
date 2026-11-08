@@ -14,12 +14,65 @@ pub(crate) const MAX_TRANSFER: u64 = 16 * 1024 * 1024;
 pub(crate) const CHUNK: u64 = 64 * 1024;
 pub(crate) const MAX_FRAME: usize = 16 * 1024;
 pub(crate) const MAX_EVENTS: u32 = (MAX_TRANSFER / CHUNK) as u32 + 3;
+const STREAM_EVENTS: u32 = 65538;
 
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(tag = "type", deny_unknown_fields)]
 pub(crate) enum Kind {
     Read,
     Write { total: u64, mode: Option<u32> },
+    Buffered { metadata: Blob },
+    Background { metadata: Blob },
+    Streaming { metadata: Blob },
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct Blob {
+    pub path: PathBuf,
+    pub device: u64,
+    pub inode: u64,
+    pub bytes: u64,
+}
+impl Blob {
+    pub(crate) fn read<T: serde::de::DeserializeOwned>(
+        &self,
+        owner: OwnerIdentity,
+        maximum: u64,
+    ) -> Result<T> {
+        if self.bytes == 0 || self.bytes > maximum {
+            return Err(Error::before(ErrorCode::Validation));
+        }
+        unredirected(&self.path)?;
+        private_directory(
+            self.path
+                .parent()
+                .ok_or(Error::before(ErrorCode::Ownership))?,
+        )?;
+        let mut file = OpenOptions::new()
+            .read(true)
+            .custom_flags(libc::O_NOFOLLOW | libc::O_CLOEXEC | libc::O_NONBLOCK)
+            .open(&self.path)
+            .map_err(|_| Error::before(ErrorCode::Io))?;
+        let meta = file.metadata().map_err(|_| Error::before(ErrorCode::Io))?;
+        if !meta.is_file()
+            || meta.uid() != owner.uid
+            || meta.mode() & 0o777 != 0o400
+            || meta.len() != self.bytes
+            || (meta.dev(), meta.ino()) != (self.device, self.inode)
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        let mut bytes = Vec::new();
+        std::io::Read::by_ref(&mut file)
+            .take(self.bytes + 1)
+            .read_to_end(&mut bytes)
+            .map_err(|_| Error::before(ErrorCode::Io))?;
+        if bytes.len() as u64 != self.bytes {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        serde_json::from_slice(&bytes).map_err(|_| Error::before(ErrorCode::Validation))
+    }
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -39,8 +92,22 @@ pub(crate) struct Request {
 
 impl Request {
     pub(crate) fn validate(&self) -> Result<()> {
+        if let Kind::Buffered { metadata }
+        | Kind::Background { metadata }
+        | Kind::Streaming { metadata } = &self.kind
+        {
+            if metadata.path.parent() != self.staging.parent()
+                || metadata.bytes == 0
+                || metadata.bytes > crate::buffered::COMMAND_METADATA_BYTES
+            {
+                return Err(Error::before(ErrorCode::Validation));
+            }
+        }
         let mode = match self.kind {
-            Kind::Read => None,
+            Kind::Read
+            | Kind::Buffered { .. }
+            | Kind::Background { .. }
+            | Kind::Streaming { .. } => None,
             Kind::Write { mode, .. } => mode,
         };
         FileOptions {
@@ -82,7 +149,10 @@ impl Request {
             .open(&self.staging)
             .map_err(|_| Error::before(ErrorCode::Io))?;
         let metadata = file.metadata().map_err(|_| Error::before(ErrorCode::Io))?;
-        let required_mode = if matches!(self.kind, Kind::Read) {
+        let required_mode = if matches!(
+            self.kind,
+            Kind::Read | Kind::Buffered { .. } | Kind::Background { .. } | Kind::Streaming { .. }
+        ) {
             0o600
         } else {
             0o400
@@ -92,7 +162,10 @@ impl Request {
             || metadata.mode() & 0o777 != required_mode
             || (metadata.dev(), metadata.ino()) != (self.staging_device, self.staging_inode)
             || match self.kind {
-                Kind::Read => metadata.len() != 0,
+                Kind::Read
+                | Kind::Buffered { .. }
+                | Kind::Background { .. }
+                | Kind::Streaming { .. } => metadata.len() != 0,
                 Kind::Write { total, .. } => metadata.len() != total,
             }
         {
@@ -105,10 +178,46 @@ impl Request {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "type", deny_unknown_fields)]
 pub(crate) enum Event {
+    StreamOutput {
+        stderr: bool,
+        offset: u64,
+        bytes: u64,
+    },
+    StreamCompleted {
+        completion: crate::Completion,
+        exit_code: Option<i32>,
+        bytes: u64,
+        running: bool,
+    },
     Ready,
-    Progress { bytes: u64 },
-    Acknowledged { bytes: u64 },
-    Failed { bytes: u64 },
+    Progress {
+        bytes: u64,
+    },
+    Acknowledged {
+        bytes: u64,
+    },
+    Failed {
+        bytes: u64,
+    },
+    Limited {
+        bytes: u64,
+    },
+    CommandCompleted {
+        exit_code: i32,
+        stdout: u64,
+        stderr: u64,
+        limited: bool,
+    },
+    Launched {
+        pid: u32,
+    },
+}
+
+#[derive(Clone, Copy)]
+pub(crate) struct CommandProof {
+    pub exit_code: i32,
+    pub stdout: u64,
+    pub stderr: u64,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -156,9 +265,16 @@ pub(crate) struct Decoder {
     body: Vec<u8>,
     size: usize,
     events: u32,
+    streaming: bool,
 }
 
 impl Decoder {
+    pub(crate) fn for_request(request: &Request) -> Self {
+        Self {
+            streaming: matches!(request.kind, Kind::Streaming { .. }),
+            ..Self::default()
+        }
+    }
     pub(crate) fn feed(&mut self, mut bytes: &[u8]) -> Result<Vec<Frame>> {
         let mut frames = Vec::new();
         while !bytes.is_empty() {
@@ -172,7 +288,15 @@ impl Decoder {
                     continue;
                 }
                 self.size = u32::from_be_bytes(self.header) as usize;
-                if self.size == 0 || self.size > MAX_FRAME || self.events >= MAX_EVENTS {
+                if self.size == 0
+                    || self.size > MAX_FRAME
+                    || self.events
+                        >= if self.streaming {
+                            STREAM_EVENTS
+                        } else {
+                            MAX_EVENTS
+                        }
+                {
                     return Err(Error::before(ErrorCode::Validation));
                 }
             }
@@ -198,6 +322,13 @@ impl Decoder {
 }
 
 pub(crate) struct Evidence {
+    pub stream: Option<crate::CommandOutcome>,
+    pub command: Option<CommandProof>,
+    pub launched: Option<u32>,
+    pub limited: bool,
+    buffered: bool,
+    background: bool,
+    streaming: bool,
     operation: String,
     sequence: u32,
     max_bytes: u64,
@@ -213,10 +344,20 @@ impl Evidence {
     pub(crate) fn new(request: &Request) -> Self {
         Self {
             operation: request.operation.clone(),
+            stream: None,
+            command: None,
+            launched: None,
+            limited: false,
+            buffered: matches!(request.kind, Kind::Buffered { .. }),
+            background: matches!(request.kind, Kind::Background { .. }),
+            streaming: matches!(request.kind, Kind::Streaming { .. }),
             sequence: 0,
             max_bytes: request.max_bytes,
             exact_write: match request.kind {
-                Kind::Read => None,
+                Kind::Read
+                | Kind::Buffered { .. }
+                | Kind::Background { .. }
+                | Kind::Streaming { .. } => None,
                 Kind::Write { total, .. } => Some(total),
             },
             ready: false,
@@ -239,21 +380,68 @@ impl Evidence {
     pub(crate) fn event(&mut self, frame: Frame) -> Result<()> {
         if frame.operation != self.operation
             || frame.sequence != self.sequence
-            || self.sequence >= MAX_EVENTS
+            || self.sequence
+                >= if self.streaming {
+                    STREAM_EVENTS
+                } else {
+                    MAX_EVENTS
+                }
             || self.terminal
             || self.retired
         {
             return Err(Error::before(ErrorCode::Validation));
         }
         match frame.event {
+            Event::StreamOutput { offset, bytes, .. }
+                if self.streaming
+                    && self.ready
+                    && offset == self.observed_bytes
+                    && bytes > 0
+                    && bytes <= CHUNK
+                    && bytes <= self.max_bytes.saturating_sub(offset) =>
+            {
+                self.observed_bytes += bytes;
+            }
+            Event::StreamCompleted {
+                completion,
+                exit_code,
+                bytes,
+                running,
+            } if self.streaming
+                && self.ready
+                && bytes == self.observed_bytes
+                && completion != crate::Completion::Unknown
+                && (exit_code.is_none() || running)
+                && (bytes == 0 || running)
+                && (completion != crate::Completion::Exited
+                    || (exit_code.is_some() && running)) =>
+            {
+                self.acknowledged = completion == crate::Completion::Exited;
+                self.limited = completion == crate::Completion::OutputLimit;
+                self.terminal = true;
+                self.stream = Some(crate::CommandOutcome {
+                    completion,
+                    dispatch: crate::Dispatch::MayHaveDispatched,
+                    observed_exit: exit_code,
+                    running_observed: running,
+                    output_bytes: bytes,
+                });
+            }
             Event::Ready if !self.ready && self.sequence == 0 => self.ready = true,
             Event::Progress { bytes }
-                if self.ready && bytes > self.observed_bytes && bytes <= self.max_bytes =>
+                if !self.background
+                    && !self.streaming
+                    && self.ready
+                    && bytes > self.observed_bytes
+                    && bytes <= self.max_bytes =>
             {
                 self.observed_bytes = bytes;
             }
             Event::Acknowledged { bytes }
-                if self.ready
+                if !self.buffered
+                    && !self.streaming
+                    && !self.background
+                    && self.ready
                     && bytes >= self.observed_bytes
                     && bytes <= self.max_bytes
                     && self.exact_write.is_none_or(|total| total == bytes) =>
@@ -266,6 +454,41 @@ impl Evidence {
                 if self.ready && bytes >= self.observed_bytes && bytes <= self.max_bytes =>
             {
                 self.observed_bytes = bytes;
+                self.terminal = true;
+            }
+            Event::Limited { bytes }
+                if self.ready && bytes >= self.observed_bytes && bytes <= self.max_bytes =>
+            {
+                self.observed_bytes = bytes;
+                self.limited = true;
+                self.terminal = true;
+            }
+            Event::CommandCompleted {
+                exit_code,
+                stdout,
+                stderr,
+                limited,
+            } if self.buffered
+                && self.ready
+                && stdout.checked_add(stderr).is_some_and(|bytes| {
+                    bytes <= self.max_bytes && bytes >= self.observed_bytes
+                }) =>
+            {
+                self.observed_bytes = stdout + stderr;
+                self.acknowledged = true;
+                self.terminal = true;
+                self.command = Some(CommandProof {
+                    exit_code,
+                    stdout,
+                    stderr,
+                });
+                self.limited = limited;
+            }
+            Event::Launched { pid }
+                if self.background && self.ready && pid > 0 && self.observed_bytes == 0 =>
+            {
+                self.launched = Some(pid);
+                self.acknowledged = true;
                 self.terminal = true;
             }
             _ => return Err(Error::before(ErrorCode::Validation)),
@@ -281,11 +504,18 @@ struct Writer<'a, W: Write> {
     sequence: u32,
     progress: u64,
     failed: bool,
+    streaming: bool,
 }
 
 impl<W: Write> Writer<'_, W> {
     fn event(&mut self, event: Event) -> Result<()> {
-        if self.sequence >= MAX_EVENTS {
+        if self.sequence
+            >= if self.streaming {
+                STREAM_EVENTS
+            } else {
+                MAX_EVENTS
+            }
+        {
             return Err(Error::before(ErrorCode::Validation));
         }
         let frame = Frame {
@@ -323,35 +553,65 @@ pub fn run_file_worker() -> Result<()> {
         sequence: 0,
         progress: 0,
         failed: false,
+        streaming: matches!(request.kind, Kind::Streaming { .. }),
     };
     writer.event(Event::Ready)?;
-    // AgentClient::connect does not start a VM or create SDK domain state.
-    let mut observed = 0;
-    let result = smolvm::agent::AgentClient::connect(&request.socket).and_then(|mut client| {
-        match request.kind {
-            Kind::Read => client
-                .read_file_to_path_capped(
-                    &request.guest_path,
-                    &request.staging,
-                    request.max_bytes,
-                    |bytes| {
-                        observed = bytes;
-                        writer.progress(bytes);
-                    },
-                )
-                .map(|bytes| observed = bytes),
-            Kind::Write { total, mode } => client.write_file_from_reader_with_progress(
-                &request.guest_path,
-                input,
-                total,
-                smolvm::agent::FileWriteMeta::mode_only(mode),
-                |bytes| {
-                    observed = bytes;
-                    writer.progress(bytes);
-                },
-            ),
+    if let Kind::Buffered { metadata }
+    | Kind::Background { metadata }
+    | Kind::Streaming { metadata } = &request.kind
+    {
+        let output = OpenOptions::new()
+            .write(true)
+            .custom_flags(libc::O_NOFOLLOW | libc::O_CLOEXEC)
+            .open(&request.staging)
+            .map_err(|_| Error::before(ErrorCode::Io))?;
+        let info = output
+            .metadata()
+            .map_err(|_| Error::before(ErrorCode::Io))?;
+        if (info.dev(), info.ino()) != (request.staging_device, request.staging_inode) {
+            return Err(Error::before(ErrorCode::Ownership));
         }
-    });
+        if matches!(request.kind, Kind::Streaming { .. }) {
+            return crate::streaming::run(&request, metadata, output, |event| writer.event(event));
+        }
+        return writer.event(crate::buffered::run(&request, metadata, output)?);
+    }
+    // A header-first relay bounds SDK allocation before its receive buffer.
+    // AgentClient calls still own the guest protocol and create no runtime.
+    let mut observed = 0;
+    let result = crate::agent_io::BoundedAgent::connect(&request.socket, request.max_bytes)
+        .and_then(|mut connection| {
+            {
+                let client = &mut connection.client;
+                match request.kind {
+                    Kind::Read => client
+                        .read_file_to_path_capped(
+                            &request.guest_path,
+                            &request.staging,
+                            request.max_bytes,
+                            |bytes| {
+                                observed = bytes;
+                                writer.progress(bytes);
+                            },
+                        )
+                        .map(|bytes| observed = bytes),
+                    Kind::Write { total, mode } => client.write_file_from_reader_with_progress(
+                        &request.guest_path,
+                        input,
+                        total,
+                        smolvm::agent::FileWriteMeta::mode_only(mode),
+                        |bytes| {
+                            observed = bytes;
+                            writer.progress(bytes);
+                        },
+                    ),
+                    Kind::Buffered { .. } | Kind::Background { .. } | Kind::Streaming { .. } => {
+                        unreachable!()
+                    }
+                }
+            }
+            .map_err(|_| Error::uncertain(ErrorCode::Native))
+        });
     if observed > request.max_bytes {
         return Err(Error::uncertain(ErrorCode::Native));
     }
@@ -365,6 +625,220 @@ pub fn run_file_worker() -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn streaming_spool_ranges_and_terminal_exit_are_correlated_without_file_ack() {
+        let query = request(Kind::Streaming {
+            metadata: Blob {
+                path: "/private/meta".into(),
+                device: 1,
+                inode: 2,
+                bytes: 16,
+            },
+        });
+        let mut evidence = Evidence::new(&query);
+        evidence.event(frame(0, Event::Ready)).unwrap();
+        assert!(evidence
+            .event(frame(1, Event::Acknowledged { bytes: 0 }))
+            .is_err());
+        assert!(evidence
+            .event(frame(
+                1,
+                Event::StreamOutput {
+                    stderr: false,
+                    offset: 1,
+                    bytes: 3
+                }
+            ))
+            .is_err());
+        evidence
+            .event(frame(
+                1,
+                Event::StreamOutput {
+                    stderr: false,
+                    offset: 0,
+                    bytes: 3,
+                },
+            ))
+            .unwrap();
+        assert!(evidence
+            .event(frame(
+                2,
+                Event::StreamOutput {
+                    stderr: true,
+                    offset: 0,
+                    bytes: 2
+                }
+            ))
+            .is_err());
+        evidence
+            .event(frame(
+                2,
+                Event::StreamOutput {
+                    stderr: true,
+                    offset: 3,
+                    bytes: 2,
+                },
+            ))
+            .unwrap();
+        assert!(evidence
+            .event(frame(
+                3,
+                Event::StreamCompleted {
+                    completion: crate::Completion::Exited,
+                    exit_code: None,
+                    bytes: 5,
+                    running: true
+                }
+            ))
+            .is_err());
+        assert!(evidence
+            .event(frame(
+                3,
+                Event::StreamCompleted {
+                    completion: crate::Completion::Exited,
+                    exit_code: Some(7),
+                    bytes: 4,
+                    running: true
+                }
+            ))
+            .is_err());
+        evidence
+            .event(frame(
+                3,
+                Event::StreamCompleted {
+                    completion: crate::Completion::Exited,
+                    exit_code: Some(7),
+                    bytes: 5,
+                    running: true,
+                },
+            ))
+            .unwrap();
+        assert_eq!(evidence.stream.unwrap().observed_exit, Some(7));
+        assert!(evidence.command.is_none() && evidence.launched.is_none());
+        let mut retired = Evidence::new(&query);
+        retired.event(frame(0, Event::Ready)).unwrap();
+        retired.retire();
+        assert!(retired
+            .event(frame(
+                1,
+                Event::StreamOutput {
+                    stderr: false,
+                    offset: 0,
+                    bytes: 3
+                }
+            ))
+            .is_err());
+        assert!(retired.stream.is_none());
+    }
+    #[test]
+    fn background_launch_has_no_exit_or_file_ack_authority_and_retired_pid_is_not_promoted() {
+        let query = request(Kind::Background {
+            metadata: Blob {
+                path: "/private/meta".into(),
+                device: 1,
+                inode: 2,
+                bytes: 16,
+            },
+        });
+        let mut evidence = Evidence::new(&query);
+        evidence.event(frame(0, Event::Ready)).unwrap();
+        for event in [
+            Event::Acknowledged { bytes: 0 },
+            Event::Launched { pid: 0 },
+            Event::CommandCompleted {
+                exit_code: 0,
+                stdout: 0,
+                stderr: 0,
+                limited: false,
+            },
+        ] {
+            assert!(evidence.event(frame(1, event)).is_err());
+        }
+        evidence
+            .event(frame(1, Event::Launched { pid: 4242 }))
+            .unwrap();
+        assert_eq!(evidence.launched, Some(4242));
+        assert!(evidence.command.is_none());
+        assert_eq!(evidence.observed_bytes, 0);
+        assert!(evidence
+            .event(frame(2, Event::Launched { pid: 4242 }))
+            .is_err());
+        let mut retired = Evidence::new(&query);
+        retired.event(frame(0, Event::Ready)).unwrap();
+        retired.retire();
+        assert!(retired
+            .event(frame(1, Event::Launched { pid: 4242 }))
+            .is_err());
+        assert!(retired.launched.is_none());
+    }
+    #[test]
+    fn buffered_exit_evidence_cannot_be_replaced_by_file_ack_or_worker_collection() {
+        let mut query = request(Kind::Buffered {
+            metadata: Blob {
+                path: "/private/meta".into(),
+                device: 1,
+                inode: 2,
+                bytes: 16,
+            },
+        });
+        query.max_bytes = 5;
+        let mut evidence = Evidence::new(&query);
+        evidence.event(frame(0, Event::Ready)).unwrap();
+        assert!(evidence
+            .event(frame(1, Event::Acknowledged { bytes: 0 }))
+            .is_err());
+        assert!(evidence.command.is_none());
+        assert!(evidence
+            .event(frame(
+                1,
+                Event::CommandCompleted {
+                    exit_code: 0,
+                    stdout: 6,
+                    stderr: 0,
+                    limited: false
+                }
+            ))
+            .is_err());
+        evidence
+            .event(frame(
+                1,
+                Event::CommandCompleted {
+                    exit_code: 7,
+                    stdout: 3,
+                    stderr: 2,
+                    limited: true,
+                },
+            ))
+            .unwrap();
+        assert_eq!(evidence.command.unwrap().exit_code, 7);
+        assert!(evidence.limited);
+        assert!(evidence
+            .event(frame(
+                2,
+                Event::CommandCompleted {
+                    exit_code: 0,
+                    stdout: 0,
+                    stderr: 0,
+                    limited: false
+                }
+            ))
+            .is_err());
+        let mut retired = Evidence::new(&query);
+        retired.event(frame(0, Event::Ready)).unwrap();
+        retired.retire();
+        assert!(retired
+            .event(frame(
+                1,
+                Event::CommandCompleted {
+                    exit_code: 0,
+                    stdout: 0,
+                    stderr: 0,
+                    limited: false
+                }
+            ))
+            .is_err());
+        assert!(retired.command.is_none());
+    }
     fn request(kind: Kind) -> Request {
         Request {
             schema: 1,

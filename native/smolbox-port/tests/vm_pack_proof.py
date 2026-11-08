@@ -8,7 +8,7 @@ from pathlib import Path
 import secrets
 import subprocess
 
-from native_proof import Port, observed, operation, save, snapshot
+from native_proof import Port, config_schema, observed, operation, save, snapshot
 
 RESOURCES = {'cpus': 1, 'memory_mib': 512, 'storage_gib': 1, 'overlay_gib': 1}
 ROOT = '/etc/smolbox-vm-root-witness'
@@ -72,9 +72,10 @@ def prove(args):
     domain_path = args.domain_json.resolve()
     domain = json.loads(domain_path.read_bytes())
     manifest_bytes = (package / 'package.json').read_bytes()
-    identity = json.loads(manifest_bytes)['identity']
+    manifest = json.loads(manifest_bytes)
+    identity = manifest['identity']
     platform = 'linux/arm64' if identity['architecture'] == 'aarch64' else 'linux/amd64'
-    config = {'schema': 1, 'target_id': domain['target_id'], 'generation': domain['generation'],
+    config = {'schema': config_schema(manifest), 'target_id': domain['target_id'], 'generation': domain['generation'],
               'allow_initialize': False, 'package_manifest_sha256': hashlib.sha256(manifest_bytes).hexdigest(),
               'approved_artifacts': []}
     before = snapshot()

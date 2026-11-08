@@ -38,10 +38,35 @@ defmodule SmolBox.Embedded.Config do
   `:limits` defaults to `SmolBox.Embedded.Limits`, and `:budget` defaults to a
   24-hour operation budget with 1-MiB request frames and 16-MiB response allowance.
   Profile and remaining operation budgets further constrain individual requests.
+
+  Optional source/checkpoint/export/branch/volume catalogs and registry credential
+  resolution use the shared HTTP approval rules. Catalog approval does not enable
+  an operation absent from the approved helper. Legacy helpers still accept only
+  local offline assignments; at least one local artifact remains required until
+  remote preparation and expanded assignments are implemented. `sdk_version/1` describes the
+  pinned SDK independently of the SmolBox engine version.
+
+  Engine `0.2.0` packages use protocol 2 and manifest schema 3. Package policy and
+  Hello must agree on the exact implemented SDK feature descriptor. The store
+  additionally needs `native_material_proofs: 2`, including the selective v17
+  reader, before enrollment. Upgrade every durable reader first. Legacy `0.1.0`
+  packages keep protocol 1.3/1.4 and v16 authority; their receipts are never promoted.
+  A descriptor with `background_exec: 1` additionally requires store capability
+  `native_background_launches: 1`; material-reader support alone is insufficient.
+  A descriptor with `terminals: 1` additionally requires
+  `native_terminal_sessions: 1` after upgrading every native v17 terminal reader
+  and command-slot transaction. Ordinary guest/platform qualification remains separate.
+
+  Optional `:sdk_identity` approves an explicit protocol-2 SDK descriptor from the
+  trusted manifest policy. Omission selects this library's current implemented
+  descriptor. Explicit approval can retain an older, smaller protocol-2 feature
+  set; unknown or unimplemented features and missing core features reject before
+  startup. The manifest and Hello must match that exact descriptor and its limits.
   """
   alias SmolBox.Backend.Budget
-  alias SmolBox.Embedded.Limits
+  alias SmolBox.Embedded.{Limits, SDKIdentity}
   alias SmolBox.{Error, Profile, Validation}
+  alias SmolBox.Runtime.Approvals
 
   @revision "9f446ae00219148ca4a703914f44a8e2fab11655"
   @package_keys ~w(engine_version smolvm_revision source_sha256 build_sha256 assets_sha256 platform architecture)
@@ -59,7 +84,23 @@ defmodule SmolBox.Embedded.Config do
     :capacity,
     :allocation_floor
   ]
-  @optional [:bridge, :qualification, :draining, :allow_initialize, :limits, :budget]
+  @optional [
+    :bridge,
+    :qualification,
+    :draining,
+    :allow_initialize,
+    :limits,
+    :budget,
+    :sources,
+    :checkpoints,
+    :export_destinations,
+    :checkpoint_policies,
+    :branch_policies,
+    :volume_policy,
+    :registry_credentials,
+    :sdk_identity,
+    :publish_address
+  ]
   @enforce_keys @required
   @derive {Inspect, only: [:id, :bridge, :platform, :architecture, :qualification, :draining]}
   defstruct @required ++
@@ -68,6 +109,15 @@ defmodule SmolBox.Embedded.Config do
                 qualification: :development,
                 draining: false,
                 allow_initialize: false,
+                sources: [],
+                checkpoints: [],
+                export_destinations: [],
+                checkpoint_policies: [],
+                branch_policies: [],
+                volume_policy: nil,
+                registry_credentials: nil,
+                sdk_identity: nil,
+                publish_address: "127.0.0.1",
                 limits: %Limits{},
                 budget: %Budget{
                   timeout_ms: 86_400_000,
@@ -88,6 +138,15 @@ defmodule SmolBox.Embedded.Config do
           architecture: String.t(),
           artifacts: [map()],
           profiles: [Profile.t()],
+          sources: [SmolBox.Source.t()],
+          checkpoints: [SmolBox.Checkpoint.t()],
+          export_destinations: [SmolBox.ExportDestination.t()],
+          checkpoint_policies: [SmolBox.CheckpointPolicy.t()],
+          branch_policies: [SmolBox.BranchPolicy.t()],
+          volume_policy: SmolBox.VolumePolicy.t() | nil,
+          registry_credentials: {module(), term()} | nil,
+          sdk_identity: map() | nil,
+          publish_address: String.t(),
           capacity: SmolBox.Store.capacity(),
           allocation_floor: map(),
           qualification: :development,
@@ -120,11 +179,53 @@ defmodule SmolBox.Embedded.Config do
   @doc false
   def executable(%__MODULE__{} = config), do: Path.join(config.package_path, "smolbox-port")
 
+  @doc "Return the SDK version bound to the source revision, independently of the engine."
+  def sdk_version(%__MODULE__{package_identity: %{"smolvm_revision" => @revision}}),
+    do: "1.22.0"
+
+  def sdk_version(_unrecognized), do: nil
+
+  @doc false
+  def protocol_major(%__MODULE__{package_identity: %{"engine_version" => "0.1.0"}}), do: 1
+  def protocol_major(%__MODULE__{package_identity: %{"engine_version" => "0.2.0"}}), do: 2
+  def protocol_major(_unrecognized), do: nil
+
+  @doc false
+  def sdk_identity(%__MODULE__{} = config) do
+    if protocol_major(config) == 2,
+      do:
+        config.sdk_identity ||
+          SDKIdentity.implemented(sdk_version(config), config.package_identity["smolvm_revision"]),
+      else: nil
+  end
+
   defp valid_fields?(config) do
-    identity?(config) and operator_policy?(config) and catalogs?(config) and
+    identity?(config) and launch_approval?(config) and
+      operator_policy?(config) and catalogs?(config) and
+      optional_catalogs?(config) and
       capacity?(config.capacity) and
       allocation_floor?(config.allocation_floor) and Limits.validate(config.limits) == :ok and
       budget?(config.budget)
+  end
+
+  defp launch_approval?(config),
+    do: sdk_approval?(config) and publish_address?(config.publish_address)
+
+  defp sdk_approval?(config) do
+    case protocol_major(config) do
+      1 ->
+        config.sdk_identity == nil
+
+      2 ->
+        SDKIdentity.approved?(
+          sdk_identity(config),
+          sdk_version(config),
+          config.package_identity["smolvm_revision"]
+        )
+
+      _ ->
+        false
+    end
   end
 
   defp identity?(config) do
@@ -140,7 +241,7 @@ defmodule SmolBox.Embedded.Config do
         is_boolean(config.draining) and is_boolean(config.allow_initialize)
 
   defp package?(%{package_identity: package} = config) do
-    exact_keys?(package, @package_keys) and package["engine_version"] == "0.1.0" and
+    exact_keys?(package, @package_keys) and package["engine_version"] in ["0.1.0", "0.2.0"] and
       package["smolvm_revision"] == @revision and
       package["platform"] == Atom.to_string(config.platform) and
       package["architecture"] == config.architecture and
@@ -152,7 +253,7 @@ defmodule SmolBox.Embedded.Config do
       Enum.all?(config.artifacts, &artifact?(&1, config.architecture)) and
       unique?(config.artifacts, & &1["id"]) and unique?(config.artifacts, & &1["path"]) and
       Validation.list?(config.profiles, 32) and config.profiles != [] and
-      Enum.all?(config.profiles, &profile?(&1, config.allocation_floor)) and
+      Enum.all?(config.profiles, &profile?(&1, config)) and
       unique?(config.profiles, & &1.id)
   end
 
@@ -163,24 +264,53 @@ defmodule SmolBox.Embedded.Config do
       Validation.integer?(artifact["max_bytes"], 1, 34_359_738_368)
   end
 
-  defp profile?(profile, floor) do
-    Profile.validate(profile) == :ok and profile.network == :offline and profile.cpus <= 16 and
+  defp profile?(profile, config) do
+    floor = config.allocation_floor
+
+    Profile.validate(profile) == :ok and
+      (profile.network == :offline or network_approved?(config)) and profile.cpus <= 16 and
       profile.max_output_bytes <= 16_777_216 and profile.max_file_bytes <= 16_777_216 and
       profile.execution_ms <= 86_400_000 and allocation_floor?(floor) and
       Enum.all?(floor, fn {field, minimum} -> Map.fetch!(profile, field) >= minimum end)
   end
 
-  defp capacity?(capacity),
-    do:
-      exact_keys?(capacity, [:slots, :cpus, :memory_mb, :disk_gb]) and
-        Enum.all?(Map.values(capacity), &Validation.integer?(&1, 1, 1_048_576))
+  defp network_approved?(config) do
+    case sdk_identity(config) do
+      %{"feature_versions" => %{"networking" => 1}} -> true
+      _legacy -> false
+    end
+  end
 
-  defp allocation_floor?(floor),
-    do:
-      exact_keys?(floor, [:storage_gb, :overlay_gb, :host_overhead_mb]) and
-        Validation.integer?(floor.storage_gb, 1, 64) and
-        Validation.integer?(floor.overlay_gb, 1, 64) and
-        Validation.integer?(floor.host_overhead_mb, 128, 16_384)
+  defp publish_address?(value) when is_binary(value) do
+    case :inet.parse_strict_address(String.to_charlist(value)) do
+      {:ok, address} when tuple_size(address) == 4 -> to_string(:inet.ntoa(address)) == value
+      _invalid -> false
+    end
+  end
+
+  defp publish_address?(_value), do: false
+
+  defp optional_catalogs?(config) do
+    version = sdk_version(config)
+
+    Approvals.sources?(config.sources, version, config.architecture) and
+      Approvals.checkpoints?(
+        config.checkpoints,
+        version,
+        config.platform,
+        config.architecture,
+        config.profiles
+      ) and
+      Approvals.export_destinations?(config.export_destinations, version) and
+      Approvals.checkpoint_policies?(config.checkpoint_policies, version) and
+      Approvals.branch_policies?(config.branch_policies, version) and
+      Approvals.volume_policy?(config.volume_policy, version, config.platform) and
+      SmolBox.RegistryCredentials.valid?(config.registry_credentials)
+  end
+
+  defp capacity?(capacity), do: Approvals.capacity?(capacity)
+
+  defp allocation_floor?(floor), do: Approvals.allocation_floor?(floor)
 
   defp budget?(budget),
     do:

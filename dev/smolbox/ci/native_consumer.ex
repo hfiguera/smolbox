@@ -6,6 +6,8 @@ defmodule SmolBox.CI.NativeConsumer do
   @native_options ~w(native_package native_fixture native_sha256 native_domain_json native_output)a
 
   def validate_options!(options) do
+    validate_terminal!(options)
+
     Util.ensure!(
       !(options[:native_ordinary] || options[:native_public]) or options[:native_package] != nil,
       "native lifecycle modes require native consumer options"
@@ -84,7 +86,7 @@ defmodule SmolBox.CI.NativeConsumer do
     ]
 
     log_path = Path.expand(options[:native_output]) <> ".log"
-    arguments = if options[:native_ordinary], do: arguments ++ ["--ordinary"], else: arguments
+    arguments = arguments ++ mode_arguments(options)
     File.mkdir_p!(Path.dirname(log_path))
 
     {log, result} =
@@ -125,12 +127,38 @@ defmodule SmolBox.CI.NativeConsumer do
       )
     end
 
+    verify_terminal(evidence, options)
+
     %{
       scope: scope(options),
       exercised: true,
       proof_tool_sha256: hashes,
       evidence: evidence
     }
+  end
+
+  defp validate_terminal!(options),
+    do:
+      Util.ensure!(
+        !options[:native_terminal] or options[:native_public] == true,
+        "--native-terminal requires explicit --native-public"
+      )
+
+  defp mode_arguments(options) do
+    ordinary = if options[:native_ordinary], do: ["--ordinary"], else: []
+    terminal = if options[:native_terminal], do: ["--terminal"], else: []
+    ordinary ++ terminal
+  end
+
+  defp verify_terminal(evidence, options) do
+    if options[:native_terminal] do
+      Util.ensure!(
+        get_in(evidence, ["terminal", "exercised"]) == true and
+          get_in(evidence, ["terminal", "observed_exit"]) == 7 and
+          get_in(evidence, ["terminal", "slot_released"]) == true,
+        "native consumer did not qualify the requested ordinary terminal"
+      )
+    end
   end
 
   defp preserve_retained(%{retained: true} = result, log_path) do

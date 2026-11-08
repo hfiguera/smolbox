@@ -20,7 +20,10 @@ fn epoch() -> Result<String, ()> {
 }
 fn run() -> Result<(), ()> {
     let args: Vec<_> = std::env::args().skip(1).collect();
-    if args.as_slice() == ["--file-worker"] {
+    if args.as_slice() == ["--terminal-worker"] {
+        return smolbox_engine::run_terminal_worker().map_err(|_| ());
+    }
+    if args.as_slice() == ["--file-worker"] || args.as_slice() == ["--job-worker"] {
         return smolbox_engine::run_file_worker().map_err(|_| ());
     }
     if args.first().map(String::as_str) == Some("_boot-vm") && args.len() == 2 {
@@ -31,13 +34,14 @@ fn run() -> Result<(), ()> {
         return Err(());
     }
     let config = package::read_config(Path::new(&args[1])).map_err(|_| ())?;
+    let sdk = package::sdk_identity().map_err(|_| ())?;
     let executable = std::env::current_exe().map_err(|_| ())?;
     let verified = match package::verify(&executable, &config.package_manifest_sha256) {
         Ok(package) => package,
         Err(code) => {
             let hello = wire::Hello {
-                major: wire::PROTOCOL_MAJOR,
-                minor: wire::PROTOCOL_MINOR,
+                major: wire::PARITY_PROTOCOL_MAJOR,
+                minor: wire::PARITY_PROTOCOL_MINOR,
                 epoch: epoch()?,
                 domain: wire::DomainIdentity {
                     target_id: config.target_id,
@@ -57,8 +61,9 @@ fn run() -> Result<(), ()> {
                     architecture: std::env::consts::ARCH.into(),
                 },
                 capabilities: vec![],
-                limits: wire::Limits::default(),
+                limits: wire::Limits::for_sdk(&sdk),
                 preflight: wire::Preflight::Rejected { code },
+                sdk: Some(Box::new(sdk)),
             };
             wire::write_frame(
                 &mut std::io::stdout().lock(),
@@ -78,6 +83,10 @@ fn run() -> Result<(), ()> {
     }
     std::env::set_var("SMOLVM_BOOT_BINARY", &executable);
     std::env::set_var("SMOLVM_IMAGE_SEEDS", "0");
+    std::env::set_var(
+        "SMOLVM_PUBLISH_ADDR",
+        config.publish_address.as_deref().unwrap_or("127.0.0.1"),
+    );
     std::env::remove_var("SMOLVM_BOOT_DEBUG");
     std::env::remove_var("SMOLVM_AGENT_ROOTFS_TAR");
     std::env::set_var("SMOLVM_AGENT_ROOTFS", verified.root.join("agent-rootfs"));
@@ -113,28 +122,18 @@ fn run() -> Result<(), ()> {
         .prepare_templates(verified.templates, &config.package_manifest_sha256)
         .map_err(|_| ())?;
     let hello = wire::Hello {
-        major: wire::PROTOCOL_MAJOR,
-        minor: wire::PROTOCOL_MINOR,
+        major: wire::PARITY_PROTOCOL_MAJOR,
+        minor: wire::PARITY_PROTOCOL_MINOR,
         epoch: helper_epoch,
         domain: wire::DomainIdentity {
             target_id: config.target_id.clone(),
             generation: config.generation.clone(),
         },
         package: verified.identity,
-        capabilities: vec![
-            wire::Capability::Create,
-            wire::Capability::Inspect,
-            wire::Capability::Start,
-            wire::Capability::Stop,
-            wire::Capability::Delete,
-            wire::Capability::Exec,
-            wire::Capability::ReadFile,
-            wire::Capability::WriteFile,
-            wire::Capability::QualifyCreation,
-            wire::Capability::InspectCreation,
-        ],
-        limits: wire::Limits::default(),
+        capabilities: sdk.capabilities(),
+        limits: wire::Limits::for_sdk(&sdk),
         preflight: wire::Preflight::Ready,
+        sdk: Some(Box::new(sdk)),
     };
     runtime::serve(engine, hello, config)
 }

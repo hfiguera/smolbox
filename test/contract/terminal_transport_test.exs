@@ -262,6 +262,30 @@ defmodule SmolBox.TerminalTransportTest do
     assert {:error, %Error{category: :output_limit}} = Terminal.input(handle, "more")
   end
 
+  test "resize controls preserve the HTTP encoded cumulative input budget" do
+    port = TestPeer.start(&route/1)
+    c = client(port)
+    resize = Jason.encode!(%{type: "resize", cols: 100, rows: 40})
+    c = %{c | worker: %{c.worker | max_request_bytes: byte_size(resize)}}
+    {:ok, handle} = Client.open_terminal(c, "owned", %Spec{})
+    assert {:ok, {:output, "ready\r\n"}} = Terminal.next(handle)
+    assert :ok = Terminal.resize(handle, 100, 40)
+    assert {:ok, {:output, ^resize}} = Terminal.next(handle)
+    assert {:error, %{category: :output_limit}} = Terminal.input(handle, "x")
+    assert {:ok, {:closed, {:error, %{category: :output_limit}}}} = Terminal.next(handle)
+  end
+
+  test "valid HTTP output remains deliverable before a later invalid semantic frame" do
+    parent = self()
+    port = TestPeer.start(fn conn -> route(conn, test_pid: parent) end)
+    {:ok, handle} = Client.open_terminal(client(port), "owned", %Spec{})
+    assert {:ok, {:output, "ready\r\n"}} = Terminal.next(handle)
+    assert_receive {:terminal_peer, peer}, 5000
+    send(peer, {:frames, [{:binary, <<0, 255, 128>>}, {:text, "invalid"}]})
+    assert {:ok, {:output, <<0, 255, 128>>}} = Terminal.next(handle)
+    assert {:ok, {:closed, {:error, %{category: :protocol}}}} = Terminal.next(handle)
+  end
+
   defp client(port) do
     {:ok, worker} = Worker.new("http", "http://127.0.0.1:#{port}", allow_insecure_loopback: true)
     {:ok, client} = Client.new(worker)

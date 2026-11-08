@@ -6,12 +6,40 @@ A separately approved helper runs locally under Elixir supervision. Existing HTT
 workers can be used in the same Runtime.
 Rustler is a future additional bridge; Kubernetes is a separate future backend.
 
+HTTP feature parity is in progress on this branch. Its repository
+design and implementation plan are `docs/design/embedded-port-http-parity.md` and
+`docs/design/embedded-port-http-parity-implementation-plan.md`. These documents do
+not establish native qualification. Protocol-2 observations and network/port/
+workload creation intent and managed terminals are implemented; other expanded
+operations remain pending. Exact new-package ordinary qualification is still required.
+
+Packages declaring `terminals: 1` use owned retained-image PTY workers and a
+bounded Port connection through the existing managed `Terminal.open/3` API.
+Upgrade every native v17 reader and command-slot transaction before advertising
+`native_terminal_sessions: 1`, alongside the ordinary terminal store markers.
+Binary consumption credit, finite budgets and collection-qualified Exit preserve
+the command slot's uncertainty rules. Unknown sessions cannot reconnect or replay
+input; graceful replacement does not restore a live connection. HTTP retains its
+Mint/TLS/WebSocket adapter, and `Client.open_terminal` stays HTTP-only.
+See [interactive terminals](interactive-terminals.md) for the shared API. One exact optimized macOS package has ordinary PTY and current/minimum public
+consumer evidence in `docs/evidence/embedded-port-http-parity-terminal-macos.json`.
+Linux, PostgreSQL and broader qualification remain pending; other bytes inherit
+no qualification.
+
+Embedded configuration now retains optional source, checkpoint, export, branch
+and volume approvals using shared validation. Registering a catalog does not
+enable an unsupported helper operation. Health reports distinguish SDK version,
+SmolBox engine version and supported feature versions; legacy helpers continue
+to advertise their existing offline feature set.
+
 The migration to an unmodified SDK has removed the five active downstream patches
 while keeping this architecture. Repository design and implementation notes are
 `docs/design/embedded-port-unmodified-sdk.md` and
 `docs/design/embedded-port-unmodified-sdk-implementation-plan.md`.
-Crash validation stays deferred. Exact clean development packages have ordinary
+Crash validation stays deferred. Exact engine 0.1.0 clean development packages have ordinary
 platform and current/minimum consumer qualification on Linux x86_64 and macOS arm64.
+The rebuilt engine 0.2.0 packages require their own ordinary qualification; schema
+and deterministic peer checks cannot transfer that historical evidence.
 Existing approved patched-package evidence remains
 historical and cannot approve their bytes.
 
@@ -53,7 +81,9 @@ Never rotate the generation to repair an error. Do not run independent SDK tools
 another helper, or a future Rustler bridge concurrently against this domain.
 
 `SmolBox.Embedded.Config.new/1` validates explicit package identity, manifest digest,
-domain binding, approved artifacts, offline profiles, capacity and allocation floor.
+domain binding, approved artifacts, profiles, capacity and allocation floor.
+Legacy packages require offline profiles. A protocol-2 package must explicitly
+declare `networking: 1` before an approved NetworkPolicy profile is accepted.
 Capacity declarations are admission policy, not host-enforced quotas. The repository
 example at `examples/embedded_port/config.example.exs` validates this configuration
 without launching a helper. Pass the resulting target in the Runtime `:workers`
@@ -71,9 +101,9 @@ list to launch the Port bridge.
 | Output budgets | Finite output cap and acknowledgement credit; sibling requests remain usable |
 | Draining | Worker drain fences new assignments; existing retained commands and lifecycle operations continue. Helper quiescence separately fences mutations during replacement |
 
-Network access, interactive stdin, background execution, port mappings, host mounts,
-checkpoint/export and branch workflows are not qualified for this bridge. Profiles
-are offline. The VM pack does not accept an explicit guest user; the execution
+Network access, startup workloads, port mappings, interactive stdin, background
+execution, host mounts, checkpoint/export and branch workflows are not ordinarily
+qualified for the rebuilt package. The VM pack does not accept an explicit guest user; the execution
 container's numeric UID is separate. Unknown outcomes must be inspected and
 reconciled, never replayed automatically.
 
@@ -85,13 +115,195 @@ matching callbacks. Store negotiation and domain binding happen before helper
 activation. A mismatched manifest, domain, handshake or recovery record keeps
 admission closed. The HTTP client configuration remains unchanged.
 
-Clean manifest schema 2 binds protocol 1.4 and SmolBox's ownership, observation,
+New engine 0.2.0 packages use manifest schema 3 and protocol 2.0. The compiled
+policy and Hello bind the SDK version, source revision and implemented feature
+versions. Fresh creation includes a journal-bound material proof, and its durable
+assignment selectively uses codec v17. Every durable reader and projection writer
+must support v17 before activation; the store must additionally advertise
+`native_material_proofs: 2`. Memory and the updated PostgreSQL example implement
+this capability. The current descriptor adds read-only observations to the
+existing lifecycle/command/file features, plus network/port/workload creation
+translation. Additional parity features and ordinary acceptance remain pending.
+
+Protocol-2 packages declaring `networking: 1`, `ports: 1` and `workloads: 1`
+accept the corresponding existing managed specifications. Approval is per feature;
+an older descriptor cannot enable them. Port mappings require `managed_ports: 1`
+in the store. Their reservations survive stop, draining and normal stopped Runtime
+replacement, and release only after verified deletion. Offline egress can coexist
+with inbound ports; the SDK record keeps explicitly empty outbound allowlists.
+
+Set `publish_address:` in trusted embedded configuration to approve the host IPv4
+listener address. It defaults to `"127.0.0.1"`; `"0.0.0.0"` requires explicit
+configuration. The helper uses that private configuration instead of inherited
+publisher overrides. This setting applies to the target, not individual machines.
+
+A startup Workload is immutable, container-only and opt-in. With no Workload the
+existing neutral boot remains. Empty entrypoint and cmd inherit both image arrays;
+explicit arrays replace both without inserting a shell. Environment overrides
+merge with image metadata, nil workdir inherits it, and the image user is retained,
+including named users. Only restart never is supported. Running state does not
+attest application readiness. These semantics have deterministic contracts;
+bounded long-start and actual native guest acceptance remain pending.
+
+Protocol-2 packages declaring `observability: 1` support typed health/capacity,
+readiness, Prometheus text, inventory and receipt-bound machine measurements.
+Inventory contains no native receipts. Capacity reports running-process
+allocations/utilization independently of configured limits and durable
+reservations; stopped machines can report zero live allocation while remaining
+reserved. Unavailable measurements remain nil. The capacity disk gauge follows
+SDK apparent storage/overlay lengths for running machines; Linux machine disk
+measurements use allocated host blocks. CPU utilization is sampled and returned
+as fractional cores; it is not a guest quota or lifetime billing total.
+
+The package/Hello bind observation bounds: 1024 inventory records, a 25-ms minimum CPU sample interval,
+65536 disk entries and depth 32. Inventory uses ordinary byte/event credit and
+validates the complete result before returning it. Limit, database and sampling
+errors never report successful partial inventory or zero replacement capacity.
+The rebuilt package's ordinary platform evidence is still pending.
+
+Packages declaring `compact_creation: 1` additionally bind creation encoding and
+larger private record-read bounds. Large workload intent uses at most ten 64-KiB
+chunks (640 KiB total) inside the existing 1-MiB request frame; command/file limits
+do not change. The original specification remains in durable state. Native decoding
+checks UTF-8, counts, lengths, complete consumption and ordinary feature validation
+before dispatch. Older descriptors retain their original request representation.
+
+These packages can read up to 8 MiB per database record and 32 MiB per read-only
+snapshot so escaped/merged workload metadata does not prevent observation. Public
+inventory still caps its complete output at 4 MiB and omits environments and
+receipts. Older observation descriptors keep the 256-KiB record/4-MiB snapshot
+bounds. Bounded image inheritance is checked separately from public request
+override limits; a large inherited environment does not acquire the request's
+64-variable limit.
+
+Packages declaring `job_resources: 1` bind engine-wide job admission. File workers
+and foreground execution share four work slots; read-only observations have two
+separate engine slots. Worker children and private staging remain reserved until
+collection. Resource exhaustion reports admission exhausted before guest dispatch.
+Unresolved collection retains reservations and closes admission; late collection
+does not automatically reopen it. These are engine limits shared by future
+bridges, separate from the controller's machine resource declarations.
+
+The Port now schedules read-only health/capacity/metrics/readiness/list/measurements
+on two dedicated threads alongside its four work threads. Approved protocol-2
+job descriptors reserve two request identities for this lane within the existing
+32-request bound; work may retain at most 30 requests. Cancellation and credit
+use their independent control path. A blocked work pool therefore cannot consume
+the observation threads or every request identity. This has deterministic bridge
+evidence; complete interference and native platform qualification remain pending.
+
+The declaration caps worker children at four, aggregate staging at 64 MiB and
+parent descriptor reservations at 32, with eight additional descriptors preserved
+for control. Existing descriptors are included in OS-limit checks. File workers
+guard public SDK calls through a private Unix socket relay: requests are capped at
+4 MiB, and response headers must fit the requested output's base64 size plus
+64 KiB before the SDK receives them. The relay creates no SDK runtime or VM.
+These checks have ordinary non-VM worker evidence; complete long-job, auxiliary,
+memory and platform qualification remain pending.
+
+Packages declaring `buffered_exec: 1` with `job_resources: 1` implement buffered
+foreground execution, including UTF-8 stdin up to 64 KiB (NUL bytes preserved).
+The public managed APIs keep their command, result and approval types. Streaming
+stdin and background stdin remain unsupported. The command specification stays
+in durable state; a private compact request handles escaped data inside the
+existing 1-MiB frame. Older descriptors retain their previous command surface.
+
+An owned worker calls the public SDK on the receipt-verified running agent and
+uses the SDK's image user/mount/overlay configuration. It creates no runtime or
+VM. Private command metadata is capped at 8 MiB per job and 32 MiB across the
+pool; output staging remains within the shared 64-MiB reservation. One deadline
+covers preparation, SDK execution, collection and output forwarding. Only an SDK
+Completed response supplies a guest Exit. Worker collection, cancellation and
+lost acknowledgment cannot substitute for it or authorize replay. Output-limit
+or consumer failures retain a real observed Exit when one is available.
+
+Buffered bare/image context and byte fidelity have public-peer and real non-VM
+SDK-worker evidence. Ordinary guest qualification, background launch qualification
+and ordinary log/platform qualification remain pending.
+
+Packages declaring `streaming_exec: 1` additionally route foreground nil-stdin
+commands through an owned streaming worker. The compact request supports the
+public 64-KiB argv and all 64 maximum-size environment values within the existing
+frame cap. Binary stdout/stderr reach callbacks while the SDK command is running;
+an actual guest Exit produces `{:exit, code}`. Callback exceptions detach the
+observer while bounded capture continues. A blocked callback remains subject to
+the absolute request deadline. Streaming stdin and background remain unsupported.
+
+The shared engine forwards authenticated contiguous output-spool ranges, preserves
+the existing aggregate output and job budgets, and retains ownership leases until
+the worker is collected. This path uses public SDK raw request/response APIs to
+avoid the convenience collector's smaller output ceiling. It creates no runtime
+or VM. Public Runtime/codec and non-VM SDK peer checks cover full command inputs,
+binary output, pre-Exit delivery and output above that SDK collector ceiling;
+ordinary Linux/macOS guest/package qualification remains pending.
+
+Upgrade every native v17 reader before advertising `native_streaming_commands: 1`.
+The record format stays v17, but older readers reject expanded nil-stdin command
+intents. Runtime requires this capability before enrolling a streaming-capable
+package. Memory and the PostgreSQL example advertise it after the reader upgrade.
+Older descriptors retain their original command limits and store requirements;
+HTTP records and v16 are unchanged.
+
+Packages declaring `logs: 1` implement both Backend.logs arities and
+Machines.logs with the existing tail/follow/timeout/output/callback options and
+LogResult type. The console is receipt-bound boot/agent diagnostics. Log reads
+create no SDK manager, do not boot a VM, take no managed command slot or machine
+mutation lock, and change no durable intent or reservation. Missing logs do not
+prove machine absence; neither lines nor EOF prove workload success or readiness.
+
+The engine emits complete lossy UTF-8 text lines; Port alone handles framing.
+Separate log stream credit preserves empty and NUL-bearing lines across chunks.
+Callbacks receive `{:log, line}` synchronously; a failing callback detaches while
+capture continues. Follow is bounded by the requested observation deadline and
+requires a callback. Snapshot/tail limits are 10,000 lines, 8 MiB of line bytes
+including newline accounting, and 131,064 bytes per delivered line, matching the
+HTTP SSE frame boundary. Raw incomplete lines stay within 1 MiB.
+
+Each read/follower consumes one shared work slot, two descriptor reservations
+and 6 MiB from the existing 32-MiB metadata/buffer pool; command/file limits and
+the two observation slots are unchanged. The readonly reader accepts authenticated
+owner-controlled SDK directories, including mode 0755, without changing modes.
+It rejects redirected, foreign, writable or replaced file/directory identities
+and never automatically reopens a changed file. Hosts must protect the dedicated
+SDK account's filesystem and log contents. Public peers and native non-VM file
+models pass; exact-package ordinary Linux/macOS qualification remains pending.
+
+Packages declaring `background_exec: 1` additionally implement buffered launch on
+retained image machines through `Machines.submit/3` and `Backend.exec`. The
+command has nil guest timeout/stdin; the profile/request budget bounds launch
+observation. A confirmed launch returns `LaunchResult` and durable `:launched`
+evidence, releases the managed command slot and preserves the machine's resource
+reservation. Streaming background execution and launch callbacks reject before
+dispatch. PID acknowledgment proves neither readiness nor continued life and
+authorizes no PID-based termination or automatic replay.
+
+The owned worker retains shared job/metadata leases and uses public SDK
+run_background with receipt-bound image user/mount/overlay context. Zero/malformed
+PID, excessive acknowledgment, lost/retired proof and foreground/file outcomes
+cannot confirm launch. Ordinary non-VM SDK checks and public Runtime/codec tests
+cover these distinctions; ordinary Linux/macOS guest qualification remains pending.
+Every store reader must support the native launch combination before advertising
+`native_background_launches: 1`. Runtime rejects a background-capable package
+before enrollment when this capability is missing. Memory and the updated
+PostgreSQL example advertise it; material-reader version 2 alone is insufficient.
+
+To retain an older protocol-2 package, explicitly pass its trusted policy's SDK
+descriptor as `sdk_identity:`. The library accepts only implemented feature
+versions with the mandatory core contract; approval cannot enable a planned
+feature. Package/Hello/limit agreement remains exact. Legacy 1.3/1.4 packages
+keep their original observations and capability surface.
+
+Previously approved engine 0.1.0 manifest schema 2 binds protocol 1.4 and SmolBox's ownership, observation,
 worker, asset and boot-guard policies. The bridge requires at least 4000 ms of
-cancellation grace for this version (the default). An epoch-bound unavailable
+cancellation grace for protocol 1.4 and 2.0 (the default). An epoch-bound unavailable
 notice closes admission while retaining the current helper, pending results and
 reserved capacity. It does not initiate replacement or prove cleanup. Approved
 legacy schema 1 / protocol 1.3 packages retain their original handshake limits;
-they cannot transfer authority to a clean package.
+legacy assignments keep codec v16. Receipt and protocol versions cannot be mixed.
+A protocol-major migration requires draining, deleting verified owned assignments
+and releasing their dependencies before approving the new package; it cannot
+promote old receipts or adopt old inventory. Stopped compatible replacements
+within the same protocol preserve the full receipt and domain generation.
 
 For local development, with `target` returned by the configuration example and
 an explicitly configured artifact store:

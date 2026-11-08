@@ -106,7 +106,14 @@ defmodule SmolBox.Embedded.PortTest do
   test "approved manifest version binds Hello and unsupported metadata cannot launch" do
     legacy = package()
     path = Path.join(legacy.package_path, "package.json")
-    manifest = Jason.encode!(%{"schema" => 2, "policy" => %{"port_protocol_minor" => 4}})
+
+    manifest =
+      Jason.encode!(%{
+        "schema" => 2,
+        "identity" => legacy.package_identity,
+        "policy" => %{"port_protocol_minor" => 4}
+      })
+
     File.write!(path, manifest)
     config = %{legacy | package_manifest_sha256: Package.hash(manifest)}
     pid = start_supervised!({Port, config})
@@ -116,7 +123,14 @@ defmodule SmolBox.Embedded.PortTest do
 
     for policy <- [%{}, %{"port_protocol_minor" => 5}] do
       current = package(protocol_minor: 4)
-      manifest = Jason.encode!(%{"schema" => 2, "policy" => policy})
+
+      manifest =
+        Jason.encode!(%{
+          "schema" => 2,
+          "identity" => current.package_identity,
+          "policy" => policy
+        })
+
       File.write!(Path.join(current.package_path, "package.json"), manifest)
       config = %{current | package_manifest_sha256: Package.hash(manifest)}
       pid = start_supervised!({Port, config})

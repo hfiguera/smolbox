@@ -3,6 +3,14 @@ defmodule SmolBox.CI.PackageTest do
   alias SmolBox.CI.{NativeConsumer, Package, Util}
 
   test "native lifecycle modes require a package and cannot be combined" do
+    assert_raise ArgumentError, ~r/native-terminal requires explicit --native-public/, fn ->
+      NativeConsumer.validate_options!(native_terminal: true)
+    end
+
+    assert_raise ArgumentError, ~r/native-terminal requires explicit --native-public/, fn ->
+      NativeConsumer.validate_options!(native_terminal: true, native_ordinary: true)
+    end
+
     for mode <- [:native_public, :native_ordinary] do
       assert_raise ArgumentError, ~r/native lifecycle modes require/, fn ->
         NativeConsumer.validate_options!([{mode, true}])

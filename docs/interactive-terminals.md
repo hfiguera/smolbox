@@ -11,6 +11,15 @@ Disposable execution and checkpoint terminals are unsupported. No process
 supervisor, automatic reconnect, input replay or guest-session reattachment is
 provided.
 
+The HTTP backend enables this API. Explicitly approved embedded Port packages
+declaring `terminals: 1` also route managed terminals through owned PTY workers,
+bounded session controls and native durable authority. One exact optimized macOS package now has ordinary retained-image PTY and
+current/minimum public no-Rust consumer evidence in
+`docs/evidence/embedded-port-http-parity-terminal-macos.json`. Linux, PostgreSQL
+and broader resource/interference qualification remain pending. The evidence
+does not qualify other package bytes or unsupported source combinations.
+`Client.open_terminal` remains an HTTP client operation.
+
 ## Open and use a managed terminal
 
 Use an owned, running machine with an approved artifact and profile:
@@ -218,6 +227,15 @@ codec **v7** with `Terminal.Spec` and `Terminal.Result`. Ordinary foreground and
 background records retain their previous encoding and fingerprints; older envelopes
 cannot carry terminal semantics. No new SQL column migration is needed in the
 example; its existing encrypted payload and state projections are reused.
+
+Native retained terminals use authenticated **v17** assignments and the same
+terminal intent/result types. Upgrade every native reader and command-slot
+transaction before advertising `native_terminal_sessions: 1`, in addition to
+`native_material_proofs: 2`, `interactive_terminal: 1` and `extended_execution: 1`.
+Older native validators cannot read that combination; v16 cannot carry it. Memory
+and the PostgreSQL example implement this reader contract. The exact approved package must also declare
+`terminals: 1`; a store marker cannot add a helper capability. Connection handles, input and transcripts remain
+operational values, and durable recovery cannot restore a live terminal session.
 
 Upgrade all controllers, readers and adapters sharing the worker/store authority
 before enabling terminals. Older readers cannot decode v7. Disabling new sessions

@@ -39,8 +39,10 @@ defmodule SmolBox.Runtime.VolumeAccess do
 
   def worker(config, id) do
     case Enum.find(config.workers, &(Target.id(&1) == id)) do
-      %{runtime_version: version, platform: :linux} = w when version in ["1.20.2", "1.22.0"] ->
-        {:ok, w}
+      %{platform: :linux} = worker ->
+        if Target.supports_feature?(worker, :volumes),
+          do: {:ok, worker},
+          else: error(:unsupported_capability)
 
       _ ->
         error(:unsupported_capability)

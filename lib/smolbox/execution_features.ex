@@ -1,5 +1,6 @@
 defmodule SmolBox.ExecutionFeatures do
   @moduledoc false
+  alias SmolBox.Backend.Features
 
   # Pure specification classification shared by persistence and runtime admission.
   # The legacy budget boundary is also part of the stored record format selection.
@@ -14,7 +15,5 @@ defmodule SmolBox.ExecutionFeatures do
   def extended?(_invalid), do: false
 
   def worker_supported?(worker, spec),
-    do:
-      not extended?(spec) or
-        worker.runtime_version in ["1.17.0", "1.19.0", "1.20.2", "1.22.0"]
+    do: not extended?(spec) or Features.supports?(worker, :extended_exec)
 end

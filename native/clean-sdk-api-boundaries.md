@@ -8,6 +8,16 @@ The [current evidence](../docs/evidence/embedded-port-unmodified-sdk-ordinary.js
 separates completed checks from remaining work. The checkpoint sections below are
 historical snapshots; their pending statements are not the current status.
 
+The next proposed milestone is [embedded HTTP parity](../docs/design/embedded-port-http-parity.md).
+Its [P0 feasibility audit](../docs/design/embedded-port-http-parity-implementation-plan.md#p0-establish-the-parity-contract-and-feasibility)
+must extend this boundary map for networking, commands, terminals, images, storage
+and saved-state workflows before enabling those features. Existing clean ordinary
+evidence qualifies the offline surface, not these proposed additions.
+
+The initial parity API and behavior map is now recorded in
+[the dedicated boundary audit](http-parity-api-boundaries.md). Its compile-only
+and pure configuration witnesses do not qualify new runtime features.
+
 | Responsibility | Clean source boundary | SmolBox obligation |
 | --- | --- | --- |
 | Worker connection | Public `AgentClient::connect`, no manager/runtime construction | Connect only to controller-authorized running agent; enforce deadline outside blocking SDK |

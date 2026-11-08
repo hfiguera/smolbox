@@ -18,6 +18,76 @@ MAX_FRAME = 1024 * 1024
 MAX_CHUNK = 65536
 
 
+def protocol(manifest):
+    """Explicit approved package selection; never reinterpret legacy authority."""
+    schema = manifest['schema']
+    engine = manifest['identity']['engine_version']
+    if schema == 1:
+        assert engine == '0.1.0', 'legacy package engine mismatch'
+        return 1, 3
+    policy = manifest['policy']
+    if schema == 2:
+        assert engine == '0.1.0' and policy['port_protocol_minor'] == 4
+        return 1, 4
+    assert schema == 3 and engine == '0.2.0', 'unsupported package schema'
+    assert policy['schema'] == 2
+    assert (policy['port_protocol_major'], policy['port_protocol_minor']) == (2, 0)
+    sdk = policy['sdk']
+    assert sdk['sdk_version'] == '1.22.0'
+    assert sdk['source_revision'] == manifest['identity']['smolvm_revision']
+    assert sdk['feature_versions']['material_proofs'] == 2
+    return 2, 0
+
+
+def config_schema(manifest):
+    return protocol(manifest)[0]
+
+
+def capabilities(manifest):
+    values = ['create', 'inspect', 'start', 'stop', 'delete', 'exec',
+              'read_file', 'write_file', 'qualify_creation', 'inspect_creation']
+    if protocol(manifest)[0] != 2:
+        return values
+    features = manifest['policy']['sdk']['feature_versions']
+    if features.get('observability') == 1:
+        values = ['health', 'capacity', 'metrics', 'readiness', 'list', 'measurements'] + values
+    for feature, operation in [('logs', 'logs'), ('background_exec', 'exec_background'),
+                               ('buffered_exec', 'exec_buffered'), ('streaming_exec', 'exec_stream'),
+                               ('terminals', 'terminal_open')]:
+        if features.get(feature) == 1:
+            values.insert(0, operation)
+    return values
+
+
+def limits(manifest):
+    major, minor = protocol(manifest)
+    values = {
+        'frame_bytes': 1048576, 'chunk_bytes': 65536, 'in_flight': 32, 'events_per_request': 65536,
+        'work_workers': 4, 'control_workers': 2, 'input_queue_encoded_bytes': 4194304, 'upload_spool_bytes': 134217728,
+        'credit_grace_ms': 1000, 'writer_grace_ms': 5000, 'initial_credit_bytes': 262144, 'initial_credit_events': 64,
+        'event_queue_decoded_bytes': 8388608, 'event_queue_encoded_bytes': 12582912,
+        'transfer_bytes': 16777216, 'command_ms': 86400000, 'file_ms': 600000,
+        'cpus_min': 1, 'cpus_max': 16, 'memory_mib_min': 64, 'memory_mib_max': 65536, 'disk_gib_min': 1, 'disk_gib_max': 1024,
+    }
+    if major == 2 or minor == 4:
+        values['cancel_grace_ms'] = 3000
+    if major == 2:
+        policy = manifest['policy']
+        features = policy['sdk']['feature_versions']
+        for feature, key, policy_key in [('observability', 'observations', 'observation_limits'),
+                                         ('compact_creation', 'creation', 'creation_limits'),
+                                         ('job_resources', 'jobs', 'job_limits'),
+                                         ('buffered_exec', 'buffered', 'buffered_limits'),
+                                         ('logs', 'logs', 'log_limits')]:
+            if features.get(feature) == 1:
+                values[key] = policy[policy_key]
+        if features.get('terminals') == 1:
+            values['terminals'] = dict(session_ms=86400000, buffer_bytes=1048576, input_bytes=65536,
+                total_input_bytes=16777216, attach_ms=30000, close_ms=5000, input_slots=2,
+                output_events=1024, descriptors=20)
+    return values
+
+
 def save(path, value):
     # Before-dispatch intent is immutable and cannot be reused as a replay.
     path = Path(path)
@@ -64,22 +134,17 @@ class Port:
             self.hello = frame['hello']
             expected_config = json.loads(Path(config).read_bytes())
             expected_manifest = json.loads((package / 'package.json').read_bytes())
-            minor = expected_manifest.get('policy', {}).get('port_protocol_minor', 3)
-            assert (self.hello['major'], self.hello['minor']) == (1, minor), 'incompatible protocol'
+            major, minor = protocol(expected_manifest)
+            assert expected_config['schema'] == major, 'config schema mismatch'
+            assert (self.hello['major'], self.hello['minor']) == (major, minor), 'incompatible protocol'
+            if major == 2:
+                assert self.hello['sdk'] == expected_manifest['policy']['sdk'], 'SDK feature mismatch'
+            else:
+                assert 'sdk' not in self.hello, 'legacy SDK descriptor cannot be upgraded'
             assert self.hello['domain'] == {'target_id': expected_config['target_id'], 'generation': expected_config['generation']}, 'wrong domain'
             assert self.hello['package'] == expected_manifest['identity'], 'wrong package tuple'
-            assert self.hello['capabilities'] == ['create', 'inspect', 'start', 'stop', 'delete', 'exec', 'read_file', 'write_file', 'qualify_creation', 'inspect_creation'], 'wrong capabilities'
-            expected_limits = {
-                'frame_bytes': 1048576, 'chunk_bytes': 65536, 'in_flight': 32, 'events_per_request': 65536,
-                'work_workers': 4, 'control_workers': 2, 'input_queue_encoded_bytes': 4194304, 'upload_spool_bytes': 134217728,
-                'credit_grace_ms': 1000, 'writer_grace_ms': 5000, 'initial_credit_bytes': 262144, 'initial_credit_events': 64,
-                'event_queue_decoded_bytes': 8388608, 'event_queue_encoded_bytes': 12582912,
-                'transfer_bytes': 16777216, 'command_ms': 86400000, 'file_ms': 600000,
-                'cpus_min': 1, 'cpus_max': 16, 'memory_mib_min': 64, 'memory_mib_max': 65536, 'disk_gib_min': 1, 'disk_gib_max': 1024,
-            }
-            if minor == 4:
-                expected_limits['cancel_grace_ms'] = 3000
-            assert self.hello['limits'] == expected_limits, 'unexpected effective limits'
+            assert self.hello['capabilities'] == capabilities(expected_manifest), 'wrong capabilities'
+            assert self.hello['limits'] == limits(expected_manifest), 'unexpected effective limits'
             self.send({'type': 'approve', 'hello': self.hello})
         except BaseException:
             self.graceful_exit()
@@ -226,7 +291,7 @@ def prove(args):
     domain = json.loads(args.domain_json.read_text())
     artifact_spec = {'path': str(artifact), 'sha256': args.sha256, 'max_bytes': artifact.stat().st_size,
                      'guest_platform': 'linux/arm64' if manifest['identity']['architecture'] == 'aarch64' else 'linux/amd64'}
-    config = {'schema': 1, 'target_id': domain['target_id'], 'generation': domain['generation'], 'allow_initialize': False,
+    config = {'schema': config_schema(manifest), 'target_id': domain['target_id'], 'generation': domain['generation'], 'allow_initialize': False,
               'package_manifest_sha256': hashlib.sha256(manifest_bytes).hexdigest(), 'approved_artifacts': [artifact_spec]}
     save(output / 'config.json', config)
     before = snapshot()

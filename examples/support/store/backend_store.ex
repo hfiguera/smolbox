@@ -20,14 +20,54 @@ defmodule SmolBox.DurableHost.BackendStore do
     alias SmolBox.Backend.Binding
     alias SmolBox.DurableHost.Database
     alias SmolBox.Error
-    alias SmolBox.Store.BackendBindings
+    alias SmolBox.Store.{BackendBindings, CodecMaterial}
 
     def capabilities(context) do
       Database.query(context, "SELECT kind,generation FROM smolbox_backend_bindings LIMIT 0", [])
 
-      if function_exported?(__MODULE__, :assignments, 4),
-        do: %{backend_bindings: 1, backend_recovery: 1},
-        else: %{backend_bindings: 1}
+      capabilities =
+        if function_exported?(__MODULE__, :assignments, 4),
+          do: %{backend_bindings: 1, backend_recovery: 1},
+          else: %{backend_bindings: 1}
+
+      capabilities =
+        if Code.ensure_loaded?(CodecMaterial),
+          do: Map.put(capabilities, :native_material_proofs, 2),
+          else: capabilities
+
+      capabilities
+      |> background_capabilities()
+      |> streaming_capabilities()
+      |> terminal_capabilities()
+    end
+
+    if Code.ensure_loaded?(CodecMaterial) and
+         function_exported?(CodecMaterial, :background_launches, 0) do
+      defp background_capabilities(capabilities),
+        do:
+          Map.put(
+            capabilities,
+            :native_background_launches,
+            CodecMaterial.background_launches()
+          )
+    else
+      defp background_capabilities(capabilities), do: capabilities
+    end
+
+    if Code.ensure_loaded?(CodecMaterial) and
+         function_exported?(CodecMaterial, :streaming_commands, 0) do
+      defp streaming_capabilities(capabilities),
+        do: Map.put(capabilities, :native_streaming_commands, CodecMaterial.streaming_commands())
+    else
+      defp streaming_capabilities(capabilities), do: capabilities
+    end
+
+    if Code.ensure_loaded?(CodecMaterial) and
+         function_exported?(CodecMaterial, :terminal_sessions, 0) do
+      defp terminal_capabilities(capabilities),
+        do: Map.put(capabilities, :native_terminal_sessions, CodecMaterial.terminal_sessions())
+    else
+      defp terminal_capabilities(capabilities), do: capabilities
     end
 
     def reserve_execution(record, worker, name, lease, capacity, used, now, assignment),

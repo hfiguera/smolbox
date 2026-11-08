@@ -32,7 +32,8 @@ defmodule SmolBox.CI.Package do
           native_domain_json: :string,
           native_output: :string,
           native_ordinary: :boolean,
-          native_public: :boolean
+          native_public: :boolean,
+          native_terminal: :boolean
         ],
         [:report]
       )

@@ -12,7 +12,8 @@ defmodule SmolBox.EmbeddedRuntimeProof do
           domain_json: :string,
           inventory_helper: :string,
           output: :string,
-          without_rust: :boolean
+          without_rust: :boolean,
+          terminal: :boolean
         ]
       )
 
@@ -38,7 +39,7 @@ defmodule SmolBox.EmbeddedRuntimeProof do
     {target, _binding} = Code.eval_file(Path.join(tooling, "config.example.exs"))
     before = inventory(tooling)
     output = Path.expand(Keyword.fetch!(options, :output))
-    evidence = EmbeddedPort.run(target, output)
+    evidence = EmbeddedPort.run(target, output, terminal: options[:terminal] || false)
     after_run = inventory(tooling)
     true = before == after_run
 

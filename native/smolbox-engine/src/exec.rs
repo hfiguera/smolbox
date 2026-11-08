@@ -114,7 +114,7 @@ pub struct Output {
     pub bytes: Vec<u8>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum Completion {
     Exited,
     Cancelled,

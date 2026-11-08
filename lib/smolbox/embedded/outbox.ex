@@ -91,10 +91,20 @@ defmodule SmolBox.Embedded.Outbox do
   defp data(outbox, entry, limit) do
     bytes = outbox.bytes + byte_size(entry.encoded)
 
-    if bytes <= limit,
+    if bytes <= limit and terminal_slots?(outbox, entry),
       do: {:ok, %{outbox | data: :queue.in(entry, outbox.data), bytes: bytes}},
       else: :error
   end
+
+  defp terminal_slots?(outbox, %{kind: :terminal_control, id: id}),
+    do:
+      Enum.count_until(
+        :queue.to_list(outbox.data),
+        &(&1.kind == :terminal_control and &1.id == id),
+        2
+      ) < 2
+
+  defp terminal_slots?(_outbox, _entry), do: true
 
   defp size(entries),
     do: Enum.reduce(entries, 0, fn entry, size -> size + byte_size(entry.encoded) end)

@@ -2,14 +2,15 @@ use crate::{adapter, output, package::Config};
 use crossbeam_channel::{bounded, Receiver, Sender};
 use smolbox_engine::{Cancellation, Engine};
 use smolbox_protocol as wire;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, VecDeque};
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom, Write};
 use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
 use std::sync::{Arc, Condvar, Mutex};
 use std::time::{Duration, Instant};
 
-const WORKERS: usize = 4;
+const WORKERS: usize = smolbox_engine::JOB_WORK_SLOTS;
+const OBSERVATION_WORKERS: usize = smolbox_engine::JOB_CONTROL_SLOTS;
 const CONTROL_WORKERS: usize = 2;
 const MAX_INPUT_BYTES: usize = 4 * 1024 * 1024;
 const MAX_UPLOAD_BYTES: u64 = 128 * 1024 * 1024;
@@ -32,6 +33,7 @@ struct Work {
     upload: Option<tempfile::NamedTempFile>,
 }
 struct Handle {
+    terminal: Option<TerminalInbox>,
     cancel: Cancellation,
     started: bool,
     deadline: Instant,
@@ -40,6 +42,88 @@ struct Handle {
     upload: Option<tempfile::NamedTempFile>,
     upload_reservation: u64,
 }
+struct TerminalInbox {
+    controls: VecDeque<smolbox_engine::TerminalMessage>,
+    credit: VecDeque<smolbox_engine::TerminalMessage>,
+    outstanding: VecDeque<(u64, u64)>,
+}
+pub trait TerminalBridge {
+    fn opened(&mut self) -> BridgeResult<()>;
+    fn control(&mut self) -> BridgeResult<Option<smolbox_engine::TerminalMessage>>;
+    fn output(&mut self, output: smolbox_engine::TerminalOutput) -> BridgeResult<()>;
+}
+struct TerminalChannel {
+    shared: Arc<Shared>,
+    id: u64,
+}
+impl TerminalBridge for TerminalChannel {
+    fn opened(&mut self) -> BridgeResult<()> {
+        let mut state = self.shared.state.lock().map_err(|_| ())?;
+        self.shared
+            .output
+            .send(0, || state.session.terminal_opened(self.id).map_err(|_| ()))
+    }
+    fn control(&mut self) -> BridgeResult<Option<smolbox_engine::TerminalMessage>> {
+        let mut state = self.shared.state.lock().map_err(|_| ())?;
+        let handle = state.handles.get_mut(&self.id).ok_or(())?;
+        if handle.cancel.is_cancelled() || handle.cancellation_requested.is_some() {
+            return Err(());
+        }
+        let inbox = handle.terminal.as_mut().ok_or(())?;
+        Ok(inbox
+            .credit
+            .pop_front()
+            .or_else(|| inbox.controls.pop_front()))
+    }
+    fn output(&mut self, output: smolbox_engine::TerminalOutput) -> BridgeResult<()> {
+        // Queue the mapping while holding the same registry lock as public
+        // emission; consumption cannot race ahead of its private ticket.
+        let mut state = self.shared.state.lock().map_err(|_| ())?;
+        let deadline = state.handles.get(&self.id).ok_or(())?.deadline;
+        loop {
+            let handle = state.handles.get(&self.id).ok_or(())?;
+            if state.closing
+                || handle.cancellation_requested.is_some()
+                || handle.cancel.is_cancelled()
+            {
+                return Err(());
+            }
+            if state.session.available_credit(self.id).map_err(|_| ())? >= output.bytes.len() as u64
+                && state
+                    .session
+                    .available_event_credit(self.id)
+                    .map_err(|_| ())?
+                    > 0
+            {
+                break;
+            }
+            let remaining = deadline.saturating_duration_since(Instant::now());
+            if remaining.is_zero() {
+                return Err(());
+            }
+            state = self
+                .shared
+                .credit_changed
+                .wait_timeout(state, remaining.min(Duration::from_millis(10)))
+                .map_err(|_| ())?
+                .0;
+        }
+        let handle = state.handles.get_mut(&self.id).ok_or(())?;
+        let inbox = handle.terminal.as_mut().ok_or(())?;
+        if inbox.outstanding.len() >= wire::INITIAL_CREDIT_EVENTS as usize {
+            return Err(());
+        }
+        inbox
+            .outstanding
+            .push_back((output.sequence, output.bytes.len() as u64));
+        self.shared.output.send(output.bytes.len(), || {
+            state
+                .session
+                .event(self.id, wire::Stream::Terminal, &output.bytes)
+                .map_err(|_| ())
+        })
+    }
+}
 struct State {
     session: wire::Session,
     handles: BTreeMap<u64, Handle>,
@@ -47,6 +131,7 @@ struct State {
     approved: bool,
     closing: bool,
     unavailable: bool,
+    reserved_observations: usize,
 }
 struct Shared {
     state: Mutex<State>,
@@ -145,6 +230,16 @@ impl Shared {
 }
 
 pub trait Native: Send + Sync + 'static {
+    fn terminal(
+        &self,
+        _receipt: wire::Receipt,
+        _spec: wire::TerminalSpec,
+        _remaining: Duration,
+        _cancel: Cancellation,
+        _bridge: &mut dyn TerminalBridge,
+    ) -> wire::Outcome {
+        before(wire::SafeCode::Unsupported)
+    }
     fn available(&self) -> bool {
         true
     }
@@ -159,6 +254,16 @@ pub trait Native: Send + Sync + 'static {
     fn shutdown(&self) -> BridgeResult<()>;
 }
 impl Native for Engine {
+    fn terminal(
+        &self,
+        receipt: wire::Receipt,
+        spec: wire::TerminalSpec,
+        remaining: Duration,
+        cancel: Cancellation,
+        bridge: &mut dyn TerminalBridge,
+    ) -> wire::Outcome {
+        adapter::terminal(self, receipt, spec, remaining, cancel, bridge)
+    }
     fn available(&self) -> bool {
         Engine::available(self)
     }
@@ -223,6 +328,16 @@ fn serve_io(
             approved: false,
             closing: false,
             unavailable: false,
+            reserved_observations: if hello.major == wire::PARITY_PROTOCOL_MAJOR
+                && hello
+                    .sdk
+                    .as_ref()
+                    .is_some_and(|sdk| sdk.feature_versions.get("job_resources") == Some(&1))
+            {
+                OBSERVATION_WORKERS
+            } else {
+                0
+            },
         }),
         output,
         fatal: AtomicBool::new(false),
@@ -263,6 +378,11 @@ fn serve_io(
     for _ in 0..WORKERS {
         spawn_worker(shared.clone(), native.clone(), work.clone());
     }
+    let (observations, observation_work) = bounded::<Work>(wire::MAX_IN_FLIGHT);
+    for _ in 0..OBSERVATION_WORKERS {
+        spawn_worker(shared.clone(), native.clone(), observation_work.clone());
+    }
+    drop(observation_work);
     let (controls, cancellations) = bounded::<Cancellation>(wire::MAX_IN_FLIGHT);
     for _ in 0..CONTROL_WORKERS {
         let receiver = cancellations.clone();
@@ -317,7 +437,7 @@ fn serve_io(
                 shared
                     .input_bytes
                     .fetch_sub(input.encoded, Ordering::AcqRel);
-                match handle_input(&shared, &jobs, spools.path(), input) {
+                match handle_input(&shared, &jobs, &observations, spools.path(), input) {
                     Ok(true) => break Ok(()),
                     Ok(false) => {}
                     Err(()) => break Err(()),
@@ -351,6 +471,7 @@ fn serve_io(
         let _ = shared.cancel(id, &controls);
     }
     drop(jobs);
+    drop(observations);
     let shutdown_at = Instant::now();
     while shared
         .state
@@ -418,6 +539,17 @@ fn before(code: wire::SafeCode) -> wire::Outcome {
         code,
         dispatch: wire::Dispatch::NotDispatched,
     }
+}
+fn is_observation(operation: &wire::Operation) -> bool {
+    matches!(
+        operation,
+        wire::Operation::Health
+            | wire::Operation::Capacity
+            | wire::Operation::Metrics
+            | wire::Operation::Readiness
+            | wire::Operation::List
+            | wire::Operation::Measurements { .. }
+    )
 }
 fn tick(shared: &Shared, controls: &Sender<Cancellation>) -> BridgeResult<()> {
     let now = Instant::now();
@@ -510,7 +642,20 @@ fn admit_request(
         } else {
             None
         },
-    );
+    )
+    .or_else(|| {
+        // A full work queue cannot consume the two request identities needed
+        // to reach the independently scheduled observation lane. Cancellation
+        // and credit bypass both queues in the reader, as before.
+        let work_requests = state
+            .handles
+            .values()
+            .filter(|h| !is_observation(&h.operation))
+            .count();
+        (!is_observation(&operation)
+            && work_requests >= wire::MAX_IN_FLIGHT - state.reserved_observations)
+            .then_some(wire::SafeCode::Overload)
+    });
     let mut accepted = false;
     shared.output.send(0, || {
         let response = state
@@ -528,6 +673,15 @@ fn admit_request(
     state.handles.insert(
         id,
         Handle {
+            terminal: if matches!(operation, wire::Operation::TerminalOpen { .. }) {
+                Some(TerminalInbox {
+                    controls: VecDeque::new(),
+                    credit: VecDeque::new(),
+                    outstanding: VecDeque::new(),
+                })
+            } else {
+                None
+            },
             cancel: cancel.clone(),
             started: false,
             deadline,
@@ -544,6 +698,7 @@ fn admit_request(
 fn handle_input(
     shared: &Shared,
     jobs: &Sender<Work>,
+    observations: &Sender<Work>,
     spool_directory: &std::path::Path,
     input: Input,
 ) -> BridgeResult<bool> {
@@ -585,14 +740,20 @@ fn handle_input(
                 }
                 queue_upload(shared, jobs, id)?;
             } else {
-                jobs.try_send(Work {
-                    id,
-                    operation,
-                    deadline,
-                    cancel,
-                    upload: None,
-                })
-                .map_err(|_| ())?;
+                let queue = if is_observation(&operation) {
+                    observations
+                } else {
+                    jobs
+                };
+                queue
+                    .try_send(Work {
+                        id,
+                        operation,
+                        deadline,
+                        cancel,
+                        upload: None,
+                    })
+                    .map_err(|_| ())?;
             }
         }
         wire::ClientMessage::Upload {
@@ -638,6 +799,7 @@ fn handle_input(
             }
         }
         wire::ClientMessage::Approve { .. }
+        | wire::ClientMessage::TerminalControl { .. }
         | wire::ClientMessage::Cancel { .. }
         | wire::ClientMessage::Credit { .. } => return Err(()),
         wire::ClientMessage::Shutdown { epoch } => {
@@ -724,15 +886,26 @@ fn spawn_worker(shared: Arc<Shared>, native: Arc<dyn Native>, work: Receiver<Wor
                     continue;
                 }
             };
-            let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                native.run(
-                    work.operation,
-                    remaining,
-                    work.cancel.clone(),
-                    upload,
-                    &mut |stream, bytes| shared.event(work.id, stream, bytes),
-                )
-            }));
+            let result =
+                std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| match work.operation {
+                    wire::Operation::TerminalOpen { receipt, terminal } => native.terminal(
+                        receipt,
+                        terminal,
+                        remaining,
+                        work.cancel.clone(),
+                        &mut TerminalChannel {
+                            shared: shared.clone(),
+                            id: work.id,
+                        },
+                    ),
+                    operation => native.run(
+                        operation,
+                        remaining,
+                        work.cancel.clone(),
+                        upload,
+                        &mut |stream, bytes| shared.event(work.id, stream, bytes),
+                    ),
+                }));
             let mut outcome = match result {
                 Ok(outcome) => outcome,
                 Err(_) => {
@@ -743,6 +916,7 @@ fn spawn_worker(shared: Arc<Shared>, native: Arc<dyn Native>, work: Receiver<Wor
             if Instant::now() >= work.deadline {
                 match &mut outcome {
                     wire::Outcome::Command { completion, .. }
+                    | wire::Outcome::Terminal { completion, .. }
                     | wire::Outcome::File { completion, .. } => {
                         *completion = wire::Completion::Deadline
                     }
@@ -766,6 +940,49 @@ fn reader_control(
             state.session.approve(&hello).map_err(|_| ())?;
             state.approved = true;
         }
+        wire::ClientMessage::TerminalControl {
+            epoch,
+            id,
+            sequence,
+            control,
+        } => {
+            let mut state = shared.state.lock().map_err(|_| ())?;
+            if !state
+                .session
+                .terminal_control(&epoch, id, sequence, &control)
+                .map_err(|_| ())?
+            {
+                return Ok(());
+            }
+            let handle = state.handles.get_mut(&id).ok_or(())?;
+            if handle.cancellation_requested.is_some() {
+                return Ok(());
+            }
+            let inbox = handle.terminal.as_mut().ok_or(())?;
+            if inbox.controls.len() >= 2 {
+                handle.cancellation_requested = Some(Instant::now());
+                controls.try_send(handle.cancel.clone()).map_err(|_| ())?;
+                return Ok(());
+            }
+            inbox.controls.push_back(match control {
+                wire::TerminalAction::Attach => smolbox_engine::TerminalMessage::Attach,
+                wire::TerminalAction::Input { data_base64 } => {
+                    smolbox_engine::TerminalMessage::Command(
+                        smolbox_engine::TerminalControl::Input(
+                            wire::decode_chunk(&data_base64).map_err(|_| ())?,
+                        ),
+                    )
+                }
+                wire::TerminalAction::Resize { cols, rows } => {
+                    smolbox_engine::TerminalMessage::Command(
+                        smolbox_engine::TerminalControl::Resize { cols, rows },
+                    )
+                }
+                wire::TerminalAction::Close => {
+                    smolbox_engine::TerminalMessage::Command(smolbox_engine::TerminalControl::Close)
+                }
+            });
+        }
         wire::ClientMessage::Cancel { epoch, id } => {
             shared
                 .state
@@ -782,13 +999,31 @@ fn reader_control(
             decoded_bytes,
             events,
         } => {
-            shared
-                .state
-                .lock()
-                .map_err(|_| ())?
+            let mut state = shared.state.lock().map_err(|_| ())?;
+            state
                 .session
                 .credit(&epoch, id, decoded_bytes, events)
                 .map_err(|_| ())?;
+            if let Some(inbox) = state
+                .handles
+                .get_mut(&id)
+                .and_then(|handle| handle.terminal.as_mut())
+            {
+                if inbox.credit.len() + events as usize > wire::INITIAL_CREDIT_EVENTS as usize {
+                    return Err(());
+                }
+                let mut total = 0;
+                for _ in 0..events {
+                    let (sequence, bytes) = inbox.outstanding.pop_front().ok_or(())?;
+                    total += bytes;
+                    inbox
+                        .credit
+                        .push_back(smolbox_engine::TerminalMessage::Consumed { sequence, bytes });
+                }
+                if total != decoded_bytes {
+                    return Err(());
+                }
+            }
             shared.credit_changed.notify_all();
         }
         _ => return Err(()),
@@ -834,6 +1069,7 @@ fn spawn_reader(
         if matches!(
             message,
             wire::ClientMessage::Approve { .. }
+                | wire::ClientMessage::TerminalControl { .. }
                 | wire::ClientMessage::Cancel { .. }
                 | wire::ClientMessage::Credit { .. }
         ) {
@@ -912,11 +1148,117 @@ mod tests {
         available: AtomicBool,
         shutdown_called: AtomicBool,
         shutdown_failed: AtomicBool,
+        hold_health: AtomicBool,
         started: Sender<()>,
         calls: AtomicUsize,
         uploaded: Mutex<Vec<u8>>,
     }
     impl Native for Fake {
+        fn terminal(
+            &self,
+            _receipt: wire::Receipt,
+            spec: wire::TerminalSpec,
+            remaining: Duration,
+            cancel: Cancellation,
+            bridge: &mut dyn TerminalBridge,
+        ) -> wire::Outcome {
+            self.calls.fetch_add(1, Ordering::AcqRel);
+            bridge.opened().unwrap();
+            if spec.program == "credit_wait" || spec.program == "controls_wait" {
+                let bytes = if spec.program == "credit_wait" {
+                    vec![0; 1024]
+                } else {
+                    vec![0, 255, 128]
+                };
+                let delivered = bytes.len() as u64;
+                bridge
+                    .output(smolbox_engine::TerminalOutput {
+                        sequence: 1,
+                        stderr: false,
+                        bytes,
+                    })
+                    .unwrap();
+                if spec.program == "credit_wait" {
+                    assert!(bridge
+                        .output(smolbox_engine::TerminalOutput {
+                            sequence: 2,
+                            stderr: false,
+                            bytes: vec![1],
+                        })
+                        .is_err());
+                } else {
+                    // Deliberately do not consume controls. The bounded inbox
+                    // must cancel this operation without closing the channel.
+                    let end = Instant::now() + remaining;
+                    while Instant::now() < end && !cancel.is_cancelled() {
+                        std::thread::sleep(Duration::from_millis(1));
+                    }
+                    assert!(cancel.is_cancelled());
+                }
+                return wire::Outcome::Terminal {
+                    completion: wire::Completion::Cancelled,
+                    dispatch: wire::Dispatch::MayHaveDispatched,
+                    observed_exit: None,
+                    worker_collected: true,
+                    output_bytes: delivered,
+                };
+            }
+            bridge
+                .output(smolbox_engine::TerminalOutput {
+                    sequence: 1,
+                    stderr: false,
+                    bytes: vec![0, 255, 128],
+                })
+                .unwrap();
+            let end = Instant::now() + remaining;
+            let mut attached = false;
+            let mut credited = false;
+            let mut input = false;
+            let mut resized = false;
+            while Instant::now() < end && !cancel.is_cancelled() {
+                match bridge.control() {
+                    Ok(Some(smolbox_engine::TerminalMessage::Attach)) => attached = true,
+                    Ok(Some(smolbox_engine::TerminalMessage::Consumed { sequence, bytes })) => {
+                        assert_eq!((sequence, bytes), (1, 3));
+                        credited = true;
+                    }
+                    Ok(Some(smolbox_engine::TerminalMessage::Command(
+                        smolbox_engine::TerminalControl::Input(bytes),
+                    ))) => {
+                        assert_eq!(bytes, [255, 0]);
+                        input = true;
+                    }
+                    Ok(Some(smolbox_engine::TerminalMessage::Command(
+                        smolbox_engine::TerminalControl::Resize { cols, rows },
+                    ))) => {
+                        assert_eq!((cols, rows), (120, 43));
+                        resized = true;
+                    }
+                    Ok(Some(smolbox_engine::TerminalMessage::Command(
+                        smolbox_engine::TerminalControl::Close,
+                    ))) => {
+                        assert!(attached && credited && input && resized);
+                        return wire::Outcome::Terminal {
+                            completion: wire::Completion::Exited,
+                            dispatch: wire::Dispatch::MayHaveDispatched,
+                            observed_exit: Some(7),
+                            worker_collected: true,
+                            output_bytes: 3,
+                        };
+                    }
+                    Ok(None) => {}
+                    _ => break,
+                }
+                std::thread::sleep(Duration::from_millis(1));
+            }
+            wire::Outcome::Terminal {
+                completion: wire::Completion::Cancelled,
+                dispatch: wire::Dispatch::MayHaveDispatched,
+                observed_exit: None,
+                worker_collected: true,
+                output_bytes: 3,
+            }
+        }
         fn available(&self) -> bool {
             self.available.load(Ordering::Acquire)
         }
@@ -930,6 +1272,22 @@ mod tests {
         ) -> wire::Outcome {
             self.calls.fetch_add(1, Ordering::AcqRel);
             match operation {
+                wire::Operation::Health if self.hold_health.load(Ordering::Acquire) => {
+                    self.started.send(()).unwrap();
+                    let at = Instant::now();
+                    while !cancel.is_cancelled() && at.elapsed() < remaining {
+                        std::thread::sleep(Duration::from_millis(1));
+                    }
+                    before(wire::SafeCode::Cancelled)
+                }
+                wire::Operation::Health => wire::Outcome::Health {
+                    snapshot: wire::HealthSnapshot {
+                        total: 0,
+                        running: 0,
+                        uptime_seconds: 1,
+                    },
+                },
+                wire::Operation::Readiness => wire::Outcome::Ready,
                 wire::Operation::Exec { command, .. } if command.argv[0] == "unavailable" => {
                     self.available.store(false, Ordering::Release);
                     wire::Outcome::Command {
@@ -1057,6 +1415,7 @@ mod tests {
             capabilities: vec![wire::Capability::Exec, wire::Capability::WriteFile],
             limits: wire::Limits::default(),
             preflight: wire::Preflight::Ready,
+            sdk: None,
         }
     }
     fn receipt() -> wire::Receipt {
@@ -1067,6 +1426,7 @@ mod tests {
             owner_token: "67".repeat(32),
             incarnation: "89".repeat(16),
             material_sha256: "ab".repeat(32),
+            material: None,
         }
     }
     fn send(client: &mut UnixStream, message: wire::ClientMessage) {
@@ -1074,6 +1434,234 @@ mod tests {
     }
     fn receive(client: &mut UnixStream) -> wire::ServerMessage {
         wire::ServerMessage::decode(wire::read_frame(client).unwrap().unwrap()).unwrap()
+    }
+
+    fn terminal_hello() -> wire::Hello {
+        let wire::ServerMessage::Hello { hello: fixture } = wire::ServerMessage::decode(
+            serde_json::from_str(include_str!(
+                "../../smolbox-protocol/fixtures/hello-v2.json"
+            ))
+            .unwrap(),
+        )
+        .unwrap() else {
+            unreachable!()
+        };
+        let mut h = *fixture;
+        h.domain = hello().domain;
+        h.epoch = hello().epoch;
+        h.sdk.as_mut().unwrap().feature_versions.extend([
+            ("terminals".into(), 1),
+            ("buffered_exec".into(), 1),
+            ("job_resources".into(), 1),
+            ("observability".into(), 1),
+        ]);
+        h.limits = wire::Limits::for_sdk(h.sdk.as_ref().unwrap());
+        h.capabilities
+            .extend([wire::Capability::TerminalOpen, wire::Capability::Readiness]);
+        h
+    }
+    fn terminal_request(h: &wire::Hello, program: Option<&str>) -> wire::ClientMessage {
+        let value = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/terminal-open-request.json"
+        ))
+        .unwrap();
+        let mut open = wire::ClientMessage::decode(value).unwrap();
+        if let wire::ClientMessage::Request {
+            epoch,
+            budget_ms,
+            operation: wire::Operation::TerminalOpen { receipt, terminal },
+            ..
+        } = &mut open
+        {
+            *epoch = h.epoch.clone();
+            *budget_ms = 1000;
+            receipt.target_id = h.domain.target_id.clone();
+            if let Some(program) = program {
+                terminal.program = program.into();
+            }
+        } else {
+            unreachable!()
+        }
+        open
+    }
+    #[test]
+    fn terminal_bridge_routes_whole_credit_and_controls_without_starving_readiness() {
+        let h = terminal_hello();
+        let (mut client, fake, _started, thread) = start_with(h.clone());
+        send(&mut client, terminal_request(&h, None));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Accepted { id: 1, .. }
+        ));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::TerminalOpened { id: 1, .. }
+        ));
+        assert!(
+            matches!(receive(&mut client), wire::ServerMessage::Event { id: 1, event: wire::Event { stream: wire::Stream::Terminal, data_base64 }, .. } if wire::decode_chunk(&data_base64).unwrap() == [0, 255, 128])
+        );
+        send(&mut client, request(2, wire::Operation::Readiness));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Accepted { id: 2, .. }
+        ));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Terminal {
+                id: 2,
+                outcome: wire::Outcome::Ready,
+                ..
+            }
+        ));
+        send(
+            &mut client,
+            wire::ClientMessage::Credit {
+                epoch: h.epoch.clone(),
+                id: 1,
+                decoded_bytes: 3,
+                events: 1,
+            },
+        );
+        for (sequence, control) in [
+            (1, wire::TerminalAction::Attach),
+            (
+                2,
+                wire::TerminalAction::Input {
+                    data_base64: wire::encode_chunk(&[255, 0]).unwrap(),
+                },
+            ),
+            (
+                3,
+                wire::TerminalAction::Resize {
+                    cols: 120,
+                    rows: 43,
+                },
+            ),
+            (4, wire::TerminalAction::Close),
+        ] {
+            send(
+                &mut client,
+                wire::ClientMessage::TerminalControl {
+                    epoch: h.epoch.clone(),
+                    id: 1,
+                    sequence,
+                    control,
+                },
+            );
+            std::thread::sleep(Duration::from_millis(5));
+        }
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Terminal {
+                id: 1,
+                outcome: wire::Outcome::Terminal {
+                    completion: wire::Completion::Exited,
+                    observed_exit: Some(7),
+                    worker_collected: true,
+                    ..
+                },
+                ..
+            }
+        ));
+        send(
+            &mut client,
+            wire::ClientMessage::Shutdown { epoch: h.epoch },
+        );
+        assert!(thread.join().unwrap().is_ok());
+        assert!(fake.shutdown_called.load(Ordering::Acquire));
+    }
+    #[test]
+    fn terminal_credit_wait_and_input_exhaustion_preserve_control_isolation() {
+        for program in ["credit_wait", "controls_wait"] {
+            let h = terminal_hello();
+            let (mut client, _fake, _, thread) = start_with(h.clone());
+            send(&mut client, terminal_request(&h, Some(program)));
+            assert!(matches!(
+                receive(&mut client),
+                wire::ServerMessage::Accepted { id: 1, .. }
+            ));
+            assert!(matches!(
+                receive(&mut client),
+                wire::ServerMessage::TerminalOpened { id: 1, .. }
+            ));
+            assert!(matches!(
+                receive(&mut client),
+                wire::ServerMessage::Event { id: 1, .. }
+            ));
+            send(&mut client, request(2, wire::Operation::Readiness));
+            assert!(matches!(
+                receive(&mut client),
+                wire::ServerMessage::Accepted { id: 2, .. }
+            ));
+            assert!(matches!(
+                receive(&mut client),
+                wire::ServerMessage::Terminal {
+                    id: 2,
+                    outcome: wire::Outcome::Ready,
+                    ..
+                }
+            ));
+            if program == "credit_wait" {
+                send(
+                    &mut client,
+                    wire::ClientMessage::Cancel {
+                        epoch: h.epoch.clone(),
+                        id: 1,
+                    },
+                );
+            } else {
+                for (sequence, control) in [
+                    (1, wire::TerminalAction::Attach),
+                    (
+                        2,
+                        wire::TerminalAction::Input {
+                            data_base64: wire::encode_chunk(&[255]).unwrap(),
+                        },
+                    ),
+                    (3, wire::TerminalAction::Resize { cols: 80, rows: 24 }),
+                ] {
+                    send(
+                        &mut client,
+                        wire::ClientMessage::TerminalControl {
+                            epoch: h.epoch.clone(),
+                            id: 1,
+                            sequence,
+                            control,
+                        },
+                    );
+                }
+            }
+            assert!(matches!(
+                receive(&mut client),
+                wire::ServerMessage::Terminal {
+                    id: 1,
+                    outcome: wire::Outcome::Terminal {
+                        completion: wire::Completion::Cancelled,
+                        observed_exit: None,
+                        ..
+                    },
+                    ..
+                }
+            ));
+            send(&mut client, request(3, wire::Operation::Readiness));
+            assert!(matches!(
+                receive(&mut client),
+                wire::ServerMessage::Accepted { id: 3, .. }
+            ));
+            assert!(matches!(
+                receive(&mut client),
+                wire::ServerMessage::Terminal {
+                    id: 3,
+                    outcome: wire::Outcome::Ready,
+                    ..
+                }
+            ));
+            send(
+                &mut client,
+                wire::ClientMessage::Shutdown { epoch: h.epoch },
+            );
+            assert!(thread.join().unwrap().is_ok());
+        }
     }
     fn request(id: u64, operation: wire::Operation) -> wire::ClientMessage {
         wire::ClientMessage::Request {
@@ -1103,6 +1691,16 @@ mod tests {
         Receiver<()>,
         std::thread::JoinHandle<BridgeResult<()>>,
     ) {
+        start_with(hello())
+    }
+    fn start_with(
+        approved: wire::Hello,
+    ) -> (
+        UnixStream,
+        Arc<Fake>,
+        Receiver<()>,
+        std::thread::JoinHandle<BridgeResult<()>>,
+    ) {
         let (mut client, server) = UnixStream::pair().unwrap();
         client
             .set_read_timeout(Some(Duration::from_secs(3)))
@@ -1113,25 +1711,28 @@ mod tests {
             available: AtomicBool::new(true),
             shutdown_called: AtomicBool::new(false),
             shutdown_failed: AtomicBool::new(false),
+            hold_health: AtomicBool::new(false),
             started: started_sender,
             calls: AtomicUsize::new(0),
             uploaded: Mutex::new(Vec::new()),
         });
         let native = fake.clone();
         let config = Config {
-            schema: 1,
+            publish_address: None,
+            schema: approved.major as u8,
             target_id: "test".into(),
             generation: "cd".repeat(16),
             allow_initialize: false,
             package_manifest_sha256: "01".repeat(32),
             approved_artifacts: vec![],
         };
+        let declared = approved.clone();
         let thread = std::thread::spawn(move || {
             serve_io(
                 input,
                 server,
                 native,
-                hello(),
+                declared,
                 config,
                 tempfile::tempdir().unwrap(),
             )
@@ -1140,8 +1741,169 @@ mod tests {
             receive(&mut client),
             wire::ServerMessage::Hello { .. }
         ));
-        send(&mut client, wire::ClientMessage::Approve { hello: hello() });
+        send(
+            &mut client,
+            wire::ClientMessage::Approve { hello: approved },
+        );
         (client, fake, started, thread)
+    }
+    #[test]
+    fn full_work_queue_preserves_observation_dispatch_and_graceful_control() {
+        let sdk = crate::package::sdk_identity()
+            .unwrap_or_else(|_| panic!("invalid compiled SDK policy"));
+        let mut approved = hello();
+        approved.major = wire::PARITY_PROTOCOL_MAJOR;
+        approved.minor = wire::PARITY_PROTOCOL_MINOR;
+        approved.package.engine_version = env!("CARGO_PKG_VERSION").into();
+        approved.package.smolvm_revision = sdk.source_revision.clone();
+        approved.limits = wire::Limits::for_sdk(&sdk);
+        approved.sdk = Some(Box::new(sdk));
+        approved
+            .capabilities
+            .extend([wire::Capability::Health, wire::Capability::Readiness]);
+        let (mut client, fake, started, thread) = start_with(approved);
+        let work_capacity = wire::MAX_IN_FLIGHT - OBSERVATION_WORKERS;
+        for id in 1..=work_capacity as u64 {
+            let mut operation = exec("hold");
+            if let wire::Operation::Exec { receipt, .. } = &mut operation {
+                receipt.material = Some(Box::new(wire::MaterialProof {
+                    schema: 2,
+                    revision: 0,
+                    record_sha256: receipt.material_sha256.clone(),
+                    chain_sha256: "cd".repeat(32),
+                    operation_id: None,
+                    request_sha256: None,
+                }));
+            }
+            let mut message = request(id, operation.clone());
+            if let wire::ClientMessage::Request { budget_ms, .. } = &mut message {
+                *budget_ms = 5000;
+            }
+            send(&mut client, message);
+            assert!(
+                matches!(receive(&mut client), wire::ServerMessage::Accepted { id: actual, .. } if actual == id)
+            );
+            if id <= WORKERS as u64 {
+                started.recv_timeout(Duration::from_secs(1)).unwrap();
+            }
+            if id == work_capacity as u64 {
+                send(&mut client, request(id + 1, operation));
+                assert!(matches!(
+                    receive(&mut client),
+                    wire::ServerMessage::Terminal {
+                        sequence: 0,
+                        outcome: wire::Outcome::Error {
+                            code: wire::SafeCode::Overload,
+                            dispatch: wire::Dispatch::NotDispatched,
+                        },
+                        ..
+                    }
+                ));
+            }
+        }
+        assert_eq!(fake.calls.load(Ordering::Acquire), WORKERS);
+        fake.hold_health.store(true, Ordering::Release);
+        let health_id = work_capacity as u64 + 2;
+        send(&mut client, request(health_id, wire::Operation::Health));
+        assert!(
+            matches!(receive(&mut client), wire::ServerMessage::Accepted { id, .. } if id == health_id)
+        );
+        started.recv_timeout(Duration::from_secs(1)).unwrap();
+        // One observation is now blocked alongside all four work threads.
+        // The second reserved request/thread still dispatches readiness.
+        let ready_id = health_id + 1;
+        send(&mut client, request(ready_id, wire::Operation::Readiness));
+        assert!(
+            matches!(receive(&mut client), wire::ServerMessage::Accepted { id, .. } if id == ready_id)
+        );
+        assert!(
+            matches!(receive(&mut client), wire::ServerMessage::Terminal {
+            id,
+            outcome: wire::Outcome::Ready,
+            ..
+        } if id == ready_id)
+        );
+        assert_eq!(fake.calls.load(Ordering::Acquire), WORKERS + 2);
+        send(
+            &mut client,
+            wire::ClientMessage::Cancel {
+                epoch: hello().epoch,
+                id: health_id,
+            },
+        );
+        assert!(
+            matches!(receive(&mut client), wire::ServerMessage::Terminal {
+            id,
+            outcome: wire::Outcome::Error { code: wire::SafeCode::Cancelled, .. },
+            ..
+        } if id == health_id)
+        );
+        // Explicit normal shutdown cancels every modeled command. There is no
+        // helper, SDK runtime, VM, owner loss or forced process termination.
+        shutdown(client, thread);
+        assert!(fake.shutdown_called.load(Ordering::Acquire));
+    }
+
+    #[test]
+    fn protocol_two_bridge_rejects_stripped_proofs_before_native_dispatch() {
+        let sdk = crate::package::sdk_identity()
+            .unwrap_or_else(|_| panic!("invalid compiled SDK policy"));
+        let mut approved = hello();
+        approved.major = wire::PARITY_PROTOCOL_MAJOR;
+        approved.minor = wire::PARITY_PROTOCOL_MINOR;
+        approved.package.engine_version = env!("CARGO_PKG_VERSION").into();
+        approved.package.smolvm_revision = sdk.source_revision.clone();
+        approved.limits = wire::Limits::for_sdk(&sdk);
+        approved.sdk = Some(Box::new(sdk));
+        let (mut client, fake, _, thread) = start_with(approved);
+        send(&mut client, request(1, exec("emit")));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Terminal {
+                id: 1,
+                sequence: 0,
+                outcome: wire::Outcome::Error {
+                    code: wire::SafeCode::Ownership,
+                    dispatch: wire::Dispatch::NotDispatched,
+                },
+                ..
+            }
+        ));
+        assert_eq!(fake.calls.load(Ordering::Acquire), 0);
+        let mut operation = exec("emit");
+        if let wire::Operation::Exec { receipt, .. } = &mut operation {
+            receipt.material = Some(Box::new(wire::MaterialProof {
+                schema: 2,
+                revision: 0,
+                record_sha256: receipt.material_sha256.clone(),
+                chain_sha256: "cd".repeat(32),
+                operation_id: None,
+                request_sha256: None,
+            }));
+        }
+        send(&mut client, request(2, operation));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Accepted { id: 2, .. }
+        ));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Event { id: 2, .. }
+        ));
+        assert!(matches!(
+            receive(&mut client),
+            wire::ServerMessage::Terminal {
+                id: 2,
+                outcome: wire::Outcome::Command {
+                    observed_exit: Some(0),
+                    ..
+                },
+                ..
+            }
+        ));
+        assert_eq!(fake.calls.load(Ordering::Acquire), 1);
+        shutdown(client, thread);
+        assert!(fake.shutdown_called.load(Ordering::Acquire));
     }
     fn shutdown(mut client: UnixStream, thread: std::thread::JoinHandle<BridgeResult<()>>) {
         send(
@@ -1429,6 +2191,7 @@ mod tests {
                 handles: [(
                     1,
                     Handle {
+                        terminal: None,
                         cancel: Cancellation::new(),
                         started: true,
                         deadline: Instant::now(),
@@ -1443,6 +2206,7 @@ mod tests {
                 approved: true,
                 closing: false,
                 unavailable: false,
+                reserved_observations: 0,
             }),
             output,
             fatal: AtomicBool::new(false),
@@ -1560,6 +2324,7 @@ mod tests {
                 approved: false,
                 closing: false,
                 unavailable: false,
+                reserved_observations: 0,
             }),
             output,
             credit_changed: Condvar::new(),
@@ -1577,6 +2342,7 @@ mod tests {
         let (queued, inputs) = bounded(32);
         let (controls, cancellations) = bounded(32);
         let config = Config {
+            publish_address: None,
             schema: 1,
             target_id: "test".into(),
             generation: "cd".repeat(16),

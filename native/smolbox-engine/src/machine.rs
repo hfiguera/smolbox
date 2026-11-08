@@ -38,6 +38,7 @@ pub enum CreationPresence {
 }
 
 pub struct Engine {
+    opened_at: std::time::Instant,
     runtime: EmbeddedRuntime,
     db: SmolvmDb,
     database_identity: (u64, u64),
@@ -46,6 +47,7 @@ pub struct Engine {
     owned_handles: Mutex<BTreeMap<String, CreationReceipt>>,
     pub(crate) domain: Arc<DomainGuard>,
     pub(crate) transfers: Option<TransferSupervisor>,
+    pub(crate) jobs: crate::jobs::JobPool,
     templates: Option<crate::assets::PreparedTemplates>,
     host: Option<crate::HostContext>,
     boot: Option<(crate::BootLauncher, crate::epoch::ActorEpoch)>,
@@ -69,6 +71,7 @@ impl Engine {
         crate::epoch::fence_previous(&domain.directory, &binding)?;
         let (db, database_identity) = open_database(&binding.database, allow_initialize)?;
         Ok(Self {
+            opened_at: std::time::Instant::now(),
             runtime: EmbeddedRuntime::with_db(db.clone()),
             db,
             database_identity,
@@ -77,6 +80,7 @@ impl Engine {
             owned_handles: Mutex::new(BTreeMap::new()),
             domain: Arc::new(domain),
             transfers: None,
+            jobs: crate::jobs::JobPool::default(),
             templates: None,
             host: None,
             boot: None,
@@ -85,6 +89,49 @@ impl Engine {
 
     pub fn binding(&self) -> &DomainBinding {
         &self.binding
+    }
+
+    pub(crate) fn observation_records(&self, budget: &crate::ReadBudget) -> Result<Vec<VmRecord>> {
+        budget.check()?;
+        self.domain.verify()?;
+        let records = crate::sdk_compat::observe_records(
+            &self.binding.database,
+            self.database_identity,
+            budget,
+        )?;
+        self.domain.verify()?;
+        budget.check()?;
+        Ok(records)
+    }
+
+    pub(crate) fn observation_uptime(&self) -> u64 {
+        self.opened_at.elapsed().as_secs()
+    }
+    pub(crate) fn observation_epoch(&self) -> Option<String> {
+        self.host.as_ref().map(|host| host.epoch.clone())
+    }
+
+    pub(crate) fn observation_missing(&self, receipt: &CreationReceipt) -> Result<Observation> {
+        receipt.validate(&self.binding)?;
+        let material = match std::fs::symlink_metadata(self.vm_directory(&receipt.name)) {
+            Ok(_) => true,
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => false,
+            Err(_) => return Err(Error::before(ErrorCode::Io)),
+        };
+        let child = self
+            .runtime
+            .pid(&receipt.name)
+            .is_some_and(smolvm::process::is_alive);
+        Ok(Observation {
+            state: if material || child {
+                ObservedState::IdentityUnknown
+            } else {
+                ObservedState::Missing
+            },
+            resources: None,
+            pid_identity: None,
+            configuration: None,
+        })
     }
 
     /// Prepare under domain ownership. Only the Port child may configure its
@@ -154,8 +201,9 @@ impl Engine {
         if host.domain != binding {
             return Err(Error::before(ErrorCode::Ownership));
         }
-        let transfers = TransferSupervisor::new(&host)?;
+        host.validate()?;
         let mut engine = Self::open(binding, allow_initialize)?;
+        let transfers = TransferSupervisor::new(&host, engine.jobs.clone())?;
         engine.transfers = Some(transfers);
         engine.host = Some(host);
         Ok(engine)
@@ -170,13 +218,55 @@ impl Engine {
         resources: Resources,
         user: Option<&str>,
     ) -> Result<()> {
+        self.qualify_creation_with_features(artifact, resources, user, None)
+    }
+
+    pub fn qualify_creation_with_features(
+        &self,
+        artifact: &ApprovedArtifact,
+        resources: Resources,
+        user: Option<&str>,
+        features: Option<&crate::CreationFeatures>,
+    ) -> Result<()> {
+        if let Some(features) = features {
+            features.validate()?;
+        }
         self.verify_templates()?;
         let prepared = artifact.prepare(&self.domain.directory.join("artifacts"), resources)?;
-        validate_guest_user(user, prepared.manifest.mode == PackMode::Container)
+        validate_guest_user(user, prepared.manifest.mode == PackMode::Container)?;
+        if let Some(features) = features {
+            features.qualify(&prepared.manifest)?;
+        }
+        Ok(())
     }
 
     pub fn create(&self, request: CreateRequest) -> Result<CreationReceipt> {
+        self.create_mode(request, false, None)
+    }
+
+    /// Fresh protocol-2 authority. An existing v1 receipt is never promoted.
+    pub fn create_versioned(&self, request: CreateRequest) -> Result<CreationReceipt> {
+        self.create_mode(request, true, None)
+    }
+
+    pub fn create_with_features(
+        &self,
+        request: CreateRequest,
+        features: crate::CreationFeatures,
+    ) -> Result<CreationReceipt> {
+        self.create_mode(request, true, Some(&features))
+    }
+
+    fn create_mode(
+        &self,
+        request: CreateRequest,
+        versioned: bool,
+        features: Option<&crate::CreationFeatures>,
+    ) -> Result<CreationReceipt> {
         validate_request(&request)?;
+        if let Some(features) = features {
+            features.validate()?;
+        }
         let gate = self.gate(&request.name)?;
         let _guard = gate
             .try_lock()
@@ -185,6 +275,9 @@ impl Engine {
         let prepared = request
             .artifact
             .prepare(&self.domain.directory.join("artifacts"), request.resources)?;
+        if let Some(features) = features {
+            features.qualify(&prepared.manifest)?;
+        }
         if self
             .db
             .get_vm(&request.name)
@@ -207,7 +300,17 @@ impl Engine {
         }
         // From here on partial storage may exist. Errors are uncertain and
         // cannot authorize reservation release or a replayed create.
-        let result = self.create_reserved(&request, prepared);
+        let result = self
+            .create_reserved(&request, prepared, features)
+            .and_then(|receipt| {
+                if versioned {
+                    crate::material::MaterialJournal::at(&self.vm_directory(&receipt.name))
+                        .initialize(&receipt)
+                        .map_err(|error| Error::uncertain(error.code))
+                } else {
+                    Ok(receipt)
+                }
+            });
         // Releasing the upstream preparation lock is distinct from releasing
         // SmolBox's durable capacity reservation. Never remove partial storage.
         let _ = self
@@ -294,6 +397,7 @@ impl Engine {
         &self,
         request: &CreateRequest,
         prepared: crate::artifact::PreparedArtifact,
+        features: Option<&crate::CreationFeatures>,
     ) -> Result<CreationReceipt> {
         let manager = AgentManager::for_vm_with_sizes(
             &request.name,
@@ -397,6 +501,11 @@ impl Engine {
         // environment values enter this durable neutral-start record.
         record.workdir = Some("/".into());
         record.user = (prepared.manifest.mode == PackMode::Container).then(|| "0".into());
+        if let Some(features) = features {
+            features
+                .apply(&mut record, &prepared.manifest)
+                .map_err(|error| Error::uncertain(error.code))?;
+        }
         let receipt = CreationReceipt {
             target_id: self.binding.target_id.clone(),
             domain_generation: self.binding.generation.clone(),
@@ -405,6 +514,7 @@ impl Engine {
             incarnation: request.incarnation.clone(),
             material_sha256: material_hash(&record)
                 .map_err(|_| Error::uncertain(ErrorCode::Native))?,
+            material: None,
         };
         write_marker(&receipt, &self.vm_directory(&receipt.name))?;
         if !self
@@ -447,6 +557,7 @@ impl Engine {
                 },
                 resources: None,
                 pid_identity: None,
+                configuration: None,
             });
         };
         self.verify_record(receipt, &record)?;
@@ -476,6 +587,7 @@ impl Engine {
         }
         Ok(Observation {
             state,
+            configuration: crate::MachineConfiguration::observe(&record),
             resources: Some(Resources {
                 cpus: record.cpus,
                 memory_mib: record.mem,
@@ -499,7 +611,104 @@ impl Engine {
         {
             return Err(Error::before(ErrorCode::Ownership));
         }
+        crate::material::MaterialJournal::at(&self.vm_directory(&receipt.name)).verify(receipt)?;
         Ok(())
+    }
+
+    /// Shared synchronous SDK operation. The bridge must use a bounded native
+    /// executor/tool supervisor before advertising disk growth; this method is
+    /// not enabled by the legacy helper's protocol or feature policy.
+    pub fn expand_disks(
+        &self,
+        receipt: &CreationReceipt,
+        operation_id: &str,
+        request: crate::GrowDisks,
+    ) -> Result<CreationReceipt> {
+        if receipt.material.is_none() {
+            return Err(Error::before(ErrorCode::Unsupported));
+        }
+        let gate = self.gate(&receipt.name)?;
+        let _guard = gate
+            .try_lock()
+            .map_err(|_| Error::before(ErrorCode::Conflict))?;
+        let observation = self.inspect(receipt)?;
+        if observation.state != ObservedState::Stopped {
+            return Err(Error::before(ErrorCode::State));
+        }
+        self.verify_lifecycle_preconditions(receipt, &observation)?;
+        // expand_disk does not acquire the machine lifecycle/source flock.
+        let _source = self.source_lease(receipt)?;
+        let before = self.record(receipt)?;
+        let journal = crate::material::MaterialJournal::at(&self.vm_directory(&receipt.name));
+        let permit = journal.prepare(receipt, operation_id, request, &before)?;
+        journal.enter(&permit)?;
+        let result = (|| {
+            let directory = self.vm_directory(&receipt.name);
+            if let Some(size) = request.storage_gib {
+                let (path, _) = smolvm::agent::resolve_disk_image(
+                    &directory,
+                    smolvm::storage::STORAGE_DISK_FILENAME,
+                );
+                smolvm::storage::expand_disk::<smolvm::storage::Storage>(&path, size)
+                    .map_err(|_| Error::uncertain(ErrorCode::Native))?;
+            }
+            if let Some(size) = request.overlay_gib {
+                let (path, _) = smolvm::agent::resolve_disk_image(
+                    &directory,
+                    smolvm::storage::OVERLAY_DISK_FILENAME,
+                );
+                smolvm::storage::expand_disk::<smolvm::storage::Overlay>(&path, size)
+                    .map_err(|_| Error::uncertain(ErrorCode::Native))?;
+            }
+            self.verify_database_identity()
+                .map_err(|error| Error::uncertain(error.code))?;
+            self.db
+                .update_vm(&receipt.name, |record| {
+                    if let Some(size) = request.storage_gib {
+                        record.storage_gb = Some(size);
+                    }
+                    if let Some(size) = request.overlay_gib {
+                        record.overlay_gb = Some(size);
+                    }
+                })
+                .map_err(|_| Error::uncertain(ErrorCode::Database))?;
+            let after = self
+                .db
+                .get_vm(&receipt.name)
+                .map_err(|_| Error::uncertain(ErrorCode::Database))?
+                .ok_or(Error::uncertain(ErrorCode::Ownership))?;
+            if !marker_matches(receipt, &directory).map_err(|error| Error::uncertain(error.code))? {
+                return Err(Error::uncertain(ErrorCode::Ownership));
+            }
+            journal.complete(receipt, &permit, &after)
+        })();
+        // Failures leave the entered journal and reservations unresolved. No
+        // SDK mutation is retried, and a partial geometry is never authorized.
+        result
+    }
+
+    /// Pure local observation of already recorded correlated success. Missing
+    /// or entered-only evidence cannot supply a replacement receipt.
+    pub fn inspect_disk_transition(
+        &self,
+        receipt: &CreationReceipt,
+        operation_id: &str,
+        request: crate::GrowDisks,
+    ) -> Result<Option<CreationReceipt>> {
+        receipt.validate(&self.binding)?;
+        let gate = self.gate(&receipt.name)?;
+        let _guard = gate
+            .try_lock()
+            .map_err(|_| Error::before(ErrorCode::Conflict))?;
+        self.verify_database_identity()?;
+        if !marker_matches(receipt, &self.vm_directory(&receipt.name))? {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        crate::material::MaterialJournal::at(&self.vm_directory(&receipt.name)).completed(
+            receipt,
+            operation_id,
+            request,
+        )
     }
 
     pub fn start(&self, receipt: &CreationReceipt) -> Result<Observation> {
@@ -521,7 +730,7 @@ impl Engine {
         dispatch
             .finish(self.runtime.pid(&receipt.name))
             .map_err(|error| Error::uncertain(error.code))?;
-        result.map_err(|_| Error::uncertain(ErrorCode::Native))?;
+        result.map_err(|error| Error::uncertain(crate::sdk_compat::launch_error(&error)))?;
         self.inspect(receipt)
             .map_err(|error| Error::uncertain(error.code))
     }
@@ -632,6 +841,7 @@ impl Engine {
             .ok_or(Error::before(ErrorCode::State))?;
         self.verify_record(receipt, &record)?;
         command.validate(record.image.is_some())?;
+        let _job = self.jobs.acquire(crate::jobs::Demand::streaming())?;
         let gate = self.gate(&receipt.name)?;
         let _guard = gate
             .try_lock()
@@ -716,9 +926,11 @@ impl Engine {
     /// Admission state only; never process termination or guest result evidence.
     /// A future bridge observes the same state while owned collectors stay alive.
     pub fn available(&self) -> bool {
-        self.boot
-            .as_ref()
-            .is_none_or(|(_, actors)| actors.available())
+        self.jobs.available()
+            && self
+                .boot
+                .as_ref()
+                .is_none_or(|(_, actors)| actors.available())
             && self
                 .transfers
                 .as_ref()
@@ -882,6 +1094,266 @@ fn marker_matches(receipt: &CreationReceipt, directory: &Path) -> Result<bool> {
 mod tests {
     use super::*;
 
+    fn read_budget() -> crate::ReadBudget {
+        crate::ReadBudget::new(std::time::Duration::from_secs(10), Cancellation::new()).unwrap()
+    }
+
+    #[test]
+    fn shared_work_admission_precedes_guest_dispatch_and_does_not_starve_observation() {
+        let temp = tempfile::tempdir().unwrap();
+        let engine = test_engine(temp.path());
+        let receipt = install_record(&engine);
+        let leases = (0..crate::JOB_WORK_SLOTS)
+            .map(|_| {
+                engine
+                    .jobs
+                    .acquire(crate::jobs::Demand::streaming())
+                    .unwrap()
+            })
+            .collect::<Vec<_>>();
+        let command = Command {
+            argv: vec!["/bin/true".into()],
+            env: vec![],
+            workdir: None,
+            user: None,
+            timeout: std::time::Duration::from_secs(1),
+            max_output_bytes: 1024,
+        };
+        assert_eq!(
+            engine
+                .exec(&receipt, command, Cancellation::new(), |_| Ok(()))
+                .err()
+                .unwrap()
+                .code,
+            ErrorCode::Admission
+        );
+        assert_eq!(engine.node_health(&read_budget()).unwrap().total, 1);
+        assert_eq!(engine.jobs.counts().work, crate::JOB_WORK_SLOTS);
+        assert_eq!(engine.jobs.counts().control, 0);
+        drop(leases);
+        assert_eq!(engine.jobs.counts().work, 0);
+    }
+
+    #[test]
+    fn observations_read_inventory_without_minting_authority_or_changing_records() {
+        let temp = tempfile::tempdir().unwrap();
+        let engine = test_engine(temp.path());
+        assert_eq!(engine.node_health(&read_budget()).unwrap().total, 0);
+        let receipt = install_record(&engine);
+        let original = engine.db.get_vm(&receipt.name).unwrap().unwrap();
+        let health = engine.node_health(&read_budget()).unwrap();
+        assert_eq!((health.total, health.running), (1, 0));
+        let inventory = engine.inventory(&read_budget()).unwrap();
+        assert_eq!(inventory.count, 1);
+        let body: serde_json::Value = serde_json::from_slice(&inventory.bytes).unwrap();
+        assert_eq!(body[0]["name"], "owned");
+        for key in [
+            "receipt",
+            "owner_token",
+            "incarnation",
+            "labels",
+            "env",
+            "source_smolmachine",
+        ] {
+            assert!(body[0].get(key).is_none());
+        }
+        let capacity = engine.node_capacity(&read_budget()).unwrap();
+        assert_eq!(
+            (
+                capacity.allocated_cpus,
+                capacity.used_memory_mb,
+                capacity.used_cpu_millis
+            ),
+            (0, 0, 0)
+        );
+        let (observation, measurements) =
+            engine.machine_counters(&receipt, &read_budget()).unwrap();
+        assert_eq!(observation.state, ObservedState::Stopped);
+        assert_eq!(measurements.cpu_millis, None);
+        assert_eq!(measurements.rss_mb, None);
+        assert_eq!(
+            crate::identity::material_hash(&original).unwrap(),
+            crate::identity::material_hash(&engine.db.get_vm(&receipt.name).unwrap().unwrap())
+                .unwrap()
+        );
+        assert!(engine.owned_handles.lock().unwrap().is_empty());
+    }
+
+    #[test]
+    fn observations_bound_records_bytes_cancel_and_foreign_running_pids() {
+        let temp = tempfile::tempdir().unwrap();
+        let engine = test_engine(temp.path());
+        let receipt = install_record(&engine);
+        let cancel = Cancellation::new();
+        cancel.cancel();
+        let stopped = crate::ReadBudget::new(std::time::Duration::from_secs(1), cancel).unwrap();
+        assert!(engine.node_health(&stopped).is_err());
+        engine
+            .db
+            .update_vm(&receipt.name, |r| {
+                r.pid = Some(std::process::id() as i32);
+                r.pid_start_time = None;
+            })
+            .unwrap();
+        assert!(engine.node_health(&read_budget()).is_err());
+        assert!(engine.node_capacity(&read_budget()).is_err());
+        engine
+            .db
+            .update_vm(&receipt.name, |r| {
+                r.pid = None;
+                r.labels.insert(
+                    "large".into(),
+                    "x".repeat(crate::observations::MAX_RECORD_BYTES + 1),
+                );
+            })
+            .unwrap();
+        assert_eq!(
+            engine.node_health(&read_budget()).err().unwrap().code,
+            ErrorCode::OutputLimit
+        );
+    }
+
+    #[test]
+    fn inventory_limit_is_an_error_not_a_partial_success() {
+        let temp = tempfile::tempdir().unwrap();
+        let engine = test_engine(temp.path());
+        for n in 0..1025 {
+            let record = VmRecord::new(format!("item-{n:04}"), 1, 512, vec![], vec![], false);
+            engine
+                .db
+                .insert_vm_if_not_exists(&record.name, &record)
+                .unwrap();
+        }
+        assert_eq!(
+            engine.inventory(&read_budget()).err().unwrap().code,
+            ErrorCode::OutputLimit
+        );
+        assert_eq!(
+            engine.node_health(&read_budget()).err().unwrap().code,
+            ErrorCode::OutputLimit
+        );
+        assert!(engine.owned_handles.lock().unwrap().is_empty());
+    }
+
+    #[test]
+    fn raw_snapshot_budget_rejects_an_aggregate_of_individually_valid_records() {
+        let temp = tempfile::tempdir().unwrap();
+        let engine = test_engine(temp.path());
+        for n in 0..9 {
+            let mut record = VmRecord::new(format!("large-{n}"), 1, 512, vec![], vec![], false);
+            record.env = vec![("IMAGE_METADATA".into(), "x".repeat(4 * 1024 * 1024))];
+            assert!(
+                serde_json::to_vec(&record).unwrap().len() < crate::observations::MAX_RECORD_BYTES
+            );
+            engine
+                .db
+                .insert_vm_if_not_exists(&record.name, &record)
+                .unwrap();
+        }
+        assert_eq!(
+            engine.node_health(&read_budget()).err().unwrap().code,
+            ErrorCode::OutputLimit
+        );
+        assert!(engine.owned_handles.lock().unwrap().is_empty());
+    }
+
+    #[test]
+    fn large_merged_workload_records_remain_observable_without_disclosing_their_env() {
+        let temp = tempfile::tempdir().unwrap();
+        let engine = test_engine(temp.path());
+        let receipt = install_record(&engine);
+        engine
+            .db
+            .update_vm(&receipt.name, |record| {
+                record.env = (0..64)
+                    .map(|n| (format!("K{n}"), "\u{1}".repeat(8192)))
+                    .collect();
+            })
+            .unwrap();
+        assert_eq!(engine.node_health(&read_budget()).unwrap().total, 1);
+        let inventory = engine.inventory(&read_budget()).unwrap();
+        let rows: serde_json::Value = serde_json::from_slice(&inventory.bytes).unwrap();
+        assert_eq!(inventory.count, 1);
+        assert!(rows[0].get("env").is_none());
+        assert!(rows[0].get("labels").is_none());
+        assert!(inventory.bytes.len() < crate::observations::MAX_INVENTORY_BYTES);
+    }
+
+    #[test]
+    fn capacity_samples_a_birth_bound_normal_process_without_creating_a_vm() {
+        let temp = tempfile::tempdir().unwrap();
+        let engine = test_engine(temp.path());
+        let receipt = install_record(&engine);
+        let pid = std::process::id() as i32;
+        let birth = smolvm::process::process_start_time(pid).unwrap();
+        engine
+            .db
+            .update_vm(&receipt.name, |r| {
+                r.pid = Some(pid);
+                r.pid_start_time = Some(birth);
+            })
+            .unwrap();
+        for name in [
+            smolvm::storage::STORAGE_DISK_FILENAME,
+            smolvm::storage::OVERLAY_DISK_FILENAME,
+        ] {
+            std::fs::File::create(engine.vm_directory(&receipt.name).join(name))
+                .unwrap()
+                .set_len(1024 * 1024 * 1024)
+                .unwrap();
+        }
+        let measured = engine.node_capacity(&read_budget()).unwrap();
+        assert_eq!(
+            (
+                measured.allocated_cpus,
+                measured.allocated_memory_mb,
+                measured.used_disk_gb
+            ),
+            (1, 512, 2)
+        );
+        assert!(measured.used_memory_mb > 0);
+        assert_eq!(engine.node_health(&read_budget()).unwrap().running, 1);
+        // Physical liveness is insufficient for a usable machine inventory
+        // result. This ordinary process deliberately has no agent socket.
+        assert_eq!(
+            engine.inventory(&read_budget()).err().unwrap().code,
+            ErrorCode::State
+        );
+        engine
+            .db
+            .update_vm(&receipt.name, |r| r.pid_start_time = Some(birth + 1))
+            .unwrap();
+        assert!(engine.node_capacity(&read_budget()).is_err());
+        assert!(engine.owned_handles.lock().unwrap().is_empty());
+    }
+
+    #[test]
+    fn machine_measurements_require_saved_authority_and_cannot_resolve_partial_storage() {
+        let temp = tempfile::tempdir().unwrap();
+        let engine = test_engine(temp.path());
+        let receipt = install_record(&engine);
+        let mut foreign = receipt.clone();
+        foreign.owner_token = "d".repeat(64);
+        assert_eq!(
+            engine
+                .machine_counters(&foreign, &read_budget())
+                .err()
+                .unwrap()
+                .code,
+            ErrorCode::Ownership
+        );
+        engine.db.remove_vm(&receipt.name).unwrap();
+        assert_eq!(
+            engine
+                .machine_counters(&receipt, &read_budget())
+                .unwrap()
+                .0
+                .state,
+            ObservedState::IdentityUnknown
+        );
+        assert!(engine.vm_directory(&receipt.name).exists());
+    }
+
     fn test_engine(root: &Path) -> Engine {
         let root = root.canonicalize().unwrap();
         let binding = DomainBinding {
@@ -893,6 +1365,7 @@ mod tests {
         let db = SmolvmDb::open_at(&binding.database).unwrap();
         let domain = DomainGuard::acquire_at(&binding, root.join("private"), true).unwrap();
         Engine {
+            opened_at: std::time::Instant::now(),
             runtime: EmbeddedRuntime::with_db(db.clone()),
             database_identity: database_identity(&binding.database).unwrap(),
             db,
@@ -901,6 +1374,7 @@ mod tests {
             owned_handles: Mutex::new(BTreeMap::new()),
             domain: Arc::new(domain),
             transfers: None,
+            jobs: crate::jobs::JobPool::default(),
             templates: None,
             host: None,
             boot: None,
@@ -1064,6 +1538,7 @@ mod tests {
             owner_token: request.owner_token.clone(),
             incarnation: request.incarnation.clone(),
             material_sha256: "e".repeat(64),
+            material: None,
         };
         engine.track_handle(&receipt).unwrap();
         assert_eq!(
@@ -1172,6 +1647,7 @@ mod tests {
             owner_token: "b".repeat(64),
             incarnation: "c".repeat(32),
             material_sha256: material_hash(&record).unwrap(),
+            material: None,
         };
         engine
             .db
@@ -1316,6 +1792,7 @@ mod tests {
             owner_token: "b".repeat(64),
             incarnation: "c".repeat(32),
             material_sha256: "d".repeat(64),
+            material: None,
         };
         assert_eq!(
             engine.inspect(&receipt).unwrap().state,
@@ -1336,6 +1813,7 @@ mod tests {
             owner_token: "b".repeat(64),
             incarnation: "c".repeat(32),
             material_sha256: "d".repeat(64),
+            material: None,
         };
         std::fs::create_dir_all(engine.vm_directory(&receipt.name)).unwrap();
         assert_eq!(

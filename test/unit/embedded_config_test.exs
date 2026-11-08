@@ -1,7 +1,8 @@
 defmodule SmolBox.Embedded.ConfigTest do
   use ExUnit.Case, async: true
-  alias SmolBox.Embedded.{Config, Limits}
-  alias SmolBox.{Error, Profile}
+  alias SmolBox.Embedded.{Config, Health, Limits, Protocol}
+  alias SmolBox.{Error, Profile, Source}
+  alias SmolBox.Runtime.Target
 
   defp options do
     {:ok, profile} = Profile.new("offline-v1")
@@ -54,6 +55,65 @@ defmodule SmolBox.Embedded.ConfigTest do
     assert Config.domain_binding(initializing) == Config.domain_binding(config)
     refute Map.has_key?(Config.domain_binding(config), :bridge)
     refute Map.has_key?(Config.domain_binding(config), :epoch)
+  end
+
+  test "shared source approval survives normalization without enabling unsupported operations" do
+    {:ok, source} =
+      Source.oci(
+        id: "approved-remote-image",
+        reference: "registry.example/team/image@sha256:" <> String.duplicate("a", 64),
+        architecture: "aarch64"
+      )
+
+    assert {:ok, config} = Config.new(Keyword.put(options(), :sources, [source]))
+    target = Target.normalize(config)
+    assert target.sources == [source]
+    assert target.checkpoints == [] and target.branch_policies == []
+    assert :ok = Target.validate(target)
+    assert config.package_identity["engine_version"] == "0.1.0"
+    assert target.runtime_version == "0.1.0"
+    assert Config.sdk_version(config) == "1.22.0"
+    assert Target.sdk_version(target) == "1.22.0"
+    assert Target.supports_feature?(target, :foreground_exec)
+
+    for feature <- ~w(networking ports workloads remote_sources images background_exec terminals
+                       checkpoints exports branches disk_growth volumes)a do
+      refute Target.supports_feature?(target, feature)
+    end
+
+    assert {:error, %Error{category: :unsupported_capability, evidence: :not_dispatched}} =
+             Target.require_operation(target, :pull_image)
+
+    refute inspect(config) =~ "registry.example"
+    refute inspect(target) =~ "registry.example"
+    assert_invalid(Keyword.put(options(), :sources, [source, source]))
+    assert_invalid(Keyword.put(options(), :sources, [%{source | architecture: "x86_64"}]))
+  end
+
+  test "optional approvals fail closed and do not change the helper capability surface" do
+    for field <- ~w(sources checkpoints export_destinations checkpoint_policies branch_policies)a,
+        invalid <- [nil, [nil], Enum.to_list(1..33)] do
+      assert_invalid(Keyword.put(options(), field, invalid))
+    end
+
+    for {field, invalid} <- [volume_policy: %{}, registry_credentials: :invalid] do
+      assert_invalid(Keyword.put(options(), field, invalid))
+    end
+
+    {:ok, config} = Config.new(options())
+    health = Health.describe(config, %{status: :ready, protocol_minor: 4})
+    assert health.sdk_version == "1.22.0"
+    assert health.engine_version == "0.1.0"
+    assert health.capabilities == Protocol.capabilities()
+    assert health.protocol_version == %{major: 1, minor: 4}
+
+    unknown = %{
+      config
+      | package_identity: %{config.package_identity | "smolvm_revision" => "unknown"}
+    }
+
+    assert Config.sdk_version(unknown) == nil
+    assert Target.sdk_version(%{runtime_version: "1.19.0"}) == "1.19.0"
   end
 
   test "identity must match the configured platform and pinned engine" do

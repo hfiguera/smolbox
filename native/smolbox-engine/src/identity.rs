@@ -28,7 +28,8 @@ impl Resources {
 
 /// Returned only by a successful create, then held by the durable caller.
 /// Inventory inspection never mints this authority from copied labels.
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct CreationReceipt {
     pub target_id: String,
     pub domain_generation: String,
@@ -36,6 +37,8 @@ pub struct CreationReceipt {
     pub owner_token: String,
     pub incarnation: String,
     pub material_sha256: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub material: Option<crate::MaterialProof>,
 }
 
 impl std::fmt::Debug for CreationReceipt {
@@ -58,12 +61,22 @@ impl CreationReceipt {
         {
             return Err(Error::before(ErrorCode::Ownership));
         }
+        if let Some(proof) = &self.material {
+            proof.validate()?;
+            if proof.revision == 0 && proof.record_sha256 != self.material_sha256 {
+                return Err(Error::before(ErrorCode::Ownership));
+            }
+        }
         Ok(())
     }
 
     pub(crate) fn matches(&self, record: &VmRecord) -> Result<bool> {
         Ok(self.name == record.name
-            && self.material_sha256 == material_hash(record)?
+            && self
+                .material
+                .as_ref()
+                .map_or(&self.material_sha256, |proof| &proof.record_sha256)
+                == &material_hash(record)?
             && record.labels.get("smolbox.owner") == Some(&self.owner_token))
     }
 }
@@ -82,16 +95,32 @@ pub enum ObservedState {
     IdentityUnknown,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct Observation {
     pub state: ObservedState,
     /// Stored configuration, not an attestation of resources applied in guest.
     pub resources: Option<Resources>,
     // Observational PID identity is not assignment identity or store authority.
     pub pid_identity: Option<(i32, u64)>,
+    pub configuration: Option<Box<crate::MachineConfiguration>>,
+}
+
+impl std::fmt::Debug for Observation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Observation")
+            .field("state", &self.state)
+            .field("resources", &self.resources)
+            .finish_non_exhaustive()
+    }
 }
 
 pub(crate) fn material_hash(record: &VmRecord) -> Result<String> {
+    let value = material_value(record)?;
+    let bytes = serde_json::to_vec(&value).map_err(|_| Error::before(ErrorCode::Native))?;
+    Ok(hex::encode(Sha256::digest(bytes)))
+}
+
+pub(crate) fn material_value(record: &VmRecord) -> Result<serde_json::Value> {
     let mut value = serde_json::to_value(record).map_err(|_| Error::before(ErrorCode::Native))?;
     let fields = value
         .as_object_mut()
@@ -107,8 +136,7 @@ pub(crate) fn material_hash(record: &VmRecord) -> Result<String> {
     ] {
         fields.remove(field);
     }
-    let bytes = serde_json::to_vec(&value).map_err(|_| Error::before(ErrorCode::Native))?;
-    Ok(hex::encode(Sha256::digest(bytes)))
+    Ok(value)
 }
 
 pub(crate) fn record_state(record: &VmRecord, has_dependents: bool) -> ObservedState {

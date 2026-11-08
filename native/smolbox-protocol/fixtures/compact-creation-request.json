@@ -1,0 +1,30 @@
+{
+  "type": "request",
+  "epoch": "abababababababababababababababab",
+  "id": 1,
+  "budget_ms": 1000,
+  "initial_credit": 262144,
+  "initial_event_credit": 64,
+  "operation": {
+    "operation": "qualify_creation",
+    "artifact": {
+      "path": "/approved.smolmachine",
+      "sha256": "efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef",
+      "max_bytes": 1024,
+      "guest_platform": "linux/arm64"
+    },
+    "resources": {
+      "cpus": 1,
+      "memory_mib": 512,
+      "storage_gib": 1,
+      "overlay_gib": 1
+    },
+    "user": null,
+    "features_payload": {
+      "schema": 1,
+      "chunks": [
+        "U0JDRgEAAAAAAAABH5AAUAEAAQAAAAgvYmluL2FwcAACAAAAEGxpdGVyYWw7ICQodGV4dCkAAAADw6kBAAEAAAAHUFJJVkFURQAAAAxvcGFxdWUBdmFsdWUBAAAABC9hcHA="
+      ]
+    }
+  }
+}

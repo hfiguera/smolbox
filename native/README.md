@@ -1,8 +1,9 @@
 # SmolBox native workspace
 
 The embedded Port backend supports explicitly approved development packages.
-The workspace builds against an unmodified SDK with completed ordinary
-development qualification on Linux x86_64 and macOS arm64. Follow the
+The workspace builds against an unmodified SDK. Exact engine 0.1.0 packages have
+completed ordinary development qualification on Linux x86_64 and macOS arm64;
+the new 0.2.0/protocol-2 packages still need their own platform evidence. Follow the
 [migration design](../docs/design/embedded-port-unmodified-sdk.md),
 [implementation plan](../docs/design/embedded-port-unmodified-sdk-implementation-plan.md),
 and [progress evidence](../docs/design/embedded-port-progress.md).
@@ -15,10 +16,36 @@ and live fault evidence is separate.
 
 The protocol crate builds independently of hypervisor assets and implements
 bounded framing, [versioned DTOs and admission/credit state](smolbox-protocol/README.md).
+Protocol-2 packages declaring `streaming_exec: 1` expose the owned streaming
+command worker through compact input and byte/event-credit output. Public nil-stdin
+command bounds and actual Exit evidence are preserved; stores must advertise
+`native_streaming_commands: 1` after upgrading all native v17 readers. The
+transport-independent engine remains reusable by a future Rustler bridge.
+Ordinary new-package guest/platform qualification remains pending.
+
+Protocol-2 packages declaring `terminals: 1` route managed retained-image terminal
+sessions through the shared engine and an owned `run_interactive_io` worker.
+Protected private IPC authenticates the parent, metadata and operation identity.
+Machine/source/domain leases and shared resource reservations remain held through
+exact child collection. Unknown collection retains leases and quarantines
+admission; EOF, local close or cancellation cannot substitute for guest Exit.
+
+The Port adapter forwards initialized/output/input/resize/close events with finite
+budgets and bounded queues. Worker initialization does not prove guest readiness.
+Only whole consumer removal restores output credit. Neither the bridge nor the
+store persists a transcript, connection or input for replay. SDK I/O uses the
+bounded existing-agent relay, without a host tty or signal handler.
+
+Stores must advertise `native_terminal_sessions: 1` after all native v17 readers
+and command-slot transactions are upgraded, alongside ordinary terminal markers.
+Current/minimum consumers and ordinary Linux/macOS PTY qualification for the new
+package bytes remain pending. Public Runtime peers and non-VM SDK/child checks
+are scoped evidence; they do not transfer historical platform qualification.
+
 `smolbox-engine` consumes the exact source pin and implements
 prepared creation, intent-bound absence checks, receipt-checked observation/lifecycle, and bounded foreground
-exec normalization, and capped guest file transfers. A macOS native proof has
-run. The [framed helper](smolbox-port/README.md), internal Elixir Port owner and
+exec normalization, and capped guest file transfers. Earlier 0.1.0 packages
+have macOS proof evidence. The [framed helper](smolbox-port/README.md), internal Elixir Port owner and
 record-scoped adapter have also run macOS proofs, including encrypted PostgreSQL
 recovery across fresh BEAM processes. Pack structure and geometry are validated
 before reservation. Public development admission is available; distribution and full crash
@@ -41,6 +68,12 @@ elixir scripts/ci.exs package-consumer --without-rust \
   --native-fixture /approved/container.smolmachine --native-sha256 APPROVED_DIGEST \
   --native-domain-json /enrolled/domain.json --native-output /new/native-proof
 ```
+
+Add `--native-terminal` with `--native-public` for the ordinary retained-image
+PTY qualification on packages declaring `terminals: 1`. It verifies binary
+input/output, resize, observed Exit 7 and durable slot release. The native package
+must use an optimized release build so complete template verification fits the
+finite startup budget. This option never selects deferred crash campaigns.
 
 Run under the minimum supported Elixir/OTP toolchain with `--minimum` to pin
 minimum production dependencies, optionally consuming the same `--archive`.

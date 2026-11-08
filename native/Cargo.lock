@@ -2325,7 +2325,7 @@ checksum = "5b3dc8af474f516a851ff4bd12db780f948b9250ad37211e4eec0bccea54e01b"
 
 [[package]]
 name = "smolbox-engine"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "dirs",
  "getrandom 0.3.4",
@@ -2345,7 +2345,7 @@ dependencies = [
 
 [[package]]
 name = "smolbox-port"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "crossbeam-channel",
  "getrandom 0.3.4",
@@ -2363,7 +2363,7 @@ dependencies = [
 
 [[package]]
 name = "smolbox-protocol"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "base64 0.22.1",
  "serde",

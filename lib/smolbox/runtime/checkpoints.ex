@@ -31,7 +31,7 @@ defmodule SmolBox.Runtime.Checkpoints do
 
   def approved?(worker, spec),
     do:
-      worker.runtime_version in ["1.19.0", "1.20.2", "1.22.0"] and
+      Target.supports_feature?(worker, :checkpoints) and
         spec.policy in worker.checkpoint_policies
 
   def advance(config, machine, capture, changes) do
@@ -117,7 +117,7 @@ defmodule SmolBox.Runtime.Checkpoints do
       profile: m.spec.profile,
       platform: worker.platform,
       architecture: worker.architecture,
-      runtime_version: worker.runtime_version
+      runtime_version: Target.sdk_version(worker)
     }
 
     with :ok <- CheckpointResult.validate(result),

@@ -1,0 +1,74 @@
+{
+  "type": "hello",
+  "hello": {
+    "major": 2,
+    "minor": 0,
+    "epoch": "abababababababababababababababab",
+    "domain": {
+      "target_id": "embedded-local",
+      "generation": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd"
+    },
+    "package": {
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "0101010101010101010101010101010101010101010101010101010101010101",
+      "build_sha256": "2323232323232323232323232323232323232323232323232323232323232323",
+      "assets_sha256": "4545454545454545454545454545454545454545454545454545454545454545",
+      "platform": "macos",
+      "architecture": "aarch64"
+    },
+    "capabilities": [
+      "create",
+      "inspect",
+      "start",
+      "stop",
+      "delete",
+      "exec",
+      "read_file",
+      "write_file",
+      "qualify_creation",
+      "inspect_creation"
+    ],
+    "limits": {
+      "cancel_grace_ms": 3000,
+      "frame_bytes": 1048576,
+      "chunk_bytes": 65536,
+      "in_flight": 32,
+      "work_workers": 4,
+      "control_workers": 2,
+      "input_queue_encoded_bytes": 4194304,
+      "upload_spool_bytes": 134217728,
+      "credit_grace_ms": 1000,
+      "writer_grace_ms": 5000,
+      "events_per_request": 65536,
+      "initial_credit_bytes": 262144,
+      "initial_credit_events": 64,
+      "event_queue_decoded_bytes": 8388608,
+      "event_queue_encoded_bytes": 12582912,
+      "transfer_bytes": 16777216,
+      "command_ms": 86400000,
+      "file_ms": 600000,
+      "cpus_min": 1,
+      "cpus_max": 16,
+      "memory_mib_min": 64,
+      "memory_mib_max": 65536,
+      "disk_gib_min": 1,
+      "disk_gib_max": 1024
+    },
+    "preflight": {
+      "status": "ready"
+    },
+    "sdk": {
+      "sdk_version": "1.22.0",
+      "source_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "feature_versions": {
+        "lifecycle": 1,
+        "foreground_exec": 1,
+        "extended_exec": 1,
+        "files": 1,
+        "extended_files": 1,
+        "material_proofs": 2
+      }
+    }
+  }
+}

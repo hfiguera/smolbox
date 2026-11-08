@@ -1,0 +1,141 @@
+{
+  "schema": 1,
+  "scope": "ordinary-macos-managed-port-pty-and-public-consumers",
+  "status": "passed",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "platform": "macos-aarch64",
+  "package_manifest_sha256": "4b20fe118ebd6a7fb76406c59612087d529405aa2421bdaf43fe272af2bfac58",
+  "identity": {
+    "architecture": "aarch64",
+    "assets_sha256": "71849350d5d6a2f219fc84354ee6c66d9b459c5232ab89b7f6de569d2709e23c",
+    "build_sha256": "06ba86329b6fed7ebbc8fb5bcc24160c7fe3fdef3d85527f2b872b1c3c4a6e2c",
+    "engine_version": "0.2.0",
+    "platform": "macos",
+    "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+  },
+  "fixture_sha256": "0f4a26a548738c6ba359701ea23c5d2bbb93f0c1d95f6444df897bfa99e27aa2",
+  "archive_sha256": "0c06172785ad3f165b0bfd64026a0671b28af5c037e5922c702d011f73f57de8",
+  "terminal": {
+    "binary_input_bytes": 3,
+    "binary_output_verified": true,
+    "codec": 17,
+    "deliberate_process_interruption": false,
+    "duplicate_open_reuses_execution": true,
+    "exercised": true,
+    "observed_exit": 7,
+    "resize": {
+      "cols": 120,
+      "rows": 43
+    },
+    "scope": "ordinary-public-retained-image-pty",
+    "slot_released": true,
+    "transcript_persisted": false
+  },
+  "lifecycle": {
+    "disposable_exit": 7,
+    "retained_write_exit": 7,
+    "file_bytes": 1048593,
+    "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+    "drain_blocks_new_assignments": true,
+    "existing_command_while_draining": true,
+    "retained_after_normal_runtime_restart": true,
+    "drain_survives_runtime_restart": true,
+    "resume_version_checked": true,
+    "owned_deleted": true,
+    "final_reserved_slots": 0
+  },
+  "inventory_empty_before_after": true,
+  "consumers": [
+    {
+      "lane": "current",
+      "minimum": false,
+      "without_rust": true,
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "runtime_dependencies": [
+        "finch",
+        "hpax",
+        "jason",
+        "mime",
+        "mint",
+        "mint_web_socket",
+        "nimble_options",
+        "nimble_pool",
+        "req",
+        "telemetry"
+      ],
+      "private_report_sha256": "456f1955b8d90949cf544ca1bbdace92814ea9d5083f0dfc4568e45e1681b833",
+      "proof_tool_sha256": {
+        "config.example.exs": "9a0178a7249aba9b4a7990a36162564bf77c39c355c7a5a9f57defae4b6330f3",
+        "demo.ex": "030504ee5e7c78f25267172e29989ad1ee7a606777dfb41e4e7b91b7c46c16f9",
+        "native-proof.exs": "8e68ef45f8fd3019bdf90de342174c6deb522207251ce7f7ffaf8a7df7a1bfef",
+        "native_proof.py": "cc6a5a4b4d8178139e13d8183f54bd4650aadfddd50faf252b0eeb7bd271333e"
+      }
+    },
+    {
+      "lane": "minimum",
+      "minimum": true,
+      "without_rust": true,
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "runtime_dependencies": [
+        "finch",
+        "hpax",
+        "jason",
+        "mime",
+        "mint",
+        "mint_web_socket",
+        "nimble_options",
+        "nimble_pool",
+        "req",
+        "telemetry"
+      ],
+      "private_report_sha256": "51e91f6fad61820bb7d2b969f2f43142c0773692a8bc4ef3566c6f62f7fd1cf9",
+      "proof_tool_sha256": {
+        "config.example.exs": "9a0178a7249aba9b4a7990a36162564bf77c39c355c7a5a9f57defae4b6330f3",
+        "demo.ex": "030504ee5e7c78f25267172e29989ad1ee7a606777dfb41e4e7b91b7c46c16f9",
+        "native-proof.exs": "8e68ef45f8fd3019bdf90de342174c6deb522207251ce7f7ffaf8a7df7a1bfef",
+        "native_proof.py": "cc6a5a4b4d8178139e13d8183f54bd4650aadfddd50faf252b0eeb7bd271333e"
+      }
+    }
+  ],
+  "deliberate_process_interruption": false,
+  "crash_handling_qualified": false,
+  "distribution_approved": false,
+  "full_http_parity_qualified": false,
+  "pending": [
+    "linux ordinary PTY and package consumers",
+    "PostgreSQL terminal qualification",
+    "broader resource/interference/upgrade campaigns",
+    "remaining P0\u2013P9 requirements"
+  ],
+  "unsuccessful_attempts": [
+    {
+      "scope": "debug-package-startup",
+      "reason": "template verification exceeded finite readiness budget",
+      "vm_created": false,
+      "owned_records": 0,
+      "forced_termination": false,
+      "qualification": false
+    }
+  ],
+  "http_only_consumers": [
+    {
+      "lane": "current",
+      "minimum": false,
+      "without_rust": true,
+      "native_assets_requested": false,
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "archive_sha256": "0c06172785ad3f165b0bfd64026a0671b28af5c037e5922c702d011f73f57de8",
+      "private_report_sha256": "aa031aed4d536e1ae39abd5be83684102b60ecea2ecd3edc9e24b0f1f3ba0398"
+    },
+    {
+      "lane": "minimum",
+      "minimum": true,
+      "without_rust": true,
+      "native_assets_requested": false,
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "archive_sha256": "0c06172785ad3f165b0bfd64026a0671b28af5c037e5922c702d011f73f57de8",
+      "private_report_sha256": "178d5e9525d07b694a763e9c707d992441b89c499ff2bc5ae0ec399f311c6de7"
+    }
+  ]
+}

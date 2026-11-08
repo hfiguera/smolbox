@@ -1,10 +1,15 @@
 defmodule SmolBox.Example.EmbeddedPort do
   @moduledoc "Public managed Port lifecycle using an explicitly approved offline package."
   alias SmolBox.ArtifactStore.Directory
-  alias SmolBox.{Command, ExecutionSpec, Files, Machines, ManagedMachineSpec, Runtime}
+  alias SmolBox.Backend.Features
+  alias SmolBox.{Command, ExecutionSpec, Files, Machines, ManagedMachineSpec, Runtime, Terminal}
   alias SmolBox.Store.{Codec, Memory}
+  alias SmolBox.Terminal.Spec, as: TerminalSpec
 
   def run(target, root, options \\ []) do
+    terminal = Keyword.get(options, :terminal, false)
+    true = is_boolean(terminal)
+    true = not terminal or Features.supports?(target, :terminals)
     root = Path.expand(root)
     :ok = File.mkdir(root)
     :ok = File.chmod(root, 0o700)
@@ -40,7 +45,8 @@ defmodule SmolBox.Example.EmbeddedPort do
       supervisor: supervisor,
       store: store,
       http_workers: Keyword.get(options, :http_workers, []),
-      root: root
+      root: root,
+      terminal: terminal
     }
 
     try do
@@ -90,6 +96,7 @@ defmodule SmolBox.Example.EmbeddedPort do
     %{state: :stopped} = idle(machine)
     checkpoint(context, "created")
     lifecycle_request(machine, :start, :running)
+    terminal_evidence = terminal(context, machine)
     data = :binary.copy(<<0, 255>>, 524_296) <> <<42>>
     :ok = Directory.seed(context.objects, "portdemo", "input", data)
     write = command(context, "write", "cat /workspace/in.bin > /workspace/retained.bin; exit 7")
@@ -140,6 +147,7 @@ defmodule SmolBox.Example.EmbeddedPort do
       "proof" => "passed",
       "package_manifest_sha256" => context.target.package_manifest_sha256,
       "identity" => context.target.package_identity,
+      "fixture_sha256" => context.artifact["sha256"],
       "public_native_admission_enabled" => true,
       "disposable_exit" => 7,
       "retained_write_exit" => 7,
@@ -154,8 +162,103 @@ defmodule SmolBox.Example.EmbeddedPort do
       "final_reserved_slots" => final.reserved.slots,
       "http_workers_exercised_while_native_draining" => length(context.http_workers),
       "deliberate_process_interruption" => false,
-      "crash_handling_qualified" => false
+      "crash_handling_qualified" => false,
+      "terminal" => terminal_evidence
     }
+  end
+
+  defp terminal(%{terminal: false}, _machine), do: %{"exercised" => false}
+
+  defp terminal(context, machine) do
+    {:ok, terminal} =
+      TerminalSpec.new(session_ms: 30_000, idle_ms: 15_000, max_buffer_bytes: 65_536)
+
+    {:ok, spec} =
+      ExecutionSpec.new(
+        scope: "portdemo",
+        id: "terminal",
+        artifact: context.artifact,
+        profile: context.profile,
+        command: terminal
+      )
+
+    {:ok, key} = Terminal.open(__MODULE__, machine, spec)
+    {:ok, ^key} = Terminal.open(__MODULE__, machine, spec)
+    {:ok, handle} = Terminal.attach(__MODULE__, key, 10_000)
+    :ok = Terminal.input(handle, "stty -echo; printf 'SB_TTY_%s\\n' READY\n")
+    terminal_marker(handle, "SB_TTY_READY")
+    :ok = Terminal.resize(handle, 120, 43)
+    :ok = Terminal.input(handle, "stty size; printf 'SB_TTY_%s\\n' SIZE\n")
+    size = terminal_marker(handle, "SB_TTY_SIZE")
+    true = :binary.match(size, "43 120") != :nomatch
+    :ok = Terminal.input(handle, "printf '\\000\\377\\200'; printf 'SB_TTY_%s\\n' OUTPUT\n")
+    output = terminal_marker(handle, "SB_TTY_OUTPUT")
+    true = :binary.match(output, <<0, 255, 128>>) != :nomatch
+    # Only this owned guest PTY changes mode. No host tty or signal API is used.
+    :ok =
+      Terminal.input(
+        handle,
+        "stty -echo -icanon min 1 time 0; printf 'SB_TTY_%s\\n' INPUT_READY; dd bs=1 count=3 2>/dev/null | od -An -t u1; stty sane -echo; printf 'SB_TTY_%s\\n' INPUT_DONE\n"
+      )
+
+    terminal_marker(handle, "SB_TTY_INPUT_READY")
+    :ok = Terminal.input(handle, <<0, 255, 128>>)
+    input = terminal_marker(handle, "SB_TTY_INPUT_DONE")
+    true = Regex.match?(~r/\b0\s+255\s+128\b/, input)
+    :ok = Terminal.input(handle, "exit 7\n")
+    terminal_exit(handle, System.monotonic_time(:millisecond) + 10_000)
+    record = completed(key, 7)
+    %{state: :running} = idle(machine)
+    {:ok, <<"smolbox-record-v17\0", _::binary>> = encoded} = Codec.encode(record)
+    {:ok, ^record} = Codec.decode(encoded)
+
+    %{
+      "exercised" => true,
+      "scope" => "ordinary-public-retained-image-pty",
+      "observed_exit" => 7,
+      "binary_input_bytes" => 3,
+      "binary_output_verified" => true,
+      "resize" => %{"cols" => 120, "rows" => 43},
+      "codec" => 17,
+      "duplicate_open_reuses_execution" => true,
+      "slot_released" => true,
+      "transcript_persisted" => false,
+      "deliberate_process_interruption" => false
+    }
+  end
+
+  defp terminal_marker(handle, marker),
+    do: terminal_marker(handle, marker, <<>>, System.monotonic_time(:millisecond) + 10_000)
+
+  defp terminal_marker(handle, marker, bytes, deadline) do
+    true = byte_size(bytes) <= 65_536 and System.monotonic_time(:millisecond) < deadline
+
+    case Terminal.next(handle, min(1000, max(0, deadline - System.monotonic_time(:millisecond)))) do
+      {:ok, {:output, chunk}} ->
+        next = bytes <> chunk
+        true = byte_size(next) <= 65_536
+
+        if :binary.match(next, marker) != :nomatch,
+          do: next,
+          else: terminal_marker(handle, marker, next, deadline)
+
+      {:error, %{category: :expired}} ->
+        terminal_marker(handle, marker, bytes, deadline)
+
+      _ ->
+        raise "ordinary terminal observation failed"
+    end
+  end
+
+  defp terminal_exit(handle, deadline) do
+    true = System.monotonic_time(:millisecond) < deadline
+
+    case Terminal.next(handle, min(1000, max(0, deadline - System.monotonic_time(:millisecond)))) do
+      {:ok, {:closed, {:ok, %{exit_code: 7}}}} -> :ok
+      {:ok, {:output, _}} -> terminal_exit(handle, deadline)
+      {:error, %{category: :expired}} -> terminal_exit(handle, deadline)
+      _ -> raise "ordinary terminal Exit was not confirmed"
+    end
   end
 
   # These are private forensic records, not a durable store or an import API.

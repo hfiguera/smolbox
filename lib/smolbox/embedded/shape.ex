@@ -26,12 +26,40 @@ defmodule SmolBox.Embedded.Shape do
   def optional?(nil, _predicate), do: true
   def optional?(value, predicate), do: predicate.(value)
 
-  def receipt?(receipt) do
+  def receipt?(receipt, major \\ 1)
+
+  def receipt?(receipt, 1) do
     keys?(receipt, ~w(target_id domain_generation name owner_token incarnation material_sha256)) and
       id?(receipt["target_id"]) and id?(receipt["name"]) and
       hex?(receipt["domain_generation"], 32) and hex?(receipt["owner_token"], 64) and
       hex?(receipt["incarnation"], 32) and Validation.digest?(receipt["material_sha256"])
   end
+
+  def receipt?(receipt, 2) do
+    keys?(
+      receipt,
+      ~w(target_id domain_generation name owner_token incarnation material_sha256 material)
+    ) and
+      receipt?(Map.delete(receipt, "material"), 1) and
+      material_proof?(receipt["material"]) and
+      (receipt["material"]["revision"] != 0 or
+         receipt["material"]["record_sha256"] == receipt["material_sha256"])
+  end
+
+  def receipt?(_receipt, _unsupported), do: false
+
+  def material_proof?(proof) do
+    keys?(proof, ~w(schema revision record_sha256 chain_sha256 operation_id request_sha256)) and
+      proof["schema"] == 2 and Validation.integer?(proof["revision"], 0, 1024) and
+      Validation.digest?(proof["record_sha256"]) and Validation.digest?(proof["chain_sha256"]) and
+      proof_operation?(proof)
+  end
+
+  defp proof_operation?(%{"revision" => 0} = proof),
+    do: proof["operation_id"] == nil and proof["request_sha256"] == nil
+
+  defp proof_operation?(proof),
+    do: id?(proof["operation_id"]) and Validation.digest?(proof["request_sha256"])
 
   def resources?(resources),
     do:

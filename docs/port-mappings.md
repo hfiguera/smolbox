@@ -12,6 +12,12 @@ prepared image, and a store advertising `managed_ports: 1`. Checkpoint mappings
 are rejected. No-port images, disposable executions and checkpoints retain their
 existing behavior. Published packages predating this feature do not include it.
 
+The embedded Port implementation now translates mapped-port intent and uses the
+same durable store reservations. Its protocol-2 package must declare `ports: 1`;
+trusted configuration supplies `publish_address:` (loopback by default). Actual
+new-package listener/traffic qualification remains pending. See
+[Embedded Port setup](embedded-port.md) for its current development status.
+
 ## Create and use
 
 Use the supervised runtime, approved image and profile from

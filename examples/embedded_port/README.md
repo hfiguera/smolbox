@@ -40,6 +40,15 @@ writes `evidence.json`; receipt-bearing `private-records-*.json` files stay priv
 Failures preserve those records before normal shutdown. Never fabricate receipts
 from SDK inventory or replay an uncertain command.
 
+For an approved package declaring `terminals: 1`, explicitly set
+`SMOLBOX_EMBEDDED_TERMINAL=true` to include the ordinary managed terminal proof.
+It opens one retained-image shell, verifies binary output and input, checks guest
+PTY dimensions after resize, observes Exit 7 and releases the durable command
+slot before normal machine cleanup. Only the owned guest PTY changes mode; the
+host tty is untouched. Terminal transcripts stay out of durable records. The
+evidence distinguishes this requested proof from a lifecycle-only run, and no
+crash, forced termination or CLI-race campaign is selected.
+
 The default store is **ephemeral Memory**. Full BEAM/store loss can strand VMs;
 private forensic files are not a store backup or restore API. For a durable host,
 use `SmolBox.Example.EmbeddedPort.run/3` with `store: {adapter, context}`,

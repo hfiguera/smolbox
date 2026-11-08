@@ -318,6 +318,7 @@ fn read_receipt(path: &Path) -> ProofResult<CreationReceipt> {
         owner_token: field(&v, "owner_token")?,
         incarnation: field(&v, "incarnation")?,
         material_sha256: field(&v, "material_sha256")?,
+        material: None,
     })
 }
 

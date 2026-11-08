@@ -18,18 +18,23 @@ defmodule SmolBox.Embedded.Identity do
   @doc false
   def valid?(%__MODULE__{} = identity),
     do:
-      Validation.struct_shape?(identity, __MODULE__) and Shape.receipt?(identity.receipt) and
+      Validation.struct_shape?(identity, __MODULE__) and
+        (Shape.receipt?(identity.receipt, 1) or Shape.receipt?(identity.receipt, 2)) and
         pid?(identity.pid_identity)
 
   def valid?(_identity), do: false
 
   @doc false
-  def matches?(%__MODULE__{} = identity, %{
-        binding: %Binding{} = binding,
-        creation: create
-      }),
+  def matches?(
+        %__MODULE__{} = identity,
+        %{
+          binding: %Binding{} = binding,
+          creation: create
+        } = assignment
+      ),
       do:
         valid?(identity) and Binding.valid?(binding) and is_map(create) and
+          Shape.receipt?(identity.receipt, Map.get(assignment, :version, 1)) and
           identity.receipt["target_id"] == binding.target_id and
           identity.receipt["domain_generation"] == binding.generation and
           Enum.all?(~w(name owner_token incarnation), &(identity.receipt[&1] == create[&1]))
