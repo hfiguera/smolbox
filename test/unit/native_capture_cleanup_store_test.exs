@@ -1,7 +1,8 @@
 defmodule SmolBox.NativeCaptureCleanupStoreTest do
   use ExUnit.Case, async: true
-  alias SmolBox.Store.{Codec, CodecNativeCaptureCleanup, Memory, NativeCaptureContract}
   alias SmolBox.{CheckpointCapture, ManagedMachine}
+  alias SmolBox.Embedded.NativeCaptureCleanup
+  alias SmolBox.Store.{Codec, CodecNativeCaptureCleanup, Contract, Memory, NativeCaptureContract}
 
   for disposition <- [:completed, :resolved, :deleted, :aborted] do
     test "Memory releases #{disposition} native capture only with exact immutable cleanup authority" do
@@ -22,7 +23,7 @@ defmodule SmolBox.NativeCaptureCleanupStoreTest do
 
     assert {:error, _} = Codec.decode(bytes <> "trailing")
     capture = record.captures["resolve-1"]
-    refute SmolBox.Embedded.NativeCaptureCleanup.valid?(nil)
+    refute NativeCaptureCleanup.valid?(nil)
     assert {:error, _} = CheckpointCapture.validate(%{capture | released_at_ms: nil})
 
     assert {:error, _} =
@@ -136,7 +137,7 @@ defmodule SmolBox.NativeCaptureCleanupStoreTest do
     assert {:error, _} =
              Memory.machine(store, :capture_advance, [
                ManagedMachine.key(sent),
-               SmolBox.Store.Contract.guard(sent),
+               Contract.guard(sent),
                spec.id,
                :dispatching,
                [state: :unknown, native_source_receipt: foreign],

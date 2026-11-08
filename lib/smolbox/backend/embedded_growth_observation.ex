@@ -12,12 +12,12 @@ defmodule SmolBox.Backend.EmbeddedGrowthObservation do
     with true <- name == context.name and EmbeddedContext.scoped?(context),
          true <- Features.supports?(context.config, :disk_growth),
          {:ok, budget} <- Budget.constrain(budget, max_response_bytes: 16_384),
-         {:ok, pin_budget} <- remaining(budget, deadline),
+         {:ok, pin_budget} <- Budget.until(budget, deadline, :inspect),
          context = Call.pin(context, pin_budget),
-         {:ok, lookup_budget} <- remaining(budget, deadline),
+         {:ok, lookup_budget} <- Budget.until(budget, deadline, :inspect),
          result = Call.run(context, request(context), lookup_budget),
          {:ok, observed_context} <- promote(context, result),
-         {:ok, inspect_budget} <- remaining(budget, deadline),
+         {:ok, inspect_budget} <- Budget.until(budget, deadline, :inspect),
          {:ok, request, inspect_budget, input, callback} <-
            EmbeddedOperation.build(observed_context, :inspect_machine, [name], inspect_budget) do
       observed_context
@@ -72,14 +72,6 @@ defmodule SmolBox.Backend.EmbeddedGrowthObservation do
     do: {:error, %{error | operation: :inspect}}
 
   def promote(_context, _result), do: invalid()
-
-  defp remaining(budget, deadline) do
-    timeout = deadline - System.monotonic_time(:millisecond)
-
-    if timeout > 0,
-      do: Budget.constrain(budget, timeout_ms: timeout),
-      else: {:error, %Error{category: :expired, operation: :inspect, evidence: :not_dispatched}}
-  end
 
   defp invalid,
     do:
