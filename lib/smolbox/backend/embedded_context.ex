@@ -1,6 +1,6 @@
 defmodule SmolBox.Backend.EmbeddedContext do
   @moduledoc false
-  alias SmolBox.Backend.{Assignment, EmbeddedExport, Features}
+  alias SmolBox.Backend.{Assignment, Features}
   alias SmolBox.Embedded.{Config, Identity, NativeGrowth, Port, Request, Shape}
   alias SmolBox.{Error, Execution, ManagedMachine, Volume}
 
@@ -69,7 +69,7 @@ defmodule SmolBox.Backend.EmbeddedContext do
            identity: current_identity(record),
            growth: NativeGrowth.intent(record),
            capture: capture_intent(record),
-           export: EmbeddedExport.intent(record),
+           export: export_intent(record),
            history: material_history(record),
            profile: record.spec.profile,
            spec: record.spec,
@@ -86,6 +86,11 @@ defmodule SmolBox.Backend.EmbeddedContext do
        do: captures[id]
 
   defp capture_intent(_), do: nil
+
+  defp export_intent(%ManagedMachine{active_export: id, exports: exports}) when not is_nil(id),
+    do: exports[id]
+
+  defp export_intent(_), do: nil
 
   def scoped?(%__MODULE__{} = context),
     do:

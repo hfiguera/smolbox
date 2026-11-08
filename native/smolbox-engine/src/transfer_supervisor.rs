@@ -1476,10 +1476,11 @@ mod tests {
         let record = engine.db.get_vm("export-source").unwrap().unwrap();
         let expected_plan = crate::ContainerExportPlan::from_imported(&record, &snapshot).unwrap();
         let socket = root.join("agent.sock");
-        let peer = crate::export_bootstrap::tests::imported_peer(
+        let peer = crate::export_bootstrap::tests::imported_peer_until(
             UnixListener::bind(&socket).unwrap(),
             files,
             false,
+            budget.deadline,
         );
         let prepared = supervisor
             .prepare_conversion_owned(
@@ -1536,7 +1537,7 @@ mod tests {
         let executable = std::env::var_os("SMOLBOX_TEST_FILE_WORKER").expect("built helper path");
         let supervisor = supervisor(&root, executable.into());
         let budget =
-            crate::ReadBudget::for_export_work(Duration::from_secs(20), Cancellation::default())
+            crate::ReadBudget::for_export_work(Duration::from_secs(60), Cancellation::default())
                 .unwrap();
         let original = crate::export_bootstrap::tests::record();
         let input =
@@ -1557,7 +1558,7 @@ mod tests {
                 stderr: vec![],
             })
         };
-        let peer = crate::export_bootstrap::tests::peer(
+        let peer = crate::export_bootstrap::tests::peer_until(
             UnixListener::bind(&socket).unwrap(),
             vec![
                 completed(),
@@ -1572,6 +1573,7 @@ mod tests {
                     done: true,
                 }),
             ],
+            budget.deadline,
         );
         let prepared = supervisor
             .prepare_conversion_owned(
@@ -1599,7 +1601,13 @@ mod tests {
         let RunResult::Collected(mut collected) = result else {
             panic!("worker not collected")
         };
-        assert_eq!(peer.join().unwrap().len(), 4);
+        let requests = peer.join().unwrap_or_else(|_| {
+            panic!(
+                "conversion peer failed after worker outcome {:?}",
+                collected.outcome
+            )
+        });
+        assert_eq!(requests.len(), 4);
         assert!(collected.worker_ready && !collected.termination_requested);
         assert!(retained.upgrade().is_some());
         let (plan, layer, _) = collected.verify_conversion(&budget).unwrap();

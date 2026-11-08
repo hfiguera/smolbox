@@ -468,8 +468,7 @@ defmodule SmolBox.Embedded.Port do
       map_size(state.records) >= state.config.limits.in_flight ->
         failure(:admission_exhausted)
 
-      not approved?(state.config, operation) or
-          not ExportContract.approved_cached?(state.export_approvals, operation) ->
+      not operation_available?(state, operation) ->
         failure(:unsupported_capability)
 
       state.upload_reserved + Map.get(operation, "total_bytes", 0) >
@@ -480,6 +479,11 @@ defmodule SmolBox.Embedded.Port do
         register(state, operation, budget, observer, caller, remaining)
     end
   end
+
+  defp operation_available?(state, operation),
+    do:
+      approved?(state.config, operation) and
+        ExportContract.approved_cached?(state.export_approvals, operation)
 
   defp admission_status?(state, operation),
     do: state.status in [:ready, :reconciling] or quarantined_control?(state, operation)

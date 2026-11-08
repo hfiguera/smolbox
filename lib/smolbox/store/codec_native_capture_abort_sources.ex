@@ -1,21 +1,21 @@
 defmodule SmolBox.Store.CodecNativeCaptureAbortSources do
   @moduledoc false
   alias SmolBox.Backend.Assignment
-  alias SmolBox.Store.CodecFields
+  alias SmolBox.Store.{CodecFields, CodecNativeExports}
   @defaults %{SmolBox.CheckpointCapture => [native_abort_source: nil]}
   def reader, do: 1
 
   def strip(record),
     do:
       record
-      |> SmolBox.Store.CodecNativeExports.strip()
+      |> CodecNativeExports.strip()
       |> CodecFields.transform(@defaults, :strip)
 
   def upgrade(record),
     do:
       record
       |> CodecFields.transform(@defaults, :upgrade)
-      |> SmolBox.Store.CodecNativeExports.upgrade()
+      |> CodecNativeExports.upgrade()
 
   def required?(%{backend_assignment: %Assignment{version: 2}} = record), do: contains?(record)
   def required?(_), do: false

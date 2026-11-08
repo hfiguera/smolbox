@@ -2,9 +2,9 @@ defmodule SmolBox.Embedded.Request do
   @moduledoc false
   alias SmolBox.Embedded.{
     CaptureTransition,
-    ExportContract,
     CheckpointContract,
     CreationFeatures,
+    ExportContract,
     ImageContract,
     MountContract,
     NativeSource,
@@ -91,23 +91,15 @@ defmodule SmolBox.Embedded.Request do
   defp operation?(%{"operation" => name} = operation, budget, 2)
        when name in ~w(qualify_export admit_export export_machine) do
     fields =
-      if name == "export_machine",
-        do: ~w(operation receipt operation_id request push_token),
-        else:
-          if(name == "admit_export",
-            do: ~w(operation receipt operation_id request),
-            else: ~w(operation receipt request)
-          )
+      case name do
+        "export_machine" -> ~w(operation receipt operation_id request push_token)
+        "admit_export" -> ~w(operation receipt operation_id request)
+        "qualify_export" -> ~w(operation receipt request)
+      end
 
     Shape.keys?(operation, fields) and Shape.receipt?(operation["receipt"], 2) and
       operation["receipt"]["material"] != nil and
-      ExportContract.request?(operation["request"]) and
-      if(name == "export_machine",
-        do:
-          Shape.id?(operation["operation_id"]) and ExportContract.token?(operation["push_token"]),
-        else:
-          budget <= 30_000 and (name != "admit_export" or Shape.id?(operation["operation_id"]))
-      )
+      ExportContract.request?(operation["request"]) and export_admission?(operation, budget)
   end
 
   defp operation?(%{"operation" => "inspect_export"} = operation, budget, 2),
@@ -357,6 +349,14 @@ defmodule SmolBox.Embedded.Request do
            Validation.integer?(total, 0, options["max_bytes"])
 
   defp operation?(_operation, _budget, _major), do: false
+
+  defp export_admission?(%{"operation" => "export_machine"} = operation, _budget),
+    do: Shape.id?(operation["operation_id"]) and ExportContract.token?(operation["push_token"])
+
+  defp export_admission?(%{"operation" => "admit_export"} = operation, budget),
+    do: budget <= 30_000 and Shape.id?(operation["operation_id"])
+
+  defp export_admission?(%{"operation" => "qualify_export"}, budget), do: budget <= 30_000
 
   defp capture_chunk?(%{"chunk_bytes" => bytes}), do: Validation.integer?(bytes, 1, 65_536)
   defp capture_chunk?(_), do: true
